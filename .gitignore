@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+# sim outputs
+*.sim.csv
+*.sim.json
+# local Claude Code settings
+.claude/settings.local.json

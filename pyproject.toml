@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "animal-kingdom"
+version = "0.0.1"
+description = "Headless rules engine, bots, and simulation harness for the Animal Kingdom game"
+requires-python = ">=3.11"
+# Core engine is standard-library only — no runtime dependencies (handoff §5).
+dependencies = []
+
+[project.optional-dependencies]
+# Analysis layer only (sim/metrics). Kept out of the engine.
+analysis = ["pandas>=2.0"]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools]
+packages = [
+    "animal_kingdom",
+    "animal_kingdom.engine",
+    "animal_kingdom.bots",
+    "animal_kingdom.sim",
+    "animal_kingdom.render",
+]
+
+[tool.setuptools.package-data]
+animal_kingdom = ["data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["animal_kingdom/tests"]

@@ -1,0 +1,558 @@
+{
+  "_comment": "Static card data ported from docs/cards.md (v0.0.1). Effect LOGIC lives in engine code (effects/statics/strength), not here; numeric tunables live in engine/config.py. base_strength is an int 0-10, or the string 'dynamic' with a 'dynamic_strength' rule name. tag is null for cards printed with '-'.",
+  "cards": [
+    {
+      "id": "nile_crocodile",
+      "name": "Nile Crocodile",
+      "archetype": "aggro",
+      "tag": "Reptile",
+      "rarity": "legendary",
+      "base_strength": "dynamic",
+      "dynamic_strength": "control_count",
+      "keywords": [],
+      "text": "This unit's strength is equal to the number of units you control."
+    },
+    {
+      "id": "queen_ant",
+      "name": "Queen Ant",
+      "archetype": "aggro",
+      "tag": "Insect",
+      "rarity": "legendary",
+      "base_strength": 3,
+      "keywords": [],
+      "text": "When placed, gain 2 food for each unit you control."
+    },
+    {
+      "id": "wild_dogs",
+      "name": "Wild Dogs",
+      "archetype": "aggro",
+      "tag": "Canine",
+      "rarity": "rare",
+      "base_strength": 1,
+      "keywords": [],
+      "text": "When placed, immediately play one more unit from your hand."
+    },
+    {
+      "id": "wasp",
+      "name": "Wasp",
+      "archetype": "aggro",
+      "tag": "Insect",
+      "rarity": "rare",
+      "base_strength": 2,
+      "keywords": [],
+      "text": "When placed, you may remove this unit to destroy an adjacent enemy unit."
+    },
+    {
+      "id": "spotted_hyena",
+      "name": "Spotted Hyena",
+      "archetype": "aggro",
+      "tag": "Canine",
+      "rarity": "rare",
+      "base_strength": 3,
+      "keywords": [],
+      "text": "May be placed onto an enemy unit of any strength (ignoring the covering rule) if you control at least 4 other units."
+    },
+    {
+      "id": "lemming",
+      "name": "Lemming",
+      "archetype": "aggro",
+      "tag": "Rodent",
+      "rarity": "common",
+      "base_strength": 1,
+      "keywords": [],
+      "text": "When placed, you may also play every other Lemming from your hand."
+    },
+    {
+      "id": "rat",
+      "name": "Rat",
+      "archetype": "aggro",
+      "tag": "Rodent",
+      "rarity": "common",
+      "base_strength": 1,
+      "keywords": [],
+      "text": "When placed, if you control 3 or more other units, draw 1."
+    },
+    {
+      "id": "army_ant",
+      "name": "Army Ant",
+      "archetype": "aggro",
+      "tag": "Insect",
+      "rarity": "common",
+      "base_strength": 1,
+      "keywords": [],
+      "text": "When placed, if you have already placed another unit this turn, gain 4 food."
+    },
+    {
+      "id": "piranha",
+      "name": "Piranha",
+      "archetype": "aggro",
+      "tag": "Fish",
+      "rarity": "common",
+      "base_strength": 2,
+      "keywords": [],
+      "text": "When placed onto an enemy unit, draw 1."
+    },
+    {
+      "id": "honey_badger",
+      "name": "Honey Badger",
+      "archetype": "aggro",
+      "tag": null,
+      "rarity": "common",
+      "base_strength": 3,
+      "keywords": [],
+      "text": "May be placed onto an enemy unit of equal or lower strength (instead of strictly lower)."
+    },
+    {
+      "id": "vervet_monkey",
+      "name": "Vervet Monkey",
+      "archetype": "aggro",
+      "tag": "Primate",
+      "rarity": "common",
+      "base_strength": 1,
+      "keywords": [],
+      "text": "When placed, if you control another Primate, gain 4 food."
+    },
+    {
+      "id": "baboon",
+      "name": "Baboon",
+      "archetype": "aggro",
+      "tag": "Primate",
+      "rarity": "common",
+      "base_strength": 4,
+      "keywords": [],
+      "text": "When placed, if you control another Primate, draw 1."
+    },
+    {
+      "id": "raven",
+      "name": "Raven",
+      "archetype": "control",
+      "tag": "Bird",
+      "rarity": "legendary",
+      "base_strength": 6,
+      "keywords": [],
+      "text": "Costs 12 food to play. When placed, draw 3 cards."
+    },
+    {
+      "id": "anaconda",
+      "name": "Anaconda",
+      "archetype": "control",
+      "tag": "Reptile",
+      "rarity": "legendary",
+      "base_strength": "dynamic",
+      "dynamic_strength": "discard_count",
+      "keywords": [],
+      "text": "This unit's strength is equal to the number of units in the discard."
+    },
+    {
+      "id": "vulture",
+      "name": "Vulture",
+      "archetype": "control",
+      "tag": "Bird",
+      "rarity": "rare",
+      "base_strength": 2,
+      "keywords": [],
+      "text": "Whenever an enemy unit is removed, draw 1 (once per turn)."
+    },
+    {
+      "id": "matriarch_elephant",
+      "name": "Matriarch Elephant",
+      "archetype": "control",
+      "tag": null,
+      "rarity": "rare",
+      "base_strength": 8,
+      "keywords": ["Immovable"],
+      "text": "Immovable."
+    },
+    {
+      "id": "giant_tortoise",
+      "name": "Giant Tortoise",
+      "archetype": "control",
+      "tag": null,
+      "rarity": "rare",
+      "base_strength": 6,
+      "keywords": [],
+      "text": "Cannot be covered by enemy units."
+    },
+    {
+      "id": "hippopotamus",
+      "name": "Hippopotamus",
+      "archetype": "control",
+      "tag": null,
+      "rarity": "rare",
+      "base_strength": 6,
+      "keywords": [],
+      "text": "When an enemy unit is placed on an adjacent crossroad, remove it if its strength is 3 or less."
+    },
+    {
+      "id": "rhinoceros",
+      "name": "Rhinoceros",
+      "archetype": "control",
+      "tag": null,
+      "rarity": "rare",
+      "base_strength": 6,
+      "keywords": [],
+      "text": "When placed, remove all enemy units of strength 3 or less adjacent to this unit."
+    },
+    {
+      "id": "gray_wolf",
+      "name": "Gray Wolf",
+      "archetype": "control",
+      "tag": "Canine",
+      "rarity": "common",
+      "base_strength": 4,
+      "keywords": [],
+      "text": "When placed, remove an adjacent enemy of strength 3 or less."
+    },
+    {
+      "id": "boa_constrictor",
+      "name": "Boa Constrictor",
+      "archetype": "control",
+      "tag": "Reptile",
+      "rarity": "common",
+      "base_strength": 4,
+      "keywords": [],
+      "text": "When placed onto an enemy unit, remove that unit instead of stacking on it."
+    },
+    {
+      "id": "raccoon",
+      "name": "Raccoon",
+      "archetype": "control",
+      "tag": null,
+      "rarity": "common",
+      "base_strength": 2,
+      "keywords": [],
+      "text": "When placed, the opponent discards a random card."
+    },
+    {
+      "id": "cape_buffalo",
+      "name": "Cape Buffalo",
+      "archetype": "control",
+      "tag": null,
+      "rarity": "common",
+      "base_strength": 6,
+      "keywords": [],
+      "text": "When this unit is removed, draw 1."
+    },
+    {
+      "id": "owl",
+      "name": "Owl",
+      "archetype": "control",
+      "tag": "Bird",
+      "rarity": "common",
+      "base_strength": 3,
+      "keywords": [],
+      "text": "When placed, look at the top 3 cards of your deck; draw 1 and put the rest on the bottom."
+    },
+    {
+      "id": "jackal",
+      "name": "Jackal",
+      "archetype": "control",
+      "tag": "Canine",
+      "rarity": "common",
+      "base_strength": 3,
+      "keywords": [],
+      "text": "When placed, return a unit from the discard to the top of your deck."
+    },
+    {
+      "id": "coyote",
+      "name": "Coyote",
+      "archetype": "control",
+      "tag": "Canine",
+      "rarity": "common",
+      "base_strength": 3,
+      "keywords": [],
+      "text": "When placed, if you control another Canine, draw 1."
+    },
+    {
+      "id": "hibernating_bear",
+      "name": "Hibernating Bear",
+      "archetype": "combo",
+      "tag": null,
+      "rarity": "legendary",
+      "base_strength": 6,
+      "keywords": ["Immovable"],
+      "text": "Immovable. When placed, lose all your stored food; two turns later, gain twice that amount."
+    },
+    {
+      "id": "octopus",
+      "name": "Octopus",
+      "archetype": "combo",
+      "tag": null,
+      "rarity": "legendary",
+      "base_strength": 4,
+      "keywords": [],
+      "text": "When placed, search your deck for a unit and put it into your hand."
+    },
+    {
+      "id": "egg",
+      "name": "Egg",
+      "archetype": "combo",
+      "tag": null,
+      "rarity": "rare",
+      "base_strength": 0,
+      "keywords": ["Fragile"],
+      "text": "After 2 turns, remove this unit and draw 2 cards. Fragile."
+    },
+    {
+      "id": "queen_bee",
+      "name": "Queen Bee",
+      "archetype": "combo",
+      "tag": "Insect",
+      "rarity": "rare",
+      "base_strength": 2,
+      "keywords": [],
+      "text": "Whenever you gain food, gain 3 additional food."
+    },
+    {
+      "id": "opossum",
+      "name": "Opossum",
+      "archetype": "combo",
+      "tag": null,
+      "rarity": "rare",
+      "base_strength": 2,
+      "keywords": [],
+      "text": "When placed, draw 1. When this would be removed, return it to your hand instead."
+    },
+    {
+      "id": "cottontail",
+      "name": "Cottontail",
+      "archetype": "combo",
+      "tag": "Rabbit",
+      "rarity": "common",
+      "base_strength": 2,
+      "keywords": [],
+      "text": "When placed, draw 1."
+    },
+    {
+      "id": "squirrel",
+      "name": "Squirrel",
+      "archetype": "combo",
+      "tag": "Rodent",
+      "rarity": "common",
+      "base_strength": 2,
+      "keywords": [],
+      "text": "When placed, gain 8 food."
+    },
+    {
+      "id": "honeybee",
+      "name": "Honeybee",
+      "archetype": "combo",
+      "tag": "Insect",
+      "rarity": "common",
+      "base_strength": 1,
+      "keywords": [],
+      "text": "When placed, gain 8 food; if you control another Insect, gain 4 more."
+    },
+    {
+      "id": "chipmunk",
+      "name": "Chipmunk",
+      "archetype": "combo",
+      "tag": "Rodent",
+      "rarity": "common",
+      "base_strength": 3,
+      "keywords": [],
+      "text": "When placed, gain 5 food."
+    },
+    {
+      "id": "wild_boar",
+      "name": "Wild Boar",
+      "archetype": "combo",
+      "tag": null,
+      "rarity": "common",
+      "base_strength": 5,
+      "keywords": [],
+      "text": "When placed, gain 3 food."
+    },
+    {
+      "id": "hedgehog",
+      "name": "Hedgehog",
+      "archetype": "combo",
+      "tag": null,
+      "rarity": "common",
+      "base_strength": 3,
+      "keywords": [],
+      "text": "When this unit is removed, draw 1."
+    },
+    {
+      "id": "armadillo",
+      "name": "Armadillo",
+      "archetype": "combo",
+      "tag": null,
+      "rarity": "common",
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Cannot be removed until your next turn."
+    },
+    {
+      "id": "pufferfish",
+      "name": "Pufferfish",
+      "archetype": "combo",
+      "tag": "Fish",
+      "rarity": "common",
+      "base_strength": 2,
+      "keywords": [],
+      "text": "When an enemy unit is placed on top of this, remove that enemy unit and this unit."
+    },
+    {
+      "id": "cheetah_brother",
+      "name": "Cheetah Brother",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "legendary",
+      "base_strength": 5,
+      "keywords": [],
+      "text": "When placed, you may immediately play Cheetah Sister from your hand or deck."
+    },
+    {
+      "id": "cheetah_sister",
+      "name": "Cheetah Sister",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "legendary",
+      "base_strength": 5,
+      "keywords": [],
+      "text": "When placed, you may immediately play Cheetah Brother from your hand or deck."
+    },
+    {
+      "id": "leopard",
+      "name": "Leopard",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "rare",
+      "base_strength": 5,
+      "keywords": [],
+      "text": "When placed, remove an adjacent enemy of strength 4 or less."
+    },
+    {
+      "id": "lioness",
+      "name": "Lioness",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "rare",
+      "base_strength": 4,
+      "keywords": [],
+      "text": "When placed, draw 1 for each Cat you control adjacent to this unit."
+    },
+    {
+      "id": "tiger",
+      "name": "Tiger",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "rare",
+      "base_strength": 7,
+      "keywords": [],
+      "text": "When placed, remove an adjacent enemy of strength 5 or less."
+    },
+    {
+      "id": "snow_leopard",
+      "name": "Snow Leopard",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "rare",
+      "base_strength": 6,
+      "keywords": [],
+      "text": "While you control this, your other Cats may be placed onto enemy units of equal or lower strength."
+    },
+    {
+      "id": "lion",
+      "name": "Lion",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "common",
+      "base_strength": 7,
+      "keywords": [],
+      "text": "Vanilla body - the pride anchor; raw strength is the point."
+    },
+    {
+      "id": "lynx",
+      "name": "Lynx",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "common",
+      "base_strength": 3,
+      "keywords": [],
+      "text": "When placed, if you control another Cat, draw 1."
+    },
+    {
+      "id": "cougar",
+      "name": "Cougar",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "common",
+      "base_strength": 5,
+      "keywords": [],
+      "text": "When placed, you may place this adjacent to any Cat you control, ignoring connection."
+    },
+    {
+      "id": "serval",
+      "name": "Serval",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "common",
+      "base_strength": 2,
+      "keywords": [],
+      "text": "When placed, remove an adjacent enemy of strength 6 or more."
+    },
+    {
+      "id": "black_panther",
+      "name": "Black Panther",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "common",
+      "base_strength": 5,
+      "keywords": [],
+      "text": "Cannot be targeted by enemy special effects."
+    },
+    {
+      "id": "caracal",
+      "name": "Caracal",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "common",
+      "base_strength": 4,
+      "keywords": [],
+      "text": "When placed, if you control another Cat, gain 4 food."
+    },
+    {
+      "id": "domestic_cat",
+      "name": "Domestic Cat",
+      "archetype": "midrange",
+      "tag": "Cat",
+      "rarity": "common",
+      "base_strength": 1,
+      "keywords": [],
+      "text": "When placed, if you control another Cat, you may play one more Cat from your hand."
+    },
+    {
+      "id": "golden_eagle",
+      "name": "Golden Eagle",
+      "archetype": "general",
+      "tag": "Bird",
+      "rarity": "rare",
+      "base_strength": 5,
+      "keywords": ["Flight"],
+      "text": "Flight."
+    },
+    {
+      "id": "chameleon",
+      "name": "Chameleon",
+      "archetype": "general",
+      "tag": "Reptile",
+      "rarity": "rare",
+      "base_strength": "dynamic",
+      "dynamic_strength": "chameleon",
+      "keywords": [],
+      "text": "May be placed on any unit, and any unit may be placed on top of it."
+    },
+    {
+      "id": "rabbit",
+      "name": "Rabbit",
+      "archetype": "parking",
+      "tag": "Rabbit",
+      "rarity": "common",
+      "base_strength": 1,
+      "keywords": [],
+      "text": "At the start of your next turn, draw a Rabbit."
+    }
+  ]
+}
