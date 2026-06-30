@@ -4,13 +4,13 @@ Ramp food, then spend it on huge `Costs 20 food` bodies (Bears / Megafauna / big
 Landmarks + delayed effects fuel the ramp. 4-4-6 shape (4 legendary ×1, 4 rare ×2, 6 common ×3 = 30).
 Source: user's offline Google Sheet (uploaded 2026-06-28). **Incomplete — has open `?` cells.**
 
-## Legendary (×1)
+## Legendary (×1) — names **PROVISIONAL** (assigned 2026-06-30; final flavor pass pending — alternates in `flavor-review.md` §3)
 | Name | Tag | Str | Effect | Description |
 |---|---|---:|---|---|
-| **[NAME]** | Megafauna | 5 | Immovable. At the end of your turn, gain 10 food. | Colossal ancient tortoise. *(ramp engine + wall)* |
-| **[NAME]** | Bear | 10 | Apex Predator. Costs 20 food. | Giant polar bear. |
-| **[NAME]** | Bird | 8 | Flight. Apex Predator. Costs 20 food. | Giant harpy eagle. |
-| **[NAME]** | Megafauna | 10 | Immovable. Costs 20 food. Battlecry: remove all adjacent enemy units. | Titanic rhino. *(anti-aggro stomp / fortress finisher)* |
+| **Methuselah** | Megafauna | 5 | Immovable. At the end of your turn, gain 10 food. | Colossal ancient tortoise. *(ramp engine + wall)* |
+| **Borealis** | Bear | 10 | Apex Predator. Costs 20 food. | Giant polar bear. |
+| **Aquila** | Bird | 8 | Flight. Apex Predator. Costs 20 food. | Giant harpy eagle. |
+| **Bulwark** | Megafauna | 10 | Immovable. Costs 20 food. Battlecry: remove all adjacent enemy units. | Titanic rhino. *(anti-aggro stomp / fortress finisher)* |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
@@ -52,7 +52,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Incomplete — has 
 ## Flags (resolve in the all-at-once review)
 - **Landmark / non-animal theme decision** — the headline item above.
 - **Finish the 3 open cards** (2 legendaries + Rhinoceros).
-- **Legendary names** — both defined legendaries are placeholders; "Polar Bear" exists as a rare, so the legendary giant polar bear needs a distinct individual name (same card-identity pattern as other decks).
+- **Legendary names** — provisional (Methuselah / Borealis / Aquila / Bulwark, assigned 2026-06-30; flavor-lock pending). **Borealis** (giant polar bear) is deliberately distinct from the common **Polar Bear** (named-individual pattern).
 - **Food cost vs food win tension:** food is both the ramp fuel (pay 20-costs) and a win condition (100). Worth watching in sim — is the deck ever incentivized to hoard to 100 vs spend? Likely fine, just noting.
 - **"In 2 turns" timing:** counted in the actor's turns (resolves at the start of your turn after next)? Align with the existing scheduler convention.
 - **Andean Condor info reveal:** revealing opponent's top card is public information for that moment — confirm the per-seat view exposes it correctly and the RNG/deck order stays deterministic.

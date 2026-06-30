@@ -5,13 +5,13 @@ board), snowball tempo, remove with buffed bodies. 4-4-6 shape (4 legendary ×1,
 6 common ×3 = 30).
 Source: user's offline Google Sheet (uploaded 2026-06-28). **Complete (2026-06-28).**
 
-## Legendary (×1) — names are working placeholders
+## Legendary (×1) — names **PROVISIONAL** (assigned 2026-06-30; final flavor pass pending — alternates in `flavor-review.md` §3). The former *howl* / *hellhound* placeholders are now real named wolves (Clarion / Shuck) — resolves the `flavor-review.md` THEME must-fix.
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
-| **[a towering alpha wolf]** | Canine | 4 | Has +2 strength for each other Canine you control. *(self-scaling alpha — the HQ-rush finisher; one body, linear scaling)* |
-| **[hellhound]** | Canine | 6 | Battlecry: return a removed Canine to your hand. Give it +2 strength. |
-| **[wolf matriarch]** | Canine | 4 | Your other Canines have +2 strength. *(anthem)* |
-| **[howl, voice of the pack]** | Canine | 4 | Battlecry: give +1 strength to all other Canines in your hand and battlefield. |
+| **Lobo** | Canine | 4 | Has +2 strength for each other Canine you control. *(self-scaling alpha — the HQ-rush finisher; one body, linear scaling; art: a towering alpha wolf)* |
+| **Shuck** | Canine | 6 | Battlecry: return a removed Canine to your hand. Give it +2 strength. *(a real black wolf — raise-the-fallen; evokes the black-dog legend, not a literal hellhound)* |
+| **Raksha** | Canine | 4 | Your other Canines have +2 strength. *(anthem — the pack matriarch)* |
+| **Clarion** | Canine | 4 | Battlecry: give +1 strength to all other Canines in your hand and battlefield. *(a real wolf whose Battlecry is the rallying howl)* |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
@@ -34,7 +34,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Complete (2026-06-2
 ---
 
 ## Open items — RESOLVED (2026-06-28)
-- **Legendary 1:** self-scaling alpha wolf (Canine 4, "has +2 str per other Canine") — the HQ-rush finisher; fixed an earlier broken "+1 per Canine to *each*" surge (quadratic). Name TBD.
+- **Legendary 1:** self-scaling alpha wolf (Canine 4, "has +2 str per other Canine") — the HQ-rush finisher; fixed an earlier broken "+1 per Canine to *each*" surge (quadratic). Now **Lobo** (provisional, 2026-06-30).
 - **Rare 6:** Bush Dog (3) — reworked from "random adjacent" to **all** friendly adjacent Canines.
 - **Rare 8:** Red Wolf (6) — body bumped to 6 (modest hand-buff effect → big body, per the no-mana power calibration).
 - **Common 11:** Fox (5) — gas engine (draw when buffed).
@@ -59,4 +59,4 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Complete (2026-06-2
 - **Buff subsystem — RESOLVED.** Full spec in `keywords.md` (§ Strength modifiers) + README decision E. Convention: **"has +X" = anthem** (live, conditional — wolf matriarch, African Wild Dog), **"give +X" = permanent counter** (stored, sticks — Dhole, howl, end-of-turn, hellhound's returned Canine). Strength is live everywhere; hand cards carry counters; `ON_GAIN_STRENGTH` fires only on counter grants; slot-6 reactor once/turn + loop-guarded; African Wild Dog counts itself ("each friendly Canine").
 - **Finish the 6 open cards / names / strengths** (see Open items).
 - **Jackal "adjacent unit removed"** — friendly and enemy both? (reads as any.) Once per turn? (not stated.) → folds into G (once-per-turn caps).
-- **Legendary names** — all four are working placeholders.
+- **Legendary names** — provisional (Lobo / Shuck / Raksha / Clarion, assigned 2026-06-30; flavor-lock pending). The *howl* / *hellhound* identities are now real named wolves (resolves the `flavor-review.md` THEME must-fix).

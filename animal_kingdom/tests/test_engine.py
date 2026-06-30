@@ -8,7 +8,7 @@ import random
 import pytest
 
 from animal_kingdom.bots.random_bot import RandomBot
-from animal_kingdom.decks import make_vanilla_deck
+from animal_kingdom.decks import PREMADE_DECKS, load_premade_deck, make_vanilla_deck
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import DrawAction, PlaceAction, action_from_dict
 from animal_kingdom.engine.cards import load_cards
@@ -78,6 +78,36 @@ def test_fuzz_random_games_stay_legal_and_terminate():
         assert_board_legal(state)
 
 
+def _play_premade(seed: int, slug_a: str, slug_b: str):
+    """A RandomBot game between two premade decks, asserting the fuzz invariants."""
+    state = new_game(load_premade_deck(slug_a), load_premade_deck(slug_b), seed)
+    bots = {"A": RandomBot(seed=seed + 1), "B": RandomBot(seed=seed + 2)}
+    while True:
+        result = rules.is_terminal(state)
+        if result is not None:
+            return state, result
+        actor = state.player_to_act()
+        legal = rules.legal_actions(state)
+        assert legal, "non-terminal state must have a legal action"
+        action = bots[actor].choose(state.view_for(actor), legal)
+        assert action in legal
+        rules.apply_action(state, action)
+
+
+def test_fuzz_premade_decks_full_matrix_terminates():
+    """Every premade deck vs every premade deck (incl. the dynamic-strength cards) stays
+    legal and terminates - the real decks the engine is built to simulate."""
+    cfg = Config.default()
+    slugs = sorted(PREMADE_DECKS)
+    for a in slugs:
+        for b in slugs:
+            for seed in range(4):
+                state, result = _play_premade(seed, a, b)
+                assert result is not None
+                assert state.turn_counter <= cfg.max_turns
+                assert_board_legal(state)
+
+
 # ------------------------------------------------------------- determinism / replay
 
 def test_same_seed_replays_identically():
@@ -121,7 +151,7 @@ def test_action_round_trips():
 def test_view_for_hides_opponent_hand_and_deck_contents():
     s = _setup(5)
     v = s.view_for("A")
-    assert v.own_hand == tuple(s.hands["A"])
+    assert v.own_hand == tuple(u.card_id for u in s.hands["A"])
     assert v.opponent_hand_count == len(s.hands["B"])
     assert v.own_deck_count == len(s.decks["A"])
     assert v.opponent_deck_count == len(s.decks["B"])

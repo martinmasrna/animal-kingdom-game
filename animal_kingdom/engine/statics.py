@@ -9,7 +9,7 @@ predicates the rules and effects call.
 from __future__ import annotations
 
 from .state import GameState, UnitInstance
-from .strength import card_strength, count_units_controlled, effective_strength
+from .strength import effective_strength, placement_strength
 
 
 def _controls(state: GameState, player: str, card_id: str) -> bool:
@@ -20,36 +20,29 @@ def _controls(state: GameState, player: str, card_id: str) -> bool:
     )
 
 
-def can_cover(state: GameState, placer_card_id: str, owner: str, target: UnitInstance) -> bool:
-    """May `owner` place `placer_card_id` onto the enemy `target` unit?
+def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance) -> bool:
+    """May the hand instance `placer` be placed onto the enemy `target` unit?
 
     Only called for covering an ENEMY top unit (own-stacking needs no strength check).
     Base rule is strictly-greater strength; the modifiers below override it.
     """
-    placer = state.cards[placer_card_id]
+    placer_card = state.cards[placer.card_id]
     target_card = state.cards[target.card_id]
+    owner = placer.owner
 
-    # Chameleon bypasses the comparison both ways (±∞).
-    if placer.dynamic_strength == "chameleon" or target_card.dynamic_strength == "chameleon":
+    # Chameleon bypasses the comparison both ways (may cover anything; may be covered by anything).
+    if placer_card.dynamic_strength == "chameleon" or target_card.dynamic_strength == "chameleon":
         return True
 
-    # Giant Tortoise cannot be covered by an enemy at all.
-    if target_card.id == "giant_tortoise":
+    # Porcupine cannot be covered by an enemy at all.
+    if target_card.id == "porcupine":
         return False
 
-    placer_str = card_strength(state, placer_card_id, owner)
+    placer_str = placement_strength(state, placer)
     target_str = effective_strength(state, target)
 
-    # Honey Badger: equal-or-lower instead of strictly-lower.
-    if placer.id == "honey_badger":
-        return placer_str >= target_str
-
-    # Spotted Hyena: any strength if you control >= threshold other units.
-    if placer.id == "spotted_hyena" and count_units_controlled(state, owner) >= state.config.spotted_hyena_threshold:
-        return True
-
     # Snow Leopard anthem: your *other* Cats may cover equal-or-lower while you control one.
-    if "Cat" in placer.tags and placer.id != "snow_leopard" and _controls(state, owner, "snow_leopard"):
+    if "Cat" in placer_card.tags and placer_card.id != "snow_leopard" and _controls(state, owner, "snow_leopard"):
         if placer_str >= target_str:
             return True
 
@@ -78,14 +71,11 @@ def extra_placement_crossroads(state: GameState, card_id: str, owner: str) -> se
 
 
 def can_be_removed(state: GameState, unit: UnitInstance) -> bool:
-    """Whether a unit may be removed by a special effect (covering is separate)."""
-    card = state.cards[unit.card_id]
-    if "Immovable" in card.keywords:                 # Matriarch Elephant, Hibernating Bear
-        return False
-    if card.id == "armadillo":                       # safe until the owner's next turn
-        if state.turn_counter < unit.placed_on_turn + 2:
-            return False
-    return True
+    """Whether a unit may be removed by a special effect (covering is separate).
+
+    Immovable units (Giant Tortoise, Scrooge, Methuselah, Bulwark, Elephant) cannot.
+    """
+    return "Immovable" not in state.cards[unit.card_id].keywords
 
 
 def can_be_targeted(state: GameState, unit: UnitInstance, by_player: str) -> bool:

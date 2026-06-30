@@ -4,10 +4,12 @@ The reworked pool: **7 premade decks**, each 4-4-6 (4 legendary ×1, 4 rare ×2,
 These decklists (uploaded from the designer's Google Sheet, 2026-06-28) are the **source of truth**.
 The legacy `cards.md` §5–9 lists are dead — do not reconcile against them.
 
-Status: **all 7 decks content-complete (2026-06-28).** Remaining before build: assign final
-**legendary names** (mostly placeholder descriptions today) and the **G/H** tuning pass
-(once-per-turn caps + food economy — largely a sim job). Next step is rebuilding
-`data/cards.json` + the effect registry from these files.
+Status: **all 7 decks content-complete (2026-06-28).** Legendary names: a **provisional set was
+assigned 2026-06-30** across all six unnamed decks (names live in each deck file; final flavor pass
+deferred — see `todo.md` and the per-deck legendary headers; 2–3 alternates each in `flavor-review.md`
+§3). Remaining before build: the **G/H** tuning pass (once-per-turn caps + food economy — largely a
+sim job). The **build (#5: rebuild `data/cards.json` + the effect registry from these files) is now
+unblocked** — provisional names give every legendary a stable name/id.
 
 > **Power calibration (read before designing any card):** there is **no mana** — 1 card/turn —
 > so strength **is** the body, and low strength must be paid back by a strong effect. Baseline
@@ -17,17 +19,17 @@ Status: **all 7 decks content-complete (2026-06-28).** Remaining before build: a
 | # | Deck | File | Identity | Complete? |
 |---|---|---|---|---|
 | 1 | Cats Midrange Tempo | `midrange-cats.md` | mono-Cat tempo/removal | ✅ all 14 defined (legendary names final: Prince Leo, Princess Lea, King Theron, Queen Adira) |
-| 2 | Egg Control | `egg-control.md` | Snake/Bird/Egg draw-shuffle-remove → food | ⚠ effects complete; **3/4 legendary names** are `[NAME]` |
-| 3 | Colony Food Swarm | `colony-food-swarm.md` | mono-Colony swarm → food | ⚠ effects complete; **4/4 legendary names** placeholders |
-| 4 | Ramp | `ramp.md` | ramp food → huge `Costs 20` bodies | ✅ all 14 defined (2 legendaries + Rhino/Hippo reworked 2026-06-28); legendary names TBD |
-| 5 | Food OTK | `food-otk.md` | sacrifice + Deathrattle → food OTK | ✅ all 14 defined (Pufferfish added); legendary names TBD |
-| 6 | Aggro HQ Rush | `aggro-hq-rush.md` | cheap chains + reach → capture HQ | ✅ all 14 defined (2026-06-28); legendary names TBD |
-| 7 | Canine Buff Tempo | `canine-buff-tempo.md` | mono-Canine persistent strength buffs | ✅ all 14 defined (2026-06-28); animal names for Fox/Dingo/Red Wolf/alpha flexible |
+| 2 | Egg Control | `egg-control.md` | Snake/Bird/Egg draw-shuffle-remove → food | ✅ all 14 defined; legendary names **provisional** (Eon, Goliath, Ember, Aurum — 2026-06-30) |
+| 3 | Colony Food Swarm | `colony-food-swarm.md` | mono-Colony swarm → food | ✅ all 14 defined; legendary names **provisional** (Queen Marabunta, Vesper, Queen Honoria, Falstaff — 2026-06-30) |
+| 4 | Ramp | `ramp.md` | ramp food → huge `Costs 20` bodies | ✅ all 14 defined; legendary names **provisional** (Methuselah, Borealis, Aquila, Bulwark — 2026-06-30) |
+| 5 | Food OTK | `food-otk.md` | sacrifice + Deathrattle → food OTK | ✅ all 14 defined; legendary names **provisional** (Fathom, Greywhisker, Carmilla, Scrooge — 2026-06-30) |
+| 6 | Aggro HQ Rush | `aggro-hq-rush.md` | cheap chains + reach → capture HQ | ✅ all 14 defined; legendary names **provisional** (Verminus, Pestis, Sirocco, Stoop — 2026-06-30) |
+| 7 | Canine Buff Tempo | `canine-buff-tempo.md` | mono-Canine persistent strength buffs | ✅ all 14 defined; legendary names **provisional** (Lobo, Shuck, Raksha, Clarion — 2026-06-30); Fox/Dingo/Red Wolf body-vs-size still flagged |
 
 ## Consolidated decision agenda (for the all-at-once review)
 Cross-cutting questions raised across the 7 decks, each detailed in the per-deck files:
 
-- **A. Card identity / keying. — RESOLVED (2026-06-28).** Every card is **globally unique by name**, lives in **exactly one deck**, and is never shared or redefined across decks → `cards.json` keyed by unique id, no deck-scoping. Apparent "duplicates" are deliberately distinct animals/cards (Worker Ant / Soldier Ant, Worker Bee / Queen Bee, Black/Grizzly/Polar Bear, Leopard / Snow Leopard, …). The "Anaconda"/"Black Widow"/"kraken" notes on legendaries are **art/flavor descriptions, not names** (real legendary names TBD); legendaries are the named-individual exception, so one can share a species with a common (e.g. the giant-anaconda legendary vs the common **Anaconda**). No collision.
+- **A. Card identity / keying. — RESOLVED (2026-06-28).** Every card is **globally unique by name**, lives in **exactly one deck**, and is never shared or redefined across decks → `cards.json` keyed by unique id, no deck-scoping. Apparent "duplicates" are deliberately distinct animals/cards (Worker Ant / Soldier Ant, Worker Bee / Queen Bee, Black/Grizzly/Polar Bear, Leopard / Snow Leopard, …). The "Anaconda"/"Black Widow"/"kraken" notes on legendaries are **art/flavor descriptions, not names** (real legendary names since assigned provisionally, 2026-06-30); legendaries are the named-individual exception, so one can share a species with a common (e.g. the giant-anaconda legendary vs the common **Anaconda**). No collision.
 - **B. Tag taxonomy & sub-tags — RESOLVED (2026-06-28).**
   - **Schema:** a card record carries `type` (`"unit"` | `"landmark"`, from C) and **`tags`: a flat list** (default `[]`). Tags is a *list* — most cards have one, but meme/hybrid cards (e.g. Platypus) can carry several (`["Bird","Reptile","Mammal"]`) and then count for *every* matching tribal effect. **Roles live in the same list** (no separate `subtags` field): `Worker Ant` = `["Colony","Worker"]`, `Queen Bee` = `["Colony","Queen"]`. Effects query membership uniformly ("a Colony Queen" = tags ⊇ {Colony, Queen}; "non-Queen Colony unit" = has Colony, lacks Queen).
   - **Active species families:** `Cat, Canine, Colony, Snake, Lizard, Bird, Rodent, Arachnid, Bear, Megafauna, Egg`. (`Bear`/`Megafauna`/`Lizard`/`Arachnid` have no effect referencing them yet — kept as future-synergy hooks per §4.2.)
@@ -69,4 +71,4 @@ Cross-cutting questions raised across the 7 decks, each detailed in the per-deck
 - **G. Once-per-turn caps.** Many value/food triggers state no cap (Queen Adira, Egg-deck food snakes, Jackal, etc.). Decide defaults; flag as tuning dials.
 - **H. Food economy re-tuning.** New numbers everywhere (20-costs, 20-food Landmarks, Gazelle +20, Egg Eater 10…) vs `win_food` 100 and region 10/20. The whole shared scale needs re-derivation in sim.
 - **I. Hidden-info / per-seat view — RESOLVED (2026-06-28).** No open tutors exist (F10 → filtered draws are random, no deck inspection). The only reveal is **Andean Condor** (F13): a momentary public reveal of both decks' top cards, logged as an event and deterministic. Nothing else leaks hidden info beyond the standard per-seat view.
-- **J. Completeness.** ~15 open card slots/effects + most legendary "named individual" names still TBD. Decide whether to review-then-fill, or fill-then-implement.
+- **J. Completeness. — RESOLVED.** All card slots/effects filled (2026-06-28); a **provisional** legendary-name set assigned 2026-06-30 (names in each deck file's legendary header; 2–3 alternates each in `flavor-review.md` §3). Final name flavor-lock is deferred to `todo.md` (it does not block the build — provisional names give stable name/id). The build (#5: rebuild `cards.json` + effect registry) is unblocked; G/H tuning remains.

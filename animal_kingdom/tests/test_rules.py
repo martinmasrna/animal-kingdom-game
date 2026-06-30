@@ -16,18 +16,22 @@ from animal_kingdom.engine.state import GameState, Result, UnitInstance
 
 
 def make_state(*, current="A", hands=None, decks=None, food=None) -> GameState:
-    return GameState(
+    state = GameState(
         load_map("map_a"),
         load_cards(),
         Config.default(),
         board={},
-        hands=hands or {"A": [], "B": []},
+        hands={"A": [], "B": []},
         decks=decks or {"A": [], "B": []},
-        discard=[],
+        remove_pile=[],
         food=food or {"A": 0, "B": 0},
         current=current,
         first_player="A",
     )
+    for player, ids in (hands or {}).items():
+        for card_id in ids:
+            state.add_to_hand(player, card_id)
+    return state
 
 
 def put(state: GameState, cr: str, card_id: str, owner: str) -> None:
