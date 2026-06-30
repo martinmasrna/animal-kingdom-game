@@ -324,7 +324,7 @@ def _op_play_extra(state, step):
         return None
     allowed = None
     if step.get("constraint") == "cat":
-        allowed = {cid for cid in state.hands[step["chooser"]] if state.cards[cid].tag == "Cat"}
+        allowed = {cid for cid in state.hands[step["chooser"]] if "Cat" in state.cards[cid].tags}
     placements = legal_placements(state, step["chooser"], allowed)
     if not placements:
         return None

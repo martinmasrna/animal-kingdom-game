@@ -10,8 +10,9 @@ from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.maps import load_map
 from animal_kingdom.engine.state import GameState, Result, UnitInstance
 
-# Card ids with known integer strengths used below:
-# vervet_monkey=1, squirrel=2, baboon=4, boa_constrictor=4, wild_boar=5, lion=7.
+# Reworked-pool card ids with known integer strengths used below, all vanilla-bodied
+# for rules tests (no Phase-1 effect handler, no keyword): house_cat=1, caracal=4,
+# cheetah=5, lion=7.
 
 
 def make_state(*, current="A", hands=None, decks=None, food=None) -> GameState:
@@ -48,7 +49,7 @@ def test_empty_board_only_own_hq_fronts_are_legal():
 
 def test_connection_extends_through_occupied():
     s = make_state(hands={"A": ["lion"], "B": []})
-    put(s, "1,2", "baboon", "A")  # an occupied, connected front
+    put(s, "1,2", "caracal", "A")  # an occupied, connected front
     assert place_targets(s) == {"1,1", "1,2", "1,3", "2,2"}
     assert "3,2" not in place_targets(s)  # two hops away, no chain yet
 
@@ -56,24 +57,24 @@ def test_connection_extends_through_occupied():
 # ------------------------------------------------------------------------ covering
 
 def test_covering_requires_strictly_greater_strength():
-    s = make_state(hands={"A": ["lion", "vervet_monkey", "boa_constrictor"], "B": []})
-    put(s, "1,2", "baboon", "A")           # A holds a connected front
-    put(s, "2,2", "boa_constrictor", "B")  # enemy strength 4, adjacent → connected for A
+    s = make_state(hands={"A": ["lion", "house_cat", "caracal"], "B": []})
+    put(s, "1,2", "caracal", "A")           # A holds a connected front
+    put(s, "2,2", "caracal", "B")  # enemy strength 4, adjacent → connected for A
     legal = rules.legal_actions(s)
     assert PlaceAction("lion", ("cr", "2,2")) in legal             # 7 > 4 ✓
-    assert PlaceAction("vervet_monkey", ("cr", "2,2")) not in legal  # 1 > 4 ✗
-    assert PlaceAction("boa_constrictor", ("cr", "2,2")) not in legal  # 4 > 4 ✗ (strict)
+    assert PlaceAction("house_cat", ("cr", "2,2")) not in legal  # 1 > 4 ✗
+    assert PlaceAction("caracal", ("cr", "2,2")) not in legal  # 4 > 4 ✗ (strict)
 
 
 def test_own_stacking_needs_no_strength():
-    s = make_state(hands={"A": ["vervet_monkey"], "B": []})
+    s = make_state(hands={"A": ["house_cat"], "B": []})
     put(s, "1,2", "lion", "A")  # own strong unit
-    assert PlaceAction("vervet_monkey", ("cr", "1,2")) in rules.legal_actions(s)
+    assert PlaceAction("house_cat", ("cr", "1,2")) in rules.legal_actions(s)
 
 
 def test_stack_reveal_on_removal():
     s = make_state()
-    put(s, "2,2", "boa_constrictor", "B")  # B (bottom)
+    put(s, "2,2", "caracal", "B")  # B (bottom)
     put(s, "2,2", "lion", "A")             # A covers (top)
     assert rules.owner_of(s, "2,2") == "A"
     s.board["2,2"].pop()                   # remove the top
@@ -85,7 +86,7 @@ def test_stack_reveal_on_removal():
 def test_region_control_produces_food_at_end_of_turn():
     s = make_state(current="A", decks={"A": ["lion"], "B": []})
     for cr in ("1,1", "2,1", "1,2", "2,2"):  # all corners of R1 (food 10)
-        put(s, cr, "baboon", "A")
+        put(s, cr, "caracal", "A")
     rules.apply_action(s, DrawAction())
     assert s.food["A"] == 10
     assert s.current == "B"  # turn passed
@@ -96,7 +97,7 @@ def test_region_control_produces_food_at_end_of_turn():
 def test_food_win():
     s = make_state(current="A", decks={"A": ["lion"], "B": []}, food={"A": 95, "B": 0})
     for cr in ("1,1", "2,1", "1,2", "2,2"):
-        put(s, cr, "baboon", "A")
+        put(s, cr, "caracal", "A")
     rules.apply_action(s, DrawAction())  # +10 → 105 ≥ 100
     assert s.result == Result("A", "food")
     assert rules.is_terminal(s) == Result("A", "food")
@@ -105,7 +106,7 @@ def test_food_win():
 def test_hq_capture_win():
     s = make_state(current="A", hands={"A": ["lion"], "B": []})
     for cr in ("1,2", "2,2", "3,2", "4,2"):  # connected chain to B's front (4,2)
-        put(s, cr, "baboon", "A")
+        put(s, cr, "caracal", "A")
     assert PlaceAction("lion", ("hq", "B")) in rules.legal_actions(s)
     rules.apply_action(s, PlaceAction("lion", ("hq", "B")))
     assert s.result == Result("A", "hq_capture")

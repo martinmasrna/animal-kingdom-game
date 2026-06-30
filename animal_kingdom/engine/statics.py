@@ -49,7 +49,7 @@ def can_cover(state: GameState, placer_card_id: str, owner: str, target: UnitIns
         return True
 
     # Snow Leopard anthem: your *other* Cats may cover equal-or-lower while you control one.
-    if placer.tag == "Cat" and placer.id != "snow_leopard" and _controls(state, owner, "snow_leopard"):
+    if "Cat" in placer.tags and placer.id != "snow_leopard" and _controls(state, owner, "snow_leopard"):
         if placer_str >= target_str:
             return True
 
@@ -72,7 +72,7 @@ def extra_placement_crossroads(state: GameState, card_id: str, owner: str) -> se
     out: set[str] = set()
     for cr, stack in state.board.items():
         top = stack[-1] if stack else None
-        if top and top.owner == owner and state.cards[top.card_id].tag == "Cat":
+        if top and top.owner == owner and "Cat" in state.cards[top.card_id].tags:
             out |= set(gm.neighbors(cr))
     return out
 

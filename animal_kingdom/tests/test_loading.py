@@ -1,4 +1,4 @@
-"""M0 acceptance: the full card pool and Map A load and validate."""
+"""Acceptance: the reworked 98-design pool and Map A load and validate."""
 
 from __future__ import annotations
 
@@ -8,7 +8,10 @@ from animal_kingdom.engine.cards import (
     COPY_LIMITS,
     Card,
     CardDataError,
+    DYNAMIC_STRENGTHS,
     KEYWORDS,
+    TAGS,
+    TYPES,
     load_cards,
     validate_card_record,
 )
@@ -21,12 +24,19 @@ from animal_kingdom.engine.maps import (
 )
 
 
+# A minimal well-formed record for validation unit tests (new schema).
+GOOD = {
+    "id": "x", "name": "X", "deck": "cats_midrange", "rarity": "common",
+    "type": "unit", "tags": [], "base_strength": 3,
+}
+
+
 # --------------------------------------------------------------------------- cards
 
 def test_cards_load_full_pool():
     cards = load_cards()
-    # 4 archetypes + 2 General + parked Rabbit, as listed in cards.md.
-    assert len(cards) == 55
+    # 7 premade decks x 14 designs each = 98 (README roster).
+    assert len(cards) == 98
     assert all(isinstance(c, Card) for c in cards.values())
 
 
@@ -36,74 +46,63 @@ def test_every_card_has_valid_static_fields():
         assert c.id == cid
         assert c.name
         assert c.rarity in COPY_LIMITS
+        assert c.type in TYPES
         assert c.keywords <= KEYWORDS
+        assert c.tags <= TAGS
+        assert c.food_cost >= 0
         if c.is_dynamic:
-            assert c.dynamic_strength in {"control_count", "discard_count", "chameleon"}
+            assert c.dynamic_strength in DYNAMIC_STRENGTHS
         else:
             assert isinstance(c.base_strength, int) and 0 <= c.base_strength <= 10
 
 
 def test_known_cards_present_with_expected_data():
     cards = load_cards()
-    assert cards["nile_crocodile"].is_dynamic
-    assert cards["nile_crocodile"].dynamic_strength == "control_count"
-    assert cards["anaconda"].dynamic_strength == "discard_count"
+    # Only Goliath + Chameleon are dynamic (dec. E).
+    assert cards["goliath"].is_dynamic
+    assert cards["goliath"].dynamic_strength == "removed_units_count"
     assert cards["chameleon"].dynamic_strength == "chameleon"
-    assert cards["matriarch_elephant"].has_keyword("Immovable")
-    assert cards["egg"].has_keyword("Fragile")
-    assert cards["golden_eagle"].has_keyword("Flight")
-    assert cards["lion"].tag == "Cat"
-    assert cards["honey_badger"].tag is None  # printed as '-'
-
-
-def test_archetype_counts_match_docs():
-    cards = load_cards()
-    counts: dict[str, int] = {}
-    for c in cards.values():
-        counts[c.archetype] = counts.get(c.archetype, 0) + 1
-    assert counts == {
-        "aggro": 12,
-        "control": 14,
-        "combo": 13,
-        "midrange": 13,
-        "general": 2,
-        "parking": 1,
-    }
+    assert cards["tiger"].has_keyword("Apex Predator")
+    assert cards["aurum"].has_keyword("Fragile")
+    assert cards["eagle"].has_keyword("Flight")
+    assert cards["lion"].has_tag("Cat")
+    assert cards["queen_bee"].tags == frozenset({"Colony", "Queen"})
+    assert cards["worker_ant"].tags == frozenset({"Colony", "Worker"})
+    assert cards["fathom"].tags == frozenset()  # tagless ('-')
+    assert cards["elephant"].food_cost == 20    # "Costs 20 food" body
+    assert cards["fig_tree"].type == "landmark"
 
 
 def test_duplicate_card_id_rejected():
-    raw = {"cards": [
-        {"id": "x", "name": "X", "archetype": "general", "rarity": "common", "tag": None, "base_strength": 1},
-        {"id": "x", "name": "X2", "archetype": "general", "rarity": "common", "tag": None, "base_strength": 1},
-    ]}
+    raw = {"cards": [GOOD, {**GOOD, "name": "X2"}]}
     with pytest.raises(CardDataError):
         load_cards(raw)
 
 
 def test_bad_strength_rejected():
-    raw = {"cards": [
-        {"id": "x", "name": "X", "archetype": "general", "rarity": "common", "tag": None, "base_strength": 99},
-    ]}
     with pytest.raises(CardDataError):
-        load_cards(raw)
+        load_cards({"cards": [{**GOOD, "base_strength": 99}]})
 
 
 def test_validate_card_record_directly():
-    good = {"id": "x", "name": "X", "archetype": "general", "rarity": "common",
-            "tag": None, "base_strength": 3}
-    validate_card_record(good)  # no raise
+    validate_card_record(GOOD)  # no raise
     with pytest.raises(CardDataError):
-        validate_card_record({**good, "rarity": "mythic"})
+        validate_card_record({**GOOD, "rarity": "mythic"})
     with pytest.raises(CardDataError):
-        validate_card_record({**good, "base_strength": "dynamic"})  # missing dynamic_strength
+        validate_card_record({**GOOD, "base_strength": "dynamic"})  # missing dynamic_strength
+    with pytest.raises(CardDataError):
+        validate_card_record({**GOOD, "type": "spell"})             # bad type
+    with pytest.raises(CardDataError):
+        validate_card_record({**GOOD, "tags": ["Reptile"]})         # retired tag
+    with pytest.raises(CardDataError):
+        validate_card_record({**GOOD, "deck": "nope"})              # unknown deck
+    with pytest.raises(CardDataError):
+        validate_card_record({**GOOD, "type": "landmark"})          # non-landmark id as landmark
 
 
 def test_validate_false_skips_checks():
     # A record that would fail validation still builds when validation is skipped.
-    bad_but_buildable = {"cards": [
-        {"id": "x", "name": "X", "archetype": "general", "rarity": "mythic",
-         "tag": None, "base_strength": 3},
-    ]}
+    bad_but_buildable = {"cards": [{**GOOD, "rarity": "mythic"}]}
     cards = load_cards(bad_but_buildable, validate=False)
     assert cards["x"].rarity == "mythic"
     with pytest.raises(CardDataError):
