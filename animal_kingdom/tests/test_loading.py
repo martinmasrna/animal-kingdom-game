@@ -128,7 +128,8 @@ def test_map_a_topology():
     assert m.adjacent("2,2", "3,2")
     assert m.adjacent("3,2", "2,2")
     assert not m.adjacent("1,1", "2,2")  # diagonal, no edge
-    assert m.neighbors("2,2") == frozenset({"1,2", "3,2", "2,1", "2,3"})
+    # neighbors() returns a stable sorted tuple (determinism guarantee, handoff §4.6).
+    assert m.neighbors("2,2") == ("1,2", "2,1", "2,3", "3,2")
 
 
 def test_map_a_regions():

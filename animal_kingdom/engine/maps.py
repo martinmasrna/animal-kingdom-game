@@ -42,9 +42,15 @@ class GameMap:
     edges: tuple[tuple[str, str], ...] = field(default=())
 
     # --- geometric helpers ---
-    def neighbors(self, crossroad: str) -> frozenset[str]:
-        """Crossroads one edge away from `crossroad`."""
-        return self._adjacency.get(crossroad, frozenset())
+    def neighbors(self, crossroad: str) -> tuple[str, ...]:
+        """Crossroads one edge away from `crossroad`, in a stable sorted order.
+
+        Deterministic ordering matters: callers iterate neighbours to fire adjacency
+        triggers and to seed RNG-driven effects, so a set's hash-dependent order would make
+        games diverge across processes (different PYTHONHASHSEED). Sorting here keeps the
+        engine's "same seed + same actions => identical replay" guarantee (handoff §4.6).
+        """
+        return tuple(sorted(self._adjacency.get(crossroad, ())))
 
     def adjacent(self, a: str, b: str) -> bool:
         """True if `a` and `b` are connected by a single edge (overview.md §3.3)."""
