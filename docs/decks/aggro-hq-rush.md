@@ -4,13 +4,13 @@ Cheap chained bodies + reach/flyers to threaten and capture the enemy HQ; remova
 through defenders. 4-4-6 shape (4 legendary ×1, 4 rare ×2, 6 common ×3 = 30).
 Source: user's offline Google Sheet (uploaded 2026-06-28). **Complete (2026-06-28).**
 
-## Legendary (×1) — names are working placeholders
+## Legendary (×1) — names **PROVISIONAL** (assigned 2026-06-30; final flavor pass pending — alternates in `flavor-review.md` §3)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
-| **[a Rat King — a writhing mass of rats]** | Rodent | 3 | Has +1 strength for each other unit you control. *(swarm → wall-breaker finisher)* |
-| **[PLAGUE RAT]** | Rodent | 3 | Battlecry: remove everything from an adjacent crossroad. |
-| **[a great musk-beast — a legendary skunk]** | — | 5 | Battlecry: return all enemy units adjacent to this to their owner's hand. *(mass-bounce disruptor — opens the HQ front)* |
-| **[a legendary bird of prey]** | Bird | 6 | Flight. Battlecry: remove an adjacent enemy of strength 6 or less. *(reach beachhead + capped snipe)* |
+| **Verminus, the Rat King** | Rodent | 3 | Has +1 strength for each other unit you control. *(swarm → wall-breaker finisher; art: a writhing mass of rats)* |
+| **Pestis** | Rodent | 3 | Battlecry: remove everything from an adjacent crossroad. *(art: a plague rat; whole-tile wipe)* |
+| **Sirocco** | — | 5 | Battlecry: return all enemy units adjacent to this to their owner's hand. *(mass-bounce disruptor — opens the HQ front; art: a great musk-beast / legendary skunk)* |
+| **Stoop** | Bird | 6 | Flight. Battlecry: remove an adjacent enemy of strength 6 or less. *(reach beachhead + capped snipe; art: a legendary bird of prey)* |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |

@@ -4,13 +4,13 @@ Sacrifice-for-value combo: feed Deathrattle fodder into sac outlets, burst food,
 cross `win_food` in one big turn. 4-4-6 shape (4 legendary ×1, 4 rare ×2, 6 common ×3 = 30).
 Source: user's offline Google Sheet (uploaded 2026-06-28). **Has one open `?` common.**
 
-## Legendary (×1) — names still placeholders
+## Legendary (×1) — names **PROVISIONAL** (assigned 2026-06-30; final flavor pass pending — alternates in `flavor-review.md` §3)
 | Name | Tag | Str | Effect | Description |
 |---|---|---:|---|---|
-| **[NAME]** | — | 4 | Battlecry: draw a legendary unit. | Octopus, looking like a kraken. |
-| **[NAME]** | Rodent | 1 | Battlecry: gain 1 food. Draw 1 card. You may play 1 more unit. | Old, wise little mouse. |
-| **[NAME], the Devourer** | Arachnid | 5 | Battlecry: remove up to 3 friendly units. Draw a card for each. | Evil-looking black widow (female name). |
-| **[NAME], Keeper of the Stash** | Rodent | 4 | Immovable. Battlecry: store all your food. In 2 turns, recover twice as much. | Squirrel with a giant hoard of nuts behind him. |
+| **Fathom** | — | 4 | Battlecry: draw a legendary unit. | Octopus, looking like a kraken. |
+| **Greywhisker** | Rodent | 1 | Battlecry: gain 1 food. Draw 1 card. You may play 1 more unit. | Old, wise little mouse. |
+| **Carmilla, the Devourer** | Arachnid | 5 | Battlecry: remove up to 3 friendly units. Draw a card for each. | Evil-looking black widow (female name). |
+| **Scrooge, Keeper of the Stash** | Rodent | 4 | Immovable. Battlecry: store all your food. In 2 turns, recover twice as much. | Squirrel with a giant hoard of nuts behind him. |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
@@ -48,7 +48,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Has one open `?` co
 - **Standardize the Deathrattle wording** (above).
 - **Sacrifice engine semantics:** does removing a friendly unit count as "removed" for all Deathrattle/`ON_REMOVE` triggers? (Assume yes.) Do Immovable units (Keeper, Giant Tortoise) resist *friendly* sacrifice, or only *enemy* removal? Immovable text says "cannot be removed by special effects" — would block your own Devourer from sacrificing them. Likely intended (you wouldn't sac your Immovable anchors), but flag.
 - **"Remove up to 3" / "you may play 1 more" — optional counts:** confirm "up to"/"may" = controller chooses 0..N; bots pick per policy.
-- **Legendary names:** "kraken octopus" / "wise mouse" / "black widow, the Devourer" / "squirrel, Keeper of the Stash" are art/flavor notes — real names TBD. The black-widow legendary is a different card from the common **Black Widow** (legendary = named individual). *(No collision — README decision A.)*
+- **Legendary names — provisional set assigned 2026-06-30** (Fathom / Greywhisker / Carmilla, the Devourer / Scrooge, Keeper of the Stash; alternates in `flavor-review.md` §3, flavor-lock pending). The black-widow legendary **Carmilla** is a different card from the common **Black Widow** (legendary = named individual). *(No collision — README decision A.)*
 - **Gazelle 20-food + mass sac = OTK swing** — central tuning dial; sim should check OTK consistency vs the 100 threshold and the 2-turn double window.
 - **Keeper "store all food":** with food = 0 during the window the player can't win-by-food or pay food costs; confirm interaction is identical to other store/double effects. (×1 legendary, so no multi-copy stacking.)
-- **Legendary names** — all four are placeholders.
+- **Legendary names** — provisional (assigned 2026-06-30); see the legendary table + the `todo.md` flavor-lock item.

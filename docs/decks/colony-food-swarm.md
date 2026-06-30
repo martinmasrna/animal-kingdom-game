@@ -4,13 +4,13 @@ Mono-`Colony` insect tribal. Go wide, convert a swarm into food. Heavy Flight.
 4-4-6 shape (4 legendary ×1, 4 rare ×2, 6 common ×3 = 30).
 Source: user's offline Google Sheet (uploaded 2026-06-28).
 
-## Legendary (×1) — names still placeholders
+## Legendary (×1) — names **PROVISIONAL** (assigned 2026-06-30; final flavor pass pending — alternates in `flavor-review.md` §3)
 | Name | Tag | Str | Effect | Description |
 |---|---|---:|---|---|
-| **Queen [Name]** | Colony | 4 | Battlecry: gain 4 food for each other friendly Colony unit. | Ant queen. |
-| **[Name], Champion of the Hive** | Colony | 2 | Flight. Has +2 strength for each other friendly Colony unit. | Deadly hornet. |
-| **Queen [Name]** | Colony | 5 | Whenever you play a Colony unit, gain 5 food. | Bee queen. |
-| **[NAME]** | Colony | 3 | Flight. Whenever you gain food, gain 3 additional food. | Hilariously fat bumblebee. |
+| **Queen Marabunta** | Colony | 4 | Battlecry: gain 4 food for each other friendly Colony unit. | Ant queen. |
+| **Vesper, Champion of the Hive** | Colony | 2 | Flight. Has +2 strength for each other friendly Colony unit. | Deadly hornet. |
+| **Queen Honoria** | Colony | 5 | Whenever you play a Colony unit, gain 5 food. | Bee queen. |
+| **Falstaff** | Colony | 3 | Flight. Whenever you gain food, gain 3 additional food. | Hilariously fat bumblebee. |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
@@ -49,10 +49,10 @@ Source: user's offline Google Sheet (uploaded 2026-06-28).
 
 ## Flags (resolve in the all-at-once review)
 - **Sub-role data model (Queen/Worker)** — the headline item above; needs a schema decision.
-- **Legendary names:** "ant queen" / "bee queen" / "Champion of the Hive" / "fat bumblebee" are art/flavor notes, not names — real names TBD. The bee-queen legendary is a different card from the common **Queen Bee** (legendary = named individual). *(No collision — README decision A.)*
+- **Legendary names — provisional set assigned 2026-06-30** (Queen Marabunta / Vesper, Champion of the Hive / Queen Honoria / Falstaff; alternates in `flavor-review.md` §3, flavor-lock pending). The bee-queen legendary **Queen Honoria** is a different card from the common **Queen Bee** (legendary = named individual). *(No collision — README decision A.)*
 - **"Play a Worker unit" / "play one additional … unit" — from where?** Hand only, or hand-or-deck (tutor)? Assume hand unless stated. Is it mandatory or "may"? Queen Bee says "play a Worker" (looks mandatory; can it fizzle if no Worker in hand?). Flag.
 - **Champion / Guard dynamic strength snapshot timing** — live at comparison time (consistent with existing dynamic-strength rule) vs. on placement. With a swarm that grows/shrinks mid-turn this matters for covering math.
 - **Once-per / stacking on food riders:** fat bumblebee "+3 whenever you gain food" — does it apply to its own and the bee queen's gains in the same chain? Watch for runaway loops; sim/tuning dial.
 - **Food numbers** (4/each, 5/play, 8, 5+5, 3/turn, +3 rider) are new and want tuning vs region output and `win_food`.
 - **Soldier Ant "remove an adjacent enemy"** — no strength cap stated (unlike most removal). Confirm it's unconditional removal once the 5-Colony gate is met. Flag.
-- **Legendary names** — three of four are placeholders.
+- **Legendary names** — provisional (assigned 2026-06-30); see the legendary table + the `todo.md` flavor-lock item.

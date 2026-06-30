@@ -4,13 +4,13 @@ Snake/Bird/Egg tribal control built around a **draw–shuffle–remove → food*
 4-4-6 shape (4 legendary ×1, 4 rare ×2, 6 common ×3 = 30).
 Source: user's offline Google Sheet (uploaded 2026-06-28).
 
-## Legendary (×1) — names still placeholders
+## Legendary (×1) — names **PROVISIONAL** (assigned 2026-06-30; final flavor pass pending — alternates in `flavor-review.md` §3)
 | Name | Tag | Str | Effect | Description |
 |---|---|---:|---|---|
-| **[NAME]** | Snake | 6 | Whenever a card is drawn, shuffled or removed, gain 1 food. | Ancient snake, inspired by Ouroboros. |
-| **[NAME]** | Snake | = | This unit's strength is equal to the number of removed units. | A giant anaconda, trying to swallow everything. |
-| **[NAME]** | Bird | 5 | Flight. When this is removed, shuffle it back to your deck. | Red/orange/yellow, fire-colored bird looking like a Phoenix. |
-| **[NAME]** | Egg | 0 | Fragile. At the start of your turn, draw a card. | Golden egg. |
+| **Eon** | Snake | 6 | Whenever a card is drawn, shuffled or removed, gain 1 food. | Ancient snake, inspired by Ouroboros. |
+| **Goliath** | Snake | = | This unit's strength is equal to the number of removed units. | A giant anaconda, trying to swallow everything. |
+| **Ember** | Bird | 5 | Flight. When this is removed, shuffle it back to your deck. | Red/orange/yellow, fire-colored bird looking like a Phoenix. |
+| **Aurum** | Egg | 0 | Fragile. At the start of your turn, draw a card. | Golden egg. |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
@@ -42,7 +42,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28).
 - **Egg sub-engine:** Fragile eggs get removed easily (covering/hatching) → Egg Eater pays 10 food each time; eggs hatch into typed draws or (golden egg) draw every turn.
 
 ## Flags (resolve in the all-at-once review)
-- **Legendary names:** three of four legendaries are still `[NAME]` placeholders. The "giant anaconda" / "Ouroboros snake" / "Phoenix" / "golden egg" notes are **art/flavor descriptions, not names** — real names TBD. The dynamic-snake legendary is a different card from the common **Anaconda** (legendaries are the named-individual exception). *(Card-identity is globally unique — resolved, see README decision A.)*
+- **Legendary names — provisional set assigned 2026-06-30** (Eon / Goliath / Ember / Aurum; alternates in `flavor-review.md` §3, flavor-lock pending). The "giant anaconda" / "Ouroboros snake" / "Phoenix" / "golden egg" notes remain **art/flavor descriptions**. The dynamic-snake legendary **Goliath** is a different card from the common **Anaconda** (legendaries are the named-individual exception). *(Card-identity is globally unique — resolved, see README decision A.)*
 - **Golden Egg "at the start of each turn, draw a card":** each of *your* turns, or *both* players' turns? Flag.
 - **"Whenever a card is drawn":** whose draws — yours only, or any? Same scope question for "shuffled" / "removed" (your cards vs all).
 - **Once-per-turn caps:** none of the event-food triggers state a cap. With Ouroboros + Rattlesnake + a shuffle-heavy turn this could spike hard — likely a sim/tuning dial.
