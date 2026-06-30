@@ -8,6 +8,14 @@ Nile Crocodile (dynamic strength), Vulture (once/turn reactive draw).
 
 from __future__ import annotations
 
+import pytest
+
+# These golden tests assert old-pool (M2a) effect *behavior* and key old-pool card ids
+# (wild_dogs, hibernating_bear, nile_crocodile, baboon, ...) that no longer exist in the
+# reworked pool. Effects are re-implemented for the reworked pool in Phase 2; skip the
+# whole module until then (Phase-1 scope is static data only).
+pytestmark = pytest.mark.skip(reason="effects re-implemented for the reworked pool in Phase 2")
+
 from animal_kingdom.engine import effects, rules
 from animal_kingdom.engine.actions import ChoiceAction, PlaceAction, DrawAction
 from animal_kingdom.engine.cards import load_cards

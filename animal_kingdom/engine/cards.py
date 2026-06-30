@@ -13,14 +13,28 @@ from typing import Optional
 
 from .resources import load_bundled_json
 
-# Allowed value domains (validation).
+# Allowed value domains (validation). Reworked 98-design pool: README decisions B-E.
 RARITIES = {"common", "rare", "legendary"}
-KEYWORDS = {"Flight", "Immovable", "Fragile"}
-DYNAMIC_STRENGTHS = {"control_count", "discard_count", "chameleon"}
-ARCHETYPES = {"aggro", "control", "combo", "midrange", "general", "parking"}
+KEYWORDS = {"Flight", "Immovable", "Fragile", "Apex Predator"}  # static keywords only;
+# Battlecry/Deathrattle are trigger prefixes printed in `text`, not stored keywords.
+TYPES = {"unit", "landmark"}                 # landmark is the lone non-unit type (dec. C)
+LANDMARK_IDS = {"fig_tree", "watering_hole"}  # the only two landmarks in the pool
+# Family + role tags (dec. B). Retired umbrellas (Reptile, Insect) are forbidden.
+TAGS = {
+    "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent",
+    "Arachnid", "Bear", "Megafauna", "Egg", "Fish",   # species families
+    "Queen", "Worker",                                # roles
+}
+DYNAMIC_STRENGTHS = {"removed_units_count", "chameleon"}  # only Goliath + Chameleon
 
-# Copy limits per rarity for roster construction (overview.md §14).
-COPY_LIMITS = {"common": 4, "rare": 2, "legendary": 1}
+# The seven premade deck slugs (align to docs/decks/ filenames).
+DECK_SLUGS = {
+    "cats_midrange", "egg_control", "colony_food_swarm", "ramp",
+    "food_otk", "aggro_hq_rush", "canine_buff_tempo",
+}
+
+# Copy limits per rarity for the locked 4-4-6 decklist shape (legendary 1 / rare 2 / common 3).
+COPY_LIMITS = {"common": 3, "rare": 2, "legendary": 1}
 
 
 class CardDataError(ValueError):
@@ -33,20 +47,30 @@ class Card:
 
     id: str
     name: str
-    archetype: str
+    deck: str
     rarity: str
-    tag: Optional[str]
+    type: str
+    tags: frozenset[str]
     base_strength: int | str       # int 0-10, or the string "dynamic"
     keywords: frozenset[str] = field(default_factory=frozenset)
     dynamic_strength: Optional[str] = None  # rule name when base_strength == "dynamic"
+    food_cost: int = 0             # placement cost; only on "Costs X food" cards
     text: str = ""
 
     @property
     def is_dynamic(self) -> bool:
         return self.base_strength == "dynamic"
 
+    @property
+    def is_unit(self) -> bool:
+        """Units and Eggs are units (dec. C); Landmarks are not."""
+        return self.type == "unit"
+
     def has_keyword(self, kw: str) -> bool:
         return kw in self.keywords
+
+    def has_tag(self, tag: str) -> bool:
+        return tag in self.tags
 
 
 def validate_card_record(rec: dict) -> None:
@@ -56,20 +80,30 @@ def validate_card_record(rec: dict) -> None:
     so a constructed Card is always valid and the engine needs no defensive checks.
     Directly unit-testable on its own.
     """
-    required = ("id", "name", "archetype", "rarity", "base_strength")
+    required = ("id", "name", "deck", "rarity", "type", "tags", "base_strength")
     for key in required:
         if key not in rec:
             raise CardDataError(f"card {rec.get('id', rec)!r} missing required field {key!r}")
-    # `tag` is required but may be null (printed '-'); keywords/text/dynamic_strength
-    # are optional and default during construction.
-    if "tag" not in rec:
-        raise CardDataError(f"card {rec['id']!r} missing required field 'tag' (use null for '-')")
+    # keywords/text/dynamic_strength/food_cost are optional and default during construction.
 
     cid = rec["id"]
     if rec["rarity"] not in RARITIES:
         raise CardDataError(f"card {cid!r}: bad rarity {rec['rarity']!r}, expected one of {sorted(RARITIES)}")
-    if rec["archetype"] not in ARCHETYPES:
-        raise CardDataError(f"card {cid!r}: bad archetype {rec['archetype']!r}")
+    if rec["deck"] not in DECK_SLUGS:
+        raise CardDataError(f"card {cid!r}: bad deck {rec['deck']!r}, expected one of {sorted(DECK_SLUGS)}")
+
+    ctype = rec["type"]
+    if ctype not in TYPES:
+        raise CardDataError(f"card {cid!r}: bad type {ctype!r}, expected one of {sorted(TYPES)}")
+    if ctype == "landmark" and cid not in LANDMARK_IDS:
+        raise CardDataError(f"card {cid!r}: only {sorted(LANDMARK_IDS)} may be landmarks (dec. C)")
+
+    tags = rec["tags"]
+    if not isinstance(tags, list):
+        raise CardDataError(f"card {cid!r}: tags must be a list, got {tags!r}")
+    for tag in tags:
+        if tag not in TAGS:
+            raise CardDataError(f"card {cid!r}: unknown tag {tag!r}, expected subset of {sorted(TAGS)}")
 
     strength = rec["base_strength"]
     if strength == "dynamic":
@@ -84,6 +118,10 @@ def validate_card_record(rec: dict) -> None:
     elif not 0 <= strength <= 10:
         raise CardDataError(f"card {cid!r}: base_strength {strength} out of range 0-10")
 
+    food_cost = rec.get("food_cost", 0)
+    if isinstance(food_cost, bool) or not isinstance(food_cost, int) or food_cost < 0:
+        raise CardDataError(f"card {cid!r}: food_cost must be an int >= 0, got {food_cost!r}")
+
     for kw in rec.get("keywords", []):
         if kw not in KEYWORDS:
             raise CardDataError(f"card {cid!r}: unknown keyword {kw!r}, expected subset of {sorted(KEYWORDS)}")
@@ -93,12 +131,14 @@ def _build_card(rec: dict) -> Card:
     return Card(
         id=rec["id"],
         name=rec["name"],
-        archetype=rec["archetype"],
+        deck=rec["deck"],
         rarity=rec["rarity"],
-        tag=rec["tag"],
+        type=rec["type"],
+        tags=frozenset(rec["tags"]),
         base_strength=rec["base_strength"],
         keywords=frozenset(rec.get("keywords", [])),
         dynamic_strength=rec.get("dynamic_strength"),
+        food_cost=rec.get("food_cost", 0),
         text=rec.get("text", ""),
     )
 

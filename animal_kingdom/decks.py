@@ -1,9 +1,13 @@
 """Deck construction helpers.
 
-M1 needs simple, legal-ish decks to fuzz and to drive the CLI. `make_vanilla_deck`
-builds one from integer-strength cards only (the 3 dynamic-strength cards are excluded
-until M2, per plan decision 5), respecting the per-rarity copy limits. The real,
-hand-built 32-card archetype decks arrive in M3.
+The reworked pool ships as **7 premade 4-4-6 decks** (`PREMADE_DECKS` /
+`load_premade_deck`), each a fixed 30-card list expanded from its 14 designs by the
+per-rarity copy limits (4 legendary ×1 + 4 rare ×2 + 6 common ×3 = 30). These are the
+real decks games are played with.
+
+`make_vanilla_deck` survives as a fuzz/CLI helper: it builds a legal-ish deck from
+integer-strength cards only (the two dynamic cards, Goliath and Chameleon, are excluded
+until their strength rules land), respecting the copy limits.
 """
 
 from __future__ import annotations
@@ -11,7 +15,28 @@ from __future__ import annotations
 import random
 from typing import Optional
 
-from .engine.cards import COPY_LIMITS, Card, load_cards
+from .engine.cards import COPY_LIMITS, Card, DECK_SLUGS, load_cards
+
+
+def _build_premade_decks(cards: dict[str, Card]) -> dict[str, list[str]]:
+    """Expand each deck's 14 designs into its 30-card decklist via the copy limits."""
+    decks: dict[str, list[str]] = {slug: [] for slug in DECK_SLUGS}
+    for card in cards.values():
+        decks[card.deck].extend([card.id] * COPY_LIMITS[card.rarity])
+    return decks
+
+
+# Deck slug -> 30 card ids. Built once from the bundled pool (single source of truth:
+# each card's `deck`/`rarity`), so it can never drift from cards.json.
+PREMADE_DECKS: dict[str, list[str]] = _build_premade_decks(load_cards())
+
+
+def load_premade_deck(slug: str, *, cards: Optional[dict[str, Card]] = None) -> list[str]:
+    """Return a fresh copy of the 30-card decklist for `slug`."""
+    decks = _build_premade_decks(cards) if cards is not None else PREMADE_DECKS
+    if slug not in decks:
+        raise ValueError(f"unknown deck slug {slug!r}, expected one of {sorted(DECK_SLUGS)}")
+    return list(decks[slug])
 
 
 def make_vanilla_deck(
@@ -28,7 +53,7 @@ def make_vanilla_deck(
     pool: list[str] = []
     for card in cards.values():
         if not isinstance(card.base_strength, int):
-            continue  # exclude dynamic-strength cards in M1
+            continue  # exclude dynamic-strength cards (Goliath, Chameleon)
         pool.extend([card.id] * COPY_LIMITS[card.rarity])
 
     if len(pool) < n:
