@@ -16,7 +16,7 @@ import sys
 from typing import Sequence
 
 from .bots.random_bot import RandomBot
-from .decks import make_vanilla_deck
+from .decks import PREMADE_DECKS, load_premade_deck, make_vanilla_deck
 from .engine import rules
 from .engine.actions import Action, DrawAction, PlaceAction
 from .engine.state import StateView, new_game
@@ -54,16 +54,29 @@ def _make_controller(kind: str, seat: str, seed: int):
     raise SystemExit(f"unknown bot kind {kind!r} (expected 'random' or 'human')")
 
 
-def play(bot_spec: str, seed: int, map_id: str, quiet: bool) -> None:
+def _make_deck(spec: str, deck_rng: random.Random) -> list[str]:
+    """A premade deck by slug, or a random vanilla deck when spec is 'vanilla'/empty."""
+    spec = spec.strip()
+    if spec in ("", "vanilla"):
+        return make_vanilla_deck(seed=deck_rng.randrange(1 << 30))
+    if spec not in PREMADE_DECKS:
+        raise SystemExit(f"unknown deck {spec!r}; expected 'vanilla' or one of {sorted(PREMADE_DECKS)}")
+    return load_premade_deck(spec)
+
+
+def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str) -> None:
     kinds = bot_spec.split(",")
     if len(kinds) != 2:
         raise SystemExit("--bots expects two comma-separated kinds, e.g. random,random")
     controllers = {"A": _make_controller(kinds[0], "A", seed),
                    "B": _make_controller(kinds[1], "B", seed)}
 
+    deck_specs = decks.split(",")
+    if len(deck_specs) != 2:
+        raise SystemExit("--decks expects two comma-separated decks, e.g. ramp,egg_control")
     deck_rng = random.Random(seed)
-    deck_a = make_vanilla_deck(seed=deck_rng.randrange(1 << 30))
-    deck_b = make_vanilla_deck(seed=deck_rng.randrange(1 << 30))
+    deck_a = _make_deck(deck_specs[0], deck_rng)
+    deck_b = _make_deck(deck_specs[1], deck_rng)
     state = new_game(deck_a, deck_b, seed, map_id=map_id)
 
     while True:
@@ -89,9 +102,12 @@ def main(argv: Sequence[str] | None = None) -> None:
                    help="two comma-separated controllers: random|human (default random,random)")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--map", dest="map_id", default="map_a")
+    p.add_argument("--decks", default="vanilla,vanilla",
+                   help="two comma-separated decks: 'vanilla' or a premade slug "
+                        "(e.g. ramp,egg_control)")
     p.add_argument("--quiet", action="store_true", help="only print the final board/result")
     args = p.parse_args(argv)
-    play(args.bots, args.seed, args.map_id, args.quiet)
+    play(args.bots, args.seed, args.map_id, args.quiet, args.decks)
 
 
 if __name__ == "__main__":

@@ -191,8 +191,8 @@ def test_validate_map_record_directly():
 
 def test_config_defaults_and_sweep():
     cfg = Config.default()
-    assert cfg.spotted_hyena_threshold == 4
-    assert cfg.raven_cost == 12
-    swept = cfg.sweep(spotted_hyena_threshold=5)
-    assert swept.spotted_hyena_threshold == 5
-    assert cfg.spotted_hyena_threshold == 4  # original unchanged (frozen)
+    assert cfg.guard_hornet_colony_threshold == 5
+    assert cfg.costs_20_food == 20
+    swept = cfg.sweep(guard_hornet_colony_threshold=4)
+    assert swept.guard_hornet_colony_threshold == 4
+    assert cfg.guard_hornet_colony_threshold == 5  # original unchanged (frozen)

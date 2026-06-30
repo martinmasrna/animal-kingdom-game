@@ -14,9 +14,9 @@ without reworking the action/bot contract:
   - `pending`       : the choice currently awaiting an action, or None (None in M1);
   - turn advancement is gated on "stack empty & nothing pending" (see rules.py).
 
-Randomness is a **carried seeded RNG** (`rng`): used by setup and by future chance
-effects (e.g. Raccoon's random discard). It is serialized and cloned, so games replay
-identically from (seed, action sequence) even with chance events.
+Randomness is a **carried seeded RNG** (`rng`): used by setup and by chance effects
+(e.g. Black Swan's random discard, filtered random draws). It is serialized and cloned,
+so games replay identically from (seed, action sequence) even with chance events.
 """
 
 from __future__ import annotations
@@ -42,31 +42,46 @@ def other_player(player: str) -> str:
 
 
 class UnitInstance:
-    """One unit in play: a card id + owner + unique instance id.
+    """One card instance: a card id + owner + unique instance id. Lives in a hand and then
+    on the board - the *same* instance moves hand->board on placement, carrying its counter.
 
-    Immutable-by-convention (guardrail a): fields are set once and never mutated, so
-    sharing instances across cloned states is safe. Strength is NOT stored here - it is
-    derived from the Card registry (and, in M2, from board state) via effective_strength.
+    Mostly set-once, but `strength_counter` and `placed_on_turn` are mutated during play
+    (decision E: "give +X" counters are stored on the instance, including hand instances).
+    Because instances are now mutable, `GameState.clone()` deep-copies them (it no longer
+    shares them by reference). Base/dynamic strength is NOT stored here - it is derived from
+    the Card registry and board state via strength.effective_strength; the counter is added.
     """
 
-    __slots__ = ("card_id", "owner", "iid", "placed_on_turn")
+    __slots__ = ("card_id", "owner", "iid", "placed_on_turn", "strength_counter", "locked_until_turn")
 
-    def __init__(self, card_id: str, owner: str, iid: int, placed_on_turn: int = 0):
+    def __init__(self, card_id: str, owner: str, iid: int, placed_on_turn: int = 0,
+                 strength_counter: int = 0, locked_until_turn: int = 0):
         self.card_id = card_id
         self.owner = owner
         self.iid = iid
-        self.placed_on_turn = placed_on_turn  # turn_counter at placement (Armadillo/Egg timing)
+        self.placed_on_turn = placed_on_turn  # turn_counter at placement (Egg timing); 0 in hand
+        self.strength_counter = strength_counter  # stored "give +X" buffs (signed); travels hand->board
+        self.locked_until_turn = locked_until_turn  # Skunk: unplayable from hand while turn < this
 
     def to_dict(self) -> dict:
         return {"card_id": self.card_id, "owner": self.owner, "iid": self.iid,
-                "placed_on_turn": self.placed_on_turn}
+                "placed_on_turn": self.placed_on_turn, "strength_counter": self.strength_counter,
+                "locked_until_turn": self.locked_until_turn}
 
     @staticmethod
     def from_dict(d: dict) -> "UnitInstance":
-        return UnitInstance(d["card_id"], d["owner"], d["iid"], d.get("placed_on_turn", 0))
+        return UnitInstance(d["card_id"], d["owner"], d["iid"], d.get("placed_on_turn", 0),
+                            d.get("strength_counter", 0), d.get("locked_until_turn", 0))
 
     def __repr__(self) -> str:
-        return f"UnitInstance({self.card_id!r}, {self.owner!r}, {self.iid})"
+        c = f", +{self.strength_counter}" if self.strength_counter else ""
+        return f"UnitInstance({self.card_id!r}, {self.owner!r}, {self.iid}{c})"
+
+
+def _copy_unit(u: UnitInstance) -> UnitInstance:
+    """An independent copy of a unit instance (used by clone, now that instances mutate)."""
+    return UnitInstance(u.card_id, u.owner, u.iid, u.placed_on_turn, u.strength_counter,
+                        u.locked_until_turn)
 
 
 @dataclass(frozen=True)
@@ -89,7 +104,7 @@ class StateView:
     """Read-only, per-seat projection of the state (guardrail b, handoff §4.5).
 
     Hidden information is stripped: the opponent's hand contents and both decks'
-    order/contents become counts only. Board, discard, and food totals are public.
+    order/contents become counts only. Board, the Remove Pile, and food totals are public.
     All containers are immutable (tuples / MappingProxy) so a bot cannot mutate the
     live game through its view. `pending` (when present) is what this seat must decide.
     """
@@ -103,7 +118,7 @@ class StateView:
     opponent_hand_count: int
     own_deck_count: int
     opponent_deck_count: int
-    discard: tuple[str, ...]
+    remove_pile: tuple[str, ...]
     food: Mapping[str, int]
     pending: Optional[Mapping[str, Any]]
     result: Optional[Result]
@@ -134,13 +149,14 @@ class GameState:
         config: Config,
         *,
         board: dict[str, list[UnitInstance]],
-        hands: dict[str, list[str]],
+        hands: dict[str, list[UnitInstance]],
         decks: dict[str, list[str]],
-        discard: list[str],
+        remove_pile: list[str],
         food: dict[str, int],
         current: str,
         first_player: str,
         rng: Optional[random.Random] = None,
+        starting_decks: Optional[dict[str, tuple]] = None,
         turn_counter: int = 0,
         units_placed_this_turn: int = 0,
         next_iid: int = 0,
@@ -154,9 +170,11 @@ class GameState:
         self.cards = cards
         self.config = config
         self.board = board                 # cr -> stack (bottom..top); top = visible/controls
-        self.hands = hands                 # player -> list of card ids
+        self.hands = hands                 # player -> list of UnitInstance (carry counters)
         self.decks = decks                 # player -> list of card ids (top = last, O(1) pop)
-        self.discard = discard             # shared, public
+        # The fixed 30-card starting decklists (immutable tuples), read by Oxpecker (F12).
+        self.starting_decks = starting_decks if starting_decks is not None else {"A": (), "B": ()}
+        self.remove_pile = remove_pile     # shared, public (formerly "discard")
         self.food = food
         self.current = current
         self.first_player = first_player
@@ -178,11 +196,25 @@ class GameState:
         return iid
 
     # --- card movement ---
-    def draw(self, player: str, n: int) -> None:
-        """Move up to n cards from the top of `player`'s deck (its end) into their hand."""
+    def draw(self, player: str, n: int) -> list["UnitInstance"]:
+        """Move up to n cards from the top of `player`'s deck (its end) into their hand.
+
+        Each drawn card becomes a fresh UnitInstance (counter 0), so a future "give +X" in
+        hand attaches to it. Returns the instances drawn (so on-draw triggers can see them).
+        """
         deck, hand = self.decks[player], self.hands[player]
+        drawn: list[UnitInstance] = []
         for _ in range(min(n, len(deck))):
-            hand.append(deck.pop())
+            inst = UnitInstance(deck.pop(), player, self.new_iid())
+            hand.append(inst)
+            drawn.append(inst)
+        return drawn
+
+    def add_to_hand(self, player: str, card_id: str, *, strength_counter: int = 0) -> "UnitInstance":
+        """Create a fresh hand instance of `card_id` for `player` (test setup, Opossum return)."""
+        inst = UnitInstance(card_id, player, self.new_iid(), strength_counter=strength_counter)
+        self.hands[player].append(inst)
+        return inst
 
     # --- board queries (shared by rules and effects, hence here on the state) ---
     def top_unit(self, cr: str) -> Optional["UnitInstance"]:
@@ -231,18 +263,20 @@ class GameState:
     def clone(self) -> "GameState":
         """An independent copy: mutating the clone never touches the original.
 
-        Containers are freshly built; UnitInstances and the map/card/config singletons
-        are shared by reference (all immutable-by-convention, so sharing is safe). The
-        RNG is copied to its own independent stream at the same position.
+        Containers are freshly built; the map/card/config singletons are shared by
+        reference (immutable). UnitInstances are now mutable (strength counters), so they
+        are **copied** - board and hand instances in the clone are independent of the
+        original. The RNG is copied to its own independent stream at the same position.
         """
         new = GameState.__new__(GameState)
         new.game_map = self.game_map
         new.cards = self.cards
         new.config = self.config
-        new.board = {cr: list(stack) for cr, stack in self.board.items()}
-        new.hands = {p: list(h) for p, h in self.hands.items()}
+        new.board = {cr: [_copy_unit(u) for u in stack] for cr, stack in self.board.items()}
+        new.hands = {p: [_copy_unit(u) for u in h] for p, h in self.hands.items()}
         new.decks = {p: list(d) for p, d in self.decks.items()}
-        new.discard = list(self.discard)
+        new.starting_decks = self.starting_decks   # immutable tuples - safe to share
+        new.remove_pile = list(self.remove_pile)
         new.food = dict(self.food)
         new.current = self.current
         new.first_player = self.first_player
@@ -271,11 +305,11 @@ class GameState:
             current=self.current,
             turn_counter=self.turn_counter,
             board=MappingProxyType(board),
-            own_hand=tuple(self.hands[player]),
+            own_hand=tuple(u.card_id for u in self.hands[player]),
             opponent_hand_count=len(self.hands[opp]),
             own_deck_count=len(self.decks[player]),
             opponent_deck_count=len(self.decks[opp]),
-            discard=tuple(self.discard),
+            remove_pile=tuple(self.remove_pile),
             food=MappingProxyType(dict(self.food)),
             pending=MappingProxyType(copy.deepcopy(self.pending)) if self.pending else None,
             result=self.result,
@@ -286,9 +320,10 @@ class GameState:
         return {
             "map_id": self.game_map.id,
             "board": {cr: [u.to_dict() for u in stack] for cr, stack in self.board.items()},
-            "hands": {p: list(h) for p, h in self.hands.items()},
+            "hands": {p: [u.to_dict() for u in h] for p, h in self.hands.items()},
             "decks": {p: list(d) for p, d in self.decks.items()},
-            "discard": list(self.discard),
+            "starting_decks": {p: list(d) for p, d in self.starting_decks.items()},
+            "remove_pile": list(self.remove_pile),
             "food": dict(self.food),
             "current": self.current,
             "first_player": self.first_player,
@@ -322,9 +357,10 @@ class GameState:
             cards,
             config,
             board=board,
-            hands={p: list(h) for p, h in d["hands"].items()},
+            hands={p: [UnitInstance.from_dict(u) for u in h] for p, h in d["hands"].items()},
             decks={p: list(dk) for p, dk in d["decks"].items()},
-            discard=list(d["discard"]),
+            starting_decks={p: tuple(dk) for p, dk in d.get("starting_decks", {}).items()},
+            remove_pile=list(d["remove_pile"]),
             food=dict(d["food"]),
             current=d["current"],
             first_player=d["first_player"],
@@ -360,6 +396,7 @@ def new_game(
     game_map = load_map(map_id)
 
     decks = {"A": list(deck_a), "B": list(deck_b)}
+    starting_decks = {"A": tuple(deck_a), "B": tuple(deck_b)}  # the fixed lists, for Oxpecker (F12)
     rng.shuffle(decks["A"])
     rng.shuffle(decks["B"])
 
@@ -373,11 +410,12 @@ def new_game(
         board={},
         hands={"A": [], "B": []},
         decks=decks,
-        discard=[],
+        remove_pile=[],
         food={"A": 0, "B": 0},
         current=first,
         first_player=first,
         rng=rng,
+        starting_decks=starting_decks,
     )
     state.draw(first, config.first_player_opening_draw)
     state.draw(second, config.second_player_opening_draw)

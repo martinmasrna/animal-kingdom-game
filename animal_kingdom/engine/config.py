@@ -1,13 +1,13 @@
-"""Tunable constants in one place (handoff §11).
+"""Tunable constants in one place (handoff §11; memory data-architecture-decision).
 
-These are deliberately *untuned placeholders* (cards.md §4.5, todo.md). The whole
-point of the simulator is to sweep these together on one shared food scale, so every
-magic number that a card effect or rule depends on lives here - never hard-coded in
-effect logic. `win_food` and region outputs are map-defined (see data/maps.json); the
-mirror here is only a fallback/default for maps that omit them.
+These are deliberately *untuned placeholders* for the reworked pool (decisions G/H are a
+sim job - see todo.md). The whole point of the simulator is to sweep them together on one
+shared food scale, so every magic number a card effect or rule depends on lives here -
+never hard-coded in effect logic. Card text is the source of the *defaults*; the sim
+re-derives the real values against `win_food` (100) and region output (data/maps.json).
 
-Build a Config once (usually `Config.default()`) and thread it through the engine.
-The sim can construct variant Configs to sweep balance dials.
+Build a Config once (usually `Config.default()`) and thread it through the engine. The sim
+constructs variant Configs via `sweep(**overrides)` to explore balance dials.
 """
 
 from __future__ import annotations
@@ -17,41 +17,96 @@ from dataclasses import dataclass, replace
 
 @dataclass(frozen=True)
 class Config:
-    # --- One-off food values on cards (cards.md §4.5 "Food Economy Constants") ---
-    f_plain: int = 4          # Army Ant, Vervet Monkey, Caracal
-    f_low: int = 3            # Wild Boar
-    f_med: int = 5            # Chipmunk
-    f_high: int = 8           # Squirrel, Honeybee (base)
-    honeybee_insect_bonus: int = 4    # Honeybee, extra if you control another Insect
-    queen_bee_bonus: int = 3          # additive, per food-gain event  (⚠ stacking dial)
-    driver_ant_per_unit: int = 2      # Driver Ant Queen, per unit you control (⚠ scaling dial)
-    raven_cost: int = 12              # Raven, food cost to play
+    # --- One-off food gains on placement (Battlecry "gain N food") ---
+    squirrel_food: int = 6
+    chipmunk_food_now: int = 5
+    chipmunk_food_later: int = 5         # paid at the start of the owner's next turn
+    flying_squirrel_food: int = 4
+    worker_ant_food: int = 8
+    worker_bee_food: int = 5             # +worker_bee_extra if you control another Worker
+    worker_bee_extra: int = 5
+    worker_wasp_food: int = 3            # at end of your turn
+    methuselah_food: int = 10            # at end of your turn
+    greywhisker_food: int = 1            # Battlecry: gain 1 food (+ draw 1, + play 1 more)
+    queen_marabunta_per_colony: int = 4  # per other friendly Colony unit
+    queen_honoria_per_play: int = 5      # per Colony unit you play
+    falstaff_food_rider: int = 3         # extra food whenever you gain food
 
-    # --- Delayed / multi-turn effects ---
-    hibernating_bear_multiplier: int = 2   # payout = stored_food * multiplier
-    hibernating_bear_delay: int = 2        # turns (of the owner) until payout
-    egg_delay: int = 2                     # turns until Egg hatches
-    egg_draw: int = 2                      # cards drawn when Egg hatches
-    rabbit_draw_delay: int = 1             # Rabbit: draw a Rabbit at start of next turn
+    # --- Food-event engine reactors (decision F2/F9; magnitudes are dials) ---
+    eon_food: int = 1                    # per draw/shuffle/remove event
+    vulture_food: int = 2                # per card removed
+    rattlesnake_food: int = 5            # per card shuffled
+    egg_eater_food: int = 10             # per Egg removed
+    jackal_food: int = 3                 # per adjacent removal
 
-    # --- Threshold dials (sim should sweep) ---
-    spotted_hyena_threshold: int = 4   # other units controlled to unlock "cover any" (sweep ~3-5)
+    # --- Deathrattle / payoff food ---
+    gazelle_food: int = 20               # Deathrattle: gain food
+    fig_tree_food: int = 20              # Landmark: gain food next turn
 
-    # Region outputs and win_food are map-defined (data/maps.json) and intentionally
-    # not duplicated here - maps are the single source of truth for board food.
+    # --- Strength anthems ("has +X", live; decision E) ---
+    anthem_lobo_per: int = 2             # per other Canine you control
+    anthem_awd_per: int = 1              # African Wild Dog, per friendly Canine
+    anthem_verminus_per: int = 1         # per other unit you control
+    anthem_vesper_per: int = 2           # per other friendly Colony unit
+    raksha_anthem: int = 2               # your other Canines have +X
+    guard_hornet_bonus: int = 5          # while >= threshold Colony units
+    guard_hornet_colony_threshold: int = 5
+
+    # --- Strength counters ("give +X", stored on the instance; decision E) ---
+    dhole_grant: int = 2                 # to adjacent friendly Canines
+    clarion_grant: int = 1               # to other Canines in hand + battlefield
+    red_wolf_grant: int = 1              # to Canines in hand
+    dingo_grant: int = 1                 # to a friendly adjacent Canine, end of turn
+    bush_dog_grant: int = 1              # to friendly adjacent Canines, on gaining strength
+    shuck_grant: int = 2                 # to the Canine returned from the Remove Pile
+
+    # --- Thresholds / strength gates ---
+    coyote_draw_threshold: int = 5       # draw if Coyote has >= this strength
+    colony_synergy_threshold: int = 5    # Guard Hornet / Soldier Ant / Nurse Bumblebee "5+ Colony"
+
+    # --- Removal-strength caps on Battlecry removals ---
+    jaguar_max: int = 5
+    serval_min: int = 6                  # removes an enemy of strength >= this
+    stoop_max: int = 6
+    rhinoceros_max: int = 5
+    hippopotamus_max: int = 3
+
+    # --- Placement costs (decision F) ---
+    costs_20_food: int = 20              # the "Costs 20 food" bodies (Borealis/Aquila/Bulwark/Elephant)
+
+    # --- Delayed / multi-turn effects (scheduler; "your turns" are 2 apart) ---
+    egg_hatch_delay: int = 2             # Bird/Snake Egg: turns until hatch
+    egg_hatch_draw: int = 2              # cards drawn when an Egg hatches
+    black_bear_delay: int = 2           # turns until Black Bear draws
+    black_bear_draw: int = 1
+    grizzly_bear_delay: int = 2         # turns until Grizzly Bear's random adjacent removal
+    scrooge_delay: int = 2              # turns until Scrooge's banked food returns
+    scrooge_multiplier: int = 2         # banked food returns x this
+
+    # --- Once-per-turn caps (decision G; default off = as printed, dials for the sim) ---
+    cap_queen_adira: bool = False
+    cap_eon: bool = False
+    cap_vulture: bool = False
+    cap_rattlesnake: bool = False
+    cap_jackal: bool = False
+    cap_queen_honoria: bool = False
+    cap_falstaff: bool = False
+
+    # Region outputs and win_food are map-defined (data/maps.json) and intentionally not
+    # duplicated here - maps are the single source of truth for board food.
 
     # --- Core rules constants (overview.md) ---
-    hand_limit: int = 8                # max hand size (overview.md §3.5)
-    first_player_opening_draw: int = 3 # overview.md §4.3
+    hand_limit: int = 8                  # max hand size (overview.md §3.5)
+    first_player_opening_draw: int = 3   # overview.md §4.3
     second_player_opening_draw: int = 4
-    draw_action_count: int = 2         # "Draw 2 cards" (overview.md §5)
+    draw_action_count: int = 2           # "Draw 2 cards" (overview.md §5)
 
     # --- Engine safety / sim hygiene ---
-    max_turns: int = 400               # hard cap so fuzz games always terminate (M1)
+    max_turns: int = 400                 # hard cap so fuzz games always terminate (M1)
 
     @staticmethod
     def default() -> "Config":
-        """The v0 placeholder constants (cards.md §4.5)."""
+        """The v0 placeholder constants for the reworked pool (untuned; see todo.md G/H)."""
         return Config()
 
     def sweep(self, **overrides) -> "Config":

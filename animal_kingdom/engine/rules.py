@@ -77,7 +77,7 @@ def apply_action(state: GameState, action: Action) -> GameState:
 def _do_draw(state: GameState, player: str) -> None:
     # Draw up to the per-action count, capped by the hand limit (state.draw caps by deck).
     n = min(state.config.draw_action_count, state.config.hand_limit - len(state.hands[player]))
-    state.draw(player, n)
+    effects.draw_cards(state, player, n)    # the wrapper fires ON_DRAW (Eon, Black Swan, ...)
 
 
 def _resolve_and_maybe_end_turn(state: GameState) -> None:
@@ -92,7 +92,11 @@ def _resolve_and_maybe_end_turn(state: GameState) -> None:
 
 def _end_turn(state: GameState) -> None:
     player = state.current
-    _produce_food(state, player)            # end-of-turn region income (Queen Bee applies)
+    effects.end_of_turn(state, player)      # on_end_of_turn triggers (Dingo, Worker Wasp, Methuselah)
+    effects.resolve(state)                  # choice-free by design, so it drains fully
+    if state.result is not None:
+        return  # an end-of-turn food gain could already win
+    _produce_food(state, player)            # end-of-turn region income
     if state.result is not None:
         return  # food win
     state.turn_counter += 1
