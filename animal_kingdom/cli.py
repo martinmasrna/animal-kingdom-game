@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import random
+import shutil
 import sys
 from typing import Sequence
 
@@ -19,17 +20,71 @@ from .bots.greedy_bot import GreedyBot
 from .bots.random_bot import RandomBot
 from .decks import PREMADE_DECKS, load_premade_deck, make_vanilla_deck
 from .engine import rules
-from .engine.actions import Action, DrawAction, PlaceAction
+from .engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
 from .engine.state import GameState, StateView, new_game
 from .render.text import render
 
 
-def _fmt_action(a: Action) -> str:
+# One-line deck identities for the interactive picker (presentation only; the source of
+# truth is docs/decks/README.md, which isn't shipped as data). Keep the slugs in sync
+# with engine.cards.DECK_SLUGS.
+_DECK_BLURBS = {
+    "cats_midrange": "mono-Cat tempo / removal",
+    "egg_control": "Snake/Bird/Egg draw-shuffle-remove into food",
+    "colony_food_swarm": "mono-Colony swarm into food",
+    "ramp": "ramp food into huge 'Costs 20' bodies",
+    "food_otk": "sacrifice + Deathrattle food OTK",
+    "aggro_hq_rush": "cheap chained bodies + reach to capture the HQ",
+    "canine_buff_tempo": "mono-Canine persistent strength buffs",
+}
+
+# Opponent levels, in menu order: label -> bot kind understood by _make_controller.
+_OPPONENT_LEVELS = [
+    ("Easy — random bot", "random"),
+    ("Normal — greedy bot (board heuristic + 1-ply lookahead)", "greedy"),
+]
+
+
+def _fmt_action(a: Action, state: GameState | None = None) -> str:
     if isinstance(a, DrawAction):
         return "draw"
     if isinstance(a, PlaceAction):
-        return f"place {a.card_id} -> {a.target[0]}:{a.target[1]}"
+        name = state.cards[a.card_id].name if state is not None else a.card_id
+        dest = f"HQ {a.target[1]}" if a.is_hq_capture else a.target[1]
+        return f"place {name} -> {dest}"
     return repr(a)
+
+
+def _describe_action(state: GameState, a: Action) -> str:
+    """Past-tense narration of a resolved action, for the turn log (card ids -> names)."""
+    if isinstance(a, DrawAction):
+        return "drew a card"
+    if isinstance(a, PlaceAction):
+        name = state.cards[a.card_id].name
+        if a.is_hq_capture:
+            return f"played {name} and captured HQ {a.target[1]}!"
+        return f"played {name} onto {a.target[1]}"
+    if isinstance(a, ChoiceAction):
+        return "declined an optional effect" if a.choice == SKIP else f"chose {a.choice}"
+    return repr(a)
+
+
+def _banner_width() -> int:
+    return max(72, shutil.get_terminal_size(fallback=(100, 24)).columns)
+
+
+def _banner(label: str) -> str:
+    label = f" {label.strip()} "
+    pad = _banner_width() - len(label)
+    left = max(0, pad) // 2
+    return "\n" + "#" * left + label + "#" * max(0, pad - left)
+
+
+def _turn_banner(turn: int, actor: str, human_seats: set[str]) -> str:
+    suffix = ""  # in a spectated bot-vs-bot game neither seat is "you"/"opponent"
+    if human_seats:
+        suffix = " (you)" if actor in human_seats else " (opponent)"
+    return _banner(f"TURN {turn} — seat {actor}{suffix}")
 
 
 class HumanController:
@@ -39,7 +94,7 @@ class HumanController:
                state: GameState | None = None) -> Action:
         legal = list(legal)
         for i, a in enumerate(legal):
-            print(f"  [{i}] {_fmt_action(a)}")
+            print(f"  [{i}] {_fmt_action(a, state)}")
         while True:
             raw = input(f"player {view.player} choose action #: ").strip()
             if raw.isdigit() and 0 <= int(raw) < len(legal):
@@ -69,12 +124,44 @@ def _make_deck(spec: str, deck_rng: random.Random) -> list[str]:
     return load_premade_deck(spec)
 
 
+def _prompt_menu(title: str, options: Sequence[tuple[str, str]]) -> str:
+    """Print a numbered menu of (label, value) pairs and return the chosen value."""
+    print(title)
+    for i, (label, _) in enumerate(options):
+        print(f"  [{i}] {label}")
+    while True:
+        try:
+            raw = input("  choose #: ").strip()
+        except EOFError:
+            raise SystemExit("\nno input; aborting setup.")
+        if raw.isdigit() and 0 <= int(raw) < len(options):
+            return options[int(raw)][1]
+        print(f"  enter a number 0..{len(options) - 1}")
+
+
+def _interactive_setup() -> tuple[str, str]:
+    """Ask for the player's deck, the opponent's deck, then the opponent's level.
+
+    Returns (bot_spec, deck_spec) strings for play(); the human always takes seat A.
+    """
+    deck_options = [(f"{slug}  —  {_DECK_BLURBS[slug]}", slug) for slug in sorted(PREMADE_DECKS)]
+    deck_options.append(("vanilla  —  random legal singleton pool", "vanilla"))
+
+    print("\n=== New game ===\n")
+    my_deck = _prompt_menu("Your deck:", deck_options)
+    opp_deck = _prompt_menu("\nOpponent's deck:", deck_options)
+    level = _prompt_menu("\nOpponent level:", _OPPONENT_LEVELS)
+    print()
+    return f"human,{level}", f"{my_deck},{opp_deck}"
+
+
 def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str) -> None:
     kinds = bot_spec.split(",")
     if len(kinds) != 2:
         raise SystemExit("--bots expects two comma-separated kinds, e.g. random,random")
     controllers = {"A": _make_controller(kinds[0], "A", seed),
                    "B": _make_controller(kinds[1], "B", seed)}
+    human_seats = {seat for seat, kind in zip(("A", "B"), kinds) if kind.strip().lower() == "human"}
 
     deck_specs = decks.split(",")
     if len(deck_specs) != 2:
@@ -84,36 +171,60 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str) -> None
     deck_b = _make_deck(deck_specs[1], deck_rng)
     state = new_game(deck_a, deck_b, seed, map_id=map_id)
 
+    # In a human game we only draw the full board on the human's own turn; the opponent's
+    # moves scroll by as one-line log entries. With no human (bot vs bot) we render every
+    # step so a spectator sees the whole game. turn_counter drives the per-turn banner.
+    spectate = not human_seats
+    last_banner_turn = None
     while True:
         result = rules.is_terminal(state)
         if result is not None:
             break
-        if not quiet:
-            print(render(state))
-            print()
         actor = state.player_to_act()
+
+        if not quiet and state.turn_counter != last_banner_turn:
+            print(_turn_banner(state.turn_counter, actor, human_seats))
+            last_banner_turn = state.turn_counter
+        if not quiet and (spectate or actor in human_seats):
+            print(render(state, reveal_hands=human_seats))
+            print()
+
         legal = rules.legal_actions(state)
         action = controllers[actor].choose(state.view_for(actor), legal, state)
+        narration = _describe_action(state, action)
         rules.apply_action(state, action)
+        if not quiet:
+            tag = f"{actor}" + (" (you)" if actor in human_seats else "")
+            print(f"  → {tag} {narration}")
 
-    print(render(state))
+    if not quiet:
+        print(_banner("GAME OVER"))
+    print(render(state, reveal_hands=human_seats))
     print(f"\nFINAL: winner={result.winner or 'draw'} reason={result.reason} "
           f"turns={state.turn_counter}")
 
 
 def main(argv: Sequence[str] | None = None) -> None:
     p = argparse.ArgumentParser(description="Play an Animal Kingdom game in the terminal.")
-    p.add_argument("--bots", default="random,random",
+    p.add_argument("--bots", default=None,
                    help="two comma-separated controllers: random|greedy|human "
-                        "(default random,random)")
+                        "(default: interactive setup, else random,random)")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--map", dest="map_id", default="map_a")
-    p.add_argument("--decks", default="vanilla,vanilla",
+    p.add_argument("--decks", default=None,
                    help="two comma-separated decks: 'vanilla' or a premade slug "
-                        "(e.g. ramp,egg_control)")
+                        "(e.g. ramp,egg_control); default: interactive setup, else vanilla,vanilla")
     p.add_argument("--quiet", action="store_true", help="only print the final board/result")
     args = p.parse_args(argv)
-    play(args.bots, args.seed, args.map_id, args.quiet, args.decks)
+
+    # Bare `./run` (no bots/decks, interactive) walks the player through setup: your deck,
+    # opponent's deck, opponent level. Any explicit flag skips it for scripted/bot-vs-bot runs.
+    if args.bots is None and args.decks is None and not args.quiet:
+        bots, decks = _interactive_setup()
+    else:
+        bots = args.bots if args.bots is not None else "random,random"
+        decks = args.decks if args.decks is not None else "vanilla,vanilla"
+    play(bots, args.seed, args.map_id, args.quiet, decks)
 
 
 if __name__ == "__main__":

@@ -416,15 +416,36 @@ def test_apex_cannot_land_on_empty_or_capture_hq():
     assert PlaceAction("tiger", ("hq", "B")) not in legal                                # no HQ
 
 
-def test_apex_may_eat_its_own_unit_but_not_an_immovable():
+def test_apex_may_eat_its_own_unit():
     eats_own = make_state(hands={"A": ["tiger"]})
     put(eats_own, "1,2", "house_cat", "A")
     rules.apply_action(eats_own, PlaceAction("tiger", ("cr", "1,2")))
     assert eats_own.top_unit("1,2").card_id == "tiger" and "house_cat" in eats_own.remove_pile
 
-    immovable = make_state(hands={"A": ["tiger"]})
-    put(immovable, "1,2", "giant_tortoise", "A")        # Immovable: cannot be eaten
-    assert PlaceAction("tiger", ("cr", "1,2")) not in rules.legal_actions(immovable)
+
+def test_apex_covers_but_does_not_eat_an_immovable():
+    # Immovable can't be eaten, but the predator may still land on it under normal covering
+    # rules (strictly-greater) and simply bury it.
+    s = make_state(hands={"A": ["tiger"]})
+    put(s, "1,2", "giant_tortoise", "A")                # own Immovable (str 5)
+    assert PlaceAction("tiger", ("cr", "1,2")) in rules.legal_actions(s)
+    rules.apply_action(s, PlaceAction("tiger", ("cr", "1,2")))
+    assert s.top_unit("1,2").card_id == "tiger"         # tiger on top
+    assert s.board["1,2"][0].card_id == "giant_tortoise"  # tortoise buried, not eaten
+    assert "giant_tortoise" not in s.remove_pile
+
+
+def test_apex_covers_but_does_not_eat_an_enemy_untargetable():
+    # The reported case: Anaconda (7) vs an enemy Black Panther (6) - can't eat it (enemy
+    # Untargetable), but 7 > 6 so it covers/buries it instead of being unplayable there.
+    s = make_state(current="A", hands={"A": ["anaconda"]})
+    put(s, "1,2", "lion", "A")                          # connects 2,2
+    put(s, "2,2", "black_panther", "B")                 # enemy str 6, untargetable
+    assert PlaceAction("anaconda", ("cr", "2,2")) in rules.legal_actions(s)
+    rules.apply_action(s, PlaceAction("anaconda", ("cr", "2,2")))
+    assert s.top_unit("2,2").card_id == "anaconda"      # anaconda on top
+    assert s.board["2,2"][0].card_id == "black_panther"  # panther buried, not removed
+    assert "black_panther" not in s.remove_pile
 
 
 def test_apex_destroys_an_egg():
