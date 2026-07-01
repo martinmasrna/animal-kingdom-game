@@ -112,10 +112,20 @@ def avg_game_length(records: Iterable[GameRecord]) -> dict:
 
 
 def _deck_win_rates(records: Iterable[GameRecord]) -> dict[str, float]:
-    """Each deck's overall win fraction across all its games, regardless of seat."""
+    """Each deck's win fraction across its non-mirror games, regardless of seat.
+
+    Mirror (deck vs itself) games are excluded: a deck can't be more or less powerful than
+    itself, so by construction they center on ~50% regardless of true field strength. Folding
+    them in just dilutes this baseline (and per_card_stats' `impact`, which subtracts it)
+    toward 50% for every deck. `matchup_matrix` still includes mirrors - they're cheap and are
+    the cleanest read on pure first-player/turn-order advantage - this exclusion is only for
+    the "how strong is this deck against the field" baseline.
+    """
     wins: dict[str, float] = defaultdict(float)
     games: dict[str, int] = defaultdict(int)
     for r in records:
+        if r.deck_a == r.deck_b:
+            continue
         for seat, slug in (("A", r.deck_a), ("B", r.deck_b)):
             res = _winner_seat(r, seat)
             games[slug] += 1
@@ -132,6 +142,9 @@ def per_card_stats(records: Iterable[GameRecord]) -> list[dict]:
     `win_rate_when_drawn` minus the deck's overall `deck_win_rate` - positive means the deck
     does better than its average when this card shows up. Sorted by impact, best first,
     with never-drawn cards (impact `None`) last.
+
+    Mirror (deck vs itself) games are excluded throughout, matching `_deck_win_rates` - see
+    its docstring. A card's `impact` is only meaningful relative to a field baseline.
     """
     records = list(records)
     deck_win_rate = _deck_win_rates(records)
@@ -142,6 +155,8 @@ def per_card_stats(records: Iterable[GameRecord]) -> list[dict]:
     card_deck: dict[str, str] = {}
 
     for r in records:
+        if r.deck_a == r.deck_b:
+            continue
         for seat, slug, seat_drawn in (("A", r.deck_a, r.cards_drawn_a),
                                        ("B", r.deck_b, r.cards_drawn_b)):
             res = _winner_seat(r, seat)

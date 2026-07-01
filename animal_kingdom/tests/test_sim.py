@@ -139,6 +139,30 @@ def test_avg_game_length():
     assert avg["overall"] == (10 + 20 + 400) / 3
 
 
+def test_deck_win_rate_and_impact_ignore_mirror_games():
+    # A mirror game a deck always wins would drag its baseline toward 50% if counted; since
+    # mirrors can't reflect true field strength, they must be excluded from both the deck
+    # baseline and per-card impact (see _deck_win_rates' docstring).
+    deck = load_premade_deck("ramp")
+    good = deck[0]
+    records = [
+        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10,
+                  cards_drawn_a=frozenset({good})),
+        GameRecord("ramp", "ramp", 1, "A", "A", "hq_capture", 10,
+                  cards_drawn_a=frozenset({good})),
+        GameRecord("ramp", "ramp", 2, "A", "B", "food", 20),
+    ]
+    rows = {r["card_id"]: r for r in metrics.per_card_stats(records)}
+    # Only the single non-mirror game counts: ramp is 1-for-1, not 2-for-3.
+    assert rows[good]["deck_win_rate"] == 1.0
+    assert rows[good]["draw_rate"] == 1.0
+    assert rows[good]["impact"] == 0.0
+
+    # matchup_matrix.csv / the diagonal itself is unaffected - mirrors stay visible there.
+    m = metrics.matchup_matrix(records)
+    assert m["win_rate"]["ramp"]["ramp"] == 0.5
+
+
 def test_per_card_stats_shape():
     rows = metrics.per_card_stats(_records())
     assert rows                                    # non-empty

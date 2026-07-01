@@ -42,13 +42,39 @@ def _card_line(row: dict, card: Card) -> str:
     return f"{mark}  {row['card_id']:<16}{wwd:>9}{imp:>8}   {info}"
 
 
+def format_matrix(records: Sequence[GameRecord]) -> str:
+    """Deck-vs-deck win-rate matrix: row = deck_a, column = deck_b, cell = A's win rate.
+
+    Columns are keyed by a 4-letter abbreviation (unique across the current deck slugs) so
+    the table fits a terminal width; the legend below spells each one out.
+    """
+    m = metrics.matchup_matrix(records)
+    decks = m["decks"]
+    abbrevs = [d[:4] for d in decks]
+    name_w = max(len(d) for d in decks)
+    col_w = 7
+
+    header = " " * (name_w + 1) + "".join(f"{ab:>{col_w}}" for ab in abbrevs)
+    lines = ["\n### Matchup matrix (row = A, column = B, cell = A's win rate)", "```", header]
+    for a in decks:
+        cells = []
+        for b in decks:
+            rate = m["win_rate"][a][b]
+            cells.append(f"{rate:>{col_w - 1}.0%} " if rate is not None else f"{'n/a':>{col_w - 1}} ")
+        lines.append(f"{a:<{name_w}} " + "".join(cells))
+    lines.append("")
+    lines += [f"{ab} = {d}" for ab, d in zip(abbrevs, decks)]
+    lines.append("```")
+    return "\n".join(lines)
+
+
 def format_report(records: Sequence[GameRecord], cards: dict[str, Card]) -> str:
-    """One impact-sorted card table per deck, as a single printable string."""
+    """The matchup matrix, then one impact-sorted card table per deck, as a single string."""
     by_deck: dict[str, list[dict]] = defaultdict(list)
     for row in metrics.per_card_stats(records):     # already sorted by impact desc, overall
         by_deck[row["deck"]].append(row)             # per-deck order is preserved (stable sort)
 
-    sections = []
+    sections = [format_matrix(records)]
     for deck in sorted(by_deck):
         deck_rows = by_deck[deck]
         baseline = deck_rows[0]["deck_win_rate"]

@@ -4,8 +4,27 @@ from __future__ import annotations
 
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine.cards import load_cards
-from animal_kingdom.sim.report import format_report
+from animal_kingdom.sim.report import format_matrix, format_report
 from animal_kingdom.sim.runner import GameRecord
+
+
+def test_format_matrix_shows_each_deck_and_its_win_rate():
+    records = [
+        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10),
+        GameRecord("egg_control", "ramp", 1, "A", "B", "food", 20),
+    ]
+    matrix = format_matrix(records)
+
+    assert "### Matchup matrix" in matrix
+    assert "ramp" in matrix and "egg_" in matrix  # row label + column abbreviation
+    assert "100%" in matrix  # ramp beat egg_control every time it was seat A
+    assert "egg_ = egg_control" in matrix  # legend spells the abbreviation out
+
+
+def test_format_report_leads_with_the_matrix():
+    records = [GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10)]
+    report = format_report(records, load_cards())
+    assert report.index("### Matchup matrix") < report.index("### egg_control")
 
 
 def test_format_report_groups_by_deck_sorted_by_impact():

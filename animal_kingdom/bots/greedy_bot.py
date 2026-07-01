@@ -96,20 +96,38 @@ class GreedyBot(Bot):
             # TODO(greedy): a view-only fallback eval if a remote driver ever needs one.
             return legal[0]
 
+        opp = other_player(me)
         best_score = -math.inf
         best: list[Action] = []
+        fallback_score = -math.inf
+        fallback: list[Action] = []
         for action in legal:
             nxt = state.clone()
             rules.apply_action(nxt, action)
             score = self._rollout_value(nxt, me, self.depth - 1)
             if _battlecry_fizzled(state, nxt, me, action):
                 score -= self.weights.wasted_battlecry
+            # Every candidate is a fallback in case *all* of them hang mate (see below).
+            if score > fallback_score:
+                fallback_score, fallback = score, [action]
+            elif score == fallback_score:
+                fallback.append(action)
+            # `own_hq_threat`/`enemy_hq_threat` are ordinary point terms an aggressive play
+            # can outbid even when the "threat" is actually a guaranteed capture next turn.
+            # Mirror the already-decisive self-win (evaluate() returns +inf for it) with a
+            # decisive self-loss check: never walk into a position where the opponent's turn
+            # opens with a legal HQ capture, if a legal action avoids it.
+            if (nxt.result is None and nxt.player_to_act() == opp
+                    and _opponent_lethal_next_turn(nxt, opp)):
+                continue
             if score > best_score:
                 best_score, best = score, [action]
             elif score == best_score:
                 best.append(action)
         # `legal` is already in deterministic (sorted) order; the RNG only splits exact ties.
-        return best[0] if len(best) == 1 else self.rng.choice(best)
+        if best:
+            return best[0] if len(best) == 1 else self.rng.choice(best)
+        return fallback[0] if len(fallback) == 1 else self.rng.choice(fallback)
 
     def _rollout_value(self, state: GameState, me: str, remaining_depth: int) -> float:
         """The value of `state` (right after one of my placements) `remaining_depth` more of
@@ -154,6 +172,20 @@ class GreedyBot(Bot):
             filler = next((a for a in legal if not isinstance(a, DrawAction)), legal[0])
             rules.apply_action(state, filler)
         return state
+
+
+def _opponent_lethal_next_turn(state: GameState, opponent: str) -> bool:
+    """True if `opponent`'s upcoming turn opens with a legal HQ capture.
+
+    Only consults board connectivity (public) and hand *size* (also legitimately public -
+    see `test_eval_ignores_opponent_hand_contents`), never hand contents: any non-empty hand
+    can play the capture once `hq_front(me)` is reached, since it only requires *some*
+    non-Apex unit, not a specific card.
+    """
+    me = other_player(opponent)
+    gm = state.game_map
+    reaches_my_hq = any(cr in state.connected_occupied(opponent) for cr in gm.hq_front(me))
+    return reaches_my_hq and len(state.hands[opponent]) > 0
 
 
 def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
