@@ -15,11 +15,12 @@ import random
 import sys
 from typing import Sequence
 
+from .bots.greedy_bot import GreedyBot
 from .bots.random_bot import RandomBot
 from .decks import PREMADE_DECKS, load_premade_deck, make_vanilla_deck
 from .engine import rules
 from .engine.actions import Action, DrawAction, PlaceAction
-from .engine.state import StateView, new_game
+from .engine.state import GameState, StateView, new_game
 from .render.text import render
 
 
@@ -34,7 +35,8 @@ def _fmt_action(a: Action) -> str:
 class HumanController:
     """Reads a choice from stdin. Lives in the CLI (not bots/) so the engine stays I/O-free."""
 
-    def choose(self, view: StateView, legal: Sequence[Action]) -> Action:
+    def choose(self, view: StateView, legal: Sequence[Action],
+               state: GameState | None = None) -> Action:
         legal = list(legal)
         for i, a in enumerate(legal):
             print(f"  [{i}] {_fmt_action(a)}")
@@ -47,11 +49,14 @@ class HumanController:
 
 def _make_controller(kind: str, seat: str, seed: int):
     kind = kind.strip().lower()
+    seat_seed = seed + (1 if seat == "A" else 2)
     if kind == "random":
-        return RandomBot(seed=seed + (1 if seat == "A" else 2))
+        return RandomBot(seed=seat_seed)
+    if kind == "greedy":
+        return GreedyBot(seed=seat_seed)
     if kind == "human":
         return HumanController()
-    raise SystemExit(f"unknown bot kind {kind!r} (expected 'random' or 'human')")
+    raise SystemExit(f"unknown bot kind {kind!r} (expected 'random', 'greedy', or 'human')")
 
 
 def _make_deck(spec: str, deck_rng: random.Random) -> list[str]:
@@ -88,7 +93,7 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str) -> None
             print()
         actor = state.player_to_act()
         legal = rules.legal_actions(state)
-        action = controllers[actor].choose(state.view_for(actor), legal)
+        action = controllers[actor].choose(state.view_for(actor), legal, state)
         rules.apply_action(state, action)
 
     print(render(state))
@@ -99,7 +104,8 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str) -> None
 def main(argv: Sequence[str] | None = None) -> None:
     p = argparse.ArgumentParser(description="Play an Animal Kingdom game in the terminal.")
     p.add_argument("--bots", default="random,random",
-                   help="two comma-separated controllers: random|human (default random,random)")
+                   help="two comma-separated controllers: random|greedy|human "
+                        "(default random,random)")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--map", dest="map_id", default="map_a")
     p.add_argument("--decks", default="vanilla,vanilla",
