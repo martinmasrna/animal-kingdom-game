@@ -106,6 +106,53 @@ balance truth, until sim quality is closer to competent human play.
   open; still trust the human read (2/3 for aggro_hq_rush) over this number until further
   diagnosed.
 
+  **Update (2026-07-01) - root-caused and fixed the actual bug, but it doesn't move this
+  matchup's number the way you'd expect.** Replayed all 3 of martin's recorded human games
+  (`results/games/*.json`) action-by-action through the engine: 2 of the 3 wins were
+  preventable on the bot's own last turn - in both, `cats_midrange` held a legal cover/removal
+  for the exact unit sitting on its own HQ-front breach (Jaguar/Snow Leopard, both easily
+  strong enough) and played elsewhere instead, because `evaluate()`'s `own_hq_threat` (-40) is
+  just an ordinary point term that a big region-control play can outbid, with no awareness the
+  threat is a *guaranteed* loss next turn (the eval never simulates the opponent's real reply -
+  see the module docstring's "no hand-content reading" rule). Added
+  `_opponent_lethal_next_turn` to `bots/greedy_bot.py`: mirrors the existing "always take a
+  winning move" logic (`evaluate` already returns +inf for that) with the missing negative
+  case - never choose an action that leaves the opponent with a legal HQ capture next turn, if
+  a legal alternative avoids it. Only reads board connectivity (public) + opponent hand *size*
+  (also public, per `test_eval_ignores_opponent_hand_contents`), never hand contents. Confirmed
+  it fixes both blundered positions exactly (bot now plays the cover in both).
+
+  **But** a 300-game bot-vs-bot re-sim after the fix moved the number the *wrong* way for
+  `aggro_hq_rush`: 8.3% -> 5.7% (mirror orientation 91.6% -> 96.3% for `cats_midrange`). Not a
+  contradiction - the fix is symmetric (both bots get it), and `cats_midrange`'s higher-strength
+  vanilla bodies mean it can actually *execute* the recommended cover once flagged, while
+  `aggro_hq_rush`'s cheap bodies often structurally can't cover `cats_midrange`'s stronger
+  row-2 push even when correctly flagged as lethal - so the fix closes more of aggro's
+  "opponent handed me the game" wins than it grants aggro new defensive saves. **Conclusion
+  unchanged from above: this is a bot-quality/execution gap, not a deck-power signal - a smart
+  human still beats this matchup by out-executing both bots' shared blind spot** (region_control
+  over-values the row-2 spine on `map_a`, so neither bot ever contests row 1/row 3 as an
+  HQ-rush lane). Trust human playtesting over this cell of the matrix either way.
+
+- [ ] **`per_card_stats`'s `impact` is confounded by a deck's win-length vs. loss-length gap,
+  not just card quality (found 2026-07-01, reading `/report` output for `cats_midrange`).**
+  `win_rate_when_drawn` uses presence-only draws (`DRAWN_CAVEAT`) - a card only counts as
+  "drawn" if the game lasts long enough to reach it. For a deck whose wins and losses run
+  different lengths, that alone biases every non-early card's impact, independent of whether
+  the card is actually good. Confirmed on `cats_midrange`: 300-ish game sample had wins
+  averaging 14.3 turns vs. losses averaging 20.1 turns (a fast-rushing deck), so almost every
+  card came out with negative impact even though the deck's overall win rate was 86.7% - any
+  card not in/guaranteed into the opening hand is disproportionately drawn in the rarer, longer
+  *losing* games. The two cards that escaped this (`princess_lea`/`prince_leo`) can fetch each
+  other straight from the deck via their battlecry, bypassing normal draw timing entirely -
+  not a coincidence, direct evidence for the mechanism. A control-style deck (wins long, loses
+  fast) would show the *opposite* skew. **Fix parked for later:** either add a caveat next to
+  `DRAWN_CAVEAT` documenting this, or length-normalize the baseline (e.g. condition on games
+  long enough to plausibly have drawn the card) - the latter is a real fix but touches
+  `metrics.py`'s core calculation and needs re-validating against the test suite + a fresh
+  gauntlet run. Do not read any single card's `impact` at face value until this is addressed,
+  especially for decks with a pronounced archetype pace (aggro/rush vs. control).
+
 ## Card-specific tuning
 - [ ] **Queen Bee (Combo):** keep additive (`+F` per food gain); watch for stacking multiple copies.
 - [ ] **Hibernating Bear (Combo):** confirm the 2-turn delay and that "lose all food" + Immovable can't be abused.
