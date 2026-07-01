@@ -11,15 +11,19 @@ loop a sim or a future web server would use. The engine itself does no I/O.
 from __future__ import annotations
 
 import argparse
+import json
 import random
 import shutil
 import sys
+from datetime import datetime
+from pathlib import Path
 from typing import Sequence
 
 from .bots.greedy_bot import GreedyBot
 from .bots.random_bot import RandomBot
 from .decks import PREMADE_DECKS, load_premade_deck, make_vanilla_deck
 from .engine import rules
+from .engine import strength as strength_mod
 from .engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
 from .engine.state import GameState, StateView, new_game
 from .render.text import render
@@ -155,7 +159,50 @@ def _interactive_setup() -> tuple[str, str]:
     return f"human,{level}", f"{my_deck},{opp_deck}"
 
 
-def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str) -> None:
+def _board_snapshot(state: GameState) -> dict:
+    """Compact board state: cr -> stack (bottom->top), each unit as id/owner/effective strength."""
+    return {
+        cr: [{"card_id": u.card_id, "owner": u.owner, "str": strength_mod.effective_strength(state, u)}
+             for u in stack]
+        for cr, stack in state.board.items() if stack
+    }
+
+
+def _default_log_path(seed: int) -> Path:
+    ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+    return Path("results") / "games" / f"{ts}_seed{seed}.json"
+
+
+def _save_log(log: dict, path: str) -> str:
+    """Writes the log to `path` (or stdout for '-'); returns a description for the user."""
+    if path == "-":
+        print(json.dumps(log, indent=2))
+        return "stdout"
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(log, indent=2))
+    return str(p)
+
+
+def _maybe_save_log(log: dict, seed: int, log_arg: str | None, quiet: bool) -> None:
+    """Honors an explicit --log path, or (interactively, unless --quiet) offers to save one."""
+    if log_arg is not None:
+        dest = _save_log(log, log_arg)
+        print(f"\ngame log saved to {dest}", file=sys.stderr if log_arg == "-" else sys.stdout)
+        return
+    if quiet:
+        return
+    try:
+        raw = input("\nSave agent-friendly game log (JSON)? [y/N]: ").strip().lower()
+    except EOFError:
+        return
+    if raw.startswith("y"):
+        dest = _save_log(log, str(_default_log_path(seed)))
+        print(f"game log saved to {dest} — hand this to an agent for review.")
+
+
+def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str,
+          log_arg: str | None = None) -> None:
     kinds = bot_spec.split(",")
     if len(kinds) != 2:
         raise SystemExit("--bots expects two comma-separated kinds, e.g. random,random")
@@ -171,6 +218,20 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str) -> None
     deck_b = _make_deck(deck_specs[1], deck_rng)
     state = new_game(deck_a, deck_b, seed, map_id=map_id)
 
+    # '--log -' reserves stdout for the JSON dump; the normal play-by-play goes to stderr instead.
+    out = sys.stderr if log_arg == "-" else sys.stdout
+
+    log = {
+        "meta": {"seed": seed, "map_id": map_id,
+                 "decks": {"A": deck_specs[0].strip(), "B": deck_specs[1].strip()},
+                 "bots": {"A": kinds[0].strip().lower(), "B": kinds[1].strip().lower()},
+                 "opening_hands": {p: [u.card_id for u in state.hands[p]] for p in ("A", "B")}},
+        "turns": [],
+    }
+    turn_no = state.turn_counter
+    turn_owner = state.current
+    turn_actions: list[dict] = []
+
     # In a human game we only draw the full board on the human's own turn; the opponent's
     # moves scroll by as one-line log entries. With no human (bot vs bot) we render every
     # step so a spectator sees the whole game. turn_counter drives the per-turn banner.
@@ -183,11 +244,11 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str) -> None
         actor = state.player_to_act()
 
         if not quiet and state.turn_counter != last_banner_turn:
-            print(_turn_banner(state.turn_counter, actor, human_seats))
+            print(_turn_banner(state.turn_counter, actor, human_seats), file=out)
             last_banner_turn = state.turn_counter
         if not quiet and (spectate or actor in human_seats):
-            print(render(state, reveal_hands=human_seats))
-            print()
+            print(render(state, reveal_hands=human_seats), file=out)
+            print(file=out)
 
         legal = rules.legal_actions(state)
         action = controllers[actor].choose(state.view_for(actor), legal, state)
@@ -195,13 +256,27 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str) -> None
         rules.apply_action(state, action)
         if not quiet:
             tag = f"{actor}" + (" (you)" if actor in human_seats else "")
-            print(f"  → {tag} {narration}")
+            print(f"  → {tag} {narration}", file=out)
+
+        turn_actions.append({"actor": actor, "action": action.to_dict(), "narration": narration})
+        if state.result is not None or state.turn_counter != turn_no:
+            log["turns"].append({
+                "turn": turn_no, "actor": turn_owner, "actions": turn_actions,
+                "board": _board_snapshot(state), "food": dict(state.food),
+                "hands": {p: [u.card_id for u in state.hands[p]] for p in ("A", "B")},
+                "deck_counts": {p: len(state.decks[p]) for p in ("A", "B")},
+                "remove_pile": list(state.remove_pile),
+            })
+            turn_no, turn_owner, turn_actions = state.turn_counter, state.current, []
 
     if not quiet:
-        print(_banner("GAME OVER"))
-    print(render(state, reveal_hands=human_seats))
+        print(_banner("GAME OVER"), file=out)
+    print(render(state, reveal_hands=human_seats), file=out)
     print(f"\nFINAL: winner={result.winner or 'draw'} reason={result.reason} "
-          f"turns={state.turn_counter}")
+          f"turns={state.turn_counter}", file=out)
+
+    log["result"] = {"winner": result.winner, "reason": result.reason, "turns": state.turn_counter}
+    _maybe_save_log(log, seed, log_arg, quiet)
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -216,6 +291,9 @@ def main(argv: Sequence[str] | None = None) -> None:
                    help="two comma-separated decks: 'vanilla' or a premade slug "
                         "(e.g. ramp,egg_control); default: interactive setup, else vanilla,vanilla")
     p.add_argument("--quiet", action="store_true", help="only print the final board/result")
+    p.add_argument("--log", dest="log_path", default=None,
+                   help="save an agent-friendly JSON game log to this path ('-' for stdout); "
+                        "omit to be asked interactively at game end (skipped under --quiet)")
     args = p.parse_args(argv)
 
     # Bare `./run` (no bots/decks, interactive) walks the player through setup: your deck,
@@ -231,7 +309,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         print(f"(seed={seed} — pass --seed {seed} to replay this exact game)")
     else:
         seed = args.seed
-    play(bots, seed, args.map_id, args.quiet, decks)
+    play(bots, seed, args.map_id, args.quiet, decks, log_arg=args.log_path)
 
 
 if __name__ == "__main__":

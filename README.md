@@ -57,6 +57,18 @@ Equivalent without the launcher: `python -m animal_kingdom.cli ...` (venv activa
 ./run --bots greedy,random --decks ramp,aggro_hq_rush --quiet
 ```
 
+### Sharing a game with an agent
+
+At game end (unless `--quiet`), `./run` offers to save an agent-friendly JSON log —
+one entry per turn with the actions taken, a compact board snapshot, food/hand/deck
+counts, and the remove pile — far cheaper to hand to an LLM than pasting the terminal
+transcript. Point an agent at the saved file, or use `--log <path>` (`-` for stdout)
+to save non-interactively:
+
+```sh
+./run --bots greedy,greedy --seed 7 --quiet --log results/games/greedy_vs_greedy.json
+```
+
 ## Run a simulation
 
 The sim harness plays N headless games per matchup and writes the balance metrics to a
