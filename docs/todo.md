@@ -40,6 +40,72 @@ Open decisions and follow-ups parked during card design. Add freely.
 - [x] **Forager strength ↔ food budget (Combo):** inverse curve realized in v0 — Wild Boar (Str 5 → 3), Chipmunk (Str 3 → 5), Squirrel (Str 2 → 8), Honeybee (Str 1 → 8+). Confirm in sim.
 - [x] **Spotted Hyena threshold `N` — v0 = 4** (control 4 other units to unlock "cover any strength"). Sim should sweep ~3–5.
 
+## Bot-sim balance findings (M3 gauntlet / report)
+Findings from bot-vs-bot simulation (`sim/report.py`, `sim/gauntlet.py`) worth a human look.
+Caveat carried from `metrics.GREEDY_CAVEAT`: the bot is 1-ply greedy and underplays
+combo/delayed-effect decks, so treat anything here as a *signal to investigate*, not final
+balance truth, until sim quality is closer to competent human play.
+
+- [ ] **Colony Food Swarm loses to board-presence decks before its engine can turn on
+  (2026-07-01, real card-balance signal, not a bot-piloting artifact).** 150-game round-robin:
+  overall win rate 23.1% (worst of the 7 decks), driven almost entirely by two matchups that
+  **no amount of `GreedyWeights` re-tuning moves at all** (identical win rate across three
+  tried presets): vs `cats_midrange` 2%, vs `canine_buff_tempo` 14%. Traced actual game logs
+  (`python -m animal_kingdom.cli --bots greedy,greedy --decks colony_food_swarm,cats_midrange
+  --seed 0`): the deck's only early plays are 1-3 strength Colony/Worker bodies (Worker Bee,
+  Worker Wasp, Queen Bee), which can't hold a crossroad against `cats_midrange`'s efficient
+  4-7 strength bodies (Lion, Black Panther, Caracal) or `canine_buff_tempo`'s snowballing
+  persistent buffs. 6/8 sampled seeds vs `cats_midrange` end in `hq_capture` by turn 7-13
+  (3-6 of the deck's own turns); 4/4 vs `canine_buff_tempo` end in `hq_capture` by turn 10-23.
+  That's not enough time for the deck's actual payoff (Queen Honoria/Falstaff/worker-chain
+  food swings) to ever come online, regardless of piloting quality - weight tuning got a real
+  but small +2-3% overall improvement (helps the winnable matchups, e.g. `food_otk`/`ramp`)
+  and made zero difference in these two specific matchups. **Worth a card-design look:** the
+  deck may need a cheap efficient early blocker, or its engine needs to pay off faster.
+
+- [ ] **`cats_midrange` vs `aggro_hq_rush`: bot-sim says `cats_midrange` crushes it (~10-12%
+  win rate), but human playtesting (2026-07-01) directly contradicts this - martin played the
+  matchup 3 times as `aggro_hq_rush` and won 2. Root-caused to a bot piloting flaw, not a card
+  power-level problem; downgraded from the original "cats_midrange may be overpowered" framing.**
+  Traced `colony_food_swarm`/`food_otk`/`aggro_hq_rush` all losing to the same `cats_midrange`
+  row-2 connected-chain rush (HQ capture turn 7-13), and retuning the losing decks'
+  `GreedyWeights` didn't help (`food_otk` -0.7% overall; `card_economy` alone moved **zero**
+  of 300 sampled games). That looked like a `cats_midrange` power-level issue - until stepping
+  through the `aggro_hq_rush` vs `cats_midrange` seed=1 loss action-by-action: at every one of
+  turns 0/2/4 the bot had a `DrawAction` available and instead dumped its hand (Jerboa -> Rat
+  -> Mouse -> Lemming) into marginal placements, never holding to draw into its actual
+  disruption tools (Hornet/Skunk/Pestis/Rat's own removal - Rat was played on an empty board
+  before any target existed). It ran out of cards and lost turn 7 having never deployed a
+  single piece of interaction. That's the same "1-ply plays too eagerly, can't hold for a
+  better line" pattern as the Grizzly Bear/own-line-lookahead findings above - a bot quality
+  gap, not evidence `cats_midrange` needs nerfing. **Take-away:** trust human playtests over
+  bot-sim win rates for "is this deck too strong" questions until the bot can hold cards /
+  sequence removal like a competent player; keep the row-2-rush *mechanic* itself in mind
+  (worth watching whether real humans can also be run over by it), but don't act on the 76%
+  round-robin number alone.
+
+  **Update (2026-07-01) - shipped a fix, partially closes the gap:** added a generic
+  `wasted_battlecry` penalty to `GreedyBot` (see `bots/greedy_bot.py::_battlecry_fizzled`,
+  tests in `test_greedy_bot.py`) - detects, from before/after state alone (no per-card
+  special-casing), whether a played card's ability text fired for literally nothing (no
+  food/removal/draw/buff beyond the unit landing) and discourages it, so the bot now prefers
+  Draw or a different card over e.g. playing Rat into an empty board. Caught and fixed a
+  related bug along the way: a battlecry that opens a pending sub-choice (e.g. Rat *with* a
+  target - "which adjacent enemy") was being scored before that choice resolves, so it was
+  wrongly flagged as fizzled too; `_battlecry_fizzled` now treats an open `state.pending` as
+  "a live effect mid-resolution", not a fizzle. Validated via a clean 150-game round-robin
+  (matched sample size against the original baseline, not the noisier 40-game runs used
+  mid-investigation): **`aggro_hq_rush` +6.0% overall** (`cats_midrange` +3.5%, `food_otk`
+  -2.8%, others within ~2%) - real and now the default, though not uniformly positive across
+  the field (the decks that lean hardest on targeted-removal battlecries, `cats_midrange`
+  included, benefit more from more-correct play than decks that don't - the same "a smarter
+  bot can widen the gap" pattern as the earlier lookahead work). *But* the specific
+  `aggro_hq_rush` vs `cats_midrange` matchup that started this investigation is **still
+  exactly 13.3%** (was 12.0%/13.3% before either fix, unchanged) - the hand-dumping fix
+  didn't touch whatever else is actually losing that specific matchup for the bot. Still
+  open; still trust the human read (2/3 for aggro_hq_rush) over this number until further
+  diagnosed.
+
 ## Card-specific tuning
 - [ ] **Queen Bee (Combo):** keep additive (`+F` per food gain); watch for stacking multiple copies.
 - [ ] **Hibernating Bear (Combo):** confirm the 2-turn delay and that "lose all food" + Immovable can't be abused.

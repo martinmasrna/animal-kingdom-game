@@ -6,7 +6,7 @@ A's HQ fronts are column 1, B's are column 4; the grid is 4x3 with orthogonal ne
 
 from __future__ import annotations
 
-from animal_kingdom.bots.greedy_bot import GreedyBot, GreedyWeights, evaluate
+from animal_kingdom.bots.greedy_bot import GreedyBot, GreedyWeights, _battlecry_fizzled, evaluate
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import PlaceAction
@@ -122,3 +122,82 @@ def test_eval_ignores_opponent_hand_contents():
     s1 = make_state(hands={"B": ["lion", "lion"]})
     s2 = make_state(hands={"B": ["mouse", "mouse"]})
     assert evaluate(s1, "A", W) == evaluate(s2, "A", W)
+
+
+# --------------------------------------------------------------- own-line lookahead
+
+def test_default_depth_matches_original_1_ply_score():
+    # depth=1 (the default) must be exactly the old behaviour: no fast-forwarding at all.
+    s = new_game(load_premade_deck("ramp"), load_premade_deck("aggro_hq_rush"), seed=3)
+    nxt = s.clone()
+    rules.apply_action(nxt, rules.legal_actions(nxt)[0])
+    assert GreedyBot(seed=0)._rollout_value(nxt, "A", 0) == evaluate(nxt, "A", W)
+
+
+def test_lookahead_is_deterministic():
+    s = new_game(load_premade_deck("ramp"), load_premade_deck("aggro_hq_rush"), seed=3)
+    actor = s.player_to_act()
+    legal = rules.legal_actions(s)
+    a1 = GreedyBot(depth=3, seed=0).choose(s.view_for(actor), legal, s)
+    a2 = GreedyBot(depth=3, seed=0).choose(s.view_for(actor), legal, s)
+    assert a1 == a2
+
+
+def test_lookahead_finds_the_grizzly_bear_delayed_removal_that_1_ply_misses():
+    # A strength-7 blocker (same as Grizzly Bear's own strength, stronger than my only other
+    # cards in hand) can't be covered directly by anything I hold - the only way to clear it
+    # is Grizzly Bear's "in 2 turns, remove a random adjacent enemy" battlecry. 1-ply (and
+    # even 2-ply, since the delay hasn't elapsed yet) can't see that payoff at all and treats
+    # Grizzly Bear as a plain vanilla body; deep enough own-line lookahead plays the position
+    # forward far enough for the removal to actually happen on the board, so it shows up.
+    s = make_state(hands={"A": ["grizzly_bear", "lion", "mouse", "mouse"], "B": ["mouse"]},
+                   decks={"A": ["mouse"] * 5, "B": ["mouse"] * 5})
+    put(s, "2,2", "lion", "B")
+    legal = rules.legal_actions(s)
+
+    shallow = GreedyBot(depth=2, seed=0).choose(s.view_for("A"), legal, s)
+    deep = GreedyBot(depth=3, seed=0).choose(s.view_for("A"), legal, s)
+
+    assert shallow != PlaceAction("grizzly_bear", ("cr", "1,2"))
+    assert deep == PlaceAction("grizzly_bear", ("cr", "1,2"))
+
+
+# --------------------------------------------------------- wasted-battlecry detection
+
+def test_battlecry_fizzles_with_no_target():
+    # Rat's "remove a card in hand to destroy an adjacent enemy" has nothing to hit.
+    s = make_state(hands={"A": ["rat", "mouse"]})
+    action = PlaceAction("rat", ("cr", "1,2"))
+    nxt = s.clone()
+    rules.apply_action(nxt, action)
+    assert _battlecry_fizzled(s, nxt, "A", action)
+
+
+def test_battlecry_with_a_pending_choice_is_not_fizzled():
+    # Rat with a valid adjacent target leaves an unresolved pending choice (which enemy) -
+    # that's a live effect mid-resolution, not a fizzle, even though nothing has happened yet.
+    s = make_state(hands={"A": ["rat", "mouse"]})
+    put(s, "2,2", "mouse", "B")
+    action = PlaceAction("rat", ("cr", "1,2"))
+    nxt = s.clone()
+    rules.apply_action(nxt, action)
+    assert nxt.pending is not None
+    assert not _battlecry_fizzled(s, nxt, "A", action)
+
+
+def test_vanilla_card_is_never_fizzled():
+    # Lion has no ability text, so there's nothing for it to waste.
+    s = make_state(hands={"A": ["lion"]})
+    action = PlaceAction("lion", ("cr", "1,2"))
+    nxt = s.clone()
+    rules.apply_action(nxt, action)
+    assert not _battlecry_fizzled(s, nxt, "A", action)
+
+
+def test_choose_prefers_a_live_battlecry_over_a_fizzling_one():
+    # With no target for Rat and an empty deck, Mouse's "draw a Rodent" is the only card
+    # whose battlecry can actually do something - the bot should prefer it.
+    s = make_state(hands={"A": ["rat", "mouse"]}, decks={"A": ["mouse"] * 3, "B": []})
+    legal = rules.legal_actions(s)
+    chosen = GreedyBot(seed=0).choose(s.view_for("A"), legal, s)
+    assert chosen.card_id == "mouse"

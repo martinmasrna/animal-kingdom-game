@@ -16,13 +16,13 @@ from typing import Sequence
 
 from ..engine.cards import DECK_SLUGS
 from . import metrics
-from .runner import run_matchup, run_round_robin
+from .runner import BOT_KINDS, run_matchup, run_round_robin
 
 
 def _parse_bots(spec: str) -> tuple[str, str]:
     parts = spec.split(",")
-    if len(parts) != 2 or any(p.strip().lower() not in ("greedy", "random") for p in parts):
-        raise SystemExit("--bots expects two of greedy|random, e.g. greedy,greedy")
+    if len(parts) != 2 or any(p.strip().lower() not in BOT_KINDS for p in parts):
+        raise SystemExit(f"--bots expects two of {'|'.join(BOT_KINDS)}, e.g. greedy,greedy")
     return parts[0].strip().lower(), parts[1].strip().lower()
 
 

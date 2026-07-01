@@ -10,10 +10,11 @@ import os
 
 import pytest
 
+from animal_kingdom.bots.greedy_bot import GreedyWeights
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.sim import metrics
 from animal_kingdom.sim.runner import (
-    GameRecord, make_bot, play_game, run_matchup, run_round_robin,
+    GameRecord, make_bot, play_game, run_matchup, run_pairs, run_round_robin,
 )
 
 REASONS = {"hq_capture", "food", "exhaustion", "max_turns"}
@@ -49,6 +50,55 @@ def test_parallel_matches_serial():
     slugs = ["ramp", "aggro_hq_rush"]
     serial = run_round_robin(slugs, 2, base_seed=0, bots=("random", "random"), jobs=1)
     parallel = run_round_robin(slugs, 2, base_seed=0, bots=("random", "random"), jobs=2)
+    assert serial == parallel
+
+
+def test_run_round_robin_delegates_to_run_pairs():
+    # run_round_robin should just be run_pairs over the full (slug x slug) cross product.
+    slugs = ["ramp", "aggro_hq_rush"]
+    via_round_robin = run_round_robin(slugs, 2, base_seed=0, bots=("random", "random"))
+    pairs = [(a, b) for a in slugs for b in slugs]
+    via_pairs = run_pairs(pairs, 2, base_seed=0, bots=("random", "random"))
+    assert via_round_robin == via_pairs
+
+
+# ------------------------------------------------------- weight-injection plumbing
+
+def test_make_bot_applies_custom_weights():
+    custom = GreedyWeights(food_progress=99.0)
+    bot = make_bot("greedy", seed=1, weights=custom)
+    assert bot.weights == custom
+
+
+def test_make_bot_defaults_weights_when_omitted():
+    bot = make_bot("greedy", seed=1)
+    assert bot.weights == GreedyWeights()
+
+
+def test_make_bot_lookahead_kind_uses_deeper_search():
+    bot = make_bot("lookahead", seed=1)
+    assert bot.depth > 1
+
+
+def test_run_matchup_threads_weights_and_stays_deterministic():
+    custom = GreedyWeights(food_progress=99.0, food_proximity=0.0, board_presence=0.0,
+                           connection=0.0, region_control=0.0, enemy_hq_threat=0.0,
+                           own_hq_threat=0.0, card_economy=0.0)
+    a = run_matchup("ramp", "egg_control", 3, base_seed=0, bots=("greedy", "greedy"),
+                    weights=(custom, None))
+    b = run_matchup("ramp", "egg_control", 3, base_seed=0, bots=("greedy", "greedy"),
+                    weights=(custom, None))
+    assert a == b
+
+
+def test_run_pairs_parallel_matches_serial_with_weights():
+    # Custom GreedyWeights must survive the ProcessPoolExecutor round-trip (picklability).
+    custom = GreedyWeights(enemy_hq_threat=999.0)
+    pairs = [("ramp", "aggro_hq_rush"), ("aggro_hq_rush", "ramp")]
+    serial = run_pairs(pairs, 2, base_seed=0, bots=("greedy", "greedy"),
+                       weights=(custom, None), jobs=1)
+    parallel = run_pairs(pairs, 2, base_seed=0, bots=("greedy", "greedy"),
+                         weights=(custom, None), jobs=2)
     assert serial == parallel
 
 
