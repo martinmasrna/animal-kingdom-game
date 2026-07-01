@@ -473,7 +473,7 @@ def test_fig_tree_is_a_landmark_that_schedules_food_and_cannot_capture_hq():
     s = make_state(hands={"A": ["fig_tree"]})
     rules.apply_action(s, PlaceAction("fig_tree", ("cr", "1,2")))
     assert s.top_unit("1,2").card_id == "fig_tree"
-    assert any(x["step"]["op"] == "gain_food" and x["step"]["amount"] == CFG.fig_tree_food
+    assert any(x["step"]["op"] == "fig_tree_payout" and x["step"]["amount"] == CFG.fig_tree_food
                for x in s.scheduled)
 
     hq = make_state(hands={"A": ["fig_tree"]})
@@ -482,10 +482,41 @@ def test_fig_tree_is_a_landmark_that_schedules_food_and_cannot_capture_hq():
     assert PlaceAction("fig_tree", ("hq", "B")) not in rules.legal_actions(hq)
 
 
+def test_fig_tree_payoff_fires_normally_if_not_covered():
+    s = make_state(hands={"A": ["fig_tree"]})
+    rules.apply_action(s, PlaceAction("fig_tree", ("cr", "1,2")))
+    fig_tree = s.top_unit("1,2")
+    food_before = s.food["A"]
+    effects._op_fig_tree_payout(s, {"op": "fig_tree_payout", "iid": fig_tree.iid,
+                                    "player": "A", "amount": CFG.fig_tree_food})
+    assert s.food["A"] == food_before + CFG.fig_tree_food
+
+
+def test_fig_tree_payoff_denied_once_covered_off_the_board():
+    s = make_state(hands={"A": ["fig_tree"]})
+    rules.apply_action(s, PlaceAction("fig_tree", ("cr", "1,2")))
+    fig_tree = s.top_unit("1,2")
+    food_before = s.food["A"]
+    s.board["1,2"] = []                                  # simulate the Fragile removal on cover
+    effects._op_fig_tree_payout(s, {"op": "fig_tree_payout", "iid": fig_tree.iid,
+                                    "player": "A", "amount": CFG.fig_tree_food})
+    assert s.food["A"] == food_before                    # denied: fig_tree is no longer on board
+
+
 def test_watering_hole_payoff_draws_only_a_strong_unit():
     s = make_state(decks={"A": ["lion", "squirrel", "eagle"], "B": []})  # 7 / 3 / 5
     effects.draw_filtered_random(s, "A", 1, "strength_min:6")
     assert hand_ids(s, "A") == ["lion"]                 # only base strength >= 6
+
+
+def test_watering_hole_payoff_denied_once_covered_off_the_board():
+    s = make_state(hands={"A": ["watering_hole"]}, decks={"A": ["lion"], "B": []})
+    rules.apply_action(s, PlaceAction("watering_hole", ("cr", "1,2")))
+    wh = s.top_unit("1,2")
+    s.board["1,2"] = []                                  # simulate the Fragile removal on cover
+    effects._op_watering_hole_payout(s, {"op": "watering_hole_payout", "iid": wh.iid,
+                                         "player": "A", "n": 1, "spec": "strength_min:6"})
+    assert "lion" not in hand_ids(s, "A")                # denied: landmark is no longer on board
 
 
 # ====================================== Stage 2.3: extra placements (decision F1) + twins

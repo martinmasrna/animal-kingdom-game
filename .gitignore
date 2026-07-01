@@ -8,5 +8,6 @@ dist/
 # sim outputs
 *.sim.csv
 *.sim.json
+results/
 # local Claude Code settings
 .claude/settings.local.json

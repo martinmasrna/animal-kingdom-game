@@ -8,6 +8,9 @@ from __future__ import annotations
 import json
 import os
 
+import pytest
+
+from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.sim import metrics
 from animal_kingdom.sim.runner import (
     GameRecord, make_bot, play_game, run_matchup, run_round_robin,
@@ -26,6 +29,14 @@ def test_play_game_returns_a_complete_record():
     assert rec.reason in REASONS
     assert rec.first_player in ("A", "B")
     assert rec.turns > 0
+
+
+def test_play_game_tracks_drawn_cards_end_to_end():
+    rec = play_game("ramp", "aggro_hq_rush", 0,
+                    bot_a=make_bot("random", 1), bot_b=make_bot("random", 2))
+    assert rec.cards_drawn_a and rec.cards_drawn_b   # opening hand alone guarantees non-empty
+    assert rec.cards_drawn_a <= set(load_premade_deck("ramp"))
+    assert rec.cards_drawn_b <= set(load_premade_deck("aggro_hq_rush"))
 
 
 def test_matchup_is_deterministic():
@@ -78,17 +89,60 @@ def test_avg_game_length():
     assert avg["overall"] == (10 + 20 + 400) / 3
 
 
-def test_per_card_winrate_delta_shape():
-    rows = metrics.per_card_winrate_delta(_records())
+def test_per_card_stats_shape():
+    rows = metrics.per_card_stats(_records())
     assert rows                                    # non-empty
     keys = set(rows[0])
-    assert keys == {"card_id", "games", "win_rate", "delta"}
-    assert rows == sorted(rows, key=lambda r: r["win_rate"], reverse=True)
+    assert keys == {"card_id", "deck", "games", "draw_rate",
+                    "win_rate_when_drawn", "deck_win_rate", "impact"}
+
+
+def test_per_card_stats_differentiates_drawn_vs_never_drawn():
+    deck = load_premade_deck("ramp")
+    always_drawn, never_drawn = deck[0], deck[1]
+    assert always_drawn != never_drawn
+    records = [
+        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10,
+                  cards_drawn_a=frozenset({always_drawn})),
+        GameRecord("ramp", "egg_control", 1, "A", "A", "hq_capture", 12,
+                  cards_drawn_a=frozenset({always_drawn})),
+        GameRecord("ramp", "egg_control", 2, "A", "B", "food", 20,
+                  cards_drawn_a=frozenset()),
+    ]
+    rows = {r["card_id"]: r for r in metrics.per_card_stats(records)}
+
+    never = rows[never_drawn]
+    assert never["draw_rate"] == 0.0
+    assert never["win_rate_when_drawn"] is None
+    assert never["impact"] is None
+
+    always = rows[always_drawn]
+    assert always["draw_rate"] == pytest.approx(2 / 3, abs=1e-4)
+    assert always["win_rate_when_drawn"] == 1.0                # won both games it was drawn in
+    assert always["deck_win_rate"] == pytest.approx(2 / 3, abs=1e-4)  # 2/3 wins for ramp
+    assert always["impact"] == pytest.approx(1.0 - 2 / 3, abs=1e-4)
+
+
+def test_per_card_stats_sorted_by_impact_desc():
+    deck = load_premade_deck("ramp")
+    good, bad = deck[0], deck[1]
+    records = [
+        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10,
+                  cards_drawn_a=frozenset({good})),
+        GameRecord("ramp", "egg_control", 1, "A", "B", "food", 20,
+                  cards_drawn_a=frozenset({bad})),
+    ]
+    rows = metrics.per_card_stats(records)
+    impacts = [r["impact"] for r in rows if r["impact"] is not None]
+    assert impacts == sorted(impacts, reverse=True)
+    good_row = next(r for r in rows if r["card_id"] == good)
+    bad_row = next(r for r in rows if r["card_id"] == bad)
+    assert rows.index(good_row) < rows.index(bad_row)
 
 
 def test_write_all_emits_bundle(tmp_path):
     summary = metrics.write_all(_records(), str(tmp_path))
-    for name in ("matchup_matrix.csv", "per_card_winrate.csv", "summary.json"):
+    for name in ("matchup_matrix.csv", "per_card_stats.csv", "summary.json"):
         assert os.path.exists(tmp_path / name)
     saved = json.loads((tmp_path / "summary.json").read_text())
     assert saved["games"] == 3

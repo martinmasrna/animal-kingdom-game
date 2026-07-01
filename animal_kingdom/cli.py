@@ -209,7 +209,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--bots", default=None,
                    help="two comma-separated controllers: random|greedy|human "
                         "(default: interactive setup, else random,random)")
-    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--seed", type=int, default=None,
+                   help="omit for a fresh random shuffle each run; pass a value to replay a game")
     p.add_argument("--map", dest="map_id", default="map_a")
     p.add_argument("--decks", default=None,
                    help="two comma-separated decks: 'vanilla' or a premade slug "
@@ -224,7 +225,13 @@ def main(argv: Sequence[str] | None = None) -> None:
     else:
         bots = args.bots if args.bots is not None else "random,random"
         decks = args.decks if args.decks is not None else "vanilla,vanilla"
-    play(bots, args.seed, args.map_id, args.quiet, decks)
+
+    if args.seed is None:
+        seed = random.SystemRandom().randrange(1 << 30)
+        print(f"(seed={seed} — pass --seed {seed} to replay this exact game)")
+    else:
+        seed = args.seed
+    play(bots, seed, args.map_id, args.quiet, decks)
 
 
 if __name__ == "__main__":

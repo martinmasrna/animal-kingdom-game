@@ -24,6 +24,12 @@ GREEDY_CAVEAT = (
     "numbers as bot-limited; do not read them as final balance truth."
 )
 
+DRAWN_CAVEAT = (
+    "\"Drawn\" is presence-only (was the card in hand at any point), not exact copy counts. "
+    "A card returned to hand by an effect (e.g. a bounce) counts as drawn again, which can "
+    "inflate draw_rate/impact slightly for bounce-heavy decks."
+)
+
 
 @lru_cache(maxsize=None)
 def _deck_card_set(slug: str) -> frozenset[str]:
@@ -105,29 +111,65 @@ def avg_game_length(records: Iterable[GameRecord]) -> dict:
             "per_matchup": per_matchup}
 
 
-def per_card_winrate_delta(records: Iterable[GameRecord]) -> list[dict]:
-    """For each card, its win rate across the games whose seat-deck contained it.
-
-    `delta` = win_rate - 0.5 (presence-in-wins vs losses against an even baseline). Sorted
-    most-winning first. Draws count as half a win on each side they appear.
-    """
+def _deck_win_rates(records: Iterable[GameRecord]) -> dict[str, float]:
+    """Each deck's overall win fraction across all its games, regardless of seat."""
     wins: dict[str, float] = defaultdict(float)
-    appearances: dict[str, int] = defaultdict(int)
+    games: dict[str, int] = defaultdict(int)
     for r in records:
         for seat, slug in (("A", r.deck_a), ("B", r.deck_b)):
             res = _winner_seat(r, seat)
+            games[slug] += 1
+            wins[slug] += 0.5 if res is None else (1.0 if res else 0.0)
+    return {slug: wins[slug] / games[slug] for slug in games}
+
+
+def per_card_stats(records: Iterable[GameRecord]) -> list[dict]:
+    """Real per-card signal: how often a card was drawn, and how games went when it was.
+
+    `draw_rate` = fraction of the card's deck's games in which it was drawn at least once
+    (presence-only, see DRAWN_CAVEAT). `win_rate_when_drawn` is the win rate restricted to
+    those games (`None` if the card was never drawn in the sample). `impact` is
+    `win_rate_when_drawn` minus the deck's overall `deck_win_rate` - positive means the deck
+    does better than its average when this card shows up. Sorted by impact, best first,
+    with never-drawn cards (impact `None`) last.
+    """
+    records = list(records)
+    deck_win_rate = _deck_win_rates(records)
+
+    games_with_card: dict[str, int] = defaultdict(int)
+    draws: dict[str, int] = defaultdict(int)
+    wins_when_drawn: dict[str, float] = defaultdict(float)
+    card_deck: dict[str, str] = {}
+
+    for r in records:
+        for seat, slug, seat_drawn in (("A", r.deck_a, r.cards_drawn_a),
+                                       ("B", r.deck_b, r.cards_drawn_b)):
+            res = _winner_seat(r, seat)
             credit = 0.5 if res is None else (1.0 if res else 0.0)
             for card_id in _deck_card_set(slug):
-                appearances[card_id] += 1
-                wins[card_id] += credit
+                games_with_card[card_id] += 1
+                card_deck[card_id] = slug
+            for card_id in seat_drawn:
+                draws[card_id] += 1
+                wins_when_drawn[card_id] += credit
 
     rows = []
-    for card_id in sorted(appearances):
-        n = appearances[card_id]
-        rate = wins[card_id] / n
-        rows.append({"card_id": card_id, "games": n,
-                     "win_rate": round(rate, 4), "delta": round(rate - 0.5, 4)})
-    rows.sort(key=lambda d: d["win_rate"], reverse=True)
+    for card_id in sorted(games_with_card):
+        n = games_with_card[card_id]
+        d = draws[card_id]
+        wwd = (wins_when_drawn[card_id] / d) if d else None
+        dwr = deck_win_rate.get(card_deck[card_id])
+        impact = wwd - dwr if (wwd is not None and dwr is not None) else None
+        rows.append({
+            "card_id": card_id,
+            "deck": card_deck[card_id],
+            "games": n,
+            "draw_rate": round(d / n, 4) if n else 0.0,
+            "win_rate_when_drawn": round(wwd, 4) if wwd is not None else None,
+            "deck_win_rate": round(dwr, 4) if dwr is not None else None,
+            "impact": round(impact, 4) if impact is not None else None,
+        })
+    rows.sort(key=lambda r: (r["impact"] is None, -(r["impact"] or 0.0)))
     return rows
 
 
@@ -146,11 +188,16 @@ def _write_matchup_csv(path: str, matrix: dict) -> None:
             w.writerow(row)
 
 
+_PER_CARD_FIELDS = ["card_id", "deck", "games", "draw_rate", "win_rate_when_drawn",
+                    "deck_win_rate", "impact"]
+
+
 def _write_per_card_csv(path: str, rows: list[dict]) -> None:
     with open(path, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["card_id", "games", "win_rate", "delta"])
+        w = csv.DictWriter(f, fieldnames=_PER_CARD_FIELDS)
         w.writeheader()
-        w.writerows(rows)
+        for row in rows:
+            w.writerow({k: ("" if v is None else v) for k, v in row.items()})
 
 
 def write_all(records: Iterable[GameRecord], out_dir: str) -> dict:
@@ -159,18 +206,18 @@ def write_all(records: Iterable[GameRecord], out_dir: str) -> dict:
     os.makedirs(out_dir, exist_ok=True)
 
     matrix = matchup_matrix(records)
-    per_card = per_card_winrate_delta(records)
+    per_card = per_card_stats(records)
     summary = {
         "games": len(records),
         "win_condition_split": win_condition_split(records),
         "first_player_win_rate": first_player_win_rate(records),
         "avg_game_length": avg_game_length(records),
         "matchup_decks": matrix["decks"],
-        "caveat": GREEDY_CAVEAT,
+        "caveat": GREEDY_CAVEAT + "\n\n" + DRAWN_CAVEAT,
     }
 
     _write_matchup_csv(os.path.join(out_dir, "matchup_matrix.csv"), matrix)
-    _write_per_card_csv(os.path.join(out_dir, "per_card_winrate.csv"), per_card)
+    _write_per_card_csv(os.path.join(out_dir, "per_card_stats.csv"), per_card)
     with open(os.path.join(out_dir, "summary.json"), "w") as f:
         json.dump(summary, f, indent=2)
     return summary

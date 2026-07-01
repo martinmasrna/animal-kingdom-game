@@ -970,11 +970,35 @@ def _aurum_start(state, unit, cr):
 
 
 def _fig_tree_place(state, unit, cr):
-    schedule(state, unit.owner, 1, {"op": "gain_food", "player": unit.owner, "amount": state.config.fig_tree_food})
+    schedule(state, unit.owner, 1, {"op": "fig_tree_payout", "iid": unit.iid,
+                                    "player": unit.owner, "amount": state.config.fig_tree_food})
 
 
 def _watering_hole_place(state, unit, cr):
-    schedule(state, unit.owner, 1, {"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": "strength_min:6"})
+    schedule(state, unit.owner, 1, {"op": "watering_hole_payout", "iid": unit.iid,
+                                    "player": unit.owner, "n": 1, "spec": "strength_min:6"})
+
+
+def _op_fig_tree_payout(state, step):
+    # Fragile: if the landmark was covered/removed before its turn, deny the payoff
+    # (same pattern as _op_egg_hatch - see _find_unit).
+    cr, unit = _find_unit(state, step["iid"])
+    if unit is None:
+        return None
+    gain_food(state, step["player"], step["amount"])
+    return None
+
+
+def _op_watering_hole_payout(state, step):
+    cr, unit = _find_unit(state, step["iid"])
+    if unit is None:
+        return None  # covered while Fragile - no payoff
+    draw_filtered_random(state, step["player"], step["n"], step["spec"])
+    return None
+
+
+OPS["fig_tree_payout"] = _op_fig_tree_payout
+OPS["watering_hole_payout"] = _op_watering_hole_payout
 
 
 # ===================================== Stage 2.4: remaining triggered / removal / utility

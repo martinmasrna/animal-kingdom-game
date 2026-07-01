@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 from typing import Sequence
 
 from ..engine.cards import DECK_SLUGS
@@ -41,11 +42,23 @@ def main(argv: Sequence[str] | None = None) -> None:
     spec = args.decks.strip()
     if spec == "all":
         slugs = sorted(DECK_SLUGS)
-        print(f"Round-robin: {len(slugs)} decks x {len(slugs)} = {len(slugs) ** 2} matchups, "
-              f"{args.games} games each, {len(slugs) ** 2 * args.games} total "
+        total_matchups = len(slugs) ** 2
+        total_games = total_matchups * args.games
+        print(f"Round-robin: {len(slugs)} decks x {len(slugs)} = {total_matchups} matchups, "
+              f"{args.games} games each, {total_games} total "
               f"(bots={bots[0]},{bots[1]}, jobs={args.jobs})...")
+
+        start = time.monotonic()
+
+        def _progress(a: str, b: str, done: int, matchup_total: int) -> None:
+            elapsed = time.monotonic() - start
+            games_done = done * args.games
+            print(f"  [{done:>2}/{matchup_total}] {elapsed:6.1f}s  {a} vs {b}  "
+                  f"({games_done}/{total_games} games)")
+
         records = run_round_robin(slugs, args.games, args.seed, bots=bots,
-                                  map_id=args.map_id, jobs=args.jobs)
+                                  map_id=args.map_id, jobs=args.jobs, progress=_progress)
+        print(f"Simulation done in {time.monotonic() - start:.1f}s.")
     else:
         pair = spec.split(",")
         if len(pair) != 2:
@@ -57,7 +70,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     summary = metrics.write_all(records, args.out)
 
     print(f"\nWrote {summary['games']} games to {args.out}/ "
-          "(matchup_matrix.csv, per_card_winrate.csv, summary.json)")
+          "(matchup_matrix.csv, per_card_stats.csv, summary.json)")
     split = summary["win_condition_split"]["percent"]
     print("Win conditions: " + ", ".join(f"{k}={v:.1%}" for k, v in sorted(split.items())))
     fp = summary["first_player_win_rate"]["rate"]
