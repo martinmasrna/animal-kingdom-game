@@ -38,12 +38,16 @@ python -m pytest
 The `./run` launcher finds the venv for you and forwards all flags to the CLI:
 
 ```sh
-./run                              # bot vs bot, seed 0
-./run --bots random,random --seed 1   # watch a game step by step
-./run --bots human,random --seed 7    # hotseat vs a bot
-./run --quiet                      # final board + result only
+./run                              # interactive setup: pick your deck, opponent's deck, opponent level
+./run --bots random,random --seed 1   # watch a bot game step by step
+./run --bots human,random --decks aggro_hq_rush,ramp --seed 7   # skip setup, configure via flags
+./run --quiet                      # final board + result only (bot vs bot, defaults)
 ./run --help                       # all flags
 ```
+
+With no `--bots`/`--decks` flags, `./run` walks you through setup at launch — your deck,
+the opponent's deck, then the opponent's level (Easy = random bot, Normal = greedy bot);
+you play seat A. Passing either flag (or `--quiet`) skips the prompt for scripted runs.
 
 Equivalent without the launcher: `python -m animal_kingdom.cli ...` (venv activated).
 

@@ -35,6 +35,12 @@ stack. (Pairs with timed payoffs: Eggs and Landmarks are typically Fragile.)
 - On placement it **removes** the occupant it lands on **instead of covering/stacking** on it
   (cf. Boa Constrictor). The removed occupant's Deathrattle / on-remove effects fire normally.
   The predator then occupies the crossroad (on top of any remaining stack beneath).
+- **If the occupant can't be eaten** (Immovable, or an enemy that's Untargetable — e.g. Black
+  Panther), the predator is **not** blocked from landing there: it simply **covers** it under
+  the normal placement rules (still needs strictly-greater strength vs an enemy) and buries it
+  instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it
+  does *when it can*, not a placement precondition. *(These "can't be eaten" cases are part of
+  the broader Immovable/Untargetable rethink — see `todo.md`.)*
 - **Cannot be placed onto a headquarters** — deliberate design choice, so Apex Predators can't
   capture an enemy HQ directly.
 - **Destroys Eggs and Landmarks** it lands on (they are occupants).

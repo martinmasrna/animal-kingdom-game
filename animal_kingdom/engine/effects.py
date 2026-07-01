@@ -120,9 +120,13 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> No
 
     # Apex Predator (decision D): eat the occupant it lands on instead of covering it; its
     # Deathrattle / remove triggers fire, then the predator occupies what remains beneath.
+    # If the occupant can't be eaten (Immovable / enemy Untargetable), the predator falls
+    # back to a normal cover, burying it — it isn't restricted to prey it can eat.
     if is_apex and covered is not None:
-        _remove_specific(state, cr, covered, by_player=player, by_card=unit.card_id)
-        covered = state.top_unit(cr)
+        if _remove_specific(state, cr, covered, by_player=player, by_card=unit.card_id):
+            covered = state.top_unit(cr)  # ate it: whatever remains beneath is now covered
+        elif covered.owner != player:
+            cover_enemy = covered         # couldn't eat -> normal cover (King Theron watches)
     elif covered is not None and covered.owner != player:
         cover_enemy = covered            # a normal cover of an enemy (King Theron watches this)
 
@@ -417,10 +421,9 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
 
 
 def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) -> bool:
-    """Apex Predator landing rules (decision D): strictly-greater vs an enemy, free on your
-    own; the occupant must be removable and targetable (it gets eaten)."""
-    if not statics.can_be_removed(state, top) or not statics.can_be_targeted(state, top, placer.owner):
-        return False
+    """Apex Predator landing rules (decision D): it may land wherever it could legally cover -
+    strictly-greater vs an enemy, free on your own. If the occupant is eat-eligible it gets
+    eaten; if not (Immovable / enemy Untargetable) it is simply covered (see _land_unit)."""
     if top.owner == placer.owner:
         return True
     return placement_strength(state, placer) > effective_strength(state, top)
