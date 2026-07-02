@@ -26,7 +26,7 @@ Built in milestones (each is a review checkpoint):
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"        # add ,analysis once the sim harness lands: ".[dev,analysis]"
+pip install -e ".[dev,cli]"    # add ,analysis once the sim harness lands: ".[dev,cli,analysis]"
 ```
 
 ## Run the tests

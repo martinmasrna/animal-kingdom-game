@@ -15,7 +15,7 @@ py="$here/.venv/bin/python"
 
 if [[ ! -x "$py" ]]; then
   echo "No virtualenv at $here/.venv — create it first:" >&2
-  echo "  python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'" >&2
+  echo "  python3 -m venv .venv && .venv/bin/pip install -e '.[dev,cli]'" >&2
   exit 1
 fi
 

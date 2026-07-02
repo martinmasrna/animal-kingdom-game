@@ -1,12 +1,19 @@
 """ASCII renderer for sanity-checking the engine in the terminal.
 
-Pure: takes a GameState, returns a string (no printing). Draws the board as a graph of
-crossroad nodes wired by the map's actual edges, with each region's food value + current
-holder printed in the block it sits on, and stack depth shown per node (full stack
-composition listed below the board). Also renders food / hand / deck counts, the turn,
-the seat to act, and the result. Optionally renders the full hand (card boxes) for seats
-passed in `reveal_hands` - callers must only pass a seat whose hand isn't hidden (a human
-player's own seat), never an opponent's.
+Pure: takes a GameState, returns a string (no printing) - a plain string carrying Rich
+markup tags (`[style]...[/style]`), not an ANSI-encoded one. Callers print it through a
+`rich.console.Console` (markup interpretation on by default); the module itself has no
+dependency on rich, so it stays trivially usable without a terminal.
+
+Draws the board as a graph of crossroad nodes wired by the map's actual edges, with each
+region's food value + current holder printed in the block it sits on, and stack depth
+shown per node (full stack composition listed below the board). Also renders food / hand
+/ deck counts, the turn, the seat to act, and the result. Optionally renders the full hand
+(card boxes) for seats passed in `reveal_hands` - callers must only pass a seat whose hand
+isn't hidden (a human player's own seat), never an opponent's.
+
+A card-selection UI can pass `highlight_crs`/`highlight_hq` to mark legal placement
+targets on the board (a green box border) while the player picks one.
 """
 
 from __future__ import annotations
@@ -16,6 +23,11 @@ import textwrap
 from typing import Collection
 
 from ..engine import strength as strength_mod
+
+# Shared with cli.py so the interactive picker's prompts match the board's colors.
+SEAT_STYLE = {"A": "bold cyan", "B": "bold red"}
+HIGHLIGHT_STYLE = "bold green"          # a legal target the player is currently choosing among
+RARITY_STYLE = {"legendary": "bold gold3", "rare": "bold blue"}  # common: unstyled
 
 _MIN_WIDTH = 72    # floor so wrapping stays sane when a terminal reports something tiny
 
@@ -54,9 +66,43 @@ def _region_holder(state, region) -> str | None:
     return owners.pop() if len(owners) == 1 and None not in owners else None
 
 
-def _blit(canvas: list[list[str]], row: int, col: int, text: str) -> None:
+def _style(text: str, style: str | None) -> str:
+    """Wrap already-final (padded/centered) plain text in a Rich markup span.
+
+    Callers must finish all width-sensitive formatting (center/ljust/truncate) on the
+    *plain* text first - wrapping adds characters that would throw off further padding.
+    """
+    return f"[{style}]{text}[/{style}]" if style else text
+
+
+def _blit(canvas: list[list[str]], style_grid: list[list[str | None]],
+          row: int, col: int, text: str, style: str | None = None) -> None:
+    """Write `text` into the plain-character canvas, and record `style` per cell.
+
+    The canvas itself stays one-character-per-cell throughout construction (later edge/
+    label drawing indexes into it by exact column), so color is tracked in a parallel
+    `style_grid` and only turned into markup once the whole board is laid out - see
+    `_canvas_to_lines`.
+    """
     for i, ch in enumerate(text):
         canvas[row][col + i] = ch
+        style_grid[row][col + i] = style
+
+
+def _canvas_to_lines(canvas: list[list[str]], style_grid: list[list[str | None]]) -> list[str]:
+    """Flatten the canvas to strings, wrapping each contiguous same-style run in markup."""
+    lines = []
+    for row_chars, row_styles in zip(canvas, style_grid):
+        parts, i, n = [], 0, len(row_chars)
+        while i < n:
+            style = row_styles[i]
+            j = i
+            while j < n and row_styles[j] == style:
+                j += 1
+            parts.append(_style("".join(row_chars[i:j]), style))
+            i = j
+        lines.append("".join(parts).rstrip())
+    return lines
 
 
 def _draw_conn(canvas: list[list[str]], r0: int, c0: int, r1: int, c1: int) -> None:
@@ -79,7 +125,9 @@ def _draw_conn(canvas: list[list[str]], r0: int, c0: int, r1: int, c1: int) -> N
             canvas[r][c] = ch
 
 
-def _render_board(state) -> list[str]:
+def _render_board(state, highlight_crs: Collection[str] = (),
+                   highlight_hq: str | None = None) -> list[str]:
+    """`highlight_crs`/`highlight_hq` mark legal targets (green box) during card selection."""
     gm = state.game_map
     coords = [_parse_cr(c) for c in gm.crossroads]
     xs = sorted({x for x, _ in coords})
@@ -103,6 +151,7 @@ def _render_board(state) -> list[str]:
     grid_w = len(xs) * _NODE_W + (len(xs) - 1) * _GAP_W
     width = left + grid_w + right
     canvas = [[" "] * width for _ in range(height)]
+    style_grid: list[list[str | None]] = [[None] * width for _ in range(height)]
 
     def box_col(x: int) -> int:
         return left + ci[x] * (_NODE_W + _GAP_W)
@@ -110,14 +159,23 @@ def _render_board(state) -> list[str]:
     def box_row(y: int) -> int:
         return ri[y] * (_NODE_H + _GAP_H)
 
-    # Nodes: a bordered box with the coordinate and the current occupancy.
+    # Nodes: a bordered box with the coordinate and the current occupancy. The border is
+    # highlighted green when this crossroad is a legal target; the occupancy text is
+    # colored by whichever seat owns the top unit, independent of the highlight.
     for x, y in coords:
+        cr = f"{x},{y}"
         r0, c0 = box_row(y), box_col(x)
         inner = _NODE_W - 2
-        _blit(canvas, r0, c0, "┌" + "─" * inner + "┐")
-        _blit(canvas, r0 + 1, c0, "│" + f"{x},{y}".center(inner) + "│")
-        _blit(canvas, r0 + 2, c0, "│" + _occupancy(state, f"{x},{y}").center(inner) + "│")
-        _blit(canvas, r0 + 3, c0, "└" + "─" * inner + "┘")
+        box_style = HIGHLIGHT_STYLE if cr in highlight_crs else None
+        stack = state.board.get(cr)
+        occ_style = SEAT_STYLE.get(stack[-1].owner) if stack else None
+
+        _blit(canvas, style_grid, r0, c0, "┌" + "─" * inner + "┐", box_style)
+        _blit(canvas, style_grid, r0 + 1, c0, "│" + f"{x},{y}".center(inner) + "│", box_style)
+        _blit(canvas, style_grid, r0 + 2, c0, "│", box_style)
+        _blit(canvas, style_grid, r0 + 2, c0 + 1, _occupancy(state, cr).center(inner), occ_style)
+        _blit(canvas, style_grid, r0 + 2, c0 + 1 + inner, "│", box_style)
+        _blit(canvas, style_grid, r0 + 3, c0, "└" + "─" * inner + "┘", box_style)
 
     # Edges from the map's real adjacency: orthogonal ones use tees + a straight run;
     # diagonal neighbours are wired corner-to-corner with / or \. Each undirected edge is
@@ -154,19 +212,22 @@ def _render_board(state) -> list[str]:
         rcoords = [_parse_cr(c) for c in region.corners]
         cx = sum(box_col(x) + _NODE_W // 2 for x, _ in rcoords) // len(rcoords)
         cy = sum(box_row(y) + _NODE_H // 2 for _, y in rcoords) // len(rcoords)
-        token = f"{region.food}{_region_holder(state, region) or '·'}"
-        _blit(canvas, cy, cx - len(token) // 2, token)
+        holder = _region_holder(state, region)
+        token = f"{region.food}{holder or '·'}"
+        _blit(canvas, style_grid, cy, cx - len(token) // 2, token, SEAT_STYLE.get(holder))
 
     # HQ boxes on the edge, each fanning out to every front crossroad: a horizontal edge to
     # the one on its own row and a 45-degree / or \ diagonal to the ones above and below.
+    # Always tinted by owning seat; green overrides while it's a legal capture target.
     for player, side in hq_side.items():
         edge_col = 0 if side == "L" else width - _HQ_W        # HQ box's left column
         inner = _HQ_W - 2
         r0 = box_row(mid_y)
-        _blit(canvas, r0, edge_col, "┌" + "─" * inner + "┐")
-        _blit(canvas, r0 + 1, edge_col, "│" + " " * inner + "│")
-        _blit(canvas, r0 + 2, edge_col, "│" + f"HQ {player}".center(inner) + "│")
-        _blit(canvas, r0 + 3, edge_col, "└" + "─" * inner + "┘")
+        hq_style = HIGHLIGHT_STYLE if player == highlight_hq else SEAT_STYLE.get(player)
+        _blit(canvas, style_grid, r0, edge_col, "┌" + "─" * inner + "┐", hq_style)
+        _blit(canvas, style_grid, r0 + 1, edge_col, "│" + " " * inner + "│", hq_style)
+        _blit(canvas, style_grid, r0 + 2, edge_col, "│" + f"HQ {player}".center(inner) + "│", hq_style)
+        _blit(canvas, style_grid, r0 + 3, edge_col, "└" + "─" * inner + "┘", hq_style)
 
         hq_edge = edge_col + _HQ_W - 1 if side == "L" else edge_col  # HQ side facing the grid
         for cr in gm.hq_connects[player]:
@@ -182,7 +243,7 @@ def _render_board(state) -> list[str]:
             else:                                             # front crossroad below -> corner down
                 _draw_conn(canvas, r0 + _NODE_H - 1, hq_edge, box_row(fy), tgt)
 
-    return ["".join(row).rstrip() for row in canvas]
+    return _canvas_to_lines(canvas, style_grid)
 
 
 _BOX_GAP = 1        # blank columns between adjacent card boxes on a shelf
@@ -205,24 +266,31 @@ def _fit_lr(left: str, right: str, width: int) -> str:
     return left + " " * (width - len(left) - len(right)) + right
 
 
+_RARITY_GLYPH = {"legendary": "★", "rare": "◆"}  # printed even without color (accessibility)
+
+
 def _card_box(state, unit, inner: int, body_h: int) -> list[str]:
     """One card as a bordered box: centred name header, wrapped text body, STR/tags footer.
 
     `inner` is the text width inside the borders; `body_h` is the shared number of text
-    rows on this shelf, so every box's footer lines up along the bottom.
+    rows on this shelf, so every box's footer lines up along the bottom. The border and
+    name are tinted by rarity (legendary/rare); common cards are left unstyled.
     """
     card = state.cards[unit.card_id]
     eff = strength_mod.placement_strength(state, unit)
     base = card.base_strength
     strength = f"STR {eff}" + (f" (base {base})" if isinstance(base, int) and eff != base else "")
+    style = RARITY_STYLE.get(card.rarity)
+    glyph = _RARITY_GLYPH.get(card.rarity, "")
+    name = f"{glyph} {card.name}" if glyph else card.name
 
-    header = _truncate(card.name, inner).center(inner)
+    header = _style(_truncate(name, inner).center(inner), style)
     body = textwrap.wrap(card.text, inner) if card.text else []
     body += [""] * (body_h - len(body))
     footer = _fit_lr(strength, "/".join(sorted(card.tags)), inner)
 
-    top = "┌" + "─" * (inner + 2) + "┐"
-    bottom = "└" + "─" * (inner + 2) + "┘"
+    top = _style("┌" + "─" * (inner + 2) + "┐", style)
+    bottom = _style("└" + "─" * (inner + 2) + "┘", style)
     # Two blank rows below the name and two above the STR/tag footer give the card air.
     rows = [header, "", ""] + body + ["", ""] + [footer]
     return [top] + [f"│ {r.ljust(inner)} │" for r in rows] + [bottom]
@@ -235,7 +303,8 @@ def _format_stacks(state) -> list[str]:
         stack = state.board[cr]
         if len(stack) > 1:
             parts = " / ".join(
-                f"{u.owner} {state.cards[u.card_id].name} ({strength_mod.effective_strength(state, u)})"
+                _style(f"{u.owner} {state.cards[u.card_id].name} "
+                       f"({strength_mod.effective_strength(state, u)})", SEAT_STYLE.get(u.owner))
                 for u in stack
             )
             lines.append(f"  stack {cr}:  {parts}   (bottom→top)")
@@ -265,32 +334,47 @@ def _format_hand(state, seat: str, width: int) -> list[str]:
     return lines
 
 
+def _cell(text: str, width: int, style: str | None = None) -> str:
+    """Left-pad `text` to `width` on its plain length, then style the padded chunk.
+
+    Padding first (then styling) keeps the visible column width correct - `_style` only
+    wraps text that's already done with width-sensitive formatting.
+    """
+    return _style(text.ljust(width), style)
+
+
 def _status_panel(state) -> list[str]:
     """A small aligned scoreboard: each seat's food (toward the win), hand size, deck size."""
     win = state.game_map.win_food
-    row = "   {who:<10}{food:<12}{hand:<8}{deck}"
     lines = [
-        row.format(who="", food="FOOD", hand="HAND", deck="DECK"),
+        "   " + _cell("", 10) + _cell("FOOD", 12) + _cell("HAND", 8) + "DECK",
         "   " + "─" * 30,
     ]
     for seat in ("A", "B"):
-        lines.append(row.format(
-            who=f"seat {seat}",
-            food=f"{state.food[seat]} / {win}",
-            hand=str(len(state.hands[seat])),
-            deck=str(len(state.decks[seat])),
-        ))
+        food = state.food[seat]
+        food_style = "bold green" if food >= win * 0.75 else None
+        lines.append(
+            "   " + _cell(f"seat {seat}", 10, SEAT_STYLE[seat])
+            + _cell(f"{food} / {win}", 12, food_style)
+            + _cell(str(len(state.hands[seat])), 8)
+            + str(len(state.decks[seat]))
+        )
     return lines
 
 
-def render(state, reveal_hands: Collection[str] = ()) -> str:
+def render(state, reveal_hands: Collection[str] = (),
+           highlight_crs: Collection[str] = (), highlight_hq: str | None = None) -> str:
+    """`highlight_crs`/`highlight_hq` are passed straight to `_render_board` - used by a
+    card-selection UI to mark that card's legal targets while the player picks one."""
     width = _terminal_width()
     lines = []
 
     if state.result is not None:
-        lines.append(f"RESULT: {state.result.winner or 'draw'} ({state.result.reason})")
+        winner = state.result.winner
+        style = SEAT_STYLE.get(winner) if winner else "bold yellow"
+        lines.append(_style(f"RESULT: {winner or 'draw'} ({state.result.reason})", style))
         lines.append("")
-    lines.extend(_render_board(state))
+    lines.extend(_render_board(state, highlight_crs=highlight_crs, highlight_hq=highlight_hq))
     lines.extend(_format_stacks(state))
     lines.append("")
     lines.extend(_status_panel(state))

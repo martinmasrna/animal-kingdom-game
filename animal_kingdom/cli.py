@@ -19,6 +19,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Sequence
 
+from rich.console import Console
+
 from .bots.greedy_bot import GreedyBot
 from .bots.random_bot import RandomBot
 from .bots.referee_bot import RefereeBot
@@ -27,7 +29,16 @@ from .engine import rules
 from .engine import strength as strength_mod
 from .engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
 from .engine.state import GameState, StateView, new_game
-from .render.text import render
+from .render.text import HIGHLIGHT_STYLE, SEAT_STYLE, render
+
+# highlight=False: Rich's default ReprHighlighter would auto-color bare numbers/punctuation
+# (board coordinates, region food values) on top of our own markup - noise, not signal.
+_console_out = Console(highlight=False)
+_console_err = Console(stderr=True, highlight=False)
+
+
+def _console_for(stream) -> Console:
+    return _console_err if stream is sys.stderr else _console_out
 
 
 # One-line deck identities for the interactive picker (presentation only; the source of
@@ -51,16 +62,6 @@ _OPPONENT_LEVELS = [
 ]
 
 
-def _fmt_action(a: Action, state: GameState | None = None) -> str:
-    if isinstance(a, DrawAction):
-        return "draw"
-    if isinstance(a, PlaceAction):
-        name = state.cards[a.card_id].name if state is not None else a.card_id
-        dest = f"HQ {a.target[1]}" if a.is_hq_capture else a.target[1]
-        return f"place {name} -> {dest}"
-    return repr(a)
-
-
 def _describe_action(state: GameState, a: Action) -> str:
     """Past-tense narration of a resolved action, for the turn log (card ids -> names)."""
     if isinstance(a, DrawAction):
@@ -79,36 +80,125 @@ def _banner_width() -> int:
     return max(72, shutil.get_terminal_size(fallback=(100, 24)).columns)
 
 
-def _banner(label: str) -> str:
+def _banner(label: str, style: str | None = None) -> str:
     label = f" {label.strip()} "
     pad = _banner_width() - len(label)
     left = max(0, pad) // 2
-    return "\n" + "#" * left + label + "#" * max(0, pad - left)
+    right = max(0, pad - left)
+    styled = f"[{style}]{label}[/{style}]" if style else label
+    return "\n" + "#" * left + styled + "#" * right
 
 
 def _turn_banner(turn: int, actor: str, human_seats: set[str]) -> str:
     suffix = ""  # in a spectated bot-vs-bot game neither seat is "you"/"opponent"
     if human_seats:
         suffix = " (you)" if actor in human_seats else " (opponent)"
-    return _banner(f"TURN {turn} — seat {actor}{suffix}")
+    return _banner(f"TURN {turn} — seat {actor}{suffix}", SEAT_STYLE[actor])
+
+
+def _parse_cr_key(cr: str) -> tuple[int, int]:
+    x, y = cr.split(",")
+    return int(x), int(y)
 
 
 class HumanController:
-    """Reads a choice from stdin. Lives in the CLI (not bots/) so the engine stays I/O-free."""
+    """Reads a choice from stdin. Lives in the CLI (not bots/) so the engine stays I/O-free.
+
+    A turn decision (draw vs. place a card) is a two-step pick: choose a card first, then
+    see that card's legal targets highlighted on the board and choose one - closer to how a
+    real board-game UI flows than a single flat list of every (card, target) pair. A
+    sub-decision mid-effect-resolution (which enemy to remove, etc.) has no "which card"
+    step, so it stays a flat numbered list.
+    """
+
+    def __init__(self, console: Console):
+        self.console = console
 
     def choose(self, view: StateView, legal: Sequence[Action],
                state: GameState | None = None) -> Action:
         legal = list(legal)
-        for i, a in enumerate(legal):
-            print(f"  [{i}] {_fmt_action(a, state)}")
+        if legal and isinstance(legal[0], ChoiceAction):
+            return self._choose_pending(view, legal)
+        return self._choose_turn_action(view, legal, state)
+
+    def _read(self, prompt: str, n: int, extra: Sequence[str] = ()) -> int | str:
+        """Read an integer 0..n-1, or one of the single-letter `extra` options, from stdin."""
         while True:
-            raw = input(f"player {view.player} choose action #: ").strip()
-            if raw.isdigit() and 0 <= int(raw) < len(legal):
-                return legal[int(raw)]
-            print(f"  enter a number 0..{len(legal) - 1}")
+            try:
+                raw = input(prompt).strip().lower()
+            except EOFError:
+                raise SystemExit("\nno input; aborting.")
+            if raw in extra:
+                return raw
+            if raw.isdigit() and 0 <= int(raw) < n:
+                return int(raw)
+            opts = f"0..{n - 1}" + (f", or {'/'.join(extra)}" if extra else "")
+            self.console.print(f"  enter {opts}")
+
+    def _choose_pending(self, view: StateView, legal: list[ChoiceAction]) -> Action:
+        for i, a in enumerate(legal):
+            label = "decline" if a.choice == SKIP else str(a.choice)
+            self.console.print(f"  [bold]{i}[/bold] {label}")
+        i = self._read(f"player {view.player} choose #: ", len(legal))
+        return legal[i]
+
+    def _choose_turn_action(self, view: StateView, legal: list[Action],
+                             state: GameState) -> Action:
+        draw = next((a for a in legal if isinstance(a, DrawAction)), None)
+        by_card: dict[str, list[PlaceAction]] = {}
+        for a in legal:
+            if isinstance(a, PlaceAction):
+                by_card.setdefault(a.card_id, []).append(a)
+        # Menu order follows hand order, so it lines up with the card boxes on screen.
+        card_ids = [u.card_id for u in state.hands[view.player] if u.card_id in by_card]
+
+        while True:
+            entries: list[tuple[str, PlaceAction | None]] = []
+            if draw is not None:
+                entries.append(("draw a card", None))
+            for cid in card_ids:
+                targets = by_card[cid]
+                n = len(targets)
+                hq_note = " (can capture HQ!)" if any(a.is_hq_capture for a in targets) else ""
+                entries.append(
+                    (f"{state.cards[cid].name} — {n} legal target{'s' if n != 1 else ''}{hq_note}",
+                     cid))
+            for i, (label, _) in enumerate(entries):
+                self.console.print(f"  [bold]{i}[/bold] {label}")
+            i = self._read(f"player {view.player} choose a card #: ", len(entries))
+            _, picked = entries[i]
+            if picked is None:
+                return draw
+            action = self._choose_target(view, state, picked, by_card[picked])
+            if action is not None:
+                return action
+            # 'b'ack: redraw the card menu (the caller already re-renders the board plainly
+            # next time round; here we just re-print the menu, no need to touch the screen).
+
+    def _choose_target(self, view: StateView, state: GameState, card_id: str,
+                        targets: list[PlaceAction]) -> PlaceAction | None:
+        """Show the board with `targets` highlighted and let the player pick one, or 'b'ack."""
+        crs = sorted((a for a in targets if not a.is_hq_capture),
+                     key=lambda a: _parse_cr_key(a.crossroad))
+        hq = [a for a in targets if a.is_hq_capture]
+        ordered = crs + hq  # HQ capture listed last - it's the highest-impact option
+        highlight_hq = hq[0].target[1] if hq else None
+
+        self.console.print(_banner(f"{state.cards[card_id].name} — choose a target",
+                                    HIGHLIGHT_STYLE))
+        self.console.print(render(state, reveal_hands={view.player},
+                                   highlight_crs={a.crossroad for a in crs},
+                                   highlight_hq=highlight_hq))
+        self.console.print()
+        for i, a in enumerate(ordered):
+            dest = f"HQ {a.target[1]} — capture and win!" if a.is_hq_capture else a.crossroad
+            self.console.print(f"  [bold]{i}[/bold] {dest}")
+        choice = self._read(f"player {view.player} choose a target # ('b' to pick a "
+                             "different card): ", len(ordered), extra=("b",))
+        return None if choice == "b" else ordered[choice]
 
 
-def _make_controller(kind: str, seat: str, seed: int):
+def _make_controller(kind: str, seat: str, seed: int, console: Console):
     kind = kind.strip().lower()
     seat_seed = seed + (1 if seat == "A" else 2)
     if kind == "random":
@@ -118,7 +208,7 @@ def _make_controller(kind: str, seat: str, seed: int):
     if kind == "referee":
         return RefereeBot(seed=seat_seed)
     if kind == "human":
-        return HumanController()
+        return HumanController(console)
     raise SystemExit(
         f"unknown bot kind {kind!r} (expected 'random', 'greedy', 'referee', or 'human')")
 
@@ -135,9 +225,9 @@ def _make_deck(spec: str, deck_rng: random.Random) -> list[str]:
 
 def _prompt_menu(title: str, options: Sequence[tuple[str, str]]) -> str:
     """Print a numbered menu of (label, value) pairs and return the chosen value."""
-    print(title)
+    _console_out.print(f"[bold]{title}[/bold]")
     for i, (label, _) in enumerate(options):
-        print(f"  [{i}] {label}")
+        _console_out.print(f"  [bold cyan]{i}[/bold cyan] {label}")
     while True:
         try:
             raw = input("  choose #: ").strip()
@@ -145,7 +235,7 @@ def _prompt_menu(title: str, options: Sequence[tuple[str, str]]) -> str:
             raise SystemExit("\nno input; aborting setup.")
         if raw.isdigit() and 0 <= int(raw) < len(options):
             return options[int(raw)][1]
-        print(f"  enter a number 0..{len(options) - 1}")
+        _console_out.print(f"  enter a number 0..{len(options) - 1}")
 
 
 def _interactive_setup() -> tuple[str, str]:
@@ -156,11 +246,11 @@ def _interactive_setup() -> tuple[str, str]:
     deck_options = [(f"{slug}  —  {_DECK_BLURBS[slug]}", slug) for slug in sorted(PREMADE_DECKS)]
     deck_options.append(("vanilla  —  random legal singleton pool", "vanilla"))
 
-    print("\n=== New game ===\n")
+    _console_out.print("\n[bold]=== New game ===[/bold]\n")
     my_deck = _prompt_menu("Your deck:", deck_options)
     opp_deck = _prompt_menu("\nOpponent's deck:", deck_options)
     level = _prompt_menu("\nOpponent level:", _OPPONENT_LEVELS)
-    print()
+    _console_out.print()
     return f"human,{level}", f"{my_deck},{opp_deck}"
 
 
@@ -193,7 +283,7 @@ def _maybe_save_log(log: dict, seed: int, log_arg: str | None, quiet: bool) -> N
     """Honors an explicit --log path, or (interactively, unless --quiet) offers to save one."""
     if log_arg is not None:
         dest = _save_log(log, log_arg)
-        print(f"\ngame log saved to {dest}", file=sys.stderr if log_arg == "-" else sys.stdout)
+        _console_for(sys.stderr if log_arg == "-" else sys.stdout).print(f"\ngame log saved to {dest}")
         return
     if quiet:
         return
@@ -203,7 +293,7 @@ def _maybe_save_log(log: dict, seed: int, log_arg: str | None, quiet: bool) -> N
         return
     if raw.startswith("y"):
         dest = _save_log(log, str(_default_log_path(seed)))
-        print(f"game log saved to {dest} — hand this to an agent for review.")
+        _console_out.print(f"game log saved to {dest} — hand this to an agent for review.")
 
 
 def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str,
@@ -211,8 +301,11 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str,
     kinds = bot_spec.split(",")
     if len(kinds) != 2:
         raise SystemExit("--bots expects two comma-separated kinds, e.g. random,random")
-    controllers = {"A": _make_controller(kinds[0], "A", seed),
-                   "B": _make_controller(kinds[1], "B", seed)}
+    # '--log -' reserves stdout for the JSON dump; the normal play-by-play goes to stderr instead.
+    out = sys.stderr if log_arg == "-" else sys.stdout
+    console = _console_for(out)
+    controllers = {"A": _make_controller(kinds[0], "A", seed, console),
+                   "B": _make_controller(kinds[1], "B", seed, console)}
     human_seats = {seat for seat, kind in zip(("A", "B"), kinds) if kind.strip().lower() == "human"}
 
     deck_specs = decks.split(",")
@@ -222,9 +315,6 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str,
     deck_a = _make_deck(deck_specs[0], deck_rng)
     deck_b = _make_deck(deck_specs[1], deck_rng)
     state = new_game(deck_a, deck_b, seed, map_id=map_id)
-
-    # '--log -' reserves stdout for the JSON dump; the normal play-by-play goes to stderr instead.
-    out = sys.stderr if log_arg == "-" else sys.stdout
 
     log = {
         "meta": {"seed": seed, "map_id": map_id,
@@ -237,23 +327,35 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str,
     turn_owner = state.current
     turn_actions: list[dict] = []
 
-    # In a human game we only draw the full board on the human's own turn; the opponent's
-    # moves scroll by as one-line log entries. With no human (bot vs bot) we render every
-    # step so a spectator sees the whole game. turn_counter drives the per-turn banner.
+    # Bot-vs-bot (no human) is a debug/spectate log: render every step, scrolling, so the
+    # full history stays in the terminal's scrollback. A human game instead redraws a fresh
+    # screen right before *that* seat must decide - like a real client's board view - with
+    # a short trail of what just happened (mostly the opponent's moves, which otherwise
+    # wouldn't get a full board redraw of their own). turn_counter drives the per-turn banner.
     spectate = not human_seats
+    recent: list[str] = []
+    _RECENT_MAX = 6
     last_banner_turn = None
     while True:
         result = rules.is_terminal(state)
         if result is not None:
             break
         actor = state.player_to_act()
+        my_turn = actor in human_seats
 
-        if not quiet and state.turn_counter != last_banner_turn:
-            print(_turn_banner(state.turn_counter, actor, human_seats), file=out)
-            last_banner_turn = state.turn_counter
-        if not quiet and (spectate or actor in human_seats):
-            print(render(state, reveal_hands=human_seats), file=out)
-            print(file=out)
+        if not quiet and (spectate or my_turn):
+            if my_turn:
+                console.clear()
+                console.print(_turn_banner(state.turn_counter, actor, human_seats))
+                last_banner_turn = state.turn_counter
+                if recent:
+                    console.print("[dim]" + "\n".join(recent) + "[/dim]")
+                    console.print()
+            elif state.turn_counter != last_banner_turn:
+                console.print(_turn_banner(state.turn_counter, actor, human_seats))
+                last_banner_turn = state.turn_counter
+            console.print(render(state, reveal_hands=human_seats))
+            console.print()
 
         legal = rules.legal_actions(state)
         action = controllers[actor].choose(state.view_for(actor), legal, state)
@@ -261,7 +363,10 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str,
         rules.apply_action(state, action)
         if not quiet:
             tag = f"{actor}" + (" (you)" if actor in human_seats else "")
-            print(f"  → {tag} {narration}", file=out)
+            line = f"  → {tag} {narration}"
+            recent.append(line)
+            del recent[:-_RECENT_MAX]
+            console.print(line)
 
         turn_actions.append({"actor": actor, "action": action.to_dict(), "narration": narration})
         if state.result is not None or state.turn_counter != turn_no:
@@ -275,10 +380,12 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str,
             turn_no, turn_owner, turn_actions = state.turn_counter, state.current, []
 
     if not quiet:
-        print(_banner("GAME OVER"), file=out)
-    print(render(state, reveal_hands=human_seats), file=out)
-    print(f"\nFINAL: winner={result.winner or 'draw'} reason={result.reason} "
-          f"turns={state.turn_counter}", file=out)
+        if human_seats:
+            console.clear()
+        console.print(_banner("GAME OVER", SEAT_STYLE.get(result.winner) or "bold yellow"))
+    console.print(render(state, reveal_hands=human_seats))
+    console.print(f"\nFINAL: winner={result.winner or 'draw'} reason={result.reason} "
+                  f"turns={state.turn_counter}")
 
     log["result"] = {"winner": result.winner, "reason": result.reason, "turns": state.turn_counter}
     _maybe_save_log(log, seed, log_arg, quiet)
@@ -311,7 +418,7 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     if args.seed is None:
         seed = random.SystemRandom().randrange(1 << 30)
-        print(f"(seed={seed} — pass --seed {seed} to replay this exact game)")
+        _console_out.print(f"[dim](seed={seed} — pass --seed {seed} to replay this exact game)[/dim]")
     else:
         seed = args.seed
     play(bots, seed, args.map_id, args.quiet, decks, log_arg=args.log_path)
