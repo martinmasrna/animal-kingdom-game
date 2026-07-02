@@ -41,6 +41,10 @@ class RefereeMatchSpec:
     seed: int
     candidate_seat: str
     map_id: str
+    # Explicit RefereeBot kwargs for the candidate as a tuple of (key, value) pairs
+    # (frozen/picklable). Empty => the production `make_bot("referee")` config. Lets the
+    # mirror validate an arbitrary candidate search config against the full legacy referee.
+    candidate_kwargs: tuple = ()
 
 
 def _run_referee_match(
@@ -49,7 +53,11 @@ def _run_referee_match(
 ) -> tuple[int, str, float, int]:
     candidate_seed = spec.seed * 2 + (1 if spec.candidate_seat == "A" else 2)
     legacy_seed = spec.seed * 2 + (2 if spec.candidate_seat == "A" else 1)
-    candidate = make_bot("referee", candidate_seed)
+    candidate = (
+        RefereeBot(seed=candidate_seed, **dict(spec.candidate_kwargs))
+        if spec.candidate_kwargs
+        else make_bot("referee", candidate_seed)
+    )
     legacy = RefereeBot(
         seed=legacy_seed,
         staged=False,
@@ -84,12 +92,13 @@ def run_mirror_strength_comparison(
     config: Optional[Config],
     map_id: str,
     jobs: int,
+    candidate_kwargs: tuple = (),
     bootstrap_resamples: int = 2_000,
     progress: Optional[Callable[[int, int], None]] = None,
 ) -> dict:
     """Paired-seat mirror cross-play: staged candidate versus full legacy Referee."""
     specs = [
-        RefereeMatchSpec(deck, base_seed + offset, seat, map_id)
+        RefereeMatchSpec(deck, base_seed + offset, seat, map_id, candidate_kwargs)
         for offset in range(paired_seeds)
         for seat in ("A", "B")
     ]
@@ -157,7 +166,11 @@ def run_mirror_strength_comparison(
                 "config",
             )
         },
-        "candidate_parameters": ratings_provenance["bot_parameters"]["referee"],
+        "candidate_parameters": (
+            {**ratings_provenance["bot_parameters"]["referee"], **dict(candidate_kwargs)}
+            if candidate_kwargs
+            else ratings_provenance["bot_parameters"]["referee"]
+        ),
         "legacy_parameters": {
             "determinizations": 5,
             "beam_width": 8,
@@ -278,6 +291,30 @@ def compare_modes(
     }
 
 
+_CONFIG_KEYS = {
+    "det": "determinizations",
+    "root": "root_width",
+    "reply": "reply_width",
+    "nodes": "max_search_nodes",
+    "beam": "beam_width",
+}
+
+
+def _parse_candidate_config(spec: Optional[str]) -> tuple:
+    """Parse 'det=3,root=5,reply=4,nodes=500' into a (key, value) tuple of RefereeBot kwargs."""
+    if not spec:
+        return ()
+    kwargs = {}
+    for item in spec.split(","):
+        key, _, value = item.partition("=")
+        key = key.strip()
+        if key not in _CONFIG_KEYS:
+            raise SystemExit(
+                f"unknown candidate-config key {key!r} (expected {sorted(_CONFIG_KEYS)})")
+        kwargs[_CONFIG_KEYS[key]] = int(value)
+    return tuple(sorted(kwargs.items()))
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description="Compare staged Referee decisions with the full legacy search."
@@ -292,8 +329,14 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     parser.add_argument(
         "--mirror-deck",
-        choices=sorted(DECK_SLUGS),
-        help="run staged-vs-legacy paired mirror games instead of position agreement",
+        choices=[*sorted(DECK_SLUGS), "all"],
+        help="run staged-vs-legacy paired mirror games instead of position agreement "
+             "('all' runs every deck as a strength gauntlet)",
+    )
+    parser.add_argument(
+        "--candidate-config",
+        help="override the candidate's RefereeBot search config, e.g. "
+             "'det=3,root=5,reply=4,nodes=500' (default: production make_bot config)",
     )
     parser.add_argument(
         "--games",
@@ -305,7 +348,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument(
         "--out",
         type=Path,
-        help="write the mirror summary and raw per-game outcomes as JSON",
+        help="write the mirror summary and raw per-game outcomes as JSON "
+             "(with --mirror-deck all, treated as a directory: one <deck>.json each)",
     )
     args = parser.parse_args(argv)
 
@@ -313,34 +357,52 @@ def main(argv: Sequence[str] | None = None) -> None:
     if args.mirror_deck:
         if args.games <= 0 or args.games % 2:
             raise SystemExit("--games must be a positive even number")
-        result = run_mirror_strength_comparison(
-            args.mirror_deck,
-            paired_seeds=args.games // 2,
-            base_seed=args.seed,
-            config=config,
-            map_id=args.map_id,
-            jobs=args.jobs,
-            progress=lambda done, total: (
-                print(
-                    f"  {done}/{total} games complete",
-                    file=sys.stderr,
-                )
-                if done == total or done % 10 == 0 else None
-            ),
-        )
-        if args.out is not None:
-            args.out.parent.mkdir(parents=True, exist_ok=True)
-            args.out.write_text(
-                json.dumps(result, indent=2, sort_keys=True) + "\n",
-                encoding="utf-8",
+        candidate_kwargs = _parse_candidate_config(args.candidate_config)
+        decks = sorted(DECK_SLUGS) if args.mirror_deck == "all" else [args.mirror_deck]
+        all_ok = True
+        for deck in decks:
+            result = run_mirror_strength_comparison(
+                deck,
+                paired_seeds=args.games // 2,
+                base_seed=args.seed,
+                config=config,
+                map_id=args.map_id,
+                jobs=args.jobs,
+                candidate_kwargs=candidate_kwargs,
+                progress=lambda done, total: (
+                    print(
+                        f"  {done}/{total} games complete",
+                        file=sys.stderr,
+                    )
+                    if done == total or done % 20 == 0 else None
+                ),
             )
-        lo, hi = result["ci95"]
-        print(
-            f"{result['deck']}: staged Referee {result['candidate_win_rate']:.1%} "
-            f"[{lo:.1%}, {hi:.1%}] over {result['games']} paired-seat mirror games; "
-            f"{result['elapsed_s']:.1f}s, {result['games_per_second']:.2f} games/s, "
-            f"{result['avg_turns']:.1f} avg turns"
-        )
+            if args.out is not None:
+                if args.mirror_deck == "all":
+                    args.out.mkdir(parents=True, exist_ok=True)
+                    target = args.out / f"{deck}.json"
+                else:
+                    args.out.parent.mkdir(parents=True, exist_ok=True)
+                    target = args.out
+                target.write_text(
+                    json.dumps(result, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+            lo, hi = result["ci95"]
+            # Non-inferiority: we must be confident the candidate is within 5 points of
+            # legacy, i.e. the *lower* CI bound clears 45% (matches the handoff's food_otk
+            # "[45.0%, 56.0%] clears the 5-point margin" reading).
+            noninferior = lo >= 0.45
+            all_ok = all_ok and noninferior
+            print(
+                f"{result['deck']:<20} candidate {result['candidate_win_rate']:.1%} "
+                f"[{lo:.1%}, {hi:.1%}]  {'OK' if noninferior else 'REGRESSION?'}  "
+                f"({result['games']} games, {result['elapsed_s']:.0f}s, "
+                f"{result['avg_turns']:.1f} avg turns)"
+            )
+        if args.mirror_deck == "all":
+            print(f"\nGauntlet verdict: "
+                  f"{'all decks non-inferior (>=45% lower CI)' if all_ok else 'AT LEAST ONE DECK REGRESSED'}")
         return
 
     turns = tuple(int(value) for value in args.turns.split(","))
