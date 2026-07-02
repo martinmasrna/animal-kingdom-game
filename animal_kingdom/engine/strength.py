@@ -3,9 +3,11 @@
 Decision E (keywords.md): one number, three layers, evaluated **live** wherever strength
 matters (covering, removal thresholds, region holding, conditions like Coyote's "if 5+"):
 
-    effective_strength = base_or_dynamic + stored_counters + active_anthems    (clamped >= 0)
+    effective_strength = base_or_dynamic + global_growth + stored_counters
+                         + active_anthems                                      (clamped >= 0)
 
 - base_or_dynamic: the printed int, or a dynamic rule (Goliath = #removed units; Chameleon).
+- global_growth: persistent per-player/card growth that applies in every zone (Rattlesnake).
 - stored_counters: `UnitInstance.strength_counter` - one-time "give +X" grants (Dhole,
   Clarion, Red Wolf, Dingo, Bush Dog, Shuck). Stored on the instance; persist after the
   granter dies; travel hand->board.
@@ -45,6 +47,10 @@ def _base_or_dynamic(state: GameState, card, owner: str) -> int:
     if isinstance(card.base_strength, int):
         return card.base_strength
     return _dynamic_strength(state, card.dynamic_strength, owner)
+
+
+def _global_growth(state: GameState, card_id: str, owner: str) -> int:
+    return state.card_strength_counters.get(owner, {}).get(card_id, 0)
 
 
 def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) -> int:
@@ -89,6 +95,7 @@ def effective_strength(state: GameState, unit: UnitInstance) -> int:
     """Strength of a unit in play: base/dynamic + its stored counter + live anthems, >= 0."""
     card = state.cards[unit.card_id]
     val = (_base_or_dynamic(state, card, unit.owner)
+           + _global_growth(state, card.id, unit.owner)
            + unit.strength_counter
            + anthem_bonus(state, card, unit.owner, unit.iid))
     return max(0, val)
@@ -98,7 +105,9 @@ def card_strength(state: GameState, card_id: str, owner: str) -> int:
     """Strength of a unit of `card_id` for `owner`, anthems as a prospective placement and
     ignoring any per-instance counter (callers that have an instance add its counter)."""
     card = state.cards[card_id]
-    val = _base_or_dynamic(state, card, owner) + anthem_bonus(state, card, owner, None)
+    val = (_base_or_dynamic(state, card, owner)
+           + _global_growth(state, card.id, owner)
+           + anthem_bonus(state, card, owner, None))
     return max(0, val)
 
 

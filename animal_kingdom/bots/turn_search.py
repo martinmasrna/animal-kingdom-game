@@ -408,6 +408,7 @@ class TurnSearcher(Bot):
             freeze(state.pending),
             freeze(state.effect_stack),
             freeze(state.scheduled),
+            freeze(state.card_strength_counters),
             freeze(state.turn_flags),
             freeze(state.result.to_dict()) if state.result else None,
         )

@@ -9,6 +9,7 @@ Examples:
   python -m animal_kingdom.sim.report 500
   python -m animal_kingdom.sim.report 200 --bots random,random --jobs 4
   python -m animal_kingdom.sim.report 500 --deck aggro   # only aggro_hq_rush's matchups/tables
+  python -m animal_kingdom.sim.report 500 --deck egg --opponent cat   # just that one matchup
 """
 
 from __future__ import annotations
@@ -149,14 +150,24 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--deck", default=None,
                    help="only simulate/report this deck's matchups (abbreviation OK, e.g. "
                         "--deck aggro matches aggro_hq_rush) instead of the full round-robin")
+    p.add_argument("--opponent", default=None,
+                   help="pair with --deck to simulate/report only that single matchup "
+                        "(abbreviation OK, both seats; same deck = mirror only)")
     args = p.parse_args(argv)
 
     bots = _parse_bots(args.bots)
     config = load_config_overrides(args.config)
     slugs = sorted(DECK_SLUGS)
 
+    if args.opponent is not None and args.deck is None:
+        raise SystemExit("--opponent requires --deck (it narrows that deck's matchups to one)")
+
     target = _resolve_deck(args.deck, slugs) if args.deck is not None else None
-    if target is not None:
+    opponent = _resolve_deck(args.opponent, slugs) if args.opponent is not None else None
+    if opponent is not None:
+        pairs = [(target, opponent)] if target == opponent else [(target, opponent), (opponent, target)]
+        label = f"{target} vs {opponent} ({len(pairs)} seat{'' if len(pairs) == 1 else 's'})"
+    elif target is not None:
         pairs = [(target, b) for b in slugs] + [(a, target) for a in slugs if a != target]
         label = f"{target}'s matchups ({len(pairs)})"
     else:

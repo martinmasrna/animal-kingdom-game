@@ -39,8 +39,7 @@ class Config:
 
     # --- Food-event engine reactors (decision F2/F9; magnitudes are dials) ---
     eon_food: int = 1                    # per draw/shuffle/remove event
-    vulture_food: int = 2                # per card removed
-    rattlesnake_food: int = 5            # per card shuffled
+    vulture_food: int = 5                # per card removed
     egg_eater_food: int = 10             # per Egg removed
     jackal_food: int = 3                 # per adjacent removal
 
@@ -94,7 +93,6 @@ class Config:
     cap_queen_adira: bool = False
     cap_eon: bool = False
     cap_vulture: bool = False
-    cap_rattlesnake: bool = False
     cap_jackal: bool = False
     cap_queen_honoria: bool = False
     cap_falstaff: bool = False

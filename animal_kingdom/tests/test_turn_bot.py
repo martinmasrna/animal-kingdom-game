@@ -276,17 +276,15 @@ def test_canine_buffs_before_the_strength_gated_payoff():
     assert isinstance(first, PlaceAction) and first.card_id == "raksha"
 
 
-def test_egg_sets_up_food_reactor_before_the_shuffle():
-    # Rattlesnake gains 5 food per shuffle. Playing it before Raven (which shuffles 2 back)
-    # banks the food; the reverse order gains nothing.
+def test_rattlesnake_grows_from_ravens_two_shuffles():
     s = make_state(current="A", hands={"A": ["rattlesnake", "raven"]},
                    decks={"A": ["eagle", "eagle", "eagle", "eagle"], "B": ["mouse"] * 4},
                    food={"A": 0, "B": 0}, config=TWO_ACTION)
-    bot = small_turn()
-    first = bot.choose(s.view_for("A"), rules.legal_actions(s), s)
-    assert isinstance(first, PlaceAction) and first.card_id == "rattlesnake"
-    play_turn(bot, s)
-    assert s.food["A"] > 0     # the shuffle reactor fired because Rattlesnake was down first
+    rules.apply_action(s, PlaceAction("rattlesnake", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("raven", ("cr", "2,2")))
+    while s.pending is not None:
+        rules.apply_action(s, rules.legal_actions(s)[0])
+    assert s.card_strength_counters["A"]["rattlesnake"] == 2
 
 
 def test_food_otk_sacrifices_the_deathrattle_payoff():
@@ -309,7 +307,8 @@ def test_ramp_pays_food_for_the_big_body_battlecry():
                    decks={"A": ["mouse"] * 3, "B": ["mouse"] * 4},
                    food={"A": 30, "B": 0}, config=TWO_ACTION)
     put(s, "1,1", "lion", "A")      # connects the HQ front
-    put(s, "1,2", "mouse", "B")     # enemy on A's HQ front, reachable from 1,3
+    for cr in ("4,2", "3,2", "2,2", "1,2"):
+        put(s, cr, "mouse", "B")     # genuine connected enemy chain to A's HQ
     bot = small_turn()
     play_turn(bot, s)
     assert "bulwark" in own_ids(s, "A")

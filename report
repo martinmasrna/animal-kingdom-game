@@ -7,6 +7,7 @@
 #
 #   ./report 500                           # 7x7 round-robin, 500 games/matchup
 #   ./report 500 --deck aggro              # only aggro_hq_rush's matchups + card table
+#   ./report 100 --deck egg --opponent cat # only that single matchup (both seats)
 #   ./report 200 --bots random,random --jobs 4
 #   ./report 500 --map map_a --config none # the classic 1-action rules on the old map
 #   ./report --help

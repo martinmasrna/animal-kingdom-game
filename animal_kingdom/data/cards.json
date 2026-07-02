@@ -163,7 +163,7 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Snake"],
-      "base_strength": 6,
+      "base_strength": 7,
       "keywords": [],
       "text": "Whenever a card is drawn, shuffled or removed, gain 1 food."
     },
@@ -186,7 +186,7 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Bird"],
-      "base_strength": 5,
+      "base_strength": 6,
       "keywords": ["Flight"],
       "text": "Flight. When this is removed, shuffle it back to your deck."
     },
@@ -208,9 +208,9 @@
       "rarity": "rare",
       "type": "unit",
       "tags": ["Snake"],
-      "base_strength": 6,
+      "base_strength": 0,
       "keywords": [],
-      "text": "Whenever you shuffle a card, gain 5 food."
+      "text": "Whenever you shuffle a card, gain 1 strength (wherever this is)."
     },
     {
       "id": "egg_eater",
@@ -230,9 +230,9 @@
       "rarity": "rare",
       "type": "unit",
       "tags": ["Bird"],
-      "base_strength": 5,
+      "base_strength": 3,
       "keywords": [],
-      "text": "When you draw this, both players remove a random card from their hand."
+      "text": "When you draw this, your opponent removes a random card from their hand."
     },
     {
       "id": "vulture",
@@ -243,7 +243,7 @@
       "tags": ["Bird"],
       "base_strength": 4,
       "keywords": ["Flight"],
-      "text": "Flight. Whenever a card is removed, gain 2 food."
+      "text": "Flight. Whenever a card is removed, gain 5 food."
     },
     {
       "id": "eagle",
@@ -287,7 +287,7 @@
       "tags": ["Bird"],
       "base_strength": 2,
       "keywords": ["Flight"],
-      "text": "Flight. Battlecry: draw 2, then shuffle 2 cards back."
+      "text": "Flight. Battlecry: draw 3 cards, then shuffle 2 cards back."
     },
     {
       "id": "bird_egg",

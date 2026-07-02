@@ -246,9 +246,12 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
         region += r.food * (mine ** 3 - theirs ** 3)
     score += w.region_control * region
 
-    # --- HQ threat: who stands in front of whose HQ (one step from capture) ---
-    score += w.enemy_hq_threat * sum(1 for cr in gm.hq_front(opp) if state.owner_of(cr) == me)
-    score -= w.own_hq_threat * sum(1 for cr in gm.hq_front(me) if state.owner_of(cr) == opp)
+    # --- HQ threat: only a connected chain can capture next turn. An isolated Flight unit
+    # in front of an HQ is board presence, not an immediate HQ threat.
+    my_connection = state.connected_occupied(me)
+    opp_connection = state.connected_occupied(opp)
+    score += w.enemy_hq_threat * sum(1 for cr in gm.hq_front(opp) if cr in my_connection)
+    score -= w.own_hq_threat * sum(1 for cr in gm.hq_front(me) if cr in opp_connection)
 
     # --- Card economy: net cards in hand (not deck - see GreedyWeights.card_economy) ---
     score += w.card_economy * (len(state.hands[me]) - len(state.hands[opp]))

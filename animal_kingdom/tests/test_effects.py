@@ -13,7 +13,7 @@ from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.maps import load_map
 from animal_kingdom.engine.state import GameState, UnitInstance
-from animal_kingdom.engine.strength import effective_strength
+from animal_kingdom.engine.strength import card_strength, effective_strength, placement_strength
 
 CFG = Config.default()
 CARDS = load_cards()
@@ -279,11 +279,17 @@ def test_vulture_gains_on_any_removal():
     assert s.food["A"] == CFG.vulture_food
 
 
-def test_rattlesnake_gains_per_card_shuffled():
-    s = make_state(decks={"A": [], "B": []})
-    put(s, "1,1", "rattlesnake", "A")
+def test_rattlesnake_gains_strength_per_own_card_shuffled_in_every_zone():
+    s = make_state(hands={"A": ["rattlesnake"]},
+                   decks={"A": ["rattlesnake"], "B": []})
+    buried = put(s, "1,1", "rattlesnake", "A")
+    put(s, "1,1", "lion", "A")                        # Rattlesnake is covered/inactive
     effects.shuffle_back(s, "A", ["lion", "fox"])         # two cards = two events
-    assert s.food["A"] == 2 * CFG.rattlesnake_food
+    assert effective_strength(s, buried) == 2
+    assert placement_strength(s, hand_inst(s, "A", "rattlesnake")) == 2
+    assert card_strength(s, "rattlesnake", "A") == 2       # also applies to the deck copy
+    effects.shuffle_back(s, "B", ["mouse"])                # only your shuffles count
+    assert card_strength(s, "rattlesnake", "A") == 2
 
 
 def test_egg_eater_only_fires_on_egg_removal():
@@ -308,14 +314,14 @@ def test_jackal_only_fires_on_adjacent_removal():
     assert s.food["A"] == CFG.jackal_food                # unchanged
 
 
-def test_black_swan_when_drawn_discards_from_both_hands():
+def test_black_swan_when_drawn_discards_from_opponents_hand_only():
     s = make_state(current="A", decks={"A": ["black_swan"], "B": []})
     s.add_to_hand("A", "lion")
     s.add_to_hand("B", "fox")
     effects.draw_cards(s, "A", 1)                        # draws Black Swan
-    assert len(s.hands["A"]) == 1                        # had lion + black_swan, lost one
+    assert sorted(hand_ids(s, "A")) == ["black_swan", "lion"]
     assert len(s.hands["B"]) == 0                        # lost its only card
-    assert len(s.remove_pile) == 2
+    assert s.remove_pile == ["fox"]
 
 
 def test_opossum_return_is_not_a_remove():
@@ -388,12 +394,17 @@ def test_owl_peeks_draws_one_and_shuffles_the_rest():
     assert sorted(s.decks["A"]) == ["eagle", "lion", "rat"]   # the other two shuffled back
 
 
-def test_raven_draws_two_and_shuffles_two_back_net_neutral():
+def test_raven_draws_three_then_shuffles_two_cards_from_hand():
     s = make_state(current="A", hands={"A": ["raven"]},
                    decks={"A": ["lion", "fox", "rat", "eagle", "owl"], "B": []})
     rules.apply_action(s, PlaceAction("raven", ("cr", "1,2")))
-    assert hand_ids(s, "A") == []                        # drew 2, shuffled the 2 back
-    assert len(s.decks["A"]) == 5
+    assert len(s.hands["A"]) == 3                        # drew 3; must choose 2 to shuffle
+    first = s.hands["A"][0]
+    rules.apply_action(s, ChoiceAction(first.iid))
+    second = s.hands["A"][0]
+    rules.apply_action(s, ChoiceAction(second.iid))
+    assert len(s.hands["A"]) == 1                        # net +1 card
+    assert len(s.decks["A"]) == 4
 
 
 # =================================================== Stage 2.3: Apex Predator (decision D)

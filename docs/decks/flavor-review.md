@@ -36,13 +36,12 @@ without citing a myth; the Leo/Lea twin fetch is a deliberate designed pair. Kee
 Thematically tight: the egg-eating snake paying out on egg removal, the scavenging vulture, the
 hoarding raven, the scouting owl, the disruptive "black swan event." Keep almost all of it.
 
-- **Rattlesnake (rare, Snake 6) — thin effect↔animal link.** "Whenever you shuffle a card, gain 5
-  food" leans on rattle≈shuffle, which is a weak pun (shuffling is a deck action, not a rattle). It's
+- **Rattlesnake (rare, Snake 0) — thin effect↔animal link.** "Whenever you shuffle a card, gain 1
+  strength (wherever this is)" leans on rattle≈shuffle, which is a weak pun (shuffling is a deck action, not a rattle). It's
   acceptable and the snake earns its slot, but if you ever want a cleaner fit, a **Sidewinder**
   (literally shuffles through sand) maps onto "shuffle" more naturally — pure reskin (same tag/str/
   effect). Low priority; keep if you like the rattlesnake silhouette.
-- **Strength note (no change):** Rattlesnake at 6 is high for a small-bodied snake, but "strength =
-  danger/venom" is a defensible reading here. Leaving it.
+- **Strength note:** Rattlesnake now begins at 0 and grows with each shuffle.
 
 ### Deck 3 — Colony Food Swarm
 Excellent eusocial flavor, and a genuinely nice touch: **wingless ants stay grounded (no Flight)

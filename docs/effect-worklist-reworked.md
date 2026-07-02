@@ -24,11 +24,13 @@ card lands). Binding rulings: README decisions **A–J** + `keywords.md`.
    + Σ counters + Σ anthems`, clamped ≥0, evaluated live.
    - *Anthems* ("**has** +X"): Raksha, Vesper, Guard Hornet, Lobo, African Wild Dog, Verminus.
    - *Counters* ("**give** +X", stored on instance, incl. hand instances): Dhole, Clarion,
-     Red Wolf, Dingo, Bush Dog, Shuck's returned Canine.
+     Red Wolf, Dingo, Bush Dog, Shuck's returned Canine. Rattlesnake uses persistent
+     per-player/card growth so its shuffle gains apply in every zone.
    - `ON_GAIN_STRENGTH` fires only on counter grants (Fox, Bush Dog); once-per-turn + loop guard.
 2. **Food-event engine** — discrete `ON_DRAW` / `ON_SHUFFLE` / `ON_REMOVE` events (dec. F2/F9).
-   Triggers: Eon (any of the three → +1), Vulture (+2/remove), Rattlesnake (+5/shuffle),
-   Egg Eater (+10/Egg removed), Jackal (+3/adjacent removal). Shuffle = one event per card
+   Triggers: Eon (any of the three → +1 food), Vulture (+5 food/remove),
+   Rattlesnake (+1 strength/own shuffle, wherever it is), Egg Eater (+10/Egg removed),
+   Jackal (+3/adjacent removal). Shuffle = one event per card
    shuffled *into* the deck.
 3. **Apex Predator placement** (dec. D) — must land on an occupant; strictly-greater vs enemy,
    free on own; removes-instead-of-covers; can't target HQ; destroys Eggs/Landmarks.
@@ -81,7 +83,7 @@ dog (Canine, ≠self), queen_bee (a Worker), termite_queen (non-Queen Colony), p
 - **queen_honoria** — "whenever you play a Colony unit" → +5 (new `ON_PLAY` tribal trigger).
 - **falstaff** — "whenever you gain food, +3" → food rider (cf. old queen_bee rider; watch loops w/ Honoria).
 - **owl** — look at top 3, draw 1, shuffle the rest (top-N peek + per-card shuffle events).
-- **raven** — draw 2, then shuffle 2 back (shuffle events).
+- **raven** — draw 3, then shuffle 2 back (shuffle events).
 - **ember** — on-remove: shuffle self back to deck (remove fires, then shuffle → dec. F9).
 - **black_swan** — `ON_DRAW` (from hand): both players discard a random hand card (seeded; cf. `discard_random`).
 - **fathom / mouse / bird_egg / snake_egg / watering_hole** — filtered random draws (subsystem 6).

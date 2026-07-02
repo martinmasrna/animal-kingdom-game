@@ -143,11 +143,8 @@ def test_saved_game_opening_preserves_the_duplicate_setup():
     assert [a.card_id for a in chosen if isinstance(a, PlaceAction)] == [
         "guard_hornet", "guard_hornet",
     ]
-    assert all(
-        isinstance(a, PlaceAction)
-        and a.crossroad in s.game_map.hq_front("A")
-        for a in chosen
-    )
+    assert all(isinstance(a, PlaceAction) for a in chosen)
+    assert all(a.crossroad not in s.game_map.hq_front("B") for a in chosen)
 
 
 def test_prefers_drawing_over_a_doomed_placement():

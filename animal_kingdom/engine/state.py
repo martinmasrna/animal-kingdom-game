@@ -120,6 +120,7 @@ class StateView:
     opponent_deck_count: int
     remove_pile: tuple[str, ...]
     food: Mapping[str, int]
+    card_strength_counters: Mapping[str, Mapping[str, int]]
     pending: Optional[Mapping[str, Any]]
     result: Optional[Result]
 
@@ -165,6 +166,7 @@ class GameState:
         pending: Optional[dict] = None,
         scheduled: Optional[list[dict]] = None,
         turn_flags: Optional[dict] = None,
+        card_strength_counters: Optional[dict[str, dict[str, int]]] = None,
         result: Optional[Result] = None,
     ):
         self.game_map = game_map
@@ -189,6 +191,10 @@ class GameState:
         self.pending = pending                                   # current choice awaiting an action
         self.scheduled = scheduled if scheduled is not None else []  # delayed effects (Egg/Bear/Rabbit)
         self.turn_flags = turn_flags if turn_flags is not None else {}  # once-per-turn trigger flags
+        # Persistent per-player/card growth that applies in every zone (Rattlesnake).
+        self.card_strength_counters = (
+            card_strength_counters if card_strength_counters is not None else {"A": {}, "B": {}}
+        )
         self.result = result
 
     # --- instance ids ---
@@ -292,6 +298,7 @@ class GameState:
         new.pending = copy.deepcopy(self.pending)
         new.scheduled = copy.deepcopy(self.scheduled)
         new.turn_flags = copy.deepcopy(self.turn_flags)
+        new.card_strength_counters = copy.deepcopy(self.card_strength_counters)
         new.result = self.result  # Result is frozen/immutable - safe to share
         return new
 
@@ -314,6 +321,10 @@ class GameState:
             opponent_deck_count=len(self.decks[opp]),
             remove_pile=tuple(self.remove_pile),
             food=MappingProxyType(dict(self.food)),
+            card_strength_counters=MappingProxyType({
+                p: MappingProxyType(dict(counters))
+                for p, counters in self.card_strength_counters.items()
+            }),
             pending=MappingProxyType(copy.deepcopy(self.pending)) if self.pending else None,
             result=self.result,
         )
@@ -339,6 +350,7 @@ class GameState:
             "pending": copy.deepcopy(self.pending),
             "scheduled": copy.deepcopy(self.scheduled),
             "turn_flags": copy.deepcopy(self.turn_flags),
+            "card_strength_counters": copy.deepcopy(self.card_strength_counters),
             "result": self.result.to_dict() if self.result else None,
         }
 
@@ -377,6 +389,9 @@ class GameState:
             pending=copy.deepcopy(d.get("pending")),
             scheduled=copy.deepcopy(d.get("scheduled") or []),
             turn_flags=copy.deepcopy(d.get("turn_flags") or {}),
+            card_strength_counters=copy.deepcopy(
+                d.get("card_strength_counters") or {"A": {}, "B": {}}
+            ),
             result=Result.from_dict(d["result"]) if d["result"] else None,
         )
 

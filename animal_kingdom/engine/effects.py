@@ -282,10 +282,10 @@ def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True)
 #
 # Discrete events (decision F2/F9): one event per card drawn, shuffled-into-deck, or
 # removed. Board-top units react via on_draw_event / on_shuffle_event / on_remove_event
-# hooks (Eon/Vulture/Rattlesnake/Egg Eater/Jackal); a *drawn card* may also react to
-# itself via on_draw (Black Swan). Reactors resolve immediately (they only gain food /
-# discard), so no extra stack steps and no re-entrancy in this stage. state.py stays free
-# of effect imports - these wrappers sit above the card-movement primitives on GameState.
+# hooks (Eon/Vulture/Egg Eater/Jackal); Rattlesnake's shuffle growth applies in every
+# zone; a *drawn card* may also react to itself via on_draw (Black Swan). Reactors resolve
+# immediately, so no extra stack steps and no re-entrancy in this stage. state.py stays
+# free of effect imports - these wrappers sit above the card-movement primitives.
 
 def _fire_event(state, hook_name: str, event: dict) -> None:
     """Dispatch one event to every board-top unit that reacts to it (deterministic order)."""
@@ -294,6 +294,8 @@ def _fire_event(state, hook_name: str, event: dict) -> None:
         hook = _hook(state, top.card_id, hook_name)
         if hook:
             hook(state, top, cr, event)
+    if hook_name == "on_shuffle_event":
+        _rattlesnake_shuffle_event(state, event)
 
 
 def _fire_remove_event(state, card_id: str, owner: str, cr, by_player=None, by_card=None) -> None:
@@ -504,14 +506,28 @@ def _op_egg_hatch(state, step):
 
 def _op_raven_dig(state, step):
     player = step["player"]
-    drawn = draw_cards(state, player, 2)            # draw 2 (fires ON_DRAW), then...
-    shuffled = []
-    for inst in drawn:                              # ...shuffle those 2 back (fires ON_SHUFFLE)
-        if inst in state.hands[player]:             # a drawn card may have been discarded (Black Swan)
+    if "remaining" not in step:
+        draw_cards(state, player, 3)                 # draw 3 (fires ON_DRAW), then...
+        step["remaining"] = min(2, len(state.hands[player]))
+        step["shuffled"] = []
+
+    if "choice" in step:
+        iid = step.pop("choice")
+        inst = next((u for u in state.hands[player] if u.iid == iid), None)
+        if inst is not None:
             state.hands[player].remove(inst)
-            shuffled.append(inst.card_id)
-    if shuffled:
-        shuffle_back(state, player, shuffled)
+            step["shuffled"].append(inst.card_id)
+            step["remaining"] -= 1
+
+    if step["remaining"] > 0 and state.hands[player]:
+        options = [u.iid for u in state.hands[player]]
+        if len(options) == 1:
+            step["choice"] = options[0]
+            return _op_raven_dig(state, step)
+        return PendingRequest("choice", player, options=options)
+
+    if step["shuffled"]:
+        shuffle_back(state, player, step["shuffled"])
     return None
 
 
@@ -855,14 +871,24 @@ def _eon_event(state, unit, cr, event):           # any draw/shuffle/remove -> +
         gain_food(state, unit.owner, state.config.eon_food)
 
 
-def _vulture_remove_event(state, unit, cr, event):  # any card removed -> +2
+def _vulture_remove_event(state, unit, cr, event):  # any card removed -> +5
     if not _capped(state, "cap_vulture", unit):
         gain_food(state, unit.owner, state.config.vulture_food)
 
 
-def _rattlesnake_shuffle_event(state, unit, cr, event):  # any card shuffled -> +5
-    if not _capped(state, "cap_rattlesnake", unit):
-        gain_food(state, unit.owner, state.config.rattlesnake_food)
+def _rattlesnake_shuffle_event(state, event):
+    """Each copy grows on its owner's shuffle, including copies still in the deck."""
+    player = event["player"]
+    has_rattlesnake = (
+        "rattlesnake" in state.starting_decks.get(player, ())
+        or "rattlesnake" in state.decks[player]
+        or any(u.card_id == "rattlesnake" for u in state.hands[player])
+        or any(u.card_id == "rattlesnake" and u.owner == player
+               for stack in state.board.values() for u in stack)
+    )
+    if has_rattlesnake:
+        counters = state.card_strength_counters.setdefault(player, {})
+        counters["rattlesnake"] = counters.get("rattlesnake", 0) + 1
 
 
 def _egg_eater_remove_event(state, unit, cr, event):     # an Egg removed -> +10
@@ -877,11 +903,11 @@ def _jackal_remove_event(state, unit, cr, event):        # an *adjacent* unit re
 
 
 def _black_swan_drawn(state, inst):
-    # Both players remove a random card from their hand (seeded; a remove, not a Deathrattle).
-    for player in ("A", "B"):
-        hand = state.hands[player]
-        if hand:
-            remove_from_hand(state, player, state.rng.choice(hand))
+    # The opponent removes a random card (seeded; a remove, not a Deathrattle).
+    opponent = other_player(inst.owner)
+    hand = state.hands[opponent]
+    if hand:
+        remove_from_hand(state, opponent, state.rng.choice(hand))
 
 
 def _owl_place(state, unit, cr):
@@ -1426,7 +1452,6 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "eon": {"on_draw_event": _eon_event, "on_shuffle_event": _eon_event,
             "on_remove_event": _eon_event},
     "vulture": {"on_remove_event": _vulture_remove_event},
-    "rattlesnake": {"on_shuffle_event": _rattlesnake_shuffle_event},
     "egg_eater": {"on_remove_event": _egg_eater_remove_event},
     "black_swan": {"on_draw": _black_swan_drawn},
     "owl": {"on_place": _owl_place},

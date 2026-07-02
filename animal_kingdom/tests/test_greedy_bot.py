@@ -133,22 +133,45 @@ def test_region_progress_is_nonlinear_and_symmetric():
 
 
 def test_standing_in_front_of_enemy_hq_is_valued():
-    # Isolate the HQ-threat term (region-corner coverage otherwise confounds positions).
+    # Isolate the HQ-threat term: the front unit is connected all the way from A's HQ.
     only_hq = GreedyWeights(food_progress=0, food_proximity=0, board_presence=0,
-                            connection=0, region_control=0, card_economy=0)
+                            connection=0, region_control=0, own_hq_threat=0,
+                            card_economy=0, effect_readiness=0)
     threat = make_state()
-    put(threat, "4,2", "lion", "A")          # in B's HQ front
+    for cr in ("1,2", "2,2", "3,2", "4,2"):
+        put(threat, cr, "lion", "A")
     midboard = make_state()
-    put(midboard, "2,2", "lion", "A")        # central, no HQ pressure
+    for cr in ("1,2", "2,2", "3,2"):
+        put(midboard, cr, "lion", "A")
     assert evaluate(threat, "A", only_hq) > evaluate(midboard, "A", only_hq)
+
+
+def test_isolated_flight_unit_is_not_an_hq_threat():
+    only_hq = GreedyWeights(food_progress=0, food_proximity=0, board_presence=0,
+                            connection=0, region_control=0, own_hq_threat=0,
+                            card_economy=0, effect_readiness=0)
+    isolated = make_state()
+    put(isolated, "4,2", "eagle", "A")
+    assert evaluate(isolated, "A", only_hq) == evaluate(make_state(), "A", only_hq)
 
 
 def test_enemy_in_front_of_own_hq_is_penalised():
     only_hq = GreedyWeights(food_progress=0, food_proximity=0, board_presence=0,
-                            connection=0, region_control=0, card_economy=0)
+                            connection=0, region_control=0, enemy_hq_threat=0,
+                            card_economy=0, effect_readiness=0)
     under_threat = make_state()
-    put(under_threat, "1,2", "lion", "B")    # B sitting in A's HQ front
+    for cr in ("4,2", "3,2", "2,2", "1,2"):
+        put(under_threat, cr, "lion", "B")
     assert evaluate(under_threat, "A", only_hq) < 0
+
+
+def test_isolated_enemy_flight_unit_is_not_connected_hq_danger():
+    only_hq = GreedyWeights(food_progress=0, food_proximity=0, board_presence=0,
+                            connection=0, region_control=0, enemy_hq_threat=0,
+                            card_economy=0, effect_readiness=0)
+    isolated = make_state()
+    put(isolated, "1,2", "eagle", "B")
+    assert evaluate(isolated, "A", only_hq) == evaluate(make_state(), "A", only_hq)
 
 
 def test_terminal_win_and_loss_are_decisive():
