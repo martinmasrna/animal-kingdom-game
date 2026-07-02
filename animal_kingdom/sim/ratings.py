@@ -1231,4 +1231,11 @@ def main(argv: Sequence[str] | None = None) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    try:
+        main(sys.argv[1:])
+    except KeyboardInterrupt:
+        # Ctrl-C during a long calibration is a normal stop, not a crash: the run loop has
+        # already terminated the worker pool and the completed blocks are checkpointed. Exit
+        # 130 (128 + SIGINT) like any shell-interrupted process, but without dumping the
+        # KeyboardInterrupt traceback that an uncaught interrupt would print.
+        raise SystemExit(130)
