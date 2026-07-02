@@ -15,10 +15,9 @@ the opponent. The two differ only in what they do at the turn boundary:
 keeps the search honest (worlds indistinguishable to `me` must pick the same action, and may
 diverge only after an observable event such as drawing a different card), beam pruning with
 the reserved tactical candidates, the hard next-turn-HQ-loss filter, wasted-battlecry penalty
-accumulation, and the projected-readiness planning eval. The three behaviours that differ are
-isolated as override hooks (`_score_final_line`, `_use_reply_comparison`/`_reply_candidates`,
-`_resolve_opponent_subchoice`, `_score_candidate_group`); the base implementations are exactly
-TurnBot's, so RefereeBot is expressed purely as overrides of them.
+accumulation, and the projected-readiness planning eval. Narrow hooks let RefereeBot add
+opponent-reply scoring, staged root selection, diagnostics, and contingent-plan collection;
+the base implementations remain TurnBot's behavior.
 
 Hidden-information honesty holds by construction: nothing is ever searched on the true state -
 only on determinized worlds - and every decision is taken once per indistinguishable group of
@@ -88,26 +87,46 @@ class TurnSearcher(Bot):
                   for _ in range(self.determinizations)]
         legal = self._safe_actions(worlds[0], legal, me)
         candidates = self._beam(worlds[0], legal, me)
+        candidates = self._select_root_candidates(worlds, candidates, state, me)
 
         best_score = -math.inf
         best: list[Action] = []
+        root_scores: list[tuple[Action, float]] = []
         for action in candidates:
-            branches = []
-            for world in worlds:
-                nxt = world.clone()
-                rules.apply_action(nxt, action)
-                penalty = (self.weights.wasted_battlecry
-                           if _battlecry_fizzled(world, nxt, me, action) else 0.0)
-                branches.append((nxt, penalty))
-            if state.current == me:
-                branches = self._complete_own_turn(branches, me, guard=0)
+            self._begin_root_candidate(action)
+            branches = self._branches_after_action(
+                worlds, action, me, complete_turn=(state.current == me))
             score = self._score_final_line(branches, me)
+            self._end_root_candidate(action)
+            root_scores.append((action, score))
             if score > best_score:
                 best_score, best = score, [action]
             elif score == best_score:
                 best.append(action)
+        self._record_root_scores(root_scores)
         # `legal` is already deterministically ordered; RNG only splits exact ties.
-        return best[0] if len(best) == 1 else self.rng.choice(best)
+        chosen = best[0] if len(best) == 1 else self.rng.choice(best)
+        self._record_chosen_root(chosen)
+        return chosen
+
+    def _branches_after_action(
+        self,
+        worlds: Sequence[GameState],
+        action: Action,
+        me: str,
+        *,
+        complete_turn: bool,
+    ) -> list[tuple[GameState, float]]:
+        branches = []
+        for world in worlds:
+            nxt = world.clone()
+            rules.apply_action(nxt, action)
+            penalty = (self.weights.wasted_battlecry
+                       if _battlecry_fizzled(world, nxt, me, action) else 0.0)
+            branches.append((nxt, penalty))
+        if complete_turn:
+            return self._complete_own_turn(branches, me, guard=0)
+        return branches
 
     # ------------------------------------------------------------- own-turn completion
 
@@ -163,6 +182,7 @@ class TurnSearcher(Bot):
                 if compare:
                     candidates = self._reply_candidates(representative, candidates, me)
                 best_score = -math.inf
+                best_action: Optional[Action] = None
                 chosen_group = []
                 for action in candidates:
                     next_group = []
@@ -177,11 +197,45 @@ class TurnSearcher(Bot):
                     score = self._score_candidate_group(candidate_group, me, compare)
                     if score > best_score:
                         best_score = score
+                        best_action = action
                         chosen_group = candidate_group
+                if best_action is not None:
+                    self._record_planned_action(
+                        self._observation_key(representative, me),
+                        best_action,
+                    )
             completed.extend(chosen_group)
         return completed
 
     # --------------------------------------------------------------- overridable hooks
+
+    def _select_root_candidates(
+        self,
+        worlds: list[GameState],
+        candidates: list[Action],
+        state: GameState,
+        me: str,
+    ) -> list[Action]:
+        """Optional second-stage root pruning after the generic tactical beam."""
+        return candidates
+
+    def _record_root_scores(
+        self,
+        scores: list[tuple[Action, float]],
+    ) -> None:
+        """Optional search diagnostics after every retained root has been scored."""
+
+    def _begin_root_candidate(self, action: Action) -> None:
+        """Optional hook for collecting a candidate's contingent continuation."""
+
+    def _end_root_candidate(self, action: Action) -> None:
+        """Optional hook paired with :meth:`_begin_root_candidate`."""
+
+    def _record_planned_action(self, observation: tuple, action: Action) -> None:
+        """Optional hook for retaining an information-set-safe continuation."""
+
+    def _record_chosen_root(self, action: Action) -> None:
+        """Optional hook after root tie-breaking identifies the real action."""
 
     def _score_final_line(
         self,

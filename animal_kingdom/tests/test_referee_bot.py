@@ -34,8 +34,10 @@ def test_takes_lethal_hq_capture():
 
     legal = rules.legal_actions(s)
     assert PlaceAction("lion", ("hq", "B")) in legal
-    chosen = small_referee().choose(s.view_for("A"), legal, s)
+    bot = small_referee()
+    chosen = bot.choose(s.view_for("A"), legal, s)
     assert chosen == PlaceAction("lion", ("hq", "B"))
+    assert bot.last_search_stats["reply_world_rollouts"] == 0
 
 
 def test_blocks_imminent_hq_threat_from_the_adversarial_reply():
@@ -92,6 +94,7 @@ def test_plans_draw_then_queen_then_king_as_one_turn():
 
     queen = bot.choose(s.view_for("A"), rules.legal_actions(s), s)
     assert isinstance(queen, PlaceAction) and queen.card_id == "termite_queen"
+    assert bot.last_search_stats["plan_reused"] == 1
     rules.apply_action(s, queen)
     assert any(
         isinstance(a, PlaceAction) and a.card_id == "termite_king"
@@ -187,12 +190,61 @@ def test_choose_is_deterministic():
     assert a1 == a2
 
 
+def test_staged_search_reduces_reply_rollouts_on_a_fixed_position():
+    s = new_game(
+        load_premade_deck("ramp"),
+        load_premade_deck("aggro_hq_rush"),
+        seed=3,
+        map_id="map_b",
+        config=Config.default().sweep(actions_per_turn=2, draw_action_count=1),
+    )
+    actor = s.player_to_act()
+    legal = rules.legal_actions(s)
+    legacy = RefereeBot(seed=0, determinizations=2, beam_width=4, staged=False)
+    staged = RefereeBot(seed=0, determinizations=2, beam_width=4)
+
+    legacy_action = legacy.choose(s.view_for(actor), legal, s)
+    staged_action = staged.choose(s.view_for(actor), legal, s)
+
+    assert staged_action == legacy_action
+    assert (
+        staged.last_search_stats["reply_world_rollouts"]
+        < legacy.last_search_stats["reply_world_rollouts"]
+    )
+
+
+def test_node_budget_falls_back_deterministically():
+    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1)
+    s = make_state(
+        current="A",
+        hands={"A": ["nurse_bumblebee", "queen_bee"]},
+        decks={"A": ["worker_wasp"], "B": ["mouse"] * 4},
+        config=config,
+    )
+    for cr in ("1,1", "1,2", "1,3", "2,1", "2,2"):
+        put(s, cr, "guard_hornet", "A")
+    legal = rules.legal_actions(s)
+    first = RefereeBot(
+        seed=4, determinizations=2, beam_width=4, max_search_nodes=1)
+    second = RefereeBot(
+        seed=4, determinizations=2, beam_width=4, max_search_nodes=1)
+
+    action = first.choose(s.view_for("A"), legal, s)
+    assert action == second.choose(s.view_for("A"), legal, s)
+    assert action in legal
+    assert first.last_search_stats["budget_fallbacks"] > 0
+
+
 def test_referee_ignores_hidden_information():
     # Two states identical in everything A can see; B's hand/deck split and A's own
-    # deck order differ. An honest bot must choose identically.
+    # deck order differ. An honest bot must choose identically, including when v2
+    # reuses the information-set plan at the second decision of a two-action turn.
+    config = Config.default().sweep(actions_per_turn=2, draw_action_count=0)
+
     def position(b_hand, b_deck, a_deck):
         s = make_state(current="A", hands={"A": ["lion", "rat"]},
-                       decks={"A": list(a_deck), "B": list(b_deck)})
+                       decks={"A": list(a_deck), "B": list(b_deck)},
+                       config=config)
         for card_id in b_hand:
             s.add_to_hand("B", card_id)
         put(s, "2,2", "mouse", "B")
@@ -207,9 +259,21 @@ def test_referee_ignores_hidden_information():
     legal1 = rules.legal_actions(s1)
     legal2 = rules.legal_actions(s2)
     assert legal1 == legal2
-    a1 = small_referee(seed=0).choose(s1.view_for("A"), legal1, s1)
-    a2 = small_referee(seed=0).choose(s2.view_for("A"), legal2, s2)
+    bot1 = small_referee(seed=0)
+    bot2 = small_referee(seed=0)
+    a1 = bot1.choose(s1.view_for("A"), legal1, s1)
+    a2 = bot2.choose(s2.view_for("A"), legal2, s2)
     assert a1 == a2
+    rules.apply_action(s1, a1)
+    rules.apply_action(s2, a2)
+
+    legal1 = rules.legal_actions(s1)
+    legal2 = rules.legal_actions(s2)
+    assert legal1 == legal2
+    assert bot1.choose(s1.view_for("A"), legal1, s1) == bot2.choose(
+        s2.view_for("A"), legal2, s2)
+    assert bot1.last_search_stats["plan_reused"] == 1
+    assert bot2.last_search_stats["plan_reused"] == 1
 
 
 # ----------------------------------------------------------------- short circuits

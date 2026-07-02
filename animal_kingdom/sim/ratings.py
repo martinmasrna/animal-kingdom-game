@@ -47,6 +47,9 @@ from .runner import (
     LOOKAHEAD_DEPTH,
     REFEREE_BEAM_WIDTH,
     REFEREE_DETERMINIZATIONS,
+    REFEREE_MAX_SEARCH_NODES,
+    REFEREE_REPLY_WIDTH,
+    REFEREE_ROOT_WIDTH,
     TURN_BEAM_WIDTH,
     TURN_DETERMINIZATIONS,
     GameRecord,
@@ -656,6 +659,12 @@ def build_provenance(
         "referee": {
             "determinizations": REFEREE_DETERMINIZATIONS,
             "beam_width": REFEREE_BEAM_WIDTH,
+            "staged": True,
+            "root_width": REFEREE_ROOT_WIDTH,
+            "reply_width": REFEREE_REPLY_WIDTH,
+            "boundary_reply_only": False,
+            "max_search_nodes": REFEREE_MAX_SEARCH_NODES,
+            "reuse_reply_scores": False,
         },
     }
     pilot_pairs = len(tuple(combinations(pilots, 2)))

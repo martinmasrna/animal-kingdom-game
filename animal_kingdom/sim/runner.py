@@ -66,10 +66,14 @@ LOOKAHEAD_BEAM_WIDTH = 8
 # RefereeBot (bots/referee_bot.py): the adversarial version the lookahead comment above
 # anticipates - opponent replies are played by a real GreedyBot out of *determinized*
 # hands, so lines get punished honestly. Cost is roughly (beam+1) x determinizations
-# opponent-turn rollouts per decision (~100-200x greedy): meant for low-volume
-# calibration runs (50-150 games/matchup), never the high-throughput balance sims.
+# opponent-turn rollouts per decision. Referee v2 stages that work behind a root screen,
+# reuses contingent plans, and caps pathological own-turn expansion; it remains the
+# calibration tier rather than the high-throughput balance pilot.
 REFEREE_DETERMINIZATIONS = 5
 REFEREE_BEAM_WIDTH = 8
+REFEREE_ROOT_WIDTH = 5
+REFEREE_REPLY_WIDTH = 4
+REFEREE_MAX_SEARCH_NODES = 1_000  # per retained root candidate
 
 # TurnBot (bots/turn_bot.py): the scalable middle tier. It completes its own turn with the
 # same determinized information-set search as the referee but stops at the turn boundary
@@ -96,7 +100,10 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None) -> B
     if kind == "referee":
         return RefereeBot(weights=weights, seed=seed,
                           determinizations=REFEREE_DETERMINIZATIONS,
-                          beam_width=REFEREE_BEAM_WIDTH)
+                          beam_width=REFEREE_BEAM_WIDTH,
+                          root_width=REFEREE_ROOT_WIDTH,
+                          reply_width=REFEREE_REPLY_WIDTH,
+                          max_search_nodes=REFEREE_MAX_SEARCH_NODES)
     if kind == "turn":
         return TurnBot(weights=weights, seed=seed,
                        determinizations=TURN_DETERMINIZATIONS,

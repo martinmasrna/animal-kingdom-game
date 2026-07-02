@@ -83,11 +83,20 @@ def test_make_bot_lookahead_kind_uses_deeper_search():
 
 def test_make_bot_referee_kind_uses_module_knobs():
     from animal_kingdom.bots.referee_bot import RefereeBot
-    from animal_kingdom.sim.runner import REFEREE_BEAM_WIDTH, REFEREE_DETERMINIZATIONS
+    from animal_kingdom.sim.runner import (
+        REFEREE_BEAM_WIDTH,
+        REFEREE_DETERMINIZATIONS,
+        REFEREE_MAX_SEARCH_NODES,
+        REFEREE_REPLY_WIDTH,
+        REFEREE_ROOT_WIDTH,
+    )
     bot = make_bot("referee", seed=1)
     assert isinstance(bot, RefereeBot)
     assert bot.determinizations == REFEREE_DETERMINIZATIONS
     assert bot.beam_width == REFEREE_BEAM_WIDTH
+    assert bot.root_width == REFEREE_ROOT_WIDTH
+    assert bot.reply_width == REFEREE_REPLY_WIDTH
+    assert bot.max_search_nodes == REFEREE_MAX_SEARCH_NODES
 
 
 def test_run_pairs_referee_parallel_matches_serial():
