@@ -88,7 +88,12 @@ cohort still needs to be run and interpreted before Balance is ungated.
 2. **TurnBot → default pilot?** Pass its acceptance run (200/opp) and clear the 10× throughput gate
    (lower determinizations/beam or a turn-depth cap; A/B speed-vs-winrate), then decide whether
    `./report` switches from `greedy,greedy` to `turn,turn`.
-3. **Known blind spot:** `region_control` over-values the row-2 spine, so neither bot contests
+3. **Referee speedup + calibration risk (new).** A validated node-budget cut
+   (`REFEREE_MAX_SEARCH_NODES` 1000→150, ~1.73× whole-game, ties shipped v2 on all 7 decks)
+   awaits an owner one-line sign-off. Separately, staged-v2 pilots **colony ~37% vs the legacy
+   oracle** (only food_otk was ever validated) — a calibration gap to triage. See
+   [`bots/backlog.md`](bots/backlog.md).
+4. **Known blind spot:** `region_control` over-values the row-2 spine, so neither bot contests
    row-1/3 as an HQ-rush lane.
 
 ## 5. CLI / App
