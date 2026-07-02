@@ -80,6 +80,23 @@ def test_make_bot_lookahead_kind_uses_deeper_search():
     assert bot.depth > 1
 
 
+def test_make_bot_referee_kind_uses_module_knobs():
+    from animal_kingdom.bots.referee_bot import RefereeBot
+    from animal_kingdom.sim.runner import REFEREE_BEAM_WIDTH, REFEREE_DETERMINIZATIONS
+    bot = make_bot("referee", seed=1)
+    assert isinstance(bot, RefereeBot)
+    assert bot.determinizations == REFEREE_DETERMINIZATIONS
+    assert bot.beam_width == REFEREE_BEAM_WIDTH
+
+
+def test_run_pairs_referee_parallel_matches_serial():
+    # The referee kind must survive the ProcessPoolExecutor round-trip like any other.
+    pairs = [("ramp", "aggro_hq_rush")]
+    serial = run_pairs(pairs, 1, base_seed=0, bots=("referee", "greedy"), jobs=1)
+    parallel = run_pairs(pairs, 1, base_seed=0, bots=("referee", "greedy"), jobs=2)
+    assert serial == parallel
+
+
 def test_run_matchup_threads_weights_and_stays_deterministic():
     custom = GreedyWeights(food_progress=99.0, food_proximity=0.0, board_presence=0.0,
                            connection=0.0, region_control=0.0, enemy_hq_threat=0.0,

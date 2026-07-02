@@ -46,6 +46,27 @@ Caveat carried from `metrics.GREEDY_CAVEAT`: the bot is 1-ply greedy and underpl
 combo/delayed-effect decks, so treat anything here as a *signal to investigate*, not final
 balance truth, until sim quality is closer to competent human play.
 
+- [ ] **RefereeBot (M5, 2026-07-01) shipped and gauntlet-validated; first calibration pass
+  says most greedy matchup verdicts hold, with `food_otk` the main suspect.** The referee
+  (`bots/referee_bot.py` + `bots/determinize.py`, kind `referee`) fixes the failed own-line
+  lookahead by playing the opponent's reply turn with a real GreedyBot out of *determinized*
+  hands (K=5 worlds sampled from public info, never the real hidden state - honesty is
+  regression-tested). Validation at 150 games/opponent vs the greedy-piloted pool: piloting
+  the same deck, referee > greedy by **ramp +6.0%** (82.1→88.1), **aggro_hq_rush +12.7%**
+  (33.6→46.3), **egg_control +5.0%** (41.0→46.0) - the biggest gain on exactly the deck the
+  hold-cards/sequencing findings below predicted. Calibration diff (50-game referee-vs-referee
+  round-robin, `results/referee_rr_50/`, vs the 500-game greedy matrix): 19 of 21 matchups
+  move ≤10 points, so the greedy matrix is broadly usable; flagged >15 points (both at the
+  edge of the 50-game ±14% CI - re-run at 150+ before acting): `aggro_hq_rush vs food_otk`
+  50.2→68.0 and `egg_control vs food_otk` 69.0→84.0 - both say **`food_otk` gets worse under
+  competent adversarial play** (its setup turns get punished), consistent with GREEDY_CAVEAT
+  overrating combo under passive piloting. Notable non-movers: `cats_midrange` stays dominant
+  (its row-2 rush is not a piloting artifact at this search depth), and
+  `aggro_hq_rush vs cats_midrange` stays ~6% even referee-piloted - the human-playtest
+  contradiction below is *not* resolved by one reply turn of adversarial search (the human
+  wins came from multi-turn disruption sequencing the referee still can't see; deeper horizon
+  is the knob to try). Referee knobs: `runner.REFEREE_DETERMINIZATIONS`/`REFEREE_BEAM_WIDTH`.
+
 - [ ] **Colony Food Swarm loses to board-presence decks before its engine can turn on
   (2026-07-01, real card-balance signal, not a bot-piloting artifact).** 150-game round-robin:
   overall win rate 23.1% (worst of the 7 decks), driven almost entirely by two matchups that
