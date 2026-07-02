@@ -4,9 +4,11 @@ The fitted Bradley--Terry model separates three effects for competitor ``(pilot,
 
     strength(pilot, deck) = pilot + deck + pilot:deck interaction
 
-and adds a signed first-player term to the log-odds of seat A winning.  RandomBot is fixed
-at zero, deck effects sum to zero, and interaction rows and columns sum to zero.  Those
+and adds a signed first-player term to the log-odds of seat A winning. RandomBot is fixed
+at zero, deck effects sum to zero, and interaction rows and columns sum to zero. Those
 constraints make the pilot term interpretable instead of rating opaque pilot/deck pairs.
+Long simulation runs checkpoint complete paired blocks and resume only when their full
+provenance matches.
 
 This module is analysis-tier: NumPy and SciPy are optional project dependencies and are
 never imported by ``engine/`` or ``bots/``.
@@ -21,11 +23,12 @@ import json
 import os
 import sys
 import time
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from itertools import combinations
 from pathlib import Path
 from statistics import NormalDist
-from typing import Any, Optional, Sequence
+from typing import Any, Callable, Optional, Sequence
 
 from .. import __version__
 from ..bots.greedy_bot import GreedyBot
@@ -42,6 +45,7 @@ from .runner import (
     REFEREE_DETERMINIZATIONS,
     TURN_BEAM_WIDTH,
     TURN_DETERMINIZATIONS,
+    GameRecord,
     MatchSpec,
     run_specs,
 )
@@ -55,6 +59,7 @@ DEFAULT_BOOTSTRAP_SEED = 0xA11CE
 DEFAULT_RIDGE = 0.1
 DEFAULT_CONFIG = "animal_kingdom/data/two_action_config.json"
 MIN_GAMES_PER_CONFIG = 200
+DEFAULT_CHECKPOINT_BLOCKS = 100
 
 
 class IdentifiabilityError(ValueError):
@@ -533,18 +538,25 @@ def generate_rating_dataset(
     )
     records = run_specs(specs, config=config, jobs=jobs)
     return [
-        RatingGame(
-            pilot_a=meta[0],
-            deck_a=meta[1],
-            pilot_b=meta[2],
-            deck_b=meta[3],
-            seed=record.seed,
-            first_player=record.first_player,
-            winner=record.winner,
-            pair_id=meta[4],
-        )
+        _rating_game(meta, record)
         for meta, record in zip(metadata, records)
     ]
+
+
+def _rating_game(
+    metadata: tuple[str, str, str, str, str],
+    record: GameRecord,
+) -> RatingGame:
+    return RatingGame(
+        pilot_a=metadata[0],
+        deck_a=metadata[1],
+        pilot_b=metadata[2],
+        deck_b=metadata[3],
+        seed=record.seed,
+        first_player=record.first_player,
+        winner=record.winner,
+        pair_id=metadata[4],
+    )
 
 
 def _source_hashes(*classes: type) -> dict[str, str]:
@@ -606,7 +618,7 @@ def build_provenance(
     pilot_pairs = len(tuple(combinations(pilots, 2)))
     paired_blocks = pilot_pairs * len(decks) * len(decks) * games_per_config
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "animal_kingdom_version": __version__,
         "pilots": list(pilots),
         "decks": list(decks),
@@ -647,6 +659,32 @@ def write_dataset(
             ) + "\n")
 
 
+def _read_dataset_record(
+    raw: dict[str, Any],
+    *,
+    path: os.PathLike[str] | str,
+    line_number: int,
+    games: list[RatingGame],
+) -> Optional[dict[str, Any]]:
+    record_type = raw.get("type")
+    if record_type == "meta":
+        return dict(raw["meta"])
+    if record_type == "game":
+        games.append(RatingGame.from_dict(raw))
+        return None
+    if record_type == "pair":
+        pair = [RatingGame.from_dict(game) for game in raw.get("games", ())]
+        if len(pair) != 2:
+            raise ValueError(f"{path}:{line_number}: paired block must contain two games")
+        if pair[0].pair_id != pair[1].pair_id:
+            raise ValueError(f"{path}:{line_number}: paired block IDs do not match")
+        if raw.get("pair_id") != pair[0].pair_id:
+            raise ValueError(f"{path}:{line_number}: paired block header ID does not match")
+        games.extend(pair)
+        return None
+    raise ValueError(f"{path}:{line_number}: unknown dataset record type")
+
+
 def load_dataset(
     path: os.PathLike[str] | str,
 ) -> tuple[list[RatingGame], dict[str, Any]]:
@@ -655,13 +693,286 @@ def load_dataset(
     with open(path) as handle:
         for line_number, line in enumerate(handle, start=1):
             raw = json.loads(line)
-            if raw.get("type") == "meta":
-                provenance = dict(raw["meta"])
-            elif raw.get("type") == "game":
-                games.append(RatingGame.from_dict(raw))
-            else:
-                raise ValueError(f"{path}:{line_number}: unknown dataset record type")
+            meta = _read_dataset_record(
+                raw, path=path, line_number=line_number, games=games
+            )
+            if meta is not None:
+                if provenance:
+                    raise ValueError(f"{path}:{line_number}: duplicate provenance header")
+                provenance = meta
     return games, provenance
+
+
+def _load_checkpoint(
+    path: os.PathLike[str] | str,
+) -> tuple[list[RatingGame], dict[str, Any]]:
+    """Load a checkpoint, discarding only a crash-truncated final JSON line."""
+    games: list[RatingGame] = []
+    provenance: dict[str, Any] = {}
+    with open(path, "rb+") as handle:
+        line_number = 0
+        while True:
+            line_start = handle.tell()
+            line = handle.readline()
+            if not line:
+                break
+            line_number += 1
+            try:
+                raw = json.loads(line)
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                # A flush/fsync makes completed pair lines durable. The only recoverable
+                # corruption is therefore an unterminated final line from a killed write.
+                if line.endswith(b"\n") or handle.read(1):
+                    raise ValueError(
+                        f"{path}:{line_number}: corrupt checkpoint record"
+                    ) from None
+                handle.seek(line_start)
+                handle.truncate()
+                handle.flush()
+                os.fsync(handle.fileno())
+                break
+            meta = _read_dataset_record(
+                raw, path=path, line_number=line_number, games=games
+            )
+            if meta is not None:
+                if provenance:
+                    raise ValueError(f"{path}:{line_number}: duplicate provenance header")
+                provenance = meta
+            # A valid last line may have reached disk before its newline. Normalize it so
+            # the next append cannot join two JSON objects.
+            if not line.endswith(b"\n"):
+                handle.seek(0, os.SEEK_END)
+                handle.write(b"\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+                break
+    return games, provenance
+
+
+def _atomic_initialize_checkpoint(
+    path: Path,
+    provenance: dict[str, Any],
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        with open(temporary, "w") as handle:
+            handle.write(
+                json.dumps({"type": "meta", "meta": provenance}, sort_keys=True) + "\n"
+            )
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def _append_checkpoint_pairs(
+    path: Path,
+    pairs: Sequence[tuple[RatingGame, RatingGame]],
+) -> None:
+    with open(path, "a") as handle:
+        for left, right in pairs:
+            payload = {
+                "type": "pair",
+                "pair_id": left.pair_id,
+                "games": [left.to_dict(), right.to_dict()],
+            }
+            handle.write(json.dumps(payload, sort_keys=True) + "\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def _game_schedule_key(game: RatingGame) -> tuple[Any, ...]:
+    return (
+        game.pair_id,
+        game.pilot_a,
+        game.deck_a,
+        game.pilot_b,
+        game.deck_b,
+        game.seed,
+    )
+
+
+def _expected_schedule_key(
+    spec: MatchSpec,
+    metadata: tuple[str, str, str, str, str],
+) -> tuple[Any, ...]:
+    return (
+        metadata[4],
+        metadata[0],
+        metadata[1],
+        metadata[2],
+        metadata[3],
+        spec.seed,
+    )
+
+
+@contextmanager
+def _checkpoint_lock(path: Path):
+    """Prevent two calibration processes from appending to one checkpoint."""
+    lock_path = path.with_name(path.name + ".lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(lock_path, "a+") as lock:
+        try:
+            import fcntl
+        except ImportError:  # pragma: no cover - advisory locks are Unix-only
+            yield
+            return
+        try:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise RuntimeError(
+                f"another process is already using checkpoint {path}"
+            ) from None
+        try:
+            yield
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
+
+def run_checkpointed_rating_dataset(
+    pilots: Sequence[str],
+    decks: Sequence[str],
+    games_per_config: int,
+    base_seed: int,
+    *,
+    dataset_path: os.PathLike[str] | str,
+    provenance: dict[str, Any],
+    config: Optional[Config] = None,
+    map_id: str = "map_b",
+    jobs: int = 1,
+    checkpoint_blocks: int = DEFAULT_CHECKPOINT_BLOCKS,
+    progress: Optional[Callable[[int, int], None]] = None,
+) -> list[RatingGame]:
+    """Run or resume a durable paired dataset in canonical schedule order.
+
+    Each checkpoint line contains both seat assignments for one paired seed. Completed
+    lines are flushed and fsynced after every batch. Existing games are accepted only when
+    their full provenance and schedule entries match this invocation exactly.
+    """
+    path = Path(dataset_path)
+    with _checkpoint_lock(path):
+        return _run_checkpointed_rating_dataset(
+            pilots,
+            decks,
+            games_per_config,
+            base_seed,
+            dataset_path=path,
+            provenance=provenance,
+            config=config,
+            map_id=map_id,
+            jobs=jobs,
+            checkpoint_blocks=checkpoint_blocks,
+            progress=progress,
+        )
+
+
+def _run_checkpointed_rating_dataset(
+    pilots: Sequence[str],
+    decks: Sequence[str],
+    games_per_config: int,
+    base_seed: int,
+    *,
+    dataset_path: os.PathLike[str] | str,
+    provenance: dict[str, Any],
+    config: Optional[Config],
+    map_id: str,
+    jobs: int,
+    checkpoint_blocks: int,
+    progress: Optional[Callable[[int, int], None]],
+) -> list[RatingGame]:
+    if checkpoint_blocks <= 0:
+        raise ValueError("checkpoint_blocks must be positive")
+    path = Path(dataset_path)
+    specs, metadata = build_paired_schedule(
+        pilots, decks, games_per_config, base_seed, map_id=map_id
+    )
+    expected = {
+        _expected_schedule_key(spec, meta): index
+        for index, (spec, meta) in enumerate(zip(specs, metadata))
+    }
+    total_blocks = len(specs) // 2
+
+    if path.exists():
+        saved_games, saved_provenance = _load_checkpoint(path)
+        if saved_provenance != provenance:
+            mismatches = sorted(
+                key for key in set(saved_provenance) | set(provenance)
+                if saved_provenance.get(key) != provenance.get(key)
+            )
+            raise ValueError(
+                "checkpoint provenance does not match this run"
+                + (f" (different: {', '.join(mismatches)})" if mismatches else "")
+            )
+    else:
+        _atomic_initialize_checkpoint(path, provenance)
+        saved_games = []
+
+    saved_by_key: dict[tuple[Any, ...], RatingGame] = {}
+    saved_per_pair: dict[str, int] = {}
+    for game in saved_games:
+        key = _game_schedule_key(game)
+        if key not in expected:
+            raise ValueError(
+                f"checkpoint game {game.pair_id!r} is not in the current seed schedule"
+            )
+        if key in saved_by_key:
+            raise ValueError(f"checkpoint contains duplicate game {game.pair_id!r}")
+        saved_by_key[key] = game
+        saved_per_pair[game.pair_id] = saved_per_pair.get(game.pair_id, 0) + 1
+    incomplete = sorted(
+        pair_id for pair_id, count in saved_per_pair.items() if count != 2
+    )
+    if incomplete:
+        raise ValueError(
+            "checkpoint contains incomplete paired block(s): "
+            + ", ".join(incomplete[:5])
+        )
+
+    missing_block_starts = [
+        index
+        for index in range(0, len(specs), 2)
+        if _expected_schedule_key(specs[index], metadata[index]) not in saved_by_key
+    ]
+    completed_blocks = total_blocks - len(missing_block_starts)
+    if progress is not None:
+        progress(completed_blocks, total_blocks)
+
+    for batch_start in range(0, len(missing_block_starts), checkpoint_blocks):
+        starts = missing_block_starts[batch_start:batch_start + checkpoint_blocks]
+        batch_specs = [
+            specs[index + offset]
+            for index in starts
+            for offset in (0, 1)
+        ]
+        records = run_specs(batch_specs, config=config, jobs=jobs)
+        completed_pairs = []
+        for pair_offset, schedule_index in enumerate(starts):
+            left = _rating_game(
+                metadata[schedule_index], records[pair_offset * 2]
+            )
+            right = _rating_game(
+                metadata[schedule_index + 1], records[pair_offset * 2 + 1]
+            )
+            if left.pair_id != right.pair_id or left.first_player != right.first_player:
+                raise RuntimeError("paired simulations returned inconsistent seed metadata")
+            completed_pairs.append((left, right))
+        _append_checkpoint_pairs(path, completed_pairs)
+        for pair in completed_pairs:
+            for game in pair:
+                saved_by_key[_game_schedule_key(game)] = game
+        completed_blocks += len(completed_pairs)
+        if progress is not None:
+            progress(completed_blocks, total_blocks)
+
+    # Checkpoint append order can differ after filling a gap. Canonical schedule order is
+    # required so a resumed fit and its bootstrap are byte-identical to an uninterrupted fit.
+    return [
+        saved_by_key[_expected_schedule_key(spec, meta)]
+        for spec, meta in zip(specs, metadata)
+    ]
 
 
 def format_result(result: RatingResult) -> str:
@@ -726,8 +1037,8 @@ def _parse_list(raw: str, *, allowed: Optional[set[str]] = None, flag: str) -> l
 def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description=(
-            "Generate paired pilot/deck cross-play and fit anchored factored "
-            "Bradley-Terry ratings."
+            "Generate resumable paired pilot/deck cross-play and fit anchored "
+            "factored Bradley-Terry ratings."
         )
     )
     parser.add_argument("--games", type=int, default=DEFAULT_GAMES_PER_CONFIG,
@@ -745,6 +1056,12 @@ def main(argv: Sequence[str] | None = None) -> None:
                         help="artifact directory")
     parser.add_argument("--dataset", default=None,
                         help="fit an existing dataset.jsonl instead of running simulations")
+    parser.add_argument(
+        "--checkpoint-blocks",
+        type=int,
+        default=DEFAULT_CHECKPOINT_BLOCKS,
+        help="paired blocks per durable checkpoint batch (default 100)",
+    )
     parser.add_argument("--ridge", type=float, default=DEFAULT_RIDGE)
     parser.add_argument("--bootstrap-resamples", type=int,
                         default=DEFAULT_BOOTSTRAP_RESAMPLES)
@@ -793,13 +1110,29 @@ def main(argv: Sequence[str] | None = None) -> None:
             f"map={args.map_id}, jobs={args.jobs}, seed={args.seed}...",
             file=sys.stderr,
         )
-        games = generate_rating_dataset(
-            pilots, decks, args.games, args.seed,
-            config=config, map_id=args.map_id, jobs=args.jobs,
-        )
         dataset_path = out_dir / "dataset.jsonl"
-        write_dataset(dataset_path, games, provenance)
-        print(f"Wrote raw dataset to {dataset_path}.", file=sys.stderr)
+        was_checkpoint = dataset_path.exists()
+
+        def _checkpoint_progress(done: int, block_total: int) -> None:
+            elapsed = time.monotonic() - start
+            verb = "Resuming" if was_checkpoint and done < block_total else "Checkpoint"
+            print(
+                f"  {verb}: {done}/{block_total} paired blocks "
+                f"({done / block_total:.1%}), {elapsed:.1f}s elapsed",
+                file=sys.stderr,
+            )
+
+        games = run_checkpointed_rating_dataset(
+            pilots, decks, args.games, args.seed,
+            dataset_path=dataset_path,
+            provenance=provenance,
+            config=config,
+            map_id=args.map_id,
+            jobs=args.jobs,
+            checkpoint_blocks=args.checkpoint_blocks,
+            progress=_checkpoint_progress,
+        )
+        print(f"Raw dataset complete at {dataset_path}.", file=sys.stderr)
 
     print(
         f"Fitting ratings with {args.bootstrap_resamples} paired bootstrap resamples...",

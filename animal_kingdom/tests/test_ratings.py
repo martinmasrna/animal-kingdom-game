@@ -7,12 +7,16 @@ from collections import Counter
 
 import pytest
 
+from animal_kingdom.sim import ratings as ratings_module
 from animal_kingdom.sim.ratings import (
     IdentifiabilityError,
     RatingGame,
+    build_provenance,
     build_paired_schedule,
     fit_ratings,
     generate_rating_dataset,
+    load_dataset,
+    run_checkpointed_rating_dataset,
 )
 
 PILOT_TRUTH = {
@@ -189,3 +193,136 @@ def test_schedule_pairs_every_seed_with_complete_competitor_seat_swap():
             right.bot_b, right.deck_b, right.bot_a, right.deck_a
         )
         assert left_meta[4] == right_meta[4]
+
+
+def _checkpoint_provenance(games_per_config: int, seed: int) -> dict:
+    return build_provenance(
+        pilots=["random", "greedy"],
+        decks=["ramp", "egg_control"],
+        games_per_config=games_per_config,
+        base_seed=seed,
+        map_id="map_b",
+        config=None,
+        config_id="none",
+    )
+
+
+def test_interrupted_checkpoint_resumes_to_identical_dataset_and_fit(
+    tmp_path, monkeypatch,
+):
+    path = tmp_path / "dataset.jsonl"
+    seed = 901
+    games_per_config = 3
+    provenance = _checkpoint_provenance(games_per_config, seed)
+    real_run_specs = ratings_module.run_specs
+    calls = 0
+
+    def interrupt_after_first_batch(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise KeyboardInterrupt
+        return real_run_specs(*args, **kwargs)
+
+    monkeypatch.setattr(ratings_module, "run_specs", interrupt_after_first_batch)
+    with pytest.raises(KeyboardInterrupt):
+        run_checkpointed_rating_dataset(
+            ["random", "greedy"],
+            ["ramp", "egg_control"],
+            games_per_config,
+            seed,
+            dataset_path=path,
+            provenance=provenance,
+            checkpoint_blocks=2,
+        )
+    saved, saved_provenance = load_dataset(path)
+    assert len(saved) == 4
+    assert saved_provenance == provenance
+
+    monkeypatch.setattr(ratings_module, "run_specs", real_run_specs)
+    resumed = run_checkpointed_rating_dataset(
+        ["random", "greedy"],
+        ["ramp", "egg_control"],
+        games_per_config,
+        seed,
+        dataset_path=path,
+        provenance=provenance,
+        checkpoint_blocks=2,
+    )
+    uninterrupted = generate_rating_dataset(
+        ["random", "greedy"],
+        ["ramp", "egg_control"],
+        games_per_config,
+        seed,
+    )
+    assert resumed == uninterrupted
+    assert fit_ratings(
+        resumed, bootstrap_resamples=5, bootstrap_seed=10
+    ) == fit_ratings(
+        uninterrupted, bootstrap_resamples=5, bootstrap_seed=10
+    )
+
+
+def test_resume_rejects_provenance_mismatch_before_running(tmp_path, monkeypatch):
+    path = tmp_path / "dataset.jsonl"
+    provenance = _checkpoint_provenance(1, 44)
+    run_checkpointed_rating_dataset(
+        ["random", "greedy"],
+        ["ramp", "egg_control"],
+        1,
+        44,
+        dataset_path=path,
+        provenance=provenance,
+        checkpoint_blocks=2,
+    )
+    mismatched = dict(provenance)
+    mismatched["map"] = "map_a"
+
+    def must_not_run(*args, **kwargs):
+        raise AssertionError("simulation ran before provenance validation")
+
+    monkeypatch.setattr(ratings_module, "run_specs", must_not_run)
+    with pytest.raises(ValueError, match=r"provenance.*different: map"):
+        run_checkpointed_rating_dataset(
+            ["random", "greedy"],
+            ["ramp", "egg_control"],
+            1,
+            44,
+            dataset_path=path,
+            provenance=mismatched,
+            checkpoint_blocks=2,
+        )
+
+
+def test_resume_discards_only_a_truncated_final_checkpoint_line(
+    tmp_path, monkeypatch,
+):
+    path = tmp_path / "dataset.jsonl"
+    provenance = _checkpoint_provenance(1, 55)
+    expected = run_checkpointed_rating_dataset(
+        ["random", "greedy"],
+        ["ramp", "egg_control"],
+        1,
+        55,
+        dataset_path=path,
+        provenance=provenance,
+        checkpoint_blocks=2,
+    )
+    with open(path, "ab") as handle:
+        handle.write(b'{"type":"pair","games":[')
+
+    def must_not_run(*args, **kwargs):
+        raise AssertionError("completed checkpoint unexpectedly reran games")
+
+    monkeypatch.setattr(ratings_module, "run_specs", must_not_run)
+    resumed = run_checkpointed_rating_dataset(
+        ["random", "greedy"],
+        ["ramp", "egg_control"],
+        1,
+        55,
+        dataset_path=path,
+        provenance=provenance,
+        checkpoint_blocks=2,
+    )
+    assert resumed == expected
+    assert path.read_bytes().endswith(b"\n")
