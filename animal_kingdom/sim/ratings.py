@@ -21,12 +21,14 @@ import hashlib
 import inspect
 import json
 import os
+import signal
 import sys
 import time
-from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from itertools import combinations
+from multiprocessing import TimeoutError as MultiprocessingTimeoutError
+from multiprocessing import get_context
 from pathlib import Path
 from statistics import NormalDist
 from typing import Any, Callable, Optional, Sequence
@@ -561,6 +563,16 @@ def _rating_game(
     )
 
 
+def _rating_worker_init() -> None:
+    """Let the parent process own Ctrl-C and terminate workers coherently."""
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+
+def _run_indexed_pair(payload):
+    schedule_index, pair, config = payload
+    return schedule_index, run_spec_pair(pair, config)
+
+
 def _source_hashes(*classes: type) -> dict[str, str]:
     hashes = {}
     for cls in classes:
@@ -983,37 +995,40 @@ def _run_checkpointed_rating_dataset(
                 ),
             )
     else:
-        # Keep a bounded queue so slow pairs do not block faster completions or cause all
-        # 58k futures to be materialized at once. A killed run loses fewer than one
-        # checkpoint buffer's completed pairs plus the small in-flight window.
-        starts = iter(missing_block_starts)
-        in_flight: dict[Any, int] = {}
-        window = max(jobs * 2, checkpoint_blocks)
-        with ProcessPoolExecutor(max_workers=jobs) as executor:
-            for schedule_index in starts:
-                future = executor.submit(
-                    run_spec_pair,
-                    (specs[schedule_index], specs[schedule_index + 1]),
-                    config,
-                )
-                in_flight[future] = schedule_index
-                if len(in_flight) >= window:
-                    break
-            while in_flight:
-                done, _ = wait(in_flight, return_when=FIRST_COMPLETED)
-                for future in done:
-                    schedule_index = in_flight.pop(future)
-                    complete_pair(schedule_index, future.result())
-                    try:
-                        next_index = next(starts)
-                    except StopIteration:
-                        continue
-                    next_future = executor.submit(
-                        run_spec_pair,
-                        (specs[next_index], specs[next_index + 1]),
-                        config,
-                    )
-                    in_flight[next_future] = next_index
+        # Workers ignore SIGINT so the parent alone handles Ctrl-C. multiprocessing.Pool
+        # exposes a real terminate operation; unlike ProcessPoolExecutor's context manager,
+        # it does not wait for a multi-minute Referee game before returning the terminal.
+        payloads = (
+            (
+                schedule_index,
+                (specs[schedule_index], specs[schedule_index + 1]),
+                config,
+            )
+            for schedule_index in missing_block_starts
+        )
+        pool = get_context().Pool(
+            processes=jobs,
+            initializer=_rating_worker_init,
+        )
+        try:
+            results = pool.imap_unordered(
+                _run_indexed_pair, payloads, chunksize=1
+            )
+            remaining = len(missing_block_starts)
+            while remaining:
+                try:
+                    schedule_index, pair_records = results.next(timeout=0.5)
+                except MultiprocessingTimeoutError:
+                    continue
+                complete_pair(schedule_index, pair_records)
+                remaining -= 1
+        except BaseException:
+            pool.terminate()
+            pool.join()
+            raise
+        else:
+            pool.close()
+            pool.join()
 
     if checkpoint_buffer:
         _append_checkpoint_pairs(path, checkpoint_buffer)

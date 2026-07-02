@@ -353,3 +353,45 @@ def test_streaming_parallel_checkpoint_matches_serial(tmp_path):
         checkpoint_blocks=2,
     )
     assert parallel == serial
+
+
+def test_keyboard_interrupt_terminates_worker_pool_immediately(
+    tmp_path, monkeypatch,
+):
+    lifecycle = []
+
+    class InterruptedResults:
+        def next(self, timeout):
+            raise KeyboardInterrupt
+
+    class FakePool:
+        def imap_unordered(self, function, payloads, chunksize):
+            return InterruptedResults()
+
+        def terminate(self):
+            lifecycle.append("terminate")
+
+        def join(self):
+            lifecycle.append("join")
+
+        def close(self):
+            lifecycle.append("close")
+
+    class FakeContext:
+        def Pool(self, **kwargs):
+            return FakePool()
+
+    monkeypatch.setattr(ratings_module, "get_context", lambda: FakeContext())
+    provenance = _checkpoint_provenance(1, 77)
+    with pytest.raises(KeyboardInterrupt):
+        run_checkpointed_rating_dataset(
+            ["random", "greedy"],
+            ["ramp", "egg_control"],
+            1,
+            77,
+            dataset_path=tmp_path / "interrupted.jsonl",
+            provenance=provenance,
+            jobs=2,
+            checkpoint_blocks=1,
+        )
+    assert lifecycle == ["terminate", "join"]

@@ -34,7 +34,8 @@ command after an interruption: it validates the saved provenance, skips complete
 and resumes the missing schedule. Each checkpoint record contains both seat assignments,
 so a crash cannot admit half a pair; a truncated final write is discarded safely. Paired
 blocks are saved in completion order and slow games do not hold up faster workers or
-checkpoints. Change the durability/progress interval with `--checkpoint-blocks N`. A
+checkpoints. `Ctrl-C` terminates the active worker pool promptly while retaining every
+flushed block. Change the durability/progress interval with `--checkpoint-blocks N`. A
 changed pilot version, config, map, seed, deck list, or sample size is rejected instead of
 being mixed into the existing dataset—use a different `--out` directory for a different
 experiment.
