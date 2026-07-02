@@ -391,6 +391,13 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
     enemy = other_player(player)
     enemy_hq = any(cr in occ for cr in gm.hq_front(enemy))  # HQ capture: connection only (not Flight)
 
+    # Connection legality depends only on (player, occ), never on the card, so the set of
+    # connection-legal crossroads is identical for every non-Flight/non-extra card. Compute it
+    # once instead of calling is_connected per (card x crossroad); Flight/extra bypasses layer
+    # on top per card below. (Byte-identical: `cr in connectable` == is_connected(player, cr).)
+    sorted_crossroads = sorted(gm.crossroads)
+    connectable = {cr for cr in sorted_crossroads if state.is_connected(player, cr, occ)}
+
     # One placement per distinct hand card id; covering uses the highest-counter copy (the
     # copy that would actually be played - see _take_from_hand).
     best: dict[str, "UnitInstance"] = {}
@@ -412,8 +419,8 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
         is_apex = "Apex Predator" in card.keywords
         flight = statics.ignores_connection(state, card_id)
         extra = statics.extra_placement_crossroads(state, card_id, player)
-        for cr in sorted(gm.crossroads):
-            if not (flight or cr in extra or state.is_connected(player, cr, occ)):
+        for cr in sorted_crossroads:
+            if not (flight or cr in connectable or cr in extra):
                 continue
             top = state.top_unit(cr)
             if is_apex:

@@ -45,6 +45,7 @@ from typing import Optional, Sequence
 
 from ..engine import rules
 from ..engine.actions import Action, DrawAction, PlaceAction
+from ..engine.effects import legal_placements
 from ..engine.state import GameState, StateView, other_player
 from ..engine.strength import effective_strength
 from .base import Bot
@@ -320,9 +321,13 @@ def _enabled_battlecry_count(state: GameState, player: str) -> int:
     }
     if not battlecries:
         return 0
+    # Only battlecry cards can enable a battlecry, so enumerate placements for just those
+    # cards (allowed_cards) instead of every hand card. At a top-level decision (guarded
+    # above) rules.legal_actions == [Draw?] + legal_placements(state, player), so filtering
+    # its battlecry PlaceActions is byte-identical to this restricted enumeration.
     placements = [
-        a for a in rules.legal_actions(state)
-        if isinstance(a, PlaceAction) and not a.is_hq_capture and a.card_id in battlecries
+        a for a in legal_placements(state, player, allowed_cards=battlecries)
+        if not a.is_hq_capture
     ]
     # Most Battlecry conditions are board-wide; target-sensitive ones care primarily about
     # landing on/adjacent to an enemy. Sample those tactical shapes plus one ordinary legal

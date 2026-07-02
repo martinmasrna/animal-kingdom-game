@@ -332,12 +332,21 @@ class TurnSearcher(Bot):
         score = self._clamped_eval(state, me)
         if state.result is not None or state.current == me:
             return score
-        projected = state.clone()
-        projected.current = me
-        projected.pending = None
-        projected.effect_stack = []
-        projected.actions_taken_this_turn = 0
-        readiness = _enabled_battlecry_count(projected, me)
+        # Readiness projection: _enabled_battlecry_count needs the position framed at my next
+        # top-level decision. It only *reads* the state (its own internal clones absorb the
+        # trial placements), so temporarily reframe these four fields and restore them rather
+        # than cloning the whole state - byte-identical, one fewer full clone per planning eval.
+        saved = (state.current, state.pending, state.effect_stack,
+                 state.actions_taken_this_turn)
+        state.current = me
+        state.pending = None
+        state.effect_stack = []
+        state.actions_taken_this_turn = 0
+        try:
+            readiness = _enabled_battlecry_count(state, me)
+        finally:
+            (state.current, state.pending, state.effect_stack,
+             state.actions_taken_this_turn) = saved
         return max(
             -_DECISIVE,
             min(_DECISIVE, score + self.weights.effect_readiness * readiness),
