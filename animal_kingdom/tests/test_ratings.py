@@ -214,17 +214,19 @@ def test_interrupted_checkpoint_resumes_to_identical_dataset_and_fit(
     seed = 901
     games_per_config = 3
     provenance = _checkpoint_provenance(games_per_config, seed)
-    real_run_specs = ratings_module.run_specs
+    real_run_pair = ratings_module.run_spec_pair
     calls = 0
 
-    def interrupt_after_first_batch(*args, **kwargs):
+    def interrupt_after_first_checkpoint(*args, **kwargs):
         nonlocal calls
         calls += 1
-        if calls == 2:
+        if calls == 3:
             raise KeyboardInterrupt
-        return real_run_specs(*args, **kwargs)
+        return real_run_pair(*args, **kwargs)
 
-    monkeypatch.setattr(ratings_module, "run_specs", interrupt_after_first_batch)
+    monkeypatch.setattr(
+        ratings_module, "run_spec_pair", interrupt_after_first_checkpoint
+    )
     with pytest.raises(KeyboardInterrupt):
         run_checkpointed_rating_dataset(
             ["random", "greedy"],
@@ -239,7 +241,7 @@ def test_interrupted_checkpoint_resumes_to_identical_dataset_and_fit(
     assert len(saved) == 4
     assert saved_provenance == provenance
 
-    monkeypatch.setattr(ratings_module, "run_specs", real_run_specs)
+    monkeypatch.setattr(ratings_module, "run_spec_pair", real_run_pair)
     resumed = run_checkpointed_rating_dataset(
         ["random", "greedy"],
         ["ramp", "egg_control"],
@@ -281,7 +283,7 @@ def test_resume_rejects_provenance_mismatch_before_running(tmp_path, monkeypatch
     def must_not_run(*args, **kwargs):
         raise AssertionError("simulation ran before provenance validation")
 
-    monkeypatch.setattr(ratings_module, "run_specs", must_not_run)
+    monkeypatch.setattr(ratings_module, "run_spec_pair", must_not_run)
     with pytest.raises(ValueError, match=r"provenance.*different: map"):
         run_checkpointed_rating_dataset(
             ["random", "greedy"],
@@ -314,7 +316,7 @@ def test_resume_discards_only_a_truncated_final_checkpoint_line(
     def must_not_run(*args, **kwargs):
         raise AssertionError("completed checkpoint unexpectedly reran games")
 
-    monkeypatch.setattr(ratings_module, "run_specs", must_not_run)
+    monkeypatch.setattr(ratings_module, "run_spec_pair", must_not_run)
     resumed = run_checkpointed_rating_dataset(
         ["random", "greedy"],
         ["ramp", "egg_control"],
@@ -326,3 +328,28 @@ def test_resume_discards_only_a_truncated_final_checkpoint_line(
     )
     assert resumed == expected
     assert path.read_bytes().endswith(b"\n")
+
+
+def test_streaming_parallel_checkpoint_matches_serial(tmp_path):
+    provenance = _checkpoint_provenance(1, 66)
+    serial = run_checkpointed_rating_dataset(
+        ["random", "greedy"],
+        ["ramp", "egg_control"],
+        1,
+        66,
+        dataset_path=tmp_path / "serial.jsonl",
+        provenance=provenance,
+        jobs=1,
+        checkpoint_blocks=2,
+    )
+    parallel = run_checkpointed_rating_dataset(
+        ["random", "greedy"],
+        ["ramp", "egg_control"],
+        1,
+        66,
+        dataset_path=tmp_path / "parallel.jsonl",
+        provenance=provenance,
+        jobs=2,
+        checkpoint_blocks=2,
+    )
+    assert parallel == serial

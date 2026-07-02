@@ -183,6 +183,14 @@ def run_specs(
         return list(ex.map(_run_spec, specs, [config] * len(specs)))
 
 
+def run_spec_pair(
+    specs: tuple[MatchSpec, MatchSpec],
+    config: Optional[Config] = None,
+) -> tuple[GameRecord, GameRecord]:
+    """Run both seat assignments for one paired seed in a single worker."""
+    return (_run_spec(specs[0], config), _run_spec(specs[1], config))
+
+
 def run_matchup(
     deck_a: str,
     deck_b: str,

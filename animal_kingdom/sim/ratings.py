@@ -23,6 +23,7 @@ import json
 import os
 import sys
 import time
+from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from itertools import combinations
@@ -47,6 +48,7 @@ from .runner import (
     TURN_DETERMINIZATIONS,
     GameRecord,
     MatchSpec,
+    run_spec_pair,
     run_specs,
 )
 
@@ -936,34 +938,90 @@ def _run_checkpointed_rating_dataset(
         for index in range(0, len(specs), 2)
         if _expected_schedule_key(specs[index], metadata[index]) not in saved_by_key
     ]
+    # The canonical schedule groups all repetitions of one deck configuration together.
+    # Execute one repetition across all configurations before the next, so a slow mirror
+    # cannot occupy every worker at startup. Final fitting order remains canonical below.
+    missing_block_starts.sort(
+        key=lambda index: (
+            int(metadata[index][4].partition(":")[2]),
+            int(metadata[index][4].partition(":")[0]),
+        )
+    )
     completed_blocks = total_blocks - len(missing_block_starts)
     if progress is not None:
         progress(completed_blocks, total_blocks)
 
-    for batch_start in range(0, len(missing_block_starts), checkpoint_blocks):
-        starts = missing_block_starts[batch_start:batch_start + checkpoint_blocks]
-        batch_specs = [
-            specs[index + offset]
-            for index in starts
-            for offset in (0, 1)
-        ]
-        records = run_specs(batch_specs, config=config, jobs=jobs)
-        completed_pairs = []
-        for pair_offset, schedule_index in enumerate(starts):
-            left = _rating_game(
-                metadata[schedule_index], records[pair_offset * 2]
-            )
-            right = _rating_game(
-                metadata[schedule_index + 1], records[pair_offset * 2 + 1]
-            )
-            if left.pair_id != right.pair_id or left.first_player != right.first_player:
-                raise RuntimeError("paired simulations returned inconsistent seed metadata")
-            completed_pairs.append((left, right))
-        _append_checkpoint_pairs(path, completed_pairs)
-        for pair in completed_pairs:
+    checkpoint_buffer: list[tuple[RatingGame, RatingGame]] = []
+
+    def complete_pair(
+        schedule_index: int,
+        records: tuple[GameRecord, GameRecord],
+    ) -> None:
+        nonlocal completed_blocks
+        left = _rating_game(metadata[schedule_index], records[0])
+        right = _rating_game(metadata[schedule_index + 1], records[1])
+        if left.pair_id != right.pair_id or left.first_player != right.first_player:
+            raise RuntimeError("paired simulations returned inconsistent seed metadata")
+        checkpoint_buffer.append((left, right))
+        if len(checkpoint_buffer) < checkpoint_blocks:
+            return
+        _append_checkpoint_pairs(path, checkpoint_buffer)
+        for pair in checkpoint_buffer:
             for game in pair:
                 saved_by_key[_game_schedule_key(game)] = game
-        completed_blocks += len(completed_pairs)
+        completed_blocks += len(checkpoint_buffer)
+        checkpoint_buffer.clear()
+        if progress is not None:
+            progress(completed_blocks, total_blocks)
+
+    if jobs <= 1:
+        for schedule_index in missing_block_starts:
+            complete_pair(
+                schedule_index,
+                run_spec_pair(
+                    (specs[schedule_index], specs[schedule_index + 1]), config
+                ),
+            )
+    else:
+        # Keep a bounded queue so slow pairs do not block faster completions or cause all
+        # 58k futures to be materialized at once. A killed run loses fewer than one
+        # checkpoint buffer's completed pairs plus the small in-flight window.
+        starts = iter(missing_block_starts)
+        in_flight: dict[Any, int] = {}
+        window = max(jobs * 2, checkpoint_blocks)
+        with ProcessPoolExecutor(max_workers=jobs) as executor:
+            for schedule_index in starts:
+                future = executor.submit(
+                    run_spec_pair,
+                    (specs[schedule_index], specs[schedule_index + 1]),
+                    config,
+                )
+                in_flight[future] = schedule_index
+                if len(in_flight) >= window:
+                    break
+            while in_flight:
+                done, _ = wait(in_flight, return_when=FIRST_COMPLETED)
+                for future in done:
+                    schedule_index = in_flight.pop(future)
+                    complete_pair(schedule_index, future.result())
+                    try:
+                        next_index = next(starts)
+                    except StopIteration:
+                        continue
+                    next_future = executor.submit(
+                        run_spec_pair,
+                        (specs[next_index], specs[next_index + 1]),
+                        config,
+                    )
+                    in_flight[next_future] = next_index
+
+    if checkpoint_buffer:
+        _append_checkpoint_pairs(path, checkpoint_buffer)
+        for pair in checkpoint_buffer:
+            for game in pair:
+                saved_by_key[_game_schedule_key(game)] = game
+        completed_blocks += len(checkpoint_buffer)
+        checkpoint_buffer.clear()
         if progress is not None:
             progress(completed_blocks, total_blocks)
 
