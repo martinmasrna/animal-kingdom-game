@@ -56,11 +56,18 @@ balance truth, until sim quality is closer to competent human play.
   (33.6→46.3), **egg_control +5.0%** (41.0→46.0) - the biggest gain on exactly the deck the
   hold-cards/sequencing findings below predicted. Calibration diff (50-game referee-vs-referee
   round-robin, `results/referee_rr_50/`, vs the 500-game greedy matrix): 19 of 21 matchups
-  move ≤10 points, so the greedy matrix is broadly usable; flagged >15 points (both at the
-  edge of the 50-game ±14% CI - re-run at 150+ before acting): `aggro_hq_rush vs food_otk`
-  50.2→68.0 and `egg_control vs food_otk` 69.0→84.0 - both say **`food_otk` gets worse under
-  competent adversarial play** (its setup turns get punished), consistent with GREEDY_CAVEAT
-  overrating combo under passive piloting. Notable non-movers: `cats_midrange` stays dominant
+  move ≤10 points, so the greedy matrix is broadly usable; flagged >15 points:
+  `aggro_hq_rush vs food_otk` 50.2→68.0 and `egg_control vs food_otk` 69.0→84.0.
+  **CONFIRMED at 150 games/matchup, independent seed (2026-07-02,
+  `results/referee_check_{aggro,egg}_food_otk/`)**: aggro_hq_rush 69.3% (greedy matrix said
+  50.2 - a +19.1 swing), egg_control 85.3% (vs 69.0, +16.3); both replicate the 50-game
+  numbers within ~1.3 points and sit far outside the 150-game ±8% CI. Verdict:
+  **`food_otk` is genuinely overrated by the greedy matrix** - under competent adversarial
+  play its setup turns get punished before the combo fires, consistent with GREEDY_CAVEAT
+  overrating combo under passive piloting, and consistent with the earlier human suspicion
+  (memory: food_otk flagged overrated). Treat food_otk's greedy-matrix numbers as inflated
+  when doing G/H tuning; a card-design look (cheaper protection or a faster kill window) is
+  the likely fix if the referee numbers hold after balance passes. Notable non-movers: `cats_midrange` stays dominant
   (its row-2 rush is not a piloting artifact at this search depth), and
   `aggro_hq_rush vs cats_midrange` stays ~6% even referee-piloted - the human-playtest
   contradiction below is *not* resolved by one reply turn of adversarial search (the human
