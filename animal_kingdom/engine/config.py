@@ -1,7 +1,7 @@
 """Tunable constants in one place (handoff §11; memory data-architecture-decision).
 
 These are deliberately *untuned placeholders* for the reworked pool (decisions G/H are a
-sim job - see todo.md). The whole point of the simulator is to sweep them together on one
+sim job - see docs/balance/backlog.md). The whole point of the simulator is to sweep them together on one
 shared food scale, so every magic number a card effect or rule depends on lives here -
 never hard-coded in effect logic. Card text is the source of the *defaults*; the sim
 re-derives the real values against `win_food` (100) and region output (data/maps.json).
@@ -22,7 +22,7 @@ class Config:
     # --- One-off food gains on placement (Battlecry "gain N food") ---
     squirrel_food: int = 12              # decision H: doubled 2026-07-02 - food_otk's guaranteed
                                           # one-off floor was ~40% of the v0 "accelerant reaches
-                                          # ~half of win_food" target; see docs/todo.md
+                                          # ~half of win_food" target; see docs/balance/backlog.md
     chipmunk_food_now: int = 10          # decision H: doubled, same reasoning
     chipmunk_food_later: int = 10        # paid at the start of the owner's next turn (doubled)
     flying_squirrel_food: int = 8        # decision H: doubled, same reasoning
@@ -88,7 +88,7 @@ class Config:
     scrooge_delay: int = 2              # turns until Scrooge's banked food returns
     scrooge_multiplier: int = 2         # banked food returns x this
 
-    # --- Once-per-turn caps (decision G; dials for the sim - see docs/todo.md for the
+    # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the
     # per-card default ruling and the data behind it) ---
     cap_queen_adira: bool = False
     cap_eon: bool = False
@@ -115,7 +115,7 @@ class Config:
 
     @staticmethod
     def default() -> "Config":
-        """The v0 placeholder constants for the reworked pool (untuned; see todo.md G/H)."""
+        """The v0 placeholder constants for the reworked pool (untuned; see docs/balance/backlog.md G/H)."""
         return Config()
 
     def sweep(self, **overrides) -> "Config":

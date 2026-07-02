@@ -6,9 +6,10 @@ bot-vs-bot games and measure whether the card pool and archetypes are balanced. 
 human/web UI is out of scope for now, but the engine is built as a pure,
 transport-agnostic library so a UI layer can drop on top later.
 
-Design source of truth lives in [`docs/`](docs/): `overview.md` (rules),
-`cards.md` (card pool), `maps.md` (Map A), `todo.md` (open design items). The build
-spec is `docs/handoff-engine.md`.
+Design source of truth lives in [`docs/`](docs/) — start at [`docs/STATUS.md`](docs/STATUS.md),
+the project dashboard. Rules are in `docs/rules/` (`overview.md`, `keywords.md`, `maps.md`), the
+card pool in `docs/cards/` (incl. `decks/`), and the engine build spec is
+`docs/engine/handoff-engine.md`. Each area has a `backlog.md` of open items.
 
 ## Status
 

@@ -1,9 +1,9 @@
 # Animal Kingdom — Project Status
 
 > **This is the map.** Open it first each session. It says where every area stands and the
-> next 1–3 moves in each — nothing more. Detail lives in each area's own docs (and, until the
-> backlog is sorted, in `todo.md`). Keep this file short; when a "Next" item is done, replace it,
-> don't append history.
+> next 1–3 moves in each — nothing more. The full open list per area lives in its
+> `docs/<area>/backlog.md`; deeper detail in that area's other docs. Keep this file short; when a
+> "Next" item is done, replace it, don't append history.
 >
 > _Last updated: 2026-07-02._
 
@@ -13,7 +13,7 @@ A headless rules engine + bots + simulation harness for *Animal Kingdom*, a 2-pl
 board game. The end goal is **trustworthy balance data**: run thousands of bot-vs-bot games and
 learn whether the 7 premade decks are fair. Human/web UI is out of scope for now; the engine is
 a pure, transport-agnostic library so a UI can drop on later. Engine built in milestones
-**M0–M6** (all ✅; M6 TurnBot in the working tree, not yet git-committed).
+**M0–M6** (all ✅; M6 TurnBot committed in `aecfdf5`).
 
 ## Areas & boundaries
 
@@ -34,7 +34,7 @@ Eight areas. The boundary rules that keep them from bleeding:
 
 ## 1. Rules & Mechanics
 _The abstract game: turn structure, placement/covering/connection, victory conditions, card
-types, keyword definitions. Source of truth: `overview.md`, `keywords.md`, `maps.md`._
+types, keyword definitions. Docs: `rules/` (`overview.md`, `keywords.md`, `maps.md`). Backlog: [`rules/backlog.md`](rules/backlog.md)._
 
 **State:** Stable and documented. Keyword registry canonical (Flight, Immovable, Fragile, Apex
 Predator, Battlecry, Deathrattle). Immovable/Stealth deep-dive ruled & shipped 2026-07-02.
@@ -46,22 +46,22 @@ Card-type model (Unit/Egg/Landmark) resolved *provisionally* (decision C).
 3. **Terminology sweep:** "Discard" → "Remove Pile" across all docs/data.
 
 ## 2. Cards & Flavor
-_The concrete content: the 7 decks (effects, numbers, names) and their theme. Sources: `decks/`,
-`card-candidates.md`, `flavor-review.md`, `data/cards.json`._
+_The concrete content: the 7 decks (effects, numbers, names) and their theme. Docs: `cards/`
+(`cards.md`, `card-candidates.md`, `decks/`, `decks/flavor-review.md`), `data/cards.json`. Backlog: [`cards/backlog.md`](cards/backlog.md)._
 _**Flavor** (subcategory): animals, biology, folklore, naming — a recurring audit pass, not a separate area._
 
-**State:** All 7 decks content-complete (4-4-6). Legendary names **provisional** (24/28
-machine-suggested 2026-06-30; only the 4 Cats are final). `cards.json` rebuild is unblocked but
-pairs with the G/H tuning below.
+**State:** All 7 decks content-complete (4-4-6) and **built into `cards.json` + the effect registry
+(build #5 done)** — the 252-test suite runs on the reworked pool. Legendary names **provisional**
+(24/28 machine-suggested 2026-06-30; only the 4 Cats are final). Remaining card work is flavor + text cleanup.
 
 **Next:**
 1. **(Flavor) Dedicated legendary-name review** — the stricter, do-not-skip pass before flavor-lock.
 2. **(Flavor) Reskins & collisions:** Black Panther → leopard (not jaguar); rename the placeholder hornet; re-cast the generic-tag animals.
-3. **Rebuild `cards.json` + effect registry** from the deck files (build #5) — do alongside Balance's Decision H.
+3. **Re-cast generic-tag animals + standardize Deathrattle card-text wording** — the data-level flavor/text cleanups.
 
 ## 3. Engine
 _Core game code: state, effect stack, rules-as-code, the sim/analysis harness (`sim/`),
-architecture, performance, tests. (Kept separate from CLI.)_
+architecture, performance, tests. (Kept separate from CLI.) Backlog: [`engine/backlog.md`](engine/backlog.md)._
 
 **State:** M0–M6 shipped; pure stdlib engine + effect interpreter + sim harness. Full suite
 **252 passing, 1 xfail**. (M6 TurnBot committed in `aecfdf5`.)
@@ -71,7 +71,7 @@ architecture, performance, tests. (Kept separate from CLI.)_
 2. **State-representation speed** (struct-of-arrays) — *parked* until NN bots; measure clone cost first.
 
 ## 4. Bots
-_The AI players and their quality. `bots/`, `handoff-turnbot*.md`._
+_The AI players and their quality. `bots/`, `bots/handoff-turnbot*.md`. Backlog: [`bots/backlog.md`](bots/backlog.md)._
 
 **State:** Ladder is **GreedyBot** (fast baseline) → **TurnBot** (M6, new middle tier) →
 **RefereeBot** (calibration oracle). TurnBot smoke: improves-or-ties all 7 decks, but blows the
@@ -91,7 +91,7 @@ no anchored/absolute rating yet.
    row-1/3 as an HQ-rush lane.
 
 ## 5. CLI / App
-_The human interface. `cli.py`, `render/`._
+_The human interface. `cli.py`, `render/`. Backlog: [`cli/backlog.md`](cli/backlog.md)._
 
 **State:** `rich`-based polish done (color by seat/rarity, in-place redraw, card-first targeting).
 Plain stdin/stdout loop underneath. Lightest area right now.
@@ -103,7 +103,7 @@ Plain stdin/stdout loop underneath. Lightest area right now.
 ## 6. Code Health
 _Cross-cutting code quality: whole-repo review, architecture principles, repo-wide refactors,
 conventions, tech-debt, cross-cutting performance. The code analogue of Balance. (Subsystem-local
-work stays in Engine/Bots/CLI.)_
+work stays in Engine/Bots/CLI.) Backlog: [`code-health/backlog.md`](code-health/backlog.md)._
 
 **State:** No systematic review done yet. Codebase is milestone-built (M0–M6) with a green suite
 (252 passing) and a deliberate architecture (data / config / effect-registry split, pure stdlib
@@ -115,7 +115,7 @@ engine) — but has never had a dedicated quality pass.
 
 ## 7. Balance
 _The central question: are the decks fair? Winrates, matchup matrix, tuning decisions + the data
-behind them. Consumes Bots + the sim harness. Roadmap: `simulation-platform-roadmap.md`._
+behind them. Consumes Bots + the sim harness. Roadmap: `balance/simulation-platform-roadmap.md`. Backlog: [`balance/backlog.md`](balance/backlog.md)._
 
 **Two outcome targets:** (a) every **deck** winrate in **40–60%**; (b) every **card's impact**
 within **±10%**.
@@ -131,12 +131,10 @@ once pilots are trustworthy — but that work is Bots, not Balance.
 3. **Triage the open sim findings:** colony early-game weakness (real → card-design look) vs cats-vs-aggro (bot bug → leave the card).
 
 ## 8. Meta
-_Holding it together: this dashboard, milestone/roadmap tracking, conventions._
+_Holding it together: this dashboard, milestone/roadmap tracking, conventions. Backlog: [`meta/backlog.md`](meta/backlog.md)._
 
-**State:** Milestones M0–M6 tracked; `simulation-platform-roadmap.md` is the long-term north star.
-Docs reorg in progress (this file is step 1).
+**State:** Milestones M0–M6 tracked; `balance/simulation-platform-roadmap.md` is the long-term north
+star. Docs reorg **done**: STATUS.md dashboard + per-area `backlog.md` files; `todo.md` retired.
 
 **Next:**
-1. **Finish the reorg:** split `todo.md` into per-area `backlog.md` files (the "sort" step).
-2. Keep `STATUS.md` as the session entry point; retire `todo.md` once sorted.
-3. **Project-level `CLAUDE.md` + project skills** — a repo `CLAUDE.md` (conventions, how to run things) and reusable skills for repeatable workflows (e.g. the standard gauntlet run, a flavor pass).
+1. **Project-level `CLAUDE.md` + project skills** — a repo `CLAUDE.md` (conventions, how to run things, where the source-of-truth docs live) and reusable skills for repeatable workflows (e.g. the standard gauntlet run, a flavor pass).

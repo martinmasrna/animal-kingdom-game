@@ -19,10 +19,10 @@ Read these first. They are authoritative; this handoff does not repeat their con
 
 | Doc | Contains |
 |---|---|
-| `docs/overview.md` | Core rules: setup, turn structure, placement legality, strength/covering, stacks, connection-to-HQ, effects, food/regions, victory conditions, deckbuilding, match structure. |
-| `docs/cards.md` | The full card pool (~57 units across Aggro / Control / Combo / Midrange / General), keywords (Flight, Immovable, Fragile, "Battlecry" = when-placed), tags, and design conventions. **Each card's effect text is the spec you must implement.** |
-| `docs/maps.md` | Map format + Map A "Savanna Crossing" (the first test map), plus the shared setup rules and the food scale. |
-| `docs/todo.md` | Open design decisions. Several constants are deliberately untuned (see §11). |
+| `docs/rules/overview.md` | Core rules: setup, turn structure, placement legality, strength/covering, stacks, connection-to-HQ, effects, food/regions, victory conditions, deckbuilding, match structure. |
+| `docs/cards/cards.md` | The full card pool (~57 units across Aggro / Control / Combo / Midrange / General), keywords (Flight, Immovable, Fragile, "Battlecry" = when-placed), tags, and design conventions. **Each card's effect text is the spec you must implement.** |
+| `docs/rules/maps.md` | Map format + Map A "Savanna Crossing" (the first test map), plus the shared setup rules and the food scale. |
+| `docs/STATUS.md` | Open design decisions. Several constants are deliberately untuned (see §11). |
 
 If this handoff and a source doc ever conflict, **the source doc wins** — flag the conflict.
 
@@ -128,7 +128,7 @@ One record per card with the fields from `cards.md`: `id`, `name`, `tag` (may be
 Card *logic* cannot live in JSON. Maintain a registry mapping `card id -> effect handlers`. A card's handlers subscribe to the relevant events/modifiers (§8). The JSON gives static stats and text; the registry gives behavior. This split keeps a future TS client able to read card stats/text from JSON while logic stays server-side.
 
 ### 6.4 Map data (`maps.json`)
-Encode Map A exactly per `docs/maps.md` §4.3: crossroads, edges (orthogonal grid + HQ front edges), HQ connections, regions (corners + food), and `win_food`. Provide helpers: `neighbors(crossroad)`, `adjacent(a,b)` (= connected by an edge), region-control check (player occupies all corners), and connectivity (§7).
+Encode Map A exactly per `docs/rules/maps.md` §4.3: crossroads, edges (orthogonal grid + HQ front edges), HQ connections, regions (corners + food), and `win_food`. Provide helpers: `neighbors(crossroad)`, `adjacent(a,b)` (= connected by an edge), region-control check (player occupies all corners), and connectivity (§7).
 
 ---
 
@@ -210,7 +210,7 @@ Output machine-readable (CSV/JSON) for analysis in pandas.
 
 ## 11. Tunable constants (do NOT hard-code; centralize in `config.py`)
 
-These are deliberately **untuned placeholders** (see `cards.md` §4.5 and `todo.md`). Put them all in one config object the sim can sweep:
+These are deliberately **untuned placeholders** (see `cards.md` §4.5 and `docs/STATUS.md`). Put them all in one config object the sim can sweep:
 - Every `F` value on cards (one-off food gains/costs).
 - Region outputs and `win_food` (Map A starts at 10 / 20 / 100 — `maps.md` §4).
 - Spotted Hyena threshold `N`; Hibernating Bear doubling and delay; Egg/Rabbit timers.

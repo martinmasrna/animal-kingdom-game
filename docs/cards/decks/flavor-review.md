@@ -5,7 +5,7 @@ Balance is explicitly out of scope. Any suggestion that touches what a card *doe
 or strength value) is labelled **⚠ FLAVOR-DRIVEN CHANGE — needs a separate balance review**; every
 other fix is a pure reskin (swap the animal / name / tag onto the existing strength + effect).
 
-Source of truth: the 7 files in `docs/decks/` (uploaded 2026-06-28). `cards.md` §5–9 ignored (legacy).
+Source of truth: the 7 files in `docs/cards/decks/` (uploaded 2026-06-28). `cards.md` §5–9 ignored (legacy).
 
 Cards that already feel right are **not** listed — only genuine issues. Decks come out very strong
 overall; the heaviest items are concentrated in **Colony** (caste one-species tension), **Canine**
@@ -65,7 +65,7 @@ your deck is precisely the oxpecker's real symbiosis with rhinos and buffalo. **
 (kills things that wander into its space) and the **Immovable hoarding tortoise** are both spot-on.
 
 - **Fig Tree / Watering Hole (Landmarks) — non-animal; see §2.C for my opinion.** Flagged as the
-  permitted exception; the theme question is parked (`todo.md`). Opinion in cross-pool section.
+  permitted exception; the theme question is parked (`docs/STATUS.md`). Opinion in cross-pool section.
 - **Tortoise tag inconsistency (cross-pool, see §2.B):** the colossal tortoise here is `Megafauna`,
   but Food OTK's Giant Tortoise is tagless. Pick one convention for tortoises.
 - **Black Bear (common, Bear 5) — flavor-thin effect.** "In 2 turns, draw 1" doesn't say "bear" the
@@ -164,7 +164,7 @@ the rat/mouse/jerboa/lemming spread, leopard vs snow-leopard once Black Panther 
 ### 2.C Non-animals
 - **Only Landmarks (Fig Tree, Watering Hole) and the "howl" legendary are non-animal.** The howl is a
   fixable mislabel (Deck 7 — make it a wolf). The Landmarks are the deliberate, parked exception.
-- **My Landmark flavor opinion (the question is undecided — `todo.md`):** I *like* Landmarks as a
+- **My Landmark flavor opinion (the question is undecided — `docs/STATUS.md`):** I *like* Landmarks as a
   sparingly-used type and would keep them. A watering hole and a fruiting fig tree are exactly the
   shared, contested *resources* a kingdom of animals would gather and fight over, so they read as
   part of the world rather than foreign objects — and "build the watering hole, reap food" is clean

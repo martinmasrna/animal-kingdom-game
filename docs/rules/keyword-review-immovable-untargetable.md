@@ -26,7 +26,7 @@ The sections below are the pre-ruling analysis, kept for the record.
 
 ---
 
-The focused pass `docs/todo.md` calls for. Walks every card that has, grants, or interacts
+The focused pass `docs/STATUS.md` calls for. Walks every card that has, grants, or interacts
 with the two keywords, tabulates **intended vs actual** behavior per effect class, and ends
 in the concrete decision forks (§5) that need a human ruling. Code references are to
 `engine/statics.py` (the predicates) and `engine/effects.py` (the call sites).
@@ -156,7 +156,7 @@ If A2 adopted, the two abilities finally *are* different and deserve distinct na
   abilities."*
 - Untargetable: rename — candidate **"Elusive"** (fits a panther; short; reads as
   "can't be picked"): *"Enemies can't choose this with abilities."*
-Rename lands in the same sweep as the Battlecry/Deathrattle renames (todo.md).
+Rename lands in the same sweep as the Battlecry/Deathrattle renames (docs/STATUS.md).
 
 ## 6. Implementation sketch (once ruled)
 

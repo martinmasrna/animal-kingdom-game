@@ -5,7 +5,7 @@ boundary instead of rolling out the opponent's reply, so the discriminating beha
 it sequences a whole two-action turn as one plan (draw -> play, ordered Battlecries, effect-
 granted extra placements), it stays honest about hidden information, it refuses to hang its
 HQ, and it models any opponent-owned sub-choice opened during its turn adversarially. The
-handoff (docs/handoff-turnbot.md §3) enumerates the acceptance list covered here, plus one
+handoff (docs/bots/handoff-turnbot.md §3) enumerates the acceptance list covered here, plus one
 same-turn sequencing puzzle per deck family so the bot can't be tuned only to Colony.
 
 Map A geometry: A's HQ fronts are column 1, B's column 4; a 4x3 grid of "col,row"

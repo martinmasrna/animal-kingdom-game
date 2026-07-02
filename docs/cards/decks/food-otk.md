@@ -36,7 +36,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Has one open `?` co
 - **Slot 11 filled:** Pufferfish (Fish 2, ON_COVERED trap) — gives the deck its only enemy interaction + a defensive trap to survive to the combo turn (the deck otherwise has zero ways to touch the opponent's board). New `Fish` tag in this deck.
 
 ## New mechanics / systems this deck introduces
-- **`Deathrattle` keyword now in active use** (resolves a `todo.md` naming TODO). Opossum prints "Deathrattle: …"; Impala/Gazelle write it out as "When this is removed, …". **Inconsistent wording for the same trigger — standardize** (pick "Deathrattle:" or "When removed", apply uniformly across the pool; Phoenix in Egg Control also uses "When this is removed").
+- **`Deathrattle` keyword now in active use** (resolves a `docs/STATUS.md` naming TODO). Opossum prints "Deathrattle: …"; Impala/Gazelle write it out as "When this is removed, …". **Inconsistent wording for the same trigger — standardize** (pick "Deathrattle:" or "When removed", apply uniformly across the pool; Phoenix in Egg Control also uses "When this is removed").
 - **⚠ Friendly-unit removal / sacrifice as a resource.** New targeting direction: effects remove *your own* units as a cost/effect — the Devourer (remove up to 3 friendly, draw each), Black Widow (remove adjacent friendly → draw). Engine needs friendly-target removal **and** must fire Deathrattles on sacrifice (Gazelle/Impala/Opossum payoffs). This is the deck's core loop.
 - **Rarity-filtered tutor/draw:** kraken "draw a legendary unit" — reads card rarity to filter the draw. New (cf. tag-filtered draws in Egg/Ramp, strength-filtered in Ramp).
 - **Store-and-double food** (Keeper of the Stash): "store all your food; in 2 turns, recover twice as much" — Immovable so it resolves. Same shape as the classic hoard-doubler; food sits at 0 during the 2-turn window.
@@ -51,4 +51,4 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Has one open `?` co
 - **Legendary names — provisional set assigned 2026-06-30** (Fathom / Greywhisker / Carmilla, the Devourer / Scrooge, Keeper of the Stash; alternates in `flavor-review.md` §3, flavor-lock pending). The black-widow legendary **Carmilla** is a different card from the common **Black Widow** (legendary = named individual). *(No collision — README decision A.)*
 - **Gazelle 20-food + mass sac = OTK swing** — central tuning dial; sim should check OTK consistency vs the 100 threshold and the 2-turn double window.
 - **Keeper "store all food":** with food = 0 during the window the player can't win-by-food or pay food costs; confirm interaction is identical to other store/double effects. (×1 legendary, so no multi-copy stacking.)
-- **Legendary names** — provisional (assigned 2026-06-30); see the legendary table + the `todo.md` flavor-lock item.
+- **Legendary names** — provisional (assigned 2026-06-30); see the legendary table + the `docs/STATUS.md` flavor-lock item.

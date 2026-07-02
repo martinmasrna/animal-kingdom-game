@@ -44,7 +44,7 @@ def _console_for(stream) -> Console:
 
 
 # One-line deck identities for the interactive picker (presentation only; the source of
-# truth is docs/decks/README.md, which isn't shipped as data). Keep the slugs in sync
+# truth is docs/cards/decks/README.md, which isn't shipped as data). Keep the slugs in sync
 # with engine.cards.DECK_SLUGS.
 _DECK_BLURBS = {
     "cats_midrange": "mono-Cat tempo / removal",

@@ -1,8 +1,8 @@
-"""Decision G: once-per-turn caps on value/food triggers (docs/todo.md).
+"""Decision G: once-per-turn caps on value/food triggers (docs/balance/backlog.md).
 
 Every cap flag defaults False (uncapped/as printed); each test forces the flag on to prove
 the *plumbing* actually limits the trigger to once per owner-turn per unit, independent of
-whatever default docs/todo.md ends up recording. Two triggers (King Theron, Egg Eater) had
+whatever default docs/balance/backlog.md ends up recording. Two triggers (King Theron, Egg Eater) had
 no cap wiring at all before this pass - the rest reuse the existing `_capped` helper.
 
 "Once per turn" here means once per single top-level action's resolution cascade (a turn is

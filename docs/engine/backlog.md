@@ -1,0 +1,6 @@
+# Engine — Backlog
+
+Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Build spec (historical): `handoff-engine.md`. M0–M6 shipped; suite 252 passing.
+
+- [ ] **Fix `metrics.py` `impact` confound.** `win_rate_when_drawn` uses presence-only draws (`DRAWN_CAVEAT`), so for a deck whose wins and losses run different lengths it biases *every* non-early card's impact independent of card quality (confirmed on cats_midrange: wins avg 14.3 turns vs losses 20.1). Fix: either document a caveat next to `DRAWN_CAVEAT`, or length-normalize the baseline (touches `metrics.py`'s core calculation; re-validate against the test suite + a fresh gauntlet). Until then, don't read any single card's impact at face value — especially for pronounced aggro/control decks.
+- [ ] **State-representation speed (before NN bots).** Engine uses per-unit `UnitInstance` objects — fine for thousands of greedy games, *not* for MCTS/AlphaZero (millions of cheap clones + batched feature extraction). When there: switch the in-play representation to struct-of-arrays / entity-component (parallel int arrays, array-copy clones) + a tensor per-seat encoding. Localized to `state.py` (the data layer and id-keyed effect registry are already decoupled). Measure clone cost first; keep `UnitInstance` lean (`__slots__`) meanwhile. *Parked until NN bots.*

@@ -84,7 +84,7 @@ A keyword is a *reusable, defined* mechanic with a printed name. Only the follow
 - **Flight** — ignores the connection-to-HQ requirement when placed.
 - **Immovable** — cannot be removed or moved by special effects.
 - **Fragile** — when another unit is placed on top of this unit, remove this unit (it does not survive under the stack).
-- **Battlecry** *(provisional name — see `todo.md`)* — an effect that resolves when the unit is placed. Most "When placed…" effects are Battlecries; we keep writing them out as "When placed" until the keyword name is finalized.
+- **Battlecry** *(provisional name — see `docs/STATUS.md`)* — an effect that resolves when the unit is placed. Most "When placed…" effects are Battlecries; we keep writing them out as "When placed" until the keyword name is finalized.
 
 One-off, single-card effects do **not** get a keyword name — they are written as plain text. (e.g. Honey Badger's cover ability is unique and stays plain text.)
 
@@ -99,7 +99,7 @@ These are fine because they are one-shot, not recurring. All food numbers (regio
 
 ### Food Economy Constants (v0)
 
-Starting values for the simulator to tune (see `todo.md`). This table is the **single source of truth**; the card rows below quote the resulting numbers, and the engine mirrors these in `config.py`. Design hierarchy: **regions are the backbone**, one-off `F` is an **accelerant** (a ~6-card food package reaches only ~half the threshold), and Hibernating Bear is the **combo finish**.
+Starting values for the simulator to tune (see `docs/STATUS.md`). This table is the **single source of truth**; the card rows below quote the resulting numbers, and the engine mirrors these in `config.py`. Design hierarchy: **regions are the backbone**, one-off `F` is an **accelerant** (a ~6-card food package reaches only ~half the threshold), and Hibernating Bear is the **combo finish**.
 
 | Constant | v0 value | Used by |
 |---|---:|---|
@@ -115,7 +115,7 @@ Starting values for the simulator to tune (see `todo.md`). This table is the **s
 | Raven cost | 12 | Raven |
 | Hibernating Bear | ×2 payout, 2-turn delay | Hibernating Bear |
 
-⚠ = values most likely to need sim attention (see `todo.md`).
+⚠ = values most likely to need sim attention (see `docs/STATUS.md`).
 
 ---
 

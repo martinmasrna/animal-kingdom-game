@@ -55,4 +55,4 @@ Source: user's offline Google Sheet (uploaded 2026-06-28).
 - **Once-per / stacking on food riders:** fat bumblebee "+3 whenever you gain food" — does it apply to its own and the bee queen's gains in the same chain? Watch for runaway loops; sim/tuning dial.
 - **Food numbers** (4/each, 5/play, 8, 5+5, 3/turn, +3 rider) are new and want tuning vs region output and `win_food`.
 - **Soldier Ant "remove an adjacent enemy"** — no strength cap stated (unlike most removal). Confirm it's unconditional removal once the 5-Colony gate is met. Flag.
-- **Legendary names** — provisional (assigned 2026-06-30); see the legendary table + the `todo.md` flavor-lock item.
+- **Legendary names** — provisional (assigned 2026-06-30); see the legendary table + the `docs/STATUS.md` flavor-lock item.

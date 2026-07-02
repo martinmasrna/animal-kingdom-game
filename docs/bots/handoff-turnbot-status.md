@@ -1,7 +1,7 @@
 # TurnBot — Status Handoff
 
 > **Audience:** a game-simulation agent picking up TurnBot after the initial build.
-> **Companion:** the original spec is `docs/handoff-turnbot.md`. This document records what
+> **Companion:** the original spec is `docs/bots/handoff-turnbot.md`. This document records what
 > was actually built, the smoke-benchmark results, the throughput problem, one tried-and-
 > reverted optimization (with data), and the open decisions.
 > **Date of work:** 2026-07-02.

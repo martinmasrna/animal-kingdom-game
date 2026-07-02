@@ -2,10 +2,10 @@
 
 Canonical definitions for every printed keyword. **This is the single source of truth** —
 card files, deck files, and the engine reference keywords by name and do not re-explain them.
-Companion to `overview.md` (rules), `cards.md` (pool), `docs/decks/` (the reworked decklists).
+Companion to `overview.md` (rules), `cards.md` (pool), `docs/cards/decks/` (the reworked decklists).
 
 "Occupant" = any card sitting on a crossroad (a `Unit`, an `Egg`, or a `Landmark`); see
-`docs/decks/README.md` decision C. "Unit" in card text means animal units (`Unit`/`Egg`),
+`docs/cards/decks/README.md` decision C. "Unit" in card text means animal units (`Unit`/`Egg`),
 never `Landmark`.
 
 ---
@@ -17,7 +17,7 @@ Ignores the connection-to-HQ requirement when placed. (All other placement rules
 
 ### Immovable
 *Physics* (keyword-review ruling A2, 2026-07-02 — see
-`docs/keyword-review-immovable-untargetable.md`). Cannot be removed, moved (bounced), or
+`docs/rules/keyword-review-immovable-untargetable.md`). Cannot be removed, moved (bounced), or
 eaten by **any** ability — the enemy's **or its own controller's** (Carmilla cannot
 sacrifice a Giant Tortoise; that cost is deliberate). It can still be **covered** under the
 normal placement rules — covering is placement, not an ability. A mass effect (Pestis) skips
@@ -27,7 +27,7 @@ can be paid or discarded normally.
 
 Carried by: Giant Tortoise, Scrooge, Methuselah, Bulwark, Elephant.
 
-⚠ *Open item (todo.md): the keyword still feels slightly off (name and effect footprint) —
+⚠ *Open item (docs/STATUS.md): the keyword still feels slightly off (name and effect footprint) —
 scheduled for another look after balance data accumulates.*
 
 ### Stealth  *(renamed from "untargetable", ruling E)*
@@ -68,15 +68,15 @@ stack. (Pairs with timed payoffs: Eggs and Landmarks are typically Fragile.)
   capture an enemy HQ directly.
 - **Destroys Eggs and Landmarks** it lands on (they are occupants).
   - ⚠ *Flavor wart:* a predator "eating" a Landmark (a tree, a watering hole) doesn't read
-    well. Tracked under the Landmark revisit (`todo.md`); mechanics stand for now.
+    well. Tracked under the Landmark revisit (`docs/STATUS.md`); mechanics stand for now.
 
 Carried by: **Tiger** (Cats), **Anaconda** (Egg), **Polar Bear** + the giant-polar-bear &
 giant-harpy-eagle legendaries (Ramp).
 
-### Battlecry  *(placeholder name — rename pending, `todo.md`)*
+### Battlecry  *(placeholder name — rename pending, `docs/STATUS.md`)*
 An effect that resolves when the unit is placed. Most "when placed…" effects are Battlecries.
 
-### Deathrattle  *(placeholder name — rename pending, `todo.md`)*
+### Deathrattle  *(placeholder name — rename pending, `docs/STATUS.md`)*
 An effect that resolves when **a unit leaves the board** — the narrow case. **Print as
 "Deathrattle: …"** (not "When this is removed").
 

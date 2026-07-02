@@ -1,5 +1,5 @@
 {
-  "_comment": "Map data ported from docs/maps.md. Crossroads named 'col,row'. 'edges' are crossroad-to-crossroad paths only (undirected); HQ front edges are derived from hqs[*].connects. Map A: 17 crossroad edges + 6 HQ connects = 23 paths.",
+  "_comment": "Map data ported from docs/rules/maps.md. Crossroads named 'col,row'. 'edges' are crossroad-to-crossroad paths only (undirected); HQ front edges are derived from hqs[*].connects. Map A: 17 crossroad edges + 6 HQ connects = 23 paths.",
   "maps": [
     {
       "id": "map_a",

@@ -1,5 +1,5 @@
 """Behavior tests for the Immovable / Stealth keyword split (keyword-review rulings
-A2/B/C1/D/E, 2026-07-02 - see docs/keyword-review-immovable-untargetable.md).
+A2/B/C1/D/E, 2026-07-02 - see docs/rules/keyword-review-immovable-untargetable.md).
 
 Immovable = physics: can't be removed/moved/eaten by ANY ability, including its own
 controller's. Stealth = can't be *chosen* by an enemy ability; mass, random, and

@@ -10,16 +10,16 @@ Replace the legacy 55-card pool with the **98-design reworked pool** (7 premade 
 schema — so Phase 2 can wire effects on top.
 
 ## Read first (authoritative & binding)
-1. `docs/decks/README.md` — deck index **and** the resolved decisions **A–J**. Binding. Especially
+1. `docs/cards/decks/README.md` — deck index **and** the resolved decisions **A–J**. Binding. Especially
    **B** (schema: `type` + flat `tags` list incl. roles), **A** (every card globally unique, lives in
    exactly one deck), **C** (`Landmark` = the lone non-unit type; `Egg` is a unit), **D** (keywords;
    Apex Predator), **E** (strength model), **F** (event/op rulings), and the **Remove Pile** rename.
-2. `docs/decks/*.md` — the 7 deck files = **source of truth** for the card list (legendary names are
+2. `docs/cards/decks/*.md` — the 7 deck files = **source of truth** for the card list (legendary names are
    now provisionally assigned). Each = 4 legendary ×1 + 4 rare ×2 + 6 common ×3 = 30.
-3. `docs/keywords.md` — canonical keywords (Flight, Immovable, Fragile, Apex Predator, Battlecry,
+3. `docs/rules/keywords.md` — canonical keywords (Flight, Immovable, Fragile, Apex Predator, Battlecry,
    Deathrattle). `Costs X food` is a **placement cost, not a keyword**. Strength "+X" is a text
    convention, not a keyword.
-4. `docs/cards.md` §2–4 — theme + conventions. **§5–9 are LEGACY — ignore** (do not reconcile to them).
+4. `docs/cards/cards.md` §2–4 — theme + conventions. **§5–9 are LEGACY — ignore** (do not reconcile to them).
 5. Current code: `animal_kingdom/engine/cards.py` (Card dataclass + validation + loader),
    `animal_kingdom/data/cards.json` (old schema to evolve), `animal_kingdom/decks.py`,
    `animal_kingdom/engine/config.py`, and the `.tag` read-sites in `engine/statics.py` + `engine/effects.py`.
@@ -94,7 +94,7 @@ Add structural tests for the new pool, and update old tests that assumed the old
 - **No legendary-name or flavor changes** (provisional names are fixed for this build).
 
 ## Recommended secondary deliverable (planning only, no logic)
-`docs/effect-worklist-reworked.md` — catalog every new card's required effect, grouped like
+`docs/engine/effect-worklist-reworked.md` — catalog every new card's required effect, grouped like
 `m2b-worklist.md` (reuses-existing-op vs new-mechanic), to scope Phase 2.
 
 ## Process & conflict rules

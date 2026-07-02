@@ -27,7 +27,7 @@ TAGS = {
 }
 DYNAMIC_STRENGTHS = {"removed_units_count", "chameleon"}  # only Goliath + Chameleon
 
-# The seven premade deck slugs (align to docs/decks/ filenames).
+# The seven premade deck slugs (align to docs/cards/decks/ filenames).
 DECK_SLUGS = {
     "cats_midrange", "egg_control", "colony_food_swarm", "ramp",
     "food_otk", "aggro_hq_rush", "canine_buff_tempo",
