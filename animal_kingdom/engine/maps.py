@@ -40,6 +40,14 @@ class GameMap:
     regions: dict[str, Region]
     win_food: int
     edges: tuple[tuple[str, str], ...] = field(default=())
+    # Precomputed cr -> sorted-neighbour tuple. The map is immutable, so this is derived once
+    # in __post_init__ (see `neighbors`); excluded from eq/repr as pure derived state.
+    _sorted_adjacency: dict[str, tuple[str, ...]] = field(
+        default_factory=dict, init=False, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "_sorted_adjacency",
+                           {cr: tuple(sorted(ns)) for cr, ns in self._adjacency.items()})
 
     # --- geometric helpers ---
     def neighbors(self, crossroad: str) -> tuple[str, ...]:
@@ -47,10 +55,12 @@ class GameMap:
 
         Deterministic ordering matters: callers iterate neighbours to fire adjacency
         triggers and to seed RNG-driven effects, so a set's hash-dependent order would make
-        games diverge across processes (different PYTHONHASHSEED). Sorting here keeps the
-        engine's "same seed + same actions => identical replay" guarantee (handoff §4.6).
+        games diverge across processes (different PYTHONHASHSEED). Sorting keeps the engine's
+        "same seed + same actions => identical replay" guarantee (handoff §4.6). The sort is
+        precomputed once (the adjacency never changes) - this is a top search hot path, so
+        re-sorting the same frozenset millions of times was pure waste.
         """
-        return tuple(sorted(self._adjacency.get(crossroad, ())))
+        return self._sorted_adjacency.get(crossroad, ())
 
     def adjacent(self, a: str, b: str) -> bool:
         """True if `a` and `b` are connected by a single edge (overview.md §3.3)."""

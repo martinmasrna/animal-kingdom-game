@@ -319,10 +319,11 @@ class TurnSearcher(Bot):
             if isinstance(action, PlaceAction) and not action.is_hq_capture:
                 by_card[action.card_id].append(action)
         opponent = other_player(me)
+        occ = world.connected_occupied(me)   # one BFS shared by every is_connected below
         for card_actions in by_card.values():
             connected = [
                 a for a in card_actions
-                if world.is_connected(me, a.crossroad)
+                if world.is_connected(me, a.crossroad, occ)
             ]
             home_front = [
                 a for a in card_actions

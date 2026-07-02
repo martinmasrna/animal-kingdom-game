@@ -267,12 +267,16 @@ class GameState:
     def connected_occupied(self, player: str) -> set:
         """Player-occupied crossroads connected to the player's HQ (overview.md §8)."""
         gm = self.game_map
-        seeds = [cr for cr in gm.hq_front(player) if self.owner_of(cr) == player]
+        board = self.board
+        # owner_of(cr) == player, inlined: this BFS is the top search hot path, so skip the
+        # owner_of -> top_unit -> board.get call chain per node (empty stack is falsy = None).
+        seeds = [cr for cr in gm.hq_front(player)
+                 if (st := board.get(cr)) and st[-1].owner == player]
         seen, queue = set(seeds), deque(seeds)
         while queue:
             cr = queue.popleft()
             for nb in gm.neighbors(cr):
-                if nb not in seen and self.owner_of(nb) == player:
+                if nb not in seen and (st := board.get(nb)) and st[-1].owner == player:
                     seen.add(nb)
                     queue.append(nb)
         return seen

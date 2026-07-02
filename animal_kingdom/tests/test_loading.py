@@ -130,8 +130,11 @@ def test_map_a_topology():
     assert m.adjacent("2,2", "3,2")
     assert m.adjacent("3,2", "2,2")
     assert not m.adjacent("1,1", "2,2")  # diagonal, no edge
-    # neighbors() returns a stable sorted tuple (determinism guarantee, handoff §4.6).
+    # neighbors() returns a stable sorted tuple (determinism guarantee, handoff §4.6);
+    # precomputed once from the immutable adjacency, and () for an unknown crossroad.
     assert m.neighbors("2,2") == ("1,2", "2,1", "2,3", "3,2")
+    assert m.neighbors("nope") == ()
+    assert all(m.neighbors(cr) == tuple(sorted(m._adjacency.get(cr, ()))) for cr in m.crossroads)
 
 
 def test_map_a_regions():

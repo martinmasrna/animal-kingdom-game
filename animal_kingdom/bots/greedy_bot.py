@@ -232,7 +232,9 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     score += w.board_presence * presence
 
     # --- Connection: own units linked to my HQ (placement reach + resilience) ---
-    score += w.connection * len(state.connected_occupied(me))
+    # Computed once and reused for the HQ-threat term below (same BFS, was run twice).
+    my_connection = state.connected_occupied(me)
+    score += w.connection * len(my_connection)
 
     # --- Region progress: nonlinear and symmetric ---
     # A lone central unit can touch four regions but is nowhere close to producing any of
@@ -248,7 +250,6 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
 
     # --- HQ threat: only a connected chain can capture next turn. An isolated Flight unit
     # in front of an HQ is board presence, not an immediate HQ threat.
-    my_connection = state.connected_occupied(me)
     opp_connection = state.connected_occupied(opp)
     score += w.enemy_hq_threat * sum(1 for cr in gm.hq_front(opp) if cr in my_connection)
     score -= w.own_hq_threat * sum(1 for cr in gm.hq_front(me) if cr in opp_connection)
@@ -331,6 +332,7 @@ def _enabled_battlecry_count(state: GameState, player: str) -> int:
         by_card.setdefault(action.card_id, []).append(action)
     representatives: list[PlaceAction] = []
     opponent = other_player(player)
+    occ = state.connected_occupied(player)   # one BFS for all the is_connected checks below
     for actions in by_card.values():
         tactical = [
             a for a in actions
@@ -339,7 +341,7 @@ def _enabled_battlecry_count(state: GameState, player: str) -> int:
                    for nb in state.game_map.neighbors(a.crossroad))
         ]
         empty = [a for a in actions if state.top_unit(a.crossroad) is None]
-        connected = [a for a in actions if state.is_connected(player, a.crossroad)]
+        connected = [a for a in actions if state.is_connected(player, a.crossroad, occ)]
         chosen = []
         for group in (tactical, empty, connected, actions):
             if group and group[0] not in chosen:
