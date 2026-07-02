@@ -17,6 +17,7 @@ from ..bots.base import Bot
 from ..bots.greedy_bot import GreedyBot, GreedyWeights
 from ..bots.random_bot import RandomBot
 from ..bots.referee_bot import RefereeBot
+from ..bots.turn_bot import TurnBot
 from ..decks import load_premade_deck
 from ..engine import rules
 from ..engine.config import Config
@@ -50,7 +51,7 @@ class GameRecord:
                 "final_food_b": self.final_food_b}
 
 
-BOT_KINDS = ("greedy", "lookahead", "random", "referee")
+BOT_KINDS = ("greedy", "lookahead", "random", "referee", "turn")
 
 # 3-ply own-line lookahead (see GreedyBot's module docstring). Gauntlet-tested 2024: it does
 # correctly find delayed/combo value 1-ply misses (e.g. Grizzly Bear), but nets *worse*
@@ -69,6 +70,13 @@ LOOKAHEAD_BEAM_WIDTH = 8
 # calibration runs (50-150 games/matchup), never the high-throughput balance sims.
 REFEREE_DETERMINIZATIONS = 5
 REFEREE_BEAM_WIDTH = 8
+
+# TurnBot (bots/turn_bot.py): the scalable middle tier. It completes its own turn with the
+# same determinized information-set search as the referee but stops at the turn boundary
+# (no opponent-reply rollout), so it costs a small multiple of greedy rather than ~100x -
+# the intended default pilot for large balance sims.
+TURN_DETERMINIZATIONS = 3
+TURN_BEAM_WIDTH = 8
 
 
 def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None) -> Bot:
@@ -89,6 +97,10 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None) -> B
         return RefereeBot(weights=weights, seed=seed,
                           determinizations=REFEREE_DETERMINIZATIONS,
                           beam_width=REFEREE_BEAM_WIDTH)
+    if kind == "turn":
+        return TurnBot(weights=weights, seed=seed,
+                       determinizations=TURN_DETERMINIZATIONS,
+                       beam_width=TURN_BEAM_WIDTH)
     raise ValueError(f"unknown bot kind {kind!r} (expected one of {BOT_KINDS})")
 
 

@@ -20,6 +20,7 @@ Built in milestones (each is a review checkpoint):
 - **M3 — Greedy bot + metrics** ✅ — `GreedyBot` (board-eval heuristic + 1-ply lookahead) and a sim harness emitting the balance metrics (matchup matrix, win-condition split, first-player win rate, game length, per-card win-rate delta) to CSV/JSON.
 - **M4 — Bot-quality gauntlet** ✅ — `sim/gauntlet.py` pits a candidate bot/weights against a pinned opponent pool so heuristic changes are validated on win-rate deltas, not vibes.
 - **M5 — Referee bot** ✅ — `RefereeBot` (`--bots referee,...`), determinized adversarial search: samples K possible opponent hands from public info (`bots/determinize.py`), plays the opponent's reply turn with a real `GreedyBot` in each sampled world, and averages the outcome. ~50–100× slower than greedy; used at low volume to calibrate which greedy balance verdicts hold (gauntlet-validated: +5 to +13 points over greedy piloting the same deck).
+- **M6 — Turn bot** — `TurnBot` (`--bots turn,...`), the scalable middle tier: shares the referee's determinized information-set search (`bots/turn_search.py`) but plans only the *complete current turn* and stops at the turn boundary (no opponent-reply rollout), so it sequences draw→play / ordered Battlecries / effect-granted placements the two-action rules need at a small multiple of greedy's cost. Paired seven-deck benchmark: `python -m animal_kingdom.sim.bot_comparison`.
 
 ## Setup
 
@@ -49,15 +50,16 @@ The `./run` launcher finds the venv for you and forwards all flags to the CLI:
 
 With no `--bots`/`--decks` flags, `./run` walks you through setup at launch — your deck,
 the opponent's deck, then the opponent's level (Easy = random bot, Normal = greedy bot,
-Hard = referee bot — thinks a moment per move);
+Hard = turn bot, Expert = referee bot — the last two think a moment per move);
 you play seat A. Passing either flag (or `--quiet`) skips the prompt for scripted runs.
 
 Equivalent without the launcher: `python -m animal_kingdom.cli ...` (venv activated).
 
-`greedy` is also a controller, so you can watch the heuristic bot play:
+`greedy` and `turn` are also controllers, so you can watch the heuristic bots play:
 
 ```sh
 ./run --bots greedy,random --decks ramp,aggro_hq_rush --quiet
+./run --bots turn,greedy --decks colony_food_swarm,cats_midrange --quiet  # complete-own-turn planner
 ```
 
 ### Sharing a game with an agent

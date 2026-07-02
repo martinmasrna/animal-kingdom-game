@@ -24,6 +24,7 @@ from rich.console import Console
 from .bots.greedy_bot import GreedyBot
 from .bots.random_bot import RandomBot
 from .bots.referee_bot import RefereeBot
+from .bots.turn_bot import TurnBot
 from .decks import PREMADE_DECKS, load_premade_deck, make_vanilla_deck
 from .engine import rules
 from .engine import strength as strength_mod
@@ -59,7 +60,8 @@ _DECK_BLURBS = {
 _OPPONENT_LEVELS = [
     ("Easy — random bot", "random"),
     ("Normal — greedy bot (board heuristic + 1-ply lookahead)", "greedy"),
-    ("Hard — referee bot (determinized adversarial search; thinks a few seconds)", "referee"),
+    ("Hard — turn bot (plans a whole turn; determinized, no opponent rollout)", "turn"),
+    ("Expert — referee bot (determinized adversarial search; thinks a few seconds)", "referee"),
 ]
 
 
@@ -208,10 +210,13 @@ def _make_controller(kind: str, seat: str, seed: int, console: Console):
         return GreedyBot(seed=seat_seed)
     if kind == "referee":
         return RefereeBot(seed=seat_seed)
+    if kind == "turn":
+        return TurnBot(seed=seat_seed)
     if kind == "human":
         return HumanController(console)
     raise SystemExit(
-        f"unknown bot kind {kind!r} (expected 'random', 'greedy', 'referee', or 'human')")
+        f"unknown bot kind {kind!r} "
+        "(expected 'random', 'greedy', 'turn', 'referee', or 'human')")
 
 
 def _make_deck(spec: str, deck_rng: random.Random) -> list[str]:
@@ -396,7 +401,7 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str,
 def main(argv: Sequence[str] | None = None) -> None:
     p = argparse.ArgumentParser(description="Play an Animal Kingdom game in the terminal.")
     p.add_argument("--bots", default=None,
-                   help="two comma-separated controllers: random|greedy|human "
+                   help="two comma-separated controllers: random|greedy|turn|referee|human "
                         "(default: interactive setup, else random,random)")
     p.add_argument("--seed", type=int, default=None,
                    help="omit for a fresh random shuffle each run; pass a value to replay a game")

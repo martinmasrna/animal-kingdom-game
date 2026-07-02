@@ -21,6 +21,7 @@ from typing import Optional, Sequence
 
 from ..bots.greedy_bot import GreedyWeights
 from ..engine.cards import DECK_SLUGS
+from ..engine.config import Config, load_config_overrides
 from .runner import BOT_KINDS, GameRecord, run_pairs
 
 
@@ -69,6 +70,7 @@ def run_gauntlet(
     opponent_kind: str = "greedy",
     opponent_weights: Optional[GreedyWeights] = None,
     opponent_pool: Optional[Sequence[str]] = None,
+    config: Optional[Config] = None,
     map_id: str = "map_a",
     jobs: int = 1,
 ) -> GauntletResult:
@@ -84,7 +86,7 @@ def run_gauntlet(
         pairs, n_games, base_seed,
         bots=(candidate_kind, opponent_kind),
         weights=(candidate_weights, opponent_weights),
-        map_id=map_id, jobs=jobs,
+        config=config, map_id=map_id, jobs=jobs,
     )
 
     per_opponent: dict[str, float] = {}
@@ -150,6 +152,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--opponent-weights", default=None,
                    help="JSON file of GreedyWeights field overrides for the pinned pool bot")
     p.add_argument("--jobs", type=int, default=1)
+    p.add_argument("--config", default=None,
+                   help="JSON file of Config field overrides (rule/balance dials); "
+                        "'none' clears a wrapper-injected preset")
     p.add_argument("--map", dest="map_id", default="map_a")
     p.add_argument("--out", default=None, help="write the GauntletResult JSON here")
     p.add_argument("--compare-to", default=None,
@@ -162,6 +167,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         candidate_weights=_load_weights(args.weights),
         opponent_kind=_parse_kind(args.opponent_kind, "--opponent-kind"),
         opponent_weights=_load_weights(args.opponent_weights),
+        config=load_config_overrides(args.config),
         map_id=args.map_id, jobs=args.jobs,
     )
 
