@@ -137,4 +137,4 @@ _Holding it together: this dashboard, milestone/roadmap tracking, conventions. B
 star. Docs reorg **done**: STATUS.md dashboard + per-area `backlog.md` files; `todo.md` retired.
 
 **Next:**
-1. **Project-level `CLAUDE.md` + project skills** — a repo `CLAUDE.md` (conventions, how to run things, where the source-of-truth docs live) and reusable skills for repeatable workflows (e.g. the standard gauntlet run, a flavor pass).
+1. **Project skills** — reusable skills for repeatable workflows (e.g. the standard gauntlet/report run, a flavor-review pass). *(Project `CLAUDE.md` at repo root: done.)*
