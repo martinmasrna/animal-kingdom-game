@@ -91,7 +91,9 @@ def main(argv: Sequence[str] | None = None) -> None:
         description="Full 7x7 round-robin, printed as one per-card impact table per deck.")
     p.add_argument("games", type=int, help="games per matchup (49 matchups in the 7x7 grid)")
     p.add_argument("--seed", type=int, default=0, help="base seed (games use seed, seed+1, ...)")
-    p.add_argument("--bots", default="greedy,greedy", help="two of greedy|random")
+    p.add_argument("--bots", default="greedy,greedy",
+                   help=f"two of {'|'.join(BOT_KINDS)} (referee is ~50-100x slower than "
+                        "greedy: pair it with a low games count, e.g. 50)")
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1, help="worker processes")
     p.add_argument("--map", dest="map_id", default="map_a")
     args = p.parse_args(argv)
