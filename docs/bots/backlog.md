@@ -1,6 +1,6 @@
 # Bots — Backlog
 
-Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Ladder: GreedyBot → TurnBot → RefereeBot. Specs: `handoff-turnbot.md`; status `handoff-turnbot-status.md`.
+Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Ladder: GreedyBot → TurnBot → RefereeBot.
 
 - [ ] **Anchored strength scale (pilot rating).** Measure *absolute-ish* pilot strength, not just A-beats-B. Factored Bradley-Terry fit over all games — `strength = pilot + deck + interaction` — read the *pilot* term. Isolate pilot from deck via **mirror matches** (same deck both sides). Anchor **floor = Random**, **ceiling = oracle**, and **calibrate to human games** (`results/games/`). This is what tells you whether a pilot is trustworthy enough for Balance to rely on. (Rejected: rating opaque bot-deck pairs — confounds pilot skill with deck strength; the factored fit separates them and its `deck` term is optionally reusable by Balance.)
 - [ ] **TurnBot → default report pilot?** Smoke (20/opp) improves-or-ties all 7 decks but blows the 10× throughput gate (12×–266×; draw-driven turn depth — memoization was a negative result, see status §5). Run acceptance (200/opp) and clear the gate: lower `TURN_DETERMINIZATIONS`/`TURN_BEAM_WIDTH` or add a turn-depth cap; A/B speed-vs-winrate via the paired benchmark. Then decide whether `./report` default switches from `greedy,greedy` to `turn,turn`. Don't paper over a failed gate with deck-specific weights.

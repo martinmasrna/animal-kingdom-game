@@ -71,7 +71,7 @@ architecture, performance, tests. (Kept separate from CLI.) Backlog: [`engine/ba
 2. **State-representation speed** (struct-of-arrays) — *parked* until NN bots; measure clone cost first.
 
 ## 4. Bots
-_The AI players and their quality. `bots/`, `bots/handoff-turnbot*.md`. Backlog: [`bots/backlog.md`](bots/backlog.md)._
+_The AI players and their quality. `bots/`. Backlog: [`bots/backlog.md`](bots/backlog.md)._
 
 **State:** Ladder is **GreedyBot** (fast baseline) → **TurnBot** (M6, new middle tier) →
 **RefereeBot** (calibration oracle). TurnBot smoke: improves-or-ties all 7 decks, but blows the

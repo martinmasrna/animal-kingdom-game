@@ -48,7 +48,7 @@ Cross-cutting questions raised across the 7 decks, each detailed in the per-deck
 - **E. Strength-modifier subsystem — RESOLVED (2026-06-28).** Model spec in `keywords.md` (§ Strength modifiers). One number, three layers, evaluated **live** wherever strength matters: `effective_strength = base_or_dynamic + stored_counters + active_anthems`, clamped ≥ 0.
   - **"has +X" = anthem** (live, conditional aura; vanishes with its source) — wolf matriarch, African Wild Dog, Colony's Champion / Guard Hornet. This live layer **subsumes existing dynamic strength** (giant anaconda = removed units) — one mechanism in `strength.py`.
   - **"give +X" = permanent counter** (one-time grant, stored on the instance, persists after the granter dies) — Dhole, howl, hellhound's returned Canine, the end-of-turn buffer.
-  - **Always live** → resolves the open `handoff-engine §9` snapshot question (we never snapshot; strength is recomputed at check time).
+  - **Always live** → resolves the snapshot question (we never snapshot; strength is recomputed at check time).
   - **Hand cards carry buffs:** hand entries are instances with a `strength_counter` that travels onto the board when played. Hand buffs are **one-time** (a Canine drawn *after* the buff is not retroactively buffed).
   - **`ON_GAIN_STRENGTH`** fires only on discrete counter grants (Layer B), never on live anthem drift; the slot-6 reactor is once-per-turn + loop-guarded.
   - **Counters are signed ints** (future "−X" debuff just works; none exist yet — Skunk is a bounce).

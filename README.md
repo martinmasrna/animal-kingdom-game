@@ -8,8 +8,7 @@ transport-agnostic library so a UI layer can drop on top later.
 
 Design source of truth lives in [`docs/`](docs/) — start at [`docs/STATUS.md`](docs/STATUS.md),
 the project dashboard. Rules are in `docs/rules/` (`overview.md`, `keywords.md`, `maps.md`), the
-card pool in `docs/cards/` (incl. `decks/`), and the engine build spec is
-`docs/engine/handoff-engine.md`. Each area has a `backlog.md` of open items.
+card pool in `docs/cards/` (incl. `decks/`). Each area has a `backlog.md` of open items.
 
 ## Status
 
