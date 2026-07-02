@@ -6,8 +6,8 @@ Source: user's offline Google Sheet (uploaded 2026-06-28).
 ## Legendary (×1)
 | Name | Tag | Str | Effect | Description |
 |---|---|---:|---|---|
-| **Prince Leo** | Cat | 5 | Battlecry: you may immediately play Princess Lea from your hand or deck. | Lion prince. Young, strong, quick, and always by his twin sister's side. |
-| **Princess Lea** | Cat | 5 | Battlecry: you may immediately play Prince Leo from your hand or deck. | Lion princess. Young, strong, quick, and always by her twin brother's side. |
+| **Prince Leo** | Cat | 4 | Battlecry: you may immediately play Princess Lea from your hand or deck. | Lion prince. Young, strong, quick, and always by his twin sister's side. |
+| **Princess Lea** | Cat | 4 | Battlecry: you may immediately play Prince Leo from your hand or deck. | Lion princess. Young, strong, quick, and always by her twin brother's side. |
 | **King Theron** | Cat | 8 | When one of your Cats covers an enemy unit, remove that enemy. | Lion king. |
 | **Queen Adira** | Cat | 6 | When one of your Cats removes an enemy unit, draw 1 card. | Lion queen. |
 

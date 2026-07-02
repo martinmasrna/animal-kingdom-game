@@ -8,7 +8,7 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Cat"],
-      "base_strength": 5,
+      "base_strength": 4,
       "keywords": [],
       "text": "Battlecry: you may immediately play Princess Lea from your hand or deck."
     },
@@ -19,7 +19,7 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Cat"],
-      "base_strength": 5,
+      "base_strength": 4,
       "keywords": [],
       "text": "Battlecry: you may immediately play Prince Leo from your hand or deck."
     },
