@@ -16,8 +16,29 @@ never `Landmark`.
 Ignores the connection-to-HQ requirement when placed. (All other placement rules still apply.)
 
 ### Immovable
-Cannot be removed or moved by special effects. (It can still be covered/eaten under the normal
-placement rules unless another keyword says otherwise.)
+*Physics* (keyword-review ruling A2, 2026-07-02 — see
+`docs/keyword-review-immovable-untargetable.md`). Cannot be removed, moved (bounced), or
+eaten by **any** ability — the enemy's **or its own controller's** (Carmilla cannot
+sacrifice a Giant Tortoise; that cost is deliberate). It can still be **covered** under the
+normal placement rules — covering is placement, not an ability. A mass effect (Pestis) skips
+an Immovable occupant **in place** and still removes everything else in the stack; Immovable
+is not a shield for the cards beneath it. Scope is **board-only**: an Immovable card in hand
+can be paid or discarded normally.
+
+Carried by: Giant Tortoise, Scrooge, Methuselah, Bulwark, Elephant.
+
+⚠ *Open item (todo.md): the keyword still feels slightly off (name and effect footprint) —
+scheduled for another look after balance data accumulates.*
+
+### Stealth  *(renamed from "untargetable", ruling E)*
+Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a
+target from (Jaguar/Serval/Stoop/Gray Wolf/Soldier Ant/Rat/Hornet/Skunk), and an Apex
+Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it instead).
+**Mass, random, and automatic effects hit it normally**: Pestis/Rhinoceros/Bulwark AoE,
+Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron/Pufferfish
+triggers. Its own controller may still choose it freely. Scope is board-only.
+
+Carried by: Black Panther.
 
 ### Fragile
 When another occupant is placed on top of this, this is removed — it does not survive under the
@@ -28,19 +49,21 @@ stack. (Pairs with timed payoffs: Eggs and Landmarks are typically Fragile.)
 
 - **Must** be placed on top of another **occupant** — it **cannot** be placed on an empty
   crossroad. If there is no legal occupant to land on, it cannot be played.
-- **Normal covering strength rules still apply:** to land on an **enemy** occupant it needs
-  **strictly greater** effective strength (like normal covering); landing on **your own**
-  occupant has **no** strength requirement.
+- **Normal covering rules apply in full** (keyword-review ruling C1, 2026-07-02): landing on
+  an **enemy** occupant uses the same legality as a normal cover — strictly-greater strength
+  by default, **including every covering static**: Snow Leopard lets an apex Cat land at
+  equal strength, Chameleon may be landed on regardless of strength, and **Porcupine
+  ("cannot be covered by enemy units") blocks the landing entirely** — quills beat teeth.
+  Landing on **your own** occupant has **no** strength requirement.
 - **May target your own occupants** as well as enemy ones — and removes (eats) them too.
 - On placement it **removes** the occupant it lands on **instead of covering/stacking** on it
   (cf. Boa Constrictor). The removed occupant's Deathrattle / on-remove effects fire normally.
   The predator then occupies the crossroad (on top of any remaining stack beneath).
-- **If the occupant can't be eaten** (Immovable, or an enemy that's Untargetable — e.g. Black
-  Panther), the predator is **not** blocked from landing there: it simply **covers** it under
-  the normal placement rules (still needs strictly-greater strength vs an enemy) and buries it
-  instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it
-  does *when it can*, not a placement precondition. *(These "can't be eaten" cases are part of
-  the broader Immovable/Untargetable rethink — see `todo.md`.)*
+- **If the occupant can't be eaten** (Immovable, or an enemy with Stealth — the eat is a
+  chosen single-out, ruling C3), the predator is **not** blocked from landing there: it
+  simply **covers** it under the normal placement rules and buries it instead of eating it.
+  Apex Predator is not restricted to prey it can eat — eating is what it does *when it can*,
+  not a placement precondition.
 - **Cannot be placed onto a headquarters** — deliberate design choice, so Apex Predators can't
   capture an enemy HQ directly.
 - **Destroys Eggs and Landmarks** it lands on (they are occupants).

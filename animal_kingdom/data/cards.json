@@ -86,8 +86,8 @@
       "type": "unit",
       "tags": ["Cat"],
       "base_strength": 6,
-      "keywords": [],
-      "text": "Cannot be targeted by enemy special effects."
+      "keywords": ["Stealth"],
+      "text": "Stealth."
     },
     {
       "id": "lion",
