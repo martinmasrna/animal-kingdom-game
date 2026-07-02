@@ -28,6 +28,10 @@ from ..engine import strength as strength_mod
 SEAT_STYLE = {"A": "bold cyan", "B": "bold red"}
 HIGHLIGHT_STYLE = "bold green"          # a legal target the player is currently choosing among
 RARITY_STYLE = {"legendary": "bold gold3", "rare": "bold blue"}  # common: unstyled
+EMPTY_STYLE = "grey42"                  # unoccupied crossroads / unheld regions: recede into the board
+# A held region is drawn as a filled chip in the holder's seat color, so controlled
+# territory reads at a glance against the dimmed empty blocks.
+REGION_HELD_STYLE = {"A": "bold white on cyan", "B": "bold white on red"}
 
 _MIN_WIDTH = 72    # floor so wrapping stays sane when a terminal reports something tiny
 
@@ -168,7 +172,7 @@ def _render_board(state, highlight_crs: Collection[str] = (),
         inner = _NODE_W - 2
         box_style = HIGHLIGHT_STYLE if cr in highlight_crs else None
         stack = state.board.get(cr)
-        occ_style = SEAT_STYLE.get(stack[-1].owner) if stack else None
+        occ_style = SEAT_STYLE.get(stack[-1].owner) if stack else EMPTY_STYLE
 
         _blit(canvas, style_grid, r0, c0, "┌" + "─" * inner + "┐", box_style)
         _blit(canvas, style_grid, r0 + 1, c0, "│" + f"{x},{y}".center(inner) + "│", box_style)
@@ -214,7 +218,8 @@ def _render_board(state, highlight_crs: Collection[str] = (),
         cy = sum(box_row(y) + _NODE_H // 2 for _, y in rcoords) // len(rcoords)
         holder = _region_holder(state, region)
         token = f"{region.food}{holder or '·'}"
-        _blit(canvas, style_grid, cy, cx - len(token) // 2, token, SEAT_STYLE.get(holder))
+        style = REGION_HELD_STYLE[holder] if holder else EMPTY_STYLE
+        _blit(canvas, style_grid, cy, cx - len(token) // 2, token, style)
 
     # HQ boxes on the edge, each fanning out to every front crossroad: a horizontal edge to
     # the one on its own row and a 45-degree / or \ diagonal to the ones above and below.
@@ -291,8 +296,9 @@ def _card_box(state, unit, inner: int, body_h: int) -> list[str]:
 
     top = _style("┌" + "─" * (inner + 2) + "┐", style)
     bottom = _style("└" + "─" * (inner + 2) + "┘", style)
-    # Two blank rows below the name and two above the STR/tag footer give the card air.
-    rows = [header, "", ""] + body + ["", ""] + [footer]
+    # One blank row below the name and one above the STR/tag footer give the card air
+    # without the old double gap that left tall cards mostly empty.
+    rows = [header, ""] + body + ["", footer]
     return [top] + [f"│ {r.ljust(inner)} │" for r in rows] + [bottom]
 
 
@@ -343,21 +349,34 @@ def _cell(text: str, width: int, style: str | None = None) -> str:
     return _style(text.ljust(width), style)
 
 
+_BAR_W = 16     # food progress-bar width in cells
+
+
+def _food_bar(food: int, win: int, fill_style: str | None) -> str:
+    """A `_BAR_W`-cell progress bar toward `win` food; overfill clamps to full."""
+    frac = max(0.0, min(1.0, food / win)) if win else 0.0
+    filled = round(frac * _BAR_W)
+    return _style("█" * filled, fill_style) + _style("░" * (_BAR_W - filled), EMPTY_STYLE)
+
+
 def _status_panel(state) -> list[str]:
-    """A small aligned scoreboard: each seat's food (toward the win), hand size, deck size."""
+    """A per-seat scoreboard: a food progress bar toward the win, then hand / deck counts.
+
+    The bar fills in the seat's color and flips to green once a seat is within striking
+    distance of the win (the same 75% threshold the old numeric readout highlighted).
+    """
     win = state.game_map.win_food
-    lines = [
-        "   " + _cell("", 10) + _cell("FOOD", 12) + _cell("HAND", 8) + "DECK",
-        "   " + "─" * 30,
-    ]
+    lines = []
     for seat in ("A", "B"):
         food = state.food[seat]
-        food_style = "bold green" if food >= win * 0.75 else None
+        near = food >= win * 0.75
+        fill_style = "bold green" if near else SEAT_STYLE[seat]
+        count = _style(f"{food}/{win}".rjust(7), "bold green" if near else None)
         lines.append(
-            "   " + _cell(f"seat {seat}", 10, SEAT_STYLE[seat])
-            + _cell(f"{food} / {win}", 12, food_style)
-            + _cell(str(len(state.hands[seat])), 8)
-            + str(len(state.decks[seat]))
+            "   " + _cell(f"seat {seat}", 8, SEAT_STYLE[seat])
+            + _food_bar(food, win, fill_style) + "  " + count
+            + _cell(f"   hand {len(state.hands[seat])}", 12)
+            + f"deck {len(state.decks[seat])}"
         )
     return lines
 
