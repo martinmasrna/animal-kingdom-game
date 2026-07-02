@@ -27,12 +27,26 @@ Open decisions and follow-ups parked during card design. Add freely.
 - [ ] **Rename the "Deathrattle" keyword** (the "when this is removed / leaves play" trigger). **Now in active use** across the reworked pool (Opossum, Impala, Gazelle, Phoenix, …) — kept as a placeholder keyword for now (decision 2026-06-28). Standardize on printing **"Deathrattle: …"** rather than writing out "When this is removed." Find an on-theme name later.
 - [ ] **Standardize the Deathrattle card-text wording across the pool (concrete sweep, do at `cards.json` build).** The same trigger is printed two ways today: Opossum prints "Deathrattle: …" while **Impala / Gazelle / Phoenix** write out "When this is removed, …". Pick one form (recommend **"Deathrattle: …"** per `keywords.md`) and apply it uniformly to every Deathrattle card. This is separate from the keyword *rename* above — purely unifying the printed phrasing. Per `keywords.md`, keep the two tiers distinct: a *unit leaving the board* = Deathrattle; a card removed from hand/deck = a plain *remove*, **not** a Deathrattle.
 - [x] **`Apex Predator` keyword fully specified** (2026-06-28, see `docs/keywords.md`): must land on an occupant; normal covering strength rules apply (strictly-greater for enemies, no req for own units); may eat your own units; cannot be placed on an HQ (deliberate — no direct HQ capture); destroys Eggs/Landmarks. *Lingering flavor wart — a predator "eating" a Landmark — folded into the Landmark revisit below.* **Amended 2026-07-01:** Apex is *not* restricted to prey it can eat — if the occupant can't be eaten (Immovable / enemy Untargetable), it now **covers/buries** it under normal placement rules instead of being unplayable there (see the Immovable/Untargetable rethink below).
-- [ ] **⚠ DEDICATED DEEP-DIVE — re-examine `Immovable` and `Untargetable` from scratch (do a focused pass, don't just fold into other work).** This is flagged for its own sit-down review: walk every card that has, cares about, or interacts with these two keywords, tabulate the intended vs actual behavior across all effect types, and only then decide the model. Treat the notes below as the starting agenda, not a settled design. **Rethink the effects of `Immovable` and `Untargetable` (Black Panther) as a pair.** Right now they overlap almost entirely: in the code every unit-touching effect (single/mass removal, bounce/move, Hippo auto-remove) requires *both* `can_be_removed` **and** `can_be_targeted`, so the two keywords block the exact same *set* of effects — the only real difference is **owner scope** (Immovable resists *everyone's* effects incl. its own controller's; Untargetable resists *enemies only*, so you can still sacrifice/move your own Black Panther). Open questions to settle deliberately: (a) Should they block the same effect *types*, or should each have a distinct footprint (e.g. Immovable = can't be *moved/removed* but *can* be debuffed/targeted; Untargetable = can't be *singled out* at all but *can* be caught by non-targeted mass effects)? (b) Is "targeted" meant to include *mass* effects (Pestis/Bulwark wipes) or only single-target picks? (c) Confirm the new Apex ruling (cover-don't-eat) reads consistently for both, and decide the **Porcupine × Apex** and **Snow Leopard × Apex** edges (Apex legality currently uses a bare strictly-greater check, *not* `can_cover`, so Porcupine's "can't be covered by enemy" and Snow Leopard's equal-strength cover don't apply to an Apex landing). (d) Nail down flavor names/text so the two keywords read as clearly different abilities.
+- [x] **Immovable/Untargetable deep-dive: RULED & SHIPPED (2026-07-02).** Full analysis +
+  rulings in `docs/keyword-review-immovable-untargetable.md`. Outcome: **Immovable** =
+  physics (blocks removal/bounce/eat from everyone incl. own controller; Pestis skips it
+  in place rather than stopping); **Stealth** (renamed from untargetable, now a real
+  keyword on Black Panther) = can't be *chosen* by enemy abilities, but mass/random/
+  automatic effects hit it; apex landings go through `can_cover` (Porcupine now blocks
+  apex landings; Snow Leopard/Chameleon apply); both keywords board-only. Engine +
+  `tests/test_keywords.py` (15 behavior tests) + `keywords.md` updated.
+- [ ] **Re-examine `Immovable` again later (naming AND effect footprint)** — martin,
+  2026-07-02, at the A2 ruling: the keyword "still feels a bit off" even after the physics
+  split. Revisit once referee-quality balance data exists for ramp/food_otk: is
+  blocks-own-sacrifices the right cost (Carmilla × Tortoise/Scrooge in food_otk)? Is the
+  name right for what it does (it also blocks *destruction*, not just movement)? Candidates
+  to weigh then: rename (e.g. "Rooted", "Colossal"), or split move-immunity from
+  remove-immunity. This is flagged for its own sit-down review: walk every card that has, cares about, or interacts with these two keywords, tabulate the intended vs actual behavior across all effect types, and only then decide the model. Treat the notes below as the starting agenda, not a settled design. **Rethink the effects of `Immovable` and `Untargetable` (Black Panther) as a pair.** Right now they overlap almost entirely: in the code every unit-touching effect (single/mass removal, bounce/move, Hippo auto-remove) requires *both* `can_be_removed` **and** `can_be_targeted`, so the two keywords block the exact same *set* of effects — the only real difference is **owner scope** (Immovable resists *everyone's* effects incl. its own controller's; Untargetable resists *enemies only*, so you can still sacrifice/move your own Black Panther). Open questions to settle deliberately: (a) Should they block the same effect *types*, or should each have a distinct footprint (e.g. Immovable = can't be *moved/removed* but *can* be debuffed/targeted; Untargetable = can't be *singled out* at all but *can* be caught by non-targeted mass effects)? (b) Is "targeted" meant to include *mass* effects (Pestis/Bulwark wipes) or only single-target picks? (c) Confirm the new Apex ruling (cover-don't-eat) reads consistently for both, and decide the **Porcupine × Apex** and **Snow Leopard × Apex** edges (Apex legality currently uses a bare strictly-greater check, *not* `can_cover`, so Porcupine's "can't be covered by enemy" and Snow Leopard's equal-strength cover don't apply to an Apex landing). (d) Nail down flavor names/text so the two keywords read as clearly different abilities.
 
 ## Balance constants (tune together on one scale)
 
 ### ⚠ Reworked-pool tuning — the real G/H work (gates final balance; does NOT block the `cards.json` build)
-- [ ] **(Decision G) Once-per-turn caps on value/food triggers — undecided; pick defaults + flag as sim dials.** Many reworked triggers state no cap and could spike on a busy turn. Decide a default (uncapped vs once-per-owner-turn) per card; treat the rest as sweepable dials. Prime suspects: **Queen Adira** (draw per Cat-kill) and **King Theron** (remove per Cat-cover) [Cats]; the Egg event-food engine — **Eon** (+1 per draw/shuffle/remove), **Rattlesnake** (+5/shuffle), **Vulture** (+2/remove), **Egg Eater** (+10/egg-removed); **Queen Honoria** (+5 per Colony played), **Worker Wasp** (+3 end of turn), **Soldier Ant** (gated removal) [Colony]; **Jackal** (+3 per adjacent removal) [Canine]. (Fox and Bush Dog already self-cap "once a turn".) Loop-risk pair to watch: **Falstaff** food-rider × **Queen Honoria** / Worker food in one chain.
+- [x] **(Decision G) Once-per-turn caps on value/food triggers — RULED 2026-07-02: all uncapped, as printed.** Martin: "that's how the cards were designed." Applies to all nine reviewed triggers — **Queen Adira** (draw per Cat-kill), **King Theron** (remove per Cat-cover) [Cats]; **Eon** (+1 per draw/shuffle/remove), **Vulture** (+2/remove), **Rattlesnake** (+5/shuffle), **Egg Eater** (+10/egg-removed) [Egg]; **Queen Honoria** (+5/Colony played), **Falstaff** (+3 per food gain) [Colony]; **Jackal** (+3/adjacent removal) [Canine]. Every `cap_*` flag in `engine/config.py` (incl. the two added this pass — `cap_king_theron`, `cap_egg_eater`, both now wired via `_capped()`) stays present and defaults `False`; the dials are kept as sim what-if tooling per the original "flag as sim dials" ask, but the shipped/default behavior for every trigger is the printed, uncapped text. Not reviewed here because they're structurally one-shot or already hard-capped in the engine, not config dials: **Worker Wasp**/Methuselah/Dingo (on_end_of_turn fires once per unit per turn by construction), **Soldier Ant** (Battlecry, fires once on placement), **Fox**/**Bush Dog** (unconditional loop guard against grant→gain→grant chains, not a balance dial). Tests: `tests/test_decision_g_caps.py`.
 - [ ] **(Decision H) Re-derive the whole food economy for the reworked pool (sim job).** Balance all the new numbers on one shared scale against `win_food` (100) and region output (`maps.json`), **replacing the legacy v0 set below** (which references retired cards). New magnitudes to tune: the 20-cost bodies + **Fig Tree** (+20) / **Watering Hole** Landmarks; **Gazelle** (+20 on death) and the sac-OTK burst; **Egg Eater** 10 / **Rattlesnake** 5 / **Vulture** 2 / **Eon** 1-per-event; **Queen Marabunta** (+4/Colony) / **Queen Honoria** (+5/play) / **Worker Ant** (+8) / **Worker Bee** (5+5) / **Falstaff** (+3 rider); **Chipmunk** (5+5) / **Squirrel** (+6); **Scrooge** store→2× window. Keep every number a placeholder in `engine/config.py` — tune there, never hard-code in effect logic. Depends on the M3 sim throughput.
 
 ### Legacy v0 constants (superseded by the G/H work above — most reference retired cards; kept for reference)
@@ -45,6 +59,48 @@ Findings from bot-vs-bot simulation (`sim/report.py`, `sim/gauntlet.py`) worth a
 Caveat carried from `metrics.GREEDY_CAVEAT`: the bot is 1-ply greedy and underplays
 combo/delayed-effect decks, so treat anything here as a *signal to investigate*, not final
 balance truth, until sim quality is closer to competent human play.
+
+- [ ] **Post-keyword-split matrix regeneration (2026-07-02): the canonical greedy matrix
+  (`results/`, 500 games/matchup) now reflects the Immovable/Stealth rules; findings below
+  quote pre-split numbers.** Two real movements from the rules change itself, both invisible
+  to the 50-game referee diff (CI ±14) but solid at 500 games (CI ±4.4): (1) **food_otk lost
+  ~9-10 points** to aggro_hq_rush (50.2→60.4) and egg_control (69.0→78.0) — the old
+  "Pestis stops at the first Immovable occupant" behavior made Giant Tortoise/Scrooge a
+  stack shield, and that shield was load-bearing; with the referee's new-rules numbers at
+  68.0/82.0, the remaining *pilot-quality* overrating of food_otk is now only ~4-8 points
+  (the rest of the previously-confirmed gap got fixed by the rules, not the bot).
+  (2) **cats_midrange vs ramp moved from ramp-favored to even** (greedy 42.6→53.2, referee
+  50.0) — mechanism is almost certainly Snow Leopard now extending to Tiger (apex Cat eats
+  equal-strength prey), which bites hardest against ramp's big-body wall. Watch this pair in
+  future balance passes; "even" is acceptable, further drift toward cats is not.
+
+- [ ] **RefereeBot (M5, 2026-07-01) shipped and gauntlet-validated; first calibration pass
+  says most greedy matchup verdicts hold, with `food_otk` the main suspect.** The referee
+  (`bots/referee_bot.py` + `bots/determinize.py`, kind `referee`) fixes the failed own-line
+  lookahead by playing the opponent's reply turn with a real GreedyBot out of *determinized*
+  hands (K=5 worlds sampled from public info, never the real hidden state - honesty is
+  regression-tested). Validation at 150 games/opponent vs the greedy-piloted pool: piloting
+  the same deck, referee > greedy by **ramp +6.0%** (82.1→88.1), **aggro_hq_rush +12.7%**
+  (33.6→46.3), **egg_control +5.0%** (41.0→46.0) - the biggest gain on exactly the deck the
+  hold-cards/sequencing findings below predicted. Calibration diff (50-game referee-vs-referee
+  round-robin, `results/referee_rr_50/`, vs the 500-game greedy matrix): 19 of 21 matchups
+  move ≤10 points, so the greedy matrix is broadly usable; flagged >15 points:
+  `aggro_hq_rush vs food_otk` 50.2→68.0 and `egg_control vs food_otk` 69.0→84.0.
+  **CONFIRMED at 150 games/matchup, independent seed (2026-07-02,
+  `results/referee_check_{aggro,egg}_food_otk/`)**: aggro_hq_rush 69.3% (greedy matrix said
+  50.2 - a +19.1 swing), egg_control 85.3% (vs 69.0, +16.3); both replicate the 50-game
+  numbers within ~1.3 points and sit far outside the 150-game ±8% CI. Verdict:
+  **`food_otk` is genuinely overrated by the greedy matrix** - under competent adversarial
+  play its setup turns get punished before the combo fires, consistent with GREEDY_CAVEAT
+  overrating combo under passive piloting, and consistent with the earlier human suspicion
+  (memory: food_otk flagged overrated). Treat food_otk's greedy-matrix numbers as inflated
+  when doing G/H tuning; a card-design look (cheaper protection or a faster kill window) is
+  the likely fix if the referee numbers hold after balance passes. Notable non-movers: `cats_midrange` stays dominant
+  (its row-2 rush is not a piloting artifact at this search depth), and
+  `aggro_hq_rush vs cats_midrange` stays ~6% even referee-piloted - the human-playtest
+  contradiction below is *not* resolved by one reply turn of adversarial search (the human
+  wins came from multi-turn disruption sequencing the referee still can't see; deeper horizon
+  is the knob to try). Referee knobs: `runner.REFEREE_DETERMINIZATIONS`/`REFEREE_BEAM_WIDTH`.
 
 - [ ] **Colony Food Swarm loses to board-presence decks before its engine can turn on
   (2026-07-01, real card-balance signal, not a bot-piloting artifact).** 150-game round-robin:

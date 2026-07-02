@@ -15,7 +15,7 @@ from .resources import load_bundled_json
 
 # Allowed value domains (validation). Reworked 98-design pool: README decisions B-E.
 RARITIES = {"common", "rare", "legendary"}
-KEYWORDS = {"Flight", "Immovable", "Fragile", "Apex Predator"}  # static keywords only;
+KEYWORDS = {"Flight", "Immovable", "Fragile", "Apex Predator", "Stealth"}  # static keywords only;
 # Battlecry/Deathrattle are trigger prefixes printed in `text`, not stored keywords.
 TYPES = {"unit", "landmark"}                 # landmark is the lone non-unit type (dec. C)
 LANDMARK_IDS = {"fig_tree", "watering_hole"}  # the only two landmarks in the pool

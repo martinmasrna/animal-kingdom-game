@@ -23,7 +23,7 @@ from typing import Callable, Optional
 from .actions import SKIP, ChoiceAction, PlaceAction
 from .state import EngineError, GameState, Result, UnitInstance, other_player
 from . import statics
-from .strength import effective_strength, placement_strength
+from .strength import effective_strength
 
 
 # ============================================================== pending / requests
@@ -120,10 +120,12 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> No
 
     # Apex Predator (decision D): eat the occupant it lands on instead of covering it; its
     # Deathrattle / remove triggers fire, then the predator occupies what remains beneath.
-    # If the occupant can't be eaten (Immovable / enemy Untargetable), the predator falls
-    # back to a normal cover, burying it — it isn't restricted to prey it can eat.
+    # If the occupant can't be eaten (Immovable, or enemy Stealth - the eat is a chosen
+    # single-out, keyword-review decision C3), the predator falls back to a normal cover,
+    # burying it — it isn't restricted to prey it can eat.
     if is_apex and covered is not None:
-        if _remove_specific(state, cr, covered, by_player=player, by_card=unit.card_id):
+        if (statics.can_be_chosen(state, covered, player)
+                and _remove_specific(state, cr, covered, by_player=player, by_card=unit.card_id)):
             covered = state.top_unit(cr)  # ate it: whatever remains beneath is now covered
         elif covered.owner != player:
             cover_enemy = covered         # couldn't eat -> normal cover (King Theron watches)
@@ -147,15 +149,18 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> No
 
 
 def _fire_cover_event(state, coverer, covered) -> None:
-    """King Theron: when one of your Cats covers an enemy unit, remove that enemy (now buried)."""
+    """King Theron: when one of your Cats covers an enemy unit, remove that enemy (now buried).
+    Decision G: House Cat/extra-placement chains can cover multiple enemies in one turn -
+    `cap_king_theron` (off by default) limits Theron to one free removal per turn."""
     if "Cat" not in state.cards[coverer.card_id].tags:
         return
     for st in state.board.values():
         top = st[-1] if st else None
         if top and top.owner == coverer.owner and top.card_id == "king_theron":
-            state.effect_stack.append(
-                {"op": "remove_iid", "iid": covered.iid, "by_player": coverer.owner,
-                 "by_card": coverer.card_id})
+            if not _capped(state, "cap_king_theron", top):
+                state.effect_stack.append(
+                    {"op": "remove_iid", "iid": covered.iid, "by_player": coverer.owner,
+                     "by_card": coverer.card_id})
             return
 
 
@@ -217,9 +222,11 @@ def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None
     stack = state.board.get(cr)
     if not stack or unit not in stack:
         return False
+    # Only the physics gate lives here (Immovable blocks any effect-removal, whoever chose
+    # it). Stealth is a *choice* restriction, enforced where enemy option lists are built
+    # (and at the Apex eat), never at resolution - so mass/random/automatic removals
+    # (Pestis, Rhino/Bulwark, Grizzly, Hippo, King Theron, Pufferfish) hit Stealth units.
     if by_effect and not statics.can_be_removed(state, unit):
-        return False
-    if by_effect and not statics.can_be_targeted(state, unit, by_player):
         return False
     stack.remove(unit)
     if not stack:
@@ -421,12 +428,16 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
 
 
 def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) -> bool:
-    """Apex Predator landing rules (decision D): it may land wherever it could legally cover -
-    strictly-greater vs an enemy, free on your own. If the occupant is eat-eligible it gets
-    eaten; if not (Immovable / enemy Untargetable) it is simply covered (see _land_unit)."""
+    """Apex Predator landing rules (decision D + keyword-review C1): it may land wherever it
+    could legally cover - free on your own occupants, `statics.can_cover` vs an enemy, so
+    the covering statics apply to apexes exactly as to normal placements: Snow Leopard lets
+    an apex Cat land at equal strength, Chameleon is land-on-able regardless of strength,
+    and Porcupine ("cannot be covered by enemy units") blocks the landing entirely - quills
+    beat teeth. If the occupant is eat-eligible it gets eaten; if not (Immovable / enemy
+    Stealth) it is simply covered (see _land_unit)."""
     if top.owner == placer.owner:
         return True
-    return placement_strength(state, placer) > effective_strength(state, top)
+    return statics.can_cover(state, placer, top)
 
 
 # ============================================================= delayed scheduler
@@ -686,15 +697,20 @@ def _fire_on_gain_strength(state, unit) -> None:
     hook(state, unit, _crossroad_of(state, unit.iid))
 
 
-def _adjacent_enemy_targets(state, unit, cr, *, max_strength=None, min_strength=None):
-    """Crossroads adjacent to `cr` whose enemy top unit is removable, targetable, and within
-    the optional [min_strength, max_strength] effective-strength bounds."""
+def _adjacent_enemy_targets(state, unit, cr, *, max_strength=None, min_strength=None,
+                            chosen=True):
+    """Crossroads adjacent to `cr` whose enemy top unit is removable and within the optional
+    [min_strength, max_strength] effective-strength bounds. `chosen=True` (the enemy player
+    picks from this list) also excludes Stealth units; mass/random effects pass
+    `chosen=False` so Stealth does not hide from them (keyword-review decision B)."""
     out = []
     for nb in sorted(state.game_map.neighbors(cr)):
         top = state.top_unit(nb)
         if not (top and top.owner != unit.owner):
             continue
-        if not (statics.can_be_targeted(state, top, unit.owner) and statics.can_be_removed(state, top)):
+        if not statics.can_be_removed(state, top):
+            continue
+        if chosen and not statics.can_be_chosen(state, top, unit.owner):
             continue
         s = effective_strength(state, top)
         if max_strength is not None and s > max_strength:
@@ -706,12 +722,14 @@ def _adjacent_enemy_targets(state, unit, cr, *, max_strength=None, min_strength=
 
 
 def _adjacent_friendly_units(state, unit, cr):
-    """Crossroads adjacent to `cr` whose top is a friendly, removable, targetable unit."""
+    """Crossroads adjacent to `cr` whose top is a friendly, removable unit. Stealth never
+    hides from its own controller; Immovable blocks its own controller's sacrifices too
+    (decision A2: that's the keyword's cost - e.g. Carmilla can't eat a Scrooge)."""
     out = []
     for nb in sorted(state.game_map.neighbors(cr)):
         top = state.top_unit(nb)
         if (top and top.owner == unit.owner and state.cards[top.card_id].is_unit
-                and statics.can_be_removed(state, top) and statics.can_be_targeted(state, top, unit.owner)):
+                and statics.can_be_removed(state, top)):
             out.append(nb)
     return out
 
@@ -848,7 +866,7 @@ def _rattlesnake_shuffle_event(state, unit, cr, event):  # any card shuffled -> 
 
 
 def _egg_eater_remove_event(state, unit, cr, event):     # an Egg removed -> +10
-    if "Egg" in event["tags"]:
+    if "Egg" in event["tags"] and not _capped(state, "cap_egg_eater", unit):
         gain_food(state, unit.owner, state.config.egg_eater_food)
 
 
@@ -1018,14 +1036,19 @@ def _push_remove_choice(state, owner, by_card, targets):
                                    "by_card": by_card, "options": targets})
 
 
-def _adjacent_enemy_unit_crossroads(state, unit, cr):
-    """Adjacent crossroads topped by an enemy *unit* that can be moved/targeted (for bounces)."""
+def _adjacent_enemy_unit_crossroads(state, unit, cr, *, chosen=True):
+    """Adjacent crossroads topped by an enemy *unit* that can be moved (for bounces).
+    Immovable can't be moved by anyone; Stealth only hides from a `chosen` pick (Skunk),
+    not from a mass bounce (Sirocco, `chosen=False`) - keyword-review decision B."""
     out = []
     for nb in sorted(state.game_map.neighbors(cr)):
         top = state.top_unit(nb)
-        if (top and top.owner != unit.owner and state.cards[top.card_id].is_unit
-                and statics.can_be_removed(state, top) and statics.can_be_targeted(state, top, unit.owner)):
-            out.append(nb)
+        if not (top and top.owner != unit.owner and state.cards[top.card_id].is_unit
+                and statics.can_be_removed(state, top)):
+            continue
+        if chosen and not statics.can_be_chosen(state, top, unit.owner):
+            continue
+        out.append(nb)
     return out
 
 
@@ -1068,21 +1091,22 @@ def _soldier_ant_place(state, unit, cr):
 
 
 def _rhinoceros_place(state, unit, cr):
-    for nb in _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.rhinoceros_max):
+    for nb in _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.rhinoceros_max,
+                                      chosen=False):        # mass AoE hits Stealth
         state.effect_stack.append({"op": "remove_iid", "iid": state.top_unit(nb).iid,
                                    "by_player": unit.owner, "by_card": "rhinoceros"})
 
 
 def _bulwark_place(state, unit, cr):
-    for nb in _adjacent_enemy_targets(state, unit, cr):     # uncapped AoE
+    for nb in _adjacent_enemy_targets(state, unit, cr, chosen=False):  # uncapped AoE, hits Stealth
         state.effect_stack.append({"op": "remove_iid", "iid": state.top_unit(nb).iid,
                                    "by_player": unit.owner, "by_card": "bulwark"})
 
 
 def _hippo_enemy_placed(state, hippo, placed, cr):
+    # Automatic trigger, nobody "chose" the target: Stealth doesn't hide (decision B).
     if (effective_strength(state, placed) <= state.config.hippopotamus_max
-            and statics.can_be_removed(state, placed)
-            and statics.can_be_targeted(state, placed, hippo.owner)):
+            and statics.can_be_removed(state, placed)):
         state.effect_stack.append({"op": "remove_iid", "iid": placed.iid,
                                    "by_player": hippo.owner, "by_card": "hippopotamus"})
 
@@ -1161,10 +1185,12 @@ def _op_black_widow_sac(state, step):
 
 
 def _friendly_unit_crossroads(state, player):
+    # Own sacrifices: Stealth never hides from its controller; Immovable still refuses
+    # (decision A2 - Carmilla/Black Widow can't eat a Tortoise or Scrooge).
     return sorted(
         c for c, st in state.board.items()
         if st[-1].owner == player and state.cards[st[-1].card_id].is_unit
-        and statics.can_be_removed(state, st[-1]) and statics.can_be_targeted(state, st[-1], player))
+        and statics.can_be_removed(state, st[-1]))
 
 
 # --- Mass effects (Aggro) ---
@@ -1183,16 +1209,17 @@ def _op_pestis_wipe(state, step):
         else:
             return PendingRequest("choice", step["chooser"], options=opts)
     target = step["choice"]
-    while True:                                          # remove the entire stack, both players
-        stack = state.board.get(target)
-        if not stack or not _remove_specific(state, target, stack[-1],
-                                             by_player=step["chooser"], by_card="pestis"):
-            break                                        # an Immovable / untargetable occupant stops it
+    # Remove the entire stack, both players, top-down. Immovable occupants are skipped in
+    # place, NOT a shield: everything else in the stack is still wiped around them
+    # (keyword-review decision B amendment). Stealth doesn't hide from a mass wipe.
+    stack = state.board.get(target)
+    for unit in reversed(list(stack or [])):
+        _remove_specific(state, target, unit, by_player=step["chooser"], by_card="pestis")
     return None
 
 
 def _sirocco_place(state, unit, cr):
-    for nb in _adjacent_enemy_unit_crossroads(state, unit, cr):
+    for nb in _adjacent_enemy_unit_crossroads(state, unit, cr, chosen=False):  # mass bounce
         state.effect_stack.append({"op": "bounce_iid", "iid": state.top_unit(nb).iid})
 
 
@@ -1326,7 +1353,7 @@ def _op_grizzly_strike(state, step):
     cr, grizzly = _find_unit(state, step["iid"])
     if grizzly is None:
         return None
-    targets = _adjacent_enemy_targets(state, grizzly, cr)
+    targets = _adjacent_enemy_targets(state, grizzly, cr, chosen=False)  # random, not chosen
     if targets:
         remove_top(state, state.rng.choice(targets), by_player=step["by_player"], by_card="grizzly_bear")
     return None

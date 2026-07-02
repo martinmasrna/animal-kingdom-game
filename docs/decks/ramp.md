@@ -7,7 +7,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Incomplete — has 
 ## Legendary (×1) — names **PROVISIONAL** (assigned 2026-06-30; final flavor pass pending — alternates in `flavor-review.md` §3)
 | Name | Tag | Str | Effect | Description |
 |---|---|---:|---|---|
-| **Methuselah** | Megafauna | 5 | Immovable. At the end of your turn, gain 10 food. | Colossal ancient tortoise. *(ramp engine + wall)* |
+| **Methuselah** | Megafauna | 5 | Immovable. At the end of your turn, gain 5 food. | Colossal ancient tortoise. *(ramp engine + wall)* |
 | **Borealis** | Bear | 10 | Apex Predator. Costs 20 food. | Giant polar bear. |
 | **Aquila** | Bird | 8 | Flight. Apex Predator. Costs 20 food. | Giant harpy eagle. |
 | **Bulwark** | Megafauna | 10 | Immovable. Costs 20 food. Battlecry: remove all adjacent enemy units. | Titanic rhino. *(anti-aggro stomp / fortress finisher)* |

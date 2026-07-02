@@ -15,7 +15,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Has one open `?` co
 ## Rare (×2)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
-| **Flying Squirrel** | Rodent | 4 | Flight. Battlecry: gain 4 food. |
+| **Flying Squirrel** | Rodent | 4 | Flight. Battlecry: gain 8 food. |
 | **Porcupine** | Rodent | 5 | Cannot be covered by enemy units. |
 | **Opossum** | — | 2 | Battlecry: draw 1 card. Deathrattle: return this to your hand. |
 | **Giant Tortoise** | — | 5 | Immovable. |
@@ -23,12 +23,12 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Has one open `?` co
 ## Common (×3)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
-| **Squirrel** | Rodent | 3 | Battlecry: gain 6 food. |
-| **Chipmunk** | Rodent | 1 | Battlecry: gain 5 food. At the start of next turn, gain 5 more. |
+| **Squirrel** | Rodent | 3 | Battlecry: gain 12 food. |
+| **Chipmunk** | Rodent | 1 | Battlecry: gain 10 food. At the start of next turn, gain 10 more. |
 | **Pufferfish** | Fish | 2 | When an enemy unit is placed on top of this, remove that enemy unit and this unit. *(ON_COVERED trap — the deck's only interaction/defense)* |
 | **Black Widow** | Arachnid | 3 | Battlecry: remove an adjacent friendly unit to draw 1. |
 | **Impala** | — | 2 | When this is removed, draw 2. |
-| **Gazelle** | — | 2 | When this is removed, gain 20 food. |
+| **Gazelle** | — | 2 | When this is removed, gain 40 food. |
 
 ---
 

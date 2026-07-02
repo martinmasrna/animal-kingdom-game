@@ -21,6 +21,7 @@ from typing import Sequence
 
 from .bots.greedy_bot import GreedyBot
 from .bots.random_bot import RandomBot
+from .bots.referee_bot import RefereeBot
 from .decks import PREMADE_DECKS, load_premade_deck, make_vanilla_deck
 from .engine import rules
 from .engine import strength as strength_mod
@@ -46,6 +47,7 @@ _DECK_BLURBS = {
 _OPPONENT_LEVELS = [
     ("Easy — random bot", "random"),
     ("Normal — greedy bot (board heuristic + 1-ply lookahead)", "greedy"),
+    ("Hard — referee bot (determinized adversarial search; thinks a few seconds)", "referee"),
 ]
 
 
@@ -113,9 +115,12 @@ def _make_controller(kind: str, seat: str, seed: int):
         return RandomBot(seed=seat_seed)
     if kind == "greedy":
         return GreedyBot(seed=seat_seed)
+    if kind == "referee":
+        return RefereeBot(seed=seat_seed)
     if kind == "human":
         return HumanController()
-    raise SystemExit(f"unknown bot kind {kind!r} (expected 'random', 'greedy', or 'human')")
+    raise SystemExit(
+        f"unknown bot kind {kind!r} (expected 'random', 'greedy', 'referee', or 'human')")
 
 
 def _make_deck(spec: str, deck_rng: random.Random) -> list[str]:

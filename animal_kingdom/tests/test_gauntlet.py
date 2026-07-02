@@ -77,6 +77,13 @@ def test_run_gauntlet_accepts_lookahead_candidate_kind():
     assert result.deck == "ramp"
 
 
+def test_run_gauntlet_accepts_referee_candidate_kind():
+    # Single game/opponent: the referee is ~100-200x slower per decision than greedy.
+    result = run_gauntlet("ramp", 1, base_seed=0, opponent_pool=["egg_control"],
+                          candidate_kind="referee")
+    assert result.deck == "ramp"
+
+
 def test_compare_gauntlets_rejects_mismatched_pool():
     a = run_gauntlet("ramp", 1, base_seed=0, opponent_pool=["egg_control"])
     b = run_gauntlet("ramp", 1, base_seed=0, opponent_pool=["aggro_hq_rush"])

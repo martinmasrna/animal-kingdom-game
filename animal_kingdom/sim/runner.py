@@ -16,6 +16,7 @@ from typing import Callable, Optional
 from ..bots.base import Bot
 from ..bots.greedy_bot import GreedyBot, GreedyWeights
 from ..bots.random_bot import RandomBot
+from ..bots.referee_bot import RefereeBot
 from ..decks import load_premade_deck
 from ..engine import rules
 from ..engine.config import Config
@@ -45,7 +46,7 @@ class GameRecord:
                 "cards_drawn_b": sorted(self.cards_drawn_b)}
 
 
-BOT_KINDS = ("greedy", "lookahead", "random")
+BOT_KINDS = ("greedy", "lookahead", "random", "referee")
 
 # 3-ply own-line lookahead (see GreedyBot's module docstring). Gauntlet-tested 2024: it does
 # correctly find delayed/combo value 1-ply misses (e.g. Grizzly Bear), but nets *worse*
@@ -56,6 +57,14 @@ BOT_KINDS = ("greedy", "lookahead", "random")
 # for a future adversarial version, not as something to actually use for balance sim today.
 LOOKAHEAD_DEPTH = 3
 LOOKAHEAD_BEAM_WIDTH = 8
+
+# RefereeBot (bots/referee_bot.py): the adversarial version the lookahead comment above
+# anticipates - opponent replies are played by a real GreedyBot out of *determinized*
+# hands, so lines get punished honestly. Cost is roughly (beam+1) x determinizations
+# opponent-turn rollouts per decision (~100-200x greedy): meant for low-volume
+# calibration runs (50-150 games/matchup), never the high-throughput balance sims.
+REFEREE_DETERMINIZATIONS = 5
+REFEREE_BEAM_WIDTH = 8
 
 
 def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None) -> Bot:
@@ -72,6 +81,10 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None) -> B
                          depth=LOOKAHEAD_DEPTH, beam_width=LOOKAHEAD_BEAM_WIDTH)
     if kind == "random":
         return RandomBot(seed=seed)
+    if kind == "referee":
+        return RefereeBot(weights=weights, seed=seed,
+                          determinizations=REFEREE_DETERMINIZATIONS,
+                          beam_width=REFEREE_BEAM_WIDTH)
     raise ValueError(f"unknown bot kind {kind!r} (expected one of {BOT_KINDS})")
 
 
