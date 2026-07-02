@@ -2,7 +2,7 @@
 
 Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Deck source of truth: `decks/`. Card-pool doc: `cards.md` (§5–9 are legacy — ignore).
 
-> **Build #5 (rebuild `data/cards.json` + the effect registry from the deck files) is DONE** — `cards.json` carries the reworked pool and the 252-test suite runs on it. Remaining card work is flavor + text cleanup below.
+> **Build #5 (rebuild `data/cards.json` + the effect registry from the deck files) is DONE** — `cards.json` carries the reworked pool and the full test suite runs on it. Remaining card work is flavor + text cleanup below.
 
 ## Flavor
 - [ ] **Dedicated legendary-name review (all 28).** The stricter, do-not-skip pass before flavor-lock. 24/28 are provisional machine-suggested names (2026-06-30); only the 4 Cats are final. Check each against `cards.md` §2.1: (a) evoke, don't cite — extra scrutiny on borderline picks (Lobo, Shuck, Marabunta, Methuselah, Goliath); (b) real species only; (c) effect↔name fit "like a glove"; (d) no collisions / one-species rule (Borealis vs Polar Bear, Goliath vs Anaconda, Carmilla vs Black Widow); (e) tone/register consistency. Alternates in `decks/flavor-review.md` §3.

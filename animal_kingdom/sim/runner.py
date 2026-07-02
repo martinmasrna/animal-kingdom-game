@@ -165,6 +165,24 @@ def _run_spec(spec: MatchSpec, config: Optional[Config] = None) -> GameRecord:
                      bot_a=bot_a, bot_b=bot_b, config=config, map_id=spec.map_id)
 
 
+def run_specs(
+    specs: list[MatchSpec],
+    *,
+    config: Optional[Config] = None,
+    jobs: int = 1,
+) -> list[GameRecord]:
+    """Run an arbitrary deterministic schedule, preserving its input order.
+
+    Most callers should use :func:`run_pairs`. Analysis designs that vary pilots and decks
+    game-by-game (notably the factored pilot-rating experiment) use this lower-level entry
+    point rather than reimplementing process-pool or bot construction plumbing.
+    """
+    if jobs <= 1:
+        return [_run_spec(spec, config) for spec in specs]
+    with ProcessPoolExecutor(max_workers=jobs) as ex:
+        return list(ex.map(_run_spec, specs, [config] * len(specs)))
+
+
 def run_matchup(
     deck_a: str,
     deck_b: str,

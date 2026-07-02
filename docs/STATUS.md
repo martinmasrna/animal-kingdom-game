@@ -51,7 +51,7 @@ _The concrete content: the 7 decks (effects, numbers, names) and their theme. Do
 _**Flavor** (subcategory): animals, biology, folklore, naming — a recurring audit pass, not a separate area._
 
 **State:** All 7 decks content-complete (4-4-6) and **built into `cards.json` + the effect registry
-(build #5 done)** — the 252-test suite runs on the reworked pool. Legendary names **provisional**
+(build #5 done)** — the full test suite runs on the reworked pool. Legendary names **provisional**
 (24/28 machine-suggested 2026-06-30; only the 4 Cats are final). Remaining card work is flavor + text cleanup.
 
 **Next:**
@@ -64,7 +64,7 @@ _Core game code: state, effect stack, rules-as-code, the sim/analysis harness (`
 architecture, performance, tests. (Kept separate from CLI.) Backlog: [`engine/backlog.md`](engine/backlog.md)._
 
 **State:** M0–M6 shipped; pure stdlib engine + effect interpreter + sim harness. Full suite
-**252 passing, 1 xfail**. (M6 TurnBot committed in `aecfdf5`.)
+**260 passing, 1 xfailed**. (M6 TurnBot committed in `aecfdf5`.)
 
 **Next:**
 1. **Fix `metrics.py` `impact` confound** — `win_rate_when_drawn` is biased by win-vs-loss game length (a harness bug, not card quality).
@@ -75,16 +75,17 @@ _The AI players and their quality. `bots/`. Backlog: [`bots/backlog.md`](bots/ba
 
 **State:** Ladder is **GreedyBot** (fast baseline) → **TurnBot** (M6, new middle tier) →
 **RefereeBot** (calibration oracle). TurnBot smoke: improves-or-ties all 7 decks, but blows the
-10× throughput gate (12×–266×). Strength is measured only **relatively** so far (paired deltas) —
-no anchored/absolute rating yet.
+10× throughput gate (12×–266×). Anchored pilot measurement is now available via the factored
+Bradley–Terry runner (`sim/ratings.py`): Random is the fixed floor, Referee is the observed ceiling,
+and every pilot/deck/interaction estimate includes a confidence interval. The full acceptance
+cohort still needs to be run and interpreted before Balance is ungated.
 
 **Next:**
-1. **Anchored strength scale (pilot rating).** Factored Bradley-Terry fit over all games —
-   `strength = pilot + deck + interaction` — read the *pilot* term as an absolute-ish rating.
-   Isolate pilot from deck via **mirror matches**; anchor **floor = Random**, **ceiling = oracle**,
-   **calibrate to human games**. This is what tells you whether a pilot is trustworthy enough for
-   Balance to rely on. *(Balance may reuse the fit's `deck` term, but that's optional.)*
-2. **TurnBot → default pilot?** Pass the acceptance run (200/opp) and clear the 10× throughput gate
+1. **Run the anchored-rating acceptance cohort.** Use the paired 200-game design in
+   [`bots/pilot-ratings.md`](bots/pilot-ratings.md), inspect pilot confidence intervals and
+   execution-difficulty interactions, and decide whether the pilots are trustworthy enough to
+   ungate Balance. Human calibration remains optional pending a curated comparable cohort.
+2. **TurnBot → default pilot?** Pass its acceptance run (200/opp) and clear the 10× throughput gate
    (lower determinizations/beam or a turn-depth cap; A/B speed-vs-winrate), then decide whether
    `./report` switches from `greedy,greedy` to `turn,turn`.
 3. **Known blind spot:** `region_control` over-values the row-2 spine, so neither bot contests
@@ -106,7 +107,7 @@ conventions, tech-debt, cross-cutting performance. The code analogue of Balance.
 work stays in Engine/Bots/CLI.) Backlog: [`code-health/backlog.md`](code-health/backlog.md)._
 
 **State:** No systematic review done yet. Codebase is milestone-built (M0–M6) with a green suite
-(252 passing) and a deliberate architecture (data / config / effect-registry split, pure stdlib
+(260 passing) and a deliberate architecture (data / config / effect-registry split, pure stdlib
 engine) — but has never had a dedicated quality pass.
 
 **Next:**
