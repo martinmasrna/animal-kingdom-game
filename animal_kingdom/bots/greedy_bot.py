@@ -67,6 +67,8 @@ class GreedyWeights:
                                       # invariant under a draw), and deck size alone isn't a
                                       # real resource with the current card pool - hand size is
                                       # the actual flexibility/tempo/denial resource.
+    effect_readiness: float = 16.0   # per distinct Battlecry in hand that can currently
+                                      # produce an observable effect on at least one legal play
     wasted_battlecry: float = 8.0    # penalty for playing a card whose ability text fired for
                                       # nothing (e.g. a removal battlecry with no target) - a
                                       # bot policy adjustment, not part of evaluate() (see
@@ -117,8 +119,10 @@ class GreedyBot(Bot):
             # Mirror the already-decisive self-win (evaluate() returns +inf for it) with a
             # decisive self-loss check: never walk into a position where the opponent's turn
             # opens with a legal HQ capture, if a legal action avoids it.
-            if (nxt.result is None and nxt.player_to_act() == opp
-                    and _opponent_lethal_next_turn(nxt, opp)):
+            # Check at every decision point, not only on the action that hands over the
+            # turn. Effects can open a target choice while another top-level action remains;
+            # choosing the wrong target there may make the eventual HQ loss unavoidable.
+            if nxt.result is None and _opponent_lethal_next_turn(nxt, opp):
                 continue
             if score > best_score:
                 best_score, best = score, [action]
@@ -175,17 +179,27 @@ class GreedyBot(Bot):
 
 
 def _opponent_lethal_next_turn(state: GameState, opponent: str) -> bool:
-    """True if `opponent`'s upcoming turn opens with a legal HQ capture.
+    """True if `opponent` can capture an HQ on their upcoming turn.
 
     Only consults board connectivity (public) and hand *size* (also legitimately public -
-    see `test_eval_ignores_opponent_hand_contents`), never hand contents: any non-empty hand
-    can play the capture once `hq_front(me)` is reached, since it only requires *some*
-    non-Apex unit, not a specific card.
+    see `test_eval_ignores_opponent_hand_contents`), never hidden card identities. Under the
+    classic one-action rules the opponent must already hold a card. Under the two-action
+    variant, an empty-handed opponent can draw and then capture if their deck is non-empty.
     """
     me = other_player(opponent)
     gm = state.game_map
     reaches_my_hq = any(cr in state.connected_occupied(opponent) for cr in gm.hq_front(me))
-    return reaches_my_hq and len(state.hands[opponent]) > 0
+    if not reaches_my_hq:
+        return False
+    if state.hands[opponent]:
+        return True
+    can_draw_then_place = (
+        state.config.actions_per_turn >= 2
+        and state.config.draw_action_count > 0
+        and bool(state.decks[opponent])
+        and len(state.hands[opponent]) < state.config.hand_limit
+    )
+    return can_draw_then_place
 
 
 def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
@@ -220,11 +234,16 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     # --- Connection: own units linked to my HQ (placement reach + resilience) ---
     score += w.connection * len(state.connected_occupied(me))
 
-    # --- Region control: corners I hold, weighted by that region's food output ---
+    # --- Region progress: nonlinear and symmetric ---
+    # A lone central unit can touch four regions but is nowhere close to producing any of
+    # them. Cubing the completion fraction keeps that speculative footprint small while
+    # still making a 3/4 or completed region strategically meaningful.
     region = 0.0
     for r in gm.regions.values():
-        held = sum(1 for c in r.corners if state.owner_of(c) == me)
-        region += held * r.food
+        n = len(r.corners)
+        mine = sum(1 for c in r.corners if state.owner_of(c) == me) / n
+        theirs = sum(1 for c in r.corners if state.owner_of(c) == opp) / n
+        region += r.food * (mine ** 3 - theirs ** 3)
     score += w.region_control * region
 
     # --- HQ threat: who stands in front of whose HQ (one step from capture) ---
@@ -233,6 +252,12 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
 
     # --- Card economy: net cards in hand (not deck - see GreedyWeights.card_economy) ---
     score += w.card_economy * (len(state.hands[me]) - len(state.hands[opp]))
+
+    # --- Immediately enabled effects in hand ---
+    # This is deliberately card-agnostic: the engine itself tells us whether a printed
+    # Battlecry would do anything. It values setup states (duplicates, tag thresholds,
+    # adjacent targets, eligible follow-up cards) without naming a deck or card.
+    score += w.effect_readiness * _enabled_battlecry_count(state, me)
 
     return score
 
@@ -251,8 +276,8 @@ def _battlecry_fizzled(pre: GameState, post: GameState, me: str, action: Action)
     """
     if not isinstance(action, PlaceAction) or action.is_hq_capture:
         return False
-    if not pre.cards[action.card_id].text:
-        return False  # a vanilla body has nothing to waste
+    if not pre.cards[action.card_id].has_battlecry:
+        return False  # passives, keywords, Deathrattles, and vanilla units are not Battlecries
     if post.pending is not None:
         return False  # battlecry offered a real choice (e.g. which adjacent enemy to
                        # remove) - it hasn't fizzled, its outcome just isn't resolved yet
@@ -269,7 +294,64 @@ def _battlecry_fizzled(pre: GameState, post: GameState, me: str, action: Action)
         return False  # e.g. "play another unit"
     if _total_strength_counters(post) != _total_strength_counters(pre):
         return False  # e.g. a buff granted, even with no removal/draw/food attached
+    if len(post.scheduled) != len(pre.scheduled):
+        return False  # delayed Battlecry payoff (Grizzly Bear, Black Bear, Scrooge)
     return True
+
+
+def _enabled_battlecry_count(state: GameState, player: str) -> int:
+    """Count distinct Battlecries in hand that have at least one live legal placement.
+
+    Only outcome *shape* is observed (draw count, pending choice, removal, and so on);
+    drawn card identities never enter the score. Call only at a top-level decision for
+    `player`; pending effect choices are already concrete and need no readiness estimate.
+    """
+    if (state.result is not None or state.pending is not None
+            or state.player_to_act() != player
+            or state.actions_taken_this_turn != 0):
+        return 0
+    battlecries = {
+        u.card_id for u in state.hands[player]
+        if state.cards[u.card_id].has_battlecry
+    }
+    if not battlecries:
+        return 0
+    placements = [
+        a for a in rules.legal_actions(state)
+        if isinstance(a, PlaceAction) and not a.is_hq_capture and a.card_id in battlecries
+    ]
+    # Most Battlecry conditions are board-wide; target-sensitive ones care primarily about
+    # landing on/adjacent to an enemy. Sample those tactical shapes plus one ordinary legal
+    # landing instead of cloning every Flight destination on the map.
+    by_card: dict[str, list[PlaceAction]] = {}
+    for action in placements:
+        by_card.setdefault(action.card_id, []).append(action)
+    representatives: list[PlaceAction] = []
+    opponent = other_player(player)
+    for actions in by_card.values():
+        tactical = [
+            a for a in actions
+            if state.owner_of(a.crossroad) == opponent
+            or any(state.owner_of(nb) == opponent
+                   for nb in state.game_map.neighbors(a.crossroad))
+        ]
+        empty = [a for a in actions if state.top_unit(a.crossroad) is None]
+        connected = [a for a in actions if state.is_connected(player, a.crossroad)]
+        chosen = []
+        for group in (tactical, empty, connected, actions):
+            if group and group[0] not in chosen:
+                chosen.append(group[0])
+        representatives.extend(chosen)
+
+    enabled: set[str] = set()
+    for action in representatives:
+        if action.card_id in enabled:
+            continue
+        nxt = state.clone()
+        rules.apply_action(nxt, action)
+        if not _battlecry_fizzled(state, nxt, player, action):
+            enabled.add(action.card_id)
+    return len(enabled)
 
 
 def _unit_count(state: GameState) -> int:

@@ -15,6 +15,7 @@ import time
 from typing import Sequence
 
 from ..engine.cards import DECK_SLUGS
+from ..engine.config import load_config_overrides
 from . import metrics
 from .runner import BOT_KINDS, run_matchup, run_round_robin
 
@@ -35,10 +36,13 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--bots", default="greedy,greedy", help="two of greedy|random")
     p.add_argument("--jobs", type=int, default=1, help="worker processes (round-robin only)")
     p.add_argument("--map", dest="map_id", default="map_a")
+    p.add_argument("--config", default=None,
+                   help="JSON file of Config field overrides (rule/balance dials)")
     p.add_argument("--out", default="results", help="output directory for the metrics bundle")
     args = p.parse_args(argv)
 
     bots = _parse_bots(args.bots)
+    config = load_config_overrides(args.config)
     spec = args.decks.strip()
     if spec == "all":
         slugs = sorted(DECK_SLUGS)
@@ -56,7 +60,7 @@ def main(argv: Sequence[str] | None = None) -> None:
             print(f"  [{done:>2}/{matchup_total}] {elapsed:6.1f}s  {a} vs {b}  "
                   f"({games_done}/{total_games} games)")
 
-        records = run_round_robin(slugs, args.games, args.seed, bots=bots,
+        records = run_round_robin(slugs, args.games, args.seed, bots=bots, config=config,
                                   map_id=args.map_id, jobs=args.jobs, progress=_progress)
         print(f"Simulation done in {time.monotonic() - start:.1f}s.")
     else:
@@ -65,7 +69,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             raise SystemExit("--decks expects 'all' or two comma-separated slugs")
         a, b = pair[0].strip(), pair[1].strip()
         print(f"Matchup: {a} vs {b}, {args.games} games (bots={bots[0]},{bots[1]})...")
-        records = run_matchup(a, b, args.games, args.seed, bots=bots, map_id=args.map_id)
+        records = run_matchup(a, b, args.games, args.seed, bots=bots, config=config,
+                              map_id=args.map_id)
 
     summary = metrics.write_all(records, args.out)
 

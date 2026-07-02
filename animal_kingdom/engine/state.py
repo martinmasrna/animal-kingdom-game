@@ -159,6 +159,7 @@ class GameState:
         starting_decks: Optional[dict[str, tuple]] = None,
         turn_counter: int = 0,
         units_placed_this_turn: int = 0,
+        actions_taken_this_turn: int = 0,
         next_iid: int = 0,
         effect_stack: Optional[list[dict]] = None,
         pending: Optional[dict] = None,
@@ -181,6 +182,7 @@ class GameState:
         self.rng = rng if rng is not None else random.Random()
         self.turn_counter = turn_counter
         self.units_placed_this_turn = units_placed_this_turn
+        self.actions_taken_this_turn = actions_taken_this_turn
         self._next_iid = next_iid
         # Decision-point + effect machinery (decision 6).
         self.effect_stack = effect_stack if effect_stack is not None else []  # op-steps to resolve
@@ -284,6 +286,7 @@ class GameState:
         new.rng.setstate(self.rng.getstate())  # independent RNG, same position
         new.turn_counter = self.turn_counter
         new.units_placed_this_turn = self.units_placed_this_turn
+        new.actions_taken_this_turn = self.actions_taken_this_turn
         new._next_iid = self._next_iid
         new.effect_stack = copy.deepcopy(self.effect_stack)
         new.pending = copy.deepcopy(self.pending)
@@ -330,6 +333,7 @@ class GameState:
             "rng": _rng_to_dict(self.rng),
             "turn_counter": self.turn_counter,
             "units_placed_this_turn": self.units_placed_this_turn,
+            "actions_taken_this_turn": self.actions_taken_this_turn,
             "next_iid": self._next_iid,
             "effect_stack": copy.deepcopy(self.effect_stack),
             "pending": copy.deepcopy(self.pending),
@@ -367,6 +371,7 @@ class GameState:
             rng=_rng_from_dict(d["rng"]),
             turn_counter=d["turn_counter"],
             units_placed_this_turn=d["units_placed_this_turn"],
+            actions_taken_this_turn=d.get("actions_taken_this_turn", 0),
             next_iid=d["next_iid"],
             effect_stack=copy.deepcopy(d.get("effect_stack") or []),
             pending=copy.deepcopy(d.get("pending")),

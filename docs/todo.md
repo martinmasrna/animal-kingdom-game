@@ -229,6 +229,16 @@ Action items from `flavor-review.md` (the 7-deck flavor audit). The legendary-na
   - **Canine size-inversion:** Fox 5 / Dingo 5 out-body Gray Wolf 4 / Coyote 3 (a fox out-muscling a wolf). Either reskin which animal carries each engine (pure, no mechanics) **or** lower the Fox/Dingo bodies toward real canid sizes (balance-gated).
   - **Apex Predator "eats" a Landmark** (a tiger devouring a fig tree) reads badly; option is to let Apex Predators *trample/raze* rather than eat a Landmark — balance-gated. Folded with the Landmark revisit (*Card model / types*).
 
+## CLI / tooling
+- [ ] **Full TUI rewrite (parked, 2026-07-02).** The terminal CLI (`cli.py`/`render/text.py`)
+  got a `rich`-based polish pass (color by seat/rarity, in-place redraw on a human's turn,
+  card-first-then-highlighted-target selection instead of one flat `place CardX -> cr`
+  menu) — still a plain stdin/stdout loop underneath. Martin flagged a fuller rewrite as a
+  later option: a real terminal app (`textual`) with mouse clicks on the board, arrow-key
+  navigation, persistent panes, live updates — a bigger lift (new dependency, a different
+  interaction model to build/test) that wasn't worth doing up front. Revisit once the
+  `rich` polish feels limiting.
+
 ## Engine / performance
 - [ ] **State-representation speed tradeoff (revisit before NN bots).** The engine currently uses per-unit Python objects (`UnitInstance`) referencing shared immutable `Card` flyweights by id — chosen for correctness, serializability, and readability, and fine for the near-term goal of *thousands* of greedy-bot games. **This will not be fast enough** once we move to **neural-network / AlphaZero-style bots** (MCTS needs millions of cheap state clones + fast batched feature extraction). When we get there, switch the *in-play* representation to **struct-of-arrays / entity-component** (parallel integer arrays indexed by board slot, cloned via array/bytes/NumPy copies, no per-unit objects) and add a tensor-encoding of the per-seat view for the network. The data layer (`cards.json`) and the id-keyed effect registry are deliberately decoupled from the in-play representation, so this is a localized change to `state.py`, not a rewrite. **Measure clone cost in M3 first** (the sim already needs throughput metrics) so the switch is driven by real numbers, not guesswork. Keep `UnitInstance` lean (`__slots__`, primitives only) in the meantime so the gap is as small as possible.
 - [ ] **Flavor pass — re-cast animal names onto existing cards.** Keep the mechanical skeleton (effects/roles/archetype ratios) fixed, but revisit the animal assigned to each card so the species fits its effect "like a glove" — pure renaming, no balance impact. Prioritize the cards currently carrying a generic `—` tag (e.g. Honey Badger, Wild Boar, Armadillo, the anchors), which are where effect-first design shows its seams. Selection filter: pick animals with a *famous specific behavior* (scavenges, steals, plays dead, swarms) rather than just "most iconic," so swarm/utility roles don't get starved in favor of big megafauna.

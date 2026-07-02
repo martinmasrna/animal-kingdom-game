@@ -12,7 +12,9 @@ constructs variant Configs via `sweep(**overrides)` to explore balance dials.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+import json
+from dataclasses import dataclass, fields, replace
+from typing import Optional
 
 
 @dataclass(frozen=True)
@@ -107,6 +109,8 @@ class Config:
     first_player_opening_draw: int = 3   # overview.md §4.3
     second_player_opening_draw: int = 4
     draw_action_count: int = 2           # "Draw 2 cards" (overview.md §5)
+    actions_per_turn: int = 1            # top-level actions (place/draw) per turn; the
+                                          # 2-action variant pairs this with draw_action_count=1
 
     # --- Engine safety / sim hygiene ---
     max_turns: int = 400                 # hard cap so fuzz games always terminate (M1)
@@ -119,3 +123,22 @@ class Config:
     def sweep(self, **overrides) -> "Config":
         """Return a copy with the given fields overridden (for balance sweeps)."""
         return replace(self, **overrides)
+
+
+def load_config_overrides(path: Optional[str]) -> Optional[Config]:
+    """Load a JSON dict of `Config` field overrides; unspecified fields keep defaults.
+
+    Shared by every CLI's `--config` flag. `None`, `''`, and `'none'` mean "no overrides"
+    (return None ⇒ callers fall back to `Config.default()`), so wrapper scripts can inject
+    a default preset that a later `--config none` still overrides back to baseline.
+    """
+    if path is None or path.strip().lower() in ("", "none"):
+        return None
+    with open(path) as f:
+        raw = json.load(f)
+    overrides = {k: v for k, v in raw.items() if not k.startswith("_")}  # "_comment" etc.
+    valid = {f.name for f in fields(Config)}
+    unknown = set(overrides) - valid
+    if unknown:
+        raise SystemExit(f"unknown Config field(s) in {path}: {sorted(unknown)}")
+    return Config.default().sweep(**overrides)

@@ -66,6 +66,11 @@ class Card:
         """Units and Eggs are units (dec. C); Landmarks are not."""
         return self.type == "unit"
 
+    @property
+    def has_battlecry(self) -> bool:
+        """Whether the printed rules text declares an on-placement Battlecry."""
+        return "Battlecry:" in self.text
+
     def has_keyword(self, kw: str) -> bool:
         return kw in self.keywords
 

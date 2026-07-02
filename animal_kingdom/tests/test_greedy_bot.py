@@ -6,10 +6,18 @@ A's HQ fronts are column 1, B's are column 4; the grid is 4x3 with orthogonal ne
 
 from __future__ import annotations
 
-from animal_kingdom.bots.greedy_bot import GreedyBot, GreedyWeights, _battlecry_fizzled, evaluate
+import pytest
+
+from animal_kingdom.bots.greedy_bot import (
+    GreedyBot,
+    GreedyWeights,
+    _battlecry_fizzled,
+    _enabled_battlecry_count,
+    evaluate,
+)
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine import rules
-from animal_kingdom.engine.actions import PlaceAction
+from animal_kingdom.engine.actions import ChoiceAction, DrawAction, PlaceAction
 from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.maps import load_map
@@ -18,9 +26,9 @@ from animal_kingdom.engine.state import GameState, UnitInstance, new_game
 W = GreedyWeights()
 
 
-def make_state(*, current="A", hands=None, decks=None, food=None) -> GameState:
+def make_state(*, current="A", hands=None, decks=None, food=None, config=None) -> GameState:
     state = GameState(
-        load_map("map_a"), load_cards(), Config.default(),
+        load_map("map_a"), load_cards(), config or Config.default(),
         board={}, hands={"A": [], "B": []}, decks=decks or {"A": [], "B": []},
         remove_pile=[], food=food or {"A": 0, "B": 0}, current=current, first_player="A",
     )
@@ -73,6 +81,28 @@ def test_no_state_falls_back_without_crashing():
     assert GreedyBot(seed=0).choose(s.view_for("A"), legal, state=None) in legal
 
 
+def test_blocks_draw_then_capture_threat_during_an_effect_choice():
+    # Two-action regression from the 2026-07-02 Colony-vs-Cats game: B has reached A's
+    # HQ front but has an empty hand. That is still lethal next turn because B can draw,
+    # then capture. Jaguar must remove the unit at 1,2 rather than an irrelevant target.
+    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1)
+    s = make_state(
+        current="A",
+        hands={"A": ["jaguar"]},
+        decks={"A": ["mouse"], "B": ["mouse"]},
+        config=config,
+    )
+    for cr in ("4,2", "3,2", "2,2", "1,2", "2,1"):
+        put(s, cr, "mouse", "B")
+
+    rules.apply_action(s, PlaceAction("jaguar", ("cr", "1,1")))
+    legal = rules.legal_actions(s)
+    assert set(legal) == {ChoiceAction("1,2"), ChoiceAction("2,1")}
+
+    chosen = GreedyBot(seed=0).choose(s.view_for("A"), legal, s)
+    assert chosen == ChoiceAction("1,2")
+
+
 # ------------------------------------------------------------------- evaluate
 
 def test_controlling_more_board_scores_higher():
@@ -86,6 +116,20 @@ def test_more_food_scores_higher():
     poor = make_state(food={"A": 0, "B": 0})
     rich = make_state(food={"A": 30, "B": 0})
     assert evaluate(rich, "A", W) > evaluate(poor, "A", W)
+
+
+def test_region_progress_is_nonlinear_and_symmetric():
+    only_regions = GreedyWeights(
+        food_progress=0, food_proximity=0, board_presence=0, connection=0,
+        region_control=1, enemy_hq_threat=0, own_hq_threat=0, card_economy=0,
+        effect_readiness=0,
+    )
+    mine = make_state()
+    put(mine, "1,1", "lion", "A")
+    theirs = make_state()
+    put(theirs, "1,1", "lion", "B")
+    assert evaluate(mine, "A", only_regions) == pytest.approx(10 * (1 / 4) ** 3)
+    assert evaluate(theirs, "A", only_regions) == -evaluate(mine, "A", only_regions)
 
 
 def test_standing_in_front_of_enemy_hq_is_valued():
@@ -185,6 +229,35 @@ def test_battlecry_with_a_pending_choice_is_not_fizzled():
     assert not _battlecry_fizzled(s, nxt, "A", action)
 
 
+def test_passive_rules_text_is_not_a_fizzled_battlecry():
+    s = make_state(hands={"A": ["guard_hornet"]})
+    action = PlaceAction("guard_hornet", ("cr", "1,2"))
+    nxt = s.clone()
+    rules.apply_action(nxt, action)
+    assert not _battlecry_fizzled(s, nxt, "A", action)
+
+
+def test_scheduled_battlecry_is_not_fizzled():
+    s = make_state(hands={"A": ["grizzly_bear"]})
+    action = PlaceAction("grizzly_bear", ("cr", "1,2"))
+    nxt = s.clone()
+    rules.apply_action(nxt, action)
+    assert nxt.scheduled
+    assert not _battlecry_fizzled(s, nxt, "A", action)
+
+
+def test_effect_readiness_detects_enabled_condition_without_card_special_case():
+    disabled = make_state(
+        hands={"A": ["nurse_bee"]},
+        decks={"A": ["mouse", "lion"], "B": []},
+    )
+    enabled = disabled.clone()
+    put(enabled, "1,1", "guard_hornet", "A")
+    put(enabled, "1,2", "guard_hornet", "A")
+    assert _enabled_battlecry_count(disabled, "A") == 0
+    assert _enabled_battlecry_count(enabled, "A") == 1
+
+
 def test_vanilla_card_is_never_fizzled():
     # Lion has no ability text, so there's nothing for it to waste.
     s = make_state(hands={"A": ["lion"]})
@@ -194,10 +267,11 @@ def test_vanilla_card_is_never_fizzled():
     assert not _battlecry_fizzled(s, nxt, "A", action)
 
 
-def test_choose_prefers_a_live_battlecry_over_a_fizzling_one():
-    # With no target for Rat and an empty deck, Mouse's "draw a Rodent" is the only card
-    # whose battlecry can actually do something - the bot should prefer it.
+def test_choose_does_not_waste_a_battlecry_when_drawing_has_more_value():
+    # Mouse is live and Rat is not, but the standard draw produces more immediate card
+    # economy than spending Mouse to replace itself. The readiness term must not force a
+    # live Battlecry over a strictly better non-placement action.
     s = make_state(hands={"A": ["rat", "mouse"]}, decks={"A": ["mouse"] * 3, "B": []})
     legal = rules.legal_actions(s)
     chosen = GreedyBot(seed=0).choose(s.view_for("A"), legal, s)
-    assert chosen.card_id == "mouse"
+    assert isinstance(chosen, DrawAction)
