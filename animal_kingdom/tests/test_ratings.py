@@ -296,6 +296,51 @@ def test_resume_rejects_provenance_mismatch_before_running(tmp_path, monkeypatch
         )
 
 
+def test_provenance_fingerprints_engine_and_card_map_data():
+    import hashlib
+    from importlib import resources
+
+    provenance = _checkpoint_provenance(1, 7)
+    # Engine modules are hashed (not just the bot policies), so an engine-only change is
+    # recorded even when it leaves the bots byte-identical.
+    engine = provenance["engine_sha256"]
+    for module in ("state.py", "maps.py", "rules.py", "effects.py", "strength.py"):
+        assert module in engine
+    engine_state = resources.files("animal_kingdom.engine") / "state.py"
+    assert engine["state.py"] == hashlib.sha256(engine_state.read_bytes()).hexdigest()
+    # Card/map data files are hashed too.
+    data = provenance["data_sha256"]
+    assert set(data) == {"cards.json", "maps.json"}
+    cards = resources.files("animal_kingdom") / "data" / "cards.json"
+    assert data["cards.json"] == hashlib.sha256(cards.read_bytes()).hexdigest()
+
+
+@pytest.mark.parametrize("field", ["engine_sha256", "data_sha256"])
+def test_resume_rejects_engine_or_data_revision_mismatch(tmp_path, monkeypatch, field):
+    """A checkpoint from one engine/data revision must not be silently resumed by another."""
+    path = tmp_path / "dataset.jsonl"
+    provenance = _checkpoint_provenance(1, 71)
+    run_checkpointed_rating_dataset(
+        ["random", "greedy"], ["ramp", "egg_control"], 1, 71,
+        dataset_path=path, provenance=provenance, checkpoint_blocks=2,
+    )
+    # Simulate resuming under a different engine build / edited data file.
+    revised = dict(provenance)
+    revised[field] = dict(provenance[field])
+    some_key = sorted(revised[field])[0]
+    revised[field][some_key] = "0" * 64
+
+    def must_not_run(*args, **kwargs):
+        raise AssertionError("simulation ran before provenance validation")
+
+    monkeypatch.setattr(ratings_module, "run_spec_pair", must_not_run)
+    with pytest.raises(ValueError, match=rf"provenance.*different: {field}"):
+        run_checkpointed_rating_dataset(
+            ["random", "greedy"], ["ramp", "egg_control"], 1, 71,
+            dataset_path=path, provenance=revised, checkpoint_blocks=2,
+        )
+
+
 def test_resume_discards_only_a_truncated_final_checkpoint_line(
     tmp_path, monkeypatch,
 ):

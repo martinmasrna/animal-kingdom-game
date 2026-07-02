@@ -26,6 +26,7 @@ import sys
 import time
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
+from importlib import resources
 from itertools import combinations
 from multiprocessing import TimeoutError as MultiprocessingTimeoutError
 from multiprocessing import get_context
@@ -582,6 +583,34 @@ def _source_hashes(*classes: type) -> dict[str, str]:
     return hashes
 
 
+def _engine_source_hashes() -> dict[str, str]:
+    """SHA-256 of every module in the rules engine, keyed by filename (sorted).
+
+    The per-pilot ``bot_versions`` hashes cover only the bot policies; game *outcomes* also
+    depend on the engine (state/rules/effects/strength/maps/cards/...). Fingerprinting the
+    engine here means a checkpoint produced by one engine revision cannot be silently resumed
+    or extended by another - even a change that leaves the bots byte-identical (e.g. a clone
+    or connectivity refactor) shifts this hash and trips the resume-time provenance guard."""
+    hashes: dict[str, str] = {}
+    engine_dir = resources.files("animal_kingdom.engine")
+    for entry in sorted(engine_dir.iterdir(), key=lambda p: p.name):
+        if entry.name.endswith(".py"):
+            hashes[entry.name] = hashlib.sha256(entry.read_bytes()).hexdigest()
+    return hashes
+
+
+def _data_hashes(*filenames: str) -> dict[str, str]:
+    """SHA-256 of bundled card/map data files, keyed by filename (sorted).
+
+    Card stats and board geometry determine outcomes as directly as the code does, so a
+    silently edited ``cards.json``/``maps.json`` must invalidate an in-progress checkpoint."""
+    hashes: dict[str, str] = {}
+    for name in sorted(filenames):
+        resource = resources.files("animal_kingdom") / "data" / name
+        hashes[name] = hashlib.sha256(resource.read_bytes()).hexdigest()
+    return hashes
+
+
 def build_provenance(
     *,
     pilots: Sequence[str],
@@ -632,11 +661,13 @@ def build_provenance(
     pilot_pairs = len(tuple(combinations(pilots, 2)))
     paired_blocks = pilot_pairs * len(decks) * len(decks) * games_per_config
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "animal_kingdom_version": __version__,
         "pilots": list(pilots),
         "decks": list(decks),
         "bot_versions": bot_versions,
+        "engine_sha256": _engine_source_hashes(),
+        "data_sha256": _data_hashes("cards.json", "maps.json"),
         "bot_parameters": {
             key: value for key, value in bot_parameters.items() if key in pilots
         },
