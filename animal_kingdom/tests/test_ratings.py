@@ -12,6 +12,7 @@ from animal_kingdom.sim.ratings import (
     RatingGame,
     build_paired_schedule,
     fit_ratings,
+    generate_rating_dataset,
 )
 
 PILOT_TRUTH = {
@@ -140,6 +141,16 @@ def test_rating_fit_and_paired_bootstrap_are_seed_deterministic():
     first = fit_ratings(games, ridge=0.01, bootstrap_resamples=10, bootstrap_seed=77)
     second = fit_ratings(games, ridge=0.01, bootstrap_resamples=10, bootstrap_seed=77)
     assert first == second
+
+
+def test_generated_dataset_is_seed_deterministic_across_job_counts():
+    serial = generate_rating_dataset(
+        ["random", "greedy"], ["ramp", "egg_control"], 1, 314, jobs=1
+    )
+    parallel = generate_rating_dataset(
+        ["random", "greedy"], ["ramp", "egg_control"], 1, 314, jobs=2
+    )
+    assert serial == parallel
 
 
 def test_design_rejects_a_missing_pilot_deck_cell_as_unidentifiable():

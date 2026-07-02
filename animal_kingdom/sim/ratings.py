@@ -36,6 +36,8 @@ from ..engine.cards import DECK_SLUGS
 from ..engine.config import Config, load_config_overrides
 from .runner import (
     BOT_KINDS,
+    LOOKAHEAD_BEAM_WIDTH,
+    LOOKAHEAD_DEPTH,
     REFEREE_BEAM_WIDTH,
     REFEREE_DETERMINIZATIONS,
     TURN_BEAM_WIDTH,
@@ -567,12 +569,14 @@ def build_provenance(
     bot_classes = {
         "random": RandomBot,
         "greedy": GreedyBot,
+        "lookahead": GreedyBot,
         "turn": TurnBot,
         "referee": RefereeBot,
     }
     shared_sources = {
         "random": (RandomBot,),
         "greedy": (GreedyBot,),
+        "lookahead": (GreedyBot,),
         # TurnBot and RefereeBot inherit their planner from TurnBot's direct base.
         "turn": (TurnBot, TurnBot.__base__, GreedyBot),
         "referee": (RefereeBot, RefereeBot.__base__, GreedyBot),
@@ -586,6 +590,10 @@ def build_provenance(
         if pilot in bot_classes
     }
     bot_parameters = {
+        "lookahead": {
+            "depth": LOOKAHEAD_DEPTH,
+            "beam_width": LOOKAHEAD_BEAM_WIDTH,
+        },
         "turn": {
             "determinizations": TURN_DETERMINIZATIONS,
             "beam_width": TURN_BEAM_WIDTH,
@@ -658,17 +666,17 @@ def load_dataset(
 
 def format_result(result: RatingResult) -> str:
     def table(title: str, rows: Sequence[tuple[str, RatingEstimate]]) -> list[str]:
-        lines = [title, f"{'name':<24}{'rating':>10}{'95% CI':>24}"]
+        lines = [title, f"{'name':<34}{'rating':>10}{'95% CI':>24}"]
         for name, estimate in rows:
             lines.append(
-                f"{name:<24}{estimate.rating:>+10.3f}"
+                f"{name:<34}{estimate.rating:>+10.3f}"
                 f"  [{estimate.ci_low:>+8.3f}, {estimate.ci_high:>+8.3f}]"
             )
         return lines
 
     lines = [
-        f"Pilot strength (Bradley-Terry log-odds; {result.anchor}=0 fixed",
-        f"observed ceiling reference: {result.ceiling_reference or 'not in dataset'})",
+        f"Pilot strength (Bradley-Terry log-odds; {result.anchor}=0 fixed; "
+        f"observed ceiling: {result.ceiling_reference or 'not in dataset'})",
         "",
     ]
     pilot_rows = sorted(
@@ -680,13 +688,13 @@ def format_result(result: RatingResult) -> str:
     lines += [
         "",
         "Pilot x deck interaction (execution difficulty; rows/columns sum to zero)",
-        f"{'pilot / deck':<24}{'rating':>10}{'95% CI':>24}",
+        f"{'pilot / deck':<34}{'rating':>10}{'95% CI':>24}",
     ]
     for pilot in sorted(result.interactions):
         for deck in sorted(result.interactions[pilot]):
             estimate = result.interactions[pilot][deck]
             lines.append(
-                f"{pilot + ' / ' + deck:<24}{estimate.rating:>+10.3f}"
+                f"{pilot + ' / ' + deck:<34}{estimate.rating:>+10.3f}"
                 f"  [{estimate.ci_low:>+8.3f}, {estimate.ci_high:>+8.3f}]"
             )
     seat = result.seat_advantage
