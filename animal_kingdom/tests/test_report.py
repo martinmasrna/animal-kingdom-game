@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import pytest
+
 from animal_kingdom.decks import load_premade_deck
-from animal_kingdom.engine.cards import load_cards
-from animal_kingdom.sim.report import format_matrix, format_report
+from animal_kingdom.engine.cards import DECK_SLUGS, load_cards
+from animal_kingdom.sim.report import _resolve_deck, format_focused_matrix, format_matrix, format_report
 from animal_kingdom.sim.runner import GameRecord
 
 
@@ -45,3 +47,42 @@ def test_format_report_groups_by_deck_sorted_by_impact():
     assert ramp_section.index(good) < ramp_section.index(bad)
     # every card line is prefixed with a rarity marker.
     assert "\U0001F7E1" in report or "\U0001F535" in report or "⚪" in report
+
+
+def test_resolve_deck_matches_exact_and_abbreviation():
+    slugs = sorted(DECK_SLUGS)
+    assert _resolve_deck("aggro_hq_rush", slugs) == "aggro_hq_rush"
+    assert _resolve_deck("aggro", slugs) == "aggro_hq_rush"
+
+
+def test_resolve_deck_rejects_no_match_or_ambiguous_match():
+    slugs = sorted(DECK_SLUGS)
+    with pytest.raises(SystemExit):
+        _resolve_deck("zzz", slugs)
+    with pytest.raises(SystemExit):
+        _resolve_deck("ca", slugs)          # matches both canine_buff_tempo and cats_midrange
+
+
+def test_format_focused_matrix_shows_both_seats_for_each_opponent():
+    records = [
+        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10),   # ramp (A) beats egg (B)
+        GameRecord("egg_control", "ramp", 1, "A", "A", "hq_capture", 10),   # egg (A) beats ramp (B)
+        GameRecord("ramp", "ramp", 2, "A", "A", "hq_capture", 10),          # mirror
+    ]
+    matrix = format_focused_matrix(records, "ramp")
+
+    assert "### ramp matchups" in matrix
+    assert "ramp (mirror)" in matrix
+    assert "cats_midrange" not in matrix        # never played, shouldn't appear as a row
+    # ramp went 1-0 as seat A and 0-1 as seat B against egg_control.
+    egg_line = next(line for line in matrix.splitlines() if line.startswith("egg_control"))
+    assert "100%" in egg_line and "0%" in egg_line
+
+
+def test_format_report_with_focus_deck_only_prints_that_decks_table():
+    records = [GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10)]
+    report = format_report(records, load_cards(), focus_deck="ramp")
+    assert "### ramp matchups" in report
+    assert "### ramp (deck win rate" in report
+    assert "### egg_control" not in report
+    assert "### Matchup matrix" not in report
