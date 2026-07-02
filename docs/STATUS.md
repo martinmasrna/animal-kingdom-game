@@ -17,7 +17,7 @@ a pure, transport-agnostic library so a UI can drop on later. Engine built in mi
 
 ## Areas & boundaries
 
-Seven areas. The boundary rules that keep them from bleeding:
+Eight areas. The boundary rules that keep them from bleeding:
 
 - **Rules ↔ Cards** — "would it survive swapping the whole card list?" Yes → Rules; no → Cards.
 - **Balance ↔ Cards** — Balance owns *decisions + data*; Cards owns *current state*. A tuning
@@ -26,6 +26,9 @@ Seven areas. The boundary rules that keep them from bleeding:
   and the tuning to hit them; Bots owns *pilot quality*. Good bots **gate** balance conclusions
   but bot work is never a Balance task. And triage every sim finding: real card signal → Balance;
   bot blind-spot/execution bug → Bots. *Never nerf a card to fix a bot.*
+- **Subsystem ↔ Code Health** — work *within one subsystem* (a feature or bug in Engine/Bots/CLI)
+  stays there; *cross-cutting or whole-repo* quality work (full review, repo-wide refactor,
+  conventions, architecture, tech-debt) → Code Health.
 
 ---
 
@@ -94,9 +97,23 @@ _The human interface. `cli.py`, `render/`._
 Plain stdin/stdout loop underneath. Lightest area right now.
 
 **Next:**
-1. **Full TUI rewrite** (`textual`: mouse, panes, live updates) — *parked*; revisit when the `rich` polish feels limiting.
+1. **One more `rich` visual-polish pass** — a round of board/UX refinement on the current stdin/stdout loop before committing to a full TUI.
+2. **Full TUI rewrite** (`textual`: mouse, panes, live updates) — *parked*; revisit after the polish pass, when `rich` feels limiting.
 
-## 6. Balance
+## 6. Code Health
+_Cross-cutting code quality: whole-repo review, architecture principles, repo-wide refactors,
+conventions, tech-debt, cross-cutting performance. The code analogue of Balance. (Subsystem-local
+work stays in Engine/Bots/CLI.)_
+
+**State:** No systematic review done yet. Codebase is milestone-built (M0–M6) with a green suite
+(252 passing) and a deliberate architecture (data / config / effect-registry split, pure stdlib
+engine) — but has never had a dedicated quality pass.
+
+**Next:**
+1. **Full code-review pass** across the whole repo (Engine + Bots + CLI + sim) — the big one to get to.
+2. **Code conventions + a tech-debt register** so known seams are tracked, not rediscovered.
+
+## 7. Balance
 _The central question: are the decks fair? Winrates, matchup matrix, tuning decisions + the data
 behind them. Consumes Bots + the sim harness. Roadmap: `simulation-platform-roadmap.md`._
 
@@ -105,15 +122,15 @@ within **±10%**.
 
 **State:** Neither target met yet. Deck spread too wide — **colony_food_swarm ~23%** (real signal),
 **food_otk overrated** by greedy. Card-impact target can't even be measured reliably yet (the
-`metrics.py impact` confound — Engine #2). **Gated on Bots:** these numbers only mean something
+`metrics.py impact` confound — Engine #1). **Gated on Bots:** these numbers only mean something
 once pilots are trustworthy — but that work is Bots, not Balance.
 
 **Next:**
 1. **Deck equality → pull every deck into 40–60%.** Active levers: Decision H food-economy re-derivation (in progress; Methuselah + food_otk floor shipped; 20-cost bodies, Landmarks, Colony/Egg numbers still open) + card-design fixes for the confirmed-weak decks (colony's early game, food_otk's kill window).
-2. **Card equality → every card's impact within ±10%.** Blocked on the metrics fix (Engine #2) and trustworthy pilots (Bots).
+2. **Card equality → every card's impact within ±10%.** Blocked on the metrics fix (Engine #1) and trustworthy pilots (Bots).
 3. **Triage the open sim findings:** colony early-game weakness (real → card-design look) vs cats-vs-aggro (bot bug → leave the card).
 
-## 7. Meta
+## 8. Meta
 _Holding it together: this dashboard, milestone/roadmap tracking, conventions._
 
 **State:** Milestones M0–M6 tracked; `simulation-platform-roadmap.md` is the long-term north star.
@@ -122,3 +139,4 @@ Docs reorg in progress (this file is step 1).
 **Next:**
 1. **Finish the reorg:** split `todo.md` into per-area `backlog.md` files (the "sort" step).
 2. Keep `STATUS.md` as the session entry point; retire `todo.md` once sorted.
+3. **Project-level `CLAUDE.md` + project skills** — a repo `CLAUDE.md` (conventions, how to run things) and reusable skills for repeatable workflows (e.g. the standard gauntlet run, a flavor pass).
