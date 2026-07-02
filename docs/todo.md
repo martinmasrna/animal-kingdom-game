@@ -60,6 +60,20 @@ Caveat carried from `metrics.GREEDY_CAVEAT`: the bot is 1-ply greedy and underpl
 combo/delayed-effect decks, so treat anything here as a *signal to investigate*, not final
 balance truth, until sim quality is closer to competent human play.
 
+- [ ] **Post-keyword-split matrix regeneration (2026-07-02): the canonical greedy matrix
+  (`results/`, 500 games/matchup) now reflects the Immovable/Stealth rules; findings below
+  quote pre-split numbers.** Two real movements from the rules change itself, both invisible
+  to the 50-game referee diff (CI ±14) but solid at 500 games (CI ±4.4): (1) **food_otk lost
+  ~9-10 points** to aggro_hq_rush (50.2→60.4) and egg_control (69.0→78.0) — the old
+  "Pestis stops at the first Immovable occupant" behavior made Giant Tortoise/Scrooge a
+  stack shield, and that shield was load-bearing; with the referee's new-rules numbers at
+  68.0/82.0, the remaining *pilot-quality* overrating of food_otk is now only ~4-8 points
+  (the rest of the previously-confirmed gap got fixed by the rules, not the bot).
+  (2) **cats_midrange vs ramp moved from ramp-favored to even** (greedy 42.6→53.2, referee
+  50.0) — mechanism is almost certainly Snow Leopard now extending to Tiger (apex Cat eats
+  equal-strength prey), which bites hardest against ramp's big-body wall. Watch this pair in
+  future balance passes; "even" is acceptable, further drift toward cats is not.
+
 - [ ] **RefereeBot (M5, 2026-07-01) shipped and gauntlet-validated; first calibration pass
   says most greedy matchup verdicts hold, with `food_otk` the main suspect.** The referee
   (`bots/referee_bot.py` + `bots/determinize.py`, kind `referee`) fixes the failed own-line
