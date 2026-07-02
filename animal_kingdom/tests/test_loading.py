@@ -71,6 +71,8 @@ def test_known_cards_present_with_expected_data():
     assert cards["fathom"].tags == frozenset()  # tagless ('-')
     assert cards["elephant"].food_cost == 20    # "Costs 20 food" body
     assert cards["fig_tree"].type == "landmark"
+    assert cards["nurse_bee"].has_battlecry
+    assert not cards["guard_hornet"].has_battlecry
 
 
 def test_duplicate_card_id_rejected():

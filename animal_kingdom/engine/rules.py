@@ -45,7 +45,10 @@ def legal_actions(state: GameState) -> list[Action]:
         return []
     if state.pending is not None:          # mid-resolution: offer the sub-choices
         return effects.legal_pending(state)
+    return _top_level_actions(state)
 
+
+def _top_level_actions(state: GameState) -> list[Action]:
     player = state.current
     actions: list[Action] = []
     if state.decks[player] and len(state.hands[player]) < state.config.hand_limit:
@@ -64,8 +67,10 @@ def apply_action(state: GameState, action: Action) -> GameState:
     if state.pending is not None:
         effects.apply_pending(state, action)
     elif isinstance(action, DrawAction):
+        state.actions_taken_this_turn += 1
         _do_draw(state, state.current)
     elif isinstance(action, PlaceAction):
+        state.actions_taken_this_turn += 1
         effects.do_placement(state, state.current, action.card_id, action.target)
     else:
         raise EngineError(f"unexpected action {action!r}")
@@ -81,12 +86,16 @@ def _do_draw(state: GameState, player: str) -> None:
 
 
 def _resolve_and_maybe_end_turn(state: GameState) -> None:
-    """Drain pending effects; end the turn only when resolution is fully complete."""
+    """Drain pending effects; end the turn only when resolution is fully complete
+    and the player has no turn actions left (config.actions_per_turn)."""
     effects.resolve(state)
     if state.result is not None:
         return  # game decided (HQ capture / food)
     if state.effect_stack or state.pending is not None:
         return  # still resolving (a choice is pending or steps remain)
+    if (state.actions_taken_this_turn < state.config.actions_per_turn
+            and _top_level_actions(state)):
+        return  # actions remain and something is playable: the turn stays open
     _end_turn(state)
 
 
@@ -101,6 +110,7 @@ def _end_turn(state: GameState) -> None:
         return  # food win
     state.turn_counter += 1
     state.units_placed_this_turn = 0
+    state.actions_taken_this_turn = 0
     state.turn_flags = {}                    # reset once-per-turn trigger flags
     state.current = other_player(player)
     # Start of the new player's turn: delayed effects + start-of-turn triggers, then resolve.

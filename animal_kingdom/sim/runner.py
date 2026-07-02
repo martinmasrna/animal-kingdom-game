@@ -37,13 +37,17 @@ class GameRecord:
     turns: int
     cards_drawn_a: frozenset[str] = frozenset()
     cards_drawn_b: frozenset[str] = frozenset()
+    final_food_a: int = 0
+    final_food_b: int = 0
 
     def to_dict(self) -> dict:
         return {"deck_a": self.deck_a, "deck_b": self.deck_b, "seed": self.seed,
                 "first_player": self.first_player, "winner": self.winner,
                 "reason": self.reason, "turns": self.turns,
                 "cards_drawn_a": sorted(self.cards_drawn_a),
-                "cards_drawn_b": sorted(self.cards_drawn_b)}
+                "cards_drawn_b": sorted(self.cards_drawn_b),
+                "final_food_a": self.final_food_a,
+                "final_food_b": self.final_food_b}
 
 
 BOT_KINDS = ("greedy", "lookahead", "random", "referee")
@@ -121,7 +125,8 @@ def play_game(
 
     return GameRecord(deck_a, deck_b, seed, state.first_player,
                       result.winner, result.reason, state.turn_counter,
-                      frozenset(drawn["A"]), frozenset(drawn["B"]))
+                      frozenset(drawn["A"]), frozenset(drawn["B"]),
+                      state.food["A"], state.food["B"])
 
 
 # --------------------------------------------------------------- match specs

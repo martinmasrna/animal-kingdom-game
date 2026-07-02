@@ -12,6 +12,7 @@ import json
 import os
 from collections import defaultdict
 from functools import lru_cache
+from statistics import median
 from typing import Iterable, Optional
 
 from ..decks import load_premade_deck
@@ -109,6 +110,43 @@ def avg_game_length(records: Iterable[GameRecord]) -> dict:
                    for (a, b) in by_pair_total}
     return {"overall": (total / len(records) if records else None),
             "per_matchup": per_matchup}
+
+
+def final_food_summary(records: Iterable[GameRecord]) -> dict:
+    """Final food distributions by seat and winner, plus the seat-A food margin."""
+    records = list(records)
+
+    def stats(values: list[int]) -> dict:
+        return {
+            "count": len(values),
+            "mean": (sum(values) / len(values) if values else None),
+            "median": (median(values) if values else None),
+            "min": (min(values) if values else None),
+            "max": (max(values) if values else None),
+        }
+
+    food_a = [r.final_food_a for r in records]
+    food_b = [r.final_food_b for r in records]
+    margins = [r.final_food_a - r.final_food_b for r in records]
+    by_winner = {}
+    for winner in ("A", "B", "draw"):
+        selected = [
+            r for r in records
+            if (winner == "draw" and r.winner is None) or r.winner == winner
+        ]
+        by_winner[winner] = {
+            "food_a": stats([r.final_food_a for r in selected]),
+            "food_b": stats([r.final_food_b for r in selected]),
+            "food_margin_a_minus_b": stats([
+                r.final_food_a - r.final_food_b for r in selected
+            ]),
+        }
+    return {
+        "food_a": stats(food_a),
+        "food_b": stats(food_b),
+        "food_margin_a_minus_b": stats(margins),
+        "by_winner": by_winner,
+    }
 
 
 def _deck_win_rates(records: Iterable[GameRecord]) -> dict[str, float]:
@@ -227,6 +265,7 @@ def write_all(records: Iterable[GameRecord], out_dir: str) -> dict:
         "win_condition_split": win_condition_split(records),
         "first_player_win_rate": first_player_win_rate(records),
         "avg_game_length": avg_game_length(records),
+        "final_food": final_food_summary(records),
         "matchup_decks": matrix["decks"],
         "caveat": GREEDY_CAVEAT + "\n\n" + DRAWN_CAVEAT,
     }

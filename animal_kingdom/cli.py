@@ -28,6 +28,7 @@ from .decks import PREMADE_DECKS, load_premade_deck, make_vanilla_deck
 from .engine import rules
 from .engine import strength as strength_mod
 from .engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
+from .engine.config import load_config_overrides
 from .engine.state import GameState, StateView, new_game
 from .render.text import HIGHLIGHT_STYLE, SEAT_STYLE, render
 
@@ -297,7 +298,7 @@ def _maybe_save_log(log: dict, seed: int, log_arg: str | None, quiet: bool) -> N
 
 
 def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str,
-          log_arg: str | None = None) -> None:
+          log_arg: str | None = None, config_arg: str | None = None) -> None:
     kinds = bot_spec.split(",")
     if len(kinds) != 2:
         raise SystemExit("--bots expects two comma-separated kinds, e.g. random,random")
@@ -314,10 +315,11 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str,
     deck_rng = random.Random(seed)
     deck_a = _make_deck(deck_specs[0], deck_rng)
     deck_b = _make_deck(deck_specs[1], deck_rng)
-    state = new_game(deck_a, deck_b, seed, map_id=map_id)
+    state = new_game(deck_a, deck_b, seed, map_id=map_id,
+                     config=load_config_overrides(config_arg))
 
     log = {
-        "meta": {"seed": seed, "map_id": map_id,
+        "meta": {"seed": seed, "map_id": map_id, "config": config_arg,
                  "decks": {"A": deck_specs[0].strip(), "B": deck_specs[1].strip()},
                  "bots": {"A": kinds[0].strip().lower(), "B": kinds[1].strip().lower()},
                  "opening_hands": {p: [u.card_id for u in state.hands[p]] for p in ("A", "B")}},
@@ -399,6 +401,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--seed", type=int, default=None,
                    help="omit for a fresh random shuffle each run; pass a value to replay a game")
     p.add_argument("--map", dest="map_id", default="map_a")
+    p.add_argument("--config", default=None,
+                   help="JSON file of Config field overrides (rule/balance dials); "
+                        "'none' clears a wrapper-injected preset")
     p.add_argument("--decks", default=None,
                    help="two comma-separated decks: 'vanilla' or a premade slug "
                         "(e.g. ramp,egg_control); default: interactive setup, else vanilla,vanilla")
@@ -421,7 +426,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         _console_out.print(f"[dim](seed={seed} — pass --seed {seed} to replay this exact game)[/dim]")
     else:
         seed = args.seed
-    play(bots, seed, args.map_id, args.quiet, decks, log_arg=args.log_path)
+    play(bots, seed, args.map_id, args.quiet, decks, log_arg=args.log_path,
+         config_arg=args.config)
 
 
 if __name__ == "__main__":

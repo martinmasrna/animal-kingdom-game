@@ -30,6 +30,7 @@ def test_play_game_returns_a_complete_record():
     assert rec.reason in REASONS
     assert rec.first_player in ("A", "B")
     assert rec.turns > 0
+    assert rec.final_food_a >= 0 and rec.final_food_b >= 0
 
 
 def test_play_game_tracks_drawn_cards_end_to_end():
@@ -154,6 +155,20 @@ def test_first_player_win_rate_excludes_draws():
 def test_avg_game_length():
     avg = metrics.avg_game_length(_records())
     assert avg["overall"] == (10 + 20 + 400) / 3
+
+
+def test_final_food_summary():
+    records = [
+        GameRecord("ramp", "egg_control", 0, "A", "A", "food", 10,
+                   final_food_a=100, final_food_b=40),
+        GameRecord("ramp", "egg_control", 1, "A", "B", "food", 12,
+                   final_food_a=30, final_food_b=110),
+    ]
+    summary = metrics.final_food_summary(records)
+    assert summary["food_a"]["mean"] == 65
+    assert summary["food_b"]["median"] == 75
+    assert summary["food_margin_a_minus_b"]["min"] == -80
+    assert summary["by_winner"]["A"]["food_margin_a_minus_b"]["mean"] == 60
 
 
 def test_deck_win_rate_and_impact_ignore_mirror_games():
