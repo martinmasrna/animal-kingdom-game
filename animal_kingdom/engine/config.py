@@ -83,7 +83,8 @@ class Config:
     scrooge_delay: int = 2              # turns until Scrooge's banked food returns
     scrooge_multiplier: int = 2         # banked food returns x this
 
-    # --- Once-per-turn caps (decision G; default off = as printed, dials for the sim) ---
+    # --- Once-per-turn caps (decision G; dials for the sim - see docs/todo.md for the
+    # per-card default ruling and the data behind it) ---
     cap_queen_adira: bool = False
     cap_eon: bool = False
     cap_vulture: bool = False
@@ -91,6 +92,8 @@ class Config:
     cap_jackal: bool = False
     cap_queen_honoria: bool = False
     cap_falstaff: bool = False
+    cap_king_theron: bool = False
+    cap_egg_eater: bool = False
 
     # Region outputs and win_food are map-defined (data/maps.json) and intentionally not
     # duplicated here - maps are the single source of truth for board food.

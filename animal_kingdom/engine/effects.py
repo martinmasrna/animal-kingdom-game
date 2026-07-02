@@ -149,15 +149,18 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> No
 
 
 def _fire_cover_event(state, coverer, covered) -> None:
-    """King Theron: when one of your Cats covers an enemy unit, remove that enemy (now buried)."""
+    """King Theron: when one of your Cats covers an enemy unit, remove that enemy (now buried).
+    Decision G: House Cat/extra-placement chains can cover multiple enemies in one turn -
+    `cap_king_theron` (off by default) limits Theron to one free removal per turn."""
     if "Cat" not in state.cards[coverer.card_id].tags:
         return
     for st in state.board.values():
         top = st[-1] if st else None
         if top and top.owner == coverer.owner and top.card_id == "king_theron":
-            state.effect_stack.append(
-                {"op": "remove_iid", "iid": covered.iid, "by_player": coverer.owner,
-                 "by_card": coverer.card_id})
+            if not _capped(state, "cap_king_theron", top):
+                state.effect_stack.append(
+                    {"op": "remove_iid", "iid": covered.iid, "by_player": coverer.owner,
+                     "by_card": coverer.card_id})
             return
 
 
@@ -863,7 +866,7 @@ def _rattlesnake_shuffle_event(state, unit, cr, event):  # any card shuffled -> 
 
 
 def _egg_eater_remove_event(state, unit, cr, event):     # an Egg removed -> +10
-    if "Egg" in event["tags"]:
+    if "Egg" in event["tags"] and not _capped(state, "cap_egg_eater", unit):
         gain_food(state, unit.owner, state.config.egg_eater_food)
 
 
