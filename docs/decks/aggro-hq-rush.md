@@ -23,7 +23,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Complete (2026-06-2
 ## Common (×3)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
-| **Lemming** | Rodent | 1 | Battlecry: place all Lemmings from your hand on random adjacent **empty** crossroads. |
+| **Lemming** | Rodent | 1 | Battlecry: place all Lemmings from your hand and deck on random adjacent **empty** crossroads. |
 | **Cheetah** | Cat | 5 | Battlecry: if you play this next to the opponent's base, draw 1 card. |
 | **Rat** | Rodent | 2 | Battlecry: remove a card in your hand to destroy an adjacent enemy unit. |
 | **Falcon** | Bird | 4 | Flight. Battlecry: if you play this next to the opponent's base, draw 1 card. |

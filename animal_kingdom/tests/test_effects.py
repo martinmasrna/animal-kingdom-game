@@ -704,6 +704,14 @@ def test_lemming_floods_empty_adjacent_crossroads():
     assert placed == 3 and s.hands["A"] == []
 
 
+def test_lemming_also_pulls_lemmings_from_deck():
+    s = make_state(current="A", hands={"A": ["lemming"]},
+                    decks={"A": ["lemming", "lemming"], "B": []})
+    rules.apply_action(s, PlaceAction("lemming", ("cr", "1,2")))
+    placed = sum(1 for st in s.board.values() for u in st if u.card_id == "lemming")
+    assert placed == 3 and s.hands["A"] == [] and "lemming" not in s.decks["A"]
+
+
 # ============================================================= Stage 2.4: team triggers
 
 def test_king_theron_and_queen_adira_combo_on_a_cat_cover():

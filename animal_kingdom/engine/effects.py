@@ -1251,10 +1251,17 @@ def _op_skunk_bounce(state, step):
 
 def _lemming_place(state, unit, cr):
     hand_lemmings = [u for u in state.hands[unit.owner] if u.card_id == "lemming"]
+    deck_lemming_count = state.decks[unit.owner].count("lemming")
+    sources = [("hand", inst) for inst in hand_lemmings] + [("deck", None)] * deck_lemming_count
+    state.rng.shuffle(sources)
     empty = [nb for nb in state.game_map.neighbors(cr) if not state.board.get(nb)]
     state.rng.shuffle(empty)
-    for inst, spot in zip(hand_lemmings, empty):         # auto-placed copies' Battlecries fizzle (F8)
-        state.hands[unit.owner].remove(inst)
+    for (kind, inst), spot in zip(sources, empty):       # auto-placed copies' Battlecries fizzle (F8)
+        if kind == "hand":
+            state.hands[unit.owner].remove(inst)
+        else:
+            state.decks[unit.owner].remove("lemming")
+            inst = UnitInstance("lemming", unit.owner, state.new_iid())
         inst.placed_on_turn = state.turn_counter
         state.board.setdefault(spot, []).append(inst)
 

@@ -879,7 +879,7 @@
       "tags": ["Rodent"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Battlecry: place all Lemmings from your hand on random adjacent empty crossroads."
+      "text": "Battlecry: place all Lemmings from your hand and deck on random adjacent empty crossroads."
     },
     {
       "id": "cheetah",
