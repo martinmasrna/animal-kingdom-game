@@ -476,7 +476,7 @@
       "tags": ["Megafauna"],
       "base_strength": 5,
       "keywords": ["Immovable"],
-      "text": "Immovable. At the end of your turn, gain 10 food."
+      "text": "Immovable. At the end of your turn, gain 5 food."
     },
     {
       "id": "borealis",
@@ -679,7 +679,7 @@
       "tags": ["Rodent"],
       "base_strength": 4,
       "keywords": ["Flight"],
-      "text": "Flight. Battlecry: gain 4 food."
+      "text": "Flight. Battlecry: gain 8 food."
     },
     {
       "id": "porcupine",
@@ -723,7 +723,7 @@
       "tags": ["Rodent"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Battlecry: gain 6 food."
+      "text": "Battlecry: gain 12 food."
     },
     {
       "id": "chipmunk",
@@ -734,7 +734,7 @@
       "tags": ["Rodent"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Battlecry: gain 5 food. At the start of next turn, gain 5 more."
+      "text": "Battlecry: gain 10 food. At the start of next turn, gain 10 more."
     },
     {
       "id": "pufferfish",
@@ -778,7 +778,7 @@
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "When this is removed, gain 20 food."
+      "text": "When this is removed, gain 40 food."
     },
 
     {

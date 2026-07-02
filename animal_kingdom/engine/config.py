@@ -18,15 +18,18 @@ from dataclasses import dataclass, replace
 @dataclass(frozen=True)
 class Config:
     # --- One-off food gains on placement (Battlecry "gain N food") ---
-    squirrel_food: int = 6
-    chipmunk_food_now: int = 5
-    chipmunk_food_later: int = 5         # paid at the start of the owner's next turn
-    flying_squirrel_food: int = 4
+    squirrel_food: int = 12              # decision H: doubled 2026-07-02 - food_otk's guaranteed
+                                          # one-off floor was ~40% of the v0 "accelerant reaches
+                                          # ~half of win_food" target; see docs/todo.md
+    chipmunk_food_now: int = 10          # decision H: doubled, same reasoning
+    chipmunk_food_later: int = 10        # paid at the start of the owner's next turn (doubled)
+    flying_squirrel_food: int = 8        # decision H: doubled, same reasoning
     worker_ant_food: int = 8
     worker_bee_food: int = 5             # +worker_bee_extra if you control another Worker
     worker_bee_extra: int = 5
     worker_wasp_food: int = 3            # at end of your turn
-    methuselah_food: int = 10            # at end of your turn
+    methuselah_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
+                                          # recurring passive in the pool - ruled down 2026-07-02)
     greywhisker_food: int = 1            # Battlecry: gain 1 food (+ draw 1, + play 1 more)
     queen_marabunta_per_colony: int = 4  # per other friendly Colony unit
     queen_honoria_per_play: int = 5      # per Colony unit you play
@@ -40,7 +43,8 @@ class Config:
     jackal_food: int = 3                 # per adjacent removal
 
     # --- Deathrattle / payoff food ---
-    gazelle_food: int = 20               # Deathrattle: gain food
+    gazelle_food: int = 40               # Deathrattle: gain food (decision H: doubled 2026-07-02,
+                                          # same food_otk-buff reasoning as the rodent one-offs)
     fig_tree_food: int = 20              # Landmark: gain food next turn
 
     # --- Strength anthems ("has +X", live; decision E) ---
