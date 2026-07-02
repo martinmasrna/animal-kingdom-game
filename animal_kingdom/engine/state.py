@@ -84,6 +84,35 @@ def _copy_unit(u: UnitInstance) -> UnitInstance:
                         u.locked_until_turn)
 
 
+def _plain_copy(v):
+    """A deep copy specialised for the effect-model containers (effect_stack, pending,
+    scheduled, turn_flags, card_strength_counters). Those hold only JSON-shaped plain data
+    - nested dict/list/tuple of str/int/float/bool/None - so a typed recursive copy is
+    exactly equivalent to `copy.deepcopy` here, but skips deepcopy's generic memo/id
+    bookkeeping (the search clones states millions of times; deepcopy dominated the profile).
+    Anything unexpected falls back to `copy.deepcopy`, so correctness never depends on the
+    plain-data assumption holding."""
+    t = type(v)
+    if t is dict:
+        return {k: _plain_copy(x) for k, x in v.items()}
+    if t is list:
+        return [_plain_copy(x) for x in v]
+    if t is tuple:
+        return tuple(_plain_copy(x) for x in v)
+    if v is None or t is str or t is int or t is float or t is bool:
+        return v
+    return copy.deepcopy(v)
+
+
+def _copy_rng(rng: random.Random) -> random.Random:
+    """An independent RNG at the same position. `random.Random()` reads OS entropy on
+    construction only to have it immediately overwritten by `setstate`; bypass __init__ via
+    __new__ so the throwaway seed (a top profile entry) is never drawn."""
+    new = random.Random.__new__(random.Random)
+    new.setstate(rng.getstate())
+    return new
+
+
 @dataclass(frozen=True)
 class Result:
     """Terminal game outcome. winner is 'A'/'B', or None for a draw."""
@@ -288,17 +317,16 @@ class GameState:
         new.food = dict(self.food)
         new.current = self.current
         new.first_player = self.first_player
-        new.rng = random.Random()
-        new.rng.setstate(self.rng.getstate())  # independent RNG, same position
+        new.rng = _copy_rng(self.rng)  # independent RNG, same position
         new.turn_counter = self.turn_counter
         new.units_placed_this_turn = self.units_placed_this_turn
         new.actions_taken_this_turn = self.actions_taken_this_turn
         new._next_iid = self._next_iid
-        new.effect_stack = copy.deepcopy(self.effect_stack)
-        new.pending = copy.deepcopy(self.pending)
-        new.scheduled = copy.deepcopy(self.scheduled)
-        new.turn_flags = copy.deepcopy(self.turn_flags)
-        new.card_strength_counters = copy.deepcopy(self.card_strength_counters)
+        new.effect_stack = _plain_copy(self.effect_stack)
+        new.pending = _plain_copy(self.pending)
+        new.scheduled = _plain_copy(self.scheduled)
+        new.turn_flags = _plain_copy(self.turn_flags)
+        new.card_strength_counters = _plain_copy(self.card_strength_counters)
         new.result = self.result  # Result is frozen/immutable - safe to share
         return new
 

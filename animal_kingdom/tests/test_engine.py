@@ -133,6 +133,60 @@ def test_clone_is_independent():
     assert c.to_dict() != before        # clone moved on
 
 
+# ---- clone() fast-path helpers: must stay byte-for-byte equivalent to the generic versions
+# they replaced (copy.deepcopy + random.Random()). These are the search hot path (millions of
+# clones/decision); the speedup is only sound if it is provably semantic-preserving.
+
+def test_plain_copy_matches_deepcopy_and_is_independent():
+    import copy
+
+    from animal_kingdom.engine.state import _plain_copy
+
+    # The shape the effect-model containers actually take: nested dict/list of primitives.
+    original = {
+        "chooser": "A", "kind": "place", "count": 3, "done": False, "note": None,
+        "opts": [{"cr": "r1c2", "iid": 5, "flags": [True, False, None]},
+                 {"cr": "r2c3", "iid": 9, "buff": 2}],
+        "meta": {"src": "lion", "nested": {"deep": [1, 2, {"x": "y"}]}},
+    }
+    copied = _plain_copy(original)
+    assert copied == copy.deepcopy(original)      # value-equal to the generic copy
+    copied["opts"][0]["flags"].append("MUT")      # deep mutation of the copy...
+    copied["meta"]["nested"]["deep"][2]["x"] = "Z"
+    assert original["opts"][0]["flags"] == [True, False, None]   # ...never touches the original
+    assert original["meta"]["nested"]["deep"][2]["x"] == "y"
+
+
+def test_plain_copy_falls_back_for_non_plain_types():
+    import copy
+
+    from animal_kingdom.engine.state import _plain_copy
+
+    # A type outside the plain-data set must still be deep-copied correctly (defensive path),
+    # so correctness never depends on the plain-data assumption holding for future effects.
+    original = {"set_val": {1, 2, 3}, "tup": (1, [2, 3])}
+    copied = _plain_copy(original)
+    assert copied == copy.deepcopy(original)
+    copied["tup"][1].append(99)
+    assert original["tup"][1] == [2, 3]
+
+
+def test_copy_rng_is_independent_and_position_preserving():
+    from animal_kingdom.engine.state import _copy_rng
+
+    src = random.Random(4242)
+    for _ in range(37):
+        src.random()                      # advance to a non-initial position
+    copy_rng = _copy_rng(src)
+    # Same position: the copy reproduces the source's continuation exactly.
+    assert [copy_rng.random() for _ in range(20)] == [src.random() for _ in range(20)]
+    # Independent stream: further draws on the copy do not disturb the source.
+    src_state = src.getstate()
+    for _ in range(10):
+        copy_rng.random()
+    assert src.getstate() == src_state
+
+
 # ------------------------------------------------------------------ serialization
 
 def test_state_round_trips():
