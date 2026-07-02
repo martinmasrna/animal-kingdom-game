@@ -43,8 +43,12 @@ class RefereeMatchSpec:
     map_id: str
     # Explicit RefereeBot kwargs for the candidate as a tuple of (key, value) pairs
     # (frozen/picklable). Empty => the production `make_bot("referee")` config. Lets the
-    # mirror validate an arbitrary candidate search config against the full legacy referee.
+    # mirror validate an arbitrary candidate search config against the reference below.
     candidate_kwargs: tuple = ()
+    # Reference ("legacy") side kwargs. Empty => the full uncapped legacy referee
+    # (staged=False). Set it to the current production config to test a candidate for
+    # non-inferiority against the *shipped* referee rather than the oracle.
+    reference_kwargs: tuple = ()
 
 
 def _run_referee_match(
@@ -58,10 +62,10 @@ def _run_referee_match(
         if spec.candidate_kwargs
         else make_bot("referee", candidate_seed)
     )
-    legacy = RefereeBot(
-        seed=legacy_seed,
-        staged=False,
-        max_search_nodes=None,
+    legacy = (
+        RefereeBot(seed=legacy_seed, **dict(spec.reference_kwargs))
+        if spec.reference_kwargs
+        else RefereeBot(seed=legacy_seed, staged=False, max_search_nodes=None)
     )
     bot_a, bot_b = (
         (candidate, legacy)
@@ -93,12 +97,14 @@ def run_mirror_strength_comparison(
     map_id: str,
     jobs: int,
     candidate_kwargs: tuple = (),
+    reference_kwargs: tuple = (),
     bootstrap_resamples: int = 2_000,
     progress: Optional[Callable[[int, int], None]] = None,
 ) -> dict:
-    """Paired-seat mirror cross-play: staged candidate versus full legacy Referee."""
+    """Paired-seat mirror cross-play: staged candidate versus the reference Referee."""
     specs = [
-        RefereeMatchSpec(deck, base_seed + offset, seat, map_id, candidate_kwargs)
+        RefereeMatchSpec(deck, base_seed + offset, seat, map_id,
+                         candidate_kwargs, reference_kwargs)
         for offset in range(paired_seeds)
         for seat in ("A", "B")
     ]
@@ -171,12 +177,16 @@ def run_mirror_strength_comparison(
             if candidate_kwargs
             else ratings_provenance["bot_parameters"]["referee"]
         ),
-        "legacy_parameters": {
-            "determinizations": 5,
-            "beam_width": 8,
-            "staged": False,
-            "max_search_nodes": None,
-        },
+        "legacy_parameters": (
+            {**ratings_provenance["bot_parameters"]["referee"], **dict(reference_kwargs)}
+            if reference_kwargs
+            else {
+                "determinizations": 5,
+                "beam_width": 8,
+                "staged": False,
+                "max_search_nodes": None,
+            }
+        ),
         "outcomes": [
             {
                 "seed": seed,
@@ -339,6 +349,12 @@ def main(argv: Sequence[str] | None = None) -> None:
              "'det=3,root=5,reply=4,nodes=500' (default: production make_bot config)",
     )
     parser.add_argument(
+        "--reference-config",
+        help="override the reference ('legacy') side, same syntax. Default is the full "
+             "uncapped legacy referee; set e.g. 'nodes=1000' to test non-inferiority "
+             "against the shipped staged config instead of the oracle.",
+    )
+    parser.add_argument(
         "--games",
         type=int,
         default=200,
@@ -358,6 +374,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         if args.games <= 0 or args.games % 2:
             raise SystemExit("--games must be a positive even number")
         candidate_kwargs = _parse_candidate_config(args.candidate_config)
+        reference_kwargs = _parse_candidate_config(args.reference_config)
         decks = sorted(DECK_SLUGS) if args.mirror_deck == "all" else [args.mirror_deck]
         all_ok = True
         for deck in decks:
@@ -369,6 +386,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                 map_id=args.map_id,
                 jobs=args.jobs,
                 candidate_kwargs=candidate_kwargs,
+                reference_kwargs=reference_kwargs,
                 progress=lambda done, total: (
                     print(
                         f"  {done}/{total} games complete",
