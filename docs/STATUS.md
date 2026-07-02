@@ -98,8 +98,10 @@ _The human interface. `cli.py`, `render/`. Backlog: [`cli/backlog.md`](cli/backl
 Plain stdin/stdout loop underneath. Lightest area right now.
 
 **Next:**
-1. **One more `rich` visual-polish pass** — a round of board/UX refinement on the current stdin/stdout loop before committing to a full TUI.
-2. **Full TUI rewrite** (`textual`: mouse, panes, live updates) — *parked*; revisit after the polish pass, when `rich` feels limiting.
+1. **Fix the `map_b` board overflow** — the 5-column map renders ~95 cols and wraps on an 80-col terminal, so `./run`'s default (map_b + 2-actions) looks broken. Compress the geometry or make it responsive.
+2. **Full TUI rewrite** (`textual`: mouse, panes, live updates) — *parked*; revisit when `rich` feels limiting.
+
+_Visual-polish pass done (commit `7d1b961`): dimmed empties, held-region chips, food progress bars, tighter cards, first renderer test._
 
 ## 6. Code Health
 _Cross-cutting code quality: whole-repo review, architecture principles, repo-wide refactors,
