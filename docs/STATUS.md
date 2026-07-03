@@ -5,7 +5,7 @@
 > `docs/<area>/backlog.md`; deeper detail in that area's other docs. Keep this file short; when a
 > "Next" item is done, replace it, don't append history.
 >
-> _Last updated: 2026-07-02._
+> _Last updated: 2026-07-03._
 
 ## The project in one paragraph
 
@@ -90,17 +90,15 @@ cohort still needs to be run and interpreted before Balance is ungated.
    paired-vs-fixed-opponent design instead of hand-rolled low-power mirrors. Follow-up: retire
    `referee_comparison`'s `--mirror-deck` mode + add the skill caveat. See
    [`bots/backlog.md`](bots/backlog.md).
-3. **TurnBot → default pilot? Ready on 6/7 decks; food_otk is a DECK question.** Acceptance cohort
-   (`greedy` vs `turn`+nb80, 200/opp × 7, `results/bot_quality/turnbot/`): TurnBot is a **clear
-   upgrade on 5/7 decks** (aggro +14%, colony +23%, cats/canine/egg +5–7%, all CI>0), a **wash on
-   ramp**, and **underperforms greedy on food_otk (−9.4%)**. Triaged: the strong oracle **RefereeBot
-   *also* loses food_otk to greedy (−9.8%)** — the whole search ladder underperforms 1-ply greedy
-   here, so it's **not a TurnBot bug**. Greedy races the deck's standalone food-gainers while search
-   "sets up" the fragile OTK. Two unresolved hypotheses: (a) the OTK is unrealistic / deck overrated
-   (→ Balance review), (b) a shared `TurnSearcher` eval blind spot. **Escalated to Balance** as a
-   food_otk OTK-realism review; the `./report` switch decision waits on that, not on a bot fix.
-   Throughput solved for the other decks: node budget (`TURN_MAX_SEARCH_NODES=80`) shipped, 6/7 ≤~8.5×;
-   turn-*depth* cap was a no-op (cost is *breadth*); uniform determinization/beam trim rejected.
+3. **TurnBot → default pilot? Strength axis GREEN on all 7 decks; only throughput left.** The original
+   acceptance cohort ran at **map_b + 1-action** — the wrong ruleset (now impossible: 2-action is the code
+   default). Re-ran the full 7-deck cohort at 2-action (`results/bot_quality/turnbot_2action/`, 100/opp,
+   seed 683470156): **TurnBot improves every deck** (all CIs>0) — aggro +18.3%, canine +6.6%, cats +9.0%,
+   colony +41.3%, egg +11.4%, **food_otk +16.4%** (the 1-action "−9.4% regression" was an artifact),
+   ramp +13.0%. So the switch is no longer blocked on any deck's *strength*; the only open gate is
+   **throughput** on the deep-combo decks (food_otk 47.6×, egg/colony ~33×). Decide there (accept the
+   slowdown for balance sims, or scope `./report` to fast decks). Node budget (`TURN_MAX_SEARCH_NODES=80`)
+   shipped; turn-*depth* cap a no-op (cost is *breadth*); uniform determinization/beam trim rejected.
 4. **Known blind spot:** `region_control` over-values the row-2 spine, so neither bot contests
    row-1/3 as an HQ-rush lane.
 
@@ -136,13 +134,15 @@ behind them. Consumes Bots + the sim harness. Roadmap: `balance/simulation-platf
 **Two outcome targets:** (a) every **deck** winrate in **40–60%**; (b) every **card's impact**
 within **±10%**.
 
-**State:** Neither target met yet. Deck spread too wide — **colony_food_swarm ~23%** (real signal),
-**food_otk overrated** by greedy. Card-impact target can't even be measured reliably yet (the
-`metrics.py impact` confound — Engine #1). **Gated on Bots:** these numbers only mean something
-once pilots are trustworthy — but that work is Bots, not Balance.
+**State:** Neither target met yet. Deck spread too wide — **colony_food_swarm ~23%** (real signal).
+**food_otk "overrated" retracted (2026-07-03):** that read came from greedy/1-action; at the settled
+2-action ruleset a search pilot executes the deck's sac-combo to 50%+ (turn +15.6% over greedy), so
+its real deck-balance is **unknown pending a search-vs-search 2-action matchup matrix**. Card-impact
+target can't even be measured reliably yet (the `metrics.py impact` confound — Engine #1). **Gated on
+Bots:** these numbers only mean something once pilots are trustworthy — but that work is Bots, not Balance.
 
 **Next:**
-1. **Deck equality → pull every deck into 40–60%.** Active levers: Decision H food-economy re-derivation (in progress; Methuselah + food_otk floor shipped; 20-cost bodies, Landmarks, Colony/Egg numbers still open) + card-design fixes for the confirmed-weak decks (colony's early game, food_otk's kill window).
+1. **Deck equality → pull every deck into 40–60%.** Active levers: Decision H food-economy re-derivation (in progress; Methuselah + food_otk floor shipped; 20-cost bodies, Landmarks, Colony/Egg numbers still open) + a card-design fix for colony's early game. **food_otk's "kill window" lever struck** — the weakness was a stale-ruleset read (see Balance backlog ✅ verdict); needs a 2-action search-vs-search read before any tuning.
 2. **Card equality → every card's impact within ±10%.** Blocked on the metrics fix (Engine #1) and trustworthy pilots (Bots).
 3. **Triage the open sim findings:** colony early-game weakness (real → card-design look) vs cats-vs-aggro (bot bug → leave the card).
 
