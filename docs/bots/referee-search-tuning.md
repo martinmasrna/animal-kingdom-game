@@ -134,12 +134,16 @@ Crucially the node budget *pays for* the reply widening. Whole-game CPU (ref-vs-
 | reply=8 | 5.82 | 0.91× (slower) |
 | **nodes=150 + reply=8** | **4.05** | **1.31× faster** |
 
-So `nodes=150+reply=8` is **1.31× faster than v2 and stronger on every deck** — a likely strict
-improvement (a faster *and* more oracle-faithful referee), far better than `nodes=150` alone
-merely preserving v2's flawed strength. Strength of the combined config is being confirmed
-directly (`nodes=150,reply=8` vs v2, 200g/deck). The shippable form may still be *adaptive*
-reply-widening (reply=8 only for combo-shaped positions) if the flat `reply=8` cost is
-unwelcome, but the combined config already nets faster, so a flat change looks viable.
+So `nodes=150+reply=8` is **1.31× faster than v2** while being **stronger on the field** — a
+near-strict improvement (faster *and* more oracle-faithful), far better than `nodes=150` alone
+merely preserving v2's flawed strength. Direct validation (`nodes=150,reply=8` vs v2, 200g/deck):
+beats/ties v2 on 6/7 — cats 58.0% [53, 63], colony 57.5% [53, 62.5] (both significant), aggro
+53.0%, food_otk 53.5%, ramp 54.0%, canine 51.0%; **egg 48.0% [41.5, 54.0]** is the lone
+underpowered deck (point ≈ parity, egg's usual high variance — being firmed to 600g). Pending
+egg's firm-up, the recommendation upgrades from "flip `REFEREE_MAX_SEARCH_NODES` 1000→150" to
+"flip that **and** `REFEREE_REPLY_WIDTH` 4→8" — one config that is faster and a better oracle. A
+flat `reply=8` is viable since the combo already nets faster; *adaptive* reply-widening (reply=8
+only for combo-shaped positions via generic features) is a fallback if egg or cost dictates.
 
 ## Reliability grade of the speedup claim
 
