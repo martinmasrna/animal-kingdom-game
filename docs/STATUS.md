@@ -137,12 +137,13 @@ behind them. Consumes Bots + the sim harness. Roadmap: `balance/simulation-platf
 **Two outcome targets:** (a) every **deck** winrate in **40–60%**; (b) every **card's impact**
 within **±10%**.
 
-**State:** Neither target met yet. Deck spread too wide — **colony_food_swarm ~23%** (real signal).
-**food_otk "overrated" retracted (2026-07-03):** that read came from greedy/1-action; at the settled
-2-action ruleset a search pilot executes the deck's sac-combo to 50%+ (turn +15.6% over greedy), so
-its real deck-balance is **unknown pending a search-vs-search 2-action matchup matrix**. Card-impact
-target can't even be measured reliably yet (the `metrics.py impact` confound — Engine #1). **Gated on
-Bots:** these numbers only mean something once pilots are trustworthy — but that work is Bots, not Balance.
+**State:** Neither target met yet, but the deck picture is now measured under competent both-sides
+piloting (turn-vs-turn 7×7 + oracle-bias correction, 2026-07-03 — see `balance/backlog.md`). Real,
+pilot-robust signals: **cats_midrange too strong (~69%)** — #1 nerf target — and **food_otk (~25%) +
+egg_control (~36%) too weak** — joint buff review. **Retracted:** colony_food_swarm's ~23–30% "weak
+deck" reputation was a greedy artifact (competent play → ~48%, in band); food_otk's "overrated" note
+likewise. Card-impact target still unmeasurable (the `metrics.py impact` confound — Engine #1). Pilot
+caveat: TurnBot is sub-oracle (~+8pt), so the matrix is directional; final calls want referee spot-checks.
 
 **Next:**
 1. **Deck equality → pull every deck into 40–60%.** Active levers: Decision H food-economy re-derivation (in progress; Methuselah + food_otk floor shipped; 20-cost bodies, Landmarks, Colony/Egg numbers still open) + a card-design fix for colony's early game. **food_otk's "kill window" lever struck** — the weakness was a stale-ruleset read (see Balance backlog ✅ verdict); needs a 2-action search-vs-search read before any tuning.
