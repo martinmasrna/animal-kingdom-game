@@ -91,11 +91,13 @@ cohort still needs to be run and interpreted before Balance is ungated.
    `referee_comparison`'s `--mirror-deck` mode + add the skill caveat. See
    [`bots/backlog.md`](bots/backlog.md).
 3. **TurnBot → default pilot?** Pass its acceptance run (200/opp) and clear the 10× throughput gate
-   (lower determinizations/beam or a turn-depth cap; A/B speed-vs-winrate), then decide whether
+   (turn-depth cap — the uniform determinization/beam trim was tried and rejected; A/B speed-vs-winrate), then decide whether
    `./report` switches from `greedy,greedy` to `turn,turn`. (Owl/Raven deck-reveal collapse
    shipped `a32dc1c` — `TURN_DECK_REVEAL_CHOICE_WIDTH=2` cut the worst outlier egg 285×→~38×;
-   self-cover placement filter tried and reverted as a wash. Gate still unmet: next is the
-   uniform determinization/beam trim across the remaining ~20–49× cluster.)
+   self-cover placement filter tried and reverted as a wash. Gate still unmet: uniform
+   determinization/beam trim tried and rejected (negative result — determ cut costs ~4% for
+   ~25% speed, beam cut is free but useless; neither approaches 10×). Only remaining lever is a
+   structural turn-depth cap.)
 4. **Known blind spot:** `region_control` over-values the row-2 spine, so neither bot contests
    row-1/3 as an HQ-rush lane.
 
