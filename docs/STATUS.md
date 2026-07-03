@@ -90,14 +90,16 @@ cohort still needs to be run and interpreted before Balance is ungated.
    paired-vs-fixed-opponent design instead of hand-rolled low-power mirrors. Follow-up: retire
    `referee_comparison`'s `--mirror-deck` mode + add the skill caveat. See
    [`bots/backlog.md`](bots/backlog.md).
-3. **TurnBot → default pilot?** Throughput gate nearly met: at 200-game gauntlet ratios **6/7 decks
-   pass (≤~8.5×)** after the node budget (`TURN_MAX_SEARCH_NODES=80`, shipped) — **food_otk (13.5×)
-   is the lone failer**, and TurnBot also *underplays* it (loses to greedy), so its fix is piloting,
-   not truncation. Remaining: run the acceptance winrate cohort (200/opp) and decide whether
-   food_otk's miss blocks the `./report` `greedy,greedy`→`turn,turn` switch or is an accepted caveat.
-   (Levers tried: Owl/Raven deck-reveal collapse `a32dc1c`; uniform determinization/beam trim
-   rejected — negative result; a turn-*depth* cap is a no-op — the cost is search *breadth*, not
-   depth, so the node budget is what worked.)
+3. **TurnBot → default pilot? BLOCKED on food_otk.** Acceptance cohort ran (`greedy` vs `turn`+nb80,
+   200/opp × 7, `results/bot_quality/turnbot/`): TurnBot is a **clear upgrade on 5/7 decks** (aggro
+   +14%, colony +23%, cats/canine/egg +5–7%, all CI>0), a **wash on ramp**, and a **decisive
+   regression on food_otk (−9.4%)** — it pilots the combo *worse than 1-ply greedy* (turn-boundary
+   horizon can't value the delayed OTK payoff) and is the lone throughput failer (12.7×). So a
+   blanket `./report` `greedy,greedy`→`turn,turn` switch would *worsen* food_otk's balance numbers —
+   held. Single blocker = **food_otk piloting** (an end-of-turn eval credit for prepared OTK setup /
+   shallow payoff lookahead); the other six decks are ready. Throughput mostly solved: node budget
+   (`TURN_MAX_SEARCH_NODES=80`) shipped, 6/7 decks ≤~8.5×; a turn-*depth* cap was a no-op (cost is
+   search *breadth*, not depth); uniform determinization/beam trim rejected as a negative result.
 4. **Known blind spot:** `region_control` over-values the row-2 spine, so neither bot contests
    row-1/3 as an HQ-rush lane.
 
