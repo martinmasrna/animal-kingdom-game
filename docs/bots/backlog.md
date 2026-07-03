@@ -36,9 +36,14 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Ladder: Greedy
   ~40%** vs the full legacy referee (seed-noisy at 100 games: 37% / 44% at two seeds;
   budget-independent — ~37% at nodes 1000/350/150 on the low seed; firm number pending a larger
   saved run, but both samples are below parity). The staged root-screen + reply-beam prune
-  exactly colony's deep multi-placement combo/swarm lines. The v2 acceptance only ever validated
-  food_otk (50.5%), so this went unmeasured. Since RefereeBot is the **calibration oracle**, a
-  ~10-pt pilot gap means staged-v2
+  exactly colony's deep multi-placement combo/swarm lines. Isolation (100g, same seed, staged
+  candidate vs oracle): baseline root5/reply4 44% → root8/reply4 45% → **root5/reply8 50%** →
+  **root8/reply8 55%** — the **reply beam is the dominant lever** (widening reply 4→8 restores
+  parity; root secondary). Caveat: a full 100g v2-vs-legacy profile is near-parity on all decks
+  (44–51%), so colony is the softest, not a stark outlier. Tension: widening reply raises the
+  dominant cost (reply rollouts), so this is a faithfulness-vs-throughput call for the oracle.
+  The v2 acceptance only ever validated food_otk (50.5%), so this went unmeasured. Since
+  RefereeBot is the **calibration oracle**, a ~10-pt pilot gap means staged-v2
   is a weaker colony pilot than the exhaustive search it approximates — it can mis-rank colony
   in the anchored ratings. Fix is pilot-side (e.g. widen root/reply for combo-shaped positions,
   generalist; or run the oracle at `staged=False` on a small calibration cohort), **never a card

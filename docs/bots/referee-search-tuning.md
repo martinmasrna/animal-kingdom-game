@@ -89,6 +89,10 @@ Every lower CI ≥ 46 → **meets the ship gate.** ~1.73× whole-game, ~2.8× cu
 original referee. **Not shipped**: it changes the oracle's decisions on budget-exhausted lines,
 so the one-line `REFEREE_MAX_SEARCH_NODES` flip in `sim/runner.py` is left for owner sign-off.
 
+Reproduced at a fresh seed (2500) and pooled to 400 games: egg 49.5% [45.5, 53.8], colony
+50.5% [48.8, 52.2], aggro 49.0% [46.8, 51.2] — all lower CI ≥ 45, so the tie is not a seed
+artifact.
+
 Reproduce:
 ```
 python -m animal_kingdom.sim.referee_comparison --mirror-deck all --games 200 \
@@ -98,15 +102,20 @@ python -m animal_kingdom.sim.referee_comparison --mirror-deck all --games 200 \
 
 ## Separate finding: staged v2 under-pilots colony vs the oracle
 
-The shipped staged v2 pilots `colony_food_swarm` **~40% vs the legacy oracle** (seed-noisy at
-100 games: 37% at one seed, 44% at another — magnitude to firm up with a larger saved run, but
-both samples are below parity so the gap is real; **budget-independent** — ~37% at nodes
-1000/350/150 on the low-seed run). The v2 acceptance only ever validated `food_otk` (50.5%),
-so this was unmeasured. Mechanism hypothesis: the staged root
-screen (8→5) and/or reply beam prune colony's deep combo/swarm lines. This is a calibration
-gap (a weak-pilot oracle can mis-rate colony), a **Bots** fix (never a card nerf), tracked as a
-task and in `backlog.md`. An isolation study (colony with `root=8`/`reply=8` widened, vs
-oracle) pins down the responsible stage.
+A 100-game v2-vs-legacy profile across all 7 decks is **near-parity everywhere** (44–51%; every
+CI ≈ includes 50), so the shipped v2 is roughly oracle-faithful. `colony_food_swarm` is the
+softest — **~40%** (seed-noisy: 37% seed1700 / 44% seed1500; magnitude to firm with a larger
+saved run) — a mild gap, not the 13-pt divergence the first sample suggested. It is
+**budget-independent** (~37% at nodes 1000/350/150 on the low seed).
+
+**Isolation (same seed, staged candidate vs oracle, 100g):** baseline `root5/reply4` 44% →
+`root8/reply4` 45% → `root5/reply8` **50%** → `root8/reply8` **55%**. The **reply beam is the
+dominant lever** (widening reply 4→8 alone restores parity; root is secondary): the staged
+reply/root pruning is what cuts colony's deep combo/swarm lines. **Tension:** widening the reply
+beam raises the dominant cost (reply rollouts), so colony faithfulness trades against referee
+speed — a faithfulness-vs-throughput call for the oracle tier. Fix is pilot-side (adaptive
+wider beams for combo-shaped positions, or `staged=False` on a small calibration cohort),
+**never a card nerf**. Tracked as a task and in `backlog.md`.
 
 ## Reliability grade of the speedup claim
 
