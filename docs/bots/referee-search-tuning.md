@@ -98,9 +98,11 @@ python -m animal_kingdom.sim.referee_comparison --mirror-deck all --games 200 \
 
 ## Separate finding: staged v2 under-pilots colony vs the oracle
 
-The shipped staged v2 pilots `colony_food_swarm` **~37% vs the legacy oracle** (100 games,
-**budget-independent** — identical at nodes 1000/350/150). The v2 acceptance only ever
-validated `food_otk` (50.5%), so this was unmeasured. Mechanism hypothesis: the staged root
+The shipped staged v2 pilots `colony_food_swarm` **~40% vs the legacy oracle** (seed-noisy at
+100 games: 37% at one seed, 44% at another — magnitude to firm up with a larger saved run, but
+both samples are below parity so the gap is real; **budget-independent** — ~37% at nodes
+1000/350/150 on the low-seed run). The v2 acceptance only ever validated `food_otk` (50.5%),
+so this was unmeasured. Mechanism hypothesis: the staged root
 screen (8→5) and/or reply beam prune colony's deep combo/swarm lines. This is a calibration
 gap (a weak-pilot oracle can mis-rate colony), a **Bots** fix (never a card nerf), tracked as a
 task and in `backlog.md`. An isolation study (colony with `root=8`/`reply=8` widened, vs

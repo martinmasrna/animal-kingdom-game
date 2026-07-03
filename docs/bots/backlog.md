@@ -33,10 +33,12 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Ladder: Greedy
     semantic-preserving lever but is higher-risk (per-mutation invalidation).
 - [ ] **Staged Referee v2 diverges from the legacy oracle on combo/deep decks (calibration risk;
   NOT a card nerf).** The shipped `referee` (staged v2, `526ccd0`) pilots **colony_food_swarm
-  ~37%** vs the full legacy referee (100 games; budget-independent — identical at nodes
-  1000/350/150). The staged root-screen + reply-beam prune exactly colony's deep multi-placement
-  combo/swarm lines. The v2 acceptance only ever validated food_otk (50.5%), so this went
-  unmeasured. Since RefereeBot is the **calibration oracle**, a ~13-pt pilot gap means staged-v2
+  ~40%** vs the full legacy referee (seed-noisy at 100 games: 37% / 44% at two seeds;
+  budget-independent — ~37% at nodes 1000/350/150 on the low seed; firm number pending a larger
+  saved run, but both samples are below parity). The staged root-screen + reply-beam prune
+  exactly colony's deep multi-placement combo/swarm lines. The v2 acceptance only ever validated
+  food_otk (50.5%), so this went unmeasured. Since RefereeBot is the **calibration oracle**, a
+  ~10-pt pilot gap means staged-v2
   is a weaker colony pilot than the exhaustive search it approximates — it can mis-rank colony
   in the anchored ratings. Fix is pilot-side (e.g. widen root/reply for combo-shaped positions,
   generalist; or run the oracle at `staged=False` on a small calibration cohort), **never a card
