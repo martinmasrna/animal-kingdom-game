@@ -81,10 +81,13 @@ and every pilot/deck/interaction estimate includes a confidence interval. The fu
 cohort still needs to be run and interpreted before Balance is ungated.
 
 **Next:**
-1. **Run the anchored-rating acceptance cohort.** Use the paired 200-game design in
-   [`bots/pilot-ratings.md`](bots/pilot-ratings.md), inspect pilot confidence intervals and
-   execution-difficulty interactions, and decide whether the pilots are trustworthy enough to
-   ungate Balance. Human calibration remains optional pending a curated comparable cohort.
+1. **Pilot-trust verdict IN (2026-07-03): TurnBot is a big step up from greedy but NOT oracle-level.**
+   Paired oracle validation (turn vs referee, opp greedy, 60/opp × 7, `results/bot_quality/turn_vs_referee_all/`):
+   referee beats turn on all 7 decks (sig. on 5), by ~+4pt (food_otk) to +14pt (ramp). The gaps are
+   non-uniform, so the turn matrix **under-rates ramp/canine/egg and over-rates food_otk/colony/cats** —
+   good for **directional** deck triage, not absolute 40–60% verdicts (see `bots/backlog.md`). Remaining:
+   the anchored Bradley–Terry cohort (`bots/pilot-ratings.md`) for a full pilot/deck/difficulty rating,
+   and (optional) referee-piloted matrices on any deck a tuning call actually hinges on.
 2. **A/B harness unified — core done (`4e5fd74`).** `bot_comparison` now accepts parametrized bot
    specs (`--baseline-kind "turn:deck_reveal_choice_width=0"`), so config/flag A/Bs run through its
    paired-vs-fixed-opponent design instead of hand-rolled low-power mirrors. Follow-up: retire
