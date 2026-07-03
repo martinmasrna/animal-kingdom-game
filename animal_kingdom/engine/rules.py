@@ -147,19 +147,19 @@ def is_terminal(state: GameState) -> Optional[Result]:
 
 
 def _resolve_exhaustion(state: GameState) -> Result:
-    # overview.md §11.3: more food wins; on a tie, the player who cannot act loses.
-    fa, fb = state.food["A"], state.food["B"]
-    if fa > fb:
+    # more food wins; on a tie, the player who cannot act loses.
+    food_a, food_b = state.food["A"], state.food["B"]
+    if food_a > food_b:
         return Result("A", "exhaustion")
-    if fb > fa:
+    if food_b > food_a:
         return Result("B", "exhaustion")
     return Result(other_player(state.current), "exhaustion")
 
 
 def _resolve_by_food(state: GameState, reason: str) -> Result:
-    fa, fb = state.food["A"], state.food["B"]
-    if fa > fb:
+    food_a, food_b = state.food["A"], state.food["B"]
+    if food_a > food_b:
         return Result("A", reason)
-    if fb > fa:
+    if food_b > food_a:
         return Result("B", reason)
     return Result(None, reason)  # draw
