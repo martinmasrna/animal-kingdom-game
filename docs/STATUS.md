@@ -90,14 +90,14 @@ cohort still needs to be run and interpreted before Balance is ungated.
    paired-vs-fixed-opponent design instead of hand-rolled low-power mirrors. Follow-up: retire
    `referee_comparison`'s `--mirror-deck` mode + add the skill caveat. See
    [`bots/backlog.md`](bots/backlog.md).
-3. **TurnBot → default pilot?** Pass its acceptance run (200/opp) and clear the 10× throughput gate
-   (turn-depth cap — the uniform determinization/beam trim was tried and rejected; A/B speed-vs-winrate), then decide whether
-   `./report` switches from `greedy,greedy` to `turn,turn`. (Owl/Raven deck-reveal collapse
-   shipped `a32dc1c` — `TURN_DECK_REVEAL_CHOICE_WIDTH=2` cut the worst outlier egg 285×→~38×;
-   self-cover placement filter tried and reverted as a wash. Gate still unmet: uniform
-   determinization/beam trim tried and rejected (negative result — determ cut costs ~4% for
-   ~25% speed, beam cut is free but useless; neither approaches 10×). Only remaining lever is a
-   structural turn-depth cap.)
+3. **TurnBot → default pilot?** Throughput gate nearly met: at 200-game gauntlet ratios **6/7 decks
+   pass (≤~8.5×)** after the node budget (`TURN_MAX_SEARCH_NODES=80`, shipped) — **food_otk (13.5×)
+   is the lone failer**, and TurnBot also *underplays* it (loses to greedy), so its fix is piloting,
+   not truncation. Remaining: run the acceptance winrate cohort (200/opp) and decide whether
+   food_otk's miss blocks the `./report` `greedy,greedy`→`turn,turn` switch or is an accepted caveat.
+   (Levers tried: Owl/Raven deck-reveal collapse `a32dc1c`; uniform determinization/beam trim
+   rejected — negative result; a turn-*depth* cap is a no-op — the cost is search *breadth*, not
+   depth, so the node budget is what worked.)
 4. **Known blind spot:** `region_control` over-values the row-2 spine, so neither bot contests
    row-1/3 as an HQ-rush lane.
 

@@ -81,6 +81,9 @@ REFEREE_MAX_SEARCH_NODES = 150  # per retained root candidate
 # the intended default pilot for large balance sims.
 TURN_DETERMINIZATIONS = 3
 TURN_BEAM_WIDTH = 8
+# Per-root own-turn node budget (bots/turn_bot.py TURN_MAX_SEARCH_NODES). None = exhaustive; 80
+# is a byte-identical-in-play speedup that caps the breadth blow-up on the deep decks.
+TURN_MAX_SEARCH_NODES = 80
 
 # 'greedy_belief' = GreedyBot + the coverage-exposure belief term (greedy_bot.py). A pure
 # 1-ply eval add-on (no search) for A/B-ing whether belief-over-the-hidden-hand helps; the
@@ -119,7 +122,8 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
         kw.update(extra)
         return RefereeBot(weights=weights, seed=seed, **kw)
     if kind == "turn":
-        kw = dict(determinizations=TURN_DETERMINIZATIONS, beam_width=TURN_BEAM_WIDTH)
+        kw = dict(determinizations=TURN_DETERMINIZATIONS, beam_width=TURN_BEAM_WIDTH,
+                  max_search_nodes=TURN_MAX_SEARCH_NODES)
         kw.update(extra)
         return TurnBot(weights=weights, seed=seed, **kw)
     raise ValueError(f"unknown bot kind {kind!r} (expected one of {BOT_KINDS})")

@@ -42,13 +42,12 @@ are dropped - both err toward the referee knowing less than a perfect observer.
 from __future__ import annotations
 
 import random
-from collections import defaultdict
 from typing import Optional, Sequence
 
 from ..engine import rules
 from ..engine.actions import Action, DrawAction, PlaceAction
 from ..engine.state import GameState, StateView
-from .greedy_bot import GreedyBot, GreedyWeights, _battlecry_fizzled
+from .greedy_bot import GreedyWeights, _battlecry_fizzled
 from .turn_search import TurnSearcher
 
 
@@ -69,19 +68,15 @@ class RefereeBot(TurnSearcher):
         self.boundary_reply_only = boundary_reply_only
         self.max_search_nodes = max_search_nodes
         self.reuse_reply_scores = reuse_reply_scores
-        # One policy bot plays every rollout seat: the opponent's reply turn out of its
-        # sampled hand, their pending sub-choices, and my own sub-choices opened mid-rollout.
-        # Being the real GreedyBot, it brings the lethal-avoidance and fizzle logic along, so
-        # the simulated opponent is exactly the sim's greedy.
-        self._policy = GreedyBot(weights=self.weights,
-                                 seed=None if seed is None else seed + 1)
+        # `self._policy` (the GreedyBot that plays every rollout seat) and `self._search_nodes`
+        # are set identically by TurnSearcher.__init__; RefereeBot uses them for reply rollouts
+        # and its staged node budget.
         self._screening = False
         self._reply_score_by_state: dict[int, float] = {}
         self.last_search_stats: dict[str, float | int] = {}
         self._candidate_plans: dict[Action, dict[tuple, Action]] = {}
         self._active_plan: Optional[dict[tuple, Action]] = None
         self._continuation_plan: dict[tuple, Action] = {}
-        self._search_nodes = 0
 
     def choose(
         self,
@@ -142,61 +137,6 @@ class RefereeBot(TurnSearcher):
             self.last_search_stats["budget_fallbacks"] += 1
             return self._greedy_complete_turn(branches, me, guard=guard)
         return super()._complete_own_turn(branches, me, guard=guard)
-
-    def _greedy_complete_turn(
-        self,
-        branches: list[tuple[GameState, float]],
-        me: str,
-        *,
-        guard: int,
-    ) -> list[tuple[GameState, float]]:
-        """Finish a budget-exhausted line without branching the search tree further."""
-        if not branches or guard >= 40:
-            return branches
-        completed = []
-        ongoing = []
-        for state, penalty in branches:
-            result = rules.is_terminal(state)
-            if result is not None:
-                state.result = result
-                completed.append((state, penalty))
-            elif state.current != me:
-                completed.append((state, penalty))
-            else:
-                ongoing.append((state, penalty))
-        if not ongoing:
-            return completed
-
-        groups = defaultdict(list)
-        for item in ongoing:
-            groups[self._observation_key(item[0], me)].append(item)
-        for group in groups.values():
-            representative = group[0][0]
-            actor = representative.player_to_act()
-            if actor == me:
-                legal = self._safe_actions(
-                    representative, rules.legal_actions(representative), me)
-                action = self._policy.choose(
-                    representative.view_for(me), legal, representative)
-                advanced = []
-                for state, penalty in group:
-                    nxt = state.clone()
-                    rules.apply_action(nxt, action)
-                    extra = (self.weights.wasted_battlecry
-                             if _battlecry_fizzled(state, nxt, me, action) else 0.0)
-                    advanced.append((nxt, penalty + extra))
-            else:
-                advanced = []
-                for state, penalty in group:
-                    legal = rules.legal_actions(state)
-                    action = self._policy.choose(
-                        state.view_for(actor), legal, state)
-                    rules.apply_action(state, action)
-                    advanced.append((state, penalty))
-            completed.extend(
-                self._greedy_complete_turn(advanced, me, guard=guard + 1)
-            )
-        return completed
 
     # ---- hook overrides: RefereeBot adds the sampled opponent reply to the shared planner --
 

@@ -39,6 +39,14 @@ TURN_BEAM_WIDTH = 8
 # strength cost statistically insignificant (-1.4% [-5.0, +2.1]); width 3 reaches parity but
 # at half the speedup. 2 is the elbow. Only egg has Owl/Raven, so this is a no-op elsewhere.
 TURN_DECK_REVEAL_CHOICE_WIDTH = 2
+# Per-root own-turn search-node budget (see TurnSearcher._complete_own_turn). None = disabled
+# (exhaustive own-turn search). N = once a root candidate's expansion exceeds N branch-nodes,
+# finish the remainder greedily (one line per info-set group) instead of branching. This caps the
+# shallow-but-bushy breadth blow-up on the deep decks. 80 tuned via the paired benchmark: it is
+# *byte-identical* in play on all 7 decks at 200 games/opp (every paired delta 0.0) while cutting
+# food_otk's gauntlet cost ~20% (17.5x->13.5x vs greedy). Lower budgets buy a little more speed
+# but start clipping real food_otk/aggro lines; 80 is the free elbow. Mirrored in sim.runner.
+TURN_MAX_SEARCH_NODES: Optional[int] = 80
 
 
 class TurnBot(TurnSearcher):
@@ -46,7 +54,20 @@ class TurnBot(TurnSearcher):
                  rng: Optional[random.Random] = None, seed: Optional[int] = None,
                  determinizations: int = TURN_DETERMINIZATIONS,
                  beam_width: int = TURN_BEAM_WIDTH,
-                 deck_reveal_choice_width: int = TURN_DECK_REVEAL_CHOICE_WIDTH):
+                 deck_reveal_choice_width: int = TURN_DECK_REVEAL_CHOICE_WIDTH,
+                 max_search_nodes: Optional[int] = TURN_MAX_SEARCH_NODES):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
-                         deck_reveal_choice_width=deck_reveal_choice_width)
+                         deck_reveal_choice_width=deck_reveal_choice_width,
+                         max_search_nodes=max_search_nodes)
+
+    def _begin_root_candidate(self, action) -> None:
+        # Per-root budget: each root candidate gets a fresh node allowance (mirrors the oracle).
+        self._search_nodes = 0
+
+    def _complete_own_turn(self, branches, me, *, guard):
+        if self.max_search_nodes is not None:
+            self._search_nodes += len(branches)
+            if self._search_nodes > self.max_search_nodes:
+                return self._greedy_complete_turn(branches, me, guard=guard)
+        return super()._complete_own_turn(branches, me, guard=guard)

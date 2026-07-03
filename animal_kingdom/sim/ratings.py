@@ -52,6 +52,7 @@ from .runner import (
     REFEREE_ROOT_WIDTH,
     TURN_BEAM_WIDTH,
     TURN_DETERMINIZATIONS,
+    TURN_MAX_SEARCH_NODES,
     GameRecord,
     MatchSpec,
     run_spec_pair,
@@ -655,6 +656,7 @@ def build_provenance(
         "turn": {
             "determinizations": TURN_DETERMINIZATIONS,
             "beam_width": TURN_BEAM_WIDTH,
+            "max_search_nodes": TURN_MAX_SEARCH_NODES,
         },
         "referee": {
             "determinizations": REFEREE_DETERMINIZATIONS,

@@ -37,6 +37,7 @@ from ..engine.state import GameState, StateView, other_player
 from .base import Bot
 from .determinize import determinize
 from .greedy_bot import (
+    GreedyBot,
     GreedyWeights,
     _battlecry_fizzled,
     _enabled_battlecry_count,
@@ -63,13 +64,24 @@ class TurnSearcher(Bot):
     def __init__(self, weights: Optional[GreedyWeights] = None,
                  rng: Optional[random.Random] = None, seed: Optional[int] = None,
                  determinizations: int = 3, beam_width: int = 8,
-                 deck_reveal_choice_width: int = 0):
+                 deck_reveal_choice_width: int = 0,
+                 max_search_nodes: Optional[int] = None):
         self.weights = weights or GreedyWeights()
         # RNG only breaks exact score ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
         self.det_rng = random.Random(None if seed is None else seed + _DET_SEED_SALT)
         self.determinizations = determinizations
         self.beam_width = beam_width
+        # Per-root own-turn node budget (None = exhaustive; used by TurnBot's override and by
+        # RefereeBot's staged budget). When a root's expansion exceeds it, `_greedy_complete_turn`
+        # finishes the line without branching, bounding the shallow-but-bushy breadth blow-up.
+        self.max_search_nodes = max_search_nodes
+        self._search_nodes = 0
+        # One greedy policy plays every non-branching completion seat: my remaining own actions
+        # in a budget-exhausted line, and (for RefereeBot) the sampled opponent reply. Being the
+        # real GreedyBot, it carries the lethal-avoidance and fizzle logic with it.
+        self._policy = GreedyBot(weights=self.weights,
+                                 seed=None if seed is None else seed + 1)
         # Beam width for a deck-reveal choice reached *in lookahead* (Owl's kept card, Raven's
         # shuffle-backs). 0 = disabled (defer to the normal `beam_width`); N>=1 = keep only the
         # top-N options by 1-ply eval. The options are re-sampled deck cards (determinize
@@ -218,6 +230,67 @@ class TurnSearcher(Bot):
                         best_action,
                     )
             completed.extend(chosen_group)
+        return completed
+
+    def _greedy_complete_turn(
+        self,
+        branches: list[tuple[GameState, float]],
+        me: str,
+        *,
+        guard: int,
+    ) -> list[tuple[GameState, float]]:
+        """Finish a budget-exhausted line without branching the search tree further.
+
+        Used by TurnBot's node-budget override and by RefereeBot's staged budget: once a root's
+        expansion is over budget, play the remainder of the turn out with one greedy line per
+        info-set group (my own actions and any opponent sub-choice both taken by `_policy`),
+        so the truncated line still reaches a scored turn-boundary position.
+        """
+        if not branches or guard >= _MAX_DEPTH:
+            return branches
+        completed = []
+        ongoing = []
+        for state, penalty in branches:
+            result = rules.is_terminal(state)
+            if result is not None:
+                state.result = result
+                completed.append((state, penalty))
+            elif state.current != me:
+                completed.append((state, penalty))
+            else:
+                ongoing.append((state, penalty))
+        if not ongoing:
+            return completed
+
+        groups: dict[tuple, list[tuple[GameState, float]]] = defaultdict(list)
+        for item in ongoing:
+            groups[self._observation_key(item[0], me)].append(item)
+        for group in groups.values():
+            representative = group[0][0]
+            actor = representative.player_to_act()
+            if actor == me:
+                legal = self._safe_actions(
+                    representative, rules.legal_actions(representative), me)
+                action = self._policy.choose(
+                    representative.view_for(me), legal, representative)
+                advanced = []
+                for state, penalty in group:
+                    nxt = state.clone()
+                    rules.apply_action(nxt, action)
+                    extra = (self.weights.wasted_battlecry
+                             if _battlecry_fizzled(state, nxt, me, action) else 0.0)
+                    advanced.append((nxt, penalty + extra))
+            else:
+                advanced = []
+                for state, penalty in group:
+                    legal = rules.legal_actions(state)
+                    action = self._policy.choose(
+                        state.view_for(actor), legal, state)
+                    rules.apply_action(state, action)
+                    advanced.append((state, penalty))
+            completed.extend(
+                self._greedy_complete_turn(advanced, me, guard=guard + 1)
+            )
         return completed
 
     # --------------------------------------------------------------- overridable hooks
