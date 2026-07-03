@@ -70,6 +70,11 @@ class GreedyWeights:
                                       # the actual flexibility/tempo/denial resource.
     effect_readiness: float = 16.0   # per distinct Battlecry in hand that can currently
                                       # produce an observable effect on at least one legal play
+    coverage_exposure: float = 0.0   # belief term (default OFF): expected own-HQ danger one
+                                      # ply ahead, = P(opponent's hidden hand can cover a
+                                      # currently-safe HQ-front defender next turn). Exact
+                                      # hypergeometric over the public unseen multiset, no
+                                      # determinization; honest (see `_p_opponent_can_cover`).
     wasted_battlecry: float = 8.0    # penalty for playing a card whose ability text fired for
                                       # nothing (e.g. a removal battlecry with no target) - a
                                       # bot policy adjustment, not part of evaluate() (see
@@ -255,6 +260,24 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     score += w.enemy_hq_threat * sum(1 for cr in gm.hq_front(opp) if cr in my_connection)
     score -= w.own_hq_threat * sum(1 for cr in gm.hq_front(me) if cr in opp_connection)
 
+    # --- Coverage exposure: expected own-HQ danger one ply ahead, from the *belief* over the
+    # opponent's hidden hand. GreedyBot is 1-ply and only sees threats already on the board;
+    # this adds the probability that a currently-safe HQ-front defender of mine gets covered
+    # next turn (opponent lands strength > mine on it, opening the capture lane). The belief is
+    # exact - open decklists make the unseen multiset public, so P(cover) is a closed-form
+    # hypergeometric, not a determinization. Scoped to *defended* HQ-front crossroads to
+    # isolate the belief signal (empty walk-ins are a deterministic threat the lethal-check /
+    # own_hq_threat already handle). Off at weight 0.
+    if w.coverage_exposure:
+        worst = 0.0                    # opponent gets one placement -> charge the single worst
+        for cr in gm.hq_front(me):     # breach, not the sum (that fantasizes a multi-cover turn)
+            top = state.top_unit(cr)
+            if top is not None and top.owner == me and \
+                    state.is_connected(opp, cr, opp_connection):
+                p = _p_opponent_can_cover(state, opp, effective_strength(state, top))
+                worst = max(worst, p)
+        score -= w.coverage_exposure * worst
+
     # --- Card economy: net cards in hand (not deck - see GreedyWeights.card_economy) ---
     score += w.card_economy * (len(state.hands[me]) - len(state.hands[opp]))
 
@@ -265,6 +288,48 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     score += w.effect_readiness * _enabled_battlecry_count(state, me)
 
     return score
+
+
+# ------------------------------------------------------------- belief over the hidden hand
+
+def _opponent_unseen_card_ids(state: GameState, opp: str) -> list[str]:
+    """The opponent's unseen cards (hand + deck) as one combined multiset of card ids.
+
+    Public under the open-list rules: this equals the opponent's fixed 30-card list minus
+    everything already observed (their units on the board, cards in the shared remove pile).
+    We read hand and deck *together* and never distinguish which card sits where - the only
+    honest use is the partition-invariant (multiset, hand-size) pair. `_p_opponent_can_cover`
+    consumes just counts, so it cannot leak the split; the honesty test pins this.
+    """
+    ids = [u.card_id for u in state.hands[opp]]
+    ids += state.decks[opp]
+    return ids
+
+
+def _p_opponent_can_cover(state: GameState, opp: str, defender_strength: int) -> float:
+    """Exact P(the opponent's hidden hand holds >=1 unit that can cover `defender_strength`).
+
+    Covering needs a *unit* of printed strength strictly greater (overview.md §6-7). The
+    unseen multiset (see above) splits into `h` cards in hand and the rest in deck uniformly at
+    random, so the marginal is a closed-form hypergeometric - no determinization/sampling.
+    Dynamic-strength units can't be read before placement, so they're conservatively excluded
+    from the coverer count (they still occupy hand/deck slots, i.e. stay in the denominator).
+    """
+    unseen = _opponent_unseen_card_ids(state, opp)
+    N = len(unseen)
+    h = len(state.hands[opp])
+    if N == 0 or h == 0:
+        return 0.0
+    k = 0
+    for cid in unseen:
+        c = state.cards[cid]
+        if c.is_unit and not c.is_dynamic and c.base_strength > defender_strength:
+            k += 1
+    if k == 0:
+        return 0.0
+    if k > N - h:                      # more coverers than deck slots -> at least one in hand
+        return 1.0
+    return 1.0 - math.comb(N - k, h) / math.comb(N, h)
 
 
 # ------------------------------------------------------------- wasted-battlecry detection

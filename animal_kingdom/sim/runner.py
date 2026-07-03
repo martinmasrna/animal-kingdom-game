@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import random
 from concurrent.futures import ProcessPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Callable, Optional
 
 from ..bots.base import Bot
@@ -51,7 +51,7 @@ class GameRecord:
                 "final_food_b": self.final_food_b}
 
 
-BOT_KINDS = ("greedy", "lookahead", "random", "referee", "turn")
+BOT_KINDS = ("greedy", "lookahead", "random", "referee", "turn", "greedy_belief")
 
 # 3-ply own-line lookahead (see GreedyBot's module docstring). Gauntlet-tested 2024: it does
 # correctly find delayed/combo value 1-ply misses (e.g. Grizzly Bear), but nets *worse*
@@ -82,6 +82,11 @@ REFEREE_MAX_SEARCH_NODES = 150  # per retained root candidate
 TURN_DETERMINIZATIONS = 3
 TURN_BEAM_WIDTH = 8
 
+# 'greedy_belief' = GreedyBot + the coverage-exposure belief term (greedy_bot.py). A pure
+# 1-ply eval add-on (no search) for A/B-ing whether belief-over-the-hidden-hand helps; the
+# weight is untuned (mirrors own_hq_threat's scale) and only affects the 'greedy_belief' kind.
+GREEDY_BELIEF_COVERAGE_EXPOSURE = 40.0
+
 
 def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None) -> Bot:
     """Construct a bot from a kind string (see `BOT_KINDS`) with a derived seed.
@@ -92,6 +97,10 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None) -> B
     kind = kind.strip().lower()
     if kind == "greedy":
         return GreedyBot(weights=weights, seed=seed)
+    if kind == "greedy_belief":
+        base = weights or GreedyWeights()
+        belief = replace(base, coverage_exposure=GREEDY_BELIEF_COVERAGE_EXPOSURE)
+        return GreedyBot(weights=belief, seed=seed)
     if kind == "lookahead":
         return GreedyBot(weights=weights, seed=seed,
                          depth=LOOKAHEAD_DEPTH, beam_width=LOOKAHEAD_BEAM_WIDTH)

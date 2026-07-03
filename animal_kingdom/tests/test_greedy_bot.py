@@ -191,6 +191,63 @@ def test_eval_ignores_opponent_hand_contents():
     assert evaluate(s1, "A", W) == evaluate(s2, "A", W)
 
 
+# ------------------------------------------------------- coverage-exposure belief term
+
+# Isolate the coverage_exposure term (all other weights zeroed).
+ONLY_COV = GreedyWeights(food_progress=0, food_proximity=0, board_presence=0, connection=0,
+                         region_control=0, enemy_hq_threat=0, own_hq_threat=0, card_economy=0,
+                         effect_readiness=0, coverage_exposure=40.0)
+
+
+def _exposed_state(*, hands=None, decks=None) -> GameState:
+    """A's strength-1 mouse defends HQ-front '1,2'; B has a connected chain 4,2-3,2-2,2 so
+    '1,2' is a legal (coverable) placement for B next turn."""
+    s = make_state(hands=hands, decks=decks)
+    put(s, "1,2", "mouse", "A")
+    for cr in ("4,2", "3,2", "2,2"):
+        put(s, cr, "lion", "B")
+    return s
+
+
+def test_coverage_exposure_is_off_by_default():
+    # Default weights (coverage_exposure=0.0) must not change any behaviour.
+    strong = _exposed_state(hands={"B": ["lion"]})
+    weak = _exposed_state(hands={"B": ["mouse"]})
+    assert evaluate(strong, "A", W) == evaluate(weak, "A", W)
+
+
+def test_coverage_exposure_penalises_a_probable_cover():
+    # B certainly holds a coverer (lion 7 > mouse 1) -> full penalty; a mouse can't cover.
+    certain = _exposed_state(hands={"B": ["lion"]})
+    harmless = _exposed_state(hands={"B": ["mouse"]})
+    assert evaluate(certain, "A", ONLY_COV) < evaluate(harmless, "A", ONLY_COV)
+    assert evaluate(harmless, "A", ONLY_COV) == 0.0        # no coverer -> no exposure
+
+
+def test_coverage_exposure_scales_with_probability():
+    # Same coverer, different odds it's in hand: certain (hand) > 50% (1 of 2) > none.
+    certain = _exposed_state(hands={"B": ["lion"]})                 # p = 1.0
+    fifty = _exposed_state(hands={"B": ["mouse"]}, decks={"B": ["lion"]})  # p = 0.5
+    none = _exposed_state(hands={"B": ["mouse"]})                   # p = 0.0
+    assert evaluate(certain, "A", ONLY_COV) < evaluate(fifty, "A", ONLY_COV) \
+        < evaluate(none, "A", ONLY_COV)
+
+
+def test_coverage_exposure_is_partition_invariant_honesty_guard():
+    # THE honesty boundary: holding the unseen multiset (lion+mouse) and hand SIZE (1) fixed,
+    # which card sits in hand vs deck must not move the score. If it does, it's a hidden peek.
+    lion_in_hand = _exposed_state(hands={"B": ["lion"]}, decks={"B": ["mouse"]})
+    mouse_in_hand = _exposed_state(hands={"B": ["mouse"]}, decks={"B": ["lion"]})
+    assert evaluate(lion_in_hand, "A", ONLY_COV) == evaluate(mouse_in_hand, "A", ONLY_COV)
+
+
+def test_coverage_exposure_needs_reachability():
+    # Identical hidden hand, but B has no board presence -> can't reach '1,2' -> no exposure.
+    unreachable = make_state(hands={"B": ["lion"]})
+    put(unreachable, "1,2", "mouse", "A")
+    assert evaluate(unreachable, "A", ONLY_COV) == 0.0
+
+
 # --------------------------------------------------------------- own-line lookahead
 
 def test_default_depth_matches_original_1_ply_score():
