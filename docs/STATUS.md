@@ -85,13 +85,16 @@ cohort still needs to be run and interpreted before Balance is ungated.
    [`bots/pilot-ratings.md`](bots/pilot-ratings.md), inspect pilot confidence intervals and
    execution-difficulty interactions, and decide whether the pilots are trustworthy enough to
    ungate Balance. Human calibration remains optional pending a curated comparable cohort.
-2. **TurnBot → default pilot?** Pass its acceptance run (200/opp) and clear the 10× throughput gate
+2. **★ Unify the A/B harnesses (HIGH).** Generalize `bot_comparison` to accept parametrized bot
+   specs (kind + config/flags), not just kind strings, keeping its paired-vs-fixed-opponent design;
+   then retire `referee_comparison`'s redundant `--mirror-deck` strength mode (keep its unique
+   decision-agreement screen). Kills a class of methodology error — a mirror self-play A/B is
+   low-power for small pilot changes, and the missing config-awareness has forced hand-rolled
+   mirror A/Bs. Unblocks doing #1/#3 rigorously. See [`bots/backlog.md`](bots/backlog.md).
+3. **TurnBot → default pilot?** Pass its acceptance run (200/opp) and clear the 10× throughput gate
    (lower determinizations/beam or a turn-depth cap; A/B speed-vs-winrate), then decide whether
-   `./report` switches from `greedy,greedy` to `turn,turn`.
-3. **Referee v3 shipped (`3794071`, 2026-07-03).** `nodes 1000→150` + `reply_width 4→8`:
-   ~1.31× faster than v2 and *stronger* on every deck, which also closed the colony ~7-pt
-   calibration gap. Done — method/data in
-   [`bots/referee-search-tuning.md`](bots/referee-search-tuning.md).
+   `./report` switches from `greedy,greedy` to `turn,turn`. (Selection-collapse + self-cover
+   pruning in progress cut the worst outlier — egg 285×→~30× — via `collapse_deck_reveal_choices`.)
 4. **Known blind spot:** `region_control` over-values the row-2 spine, so neither bot contests
    row-1/3 as an HQ-rush lane.
 

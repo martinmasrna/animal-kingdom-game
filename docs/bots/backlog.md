@@ -2,6 +2,26 @@
 
 Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Ladder: GreedyBot → TurnBot → RefereeBot.
 
+- [ ] **★ HIGH — Unify the A/B harnesses: give `bot_comparison` config-awareness, retire
+  `referee_comparison`'s mirror-strength mode.** The two benchmarks answer different questions
+  and are *not* broadly redundant: `bot_comparison` = strength verdict (candidate(D) vs Greedy(O)
+  vs baseline(D) vs Greedy(O), **paired per (opponent, seed)** → cancels shared variance, tight CI);
+  `referee_comparison` = decision-agreement + speed screen over a fixed position corpus vs the
+  uncapped legacy oracle (higher-power for "same move?" than any win-rate test; keep it). **The
+  real defect is a missing abstraction:** `bot_comparison` accepts only bot *kind strings*, not
+  parametrized configs/flags. That single gap forced (a) `referee_comparison` to grow its own
+  config-parametrized **mirror-strength** mode (`--mirror-deck`), which duplicates `bot_comparison`
+  in the *weaker* head-to-head design, and (b) bespoke hand-rolled A/Bs for any config/flag change
+  (e.g. the `greedy_belief` weight and the `collapse_deck_reveal_choices` flag). **Fix:** generalize
+  `bot_comparison` to take a parametrized bot spec (kind + kwargs/config), keeping the
+  paired-vs-fixed-opponent design; then future flag/config A/Bs run through the one good harness in
+  the superior design, and `referee_comparison` sheds `--mirror-deck` and keeps only its unique
+  agreement/oracle screen. **Why HIGH:** it kills a *class* of methodology error — a mirror
+  self-play A/B is valid but **low-power for small pilot changes** (games where the two versions
+  play identically add coin-flip noise instead of contributing 0 to a paired delta), so hand-rolled
+  mirror checks understate/obscure real effects. Also: add a one-line caveat to the `balance-eval`
+  skill ("mirror self-play is low-power for small changes — prefer the paired-vs-fixed-opponent
+  delta"); the skill already prescribes `bot_comparison` for bot changes, this hardens the trap.
 - [ ] **TurnBot → default report pilot?** Smoke (20/opp) improves-or-ties all 7 decks but blows the 10× throughput gate (12×–266×; draw-driven turn depth — memoization was a negative result, see status §5). Run acceptance (200/opp) and clear the gate: lower `TURN_DETERMINIZATIONS`/`TURN_BEAM_WIDTH` or add a turn-depth cap; A/B speed-vs-winrate via the paired benchmark. Then decide whether `./report` default switches from `greedy,greedy` to `turn,turn`. Don't paper over a failed gate with deck-specific weights.
   - **Measured post-`f598951` (turn-vs-greedy whole-game CPU ÷ greedy-vs-greedy, map_b two-action, 6 games/deck):** ramp **9.6×** (only deck under gate), canine 13.3×, cats 21.8×, aggro/colony 24.0×, egg 184×, **food_otk 590×**. The semantic-preserving perf pass did **not** move the gate — the blowup is structural (complete-turn search explodes on the deep combo decks food_otk/egg, not a constant factor). Confirms a turn-depth cap / determinization cut is required, and that's a strength tradeoff (validate via the paired benchmark, don't just speed-cap). (Measured by timing `play_game` for turn-vs-greedy vs greedy-vs-greedy per deck.)
 - [ ] **RefereeBot / TurnSearcher performance (roadmap Phase 2).** Three proven
