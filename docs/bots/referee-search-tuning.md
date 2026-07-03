@@ -136,9 +136,22 @@ Crucially the node budget *pays for* the reply widening. Whole-game CPU (ref-vs-
 
 So `nodes=150+reply=8` is **1.31× faster than v2** while being **stronger on the field** — a
 near-strict improvement (faster *and* more oracle-faithful), far better than `nodes=150` alone
-merely preserving v2's flawed strength. Direct validation (`nodes=150,reply=8` vs v2, 200g/deck; egg pooled to 600g) **beats or ties v2
-on all 7 decks**: cats 58.0% [53, 63], colony 57.5% [53, 62.5] (both significant), aggro 53.0%,
-food_otk 53.5%, ramp 54.0%, canine 51.0%, egg 51.2% [47.8, 54.7]. Every lower CI ≥ 45.5.
+merely preserving v2's flawed strength. Direct validation (`nodes=150,reply=8` vs v2), **pooled over two seeds, 400–800g/deck**:
+
+| deck | pooled win% vs v2 | |
+|---|---|---|
+| colony_food_swarm | 56.8% [53.2, 60.2] | **stronger** |
+| food_otk | 54.8% [51.0, 58.5] | **stronger** |
+| cats_midrange | 53.8% [50.0, 57.2] | ok |
+| canine_buff_tempo | 52.2% [49.0, 55.5] | ok |
+| ramp | 52.2% [48.5, 56.0] | ok |
+| aggro_hq_rush | 51.5% [47.5, 55.5] | ok |
+| egg_control | 51.5% [48.4, 54.5] (800g) | ok |
+
+**Every deck's point estimate > 50%; worst lower CI 47.5%** — non-inferior everywhere, and
+significantly stronger on the two combo decks (colony, food_otk) where the shipped reply-beam
+pruning hurt most. (A single seed had over-stated cats at 58% and aggro at 53%; the two-seed
+pool corrects that seed noise without touching the core conclusion — hence the reproduction.)
 
 **Recommendation (owner sign-off):** upgrade from "flip `REFEREE_MAX_SEARCH_NODES` 1000→150" to
 flipping that **and** `REFEREE_REPLY_WIDTH` 4→8 in `sim/runner.py` — one config that is **~1.31×
