@@ -88,11 +88,10 @@ cohort still needs to be run and interpreted before Balance is ungated.
 2. **TurnBot → default pilot?** Pass its acceptance run (200/opp) and clear the 10× throughput gate
    (lower determinizations/beam or a turn-depth cap; A/B speed-vs-winrate), then decide whether
    `./report` switches from `greedy,greedy` to `turn,turn`.
-3. **Referee speedup + calibration risk (new).** A validated node-budget cut
-   (`REFEREE_MAX_SEARCH_NODES` 1000→150, ~1.73× whole-game, ties shipped v2 on all 7 decks)
-   awaits an owner one-line sign-off. Separately, staged-v2 pilots **colony 43% [39.8, 46.8] (500g) vs the legacy
-   oracle** (only food_otk was ever validated) — a real ~7-pt calibration gap to triage. See
-   [`bots/backlog.md`](bots/backlog.md).
+3. **Referee v3 shipped (`3794071`, 2026-07-03).** `nodes 1000→150` + `reply_width 4→8`:
+   ~1.31× faster than v2 and *stronger* on every deck, which also closed the colony ~7-pt
+   calibration gap. Done — method/data in
+   [`bots/referee-search-tuning.md`](bots/referee-search-tuning.md).
 4. **Known blind spot:** `region_control` over-values the row-2 spine, so neither bot contests
    row-1/3 as an HQ-rush lane.
 
