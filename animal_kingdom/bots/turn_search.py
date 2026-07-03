@@ -62,13 +62,22 @@ class TurnSearcher(Bot):
 
     def __init__(self, weights: Optional[GreedyWeights] = None,
                  rng: Optional[random.Random] = None, seed: Optional[int] = None,
-                 determinizations: int = 3, beam_width: int = 8):
+                 determinizations: int = 3, beam_width: int = 8,
+                 deck_reveal_choice_width: int = 0):
         self.weights = weights or GreedyWeights()
         # RNG only breaks exact score ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
         self.det_rng = random.Random(None if seed is None else seed + _DET_SEED_SALT)
         self.determinizations = determinizations
         self.beam_width = beam_width
+        # Beam width for a deck-reveal choice reached *in lookahead* (Owl's kept card, Raven's
+        # shuffle-backs). 0 = disabled (defer to the normal `beam_width`); N>=1 = keep only the
+        # top-N options by 1-ply eval. The options are re-sampled deck cards (determinize
+        # forgets the true order), so branching wide over them optimizes over noise - a narrow
+        # width removes that cost. Too narrow (1) under-values the draw-engine play itself;
+        # this is the tuned frontier. No honesty change; only fires deeper than the root, where
+        # the real revealed cards are known.
+        self.deck_reveal_choice_width = deck_reveal_choice_width
 
     def choose(
         self,
@@ -177,7 +186,11 @@ class TurnSearcher(Bot):
             else:
                 legal = self._safe_actions(
                     representative, rules.legal_actions(representative), me)
-                candidates = self._beam(representative, legal, me)
+                if self._is_collapsible_deck_reveal(representative):
+                    candidates = self._greedy_topn(
+                        representative, legal, me, self.deck_reveal_choice_width)
+                else:
+                    candidates = self._beam(representative, legal, me)
                 compare = self._use_reply_comparison(representative)
                 if compare:
                     candidates = self._reply_candidates(representative, candidates, me)
@@ -416,6 +429,29 @@ class TurnSearcher(Bot):
             if len(kept) >= max(self.beam_width, len(reserved)):
                 break
         return [a for a in legal if a in kept]
+
+    def _is_collapsible_deck_reveal(self, world: GameState) -> bool:
+        """A deck-reveal choice (Owl/Raven) whose options are re-sampled noise in lookahead.
+
+        Generic: reads only the engine's public `from_deck_reveal` provenance tag, never a
+        card id. Gated on the opt-in width so the oracle keeps its exhaustive behaviour.
+        """
+        return (self.deck_reveal_choice_width > 0
+                and world.pending is not None
+                and bool(world.pending.get("from_deck_reveal")))
+
+    def _greedy_topn(self, world: GameState, legal: list[Action], me: str, n: int) -> list[Action]:
+        """Keep the `n` best options by 1-ply eval (deterministic: score desc, ties broken by
+        `legal`'s deterministic order). Narrows a deck-reveal choice to top-N in lookahead."""
+        if len(legal) <= n:
+            return list(legal)
+        scored = []
+        for i, action in enumerate(legal):
+            nxt = world.clone()
+            rules.apply_action(nxt, action)
+            scored.append((self._clamped_eval(nxt, me), -i, action))
+        scored.sort(reverse=True)
+        return [action for _, _, action in scored[:n]]
 
     def _safe_actions(self, world: GameState, legal: Sequence[Action], me: str) -> list[Action]:
         """Hard-filter actions that leave an avoidable next-turn HQ capture."""

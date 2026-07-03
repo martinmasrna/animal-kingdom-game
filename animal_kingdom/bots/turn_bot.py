@@ -33,12 +33,20 @@ from .turn_search import TurnSearcher
 # there so the sim can name them without importing the bots package).
 TURN_DETERMINIZATIONS = 3
 TURN_BEAM_WIDTH = 8
+# Lookahead beam width for Owl/Raven deck-reveal choices (see TurnSearcher). 0 = off. Tuned
+# by the egg-vs-field width sweep (paired, 420 games/width): width 1 was 9.1x faster but cost
+# ~7pt of egg strength (over-collapse); width 2 keeps ~8.2x (11.9s->1.45s/game) with the
+# strength cost statistically insignificant (-1.4% [-5.0, +2.1]); width 3 reaches parity but
+# at half the speedup. 2 is the elbow. Only egg has Owl/Raven, so this is a no-op elsewhere.
+TURN_DECK_REVEAL_CHOICE_WIDTH = 2
 
 
 class TurnBot(TurnSearcher):
     def __init__(self, weights: Optional[GreedyWeights] = None,
                  rng: Optional[random.Random] = None, seed: Optional[int] = None,
                  determinizations: int = TURN_DETERMINIZATIONS,
-                 beam_width: int = TURN_BEAM_WIDTH):
+                 beam_width: int = TURN_BEAM_WIDTH,
+                 deck_reveal_choice_width: int = TURN_DECK_REVEAL_CHOICE_WIDTH):
         super().__init__(weights=weights, rng=rng, seed=seed,
-                         determinizations=determinizations, beam_width=beam_width)
+                         determinizations=determinizations, beam_width=beam_width,
+                         deck_reveal_choice_width=deck_reveal_choice_width)

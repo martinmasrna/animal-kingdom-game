@@ -36,6 +36,12 @@ class PendingRequest:
     optional: bool = False
     options: Optional[list] = None        # mode == "choice": serializable option values
     placements: Optional[list] = None     # mode == "place": [{card_id, target}]
+    from_deck_reveal: bool = False        # options are cards just peeked/drawn from the hidden
+                                          # deck (Owl, Raven). Generic provenance tag: a search
+                                          # bot that re-samples deck order (determinize) knows
+                                          # the specific option identities are noise in
+                                          # lookahead and may collapse the choice instead of
+                                          # branching on every one. Pure engine data.
 
     def to_pending(self) -> dict:
         p = {"mode": self.mode, "chooser": self.chooser, "optional": self.optional}
@@ -43,6 +49,8 @@ class PendingRequest:
             p["options"] = list(self.options)
         else:
             p["placements"] = list(self.placements)
+        if self.from_deck_reveal:
+            p["from_deck_reveal"] = True
         return p
 
 
@@ -531,7 +539,7 @@ def _op_raven_dig(state, step):
         if len(options) == 1:
             step["choice"] = options[0]
             return _op_raven_dig(state, step)
-        return PendingRequest("choice", player, options=options)
+        return PendingRequest("choice", player, options=options, from_deck_reveal=True)
 
     if step["shuffled"]:
         shuffle_back(state, player, step["shuffled"])
@@ -550,7 +558,8 @@ def _op_owl_peek(state, step):
         if len(pulled) == 1:
             step["choice"] = pulled[0]
         else:
-            return PendingRequest("choice", player, options=sorted(set(pulled)))
+            return PendingRequest("choice", player, options=sorted(set(pulled)),
+                                  from_deck_reveal=True)
     pulled = list(step["pulled"])
     pulled.remove(step["choice"])
     inst = UnitInstance(step["choice"], player, state.new_iid())

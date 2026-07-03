@@ -407,6 +407,21 @@ def test_raven_draws_three_then_shuffles_two_cards_from_hand():
     assert len(s.decks["A"]) == 4
 
 
+def test_deck_reveal_choices_are_tagged_from_deck_reveal():
+    # Owl/Raven selections are over cards revealed from the hidden deck. The generic
+    # `from_deck_reveal` provenance tag is the contract search bots rely on to collapse these
+    # noise-in-lookahead choices (bots/turn_search.py); other choices must NOT carry it.
+    owl = make_state(current="A", hands={"A": ["owl"]},
+                     decks={"A": ["lion", "fox", "rat"], "B": []})
+    rules.apply_action(owl, PlaceAction("owl", ("cr", "1,2")))
+    assert owl.pending["from_deck_reveal"] is True
+
+    raven = make_state(current="A", hands={"A": ["raven"]},
+                       decks={"A": ["lion", "fox", "rat", "eagle"], "B": []})
+    rules.apply_action(raven, PlaceAction("raven", ("cr", "1,2")))
+    assert raven.pending["from_deck_reveal"] is True
+
+
 # =================================================== Stage 2.3: Apex Predator (decision D)
 
 def test_apex_eats_a_weaker_enemy_and_occupies():
