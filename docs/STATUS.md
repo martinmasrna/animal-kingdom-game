@@ -93,8 +93,10 @@ cohort still needs to be run and interpreted before Balance is ungated.
    mirror A/Bs. Unblocks doing #1/#3 rigorously. See [`bots/backlog.md`](bots/backlog.md).
 3. **TurnBot → default pilot?** Pass its acceptance run (200/opp) and clear the 10× throughput gate
    (lower determinizations/beam or a turn-depth cap; A/B speed-vs-winrate), then decide whether
-   `./report` switches from `greedy,greedy` to `turn,turn`. (Selection-collapse + self-cover
-   pruning in progress cut the worst outlier — egg 285×→~30× — via `collapse_deck_reveal_choices`.)
+   `./report` switches from `greedy,greedy` to `turn,turn`. (Owl/Raven deck-reveal collapse
+   shipped `a32dc1c` — `TURN_DECK_REVEAL_CHOICE_WIDTH=2` cut the worst outlier egg 285×→~38×;
+   self-cover placement filter tried and reverted as a wash. Gate still unmet: next is the
+   uniform determinization/beam trim across the remaining ~20–49× cluster.)
 4. **Known blind spot:** `region_control` over-values the row-2 spine, so neither bot contests
    row-1/3 as an HQ-rush lane.
 
