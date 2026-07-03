@@ -64,7 +64,7 @@ def test_run_referee_match_default_reference_is_uncapped_legacy(monkeypatch):
         deck="ramp", seed=5, candidate_seat="B", map_id="map_b")
     captured, _ = _capture_match_bots(monkeypatch, spec)
     assert captured["a"].staged is False and captured["a"].max_search_nodes is None
-    assert captured["b"].max_search_nodes == 1000  # candidate = production make_bot referee
+    assert captured["b"].max_search_nodes == 150  # candidate = production make_bot referee
 
 
 def test_position_corpus_is_deterministic_and_covers_requested_decks():

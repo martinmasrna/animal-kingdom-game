@@ -72,8 +72,8 @@ LOOKAHEAD_BEAM_WIDTH = 8
 REFEREE_DETERMINIZATIONS = 5
 REFEREE_BEAM_WIDTH = 8
 REFEREE_ROOT_WIDTH = 5
-REFEREE_REPLY_WIDTH = 4
-REFEREE_MAX_SEARCH_NODES = 1_000  # per retained root candidate
+REFEREE_REPLY_WIDTH = 8
+REFEREE_MAX_SEARCH_NODES = 150  # per retained root candidate
 
 # TurnBot (bots/turn_bot.py): the scalable middle tier. It completes its own turn with the
 # same determinized information-set search as the referee but stops at the turn boundary
