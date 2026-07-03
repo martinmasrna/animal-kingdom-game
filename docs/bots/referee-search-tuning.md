@@ -118,6 +118,29 @@ speed — a faithfulness-vs-throughput call for the oracle tier. Fix is pilot-si
 wider beams for combo-shaped positions, or `staged=False` on a small calibration cohort),
 **never a card nerf**. Tracked as a task and in `backlog.md`.
 
+## The reply beam recovers strength cheaply — `reply=8` dominates `reply=4`
+
+Widening the reply beam turns out to help the whole field, not just colony. `reply=8`-vs-v2
+(200 games/deck): **beats v2 on every deck** — colony 57.5% [53, 62.5], aggro 57.0%, cats 59.0%
+(all significant), plus ramp 54%, food_otk 52.5%, egg 51.5%, canine 51.5% (non-inferior). So the
+shipped `reply_width=4` was globally under-powered; colony was just where it hurt most.
+
+Crucially the node budget *pays for* the reply widening. Whole-game CPU (ref-vs-random, map_b):
+
+| config | CPU-s/game | vs v2 |
+|---|---|---|
+| v2 (nodes1000, reply4) | 5.30 | 1.00× |
+| nodes=150 | 3.19 | 1.66× faster |
+| reply=8 | 5.82 | 0.91× (slower) |
+| **nodes=150 + reply=8** | **4.05** | **1.31× faster** |
+
+So `nodes=150+reply=8` is **1.31× faster than v2 and stronger on every deck** — a likely strict
+improvement (a faster *and* more oracle-faithful referee), far better than `nodes=150` alone
+merely preserving v2's flawed strength. Strength of the combined config is being confirmed
+directly (`nodes=150,reply=8` vs v2, 200g/deck). The shippable form may still be *adaptive*
+reply-widening (reply=8 only for combo-shaped positions) if the flat `reply=8` cost is
+unwelcome, but the combined config already nets faster, so a flat change looks viable.
+
 ## Reliability grade of the speedup claim
 
 **B (credible):** stable across seats/seeds, paired ≥200 games (egg 800), reference config
