@@ -3,6 +3,8 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 
+from textual.widgets import Static
+
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import UnitInstance, new_game
@@ -92,6 +94,35 @@ def test_tui_click_card_then_board_target(tmp_path):
             await pilot.click("#board", offset=(hitbox.x + 1, hitbox.y + 1))
             await pilot.pause()
             assert app.session.decision_count > before
+
+    asyncio.run(scenario())
+
+
+def test_tui_wide_layout_centers_board_and_labels_players(tmp_path):
+    async def scenario():
+        app = RecorderApp(manifest=_manifest(), output_root=Path(tmp_path))
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause()
+
+            board = app.query_one(BoardWidget)
+            assert board.board_render is not None
+            hitboxes = board.board_render.hitboxes.values()
+            left = min(hitbox.x for hitbox in hitboxes)
+            right = max(hitbox.x + hitbox.width for hitbox in hitboxes)
+            top = min(hitbox.y for hitbox in hitboxes)
+            bottom = max(hitbox.y + hitbox.height for hitbox in hitboxes)
+            assert left > 0 and top > 0
+            assert abs(left - (board.size.width - right)) <= 1
+            assert abs(top - (board.size.height - bottom)) <= 1
+
+            status = str(app.query_one("#status", Static).content)
+            assert "Your turn" in status
+            assert "Turn 1" in status
+            assert "OPPONENT · Seat B" in str(app.query_one("#opponent", Static).content)
+            player = str(app.query_one("#player", Static).content)
+            assert "YOU · Seat A" in player
+            assert "Food 0" in player
+            assert "Actions 2" in player
 
     asyncio.run(scenario())
 

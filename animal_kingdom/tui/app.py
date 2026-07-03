@@ -26,7 +26,7 @@ from ..engine.config import Config, load_config_overrides
 from ..recording.cohort import CohortManifest, ScheduledGame, load_manifest
 from ..recording.session import GameSetup, RecorderSession
 from ..recording.writer import completed_game_ids
-from ..render.text import BoardRender, render_board
+from ..render.text import BoardRender, Hitbox, SEAT_STYLE, render_board
 from ..sim.runner import BOT_KINDS
 
 
@@ -56,15 +56,40 @@ class BoardWidget(Static):
         crs = {value for kind, value in targets if kind == "cr"}
         hqs = [value for kind, value in targets if kind == "hq"]
         width = max(1, self.size.width or self.content_size.width or 80)
-        self.board_render = render_board(
+        height = max(1, self.size.height)
+        # Keep a little air around the map when the pane allows it. The renderer still
+        # receives the constrained inner dimensions, so compact terminals retain the
+        # same fit guarantees as before.
+        inner_width = max(1, width - 2)
+        inner_height = max(1, height - 2)
+        board = render_board(
             state,
             highlight_crs=crs,
             highlight_hq=hqs[0] if hqs else None,
             focus_target=focused,
-            max_width=width,
-            vertical_gap=1 if self.size.height < 18 else 3,
+            max_width=inner_width,
+            vertical_gap=1 if height < 18 else 3,
             perspective_player=perspective_player,
-            max_height=max(1, self.size.height),
+            max_height=inner_height,
+        )
+        x_offset = max(0, (width - board.width) // 2)
+        y_offset = max(0, (height - board.height) // 2)
+        markup = "\n" * y_offset + "\n".join(
+            " " * x_offset + line for line in board.markup.splitlines()
+        )
+        self.board_render = BoardRender(
+            markup=markup,
+            hitboxes={
+                target: Hitbox(
+                    hitbox.x + x_offset,
+                    hitbox.y + y_offset,
+                    hitbox.width,
+                    hitbox.height,
+                )
+                for target, hitbox in board.hitboxes.items()
+            },
+            width=x_offset + board.width,
+            height=y_offset + board.height,
         )
         self.update(self.board_render.markup)
 
@@ -270,7 +295,19 @@ class RecorderApp(App[None]):
     TITLE = "Animal Kingdom — Human Benchmark Recorder"
     CSS = """
     Screen { layout: vertical; }
-    #status { height: 1; padding: 0 1; background: $panel; }
+    #status {
+        height: 1;
+        padding: 0 2;
+        background: $panel;
+        text-align: center;
+    }
+    #opponent, #player {
+        height: 1;
+        padding: 0 2;
+        background: $boost;
+    }
+    #opponent { text-align: center; }
+    #player { text-align: center; }
     #main { height: 1fr; min-height: 14; }
     #board { width: 1fr; height: 100%; overflow: hidden hidden; }
     #side { width: 34; height: 100%; padding: 0 1; background: $panel; overflow: hidden hidden; }
@@ -287,7 +324,9 @@ class RecorderApp(App[None]):
     #notice { height: 1; padding: 0 1; }
     Footer { height: 1; }
     .narrow #side { display: none; }
-    .compact-height #notice, .compact-height Footer { display: none; }
+    .compact-height #opponent,
+    .compact-height #notice,
+    .compact-height Footer { display: none; }
     """
     BINDINGS = [
         ("q", "quit_recorder", "Quit"),
@@ -327,9 +366,11 @@ class RecorderApp(App[None]):
 
     def compose(self) -> ComposeResult:
         yield Static("Starting…", id="status", markup=True)
+        yield Static("", id="opponent", markup=True)
         with Horizontal(id="main"):
             yield BoardWidget()
             yield Static("", id="side", markup=True)
+        yield Static("", id="player", markup=True)
         yield CardShelf()
         yield Static("", id="notice", markup=True)
         yield Footer()
@@ -412,20 +453,57 @@ class RecorderApp(App[None]):
         state = session.state
         result = session.result
         actor = state.player_to_act()
+        human = session.setup.human_seat
+        opponent = next(player for player in state.game_map.players if player != human)
         invalid = " [bold red]GAME EXCLUDED[/bold red]" if not session.game_valid else ""
-        busy = " — bot thinking…" if self.bot_busy else ""
-        result_text = f" — winner {result.winner or 'draw'} ({result.reason})" if result else ""
         cohort_text = ""
         if self.manifest is not None and session.setup.scheduled_game_id:
             index = next(
                 i for i, game in enumerate(self.manifest.games, start=1)
                 if game.game_id == session.setup.scheduled_game_id
             )
-            cohort_text = f" — cohort {index}/{len(self.manifest.games)}"
+            cohort_text = f" · Game {index}/{len(self.manifest.games)}"
+
+        if result:
+            winner = "Draw" if result.winner is None else (
+                "You win" if result.winner == human else "Opponent wins"
+            )
+            phase = f"{winner} · {escape(result.reason)}"
+        elif self.bot_busy:
+            phase = "Opponent thinking…"
+        elif actor == human and state.pending:
+            phase = "Resolve effect"
+        elif actor == human:
+            phase = "Your turn"
+        else:
+            phase = "Opponent turn"
         self.query_one("#status", Static).update(
-            f"[bold]T{state.turn_counter} · {actor}[/bold]{cohort_text}{busy}{result_text}{invalid}"
-            f"  |  A F{state.food['A']} H{len(state.hands['A'])} D{len(state.decks['A'])}"
-            f"  |  B F{state.food['B']} H{len(state.hands['B'])} D{len(state.decks['B'])}"
+            f"[bold]{phase}[/bold] · Turn {state.turn_counter + 1}{cohort_text}{invalid}"
+        )
+
+        opponent_style = SEAT_STYLE.get(opponent, "bold")
+        human_style = SEAT_STYLE.get(human, "bold")
+        self.query_one("#opponent", Static).update(
+            f"[{opponent_style}]OPPONENT · Seat {opponent}[/{opponent_style}]"
+            f"   Food {state.food[opponent]}"
+            f"  ·  Hand {len(state.hands[opponent])}"
+            f"  ·  Deck {len(state.decks[opponent])}"
+        )
+        actions_remaining = max(
+            0,
+            state.config.actions_per_turn - state.actions_taken_this_turn,
+        )
+        action_text = (
+            f"  ·  Actions {actions_remaining}"
+            if actor == human and result is None
+            else ""
+        )
+        self.query_one("#player", Static).update(
+            f"[{human_style}]YOU · Seat {human}[/{human_style}]"
+            f"   Food {state.food[human]}"
+            f"  ·  Hand {len(state.hands[human])}"
+            f"  ·  Deck {len(state.decks[human])}"
+            f"{action_text}"
         )
 
         self._build_action_state()
