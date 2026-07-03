@@ -86,8 +86,8 @@ Paired mirror, nodes=150 vs shipped v2, 200 games/deck (egg pooled to 800), seed
 | ramp | 50.0 [50.0, 50.0] |
 
 Every lower CI ≥ 46 → **meets the ship gate.** ~1.73× whole-game, ~2.8× cumulative vs the
-original referee. **Not shipped**: it changes the oracle's decisions on budget-exhausted lines,
-so the one-line `REFEREE_MAX_SEARCH_NODES` flip in `sim/runner.py` is left for owner sign-off.
+original referee. Superseded as the ship choice by `nodes=150+reply=8` below (which is faster
+*and* stronger); `nodes=150` alone would merely preserve v2's flawed strength.
 
 Reproduced at a fresh seed (2500) and pooled to 400 games: egg 49.5% [45.5, 53.8], colony
 50.5% [48.8, 52.2], aggro 49.0% [46.8, 51.2] — all lower CI ≥ 45, so the tie is not a seed
@@ -116,7 +116,8 @@ reply/root pruning is what cuts colony's deep combo/swarm lines. **Tension:** wi
 beam raises the dominant cost (reply rollouts), so colony faithfulness trades against referee
 speed — a faithfulness-vs-throughput call for the oracle tier. Fix is pilot-side (adaptive
 wider beams for combo-shaped positions, or `staged=False` on a small calibration cohort),
-**never a card nerf**. Tracked as a task and in `backlog.md`.
+**never a card nerf**. **Resolved (2026-07-03):** shipping the flat `reply=8` upgrade (see below)
+restored colony parity; the adaptive-beam variant stays a fallback only if cost later dictates.
 
 ## The reply beam recovers strength cheaply — `reply=8` dominates `reply=4`
 
@@ -153,10 +154,11 @@ significantly stronger on the two combo decks (colony, food_otk) where the shipp
 pruning hurt most. (A single seed had over-stated cats at 58% and aggro at 53%; the two-seed
 pool corrects that seed noise without touching the core conclusion — hence the reproduction.)
 
-**Recommendation (owner sign-off):** upgrade from "flip `REFEREE_MAX_SEARCH_NODES` 1000→150" to
-flipping that **and** `REFEREE_REPLY_WIDTH` 4→8 in `sim/runner.py` — one config that is **~1.31×
-faster than v2 and a strictly better (more oracle-faithful) pilot on every deck**, fixing
-colony's ~7-pt gap as part of a general strength gain. (Trade-off vs `nodes=150` alone: that is
+**Shipped (2026-07-03, owner sign-off, commit 3794071):** flipped both
+`REFEREE_MAX_SEARCH_NODES` 1000→150 **and** `REFEREE_REPLY_WIDTH` 4→8 in `sim/runner.py` — one
+config that is **~1.31× faster than v2 and a strictly better (more oracle-faithful) pilot on
+every deck**, fixing colony's ~7-pt gap as part of a general strength gain. This is now the
+production referee ("v3"). (Trade-off vs `nodes=150` alone: that is
 faster still — ~2.8× cumulative vs original — but merely *ties* v2's flawed strength;
 `nodes=150+reply=8` is ~2.1× cumulative and *improves* the oracle. For the calibration tier,
 faithfulness wins.) A flat `reply=8` is viable since the combo already nets faster; *adaptive*
