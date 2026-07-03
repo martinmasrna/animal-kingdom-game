@@ -136,14 +136,19 @@ Crucially the node budget *pays for* the reply widening. Whole-game CPU (ref-vs-
 
 So `nodes=150+reply=8` is **1.31× faster than v2** while being **stronger on the field** — a
 near-strict improvement (faster *and* more oracle-faithful), far better than `nodes=150` alone
-merely preserving v2's flawed strength. Direct validation (`nodes=150,reply=8` vs v2, 200g/deck):
-beats/ties v2 on 6/7 — cats 58.0% [53, 63], colony 57.5% [53, 62.5] (both significant), aggro
-53.0%, food_otk 53.5%, ramp 54.0%, canine 51.0%; **egg 48.0% [41.5, 54.0]** is the lone
-underpowered deck (point ≈ parity, egg's usual high variance — being firmed to 600g). Pending
-egg's firm-up, the recommendation upgrades from "flip `REFEREE_MAX_SEARCH_NODES` 1000→150" to
-"flip that **and** `REFEREE_REPLY_WIDTH` 4→8" — one config that is faster and a better oracle. A
-flat `reply=8` is viable since the combo already nets faster; *adaptive* reply-widening (reply=8
-only for combo-shaped positions via generic features) is a fallback if egg or cost dictates.
+merely preserving v2's flawed strength. Direct validation (`nodes=150,reply=8` vs v2, 200g/deck; egg pooled to 600g) **beats or ties v2
+on all 7 decks**: cats 58.0% [53, 63], colony 57.5% [53, 62.5] (both significant), aggro 53.0%,
+food_otk 53.5%, ramp 54.0%, canine 51.0%, egg 51.2% [47.8, 54.7]. Every lower CI ≥ 45.5.
+
+**Recommendation (owner sign-off):** upgrade from "flip `REFEREE_MAX_SEARCH_NODES` 1000→150" to
+flipping that **and** `REFEREE_REPLY_WIDTH` 4→8 in `sim/runner.py` — one config that is **~1.31×
+faster than v2 and a strictly better (more oracle-faithful) pilot on every deck**, fixing
+colony's ~7-pt gap as part of a general strength gain. (Trade-off vs `nodes=150` alone: that is
+faster still — ~2.8× cumulative vs original — but merely *ties* v2's flawed strength;
+`nodes=150+reply=8` is ~2.1× cumulative and *improves* the oracle. For the calibration tier,
+faithfulness wins.) A flat `reply=8` is viable since the combo already nets faster; *adaptive*
+reply-widening (reply=8 only for combo-shaped positions via generic features) stays a fallback if
+cost ever dictates.
 
 ## Reliability grade of the speedup claim
 
