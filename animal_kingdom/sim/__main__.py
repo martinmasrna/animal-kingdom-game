@@ -17,14 +17,7 @@ from typing import Sequence
 from ..engine.cards import DECK_SLUGS
 from ..engine.config import load_config_overrides
 from . import metrics
-from .runner import BOT_KINDS, run_matchup, run_round_robin
-
-
-def _parse_bots(spec: str) -> tuple[str, str]:
-    parts = spec.split(",")
-    if len(parts) != 2 or any(p.strip().lower() not in BOT_KINDS for p in parts):
-        raise SystemExit(f"--bots expects two of {'|'.join(BOT_KINDS)}, e.g. greedy,greedy")
-    return parts[0].strip().lower(), parts[1].strip().lower()
+from .runner import parse_bot_pair, run_matchup, run_round_robin
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -41,7 +34,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--out", default="results", help="output directory for the metrics bundle")
     args = p.parse_args(argv)
 
-    bots = _parse_bots(args.bots)
+    bots = parse_bot_pair(args.bots)
     config = load_config_overrides(args.config)
     spec = args.decks.strip()
     if spec == "all":

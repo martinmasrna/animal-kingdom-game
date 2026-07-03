@@ -39,7 +39,7 @@ from ..engine.cards import DECK_SLUGS
 from ..engine.config import Config, load_config_overrides
 from . import metrics
 from .gauntlet import _credit
-from .runner import BOT_KINDS, GameRecord, run_pairs
+from .runner import BOT_KINDS, GameRecord, parse_bot_kind, run_pairs
 
 # Fixed bootstrap seed: repeating a benchmark reproduces the intervals exactly (handoff §4.3
 # gate 6). Overridable for sensitivity checks, but never varies across a given run's cells.
@@ -460,13 +460,6 @@ def run_all(
 
 # ------------------------------------------------------------------------------- CLI
 
-def _parse_kind(kind: str, flag: str) -> str:
-    kind = kind.strip().lower()
-    if kind not in BOT_KINDS:
-        raise SystemExit(f"{flag} expects one of {'|'.join(BOT_KINDS)}, got {kind!r}")
-    return kind
-
-
 def main(argv: Sequence[str] | None = None) -> None:
     p = argparse.ArgumentParser(
         description="Paired seven-deck bot-quality benchmark (baseline vs candidate pilot).")
@@ -492,9 +485,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     args = p.parse_args(argv)
 
     config = load_config_overrides(args.config)
-    candidate_kind = _parse_kind(args.candidate_kind, "--candidate-kind")
-    baseline_kind = _parse_kind(args.baseline_kind, "--baseline-kind")
-    opponent_kind = _parse_kind(args.opponent_kind, "--opponent-kind")
+    candidate_kind = parse_bot_kind(args.candidate_kind, "--candidate-kind")
+    baseline_kind = parse_bot_kind(args.baseline_kind, "--baseline-kind")
+    opponent_kind = parse_bot_kind(args.opponent_kind, "--opponent-kind")
 
     decks = sorted(DECK_SLUGS)
     if args.deck is not None:

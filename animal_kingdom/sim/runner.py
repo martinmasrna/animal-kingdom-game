@@ -111,6 +111,22 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None) -> B
     raise ValueError(f"unknown bot kind {kind!r} (expected one of {BOT_KINDS})")
 
 
+def parse_bot_kind(kind: str, flag: str) -> str:
+    """Validate one CLI bot-kind argument against BOT_KINDS, or exit with a usage error."""
+    kind = kind.strip().lower()
+    if kind not in BOT_KINDS:
+        raise SystemExit(f"{flag} expects one of {'|'.join(BOT_KINDS)}, got {kind!r}")
+    return kind
+
+
+def parse_bot_pair(spec: str) -> tuple[str, str]:
+    """Validate a `--bots a,b` CLI argument (two of BOT_KINDS), or exit with a usage error."""
+    parts = spec.split(",")
+    if len(parts) != 2 or any(p.strip().lower() not in BOT_KINDS for p in parts):
+        raise SystemExit(f"--bots expects two of {'|'.join(BOT_KINDS)}, e.g. greedy,greedy")
+    return parts[0].strip().lower(), parts[1].strip().lower()
+
+
 def play_game(
     deck_a: str,
     deck_b: str,

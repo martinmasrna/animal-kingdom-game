@@ -49,7 +49,7 @@ def _terminal_width() -> int:
     return max(_MIN_WIDTH, shutil.get_terminal_size(fallback=(100, 24)).columns)
 
 
-def _parse_cr(cr: str) -> tuple[int, int]:
+def parse_cr(cr: str) -> tuple[int, int]:
     x, y = cr.split(",")
     return int(x), int(y)
 
@@ -133,7 +133,7 @@ def _render_board(state, highlight_crs: Collection[str] = (),
                    highlight_hq: str | None = None) -> list[str]:
     """`highlight_crs`/`highlight_hq` mark legal targets (green box) during card selection."""
     gm = state.game_map
-    coords = [_parse_cr(c) for c in gm.crossroads]
+    coords = [parse_cr(c) for c in gm.crossroads]
     xs = sorted({x for x, _ in coords})
     ys_top_first = sorted({y for _, y in coords}, reverse=True)  # highest y drawn at the top
     ci = {x: i for i, x in enumerate(xs)}          # grid x -> screen column index
@@ -143,7 +143,7 @@ def _render_board(state, highlight_crs: Collection[str] = (),
     # Which players' HQs sit on the left (min column) / right (max column) edge.
     hq_side = {}  # player -> "L"/"R"
     for player, fronts in gm.hq_connects.items():
-        fx = {_parse_cr(c)[0] for c in fronts}
+        fx = {parse_cr(c)[0] for c in fronts}
         if fx == {min(xs)}:
             hq_side[player] = "L"
         elif fx == {max(xs)}:
@@ -186,7 +186,7 @@ def _render_board(state, highlight_crs: Collection[str] = (),
     # drawn once (skipped from the higher-coordinate endpoint).
     for x, y in coords:
         for b in gm.neighbors(f"{x},{y}"):
-            bx, by = _parse_cr(b)
+            bx, by = parse_cr(b)
             if (bx, by) < (x, y):
                 continue  # this edge is drawn from its lower-coordinate endpoint
             if by == y:                        # horizontal
@@ -213,7 +213,7 @@ def _render_board(state, highlight_crs: Collection[str] = (),
 
     # Region labels at each block centre: `<food><holder>` (holder owns all 4 corners).
     for region in gm.regions.values():
-        rcoords = [_parse_cr(c) for c in region.corners]
+        rcoords = [parse_cr(c) for c in region.corners]
         cx = sum(box_col(x) + _NODE_W // 2 for x, _ in rcoords) // len(rcoords)
         cy = sum(box_row(y) + _NODE_H // 2 for _, y in rcoords) // len(rcoords)
         holder = _region_holder(state, region)
@@ -236,7 +236,7 @@ def _render_board(state, highlight_crs: Collection[str] = (),
 
         hq_edge = edge_col + _HQ_W - 1 if side == "L" else edge_col  # HQ side facing the grid
         for cr in gm.hq_connects[player]:
-            fx, fy = _parse_cr(cr)
+            fx, fy = parse_cr(cr)
             tgt = box_col(fx) if side == "L" else box_col(fx) + _NODE_W - 1  # target's near side
             if fy == mid_y:                                   # horizontal spur
                 row = r0 + 2
@@ -305,7 +305,7 @@ def _card_box(state, unit, inner: int, body_h: int) -> list[str]:
 def _format_stacks(state) -> list[str]:
     """List every multi-unit stack bottom->top (the board only shows the top unit)."""
     lines = []
-    for cr in sorted(state.board, key=_parse_cr):
+    for cr in sorted(state.board, key=parse_cr):
         stack = state.board[cr]
         if len(stack) > 1:
             parts = " / ".join(

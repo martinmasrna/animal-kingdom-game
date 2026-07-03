@@ -24,16 +24,9 @@ from typing import Optional, Sequence
 from ..engine.cards import DECK_SLUGS, Card, load_cards
 from ..engine.config import load_config_overrides
 from . import metrics
-from .runner import BOT_KINDS, GameRecord, run_pairs
+from .runner import BOT_KINDS, GameRecord, parse_bot_pair, run_pairs
 
 RARITY_MARK = {"legendary": "\U0001F7E1", "rare": "\U0001F535", "common": "⚪"}  # yellow/blue/white
-
-
-def _parse_bots(spec: str) -> tuple[str, str]:
-    parts = spec.split(",")
-    if len(parts) != 2 or any(p.strip().lower() not in BOT_KINDS for p in parts):
-        raise SystemExit(f"--bots expects two of {'|'.join(BOT_KINDS)}, e.g. greedy,greedy")
-    return parts[0].strip().lower(), parts[1].strip().lower()
 
 
 def _resolve_deck(query: str, slugs: list[str]) -> str:
@@ -155,7 +148,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                         "(abbreviation OK, both seats; same deck = mirror only)")
     args = p.parse_args(argv)
 
-    bots = _parse_bots(args.bots)
+    bots = parse_bot_pair(args.bots)
     config = load_config_overrides(args.config)
     slugs = sorted(DECK_SLUGS)
 

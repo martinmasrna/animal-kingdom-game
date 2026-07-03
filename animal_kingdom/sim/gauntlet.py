@@ -22,7 +22,7 @@ from typing import Optional, Sequence
 from ..bots.greedy_bot import GreedyWeights
 from ..engine.cards import DECK_SLUGS
 from ..engine.config import Config, load_config_overrides
-from .runner import BOT_KINDS, GameRecord, run_pairs
+from .runner import BOT_KINDS, GameRecord, parse_bot_kind, run_pairs
 
 
 def _credit(rec: GameRecord, seat: str) -> float:
@@ -129,13 +129,6 @@ def _load_weights(path: Optional[str]) -> Optional[GreedyWeights]:
     return GreedyWeights(**overrides)
 
 
-def _parse_kind(kind: str, flag: str) -> str:
-    kind = kind.strip().lower()
-    if kind not in BOT_KINDS:
-        raise SystemExit(f"{flag} expects one of {'|'.join(BOT_KINDS)}, got {kind!r}")
-    return kind
-
-
 def main(argv: Sequence[str] | None = None) -> None:
     p = argparse.ArgumentParser(
         description="Run a deck's bot against a pinned pool of opponents; "
@@ -163,9 +156,9 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     result = run_gauntlet(
         args.deck, args.games, args.seed,
-        candidate_kind=_parse_kind(args.candidate_kind, "--candidate-kind"),
+        candidate_kind=parse_bot_kind(args.candidate_kind, "--candidate-kind"),
         candidate_weights=_load_weights(args.weights),
-        opponent_kind=_parse_kind(args.opponent_kind, "--opponent-kind"),
+        opponent_kind=parse_bot_kind(args.opponent_kind, "--opponent-kind"),
         opponent_weights=_load_weights(args.opponent_weights),
         config=load_config_overrides(args.config),
         map_id=args.map_id, jobs=args.jobs,

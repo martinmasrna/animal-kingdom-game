@@ -31,7 +31,7 @@ from .engine import strength as strength_mod
 from .engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
 from .engine.config import load_config_overrides
 from .engine.state import GameState, StateView, new_game
-from .render.text import HIGHLIGHT_STYLE, SEAT_STYLE, render
+from .render.text import HIGHLIGHT_STYLE, SEAT_STYLE, parse_cr, render
 
 # highlight=False: Rich's default ReprHighlighter would auto-color bare numbers/punctuation
 # (board coordinates, region food values) on top of our own markup - noise, not signal.
@@ -97,11 +97,6 @@ def _turn_banner(turn: int, actor: str, human_seats: set[str]) -> str:
     if human_seats:
         suffix = " (you)" if actor in human_seats else " (opponent)"
     return _banner(f"TURN {turn} — seat {actor}{suffix}", SEAT_STYLE[actor])
-
-
-def _parse_cr_key(cr: str) -> tuple[int, int]:
-    x, y = cr.split(",")
-    return int(x), int(y)
 
 
 class HumanController:
@@ -182,7 +177,7 @@ class HumanController:
                         targets: list[PlaceAction]) -> PlaceAction | None:
         """Show the board with `targets` highlighted and let the player pick one, or 'b'ack."""
         crs = sorted((a for a in targets if not a.is_hq_capture),
-                     key=lambda a: _parse_cr_key(a.crossroad))
+                     key=lambda a: parse_cr(a.crossroad))
         hq = [a for a in targets if a.is_hq_capture]
         ordered = crs + hq  # HQ capture listed last - it's the highest-impact option
         highlight_hq = hq[0].target[1] if hq else None
