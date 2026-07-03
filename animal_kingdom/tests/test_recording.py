@@ -9,6 +9,7 @@ from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import GameState
 from animal_kingdom.recording.cohort import generate_manifest
 from animal_kingdom.recording.session import GameSetup, RecorderSession
+from animal_kingdom.recording.schedule import main as schedule_main
 from animal_kingdom.recording.writer import (
     JsonlGameWriter,
     completed_game_ids,
@@ -120,3 +121,18 @@ def test_state_view_to_dict_is_json_safe(tmp_path):
     assert "opponent_hand_count" in payload
     assert "decks" not in payload
     session.close()
+
+
+def test_schedule_cli_uses_shipped_config_without_retired_preset(tmp_path):
+    output = tmp_path / "cohort.json"
+    schedule_main([
+        "--id", "default-config",
+        "--out", str(output),
+        "--human-decks", "ramp",
+        "--opponent-decks", "egg_control",
+        "--bots", "random",
+        "--seats", "A",
+    ])
+    manifest = json.loads(output.read_text())
+    assert manifest["config"]["actions_per_turn"] == 2
+    assert manifest["config"]["draw_action_count"] == 1

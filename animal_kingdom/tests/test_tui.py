@@ -7,7 +7,7 @@ from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import UnitInstance, new_game
 from animal_kingdom.recording.cohort import generate_manifest
-from animal_kingdom.tui.app import ActionCard, BoardWidget, CardShelf, RecorderApp
+from animal_kingdom.tui.app import ActionCard, BoardWidget, CardShelf, RecorderApp, build_parser
 
 
 def _human_first_seed() -> int:
@@ -183,3 +183,7 @@ def test_hovering_crossroad_shows_complete_stack_tooltip(tmp_path):
             assert tooltip.index("Elephant") < tooltip.index("Fig Tree")
 
     asyncio.run(scenario())
+
+
+def test_recorder_cli_defaults_to_shipped_config():
+    assert build_parser().parse_args([]).config == "none"

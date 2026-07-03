@@ -38,7 +38,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--map", dest="map_id", default="map_b")
     parser.add_argument(
         "--config",
-        default="animal_kingdom/data/two_action_config.json",
+        default="none",
         help="Config override JSON; use 'none' for defaults.",
     )
     args = parser.parse_args(argv)

@@ -763,7 +763,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--map", dest="map_id", default="map_b")
     parser.add_argument(
         "--config",
-        default="animal_kingdom/data/two_action_config.json",
+        default="none",
         help="Ad-hoc config override JSON; use 'none' for defaults.",
     )
     return parser
