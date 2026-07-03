@@ -4,9 +4,25 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Deck source of
 
 > **Build #5 (rebuild `data/cards.json` + the effect registry from the deck files) is DONE** — `cards.json` carries the reworked pool and the full test suite runs on it. Remaining card work is flavor + text cleanup below.
 
+## Expansion and constructed play
+
+- [ ] **Re-audit every noncanonical candidate for the no-mana economy before promotion.** The
+  invariant is explicit in `decks/README.md`: all cards consume the same placement action, so low
+  strength is never “cheap.” Apply the body/card/action/delay ledgers in
+  `expansion-design-todo.md` to the single consolidated inventory in
+  [`card-candidates.md`](card-candidates.md); rarity alone cannot repay a weak rate.
+- [ ] **Review the consolidated candidate inventory:** [`card-candidates.md`](card-candidates.md)
+  contains the Common, Rare, and Legendary tables. `expansion-design-todo.md` retains the design
+  guardrails and module context rather than serving as a second inventory.
+- [ ] **Validate actual deckbuilding choice:** [`deckbuilding-todo.md`](deckbuilding-todo.md)
+  defines first-pool size targets, module structure, bridge-card goals, and list-diversity tests.
+- [ ] **Resolve post-balance names and species:** [`flavor-todo.md`](flavor-todo.md) covers
+  Secretarybird, rare Goliath's species collision, legendary Black Swan, the new Aggro legendary,
+  and the broader legendary-name policy.
+
 ## Flavor
-- [ ] **Dedicated legendary-name review (all 28).** The stricter, do-not-skip pass before flavor-lock. 24/28 are provisional machine-suggested names (2026-06-30); only the 4 Cats are final. Check each against `cards.md` §2.1: (a) evoke, don't cite — extra scrutiny on borderline picks (Lobo, Shuck, Marabunta, Methuselah, Goliath); (b) real species only; (c) effect↔name fit "like a glove"; (d) no collisions / one-species rule (Borealis vs Polar Bear, Goliath vs Anaconda, Carmilla vs Black Widow); (e) tone/register consistency. Alternates in `decks/flavor-review.md` §3.
-- [ ] **Reskins & collisions (pure, no mechanics).** Black Panther = melanistic *leopard* (not jaguar — avoids the Cats deck's Jaguar collision). Rename the Aggro placeholder hornet (→ Tarantula Hawk / Velvet Ant; collides with Colony's Guard Hornet). Reconcile tag taxonomy: mark `Fish` active (Pufferfish uses it), pick one tortoise tag.
+- [ ] **Dedicated legendary-name review (all 28).** The stricter, do-not-skip pass before flavor-lock. Only the 4 Cats are final. Check each against `cards.md` §2.1: (a) evoke, don't cite — extra scrutiny on borderline picks (Lobo, Shuck, Marabunta, Methuselah); (b) real species only; (c) effect↔name fit "like a glove"; (d) no collisions / one-species rule; (e) tone/register consistency. Goliath is now a rare-species rename; legendary Black Swan and the new Aggro cover-retaliation unit enter this review. Alternates and recommendations live in `decks/flavor-review.md` §3 and `flavor-todo.md`.
+- [ ] **Reskins & collisions (pure, no mechanics).** Black Panther = melanistic *leopard* (not jaguar — avoids the Cats deck's Jaguar collision). Rename the Aggro placeholder hornet → **Tarantula Hawk** or another flying stinging insect; Velvet Ant no longer fits after the card gained Flight because the stinging females are wingless. Reconcile tag taxonomy: mark `Fish` active (Pufferfish uses it), pick one tortoise tag.
 - [ ] **Re-cast animal names onto existing cards (flavor pass).** Keep mechanics fixed; revisit the species per effect so it fits "like a glove." Prioritize the generic `—`-tag cards (Honey Badger, Wild Boar, Armadillo). Filter: pick animals with a *famous specific behavior* (scavenges, plays dead, swarms) over "most iconic."
 - [ ] **Colony eusocial-castes §2.1 exception (human ruling).** Bee/ant castes collapse to one species under §2.1, yet real colonies *are* one species across castes. Decide: carve a narrow "eusocial castes may repeat within the Colony tribe" exception (flavor-review's rec), or split the hive across species (advised against).
 - [ ] **Balance-gated flavor changes (do NOT do silently).** Canine size-inversion: Fox 5 / Dingo 5 out-body Gray Wolf 4 — reskin which animal carries each engine, or lower the Fox/Dingo bodies (balance-gated → Balance). Apex "trample/raze" vs "eat" a Landmark (balance-gated; folded with the Landmark revisit in `../rules/backlog.md`).
