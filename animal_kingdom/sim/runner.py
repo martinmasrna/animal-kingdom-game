@@ -88,35 +88,40 @@ TURN_BEAM_WIDTH = 8
 GREEDY_BELIEF_COVERAGE_EXPOSURE = 40.0
 
 
-def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None) -> Bot:
+def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
+             extra: Optional[dict] = None) -> Bot:
     """Construct a bot from a kind string (see `BOT_KINDS`) with a derived seed.
 
     `weights` overrides a greedy/lookahead bot's eval weights (default `GreedyWeights()` if
-    omitted); it's ignored for 'random'.
+    omitted); it's ignored for 'random'. `extra` overrides the kind's default constructor
+    kwargs (e.g. `{"deck_reveal_choice_width": 0}`, `{"determinizations": 2}`), so one A/B
+    can compare configs of the same kind without a bespoke bot kind - the seam the paired
+    benchmark uses to stay in its fixed-opponent design.
     """
     kind = kind.strip().lower()
+    extra = dict(extra or {})
     if kind == "greedy":
-        return GreedyBot(weights=weights, seed=seed)
+        return GreedyBot(weights=weights, seed=seed, **extra)
     if kind == "greedy_belief":
         base = weights or GreedyWeights()
         belief = replace(base, coverage_exposure=GREEDY_BELIEF_COVERAGE_EXPOSURE)
-        return GreedyBot(weights=belief, seed=seed)
+        return GreedyBot(weights=belief, seed=seed, **extra)
     if kind == "lookahead":
-        return GreedyBot(weights=weights, seed=seed,
-                         depth=LOOKAHEAD_DEPTH, beam_width=LOOKAHEAD_BEAM_WIDTH)
+        kw = dict(depth=LOOKAHEAD_DEPTH, beam_width=LOOKAHEAD_BEAM_WIDTH)
+        kw.update(extra)
+        return GreedyBot(weights=weights, seed=seed, **kw)
     if kind == "random":
         return RandomBot(seed=seed)
     if kind == "referee":
-        return RefereeBot(weights=weights, seed=seed,
-                          determinizations=REFEREE_DETERMINIZATIONS,
-                          beam_width=REFEREE_BEAM_WIDTH,
-                          root_width=REFEREE_ROOT_WIDTH,
-                          reply_width=REFEREE_REPLY_WIDTH,
-                          max_search_nodes=REFEREE_MAX_SEARCH_NODES)
+        kw = dict(determinizations=REFEREE_DETERMINIZATIONS, beam_width=REFEREE_BEAM_WIDTH,
+                  root_width=REFEREE_ROOT_WIDTH, reply_width=REFEREE_REPLY_WIDTH,
+                  max_search_nodes=REFEREE_MAX_SEARCH_NODES)
+        kw.update(extra)
+        return RefereeBot(weights=weights, seed=seed, **kw)
     if kind == "turn":
-        return TurnBot(weights=weights, seed=seed,
-                       determinizations=TURN_DETERMINIZATIONS,
-                       beam_width=TURN_BEAM_WIDTH)
+        kw = dict(determinizations=TURN_DETERMINIZATIONS, beam_width=TURN_BEAM_WIDTH)
+        kw.update(extra)
+        return TurnBot(weights=weights, seed=seed, **kw)
     raise ValueError(f"unknown bot kind {kind!r} (expected one of {BOT_KINDS})")
 
 
@@ -126,6 +131,35 @@ def parse_bot_kind(kind: str, flag: str) -> str:
     if kind not in BOT_KINDS:
         raise SystemExit(f"{flag} expects one of {'|'.join(BOT_KINDS)}, got {kind!r}")
     return kind
+
+
+def _coerce_kwarg(value: str):
+    """Coerce a CLI kwarg string to int -> float -> bool -> str."""
+    for cast in (int, float):
+        try:
+            return cast(value)
+        except ValueError:
+            pass
+    low = value.lower()
+    return low == "true" if low in ("true", "false") else value
+
+
+def parse_bot_spec(spec: str, flag: str) -> tuple[str, tuple]:
+    """Parse a `kind[:k=v,k=v]` bot spec into `(kind, ((k, v), ...))` for `make_bot`'s `extra`.
+
+    Lets one A/B compare configs of the *same* kind through the paired benchmark without a
+    bespoke bot kind, e.g. `turn:deck_reveal_choice_width=0` or
+    `referee:reply_width=8,max_search_nodes=150`. Values coerce int -> float -> bool -> str.
+    """
+    head, _, tail = spec.partition(":")
+    kind = parse_bot_kind(head, flag)
+    kwargs = []
+    for item in filter(None, tail.split(",")):
+        if "=" not in item:
+            raise SystemExit(f"{flag}: bad kwarg {item!r} (expected key=value)")
+        key, value = item.split("=", 1)
+        kwargs.append((key.strip(), _coerce_kwarg(value.strip())))
+    return kind, tuple(kwargs)
 
 
 def parse_bot_pair(spec: str) -> tuple[str, str]:
@@ -188,11 +222,17 @@ class MatchSpec:
     map_id: str = "map_a"
     weights_a: Optional[GreedyWeights] = None
     weights_b: Optional[GreedyWeights] = None
+    # Per-seat constructor-kwarg overrides as picklable (key, value) tuples (e.g.
+    # (("deck_reveal_choice_width", 0),)); empty => the kind's default config.
+    kwargs_a: tuple = ()
+    kwargs_b: tuple = ()
 
 
 def _run_spec(spec: MatchSpec, config: Optional[Config] = None) -> GameRecord:
-    bot_a = make_bot(spec.bot_a, seed=spec.seed * 2 + 1, weights=spec.weights_a)
-    bot_b = make_bot(spec.bot_b, seed=spec.seed * 2 + 2, weights=spec.weights_b)
+    bot_a = make_bot(spec.bot_a, seed=spec.seed * 2 + 1, weights=spec.weights_a,
+                     extra=dict(spec.kwargs_a))
+    bot_b = make_bot(spec.bot_b, seed=spec.seed * 2 + 2, weights=spec.weights_b,
+                     extra=dict(spec.kwargs_b))
     return play_game(spec.deck_a, spec.deck_b, spec.seed,
                      bot_a=bot_a, bot_b=bot_b, config=config, map_id=spec.map_id)
 
@@ -248,6 +288,7 @@ def run_pairs(
     *,
     bots: tuple[str, str] = ("greedy", "greedy"),
     weights: tuple[Optional[GreedyWeights], Optional[GreedyWeights]] = (None, None),
+    bot_kwargs: tuple[tuple, tuple] = ((), ()),
     config: Optional[Config] = None,
     map_id: str = "map_a",
     jobs: int = 1,
@@ -265,7 +306,8 @@ def run_pairs(
 
     def _pair_specs(pair_index: int, a: str, b: str) -> list[MatchSpec]:
         pair_seed = base_seed + pair_index * n_games
-        return [MatchSpec(a, b, pair_seed + i, bots[0], bots[1], map_id, weights[0], weights[1])
+        return [MatchSpec(a, b, pair_seed + i, bots[0], bots[1], map_id,
+                          weights[0], weights[1], bot_kwargs[0], bot_kwargs[1])
                 for i in range(n_games)]
 
     def _run_all(ex: Optional[ProcessPoolExecutor]) -> None:

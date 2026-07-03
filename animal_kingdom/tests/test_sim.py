@@ -107,6 +107,33 @@ def test_run_pairs_referee_parallel_matches_serial():
     assert serial == parallel
 
 
+def test_parse_bot_spec_coerces_kwargs():
+    from animal_kingdom.sim.runner import parse_bot_spec
+    assert parse_bot_spec("turn", "--x") == ("turn", ())
+    kind, kw = parse_bot_spec("turn:deck_reveal_choice_width=0,determinizations=2", "--x")
+    assert kind == "turn"
+    assert kw == (("deck_reveal_choice_width", 0), ("determinizations", 2))
+    assert all(isinstance(v, int) for _, v in kw)   # "0"/"2" coerced to int, not str
+
+
+def test_make_bot_extra_overrides_kind_defaults():
+    from animal_kingdom.bots.turn_bot import TURN_DECK_REVEAL_CHOICE_WIDTH
+    default = make_bot("turn", seed=1)
+    overridden = make_bot("turn", seed=1, extra={"deck_reveal_choice_width": 0})
+    assert default.deck_reveal_choice_width == TURN_DECK_REVEAL_CHOICE_WIDTH
+    assert overridden.deck_reveal_choice_width == 0
+
+
+def test_run_pairs_bot_kwargs_thread_and_survive_the_pool():
+    # A config A/B of the same kind: one arm width 0, one arm width 2, over the process pool.
+    pairs = [("egg_control", "ramp")]
+    a = run_pairs(pairs, 1, base_seed=0, bots=("turn", "greedy"),
+                  bot_kwargs=((("deck_reveal_choice_width", 0),), ()), jobs=2)
+    b = run_pairs(pairs, 1, base_seed=0, bots=("turn", "greedy"),
+                  bot_kwargs=((("deck_reveal_choice_width", 0),), ()), jobs=2)
+    assert a == b                                    # deterministic across the pool round-trip
+
+
 def test_run_matchup_threads_weights_and_stays_deterministic():
     custom = GreedyWeights(food_progress=99.0, food_proximity=0.0, board_presence=0.0,
                            connection=0.0, region_control=0.0, enemy_hq_threat=0.0,

@@ -39,7 +39,7 @@ from ..engine.cards import DECK_SLUGS
 from ..engine.config import Config, load_config_overrides
 from . import metrics
 from .gauntlet import _credit
-from .runner import BOT_KINDS, GameRecord, parse_bot_kind, run_pairs
+from .runner import BOT_KINDS, GameRecord, parse_bot_spec, run_pairs
 
 # Fixed bootstrap seed: repeating a benchmark reproduces the intervals exactly (handoff §4.3
 # gate 6). Overridable for sensitivity checks, but never varies across a given run's cells.
@@ -164,6 +164,9 @@ def run_bot_comparison(
     baseline_kind: str = "greedy",
     candidate_kind: str = "turn",
     opponent_kind: str = "greedy",
+    baseline_kwargs: tuple = (),
+    candidate_kwargs: tuple = (),
+    opponent_kwargs: tuple = (),
     config: Optional[Config] = None,
     map_id: str = "map_b",
     jobs: int = 1,
@@ -184,10 +187,12 @@ def run_bot_comparison(
     t0 = time.monotonic()
     baseline_records = run_pairs(pairs, n_games, base_seed,
                                  bots=(baseline_kind, opponent_kind),
+                                 bot_kwargs=(baseline_kwargs, opponent_kwargs),
                                  config=config, map_id=map_id, jobs=jobs)
     t1 = time.monotonic()
     candidate_records = run_pairs(pairs, n_games, base_seed,
                                   bots=(candidate_kind, opponent_kind),
+                                  bot_kwargs=(candidate_kwargs, opponent_kwargs),
                                   config=config, map_id=map_id, jobs=jobs)
     t2 = time.monotonic()
 
@@ -359,9 +364,14 @@ def _write_per_opponent_csv(path: str, results: dict[str, BotComparisonResult]) 
 
 
 def format_table(results: dict[str, BotComparisonResult], gates: dict) -> str:
+    # Label the two win-rate columns with the actual bot kinds (baseline, candidate) rather
+    # than hardcoded greedy/turn; distinguishing kwargs for same-kind A/Bs live in summary.json.
+    any_r = next(iter(results.values()), None)
+    base_lbl = (any_r.baseline_kind if any_r else "baseline")[:8]
+    cand_lbl = (any_r.candidate_kind if any_r else "candidate")[:8]
     lines = [
         "",
-        f"{'deck':<20}{'greedy':>8}{'turn':>8}{'delta':>9}"
+        f"{'deck':<20}{base_lbl:>8}{cand_lbl:>8}{'delta':>9}"
         f"{'95% CI':>18}{'mirror':>8}{'worst opp':>22}{'slow':>7}  gates",
     ]
     for deck in sorted(results):
@@ -408,6 +418,9 @@ def run_all(
     baseline_kind: str = "greedy",
     candidate_kind: str = "turn",
     opponent_kind: str = "greedy",
+    baseline_kwargs: tuple = (),
+    candidate_kwargs: tuple = (),
+    opponent_kwargs: tuple = (),
     config: Optional[Config] = None,
     map_id: str = "map_b",
     jobs: int = 1,
@@ -425,7 +438,9 @@ def run_all(
         results[deck] = run_bot_comparison(
             deck, pool, n_games, base_seed,
             baseline_kind=baseline_kind, candidate_kind=candidate_kind,
-            opponent_kind=opponent_kind, config=config, map_id=map_id, jobs=jobs,
+            opponent_kind=opponent_kind, baseline_kwargs=baseline_kwargs,
+            candidate_kwargs=candidate_kwargs, opponent_kwargs=opponent_kwargs,
+            config=config, map_id=map_id, jobs=jobs,
             bootstrap_resamples=bootstrap_resamples, bootstrap_seed=bootstrap_seed,
             config_id=config_id)
         if progress is not None:
@@ -442,6 +457,9 @@ def run_all(
             "baseline_kind": baseline_kind,
             "candidate_kind": candidate_kind,
             "opponent_kind": opponent_kind,
+            "baseline_kwargs": dict(baseline_kwargs),
+            "candidate_kwargs": dict(candidate_kwargs),
+            "opponent_kwargs": dict(opponent_kwargs),
             "map_id": map_id,
             "config": config_id,
             "bootstrap_resamples": bootstrap_resamples,
@@ -467,11 +485,12 @@ def main(argv: Sequence[str] | None = None) -> None:
                    help="games per opponent (smoke 20 / acceptance 200 / resolve 500|1000)")
     p.add_argument("--seed", type=int, default=ACCEPTANCE_SEED, help="base seed")
     p.add_argument("--candidate-kind", default="turn",
-                   help=f"one of {'|'.join(BOT_KINDS)} (default turn)")
+                   help=f"{'|'.join(BOT_KINDS)}, optionally kind:k=v,k=v "
+                        "(e.g. turn:deck_reveal_choice_width=0) (default turn)")
     p.add_argument("--baseline-kind", default="greedy",
-                   help=f"one of {'|'.join(BOT_KINDS)} (default greedy)")
+                   help="as --candidate-kind (default greedy)")
     p.add_argument("--opponent-kind", default="greedy",
-                   help=f"one of {'|'.join(BOT_KINDS)} (default greedy)")
+                   help="as --candidate-kind (default greedy)")
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1, help="worker processes")
     p.add_argument("--map", dest="map_id", default="map_b")
     p.add_argument("--config", default=None,
@@ -485,9 +504,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     args = p.parse_args(argv)
 
     config = load_config_overrides(args.config)
-    candidate_kind = parse_bot_kind(args.candidate_kind, "--candidate-kind")
-    baseline_kind = parse_bot_kind(args.baseline_kind, "--baseline-kind")
-    opponent_kind = parse_bot_kind(args.opponent_kind, "--opponent-kind")
+    candidate_kind, candidate_kwargs = parse_bot_spec(args.candidate_kind, "--candidate-kind")
+    baseline_kind, baseline_kwargs = parse_bot_spec(args.baseline_kind, "--baseline-kind")
+    opponent_kind, opponent_kwargs = parse_bot_spec(args.opponent_kind, "--opponent-kind")
 
     decks = sorted(DECK_SLUGS)
     if args.deck is not None:
@@ -512,7 +531,9 @@ def main(argv: Sequence[str] | None = None) -> None:
         results = run_all(
             args.games, args.seed,
             baseline_kind=baseline_kind, candidate_kind=candidate_kind,
-            opponent_kind=opponent_kind, config=config, map_id=args.map_id, jobs=args.jobs,
+            opponent_kind=opponent_kind, baseline_kwargs=baseline_kwargs,
+            candidate_kwargs=candidate_kwargs, opponent_kwargs=opponent_kwargs,
+            config=config, map_id=args.map_id, jobs=args.jobs,
             config_id=args.config, out_dir=args.out,
             bootstrap_resamples=args.bootstrap_resamples,
             bootstrap_seed=args.bootstrap_seed, progress=_progress)
@@ -523,7 +544,9 @@ def main(argv: Sequence[str] | None = None) -> None:
             results[deck] = run_bot_comparison(
                 deck, pool, args.games, args.seed,
                 baseline_kind=baseline_kind, candidate_kind=candidate_kind,
-                opponent_kind=opponent_kind, config=config, map_id=args.map_id,
+                opponent_kind=opponent_kind, baseline_kwargs=baseline_kwargs,
+                candidate_kwargs=candidate_kwargs, opponent_kwargs=opponent_kwargs,
+                config=config, map_id=args.map_id,
                 jobs=args.jobs, bootstrap_resamples=args.bootstrap_resamples,
                 bootstrap_seed=args.bootstrap_seed, config_id=args.config)
             _progress(deck, i + 1, len(decks))
