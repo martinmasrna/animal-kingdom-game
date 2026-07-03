@@ -182,7 +182,7 @@ def play_game(
     bot_a: Bot,
     bot_b: Bot,
     config: Optional[Config] = None,
-    map_id: str = "map_a",
+    map_id: str = "map_b",
 ) -> GameRecord:
     """Play one headless game and return its record. Mirrors the cli.play loop."""
     state = new_game(load_premade_deck(deck_a), load_premade_deck(deck_b), seed,
@@ -223,7 +223,7 @@ class MatchSpec:
     seed: int
     bot_a: str = "greedy"
     bot_b: str = "greedy"
-    map_id: str = "map_a"
+    map_id: str = "map_b"
     weights_a: Optional[GreedyWeights] = None
     weights_b: Optional[GreedyWeights] = None
     # Per-seat constructor-kwarg overrides as picklable (key, value) tuples (e.g.
@@ -276,7 +276,7 @@ def run_matchup(
     bots: tuple[str, str] = ("greedy", "greedy"),
     weights: tuple[Optional[GreedyWeights], Optional[GreedyWeights]] = (None, None),
     config: Optional[Config] = None,
-    map_id: str = "map_a",
+    map_id: str = "map_b",
 ) -> list[GameRecord]:
     """`n_games` of deck_a vs deck_b with distinct seeds (first player varies via the flip)."""
     specs = [MatchSpec(deck_a, deck_b, base_seed + i, bots[0], bots[1], map_id,
@@ -294,7 +294,7 @@ def run_pairs(
     weights: tuple[Optional[GreedyWeights], Optional[GreedyWeights]] = (None, None),
     bot_kwargs: tuple[tuple, tuple] = ((), ()),
     config: Optional[Config] = None,
-    map_id: str = "map_a",
+    map_id: str = "map_b",
     jobs: int = 1,
     progress: Optional[Callable[[str, str, int, int], None]] = None,
 ) -> list[GameRecord]:
@@ -338,7 +338,7 @@ def run_round_robin(
     *,
     bots: tuple[str, str] = ("greedy", "greedy"),
     config: Optional[Config] = None,
-    map_id: str = "map_a",
+    map_id: str = "map_b",
     jobs: int = 1,
     progress: Optional[Callable[[str, str, int, int], None]] = None,
 ) -> list[GameRecord]:

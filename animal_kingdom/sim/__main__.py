@@ -28,7 +28,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--seed", type=int, default=0, help="base seed (games use seed, seed+1, ...)")
     p.add_argument("--bots", default="greedy,greedy", help="two of greedy|random")
     p.add_argument("--jobs", type=int, default=1, help="worker processes (round-robin only)")
-    p.add_argument("--map", dest="map_id", default="map_a")
+    p.add_argument("--map", dest="map_id", default="map_b")
     p.add_argument("--config", default=None,
                    help="JSON file of Config field overrides (rule/balance dials)")
     p.add_argument("--out", default="results", help="output directory for the metrics bundle")

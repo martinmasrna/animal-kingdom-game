@@ -400,7 +400,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                         "(default: interactive setup, else random,random)")
     p.add_argument("--seed", type=int, default=None,
                    help="omit for a fresh random shuffle each run; pass a value to replay a game")
-    p.add_argument("--map", dest="map_id", default="map_a")
+    p.add_argument("--map", dest="map_id", default="map_b")
     p.add_argument("--config", default=None,
                    help="JSON file of Config field overrides (rule/balance dials); "
                         "'none' clears a wrapper-injected preset")

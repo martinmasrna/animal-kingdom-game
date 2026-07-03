@@ -16,10 +16,10 @@ Python ≥3.11; venv at `.venv` (`python3 -m venv .venv && .venv/bin/pip install
 - **Play a game:** `./run` (launcher, finds the venv). `./run --help` for flags.
 - **Balance report:** `./report 500` (500 games/matchup; `--deck aggro` to scope one deck).
 - **Matchup matrix / sim:** `.venv/bin/python -m animal_kingdom.sim --decks all --games 200 --seed 0 --jobs 4 --out results/`
-- **Paired bot-quality benchmark:** `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --config animal_kingdom/data/two_action_config.json --out results/bot_quality/turnbot`
+- **Paired bot-quality benchmark:** `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/turnbot`
 
-⚠ **`./run` and `./report` default to the experimental ruleset** (map_b + 2-actions/turn). For the
-classic 1-action rules on the old map, add `--map map_a --config none`.
+The ruleset is **map_b + 2 actions/turn** (draw 1 per Draw action) — the shipped default everywhere,
+no flags needed.
 
 ## Invariants — do not violate
 

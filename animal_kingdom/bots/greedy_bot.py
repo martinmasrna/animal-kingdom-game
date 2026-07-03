@@ -188,9 +188,9 @@ def _opponent_lethal_next_turn(state: GameState, opponent: str) -> bool:
     """True if `opponent` can capture an HQ on their upcoming turn.
 
     Only consults board connectivity (public) and hand *size* (also legitimately public -
-    see `test_eval_ignores_opponent_hand_contents`), never hidden card identities. Under the
-    classic one-action rules the opponent must already hold a card. Under the two-action
-    variant, an empty-handed opponent can draw and then capture if their deck is non-empty.
+    see `test_eval_ignores_opponent_hand_contents`), never hidden card identities. With two
+    actions per turn an empty-handed opponent can draw and *then* capture if their deck is
+    non-empty; the hand check covers the case where they already hold a card.
     """
     me = other_player(opponent)
     gm = state.game_map

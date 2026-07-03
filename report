@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
 # Convenience launcher for the per-card balance report - no venv activation needed.
 #
-# Defaults to the current experimental ruleset: map_b (5x3 "Savanna Expanse") and the
-# 2-actions-per-turn variant (animal_kingdom/data/two_action_config.json). Explicit
-# flags win over the injected defaults (argparse keeps the last occurrence):
+# The shipped ruleset (map_b "Savanna Expanse", 2 actions/turn) is the code default, so
+# no ruleset flags are needed:
 #
 #   ./report 500                           # 7x7 round-robin, 500 games/matchup
 #   ./report 500 --deck aggro              # only aggro_hq_rush's matchups + card table
 #   ./report 100 --deck egg --opponent cat # only that single matchup (both seats)
 #   ./report 200 --bots random,random --jobs 4
-#   ./report 500 --map map_a --config none # the classic 1-action rules on the old map
 #   ./report --help
 #
 # All arguments are passed straight through to `python -m animal_kingdom.sim.report`.
@@ -24,5 +22,4 @@ if [[ ! -x "$py" ]]; then
   exit 1
 fi
 
-exec "$py" -m animal_kingdom.sim.report \
-  --map map_b --config "$here/animal_kingdom/data/two_action_config.json" "$@"
+exec "$py" -m animal_kingdom.sim.report "$@"

@@ -274,8 +274,11 @@ def test_lookahead_finds_the_grizzly_bear_delayed_removal_that_1_ply_misses():
     # even 2-ply, since the delay hasn't elapsed yet) can't see that payoff at all and treats
     # Grizzly Bear as a plain vanilla body; deep enough own-line lookahead plays the position
     # forward far enough for the removal to actually happen on the board, so it shows up.
+    # `depth` counts own placements, so the depth needed to span the 2-turn delay is defined
+    # against one placement per turn: pin this opt-in-lookahead calibration to that ruleset.
+    one_action = Config.default().sweep(actions_per_turn=1, draw_action_count=2)
     s = make_state(hands={"A": ["grizzly_bear", "lion", "mouse", "mouse"], "B": ["mouse"]},
-                   decks={"A": ["mouse"] * 5, "B": ["mouse"] * 5})
+                   decks={"A": ["mouse"] * 5, "B": ["mouse"] * 5}, config=one_action)
     put(s, "2,2", "lion", "B")
     legal = rules.legal_actions(s)
 

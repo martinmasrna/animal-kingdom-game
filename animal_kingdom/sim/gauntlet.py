@@ -71,7 +71,7 @@ def run_gauntlet(
     opponent_weights: Optional[GreedyWeights] = None,
     opponent_pool: Optional[Sequence[str]] = None,
     config: Optional[Config] = None,
-    map_id: str = "map_a",
+    map_id: str = "map_b",
     jobs: int = 1,
 ) -> GauntletResult:
     """Run `deck`'s candidate bot against every deck in `opponent_pool` (default: all other
@@ -148,7 +148,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--config", default=None,
                    help="JSON file of Config field overrides (rule/balance dials); "
                         "'none' clears a wrapper-injected preset")
-    p.add_argument("--map", dest="map_id", default="map_a")
+    p.add_argument("--map", dest="map_id", default="map_b")
     p.add_argument("--out", default=None, help="write the GauntletResult JSON here")
     p.add_argument("--compare-to", default=None,
                    help="a previously-saved GauntletResult JSON; print the delta instead")

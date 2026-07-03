@@ -46,7 +46,7 @@ If the change is to a **bot** (heuristic / weights / search), additionally:
 - **Sample size:** ≥200 games/matchup, paired seeds, both seats.
 
 ## Quick reference (commands)
-Default ruleset is experimental (map_b + 2-action); add `--map map_a --config none` for classic.
+Ruleset is the shipped default everywhere (map_b + 2 actions/turn) — no ruleset flags needed.
 - Matchup matrix + per-card table: `./report 200 [--deck aggro --opponent cat]`
-- Paired bot/deck benchmark: `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --config animal_kingdom/data/two_action_config.json --out results/bot_quality/<name>`
+- Paired bot/deck benchmark: `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/<name>`
 - Single matchup, both seats: `.venv/bin/python -m animal_kingdom.sim --decks A,B --games 200 --seed 0 --jobs 4 --out results/`

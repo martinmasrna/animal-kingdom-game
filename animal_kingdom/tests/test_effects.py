@@ -138,6 +138,7 @@ def test_dingo_buffs_adjacent_canine_at_end_of_turn():
     s = make_state(current="A", decks={"A": ["lion"], "B": ["lynx"]})
     put(s, "2,2", "dingo", "A")
     fox = put(s, "1,2", "fox", "A")
+    s.actions_taken_this_turn = s.config.actions_per_turn - 1
     rules.apply_action(s, DrawAction())                  # ends A's turn -> Dingo fires
     assert fox.strength_counter == 1
 
@@ -774,8 +775,10 @@ def test_queen_marabunta_scales_with_other_colony():
 def test_chipmunk_pays_now_and_next_turn():
     s = make_state(current="A", hands={"A": ["chipmunk"]},
                    decks={"A": ["lion"], "B": ["lynx", "lynx"]})
+    s.actions_taken_this_turn = s.config.actions_per_turn - 1  # Place ends A's turn
     rules.apply_action(s, PlaceAction("chipmunk", ("cr", "1,2")))
     assert s.food["A"] == CFG.chipmunk_food_now
+    s.actions_taken_this_turn = s.config.actions_per_turn - 1  # Draw ends B's turn -> start of A's next
     rules.apply_action(s, DrawAction())                 # B's turn -> start of A's next turn
     assert s.food["A"] == CFG.chipmunk_food_now + CFG.chipmunk_food_later
 
@@ -783,6 +786,7 @@ def test_chipmunk_pays_now_and_next_turn():
 def test_methuselah_gains_food_at_end_of_turn():
     s = make_state(current="A", decks={"A": ["lion"], "B": ["lynx"]})
     put(s, "1,1", "methuselah", "A")
+    s.actions_taken_this_turn = s.config.actions_per_turn - 1
     rules.apply_action(s, DrawAction())
     assert s.food["A"] == CFG.methuselah_food
 

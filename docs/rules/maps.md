@@ -34,9 +34,23 @@ Game-wide setup and HQ rules are the source of truth in `overview.md` — **§4 
 
 ---
 
-# 4. Map A — "Savanna Crossing"
+# 4. Map B — "Savanna Expanse" (the game map)
 
-The first test map: small, symmetric, and open. Its job is to bring the engine up and to **measure** first-player advantage in isolation — not to be clever. Chokepoints and asymmetry belong on later maps.
+**This is the shipped map** — every game and sim runs on it. A 5×3 lattice of **15 crossroads**
+(columns 1–5, rows 1–3), HQ_A fronting column 1 and HQ_B fronting column 5, with **8 regions**
+(R1–R8; the four center cells R2/R3/R6/R7 output **20** food, the flanks **10**) and **win_food 100**.
+The exact geometry (crossroads, edges, region corners) is canonical in
+[`animal_kingdom/data/maps.json`](../../animal_kingdom/data/maps.json) — that file is the source of
+truth; this section is the prose companion. The extra column over the old 4×3 map gives combo/food
+decks room to develop and opens a genuine row-1/row-3 flank as an HQ-rush lane.
+
+---
+
+# 4L. Map A — "Savanna Crossing" (retired — test fixture only)
+
+> **Legacy.** Map A is **not a playable ruleset** — it is retained in `maps.json` solely as a small,
+> symmetric geometry fixture for engine unit tests. It is never a game or sim default. The section
+> below is kept for those tests' reference only.
 
 A 4×3 lattice of crossroads, HQs on opposite sides, square cells forming 6 regions.
 
@@ -94,7 +108,7 @@ win_food: 100
 
 ---
 
-# 5. Tuning targets (Map A)
+# 5. Tuning targets (Map B)
 - **Food curve:** region outputs (10 / 20) and `win_food` (100) vs. the card `F` scale — set together in the simulator.
 - **First-player win rate:** target ≈ 50% with the 3/4 opening-hand split; adjust the split or add another lever if skewed.
 - **Win-condition split:** healthy if all three (HQ / food / exhaustion) appear; if exhaustion dominates, the map is too stally or decks too removal-heavy.
@@ -104,4 +118,4 @@ win_food: 100
 # 6. Open questions / parking
 - **First-player determination** — coin flip for now; revisit (e.g. a bid system) if it matters competitively.
 - **Setup rules now live in `overview.md`** — §4 (Game Setup) and §6 (Legal Placement) are the source of truth; §3 here just references them.
-- **More maps** — Map B (a chokepoint/lane map) and Map C (asymmetric or food-skewed) for the best-of-3, once Map A validates the engine.
+- **More maps** — a Map C (asymmetric or food-skewed) for the best-of-3, to complement the current Map B.

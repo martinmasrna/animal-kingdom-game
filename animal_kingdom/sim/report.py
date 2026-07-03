@@ -136,7 +136,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                    help=f"two of {'|'.join(BOT_KINDS)} (referee is ~50-100x slower than "
                         "greedy: pair it with a low games count, e.g. 50)")
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1, help="worker processes")
-    p.add_argument("--map", dest="map_id", default="map_a")
+    p.add_argument("--map", dest="map_id", default="map_b")
     p.add_argument("--config", default=None,
                    help="JSON file of Config field overrides (rule/balance dials); "
                         "'none' clears a wrapper-injected preset")

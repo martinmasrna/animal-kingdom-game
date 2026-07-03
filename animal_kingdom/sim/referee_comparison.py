@@ -335,7 +335,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--map", dest="map_id", default="map_b")
     parser.add_argument(
         "--config",
-        default="animal_kingdom/data/two_action_config.json",
+        default=None,  # None => Config.default() = the shipped ruleset (2-action, map_b)
     )
     parser.add_argument(
         "--mirror-deck",

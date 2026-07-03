@@ -91,6 +91,7 @@ def test_region_control_produces_food_at_end_of_turn():
     s = make_state(current="A", decks={"A": ["lion"], "B": []})
     for cr in ("1,1", "2,1", "1,2", "2,2"):  # all corners of R1 (food 10)
         put(s, cr, "caracal", "A")
+    s.actions_taken_this_turn = s.config.actions_per_turn - 1  # make the Draw A's last action
     rules.apply_action(s, DrawAction())
     assert s.food["A"] == 10
     assert s.current == "B"  # turn passed
@@ -102,7 +103,8 @@ def test_food_win():
     s = make_state(current="A", decks={"A": ["lion"], "B": []}, food={"A": 95, "B": 0})
     for cr in ("1,1", "2,1", "1,2", "2,2"):
         put(s, cr, "caracal", "A")
-    rules.apply_action(s, DrawAction())  # +10 → 105 ≥ 100
+    s.actions_taken_this_turn = s.config.actions_per_turn - 1  # make the Draw A's last action
+    rules.apply_action(s, DrawAction())  # end of turn: region income +10 → 105 ≥ 100
     assert s.result == Result("A", "food")
     assert rules.is_terminal(s) == Result("A", "food")
 
@@ -127,9 +129,9 @@ def test_exhaustion_tie_breaks_against_player_who_cannot_act():
     assert rules.is_terminal(s) == Result("B", "exhaustion")  # A is stuck → A loses
 
 
-# ------------------------------------------------- actions per turn (2-action variant)
+# ------------------------------------------------- actions per turn (2 per turn, the default)
 
-TWO_ACTIONS = Config.default().sweep(actions_per_turn=2, draw_action_count=1)
+TWO_ACTIONS = Config.default()  # the shipped ruleset is 2 actions/turn, draw 1
 
 
 def test_two_actions_play_play_then_turn_ends():
@@ -172,7 +174,11 @@ def test_effect_granted_extra_play_consumes_no_action():
     assert s.current == "B"
 
 
-def test_default_config_still_one_action_per_turn():
+def test_default_config_is_two_actions_per_turn():
+    # The shipped ruleset gives two actions/turn, so one placement keeps the turn open.
     s = make_state(hands={"A": ["lion", "caracal"], "B": ["lion"]})
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
+    assert s.current == "A"
+    assert s.actions_taken_this_turn == 1
+    rules.apply_action(s, PlaceAction("caracal", ("cr", "1,2")))
     assert s.current == "B"

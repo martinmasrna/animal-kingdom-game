@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 # Convenience launcher for the Animal Kingdom CLI - no venv activation needed.
 #
-# Defaults to the current experimental ruleset: map_b (5x3 "Savanna Expanse") and the
-# 2-actions-per-turn variant (animal_kingdom/data/two_action_config.json). Explicit
-# flags win over the injected defaults (argparse keeps the last occurrence):
+# The shipped ruleset (map_b "Savanna Expanse", 2 actions/turn) is the code default, so
+# no flags are needed for a standard game:
 #
-#   ./run                                  # bot vs bot, seed 0, map_b + 2-action rules
+#   ./run                                  # bot vs bot, seed 0
 #   ./run --bots human,random --seed 7
-#   ./run --map map_a --config none        # the classic 1-action rules on the old map
 #   ./run --quiet
 #   ./run --help
 #
@@ -23,5 +21,4 @@ if [[ ! -x "$py" ]]; then
   exit 1
 fi
 
-exec "$py" -m animal_kingdom.cli \
-  --map map_b --config "$here/animal_kingdom/data/two_action_config.json" "$@"
+exec "$py" -m animal_kingdom.cli "$@"

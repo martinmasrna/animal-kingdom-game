@@ -433,7 +433,7 @@ def new_game(
     deck_b: list[str],
     seed: int,
     *,
-    map_id: str = "map_a",
+    map_id: str = "map_b",
     cards: Optional[dict[str, Card]] = None,
     config: Optional[Config] = None,
 ) -> GameState:

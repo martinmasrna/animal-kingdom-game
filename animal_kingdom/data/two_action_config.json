@@ -1,5 +1,0 @@
-{
-  "_comment": "The 2-actions-per-turn rules variant (2026-07-02 experiment): each turn is two actions, an action = play a card or draw 1 card. Pair of dials, not independent: actions_per_turn=2 only makes sense with draw_action_count=1. Injected by ./run and ./report as the default preset; pass --config none for the classic 1-action rule.",
-  "actions_per_turn": 2,
-  "draw_action_count": 1
-}

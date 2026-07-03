@@ -65,12 +65,12 @@ The **first player** draws **3** cards; the **second player** draws **4** cards.
 ---
 
 # 5. Turn Structure
-Players alternate turns. On a turn, the active player performs exactly one of the following actions:
+Players alternate turns. On a turn, the active player performs **two actions**; each action is one of:
 
-1. **Draw 2 cards**
+1. **Draw 1 card**
 2. **Place one unit**
 
-Some troop effects can allow additional placements or draws during the same turn. When taking the place action:
+The turn ends after two actions, or earlier if no legal action remains. Some troop effects can allow additional placements or draws during the same turn (these are free — they do not consume an action). When taking the place action:
 
 1. Choose one unit from the rack.
 2. Choose a legal placement.

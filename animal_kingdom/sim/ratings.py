@@ -66,7 +66,7 @@ DEFAULT_GAMES_PER_CONFIG = 200
 DEFAULT_BOOTSTRAP_RESAMPLES = 400
 DEFAULT_BOOTSTRAP_SEED = 0xA11CE
 DEFAULT_RIDGE = 0.1
-DEFAULT_CONFIG = "animal_kingdom/data/two_action_config.json"
+DEFAULT_CONFIG = None  # None => Config.default() = the shipped ruleset (2-action, map_b)
 MIN_GAMES_PER_CONFIG = 200
 DEFAULT_CHECKPOINT_BLOCKS = 100
 
@@ -1166,7 +1166,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
     parser.add_argument("--map", dest="map_id", default="map_b")
     parser.add_argument("--config", default=DEFAULT_CONFIG,
-                        help="JSON Config overrides; use 'none' for classic defaults")
+                        help="JSON Config overrides (default: shipped ruleset)")
     parser.add_argument("--out", default="results/pilot_ratings",
                         help="artifact directory")
     parser.add_argument("--dataset", default=None,

@@ -11,8 +11,6 @@ Run the acceptance cohort with:
 ```bash
 .venv/bin/python -m animal_kingdom.sim.ratings \
   --games 200 \
-  --config animal_kingdom/data/two_action_config.json \
-  --map map_b \
   --jobs 4 \
   --out results/pilot_ratings
 ```
