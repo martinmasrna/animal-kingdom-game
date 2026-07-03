@@ -102,11 +102,12 @@ python -m animal_kingdom.sim.referee_comparison --mirror-deck all --games 200 \
 
 ## Separate finding: staged v2 under-pilots colony vs the oracle
 
-A 100-game v2-vs-legacy profile across all 7 decks is **near-parity everywhere** (44–51%; every
-CI ≈ includes 50), so the shipped v2 is roughly oracle-faithful. `colony_food_swarm` is the
-softest — **~40%** (seed-noisy: 37% seed1700 / 44% seed1500; magnitude to firm with a larger
-saved run) — a mild gap, not the 13-pt divergence the first sample suggested. It is
-**budget-independent** (~37% at nodes 1000/350/150 on the low seed).
+A 100-game v2-vs-legacy profile across all 7 decks is near-parity (44–51%; CIs include 50) —
+except `colony_food_swarm`, which at **500 games is 43.4% [39.8%, 46.8%]**, a *real* ~7-pt
+regression (CI excludes 50). So the shipped v2 is oracle-faithful on the field but genuinely
+under-pilots colony — milder than the alarming 37% first sample, but not noise. The other 6
+decks weren't measured at 500g power, so small gaps aren't excluded for them; colony is the
+confirmed outlier. It is **budget-independent** (~37–44% at nodes 1000/350/150).
 
 **Isolation (same seed, staged candidate vs oracle, 100g):** baseline `root5/reply4` 44% →
 `root8/reply4` 45% → `root5/reply8` **50%** → `root8/reply8` **55%**. The **reply beam is the

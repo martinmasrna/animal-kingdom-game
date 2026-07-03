@@ -33,9 +33,10 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Ladder: Greedy
     semantic-preserving lever but is higher-risk (per-mutation invalidation).
 - [ ] **Staged Referee v2 diverges from the legacy oracle on combo/deep decks (calibration risk;
   NOT a card nerf).** The shipped `referee` (staged v2, `526ccd0`) pilots **colony_food_swarm
-  ~40%** vs the full legacy referee (seed-noisy at 100 games: 37% / 44% at two seeds;
-  budget-independent — ~37% at nodes 1000/350/150 on the low seed; firm number pending a larger
-  saved run, but both samples are below parity). The staged root-screen + reply-beam prune
+  43.4% [39.8%, 46.8%]** vs the full legacy referee (500 games: seed3000 400g + seed1500 100g) —
+  a real ~7-pt regression (CI excludes 50), budget-independent (~37–44% at nodes 1000/350/150).
+  The other 6 decks are near-parity at 100g but weren't measured at 500g power. The staged
+  root-screen + reply-beam prune
   exactly colony's deep multi-placement combo/swarm lines. Isolation (100g, same seed, staged
   candidate vs oracle): baseline root5/reply4 44% → root8/reply4 45% → **root5/reply8 50%** →
   **root8/reply8 55%** — the **reply beam is the dominant lever** (widening reply 4→8 restores
