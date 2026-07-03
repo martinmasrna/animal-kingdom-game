@@ -85,12 +85,11 @@ cohort still needs to be run and interpreted before Balance is ungated.
    [`bots/pilot-ratings.md`](bots/pilot-ratings.md), inspect pilot confidence intervals and
    execution-difficulty interactions, and decide whether the pilots are trustworthy enough to
    ungate Balance. Human calibration remains optional pending a curated comparable cohort.
-2. **★ Unify the A/B harnesses (HIGH).** Generalize `bot_comparison` to accept parametrized bot
-   specs (kind + config/flags), not just kind strings, keeping its paired-vs-fixed-opponent design;
-   then retire `referee_comparison`'s redundant `--mirror-deck` strength mode (keep its unique
-   decision-agreement screen). Kills a class of methodology error — a mirror self-play A/B is
-   low-power for small pilot changes, and the missing config-awareness has forced hand-rolled
-   mirror A/Bs. Unblocks doing #1/#3 rigorously. See [`bots/backlog.md`](bots/backlog.md).
+2. **A/B harness unified — core done (`4e5fd74`).** `bot_comparison` now accepts parametrized bot
+   specs (`--baseline-kind "turn:deck_reveal_choice_width=0"`), so config/flag A/Bs run through its
+   paired-vs-fixed-opponent design instead of hand-rolled low-power mirrors. Follow-up: retire
+   `referee_comparison`'s `--mirror-deck` mode + add the skill caveat. See
+   [`bots/backlog.md`](bots/backlog.md).
 3. **TurnBot → default pilot?** Pass its acceptance run (200/opp) and clear the 10× throughput gate
    (lower determinizations/beam or a turn-depth cap; A/B speed-vs-winrate), then decide whether
    `./report` switches from `greedy,greedy` to `turn,turn`. (Owl/Raven deck-reveal collapse
