@@ -15,7 +15,8 @@ dependencies = []
 analysis = ["numpy>=1.26", "scipy>=1.11", "pandas>=2.0"]
 # Terminal presentation only (cli.py / render/). engine/ and bots/ stay stdlib-only.
 cli = ["rich>=13.7"]
-dev = ["pytest>=7.0", "rich>=13.7", "numpy>=1.26", "scipy>=1.11"]
+tui = ["textual>=8.2,<9"]
+dev = ["pytest>=7.0", "rich>=13.7", "textual>=8.2,<9", "numpy>=1.26", "scipy>=1.11"]
 
 [tool.setuptools]
 packages = [
@@ -24,6 +25,8 @@ packages = [
     "animal_kingdom.bots",
     "animal_kingdom.sim",
     "animal_kingdom.render",
+    "animal_kingdom.recording",
+    "animal_kingdom.tui",
 ]
 
 [tool.setuptools.package-data]

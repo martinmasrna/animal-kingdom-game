@@ -55,6 +55,37 @@ you play seat A. Passing either flag (or `--quiet`) skips the prompt for scripte
 
 Equivalent without the launcher: `python -m animal_kingdom.cli ...` (venv activated).
 
+## Record human benchmark games
+
+Install the TUI extra, then launch the persistent recorder:
+
+```sh
+pip install -e ".[dev,tui]"
+./record
+```
+
+The board, hand, status, and recent actions stay on screen. Click a card and then a
+highlighted target; `D` draws, number keys select cards, arrows move between targets, and
+Enter confirms. Every human and bot decision is saved immediately under
+`results/human_games/`, including the player-visible state, legal alternatives, chosen
+action, exact engine state, timing, provenance, and final result. `M` excludes the latest
+human decision and `G` excludes the whole game without deleting raw data.
+
+For a reproducible cohort, generate an explicit schedule and record its next incomplete
+game:
+
+```sh
+python -m animal_kingdom.recording.schedule \
+  --id human-v1 --out human-v1.json \
+  --human-decks all --opponent-decks all \
+  --bots greedy,turn --repetitions 1 --seats both
+
+./record --schedule human-v1.json --player-id human-1
+```
+
+Completed valid games are skipped automatically. Interrupted or excluded scheduled games
+remain in the queue.
+
 `greedy` and `turn` are also controllers, so you can watch the heuristic bots play:
 
 ```sh

@@ -153,6 +153,31 @@ class StateView:
     pending: Optional[Mapping[str, Any]]
     result: Optional[Result]
 
+    def to_dict(self) -> dict:
+        """Return a JSON-safe snapshot of exactly what this player may observe."""
+        return {
+            "player": self.player,
+            "to_act": self.to_act,
+            "current": self.current,
+            "turn_counter": self.turn_counter,
+            "board": {
+                cr: [list(unit) for unit in stack]
+                for cr, stack in self.board.items()
+            },
+            "own_hand": list(self.own_hand),
+            "opponent_hand_count": self.opponent_hand_count,
+            "own_deck_count": self.own_deck_count,
+            "opponent_deck_count": self.opponent_deck_count,
+            "remove_pile": list(self.remove_pile),
+            "food": dict(self.food),
+            "card_strength_counters": {
+                player: dict(counters)
+                for player, counters in self.card_strength_counters.items()
+            },
+            "pending": copy.deepcopy(dict(self.pending)) if self.pending else None,
+            "result": self.result.to_dict() if self.result else None,
+        }
+
 
 def _rng_to_dict(rng: random.Random) -> dict:
     version, internal, gauss = rng.getstate()

@@ -18,7 +18,7 @@ from animal_kingdom.bots.random_bot import RandomBot
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.state import new_game
-from animal_kingdom.render.text import render
+from animal_kingdom.render.text import render, render_board
 
 
 def _advance(state, plies: int, seed: int) -> None:
@@ -73,3 +73,29 @@ def test_render_highlights_and_result() -> None:
         rules.apply_action(state, drng.choice(legal))
     final = render(state)
     assert "RESULT:" in _assert_valid_markup(final)
+
+
+def test_diagonal_projection_orients_each_player_bottom_left() -> None:
+    state = new_game(
+        load_premade_deck("ramp"),
+        load_premade_deck("egg_control"),
+        seed=7,
+        map_id="map_b",
+    )
+    for player, opponent in (("A", "B"), ("B", "A")):
+        board = render_board(
+            state,
+            perspective_player=player,
+            max_width=80,
+            max_height=28,
+        )
+        own = board.hitboxes[("hq", player)]
+        enemy = board.hitboxes[("hq", opponent)]
+        assert own.x < enemy.x
+        assert own.y > enemy.y
+        assert set(board.hitboxes) == {
+            *(("cr", cr) for cr in state.game_map.crossroads),
+            ("hq", "A"),
+            ("hq", "B"),
+        }
+        _assert_valid_markup(board.markup)
