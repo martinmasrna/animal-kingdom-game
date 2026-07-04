@@ -58,9 +58,13 @@ def format_matrix(records: Sequence[GameRecord]) -> str:
     Rows/columns are ordered by each deck's combined (both-seats) win rate, strongest first,
     so the table itself reads as a ranking. Columns are keyed by a 4-letter abbreviation
     (unique across the current deck slugs) so the table fits a terminal width. Trailing "TotA"
-    column = that row-deck's average win rate playing as seat A across every matchup; trailing
-    "TotB" row = that column-deck's average win rate playing as seat B; "Both" column = the
-    same deck's combined (both-seats) average win rate, i.e. (TotA + TotB) / 2 for that deck.
+    column = that row-deck's average win rate playing as seat A across its non-mirror matchups;
+    trailing "TotB" row = that column-deck's average win rate playing as seat B; "Both" column
+    = the same deck's combined (both-seats) average win rate, i.e. (TotA + TotB) / 2 for that
+    deck. The mirror matchup is still shown on the diagonal but excluded from these three
+    aggregates - same convention as `metrics._deck_win_rates` (a deck can't be more or less
+    powerful than itself, so folding the mirror in just dilutes the "vs the field" read toward
+    50%), which keeps these numbers consistent with each per-deck section's "deck win rate".
     """
     m = metrics.matchup_matrix(records)
     all_decks = m["decks"]
@@ -69,9 +73,11 @@ def format_matrix(records: Sequence[GameRecord]) -> str:
     def _avg(vals: list[float]) -> Optional[float]:
         return sum(vals) / len(vals) if vals else None
 
-    as_a = {a: _avg([m["win_rate"][a][b] for b in all_decks if m["win_rate"][a][b] is not None])
+    as_a = {a: _avg([m["win_rate"][a][b] for b in all_decks
+                    if b != a and m["win_rate"][a][b] is not None])
             for a in all_decks}
-    as_b = {b: _avg([1.0 - m["win_rate"][a][b] for a in all_decks if m["win_rate"][a][b] is not None])
+    as_b = {b: _avg([1.0 - m["win_rate"][a][b] for a in all_decks
+                    if a != b and m["win_rate"][a][b] is not None])
             for b in all_decks}
     combined = {d: _avg([v for v in (as_a[d], as_b[d]) if v is not None]) for d in all_decks}
 
