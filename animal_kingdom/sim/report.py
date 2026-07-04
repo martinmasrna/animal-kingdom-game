@@ -56,7 +56,10 @@ def format_matrix(records: Sequence[GameRecord]) -> str:
     """Deck-vs-deck win-rate matrix: row = deck_a, column = deck_b, cell = A's win rate.
 
     Columns are keyed by a 4-letter abbreviation (unique across the current deck slugs) so
-    the table fits a terminal width; the legend below spells each one out.
+    the table fits a terminal width. Trailing "TotA" column = that row-deck's average win
+    rate playing as seat A across every matchup; trailing "TotB" row = that column-deck's
+    average win rate playing as seat B; "Both" column = the same deck's combined (both-seats)
+    average win rate, i.e. (TotA + TotB) / 2 for that deck.
     """
     m = metrics.matchup_matrix(records)
     decks = m["decks"]
@@ -64,16 +67,28 @@ def format_matrix(records: Sequence[GameRecord]) -> str:
     name_w = max(len(d) for d in decks)
     col_w = 7
 
-    header = " " * (name_w + 1) + "".join(f"{ab:>{col_w}}" for ab in abbrevs)
+    def _avg(vals: list[float]) -> Optional[float]:
+        return sum(vals) / len(vals) if vals else None
+
+    as_a = {a: _avg([m["win_rate"][a][b] for b in decks if m["win_rate"][a][b] is not None])
+            for a in decks}
+    as_b = {b: _avg([1.0 - m["win_rate"][a][b] for a in decks if m["win_rate"][a][b] is not None])
+            for b in decks}
+    combined = {d: _avg([v for v in (as_a[d], as_b[d]) if v is not None]) for d in decks}
+
+    def _cell(rate: Optional[float]) -> str:
+        return f"{rate:>{col_w - 1}.0%} " if rate is not None else f"{'n/a':>{col_w - 1}} "
+
+    header = (" " * (name_w + 1) + "".join(f"{ab:>{col_w}}" for ab in abbrevs)
+              + f"{'TotA':>{col_w}}{'Both':>{col_w}}")
     lines = ["\n### Matchup matrix (row = A, column = B, cell = A's win rate)", "```", header]
     for a in decks:
-        cells = []
-        for b in decks:
-            rate = m["win_rate"][a][b]
-            cells.append(f"{rate:>{col_w - 1}.0%} " if rate is not None else f"{'n/a':>{col_w - 1}} ")
+        cells = [_cell(m["win_rate"][a][b]) for b in decks]
+        cells.append(_cell(as_a[a]))
+        cells.append(_cell(combined[a]))
         lines.append(f"{a:<{name_w}} " + "".join(cells))
-    lines.append("")
-    lines += [f"{ab} = {d}" for ab, d in zip(abbrevs, decks)]
+    tot_b_cells = [_cell(as_b[b]) for b in decks] + [_cell(None), _cell(None)]
+    lines.append(f"{'TotB':<{name_w}} " + "".join(tot_b_cells))
     lines.append("```")
     return "\n".join(lines)
 
