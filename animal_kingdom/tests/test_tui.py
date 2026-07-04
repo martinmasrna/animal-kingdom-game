@@ -59,7 +59,22 @@ def test_tui_80x24_keyboard_draw_and_annotations(tmp_path):
             ]
             assert hand_cards
             assert all(widget.entry.effect and widget.entry.stats.startswith("STR ") for widget in hand_cards)
+            prompt = str(app.query_one("#notice", Static).content)
+            assert "Choose a card from your hand or draw" in prompt
             assert "STR" in app.export_screenshot()
+
+            await pilot.press("1")
+            await pilot.pause()
+            assert app.selected_card is not None
+            assert "Choose a highlighted location" in str(
+                app.query_one("#notice", Static).content
+            )
+            await pilot.press("escape")
+            await pilot.pause()
+            assert app.selected_card is None
+            assert "Choose a card from your hand or draw" in str(
+                app.query_one("#notice", Static).content
+            )
 
             await pilot.press("d")
             await pilot.pause()
@@ -87,6 +102,10 @@ def test_tui_click_card_then_board_target(tmp_path):
             await pilot.pause()
             assert app.selected_card is not None
             assert app.target_map
+            selected_name = app.session.state.cards[app.selected_card].name
+            prompt = str(app.query_one("#notice", Static).content)
+            assert selected_name in prompt
+            assert "Choose a highlighted location" in prompt
 
             target = next(iter(app.target_map))
             hitbox = app.query_one(BoardWidget).board_render.hitboxes[target]
@@ -124,6 +143,12 @@ def test_tui_wide_layout_centers_board_and_labels_players(tmp_path):
             assert "Food 0" in player
             assert "Actions 2" in player
 
+            app.bot_busy = True
+            app.refresh_game()
+            assert "Opponent is thinking" in str(
+                app.query_one("#notice", Static).content
+            )
+
     asyncio.run(scenario())
 
 
@@ -149,6 +174,9 @@ def test_tui_pending_choice_can_be_declined_without_number_prompt(tmp_path):
             app.refresh_game()
             await pilot.pause()
             app.query_one(CardShelf)
+            prompt = str(app.query_one("#notice", Static).content)
+            assert "Resolve effect" in prompt
+            assert "highlighted location or an option below" in prompt
             decline = next(
                 widget for widget in app.query(ActionCard)
                 if getattr(widget.entry.payload, "choice", None) == "__skip__"

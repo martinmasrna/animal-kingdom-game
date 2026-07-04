@@ -6,7 +6,7 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Code: `animal_
 - [ ] **Continue the recorder UI/UX polish in small passes.**
   - [x] Composition: centre the board, preserve mouse hitboxes, add player/turn bands, and keep
     the 80×24 compact layout working.
-  - [ ] Make the current decision unmistakable with a contextual action prompt.
+  - [x] Make the current decision unmistakable with a contextual action prompt.
   - [ ] Turn the right rail into a contextual inspector (selection/hover, stack, recent actions).
   - [ ] Refine the hand shelf and reduce specialist recorder noise in the footer.
 - [ ] **Decide whether the recorder becomes the general game TUI.** It already has mouse board

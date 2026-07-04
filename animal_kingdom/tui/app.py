@@ -311,6 +311,13 @@ class RecorderApp(App[None]):
     #main { height: 1fr; min-height: 14; }
     #board { width: 1fr; height: 100%; overflow: hidden hidden; }
     #side { width: 34; height: 100%; padding: 0 1; background: $panel; overflow: hidden hidden; }
+    #notice {
+        height: 1;
+        padding: 0 2;
+        background: $primary-background;
+        text-align: center;
+        text-style: bold;
+    }
     #actions {
         height: 7;
         layout: horizontal;
@@ -321,11 +328,10 @@ class RecorderApp(App[None]):
     ActionCard { width: 22; height: 7; margin-right: 1; }
     ActionCard.draw { width: 10; }
     ActionCard:focus { background: $boost; }
-    #notice { height: 1; padding: 0 1; }
     Footer { height: 1; }
     .narrow #side { display: none; }
+    .compact-height #status,
     .compact-height #opponent,
-    .compact-height #notice,
     .compact-height Footer { display: none; }
     """
     BINDINGS = [
@@ -370,9 +376,9 @@ class RecorderApp(App[None]):
         with Horizontal(id="main"):
             yield BoardWidget()
             yield Static("", id="side", markup=True)
+        yield Static("", id="notice", markup=True)
         yield Static("", id="player", markup=True)
         yield CardShelf()
-        yield Static("", id="notice", markup=True)
         yield Footer()
 
     def on_mount(self) -> None:
@@ -516,22 +522,30 @@ class RecorderApp(App[None]):
         )
         self.query_one(CardShelf).set_entries(self._action_entries())
         self._update_side(focused)
+        self._update_prompt()
 
-        if result:
-            suffix = (
-                "Enter starts the next scheduled game."
+    def _update_prompt(self) -> None:
+        assert self.session is not None
+        session = self.session
+        state = session.state
+        if session.result:
+            next_game = (
+                "start the next game"
                 if self.manifest is not None
-                else "Enter opens a new ad-hoc game."
+                else "open a new game"
             )
-            self.query_one("#notice", Static).update(
-                f"[bold green]Game recorded: {session.path}[/bold green]  {suffix}"
-            )
-        elif self.bot_busy:
-            self.query_one("#notice", Static).update("Input locked while the bot chooses.")
+            prompt = f"[bold green]Game recorded[/bold green] · Press Enter to {next_game}"
+        elif self.bot_busy or not session.human_turn:
+            prompt = "Opponent is thinking…"
+        elif state.pending:
+            board_hint = "a highlighted location or " if self.target_map else ""
+            prompt = f"Resolve effect · Choose {board_hint}an option below"
+        elif self.selected_card:
+            card_name = escape(state.cards[self.selected_card].name)
+            prompt = f"Place [bold]{card_name}[/bold] · Choose a highlighted location"
         else:
-            self.query_one("#notice", Static).update(
-                "Click a card then a highlighted target. D draws; M/G mark bad data."
-            )
+            prompt = "Choose a card from your hand or draw"
+        self.query_one("#notice", Static).update(prompt)
 
     def _build_action_state(self) -> None:
         self.target_map.clear()
