@@ -5,7 +5,7 @@
 > `docs/<area>/backlog.md`; deeper detail in that area's other docs. Keep this file short; when a
 > "Next" item is done, replace it, don't append history.
 >
-> _Last updated: 2026-07-03._
+> _Last updated: 2026-07-04._
 
 ## The project in one paragraph
 
@@ -50,9 +50,11 @@ _The concrete content: the 7 decks (effects, numbers, names) and their theme. Do
 (`cards.md`, `card-candidates.md`, `decks/`, `decks/flavor-review.md`), `data/cards.json`. Backlog: [`cards/backlog.md`](cards/backlog.md)._
 _**Flavor** (subcategory): animals, biology, folklore, naming — a recurring audit pass, not a separate area._
 
-**State:** All 7 decks content-complete (4-4-6) and **built into `cards.json` + the effect registry
-(build #5 done)** — the full test suite runs on the reworked pool. Legendary names **provisional**
-(24/28 machine-suggested 2026-06-30; only the 4 Cats are final). Remaining card work is flavor + text cleanup.
+**State:** All 7 decks content-complete (4-4-6) and built into `cards.json` + the effect registry.
+**Locked card review applied 2026-07-04** (cats trims Prince Leo/Princess Lea 4→3 + Queen Adira 6→5;
+Skunk 2→4; Hornet redesign; new Aggro legendary **Gale**; **Stoop→egg_control** as rare "Peregrine
+Falcon" 6→4; **Black Swan** rare→legendary; **Goliath** legendary→rare; **Vulture** shelved) plus a
+food_otk OTK-lean buff pass. Legendary names still **provisional**. Remaining card work is flavor + text cleanup.
 
 **Next:**
 1. **(Flavor) Dedicated legendary-name review** — the stricter, do-not-skip pass before flavor-lock.
@@ -102,18 +104,24 @@ cohort still needs to be run and interpreted before Balance is ungated.
    **throughput** on the deep-combo decks (food_otk 47.6×, egg/colony ~33×). Decide there (accept the
    slowdown for balance sims, or scope `./report` to fast decks). Node budget (`TURN_MAX_SEARCH_NODES=80`)
    shipped; turn-*depth* cap a no-op (cost is *breadth*); uniform determinization/beam trim rejected.
-4. **Known blind spot:** `region_control` over-values the row-2 spine, so neither bot contests
-   row-1/3 as an HQ-rush lane.
+4. **Known blind spots:** (a) `region_control` over-values the row-2 spine, so neither bot contests
+   row-1/3 as an HQ-rush lane; (b) **the evaluator scores *current* strength, so it under-values
+   dynamic/scaling bodies** (Rattlesnake→8, Goliath→11) — surfaced 2026-07-04 when egg_control scored
+   ~18% under the bot but ~50% in human play vs referee-cats. This means the turn matrix likely
+   under-rates scaling/HQ-capture decks and **over-rates board/food-control decks (cats' ~69% may be
+   inflated)** — so hold the cats-nerf magnitude until human/oracle spot-checks confirm it.
 
 ## 5. CLI / App
 _The human interface. `cli.py`, `render/`. Backlog: [`cli/backlog.md`](cli/backlog.md)._
 
-**State:** `rich`-based polish done (color by seat/rarity, in-place redraw, card-first targeting).
-Plain stdin/stdout loop underneath. Lightest area right now.
+**State:** `rich`-based CLI polish done, plus a **recorder (`./record`) Textual UI/UX pass landed
+2026-07-04** (`tui/app.py`): centered board with preserved hitboxes, contextual action prompt +
+inspector rail, responsive hand shelf / deck trackers / food bars, in-app JSONL link, `?` help overlay
+— all kept working at the compact 80×24 layout.
 
 **Next:**
-1. **Fix the `map_b` board overflow** — the 5-column map renders ~95 cols and wraps on an 80-col terminal, so `./run`'s default (map_b + 2-actions) looks broken. Compress the geometry or make it responsive.
-2. **Full TUI rewrite** (`textual`: mouse, panes, live updates) — *parked*; revisit when `rich` feels limiting.
+1. **Fix the `map_b` board overflow in `./run`** (the `rich` CLI, `render/text.py`) — the 5-column map renders ~95 cols and wraps on an 80-col terminal. (The recorder now fits 80 cols; the `./run` renderer still needs the responsive/compressed geometry.)
+2. **Full general-purpose TUI** (`textual`, beyond the recorder) — *parked*; revisit when `rich` feels limiting.
 
 _Visual-polish pass done (commit `7d1b961`): dimmed empties, held-region chips, food progress bars, tighter cards, first renderer test._
 
@@ -137,13 +145,15 @@ behind them. Consumes Bots + the sim harness. Roadmap: `balance/simulation-platf
 **Two outcome targets:** (a) every **deck** winrate in **40–60%**; (b) every **card's impact**
 within **±10%**.
 
-**State:** Neither target met yet, but the deck picture is now measured under competent both-sides
-piloting (turn-vs-turn 7×7 + oracle-bias correction, 2026-07-03 — see `balance/backlog.md`). Real,
-pilot-robust signals: **cats_midrange too strong (~69%)** — #1 nerf target — and **food_otk (~25%) +
-egg_control (~36%) too weak** — joint buff review. **Retracted:** colony_food_swarm's ~23–30% "weak
-deck" reputation was a greedy artifact (competent play → ~48%, in band); food_otk's "overrated" note
-likewise. Card-impact target still unmeasurable (the `metrics.py impact` confound — Engine #1). Pilot
-caveat: TurnBot is sub-oracle (~+8pt), so the matrix is directional; final calls want referee spot-checks.
+**State:** Deck picture measured under competent both-sides piloting (turn-vs-turn 7×7 + oracle-bias
+correction) — see `balance/backlog.md`. **2026-07-04 pass:** locked card review applied; **food_otk
+OTK-lean buff shipped (pending sim validation)** — leans *into* the OTK (Opossum food, Tortoise/Porcupine
+5→7, Pufferfish draw, Gazelle 40→30), diagnostic = flip Scrooge from worst- to best-impact without
+touching Scrooge itself. **egg_control retracted as a card problem** — its ~18% is a *pilot* artifact
+(human egg ~50% vs referee-cats); the fix is a Bots one (search under-values dynamic strength, §4).
+**cats_midrange (~69%) still the #1 nerf target but its number may be inflated** by that same pilot gap —
+hold the nerf magnitude. **colony retracted** (greedy artifact, ~48% in band). Card-impact target still
+unmeasurable (`metrics.py` confound — Engine #1). Pilot caveat: TurnBot is sub-oracle (~+8pt) → matrix is directional.
 
 **Next:**
 1. **Deck equality → pull every deck into 40–60%.** Active levers: Decision H food-economy re-derivation (in progress; Methuselah + food_otk floor shipped; 20-cost bodies, Landmarks, Colony/Egg numbers still open) + a card-design fix for colony's early game. **food_otk's "kill window" lever struck** — the weakness was a stale-ruleset read (see Balance backlog ✅ verdict); needs a 2-action search-vs-search read before any tuning.
