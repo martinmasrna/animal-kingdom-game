@@ -35,6 +35,7 @@ import time
 from dataclasses import asdict, dataclass
 from typing import Optional, Sequence
 
+from ..bots.greedy_bot import GreedyWeights
 from ..engine.cards import DECK_SLUGS
 from ..engine.config import Config, load_config_overrides
 from . import metrics
@@ -167,6 +168,8 @@ def run_bot_comparison(
     baseline_kwargs: tuple = (),
     candidate_kwargs: tuple = (),
     opponent_kwargs: tuple = (),
+    baseline_weights: Optional[GreedyWeights] = None,
+    candidate_weights: Optional[GreedyWeights] = None,
     config: Optional[Config] = None,
     map_id: str = "map_b",
     jobs: int = 1,
@@ -187,11 +190,13 @@ def run_bot_comparison(
     t0 = time.monotonic()
     baseline_records = run_pairs(pairs, n_games, base_seed,
                                  bots=(baseline_kind, opponent_kind),
+                                 weights=(baseline_weights, None),
                                  bot_kwargs=(baseline_kwargs, opponent_kwargs),
                                  config=config, map_id=map_id, jobs=jobs)
     t1 = time.monotonic()
     candidate_records = run_pairs(pairs, n_games, base_seed,
                                   bots=(candidate_kind, opponent_kind),
+                                  weights=(candidate_weights, None),
                                   bot_kwargs=(candidate_kwargs, opponent_kwargs),
                                   config=config, map_id=map_id, jobs=jobs)
     t2 = time.monotonic()
@@ -421,6 +426,8 @@ def run_all(
     baseline_kwargs: tuple = (),
     candidate_kwargs: tuple = (),
     opponent_kwargs: tuple = (),
+    baseline_weights: Optional[GreedyWeights] = None,
+    candidate_weights: Optional[GreedyWeights] = None,
     config: Optional[Config] = None,
     map_id: str = "map_b",
     jobs: int = 1,
@@ -440,6 +447,7 @@ def run_all(
             baseline_kind=baseline_kind, candidate_kind=candidate_kind,
             opponent_kind=opponent_kind, baseline_kwargs=baseline_kwargs,
             candidate_kwargs=candidate_kwargs, opponent_kwargs=opponent_kwargs,
+            baseline_weights=baseline_weights, candidate_weights=candidate_weights,
             config=config, map_id=map_id, jobs=jobs,
             bootstrap_resamples=bootstrap_resamples, bootstrap_seed=bootstrap_seed,
             config_id=config_id)
