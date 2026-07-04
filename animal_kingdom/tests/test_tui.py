@@ -8,7 +8,7 @@ from textual.widgets import Static
 
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.state import UnitInstance, new_game
+from animal_kingdom.engine.state import Result, UnitInstance, new_game
 from animal_kingdom.recording.cohort import generate_manifest
 from animal_kingdom.tui.app import ActionCard, BoardWidget, CardShelf, RecorderApp, build_parser
 
@@ -199,6 +199,31 @@ def test_tui_pending_choice_can_be_declined_without_number_prompt(tmp_path):
             await pilot.pause()
             assert app.session.state.pending is None
             assert app.session.decision_count == 1
+
+    asyncio.run(scenario())
+
+
+def test_completed_game_shows_clickable_recording_path(tmp_path, monkeypatch):
+    async def scenario():
+        app = RecorderApp(manifest=_manifest(), output_root=Path(tmp_path))
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause()
+            assert app.session is not None
+            path = app.session.path.resolve()
+            monkeypatch.setattr(
+                type(app.session),
+                "result",
+                property(lambda _session: Result("A", "food")),
+            )
+            app.refresh_game()
+            await pilot.pause()
+
+            prompt = str(app.query_one("#notice", Static).content)
+            inspector = str(app.query_one("#side", Static).content)
+            assert f"[link='{path.as_uri()}']Open JSONL log[/link]" in prompt
+            assert "GAME RECORDED" in inspector
+            assert str(path) in inspector
+            assert f"[link='{path.as_uri()}']" in inspector
 
     asyncio.run(scenario())
 

@@ -557,7 +557,11 @@ class RecorderApp(App[None]):
                 if self.manifest is not None
                 else "open a new game"
             )
-            prompt = f"[bold green]Game recorded[/bold green] · Press Enter to {next_game}"
+            prompt = (
+                "[bold green]Game recorded[/bold green] · "
+                f"{self._recording_link('Open JSONL log')} · "
+                f"Press Enter to {next_game}"
+            )
         elif self.bot_busy or not session.human_turn:
             prompt = "Opponent is thinking…"
         elif state.pending:
@@ -569,6 +573,12 @@ class RecorderApp(App[None]):
         else:
             prompt = "Choose a card from your hand or draw"
         self.query_one("#notice", Static).update(prompt)
+
+    def _recording_link(self, label: str | None = None) -> str:
+        assert self.session is not None
+        path = self.session.path.resolve()
+        link_label = label if label is not None else str(path)
+        return f"[link='{path.as_uri()}']{escape(link_label)}[/link]"
 
     def _build_action_state(self) -> None:
         self.target_map.clear()
@@ -676,7 +686,20 @@ class RecorderApp(App[None]):
         assert self.session is not None
         state = self.session.state
         lines: list[str] = []
-        if self.selected_card:
+        if self.session.result:
+            next_game = (
+                "Press Enter for the next game."
+                if self.manifest is not None
+                else "Press Enter to set up a new game."
+            )
+            lines.extend([
+                "[bold green]GAME RECORDED[/bold green]",
+                "JSONL log:",
+                self._recording_link(),
+                "",
+                next_game,
+            ])
+        elif self.selected_card:
             unit = next(
                 u for u in state.hands[self.setup.human_seat]
                 if u.card_id == self.selected_card
@@ -694,7 +717,7 @@ class RecorderApp(App[None]):
                 stats,
                 escape(card.text),
             ])
-        inspected = self.hovered_target or focused
+        inspected = None if self.session.result else self.hovered_target or focused
         if inspected:
             if lines:
                 lines.append("")
