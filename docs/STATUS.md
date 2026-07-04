@@ -83,6 +83,12 @@ and every pilot/deck/interaction estimate includes a confidence interval. The fu
 cohort still needs to be run and interpreted before Balance is ungated.
 
 **Next:**
+0. **★ Learning pilot — the strategic bet (handoff written 2026-07-04).** The whole heuristic ladder
+   shares a hand-written, current-state-only evaluator with a structural judgement ceiling — proven
+   when a *human* piloting egg went ~even vs referee-cats where the bot scores ~18% (egg's scaling
+   plan is invisible to a present-only evaluator). Direction: a pilot whose judgement is *learned
+   from experience*, no strategy-class blind spots, measured against recorded human play. Conceptual
+   brief for the AI/ML specialist: [`bots/learned-pilot-handoff.md`](bots/learned-pilot-handoff.md).
 1. **Pilot-trust verdict IN (2026-07-03): TurnBot is a big step up from greedy but NOT oracle-level.**
    Paired oracle validation (turn vs referee, opp greedy, 60/opp × 7, `results/bot_quality/turn_vs_referee_all/`):
    referee beats turn on all 7 decks (sig. on 5), by ~+4pt (food_otk) to +14pt (ramp). The gaps are

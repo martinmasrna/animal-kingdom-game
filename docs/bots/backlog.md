@@ -2,6 +2,22 @@
 
 Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Ladder: GreedyBot → TurnBot → RefereeBot.
 
+- [ ] **★ Lean pilot/deck ratings (80/20 direction agreed, not executed).** Rough
+  absolute-strength ladder via point-estimate ratings only — no CIs, no seat term. Cost is
+  playing the games, not the stats; pilot strength needs a cross-play cohort. What & why in
+  [`lean-ratings-plan.md`](lean-ratings-plan.md); full-rigor design in
+  [`pilot-ratings.md`](pilot-ratings.md).
+
+- [ ] **★ Learning pilot — the big one (handoff written 2026-07-04).** The whole heuristic-search
+  ladder shares a hand-written, current-state-only evaluator, which is a structural judgement
+  ceiling: it can't value a plan whose payoff is in the future (proven on egg's scaling win
+  condition — see the dynamic-strength item below + `../balance/backlog.md`). Direction: build a
+  pilot whose judgement is *learned from experience*, measured against recorded human play, with no
+  strategy-class blind spots. Conceptual brief (what/why, not how) for the AI/ML specialist:
+  [`learned-pilot-handoff.md`](learned-pilot-handoff.md). **Deferred sub-task:** a survey of how
+  state-of-the-art hidden-information game AI handles this, to inform later rounds (parked, not a
+  prerequisite to the first build).
+
 - [x] **DONE (`4e5fd74`) — `bot_comparison` is now config-aware.** It accepted only bot *kind
   strings*, forcing bespoke (and low-power mirror) A/Bs for any config/flag change (the
   `greedy_belief` weight, the `collapse_deck_reveal_choices`/width flag). Now it compares configs
