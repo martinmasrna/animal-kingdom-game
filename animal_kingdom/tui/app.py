@@ -72,20 +72,15 @@ class DeckTracker(Static):
         )
         for card_id in card_ids:
             card = state.cards[card_id]
-            total = starting[card_id]
             left = self.remaining_counts[card_id]
-            gone = total - left
             count = f"(x{left})"
-            gone_label = f"−{gone}" if gone else ""
-            prefix_width = len(count) + 1 + (len(gone_label) + 1 if gone_label else 0)
+            prefix_width = len(count) + 1
             max_name_width = self.CONTENT_WIDTH - prefix_width
             name = card.name
             if len(name) > max_name_width:
                 name = name[: max_name_width - 1].rstrip() + "…"
             if left == 0:
-                lines.append(
-                    f"[grey42]{count} {gone_label} {escape(name)}[/grey42]"
-                )
+                lines.append(f"[grey42]{count} {escape(name)}[/grey42]")
                 continue
             name_style = RARITY_STYLE.get(card.rarity)
             styled_name = (
@@ -93,8 +88,7 @@ class DeckTracker(Static):
                 if name_style
                 else escape(name)
             )
-            consumed = f" [grey42]{gone_label}[/grey42]" if gone_label else ""
-            lines.append(f"{count}{consumed} {styled_name}")
+            lines.append(f"{count} {styled_name}")
         self.update("\n".join(lines))
 
 
@@ -763,7 +757,7 @@ class RecorderApp(App[None]):
         self.query_one("#own-deck", DeckTracker).set_counts(
             state,
             title="YOUR DECK",
-            subtitle="remaining · grey = drawn",
+            subtitle="copies remaining",
             starting=own_starting,
             remaining=own_remaining,
             title_style=SEAT_STYLE.get(human, "bold"),
@@ -771,7 +765,7 @@ class RecorderApp(App[None]):
         self.query_one("#opponent-deck", DeckTracker).set_counts(
             state,
             title="OPPONENT UNSEEN",
-            subtitle="deck + hand · grey = revealed",
+            subtitle="remaining in deck + hand",
             starting=opponent_starting,
             remaining=opponent_remaining,
             title_style=SEAT_STYLE.get(opponent, "bold"),

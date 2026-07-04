@@ -244,9 +244,9 @@ def test_deck_trackers_are_responsive_and_ignore_opponent_hidden_zones(tmp_path)
             assert opponent.remaining_counts[revealed_card] == expected_left
             opponent_markup = str(opponent.content)
             assert f"(x{expected_left})" in opponent_markup
-            assert "−1" in opponent_markup
+            assert "−" not in opponent_markup
             if expected_left == 0:
-                assert "[grey42](x0) −1" in opponent_markup
+                assert "[grey42](x0)" in opponent_markup
             assert "[bold yellow]" in opponent_markup
             assert "[bold blue]" in opponent_markup
 
