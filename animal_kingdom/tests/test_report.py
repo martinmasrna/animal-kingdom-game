@@ -20,7 +20,15 @@ def test_format_matrix_shows_each_deck_and_its_win_rate():
     assert "### Matchup matrix" in matrix
     assert "ramp" in matrix and "egg_" in matrix  # row label + column abbreviation
     assert "100%" in matrix  # ramp beat egg_control every time it was seat A
-    assert "egg_ = egg_control" in matrix  # legend spells the abbreviation out
+    assert "egg_ = egg_control" not in matrix  # legend dropped
+
+    # ramp went 1-0 as A and 1-0 as B (it won both recorded games) -> TotA/Both both 100%.
+    ramp_line = next(line for line in matrix.splitlines() if line.startswith("ramp"))
+    assert "TotA" in matrix and "Both" in matrix
+    assert ramp_line.count("100%") == 3  # vs egg_control, TotA, Both
+
+    tot_b_line = next(line for line in matrix.splitlines() if line.startswith("TotB"))
+    assert "100%" in tot_b_line  # ramp's average win rate as seat B (from the 2nd record)
 
 
 def test_format_report_leads_with_the_matrix():

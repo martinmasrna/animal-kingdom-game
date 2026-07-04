@@ -3,6 +3,11 @@
 Sacrifice-for-value combo: feed Deathrattle fodder into sac outlets, burst food, double it,
 cross `win_food` in one big turn. 4-4-6 shape (4 legendary ×1, 4 rare ×2, 6 common ×3 = 30).
 Source: user's offline Google Sheet (uploaded 2026-06-28). **Has one open `?` common.**
+**OTK-lean buff pass applied 2026-07-04** (see `../../balance/backlog.md` "Deck equality"):
+corrected direction after the 2026-07-03 pilot data — lean *into* the OTK identity rather than
+away from it, since Scrooge (the payoff card) was the single worst per-card impact in the deck.
+The fix targets survivability/resilience so the deck lives long enough to cash Scrooge in,
+**not** Scrooge itself (`scrooge_delay`/`scrooge_multiplier` untouched). Pending sim validation.
 
 ## Legendary (×1) — names **PROVISIONAL** (assigned 2026-06-30; final flavor pass pending — alternates in `flavor-review.md` §3)
 | Name | Tag | Str | Effect | Description |
@@ -10,25 +15,25 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Has one open `?` co
 | **Fathom** | — | 4 | Battlecry: draw a legendary unit. | Octopus, looking like a kraken. |
 | **Greywhisker** | Rodent | 1 | Battlecry: gain 1 food. Draw 1 card. You may play 1 more unit. | Old, wise little mouse. |
 | **Carmilla, the Devourer** | Arachnid | 5 | Battlecry: remove up to 3 friendly units. Draw a card for each. | Evil-looking black widow (female name). |
-| **Scrooge, Keeper of the Stash** | Rodent | 4 | Immovable. Battlecry: store all your food. In 2 turns, recover twice as much. | Squirrel with a giant hoard of nuts behind him. |
+| **Scrooge, Keeper of the Stash** | Rodent | 4 | Immovable. Battlecry: store all your food. In 2 turns, recover twice as much. | Squirrel with a giant hoard of nuts behind him. *(untouched by the 2026-07-04 pass — it's the diagnostic target, not a lever)* |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
 | **Flying Squirrel** | Rodent | 4 | Flight. Battlecry: gain 8 food. |
-| **Porcupine** | Rodent | 5 | Cannot be covered by enemy units. |
-| **Opossum** | — | 2 | Battlecry: draw 1 card. Deathrattle: return this to your hand. |
-| **Giant Tortoise** | — | 5 | Immovable. |
+| **Porcupine** | Rodent | 7 | Cannot be covered by enemy units. *(str 5→7, 2026-07-04 — now dodges Jaguar/Rhino/Hippo/Peregrine Falcon thresholds too; already un-buriable per the "quills beat teeth" ruling)* |
+| **Opossum** | — | 2 | Battlecry: gain 5 food and draw 1 card. Deathrattle: return this to your hand. *(food added 2026-07-04 — recyclable via Carmilla/Black Widow sac loops, compounds into what Scrooge later doubles)* |
+| **Giant Tortoise** | — | 7 | Immovable. *(str 5→7, 2026-07-04 — now only buriable, never removable, by strength 8+)* |
 
 ## Common (×3)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
 | **Squirrel** | Rodent | 3 | Battlecry: gain 12 food. |
 | **Chipmunk** | Rodent | 1 | Battlecry: gain 10 food. At the start of next turn, gain 10 more. |
-| **Pufferfish** | Fish | 2 | When an enemy unit is placed on top of this, remove that enemy unit and this unit. *(ON_COVERED trap — the deck's only interaction/defense)* |
+| **Pufferfish** | Fish | 2 | When an enemy unit is placed on top of this, remove that enemy unit and this unit. Draw 1 card. *(ON_COVERED trap — the deck's only interaction/defense; draw added 2026-07-04 since the trap so rarely fires against a competent opponent that its payoff needed raising, not its trigger rate)* |
 | **Black Widow** | Arachnid | 3 | Battlecry: remove an adjacent friendly unit to draw 1. |
-| **Impala** | — | 2 | When this is removed, draw 2. |
-| **Gazelle** | — | 2 | When this is removed, gain 40 food. |
+| **Impala** | — | 2 | When this is removed, draw 2. *(watch: still the deck's worst-or-near-worst card after the pass — the natural next lever if so)* |
+| **Gazelle** | — | 2 | When this is removed, gain 30 food. *(40→30, 2026-07-04 — the single-hit swing overshadowed Impala; budget moved into the survivability buffs above)* |
 
 ---
 

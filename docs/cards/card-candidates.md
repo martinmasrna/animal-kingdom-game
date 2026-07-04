@@ -2,6 +2,12 @@
 
 Single inventory of proposed new cards and unresolved variants. Nothing here is locked.
 
+**2026-07-04:** the "New cover-retaliation legendary" candidate shipped into `aggro_hq_rush` as
+**Gale** (card-balance-todo.md, filling the legendary slot Stoop vacated when it moved to
+Egg Control) — removed from this list. Vulture (Rare table, below) is shelved out of
+`egg_control` the same session; its `config.py` dial (`vulture_food`/`cap_vulture`) and
+`effects.py` handler are left dormant, ready if it's re-added to a deck.
+
 - Multiple strengths or effects in one row are competing versions, not combined card text.
 - Where a row has numbered variants, multiple STR values correspond in the same order. If the
   text is shared, only the proposed strength differs.
@@ -184,7 +190,6 @@ Single inventory of proposed new cards and unresolved variants. Nothing here is 
 | **Hachiko, the Faithful** | Canine | 5 | The first time each turn another friendly Canine would be removed, return it to your hand instead. |
 | **Kanzi** | Primate | 4 | Battlecry: repeat the Battlecry of another adjacent Primate. |
 | **Legendary Parrot (name TBD)** | Bird | TBD | **Variant 1:** Become a copy of the last unit your opponent played.<br>**Variant 2:** Flight. Battlecry: repeat the Battlecry of the last unit your opponent played. |
-| **New cover-retaliation legendary (name TBD)** | Bird | 4 | Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand. |
 | **Orca — “Granny”** | Cetacean | 8 | Battlecry: remove an adjacent enemy of any strength. |
 | **Sable, the Solitary** | Cat | 5 | At the end of your turn, if no other friendly unit is adjacent to this, draw 1 card. |
 | **Sue (Tyrannosaurus rex)** | Dinosaur | 10 / 12 | **Variant 1:** Apex Predator. You may play this only if one of your Eggs has hatched this game.<br>**Variant 2:** Apex Predator. Adjacent enemy units have −2 strength. Costs 20 food to play. |

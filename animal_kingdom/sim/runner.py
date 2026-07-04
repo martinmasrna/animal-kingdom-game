@@ -9,7 +9,7 @@ module only *produces* the per-game `GameRecord`s.
 from __future__ import annotations
 
 import random
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, replace
 from typing import Callable, Optional
 
@@ -297,14 +297,19 @@ def run_pairs(
     map_id: str = "map_b",
     jobs: int = 1,
     progress: Optional[Callable[[str, str, int, int], None]] = None,
+    game_progress: Optional[Callable[[str, str, int, int], None]] = None,
 ) -> list[GameRecord]:
     """`n_games` of every (a, b) pair in `pairs`, same bot kinds/weights on every pair.
 
     `jobs > 1` fans games out over a process pool; because each game is seed-determined the
     aggregate is identical regardless of `jobs`. A distinct seed per (pair, game) keeps every
-    game independent. Pairs are run and reported one at a time (still spread across all
-    `jobs` workers within each pair) so `progress`, if given, is called after every
-    completed pair as `progress(a, b, pairs_done, pairs_total)`.
+    game independent. Pairs are run one at a time (still spread across all `jobs` workers
+    within each pair); `progress`, if given, is called after every completed pair as
+    `progress(a, b, pairs_done, pairs_total)`. `game_progress`, if given, is called after
+    every individual game finishes *within* the current pair, as
+    `game_progress(a, b, games_done, n_games)` - finer-grained than `progress` for watching a
+    single slow (e.g. referee-piloted) matchup tick over. Games can complete out of order
+    under `jobs > 1`, but the returned records preserve the original (pair, seed) order.
     """
     records: list[GameRecord] = []
 
@@ -314,11 +319,30 @@ def run_pairs(
                           weights[0], weights[1], bot_kwargs[0], bot_kwargs[1])
                 for i in range(n_games)]
 
+    def _run_batch(ex: Optional[ProcessPoolExecutor], a: str, b: str,
+                   specs: list[MatchSpec]) -> list[GameRecord]:
+        if game_progress is None:
+            return ([_run_spec(s, config) for s in specs] if ex is None
+                    else list(ex.map(_run_spec, specs, [config] * len(specs))))
+        if ex is None:
+            results = []
+            for i, s in enumerate(specs):
+                results.append(_run_spec(s, config))
+                game_progress(a, b, i + 1, len(specs))
+            return results
+        results: list[Optional[GameRecord]] = [None] * len(specs)
+        futures = {ex.submit(_run_spec, s, config): i for i, s in enumerate(specs)}
+        done = 0
+        for fut in as_completed(futures):
+            results[futures[fut]] = fut.result()
+            done += 1
+            game_progress(a, b, done, len(specs))
+        return results
+
     def _run_all(ex: Optional[ProcessPoolExecutor]) -> None:
         for pair_index, (a, b) in enumerate(pairs):
             specs = _pair_specs(pair_index, a, b)
-            batch = ([_run_spec(s, config) for s in specs] if ex is None
-                    else list(ex.map(_run_spec, specs, [config] * len(specs))))
+            batch = _run_batch(ex, a, b, specs)
             records.extend(batch)
             if progress is not None:
                 progress(a, b, pair_index + 1, len(pairs))

@@ -873,7 +873,10 @@ OPS["shuck_return"] = _op_shuck_return
 def _pufferfish_covered(state, covered, coverer, cr):
     if coverer.owner == covered.owner:
         return  # only triggers vs an enemy coverer
-    # Remove the coverer, then the pufferfish (both pushed; coverer resolves first).
+    # Remove the coverer, then the pufferfish (both pushed; coverer resolves first). Draw
+    # added 2026-07-04 OTK-lean pass (the trap so rarely fires against a competent opponent
+    # that its payoff needed raising, not its trigger rate) - pushed first, resolves last.
+    state.effect_stack.append({"op": "draw", "player": covered.owner, "n": 1})
     state.effect_stack.append(
         {"op": "remove_iid", "iid": covered.iid, "by_player": covered.owner, "by_effect": False})
     state.effect_stack.append(
@@ -919,6 +922,13 @@ def _jackal_remove_event(state, unit, cr, event):        # an *adjacent* unit re
 
 
 def _black_swan_drawn(state, inst):
+    # Hard, printed-text cap (not a Config dial - card-balance-todo's legendary redesign):
+    # "the first time each turn you draw Black Swan". Keyed by owner, not iid: a reshuffled
+    # redraw gets a fresh UnitInstance/iid, so the cap must survive across instances.
+    key = f"black_swan_turn_cap_{inst.owner}"
+    if state.turn_flags.get(key):
+        return
+    state.turn_flags[key] = True
     # The opponent removes a random card (seeded; a remove, not a Deathrattle).
     opponent = other_player(inst.owner)
     hand = state.hands[opponent]
@@ -960,7 +970,9 @@ def _snake_egg_place(state, unit, cr):
 
 
 def _opossum_place(state, unit, cr):
-    _push_draw(state, unit.owner, 1)                    # Battlecry (its Deathrattle return is in _dispose)
+    # Battlecry (its Deathrattle return is in _dispose); food added 2026-07-04 OTK-lean pass.
+    _push_draw(state, unit.owner, 1)
+    _push_gain(state, unit.owner, state.config.opossum_food)
 
 
 def _gazelle_remove(state, unit):
@@ -1172,10 +1184,27 @@ def _op_rat_kill(state, step):
     return None
 
 
+def _has_spare_copy(state, player, card_id) -> bool:
+    return (any(u.card_id == card_id for u in state.hands[player])
+            or card_id in state.decks[player])
+
+
+def _remove_another_copy(state, player, card_id) -> None:
+    """Consume one other copy of `card_id` from hand (if any) else deck, to the Remove Pile
+    (a remove, not a Deathrattle - the paid copy never touched the board)."""
+    for inst in state.hands[player]:
+        if inst.card_id == card_id:
+            remove_from_hand(state, player, inst)
+            return
+    state.decks[player].remove(card_id)
+    state.remove_pile.append(card_id)
+    _fire_remove_event(state, card_id, player, None)
+
+
 def _hornet_place(state, unit, cr):
     targets = _adjacent_enemy_targets(state, unit, cr)
-    if targets:
-        state.effect_stack.append({"op": "hornet_kill", "chooser": unit.owner, "iid": unit.iid, "options": targets})
+    if targets and _has_spare_copy(state, unit.owner, "hornet"):
+        state.effect_stack.append({"op": "hornet_kill", "chooser": unit.owner, "options": targets})
 
 
 def _op_hornet_kill(state, step):
@@ -1183,10 +1212,8 @@ def _op_hornet_kill(state, step):
         return PendingRequest("choice", step["chooser"], optional=True, options=step["options"])
     if step["choice"] == SKIP:
         return None
-    cr_self, hornet = _find_unit(state, step["iid"])
+    _remove_another_copy(state, step["chooser"], "hornet")
     remove_top(state, step["choice"], by_player=step["chooser"], by_card="hornet")
-    if hornet is not None:
-        _remove_specific(state, cr_self, hornet, by_player=hornet.owner, by_effect=False)
     return None
 
 
@@ -1270,6 +1297,18 @@ def _op_bounce_iid(state, step):
     if u is not None:
         _bounce(state, cr, u)
     return None
+
+
+def _gale_covered(state, covered, coverer, cr):
+    # "The first time an enemy unit covers this" - once per instance (not per turn), gated
+    # on `retaliation_used` (persists across turns, unlike state.turn_flags). Consumed on any
+    # genuine enemy cover, but Immovable still blocks the actual bounce (keyword physics: cf.
+    # Apex Predator vs. an unremovable occupant - the ability resolves, the move just fails).
+    if coverer.owner == covered.owner or covered.retaliation_used:
+        return
+    covered.retaliation_used = True
+    if statics.can_be_removed(state, coverer):
+        state.effect_stack.append({"op": "bounce_iid", "iid": coverer.iid})
 
 
 def _skunk_place(state, unit, cr):
@@ -1542,4 +1581,5 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "oxpecker": {"on_place": _oxpecker_place},
     # Shared.
     "pufferfish": {"on_covered": _pufferfish_covered},
+    "gale": {"on_covered": _gale_covered},
 }

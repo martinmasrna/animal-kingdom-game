@@ -55,25 +55,49 @@ def _card_line(row: dict, card: Card) -> str:
 def format_matrix(records: Sequence[GameRecord]) -> str:
     """Deck-vs-deck win-rate matrix: row = deck_a, column = deck_b, cell = A's win rate.
 
-    Columns are keyed by a 4-letter abbreviation (unique across the current deck slugs) so
-    the table fits a terminal width; the legend below spells each one out.
+    Rows/columns are ordered by each deck's combined (both-seats) win rate, strongest first,
+    so the table itself reads as a ranking. Columns are keyed by a 4-letter abbreviation
+    (unique across the current deck slugs) so the table fits a terminal width. Trailing "TotA"
+    column = that row-deck's average win rate playing as seat A across its non-mirror matchups;
+    trailing "TotB" row = that column-deck's average win rate playing as seat B; "Both" column
+    = the same deck's combined (both-seats) average win rate, i.e. (TotA + TotB) / 2 for that
+    deck. The mirror matchup is still shown on the diagonal but excluded from these three
+    aggregates - same convention as `metrics._deck_win_rates` (a deck can't be more or less
+    powerful than itself, so folding the mirror in just dilutes the "vs the field" read toward
+    50%), which keeps these numbers consistent with each per-deck section's "deck win rate".
     """
     m = metrics.matchup_matrix(records)
-    decks = m["decks"]
-    abbrevs = [d[:4] for d in decks]
-    name_w = max(len(d) for d in decks)
+    all_decks = m["decks"]
     col_w = 7
 
-    header = " " * (name_w + 1) + "".join(f"{ab:>{col_w}}" for ab in abbrevs)
+    def _avg(vals: list[float]) -> Optional[float]:
+        return sum(vals) / len(vals) if vals else None
+
+    as_a = {a: _avg([m["win_rate"][a][b] for b in all_decks
+                    if b != a and m["win_rate"][a][b] is not None])
+            for a in all_decks}
+    as_b = {b: _avg([1.0 - m["win_rate"][a][b] for a in all_decks
+                    if a != b and m["win_rate"][a][b] is not None])
+            for b in all_decks}
+    combined = {d: _avg([v for v in (as_a[d], as_b[d]) if v is not None]) for d in all_decks}
+
+    decks = sorted(all_decks, key=lambda d: (combined[d] is None, -(combined[d] or 0.0)))
+    abbrevs = [d[:4] for d in decks]
+    name_w = max(len(d) for d in decks)
+
+    def _cell(rate: Optional[float]) -> str:
+        return f"{rate:>{col_w - 1}.0%} " if rate is not None else f"{'n/a':>{col_w - 1}} "
+
+    header = (" " * (name_w + 1) + "".join(f"{ab:>{col_w}}" for ab in abbrevs)
+              + f"{'TotA':>{col_w}}{'Both':>{col_w}}")
     lines = ["\n### Matchup matrix (row = A, column = B, cell = A's win rate)", "```", header]
     for a in decks:
-        cells = []
-        for b in decks:
-            rate = m["win_rate"][a][b]
-            cells.append(f"{rate:>{col_w - 1}.0%} " if rate is not None else f"{'n/a':>{col_w - 1}} ")
+        cells = [_cell(m["win_rate"][a][b]) for b in decks]
+        cells.append(_cell(as_a[a]))
+        cells.append(_cell(combined[a]))
         lines.append(f"{a:<{name_w}} " + "".join(cells))
-    lines.append("")
-    lines += [f"{ab} = {d}" for ab, d in zip(abbrevs, decks)]
+    tot_b_cells = [_cell(as_b[b]) for b in decks] + [_cell(None), _cell(None)]
+    lines.append(f"{'TotB':<{name_w}} " + "".join(tot_b_cells))
     lines.append("```")
     return "\n".join(lines)
 
@@ -104,7 +128,8 @@ def format_focused_matrix(records: Sequence[GameRecord], deck: str) -> str:
 def format_report(records: Sequence[GameRecord], cards: dict[str, Card],
                   focus_deck: Optional[str] = None) -> str:
     """One impact-sorted card table per deck (or just `focus_deck`, if given), preceded by
-    the matchup matrix (or a trimmed one-deck view of it), as a single string."""
+    the matchup matrix (or a trimmed one-deck view of it), as a single string. Deck sections
+    are ordered by that deck's own win rate, strongest first."""
     by_deck: dict[str, list[dict]] = defaultdict(list)
     for row in metrics.per_card_stats(records):     # already sorted by impact desc, overall
         by_deck[row["deck"]].append(row)             # per-deck order is preserved (stable sort)
@@ -114,7 +139,7 @@ def format_report(records: Sequence[GameRecord], cards: dict[str, Card],
         decks_to_print = [focus_deck] if focus_deck in by_deck else []
     else:
         sections = [format_matrix(records)]
-        decks_to_print = sorted(by_deck)
+        decks_to_print = sorted(by_deck, key=lambda d: -by_deck[d][0]["deck_win_rate"])
 
     for deck in decks_to_print:
         deck_rows = by_deck[deck]
@@ -146,6 +171,10 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--opponent", default=None,
                    help="pair with --deck to simulate/report only that single matchup "
                         "(abbreviation OK, both seats; same deck = mirror only)")
+    p.add_argument("--progress-every", type=int, default=20,
+                   help="print a progress line every N completed games within the current "
+                        "matchup, in addition to the once-per-matchup summary line (0 disables "
+                        "the within-matchup lines)")
     args = p.parse_args(argv)
 
     bots = parse_bot_pair(args.bots)
@@ -174,14 +203,27 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     start = time.monotonic()
 
+    matchups_done = 0
+
     def _progress(a: str, b: str, done: int, matchup_total: int) -> None:
+        nonlocal matchups_done
+        matchups_done = done
         elapsed = time.monotonic() - start
         games_done = done * args.games
         print(f"  [{done:>2}/{matchup_total}] {elapsed:6.1f}s  {a} vs {b}  "
               f"({games_done}/{total_games} games)", file=sys.stderr)
 
+    def _game_progress(a: str, b: str, done: int, matchup_games: int) -> None:
+        if args.progress_every <= 0 or (done % args.progress_every != 0 and done != matchup_games):
+            return
+        elapsed = time.monotonic() - start
+        games_done = matchups_done * args.games + done
+        print(f"      {a} vs {b}: {done}/{matchup_games} games "
+              f"({games_done}/{total_games} total, {elapsed:6.1f}s)", file=sys.stderr)
+
     records = run_pairs(pairs, args.games, args.seed, bots=bots, config=config,
-                        map_id=args.map_id, jobs=args.jobs, progress=_progress)
+                        map_id=args.map_id, jobs=args.jobs, progress=_progress,
+                        game_progress=_game_progress)
     print(f"Simulation done in {time.monotonic() - start:.1f}s.\n", file=sys.stderr)
     print(format_report(records, load_cards(), focus_deck=target))
 

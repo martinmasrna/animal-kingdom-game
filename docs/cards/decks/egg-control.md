@@ -3,22 +3,26 @@
 Snake/Bird/Egg tribal control built around a **draw–shuffle–remove → food** engine.
 4-4-6 shape (4 legendary ×1, 4 rare ×2, 6 common ×3 = 30).
 Source: user's offline Google Sheet (uploaded 2026-06-28).
+**card-balance-todo applied 2026-07-04:** Goliath demoted to rare; Black Swan promoted to
+legendary (now capped "first time each turn"); Vulture shelved (see
+`../card-candidates.md`); Stoop moved in from Aggro as the rare "Peregrine Falcon" (name
+provisional, str 6→4, threshold 6→4). Shape stays 4-4-6. See `../../balance/card-balance-todo.md`.
 
 ## Legendary (×1) — names **PROVISIONAL** (assigned 2026-06-30; final flavor pass pending — alternates in `flavor-review.md` §3)
 | Name | Tag | Str | Effect | Description |
 |---|---|---:|---|---|
 | **Eon** | Snake | 7 | Whenever a card is drawn, shuffled or removed, gain 1 food. | Ancient snake, inspired by Ouroboros. |
-| **Goliath** | Snake | = | This unit's strength is equal to the number of removed units. | A giant anaconda, trying to swallow everything. |
 | **Ember** | Bird | 6 | Flight. When this is removed, shuffle it back to your deck. | Red/orange/yellow, fire-colored bird looking like a Phoenix. |
 | **Aurum** | Egg | 0 | Fragile. At the start of your turn, draw a card. | Golden egg. |
+| **Black Swan** | Bird | 3 | The first time each turn you draw Black Swan, your opponent removes a random card from their hand. | *(promoted from rare, card-balance-todo 2026-07-04)* |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
 | **Rattlesnake** | Snake | 0 | Whenever you shuffle a card, gain 1 strength (wherever this is). |
 | **Egg Eater** | Snake | 4 | Whenever an Egg is removed, gain 10 food. |
-| **Black Swan** | Bird | 3 | When you draw this, your opponent removes a random card from their hand. |
-| **Vulture** | Bird | 4 | Flight. Whenever a card is removed, gain 5 food. |
+| **Goliath** | Snake | = | This unit's strength is equal to the number of removed units. *(demoted from legendary, card-balance-todo 2026-07-04)* |
+| **Peregrine Falcon** *(id `stoop`)* | Bird | 4 | Flight. Battlecry: remove an adjacent enemy of strength 4 or less. *(moved in from Aggro as a rare, card-balance-todo 2026-07-04; name provisional)* |
 
 ## Common (×3)
 | Name | Tag | Str | Effect |
@@ -46,6 +50,9 @@ Source: user's offline Google Sheet (uploaded 2026-06-28).
 - **Golden Egg "at the start of each turn, draw a card":** each of *your* turns, or *both* players' turns? Flag.
 - **"Whenever a card is drawn":** whose draws — yours only, or any? Same scope question for "shuffled" / "removed" (your cards vs all).
 - **Once-per-turn caps:** none of the event-food triggers state a cap. With Ouroboros and a busy event turn this could spike hard — likely a sim/tuning dial.
-- **Food numbers** (Egg Eater 10, Vulture 5/remove) are new and want sim tuning against region output and `win_food`.
-- **Black Swan discard:** the opponent removes a random card from their hand into the shared Remove Pile using seeded RNG.
-- **Eagle / Raven / Owl / Vulture** are all Flight birds here; just note for the card-identity decision above.
+- **Food numbers** (Egg Eater 10) are new and want sim tuning against region output and `win_food`.
+  Vulture's 5/remove is shelved with the card (see `../card-candidates.md`) but its `config.py`
+  dial (`vulture_food`/`cap_vulture`) is left in place, dormant, for if it returns.
+- **Black Swan discard:** the opponent removes a random card from their hand into the shared Remove
+  Pile using seeded RNG; now hard-capped to the first trigger each turn (card-balance-todo).
+- **Eagle / Raven / Owl** are all Flight birds here; just note for the card-identity decision above.

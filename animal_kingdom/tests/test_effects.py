@@ -180,10 +180,12 @@ def test_coyote_does_not_draw_below_threshold():
 # ===================================================================== Group A statics
 
 def test_porcupine_cannot_be_covered_by_enemy():
-    s = make_state(current="B", hands={"B": ["lion"]})
+    s = make_state(current="B", hands={"B": ["king_theron"]})
     put(s, "4,2", "caracal", "B")                        # B front connects 3,2
-    put(s, "3,2", "porcupine", "A")                      # A porcupine (str 5)
-    assert PlaceAction("lion", ("cr", "3,2")) not in rules.legal_actions(s)
+    put(s, "3,2", "porcupine", "A")                      # A porcupine (str 7)
+    # king_theron (8) is strictly greater than porcupine (7) - if the static block weren't
+    # there, this cover would otherwise be legal by strength alone.
+    assert PlaceAction("king_theron", ("cr", "3,2")) not in rules.legal_actions(s)
 
 
 def test_chameleon_covers_anything_and_is_covered_by_anything():
@@ -208,9 +210,9 @@ def test_goliath_strength_equals_remove_pile_size():
 
 def test_immovable_survives_removal_effect():
     s = make_state(hands={"A": ["gray_wolf"]})
-    hand_inst(s, "A", "gray_wolf").strength_counter = 2  # body 6
+    hand_inst(s, "A", "gray_wolf").strength_counter = 3  # body 7 - meets giant_tortoise's str
     put(s, "1,2", "lion", "A")
-    put(s, "3,2", "giant_tortoise", "B")                 # str 5 but Immovable
+    put(s, "3,2", "giant_tortoise", "B")                 # str 7 but Immovable
     rules.apply_action(s, PlaceAction("gray_wolf", ("cr", "2,2")))
     assert s.owner_of("3,2") == "B"
 
@@ -240,12 +242,44 @@ def test_black_panther_untargetable_by_enemy_effect():
 # =============================================================== shared (kept from M2a)
 
 def test_pufferfish_trap_removes_enemy_coverer_and_itself():
-    s = make_state(current="A", hands={"A": ["lion"]})
+    s = make_state(current="A", hands={"A": ["lion"]}, decks={"A": [], "B": ["fox"]})
     put(s, "1,2", "caracal", "A")                        # connects 2,2
     put(s, "2,2", "pufferfish", "B")                     # enemy trap (str 2)
     rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))   # lion (7) covers it
     assert s.owner_of("2,2") is None
     assert "lion" in s.remove_pile and "pufferfish" in s.remove_pile
+    assert hand_ids(s, "B") == ["fox"]                   # pufferfish's owner draws 1 (2026-07-04)
+
+
+def test_gale_returns_first_enemy_coverer_then_stops_reacting():
+    s = make_state(current="A", hands={"A": ["lion"]})
+    put(s, "1,2", "caracal", "A")                        # connects 2,2
+    gale = put(s, "2,2", "gale", "B")                    # enemy Gale
+    rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))   # lion (7) covers it
+    assert s.owner_of("2,2") == "B"                      # Gale is revealed again on top
+    assert "lion" in hand_ids(s, "A") and "lion" not in s.remove_pile  # bounced, not removed
+    assert gale.retaliation_used is True
+
+    rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))   # covers again: charge already used
+    assert s.owner_of("2,2") == "A" and "lion" not in hand_ids(s, "A")
+
+
+def test_gale_does_not_react_to_a_friendly_cover():
+    s = make_state(current="A", hands={"A": ["lion"]})
+    put(s, "1,2", "caracal", "A")
+    gale = put(s, "2,2", "gale", "A")                    # friendly Gale
+    rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))
+    assert s.owner_of("2,2") == "A"                      # lion just covers normally
+    assert gale.retaliation_used is False
+
+
+def test_gale_cannot_bounce_an_immovable_coverer():
+    s = make_state(current="A", hands={"A": ["giant_tortoise"]})
+    put(s, "1,2", "caracal", "A")
+    gale = put(s, "2,2", "gale", "B")
+    rules.apply_action(s, PlaceAction("giant_tortoise", ("cr", "2,2")))
+    assert s.owner_of("2,2") == "A"                      # Immovable resists the bounce
+    assert gale.retaliation_used is True                 # but the charge is still consumed
 
 
 # ===================================================================== clone w/ counters
@@ -270,14 +304,6 @@ def test_eon_gains_on_draw_shuffle_and_remove():
     victim = put(s, "2,2", "rat", "B")
     effects._remove_specific(s, "2,2", victim, by_player="A")
     assert s.food["A"] == 3 * CFG.eon_food               # a removal
-
-
-def test_vulture_gains_on_any_removal():
-    s = make_state()
-    put(s, "1,1", "vulture", "A")
-    victim = put(s, "2,2", "rat", "B")
-    effects._remove_specific(s, "2,2", victim, by_player="A")
-    assert s.food["A"] == CFG.vulture_food
 
 
 def test_rattlesnake_gains_strength_per_own_card_shuffled_in_every_zone():
@@ -325,6 +351,34 @@ def test_black_swan_when_drawn_discards_from_opponents_hand_only():
     assert s.remove_pile == ["fox"]
 
 
+def test_black_swan_hard_cap_fires_once_per_turn():
+    s = make_state(current="A")
+    s.add_to_hand("B", "fox")
+    s.add_to_hand("B", "lion")
+    first = UnitInstance("black_swan", "A", s.new_iid())
+    s.hands["A"].append(first)
+    effects._black_swan_drawn(s, first)
+    assert len(s.hands["B"]) == 1                        # first trigger this turn: discards one
+
+    second = UnitInstance("black_swan", "A", s.new_iid())  # a fresh instance (e.g. reshuffled+redrawn)
+    s.hands["A"].append(second)
+    effects._black_swan_drawn(s, second)
+    assert len(s.hands["B"]) == 1                        # capped: no second discard this turn
+
+    s.turn_flags = {}                                    # simulate rules._end_turn's reset
+    third = UnitInstance("black_swan", "A", s.new_iid())
+    s.hands["A"].append(third)
+    effects._black_swan_drawn(s, third)
+    assert len(s.hands["B"]) == 0                         # cap reset -> fires again next turn
+
+
+def test_opossum_battlecry_gains_food_and_draws():
+    s = make_state(hands={"A": ["opossum"]}, decks={"A": ["fox"], "B": []})
+    rules.apply_action(s, PlaceAction("opossum", ("cr", "1,2")))
+    assert s.food["A"] == CFG.opossum_food
+    assert "fox" in hand_ids(s, "A")
+
+
 def test_opossum_return_is_not_a_remove():
     s = make_state()
     put(s, "1,1", "eon", "A")                            # would react to a real removal
@@ -370,9 +424,9 @@ def test_mouse_draws_a_rodent_at_random():
 
 
 def test_fathom_draws_a_legendary():
-    s = make_state(hands={"A": ["fathom"]}, decks={"A": ["lion", "goliath", "eagle"], "B": []})
+    s = make_state(hands={"A": ["fathom"]}, decks={"A": ["lion", "eon", "eagle"], "B": []})
     rules.apply_action(s, PlaceAction("fathom", ("cr", "1,2")))
-    assert "goliath" in hand_ids(s, "A")                # the only legendary in the deck
+    assert "eon" in hand_ids(s, "A")                    # the only legendary in the deck
 
 
 def test_bird_egg_schedules_and_hatches_into_two_birds():
@@ -673,13 +727,23 @@ def test_rat_pays_a_hand_card_to_destroy_any_enemy():
     assert s.owner_of("3,2") is None and "lion" in s.remove_pile and s.hands["A"] == []
 
 
-def test_hornet_self_removes_to_destroy_an_enemy():
-    s = make_state(hands={"A": ["hornet"]})
+def test_hornet_saccs_a_spare_copy_to_destroy_an_enemy():
+    s = make_state(hands={"A": ["hornet", "hornet"]})
     put(s, "1,2", "caracal", "A")
     put(s, "3,2", "lion", "B")
     rules.apply_action(s, PlaceAction("hornet", ("cr", "2,2")))
     rules.apply_action(s, ChoiceAction("3,2"))
-    assert s.owner_of("3,2") is None and s.owner_of("2,2") is None
+    assert s.owner_of("3,2") is None and s.owner_of("2,2") == "A"   # hornet itself survives
+    assert s.remove_pile == ["hornet", "lion"] and hand_ids(s, "A") == []  # spare paid, target killed
+
+
+def test_hornet_has_no_effect_without_a_spare_copy():
+    s = make_state(hands={"A": ["hornet"]})
+    put(s, "1,2", "caracal", "A")
+    put(s, "3,2", "lion", "B")
+    rules.apply_action(s, PlaceAction("hornet", ("cr", "2,2")))
+    assert s.pending is None                            # no spare in hand or deck -> no offer
+    assert s.owner_of("3,2") == "B"
 
 
 def test_carmilla_sacrifices_for_cards():
