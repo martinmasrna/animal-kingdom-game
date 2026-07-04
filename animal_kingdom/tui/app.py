@@ -92,6 +92,46 @@ class DeckTracker(Static):
         self.update("\n".join(lines))
 
 
+class RecentActionIcon(Static):
+    """One compact public-history glyph with the narration available on hover."""
+
+    def __init__(self, narration: str, index: int):
+        actor, separator, action = narration.partition(": ")
+        action_text = action if separator else narration
+        symbol = (
+            "⚑" if "captured HQ" in action_text
+            else "↓" if "drew" in action_text
+            else "◆" if "played" in action_text
+            else "×" if "declined" in action_text
+            else "◇" if "chose" in action_text
+            else "•"
+        )
+        style = SEAT_STYLE.get(actor, "bold")
+        label = f"{actor}{symbol}" if separator else symbol
+        super().__init__(
+            f"[{style}]{label}[/{style}]",
+            id=f"recent-{index}",
+            markup=True,
+        )
+        self.tooltip = narration
+
+
+class RecentLog(Vertical):
+    """Newest-first action icons; full public text lives in per-icon tooltips."""
+
+    entries: reactive[tuple[str, ...]] = reactive(tuple, recompose=True)
+
+    def __init__(self) -> None:
+        super().__init__(id="recent-log")
+
+    def compose(self) -> ComposeResult:
+        for index, narration in enumerate(reversed(self.entries)):
+            yield RecentActionIcon(narration, index)
+
+    def set_entries(self, entries: Sequence[str]) -> None:
+        self.entries = tuple(entries[-6:])
+
+
 class BoardWidget(Static):
     """Board markup with visible-coordinate target hitboxes."""
 
@@ -467,6 +507,21 @@ class RecorderApp(App[None]):
     #player { text-align: center; }
     #main { height: 1fr; min-height: 14; }
     #board { width: 1fr; height: 100%; overflow: hidden hidden; }
+    #recent-log {
+        width: 5;
+        height: 100%;
+        padding-top: 1;
+        align-horizontal: center;
+        background: $background;
+        overflow: hidden hidden;
+    }
+    RecentActionIcon {
+        width: 4;
+        height: 1;
+        margin-bottom: 1;
+        text-align: center;
+        background: $boost;
+    }
     DeckTracker {
         width: 31;
         height: 100%;
@@ -559,6 +614,7 @@ class RecorderApp(App[None]):
         with Horizontal(id="main"):
             yield DeckTracker(id="own-deck")
             yield BoardWidget()
+            yield RecentLog()
             yield DeckTracker(id="opponent-deck")
             yield Static("", id="side", markup=True)
         yield Static("", id="notice", markup=True)
@@ -701,6 +757,7 @@ class RecorderApp(App[None]):
             session.setup.human_seat,
         )
         self.query_one(CardShelf).set_entries(self._action_entries())
+        self.query_one(RecentLog).set_entries(session.recent)
         self._update_side(focused)
         self._update_prompt()
 
@@ -975,21 +1032,6 @@ class RecorderApp(App[None]):
                         f"{escape(card.name)} · STR "
                         f"{strength_mod.effective_strength(state, unit)}"
                     )
-        elif not lines:
-            lines.extend([
-                "[bold]INSPECTOR[/bold]",
-                "Hover a board location for details.",
-                "Select a card to see its rules.",
-                "",
-                f"[bold]{escape(state.game_map.name)}[/bold]",
-                f"Food needed to win: {state.game_map.win_food}",
-            ])
-
-        lines.extend(["", "[bold]RECENT[/bold]"])
-        if self.session.recent:
-            lines.extend(f"• {escape(line)}" for line in self.session.recent[-5:])
-        else:
-            lines.append("[dim]No actions yet.[/dim]")
         self.query_one("#side", Static).update("\n".join(lines))
 
     def _submit(self, action: Action) -> None:

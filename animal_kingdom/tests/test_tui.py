@@ -18,6 +18,8 @@ from animal_kingdom.tui.app import (
     CardShelf,
     DeckTracker,
     HelpScreen,
+    RecentActionIcon,
+    RecentLog,
     RecorderApp,
     build_parser,
 )
@@ -187,18 +189,55 @@ def test_tui_wide_layout_centers_board_and_labels_players(tmp_path):
             left = cards[0].region.x - shelf.region.x
             right = shelf.region.right - cards[-1].region.right
             assert left > 0 and abs(left - right) <= 1
-            inspector = Text.from_markup(
-                str(app.query_one("#side", Static).content)
-            ).plain
-            assert "INSPECTOR" in inspector
-            assert "Savanna Expanse" in inspector
-            assert "No actions yet." in inspector
+            assert str(app.query_one("#side", Static).content) == ""
 
             app.bot_busy = True
             app.refresh_game()
             assert "Opponent is thinking" in str(
                 app.query_one("#notice", Static).content
             )
+
+    asyncio.run(scenario())
+
+
+def test_recent_log_uses_hoverable_icons_beside_board(tmp_path):
+    async def scenario():
+        app = RecorderApp(manifest=_manifest(), output_root=Path(tmp_path))
+        async with app.run_test(size=(180, 40)) as pilot:
+            await pilot.pause()
+            assert app.session is not None
+            entries = [
+                "A: drew cards",
+                "B: played Eagle on 3,3",
+                "A: chose 2,2",
+            ]
+            app.session.recent[:] = entries
+            app.refresh_game()
+            await pilot.pause()
+
+            board = app.query_one(BoardWidget)
+            recent = app.query_one(RecentLog)
+            opponent = app.query_one("#opponent-deck", DeckTracker)
+            assert board.region.right == recent.region.x
+            assert recent.region.right == opponent.region.x
+
+            icons = list(app.query(RecentActionIcon))
+            assert len(icons) == 3
+            assert [str(icon.tooltip) for icon in icons] == list(reversed(entries))
+            icon_text = [
+                Text.from_markup(str(icon.content)).plain
+                for icon in icons
+            ]
+            assert icon_text == ["A◇", "B◆", "A↓"]
+            assert all(
+                str(icon.tooltip) not in text
+                for icon, text in zip(icons, icon_text)
+            )
+
+            await pilot.hover(f"#{icons[0].id}")
+            await pilot.pause()
+            assert str(icons[0].tooltip) == "A: chose 2,2"
+            assert str(app.query_one("#side", Static).content) == ""
 
     asyncio.run(scenario())
 
@@ -438,7 +477,7 @@ def test_hovering_crossroad_shows_complete_stack_details(tmp_path):
 
             await pilot.hover("#actions")
             await pilot.pause()
-            assert "INSPECTOR" in str(app.query_one("#side", Static).content)
+            assert str(app.query_one("#side", Static).content) == ""
 
     asyncio.run(scenario())
 
