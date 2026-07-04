@@ -171,6 +171,10 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--opponent", default=None,
                    help="pair with --deck to simulate/report only that single matchup "
                         "(abbreviation OK, both seats; same deck = mirror only)")
+    p.add_argument("--progress-every", type=int, default=20,
+                   help="print a progress line every N completed games within the current "
+                        "matchup, in addition to the once-per-matchup summary line (0 disables "
+                        "the within-matchup lines)")
     args = p.parse_args(argv)
 
     bots = parse_bot_pair(args.bots)
@@ -199,14 +203,27 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     start = time.monotonic()
 
+    matchups_done = 0
+
     def _progress(a: str, b: str, done: int, matchup_total: int) -> None:
+        nonlocal matchups_done
+        matchups_done = done
         elapsed = time.monotonic() - start
         games_done = done * args.games
         print(f"  [{done:>2}/{matchup_total}] {elapsed:6.1f}s  {a} vs {b}  "
               f"({games_done}/{total_games} games)", file=sys.stderr)
 
+    def _game_progress(a: str, b: str, done: int, matchup_games: int) -> None:
+        if args.progress_every <= 0 or (done % args.progress_every != 0 and done != matchup_games):
+            return
+        elapsed = time.monotonic() - start
+        games_done = matchups_done * args.games + done
+        print(f"      {a} vs {b}: {done}/{matchup_games} games "
+              f"({games_done}/{total_games} total, {elapsed:6.1f}s)", file=sys.stderr)
+
     records = run_pairs(pairs, args.games, args.seed, bots=bots, config=config,
-                        map_id=args.map_id, jobs=args.jobs, progress=_progress)
+                        map_id=args.map_id, jobs=args.jobs, progress=_progress,
+                        game_progress=_game_progress)
     print(f"Simulation done in {time.monotonic() - start:.1f}s.\n", file=sys.stderr)
     print(format_report(records, load_cards(), focus_deck=target))
 
