@@ -32,6 +32,11 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--opponent-decks", default="all")
     parser.add_argument("--bots", default="greedy")
     parser.add_argument("--repetitions", type=int, default=1)
+    parser.add_argument(
+        "--exclude-mirrors",
+        action="store_true",
+        help="Skip deck-vs-itself matchups (lower value for a balance yardstick).",
+    )
     parser.add_argument("--seats", choices=("A", "B", "both"), default="both")
     parser.add_argument("--base-seed", type=int, default=0)
     parser.add_argument("--schedule-seed", type=int, default=0)
@@ -64,6 +69,7 @@ def main(argv: Sequence[str] | None = None) -> None:
             schedule_seed=args.schedule_seed,
             map_id=args.map_id,
             config=config,
+            exclude_mirrors=args.exclude_mirrors,
         )
     except ValueError as exc:
         parser.error(str(exc))

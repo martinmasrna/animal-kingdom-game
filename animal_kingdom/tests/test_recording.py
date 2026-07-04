@@ -42,6 +42,28 @@ def test_schedule_is_deterministic_paired_and_unique():
     assert all(seats == {"A", "B"} for seats in paired.values())
 
 
+def test_exclude_mirrors_drops_deck_vs_itself():
+    kwargs = dict(
+        cohort_id="human-v1",
+        human_decks=("ramp", "egg_control", "cats_midrange"),
+        opponent_decks=("ramp", "egg_control", "cats_midrange"),
+        opponent_kinds=("greedy",),
+        repetitions=1,
+        seats=("A", "B"),
+        base_seed=0,
+        schedule_seed=0,
+        map_id="map_b",
+        config=Config(),
+    )
+    full = generate_manifest(**kwargs)
+    trimmed = generate_manifest(**kwargs, exclude_mirrors=True)
+    # 3x3 pairs x 2 seats = 18; excluding 3 mirrors x 2 seats = 12.
+    assert len(full.games) == 18
+    assert len(trimmed.games) == 12
+    assert all(g.human_deck != g.opponent_deck for g in trimmed.games)
+    assert trimmed.generation["exclude_mirrors"] is True
+
+
 def test_writer_recovers_truncated_tail_and_tracks_latest_validity(tmp_path):
     path = tmp_path / "game.jsonl"
     with JsonlGameWriter(path) as writer:

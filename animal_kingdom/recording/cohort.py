@@ -128,6 +128,7 @@ def generate_manifest(
     schedule_seed: int,
     map_id: str,
     config: Config,
+    exclude_mirrors: bool = False,
 ) -> CohortManifest:
     """Expand a balanced grid into explicit games and shuffle it reproducibly."""
     import random
@@ -148,6 +149,8 @@ def generate_manifest(
     pair_index = 0
     for human_deck in human_decks:
         for opponent_deck in opponent_decks:
+            if exclude_mirrors and human_deck == opponent_deck:
+                continue
             for opponent_kind in opponent_kinds:
                 for repetition in range(repetitions):
                     seed = base_seed + pair_index
@@ -183,6 +186,7 @@ def generate_manifest(
             "seats": list(seats),
             "base_seed": base_seed,
             "schedule_seed": schedule_seed,
+            "exclude_mirrors": exclude_mirrors,
         },
     )
     manifest.validate()
