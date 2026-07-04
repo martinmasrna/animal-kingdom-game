@@ -99,3 +99,29 @@ def test_diagonal_projection_orients_each_player_bottom_left() -> None:
             ("hq", "B"),
         }
         _assert_valid_markup(board.markup)
+
+
+def test_diagonal_crossroad_shows_card_name_and_strength_without_seat_label() -> None:
+    state = new_game(
+        load_premade_deck("aggro_hq_rush"),
+        load_premade_deck("ramp"),
+        seed=7,
+        map_id="map_b",
+    )
+    unit = state.add_to_hand("A", "falcon")
+    state.hands["A"].remove(unit)
+    state.board["1,1"] = [unit]
+
+    board = render_board(
+        state,
+        perspective_player="A",
+        max_width=100,
+        max_height=40,
+    )
+    plain = _assert_valid_markup(board.markup)
+
+    assert "Falcon" in plain
+    assert "STR 4" in plain
+    assert "A4" not in plain
+    assert board.hitboxes[("cr", "1,1")].width == 12
+    assert board.hitboxes[("cr", "1,1")].height == 5

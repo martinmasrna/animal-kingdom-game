@@ -14,6 +14,7 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Code: `animal_
   - [x] Add responsive deck trackers: exact remaining deck for the human, public
     deck-plus-hand deduction for the opponent, with no hidden-zone reads.
   - [x] Add responsive food progress bars to the player bands.
+  - [x] Replace seat/strength crossroad codes with responsive card-name and strength labels.
 - [ ] **Promote the recorder to the general game TUI — decision: yes (2026-07-04).** Preserve
   automatic JSONL recording while making scheduled cohorts an optional workflow rather than the
   app's identity.

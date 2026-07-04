@@ -41,6 +41,8 @@ _MIN_WIDTH = 72    # floor so wrapping stays sane when a terminal reports someth
 # between adjacent crossroads and, at each 2x2 block centre, the region food label.
 _NODE_W = 9        # node box width incl. borders
 _NODE_H = 4        # node box height incl. borders (border, coord, occupancy, border)
+_DETAIL_NODE_W = 12  # room for a recognisable card name in the player-relative TUI
+_DETAIL_NODE_H = 5   # border, coordinate, card name, strength, border
 _GAP_W = 7         # horizontal gap between node columns
 _GAP_H = 3         # vertical gap between node rows
 _HQ_W = 8          # HQ box width incl. borders
@@ -87,6 +89,31 @@ def _occupancy(state, cr: str) -> str:
     top = stack[-1]
     label = f"{top.owner}{strength_mod.effective_strength(state, top)}"
     return label + (f"▾{len(stack)}" if len(stack) > 1 else "")
+
+
+def _occupant_details(state, cr: str, name_width: int) -> tuple[str, str]:
+    """Visible card name and strength, with color left to communicate ownership."""
+    stack = state.board.get(cr)
+    if not stack:
+        return "·", ""
+    top = stack[-1]
+    stack_suffix = f" ▾{len(stack)}" if len(stack) > 1 else ""
+    available = max(1, name_width - len(stack_suffix))
+    name = _truncate(state.cards[top.card_id].name, available) + stack_suffix
+    strength = f"STR {strength_mod.effective_strength(state, top)}"
+    return name, strength
+
+
+def _compact_occupant(state, cr: str, width: int) -> str:
+    """Single-line name + strength fallback for constrained board panes."""
+    stack = state.board.get(cr)
+    if not stack:
+        return "·"
+    top = stack[-1]
+    suffix = f" {strength_mod.effective_strength(state, top)}"
+    if len(stack) > 1:
+        suffix += f"▾{len(stack)}"
+    return _truncate(state.cards[top.card_id].name, max(1, width - len(suffix))) + suffix
 
 
 def _region_holder(state, region) -> str | None:
@@ -180,8 +207,16 @@ def _render_diagonal_board(
         raise ValueError("diagonal projection requires an HQ on a vertical map edge")
 
     slots = len(xs) + len(ys_top_first) - 1
-    compact_nodes = max_height is not None and max_height < 22
-    node_w, node_h = _NODE_W, 3 if compact_nodes else _NODE_H
+    detailed_nodes = (
+        (max_width is None or max_width >= slots * _DETAIL_NODE_W)
+        and (
+            max_height is None
+            or max_height >= (slots - 1) * 4 + _DETAIL_NODE_H
+        )
+    )
+    compact_nodes = not detailed_nodes and max_height is not None and max_height < 22
+    node_w = _DETAIL_NODE_W if detailed_nodes else _NODE_W
+    node_h = _DETAIL_NODE_H if detailed_nodes else 3 if compact_nodes else _NODE_H
     if max_width is None:
         col_step = 10
     else:
@@ -263,6 +298,7 @@ def _render_diagonal_board(
         )
         stack = state.board.get(cr)
         occ_style = SEAT_STYLE.get(stack[-1].owner) if stack else EMPTY_STYLE
+        name, strength = _occupant_details(state, cr, inner)
         if compact_nodes:
             _blit(
                 canvas,
@@ -273,14 +309,26 @@ def _render_diagonal_board(
                 box_style,
             )
             _blit(canvas, style_grid, r0 + 1, c0, "│", box_style)
-            _blit(canvas, style_grid, r0 + 1, c0 + 1, _occupancy(state, cr).center(inner), occ_style)
+            label = _compact_occupant(state, cr, inner)
+            _blit(canvas, style_grid, r0 + 1, c0 + 1, label.center(inner), occ_style)
             _blit(canvas, style_grid, r0 + 1, c0 + 1 + inner, "│", box_style)
             _blit(canvas, style_grid, r0 + 2, c0, "└" + "─" * inner + "┘", box_style)
+        elif detailed_nodes:
+            _blit(canvas, style_grid, r0, c0, "┌" + "─" * inner + "┐", box_style)
+            _blit(canvas, style_grid, r0 + 1, c0, "│" + f"{x},{y}".center(inner) + "│", box_style)
+            _blit(canvas, style_grid, r0 + 2, c0, "│", box_style)
+            _blit(canvas, style_grid, r0 + 2, c0 + 1, name.center(inner), occ_style)
+            _blit(canvas, style_grid, r0 + 2, c0 + 1 + inner, "│", box_style)
+            _blit(canvas, style_grid, r0 + 3, c0, "│", box_style)
+            _blit(canvas, style_grid, r0 + 3, c0 + 1, strength.center(inner), occ_style)
+            _blit(canvas, style_grid, r0 + 3, c0 + 1 + inner, "│", box_style)
+            _blit(canvas, style_grid, r0 + 4, c0, "└" + "─" * inner + "┘", box_style)
         else:
             _blit(canvas, style_grid, r0, c0, "┌" + "─" * inner + "┐", box_style)
             _blit(canvas, style_grid, r0 + 1, c0, "│" + f"{x},{y}".center(inner) + "│", box_style)
             _blit(canvas, style_grid, r0 + 2, c0, "│", box_style)
-            _blit(canvas, style_grid, r0 + 2, c0 + 1, _occupancy(state, cr).center(inner), occ_style)
+            label = _compact_occupant(state, cr, inner)
+            _blit(canvas, style_grid, r0 + 2, c0 + 1, label.center(inner), occ_style)
             _blit(canvas, style_grid, r0 + 2, c0 + 1 + inner, "│", box_style)
             _blit(canvas, style_grid, r0 + 3, c0, "└" + "─" * inner + "┘", box_style)
 
@@ -293,13 +341,25 @@ def _render_diagonal_board(
             else SEAT_STYLE.get(player)
         )
         _blit(canvas, style_grid, r0, c0, "┌" + "─" * inner + "┐", hq_style)
-        if compact_nodes:
-            _blit(canvas, style_grid, r0 + 1, c0, "│" + f"HQ {player}".center(inner) + "│", hq_style)
-            _blit(canvas, style_grid, r0 + 2, c0, "└" + "─" * inner + "┘", hq_style)
-        else:
-            _blit(canvas, style_grid, r0 + 1, c0, "│" + " " * inner + "│", hq_style)
-            _blit(canvas, style_grid, r0 + 2, c0, "│" + f"HQ {player}".center(inner) + "│", hq_style)
-            _blit(canvas, style_grid, r0 + 3, c0, "└" + "─" * inner + "┘", hq_style)
+        label_row = node_h // 2
+        for row in range(1, node_h - 1):
+            label = f"HQ {player}" if row == label_row else ""
+            _blit(
+                canvas,
+                style_grid,
+                r0 + row,
+                c0,
+                "│" + label.center(inner) + "│",
+                hq_style,
+            )
+        _blit(
+            canvas,
+            style_grid,
+            r0 + node_h - 1,
+            c0,
+            "└" + "─" * inner + "┘",
+            hq_style,
+        )
 
     # A raw backslash immediately before a Rich/Textual tag escapes the opening bracket.
     # Box-drawing diagonals avoid that markup ambiguity and read better in this projection.
