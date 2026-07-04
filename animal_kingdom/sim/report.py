@@ -55,26 +55,29 @@ def _card_line(row: dict, card: Card) -> str:
 def format_matrix(records: Sequence[GameRecord]) -> str:
     """Deck-vs-deck win-rate matrix: row = deck_a, column = deck_b, cell = A's win rate.
 
-    Columns are keyed by a 4-letter abbreviation (unique across the current deck slugs) so
-    the table fits a terminal width. Trailing "TotA" column = that row-deck's average win
-    rate playing as seat A across every matchup; trailing "TotB" row = that column-deck's
-    average win rate playing as seat B; "Both" column = the same deck's combined (both-seats)
-    average win rate, i.e. (TotA + TotB) / 2 for that deck.
+    Rows/columns are ordered by each deck's combined (both-seats) win rate, strongest first,
+    so the table itself reads as a ranking. Columns are keyed by a 4-letter abbreviation
+    (unique across the current deck slugs) so the table fits a terminal width. Trailing "TotA"
+    column = that row-deck's average win rate playing as seat A across every matchup; trailing
+    "TotB" row = that column-deck's average win rate playing as seat B; "Both" column = the
+    same deck's combined (both-seats) average win rate, i.e. (TotA + TotB) / 2 for that deck.
     """
     m = metrics.matchup_matrix(records)
-    decks = m["decks"]
-    abbrevs = [d[:4] for d in decks]
-    name_w = max(len(d) for d in decks)
+    all_decks = m["decks"]
     col_w = 7
 
     def _avg(vals: list[float]) -> Optional[float]:
         return sum(vals) / len(vals) if vals else None
 
-    as_a = {a: _avg([m["win_rate"][a][b] for b in decks if m["win_rate"][a][b] is not None])
-            for a in decks}
-    as_b = {b: _avg([1.0 - m["win_rate"][a][b] for a in decks if m["win_rate"][a][b] is not None])
-            for b in decks}
-    combined = {d: _avg([v for v in (as_a[d], as_b[d]) if v is not None]) for d in decks}
+    as_a = {a: _avg([m["win_rate"][a][b] for b in all_decks if m["win_rate"][a][b] is not None])
+            for a in all_decks}
+    as_b = {b: _avg([1.0 - m["win_rate"][a][b] for a in all_decks if m["win_rate"][a][b] is not None])
+            for b in all_decks}
+    combined = {d: _avg([v for v in (as_a[d], as_b[d]) if v is not None]) for d in all_decks}
+
+    decks = sorted(all_decks, key=lambda d: (combined[d] is None, -(combined[d] or 0.0)))
+    abbrevs = [d[:4] for d in decks]
+    name_w = max(len(d) for d in decks)
 
     def _cell(rate: Optional[float]) -> str:
         return f"{rate:>{col_w - 1}.0%} " if rate is not None else f"{'n/a':>{col_w - 1}} "
@@ -119,7 +122,8 @@ def format_focused_matrix(records: Sequence[GameRecord], deck: str) -> str:
 def format_report(records: Sequence[GameRecord], cards: dict[str, Card],
                   focus_deck: Optional[str] = None) -> str:
     """One impact-sorted card table per deck (or just `focus_deck`, if given), preceded by
-    the matchup matrix (or a trimmed one-deck view of it), as a single string."""
+    the matchup matrix (or a trimmed one-deck view of it), as a single string. Deck sections
+    are ordered by that deck's own win rate, strongest first."""
     by_deck: dict[str, list[dict]] = defaultdict(list)
     for row in metrics.per_card_stats(records):     # already sorted by impact desc, overall
         by_deck[row["deck"]].append(row)             # per-deck order is preserved (stable sort)
@@ -129,7 +133,7 @@ def format_report(records: Sequence[GameRecord], cards: dict[str, Card],
         decks_to_print = [focus_deck] if focus_deck in by_deck else []
     else:
         sections = [format_matrix(records)]
-        decks_to_print = sorted(by_deck)
+        decks_to_print = sorted(by_deck, key=lambda d: -by_deck[d][0]["deck_win_rate"])
 
     for deck in decks_to_print:
         deck_rows = by_deck[deck]
