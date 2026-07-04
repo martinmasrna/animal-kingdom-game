@@ -35,8 +35,7 @@ from ..sim.runner import BOT_KINDS
 class DeckTracker(Static):
     """Known deck composition without exposing an opponent's hidden zones."""
 
-    MAX_NAME_WIDTH = 25
-    MAX_COPIES = 3
+    CONTENT_WIDTH = 29
 
     def __init__(self, *, id: str):
         super().__init__("", id=id, markup=True)
@@ -76,25 +75,26 @@ class DeckTracker(Static):
             total = starting[card_id]
             left = self.remaining_counts[card_id]
             gone = total - left
-            copies = (
-                " " * (self.MAX_COPIES - total)
-                + (f"[grey42]{'●' * gone}[/grey42]" if gone else "")
-                + "●" * left
-            )
+            count = f"(x{left})"
+            gone_label = f"−{gone}" if gone else ""
+            prefix_width = len(count) + 1 + (len(gone_label) + 1 if gone_label else 0)
+            max_name_width = self.CONTENT_WIDTH - prefix_width
             name = card.name
-            if len(name) > self.MAX_NAME_WIDTH:
-                name = name[: self.MAX_NAME_WIDTH - 1].rstrip() + "…"
-            name_style = (
-                "grey42"
-                if left == 0
-                else RARITY_STYLE.get(card.rarity)
-            )
+            if len(name) > max_name_width:
+                name = name[: max_name_width - 1].rstrip() + "…"
+            if left == 0:
+                lines.append(
+                    f"[grey42]{count} {gone_label} {escape(name)}[/grey42]"
+                )
+                continue
+            name_style = RARITY_STYLE.get(card.rarity)
             styled_name = (
                 f"[{name_style}]{escape(name)}[/{name_style}]"
                 if name_style
                 else escape(name)
             )
-            lines.append(f"{copies} {styled_name}")
+            consumed = f" [grey42]{gone_label}[/grey42]" if gone_label else ""
+            lines.append(f"{count}{consumed} {styled_name}")
         self.update("\n".join(lines))
 
 
@@ -763,7 +763,7 @@ class RecorderApp(App[None]):
         self.query_one("#own-deck", DeckTracker).set_counts(
             state,
             title="YOUR DECK",
-            subtitle="grey = drawn",
+            subtitle="remaining · grey = drawn",
             starting=own_starting,
             remaining=own_remaining,
             title_style=SEAT_STYLE.get(human, "bold"),

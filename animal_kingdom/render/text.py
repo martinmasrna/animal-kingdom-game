@@ -29,7 +29,7 @@ from ..engine import strength as strength_mod
 SEAT_STYLE = {"A": "bold cyan", "B": "bold red"}
 HIGHLIGHT_STYLE = "bold green"          # a legal target the player is currently choosing among
 FOCUS_STYLE = "bold yellow"             # keyboard-focused target within the legal targets
-RARITY_STYLE = {"legendary": "bold gold3", "rare": "bold blue"}  # common: unstyled
+RARITY_STYLE = {"legendary": "bold yellow", "rare": "bold blue"}  # common: unstyled
 EMPTY_STYLE = "grey42"                  # unoccupied crossroads / unheld regions: recede into the board
 # A held region is drawn as a filled chip in the holder's seat color, so controlled
 # territory reads at a glance against the dimmed empty blocks.

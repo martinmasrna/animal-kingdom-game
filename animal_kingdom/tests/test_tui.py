@@ -240,10 +240,15 @@ def test_deck_trackers_are_responsive_and_ignore_opponent_hidden_zones(tmp_path)
             revealed_card = state.starting_decks["B"][0]
             state.board["1,1"] = [UnitInstance(revealed_card, "B", 900)]
             app.refresh_game()
-            assert opponent.remaining_counts[revealed_card] == (
-                Counter(state.starting_decks["B"])[revealed_card] - 1
-            )
-            assert "[grey42]●[/grey42]" in str(opponent.content)
+            expected_left = Counter(state.starting_decks["B"])[revealed_card] - 1
+            assert opponent.remaining_counts[revealed_card] == expected_left
+            opponent_markup = str(opponent.content)
+            assert f"(x{expected_left})" in opponent_markup
+            assert "−1" in opponent_markup
+            if expected_left == 0:
+                assert "[grey42](x0) −1" in opponent_markup
+            assert "[bold yellow]" in opponent_markup
+            assert "[bold blue]" in opponent_markup
 
             await pilot.resize_terminal(150, 40)
             await pilot.pause()
