@@ -80,7 +80,7 @@ class DeckTracker(Static):
             if len(name) > max_name_width:
                 name = name[: max_name_width - 1].rstrip() + "…"
             if left == 0:
-                lines.append(f"[grey42]{count} {escape(name)}[/grey42]")
+                lines.append(f"[dim]{count} {escape(name)}[/dim]")
                 continue
             name_style = RARITY_STYLE.get(card.rarity)
             styled_name = (
@@ -531,7 +531,7 @@ class RecorderApp(App[None]):
     }
     #opponent-deck { background: $panel; }
     #side {
-        width: 34;
+        width: 31;
         height: 100%;
         padding: 1 2;
         background: $panel;
@@ -972,20 +972,7 @@ class RecorderApp(App[None]):
         assert self.session is not None
         state = self.session.state
         lines: list[str] = []
-        if self.session.result:
-            next_game = (
-                "Press Enter for the next game."
-                if self.manifest is not None
-                else "Press Enter to set up a new game."
-            )
-            lines.extend([
-                "[bold green]GAME RECORDED[/bold green]",
-                "JSONL log:",
-                self._recording_link(),
-                "",
-                next_game,
-            ])
-        elif self.selected_card:
+        if self.session.result is None and self.selected_card:
             unit = next(
                 u for u in state.hands[self.setup.human_seat]
                 if u.card_id == self.selected_card

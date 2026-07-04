@@ -254,6 +254,7 @@ def test_deck_trackers_are_responsive_and_ignore_opponent_hidden_zones(tmp_path)
             side = app.query_one("#side", Static)
 
             assert own.display and opponent.display and side.display
+            assert own.region.width == side.region.width
             assert own.remaining_counts == Counter(state.decks["A"])
             assert sum(own.remaining_counts.values()) == len(state.decks["A"])
             assert sum(opponent.remaining_counts.values()) == len(
@@ -285,9 +286,24 @@ def test_deck_trackers_are_responsive_and_ignore_opponent_hidden_zones(tmp_path)
             assert f"(x{expected_left})" in opponent_markup
             assert "−" not in opponent_markup
             if expected_left == 0:
-                assert "[grey42](x0)" in opponent_markup
+                assert "[dim](x0)" in opponent_markup
             assert "[bold yellow]" in opponent_markup
             assert "[bold blue]" in opponent_markup
+
+            own_legendary = next(
+                card_id
+                for card_id in state.starting_decks["A"]
+                if state.cards[card_id].rarity == "legendary"
+            )
+            state.decks["A"] = [
+                card_id for card_id in state.decks["A"]
+                if card_id != own_legendary
+            ]
+            app.refresh_game()
+            assert (
+                f"[dim](x0) {state.cards[own_legendary].name}[/dim]"
+                in str(own.content)
+            )
 
             await pilot.resize_terminal(150, 40)
             await pilot.pause()
@@ -362,9 +378,7 @@ def test_completed_game_shows_clickable_recording_path(tmp_path, monkeypatch):
             prompt = str(notice.content)
             inspector = str(app.query_one("#side", Static).content)
             assert "[@click=app.open_recording underline]Open JSONL log (O)[/]" in prompt
-            assert "GAME RECORDED" in inspector
-            assert str(path) in inspector
-            assert "[@click=app.open_recording underline]" in inspector
+            assert inspector == ""
 
             opened: list[str] = []
             monkeypatch.setattr(
