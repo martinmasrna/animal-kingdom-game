@@ -1,10 +1,23 @@
 # CLI / App — Backlog
 
-Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Code: `animal_kingdom/cli.py`, `render/`.
+Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Code: `animal_kingdom/cli.py`,
+`render/`, and `tui/`.
 
-- [ ] **Board overflows the terminal on `map_b`.** The 5-column game map renders ~95 cols wide. On an 80-col terminal it wraps and the board shatters — and since map_b is the only map, `./run` looks broken out of the box. The renderer draws at fixed geometry and never checks terminal width. Fix: compress node/gap geometry (e.g. `_GAP_W` 7→3 saves 16 cols) or make the board responsive. (Found during the polish pass; deferred.)
-- [ ] **Full TUI rewrite (parked).** A real terminal app (`textual`): mouse clicks on the board, arrow-key navigation, persistent panes, live updates. Bigger lift (new dependency, a different interaction model to build/test). Revisit after the polish pass, when `rich` feels limiting.
-- [x] **Human benchmark recorder.** Added a deliberately narrow Textual app (`./record`):
-  persistent compact state, click-card/click-target and keyboard controls, background bots,
-  scheduled cohorts, and durable decision-level JSONL. This is a data-collection tool; it
-  does not replace the parked general-purpose TUI rewrite.
+- [x] **Recorder UI/UX polish.**
+  - [x] Composition: centre the board, preserve mouse hitboxes, add player/turn bands, and keep
+    the 80×24 compact layout working.
+  - [x] Make the current decision unmistakable with a contextual action prompt.
+  - [x] Turn the right rail into a contextual inspector (selection/hover, stack, recent actions).
+  - [x] Show the completed game's JSONL path as a clickable in-app file link.
+  - [x] Refine the hand shelf with responsive centring and explicit action states.
+  - [x] Move specialist recorder controls into a `?` help overlay.
+  - [x] Add responsive deck trackers: exact remaining deck for the human, public
+    deck-plus-hand deduction for the opponent, with no hidden-zone reads.
+  - [x] Add responsive food progress bars to the player bands.
+  - [x] Replace seat/strength crossroad codes with responsive card-name and strength labels.
+- [ ] **Promote the recorder to the general game TUI — decision: yes (2026-07-04).** Preserve
+  automatic JSONL recording while making scheduled cohorts an optional workflow rather than the
+  app's identity.
+  1. Rename the app and user-facing copy from “recorder” to the general game UI.
+  2. Make `./run` launch the Textual UI for human games; preserve its headless bot-game path.
+  3. Retire or alias `./record` once the general launcher covers ad-hoc and scheduled play.

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import random
 import textwrap
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional, Sequence
@@ -12,11 +13,12 @@ from typing import Any, Optional, Sequence
 from rich.markup import escape
 from textual import on, work
 from textual.app import App, ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.events import Click, Key, Leave, MouseMove, Resize
 from textual.message import Message
 from textual.reactive import reactive
-from textual.screen import Screen
+from textual.screen import ModalScreen, Screen
 from textual.widgets import Button, Footer, Input, Label, Select, Static
 
 from ..decks import PREMADE_DECKS
@@ -26,8 +28,108 @@ from ..engine.config import Config, load_config_overrides
 from ..recording.cohort import CohortManifest, ScheduledGame, load_manifest
 from ..recording.session import GameSetup, RecorderSession
 from ..recording.writer import completed_game_ids
-from ..render.text import BoardRender, render_board
+from ..render.text import BoardRender, Hitbox, RARITY_STYLE, SEAT_STYLE, render_board
 from ..sim.runner import BOT_KINDS
+
+
+class DeckTracker(Static):
+    """Known deck composition without exposing an opponent's hidden zones."""
+
+    CONTENT_WIDTH = 29
+
+    def __init__(self, *, id: str):
+        super().__init__("", id=id, markup=True)
+        self.starting_counts: Counter[str] = Counter()
+        self.remaining_counts: Counter[str] = Counter()
+
+    def set_counts(
+        self,
+        state,
+        *,
+        title: str,
+        subtitle: str,
+        starting: Counter[str],
+        remaining: Counter[str],
+        title_style: str,
+    ) -> None:
+        self.starting_counts = Counter(starting)
+        self.remaining_counts = Counter({
+            card_id: max(0, min(total, remaining.get(card_id, 0)))
+            for card_id, total in starting.items()
+        })
+        total_remaining = sum(self.remaining_counts.values())
+        lines = [
+            f"[{title_style}]{escape(title)} · {total_remaining}[/{title_style}]",
+            f"[dim]{escape(subtitle)}[/dim]",
+        ]
+        rarity_order = {"legendary": 0, "rare": 1, "common": 2}
+        card_ids = sorted(
+            starting,
+            key=lambda card_id: (
+                rarity_order[state.cards[card_id].rarity],
+                state.cards[card_id].name,
+            ),
+        )
+        for card_id in card_ids:
+            card = state.cards[card_id]
+            left = self.remaining_counts[card_id]
+            count = f"(x{left})"
+            prefix_width = len(count) + 1
+            max_name_width = self.CONTENT_WIDTH - prefix_width
+            name = card.name
+            if len(name) > max_name_width:
+                name = name[: max_name_width - 1].rstrip() + "…"
+            if left == 0:
+                lines.append(f"[dim]{count} {escape(name)}[/dim]")
+                continue
+            name_style = RARITY_STYLE.get(card.rarity)
+            styled_name = (
+                f"[{name_style}]{escape(name)}[/{name_style}]"
+                if name_style
+                else escape(name)
+            )
+            lines.append(f"{count} {styled_name}")
+        self.update("\n".join(lines))
+
+
+class RecentActionIcon(Static):
+    """One compact public-history glyph with the narration available on hover."""
+
+    def __init__(self, narration: str, index: int):
+        actor, separator, action = narration.partition(": ")
+        action_text = action if separator else narration
+        symbol = (
+            "⚑" if "captured HQ" in action_text
+            else "↓" if "drew" in action_text
+            else "◆" if "played" in action_text
+            else "×" if "declined" in action_text
+            else "◇" if "chose" in action_text
+            else "•"
+        )
+        style = SEAT_STYLE.get(actor, "bold")
+        label = f"{actor}{symbol}" if separator else symbol
+        super().__init__(
+            f"[{style}]{label}[/{style}]",
+            id=f"recent-{index}",
+            markup=True,
+        )
+        self.tooltip = narration
+
+
+class RecentLog(Vertical):
+    """Newest-first action icons; full public text lives in per-icon tooltips."""
+
+    entries: reactive[tuple[str, ...]] = reactive(tuple, recompose=True)
+
+    def __init__(self) -> None:
+        super().__init__(id="recent-log")
+
+    def compose(self) -> ComposeResult:
+        for index, narration in enumerate(reversed(self.entries)):
+            yield RecentActionIcon(narration, index)
+
+    def set_entries(self, entries: Sequence[str]) -> None:
+        self.entries = tuple(entries[-6:])
 
 
 class BoardWidget(Static):
@@ -40,10 +142,22 @@ class BoardWidget(Static):
             super().__init__()
             self.target = target
 
+    class TargetHovered(Message):
+        def __init__(self, target: tuple[str, str] | None):
+            super().__init__()
+            self.target = target
+
     def __init__(self) -> None:
         super().__init__("", id="board", markup=True)
         self.board_render: Optional[BoardRender] = None
         self._state = None
+        self._hovered_target: tuple[str, str] | None = None
+
+    def _set_hovered_target(self, target: tuple[str, str] | None) -> None:
+        if target == self._hovered_target:
+            return
+        self._hovered_target = target
+        self.post_message(self.TargetHovered(target))
 
     def set_position(
         self,
@@ -56,21 +170,47 @@ class BoardWidget(Static):
         crs = {value for kind, value in targets if kind == "cr"}
         hqs = [value for kind, value in targets if kind == "hq"]
         width = max(1, self.size.width or self.content_size.width or 80)
-        self.board_render = render_board(
+        height = max(1, self.size.height)
+        # Keep a little air around the map when the pane allows it. The renderer still
+        # receives the constrained inner dimensions, so compact terminals retain the
+        # same fit guarantees as before.
+        inner_width = max(1, width - 2)
+        inner_height = max(1, height - 2)
+        board = render_board(
             state,
             highlight_crs=crs,
             highlight_hq=hqs[0] if hqs else None,
             focus_target=focused,
-            max_width=width,
-            vertical_gap=1 if self.size.height < 18 else 3,
+            max_width=inner_width,
+            vertical_gap=1 if height < 18 else 3,
             perspective_player=perspective_player,
-            max_height=max(1, self.size.height),
+            max_height=inner_height,
+        )
+        x_offset = max(0, (width - board.width) // 2)
+        y_offset = max(0, (height - board.height) // 2)
+        markup = "\n" * y_offset + "\n".join(
+            " " * x_offset + line for line in board.markup.splitlines()
+        )
+        self.board_render = BoardRender(
+            markup=markup,
+            hitboxes={
+                target: Hitbox(
+                    hitbox.x + x_offset,
+                    hitbox.y + y_offset,
+                    hitbox.width,
+                    hitbox.height,
+                )
+                for target, hitbox in board.hitboxes.items()
+            },
+            width=x_offset + board.width,
+            height=y_offset + board.height,
         )
         self.update(self.board_render.markup)
 
     def on_mouse_move(self, event: MouseMove) -> None:
         if self.board_render is None or self._state is None:
             self.tooltip = None
+            self._set_hovered_target(None)
             return
         x, y = event.offset
         hovered = next(
@@ -81,6 +221,7 @@ class BoardWidget(Static):
             ),
             None,
         )
+        self._set_hovered_target(hovered)
         if hovered is None:
             self.tooltip = None
             return
@@ -102,6 +243,11 @@ class BoardWidget(Static):
 
     def on_leave(self, _event: Leave) -> None:
         self.tooltip = None
+        self._set_hovered_target(None)
+
+    def on_resize(self, _event: Resize) -> None:
+        if self._state is not None:
+            self.call_after_refresh(self.app.refresh_game)
 
     def on_click(self, event: Click) -> None:
         if self.board_render is None:
@@ -128,9 +274,10 @@ class ActionCard(Static):
     """One fully clickable compact card with the information needed to decide."""
 
     can_focus = True
+
     def __init__(self, entry: ActionEntry, index: int):
         is_draw = isinstance(entry.payload, DrawAction)
-        inner = 8 if is_draw else 20
+        inner = 12 if is_draw else 20
         super().__init__(self._markup(entry, inner), id=f"action-{index}", markup=True)
         self.entry = entry
         self.set_class(is_draw, "draw")
@@ -150,7 +297,9 @@ class ActionCard(Static):
         stats = entry.stats
         if len(stats) > inner:
             stats = stats[: inner - 1] + "…"
-        name = entry.label if len(entry.label) <= inner else entry.label[: inner - 1] + "…"
+        marker = "▶ " if entry.selected else "× " if not entry.enabled else ""
+        full_name = marker + entry.label
+        name = full_name if len(full_name) <= inner else full_name[: inner - 1] + "…"
         border_style = (
             "bold yellow" if entry.selected
             else "blue" if entry.enabled
@@ -184,6 +333,10 @@ class ActionCard(Static):
 class CardShelf(Horizontal):
     """A persistent horizontally scrollable shelf of information-rich cards."""
 
+    CARD_WIDTH = 22
+    DRAW_WIDTH = 14
+    CARD_MARGIN = 1
+
     entries: reactive[tuple[ActionEntry, ...]] = reactive(tuple, recompose=True)
 
     class EntryClicked(Message):
@@ -200,6 +353,22 @@ class CardShelf(Horizontal):
 
     def set_entries(self, entries: Sequence[ActionEntry]) -> None:
         self.entries = tuple(entries)
+        self._update_fit_class()
+
+    def on_resize(self, _event: Resize) -> None:
+        self._update_fit_class()
+
+    def _update_fit_class(self) -> None:
+        content_width = sum(
+            (
+                self.DRAW_WIDTH
+                if isinstance(entry.payload, DrawAction)
+                else self.CARD_WIDTH
+            )
+            + self.CARD_MARGIN
+            for entry in self.entries
+        )
+        self.set_class(bool(self.entries) and content_width <= self.size.width, "fits")
 
 
 class SetupScreen(Screen[GameSetup]):
@@ -264,16 +433,117 @@ class SetupScreen(Screen[GameSetup]):
         self.dismiss(setup)
 
 
+class HelpScreen(ModalScreen[None]):
+    """Compact command reference; recorder-only controls stay out of the main footer."""
+
+    CSS = """
+    HelpScreen { align: center middle; }
+    #help {
+        width: 62;
+        height: auto;
+        max-height: 90%;
+        padding: 1 2;
+        border: round $primary;
+        background: $panel;
+    }
+    """
+    BINDINGS = [
+        Binding("escape", "dismiss", "Close"),
+        Binding("question_mark", "dismiss", "Close", show=False),
+    ]
+
+    def compose(self) -> ComposeResult:
+        yield Static(
+            "\n".join([
+                "[bold]HOW TO PLAY[/bold]",
+                "[bold]D[/bold]        Draw",
+                "[bold]1–9[/bold]      Select a card",
+                "[bold]Arrows[/bold]   Move between legal targets",
+                "[bold]Enter[/bold]    Confirm target / continue after a game",
+                "[bold]Esc[/bold]      Cancel card selection",
+                "",
+                "[bold]GAME & RECORDING[/bold]",
+                "[bold]O[/bold]        Open the completed game's JSONL log",
+                "[bold]M[/bold]        Exclude / restore the latest human decision",
+                "[bold]G[/bold]        Exclude / restore the entire game",
+                "[bold]Q[/bold]        Quit safely",
+                "",
+                "[dim]Every action is saved to JSONL as it happens.[/dim]",
+                "[dim]Press ? or Esc to close.[/dim]",
+            ]),
+            id="help",
+            markup=True,
+        )
+
+
 class RecorderApp(App[None]):
     """One-screen recorder with direct board actions and durable transition logging."""
 
     TITLE = "Animal Kingdom — Human Benchmark Recorder"
+    HORIZONTAL_BREAKPOINTS = [
+        (0, "layout-narrow"),
+        (110, "layout-inspector"),
+        (130, "layout-trackers"),
+        (170, "layout-wide"),
+    ]
+    VERTICAL_BREAKPOINTS = [
+        (0, "height-compact"),
+        (32, "height-full"),
+    ]
     CSS = """
     Screen { layout: vertical; }
-    #status { height: 1; padding: 0 1; background: $panel; }
+    #status {
+        height: 1;
+        padding: 0 2;
+        background: $panel;
+        text-align: center;
+    }
+    #opponent, #player {
+        height: 1;
+        padding: 0 2;
+        background: $boost;
+    }
+    #opponent { text-align: center; }
+    #player { text-align: center; }
     #main { height: 1fr; min-height: 14; }
     #board { width: 1fr; height: 100%; overflow: hidden hidden; }
-    #side { width: 34; height: 100%; padding: 0 1; background: $panel; overflow: hidden hidden; }
+    #recent-log {
+        width: 5;
+        height: 100%;
+        padding-top: 1;
+        align-horizontal: center;
+        background: $background;
+        overflow: hidden hidden;
+    }
+    RecentActionIcon {
+        width: 4;
+        height: 1;
+        margin-bottom: 1;
+        text-align: center;
+        background: $boost;
+    }
+    DeckTracker {
+        width: 31;
+        height: 100%;
+        padding: 1;
+        background: $surface;
+        overflow: hidden hidden;
+    }
+    #opponent-deck { background: $panel; }
+    #side {
+        width: 31;
+        height: 100%;
+        padding: 1 2;
+        background: $panel;
+        overflow: hidden hidden;
+    }
+    #notice {
+        height: 1;
+        padding: 0 2;
+        background: $primary-background;
+        text-align: center;
+        text-style: bold;
+    }
     #actions {
         height: 7;
         layout: horizontal;
@@ -281,13 +551,18 @@ class RecorderApp(App[None]):
         overflow-y: hidden;
         scrollbar-size-horizontal: 0;
     }
+    #actions.fits { align-horizontal: center; }
     ActionCard { width: 22; height: 7; margin-right: 1; }
-    ActionCard.draw { width: 10; }
+    ActionCard.draw { width: 14; }
     ActionCard:focus { background: $boost; }
-    #notice { height: 1; padding: 0 1; }
     Footer { height: 1; }
-    .narrow #side { display: none; }
-    .compact-height #notice, .compact-height Footer { display: none; }
+    .layout-narrow DeckTracker, .layout-narrow #side { display: none; }
+    .layout-inspector DeckTracker { display: none; }
+    .layout-trackers #side { display: none; }
+    .height-compact DeckTracker,
+    .height-compact #status,
+    .height-compact #opponent,
+    .height-compact Footer { display: none; }
     """
     BINDINGS = [
         ("q", "quit_recorder", "Quit"),
@@ -298,8 +573,10 @@ class RecorderApp(App[None]):
         ("right", "next_target", "Next target"),
         ("down", "next_target", "Next target"),
         ("enter", "confirm_target", "Confirm/next"),
-        ("m", "mark_decision", "Mark decision"),
-        ("g", "mark_game", "Mark game"),
+        Binding("m", "mark_decision", "Mark decision", show=False),
+        Binding("g", "mark_game", "Mark game", show=False),
+        Binding("o", "open_recording", "Open game log", show=False),
+        Binding("question_mark", "show_help", "Help"),
     ]
 
     def __init__(
@@ -324,18 +601,28 @@ class RecorderApp(App[None]):
         self.target_index = 0
         self.entry_shortcuts: list[Any] = []
         self.bot_busy = False
+        self.hovered_target: tuple[str, str] | None = None
+        self.revealed_cards: dict[str, Counter[str]] = {
+            "A": Counter(),
+            "B": Counter(),
+        }
+        self._seen_board_iids: set[int] = set()
 
     def compose(self) -> ComposeResult:
         yield Static("Starting…", id="status", markup=True)
+        yield Static("", id="opponent", markup=True)
         with Horizontal(id="main"):
+            yield DeckTracker(id="own-deck")
             yield BoardWidget()
+            yield RecentLog()
+            yield DeckTracker(id="opponent-deck")
             yield Static("", id="side", markup=True)
-        yield CardShelf()
         yield Static("", id="notice", markup=True)
+        yield Static("", id="player", markup=True)
+        yield CardShelf()
         yield Footer()
 
     def on_mount(self) -> None:
-        self._update_responsive_class()
         if self.manifest is not None:
             self.start_next_scheduled_game()
         else:
@@ -352,14 +639,6 @@ class RecorderApp(App[None]):
         # The initial session may render during on_mount before final widget dimensions
         # exist; redraw once layout has assigned the real 80x24/wide-pane sizes.
         self.refresh_game()
-
-    def on_resize(self, _event: Resize) -> None:
-        self._update_responsive_class()
-        self.refresh_game()
-
-    def _update_responsive_class(self) -> None:
-        self.screen.set_class(self.size.width < 110, "narrow")
-        self.screen.set_class(self.size.height < 32, "compact-height")
 
     def _scheduled_setup(self, game: ScheduledGame) -> GameSetup:
         assert self.manifest is not None
@@ -402,8 +681,24 @@ class RecorderApp(App[None]):
         self.target_order.clear()
         self.target_index = 0
         self.bot_busy = False
+        self.hovered_target = None
+        self.revealed_cards = {"A": Counter(), "B": Counter()}
+        self._seen_board_iids.clear()
         self.refresh_game()
         self.maybe_start_bot()
+
+    def _food_progress(self, state, player: str) -> str:
+        value = state.food[player]
+        target = state.game_map.win_food
+        width = 18 if self.size.width >= 130 else 10
+        filled = max(0, min(width, round(width * value / target)))
+        empty = width - filled
+        style = SEAT_STYLE.get(player, "bold")
+        bar = (
+            f"[{style}]{'█' * filled}[/{style}]"
+            f"[dim]{'░' * empty}[/dim]"
+        )
+        return f"Food {value}/{target} ▕{bar}▏"
 
     def refresh_game(self) -> None:
         session = self.session
@@ -412,21 +707,59 @@ class RecorderApp(App[None]):
         state = session.state
         result = session.result
         actor = state.player_to_act()
+        human = session.setup.human_seat
+        opponent = next(player for player in state.game_map.players if player != human)
         invalid = " [bold red]GAME EXCLUDED[/bold red]" if not session.game_valid else ""
-        busy = " — bot thinking…" if self.bot_busy else ""
-        result_text = f" — winner {result.winner or 'draw'} ({result.reason})" if result else ""
         cohort_text = ""
         if self.manifest is not None and session.setup.scheduled_game_id:
             index = next(
                 i for i, game in enumerate(self.manifest.games, start=1)
                 if game.game_id == session.setup.scheduled_game_id
             )
-            cohort_text = f" — cohort {index}/{len(self.manifest.games)}"
+            cohort_text = f" · Game {index}/{len(self.manifest.games)}"
+
+        if result:
+            winner = "Draw" if result.winner is None else (
+                "You win" if result.winner == human else "Opponent wins"
+            )
+            phase = f"{winner} · {escape(result.reason)}"
+        elif self.bot_busy:
+            phase = "Opponent thinking…"
+        elif actor == human and state.pending:
+            phase = "Resolve effect"
+        elif actor == human:
+            phase = "Your turn"
+        else:
+            phase = "Opponent turn"
         self.query_one("#status", Static).update(
-            f"[bold]T{state.turn_counter} · {actor}[/bold]{cohort_text}{busy}{result_text}{invalid}"
-            f"  |  A F{state.food['A']} H{len(state.hands['A'])} D{len(state.decks['A'])}"
-            f"  |  B F{state.food['B']} H{len(state.hands['B'])} D{len(state.decks['B'])}"
+            f"[bold]{phase}[/bold] · Turn {state.turn_counter + 1}{cohort_text}{invalid}"
         )
+
+        opponent_style = SEAT_STYLE.get(opponent, "bold")
+        human_style = SEAT_STYLE.get(human, "bold")
+        self.query_one("#opponent", Static).update(
+            f"[{opponent_style}]OPPONENT · Seat {opponent}[/{opponent_style}]"
+            f"   {self._food_progress(state, opponent)}"
+            f"  ·  Hand {len(state.hands[opponent])}"
+            f"  ·  Deck {len(state.decks[opponent])}"
+        )
+        actions_remaining = max(
+            0,
+            state.config.actions_per_turn - state.actions_taken_this_turn,
+        )
+        action_text = (
+            f"  ·  Actions {actions_remaining}"
+            if actor == human and result is None
+            else ""
+        )
+        self.query_one("#player", Static).update(
+            f"[{human_style}]YOUR HAND · Seat {human}[/{human_style}]"
+            f"   {self._food_progress(state, human)}"
+            f"  ·  Cards {len(state.hands[human])}"
+            f"  ·  Deck {len(state.decks[human])}"
+            f"{action_text}"
+        )
+        self._update_deck_trackers()
 
         self._build_action_state()
         focused = self.target_order[self.target_index] if self.target_order else None
@@ -437,23 +770,109 @@ class RecorderApp(App[None]):
             session.setup.human_seat,
         )
         self.query_one(CardShelf).set_entries(self._action_entries())
+        self.query_one(RecentLog).set_entries(session.recent)
         self._update_side(focused)
+        self._update_prompt()
 
-        if result:
-            suffix = (
-                "Enter starts the next scheduled game."
+    def _observe_public_cards(self) -> None:
+        """Remember cards revealed on the board without reading hidden opponent zones."""
+        assert self.session is not None
+        state = self.session.state
+        for stack in state.board.values():
+            for unit in stack:
+                if unit.iid in self._seen_board_iids:
+                    continue
+                self._seen_board_iids.add(unit.iid)
+                self.revealed_cards[unit.owner][unit.card_id] += 1
+
+        # The Remove Pile is public but stores card ids without owners. Card ids identify
+        # their premade deck exactly when the players brought different decks; in a mirror,
+        # attribution would leak/guess ownership, so leave those copies conservatively unseen.
+        if self.setup.human_deck == self.setup.opponent_deck:
+            return
+        deck_by_player = {
+            self.setup.human_seat: self.setup.human_deck,
+            next(
+                player
+                for player in state.game_map.players
+                if player != self.setup.human_seat
+            ): self.setup.opponent_deck,
+        }
+        removed = Counter(state.remove_pile)
+        for player, deck_slug in deck_by_player.items():
+            for card_id, count in removed.items():
+                if state.cards[card_id].deck == deck_slug:
+                    self.revealed_cards[player][card_id] = max(
+                        self.revealed_cards[player][card_id],
+                        count,
+                    )
+
+    def _update_deck_trackers(self) -> None:
+        assert self.session is not None
+        state = self.session.state
+        human = self.setup.human_seat
+        opponent = next(player for player in state.game_map.players if player != human)
+        self._observe_public_cards()
+
+        own_starting = Counter(state.starting_decks[human])
+        own_remaining = Counter(state.decks[human])
+        opponent_starting = Counter(state.starting_decks[opponent])
+        opponent_remaining = Counter({
+            card_id: max(
+                0,
+                total - self.revealed_cards[opponent].get(card_id, 0),
+            )
+            for card_id, total in opponent_starting.items()
+        })
+        self.query_one("#own-deck", DeckTracker).set_counts(
+            state,
+            title="YOUR DECK",
+            subtitle="copies remaining",
+            starting=own_starting,
+            remaining=own_remaining,
+            title_style=SEAT_STYLE.get(human, "bold"),
+        )
+        self.query_one("#opponent-deck", DeckTracker).set_counts(
+            state,
+            title="OPPONENT UNSEEN",
+            subtitle="remaining in deck + hand",
+            starting=opponent_starting,
+            remaining=opponent_remaining,
+            title_style=SEAT_STYLE.get(opponent, "bold"),
+        )
+
+    def _update_prompt(self) -> None:
+        assert self.session is not None
+        session = self.session
+        state = session.state
+        if session.result:
+            next_game = (
+                "start the next game"
                 if self.manifest is not None
-                else "Enter opens a new ad-hoc game."
+                else "open a new game"
             )
-            self.query_one("#notice", Static).update(
-                f"[bold green]Game recorded: {session.path}[/bold green]  {suffix}"
+            prompt = (
+                "[bold green]Game recorded[/bold green] · "
+                f"{self._recording_link('Open JSONL log (O)')} · "
+                f"Press Enter to {next_game}"
             )
-        elif self.bot_busy:
-            self.query_one("#notice", Static).update("Input locked while the bot chooses.")
+        elif self.bot_busy or not session.human_turn:
+            prompt = "Opponent is thinking…"
+        elif state.pending:
+            board_hint = "a highlighted location or " if self.target_map else ""
+            prompt = f"Resolve effect · Choose {board_hint}an option below"
+        elif self.selected_card:
+            card_name = escape(state.cards[self.selected_card].name)
+            prompt = f"Place [bold]{card_name}[/bold] · Choose a highlighted location"
         else:
-            self.query_one("#notice", Static).update(
-                "Click a card then a highlighted target. D draws; M/G mark bad data."
-            )
+            prompt = "Choose a card from your hand or draw"
+        self.query_one("#notice", Static).update(prompt)
+
+    def _recording_link(self, label: str | None = None) -> str:
+        assert self.session is not None
+        path = self.session.path.resolve()
+        link_label = label if label is not None else str(path)
+        return f"[@click=app.open_recording underline]{escape(link_label)}[/]"
 
     def _build_action_state(self) -> None:
         self.target_map.clear()
@@ -530,7 +949,12 @@ class RecorderApp(App[None]):
 
         draw = next((action for action in legal if isinstance(action, DrawAction)), None)
         if draw is not None:
-            entries.append(ActionEntry("D Draw", draw, effect="Draw cards"))
+            draw_count = state.config.draw_action_count
+            entries.append(ActionEntry(
+                "D DRAW",
+                draw,
+                effect=f"Draw {draw_count} card{'s' if draw_count != 1 else ''}",
+            ))
         playable = {action.card_id for action in legal if isinstance(action, PlaceAction)}
         seen: set[str] = set()
         card_number = 0
@@ -554,37 +978,60 @@ class RecorderApp(App[None]):
                 effect=card.text,
                 stats=f"STR {strength}   {tags}",
             ))
-            self.entry_shortcuts.append(payload)
+            self.entry_shortcuts.append(payload if unit.card_id in playable else None)
         return entries
 
-    def _update_side(self, focused: tuple[str, str] | None) -> None:
+    def _update_side(self, focused: tuple[str, str] | None = None) -> None:
         assert self.session is not None
         state = self.session.state
         lines: list[str] = []
-        if self.selected_card:
+        if self.session.result is None and self.selected_card:
             unit = next(
                 u for u in state.hands[self.setup.human_seat]
                 if u.card_id == self.selected_card
             )
             card = state.cards[self.selected_card]
+            stats = f"STR {strength_mod.placement_strength(state, unit)}"
+            if card.food_cost:
+                stats += f" · Costs {card.food_cost} food"
+            if card.tags:
+                stats += f" · {escape(' / '.join(sorted(card.tags)))}"
             lines.extend([
-                f"[bold]{escape(card.name)}[/bold]",
-                f"STR {strength_mod.placement_strength(state, unit)} — {escape('/'.join(card.tags))}",
+                "[bold]SELECTED CARD[/bold]",
+                f"[bold]{escape(card.name)}[/bold] · "
+                f"{escape(card.rarity.title())} {escape(card.type.title())}",
+                stats,
                 escape(card.text),
             ])
-        elif focused:
-            stack = state.board.get(focused[1], []) if focused[0] == "cr" else []
-            lines.append(f"[bold]Target {focused[1]}[/bold]")
-            for unit in reversed(stack):
-                lines.append(
-                    f"{unit.owner} {escape(state.cards[unit.card_id].name)} "
-                    f"({strength_mod.effective_strength(state, unit)})"
-                )
-        elif state.pending:
-            lines.append("[bold]Resolve effect choice[/bold]")
-        lines.append("")
-        lines.append("[bold]Recent[/bold]")
-        lines.extend(escape(line) for line in self.session.recent[-6:])
+        inspected = None if self.session.result else self.hovered_target or focused
+        if inspected:
+            if lines:
+                lines.append("")
+            kind, value = inspected
+            is_legal = inspected in self.target_map
+            lines.append("[bold]LOCATION[/bold]")
+            if kind == "hq":
+                relationship = "Yours" if value == self.setup.human_seat else "Opponent"
+                lines.append(f"[bold]HQ {escape(value)}[/bold] · {relationship}")
+            else:
+                lines.append(f"[bold]Crossroad {escape(value)}[/bold]")
+            if is_legal:
+                lines.append("[bold green]LEGAL TARGET[/bold green]")
+
+            stack = state.board.get(value, []) if kind == "cr" else []
+            if kind == "cr" and not stack:
+                lines.append("Empty")
+            elif stack:
+                count = len(stack)
+                lines.append(f"STACK · {count} card{'s' if count != 1 else ''} · top first")
+                for unit in reversed(stack):
+                    card = state.cards[unit.card_id]
+                    owner_style = SEAT_STYLE.get(unit.owner, "bold")
+                    lines.append(
+                        f"[{owner_style}]{unit.owner}[/{owner_style}] "
+                        f"{escape(card.name)} · STR "
+                        f"{strength_mod.effective_strength(state, unit)}"
+                    )
         self.query_one("#side", Static).update("\n".join(lines))
 
     def _submit(self, action: Action) -> None:
@@ -605,6 +1052,14 @@ class RecorderApp(App[None]):
         action = self.target_map.get(event.target)
         if action is not None:
             self._submit(action)
+
+    @on(BoardWidget.TargetHovered)
+    def board_target_hovered(self, event: BoardWidget.TargetHovered) -> None:
+        self.hovered_target = event.target
+        if self.session is None:
+            return
+        focused = self.target_order[self.target_index] if self.target_order else None
+        self._update_side(focused)
 
     @on(CardShelf.EntryClicked)
     def action_entry_clicked(self, event: CardShelf.EntryClicked) -> None:
@@ -695,6 +1150,14 @@ class RecorderApp(App[None]):
         self.query_one("#notice", Static).update(
             "Game restored." if valid else "Game excluded; its scheduled entry will be replayed."
         )
+
+    def action_open_recording(self) -> None:
+        if self.session is None or self.session.result is None:
+            return
+        self.open_url(self.session.path.resolve().as_uri())
+
+    def action_show_help(self) -> None:
+        self.push_screen(HelpScreen())
 
     def maybe_start_bot(self) -> None:
         if (
