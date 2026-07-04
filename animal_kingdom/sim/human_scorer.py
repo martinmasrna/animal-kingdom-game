@@ -28,6 +28,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Iterator, Sequence
 
+from ..bots.greedy_bot import GreedyWeights, _battlecry_fizzled, evaluate
 from ..engine import rules
 from ..engine.actions import Action, action_from_dict
 from ..engine.config import Config
@@ -103,6 +104,39 @@ def _bot_action(kind: str, dec: HumanDecision, legal: list[Action], state: GameS
     return action.to_dict()
 
 
+def _greedy_scores(state: GameState, me: str, legal: list[Action],
+                   weights: GreedyWeights) -> list[float]:
+    """GreedyBot's depth-1 valuation of each legal action, from `me`'s perspective.
+
+    Faithful to GreedyBot.choose's per-action score (evaluate(state-after-action) with the
+    wasted-battlecry penalty), minus the lethal-avoidance hard override — we want the eval's
+    *opinion* of a move, not the safety veto. This is the "hand-written judgement" the
+    blind-spot thesis is about; search only amplifies it, so probing the eval is the point.
+    """
+    scores = []
+    for action in legal:
+        nxt = state.clone()
+        rules.apply_action(nxt, action)
+        s = evaluate(nxt, me, weights)
+        if _battlecry_fizzled(state, nxt, me, action):
+            s -= weights.wasted_battlecry
+        scores.append(s)
+    return scores
+
+
+def _value_rank(scores: list[float], idx: int) -> float:
+    """Fraction of legal moves the eval scores STRICTLY better than move `idx`.
+
+    0.0 = the eval's own top pick; →1.0 = the eval thinks it's among the worst available.
+    Branching- and scale-immune: this is a within-decision percentile, not a raw gap.
+    """
+    if len(scores) <= 1:
+        return 0.0
+    mine = scores[idx]
+    better = sum(1 for s in scores if s > mine)
+    return better / (len(scores) - 1)
+
+
 @dataclasses.dataclass
 class _Tally:
     n: int = 0
@@ -130,11 +164,14 @@ def score(
     legal action (a reconstruction-fidelity canary).
     """
     deck_filter = set(decks) if decks else None
+    weights = GreedyWeights()
     # per (deck, bot) -> Tally, and place-only variant
     agree: dict = defaultdict(_Tally)
     agree_place: dict = defaultdict(_Tally)
     # bot-vs-bot pairwise agreement on identical positions (consensus baseline)
     pair: dict = defaultdict(_Tally)
+    # per deck -> list of value-ranks of the human's move (placements only), by greedy's eval
+    value: dict = defaultdict(list)
     unscored = 0
     n_games: set = set()
 
@@ -149,6 +186,12 @@ def score(
             continue
         n_games.add(dec.game_id)
         is_place = dec.action.get("kind") == "place"
+        # Value-rank: where greedy's evaluator ranks the human's actual move (placements).
+        if is_place:
+            scores = _greedy_scores(state, dec.actor, legal, weights)
+            vr = _value_rank(scores, legal_dicts.index(dec.action))
+            value[dec.human_deck].append(vr)
+            value["ALL"].append(vr)
         choices: dict[str, dict] = {}
         for kind in bot_kinds:
             choices[kind] = _bot_action(kind, dec, legal, state)
@@ -168,6 +211,7 @@ def score(
         "agree": agree,
         "agree_place": agree_place,
         "pair": pair,
+        "value": value,
     }
 
 
@@ -198,6 +242,38 @@ def _print_report(result: dict) -> None:
         print("\nBot-vs-bot agreement on the SAME positions (near-tie/consensus baseline):")
         for (deck, pairname), t in result["pair"].items():
             print(f"  {pairname:24} {t.rate * 100:5.1f}% ({t.agree}/{t.n})")
+
+    _print_value_report(result["value"])
+
+
+def _median(xs: list[float]) -> float:
+    xs = sorted(xs)
+    n = len(xs)
+    if not n:
+        return float("nan")
+    mid = n // 2
+    return xs[mid] if n % 2 else (xs[mid - 1] + xs[mid]) / 2
+
+
+def _print_value_report(value: dict) -> None:
+    """Where GreedyBot's EVALUATOR ranks your actual placements (0=its top pick, 1=worst).
+
+    This is the sharp, confound-free test: a real blind spot shows as a HIGH value-rank on a
+    deck you WIN with — the eval systematically rates your winning moves near the bottom.
+    """
+    print("\nValue-rank of YOUR placements under greedy's evaluator "
+          "(0.0 = its top pick, 1.0 = worst):")
+    print(f"{'human_deck':20} {'median':>8} {'mean':>8} {'%your-move-is-its-top':>22} "
+          f"{'%bottom-quartile':>18} {'n':>5}")
+    decks = sorted(d for d in value if d != "ALL")
+    for deck in decks + ["ALL"]:
+        xs = value.get(deck, [])
+        if not xs:
+            continue
+        top = sum(1 for v in xs if v == 0.0) / len(xs)
+        bottom = sum(1 for v in xs if v >= 0.75) / len(xs)
+        print(f"{deck:20} {_median(xs):8.2f} {sum(xs) / len(xs):8.2f} "
+              f"{top * 100:21.1f}% {bottom * 100:17.1f}% {len(xs):5}")
 
 
 def _write_csv(result: dict, out: Path) -> None:
