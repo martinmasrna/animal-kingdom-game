@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections import Counter
 from pathlib import Path
 
 from rich.text import Text
@@ -15,6 +16,7 @@ from animal_kingdom.tui.app import (
     ActionCard,
     BoardWidget,
     CardShelf,
+    DeckTracker,
     HelpScreen,
     RecorderApp,
     build_parser,
@@ -160,6 +162,8 @@ def test_tui_wide_layout_centers_board_and_labels_players(tmp_path):
 
             board = app.query_one(BoardWidget)
             assert board.board_render is not None
+            assert not app.query_one("#own-deck", DeckTracker).display
+            assert not app.query_one("#opponent-deck", DeckTracker).display
             hitboxes = board.board_render.hitboxes.values()
             left = min(hitbox.x for hitbox in hitboxes)
             right = max(hitbox.x + hitbox.width for hitbox in hitboxes)
@@ -195,6 +199,65 @@ def test_tui_wide_layout_centers_board_and_labels_players(tmp_path):
             assert "Opponent is thinking" in str(
                 app.query_one("#notice", Static).content
             )
+
+    asyncio.run(scenario())
+
+
+def test_deck_trackers_are_responsive_and_ignore_opponent_hidden_zones(tmp_path):
+    async def scenario():
+        app = RecorderApp(manifest=_manifest(), output_root=Path(tmp_path))
+        async with app.run_test(size=(180, 40)) as pilot:
+            await pilot.pause()
+            assert app.session is not None
+            state = app.session.state
+            own = app.query_one("#own-deck", DeckTracker)
+            opponent = app.query_one("#opponent-deck", DeckTracker)
+            side = app.query_one("#side", Static)
+
+            assert own.display and opponent.display and side.display
+            assert own.remaining_counts == Counter(state.decks["A"])
+            assert sum(own.remaining_counts.values()) == len(state.decks["A"])
+            assert sum(opponent.remaining_counts.values()) == len(
+                state.starting_decks["B"]
+            )
+            assert "YOUR DECK" in str(own.content)
+            assert "OPPONENT UNSEEN" in str(opponent.content)
+
+            opponent_before = str(opponent.content)
+            hand_card = state.hands["B"][0].card_id
+            deck_index = next(
+                index
+                for index, card_id in enumerate(state.decks["B"])
+                if card_id != hand_card
+            )
+            state.hands["B"][0].card_id, state.decks["B"][deck_index] = (
+                state.decks["B"][deck_index],
+                hand_card,
+            )
+            app.refresh_game()
+            assert str(opponent.content) == opponent_before
+
+            revealed_card = state.starting_decks["B"][0]
+            state.board["1,1"] = [UnitInstance(revealed_card, "B", 900)]
+            app.refresh_game()
+            assert opponent.remaining_counts[revealed_card] == (
+                Counter(state.starting_decks["B"])[revealed_card] - 1
+            )
+            assert "[grey42]●[/grey42]" in str(opponent.content)
+
+            await pilot.resize_terminal(150, 40)
+            await pilot.pause()
+            assert own.display and opponent.display
+            assert not side.display
+
+            await pilot.resize_terminal(120, 40)
+            await pilot.pause()
+            assert not own.display and not opponent.display
+            assert side.display
+
+            await pilot.resize_terminal(100, 40)
+            await pilot.pause()
+            assert not own.display and not opponent.display and not side.display
 
     asyncio.run(scenario())
 

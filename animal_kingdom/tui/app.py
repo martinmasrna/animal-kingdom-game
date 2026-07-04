@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import random
 import textwrap
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional, Sequence
@@ -27,8 +28,74 @@ from ..engine.config import Config, load_config_overrides
 from ..recording.cohort import CohortManifest, ScheduledGame, load_manifest
 from ..recording.session import GameSetup, RecorderSession
 from ..recording.writer import completed_game_ids
-from ..render.text import BoardRender, Hitbox, SEAT_STYLE, render_board
+from ..render.text import BoardRender, Hitbox, RARITY_STYLE, SEAT_STYLE, render_board
 from ..sim.runner import BOT_KINDS
+
+
+class DeckTracker(Static):
+    """Known deck composition without exposing an opponent's hidden zones."""
+
+    MAX_NAME_WIDTH = 25
+    MAX_COPIES = 3
+
+    def __init__(self, *, id: str):
+        super().__init__("", id=id, markup=True)
+        self.starting_counts: Counter[str] = Counter()
+        self.remaining_counts: Counter[str] = Counter()
+
+    def set_counts(
+        self,
+        state,
+        *,
+        title: str,
+        subtitle: str,
+        starting: Counter[str],
+        remaining: Counter[str],
+        title_style: str,
+    ) -> None:
+        self.starting_counts = Counter(starting)
+        self.remaining_counts = Counter({
+            card_id: max(0, min(total, remaining.get(card_id, 0)))
+            for card_id, total in starting.items()
+        })
+        total_remaining = sum(self.remaining_counts.values())
+        lines = [
+            f"[{title_style}]{escape(title)} · {total_remaining}[/{title_style}]",
+            f"[dim]{escape(subtitle)}[/dim]",
+        ]
+        rarity_order = {"legendary": 0, "rare": 1, "common": 2}
+        card_ids = sorted(
+            starting,
+            key=lambda card_id: (
+                rarity_order[state.cards[card_id].rarity],
+                state.cards[card_id].name,
+            ),
+        )
+        for card_id in card_ids:
+            card = state.cards[card_id]
+            total = starting[card_id]
+            left = self.remaining_counts[card_id]
+            gone = total - left
+            copies = (
+                " " * (self.MAX_COPIES - total)
+                + (f"[grey42]{'●' * gone}[/grey42]" if gone else "")
+                + "●" * left
+            )
+            name = card.name
+            if len(name) > self.MAX_NAME_WIDTH:
+                name = name[: self.MAX_NAME_WIDTH - 1].rstrip() + "…"
+            name_style = (
+                "grey42"
+                if left == 0
+                else RARITY_STYLE.get(card.rarity)
+            )
+            styled_name = (
+                f"[{name_style}]{escape(name)}[/{name_style}]"
+                if name_style
+                else escape(name)
+            )
+            lines.append(f"{copies} {styled_name}")
+        self.update("\n".join(lines))
 
 
 class BoardWidget(Static):
@@ -143,6 +210,10 @@ class BoardWidget(Static):
     def on_leave(self, _event: Leave) -> None:
         self.tooltip = None
         self._set_hovered_target(None)
+
+    def on_resize(self, _event: Resize) -> None:
+        if self._state is not None:
+            self.call_after_refresh(self.app.refresh_game)
 
     def on_click(self, event: Click) -> None:
         if self.board_render is None:
@@ -375,6 +446,16 @@ class RecorderApp(App[None]):
     """One-screen recorder with direct board actions and durable transition logging."""
 
     TITLE = "Animal Kingdom — Human Benchmark Recorder"
+    HORIZONTAL_BREAKPOINTS = [
+        (0, "layout-narrow"),
+        (110, "layout-inspector"),
+        (130, "layout-trackers"),
+        (170, "layout-wide"),
+    ]
+    VERTICAL_BREAKPOINTS = [
+        (0, "height-compact"),
+        (32, "height-full"),
+    ]
     CSS = """
     Screen { layout: vertical; }
     #status {
@@ -392,6 +473,14 @@ class RecorderApp(App[None]):
     #player { text-align: center; }
     #main { height: 1fr; min-height: 14; }
     #board { width: 1fr; height: 100%; overflow: hidden hidden; }
+    DeckTracker {
+        width: 31;
+        height: 100%;
+        padding: 1;
+        background: $surface;
+        overflow: hidden hidden;
+    }
+    #opponent-deck { background: $panel; }
     #side {
         width: 34;
         height: 100%;
@@ -418,10 +507,13 @@ class RecorderApp(App[None]):
     ActionCard.draw { width: 14; }
     ActionCard:focus { background: $boost; }
     Footer { height: 1; }
-    .narrow #side { display: none; }
-    .compact-height #status,
-    .compact-height #opponent,
-    .compact-height Footer { display: none; }
+    .layout-narrow DeckTracker, .layout-narrow #side { display: none; }
+    .layout-inspector DeckTracker { display: none; }
+    .layout-trackers #side { display: none; }
+    .height-compact DeckTracker,
+    .height-compact #status,
+    .height-compact #opponent,
+    .height-compact Footer { display: none; }
     """
     BINDINGS = [
         ("q", "quit_recorder", "Quit"),
@@ -461,12 +553,19 @@ class RecorderApp(App[None]):
         self.entry_shortcuts: list[Any] = []
         self.bot_busy = False
         self.hovered_target: tuple[str, str] | None = None
+        self.revealed_cards: dict[str, Counter[str]] = {
+            "A": Counter(),
+            "B": Counter(),
+        }
+        self._seen_board_iids: set[int] = set()
 
     def compose(self) -> ComposeResult:
         yield Static("Starting…", id="status", markup=True)
         yield Static("", id="opponent", markup=True)
         with Horizontal(id="main"):
+            yield DeckTracker(id="own-deck")
             yield BoardWidget()
+            yield DeckTracker(id="opponent-deck")
             yield Static("", id="side", markup=True)
         yield Static("", id="notice", markup=True)
         yield Static("", id="player", markup=True)
@@ -474,7 +573,6 @@ class RecorderApp(App[None]):
         yield Footer()
 
     def on_mount(self) -> None:
-        self._update_responsive_class()
         if self.manifest is not None:
             self.start_next_scheduled_game()
         else:
@@ -491,14 +589,6 @@ class RecorderApp(App[None]):
         # The initial session may render during on_mount before final widget dimensions
         # exist; redraw once layout has assigned the real 80x24/wide-pane sizes.
         self.refresh_game()
-
-    def on_resize(self, _event: Resize) -> None:
-        self._update_responsive_class()
-        self.refresh_game()
-
-    def _update_responsive_class(self) -> None:
-        self.screen.set_class(self.size.width < 110, "narrow")
-        self.screen.set_class(self.size.height < 32, "compact-height")
 
     def _scheduled_setup(self, game: ScheduledGame) -> GameSetup:
         assert self.manifest is not None
@@ -542,6 +632,8 @@ class RecorderApp(App[None]):
         self.target_index = 0
         self.bot_busy = False
         self.hovered_target = None
+        self.revealed_cards = {"A": Counter(), "B": Counter()}
+        self._seen_board_iids.clear()
         self.refresh_game()
         self.maybe_start_bot()
 
@@ -604,6 +696,7 @@ class RecorderApp(App[None]):
             f"  ·  Deck {len(state.decks[human])}"
             f"{action_text}"
         )
+        self._update_deck_trackers()
 
         self._build_action_state()
         focused = self.target_order[self.target_index] if self.target_order else None
@@ -616,6 +709,73 @@ class RecorderApp(App[None]):
         self.query_one(CardShelf).set_entries(self._action_entries())
         self._update_side(focused)
         self._update_prompt()
+
+    def _observe_public_cards(self) -> None:
+        """Remember cards revealed on the board without reading hidden opponent zones."""
+        assert self.session is not None
+        state = self.session.state
+        for stack in state.board.values():
+            for unit in stack:
+                if unit.iid in self._seen_board_iids:
+                    continue
+                self._seen_board_iids.add(unit.iid)
+                self.revealed_cards[unit.owner][unit.card_id] += 1
+
+        # The Remove Pile is public but stores card ids without owners. Card ids identify
+        # their premade deck exactly when the players brought different decks; in a mirror,
+        # attribution would leak/guess ownership, so leave those copies conservatively unseen.
+        if self.setup.human_deck == self.setup.opponent_deck:
+            return
+        deck_by_player = {
+            self.setup.human_seat: self.setup.human_deck,
+            next(
+                player
+                for player in state.game_map.players
+                if player != self.setup.human_seat
+            ): self.setup.opponent_deck,
+        }
+        removed = Counter(state.remove_pile)
+        for player, deck_slug in deck_by_player.items():
+            for card_id, count in removed.items():
+                if state.cards[card_id].deck == deck_slug:
+                    self.revealed_cards[player][card_id] = max(
+                        self.revealed_cards[player][card_id],
+                        count,
+                    )
+
+    def _update_deck_trackers(self) -> None:
+        assert self.session is not None
+        state = self.session.state
+        human = self.setup.human_seat
+        opponent = next(player for player in state.game_map.players if player != human)
+        self._observe_public_cards()
+
+        own_starting = Counter(state.starting_decks[human])
+        own_remaining = Counter(state.decks[human])
+        opponent_starting = Counter(state.starting_decks[opponent])
+        opponent_remaining = Counter({
+            card_id: max(
+                0,
+                total - self.revealed_cards[opponent].get(card_id, 0),
+            )
+            for card_id, total in opponent_starting.items()
+        })
+        self.query_one("#own-deck", DeckTracker).set_counts(
+            state,
+            title="YOUR DECK",
+            subtitle="grey = drawn",
+            starting=own_starting,
+            remaining=own_remaining,
+            title_style=SEAT_STYLE.get(human, "bold"),
+        )
+        self.query_one("#opponent-deck", DeckTracker).set_counts(
+            state,
+            title="OPPONENT UNSEEN",
+            subtitle="deck + hand · grey = revealed",
+            starting=opponent_starting,
+            remaining=opponent_remaining,
+            title_style=SEAT_STYLE.get(opponent, "bold"),
+        )
 
     def _update_prompt(self) -> None:
         assert self.session is not None
