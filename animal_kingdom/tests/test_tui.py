@@ -11,7 +11,14 @@ from animal_kingdom.engine.actions import DrawAction
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import Result, UnitInstance, new_game
 from animal_kingdom.recording.cohort import generate_manifest
-from animal_kingdom.tui.app import ActionCard, BoardWidget, CardShelf, RecorderApp, build_parser
+from animal_kingdom.tui.app import (
+    ActionCard,
+    BoardWidget,
+    CardShelf,
+    HelpScreen,
+    RecorderApp,
+    build_parser,
+)
 
 
 def _human_first_seed() -> int:
@@ -272,6 +279,30 @@ def test_completed_game_shows_clickable_recording_path(tmp_path, monkeypatch):
             await pilot.press("o")
             await pilot.pause()
             assert opened == [path.as_uri(), path.as_uri()]
+
+    asyncio.run(scenario())
+
+
+def test_help_overlay_keeps_recorder_controls_out_of_footer(tmp_path):
+    async def scenario():
+        app = RecorderApp(manifest=_manifest(), output_root=Path(tmp_path))
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause()
+            assert not app.active_bindings["m"].binding.show
+            assert not app.active_bindings["g"].binding.show
+            assert app.active_bindings["question_mark"].binding.show
+
+            await pilot.press("question_mark")
+            await pilot.pause()
+            assert isinstance(app.screen, HelpScreen)
+            help_text = str(app.screen.query_one("#help", Static).content)
+            assert "HOW TO PLAY" in help_text
+            assert "Exclude / restore the latest human decision" in help_text
+            assert "Every action is saved to JSONL" in help_text
+
+            await pilot.press("escape")
+            await pilot.pause()
+            assert not isinstance(app.screen, HelpScreen)
 
     asyncio.run(scenario())
 

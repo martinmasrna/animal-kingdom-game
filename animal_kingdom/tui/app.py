@@ -17,7 +17,7 @@ from textual.containers import Horizontal, Vertical
 from textual.events import Click, Key, Leave, MouseMove, Resize
 from textual.message import Message
 from textual.reactive import reactive
-from textual.screen import Screen
+from textual.screen import ModalScreen, Screen
 from textual.widgets import Button, Footer, Input, Label, Select, Static
 
 from ..decks import PREMADE_DECKS
@@ -328,6 +328,49 @@ class SetupScreen(Screen[GameSetup]):
         self.dismiss(setup)
 
 
+class HelpScreen(ModalScreen[None]):
+    """Compact command reference; recorder-only controls stay out of the main footer."""
+
+    CSS = """
+    HelpScreen { align: center middle; }
+    #help {
+        width: 62;
+        height: auto;
+        max-height: 90%;
+        padding: 1 2;
+        border: round $primary;
+        background: $panel;
+    }
+    """
+    BINDINGS = [
+        Binding("escape", "dismiss", "Close"),
+        Binding("question_mark", "dismiss", "Close", show=False),
+    ]
+
+    def compose(self) -> ComposeResult:
+        yield Static(
+            "\n".join([
+                "[bold]HOW TO PLAY[/bold]",
+                "[bold]D[/bold]        Draw",
+                "[bold]1–9[/bold]      Select a card",
+                "[bold]Arrows[/bold]   Move between legal targets",
+                "[bold]Enter[/bold]    Confirm target / continue after a game",
+                "[bold]Esc[/bold]      Cancel card selection",
+                "",
+                "[bold]GAME & RECORDING[/bold]",
+                "[bold]O[/bold]        Open the completed game's JSONL log",
+                "[bold]M[/bold]        Exclude / restore the latest human decision",
+                "[bold]G[/bold]        Exclude / restore the entire game",
+                "[bold]Q[/bold]        Quit safely",
+                "",
+                "[dim]Every action is saved to JSONL as it happens.[/dim]",
+                "[dim]Press ? or Esc to close.[/dim]",
+            ]),
+            id="help",
+            markup=True,
+        )
+
+
 class RecorderApp(App[None]):
     """One-screen recorder with direct board actions and durable transition logging."""
 
@@ -389,9 +432,10 @@ class RecorderApp(App[None]):
         ("right", "next_target", "Next target"),
         ("down", "next_target", "Next target"),
         ("enter", "confirm_target", "Confirm/next"),
-        ("m", "mark_decision", "Mark decision"),
-        ("g", "mark_game", "Mark game"),
+        Binding("m", "mark_decision", "Mark decision", show=False),
+        Binding("g", "mark_game", "Mark game", show=False),
         Binding("o", "open_recording", "Open game log", show=False),
+        Binding("question_mark", "show_help", "Help"),
     ]
 
     def __init__(
@@ -915,6 +959,9 @@ class RecorderApp(App[None]):
         if self.session is None or self.session.result is None:
             return
         self.open_url(self.session.path.resolve().as_uri())
+
+    def action_show_help(self) -> None:
+        self.push_screen(HelpScreen())
 
     def maybe_start_bot(self) -> None:
         if (
