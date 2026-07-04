@@ -156,6 +156,7 @@ def score(
     bot_kinds: Sequence[str],
     *,
     decks: Sequence[str] | None = None,
+    pending_weight: float = 0.0,
 ) -> dict:
     """Replay human decisions; return per-deck top-1 agreement per bot + bot-vs-bot baseline.
 
@@ -164,7 +165,7 @@ def score(
     legal action (a reconstruction-fidelity canary).
     """
     deck_filter = set(decks) if decks else None
-    weights = GreedyWeights()
+    weights = dataclasses.replace(GreedyWeights(), pending_payoff=pending_weight)
     # per (deck, bot) -> Tally, and place-only variant
     agree: dict = defaultdict(_Tally)
     agree_place: dict = defaultdict(_Tally)
@@ -295,6 +296,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--decks", default=None,
                         help="Comma-separated human decks to scope to (default: all).")
     parser.add_argument("--out", type=Path, default=Path("results/human_games/scores/agreement.csv"))
+    parser.add_argument("--pending", type=float, default=0.0,
+                        help="Override GreedyWeights.pending_payoff for the value-rank probe.")
     args = parser.parse_args(argv)
 
     paths = sorted(glob.glob(args.games))
@@ -306,7 +309,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         parser.error(f"unknown bot kind(s) {unknown}; expected from {BOT_KINDS}")
     decks = [d.strip() for d in args.decks.split(",")] if args.decks else None
 
-    result = score(paths, bot_kinds, decks=decks)
+    result = score(paths, bot_kinds, decks=decks, pending_weight=args.pending)
     _print_report(result)
     _write_csv(result, args.out)
     print(f"\nwrote {args.out}")

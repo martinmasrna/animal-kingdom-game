@@ -70,6 +70,13 @@ class GreedyWeights:
                                       # the actual flexibility/tempo/denial resource.
     effect_readiness: float = 16.0   # per distinct Battlecry in hand that can currently
                                       # produce an observable effect on at least one legal play
+    pending_payoff: float = 0.0      # per delayed effect I own on state.scheduled (Egg hatch,
+                                      # Bear, ...), imminence-discounted. board_presence can't
+                                      # see these - the placed card is weak *now* and only pays
+                                      # off when it fires later, the "weak now, strong later"
+                                      # the 1-ply eval is otherwise blind to. Card-agnostic
+                                      # (reads scheduled, names no card). Default OFF; enabling
+                                      # it changes greedy everywhere, so tune before shipping.
     coverage_exposure: float = 0.0   # belief term (default OFF): expected own-HQ danger one
                                       # ply ahead, = P(opponent's hidden hand can cover a
                                       # currently-safe HQ-front defender next turn). Exact
@@ -286,6 +293,18 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     # Battlecry would do anything. It values setup states (duplicates, tag thresholds,
     # adjacent targets, eligible follow-up cards) without naming a deck or card.
     score += w.effect_readiness * _enabled_battlecry_count(state, me)
+
+    # --- Pending delayed payoffs: net scheduled future effects, imminence-discounted ---
+    # A just-placed Egg/Bear contributes ~nothing to board_presence (it's weak now) yet is a
+    # real investment that pays off when it fires. Reading state.scheduled credits that future
+    # value generically - any delayed effect counts, no card is named. Sooner-firing effects
+    # are worth more (less time for the board to change under them).
+    if w.pending_payoff:
+        pending = 0.0
+        for s in state.scheduled:
+            disc = 1.0 / (1.0 + max(0, s["due"] - state.turn_counter))
+            pending += disc if s["owner"] == me else -disc
+        score += w.pending_payoff * pending
 
     return score
 
