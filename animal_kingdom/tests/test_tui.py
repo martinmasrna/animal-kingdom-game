@@ -7,6 +7,7 @@ from rich.text import Text
 from textual.widgets import Static
 
 from animal_kingdom.decks import load_premade_deck
+from animal_kingdom.engine.actions import DrawAction
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import Result, UnitInstance, new_game
 from animal_kingdom.recording.cohort import generate_manifest
@@ -59,7 +60,15 @@ def test_tui_80x24_keyboard_draw_and_annotations(tmp_path):
                 if isinstance(widget.entry.payload, tuple)
             ]
             assert hand_cards
+            shelf = app.query_one(CardShelf)
+            assert not shelf.has_class("fits")
             assert all(widget.entry.effect and widget.entry.stats.startswith("STR ") for widget in hand_cards)
+            draw = next(
+                widget for widget in app.query(ActionCard)
+                if isinstance(widget.entry.payload, DrawAction)
+            )
+            assert "D DRAW" in str(draw.content)
+            assert "Draw 1 card" in str(draw.content)
             prompt = str(app.query_one("#notice", Static).content)
             assert "Choose a card from your hand or draw" in prompt
             assert "STR" in app.export_screenshot()
@@ -67,6 +76,8 @@ def test_tui_80x24_keyboard_draw_and_annotations(tmp_path):
             await pilot.press("1")
             await pilot.pause()
             assert app.selected_card is not None
+            selected = next(widget for widget in app.query(ActionCard) if widget.entry.selected)
+            assert "▶ " in str(selected.content)
             assert "Choose a highlighted location" in str(
                 app.query_one("#notice", Static).content
             )
@@ -76,6 +87,15 @@ def test_tui_80x24_keyboard_draw_and_annotations(tmp_path):
             assert "Choose a card from your hand or draw" in str(
                 app.query_one("#notice", Static).content
             )
+            disabled = next(
+                widget for widget in app.query(ActionCard)
+                if not widget.entry.enabled
+            )
+            assert "× " in str(disabled.content)
+            shortcut = disabled.entry.label.split(maxsplit=1)[0]
+            await pilot.press(shortcut)
+            await pilot.pause()
+            assert app.selected_card is None
 
             await pilot.press("d")
             await pilot.pause()
@@ -147,9 +167,15 @@ def test_tui_wide_layout_centers_board_and_labels_players(tmp_path):
             assert "Turn 1" in status
             assert "OPPONENT · Seat B" in str(app.query_one("#opponent", Static).content)
             player = str(app.query_one("#player", Static).content)
-            assert "YOU · Seat A" in player
+            assert "YOUR HAND · Seat A" in player
             assert "Food 0" in player
             assert "Actions 2" in player
+            shelf = app.query_one(CardShelf)
+            assert shelf.has_class("fits")
+            cards = list(app.query(ActionCard))
+            left = cards[0].region.x - shelf.region.x
+            right = shelf.region.right - cards[-1].region.right
+            assert left > 0 and abs(left - right) <= 1
             inspector = Text.from_markup(
                 str(app.query_one("#side", Static).content)
             ).plain

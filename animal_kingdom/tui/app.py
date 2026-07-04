@@ -168,9 +168,10 @@ class ActionCard(Static):
     """One fully clickable compact card with the information needed to decide."""
 
     can_focus = True
+
     def __init__(self, entry: ActionEntry, index: int):
         is_draw = isinstance(entry.payload, DrawAction)
-        inner = 8 if is_draw else 20
+        inner = 12 if is_draw else 20
         super().__init__(self._markup(entry, inner), id=f"action-{index}", markup=True)
         self.entry = entry
         self.set_class(is_draw, "draw")
@@ -190,7 +191,9 @@ class ActionCard(Static):
         stats = entry.stats
         if len(stats) > inner:
             stats = stats[: inner - 1] + "…"
-        name = entry.label if len(entry.label) <= inner else entry.label[: inner - 1] + "…"
+        marker = "▶ " if entry.selected else "× " if not entry.enabled else ""
+        full_name = marker + entry.label
+        name = full_name if len(full_name) <= inner else full_name[: inner - 1] + "…"
         border_style = (
             "bold yellow" if entry.selected
             else "blue" if entry.enabled
@@ -224,6 +227,10 @@ class ActionCard(Static):
 class CardShelf(Horizontal):
     """A persistent horizontally scrollable shelf of information-rich cards."""
 
+    CARD_WIDTH = 22
+    DRAW_WIDTH = 14
+    CARD_MARGIN = 1
+
     entries: reactive[tuple[ActionEntry, ...]] = reactive(tuple, recompose=True)
 
     class EntryClicked(Message):
@@ -240,6 +247,22 @@ class CardShelf(Horizontal):
 
     def set_entries(self, entries: Sequence[ActionEntry]) -> None:
         self.entries = tuple(entries)
+        self._update_fit_class()
+
+    def on_resize(self, _event: Resize) -> None:
+        self._update_fit_class()
+
+    def _update_fit_class(self) -> None:
+        content_width = sum(
+            (
+                self.DRAW_WIDTH
+                if isinstance(entry.payload, DrawAction)
+                else self.CARD_WIDTH
+            )
+            + self.CARD_MARGIN
+            for entry in self.entries
+        )
+        self.set_class(bool(self.entries) and content_width <= self.size.width, "fits")
 
 
 class SetupScreen(Screen[GameSetup]):
@@ -346,8 +369,9 @@ class RecorderApp(App[None]):
         overflow-y: hidden;
         scrollbar-size-horizontal: 0;
     }
+    #actions.fits { align-horizontal: center; }
     ActionCard { width: 22; height: 7; margin-right: 1; }
-    ActionCard.draw { width: 10; }
+    ActionCard.draw { width: 14; }
     ActionCard:focus { background: $boost; }
     Footer { height: 1; }
     .narrow #side { display: none; }
@@ -528,9 +552,9 @@ class RecorderApp(App[None]):
             else ""
         )
         self.query_one("#player", Static).update(
-            f"[{human_style}]YOU · Seat {human}[/{human_style}]"
+            f"[{human_style}]YOUR HAND · Seat {human}[/{human_style}]"
             f"   Food {state.food[human]}"
-            f"  ·  Hand {len(state.hands[human])}"
+            f"  ·  Cards {len(state.hands[human])}"
             f"  ·  Deck {len(state.decks[human])}"
             f"{action_text}"
         )
@@ -655,7 +679,12 @@ class RecorderApp(App[None]):
 
         draw = next((action for action in legal if isinstance(action, DrawAction)), None)
         if draw is not None:
-            entries.append(ActionEntry("D Draw", draw, effect="Draw cards"))
+            draw_count = state.config.draw_action_count
+            entries.append(ActionEntry(
+                "D DRAW",
+                draw,
+                effect=f"Draw {draw_count} card{'s' if draw_count != 1 else ''}",
+            ))
         playable = {action.card_id for action in legal if isinstance(action, PlaceAction)}
         seen: set[str] = set()
         card_number = 0
@@ -679,7 +708,7 @@ class RecorderApp(App[None]):
                 effect=card.text,
                 stats=f"STR {strength}   {tags}",
             ))
-            self.entry_shortcuts.append(payload)
+            self.entry_shortcuts.append(payload if unit.card_id in playable else None)
         return entries
 
     def _update_side(self, focused: tuple[str, str] | None = None) -> None:
