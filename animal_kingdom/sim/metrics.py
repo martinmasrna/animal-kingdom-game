@@ -20,9 +20,11 @@ from .runner import GameRecord
 
 # Honest health warning carried into every results bundle (handoff §10).
 GREEDY_CAVEAT = (
-    "Balance conclusions are only as good as the bots. A 1-ply greedy bot underplays Combo "
-    "(multi-turn payoffs) and sequencing chains (e.g. Wild Dogs / Domestic Cat). Treat these "
-    "numbers as bot-limited; do not read them as final balance truth."
+    "Balance conclusions are only as good as the bots. GreedyBot now credits scheduled/delayed "
+    "single-card payoffs (Egg hatch, Bear removal) via pending_payoff, but a 1-ply eval still "
+    "underplays multi-card combos and in-turn sequencing chains (e.g. Wild Dogs / Domestic "
+    "Cat) that need turn search. Treat these numbers as bot-limited; confirm suspect verdicts "
+    "with the turn/referee pilots."
 )
 
 DRAWN_CAVEAT = (

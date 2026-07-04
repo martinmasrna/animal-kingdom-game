@@ -70,13 +70,14 @@ class GreedyWeights:
                                       # the actual flexibility/tempo/denial resource.
     effect_readiness: float = 16.0   # per distinct Battlecry in hand that can currently
                                       # produce an observable effect on at least one legal play
-    pending_payoff: float = 0.0      # per delayed effect I own on state.scheduled (Egg hatch,
+    pending_payoff: float = 20.0     # per delayed effect I own on state.scheduled (Egg hatch,
                                       # Bear, ...), imminence-discounted. board_presence can't
                                       # see these - the placed card is weak *now* and only pays
                                       # off when it fires later, the "weak now, strong later"
                                       # the 1-ply eval is otherwise blind to. Card-agnostic
-                                      # (reads scheduled, names no card). Default OFF; enabling
-                                      # it changes greedy everywhere, so tune before shipping.
+                                      # (reads scheduled, names no card). Validated 2026-07-04:
+                                      # paired benchmark egg +5.3 / ramp +10.4, all decks
+                                      # improve-or-tie (see docs/bots + human_scorer value-rank).
     coverage_exposure: float = 0.0   # belief term (default OFF): expected own-HQ danger one
                                       # ply ahead, = P(opponent's hidden hand can cover a
                                       # currently-safe HQ-front defender next turn). Exact

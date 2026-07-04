@@ -7,12 +7,9 @@ Reuses the constructed-state helpers from test_greedy_bot.py rather than reinven
 
 from __future__ import annotations
 
-import pytest
-
 from animal_kingdom.bots.greedy_bot import GreedyBot, GreedyWeights, evaluate
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import PlaceAction
-from animal_kingdom.sim.metrics import GREEDY_CAVEAT
 
 from .test_greedy_bot import make_state, put
 
@@ -62,16 +59,10 @@ def test_prefers_region_richer_hq_front_tile():
     assert chosen == richer
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "Known limitation tracked by metrics.GREEDY_CAVEAT: a 1-ply greedy bot can't see past "
-    "the current action, so it scores a delayed payoff (Grizzly Bear's 'in 2 turns, remove "
-    "a random adjacent enemy') exactly the same as a same-strength vanilla body with no "
-    "payoff at all. Once the bot's evaluation accounts for scheduled/delayed effects, this "
-    "assertion should start passing - which is the signal to update GREEDY_CAVEAT."
-))
 def test_recognizes_grizzly_bear_delayed_removal_as_better_than_a_vanilla_twin():
-    assert GREEDY_CAVEAT  # the caveat this puzzle exists to eventually retire
-
+    # Retired xfail (2026-07-04): GreedyWeights.pending_payoff now credits owned scheduled
+    # effects, so a Grizzly Bear's delayed removal outscores a same-strength vanilla body.
+    # This was the tripwire for the scheduled/delayed-effect blind spot; the fix trips it.
     s = make_state(hands={"A": ["grizzly_bear", "lion"]})   # both base_strength 7
     put(s, "2,2", "mouse", "B")                              # a free future target
 

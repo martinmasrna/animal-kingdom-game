@@ -267,26 +267,24 @@ def test_lookahead_is_deterministic():
     assert a1 == a2
 
 
-def test_lookahead_finds_the_grizzly_bear_delayed_removal_that_1_ply_misses():
-    # A strength-7 blocker (same as Grizzly Bear's own strength, stronger than my only other
-    # cards in hand) can't be covered directly by anything I hold - the only way to clear it
-    # is Grizzly Bear's "in 2 turns, remove a random adjacent enemy" battlecry. 1-ply (and
-    # even 2-ply, since the delay hasn't elapsed yet) can't see that payoff at all and treats
-    # Grizzly Bear as a plain vanilla body; deep enough own-line lookahead plays the position
-    # forward far enough for the removal to actually happen on the board, so it shows up.
-    # `depth` counts own placements, so the depth needed to span the 2-turn delay is defined
-    # against one placement per turn: pin this opt-in-lookahead calibration to that ruleset.
+def test_pending_payoff_surfaces_grizzly_delayed_removal_at_1_ply():
+    # A strength-7 blocker (as strong as Grizzly Bear, stronger than my other cards) can't be
+    # covered directly by anything I hold - the only way to clear it is Grizzly Bear's "in 2
+    # turns, remove a random adjacent enemy" battlecry. The blind eval (pending_payoff=0)
+    # treats Grizzly as a plain vanilla body and needed deep own-line lookahead to play the
+    # position forward until the removal fired; pending_payoff now credits the scheduled
+    # removal directly, so the default 1-ply GreedyBot finds it without any lookahead. (That
+    # subsumes the old lookahead-only demonstration of this exact line.)
     one_action = Config.default().sweep(actions_per_turn=1, draw_action_count=2)
     s = make_state(hands={"A": ["grizzly_bear", "lion", "mouse", "mouse"], "B": ["mouse"]},
                    decks={"A": ["mouse"] * 5, "B": ["mouse"] * 5}, config=one_action)
     put(s, "2,2", "lion", "B")
     legal = rules.legal_actions(s)
+    grizzly = PlaceAction("grizzly_bear", ("cr", "1,2"))
 
-    shallow = GreedyBot(depth=2, seed=0).choose(s.view_for("A"), legal, s)
-    deep = GreedyBot(depth=3, seed=0).choose(s.view_for("A"), legal, s)
-
-    assert shallow != PlaceAction("grizzly_bear", ("cr", "1,2"))
-    assert deep == PlaceAction("grizzly_bear", ("cr", "1,2"))
+    blind = GreedyBot(seed=0, weights=GreedyWeights(pending_payoff=0.0))
+    assert blind.choose(s.view_for("A"), legal, s) != grizzly   # 1-ply blind eval misses it
+    assert GreedyBot(seed=0).choose(s.view_for("A"), legal, s) == grizzly  # the fix finds it
 
 
 # --------------------------------------------------------- wasted-battlecry detection
