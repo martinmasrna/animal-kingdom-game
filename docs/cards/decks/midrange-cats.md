@@ -2,14 +2,17 @@
 
 Mono-Cat tribal. 4-4-6 shape (4 legendary ×1, 4 rare ×2, 6 common ×3 = 30).
 Source: user's offline Google Sheet (uploaded 2026-06-28).
+**card-balance-todo applied 2026-07-04:** Prince Leo/Princess Lea 4→3, Queen Adira 6→5 (cats was
+the clear balance outlier at ~69-72% corrected winrate; trims only, no effect changes). See
+`../../balance/card-balance-todo.md`.
 
 ## Legendary (×1)
 | Name | Tag | Str | Effect | Description |
 |---|---|---:|---|---|
-| **Prince Leo** | Cat | 4 | Battlecry: you may immediately play Princess Lea from your hand or deck. | Lion prince. Young, strong, quick, and always by his twin sister's side. |
-| **Princess Lea** | Cat | 4 | Battlecry: you may immediately play Prince Leo from your hand or deck. | Lion princess. Young, strong, quick, and always by her twin brother's side. |
+| **Prince Leo** | Cat | 3 | Battlecry: you may immediately play Princess Lea from your hand or deck. | Lion prince. Young, strong, quick, and always by his twin sister's side. |
+| **Princess Lea** | Cat | 3 | Battlecry: you may immediately play Prince Leo from your hand or deck. | Lion princess. Young, strong, quick, and always by her twin brother's side. |
 | **King Theron** | Cat | 8 | When one of your Cats covers an enemy unit, remove that enemy. | Lion king. |
-| **Queen Adira** | Cat | 6 | When one of your Cats removes an enemy unit, draw 1 card. | Lion queen. |
+| **Queen Adira** | Cat | 5 | When one of your Cats removes an enemy unit, draw 1 card. | Lion queen. |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |

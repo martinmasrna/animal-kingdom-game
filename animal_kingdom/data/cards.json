@@ -8,7 +8,7 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Cat"],
-      "base_strength": 4,
+      "base_strength": 3,
       "keywords": [],
       "text": "Battlecry: you may immediately play Princess Lea from your hand or deck."
     },
@@ -19,7 +19,7 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Cat"],
-      "base_strength": 4,
+      "base_strength": 3,
       "keywords": [],
       "text": "Battlecry: you may immediately play Prince Leo from your hand or deck."
     },
@@ -41,7 +41,7 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Cat"],
-      "base_strength": 6,
+      "base_strength": 5,
       "keywords": [],
       "text": "When one of your Cats removes an enemy unit, draw 1 card."
     },
@@ -171,7 +171,7 @@
       "id": "goliath",
       "name": "Goliath",
       "deck": "egg_control",
-      "rarity": "legendary",
+      "rarity": "rare",
       "type": "unit",
       "tags": ["Snake"],
       "base_strength": "dynamic",
@@ -227,23 +227,23 @@
       "id": "black_swan",
       "name": "Black Swan",
       "deck": "egg_control",
-      "rarity": "rare",
+      "rarity": "legendary",
       "type": "unit",
       "tags": ["Bird"],
       "base_strength": 3,
       "keywords": [],
-      "text": "When you draw this, your opponent removes a random card from their hand."
+      "text": "The first time each turn you draw Black Swan, your opponent removes a random card from their hand."
     },
     {
-      "id": "vulture",
-      "name": "Vulture",
+      "id": "stoop",
+      "name": "Peregrine Falcon",
       "deck": "egg_control",
       "rarity": "rare",
       "type": "unit",
       "tags": ["Bird"],
       "base_strength": 4,
       "keywords": ["Flight"],
-      "text": "Flight. Whenever a card is removed, gain 5 food."
+      "text": "Flight. Battlecry: remove an adjacent enemy of strength 4 or less."
     },
     {
       "id": "eagle",
@@ -688,7 +688,7 @@
       "rarity": "rare",
       "type": "unit",
       "tags": ["Rodent"],
-      "base_strength": 5,
+      "base_strength": 7,
       "keywords": [],
       "text": "Cannot be covered by enemy units."
     },
@@ -701,7 +701,7 @@
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Battlecry: draw 1 card. Deathrattle: return this to your hand."
+      "text": "Battlecry: gain 5 food and draw 1 card. Deathrattle: return this to your hand."
     },
     {
       "id": "giant_tortoise",
@@ -710,7 +710,7 @@
       "rarity": "rare",
       "type": "unit",
       "tags": [],
-      "base_strength": 5,
+      "base_strength": 7,
       "keywords": ["Immovable"],
       "text": "Immovable."
     },
@@ -745,7 +745,7 @@
       "tags": ["Fish"],
       "base_strength": 2,
       "keywords": [],
-      "text": "When an enemy unit is placed on top of this, remove that enemy unit and this unit."
+      "text": "When an enemy unit is placed on top of this, remove that enemy unit and this unit. Draw 1 card."
     },
     {
       "id": "black_widow",
@@ -778,7 +778,7 @@
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "When this is removed, gain 40 food."
+      "text": "When this is removed, gain 30 food."
     },
 
     {
@@ -815,15 +815,15 @@
       "text": "Battlecry: return all enemy units adjacent to this to their owner's hand."
     },
     {
-      "id": "stoop",
-      "name": "Stoop",
+      "id": "gale",
+      "name": "Gale",
       "deck": "aggro_hq_rush",
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Bird"],
-      "base_strength": 6,
+      "base_strength": 4,
       "keywords": ["Flight"],
-      "text": "Flight. Battlecry: remove an adjacent enemy of strength 6 or less."
+      "text": "Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand."
     },
     {
       "id": "jerboa",
@@ -844,8 +844,8 @@
       "type": "unit",
       "tags": [],
       "base_strength": 2,
-      "keywords": [],
-      "text": "Battlecry: you may remove this to destroy an adjacent enemy unit (any strength)."
+      "keywords": ["Flight"],
+      "text": "Flight. Battlecry: you may remove another Hornet from your hand or deck. If you do, destroy an adjacent enemy unit."
     },
     {
       "id": "chameleon",
@@ -866,7 +866,7 @@
       "rarity": "rare",
       "type": "unit",
       "tags": [],
-      "base_strength": 2,
+      "base_strength": 4,
       "keywords": [],
       "text": "Return an adjacent enemy to your opponent's hand. They can't play it next turn."
     },

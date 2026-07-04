@@ -3,6 +3,9 @@
 Cheap chained bodies + reach/flyers to threaten and capture the enemy HQ; removal to punch
 through defenders. 4-4-6 shape (4 legendary ×1, 4 rare ×2, 6 common ×3 = 30).
 Source: user's offline Google Sheet (uploaded 2026-06-28). **Complete (2026-06-28).**
+**card-balance-todo applied 2026-07-04:** Stoop moved to Egg Control (rare, see `egg-control.md`);
+Gale is its legendary replacement. Hornet redesigned (spare-copy sac, gained Flight). Skunk 2→4
+str. See `../../balance/card-balance-todo.md`.
 
 ## Legendary (×1) — names **PROVISIONAL** (assigned 2026-06-30; final flavor pass pending — alternates in `flavor-review.md` §3)
 | Name | Tag | Str | Effect |
@@ -10,15 +13,15 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Complete (2026-06-2
 | **Verminus, the Rat King** | Rodent | 3 | Has +1 strength for each other unit you control. *(swarm → wall-breaker finisher; art: a writhing mass of rats)* |
 | **Pestis** | Rodent | 3 | Battlecry: remove everything from an adjacent crossroad. *(art: a plague rat; whole-tile wipe)* |
 | **Sirocco** | — | 5 | Battlecry: return all enemy units adjacent to this to their owner's hand. *(mass-bounce disruptor — opens the HQ front; art: a great musk-beast / legendary skunk)* |
-| **Stoop** | Bird | 6 | Flight. Battlecry: remove an adjacent enemy of strength 6 or less. *(reach beachhead + capped snipe; art: a legendary bird of prey)* |
+| **Gale** | Bird | 4 | Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand. *(card-balance-todo, 2026-07-04: replaces Stoop, which moved to Egg Control as a rare; name provisional)* |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
 | **Jerboa** | Rodent | 2 | Battlecry: play another unit. |
-| **[a hornet]** | — | 2 | Battlecry: you may remove this to destroy an adjacent enemy unit (any strength). *(expendable wall-clearer)* |
+| **Hornet** | — | 2 | Flight. Battlecry: you may remove another Hornet from your hand or deck. If you do, destroy an adjacent enemy unit. *(card-balance-todo, 2026-07-04: was a self-sac; now saccs a spare copy so Hornet survives, and gained Flight)* |
 | **Chameleon** | Lizard | ±∞ | May be placed on any unit, and any unit may be placed on top of it. |
-| **Skunk** | — | 2 | Return an adjacent enemy to your opponent's hand. They can't play it next turn. |
+| **Skunk** | — | 4 | Return an adjacent enemy to your opponent's hand. They can't play it next turn. *(card-balance-todo, 2026-07-04: strength 2→4)* |
 
 ## Common (×3)
 | Name | Tag | Str | Effect |

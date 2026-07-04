@@ -33,6 +33,10 @@ class Config:
     methuselah_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
                                           # recurring passive in the pool - ruled down 2026-07-02)
     greywhisker_food: int = 1            # Battlecry: gain 1 food (+ draw 1, + play 1 more)
+    opossum_food: int = 5                # food_otk OTK-lean pass 2026-07-04: Battlecry now also
+                                          # gains food (was draw-1 only) - recyclable via its own
+                                          # Deathrattle-return, so this compounds through Carmilla/
+                                          # Black Widow sac loops into what Scrooge later doubles
     queen_marabunta_per_colony: int = 4  # per other friendly Colony unit
     queen_honoria_per_play: int = 5      # per Colony unit you play
     falstaff_food_rider: int = 3         # extra food whenever you gain food
@@ -44,8 +48,11 @@ class Config:
     jackal_food: int = 3                 # per adjacent removal
 
     # --- Deathrattle / payoff food ---
-    gazelle_food: int = 40               # Deathrattle: gain food (decision H: doubled 2026-07-02,
-                                          # same food_otk-buff reasoning as the rodent one-offs)
+    gazelle_food: int = 30               # Deathrattle: gain food. Was 40 (doubled 2026-07-02);
+                                          # trimmed 2026-07-04 as part of the OTK-lean pass - the
+                                          # single-hit swing overshadowed Impala's draw-2 payoff,
+                                          # and the budget moved into Opossum/Tortoise/Porcupine/
+                                          # Pufferfish so the deck survives to cash in Scrooge at all
     fig_tree_food: int = 20              # Landmark: gain food next turn
 
     # --- Strength anthems ("has +X", live; decision E) ---
@@ -72,7 +79,8 @@ class Config:
     # --- Removal-strength caps on Battlecry removals ---
     jaguar_max: int = 5
     serval_min: int = 6                  # removes an enemy of strength >= this
-    stoop_max: int = 6
+    stoop_max: int = 4                   # card-balance-todo: Stoop moved to egg_control as a rare,
+                                          # 6→4 (id kept as "stoop"; printed name "Peregrine Falcon")
     rhinoceros_max: int = 5
     hippopotamus_max: int = 3
 
