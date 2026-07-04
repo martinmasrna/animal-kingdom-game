@@ -7,7 +7,7 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Code: `animal_
   - [x] Composition: centre the board, preserve mouse hitboxes, add player/turn bands, and keep
     the 80×24 compact layout working.
   - [x] Make the current decision unmistakable with a contextual action prompt.
-  - [ ] Turn the right rail into a contextual inspector (selection/hover, stack, recent actions).
+  - [x] Turn the right rail into a contextual inspector (selection/hover, stack, recent actions).
   - [ ] Refine the hand shelf and reduce specialist recorder noise in the footer.
 - [ ] **Decide whether the recorder becomes the general game TUI.** It already has mouse board
   targeting, keyboard navigation, persistent panes, background bots, scheduled cohorts, and

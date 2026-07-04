@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 
+from rich.text import Text
 from textual.widgets import Static
 
 from animal_kingdom.decks import load_premade_deck
@@ -106,6 +107,13 @@ def test_tui_click_card_then_board_target(tmp_path):
             prompt = str(app.query_one("#notice", Static).content)
             assert selected_name in prompt
             assert "Choose a highlighted location" in prompt
+            inspector = Text.from_markup(
+                str(app.query_one("#side", Static).content)
+            ).plain
+            assert "SELECTED CARD" in inspector
+            assert selected_name in inspector
+            assert "LOCATION" in inspector
+            assert "LEGAL TARGET" in inspector
 
             target = next(iter(app.target_map))
             hitbox = app.query_one(BoardWidget).board_render.hitboxes[target]
@@ -142,6 +150,12 @@ def test_tui_wide_layout_centers_board_and_labels_players(tmp_path):
             assert "YOU · Seat A" in player
             assert "Food 0" in player
             assert "Actions 2" in player
+            inspector = Text.from_markup(
+                str(app.query_one("#side", Static).content)
+            ).plain
+            assert "INSPECTOR" in inspector
+            assert "Savanna Expanse" in inspector
+            assert "No actions yet." in inspector
 
             app.bot_busy = True
             app.refresh_game()
@@ -221,7 +235,7 @@ def test_tui_runs_bot_first_without_blocking_input_loop(tmp_path):
     asyncio.run(scenario())
 
 
-def test_hovering_crossroad_shows_complete_stack_tooltip(tmp_path):
+def test_hovering_crossroad_shows_complete_stack_details(tmp_path):
     async def scenario():
         app = RecorderApp(manifest=_manifest(), output_root=Path(tmp_path))
         async with app.run_test(size=(100, 30)) as pilot:
@@ -240,6 +254,19 @@ def test_hovering_crossroad_shows_complete_stack_tooltip(tmp_path):
             assert "A  Elephant" in tooltip
             assert "B  Fig Tree" in tooltip
             assert tooltip.index("Elephant") < tooltip.index("Fig Tree")
+
+            inspector = Text.from_markup(
+                str(app.query_one("#side", Static).content)
+            ).plain
+            assert "Crossroad 1,1" in inspector
+            assert "STACK · 2 cards · top first" in inspector
+            assert "A Elephant · STR" in inspector
+            assert "B Fig Tree · STR" in inspector
+            assert inspector.index("Fig Tree") < inspector.index("Elephant")
+
+            await pilot.hover("#actions")
+            await pilot.pause()
+            assert "INSPECTOR" in str(app.query_one("#side", Static).content)
 
     asyncio.run(scenario())
 

@@ -40,10 +40,22 @@ class BoardWidget(Static):
             super().__init__()
             self.target = target
 
+    class TargetHovered(Message):
+        def __init__(self, target: tuple[str, str] | None):
+            super().__init__()
+            self.target = target
+
     def __init__(self) -> None:
         super().__init__("", id="board", markup=True)
         self.board_render: Optional[BoardRender] = None
         self._state = None
+        self._hovered_target: tuple[str, str] | None = None
+
+    def _set_hovered_target(self, target: tuple[str, str] | None) -> None:
+        if target == self._hovered_target:
+            return
+        self._hovered_target = target
+        self.post_message(self.TargetHovered(target))
 
     def set_position(
         self,
@@ -96,6 +108,7 @@ class BoardWidget(Static):
     def on_mouse_move(self, event: MouseMove) -> None:
         if self.board_render is None or self._state is None:
             self.tooltip = None
+            self._set_hovered_target(None)
             return
         x, y = event.offset
         hovered = next(
@@ -106,6 +119,7 @@ class BoardWidget(Static):
             ),
             None,
         )
+        self._set_hovered_target(hovered)
         if hovered is None:
             self.tooltip = None
             return
@@ -127,6 +141,7 @@ class BoardWidget(Static):
 
     def on_leave(self, _event: Leave) -> None:
         self.tooltip = None
+        self._set_hovered_target(None)
 
     def on_click(self, event: Click) -> None:
         if self.board_render is None:
@@ -310,7 +325,13 @@ class RecorderApp(App[None]):
     #player { text-align: center; }
     #main { height: 1fr; min-height: 14; }
     #board { width: 1fr; height: 100%; overflow: hidden hidden; }
-    #side { width: 34; height: 100%; padding: 0 1; background: $panel; overflow: hidden hidden; }
+    #side {
+        width: 34;
+        height: 100%;
+        padding: 1 2;
+        background: $panel;
+        overflow: hidden hidden;
+    }
     #notice {
         height: 1;
         padding: 0 2;
@@ -369,6 +390,7 @@ class RecorderApp(App[None]):
         self.target_index = 0
         self.entry_shortcuts: list[Any] = []
         self.bot_busy = False
+        self.hovered_target: tuple[str, str] | None = None
 
     def compose(self) -> ComposeResult:
         yield Static("Starting…", id="status", markup=True)
@@ -449,6 +471,7 @@ class RecorderApp(App[None]):
         self.target_order.clear()
         self.target_index = 0
         self.bot_busy = False
+        self.hovered_target = None
         self.refresh_game()
         self.maybe_start_bot()
 
@@ -649,7 +672,7 @@ class RecorderApp(App[None]):
             self.entry_shortcuts.append(payload)
         return entries
 
-    def _update_side(self, focused: tuple[str, str] | None) -> None:
+    def _update_side(self, focused: tuple[str, str] | None = None) -> None:
         assert self.session is not None
         state = self.session.state
         lines: list[str] = []
@@ -659,24 +682,62 @@ class RecorderApp(App[None]):
                 if u.card_id == self.selected_card
             )
             card = state.cards[self.selected_card]
+            stats = f"STR {strength_mod.placement_strength(state, unit)}"
+            if card.food_cost:
+                stats += f" · Costs {card.food_cost} food"
+            if card.tags:
+                stats += f" · {escape(' / '.join(sorted(card.tags)))}"
             lines.extend([
-                f"[bold]{escape(card.name)}[/bold]",
-                f"STR {strength_mod.placement_strength(state, unit)} — {escape('/'.join(card.tags))}",
+                "[bold]SELECTED CARD[/bold]",
+                f"[bold]{escape(card.name)}[/bold] · "
+                f"{escape(card.rarity.title())} {escape(card.type.title())}",
+                stats,
                 escape(card.text),
             ])
-        elif focused:
-            stack = state.board.get(focused[1], []) if focused[0] == "cr" else []
-            lines.append(f"[bold]Target {focused[1]}[/bold]")
-            for unit in reversed(stack):
-                lines.append(
-                    f"{unit.owner} {escape(state.cards[unit.card_id].name)} "
-                    f"({strength_mod.effective_strength(state, unit)})"
-                )
-        elif state.pending:
-            lines.append("[bold]Resolve effect choice[/bold]")
-        lines.append("")
-        lines.append("[bold]Recent[/bold]")
-        lines.extend(escape(line) for line in self.session.recent[-6:])
+        inspected = self.hovered_target or focused
+        if inspected:
+            if lines:
+                lines.append("")
+            kind, value = inspected
+            is_legal = inspected in self.target_map
+            lines.append("[bold]LOCATION[/bold]")
+            if kind == "hq":
+                relationship = "Yours" if value == self.setup.human_seat else "Opponent"
+                lines.append(f"[bold]HQ {escape(value)}[/bold] · {relationship}")
+            else:
+                lines.append(f"[bold]Crossroad {escape(value)}[/bold]")
+            if is_legal:
+                lines.append("[bold green]LEGAL TARGET[/bold green]")
+
+            stack = state.board.get(value, []) if kind == "cr" else []
+            if kind == "cr" and not stack:
+                lines.append("Empty")
+            elif stack:
+                count = len(stack)
+                lines.append(f"STACK · {count} card{'s' if count != 1 else ''} · top first")
+                for unit in reversed(stack):
+                    card = state.cards[unit.card_id]
+                    owner_style = SEAT_STYLE.get(unit.owner, "bold")
+                    lines.append(
+                        f"[{owner_style}]{unit.owner}[/{owner_style}] "
+                        f"{escape(card.name)} · STR "
+                        f"{strength_mod.effective_strength(state, unit)}"
+                    )
+        elif not lines:
+            lines.extend([
+                "[bold]INSPECTOR[/bold]",
+                "Hover a board location for details.",
+                "Select a card to see its rules.",
+                "",
+                f"[bold]{escape(state.game_map.name)}[/bold]",
+                f"Food needed to win: {state.game_map.win_food}",
+            ])
+
+        lines.extend(["", "[bold]RECENT[/bold]"])
+        if self.session.recent:
+            lines.extend(f"• {escape(line)}" for line in self.session.recent[-5:])
+        else:
+            lines.append("[dim]No actions yet.[/dim]")
         self.query_one("#side", Static).update("\n".join(lines))
 
     def _submit(self, action: Action) -> None:
@@ -697,6 +758,14 @@ class RecorderApp(App[None]):
         action = self.target_map.get(event.target)
         if action is not None:
             self._submit(action)
+
+    @on(BoardWidget.TargetHovered)
+    def board_target_hovered(self, event: BoardWidget.TargetHovered) -> None:
+        self.hovered_target = event.target
+        if self.session is None:
+            return
+        focused = self.target_order[self.target_index] if self.target_order else None
+        self._update_side(focused)
 
     @on(CardShelf.EntryClicked)
     def action_entry_clicked(self, event: CardShelf.EntryClicked) -> None:
