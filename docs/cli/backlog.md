@@ -8,7 +8,7 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Code: `animal_
     the 80×24 compact layout working.
   - [x] Make the current decision unmistakable with a contextual action prompt.
   - [x] Turn the right rail into a contextual inspector (selection/hover, stack, recent actions).
-  - [x] Show the completed game's JSONL path as a terminal hyperlink.
+  - [x] Show the completed game's JSONL path as a clickable in-app file link.
   - [x] Refine the hand shelf with responsive centring and explicit action states.
   - [ ] Reduce specialist recorder noise in the footer.
 - [ ] **Decide whether the recorder becomes the general game TUI.** It already has mouse board

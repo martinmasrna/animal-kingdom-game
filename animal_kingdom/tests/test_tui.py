@@ -244,12 +244,34 @@ def test_completed_game_shows_clickable_recording_path(tmp_path, monkeypatch):
             app.refresh_game()
             await pilot.pause()
 
-            prompt = str(app.query_one("#notice", Static).content)
+            notice = app.query_one("#notice", Static)
+            prompt = str(notice.content)
             inspector = str(app.query_one("#side", Static).content)
-            assert f"[link='{path.as_uri()}']Open JSONL log[/link]" in prompt
+            assert "[@click=app.open_recording underline]Open JSONL log (O)[/]" in prompt
             assert "GAME RECORDED" in inspector
             assert str(path) in inspector
-            assert f"[link='{path.as_uri()}']" in inspector
+            assert "[@click=app.open_recording underline]" in inspector
+
+            opened: list[str] = []
+            monkeypatch.setattr(
+                app,
+                "open_url",
+                lambda url, **_kwargs: opened.append(url),
+            )
+            link_x = notice.content_region.x - notice.region.x
+            for segment in notice.render_line(0):
+                if segment.style and segment.style.meta.get("@click") == "app.open_recording":
+                    break
+                link_x += segment.cell_length
+            else:
+                raise AssertionError("completion prompt has no clickable log segment")
+            await pilot.click("#notice", offset=(link_x, 0))
+            await pilot.pause()
+            assert opened == [path.as_uri()]
+
+            await pilot.press("o")
+            await pilot.pause()
+            assert opened == [path.as_uri(), path.as_uri()]
 
     asyncio.run(scenario())
 

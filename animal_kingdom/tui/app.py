@@ -12,6 +12,7 @@ from typing import Any, Optional, Sequence
 from rich.markup import escape
 from textual import on, work
 from textual.app import App, ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.events import Click, Key, Leave, MouseMove, Resize
 from textual.message import Message
@@ -390,6 +391,7 @@ class RecorderApp(App[None]):
         ("enter", "confirm_target", "Confirm/next"),
         ("m", "mark_decision", "Mark decision"),
         ("g", "mark_game", "Mark game"),
+        Binding("o", "open_recording", "Open game log", show=False),
     ]
 
     def __init__(
@@ -583,7 +585,7 @@ class RecorderApp(App[None]):
             )
             prompt = (
                 "[bold green]Game recorded[/bold green] · "
-                f"{self._recording_link('Open JSONL log')} · "
+                f"{self._recording_link('Open JSONL log (O)')} · "
                 f"Press Enter to {next_game}"
             )
         elif self.bot_busy or not session.human_turn:
@@ -602,7 +604,7 @@ class RecorderApp(App[None]):
         assert self.session is not None
         path = self.session.path.resolve()
         link_label = label if label is not None else str(path)
-        return f"[link='{path.as_uri()}']{escape(link_label)}[/link]"
+        return f"[@click=app.open_recording underline]{escape(link_label)}[/]"
 
     def _build_action_state(self) -> None:
         self.target_map.clear()
@@ -908,6 +910,11 @@ class RecorderApp(App[None]):
         self.query_one("#notice", Static).update(
             "Game restored." if valid else "Game excluded; its scheduled entry will be replayed."
         )
+
+    def action_open_recording(self) -> None:
+        if self.session is None or self.session.result is None:
+            return
+        self.open_url(self.session.path.resolve().as_uri())
 
     def maybe_start_bot(self) -> None:
         if (
