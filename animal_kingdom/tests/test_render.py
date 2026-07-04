@@ -75,7 +75,7 @@ def test_render_highlights_and_result() -> None:
     assert "RESULT:" in _assert_valid_markup(final)
 
 
-def test_diagonal_projection_orients_each_player_bottom_left() -> None:
+def test_vertical_projection_orients_each_player_bottom_to_top() -> None:
     state = new_game(
         load_premade_deck("ramp"),
         load_premade_deck("egg_control"),
@@ -91,7 +91,7 @@ def test_diagonal_projection_orients_each_player_bottom_left() -> None:
         )
         own = board.hitboxes[("hq", player)]
         enemy = board.hitboxes[("hq", opponent)]
-        assert own.x < enemy.x
+        assert own.x == enemy.x
         assert own.y > enemy.y
         assert set(board.hitboxes) == {
             *(("cr", cr) for cr in state.game_map.crossroads),

@@ -687,6 +687,19 @@ class RecorderApp(App[None]):
         self.refresh_game()
         self.maybe_start_bot()
 
+    def _food_progress(self, state, player: str) -> str:
+        value = state.food[player]
+        target = state.game_map.win_food
+        width = 18 if self.size.width >= 130 else 10
+        filled = max(0, min(width, round(width * value / target)))
+        empty = width - filled
+        style = SEAT_STYLE.get(player, "bold")
+        bar = (
+            f"[{style}]{'█' * filled}[/{style}]"
+            f"[dim]{'░' * empty}[/dim]"
+        )
+        return f"Food {value}/{target} ▕{bar}▏"
+
     def refresh_game(self) -> None:
         session = self.session
         if session is None:
@@ -726,7 +739,7 @@ class RecorderApp(App[None]):
         human_style = SEAT_STYLE.get(human, "bold")
         self.query_one("#opponent", Static).update(
             f"[{opponent_style}]OPPONENT · Seat {opponent}[/{opponent_style}]"
-            f"   Food {state.food[opponent]}"
+            f"   {self._food_progress(state, opponent)}"
             f"  ·  Hand {len(state.hands[opponent])}"
             f"  ·  Deck {len(state.decks[opponent])}"
         )
@@ -741,7 +754,7 @@ class RecorderApp(App[None]):
         )
         self.query_one("#player", Static).update(
             f"[{human_style}]YOUR HAND · Seat {human}[/{human_style}]"
-            f"   Food {state.food[human]}"
+            f"   {self._food_progress(state, human)}"
             f"  ·  Cards {len(state.hands[human])}"
             f"  ·  Deck {len(state.decks[human])}"
             f"{action_text}"

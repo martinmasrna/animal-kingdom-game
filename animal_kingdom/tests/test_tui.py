@@ -65,7 +65,7 @@ def test_tui_80x24_keyboard_draw_and_annotations(tmp_path):
             assert board.board_render.height <= board.size.height
             own_hq = board.board_render.hitboxes[("hq", "A")]
             enemy_hq = board.board_render.hitboxes[("hq", "B")]
-            assert own_hq.x < enemy_hq.x and own_hq.y > enemy_hq.y
+            assert own_hq.x == enemy_hq.x and own_hq.y > enemy_hq.y
             hand_cards = [
                 widget for widget in app.query(ActionCard)
                 if isinstance(widget.entry.payload, tuple)
@@ -149,7 +149,13 @@ def test_tui_click_card_then_board_target(tmp_path):
             target = next(iter(app.target_map))
             hitbox = app.query_one(BoardWidget).board_render.hitboxes[target]
             before = app.session.decision_count
-            await pilot.click("#board", offset=(hitbox.x + 1, hitbox.y + 1))
+            await pilot.click(
+                "#board",
+                offset=(
+                    hitbox.x + hitbox.width // 2,
+                    hitbox.y + hitbox.height // 2,
+                ),
+            )
             await pilot.pause()
             assert app.session.decision_count > before
 
@@ -238,6 +244,35 @@ def test_recent_log_uses_hoverable_icons_beside_board(tmp_path):
             await pilot.pause()
             assert str(icons[0].tooltip) == "A: chose 2,2"
             assert str(app.query_one("#side", Static).content) == ""
+
+    asyncio.run(scenario())
+
+
+def test_food_progress_bars_show_current_and_target(tmp_path):
+    async def scenario():
+        app = RecorderApp(manifest=_manifest(), output_root=Path(tmp_path))
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause()
+            assert app.session is not None
+            app.session.state.food["A"] = 50
+            app.session.state.food["B"] = 20
+            app.refresh_game()
+
+            player = Text.from_markup(
+                str(app.query_one("#player", Static).content)
+            ).plain
+            opponent = Text.from_markup(
+                str(app.query_one("#opponent", Static).content)
+            ).plain
+            assert "Food 50/100 ▕█████░░░░░▏" in player
+            assert "Food 20/100 ▕██░░░░░░░░▏" in opponent
+
+            app.session.state.food["A"] = 120
+            app.refresh_game()
+            player = Text.from_markup(
+                str(app.query_one("#player", Static).content)
+            ).plain
+            assert "Food 120/100 ▕██████████▏" in player
 
     asyncio.run(scenario())
 
@@ -455,7 +490,7 @@ def test_tui_runs_bot_first_without_blocking_input_loop(tmp_path):
             board = app.query_one(BoardWidget).board_render
             own_hq = board.hitboxes[("hq", "B")]
             enemy_hq = board.hitboxes[("hq", "A")]
-            assert own_hq.x < enemy_hq.x and own_hq.y > enemy_hq.y
+            assert own_hq.x == enemy_hq.x and own_hq.y > enemy_hq.y
 
     asyncio.run(scenario())
 
@@ -472,7 +507,13 @@ def test_hovering_crossroad_shows_complete_stack_details(tmp_path):
             ]
             app.refresh_game()
             hitbox = board.board_render.hitboxes[("cr", "1,1")]
-            await pilot.hover("#board", offset=(hitbox.x + 1, hitbox.y + 1))
+            await pilot.hover(
+                "#board",
+                offset=(
+                    hitbox.x + hitbox.width // 2,
+                    hitbox.y + hitbox.height // 2,
+                ),
+            )
             await pilot.pause()
             tooltip = str(board.tooltip)
             assert "bottom → top" in tooltip

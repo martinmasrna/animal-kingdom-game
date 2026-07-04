@@ -154,7 +154,7 @@ def _draw_conn(canvas: list[list[str]], r0: int, c0: int, r1: int, c1: int) -> N
             canvas[r][c] = ch
 
 
-def _render_diagonal_board(
+def _render_vertical_board(
     state,
     *,
     perspective_player: str,
@@ -164,58 +164,66 @@ def _render_diagonal_board(
     max_width: int | None,
     max_height: int | None,
 ) -> BoardRender:
-    """Player-relative square projection: own HQ bottom-left, opponent top-right."""
+    """Player-relative projection: opponent HQ top-centre, own HQ bottom-centre."""
     gm = state.game_map
     if perspective_player not in gm.hq_connects:
         raise ValueError(f"unknown perspective player {perspective_player!r}")
     coords = [parse_cr(c) for c in gm.crossroads]
     xs = sorted({x for x, _ in coords})
-    ys_top_first = sorted({y for _, y in coords}, reverse=True)
+    ys = sorted({y for _, y in coords})
     ci = {x: i for i, x in enumerate(xs)}
-    ri = {y: i for i, y in enumerate(ys_top_first)}
 
     front_xs = {parse_cr(cr)[0] for cr in gm.hq_front(perspective_player)}
     own_on_left = front_xs == {min(xs)}
     if not own_on_left and front_xs != {max(xs)}:
-        raise ValueError("diagonal projection requires an HQ on a vertical map edge")
+        raise ValueError("vertical projection requires an HQ on a vertical map edge")
 
-    slots = len(xs) + len(ys_top_first) - 1
-    compact_nodes = max_height is not None and max_height < 22
-    node_w, node_h = _NODE_W, 3 if compact_nodes else _NODE_H
+    available_height = max_height if max_height is not None else 40
+    if available_height >= 40:
+        node_h, row_gap, hq_h, hq_gap = 4, 2, 4, 2
+    elif available_height >= 27:
+        node_h, row_gap, hq_h, hq_gap = 3, 1, 3, 1
+    else:
+        node_h, row_gap, hq_h, hq_gap = 1, 1, 1, 1
+
+    node_w = _NODE_W
     if max_width is None:
-        col_step = 10
+        col_gap = _GAP_W
     else:
-        col_step = max(node_w, min(10, (max_width - node_w) // max(1, slots - 1)))
-    if compact_nodes:
-        row_step = 2
-    elif max_height is None or max_height >= (slots - 1) * 4 + node_h:
-        row_step = 4
-    elif max_height >= (slots - 1) * 3 + node_h:
-        row_step = 3
-    else:
-        row_step = 2
-    width = (slots - 1) * col_step + node_w
-    height = (slots - 1) * row_step + node_h
+        fixed_width = len(ys) * node_w
+        col_gap = max(
+            1,
+            min(_GAP_W, (max_width - fixed_width) // max(1, len(ys) - 1)),
+        )
+    col_step = node_w + col_gap
+    row_step = node_h + row_gap
+    grid_width = len(ys) * node_w + (len(ys) - 1) * col_gap
+    grid_height = len(xs) * node_h + (len(xs) - 1) * row_gap
+    width = max(grid_width, _HQ_W)
+    height = hq_h + hq_gap + grid_height + hq_gap + hq_h
     canvas = [[" "] * width for _ in range(height)]
     style_grid: list[list[str | None]] = [[None] * width for _ in range(height)]
     hitboxes: dict[tuple[str, str], Hitbox] = {}
 
+    lateral_values = sorted(ys, reverse=own_on_left)
+    lateral_index = {y: index for index, y in enumerate(lateral_values)}
+    grid_top = hq_h + hq_gap
     positions: dict[str, tuple[int, int]] = {}
     for x, y in coords:
-        forward = ci[x] if own_on_left else len(xs) - 1 - ci[x]
-        lateral = ri[y] if own_on_left else len(ys_top_first) - 1 - ri[y]
-        slot_col = forward + lateral
-        slot_row = (len(xs) - 1 - forward) + lateral
-        positions[f"{x},{y}"] = (slot_row * row_step, slot_col * col_step)
+        row_index = len(xs) - 1 - ci[x] if own_on_left else ci[x]
+        positions[f"{x},{y}"] = (
+            grid_top + row_index * row_step,
+            lateral_index[y] * col_step,
+        )
 
     players = tuple(sorted(gm.hq_connects))
     opponent = next(player for player in players if player != perspective_player)
+    hq_col = (width - _HQ_W) // 2
     hq_positions = {
-        perspective_player: (height - node_h, 0),
-        opponent: (0, width - _HQ_W),
+        perspective_player: (height - hq_h, hq_col),
+        opponent: (0, hq_col),
     }
 
-    # Connections go down first, then labels and boxes overwrite their interiors.
     for a, b in gm.edges:
         ar, ac = positions[a]
         br, bc = positions[b]
@@ -232,13 +240,12 @@ def _render_diagonal_board(
             nr, nc = positions[cr]
             _draw_conn(
                 canvas,
-                hr + node_h // 2,
+                hr + hq_h // 2,
                 hc + _HQ_W // 2,
                 nr + node_h // 2,
                 nc + node_w // 2,
             )
 
-    # Region value/holder chips stay at the projected centre of their four corners.
     for region in gm.regions.values():
         centres = [
             (positions[cr][0] + node_h // 2, positions[cr][1] + node_w // 2)
@@ -263,7 +270,18 @@ def _render_diagonal_board(
         )
         stack = state.board.get(cr)
         occ_style = SEAT_STYLE.get(stack[-1].owner) if stack else EMPTY_STYLE
-        if compact_nodes:
+        if node_h == 1:
+            label = f"{x},{y}:{_occupancy(state, cr)}"
+            label = label[: node_w - 2].center(node_w - 2)
+            _blit(
+                canvas,
+                style_grid,
+                r0,
+                c0,
+                "[" + label + "]",
+                box_style or occ_style,
+            )
+        elif node_h == 3:
             _blit(
                 canvas,
                 style_grid,
@@ -285,24 +303,32 @@ def _render_diagonal_board(
             _blit(canvas, style_grid, r0 + 3, c0, "└" + "─" * inner + "┘", box_style)
 
     for player, (r0, c0) in hq_positions.items():
-        hitboxes[("hq", player)] = Hitbox(c0, r0, _HQ_W, node_h)
+        hitboxes[("hq", player)] = Hitbox(c0, r0, _HQ_W, hq_h)
         inner = _HQ_W - 2
         hq_style = (
             FOCUS_STYLE if focus_target == ("hq", player)
             else HIGHLIGHT_STYLE if player == highlight_hq
             else SEAT_STYLE.get(player)
         )
-        _blit(canvas, style_grid, r0, c0, "┌" + "─" * inner + "┐", hq_style)
-        if compact_nodes:
+        if hq_h == 1:
+            _blit(
+                canvas,
+                style_grid,
+                r0,
+                c0,
+                f"[HQ {player}]".center(_HQ_W),
+                hq_style,
+            )
+        else:
+            _blit(canvas, style_grid, r0, c0, "┌" + "─" * inner + "┐", hq_style)
+        if hq_h == 3:
             _blit(canvas, style_grid, r0 + 1, c0, "│" + f"HQ {player}".center(inner) + "│", hq_style)
             _blit(canvas, style_grid, r0 + 2, c0, "└" + "─" * inner + "┘", hq_style)
-        else:
+        elif hq_h == 4:
             _blit(canvas, style_grid, r0 + 1, c0, "│" + " " * inner + "│", hq_style)
             _blit(canvas, style_grid, r0 + 2, c0, "│" + f"HQ {player}".center(inner) + "│", hq_style)
             _blit(canvas, style_grid, r0 + 3, c0, "└" + "─" * inner + "┘", hq_style)
 
-    # A raw backslash immediately before a Rich/Textual tag escapes the opening bracket.
-    # Box-drawing diagonals avoid that markup ambiguity and read better in this projection.
     for row in canvas:
         for index, char in enumerate(row):
             if char == "\\":
@@ -331,7 +357,7 @@ def render_board(state, highlight_crs: Collection[str] = (),
     an 80-column terminal without changing node size or truncating state.
     """
     if perspective_player is not None:
-        return _render_diagonal_board(
+        return _render_vertical_board(
             state,
             perspective_player=perspective_player,
             highlight_crs=highlight_crs,

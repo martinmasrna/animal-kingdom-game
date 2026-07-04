@@ -13,6 +13,7 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Code: `animal_
   - [x] Move specialist recorder controls into a `?` help overlay.
   - [x] Add responsive deck trackers: exact remaining deck for the human, public
     deck-plus-hand deduction for the opponent, with no hidden-zone reads.
+  - [x] Reorient the player-relative map bottom-to-top and add food progress bars.
 - [ ] **Promote the recorder to the general game TUI — decision: yes (2026-07-04).** Preserve
   automatic JSONL recording while making scheduled cohorts an optional workflow rather than the
   app's identity.
