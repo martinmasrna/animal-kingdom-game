@@ -38,7 +38,9 @@ Game-wide setup and HQ rules are the source of truth in `overview.md` — **§4 
 
 **This is the shipped map** — every game and sim runs on it. A 5×3 lattice of **15 crossroads**
 (columns 1–5, rows 1–3), HQ_A fronting column 1 and HQ_B fronting column 5, with **8 regions**
-(R1–R8; the four center cells R2/R3/R6/R7 output **20** food, the flanks **10**) and **win_food 100**.
+(R1–R8; the four center cells R2/R3/R6/R7 output **15** food, the flanks **10**) and **win_food 100**.
+The center was cut from 20→15 on 2026-07-05 to balance the two win conditions: at 20/10 food wins
+dominated (~63–71% of games); at 15/10 the food/HQ-capture split lands ~50/50 (greedy-vs-greedy, 200 games/matchup).
 The exact geometry (crossroads, edges, region corners) is canonical in
 [`animal_kingdom/data/maps.json`](../../animal_kingdom/data/maps.json) — that file is the source of
 truth; this section is the prose companion. The extra column over the old 4×3 map gives combo/food

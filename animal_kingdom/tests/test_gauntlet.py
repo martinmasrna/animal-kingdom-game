@@ -48,11 +48,14 @@ def test_gauntlet_result_roundtrips_through_dict():
 
 
 def test_compare_gauntlets_computes_deltas_for_a_weight_change():
-    # Full default pool + enough games for the weight change to reliably show up somewhere;
-    # a 2-opponent/5-game sample was too small and landed on an exact-zero delta by chance.
-    old = run_gauntlet("ramp", 10, base_seed=0)
+    # Full default pool + enough games for the weight change to reliably show up somewhere.
+    # This is a discrete-outcome sensitivity check, so the sample must be large enough to clear
+    # chance zero-deltas: a 2-opponent/5-game sample, and later a 10-game sample (after the
+    # 2026-07-05 map_b 20->15 economy change), both landed on an exact-zero delta by chance.
+    # 60 games moves 3 of 6 opponents on seed 0 — comfortable margin.
+    old = run_gauntlet("ramp", 60, base_seed=0)
     boosted = GreedyWeights(enemy_hq_threat=200.0)
-    new = run_gauntlet("ramp", 10, base_seed=0, candidate_weights=boosted)
+    new = run_gauntlet("ramp", 60, base_seed=0, candidate_weights=boosted)
 
     diff = compare_gauntlets(old, new)
     assert diff["deck"] == "ramp"
