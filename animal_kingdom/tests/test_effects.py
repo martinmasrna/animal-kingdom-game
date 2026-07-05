@@ -70,8 +70,8 @@ def test_raksha_buffs_other_canines_but_not_itself():
     s = make_state()
     raksha = put(s, "1,1", "raksha", "A")
     coyote = put(s, "1,2", "coyote", "A")
-    assert effective_strength(s, coyote) == 5            # 3 + 2 aura
-    assert effective_strength(s, raksha) == 4            # aura excludes itself
+    assert effective_strength(s, coyote) == 4            # 3 + 1 aura
+    assert effective_strength(s, raksha) == 5            # body 5; aura excludes itself
 
 
 def test_african_wild_dog_counts_itself():
@@ -105,7 +105,7 @@ def test_dhole_buffs_adjacent_friendly_canine_and_fires_reactor():
     s = make_state(hands={"A": ["dhole"]}, decks={"A": ["lion", "tiger"], "B": []})
     fox = put(s, "1,2", "fox", "A")                      # adjacent to 2,2; has on_gain reactor
     rules.apply_action(s, PlaceAction("dhole", ("cr", "2,2")))
-    assert fox.strength_counter == 2
+    assert fox.strength_counter == 3
     assert len(s.hands["A"]) == 1                        # Fox drew 1 on gaining strength
 
 
@@ -772,8 +772,8 @@ def test_queen_honoria_and_falstaff_riders_stack():
     put(s, "1,3", "falstaff", "A")                      # +3 whenever you gain food
     put(s, "1,2", "caracal", "A")
     rules.apply_action(s, PlaceAction("worker_ant", ("cr", "2,2")))
-    # Honoria +5 (+3 rider) then Worker Ant +8 (+3 rider) = 19
-    assert s.food["A"] == 19
+    # Honoria +4 (+3 rider) then Worker Ant +15 (+3 rider) = 25
+    assert s.food["A"] == 25
 
 
 def test_queen_marabunta_scales_with_other_colony():

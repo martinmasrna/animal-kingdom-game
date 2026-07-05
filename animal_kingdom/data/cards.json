@@ -330,7 +330,7 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Colony"],
-      "base_strength": 2,
+      "base_strength": 0,
       "keywords": ["Flight"],
       "text": "Flight. Has +2 strength for each other friendly Colony unit."
     },
@@ -341,9 +341,9 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Colony", "Queen"],
-      "base_strength": 5,
+      "base_strength": 4,
       "keywords": [],
-      "text": "Whenever you play a Colony unit, gain 5 food."
+      "text": "Whenever you play a Colony unit, gain 4 food."
     },
     {
       "id": "falstaff",
@@ -374,7 +374,7 @@
       "rarity": "rare",
       "type": "unit",
       "tags": ["Colony"],
-      "base_strength": 2,
+      "base_strength": 3,
       "keywords": ["Flight"],
       "text": "Flight. Battlecry: if you control 5 or more Colony units, draw 2 cards."
     },
@@ -396,7 +396,7 @@
       "rarity": "rare",
       "type": "unit",
       "tags": ["Colony", "Queen"],
-      "base_strength": 5,
+      "base_strength": 3,
       "keywords": [],
       "text": "Battlecry: you may play one additional non-Queen Colony unit this turn."
     },
@@ -442,7 +442,7 @@
       "tags": ["Colony", "Worker"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Battlecry: gain 8 food."
+      "text": "Battlecry: gain 15 food."
     },
     {
       "id": "worker_wasp",
@@ -464,7 +464,7 @@
       "tags": ["Colony", "Worker"],
       "base_strength": 1,
       "keywords": ["Flight"],
-      "text": "Flight. Battlecry: gain 5 food; if you control another Worker, gain 5 more."
+      "text": "Flight. Battlecry: gain 10 food; if you control another Worker, gain 10 more."
     },
 
     {
@@ -966,9 +966,9 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Canine"],
-      "base_strength": 4,
+      "base_strength": 5,
       "keywords": [],
-      "text": "Your other Canines have +2 strength."
+      "text": "Your other Canines have +1 strength."
     },
     {
       "id": "clarion",
@@ -990,7 +990,7 @@
       "tags": ["Canine"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Battlecry: give all adjacent Canines +2 strength."
+      "text": "Battlecry: give all adjacent Canines +3 strength."
     },
     {
       "id": "bush_dog",
@@ -1010,9 +1010,9 @@
       "rarity": "rare",
       "type": "unit",
       "tags": ["Canine"],
-      "base_strength": 3,
+      "base_strength": 5,
       "keywords": [],
-      "text": "Whenever an adjacent unit is removed, gain 3 food."
+      "text": "Whenever an adjacent unit is removed, gain 5 food."
     },
     {
       "id": "red_wolf",
@@ -1054,7 +1054,7 @@
       "rarity": "common",
       "type": "unit",
       "tags": ["Canine"],
-      "base_strength": 5,
+      "base_strength": 3,
       "keywords": [],
       "text": "Whenever this gains strength, draw a card (once per turn)."
     },

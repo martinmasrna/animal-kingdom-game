@@ -8,17 +8,17 @@ Source: user's offline Google Sheet (uploaded 2026-06-28).
 | Name | Tag | Str | Effect | Description |
 |---|---|---:|---|---|
 | **Queen Marabunta** | Colony | 4 | Battlecry: gain 4 food for each other friendly Colony unit. | Ant queen. |
-| **Vesper, Champion of the Hive** | Colony | 2 | Flight. Has +2 strength for each other friendly Colony unit. | Deadly hornet. |
-| **Queen Honoria** | Colony | 5 | Whenever you play a Colony unit, gain 5 food. | Bee queen. |
+| **Vesper, Champion of the Hive** | Colony | 0 | Flight. Has +2 strength for each other friendly Colony unit. | Deadly hornet. *(2026-07-05: body 2→0)* |
+| **Queen Honoria** | Colony | 4 | Whenever you play a Colony unit, gain 4 food. | Bee queen. *(2026-07-05: 5/5→4/4)* |
 | **Falstaff** | Colony | 3 | Flight. Whenever you gain food, gain 3 additional food. | Hilariously fat bumblebee. |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
 | **Nurse Bee** | Colony | 2 | Flight. Battlecry: if you control two copies of the same Colony unit, draw 2 cards. |
-| **Nurse Bumblebee** | Colony | 2 | Flight. Battlecry: if you control 5 or more Colony units, draw 2 cards. |
+| **Nurse Bumblebee** | Colony | 3 | Flight. Battlecry: if you control 5 or more Colony units, draw 2 cards. *(2026-07-05: body 2→3)* |
 | **Termite King** | Colony | 5 | Battlecry: if you control a Colony Queen, draw 1 card. |
-| **Termite Queen** | Colony | 5 | Battlecry: you may play one additional non-Queen Colony unit this turn. |
+| **Termite Queen** | Colony | 3 | Battlecry: you may play one additional non-Queen Colony unit this turn. *(2026-07-05: body 5→3)* |
 
 ## Common (×3)
 | Name | Tag | Str | Effect |
@@ -26,9 +26,9 @@ Source: user's offline Google Sheet (uploaded 2026-06-28).
 | **Queen Bee** | Colony | 2 | Battlecry: play a Worker unit. |
 | **Guard Hornet** | Colony | 3 | Flight. Has +5 strength while you control 5 or more Colony units. |
 | **Soldier Ant** | Colony | 2 | Battlecry: if you control 5 or more Colony units, remove an adjacent enemy. |
-| **Worker Ant** | Colony | 1 | Battlecry: gain 8 food. |
+| **Worker Ant** | Colony | 1 | Battlecry: gain 15 food. *(2026-07-05: 8→15, colony floor buff; cf. Squirrel's 12)* |
 | **Worker Wasp** | Colony | 3 | Flight. At the end of your turn, gain 3 food. |
-| **Worker Bee** | Colony | 1 | Flight. Battlecry: gain 5 food; if you control another Worker, gain 5 more. |
+| **Worker Bee** | Colony | 1 | Flight. Battlecry: gain 10 food; if you control another Worker, gain 10 more. *(2026-07-05: 5/5→10/10)* |
 
 ---
 

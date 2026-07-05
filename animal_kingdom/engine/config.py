@@ -28,9 +28,9 @@ class Config:
     flying_squirrel_food: int = 8        # decision H: doubled, same reasoning
     hedgehog_food: int = 5               # Immovable wall that also feeds (food_otk 2026-07-05)
     rat_king_per_rodent: int = 4         # Battlecry: gain N food per OTHER Rodent you control
-    worker_ant_food: int = 8
-    worker_bee_food: int = 5             # +worker_bee_extra if you control another Worker
-    worker_bee_extra: int = 5
+    worker_ant_food: int = 15            # 8→15 (2026-07-05 colony floor buff; cf. Squirrel's 12)
+    worker_bee_food: int = 10            # 5→10; +worker_bee_extra if you control another Worker
+    worker_bee_extra: int = 10           # 5→10
     worker_wasp_food: int = 3            # at end of your turn
     methuselah_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
                                           # recurring passive in the pool - ruled down 2026-07-02)
@@ -40,7 +40,7 @@ class Config:
                                           # Deathrattle-return, so this compounds through Carmilla/
                                           # Black Widow sac loops into what Scrooge later doubles
     queen_marabunta_per_colony: int = 4  # per other friendly Colony unit
-    queen_honoria_per_play: int = 5      # per Colony unit you play
+    queen_honoria_per_play: int = 4      # per Colony unit you play (5→4, 2026-07-05)
     falstaff_food_rider: int = 3         # extra food whenever you gain food
 
     # --- "Food gained this turn" signature mechanic (food_otk pure-OTK overhaul 2026-07-05) ---
@@ -55,7 +55,7 @@ class Config:
     eon_food: int = 1                    # per draw/shuffle/remove event
     vulture_food: int = 5                # per card removed
     egg_eater_food: int = 10             # per Egg removed
-    jackal_food: int = 3                 # per adjacent removal
+    jackal_food: int = 5                 # per adjacent removal (3→5, 2026-07-05; body 3→5)
 
     # --- Deathrattle / payoff food ---
     gazelle_food: int = 30               # Deathrattle: gain food. Was 40 (doubled 2026-07-02);
@@ -70,12 +70,12 @@ class Config:
     anthem_awd_per: int = 1              # African Wild Dog, per friendly Canine
     anthem_verminus_per: int = 1         # per other unit you control
     anthem_vesper_per: int = 2           # per other friendly Colony unit
-    raksha_anthem: int = 2               # your other Canines have +X
+    raksha_anthem: int = 1               # your other Canines have +X (2→1, 2026-07-05; body 4→5 to compensate)
     guard_hornet_bonus: int = 5          # while >= threshold Colony units
     guard_hornet_colony_threshold: int = 5
 
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
-    dhole_grant: int = 2                 # to adjacent friendly Canines
+    dhole_grant: int = 3                 # to adjacent friendly Canines (2→3, 2026-07-05)
     clarion_grant: int = 1               # to other Canines in hand + battlefield
     red_wolf_grant: int = 1              # to Canines in hand
     dingo_grant: int = 1                 # to a friendly adjacent Canine, end of turn
