@@ -15,13 +15,19 @@ from __future__ import annotations
 import random
 from typing import Optional
 
-from .engine.cards import COPY_LIMITS, Card, DECK_SLUGS, load_cards
+from .engine.cards import COPY_LIMITS, Card, DECK_SLUGS, NON_DECK_SLUGS, load_cards
 
 
 def _build_premade_decks(cards: dict[str, Card]) -> dict[str, list[str]]:
-    """Expand each deck's 14 designs into its 30-card decklist via the copy limits."""
+    """Expand each deck's 14 designs into its 30-card decklist via the copy limits.
+
+    Non-draftable cards (tokens, reserve designs; see NON_DECK_SLUGS) are skipped — they
+    live in the registry but belong to no premade deck.
+    """
     decks: dict[str, list[str]] = {slug: [] for slug in DECK_SLUGS}
     for card in cards.values():
+        if card.deck in NON_DECK_SLUGS:
+            continue
         decks[card.deck].extend([card.id] * COPY_LIMITS[card.rarity])
     return decks
 
@@ -54,6 +60,8 @@ def make_vanilla_deck(
     for card in cards.values():
         if not isinstance(card.base_strength, int):
             continue  # exclude dynamic-strength cards (Goliath, Chameleon)
+        if card.deck in NON_DECK_SLUGS:
+            continue  # exclude tokens / reserve designs
         pool.extend([card.id] * COPY_LIMITS[card.rarity])
 
     if len(pool) < n:

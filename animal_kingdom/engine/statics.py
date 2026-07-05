@@ -54,19 +54,30 @@ def ignores_connection(state: GameState, card_id: str) -> bool:
     return "Flight" in state.cards[card_id].keywords
 
 
-def extra_placement_crossroads(state: GameState, card_id: str, owner: str) -> set[str]:
-    """Crossroads a card may target ignoring connection, beyond the normal rules.
-
-    Cougar: may be placed adjacent to any Cat you control, ignoring connection.
-    """
-    if card_id != "cougar":
-        return set()
+def _neighbors_of_friendly_tag(state: GameState, owner: str, tag: str) -> set[str]:
+    """Crossroads adjacent to any crossroad `owner` tops with a `tag` unit."""
     gm = state.game_map
     out: set[str] = set()
     for cr, stack in state.board.items():
         top = stack[-1] if stack else None
-        if top and top.owner == owner and "Cat" in state.cards[top.card_id].tags:
+        if top and top.owner == owner and tag in state.cards[top.card_id].tags:
             out |= set(gm.neighbors(cr))
+    return out
+
+
+def extra_placement_crossroads(state: GameState, card_id: str, owner: str) -> set[str]:
+    """Crossroads a card may target ignoring connection, beyond the normal rules.
+
+    Cougar: may be placed adjacent to any Cat you control, ignoring connection.
+    Outrider: while you control one, your *other* Canines may be placed adjacent to any
+    Canine you control, ignoring connection.
+    """
+    card = state.cards[card_id]
+    out: set[str] = set()
+    if card_id == "cougar":
+        out |= _neighbors_of_friendly_tag(state, owner, "Cat")
+    if "Canine" in card.tags and card_id != "outrider" and _controls(state, owner, "outrider"):
+        out |= _neighbors_of_friendly_tag(state, owner, "Canine")
     return out
 
 

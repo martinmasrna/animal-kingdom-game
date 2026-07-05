@@ -11,8 +11,8 @@ matters (covering, removal thresholds, region holding, conditions like Coyote's 
 - stored_counters: `UnitInstance.strength_counter` - one-time "give +X" grants (Dhole,
   Clarion, Red Wolf, Dingo, Bush Dog, Shuck). Stored on the instance; persist after the
   granter dies; travel hand->board.
-- active_anthems: live "has +X" auras (Raksha, Lobo, African Wild Dog, Verminus, Vesper,
-  Guard Hornet). Recomputed from the board every time; vanish when their condition lapses.
+- active_anthems: live "has +X" auras (Raksha, Lobo, Verminus, Vesper, Guard Hornet).
+  Recomputed from the board every time; vanish when their condition lapses.
 
 For covering legality a card is still in hand (no board iid yet), so anthems are computed
 "as a prospective placement" (`card_strength`); the instance's counter is added on top.
@@ -74,8 +74,6 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
     bonus = 0
     if cid == "lobo":                       # +2 for each OTHER Canine you control
         bonus += cfg.anthem_lobo_per * count("Canine", include_self=False)
-    elif cid == "african_wild_dog":         # +1 for each friendly Canine (incl. itself)
-        bonus += cfg.anthem_awd_per * count("Canine", include_self=True)
     elif cid == "verminus":                 # +1 for each OTHER unit you control (any tag; not Landmarks)
         others = sum(1 for u in tops if u.iid != self_iid and state.cards[u.card_id].is_unit)
         bonus += cfg.anthem_verminus_per * others

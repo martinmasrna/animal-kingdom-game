@@ -74,12 +74,13 @@ def test_raksha_buffs_other_canines_but_not_itself():
     assert effective_strength(s, raksha) == 5            # body 5; aura excludes itself
 
 
-def test_african_wild_dog_counts_itself():
-    s = make_state()
-    awd = put(s, "1,1", "african_wild_dog", "A")
-    assert effective_strength(s, awd) == 3               # 2 + 1 (itself)
-    put(s, "1,2", "fox", "A")
-    assert effective_strength(s, awd) == 4               # + another friendly Canine
+def test_african_wild_dog_spawns_a_pup():
+    s = make_state(hands={"A": ["african_wild_dog"]})
+    put(s, "1,2", "dog", "A")                            # HQ-front anchor so 2,2 is connected
+    rules.apply_action(s, PlaceAction("african_wild_dog", ("cr", "2,2")))
+    pups = [u for st in s.board.values() for u in st if u.card_id == "pup"]
+    assert len(pups) == 1 and pups[0].owner == "A"       # one Pup token spawned adjacent
+    assert "Canine" in s.cards["pup"].tags               # Pups count for the pack
 
 
 def test_verminus_counts_any_other_unit():
@@ -109,19 +110,68 @@ def test_dhole_buffs_adjacent_friendly_canine_and_fires_reactor():
     assert len(s.hands["A"]) == 1                        # Fox drew 1 on gaining strength
 
 
-def test_clarion_buffs_other_canines_in_hand_and_on_board():
+def test_clarion_buffs_other_board_canines_by_two_not_hand():
     s = make_state(hands={"A": ["clarion", "gray_wolf"]})
     coyote = put(s, "1,2", "coyote", "A")
     rules.apply_action(s, PlaceAction("clarion", ("cr", "2,2")))
-    assert coyote.strength_counter == 1
-    assert hand_inst(s, "A", "gray_wolf").strength_counter == 1
+    assert coyote.strength_counter == 2                      # +2 to a board Canine
+    assert hand_inst(s, "A", "gray_wolf").strength_counter == 0   # hand is no longer buffed
 
 
-def test_red_wolf_buffs_only_hand_canines():
-    s = make_state(hands={"A": ["red_wolf", "gray_wolf", "lion"]})
-    rules.apply_action(s, PlaceAction("red_wolf", ("cr", "1,2")))
-    assert hand_inst(s, "A", "gray_wolf").strength_counter == 1
-    assert hand_inst(s, "A", "lion").strength_counter == 0    # not a Canine
+def test_red_wolf_buffs_canines_that_enter_after_it():
+    s = make_state(hands={"A": ["gray_wolf", "lion"]})
+    put(s, "1,2", "red_wolf", "A")                           # Red Wolf already on the board
+    rules.apply_action(s, PlaceAction("gray_wolf", ("cr", "2,2")))
+    assert s.top_unit("2,2").strength_counter == 1           # Canine buffed as it entered
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,3")))
+    assert s.top_unit("1,3").strength_counter == 0           # non-Canine unaffected
+
+
+def test_alpha_places_two_pups():
+    s = make_state(hands={"A": ["alpha"]})
+    put(s, "1,2", "dog", "A")                                # HQ-front anchor so 2,2 is connected
+    rules.apply_action(s, PlaceAction("alpha", ("cr", "2,2")))
+    pups = [u for st in s.board.values() for u in st if u.card_id == "pup"]
+    assert len(pups) == 2 and all(p.owner == "A" for p in pups)
+
+
+def test_red_wolf_buffs_spawned_pups():
+    # The core token synergy: pups enter play, so Red Wolf's on-enter buff catches them.
+    s = make_state(hands={"A": ["alpha"]})
+    put(s, "1,2", "red_wolf", "A")
+    rules.apply_action(s, PlaceAction("alpha", ("cr", "2,2")))
+    pups = [u for st in s.board.values() for u in st if u.card_id == "pup"]
+    assert len(pups) == 2 and all(p.strength_counter == 1 for p in pups)
+
+
+def test_hyena_removal_scales_with_canine_count():
+    # Dog + Hyena = 2 Canines -> may remove strength <= 2, but not a bigger body.
+    s = make_state(hands={"A": ["hyena"]})
+    put(s, "1,2", "dog", "A")
+    put(s, "3,2", "jerboa", "B")                             # STR 2 enemy adjacent to 2,2
+    put(s, "2,3", "lion", "B")                               # STR 7 enemy adjacent to 2,2
+    rules.apply_action(s, PlaceAction("hyena", ("cr", "2,2")))
+    assert s.owner_of("3,2") is None                         # 2 <= 2 Canines: removed
+    assert s.owner_of("2,3") == "B"                          # 7 > 2: survives
+
+
+def test_outrider_lets_canines_ignore_connection():
+    s = make_state(hands={"A": ["gray_wolf"]})
+    put(s, "3,2", "dog", "A")                                # a friendly Canine with no path to HQ
+    assert "2,2" not in place_targets(s)                     # can't reach it normally
+    put(s, "3,3", "outrider", "A")                           # control an Outrider (also disconnected)
+    assert "2,2" in place_targets(s)                         # may now place adjacent to the pack
+
+
+def test_fox_draws_on_each_buff_when_uncapped():
+    s = make_state(hands={"A": ["dhole", "clarion"]},
+                   decks={"A": ["lion", "tiger", "eagle"], "B": []})
+    fox = put(s, "1,2", "fox", "A")
+    rules.apply_action(s, PlaceAction("dhole", ("cr", "2,2")))    # +3 -> Fox draws
+    rules.apply_action(s, PlaceAction("clarion", ("cr", "1,1")))  # +2 -> Fox draws AGAIN (uncapped)
+    assert fox.strength_counter == 5
+    # Two placements from hand, two Fox draws -> hand nets back to 2 (would be 1 if capped once/turn).
+    assert len(s.hands["A"]) == 2
 
 
 def test_hand_counter_travels_onto_the_board():

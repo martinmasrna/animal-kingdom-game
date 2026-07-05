@@ -53,6 +53,7 @@ owns the crossroad).
 | "summoning sickness / haste" | None. A placed unit is **immediately active** — it can cover, capture, or trigger the same turn. |
 | "tempo = playing on curve" | Tempo = **board presence + connection reach + action efficiency**. |
 | "card draw is card advantage" | Drawing **costs an action** (half your turn), so "draw" riders mainly **refund tempo**; running dry risks **exhaustion loss**. |
+| "give the utility card a small body to balance its ability" | **No stat-for-ability tradeoff exists.** Strength is the *entire* body; an ability is a **free rider** on top, not paid for with stats. Cougar is a STR **6** with a weak reach ability and is *still the worst card in cats*. Cost utility/reach cards at **near-vanilla strength for their role** — don't reflexively lowball the body. |
 
 ## Strategic truths that follow (the ones easy to miss)
 

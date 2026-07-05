@@ -28,9 +28,11 @@ DYNAMIC_IDS = {"goliath", "chameleon"}
 
 def test_98_designs_in_exactly_7_decks():
     cards = load_cards()
-    assert len(cards) == 98
+    # 98 draftable designs across the 7 decks; tokens/reserve live outside the deck pool.
+    draftable = [c for c in cards.values() if c.deck in DECK_SLUGS]
+    assert len(draftable) == 98
     by_deck: dict[str, list] = {slug: [] for slug in DECK_SLUGS}
-    for c in cards.values():
+    for c in draftable:
         by_deck[c.deck].append(c)
     assert len(by_deck) == 7
     for slug, designs in by_deck.items():
@@ -41,10 +43,11 @@ def test_98_designs_in_exactly_7_decks():
 
 def test_ids_and_names_globally_unique():
     cards = load_cards()
+    # Every id and name in the registry (draftable + tokens + reserve) is unique.
     ids = [c.id for c in cards.values()]
     names = [c.name for c in cards.values()]
-    assert len(set(ids)) == len(ids) == 98
-    assert len(set(names)) == len(names) == 98
+    assert len(set(ids)) == len(ids) == len(cards)
+    assert len(set(names)) == len(names) == len(cards)
 
 
 def test_each_deck_expands_to_30():

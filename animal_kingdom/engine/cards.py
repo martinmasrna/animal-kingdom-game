@@ -33,6 +33,12 @@ DECK_SLUGS = {
     "food_otk", "aggro_hq_rush", "canine_buff_tempo",
 }
 
+# Non-draftable pools: cards that exist in the registry but belong to no premade deck.
+# "token" = spawned on the board by effects (e.g. Pup); never drawn. "reserve" = shelved
+# designs kept out of play (e.g. cards earmarked for a not-yet-built deck). Both are
+# skipped by the deck builders in decks.py.
+NON_DECK_SLUGS = {"token", "reserve"}
+
 # Copy limits per rarity for the locked 4-4-6 decklist shape (legendary 1 / rare 2 / common 3).
 COPY_LIMITS = {"common": 3, "rare": 2, "legendary": 1}
 
@@ -94,8 +100,10 @@ def validate_card_record(rec: dict) -> None:
     cid = rec["id"]
     if rec["rarity"] not in RARITIES:
         raise CardDataError(f"card {cid!r}: bad rarity {rec['rarity']!r}, expected one of {sorted(RARITIES)}")
-    if rec["deck"] not in DECK_SLUGS:
-        raise CardDataError(f"card {cid!r}: bad deck {rec['deck']!r}, expected one of {sorted(DECK_SLUGS)}")
+    if rec["deck"] not in DECK_SLUGS and rec["deck"] not in NON_DECK_SLUGS:
+        raise CardDataError(
+            f"card {cid!r}: bad deck {rec['deck']!r}, expected one of "
+            f"{sorted(DECK_SLUGS | NON_DECK_SLUGS)}")
 
     ctype = rec["type"]
     if ctype not in TYPES:

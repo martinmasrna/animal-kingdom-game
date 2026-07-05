@@ -65,7 +65,6 @@ class Config:
 
     # --- Strength anthems ("has +X", live; decision E) ---
     anthem_lobo_per: int = 2             # per other Canine you control
-    anthem_awd_per: int = 1              # African Wild Dog, per friendly Canine
     anthem_verminus_per: int = 1         # per other unit you control
     anthem_vesper_per: int = 2           # per other friendly Colony unit
     raksha_anthem: int = 1               # your other Canines have +X (2→1, 2026-07-05; body 4→5 to compensate)
@@ -73,12 +72,16 @@ class Config:
     guard_hornet_colony_threshold: int = 5
 
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
-    dhole_grant: int = 3                 # to adjacent friendly Canines (2→3, 2026-07-05)
-    clarion_grant: int = 1               # to other Canines in hand + battlefield
-    red_wolf_grant: int = 1              # to Canines in hand
+    dhole_grant: int = 3                 # to adjacent friendly Canines (2→3, 2026-07-05); reserve
+    clarion_grant: int = 2               # to all other friendly Canines on board (+1→+2, body 4→2, 2026-07-05)
+    red_wolf_grant: int = 1              # to each other Canine that enters play (reworked 2026-07-05)
     dingo_grant: int = 1                 # to a friendly adjacent Canine, end of turn
     bush_dog_grant: int = 1              # to friendly adjacent Canines, on gaining strength
-    shuck_grant: int = 2                 # to the Canine returned from the Remove Pile
+    shuck_grant: int = 2                 # to the Canine returned from the Remove Pile; reserve
+
+    # --- Token spawns (Canine go-wide; 2026-07-05) ---
+    alpha_pups: int = 2                  # Pups Alpha places on adjacent empty crossroads
+    awd_pups: int = 1                    # Pups African Wild Dog spawns on placement
 
     # --- Thresholds / strength gates ---
     coyote_draw_threshold: int = 5       # draw if Coyote has >= this strength
@@ -105,6 +108,9 @@ class Config:
     # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the
     # per-card default ruling and the data behind it) ---
     cap_queen_adira: bool = False
+    # Fox draws on EVERY strength gain (printed cap dropped 2026-07-05); set True to restore the
+    # old once-per-turn cap. Fox draws only, so uncapping cannot create a grant->gain->grant loop.
+    fox_gain_once: bool = False
     cap_eon: bool = False
     cap_vulture: bool = False
     cap_jackal: bool = False

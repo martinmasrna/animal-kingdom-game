@@ -153,7 +153,7 @@
       "tags": ["Cat"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Battlecry: if you control another Cat, play one more Cat from your hand (other than House Cat)."
+      "text": "Battlecry: if you control another Cat, play one more Cat from your hand."
     },
 
     {
@@ -951,7 +951,7 @@
     {
       "id": "shuck",
       "name": "Shuck",
-      "deck": "canine_buff_tempo",
+      "deck": "reserve",
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Canine"],
@@ -977,14 +977,14 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Canine"],
-      "base_strength": 4,
+      "base_strength": 2,
       "keywords": [],
-      "text": "Battlecry: give +1 strength to all other Canines in your hand and battlefield."
+      "text": "Battlecry: give +2 strength to all other friendly Canines."
     },
     {
       "id": "dhole",
       "name": "Dhole",
-      "deck": "canine_buff_tempo",
+      "deck": "reserve",
       "rarity": "rare",
       "type": "unit",
       "tags": ["Canine"],
@@ -1006,7 +1006,7 @@
     {
       "id": "jackal",
       "name": "Jackal",
-      "deck": "canine_buff_tempo",
+      "deck": "reserve",
       "rarity": "rare",
       "type": "unit",
       "tags": ["Canine"],
@@ -1023,7 +1023,7 @@
       "tags": ["Canine"],
       "base_strength": 5,
       "keywords": [],
-      "text": "Battlecry: give +1 strength to all Canines in your hand."
+      "text": "Whenever another Canine you control enters play, give it +1 strength."
     },
     {
       "id": "gray_wolf",
@@ -1039,7 +1039,7 @@
     {
       "id": "coyote",
       "name": "Coyote",
-      "deck": "canine_buff_tempo",
+      "deck": "reserve",
       "rarity": "common",
       "type": "unit",
       "tags": ["Canine"],
@@ -1054,9 +1054,9 @@
       "rarity": "common",
       "type": "unit",
       "tags": ["Canine"],
-      "base_strength": 3,
+      "base_strength": 4,
       "keywords": [],
-      "text": "Whenever this gains strength, draw a card (once per turn)."
+      "text": "Whenever this gains strength, draw a card."
     },
     {
       "id": "african_wild_dog",
@@ -1067,7 +1067,7 @@
       "tags": ["Canine"],
       "base_strength": 2,
       "keywords": [],
-      "text": "Has +1 strength for each friendly Canine."
+      "text": "Battlecry: spawn a Pup on an adjacent empty crossroad."
     },
     {
       "id": "dingo",
@@ -1089,7 +1089,62 @@
       "tags": ["Canine"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Battlecry: if you control another Canine, play another Canine from your hand (other than Dog)."
+      "text": "Battlecry: if you control another Canine, play another Canine from your hand."
+    },
+    {
+      "id": "alpha",
+      "name": "Alpha",
+      "deck": "canine_buff_tempo",
+      "rarity": "legendary",
+      "type": "unit",
+      "tags": ["Canine"],
+      "base_strength": 5,
+      "keywords": [],
+      "text": "Battlecry: place two Pups on random adjacent empty crossroads."
+    },
+    {
+      "id": "hyena",
+      "name": "Hyena",
+      "deck": "canine_buff_tempo",
+      "rarity": "rare",
+      "type": "unit",
+      "tags": ["Canine"],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy with strength less than or equal to the number of Canines you control."
+    },
+    {
+      "id": "outrider",
+      "name": "Outrider",
+      "deck": "canine_buff_tempo",
+      "rarity": "rare",
+      "type": "unit",
+      "tags": ["Canine"],
+      "base_strength": 6,
+      "keywords": [],
+      "text": "Your other Canines may be placed adjacent to any Canine you control, ignoring connection."
+    },
+    {
+      "id": "dire_wolf",
+      "name": "Dire Wolf",
+      "deck": "canine_buff_tempo",
+      "rarity": "common",
+      "type": "unit",
+      "tags": ["Canine"],
+      "base_strength": 7,
+      "keywords": [],
+      "text": ""
+    },
+    {
+      "id": "pup",
+      "name": "Pup",
+      "deck": "token",
+      "rarity": "common",
+      "type": "unit",
+      "tags": ["Canine"],
+      "base_strength": 1,
+      "keywords": [],
+      "text": ""
     }
   ]
 }

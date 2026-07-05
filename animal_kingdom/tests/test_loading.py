@@ -35,8 +35,9 @@ GOOD = {
 
 def test_cards_load_full_pool():
     cards = load_cards()
-    # 7 premade decks x 14 designs each = 98 (README roster).
-    assert len(cards) == 98
+    # 7 premade decks x 14 designs each = 98 draftable, plus non-deck cards (tokens, reserve).
+    from animal_kingdom.engine.cards import DECK_SLUGS
+    assert sum(1 for c in cards.values() if c.deck in DECK_SLUGS) == 98
     assert all(isinstance(c, Card) for c in cards.values())
 
 

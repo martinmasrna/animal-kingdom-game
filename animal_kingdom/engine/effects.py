@@ -173,15 +173,20 @@ def _fire_cover_event(state, coverer, covered) -> None:
 
 
 def _fire_play_event(state, played) -> None:
-    """Queen Honoria: whenever you play a Colony unit, gain food (not for Honoria herself)."""
-    if "Colony" not in state.cards[played.card_id].tags:
-        return
+    """Fire ON_FRIENDLY_PLAY reactors for a unit its controller just played or spawned
+    (Queen Honoria's food, Red Wolf's on-enter buff). The played unit itself is skipped."""
     for st in state.board.values():
         top = st[-1] if st else None
-        if (top and top.owner == played.owner and top.card_id == "queen_honoria"
-                and top.iid != played.iid):
-            if not _capped(state, "cap_queen_honoria", top):
-                gain_food(state, played.owner, state.config.queen_honoria_per_play)
+        if not (top and top.owner == played.owner and top.iid != played.iid):
+            continue
+        hook = _hook(state, top.card_id, "on_friendly_play")
+        if hook is not None:
+            hook(state, top, played)
+
+
+def _queen_honoria_friendly_play(state, watcher, played) -> None:
+    if "Colony" in state.cards[played.card_id].tags and not _capped(state, "cap_queen_honoria", watcher):
+        gain_food(state, played.owner, state.config.queen_honoria_per_play)
 
 
 def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
@@ -743,10 +748,14 @@ def _fire_on_gain_strength(state, unit) -> None:
     hook = _hook(state, unit.card_id, "on_gain_strength")
     if hook is None:
         return
-    flag = f"gain_str_{unit.iid}"
-    if state.turn_flags.get(flag):
-        return
-    state.turn_flags[flag] = True
+    # The per-unit once-per-turn flag doubles as the grant->gain->grant loop guard for granting
+    # reactors (Bush Dog). Fox only draws (no grant, so no loop) and now fires on every distinct
+    # buff — its printed "once per turn" clause was dropped 2026-07-05 (config.fox_gain_once restores it).
+    if not (unit.card_id == "fox" and not state.config.fox_gain_once):
+        flag = f"gain_str_{unit.iid}"
+        if state.turn_flags.get(flag):
+            return
+        state.turn_flags[flag] = True
     hook(state, unit, _crossroad_of(state, unit.iid))
 
 
@@ -833,17 +842,43 @@ def _dhole_place(state, unit, cr):
 
 
 def _clarion_place(state, unit, cr):
-    # Give +1 to all OTHER Canines you control, on the board and in hand.
+    # Give +2 to all OTHER friendly Canines on the board (board-only, 2026-07-05 rework).
     iids = [u.iid for st in state.board.values() for u in st
             if u.owner == unit.owner and u.iid != unit.iid and "Canine" in state.cards[u.card_id].tags]
-    iids += [u.iid for u in state.hands[unit.owner]
-             if u.iid != unit.iid and "Canine" in state.cards[u.card_id].tags]
     _grant(state, iids, state.config.clarion_grant)
 
 
-def _red_wolf_place(state, unit, cr):
-    iids = [u.iid for u in state.hands[unit.owner] if "Canine" in state.cards[u.card_id].tags]
-    _grant(state, iids, state.config.red_wolf_grant)
+def _red_wolf_friendly_play(state, watcher, played):
+    # Whenever another Canine you control enters play (played or spawned), give it +1 strength.
+    if "Canine" in state.cards[played.card_id].tags:
+        _grant(state, [played.iid], state.config.red_wolf_grant)
+
+
+def _spawn_pups(state, unit, cr, n):
+    """Land up to `n` Pup tokens on random empty crossroads adjacent to `cr`. Pups enter via the
+    normal landing path (so Red Wolf's on-enter buff sees them) but carry no Battlecry, so there
+    is no spawn recursion."""
+    empty = [nb for nb in state.game_map.neighbors(cr) if not state.board.get(nb)]
+    state.rng.shuffle(empty)
+    for spot in empty[:n]:
+        pup = UnitInstance("pup", unit.owner, state.new_iid())
+        _land_unit(state, unit.owner, pup, spot)
+
+
+def _alpha_place(state, unit, cr):
+    _spawn_pups(state, unit, cr, state.config.alpha_pups)
+
+
+def _african_wild_dog_place(state, unit, cr):
+    _spawn_pups(state, unit, cr, state.config.awd_pups)
+
+
+def _hyena_place(state, unit, cr):
+    # Remove an adjacent enemy of strength <= the number of Canines you control (Hyena included).
+    cap = _control_tag_count(state, unit.owner, "Canine")
+    targets = _adjacent_enemy_targets(state, unit, cr, max_strength=cap)
+    if targets:
+        _push_remove_choice(state, unit.owner, "hyena", targets)
 
 
 def _dingo_end_of_turn(state, unit, cr):
@@ -1030,13 +1065,15 @@ def _greywhisker_place(state, unit, cr):
 
 
 def _house_cat_place(state, unit, cr):
+    # May chain into another House Cat now (self-exclusion dropped 2026-07-05).
     if _controls_another_tag(state, unit, "Cat"):
-        _push_play_extra(state, unit.owner, filter={"tags_all": ["Cat"], "exclude_id": "house_cat"})
+        _push_play_extra(state, unit.owner, filter={"tags_all": ["Cat"]})
 
 
 def _dog_place(state, unit, cr):
+    # May chain into another Dog now (self-exclusion dropped 2026-07-05).
     if _controls_another_tag(state, unit, "Canine"):
-        _push_play_extra(state, unit.owner, filter={"tags_all": ["Canine"], "exclude_id": "dog"})
+        _push_play_extra(state, unit.owner, filter={"tags_all": ["Canine"]})
 
 
 def _queen_bee_place(state, unit, cr):
@@ -1548,16 +1585,21 @@ OPS.update({
 
 
 EFFECTS: dict[str, dict[str, Callable]] = {
-    # Canine buff/tempo (anthems Raksha/Lobo/African Wild Dog/Verminus + statics live in
+    # Canine buff/tempo (anthems Raksha/Lobo/Verminus + Outrider's placement static live in
     # strength.py / statics.py - no handler needed here).
     "gray_wolf": {"on_place": _gray_wolf_place},
-    "coyote": {"on_place": _coyote_place},
-    "dhole": {"on_place": _dhole_place},
+    "hyena": {"on_place": _hyena_place},
+    "alpha": {"on_place": _alpha_place},
+    "african_wild_dog": {"on_place": _african_wild_dog_place},
     "clarion": {"on_place": _clarion_place},
-    "red_wolf": {"on_place": _red_wolf_place},
+    "red_wolf": {"on_friendly_play": _red_wolf_friendly_play},
+    "queen_honoria": {"on_friendly_play": _queen_honoria_friendly_play},
     "dingo": {"on_end_of_turn": _dingo_end_of_turn},
     "fox": {"on_gain_strength": _fox_gain_strength},
     "bush_dog": {"on_gain_strength": _bush_dog_gain_strength},
+    # Reserve designs (not in any playable deck; kept for the future hand-buff deck / fixtures).
+    "coyote": {"on_place": _coyote_place},
+    "dhole": {"on_place": _dhole_place},
     "shuck": {"on_place": _shuck_place},
     "jackal": {"on_remove_event": _jackal_remove_event},
     # Egg Control: draw/shuffle/remove food engine + filtered random draws.
