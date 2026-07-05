@@ -52,7 +52,11 @@ A per-turn counter (`turn_flags["food_gained_<player>"]`, reset each turn end; h
 - **Per-Rodent food payoff** (Rat King) — `rat_king_per_rodent`; go-wide reward (cf. Queen Marabunta for Colony).
 
 ## Open tuning items (all magnitudes are config dials)
-- **Combo consistency vs the 100 threshold** — validate on TurnBot/RefereeBot (GreedyBot can't pilot an in-turn combo; its numbers are a floor). Greedy floor after overhaul: 41.5% (was 36.9%).
+- **Validated on TurnBot** (2026-07-05, 30 games/opp vs a TurnBot-piloted field, map_b): **45.2%**
+  under competent play, vs 18.6% when piloted by greedy — a **+26.7pt [+19.5,+33.8]** pilot delta
+  that confirms the combo is real and rewards sequencing (GreedyBot can't execute it; its
+  round-robin floor was 41.5%, was 36.9% pre-overhaul). From dead-last outlier to in the pack;
+  a light dial nudge could reach ~50% but confirm at higher game counts first.
 - Dials: `rat_king_per_rodent=4`, `fed_threshold=10`, `hedgehog_food=5`, `groundhog_strength=5`, `hamster_draw=2`, `chinchilla_bonus_actions=1`, `scrooge_gain_multiplier=1`.
 - **Chinchilla stacking** — two in a turn → +2 actions next turn; watch for degenerate chains (no cap today).
 - **Survival floor** — three sticky bodies (Porcupine uncoverable, Hedgehog + Armadillo Immovable); confirm the deck actually lives to its combo turn.
