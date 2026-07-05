@@ -48,6 +48,7 @@ Goliath no longer has the legendary named-individual exemption.
   - **Nocturne, the Black Swan** — elegant, dark, and disruptive.
   - **Portent, the Black Swan** — directly evokes the unexpected bad event.
   - **Calamity, the Black Swan** — louder and more playful; fits the random hand loss.
+  - **MARTIN NOTE** -- do some clever reference to Talib or whatever his name is
 - [ ] Recommended: **Nocturne** if the Egg deck should remain lyrical; **Portent** if effect
   legibility matters more.
 - [ ] Keep the animal a real black swan. The “black swan event” is metaphorical flavor, not a
@@ -167,7 +168,7 @@ Both can be charming, but the line is currently implicit.
 - [ ] **Keep Bulwark** unless the final policy insists every legendary name sound like a personal
   name. The living-fortress effect fit is exceptionally strong.
 
-### Food sacrifice
+### Food OTk
 
 - [ ] **Keep:** Fathom, Greywhisker.
 - [ ] Decide whether **Carmilla** is the deck's one literary wink. If not, use **Vespera, the
@@ -176,6 +177,7 @@ Both can be charming, but the line is currently implicit.
   kraken-adjacent art may make the deck's references louder than the others.
 - [ ] If Scrooge changes, develop an original hoarder name rather than defaulting to another
   famous rich figure. Working direction: **Tally, Keeper of the Stash**.
+- [ ] we now have two legendaries with "Rat King" in name -- sort that out
 
 ### Aggro
 
