@@ -89,6 +89,14 @@ cohort still needs to be run and interpreted before Balance is ungated.
    plan is invisible to a present-only evaluator). Direction: a pilot whose judgement is *learned
    from experience*, no strategy-class blind spots, measured against recorded human play. Conceptual
    brief for the AI/ML specialist: [`bots/learned-pilot-handoff.md`](bots/learned-pilot-handoff.md).
+   **UPDATE 2026-07-05 — bet re-scoped, not obviated.** The *delayed-single-card-payoff* slice of
+   this ceiling is now closed by a hand-written eval term (`pending_payoff`, commit `ad4c885`; egg/ramp
+   re-rated up, egg into band) — real evidence the *smallest step* (patch the judgement, keep the
+   search) can pay off cheaply. **But the canonical egg-vs-cats gap persists** (~24% bot vs ~50%
+   human): out-scaling cats needs the pilot to *plan* a multi-turn grow-then-win, which a per-position
+   term can't do. So the bet's target narrows to the **multi-turn planning/scaling** gap; the
+   present-state delayed-payoff part is handled. This tightens the handoff's open "smallest step vs
+   full learned player?" question — the smallest step already banked one class of blind spot.
 1. **Pilot-trust verdict IN (2026-07-03): TurnBot is a big step up from greedy but NOT oracle-level.**
    Paired oracle validation (turn vs referee, opp greedy, 60/opp × 7, `results/bot_quality/turn_vs_referee_all/`):
    referee beats turn on all 7 decks (sig. on 5), by ~+4pt (food_otk) to +14pt (ramp). The gaps are
@@ -111,11 +119,16 @@ cohort still needs to be run and interpreted before Balance is ungated.
    slowdown for balance sims, or scope `./report` to fast decks). Node budget (`TURN_MAX_SEARCH_NODES=80`)
    shipped; turn-*depth* cap a no-op (cost is *breadth*); uniform determinization/beam trim rejected.
 4. **Known blind spots:** (a) `region_control` over-values the row-2 spine, so neither bot contests
-   row-1/3 as an HQ-rush lane; (b) **the evaluator scores *current* strength, so it under-values
-   dynamic/scaling bodies** (Rattlesnake→8, Goliath→11) — surfaced 2026-07-04 when egg_control scored
-   ~18% under the bot but ~50% in human play vs referee-cats. This means the turn matrix likely
-   under-rates scaling/HQ-capture decks and **over-rates board/food-control decks (cats' ~69% may be
-   inflated)** — so hold the cats-nerf magnitude until human/oracle spot-checks confirm it.
+   row-1/3 as an HQ-rush lane; (b) **the evaluator scores *current* strength.** ◐ *Partially fixed
+   2026-07-05* — **delayed single-card payoffs** (Egg hatch, Bear) are now credited by
+   `pending_payoff=20` (commit `ad4c885`); egg/ramp re-rated up, egg into band overall, and the
+   referee-quality re-baseline is in `results/matrix_referee_pending20/`. **STILL OPEN:** the
+   *multi-turn scaling plan* (growing Rattlesnake→8 / Goliath→11 to out-body cats) — egg still wins
+   only **~24% vs referee-cats** vs the human's ~50%; a per-position eval term can't orchestrate a
+   grow-then-win plan. Note cats deflated ~69→63 mostly because **ramp** (a delayed-payoff deck the
+   fix lifted) now beats it — *not* because egg's scaling got piloted — so cats may **still** be
+   mildly inflated by the residual scaling gap; confirm the cats-nerf magnitude against human play
+   into cats before committing.
 
 ## 5. CLI / App
 _The human interface. `cli.py`, `render/`. Backlog: [`cli/backlog.md`](cli/backlog.md)._

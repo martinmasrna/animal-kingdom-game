@@ -21,7 +21,7 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Two targets: e
   | food_otk | 35.3 | 40.2 | 37.7 | ~25 (pre-buff) | still slightly weak |
 
   - **✅ egg_control RESOLVED — close the buff question.** Its old ~36% *was* the pilot-under-values-scaling artifact the notes diagnosed; the pending_payoff fix confirms it — egg is 43.5%, in band, **no card change** (validates both the diagnosis and the fix). See [[egg-scaling-blindspot-confirmed]].
-  - **cats recalibrated down (~69 → ~63).** The prior caveat ("cats' ~69% may be partly inflated because the pilot under-plays scaling decks; hold the nerf magnitude") is now resolved: with scaling properly piloted, cats is ~63%. Still **#1 nerf target**, but the nerf **magnitude should be smaller** than the old 69% implied.
+  - **cats recalibrated down (~69 → ~63).** Still **#1 nerf target**, and the nerf **magnitude should be smaller** than the old 69% implied. ⚠️ **But the prior "cats may be inflated because the pilot under-plays scaling" caveat is only *partly* resolved.** cats deflated mostly because **ramp** (a delayed-payoff deck the fix lifted) now beats it (cats-vs-ramp ~29%) — **not** because egg's scaling got piloted: **egg-vs-cats is still ~24% (bot) vs ~50% (human)** (the multi-turn scaling plan is still un-piloted — see `../bots/backlog.md` dynamic-strength item). So ~63% may *still* be mildly inflated; **confirm the cats-nerf magnitude against human play into cats** before committing.
   - **food_otk still ~38%** after the 2026-07-04 OTK-lean buffs — near the 40% floor but not over it; the pending Pufferfish/common-slot follow-up (below) may close it. Highest pilot spread (4.9pt) → lowest-confidence cell.
   - ramp/aggro ~58–59% borderline-high — watch, don't act.
 
