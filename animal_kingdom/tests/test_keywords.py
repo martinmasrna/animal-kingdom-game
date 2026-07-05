@@ -70,25 +70,7 @@ def test_stealth_does_not_hide_from_pestis_wipe():
     assert "black_panther" in s.remove_pile
 
 
-def test_stealth_own_controller_may_still_sacrifice_it():
-    # Black Widow: remove an adjacent *friendly* unit to draw 1 - owner's pick is allowed.
-    s = make_state(hands={"B": ["black_widow"]}, decks={"A": [], "B": ["mouse"]}, current="B")
-    put(s, "4,2", "black_panther", "B")
-    rules.apply_action(s, PlaceAction("black_widow", ("cr", "3,2")))
-    assert s.pending is not None                          # the sac choice IS offered
-    assert ("4,2" in s.pending["options"]) if "options" in s.pending else True
-
-
 # ------------------------------------------------------------- Immovable: physics for all
-
-def test_immovable_blocks_own_controllers_sacrifice():
-    # Carmilla can't eat a Giant Tortoise (decision A2: in-deck cost of the keyword).
-    s = make_state(hands={"B": ["black_widow"]}, decks={"B": ["mouse"]}, current="B")
-    put(s, "4,2", "giant_tortoise", "B")
-    rules.apply_action(s, PlaceAction("black_widow", ("cr", "3,2")))
-    assert s.pending is None                              # no legal sac target -> no choice
-    assert _ids_at(s, "4,2") == ["giant_tortoise"]
-
 
 def test_immovable_survives_mass_aoe():
     s = make_state(hands={"A": ["bulwark"]}, food={"A": 20, "B": 0})
@@ -150,21 +132,3 @@ def test_apex_covers_immovable_prey_instead_of_eating_it():
         assert "elephant" not in s.remove_pile
 
 
-# --------------------------------------------------- automatic effects hit Stealth (B)
-
-def test_pufferfish_retaliation_kills_a_stealth_coverer():
-    # Automatic trigger: covering a pufferfish is fatal even for the panther now.
-    s = make_state(hands={"B": ["black_panther"]}, current="B")
-    put(s, "4,2", "pufferfish", "A")                      # str 1, in B's HQ front column
-    rules.apply_action(s, PlaceAction("black_panther", ("cr", "4,2")))
-    assert "black_panther" in s.remove_pile
-    assert "pufferfish" in s.remove_pile
-
-
-def test_pufferfish_retaliation_still_loses_to_immovable():
-    # Physics beats spikes: an Elephant covering a pufferfish survives.
-    s = make_state(hands={"B": ["elephant"]}, food={"A": 0, "B": 20}, current="B")
-    put(s, "4,2", "pufferfish", "A")
-    rules.apply_action(s, PlaceAction("elephant", ("cr", "4,2")))
-    assert "elephant" not in s.remove_pile
-    assert "pufferfish" in s.remove_pile                  # it still pops itself

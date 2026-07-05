@@ -210,9 +210,9 @@ def test_goliath_strength_equals_remove_pile_size():
 
 def test_immovable_survives_removal_effect():
     s = make_state(hands={"A": ["gray_wolf"]})
-    hand_inst(s, "A", "gray_wolf").strength_counter = 3  # body 7 - meets giant_tortoise's str
+    hand_inst(s, "A", "gray_wolf").strength_counter = 3  # body 7 - clears Armadillo's str 5
     put(s, "1,2", "lion", "A")
-    put(s, "3,2", "giant_tortoise", "B")                 # str 7 but Immovable
+    put(s, "3,2", "armadillo", "B")                      # str 5 but Immovable
     rules.apply_action(s, PlaceAction("gray_wolf", ("cr", "2,2")))
     assert s.owner_of("3,2") == "B"
 
@@ -241,16 +241,6 @@ def test_black_panther_untargetable_by_enemy_effect():
 
 # =============================================================== shared (kept from M2a)
 
-def test_pufferfish_trap_removes_enemy_coverer_and_itself():
-    s = make_state(current="A", hands={"A": ["lion"]}, decks={"A": [], "B": ["fox"]})
-    put(s, "1,2", "caracal", "A")                        # connects 2,2
-    put(s, "2,2", "pufferfish", "B")                     # enemy trap (str 2)
-    rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))   # lion (7) covers it
-    assert s.owner_of("2,2") is None
-    assert "lion" in s.remove_pile and "pufferfish" in s.remove_pile
-    assert hand_ids(s, "B") == ["fox"]                   # pufferfish's owner draws 1 (2026-07-04)
-
-
 def test_gale_returns_first_enemy_coverer_then_stops_reacting():
     s = make_state(current="A", hands={"A": ["lion"]})
     put(s, "1,2", "caracal", "A")                        # connects 2,2
@@ -274,10 +264,10 @@ def test_gale_does_not_react_to_a_friendly_cover():
 
 
 def test_gale_cannot_bounce_an_immovable_coverer():
-    s = make_state(current="A", hands={"A": ["giant_tortoise"]})
+    s = make_state(current="A", hands={"A": ["armadillo"]})
     put(s, "1,2", "caracal", "A")
     gale = put(s, "2,2", "gale", "B")
-    rules.apply_action(s, PlaceAction("giant_tortoise", ("cr", "2,2")))
+    rules.apply_action(s, PlaceAction("armadillo", ("cr", "2,2")))
     assert s.owner_of("2,2") == "A"                      # Immovable resists the bounce
     assert gale.retaliation_used is True                 # but the charge is still consumed
 
@@ -370,42 +360,6 @@ def test_black_swan_hard_cap_fires_once_per_turn():
     s.hands["A"].append(third)
     effects._black_swan_drawn(s, third)
     assert len(s.hands["B"]) == 0                         # cap reset -> fires again next turn
-
-
-def test_opossum_battlecry_gains_food_and_draws():
-    s = make_state(hands={"A": ["opossum"]}, decks={"A": ["fox"], "B": []})
-    rules.apply_action(s, PlaceAction("opossum", ("cr", "1,2")))
-    assert s.food["A"] == CFG.opossum_food
-    assert "fox" in hand_ids(s, "A")
-
-
-def test_opossum_return_is_not_a_remove():
-    s = make_state()
-    put(s, "1,1", "eon", "A")                            # would react to a real removal
-    op = put(s, "2,2", "opossum", "A")
-    effects._remove_specific(s, "2,2", op, by_player="A", by_effect=False)
-    assert "opossum" in hand_ids(s, "A")                # returned to hand
-    assert "opossum" not in s.remove_pile
-    assert s.food["A"] == 0                              # no remove event fired (F9)
-
-
-def test_gazelle_deathrattle_only_on_board_removal():
-    board = make_state()
-    g = put(board, "2,2", "gazelle", "A")
-    effects._remove_specific(board, "2,2", g, by_player="A", by_effect=False)
-    assert board.food["A"] == CFG.gazelle_food
-
-    from_hand = make_state()
-    from_hand.add_to_hand("A", "gazelle")
-    effects.remove_from_hand(from_hand, "A", from_hand.hands["A"][0])
-    assert from_hand.food["A"] == 0                      # a hand remove is not a Deathrattle
-
-
-def test_impala_deathrattle_draws_two():
-    s = make_state(decks={"A": ["lion", "fox", "rat"], "B": []})
-    i = put(s, "2,2", "impala", "A")
-    effects._remove_specific(s, "2,2", i, by_player="A", by_effect=False)
-    assert len(s.hands["A"]) == 2
 
 
 def test_ember_deathrattle_shuffles_itself_back_to_deck():
@@ -508,12 +462,12 @@ def test_apex_covers_but_does_not_eat_an_immovable():
     # Immovable can't be eaten, but the predator may still land on it under normal covering
     # rules (strictly-greater) and simply bury it.
     s = make_state(hands={"A": ["tiger"]})
-    put(s, "1,2", "giant_tortoise", "A")                # own Immovable (str 5)
+    put(s, "1,2", "armadillo", "A")                    # own Immovable (str 5)
     assert PlaceAction("tiger", ("cr", "1,2")) in rules.legal_actions(s)
     rules.apply_action(s, PlaceAction("tiger", ("cr", "1,2")))
     assert s.top_unit("1,2").card_id == "tiger"         # tiger on top
-    assert s.board["1,2"][0].card_id == "giant_tortoise"  # tortoise buried, not eaten
-    assert "giant_tortoise" not in s.remove_pile
+    assert s.board["1,2"][0].card_id == "armadillo"    # armadillo buried, not eaten
+    assert "armadillo" not in s.remove_pile
 
 
 def test_apex_covers_but_does_not_eat_an_enemy_untargetable():
@@ -746,15 +700,6 @@ def test_hornet_has_no_effect_without_a_spare_copy():
     assert s.owner_of("3,2") == "B"
 
 
-def test_carmilla_sacrifices_for_cards():
-    s = make_state(hands={"A": ["carmilla"]}, decks={"A": ["lion", "fox"], "B": []})
-    put(s, "1,2", "squirrel", "A")
-    rules.apply_action(s, PlaceAction("carmilla", ("cr", "1,3")))
-    rules.apply_action(s, ChoiceAction("1,2"))          # sacrifice the squirrel -> draw 1
-    rules.apply_action(s, ChoiceAction(SKIP))           # stop (up to 3)
-    assert s.owner_of("1,2") is None and len(s.hands["A"]) == 1
-
-
 # ================================================================ Stage 2.4: mass effects
 
 def test_pestis_wipes_an_entire_adjacent_stack():
@@ -884,13 +829,12 @@ def test_grizzly_bear_strikes_a_random_adjacent_enemy_later():
     assert s.owner_of("3,2") is None
 
 
-def test_scrooge_banks_food_and_returns_double():
-    s = make_state(current="A", hands={"A": ["scrooge"]},
-                   decks={"A": ["lion"] * 4, "B": ["lynx"] * 4}, food={"A": 30, "B": 0})
+def test_scrooge_doubles_this_turns_haul():
+    # Reworked 2026-07-05: Battlecry gains again whatever you gained this turn (no banking).
+    s = make_state(current="A", hands={"A": ["scrooge"]}, food={"A": 20, "B": 0})
+    s.turn_flags["food_gained_A"] = 20                  # 20 already gained this turn
     rules.apply_action(s, PlaceAction("scrooge", ("cr", "1,2")))
-    assert s.food["A"] == 0                             # banked now
-    advance_to(s, 4)                                    # two of A's turns later
-    assert s.food["A"] == 30 * CFG.scrooge_multiplier
+    assert s.food["A"] == 20 + 20 * CFG.scrooge_gain_multiplier
 
 
 def test_andean_condor_draws_only_when_its_top_is_stronger():

@@ -26,6 +26,8 @@ class Config:
     chipmunk_food_now: int = 10          # decision H: doubled, same reasoning
     chipmunk_food_later: int = 10        # paid at the start of the owner's next turn (doubled)
     flying_squirrel_food: int = 8        # decision H: doubled, same reasoning
+    hedgehog_food: int = 5               # Immovable wall that also feeds (food_otk 2026-07-05)
+    rat_king_per_rodent: int = 4         # Battlecry: gain N food per OTHER Rodent you control
     worker_ant_food: int = 8
     worker_bee_food: int = 5             # +worker_bee_extra if you control another Worker
     worker_bee_extra: int = 5
@@ -40,6 +42,14 @@ class Config:
     queen_marabunta_per_colony: int = 4  # per other friendly Colony unit
     queen_honoria_per_play: int = 5      # per Colony unit you play
     falstaff_food_rider: int = 3         # extra food whenever you gain food
+
+    # --- "Food gained this turn" signature mechanic (food_otk pure-OTK overhaul 2026-07-05) ---
+    # A shared threshold read by Hamster/Muskrat/Groundhog; Scrooge instead doubles the raw haul.
+    fed_threshold: int = 10              # food gained this turn to arm Hamster/Muskrat/Groundhog
+    hamster_draw: int = 2               # Hamster: draw N if fed this turn
+    groundhog_strength: int = 5         # Groundhog: +N strength (stored) if fed this turn
+    scrooge_gain_multiplier: int = 1    # Scrooge: gain (food gained this turn) x this
+    chinchilla_bonus_actions: int = 1   # Chinchilla: extra top-level actions on your NEXT turn
 
     # --- Food-event engine reactors (decision F2/F9; magnitudes are dials) ---
     eon_food: int = 1                    # per draw/shuffle/remove event
@@ -93,8 +103,6 @@ class Config:
     black_bear_delay: int = 2           # turns until Black Bear draws
     black_bear_draw: int = 1
     grizzly_bear_delay: int = 2         # turns until Grizzly Bear's random adjacent removal
-    scrooge_delay: int = 2              # turns until Scrooge's banked food returns
-    scrooge_multiplier: int = 2         # banked food returns x this
 
     # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the
     # per-card default ruling and the data behind it) ---

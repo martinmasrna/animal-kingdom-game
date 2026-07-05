@@ -81,6 +81,20 @@ def can_be_removed(state: GameState, unit: UnitInstance) -> bool:
     return "Immovable" not in state.cards[unit.card_id].keywords
 
 
+def _adjacent_to_friendly_armadillo(state: GameState, unit: UnitInstance) -> bool:
+    """True if `unit` is a board top with a friendly Armadillo topping an adjacent crossroad.
+    Armadillo's aura grants Stealth to the units it shelters (food_otk overhaul 2026-07-05)."""
+    for cr, stack in state.board.items():
+        if not (stack and stack[-1].iid == unit.iid):
+            continue
+        for nb in state.game_map.neighbors(cr):
+            top = state.top_unit(nb)
+            if top and top.owner == unit.owner and top.card_id == "armadillo":
+                return True
+        return False
+    return False
+
+
 def can_be_chosen(state: GameState, unit: UnitInstance, by_player: str) -> bool:
     """Stealth (keyword-review decisions A2/B/E, 2026-07-02): the unit cannot be *chosen*
     by an enemy ability - consulted ONLY when building option lists an enemy chooser picks
@@ -88,9 +102,10 @@ def can_be_chosen(state: GameState, unit: UnitInstance, by_player: str) -> bool:
     (Pestis/Rhinoceros/Bulwark/Sirocco, Grizzly Bear, Hippopotamus, King Theron,
     Pufferfish) do NOT consult this and hit Stealth units normally.
 
-    Carrier: Black Panther.
+    Carriers: Black Panther (keyword); Armadillo grants it to adjacent friendly units (aura).
     """
     card = state.cards[unit.card_id]
-    if "Stealth" in card.keywords and by_player != unit.owner:
-        return False
+    if by_player != unit.owner:
+        if "Stealth" in card.keywords or _adjacent_to_friendly_armadillo(state, unit):
+            return False
     return True

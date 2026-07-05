@@ -1,59 +1,58 @@
 # Deck: FOOD OTK
 
-Sacrifice-for-value combo: feed Deathrattle fodder into sac outlets, burst food, double it,
-cross `win_food` in one big turn. 4-4-6 shape (4 legendary ×1, 4 rare ×2, 6 common ×3 = 30).
-Source: user's offline Google Sheet (uploaded 2026-06-28). **Has one open `?` common.**
-**OTK-lean buff pass applied 2026-07-04** (see `../../balance/backlog.md` "Deck equality"):
-corrected direction after the 2026-07-03 pilot data — lean *into* the OTK identity rather than
-away from it, since Scrooge (the payoff card) was the single worst per-card impact in the deck.
-The fix targets survivability/resilience so the deck lives long enough to cash Scrooge in,
-**not** Scrooge itself (`scrooge_delay`/`scrooge_multiplier` untouched). Pending sim validation.
+**Pure food-combo deck** (overhauled 2026-07-05). Win condition: cross `win_food` (100) in a
+burst. The old deck was three half-decks in one (a food-OTK core, a wall package, and a
+sacrifice package) and finished last at ~33–37%; the overhaul cut the wall/sacrifice packages
+(shelved in [`../shelved-cards.md`](../shelved-cards.md), earmarked for a future Aristocrats-Spider
+deck) and rebuilt around a single, coherent combo. 4-4-6 shape (4 legendary ×1, 4 rare ×2, 6 common ×3 = 30).
 
-## Legendary (×1) — names **PROVISIONAL** (assigned 2026-06-30; final flavor pass pending — alternates in `flavor-review.md` §3)
-| Name | Tag | Str | Effect | Description |
-|---|---|---:|---|---|
-| **Fathom** | — | 4 | Battlecry: draw a legendary unit. | Octopus, looking like a kraken. |
-| **Greywhisker** | Rodent | 1 | Battlecry: gain 1 food. Draw 1 card. You may play 1 more unit. | Old, wise little mouse. |
-| **Carmilla, the Devourer** | Arachnid | 5 | Battlecry: remove up to 3 friendly units. Draw a card for each. | Evil-looking black widow (female name). |
-| **Scrooge, Keeper of the Stash** | Rodent | 4 | Immovable. Battlecry: store all your food. In 2 turns, recover twice as much. | Squirrel with a giant hoard of nuts behind him. *(untouched by the 2026-07-04 pass — it's the diagnostic target, not a lever)* |
+## The plan
+Dig → go wide with cheap Rodents in one turn (Chinchilla's extra action + Greywhisker's replay)
+→ **Rat King** converts the wide board to a food burst, each enabler stacks, and **Scrooge**
+doubles the turn's haul. The **defensive package** (Porcupine / Hedgehog / Armadillo) buys the
+turns to assemble; Armadillo's aura shields the fragile payoff pieces from removal.
+
+## Signature mechanic: **food gained this turn**
+A per-turn counter (`turn_flags["food_gained_<player>"]`, reset each turn end; helper
+`effects._food_gained_this_turn`). Four cards key off it — a unique, teachable identity:
+
+- **Scrooge** — gain again whatever you gained this turn (doubles the haul).
+- **Hamster / Muskrat / Groundhog** — if you gained ≥ `fed_threshold` (10) this turn: draw 2 / remove an adjacent enemy / +5 strength.
+
+## Legendary (×1)
+| Name | Tag | Str | Effect |
+|---|---|---:|---|
+| **Fathom** | — | 4 | Battlecry: draw a legendary unit. *(tutors Rat King / Scrooge)* |
+| **Greywhisker** | Rodent | 1 | Battlecry: gain 1 food. Draw 1 card. You may play 1 more unit. |
+| **Scrooge, Keeper of the Stash** | Rodent | 4 | Battlecry: gain food equal to the food you gained this turn. *(reworked — was the bank-and-double-in-2-turns coin flip; lost Immovable)* |
+| **Rat King** | Rodent | 5 | Battlecry: gain 4 food per other Rodent you control. Draw 1 card. |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
 | **Flying Squirrel** | Rodent | 4 | Flight. Battlecry: gain 8 food. |
-| **Porcupine** | Rodent | 7 | Cannot be covered by enemy units. *(str 5→7, 2026-07-04 — now dodges Jaguar/Rhino/Hippo/Peregrine Falcon thresholds too; already un-buriable per the "quills beat teeth" ruling)* |
-| **Opossum** | — | 2 | Battlecry: gain 5 food and draw 1 card. Deathrattle: return this to your hand. *(food added 2026-07-04 — recyclable via Carmilla/Black Widow sac loops, compounds into what Scrooge later doubles)* |
-| **Giant Tortoise** | — | 7 | Immovable. *(str 5→7, 2026-07-04 — now only buriable, never removable, by strength 8+)* |
+| **Porcupine** | Rodent | 7 | Cannot be covered by enemy units. |
+| **Chinchilla** | Rodent | 3 | Battlecry: next turn, take 1 additional action. |
+| **Armadillo** | — | 5 | Immovable. Adjacent friendly units can't be chosen by enemy abilities. *(grants Stealth as an aura)* |
 
 ## Common (×3)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
 | **Squirrel** | Rodent | 3 | Battlecry: gain 12 food. |
 | **Chipmunk** | Rodent | 1 | Battlecry: gain 10 food. At the start of next turn, gain 10 more. |
-| **Pufferfish** | Fish | 2 | When an enemy unit is placed on top of this, remove that enemy unit and this unit. Draw 1 card. *(ON_COVERED trap — the deck's only interaction/defense; draw added 2026-07-04 since the trap so rarely fires against a competent opponent that its payoff needed raising, not its trigger rate)* |
-| **Black Widow** | Arachnid | 3 | Battlecry: remove an adjacent friendly unit to draw 1. |
-| **Impala** | — | 2 | When this is removed, draw 2. *(watch: still the deck's worst-or-near-worst card after the pass — the natural next lever if so)* |
-| **Gazelle** | — | 2 | When this is removed, gain 30 food. *(40→30, 2026-07-04 — the single-hit swing overshadowed Impala; budget moved into the survivability buffs above)* |
-
----
-
-## Open items — RESOLVED (2026-06-28)
-- **Slot 11 filled:** Pufferfish (Fish 2, ON_COVERED trap) — gives the deck its only enemy interaction + a defensive trap to survive to the combo turn (the deck otherwise has zero ways to touch the opponent's board). New `Fish` tag in this deck.
+| **Hedgehog** | — | 3 | Immovable. Battlecry: gain 5 food. |
+| **Hamster** | Rodent | 3 | Battlecry: if you gained 10+ food this turn, draw 2 cards. |
+| **Muskrat** | Rodent | 3 | Battlecry: if you gained 10+ food this turn, remove an adjacent enemy unit. |
+| **Groundhog** | Rodent | 2 | Battlecry: if you gained 10+ food this turn, gain +5 strength. |
 
 ## New mechanics / systems this deck introduces
-- **`Deathrattle` keyword now in active use** (resolves a `docs/STATUS.md` naming TODO). Opossum prints "Deathrattle: …"; Impala/Gazelle write it out as "When this is removed, …". **Inconsistent wording for the same trigger — standardize** (pick "Deathrattle:" or "When removed", apply uniformly across the pool; Phoenix in Egg Control also uses "When this is removed").
-- **⚠ Friendly-unit removal / sacrifice as a resource.** New targeting direction: effects remove *your own* units as a cost/effect — the Devourer (remove up to 3 friendly, draw each), Black Widow (remove adjacent friendly → draw). Engine needs friendly-target removal **and** must fire Deathrattles on sacrifice (Gazelle/Impala/Opossum payoffs). This is the deck's core loop.
-- **Rarity-filtered tutor/draw:** kraken "draw a legendary unit" — reads card rarity to filter the draw. New (cf. tag-filtered draws in Egg/Ramp, strength-filtered in Ramp).
-- **Store-and-double food** (Keeper of the Stash): "store all your food; in 2 turns, recover twice as much" — Immovable so it resolves. Same shape as the classic hoard-doubler; food sits at 0 during the 2-turn window.
-- **Big Deathrattle payoffs as sac fodder:** Gazelle (remove → +20 food), Impala (remove → draw 2), Opossum (remove → return to hand, recyclable). Devourer + 3 Gazelles = +60 food + draw 3 in one Battlecry; Keeper then doubles the hoard. That's the OTK.
-- **Split delayed food:** Chipmunk "gain 5 now, +5 at start of next turn."
-- **New tag:** `Arachnid`.
+- **Food gained this turn** — the signature counter above (`fed_threshold`, `scrooge_gain_multiplier`).
+- **Bonus actions next turn** (Chinchilla) — `grant_action` op scheduled to the owner's next turn, read off `turn_flags["bonus_actions_<player>"]` by `rules._resolve_and_maybe_end_turn` (`chinchilla_bonus_actions`).
+- **Stealth as an aura** (Armadillo) — `statics.can_be_chosen` now also shelters a unit adjacent to a friendly Armadillo, not just cards with the Stealth keyword.
+- **Per-Rodent food payoff** (Rat King) — `rat_king_per_rodent`; go-wide reward (cf. Queen Marabunta for Colony).
 
-## Flags (resolve in the all-at-once review)
-- **Standardize the Deathrattle wording** (above).
-- **Sacrifice engine semantics:** does removing a friendly unit count as "removed" for all Deathrattle/`ON_REMOVE` triggers? (Assume yes.) Do Immovable units (Keeper, Giant Tortoise) resist *friendly* sacrifice, or only *enemy* removal? Immovable text says "cannot be removed by special effects" — would block your own Devourer from sacrificing them. Likely intended (you wouldn't sac your Immovable anchors), but flag.
-- **"Remove up to 3" / "you may play 1 more" — optional counts:** confirm "up to"/"may" = controller chooses 0..N; bots pick per policy.
-- **Legendary names — provisional set assigned 2026-06-30** (Fathom / Greywhisker / Carmilla, the Devourer / Scrooge, Keeper of the Stash; alternates in `flavor-review.md` §3, flavor-lock pending). The black-widow legendary **Carmilla** is a different card from the common **Black Widow** (legendary = named individual). *(No collision — README decision A.)*
-- **Gazelle 20-food + mass sac = OTK swing** — central tuning dial; sim should check OTK consistency vs the 100 threshold and the 2-turn double window.
-- **Keeper "store all food":** with food = 0 during the window the player can't win-by-food or pay food costs; confirm interaction is identical to other store/double effects. (×1 legendary, so no multi-copy stacking.)
-- **Legendary names** — provisional (assigned 2026-06-30); see the legendary table + the `docs/STATUS.md` flavor-lock item.
+## Open tuning items (all magnitudes are config dials)
+- **Combo consistency vs the 100 threshold** — validate on TurnBot/RefereeBot (GreedyBot can't pilot an in-turn combo; its numbers are a floor). Greedy floor after overhaul: 41.5% (was 36.9%).
+- Dials: `rat_king_per_rodent=4`, `fed_threshold=10`, `hedgehog_food=5`, `groundhog_strength=5`, `hamster_draw=2`, `chinchilla_bonus_actions=1`, `scrooge_gain_multiplier=1`.
+- **Chinchilla stacking** — two in a turn → +2 actions next turn; watch for degenerate chains (no cap today).
+- **Survival floor** — three sticky bodies (Porcupine uncoverable, Hedgehog + Armadillo Immovable); confirm the deck actually lives to its combo turn.

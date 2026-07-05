@@ -38,7 +38,9 @@ Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it
 Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron/Pufferfish
 triggers. Its own controller may still choose it freely. Scope is board-only.
 
-Carried by: Black Panther.
+Carried by: Black Panther (keyword). **Armadillo grants it as an aura** to every friendly unit
+on an adjacent crossroad while Armadillo tops its own (food_otk overhaul 2026-07-05) — the
+first "grant Stealth to others" effect; implemented in `statics.can_be_chosen`.
 
 ### Fragile
 When another occupant is placed on top of this, this is removed — it does not survive under the

@@ -287,19 +287,6 @@ def test_rattlesnake_grows_from_ravens_two_shuffles():
     assert s.card_strength_counters["A"]["rattlesnake"] == 2
 
 
-def test_food_otk_sacrifices_the_deathrattle_payoff():
-    # Black Widow removes an adjacent friendly to draw. The right sacrifice is the Gazelle
-    # (Deathrattle: +30 food, trimmed from 40 in the 2026-07-04 OTK-lean pass), not the decoy mouse.
-    s = make_state(current="A", hands={"A": ["black_widow"]},
-                   decks={"A": ["mouse"] * 3, "B": ["mouse"] * 4},
-                   food={"A": 10, "B": 0}, config=TWO_ACTION)
-    put(s, "1,1", "gazelle", "A")
-    put(s, "1,3", "mouse", "A")     # decoy alternative sacrifice
-    bot = small_turn()
-    play_turn(bot, s)
-    assert s.food["A"] >= 40         # gained ~30 from sacrificing the Gazelle
-
-
 def test_ramp_pays_food_for_the_big_body_battlecry():
     # Bulwark costs 20 food and clears adjacent enemies. With food in the bank TurnBot spends
     # it to play the big body; placing it on the connected HQ front next to the enemy wipes it.

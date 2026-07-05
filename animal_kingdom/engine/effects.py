@@ -269,10 +269,21 @@ def _fire_on_remove(state, unit) -> None:
         hook(state, unit)
 
 
+def _food_gained_this_turn(state: GameState, player: str) -> int:
+    """Food `player` has gained since the start of their current turn (turn_flags reset each
+    turn end). Powers the food_otk signature cards: Scrooge / Hamster / Muskrat / Groundhog."""
+    return state.turn_flags.get(f"food_gained_{player}", 0)
+
+
+def _fed_this_turn(state: GameState, player: str) -> bool:
+    return _food_gained_this_turn(state, player) >= state.config.fed_threshold
+
+
 def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True) -> None:
     if amount <= 0:
         return
     state.food[player] += amount
+    state.turn_flags[f"food_gained_{player}"] = _food_gained_this_turn(state, player) + amount
     if state.food[player] >= state.game_map.win_food:
         state.result = Result(player, "food")
         return
@@ -678,6 +689,15 @@ def _op_grant_strength(state, step):
     return None
 
 
+def _op_grant_action(state, step):
+    """Chinchilla: add extra top-level actions to `player` for the turn this fires on (it is
+    scheduled to fire at the start of the owner's next turn). Read by rules._resolve_and_maybe_end_turn
+    off turn_flags, which resets each turn end - so the grant lasts exactly that one turn."""
+    key = f"bonus_actions_{step['player']}"
+    state.turn_flags[key] = state.turn_flags.get(key, 0) + step["n"]
+    return None
+
+
 OPS: dict[str, Callable] = {
     "gain_food": _op_gain_food,
     "draw": _op_draw,
@@ -690,6 +710,7 @@ OPS: dict[str, Callable] = {
     "play_extra": _op_play_extra,
     "play_named": _op_play_named,
     "grant_strength": _op_grant_strength,
+    "grant_action": _op_grant_action,
 }
 
 
@@ -1448,11 +1469,43 @@ def _op_grizzly_strike(state, step):
 
 
 def _scrooge_place(state, unit, cr):
-    o = unit.owner
-    stored = state.food[o]
-    state.food[o] = 0                                    # bank all food now (F7)
-    schedule(state, o, state.config.scrooge_delay,
-             {"op": "gain_food", "player": o, "amount": stored * state.config.scrooge_multiplier})
+    # Battlecry: double this turn's haul (reworked 2026-07-05 - the old bank-and-double-in-2-turns
+    # was the food_otk coin-flip). Snapshot now; the gain step resolves as a literal amount.
+    haul = _food_gained_this_turn(state, unit.owner)
+    _push_gain(state, unit.owner, haul * state.config.scrooge_gain_multiplier)
+
+
+# --- Food OTK: "food gained this turn" signature cards (pure-OTK overhaul 2026-07-05) ---
+
+def _rat_king_place(state, unit, cr):
+    others = _control_tag_count(state, unit.owner, "Rodent") - 1     # exclude Rat King itself
+    _push_draw(state, unit.owner, 1)
+    _push_gain(state, unit.owner, state.config.rat_king_per_rodent * max(0, others))
+
+
+def _hedgehog_place(state, unit, cr):                                # Immovable body that feeds
+    _push_gain(state, unit.owner, state.config.hedgehog_food)
+
+
+def _chinchilla_place(state, unit, cr):                             # +1 action on your NEXT turn
+    schedule(state, unit.owner, 1,
+             {"op": "grant_action", "player": unit.owner, "n": state.config.chinchilla_bonus_actions})
+
+
+def _hamster_place(state, unit, cr):
+    if _fed_this_turn(state, unit.owner):
+        _push_draw(state, unit.owner, state.config.hamster_draw)
+
+
+def _muskrat_place(state, unit, cr):
+    if _fed_this_turn(state, unit.owner):
+        _push_remove_choice(state, unit.owner, "muskrat",
+                            _adjacent_enemy_targets(state, unit, cr))
+
+
+def _groundhog_place(state, unit, cr):
+    if _fed_this_turn(state, unit.owner):
+        _grant(state, [unit.iid], state.config.groundhog_strength)  # stored +5, permanent
 
 
 # --- Reveal (Ramp) ---
@@ -1575,7 +1628,14 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Delayed.
     "black_bear": {"on_place": _black_bear_place},
     "grizzly_bear": {"on_place": _grizzly_place},
+    # Food OTK: "food gained this turn" signature + go-wide rodent payoff (2026-07-05 overhaul).
     "scrooge": {"on_place": _scrooge_place},
+    "rat_king": {"on_place": _rat_king_place},
+    "hedgehog": {"on_place": _hedgehog_place},
+    "chinchilla": {"on_place": _chinchilla_place},
+    "hamster": {"on_place": _hamster_place},
+    "muskrat": {"on_place": _muskrat_place},
+    "groundhog": {"on_place": _groundhog_place},
     # Reveal.
     "andean_condor": {"on_place": _andean_condor_place},
     "oxpecker": {"on_place": _oxpecker_place},

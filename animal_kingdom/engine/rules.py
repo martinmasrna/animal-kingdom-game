@@ -93,7 +93,9 @@ def _resolve_and_maybe_end_turn(state: GameState) -> None:
         return  # game decided (HQ capture / food)
     if state.effect_stack or state.pending is not None:
         return  # still resolving (a choice is pending or steps remain)
-    if (state.actions_taken_this_turn < state.config.actions_per_turn
+    action_limit = (state.config.actions_per_turn
+                    + state.turn_flags.get(f"bonus_actions_{state.current}", 0))  # Chinchilla
+    if (state.actions_taken_this_turn < action_limit
             and _top_level_actions(state)):
         return  # actions remain and something is playable: the turn stays open
     _end_turn(state)

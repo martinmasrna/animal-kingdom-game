@@ -649,15 +649,15 @@
       "text": "Battlecry: gain 1 food. Draw 1 card. You may play 1 more unit."
     },
     {
-      "id": "carmilla",
-      "name": "Carmilla, the Devourer",
+      "id": "rat_king",
+      "name": "Rat King",
       "deck": "food_otk",
       "rarity": "legendary",
       "type": "unit",
-      "tags": ["Arachnid"],
+      "tags": ["Rodent"],
       "base_strength": 5,
       "keywords": [],
-      "text": "Battlecry: remove up to 3 friendly units. Draw a card for each."
+      "text": "Battlecry: gain 4 food for each other Rodent you control. Draw 1 card."
     },
     {
       "id": "scrooge",
@@ -667,8 +667,8 @@
       "type": "unit",
       "tags": ["Rodent"],
       "base_strength": 4,
-      "keywords": ["Immovable"],
-      "text": "Immovable. Battlecry: store all your food. In 2 turns, recover twice as much."
+      "keywords": [],
+      "text": "Battlecry: gain food equal to the food you gained this turn."
     },
     {
       "id": "flying_squirrel",
@@ -693,26 +693,26 @@
       "text": "Cannot be covered by enemy units."
     },
     {
-      "id": "opossum",
-      "name": "Opossum",
+      "id": "chinchilla",
+      "name": "Chinchilla",
       "deck": "food_otk",
       "rarity": "rare",
       "type": "unit",
-      "tags": [],
-      "base_strength": 2,
+      "tags": ["Rodent"],
+      "base_strength": 3,
       "keywords": [],
-      "text": "Battlecry: gain 5 food and draw 1 card. Deathrattle: return this to your hand."
+      "text": "Battlecry: next turn, take 1 additional action."
     },
     {
-      "id": "giant_tortoise",
-      "name": "Giant Tortoise",
+      "id": "armadillo",
+      "name": "Armadillo",
       "deck": "food_otk",
       "rarity": "rare",
       "type": "unit",
       "tags": [],
-      "base_strength": 7,
+      "base_strength": 5,
       "keywords": ["Immovable"],
-      "text": "Immovable."
+      "text": "Immovable. Adjacent friendly units can't be chosen by enemy abilities."
     },
     {
       "id": "squirrel",
@@ -737,48 +737,48 @@
       "text": "Battlecry: gain 10 food. At the start of next turn, gain 10 more."
     },
     {
-      "id": "pufferfish",
-      "name": "Pufferfish",
+      "id": "hedgehog",
+      "name": "Hedgehog",
       "deck": "food_otk",
       "rarity": "common",
       "type": "unit",
-      "tags": ["Fish"],
-      "base_strength": 2,
-      "keywords": [],
-      "text": "When an enemy unit is placed on top of this, remove that enemy unit and this unit. Draw 1 card."
+      "tags": [],
+      "base_strength": 3,
+      "keywords": ["Immovable"],
+      "text": "Immovable. Battlecry: gain 5 food."
     },
     {
-      "id": "black_widow",
-      "name": "Black Widow",
+      "id": "hamster",
+      "name": "Hamster",
       "deck": "food_otk",
       "rarity": "common",
       "type": "unit",
-      "tags": ["Arachnid"],
+      "tags": ["Rodent"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Battlecry: remove an adjacent friendly unit to draw 1."
+      "text": "Battlecry: if you gained 10 or more food this turn, draw 2 cards."
     },
     {
-      "id": "impala",
-      "name": "Impala",
+      "id": "muskrat",
+      "name": "Muskrat",
       "deck": "food_otk",
       "rarity": "common",
       "type": "unit",
-      "tags": [],
-      "base_strength": 2,
+      "tags": ["Rodent"],
+      "base_strength": 3,
       "keywords": [],
-      "text": "When this is removed, draw 2."
+      "text": "Battlecry: if you gained 10 or more food this turn, remove an adjacent enemy unit."
     },
     {
-      "id": "gazelle",
-      "name": "Gazelle",
+      "id": "groundhog",
+      "name": "Groundhog",
       "deck": "food_otk",
       "rarity": "common",
       "type": "unit",
-      "tags": [],
+      "tags": ["Rodent"],
       "base_strength": 2,
       "keywords": [],
-      "text": "When this is removed, gain 30 food."
+      "text": "Battlecry: if you gained 10 or more food this turn, gain +5 strength."
     },
 
     {
