@@ -54,7 +54,7 @@
       "tags": ["Cat"],
       "base_strength": 5,
       "keywords": [],
-      "text": "Battlecry: remove an adjacent enemy of strength 5 or less."
+      "text": "Battlecry: remove an adjacent enemy of strength 4 or less."
     },
     {
       "id": "serval",
@@ -474,7 +474,7 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Megafauna"],
-      "base_strength": 5,
+      "base_strength": 3,
       "keywords": ["Immovable"],
       "text": "Immovable. At the end of your turn, gain 5 food."
     },
@@ -487,8 +487,8 @@
       "tags": ["Bear"],
       "base_strength": 10,
       "keywords": ["Apex Predator"],
-      "food_cost": 20,
-      "text": "Apex Predator. Costs 20 food."
+      "food_cost": 15,
+      "text": "Apex Predator. Costs 15 food."
     },
     {
       "id": "aquila",
@@ -499,8 +499,8 @@
       "tags": ["Bird"],
       "base_strength": 8,
       "keywords": ["Flight", "Apex Predator"],
-      "food_cost": 20,
-      "text": "Flight. Apex Predator. Costs 20 food."
+      "food_cost": 15,
+      "text": "Flight. Apex Predator. Costs 15 food."
     },
     {
       "id": "bulwark",
@@ -511,8 +511,8 @@
       "tags": ["Megafauna"],
       "base_strength": 10,
       "keywords": ["Immovable"],
-      "food_cost": 20,
-      "text": "Immovable. Costs 20 food. Battlecry: remove all adjacent units."
+      "food_cost": 15,
+      "text": "Immovable. Costs 15 food. Battlecry: remove all adjacent units."
     },
     {
       "id": "polar_bear",
@@ -567,8 +567,8 @@
       "tags": ["Megafauna"],
       "base_strength": 8,
       "keywords": ["Immovable"],
-      "food_cost": 20,
-      "text": "Immovable. Costs 20 food."
+      "food_cost": 15,
+      "text": "Immovable. Costs 15 food."
     },
     {
       "id": "grizzly_bear",

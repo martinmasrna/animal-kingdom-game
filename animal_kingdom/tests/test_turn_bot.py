@@ -288,7 +288,7 @@ def test_rattlesnake_grows_from_ravens_two_shuffles():
 
 
 def test_ramp_pays_food_for_the_big_body_battlecry():
-    # Bulwark costs 20 food and clears adjacent enemies. With food in the bank TurnBot spends
+    # Bulwark costs 15 food and clears adjacent enemies. With food in the bank TurnBot spends
     # it to play the big body; placing it on the connected HQ front next to the enemy wipes it.
     s = make_state(current="A", hands={"A": ["bulwark"]},
                    decks={"A": ["mouse"] * 3, "B": ["mouse"] * 4},
@@ -299,7 +299,7 @@ def test_ramp_pays_food_for_the_big_body_battlecry():
     bot = small_turn()
     play_turn(bot, s)
     assert "bulwark" in own_ids(s, "A")
-    assert s.food["A"] <= 12                              # paid the 20-food cost
+    assert s.food["A"] <= 15                              # paid the 15-food cost
     top = s.top_unit("1,2")
     assert top is None or top.owner == "A"                # enemy on A's HQ front neutralized
 

@@ -494,12 +494,12 @@ def test_apex_destroys_an_egg():
 # ====================================================== Stage 2.3: "Costs X food" (dec. F)
 
 def test_food_cost_gates_placement_and_is_paid():
-    s = make_state(hands={"A": ["elephant"]}, food={"A": 19, "B": 0})
-    assert not [a for a in rules.legal_actions(s) if a.card_id == "elephant"]   # 19 < 20
-    s.food["A"] = 20
+    s = make_state(hands={"A": ["elephant"]}, food={"A": 14, "B": 0})
+    assert not [a for a in rules.legal_actions(s) if a.card_id == "elephant"]   # 14 < 15
+    s.food["A"] = 15
     assert [a for a in rules.legal_actions(s) if a.card_id == "elephant"]       # now affordable
     rules.apply_action(s, PlaceAction("elephant", ("cr", "1,2")))
-    assert s.food["A"] == 0                              # 20 paid on placement
+    assert s.food["A"] == 0                              # 15 paid on placement
 
 
 # ========================================================= Stage 2.3: Landmarks (dec. C)
@@ -656,7 +656,7 @@ def test_rhinoceros_sweeps_only_small_adjacent_enemies():
 
 
 def test_bulwark_pays_cost_and_clears_all_adjacent_units_friend_and_foe():
-    s = make_state(hands={"A": ["bulwark"]}, food={"A": 20, "B": 0})
+    s = make_state(hands={"A": ["bulwark"]}, food={"A": 15, "B": 0})
     put(s, "1,2", "caracal", "A")                       # friendly - connects 2,2, caught in the blast
     put(s, "3,2", "lion", "B")                          # 7 - removed (uncapped)
     rules.apply_action(s, PlaceAction("bulwark", ("cr", "2,2")))
