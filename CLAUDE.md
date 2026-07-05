@@ -8,6 +8,12 @@ transport-agnostic library; no UI.
 state, next moves). Open items per area live in `docs/<area>/backlog.md`. Rules are
 source-of-truth in `docs/rules/` (`overview.md`, `keywords.md`).
 
+> ⚠ **Before reasoning about any card, effect, or balance change, read
+> [`docs/rules/mental-model.md`](docs/rules/mental-model.md).** This game has **no mana, no
+> attack/health, no combat damage** — it is *not* Magic/Hearthstone despite the shared vocabulary.
+> Pattern-matching onto those systems (e.g. "STR 2 is fragile / dies to a ping", "mana curve",
+> "removal spell", "go wide for damage") is the single most common recurring mistake here.
+
 ## Commands
 
 Python ≥3.11; venv at `.venv` (`python3 -m venv .venv && .venv/bin/pip install -e '.[dev,cli]'`).
