@@ -23,6 +23,11 @@ Python ≥3.11; venv at `.venv` (`python3 -m venv .venv && .venv/bin/pip install
 - **Balance simulation/report:** `./report 500` (human-readable); add `--format files
   --out results/baseline` for CSV/JSON or `--format both` for both outputs from one run.
   Use `--deck aggro` to scope one deck.
+- **Game logs / replay:** add `--log results/run.jsonl` to any `./report` run to capture every
+  game's action sequence (JSONL). Because games are deterministic, replay any of them move-by-move
+  with **no bot compute** via `python -m animal_kingdom.sim.replay results/run.jsonl [--deck X
+  --opponent Y --seed N]`. Prefer this over re-simulating to inspect a matchup (referee search is
+  expensive to re-pay).
 - **Paired bot-quality benchmark:** `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/turnbot`
 
 The ruleset is **map_b + 2 actions/turn** (draw 1 per Draw action) — the shipped default everywhere,

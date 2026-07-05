@@ -40,6 +40,10 @@ class GameRecord:
     cards_drawn_b: frozenset[str] = frozenset()
     final_food_a: int = 0
     final_food_b: int = 0
+    # Full ordered action log (each action.to_dict()), populated only when play_game is called
+    # with log_actions=True. Lets a game be replayed move-by-move with no bot compute (the bots'
+    # search is bypassed - the stored actions are applied straight through the rules engine).
+    actions: tuple = ()
 
     def to_dict(self) -> dict:
         return {"deck_a": self.deck_a, "deck_b": self.deck_b, "seed": self.seed,
@@ -183,13 +187,19 @@ def play_game(
     bot_b: Bot,
     config: Optional[Config] = None,
     map_id: str = "map_b",
+    log_actions: bool = False,
 ) -> GameRecord:
-    """Play one headless game and return its record. Mirrors the cli.play loop."""
+    """Play one headless game and return its record. Mirrors the cli.play loop.
+
+    With `log_actions=True` the returned record carries the full ordered action log, so the
+    game can be replayed move-by-move later without re-invoking the bots (see sim/replay.py).
+    """
     state = new_game(load_premade_deck(deck_a), load_premade_deck(deck_b), seed,
                      map_id=map_id, config=config)
     bots = {"A": bot_a, "B": bot_b}
 
     drawn: dict[str, set[str]] = {"A": set(), "B": set()}
+    trace: list[dict] = []
 
     def _snapshot_hands() -> None:
         for seat in ("A", "B"):
@@ -201,6 +211,8 @@ def play_game(
         actor = state.player_to_act()
         legal = rules.legal_actions(state)
         action = bots[actor].choose(state.view_for(actor), legal, state)
+        if log_actions:
+            trace.append(action.to_dict())
         rules.apply_action(state, action)
         _snapshot_hands()  # catches draws, bounces, tutors - anything that touches hands
         result = rules.is_terminal(state)
@@ -208,7 +220,7 @@ def play_game(
     return GameRecord(deck_a, deck_b, seed, state.first_player,
                       result.winner, result.reason, state.turn_counter,
                       frozenset(drawn["A"]), frozenset(drawn["B"]),
-                      state.food["A"], state.food["B"])
+                      state.food["A"], state.food["B"], tuple(trace))
 
 
 # --------------------------------------------------------------- match specs
@@ -230,6 +242,7 @@ class MatchSpec:
     # (("deck_reveal_choice_width", 0),)); empty => the kind's default config.
     kwargs_a: tuple = ()
     kwargs_b: tuple = ()
+    log_actions: bool = False
 
 
 def _run_spec(spec: MatchSpec, config: Optional[Config] = None) -> GameRecord:
@@ -238,7 +251,8 @@ def _run_spec(spec: MatchSpec, config: Optional[Config] = None) -> GameRecord:
     bot_b = make_bot(spec.bot_b, seed=spec.seed * 2 + 2, weights=spec.weights_b,
                      extra=dict(spec.kwargs_b))
     return play_game(spec.deck_a, spec.deck_b, spec.seed,
-                     bot_a=bot_a, bot_b=bot_b, config=config, map_id=spec.map_id)
+                     bot_a=bot_a, bot_b=bot_b, config=config, map_id=spec.map_id,
+                     log_actions=spec.log_actions)
 
 
 def run_specs(
@@ -296,6 +310,7 @@ def run_pairs(
     config: Optional[Config] = None,
     map_id: str = "map_b",
     jobs: int = 1,
+    log_actions: bool = False,
     progress: Optional[Callable[[str, str, int, int], None]] = None,
     game_progress: Optional[Callable[[str, str, int, int], None]] = None,
     matchup_progress: Optional[
@@ -321,7 +336,8 @@ def run_pairs(
     def _pair_specs(pair_index: int, a: str, b: str) -> list[MatchSpec]:
         pair_seed = base_seed + pair_index * n_games
         return [MatchSpec(a, b, pair_seed + i, bots[0], bots[1], map_id,
-                          weights[0], weights[1], bot_kwargs[0], bot_kwargs[1])
+                          weights[0], weights[1], bot_kwargs[0], bot_kwargs[1],
+                          log_actions=log_actions)
                 for i in range(n_games)]
 
     def _run_batch(ex: Optional[ProcessPoolExecutor], a: str, b: str,

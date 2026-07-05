@@ -204,6 +204,9 @@ def main(
                    help=f"output mode (default: {default_format})")
     p.add_argument("--out", default="results",
                    help="metrics output directory for --format files/both")
+    p.add_argument("--log", default=None,
+                   help="also write a per-game action log (JSONL) to this path, for later "
+                        "move-by-move replay via `python -m animal_kingdom.sim.replay`")
     args = p.parse_args(argv)
 
     if args.games is not None and args.games_option is not None:
@@ -289,11 +292,16 @@ def main(
               file=sys.stderr, flush=True)
 
     records = run_pairs(pairs, args.games, args.seed, bots=bots, config=config,
-                        map_id=args.map_id, jobs=args.jobs,
+                        map_id=args.map_id, jobs=args.jobs, log_actions=bool(args.log),
                         game_progress=_game_progress,
                         matchup_progress=_matchup_progress)
     print(f"Simulation done in {time.monotonic() - start:.1f}s.\n",
           file=sys.stderr, flush=True)
+
+    if args.log:
+        from .replay import write_game_logs
+        n = write_game_logs(records, args.log, map_id=args.map_id, bots=bots)
+        print(f"Wrote {n} game action-logs to {args.log}", file=sys.stderr, flush=True)
 
     if args.output_format in ("files", "both"):
         summary = metrics.write_all(records, args.out)
