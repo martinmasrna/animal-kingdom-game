@@ -8,6 +8,23 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Two targets: e
   ~2h validation run as the food_otk/egg_control Decision H buffs below (small-change sims
   don't justify a standalone run per this session's constraint). Watch list still open: see
   `card-balance-todo.md`'s "Quick follow-up sweep."
+- [ ] **★ Fixed-pilot re-baseline (2026-07-05) — supersedes the oracle-corrected table below.** After shipping `GreedyWeights.pending_payoff=20` (the scaling/delayed-effect eval fix, commit ad4c885; turn/referee share the evaluator so they inherit it), regenerated the 7×7 matrix with BOTH strong pilots directly — no oracle-correction needed. Provenance: `results/matrix_referee_pending20/` (referee,referee, 150 games/matchup) + `results/matrix_turn_pending20/` (turn,turn, 200), seed 0, map_b + 2-action, both seats. Deck strength (both-seat avg); the two pilots agree tightly (spread ≤4.9pt) → deck-level numbers reliable:
+
+  | deck | referee | turn | avg | prev ~corrected | verdict |
+  |---|---:|---:|---:|---:|---|
+  | cats_midrange | 62.6 | 63.0 | **62.8** | ~69 | too strong — but LESS than before |
+  | ramp | 60.0 | 58.5 | 59.2 | ~61 | borderline-high, watch |
+  | aggro_hq_rush | 60.2 | 56.0 | 58.1 | ~60 | borderline-high, watch |
+  | colony_food_swarm | 45.1 | 46.8 | 46.0 | ~48 | ✓ in band |
+  | egg_control | 44.5 | 42.4 | **43.5** | ~36 | ✓ **NOW IN BAND** |
+  | canine_buff_tempo | 42.3 | 43.1 | 42.7 | ~51 | ✓ in band |
+  | food_otk | 35.3 | 40.2 | 37.7 | ~25 (pre-buff) | still slightly weak |
+
+  - **✅ egg_control RESOLVED — close the buff question.** Its old ~36% *was* the pilot-under-values-scaling artifact the notes diagnosed; the pending_payoff fix confirms it — egg is 43.5%, in band, **no card change** (validates both the diagnosis and the fix). See [[egg-scaling-blindspot-confirmed]].
+  - **cats recalibrated down (~69 → ~63).** The prior caveat ("cats' ~69% may be partly inflated because the pilot under-plays scaling decks; hold the nerf magnitude") is now resolved: with scaling properly piloted, cats is ~63%. Still **#1 nerf target**, but the nerf **magnitude should be smaller** than the old 69% implied.
+  - **food_otk still ~38%** after the 2026-07-04 OTK-lean buffs — near the 40% floor but not over it; the pending Pufferfish/common-slot follow-up (below) may close it. Highest pilot spread (4.9pt) → lowest-confidence cell.
+  - ramp/aggro ~58–59% borderline-high — watch, don't act.
+
 - [ ] **Deck equality → pull every deck into 40–60%.** **Current best read = the turn-vs-turn 7×7 matrix at the settled ruleset, oracle-bias-corrected (2026-07-03).** Both-seats competent piloting (`results/matrix_turn/` — regenerate via `python -m animal_kingdom.sim --decks all --games 200 --seed 0 --bots turn,turn --out results/matrix_turn`; greedy baseline in `results/matrix_greedy/`), then adjusted by each deck's referee-underplay gap (`results/bot_quality/turn_vs_referee_all/`, see `../bots/backlog.md` pilot-trust item). Corrected standings:
 
   | deck | greedy WR | turn WR | oracle-corrected* | verdict |
