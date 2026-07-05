@@ -91,7 +91,7 @@ class Config:
     serval_min: int = 6                  # removes an enemy of strength >= this
     stoop_max: int = 4                   # card-balance-todo: Stoop moved to egg_control as a rare,
                                           # 6→4 (id kept as "stoop"; printed name "Peregrine Falcon")
-    rhinoceros_max: int = 5
+    rhinoceros_max: int = 3              # proactive Battlecry mirror of Hippopotamus (5→3, 2026-07-05)
     hippopotamus_max: int = 3
 
     # --- Placement costs (decision F) ---

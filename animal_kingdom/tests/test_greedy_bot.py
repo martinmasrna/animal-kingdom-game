@@ -268,7 +268,7 @@ def test_lookahead_is_deterministic():
 
 
 def test_pending_payoff_surfaces_grizzly_delayed_removal_at_1_ply():
-    # A strength-7 blocker (as strong as Grizzly Bear, stronger than my other cards) can't be
+    # A strength-7 blocker (stronger than Grizzly Bear's str-6 body and my other cards) can't be
     # covered directly by anything I hold - the only way to clear it is Grizzly Bear's "in 2
     # turns, remove a random adjacent enemy" battlecry. The blind eval (pending_payoff=0)
     # treats Grizzly as a plain vanilla body and needed deep own-line lookahead to play the

@@ -13,7 +13,7 @@ str. See `../../balance/card-balance-todo.md`.
 | **Verminus, the Rat King** | Rodent | 3 | Has +1 strength for each other unit you control. *(swarm → wall-breaker finisher; art: a writhing mass of rats)* |
 | **Pestis** | Rodent | 3 | Battlecry: remove everything from an adjacent crossroad. *(art: a plague rat; whole-tile wipe)* |
 | **Sirocco** | — | 5 | Battlecry: return all enemy units adjacent to this to their owner's hand. *(mass-bounce disruptor — opens the HQ front; art: a great musk-beast / legendary skunk)* |
-| **Gale** | Bird | 4 | Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand. *(card-balance-todo, 2026-07-04: replaces Stoop, which moved to Egg Control as a rare; name provisional)* |
+| **Gale** | Bird | 6 | Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand. *(2026-07-05: str 4→6 — worst card in the deck at −7.1% impact; a flying 6 is a sticky body even when the reactive bounce never fires. Watch: may still read as off-identity reactive; rework the effect if it stays underwater)* |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |

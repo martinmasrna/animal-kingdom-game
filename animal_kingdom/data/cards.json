@@ -512,7 +512,7 @@
       "base_strength": 10,
       "keywords": ["Immovable"],
       "food_cost": 20,
-      "text": "Immovable. Costs 20 food. Battlecry: remove all adjacent enemy units."
+      "text": "Immovable. Costs 20 food. Battlecry: remove all adjacent units."
     },
     {
       "id": "polar_bear",
@@ -534,7 +534,7 @@
       "tags": ["Megafauna"],
       "base_strength": 6,
       "keywords": [],
-      "text": "Battlecry: remove all adjacent enemies of strength 5 or less."
+      "text": "Battlecry: remove all adjacent enemies of strength 3 or less."
     },
     {
       "id": "hippopotamus",
@@ -577,7 +577,7 @@
       "rarity": "common",
       "type": "unit",
       "tags": ["Bear"],
-      "base_strength": 7,
+      "base_strength": 6,
       "keywords": [],
       "text": "Battlecry: in 2 turns, remove a random adjacent enemy."
     },
@@ -821,7 +821,7 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Bird"],
-      "base_strength": 4,
+      "base_strength": 6,
       "keywords": ["Flight"],
       "text": "Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand."
     },

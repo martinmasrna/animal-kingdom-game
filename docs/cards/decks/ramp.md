@@ -10,13 +10,13 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Incomplete — has 
 | **Methuselah** | Megafauna | 5 | Immovable. At the end of your turn, gain 5 food. | Colossal ancient tortoise. *(ramp engine + wall)* |
 | **Borealis** | Bear | 10 | Apex Predator. Costs 20 food. | Giant polar bear. |
 | **Aquila** | Bird | 8 | Flight. Apex Predator. Costs 20 food. | Giant harpy eagle. |
-| **Bulwark** | Megafauna | 10 | Immovable. Costs 20 food. Battlecry: remove all adjacent enemy units. | Titanic rhino. *(anti-aggro stomp / fortress finisher)* |
+| **Bulwark** | Megafauna | 10 | Immovable. Costs 20 food. Battlecry: remove all adjacent units. | Titanic rhino. *(anti-aggro stomp / fortress finisher; 2026-07-05 nerf: now clears friendly neighbours too — place with care)* |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
 | **Polar Bear** | Bear | 8 | Apex Predator. |
-| **Rhinoceros** | Megafauna | 6 | Battlecry: remove all adjacent enemies of strength 5 or less. *(proactive charge sweep)* |
+| **Rhinoceros** | Megafauna | 6 | Battlecry: remove all adjacent enemies of strength 3 or less. *(2026-07-05: 5→3, the proactive Battlecry mirror of Hippopotamus; was strictly better than Jaguar)* |
 | **Hippopotamus** | Megafauna | 6 | When an enemy unit is placed on an adjacent crossroad, remove it if its strength is 3 or less. *(reactive territorial deterrent; cost dropped)* |
 | **Andean Condor** | Bird | 4 | Flight. Reveal top card of both decks. If yours has higher strength, draw it. |
 
@@ -24,7 +24,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Incomplete — has 
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
 | **Elephant** | Megafauna | 8 | Immovable. Costs 20 food. |
-| **Grizzly Bear** | Bear | 7 | Battlecry: in 2 turns, remove a random adjacent enemy. |
+| **Grizzly Bear** | Bear | 6 | Battlecry: in 2 turns, remove a random adjacent enemy. *(2026-07-05: 7→6 — a common with a str-7 body AND an effect outclassed the vanilla-Lion-7 baseline)* |
 | **Oxpecker** | Bird | 1 | Flight. Gain 1 food for each unit in your starting deck with strength 6 or more. |
 | **Black Bear** | Bear | 5 | Battlecry: in 2 turns, draw 1 card. |
 | **Fig Tree** | Landmark | 0 | Fragile. At the start of next turn, gain 20 food. |
@@ -34,7 +34,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Incomplete — has 
 
 ## Open items — RESOLVED (2026-06-28)
 - **2 legendaries filled:** colossal ancient tortoise (Megafauna 5, ramp engine + wall) and titanic rhino (Megafauna 10, anti-aggro stomp). Names still TBD.
-- **Rhinoceros:** proactive AoE charge sweep (remove all adjacent ≤5).
+- **Rhinoceros:** proactive AoE charge sweep (remove all adjacent ≤3) — the Battlecry mirror of Hippopotamus.
 - **Hippopotamus:** reworked Battlecry-sweep → reactive territorial deterrent (remove adjacent placements ≤3); **Costs 20 dropped** (now a free on-curve body).
 - Removal suite reads cleanly: Rhino = proactive AoE, Hippo = reactive AoE, titanic rhino = proactive uncapped stomp. No cheap single-target removal (intentional — not Ramp's identity).
 

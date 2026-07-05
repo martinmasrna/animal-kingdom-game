@@ -1173,9 +1173,13 @@ def _rhinoceros_place(state, unit, cr):
 
 
 def _bulwark_place(state, unit, cr):
-    for nb in _adjacent_enemy_targets(state, unit, cr, chosen=False):  # uncapped AoE, hits Stealth
-        state.effect_stack.append({"op": "remove_iid", "iid": state.top_unit(nb).iid,
-                                   "by_player": unit.owner, "by_card": "bulwark"})
+    # Remove ALL adjacent units, friend and foe (2026-07-05 nerf: was enemies only). Automatic
+    # mass effect, so it hits Stealth; Immovable neighbours survive (can_be_removed).
+    for nb in sorted(state.game_map.neighbors(cr)):
+        top = state.top_unit(nb)
+        if top and state.cards[top.card_id].is_unit and statics.can_be_removed(state, top):
+            state.effect_stack.append({"op": "remove_iid", "iid": top.iid,
+                                       "by_player": unit.owner, "by_card": "bulwark"})
 
 
 def _hippo_enemy_placed(state, hippo, placed, cr):

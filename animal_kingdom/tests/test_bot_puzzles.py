@@ -59,11 +59,12 @@ def test_prefers_region_richer_hq_front_tile():
     assert chosen == richer
 
 
-def test_recognizes_grizzly_bear_delayed_removal_as_better_than_a_vanilla_twin():
+def test_recognizes_grizzly_bear_delayed_removal_as_better_than_a_vanilla_body():
     # Retired xfail (2026-07-04): GreedyWeights.pending_payoff now credits owned scheduled
-    # effects, so a Grizzly Bear's delayed removal outscores a same-strength vanilla body.
+    # effects, so a Grizzly Bear's delayed removal outscores a plain vanilla body even though
+    # Grizzly's own body is smaller (str 6 after the 2026-07-05 nerf) than the vanilla Lion (7).
     # This was the tripwire for the scheduled/delayed-effect blind spot; the fix trips it.
-    s = make_state(hands={"A": ["grizzly_bear", "lion"]})   # both base_strength 7
+    s = make_state(hands={"A": ["grizzly_bear", "lion"]})   # grizzly str 6 + effect vs lion str 7
     put(s, "2,2", "mouse", "B")                              # a free future target
 
     grizzly = s.clone()
