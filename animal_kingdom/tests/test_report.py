@@ -6,7 +6,14 @@ import pytest
 
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine.cards import DECK_SLUGS, load_cards
-from animal_kingdom.sim.report import _resolve_deck, format_focused_matrix, format_matrix, format_report
+from animal_kingdom.sim import report as report_module
+from animal_kingdom.sim.report import (
+    _crossed_progress_decile,
+    _resolve_deck,
+    format_focused_matrix,
+    format_matrix,
+    format_report,
+)
 from animal_kingdom.sim.runner import GameRecord
 
 
@@ -94,3 +101,79 @@ def test_format_report_with_focus_deck_only_prints_that_decks_table():
     assert "### ramp (deck win rate" in report
     assert "### egg_control" not in report
     assert "### Matchup matrix" not in report
+
+
+def test_progress_deciles_scale_with_matchup_size():
+    assert [done for done in range(1, 201) if _crossed_progress_decile(done, 200)] == [
+        20, 40, 60, 80, 100, 120, 140, 160, 180, 200,
+    ]
+    assert [done for done in range(1, 96) if _crossed_progress_decile(done, 95)] == [
+        10, 19, 29, 38, 48, 57, 67, 76, 86, 95,
+    ]
+    assert [done for done in range(1, 6) if _crossed_progress_decile(done, 5)] == [
+        1, 2, 3, 4, 5,
+    ]
+
+
+def test_report_cli_prints_game_progress_and_completed_matchup_win_rates(monkeypatch, capsys):
+    records = [
+        GameRecord("ramp", "ramp", 0, "A", "A", "food", 10),
+        GameRecord("ramp", "ramp", 1, "A", "A", "food", 10),
+        GameRecord("ramp", "ramp", 2, "A", "B", "food", 10),
+        GameRecord("ramp", "ramp", 3, "A", "B", "food", 10),
+        GameRecord("ramp", "ramp", 4, "A", None, "max_turns", 10),
+    ]
+
+    def fake_run_pairs(pairs, n_games, base_seed, **kwargs):
+        for done in range(1, n_games + 1):
+            kwargs["game_progress"]("ramp", "ramp", done, n_games)
+        kwargs["matchup_progress"]("ramp", "ramp", 1, 1, records)
+        return records
+
+    monkeypatch.setattr(report_module, "run_pairs", fake_run_pairs)
+    report_module.main(["5", "--deck", "ramp", "--opponent", "ramp"])
+
+    output = capsys.readouterr().err
+    assert "[ 20%] ramp vs ramp | 1/5 games" in output
+    assert "[ 40%] ramp vs ramp | 2/5 games" in output
+    assert "[100%] ramp vs ramp | 5/5 games" in output
+    assert "=== MATCHUP 1/1 COMPLETE === ramp vs ramp" in output
+    assert "WR A=50.0%, B=50.0%, draws=20.0%" in output
+    banner_start = output.index("  === MATCHUP 1/1 COMPLETE ===")
+    banner_end = output.index("\n", banner_start)
+    assert output[banner_start - 2:banner_start] == "\n\n"
+    assert output[banner_end:banner_end + 2] == "\n\n"
+
+
+def test_unified_cli_files_mode_accepts_legacy_arguments(monkeypatch, tmp_path, capsys):
+    records = [GameRecord("ramp", "ramp", 0, "A", "A", "food", 10)]
+    writes = []
+
+    monkeypatch.setattr(report_module, "DECK_SLUGS", ("ramp",))
+    monkeypatch.setattr(report_module, "run_pairs", lambda *args, **kwargs: records)
+    monkeypatch.setattr(
+        report_module.metrics,
+        "write_all",
+        lambda received, out: writes.append((received, out)) or {
+            "games": 1,
+            "win_condition_split": {"percent": {"food": 1.0}},
+            "first_player_win_rate": {"rate": 1.0},
+            "avg_game_length": {"overall": 10.0},
+            "caveat": "test",
+        },
+    )
+    monkeypatch.setattr(
+        report_module,
+        "format_report",
+        lambda *args, **kwargs: pytest.fail("files mode must not render a report"),
+    )
+
+    report_module.main([
+        "--decks", "all",
+        "--games", "1",
+        "--format", "files",
+        "--out", str(tmp_path),
+    ])
+
+    assert writes == [(records, str(tmp_path))]
+    assert f"Wrote 1 games to {tmp_path}/" in capsys.readouterr().out

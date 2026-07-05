@@ -442,7 +442,7 @@
       "tags": ["Colony", "Worker"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Battlecry: gain 15 food."
+      "text": "Battlecry: gain 12 food."
     },
     {
       "id": "worker_wasp",
@@ -655,7 +655,7 @@
       "rarity": "legendary",
       "type": "unit",
       "tags": ["Rodent"],
-      "base_strength": 5,
+      "base_strength": 4,
       "keywords": [],
       "text": "Battlecry: gain 4 food for each other Rodent you control. Draw 1 card."
     },
@@ -723,7 +723,7 @@
       "tags": ["Rodent"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Battlecry: gain 12 food."
+      "text": "Battlecry: gain 10 food."
     },
     {
       "id": "chipmunk",
@@ -743,7 +743,7 @@
       "rarity": "common",
       "type": "unit",
       "tags": [],
-      "base_strength": 3,
+      "base_strength": 4,
       "keywords": ["Immovable"],
       "text": "Immovable. Battlecry: gain 5 food."
     },
@@ -765,7 +765,7 @@
       "rarity": "common",
       "type": "unit",
       "tags": ["Rodent"],
-      "base_strength": 3,
+      "base_strength": 2,
       "keywords": [],
       "text": "Battlecry: if you gained 10 or more food this turn, remove an adjacent enemy unit."
     },
@@ -776,7 +776,7 @@
       "rarity": "common",
       "type": "unit",
       "tags": ["Rodent"],
-      "base_strength": 2,
+      "base_strength": 4,
       "keywords": [],
       "text": "Battlecry: if you gained 10 or more food this turn, gain +5 strength."
     },
@@ -1021,7 +1021,7 @@
       "rarity": "rare",
       "type": "unit",
       "tags": ["Canine"],
-      "base_strength": 6,
+      "base_strength": 5,
       "keywords": [],
       "text": "Battlecry: give +1 strength to all Canines in your hand."
     },

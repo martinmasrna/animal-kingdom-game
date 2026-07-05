@@ -105,22 +105,26 @@ to save non-interactively:
 ./run --bots greedy,greedy --seed 7 --quiet --log results/games/greedy_vs_greedy.json
 ```
 
-## Run a simulation
+## Run a balance simulation or report
 
-The sim harness plays N headless games per matchup and writes the balance metrics to a
-results directory (CSV + JSON, standard-library only — `pandas` is only needed for your own
-downstream analysis):
+`./report` is the unified balance CLI. It plays N headless games per matchup and prints a
+human-readable matchup/per-card report by default:
 
 ```sh
-python -m animal_kingdom.sim --decks all --games 200 --seed 0 --jobs 4 --out results/
-python -m animal_kingdom.sim --decks ramp,egg_control --games 100 --bots greedy,random
+./report 200 --seed 0 --jobs 4
+./report 100 --deck ramp --opponent egg --bots greedy,random
+./report 200 --format files --out results/baseline
+./report 200 --format both --out results/baseline
 ```
 
-`--decks all` runs the full deck round-robin; two slugs run a single matchup. Output:
-`matchup_matrix.csv` (win rate from seat A's view), `per_card_winrate.csv`, and
-`summary.json` (win-condition split, first-player win rate, average game length, and a
-caveat that greedy self-play underplays Combo decks). Runs are seed-deterministic, so
-`--jobs` only changes speed, not results.
+Use `--deck` to focus one deck and `--opponent` to narrow it to one opponent. `--format
+files` writes `matchup_matrix.csv`, `per_card_stats.csv`, and `summary.json`; `--format
+both` writes those artifacts and prints the report from the same run. Runs are
+seed-deterministic, so `--jobs` only changes speed, not results.
+
+The older `python -m animal_kingdom.sim --decks all --games ...` form remains a
+compatibility alias for `./report ... --format files`; it no longer has a separate
+implementation.
 
 ## Layout
 

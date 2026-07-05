@@ -120,8 +120,8 @@ dead for food). But it carries the audit's two clearest **theme** problems and a
     ride on a **Coyote** or **Jackal** rather than a Fox, and let the small str sit on the Fox.
   - *If the strengths are locked for the buff engine:* **⚠ FLAVOR-DRIVEN CHANGE — needs a separate
     balance review** to instead lower Fox/Dingo bodies toward real canid sizes. Don't do this silently.
-- **Red Wolf (rare, 6) vs Gray Wolf (common, 4) — minor inversion.** Red wolves are *smaller* than
-  gray wolves, so Red Wolf 6 > Gray Wolf 4 is mildly off. Lowest priority of the canine items; folds
+- **Red Wolf (rare, 5) vs Gray Wolf (common, 4) — minor inversion.** Red wolves are *smaller* than
+  gray wolves, so Red Wolf 5 > Gray Wolf 4 is mildly off. Lowest priority of the canine items; folds
   into the same body-vs-size question above. No standalone change recommended.
 
 ---

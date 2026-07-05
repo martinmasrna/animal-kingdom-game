@@ -95,11 +95,11 @@ def test_groundhog_gains_strength_only_when_fed():
     fed = make_state(hands={"A": ["groundhog"]})
     fed.turn_flags["food_gained_A"] = CFG.fed_threshold
     rules.apply_action(fed, PlaceAction("groundhog", ("cr", "1,2")))
-    assert effective_strength(fed, fed.top_unit("1,2")) == 2 + CFG.groundhog_strength
+    assert effective_strength(fed, fed.top_unit("1,2")) == 4 + CFG.groundhog_strength
 
     unfed = make_state(hands={"A": ["groundhog"]})
     rules.apply_action(unfed, PlaceAction("groundhog", ("cr", "1,2")))
-    assert effective_strength(unfed, unfed.top_unit("1,2")) == 2
+    assert effective_strength(unfed, unfed.top_unit("1,2")) == 4
 
 
 # ------------------------------------------------------------------ go-wide rodent payoff

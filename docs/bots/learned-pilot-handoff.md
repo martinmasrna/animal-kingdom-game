@@ -8,17 +8,15 @@ here prescribes a method; treat every mention of an approach as context, not ins
 
 ## 1. Why this matters (the real goal)
 
-This project exists to produce **trustworthy balance data**: play the game bot-vs-bot thousands
+We want to produce **trustworthy balance data**: play the game bot-vs-bot thousands
 of times to learn whether the seven premade decks are fair. Every balance conclusion is only as
 good as the bot piloting it. If the bot systematically can't execute a whole *kind* of strategy,
 then the win-rate matrix lies about any deck built around that strategy — and we tune the game
 against a distorted mirror.
 
-So the point of a stronger bot here is **not** to beat humans for its own sake. It is to remove
-**strategy-class blind spots** that bias the balance data. The target is *breadth of competence*
-— a pilot that can play every deck's actual game plan at least passably — more than raw peak
-strength. A bot that plays six of seven decks brilliantly and is blind to the seventh's plan is
-worse for us than one that plays all seven decently.
+The target is *breadth of competence* — a pilot that can play every deck's actual game plan at least
+passably — more than raw peak strength. A bot that plays six of seven decks brilliantly and is blind
+to the seventh's plan is worse for us than one that plays all seven decently.
 
 ## 2. What we've learned — the ceiling is real, and we've measured it
 
@@ -132,9 +130,3 @@ These are yours to answer; we have opinions but no commitments.
   heavier and more opaque?
 - What compute, on what hardware, for the training run — and does that force us into the fast-pilot
   /strong-pilot split above?
-
----
-
-*Written by the balance agent, 2026-07-04, after a human-vs-bot investigation of the egg-vs-cats
-matchup established that the strongest current bot has a measurable, structural judgement ceiling.
-Background lives in [`backlog.md`](backlog.md) (Bots) and [`../balance/backlog.md`](../balance/backlog.md).*

@@ -298,6 +298,9 @@ def run_pairs(
     jobs: int = 1,
     progress: Optional[Callable[[str, str, int, int], None]] = None,
     game_progress: Optional[Callable[[str, str, int, int], None]] = None,
+    matchup_progress: Optional[
+        Callable[[str, str, int, int, list[GameRecord]], None]
+    ] = None,
 ) -> list[GameRecord]:
     """`n_games` of every (a, b) pair in `pairs`, same bot kinds/weights on every pair.
 
@@ -308,8 +311,10 @@ def run_pairs(
     `progress(a, b, pairs_done, pairs_total)`. `game_progress`, if given, is called after
     every individual game finishes *within* the current pair, as
     `game_progress(a, b, games_done, n_games)` - finer-grained than `progress` for watching a
-    single slow (e.g. referee-piloted) matchup tick over. Games can complete out of order
-    under `jobs > 1`, but the returned records preserve the original (pair, seed) order.
+    single slow (e.g. referee-piloted) matchup tick over. `matchup_progress`, if given, is
+    called after each pair with the completed pair's records as its fifth argument. Games can
+    complete out of order under `jobs > 1`, but the returned records preserve the original
+    (pair, seed) order.
     """
     records: list[GameRecord] = []
 
@@ -344,6 +349,8 @@ def run_pairs(
             specs = _pair_specs(pair_index, a, b)
             batch = _run_batch(ex, a, b, specs)
             records.extend(batch)
+            if matchup_progress is not None:
+                matchup_progress(a, b, pair_index + 1, len(pairs), batch)
             if progress is not None:
                 progress(a, b, pair_index + 1, len(pairs))
 
@@ -365,8 +372,13 @@ def run_round_robin(
     map_id: str = "map_b",
     jobs: int = 1,
     progress: Optional[Callable[[str, str, int, int], None]] = None,
+    game_progress: Optional[Callable[[str, str, int, int], None]] = None,
+    matchup_progress: Optional[
+        Callable[[str, str, int, int, list[GameRecord]], None]
+    ] = None,
 ) -> list[GameRecord]:
     """Every ordered deck pair (full matrix incl. mirrors), `n_games` each. See `run_pairs`."""
     pairs = [(a, b) for a in slugs for b in slugs]
     return run_pairs(pairs, n_games, base_seed, bots=bots, config=config,
-                     map_id=map_id, jobs=jobs, progress=progress)
+                     map_id=map_id, jobs=jobs, progress=progress,
+                     game_progress=game_progress, matchup_progress=matchup_progress)

@@ -13,6 +13,7 @@ import pytest
 from animal_kingdom.bots.greedy_bot import GreedyWeights
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.sim import metrics
+from animal_kingdom.sim import __main__ as sim_main
 from animal_kingdom.sim.runner import (
     GameRecord, make_bot, play_game, run_matchup, run_pairs, run_round_robin,
 )
@@ -61,6 +62,45 @@ def test_run_round_robin_delegates_to_run_pairs():
     pairs = [(a, b) for a in slugs for b in slugs]
     via_pairs = run_pairs(pairs, 2, base_seed=0, bots=("random", "random"))
     assert via_round_robin == via_pairs
+
+
+def test_run_round_robin_reports_per_game_progress():
+    updates = []
+    run_round_robin(
+        ["ramp"], 3, base_seed=0, bots=("random", "random"),
+        game_progress=lambda a, b, done, total: updates.append((a, b, done, total)),
+    )
+    assert updates == [
+        ("ramp", "ramp", 1, 3),
+        ("ramp", "ramp", 2, 3),
+        ("ramp", "ramp", 3, 3),
+    ]
+
+
+def test_run_round_robin_reports_completed_matchup_records():
+    updates = []
+    records = run_round_robin(
+        ["ramp"], 3, base_seed=0, bots=("random", "random"),
+        matchup_progress=lambda a, b, done, total, batch: updates.append(
+            (a, b, done, total, batch)
+        ),
+    )
+    assert updates == [("ramp", "ramp", 1, 1, records)]
+
+
+def test_sim_module_delegates_to_unified_cli_in_files_mode(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        sim_main,
+        "unified_main",
+        lambda argv, **kwargs: calls.append((argv, kwargs)),
+    )
+
+    sim_main.main(["--decks", "all", "--games", "5"])
+
+    assert calls == [
+        (["--decks", "all", "--games", "5"], {"default_format": "files"}),
+    ]
 
 
 # ------------------------------------------------------- weight-injection plumbing

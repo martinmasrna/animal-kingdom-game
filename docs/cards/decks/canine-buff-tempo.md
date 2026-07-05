@@ -19,7 +19,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Complete (2026-06-2
 | **Dhole** | Canine | 3 | Battlecry: give all adjacent Canines +3 strength. *(2026-07-05: +2→+3)* |
 | **Bush Dog** | Canine | 3 | Once a turn, when this gains strength, give all friendly adjacent Canines +1 strength. |
 | **Jackal** | Canine | 5 | Whenever an adjacent unit is removed, gain 5 food. *(2026-07-05: body 3→5, food 3→5; note: canine has no food sink, so watch whether this actually helps)* |
-| **Red Wolf** | Canine | 6 | Battlecry: give +1 strength to all Canines in your hand. |
+| **Red Wolf** | Canine | 5 | Battlecry: give +1 strength to all Canines in your hand. |
 
 ## Common (×3)
 | Name | Tag | Str | Effect |
@@ -36,7 +36,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Complete (2026-06-2
 ## Open items — RESOLVED (2026-06-28)
 - **Legendary 1:** self-scaling alpha wolf (Canine 4, "has +2 str per other Canine") — the HQ-rush finisher; fixed an earlier broken "+1 per Canine to *each*" surge (quadratic). Now **Lobo** (provisional, 2026-06-30).
 - **Rare 6:** Bush Dog (3) — reworked from "random adjacent" to **all** friendly adjacent Canines.
-- **Rare 8:** Red Wolf (6) — body bumped to 6 (modest hand-buff effect → big body, per the no-mana power calibration).
+- **Rare 8:** Red Wolf (5) — modest hand-buff effect on a solid body.
 - **Common 11:** Fox (3) — gas engine (draw when buffed).
 - **Common 13:** Dingo (5) — end-of-turn neighbor buffer (body bumped to 5).
 - **Dog:** Canine **1**, the "play another Canine" chain (the Canine House Cat).

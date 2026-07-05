@@ -25,7 +25,7 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Two targets: e
   - **food_otk still ~38%** after the 2026-07-04 OTK-lean buffs — near the 40% floor but not over it; the pending Pufferfish/common-slot follow-up (below) may close it. Highest pilot spread (4.9pt) → lowest-confidence cell.
   - ramp/aggro ~58–59% borderline-high — watch, don't act.
 
-- [ ] **Deck equality → pull every deck into 40–60%.** **Current best read = the turn-vs-turn 7×7 matrix at the settled ruleset, oracle-bias-corrected (2026-07-03).** Both-seats competent piloting (`results/matrix_turn/` — regenerate via `python -m animal_kingdom.sim --decks all --games 200 --seed 0 --bots turn,turn --out results/matrix_turn`; greedy baseline in `results/matrix_greedy/`), then adjusted by each deck's referee-underplay gap (`results/bot_quality/turn_vs_referee_all/`, see `../bots/backlog.md` pilot-trust item). Corrected standings:
+- [ ] **Deck equality → pull every deck into 40–60%.** **Current best read = the turn-vs-turn 7×7 matrix at the settled ruleset, oracle-bias-corrected (2026-07-03).** Both-seats competent piloting (`results/matrix_turn/` — regenerate via `./report 200 --seed 0 --bots turn,turn --format files --out results/matrix_turn`; greedy baseline in `results/matrix_greedy/`), then adjusted by each deck's referee-underplay gap (`results/bot_quality/turn_vs_referee_all/`, see `../bots/backlog.md` pilot-trust item). Corrected standings:
 
   | deck | greedy WR | turn WR | oracle-corrected* | verdict |
   |---|---:|---:|---:|---|

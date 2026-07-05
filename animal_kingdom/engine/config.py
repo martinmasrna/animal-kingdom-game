@@ -20,15 +20,13 @@ from typing import Optional
 @dataclass(frozen=True)
 class Config:
     # --- One-off food gains on placement (Battlecry "gain N food") ---
-    squirrel_food: int = 12              # decision H: doubled 2026-07-02 - food_otk's guaranteed
-                                          # one-off floor was ~40% of the v0 "accelerant reaches
-                                          # ~half of win_food" target; see docs/balance/backlog.md
+    squirrel_food: int = 10              # trimmed from 12 in the 2026-07-05 balance pass
     chipmunk_food_now: int = 10          # decision H: doubled, same reasoning
     chipmunk_food_later: int = 10        # paid at the start of the owner's next turn (doubled)
     flying_squirrel_food: int = 8        # decision H: doubled, same reasoning
     hedgehog_food: int = 5               # Immovable wall that also feeds (food_otk 2026-07-05)
     rat_king_per_rodent: int = 4         # Battlecry: gain N food per OTHER Rodent you control
-    worker_ant_food: int = 15            # 8→15 (2026-07-05 colony floor buff; cf. Squirrel's 12)
+    worker_ant_food: int = 12            # trimmed from 15 in the 2026-07-05 balance pass
     worker_bee_food: int = 10            # 5→10; +worker_bee_extra if you control another Worker
     worker_bee_extra: int = 10           # 5→10
     worker_wasp_food: int = 3            # at end of your turn

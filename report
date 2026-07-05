@@ -8,9 +8,12 @@
 #   ./report 500 --deck aggro              # only aggro_hq_rush's matchups + card table
 #   ./report 100 --deck egg --opponent cat # only that single matchup (both seats)
 #   ./report 200 --bots random,random --jobs 4
+#   ./report 200 --format files --out results/baseline
+#   ./report 200 --format both --out results/baseline
 #   ./report --help
 #
-# All arguments are passed straight through to `python -m animal_kingdom.sim.report`.
+# This is the canonical simulation/report command. All arguments are passed straight
+# through to the unified `python -m animal_kingdom.sim.report` implementation.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

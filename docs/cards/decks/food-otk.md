@@ -25,7 +25,7 @@ A per-turn counter (`turn_flags["food_gained_<player>"]`, reset each turn end; h
 | **Fathom** | — | 4 | Battlecry: draw a legendary unit. *(tutors Rat King / Scrooge)* |
 | **Greywhisker** | Rodent | 1 | Battlecry: gain 1 food. Draw 1 card. You may play 1 more unit. |
 | **Scrooge, Keeper of the Stash** | Rodent | 4 | Battlecry: gain food equal to the food you gained this turn. *(reworked — was the bank-and-double-in-2-turns coin flip; lost Immovable)* |
-| **Rat King** | Rodent | 5 | Battlecry: gain 4 food per other Rodent you control. Draw 1 card. |
+| **Rat King** | Rodent | 4 | Battlecry: gain 4 food per other Rodent you control. Draw 1 card. |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
@@ -38,12 +38,12 @@ A per-turn counter (`turn_flags["food_gained_<player>"]`, reset each turn end; h
 ## Common (×3)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
-| **Squirrel** | Rodent | 3 | Battlecry: gain 12 food. |
+| **Squirrel** | Rodent | 3 | Battlecry: gain 10 food. |
 | **Chipmunk** | Rodent | 1 | Battlecry: gain 10 food. At the start of next turn, gain 10 more. |
-| **Hedgehog** | — | 3 | Immovable. Battlecry: gain 5 food. |
+| **Hedgehog** | — | 4 | Immovable. Battlecry: gain 5 food. |
 | **Hamster** | Rodent | 3 | Battlecry: if you gained 10+ food this turn, draw 2 cards. |
-| **Muskrat** | Rodent | 3 | Battlecry: if you gained 10+ food this turn, remove an adjacent enemy unit. |
-| **Groundhog** | Rodent | 2 | Battlecry: if you gained 10+ food this turn, gain +5 strength. |
+| **Muskrat** | Rodent | 2 | Battlecry: if you gained 10+ food this turn, remove an adjacent enemy unit. |
+| **Groundhog** | Rodent | 4 | Battlecry: if you gained 10+ food this turn, gain +5 strength. |
 
 ## New mechanics / systems this deck introduces
 - **Food gained this turn** — the signature counter above (`fed_threshold`, `scrooge_gain_multiplier`).

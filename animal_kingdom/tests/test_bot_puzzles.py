@@ -35,7 +35,7 @@ def test_blocks_imminent_hq_threat_over_unrelated_offense():
 
 
 def test_prefers_big_food_gain_over_marginal_board_presence():
-    # Worker Ant's battlecry (gain 8 food, non-lethal here) trades a strong body (Lion, 7
+    # Worker Ant's battlecry (gain 12 food, non-lethal here) trades a strong body (Lion, 7
     # strength) for a weak one (1 strength) - the food swing should win out over the
     # marginal board-presence loss.
     s = make_state(hands={"A": ["worker_ant", "lion"]}, food={"A": 50, "B": 0})

@@ -14,8 +14,9 @@ Python ≥3.11; venv at `.venv` (`python3 -m venv .venv && .venv/bin/pip install
 
 - **Tests:** `.venv/bin/python -m pytest animal_kingdom/tests/ -q`
 - **Play a game:** `./run` (launcher, finds the venv). `./run --help` for flags.
-- **Balance report:** `./report 500` (500 games/matchup; `--deck aggro` to scope one deck).
-- **Matchup matrix / sim:** `.venv/bin/python -m animal_kingdom.sim --decks all --games 200 --seed 0 --jobs 4 --out results/`
+- **Balance simulation/report:** `./report 500` (human-readable); add `--format files
+  --out results/baseline` for CSV/JSON or `--format both` for both outputs from one run.
+  Use `--deck aggro` to scope one deck.
 - **Paired bot-quality benchmark:** `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/turnbot`
 
 The ruleset is **map_b + 2 actions/turn** (draw 1 per Draw action) — the shipped default everywhere,

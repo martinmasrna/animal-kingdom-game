@@ -26,7 +26,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28).
 | **Queen Bee** | Colony | 2 | Battlecry: play a Worker unit. |
 | **Guard Hornet** | Colony | 3 | Flight. Has +5 strength while you control 5 or more Colony units. |
 | **Soldier Ant** | Colony | 2 | Battlecry: if you control 5 or more Colony units, remove an adjacent enemy. |
-| **Worker Ant** | Colony | 1 | Battlecry: gain 15 food. *(2026-07-05: 8→15, colony floor buff; cf. Squirrel's 12)* |
+| **Worker Ant** | Colony | 1 | Battlecry: gain 12 food. |
 | **Worker Wasp** | Colony | 3 | Flight. At the end of your turn, gain 3 food. |
 | **Worker Bee** | Colony | 1 | Flight. Battlecry: gain 10 food; if you control another Worker, gain 10 more. *(2026-07-05: 5/5→10/10)* |
 

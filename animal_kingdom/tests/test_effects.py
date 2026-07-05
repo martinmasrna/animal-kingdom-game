@@ -772,8 +772,8 @@ def test_queen_honoria_and_falstaff_riders_stack():
     put(s, "1,3", "falstaff", "A")                      # +3 whenever you gain food
     put(s, "1,2", "caracal", "A")
     rules.apply_action(s, PlaceAction("worker_ant", ("cr", "2,2")))
-    # Honoria +4 (+3 rider) then Worker Ant +15 (+3 rider) = 25
-    assert s.food["A"] == 25
+    # Honoria +4 (+3 rider) then Worker Ant +12 (+3 rider) = 22
+    assert s.food["A"] == 22
 
 
 def test_queen_marabunta_scales_with_other_colony():

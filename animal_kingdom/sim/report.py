@@ -1,15 +1,15 @@
-"""Per-card balance report: full 7x7 round-robin, printed as one impact table per deck.
+"""Unified balance simulation CLI: human-readable reports and machine-readable artifacts.
 
-Same simulation/metrics machinery as `python -m animal_kingdom.sim` (that module writes
-the raw CSV/JSON bundle); this one prints human-readable per-deck card tables instead,
-sorted by `impact` (win_rate_when_drawn minus the deck's own baseline win rate) so the
-over/under-performing cards in each deck surface at the top/bottom.
+The default prints human-readable per-deck card tables sorted by `impact`
+(win_rate_when_drawn minus the deck's own baseline win rate). ``--format files`` writes
+the raw CSV/JSON metrics bundle instead; ``--format both`` does both from the same run.
 
 Examples:
-  python -m animal_kingdom.sim.report 500
-  python -m animal_kingdom.sim.report 200 --bots random,random --jobs 4
-  python -m animal_kingdom.sim.report 500 --deck aggro   # only aggro_hq_rush's matchups/tables
-  python -m animal_kingdom.sim.report 500 --deck egg --opponent cat   # just that one matchup
+  ./report 500
+  ./report 200 --bots random,random --jobs 4
+  ./report 500 --format both --out results/baseline
+  ./report 500 --deck aggro
+  ./report 500 --deck egg --opponent cat
 """
 
 from __future__ import annotations
@@ -152,10 +152,36 @@ def format_report(records: Sequence[GameRecord], cards: dict[str, Card],
     return "\n".join(sections)
 
 
-def main(argv: Sequence[str] | None = None) -> None:
+def _print_metrics_summary(summary: dict, out_dir: str, *, file) -> None:
+    print(f"\nWrote {summary['games']} games to {out_dir}/ "
+          "(matchup_matrix.csv, per_card_stats.csv, summary.json)", file=file)
+    split = summary["win_condition_split"]["percent"]
+    print("Win conditions: "
+          + ", ".join(f"{key}={value:.1%}" for key, value in sorted(split.items())),
+          file=file)
+    first_player = summary["first_player_win_rate"]["rate"]
+    print(f"First-player win rate: {first_player:.1%}" if first_player is not None
+          else "First-player win rate: n/a", file=file)
+    print(f"Avg game length: {summary['avg_game_length']['overall']:.1f} turns", file=file)
+    print(f"\nCaveat: {summary['caveat']}", file=file)
+
+
+def _crossed_progress_decile(done: int, total: int) -> bool:
+    """Return whether completing game ``done`` crossed the next 10% matchup milestone."""
+    return total > 0 and (done * 10) // total > ((done - 1) * 10) // total
+
+
+def main(
+    argv: Sequence[str] | None = None,
+    *,
+    default_format: str = "report",
+) -> None:
     p = argparse.ArgumentParser(
-        description="Full 7x7 round-robin, printed as one per-card impact table per deck.")
-    p.add_argument("games", type=int, help="games per matchup (49 matchups in the 7x7 grid)")
+        description="Run balance simulations and print a report, write metrics files, or both.")
+    p.add_argument("games", nargs="?", type=int,
+                   help="games per matchup (e.g. './report 200')")
+    p.add_argument("--games", dest="games_option", type=int,
+                   help="games per matchup (compatibility form)")
     p.add_argument("--seed", type=int, default=0, help="base seed (games use seed, seed+1, ...)")
     p.add_argument("--bots", default="greedy,greedy",
                    help=f"two of {'|'.join(BOT_KINDS)} (referee is ~50-100x slower than "
@@ -171,22 +197,43 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--opponent", default=None,
                    help="pair with --deck to simulate/report only that single matchup "
                         "(abbreviation OK, both seats; same deck = mirror only)")
-    p.add_argument("--progress-every", type=int, default=20,
-                   help="print a progress line every N completed games within the current "
-                        "matchup, in addition to the once-per-matchup summary line (0 disables "
-                        "the within-matchup lines)")
+    p.add_argument("--decks", default=None,
+                   help="compatibility form: 'all' or one ordered comma-separated pair")
+    p.add_argument("--format", dest="output_format",
+                   choices=("report", "files", "both"), default=default_format,
+                   help=f"output mode (default: {default_format})")
+    p.add_argument("--out", default="results",
+                   help="metrics output directory for --format files/both")
     args = p.parse_args(argv)
+
+    if args.games is not None and args.games_option is not None:
+        p.error("pass games either positionally or with --games, not both")
+    games = args.games if args.games is not None else args.games_option
+    if games is None:
+        p.error("games per matchup is required (e.g. './report 200')")
+    if games <= 0:
+        p.error("games per matchup must be positive")
+    args.games = games
 
     bots = parse_bot_pair(args.bots)
     config = load_config_overrides(args.config)
     slugs = sorted(DECK_SLUGS)
 
+    if args.decks is not None and (args.deck is not None or args.opponent is not None):
+        p.error("--decks cannot be combined with --deck or --opponent")
     if args.opponent is not None and args.deck is None:
-        raise SystemExit("--opponent requires --deck (it narrows that deck's matchups to one)")
+        p.error("--opponent requires --deck (it narrows that deck's matchups to one)")
 
     target = _resolve_deck(args.deck, slugs) if args.deck is not None else None
     opponent = _resolve_deck(args.opponent, slugs) if args.opponent is not None else None
-    if opponent is not None:
+    if args.decks is not None and args.decks.strip() != "all":
+        pair = [part.strip() for part in args.decks.split(",")]
+        if len(pair) != 2:
+            p.error("--decks expects 'all' or two comma-separated deck names")
+        a, b = (_resolve_deck(part, slugs) for part in pair)
+        pairs = [(a, b)]
+        label = f"{a} vs {b} (ordered seats)"
+    elif opponent is not None:
         pairs = [(target, opponent)] if target == opponent else [(target, opponent), (opponent, target)]
         label = f"{target} vs {opponent} ({len(pairs)} seat{'' if len(pairs) == 1 else 's'})"
     elif target is not None:
@@ -199,33 +246,61 @@ def main(argv: Sequence[str] | None = None) -> None:
     total_matchups = len(pairs)
     total_games = total_matchups * args.games
     print(f"Running {label}, {args.games} games/matchup "
-          f"({total_games} games total, bots={bots[0]},{bots[1]}, jobs={args.jobs})...", file=sys.stderr)
+          f"({total_games} games total, bots={bots[0]},{bots[1]}, jobs={args.jobs})...",
+          file=sys.stderr, flush=True)
 
     start = time.monotonic()
 
     matchups_done = 0
 
-    def _progress(a: str, b: str, done: int, matchup_total: int) -> None:
+    def _matchup_progress(
+        a: str,
+        b: str,
+        done: int,
+        matchup_total: int,
+        batch: list[GameRecord],
+    ) -> None:
         nonlocal matchups_done
         matchups_done = done
         elapsed = time.monotonic() - start
         games_done = done * args.games
-        print(f"  [{done:>2}/{matchup_total}] {elapsed:6.1f}s  {a} vs {b}  "
-              f"({games_done}/{total_games} games)", file=sys.stderr)
+        total = len(batch)
+        draws = sum(record.winner is None for record in batch)
+        draw_rate = draws / total if total else 0.0
+        a_rate = (
+            (sum(record.winner == "A" for record in batch) + draws / 2) / total
+            if total else 0.0
+        )
+        b_rate = 1.0 - a_rate if total else 0.0
+        print(f"\n  === MATCHUP {done}/{matchup_total} COMPLETE === {a} vs {b} | "
+              f"WR A={a_rate:.1%}, B={b_rate:.1%}, draws={draw_rate:.1%} | "
+              f"{games_done}/{total_games} total games | {elapsed:.1f}s\n",
+              file=sys.stderr, flush=True)
 
     def _game_progress(a: str, b: str, done: int, matchup_games: int) -> None:
-        if args.progress_every <= 0 or (done % args.progress_every != 0 and done != matchup_games):
+        if not _crossed_progress_decile(done, matchup_games):
             return
         elapsed = time.monotonic() - start
         games_done = matchups_done * args.games + done
-        print(f"      {a} vs {b}: {done}/{matchup_games} games "
-              f"({games_done}/{total_games} total, {elapsed:6.1f}s)", file=sys.stderr)
+        matchup_percent = done / matchup_games
+        print(f"      [{matchup_percent:>4.0%}] {a} vs {b} | "
+              f"{done}/{matchup_games} games | {games_done}/{total_games} total | "
+              f"{elapsed:.1f}s",
+              file=sys.stderr, flush=True)
 
     records = run_pairs(pairs, args.games, args.seed, bots=bots, config=config,
-                        map_id=args.map_id, jobs=args.jobs, progress=_progress,
-                        game_progress=_game_progress)
-    print(f"Simulation done in {time.monotonic() - start:.1f}s.\n", file=sys.stderr)
-    print(format_report(records, load_cards(), focus_deck=target))
+                        map_id=args.map_id, jobs=args.jobs,
+                        game_progress=_game_progress,
+                        matchup_progress=_matchup_progress)
+    print(f"Simulation done in {time.monotonic() - start:.1f}s.\n",
+          file=sys.stderr, flush=True)
+
+    if args.output_format in ("files", "both"):
+        summary = metrics.write_all(records, args.out)
+        summary_stream = sys.stdout if args.output_format == "files" else sys.stderr
+        _print_metrics_summary(summary, args.out, file=summary_stream)
+    if args.output_format in ("report", "both"):
+        print(format_report(records, load_cards(), focus_deck=target))
 
 
 if __name__ == "__main__":
