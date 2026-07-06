@@ -82,6 +82,29 @@ def test_writer_recovers_truncated_tail_and_tracks_latest_validity(tmp_path):
     assert completed_game_ids([path]) == {"g1"}
 
 
+def test_summarize_cohort_tallies_human_record(tmp_path):
+    from animal_kingdom.recording.writer import summarize_cohort
+
+    def game(name, sid, human_seat, opp_deck, winner, valid=True):
+        opp_seat = "B" if human_seat == "A" else "A"
+        with JsonlGameWriter(tmp_path / name) as w:
+            w.append({"type": "meta", "scheduled_game_id": sid, "human_seat": human_seat,
+                      "decks": {human_seat: "food_otk", opp_seat: opp_deck}})
+            w.append({"type": "result", "winner": winner, "game_valid": valid})
+
+    game("g1.jsonl", "g1", "A", "ramp", "A")                       # human (A) wins
+    game("g2.jsonl", "g2", "B", "ramp", "A")                       # human (B) loses
+    game("g3.jsonl", "g3", "A", "cats_midrange", None)             # draw
+    game("g4.jsonl", "g4", "A", "ramp", "B", valid=False)         # excluded -> ignored
+
+    prog = summarize_cohort(sorted(tmp_path.glob("*.jsonl")))
+    assert (prog.win, prog.loss, prog.draw) == (1, 1, 1)
+    assert prog.completed_ids == {"g1", "g2", "g3"}
+    assert prog.per_opponent["ramp"] == [1, 1, 0]
+    assert prog.per_opponent["cats_midrange"] == [0, 0, 1]
+    assert prog.win_pct == 50.0                                    # 1 win / 2 decided
+
+
 def test_session_records_replayable_decisions_and_hidden_view(tmp_path):
     config = Config().sweep(max_turns=20)
     setup = GameSetup(

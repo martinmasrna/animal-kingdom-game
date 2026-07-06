@@ -27,7 +27,7 @@ from ..engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
 from ..engine.config import Config, load_config_overrides
 from ..recording.cohort import CohortManifest, ScheduledGame, load_manifest
 from ..recording.session import GameSetup, RecorderSession
-from ..recording.writer import completed_game_ids
+from ..recording.writer import CohortProgress, summarize_cohort
 from ..render.text import BoardRender, Hitbox, RARITY_STYLE, SEAT_STYLE, render_board
 from ..sim.runner import BOT_KINDS
 
@@ -595,6 +595,7 @@ class RecorderApp(App[None]):
         self.ad_hoc_config = ad_hoc_config or Config.default()
         self.ad_hoc_map = ad_hoc_map
         self.session: RecorderSession | None = None
+        self.cohort_progress: CohortProgress = CohortProgress()
         self.selected_card: str | None = None
         self.target_map: dict[tuple[str, str], Action] = {}
         self.target_order: list[tuple[str, str]] = []
@@ -661,14 +662,31 @@ class RecorderApp(App[None]):
             self.session.close(reason="next_game")
             self.session = None
         cohort_dir = self.output_root / self.manifest.cohort_id
-        completed = completed_game_ids(cohort_dir.glob("*.jsonl")) if cohort_dir.exists() else set()
-        game = next((game for game in self.manifest.games if game.game_id not in completed), None)
+        progress = summarize_cohort(cohort_dir.glob("*.jsonl") if cohort_dir.exists() else [])
+        self.cohort_progress = progress
+        game = next((g for g in self.manifest.games if g.game_id not in progress.completed_ids), None)
         if game is None:
-            self.query_one("#status", Static).update("[bold green]Cohort complete[/bold green]")
-            self.query_one("#notice", Static).update("Q quits.")
+            self.query_one("#status", Static).update(
+                f"[bold green]Cohort complete[/bold green] · {self._record_text(progress)}")
+            self.query_one("#notice", Static).update(self._per_opponent_text(progress) + "  ·  Q quits.")
             self.query_one(CardShelf).set_entries([])
             return
         self.start_game(self._scheduled_setup(game))
+
+    @staticmethod
+    def _record_text(prog: CohortProgress) -> str:
+        rec = f"{prog.win}–{prog.loss}" + (f"–{prog.draw}" if prog.draw else "")
+        return f"you {rec} ({prog.win_pct:.0f}%)" if prog.decided else "you 0–0"
+
+    @staticmethod
+    def _per_opponent_text(prog: CohortProgress) -> str:
+        parts = []
+        for opp in sorted(prog.per_opponent):
+            w, l, d = prog.per_opponent[opp]
+            dec = w + l
+            pct = f" {100 * w / dec:.0f}%" if dec else ""
+            parts.append(f"{opp.split('_')[0]} {w}–{l}" + (f"–{d}" if d else "") + pct)
+        return "   ".join(parts)
 
     def start_game(self, setup: GameSetup | None) -> None:
         if setup is None:
@@ -717,6 +735,12 @@ class RecorderApp(App[None]):
                 if game.game_id == session.setup.scheduled_game_id
             )
             cohort_text = f" · Game {index}/{len(self.manifest.games)}"
+            prog = self.cohort_progress
+            if prog.played:
+                cohort_text += f" · {self._record_text(prog)}"
+                w, l, d = prog.per_opponent.get(session.setup.opponent_deck, [0, 0, 0])
+                if w + l + d:
+                    cohort_text += f" · vs {session.setup.opponent_deck.split('_')[0]} {w}–{l}"
 
         if result:
             winner = "Draw" if result.winner is None else (
