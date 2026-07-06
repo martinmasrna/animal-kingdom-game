@@ -35,9 +35,11 @@ GOOD = {
 
 def test_cards_load_full_pool():
     cards = load_cards()
-    # 7 premade decks x 14 designs each = 98 draftable, plus non-deck cards (tokens, reserve).
+    # 7 premade decks x 14 designs each = 98 draftable, +1 for food_otk's deliberate 15th
+    # design (Gopher, 2026-07-06 - see Card.copies / test_pool.DESIGN_COUNT_OVERRIDES),
+    # plus non-deck cards (tokens, reserve).
     from animal_kingdom.engine.cards import DECK_SLUGS
-    assert sum(1 for c in cards.values() if c.deck in DECK_SLUGS) == 98
+    assert sum(1 for c in cards.values() if c.deck in DECK_SLUGS) == 99
     assert all(isinstance(c, Card) for c in cards.values())
 
 

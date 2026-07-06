@@ -45,9 +45,13 @@ class Config:
     # A shared threshold read by Hamster/Muskrat/Groundhog; Scrooge instead doubles the raw haul.
     fed_threshold: int = 10              # food gained this turn to arm Hamster/Muskrat/Groundhog
     hamster_draw: int = 2               # Hamster: draw N if fed this turn
-    groundhog_strength: int = 5         # Groundhog: +N strength (stored) if fed this turn
+    groundhog_food: int = 10            # Groundhog: gain N food if fed this turn (was +5 str)
     scrooge_gain_multiplier: int = 1    # Scrooge: gain (food gained this turn) x this
     chinchilla_bonus_actions: int = 1   # Chinchilla: extra top-level actions on your NEXT turn
+    chinchilla_draw: int = 1            # Chinchilla: cards drawn on Battlecry (2026-07-06 rework)
+
+    # --- "Played a Rodent last turn" signature mechanic (2026-07-06) ---
+    rodent_last_turn_food: int = 10     # gain N food if you played a Rodent on your last turn
 
     # --- Food-event engine reactors (decision F2/F9; magnitudes are dials) ---
     eon_food: int = 1                    # per draw/shuffle/remove event

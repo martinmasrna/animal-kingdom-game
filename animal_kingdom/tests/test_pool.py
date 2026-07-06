@@ -23,22 +23,35 @@ from animal_kingdom.decks import PREMADE_DECKS, load_premade_deck
 RETIRED_TAGS = {"Reptile", "Insect"}
 DYNAMIC_IDS = {"goliath", "chameleon"}
 
+# food_otk is the one deliberate exception to the locked 4-4-6/14-design template
+# (2026-07-06): a 7th common (2 copies) was added alongside Hedgehog/Hamster dropping to
+# 2 copies each, so the design count and rarity mix - not the 30-card total - move for
+# this deck only. See Card.copies (engine/cards.py) for the per-design override.
+DESIGN_COUNT_OVERRIDES = {"food_otk": 15}
+RARITY_MIX_OVERRIDES = {"food_otk": {"legendary": 4, "rare": 4, "common": 7}}
+
 
 # ----------------------------------------------------------------- pool composition
 
 def test_98_designs_in_exactly_7_decks():
     cards = load_cards()
-    # 98 draftable designs across the 7 decks; tokens/reserve live outside the deck pool.
+    # 99 draftable designs across the 7 decks (98 base + food_otk's 1 override); tokens/reserve
+    # live outside the deck pool.
     draftable = [c for c in cards.values() if c.deck in DECK_SLUGS]
-    assert len(draftable) == 98
+    expected_total = 14 * len(DECK_SLUGS) + sum(
+        n - 14 for n in DESIGN_COUNT_OVERRIDES.values()
+    )
+    assert len(draftable) == expected_total
     by_deck: dict[str, list] = {slug: [] for slug in DECK_SLUGS}
     for c in draftable:
         by_deck[c.deck].append(c)
     assert len(by_deck) == 7
     for slug, designs in by_deck.items():
-        assert len(designs) == 14, f"{slug} has {len(designs)} designs, expected 14"
+        expected = DESIGN_COUNT_OVERRIDES.get(slug, 14)
+        assert len(designs) == expected, f"{slug} has {len(designs)} designs, expected {expected}"
         rarities = Counter(c.rarity for c in designs)
-        assert rarities == {"legendary": 4, "rare": 4, "common": 6}, f"{slug}: {rarities}"
+        expected_mix = RARITY_MIX_OVERRIDES.get(slug, {"legendary": 4, "rare": 4, "common": 6})
+        assert rarities == expected_mix, f"{slug}: {rarities}"
 
 
 def test_ids_and_names_globally_unique():
@@ -54,9 +67,8 @@ def test_each_deck_expands_to_30():
     for slug in DECK_SLUGS:
         deck = load_premade_deck(slug)
         assert len(deck) == 30, f"{slug} expands to {len(deck)}"
-        # Exactly the 14 distinct designs at their copy limits.
         counts = Counter(deck)
-        assert len(counts) == 14
+        assert len(counts) == DESIGN_COUNT_OVERRIDES.get(slug, 14)
     assert PREMADE_DECKS.keys() == DECK_SLUGS
 
 
@@ -66,7 +78,9 @@ def test_copy_limits_locked_446():
     for slug in DECK_SLUGS:
         counts = Counter(load_premade_deck(slug))
         for cid, n in counts.items():
-            assert n == COPY_LIMITS[cards[cid].rarity]
+            card = cards[cid]
+            expected = card.copies if card.copies is not None else COPY_LIMITS[card.rarity]
+            assert n == expected
 
 
 # ------------------------------------------------------------------ field domains

@@ -363,7 +363,7 @@
       "rarity": "rare",
       "type": "unit",
       "tags": ["Colony"],
-      "base_strength": 2,
+      "base_strength": 3,
       "keywords": ["Flight"],
       "text": "Flight. Battlecry: if you control two copies of the same Colony unit, draw 2 cards."
     },
@@ -407,7 +407,7 @@
       "rarity": "common",
       "type": "unit",
       "tags": ["Colony", "Queen"],
-      "base_strength": 2,
+      "base_strength": 3,
       "keywords": [],
       "text": "Battlecry: play a Worker unit."
     },
@@ -679,7 +679,7 @@
       "tags": ["Rodent"],
       "base_strength": 4,
       "keywords": ["Flight"],
-      "text": "Flight. Battlecry: gain 8 food."
+      "text": "Flight. Battlecry: gain 10 food."
     },
     {
       "id": "porcupine",
@@ -699,9 +699,9 @@
       "rarity": "rare",
       "type": "unit",
       "tags": ["Rodent"],
-      "base_strength": 3,
+      "base_strength": 2,
       "keywords": [],
-      "text": "Battlecry: next turn, take 1 additional action."
+      "text": "Battlecry: Draw 1 card. Next turn, take 1 additional action."
     },
     {
       "id": "armadillo",
@@ -743,9 +743,10 @@
       "rarity": "common",
       "type": "unit",
       "tags": [],
-      "base_strength": 4,
+      "base_strength": 5,
       "keywords": ["Immovable"],
-      "text": "Immovable. Battlecry: gain 5 food."
+      "text": "Immovable. Battlecry: gain 5 food.",
+      "copies": 2
     },
     {
       "id": "hamster",
@@ -756,7 +757,8 @@
       "tags": ["Rodent"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Battlecry: if you gained 10 or more food this turn, draw 2 cards."
+      "text": "Battlecry: if you gained 10 or more food this turn, draw 2 cards.",
+      "copies": 2
     },
     {
       "id": "muskrat",
@@ -778,7 +780,19 @@
       "tags": ["Rodent"],
       "base_strength": 4,
       "keywords": [],
-      "text": "Battlecry: if you gained 10 or more food this turn, gain +5 strength."
+      "text": "Battlecry: if you gained 10 or more food this turn, gain 10 food."
+    },
+    {
+      "id": "gopher",
+      "name": "Gopher",
+      "deck": "food_otk",
+      "rarity": "common",
+      "type": "unit",
+      "tags": ["Rodent"],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: if you played a Rodent last turn, gain 10 food.",
+      "copies": 2
     },
 
     {

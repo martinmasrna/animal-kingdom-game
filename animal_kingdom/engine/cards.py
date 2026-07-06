@@ -62,6 +62,7 @@ class Card:
     dynamic_strength: Optional[str] = None  # rule name when base_strength == "dynamic"
     food_cost: int = 0             # placement cost; only on "Costs X food" cards
     text: str = ""
+    copies: Optional[int] = None   # override COPY_LIMITS[rarity] for this one design (rare exception)
 
     @property
     def is_dynamic(self) -> bool:
@@ -139,6 +140,10 @@ def validate_card_record(rec: dict) -> None:
         if kw not in KEYWORDS:
             raise CardDataError(f"card {cid!r}: unknown keyword {kw!r}, expected subset of {sorted(KEYWORDS)}")
 
+    copies = rec.get("copies")
+    if copies is not None and (isinstance(copies, bool) or not isinstance(copies, int) or copies < 1):
+        raise CardDataError(f"card {cid!r}: copies must be a positive int if set, got {copies!r}")
+
 
 def _build_card(rec: dict) -> Card:
     return Card(
@@ -153,6 +158,7 @@ def _build_card(rec: dict) -> Card:
         dynamic_strength=rec.get("dynamic_strength"),
         food_cost=rec.get("food_cost", 0),
         text=rec.get("text", ""),
+        copies=rec.get("copies"),
     )
 
 

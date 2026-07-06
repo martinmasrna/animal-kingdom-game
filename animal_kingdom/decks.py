@@ -28,7 +28,8 @@ def _build_premade_decks(cards: dict[str, Card]) -> dict[str, list[str]]:
     for card in cards.values():
         if card.deck in NON_DECK_SLUGS:
             continue
-        decks[card.deck].extend([card.id] * COPY_LIMITS[card.rarity])
+        copies = card.copies if card.copies is not None else COPY_LIMITS[card.rarity]
+        decks[card.deck].extend([card.id] * copies)
     return decks
 
 

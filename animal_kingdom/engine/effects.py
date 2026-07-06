@@ -154,6 +154,8 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> No
     _push_hook(state, unit, cr, "on_place")
     if onto_enemy:
         _push_hook(state, unit, cr, "on_place_onto_enemy")
+    # Recorded last so a Rodent's own placement can't satisfy its own "last turn" check (Gopher).
+    _track_rodent_play(state, unit)
 
 
 def _fire_cover_event(state, coverer, covered) -> None:
@@ -282,6 +284,22 @@ def _food_gained_this_turn(state: GameState, player: str) -> int:
 
 def _fed_this_turn(state: GameState, player: str) -> bool:
     return _food_gained_this_turn(state, player) >= state.config.fed_threshold
+
+
+def _played_rodent_last_turn(state: GameState, player: str) -> bool:
+    """True iff `player` placed a Rodent on their own turn immediately before this one
+    (Rodent-last-turn payoff cards, e.g. Gopher). Turns alternate one `turn_counter` tick per
+    single-player turn, so "my last turn" is always exactly turn_counter - 2. Tracked directly
+    in `state.rodent_played_turn` (not state.scheduled/turn_flags): GreedyBot's eval credits
+    *any* entry on state.scheduled as a generic future payoff, so routing this bookkeeping
+    through the delayed-effect queue would silently overvalue every Rodent placement."""
+    return state.rodent_played_turn.get(player) == state.turn_counter - 2
+
+
+def _track_rodent_play(state: GameState, unit: UnitInstance) -> None:
+    """Record the turn a Rodent was placed, for `_played_rodent_last_turn` above."""
+    if "Rodent" in state.cards[unit.card_id].tags:
+        state.rodent_played_turn[unit.owner] = state.turn_counter
 
 
 def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True) -> None:
@@ -1528,7 +1546,8 @@ def _hedgehog_place(state, unit, cr):                                # Immovable
     _push_gain(state, unit.owner, state.config.hedgehog_food)
 
 
-def _chinchilla_place(state, unit, cr):                             # +1 action on your NEXT turn
+def _chinchilla_place(state, unit, cr):                             # draw 1, +1 action NEXT turn
+    _push_draw(state, unit.owner, state.config.chinchilla_draw)
     schedule(state, unit.owner, 1,
              {"op": "grant_action", "player": unit.owner, "n": state.config.chinchilla_bonus_actions})
 
@@ -1546,7 +1565,12 @@ def _muskrat_place(state, unit, cr):
 
 def _groundhog_place(state, unit, cr):
     if _fed_this_turn(state, unit.owner):
-        _grant(state, [unit.iid], state.config.groundhog_strength)  # stored +5, permanent
+        _push_gain(state, unit.owner, state.config.groundhog_food)
+
+
+def _gopher_place(state, unit, cr):
+    if _played_rodent_last_turn(state, unit.owner):
+        _push_gain(state, unit.owner, state.config.rodent_last_turn_food)
 
 
 # --- Reveal (Ramp) ---
@@ -1682,6 +1706,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "hamster": {"on_place": _hamster_place},
     "muskrat": {"on_place": _muskrat_place},
     "groundhog": {"on_place": _groundhog_place},
+    "gopher": {"on_place": _gopher_place},
     # Reveal.
     "andean_condor": {"on_place": _andean_condor_place},
     "oxpecker": {"on_place": _oxpecker_place},

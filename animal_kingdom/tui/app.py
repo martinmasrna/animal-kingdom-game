@@ -234,11 +234,15 @@ class BoardWidget(Static):
             self.tooltip = f"Crossroad {value}\n(empty)"
             return
         lines = [f"Crossroad {value} — bottom → top"]
-        lines.extend(
-            f"{unit.owner}  {self._state.cards[unit.card_id].name}"
-            f"  —  STR {strength_mod.effective_strength(self._state, unit)}"
-            for unit in stack
-        )
+        for unit in stack:
+            card = self._state.cards[unit.card_id]
+            tags = "/".join(sorted(card.tags))
+            header = f"{unit.owner}  {card.name}  —  STR {strength_mod.effective_strength(self._state, unit)}"
+            if tags:
+                header += f"  ({tags})"
+            lines.append(header)
+            if card.text:
+                lines.append(card.text)
         self.tooltip = "\n".join(lines)
 
     def on_leave(self, _event: Leave) -> None:

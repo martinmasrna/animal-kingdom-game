@@ -224,6 +224,7 @@ class GameState:
         scheduled: Optional[list[dict]] = None,
         turn_flags: Optional[dict] = None,
         card_strength_counters: Optional[dict[str, dict[str, int]]] = None,
+        rodent_played_turn: Optional[dict[str, int]] = None,
         result: Optional[Result] = None,
     ):
         self.game_map = game_map
@@ -252,6 +253,8 @@ class GameState:
         self.card_strength_counters = (
             card_strength_counters if card_strength_counters is not None else {"A": {}, "B": {}}
         )
+        # player -> turn_counter they last placed a Rodent (Gopher's "last turn" payoff).
+        self.rodent_played_turn = rodent_played_turn if rodent_played_turn is not None else {}
         self.result = result
 
     # --- instance ids ---
@@ -359,6 +362,7 @@ class GameState:
         new.scheduled = _plain_copy(self.scheduled)
         new.turn_flags = _plain_copy(self.turn_flags)
         new.card_strength_counters = _plain_copy(self.card_strength_counters)
+        new.rodent_played_turn = dict(self.rodent_played_turn)
         new.result = self.result  # Result is frozen/immutable - safe to share
         return new
 
@@ -411,6 +415,7 @@ class GameState:
             "scheduled": copy.deepcopy(self.scheduled),
             "turn_flags": copy.deepcopy(self.turn_flags),
             "card_strength_counters": copy.deepcopy(self.card_strength_counters),
+            "rodent_played_turn": dict(self.rodent_played_turn),
             "result": self.result.to_dict() if self.result else None,
         }
 
@@ -452,6 +457,7 @@ class GameState:
             card_strength_counters=copy.deepcopy(
                 d.get("card_strength_counters") or {"A": {}, "B": {}}
             ),
+            rodent_played_turn=copy.deepcopy(d.get("rodent_played_turn") or {}),
             result=Result.from_dict(d["result"]) if d["result"] else None,
         )
 

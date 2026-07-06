@@ -4,6 +4,9 @@ Covers the new signature mechanic ("food gained this turn") and the new cards: R
 Scrooge (reworked), Chinchilla (bonus action), Hedgehog, Hamster, Muskrat, Groundhog, and
 the Armadillo Stealth aura. Map A geometry (4x3): "2,2" neighbours "1,2","3,2","2,1","2,3";
 A's HQ fronts column 1, B's column 4.
+
+Also covers the "played a Rodent last turn" signature mechanic (2026-07-06) introduced with
+Gopher.
 """
 
 from __future__ import annotations
@@ -91,15 +94,42 @@ def test_muskrat_removes_adjacent_enemy_only_when_fed():
     assert unfed.owner_of("2,1") == "B"                               # no removal offered
 
 
-def test_groundhog_gains_strength_only_when_fed():
+def test_groundhog_gains_food_only_when_fed():
     fed = make_state(hands={"A": ["groundhog"]})
     fed.turn_flags["food_gained_A"] = CFG.fed_threshold
     rules.apply_action(fed, PlaceAction("groundhog", ("cr", "1,2")))
-    assert effective_strength(fed, fed.top_unit("1,2")) == 4 + CFG.groundhog_strength
+    assert fed.food["A"] == CFG.groundhog_food
 
     unfed = make_state(hands={"A": ["groundhog"]})
     rules.apply_action(unfed, PlaceAction("groundhog", ("cr", "1,2")))
-    assert effective_strength(unfed, unfed.top_unit("1,2")) == 4
+    assert unfed.food["A"] == 0
+
+
+# -------------------------------------------------------- "played a Rodent last turn"
+
+def test_gopher_gains_food_if_rodent_played_last_turn():
+    s = make_state(hands={"A": ["squirrel"]}, decks={"A": ["mouse"] * 6, "B": ["mouse"] * 6})
+    rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,2")))    # Rodent played this turn
+    advance_to(s, 2)                                                 # into A's next turn
+    s.add_to_hand("A", "gopher")
+    rules.apply_action(s, PlaceAction("gopher", ("cr", "1,3")))
+    assert s.food["A"] == CFG.squirrel_food + CFG.rodent_last_turn_food
+
+
+def test_gopher_no_food_without_a_rodent_played_last_turn():
+    s = make_state(hands={"A": ["gopher"]})
+    rules.apply_action(s, PlaceAction("gopher", ("cr", "1,2")))
+    assert s.food["A"] == 0
+
+
+def test_gopher_flag_expires_after_exactly_one_of_your_turns():
+    s = make_state(hands={"A": ["squirrel"]}, decks={"A": ["mouse"] * 10, "B": ["mouse"] * 10})
+    rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,2")))    # Rodent played turn 0
+    advance_to(s, 2)                                                 # A's very next turn: armed
+    advance_to(s, 4)                                                 # A's turn after that: expired
+    s.add_to_hand("A", "gopher")
+    rules.apply_action(s, PlaceAction("gopher", ("cr", "1,3")))
+    assert s.food["A"] == CFG.squirrel_food                          # no Gopher bonus
 
 
 # ------------------------------------------------------------------ go-wide rodent payoff
@@ -122,10 +152,11 @@ def test_hedgehog_feeds_and_is_immovable():
 
 # ------------------------------------------------------------------- Chinchilla (tempo)
 
-def test_chinchilla_grants_an_extra_action_next_turn():
+def test_chinchilla_draws_and_grants_an_extra_action_next_turn():
     s = make_state(hands={"A": ["chinchilla"]},
                    decks={"A": ["mouse"] * 12, "B": ["mouse"] * 12})
     rules.apply_action(s, PlaceAction("chinchilla", ("cr", "1,2")))   # action 1
+    assert len(s.hands["A"]) == CFG.chinchilla_draw
     assert any(x["step"]["op"] == "grant_action" for x in s.scheduled)
     advance_to(s, 2)                                                  # into A's next turn
     assert s.turn_flags.get("bonus_actions_A") == CFG.chinchilla_bonus_actions
