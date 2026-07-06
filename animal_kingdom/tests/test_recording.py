@@ -82,6 +82,19 @@ def test_writer_recovers_truncated_tail_and_tracks_latest_validity(tmp_path):
     assert completed_game_ids([path]) == {"g1"}
 
 
+def test_generate_manifest_grouped_keeps_matchups_consecutive():
+    from animal_kingdom.recording.cohort import generate_manifest
+    from animal_kingdom.engine.config import Config
+
+    m = generate_manifest(
+        cohort_id="c", human_decks=["food_otk"],
+        opponent_decks=["ramp", "cats_midrange"], opponent_kinds=["greedy"],
+        repetitions=3, seats=("A", "B"), base_seed=0, schedule_seed=0,
+        map_id="map_b", config=Config.default(), shuffle=False)
+    # 3 reps x 2 seats = 6 games per opponent, all of one matchup before the next.
+    assert [g.opponent_deck for g in m.games] == ["ramp"] * 6 + ["cats_midrange"] * 6
+
+
 def test_summarize_cohort_tallies_human_record(tmp_path):
     from animal_kingdom.recording.writer import summarize_cohort
 

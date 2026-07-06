@@ -38,6 +38,11 @@ def main(argv: Sequence[str] | None = None) -> None:
         help="Skip deck-vs-itself matchups (lower value for a balance yardstick).",
     )
     parser.add_argument("--seats", choices=("A", "B", "both"), default="both")
+    parser.add_argument(
+        "--order", choices=("shuffled", "grouped"), default="shuffled",
+        help="'shuffled' interleaves matchups (comparable-cohort default); 'grouped' plays "
+             "all games of one matchup consecutively before the next.",
+    )
     parser.add_argument("--base-seed", type=int, default=0)
     parser.add_argument("--schedule-seed", type=int, default=0)
     parser.add_argument("--map", dest="map_id", default="map_b")
@@ -70,6 +75,7 @@ def main(argv: Sequence[str] | None = None) -> None:
             map_id=args.map_id,
             config=config,
             exclude_mirrors=args.exclude_mirrors,
+            shuffle=(args.order == "shuffled"),
         )
     except ValueError as exc:
         parser.error(str(exc))

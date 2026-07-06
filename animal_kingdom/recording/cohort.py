@@ -129,8 +129,11 @@ def generate_manifest(
     map_id: str,
     config: Config,
     exclude_mirrors: bool = False,
+    shuffle: bool = True,
 ) -> CohortManifest:
-    """Expand a balanced grid into explicit games and shuffle it reproducibly."""
+    """Expand a balanced grid into explicit games. By default the games are shuffled
+    reproducibly (comparable-cohort methodology); pass shuffle=False to keep them grouped by
+    matchup in generation order (all reps of one opponent consecutively) for focused play."""
     import random
 
     if repetitions <= 0:
@@ -172,7 +175,8 @@ def generate_manifest(
                             opponent_deck=opponent_deck,
                             opponent_kind=opponent_kind,
                         ))
-    random.Random(schedule_seed).shuffle(games)
+    if shuffle:
+        random.Random(schedule_seed).shuffle(games)
     manifest = CohortManifest(
         cohort_id=cohort_id,
         map_id=map_id,
@@ -187,6 +191,7 @@ def generate_manifest(
             "base_seed": base_seed,
             "schedule_seed": schedule_seed,
             "exclude_mirrors": exclude_mirrors,
+            "shuffle": shuffle,
         },
     )
     manifest.validate()
