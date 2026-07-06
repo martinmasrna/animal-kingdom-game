@@ -122,6 +122,21 @@ def test_action_log_replays_to_identical_state():
     assert replay(456, log).to_dict() == final.to_dict()
 
 
+def test_new_game_forces_first_player_without_disturbing_rng_stream():
+    # sim/runner.py forces a mover deliberately (instead of leaving it to the seed's coin
+    # flip) to split a matchup's games evenly; that override must not change anything else
+    # the seed determines (deck shuffles, later chance-effect draws).
+    cards = load_cards()
+    deck_a = make_vanilla_deck(seed=1, cards=cards)
+    deck_b = make_vanilla_deck(seed=2, cards=cards)
+
+    coin_flip = new_game(deck_a, deck_b, 42, cards=cards)
+    forced = new_game(deck_a, deck_b, 42, cards=cards, first_player="B")
+
+    assert forced.first_player == "B" and forced.current == "B"
+    assert forced.rng.getstate() == coin_flip.rng.getstate()
+
+
 # ------------------------------------------------------------------ clone guardrail
 
 def test_clone_is_independent():

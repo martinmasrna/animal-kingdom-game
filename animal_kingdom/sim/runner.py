@@ -188,14 +188,18 @@ def play_game(
     config: Optional[Config] = None,
     map_id: str = "map_b",
     log_actions: bool = False,
+    first_player: Optional[str] = None,
 ) -> GameRecord:
     """Play one headless game and return its record. Mirrors the cli.play loop.
 
     With `log_actions=True` the returned record carries the full ordered action log, so the
     game can be replayed move-by-move later without re-invoking the bots (see sim/replay.py).
+    `first_player`, if given, forces who moves first instead of the seed's coin flip (see
+    `engine.state.new_game`) - used to deliberately split a matchup's games evenly by mover
+    rather than leaving it to chance.
     """
     state = new_game(load_premade_deck(deck_a), load_premade_deck(deck_b), seed,
-                     map_id=map_id, config=config)
+                     map_id=map_id, config=config, first_player=first_player)
     bots = {"A": bot_a, "B": bot_b}
 
     drawn: dict[str, set[str]] = {"A": set(), "B": set()}
@@ -243,6 +247,8 @@ class MatchSpec:
     kwargs_a: tuple = ()
     kwargs_b: tuple = ()
     log_actions: bool = False
+    # Forces who moves first (see `play_game`); None leaves it to the seed's coin flip.
+    first_player: Optional[str] = None
 
 
 def _run_spec(spec: MatchSpec, config: Optional[Config] = None) -> GameRecord:
@@ -252,7 +258,7 @@ def _run_spec(spec: MatchSpec, config: Optional[Config] = None) -> GameRecord:
                      extra=dict(spec.kwargs_b))
     return play_game(spec.deck_a, spec.deck_b, spec.seed,
                      bot_a=bot_a, bot_b=bot_b, config=config, map_id=spec.map_id,
-                     log_actions=spec.log_actions)
+                     log_actions=spec.log_actions, first_player=spec.first_player)
 
 
 def run_specs(
@@ -317,15 +323,24 @@ def run_pairs(
         Callable[[str, str, int, int, list[GameRecord]], None]
     ] = None,
 ) -> list[GameRecord]:
-    """`n_games` of every (a, b) pair in `pairs`, same bot kinds/weights on every pair.
+    """Every (a, b) pair in `pairs`, same bot kinds/weights throughout, unordered (each pair
+    appears once - do not also pass its reverse).
+
+    A mirror pair (`a == b`) runs `n_games` games with the seed's natural coin flip deciding
+    first player (forcing a mover is meaningless when both decks are identical). A non-mirror
+    pair runs `2 * n_games` games: `n_games` with `a` forced to move first, then `n_games` with
+    `b` forced to move first - a deliberate, controlled split of the mover axis instead of
+    leaving it to chance, so `a`'s and `b`'s win rates against each other come from one pooled
+    sample rather than two disconnected ones.
 
     `jobs > 1` fans games out over a process pool; because each game is seed-determined the
-    aggregate is identical regardless of `jobs`. A distinct seed per (pair, game) keeps every
-    game independent. Pairs are run one at a time (still spread across all `jobs` workers
-    within each pair); `progress`, if given, is called after every completed pair as
-    `progress(a, b, pairs_done, pairs_total)`. `game_progress`, if given, is called after
-    every individual game finishes *within* the current pair, as
-    `game_progress(a, b, games_done, n_games)` - finer-grained than `progress` for watching a
+    aggregate is identical regardless of `jobs`. Seed blocks are assigned per pair in order
+    (mirror pairs consume `n_games` seeds, non-mirror pairs consume `2 * n_games`), so every
+    game across the whole schedule gets a distinct seed. Pairs are run one at a time (still
+    spread across all `jobs` workers within each pair); `progress`, if given, is called after
+    every completed pair as `progress(a, b, pairs_done, pairs_total)`. `game_progress`, if
+    given, is called after every individual game finishes *within* the current pair, as
+    `game_progress(a, b, games_done, pair_games)` - finer-grained than `progress` for watching a
     single slow (e.g. referee-piloted) matchup tick over. `matchup_progress`, if given, is
     called after each pair with the completed pair's records as its fifth argument. Games can
     complete out of order under `jobs > 1`, but the returned records preserve the original
@@ -333,12 +348,20 @@ def run_pairs(
     """
     records: list[GameRecord] = []
 
-    def _pair_specs(pair_index: int, a: str, b: str) -> list[MatchSpec]:
-        pair_seed = base_seed + pair_index * n_games
-        return [MatchSpec(a, b, pair_seed + i, bots[0], bots[1], map_id,
-                          weights[0], weights[1], bot_kwargs[0], bot_kwargs[1],
-                          log_actions=log_actions)
-                for i in range(n_games)]
+    def _pair_specs(pair_seed: int, a: str, b: str) -> list[MatchSpec]:
+        if a == b:
+            return [MatchSpec(a, b, pair_seed + i, bots[0], bots[1], map_id,
+                              weights[0], weights[1], bot_kwargs[0], bot_kwargs[1],
+                              log_actions=log_actions)
+                    for i in range(n_games)]
+        specs = []
+        for half, mover in enumerate(("A", "B")):
+            offset = pair_seed + half * n_games
+            specs += [MatchSpec(a, b, offset + i, bots[0], bots[1], map_id,
+                                weights[0], weights[1], bot_kwargs[0], bot_kwargs[1],
+                                log_actions=log_actions, first_player=mover)
+                      for i in range(n_games)]
+        return specs
 
     def _run_batch(ex: Optional[ProcessPoolExecutor], a: str, b: str,
                    specs: list[MatchSpec]) -> list[GameRecord]:
@@ -361,8 +384,10 @@ def run_pairs(
         return results
 
     def _run_all(ex: Optional[ProcessPoolExecutor]) -> None:
+        seed_cursor = base_seed
         for pair_index, (a, b) in enumerate(pairs):
-            specs = _pair_specs(pair_index, a, b)
+            specs = _pair_specs(seed_cursor, a, b)
+            seed_cursor += len(specs)
             batch = _run_batch(ex, a, b, specs)
             records.extend(batch)
             if matchup_progress is not None:
@@ -393,8 +418,10 @@ def run_round_robin(
         Callable[[str, str, int, int, list[GameRecord]], None]
     ] = None,
 ) -> list[GameRecord]:
-    """Every ordered deck pair (full matrix incl. mirrors), `n_games` each. See `run_pairs`."""
-    pairs = [(a, b) for a in slugs for b in slugs]
+    """Every unordered non-mirror deck pair, `2 * n_games` each (see `run_pairs`) - mirrors are
+    excluded (a deck-vs-itself win rate is a poor, matchup-dependent proxy for turn-order
+    advantage and isn't worth the extra games)."""
+    pairs = [(a, b) for i, a in enumerate(slugs) for b in slugs[i + 1:]]
     return run_pairs(pairs, n_games, base_seed, bots=bots, config=config,
                      map_id=map_id, jobs=jobs, progress=progress,
                      game_progress=game_progress, matchup_progress=matchup_progress)

@@ -55,16 +55,12 @@ def _card_line(row: dict, card: Card) -> str:
 def format_matrix(records: Sequence[GameRecord]) -> str:
     """Deck-vs-deck win-rate matrix: row = deck_a, column = deck_b, cell = A's win rate.
 
-    Rows/columns are ordered by each deck's combined (both-seats) win rate, strongest first,
-    so the table itself reads as a ranking. Columns are keyed by a 4-letter abbreviation
-    (unique across the current deck slugs) so the table fits a terminal width. Trailing "TotA"
-    column = that row-deck's average win rate playing as seat A across its non-mirror matchups;
-    trailing "TotB" row = that column-deck's average win rate playing as seat B; "Both" column
-    = the same deck's combined (both-seats) average win rate, i.e. (TotA + TotB) / 2 for that
-    deck. The mirror matchup is still shown on the diagonal but excluded from these three
-    aggregates - same convention as `metrics._deck_win_rates` (a deck can't be more or less
-    powerful than itself, so folding the mirror in just dilutes the "vs the field" read toward
-    50%), which keeps these numbers consistent with each per-deck section's "deck win rate".
+    Rows/columns are ordered by each deck's combined win rate, strongest first, so the table
+    itself reads as a ranking. Columns are keyed by a 4-letter abbreviation (unique across the
+    current deck slugs) so the table fits a terminal width. Trailing "1st" column = that
+    row-deck's average win rate across the field when it moved first; "2nd" = the same when it
+    moved second; "Both" = their average, i.e. the deck's overall mover-agnostic field win rate.
+    The diagonal (mirror) is typically "n/a" - the default schedule doesn't run mirrors.
     """
     m = metrics.matchup_matrix(records)
     all_decks = m["decks"]
@@ -73,13 +69,14 @@ def format_matrix(records: Sequence[GameRecord]) -> str:
     def _avg(vals: list[float]) -> Optional[float]:
         return sum(vals) / len(vals) if vals else None
 
-    as_a = {a: _avg([m["win_rate"][a][b] for b in all_decks
-                    if b != a and m["win_rate"][a][b] is not None])
-            for a in all_decks}
-    as_b = {b: _avg([1.0 - m["win_rate"][a][b] for a in all_decks
-                    if a != b and m["win_rate"][a][b] is not None])
-            for b in all_decks}
-    combined = {d: _avg([v for v in (as_a[d], as_b[d]) if v is not None]) for d in all_decks}
+    as_first = {a: _avg([m["win_rate_first"][a][b] for b in all_decks
+                        if b != a and m["win_rate_first"][a][b] is not None])
+               for a in all_decks}
+    as_second = {a: _avg([m["win_rate_second"][a][b] for b in all_decks
+                         if b != a and m["win_rate_second"][a][b] is not None])
+                for a in all_decks}
+    combined = {d: _avg([v for v in (as_first[d], as_second[d]) if v is not None])
+               for d in all_decks}
 
     decks = sorted(all_decks, key=lambda d: (combined[d] is None, -(combined[d] or 0.0)))
     abbrevs = [d[:4] for d in decks]
@@ -89,22 +86,23 @@ def format_matrix(records: Sequence[GameRecord]) -> str:
         return f"{rate:>{col_w - 1}.0%} " if rate is not None else f"{'n/a':>{col_w - 1}} "
 
     header = (" " * (name_w + 1) + "".join(f"{ab:>{col_w}}" for ab in abbrevs)
-              + f"{'TotA':>{col_w}}{'Both':>{col_w}}")
+              + f"{'1st':>{col_w}}{'2nd':>{col_w}}{'Both':>{col_w}}")
     lines = ["\n### Matchup matrix (row = A, column = B, cell = A's win rate)", "```", header]
     for a in decks:
         cells = [_cell(m["win_rate"][a][b]) for b in decks]
-        cells.append(_cell(as_a[a]))
+        cells.append(_cell(as_first[a]))
+        cells.append(_cell(as_second[a]))
         cells.append(_cell(combined[a]))
         lines.append(f"{a:<{name_w}} " + "".join(cells))
-    tot_b_cells = [_cell(as_b[b]) for b in decks] + [_cell(None), _cell(None)]
-    lines.append(f"{'TotB':<{name_w}} " + "".join(tot_b_cells))
     lines.append("```")
     return "\n".join(lines)
 
 
 def format_focused_matrix(records: Sequence[GameRecord], deck: str) -> str:
-    """`deck`'s win rate against every opponent (mirror included), split by which seat it
-    played — a trimmed one-deck view instead of the full square grid."""
+    """`deck`'s win rate against every opponent, split by whether it moved first or second —
+    a trimmed one-deck view instead of the full square grid. The mirror row (only present if
+    this query explicitly included one via `--opponent`) shows a single overall rate, since
+    "moved first/second" isn't meaningful when both sides run the same deck."""
     m = metrics.matchup_matrix(records)
     opponents = [d for d in m["decks"] if d != deck]
     name_w = max((len(d) for d in opponents), default=len(deck)) + 9  # +len(" (mirror)")
@@ -113,14 +111,13 @@ def format_focused_matrix(records: Sequence[GameRecord], deck: str) -> str:
         return f"{rate:>6.0%}" if rate is not None else f"{'n/a':>6}"
 
     lines = [f"\n### {deck} matchups (cell = {deck}'s win rate)", "```",
-             f"{'opponent':<{name_w}} {'as A':>6} {'as B':>6}"]
+             f"{'opponent':<{name_w}} {'1st':>6} {'2nd':>6}"]
     mirror = m["win_rate"][deck][deck]
     lines.append(f"{deck + ' (mirror)':<{name_w}} {_fmt(mirror)} {'':>6}")
     for opp in opponents:
-        as_a = m["win_rate"][deck][opp]                                   # deck seat A, opp seat B
-        opp_as_a = m["win_rate"][opp][deck]                                # opp seat A, deck seat B
-        as_b = (1.0 - opp_as_a) if opp_as_a is not None else None
-        lines.append(f"{opp:<{name_w}} {_fmt(as_a)} {_fmt(as_b)}")
+        first = m["win_rate_first"][deck][opp]
+        second = m["win_rate_second"][deck][opp]
+        lines.append(f"{opp:<{name_w}} {_fmt(first)} {_fmt(second)}")
     lines.append("```")
     return "\n".join(lines)
 
@@ -196,9 +193,9 @@ def main(
                         "--deck aggro matches aggro_hq_rush) instead of the full round-robin")
     p.add_argument("--opponent", default=None,
                    help="pair with --deck to simulate/report only that single matchup "
-                        "(abbreviation OK, both seats; same deck = mirror only)")
+                        "(abbreviation OK; same deck = mirror)")
     p.add_argument("--decks", default=None,
-                   help="compatibility form: 'all' or one ordered comma-separated pair")
+                   help="compatibility form: 'all' or one comma-separated pair")
     p.add_argument("--format", dest="output_format",
                    choices=("report", "files", "both"), default=default_format,
                    help=f"output mode (default: {default_format})")
@@ -235,26 +232,30 @@ def main(
             p.error("--decks expects 'all' or two comma-separated deck names")
         a, b = (_resolve_deck(part, slugs) for part in pair)
         pairs = [(a, b)]
-        label = f"{a} vs {b} (ordered seats)"
+        label = f"{a} vs {b}" + (" (mirror)" if a == b else "")
     elif opponent is not None:
-        pairs = [(target, opponent)] if target == opponent else [(target, opponent), (opponent, target)]
-        label = f"{target} vs {opponent} ({len(pairs)} seat{'' if len(pairs) == 1 else 's'})"
+        pairs = [(target, opponent)]
+        label = f"{target} vs {opponent}" + (" (mirror)" if target == opponent else "")
     elif target is not None:
-        pairs = [(target, b) for b in slugs] + [(a, target) for a in slugs if a != target]
+        pairs = [(target, b) for b in slugs if b != target]
         label = f"{target}'s matchups ({len(pairs)})"
     else:
-        pairs = [(a, b) for a in slugs for b in slugs]
-        label = f"{len(slugs)}x{len(slugs)} round-robin"
+        pairs = [(a, b) for i, a in enumerate(slugs) for b in slugs[i + 1:]]
+        label = f"{len(slugs)}-deck round-robin ({len(pairs)} matchups, mirrors excluded)"
 
     total_matchups = len(pairs)
-    total_games = total_matchups * args.games
+
+    def _pair_games(a: str, b: str) -> int:
+        return args.games if a == b else 2 * args.games
+
+    total_games = sum(_pair_games(a, b) for a, b in pairs)
     print(f"Running {label}, {args.games} games/matchup "
           f"({total_games} games total, bots={bots[0]},{bots[1]}, jobs={args.jobs})...",
           file=sys.stderr, flush=True)
 
     start = time.monotonic()
 
-    matchups_done = 0
+    games_done_total = 0
 
     def _matchup_progress(
         a: str,
@@ -263,10 +264,9 @@ def main(
         matchup_total: int,
         batch: list[GameRecord],
     ) -> None:
-        nonlocal matchups_done
-        matchups_done = done
+        nonlocal games_done_total
         elapsed = time.monotonic() - start
-        games_done = done * args.games
+        games_done_total += len(batch)
         total = len(batch)
         draws = sum(record.winner is None for record in batch)
         draw_rate = draws / total if total else 0.0
@@ -277,14 +277,14 @@ def main(
         b_rate = 1.0 - a_rate if total else 0.0
         print(f"\n  === MATCHUP {done}/{matchup_total} COMPLETE === {a} vs {b} | "
               f"WR A={a_rate:.1%}, B={b_rate:.1%}, draws={draw_rate:.1%} | "
-              f"{games_done}/{total_games} total games | {elapsed:.1f}s\n",
+              f"{games_done_total}/{total_games} total games | {elapsed:.1f}s\n",
               file=sys.stderr, flush=True)
 
     def _game_progress(a: str, b: str, done: int, matchup_games: int) -> None:
         if not _crossed_progress_decile(done, matchup_games):
             return
         elapsed = time.monotonic() - start
-        games_done = matchups_done * args.games + done
+        games_done = games_done_total + done
         matchup_percent = done / matchup_games
         print(f"      [{matchup_percent:>4.0%}] {a} vs {b} | "
               f"{done}/{matchup_games} games | {games_done}/{total_games} total | "

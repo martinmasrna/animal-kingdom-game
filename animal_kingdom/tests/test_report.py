@@ -19,23 +19,21 @@ from animal_kingdom.sim.runner import GameRecord
 
 def test_format_matrix_shows_each_deck_and_its_win_rate():
     records = [
-        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10),
-        GameRecord("egg_control", "ramp", 1, "A", "B", "food", 20),
+        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10),  # ramp first, ramp won
+        GameRecord("ramp", "egg_control", 1, "B", "A", "food", 20),        # egg first, ramp won
     ]
     matrix = format_matrix(records)
 
     assert "### Matchup matrix" in matrix
     assert "ramp" in matrix and "egg_" in matrix  # row label + column abbreviation
-    assert "100%" in matrix  # ramp beat egg_control every time it was seat A
+    assert "100%" in matrix  # ramp beat egg_control every time
     assert "egg_ = egg_control" not in matrix  # legend dropped
+    assert "TotA" not in matrix and "TotB" not in matrix  # seat concept retired
 
-    # ramp went 1-0 as A and 1-0 as B (it won both recorded games) -> TotA/Both both 100%.
+    # ramp won both moving first and moving second -> vs/1st/2nd/Both all read 100%.
     ramp_line = next(line for line in matrix.splitlines() if line.startswith("ramp"))
-    assert "TotA" in matrix and "Both" in matrix
-    assert ramp_line.count("100%") == 3  # vs egg_control, TotA, Both
-
-    tot_b_line = next(line for line in matrix.splitlines() if line.startswith("TotB"))
-    assert "100%" in tot_b_line  # ramp's average win rate as seat B (from the 2nd record)
+    assert "1st" in matrix and "2nd" in matrix and "Both" in matrix
+    assert ramp_line.count("100%") == 4  # vs egg_control, 1st, 2nd, Both
 
 
 def test_format_report_leads_with_the_matrix():
@@ -78,10 +76,10 @@ def test_resolve_deck_rejects_no_match_or_ambiguous_match():
         _resolve_deck("ca", slugs)          # matches both canine_buff_tempo and cats_midrange
 
 
-def test_format_focused_matrix_shows_both_seats_for_each_opponent():
+def test_format_focused_matrix_shows_both_movers_for_each_opponent():
     records = [
-        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10),   # ramp (A) beats egg (B)
-        GameRecord("egg_control", "ramp", 1, "A", "A", "hq_capture", 10),   # egg (A) beats ramp (B)
+        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10),   # ramp moved first, won
+        GameRecord("ramp", "egg_control", 1, "B", "B", "food", 20),         # egg moved first, won
         GameRecord("ramp", "ramp", 2, "A", "A", "hq_capture", 10),          # mirror
     ]
     matrix = format_focused_matrix(records, "ramp")
@@ -89,7 +87,7 @@ def test_format_focused_matrix_shows_both_seats_for_each_opponent():
     assert "### ramp matchups" in matrix
     assert "ramp (mirror)" in matrix
     assert "cats_midrange" not in matrix        # never played, shouldn't appear as a row
-    # ramp went 1-0 as seat A and 0-1 as seat B against egg_control.
+    # ramp went 1-0 moving first and 0-1 moving second against egg_control.
     egg_line = next(line for line in matrix.splitlines() if line.startswith("egg_control"))
     assert "100%" in egg_line and "0%" in egg_line
 

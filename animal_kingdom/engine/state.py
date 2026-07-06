@@ -464,11 +464,15 @@ def new_game(
     map_id: str = "map_b",
     cards: Optional[dict[str, Card]] = None,
     config: Optional[Config] = None,
+    first_player: Optional[str] = None,
 ) -> GameState:
     """Set up a fresh game: shuffle decks, pick first player, deal opening hands.
 
     The seeded RNG created here is carried on the state, so later chance effects stay
     reproducible. `deck_a`/`deck_b` are lists of card ids (order is irrelevant - shuffled).
+    `first_player`, if given ("A"/"B"), forces who goes first instead of the coin flip below -
+    the RNG is still drawn from so the rest of the stream (shuffles already happened, later
+    chance effects) is identical either way.
     """
     rng = random.Random(seed)
     cards = cards or load_cards()
@@ -480,7 +484,8 @@ def new_game(
     rng.shuffle(decks["A"])
     rng.shuffle(decks["B"])
 
-    first = "A" if rng.random() < 0.5 else "B"  # coin flip via injected seed
+    coin_flip = "A" if rng.random() < 0.5 else "B"  # coin flip via injected seed
+    first = first_player if first_player is not None else coin_flip
     second = other_player(first)
 
     state = GameState(

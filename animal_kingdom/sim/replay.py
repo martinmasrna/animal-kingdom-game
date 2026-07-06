@@ -78,7 +78,8 @@ def replay(log: dict, *, config: Optional[Config] = None) -> list[dict]:
     """Re-run one logged game by applying its stored actions (no bots). Returns a step list,
     each step diffing state before/after the action (food, region control, board ownership)."""
     state = new_game(load_premade_deck(log["deck_a"]), load_premade_deck(log["deck_b"]),
-                     log["seed"], map_id=log.get("map_id", "map_b"), config=config)
+                     log["seed"], map_id=log.get("map_id", "map_b"), config=config,
+                     first_player=log["first_player"])
     steps: list[dict] = []
     for adict in log["actions"]:
         action = action_from_dict(adict)

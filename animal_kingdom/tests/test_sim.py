@@ -56,36 +56,41 @@ def test_parallel_matches_serial():
 
 
 def test_run_round_robin_delegates_to_run_pairs():
-    # run_round_robin should just be run_pairs over the full (slug x slug) cross product.
+    # run_round_robin should be run_pairs over the unordered non-mirror pairs only.
     slugs = ["ramp", "aggro_hq_rush"]
     via_round_robin = run_round_robin(slugs, 2, base_seed=0, bots=("random", "random"))
-    pairs = [(a, b) for a in slugs for b in slugs]
+    pairs = [(a, b) for i, a in enumerate(slugs) for b in slugs[i + 1:]]
     via_pairs = run_pairs(pairs, 2, base_seed=0, bots=("random", "random"))
     assert via_round_robin == via_pairs
 
 
 def test_run_round_robin_reports_per_game_progress():
+    # A single non-mirror pair runs 2 * n_games (n forced-A-first, n forced-B-first).
     updates = []
     run_round_robin(
-        ["ramp"], 3, base_seed=0, bots=("random", "random"),
+        ["ramp", "aggro_hq_rush"], 3, base_seed=0, bots=("random", "random"),
         game_progress=lambda a, b, done, total: updates.append((a, b, done, total)),
     )
     assert updates == [
-        ("ramp", "ramp", 1, 3),
-        ("ramp", "ramp", 2, 3),
-        ("ramp", "ramp", 3, 3),
+        ("ramp", "aggro_hq_rush", 1, 6),
+        ("ramp", "aggro_hq_rush", 2, 6),
+        ("ramp", "aggro_hq_rush", 3, 6),
+        ("ramp", "aggro_hq_rush", 4, 6),
+        ("ramp", "aggro_hq_rush", 5, 6),
+        ("ramp", "aggro_hq_rush", 6, 6),
     ]
 
 
 def test_run_round_robin_reports_completed_matchup_records():
     updates = []
     records = run_round_robin(
-        ["ramp"], 3, base_seed=0, bots=("random", "random"),
+        ["ramp", "aggro_hq_rush"], 3, base_seed=0, bots=("random", "random"),
         matchup_progress=lambda a, b, done, total, batch: updates.append(
             (a, b, done, total, batch)
         ),
     )
-    assert updates == [("ramp", "ramp", 1, 1, records)]
+    assert updates == [("ramp", "aggro_hq_rush", 1, 1, records)]
+    assert len(records) == 6
 
 
 def test_sim_module_delegates_to_unified_cli_in_files_mode(monkeypatch):
@@ -188,7 +193,7 @@ def test_run_matchup_threads_weights_and_stays_deterministic():
 def test_run_pairs_parallel_matches_serial_with_weights():
     # Custom GreedyWeights must survive the ProcessPoolExecutor round-trip (picklability).
     custom = GreedyWeights(enemy_hq_threat=999.0)
-    pairs = [("ramp", "aggro_hq_rush"), ("aggro_hq_rush", "ramp")]
+    pairs = [("ramp", "aggro_hq_rush")]
     serial = run_pairs(pairs, 2, base_seed=0, bots=("greedy", "greedy"),
                        weights=(custom, None), jobs=1)
     parallel = run_pairs(pairs, 2, base_seed=0, bots=("greedy", "greedy"),
@@ -199,19 +204,49 @@ def test_run_pairs_parallel_matches_serial_with_weights():
 # --------------------------------------------------------------------- metrics
 
 def _records():
-    # Hand-built records over two real deck slugs to exercise aggregation precisely.
+    # Hand-built records over two real deck slugs, single (deck_a, deck_b) direction only - the
+    # new schedule never runs the reversed-labeled pair, so `deck_a`/`deck_b` stay fixed and
+    # only `first_player` varies within the pair.
     return [
         GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10),
         GameRecord("ramp", "egg_control", 1, "A", "B", "food", 20),   # second player wins
-        GameRecord("egg_control", "ramp", 2, "A", None, "max_turns", 400),  # draw
+        GameRecord("ramp", "egg_control", 2, "B", None, "max_turns", 400),  # draw, egg moved first
     ]
 
 
 def test_matchup_matrix_shape_and_values():
     m = metrics.matchup_matrix(_records())
     assert m["decks"] == ["egg_control", "ramp"]
-    assert m["win_rate"]["ramp"]["egg_control"] == 0.5      # one A-win, one B-win
-    assert m["win_rate"]["egg_control"]["ramp"] == 0.5      # the single draw = half
+    assert m["win_rate"]["ramp"]["egg_control"] == 0.5      # one A-win, one B-win, one draw
+    assert m["win_rate"]["egg_control"]["ramp"] == 0.5      # derived as the exact complement
+
+
+def test_matchup_matrix_derives_reverse_from_a_single_pooled_batch():
+    # The new schedule never runs both (a, b) and (b, a) as separate blocks - win_rate[b][a]
+    # must be the exact complement of win_rate[a][b] (same games, opposite perspective), and
+    # the mover split must be correctly attributed regardless of which deck is "deck_a".
+    records = [
+        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10),  # ramp first, ramp won
+        GameRecord("ramp", "egg_control", 1, "A", "A", "hq_capture", 10),  # ramp first, ramp won
+        GameRecord("ramp", "egg_control", 2, "B", "B", "food", 20),        # egg first, egg won
+    ]
+    m = metrics.matchup_matrix(records)
+    assert m["win_rate"]["ramp"]["egg_control"] == pytest.approx(2 / 3)
+    assert m["win_rate"]["egg_control"]["ramp"] == pytest.approx(1 / 3)
+    assert m["win_rate"]["ramp"]["egg_control"] + m["win_rate"]["egg_control"]["ramp"] == 1.0
+
+    assert m["win_rate_first"]["ramp"]["egg_control"] == 1.0     # ramp always won moving first
+    assert m["win_rate_second"]["ramp"]["egg_control"] == 0.0    # ramp never won moving second
+    assert m["win_rate_first"]["egg_control"]["ramp"] == 1.0     # egg's WR moving first
+    assert m["win_rate_second"]["egg_control"]["ramp"] == 0.0    # egg's WR moving second
+    # each side's "moved first" rate is the complement of the other's "moved second" rate,
+    # since both read off the exact same sub-batch of games.
+    assert m["win_rate_first"]["egg_control"]["ramp"] == 1.0 - m["win_rate_second"]["ramp"]["egg_control"]
+    assert m["win_rate_second"]["egg_control"]["ramp"] == 1.0 - m["win_rate_first"]["ramp"]["egg_control"]
+
+    # mirror: no meaningful mover identity when both sides run the same deck.
+    assert m["win_rate_first"]["ramp"]["ramp"] is None
+    assert m["win_rate_second"]["ramp"]["ramp"] is None
 
 
 def test_win_condition_split_sums_to_one():

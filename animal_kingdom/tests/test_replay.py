@@ -38,6 +38,20 @@ def test_replay_is_deterministic():
     assert (r1.winner, r1.reason) == (r2.winner, r2.reason)
 
 
+def test_replay_reproduces_a_forced_first_player():
+    # run_pairs forces first_player independently of the seed's coin flip (see runner.py); the
+    # logged record and replay must agree on which player actually moved first.
+    rec = play_game("colony_food_swarm", "ramp", 0, bot_a=GreedyBot(), bot_b=GreedyBot(),
+                    log_actions=True, first_player="B")
+    assert rec.first_player == "B"
+    log = replay.game_log_record(rec, map_id="map_b", bots=("greedy", "greedy"))
+
+    _, result, state = replay.replay(log)
+    assert state.first_player == "B"
+    assert result.winner == rec.winner
+    assert result.reason == rec.reason
+
+
 def test_write_and_load_logs_round_trip(tmp_path):
     recs = [play_game("aggro_hq_rush", "egg_control", s,
                       bot_a=GreedyBot(), bot_b=GreedyBot(), log_actions=True) for s in range(3)]

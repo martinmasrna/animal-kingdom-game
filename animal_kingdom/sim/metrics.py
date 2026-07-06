@@ -49,28 +49,80 @@ def _winner_seat(rec: GameRecord, seat: str) -> Optional[bool]:
 # --------------------------------------------------------------------- metrics
 
 def matchup_matrix(records: Iterable[GameRecord]) -> dict:
-    """Win rate from seat A's perspective for each (deck_a, deck_b) pairing.
+    """Deck-vs-deck win rate for every pair actually played, plus a mover/responder split.
 
-    Returns {"decks": [...sorted slugs...], "win_rate": {a: {b: rate|None}}, "games": {...}}.
-    A draw counts as half a win to each side so a mirror matchup centres on 0.5.
+    `runner.run_pairs` schedules each unordered pair `{a, b}` under a single fixed
+    `(deck_a, deck_b)` labeling (never both), so `win_rate[a][b]` is computed directly from
+    that pair's games and `win_rate[b][a]` is derived as its exact complement
+    (`1 - win_rate[a][b]`) - both describe the same pooled batch of games from opposite
+    perspectives, so they're guaranteed to sum to 1, not just approximately so.
+    `win_rate_first[a][b]` / `win_rate_second[a][b]` split that same batch by which side moved
+    first: a's win rate against b when a moved first / when b moved first. Both are `None` on
+    the diagonal - a mirror matchup has no meaningful "mover" identity since both sides run the
+    same deck.
+
+    Returns {"decks": [...sorted slugs...], "win_rate": {a: {b: rate|None}},
+    "win_rate_first": {a: {b: rate|None}}, "win_rate_second": {a: {b: rate|None}},
+    "games": {a: {b: count}}}. A draw counts as half a win to each side so a mirror matchup
+    centres on 0.5.
     """
     wins: dict[tuple[str, str], float] = defaultdict(float)
     games: dict[tuple[str, str], int] = defaultdict(int)
+    wins_first: dict[tuple[str, str], float] = defaultdict(float)
+    games_first: dict[tuple[str, str], int] = defaultdict(int)
+    wins_second: dict[tuple[str, str], float] = defaultdict(float)
+    games_second: dict[tuple[str, str], int] = defaultdict(int)
     decks: set[str] = set()
     for r in records:
         decks.add(r.deck_a)
         decks.add(r.deck_b)
-        games[(r.deck_a, r.deck_b)] += 1
-        if r.winner == "A":
-            wins[(r.deck_a, r.deck_b)] += 1.0
-        elif r.winner is None:
-            wins[(r.deck_a, r.deck_b)] += 0.5
+        key = (r.deck_a, r.deck_b)
+        games[key] += 1
+        win = 1.0 if r.winner == "A" else (0.5 if r.winner is None else 0.0)
+        wins[key] += win
+        if r.deck_a != r.deck_b:
+            if r.first_player == "A":
+                games_first[key] += 1
+                wins_first[key] += win
+            else:
+                games_second[key] += 1
+                wins_second[key] += win
 
     order = sorted(decks)
-    win_rate = {a: {b: (wins[(a, b)] / games[(a, b)] if games[(a, b)] else None)
-                    for b in order} for a in order}
-    game_counts = {a: {b: games[(a, b)] for b in order} for a in order}
-    return {"decks": order, "win_rate": win_rate, "games": game_counts}
+
+    def _rate(w: dict[tuple[str, str], float], g: dict[tuple[str, str], int],
+             key: tuple[str, str]) -> Optional[float]:
+        return w[key] / g[key] if g[key] else None
+
+    win_rate: dict[str, dict[str, Optional[float]]] = {a: {} for a in order}
+    win_rate_first: dict[str, dict[str, Optional[float]]] = {a: {} for a in order}
+    win_rate_second: dict[str, dict[str, Optional[float]]] = {a: {} for a in order}
+    game_counts: dict[str, dict[str, int]] = {a: {} for a in order}
+    for a in order:
+        for b in order:
+            if a == b:
+                win_rate[a][b] = _rate(wins, games, (a, b))
+                win_rate_first[a][b] = None
+                win_rate_second[a][b] = None
+                game_counts[a][b] = games[(a, b)]
+                continue
+            direct = _rate(wins, games, (a, b))
+            if direct is not None:
+                win_rate[a][b] = direct
+                win_rate_first[a][b] = _rate(wins_first, games_first, (a, b))
+                win_rate_second[a][b] = _rate(wins_second, games_second, (a, b))
+                game_counts[a][b] = games[(a, b)]
+                continue
+            reverse = _rate(wins, games, (b, a))
+            win_rate[a][b] = (1.0 - reverse) if reverse is not None else None
+            rev_first = _rate(wins_first, games_first, (b, a))
+            rev_second = _rate(wins_second, games_second, (b, a))
+            win_rate_first[a][b] = (1.0 - rev_second) if rev_second is not None else None
+            win_rate_second[a][b] = (1.0 - rev_first) if rev_first is not None else None
+            game_counts[a][b] = games[(b, a)]
+
+    return {"decks": order, "win_rate": win_rate, "win_rate_first": win_rate_first,
+            "win_rate_second": win_rate_second, "games": game_counts}
 
 
 def win_condition_split(records: Iterable[GameRecord]) -> dict:
@@ -99,7 +151,8 @@ def first_player_win_rate(records: Iterable[GameRecord]) -> dict:
 
 
 def avg_game_length(records: Iterable[GameRecord]) -> dict:
-    """Mean game length in turns, overall and per ordered matchup."""
+    """Mean game length in turns, overall and per matchup (each unordered pair appears once,
+    keyed by whichever `(deck_a, deck_b)` labeling its games were scheduled under)."""
     records = list(records)
     by_pair_total: dict[tuple[str, str], int] = defaultdict(int)
     by_pair_n: dict[tuple[str, str], int] = defaultdict(int)
@@ -157,9 +210,9 @@ def _deck_win_rates(records: Iterable[GameRecord]) -> dict[str, float]:
     Mirror (deck vs itself) games are excluded: a deck can't be more or less powerful than
     itself, so by construction they center on ~50% regardless of true field strength. Folding
     them in just dilutes this baseline (and per_card_stats' `impact`, which subtracts it)
-    toward 50% for every deck. `matchup_matrix` still includes mirrors - they're cheap and are
-    the cleanest read on pure first-player/turn-order advantage - this exclusion is only for
-    the "how strong is this deck against the field" baseline.
+    toward 50% for every deck. The default schedule (`runner.run_round_robin`) doesn't generate
+    mirrors at all; this exclusion only matters if records were built from an explicit
+    `--deck X --opponent X` query.
     """
     wins: dict[str, float] = defaultdict(float)
     games: dict[str, int] = defaultdict(int)
