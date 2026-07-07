@@ -12,7 +12,7 @@ dependencies = []
 
 [project.optional-dependencies]
 # Analysis layer only (sim/metrics and sim/ratings). Kept out of the engine.
-analysis = ["numpy>=1.26", "scipy>=1.11", "pandas>=2.0"]
+analysis = ["numpy>=1.26", "scipy>=1.11", "pandas>=2.0", "matplotlib>=3.8"]
 # Terminal presentation only (cli.py / render/). engine/ and bots/ stay stdlib-only.
 cli = ["rich>=13.7"]
 tui = ["textual>=8.2,<9"]
