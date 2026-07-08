@@ -38,3 +38,5 @@ No locked changes waiting to be made.
 ## Random Martin notes
 
 - remove "other than Dog" from dog and other cards like this? Seems too defensive for no real reason
+- nerf queen Adira to 4 strength
+- nerf Bullwark to 8 strength

@@ -9,10 +9,7 @@ state, next moves). Open items per area live in `docs/<area>/backlog.md`. Rules 
 source-of-truth in `docs/rules/` (`overview.md`, `keywords.md`).
 
 > ⚠ **Before reasoning about any card, effect, or balance change, read
-> [`docs/rules/mental-model.md`](docs/rules/mental-model.md).** This game has **no mana, no
-> attack/health, no combat damage** — it is *not* Magic/Hearthstone despite the shared vocabulary.
-> Pattern-matching onto those systems (e.g. "STR 2 is fragile / dies to a ping", "mana curve",
-> "removal spell", "go wide for damage") is the single most common recurring mistake here.
+> [`docs/rules/mental-model.md`](docs/rules/mental-model.md).
 
 ## Commands
 
@@ -50,6 +47,8 @@ no flags needed.
 
 - GreedyBot is 1-ply and **underplays combo / delayed-effect decks** (`GREEDY_CAVEAT`) — its win
   rates are a signal to investigate, not truth. TurnBot / RefereeBot are the stronger pilots.
+- This game has **no mana, no attack/health, no combat damage** — it is *not* Magic/Hearthstone despite the shared vocabulary. Pattern-matching onto those systems (e.g. "cheap minions / dies to a ping", "mana curve",
+"removal spell", "go wide for damage") is the single most common recurring mistake here.
 
 ## Workflow
 

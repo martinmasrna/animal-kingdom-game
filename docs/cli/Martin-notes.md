@@ -1,2 +1,0 @@
-- [ ] game setting should persisnt between games
-- [ ] coordinates on crossroads no longer needed
