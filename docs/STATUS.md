@@ -5,7 +5,7 @@
 > `docs/<area>/backlog.md`; deeper detail in that area's other docs. Keep this file short; when a
 > "Next" item is done, replace it, don't append history.
 >
-> _Last updated: 2026-07-04._
+> _Last updated: 2026-07-08._
 
 ## The project in one paragraph
 
@@ -43,7 +43,7 @@ Card-type model (Unit/Egg/Landmark) resolved *provisionally* (decision C).
 **Next:**
 1. **Confirm-or-revert the Landmark card-type decision** before `cards.json` hardens (Apex-eats-Landmark flavor wart included).
 2. **Re-examine Immovable** (naming + effect footprint) — flagged 2026-07-02, *gated on referee-quality balance data*.
-3. **Terminology sweep:** "Discard" → "Remove Pile" across all docs/data.
+3. **Terminology sweep:** "Discard" → "Remove Pile" — canonical docs done (`overview.md`/`keywords.md`); legacy `cards.md`/`card-candidates.md` refs remain.
 
 ## 2. Cards & Flavor
 _The concrete content: the 7 decks (effects, numbers, names) and their theme. Docs: `cards/`
@@ -69,7 +69,7 @@ architecture, performance, tests. (Kept separate from CLI.) Backlog: [`engine/ba
 **260 passing, 1 xfailed**. (M6 TurnBot committed in `aecfdf5`.)
 
 **Next:**
-1. **Fix `metrics.py` `impact` confound** — `win_rate_when_drawn` is biased by win-vs-loss game length (a harness bug, not card quality).
+1. **Fix `metrics.py` `impact` confound** — `win_rate_when_drawn` is biased by win-vs-loss game length (a harness bug, not card quality). *Caveat now documented (`IMPACT_LENGTH_CAVEAT`); the length-normalization fix is the open work.*
 2. **State-representation speed** (struct-of-arrays) — *parked* until NN bots; measure clone cost first.
 
 ## 4. Bots

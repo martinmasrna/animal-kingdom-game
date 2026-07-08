@@ -33,6 +33,16 @@ DRAWN_CAVEAT = (
     "inflate draw_rate/impact slightly for bounce-heavy decks."
 )
 
+IMPACT_LENGTH_CAVEAT = (
+    "`impact` is game-length-confounded: presence-only draw probability rises the longer a "
+    "game runs, so if a deck's losses run longer than its wins (measured on cats_midrange: "
+    "wins avg 14.3 turns vs losses 20.1), every non-opening card is disproportionately "
+    "\"present\" in losing games and its impact is dragged down independent of card quality. "
+    "Read a single card's impact as suggestive, not a verdict - especially for decks with a "
+    "pronounced win/loss length gap (aggro, control). A length-normalized baseline is the real "
+    "fix (see engine backlog); until then this bias sits under every impact number below."
+)
+
 
 @lru_cache(maxsize=None)
 def _deck_card_set(slug: str) -> frozenset[str]:
@@ -237,7 +247,8 @@ def per_card_stats(records: Iterable[GameRecord]) -> list[dict]:
     with never-drawn cards (impact `None`) last.
 
     Mirror (deck vs itself) games are excluded throughout, matching `_deck_win_rates` - see
-    its docstring. A card's `impact` is only meaningful relative to a field baseline.
+    its docstring. A card's `impact` is only meaningful relative to a field baseline, and it
+    carries a game-length bias - see IMPACT_LENGTH_CAVEAT.
     """
     records = list(records)
     deck_win_rate = _deck_win_rates(records)
@@ -322,7 +333,7 @@ def write_all(records: Iterable[GameRecord], out_dir: str) -> dict:
         "avg_game_length": avg_game_length(records),
         "final_food": final_food_summary(records),
         "matchup_decks": matrix["decks"],
-        "caveat": GREEDY_CAVEAT + "\n\n" + DRAWN_CAVEAT,
+        "caveat": GREEDY_CAVEAT + "\n\n" + DRAWN_CAVEAT + "\n\n" + IMPACT_LENGTH_CAVEAT,
     }
 
     _write_matchup_csv(os.path.join(out_dir, "matchup_matrix.csv"), matrix)

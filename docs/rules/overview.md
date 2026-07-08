@@ -46,8 +46,8 @@ A region is a closed area surrounded by paths and crossroads. A player controls 
 ## 3.6 Deck
 Player's face-down cards, pile he draws from.
 
-## 3.7 Discard
-The discard is a shared visible area for units removed from hands, decks, or the map. Unless an effect states otherwise, discarded units do not return to the game.
+## 3.7 Remove Pile
+The Remove Pile is one shared, visible area for cards removed from hands, decks, or the map (there is no separate discard pile). Unless an effect states otherwise, cards in the Remove Pile do not return to the game. Sending any card here is a **remove** (fires remove triggers); a *unit leaving the board* is the narrower case that also fires **Deathrattle**. See `keywords.md` for the two trigger tiers.
 
 # 4. Game Setup
 
@@ -135,7 +135,7 @@ Unless stated otherwise, a units's effect is resolved after it is placed. Effect
 
 - drawing units;
 - placing an additional unit;
-- discarding units;
+- removing units from a hand or deck;
 - ignoring connection;
 - removing visible units.
 
