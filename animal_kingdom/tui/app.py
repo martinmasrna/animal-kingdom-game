@@ -484,6 +484,10 @@ class RecorderApp(App[None]):
     """One-screen recorder with direct board actions and durable transition logging."""
 
     TITLE = "Animal Kingdom — Human Benchmark Recorder"
+    # Disable Textual's terminal text-selection: the recorder never needs it, and a
+    # double-click on a parentless widget (e.g. an ActionCard) crashes Textual 8.2.8's
+    # selection path (screen.py:1914 dereferences a None container). Gated off here.
+    ALLOW_SELECT = False
     HORIZONTAL_BREAKPOINTS = [
         (0, "layout-narrow"),
         (110, "layout-inspector"),
