@@ -20,6 +20,7 @@ import argparse
 import hashlib
 import inspect
 import json
+import math
 import os
 import signal
 import sys
@@ -58,6 +59,12 @@ from .runner import (
     run_spec_pair,
     run_specs,
 )
+
+# Elo is the default reporting scale: a linear relabel of the Bradley-Terry log-odds
+# (pilots stay anchored at random=0). The factor 400/ln(10) is the standard chess-Elo
+# constant, so a +400 Elo gap == 10:1 odds == a 0.909 expected score. The fit itself stays
+# on log-odds (canonical, reproducible, what the tests pin); only presentation is Elo.
+ELO_SCALE = 400.0 / math.log(10.0)  # ~173.72 Elo per log-odds unit
 
 DEFAULT_PILOTS = ("random", "greedy", "turn", "referee")
 DEFAULT_ANCHOR = "random"
@@ -1090,44 +1097,74 @@ def _run_checkpointed_rating_dataset(
     ]
 
 
+def elo_view(result: RatingResult) -> dict[str, Any]:
+    """Elo-scaled mirror of the fitted ratings for the JSON payload.
+
+    Pilots are absolute Elo (anchor=0); decks, interactions, and the seat term are Elo-point
+    offsets (they are sum-zero contrasts, not absolute strengths). The canonical log-odds
+    values remain in ``result.to_dict()`` for reproducibility and refitting."""
+    def scaled(est: RatingEstimate) -> dict[str, float]:
+        return {
+            "elo": est.rating * ELO_SCALE,
+            "ci_low": est.ci_low * ELO_SCALE,
+            "ci_high": est.ci_high * ELO_SCALE,
+        }
+    return {
+        "elo_scale": ELO_SCALE,
+        "note": ("pilots are absolute Elo (anchor=0); decks/interactions/seat are Elo "
+                 "offsets vs the average; +400 Elo == 10:1 odds"),
+        "pilots": {name: scaled(est) for name, est in result.pilots.items()},
+        "decks": {name: scaled(est) for name, est in result.decks.items()},
+        "interactions": {
+            pilot: {deck: scaled(est) for deck, est in cells.items()}
+            for pilot, cells in result.interactions.items()
+        },
+        "seat_advantage": scaled(result.seat_advantage),
+    }
+
+
 def format_result(result: RatingResult) -> str:
-    def table(title: str, rows: Sequence[tuple[str, RatingEstimate]]) -> list[str]:
-        lines = [title, f"{'name':<34}{'rating':>10}{'95% CI':>24}"]
+    def elo(value: float) -> float:
+        return value * ELO_SCALE
+
+    def table(title: str, rows: Sequence[tuple[str, RatingEstimate]], unit: str) -> list[str]:
+        lines = [title, f"{'name':<34}{unit:>8}{'95% CI':>22}"]
         for name, estimate in rows:
             lines.append(
-                f"{name:<34}{estimate.rating:>+10.3f}"
-                f"  [{estimate.ci_low:>+8.3f}, {estimate.ci_high:>+8.3f}]"
+                f"{name:<34}{elo(estimate.rating):>+8.0f}"
+                f"  [{elo(estimate.ci_low):>+7.0f}, {elo(estimate.ci_high):>+7.0f}]"
             )
         return lines
 
     lines = [
-        f"Pilot strength (Bradley-Terry log-odds; {result.anchor}=0 fixed; "
-        f"observed ceiling: {result.ceiling_reference or 'not in dataset'})",
+        f"Pilot strength — Elo scale ({result.anchor}=0; +400 Elo = 10:1 odds; "
+        f"Bradley-Terry log-odds x {ELO_SCALE:.1f})",
+        f"observed ceiling: {result.ceiling_reference or 'not in dataset'}",
         "",
     ]
-    pilot_rows = sorted(
-        result.pilots.items(), key=lambda item: item[1].rating
-    )
-    lines.extend(table("Pilots", pilot_rows))
-    lines.extend(["", *table("Deck strength (byproduct; sum constrained to zero)",
-                             sorted(result.decks.items()))])
+    pilot_rows = sorted(result.pilots.items(), key=lambda item: -item[1].rating)
+    lines.extend(table("Pilots (absolute Elo)", pilot_rows, "Elo"))
+    lines.extend(["", *table("Deck strength (Elo vs average deck; sum zero)",
+                             sorted(result.decks.items()), "Elo")])
     lines += [
         "",
-        "Pilot x deck interaction (execution difficulty; rows/columns sum to zero)",
-        f"{'pilot / deck':<34}{'rating':>10}{'95% CI':>24}",
+        "Pilot x deck interaction (execution difficulty, Elo; rows/cols sum zero)",
+        f"{'pilot / deck':<34}{'Elo':>8}{'95% CI':>22}",
     ]
     for pilot in sorted(result.interactions):
         for deck in sorted(result.interactions[pilot]):
             estimate = result.interactions[pilot][deck]
             lines.append(
-                f"{pilot + ' / ' + deck:<34}{estimate.rating:>+10.3f}"
-                f"  [{estimate.ci_low:>+8.3f}, {estimate.ci_high:>+8.3f}]"
+                f"{pilot + ' / ' + deck:<34}{elo(estimate.rating):>+8.0f}"
+                f"  [{elo(estimate.ci_low):>+7.0f}, {elo(estimate.ci_high):>+7.0f}]"
             )
     seat = result.seat_advantage
     lines += [
         "",
-        "First-player advantage",
-        f"  {seat.rating:+.3f}  [{seat.ci_low:+.3f}, {seat.ci_high:+.3f}] log-odds",
+        f"First-player advantage: {elo(seat.rating):+.0f} Elo "
+        f"[{elo(seat.ci_low):+.0f}, {elo(seat.ci_high):+.0f}]",
+        "",
+        "Elo gap -> win% of the higher: +50=57  +100=64  +200=76  +300=85  +400=91",
         "",
         f"{result.games} games / {result.paired_blocks} paired blocks; "
         f"{result.draws} draws; {result.interval_method}; ridge={result.ridge:g}; "
@@ -1261,7 +1298,11 @@ def main(argv: Sequence[str] | None = None) -> None:
         bootstrap_resamples=args.bootstrap_resamples,
         bootstrap_seed=args.bootstrap_seed,
     )
-    payload = {"provenance": provenance, "ratings": result.to_dict()}
+    payload = {
+        "provenance": provenance,
+        "ratings": result.to_dict(),
+        "elo": elo_view(result),
+    }
     ratings_path = out_dir / "ratings.json"
     with open(ratings_path, "w") as handle:
         json.dump(payload, handle, indent=2, sort_keys=True)
