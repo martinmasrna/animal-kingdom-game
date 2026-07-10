@@ -178,7 +178,7 @@ def test_tui_wide_layout_centers_board_and_labels_players(tmp_path):
             right = max(hitbox.x + hitbox.width for hitbox in hitboxes)
             top = min(hitbox.y for hitbox in hitboxes)
             bottom = max(hitbox.y + hitbox.height for hitbox in hitboxes)
-            assert left > 0 and top > 0
+            assert left > 0 and top >= 0
             assert abs(left - (board.size.width - right)) <= 1
             assert abs(top - (board.size.height - bottom)) <= 1
 

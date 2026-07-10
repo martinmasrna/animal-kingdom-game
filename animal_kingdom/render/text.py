@@ -235,6 +235,18 @@ def _draw_node(
         _blit(canvas, style_grid, row + 2, col, "└" + "─" * inner + "┘", box_style)
         return
 
+    if height == 4:
+        first = f"{x},{y}" if show_coords else name
+        second = name if show_coords else strength
+        _blit(canvas, style_grid, row + 1, col, "│", box_style)
+        _blit(canvas, style_grid, row + 1, col + 1, first.center(inner), occ_style)
+        _blit(canvas, style_grid, row + 1, col + 1 + inner, "│", box_style)
+        _blit(canvas, style_grid, row + 2, col, "│", box_style)
+        _blit(canvas, style_grid, row + 2, col + 1, second.center(inner), occ_style)
+        _blit(canvas, style_grid, row + 2, col + 1 + inner, "│", box_style)
+        _blit(canvas, style_grid, row + 3, col, "└" + "─" * inner + "┘", box_style)
+        return
+
     first = f"{x},{y}" if show_coords else name
     second = name if show_coords else strength
     third = strength if show_coords else _occupant_tags(state, cr, inner)
@@ -302,8 +314,10 @@ def _render_vertical_board(
 
     if max_height is None or max_height >= 46:
         node_w, node_h, rank_gap, hq_h = _DETAIL_NODE_W, _DETAIL_NODE_H, 1, 3
-    elif max_height >= 23:
-        node_w, node_h, rank_gap, hq_h = 10, 3, 1, 1
+    elif max_height >= 30:
+        node_w, node_h, rank_gap, hq_h = 10, 4, 1, 3
+    elif max_height >= 25:
+        node_w, node_h, rank_gap, hq_h = 10, 3, 1, 3
     else:
         node_w, node_h, rank_gap, hq_h = 9, 1, 1, 1
     lanes = len(ys)
@@ -317,7 +331,7 @@ def _render_vertical_board(
     width = max(grid_w, hq_w)
     grid_left = (width - grid_w) // 2
     hq_col = (width - hq_w) // 2
-    hq_gap = 1
+    hq_gap = 0 if node_h in (3, 4) else 1
     grid_top = hq_h + hq_gap
     grid_h = ranks * node_h + (ranks - 1) * rank_gap
     height = hq_h + hq_gap + grid_h + hq_gap + hq_h
