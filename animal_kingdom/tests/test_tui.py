@@ -65,7 +65,8 @@ def test_tui_80x24_keyboard_draw_and_annotations(tmp_path):
             assert board.board_render.height <= board.size.height
             own_hq = board.board_render.hitboxes[("hq", "A")]
             enemy_hq = board.board_render.hitboxes[("hq", "B")]
-            assert own_hq.x < enemy_hq.x and own_hq.y > enemy_hq.y
+            assert own_hq.y > enemy_hq.y
+            assert abs((own_hq.x + own_hq.width // 2) - (enemy_hq.x + enemy_hq.width // 2)) <= 1
             hand_cards = [
                 widget for widget in app.query(ActionCard)
                 if isinstance(widget.entry.payload, tuple)
@@ -494,7 +495,8 @@ def test_tui_runs_bot_first_without_blocking_input_loop(tmp_path):
             board = app.query_one(BoardWidget).board_render
             own_hq = board.hitboxes[("hq", "B")]
             enemy_hq = board.hitboxes[("hq", "A")]
-            assert own_hq.x < enemy_hq.x and own_hq.y > enemy_hq.y
+            assert own_hq.y > enemy_hq.y
+            assert abs((own_hq.x + own_hq.width // 2) - (enemy_hq.x + enemy_hq.width // 2)) <= 1
 
     asyncio.run(scenario())
 

@@ -186,6 +186,259 @@ def _region_token(state, region) -> tuple[str, str | None]:
     return str(region.food), style
 
 
+def _node_style(
+    state,
+    cr: str,
+    *,
+    highlight_crs: Collection[str],
+    focus_target: tuple[str, str] | None,
+) -> tuple[str | None, str | None]:
+    target_style = (
+        FOCUS_STYLE if focus_target == ("cr", cr)
+        else HIGHLIGHT_STYLE if cr in highlight_crs
+        else None
+    )
+    stack = state.board.get(cr)
+    owner_style = SEAT_STYLE.get(stack[-1].owner) if stack else EMPTY_STYLE
+    return target_style or owner_style, owner_style
+
+
+def _draw_node(
+    canvas: list[list[str]],
+    style_grid: list[list[str | None]],
+    state,
+    cr: str,
+    row: int,
+    col: int,
+    *,
+    width: int,
+    height: int,
+    box_style: str | None,
+    occ_style: str | None,
+    show_coords: bool,
+) -> None:
+    x, y = parse_cr(cr)
+    inner = width - 2
+    name, strength = _occupant_details(state, cr, inner)
+    if height == 1:
+        label = f"{x},{y}" if show_coords else _compact_occupant(state, cr, inner)
+        _blit(canvas, style_grid, row, col, "[" + " " * inner + "]", box_style)
+        _blit(canvas, style_grid, row, col + 1, label.center(inner), occ_style)
+        return
+
+    _blit(canvas, style_grid, row, col, "┌" + "─" * inner + "┐", box_style)
+    if height == 3:
+        label = f"{x},{y}" if show_coords else _compact_occupant(state, cr, inner)
+        _blit(canvas, style_grid, row + 1, col, "│", box_style)
+        _blit(canvas, style_grid, row + 1, col + 1, label.center(inner), occ_style)
+        _blit(canvas, style_grid, row + 1, col + 1 + inner, "│", box_style)
+        _blit(canvas, style_grid, row + 2, col, "└" + "─" * inner + "┘", box_style)
+        return
+
+    first = f"{x},{y}" if show_coords else name
+    second = name if show_coords else strength
+    third = strength if show_coords else _occupant_tags(state, cr, inner)
+    _blit(canvas, style_grid, row + 1, col, "│", box_style)
+    _blit(canvas, style_grid, row + 1, col + 1, first.center(inner), occ_style)
+    _blit(canvas, style_grid, row + 1, col + 1 + inner, "│", box_style)
+    _blit(canvas, style_grid, row + 2, col, "│", box_style)
+    _blit(canvas, style_grid, row + 2, col + 1, second.center(inner), occ_style)
+    _blit(canvas, style_grid, row + 2, col + 1 + inner, "│", box_style)
+    _blit(canvas, style_grid, row + 3, col, "│", box_style)
+    _blit(canvas, style_grid, row + 3, col + 1, third.center(inner), occ_style)
+    _blit(canvas, style_grid, row + 3, col + 1 + inner, "│", box_style)
+    _blit(canvas, style_grid, row + 4, col, "└" + "─" * inner + "┘", box_style)
+
+
+def _draw_hq(
+    canvas: list[list[str]],
+    style_grid: list[list[str | None]],
+    player: str,
+    row: int,
+    col: int,
+    *,
+    width: int,
+    height: int,
+    style: str | None,
+) -> None:
+    inner = width - 2
+    if height == 1:
+        label = f"HQ {player}"
+        _blit(canvas, style_grid, row, col, "[" + _truncate(label, inner).center(inner) + "]", style)
+        return
+    _blit(canvas, style_grid, row, col, "┌" + "─" * inner + "┐", style)
+    label_row = height // 2
+    for offset in range(1, height - 1):
+        label = f"HQ {player}" if offset == label_row else ""
+        _blit(canvas, style_grid, row + offset, col, "│" + label.center(inner) + "│", style)
+    _blit(canvas, style_grid, row + height - 1, col, "└" + "─" * inner + "┘", style)
+
+
+def _render_vertical_board(
+    state,
+    *,
+    perspective_player: str,
+    highlight_crs: Collection[str],
+    highlight_hq: str | None,
+    focus_target: tuple[str, str] | None,
+    max_width: int | None,
+    max_height: int | None,
+    show_coords: bool,
+) -> BoardRender:
+    """Player-relative orthogonal projection: own HQ bottom, opponent top."""
+    gm = state.game_map
+    if perspective_player not in gm.hq_connects:
+        raise ValueError(f"unknown perspective player {perspective_player!r}")
+    coords = [parse_cr(c) for c in gm.crossroads]
+    xs = sorted({x for x, _ in coords})
+    ys = sorted({y for _, y in coords})
+    ci = {x: i for i, x in enumerate(xs)}
+    li = {y: i for i, y in enumerate(ys)}
+
+    front_xs = {parse_cr(cr)[0] for cr in gm.hq_front(perspective_player)}
+    own_on_min_x = front_xs == {min(xs)}
+    if not own_on_min_x and front_xs != {max(xs)}:
+        raise ValueError("vertical projection requires an HQ on a vertical map edge")
+
+    if max_height is None or max_height >= 34:
+        node_w, node_h, rank_gap, hq_h = _DETAIL_NODE_W, _DETAIL_NODE_H, 1, 3
+    elif max_height >= 23:
+        node_w, node_h, rank_gap, hq_h = 10, 3, 1, 1
+    else:
+        node_w, node_h, rank_gap, hq_h = 9, 1, 1, 1
+    lanes = len(ys)
+    ranks = len(xs)
+    if max_width is None or lanes <= 1:
+        lane_gap = 6
+    else:
+        lane_gap = max(2, min(6, (max_width - lanes * node_w) // (lanes - 1)))
+    grid_w = lanes * node_w + (lanes - 1) * lane_gap
+    hq_w = max(_HQ_W, node_w)
+    width = max(grid_w, hq_w)
+    grid_left = (width - grid_w) // 2
+    hq_col = (width - hq_w) // 2
+    hq_gap = 1
+    grid_top = hq_h + hq_gap
+    grid_h = ranks * node_h + (ranks - 1) * rank_gap
+    height = hq_h + hq_gap + grid_h + hq_gap + hq_h
+    canvas = [[" "] * width for _ in range(height)]
+    style_grid: list[list[str | None]] = [[None] * width for _ in range(height)]
+    hitboxes: dict[tuple[str, str], Hitbox] = {}
+
+    def rank_index(x: int) -> int:
+        forward = ci[x] if own_on_min_x else len(xs) - 1 - ci[x]
+        return len(xs) - 1 - forward
+
+    def lane_index(y: int) -> int:
+        return li[y] if own_on_min_x else len(ys) - 1 - li[y]
+
+    def box_row(x: int) -> int:
+        return grid_top + rank_index(x) * (node_h + rank_gap)
+
+    def box_col(y: int) -> int:
+        return grid_left + lane_index(y) * (node_w + lane_gap)
+
+    positions = {
+        f"{x},{y}": (box_row(x), box_col(y))
+        for x, y in coords
+    }
+    players = tuple(sorted(gm.hq_connects))
+    opponent = next(player for player in players if player != perspective_player)
+    hq_positions = {
+        opponent: (0, hq_col),
+        perspective_player: (grid_top + grid_h + hq_gap, hq_col),
+    }
+
+    # Connections go down first; boxes and chips overwrite their interiors.
+    for a, b in gm.edges:
+        ar, ac = positions[a]
+        br, bc = positions[b]
+        _draw_conn(
+            canvas,
+            ar + node_h // 2,
+            ac + node_w // 2,
+            br + node_h // 2,
+            bc + node_w // 2,
+        )
+    for player, fronts in gm.hq_connects.items():
+        hr, hc = hq_positions[player]
+        for cr in fronts:
+            nr, nc = positions[cr]
+            _draw_conn(
+                canvas,
+                hr + hq_h // 2,
+                hc + hq_w // 2,
+                nr + node_h // 2,
+                nc + node_w // 2,
+            )
+
+    for region in gm.regions.values():
+        centres = [
+            (positions[cr][0] + node_h // 2, positions[cr][1] + node_w // 2)
+            for cr in region.corners
+        ]
+        row = sum(r for r, _ in centres) // len(centres)
+        col = sum(c for _, c in centres) // len(centres)
+        token, style = _region_token(state, region)
+        col = max(0, min(width - len(token), col - len(token) // 2))
+        _blit(canvas, style_grid, row, col, token, style)
+
+    for cr, (row, col) in positions.items():
+        hitboxes[("cr", cr)] = Hitbox(col, row, node_w, node_h)
+        box_style, occ_style = _node_style(
+            state,
+            cr,
+            highlight_crs=highlight_crs,
+            focus_target=focus_target,
+        )
+        _draw_node(
+            canvas,
+            style_grid,
+            state,
+            cr,
+            row,
+            col,
+            width=node_w,
+            height=node_h,
+            box_style=box_style,
+            occ_style=occ_style,
+            show_coords=show_coords,
+        )
+
+    for player, (row, col) in hq_positions.items():
+        hitboxes[("hq", player)] = Hitbox(col, row, hq_w, hq_h)
+        hq_style = (
+            FOCUS_STYLE if focus_target == ("hq", player)
+            else HIGHLIGHT_STYLE if player == highlight_hq
+            else SEAT_STYLE.get(player)
+        )
+        _draw_hq(
+            canvas,
+            style_grid,
+            player,
+            row,
+            col,
+            width=hq_w,
+            height=hq_h,
+            style=hq_style,
+        )
+
+    # A raw backslash immediately before a Rich/Textual tag escapes the opening bracket.
+    for row in canvas:
+        for index, char in enumerate(row):
+            if char == "\\":
+                row[index] = "╲"
+            elif char == "/":
+                row[index] = "╱"
+
+    return BoardRender(
+        markup="\n".join(_canvas_to_lines(canvas, style_grid)),
+        hitboxes=hitboxes,
+        width=width,
+        height=height,
+    )
+
+
 def _render_diagonal_board(
     state,
     *,
@@ -398,13 +651,27 @@ def render_board(state, highlight_crs: Collection[str] = (),
                  vertical_gap: int = _GAP_H,
                  perspective_player: str | None = None,
                  max_height: int | None = None,
-                 show_coords: bool = False) -> BoardRender:
+                 show_coords: bool = False,
+                 projection: str = "diagonal") -> BoardRender:
     """Render the board and expose target hitboxes for mouse-driven clients.
 
     Horizontal gaps shrink from seven to one cell when necessary, allowing Map B to fit
     an 80-column terminal without changing node size or truncating state.
     """
+    if perspective_player is not None and projection == "vertical":
+        return _render_vertical_board(
+            state,
+            perspective_player=perspective_player,
+            highlight_crs=highlight_crs,
+            highlight_hq=highlight_hq,
+            focus_target=focus_target,
+            max_width=max_width,
+            max_height=max_height,
+            show_coords=show_coords,
+        )
     if perspective_player is not None:
+        if projection != "diagonal":
+            raise ValueError(f"unknown board projection {projection!r}")
         return _render_diagonal_board(
             state,
             perspective_player=perspective_player,

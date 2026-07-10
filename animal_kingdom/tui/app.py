@@ -187,6 +187,7 @@ class BoardWidget(Static):
             perspective_player=perspective_player,
             max_height=inner_height,
             show_coords=False,
+            projection="vertical",
         )
         x_offset = max(0, (width - board.width) // 2)
         y_offset = max(0, (height - board.height) // 2)
