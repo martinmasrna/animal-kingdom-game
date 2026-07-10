@@ -122,6 +122,28 @@ def test_diagonal_crossroad_shows_card_name_and_strength_without_seat_label() ->
 
     assert "Falcon" in plain
     assert "STR 4" in plain
+    assert "1,1" not in plain
     assert "A4" not in plain
     assert board.hitboxes[("cr", "1,1")].width == 12
     assert board.hitboxes[("cr", "1,1")].height == 5
+
+
+def test_standard_board_hides_coordinates_and_prioritizes_unit_identity() -> None:
+    state = new_game(
+        load_premade_deck("aggro_hq_rush"),
+        load_premade_deck("ramp"),
+        seed=7,
+        map_id="map_a",
+    )
+    unit = state.add_to_hand("A", "falcon")
+    state.hands["A"].remove(unit)
+    state.board["1,1"] = [unit]
+
+    board = render_board(state)
+    plain = _assert_valid_markup(board.markup)
+
+    assert "Falcon" in plain
+    assert "STR 4" in plain
+    assert "1,1" not in plain
+    assert "A4" not in plain
+    assert "10·" not in plain
