@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -97,6 +97,19 @@ class CohortManifest:
         ids = [game.game_id for game in self.games]
         if len(ids) != len(set(ids)):
             raise ValueError("cohort contains duplicate game IDs")
+
+
+def config_drift(config: Config) -> list[tuple[str, Any, Any]]:
+    """Pinned constants whose value differs from the current code default (`Config.default()`),
+    as (name, pinned, current) triples. A schedule freezes the config at generation time so a
+    cohort's games share identical rules; if a balance constant is changed in code afterwards, the
+    schedule keeps recording with the stale pinned value. A non-empty result flags exactly that."""
+    default = Config.default()
+    return [
+        (f.name, getattr(config, f.name), getattr(default, f.name))
+        for f in fields(Config)
+        if getattr(config, f.name) != getattr(default, f.name)
+    ]
 
 
 def load_manifest(path: Path | str) -> CohortManifest:

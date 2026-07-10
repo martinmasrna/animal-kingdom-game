@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import random
+import sys
 import textwrap
 from collections import Counter
 from dataclasses import dataclass
@@ -25,7 +26,7 @@ from ..decks import PREMADE_DECKS
 from ..engine import strength as strength_mod
 from ..engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
 from ..engine.config import Config, load_config_overrides
-from ..recording.cohort import CohortManifest, ScheduledGame, load_manifest
+from ..recording.cohort import CohortManifest, ScheduledGame, config_drift, load_manifest
 from ..recording.session import GameSetup, RecorderSession
 from ..recording.writer import CohortProgress, summarize_cohort
 from ..render.text import BoardRender, Hitbox, RARITY_STYLE, SEAT_STYLE, render_board
@@ -185,6 +186,7 @@ class BoardWidget(Static):
             vertical_gap=1 if height < 18 else 3,
             perspective_player=perspective_player,
             max_height=inner_height,
+            show_coords=False,
         )
         x_offset = max(0, (width - board.width) // 2)
         y_offset = max(0, (height - board.height) // 2)
@@ -1264,9 +1266,40 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _warn_config_drift(manifest: CohortManifest) -> None:
+    """Loudly flag (and gate on) a schedule whose pinned rules no longer match the code.
+
+    Textual takes over the screen, so an in-app toast would flash past; instead we print to
+    stderr before the app mounts and, on a TTY, require an explicit keypress so the operator
+    can't unknowingly record a session with stale balance constants (the flying_squirrel 8-vs-10
+    incident, 2026-07-10). Aborting here lets them regenerate the schedule first."""
+    drift = config_drift(manifest.config)
+    if not drift:
+        return
+    lines = "\n".join(
+        f"    - {name}: schedule pins {pinned!r}, code default is {current!r}"
+        for name, pinned, current in drift
+    )
+    sys.stderr.write(
+        f"\n⚠️  SCHEDULE CONFIG DRIFT — {manifest.cohort_id}\n"
+        f"  This schedule's pinned rules differ from the current code in {len(drift)} value(s):\n"
+        f"{lines}\n"
+        "  Games recorded from it use the PINNED (stale) values, not your latest code.\n"
+        "  Regenerate the schedule (or resync its config block) to record with current rules.\n\n"
+    )
+    if sys.stdin.isatty():
+        try:
+            input("  Press Enter to record with the pinned rules anyway, or Ctrl-C to abort... ")
+        except (EOFError, KeyboardInterrupt):
+            sys.stderr.write("\nAborted.\n")
+            raise SystemExit(1)
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     args = build_parser().parse_args(argv)
     manifest = load_manifest(args.schedule) if args.schedule else None
+    if manifest is not None:
+        _warn_config_drift(manifest)
     config = load_config_overrides(args.config) or Config.default()
     RecorderApp(
         manifest=manifest,

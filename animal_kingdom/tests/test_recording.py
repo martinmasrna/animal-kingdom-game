@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import json
 from pathlib import Path
 
@@ -7,7 +8,7 @@ from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import action_from_dict
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import GameState
-from animal_kingdom.recording.cohort import generate_manifest
+from animal_kingdom.recording.cohort import config_drift, generate_manifest
 from animal_kingdom.recording.session import GameSetup, RecorderSession
 from animal_kingdom.recording.schedule import main as schedule_main
 from animal_kingdom.recording.writer import (
@@ -194,3 +195,23 @@ def test_schedule_cli_uses_shipped_config_without_retired_preset(tmp_path):
     manifest = json.loads(output.read_text())
     assert manifest["config"]["actions_per_turn"] == 2
     assert manifest["config"]["draw_action_count"] == 1
+
+
+def test_config_drift_flags_stale_pinned_constants():
+    """A schedule pins config at generation; if a balance constant later changes in code, the
+    drift check must surface exactly the stale keys (guards the flying_squirrel 8-vs-10 incident)."""
+    # A schedule generated from the current defaults has no drift.
+    assert config_drift(Config.default()) == []
+
+    # Pin two constants at stale values; only those should be reported, with (name, pinned, current).
+    default = Config.default()
+    stale = dataclasses.replace(
+        default,
+        flying_squirrel_food=default.flying_squirrel_food - 2,
+        groundhog_food=default.groundhog_food - 3,
+    )
+    drift = dict((name, (pinned, current)) for name, pinned, current in config_drift(stale))
+    assert drift == {
+        "flying_squirrel_food": (default.flying_squirrel_food - 2, default.flying_squirrel_food),
+        "groundhog_food": (default.groundhog_food - 3, default.groundhog_food),
+    }
