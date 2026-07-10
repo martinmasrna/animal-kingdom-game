@@ -46,3 +46,48 @@ Human-game logs were inspected but are not imported automatically: the current
 `results/games/*.json` collection is sparse, unpaired human-vs-bot play across selected
 matchups. Treating it as a direct anchor would mix experimental designs. Human calibration
 remains optional until there is a curated, comparable cohort.
+
+## Reporting scale — Elo
+
+The fit is canonical on Bradley–Terry log-odds (what `ratings.json` stores under `ratings`
+and what the tests pin), but `format_result` and the `elo` block in `ratings.json` render
+**Elo by default** (`ELO_SCALE = 400/ln 10 ≈ 173.72` Elo per log-odds unit; RandomBot = 0).
+Elo gap → win% of the higher pilot: `+50→57  +100→64  +200→76  +300→85  +400→91`.
+
+## Results — bot ladder (cohort 2026-07-10)
+
+The shipped ladder was fit from a lean cohort (four pilots × seven decks, independent
+seat-balanced games — 50 first / 50 second per matchup, **no paired seeds**, both deck
+assignments played). Absolute pilot Elo:
+
+| Pilot | Elo | Note |
+| --- | --- | --- |
+| referee | +1499 | determinized adversarial search (the calibration "oracle") |
+| turn | +1401 | M6 middle tier |
+| greedy | +1245 | 1-ply baseline |
+| random | 0 | anchor |
+
+First-player term is **negative** (~−16 Elo): a slight *second*-player edge under map_b +
+2-action.
+
+## Results — human on the ladder (2026-07-10)
+
+294 recorded human-vs-RefereeBot games (7 sessions × 42, one deck per session, full 7×7
+matchup range, seat-balanced, matchup-blocked). Fit by holding the bot terms fixed and MLE-ing
+a single anchored human pilot term (`scratchpad human_anchor.py`; anchored single-parameter
+fit is robust for scarce human data):
+
+| Pilot | Elo | 95% CI |
+| --- | --- | --- |
+| **human** | **+1572** | [1530, 1613] |
+| referee | +1499 | — |
+| turn | +1401 | — |
+| greedy | +1245 | — |
+
+**A strong human sits ~73 Elo above the oracle (~60% head-to-head)** — CI floor (1530) clears
+Referee's 1499, so RefereeBot is *not* human-level. The per-deck anchored *edge-vs-referee*
+(isolating piloting from deck/matchup) is largest where the search underweights foresight
+(egg_control +203, cats_midrange +165) and collapses to noise where the oracle executes
+mechanically (food_otk +44, ramp +35, colony −3, canine −22 — all inside ±~110 Elo bands).
+The egg_control result **re-confirms the egg delayed-payoff blind spot**: it is a piloting
+artifact, not a weak deck — do not buff egg off bot win rates.
