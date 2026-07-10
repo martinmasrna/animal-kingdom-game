@@ -139,6 +139,13 @@ Unless stated otherwise, a units's effect is resolved after it is placed. Effect
 - ignoring connection;
 - removing visible units.
 
+**Timing of reactions.** A placed unit's own effect (Battlecry) resolves *before* any reaction
+another unit has to that placement (e.g. Hippopotamus removing a weak enemy placed adjacent). A
+reaction that has been queued **fizzles if the unit it belongs to is no longer on the board when it
+would resolve** — so a fed Muskrat placed next to an enemy Hippopotamus removes the Hippo with its
+Battlecry first, and the Hippo's queued removal then does nothing; the Muskrat survives. (An unfed
+Muskrat has no Battlecry removal, so the Hippo removes it as normal.)
+
 ---
 
 # 10. Controlling Regions and Gaining Food

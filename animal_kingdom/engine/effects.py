@@ -622,6 +622,13 @@ def _op_remove_choice(state, step):
 
 
 def _op_remove_iid(state, step):
+    # A reactive removal may name the unit that triggered it (`source_iid`). If that source
+    # has since left the board - e.g. a fed Muskrat's battlecry removed the Hippo before the
+    # Hippo's queued reaction resolves (decision: reactions fizzle when their source is gone) -
+    # the removal fizzles rather than firing from a dead trigger.
+    src = step.get("source_iid")
+    if src is not None and _find_unit(state, src)[1] is None:
+        return None
     cr, unit = _find_unit(state, step["iid"])
     if unit is not None:
         _remove_specific(state, cr, unit, by_player=step.get("by_player", unit.owner),
@@ -1242,7 +1249,8 @@ def _hippo_enemy_placed(state, hippo, placed, cr):
     if (effective_strength(state, placed) <= state.config.hippopotamus_max
             and statics.can_be_removed(state, placed)):
         state.effect_stack.append({"op": "remove_iid", "iid": placed.iid,
-                                   "by_player": hippo.owner, "by_card": "hippopotamus"})
+                                   "by_player": hippo.owner, "by_card": "hippopotamus",
+                                   "source_iid": hippo.iid})
 
 
 # --- Hand-cost / friendly-sacrifice removal (Aggro / Food OTK) ---
