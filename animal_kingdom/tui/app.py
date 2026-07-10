@@ -769,11 +769,8 @@ class RecorderApp(App[None]):
             f"[bold]{phase}[/bold] · Turn {state.turn_counter + 1}{cohort_text}{invalid}"
         )
 
-        opponent_style = SEAT_STYLE.get(opponent, "bold")
-        human_style = SEAT_STYLE.get(human, "bold")
         self.query_one("#opponent", Static).update(
-            f"[{opponent_style}]OPPONENT · Seat {opponent}[/{opponent_style}]"
-            f"   {self._food_progress(state, opponent)}"
+            f"{self._food_progress(state, opponent)}"
             f"  ·  Hand {len(state.hands[opponent])}"
             f"  ·  Deck {len(state.decks[opponent])}"
         )
@@ -787,8 +784,7 @@ class RecorderApp(App[None]):
             else ""
         )
         self.query_one("#player", Static).update(
-            f"[{human_style}]YOUR HAND · Seat {human}[/{human_style}]"
-            f"   {self._food_progress(state, human)}"
+            f"{self._food_progress(state, human)}"
             f"  ·  Cards {len(state.hands[human])}"
             f"  ·  Deck {len(state.decks[human])}"
             f"{action_text}"

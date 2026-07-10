@@ -147,3 +147,23 @@ def test_standard_board_hides_coordinates_and_prioritizes_unit_identity() -> Non
     assert "1,1" not in plain
     assert "A4" not in plain
     assert "10·" not in plain
+
+
+def test_region_food_chip_uses_color_not_owner_letter_for_control() -> None:
+    state = new_game(
+        load_premade_deck("aggro_hq_rush"),
+        load_premade_deck("ramp"),
+        seed=7,
+        map_id="map_a",
+    )
+    for cr in ("1,1", "1,2", "2,1", "2,2"):
+        unit = state.add_to_hand("A", "falcon")
+        state.hands["A"].remove(unit)
+        state.board[cr] = [unit]
+
+    board = render_board(state)
+    plain = _assert_valid_markup(board.markup)
+
+    assert "A10" not in plain
+    assert "B10" not in plain
+    assert "[bold white on cyan]10[/bold white on cyan]" in board.markup

@@ -180,11 +180,10 @@ def _draw_conn(canvas: list[list[str]], r0: int, c0: int, r1: int, c1: int) -> N
 
 
 def _region_token(state, region) -> tuple[str, str | None]:
-    """Compact food chip: neutral regions show food, held regions prefix the owner."""
+    """Compact food chip: ownership is color-only so the number stays easy to scan."""
     holder = _region_holder(state, region)
-    token = f"{holder}{region.food}" if holder else str(region.food)
     style = REGION_HELD_STYLE[holder] if holder else EMPTY_STYLE
-    return token, style
+    return str(region.food), style
 
 
 def _render_diagonal_board(

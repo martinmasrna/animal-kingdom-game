@@ -184,9 +184,13 @@ def test_tui_wide_layout_centers_board_and_labels_players(tmp_path):
             status = str(app.query_one("#status", Static).content)
             assert "Your turn" in status
             assert "Turn 1" in status
-            assert "OPPONENT · Seat B" in str(app.query_one("#opponent", Static).content)
+            opponent = str(app.query_one("#opponent", Static).content)
+            assert "OPPONENT" not in opponent
+            assert "Seat B" not in opponent
+            assert "Food 0" in opponent
             player = str(app.query_one("#player", Static).content)
-            assert "YOUR HAND · Seat A" in player
+            assert "YOUR HAND" not in player
+            assert "Seat A" not in player
             assert "Food 0" in player
             assert "Actions 2" in player
             shelf = app.query_one(CardShelf)
