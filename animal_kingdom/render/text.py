@@ -300,7 +300,7 @@ def _render_vertical_board(
     if not own_on_min_x and front_xs != {max(xs)}:
         raise ValueError("vertical projection requires an HQ on a vertical map edge")
 
-    if max_height is None or max_height >= 34:
+    if max_height is None or max_height >= 46:
         node_w, node_h, rank_gap, hq_h = _DETAIL_NODE_W, _DETAIL_NODE_H, 1, 3
     elif max_height >= 23:
         node_w, node_h, rank_gap, hq_h = 10, 3, 1, 1
