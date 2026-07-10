@@ -289,17 +289,20 @@ def _fed_this_turn(state: GameState, player: str) -> bool:
 def _played_rodent_last_turn(state: GameState, player: str) -> bool:
     """True iff `player` placed a Rodent on their own turn immediately before this one
     (Rodent-last-turn payoff cards, e.g. Gopher). Turns alternate one `turn_counter` tick per
-    single-player turn, so "my last turn" is always exactly turn_counter - 2. Tracked directly
-    in `state.rodent_played_turn` (not state.scheduled/turn_flags): GreedyBot's eval credits
-    *any* entry on state.scheduled as a generic future payoff, so routing this bookkeeping
-    through the delayed-effect queue would silently overvalue every Rodent placement."""
-    return state.rodent_played_turn.get(player) == state.turn_counter - 2
+    single-player turn, so "my last turn" is always exactly turn_counter - 2. We check set
+    membership rather than a single latest turn: in a go-wide Rodent deck the player usually
+    places another Rodent *this* turn before Gopher, and a scalar "last turn placed" would be
+    overwritten by that same-turn play and wrongly disarm Gopher. Tracked directly in
+    `state.rodent_played_turns` (not state.scheduled/turn_flags): GreedyBot's eval credits *any*
+    entry on state.scheduled as a generic future payoff, so routing this bookkeeping through the
+    delayed-effect queue would silently overvalue every Rodent placement."""
+    return (state.turn_counter - 2) in state.rodent_played_turns.get(player, ())
 
 
 def _track_rodent_play(state: GameState, unit: UnitInstance) -> None:
     """Record the turn a Rodent was placed, for `_played_rodent_last_turn` above."""
     if "Rodent" in state.cards[unit.card_id].tags:
-        state.rodent_played_turn[unit.owner] = state.turn_counter
+        state.rodent_played_turns.setdefault(unit.owner, set()).add(state.turn_counter)
 
 
 def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True) -> None:

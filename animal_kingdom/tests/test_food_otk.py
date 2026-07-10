@@ -147,6 +147,30 @@ def test_gopher_no_food_without_a_rodent_played_last_turn():
     assert s.food["A"] == 0
 
 
+def test_gopher_fires_even_if_another_rodent_is_played_earlier_this_turn():
+    """Regression: `rodent_played_turns` is a set, so a Rodent placed THIS turn before Gopher
+    no longer erases the fact that one was played LAST turn. (It used to be a single 'latest
+    turn' scalar; the same-turn play overwrote it and silently disarmed Gopher - the normal
+    line in a go-wide Rodent deck at 2 actions/turn.)"""
+    s = make_state(hands={"A": ["squirrel"]}, decks={"A": ["mouse"] * 8, "B": ["mouse"] * 8})
+    rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,2")))    # Rodent played last turn (t0)
+    advance_to(s, 2)                                                 # into A's next turn
+    s.add_to_hand("A", "mouse")
+    s.add_to_hand("A", "gopher")
+    rules.apply_action(s, PlaceAction("mouse", ("cr", "1,1")))       # another Rodent THIS turn
+    rules.apply_action(s, PlaceAction("gopher", ("cr", "1,3")))      # ...then Gopher
+    assert s.food["A"] == CFG.squirrel_food + CFG.rodent_last_turn_food
+
+
+def test_gopher_does_not_fire_on_a_rodent_played_only_this_turn():
+    """The complement: a Rodent placed only THIS turn (none last turn) must not arm Gopher."""
+    s = make_state(hands={"A": ["mouse", "gopher"]}, decks={"A": ["mouse"] * 8, "B": ["mouse"] * 8})
+    advance_to(s, 2)                                                 # A played no Rodent on t0
+    rules.apply_action(s, PlaceAction("mouse", ("cr", "1,2")))       # Rodent only this turn
+    rules.apply_action(s, PlaceAction("gopher", ("cr", "1,1")))
+    assert s.food["A"] == 0                                          # no Gopher bonus
+
+
 def test_gopher_flag_expires_after_exactly_one_of_your_turns():
     s = make_state(hands={"A": ["squirrel"]}, decks={"A": ["mouse"] * 10, "B": ["mouse"] * 10})
     rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,2")))    # Rodent played turn 0
