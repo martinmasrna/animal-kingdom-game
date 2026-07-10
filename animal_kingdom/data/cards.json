@@ -376,7 +376,7 @@
       "tags": ["Colony"],
       "base_strength": 3,
       "keywords": ["Flight"],
-      "text": "Flight. Battlecry: if you control 5 or more Colony units, draw 2 cards."
+      "text": "Flight. Battlecry: if you control 4 or more Colony units, draw 2 cards."
     },
     {
       "id": "termite_king",
@@ -420,7 +420,7 @@
       "tags": ["Colony"],
       "base_strength": 3,
       "keywords": ["Flight"],
-      "text": "Flight. Has +5 strength while you control 5 or more Colony units."
+      "text": "Flight. Has +5 strength while you control 4 or more Colony units."
     },
     {
       "id": "soldier_ant",
@@ -431,7 +431,7 @@
       "tags": ["Colony"],
       "base_strength": 2,
       "keywords": [],
-      "text": "Battlecry: if you control 5 or more Colony units, remove an adjacent enemy."
+      "text": "Battlecry: if you control 4 or more Colony units, remove an adjacent enemy."
     },
     {
       "id": "worker_ant",

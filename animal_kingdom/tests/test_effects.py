@@ -91,13 +91,29 @@ def test_verminus_counts_any_other_unit():
     assert effective_strength(s, verm) == 4
 
 
-def test_guard_hornet_anthem_gated_on_five_colony():
+def test_guard_hornet_anthem_gated_on_four_colony():
     s = make_state()
     gh = put(s, "1,1", "guard_hornet", "A")
     assert effective_strength(s, gh) == 3
-    for cr in ("1,2", "1,3", "2,1", "2,2"):              # four more Colony -> 5 incl. self
+    for cr in ("1,2", "1,3"):
         put(s, cr, "worker_ant", "A")
+    assert effective_strength(s, gh) == 3                # only 3 Colony incl. self
+    put(s, "2,1", "worker_ant", "A")                     # three more Colony -> 4 incl. self
     assert effective_strength(s, gh) == 8                # +5 anthem
+
+
+def test_nurse_bumblebee_draw_gated_on_four_colony():
+    few = make_state(hands={"A": ["nurse_bumblebee"]}, decks={"A": ["lion", "tiger"], "B": []})
+    put(few, "1,2", "worker_ant", "A")
+    put(few, "1,3", "worker_ant", "A")
+    rules.apply_action(few, PlaceAction("nurse_bumblebee", ("cr", "2,2")))  # 3 Colony incl. Nurse
+    assert len(few.hands["A"]) == 0
+
+    many = make_state(hands={"A": ["nurse_bumblebee"]}, decks={"A": ["lion", "tiger"], "B": []})
+    for cr in ("1,1", "1,2", "1,3"):
+        put(many, cr, "worker_ant", "A")
+    rules.apply_action(many, PlaceAction("nurse_bumblebee", ("cr", "2,2")))  # 4 Colony incl. Nurse
+    assert sorted(hand_ids(many, "A")) == ["lion", "tiger"]
 
 
 # ============================================== counters ("give +X", stored on instance)
@@ -679,16 +695,17 @@ def test_jaguar_and_serval_respect_strength_bounds():
     assert srv.owner_of("3,2") is None and srv.owner_of("2,3") == "B"
 
 
-def test_soldier_ant_removal_gated_on_five_colony():
+def test_soldier_ant_removal_gated_on_four_colony():
     few = make_state(hands={"A": ["soldier_ant"]})
     put(few, "1,2", "worker_ant", "A")
+    put(few, "1,3", "worker_ant", "A")
     put(few, "3,2", "coyote", "B")
-    rules.apply_action(few, PlaceAction("soldier_ant", ("cr", "2,2")))   # only 2 Colony
+    rules.apply_action(few, PlaceAction("soldier_ant", ("cr", "2,2")))   # only 3 Colony incl. Soldier
     assert few.owner_of("3,2") == "B"
 
     many = make_state(hands={"A": ["soldier_ant"]})
-    for cr in ("1,1", "1,2", "1,3", "2,1"):
-        put(many, cr, "worker_ant", "A")               # 4 + Soldier = 5 Colony
+    for cr in ("1,1", "1,2", "1,3"):
+        put(many, cr, "worker_ant", "A")               # 3 + Soldier = 4 Colony
     put(many, "3,2", "coyote", "B")
     rules.apply_action(many, PlaceAction("soldier_ant", ("cr", "2,2")))
     assert many.owner_of("3,2") is None

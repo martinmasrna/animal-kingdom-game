@@ -73,7 +73,7 @@ class Config:
     anthem_vesper_per: int = 2           # per other friendly Colony unit
     raksha_anthem: int = 1               # your other Canines have +X (2→1, 2026-07-05; body 4→5 to compensate)
     guard_hornet_bonus: int = 5          # while >= threshold Colony units
-    guard_hornet_colony_threshold: int = 5
+    guard_hornet_colony_threshold: int = 4
 
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
     dhole_grant: int = 3                 # to adjacent friendly Canines (2→3, 2026-07-05); reserve
@@ -89,7 +89,7 @@ class Config:
 
     # --- Thresholds / strength gates ---
     coyote_draw_threshold: int = 5       # draw if Coyote has >= this strength
-    colony_synergy_threshold: int = 5    # Guard Hornet / Soldier Ant / Nurse Bumblebee "5+ Colony"
+    colony_synergy_threshold: int = 4    # Guard Hornet / Soldier Ant / Nurse Bumblebee "4+ Colony"
 
     # --- Removal-strength caps on Battlecry removals ---
     jaguar_max: int = 5
