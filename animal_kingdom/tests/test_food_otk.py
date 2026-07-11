@@ -13,35 +13,12 @@ from __future__ import annotations
 
 from animal_kingdom.engine import effects, rules, statics
 from animal_kingdom.engine.actions import ChoiceAction, DrawAction, PlaceAction
-from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.maps import load_map
-from animal_kingdom.engine.state import GameState, UnitInstance
 from animal_kingdom.engine.strength import effective_strength
 
+from ._helpers import hand_ids, make_state, put
+
 CFG = Config.default()
-
-
-def make_state(*, current="A", hands=None, decks=None, food=None) -> GameState:
-    s = GameState(
-        load_map("map_a"), load_cards(), Config.default(),
-        board={}, hands={"A": [], "B": []}, decks=decks or {"A": [], "B": []},
-        remove_pile=[], food=food or {"A": 0, "B": 0}, current=current, first_player="A",
-    )
-    for player, ids in (hands or {}).items():
-        for cid in ids:
-            s.add_to_hand(player, cid)
-    return s
-
-
-def put(s, cr, cid, owner):
-    u = UnitInstance(cid, owner, s.new_iid(), placed_on_turn=s.turn_counter)
-    s.board.setdefault(cr, []).append(u)
-    return u
-
-
-def hand_ids(s, player):
-    return [u.card_id for u in s.hands[player]]
 
 
 def advance_to(s, target_tc):

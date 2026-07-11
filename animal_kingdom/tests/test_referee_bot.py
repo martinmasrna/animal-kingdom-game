@@ -17,7 +17,7 @@ from animal_kingdom.engine.actions import ChoiceAction, DrawAction, PlaceAction
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import new_game
 
-from .test_greedy_bot import make_state, put
+from ._helpers import make_state, put
 
 
 def small_referee(seed=0) -> RefereeBot:

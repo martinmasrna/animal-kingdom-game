@@ -11,7 +11,7 @@ from animal_kingdom.bots.greedy_bot import GreedyBot, GreedyWeights, evaluate
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import PlaceAction
 
-from .test_greedy_bot import make_state, put
+from ._helpers import make_state, put
 
 W = GreedyWeights()
 

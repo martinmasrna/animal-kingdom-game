@@ -5,42 +5,14 @@ from __future__ import annotations
 
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import DrawAction, PlaceAction
-from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.maps import load_map
-from animal_kingdom.engine.state import GameState, Result, UnitInstance
+from animal_kingdom.engine.state import Result
+
+from ._helpers import make_state, place_targets, put
 
 # Reworked-pool card ids with known integer strengths used below, all vanilla-bodied
 # for rules tests (no Phase-1 effect handler, no keyword): house_cat=1, caracal=4,
 # cheetah=5, lion=7.
-
-
-def make_state(*, current="A", hands=None, decks=None, food=None, config=None) -> GameState:
-    state = GameState(
-        load_map("map_a"),
-        load_cards(),
-        config or Config.default(),
-        board={},
-        hands={"A": [], "B": []},
-        decks=decks or {"A": [], "B": []},
-        remove_pile=[],
-        food=food or {"A": 0, "B": 0},
-        current=current,
-        first_player="A",
-    )
-    for player, ids in (hands or {}).items():
-        for card_id in ids:
-            state.add_to_hand(player, card_id)
-    return state
-
-
-def put(state: GameState, cr: str, card_id: str, owner: str) -> None:
-    state.board.setdefault(cr, []).append(UnitInstance(card_id, owner, state.new_iid()))
-
-
-def place_targets(state):
-    return {a.target[1] for a in rules.legal_actions(state)
-            if isinstance(a, PlaceAction) and a.target[0] == "cr"}
 
 
 # ---------------------------------------------------------------------- connection

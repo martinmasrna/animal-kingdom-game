@@ -22,7 +22,7 @@ from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import new_game
 from animal_kingdom.sim.runner import run_pairs
 
-from .test_greedy_bot import make_state, put
+from ._helpers import make_state, put
 
 TWO_ACTION = Config.default().sweep(actions_per_turn=2, draw_action_count=1)
 

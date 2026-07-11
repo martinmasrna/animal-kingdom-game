@@ -13,7 +13,7 @@ from __future__ import annotations
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import PlaceAction
 
-from .test_effects import make_state, put
+from ._helpers import make_state, put
 
 
 def _ids_at(state, cr):

@@ -20,25 +20,10 @@ from dataclasses import replace
 
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import ChoiceAction, PlaceAction
-from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.effects import gain_food
-from animal_kingdom.engine.maps import load_map
-from animal_kingdom.engine.state import GameState
 
-from .test_effects import put
-
-
-def make_state(*, config: Config, current="A", hands=None, decks=None, food=None) -> GameState:
-    state = GameState(
-        load_map("map_a"), load_cards(), config,
-        board={}, hands={"A": [], "B": []}, decks=decks or {"A": [], "B": []},
-        remove_pile=[], food=food or {"A": 0, "B": 0}, current=current, first_player="A",
-    )
-    for player, ids in (hands or {}).items():
-        for card_id in ids:
-            state.add_to_hand(player, card_id)
-    return state
+from ._helpers import make_state, put
 
 
 # ------------------------------------------------------------------ King Theron (new cap)

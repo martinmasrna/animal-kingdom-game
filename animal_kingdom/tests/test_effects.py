@@ -11,43 +11,17 @@ from animal_kingdom.engine import effects, rules
 from animal_kingdom.engine.actions import SKIP, ChoiceAction, DrawAction, PlaceAction
 from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.maps import load_map
-from animal_kingdom.engine.state import GameState, UnitInstance
+from animal_kingdom.engine.state import UnitInstance
 from animal_kingdom.engine.strength import card_strength, effective_strength, placement_strength
+
+from ._helpers import hand_ids, make_state, place_targets, put
 
 CFG = Config.default()
 CARDS = load_cards()
 
 
-def hand_ids(state, player):
-    return [u.card_id for u in state.hands[player]]
-
-
-def make_state(*, current="A", hands=None, decks=None, food=None) -> GameState:
-    state = GameState(
-        load_map("map_a"), load_cards(), Config.default(),
-        board={}, hands={"A": [], "B": []}, decks=decks or {"A": [], "B": []},
-        remove_pile=[], food=food or {"A": 0, "B": 0}, current=current, first_player="A",
-    )
-    for player, ids in (hands or {}).items():
-        for card_id in ids:
-            state.add_to_hand(player, card_id)
-    return state
-
-
-def put(state: GameState, cr: str, card_id: str, owner: str) -> UnitInstance:
-    u = UnitInstance(card_id, owner, state.new_iid(), placed_on_turn=state.turn_counter)
-    state.board.setdefault(cr, []).append(u)
-    return u
-
-
 def hand_inst(state, player, card_id):
     return next(u for u in state.hands[player] if u.card_id == card_id)
-
-
-def place_targets(state):
-    return {a.target[1] for a in rules.legal_actions(state)
-            if isinstance(a, PlaceAction) and a.target[0] == "cr"}
 
 
 def advance_to(state, target_tc):

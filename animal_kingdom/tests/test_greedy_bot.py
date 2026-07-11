@@ -18,30 +18,12 @@ from animal_kingdom.bots.greedy_bot import (
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import ChoiceAction, DrawAction, PlaceAction
-from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.maps import load_map
-from animal_kingdom.engine.state import GameState, UnitInstance, new_game
+from animal_kingdom.engine.state import GameState, new_game
+
+from ._helpers import make_state, put
 
 W = GreedyWeights()
-
-
-def make_state(*, current="A", hands=None, decks=None, food=None, config=None) -> GameState:
-    state = GameState(
-        load_map("map_a"), load_cards(), config or Config.default(),
-        board={}, hands={"A": [], "B": []}, decks=decks or {"A": [], "B": []},
-        remove_pile=[], food=food or {"A": 0, "B": 0}, current=current, first_player="A",
-    )
-    for player, ids in (hands or {}).items():
-        for card_id in ids:
-            state.add_to_hand(player, card_id)
-    return state
-
-
-def put(state: GameState, cr: str, card_id: str, owner: str) -> UnitInstance:
-    u = UnitInstance(card_id, owner, state.new_iid(), placed_on_turn=state.turn_counter)
-    state.board.setdefault(cr, []).append(u)
-    return u
 
 
 # --------------------------------------------------------------------- choose
