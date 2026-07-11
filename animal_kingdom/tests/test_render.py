@@ -220,4 +220,5 @@ def test_region_food_chip_uses_color_not_owner_letter_for_control() -> None:
 
     assert "A10" not in plain
     assert "B10" not in plain
-    assert "[bold white on cyan]10[/bold white on cyan]" in board.markup
+    assert "[bold cyan]10[/bold cyan]" in board.markup
+    assert "on cyan" not in board.markup

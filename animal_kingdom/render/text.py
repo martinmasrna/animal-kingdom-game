@@ -31,9 +31,9 @@ HIGHLIGHT_STYLE = "bold green"          # a legal target the player is currently
 FOCUS_STYLE = "bold yellow"             # keyboard-focused target within the legal targets
 RARITY_STYLE = {"legendary": "bold yellow", "rare": "bold blue"}  # common: unstyled
 EMPTY_STYLE = "grey42"                  # unoccupied crossroads / unheld regions: recede into the board
-# A held region is drawn as a filled chip in the holder's seat color, so controlled
-# territory reads at a glance against the dimmed empty blocks.
-REGION_HELD_STYLE = {"A": "bold white on cyan", "B": "bold white on red"}
+# A held region uses the holder's seat color without a filled background, so the food
+# value stays legible without reading like a selected target.
+REGION_HELD_STYLE = SEAT_STYLE
 
 _MIN_WIDTH = 72    # floor so wrapping stays sane when a terminal reports something tiny
 
@@ -331,9 +331,9 @@ def _render_vertical_board(
     width = max(grid_w, hq_w)
     grid_left = (width - grid_w) // 2
     hq_col = (width - hq_w) // 2
-    hq_gap = 0 if node_h in (3, 4) else 1
-    grid_top = hq_h + hq_gap
     grid_h = ranks * node_h + (ranks - 1) * rank_gap
+    hq_gap = 1 if max_height is None or (hq_h * 2 + grid_h + 2) <= max_height else 0
+    grid_top = hq_h + hq_gap
     height = hq_h + hq_gap + grid_h + hq_gap + hq_h
     canvas = [[" "] * width for _ in range(height)]
     style_grid: list[list[str | None]] = [[None] * width for _ in range(height)]
