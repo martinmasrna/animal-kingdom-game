@@ -22,14 +22,7 @@ from typing import Optional, Sequence
 from ..bots.greedy_bot import GreedyWeights
 from ..engine.cards import DECK_SLUGS
 from ..engine.config import Config, load_config_overrides
-from .runner import BOT_KINDS, GameRecord, parse_bot_kind, run_pairs
-
-
-def _credit(rec: GameRecord, seat: str) -> float:
-    """1.0 for a win, 0.5 for a draw, 0.0 for a loss, from `seat`'s perspective."""
-    if rec.winner is None:
-        return 0.5
-    return 1.0 if rec.winner == seat else 0.0
+from .runner import BOT_KINDS, parse_bot_kind, run_pairs
 
 
 @dataclass(frozen=True)
@@ -92,9 +85,9 @@ def run_gauntlet(
     per_opponent: dict[str, float] = {}
     for opp in pool:
         opp_records = [r for r in records if r.deck_b == opp]
-        per_opponent[opp] = sum(_credit(r, "A") for r in opp_records) / len(opp_records)
+        per_opponent[opp] = sum(r.credit("A") for r in opp_records) / len(opp_records)
 
-    overall = sum(_credit(r, "A") for r in records) / len(records)
+    overall = sum(r.credit("A") for r in records) / len(records)
     return GauntletResult(deck, pool, n_games, overall, per_opponent)
 
 

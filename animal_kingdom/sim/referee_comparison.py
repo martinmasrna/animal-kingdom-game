@@ -81,10 +81,7 @@ def _run_referee_match(
         config=config,
         map_id=spec.map_id,
     )
-    credit = (
-        0.5 if record.winner is None
-        else float(record.winner == spec.candidate_seat)
-    )
+    credit = record.credit(spec.candidate_seat)
     return spec.seed, spec.candidate_seat, credit, record.turns
 
 

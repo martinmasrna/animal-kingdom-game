@@ -35,9 +35,8 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 from ..decks import PREMADE_DECKS
-from ..engine.cards import COPY_LIMITS, NON_DECK_SLUGS, load_cards
+from ..engine.cards import COPY_LIMITS, DECK_SLUGS, NON_DECK_SLUGS, load_cards
 from ..engine.config import Config, load_config_overrides
-from ..engine.cards import DECK_SLUGS
 from .runner import run_pairs
 
 RARITIES = ("legendary", "rare", "common")
@@ -179,10 +178,7 @@ def evaluate(
     for rec in records:
         f = rec.deck_b  # candidate is always deck_a
         counts[f] += 1
-        if rec.winner == "A":
-            wins[f] += 1.0
-        elif rec.winner is None:
-            wins[f] += 0.5
+        wins[f] += rec.credit("A")
     per_field = {f: wins[f] / counts[f] for f in field}
     return Evaluation(
         mean=sum(per_field.values()) / len(per_field),
@@ -325,7 +321,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--objective", choices=("mean", "min"), default="mean",
                         help="maximize mean field winrate, or the worst matchup (maximin)")
     parser.add_argument("--rng-seed", type=int, default=0, help="seed for neighbor proposals")
-    parser.add_argument("--jobs", type=int, default=8)
+    parser.add_argument("--jobs", type=int, default=os.cpu_count() or 1, help="worker processes")
     parser.add_argument("--config", default=None)
     parser.add_argument("--seed-recipe", type=Path,
                         help="JSON {legendary:[...],rare:[...],common:[...]} to start from "

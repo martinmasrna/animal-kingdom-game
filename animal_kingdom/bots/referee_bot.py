@@ -57,22 +57,17 @@ class RefereeBot(TurnSearcher):
                  determinizations: int = 5, beam_width: int = 8,
                  staged: bool = True, root_width: int = 5,
                  reply_width: int = 4,
-                 boundary_reply_only: bool = False,
-                 max_search_nodes: Optional[int] = 1_000,
-                 reuse_reply_scores: bool = False):
+                 max_search_nodes: Optional[int] = 1_000):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width)
         self.staged = staged
         self.root_width = root_width
         self.reply_width = reply_width
-        self.boundary_reply_only = boundary_reply_only
         self.max_search_nodes = max_search_nodes
-        self.reuse_reply_scores = reuse_reply_scores
         # `self._policy` (the GreedyBot that plays every rollout seat) and `self._search_nodes`
         # are set identically by TurnSearcher.__init__; RefereeBot uses them for reply rollouts
         # and its staged node budget.
         self._screening = False
-        self._reply_score_by_state: dict[int, float] = {}
         self.last_search_stats: dict[str, float | int] = {}
         self._candidate_plans: dict[Action, dict[tuple, Action]] = {}
         self._active_plan: Optional[dict[tuple, Action]] = None
@@ -85,7 +80,6 @@ class RefereeBot(TurnSearcher):
         state: Optional[GameState] = None,
     ) -> Action:
         legal = list(legal)
-        self._reply_score_by_state = {}
         self.last_search_stats = {
             "root_candidates": len(legal),
             "screened_candidates": len(legal),
@@ -145,22 +139,11 @@ class RefereeBot(TurnSearcher):
         branches: list[tuple[GameState, float]],
         me: str,
     ) -> float:
-        if self.staged and self.reuse_reply_scores:
-            scores = []
-            for state, penalty in branches:
-                cached = self._reply_score_by_state.get(id(state))
-                if cached is None:
-                    self._advance(state, me)
-                    cached = self._clamped_eval(state, me) - penalty
-                    self.last_search_stats["reply_world_rollouts"] += 1
-                scores.append(cached)
-            return sum(scores) / len(scores)
         return self._mean_reply_score(branches, me)
 
     def _use_reply_comparison(self, representative: GameState) -> bool:
         return (
             not self._screening
-            and not (self.staged and self.boundary_reply_only)
             and representative.pending is None
             and representative.actions_taken_this_turn
             >= representative.config.actions_per_turn - 1
@@ -175,9 +158,6 @@ class RefereeBot(TurnSearcher):
         if compare and not self._screening:
             trial = [(state.clone(), penalty) for state, penalty in candidate_group]
             scores = self._reply_scores(trial, me)
-            if self.staged and self.reuse_reply_scores:
-                for (state, _), score in zip(candidate_group, scores):
-                    self._reply_score_by_state[id(state)] = score
             return sum(scores) / len(scores)
         return self._mean_planning_score(candidate_group, me)
 

@@ -24,7 +24,8 @@ from typing import Optional, Sequence
 from ..engine.cards import DECK_SLUGS, Card, load_cards
 from ..engine.config import load_config_overrides
 from . import metrics
-from .runner import BOT_KINDS, GameRecord, parse_bot_pair, run_pairs
+from .runner import (BOT_KINDS, GameRecord, crossed_progress_decile, parse_bot_pair,
+                     run_pairs)
 
 RARITY_MARK = {"legendary": "\U0001F7E1", "rare": "\U0001F535", "common": "⚪"}  # yellow/blue/white
 
@@ -163,11 +164,6 @@ def _print_metrics_summary(summary: dict, out_dir: str, *, file) -> None:
     print(f"\nCaveat: {summary['caveat']}", file=file)
 
 
-def _crossed_progress_decile(done: int, total: int) -> bool:
-    """Return whether completing game ``done`` crossed the next 10% matchup milestone."""
-    return total > 0 and (done * 10) // total > ((done - 1) * 10) // total
-
-
 def main(
     argv: Sequence[str] | None = None,
     *,
@@ -270,10 +266,7 @@ def main(
         total = len(batch)
         draws = sum(record.winner is None for record in batch)
         draw_rate = draws / total if total else 0.0
-        a_rate = (
-            (sum(record.winner == "A" for record in batch) + draws / 2) / total
-            if total else 0.0
-        )
+        a_rate = sum(record.credit("A") for record in batch) / total if total else 0.0
         b_rate = 1.0 - a_rate if total else 0.0
         print(f"\n  === MATCHUP {done}/{matchup_total} COMPLETE === {a} vs {b} | "
               f"WR A={a_rate:.1%}, B={b_rate:.1%}, draws={draw_rate:.1%} | "
@@ -281,7 +274,7 @@ def main(
               file=sys.stderr, flush=True)
 
     def _game_progress(a: str, b: str, done: int, matchup_games: int) -> None:
-        if not _crossed_progress_decile(done, matchup_games):
+        if not crossed_progress_decile(done, matchup_games):
             return
         elapsed = time.monotonic() - start
         games_done = games_done_total + done

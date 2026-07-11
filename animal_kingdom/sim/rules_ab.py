@@ -20,7 +20,8 @@ from typing import Optional, Sequence
 from ..engine.cards import DECK_SLUGS
 from ..engine.config import Config
 from . import metrics
-from .runner import BOT_KINDS, GameRecord, parse_bot_pair, run_pairs
+from .runner import (BOT_KINDS, GameRecord, crossed_progress_decile, parse_bot_pair,
+                     run_pairs)
 
 
 @dataclass(frozen=True)
@@ -42,28 +43,12 @@ def _non_mirror_pairs(slugs: Sequence[str]) -> list[tuple[str, str]]:
     return [(a, b) for i, a in enumerate(ordered) for b in ordered[i + 1:]]
 
 
-def _deck_field_rates(records: Sequence[GameRecord]) -> dict[str, float]:
-    wins: dict[str, float] = {}
-    games: dict[str, int] = {}
-    for record in records:
-        if record.deck_a == record.deck_b:
-            continue
-        for seat, deck in (("A", record.deck_a), ("B", record.deck_b)):
-            games[deck] = games.get(deck, 0) + 1
-            if record.winner is None:
-                credit = 0.5
-            else:
-                credit = 1.0 if record.winner == seat else 0.0
-            wins[deck] = wins.get(deck, 0.0) + credit
-    return {deck: wins[deck] / games[deck] for deck in games}
-
-
 def deck_deltas(
     control_records: Sequence[GameRecord],
     treatment_records: Sequence[GameRecord],
 ) -> list[DeckDelta]:
-    control = _deck_field_rates(control_records)
-    treatment = _deck_field_rates(treatment_records)
+    control = metrics.deck_field_win_rates(control_records)
+    treatment = metrics.deck_field_win_rates(treatment_records)
     decks = sorted(set(control) | set(treatment))
     rows = []
     for deck in decks:
@@ -108,16 +93,12 @@ def _signed_pct(value: Optional[float]) -> str:
     return "n/a" if value is None else f"{value:+.1%}"
 
 
-def _crossed_progress_decile(done: int, total: int) -> bool:
-    return total > 0 and (done * 10) // total > ((done - 1) * 10) // total
-
-
 def _matchup_batch_summary(records: Sequence[GameRecord]) -> tuple[float, float, float]:
     total = len(records)
     if total == 0:
         return 0.0, 0.0, 0.0
     draws = sum(record.winner is None for record in records)
-    a_credit = sum(record.winner == "A" for record in records) + draws / 2
+    a_credit = sum(record.credit("A") for record in records)
     avg_turns = sum(record.turns for record in records) / total
     return a_credit / total, draws / total, avg_turns
 
@@ -374,7 +355,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         )
 
         def _game_progress(a: str, b: str, done: int, matchup_games: int) -> None:
-            if not _crossed_progress_decile(done, matchup_games):
+            if not crossed_progress_decile(done, matchup_games):
                 return
             elapsed = time.monotonic() - start
             games_done = games_done_total + done

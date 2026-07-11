@@ -12,6 +12,11 @@ class _FakeRecord:
         self.winner = winner
         self.turns = turns
 
+    def credit(self, seat="A"):
+        if self.winner is None:
+            return 0.5
+        return 1.0 if self.winner == seat else 0.0
+
 
 def _capture_match_bots(monkeypatch, spec):
     """Run _run_referee_match with play_game stubbed; return the (bot_a, bot_b) built."""

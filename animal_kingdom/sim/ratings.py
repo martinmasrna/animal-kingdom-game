@@ -671,9 +671,7 @@ def build_provenance(
             "staged": True,
             "root_width": REFEREE_ROOT_WIDTH,
             "reply_width": REFEREE_REPLY_WIDTH,
-            "boundary_reply_only": False,
             "max_search_nodes": REFEREE_MAX_SEARCH_NODES,
-            "reuse_reply_scores": False,
         },
     }
     pilot_pairs = len(tuple(combinations(pilots, 2)))

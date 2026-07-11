@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import random
 import sys
 import time
@@ -110,7 +111,7 @@ def matchup_matrix(
                               bots=(pilot, pilot), config=config, jobs=jobs)
     agg: dict[tuple[str, str], list[float]] = defaultdict(lambda: [0.0, 0])
     for rec in records:
-        credit = 1.0 if rec.winner == "A" else (0.5 if rec.winner is None else 0.0)
+        credit = rec.credit("A")
         cell = agg[(rec.deck_a, rec.deck_b)]
         cell[0] += credit
         cell[1] += 1
@@ -295,7 +296,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                    help="reject a best-response whose card Jaccard vs an existing deck exceeds this")
     p.add_argument("--rng-seed", type=int, default=0)
     p.add_argument("--search-seed", type=int, default=515000)
-    p.add_argument("--jobs", type=int, default=8)
+    p.add_argument("--jobs", type=int, default=os.cpu_count() or 1, help="worker processes")
     p.add_argument("--config", default=None)
     p.add_argument("--out", type=Path)
     args = p.parse_args(argv)

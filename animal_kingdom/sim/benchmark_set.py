@@ -60,7 +60,7 @@ def _fold(records) -> dict:
     credit = 0.0
     cards: dict[str, list] = defaultdict(lambda: [0.0, 0])  # cid -> [win-credit-when-drawn, drawn]
     for r in records:
-        cr = 1.0 if r.winner == "A" else (0.5 if r.winner is None else 0.0)
+        cr = r.credit("A")
         n += 1
         credit += cr
         for cid in r.cards_drawn_a:
@@ -88,7 +88,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--field", default="",
                    help="explicit comma-separated field (overrides --exclude entirely)")
     p.add_argument("--base-seed", type=int, default=902000)
-    p.add_argument("--jobs", type=int, default=8)
+    p.add_argument("--jobs", type=int, default=os.cpu_count() or 1, help="worker processes")
     p.add_argument("--out", type=Path, help="write the final per-card table as CSV")
     p.add_argument("--checkpoint", type=Path,
                    help="checkpoint file for crash-safe resume "

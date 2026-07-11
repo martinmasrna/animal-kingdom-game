@@ -45,6 +45,12 @@ class GameRecord:
     # search is bypassed - the stored actions are applied straight through the rules engine).
     actions: tuple = ()
 
+    def credit(self, seat: str = "A") -> float:
+        """Outcome credit for `seat`: 1.0 win, 0.5 draw, 0.0 loss."""
+        if self.winner is None:
+            return 0.5
+        return 1.0 if self.winner == seat else 0.0
+
     def to_dict(self) -> dict:
         return {"deck_a": self.deck_a, "deck_b": self.deck_b, "seed": self.seed,
                 "first_player": self.first_player, "winner": self.winner,
@@ -53,6 +59,11 @@ class GameRecord:
                 "cards_drawn_b": sorted(self.cards_drawn_b),
                 "final_food_a": self.final_food_a,
                 "final_food_b": self.final_food_b}
+
+
+def crossed_progress_decile(done: int, total: int) -> bool:
+    """Whether completing game `done` crossed the next 10% matchup milestone (progress pacing)."""
+    return total > 0 and (done * 10) // total > ((done - 1) * 10) // total
 
 
 BOT_KINDS = ("greedy", "lookahead", "random", "referee", "turn", "greedy_belief")

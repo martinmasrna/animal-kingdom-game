@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Sequence
@@ -33,7 +34,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--pilot", default="turn", help="bot kind for both seats (turn|referee|greedy)")
     p.add_argument("--games", type=int, default=50, help="games/opponent PER MOVER (2x = per matchup)")
     p.add_argument("--base-seed", type=int, default=414000)
-    p.add_argument("--jobs", type=int, default=8)
+    p.add_argument("--jobs", type=int, default=os.cpu_count() or 1, help="worker processes")
     p.add_argument("--config", default=None)
     args = p.parse_args(argv)
 
@@ -54,8 +55,7 @@ def main(argv: Sequence[str] | None = None) -> None:
           f"{2*args.games} games/matchup | config {args.config or 'default'}\n", file=sys.stderr)
 
     def _prog(a, b, done, total, recs):
-        wr = sum(1.0 if r.winner == "A" else (0.5 if r.winner is None else 0.0)
-                 for r in recs) / len(recs)
+        wr = sum(r.credit("A") for r in recs) / len(recs)
         print(f"  [{done}/{len(field)}] vs {b:<20} {wr:.1%}", file=sys.stderr)
 
     pairs = [(args.deck, f) for f in field]
@@ -65,7 +65,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     per: dict[str, list[float]] = {f: [0.0, 0] for f in field}
     for rec in records:
         cell = per[rec.deck_b]
-        cell[0] += 1.0 if rec.winner == "A" else (0.5 if rec.winner is None else 0.0)
+        cell[0] += rec.credit("A")
         cell[1] += 1
     rates = {f: per[f][0] / per[f][1] for f in field}
     print(f"\n{args.deck} win rate vs field (pilot {args.pilot}):")

@@ -8,13 +8,12 @@ from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine.cards import DECK_SLUGS, load_cards
 from animal_kingdom.sim import report as report_module
 from animal_kingdom.sim.report import (
-    _crossed_progress_decile,
     _resolve_deck,
     format_focused_matrix,
     format_matrix,
     format_report,
 )
-from animal_kingdom.sim.runner import GameRecord
+from animal_kingdom.sim.runner import GameRecord, crossed_progress_decile
 
 
 def test_format_matrix_shows_each_deck_and_its_win_rate():
@@ -102,13 +101,13 @@ def test_format_report_with_focus_deck_only_prints_that_decks_table():
 
 
 def test_progress_deciles_scale_with_matchup_size():
-    assert [done for done in range(1, 201) if _crossed_progress_decile(done, 200)] == [
+    assert [done for done in range(1, 201) if crossed_progress_decile(done, 200)] == [
         20, 40, 60, 80, 100, 120, 140, 160, 180, 200,
     ]
-    assert [done for done in range(1, 96) if _crossed_progress_decile(done, 95)] == [
+    assert [done for done in range(1, 96) if crossed_progress_decile(done, 95)] == [
         10, 19, 29, 38, 48, 57, 67, 76, 86, 95,
     ]
-    assert [done for done in range(1, 6) if _crossed_progress_decile(done, 5)] == [
+    assert [done for done in range(1, 6) if crossed_progress_decile(done, 5)] == [
         1, 2, 3, 4, 5,
     ]
 

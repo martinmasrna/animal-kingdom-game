@@ -39,7 +39,6 @@ from ..bots.greedy_bot import GreedyWeights
 from ..engine.cards import DECK_SLUGS
 from ..engine.config import Config, load_config_overrides
 from . import metrics
-from .gauntlet import _credit
 from .runner import BOT_KINDS, GameRecord, parse_bot_spec, run_pairs
 
 # Fixed bootstrap seed: repeating a benchmark reproduces the intervals exactly (handoff §4.3
@@ -209,8 +208,8 @@ def run_bot_comparison(
     all_deltas: list[float] = []
     for r in candidate_records:
         base = base_by_key[(r.deck_b, r.seed)]
-        cand_credit = _credit(r, "A")
-        base_credit = _credit(base, "A")
+        cand_credit = r.credit("A")
+        base_credit = base.credit("A")
         delta = cand_credit - base_credit
         all_deltas.append(delta)
         per_opp_deltas[r.deck_b].append(delta)
@@ -230,8 +229,8 @@ def run_bot_comparison(
                 seed=(bootstrap_seed, deck, opp)),
         }
 
-    baseline_wr = sum(_credit(r, "A") for r in baseline_records) / len(baseline_records)
-    candidate_wr = sum(_credit(r, "A") for r in candidate_records) / len(candidate_records)
+    baseline_wr = sum(r.credit("A") for r in baseline_records) / len(baseline_records)
+    candidate_wr = sum(r.credit("A") for r in candidate_records) / len(candidate_records)
 
     baseline_food = metrics.final_food_summary(baseline_records)
     candidate_food = metrics.final_food_summary(candidate_records)

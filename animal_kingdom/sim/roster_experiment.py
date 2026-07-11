@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
 import sys
 from pathlib import Path
@@ -69,8 +70,7 @@ def matchup_matrix(
             print(f"    {a} vs {b}: {done}/{pair_total} games", file=sys.stderr)
 
     def _matchup_prog(a: str, b: str, done: int, _total: int, recs: list) -> None:
-        wr = sum(1.0 if r.winner == "A" else (0.5 if r.winner is None else 0.0)
-                 for r in recs) / len(recs)
+        wr = sum(r.credit("A") for r in recs) / len(recs)
         print(f"  [{done}/{total_pairs}] {a} vs {b}: {a} wins {wr:.1%}", file=sys.stderr)
 
     records = run_pairs(pairs, n_games, base_seed, bots=(pilot, pilot),
@@ -79,7 +79,7 @@ def matchup_matrix(
     agg: dict[tuple[str, str], list[float]] = {(r, c): [0.0, 0] for r in rows for c in cols}
     for rec in records:
         cell = agg[(rec.deck_a, rec.deck_b)]
-        cell[0] += 1.0 if rec.winner == "A" else (0.5 if rec.winner is None else 0.0)
+        cell[0] += rec.credit("A")
         cell[1] += 1
     matrix = [[agg[(r, c)][0] / agg[(r, c)][1] for c in cols] for r in rows]
     return matrix, records
@@ -95,7 +95,7 @@ def card_winrates(records, row_decks: Sequence[str]) -> dict[str, dict[str, tupl
     for rec in records:
         if rec.deck_a not in stats:
             continue
-        credit = 1.0 if rec.winner == "A" else (0.5 if rec.winner is None else 0.0)
+        credit = rec.credit("A")
         for cid in rec.cards_drawn_a:
             entry = stats[rec.deck_a][cid]
             entry[0] += credit
@@ -113,7 +113,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--leftover-games", type=int, default=25, help="search games/opp per mover")
     p.add_argument("--leftover-steps", type=int, default=20)
     p.add_argument("--rng-seed", type=int, default=3)
-    p.add_argument("--jobs", type=int, default=8)
+    p.add_argument("--jobs", type=int, default=os.cpu_count() or 1, help="worker processes")
     p.add_argument("--config", default=None)
     p.add_argument("--from-result", type=Path,
                    help="load the leftover decks from a prior run's JSON and just RE-MEASURE the "

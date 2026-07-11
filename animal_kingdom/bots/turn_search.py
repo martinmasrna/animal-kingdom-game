@@ -149,6 +149,29 @@ class TurnSearcher(Bot):
             return self._complete_own_turn(branches, me, guard=0)
         return branches
 
+    def _partition_by_observation(
+        self,
+        branches: list[tuple[GameState, float]],
+        me: str,
+    ) -> tuple[list[tuple[GameState, float]], dict[tuple, list[tuple[GameState, float]]]]:
+        """Split into completed lines (terminal → set result, or opponent's turn) and
+        info-set groups of lines still on `me`'s turn (keyed by observation)."""
+        completed: list[tuple[GameState, float]] = []
+        ongoing: list[tuple[GameState, float]] = []
+        for state, penalty in branches:
+            result = rules.is_terminal(state)
+            if result is not None:
+                state.result = result
+                completed.append((state, penalty))
+            elif state.current != me:
+                completed.append((state, penalty))
+            else:
+                ongoing.append((state, penalty))
+        groups: dict[tuple, list[tuple[GameState, float]]] = defaultdict(list)
+        for item in ongoing:
+            groups[self._observation_key(item[0], me)].append(item)
+        return completed, groups
+
     # ------------------------------------------------------------- own-turn completion
 
     def _complete_own_turn(
@@ -166,29 +189,10 @@ class TurnSearcher(Bot):
         end-of-own-turn evaluation (`_score_candidate_group`); the surviving complete line is
         then scored by `_score_final_line` in `choose`.
         """
-        if not branches:
-            return []
-        if guard >= _MAX_DEPTH:
+        if not branches or guard >= _MAX_DEPTH:
             return branches
 
-        completed: list[tuple[GameState, float]] = []
-        ongoing: list[tuple[GameState, float]] = []
-        for state, penalty in branches:
-            result = rules.is_terminal(state)
-            if result is not None:
-                state.result = result
-                completed.append((state, penalty))
-            elif state.current != me:
-                completed.append((state, penalty))
-            else:
-                ongoing.append((state, penalty))
-
-        if not ongoing:
-            return completed
-
-        groups: dict[tuple, list[tuple[GameState, float]]] = defaultdict(list)
-        for item in ongoing:
-            groups[self._observation_key(item[0], me)].append(item)
+        completed, groups = self._partition_by_observation(branches, me)
 
         for group in groups.values():
             representative = group[0][0]
@@ -248,23 +252,8 @@ class TurnSearcher(Bot):
         """
         if not branches or guard >= _MAX_DEPTH:
             return branches
-        completed = []
-        ongoing = []
-        for state, penalty in branches:
-            result = rules.is_terminal(state)
-            if result is not None:
-                state.result = result
-                completed.append((state, penalty))
-            elif state.current != me:
-                completed.append((state, penalty))
-            else:
-                ongoing.append((state, penalty))
-        if not ongoing:
-            return completed
 
-        groups: dict[tuple, list[tuple[GameState, float]]] = defaultdict(list)
-        for item in ongoing:
-            groups[self._observation_key(item[0], me)].append(item)
+        completed, groups = self._partition_by_observation(branches, me)
         for group in groups.values():
             representative = group[0][0]
             actor = representative.player_to_act()

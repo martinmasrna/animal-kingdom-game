@@ -95,15 +95,12 @@ def can_be_removed(state: GameState, unit: UnitInstance) -> bool:
 def _adjacent_to_friendly_armadillo(state: GameState, unit: UnitInstance) -> bool:
     """True if `unit` is a board top with a friendly Armadillo topping an adjacent crossroad.
     Armadillo's aura grants Stealth to the units it shelters (food_otk overhaul 2026-07-05)."""
-    for cr, stack in state.board.items():
-        if not (stack and stack[-1].iid == unit.iid):
-            continue
-        for nb in state.game_map.neighbors(cr):
-            top = state.top_unit(nb)
-            if top and top.owner == unit.owner and top.card_id == "armadillo":
-                return True
+    cr = next((c for c, st in state.board.items() if st and st[-1].iid == unit.iid), None)
+    if cr is None:
         return False
-    return False
+    return any((top := state.top_unit(nb)) and top.owner == unit.owner
+               and top.card_id == "armadillo"
+               for nb in state.game_map.neighbors(cr))
 
 
 def can_be_chosen(state: GameState, unit: UnitInstance, by_player: str) -> bool:

@@ -45,13 +45,6 @@ def _deck_card_set(slug: str) -> frozenset[str]:
     return frozenset(load_premade_deck(slug))
 
 
-def _winner_seat(rec: GameRecord, seat: str) -> Optional[bool]:
-    """True if `seat` won, False if it lost, None on a draw (no result for that seat)."""
-    if rec.winner is None:
-        return None
-    return rec.winner == seat
-
-
 # --------------------------------------------------------------------- metrics
 
 def matchup_matrix(records: Iterable[GameRecord]) -> dict:
@@ -84,7 +77,7 @@ def matchup_matrix(records: Iterable[GameRecord]) -> dict:
         decks.add(r.deck_b)
         key = (r.deck_a, r.deck_b)
         games[key] += 1
-        win = 1.0 if r.winner == "A" else (0.5 if r.winner is None else 0.0)
+        win = r.credit("A")
         wins[key] += win
         if r.deck_a != r.deck_b:
             if r.first_player == "A":
@@ -210,7 +203,7 @@ def final_food_summary(records: Iterable[GameRecord]) -> dict:
     }
 
 
-def _deck_win_rates(records: Iterable[GameRecord]) -> dict[str, float]:
+def deck_field_win_rates(records: Iterable[GameRecord]) -> dict[str, float]:
     """Each deck's win fraction across its non-mirror games, regardless of seat.
 
     Mirror (deck vs itself) games are excluded: a deck can't be more or less powerful than
@@ -226,9 +219,8 @@ def _deck_win_rates(records: Iterable[GameRecord]) -> dict[str, float]:
         if r.deck_a == r.deck_b:
             continue
         for seat, slug in (("A", r.deck_a), ("B", r.deck_b)):
-            res = _winner_seat(r, seat)
             games[slug] += 1
-            wins[slug] += 0.5 if res is None else (1.0 if res else 0.0)
+            wins[slug] += r.credit(seat)
     return {slug: wins[slug] / games[slug] for slug in games}
 
 
@@ -242,13 +234,13 @@ def per_card_stats(records: Iterable[GameRecord]) -> list[dict]:
     does better than its average when this card shows up. Sorted by impact, best first,
     with never-drawn cards (impact `None`) last.
 
-    Mirror (deck vs itself) games are excluded throughout, matching `_deck_win_rates` - see
+    Mirror (deck vs itself) games are excluded throughout, matching `deck_field_win_rates` - see
     its docstring. A card's `impact` is meaningful as a within-deck, same-rarity *relative*
     signal - compare two cards of the same copy-count in the same deck, not absolute numbers
     across rarities.
     """
     records = list(records)
-    deck_win_rate = _deck_win_rates(records)
+    deck_win_rate = deck_field_win_rates(records)
 
     games_with_card: dict[str, int] = defaultdict(int)
     draws: dict[str, int] = defaultdict(int)
@@ -260,8 +252,7 @@ def per_card_stats(records: Iterable[GameRecord]) -> list[dict]:
             continue
         for seat, slug, seat_drawn in (("A", r.deck_a, r.cards_drawn_a),
                                        ("B", r.deck_b, r.cards_drawn_b)):
-            res = _winner_seat(r, seat)
-            credit = 0.5 if res is None else (1.0 if res else 0.0)
+            credit = r.credit(seat)
             for card_id in _deck_card_set(slug):
                 games_with_card[card_id] += 1
                 card_deck[card_id] = slug
