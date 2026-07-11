@@ -8,18 +8,21 @@ within-rarity siloing needed). See docs/balance/benchmark-set-handoff.md.
 Reading `impact`: win-rate-when-drawn minus the deck's overall win rate. A vanilla body sits at
 the ~0 line; an effect well above it is carrying weight, one in the flat tail is 'just a body'.
 
+Crash-safe for long referee runs: after each matchup the accumulated tallies are written to a
+checkpoint file; re-running the SAME command auto-resumes, skipping matchups already done.
+
 Examples:
-  # oracle read, dropping the two decks bots pilot worst, live progress:
-  .venv/bin/python -m animal_kingdom.sim.benchmark_set --pilot referee --games 50
+  # oracle read, dropping the two decks bots pilot worst, live progress + auto-resume:
+  .venv/bin/python -m animal_kingdom.sim.benchmark_set --pilot referee --games 500 --out results/benchmark_set/referee.csv
   # fast sanity pass over the full field:
   .venv/bin/python -m animal_kingdom.sim.benchmark_set --pilot turn --games 100 --exclude ""
-  # save the final table:
-  .venv/bin/python -m animal_kingdom.sim.benchmark_set --pilot referee --games 50 --out results/benchmark_set/referee.csv
 """
 from __future__ import annotations
 
 import argparse
 import csv
+import json
+import os
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -51,6 +54,28 @@ def _kw(card) -> str:
             .replace("Apex Predator", "apex").replace("Immovable", "immov").replace("Flight", "fly"))
 
 
+def _fold(records) -> dict:
+    """Reduce one matchup's game records to the additive tallies the report needs."""
+    n = 0
+    credit = 0.0
+    cards: dict[str, list] = defaultdict(lambda: [0.0, 0])  # cid -> [win-credit-when-drawn, drawn]
+    for r in records:
+        cr = 1.0 if r.winner == "A" else (0.5 if r.winner is None else 0.0)
+        n += 1
+        credit += cr
+        for cid in r.cards_drawn_a:
+            cards[cid][0] += cr
+            cards[cid][1] += 1
+    return {"n": n, "credit": credit, "cards": {k: v for k, v in cards.items()}}
+
+
+def _write_json_atomic(path: Path, data: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(data))
+    os.replace(tmp, path)  # atomic: a crash mid-write can't corrupt the checkpoint
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     p.add_argument("--pilot", default="referee", choices=BOT_KINDS,
@@ -65,6 +90,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--base-seed", type=int, default=902000)
     p.add_argument("--jobs", type=int, default=8)
     p.add_argument("--out", type=Path, help="write the final per-card table as CSV")
+    p.add_argument("--checkpoint", type=Path,
+                   help="checkpoint file for crash-safe resume "
+                        "(default: results/benchmark_set/<pilot>_g<games>.ckpt.json)")
     args = p.parse_args(argv)
 
     if args.field.strip():
@@ -78,51 +106,72 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     register_synthetic("baseline", DECKLIST)
     cards = load_cards()
-    total_games = 2 * args.games * len(field)
-    print(f"benchmark rig (18C/8R/4L, all x1) vs {len(field)} decks: {', '.join(field)}", file=sys.stderr)
-    print(f"pilot {args.pilot} | {2*args.games} games/matchup | {total_games} total"
-          f"{' | referee is slow — start small and scale up' if args.pilot == 'referee' else ''}\n",
-          file=sys.stderr)
 
-    # --- live progress: a per-game counter within each matchup, a summary line per matchup ---
+    ckpt_path = args.checkpoint or Path(f"results/benchmark_set/{args.pilot}_g{args.games}.ckpt.json")
+    # This run's identity — a resumed checkpoint must match all of it, else the samples don't compose.
+    run_key = {"pilot": args.pilot, "games": args.games, "base_seed": args.base_seed,
+               "field": sorted(field), "deck": DECKLIST}
+
+    matchups: dict[str, dict] = {}
+    if ckpt_path.exists():
+        saved = json.loads(ckpt_path.read_text())
+        if saved.get("run_key") != run_key:
+            raise SystemExit(
+                f"checkpoint {ckpt_path} is from a different run (pilot/games/seed/field/deck).\n"
+                f"Delete it or pass a fresh --checkpoint to start over.")
+        matchups = saved.get("matchups", {})
+        # normalize card lists back to [float, int]
+        for m in matchups.values():
+            m["cards"] = {k: [float(v[0]), int(v[1])] for k, v in m["cards"].items()}
+        if matchups:
+            print(f"resuming from {ckpt_path}: {len(matchups)}/{len(field)} matchups already done "
+                  f"({', '.join(sorted(matchups))})", file=sys.stderr)
+
+    todo = [f for f in field if f not in matchups]
+    print(f"benchmark rig (18C/8R/4L, all x1) vs {len(field)} decks | pilot {args.pilot} | "
+          f"{2*args.games} games/matchup | {len(todo)} matchups to run"
+          f"{' | referee is slow' if args.pilot == 'referee' else ''}\n", file=sys.stderr)
+
     def on_game(a, b, done, pair_games):
         print(f"\r  vs {b:<22} {done}/{pair_games} games", end="", file=sys.stderr, flush=True)
 
-    def on_matchup(a, b, done, total, recs):
-        wr = sum(1.0 if r.winner == "A" else (0.5 if r.winner is None else 0.0) for r in recs) / len(recs)
-        print(f"\r  [{done}/{total}] vs {b:<22} {wr:6.1%}   ({len(recs)} games)", file=sys.stderr, flush=True)
+    # Each matchup runs on its own stable seed (indexed off the full field) so a resumed matchup
+    # reproduces exactly, and completes independently before we checkpoint it.
+    for f in todo:
+        seed = args.base_seed + sorted(field).index(f)
+        recs = run_pairs([("baseline", f)], args.games, seed,
+                         bots=(args.pilot, args.pilot), jobs=args.jobs, game_progress=on_game)
+        agg = _fold(recs)
+        matchups[f] = agg
+        _write_json_atomic(ckpt_path, {"run_key": run_key, "matchups": matchups})
+        print(f"\r  [{len([x for x in field if x in matchups])}/{len(field)}] vs {f:<22} "
+              f"{agg['credit']/agg['n']:6.1%}   ({agg['n']} games) ✓ checkpointed", file=sys.stderr, flush=True)
 
-    records = run_pairs([("baseline", f) for f in field], args.games, args.base_seed,
-                        bots=(args.pilot, args.pilot), jobs=args.jobs,
-                        game_progress=on_game, matchup_progress=on_matchup)
-
-    # --- aggregate ---
-    per = {f: [0.0, 0] for f in field}
-    tot_c = tot_n = 0
-    drawn = defaultdict(lambda: [0.0, 0])
-    for r in records:
-        cr = 1.0 if r.winner == "A" else (0.5 if r.winner is None else 0.0)
-        c = per[r.deck_b]; c[0] += cr; c[1] += 1
-        tot_c += cr; tot_n += 1
-        for cid in r.cards_drawn_a:
-            drawn[cid][0] += cr; drawn[cid][1] += 1
+    # --- aggregate across all matchups ---
+    tot_c = sum(m["credit"] for m in matchups.values())
+    tot_n = sum(m["n"] for m in matchups.values())
     deck_wr = tot_c / tot_n
-    rates = {f: per[f][0] / per[f][1] for f in field}
+    rates = {f: matchups[f]["credit"] / matchups[f]["n"] for f in field}
+    drawn: dict[str, list] = defaultdict(lambda: [0.0, 0])
+    for m in matchups.values():
+        for cid, (w, n) in m["cards"].items():
+            drawn[cid][0] += w
+            drawn[cid][1] += n
 
     print(f"\nrig win rate vs field (pilot {args.pilot}):")
     for f, wr in sorted(rates.items(), key=lambda kv: kv[1]):
         print(f"  vs {f:<22} {wr:.1%}")
     print(f"  OVERALL {deck_wr:.1%} | worst {min(rates.values()):.1%} | best {max(rates.values()):.1%}")
 
-    # --- unified per-card ranking ---
-    table = []  # (rank fields) sorted by impact
+    table = []
     for cid in DECKLIST:
         w, n = drawn[cid]
         wwd = (w / n) if n else float("nan")
         table.append((cid, wwd, wwd - deck_wr, n))
     table.sort(key=lambda t: -t[1])
 
-    print(f"\nUNIFIED per-card ranking (overall = {deck_wr:.1%}; all x1, equal draw rate):")
+    print(f"\nUNIFIED per-card ranking (overall = {deck_wr:.1%}; all x1, equal draw rate; "
+          f"{tot_n} games):")
     print(f"  {'#':>2} {'card':<18}{'R':<2}{'STR':<4}{'kw':<12}{'impact':>8}{'wwd':>8}{'draw%':>7}")
     for i, (cid, wwd, impact, n) in enumerate(table, 1):
         c = cards[cid]
@@ -141,14 +190,15 @@ def main(argv: Sequence[str] | None = None) -> None:
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         with args.out.open("w", newline="") as fh:
-            wr = csv.writer(fh)
-            wr.writerow(["rank", "card_id", "name", "rarity", "strength", "keywords",
-                         "drawn_games", "draw_rate", "win_rate_when_drawn", "impact"])
+            w = csv.writer(fh)
+            w.writerow(["rank", "card_id", "name", "rarity", "strength", "keywords",
+                        "drawn_games", "draw_rate", "win_rate_when_drawn", "impact"])
             for i, (cid, wwd, impact, n) in enumerate(table, 1):
                 c = cards[cid]
-                wr.writerow([i, cid, c.name, RARITY[cid], c.base_strength, _kw(c),
-                             n, round(n / tot_n, 4), round(wwd, 4), round(impact, 4)])
+                w.writerow([i, cid, c.name, RARITY[cid], c.base_strength, _kw(c),
+                            n, round(n / tot_n, 4), round(wwd, 4), round(impact, 4)])
         print(f"\nwrote {args.out}", file=sys.stderr)
+    print(f"(checkpoint: {ckpt_path})", file=sys.stderr)
 
 
 if __name__ == "__main__":
