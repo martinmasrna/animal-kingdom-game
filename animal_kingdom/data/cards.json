@@ -1181,6 +1181,83 @@
       "base_strength": 4,
       "keywords": [],
       "text": "Battlecry: your opponent removes a random card from their hand."
+    },
+    {
+      "id": "mock_vanilla_5",
+      "name": "Vanilla 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [],
+      "text": ""
+    },
+    {
+      "id": "mock_vanilla_6",
+      "name": "Vanilla 6",
+      "deck": "reserve",
+      "rarity": "common",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": [],
+      "text": ""
+    },
+    {
+      "id": "mock_vanilla_8",
+      "name": "Vanilla 8",
+      "deck": "reserve",
+      "rarity": "common",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 8,
+      "keywords": [],
+      "text": ""
+    },
+    {
+      "id": "mock_vanilla_9",
+      "name": "Vanilla 9",
+      "deck": "reserve",
+      "rarity": "common",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 9,
+      "keywords": [],
+      "text": ""
+    },
+    {
+      "id": "mock_apex_5",
+      "name": "Apex 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": ["Apex Predator"],
+      "text": "Apex Predator."
+    },
+    {
+      "id": "mock_apex_6",
+      "name": "Apex 6",
+      "deck": "reserve",
+      "rarity": "common",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": ["Apex Predator"],
+      "text": "Apex Predator."
+    },
+    {
+      "id": "mock_draw2",
+      "name": "Archivist",
+      "deck": "reserve",
+      "rarity": "legendary",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [],
+      "text": "Battlecry: draw 2 cards."
     }
   ]
 }

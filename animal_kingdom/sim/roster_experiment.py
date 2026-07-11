@@ -88,9 +88,8 @@ def matchup_matrix(
 def card_winrates(records, row_decks: Sequence[str]) -> dict[str, dict[str, tuple[float, int]]]:
     """Per row deck, each card's win-rate-when-drawn: card_id -> (win_rate, games_drawn).
 
-    Presence-only (was the card in hand at any point), and length-confounded (see
-    IMPACT_LENGTH_CAVEAT): a card is disproportionately 'present' in longer games, which skew
-    toward losses, so read this as suggestive of which cards ride with wins, not a clean verdict."""
+    Presence-only (was the card in hand at any point). Read as a within-deck, same-rarity
+    relative signal of which cards ride with wins - compare like copy-counts in one deck."""
     from collections import defaultdict
     stats: dict[str, dict[str, list[float]]] = {d: defaultdict(lambda: [0.0, 0]) for d in row_decks}
     for rec in records:
@@ -121,7 +120,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                         "matrix (skip optimization) - e.g. to re-score under a different --pilot")
     p.add_argument("--card-winrates", action="store_true",
                    help="also print each non-premade deck's per-card win-rate-when-drawn "
-                        "(presence-only, length-confounded - suggestive not a verdict)")
+                        "(presence-only; a within-deck, same-rarity relative signal)")
     p.add_argument("--out", type=Path)
     args = p.parse_args(argv)
 
@@ -182,7 +181,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         names = {cid: c.name for cid, c in load_cards().items()}
         deck_wr = dict(zip(concentrate, (sum(r) / len(r) for r in matrix)))
         per = card_winrates(records, concentrate)
-        print("\n--- per-card win-rate-when-drawn (presence-only, length-confounded) ---")
+        print("\n--- per-card win-rate-when-drawn (presence-only; within-deck relative) ---")
         for deck in concentrate:
             print(f"\n  {deck}  (deck overall {deck_wr[deck]:.0%} vs spread):")
             for cid, (wr, n) in sorted(per[deck].items(), key=lambda kv: -kv[1][0]):

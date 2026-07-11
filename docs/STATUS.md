@@ -69,8 +69,9 @@ architecture, performance, tests. (Kept separate from CLI.) Backlog: [`engine/ba
 **260 passing, 1 xfailed**. (M6 TurnBot committed in `aecfdf5`.)
 
 **Next:**
-1. **Fix `metrics.py` `impact` confound** — `win_rate_when_drawn` is biased by win-vs-loss game length (a harness bug, not card quality). *Caveat now documented (`IMPACT_LENGTH_CAVEAT`); the length-normalization fix is the open work.*
-2. **State-representation speed** (struct-of-arrays) — *parked* until NN bots; measure clone cost first.
+1. **State-representation speed** (struct-of-arrays) — *parked* until NN bots; measure clone cost first.
+
+_(The old `metrics.py` "impact game-length confound" item was retired 2026-07-11: any length effect is common-mode within a deck and cancels in the within-deck, same-rarity relative reads impact is actually used for.)_
 
 ## 4. Bots
 _The AI players and their quality. `bots/`. Backlog: [`bots/backlog.md`](bots/backlog.md)._
@@ -171,12 +172,12 @@ OTK-lean buff shipped (pending sim validation)** — leans *into* the OTK (Oposs
 touching Scrooge itself. **egg_control retracted as a card problem** — its ~18% is a *pilot* artifact
 (human egg ~50% vs referee-cats); the fix is a Bots one (search under-values dynamic strength, §4).
 **cats_midrange (~69%) still the #1 nerf target but its number may be inflated** by that same pilot gap —
-hold the nerf magnitude. **colony retracted** (greedy artifact, ~48% in band). Card-impact target still
-unmeasurable (`metrics.py` confound — Engine #1). Pilot caveat: TurnBot is sub-oracle (~+8pt) → matrix is directional.
+hold the nerf magnitude. **colony retracted** (greedy artifact, ~48% in band). Card-impact reads as a
+within-deck, same-rarity relative signal (`per_card_stats`). Pilot caveat: TurnBot is sub-oracle (~+8pt) → matrix is directional.
 
 **Next:**
 1. **Deck equality → pull every deck into 40–60%.** Active levers: Decision H food-economy re-derivation (in progress; Methuselah + food_otk floor shipped; 20-cost bodies, Landmarks, Colony/Egg numbers still open) + a card-design fix for colony's early game. **food_otk's "kill window" lever struck** — the weakness was a stale-ruleset read (see Balance backlog ✅ verdict); needs a 2-action search-vs-search read before any tuning.
-2. **Card equality → every card's impact within ±10%.** Blocked on the metrics fix (Engine #1) and trustworthy pilots (Bots).
+2. **Card equality → every card's impact within ±10%.** Read impact within-deck / same-rarity (`per_card_stats`); still gated on trustworthy pilots (Bots).
 3. **Triage the open sim findings:** colony early-game weakness (real → card-design look) vs cats-vs-aggro (bot bug → leave the card).
 
 ## 8. Meta

@@ -41,7 +41,7 @@ If the change is to a **bot** (heuristic / weights / search), additionally:
 
 ## Caveats / release gates (believe a number only after these)
 - **GreedyBot is 1-ply and underplays combo/delayed decks** (`GREEDY_CAVEAT`) — its winrates are a signal to investigate, not truth. Confirm suspect verdicts with `turn`/`referee`.
-- **`per_card_stats` `impact` is confounded by game length** (open bug — `docs/engine/backlog.md`). Don't act on a single card's `impact` yet.
+- **`per_card_stats` `impact` is a within-deck, same-rarity *relative* signal.** Compare two cards of the same copy-count in the same deck; don't compare absolute impact across rarities. (Any game-length effect is common-mode within a deck and cancels in that comparison.)
 - **Pilot sensitivity is itself a result.** If a matchup swings a lot across pilots, that *lowers* reliability — report the spread, don't average it away.
 - **Sample size:** ≥200 games/matchup, paired seeds, both seats.
 

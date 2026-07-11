@@ -1506,6 +1506,11 @@ def _mock_scout_place(state, unit, cr):
     _push_draw(state, unit.owner, 1)
 
 
+def _mock_draw2_place(state, unit, cr):
+    # Baseline yardstick legendary: bare "draw 2" on a tiny body - prices raw card draw.
+    _push_draw(state, unit.owner, 2)
+
+
 def _mock_saboteur_place(state, unit, cr):
     # Baseline yardstick card: bare random hand-disruption (reuses Black Swan's seeded discard,
     # so it stays honest re: hidden info). No once-per-turn cap - it fires on placement.
@@ -1719,6 +1724,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "bat": {"on_place": _bat_place},
     "mock_scout": {"on_place": _mock_scout_place},
     "mock_saboteur": {"on_place": _mock_saboteur_place},
+    "mock_draw2": {"on_place": _mock_draw2_place},
     "nurse_bee": {"on_place": _nurse_bee_place},
     "nurse_bumblebee": {"on_place": _nurse_bumblebee_place},
     "termite_king": {"on_place": _termite_king_place},
