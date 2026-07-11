@@ -122,6 +122,18 @@ files` writes `matchup_matrix.csv`, `per_card_stats.csv`, and `summary.json`; `-
 both` writes those artifacts and prints the report from the same run. Runs are
 seed-deterministic, so `--jobs` only changes speed, not results.
 
+For a paired rules A/B over the full deck matrix, use the dedicated helper. This keeps the
+shipped ruleset as the control arm and compares it to a treatment config using the same
+matchup schedule and seed blocks:
+
+```sh
+python -m animal_kingdom.sim.rules_ab 200 --jobs 4 --out results/rules_ab/draw2
+```
+
+By default that compares Draw action = 1 card vs Draw action = 2 cards with
+`greedy,greedy` pilots. It writes each arm's normal metrics bundle plus `deck_delta.csv`,
+`matchup_delta.csv`, and a combined `summary.json`.
+
 The older `python -m animal_kingdom.sim --decks all --games ...` form remains a
 compatibility alias for `./report ... --format files`; it no longer has a separate
 implementation.

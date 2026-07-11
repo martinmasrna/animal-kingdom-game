@@ -1159,6 +1159,28 @@
       "base_strength": 1,
       "keywords": [],
       "text": ""
+    },
+    {
+      "id": "mock_scout",
+      "name": "Scout",
+      "deck": "reserve",
+      "rarity": "common",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "Battlecry: draw 1 card."
+    },
+    {
+      "id": "mock_saboteur",
+      "name": "Saboteur",
+      "deck": "reserve",
+      "rarity": "common",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: your opponent removes a random card from their hand."
     }
   ]
 }

@@ -1501,6 +1501,20 @@ def _bat_place(state, unit, cr):
     _push_draw(state, unit.owner, 1)
 
 
+def _mock_scout_place(state, unit, cr):
+    # Baseline yardstick card: bare "draw 1" rider on a vanilla body (docs/balance/benchmark-set).
+    _push_draw(state, unit.owner, 1)
+
+
+def _mock_saboteur_place(state, unit, cr):
+    # Baseline yardstick card: bare random hand-disruption (reuses Black Swan's seeded discard,
+    # so it stays honest re: hidden info). No once-per-turn cap - it fires on placement.
+    opponent = other_player(unit.owner)
+    hand = state.hands[opponent]
+    if hand:
+        remove_from_hand(state, opponent, state.rng.choice(hand))
+
+
 def _nurse_bee_place(state, unit, cr):
     if _controls_two_same_colony(state, unit.owner):
         _push_draw(state, unit.owner, 2)
@@ -1703,6 +1717,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "lynx": {"on_place": _lynx_place},
     "caracal": {"on_place_onto_enemy": _caracal_onto_enemy},
     "bat": {"on_place": _bat_place},
+    "mock_scout": {"on_place": _mock_scout_place},
+    "mock_saboteur": {"on_place": _mock_saboteur_place},
     "nurse_bee": {"on_place": _nurse_bee_place},
     "nurse_bumblebee": {"on_place": _nurse_bumblebee_place},
     "termite_king": {"on_place": _termite_king_place},

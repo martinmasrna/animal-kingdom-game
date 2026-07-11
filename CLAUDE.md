@@ -45,8 +45,6 @@ no flags needed.
 
 ## Gotchas
 
-- GreedyBot is 1-ply and **underplays combo / delayed-effect decks** (`GREEDY_CAVEAT`) — its win
-  rates are a signal to investigate, not truth. TurnBot / RefereeBot are the stronger pilots.
 - This game has **no mana, no attack/health, no combat damage** — it is *not* Magic/Hearthstone despite the shared vocabulary. Pattern-matching onto those systems (e.g. "cheap minions / dies to a ping", "mana curve",
 "removal spell", "go wide for damage") is the single most common recurring mistake here.
 

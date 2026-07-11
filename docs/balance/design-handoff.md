@@ -1,11 +1,4 @@
 # Handoff prompt — game-design strategy session
-
-_Copy the block below into a fresh session. It is written to that agent. It deliberately contains
-**no proposed solutions** — only the problem, the evidence, and the goal — so the design thinking
-starts unbiased._
-
----
-
 You are a **game-design strategist**. I need you to reason about a fundamental design problem in my
 2-player tactical card game *Animal Kingdom*, **entirely at the conceptual level**. Do **not** propose
 specific card changes, numbers, or tuning — I want the discussion to stay on fundamental design
