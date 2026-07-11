@@ -65,7 +65,8 @@ def test_tui_80x24_keyboard_draw_and_annotations(tmp_path):
             assert board.board_render.height <= board.size.height
             own_hq = board.board_render.hitboxes[("hq", "A")]
             enemy_hq = board.board_render.hitboxes[("hq", "B")]
-            assert own_hq.x < enemy_hq.x and own_hq.y > enemy_hq.y
+            assert own_hq.y > enemy_hq.y
+            assert abs((own_hq.x + own_hq.width // 2) - (enemy_hq.x + enemy_hq.width // 2)) <= 1
             hand_cards = [
                 widget for widget in app.query(ActionCard)
                 if isinstance(widget.entry.payload, tuple)
@@ -177,18 +178,26 @@ def test_tui_wide_layout_centers_board_and_labels_players(tmp_path):
             right = max(hitbox.x + hitbox.width for hitbox in hitboxes)
             top = min(hitbox.y for hitbox in hitboxes)
             bottom = max(hitbox.y + hitbox.height for hitbox in hitboxes)
-            assert left > 0 and top > 0
+            assert left > 0 and top >= 0
             assert abs(left - (board.size.width - right)) <= 1
             assert abs(top - (board.size.height - bottom)) <= 1
 
             status = str(app.query_one("#status", Static).content)
             assert "Your turn" in status
             assert "Turn 1" in status
-            assert "OPPONENT · Seat B" in str(app.query_one("#opponent", Static).content)
-            player = str(app.query_one("#player", Static).content)
-            assert "YOUR HAND · Seat A" in player
-            assert "Food 0" in player
-            assert "Actions 2" in player
+            opponent = str(app.query_one("#opponent", Static).content)
+            assert "OPPONENT" not in opponent
+            assert "Seat B" not in opponent
+            assert "Food 0" in opponent
+            notice = str(app.query_one("#notice", Static).content)
+            assert "YOUR HAND" not in notice
+            assert "Seat A" not in notice
+            assert "Food 0" in notice
+            assert "Actions 2" in notice
+            footer = str(app.query_one("#footer", Static).content)
+            assert "q" in footer and "Quit" in footer
+            assert "?" in footer and "Help" in footer
+            assert "Previous target" not in footer
             shelf = app.query_one(CardShelf)
             assert shelf.has_class("fits")
             cards = list(app.query(ActionCard))
@@ -259,7 +268,7 @@ def test_food_progress_bars_show_current_and_target(tmp_path):
             app.refresh_game()
 
             player = Text.from_markup(
-                str(app.query_one("#player", Static).content)
+                str(app.query_one("#notice", Static).content)
             ).plain
             opponent = Text.from_markup(
                 str(app.query_one("#opponent", Static).content)
@@ -270,7 +279,7 @@ def test_food_progress_bars_show_current_and_target(tmp_path):
             app.session.state.food["A"] = 120
             app.refresh_game()
             player = Text.from_markup(
-                str(app.query_one("#player", Static).content)
+                str(app.query_one("#notice", Static).content)
             ).plain
             assert "Food 120/100 ▕██████████▏" in player
 
@@ -490,7 +499,8 @@ def test_tui_runs_bot_first_without_blocking_input_loop(tmp_path):
             board = app.query_one(BoardWidget).board_render
             own_hq = board.hitboxes[("hq", "B")]
             enemy_hq = board.hitboxes[("hq", "A")]
-            assert own_hq.x < enemy_hq.x and own_hq.y > enemy_hq.y
+            assert own_hq.y > enemy_hq.y
+            assert abs((own_hq.x + own_hq.width // 2) - (enemy_hq.x + enemy_hq.width // 2)) <= 1
 
     asyncio.run(scenario())
 

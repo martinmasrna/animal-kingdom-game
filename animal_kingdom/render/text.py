@@ -31,9 +31,9 @@ HIGHLIGHT_STYLE = "bold green"          # a legal target the player is currently
 FOCUS_STYLE = "bold yellow"             # keyboard-focused target within the legal targets
 RARITY_STYLE = {"legendary": "bold yellow", "rare": "bold blue"}  # common: unstyled
 EMPTY_STYLE = "grey42"                  # unoccupied crossroads / unheld regions: recede into the board
-# A held region is drawn as a filled chip in the holder's seat color, so controlled
-# territory reads at a glance against the dimmed empty blocks.
-REGION_HELD_STYLE = {"A": "bold white on cyan", "B": "bold white on red"}
+# A held region uses the holder's seat color without a filled background, so the food
+# value stays legible without reading like a selected target.
+REGION_HELD_STYLE = SEAT_STYLE
 
 _MIN_WIDTH = 72    # floor so wrapping stays sane when a terminal reports something tiny
 
@@ -81,16 +81,6 @@ def parse_cr(cr: str) -> tuple[int, int]:
     return int(x), int(y)
 
 
-def _occupancy(state, cr: str) -> str:
-    """Top unit as `owner+strength`, `·` if empty, with `▾N` when N units are stacked."""
-    stack = state.board.get(cr)
-    if not stack:
-        return "·"
-    top = stack[-1]
-    label = f"{top.owner}{strength_mod.effective_strength(state, top)}"
-    return label + (f"▾{len(stack)}" if len(stack) > 1 else "")
-
-
 def _occupant_details(state, cr: str, name_width: int) -> tuple[str, str]:
     """Visible card name and strength, with color left to communicate ownership."""
     stack = state.board.get(cr)
@@ -102,6 +92,14 @@ def _occupant_details(state, cr: str, name_width: int) -> tuple[str, str]:
     name = _truncate(state.cards[top.card_id].name, available) + stack_suffix
     strength = f"STR {strength_mod.effective_strength(state, top)}"
     return name, strength
+
+
+def _occupant_tags(state, cr: str, width: int) -> str:
+    stack = state.board.get(cr)
+    if not stack:
+        return ""
+    tags = "/".join(sorted(state.cards[stack[-1].card_id].tags))
+    return _truncate(tags, width) if tags else ""
 
 
 def _compact_occupant(state, cr: str, width: int) -> str:
@@ -161,7 +159,16 @@ def _canvas_to_lines(canvas: list[list[str]], style_grid: list[list[str | None]]
     return lines
 
 
-def _draw_conn(canvas: list[list[str]], r0: int, c0: int, r1: int, c1: int) -> None:
+def _draw_conn(
+    canvas: list[list[str]],
+    r0: int,
+    c0: int,
+    r1: int,
+    c1: int,
+    *,
+    style_grid: list[list[str | None]] | None = None,
+    style: str | None = None,
+) -> None:
     """Wire (r0,c0)->(r1,c1) with box/diagonal glyphs, skipping the endpoints (box borders).
 
     Horizontal runs use ─, vertical │, and diagonals / or \\ by direction; the endpoints are
@@ -179,6 +186,304 @@ def _draw_conn(canvas: list[list[str]], r0: int, c0: int, r1: int, c1: int) -> N
             ch = "/" if (dr < 0) == (dc > 0) else "\\"
         if canvas[r][c] == " ":
             canvas[r][c] = ch
+        if style_grid is not None and style is not None and canvas[r][c] in "─│/\\":
+            style_grid[r][c] = style
+
+
+def _region_token(state, region) -> tuple[str, str | None]:
+    """Compact food chip: ownership is color-only so the number stays easy to scan."""
+    holder = _region_holder(state, region)
+    style = REGION_HELD_STYLE[holder] if holder else EMPTY_STYLE
+    return str(region.food), style
+
+
+def _draw_controlled_region_edges(
+    canvas: list[list[str]],
+    style_grid: list[list[str | None]],
+    state,
+    edges,
+    region,
+    centres: dict[str, tuple[int, int]],
+) -> None:
+    holder = _region_holder(state, region)
+    if holder is None:
+        return
+    corners = set(region.corners)
+    style = REGION_HELD_STYLE[holder]
+    for a, b in edges:
+        if a in corners and b in corners:
+            ar, ac = centres[a]
+            br, bc = centres[b]
+            _draw_conn(canvas, ar, ac, br, bc, style_grid=style_grid, style=style)
+
+
+def _node_style(
+    state,
+    cr: str,
+    *,
+    highlight_crs: Collection[str],
+    focus_target: tuple[str, str] | None,
+) -> tuple[str | None, str | None]:
+    target_style = (
+        FOCUS_STYLE if focus_target == ("cr", cr)
+        else HIGHLIGHT_STYLE if cr in highlight_crs
+        else None
+    )
+    stack = state.board.get(cr)
+    owner_style = SEAT_STYLE.get(stack[-1].owner) if stack else EMPTY_STYLE
+    return target_style or owner_style, owner_style
+
+
+def _draw_node(
+    canvas: list[list[str]],
+    style_grid: list[list[str | None]],
+    state,
+    cr: str,
+    row: int,
+    col: int,
+    *,
+    width: int,
+    height: int,
+    box_style: str | None,
+    occ_style: str | None,
+    show_coords: bool,
+) -> None:
+    x, y = parse_cr(cr)
+    inner = width - 2
+    name, strength = _occupant_details(state, cr, inner)
+    if height == 1:
+        label = f"{x},{y}" if show_coords else _compact_occupant(state, cr, inner)
+        _blit(canvas, style_grid, row, col, "[" + " " * inner + "]", box_style)
+        _blit(canvas, style_grid, row, col + 1, label.center(inner), occ_style)
+        return
+
+    _blit(canvas, style_grid, row, col, "┌" + "─" * inner + "┐", box_style)
+    if height == 3:
+        label = f"{x},{y}" if show_coords else _compact_occupant(state, cr, inner)
+        _blit(canvas, style_grid, row + 1, col, "│", box_style)
+        _blit(canvas, style_grid, row + 1, col + 1, label.center(inner), occ_style)
+        _blit(canvas, style_grid, row + 1, col + 1 + inner, "│", box_style)
+        _blit(canvas, style_grid, row + 2, col, "└" + "─" * inner + "┘", box_style)
+        return
+
+    if height == 4:
+        first = f"{x},{y}" if show_coords else name
+        second = name if show_coords else strength
+        _blit(canvas, style_grid, row + 1, col, "│", box_style)
+        _blit(canvas, style_grid, row + 1, col + 1, first.center(inner), occ_style)
+        _blit(canvas, style_grid, row + 1, col + 1 + inner, "│", box_style)
+        _blit(canvas, style_grid, row + 2, col, "│", box_style)
+        _blit(canvas, style_grid, row + 2, col + 1, second.center(inner), occ_style)
+        _blit(canvas, style_grid, row + 2, col + 1 + inner, "│", box_style)
+        _blit(canvas, style_grid, row + 3, col, "└" + "─" * inner + "┘", box_style)
+        return
+
+    first = f"{x},{y}" if show_coords else name
+    second = name if show_coords else strength
+    third = strength if show_coords else _occupant_tags(state, cr, inner)
+    _blit(canvas, style_grid, row + 1, col, "│", box_style)
+    _blit(canvas, style_grid, row + 1, col + 1, first.center(inner), occ_style)
+    _blit(canvas, style_grid, row + 1, col + 1 + inner, "│", box_style)
+    _blit(canvas, style_grid, row + 2, col, "│", box_style)
+    _blit(canvas, style_grid, row + 2, col + 1, second.center(inner), occ_style)
+    _blit(canvas, style_grid, row + 2, col + 1 + inner, "│", box_style)
+    _blit(canvas, style_grid, row + 3, col, "│", box_style)
+    _blit(canvas, style_grid, row + 3, col + 1, third.center(inner), occ_style)
+    _blit(canvas, style_grid, row + 3, col + 1 + inner, "│", box_style)
+    _blit(canvas, style_grid, row + 4, col, "└" + "─" * inner + "┘", box_style)
+
+
+def _draw_hq(
+    canvas: list[list[str]],
+    style_grid: list[list[str | None]],
+    player: str,
+    row: int,
+    col: int,
+    *,
+    width: int,
+    height: int,
+    style: str | None,
+) -> None:
+    inner = width - 2
+    if height == 1:
+        label = f"HQ {player}"
+        _blit(canvas, style_grid, row, col, "[" + _truncate(label, inner).center(inner) + "]", style)
+        return
+    _blit(canvas, style_grid, row, col, "┌" + "─" * inner + "┐", style)
+    label_row = height // 2
+    for offset in range(1, height - 1):
+        label = f"HQ {player}" if offset == label_row else ""
+        _blit(canvas, style_grid, row + offset, col, "│" + label.center(inner) + "│", style)
+    _blit(canvas, style_grid, row + height - 1, col, "└" + "─" * inner + "┘", style)
+
+
+def _render_vertical_board(
+    state,
+    *,
+    perspective_player: str,
+    highlight_crs: Collection[str],
+    highlight_hq: str | None,
+    focus_target: tuple[str, str] | None,
+    max_width: int | None,
+    max_height: int | None,
+    show_coords: bool,
+) -> BoardRender:
+    """Player-relative orthogonal projection: own HQ bottom, opponent top."""
+    gm = state.game_map
+    if perspective_player not in gm.hq_connects:
+        raise ValueError(f"unknown perspective player {perspective_player!r}")
+    coords = [parse_cr(c) for c in gm.crossroads]
+    xs = sorted({x for x, _ in coords})
+    ys = sorted({y for _, y in coords})
+    ci = {x: i for i, x in enumerate(xs)}
+    li = {y: i for i, y in enumerate(ys)}
+
+    front_xs = {parse_cr(cr)[0] for cr in gm.hq_front(perspective_player)}
+    own_on_min_x = front_xs == {min(xs)}
+    if not own_on_min_x and front_xs != {max(xs)}:
+        raise ValueError("vertical projection requires an HQ on a vertical map edge")
+
+    if max_height is None or max_height >= 46:
+        node_w, node_h, rank_gap, hq_h = _DETAIL_NODE_W, _DETAIL_NODE_H, 1, 3
+    elif max_height >= 30:
+        node_w, node_h, rank_gap, hq_h = 10, 4, 1, 3
+    elif max_height >= 25:
+        node_w, node_h, rank_gap, hq_h = 10, 3, 1, 3
+    else:
+        node_w, node_h, rank_gap, hq_h = 9, 1, 1, 1
+    lanes = len(ys)
+    ranks = len(xs)
+    if max_width is None or lanes <= 1:
+        lane_gap = 6
+    else:
+        lane_gap = max(2, min(6, (max_width - lanes * node_w) // (lanes - 1)))
+    grid_w = lanes * node_w + (lanes - 1) * lane_gap
+    hq_w = max(_HQ_W, node_w)
+    width = max(grid_w, hq_w)
+    grid_left = (width - grid_w) // 2
+    hq_col = (width - hq_w) // 2
+    grid_h = ranks * node_h + (ranks - 1) * rank_gap
+    hq_gap = 1 if max_height is None or (hq_h * 2 + grid_h + 2) <= max_height else 0
+    grid_top = hq_h + hq_gap
+    height = hq_h + hq_gap + grid_h + hq_gap + hq_h
+    canvas = [[" "] * width for _ in range(height)]
+    style_grid: list[list[str | None]] = [[None] * width for _ in range(height)]
+    hitboxes: dict[tuple[str, str], Hitbox] = {}
+
+    def rank_index(x: int) -> int:
+        forward = ci[x] if own_on_min_x else len(xs) - 1 - ci[x]
+        return len(xs) - 1 - forward
+
+    def lane_index(y: int) -> int:
+        return li[y] if own_on_min_x else len(ys) - 1 - li[y]
+
+    def box_row(x: int) -> int:
+        return grid_top + rank_index(x) * (node_h + rank_gap)
+
+    def box_col(y: int) -> int:
+        return grid_left + lane_index(y) * (node_w + lane_gap)
+
+    positions = {
+        f"{x},{y}": (box_row(x), box_col(y))
+        for x, y in coords
+    }
+    node_centres = {
+        cr: (row + node_h // 2, col + node_w // 2)
+        for cr, (row, col) in positions.items()
+    }
+    players = tuple(sorted(gm.hq_connects))
+    opponent = next(player for player in players if player != perspective_player)
+    hq_positions = {
+        opponent: (0, hq_col),
+        perspective_player: (grid_top + grid_h + hq_gap, hq_col),
+    }
+
+    # Connections go down first; boxes and chips overwrite their interiors.
+    for a, b in gm.edges:
+        ar, ac = positions[a]
+        br, bc = positions[b]
+        _draw_conn(
+            canvas,
+            ar + node_h // 2,
+            ac + node_w // 2,
+            br + node_h // 2,
+            bc + node_w // 2,
+        )
+    for player, fronts in gm.hq_connects.items():
+        hr, hc = hq_positions[player]
+        for cr in fronts:
+            nr, nc = positions[cr]
+            _draw_conn(
+                canvas,
+                hr + hq_h // 2,
+                hc + hq_w // 2,
+                nr + node_h // 2,
+                nc + node_w // 2,
+            )
+
+    for region in gm.regions.values():
+        _draw_controlled_region_edges(canvas, style_grid, state, gm.edges, region, node_centres)
+        centres = [node_centres[cr] for cr in region.corners]
+        row = sum(r for r, _ in centres) // len(centres)
+        col = sum(c for _, c in centres) // len(centres)
+        token, style = _region_token(state, region)
+        col = max(0, min(width - len(token), col - len(token) // 2))
+        _blit(canvas, style_grid, row, col, token, style)
+
+    for cr, (row, col) in positions.items():
+        hitboxes[("cr", cr)] = Hitbox(col, row, node_w, node_h)
+        box_style, occ_style = _node_style(
+            state,
+            cr,
+            highlight_crs=highlight_crs,
+            focus_target=focus_target,
+        )
+        _draw_node(
+            canvas,
+            style_grid,
+            state,
+            cr,
+            row,
+            col,
+            width=node_w,
+            height=node_h,
+            box_style=box_style,
+            occ_style=occ_style,
+            show_coords=show_coords,
+        )
+
+    for player, (row, col) in hq_positions.items():
+        hitboxes[("hq", player)] = Hitbox(col, row, hq_w, hq_h)
+        hq_style = (
+            FOCUS_STYLE if focus_target == ("hq", player)
+            else HIGHLIGHT_STYLE if player == highlight_hq
+            else SEAT_STYLE.get(player)
+        )
+        _draw_hq(
+            canvas,
+            style_grid,
+            player,
+            row,
+            col,
+            width=hq_w,
+            height=hq_h,
+            style=hq_style,
+        )
+
+    # A raw backslash immediately before a Rich/Textual tag escapes the opening bracket.
+    for row in canvas:
+        for index, char in enumerate(row):
+            if char == "\\":
+                row[index] = "╲"
+            elif char == "/":
+                row[index] = "╱"
+
+    return BoardRender(
+        markup="\n".join(_canvas_to_lines(canvas, style_grid)),
+        hitboxes=hitboxes,
+        width=width,
+        height=height,
+    )
 
 
 def _render_diagonal_board(
@@ -190,6 +495,7 @@ def _render_diagonal_board(
     focus_target: tuple[str, str] | None,
     max_width: int | None,
     max_height: int | None,
+    show_coords: bool,
 ) -> BoardRender:
     """Player-relative square projection: own HQ bottom-left, opponent top-right."""
     gm = state.game_map
@@ -242,6 +548,10 @@ def _render_diagonal_board(
         slot_col = forward + lateral
         slot_row = (len(xs) - 1 - forward) + lateral
         positions[f"{x},{y}"] = (slot_row * row_step, slot_col * col_step)
+    node_centres = {
+        cr: (row + node_h // 2, col + node_w // 2)
+        for cr, (row, col) in positions.items()
+    }
 
     players = tuple(sorted(gm.hq_connects))
     opponent = next(player for player in players if player != perspective_player)
@@ -275,15 +585,11 @@ def _render_diagonal_board(
 
     # Region value/holder chips stay at the projected centre of their four corners.
     for region in gm.regions.values():
-        centres = [
-            (positions[cr][0] + node_h // 2, positions[cr][1] + node_w // 2)
-            for cr in region.corners
-        ]
+        _draw_controlled_region_edges(canvas, style_grid, state, gm.edges, region, node_centres)
+        centres = [node_centres[cr] for cr in region.corners]
         row = sum(r for r, _ in centres) // len(centres)
         col = sum(c for _, c in centres) // len(centres)
-        holder = _region_holder(state, region)
-        token = f"{region.food}{holder or '·'}"
-        style = REGION_HELD_STYLE[holder] if holder else EMPTY_STYLE
+        token, style = _region_token(state, region)
         col = max(0, min(width - len(token), col - len(token) // 2))
         _blit(canvas, style_grid, row, col, token, style)
 
@@ -291,12 +597,13 @@ def _render_diagonal_board(
         hitboxes[("cr", cr)] = Hitbox(c0, r0, node_w, node_h)
         x, y = parse_cr(cr)
         inner = node_w - 2
-        box_style = (
+        target_style = (
             FOCUS_STYLE if focus_target == ("cr", cr)
             else HIGHLIGHT_STYLE if cr in highlight_crs
             else None
         )
         stack = state.board.get(cr)
+        box_style = target_style or (SEAT_STYLE.get(stack[-1].owner) if stack else EMPTY_STYLE)
         occ_style = SEAT_STYLE.get(stack[-1].owner) if stack else EMPTY_STYLE
         name, strength = _occupant_details(state, cr, inner)
         if compact_nodes:
@@ -305,7 +612,7 @@ def _render_diagonal_board(
                 style_grid,
                 r0,
                 c0,
-                "┌" + f"{x},{y}".center(inner, "─") + "┐",
+                "┌" + (f"{x},{y}" if show_coords else "").center(inner, "─") + "┐",
                 box_style,
             )
             _blit(canvas, style_grid, r0 + 1, c0, "│", box_style)
@@ -315,20 +622,28 @@ def _render_diagonal_board(
             _blit(canvas, style_grid, r0 + 2, c0, "└" + "─" * inner + "┘", box_style)
         elif detailed_nodes:
             _blit(canvas, style_grid, r0, c0, "┌" + "─" * inner + "┐", box_style)
-            _blit(canvas, style_grid, r0 + 1, c0, "│" + f"{x},{y}".center(inner) + "│", box_style)
+            first = f"{x},{y}" if show_coords else name
+            second = name if show_coords else strength
+            third = strength if show_coords else _occupant_tags(state, cr, inner)
+            _blit(canvas, style_grid, r0 + 1, c0, "│", box_style)
+            _blit(canvas, style_grid, r0 + 1, c0 + 1, first.center(inner), occ_style)
+            _blit(canvas, style_grid, r0 + 1, c0 + 1 + inner, "│", box_style)
             _blit(canvas, style_grid, r0 + 2, c0, "│", box_style)
-            _blit(canvas, style_grid, r0 + 2, c0 + 1, name.center(inner), occ_style)
+            _blit(canvas, style_grid, r0 + 2, c0 + 1, second.center(inner), occ_style)
             _blit(canvas, style_grid, r0 + 2, c0 + 1 + inner, "│", box_style)
             _blit(canvas, style_grid, r0 + 3, c0, "│", box_style)
-            _blit(canvas, style_grid, r0 + 3, c0 + 1, strength.center(inner), occ_style)
+            _blit(canvas, style_grid, r0 + 3, c0 + 1, third.center(inner), occ_style)
             _blit(canvas, style_grid, r0 + 3, c0 + 1 + inner, "│", box_style)
             _blit(canvas, style_grid, r0 + 4, c0, "└" + "─" * inner + "┘", box_style)
         else:
             _blit(canvas, style_grid, r0, c0, "┌" + "─" * inner + "┐", box_style)
-            _blit(canvas, style_grid, r0 + 1, c0, "│" + f"{x},{y}".center(inner) + "│", box_style)
+            first = f"{x},{y}" if show_coords else name
+            second = name if show_coords else strength
+            _blit(canvas, style_grid, r0 + 1, c0, "│", box_style)
+            _blit(canvas, style_grid, r0 + 1, c0 + 1, first.center(inner), occ_style)
+            _blit(canvas, style_grid, r0 + 1, c0 + 1 + inner, "│", box_style)
             _blit(canvas, style_grid, r0 + 2, c0, "│", box_style)
-            label = _compact_occupant(state, cr, inner)
-            _blit(canvas, style_grid, r0 + 2, c0 + 1, label.center(inner), occ_style)
+            _blit(canvas, style_grid, r0 + 2, c0 + 1, second.center(inner), occ_style)
             _blit(canvas, style_grid, r0 + 2, c0 + 1 + inner, "│", box_style)
             _blit(canvas, style_grid, r0 + 3, c0, "└" + "─" * inner + "┘", box_style)
 
@@ -385,13 +700,27 @@ def render_board(state, highlight_crs: Collection[str] = (),
                  vertical_gap: int = _GAP_H,
                  perspective_player: str | None = None,
                  max_height: int | None = None,
-                 show_coords: bool = True) -> BoardRender:
+                 show_coords: bool = False,
+                 projection: str = "diagonal") -> BoardRender:
     """Render the board and expose target hitboxes for mouse-driven clients.
 
     Horizontal gaps shrink from seven to one cell when necessary, allowing Map B to fit
     an 80-column terminal without changing node size or truncating state.
     """
+    if perspective_player is not None and projection == "vertical":
+        return _render_vertical_board(
+            state,
+            perspective_player=perspective_player,
+            highlight_crs=highlight_crs,
+            highlight_hq=highlight_hq,
+            focus_target=focus_target,
+            max_width=max_width,
+            max_height=max_height,
+            show_coords=show_coords,
+        )
     if perspective_player is not None:
+        if projection != "diagonal":
+            raise ValueError(f"unknown board projection {projection!r}")
         return _render_diagonal_board(
             state,
             perspective_player=perspective_player,
@@ -400,6 +729,7 @@ def render_board(state, highlight_crs: Collection[str] = (),
             focus_target=focus_target,
             max_width=max_width,
             max_height=max_height,
+            show_coords=show_coords,
         )
     gm = state.game_map
     if vertical_gap < 1:
@@ -448,22 +778,24 @@ def render_board(state, highlight_crs: Collection[str] = (),
         r0, c0 = box_row(y), box_col(x)
         hitboxes[("cr", cr)] = Hitbox(c0, r0, _NODE_W, _NODE_H)
         inner = _NODE_W - 2
-        box_style = (
+        target_style = (
             FOCUS_STYLE if focus_target == ("cr", cr)
             else HIGHLIGHT_STYLE if cr in highlight_crs
             else None
         )
         stack = state.board.get(cr)
+        box_style = target_style or (SEAT_STYLE.get(stack[-1].owner) if stack else EMPTY_STYLE)
         occ_style = SEAT_STYLE.get(stack[-1].owner) if stack else EMPTY_STYLE
+        name, strength = _occupant_details(state, cr, inner)
+        first = f"{x},{y}" if show_coords else name
+        second = name if show_coords else strength
 
-        # The coordinate row is only needed by keyboard clients that pick a target from a
-        # numbered menu (./run) and must map each menu entry back to a node; mouse clients
-        # click the hitbox directly, so they hide it (blank the row, keeping box geometry).
-        coord_text = f"{x},{y}" if show_coords else ""
         _blit(canvas, style_grid, r0, c0, "┌" + "─" * inner + "┐", box_style)
-        _blit(canvas, style_grid, r0 + 1, c0, "│" + coord_text.center(inner) + "│", box_style)
+        _blit(canvas, style_grid, r0 + 1, c0, "│", box_style)
+        _blit(canvas, style_grid, r0 + 1, c0 + 1, first.center(inner), occ_style)
+        _blit(canvas, style_grid, r0 + 1, c0 + 1 + inner, "│", box_style)
         _blit(canvas, style_grid, r0 + 2, c0, "│", box_style)
-        _blit(canvas, style_grid, r0 + 2, c0 + 1, _occupancy(state, cr).center(inner), occ_style)
+        _blit(canvas, style_grid, r0 + 2, c0 + 1, second.center(inner), occ_style)
         _blit(canvas, style_grid, r0 + 2, c0 + 1 + inner, "│", box_style)
         _blit(canvas, style_grid, r0 + 3, c0, "└" + "─" * inner + "┘", box_style)
 
@@ -502,9 +834,7 @@ def render_board(state, highlight_crs: Collection[str] = (),
         rcoords = [parse_cr(c) for c in region.corners]
         cx = sum(box_col(x) + _NODE_W // 2 for x, _ in rcoords) // len(rcoords)
         cy = sum(box_row(y) + _NODE_H // 2 for _, y in rcoords) // len(rcoords)
-        holder = _region_holder(state, region)
-        token = f"{region.food}{holder or '·'}"
-        style = REGION_HELD_STYLE[holder] if holder else EMPTY_STYLE
+        token, style = _region_token(state, region)
         _blit(canvas, style_grid, cy, cx - len(token) // 2, token, style)
 
     # HQ boxes on the edge, each fanning out to every front crossroad: a horizontal edge to

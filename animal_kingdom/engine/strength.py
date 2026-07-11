@@ -79,7 +79,7 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
         bonus += cfg.anthem_verminus_per * others
     elif cid == "vesper":                   # +2 for each OTHER friendly Colony unit
         bonus += cfg.anthem_vesper_per * count("Colony", include_self=False)
-    elif cid == "guard_hornet":             # +5 while you control >= 5 Colony units (incl. itself)
+    elif cid == "guard_hornet":             # +5 while you control >= threshold Colony units (incl. itself)
         if count("Colony", include_self=True) >= cfg.guard_hornet_colony_threshold:
             bonus += cfg.guard_hornet_bonus
 

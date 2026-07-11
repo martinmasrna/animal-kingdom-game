@@ -27,10 +27,15 @@ No locked changes waiting to be made.
 
 ## Quick follow-up sweep — tests, not locked changes
 
-- [ ] **Prototype Colony's five-unit gates at four units.** Run one isolated experiment changing
-  Guard Hornet, Soldier Ant, and Nurse Bumblebee from “5 or more Colony units” to “4 or more.”
-  Colony currently tends to lose before its threshold cards switch on. Keep the shared threshold
-  consistent during the experiment, then inspect each card before locking anything.
+- [x] **DONE 2026-07-10 — Prototype Colony's five-unit gates at four units.** Isolated experiment
+  changed Guard Hornet, Soldier Ant, and Nurse Bumblebee from “5 or more Colony units” to “4 or
+  more” via the shared config thresholds. RefereeBot vs RefereeBot directional screen:
+  `./report 50 --deck colony --bots referee,referee --seed 0 --format both --out results/colony_threshold4_referee_100`
+  (6 non-mirror matchups, 100 games each, 50 each seat, 600 total). Result:
+  **colony_food_swarm 53.8%**, +12.7pt vs the prior 41.1% context number. Matchups:
+  aggro 44%, canine 47%, cats 51%, egg 69%, food_otk 38%, ramp 74%. This is a useful direction
+  signal, not a balance-grade verdict; rerun at ≥200 games/matchup and inspect the individual
+  threshold cards before locking the change.
 - [ ] **Watch Methuselah rather than nerfing it again immediately.** Its +12.5-point drawn impact
   is the loudest current signal, but the recurring food amount was already reduced to 5 and needs
   clean post-change data.

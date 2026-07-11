@@ -20,7 +20,7 @@ from textual.events import Click, Key, Leave, MouseMove, Resize
 from textual.message import Message
 from textual.reactive import reactive
 from textual.screen import ModalScreen, Screen
-from textual.widgets import Button, Footer, Input, Label, Select, Static
+from textual.widgets import Button, Input, Label, Select, Static
 
 from ..decks import PREMADE_DECKS
 from ..engine import strength as strength_mod
@@ -187,6 +187,7 @@ class BoardWidget(Static):
             perspective_player=perspective_player,
             max_height=inner_height,
             show_coords=False,
+            projection="vertical",
         )
         x_offset = max(0, (width - board.width) // 2)
         y_offset = max(0, (height - board.height) // 2)
@@ -508,13 +509,12 @@ class RecorderApp(App[None]):
         background: $panel;
         text-align: center;
     }
-    #opponent, #player {
+    #opponent {
         height: 1;
         padding: 0 2;
         background: $boost;
     }
     #opponent { text-align: center; }
-    #player { text-align: center; }
     #main { height: 1fr; min-height: 14; }
     #board { width: 1fr; height: 100%; overflow: hidden hidden; }
     #recent-log {
@@ -565,14 +565,18 @@ class RecorderApp(App[None]):
     ActionCard { width: 22; height: 7; margin-right: 1; }
     ActionCard.draw { width: 14; }
     ActionCard:focus { background: $boost; }
-    Footer { height: 1; }
+    #footer {
+        height: 1;
+        padding: 0 2;
+        background: $panel;
+    }
     .layout-narrow DeckTracker, .layout-narrow #side { display: none; }
     .layout-inspector DeckTracker { display: none; }
     .layout-trackers #side { display: none; }
     .height-compact DeckTracker,
     .height-compact #status,
     .height-compact #opponent,
-    .height-compact Footer { display: none; }
+    .height-compact #footer { display: none; }
     """
     BINDINGS = [
         ("q", "quit_recorder", "Quit"),
@@ -629,9 +633,8 @@ class RecorderApp(App[None]):
             yield DeckTracker(id="opponent-deck")
             yield Static("", id="side", markup=True)
         yield Static("", id="notice", markup=True)
-        yield Static("", id="player", markup=True)
         yield CardShelf()
-        yield Footer()
+        yield Static("[bold]q[/bold] Quit   [bold]?[/bold] Help", id="footer", markup=True)
 
     def on_mount(self) -> None:
         if self.manifest is not None:
@@ -728,6 +731,27 @@ class RecorderApp(App[None]):
         )
         return f"Food {value}/{target} ▕{bar}▏"
 
+    def _player_summary(self) -> str:
+        assert self.session is not None
+        state = self.session.state
+        human = self.session.setup.human_seat
+        actor = state.player_to_act()
+        actions_remaining = max(
+            0,
+            state.config.actions_per_turn - state.actions_taken_this_turn,
+        )
+        action_text = (
+            f"  ·  Actions {actions_remaining}"
+            if actor == human and self.session.result is None
+            else ""
+        )
+        return (
+            f"{self._food_progress(state, human)}"
+            f"  ·  Cards {len(state.hands[human])}"
+            f"  ·  Deck {len(state.decks[human])}"
+            f"{action_text}"
+        )
+
     def refresh_game(self) -> None:
         session = self.session
         if session is None:
@@ -769,29 +793,10 @@ class RecorderApp(App[None]):
             f"[bold]{phase}[/bold] · Turn {state.turn_counter + 1}{cohort_text}{invalid}"
         )
 
-        opponent_style = SEAT_STYLE.get(opponent, "bold")
-        human_style = SEAT_STYLE.get(human, "bold")
         self.query_one("#opponent", Static).update(
-            f"[{opponent_style}]OPPONENT · Seat {opponent}[/{opponent_style}]"
-            f"   {self._food_progress(state, opponent)}"
+            f"{self._food_progress(state, opponent)}"
             f"  ·  Hand {len(state.hands[opponent])}"
             f"  ·  Deck {len(state.decks[opponent])}"
-        )
-        actions_remaining = max(
-            0,
-            state.config.actions_per_turn - state.actions_taken_this_turn,
-        )
-        action_text = (
-            f"  ·  Actions {actions_remaining}"
-            if actor == human and result is None
-            else ""
-        )
-        self.query_one("#player", Static).update(
-            f"[{human_style}]YOUR HAND · Seat {human}[/{human_style}]"
-            f"   {self._food_progress(state, human)}"
-            f"  ·  Cards {len(state.hands[human])}"
-            f"  ·  Deck {len(state.decks[human])}"
-            f"{action_text}"
         )
         self._update_deck_trackers()
 
@@ -900,7 +905,7 @@ class RecorderApp(App[None]):
             prompt = f"Place [bold]{card_name}[/bold] · Choose a highlighted location"
         else:
             prompt = "Choose a card from your hand or draw"
-        self.query_one("#notice", Static).update(prompt)
+        self.query_one("#notice", Static).update(f"{prompt}  ·  {self._player_summary()}")
 
     def _recording_link(self, label: str | None = None) -> str:
         assert self.session is not None

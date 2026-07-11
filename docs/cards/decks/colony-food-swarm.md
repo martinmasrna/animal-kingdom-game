@@ -16,7 +16,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28).
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
 | **Nurse Bee** | Colony | 2 | Flight. Battlecry: if you control two copies of the same Colony unit, draw 2 cards. |
-| **Nurse Bumblebee** | Colony | 3 | Flight. Battlecry: if you control 5 or more Colony units, draw 2 cards. *(2026-07-05: body 2→3)* |
+| **Nurse Bumblebee** | Colony | 3 | Flight. Battlecry: if you control 4 or more Colony units, draw 2 cards. *(2026-07-05: body 2→3)* |
 | **Termite King** | Colony | 5 | Battlecry: if you control a Colony Queen, draw 1 card. |
 | **Termite Queen** | Colony | 3 | Battlecry: you may play one additional non-Queen Colony unit this turn. *(2026-07-05: body 5→3)* |
 
@@ -24,8 +24,8 @@ Source: user's offline Google Sheet (uploaded 2026-06-28).
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
 | **Queen Bee** | Colony | 2 | Battlecry: play a Worker unit. |
-| **Guard Hornet** | Colony | 3 | Flight. Has +5 strength while you control 5 or more Colony units. |
-| **Soldier Ant** | Colony | 2 | Battlecry: if you control 5 or more Colony units, remove an adjacent enemy. |
+| **Guard Hornet** | Colony | 3 | Flight. Has +5 strength while you control 4 or more Colony units. |
+| **Soldier Ant** | Colony | 2 | Battlecry: if you control 4 or more Colony units, remove an adjacent enemy. |
 | **Worker Ant** | Colony | 1 | Battlecry: gain 12 food. |
 | **Worker Wasp** | Colony | 3 | Flight. At the end of your turn, gain 3 food. |
 | **Worker Bee** | Colony | 1 | Flight. Battlecry: gain 10 food; if you control another Worker, gain 10 more. *(2026-07-05: 5/5→10/10)* |
@@ -39,12 +39,12 @@ Source: user's offline Google Sheet (uploaded 2026-06-28).
   - **Worker** members: Worker Ant, Worker Wasp, Worker Bee. Referenced by Queen Bee ("play a Worker unit") and Worker Bee ("another Worker").
   - Termite **King** is a King, not a Queen (doesn't satisfy its own Queen check).
   - Decide: explicit sub-tag field per card (e.g. `subtags: [Queen]`) vs. inferring from name. Recommend explicit.
-- **Count-of-tag dynamic strength:** Champion of the Hive = +2 str per other Colony; Guard Hornet = +5 while ≥5 Colony. New `effective_strength` variants (linear-per-tag, and threshold buff).
+- **Count-of-tag dynamic strength:** Champion of the Hive = +2 str per other Colony; Guard Hornet = +5 while ≥4 Colony. New `effective_strength` variants (linear-per-tag, and threshold buff).
 - **"Whenever you play a Colony unit" trigger** (bee queen) — fires on each tagged placement, not just self-placement.
 - **Recurring per-unit end-of-turn food:** Worker Wasp "at the end of your turn, gain 3 food" — food income from a unit on the board, separate from regions.
 - **Food rider** (fat bumblebee): "whenever you gain food, gain 3 additional" — additive multiplier on the swarm's food output. Stacks conceptually with the bee queen + worker food.
 - **Duplicate-copy condition:** Nurse Bee "if you control two copies of the same Colony unit" — a new board condition (≥2 of an identical card in play).
-- **Board-size gates:** "if you control 5 or more Colony units" (Nurse Bumblebee draw, Soldier Ant removal, Guard Hornet buff).
+- **Board-size gates:** "if you control 4 or more Colony units" (Nurse Bumblebee draw, Soldier Ant removal, Guard Hornet buff).
 - **Tag/subtype-constrained extra placement:** Queen Bee "play a Worker unit"; Termite Queen "play one additional non-Queen Colony unit this turn."
 
 ## Flags (resolve in the all-at-once review)

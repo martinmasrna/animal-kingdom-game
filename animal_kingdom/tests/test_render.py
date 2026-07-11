@@ -101,6 +101,34 @@ def test_diagonal_projection_orients_each_player_bottom_left() -> None:
         _assert_valid_markup(board.markup)
 
 
+def test_vertical_projection_orients_each_player_bottom_to_top() -> None:
+    state = new_game(
+        load_premade_deck("ramp"),
+        load_premade_deck("egg_control"),
+        seed=7,
+        map_id="map_b",
+    )
+    for player, opponent in (("A", "B"), ("B", "A")):
+        board = render_board(
+            state,
+            perspective_player=player,
+            projection="vertical",
+            max_width=80,
+            max_height=28,
+        )
+        own = board.hitboxes[("hq", player)]
+        enemy = board.hitboxes[("hq", opponent)]
+        assert own.y > enemy.y
+        assert abs((own.x + own.width // 2) - (enemy.x + enemy.width // 2)) <= 1
+        assert set(board.hitboxes) == {
+            *(("cr", cr) for cr in state.game_map.crossroads),
+            ("hq", "A"),
+            ("hq", "B"),
+        }
+        plain = _assert_valid_markup(board.markup)
+        assert "HQ A" in plain and "HQ B" in plain
+
+
 def test_diagonal_crossroad_shows_card_name_and_strength_without_seat_label() -> None:
     state = new_game(
         load_premade_deck("aggro_hq_rush"),
@@ -122,6 +150,77 @@ def test_diagonal_crossroad_shows_card_name_and_strength_without_seat_label() ->
 
     assert "Falcon" in plain
     assert "STR 4" in plain
+    assert "1,1" not in plain
     assert "A4" not in plain
     assert board.hitboxes[("cr", "1,1")].width == 12
     assert board.hitboxes[("cr", "1,1")].height == 5
+
+
+def test_vertical_projection_compacts_to_fit_short_board_panes() -> None:
+    state = new_game(
+        load_premade_deck("aggro_hq_rush"),
+        load_premade_deck("ramp"),
+        seed=7,
+        map_id="map_b",
+    )
+    unit = state.add_to_hand("A", "falcon")
+    state.hands["A"].remove(unit)
+    state.board["1,1"] = [unit]
+
+    board = render_board(
+        state,
+        perspective_player="A",
+        projection="vertical",
+        max_width=80,
+        max_height=14,
+    )
+    plain = _assert_valid_markup(board.markup)
+
+    assert board.height <= 14
+    assert board.width <= 80
+    assert "Falc" in plain
+    assert "1,1" not in plain
+
+
+def test_standard_board_hides_coordinates_and_prioritizes_unit_identity() -> None:
+    state = new_game(
+        load_premade_deck("aggro_hq_rush"),
+        load_premade_deck("ramp"),
+        seed=7,
+        map_id="map_a",
+    )
+    unit = state.add_to_hand("A", "falcon")
+    state.hands["A"].remove(unit)
+    state.board["1,1"] = [unit]
+
+    board = render_board(state)
+    plain = _assert_valid_markup(board.markup)
+
+    assert "Falcon" in plain
+    assert "STR 4" in plain
+    assert "1,1" not in plain
+    assert "A4" not in plain
+    assert "10·" not in plain
+
+
+def test_region_food_chip_uses_color_not_owner_letter_for_control() -> None:
+    state = new_game(
+        load_premade_deck("aggro_hq_rush"),
+        load_premade_deck("ramp"),
+        seed=7,
+        map_id="map_b",
+    )
+    region = next(iter(state.game_map.regions.values()))
+    for cr in region.corners:
+        unit = state.add_to_hand("A", "falcon")
+        state.hands["A"].remove(unit)
+        state.board[cr] = [unit]
+
+    board = render_board(state, projection="vertical", perspective_player="A", max_height=32)
+    plain = _assert_valid_markup(board.markup)
+
+    assert "A10" not in plain
+    assert "B10" not in plain
+    assert f"[bold cyan]{region.food}[/bold cyan]" in board.markup
+    assert "[bold cyan]─" in board.markup or "[bold cyan]│" in board.markup
+    assert "on cyan" not in board.markup

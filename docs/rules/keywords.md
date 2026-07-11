@@ -104,7 +104,7 @@ Card text grants strength two ways, **distinguished by the verb** — this readi
 - **"has +X strength" → an anthem** (live, conditional aura). Recomputed live; **vanishes**
   when its source leaves play or its condition stops holding. Examples: wolf matriarch ("your
   other Canines *have* +2"), African Wild Dog ("*has* +1 for each friendly Canine"), Champion
-  of the Hive, Guard Hornet ("*has* +5 while ≥5 Colony"). The same live layer also computes
+  of the Hive, Guard Hornet ("*has* +5 while ≥4 Colony"). The same live layer also computes
   **dynamic strength** (e.g. the giant-anaconda legendary = number of removed units).
 - **"give +X strength" → a permanent counter** (one-time grant, **stored on the unit
   instance**, persists after the granter dies). Also applies to **cards in hand** (which carry
