@@ -38,6 +38,26 @@ def _build_premade_decks(cards: dict[str, Card]) -> dict[str, list[str]]:
 PREMADE_DECKS: dict[str, list[str]] = _build_premade_decks(load_cards())
 
 
+def _load_env_extra_decks() -> None:
+    """Merge synthetic decks from $AK_EXTRA_DECKS (JSON {slug: [card_id, ...]}) into PREMADE_DECKS.
+
+    The deck_optimizer's candidate decks are not in cards.json; this env hook lets them survive into
+    `spawn`ed worker processes (which re-import this module) without threading a decklist through the
+    whole sim harness. No-op when the var is unset, so it never affects normal runs.
+    """
+    import json
+    import os
+
+    raw = os.environ.get("AK_EXTRA_DECKS")
+    if not raw:
+        return
+    for slug, ids in json.loads(raw).items():
+        PREMADE_DECKS[slug] = list(ids)
+
+
+_load_env_extra_decks()
+
+
 def load_premade_deck(slug: str, *, cards: Optional[dict[str, Card]] = None) -> list[str]:
     """Return a fresh copy of the 30-card decklist for `slug`."""
     decks = _build_premade_decks(cards) if cards is not None else PREMADE_DECKS
