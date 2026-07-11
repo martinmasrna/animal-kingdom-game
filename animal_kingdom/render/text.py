@@ -384,7 +384,8 @@ def render_board(state, highlight_crs: Collection[str] = (),
                  max_width: int | None = None,
                  vertical_gap: int = _GAP_H,
                  perspective_player: str | None = None,
-                 max_height: int | None = None) -> BoardRender:
+                 max_height: int | None = None,
+                 show_coords: bool = True) -> BoardRender:
     """Render the board and expose target hitboxes for mouse-driven clients.
 
     Horizontal gaps shrink from seven to one cell when necessary, allowing Map B to fit
@@ -455,8 +456,12 @@ def render_board(state, highlight_crs: Collection[str] = (),
         stack = state.board.get(cr)
         occ_style = SEAT_STYLE.get(stack[-1].owner) if stack else EMPTY_STYLE
 
+        # The coordinate row is only needed by keyboard clients that pick a target from a
+        # numbered menu (./run) and must map each menu entry back to a node; mouse clients
+        # click the hitbox directly, so they hide it (blank the row, keeping box geometry).
+        coord_text = f"{x},{y}" if show_coords else ""
         _blit(canvas, style_grid, r0, c0, "┌" + "─" * inner + "┐", box_style)
-        _blit(canvas, style_grid, r0 + 1, c0, "│" + f"{x},{y}".center(inner) + "│", box_style)
+        _blit(canvas, style_grid, r0 + 1, c0, "│" + coord_text.center(inner) + "│", box_style)
         _blit(canvas, style_grid, r0 + 2, c0, "│", box_style)
         _blit(canvas, style_grid, r0 + 2, c0 + 1, _occupancy(state, cr).center(inner), occ_style)
         _blit(canvas, style_grid, r0 + 2, c0 + 1 + inner, "│", box_style)

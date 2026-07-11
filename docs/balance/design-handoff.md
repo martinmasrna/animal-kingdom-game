@@ -31,7 +31,9 @@ intent).
 
 There is a **dominant strategy**: a deck assembled from the individually-strongest cards across all
 themes (a "good-stuff" pile) beats everything, and nothing beats it. The intended variety of viable,
-distinct decks collapses into one best pile.
+distinct decks collapses into one best pile. Part of this is because the pre-made decks are not optimized,
+and they each have some "dead" cards. But we have a suspicion that this is more of a fundamental issue,
+give the game format is "create deck from ALL available cards", and all cards have equal "cost".
 
 ## The evidence (measured, via bot-vs-bot simulation + human play)
 
@@ -71,7 +73,7 @@ Design, at a **fundamental/conceptual level**, what would turn this into the gam
 - **No mana / no per-card resource cost.** (A design pillar; and the obvious in-game resource, food,
   is earned by being ahead, so pricing cards in it would just reward the leader.)
 - **No colors/classes** in the Magic/Hearthstone sense (a hard rule restricting which cards a deck
-  may contain). Rejected as importing another game wholesale.
+  may contain). Rejected as importing another game wholesale, doesn't fit the Animal Kingdom theme.
 - **It remains an open-construction deckbuilding game** — not a fixed-roster "pick a character" game,
   and not a shared-pool / drafting game. (Those were considered and set aside as not fitting the
   theme.)

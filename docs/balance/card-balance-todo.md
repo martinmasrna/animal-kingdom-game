@@ -40,3 +40,5 @@ No locked changes waiting to be made.
 - remove "other than Dog" from dog and other cards like this? Seems too defensive for no real reason
 - nerf queen Adira to 4 strength
 - nerf Bullwark to 8 strength
+- remove Immovable from Bullwakr, it's broken enough as it is (in general, keep Immovable only on real defenders)
+- swap colony threshholds from 5 to 4
