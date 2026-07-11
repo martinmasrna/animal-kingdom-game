@@ -31,7 +31,7 @@ from .engine import strength as strength_mod
 from .engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
 from .engine.config import load_config_overrides
 from .engine.state import GameState, StateView, new_game
-from .render.text import HIGHLIGHT_STYLE, SEAT_STYLE, parse_cr, render
+from .render.text import HIGHLIGHT_STYLE, SEAT_STYLE, describe_action, parse_cr, render
 
 # highlight=False: Rich's default ReprHighlighter would auto-color bare numbers/punctuation
 # (board coordinates, region food values) on top of our own markup - noise, not signal.
@@ -63,20 +63,6 @@ _OPPONENT_LEVELS = [
     ("Hard — turn bot (plans a whole turn; determinized, no opponent rollout)", "turn"),
     ("Expert — referee bot (determinized adversarial search; thinks a few seconds)", "referee"),
 ]
-
-
-def _describe_action(state: GameState, a: Action) -> str:
-    """Past-tense narration of a resolved action, for the turn log (card ids -> names)."""
-    if isinstance(a, DrawAction):
-        return "drew a card"
-    if isinstance(a, PlaceAction):
-        name = state.cards[a.card_id].name
-        if a.is_hq_capture:
-            return f"played {name} and captured HQ {a.target[1]}!"
-        return f"played {name} onto {a.target[1]}"
-    if isinstance(a, ChoiceAction):
-        return "declined an optional effect" if a.choice == SKIP else f"chose {a.choice}"
-    return repr(a)
 
 
 def _banner_width() -> int:
@@ -361,7 +347,7 @@ def play(bot_spec: str, seed: int, map_id: str, quiet: bool, decks: str,
 
         legal = rules.legal_actions(state)
         action = controllers[actor].choose(state.view_for(actor), legal, state)
-        narration = _describe_action(state, action)
+        narration = describe_action(state, action)
         rules.apply_action(state, action)
         if not quiet:
             tag = f"{actor}" + (" (you)" if actor in human_seats else "")

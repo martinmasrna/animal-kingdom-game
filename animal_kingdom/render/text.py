@@ -24,6 +24,7 @@ from dataclasses import dataclass
 from typing import Collection
 
 from ..engine import strength as strength_mod
+from ..engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
 
 # Shared with cli.py so the interactive picker's prompts match the board's colors.
 SEAT_STYLE = {"A": "bold cyan", "B": "bold red"}
@@ -79,6 +80,21 @@ def _terminal_width() -> int:
 def parse_cr(cr: str) -> tuple[int, int]:
     x, y = cr.split(",")
     return int(x), int(y)
+
+
+def describe_action(state, action: Action) -> str:
+    """Past-tense narration of a resolved action (card ids -> names), for CLI play-by-play
+    and the recorded-game log."""
+    if isinstance(action, DrawAction):
+        return "drew a card"
+    if isinstance(action, PlaceAction):
+        name = state.cards[action.card_id].name
+        if action.is_hq_capture:
+            return f"played {name} and captured HQ {action.target[1]}"
+        return f"played {name} onto {action.crossroad}"
+    if isinstance(action, ChoiceAction):
+        return "declined an optional effect" if action.choice == SKIP else f"chose {action.choice}"
+    return repr(action)
 
 
 def _occupant_details(state, cr: str, name_width: int) -> tuple[str, str]:

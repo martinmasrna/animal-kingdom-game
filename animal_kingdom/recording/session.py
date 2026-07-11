@@ -13,9 +13,10 @@ from ..bots.base import Bot
 from ..decks import load_premade_deck
 from ..engine import rules
 from ..engine import strength as strength_mod
-from ..engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
+from ..engine.actions import Action
 from ..engine.config import Config
 from ..engine.state import GameState, Result, new_game, other_player
+from ..render.text import describe_action
 from ..sim.runner import BOT_KINDS, make_bot
 from .provenance import build_game_provenance
 from .writer import JsonlGameWriter
@@ -43,19 +44,6 @@ class GameSetup:
             raise ValueError(f"unknown bot kind {self.opponent_kind!r}")
         if not self.player_id:
             raise ValueError("player_id must not be empty")
-
-
-def describe_action(state: GameState, action: Action) -> str:
-    if isinstance(action, DrawAction):
-        return "drew cards"
-    if isinstance(action, PlaceAction):
-        name = state.cards[action.card_id].name
-        if action.is_hq_capture:
-            return f"played {name} and captured HQ {action.target[1]}"
-        return f"played {name} on {action.crossroad}"
-    if isinstance(action, ChoiceAction):
-        return "declined an optional effect" if action.choice == SKIP else f"chose {action.choice}"
-    return repr(action)
 
 
 def visible_state_to_dict(state: GameState, player: str) -> dict:
