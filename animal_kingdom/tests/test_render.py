@@ -208,17 +208,19 @@ def test_region_food_chip_uses_color_not_owner_letter_for_control() -> None:
         load_premade_deck("aggro_hq_rush"),
         load_premade_deck("ramp"),
         seed=7,
-        map_id="map_a",
+        map_id="map_b",
     )
-    for cr in ("1,1", "1,2", "2,1", "2,2"):
+    region = next(iter(state.game_map.regions.values()))
+    for cr in region.corners:
         unit = state.add_to_hand("A", "falcon")
         state.hands["A"].remove(unit)
         state.board[cr] = [unit]
 
-    board = render_board(state)
+    board = render_board(state, projection="vertical", perspective_player="A", max_height=32)
     plain = _assert_valid_markup(board.markup)
 
     assert "A10" not in plain
     assert "B10" not in plain
-    assert "[bold cyan]10[/bold cyan]" in board.markup
+    assert f"[bold cyan]{region.food}[/bold cyan]" in board.markup
+    assert "[bold cyan]─" in board.markup or "[bold cyan]│" in board.markup
     assert "on cyan" not in board.markup

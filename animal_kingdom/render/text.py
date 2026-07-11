@@ -159,7 +159,16 @@ def _canvas_to_lines(canvas: list[list[str]], style_grid: list[list[str | None]]
     return lines
 
 
-def _draw_conn(canvas: list[list[str]], r0: int, c0: int, r1: int, c1: int) -> None:
+def _draw_conn(
+    canvas: list[list[str]],
+    r0: int,
+    c0: int,
+    r1: int,
+    c1: int,
+    *,
+    style_grid: list[list[str | None]] | None = None,
+    style: str | None = None,
+) -> None:
     """Wire (r0,c0)->(r1,c1) with box/diagonal glyphs, skipping the endpoints (box borders).
 
     Horizontal runs use ─, vertical │, and diagonals / or \\ by direction; the endpoints are
@@ -177,6 +186,8 @@ def _draw_conn(canvas: list[list[str]], r0: int, c0: int, r1: int, c1: int) -> N
             ch = "/" if (dr < 0) == (dc > 0) else "\\"
         if canvas[r][c] == " ":
             canvas[r][c] = ch
+        if style_grid is not None and style is not None and canvas[r][c] in "─│/\\":
+            style_grid[r][c] = style
 
 
 def _region_token(state, region) -> tuple[str, str | None]:
@@ -184,6 +195,26 @@ def _region_token(state, region) -> tuple[str, str | None]:
     holder = _region_holder(state, region)
     style = REGION_HELD_STYLE[holder] if holder else EMPTY_STYLE
     return str(region.food), style
+
+
+def _draw_controlled_region_edges(
+    canvas: list[list[str]],
+    style_grid: list[list[str | None]],
+    state,
+    edges,
+    region,
+    centres: dict[str, tuple[int, int]],
+) -> None:
+    holder = _region_holder(state, region)
+    if holder is None:
+        return
+    corners = set(region.corners)
+    style = REGION_HELD_STYLE[holder]
+    for a, b in edges:
+        if a in corners and b in corners:
+            ar, ac = centres[a]
+            br, bc = centres[b]
+            _draw_conn(canvas, ar, ac, br, bc, style_grid=style_grid, style=style)
 
 
 def _node_style(
@@ -356,6 +387,10 @@ def _render_vertical_board(
         f"{x},{y}": (box_row(x), box_col(y))
         for x, y in coords
     }
+    node_centres = {
+        cr: (row + node_h // 2, col + node_w // 2)
+        for cr, (row, col) in positions.items()
+    }
     players = tuple(sorted(gm.hq_connects))
     opponent = next(player for player in players if player != perspective_player)
     hq_positions = {
@@ -387,10 +422,8 @@ def _render_vertical_board(
             )
 
     for region in gm.regions.values():
-        centres = [
-            (positions[cr][0] + node_h // 2, positions[cr][1] + node_w // 2)
-            for cr in region.corners
-        ]
+        _draw_controlled_region_edges(canvas, style_grid, state, gm.edges, region, node_centres)
+        centres = [node_centres[cr] for cr in region.corners]
         row = sum(r for r, _ in centres) // len(centres)
         col = sum(c for _, c in centres) // len(centres)
         token, style = _region_token(state, region)
@@ -515,6 +548,10 @@ def _render_diagonal_board(
         slot_col = forward + lateral
         slot_row = (len(xs) - 1 - forward) + lateral
         positions[f"{x},{y}"] = (slot_row * row_step, slot_col * col_step)
+    node_centres = {
+        cr: (row + node_h // 2, col + node_w // 2)
+        for cr, (row, col) in positions.items()
+    }
 
     players = tuple(sorted(gm.hq_connects))
     opponent = next(player for player in players if player != perspective_player)
@@ -548,10 +585,8 @@ def _render_diagonal_board(
 
     # Region value/holder chips stay at the projected centre of their four corners.
     for region in gm.regions.values():
-        centres = [
-            (positions[cr][0] + node_h // 2, positions[cr][1] + node_w // 2)
-            for cr in region.corners
-        ]
+        _draw_controlled_region_edges(canvas, style_grid, state, gm.edges, region, node_centres)
+        centres = [node_centres[cr] for cr in region.corners]
         row = sum(r for r, _ in centres) // len(centres)
         col = sum(c for _, c in centres) // len(centres)
         token, style = _region_token(state, region)
