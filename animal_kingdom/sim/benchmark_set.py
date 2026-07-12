@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Sequence
 
 from ..engine.cards import DECK_SLUGS, load_cards
+from ..engine.config import load_config_overrides
 from .deck_optimizer import register_synthetic
 from .runner import BOT_KINDS, run_pairs
 
@@ -90,10 +91,14 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--base-seed", type=int, default=902000)
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1, help="worker processes")
     p.add_argument("--out", type=Path, help="write the final per-card table as CSV")
+    p.add_argument("--config", default=None,
+                   help="JSON of Config overrides (e.g. a rules variant like draw_action_count=2)")
     p.add_argument("--checkpoint", type=Path,
                    help="checkpoint file for crash-safe resume "
-                        "(default: results/benchmark_set/<pilot>_g<games>.ckpt.json)")
+                        "(default: results/benchmark_set/<pilot>_g<games>[_<config>].ckpt.json)")
     args = p.parse_args(argv)
+
+    config = load_config_overrides(args.config)
 
     if args.field.strip():
         field = [s.strip() for s in args.field.split(",") if s.strip()]
@@ -107,10 +112,11 @@ def main(argv: Sequence[str] | None = None) -> None:
     register_synthetic("baseline", DECKLIST)
     cards = load_cards()
 
-    ckpt_path = args.checkpoint or Path(f"results/benchmark_set/{args.pilot}_g{args.games}.ckpt.json")
+    cfg_tag = f"_{Path(args.config).stem}" if args.config else ""
+    ckpt_path = args.checkpoint or Path(f"results/benchmark_set/{args.pilot}_g{args.games}{cfg_tag}.ckpt.json")
     # This run's identity — a resumed checkpoint must match all of it, else the samples don't compose.
     run_key = {"pilot": args.pilot, "games": args.games, "base_seed": args.base_seed,
-               "field": sorted(field), "deck": DECKLIST}
+               "field": sorted(field), "deck": DECKLIST, "config": str(args.config)}
 
     matchups: dict[str, dict] = {}
     if ckpt_path.exists():
@@ -140,7 +146,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     for f in todo:
         seed = args.base_seed + sorted(field).index(f)
         recs = run_pairs([("baseline", f)], args.games, seed,
-                         bots=(args.pilot, args.pilot), jobs=args.jobs, game_progress=on_game)
+                         bots=(args.pilot, args.pilot), config=config, jobs=args.jobs,
+                         game_progress=on_game)
         agg = _fold(recs)
         matchups[f] = agg
         _write_json_atomic(ckpt_path, {"run_key": run_key, "matchups": matchups})
