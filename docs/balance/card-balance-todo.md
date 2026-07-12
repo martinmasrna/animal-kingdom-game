@@ -47,3 +47,8 @@ No locked changes waiting to be made.
 - nerf Bullwark to 8 strength
 - remove Immovable from Bullwakr, it's broken enough as it is (in general, keep Immovable only on real defenders)
 - swap colony threshholds from 5 to 4
+
+## Bug Fixes
+
+- chipmunk works when covered as well?
+- skunk makes all the instance unplayable, not just the one that was returned
