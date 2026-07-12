@@ -80,7 +80,7 @@ def test_tui_80x24_keyboard_draw_and_annotations(tmp_path):
                 if isinstance(widget.entry.payload, DrawAction)
             )
             assert "D DRAW" in str(draw.content)
-            assert "Draw 1 card" in str(draw.content)
+            assert "Draw 2 cards" in str(draw.content)
             prompt = str(app.query_one("#notice", Static).content)
             assert "Choose a card from your hand or draw" in prompt
             assert "STR" in app.export_screenshot()

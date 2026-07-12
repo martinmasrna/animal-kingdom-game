@@ -103,7 +103,7 @@ def test_exhaustion_tie_breaks_against_player_who_cannot_act():
 
 # ------------------------------------------------- actions per turn (2 per turn, the default)
 
-TWO_ACTIONS = Config.default()  # the shipped ruleset is 2 actions/turn, draw 1
+TWO_ACTIONS = Config.default()  # the shipped ruleset is 2 actions/turn, draw 2
 
 
 def test_two_actions_play_play_then_turn_ends():
@@ -116,11 +116,11 @@ def test_two_actions_play_play_then_turn_ends():
     assert s.actions_taken_this_turn == 0
 
 
-def test_two_actions_draw_draws_one_and_keeps_turn_open():
+def test_two_actions_draw_draws_two_and_keeps_turn_open():
     s = make_state(hands={"A": ["lion"], "B": ["lion"]},
                    decks={"A": ["caracal", "cheetah"], "B": []}, config=TWO_ACTIONS)
     rules.apply_action(s, DrawAction())
-    assert len(s.hands["A"]) == 2                # draw_action_count=1: exactly one card
+    assert len(s.hands["A"]) == 3                # draw_action_count=2: lion + both drawn
     assert s.current == "A"
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
     assert s.current == "B"

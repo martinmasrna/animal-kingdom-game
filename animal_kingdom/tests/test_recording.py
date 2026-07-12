@@ -194,7 +194,7 @@ def test_schedule_cli_uses_shipped_config_without_retired_preset(tmp_path):
     ])
     manifest = json.loads(output.read_text())
     assert manifest["config"]["actions_per_turn"] == 2
-    assert manifest["config"]["draw_action_count"] == 1
+    assert manifest["config"]["draw_action_count"] == 2
 
 
 def test_config_drift_flags_stale_pinned_constants():

@@ -12,12 +12,15 @@ def _logged_game(deck_a="colony_food_swarm", deck_b="ramp", seed=0):
 
 
 def test_log_actions_captures_the_full_game():
+    # Seed the bots so the logged and unlogged games are genuinely comparable: an unseeded
+    # GreedyBot breaks ties from a fresh RNG, so two plays of the same game can diverge (that is
+    # bot nondeterminism, not a logging side effect).
     rec = play_game("cats_midrange", "canine_buff_tempo", 1,
-                    bot_a=GreedyBot(), bot_b=GreedyBot(), log_actions=True)
+                    bot_a=GreedyBot(seed=0), bot_b=GreedyBot(seed=1), log_actions=True)
     assert rec.actions and all("kind" in a for a in rec.actions)
     # Off by default -> no overhead / empty log.
     quiet = play_game("cats_midrange", "canine_buff_tempo", 1,
-                      bot_a=GreedyBot(), bot_b=GreedyBot())
+                      bot_a=GreedyBot(seed=0), bot_b=GreedyBot(seed=1))
     assert quiet.actions == ()
     assert quiet.winner == rec.winner and quiet.reason == rec.reason  # logging changes nothing
 

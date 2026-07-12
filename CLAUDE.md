@@ -27,7 +27,7 @@ Python ≥3.11; venv at `.venv` (`python3 -m venv .venv && .venv/bin/pip install
   expensive to re-pay).
 - **Paired bot-quality benchmark:** `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/turnbot`
 
-The ruleset is **map_b + 2 actions/turn** (draw 1 per Draw action) — the shipped default everywhere,
+The ruleset is **map_b + 2 actions/turn** (draw 2 per Draw action) — the shipped default everywhere,
 no flags needed.
 
 ## Invariants — do not violate
