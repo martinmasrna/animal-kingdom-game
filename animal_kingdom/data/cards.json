@@ -241,9 +241,9 @@
       "rarity": "rare",
       "type": "unit",
       "tags": ["Bird"],
-      "base_strength": 4,
+      "base_strength": 3,
       "keywords": ["Flight"],
-      "text": "Flight. Battlecry: remove an adjacent enemy of strength 4 or less."
+      "text": "Flight. Battlecry: remove an adjacent enemy of strength 3 or less."
     },
     {
       "id": "eagle",
@@ -534,7 +534,7 @@
       "tags": ["Megafauna"],
       "base_strength": 6,
       "keywords": [],
-      "text": "Battlecry: remove all adjacent enemies of strength 3 or less."
+      "text": "Battlecry: remove all adjacent enemies of strength 2 or less."
     },
     {
       "id": "hippopotamus",
@@ -601,7 +601,7 @@
       "tags": ["Bear"],
       "base_strength": 5,
       "keywords": [],
-      "text": "Battlecry: in 2 turns, draw 1 card."
+      "text": "Battlecry: in 2 turns, draw 2 cards."
     },
     {
       "id": "fig_tree",
@@ -935,7 +935,7 @@
       "rarity": "common",
       "type": "unit",
       "tags": [],
-      "base_strength": 2,
+      "base_strength": 4,
       "keywords": ["Flight"],
       "text": "Flight. Battlecry: draw 1 card."
     },
@@ -1167,7 +1167,7 @@
       "rarity": "common",
       "type": "unit",
       "tags": [],
-      "base_strength": 3,
+      "base_strength": 5,
       "keywords": [],
       "text": "Battlecry: draw 1 card."
     },

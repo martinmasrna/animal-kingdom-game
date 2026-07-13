@@ -688,8 +688,8 @@ def test_soldier_ant_removal_gated_on_four_colony():
 def test_rhinoceros_sweeps_only_small_adjacent_enemies():
     s = make_state(hands={"A": ["rhinoceros"]})
     put(s, "1,2", "lion", "A")
-    put(s, "3,2", "coyote", "B")                        # 3 - removed
-    put(s, "2,3", "gray_wolf", "B")                     # 4 - survives (threshold tightened 5->3)
+    put(s, "3,2", "serval", "B")                        # 2 - removed (<= 2)
+    put(s, "2,3", "coyote", "B")                        # 3 - survives (threshold tightened 5->2)
     put(s, "2,1", "lion", "B")                          # 7 - survives
     rules.apply_action(s, PlaceAction("rhinoceros", ("cr", "2,2")))
     assert s.owner_of("3,2") is None

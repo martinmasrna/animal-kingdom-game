@@ -94,9 +94,9 @@ class Config:
     # --- Removal-strength caps on Battlecry removals ---
     jaguar_max: int = 5
     serval_min: int = 6                  # removes an enemy of strength >= this
-    stoop_max: int = 4                   # card-balance-todo: Stoop moved to egg_control as a rare,
-                                          # 6→4 (id kept as "stoop"; printed name "Peregrine Falcon")
-    rhinoceros_max: int = 3              # proactive Battlecry mirror of Hippopotamus (5→3, 2026-07-05)
+    stoop_max: int = 3                   # baseline-ruler tuning 2026-07-13: str 4→3, remove ≤4→≤3
+                                          # (id kept as "stoop"; printed name "Peregrine Falcon")
+    rhinoceros_max: int = 2              # baseline-ruler tuning 2026-07-13: remove-all ≤3→≤2
     hippopotamus_max: int = 3
 
     # --- Placement costs (decision F) ---
@@ -106,7 +106,7 @@ class Config:
     egg_hatch_delay: int = 2             # Bird/Snake Egg: turns until hatch
     egg_hatch_draw: int = 2              # cards drawn when an Egg hatches
     black_bear_delay: int = 2           # turns until Black Bear draws
-    black_bear_draw: int = 1
+    black_bear_draw: int = 2            # baseline-ruler tuning 2026-07-13: 1→2 (draw-1 too weak vs draw-2 default)
     grizzly_bear_delay: int = 2         # turns until Grizzly Bear's random adjacent removal
 
     # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the
