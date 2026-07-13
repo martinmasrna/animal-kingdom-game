@@ -1511,6 +1511,16 @@ def _mock_draw2_place(state, unit, cr):
     _push_draw(state, unit.owner, 2)
 
 
+def _mock_removal_place(state, unit, cr):
+    # Baseline yardstick legendary: bare UNCONDITIONAL removal of one adjacent enemy (any
+    # strength) - prices the basic "remove a unit" primitive at a scarce legendary slot.
+    targets = _adjacent_enemy_targets(state, unit, cr)
+    if targets:
+        state.effect_stack.append(
+            {"op": "remove_choice", "chooser": unit.owner, "by_player": unit.owner,
+             "by_card": "mock_removal", "options": targets})
+
+
 def _mock_saboteur_place(state, unit, cr):
     # Baseline yardstick card: bare random hand-disruption (reuses Black Swan's seeded discard,
     # so it stays honest re: hidden info). No once-per-turn cap - it fires on placement.
@@ -1725,6 +1735,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "mock_scout": {"on_place": _mock_scout_place},
     "mock_saboteur": {"on_place": _mock_saboteur_place},
     "mock_draw2": {"on_place": _mock_draw2_place},
+    "mock_removal": {"on_place": _mock_removal_place},
     "nurse_bee": {"on_place": _nurse_bee_place},
     "nurse_bumblebee": {"on_place": _nurse_bumblebee_place},
     "termite_king": {"on_place": _termite_king_place},

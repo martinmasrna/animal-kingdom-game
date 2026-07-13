@@ -1227,6 +1227,50 @@
       "text": ""
     },
     {
+      "id": "mock_vanilla_10",
+      "name": "Vanilla 10",
+      "deck": "reserve",
+      "rarity": "legendary",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 10,
+      "keywords": [],
+      "text": ""
+    },
+    {
+      "id": "mock_flyer_7",
+      "name": "Flyer 7",
+      "deck": "reserve",
+      "rarity": "legendary",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 7,
+      "keywords": ["Flight"],
+      "text": "Flight."
+    },
+    {
+      "id": "mock_immovable_6",
+      "name": "Immovable 6",
+      "deck": "reserve",
+      "rarity": "common",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": ["Immovable"],
+      "text": "Immovable."
+    },
+    {
+      "id": "mock_removal",
+      "name": "Executioner",
+      "deck": "reserve",
+      "rarity": "legendary",
+      "type": "unit",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy."
+    },
+    {
       "id": "mock_apex_5",
       "name": "Apex 5",
       "deck": "reserve",
@@ -1252,7 +1296,7 @@
       "id": "mock_draw2",
       "name": "Archivist",
       "deck": "reserve",
-      "rarity": "legendary",
+      "rarity": "rare",
       "type": "unit",
       "tags": [],
       "base_strength": 2,

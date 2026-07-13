@@ -34,20 +34,23 @@ from .deck_optimizer import register_synthetic
 from .runner import BOT_KINDS, run_pairs
 
 # --- the yardstick rig: 30 distinct cards, 1 copy each (18 common / 8 rare / 4 legendary) ---
+# Every card is self-sufficient: it functions with no synergy/tribal/food-state condition (cost-
+# gated and delayed cards were cut). Legendaries are basic primitives at top dosage. See
+# docs/balance/baseline-deck-arc.md.
 COMMONS = ["lion", "eagle", "bat", "squirrel", "mock_scout", "mock_saboteur",
-           "african_wild_dog", "anaconda", "hedgehog", "elephant", "black_bear", "grizzly_bear",
-           "mock_vanilla_5", "mock_vanilla_6", "mock_vanilla_8", "mock_vanilla_9",
+           "african_wild_dog", "anaconda", "gray_wolf", "mock_immovable_6", "black_bear",
+           "grizzly_bear", "mock_vanilla_5", "mock_vanilla_6", "mock_vanilla_8", "mock_vanilla_9",
            "mock_apex_5", "mock_apex_6"]
 RARES = ["jerboa", "jaguar", "serval", "stoop", "porcupine", "polar_bear",
-         "rhinoceros", "hippopotamus"]
-LEGENDARIES = ["greywhisker", "mock_draw2", "borealis", "aquila"]
+         "rhinoceros", "mock_draw2"]
+LEGENDARIES = ["greywhisker", "mock_removal", "mock_vanilla_10", "mock_flyer_7"]
 DECKLIST = COMMONS + RARES + LEGENDARIES
 RARITY = {**{c: "C" for c in COMMONS}, **{c: "R" for c in RARES}, **{c: "L" for c in LEGENDARIES}}
 
 # Calibration ladders (id lists, ascending strength) surfaced separately in the report.
-VANILLA_LADDER = ["mock_vanilla_5", "mock_vanilla_6", "lion", "mock_vanilla_8", "mock_vanilla_9"]
+VANILLA_LADDER = ["mock_vanilla_5", "mock_vanilla_6", "lion", "mock_vanilla_8", "mock_vanilla_9",
+                  "mock_vanilla_10"]
 APEX_FREE_LADDER = ["mock_apex_5", "mock_apex_6", "anaconda", "polar_bear"]
-APEX_COST_LADDER = ["aquila", "borealis"]
 
 
 def _kw(card) -> str:
@@ -192,7 +195,6 @@ def main(argv: Sequence[str] | None = None) -> None:
     print("\nSTRENGTH LADDERS (impact by body size):")
     ladder("vanilla", VANILLA_LADDER)
     ladder("apex (free)", APEX_FREE_LADDER)
-    ladder("apex (cost15)", APEX_COST_LADDER)
 
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)

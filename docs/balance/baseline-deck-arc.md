@@ -5,6 +5,16 @@ and the immediate top of Balance. It builds directly on
 [`benchmark-set-handoff.md`](benchmark-set-handoff.md) (the problem statement) and the
 `sim/benchmark_set.py` instrument already shipped (commit `659acf9`)._
 
+> **Status — Step 1 DONE (2026-07-13).** The baseline roster is built and locked in
+> `sim/benchmark_set.py` (source of truth). "Basic" was settled as **self-sufficient** (no
+> synergy/tribal/food-state/cost condition to function) — *not* "effectless." Cut the cost-gated
+> apex bombs (borealis/aquila), delayed bears' co-tenants stayed, and the reactive/keyword outliers;
+> `mock_draw2` dropped legendary→rare. Minted 4 controlled mocks: `mock_vanilla_10` (bare body),
+> `mock_flyer_7` (vanilla flyer), `mock_immovable_6` (vanilla wall), `mock_removal` (unconditional
+> "remove an adjacent enemy" — the basic-removal legendary anchor). Legendary tier is now the basic
+> primitives at top dosage: engine (greywhisker) / body (vanilla-10) / reach-body (flyer-7) /
+> removal (mock_removal). Suite green (367). **Next: Step 2 — referee run vs the 7-deck field.**
+
 ## The idea in one paragraph
 
 Introduce a **fixed, neutral reference opponent**: a 30-card deck of solid basic cards with **zero
@@ -33,8 +43,13 @@ is O(decks), not O(decks²) — a walk-away overnight run instead of a brutal fu
   two don't land at equal impact, Flight isn't worth 2 and we re-anchor.
 - **Rare / legendary anchors set by feel, not computed.** The rarity ladder (how much more impact a
   fair legendary is allowed than a fair common — the "rarity premium") is a deliberate *design* call,
-  not a formula. (We considered pinning it to draw-frequency ratios and rejected that in favor of
-  feel.)
+  not a formula. The premium exists because of the **deckbuilding slot budget** — a constructed deck
+  is 18 common / 8 rare / 4 legendary *cards* (the 6×3 / 4×2 / 4×1 "4-4-6" max-copy shape), so a
+  legendary is capped at 4 slots and must earn its scarce seat by being individually more impactful.
+  (NOT because it's drawn less — that's a weaker, secondary effect.) Mechanically the rig flattens
+  rarity (all ×1, equal draw → one unified impact ladder, Lion/Eagle ≈ 0); the per-rarity anchors are
+  the **feel-set target heights on that single ladder**, not separate measurement contexts. The rig's
+  18C/8R/4L singleton composition is itself a legal-shape deck, honoring the 4-legendary cap.
 - **Legendary anchor character is ours to choose** — engine, big body, or reach. Greywhiskers (an
   effect-engine) is a candidate; a "vanilla legendary" (bare str-9/10 body) is an alternative worth
   *testing* rather than assuming (see caveats). Pick the character by feel; let the rig confirm it
