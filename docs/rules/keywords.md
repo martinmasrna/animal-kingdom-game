@@ -23,7 +23,7 @@ sacrifice a Giant Tortoise; that cost is deliberate). It can still be **covered*
 normal placement rules — covering is placement, not an ability. A mass effect (Pestis) skips
 an Immovable occupant **in place** and still removes everything else in the stack; Immovable
 is not a shield for the cards beneath it. Scope is **board-only**: an Immovable card in hand
-can be paid or discarded normally.
+can be paid or removed normally.
 
 Carried by: Giant Tortoise, Scrooge, Methuselah, Bulwark, Elephant.
 
@@ -83,8 +83,8 @@ An effect that resolves when **a unit leaves the board** — the narrow case. **
 "Deathrattle: …"** (not "When this is removed").
 
 **Deathrattle vs. "remove":** a unit leaving the board is one kind of *remove*, but not the
-only one — a card sent to the **Remove Pile** from hand or deck (e.g. Rat's paid card, a
-discard) is a **remove** but **not** a Deathrattle. So there are two trigger tiers: a
+only one — a card sent to the **Remove Pile** from hand or deck (e.g. Rat's paid card, Black
+Swan's hand-remove) is a **remove** but **not** a Deathrattle. So there are two trigger tiers: a
 **remove trigger** (any card → Remove Pile, from anywhere) and the narrower **Deathrattle**
 (a unit leaving the board). See `overview.md` for the Remove Pile zone. A "return … instead"
 effect (e.g. Opossum) is *not* a remove at all — the card never reaches the Remove Pile.

@@ -53,6 +53,6 @@ provisional, str 6→4, threshold 6→4). Shape stays 4-4-6. See `../../balance/
 - **Food numbers** (Egg Eater 10) are new and want sim tuning against region output and `win_food`.
   Vulture's 5/remove is shelved with the card (see `../card-candidates.md`) but its `config.py`
   dial (`vulture_food`/`cap_vulture`) is left in place, dormant, for if it returns.
-- **Black Swan discard:** the opponent removes a random card from their hand into the shared Remove
+- **Black Swan hand-remove:** the opponent removes a random card from their hand into the shared Remove
   Pile using seeded RNG; now hard-capped to the first trigger each turn (card-balance-todo).
 - **Eagle / Raven / Owl** are all Flight birds here; just note for the card-identity decision above.

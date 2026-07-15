@@ -48,7 +48,7 @@ str. See `../../balance/card-balance-todo.md`.
 - **⚠ HQ-adjacency condition — "next to the opponent's base".** Cheetah and Falcon draw when placed adjacent to the enemy HQ. Engine needs an "is this crossroad adjacent to enemy HQ" helper (HQ front-crossroads). Thematically the payoff for the rush plan.
 - **Remove an entire stack** (Plague Rat): "remove ALL units from an adjacent crossroad" — clears a whole crossroad (every unit in the stack), distinct from top-unit removal. New `remove_all_at_crossroad` op. Is it friendly-and-enemy, or enemy-only? ("ALL units" reads as everything — flag.)
 - **Bounce enemy to hand + temporary lock** (Skunk): return an enemy unit to the opponent's hand, and that card "can't be played next turn." Two new things: (a) bounce an enemy unit to enemy hand; (b) a per-card "locked until turn N" status. New.
-- **Discard-from-hand as a cost** (Rat): "remove a card in your hand to destroy an adjacent enemy unit" — pay a hand card → kill adjacent enemy (no strength cap stated). New cost type.
+- **Remove-from-hand as a cost** (Rat): "remove a card in your hand to destroy an adjacent enemy unit" — pay a hand card → kill adjacent enemy (no strength cap stated). New cost type.
 - **Random placement** (Lemming): "place all Lemmings from your hand on random adjacent crossroads" — multi-place using seeded RNG and adjacency (adjacent to what — the placed Lemming? flag).
 - **Generic extra placement** (Jerboa "play another unit", and the swarm chains). Mouse "draw a Rodent" = tag-filtered draw (consistent with Egg/Food/Ramp filtered draws/tutors).
 - **New tag:** `Lizard` (Chameleon).

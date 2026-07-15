@@ -55,7 +55,7 @@ Egg Control) — removed from this list. Vulture (Rare table, below) is shelved 
 | **Giraffe** | — | 5 | May cover enemy units of equal strength. |
 | **Goshawk** | Bird | 4 | Flight. Battlecry: remove an adjacent enemy of strength 2 or less. |
 | **Groundhog** | Rodent | 3 | At the start of your next turn, gain 4 food and draw 1 card. |
-| **Hamster** | Rodent | 1 | Battlecry: draw 2 cards, then discard 1. |
+| **Hamster** | Rodent | 1 | Battlecry: draw 2 cards, then remove 1 from your hand. |
 | **Hare** | Rabbit | 6 | Burrow. |
 | **Honeyguide** | Bird | 1 / 3 | Flight. Battlecry: gain 6 food; if you control a Bear or Colony unit, gain 4 more. |
 | **Honeypot Ant** | Colony | 2 | Deathrattle: gain 16 food. |

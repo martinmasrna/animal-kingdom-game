@@ -52,7 +52,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Complete (2026-06-2
 - **New event `ON_GAIN_STRENGTH`** (unnamed rare: "when this gains strength, …") — fires on buff application; enables buff cascades. Needs a once-per-turn guard (the card states "once a turn").
 - **Removal threshold = own (buffed) strength** (Gray Wolf: "remove an adjacent enemy with less or equal strength" = ≤ this unit's current effective strength). Scales as Gray Wolf is buffed.
 - **Condition on own current strength** (Coyote: "if this has 5+ strength, draw") — reads buffed effective strength at resolution.
-- **Recursion + buff** (hellhound): return a removed Canine from discard to hand, with +2 attached (a hand-buff instance, per above).
+- **Recursion + buff** (hellhound): return a removed Canine from the Remove Pile to hand, with +2 attached (a hand-buff instance, per above).
 - **Food on adjacent removal** (Jackal): any adjacent unit removed → +5 food (friend or enemy — confirm).
 
 ## Flags (resolve in the all-at-once review)

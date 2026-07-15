@@ -43,7 +43,7 @@ Card-type model (Unit/Egg/Landmark) resolved *provisionally* (decision C).
 **Next:**
 1. **Confirm-or-revert the Landmark card-type decision** before `cards.json` hardens (Apex-eats-Landmark flavor wart included).
 2. **Re-examine Immovable** (naming + effect footprint) — flagged 2026-07-02, *gated on referee-quality balance data*.
-3. **Terminology sweep:** "Discard" → "Remove Pile" — canonical docs done (`overview.md`/`keywords.md`); legacy `cards.md`/`card-candidates.md` refs remain.
+3. ✅ **Terminology sweep done (2026-07-15)** — "Discard" → "Remove Pile" across the canonical docs, deck docs, `card-candidates.md`; `cards.json` was already clean. `cards.md` deliberately left: its refs are stale 0.0.1 content, not wording (→ Cards).
 
 ## 2. Cards & Flavor
 _The concrete content: the 7 decks (effects, numbers, names) and their theme. Docs: `cards/`
