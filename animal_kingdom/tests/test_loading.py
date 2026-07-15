@@ -202,7 +202,6 @@ def test_config_defaults_and_sweep():
     cfg = Config.default()
     assert cfg.guard_hornet_colony_threshold == 4
     assert cfg.colony_synergy_threshold == 4
-    assert cfg.costs_20_food == 20
     swept = cfg.sweep(guard_hornet_colony_threshold=5)
     assert swept.guard_hornet_colony_threshold == 5
     assert cfg.guard_hornet_colony_threshold == 4  # original unchanged (frozen)

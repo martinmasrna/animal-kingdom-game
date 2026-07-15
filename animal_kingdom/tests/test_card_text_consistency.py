@@ -25,6 +25,7 @@ from animal_kingdom.engine.config import Config
 
 GAIN_FOOD_RE = re.compile(r"gain (\d+) (?:food|more)", re.IGNORECASE)
 THRESHOLD_RE = re.compile(r"gained (\d+) or more food this turn", re.IGNORECASE)
+COSTS_RE = re.compile(r"costs (\d+) food", re.IGNORECASE)
 
 # card_id -> config attrs, one per "gain N food/more" number in text, in order.
 FOOD_CONSTANTS: dict[str, list[str]] = {
@@ -94,6 +95,35 @@ def test_fed_threshold_text_matches_config():
             assert n == cfg.fed_threshold, (
                 f"{cid}: text threshold {n} != config.fed_threshold {cfg.fed_threshold}"
             )
+
+
+def test_costs_text_matches_food_cost():
+    """A printed "Costs N food" must equal the card's `food_cost` (what effects.py charges).
+
+    Unlike the gain-food numbers above, a placement cost is card-intrinsic: it lives in
+    cards.json next to base_strength, NOT in config.py. A `costs_20_food = 20` constant sat in
+    config until 2026-07-15 — unread by any code, and stale from a27f0df (which cut these bodies
+    to 15). Nothing linked the printed number to the charged one; this does.
+    """
+    mismatches = []
+    for cid, card in _cards().items():
+        printed = [int(n) for n in COSTS_RE.findall(card.text)]
+        if printed and printed[0] != card.food_cost:
+            mismatches.append(f"{cid}: text says Costs {printed[0]} food, food_cost = {card.food_cost}")
+    assert not mismatches, "card text / food_cost desync:\n  " + "\n  ".join(mismatches)
+
+
+def test_no_costed_card_escapes_the_check():
+    """A charged cost must be printed, and a printed cost must be charged — no silent gate."""
+    unprinted, uncharged = [], []
+    for cid, card in _cards().items():
+        printed = COSTS_RE.findall(card.text)
+        if card.food_cost and not printed:
+            unprinted.append(f"{cid}: food_cost={card.food_cost} but text {card.text!r} never says so")
+        if printed and not card.food_cost:
+            uncharged.append(f"{cid}: text {card.text!r} promises a cost but food_cost=0")
+    assert not unprinted, "cost charged but not printed:\n  " + "\n  ".join(unprinted)
+    assert not uncharged, "cost printed but not charged:\n  " + "\n  ".join(uncharged)
 
 
 def test_no_food_card_escapes_the_check():

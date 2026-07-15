@@ -1,6 +1,6 @@
 # Deck: RAMP
 
-Ramp food, then spend it on huge `Costs 20 food` bodies (Bears / Megafauna / big Birds).
+Ramp food, then spend it on huge `Costs 15 food` bodies (Bears / Megafauna / big Birds).
 Landmarks + delayed effects fuel the ramp. 4-4-6 shape (4 legendary ×1, 4 rare ×2, 6 common ×3 = 30).
 Source: user's offline Google Sheet (uploaded 2026-06-28). **Incomplete — has open `?` cells.**
 
@@ -8,9 +8,9 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Incomplete — has 
 | Name | Tag | Str | Effect | Description |
 |---|---|---:|---|---|
 | **Methuselah** | Megafauna | 5 | Immovable. At the end of your turn, gain 5 food. | Colossal ancient tortoise. *(ramp engine + wall)* |
-| **Borealis** | Bear | 10 | Apex Predator. Costs 20 food. | Giant polar bear. |
-| **Aquila** | Bird | 8 | Flight. Apex Predator. Costs 20 food. | Giant harpy eagle. |
-| **Bulwark** | Megafauna | 10 | Immovable. Costs 20 food. Battlecry: remove all adjacent units. | Titanic rhino. *(anti-aggro stomp / fortress finisher; 2026-07-05 nerf: now clears friendly neighbours too — place with care)* |
+| **Borealis** | Bear | 10 | Apex Predator. Costs 15 food. | Giant polar bear. |
+| **Aquila** | Bird | 8 | Flight. Apex Predator. Costs 15 food. | Giant harpy eagle. |
+| **Bulwark** | Megafauna | 10 | Immovable. Costs 15 food. Battlecry: remove all adjacent units. | Titanic rhino. *(anti-aggro stomp / fortress finisher; 2026-07-05 nerf: now clears friendly neighbours too — place with care)* |
 
 ## Rare (×2)
 | Name | Tag | Str | Effect |
@@ -23,7 +23,7 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Incomplete — has 
 ## Common (×3)
 | Name | Tag | Str | Effect |
 |---|---|---:|---|
-| **Elephant** | Megafauna | 8 | Immovable. Costs 20 food. |
+| **Elephant** | Megafauna | 8 | Immovable. Costs 15 food. |
 | **Grizzly Bear** | Bear | 6 | Battlecry: in 2 turns, remove a random adjacent enemy. *(2026-07-05: 7→6 — a common with a str-7 body AND an effect outclassed the vanilla-Lion-7 baseline)* |
 | **Oxpecker** | Bird | 1 | Flight. Gain 1 food for each unit in your starting deck with strength 6 or more. |
 | **Black Bear** | Bear | 5 | Battlecry: in 2 turns, draw 1 card. |
@@ -40,8 +40,8 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Incomplete — has 
 
 ## New mechanics / systems this deck introduces
 - **⚠ `Landmark` card type — NON-ANIMAL cards.** Fig Tree and Watering Hole are not animals (or things that become animals), which contradicts the `cards.md` §2 theme rule ("every card is an animal… no spells or other non-creature cards"). This is a new permitted category (functions like ramp "lands"). **Needs an explicit theme-rule decision** — relax the rule for Landmarks, or re-theme these as animals.
-- **Food as a placement cost at scale:** multiple bodies "Costs 20 food". The ramp loop is: build food → spend on huge units. Same placement-cost gate already scoped for the engine (offer only if food ≥ cost; pay on placement).
-- **`Apex Predator` is a KEYWORD, not vanilla** (corrected 2026-06-28): must be placed on top of another occupant and removes it instead of covering. Carried here by Polar Bear and both giant legendaries (alongside Costs 20). See README decision D for the full keyword + open ambiguities (strength gate, friendly targets, HQ capture).
+- **Food as a placement cost at scale:** multiple bodies "Costs 15 food". The ramp loop is: build food → spend on huge units. Same placement-cost gate already scoped for the engine (offer only if food ≥ cost; pay on placement).
+- **`Apex Predator` is a KEYWORD, not vanilla** (corrected 2026-06-28): must be placed on top of another occupant and removes it instead of covering. Carried here by Polar Bear and both giant legendaries (alongside Costs 15). See README decision D for the full keyword + open ambiguities (strength gate, friendly targets, HQ capture).
 - **New tags:** `Bear`, `Megafauna`, plus `Landmark` (type, above).
 - **Delayed "in 2 turns" effects** (scheduler): Grizzly Bear (remove random adjacent enemy), Black Bear (draw). Landmarks use "at the start of next turn" (1-turn delay).
 - **RNG removal:** Grizzly "remove a *random* adjacent enemy" — seeded RNG, reproducible.
@@ -53,6 +53,6 @@ Source: user's offline Google Sheet (uploaded 2026-06-28). **Incomplete — has 
 - **Landmark / non-animal theme decision** — the headline item above.
 - **Finish the 3 open cards** (2 legendaries + Rhinoceros).
 - **Legendary names** — provisional (Methuselah / Borealis / Aquila / Bulwark, assigned 2026-06-30; flavor-lock pending). **Borealis** (giant polar bear) is deliberately distinct from the common **Polar Bear** (named-individual pattern).
-- **Food cost vs food win tension:** food is both the ramp fuel (pay 20-costs) and a win condition (100). Worth watching in sim — is the deck ever incentivized to hoard to 100 vs spend? Likely fine, just noting.
+- **Food cost vs food win tension:** food is both the ramp fuel (pay the 15-costs) and a win condition (100). **Sharper than "just noting" (revisited 2026-07-15):** the 6 costed copies total **90 food against a 100 win**, so the deck can deploy its payoffs *or* threaten the food win — not both. At the originally-designed 20 it was 120 vs 100, i.e. unaffordable in full; `a27f0df`'s cut to 15 is what relieved that. Feeds Decision H.
 - **"In 2 turns" timing:** counted in the actor's turns (resolves at the start of your turn after next)? Align with the existing scheduler convention.
 - **Andean Condor info reveal:** revealing opponent's top card is public information for that moment — confirm the per-seat view exposes it correctly and the RNG/deck order stays deterministic.

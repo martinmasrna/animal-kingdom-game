@@ -237,19 +237,19 @@ pick a real vivid bird, e.g. Scarlet Ibis or Golden Pheasant):
   taken literally, and quietly funny.
 - **Aldabra** — the giant-tortoise atoll/species name; evocative and unmistakably tortoise.
 
-**Giant polar bear** (Bear 10, Apex Predator, Costs 20):
+**Giant polar bear** (Bear 10, Apex Predator, Costs 15):
 - **Borealis** — of the far north; cold grandeur.
 - **Tundra** — the white waste made flesh; blunt and big.
 - **Whiteclaw** — a descriptive individual-name for the white giant. *(Avoided "Nanook" — that's a
   folklore bear-spirit, borderline cite.)*
 
-**Giant harpy eagle** (Bird 8, Flight, Apex Predator, Costs 20):
+**Giant harpy eagle** (Bird 8, Flight, Apex Predator, Costs 15):
 - **Aquila** — Latin for eagle (and the constellation); clean, soaring, no myth-creature.
 - **Tempest** — the storm that drops out of the sky; matches the Apex dive.
-- **Skyrender** — descriptive epithet-name for a 20-cost sky predator. *(Avoided "Roc" — direct
+- **Skyrender** — descriptive epithet-name for a costed sky predator. *(Avoided "Roc" — direct
   giant-bird myth.)*
 
-**Titanic rhino** (Megafauna 10, Immovable, Costs 20, removes all adjacent; fortress finisher):
+**Titanic rhino** (Megafauna 10, Immovable, Costs 15, removes all adjacent; fortress finisher):
 - **Bulwark** — a living rampart; perfect for the Immovable stomp-wall.
 - **Bastion** — the fortress that also flattens its surroundings.
 - **Rampart** — same fortress register, slightly more aggressive. *(Avoided "Behemoth/Juggernaut" —

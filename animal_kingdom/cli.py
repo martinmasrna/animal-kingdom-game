@@ -50,7 +50,7 @@ _DECK_BLURBS = {
     "cats_midrange": "mono-Cat tempo / removal",
     "egg_control": "Snake/Bird/Egg draw-shuffle-remove into food",
     "colony_food_swarm": "mono-Colony swarm into food",
-    "ramp": "ramp food into huge 'Costs 20' bodies",
+    "ramp": "ramp food into huge 'Costs 15' bodies",
     "food_otk": "sacrifice + Deathrattle food OTK",
     "aggro_hq_rush": "cheap chained bodies + reach to capture the HQ",
     "canine_buff_tempo": "mono-Canine persistent strength buffs",

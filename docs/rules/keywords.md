@@ -95,8 +95,9 @@ effect (e.g. Opossum) is *not* a remove at all — the card never reaches the Re
 
 ### Costs X food  *(placement cost)*
 A printed cost, handled by the engine, not a keyword. The placement is offered only if the
-controller has ≥ X food; X food is paid on placement. (e.g. Ramp's `Costs 20 food` bodies,
-some legendaries.)
+controller has ≥ X food; X food is paid on placement. (e.g. Ramp's `Costs 15 food` bodies,
+some legendaries.) X is card-intrinsic — `food_cost` in `cards.json`, next to `base_strength` —
+not a `config.py` constant; tune it there.
 
 ### Strength modifiers  *(card-text convention, not a keyword)*
 Card text grants strength two ways, **distinguished by the verb** — this reading is binding:

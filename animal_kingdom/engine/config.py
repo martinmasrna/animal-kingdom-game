@@ -100,7 +100,10 @@ class Config:
     hippopotamus_max: int = 3
 
     # --- Placement costs (decision F) ---
-    costs_20_food: int = 20              # the "Costs 20 food" bodies (Borealis/Aquila/Bulwark/Elephant)
+    # NOTE: there is deliberately no constant here. A printed "Costs X food" is a card-intrinsic
+    # field (`food_cost` in cards.json, gated in effects.py), like base_strength - tune it there.
+    # A vestigial `costs_20_food = 20` lived here until 2026-07-15, unread by any code and stale
+    # since a27f0df cut those bodies to 15; it could only mislead a Decision H re-derivation.
 
     # --- Delayed / multi-turn effects (scheduler; "your turns" are 2 apart) ---
     egg_hatch_delay: int = 2             # Bird/Snake Egg: turns until hatch
