@@ -1,6 +1,6 @@
 # Code Health — Backlog
 
-Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Cross-cutting code quality across Engine + Bots + CLI + sim (subsystem-local work stays in those areas).
+Open items only. The first systematic pass is complete; see the [review](review-2026-07-15.md), durable [tech-debt register](tech-debt-register.md), observed [conventions](conventions.md), and [effect/data inventory](effect-data-inventory-2026-07-15.md). Cross-cutting quality work lives here; subsystem fixes proposed by the review belong in their owning area backlogs.
 
-- [ ] **Full code-review pass across the whole repo.** The first systematic quality pass. Codebase is milestone-built (M0–M6) with a green suite (260 passing) and a deliberate architecture (data / config / effect-registry split, pure stdlib engine) — but has never been audited end-to-end.
-- [ ] **Code conventions + a tech-debt register.** Write down conventions (naming, structure, testing) and start a tracked tech-debt list so known seams — e.g. the `UnitInstance` object model → struct-of-arrays switch (`../engine/backlog.md`) — are captured, not rediscovered.
+- [ ] **Close the cross-cutting text/config consistency gap.** Establish and enforce one representation/guard policy for every printed numeric card effect; the review found hard-coded non-food values outside the guard.
+- [ ] **Define the engine purity boundary and add boundary-level contracts.** Decide the loader-I/O exception (or move it), then prioritize action-validation, checkpoint-identity, and CLI/analysis smoke coverage with the owning areas.
