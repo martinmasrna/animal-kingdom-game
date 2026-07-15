@@ -6,6 +6,8 @@
 
 This is a design proposal only. Names, strength values, and exact wording are provisional; nothing below is ready to ship. It does not authorize a deck, data, engine, configuration, or bot change.
 
+> **TODO — designer manual review:** Review every larger-pool candidate below before any implementation. For each one, name the closest existing comparator(s), reject practical upgrades and redundant variants, and choose only the small subset that merits a 30-card test list.
+
 ## Governing facts and scope
 
 The current game is two actions per turn, with a Draw action drawing two cards. A unit captures the HQ immediately when placed there; normal placement needs a connected chain, while Flight only ignores that connection for the flying unit. Strength is relevant to covering and holding a crossroad, not to dealing damage. These are the constraints for this proposal, not the historical draw-1 assumptions in the earlier Aggro redesign document. See the [mental model](../rules/mental-model.md#the-whole-system-in-one-breath) and its [connection and strength rules](../rules/mental-model.md#the-board-is-a-graph-placement-is-gated-by-connection).
@@ -101,6 +103,71 @@ The long-term pool may expand to at most **6 legendaries, 12 rares, and 18 commo
 | Neutral support | alternate Rodent consistency, stack-flex cards, limited flyers | Must improve a real action/pathing role in Aggro without being an automatic inclusion in slow decks. |
 
 Starling and any other multi-flyer extra-placement burst are explicitly held behind a two-card and three-card HQ-capture search. The expansion queue already identifies that risk, as well as the empty-only requirement for Burrow ([expansion to-do, Aggro alternatives](expansion-design-todo.md#16-aggro--alternative-rush-packages)).
+
+### Full candidate reservoir — manual-review list
+
+The following is the full larger-pool whiteboard: **6 legendary, 12 rare, and 18 common candidates**. It is a reservoir of mutually competing options, not a 36-card deck and not a promise to implement every row.
+
+For a chain condition, “two or more other units were placed this turn” excludes the candidate itself and includes free placements. A free placement is hand-only unless the card says otherwise; every such effect below excludes the enemy HQ. Strength values are starting hypotheses only.
+
+#### Legendary — 6
+
+| Card | Provisional text / role | Closest existing comparison |
+|---|---|---|
+| **Verminus** | Keep: STR 3, gains strength per other friendly unit. Neutral swarm finisher. | Existing Verminus |
+| **Warren General** | STR 5. At the start of your turn, if a friendly unit is HQ-front, place a Rodent from hand for free on an empty non-HQ crossroad adjacent to it. | Jerboa; delayed but front-gated |
+| **King Ratbeard** | STR 5. Other Rodents gain strength while your hand is empty. All-in swarm capstone. | Verminus and existing anthem cards |
+| **Plague Warden** | STR 8. May cover an enemy adjacent to the enemy HQ regardless of strength; after doing so, remove other adjacent enemy units. | Weasel; strictly HQ-front and legendary |
+| **Sirocco rework** | STR 6. If placed on a friendly HQ-front unit, return adjacent enemies to hand and lock them through their next turn. | Skunk; larger but requires an earned front |
+| **Rufus, the Warren King** | STR 6. If two other Rodents were placed this turn, play up to two Rodents from hand onto empty non-HQ crossroads adjacent to Rufus, ignoring connection. | Jerboa and Prairie Dog; requires an explicit burst audit |
+
+#### Rare — 12
+
+| Card | Provisional text / role | Closest existing comparison |
+|---|---|---|
+| **Jerboa** | Keep: STR 2, play another unit. | Existing Jerboa |
+| **Chameleon** | Keep as neutral stack-flex. | Existing Chameleon |
+| **Weasel** | STR 5. May cover any-strength enemy only when it is HQ-front. | Chameleon |
+| **Skunk rework** | STR 5. If you control an HQ-front unit, bounce an adjacent enemy and lock it. | Existing Skunk |
+| **Vanguard Vole** | STR 5. Whenever you place a unit HQ-front, this gains +2 strength wherever it is. | Rattlesnake-style growth; must prove it is not just a generic scaler |
+| **Springhare** | STR 5. Burrow. If placed HQ-front, draw 1. | Scout, Falcon, Mole |
+| **Gundi** | STR 8. May only be placed on an empty non-HQ crossroad adjacent to an enemy, ignoring connection, if two other Rodents were placed this turn. | Gecko; harder placement fence buys the body |
+| **Mongoose** | STR 5. If you control an HQ-front unit, clear an adjacent enemy’s effects and keywords. | Chameleon and anti-wall tech; no generic removal |
+| **Hornet rework** | STR 5, Flight. If two other units were placed, clear an adjacent enemy’s effects and keywords. | Mongoose; Flight is offset by the chain gate |
+| **Shrike** | STR 5, Flight. If you control an HQ-front unit, return an adjacent enemy of STR 4 or less to hand. | Skunk and Bombardier Beetle |
+| **Secretarybird** | STR 5, Flight. If two other units were placed, remove an adjacent enemy of STR 4 or less. | Scurry; Flight changes targeting, chain gate prevents generic removal |
+| **Bombardier Beetle** | STR 5. Return an adjacent enemy of STR 4 or less to hand. | Skunk; neutral capped interaction, no lock |
+
+#### Common — 18
+
+| Card | Provisional text / role | Closest existing comparison |
+|---|---|---|
+| **Lemming** | Keep: width and chained placement. | Existing Lemming |
+| **Mouse** | Keep: random Rodent consistency. | Existing Mouse |
+| **Cheetah rework** | STR 6. Draw 1 if you control another HQ-front unit. | Scout and Falcon |
+| **Sapper Mole** | STR 9. Can only be placed adjacent to an enemy unit or enemy HQ. | Lion 7 |
+| **Ratcatcher** | STR 5. If friendly HQ-front exists, draw two random Rodents. | Scout |
+| **Scurry** | STR 2. If two other units were placed, remove an adjacent enemy up to its eventual tested cap. | Serval and Soldier Ant |
+| **Gambian Pouched Rat** | STR 5. If two other units were placed, draw two random Rodents. | Scout; chain-gated refill |
+| **Mara** | STR 5. Has +4 strength while two other units were placed this turn. | Lion; a one-turn cover tool, not a persistent wall |
+| **Mole** | STR 6. Burrow. | Cougar; empty-only reach |
+| **Gecko** | STR 6. May be placed on an empty crossroad adjacent to an enemy, ignoring connection. | Cougar and Mole |
+| **Starling** | STR 2, Flight. If another friendly flyer exists, play another flyer from hand. | Jerboa and Bat; held behind capture-combo audit |
+| **Cornered Rat** | STR 5. Has +4 strength while you have one or fewer cards in hand. | Lion and King Ratbeard |
+| **Bat rework** | STR 3, Flight. Draw 1 only if you control another HQ-front unit. | Bat, Falcon, and Scout |
+| **Hare** | STR 6. Burrow. Alternate non-Rodent empty-crossroad reach body. | Mole |
+| **Warthog** | STR 8. Can only be placed adjacent to an enemy unit or enemy HQ. Neutral front-only body. | Lion and Sapper Mole |
+| **Gopher** | STR 6. May cover an equal-strength enemy only if two other Rodents were placed this turn. | Weasel and equal-cover statics |
+| **Agouti** | STR 5. If two other Rodents were placed, remove an adjacent enemy of STR 7 or more. | Serval; chain-gated answer to a large wall |
+| **Prairie Dog** | STR 5. If two other Rodents were placed, play a Rodent from hand onto an empty non-HQ crossroad adjacent to this, ignoring connection. | Jerboa; chain-only Rodent extension |
+
+### Deliberate pruning rules
+
+- The chain package is Scurry, Gambian Pouched Rat, Mara, Gopher, Agouti, Prairie Dog, and Rufus. It must not become seven automatic inclusions.
+- The HQ-front package is General, Weasel, Skunk, Ratcatcher, Cheetah, Shrike, and Mongoose. A constructed list should normally choose only a few.
+- Mole, Gecko, Hare, Springhare, and Gundi are competing empty-crossroad/reach designs. Test at most one or two in a list.
+- Verminus, Chameleon, Lemming, Mouse, Bombardier Beetle, and Warthog are the neutral-support choices. Their combined slots, not merely their distinct names, must remain near the 30% support budget.
+
 
 ## RPS hypothesis
 
