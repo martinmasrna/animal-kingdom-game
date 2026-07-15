@@ -20,9 +20,8 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Deck source of
     ruling instead: cover it with a 4+ and the timer suspends. Keep STR < 6 so it doesn't feed
     Oxpecker. **Depends on [`../rules/timed-effect-ruling.md`](../rules/timed-effect-ruling.md)
     landing first** — under today's engine a non-Fragile timed payout cannot be stopped at all.
-  - **Number still open (20 vs 15):** ramp is 59% vs the field. Holding its economy flat wants ~17
-    each (Oxpecker's 54 + 51 ≈ today's 105); 20 → 114 is a buff, 15 → 99 a slight cut. Ramp's
-    per-card table from the benchmark run should settle whether Fig Tree carries or drags first.
+  - **Number: 20 food — decided 2026-07-15.** Recorded for whoever implements it: with Cape Buffalo
+    lifting Oxpecker to 54, 3×20 = 60 puts ramp's food economy at ~114 against ~105 today.
   - **Tribe:** a sloth is none of ramp's Megafauna/Bear/Bird. Costs nothing mechanically — **no card
     in ramp references a tribe** (all 14 checked); the tags are pure identity. Untagged does collide
     with the generic-tag flavor item below.
