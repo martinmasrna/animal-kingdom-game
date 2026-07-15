@@ -58,16 +58,22 @@ def _kw(card) -> str:
             .replace("Apex Predator", "apex").replace("Immovable", "immov").replace("Flight", "fly"))
 
 
-def _fold(records) -> dict:
-    """Reduce one matchup's game records to the additive tallies the report needs."""
+def _fold(records, seat: str = "A") -> dict:
+    """Reduce one matchup's game records to the additive tallies the report needs.
+
+    `seat` picks whose result/cards to tally: "A" = the baseline rig (default), "B" = the field
+    (synergy) deck. In `run_pairs([("baseline", f)], ...)` the baseline is always seat A and the
+    field deck always seat B (the mover split uses first_player, not a seat swap), so seat "B"
+    cleanly reads the synergy deck's per-card impact vs the baseline."""
+    drawn_attr = "cards_drawn_a" if seat == "A" else "cards_drawn_b"
     n = 0
     credit = 0.0
     cards: dict[str, list] = defaultdict(lambda: [0.0, 0])  # cid -> [win-credit-when-drawn, drawn]
     for r in records:
-        cr = r.credit("A")
+        cr = r.credit(seat)
         n += 1
         credit += cr
-        for cid in r.cards_drawn_a:
+        for cid in getattr(r, drawn_attr):
             cards[cid][0] += cr
             cards[cid][1] += 1
     return {"n": n, "credit": credit, "cards": {k: v for k, v in cards.items()}}
@@ -99,7 +105,12 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--checkpoint", type=Path,
                    help="checkpoint file for crash-safe resume "
                         "(default: results/benchmark_set/<pilot>_g<games>[_<config>].ckpt.json)")
+    p.add_argument("--measure", choices=("self", "opponent"), default="self",
+                   help="whose per-card impact to report: 'self' = the baseline rig (default), "
+                        "'opponent' = each field/synergy deck's own cards, measured vs the baseline "
+                        "(the step-5 read: which cards carry/drag each deck against the ruler)")
     args = p.parse_args(argv)
+    seat = "A" if args.measure == "self" else "B"
 
     config = load_config_overrides(args.config)
 
@@ -116,10 +127,13 @@ def main(argv: Sequence[str] | None = None) -> None:
     cards = load_cards()
 
     cfg_tag = f"_{Path(args.config).stem}" if args.config else ""
-    ckpt_path = args.checkpoint or Path(f"results/benchmark_set/{args.pilot}_g{args.games}{cfg_tag}.ckpt.json")
+    measure_tag = "" if args.measure == "self" else "_opp"
+    ckpt_path = args.checkpoint or Path(
+        f"results/benchmark_set/{args.pilot}_g{args.games}{cfg_tag}{measure_tag}.ckpt.json")
     # This run's identity — a resumed checkpoint must match all of it, else the samples don't compose.
     run_key = {"pilot": args.pilot, "games": args.games, "base_seed": args.base_seed,
-               "field": sorted(field), "deck": DECKLIST, "config": str(args.config)}
+               "field": sorted(field), "deck": DECKLIST, "config": str(args.config),
+               "measure": args.measure}
 
     matchups: dict[str, dict] = {}
     if ckpt_path.exists():
@@ -151,7 +165,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         recs = run_pairs([("baseline", f)], args.games, seed,
                          bots=(args.pilot, args.pilot), config=config, jobs=args.jobs,
                          game_progress=on_game)
-        agg = _fold(recs)
+        agg = _fold(recs, seat)
         matchups[f] = agg
         _write_json_atomic(ckpt_path, {"run_key": run_key, "matchups": matchups})
         print(f"\r  [{len([x for x in field if x in matchups])}/{len(field)}] vs {f:<22} "
@@ -167,6 +181,37 @@ def main(argv: Sequence[str] | None = None) -> None:
         for cid, (w, n) in m["cards"].items():
             drawn[cid][0] += w
             drawn[cid][1] += n
+
+    if args.measure == "opponent":
+        # Each field/synergy deck's OWN cards, ranked by impact vs the baseline (the 0 line is
+        # that deck's win rate vs baseline). One table per deck (their card lists differ).
+        rmap = {"common": "C", "rare": "R", "legendary": "L"}
+        print(f"\nsynergy-deck win rate vs the baseline (pilot {args.pilot}):")
+        for f, wr in sorted(rates.items(), key=lambda kv: -kv[1]):
+            print(f"  {f:<22} {wr:.1%}  ({'beats baseline' if wr > 0.5 else 'loses'})")
+        csv_rows = []
+        for f in sorted(field, key=lambda x: rates[x]):
+            fwr, fn = rates[f], matchups[f]["n"]
+            ftab = sorted(((cid, (w / n if n else float("nan")), (w / n if n else float("nan")) - fwr, n)
+                           for cid, (w, n) in matchups[f]["cards"].items()), key=lambda t: -t[1])
+            print(f"\n{f} vs baseline = {fwr:.1%}  ({fn} games) - per-card impact:")
+            print(f"  {'#':>2} {'card':<20}{'R':<2}{'STR':<4}{'kw':<12}{'impact':>8}{'wwd':>8}{'draw%':>7}")
+            for i, (cid, wwd, impact, n) in enumerate(ftab, 1):
+                c = cards[cid]
+                print(f"  {i:>2} {c.name:<20}{rmap.get(getattr(c, 'rarity', ''), '?'):<2}"
+                      f"{str(c.base_strength):<4}{_kw(c):<12}{impact:+7.1%} {wwd:6.1%} {n/fn:6.0%}")
+                csv_rows.append([f, i, cid, c.name, getattr(c, "rarity", ""), c.base_strength,
+                                 _kw(c), n, round(n / fn, 4), round(wwd, 4), round(impact, 4)])
+        if args.out:
+            args.out.parent.mkdir(parents=True, exist_ok=True)
+            with args.out.open("w", newline="") as fh:
+                w = csv.writer(fh)
+                w.writerow(["deck", "rank", "card_id", "name", "rarity", "strength", "keywords",
+                            "drawn_games", "draw_rate", "win_rate_when_drawn", "impact"])
+                w.writerows(csv_rows)
+            print(f"\nwrote {args.out}", file=sys.stderr)
+        print(f"(checkpoint: {ckpt_path})", file=sys.stderr)
+        return
 
     print(f"\nrig win rate vs field (pilot {args.pilot}):")
     for f, wr in sorted(rates.items(), key=lambda kv: kv[1]):
