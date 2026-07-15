@@ -4,6 +4,35 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Deck source of
 
 > **Build #5 (rebuild `data/cards.json` + the effect registry from the deck files) is DONE** — `cards.json` carries the reworked pool and the full test suite runs on it. Remaining card work is flavor + text cleanup below.
 
+## Landmark cut (decided 2026-07-15) — pending execution
+
+- [ ] **★ Cut Fig Tree + Watering Hole; add ramp's 2 replacement commons.** The game commits to
+  animals only (Rules decision, see [`../rules/backlog.md`](../rules/backlog.md)). **Blocked on the
+  in-flight benchmark run** — `cards.json` must not change mid-run (workers reload it, and the rig's
+  `run_key` doesn't fingerprint card data). Agreed replacements, both `ramp` commons ×3:
+  - **Cape Buffalo** (Megafauna, STR 7, vanilla) — replaces Watering Hole, whose tutor-a-6+ job died
+    when Draw went to 2 cards. ⚠ **Not inert:** STR 7 clears Oxpecker's ≥6 threshold, so ramp's
+    count goes 15→18 and Oxpecker's output 45→54 without Oxpecker being touched.
+  - **Sloth** (no tag, STR 3) — *"In 2 turns, gain 20 food."* Replaces Fig Tree's burst-food job.
+    Flavor = slow digestion (~a month to digest a leaf), not hibernation. **No Fragile** (sloths
+    aren't fragile) and **no Immovable** (it would make the payout unanswerable *and* shadow
+    Methuselah — legendary, STR 3, Immovable, 5 food/turn). Counterplay comes from the timed-effect
+    ruling instead: cover it with a 4+ and the timer suspends. Keep STR < 6 so it doesn't feed
+    Oxpecker. **Depends on [`../rules/timed-effect-ruling.md`](../rules/timed-effect-ruling.md)
+    landing first** — under today's engine a non-Fragile timed payout cannot be stopped at all.
+  - **Number still open (20 vs 15):** ramp is 59% vs the field. Holding its economy flat wants ~17
+    each (Oxpecker's 54 + 51 ≈ today's 105); 20 → 114 is a buff, 15 → 99 a slight cut. Ramp's
+    per-card table from the benchmark run should settle whether Fig Tree carries or drags first.
+  - **Tribe:** a sloth is none of ramp's Megafauna/Bear/Bird. Costs nothing mechanically — **no card
+    in ramp references a tribe** (all 14 checked); the tags are pure identity. Untagged does collide
+    with the generic-tag flavor item below.
+- [ ] **~20 candidate entries lapse with the cut.** 14 Landmark candidates (Antivenom Grove, Carcass,
+  Fallen Log, Fossil Bed, Kelp Forest, Salt Lick, Termite Mound, Tool Cache, Baobab Tree, Cave, Coral
+  Reef, Nesting Ground, Royal Jelly, Warren) + 6 cards that only work if Landmarks exist (Capuchin,
+  Clownfish, Fishing Cat, Moose, Beaver, Orangutan). Decide: strike them, or park them with the Ice
+  Age set. One of them (a bear den — "draw a random Bear; your Bears cost 5 less food") was built for
+  ramp and is worth re-casting as an animal.
+
 ## Expansion and constructed play
 
 - [ ] **Re-audit every noncanonical candidate for the no-mana economy before promotion.** The

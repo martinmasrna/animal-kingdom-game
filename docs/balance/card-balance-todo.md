@@ -50,5 +50,15 @@ No locked changes waiting to be made.
 
 ## Bug Fixes
 
-- chipmunk works when covered as well?
-- skunk makes all the instance unplayable, not just the one that was returned
+- ~~chipmunk works when covered as well?~~ **CONFIRMED + generalised 2026-07-15 → ruled, see
+  [`../rules/timed-effect-ruling.md`](../rules/timed-effect-ruling.md).** You were right, and it's
+  worse than covered: Chipmunk schedules its second payout with **no reference to the unit at all**,
+  so it fires even when Chipmunk is *destroyed*. Not a Chipmunk bug — the same hole hits **Black Bear
+  and Chinchilla** (also no `iid`) and **Grizzly Bear** (has one, but `_find_unit` scans the whole
+  stack, so it strikes while buried). Eggs/Fig Tree/Watering Hole only look correct because they're
+  Fragile. Ruling: a timer advances only while its unit is top-of-stack; removal cancels; bounce
+  resets. Engine work → [`../engine/backlog.md`](../engine/backlog.md). Nerfs Chipmunk + Chinchilla,
+  both food_otk's (already weakest ~38%) — re-balance *after* the fix, don't bend the rule.
+- skunk makes all the instances unplayable, not just the one that was returned — **still open**, and
+  a genuinely separate bug (hand-state keyed by card id rather than instance, most likely). Not
+  covered by the timed-effect ruling.

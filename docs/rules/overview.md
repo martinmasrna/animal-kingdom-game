@@ -112,7 +112,8 @@ When a unit is placed on an occupied base, it is added to the top of the existin
 - occupies the crossroad;
 - contributes to connection;
 - can normally be selected by effects;
-- determines the crossroad's current owner.
+- determines the crossroad's current owner;
+- advances its pending timed effects (§9.1).
 
 When a visible unit is removed, the unit underneath becomes visible and immediately determines control of the crossroad.
 
@@ -145,6 +146,32 @@ reaction that has been queued **fizzles if the unit it belongs to is no longer o
 would resolve** — so a fed Muskrat placed next to an enemy Hippopotamus removes the Hippo with its
 Battlecry first, and the Hippo's queued removal then does nothing; the Muskrat survives. (An unfed
 Muskrat has no Battlecry removal, so the Hippo removes it as normal.)
+
+## 9.1 Timed effects ("in N turns")
+
+Some effects resolve on a delay — "in 2 turns, draw 2 cards" (Black Bear), "at the start of next
+turn, gain 10 more" (Chipmunk). **The timer belongs to the unit, not to the board**, and obeys the
+same top-of-stack principle as everything else (§7.1):
+
+- **The timer advances only while the unit is the topmost unit of its crossroad.** A buried unit
+  *waits* — its timer is **suspended, not lost** — and resumes advancing if it becomes visible
+  again. A unit that stays buried never pays out. So covering a timed unit is real counterplay
+  (it buys time, and denies the payout entirely for as long as the cover holds), but clearing the
+  coverer gives the payout back.
+- **Removal cancels the effect outright.** A unit sent to the Remove Pile is gone, not waiting; its
+  pending effect never resolves. (A **Fragile** unit is removed *by* being covered, so for Fragile
+  cards covering and cancelling are the same event — this is why Fig Tree's 20 food is a gamble.)
+- **Returning a unit to a hand resets its timer.** A replayed unit starts a fresh timer; it never
+  resumes a partly-elapsed one.
+
+This is the same principle as the reaction-fizzle rule above: anything queued re-checks its unit
+before it resolves. Covering is placement, not an ability, so neither **Immovable** nor **Stealth**
+protects a timer — only strength (being hard to cover) does.
+
+> ⚠ **Ruled 2026-07-15; the engine does not implement this yet.** Today the scheduler books an
+> absolute fire-turn and mostly forgets the unit: Chipmunk/Black Bear/Chinchilla pay out even when
+> destroyed, and Grizzly Bear strikes from under a stack. See [`backlog.md`](backlog.md) and
+> [`timed-effect-ruling.md`](timed-effect-ruling.md).
 
 ---
 
