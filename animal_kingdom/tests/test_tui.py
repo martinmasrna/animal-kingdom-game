@@ -59,11 +59,6 @@ def test_tui_80x24_keyboard_draw_and_annotations(tmp_path):
         async with app.run_test(size=(80, 24)) as pilot:
             await pilot.pause()
             assert app.session is not None and app.session.human_turn
-            status = str(app.query_one("#status", Static).content)
-            assert "Your turn" in status
-            assert "You 0/100 food" in status
-            assert "Opponent 0/100" in status
-            assert "2 actions" in status
             board = app.query_one(BoardWidget)
             assert board.board_render is not None
             assert board.board_render.width <= board.size.width
@@ -105,13 +100,6 @@ def test_tui_80x24_keyboard_draw_and_annotations(tmp_path):
             assert "Choose a highlighted location" in str(
                 app.query_one("#notice", Static).content
             )
-            selected_prompt = str(app.query_one("#notice", Static).content)
-            assert "Legal empty crossroad" in selected_prompt
-            assert any(reason in selected_prompt for reason in (
-                "connected to your HQ chain",
-                "Flight ignores connection",
-                "card effect grants reach beyond connection",
-            ))
             await pilot.press("escape")
             await pilot.pause()
             assert app.selected_card is None

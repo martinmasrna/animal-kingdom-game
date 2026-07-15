@@ -574,6 +574,7 @@ class RecorderApp(App[None]):
     .layout-inspector DeckTracker { display: none; }
     .layout-trackers #side { display: none; }
     .height-compact DeckTracker,
+    .height-compact #status,
     .height-compact #opponent,
     .height-compact #footer { display: none; }
     """
@@ -751,28 +752,6 @@ class RecorderApp(App[None]):
             f"{action_text}"
         )
 
-    def _status_summary(self, phase: str, opponent: str) -> str:
-        """One-line turn and win-race state that survives the compact layout."""
-        assert self.session is not None
-        state = self.session.state
-        human = self.session.setup.human_seat
-        target = state.game_map.win_food
-        summary = (
-            f"[bold]{phase}[/bold] · Turn {state.turn_counter + 1}"
-            f" · You {state.food[human]}/{target} food"
-            f" · Opponent {state.food[opponent]}/{target}"
-        )
-        if (
-            self.session.result is None
-            and state.player_to_act() == human
-        ):
-            remaining = max(
-                0,
-                state.config.actions_per_turn - state.actions_taken_this_turn,
-            )
-            summary += f" · {remaining} action{'s' if remaining != 1 else ''}"
-        return summary
-
     def refresh_game(self) -> None:
         session = self.session
         if session is None:
@@ -810,10 +789,9 @@ class RecorderApp(App[None]):
             phase = "Your turn"
         else:
             phase = "Opponent turn"
-        status = self._status_summary(phase, opponent)
-        if self.size.width >= 110:
-            status += cohort_text
-        self.query_one("#status", Static).update(f"{status}{invalid}")
+        self.query_one("#status", Static).update(
+            f"[bold]{phase}[/bold] · Turn {state.turn_counter + 1}{cohort_text}{invalid}"
+        )
 
         self.query_one("#opponent", Static).update(
             f"{self._food_progress(state, opponent)}"
@@ -924,53 +902,10 @@ class RecorderApp(App[None]):
             prompt = f"Resolve effect · Choose {board_hint}an option below"
         elif self.selected_card:
             card_name = escape(state.cards[self.selected_card].name)
-            focused = self.target_order[self.target_index] if self.target_order else None
-            detail = self._target_hint(focused) if focused else None
             prompt = f"Place [bold]{card_name}[/bold] · Choose a highlighted location"
-            if detail:
-                prompt += f" · {detail}"
         else:
             prompt = "Choose a card from your hand or draw"
         self.query_one("#notice", Static).update(f"{prompt}  ·  {self._player_summary()}")
-
-    def _target_hint(self, target: tuple[str, str] | None) -> str:
-        """Explain the focused legal placement without turning every board node into text."""
-        assert self.session is not None
-        if target is None or self.selected_card is None:
-            return "Choose a highlighted location"
-        state = self.session.state
-        human = self.setup.human_seat
-        kind, value = target
-        if kind == "hq":
-            return "Legal target · Capture the enemy HQ and win immediately"
-
-        card = state.cards[self.selected_card]
-        top = state.top_unit(value)
-        if top is None:
-            if "Flight" in card.keywords:
-                reason = "Flight ignores connection"
-            elif state.is_connected(human, value):
-                reason = "connected to your HQ chain"
-            else:
-                reason = "card effect grants reach beyond connection"
-            return f"Legal empty crossroad · {reason}"
-
-        if "Apex Predator" in card.keywords:
-            return "Legal apex landing · its effect may remove the top unit"
-        if top.owner == human:
-            return "Legal stack on your unit · no strength check"
-
-        placer = max(
-            (unit for unit in state.hands[human] if unit.card_id == self.selected_card),
-            key=lambda unit: unit.strength_counter,
-        )
-        own_strength = strength_mod.placement_strength(state, placer)
-        enemy_strength = strength_mod.effective_strength(state, top)
-        return (
-            "Legal cover · "
-            f"your STR {own_strength} / opponent top STR {enemy_strength} · "
-            "their unit is buried"
-        )
 
     def _recording_link(self, label: str | None = None) -> str:
         assert self.session is not None
