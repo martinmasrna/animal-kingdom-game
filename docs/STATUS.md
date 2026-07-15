@@ -141,7 +141,11 @@ inspector rail, responsive hand shelf / deck trackers / food bars, in-app JSONL 
 — all kept working at the compact 80×24 layout.
 
 **Next:**
-1. **Full general-purpose TUI** (`textual`, beyond the recorder) — *parked*; revisit when `rich` feels limiting.
+1. **Recorder TUI reassessment** — the existing Textual screen needs a fresh real-terminal
+   usability and visual-quality review before any broader general-UI work. Revisit information
+   density, layout hierarchy, board legibility, and compact behavior from the player's perspective;
+   do not treat the 2026-07-04 pass as sufficient evidence of quality.
+2. **Full general-purpose TUI** (`textual`, beyond the recorder) — *parked*; revisit when `rich` feels limiting.
 
 _Visual-polish pass done (commit `7d1b961`): dimmed empties, held-region chips, food progress bars, tighter cards, first renderer test._
 
