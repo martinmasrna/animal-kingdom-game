@@ -303,7 +303,12 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     if w.pending_payoff:
         pending = 0.0
         for s in state.scheduled:
-            disc = 1.0 / (1.0 + max(0, s["due"] - state.turn_counter))
+            # `remaining` counts the OWNER's remaining turns; discount by the horizon in global
+            # turns, as this term has always done. The owner's turns are 2 apart, less one if they
+            # are not the player to move (their next turn is already one tick away). Equals the
+            # pre-2026-07-15 `due - turn_counter` exactly - this term's 20.0 was tuned to that.
+            horizon = 2 * max(0, s["remaining"]) - (0 if state.current == s["owner"] else 1)
+            disc = 1.0 / (1.0 + max(0, horizon))
             pending += disc if s["owner"] == me else -disc
         score += w.pending_payoff * pending
 

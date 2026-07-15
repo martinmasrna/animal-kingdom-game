@@ -74,7 +74,14 @@ def test_tui_80x24_keyboard_draw_and_annotations(tmp_path):
             assert hand_cards
             shelf = app.query_one(CardShelf)
             assert not shelf.has_class("fits")
-            assert all(widget.entry.effect and widget.entry.stats.startswith("STR ") for widget in hand_cards)
+            # Every card shows its stats; the effect line mirrors the *printed* text, so a vanilla
+            # body legitimately has none (ramp gained Cape Buffalo 2026-07-15 and this assertion
+            # had assumed every card in the deck was worded). The shelf pads the blank lines.
+            assert all(widget.entry.stats.startswith("STR ") for widget in hand_cards)
+            assert all(
+                bool(widget.entry.effect) == bool(app.session.state.cards[widget.entry.payload[1]].text)
+                for widget in hand_cards
+            )
             draw = next(
                 widget for widget in app.query(ActionCard)
                 if isinstance(widget.entry.payload, DrawAction)
@@ -513,7 +520,7 @@ def test_hovering_crossroad_shows_complete_stack_details(tmp_path):
             board = app.query_one(BoardWidget)
             app.session.state.board["1,1"] = [
                 UnitInstance("elephant", "A", 900),
-                UnitInstance("fig_tree", "B", 901),
+                UnitInstance("sloth", "B", 901),
             ]
             app.refresh_game()
             hitbox = board.board_render.hitboxes[("cr", "1,1")]
@@ -528,8 +535,8 @@ def test_hovering_crossroad_shows_complete_stack_details(tmp_path):
             tooltip = str(board.tooltip)
             assert "bottom → top" in tooltip
             assert "A  Elephant" in tooltip
-            assert "B  Fig Tree" in tooltip
-            assert tooltip.index("Elephant") < tooltip.index("Fig Tree")
+            assert "B  Sloth" in tooltip
+            assert tooltip.index("Elephant") < tooltip.index("Sloth")
 
             inspector = Text.from_markup(
                 str(app.query_one("#side", Static).content)
@@ -537,8 +544,8 @@ def test_hovering_crossroad_shows_complete_stack_details(tmp_path):
             assert "Crossroad 1,1" in inspector
             assert "STACK · 2 cards · top first" in inspector
             assert "A Elephant · STR" in inspector
-            assert "B Fig Tree · STR" in inspector
-            assert inspector.index("Fig Tree") < inspector.index("Elephant")
+            assert "B Sloth · STR" in inspector
+            assert inspector.index("Sloth") < inspector.index("Elephant")
 
             await pilot.hover("#actions")
             await pilot.pause()

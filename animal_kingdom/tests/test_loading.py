@@ -73,7 +73,9 @@ def test_known_cards_present_with_expected_data():
     assert cards["worker_ant"].tags == frozenset({"Colony", "Worker"})
     assert cards["fathom"].tags == frozenset()  # tagless ('-')
     assert cards["elephant"].food_cost == 15    # "Costs 15 food" body
-    assert cards["fig_tree"].type == "landmark"
+    # Nothing is a landmark since the 2026-07-15 animals-only cut (Fig Tree/Watering Hole gone), so
+    # is_unit is always True and the type machinery is dormant. Pin that rather than drop the check.
+    assert all(c.type == "unit" and c.is_unit for c in cards.values())
     assert cards["nurse_bee"].has_battlecry
     assert not cards["guard_hornet"].has_battlecry
 

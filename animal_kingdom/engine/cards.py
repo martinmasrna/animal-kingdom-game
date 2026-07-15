@@ -18,7 +18,11 @@ RARITIES = {"common", "rare", "legendary"}
 KEYWORDS = {"Flight", "Immovable", "Fragile", "Apex Predator", "Stealth"}  # static keywords only;
 # Battlecry/Deathrattle are trigger prefixes printed in `text`, not stored keywords.
 TYPES = {"unit", "landmark"}                 # landmark is the lone non-unit type (dec. C)
-LANDMARK_IDS = {"fig_tree", "watering_hole"}  # the only two landmarks in the pool
+# Dormant since 2026-07-15: the game committed to animals only and both landmarks (Fig Tree,
+# Watering Hole) were cut, so NOTHING is a landmark and `Card.is_unit` is always True. Kept as the
+# decision-C validation hook rather than ripped out with the cards; removing the type concept and
+# the now-dead `is_unit` branches is a separate cleanup (-> Code Health backlog).
+LANDMARK_IDS: set[str] = set()
 # Family + role tags (dec. B). Retired umbrellas (Reptile, Insect) are forbidden.
 TAGS = {
     "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent",

@@ -65,7 +65,9 @@ class Config:
                                           # single-hit swing overshadowed Impala's draw-2 payoff,
                                           # and the budget moved into Opossum/Tortoise/Porcupine/
                                           # Pufferfish so the deck survives to cash in Scrooge at all
-    fig_tree_food: int = 20              # Landmark: gain food next turn
+    sloth_food: int = 20                 # Sloth: gain food when its timer comes due
+    sloth_delay: int = 2                 # owner-turns until Sloth pays out (ticks only while it is
+                                          # top of its crossroad - see rules overview.md 9.1)
 
     # --- Strength anthems ("has +X", live; decision E) ---
     anthem_lobo_per: int = 2             # per other Canine you control

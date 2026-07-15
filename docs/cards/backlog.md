@@ -4,12 +4,12 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Deck source of
 
 > **Build #5 (rebuild `data/cards.json` + the effect registry from the deck files) is DONE** — `cards.json` carries the reworked pool and the full test suite runs on it. Remaining card work is flavor + text cleanup below.
 
-## Landmark cut (decided 2026-07-15) — pending execution
+## Landmark cut (decided + SHIPPED 2026-07-15)
 
-- [ ] **★ Cut Fig Tree + Watering Hole; add ramp's 2 replacement commons.** The game commits to
-  animals only (Rules decision, see [`../rules/backlog.md`](../rules/backlog.md)). **Blocked on the
-  in-flight benchmark run** — `cards.json` must not change mid-run (workers reload it, and the rig's
-  `run_key` doesn't fingerprint card data). Agreed replacements, both `ramp` commons ×3:
+- [x] **Cut Fig Tree + Watering Hole; add ramp's 2 replacement commons — DONE.** The game commits to
+  animals only (Rules decision, see [`../rules/backlog.md`](../rules/backlog.md)). Ramp rebuilds to
+  30 / 4-4-6 automatically (decks derive from `cards.json`). Suite green. The shipped cards, both
+  `ramp` commons ×3:
   - **Cape Buffalo** (Megafauna, STR 7, vanilla) — replaces Watering Hole, whose tutor-a-6+ job died
     when Draw went to 2 cards. ⚠ **Not inert:** STR 7 clears Oxpecker's ≥6 threshold, so ramp's
     count goes 15→18 and Oxpecker's output 45→54 without Oxpecker being touched.
@@ -20,8 +20,10 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Deck source of
     ruling instead: cover it with a 4+ and the timer suspends. Keep STR < 6 so it doesn't feed
     Oxpecker. **Depends on [`../rules/timed-effect-ruling.md`](../rules/timed-effect-ruling.md)
     landing first** — under today's engine a non-Fragile timed payout cannot be stopped at all.
-  - **Number: 20 food — decided 2026-07-15.** Recorded for whoever implements it: with Cape Buffalo
-    lifting Oxpecker to 54, 3×20 = 60 puts ramp's food economy at ~114 against ~105 today.
+  - **Number: 20 food — decided 2026-07-15, shipped** (`config.sloth_food`, `sloth_delay=2`).
+    Measured after the change: Oxpecker's count went 15→18 exactly as predicted, so ramp's food is
+    **114** (Sloth 60 + Oxpecker 54) against ~105 before — a deliberate net buff. Ramp was 59% vs
+    the field pre-change; **re-measure it** once the ruler is re-baselined.
   - **Tribe:** a sloth is none of ramp's Megafauna/Bear/Bird. Costs nothing mechanically — **no card
     in ramp references a tribe** (all 14 checked); the tags are pure identity. Untagged does collide
     with the generic-tag flavor item below.

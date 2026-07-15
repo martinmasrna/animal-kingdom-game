@@ -496,17 +496,41 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
 
 # ============================================================= delayed scheduler
 
-def schedule(state: GameState, owner: str, owner_turn_delay: int, step: dict) -> None:
-    """Queue `step` to fire at the start of `owner`'s turn `owner_turn_delay` turns later."""
-    due = state.turn_counter + 2 * owner_turn_delay  # a player's turns are 2 apart
-    state.scheduled.append({"due": due, "owner": owner, "step": step})
+def schedule(state: GameState, unit, owner_turn_delay: int, step: dict) -> None:
+    """Queue `step` to fire after `owner_turn_delay` more of `unit`'s owner's turns.
+
+    The timer belongs to the **unit**, not the board (rules `overview.md` §9.1): it advances only
+    while `unit` is the top of its crossroad, and is cancelled outright if `unit` leaves the board.
+    A bounced unit re-enters play as a fresh instance with a new iid, so replaying it starts a new
+    timer rather than resuming this one - "bounce resets".
+    """
+    state.scheduled.append({"iid": unit.iid, "owner": unit.owner,
+                            "remaining": owner_turn_delay, "step": step})
 
 
 def start_of_turn(state: GameState, player: str) -> None:
-    """Fire due scheduled effects and on_start_of_turn hooks for `player` (then caller resolves)."""
-    due = [s for s in state.scheduled if s["owner"] == player and s["due"] <= state.turn_counter]
-    state.scheduled = [s for s in state.scheduled if s not in due]
-    for s in sorted(due, key=lambda x: x["due"], reverse=True):  # earliest ends on top of stack
+    """Advance `player`'s pending timers, fire those that come due, then run on_start_of_turn
+    hooks (the caller resolves the stack).
+
+    Per `overview.md` §9.1 a timer ticks only for a unit that is currently the **top** of its
+    crossroad: a buried unit's timer is suspended (not lost) and resumes if it becomes visible
+    again; a unit that has left the board has its timer cancelled.
+    """
+    on_board = {u.iid for stack in state.board.values() for u in stack}
+    tops = {stack[-1].iid for stack in state.board.values() if stack}
+    fired, keep = [], []
+    for s in state.scheduled:
+        if s["owner"] != player:
+            keep.append(s)
+        elif s["iid"] not in on_board:
+            continue                       # removed: cancelled outright (§9.1)
+        elif s["iid"] not in tops:
+            keep.append(s)                 # buried: suspended, does not tick (§9.1)
+        else:
+            s["remaining"] -= 1
+            (fired if s["remaining"] <= 0 else keep).append(s)
+    state.scheduled = keep
+    for s in reversed(fired):  # earliest-scheduled ends on top of the stack -> resolves first
         state.effect_stack.append(s["step"])
     for cr, stack in sorted(state.board.items()):
         top = stack[-1]
@@ -1044,12 +1068,12 @@ def _fathom_place(state, unit, cr):
 
 
 def _bird_egg_place(state, unit, cr):
-    schedule(state, unit.owner, state.config.egg_hatch_delay,
+    schedule(state, unit, state.config.egg_hatch_delay,
              {"op": "egg_hatch", "iid": unit.iid, "n": state.config.egg_hatch_draw, "spec": "tag:Bird"})
 
 
 def _snake_egg_place(state, unit, cr):
-    schedule(state, unit.owner, state.config.egg_hatch_delay,
+    schedule(state, unit, state.config.egg_hatch_delay,
              {"op": "egg_hatch", "iid": unit.iid, "n": state.config.egg_hatch_draw, "spec": "tag:Snake"})
 
 
@@ -1127,36 +1151,15 @@ def _aurum_start(state, unit, cr):
     state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1})
 
 
-def _fig_tree_place(state, unit, cr):
-    schedule(state, unit.owner, 1, {"op": "fig_tree_payout", "iid": unit.iid,
-                                    "player": unit.owner, "amount": state.config.fig_tree_food})
+def _sloth_place(state, unit, cr):
+    """"In 2 turns, gain 20 food." Deliberately NOT Fragile and NOT Immovable.
 
-
-def _watering_hole_place(state, unit, cr):
-    schedule(state, unit.owner, 1, {"op": "watering_hole_payout", "iid": unit.iid,
-                                    "player": unit.owner, "n": 1, "spec": "strength_min:6"})
-
-
-def _op_fig_tree_payout(state, step):
-    # Fragile: if the landmark was covered/removed before its turn, deny the payoff
-    # (same pattern as _op_egg_hatch - see _find_unit).
-    cr, unit = _find_unit(state, step["iid"])
-    if unit is None:
-        return None
-    gain_food(state, step["player"], step["amount"])
-    return None
-
-
-def _op_watering_hole_payout(state, step):
-    cr, unit = _find_unit(state, step["iid"])
-    if unit is None:
-        return None  # covered while Fragile - no payoff
-    draw_filtered_random(state, step["player"], step["n"], step["spec"])
-    return None
-
-
-OPS["fig_tree_payout"] = _op_fig_tree_payout
-OPS["watering_hole_payout"] = _op_watering_hole_payout
+    Its counterplay is the timed-effect rule (overview.md 9.1), not a keyword: cover the Sloth and
+    the timer suspends for as long as the cover holds. Fragile would delete it outright (wrong for
+    a sloth); Immovable would make the payout unanswerable AND shadow Methuselah.
+    """
+    schedule(state, unit, state.config.sloth_delay,
+             {"op": "gain_food", "player": unit.owner, "amount": state.config.sloth_food})
 
 
 # ===================================== Stage 2.4: remaining triggered / removal / utility
@@ -1470,7 +1473,7 @@ def _squirrel_place(state, unit, cr):
 
 def _chipmunk_place(state, unit, cr):
     _push_gain(state, unit.owner, state.config.chipmunk_food_now)
-    schedule(state, unit.owner, 1, {"op": "gain_food", "player": unit.owner, "amount": state.config.chipmunk_food_later})
+    schedule(state, unit, 1, {"op": "gain_food", "player": unit.owner, "amount": state.config.chipmunk_food_later})
 
 
 def _queen_marabunta_place(state, unit, cr):
@@ -1548,12 +1551,12 @@ def _termite_king_place(state, unit, cr):
 # --- Delayed (Ramp / Food OTK) ---
 
 def _black_bear_place(state, unit, cr):
-    schedule(state, unit.owner, state.config.black_bear_delay,
+    schedule(state, unit, state.config.black_bear_delay,
              {"op": "draw", "player": unit.owner, "n": state.config.black_bear_draw})
 
 
 def _grizzly_place(state, unit, cr):
-    schedule(state, unit.owner, state.config.grizzly_bear_delay,
+    schedule(state, unit, state.config.grizzly_bear_delay,
              {"op": "grizzly_strike", "iid": unit.iid, "by_player": unit.owner})
 
 
@@ -1588,7 +1591,7 @@ def _hedgehog_place(state, unit, cr):                                # Immovable
 
 def _chinchilla_place(state, unit, cr):                             # draw 1, +1 action NEXT turn
     _push_draw(state, unit.owner, state.config.chinchilla_draw)
-    schedule(state, unit.owner, 1,
+    schedule(state, unit, 1,
              {"op": "grant_action", "player": unit.owner, "n": state.config.chinchilla_bonus_actions})
 
 
@@ -1697,8 +1700,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "cheetah": {"on_place": _hq_adjacent_draw},
     "falcon": {"on_place": _hq_adjacent_draw},
     "aurum": {"on_start_of_turn": _aurum_start},
-    "fig_tree": {"on_place": _fig_tree_place},
-    "watering_hole": {"on_place": _watering_hole_place},
+    "sloth": {"on_place": _sloth_place},
     # Stage 2.4: removal battlecries (King Theron's cover trigger fires from _fire_cover_event).
     "jaguar": {"on_place": _jaguar_place},
     "serval": {"on_place": _serval_place},

@@ -29,7 +29,17 @@ and the immediate top of Balance. It builds directly on
 > rig's ranking *and* every field deck's; `--report` only picks what prints. Seed re-rolled
 > 902000→715000, so **all pre-2026-07-15 benchmark data is superseded** by the fresh both-seats run.
 >
-> **Next: the fresh referee run, then Step 3 — analyze.**
+> **⚠ ALL BENCHMARK DATA VOID — the ruler itself was buggy (2026-07-15).** The fresh both-seats run
+> was launched and then **killed one matchup in**, because the timed-effect survey found that
+> **`black_bear` and `grizzly_bear` — both in the rig's own `DECKLIST`** — were cheating: Black Bear
+> drew 2 cards even after being destroyed, Grizzly struck from under a stack. Every matchup runs the
+> ruler, so *every* number was affected, not just ramp's. Ruled and fixed the same day
+> ([`../rules/timed-effect-ruling.md`](../rules/timed-effect-ruling.md)): timers now tick only while
+> their unit is top-of-stack. Ramp also changed underneath it (Landmarks cut; Sloth + Cape Buffalo
+> in, which moves Oxpecker 15→18).
+>
+> **Next: re-run the ruler from scratch** (`--pilot referee --games 500`, both seats, all 7,
+> seed 715000), then Step 3 — analyze. Nothing may be locked from pre-2026-07-15 data.
 
 ## The idea in one paragraph
 

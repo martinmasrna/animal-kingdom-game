@@ -168,10 +168,9 @@ This is the same principle as the reaction-fizzle rule above: anything queued re
 before it resolves. Covering is placement, not an ability, so neither **Immovable** nor **Stealth**
 protects a timer — only strength (being hard to cover) does.
 
-> ⚠ **Ruled 2026-07-15; the engine does not implement this yet.** Today the scheduler books an
-> absolute fire-turn and mostly forgets the unit: Chipmunk/Black Bear/Chinchilla pay out even when
-> destroyed, and Grizzly Bear strikes from under a stack. See [`backlog.md`](backlog.md) and
-> [`timed-effect-ruling.md`](timed-effect-ruling.md).
+_Ruled and implemented 2026-07-15 (`effects.schedule` / `effects.start_of_turn` carry a per-unit
+`remaining` that ticks only for a top-of-stack unit). Background, and the three tiers of wrong
+behaviour this replaced, in [`timed-effect-ruling.md`](timed-effect-ruling.md)._
 
 ---
 

@@ -41,8 +41,8 @@ Predator, Battlecry, Deathrattle). Immovable/Stealth deep-dive ruled & shipped 2
 Card-type model (Unit/Egg/Landmark) resolved *provisionally* (decision C).
 
 **Next:**
-0. **★ Implement the timed-effect ruling** (ruled 2026-07-15; `overview.md` §9.1 + [`rules/timed-effect-ruling.md`](rules/timed-effect-ruling.md)). Timers advance only while the unit is top-of-stack; removal cancels; bounce resets. Engine disagrees today — Chipmunk/Black Bear/Chinchilla pay out **when destroyed**, Grizzly strikes **while buried**. ⚠ Black Bear + Grizzly Bear sit **inside the baseline ruler**, so this must land before the ruler locks (→ Engine, then re-baseline → Balance).
-1. **Landmarks: CUT (decided 2026-07-15).** Fig Tree + Watering Hole out; the game commits to animals only. Resolves the Landmark card-type decision *and* the Apex-eats-Landmark wart. Ramp needs 2 replacement commons (→ Cards); execution waits for the in-flight benchmark run.
+1. ✅ **Timed-effect ruling — ruled AND shipped 2026-07-15** (`overview.md` §9.1 + [`rules/timed-effect-ruling.md`](rules/timed-effect-ruling.md)). Timers tick only while the unit is top-of-stack; removal cancels; bounce resets. Closed the flagged Chipmunk bug and 3 more cards. ⚠ **Consequence → Balance: every pre-2026-07-15 benchmark number is void** — Black Bear + Grizzly Bear are in the ruler's own decklist.
+2. ✅ **Landmarks: CUT and shipped 2026-07-15.** Fig Tree + Watering Hole gone; the game is animals-only. Resolves the Landmark card-type decision *and* the Apex-eats-Landmark wart. Ramp's replacements shipped (Sloth, Cape Buffalo). Left dormant: the now-dead type/`is_unit` machinery (→ Engine/Code Health).
 2. **Re-examine Immovable** (naming + effect footprint) — flagged 2026-07-02, *gated on referee-quality balance data*.
 3. ✅ **Terminology sweep done (2026-07-15)** — "Discard" → "Remove Pile" across the canonical docs, deck docs, `card-candidates.md`; `cards.json` was already clean. `cards.md` deliberately left: its refs are stale 0.0.1 content, not wording (→ Cards).
 

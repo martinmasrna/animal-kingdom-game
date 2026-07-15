@@ -542,56 +542,124 @@ def test_food_cost_gates_placement_and_is_paid():
     assert s.food["A"] == 0                              # 15 paid on placement
 
 
-# ========================================================= Stage 2.3: Landmarks (dec. C)
+# ============================== timed effects vs the stack (rules overview.md 9.1, ruled 2026-07-15)
+#
+# A pending timer advances ONLY while its unit is the top of its crossroad; removal cancels it
+# outright; bounce resets it. Before this ruling the scheduler booked an absolute fire-turn and
+# mostly forgot the unit - Chipmunk/Black Bear/Chinchilla paid out even when destroyed, and Grizzly
+# Bear struck from under a stack. See docs/rules/timed-effect-ruling.md.
 
-def test_fig_tree_is_a_landmark_that_schedules_food_and_cannot_capture_hq():
-    s = make_state(hands={"A": ["fig_tree"]})
-    rules.apply_action(s, PlaceAction("fig_tree", ("cr", "1,2")))
-    assert s.top_unit("1,2").card_id == "fig_tree"
-    assert any(x["step"]["op"] == "fig_tree_payout" and x["step"]["amount"] == CFG.fig_tree_food
-               for x in s.scheduled)
-
-    hq = make_state(hands={"A": ["fig_tree"]})
-    for cr in ("1,2", "2,2", "3,2", "4,2"):
-        put(hq, cr, "caracal", "A")
-    assert PlaceAction("fig_tree", ("hq", "B")) not in rules.legal_actions(hq)
+def _tick(s, player="A"):
+    """Advance `player`'s timers exactly as the turn loop does, and resolve what fires."""
+    effects.start_of_turn(s, player)
+    effects.resolve(s)
 
 
-def test_fig_tree_payoff_fires_normally_if_not_covered():
-    s = make_state(hands={"A": ["fig_tree"]})
-    rules.apply_action(s, PlaceAction("fig_tree", ("cr", "1,2")))
-    fig_tree = s.top_unit("1,2")
+def _pending(s, op):
+    return [x for x in s.scheduled if x["step"]["op"] == op]
+
+
+def test_sloth_schedules_a_delayed_food_payout():
+    s = make_state(hands={"A": ["sloth"]})
+    rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
+    sched = _pending(s, "gain_food")
+    assert len(sched) == 1
+    assert sched[0]["step"]["amount"] == CFG.sloth_food
+    assert sched[0]["remaining"] == CFG.sloth_delay
+    assert sched[0]["iid"] == s.top_unit("1,2").iid      # the timer belongs to the unit
+
+
+def test_sloth_pays_out_after_its_delay_when_left_uncovered():
+    s = make_state(hands={"A": ["sloth"]})
+    rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
     food_before = s.food["A"]
-    effects._op_fig_tree_payout(s, {"op": "fig_tree_payout", "iid": fig_tree.iid,
-                                    "player": "A", "amount": CFG.fig_tree_food})
-    assert s.food["A"] == food_before + CFG.fig_tree_food
+    for _ in range(CFG.sloth_delay - 1):
+        _tick(s)
+        assert s.food["A"] == food_before               # not due yet
+    _tick(s)
+    assert s.food["A"] == food_before + CFG.sloth_food
+    assert not _pending(s, "gain_food")                  # fired and dropped
 
 
-def test_fig_tree_payoff_denied_once_covered_off_the_board():
-    s = make_state(hands={"A": ["fig_tree"]})
-    rules.apply_action(s, PlaceAction("fig_tree", ("cr", "1,2")))
-    fig_tree = s.top_unit("1,2")
+def test_timer_is_suspended_while_the_unit_is_buried():
+    s = make_state(hands={"A": ["sloth"]})
+    rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
     food_before = s.food["A"]
-    s.board["1,2"] = []                                  # simulate the Fragile removal on cover
-    effects._op_fig_tree_payout(s, {"op": "fig_tree_payout", "iid": fig_tree.iid,
-                                    "player": "A", "amount": CFG.fig_tree_food})
-    assert s.food["A"] == food_before                    # denied: fig_tree is no longer on board
+    put(s, "1,2", "lion", "B")                           # cover the str-3 Sloth with a str-7
+    for _ in range(CFG.sloth_delay + 3):                 # well past its delay
+        _tick(s)
+    assert s.food["A"] == food_before                    # buried: never paid out
+    assert _pending(s, "gain_food")[0]["remaining"] == CFG.sloth_delay  # and never ticked
 
 
-def test_watering_hole_payoff_draws_only_a_strong_unit():
+def test_timer_resumes_when_the_unit_is_uncovered():
+    s = make_state(hands={"A": ["sloth"]})
+    rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
+    food_before = s.food["A"]
+    put(s, "1,2", "lion", "B")
+    _tick(s)                                             # suspended
+    s.board["1,2"].pop()                                 # remove the coverer; Sloth resurfaces
+    for _ in range(CFG.sloth_delay):
+        _tick(s)
+    assert s.food["A"] == food_before + CFG.sloth_food    # waited, then resumed
+
+
+def test_removal_cancels_the_timer_outright():
+    s = make_state(hands={"A": ["sloth"]})
+    rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
+    food_before = s.food["A"]
+    effects._remove_specific(s, "1,2", s.top_unit("1,2"), by_player="B", by_effect=False)
+    for _ in range(CFG.sloth_delay + 1):
+        _tick(s)
+    assert s.food["A"] == food_before
+    assert not _pending(s, "gain_food")                  # cancelled and pruned
+
+
+def test_bounce_resets_the_timer():
+    """A bounced unit returns as a fresh instance, so replaying it starts a new timer."""
+    s = make_state(hands={"A": ["sloth"]})
+    rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
+    first_iid = s.top_unit("1,2").iid
+    _tick(s)                                             # burn one turn off the timer
+    assert _pending(s, "gain_food")[0]["remaining"] == CFG.sloth_delay - 1
+
+    effects._remove_specific(s, "1,2", s.top_unit("1,2"), by_player="B", by_effect=False)
+    s.add_to_hand("A", "sloth")   # bounce: off the board, back to hand
+    s.current = "A"               # placing ended A's turn; hand it back so A can replay the Sloth
+    rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
+    live = [x for x in _pending(s, "gain_food") if x["iid"] == s.top_unit("1,2").iid]
+    assert s.top_unit("1,2").iid != first_iid            # a new instance
+    assert live[0]["remaining"] == CFG.sloth_delay       # full timer, not the partly-elapsed one
+
+
+def test_chipmunk_no_longer_pays_out_after_it_is_destroyed():
+    """The 2026-07-12 finding ("chipmunk works when covered as well?"), now ruled: Chipmunk
+    scheduled its second payout with no reference to its unit, so it fired even when destroyed."""
+    s = make_state(hands={"A": ["chipmunk"]})
+    rules.apply_action(s, PlaceAction("chipmunk", ("cr", "1,2")))
+    food_after_battlecry = s.food["A"]
+    effects._remove_specific(s, "1,2", s.top_unit("1,2"), by_player="B", by_effect=False)
+    _tick(s)
+    assert s.food["A"] == food_after_battlecry           # no second helping
+
+
+def test_fragile_still_dies_to_cover_so_its_timer_is_cancelled():
+    """Eggs are Fragile: covering *removes* them, so cover and cancel are the same event. This is
+    the pre-existing behaviour the ruling leaves untouched."""
+    s = make_state(hands={"A": ["bird_egg"]}, decks={"A": ["eagle", "owl"], "B": []})
+    rules.apply_action(s, PlaceAction("bird_egg", ("cr", "1,2")))
+    assert _pending(s, "egg_hatch")
+    put(s, "1,2", "lion", "B")                           # Fragile: removed, not buried
+    assert s.top_unit("1,2").card_id == "lion"
+    for _ in range(CFG.egg_hatch_delay + 1):
+        _tick(s)
+    assert not any("Bird" in CARDS[c].tags for c in hand_ids(s, "A"))   # never hatched
+
+
+def test_draw_filtered_random_strength_min_picks_only_strong_units():
     s = make_state(decks={"A": ["lion", "squirrel", "eagle"], "B": []})  # 7 / 3 / 5
     effects.draw_filtered_random(s, "A", 1, "strength_min:6")
     assert hand_ids(s, "A") == ["lion"]                 # only base strength >= 6
-
-
-def test_watering_hole_payoff_denied_once_covered_off_the_board():
-    s = make_state(hands={"A": ["watering_hole"]}, decks={"A": ["lion"], "B": []})
-    rules.apply_action(s, PlaceAction("watering_hole", ("cr", "1,2")))
-    wh = s.top_unit("1,2")
-    s.board["1,2"] = []                                  # simulate the Fragile removal on cover
-    effects._op_watering_hole_payout(s, {"op": "watering_hole_payout", "iid": wh.iid,
-                                         "player": "A", "n": 1, "spec": "strength_min:6"})
-    assert "lion" not in hand_ids(s, "A")                # denied: landmark is no longer on board
 
 
 # ====================================== Stage 2.3: extra placements (decision F1) + twins

@@ -37,7 +37,7 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "worker_wasp": ["worker_wasp_food"],
     "worker_bee": ["worker_bee_food", "worker_bee_extra"],
     "methuselah": ["methuselah_food"],
-    "fig_tree": ["fig_tree_food"],
+    "sloth": ["sloth_food"],
     "greywhisker": ["greywhisker_food"],
     "rat_king": ["rat_king_per_rodent"],
     "flying_squirrel": ["flying_squirrel_food"],

@@ -1,7 +1,16 @@
 # Ruling: timed effects and the stack ("in N turns")
 
-_Ruled 2026-07-15. Canonical text is [`overview.md`](overview.md) §9.1 — if this doc and that
-disagree, that wins. This file holds the evidence, the blast radius, and the engine work implied._
+_Ruled **and implemented** 2026-07-15. Canonical text is [`overview.md`](overview.md) §9.1 — if this
+doc and that disagree, that wins. This file holds the evidence and the blast radius._
+
+> **Status: SHIPPED.** `schedule()` now takes the *unit* and stores `{iid, owner, remaining, step}`;
+> `start_of_turn()` ticks `remaining` only for units that are top of their crossroad, cancels
+> entries whose unit has left the board, and fires at zero. All three tiers below are closed and
+> regression-tested (`test_effects.py`, the "timed effects vs the stack" block).
+>
+> **Still open — re-baseline the ruler.** Black Bear + Grizzly Bear are in `benchmark_set.DECKLIST`,
+> so every pre-2026-07-15 benchmark number priced a ruler whose cards cheated. The in-flight run was
+> killed for this reason. → [`../balance/baseline-deck-arc.md`](../balance/baseline-deck-arc.md).
 
 ## The ruling in three lines
 
@@ -60,18 +69,35 @@ prices the ruler with both cards cheating, and every matchup uses the ruler. See
 four cards. Two of them are food_otk's, already the weakest deck (~38%). Fix the rule first, then
 re-balance — never bend the ruling to protect a deck's number.
 
-## Engine work implied
+## How it was implemented (2026-07-15)
 
-The scheduler is built the wrong way round for this: it needs **turns-remaining tracked per unit**,
-decremented at the start of the owner's turn *only if that unit is currently the top of its
-crossroad* — not an absolute fire-turn booked once. Also:
+- `schedule(state, unit, owner_turn_delay, step)` — takes the **unit** (was: the owner string) and
+  stores `{iid, owner, remaining, step}`. No absolute fire-turn any more.
+- `start_of_turn(state, player)` — for each of `player`'s entries: **not on the board → drop**
+  (cancelled); **not top of its crossroad → keep, don't tick** (suspended); else decrement and fire
+  at zero. Entries fire in schedule order.
+- Chipmunk / Black Bear / Chinchilla now pass their unit, so they have an identity to check.
+- **Bounce reset came free:** `_bounce` returns the *card* to hand, and replaying mints a new
+  `UnitInstance` with a new `iid` — so the old entry is cancelled (its iid is off the board) and the
+  replay schedules a fresh timer. No special-casing needed.
+- `_find_unit` was left alone — it is still the right primitive for its other callers ("does this
+  exist"); the top-of-stack question is now answered in `start_of_turn` where it belongs.
 
-- give Chipmunk / Black Bear / Chinchilla an `iid` (they have none);
-- `_find_unit` is the wrong primitive for this — it answers "does this unit exist anywhere",
-  where the question is "is this unit on top". Callers that want the latter need a `top_unit` check
-  (or a new helper) rather than existence;
-- bounce-to-hand must clear any pending timer for that unit;
-- regression tests per tier: destroyed → cancelled; buried → suspended; uncovered → resumes;
-  bounced+replayed → fresh timer; Fragile+covered → cancelled (unchanged).
+**One non-obvious knock-on.** `GreedyWeights.pending_payoff` (the validated `ad4c885` eval term)
+discounted by `due - turn_counter`, i.e. a horizon in *global* turns. `remaining` counts the
+*owner's* turns, so a naive swap silently rescaled the term and broke
+`test_pending_payoff_surfaces_grizzly_delayed_removal_at_1_ply` — a deliberate tripwire. The bot now
+reconstructs the identical horizon: `2*remaining - (0 if state.current == owner else 1)`. Same
+numbers as before the change; the 20.0 weight keeps its validation.
 
-Then re-baseline the ruler (the arc's step 2) before locking it.
+**Regression tests** — `test_effects.py`, "timed effects vs the stack": schedules with the unit's
+iid; pays out uncovered; suspended while buried (and doesn't tick); resumes when uncovered;
+cancelled on removal; bounce mints a fresh timer; Chipmunk no longer pays out after being destroyed;
+Fragile+covered still cancels (unchanged).
+
+## Still open
+
+**Re-baseline the ruler before locking it.** Black Bear + Grizzly Bear are in
+`benchmark_set.DECKLIST`, so every benchmark number from before this fix priced a ruler whose own
+cards cheated — including on matchups whose field deck was unaffected, since every matchup runs the
+ruler. → [`../balance/baseline-deck-arc.md`](../balance/baseline-deck-arc.md).

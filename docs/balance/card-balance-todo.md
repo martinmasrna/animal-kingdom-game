@@ -50,7 +50,7 @@ No locked changes waiting to be made.
 
 ## Bug Fixes
 
-- ~~chipmunk works when covered as well?~~ **CONFIRMED + generalised 2026-07-15 → ruled, see
+- ~~chipmunk works when covered as well?~~ **CONFIRMED + generalised + FIXED 2026-07-15 → ruled + shipped, see
   [`../rules/timed-effect-ruling.md`](../rules/timed-effect-ruling.md).** You were right, and it's
   worse than covered: Chipmunk schedules its second payout with **no reference to the unit at all**,
   so it fires even when Chipmunk is *destroyed*. Not a Chipmunk bug — the same hole hits **Black Bear
