@@ -192,4 +192,5 @@ Egg Control) — removed from this list. Vulture (Rare table, below) is shelved 
 | **Legendary Parrot (name TBD)** | Bird | TBD | **Variant 1:** Become a copy of the last unit your opponent played.<br>**Variant 2:** Flight. Battlecry: repeat the Battlecry of the last unit your opponent played. |
 | **Orca — “Granny”** | Cetacean | 8 | Battlecry: remove an adjacent enemy of any strength. |
 | **Sable, the Solitary** | Cat | 5 | At the end of your turn, if no other friendly unit is adjacent to this, draw 1 card. |
+| **Scarface** | Cat | TBD | TBD — a Lion legendary; not yet designed. |
 | **Sue (Tyrannosaurus rex)** | Dinosaur | 10 / 12 | **Variant 1:** Apex Predator. You may play this only if one of your Eggs has hatched this game.<br>**Variant 2:** Apex Predator. Adjacent enemy units have −2 strength. Costs 20 food to play. |
