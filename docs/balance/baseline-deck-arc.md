@@ -5,15 +5,31 @@ and the immediate top of Balance. It builds directly on
 [`benchmark-set-handoff.md`](benchmark-set-handoff.md) (the problem statement) and the
 `sim/benchmark_set.py` instrument already shipped (commit `659acf9`)._
 
-> **Status — Step 1 DONE (2026-07-13).** The baseline roster is built and locked in
-> `sim/benchmark_set.py` (source of truth). "Basic" was settled as **self-sufficient** (no
-> synergy/tribal/food-state/cost condition to function) — *not* "effectless." Cut the cost-gated
-> apex bombs (borealis/aquila), delayed bears' co-tenants stayed, and the reactive/keyword outliers;
-> `mock_draw2` dropped legendary→rare. Minted 4 controlled mocks: `mock_vanilla_10` (bare body),
-> `mock_flyer_7` (vanilla flyer), `mock_immovable_6` (vanilla wall), `mock_removal` (unconditional
-> "remove an adjacent enemy" — the basic-removal legendary anchor). Legendary tier is now the basic
-> primitives at top dosage: engine (greywhisker) / body (vanilla-10) / reach-body (flyer-7) /
-> removal (mock_removal). Suite green (367). **Next: Step 2 — referee run vs the 7-deck field.**
+> **Status — Steps 1–2 DONE, first tune applied; re-running fresh (2026-07-15).**
+>
+> **Step 1 (2026-07-13).** The baseline roster is built and locked in `sim/benchmark_set.py`
+> (source of truth). "Basic" was settled as **self-sufficient** (no synergy/tribal/food-state/cost
+> condition to function) — *not* "effectless." Cut the cost-gated apex bombs (borealis/aquila),
+> delayed bears' co-tenants stayed, and the reactive/keyword outliers; `mock_draw2` dropped
+> legendary→rare. Minted 4 controlled mocks: `mock_vanilla_10` (bare body), `mock_flyer_7` (vanilla
+> flyer), `mock_immovable_6` (vanilla wall), `mock_removal` (unconditional "remove an adjacent
+> enemy" — the basic-removal legendary anchor). Legendary tier is now the basic primitives at top
+> dosage: engine (greywhisker) / body (vanilla-10) / reach-body (flyer-7) / removal (mock_removal).
+>
+> **Step 2 + a first step-4 tune (2026-07-13/14).** Referee run vs the 7-deck field, then a tuning
+> pass on the 30 (`e3020e4`, draw-1 buffs + 2 nerfs) re-confirmed in `referee_tuned1.csv`.
+> **Headline: the tuned ruler beats 6 of 7 decks** — aggro 70%, food_otk 61%, canine 60%, colony
+> 59%, ramp 54%, egg_control 96%; only cats holds it under 50 (43%). That is either the anchors
+> sitting far above the game's power level (caveat 2) or pilot bias landing exactly where caveat 1
+> predicted — **unresolved, and the arc's live question.**
+>
+> **Rig fix (2026-07-15).** The rig scored only one seat per run, so reading the field decks' cards
+> meant re-simulating the *identical* games to fold the seat thrown away (`referee_tuned1` and
+> `referee_opp` differed only in `measure`). It now folds **both seats always** — one pass yields the
+> rig's ranking *and* every field deck's; `--report` only picks what prints. Seed re-rolled
+> 902000→715000, so **all pre-2026-07-15 benchmark data is superseded** by the fresh both-seats run.
+>
+> **Next: the fresh referee run, then Step 3 — analyze.**
 
 ## The idea in one paragraph
 

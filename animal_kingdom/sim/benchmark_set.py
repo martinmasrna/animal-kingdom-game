@@ -8,6 +8,10 @@ within-rarity siloing needed). See docs/balance/benchmark-set-handoff.md.
 Reading `impact`: win-rate-when-drawn minus the deck's overall win rate. A vanilla body sits at
 the ~0 line; an effect well above it is carrying weight, one in the flat tail is 'just a body'.
 
+Every game scores BOTH seats: one pass yields the rig's own per-card ranking *and* each field
+deck's per-card ranking vs the rig. The games are the expensive part (referee search); folding
+the second seat is free, so `--report` only picks which tables get printed, never what gets run.
+
 Crash-safe for long referee runs: after each matchup the accumulated tallies are written to a
 checkpoint file; re-running the SAME command auto-resumes, skipping matchups already done.
 
@@ -53,30 +57,37 @@ VANILLA_LADDER = ["mock_vanilla_5", "mock_vanilla_6", "lion", "mock_vanilla_8", 
 APEX_FREE_LADDER = ["mock_apex_5", "mock_apex_6", "anaconda", "polar_bear"]
 
 
+# Checkpoint schema. v1 stored a single seat's tallies (whichever --measure picked) and is
+# unreadable here: the other seat's games were never written down.
+CKPT_VERSION = 2
+
+
 def _kw(card) -> str:
     return (",".join(card.keywords)
             .replace("Apex Predator", "apex").replace("Immovable", "immov").replace("Flight", "fly"))
 
 
-def _fold(records, seat: str = "A") -> dict:
-    """Reduce one matchup's game records to the additive tallies the report needs.
+def _fold(records) -> dict:
+    """Reduce one matchup's game records to the additive tallies the report needs, BOTH seats.
 
-    `seat` picks whose result/cards to tally: "A" = the baseline rig (default), "B" = the field
-    (synergy) deck. In `run_pairs([("baseline", f)], ...)` the baseline is always seat A and the
-    field deck always seat B (the mover split uses first_player, not a seat swap), so seat "B"
-    cleanly reads the synergy deck's per-card impact vs the baseline."""
-    drawn_attr = "cards_drawn_a" if seat == "A" else "cards_drawn_b"
-    n = 0
-    credit = 0.0
-    cards: dict[str, list] = defaultdict(lambda: [0.0, 0])  # cid -> [win-credit-when-drawn, drawn]
-    for r in records:
-        cr = r.credit(seat)
-        n += 1
-        credit += cr
-        for cid in getattr(r, drawn_attr):
-            cards[cid][0] += cr
-            cards[cid][1] += 1
-    return {"n": n, "credit": credit, "cards": {k: v for k, v in cards.items()}}
+    In `run_pairs([("baseline", f)], ...)` the baseline is always seat A and the field deck always
+    seat B (the mover split uses first_player, not a seat swap), so seat "A" reads the rig's own
+    per-card impact and seat "B" reads the synergy deck's, off the very same games. Returns
+    {"A": tallies, "B": tallies}; each seat's tallies are {n, credit, cards: cid -> [credit, n]}."""
+    out = {}
+    for seat, drawn_attr in (("A", "cards_drawn_a"), ("B", "cards_drawn_b")):
+        n = 0
+        credit = 0.0
+        cards: dict[str, list] = defaultdict(lambda: [0.0, 0])  # cid -> [win-credit-when-drawn, drawn]
+        for r in records:
+            cr = r.credit(seat)
+            n += 1
+            credit += cr
+            for cid in getattr(r, drawn_attr):
+                cards[cid][0] += cr
+                cards[cid][1] += 1
+        out[seat] = {"n": n, "credit": credit, "cards": {k: v for k, v in cards.items()}}
+    return out
 
 
 def _write_json_atomic(path: Path, data: dict) -> None:
@@ -97,7 +108,9 @@ def main(argv: Sequence[str] | None = None) -> None:
                         "these two by default); pass '' to keep the full 7-deck field")
     p.add_argument("--field", default="",
                    help="explicit comma-separated field (overrides --exclude entirely)")
-    p.add_argument("--base-seed", type=int, default=902000)
+    # Re-rolled 2026-07-15 for the fresh both-seats run (was 902000). Pass the old value
+    # explicitly to reproduce any pre-2026-07-15 result.
+    p.add_argument("--base-seed", type=int, default=715000)
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1, help="worker processes")
     p.add_argument("--out", type=Path, help="write the final per-card table as CSV")
     p.add_argument("--config", default=None,
@@ -105,12 +118,11 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--checkpoint", type=Path,
                    help="checkpoint file for crash-safe resume "
                         "(default: results/benchmark_set/<pilot>_g<games>[_<config>].ckpt.json)")
-    p.add_argument("--measure", choices=("self", "opponent"), default="self",
-                   help="whose per-card impact to report: 'self' = the baseline rig (default), "
-                        "'opponent' = each field/synergy deck's own cards, measured vs the baseline "
-                        "(the step-5 read: which cards carry/drag each deck against the ruler)")
+    p.add_argument("--report", choices=("self", "opponent", "both"), default="both",
+                   help="which per-card tables to PRINT (both are always measured): 'self' = the "
+                        "baseline rig's own cards, 'opponent' = each field deck's cards vs the "
+                        "baseline, 'both' (default). Never affects what gets simulated.")
     args = p.parse_args(argv)
-    seat = "A" if args.measure == "self" else "B"
 
     config = load_config_overrides(args.config)
 
@@ -127,17 +139,21 @@ def main(argv: Sequence[str] | None = None) -> None:
     cards = load_cards()
 
     cfg_tag = f"_{Path(args.config).stem}" if args.config else ""
-    measure_tag = "" if args.measure == "self" else "_opp"
     ckpt_path = args.checkpoint or Path(
-        f"results/benchmark_set/{args.pilot}_g{args.games}{cfg_tag}{measure_tag}.ckpt.json")
-    # This run's identity — a resumed checkpoint must match all of it, else the samples don't compose.
+        f"results/benchmark_set/{args.pilot}_g{args.games}{cfg_tag}.ckpt.json")
+    # This run's identity — a resumed checkpoint must match all of it, else the samples don't
+    # compose. (`--report` is absent by design: it picks output, not what's simulated.)
     run_key = {"pilot": args.pilot, "games": args.games, "base_seed": args.base_seed,
-               "field": sorted(field), "deck": DECKLIST, "config": str(args.config),
-               "measure": args.measure}
+               "field": sorted(field), "deck": DECKLIST, "config": str(args.config)}
 
     matchups: dict[str, dict] = {}
     if ckpt_path.exists():
         saved = json.loads(ckpt_path.read_text())
+        if saved.get("version") != CKPT_VERSION:
+            raise SystemExit(
+                f"checkpoint {ckpt_path} is v{saved.get('version', 1)} (one seat only); this rig "
+                f"writes v{CKPT_VERSION} (both seats). The unrecorded seat can't be recovered: "
+                f"delete it or pass a fresh --checkpoint and re-run.")
         if saved.get("run_key") != run_key:
             raise SystemExit(
                 f"checkpoint {ckpt_path} is from a different run (pilot/games/seed/field/deck).\n"
@@ -145,7 +161,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         matchups = saved.get("matchups", {})
         # normalize card lists back to [float, int]
         for m in matchups.values():
-            m["cards"] = {k: [float(v[0]), int(v[1])] for k, v in m["cards"].items()}
+            for seat in ("A", "B"):
+                m[seat]["cards"] = {k: [float(v[0]), int(v[1])] for k, v in m[seat]["cards"].items()}
         if matchups:
             print(f"resuming from {ckpt_path}: {len(matchups)}/{len(field)} matchups already done "
                   f"({', '.join(sorted(matchups))})", file=sys.stderr)
@@ -165,92 +182,94 @@ def main(argv: Sequence[str] | None = None) -> None:
         recs = run_pairs([("baseline", f)], args.games, seed,
                          bots=(args.pilot, args.pilot), config=config, jobs=args.jobs,
                          game_progress=on_game)
-        agg = _fold(recs, seat)
+        agg = _fold(recs)
         matchups[f] = agg
-        _write_json_atomic(ckpt_path, {"run_key": run_key, "matchups": matchups})
+        _write_json_atomic(ckpt_path,
+                           {"version": CKPT_VERSION, "run_key": run_key, "matchups": matchups})
         print(f"\r  [{len([x for x in field if x in matchups])}/{len(field)}] vs {f:<22} "
-              f"{agg['credit']/agg['n']:6.1%}   ({agg['n']} games) ✓ checkpointed", file=sys.stderr, flush=True)
+              f"{agg['A']['credit']/agg['A']['n']:6.1%}   ({agg['A']['n']} games) ✓ checkpointed",
+              file=sys.stderr, flush=True)
 
-    # --- aggregate across all matchups ---
-    tot_c = sum(m["credit"] for m in matchups.values())
-    tot_n = sum(m["n"] for m in matchups.values())
+    # --- aggregate across all matchups (both seats came out of the same games) ---
+    # Seat A: the rig's cards, POOLED across the whole field — one unified ranking, 0 line = the
+    # rig's overall win rate. Seat B: each field deck's own cards, per deck (their lists differ),
+    # 0 line = that deck's win rate vs the rig.
+    tot_c = sum(m["A"]["credit"] for m in matchups.values())
+    tot_n = sum(m["A"]["n"] for m in matchups.values())
     deck_wr = tot_c / tot_n
-    rates = {f: matchups[f]["credit"] / matchups[f]["n"] for f in field}
+    rates = {f: matchups[f]["A"]["credit"] / matchups[f]["A"]["n"] for f in field}
     drawn: dict[str, list] = defaultdict(lambda: [0.0, 0])
     for m in matchups.values():
-        for cid, (w, n) in m["cards"].items():
+        for cid, (w, n) in m["A"]["cards"].items():
             drawn[cid][0] += w
             drawn[cid][1] += n
 
-    if args.measure == "opponent":
-        # Each field/synergy deck's OWN cards, ranked by impact vs the baseline (the 0 line is
-        # that deck's win rate vs baseline). One table per deck (their card lists differ).
-        rmap = {"common": "C", "rare": "R", "legendary": "L"}
-        print(f"\nsynergy-deck win rate vs the baseline (pilot {args.pilot}):")
-        for f, wr in sorted(rates.items(), key=lambda kv: -kv[1]):
-            print(f"  {f:<22} {wr:.1%}  ({'beats baseline' if wr > 0.5 else 'loses'})")
-        csv_rows = []
-        for f in sorted(field, key=lambda x: rates[x]):
-            fwr, fn = rates[f], matchups[f]["n"]
-            ftab = sorted(((cid, (w / n if n else float("nan")), (w / n if n else float("nan")) - fwr, n)
-                           for cid, (w, n) in matchups[f]["cards"].items()), key=lambda t: -t[1])
-            print(f"\n{f} vs baseline = {fwr:.1%}  ({fn} games) - per-card impact:")
-            print(f"  {'#':>2} {'card':<20}{'R':<2}{'STR':<4}{'kw':<12}{'impact':>8}{'wwd':>8}{'draw%':>7}")
-            for i, (cid, wwd, impact, n) in enumerate(ftab, 1):
-                c = cards[cid]
-                print(f"  {i:>2} {c.name:<20}{rmap.get(getattr(c, 'rarity', ''), '?'):<2}"
-                      f"{str(c.base_strength):<4}{_kw(c):<12}{impact:+7.1%} {wwd:6.1%} {n/fn:6.0%}")
-                csv_rows.append([f, i, cid, c.name, getattr(c, "rarity", ""), c.base_strength,
-                                 _kw(c), n, round(n / fn, 4), round(wwd, 4), round(impact, 4)])
-        if args.out:
-            args.out.parent.mkdir(parents=True, exist_ok=True)
-            with args.out.open("w", newline="") as fh:
-                w = csv.writer(fh)
-                w.writerow(["deck", "rank", "card_id", "name", "rarity", "strength", "keywords",
-                            "drawn_games", "draw_rate", "win_rate_when_drawn", "impact"])
-                w.writerows(csv_rows)
-            print(f"\nwrote {args.out}", file=sys.stderr)
-        print(f"(checkpoint: {ckpt_path})", file=sys.stderr)
-        return
+    def _rank(tallies: dict, base_wr: float) -> list:
+        """cid -> (win-rate-when-drawn, impact vs base_wr, games drawn), best-first."""
+        rows = [(cid, (w / n if n else float("nan")), n) for cid, (w, n) in tallies.items()]
+        return sorted(((cid, wwd, wwd - base_wr, n) for cid, wwd, n in rows), key=lambda t: -t[1])
 
-    print(f"\nrig win rate vs field (pilot {args.pilot}):")
-    for f, wr in sorted(rates.items(), key=lambda kv: kv[1]):
-        print(f"  vs {f:<22} {wr:.1%}")
-    print(f"  OVERALL {deck_wr:.1%} | worst {min(rates.values()):.1%} | best {max(rates.values()):.1%}")
+    def _print_table(rows: list, total: int, rarity_of) -> None:
+        print(f"  {'#':>2} {'card':<20}{'R':<2}{'STR':<4}{'kw':<12}{'impact':>8}{'wwd':>8}{'draw%':>7}")
+        for i, (cid, wwd, impact, n) in enumerate(rows, 1):
+            c = cards[cid]
+            print(f"  {i:>2} {c.name:<20}{rarity_of(cid):<2}{str(c.base_strength):<4}{_kw(c):<12}"
+                  f"{impact:+7.1%} {wwd:6.1%} {n/total:6.0%}")
 
-    table = []
-    for cid in DECKLIST:
-        w, n = drawn[cid]
-        wwd = (w / n) if n else float("nan")
-        table.append((cid, wwd, wwd - deck_wr, n))
-    table.sort(key=lambda t: -t[1])
+    rmap = {"common": "C", "rare": "R", "legendary": "L"}
+    csv_rows = []
 
-    print(f"\nUNIFIED per-card ranking (overall = {deck_wr:.1%}; all x1, equal draw rate; "
-          f"{tot_n} games):")
-    print(f"  {'#':>2} {'card':<18}{'R':<2}{'STR':<4}{'kw':<12}{'impact':>8}{'wwd':>8}{'draw%':>7}")
-    for i, (cid, wwd, impact, n) in enumerate(table, 1):
+    # --- seat A: the baseline rig ---
+    base_tab = _rank({cid: drawn[cid] for cid in DECKLIST}, deck_wr)
+    if args.report in ("self", "both"):
+        print(f"\nrig win rate vs field (pilot {args.pilot}):")
+        for f, wr in sorted(rates.items(), key=lambda kv: kv[1]):
+            print(f"  vs {f:<22} {wr:.1%}")
+        print(f"  OVERALL {deck_wr:.1%} | worst {min(rates.values()):.1%} | "
+              f"best {max(rates.values()):.1%}")
+        print(f"\nUNIFIED per-card ranking (overall = {deck_wr:.1%}; all x1, equal draw rate; "
+              f"{tot_n} games):")
+        _print_table(base_tab, tot_n, lambda cid: RARITY[cid])
+
+        imp = {cid: impact for cid, _, impact, _ in base_tab}
+        def ladder(label, ids):
+            print(f"  {label:<16} " + "  ".join(f"STR{cards[i].base_strength}={imp[i]:+.1%}"
+                                                for i in ids if i in imp))
+        print("\nSTRENGTH LADDERS (impact by body size):")
+        ladder("vanilla", VANILLA_LADDER)
+        ladder("apex (free)", APEX_FREE_LADDER)
+    for i, (cid, wwd, impact, n) in enumerate(base_tab, 1):
         c = cards[cid]
-        print(f"  {i:>2} {c.name:<18}{RARITY[cid]:<2}{str(c.base_strength):<4}{_kw(c):<12}"
-              f"{impact:+7.1%} {wwd:6.1%} {n/tot_n:6.0%}")
+        csv_rows.append(["baseline", i, cid, c.name, RARITY[cid], c.base_strength, _kw(c),
+                         n, round(n / tot_n, 4), round(wwd, 4), round(impact, 4)])
 
-    imp = {cid: impact for cid, _, impact, _ in table}
-    def ladder(label, ids):
-        print(f"  {label:<16} " + "  ".join(f"STR{cards[i].base_strength}={imp[i]:+.1%}"
-                                            for i in ids if i in imp))
-    print("\nSTRENGTH LADDERS (impact by body size):")
-    ladder("vanilla", VANILLA_LADDER)
-    ladder("apex (free)", APEX_FREE_LADDER)
+    # --- seat B: each field deck vs the baseline ---
+    if args.report in ("opponent", "both"):
+        print(f"\nfield-deck win rate vs the baseline (pilot {args.pilot}):")
+        for f, wr in sorted(rates.items(), key=lambda kv: kv[1]):
+            fwr = 1.0 - wr
+            print(f"  {f:<22} {fwr:.1%}  ({'beats baseline' if fwr > 0.5 else 'loses'})")
+    for f in sorted(field, key=lambda x: -rates[x]):
+        fwr, fn = matchups[f]["B"]["credit"] / matchups[f]["B"]["n"], matchups[f]["B"]["n"]
+        ftab = _rank(matchups[f]["B"]["cards"], fwr)
+        if args.report in ("opponent", "both"):
+            print(f"\n{f} vs baseline = {fwr:.1%}  ({fn} games) - per-card impact:")
+            _print_table(ftab, fn, lambda cid: rmap.get(getattr(cards[cid], "rarity", ""), "?"))
+        for i, (cid, wwd, impact, n) in enumerate(ftab, 1):
+            c = cards[cid]
+            csv_rows.append([f, i, cid, c.name, rmap.get(getattr(c, "rarity", ""), "?"),
+                             c.base_strength, _kw(c), n, round(n / fn, 4), round(wwd, 4),
+                             round(impact, 4)])
 
+    # One CSV, every deck, every card: `deck` is "baseline" for the rig's own pooled ranking and
+    # the field slug for each opponent's. Always both tables regardless of --report.
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         with args.out.open("w", newline="") as fh:
             w = csv.writer(fh)
-            w.writerow(["rank", "card_id", "name", "rarity", "strength", "keywords",
+            w.writerow(["deck", "rank", "card_id", "name", "rarity", "strength", "keywords",
                         "drawn_games", "draw_rate", "win_rate_when_drawn", "impact"])
-            for i, (cid, wwd, impact, n) in enumerate(table, 1):
-                c = cards[cid]
-                w.writerow([i, cid, c.name, RARITY[cid], c.base_strength, _kw(c),
-                            n, round(n / tot_n, 4), round(wwd, 4), round(impact, 4)])
+            w.writerows(csv_rows)
         print(f"\nwrote {args.out}", file=sys.stderr)
     print(f"(checkpoint: {ckpt_path})", file=sys.stderr)
 
