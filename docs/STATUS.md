@@ -140,8 +140,7 @@ inspector rail, responsive hand shelf / deck trackers / food bars, in-app JSONL 
 — all kept working at the compact 80×24 layout.
 
 **Next:**
-1. **Fix the `map_b` board overflow in `./run`** (the `rich` CLI, `render/text.py`) — the 5-column map renders ~95 cols and wraps on an 80-col terminal. (The recorder now fits 80 cols; the `./run` renderer still needs the responsive/compressed geometry.)
-2. **Full general-purpose TUI** (`textual`, beyond the recorder) — *parked*; revisit when `rich` feels limiting.
+1. **Full general-purpose TUI** (`textual`, beyond the recorder) — *parked*; revisit when `rich` feels limiting.
 
 _Visual-polish pass done (commit `7d1b961`): dimmed empties, held-region chips, food progress bars, tighter cards, first renderer test._
 
