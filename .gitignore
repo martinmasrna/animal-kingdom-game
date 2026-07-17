@@ -5,9 +5,10 @@ __pycache__/
 .pytest_cache/
 build/
 dist/
-# sim outputs
+# sim outputs (re-runnable; human recordings are NOT — keep those tracked)
 *.sim.csv
 *.sim.json
-results/
+results/*
+!results/human_games/
 # local Claude Code settings
 .claude/settings.local.json
