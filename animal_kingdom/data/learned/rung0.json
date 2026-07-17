@@ -1,0 +1,41 @@
+{
+  "feature_set": "rung0",
+  "feature_schema_hash": "e6367321913d11c0",
+  "weights": [
+    0.036453156912626794,
+    -0.6130530432475552,
+    0.06154744410358678,
+    0.04644421458800239,
+    0.04679528968680095,
+    0.6083608626421876,
+    0.2889002234347304,
+    0.5779901199095734,
+    0.22466167160062991,
+    -0.3047677851969164,
+    0.8814885248154707
+  ],
+  "bias": -0.17702803554149654,
+  "provenance": {
+    "git_rev": "9e380083bc90f5c539ad342110d2221ab2a9bcce",
+    "created_unix": 1784325389.0001578,
+    "run_id": "rung0_v2",
+    "notes": "session-1 rung0 v2: readiness-projection fix + linear alpha decay",
+    "source_checkpoint": "results\\learn\\rung0_v2\\checkpoint.json",
+    "training_iteration": 60,
+    "training_git_rev": "9e380083bc90f5c539ad342110d2221ab2a9bcce",
+    "training_config": {
+      "feature_set": "rung0",
+      "lam": 0.8,
+      "alpha": 0.01,
+      "alpha_final": 0.001,
+      "alpha_decay_iters": 60,
+      "epsilon": 0.05,
+      "grad_clip": 5.0,
+      "run_seed": 0,
+      "batch_size": 500,
+      "anchor_fraction": 0.2,
+      "map_id": "map_b",
+      "init_weights": null
+    }
+  }
+}
