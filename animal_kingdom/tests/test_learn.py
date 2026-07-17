@@ -116,6 +116,59 @@ def test_no_anchor_yields_both_seats_trajectories():
     assert {t.seat for t in trajectories} == {"A", "B"}
 
 
+def test_effect_readiness_is_exercised_in_training_phis():
+    # Regression (2026-07-17): every guard in enabled_battlecry_count (opponent to act /
+    # actions already taken / pending choice) fires on every possible *raw* afterstate shape,
+    # so recording raw afterstates left the effect_readiness column identically zero across
+    # whole training runs - its weight could never receive a TD gradient, while the deployed
+    # turn tier (whose _planning_eval reframes end-of-turn states to the owner's next
+    # top-level decision) would actually consume the feature. Training now records
+    # end-of-turn afterstates through that same reframe (see extract_as_scored); with a
+    # battlecry-heavy deck (cats) the column must be nonzero on some emitted phis.
+    idx = features.RUNG0_FEATURES.index("effect_readiness")
+    nonzero = 0
+    total = 0
+    for seed in range(4):
+        spec = EpisodeSpec(deck_a="cats_midrange", deck_b="cats_midrange", seed=seed,
+                           feature_set="rung0", weights=(0.1,) * N_RUNG0, epsilon=0.05)
+        for traj in play_episode(spec):
+            for phi in traj.phis:
+                total += 1
+                if phi[idx] != 0.0:
+                    nonzero += 1
+    assert total > 0
+    assert nonzero > 0, (
+        "effect_readiness was zero on every training afterstate - the reframe projection "
+        "in extract_as_scored has regressed"
+    )
+
+
+def test_extract_as_scored_matches_raw_extraction_mid_turn():
+    # Mid-turn afterstates (still my turn) are scored raw at deployment, so the projection
+    # helper must leave them untouched - only end-of-turn states get the reframe.
+    from animal_kingdom.learn.episodes import extract_as_scored
+    from animal_kingdom.tests._helpers import make_state
+
+    s = make_state(hands={"A": ["rat", "mouse"]}, decks={"A": ["mouse"] * 3, "B": []})
+    s.actions_taken_this_turn = 1   # my second action still to come
+    assert extract_as_scored(s, "A", "rung0") == features.extract(s, "A", "rung0")
+
+
+def test_extract_as_scored_restores_the_reframed_state():
+    # The reframe must be read-only from the caller's perspective: after extraction the
+    # state's four reframed fields are byte-identical to before.
+    from animal_kingdom.learn.episodes import extract_as_scored
+    from animal_kingdom.tests._helpers import make_state
+
+    s = make_state(current="B", hands={"A": ["rat", "mouse"], "B": ["lion"]},
+                   decks={"A": ["mouse"] * 3, "B": ["mouse"] * 3})
+    s.actions_taken_this_turn = 0
+    before = (s.current, s.pending, list(s.effect_stack), s.actions_taken_this_turn)
+    extract_as_scored(s, "A", "rung0")   # A's end-of-turn afterstate: B is to move
+    after = (s.current, s.pending, list(s.effect_stack), s.actions_taken_this_turn)
+    assert before == after
+
+
 def test_trajectory_phis_have_the_right_width_and_outcomes_are_valid():
     spec = _toy_spec(seed=5)
     for traj in play_episode(spec):
@@ -223,6 +276,54 @@ def test_empty_trajectory_is_skipped_without_error():
     stats = trainer.update([empty])
     assert stats["n_trajectories_used"] == 0
     assert all(w == 0.0 for w in trainer.weights)
+
+
+# ------------------------------------------------------------------- learning-rate decay
+
+def test_alpha_constant_by_default():
+    cfg = TrainConfig(feature_set="rung0", alpha=0.01)
+    trainer = TDTrainer(cfg)
+    assert all(trainer.alpha_at(k) == 0.01 for k in (0, 1, 30, 60, 1000))
+
+
+def test_alpha_linear_decay_endpoints_and_floor():
+    cfg = TrainConfig(feature_set="rung0", alpha=0.01, alpha_final=0.001,
+                      alpha_decay_iters=60)
+    trainer = TDTrainer(cfg)
+    assert trainer.alpha_at(0) == pytest.approx(0.01)
+    assert trainer.alpha_at(30) == pytest.approx((0.01 + 0.001) / 2)
+    assert trainer.alpha_at(60) == pytest.approx(0.001)
+    assert trainer.alpha_at(1000) == pytest.approx(0.001)   # floor after the decay window
+
+
+def test_update_uses_the_scheduled_alpha():
+    # The same single-step trajectory applied at iteration 0 vs deep into the decay window
+    # must produce weight steps in exactly the ratio of the scheduled alphas.
+    def one_step(iteration):
+        cfg = TrainConfig(feature_set="rung0", lam=0.8, alpha=0.1, alpha_final=0.01,
+                          alpha_decay_iters=10, grad_clip=1e9)
+        trainer = TDTrainer(cfg)
+        phi = [0.0] * N_RUNG0
+        phi[FOOD_IDX] = 1.0
+        traj = Trajectory(seat="A", deck="x", opponent_deck="y", seed=0, phis=[phi],
+                          outcome=1.0)
+        trainer.update([traj], iteration)
+        return trainer, list(trainer.weights)
+
+    trainer0, w0 = one_step(0)
+    trainer5, w5 = one_step(5)
+    ratio = trainer5.alpha_at(5) / trainer0.alpha_at(0)
+    assert w5[FOOD_IDX] == pytest.approx(w0[FOOD_IDX] * ratio, abs=1e-12)
+
+
+def test_decay_schedule_is_part_of_the_run_key(tmp_path):
+    cfg = TrainConfig(feature_set="rung0", batch_size=3, total_episodes=3, jobs=1,
+                      run_seed=5, arena_every=1000)
+    out = tmp_path / "run"
+    learn_train.run_training(cfg, out)
+    decayed = TrainConfig(**{**cfg.__dict__, "alpha_final": 0.001})
+    with pytest.raises(SystemExit):
+        learn_train.run_training(decayed, out)   # a changed schedule is a different run
 
 
 # --------------------------------------------------------- toy convergence: learns the sign

@@ -29,6 +29,7 @@ from typing import Optional
 
 from ..bots.base import Bot
 from ..bots.greedy_bot import GreedyBot
+from ..bots.turn_search import _reframed_at_my_turn
 from ..bots import features
 from ..decks import load_premade_deck
 from ..engine import rules
@@ -136,8 +137,29 @@ class ExplorationBot(Bot):
             nxt = state.clone()
             rules.apply_action(nxt, action)
             if nxt.result is None:
-                self.trajectory.append(features.extract(nxt, view.player, self.feature_set))
+                self.trajectory.append(extract_as_scored(nxt, view.player, self.feature_set))
         return action
+
+
+def extract_as_scored(state: GameState, me: str, feature_set: str) -> list:
+    """`features.extract()` for a training afterstate, matching what the deployed learned
+    evaluator scores for the same position.
+
+    While it's still `me`'s turn (a mid-turn afterstate: my second action, or a pending
+    sub-choice), the deployed search scores the raw state, so raw extraction is correct. Once
+    control has passed to the opponent (an end-of-own-turn afterstate), the deployed learned
+    path is `TurnSearcher._planning_eval`: it applies the 4-field reframe to `me`'s next
+    top-level decision and re-evaluates the whole feature vector there. Recording the raw
+    state instead would leave `effect_readiness` structurally zero on *every* trainable
+    afterstate (each of `enabled_battlecry_count`'s guards - opponent to act, actions already
+    taken, or a pending choice - fires on every possible afterstate shape), so its weight
+    could never receive a gradient and the feature the turn tier actually consumes at
+    deployment would go untrained. The reframe also keeps `pending_payoff`'s current-player
+    horizon discount consistent with what `_planning_eval` evaluates.
+    """
+    if state.current == me:
+        return features.extract(state, me, feature_set)
+    return _reframed_at_my_turn(state, me, lambda: features.extract(state, me, feature_set))
 
 
 def _outcome_for(result, seat: str) -> float:
