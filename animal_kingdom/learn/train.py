@@ -39,8 +39,9 @@ from .episodes import EpisodeSpec, all_deck_pairs, ensure_baseline_registered, p
 from .td import TDTrainer, TrainConfig
 
 CKPT_VERSION = 1
-CURVE_FIELDS_BASE = ("iteration", "episodes", "n_trajectories", "n_trajectories_used",
-                    "n_steps", "mean_abs_delta", "logloss", "weight_norm")
+CURVE_FIELDS_BASE = ("iteration", "episodes", "alpha", "n_trajectories",
+                    "n_trajectories_used", "n_steps", "mean_abs_delta", "logloss",
+                    "weight_norm")
 
 
 # Fields that determine the deterministic weight trajectory a checkpoint encodes. A resumed
@@ -49,8 +50,9 @@ CURVE_FIELDS_BASE = ("iteration", "episodes", "n_trajectories", "n_trajectories_
 # a legitimate continue-training operation, not a different run), `jobs` (doesn't affect the
 # result - `ex.map` is order-preserving regardless of worker count), and the `arena_*` fields
 # (reporting/probe cadence only, never touch `trainer.weights`).
-_IDENTITY_FIELDS = ("feature_set", "lam", "alpha", "epsilon", "grad_clip", "run_seed",
-                    "batch_size", "anchor_fraction", "map_id", "init_weights")
+_IDENTITY_FIELDS = ("feature_set", "lam", "alpha", "alpha_final", "alpha_decay_iters",
+                    "epsilon", "grad_clip", "run_seed", "batch_size", "anchor_fraction",
+                    "map_id", "init_weights")
 
 
 def _run_key(cfg: TrainConfig) -> dict:
@@ -182,7 +184,7 @@ def run_training(
         batches = (list(ex.map(play_episode, specs)) if ex is not None
                   else [play_episode(s) for s in specs])          # order-preserving either way
         trajectories = [t for batch in batches for t in batch]
-        stats = trainer.update(trajectories)                      # sequential updates, in order
+        stats = trainer.update(trajectories, iteration)           # sequential updates, in order
 
         row = {
             "iteration": iteration + 1,
@@ -236,6 +238,13 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
     p.add_argument("--lam", type=float, default=0.8)
     p.add_argument("--alpha", type=float, default=0.01)
+    p.add_argument("--alpha-final", type=float, default=None,
+                   help="enable linear learning-rate decay from --alpha down to this value "
+                        "over --alpha-decay-iters iterations (default: no decay, constant "
+                        "--alpha; a changed schedule is a new run key)")
+    p.add_argument("--alpha-decay-iters", type=int, default=60,
+                   help="iterations over which --alpha decays linearly to --alpha-final "
+                        "(ignored without --alpha-final)")
     p.add_argument("--epsilon", type=float, default=0.05)
     p.add_argument("--grad-clip", type=float, default=5.0)
     p.add_argument("--anchor-fraction", type=float, default=0.20)
@@ -248,7 +257,9 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     args = p.parse_args(argv)
 
     cfg = TrainConfig(
-        feature_set=args.feature_set, lam=args.lam, alpha=args.alpha, epsilon=args.epsilon,
+        feature_set=args.feature_set, lam=args.lam, alpha=args.alpha,
+        alpha_final=args.alpha_final, alpha_decay_iters=args.alpha_decay_iters,
+        epsilon=args.epsilon,
         grad_clip=args.grad_clip, run_seed=args.run_seed, batch_size=args.batch_size,
         anchor_fraction=args.anchor_fraction, total_episodes=args.total_episodes,
         jobs=args.jobs, map_id=args.map_id, arena_every=args.arena_every,
@@ -260,6 +271,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     def _progress(iteration, total, stats, arena_row):
         elapsed = time.monotonic() - start
         msg = (f"\r  [{iteration}/{total}] {elapsed:7.1f}s  "
+              f"a={stats['alpha']:.4g}  "
               f"mean|d|={stats['mean_abs_delta']:.4f}  logloss={stats['logloss']:.4f}  "
               f"||w||={stats['weight_norm']:.3f}")
         if arena_row is not None:

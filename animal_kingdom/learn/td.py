@@ -57,6 +57,16 @@ class TrainConfig:
     feature_set: str = "rung0"
     lam: float = 0.8
     alpha: float = 0.01
+    # Optional linear learning-rate decay: alpha at iteration k moves linearly from `alpha`
+    # (k=0) to `alpha_final` (k >= alpha_decay_iters), then stays at `alpha_final`. Default
+    # None = the original constant-alpha behaviour, byte-for-byte (backward compatible).
+    # Motivated by the 2026-07-17 rung-0 run: constant alpha left logloss flat while ||w||
+    # grew near-linearly for 60 iterations - the update was circling the target instead of
+    # landing on it. Deliberately parameterized by its own iteration count (never by
+    # `total_episodes`, which is excluded from the run-key identity so runs stay extendable);
+    # both decay fields ARE part of the run key - a changed schedule is a different run.
+    alpha_final: Optional[float] = None
+    alpha_decay_iters: int = 60
     epsilon: float = 0.05
     grad_clip: float = 5.0
     run_seed: int = 0
@@ -103,6 +113,17 @@ class TDTrainer:
         w = [float(x) for x in self.weights]
         return LinearEval(feature_set=self.config.feature_set, weights=tuple(w[:-1]), bias=w[-1])
 
+    def alpha_at(self, iteration: int) -> float:
+        """The learning rate for iteration `iteration` (0-based) under the configured
+        schedule - `alpha` itself when no decay is configured (see TrainConfig)."""
+        cfg = self.config
+        if cfg.alpha_final is None:
+            return cfg.alpha
+        if iteration >= cfg.alpha_decay_iters:
+            return cfg.alpha_final
+        frac = iteration / cfg.alpha_decay_iters
+        return cfg.alpha + (cfg.alpha_final - cfg.alpha) * frac
+
     def set_weights(self, values: Sequence[float]) -> None:
         np = _np()
         n = _param_size(self.config.feature_set)
@@ -111,14 +132,17 @@ class TDTrainer:
             raise ValueError(f"expected {n} weight values, got {len(values)}")
         self.weights = np.array(values, dtype=float)
 
-    def update(self, trajectories: Sequence[Trajectory]) -> dict:
+    def update(self, trajectories: Sequence[Trajectory], iteration: int = 0) -> dict:
         """One sequential TD(lambda) pass over a batch of trajectories - mutates
-        `self.weights` in place, once per trajectory, in list order. Returns batch
-        diagnostics computed from each trajectory's PRE-update predictions (so `logloss`
-        measures the snapshot the episodes were actually generated with, not a value already
-        nudged by this same batch)."""
+        `self.weights` in place, once per trajectory, in list order. `iteration` (the
+        0-based training-iteration index) selects the learning rate under the configured
+        schedule (`alpha_at`); the default 0 preserves the plain constant-alpha call form.
+        Returns batch diagnostics computed from each trajectory's PRE-update predictions
+        (so `logloss` measures the snapshot the episodes were actually generated with, not
+        a value already nudged by this same batch)."""
         np = _np()
         cfg = self.config
+        alpha = self.alpha_at(iteration)
         w = self.weights
         total_abs_delta = 0.0
         total_logloss = 0.0
@@ -140,7 +164,7 @@ class TDTrainer:
             for t in range(len(preds)):
                 trace = cfg.lam * trace + grads[t]
                 dw += deltas[t] * trace
-            dw *= cfg.alpha
+            dw *= alpha
             norm = float(np.linalg.norm(dw))
             if cfg.grad_clip and norm > cfg.grad_clip:
                 dw *= cfg.grad_clip / norm
@@ -156,6 +180,7 @@ class TDTrainer:
             )
 
         return {
+            "alpha": alpha,
             "n_trajectories": len(trajectories),
             "n_trajectories_used": n_trajectories_used,
             "n_steps": n_steps,
