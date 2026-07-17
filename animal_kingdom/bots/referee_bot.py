@@ -48,6 +48,7 @@ from ..engine import rules
 from ..engine.actions import Action, DrawAction, PlaceAction
 from ..engine.state import GameState, StateView
 from .greedy_bot import GreedyWeights, _battlecry_fizzled
+from .learned_eval import LinearEval
 from .turn_search import TurnSearcher
 
 
@@ -57,9 +58,11 @@ class RefereeBot(TurnSearcher):
                  determinizations: int = 5, beam_width: int = 8,
                  staged: bool = True, root_width: int = 5,
                  reply_width: int = 4,
-                 max_search_nodes: Optional[int] = 1_000):
+                 max_search_nodes: Optional[int] = 1_000,
+                 evaluator: Optional[LinearEval] = None):
         super().__init__(weights=weights, rng=rng, seed=seed,
-                         determinizations=determinizations, beam_width=beam_width)
+                         determinizations=determinizations, beam_width=beam_width,
+                         evaluator=evaluator)
         self.staged = staged
         self.root_width = root_width
         self.reply_width = reply_width

@@ -27,6 +27,7 @@ import random
 from typing import Optional
 
 from .greedy_bot import GreedyWeights
+from .learned_eval import LinearEval
 from .turn_search import TurnSearcher
 
 # Defaults mirrored by sim.runner.TURN_DETERMINIZATIONS / TURN_BEAM_WIDTH (kept in sync
@@ -55,11 +56,12 @@ class TurnBot(TurnSearcher):
                  determinizations: int = TURN_DETERMINIZATIONS,
                  beam_width: int = TURN_BEAM_WIDTH,
                  deck_reveal_choice_width: int = TURN_DECK_REVEAL_CHOICE_WIDTH,
-                 max_search_nodes: Optional[int] = TURN_MAX_SEARCH_NODES):
+                 max_search_nodes: Optional[int] = TURN_MAX_SEARCH_NODES,
+                 evaluator: Optional[LinearEval] = None):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          deck_reveal_choice_width=deck_reveal_choice_width,
-                         max_search_nodes=max_search_nodes)
+                         max_search_nodes=max_search_nodes, evaluator=evaluator)
 
     def _begin_root_candidate(self, action) -> None:
         # Per-root budget: each root candidate gets a fresh node allowance (mirrors the oracle).

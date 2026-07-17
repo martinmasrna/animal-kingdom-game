@@ -48,6 +48,7 @@ from ..engine.actions import Action, DrawAction
 from ..engine.state import GameState, StateView, other_player
 from .base import Bot
 from . import features as _features
+from .learned_eval import LinearEval
 # Re-exported for backward compatibility: turn_search.py/referee_bot.py import these names
 # from greedy_bot (their bodies now live in features.py - the shared rung-0/rung-1 module -
 # see features.py's module docstring for why).
@@ -98,12 +99,23 @@ class GreedyWeights:
 class GreedyBot(Bot):
     def __init__(self, weights: Optional[GreedyWeights] = None,
                  rng: Optional[random.Random] = None, seed: Optional[int] = None,
-                 depth: int = 1, beam_width: int = 8):
+                 depth: int = 1, beam_width: int = 8,
+                 evaluator: Optional[LinearEval] = None):
         self.weights = weights or GreedyWeights()
         # RNG only breaks exact eval ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
         self.depth = depth
         self.beam_width = beam_width
+        # Learned-pilot seam (default None => the hand path below is byte-identical to
+        # before this existed). See `_eval`.
+        self.evaluator = evaluator
+
+    def _eval(self, state: GameState, me: str) -> float:
+        """Routes to the learned evaluator if one was supplied, else the hand-written
+        `evaluate()`. The one chokepoint every scoring call in this bot goes through."""
+        if self.evaluator is not None:
+            return self.evaluator.value(state, me)
+        return evaluate(state, me, self.weights)
 
     def choose(
         self,
@@ -157,21 +169,21 @@ class GreedyBot(Bot):
         """The value of `state` (right after one of my placements) `remaining_depth` more of
         my own placements deep. `remaining_depth <= 0` is exactly the original 1-ply score."""
         if remaining_depth <= 0 or state.result is not None:
-            return evaluate(state, me, self.weights)
+            return self._eval(state, me)
 
         state = self._advance_to_my_turn(state, me)
         if state.result is not None:
-            return evaluate(state, me, self.weights)
+            return self._eval(state, me)
 
         candidates = rules.legal_actions(state)
         if not candidates:
-            return evaluate(state, me, self.weights)
+            return self._eval(state, me)
 
         scored: list[tuple[float, GameState]] = []
         for action in candidates:
             nxt = state.clone()
             rules.apply_action(nxt, action)
-            scored.append((evaluate(nxt, me, self.weights), nxt))
+            scored.append((self._eval(nxt, me), nxt))
         scored.sort(key=lambda pair: pair[0], reverse=True)
         beam = scored[: self.beam_width] if self.beam_width else scored
 

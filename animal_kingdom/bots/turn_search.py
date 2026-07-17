@@ -44,6 +44,7 @@ from .greedy_bot import (
     _opponent_lethal_next_turn,
     evaluate,
 )
+from .learned_eval import LinearEval
 
 # Terminal evals are +/-inf; averaging a won world with a lost one must yield a large
 # finite number (fraction-of-worlds-won), not NaN.
@@ -57,6 +58,26 @@ _DET_SEED_SALT = 0x9E3779B9
 _MAX_DEPTH = 40
 
 
+def _reframed_at_my_turn(state: GameState, me: str, fn):
+    """Temporarily reframe `state` to `me`'s next top-level decision, call `fn()`, then
+    restore. Shared by `_planning_eval`'s hand path (`_enabled_battlecry_count`) and learned
+    path (re-scoring via `_clamped_eval`) - both only *read* the state (their own internal
+    clones absorb any trial placements), so this reframe-and-restore is byte-identical to a
+    full clone but one fewer clone per planning eval.
+    """
+    saved = (state.current, state.pending, state.effect_stack,
+             state.actions_taken_this_turn)
+    state.current = me
+    state.pending = None
+    state.effect_stack = []
+    state.actions_taken_this_turn = 0
+    try:
+        return fn()
+    finally:
+        (state.current, state.pending, state.effect_stack,
+         state.actions_taken_this_turn) = saved
+
+
 class TurnSearcher(Bot):
     """Determinized complete-own-turn planner. Base behaviour is TurnBot's; RefereeBot
     subclasses and overrides the reply/opponent-policy hooks."""
@@ -65,13 +86,17 @@ class TurnSearcher(Bot):
                  rng: Optional[random.Random] = None, seed: Optional[int] = None,
                  determinizations: int = 3, beam_width: int = 8,
                  deck_reveal_choice_width: int = 0,
-                 max_search_nodes: Optional[int] = None):
+                 max_search_nodes: Optional[int] = None,
+                 evaluator: Optional[LinearEval] = None):
         self.weights = weights or GreedyWeights()
         # RNG only breaks exact score ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
         self.det_rng = random.Random(None if seed is None else seed + _DET_SEED_SALT)
         self.determinizations = determinizations
         self.beam_width = beam_width
+        # Learned-pilot seam (default None => the hand path is byte-identical to before this
+        # existed). See `_eval`.
+        self.evaluator = evaluator
         # Per-root own-turn node budget (None = exhaustive; used by TurnBot's override and by
         # RefereeBot's staged budget). When a root's expansion exceeds it, `_greedy_complete_turn`
         # finishes the line without branching, bounding the shallow-but-bushy breadth blow-up.
@@ -79,9 +104,12 @@ class TurnSearcher(Bot):
         self._search_nodes = 0
         # One greedy policy plays every non-branching completion seat: my remaining own actions
         # in a budget-exhausted line, and (for RefereeBot) the sampled opponent reply. Being the
-        # real GreedyBot, it carries the lethal-avoidance and fizzle logic with it.
+        # real GreedyBot, it carries the lethal-avoidance and fizzle logic with it - and the same
+        # evaluator, so budget-exhausted completions and referee replies stay consistent with
+        # the rest of the search.
         self._policy = GreedyBot(weights=self.weights,
-                                 seed=None if seed is None else seed + 1)
+                                 seed=None if seed is None else seed + 1,
+                                 evaluator=self.evaluator)
         # Beam width for a deck-reveal choice reached *in lookahead* (Owl's kept card, Raven's
         # shuffle-backs). 0 = disabled (defer to the normal `beam_width`); N>=1 = keep only the
         # top-N options by 1-ply eval. The options are re-sampled deck cards (determinize
@@ -393,8 +421,15 @@ class TurnSearcher(Bot):
             self._planning_eval(state, me) - penalty for state, penalty in branches
         ) / len(branches)
 
+    def _eval(self, state: GameState, me: str) -> float:
+        """Routes to the learned evaluator if one was supplied, else the hand-written
+        `evaluate()` - the same chokepoint GreedyBot uses (see its `_eval`)."""
+        if self.evaluator is not None:
+            return self.evaluator.value(state, me)
+        return evaluate(state, me, self.weights)
+
     def _clamped_eval(self, state: GameState, me: str) -> float:
-        score = evaluate(state, me, self.weights)
+        score = self._eval(state, me)
         return max(-_DECISIVE, min(_DECISIVE, score))
 
     def _planning_eval(self, state: GameState, me: str) -> float:
@@ -407,21 +442,16 @@ class TurnSearcher(Bot):
         score = self._clamped_eval(state, me)
         if state.result is not None or state.current == me:
             return score
+        if self.evaluator is not None:
+            # Learned path: `effect_readiness` is already a feature inside phi, so simply
+            # re-evaluating the reframed state at my next top-level decision subsumes the
+            # hand path's manual readiness addition below - no separate term to add.
+            return _reframed_at_my_turn(state, me, lambda: self._clamped_eval(state, me))
         # Readiness projection: _enabled_battlecry_count needs the position framed at my next
         # top-level decision. It only *reads* the state (its own internal clones absorb the
         # trial placements), so temporarily reframe these four fields and restore them rather
         # than cloning the whole state - byte-identical, one fewer full clone per planning eval.
-        saved = (state.current, state.pending, state.effect_stack,
-                 state.actions_taken_this_turn)
-        state.current = me
-        state.pending = None
-        state.effect_stack = []
-        state.actions_taken_this_turn = 0
-        try:
-            readiness = _enabled_battlecry_count(state, me)
-        finally:
-            (state.current, state.pending, state.effect_stack,
-             state.actions_taken_this_turn) = saved
+        readiness = _reframed_at_my_turn(state, me, lambda: _enabled_battlecry_count(state, me))
         return max(
             -_DECISIVE,
             min(_DECISIVE, score + self.weights.effect_readiness * readiness),
