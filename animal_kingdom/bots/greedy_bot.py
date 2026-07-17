@@ -44,11 +44,17 @@ from dataclasses import dataclass
 from typing import Optional, Sequence
 
 from ..engine import rules
-from ..engine.actions import Action, DrawAction, PlaceAction
-from ..engine.effects import legal_placements
+from ..engine.actions import Action, DrawAction
 from ..engine.state import GameState, StateView, other_player
-from ..engine.strength import effective_strength
 from .base import Bot
+from . import features as _features
+# Re-exported for backward compatibility: turn_search.py/referee_bot.py import these names
+# from greedy_bot (their bodies now live in features.py - the shared rung-0/rung-1 module -
+# see features.py's module docstring for why).
+from .features import (  # noqa: F401
+    _battlecry_fizzled,
+    enabled_battlecry_count as _enabled_battlecry_count,
+)
 
 
 @dataclass(frozen=True)
@@ -217,7 +223,13 @@ def _opponent_lethal_next_turn(state: GameState, opponent: str) -> bool:
 
 
 def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
-    """Heuristic value of `state` from `me`'s perspective (higher is better)."""
+    """Heuristic value of `state` from `me`'s perspective (higher is better).
+
+    Term bodies live in `bots/features.py` (rung 0 is exactly these 11 terms - see its module
+    docstring); this function just applies `weights` to them, preserving the original
+    skip-when-zero-weight short-circuits (`coverage_exposure`, `pending_payoff`) so perf is
+    unchanged.
+    """
     opp = other_player(me)
 
     if state.result is not None:                       # terminal: decisive
@@ -227,23 +239,16 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
             return -math.inf
         return 0.0                                     # draw
 
-    gm = state.game_map
     w = weights
     score = 0.0
 
     # --- Food: net total + proximity to the food win ---
-    score += w.food_progress * (state.food[me] - state.food[opp])
-    score += w.food_proximity * (state.food[me] / gm.win_food)
+    food_progress, food_proximity = _features.food_terms(state, me, opp)
+    score += w.food_progress * food_progress
+    score += w.food_proximity * food_proximity
 
     # --- Board presence: net effective strength of controlled crossroads ---
-    presence = 0.0
-    for stack in state.board.values():
-        if not stack:
-            continue
-        top = stack[-1]
-        s = effective_strength(state, top)
-        presence += s if top.owner == me else -s
-    score += w.board_presence * presence
+    score += w.board_presence * _features.board_presence(state, me, opp)
 
     # --- Connection: own units linked to my HQ (placement reach + resilience) ---
     # Computed once and reused for the HQ-threat term below (same BFS, was run twice).
@@ -254,19 +259,14 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     # A lone central unit can touch four regions but is nowhere close to producing any of
     # them. Cubing the completion fraction keeps that speculative footprint small while
     # still making a 3/4 or completed region strategically meaningful.
-    region = 0.0
-    for r in gm.regions.values():
-        n = len(r.corners)
-        mine = sum(1 for c in r.corners if state.owner_of(c) == me) / n
-        theirs = sum(1 for c in r.corners if state.owner_of(c) == opp) / n
-        region += r.food * (mine ** 3 - theirs ** 3)
-    score += w.region_control * region
+    score += w.region_control * _features.region_control(state, me, opp)
 
     # --- HQ threat: only a connected chain can capture next turn. An isolated Flight unit
     # in front of an HQ is board presence, not an immediate HQ threat.
     opp_connection = state.connected_occupied(opp)
-    score += w.enemy_hq_threat * sum(1 for cr in gm.hq_front(opp) if cr in my_connection)
-    score -= w.own_hq_threat * sum(1 for cr in gm.hq_front(me) if cr in opp_connection)
+    enemy_threat, own_threat = _features.hq_threat_terms(state, me, opp, my_connection, opp_connection)
+    score += w.enemy_hq_threat * enemy_threat
+    score -= w.own_hq_threat * own_threat
 
     # --- Coverage exposure: expected own-HQ danger one ply ahead, from the *belief* over the
     # opponent's hidden hand. GreedyBot is 1-ply and only sees threats already on the board;
@@ -277,188 +277,25 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     # isolate the belief signal (empty walk-ins are a deterministic threat the lethal-check /
     # own_hq_threat already handle). Off at weight 0.
     if w.coverage_exposure:
-        worst = 0.0                    # opponent gets one placement -> charge the single worst
-        for cr in gm.hq_front(me):     # breach, not the sum (that fantasizes a multi-cover turn)
-            top = state.top_unit(cr)
-            if top is not None and top.owner == me and \
-                    state.is_connected(opp, cr, opp_connection):
-                p = _p_opponent_can_cover(state, opp, effective_strength(state, top))
-                worst = max(worst, p)
-        score -= w.coverage_exposure * worst
+        score -= w.coverage_exposure * _features.coverage_exposure_worst(state, me, opp, opp_connection)
 
     # --- Card economy: net cards in hand (not deck - see GreedyWeights.card_economy) ---
-    score += w.card_economy * (len(state.hands[me]) - len(state.hands[opp]))
+    score += w.card_economy * _features.card_economy(state, me, opp)
 
     # --- Immediately enabled effects in hand ---
     # This is deliberately card-agnostic: the engine itself tells us whether a printed
     # Battlecry would do anything. It values setup states (duplicates, tag thresholds,
     # adjacent targets, eligible follow-up cards) without naming a deck or card.
-    score += w.effect_readiness * _enabled_battlecry_count(state, me)
+    score += w.effect_readiness * _features.enabled_battlecry_count(state, me)
 
     # --- Pending delayed payoffs: net scheduled future effects, imminence-discounted ---
     # A just-placed Egg/Bear contributes ~nothing to board_presence (it's weak now) yet is a
     # real investment that pays off when it fires. Reading state.scheduled credits that future
     # value generically - any delayed effect counts, no card is named. Sooner-firing effects
-    # are worth more (less time for the board to change under them).
+    # are worth more (less time for the board to change under them). `remaining` counts the
+    # OWNER's remaining turns; equals the pre-2026-07-15 `due - turn_counter` exactly - this
+    # term's 20.0 was tuned to that.
     if w.pending_payoff:
-        pending = 0.0
-        for s in state.scheduled:
-            # `remaining` counts the OWNER's remaining turns; discount by the horizon in global
-            # turns, as this term has always done. The owner's turns are 2 apart, less one if they
-            # are not the player to move (their next turn is already one tick away). Equals the
-            # pre-2026-07-15 `due - turn_counter` exactly - this term's 20.0 was tuned to that.
-            horizon = 2 * max(0, s["remaining"]) - (0 if state.current == s["owner"] else 1)
-            disc = 1.0 / (1.0 + max(0, horizon))
-            pending += disc if s["owner"] == me else -disc
-        score += w.pending_payoff * pending
+        score += w.pending_payoff * _features.pending_payoff(state, me, opp)
 
     return score
-
-
-# ------------------------------------------------------------- belief over the hidden hand
-
-def _opponent_unseen_card_ids(state: GameState, opp: str) -> list[str]:
-    """The opponent's unseen cards (hand + deck) as one combined multiset of card ids.
-
-    Public under the open-list rules: this equals the opponent's fixed 30-card list minus
-    everything already observed (their units on the board, cards in the shared remove pile).
-    We read hand and deck *together* and never distinguish which card sits where - the only
-    honest use is the partition-invariant (multiset, hand-size) pair. `_p_opponent_can_cover`
-    consumes just counts, so it cannot leak the split; the honesty test pins this.
-    """
-    ids = [u.card_id for u in state.hands[opp]]
-    ids += state.decks[opp]
-    return ids
-
-
-def _p_opponent_can_cover(state: GameState, opp: str, defender_strength: int) -> float:
-    """Exact P(the opponent's hidden hand holds >=1 unit that can cover `defender_strength`).
-
-    Covering needs a *unit* of printed strength strictly greater (overview.md §6-7). The
-    unseen multiset (see above) splits into `h` cards in hand and the rest in deck uniformly at
-    random, so the marginal is a closed-form hypergeometric - no determinization/sampling.
-    Dynamic-strength units can't be read before placement, so they're conservatively excluded
-    from the coverer count (they still occupy hand/deck slots, i.e. stay in the denominator).
-    """
-    unseen = _opponent_unseen_card_ids(state, opp)
-    N = len(unseen)
-    h = len(state.hands[opp])
-    if N == 0 or h == 0:
-        return 0.0
-    k = 0
-    for cid in unseen:
-        c = state.cards[cid]
-        if c.is_unit and not c.is_dynamic and c.base_strength > defender_strength:
-            k += 1
-    if k == 0:
-        return 0.0
-    if k > N - h:                      # more coverers than deck slots -> at least one in hand
-        return 1.0
-    return 1.0 - math.comb(N - k, h) / math.comb(N, h)
-
-
-# ------------------------------------------------------------- wasted-battlecry detection
-
-def _battlecry_fizzled(pre: GameState, post: GameState, me: str, action: Action) -> bool:
-    """True if `action` played a card with ability text but nothing beyond the unit landing
-    on the board actually happened - e.g. a removal battlecry with no adjacent target.
-
-    A `choose()`-level bot-policy adjustment, not part of `evaluate()`: it needs the
-    before/after pair plus the action taken, which `evaluate()`'s pure-state contract
-    deliberately doesn't carry (see its tests). Generic over card text - it only checks
-    whether anything *observable* moved besides "one fewer card in my hand, one more unit on
-    the board", never the specific card id, so it doesn't special-case any one card.
-    """
-    if not isinstance(action, PlaceAction) or action.is_hq_capture:
-        return False
-    if not pre.cards[action.card_id].has_battlecry:
-        return False  # passives, keywords, Deathrattles, and vanilla units are not Battlecries
-    if post.pending is not None:
-        return False  # battlecry offered a real choice (e.g. which adjacent enemy to
-                       # remove) - it hasn't fizzled, its outcome just isn't resolved yet
-    if post.food != pre.food:
-        return False
-    if len(post.remove_pile) != len(pre.remove_pile):
-        return False
-    opp = other_player(me)
-    if len(post.hands[me]) != len(pre.hands[me]) - 1:
-        return False  # drew/removed extra cards -> something happened
-    if len(post.hands[opp]) != len(pre.hands[opp]):
-        return False  # e.g. bounced an enemy unit back to hand
-    if _unit_count(post) != _unit_count(pre) + 1:
-        return False  # e.g. "play another unit"
-    if _total_strength_counters(post) != _total_strength_counters(pre):
-        return False  # e.g. a buff granted, even with no removal/draw/food attached
-    if len(post.scheduled) != len(pre.scheduled):
-        return False  # delayed Battlecry payoff (Grizzly Bear, Black Bear, Scrooge)
-    return True
-
-
-def _enabled_battlecry_count(state: GameState, player: str) -> int:
-    """Count distinct Battlecries in hand that have at least one live legal placement.
-
-    Only outcome *shape* is observed (draw count, pending choice, removal, and so on);
-    drawn card identities never enter the score. Call only at a top-level decision for
-    `player`; pending effect choices are already concrete and need no readiness estimate.
-    """
-    if (state.result is not None or state.pending is not None
-            or state.player_to_act() != player
-            or state.actions_taken_this_turn != 0):
-        return 0
-    battlecries = {
-        u.card_id for u in state.hands[player]
-        if state.cards[u.card_id].has_battlecry
-    }
-    if not battlecries:
-        return 0
-    # Only battlecry cards can enable a battlecry, so enumerate placements for just those
-    # cards (allowed_cards) instead of every hand card. At a top-level decision (guarded
-    # above) rules.legal_actions == [Draw?] + legal_placements(state, player), so filtering
-    # its battlecry PlaceActions is byte-identical to this restricted enumeration.
-    placements = [
-        a for a in legal_placements(state, player, allowed_cards=battlecries)
-        if not a.is_hq_capture
-    ]
-    # Most Battlecry conditions are board-wide; target-sensitive ones care primarily about
-    # landing on/adjacent to an enemy. Sample those tactical shapes plus one ordinary legal
-    # landing instead of cloning every Flight destination on the map.
-    by_card: dict[str, list[PlaceAction]] = {}
-    for action in placements:
-        by_card.setdefault(action.card_id, []).append(action)
-    representatives: list[PlaceAction] = []
-    opponent = other_player(player)
-    occ = state.connected_occupied(player)   # one BFS for all the is_connected checks below
-    for actions in by_card.values():
-        tactical = [
-            a for a in actions
-            if state.owner_of(a.crossroad) == opponent
-            or any(state.owner_of(nb) == opponent
-                   for nb in state.game_map.neighbors(a.crossroad))
-        ]
-        empty = [a for a in actions if state.top_unit(a.crossroad) is None]
-        connected = [a for a in actions if state.is_connected(player, a.crossroad, occ)]
-        chosen = []
-        for group in (tactical, empty, connected, actions):
-            if group and group[0] not in chosen:
-                chosen.append(group[0])
-        representatives.extend(chosen)
-
-    enabled: set[str] = set()
-    for action in representatives:
-        if action.card_id in enabled:
-            continue
-        nxt = state.clone()
-        rules.apply_action(nxt, action)
-        if not _battlecry_fizzled(state, nxt, player, action):
-            enabled.add(action.card_id)
-    return len(enabled)
-
-
-def _unit_count(state: GameState) -> int:
-    return sum(len(stack) for stack in state.board.values())
-
-
-def _total_strength_counters(state: GameState) -> int:
-    board = sum(u.strength_counter for stack in state.board.values() for u in stack)
-    hands = sum(u.strength_counter for hand in state.hands.values() for u in hand)
-    return board + hands
