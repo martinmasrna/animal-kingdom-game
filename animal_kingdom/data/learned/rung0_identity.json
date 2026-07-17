@@ -1,0 +1,22 @@
+{
+  "feature_set": "rung0",
+  "feature_schema_hash": "e6367321913d11c0",
+  "weights": [
+    1.0,
+    30.0,
+    0.5,
+    1.0,
+    2.0,
+    40.0,
+    40.0,
+    0.0,
+    3.0,
+    16.0,
+    20.0
+  ],
+  "bias": 0.0,
+  "provenance": {
+    "kind": "hand_mimic",
+    "notes": "dev/test fixture: exact GreedyWeights() defaults, for gate verification (identity-artifact bot_comparison delta should be ~0)"
+  }
+}

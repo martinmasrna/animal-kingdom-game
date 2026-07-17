@@ -15,6 +15,7 @@ from typing import Callable, Optional
 
 from ..bots.base import Bot
 from ..bots.greedy_bot import GreedyBot, GreedyWeights
+from ..bots.learned_eval import load_eval
 from ..bots.random_bot import RandomBot
 from ..bots.referee_bot import RefereeBot
 from ..bots.turn_bot import TurnBot
@@ -66,7 +67,19 @@ def crossed_progress_decile(done: int, total: int) -> bool:
     return total > 0 and (done * 10) // total > ((done - 1) * 10) // total
 
 
-BOT_KINDS = ("greedy", "lookahead", "random", "referee", "turn", "greedy_belief")
+BOT_KINDS = ("greedy", "lookahead", "random", "referee", "turn", "greedy_belief",
+             "greedy_learned", "turn_learned", "referee_learned")
+
+# '<kind>_learned' -> the base kind it otherwise builds exactly like (see make_bot). The
+# learned kinds exist so a paired benchmark can A/B a LinearEval-piloted bot against its
+# hand-eval counterpart through the same `--candidate-kind` seam every other bot A/B uses -
+# no bespoke harness plumbing.
+LEARNED_BASE_KIND = {"greedy_learned": "greedy", "turn_learned": "turn",
+                     "referee_learned": "referee"}
+
+# Bare name resolved via bots.learned_eval.load_eval when a '<kind>_learned' bot's `extra`
+# doesn't set `eval=` explicitly (e.g. `--candidate-kind turn_learned:eval=rung0`).
+DEFAULT_LEARNED_EVAL = "rung1"
 
 # 3-ply own-line lookahead (see GreedyBot's module docstring). Gauntlet-tested 2024: it does
 # correctly find delayed/combo value 1-ply misses (e.g. Grizzly Bear), but nets *worse*
@@ -115,9 +128,20 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
     kwargs (e.g. `{"deck_reveal_choice_width": 0}`, `{"determinizations": 2}`), so one A/B
     can compare configs of the same kind without a bespoke bot kind - the seam the paired
     benchmark uses to stay in its fixed-opponent design.
+
+    A `'<kind>_learned'` kind (`LEARNED_BASE_KIND`) builds its base kind's bot exactly as
+    usual, but with `evaluator=load_eval(extra.pop("eval", DEFAULT_LEARNED_EVAL))` threaded
+    in - so `turn_learned:eval=rung0` A/Bs a LinearEval-piloted TurnBot against plain `turn`
+    through the same `extra` kwarg seam every other bot variant uses. `load_eval` is called
+    in-worker (this function runs inside the ProcessPoolExecutor worker via `_run_spec`), so
+    only the eval *name* needs to be picklable on `MatchSpec` - not the loaded LinearEval.
     """
     kind = kind.strip().lower()
     extra = dict(extra or {})
+    if kind in LEARNED_BASE_KIND:
+        eval_name = extra.pop("eval", DEFAULT_LEARNED_EVAL)
+        extra["evaluator"] = load_eval(eval_name)
+        kind = LEARNED_BASE_KIND[kind]
     if kind == "greedy":
         return GreedyBot(weights=weights, seed=seed, **extra)
     if kind == "greedy_belief":

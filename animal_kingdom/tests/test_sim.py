@@ -201,6 +201,58 @@ def test_run_pairs_parallel_matches_serial_with_weights():
     assert serial == parallel
 
 
+# ------------------------------------------------------------------ learned bot kinds
+
+def test_learned_kinds_are_registered():
+    from animal_kingdom.sim.runner import BOT_KINDS, LEARNED_BASE_KIND
+    for kind in ("greedy_learned", "turn_learned", "referee_learned"):
+        assert kind in BOT_KINDS
+        assert kind in LEARNED_BASE_KIND
+
+
+def test_make_bot_learned_kind_constructs_base_kind_with_evaluator(tmp_path):
+    from animal_kingdom.bots.greedy_bot import GreedyBot
+    from animal_kingdom.bots.learned_eval import LinearEval, load_eval
+
+    path = tmp_path / "mimic.json"
+    LinearEval.hand_mimic().save(str(path))
+    load_eval.cache_clear()
+    try:
+        bot = make_bot("greedy_learned", seed=1, extra={"eval": str(path)})
+        assert isinstance(bot, GreedyBot)
+        assert bot.evaluator is not None
+        assert bot.evaluator.feature_set == "rung0"
+    finally:
+        load_eval.cache_clear()
+
+
+def test_parse_bot_spec_round_trips_learned_eval_kwarg():
+    from animal_kingdom.sim.runner import parse_bot_spec
+    kind, kw = parse_bot_spec("turn_learned:eval=rung0_identity", "--x")
+    assert kind == "turn_learned"
+    assert kw == (("eval", "rung0_identity"),)
+
+
+def test_learned_kind_identity_artifact_matches_hand_kind_one_game():
+    # 1-game integration smoke: the shipped dev fixture (an exact GreedyWeights() mimic)
+    # must choose identically to plain 'greedy' over a full game, through the whole
+    # make_bot -> MatchSpec -> ProcessPoolExecutor path (not just direct construction).
+    pairs = [("cats_midrange", "ramp")]
+    hand = run_pairs(pairs, 1, base_seed=0, bots=("greedy", "greedy"))
+    learned = run_pairs(pairs, 1, base_seed=0, bots=("greedy_learned", "greedy"),
+                        bot_kwargs=((("eval", "rung0_identity"),), ()))
+    assert hand == learned
+
+
+def test_learned_kind_survives_the_process_pool():
+    pairs = [("cats_midrange", "ramp")]
+    serial = run_pairs(pairs, 2, base_seed=0, bots=("greedy_learned", "greedy"),
+                       bot_kwargs=((("eval", "rung0_identity"),), ()), jobs=1)
+    parallel = run_pairs(pairs, 2, base_seed=0, bots=("greedy_learned", "greedy"),
+                         bot_kwargs=((("eval", "rung0_identity"),), ()), jobs=2)
+    assert serial == parallel
+
+
 # --------------------------------------------------------------------- metrics
 
 def _records():

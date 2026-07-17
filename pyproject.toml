@@ -27,10 +27,11 @@ packages = [
     "animal_kingdom.render",
     "animal_kingdom.recording",
     "animal_kingdom.tui",
+    "animal_kingdom.learn",
 ]
 
 [tool.setuptools.package-data]
-animal_kingdom = ["data/*.json"]
+animal_kingdom = ["data/*.json", "data/learned/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["animal_kingdom/tests"]
