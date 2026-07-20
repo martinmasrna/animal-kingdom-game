@@ -99,6 +99,14 @@ cohort still needs to be run and interpreted before Balance is ungated.
    term can't do. So the bet's target narrows to the **multi-turn planning/scaling** gap; the
    present-state delayed-payoff part is handled. This tightens the handoff's open "smallest step vs
    full learned player?" question — the smallest step already banked one class of blind spot.
+   **UPDATE 2026-07-20 — self-play TD path is live; rung-0 promoted, rung-1 failed.** The smallest
+   step shipped as a self-play TD(λ) linear evaluator (`learn/`, `bots/features.py`). **rung-0 v2**
+   (the 11 hand-eval terms, learned) beats hand-eval on 6/7 decks and is the current pilot
+   (`9f2606a`). **rung-1** (adds 13 dynamics features) is a **regression** — worse than rung-0 on
+   5/7 decks (food_otk −20 pts) because several new features are collinear with rung-0 terms and the
+   unregularized raw-feature fit reallocated weight toward self-play's majority rush dynamic. Do not
+   promote `data/learned/rung1.json`. Full analysis + salvage levers:
+   [`bots/learned-eval-rung1-negative-result.md`](bots/learned-eval-rung1-negative-result.md).
 1. **Pilot-trust verdict IN (2026-07-03): TurnBot is a big step up from greedy but NOT oracle-level.**
    Paired oracle validation (turn vs referee, opp greedy, 60/opp × 7, `results/bot_quality/turn_vs_referee_all/`):
    referee beats turn on all 7 decks (sig. on 5), by ~+4pt (food_otk) to +14pt (ramp). The gaps are
