@@ -8,6 +8,18 @@ Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Ladder: Greedy
   [`lean-ratings-plan.md`](lean-ratings-plan.md); full-rigor design in
   [`pilot-ratings.md`](pilot-ratings.md).
 
+- [ ] **★ Re-simulate the anchored ladder on the current ruleset (calibration is dead + stale).**
+  The RandomBot=0 absolute Elo scale in [`pilot-ratings.md`](pilot-ratings.md) (random 0, greedy
+  +1245, turn +1401, referee +1499, human +1572) is unusable for placing today's bots: its 117k-game
+  cohort + 294-game human dataset were **purged**, and it predates the 2026-07-15 timed-effect fix +
+  Draw-2 + Landmark cut, so it's a *different game*. Consequence: the new learned-eval pilots (rung-0
+  v2, rung-1) can only be placed by a soft splice through greedy's stale anchor (rung-0 ≈ 1288, rung-1
+  ≈ 1263 — ~13%/~5% of the greedy→human gap, both caveated in the rung-1 negative-result doc), and
+  there is **no valid human bar on the current ruleset at all**. Fix: re-run `sim.ratings` (the
+  ~117k-game calibration cohort) on the current ruleset with the learned bots included; human anchor
+  waits on re-recording (`./record`, see [[learned-pilot-bet-active]]). Not urgent, but every
+  "how close to human" question is blocked until this exists.
+
 - [ ] **★ Learning pilot — the big one (handoff written 2026-07-04).** The whole heuristic-search
   ladder shares a hand-written, current-state-only evaluator, which is a structural judgement
   ceiling: it can't value a plan whose payoff is in the future (proven on egg's scaling win
