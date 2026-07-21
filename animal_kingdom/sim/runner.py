@@ -79,7 +79,7 @@ LEARNED_BASE_KIND = {"greedy_learned": "greedy", "turn_learned": "turn",
 
 # Bare name resolved via bots.learned_eval.load_eval when a '<kind>_learned' bot's `extra`
 # doesn't set `eval=` explicitly (e.g. `--candidate-kind turn_learned:eval=rung0`).
-DEFAULT_LEARNED_EVAL = "rung1"
+DEFAULT_LEARNED_EVAL = "rung0"
 
 # 3-ply own-line lookahead (see GreedyBot's module docstring). Gauntlet-tested 2024: it does
 # correctly find delayed/combo value 1-ply misses (e.g. Grizzly Bear), but nets *worse*
