@@ -2,6 +2,32 @@
 
 Open items only. Top-3 summary in [`../STATUS.md`](../STATUS.md). Ladder: GreedyBot → TurnBot → RefereeBot.
 
+- [ ] **★ Next learned-eval experiment — fix rung-1 the right way before considering an NN.**
+  rung-1 regressed because collinear features plus an unregularized raw-feature fit let self-play's
+  majority rush dynamic crowd out the food/scheduled/ramp signals (full analysis:
+  [`learned-eval-rung1-negative-result.md`](learned-eval-rung1-negative-result.md)). Test whether a
+  *well-built linear* eval clears the bar before spending on a neural net:
+  1. **Fix the fit.** Standardize the features (common scale) and add L2; prune or merge the collinear
+     duplicates (`sched_near/far` vs `pending_payoff`, `hq_dist_diff` vs the two `hq_threat` terms,
+     `income_diff` vs `region_control`). Re-run the gate vs rung-0 v2 **and** vs hand-eval greedy
+     (paired seeds, ≥200/matchup, both seats).
+  2. **Add conditional signals** — interaction + deck-fingerprint features so a linear model can
+     express "this resource matters *because* I hold the cards that use it" (e.g. food × holds-food-
+     payoff; generic public-deck summaries — scaling weight, food-dependence — crossed with position
+     signals). Stays generalist: no deck slugs, only generic properties.
+  - **Decision rule:** recovers and beats rung-0 broadly → that's the pilot, NN deferred. Plateaus
+    below target → earned evidence the linear family is exhausted, with the feature pipeline and
+    training loop already built to drop a net into.
+  - **Parallel, cheap:** throughput probe — time a small-MLP forward pass at the search's leaf-eval
+    call rate on this machine. One number decides whether an NN eval is viable for bulk sims at all.
+    Note: the `bots/`-stdlib rule is a convention, not a documented requirement (only `engine/` purity
+    is load-bearing) — revisit it if going NN. And numpy isn't a free speed-up: tiny per-leaf forward
+    passes are dominated by call overhead, so a real win needs batching leaves into one matmul (a
+    search-architecture change), which the probe should account for.
+  - **Framing:** an NN *evaluator* is not the planning fix. The egg-vs-cats gap needs search depth
+    plus a good leaf eval, not a richer static score. Highest ceiling = referee-search + strong
+    learned leaf eval.
+
 - [ ] **★ Lean pilot/deck ratings (80/20 direction agreed, not executed).** Rough
   absolute-strength ladder via point-estimate ratings only — no CIs, no seat term. Cost is
   playing the games, not the stats; pilot strength needs a cross-play cohort. What & why in
