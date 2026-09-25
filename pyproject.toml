@@ -11,12 +11,12 @@ requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
-# Analysis layer only (sim/metrics and sim/ratings). Kept out of the engine.
-analysis = ["numpy>=1.26", "scipy>=1.11", "pandas>=2.0", "matplotlib>=3.8"]
+# Self-play training math only (learn/). Kept out of the engine.
+analysis = ["numpy>=1.26"]
 # Terminal presentation only (cli.py / render/). engine/ and bots/ stay stdlib-only.
 cli = ["rich>=13.7"]
 tui = ["textual>=8.2,<9"]
-dev = ["pytest>=7.0", "rich>=13.7", "textual>=8.2,<9", "numpy>=1.26", "scipy>=1.11"]
+dev = ["pytest>=7.0", "rich>=13.7", "textual>=8.2,<9", "numpy>=1.26"]
 
 [tool.setuptools]
 packages = [

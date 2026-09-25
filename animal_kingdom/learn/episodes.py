@@ -15,10 +15,8 @@ seat's perspective. `ExplorationBot` is the training-only policy that generates 
 epsilon-greedy exploration and afterstate recording.
 
 Deck sampling draws from the "36 unordered pairs" pool: the 7 premade decks plus the
-`sim.benchmark_set` calibration rig (`baseline`, a single-copy 30-card yardstick deck) - 8
-decks, C(8,2)+8 = 36 unordered pairs including mirrors. `ensure_baseline_registered` must run
-in every process that will call `play_episode` with the `"baseline"` deck (workers included -
-see its docstring).
+synergy-free `baseline` deck (`decks.BASELINE_DECK`) - 8 decks, C(8,2)+8 = 36 unordered pairs
+including mirrors.
 """
 
 from __future__ import annotations
@@ -36,27 +34,12 @@ from ..engine import rules
 from ..engine.actions import Action
 from ..engine.config import Config
 from ..engine.state import GameState, StateView, new_game, other_player
-from ..sim.benchmark_set import DECKLIST as _BASELINE_DECKLIST
-from ..sim.deck_optimizer import register_synthetic
 
 BASELINE_SLUG = "baseline"
 
 
-def ensure_baseline_registered() -> None:
-    """Register the `sim.benchmark_set` calibration rig under `"baseline"` so
-    `load_premade_deck("baseline")` works in *this* process.
-
-    Idempotent (safe to call every time): `register_synthetic` re-publishes the same fixed
-    decklist and re-writes the `$AK_EXTRA_DECKS` env var each call, so calling it once in the
-    training driver before spawning the worker pool is enough for the env var to propagate to
-    spawned workers (see `decks.py`'s `_load_env_extra_decks`); calling it again from a worker
-    (e.g. this module's own import, as a safety net) is a harmless no-op recomputation.
-    """
-    register_synthetic(BASELINE_SLUG, _BASELINE_DECKLIST)
-
-
 def deck_pool() -> tuple[str, ...]:
-    """The 8 decks episodes sample from: the 7 premades + the calibration rig."""
+    """The 8 decks episodes sample from: the 7 premades + the baseline deck."""
     from ..engine.cards import DECK_SLUGS
 
     return tuple(sorted(DECK_SLUGS)) + (BASELINE_SLUG,)
@@ -172,11 +155,8 @@ def play_episode(spec: EpisodeSpec) -> list[Trajectory]:
     """Play one full self-play game per `spec` and return the learner seat(s)' trajectories.
 
     Module-level (not a closure/method) and `spec` is a plain picklable dataclass, so this is
-    safe to pass directly to `ProcessPoolExecutor.map` (Windows spawn-safe). Re-registers the
-    baseline rig defensively (idempotent - see `ensure_baseline_registered`) so a worker that
-    somehow never inherited `$AK_EXTRA_DECKS` still works.
+    safe to pass directly to `ProcessPoolExecutor.map` (Windows spawn-safe).
     """
-    ensure_baseline_registered()
     from ..bots.learned_eval import LinearEval
 
     evaluator = LinearEval(feature_set=spec.feature_set, weights=spec.weights, bias=spec.bias)

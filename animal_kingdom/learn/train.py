@@ -3,7 +3,7 @@
 Deterministic: the whole run is a pure function of `TrainConfig` (git rev and
 feature_schema_hash ride along in the run-key/manifest for provenance only - neither affects
 the computation). Crash-safe: an atomic checkpoint under `--out` lets a killed run resume
-exactly where it left off (mirrors `sim/benchmark_set.py`'s run-key checkpoint/resume - a
+exactly where it left off (a
 resumed run whose config/git/schema don't match the checkpoint refuses to continue rather
 than silently composing incompatible samples).
 
@@ -35,7 +35,7 @@ from ..decks import load_premade_deck
 from ..engine import rules
 from ..engine.state import new_game
 from . import artifacts
-from .episodes import EpisodeSpec, all_deck_pairs, ensure_baseline_registered, play_episode
+from .episodes import EpisodeSpec, all_deck_pairs, play_episode
 from .td import TDTrainer, TrainConfig
 
 CKPT_VERSION = 1
@@ -144,7 +144,6 @@ def run_training(
     *,
     progress=None,
 ) -> TDTrainer:
-    ensure_baseline_registered()
     out_dir.mkdir(parents=True, exist_ok=True)
     ckpt_path = out_dir / "checkpoint.json"
     curve_path = out_dir / "curve.csv"

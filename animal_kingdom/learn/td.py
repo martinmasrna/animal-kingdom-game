@@ -17,7 +17,7 @@ gradient-descent form, not the "plain phi" trace some other TD(lambda) write-ups
 `grad_clip` bounds the L2 norm of one trajectory's total weight step (not each per-step
 term) - a single pathological trajectory can't blow up the run.
 
-Numpy-lazy (mirrors `sim/ratings.py`'s `_analysis_imports`): `bots/`/`engine/` stay
+Numpy-lazy: `bots/`/`engine/` stay
 stdlib-only; this is the one place in the repo allowed to import numpy, and only inside
 function/method bodies, so a core-only install never pays for it.
 """

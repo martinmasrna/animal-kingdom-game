@@ -16,7 +16,7 @@ strength count), which is public board information.
 Caveat (handoff §10): a 1-ply greedy bot underplays Combo / multi-turn sequencing. Balance
 conclusions drawn from greedy self-play are bot-limited; the sim harness records this.
 
-`depth > 1` ("own-line" lookahead - see sim/gauntlet.py) searches `depth` of *my own*
+`depth > 1` ("own-line" lookahead) searches `depth` of *my own*
 placements in a row instead of stopping at 1 ply. This is deliberately not adversarial
 minimax: simulating the opponent's actual best reply would mean playing cards out of their
 real (hidden) hand to predict their move, which the project's evaluate() explicitly refuses
@@ -84,7 +84,7 @@ class GreedyWeights:
                                       # the 1-ply eval is otherwise blind to. Card-agnostic
                                       # (reads scheduled, names no card). Validated 2026-07-04:
                                       # paired benchmark egg +5.3 / ramp +10.4, all decks
-                                      # improve-or-tie (see docs/bots + human_scorer value-rank).
+                                      # improve-or-tie (see docs/bots).
     coverage_exposure: float = 0.0   # belief term (default OFF): expected own-HQ danger one
                                       # ply ahead, = P(opponent's hidden hand can cover a
                                       # currently-safe HQ-front defender next turn). Exact
@@ -197,7 +197,7 @@ class GreedyBot(Bot):
 
         Placement is preferred over Draw so the simulated opponent actually develops a board
         instead of stalling for free (an earlier Draw-first filler made every rollout look
-        artificially safe - see the module docstring's gauntlet-tested history).
+        artificially safe).
         """
         guard = 0
         while state.result is None and state.player_to_act() != me and guard < 20:

@@ -10,46 +10,22 @@ of single-digit-to-low-hundreds of games.
 from __future__ import annotations
 
 import math
-import os
 
 import pytest
 
 from animal_kingdom.bots import features
-from animal_kingdom.decks import PREMADE_DECKS
 from animal_kingdom.learn import train as learn_train
 from animal_kingdom.learn.episodes import (
     EpisodeSpec,
     Trajectory,
     all_deck_pairs,
     deck_pool,
-    ensure_baseline_registered,
     play_episode,
 )
 from animal_kingdom.learn.td import TDTrainer, TrainConfig
-from animal_kingdom.sim import deck_optimizer
 
 N_RUNG0 = len(features.RUNG0_FEATURES)   # 11
 FOOD_IDX = features.RUNG0_FEATURES.index("food_progress")
-
-
-@pytest.fixture(autouse=True)
-def restore_deck_registry():
-    """Every test here (directly or via play_episode) registers the synthetic 'baseline'
-    rig into process-global state (PREMADE_DECKS + $AK_EXTRA_DECKS). Undo it, or
-    test_pool.py's PREMADE_DECKS == DECK_SLUGS invariant fails depending on test order (see
-    the identical fixture in test_benchmark_set.py)."""
-    decks = dict(PREMADE_DECKS)
-    synth = dict(deck_optimizer._SYNTHETIC_DECKS)
-    env = os.environ.get("AK_EXTRA_DECKS")
-    yield
-    PREMADE_DECKS.clear()
-    PREMADE_DECKS.update(decks)
-    deck_optimizer._SYNTHETIC_DECKS.clear()
-    deck_optimizer._SYNTHETIC_DECKS.update(synth)
-    if env is None:
-        os.environ.pop("AK_EXTRA_DECKS", None)
-    else:
-        os.environ["AK_EXTRA_DECKS"] = env
 
 
 # --------------------------------------------------------------------- deck pool / pairs
@@ -70,11 +46,9 @@ def test_all_deck_pairs_is_36_unordered_pairs_including_mirrors():
     assert sum(1 for a, b in pairs if a == b) == 8   # every deck mirrors itself once
 
 
-def test_ensure_baseline_registered_makes_baseline_loadable():
+def test_baseline_deck_is_loadable():
     from animal_kingdom.decks import load_premade_deck
-    ensure_baseline_registered()
-    deck = load_premade_deck("baseline")
-    assert len(deck) == 30
+    assert len(load_premade_deck("baseline")) == 30
 
 
 # --------------------------------------------------------------------- episode determinism

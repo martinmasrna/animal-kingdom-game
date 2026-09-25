@@ -4,8 +4,7 @@ under `animal_kingdom/data/learned/` carries.
 
 This module is about the *published* weight artifact only - the thing
 `bots.learned_eval.load_eval()` reads. Per-run training checkpoints/manifests/curves
-(`results/learn/<run_id>/`) are a separate, run-level concern owned by `learn/train.py`
-(mirrors `sim/benchmark_set.py`'s run-key checkpoint/resume convention, not this module).
+(`results/learn/<run_id>/`) are a separate, run-level concern owned by `learn/train.py`.
 """
 
 from __future__ import annotations

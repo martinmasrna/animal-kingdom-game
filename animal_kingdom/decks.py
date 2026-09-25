@@ -38,31 +38,30 @@ def _build_premade_decks(cards: dict[str, Card]) -> dict[str, list[str]]:
 PREMADE_DECKS: dict[str, list[str]] = _build_premade_decks(load_cards())
 
 
-def _load_env_extra_decks() -> None:
-    """Merge synthetic decks from $AK_EXTRA_DECKS (JSON {slug: [card_id, ...]}) into PREMADE_DECKS.
+# The no-synergy "baseline" deck: 30 distinct self-sufficient cards (18 common / 8 rare /
+# 4 legendary, 1 copy each) plus minted calibration bodies (the `mock_*` reserve cards). Not a
+# shipped deck; self-play trains against it as an eighth, synergy-free opponent.
+BASELINE_DECK: list[str] = [
+    # common
+    "lion", "eagle", "bat", "squirrel", "mock_scout", "mock_saboteur", "african_wild_dog",
+    "anaconda", "gray_wolf", "mock_immovable_6", "black_bear", "grizzly_bear", "mock_vanilla_5",
+    "mock_vanilla_6", "mock_vanilla_8", "mock_vanilla_9", "mock_apex_5", "mock_apex_6",
+    # rare
+    "jerboa", "jaguar", "serval", "stoop", "porcupine", "polar_bear", "rhinoceros", "mock_draw2",
+    # legendary
+    "greywhisker", "mock_removal", "mock_vanilla_10", "mock_flyer_7",
+]
 
-    The deck_optimizer's candidate decks are not in cards.json; this env hook lets them survive into
-    `spawn`ed worker processes (which re-import this module) without threading a decklist through the
-    whole sim harness. No-op when the var is unset, so it never affects normal runs.
-    """
-    import json
-    import os
-
-    raw = os.environ.get("AK_EXTRA_DECKS")
-    if not raw:
-        return
-    for slug, ids in json.loads(raw).items():
-        PREMADE_DECKS[slug] = list(ids)
-
-
-_load_env_extra_decks()
+# Decks loadable by slug that are not shipped premades.
+EXTRA_DECKS: dict[str, list[str]] = {"baseline": BASELINE_DECK}
 
 
 def load_premade_deck(slug: str, *, cards: Optional[dict[str, Card]] = None) -> list[str]:
     """Return a fresh copy of the 30-card decklist for `slug`."""
     decks = _build_premade_decks(cards) if cards is not None else PREMADE_DECKS
+    decks = {**decks, **EXTRA_DECKS}
     if slug not in decks:
-        raise ValueError(f"unknown deck slug {slug!r}, expected one of {sorted(DECK_SLUGS)}")
+        raise ValueError(f"unknown deck slug {slug!r}, expected one of {sorted(decks)}")
     return list(decks[slug])
 
 

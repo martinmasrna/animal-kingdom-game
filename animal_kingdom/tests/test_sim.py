@@ -13,7 +13,6 @@ import pytest
 from animal_kingdom.bots.greedy_bot import GreedyWeights
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.sim import metrics
-from animal_kingdom.sim import __main__ as sim_main
 from animal_kingdom.sim.runner import (
     GameRecord, make_bot, play_game, run_matchup, run_pairs, run_round_robin,
 )
@@ -91,21 +90,6 @@ def test_run_round_robin_reports_completed_matchup_records():
     )
     assert updates == [("ramp", "aggro_hq_rush", 1, 1, records)]
     assert len(records) == 6
-
-
-def test_sim_module_delegates_to_unified_cli_in_files_mode(monkeypatch):
-    calls = []
-    monkeypatch.setattr(
-        sim_main,
-        "unified_main",
-        lambda argv, **kwargs: calls.append((argv, kwargs)),
-    )
-
-    sim_main.main(["--decks", "all", "--games", "5"])
-
-    assert calls == [
-        (["--decks", "all", "--games", "5"], {"default_format": "files"}),
-    ]
 
 
 # ------------------------------------------------------- weight-injection plumbing

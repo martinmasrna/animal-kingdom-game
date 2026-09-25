@@ -1,9 +1,7 @@
 """Paired bot-quality benchmark: is the candidate pilot actually better, per deck?
 
-`sim/gauntlet.py` answers "does this deck's candidate bot beat a pinned pool" as one blended
-win rate. That is too coarse for the TurnBot decision (handoff §4): "TurnBot is better" must
-hold *for each candidate deck separately*, with evidence rather than noise. This module runs
-the paired design:
+"The candidate bot is better" must hold *for each deck separately*, with evidence rather than
+noise. This module runs the paired design:
 
     baseline:  GreedyBot(D) vs GreedyBot(O)
     candidate: TurnBot(D)   vs GreedyBot(O)
