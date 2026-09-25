@@ -12,8 +12,10 @@ until their strength rules land), respecting the copy limits.
 
 from __future__ import annotations
 
+import json
+import os
 import random
-from typing import Optional
+from typing import Optional, Sequence
 
 from .engine.cards import COPY_LIMITS, Card, DECK_SLUGS, NON_DECK_SLUGS, load_cards
 
@@ -52,8 +54,20 @@ BASELINE_DECK: list[str] = [
     "greywhisker", "mock_removal", "mock_vanilla_10", "mock_flyer_7",
 ]
 
-# Decks loadable by slug that are not shipped premades.
+# Decks loadable by slug that are not shipped premades: the baseline, plus synthetic decks the sim
+# tools register (optimizer candidates, goodstuff piles). Registered decks are mirrored into
+# $AK_EXTRA_DECKS so `spawn`ed worker processes, which re-import this module, load them too.
 EXTRA_DECKS: dict[str, list[str]] = {"baseline": BASELINE_DECK}
+EXTRA_DECKS.update(json.loads(os.environ.get("AK_EXTRA_DECKS", "{}")))
+
+
+def register_deck(slug: str, decklist: Sequence[str]) -> None:
+    """Make `decklist` loadable as `slug` in this process and in any worker it spawns later."""
+    if slug in DECK_SLUGS:
+        raise ValueError(f"{slug!r} collides with a premade deck slug")
+    EXTRA_DECKS[slug] = list(decklist)
+    os.environ["AK_EXTRA_DECKS"] = json.dumps(
+        {s: d for s, d in EXTRA_DECKS.items() if s != "baseline"})
 
 
 def load_premade_deck(slug: str, *, cards: Optional[dict[str, Card]] = None) -> list[str]:

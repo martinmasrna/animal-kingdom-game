@@ -11,8 +11,8 @@ requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
-# Self-play training math only (learn/). Kept out of the engine.
-analysis = ["numpy>=1.26"]
+# Analysis only: learn/ training math and metagame_evolution plots. Kept out of the engine.
+analysis = ["numpy>=1.26", "matplotlib>=3.8"]
 # Terminal presentation only (cli.py / render/). engine/ and bots/ stay stdlib-only.
 cli = ["rich>=13.7"]
 tui = ["textual>=8.2,<9"]
