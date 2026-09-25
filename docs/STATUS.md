@@ -12,7 +12,7 @@ The map. Read it first each session and keep it current: when something here cha
 4. **Balance it seriously** with the simulation platform.
 5. **Go public**, where player data takes over as the balance source.
 
-**Current stage: 1, blocked on one design problem, with 2 not started.**
+**Current stage: 1, blocked on one design problem; 2 (the web client) is next.**
 
 ## What exists
 
@@ -24,7 +24,7 @@ The map. Read it first each session and keep it current: when something here cha
 ## Open problems, most important first
 
 1. **The goodstuff problem (design).** A pile of the best cards from every deck beats all seven themed decks and nothing beats it, so there is one correct deck instead of an archetype metagame. The direction is synergy payoffs a pile structurally can't reach (tribe-count thresholds); the Colony prototype was promising but short. This is the game's central open question: [`design/goodstuff.md`](design/goodstuff.md).
-2. **Nobody but Martin can play it.** Friends playing is the best design signal available, and it needs a playable version they can reach. Undecided: promote the Textual recorder into the general game UI (agreed as a direction, not started), or go straight to something friends can open remotely.
+2. **Nobody but Martin can play it.** Friends playing is the best design signal available. Decided 2026-09-26: build a web client friends can open remotely, over the existing engine, in the wireframe look (the card art isn't needed for it). Not started; the stack and hosting are still open. The UI spec is the mockup set in `~/Work/fun/animal-kingdom-design/`: the game screen `game/horizontal.html` (states `#choice`, `#game`, `#match`) with its decisions in `game/notes.md`, the menu flow `menu/home.html` → `play.html` → `prematch.html` in `menu/notes.md`, and the collection/deckbuilder in `builder/`.
 3. **The aggro redesign** is mid-flight: Martin's card analysis is in [`cards/aggro-redesign.md`](cards/aggro-redesign.md), a candidate slate in [`cards/aggro-redesign-candidates.md`](cards/aggro-redesign-candidates.md), and nothing is chosen.
 4. **Egg Control wins 8% on the current ruleset**, far below every other deck; likely a rule change broke its engine, or a bug. Goodstuff still beats the field 80% under RefereeBot. Data in [`balance.md`](balance.md).
 5. **Bots can't plan across turns**, which understates scaling decks in every simulation. Next experiment: a regularized learned evaluator ([`bots.md`](bots.md)).
