@@ -88,20 +88,23 @@ def _effects(state: GameState, move: Move) -> list:
         if below and below[-1][2] != move.seat:
             fx.append({"k": "cover", "card": below[-1][1], "owner": below[-1][2]})
     on_board_now = {u.iid for st in state.board.values() for u in st}
-    in_hand_now = {p: {u.iid for u in state.hands[p]} for p in "AB"}
-    vanished = {iid: (cid, owner) for st in pre["board"].values() for iid, cid, owner in st
-                if iid not in on_board_now}
-    for iid, (cid, owner) in vanished.items():
-        if iid in in_hand_now[owner]:
-            fx.append({"k": "bounce", "card": cid, "owner": owner})
+    vanished = [(cid, owner) for st in pre["board"].values() for iid, cid, owner in st
+                if iid not in on_board_now]
+    # New hand instances are draws, unless they are a unit that just left the board: a
+    # bounced unit comes back to hand as a fresh instance (new iid), so match it by card.
+    new_in_hand = {p: [u.card_id for u in state.hands[p] if u.iid not in pre["hands"][p]] for p in "AB"}
     for cid in state.remove_pile[pre["remove"]:]:
-        owner = next((o for iid, (c, o) in vanished.items() if c == cid), None)
+        owner = next((o for c, o in vanished if c == cid), None)
+        if owner:
+            vanished.remove((cid, owner))
         fx.append({"k": "remove", "card": cid, "owner": owner})
-    pre_board_iids = {iid for st in pre["board"].values() for iid, _, _ in st}
+    for cid, owner in vanished:
+        if cid in new_in_hand[owner]:
+            new_in_hand[owner].remove(cid)
+            fx.append({"k": "bounce", "card": cid, "owner": owner})
     for p in "AB":
-        drawn = len(in_hand_now[p] - pre["hands"][p] - pre_board_iids)
-        if drawn:
-            fx.append({"k": "draw", "seat": p, "n": drawn})
+        if new_in_hand[p]:
+            fx.append({"k": "draw", "seat": p, "n": len(new_in_hand[p])})
     for p in "AB":
         gain = state.food[p] - pre["food"][p]
         if state.turn_counter != pre["turn"] and p == move.seat:

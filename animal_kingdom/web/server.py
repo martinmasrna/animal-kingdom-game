@@ -168,6 +168,8 @@ async def socket(req):
                 elif kind == "ready":
                     match.ready(seat)
                 elif kind == "next":
+                    if match.phase == "playing":      # the other player already started it
+                        continue
                     match.next_game()
                 elif kind == "rematch":
                     match.rematch()
