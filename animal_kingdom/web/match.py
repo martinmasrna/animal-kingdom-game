@@ -11,6 +11,7 @@ import random
 import secrets
 from collections import Counter
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Optional
 
 from ..bots.greedy_bot import GreedyBot
@@ -120,7 +121,11 @@ class Match:
         self.history: list[Move] = []
         self.bots: dict[str, object] = {}
         self.version = 0                 # bumped on every change; the server pushes on bumps
+        self.seed: Optional[int] = None
+        self.actions: list[dict] = []    # the current game's actions, for the replayable log
+        self.on_game_end = None          # callback(match, log record); the server saves human games
         self.rng = random.Random(secrets.randbits(32))
+        self.created = datetime.now(timezone.utc)
 
     # ----------------------------------------------------------------- seats
     def seat_of(self, token: str) -> Optional[str]:
@@ -171,7 +176,8 @@ class Match:
         if self.results:
             last = self.results[-1]
             first = other_player(last["winner"]) if last["winner"] else last["first"]
-        seed = self.rng.randrange(1 << 30)
+        seed = self.seed = self.rng.randrange(1 << 30)
+        self.actions = []
         self.state = new_game(load_premade_deck(self.seats["A"].deck),
                               load_premade_deck(self.seats["B"].deck), seed,
                               map_id=MAP_ID, first_player=first)
@@ -216,6 +222,7 @@ class Match:
         starts_move = state.pending is None or isinstance(action, PlaceAction)
         pre = _snapshot(state) if starts_move else None
         rules.apply_action(state, action)    # validates; raises EngineError if illegal
+        self.actions.append(action.to_dict())
         if starts_move:
             placed = isinstance(action, PlaceAction)
             self.history.append(Move(
@@ -235,9 +242,21 @@ class Match:
         self.results.append({"winner": result.winner, "reason": result.reason,
                              "turns": self.state.turn_counter // 2 + 1,
                              "first": self.state.first_player})
+        if self.on_game_end:
+            self.on_game_end(self, self.game_log())
         score = self.score()
         over = max(score.values()) >= GAMES_TO_WIN or len(self.results) >= 2 * GAMES_TO_WIN - 1
         self.phase = "match_over" if over else "game_over"
+
+    def game_log(self) -> dict:
+        """The finished game in the sim.replay log format (replayable with no bot compute)."""
+        r = self.results[-1]
+        return {"deck_a": self.seats["A"].deck, "deck_b": self.seats["B"].deck, "seed": self.seed,
+                "map_id": MAP_ID, "first_player": r["first"],
+                "bots": [self.seats[p].bot or "human" for p in "AB"],
+                "winner": r["winner"], "reason": r["reason"], "turns": self.state.turn_counter,
+                "actions": list(self.actions),
+                "match_id": self.id, "game_no": len(self.results)}
 
     def bot_move(self):
         """The action the bot to act would take (pure: call off the event loop, apply after)."""

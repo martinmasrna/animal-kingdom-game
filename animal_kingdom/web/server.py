@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import logging
+import os
 import secrets
 import webbrowser
 from pathlib import Path
@@ -21,8 +23,23 @@ from ..engine.state import EngineError
 from .match import BOT_LEVELS, DECK_NAMES, Match, Seat, card_pool, map_info
 
 STATIC = Path(__file__).parent / "static"
+# Human games are the best design signal there is: every game with a human seat is kept,
+# one JSONL file per match, replayable with `python -m animal_kingdom.sim.replay FILE --index N`.
+LOG_DIR = Path(__file__).resolve().parents[2] / "results" / "human_games" / "web"
 BOT_PAUSE = {"move": 0.9, "choice": 0.6}   # seconds, so a human can follow the bot's moves
 log = logging.getLogger("animal_kingdom.web")
+
+
+def save_game(match: Match, record: dict) -> None:
+    if os.environ.get("AK_NO_GAME_LOGS") or all(seat.is_bot for seat in match.seats.values()):
+        return
+    try:
+        LOG_DIR.mkdir(parents=True, exist_ok=True)
+        stamp = match.created.strftime("%Y%m%dT%H%M%S")
+        with open(LOG_DIR / f"web_{stamp}_{match.id}.jsonl", "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(record) + "\n")
+    except OSError:
+        log.exception("could not save the game log for match %s", match.id)
 
 
 class Hub:
@@ -103,6 +120,7 @@ async def create_match(req):
                         bot=bot["level"], deck=bot["deck"]))
     else:
         match.version += 1
+    match.on_game_end = save_game
     hub.matches[mid] = match
     return web.json_response({"id": mid, "token": token, "seat": "A"})
 

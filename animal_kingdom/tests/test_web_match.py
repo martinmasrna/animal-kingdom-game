@@ -83,3 +83,14 @@ def test_every_view_is_json_and_offers_legal_choices():
             offered = {json.dumps(o["v"]) for o in game["pending"]["options"]}
             assert offered == {json.dumps(a.choice) for a in legal if a.kind == "choice" and a.choice != "__skip__"}
         m.act(s, rng.choice(legal).to_dict())
+
+
+def test_game_log_replays_to_the_same_result():
+    from animal_kingdom.sim.replay import replay
+    rng = random.Random(5)
+    logs = []
+    m = _match(decks=("food_otk", "aggro_hq_rush"))
+    m.on_game_end = lambda match, rec: logs.append(json.loads(json.dumps(rec)))
+    _play_out_game(m, rng)
+    _, result, _ = replay(logs[0])
+    assert (result.winner, result.reason) == (logs[0]["winner"], logs[0]["reason"])

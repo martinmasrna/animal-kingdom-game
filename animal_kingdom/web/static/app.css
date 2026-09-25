@@ -60,6 +60,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .lists .hd span { font-size: 12px; color: var(--muted); }
 .lists .dr { height: 23px; margin-bottom: 2px; } .lists .dr .nm { font-size: 13px; }
 .lists .A b { color: var(--you); } .lists .B b { color: var(--them); }
+.lists .A .dr { --c: var(--you); } .lists .B .dr { --c: var(--them); }
 .vs { width: 170px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
 .vs .big { font-family: var(--font-display); font-weight: 700; font-size: 40px; color: var(--faint); }
 .vs .t { font-size: 12px; color: var(--muted); text-align: center; }

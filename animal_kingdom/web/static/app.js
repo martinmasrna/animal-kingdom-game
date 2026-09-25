@@ -172,6 +172,7 @@ function matchScreen(id) {
     ws.onmessage = e => {
       const m = JSON.parse(e.data);
       if (m.t === 'view') { const prev = V; V = m.view; onView(prev); }
+      else if (m.t === 'error' && m.error === 'unknown match or seat') { disconnect(); location.hash = '#/'; toast('That match has ended'); }
       else if (m.t === 'error') toast(m.error);
     };
     ws.onclose = () => { if (wsId === id) setTimeout(() => { if (wsId === id) connect(); }, 1000); };
