@@ -1,6 +1,6 @@
 # Balance
 
-How the game gets measured, and what is known. No balance numbers exist yet for the current ruleset (draw 2 per Draw action, timed effects that run only on top of the stack, no Landmarks). Every earlier result is void, so treat the leads below as places to look, not verdicts.
+How the game gets measured, and what is known on the current ruleset (draw 2 per Draw action, timed effects that run only on top of the stack, no Landmarks). Results from before 2026-09-25 are void.
 
 ## Targets
 
@@ -43,12 +43,28 @@ Caveats that survive:
 
 Status: the roster is built and was tuned once, but its run was killed when two of its own cards (Black Bear, Grizzly Bear) turned out to cheat under the old timer bug. Next is the full fresh run: `.venv/bin/python -m animal_kingdom.sim.benchmark_set --pilot referee --games 500`, both seats, all 7 decks.
 
-## Leads to re-check on the current ruleset
+## Current data (2026-09-25, current ruleset)
 
-- **Cats** measured about 63% (too strong), with the Prince Leo and Princess Lea twin pair as the engine. Part of that may be the bots underplaying the decks that beat it.
-- **Food OTK** measured about 38%; the combo is real and bots play it well at two actions.
-- **Egg** measured about 43%, understated by the bots' planning ceiling.
-- **Colony** measures 23 to 52% depending on pilot: extremely pilot-sensitive.
+**Premade matrix, TurnBot vs TurnBot, 200 games per matchup** (`./report 100 --bots turn,turn`; output was in the untracked `results/queue-2026-09-25/`):
+
+| Deck | Win rate vs field |
+|---|---:|
+| colony_food_swarm | 64% |
+| cats_midrange | 62% |
+| food_otk | 59% |
+| aggro_hq_rush | 56% |
+| canine_buff_tempo | 55% |
+| ramp | 45% |
+| egg_control | 8% |
+
+- **egg_control at 8% is the first thing to investigate.** It was about 43% under the old ruleset with stronger pilots. Either a rule change since (draw 2, timed effects running only on top of the stack) broke its Egg engine, or it is a bug. Check by hand before any card change; the bots understate this deck, but not by 35 points.
+- Excluding egg, the field spans 45 to 64%: colony and cats sit above the 60% line, ramp just above 40%.
+- First player wins 56.7%; games average 10.4 turns.
+
+**Goodstuff still dominates.** A greedy hill-climb built a pile that beats all seven premades (92% mean), and RefereeBot confirms it: **80% mean, worst matchup 64% (vs aggro)**. The structural problem in [`design/goodstuff.md`](design/goodstuff.md) holds under the current rules. The recipe: legendaries Alpha, Gale, Rat King, Sirocco; rares Black Panther, Chinchilla, Polar Bear, Serval; commons Anaconda, Bat, Dire Wolf, Lemming, Lion, Tiger.
+
+## Leads to re-check
+
+- **Food OTK**'s combo is real and the bots play it well at two actions.
 - **Methuselah** had the loudest single-card impact (+12.5 points) before its food was cut to 5.
-- **Ramp** now makes more food (Sloth and Cape Buffalo push it to about 114).
 - **Decision H**, re-deriving every food number on one shared scale against the 100-food win and 10/20 regions, is still open.

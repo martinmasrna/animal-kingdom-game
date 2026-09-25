@@ -11,7 +11,7 @@ The central open design problem. A deck of the individually strongest cards from
 - The core the piles converged on is action economy. Chinchilla (an extra action) and Polar Bear were in every pile, then Bat, Lemming, Tiger, Greywhisker, Black Bear, Alpha, Mouse, Raven and Rhinoceros. In a game whose only resource is the action, cards that manufacture actions are unconditionally strong.
 - The themed decks, by contrast, carry low-floor cards that are dead draws without their partners. Goodstuff has no dead draws.
 
-These numbers predate the draw-2 rule and the timed-effect fix, so they need a re-run, but the structural argument below doesn't depend on them.
+Re-run on the current ruleset (2026-09-25): a fresh optimized pile still beats all seven premades, 80% mean and 64% worst under RefereeBot. Its recipe is in [`../balance.md`](../balance.md).
 
 ## Why it happens
 
@@ -51,4 +51,4 @@ Colony already has that shape and was the first prototype. Lowering its threshol
 - `sim/measure_deck.py` measures one deck against a field under any pilot and config (`--with-goodstuff` adds the pile).
 - `sim/benchmark_set.py` plays the fixed no-synergy baseline deck against the field; see [`../balance.md`](../balance.md).
 
-The optimized piles and the Colony prototype recipe lived in the untracked `results/` folder and are gone. The conquest and roster experiments are archived at tag `archive/research-2026-07`.
+The Colony prototype recipe lived in the untracked `results/` folder and is gone. The conquest and roster experiments are archived at tag `archive/research-2026-07`.

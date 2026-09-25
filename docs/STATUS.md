@@ -26,7 +26,7 @@ The map. Read it first each session and keep it current: when something here cha
 1. **The goodstuff problem (design).** A pile of the best cards from every deck beats all seven themed decks and nothing beats it, so there is one correct deck instead of an archetype metagame. The direction is synergy payoffs a pile structurally can't reach (tribe-count thresholds); the Colony prototype was promising but short. This is the game's central open question: [`design/goodstuff.md`](design/goodstuff.md).
 2. **Nobody but Martin can play it.** Friends playing is the best design signal available, and it needs a playable version they can reach. Undecided: promote the Textual recorder into the general game UI (agreed as a direction, not started), or go straight to something friends can open remotely.
 3. **The aggro redesign** is mid-flight: Martin's card analysis is in [`cards/aggro-redesign.md`](cards/aggro-redesign.md), a candidate slate in [`cards/aggro-redesign-candidates.md`](cards/aggro-redesign-candidates.md), and nothing is chosen.
-4. **No balance data on the current ruleset.** The first run to make is the fresh baseline-ruler run; see [`balance.md`](balance.md).
+4. **Egg Control wins 8% on the current ruleset**, far below every other deck; likely a rule change broke its engine, or a bug. Goodstuff still beats the field 80% under RefereeBot. Data in [`balance.md`](balance.md).
 5. **Bots can't plan across turns**, which understates scaling decks in every simulation. Next experiment: a regularized learned evaluator ([`bots.md`](bots.md)).
 
 ## Waiting on Martin
