@@ -57,4 +57,5 @@ Reported by Martin from play:
 - [`design/`](design/): [`principles.md`](design/principles.md) (the game we want, card-design rules), [`art-direction.md`](design/art-direction.md) (what the art must make people feel) and [`goodstuff.md`](design/goodstuff.md).
 - [`cards/`](cards/): the seven [`decks/`](cards/decks/README.md) (tables generated from `cards.json`), [`card-candidates.md`](cards/card-candidates.md), [`shelved-cards.md`](cards/shelved-cards.md), and the idea banks [`expansion-design-todo.md`](cards/expansion-design-todo.md) and [`deckbuilding-todo.md`](cards/deckbuilding-todo.md).
 - [`bots.md`](bots.md), [`balance.md`](balance.md).
+- [`pre-launch.md`](pre-launch.md): what must be settled before going public, and not before.
 - Research tooling removed from the tree (pilot ratings, conquest and roster experiments, referee comparison, gauntlet, human scorer) and the old docs are at tag `archive/research-2026-07`.
