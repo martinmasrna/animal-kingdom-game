@@ -1,45 +1,28 @@
 # Mental Model — read this before reasoning about cards or balance
 
-**Why this doc exists:** *Animal Kingdom* shares surface vocabulary with Magic/Hearthstone/Slay-the-Spire
-("strength", "battlecry", "draw", "remove"), so it is very easy to pattern-match onto their
-mana + attack/health + combat-damage systems. **It has none of those.** Almost every recurring
-design mistake in this project comes from importing that model. Recalibrate here first.
+**Why this doc exists:** *Animal Kingdom* shares surface vocabulary with Magic/Hearthstone/Slay-the-Spire ("strength", "battlecry", "draw", "remove"), so it is very easy to pattern-match onto their mana + attack/health + combat-damage systems. **It has none of those.** Almost every recurring design mistake in this project comes from importing that model. Recalibrate here first.
 
 ## The whole system in one breath
 
-Two players place animal **units** onto a **graph of crossroads**. A turn is **2 actions**; each
-action is either **draw 2** or **place 1 unit** (some effects grant *free* extra draws/places). You
-win instantly by **capturing the enemy HQ** (place any unit on it) or **hitting the food threshold**
-(control regions → they generate food each turn). That's the game.
+Two players place animal **units** onto a **graph of crossroads**. A turn is **2 actions**; each action is either **draw 2** or **place 1 unit** (some effects grant *free* extra draws/places). You win instantly by **capturing the enemy HQ** (place any unit on it) or **hitting the food threshold** (control regions → they generate food each turn). That's the game.
 
 ## A unit is a single number
 
-A unit has **one stat: strength (1–10)** and an optional effect. There is **no health/toughness, no
-mana cost, no attack value, no summoning sickness**. Strength does exactly three things:
+A unit has **one stat: strength (0–10)** and an optional effect. There is **no health/toughness, no mana cost, no attack value, no summoning sickness**. Strength does exactly three things:
 
-1. **Covering** — to place on top of an *enemy* unit you need **strictly greater** strength (5 covers
-   4; 5 cannot cover 5). Placing on your *own* unit needs no strength.
-2. **Surviving strength-gated removal** — many removal effects read "remove an enemy of strength ≤ X"
-   or "≤ your strength". Higher strength dodges those.
-3. **Being a wall** — a big unit is hard to cover, so it holds a crossroad until the opponent finds
-   greater strength or an unconditional removal effect.
+1. **Covering** — to place on top of an *enemy* unit you need **strictly greater** strength (5 covers 4; 5 cannot cover 5). Placing on your *own* unit needs no strength.
+2. **Surviving strength-gated removal** — many removal effects read "remove an enemy of strength ≤ X" or "≤ your strength". Higher strength dodges those.
+3. **Being a wall** — a big unit is hard to cover, so it holds a crossroad until the opponent finds greater strength or an unconditional removal effect.
 
 That's **all** strength does. It is **not** an HP pool and it does **not** help region control.
 
 ## How units leave play
 
-Only two ways: **covered** (enemy places strictly-greater strength on top — the covered unit is
-**buried in the stack, not discarded**, and resurfaces if the top is removed), or a **removal effect**
-deletes it. **There is no chip/ping damage, no combat step, no trading, no debuff-to-death.**
+Only two ways: **covered** (enemy places strictly-greater strength on top — the covered unit is **buried in the stack, not discarded**, and resurfaces if the top is removed), or a **removal effect** deletes it. **There is no chip/ping damage, no combat step, no trading, no debuff-to-death.**
 
 ## The board is a graph; placement is gated by *connection*
 
-You may normally only place on a crossroad **connected back to your HQ through a chain of crossroads
-you occupy**. This spatial tempo is the heart of the game — it's why "reach" effects (Flight = ignore
-connection; Cougar = place adjacent to any of your units ignoring connection) are powerful: they let
-you deploy *away from your established territory* instead of grinding a chain forward crossroad by
-crossroad. Covering builds **stacks**; only the top unit counts (occupies, connects, is targetable,
-owns the crossroad).
+You may normally only place on a crossroad **connected back to your HQ through a chain of crossroads you occupy**. This spatial tempo is the heart of the game — it's why "reach" effects (Flight = ignore connection; Cougar = place adjacent to any of your units ignoring connection) are powerful: they let you deploy *away from your established territory* instead of grinding a chain forward crossroad by crossroad. Covering builds **stacks**; only the top unit counts (occupies, connects, is targetable, owns the crossroad).
 
 ## Instinct → reality cheat-sheet
 
@@ -59,13 +42,8 @@ owns the crossroad).
 
 - **Region control ignores strength.** A STR 1 token holds a region corner exactly as well as a STR
   10. Cheap wide bodies are legitimately strong for the food win — don't dismiss them as "weak".
-- **HQ capture ignores strength.** *Any* unit on the enemy HQ wins; the enemy can't sit on their own
-  HQ to defend it. So the HQ rush is a **connection/pathing problem, not a strength problem** — reach
-  (Flight/Cougar) matters more than big bodies for that line.
-- **Covered units aren't dead.** They wait under the stack; recursion/resurface effects and removing
-  the coverer bring them back.
-- **The unit of resource is the action.** Evaluate a card by what it does *per action* and whether it
-  grants free actions — not by an imaginary mana cost.
+- **HQ capture ignores strength.** *Any* unit on the enemy HQ wins; the enemy can't sit on their own HQ to defend it. So the HQ rush is a **connection/pathing problem, not a strength problem** — reach (Flight/Cougar) matters more than big bodies for that line.
+- **Covered units aren't dead.** They wait under the stack; recursion/resurface effects and removing the coverer bring them back.
+- **The unit of resource is the action.** Evaluate a card by what it does *per action* and whether it grants free actions — not by an imaginary mana cost.
 
-**Source of truth:** [`overview.md`](overview.md) (rules) and [`keywords.md`](keywords.md) (keywords).
-If anything here conflicts with those, they win — and fix this doc.
+**Source of truth:** [`overview.md`](overview.md) (rules) and [`keywords.md`](keywords.md) (keywords). If anything here conflicts with those, they win — and fix this doc.

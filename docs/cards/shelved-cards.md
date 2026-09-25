@@ -1,24 +1,16 @@
 # Shelved Cards
 
-Cards pulled out of an active deck but kept here so their designs (and their effect code,
-which still lives in `engine/effects.py`) aren't lost. Re-home them by pasting the JSON back
-into `animal_kingdom/data/cards.json` with an updated `deck` slug.
+Cards pulled out of an active deck but kept here so their designs (and their effect code, which still lives in `engine/effects.py`) aren't lost. Re-home them by pasting the JSON back into `animal_kingdom/data/cards.json` with an updated `deck` slug.
 
 ---
 
 ## From the 2026-07-05 food_otk → pure-OTK overhaul
 
-food_otk was three half-decks in a trenchcoat (a food-OTK package, a wall package, and a
-sacrifice package). The overhaul kept the OTK core and cut the other two. The wall bodies
-(Giant Tortoise) and the sacrifice/deathrattle cards below came out. Their effect handlers
-are still registered in `effects.py`, so re-homing is just a cards.json paste (+ tests).
+food_otk was three half-decks in a trenchcoat (a food-OTK package, a wall package, and a sacrifice package). The overhaul kept the OTK core and cut the other two. The wall bodies (Giant Tortoise) and the sacrifice/deathrattle cards below came out. Their effect handlers are still registered in `effects.py`, so re-homing is just a cards.json paste (+ tests).
 
 ### → future **Aristocrats (Spider)** deck
 
-Carmilla and Black Widow are **Arachnids**, and the whole sacrifice/deathrattle package is a
-textbook *aristocrats* engine: remove your own units on purpose to convert them into cards
-and food. That's a coherent, flavourful archetype waiting to be built — a Spider/Arachnid
-tribe whose payoff is *feeding on its own*:
+Carmilla and Black Widow are **Arachnids**, and the whole sacrifice/deathrattle package is a textbook *aristocrats* engine: remove your own units on purpose to convert them into cards and food. That's a coherent, flavourful archetype waiting to be built — a Spider/Arachnid tribe whose payoff is *feeding on its own*:
 
 - **Carmilla, the Devourer** (L, Arachnid) — the sacrifice payoff (eat up to 3 friendlies, draw each).
 - **Black Widow** (C, Arachnid) — the repeatable sac-for-value outlet.
@@ -26,13 +18,11 @@ tribe whose payoff is *feeding on its own*:
 - **Opossum** — recursion (Deathrattle: return to hand), replays the sac loop.
 - **Pufferfish** — defensive sac (trades itself + the coverer, draws).
 
-To finish the deck you'd want more Arachnids (a web/trap keyword?), and a couple more
-"when removed" and "sacrifice N friendlies" payoffs. Filed as an expansion candidate.
+To finish the deck you'd want more Arachnids (a web/trap keyword?), and a couple more "when removed" and "sacrifice N friendlies" payoffs. Filed as an expansion candidate.
 
 ### Giant Tortoise → **Ramp** (or a defensive deck)
 
-A plain STR-7 Immovable wall. Fits Ramp's immovable-megafauna identity; re-home there when
-Ramp has a slot (it's currently a locked 4-4-6, so it needs a swap, not a free add).
+A plain STR-7 Immovable wall. Fits Ramp's immovable-megafauna identity; re-home there when Ramp has a slot (it's currently a locked 4-4-6, so it needs a swap, not a free add).
 
 ### Card JSON (paste back to re-home)
 
@@ -46,46 +36,24 @@ Ramp has a slot (it's currently a locked 4-4-6, so it needs a swap, not a free a
 {"id": "gazelle", "name": "Gazelle", "deck": "food_otk", "rarity": "common", "type": "unit", "tags": [], "base_strength": 2, "keywords": [], "text": "When this is removed, gain 30 food."}
 ```
 
-> **Note:** the `deck` field above still reads `"food_otk"` — update it when re-homing (e.g.
-> `"aristocrats_spider"` for the Spider deck). The effect handlers (`_carmilla_place`,
-> `_black_widow_place`, `_gazelle_remove`, `_impala_remove`, `_opossum_place`,
-> `_pufferfish_covered`) remain in `effects.py`.
+> **Note:** the `deck` field above still reads `"food_otk"` — update it when re-homing (e.g. `"aristocrats_spider"` for the Spider deck). The effect handlers (`_carmilla_place`, `_black_widow_place`, `_gazelle_remove`, `_impala_remove`, `_opossum_place`, `_pufferfish_covered`) remain in `effects.py`.
 
 ---
 
 ## From the 2026-07-05 Canine tokens+reach rework
 
-The Canine deck was split into two clean archetypes. Canine kept **tokens + board-buffs** (go
-wide, pump the board). The other half — **hand-buff / go-tall** — was pulled out to seed a future
-deck. Shuck and Coyote now sit in the **`reserve` deck slug** (in `cards.json`, excluded from play
-via `NON_DECK_SLUGS`); their effect handlers (`_shuck_place`, `_coyote_place`) still live in
-`effects.py`. Jackal and Dhole also moved to `reserve` (fully cut from Canine; available if wanted).
+The Canine deck was split into two clean archetypes. Canine kept **tokens + board-buffs** (go wide, pump the board). The other half — **hand-buff / go-tall** — was pulled out to seed a future deck. Shuck and Coyote now sit in the **`reserve` deck slug** (in `cards.json`, excluded from play via `NON_DECK_SLUGS`); their effect handlers (`_shuck_place`, `_coyote_place`) still live in `effects.py`. Jackal and Dhole also moved to `reserve` (fully cut from Canine; available if wanted).
 
 ### → future **hand-buff (Primates?)** deck
 
-The mechanical thesis, and *why* it must be its own deck: **"if this has ≥N strength" battlecries
-fire on entry — before any board buff can apply — so they can only be satisfied by buffing the card
-in hand first.** A threshold-payoff package therefore *requires* a hand-buff engine and cannot
-coexist with Canine's board-buff plan. That's a whole second archetype: pump units in hand, then
-deploy a pre-grown threat (which, unlike Canine's go-wide plan, can cover a big body from an empty
-board). Candidate flavor: **primates** — "train/develop the creature before it enters play" reads as
-intelligence/tool-use.
+The mechanical thesis, and *why* it must be its own deck: **"if this has ≥N strength" battlecries fire on entry — before any board buff can apply — so they can only be satisfied by buffing the card in hand first.** A threshold-payoff package therefore *requires* a hand-buff engine and cannot coexist with Canine's board-buff plan. That's a whole second archetype: pump units in hand, then deploy a pre-grown threat (which, unlike Canine's go-wide plan, can cover a big body from an empty board). Candidate flavor: **primates** — "train/develop the creature before it enters play" reads as intelligence/tool-use.
 
 Seed pieces (designs, not final cards):
 
-- **Shuck** (reserve) — recursion + hand-buff: "Battlecry: return a removed [tribe] to your hand,
-  give it +2 strength."
-- **Coyote** (reserve) — a threshold payoff: "Battlecry: if this has 5+ strength, draw a card."
-  (The founding member of the "≥N strength" package.)
-- **Red Wolf's *old* effect** — hand-buff: "Battlecry: give +1 strength to all [tribe] in your hand."
-  (The Canine *animal* kept the name with a new on-enter effect; the hand-buff *effect* belongs here.)
-- **New hand-buff common** (proposed) — "STR 3, Battlecry: give +2 strength to two units in your
-  hand." Works from an empty board — the go-tall catch-up tool.
-- **Reused threshold package** — mirror Colony's "5+ units" / OTK's "gained 10 food" payoff trio,
-  but keyed on **strength** ("if this has ≥X strength: remove / draw / +str"). Keying on strength
-  (not unit count) keeps it distinct from Colony and doubles down on the buff identity.
+- **Shuck** (reserve) — recursion + hand-buff: "Battlecry: return a removed [tribe] to your hand, give it +2 strength."
+- **Coyote** (reserve) — a threshold payoff: "Battlecry: if this has 5+ strength, draw a card." (The founding member of the "≥N strength" package.)
+- **Red Wolf's *old* effect** — hand-buff: "Battlecry: give +1 strength to all [tribe] in your hand." (The Canine *animal* kept the name with a new on-enter effect; the hand-buff *effect* belongs here.)
+- **New hand-buff common** (proposed) — "STR 3, Battlecry: give +2 strength to two units in your hand." Works from an empty board — the go-tall catch-up tool.
+- **Reused threshold package** — mirror Colony's "5+ units" / OTK's "gained 10 food" payoff trio, but keyed on **strength** ("if this has ≥X strength: remove / draw / +str"). Keying on strength (not unit count) keeps it distinct from Colony and doubles down on the buff identity.
 
-Status: **not built.** When it is, re-home Shuck/Coyote by changing their `deck` from `reserve`
-to the new slug (add it to `DECK_SLUGS`), and build to the standard 4-4-6. See
-[`docs/rules/mental-model.md`](../rules/mental-model.md) for why strength/covering — not HP — drives
-whether a pre-grown threat can cover a given body.
+Status: **not built.** When it is, re-home Shuck/Coyote by changing their `deck` from `reserve` to the new slug (add it to `DECK_SLUGS`), and build to the standard 4-4-6. See [`docs/rules/mental-model.md`](../rules/mental-model.md) for why strength/covering — not HP — drives whether a pre-grown threat can cover a given body.

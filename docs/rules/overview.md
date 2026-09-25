@@ -8,9 +8,7 @@ This document describes a proposed fast-paced strategy game set in a theme of An
 - Players deploy unit (themed as various animals) onto a connected graph of vertices.
 - Units expand the player's territory, capture enemy positions, surround regions with food, and create paths toward the enemy headquarters.
 
-A player wins immediately by either:
-(a) placing a unit on an enemy headquarters; or
-(b) collecting the required number of food
+A player wins immediately by either: (a) placing a unit on an enemy headquarters; or (b) collecting the required number of food
 
 The game can also end through exhaustion if a player can neither draw nor place a unit.
 
@@ -21,7 +19,7 @@ The game can also end through exhaustion if a player can neither draw nor place 
 ## 3.1 Unit
 Each unit has:
 - a name;
-- a strength from `1` to `10`;
+- a strength from `0` to `10`;
 - an optional effect.
 
 ## 3.2 Map
@@ -140,37 +138,17 @@ Unless stated otherwise, a units's effect is resolved after it is placed. Effect
 - ignoring connection;
 - removing visible units.
 
-**Timing of reactions.** A placed unit's own effect (Battlecry) resolves *before* any reaction
-another unit has to that placement (e.g. Hippopotamus removing a weak enemy placed adjacent). A
-reaction that has been queued **fizzles if the unit it belongs to is no longer on the board when it
-would resolve** — so a fed Muskrat placed next to an enemy Hippopotamus removes the Hippo with its
-Battlecry first, and the Hippo's queued removal then does nothing; the Muskrat survives. (An unfed
-Muskrat has no Battlecry removal, so the Hippo removes it as normal.)
+**Timing of reactions.** A placed unit's own effect (Battlecry) resolves *before* any reaction another unit has to that placement (e.g. Hippopotamus removing a weak enemy placed adjacent). A reaction that has been queued **fizzles if the unit it belongs to is no longer on the board when it would resolve** — so a fed Muskrat placed next to an enemy Hippopotamus removes the Hippo with its Battlecry first, and the Hippo's queued removal then does nothing; the Muskrat survives. (An unfed Muskrat has no Battlecry removal, so the Hippo removes it as normal.)
 
 ## 9.1 Timed effects ("in N turns")
 
-Some effects resolve on a delay — "in 2 turns, draw 2 cards" (Black Bear), "at the start of next
-turn, gain 10 more" (Chipmunk). **The timer belongs to the unit, not to the board**, and obeys the
-same top-of-stack principle as everything else (§7.1):
+Some effects resolve on a delay — "in 2 turns, draw 2 cards" (Black Bear), "at the start of next turn, gain 10 more" (Chipmunk). **The timer belongs to the unit, not to the board**, and obeys the same top-of-stack principle as everything else (§7.1):
 
-- **The timer advances only while the unit is the topmost unit of its crossroad.** A buried unit
-  *waits* — its timer is **suspended, not lost** — and resumes advancing if it becomes visible
-  again. A unit that stays buried never pays out. So covering a timed unit is real counterplay
-  (it buys time, and denies the payout entirely for as long as the cover holds), but clearing the
-  coverer gives the payout back.
-- **Removal cancels the effect outright.** A unit sent to the Remove Pile is gone, not waiting; its
-  pending effect never resolves. (A **Fragile** unit is removed *by* being covered, so for Fragile
-  cards covering and cancelling are the same event — this is why Fig Tree's 20 food is a gamble.)
-- **Returning a unit to a hand resets its timer.** A replayed unit starts a fresh timer; it never
-  resumes a partly-elapsed one.
+- **The timer advances only while the unit is the topmost unit of its crossroad.** A buried unit *waits* — its timer is **suspended, not lost** — and resumes advancing if it becomes visible again. A unit that stays buried never pays out. So covering a timed unit is real counterplay (it buys time, and denies the payout entirely for as long as the cover holds), but clearing the coverer gives the payout back.
+- **Removal cancels the effect outright.** A unit sent to the Remove Pile is gone, not waiting; its pending effect never resolves. (A **Fragile** unit is removed *by* being covered, so for Fragile cards covering and cancelling are the same event.)
+- **Returning a unit to a hand resets its timer.** A replayed unit starts a fresh timer; it never resumes a partly-elapsed one.
 
-This is the same principle as the reaction-fizzle rule above: anything queued re-checks its unit
-before it resolves. Covering is placement, not an ability, so neither **Immovable** nor **Stealth**
-protects a timer — only strength (being hard to cover) does.
-
-_Ruled and implemented 2026-07-15 (`effects.schedule` / `effects.start_of_turn` carry a per-unit
-`remaining` that ticks only for a top-of-stack unit). Background, and the three tiers of wrong
-behaviour this replaced, in [`timed-effect-ruling.md`](timed-effect-ruling.md)._
+This is the same principle as the reaction-fizzle rule above: anything queued re-checks its unit before it resolves. Covering is placement, not an ability, so neither **Immovable** nor **Stealth** protects a timer — only strength (being hard to cover) does.
 
 ---
 
@@ -183,8 +161,7 @@ A player takes control of a region immediately upon occupying every crossroad su
 # 11. Victory Conditions
 
 ## 11.1 Capturing an Enemy Headquarters
-If a player places one of their troops on an enemy headquarters, that player wins immediately.
-If a map gives one player multiple headquarters, capturing any single enemy headquarters is sufficient.
+If a player places one of their troops on an enemy headquarters, that player wins immediately. If a map gives one player multiple headquarters, capturing any single enemy headquarters is sufficient.
 
 ## 11.2 Reaching the Food Objective
 If a player obtains at least certain amount of food (specified by the map), the player wins immediately.

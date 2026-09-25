@@ -1,203 +1,60 @@
-# Animal Kingdom — Project Status
+# Status
 
-> **This is the map.** Open it first each session. It says where every area stands and the
-> next 1–3 moves in each — nothing more. The full open list per area lives in its
-> `docs/<area>/backlog.md`; deeper detail in that area's other docs. Keep this file short; when a
-> "Next" item is done, replace it, don't append history.
->
-> _Last updated: 2026-07-08._
+The map. Read it first each session and keep it current: when something here changes, rewrite the line, don't append to it.
 
-## The project in one paragraph
+## Where this is going
 
-A headless rules engine + bots + simulation harness for *Animal Kingdom*, a 2-player tactical
-board game. The end goal is **trustworthy balance data**: run thousands of bot-vs-bot games and
-learn whether the 7 premade decks are fair. Human/web UI is out of scope for now; the engine is
-a pure, transport-agnostic library so a UI can drop on later. Engine built in milestones
-**M0–M6** (all ✅; M6 TurnBot committed in `aecfdf5`).
+*Animal Kingdom* is a two-player tactical deckbuilding game Martin is designing, meant to become a digital game people play competitively. The path there:
 
-## Areas & boundaries
+1. **Design a game that is fun and deep.** Only humans can judge this.
+2. **Make it playable by other people**, so humans other than Martin can play and give signal.
+3. **Stabilize the rules and card pool.**
+4. **Balance it seriously** with the simulation platform.
+5. **Go public**, where player data takes over as the balance source.
 
-Eight areas. The boundary rules that keep them from bleeding:
+**Current stage: 1, blocked on one design problem, with 2 not started.**
 
-- **Rules ↔ Cards** — "would it survive swapping the whole card list?" Yes → Rules; no → Cards.
-- **Balance ↔ Cards** — Balance owns *decisions + data*; Cards owns *current state*. A tuning
-  investigation is Balance; the resulting number lives in `cards.json` (Cards).
-- **Balance ↔ Bots** — Balance owns the *outcome targets* (deck-winrate spread, per-card impact)
-  and the tuning to hit them; Bots owns *pilot quality*. Good bots **gate** balance conclusions
-  but bot work is never a Balance task. And triage every sim finding: real card signal → Balance;
-  bot blind-spot/execution bug → Bots. *Never nerf a card to fix a bot.*
-- **Subsystem ↔ Code Health** — work *within one subsystem* (a feature or bug in Engine/Bots/CLI)
-  stays there; *cross-cutting or whole-repo* quality work (full review, repo-wide refactor,
-  conventions, architecture, tech-debt) → Code Health.
+## What exists
 
----
+- **Engine** (`animal_kingdom/engine/`): complete rules for the seven-deck pool, deterministic and serializable, validating every action. Solid and well tested.
+- **Bots:** random, greedy, turn and referee, plus a learned evaluator. Good enough to be an opponent and to give directional balance reads. They can't plan across turns. See [`bots.md`](bots.md).
+- **Simulation:** round-robin reports, paired A/B benchmarks, a deckbuilding optimizer, metagame search, and the baseline-deck ruler. See [`balance.md`](balance.md).
+- **Interfaces:** a Rich terminal CLI (`./run`) and a Textual recorder (`./record`). Local only; nobody else can play.
 
-## 1. Rules & Mechanics
-_The abstract game: turn structure, placement/covering/connection, victory conditions, card
-types, keyword definitions. Docs: `rules/` (`overview.md`, `keywords.md`, `maps.md`). Backlog: [`rules/backlog.md`](rules/backlog.md)._
+## Open problems, most important first
 
-**State:** Stable and documented. Keyword registry canonical (Flight, Immovable, Fragile, Apex
-Predator, Battlecry, Deathrattle). Immovable/Stealth deep-dive ruled & shipped 2026-07-02.
-Card-type model (Unit/Egg/Landmark) resolved *provisionally* (decision C).
+1. **The goodstuff problem (design).** A pile of the best cards from every deck beats all seven themed decks and nothing beats it, so there is one correct deck instead of an archetype metagame. The direction is synergy payoffs a pile structurally can't reach (tribe-count thresholds); the Colony prototype was promising but short. This is the game's central open question: [`design/goodstuff.md`](design/goodstuff.md).
+2. **Nobody but Martin can play it.** Friends playing is the best design signal available, and it needs a playable version they can reach. Undecided: promote the Textual recorder into the general game UI (agreed as a direction, not started), or go straight to something friends can open remotely.
+3. **The aggro redesign** is mid-flight: Martin's card analysis is in [`cards/aggro-redesign.md`](cards/aggro-redesign.md), a candidate slate in [`cards/aggro-redesign-candidates.md`](cards/aggro-redesign-candidates.md), and nothing is chosen.
+4. **No balance data on the current ruleset.** The first run to make is the fresh baseline-ruler run; see [`balance.md`](balance.md).
+5. **Bots can't plan across turns**, which understates scaling decks in every simulation. Next experiment: a regularized learned evaluator ([`bots.md`](bots.md)).
 
-**Next:**
-1. ✅ **Timed-effect ruling — ruled AND shipped 2026-07-15** (`overview.md` §9.1 + [`rules/timed-effect-ruling.md`](rules/timed-effect-ruling.md)). Timers tick only while the unit is top-of-stack; removal cancels; bounce resets. Closed the flagged Chipmunk bug and 3 more cards. ⚠ **Consequence → Balance: every pre-2026-07-15 benchmark number is void** — Black Bear + Grizzly Bear are in the ruler's own decklist.
-2. ✅ **Landmarks: CUT and shipped 2026-07-15.** Fig Tree + Watering Hole gone; the game is animals-only. Resolves the Landmark card-type decision *and* the Apex-eats-Landmark wart. Ramp's replacements shipped (Sloth, Cape Buffalo). Left dormant: the now-dead type/`is_unit` machinery (→ Engine/Code Health).
-2. **Re-examine Immovable** (naming + effect footprint) — flagged 2026-07-02, *gated on referee-quality balance data*.
-3. ✅ **Terminology sweep done (2026-07-15)** — "Discard" → "Remove Pile" across the canonical docs, deck docs, `card-candidates.md`; `cards.json` was already clean. `cards.md` deliberately left: its refs are stale 0.0.1 content, not wording (→ Cards).
+## Waiting on Martin
 
-## 2. Cards & Flavor
-_The concrete content: the 7 decks (effects, numbers, names) and their theme. Docs: `cards/`
-(`cards.md`, `card-candidates.md`, `decks/`, `decks/flavor-review.md`), `data/cards.json`. Backlog: [`cards/backlog.md`](cards/backlog.md)._
-_**Flavor** (subcategory): animals, biology, folklore, naming — a recurring audit pass, not a separate area._
+Taste calls only Martin can make. Nothing here is started.
 
-**State:** All 7 decks content-complete (4-4-6) and built into `cards.json` + the effect registry.
-**Locked card review applied 2026-07-04** (cats trims Prince Leo/Princess Lea 4→3 + Queen Adira 6→5;
-Skunk 2→4; Hornet redesign; new Aggro legendary **Gale**; **Stoop→egg_control** as rare "Peregrine
-Falcon" 6→4; **Black Swan** rare→legendary; **Goliath** legendary→rare; **Vulture** shelved) plus a
-food_otk OTK-lean buff pass. Legendary names still **provisional**. Remaining card work is flavor + text cleanup.
+- **Card notes from play:** Queen Adira 5→4; Bulwark 10→8 and drop its Immovable ("keep Immovable only on real defenders"); Colony's 5-unit thresholds to 4; Prince Leo and Princess Lea play each other automatically (target chosen, not random) instead of "you may".
+- **Rules:** re-examine Immovable (name, and whether blocking your own sacrifices is right; possibly split move-immunity from remove-immunity); rename Battlecry and Deathrattle to something on-theme (Instinct and Pounce were rejected); print Deathrattle uniformly ("Deathrattle: …" vs "When this is removed, …"); settle the Flight-versus-HQ wording before approving more reach cards.
+- **Flavor:** the legendary-name review (only the Cats legendaries are final); Cat/Canine vs Feline/Canine as the tribe pair; Black Panther as a melanistic leopard; a new name for Hornet (Tarantula Hawk?); a Colony exception to one-species-per-pool for castes; re-casting the untagged animals. Details in [`cards/flavor-todo.md`](cards/flavor-todo.md) and [`cards/decks/flavor-review.md`](cards/decks/flavor-review.md).
+- **Candidates that depended on Landmarks** (14 Landmark cards plus 6 that reference them) in [`cards/card-candidates.md`](cards/card-candidates.md): strike them, or recast the bear den as an animal.
 
-**Next:**
-1. **(Flavor) Dedicated legendary-name review** — the stricter, do-not-skip pass before flavor-lock.
-2. **(Flavor) Reskins & collisions:** Black Panther → leopard (not jaguar); rename the placeholder hornet; re-cast the generic-tag animals.
-3. **Re-cast generic-tag animals + standardize Deathrattle card-text wording** — the data-level flavor/text cleanups.
+## Bug reports to verify
 
-## 3. Engine
-_Core game code: state, effect stack, rules-as-code, the sim/analysis harness (`sim/`),
-architecture, performance, tests. (Kept separate from CLI.) Backlog: [`engine/backlog.md`](engine/backlog.md)._
+Reported by Martin from play:
 
-**State:** M0–M6 shipped; pure stdlib engine + effect interpreter + sim harness. Full suite
-**260 passing, 1 xfailed**. (M6 TurnBot committed in `aecfdf5`.)
+- **Dingo always buffs the same Canine:** confirmed. The engine gives the end-of-turn +1 to the adjacent Canine with the lowest internal id; the text says "a friendly adjacent Canine" without saying who picks. Decide between the controller's choice and random, then fix.
+- Porcupine may not work properly; Chameleon can land on Porcupine and perhaps shouldn't. Not reproduced yet.
 
-**Next:**
-1. **State-representation speed** (struct-of-arrays) — *parked* until NN bots; measure clone cost first.
+## Engine debt
 
-_(The old `metrics.py` "impact game-length confound" item was retired 2026-07-11: any length effect is common-mode within a deck and cancels in the within-deck, same-rarity relative reads impact is actually used for.)_
+- Some printed numbers are still literals in effect code (Raven's draw 3 / shuffle 2, Owl's look 3, several draw-2s); only food values and costs are guarded against the card text. Move them to `Config` or card data, and extend `test_card_text_consistency.py`.
+- `benchmark_set` checkpoints don't fingerprint card data or config values.
+- Before any neural-net bot: move game state to struct-of-arrays for cheap clones (measure clone cost first).
 
-## 4. Bots
-_The AI players and their quality. `bots/`. Backlog: [`bots/backlog.md`](bots/backlog.md)._
+## Where things live
 
-**State:** Ladder is **GreedyBot** (fast baseline) → **TurnBot** (M6, new middle tier) →
-**RefereeBot** (calibration oracle). TurnBot smoke: improves-or-ties all 7 decks, but blows the
-10× throughput gate (12×–266×). Anchored pilot measurement is now available via the factored
-Bradley–Terry runner (`sim/ratings.py`): Random is the fixed floor, Referee is the observed ceiling,
-and every pilot/deck/interaction estimate includes a confidence interval. The full acceptance
-cohort still needs to be run and interpreted before Balance is ungated.
-
-**Next:**
-0. **★ Learning pilot — the strategic bet (handoff written 2026-07-04).** The whole heuristic ladder
-   shares a hand-written, current-state-only evaluator with a structural judgement ceiling — proven
-   when a *human* piloting egg went ~even vs referee-cats where the bot scores ~18% (egg's scaling
-   plan is invisible to a present-only evaluator). Direction: a pilot whose judgement is *learned
-   from experience*, no strategy-class blind spots, measured against recorded human play. Conceptual
-   brief for the AI/ML specialist: [`bots/learned-pilot-handoff.md`](bots/learned-pilot-handoff.md).
-   **UPDATE 2026-07-05 — bet re-scoped, not obviated.** The *delayed-single-card-payoff* slice of
-   this ceiling is now closed by a hand-written eval term (`pending_payoff`, commit `ad4c885`; egg/ramp
-   re-rated up, egg into band) — real evidence the *smallest step* (patch the judgement, keep the
-   search) can pay off cheaply. **But the canonical egg-vs-cats gap persists** (~24% bot vs ~50%
-   human): out-scaling cats needs the pilot to *plan* a multi-turn grow-then-win, which a per-position
-   term can't do. So the bet's target narrows to the **multi-turn planning/scaling** gap; the
-   present-state delayed-payoff part is handled. This tightens the handoff's open "smallest step vs
-   full learned player?" question — the smallest step already banked one class of blind spot.
-   **UPDATE 2026-07-20 — self-play TD path is live; rung-0 promoted, rung-1 failed.** The smallest
-   step shipped as a self-play TD(λ) linear evaluator (`learn/`, `bots/features.py`). **rung-0 v2**
-   (the 11 hand-eval terms, learned) beats hand-eval on 6/7 decks and is the current pilot
-   (`9f2606a`). **rung-1** (adds 13 dynamics features) is a **regression** — worse than rung-0 on
-   5/7 decks (food_otk −20 pts) because several new features are collinear with rung-0 terms and the
-   unregularized raw-feature fit reallocated weight toward self-play's majority rush dynamic. Do not
-   promote `data/learned/rung1.json`. Full analysis + salvage levers:
-   [`bots/learned-eval-rung1-negative-result.md`](bots/learned-eval-rung1-negative-result.md).
-1. **Pilot-trust verdict IN (2026-07-03): TurnBot is a big step up from greedy but NOT oracle-level.**
-   Paired oracle validation (turn vs referee, opp greedy, 60/opp × 7, `results/bot_quality/turn_vs_referee_all/`):
-   referee beats turn on all 7 decks (sig. on 5), by ~+4pt (food_otk) to +14pt (ramp). The gaps are
-   non-uniform, so the turn matrix **under-rates ramp/canine/egg and over-rates food_otk/colony/cats** —
-   good for **directional** deck triage, not absolute 40–60% verdicts (see `bots/backlog.md`). Remaining:
-   the anchored Bradley–Terry cohort (`bots/pilot-ratings.md`) for a full pilot/deck/difficulty rating,
-   and (optional) referee-piloted matrices on any deck a tuning call actually hinges on.
-2. **A/B harness unified — core done (`4e5fd74`).** `bot_comparison` now accepts parametrized bot
-   specs (`--baseline-kind "turn:deck_reveal_choice_width=0"`), so config/flag A/Bs run through its
-   paired-vs-fixed-opponent design instead of hand-rolled low-power mirrors. Follow-up: retire
-   `referee_comparison`'s `--mirror-deck` mode + add the skill caveat. See
-   [`bots/backlog.md`](bots/backlog.md).
-3. **TurnBot → default pilot? Strength axis GREEN on all 7 decks; only throughput left.** The original
-   acceptance cohort ran at **map_b + 1-action** — the wrong ruleset (now impossible: 2-action is the code
-   default). Re-ran the full 7-deck cohort at 2-action (`results/bot_quality/turnbot_2action/`, 100/opp,
-   seed 683470156): **TurnBot improves every deck** (all CIs>0) — aggro +18.3%, canine +6.6%, cats +9.0%,
-   colony +41.3%, egg +11.4%, **food_otk +16.4%** (the 1-action "−9.4% regression" was an artifact),
-   ramp +13.0%. So the switch is no longer blocked on any deck's *strength*; the only open gate is
-   **throughput** on the deep-combo decks (food_otk 47.6×, egg/colony ~33×). Decide there (accept the
-   slowdown for balance sims, or scope `./report` to fast decks). Node budget (`TURN_MAX_SEARCH_NODES=80`)
-   shipped; turn-*depth* cap a no-op (cost is *breadth*); uniform determinization/beam trim rejected.
-4. **Known blind spots:** (a) `region_control` over-values the row-2 spine, so neither bot contests
-   row-1/3 as an HQ-rush lane; (b) **the evaluator scores *current* strength.** ◐ *Partially fixed
-   2026-07-05* — **delayed single-card payoffs** (Egg hatch, Bear) are now credited by
-   `pending_payoff=20` (commit `ad4c885`); egg/ramp re-rated up, egg into band overall, and the
-   referee-quality re-baseline is in `results/matrix_referee_pending20/`. **STILL OPEN:** the
-   *multi-turn scaling plan* (growing Rattlesnake→8 / Goliath→11 to out-body cats) — egg still wins
-   only **~24% vs referee-cats** vs the human's ~50%; a per-position eval term can't orchestrate a
-   grow-then-win plan. Note cats deflated ~69→63 mostly because **ramp** (a delayed-payoff deck the
-   fix lifted) now beats it — *not* because egg's scaling got piloted — so cats may **still** be
-   mildly inflated by the residual scaling gap; confirm the cats-nerf magnitude against human play
-   into cats before committing.
-
-## 5. CLI / App
-_The human interface. `cli.py`, `render/`. Backlog: [`cli/backlog.md`](cli/backlog.md)._
-
-**State:** `rich`-based CLI polish done, plus a **recorder (`./record`) Textual UI/UX pass landed
-2026-07-04** (`tui/app.py`): centered board with preserved hitboxes, contextual action prompt +
-inspector rail, responsive hand shelf / deck trackers / food bars, in-app JSONL link, `?` help overlay
-— all kept working at the compact 80×24 layout.
-
-**Next:**
-1. **Recorder TUI reassessment** — the existing Textual screen needs a fresh real-terminal
-   usability and visual-quality review before any broader general-UI work. Revisit information
-   density, layout hierarchy, board legibility, and compact behavior from the player's perspective;
-   do not treat the 2026-07-04 pass as sufficient evidence of quality.
-2. **Full general-purpose TUI** (`textual`, beyond the recorder) — *parked*; revisit when `rich` feels limiting.
-
-_Visual-polish pass done (commit `7d1b961`): dimmed empties, held-region chips, food progress bars, tighter cards, first renderer test._
-
-## 6. Code Health
-_Cross-cutting code quality: whole-repo review, architecture principles, repo-wide refactors,
-conventions, tech-debt, cross-cutting performance. The code analogue of Balance. (Subsystem-local
-work stays in Engine/Bots/CLI.) Backlog: [`code-health/backlog.md`](code-health/backlog.md)._
-
-**State:** No systematic review done yet. Codebase is milestone-built (M0–M6) with a green suite
-(260 passing) and a deliberate architecture (data / config / effect-registry split, pure stdlib
-engine) — but has never had a dedicated quality pass.
-
-**Next:**
-1. **Full code-review pass** across the whole repo (Engine + Bots + CLI + sim) — the big one to get to.
-2. **Code conventions + a tech-debt register** so known seams are tracked, not rediscovered.
-
-## 7. Balance
-_The central question: are the decks fair? Winrates, matchup matrix, tuning decisions + the data
-behind them. Consumes Bots + the sim harness. Roadmap: `balance/simulation-platform-roadmap.md`. Backlog: [`balance/backlog.md`](balance/backlog.md)._
-
-**Two outcome targets:** (a) every **deck** winrate in **40–60%**; (b) every **card's impact**
-within **±10%**.
-
-**State:** Deck picture measured under competent both-sides piloting (turn-vs-turn 7×7 + oracle-bias
-correction) — see `balance/backlog.md`. **2026-07-04 pass:** locked card review applied; **food_otk
-OTK-lean buff shipped (pending sim validation)** — leans *into* the OTK (Opossum food, Tortoise/Porcupine
-5→7, Pufferfish draw, Gazelle 40→30), diagnostic = flip Scrooge from worst- to best-impact without
-touching Scrooge itself. **egg_control retracted as a card problem** — its ~18% is a *pilot* artifact
-(human egg ~50% vs referee-cats); the fix is a Bots one (search under-values dynamic strength, §4).
-**cats_midrange (~69%) still the #1 nerf target but its number may be inflated** by that same pilot gap —
-hold the nerf magnitude. **colony retracted** (greedy artifact, ~48% in band). Card-impact reads as a
-within-deck, same-rarity relative signal (`per_card_stats`). Pilot caveat: TurnBot is sub-oracle (~+8pt) → matrix is directional.
-
-**Next:**
-0. **★ CURRENT ARC — build a trustworthy card-power ruler (the baseline deck).** Agreed 2026-07-13: a fixed 30-card no-synergy reference opponent (extend `sim/benchmark_set.py`), anchored by impact-equivalence *within* each rarity (vanilla-7 ground / vanilla-5 flying common; feel-set rare & legendary), run at **RefereeBot** vs all 7, to price cards and rebalance the 30. Pulling the synergy decks to beat that baseline is the *sequel* arc. Full plan + locked decisions + risks: [`balance/baseline-deck-arc.md`](balance/baseline-deck-arc.md). **NB:** all pre-`8c3d473` balance data below is stale draw-1 data and must be re-baselined.
-1. **Deck equality → pull every deck into 40–60%.** Active levers: Decision H food-economy re-derivation (in progress; Methuselah + food_otk floor shipped; the 15-cost bodies — *not* 20, corrected 2026-07-15 — Landmarks, Colony/Egg numbers still open) + a card-design fix for colony's early game. **food_otk's "kill window" lever struck** — the weakness was a stale-ruleset read (see Balance backlog ✅ verdict); needs a 2-action search-vs-search read before any tuning.
-2. **Card equality → every card's impact within ±10%.** Read impact within-deck / same-rarity (`per_card_stats`); still gated on trustworthy pilots (Bots).
-3. **Triage the open sim findings:** colony early-game weakness (real → card-design look) vs cats-vs-aggro (bot bug → leave the card).
-
-## 8. Meta
-_Holding it together: this dashboard, milestone/roadmap tracking, conventions. Backlog: [`meta/backlog.md`](meta/backlog.md)._
-
-**State:** Milestones M0–M6 tracked; `balance/simulation-platform-roadmap.md` is the long-term north
-star. Docs reorg **done**: STATUS.md dashboard + per-area `backlog.md` files; `todo.md` retired.
-
-**Next:**
-1. **Project skills** — reusable skills for repeatable workflows (e.g. the standard gauntlet/report run, a flavor-review pass). *(Project `CLAUDE.md` at repo root: done.)*
+- [`rules/`](rules/): [`mental-model.md`](rules/mental-model.md) (read before any card or balance reasoning), [`overview.md`](rules/overview.md), [`keywords.md`](rules/keywords.md), [`rulings.md`](rules/rulings.md), [`maps.md`](rules/maps.md), and the unadopted [`expansion-mechanics-todo.md`](rules/expansion-mechanics-todo.md).
+- [`design/`](design/): [`principles.md`](design/principles.md) (the game we want, card-design rules) and [`goodstuff.md`](design/goodstuff.md).
+- [`cards/`](cards/): the seven [`decks/`](cards/decks/README.md) (tables generated from `cards.json`), [`card-candidates.md`](cards/card-candidates.md), [`shelved-cards.md`](cards/shelved-cards.md), and the idea banks [`expansion-design-todo.md`](cards/expansion-design-todo.md) and [`deckbuilding-todo.md`](cards/deckbuilding-todo.md).
+- [`bots.md`](bots.md), [`balance.md`](balance.md).
+- Research tooling removed from the tree (pilot ratings, conquest and roster experiments, referee comparison, gauntlet, human scorer) and the old docs are at tag `archive/research-2026-07`.

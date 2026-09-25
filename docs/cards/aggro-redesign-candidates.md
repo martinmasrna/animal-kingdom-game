@@ -1,4 +1,4 @@
-# Aggro HQ Rush redesign session — 2026-07-15
+# Aggro HQ Rush redesign: candidates
 
 ## Identity
 
@@ -23,7 +23,7 @@ The current 4-4-6 list is a source of roles and candidates, not a claim that eve
 | 3 | **Exploit a real opening** | Once a front is held, the deck must turn that state into pressure before the defender re-establishes a wall. Current bounce and whole-stack effects can be too situational because they do not reliably convert their opening into connection. | Extra placement and removal must be front- or sequence-fenced; no unrestricted placement and no Flight-plus-capture shortcut. |
 | 4 | **Refill** | Draw 2 makes refill materially less urgent than the historical draw-1 analysis suggests. The deck still needs enough cards to continue a committed push, but its primary answer should be efficient, conditional pressure, not a generic draw suite or a late-game engine. | One front-gated Rodent draw rider may be tested, but it must at least beat the Scout comparison rather than asking the fence to pay for a weak body. Empty-hand payoff remains optional and risky rather than a core repair. |
 
-This order follows the earlier diagnosis that clearing without occupying fails the two-action test and that strong conditions must be difficult for a reactive pile to fake ([Aggro redesign, sections 4–5](../balance/aggro-redesign.md#4-new-card-suggestions)). It also applies the rule that only top-of-stack occupants provide connection ([mental model](../rules/mental-model.md#the-board-is-a-graph-placement-is-gated-by-connection)).
+This order follows the earlier diagnosis that clearing without occupying fails the two-action test and that strong conditions must be difficult for a reactive pile to fake ([Aggro redesign, sections 4–5](aggro-redesign.md#4-new-card-suggestions)). It also applies the rule that only top-of-stack occupants provide connection ([mental model](../rules/mental-model.md#the-board-is-a-graph-placement-is-gated-by-connection)).
 
 ### Evidence versus bot blind spot
 
@@ -45,18 +45,15 @@ Dependency map:
 
     connected Rodent line / width
                 |
-                v
-    occupied HQ-front crossroad -- removed or covered --> attempt ends
+                v occupied HQ-front crossroad -- removed or covered --> attempt ends
                 |
          front-gated draw, free Rodent, bounce
                 |
-                v
-    last wall at the HQ front
+                v last wall at the HQ front
                 |
          Weasel covers it while occupying the crossroad
                 |
-                v
-    normal connected placement on enemy HQ -> immediate win
+                v normal connected placement on enemy HQ -> immediate win
 
 There is deliberately no arrow from Flight, empty-crossroad placement, or removal directly to capture. Flight can establish a unit but cannot establish the ordinary connected HQ path; a cleared wall that remains unoccupied does not complete the map. This preserves the hard guards already identified for this archetype ([Aggro deck — rejected designs](decks/aggro-hq-rush.md#open-items--resolved-2026-06-28)).
 
@@ -177,7 +174,7 @@ For a chain condition, “two or more other units were placed this turn” exclu
 | **Predator** | Decks with repeated cheap removal, durable/high-strength HQ-front walls, or stabilizers that can erase the beachhead while continuing their own plan. | Aggro spends actions rebuilding the chain; its front-gated cards become weak floors and it exhausts before a conversion window. |
 | **Weak-matchup signature** | The rush loses clearly, not narrowly, when its initial front is removed or covered twice. | It has no broad late-game draw engine, no unrestricted placement, and no generic answer to every wall. A high overall rate with no such losing pattern is evidence that a fence failed. |
 
-The aim is therefore an RPS relationship, not simply a higher aggregate win rate—the acceptance rule stated in the earlier redesign ([Aggro redesign, section 5.5](../balance/aggro-redesign.md#55-testing--acceptance)).
+The aim is therefore an RPS relationship, not simply a higher aggregate win rate—the acceptance rule stated in the earlier redesign ([Aggro redesign, section 5.5](aggro-redesign.md#55-testing--acceptance)).
 
 ## Later validation plan
 

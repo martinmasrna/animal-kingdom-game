@@ -1,19 +1,12 @@
 ---
 name: balance-eval
 description: >-
-  Evaluate whether a balance or bot change actually helped, and whether a deck/card is balanced,
-  using this repo's bot-vs-bot simulation methodology. Use when running or interpreting the
-  balance report, matchup matrix, or paired bot benchmark; when asked "did this change help?",
-  "is this deck/card balanced?", or "is this bot better?"; or before recording any balance/bot
-  conclusion. Enforces paired-seed, both-seat, >=200-games sampling and the card-vs-bot triage.
+  Evaluate whether a balance or bot change actually helped, and whether a deck/card is balanced, using this repo's bot-vs-bot simulation methodology. Use when running or interpreting the balance report, matchup matrix, or paired bot benchmark; when asked "did this change help?", "is this deck/card balanced?", or "is this bot better?"; or before recording any balance/bot conclusion. Enforces paired-seed, both-seat, >=200-games sampling and the card-vs-bot triage.
 ---
 
 # Balance-change evaluation
 
-The core purpose of this repo is **trustworthy balance data**. A conclusion is only as good as the
-methodology and the pilot behind it. This skill is the procedure that keeps a result from being a
-noisy or mis-attributed mislead. Deeper framework: `docs/balance/simulation-platform-roadmap.md`
-(release gates, reliability grades). Boundary rules: `docs/STATUS.md`.
+The core purpose of this repo is **trustworthy balance data**. A conclusion is only as good as the methodology and the pilot behind it. This skill is the procedure that keeps a result from being a noisy or mis-attributed mislead. Background: `docs/balance.md` and `docs/bots.md`.
 
 ## When this applies
 - "I changed a number / heuristic / weights — did it help?" → run the procedure below.
@@ -31,7 +24,7 @@ noisy or mis-attributed mislead. Deeper framework: `docs/balance/simulation-plat
    - Is it a **real card-balance signal**, or a **bot artifact** (a pilot too weak/blind to execute)?
    - Decision aids: does a *stronger* pilot (`turn`/`referee`) change it? Does it replicate across pilots? Does human playtest agree?
    - Real card signal → **Balance** backlog + tune the number (in `engine/config.py`). Bot blind-spot / execution gap → **Bots** backlog. **Never nerf a card to fix a bot.**
-7. **Record with provenance.** Conclusion + bot versions, config, map, seed schedule, sample size, and CI. Update the relevant `docs/<area>/backlog.md` (and `docs/STATUS.md` if a priority moves).
+7. **Record with provenance.** Conclusion + bot versions, config, map, seed schedule, sample size, and CI. Update `docs/balance.md` or `docs/bots.md`, and `docs/STATUS.md` if a priority moves.
 
 ## Bot-change branch
 If the change is to a **bot** (heuristic / weights / search), additionally:
@@ -49,4 +42,4 @@ If the change is to a **bot** (heuristic / weights / search), additionally:
 Ruleset is the shipped default everywhere (map_b + 2 actions/turn) — no ruleset flags needed.
 - Matchup matrix + per-card table: `./report 200 [--deck aggro --opponent cat]`
 - Paired bot/deck benchmark: `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/<name>`
-- Single matchup, both seats: `.venv/bin/python -m animal_kingdom.sim --decks A,B --games 200 --seed 0 --jobs 4 --out results/`
+- Single matchup, both seats: `./report 200 --deck A --opponent B --format both --out results/<name>`

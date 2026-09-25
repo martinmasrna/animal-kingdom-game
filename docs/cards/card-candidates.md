@@ -2,20 +2,12 @@
 
 Single inventory of proposed new cards and unresolved variants. Nothing here is locked.
 
-**2026-07-04:** the "New cover-retaliation legendary" candidate shipped into `aggro_hq_rush` as
-**Gale** (card-balance-todo.md, filling the legendary slot Stoop vacated when it moved to
-Egg Control) — removed from this list. Vulture (Rare table, below) is shelved out of
-`egg_control` the same session; its `config.py` dial (`vulture_food`/`cap_vulture`) and
-`effects.py` handler are left dormant, ready if it's re-added to a deck.
+Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` handler still exist, ready if it returns to a deck.
 
 - Multiple strengths or effects in one row are competing versions, not combined card text.
-- Where a row has numbered variants, multiple STR values correspond in the same order. If the
-  text is shared, only the proposed strength differs.
-- Candidates with no proposed rarity are marked **rarity TBD** and parked in the Common table
-  solely to keep this document to the requested three tables. That placement does not assign
-  Common rarity.
-- Tokens created by cards are included in effect text but are not listed as separate collectible
-  cards.
+- Where a row has numbered variants, multiple STR values correspond in the same order. If the text is shared, only the proposed strength differs.
+- Candidates with no proposed rarity are marked **rarity TBD** and parked in the Common table solely to keep this document to the requested three tables. That placement does not assign Common rarity.
+- Tokens created by cards are included in effect text but are not listed as separate collectible cards.
 
 ## Common
 

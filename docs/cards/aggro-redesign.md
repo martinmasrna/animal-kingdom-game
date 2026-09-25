@@ -1,3 +1,5 @@
+# Aggro HQ Rush redesign: Martin's analysis
+
 
 ## 1. Card design principles
 
@@ -21,7 +23,7 @@ When it comes to designing cards, this leads to 4 core principles:
 
 ### 1.4 Cards should reward skill
 - (a) skillful dekcbuilding -> creating deck strong against the whole "meta", across many different decks and archetypes
-- (b) long- term strategic planning -> seeing the matchup, realizing what the win conditions for boths decks are, and ajusting the strategy accordingly 
+- (b) long- term strategic planning -> seeing the matchup, realizing what the win conditions for boths decks are, and ajusting the strategy accordingly
 - (c) in-game tactical decisions -> small, turn-by-turn play, clever manouvering, squeezing the maximum win % of of each individual game and position
 
 ## 2. Current Card Analysis
@@ -37,12 +39,7 @@ Now, we shall analyze current cards in the Aggro deck through the lens we just e
 
 Here are current 6 common cards:
 
-⚪  lemming             Rodent · STR 1 · Battlecry: place all Lemmings from your hand and deck on random adjacent empty crossroads.
-⚪  mouse               Rodent · STR 1 · Battlecry: draw a Rodent.
-⚪  bat                 - · STR 2 · Flight. Battlecry: draw 1 card.
-⚪  rat                 Rodent · STR 2 · Battlecry: remove a card in your hand to destroy an adjacent enemy unit.
-⚪  falcon              Bird · STR 4 · Flight. Battlecry: if you play this next to the opponent's base, draw 1 card.
-⚪  cheetah             Cat · STR 5 · Battlecry: if you play this next to the opponent's base, draw 1 card.
+⚪  lemming             Rodent · STR 1 · Battlecry: place all Lemmings from your hand and deck on random adjacent empty crossroads. ⚪  mouse               Rodent · STR 1 · Battlecry: draw a Rodent. ⚪  bat                 - · STR 2 · Flight. Battlecry: draw 1 card. ⚪  rat                 Rodent · STR 2 · Battlecry: remove a card in your hand to destroy an adjacent enemy unit. ⚪  falcon              Bird · STR 4 · Flight. Battlecry: if you play this next to the opponent's base, draw 1 card. ⚪  cheetah             Cat · STR 5 · Battlecry: if you play this next to the opponent's base, draw 1 card.
 
 Let's talk about them one by one now:
 
@@ -57,7 +54,7 @@ Let's talk about them one by one now:
 - unconditional, tribe-specific draw
 - again, a strong card, but I don't think it's toxic or too oppresive, and we literally can't make it any weaker since it already has strength 1
 - more of a "neutral card" that happens to be good in this deck, rather than a dedicated HQ rush card
-- I can see this being played in heavy Rodent decks, from aggro to combo to midrange, but also in control decks that want to tutor a specific Rodent. It's possible this might become auto-include in a lot of deck, similar to many other "draw a card" unit -- changing "draw cards" action from drawing 1 card to drawing 2 cards could help with this, I think 
+- I can see this being played in heavy Rodent decks, from aggro to combo to midrange, but also in control decks that want to tutor a specific Rodent. It's possible this might become auto-include in a lot of deck, similar to many other "draw a card" unit -- changing "draw cards" action from drawing 1 card to drawing 2 cards could help with this, I think
 
 
 #### 2.1.3 Bat
@@ -96,11 +93,7 @@ Let's talk about them one by one now:
 
 4 rare cards currently being used in the deck:
 
-🔵  jerboa              Rodent · STR 2 · Battlecry: play another unit.
-🔵  hornet              - · STR 2 · Flight. Battlecry: you may remove another Hornet from your hand or deck. If you do, 
-destroy an adjacent enemy unit.
-🔵  skunk               - · STR 4 · Return an adjacent enemy to your opponent's hand. They can't play it next turn.
-🔵  chameleon           Lizard · STR dynamic · May be placed on any unit, and any unit may be placed on top of it.
+🔵  jerboa              Rodent · STR 2 · Battlecry: play another unit. 🔵  hornet              - · STR 2 · Flight. Battlecry: you may remove another Hornet from your hand or deck. If you do, destroy an adjacent enemy unit. 🔵  skunk               - · STR 4 · Return an adjacent enemy to your opponent's hand. They can't play it next turn. 🔵  chameleon           Lizard · STR dynamic · May be placed on any unit, and any unit may be placed on top of it.
 
 Let's go over them one by one:
 
@@ -130,10 +123,7 @@ Let's go over them one by one:
 
 4 legendaries currently being used in the deck:
 
-🟡  verminus            Rodent · STR 3 · Has +1 strength for each other unit you control.
-🟡  sirocco             - · STR 5 · Battlecry: return all enemy units adjacent to this to their owner's hand.
-🟡  gale                Bird · STR 6 · Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand.
-🟡  pestis              Rodent · STR 3 · Battlecry: remove everything from an adjacent crossroad.
+🟡  verminus            Rodent · STR 3 · Has +1 strength for each other unit you control. 🟡  sirocco             - · STR 5 · Battlecry: return all enemy units adjacent to this to their owner's hand. 🟡  gale                Bird · STR 6 · Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand. 🟡  pestis              Rodent · STR 3 · Battlecry: remove everything from an adjacent crossroad.
 
 #### 2.3.1 Verminus
 - strongest legendary in the deck (but to be honest, other 3 are quite underwhelming)
@@ -170,20 +160,13 @@ Based on the above, here's how I see the situation with Aggro HQ Rush deck:
 
 First of all, an important note: nothing is forcing us to stick to only 4 legenaries, only 4 rares and only 6 commons. It's okay to create more cards than decks, and then test various decks to find out what works and what doesn't work. That being said, here are some suggestions:
 
-All strength values below are **starting proposals** marked with `?` — the real numbers get
-tuned in `config.py` under sim, never hard-coded. Every card is built to two rules we agreed on:
-**(1) carrot + fence ship together** (a payoff *and* a hard, aggro-only condition), and **(2) it
-sharpens the weakness** — each card gets *worse* against a wall / against removal / when the race
-stalls, and none of them grant resilience or a late game.
+All strength values below are **starting proposals** marked with `?` — the real numbers get tuned in `config.py` under sim, never hard-coded. Every card is built to two rules we agreed on: **(1) carrot + fence ship together** (a payoff *and* a hard, aggro-only condition), and **(2) it sharpens the weakness** — each card gets *worse* against a wall / against removal / when the race stalls, and none of them grant resilience or a late game.
 
-The condition each card keys on is a **legible board state a greedy/reactive deck structurally
-can't fake**: *adjacent to the enemy HQ*, *adjacent to an enemy unit* ("in the fight"),
-*empty hand*, *another unit placed this turn*, or *Rodent commitment*.
+The condition each card keys on is a **legible board state a greedy/reactive deck structurally can't fake**: *adjacent to the enemy HQ*, *adjacent to an enemy unit* ("in the fight"), *empty hand*, *another unit placed this turn*, or *Rodent commitment*.
 
 ### 4.1 New Legendaries
 
-Legendaries should be **splashy and identity-defining** (the current four are anthems/riders that
-don't read legendary). These are engines, bursts, and finishers, not big bodies with a footnote.
+Legendaries should be **splashy and identity-defining** (the current four are anthems/riders that don't read legendary). These are engines, bursts, and finishers, not big bodies with a footnote.
 
 🟡 **Warren General** — Rodent · STR 4? · *At the start of your turn, if you control a unit adjacent to the enemy HQ, place a Rodent from your hand for free onto a crossroad adjacent to that unit.*
 - **Persistent assault engine.** Snowballs the rush turn over turn, but only while you hold the front — a durdle deck never turns it on, and it dies the moment your beachhead is swept. Skill: protecting the front unit to keep the engine online. The "reward repeated front pressure" idea made into an ongoing engine.
@@ -238,8 +221,7 @@ Commons are the load-bearing backbone — simple, aggressive, all hard-fenced to
 
 ## 5. Agreed Changes
 
-Checklist of everything we've locked in. Ordered so effects stay attributable (global rule first,
-re-baseline, then cards).
+Checklist of everything we've locked in. Ordered so effects stay attributable (global rule first, re-baseline, then cards).
 
 ### 5.1 Principle addenda — fold into §1 before designing more cards
 - [ ] **Condition *difficulty* is the real lever, not condition presence.** An easy-to-meet condition (esp. one Flight satisfies for free — see Falcon) is a neutral card dodging the neutral tax. The condition must be one a greedy/reactive deck structurally can't meet.
@@ -248,14 +230,9 @@ re-baseline, then cards).
 - [ ] **Removal must not cost the tempo to exploit it.** In a 2-action turn, "clear then occupy then capture" doesn't fit. Removal has to *occupy as it clears* (Weasel, Plague Warden) or ride a body you were placing anyway (Scurry).
 
 ### 5.2 Draw rule — DECIDED: keep draw 1
-- **Draw action stays 1 card** (the shipped default; 2 actions/turn unchanged). Draw-2 was
-  considered as a game-health change (it would smooth the topdeck non-decision) but **rejected for
-  cleanliness** — one card per draw is simpler and we'd rather not carry the extra tempo/exhaustion
-  complexity or the re-baseline it forces. Revisit only on a *serious* reason.
-- **Accepted cost:** the empty-hand "topdeck" turn stays a low-agency spot. That's a known
-  tradeoff, not an oversight.
-- Consequence for design: no global re-baseline needed, and the draw-family benchmark can be pinned
-  directly (no rule dependency).
+- **Draw action stays 1 card** (the shipped default; 2 actions/turn unchanged). Draw-2 was considered as a game-health change (it would smooth the topdeck non-decision) but **rejected for cleanliness** — one card per draw is simpler and we'd rather not carry the extra tempo/exhaustion complexity or the re-baseline it forces. Revisit only on a *serious* reason.
+- **Accepted cost:** the empty-hand "topdeck" turn stays a low-agency spot. That's a known tradeoff, not an oversight.
+- Consequence for design: no global re-baseline needed, and the draw-family benchmark can be pinned directly (no rule dependency).
 
 ### 5.3 Existing-card changes
 - [ ] **Gale** — nerf STR (6→4?) and demote legendary → rare/common; effect doesn't read legendary and a 6-str flyer is neutral value in slow decks.

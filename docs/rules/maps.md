@@ -1,8 +1,8 @@
 # 1. Document Scope
 
-This document describes the **maps** for the **0.0.1** version of the game, plus the shared setup rules and the map-data format used to encode them. It is a companion to `overview.md` (rules) and `cards.md` (card pool).
+This document describes the game's **maps**, the shared setup rules, and the map-data format used to encode them. It is a companion to `overview.md` (rules).
 
-A map is the board a single game is played on. A competitive match is a best-of-3 over three maps revealed in advance (`overview.md` §15).
+A map is the board a single game is played on. A competitive match is a best-of-3 over three maps revealed in advance (`overview.md` §14).
 
 ---
 
@@ -18,7 +18,7 @@ Every map is a graph plus a food layout. Maps are encoded with these fields:
 | **regions** | Closed cells. Each lists its bounding **corners** (crossroads) and its **food** output per turn. A player controls a region when they occupy *all* its corners. |
 | **win_food** | Food total that wins the game on this map (`overview.md` §11.2). |
 
-All food numbers (region output, `win_food`, and the card `F` values in `cards.md`) live on **one shared scale** and are tuned together. The numbers below are deliberate round **placeholders** — the simulator's first job is to tune them.
+All food numbers (region output, `win_food`, and every card's food numbers) live on **one shared scale** and are tuned together. The numbers below are deliberate round **placeholders** — the simulator's first job is to tune them.
 
 ---
 
@@ -36,23 +36,13 @@ Game-wide setup and HQ rules are the source of truth in `overview.md` — **§4 
 
 # 4. Map B — "Savanna Expanse" (the game map)
 
-**This is the shipped map** — every game and sim runs on it. A 5×3 lattice of **15 crossroads**
-(columns 1–5, rows 1–3), HQ_A fronting column 1 and HQ_B fronting column 5, with **8 regions**
-(R1–R8; the four center cells R2/R3/R6/R7 output **15** food, the flanks **10**) and **win_food 100**.
-The center was cut from 20→15 on 2026-07-05 to balance the two win conditions: at 20/10 food wins
-dominated (~63–71% of games); at 15/10 the food/HQ-capture split lands ~50/50 (greedy-vs-greedy, 200 games/matchup).
-The exact geometry (crossroads, edges, region corners) is canonical in
-[`animal_kingdom/data/maps.json`](../../animal_kingdom/data/maps.json) — that file is the source of
-truth; this section is the prose companion. The extra column over the old 4×3 map gives combo/food
-decks room to develop and opens a genuine row-1/row-3 flank as an HQ-rush lane.
+**This is the shipped map** — every game and sim runs on it. A 5×3 lattice of **15 crossroads** (columns 1–5, rows 1–3), HQ_A fronting column 1 and HQ_B fronting column 5, with **8 regions** (R1–R8; the four center cells R2/R3/R6/R7 output **15** food, the flanks **10**) and **win_food 100**. The center was cut from 20→15 on 2026-07-05 to balance the two win conditions: at 20/10 food wins dominated (~63–71% of games); at 15/10 the food/HQ-capture split lands ~50/50 (greedy-vs-greedy, 200 games/matchup). The exact geometry (crossroads, edges, region corners) is canonical in [`animal_kingdom/data/maps.json`](../../animal_kingdom/data/maps.json) — that file is the source of truth; this section is the prose companion. The extra column over the old 4×3 map gives combo/food decks room to develop and opens a genuine row-1/row-3 flank as an HQ-rush lane.
 
 ---
 
 # 4L. Map A — "Savanna Crossing" (retired — test fixture only)
 
-> **Legacy.** Map A is **not a playable ruleset** — it is retained in `maps.json` solely as a small,
-> symmetric geometry fixture for engine unit tests. It is never a game or sim default. The section
-> below is kept for those tests' reference only.
+> **Legacy.** Map A is **not a playable ruleset** — it is retained in `maps.json` solely as a small, symmetric geometry fixture for engine unit tests. It is never a game or sim default. The section below is kept for those tests' reference only.
 
 A 4×3 lattice of crossroads, HQs on opposite sides, square cells forming 6 regions.
 
