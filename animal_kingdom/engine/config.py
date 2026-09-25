@@ -94,7 +94,7 @@ class Config:
     colony_synergy_threshold: int = 4    # Guard Hornet / Soldier Ant / Nurse Bumblebee "4+ Colony"
 
     # --- Removal-strength caps on Battlecry removals ---
-    jaguar_max: int = 5
+    jaguar_max: int = 4
     serval_min: int = 6                  # removes an enemy of strength >= this
     stoop_max: int = 3                   # baseline-ruler tuning 2026-07-13: str 4→3, remove ≤4→≤3
                                           # (id kept as "stoop"; printed name "Peregrine Falcon")

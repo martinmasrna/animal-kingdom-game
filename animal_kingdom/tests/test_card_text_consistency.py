@@ -143,3 +143,28 @@ def test_no_food_card_escapes_the_check():
         "cards with a 'gain N food' text but no config mapping — add them to "
         f"FOOD_CONSTANTS or NO_CONSTANT in this test: {sorted(unaccounted)}"
     )
+
+
+STRENGTH_LIMIT_RE = re.compile(r"strength (\d+) or (?:less|more)", re.IGNORECASE)
+
+# card_id -> the config attr holding its "strength N or less/more" removal limit.
+STRENGTH_LIMITS = {
+    "jaguar": "jaguar_max",
+    "serval": "serval_min",
+    "stoop": "stoop_max",
+    "rhinoceros": "rhinoceros_max",
+}
+
+
+def test_strength_limit_text_matches_config():
+    """Every printed "strength N or less/more" removal limit equals the constant its effect uses."""
+    cfg = Config.default()
+    for cid, attr in STRENGTH_LIMITS.items():
+        (text_n,) = (int(n) for n in STRENGTH_LIMIT_RE.findall(_cards()[cid].text))
+        assert getattr(cfg, attr) == text_n, f"{cid}: text says {text_n}, {attr} is {getattr(cfg, attr)}"
+
+
+def test_no_strength_limit_card_escapes_the_check():
+    # Oxpecker's "strength 6 or more" counts its own decklist, not a removal limit.
+    printed = {cid for cid, c in _cards().items() if STRENGTH_LIMIT_RE.search(c.text)}
+    assert printed - {"oxpecker"} == set(STRENGTH_LIMITS)
