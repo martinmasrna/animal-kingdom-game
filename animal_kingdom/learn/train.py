@@ -119,7 +119,7 @@ def arena_probe(
                 actor = state.player_to_act()
                 legal = rules.legal_actions(state)
                 action = bots[actor].choose(state.view_for(actor), legal, state)
-                rules.apply_action(state, action)
+                rules.apply_action(state, action, validate=False)
                 result = rules.is_terminal(state)
             if result.winner is None:
                 credit += 0.5

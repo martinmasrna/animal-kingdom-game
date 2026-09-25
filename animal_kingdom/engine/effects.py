@@ -98,7 +98,10 @@ def resolve(state: GameState) -> None:
 
 def do_placement(state: GameState, player: str, card_id: str, target) -> None:
     """Place an occupant from hand. Handles food cost, HQ capture, and crossroad landing."""
-    unit = _take_from_hand(state, player, card_id)
+    unit = playable_copy(state, player, card_id)
+    if unit is None:
+        raise EngineError(f"{player} has no playable {card_id!r} in hand")
+    state.hands[player].remove(unit)
     cost = state.cards[card_id].food_cost          # "Costs X food" (decision F): paid on placement
     if cost:
         state.food[player] -= cost
@@ -110,9 +113,21 @@ def do_placement(state: GameState, player: str, card_id: str, target) -> None:
     _land_unit(state, player, unit, where)
 
 
+def playable_copy(state: GameState, player: str, card_id: str) -> Optional[UnitInstance]:
+    """The hand instance a PlaceAction for `card_id` plays: the highest-counter copy that is not
+    Skunk-locked (F4), first in hand order on ties. PlaceAction is keyed only by card id, so move
+    generation and execution must both pick through this one predicate."""
+    best = None
+    for u in state.hands[player]:
+        if u.card_id != card_id or u.locked_until_turn > state.turn_counter:
+            continue
+        if best is None or u.strength_counter > best.strength_counter:
+            best = u
+    return best
+
+
 def _take_from_hand(state: GameState, player: str, card_id: str) -> UnitInstance:
-    """Remove and return a hand instance of `card_id`, preferring the highest-counter copy
-    (so a buffed copy is the one actually played - PlaceAction is keyed only by card id)."""
+    """Remove and return a hand instance of `card_id`, preferring the highest-counter copy."""
     candidates = [u for u in state.hands[player] if u.card_id == card_id]
     unit = max(candidates, key=lambda u: u.strength_counter)
     state.hands[player].remove(unit)
@@ -440,17 +455,14 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
     sorted_crossroads = sorted(gm.crossroads)
     connectable = {cr for cr in sorted_crossroads if state.is_connected(player, cr, occ)}
 
-    # One placement per distinct hand card id; covering uses the highest-counter copy (the
-    # copy that would actually be played - see _take_from_hand).
+    # One placement per distinct hand card id, using the copy that would actually be played.
     best: dict[str, "UnitInstance"] = {}
-    for u in state.hands[player]:
-        if allowed_cards is not None and u.card_id not in allowed_cards:
+    for card_id in {u.card_id for u in state.hands[player]}:
+        if allowed_cards is not None and card_id not in allowed_cards:
             continue
-        if u.locked_until_turn > state.turn_counter:    # Skunk lock (F4)
-            continue
-        cur = best.get(u.card_id)
-        if cur is None or u.strength_counter > cur.strength_counter:
-            best[u.card_id] = u
+        placer = playable_copy(state, player, card_id)
+        if placer is not None:
+            best[card_id] = placer
 
     out = []
     for card_id in sorted(best):

@@ -118,7 +118,7 @@ class ExplorationBot(Bot):
             action = self._policy.choose(view, legal, state)
         if state is not None:
             nxt = state.clone()
-            rules.apply_action(nxt, action)
+            rules.apply_action(nxt, action, validate=False)
             if nxt.result is None:
                 self.trajectory.append(extract_as_scored(nxt, view.player, self.feature_set))
         return action
@@ -181,7 +181,7 @@ def play_episode(spec: EpisodeSpec) -> list[Trajectory]:
         actor = state.player_to_act()
         legal = rules.legal_actions(state)
         action = bots[actor].choose(state.view_for(actor), legal, state)
-        rules.apply_action(state, action)
+        rules.apply_action(state, action, validate=False)
         result = rules.is_terminal(state)
 
     decks = {"A": spec.deck_a, "B": spec.deck_b}

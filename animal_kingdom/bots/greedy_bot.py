@@ -137,7 +137,7 @@ class GreedyBot(Bot):
         fallback: list[Action] = []
         for action in legal:
             nxt = state.clone()
-            rules.apply_action(nxt, action)
+            rules.apply_action(nxt, action, validate=False)
             score = self._rollout_value(nxt, me, self.depth - 1)
             if _battlecry_fizzled(state, nxt, me, action):
                 score -= self.weights.wasted_battlecry
@@ -182,7 +182,7 @@ class GreedyBot(Bot):
         scored: list[tuple[float, GameState]] = []
         for action in candidates:
             nxt = state.clone()
-            rules.apply_action(nxt, action)
+            rules.apply_action(nxt, action, validate=False)
             scored.append((self._eval(nxt, me), nxt))
         scored.sort(key=lambda pair: pair[0], reverse=True)
         beam = scored[: self.beam_width] if self.beam_width else scored
@@ -206,7 +206,7 @@ class GreedyBot(Bot):
             if not legal:
                 break
             filler = next((a for a in legal if not isinstance(a, DrawAction)), legal[0])
-            rules.apply_action(state, filler)
+            rules.apply_action(state, filler, validate=False)
         return state
 
 

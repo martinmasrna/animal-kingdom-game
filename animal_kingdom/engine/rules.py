@@ -59,10 +59,16 @@ def _top_level_actions(state: GameState) -> list[Action]:
 
 # ------------------------------------------------------------- apply / resolve
 
-def apply_action(state: GameState, action: Action) -> GameState:
-    """Apply one action (a top-level move or a pending sub-choice), mutating `state`."""
+def apply_action(state: GameState, action: Action, *, validate: bool = True) -> GameState:
+    """Apply one action (a top-level move or a pending sub-choice), mutating `state`.
+
+    Raises EngineError unless `action` is in `legal_actions(state)`. Bot search, which only
+    ever applies actions it just drew from `legal_actions`, passes `validate=False` to skip
+    regenerating them."""
     if state.result is not None:
         raise EngineError("cannot act: the game is over")
+    if validate and action not in legal_actions(state):
+        raise EngineError(f"illegal action {action!r}")
 
     if state.pending is not None:
         effects.apply_pending(state, action)

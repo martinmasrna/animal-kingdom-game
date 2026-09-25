@@ -377,7 +377,7 @@ def enabled_battlecry_count(state: GameState, player: str) -> int:
         if action.card_id in enabled:
             continue
         nxt = state.clone()
-        rules.apply_action(nxt, action)
+        rules.apply_action(nxt, action, validate=False)
         if not _battlecry_fizzled(state, nxt, player, action):
             enabled.add(action.card_id)
     return len(enabled)

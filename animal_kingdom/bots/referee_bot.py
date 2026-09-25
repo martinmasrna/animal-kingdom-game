@@ -248,7 +248,7 @@ class RefereeBot(TurnSearcher):
         for state, penalty in group:
             legal = rules.legal_actions(state)
             action = self._policy.choose(state.view_for(actor), legal, state)
-            rules.apply_action(state, action)
+            rules.apply_action(state, action, validate=False)
             advanced.append((state, penalty))
         return self._complete_own_turn(advanced, me, guard=guard + 1)
 
@@ -268,7 +268,7 @@ class RefereeBot(TurnSearcher):
         live = []
         for index, action in enumerate(candidates):
             nxt = state.clone()
-            rules.apply_action(nxt, action)
+            rules.apply_action(nxt, action, validate=False)
             score = self._planning_eval(nxt, me)
             scored.append((score, -index, action))
             if (isinstance(action, PlaceAction)
@@ -342,4 +342,4 @@ class RefereeBot(TurnSearcher):
             actor = state.player_to_act()
             legal = rules.legal_actions(state)
             action = self._policy.choose(state.view_for(actor), legal, state)
-            rules.apply_action(state, action)
+            rules.apply_action(state, action, validate=False)

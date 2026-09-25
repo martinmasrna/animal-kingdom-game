@@ -3,10 +3,12 @@ each in a hand-constructed scenario."""
 
 from __future__ import annotations
 
+import pytest
+
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import DrawAction, PlaceAction
 from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.state import Result
+from animal_kingdom.engine.state import EngineError, Result
 
 from ._helpers import make_state, place_targets, put
 
@@ -154,3 +156,24 @@ def test_default_config_is_two_actions_per_turn():
     assert s.actions_taken_this_turn == 1
     rules.apply_action(s, PlaceAction("caracal", ("cr", "1,2")))
     assert s.current == "B"
+
+
+# ---------------------------------------------------------------------- action boundary
+
+def test_apply_action_rejects_illegal_placement():
+    s = make_state(hands={"A": ["lion"], "B": []})
+    with pytest.raises(EngineError):
+        rules.apply_action(s, PlaceAction("lion", ("cr", "3,3")))    # not connected
+    with pytest.raises(EngineError):
+        rules.apply_action(s, PlaceAction("cheetah", ("cr", "1,1")))  # not in hand
+
+
+def test_locked_copy_is_never_the_one_played():
+    # A Skunk-locked copy ahead of an unlocked copy of the same card, equal counters: the legal
+    # placement offered is the unlocked copy's, so that is the instance that must leave the hand.
+    s = make_state(hands={"A": ["lion", "lion"], "B": []})
+    locked, unlocked = s.hands["A"]
+    locked.locked_until_turn = s.turn_counter + 2
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
+    assert s.hands["A"] == [locked]
+    assert s.top_unit("1,1").iid == unlocked.iid

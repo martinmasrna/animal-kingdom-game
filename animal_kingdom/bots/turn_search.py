@@ -169,7 +169,7 @@ class TurnSearcher(Bot):
         branches = []
         for world in worlds:
             nxt = world.clone()
-            rules.apply_action(nxt, action)
+            rules.apply_action(nxt, action, validate=False)
             penalty = (self.weights.wasted_battlecry
                        if _battlecry_fizzled(world, nxt, me, action) else 0.0)
             branches.append((nxt, penalty))
@@ -245,7 +245,7 @@ class TurnSearcher(Bot):
                     next_group = []
                     for state, penalty in group:
                         nxt = state.clone()
-                        rules.apply_action(nxt, action)
+                        rules.apply_action(nxt, action, validate=False)
                         extra = (self.weights.wasted_battlecry
                                  if _battlecry_fizzled(state, nxt, me, action) else 0.0)
                         next_group.append((nxt, penalty + extra))
@@ -293,7 +293,7 @@ class TurnSearcher(Bot):
                 advanced = []
                 for state, penalty in group:
                     nxt = state.clone()
-                    rules.apply_action(nxt, action)
+                    rules.apply_action(nxt, action, validate=False)
                     extra = (self.weights.wasted_battlecry
                              if _battlecry_fizzled(state, nxt, me, action) else 0.0)
                     advanced.append((nxt, penalty + extra))
@@ -303,7 +303,7 @@ class TurnSearcher(Bot):
                     legal = rules.legal_actions(state)
                     action = self._policy.choose(
                         state.view_for(actor), legal, state)
-                    rules.apply_action(state, action)
+                    rules.apply_action(state, action, validate=False)
                     advanced.append((state, penalty))
             completed.extend(
                 self._greedy_complete_turn(advanced, me, guard=guard + 1)
@@ -401,7 +401,7 @@ class TurnSearcher(Bot):
             next_group = []
             for state, penalty in group:
                 nxt = state.clone()
-                rules.apply_action(nxt, action)
+                rules.apply_action(nxt, action, validate=False)
                 next_group.append((nxt, penalty))
             candidate_group = self._complete_own_turn(next_group, me, guard=guard + 1)
             score = self._mean_planning_score(candidate_group, me)
@@ -472,7 +472,7 @@ class TurnSearcher(Bot):
         scored = []
         for i, action in enumerate(legal):
             nxt = world.clone()
-            rules.apply_action(nxt, action)
+            rules.apply_action(nxt, action, validate=False)
             scored.append((self._clamped_eval(nxt, me), -i, action))
         scored.sort(reverse=True)   # -i: stable toward `legal`'s deterministic order
         score_of = {action: score for score, _, action in scored}
@@ -506,7 +506,7 @@ class TurnSearcher(Bot):
             if world.cards[card_actions[0].card_id].has_battlecry:
                 for a in card_actions:
                     nxt = world.clone()
-                    rules.apply_action(nxt, a)
+                    rules.apply_action(nxt, a, validate=False)
                     if not _battlecry_fizzled(world, nxt, me, a):
                         live.append(a)
             for group in (connected, home_front, covers, live):
@@ -540,7 +540,7 @@ class TurnSearcher(Bot):
         scored = []
         for i, action in enumerate(legal):
             nxt = world.clone()
-            rules.apply_action(nxt, action)
+            rules.apply_action(nxt, action, validate=False)
             scored.append((self._clamped_eval(nxt, me), -i, action))
         scored.sort(reverse=True)
         return [action for _, _, action in scored[:n]]
@@ -551,7 +551,7 @@ class TurnSearcher(Bot):
         opponent = other_player(me)
         for action in legal:
             nxt = world.clone()
-            rules.apply_action(nxt, action)
+            rules.apply_action(nxt, action, validate=False)
             if nxt.result is not None or not _opponent_lethal_next_turn(nxt, opponent):
                 safe.append(action)
         return safe or list(legal)
