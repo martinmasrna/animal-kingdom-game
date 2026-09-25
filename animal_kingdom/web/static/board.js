@@ -1,7 +1,8 @@
 // Board renderer (from the design mockups' table.js, horizontal and flat only).
 // Draws in viewer space: the viewer is always 'A' (orange, HQ on the left), the opponent 'B'.
 // `g` is a viewer-space game: { board: {cr: [{id, owner, str, timer}]}, food, income, winFood },
-// `ui` carries what is interactive: { rings: [cr], hqRing: bool, preview: {cr, id, str} }.
+// `ui` carries what is interactive: { rings: [cr], hqRing: bool, preview: {cr, id, str} },
+// plus `recent`: the crossroads the opponent placed on since your last move.
 const COL = { A: 'var(--you)', B: 'var(--them)' }, DEEP = { A: 'var(--you-deep)', B: 'var(--them-deep)' };
 const RGB = { A: 'var(--you-rgb)', B: 'var(--them-rgb)' };
 const key = (c, r) => `${c},${r}`;
@@ -29,7 +30,7 @@ export function renderBoard(el, M, g, cards, ui, o) {
   const poly = pts => pts.map(p => proj(p)).map(p => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
   const conn = { A: connected('A'), B: connected('B') };
   const hqRect = { A: [cx - hqL / 2, Hf - hqT, hqL, hqT], B: [cx - hqL / 2, 0, hqL, hqT] };
-  const rings = new Set(ui.rings || []);
+  const rings = new Set(ui.rings || []), recent = new Set(ui.recent || []);
 
   let s = '';
   // Regions.
@@ -91,7 +92,11 @@ export function renderBoard(el, M, g, cards, ui, o) {
     s += `<circle cx="${x}" cy="${y}" r="${R + 10}" fill="transparent"/>`;
     if (ui.preview && ui.preview.cr === cr) s += piece(x, y, { id: ui.preview.id, owner: 'A', str: ui.preview.str }, stack.length, true);
     else if (!stack.length) s += `<circle cx="${x}" cy="${y}" r="5" fill="var(--line-strong)"/>`;
-    else s += piece(x, y, stack[stack.length - 1], stack.length - 1, false);
+    else {
+      const u = stack[stack.length - 1];
+      if (recent.has(cr)) s += `<circle cx="${x}" cy="${y}" r="${R + 7}" fill="none" stroke="${COL[u.owner]}" stroke-width="5" opacity="0.3"/>`;
+      s += piece(x, y, u, stack.length - 1, false);
+    }
     s += '</g>';
   }
 

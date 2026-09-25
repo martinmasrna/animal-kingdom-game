@@ -399,7 +399,9 @@ function drawBoard(d) {
     const strs = V.game.hand.filter(h => h.id === ui.sel).map(h => h.str);
     preview = { cr: ui.hover, id: ui.sel, str: Math.max(...strs) };
   }
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview }, { fitW: stage.clientWidth, fitH: stage.clientHeight });
+  const H = V.game.history, recent = [];
+  for (let i = H.length - 1; i >= 0 && H[i].seat !== V.you; i--) if (H[i].target && H[i].target[0] === 'cr') recent.push(dcr(H[i].target[1]));
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent }, { fitW: stage.clientWidth, fitH: stage.clientHeight });
 }
 
 function wireBoard() {
