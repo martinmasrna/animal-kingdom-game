@@ -13,7 +13,7 @@ The game has no mana, no attack or health, no combat damage. A unit is a single 
 Python ≥3.11 with a venv at `.venv`: `python3 -m venv .venv && .venv/bin/pip install -e '.[dev,cli]'` (add `analysis` for self-play training and plots).
 
 - Tests: `.venv/bin/python -m pytest -q` (about a minute).
-- Play: `./run` (interactive setup; `--help` for flags). Recorder UI: `./record` (needs the `tui` extra).
+- Web client: `./play` (serves `animal_kingdom/web/` at localhost:8000; `AK_NO_GAME_LOGS=1` keeps test games out of `results/human_games/web/`). Terminal: `./run` (interactive setup; `--help` for flags). Recorder UI: `./record` (needs the `tui` extra).
 - Balance report: `./report 200` (round-robin; `--deck X --opponent Y` to scope, `--format files --out DIR` for CSV/JSON, `--log FILE` to record games). Replay a logged game with no bot compute: `.venv/bin/python -m animal_kingdom.sim.replay FILE`.
 - Paired bot A/B: `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/<name>`.
 - Deckbuilding and the goodstuff problem: `sim.deck_optimizer`, `sim.metagame_search`, `sim.measure_deck`, `sim.benchmark_set` (see `docs/design/goodstuff.md`).
