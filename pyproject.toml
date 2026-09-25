@@ -16,6 +16,8 @@ analysis = ["numpy>=1.26", "matplotlib>=3.8"]
 # Terminal presentation only (cli.py / render/). engine/ and bots/ stay stdlib-only.
 cli = ["rich>=13.7"]
 tui = ["textual>=8.2,<9"]
+# The web client's server only (animal_kingdom/web). engine/ and bots/ stay stdlib-only.
+web = ["aiohttp>=3.9"]
 dev = ["pytest>=7.0", "rich>=13.7", "textual>=8.2,<9", "numpy>=1.26"]
 
 [tool.setuptools]
@@ -28,10 +30,11 @@ packages = [
     "animal_kingdom.recording",
     "animal_kingdom.tui",
     "animal_kingdom.learn",
+    "animal_kingdom.web",
 ]
 
 [tool.setuptools.package-data]
-animal_kingdom = ["data/*.json", "data/learned/*.json"]
+animal_kingdom = ["data/*.json", "data/learned/*.json", "web/static/*", "web/static/art/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["animal_kingdom/tests"]

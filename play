@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Launch the web client: starts the server and opens it in the browser.
+#
+#   ./play                    # http://localhost:8000
+#   ./play --port 8001 --no-open
+#   ./play --host 0.0.0.0     # reachable from other machines on the network
+set -euo pipefail
+
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+py="$here/.venv/bin/python"
+
+if [[ ! -x "$py" ]]; then
+  echo "No virtualenv at $here/.venv — create it first:" >&2
+  echo "  python3 -m venv .venv && .venv/bin/pip install -e '.[dev,cli,web]'" >&2
+  exit 1
+fi
+if ! "$py" -c "import aiohttp" 2>/dev/null; then
+  "$py" -m pip install -q -e "$here[web]"
+fi
+
+exec "$py" -m animal_kingdom.web.server "$@"
