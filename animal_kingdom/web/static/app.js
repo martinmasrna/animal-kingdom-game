@@ -354,6 +354,12 @@ function drawGame() {
     bar.classList.remove('on');
     if (V.phase === 'playing' && G.opponentChoosing) waiting.textContent = 'Opponent is choosing';
   }
+  // A bot can think for several seconds (Expert, under load): say so rather than look frozen.
+  clearTimeout(drawGame.think);
+  if (V.phase === 'playing' && G.toAct === them && V.seats[them].bot) {
+    const ver = V.version;
+    drawGame.think = setTimeout(() => { if (V && V.version === ver && screen === 'game') waiting.textContent = 'Bot is thinking'; }, 2500);
+  }
 
   drawBoard(d);
   drawEnd();
@@ -413,14 +419,23 @@ function wireBoard() {
     ui.hover = cr;
     if (ui.sel) drawBoard();
   });
-  board.addEventListener('mouseleave', () => { stackpop.style.display = 'none'; if (ui.hover) { ui.hover = null; if (ui.sel) drawBoard(); } });
+  board.addEventListener('mouseleave', () => { showStack(null, null); if (ui.hover) { ui.hover = null; if (ui.sel) drawBoard(); } });
   board.addEventListener('contextmenu', e => { if (ui.sel) { e.preventDefault(); ui.sel = null; drawGame(); } });
 }
 
 // Hover a piece: the whole stack as cards, the top unit first, then each buried card top to bottom.
+// Shown after a short rest on the piece, and never while targets are ringed (it would cover them).
+let stackTimer = null, stackCr = null;
 function showStack(g, cr) {
+  if (cr === stackCr) return;
+  stackCr = cr; clearTimeout(stackTimer); stackpop.style.display = 'none';
   const st = cr && viewerGame().board[cr];
-  if (!st || !st.length || ui.sel) { stackpop.style.display = 'none'; return; }
+  if (!st || !st.length || ui.sel || (lastDecision && lastDecision.rings.length)) return;
+  stackTimer = setTimeout(() => stackAt(cr), 350);
+}
+function stackAt(cr) {
+  const g = document.querySelector(`#board [data-cr="${cr}"]`), st = V && V.game && viewerGame().board[cr];
+  if (!g || !st) return;
   const card = (u, w, top) => { const c = CARDS[u.id];
     return `<div class="sc ${c.rarity}" style="--w:${w}px;--c:${COL[u.owner]}"><div class="own"></div><div class="art gradart" ${artStyle(u.id)}></div><div class="s">${top ? u.str : c.str}</div><div class="nm">${c.name}</div><div class="tx">${c.text || ''}</div>` +
       (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `<div class="tg">${c.tags.join(' · ')}</div></div>`; };
