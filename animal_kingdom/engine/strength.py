@@ -74,8 +74,8 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
     bonus = 0
     if cid == "lobo":                       # +2 for each OTHER Canine you control
         bonus += cfg.anthem_lobo_per * count("Canine", include_self=False)
-    elif cid == "verminus":                 # +1 for each OTHER unit you control (any tag; not Landmarks)
-        others = sum(1 for u in tops if u.iid != self_iid and state.cards[u.card_id].is_unit)
+    elif cid == "verminus":                 # +1 for each OTHER unit you control (any tag)
+        others = sum(1 for u in tops if u.iid != self_iid)
         bonus += cfg.anthem_verminus_per * others
     elif cid == "vesper":                   # +2 for each OTHER friendly Colony unit
         bonus += cfg.anthem_vesper_per * count("Colony", include_self=False)

@@ -1038,7 +1038,7 @@ class RecorderApp(App[None]):
             lines.extend([
                 "[bold]SELECTED CARD[/bold]",
                 f"[bold]{escape(card.name)}[/bold] · "
-                f"{escape(card.rarity.title())} {escape(card.type.title())}",
+                f"{escape(card.rarity.title())}",
                 stats,
                 escape(card.text),
             ])

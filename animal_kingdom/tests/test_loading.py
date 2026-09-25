@@ -11,7 +11,6 @@ from animal_kingdom.engine.cards import (
     DYNAMIC_STRENGTHS,
     KEYWORDS,
     TAGS,
-    TYPES,
     load_cards,
     validate_card_record,
 )
@@ -27,7 +26,7 @@ from animal_kingdom.engine.maps import (
 # A minimal well-formed record for validation unit tests (new schema).
 GOOD = {
     "id": "x", "name": "X", "deck": "cats_midrange", "rarity": "common",
-    "type": "unit", "tags": [], "base_strength": 3,
+    "tags": [], "base_strength": 3,
 }
 
 
@@ -49,7 +48,6 @@ def test_every_card_has_valid_static_fields():
         assert c.id == cid
         assert c.name
         assert c.rarity in COPY_LIMITS
-        assert c.type in TYPES
         assert c.keywords <= KEYWORDS
         assert c.tags <= TAGS
         assert c.food_cost >= 0
@@ -73,9 +71,6 @@ def test_known_cards_present_with_expected_data():
     assert cards["worker_ant"].tags == frozenset({"Colony", "Worker"})
     assert cards["fathom"].tags == frozenset()  # tagless ('-')
     assert cards["elephant"].food_cost == 15    # "Costs 15 food" body
-    # Nothing is a landmark since the 2026-07-15 animals-only cut (Fig Tree/Watering Hole gone), so
-    # is_unit is always True and the type machinery is dormant. Pin that rather than drop the check.
-    assert all(c.type == "unit" and c.is_unit for c in cards.values())
     assert cards["nurse_bee"].has_battlecry
     assert not cards["guard_hornet"].has_battlecry
 
@@ -98,13 +93,9 @@ def test_validate_card_record_directly():
     with pytest.raises(CardDataError):
         validate_card_record({**GOOD, "base_strength": "dynamic"})  # missing dynamic_strength
     with pytest.raises(CardDataError):
-        validate_card_record({**GOOD, "type": "spell"})             # bad type
-    with pytest.raises(CardDataError):
         validate_card_record({**GOOD, "tags": ["Reptile"]})         # retired tag
     with pytest.raises(CardDataError):
         validate_card_record({**GOOD, "deck": "nope"})              # unknown deck
-    with pytest.raises(CardDataError):
-        validate_card_record({**GOOD, "type": "landmark"})          # non-landmark id as landmark
 
 
 def test_validate_false_skips_checks():

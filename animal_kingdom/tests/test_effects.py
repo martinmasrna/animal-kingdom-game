@@ -656,12 +656,6 @@ def test_fragile_still_dies_to_cover_so_its_timer_is_cancelled():
     assert not any("Bird" in CARDS[c].tags for c in hand_ids(s, "A"))   # never hatched
 
 
-def test_draw_filtered_random_strength_min_picks_only_strong_units():
-    s = make_state(decks={"A": ["lion", "squirrel", "eagle"], "B": []})  # 7 / 3 / 5
-    effects.draw_filtered_random(s, "A", 1, "strength_min:6")
-    assert hand_ids(s, "A") == ["lion"]                 # only base strength >= 6
-
-
 # ====================================== Stage 2.3: extra placements (decision F1) + twins
 
 def test_jerboa_plays_another_unit():

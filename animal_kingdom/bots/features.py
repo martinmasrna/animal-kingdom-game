@@ -255,7 +255,7 @@ def p_opponent_can_cover(state: GameState, opp: str, defender_strength: int) -> 
     k = 0
     for cid in unseen:
         c = state.cards[cid]
-        if c.is_unit and not c.is_dynamic and c.base_strength > defender_strength:
+        if not c.is_dynamic and c.base_strength > defender_strength:
             k += 1
     if k == 0:
         return 0.0

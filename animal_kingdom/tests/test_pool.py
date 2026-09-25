@@ -13,9 +13,7 @@ from animal_kingdom.engine.cards import (
     DECK_SLUGS,
     DYNAMIC_STRENGTHS,
     KEYWORDS,
-    LANDMARK_IDS,
     TAGS,
-    TYPES,
     load_cards,
 )
 from animal_kingdom.decks import PREMADE_DECKS, load_premade_deck
@@ -103,14 +101,6 @@ def test_keywords_and_tags_within_allowed_sets_no_retired_tags():
         assert c.keywords <= KEYWORDS
         assert c.tags <= TAGS
         assert not (c.tags & RETIRED_TAGS)
-
-
-def test_types_domain_and_landmarks_are_only_the_two():
-    cards = load_cards()
-    landmarks = {c.id for c in cards.values() if c.type == "landmark"}
-    assert landmarks == LANDMARK_IDS
-    for c in cards.values():
-        assert c.type in TYPES
 
 
 def test_food_cost_present_only_where_text_says_costs():

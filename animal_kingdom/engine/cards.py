@@ -17,12 +17,6 @@ from .resources import load_bundled_json
 RARITIES = {"common", "rare", "legendary"}
 KEYWORDS = {"Flight", "Immovable", "Fragile", "Apex Predator", "Stealth"}  # static keywords only;
 # Battlecry/Deathrattle are trigger prefixes printed in `text`, not stored keywords.
-TYPES = {"unit", "landmark"}                 # landmark is the lone non-unit type (dec. C)
-# Dormant since 2026-07-15: the game committed to animals only and both landmarks (Fig Tree,
-# Watering Hole) were cut, so NOTHING is a landmark and `Card.is_unit` is always True. Kept as the
-# decision-C validation hook rather than ripped out with the cards; removing the type concept and
-# the now-dead `is_unit` branches is a separate cleanup (-> Code Health backlog).
-LANDMARK_IDS: set[str] = set()
 # Family + role tags (dec. B). Retired umbrellas (Reptile, Insect) are forbidden.
 TAGS = {
     "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent",
@@ -59,7 +53,6 @@ class Card:
     name: str
     deck: str
     rarity: str
-    type: str
     tags: frozenset[str]
     base_strength: int | str       # int 0-10, or the string "dynamic"
     keywords: frozenset[str] = field(default_factory=frozenset)
@@ -71,11 +64,6 @@ class Card:
     @property
     def is_dynamic(self) -> bool:
         return self.base_strength == "dynamic"
-
-    @property
-    def is_unit(self) -> bool:
-        """Units and Eggs are units (dec. C); Landmarks are not."""
-        return self.type == "unit"
 
     @property
     def has_battlecry(self) -> bool:
@@ -96,7 +84,7 @@ def validate_card_record(rec: dict) -> None:
     so a constructed Card is always valid and the engine needs no defensive checks.
     Directly unit-testable on its own.
     """
-    required = ("id", "name", "deck", "rarity", "type", "tags", "base_strength")
+    required = ("id", "name", "deck", "rarity", "tags", "base_strength")
     for key in required:
         if key not in rec:
             raise CardDataError(f"card {rec.get('id', rec)!r} missing required field {key!r}")
@@ -109,12 +97,6 @@ def validate_card_record(rec: dict) -> None:
         raise CardDataError(
             f"card {cid!r}: bad deck {rec['deck']!r}, expected one of "
             f"{sorted(DECK_SLUGS | NON_DECK_SLUGS)}")
-
-    ctype = rec["type"]
-    if ctype not in TYPES:
-        raise CardDataError(f"card {cid!r}: bad type {ctype!r}, expected one of {sorted(TYPES)}")
-    if ctype == "landmark" and cid not in LANDMARK_IDS:
-        raise CardDataError(f"card {cid!r}: only {sorted(LANDMARK_IDS)} may be landmarks (dec. C)")
 
     tags = rec["tags"]
     if not isinstance(tags, list):
@@ -155,7 +137,6 @@ def _build_card(rec: dict) -> Card:
         name=rec["name"],
         deck=rec["deck"],
         rarity=rec["rarity"],
-        type=rec["type"],
         tags=frozenset(rec["tags"]),
         base_strength=rec["base_strength"],
         keywords=frozenset(rec.get("keywords", [])),

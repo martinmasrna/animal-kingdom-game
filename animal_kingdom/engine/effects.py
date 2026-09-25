@@ -105,8 +105,7 @@ def do_placement(state: GameState, player: str, card_id: str, target) -> None:
     state.units_placed_this_turn += 1
     kind, where = target
     if kind == "hq":
-        if state.cards[card_id].is_unit:           # Landmarks cannot capture an HQ (decision C)
-            state.result = Result(player, "hq_capture")
+        state.result = Result(player, "hq_capture")
         return
     _land_unit(state, player, unit, where)
 
@@ -400,14 +399,12 @@ def remove_from_hand(state: GameState, player: str, inst: UnitInstance) -> None:
 
 def _matches(card, spec: str) -> bool:
     """A serializable filter for filtered draws: 'tag:Bird', 'rarity:legendary',
-    'strength_min:6' (printed base only; dynamic-strength cards never match)."""
+    """
     kind, _, val = spec.partition(":")
     if kind == "tag":
         return val in card.tags
     if kind == "rarity":
         return card.rarity == val
-    if kind == "strength_min":
-        return isinstance(card.base_strength, int) and card.base_strength >= int(val)
     raise EngineError(f"unknown filter spec {spec!r}")
 
 
@@ -475,8 +472,8 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
                 out.append(PlaceAction(card_id, ("cr", cr)))
             elif statics.can_cover(state, placer, top):
                 out.append(PlaceAction(card_id, ("cr", cr)))
-        # Apex Predators and Landmarks can never capture an HQ (decisions C/D).
-        if enemy_hq and card.is_unit and not is_apex:
+        # Apex Predators can never capture an HQ (decision D).
+        if enemy_hq and not is_apex:
             out.append(PlaceAction(card_id, ("hq", enemy)))
     return out
 
@@ -664,12 +661,12 @@ def _op_remove_iid(state, step):
 
 
 def _hand_allowed(state, player, filt: dict) -> set:
-    """Hand card ids a play_extra may place: units only (never Landmarks), matching the
+    """Hand card ids a play_extra may place, matching the
     filter `tags_all` / `tags_none` / `exclude_id` (decision F1 per-card constraints)."""
     allowed = set()
     for u in state.hands[player]:
         card = state.cards[u.card_id]
-        if not card.is_unit or u.card_id == filt.get("exclude_id"):
+        if u.card_id == filt.get("exclude_id"):
             continue
         if any(t not in card.tags for t in filt.get("tags_all", ())):
             continue
@@ -842,7 +839,7 @@ def _adjacent_friendly_units(state, unit, cr):
     out = []
     for nb in sorted(state.game_map.neighbors(cr)):
         top = state.top_unit(nb)
-        if (top and top.owner == unit.owner and state.cards[top.card_id].is_unit
+        if (top and top.owner == unit.owner
                 and statics.can_be_removed(state, top)):
             out.append(nb)
     return out
@@ -1091,7 +1088,7 @@ def _impala_remove(state, unit):
     draw_cards(state, unit.owner, 2)
 
 
-# --- Extra placements / HQ-adjacency / landmarks / start-of-turn (Stage 2.3) ---
+# --- Extra placements / HQ-adjacency / start-of-turn (Stage 2.3) ---
 
 def _controls_another_tag(state, unit, tag) -> bool:
     return any(
@@ -1186,7 +1183,7 @@ def _adjacent_enemy_unit_crossroads(state, unit, cr, *, chosen=True):
     out = []
     for nb in sorted(state.game_map.neighbors(cr)):
         top = state.top_unit(nb)
-        if not (top and top.owner != unit.owner and state.cards[top.card_id].is_unit
+        if not (top and top.owner != unit.owner
                 and statics.can_be_removed(state, top)):
             continue
         if chosen and not statics.can_be_chosen(state, top, unit.owner):
@@ -1245,7 +1242,7 @@ def _bulwark_place(state, unit, cr):
     # mass effect, so it hits Stealth; Immovable neighbours survive (can_be_removed).
     for nb in sorted(state.game_map.neighbors(cr)):
         top = state.top_unit(nb)
-        if top and state.cards[top.card_id].is_unit and statics.can_be_removed(state, top):
+        if top and statics.can_be_removed(state, top):
             state.effect_stack.append({"op": "remove_iid", "iid": top.iid,
                                        "by_player": unit.owner, "by_card": "bulwark"})
 
@@ -1352,7 +1349,7 @@ def _friendly_unit_crossroads(state, player):
     # (decision A2 - Carmilla/Black Widow can't eat a Tortoise or Scrooge).
     return sorted(
         c for c, st in state.board.items()
-        if st[-1].owner == player and state.cards[st[-1].card_id].is_unit
+        if st[-1].owner == player
         and statics.can_be_removed(state, st[-1]))
 
 
@@ -1686,7 +1683,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "opossum": {"on_place": _opossum_place},
     "gazelle": {"on_remove": _gazelle_remove},
     "impala": {"on_remove": _impala_remove},
-    # Stage 2.3: extra placements (F1), HQ-adjacency draws (F6), start-of-turn, Landmarks.
+    # Stage 2.3: extra placements (F1), HQ-adjacency draws (F6), start-of-turn.
     # Apex Predator (tiger/anaconda/polar_bear/borealis/aquila) and "Costs X food"
     # (borealis/aquila/bulwark/elephant) are handled in _land_unit / legal_placements.
     "jerboa": {"on_place": _jerboa_place},
