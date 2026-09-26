@@ -9,7 +9,7 @@ The art celebrates this. The test is the collection screen, the atlas of cards y
 ## Principles
 
 1. **Each card celebrates what makes that animal formidable or unique in nature, read through its card.** Start from the card's strength and effect and from what the animal *is* (the elephant: the most massive land animal, nothing dares attack it; strength 8, Immovable), not from its most famous body part in a pleasant scene (an elephant spraying water misses the card entirely).
-2. **Diversity is the point.** The collection must read as a menagerie of wildly different creatures. One consistent rendering style, but silhouettes, poses, colours and compositions vary as much as the animals do; no single template pose or lighting recipe.
+2. **Diversity is the point.** The collection must read as a menagerie of wildly different creatures. One consistent rendering style, but silhouettes, poses, colours and compositions vary as much as the animals do; no single template pose or lighting recipe. Each card is painted in its own authentic habitat, light and palette (the tiger in the golden dust of an Indian dry forest, the buffalo in Okavango mud and mist); a shared sky-and-grass backdrop is not how nature works. When a style reference is used, it carries only the painting hand, never a scene.
 3. **True and unpretentious.** Real animals as they are, drawn so they're recognisable at a glance. No costumes, crowns or fantasy additions; nature's own design is enough. The rendering may be stylized.
 4. **Clarity above cleverness.** No concept that makes the viewer decode the picture (double exposure, silhouette tricks).
 5. **Emotion over medium.** Colour, proportion, composition and focus matter more than whether it's oil or gouache.
