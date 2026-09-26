@@ -8,18 +8,13 @@ from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import SKIP, action_from_dict
 from animal_kingdom.engine.state import new_game
 from animal_kingdom.engine.strength import effective_strength
+from animal_kingdom.sim.agent_play import board_view
 
 ME = "A"
 
 def board(st):
-    rows = []
-    for r in range(1, 4):
-        cells = []
-        for c in range(1, 6):
-            s = st.board.get(f"{c},{r}")
-            cells.append("·" if not s else "/".join(f"{u.owner}{st.cards[u.card_id].name.split(',')[0]}{effective_strength(st,u)}" for u in s))
-        rows.append("   " + " | ".join(f"{c:<24}" for c in cells))
-    return "\n".join(rows)
+    return "\n".join("   " + line for line in board_view(st)[1:])
+
 
 def conn(st, p):
     return sorted(st.connected_occupied(p))
