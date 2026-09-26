@@ -37,6 +37,10 @@ Points 2 and 3 fight each other; that is the core difficulty. The shape that thr
 
 Colony already has that shape and was the first prototype. Lowering its thresholds from 5 to 4 and raising its queens lifted it from 38% to 54% against the field, but it still won only 21% against goodstuff (30% with Martin piloting), and it lost its intended bad matchup against aggro. The likely missing lever is resilience against the pile's removal, not more food. The prototype was reverted.
 
+## Held in reserve: heroes
+
+If synergy design alone can't beat the pile, the fallback is a deckbuilding constraint that grows out of the pool instead of being imposed on it: each common and rare is attached to one or more legendaries, and a deck is built around a legendary ("hero") from the cards attached to it. That gives classes without colours. It is the Flesh and Blood shape (a hero card that defines the legal pool), and Hearthstone's classes with the hero as a card. It is a drastic change to deckbuilding and the collection, so it is the last resort, not the next experiment (Martin, 2026-09-26).
+
 ## Open questions
 
 1. Which lever lets a synergy deck beat the pile: resilience (survive the removal) or speed (win before it)?
