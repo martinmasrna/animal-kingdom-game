@@ -202,3 +202,4 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .notebox .rec.off { background: var(--faint); animation: none; }
 @keyframes pulse { 50% { opacity: 0.3; } }
 .toast.ok { background: var(--surface-2); border-color: var(--line-strong); }
+.livedot { display: none; width: 10px; height: 10px; border-radius: 999px; background: #c65a4a; animation: pulse 1s infinite; flex: none; }

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import random
 import secrets
+import time
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -127,6 +128,8 @@ class Match:
         self.seed: Optional[int] = None
         self.actions: list[dict] = []    # the current game's actions, for the replayable log
         self.notes: list[dict] = []      # a player's spoken or typed commentary, pinned to a point in the game
+        self.action_times: list[float] = []   # seconds since the game started, one per action
+        self.started_at = 0.0
         self.on_game_end = None          # callback(match, log record); the server saves human games
         self.rng = random.Random(secrets.randbits(32))
         self.created = datetime.now(timezone.utc)
@@ -183,6 +186,8 @@ class Match:
         seed = self.seed = self.rng.randrange(1 << 30)
         self.actions = []
         self.notes = []
+        self.action_times = []
+        self.started_at = time.time()
         self.state = new_game(load_premade_deck(self.seats["A"].deck),
                               load_premade_deck(self.seats["B"].deck), seed,
                               map_id=MAP_ID, first_player=first)
@@ -228,6 +233,7 @@ class Match:
         pre = _snapshot(state) if starts_move else None
         rules.apply_action(state, action)    # validates; raises EngineError if illegal
         self.actions.append(action.to_dict())
+        self.action_times.append(round(time.time() - self.started_at, 1))
         if starts_move:
             placed = isinstance(action, PlaceAction)
             self.history.append(Move(
@@ -259,7 +265,7 @@ class Match:
         if not text or self.state is None:
             return
         self.notes.append({"at": len(self.actions), "seat": s, "round": self.state.turn_counter // 2 + 1,
-                           "text": text[:2000]})
+                           "t": round(time.time() - self.started_at, 1), "text": text[:2000]})
 
     def game_log(self) -> dict:
         """The finished game in the sim.replay log format (replayable with no bot compute)."""
@@ -268,7 +274,8 @@ class Match:
                 "map_id": MAP_ID, "first_player": r["first"],
                 "bots": [self.seats[p].bot or "human" for p in "AB"],
                 "winner": r["winner"], "reason": r["reason"], "turns": self.state.turn_counter,
-                "actions": list(self.actions), "notes": list(self.notes),
+                "actions": list(self.actions), "action_times": list(self.action_times),
+                "notes": list(self.notes),
                 "match_id": self.id, "game_no": len(self.results)}
 
     def bot_move(self):

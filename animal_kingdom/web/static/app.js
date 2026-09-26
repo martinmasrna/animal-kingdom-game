@@ -159,7 +159,7 @@ function joinScreen(id) {
 }
 
 // ------------------------------------------------------------------ match connection
-function disconnect() { if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
+function disconnect() { if (live) setLive(false); if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
 function matchScreen(id) {
   const token = getToken(id);
   if (!token) { location.hash = '#/join/' + id; return; }
@@ -226,8 +226,8 @@ function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
     app.innerHTML = `<div class="screen" id="scr">
-      <div class="topbar"><div id="series"></div><div class="hist" id="hist"></div><div class="removed" id="removed"></div>
-        <div class="menu" id="menubtn">☰<div class="menudrop" id="menudrop"><a href="#" id="notelink">Add a note (N)</a><a href="#/">Leave match</a></div></div></div>
+      <div class="topbar"><div id="series"></div><div class="hist" id="hist"></div><span class="livedot" id="livedot" title="Live commentary on"></span><div class="removed" id="removed"></div>
+        <div class="menu" id="menubtn">☰<div class="menudrop" id="menudrop"><a href="#" id="livelink">Live commentary (L)</a><a href="#" id="notelink">Add a note (N)</a><a href="#/">Leave match</a></div></div></div>
       <div id="stage"><div id="board"></div></div>
       <div class="col lc"><div class="ph" id="pa"></div><div class="dl A" id="mine"></div></div>
       <div class="col rc"><div class="ph" id="pb"></div><div class="dl B" id="theirs"></div></div>
@@ -239,6 +239,7 @@ function gameScreen() {
     wireNotes();
     const menubtn = document.getElementById('menubtn');
     menubtn.onclick = e => { e.stopPropagation(); document.getElementById('menudrop').classList.toggle('on'); };
+    document.getElementById('livelink').onclick = e => { e.preventDefault(); e.stopPropagation(); document.getElementById('menudrop').classList.remove('on'); setLive(!live); };
     document.getElementById('notelink').onclick = e => { e.preventDefault(); e.stopPropagation(); document.getElementById('menudrop').classList.remove('on'); openNote(); };
     const scr = document.getElementById('scr');
     scr.addEventListener('click', () => document.getElementById('menudrop').classList.remove('on'));
@@ -504,6 +505,7 @@ function wireNotes() {
   };
 }
 function openNote() {
+  if (live) { toast('Live commentary is already recording'); return; }
   const box = document.getElementById('notebox'), ta = document.getElementById('notetext');
   if (!box || box.classList.contains('on')) return;
   ta.value = ''; box.classList.add('on'); ta.focus();
@@ -532,6 +534,30 @@ function closeNote(save) {
   if (save && ta.value.trim()) { send({ t: 'note', text: ta.value.trim() }); toast('Note saved', true); }
   box.classList.remove('on');
 }
+// Live commentary: the mic stays on for the whole game and every finished sentence is sent as a
+// note the moment it's recognised, so the server pins it next to the moves being made.
+let live = null;
+function setLive(on) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (on && !SR) { toast('No speech recognition in this browser'); return; }
+  if (live) { live.onend = null; try { live.stop(); } catch { } live = null; }
+  if (on) {
+    live = new SR(); live.continuous = true; live.interimResults = false; live.lang = 'en-US';
+    live.onresult = e => { for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) {
+      const text = e.results[i][0].transcript.trim(); if (text) send({ t: 'note', text }); } };
+    live.onend = () => { if (live) try { live.start(); } catch { } };   // Chrome stops after a pause; keep going
+    live.onerror = e => { if (e.error === 'not-allowed') { toast('Microphone blocked'); setLive(false); } };
+    try { live.start(); } catch { }
+  }
+  const dot = document.getElementById('livedot'); if (dot) dot.style.display = on && live ? 'inline-block' : 'none';
+  const link = document.getElementById('livelink'); if (link) link.textContent = live ? 'Stop live commentary (L)' : 'Live commentary (L)';
+  if (on && live) toast('Live commentary on', true);
+}
+addEventListener('keydown', e => {
+  if ((e.key === 'l' || e.key === 'L') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault(); setLive(!live);
+  }
+});
 addEventListener('keydown', e => {
   if ((e.key === 'n' || e.key === 'N') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
     e.preventDefault(); openNote();

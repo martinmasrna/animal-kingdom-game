@@ -105,4 +105,6 @@ def test_notes_are_pinned_to_the_point_of_the_game():
     m.add_note("A", "  going wide here  ")
     m.add_note("A", "   ")
     _play_out_game(m, rng)
-    assert logs[0]["notes"] == [{"at": 1, "seat": "A", "round": 1, "text": "going wide here"}]
+    notes = logs[0]["notes"]
+    assert [(n["at"], n["seat"], n["round"], n["text"]) for n in notes] == [(1, "A", 1, "going wide here")]
+    assert len(logs[0]["action_times"]) == len(logs[0]["actions"])
