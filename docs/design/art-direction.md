@@ -14,6 +14,8 @@ The art celebrates this. The test is the collection screen, the atlas of cards y
 4. **Clarity above cleverness.** No concept that makes the viewer decode the picture (double exposure, silhouette tricks).
 5. **Emotion over medium.** Colour, proportion, composition and focus matter more than whether it's oil or gouache.
 6. **Rarity shows through nature itself.** Commons are calm portraits of the whole animal in bright daylight in its habitat, the animal-book picture: the trait reads through pose and scale, not an action scene. Legendaries are specific, mythic individuals of a real species: nature rises around them and their own features are supercharged to mythical proportions (Methuselah's shell grown into a mossy hill under an aurora, Theron's mane like fire under a blood-red sun). They may be dark and dramatic; commons may not. Never ornaments, crowns or costumes.
+7. **The animal separates from its background.** Strong contrast of light and colour between the animal and what is behind it, and a simpler, softer background (Borealis: a white bear against a dark aurora sky). An ochre lion on ochre rock under an orange sky reads only once decoded.
+8. **No template pose.** Each animal gets a characteristic pose of its own, chosen from its essence; a tiger that stands like the lion reads as a recoloured lion.
 
 ## Evaluate on the collection, not on one card
 
