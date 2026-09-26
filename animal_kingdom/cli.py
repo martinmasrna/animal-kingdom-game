@@ -102,7 +102,7 @@ class HumanController:
                state: GameState | None = None) -> Action:
         legal = list(legal)
         if legal and isinstance(legal[0], ChoiceAction):
-            return self._choose_pending(view, legal)
+            return self._choose_pending(view, legal, state)
         return self._choose_turn_action(view, legal, state)
 
     def _read(self, prompt: str, n: int, extra: Sequence[str] = ()) -> int | str:
@@ -119,9 +119,18 @@ class HumanController:
             opts = f"0..{n - 1}" + (f", or {'/'.join(extra)}" if extra else "")
             self.console.print(f"  enter {opts}")
 
-    def _choose_pending(self, view: StateView, legal: list[ChoiceAction]) -> Action:
+    def _choose_pending(self, view: StateView, legal: list[ChoiceAction],
+                        state: GameState | None = None) -> Action:
+        mulligan = (state is not None and state.effect_stack
+                    and state.effect_stack[-1].get("op") == "mulligan")
+        in_hand = {u.iid: state.cards[u.card_id].name for u in state.hands[view.player]} if state else {}
+        if mulligan:
+            self.console.print("  [bold]Mulligan[/bold] — return a card, or keep the rest")
         for i, a in enumerate(legal):
-            label = "decline" if a.choice == SKIP else str(a.choice)
+            if a.choice == SKIP:
+                label = "keep" if mulligan else "decline"
+            else:
+                label = in_hand.get(a.choice, str(a.choice))
             self.console.print(f"  [bold]{i}[/bold] {label}")
         i = self._read(f"player {view.player} choose #: ", len(legal))
         return legal[i]

@@ -45,6 +45,7 @@ import random
 from typing import Optional, Sequence
 
 from ..engine import rules
+from .base import keep_hand
 from ..engine.actions import Action, DrawAction, PlaceAction
 from ..engine.state import GameState, StateView
 from .greedy_bot import GreedyWeights, _battlecry_fizzled
@@ -90,6 +91,8 @@ class RefereeBot(TurnSearcher):
             "plan_reused": 0,
             "budget_fallbacks": 0,
         }
+        if (keep := keep_hand(view, legal)) is not None:
+            return keep
         self._search_nodes = 0
         if self.staged:
             captures = [

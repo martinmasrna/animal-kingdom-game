@@ -62,7 +62,7 @@ def test_blocks_draw_then_capture_threat_during_an_effect_choice():
     # Exact tactical shape of the 2026-07-02 regression: with two actions per turn, an
     # empty opposing hand can still draw and capture. Resolve Jaguar's pending target
     # choice by breaking the HQ lane, not by taking an irrelevant unit for immediate value.
-    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1)
+    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1, mulligan=False)
     s = make_state(
         current="A",
         hands={"A": ["jaguar"]},
@@ -81,7 +81,7 @@ def test_blocks_draw_then_capture_threat_during_an_effect_choice():
 
 
 def test_plans_draw_then_queen_then_king_as_one_turn():
-    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1)
+    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1, mulligan=False)
     s = make_state(
         current="A",
         hands={"A": ["termite_queen"]},
@@ -103,7 +103,7 @@ def test_plans_draw_then_queen_then_king_as_one_turn():
 
 
 def test_plans_nurse_then_queen_bee_then_worker_as_one_turn():
-    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1)
+    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1, mulligan=False)
     s = make_state(
         current="A",
         hands={"A": ["nurse_bumblebee"]},
@@ -128,7 +128,7 @@ def test_plans_nurse_then_queen_bee_then_worker_as_one_turn():
 
 
 def test_saved_game_opening_preserves_the_duplicate_setup():
-    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1)
+    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1, mulligan=False)
     s = new_game(
         load_premade_deck("colony_food_swarm"),
         load_premade_deck("cats_midrange"),
@@ -196,7 +196,7 @@ def test_staged_search_reduces_reply_rollouts_on_a_fixed_position():
         load_premade_deck("aggro_hq_rush"),
         seed=3,
         map_id="map_b",
-        config=Config.default().sweep(actions_per_turn=2, draw_action_count=1),
+        config=Config.default().sweep(actions_per_turn=2, draw_action_count=1, mulligan=False),
     )
     actor = s.player_to_act()
     legal = rules.legal_actions(s)
@@ -214,7 +214,7 @@ def test_staged_search_reduces_reply_rollouts_on_a_fixed_position():
 
 
 def test_node_budget_falls_back_deterministically():
-    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1)
+    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1, mulligan=False)
     s = make_state(
         current="A",
         hands={"A": ["nurse_bumblebee", "queen_bee"]},

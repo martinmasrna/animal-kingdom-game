@@ -342,7 +342,12 @@ function drawGame() {
   // Prompt for a pending choice: the card that asks and its rule, nothing more.
   const bar = document.getElementById('choicebar'), waiting = document.getElementById('waiting');
   waiting.textContent = '';
-  if (d.pend) {
+  if (d.pend && d.pend.kind === 'mulligan') {
+    const n = d.pend.returned;
+    bar.innerHTML = `<div><b>Mulligan</b><div class="q">Click the cards you want to replace${n ? ` · ${n} returned` : ''}</div></div><span class="skip" id="skip">${n ? 'Done' : 'Keep hand'}</span>`;
+    bar.classList.add('on');
+    document.getElementById('skip').onclick = () => act({ kind: 'choice', choice: SKIP });
+  } else if (d.pend) {
     const src = d.pend.source && CARDS[d.pend.source];
     const head = src ? `<div class="th gradart" ${artStyle(src.id)}><span>${src.str}</span></div><div><b>${src.name}</b><div class="q">${src.text}</div></div>` : `<div><b>Choose</b></div>`;
     const opts = d.cardOpts.length || d.otherOpts.length ? `<div class="opts">${d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="oc" data-o="${i}"><div class="art gradart" ${artStyle(o.id)}></div><div class="s">${c.str}</div><div class="nm">${c.name}</div><div class="tx">${c.text}</div></div>`; }).join('')}${d.otherOpts.map((o, i) => `<span class="skip" data-x="${i}">${o.label}</span>`).join('')}</div>` : '';
@@ -353,7 +358,7 @@ function drawGame() {
     const sk = document.getElementById('skip'); if (sk) sk.onclick = () => act({ kind: 'choice', choice: SKIP });
   } else {
     bar.classList.remove('on');
-    if (V.phase === 'playing' && G.opponentChoosing) waiting.textContent = 'Opponent is choosing';
+    if (V.phase === 'playing' && G.opponentChoosing) waiting.textContent = G.history.length ? 'Opponent is choosing' : 'Opponent is mulliganing';
   }
   // A bot can think for several seconds (Expert, under load): say so rather than look frozen.
   clearTimeout(drawGame.think);

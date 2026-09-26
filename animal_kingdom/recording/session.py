@@ -100,12 +100,14 @@ class RecorderSession:
             if setup.human_seat == "A"
             else (deck_opponent, deck_human)
         )
+        # The recorder's screens predate the mulligan (overview.md §4.4) and can't drive one, so
+        # recorded games skip it: they differ from web-client games at setup only.
         self.state = state or new_game(
             deck_a,
             deck_b,
             setup.seed,
             map_id=setup.map_id,
-            config=setup.config,
+            config=setup.config.sweep(mulligan=False),
         )
         opponent_seat = other_player(setup.human_seat)
         bot_seed = setup.seed * 2 + (1 if opponent_seat == "A" else 2)

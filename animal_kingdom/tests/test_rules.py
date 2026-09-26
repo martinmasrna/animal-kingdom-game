@@ -177,3 +177,34 @@ def test_locked_copy_is_never_the_one_played():
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
     assert s.hands["A"] == [locked]
     assert s.top_unit("1,1").iid == unlocked.iid
+
+
+# --------------------------------------------------------------- mulligan (overview.md §4.4)
+
+def test_mulligan_first_player_first_then_second_then_turn_one():
+    from animal_kingdom.decks import load_premade_deck
+    from animal_kingdom.engine.actions import SKIP, ChoiceAction
+    from animal_kingdom.engine.state import new_game, other_player
+    s = new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 5)
+    first, second = s.current, other_player(s.current)
+    assert s.pending["chooser"] == first
+    kept = [u.card_id for u in s.hands[first]]
+    returned = s.hands[first][0]
+    rules.apply_action(s, ChoiceAction(returned.iid))
+    assert s.pending["chooser"] == first and returned not in s.hands[first]
+    rules.apply_action(s, ChoiceAction(SKIP))
+    # one replacement drawn, the returned card shuffled back, deck size unchanged
+    assert len(s.hands[first]) == len(kept) and len(s.decks[first]) == 30 - len(kept)
+    assert s.pending["chooser"] == second
+    rules.apply_action(s, ChoiceAction(SKIP))
+    assert s.pending is None and s.turn_counter == 0 and s.current == first
+    assert rules.legal_actions(s)[0].kind == "draw"
+
+
+def test_mulligan_can_be_disabled():
+    from animal_kingdom.decks import load_premade_deck
+    from animal_kingdom.engine.config import Config
+    from animal_kingdom.engine.state import new_game
+    s = new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 5,
+                 config=Config(mulligan=False))
+    assert s.pending is None and rules.legal_actions(s)[0].kind == "draw"

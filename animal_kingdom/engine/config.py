@@ -135,6 +135,8 @@ class Config:
     hand_limit: int = 8                  # max hand size (overview.md §3.5)
     first_player_opening_draw: int = 3   # overview.md §4.3
     second_player_opening_draw: int = 4
+    mulligan: bool = True                # overview.md §4.4: each player may return any opening cards
+                                          # once, first player first; replacements drawn, returns shuffled in
     draw_action_count: int = 2           # cards drawn by one Draw action (overview.md §5); 1→2
                                           # 2026-07-12 after a 42-game human draw-2 cohort — plays
                                           # better and de-fangs free "draw 1" riders (they no longer

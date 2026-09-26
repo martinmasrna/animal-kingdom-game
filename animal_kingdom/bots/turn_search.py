@@ -34,7 +34,7 @@ from typing import Optional, Sequence
 from ..engine import rules
 from ..engine.actions import Action, DrawAction, PlaceAction
 from ..engine.state import GameState, StateView, other_player
-from .base import Bot
+from .base import Bot, keep_hand
 from .determinize import determinize
 from .greedy_bot import (
     GreedyBot,
@@ -126,6 +126,8 @@ class TurnSearcher(Bot):
         state: Optional[GameState] = None,
     ) -> Action:
         legal = list(legal)
+        if (keep := keep_hand(view, legal)) is not None:
+            return keep
         if state is None or len(legal) == 1:
             return legal[0]
         # view.player, not state.current: we may be answering a pending sub-choice, including

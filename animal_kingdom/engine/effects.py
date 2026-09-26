@@ -36,6 +36,7 @@ class PendingRequest:
     optional: bool = False
     options: Optional[list] = None        # mode == "choice": serializable option values
     placements: Optional[list] = None     # mode == "place": [{card_id, target}]
+    kind: Optional[str] = None            # "mulligan" for the setup choice (bots keep by default)
     from_deck_reveal: bool = False        # options are cards just peeked/drawn from the hidden
                                           # deck (Owl, Raven). Generic provenance tag: a search
                                           # bot that re-samples deck order (determinize) knows
@@ -51,6 +52,8 @@ class PendingRequest:
             p["placements"] = list(self.placements)
         if self.from_deck_reveal:
             p["from_deck_reveal"] = True
+        if self.kind:
+            p["kind"] = self.kind
         return p
 
 
@@ -92,6 +95,33 @@ def resolve(state: GameState) -> None:
             state.effect_stack.append(step)
             state.pending = req.to_pending()
             return
+
+
+# ================================================================== mulligan
+
+def _op_mulligan(state, step):
+    """Return cards one at a time (SKIP = keep the rest); then draw as many replacements as were
+    returned and shuffle the returned cards into the deck. Raw draws and a raw shuffle: no
+    on-draw or on-shuffle triggers, exactly like the opening deal."""
+    player, returned = step["player"], step["returned"]
+    done = False
+    if "choice" in step:
+        choice = step.pop("choice")
+        if choice == SKIP:
+            done = True
+        else:
+            inst = next((u for u in state.hands[player] if u.iid == choice), None)
+            if inst is not None:
+                state.hands[player].remove(inst)
+                returned.append(inst.card_id)
+    if not done and state.hands[player]:
+        return PendingRequest("choice", player, optional=True, kind="mulligan",
+                              options=[u.iid for u in state.hands[player]])
+    if returned:                      # a kept hand leaves the deck order (and the RNG) untouched
+        state.draw(player, len(returned))
+        state.decks[player].extend(returned)
+        state.rng.shuffle(state.decks[player])
+    return None
 
 
 # ============================================================ placement + events
@@ -765,6 +795,7 @@ def _op_grant_action(state, step):
 
 
 OPS: dict[str, Callable] = {
+    "mulligan": _op_mulligan,
     "gain_food": _op_gain_food,
     "draw": _op_draw,
     "draw_filtered": _op_draw_filtered,

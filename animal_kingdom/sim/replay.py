@@ -20,7 +20,7 @@ from typing import Iterable, Optional, Sequence
 
 from ..decks import load_premade_deck
 from ..engine import rules
-from ..engine.actions import action_from_dict
+from ..engine.actions import SKIP, ChoiceAction, action_from_dict
 from ..engine.config import Config
 from ..engine.state import GameState, new_game
 
@@ -83,6 +83,10 @@ def replay(log: dict, *, config: Optional[Config] = None) -> list[dict]:
     steps: list[dict] = []
     for adict in log["actions"]:
         action = action_from_dict(adict)
+        # A log recorded before the mulligan rule opens with a turn action: both players keep.
+        while state.pending is not None and state.effect_stack[-1].get("op") == "mulligan" \
+                and adict["kind"] != "choice":
+            rules.apply_action(state, ChoiceAction(SKIP))
         actor = state.player_to_act()
         food0, reg0, own0 = dict(state.food), regions_controlled(state), _board_owners(state)
         rules.apply_action(state, action)

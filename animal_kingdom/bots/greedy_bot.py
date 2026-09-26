@@ -46,7 +46,7 @@ from typing import Optional, Sequence
 from ..engine import rules
 from ..engine.actions import Action, DrawAction
 from ..engine.state import GameState, StateView, other_player
-from .base import Bot
+from .base import Bot, keep_hand
 from . import features as _features
 from .learned_eval import LinearEval
 # Re-exported for backward compatibility: turn_search.py/referee_bot.py import these names
@@ -124,6 +124,8 @@ class GreedyBot(Bot):
         state: Optional[GameState] = None,
     ) -> Action:
         legal = list(legal)
+        if (keep := keep_hand(view, legal)) is not None:
+            return keep
         me = view.player
         if state is None:
             # No search context (shouldn't happen via cli/sim, which always pass state).

@@ -517,4 +517,14 @@ def new_game(
     )
     state.draw(first, config.first_player_opening_draw)
     state.draw(second, config.second_player_opening_draw)
+    if config.mulligan:
+        # Mulligan (overview.md §4.4), first player first. Seeded as plain op-steps so this module
+        # needn't import the effect engine; the first step is the pending choice from the start.
+        for player in (second, first):
+            if state.hands[player]:
+                state.effect_stack.append({"op": "mulligan", "player": player, "returned": []})
+        if state.effect_stack:
+            chooser = state.effect_stack[-1]["player"]
+            state.pending = {"mode": "choice", "chooser": chooser, "optional": True,
+                             "kind": "mulligan", "options": [u.iid for u in state.hands[chooser]]}
     return state

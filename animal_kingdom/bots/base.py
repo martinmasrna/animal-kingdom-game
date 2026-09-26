@@ -15,7 +15,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Optional, Sequence
 
-from ..engine.actions import Action
+from ..engine.actions import SKIP, Action, ChoiceAction
 from ..engine.state import StateView
 
 if TYPE_CHECKING:
@@ -35,3 +35,12 @@ class Bot(ABC):
         `state` (the full position) is supplied only by in-process drivers for search bots;
         view-only bots ignore it.
         """
+
+
+def keep_hand(view: StateView, legal: Sequence[Action]) -> Optional[Action]:
+    """The bots' mulligan policy: keep the opening hand. Search over a mulligan is noise (the
+    replacements are random and the evaluators don't rate hand quality), so every bot declines.
+    Returns the keep action while a mulligan is pending, else None."""
+    if view.pending is not None and view.pending.get("kind") == "mulligan":
+        return next(a for a in legal if isinstance(a, ChoiceAction) and a.choice == SKIP)
+    return None
