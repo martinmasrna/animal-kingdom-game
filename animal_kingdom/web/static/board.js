@@ -90,26 +90,31 @@ export function renderBoard(el, M, g, cards, ui, o) {
     const cr = key(c, r), [x, y] = pos(cr), stack = g.board[cr] || [], tgt = rings.has(cr);
     s += `<g data-cr="${cr}" class="${tgt ? 'tgt' : ''}${stack.length ? ' occ' : ''}">`;
     s += `<circle cx="${x}" cy="${y}" r="${R + 10}" fill="transparent"/>`;
-    if (ui.preview && ui.preview.cr === cr) s += piece(x, y, { id: ui.preview.id, owner: 'A', str: ui.preview.str }, stack.length, true);
+    if (ui.preview && ui.preview.cr === cr) s += piece(x, y, { id: ui.preview.id, owner: 'A', str: ui.preview.str }, stack.slice().reverse(), true);
     else if (!stack.length) s += `<circle cx="${x}" cy="${y}" r="5" fill="var(--line-strong)"/>`;
     else {
       const u = stack[stack.length - 1];
       if (recent.has(cr)) s += `<circle cx="${x}" cy="${y}" r="${R + 7}" fill="none" stroke="${COL[u.owner]}" stroke-width="5" opacity="0.3"/>`;
-      s += piece(x, y, u, stack.length - 1, false);
+      s += piece(x, y, u, stack.slice(0, -1).reverse(), false);
     }
     s += '</g>';
   }
 
-  function piece(x, y, u, buried, ghost) {
-    const card = cards[u.id], p = u.owner, r = R;
+  // `under`: the buried units, top first. Each shows as a disc in its owner's colour peeking out
+  // below the piece (buried units are public and resurface), with a count when there are any.
+  function piece(x, y, u, under, ghost) {
+    const card = cards[u.id], p = u.owner, r = R, peek = Math.min(under.length, 3), off = 9;
     let q = `<g opacity="${ghost ? 0.6 : 1}">`;
     const body = (by, f, st, w, extra) => `<circle cx="${x}" cy="${by}" r="${r}" fill="${f}" stroke="${st}" stroke-width="${w}" ${extra}/>`;
-    for (let i = Math.min(buried, 2); i >= 1; i--) q += body(y + i * 5, 'var(--surface-2)', 'var(--line-strong)', 1.5, '');
+    for (let i = peek; i >= 1; i--) q += body(y + i * off, DEEP[under[i - 1].owner], COL[under[i - 1].owner], 2.5, 'opacity="0.9"');
     q += body(y, DEEP[p], COL[p], 2.5, ghost ? 'stroke-dasharray="4 3"' : '');
     q += `<text x="${x}" y="${y + 1}" text-anchor="middle" dominant-baseline="central" font-family="var(--font-display)" font-weight="700" font-size="${r * 1.15}" fill="${COL[p]}">${u.str}</text>`;
-    q += `<text x="${x}" y="${y + r + 16 + Math.min(buried, 2) * 5}" text-anchor="middle" font-family="var(--font-text)" font-weight="500" font-size="11" letter-spacing="0.06em" fill="var(--muted)" stroke="var(--bg)" stroke-width="4" paint-order="stroke">${card.name.toUpperCase()}</text>`;
+    q += `<text x="${x}" y="${y + r + 16 + peek * off}" text-anchor="middle" font-family="var(--font-text)" font-weight="500" font-size="11" letter-spacing="0.06em" fill="var(--muted)" stroke="var(--bg)" stroke-width="4" paint-order="stroke">${card.name.toUpperCase()}</text>`;
     if (u.timer && !ghost) q += `<circle cx="${x + r * 0.78}" cy="${y - r * 0.78}" r="16" fill="${COL[p]}" stroke="var(--bg)" stroke-width="3"/><text x="${x + r * 0.78}" y="${y - r * 0.78 + 1}" text-anchor="middle" dominant-baseline="central" font-family="var(--font-display)" font-weight="700" font-size="22" fill="var(--token-text)">${u.timer}</text>`;
-    if (buried && !ghost) q += `<text x="${x + r + 4}" y="${y + r - 2}" font-family="var(--font-display)" font-weight="600" font-size="14" fill="var(--muted)" stroke="var(--bg)" stroke-width="4" paint-order="stroke">+${buried}</text>`;
+    if (under.length && !ghost) {
+      const bx = x + r * 0.95, by = y + r * 0.7 + peek * off;
+      q += `<rect x="${bx - 14}" y="${by - 11}" width="28" height="22" rx="11" fill="var(--surface-2)" stroke="var(--text)" stroke-width="1.5"/><text x="${bx}" y="${by + 1}" text-anchor="middle" dominant-baseline="central" font-family="var(--font-display)" font-weight="700" font-size="15" fill="var(--text)">+${under.length}</text>`;
+    }
     return q + '</g>';
   }
 
