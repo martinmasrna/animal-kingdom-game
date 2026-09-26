@@ -47,6 +47,8 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "groundhog": ["groundhog_food"],
     "gopher": ["rodent_last_turn_food"],
     "jackal": ["jackal_food"],
+    **{f"calib_food10_{n}": ["squirrel_food"] for n in (2, 3, 4, 5, 6)},
+    **{f"calib_food3t_{n}": ["worker_wasp_food"] for n in (2, 3, 4, 5, 6)},
 }
 
 # Cards whose food-gain number is structural, not a tunable constant, so there is
@@ -153,6 +155,9 @@ STRENGTH_LIMITS = {
     "serval": "serval_min",
     "stoop": "stoop_max",
     "rhinoceros": "rhinoceros_max",
+    **{f"calib_rm3_{n}": "stoop_max" for n in (2, 3, 4, 5, 6)},
+    **{f"calib_rm4_{n}": "jaguar_max" for n in (2, 3, 4, 5, 6)},
+    **{f"calib_rm6_{n}": "serval_min" for n in (1, 2, 3, 4, 5)},
 }
 
 

@@ -1111,6 +1111,616 @@
       "text": "Battlecry: draw 1 card."
     },
     {
+      "id": "mock_draw_3",
+      "name": "Draw 3",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "Battlecry: draw 1 card."
+    },
+    {
+      "id": "mock_draw_4",
+      "name": "Draw 4",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: draw 1 card."
+    },
+    {
+      "id": "mock_draw_6",
+      "name": "Draw 6",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": [],
+      "text": "Battlecry: draw 1 card."
+    },
+    {
+      "id": "mock_draw_7",
+      "name": "Draw 7",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 7,
+      "keywords": [],
+      "text": "Battlecry: draw 1 card."
+    },
+    {
+      "id": "mock_flydraw_2",
+      "name": "Flying Draw 2",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": ["Flight"],
+      "text": "Flight. Battlecry: draw 1 card."
+    },
+    {
+      "id": "mock_flydraw_3",
+      "name": "Flying Draw 3",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": ["Flight"],
+      "text": "Flight. Battlecry: draw 1 card."
+    },
+    {
+      "id": "mock_flydraw_4",
+      "name": "Flying Draw 4",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": ["Flight"],
+      "text": "Flight. Battlecry: draw 1 card."
+    },
+    {
+      "id": "mock_flydraw_5",
+      "name": "Flying Draw 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": ["Flight"],
+      "text": "Flight. Battlecry: draw 1 card."
+    },
+    {
+      "id": "calib_draw1_1",
+      "name": "Calibration Draw1 1",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "keywords": [],
+      "text": "Battlecry: draw 1 card."
+    },
+    {
+      "id": "calib_draw1_2",
+      "name": "Calibration Draw1 2",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [],
+      "text": "Battlecry: draw 1 card."
+    },
+    {
+      "id": "calib_draw2_0",
+      "name": "Calibration Draw2 0",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 0,
+      "keywords": [],
+      "text": "Battlecry: draw 2 cards."
+    },
+    {
+      "id": "calib_draw2_1",
+      "name": "Calibration Draw2 1",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "keywords": [],
+      "text": "Battlecry: draw 2 cards."
+    },
+    {
+      "id": "calib_draw2_2",
+      "name": "Calibration Draw2 2",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [],
+      "text": "Battlecry: draw 2 cards."
+    },
+    {
+      "id": "calib_draw2_3",
+      "name": "Calibration Draw2 3",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "Battlecry: draw 2 cards."
+    },
+    {
+      "id": "calib_rm3_2",
+      "name": "Calibration Rm3 2",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 3 or less."
+    },
+    {
+      "id": "calib_rm3_3",
+      "name": "Calibration Rm3 3",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 3 or less."
+    },
+    {
+      "id": "calib_rm3_4",
+      "name": "Calibration Rm3 4",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 3 or less."
+    },
+    {
+      "id": "calib_rm3_5",
+      "name": "Calibration Rm3 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 3 or less."
+    },
+    {
+      "id": "calib_rm3_6",
+      "name": "Calibration Rm3 6",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 3 or less."
+    },
+    {
+      "id": "calib_rm4_2",
+      "name": "Calibration Rm4 2",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 4 or less."
+    },
+    {
+      "id": "calib_rm4_3",
+      "name": "Calibration Rm4 3",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 4 or less."
+    },
+    {
+      "id": "calib_rm4_4",
+      "name": "Calibration Rm4 4",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 4 or less."
+    },
+    {
+      "id": "calib_rm4_5",
+      "name": "Calibration Rm4 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 4 or less."
+    },
+    {
+      "id": "calib_rm4_6",
+      "name": "Calibration Rm4 6",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 4 or less."
+    },
+    {
+      "id": "calib_rm6_1",
+      "name": "Calibration Rm6 1",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 6 or more."
+    },
+    {
+      "id": "calib_rm6_2",
+      "name": "Calibration Rm6 2",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 6 or more."
+    },
+    {
+      "id": "calib_rm6_3",
+      "name": "Calibration Rm6 3",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 6 or more."
+    },
+    {
+      "id": "calib_rm6_4",
+      "name": "Calibration Rm6 4",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 6 or more."
+    },
+    {
+      "id": "calib_rm6_5",
+      "name": "Calibration Rm6 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 6 or more."
+    },
+    {
+      "id": "calib_rmany_1",
+      "name": "Calibration Rmany 1",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy unit."
+    },
+    {
+      "id": "calib_rmany_2",
+      "name": "Calibration Rmany 2",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy unit."
+    },
+    {
+      "id": "calib_rmany_3",
+      "name": "Calibration Rmany 3",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy unit."
+    },
+    {
+      "id": "calib_rmany_4",
+      "name": "Calibration Rmany 4",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy unit."
+    },
+    {
+      "id": "calib_rmany_5",
+      "name": "Calibration Rmany 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy unit."
+    },
+    {
+      "id": "calib_extra_1",
+      "name": "Calibration Extra 1",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "keywords": [],
+      "text": "Battlecry: play another unit."
+    },
+    {
+      "id": "calib_extra_2",
+      "name": "Calibration Extra 2",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [],
+      "text": "Battlecry: play another unit."
+    },
+    {
+      "id": "calib_extra_3",
+      "name": "Calibration Extra 3",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "Battlecry: play another unit."
+    },
+    {
+      "id": "calib_extra_4",
+      "name": "Calibration Extra 4",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: play another unit."
+    },
+    {
+      "id": "calib_extra_5",
+      "name": "Calibration Extra 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [],
+      "text": "Battlecry: play another unit."
+    },
+    {
+      "id": "calib_food10_2",
+      "name": "Calibration Food10 2",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [],
+      "text": "Battlecry: gain 10 food."
+    },
+    {
+      "id": "calib_food10_3",
+      "name": "Calibration Food10 3",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "Battlecry: gain 10 food."
+    },
+    {
+      "id": "calib_food10_4",
+      "name": "Calibration Food10 4",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: gain 10 food."
+    },
+    {
+      "id": "calib_food10_5",
+      "name": "Calibration Food10 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [],
+      "text": "Battlecry: gain 10 food."
+    },
+    {
+      "id": "calib_food10_6",
+      "name": "Calibration Food10 6",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": [],
+      "text": "Battlecry: gain 10 food."
+    },
+    {
+      "id": "calib_food3t_2",
+      "name": "Calibration Food3T 2",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 2,
+      "keywords": [],
+      "text": "At the end of your turn, gain 3 food."
+    },
+    {
+      "id": "calib_food3t_3",
+      "name": "Calibration Food3T 3",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "At the end of your turn, gain 3 food."
+    },
+    {
+      "id": "calib_food3t_4",
+      "name": "Calibration Food3T 4",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "At the end of your turn, gain 3 food."
+    },
+    {
+      "id": "calib_food3t_5",
+      "name": "Calibration Food3T 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [],
+      "text": "At the end of your turn, gain 3 food."
+    },
+    {
+      "id": "calib_food3t_6",
+      "name": "Calibration Food3T 6",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": [],
+      "text": "At the end of your turn, gain 3 food."
+    },
+    {
+      "id": "calib_apex_5",
+      "name": "Calibration Apex 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": ["Apex Predator"],
+      "text": "Apex Predator."
+    },
+    {
+      "id": "calib_apex_6",
+      "name": "Calibration Apex 6",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": ["Apex Predator"],
+      "text": "Apex Predator."
+    },
+    {
+      "id": "calib_apex_7",
+      "name": "Calibration Apex 7",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 7,
+      "keywords": ["Apex Predator"],
+      "text": "Apex Predator."
+    },
+    {
+      "id": "calib_apex_8",
+      "name": "Calibration Apex 8",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 8,
+      "keywords": ["Apex Predator"],
+      "text": "Apex Predator."
+    },
+    {
+      "id": "calib_immov_5",
+      "name": "Calibration Immov 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": ["Immovable"],
+      "text": "Immovable."
+    },
+    {
+      "id": "calib_immov_6",
+      "name": "Calibration Immov 6",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": ["Immovable"],
+      "text": "Immovable."
+    },
+    {
+      "id": "calib_immov_7",
+      "name": "Calibration Immov 7",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 7,
+      "keywords": ["Immovable"],
+      "text": "Immovable."
+    },
+    {
+      "id": "calib_immov_8",
+      "name": "Calibration Immov 8",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 8,
+      "keywords": ["Immovable"],
+      "text": "Immovable."
+    },
+    {
+      "id": "calib_stealth_5",
+      "name": "Calibration Stealth 5",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": ["Stealth"],
+      "text": "Stealth."
+    },
+    {
+      "id": "calib_stealth_6",
+      "name": "Calibration Stealth 6",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "keywords": ["Stealth"],
+      "text": "Stealth."
+    },
+    {
+      "id": "calib_stealth_7",
+      "name": "Calibration Stealth 7",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 7,
+      "keywords": ["Stealth"],
+      "text": "Stealth."
+    },
+    {
+      "id": "calib_stealth_8",
+      "name": "Calibration Stealth 8",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 8,
+      "keywords": ["Stealth"],
+      "text": "Stealth."
+    },
+    {
       "id": "mock_saboteur",
       "name": "Saboteur",
       "deck": "reserve",
