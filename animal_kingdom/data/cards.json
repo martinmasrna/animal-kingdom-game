@@ -141,7 +141,6 @@
       "keywords": [],
       "text": "Battlecry: if you control another Cat, play one more Cat from your hand."
     },
-
     {
       "id": "eon",
       "name": "Eon",
@@ -178,10 +177,10 @@
       "name": "Aurum",
       "deck": "egg_control",
       "rarity": "legendary",
-      "tags": ["Egg"],
-      "base_strength": 0,
-      "keywords": ["Fragile"],
-      "text": "Fragile. At the start of your turn, draw a card."
+      "tags": ["Bird"],
+      "base_strength": 1,
+      "keywords": [],
+      "text": "At the start of your turn, draw a card."
     },
     {
       "id": "rattlesnake",
@@ -196,7 +195,7 @@
     {
       "id": "egg_eater",
       "name": "Egg Eater",
-      "deck": "egg_control",
+      "deck": "reserve",
       "rarity": "rare",
       "tags": ["Snake"],
       "base_strength": 4,
@@ -254,6 +253,36 @@
       "text": "Apex Predator."
     },
     {
+      "id": "king_cobra",
+      "name": "King Cobra",
+      "deck": "egg_control",
+      "rarity": "rare",
+      "tags": ["Snake"],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: if you shuffled a card this turn, remove an adjacent enemy unit."
+    },
+    {
+      "id": "puff_adder",
+      "name": "Puff Adder",
+      "deck": "egg_control",
+      "rarity": "common",
+      "tags": ["Snake"],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "When an enemy unit covers this, remove that enemy if you control a Bird."
+    },
+    {
+      "id": "secretary_bird",
+      "name": "Secretary Bird",
+      "deck": "egg_control",
+      "rarity": "common",
+      "tags": ["Bird"],
+      "base_strength": 4,
+      "keywords": ["Flight"],
+      "text": "Flight. Battlecry: draw a Snake."
+    },
+    {
       "id": "raven",
       "name": "Raven",
       "deck": "egg_control",
@@ -266,7 +295,7 @@
     {
       "id": "bird_egg",
       "name": "Bird Egg",
-      "deck": "egg_control",
+      "deck": "reserve",
       "rarity": "common",
       "tags": ["Egg"],
       "base_strength": 0,
@@ -276,14 +305,13 @@
     {
       "id": "snake_egg",
       "name": "Snake Egg",
-      "deck": "egg_control",
+      "deck": "reserve",
       "rarity": "common",
       "tags": ["Egg"],
       "base_strength": 0,
       "keywords": ["Fragile"],
       "text": "Fragile. After 2 turns, remove this and draw 2 Snakes."
     },
-
     {
       "id": "queen_marabunta",
       "name": "Queen Marabunta",
@@ -424,7 +452,6 @@
       "keywords": ["Flight"],
       "text": "Flight. Battlecry: gain 10 food; if you control another Worker, gain 10 more."
     },
-
     {
       "id": "methuselah",
       "name": "Methuselah",
@@ -569,7 +596,6 @@
       "keywords": [],
       "text": ""
     },
-
     {
       "id": "fathom",
       "name": "Fathom",
@@ -723,7 +749,6 @@
       "text": "Battlecry: if you played a Rodent last turn, gain 10 food.",
       "copies": 2
     },
-
     {
       "id": "verminus",
       "name": "Verminus, the Rat King",
@@ -865,7 +890,6 @@
       "keywords": [],
       "text": "Battlecry: draw a Rodent."
     },
-
     {
       "id": "lobo",
       "name": "Lobo",

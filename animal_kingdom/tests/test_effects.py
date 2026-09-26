@@ -958,3 +958,42 @@ def test_oxpecker_counts_strong_units_in_the_starting_deck():
     s.starting_decks["A"] = ("lion", "lion", "squirrel", "eagle", "goliath")  # 7,7 qualify; 3,5,dyn don't
     rules.apply_action(s, PlaceAction("oxpecker", ("cr", "1,2")))
     assert s.food["A"] == 2
+
+
+# ============================================ Snake/Bird control (2026-09-26 redesign)
+
+def test_secretary_bird_draws_a_snake():
+    s = make_state(hands={"A": ["secretary_bird"]}, decks={"A": ["lion", "anaconda", "eagle"], "B": []})
+    rules.apply_action(s, PlaceAction("secretary_bird", ("cr", "1,2")))
+    assert "anaconda" in hand_ids(s, "A") and "anaconda" not in s.decks["A"]
+
+
+def test_king_cobra_removes_any_adjacent_enemy_only_after_a_shuffle_this_turn():
+    s = make_state(hands={"A": ["king_cobra", "king_cobra", "owl"]},
+                   decks={"A": ["lion", "eagle", "raven"], "B": []})
+    put(s, "1,1", "caracal", "A")
+    put(s, "2,2", "king_theron", "B")                     # an 8: nothing else in the deck answers it
+    rules.apply_action(s, PlaceAction("king_cobra", ("cr", "1,2")))   # no shuffle yet this turn
+    assert s.owner_of("2,2") == "B"
+
+    s.current, s.turn_flags, s.actions_taken_this_turn = "A", {}, 0
+    rules.apply_action(s, PlaceAction("owl", ("cr", "1,3")))          # look at 3, shuffle 2 back
+    if s.pending:
+        rules.apply_action(s, rules.legal_actions(s)[0])
+    rules.apply_action(s, PlaceAction("king_cobra", ("cr", "2,1")))   # adjacent to 2,2
+    assert s.top_unit("2,2") is None and "king_theron" in s.remove_pile
+
+
+def test_puff_adder_removes_its_coverer_only_while_you_control_a_bird():
+    s = make_state(current="B", hands={"B": ["lion", "lion"]})
+    put(s, "4,2", "caracal", "B")                         # connects B toward 3,2
+    put(s, "3,2", "puff_adder", "A")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))         # no Bird: the cover stands
+    assert s.owner_of("3,2") == "B"
+
+    s2 = make_state(current="B", hands={"B": ["lion"]})
+    put(s2, "4,2", "caracal", "B")
+    put(s2, "3,2", "puff_adder", "A")
+    put(s2, "1,1", "eagle", "A")                          # a Bird anywhere
+    rules.apply_action(s2, PlaceAction("lion", ("cr", "3,2")))
+    assert s2.owner_of("3,2") == "A" and "lion" in s2.remove_pile     # coverer removed, Adder back on top

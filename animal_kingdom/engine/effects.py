@@ -430,6 +430,8 @@ def shuffle_back(state: GameState, player: str, card_ids: list) -> None:
     deck = state.decks[player]
     deck.extend(card_ids)
     state.rng.shuffle(deck)
+    if card_ids:
+        state.turn_flags[f"shuffled_{player}"] = True     # King Cobra: "if you shuffled a card this turn"
     for cid in card_ids:
         _fire_event(state, "on_shuffle_event", {"card_id": cid, "player": player})
 
@@ -1099,6 +1101,25 @@ def _ember_remove(state, unit):
         shuffle_back(state, unit.owner, ["ember"])
 
 
+def _secretary_bird_place(state, unit, cr):
+    state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": "tag:Snake"})
+
+
+def _king_cobra_place(state, unit, cr):
+    if state.turn_flags.get(f"shuffled_{unit.owner}"):
+        _push_remove_choice(state, unit.owner, "king_cobra", _adjacent_enemy_targets(state, unit, cr))
+
+
+def _puff_adder_covered(state, covered, coverer, cr):
+    # "When an enemy unit covers this, remove that enemy if you control a Bird." Every cover,
+    # not once; the Adder itself is buried by then, so the Bird has to be another unit on top.
+    if coverer.owner == covered.owner or not _control_tag_count(state, covered.owner, "Bird"):
+        return
+    if statics.can_be_removed(state, coverer):
+        state.effect_stack.append({"op": "remove_iid", "iid": coverer.iid, "by_player": covered.owner,
+                                   "by_card": "puff_adder", "source_iid": covered.iid})
+
+
 def _mouse_place(state, unit, cr):
     state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": "tag:Rodent"})
 
@@ -1719,6 +1740,9 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "raven": {"on_place": _raven_place},
     "ember": {"on_remove": _ember_remove},
     "mouse": {"on_place": _mouse_place},
+    "secretary_bird": {"on_place": _secretary_bird_place},
+    "king_cobra": {"on_place": _king_cobra_place},
+    "puff_adder": {"on_covered": _puff_adder_covered},
     "bird_egg": {"on_place": _bird_egg_place},
     "snake_egg": {"on_place": _snake_egg_place},
     # Food OTK: filtered draw + Deathrattle payoffs (Opossum's return lives in _dispose).

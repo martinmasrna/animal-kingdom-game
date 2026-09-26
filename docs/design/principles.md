@@ -41,7 +41,7 @@ There is no mana: every card costs one card and one placement action. Low streng
 
 ## Theme and naming
 
-- Every card is an animal, or something that becomes one (an egg). No spells, no objects, no places.
+- Every card is an animal. No spells, no objects, no places.
 - Let the animal's real behaviour suggest the mechanic: birds fly over lines, elephants hold ground, lemmings swarm.
 - Rarity follows how exotic the animal is. Commons are everyday animals, rares exotic ones, legendaries a specific named individual of a real species. A legendary's name may evoke myth or folklore but never cites it (no "Bastet").
 - One species per pool among commons and rares; subspecies, sex and age variants count as the same species. Legendaries are exempt, being named individuals.
