@@ -8,7 +8,7 @@ The art celebrates this. The test is the collection screen, the atlas of cards y
 
 ## Principles
 
-1. **Each card celebrates what only that animal has.** The signature trait is the hero of the image: the lion's mane, the tiger's stripes, the rhino's horn, the chameleon's eyes, the snake's legless body. Composition, focus and proportion exist to show it. Where possible, show why the trait exists (the horn in use, the tongue striking), which often matches the card's mechanic.
+1. **Each card celebrates what makes that animal formidable or unique in nature, read through its card.** Start from the card's strength and effect and from what the animal *is* (the elephant: the most massive land animal, nothing dares attack it; strength 8, Immovable), not from its most famous body part in a pleasant scene (an elephant spraying water misses the card entirely). The trait is the hero of the image: composition, focus, proportion and scale exist to show it, ideally in the moment it matters (the anaconda crushing prey in its coils, the elephant standing its ground while lions back away).
 2. **Diversity is the point.** The collection must read as a menagerie of wildly different creatures. One consistent rendering style, but silhouettes, poses, colours and compositions vary as much as the animals do; no single template pose or lighting recipe.
 3. **True and unpretentious.** Real animals as they are, drawn so they're recognisable at a glance. No costumes, crowns or fantasy additions; nature's own design is enough. The rendering may be stylized.
 4. **Clarity above cleverness.** No concept that makes the viewer decode the picture (double exposure, silhouette tricks).
