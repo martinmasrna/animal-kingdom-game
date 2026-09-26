@@ -168,3 +168,12 @@ def test_no_strength_limit_card_escapes_the_check():
     # Oxpecker's "strength 6 or more" counts its own decklist, not a removal limit.
     printed = {cid for cid, c in _cards().items() if STRENGTH_LIMIT_RE.search(c.text)}
     assert printed - {"oxpecker"} == set(STRENGTH_LIMITS)
+
+
+STRENGTH_LOSS_RE = re.compile(r"gets -(\d+) strength", re.IGNORECASE)
+
+
+def test_strength_loss_text_matches_config():
+    """Viper's printed "-N strength" equals viper_poison, and no other card prints a loss unchecked."""
+    printed = {cid: int(m.group(1)) for cid, c in _cards().items() if (m := STRENGTH_LOSS_RE.search(c.text))}
+    assert printed == {"viper": Config.default().viper_poison}
