@@ -997,3 +997,11 @@ def test_puff_adder_removes_its_coverer_only_while_you_control_a_bird():
     put(s2, "1,1", "eagle", "A")                          # a Bird anywhere
     rules.apply_action(s2, PlaceAction("lion", ("cr", "3,2")))
     assert s2.owner_of("3,2") == "A" and "lion" in s2.remove_pile     # coverer removed, Adder back on top
+
+    s3 = make_state(current="B", hands={"B": ["lion"]})
+    put(s3, "5,1", "king_theron", "B")
+    put(s3, "4,2", "caracal", "B")
+    put(s3, "3,2", "puff_adder", "A")
+    put(s3, "1,1", "eagle", "A")
+    rules.apply_action(s3, PlaceAction("lion", ("cr", "3,2")))       # Theron removes the Adder first
+    assert "puff_adder" in s3.remove_pile and "lion" in s3.remove_pile  # the trap still fires
