@@ -45,9 +45,49 @@ def unit(st, u):
     return f"{u.owner}:{name(st, u.card_id)} {effective_strength(st, u)}" + (f" ⏱{tm}" if tm else "")
 
 
-def board_view(st):
-    """The board as the web client shows it: owners and strengths on top, what's buried, timers,
-    lit connections (both ends yours and connected to your HQ), region state, and the HQ fronts."""
+def board_view(st, drawing=False):
+    """The position as facts, not a picture: each side's units (with what's buried under them and
+    timers), which crossroads connect to each HQ, both HQs' fronts, and every region's state.
+    Coordinates are col,row on the 5x3 grid; col 1 is A's HQ side, col 5 is B's."""
+    if drawing:
+        return board_drawing(st)
+    gm = st.game_map
+    conn = {p: st.connected_occupied(p) for p in "AB"}
+    timers = {x["iid"]: x["remaining"] for x in st.scheduled}
+    out = []
+    for p in "AB":
+        units = []
+        for cr in sorted(st.board, key=lambda c: tuple(map(int, c.split(",")))[::-1]):
+            s_ = st.board[cr]
+            if not s_ or s_[-1].owner != p:
+                continue
+            u = s_[-1]
+            t = f"{cr} {name(st, u.card_id)} {effective_strength(st, u)}"
+            if u.iid in timers:
+                t += f" ⏱{timers[u.iid]}"
+            if len(s_) > 1:
+                t += " [under: " + ", ".join(f"{v.owner}:{name(st, v.card_id)}" for v in reversed(s_[:-1])) + "]"
+            units.append(t)
+        out.append(f"{p} units: " + (" | ".join(units) if units else "none"))
+    for p in "AB":
+        loose = sorted(cr for cr, s_ in st.board.items() if s_ and s_[-1].owner == p and cr not in conn[p])
+        line = f"connected to {p}'s HQ: " + (" ".join(sorted(conn[p])) or "none")
+        if loose:
+            line += f"   (cut off: {' '.join(loose)})"
+        out.append(line)
+    out.append("HQ fronts: A's " + " ".join(f"{cr}={st.owner_of(cr) or '·'}" for cr in sorted(gm.hq_front("A")))
+               + " | B's " + " ".join(f"{cr}={st.owner_of(cr) or '·'}" for cr in sorted(gm.hq_front("B"))))
+    regs = []
+    for reg in gm.regions.values():
+        own = [st.owner_of(cr) for cr in reg.corners]
+        tag = next((f"{p}✓" for p in "AB" if own.count(p) == 4), None) or f"A{own.count('A')} B{own.count('B')}"
+        regs.append(f"{reg.corners[0]}–{reg.corners[-1]} +{reg.food} {tag}")
+    out.append("regions: " + " | ".join(regs))
+    return out
+
+
+def board_drawing(st):
+    """The same position as an ASCII picture, for a human looking at it."""
     gm = st.game_map
     conn = {p: st.connected_occupied(p) for p in "AB"}
     W = 17
@@ -57,56 +97,22 @@ def board_view(st):
         if not s_:
             return "·".center(W)
         u = s_[-1]
-        tm = next((x["remaining"] for x in st.scheduled if x["iid"] == u.iid), None)
-        t = f"{u.owner}:{name(st, u.card_id)[:9]} {effective_strength(st, u)}"
-        t += "*" if st.board[cr][-1].owner and cr in conn[u.owner] else ""
-        if tm: t += f"⏱{tm}"
-        if len(s_) > 1: t += f"+{len(s_)-1}"
+        t = f"{u.owner}:{name(st, u.card_id)[:9]} {effective_strength(st, u)}" + ("*" if cr in conn[u.owner] else "")
+        if len(s_) > 1:
+            t += f"+{len(s_)-1}"
         return t[:W].center(W)
 
     def link(a_, b_, horiz):
         oa, ob = st.owner_of(a_), st.owner_of(b_)
         if oa and oa == ob and a_ in conn[oa] and b_ in conn[oa]:
-            return (f"═{oa}═" if horiz else oa)
+            return f"═{oa}═" if horiz else oa
         return "───" if horiz else "│"
 
-    def region_label(c, r):
-        reg = next(x for x in gm.regions.values() if f"{c},{r}" in x.corners and f"{c+1},{r+1}" in x.corners)
-        own = [st.owner_of(cr) for cr in reg.corners]
-        for p in "AB":
-            if own.count(p) == 4:
-                return f"+{reg.food} {p}✓"
-            if own.count(p) == 3 and own.count(None) == 1:
-                return f"+{reg.food} {p}3"
-        return f"+{reg.food}"
-
-    out = ["board (* = connected to its HQ; ═A═ = lit A path; +N = units buried under; region: ✓ held, 3 = 3 of 4 with the 4th empty):"]
-    head = "      " + "".join(f"col {c}".center(W) + ("   " if c < 5 else "") for c in range(1, 6))
-    out.append(head)
+    out = []
     for r in range(1, 4):
-        fa = f"{r},"  # unused
-        hqa = "A" if st.owner_of(f"1,{r}") == "A" else " "
-        hqb = "B" if st.owner_of(f"5,{r}") == "B" else " "
-        row = f"HQA{hqa}─" + "".join(cell(f"{c},{r}") + (link(f"{c},{r}", f"{c+1},{r}", True) if c < 5 else "") for c in range(1, 6)) + f"─{hqb}HQB"
-        out.append(row)
+        out.append("HQA─" + "".join(cell(f"{c},{r}") + (link(f"{c},{r}", f"{c+1},{r}", True) if c < 5 else "") for c in range(1, 6)) + "─HQB")
         if r < 3:
-            parts = []
-            for c in range(1, 6):
-                parts.append(link(f"{c},{r}", f"{c},{r+1}", False).center(W))
-                if c < 5:
-                    parts.append(region_label(c, r).center(3) if False else "")
-            vline = "      " + "   ".join(link(f"{c},{r}", f"{c},{r+1}", False).center(W) for c in range(1, 6))
-            regs = "      " + " " * (W // 2) + "".join(region_label(c, r).center(W + 3) for c in range(1, 5))
-            out.append(vline)
-            out.append(regs)
-            out.append(vline)
-    stacks = [(cr, s_) for cr, s_ in sorted(st.board.items()) if len(s_) > 1]
-    if stacks:
-        out.append("stacks (bottom→top): " + " ; ".join(f"{cr} " + " / ".join(f"{u.owner}:{name(st,u.card_id)} {effective_strength(st,u)}" for u in s_) for cr, s_ in stacks))
-    fronts = {p: [cr for cr in sorted(gm.hq_front(p))] for p in "AB"}
-    for p, label in (("A", "your"), ("B", "their")):
-        held = [f"{cr}={st.owner_of(cr) or '·'}" for cr in fronts[p]]
-        out.append(f"{label} HQ fronts: " + " ".join(held))
+            out.append("    " + "   ".join(link(f"{c},{r}", f"{c},{r+1}", False).center(W) for c in range(1, 6)))
     return out
 
 
@@ -154,7 +160,7 @@ def show(g, st):
     if new:
         out.append("since your last decision: " + " | ".join(new))
     g["shown"] = len(g["log"])
-    out.extend(board_view(st))
+    out.extend(board_view(st, drawing="--drawing" in sys.argv))
     mine_left = Counter(st.decks[ME])
     out.append("your deck (copies left): " + ", ".join(f"{name(st,c)} {st.cards[c].base_strength}×{n}" for c, n in sorted(mine_left.items(), key=lambda x: str(st.cards[x[0]].base_strength))))
     out.append(f"your hand: " + " ; ".join(f"{name(st,u.card_id)} [{placement_strength(st,u)}] {st.cards[u.card_id].text}" for u in st.hands[ME]))

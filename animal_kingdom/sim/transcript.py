@@ -13,7 +13,7 @@ from animal_kingdom.sim.agent_play import board_view
 ME = "A"
 
 def board(st):
-    return "\n".join("   " + line for line in board_view(st)[1:])
+    return "\n".join("   " + line for line in board_view(st))
 
 
 def conn(st, p):
