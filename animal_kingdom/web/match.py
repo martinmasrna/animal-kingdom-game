@@ -126,6 +126,7 @@ class Match:
         self.version = 0                 # bumped on every change; the server pushes on bumps
         self.seed: Optional[int] = None
         self.actions: list[dict] = []    # the current game's actions, for the replayable log
+        self.notes: list[dict] = []      # a player's spoken or typed commentary, pinned to a point in the game
         self.on_game_end = None          # callback(match, log record); the server saves human games
         self.rng = random.Random(secrets.randbits(32))
         self.created = datetime.now(timezone.utc)
@@ -181,6 +182,7 @@ class Match:
             first = other_player(last["winner"]) if last["winner"] else last["first"]
         seed = self.seed = self.rng.randrange(1 << 30)
         self.actions = []
+        self.notes = []
         self.state = new_game(load_premade_deck(self.seats["A"].deck),
                               load_premade_deck(self.seats["B"].deck), seed,
                               map_id=MAP_ID, first_player=first)
@@ -251,6 +253,14 @@ class Match:
         over = max(score.values()) >= GAMES_TO_WIN or len(self.results) >= 2 * GAMES_TO_WIN - 1
         self.phase = "match_over" if over else "game_over"
 
+    def add_note(self, s: str, text: str) -> None:
+        """Pin a comment to the current point of the game: it belongs after the first `at` actions."""
+        text = text.strip()
+        if not text or self.state is None:
+            return
+        self.notes.append({"at": len(self.actions), "seat": s, "round": self.state.turn_counter // 2 + 1,
+                           "text": text[:2000]})
+
     def game_log(self) -> dict:
         """The finished game in the sim.replay log format (replayable with no bot compute)."""
         r = self.results[-1]
@@ -258,7 +268,7 @@ class Match:
                 "map_id": MAP_ID, "first_player": r["first"],
                 "bots": [self.seats[p].bot or "human" for p in "AB"],
                 "winner": r["winner"], "reason": r["reason"], "turns": self.state.turn_counter,
-                "actions": list(self.actions),
+                "actions": list(self.actions), "notes": list(self.notes),
                 "match_id": self.id, "game_no": len(self.results)}
 
     def bot_move(self):

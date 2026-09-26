@@ -20,8 +20,8 @@ let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, hover: null, peek: false, menu: false };
 
 // ------------------------------------------------------------------ shared bits
-function toast(msg) {
-  const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
+function toast(msg, ok) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; t.classList.toggle('ok', !!ok);
   clearTimeout(toast.h); toast.h = setTimeout(() => t.style.display = 'none', 3500);
 }
 function sortIds(ids) {
@@ -197,7 +197,7 @@ function lobbyScreen() {
     <div class="lobby"><div class="lbl">Invite a friend</div><div class="code">${V.id}</div>
       <div class="link">${link}</div><span class="chip on" id="copy">Copy link</span>
       <div class="lbl" style="margin-top:24px">Waiting for them to join</div></div>`;
-  document.getElementById('copy').onclick = () => navigator.clipboard.writeText(link).then(() => toast('Link copied'), () => toast(link));
+  document.getElementById('copy').onclick = () => navigator.clipboard.writeText(link).then(() => toast('Link copied', true), () => toast(link));
 }
 
 function seatLabel(p) {
@@ -227,7 +227,7 @@ function gameScreen() {
     screen = 'game';
     app.innerHTML = `<div class="screen" id="scr">
       <div class="topbar"><div id="series"></div><div class="hist" id="hist"></div><div class="removed" id="removed"></div>
-        <div class="menu" id="menubtn">☰<div class="menudrop" id="menudrop"><a href="#/">Leave match</a></div></div></div>
+        <div class="menu" id="menubtn">☰<div class="menudrop" id="menudrop"><a href="#" id="notelink">Add a note (N)</a><a href="#/">Leave match</a></div></div></div>
       <div id="stage"><div id="board"></div></div>
       <div class="col lc"><div class="ph" id="pa"></div><div class="dl A" id="mine"></div></div>
       <div class="col rc"><div class="ph" id="pb"></div><div class="dl B" id="theirs"></div></div>
@@ -236,8 +236,10 @@ function gameScreen() {
       <div class="prompt" id="choicebar"></div>
       <div class="waiting" id="waiting"></div>
       <div class="endov" id="endov"></div></div>`;
+    wireNotes();
     const menubtn = document.getElementById('menubtn');
     menubtn.onclick = e => { e.stopPropagation(); document.getElementById('menudrop').classList.toggle('on'); };
+    document.getElementById('notelink').onclick = e => { e.preventDefault(); e.stopPropagation(); document.getElementById('menudrop').classList.remove('on'); openNote(); };
     const scr = document.getElementById('scr');
     scr.addEventListener('click', () => document.getElementById('menudrop').classList.remove('on'));
     scr.addEventListener('scroll', () => { scr.scrollTop = 0; scr.scrollLeft = 0; });   // hover lifts must never scroll the screen
@@ -482,6 +484,59 @@ function drawEnd() {
   document.getElementById('peek').onclick = () => { ui.peek = true; drawGame(); };
   ov.classList.add('on');
 }
+
+// Playtest notes: N opens a box, Chrome's speech recognition fills it while you talk (or type),
+// Enter saves it to the game log at this exact point, Esc discards.
+let noteRec = null;
+function wireNotes() {
+  let box = document.getElementById('notebox');
+  if (!box) {
+    box = document.createElement('div'); box.id = 'notebox'; box.className = 'notebox';
+    box.innerHTML = `<textarea id="notetext" placeholder="Say or type what you're thinking"></textarea>
+      <div class="nb"><span class="rec off" id="noterec"></span><span id="notestate">Enter saves · Esc discards</span></div>`;
+    document.body.appendChild(box);
+  }
+  const ta = document.getElementById('notetext');
+  ta.onkeydown = e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); closeNote(true); }
+    else if (e.key === 'Escape') { e.preventDefault(); closeNote(false); }
+    e.stopPropagation();
+  };
+}
+function openNote() {
+  const box = document.getElementById('notebox'), ta = document.getElementById('notetext');
+  if (!box || box.classList.contains('on')) return;
+  ta.value = ''; box.classList.add('on'); ta.focus();
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const dot = document.getElementById('noterec'), state = document.getElementById('notestate');
+  if (!SR) { state.textContent = 'No speech recognition in this browser: type · Enter saves · Esc discards'; return; }
+  noteRec = new SR(); noteRec.continuous = true; noteRec.interimResults = true; noteRec.lang = 'en-US';
+  let committed = '';
+  noteRec.onresult = e => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) committed += e.results[i][0].transcript.trim() + ' ';
+      else interim += e.results[i][0].transcript;
+    }
+    ta.value = (committed + interim).trim();
+  };
+  noteRec.onstart = () => { dot.classList.remove('off'); state.textContent = 'Listening · Enter saves · Esc discards'; };
+  noteRec.onend = () => { dot.classList.add('off'); if (box.classList.contains('on')) state.textContent = 'Mic off: edit or type · Enter saves · Esc discards'; };
+  noteRec.onerror = e => { state.textContent = `Mic: ${e.error} · type instead · Enter saves`; };
+  try { noteRec.start(); } catch { /* already running */ }
+}
+function closeNote(save) {
+  const box = document.getElementById('notebox'), ta = document.getElementById('notetext');
+  if (noteRec) { noteRec.onend = null; try { noteRec.stop(); } catch { } noteRec = null; }
+  document.getElementById('noterec').classList.add('off');
+  if (save && ta.value.trim()) { send({ t: 'note', text: ta.value.trim() }); toast('Note saved', true); }
+  box.classList.remove('on');
+}
+addEventListener('keydown', e => {
+  if ((e.key === 'n' || e.key === 'N') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault(); openNote();
+  }
+});
 
 window.__ak = () => ({ V, ui });   // test hook: the headless play-through reads the view
 boot();

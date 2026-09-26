@@ -192,3 +192,13 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .sc .tx { padding: 4px 10px 6px 12px; font-size: calc(var(--w) * 0.064); line-height: 1.35; color: #c9c6bf; flex: 1; }
 .sc .tg { padding: 0 10px 8px 12px; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .sc .tm { padding: 0 10px 6px 12px; font-size: 11px; color: var(--muted); }
+
+/* Playtest notes: press N, speak or type, Enter saves it pinned to this point of the game */
+.notebox { position: fixed; left: 50%; top: 64px; transform: translateX(-50%); z-index: 80; width: 560px; max-width: calc(100% - 32px); display: none; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line-strong); box-shadow: 0 10px 28px rgba(0,0,0,0.55); }
+.notebox.on { display: flex; }
+.notebox textarea { width: 100%; height: 72px; resize: none; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: 13px/1.4 var(--font-text); padding: 8px; }
+.notebox .nb { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
+.notebox .rec { width: 9px; height: 9px; border-radius: 999px; background: #c65a4a; animation: pulse 1s infinite; }
+.notebox .rec.off { background: var(--faint); animation: none; }
+@keyframes pulse { 50% { opacity: 0.3; } }
+.toast.ok { background: var(--surface-2); border-color: var(--line-strong); }

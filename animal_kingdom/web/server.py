@@ -173,6 +173,9 @@ async def socket(req):
                     match.next_game()
                 elif kind == "rematch":
                     match.rematch()
+                elif kind == "note":
+                    match.add_note(seat, str(data.get("text", "")))
+                    continue                          # nothing on screen changes
                 else:
                     raise EngineError(f"unknown message {kind!r}")
             except (EngineError, KeyError, ValueError) as e:
