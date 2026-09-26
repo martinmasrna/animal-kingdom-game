@@ -112,6 +112,7 @@ class Config:
     egg_hatch_draw: int = 2              # cards drawn when an Egg hatches
     black_bear_delay: int = 2           # turns until Black Bear draws
     black_bear_draw: int = 2            # baseline-ruler tuning 2026-07-13: 1→2 (draw-1 too weak vs draw-2 default)
+    viper_poison: int = 3               # Viper's permanent strength loss on the bitten enemy
     grizzly_bear_delay: int = 2         # turns until Grizzly Bear's random adjacent removal
 
     # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the

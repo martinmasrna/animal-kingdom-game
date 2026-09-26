@@ -1005,3 +1005,27 @@ def test_puff_adder_removes_its_coverer_only_while_you_control_a_bird():
     put(s3, "1,1", "eagle", "A")
     rules.apply_action(s3, PlaceAction("lion", ("cr", "3,2")))       # Theron removes the Adder first
     assert "puff_adder" in s3.remove_pile and "lion" in s3.remove_pile  # the trap still fires
+
+
+def test_viper_permanently_shrinks_an_adjacent_enemy_so_a_bird_can_cover_it():
+    s = make_state(hands={"A": ["viper", "eagle"]})
+    put(s, "2,1", "lion", "B")                            # a 7: Eagle (5) can't cover it
+    assert PlaceAction("eagle", ("cr", "2,1")) not in rules.legal_actions(s)
+    rules.apply_action(s, PlaceAction("viper", ("cr", "1,1")))        # bites the Lion: 7 -> 4
+    assert effective_strength(s, s.top_unit("2,1")) == 4
+    rules.apply_action(s, PlaceAction("eagle", ("cr", "2,1")))
+    assert s.owner_of("2,1") == "A"
+
+
+def test_black_mamba_venom_removes_the_bitten_unit_next_turn_even_if_buried_or_the_mamba_is_gone():
+    s = make_state(hands={"A": ["black_mamba"], "B": ["tiger"]},
+                   decks={"A": ["eagle"] * 8, "B": ["eagle"] * 8})
+    put(s, "2,1", "lion", "B")
+    rules.apply_action(s, PlaceAction("black_mamba", ("cr", "1,1")))  # bites the Lion at 2,1
+    lion = s.top_unit("2,1")
+    assert lion.card_id == "lion"
+    rules.apply_action(s, DrawAction())                   # A ends the turn
+    put(s, "1,1", "lion", "B")                            # the Mamba is covered...
+    put(s, "2,1", "tiger", "B")                           # ...and the Lion buried under B's own Tiger
+    rules.apply_action(s, DrawAction()); rules.apply_action(s, DrawAction())   # B's turn
+    assert "lion" in s.remove_pile and s.top_unit("2,1").card_id == "tiger"

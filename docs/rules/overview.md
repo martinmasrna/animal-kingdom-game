@@ -151,6 +151,8 @@ Some effects resolve on a delay — "in 2 turns, draw 2 cards" (Black Bear), "at
 - **Removal cancels the effect outright.** A unit sent to the Remove Pile is gone, not waiting; its pending effect never resolves. (A **Fragile** unit is removed *by* being covered, so for Fragile cards covering and cancelling are the same event.)
 - **Returning a unit to a hand resets its timer.** A replayed unit starts a fresh timer; it never resumes a partly-elapsed one.
 
+**Venom is the exception: it belongs to the bitten unit, not to the snake.** Black Mamba's bite ("at the start of your next turn, remove it") resolves even if the Mamba has been covered or removed, and even if the bitten unit is buried; it is cancelled only if the bitten unit leaves the board first.
+
 This is the same principle as the reaction-fizzle rule above: anything queued re-checks its unit before it resolves. Covering is placement, not an ability, so neither **Immovable** nor **Stealth** protects a timer — only strength (being hard to cover) does.
 
 ---

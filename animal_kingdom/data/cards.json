@@ -253,9 +253,29 @@
       "text": "Apex Predator."
     },
     {
+      "id": "black_mamba",
+      "name": "Black Mamba",
+      "deck": "egg_control",
+      "rarity": "rare",
+      "tags": ["Snake"],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: choose an adjacent enemy unit. At the start of your next turn, remove it."
+    },
+    {
+      "id": "viper",
+      "name": "Viper",
+      "deck": "egg_control",
+      "rarity": "common",
+      "tags": ["Snake"],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "Battlecry: an adjacent enemy unit gets -3 strength."
+    },
+    {
       "id": "king_cobra",
       "name": "King Cobra",
-      "deck": "egg_control",
+      "deck": "reserve",
       "rarity": "rare",
       "tags": ["Snake"],
       "base_strength": 4,
@@ -265,7 +285,7 @@
     {
       "id": "puff_adder",
       "name": "Puff Adder",
-      "deck": "egg_control",
+      "deck": "reserve",
       "rarity": "common",
       "tags": ["Snake"],
       "base_strength": 3,

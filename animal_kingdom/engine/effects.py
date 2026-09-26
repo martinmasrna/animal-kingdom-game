@@ -565,7 +565,7 @@ def start_of_turn(state: GameState, player: str) -> None:
             keep.append(s)
         elif s["iid"] not in on_board:
             continue                       # removed: cancelled outright (§9.1)
-        elif s["iid"] not in tops:
+        elif s["iid"] not in tops and not s.get("while_buried"):
             keep.append(s)                 # buried: suspended, does not tick (§9.1)
         else:
             s["remaining"] -= 1
@@ -1108,6 +1108,51 @@ def _secretary_bird_place(state, unit, cr):
 def _king_cobra_place(state, unit, cr):
     if state.turn_flags.get(f"shuffled_{unit.owner}"):
         _push_remove_choice(state, unit.owner, "king_cobra", _adjacent_enemy_targets(state, unit, cr))
+
+
+def _enemy_neighbors(state, unit, cr):
+    """Adjacent crossroads topped by an enemy unit this player may choose (Stealth hides)."""
+    return [nb for nb in sorted(state.game_map.neighbors(cr))
+            if (top := state.top_unit(nb)) and top.owner != unit.owner
+            and statics.can_be_chosen(state, top, unit.owner)]
+
+
+def _viper_place(state, unit, cr):
+    targets = _enemy_neighbors(state, unit, cr)
+    if targets:
+        state.effect_stack.append({"op": "venom", "kind": "viper", "chooser": unit.owner,
+                                   "options": targets})
+
+
+def _black_mamba_place(state, unit, cr):
+    targets = _adjacent_enemy_targets(state, unit, cr)
+    if targets:
+        state.effect_stack.append({"op": "venom", "kind": "mamba", "chooser": unit.owner,
+                                   "options": targets})
+
+
+def _op_venom(state, step):
+    """Viper: the chosen adjacent enemy gets -3 strength, permanently. Black Mamba: the chosen
+    adjacent enemy is removed at the start of the Mamba owner's next turn. The venom is on the
+    bitten unit, not on the snake (rules §9.1 exception): it resolves even if the Mamba is gone
+    or the bitten unit is buried, and is cancelled only if the bitten unit leaves the board."""
+    options = step["options"]
+    if "choice" not in step:
+        if len(options) == 1:
+            step["choice"] = options[0]
+        else:
+            return PendingRequest("choice", step["chooser"], options=options)
+    target = state.top_unit(step["choice"])
+    if target is None:
+        return None
+    if step["kind"] == "viper":
+        target.strength_counter -= state.config.viper_poison
+    else:
+        state.scheduled.append({"iid": target.iid, "owner": step["chooser"], "remaining": 1,
+                                "while_buried": True,
+                                "step": {"op": "remove_iid", "iid": target.iid,
+                                         "by_player": step["chooser"], "by_card": "black_mamba"}})
+    return None
 
 
 def _puff_adder_covered(state, covered, coverer, cr):
@@ -1710,6 +1755,7 @@ OPS.update({
     "bounce_iid": _op_bounce_iid,
     "skunk_bounce": _op_skunk_bounce,
     "grizzly_strike": _op_grizzly_strike,
+    "venom": _op_venom,
 })
 
 
@@ -1744,6 +1790,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "secretary_bird": {"on_place": _secretary_bird_place},
     "king_cobra": {"on_place": _king_cobra_place},
     "puff_adder": {"on_covered": _puff_adder_covered},
+    "viper": {"on_place": _viper_place},
+    "black_mamba": {"on_place": _black_mamba_place},
     "bird_egg": {"on_place": _bird_egg_place},
     "snake_egg": {"on_place": _snake_egg_place},
     # Food OTK: filtered draw + Deathrattle payoffs (Opossum's return lives in _dispose).
