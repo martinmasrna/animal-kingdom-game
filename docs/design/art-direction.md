@@ -8,12 +8,12 @@ The art celebrates this. The test is the collection screen, the atlas of cards y
 
 ## Principles
 
-1. **Each card celebrates what makes that animal formidable or unique in nature, read through its card.** Start from the card's strength and effect and from what the animal *is* (the elephant: the most massive land animal, nothing dares attack it; strength 8, Immovable), not from its most famous body part in a pleasant scene (an elephant spraying water misses the card entirely). The trait is the hero of the image: composition, focus, proportion and scale exist to show it, ideally in the moment it matters (the anaconda crushing prey in its coils, the elephant standing its ground while lions back away).
+1. **Each card celebrates what makes that animal formidable or unique in nature, read through its card.** Start from the card's strength and effect and from what the animal *is* (the elephant: the most massive land animal, nothing dares attack it; strength 8, Immovable), not from its most famous body part in a pleasant scene (an elephant spraying water misses the card entirely).
 2. **Diversity is the point.** The collection must read as a menagerie of wildly different creatures. One consistent rendering style, but silhouettes, poses, colours and compositions vary as much as the animals do; no single template pose or lighting recipe.
 3. **True and unpretentious.** Real animals as they are, drawn so they're recognisable at a glance. No costumes, crowns or fantasy additions; nature's own design is enough. The rendering may be stylized.
 4. **Clarity above cleverness.** No concept that makes the viewer decode the picture (double exposure, silhouette tricks).
 5. **Emotion over medium.** Colour, proportion, composition and focus matter more than whether it's oil or gouache.
-6. **Legendaries are specific, mythic individuals** of a real species, raised by nature's own regalia (scale, age, light, the moment), never by ornaments.
+6. **Rarity shows through nature itself.** Commons are calm portraits of the whole animal in bright daylight in its habitat, the animal-book picture: the trait reads through pose and scale, not an action scene. Legendaries are specific, mythic individuals of a real species: nature rises around them and their own features are supercharged to mythical proportions (Methuselah's shell grown into a mossy hill under an aurora, Theron's mane like fire under a blood-red sun). They may be dark and dramatic; commons may not. Never ornaments, crowns or costumes.
 
 ## Evaluate on the collection, not on one card
 
