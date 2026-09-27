@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=Lilita+One&display=swap');
 
 :root {
   --bg: #0f1113;
@@ -11,12 +11,12 @@
   --muted: #8a9097;
   --faint: #5b6168;
 
-  --you: #f2a541;
-  --you-rgb: 242,165,65;
-  --them-rgb: 76,184,220;
+  --you: #e0a040;
+  --you-rgb: 224,160,64;
+  --them-rgb: 127,157,194;
   --token-text: #111;
   --you-deep: #2b2012;
-  --them: #4cb8dc;
+  --them: #7f9dc2;
   --them-deep: #10242c;
 
   --font-display: 'Barlow Condensed', system-ui, sans-serif;

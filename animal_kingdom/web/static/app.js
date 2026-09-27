@@ -1,14 +1,14 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
-import { renderBoard } from './board.js';
+import { renderBoard, portrait, kitImg } from './board.js';
+import { hasArt, artUrl } from './art.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
-const ART = { lion: '/static/art/lion.jpg', king_theron: '/static/art/king_theron.jpg' };
 const COVER = { cats_midrange: 'king_theron' };
 const RANK = { legendary: 0, rare: 1, common: 2 };
 const COL = { A: 'var(--you)', B: 'var(--them)' };
 const SKIP = '__skip__';
-const artStyle = id => ART[id] ? `style="background-image:url(${ART[id]})"` : '';
+const artStyle = id => hasArt(id) ? `style="background-image:url(${artUrl(id)})"` : '';
 const sv = c => c.str === '*' ? -1 : c.str;
 const store = (k, v) => { try { v === undefined ? null : localStorage.setItem(k, v); return localStorage.getItem(k); } catch { return null; } };
 const tokenKey = id => 'ak:seat:' + id;
@@ -17,7 +17,7 @@ const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } c
 
 let CARDS = {}, MAP, DECKS = [];
 let V = null, ws = null, wsId = null, screen = null;
-const ui = { sel: null, hover: null, peek: false, menu: false };
+const ui = { sel: null, hover: null, peek: false, menu: false, panel: null };
 
 // ------------------------------------------------------------------ shared bits
 function toast(msg, ok) {
@@ -72,7 +72,7 @@ function miniMap(w, h) {
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
 }
 function deckTile(d, on) {
-  const list = counted(d.list), cv = COVER[d.id] ? `style="background-image:url(${ART[COVER[d.id]]})"` : '';
+  const list = counted(d.list), cv = COVER[d.id] ? artStyle(COVER[d.id]) : '';
   return `<div class="dk${on ? ' on' : ''}" data-deck="${d.id}"><div class="cv gradart" ${cv}></div><div class="in"><b>${d.name}</b><span>Starter deck · ${d.list.length} cards</span><span>${tribes(list)}</span></div></div>`;
 }
 
@@ -81,7 +81,7 @@ async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
   CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks;
   addEventListener('hashchange', route);
-  addEventListener('resize', () => { if (screen === 'game') drawGame(); });
+  addEventListener('resize', () => { if (screen === 'game') fitStage(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && ui.sel) { ui.sel = null; drawGame(); } });
   route();
 }
@@ -225,24 +225,33 @@ function prematchScreen() {
 function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
-    app.innerHTML = `<div class="screen" id="scr">
-      <div class="topbar"><div id="series"></div><div class="hist" id="hist"></div><span class="livedot" id="livedot" title="Live commentary on"></span><div class="removed" id="removed"></div>
-        <div class="menu" id="menubtn">☰<div class="menudrop" id="menudrop"><a href="#" id="livelink">Live commentary (L)</a><a href="#" id="notelink">Add a note (N)</a><a href="#/">Leave match</a></div></div></div>
-      <div id="stage"><div id="board"></div></div>
-      <div class="col lc"><div class="ph" id="pa"></div><div class="dl A" id="mine"></div></div>
-      <div class="col rc"><div class="ph" id="pb"></div><div class="dl B" id="theirs"></div></div>
+    // Everything lives on one stage drawn at the kit's native 1672x941 and scaled to the window (fitStage).
+    app.innerHTML = `<div class="screen" id="scr"><div id="stage">
+      <img class="layer" src="/static/kit/surround.jpg" alt=""><img class="layer" src="/static/kit/plateau.webp" alt="">
+      <div id="board"></div>
+      <div class="plq me" id="pa" data-panel="mine"></div><div class="plq them" id="pb" data-panel="theirs"></div>
+      <div class="plq series" id="series" data-panel="hist"></div>
+      <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
+      <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
+      <div class="menu" id="menubtn">${kitImg('button')}<span class="num">☰</span><span class="livedot" id="livedot" title="Live commentary on"></span>
+        <div class="menudrop" id="menudrop"><a href="#" id="livelink">Live commentary (L)</a><a href="#" id="notelink">Add a note (N)</a><a href="#/">Leave match</a></div></div>
+      <div class="turn" id="turn"></div>
       <div class="hand" id="hand"></div>
       <div class="deck" id="deck"></div>
       <div class="prompt" id="choicebar"></div>
-      <div class="waiting" id="waiting"></div>
-      <div class="endov" id="endov"></div></div>`;
+      <div class="waiting num" id="waiting"></div>
+      <div class="endov" id="endov"></div></div></div>`;
+    fitStage();
     wireNotes();
     const menubtn = document.getElementById('menubtn');
     menubtn.onclick = e => { e.stopPropagation(); document.getElementById('menudrop').classList.toggle('on'); };
     document.getElementById('livelink').onclick = e => { e.preventDefault(); e.stopPropagation(); document.getElementById('menudrop').classList.remove('on'); setLive(!live); };
     document.getElementById('notelink').onclick = e => { e.preventDefault(); e.stopPropagation(); document.getElementById('menudrop').classList.remove('on'); openNote(); };
+    // The player plaques and the series plaque open the decklists and the history; one panel at a time.
+    app.querySelectorAll('[data-panel]').forEach(el => el.onclick = e => { e.stopPropagation(); ui.panel = ui.panel === el.dataset.panel ? null : el.dataset.panel; showPanel(); });
+    app.querySelectorAll('.panel').forEach(el => el.onclick = e => e.stopPropagation());
     const scr = document.getElementById('scr');
-    scr.addEventListener('click', () => document.getElementById('menudrop').classList.remove('on'));
+    scr.addEventListener('click', () => { document.getElementById('menudrop').classList.remove('on'); if (ui.panel) { ui.panel = null; showPanel(); } });
     scr.addEventListener('scroll', () => { scr.scrollTop = 0; scr.scrollLeft = 0; });   // hover lifts must never scroll the screen
     wireBoard();
   }
@@ -286,7 +295,7 @@ function drawGame() {
   // Series + history + removed.
   const gameNo = V.phase === 'playing' ? V.results.length + 1 : V.results.length;
   const dots = [0, 1, 2].map(i => { const r = V.results[i]; return `<i class="${r ? (r.winner ? rel(r.winner) : '') : i === gameNo - 1 ? 'now' : ''}"></i>`; }).join('');
-  document.getElementById('series').innerHTML = `<div class="series"><b>Game ${gameNo} of 3</b><span class="games">${dots}</span><span>${MAP.name}</span></div>`;
+  document.getElementById('series').innerHTML = kitImg('plaque') + `<div class="tx"><b class="num">Game ${gameNo} of 3 <span class="games">${dots}</span></b><span>${MAP.name} · history ▾</span></div>`;
   const hist = document.getElementById('hist');
   let hs = '', lastT = null;
   G.history.forEach((m, i) => {
@@ -294,9 +303,9 @@ function drawGame() {
     const c = COL[rel(m.seat)];
     if (m.kind === 'draw') { const dr = m.fx.find(f => f.k === 'draw' && f.seat === m.seat); hs += `<div class="hi draw" style="--c:${c}" data-h="${i}">+${dr ? dr.n : 0}</div>`; }
     else { const k = m.fx.filter(f => f.k === 'remove').length;
-      hs += `<div class="hi gradart" style="--c:${c};${ART[m.card] ? `background-image:url(${ART[m.card]})` : ''}" data-h="${i}"><span class="s">${CARDS[m.card].str}</span>${k ? `<span class="k">×${k}</span>` : ''}</div>`; }
+      hs += `<div class="hi gradart" style="--c:${c};${hasArt(m.card) ? `background-image:url(${artUrl(m.card)})` : ''}" data-h="${i}"><span class="s">${CARDS[m.card].str}</span>${k ? `<span class="k">×${k}</span>` : ''}</div>`; }
   });
-  hist.innerHTML = hs; hist.scrollLeft = hist.scrollWidth;
+  hist.innerHTML = hs; hist.scrollTop = hist.scrollHeight;
   hist.querySelectorAll('[data-h]').forEach(el => {
     const m = G.history[el.dataset.h];
     el.onmouseenter = () => { if (m.kind === 'place') cardPop(el, m.card, moveLine(m), 'below'); else { pop.className = 'pop'; pop.innerHTML = `<div class="ev">${moveLine(m)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex'; const r = el.getBoundingClientRect(); pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; } };
@@ -305,28 +314,30 @@ function drawGame() {
   const removed = document.getElementById('removed');
   removed.innerHTML = `Removed <b>${G.removed.length}</b>`;
 
-  // Player headers.
-  const header = p => {
-    const r = rel(p), turn = G.current === p && V.phase === 'playing';
-    const pips = turn ? `<span class="pips">${Array.from({ length: G.actionsTotal }, (_, i) => `<span class="${i < G.actionsTotal - G.actionsLeft ? 'on' : ''}"></span>`).join('')}</span>` : '';
-    const label = turn ? `<span class="tt ${r}">${p === you ? 'Your turn' : 'Their turn'} ${pips}</span>` : `<span class="who">${seatLabel(p)} · ${V.seats[p].deckName}</span>`;
-    return `<div class="l1">${label}</div>`;
-  };
-  document.getElementById('pa').innerHTML = header(you);
-  document.getElementById('pb').innerHTML = header(them);
+  // Player plaques (each opens that player's decklist) and the turn banner with its action gems.
   const sum = o => Object.values(o).reduce((a, b) => a + b, 0);
+  const backs = `<span class="backs" title="Cards in their hand">${'<i></i>'.repeat(G.handCount[them])}</span>`;
+  document.getElementById('pa').innerHTML = kitImg('plaque') + `<div class="tx"><b class="num">${seatLabel(you)}</b><span>${V.seats[you].deckName} · deck ${sum(G.deckLeft)} ▾</span></div>`;
+  document.getElementById('pb').innerHTML = kitImg('plaque') + `<div class="tx"><b class="num">${seatLabel(them)}</b><span>${V.seats[them].deckName} · ${sum(G.unseen)} unseen ▾ ${backs}</span></div>`;
+  const turn = document.getElementById('turn'), cur = G.current;
+  if (V.phase === 'playing') {
+    const gems = Array.from({ length: G.actionsTotal }, (_, i) => `<span class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}">${kitImg(rel(cur) === 'A' ? 'gem_a' : 'gem_b')}</span>`).join('');
+    turn.innerHTML = kitImg('banner') + `<div class="tx"><b class="num">${cur === you ? 'Your turn' : 'Their turn'}</b><span class="acts">${gems}</span></div>`;
+    turn.className = 'turn ' + rel(cur);
+  } else turn.innerHTML = '';
   const mine = document.getElementById('mine'), theirs = document.getElementById('theirs');
-  mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4>${rows(V.lists[you], G.deckLeft)}`;
-  theirs.innerHTML = `<h4>Their cards<span class="backs" title="Cards in their hand">${'<span></span>'.repeat(G.handCount[them])}</span><span class="n">${sum(G.unseen)} left</span></h4>${rows(V.lists[them], G.unseen)}`;
+  mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4><div class="rows">${rows(V.lists[you], G.deckLeft)}</div>`;
+  theirs.innerHTML = `<h4>Their cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them], G.unseen)}</div>`;
   wirePops(mine); wirePops(theirs);
+  showPanel();
 
-  // Hand.
-  const hand = document.getElementById('hand');
-  hand.innerHTML = G.hand.map(h => {
+  // Hand: full-bleed cards along the bottom ledge, overlapping when the hand is long.
+  const hand = document.getElementById('hand'), n = G.hand.length, gap = n > 1 ? Math.min(14, (1000 - n * 150) / (n - 1)) : 0;
+  hand.innerHTML = G.hand.map((h, i) => {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && d.places[h.id], pick = d.handPick.has(h.iid);
     const base = sv(c), cls = [c.rarity, can ? 'can' : '', pick ? 'pick can' : '', h.id === ui.sel ? 'sel' : '', d.mine && !can && !pick ? 'dim' : ''].join(' ');
     const delta = base >= 0 && h.str !== base ? (h.str > base ? ' up' : ' down') : '';
-    return `<div class="hc ${cls}" data-iid="${h.iid}" data-id="${h.id}"><div class="art gradart" ${artStyle(h.id)}></div><div class="s${delta}">${h.str}</div><div class="nm">${c.name}</div><div class="tx">${c.text}</div></div>`;
+    return `<div class="hc ${cls}" data-iid="${h.iid}" data-id="${h.id}" style="margin-left:${i ? gap : 0}px"><div class="face"><div class="art gradart" ${artStyle(h.id)}></div><div class="nm">${c.name}</div><div class="tx">${c.text}</div></div><div class="gem">${kitImg('gem_a')}<span class="num${delta}">${h.str}</span></div></div>`;
   }).join('');
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
     e.stopPropagation();
@@ -336,11 +347,12 @@ function drawGame() {
     ui.sel = ui.sel === id ? null : id; ui.hover = null; drawGame();
   });
 
-  // Deck pile.
+  // Deck and the Draw 2 button, lit when drawing is legal.
   const canDraw = d.mine && !d.pend && G.legal.draw;
   const deck = document.getElementById('deck');
-  deck.innerHTML = `<div class="pilebtn ${canDraw ? 'can' : d.mine ? 'off' : ''}" id="drawbtn"><b>Draw 2</b><span>${G.deckCount[you]} in deck</span><span>hand ${G.hand.length} / ${G.handLimit}</span></div>`;
-  document.getElementById('drawbtn').onclick = () => { if (canDraw) act({ kind: 'draw' }); };
+  deck.innerHTML = `<div class="pile">${kitImg('deck')}<span class="num">${G.deckCount[you]}</span></div>` +
+    `<div class="drawbtn ${canDraw ? 'can' : d.mine ? 'off' : ''}" id="drawbtn">${kitImg(canDraw ? 'button_lit' : 'button')}<span class="num">Draw 2<small>hand ${G.hand.length}/${G.handLimit}</small></span></div>`;
+  document.getElementById('drawbtn').onclick = e => { e.stopPropagation(); if (canDraw) act({ kind: 'draw' }); };
 
   // Prompt for a pending choice: the card that asks and its rule, nothing more.
   const bar = document.getElementById('choicebar'), waiting = document.getElementById('waiting');
@@ -374,6 +386,16 @@ function drawGame() {
   drawEnd();
 }
 
+function showPanel() {
+  for (const [k, id] of [['mine', 'mine'], ['theirs', 'theirs'], ['hist', 'histp']]) document.getElementById(id).classList.toggle('on', ui.panel === k);
+  if (ui.panel === 'hist') { const h = document.getElementById('hist'); h.scrollTop = h.scrollHeight; }
+}
+// The stage keeps its 1672x941 design size and scales, letterboxed, to the window.
+function fitStage() {
+  const st = document.getElementById('stage'); if (!st) return;
+  st.style.transform = `scale(${Math.min(innerWidth / 1672, innerHeight / 941)}) translate(-50%, -50%)`;
+}
+
 function moveLine(m) {
   const who = m.seat === V.you ? 'You' : 'They', name = id => CARDS[id] ? CARDS[id].name : id;
   const fx = m.fx.map(f => {
@@ -401,7 +423,7 @@ function viewerMap() {
 let lastDecision = null;
 function drawBoard(d) {
   d = d || lastDecision; lastDecision = d;
-  const stage = document.getElementById('stage'), g = viewerGame();
+  const g = viewerGame();
   let preview = null;
   if (ui.sel && ui.hover && d.rings.includes(ui.hover)) {
     const strs = V.game.hand.filter(h => h.id === ui.sel).map(h => h.str);
@@ -409,7 +431,7 @@ function drawBoard(d) {
   }
   const H = V.game.history, recent = [];
   for (let i = H.length - 1; i >= 0 && H[i].seat !== V.you; i--) if (H[i].target && H[i].target[0] === 'cr') recent.push(dcr(H[i].target[1]));
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent }, { fitW: stage.clientWidth, fitH: stage.clientHeight });
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent });
 }
 
 function wireBoard() {
