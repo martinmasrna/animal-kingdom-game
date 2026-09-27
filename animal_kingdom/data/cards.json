@@ -1721,6 +1721,26 @@
       "text": "Stealth."
     },
     {
+      "id": "mock_courier",
+      "name": "Courier",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 3,
+      "keywords": ["Flight"],
+      "text": "Flight. Battlecry: draw 1 card."
+    },
+    {
+      "id": "mock_skully",
+      "name": "Skully",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "keywords": [],
+      "text": "Battlecry: draw 2 cards."
+    },
+    {
       "id": "mock_saboteur",
       "name": "Saboteur",
       "deck": "reserve",

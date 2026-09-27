@@ -1859,6 +1859,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "mock_saboteur": {"on_place": _mock_saboteur_place},
     "mock_draw2": {"on_place": _mock_draw2_place},
     "mock_removal": {"on_place": _mock_removal_place},
+    "mock_courier": {"on_place": _mock_scout_place},
+    "mock_skully": {"on_place": _mock_draw2_place},
     # Calibration bodies (reserve): one bare effect on a ladder of strengths, for pricing anchors.
     "calib_draw1_1": {"on_place": _mock_scout_place},
     "calib_draw1_2": {"on_place": _mock_scout_place},
