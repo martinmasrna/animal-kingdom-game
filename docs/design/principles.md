@@ -25,6 +25,7 @@ There is no mana: every card costs one card and one placement action. Low streng
 
 - **References:** Lion (STR 7) for ground units, Eagle (STR 5) for flyers. Price every effect as strength bought off that body. A utility card should sit near vanilla strength for its role; don't lowball the body to "pay" for an ability.
 - **Card ledger:** a Draw action gives 2 cards. "Draw 1" replaces the played card but doesn't refund the action.
+- **Draw anchors (commons):** "Battlecry: draw 1" is a 5 on the ground and a 3 with Flight. A real condition (one that can fail at home) buys +1; a condition that is nearly always met at home buys nothing, the tag is the card's edge (Lynx). Filtering to a tag ("draw a Snake") is worth nothing extra. Selection (Owl: look at 3, keep 1) is anchor −1, since it can't be weaker than the plain draw.
 - **Action ledger:** free placements, tokens and deck-to-board effects are action economy, the game's only resource. The cards that break goodstuff open are exactly the ones that manufacture actions.
 - **Delay ledger:** a delayed payoff gives up board presence now and hands the opponent a window to answer it.
 - **Floor:** price a conditional card for its common failed state, not the screenshot where everything lines up.

@@ -34,7 +34,7 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 | **Owl** | 3 | Bird | 2 | Flight. Battlecry: look at the top 3 cards; draw 1 and shuffle the rest. |
 | **Anaconda** | 3 | Snake | 7 | Apex Predator. |
 | **Viper** | 3 | Snake | 3 | Battlecry: an adjacent enemy unit gets -3 strength. |
-| **Secretary Bird** | 3 | Bird | 4 | Flight. Battlecry: draw a Snake. |
+| **Secretary Bird** | 3 | Bird | 3 | Flight. Battlecry: draw a Snake. |
 | **Raven** | 3 | Bird | 2 | Flight. Battlecry: draw 3 cards, then shuffle 2 cards back. |
 
 <!-- cards:end -->

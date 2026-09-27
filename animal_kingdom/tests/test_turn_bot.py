@@ -130,10 +130,10 @@ def test_resolves_mandatory_removal_target_choice():
     # Jaguar's Battlecry must remove one adjacent enemy; the search resolves the pending pick
     # rather than leaving the turn unfinished. It should take the stronger legal target.
     s = make_state(current="A", hands={"A": ["jaguar"]},
-                   decks={"A": [], "B": ["mouse"] * 4}, config=TWO_ACTION)
+                   decks={"A": [], "B": ["pup"] * 4}, config=TWO_ACTION)
     put(s, "1,1", "lion", "A")
-    put(s, "2,1", "mouse", "B")     # str 1, adjacent to 1,1
-    put(s, "1,2", "caracal", "B")   # str 4, adjacent to 1,1 - the better removal
+    put(s, "2,1", "pup", "B")     # str 1 (Pup), adjacent to 1,1
+    put(s, "1,2", "gray_wolf", "B")   # str 4, adjacent to 1,1 - the better removal
     rules.apply_action(s, PlaceAction("jaguar", ("cr", "1,1")))  # covers lion, adjacent to both
     legal = rules.legal_actions(s)
     assert all(isinstance(a, ChoiceAction) for a in legal)
@@ -185,9 +185,9 @@ def test_blocks_draw_then_capture_threat_during_an_effect_choice():
     # Two-action shape: an empty opposing hand can still draw and capture. Resolve Jaguar's
     # pending target by breaking the HQ lane, not by grabbing an irrelevant unit.
     s = make_state(current="A", hands={"A": ["jaguar"]},
-                   decks={"A": ["mouse"], "B": ["mouse"]}, config=TWO_ACTION)
+                   decks={"A": ["pup"], "B": ["pup"]}, config=TWO_ACTION)
     for cr in ("4,2", "3,2", "2,2", "1,2", "2,1"):
-        put(s, cr, "mouse", "B")
+        put(s, cr, "pup", "B")
     rules.apply_action(s, PlaceAction("jaguar", ("cr", "1,1")))
     legal = rules.legal_actions(s)
     assert set(legal) == {ChoiceAction("1,2"), ChoiceAction("2,1")}

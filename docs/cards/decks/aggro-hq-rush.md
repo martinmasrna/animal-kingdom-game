@@ -36,10 +36,10 @@ The deck is being redesigned: the diagnosis and Martin's card-by-card analysis a
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Lemming** | 3 | Rodent | 1 | Battlecry: place all Lemmings from your hand and deck on random adjacent empty crossroads. |
-| **Cheetah** | 3 | Cat | 5 | Battlecry: if you play this next to the opponent's base, draw 1 card. |
+| **Cheetah** | 3 | Cat | 6 | Battlecry: if you play this next to the opponent's base, draw 1 card. |
 | **Rat** | 3 | Rodent | 2 | Battlecry: remove a card in your hand to destroy an adjacent enemy unit. |
 | **Falcon** | 3 | Bird | 4 | Flight. Battlecry: if you play this next to the opponent's base, draw 1 card. |
-| **Bat** | 3 | — | 4 | Flight. Battlecry: draw 1 card. |
-| **Mouse** | 3 | Rodent | 1 | Battlecry: draw a Rodent. |
+| **Bat** | 3 | — | 3 | Flight. Battlecry: draw 1 card. |
+| **Mouse** | 3 | Rodent | 5 | Battlecry: draw a Rodent. |
 
 <!-- cards:end -->

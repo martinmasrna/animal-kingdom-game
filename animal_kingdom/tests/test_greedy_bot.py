@@ -71,11 +71,11 @@ def test_blocks_draw_then_capture_threat_during_an_effect_choice():
     s = make_state(
         current="A",
         hands={"A": ["jaguar"]},
-        decks={"A": ["mouse"], "B": ["mouse"]},
+        decks={"A": ["pup"], "B": ["pup"]},
         config=config,
     )
     for cr in ("4,2", "3,2", "2,2", "1,2", "2,1"):
-        put(s, cr, "mouse", "B")
+        put(s, cr, "pup", "B")
 
     rules.apply_action(s, PlaceAction("jaguar", ("cr", "1,1")))
     legal = rules.legal_actions(s)

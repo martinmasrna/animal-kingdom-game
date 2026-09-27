@@ -97,7 +97,7 @@
       "deck": "cats_midrange",
       "rarity": "common",
       "tags": ["Cat"],
-      "base_strength": 3,
+      "base_strength": 5,
       "keywords": [],
       "text": "Battlecry: if you control another Cat, draw 1."
     },
@@ -107,7 +107,7 @@
       "deck": "cats_midrange",
       "rarity": "common",
       "tags": ["Cat"],
-      "base_strength": 4,
+      "base_strength": 6,
       "keywords": [],
       "text": "Battlecry: if placed on top of an enemy unit, draw 1 card."
     },
@@ -298,7 +298,7 @@
       "deck": "egg_control",
       "rarity": "common",
       "tags": ["Bird"],
-      "base_strength": 4,
+      "base_strength": 3,
       "keywords": ["Flight"],
       "text": "Flight. Battlecry: draw a Snake."
     },
@@ -866,7 +866,7 @@
       "deck": "aggro_hq_rush",
       "rarity": "common",
       "tags": ["Cat"],
-      "base_strength": 5,
+      "base_strength": 6,
       "keywords": [],
       "text": "Battlecry: if you play this next to the opponent's base, draw 1 card."
     },
@@ -896,7 +896,7 @@
       "deck": "aggro_hq_rush",
       "rarity": "common",
       "tags": [],
-      "base_strength": 4,
+      "base_strength": 3,
       "keywords": ["Flight"],
       "text": "Flight. Battlecry: draw 1 card."
     },
@@ -906,7 +906,7 @@
       "deck": "aggro_hq_rush",
       "rarity": "common",
       "tags": ["Rodent"],
-      "base_strength": 1,
+      "base_strength": 5,
       "keywords": [],
       "text": "Battlecry: draw a Rodent."
     },

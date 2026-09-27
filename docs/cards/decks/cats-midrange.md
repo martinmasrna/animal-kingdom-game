@@ -31,8 +31,8 @@ Lion is the pool's only true vanilla body and the power reference for every grou
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Lion** | 3 | Cat | 7 | — |
-| **Lynx** | 3 | Cat | 3 | Battlecry: if you control another Cat, draw 1. |
-| **Caracal** | 3 | Cat | 4 | Battlecry: if placed on top of an enemy unit, draw 1 card. |
+| **Lynx** | 3 | Cat | 5 | Battlecry: if you control another Cat, draw 1. |
+| **Caracal** | 3 | Cat | 6 | Battlecry: if placed on top of an enemy unit, draw 1 card. |
 | **Tiger** | 3 | Cat | 7 | Apex Predator. |
 | **Cougar** | 3 | Cat | 6 | You may place this adjacent to any Cat you control, ignoring connection. |
 | **House Cat** | 3 | Cat | 1 | Battlecry: if you control another Cat, play one more Cat from your hand. |
