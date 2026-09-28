@@ -163,7 +163,7 @@ function joinScreen(id) {
 function disconnect() { if (live) setLive(false); if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
 // The live look, Martin's picks (2026-09-28): painted map D, sandstone payout stones with engraved numbers,
 // war paint in team colour on each den (proposed, pending his look), bigger hand cards that grow on hover. The lab overrides these per frame.
-const LIVE_LOOK = { v: 'sD', p: '1', d: 'w', h: '1', f: 'p' };
+const LIVE_LOOK = { v: 'sD', p: '1', d: 'w', h: '1', f: 'o' };
 
 function matchScreen(id) {
   Object.assign(document.documentElement.dataset, LIVE_LOOK);
@@ -207,7 +207,7 @@ async function labScreen(name) {
 // A switcher over the lab frame: each row flips one design choice live.
 const LAB = [['p', 'Payout stones', [['', 'dark (now)'], ['1', 'sandstone, carved numbers'], ['2', 'sandstone, white numbers']]],
   ['d', 'Your den vs theirs', [['', 'no hint'], ['w', 'war paint']]],
-  ['f', 'Food (sketches)', [['', 'slab (now)'], ['a', 'A stone track'], ['b', 'B painted gauge'], ['c', 'C stockpile'], ['m', 'M territory marks + paw tally'], ['k', 'K food cache at the den'], ['r', 'R fruit row to the den'], ['t', 'T fruit trough (sketch)'], ['p', 'P painted trough']]],
+  ['f', 'Food (sketches)', [['', 'slab (now)'], ['a', 'A stone track'], ['b', 'B painted gauge'], ['c', 'C stockpile'], ['m', 'M territory marks + paw tally'], ['k', 'K food cache at the den'], ['r', 'R fruit row to the den'], ['t', 'T fruit trough (sketch)'], ['p', 'P painted trough'], ['o', 'O one fruit = one food']]],
   ['h', 'Hand (hover a card)', [['', 'small cards (now)'], ['1', 'bigger, hovered card grows'], ['2', 'bigger, Gwent side panel']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {

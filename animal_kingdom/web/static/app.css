@@ -527,3 +527,12 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .ptrough .fill, .ptrough .inc { position: absolute; left: 0; top: 0; bottom: 0; overflow: hidden; background-size: auto 100%; background-repeat: repeat-x; }
 .ptrough .fill { background-image: url(/static/kit/fruit_ripe.webp); }
 .ptrough .inc { background-image: url(/static/kit/fruit_green.webp); }
+
+/* Sketch O: 100 whole fruit, 34 columns of 3. */
+[data-v="sD"][data-f="o"] #stage { background-image: url(/static/kit/sav_D4.webp); }
+.otrough { width: 290px; height: 50px; }
+.otrough > img { position: relative; z-index: 0; }
+.otrough .hollow { position: absolute; left: 3.6%; width: 87%; top: 20%; height: 50%; z-index: 1; }
+.otrough i { position: absolute; width: 9px; height: 9px; border-radius: 50%; box-shadow: .5px 1px 1px rgba(0,0,0,.55); }
+.otrough i.r { background: radial-gradient(circle at 35% 30%, #fff1a8, #f2b830 45%, #b8700c 90%); }
+.otrough i.g { background: radial-gradient(circle at 35% 30%, #e0f4b0, #8cbf3e 50%, #4f7a1c 90%); }
