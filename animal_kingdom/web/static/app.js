@@ -1,6 +1,6 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
-import { renderBoard, portrait, kitImg } from './board.js';
+import { renderBoard, portrait, kitImg, teamGem } from './board.js';
 import { hasArt, artUrl } from './art.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
@@ -321,7 +321,7 @@ function drawGame() {
   document.getElementById('pb').innerHTML = kitImg('plaque') + `<div class="tx"><b class="num">${seatLabel(them)}</b><span>${V.seats[them].deckName} · ${sum(G.unseen)} unseen ▾ ${backs}</span></div>`;
   const turn = document.getElementById('turn'), cur = G.current;
   if (V.phase === 'playing') {
-    const gems = Array.from({ length: G.actionsTotal }, (_, i) => `<span class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}">${kitImg(rel(cur) === 'A' ? 'gem_a' : 'gem_b')}</span>`).join('');
+    const gems = Array.from({ length: G.actionsTotal }, (_, i) => `<span class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}">${kitImg(teamGem(rel(cur)))}</span>`).join('');
     turn.innerHTML = kitImg('banner') + `<div class="tx"><b class="num">${cur === you ? 'Your turn' : 'Their turn'}</b><span class="acts">${gems}</span></div>`;
     turn.className = 'turn ' + rel(cur);
   } else turn.innerHTML = '';
@@ -337,7 +337,7 @@ function drawGame() {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && d.places[h.id], pick = d.handPick.has(h.iid);
     const base = sv(c), cls = [c.rarity, can ? 'can' : '', pick ? 'pick can' : '', h.id === ui.sel ? 'sel' : '', d.mine && !can && !pick ? 'dim' : ''].join(' ');
     const delta = base >= 0 && h.str !== base ? (h.str > base ? ' up' : ' down') : '';
-    return `<div class="hc ${cls}" data-iid="${h.iid}" data-id="${h.id}" style="margin-left:${i ? gap : 0}px"><div class="face"><div class="art gradart" ${artStyle(h.id)}></div><div class="nm">${c.name}</div><div class="tx">${c.text}</div></div><div class="gem">${kitImg('gem_a')}<span class="num${delta}">${h.str}</span></div></div>`;
+    return `<div class="hc ${cls}" data-iid="${h.iid}" data-id="${h.id}" style="margin-left:${i ? gap : 0}px"><div class="face"><div class="art gradart" ${artStyle(h.id)}></div><div class="nm">${c.name}</div><div class="tx">${c.text}</div></div><div class="gem">${kitImg(teamGem('A'))}<span class="num${delta}">${h.str}</span></div></div>`;
   }).join('');
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
     e.stopPropagation();
@@ -431,7 +431,7 @@ function drawBoard(d) {
   }
   const H = V.game.history, recent = [];
   for (let i = H.length - 1; i >= 0 && H[i].seat !== V.you; i--) if (H[i].target && H[i].target[0] === 'cr') recent.push(dcr(H[i].target[1]));
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent, enamel: store('ak:rim') === 'enamel' });
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent, enamel: store('ak:rim') !== 'metal' });
 }
 
 function wireBoard() {
@@ -598,7 +598,7 @@ addEventListener('keydown', e => {
 // R swaps the unit rims between plain metal and team-colour enamel (a look being judged).
 addEventListener('keydown', e => {
   if ((e.key === 'r' || e.key === 'R') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
-    store('ak:rim', store('ak:rim') === 'enamel' ? 'metal' : 'enamel'); drawBoard(); toast(`Rims: ${store('ak:rim')}`, true);
+    store('ak:rim', store('ak:rim') === 'metal' ? 'enamel' : 'metal'); drawBoard(); toast(`Rims: ${store('ak:rim')}`, true);
   }
 });
 

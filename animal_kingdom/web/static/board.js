@@ -1,6 +1,6 @@
 // Board renderer: the painted kit (static/kit/, from the design sandbox's board/r7) assembled over the plateau.
 // Draws in viewer space and stage pixels (the 1672x941 stage in app.css): the viewer is always 'A'
-// (bronze, den on the left), the opponent 'B' (iron, den on the right).
+// (blue, den on the left), the opponent 'B' (red, den on the right).
 // `g` is a viewer-space game: { board: {cr: [{id, owner, str, timer}]}, food, income, winFood },
 // `ui` carries what is interactive: { rings: [cr], hqRing: bool, preview: {cr, id, str} },
 // plus `recent`: the crossroads the opponent placed on since your last move.
@@ -9,7 +9,12 @@ import { CROP, hasArt, artUrl } from './art.js';
 const key = (c, r) => `${c},${r}`;
 export const kit = n => `/static/kit/${n}.webp`;
 export const kitImg = n => `<img src="${kit(n)}" alt="" draggable="false">`;
-const OWN = { A: { rim: 'rim_a', gem: 'gem_a', token: 'token_a', den: 'den_a' }, B: { rim: 'rim_b', gem: 'gem_b', token: 'token_b', den: 'den_b' } };
+// Team colours: blue for the viewer, red for the opponent (the genre's own-versus-enemy convention).
+const OWN = {
+  A: { rim: 'rim_b', enamel: 'rim_b_enamel', gem: 'gem_b', token: 'token_b', ribbon: 'ribbon_b', den: 'den_a' },
+  B: { rim: 'rim_a', enamel: 'rim_red_enamel', gem: 'gem_red', token: 'token_red', ribbon: 'ribbon_red', den: 'den_b' },
+};
+export const teamGem = p => OWN[p].gem;
 // Crossroads span the plateau; each den stands off its edge, with its food silo and food plaque below it.
 const HQX = { A: 150, B: 1522 }, DEN_Y = 290, PORTRAIT = 136;
 // Keywords that change what can be done to a unit already on the board (Flight and Apex Predator only matter while placing).
@@ -93,9 +98,9 @@ export function renderBoard(el, M, g, cards, ui) {
     const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';
     const peek = under.slice(0, 3).map((b, i) => `<div class="buried" style="transform:translate(${(i + 1) * 8}px,${(i + 1) * 9}px);z-index:${-i - 1}">${kitImg(OWN[b.owner].rim)}</div>`).join('');
     const kws = (card.kw || []).filter(k => BOARD_KW[k]).map(k => `<img src="${kit(BOARD_KW[k])}" alt="" title="${k}" draggable="false">`).join('');
-    const rim = ui.enamel ? OWN[u.owner].rim + '_enamel' : OWN[u.owner].rim;
+    const rim = ui.enamel ? OWN[u.owner].enamel : OWN[u.owner].rim;
     return `<div class="unit lift ${u.owner}${ghost ? ' ghost' : ''}">${peek}${portrait(u.id, PORTRAIT, card.name)}<img class="rim" src="${kit(rim)}" alt="" draggable="false">` +
-      `<div class="ribbon">${kitImg(u.owner === 'A' ? 'ribbon_a' : 'ribbon_b')}<span class="num">${card.name}</span></div>` + (kws ? `<div class="kws">${kws}</div>` : '') +
+      `<div class="ribbon">${kitImg(OWN[u.owner].ribbon)}<span class="num">${card.name}</span></div>` + (kws ? `<div class="kws">${kws}</div>` : '') +
       `<div class="gem">${kitImg(OWN[u.owner].gem)}<span class="num${delta}">${u.str}</span></div>` +
       (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') +
       (under.length && !ghost ? `<div class="under num">+${under.length}</div>` : '') + '</div>';

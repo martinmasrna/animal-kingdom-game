@@ -11,12 +11,12 @@
   --muted: #8a9097;
   --faint: #5b6168;
 
-  --you: #e0a040;
-  --you-rgb: 224,160,64;
-  --them-rgb: 127,157,194;
+  --you: #3c96f0;
+  --you-rgb: 60,150,240;
+  --them-rgb: 224,50,40;
   --token-text: #111;
   --you-deep: #2b2012;
-  --them: #7f9dc2;
+  --them: #e03228;
   --them-deep: #10242c;
 
   --font-display: 'Barlow Condensed', system-ui, sans-serif;
