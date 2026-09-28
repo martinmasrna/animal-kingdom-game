@@ -826,7 +826,7 @@
       "tags": ["Rodent"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Battlecry: remove everything from an adjacent crossroad."
+      "text": "Battlecry: remove an adjacent enemy and every unit buried under it."
     },
     {
       "id": "sirocco",

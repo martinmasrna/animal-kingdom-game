@@ -66,9 +66,7 @@ def _pestis_double_egg_state(config: Config) -> GameState:
     put(s, "1,2", "mouse", "A")             # connection anchor, adjacent to "2,2"
     put(s, "2,1", "bird_egg", "B")
     put(s, "2,1", "snake_egg", "B")         # same crossroad, same owner: stacks freely
-    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))
-    assert s.pending is not None            # two adjacent occupied stacks: "1,2" (mine), "2,1"
-    rules.apply_action(s, ChoiceAction("2,1"))
+    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))  # the only adjacent enemy: "2,1"
     return s
 
 
@@ -96,9 +94,7 @@ def test_eon_capped_fires_once_per_turn_across_multiple_events():
     put(s, "1,2", "mouse", "A")             # connection anchor
     put(s, "2,1", "mouse", "B")
     put(s, "2,1", "rat", "B")               # same crossroad, same owner: stacks freely
-    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))
-    assert s.pending is not None
-    rules.apply_action(s, ChoiceAction("2,1"))
+    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))  # the only adjacent enemy: "2,1"
     assert s.food["A"] == cfg.eon_food      # two remove events fired; only the first paid out
 
 

@@ -1525,7 +1525,9 @@ def _friendly_unit_crossroads(state, player):
 # --- Mass effects (Aggro) ---
 
 def _pestis_place(state, unit, cr):
-    options = sorted(nb for nb in state.game_map.neighbors(cr) if state.board.get(nb))
+    # "Remove an adjacent enemy and every unit buried under it": the target is a chosen enemy
+    # (so Stealth and Immovable tops are off limits, as for any removal), the whole stack goes.
+    options = _adjacent_enemy_unit_crossroads(state, unit, cr)
     if options:
         state.effect_stack.append({"op": "pestis_wipe", "chooser": unit.owner, "options": options})
 
@@ -1538,9 +1540,8 @@ def _op_pestis_wipe(state, step):
         else:
             return PendingRequest("choice", step["chooser"], options=opts)
     target = step["choice"]
-    # Remove the entire stack, both players, top-down. Immovable occupants are skipped in
-    # place, NOT a shield: everything else in the stack is still wiped around them
-    # (keyword-review decision B amendment). Stealth doesn't hide from a mass wipe.
+    # Remove the entire stack under the enemy, both players' units, top-down. A buried
+    # Immovable unit is skipped in place, not a shield: everything else is still wiped around it.
     stack = state.board.get(target)
     for unit in reversed(list(stack or [])):
         _remove_specific(state, target, unit, by_player=step["chooser"], by_card="pestis")

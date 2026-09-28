@@ -12,14 +12,14 @@ Everything on a crossroad is a unit; Eggs are units too.
 Ignores the connection-to-HQ requirement when placed. (All other placement rules still apply.)
 
 ### Immovable
-*Physics.* Cannot be removed, moved (bounced), or eaten by **any** ability — the enemy's **or its own controller's** (Carmilla cannot sacrifice a Giant Tortoise; that cost is deliberate). It can still be **covered** under the normal placement rules — covering is placement, not an ability. A mass effect (Pestis) skips an Immovable occupant **in place** and still removes everything else in the stack; Immovable is not a shield for the cards beneath it. Scope is **board-only**: an Immovable card in hand can be paid or removed normally.
+*Physics.* Cannot be removed, moved (bounced), or eaten by **any** ability — the enemy's **or its own controller's** (Carmilla cannot sacrifice a Giant Tortoise; that cost is deliberate). It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an Immovable enemy; when it removes a stack, a buried Immovable unit is skipped **in place** and everything else is still removed. Immovable is not a shield for the cards beneath it. Scope is **board-only**: an Immovable card in hand can be paid or removed normally.
 
 Carried by: Giant Tortoise, Scrooge, Methuselah, Bulwark, Elephant.
 
 ⚠ *Open (`docs/STATUS.md`): the keyword still feels slightly off, in name and footprint.*
 
 ### Stealth
-Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk), and an Apex Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it instead). **Mass, random, and automatic effects hit it normally**: Pestis/Rhinoceros/Bulwark AoE, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron/Pufferfish triggers. Its own controller may still choose it freely. Scope is board-only.
+Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis), and an Apex Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it instead). **Mass, random, and automatic effects hit it normally**: Rhinoceros/Bulwark AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron/Pufferfish triggers. Its own controller may still choose it freely. Scope is board-only.
 
 Carried by: Black Panther (keyword). **Armadillo grants it as an aura** to every friendly unit on an adjacent crossroad while Armadillo tops its own.
 

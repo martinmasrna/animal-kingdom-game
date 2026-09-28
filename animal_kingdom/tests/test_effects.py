@@ -813,15 +813,21 @@ def test_hornet_has_no_effect_without_a_spare_copy():
 
 # ================================================================ Stage 2.4: mass effects
 
-def test_pestis_wipes_an_entire_adjacent_stack():
+def test_pestis_wipes_an_adjacent_enemy_and_everything_under_it():
     s = make_state(hands={"A": ["pestis"]})
     put(s, "1,2", "caracal", "A")
     put(s, "3,2", "lion", "B")                          # bottom
     put(s, "3,2", "unnamed_canine", "B")                        # top (same owner stacks freely)
-    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))
-    rules.apply_action(s, ChoiceAction("3,2"))
+    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))  # the only enemy target: 3,2
     assert s.board.get("3,2") is None
     assert s.remove_pile.count("lion") == 1 and s.remove_pile.count("unnamed_canine") == 1
+
+
+def test_pestis_never_hits_its_own_side():
+    s = make_state(hands={"A": ["pestis"]})
+    put(s, "1,2", "caracal", "A")                       # the only adjacent unit is friendly
+    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))
+    assert s.pending is None and s.top_unit("1,2").card_id == "caracal"
 
 
 def test_sirocco_bounces_all_adjacent_enemies_to_hand():

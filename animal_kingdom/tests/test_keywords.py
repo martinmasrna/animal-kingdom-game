@@ -61,13 +61,12 @@ def test_stealth_does_not_hide_from_sirocco_mass_bounce():
     assert any(u.card_id == "black_panther" for u in s.hands["B"])
 
 
-def test_stealth_does_not_hide_from_pestis_wipe():
+def test_stealth_top_cannot_be_chosen_by_pestis():
     s = make_state(hands={"A": ["pestis"]})
     put(s, "2,2", "mouse", "B")
     put(s, "2,2", "black_panther", "B")                   # panther on top of the stack
     rules.apply_action(s, PlaceAction("pestis", ("cr", "1,2")))
-    assert "2,2" not in s.board                           # whole stack wiped, panther included
-    assert "black_panther" in s.remove_pile
+    assert s.top_unit("2,2").card_id == "black_panther"   # Pestis chooses its enemy; Stealth hides it
 
 
 # ------------------------------------------------------------- Immovable: physics for all
