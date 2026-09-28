@@ -664,3 +664,5 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .unit.stone .disc.A { background: radial-gradient(circle at 40% 35%, #4d8ee0, #1d4f9a); } .unit.stone .disc.B { background: radial-gradient(circle at 40% 35%, #d8544a, #8a1a12); }
 .unit.stone .srim { position: absolute; max-width: none; pointer-events: none; z-index: 2; filter: drop-shadow(0 2px 3px rgba(20,10,0,.45)); }
 .unit.stone .portrait { box-shadow: none; }
+.unit.stone .bnum { position: absolute; z-index: 3; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; text-box: trim-both cap alphabetic;
+  font-family: 'Source Serif 4', serif; font-weight: 800; font-variant-numeric: lining-nums tabular-nums; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.75); line-height: 1; }

@@ -7,6 +7,12 @@
 import { CROP, hasArt, artUrl } from './art.js';
 
 const key = (c, r) => `${c},${r}`;
+// Rims with the strength seat cast in (board/r10 sheet_boss): ring centre/radii and the seat's centre, sprite px.
+const BRIM = {
+  bot_a: { W: 404, cx: 201.5, cy: 197, ro: 202.1, ri: 160, nx: 200.5, ny: 346, ns: 46 }, bot_b: { W: 404, cx: 201.5, cy: 197, ro: 202.3, ri: 160, nx: 202, ny: 346, ns: 46 },
+  top_a: { W: 406, cx: 202.5, cy: 197, ro: 204.8, ri: 160.5, nx: 199, ny: 44, ns: 46 }, top_b: { W: 406, cx: 202, cy: 197, ro: 205.1, ri: 161, nx: 200, ny: 44, ns: 46 },
+  band_a: { W: 403, cx: 201, cy: 197, ro: 202.1, ri: 159, nx: 201, ny: 344, ns: 40 }, band_b: { W: 403, cx: 200.5, cy: 197, ro: 202.2, ri: 159.5, nx: 200.5, ny: 344, ns: 40 },
+};
 // Card-style unit rims in team colour, per rarity (board/r10 sheet_rims): sprite size, circle centre, inner and outer radius.
 const CRIM = {"common_a": {"W": 430, "H": 416, "cx": 215.5, "cy": 207.5, "ri": 174.5, "ro": 212.1}, "rare_a": {"W": 452, "H": 434, "cx": 226.5, "cy": 215.5, "ri": 173.5, "ro": 212.1}, "legendary_a": {"W": 441, "H": 449, "cx": 220.5, "cy": 233.5, "ri": 177.5, "ro": 215.0}, "common_b": {"W": 429, "H": 415, "cx": 215.0, "cy": 207.0, "ri": 174.0, "ro": 211.6}, "rare_b": {"W": 450, "H": 434, "cx": 225.0, "cy": 216.0, "ri": 172.0, "ro": 212.0}, "legendary_b": {"W": 440, "H": 448, "cx": 219.5, "cy": 232.5, "ri": 177.5, "ro": 214.6}};
 // Map D's clearings as painted: centre x, y and radius (measured in board/r8/kit/clearings.json).
@@ -330,6 +336,15 @@ function renderField(el, M, g, cards, ui) {
     const kws = (card.kw || []).filter(k => BOARD_KW[k]).map(k => `<img src="${kit(BOARD_KW[k])}" alt="" title="${k}" draggable="false">`).join('');
     // Buried units peek out behind the portrait as discs in their owners' colours: how many, and whose.
     const peek = ghost ? '' : under.slice(0, 4).map((b, i) => `<i class="disc ${b.owner}" style="inset:${D / 2 - outer}px;transform:translate(${(i + 1) * 6}px,${(i + 1) * 7}px);z-index:${-i - 1}"></i>`).join('');
+    const SP = document.documentElement.dataset.sp, BK = { b: 'bot', t: 'top', n: 'band' }[SP];
+    if (BK) {   // the seat is part of the rim sprite; the number is set into it
+      const B = BRIM[`${BK}_${side}`], bs = outer / B.ro, Db = 2 * B.ri * bs + 2;
+      return `<div class="unit stone ${u.owner}${ghost ? ' ghost' : ''}" style="--pp:${Db}px">${peek}${portrait(u.id, Db, card.name)}` +
+        `<img class="srim" src="${kit(`brim_${BK}_${side}`)}" alt="" draggable="false" style="width:${B.W * bs}px;left:${Db / 2 - B.cx * bs}px;top:${Db / 2 - B.cy * bs}px">` +
+        `<div class="bnum ${delta.trim()}" style="left:${Db / 2 + (B.nx - B.cx) * bs - 20}px;top:${Db / 2 + (B.ny - B.cy) * bs - 20}px;font-size:${B.ns * bs * 1.25}px">${u.str}</div>` +
+        (kws ? `<div class="kws">${kws}</div>` : '') +
+        (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') + '</div>';
+    }
     return `<div class="unit stone ${u.owner}${ghost ? ' ghost' : ''}" style="--pp:${D}px">${peek}${portrait(u.id, D, card.name)}` +
       `<img class="srim" src="${kit(`crim_common_${side}`)}" alt="" draggable="false" style="width:${K.W * rs}px;left:${D / 2 - K.cx * rs}px;top:${D / 2 - K.cy * rs}px">` +
       `<div class="splate" style="${platePos(D, mid, clasp)}">${kitImg('plate_' + side)}<span class="${delta.trim()}">${u.str}</span></div>` +
