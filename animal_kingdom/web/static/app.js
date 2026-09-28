@@ -167,7 +167,7 @@ function joinScreen(id) {
 function disconnect() { if (live) setLive(false); if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
 // The live look, Martin's picks (2026-09-28): painted map D, sandstone payout stones with engraved numbers,
 // war paint in team colour on each den (proposed, pending his look), bigger hand cards that grow on hover. The lab overrides these per frame.
-const LIVE_LOOK = { v: 'sD', p: '1', d: 'w', h: '1', f: 'o', t: '1', k: '1', m: 'S', sp: 'B' };
+const LIVE_LOOK = { v: 'sD', p: '1', d: 'w', h: '1', f: 'o', t: '1', k: '1', m: 'S', sp: 'B', c: '1' };
 
 function matchScreen(id) {
   Object.assign(document.documentElement.dataset, LIVE_LOOK);
@@ -207,13 +207,13 @@ function onView(prev) {
 // (data-v on <html>, read by app.css and board.js). No server match; nothing can be played.
 async function labScreen(name) {
   const q = new URLSearchParams(location.search), de = document.documentElement.dataset;
-  for (const k of ['v', 'p', 'd', 'h', 'f', 't', 'k', 'm', 'sp', 'pv', 'g', 'z']) de[k] = q.has(k) ? q.get(k) : (LIVE_LOOK[k] || '');
+  for (const k of ['v', 'p', 'd', 'h', 'f', 't', 'k', 'm', 'sp', 'pv', 'g', 'z', 'c']) de[k] = q.has(k) ? q.get(k) : (LIVE_LOOK[k] || '');
   V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
   screen = null; gameScreen(); labBar();
 }
 // A switcher over the lab frame: each row flips one design choice live.
 // Only the open questions; decided ones live in LIVE_LOOK.
-const LAB = [['z', 'Space', [['', 'now'], ['1', 'smaller pieces'], ['2', 'smaller pieces + low hand']]], ['g', 'Ground', [['', 'now'], ['1', 'muted'], ['2', 'muted + dark']]]];
+const LAB = [['c', 'Screen', [['', 'before'], ['1', 'calm pass']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {
   let bar = document.getElementById('labbar'); if (!LAB.length) { if (bar) bar.remove(); return; }
@@ -400,7 +400,7 @@ function drawGame() {
   document.getElementById('drawbtn').onclick = e => { e.stopPropagation(); if (canDraw) act({ kind: 'draw' }); };
   // End the turn early: only after the first action (rules.can_pass), quiet and secondary.
   if (d.mine && !d.pend) {
-    deck.insertAdjacentHTML('beforeend', `<div class="endturn ${G.canPass ? 'can' : 'off'}" id="endturn" title="${G.canPass ? 'End your turn now' : 'Take your first action first'}">${kitImg('button')}<span class="num">End<br>turn</span></div>`);
+    deck.insertAdjacentHTML('beforeend', `<div class="endturn ${G.canPass ? 'can' : 'off'}" id="endturn" title="${G.canPass ? 'End your turn now' : 'Take your first action first'}">${kitImg('button')}<span class="num">End <br>turn</span></div>`);
     document.getElementById('endturn').onclick = e => { e.stopPropagation(); if (G.canPass) act({ kind: 'pass' }); };
   }
 

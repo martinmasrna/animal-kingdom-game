@@ -207,6 +207,7 @@ function renderField(el, M, g, cards, ui) {
       }
     } else {
     if (VAR === 'sD' && st && st.full) s += MARK ? put(`pawmark ${st.owner}`, at[0], at[1], PAW) : put(`stonetint ${st.owner}`, at[0], at[1]);
+    if (document.documentElement.dataset.c === '1' && !(st && st.full)) s += put('stonedim', at[0], at[1]);   // unheld stones sink into the ground
     s += put(`payout${st && st.full ? ' full ' + st.owner : ''}`, at[0], at[1], `<span class="plus">+</span>${reg.food}`);
     }
   }
@@ -248,8 +249,14 @@ function renderField(el, M, g, cards, ui) {
       for (let i = 0; i < Math.min(win, food + inc); i++)
         t += `<i class="${i < food ? 'r' : 'g'}${i >= was && i < food ? ' new' : ''}" style="${i >= was && i < food ? `animation-delay:${.55 + (i - was) / Math.max(1, gained) * .5}s;` : ''}left:${Math.floor(i / 3) * 7.4 + jit(i, 1) * 2 - 1}px;top:${(2 - i % 3) * 7 + (Math.floor(i / 3) % 2) * 2 + jit(i, 2) * 2 - 1}px;background-position:${kind(i) * 12.5}% 0;transform:rotate(${jit(i, 3) * 60 - 30}deg)"></i>`;
       const incTag = inc > 0 ? `<b class="incnum num" style="left:${Math.min(Math.floor(Math.min(win, food + inc) / 3) * 7.4 + 14, 236)}px">+${inc}</b>` : '';
+      const CALM = document.documentElement.dataset.c === '1', hx = p === 'A' ? 150 : 1522;
+      if (CALM) {   // one compact block per player under their den: count, next turn's income, the trough
+        s += put(`pblock ${p}`, hx, 520, `<div class="pcount"><b>${food}</b><span>/ ${win}</span></div><div class="pinc">${inc > 0 ? `+${inc} next turn` : 'no income'}</div>`);
+        s += put(`otrough calm ${p}`, hx, 592, `<div class="hollow">${t}</div>` + kitImg('trough'));
+      } else {
       s += put('foodhud', p === 'A' ? 160 : 1512, 592);
       s += put(`otrough big ${p}`, p === 'A' ? 160 : 1514, 560, `<div class="hollow">${t}${incTag}</div>` + kitImg('trough'));
+      }
       // Fruit flies from each held stone to where the new fruit lands in the trough.
       if (gained > 0) {
         const tx = (p === 'A' ? 160 : 1514) - 145 + 10 + Math.floor(was / 3) * 7.4, ty = 560;
@@ -258,7 +265,7 @@ function renderField(el, M, g, cards, ui) {
         srcs.forEach(([sx, sy], k) => { for (let j = 0; j < 3; j++)
           fx += `<i class="flyfruit" style="left:${sx}px;top:${sy}px;--dx:${tx - sx}px;--dy:${ty - sy}px;animation-delay:${k * .08 + j * .06}s;background-position:${((k * 3 + j) * 4 % 9) * 12.5}% 0"></i>`; });
       }
-      s += put(`carved food ${p}`, p === 'A' ? 160 : 1514, 622, `${food}<small> / ${win}</small>`);
+      if (!CALM) s += put(`carved food ${p}`, p === 'A' ? 160 : 1514, 622, `${food}<small> / ${win}</small>`);
     } else if (F === 't') {
       // A carved trough filled with fruit toward the win at its end; next turn's income as unripe green fruit.
       s += put(`trough ${p}`, x, 560, `<div class="in"><div class="inc" style="width:${f2 * 100}%"></div><div class="fill" style="width:${f1 * 100}%"></div></div><span class="cap"></span>`);

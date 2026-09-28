@@ -705,3 +705,49 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 [data-z="2"] .hand { top: 770px; }
 [data-z="2"] .hand .hc:hover { z-index: 30; }
 [data-z="2"] .deck { top: 790px; }
+
+/* ================= calm pass (lab c=1): one type family, zones with room, a ground that steps back ================= */
+/* Ground: the map a step back, darker toward the edges. */
+[data-c="1"] #stage { background-image: none !important; background-color: #17110a; }
+[data-c="1"] #stage::before { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 58% 62% at 50% 42%, rgba(12,8,3,0) 45%, rgba(12,8,3,.5) 100%), url(/static/kit/sav_D4.webp) 0 0 / 100% 100%;
+  filter: saturate(.68) brightness(.8) contrast(.92); }
+/* Room: pieces sit inside their clearings; the hand sinks and rises on hover. */
+[data-c="1"] .cr .unit { scale: .8; }
+[data-c="1"] .unit.stone .srim, [data-c="1"] .unit.stone .disc { filter: saturate(.82) brightness(.95); }
+[data-c="1"] .groove.A, [data-c="1"] .groove.B { opacity: .45; }
+[data-c="1"] .hand { top: 772px; }
+/* One family for everything read on the screen. */
+[data-c="1"] .num, [data-c="1"] .plq b, [data-c="1"] .payout, [data-c="1"] .turn b { font-family: 'Source Serif 4', serif !important; font-weight: 800; -webkit-text-stroke: 0; paint-order: normal; }
+[data-c="1"] .payout { font-size: 24px !important; color: rgba(70,48,22,.75) !important; }
+/* Each player's block under their den: name at the top of the column stays, count and trough directly beneath the den. */
+[data-c="1"] .plq.me, [data-c="1"] .plq.them { top: 150px; width: 260px; }
+[data-c="1"] .plq.me { left: 20px; } [data-c="1"] .plq.them { right: 20px; }
+[data-c="1"] .plq b { font-size: 21px; letter-spacing: .01em; color: #f6ecd8; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+[data-c="1"] .plq .tx > span { font: 500 12.5px 'Source Serif 4', serif; color: rgba(246,236,216,.75); text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+.pblock { width: 240px; text-align: center; color: #f6ecd8; text-shadow: 0 1px 3px rgba(0,0,0,.85); }
+.pcount { display: flex; align-items: baseline; justify-content: center; gap: 6px; font-family: 'Source Serif 4', serif; }
+.pcount b { font-size: 44px; font-weight: 800; line-height: 1; }
+.pcount span { font-size: 19px; font-weight: 600; opacity: .7; }
+.pinc { margin-top: 2px; font: 600 13px 'Source Serif 4', serif; opacity: .8; }
+.pblock.A .pinc { color: #a9ccff; } .pblock.B .pinc { color: #ffb4a8; }
+.otrough.calm { transform: translate(-50%, -50%) scale(.83); }
+/* Controls: one quiet cluster at the bottom right, End turn as a secondary action under Draw. */
+[data-c="1"] .deck { left: 1392px; top: 800px; transform: scale(.78); transform-origin: 0 0; }
+[data-c="1"] .drawbtn { filter: drop-shadow(3px 5px 5px rgba(20,10,0,.6)); }
+[data-c="1"] .drawbtn img { filter: saturate(.6) brightness(.78); }
+[data-c="1"] .drawbtn.off img { filter: saturate(.4) brightness(.45); }
+[data-c="1"] .drawbtn .num { font-size: 26px; color: #fff4e0; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+[data-c="1"] .drawbtn small { font-size: 14px; font-weight: 600; }
+[data-c="1"] .endturn { left: 148px; top: -42px; width: 150px; height: 34px; filter: none; }
+[data-c="1"] .endturn img { display: none; }
+[data-c="1"] .endturn .num { font-size: 17px; font-weight: 700; color: #f6ecd8; text-shadow: 0 1px 3px rgba(0,0,0,.9); inset: 0; }
+[data-c="1"] .endturn.off .num { opacity: .4; }
+[data-c="1"] .endturn .num br { display: none; }
+[data-c="1"] .plq.series b { font-size: 15px; }
+.stonedim { width: 62px; height: 62px; border-radius: 50%; background: rgba(95,72,40,.55); mix-blend-mode: multiply; }
+[data-c="1"] .payout:not(.full) { color: rgba(40,26,10,.7) !important; }
+[data-c="1"] .drawbtn .num { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.95), 0 0 8px rgba(0,0,0,.6); }
+[data-c="1"][data-h="1"] .hc:hover, [data-c="1"][data-h="1"] .hc.sel:hover { transform: translateY(-150px) scale(1.5); }
+[data-c="1"] .hc.sel { transform: translateY(-60px); }
+[data-c="1"] .portrait.noart { font: 700 18px/1.1 'Source Serif 4', serif; color: #f3e6cc; }
