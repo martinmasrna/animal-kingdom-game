@@ -385,34 +385,34 @@ def test_jackal_only_fires_on_adjacent_removal():
     assert s.food["A"] == CFG.jackal_food                # unchanged
 
 
-def test_nassim_when_drawn_discards_from_opponents_hand_only():
-    s = make_state(current="A", decks={"A": ["nassim"], "B": []})
+def test_omen_when_drawn_discards_from_opponents_hand_only():
+    s = make_state(current="A", decks={"A": ["omen"], "B": []})
     s.add_to_hand("A", "lion")
     s.add_to_hand("B", "fox")
-    effects.draw_cards(s, "A", 1)                        # draws Nassim
-    assert sorted(hand_ids(s, "A")) == ["lion", "nassim"]
+    effects.draw_cards(s, "A", 1)                        # draws Omen
+    assert sorted(hand_ids(s, "A")) == ["lion", "omen"]
     assert len(s.hands["B"]) == 0                        # lost its only card
     assert s.remove_pile == ["fox"]
 
 
-def test_nassim_hard_cap_fires_once_per_turn():
+def test_omen_hard_cap_fires_once_per_turn():
     s = make_state(current="A")
     s.add_to_hand("B", "fox")
     s.add_to_hand("B", "lion")
-    first = UnitInstance("nassim", "A", s.new_iid())
+    first = UnitInstance("omen", "A", s.new_iid())
     s.hands["A"].append(first)
-    effects._nassim_drawn(s, first)
+    effects._omen_drawn(s, first)
     assert len(s.hands["B"]) == 1                        # first trigger this turn: discards one
 
-    second = UnitInstance("nassim", "A", s.new_iid())  # a fresh instance (e.g. reshuffled+redrawn)
+    second = UnitInstance("omen", "A", s.new_iid())  # a fresh instance (e.g. reshuffled+redrawn)
     s.hands["A"].append(second)
-    effects._nassim_drawn(s, second)
+    effects._omen_drawn(s, second)
     assert len(s.hands["B"]) == 1                        # capped: no second discard this turn
 
     s.turn_flags = {}                                    # simulate rules._end_turn's reset
-    third = UnitInstance("nassim", "A", s.new_iid())
+    third = UnitInstance("omen", "A", s.new_iid())
     s.hands["A"].append(third)
-    effects._nassim_drawn(s, third)
+    effects._omen_drawn(s, third)
     assert len(s.hands["B"]) == 0                         # cap reset -> fires again next turn
 
 

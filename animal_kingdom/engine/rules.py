@@ -100,7 +100,7 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
 def _do_draw(state: GameState, player: str) -> None:
     # Draw up to the per-action count, capped by the hand limit (state.draw caps by deck).
     n = min(state.config.draw_action_count, state.config.hand_limit - len(state.hands[player]))
-    effects.draw_cards(state, player, n)    # the wrapper fires ON_DRAW (Eon, Nassim, ...)
+    effects.draw_cards(state, player, n)    # the wrapper fires ON_DRAW (Eon, Omen, ...)
 
 
 def _resolve_and_maybe_end_turn(state: GameState) -> None:

@@ -67,7 +67,7 @@ Let's talk about them one by one now:
 #### 2.1.4 Rat
 - from experience, one of the worst cards in the deck, you are rarely hapy to draw it
 - paying 1 card to remove one unit is simply too much, you lose too much value
-- I would put this card aside for now, and later on maybe develop some "discard card from hand" synnergies ... I could see some aggro self-discard deck working (or maybe also a control self+opponent discard deck, played around Nassim maybe)
+- I would put this card aside for now, and later on maybe develop some "discard card from hand" synnergies ... I could see some aggro self-discard deck working (or maybe also a control self+opponent discard deck, played around Omen maybe)
 
 
 #### 2.1.5 Falcon

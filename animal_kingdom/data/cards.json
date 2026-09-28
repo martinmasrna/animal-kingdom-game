@@ -213,14 +213,14 @@
       "text": "Whenever an Egg is removed, gain 10 food."
     },
     {
-      "id": "nassim",
-      "name": "Nassim",
+      "id": "omen",
+      "name": "Omen, the Black Swan",
       "deck": "egg_control",
       "rarity": "legendary",
       "tags": ["Bird"],
       "base_strength": 3,
       "keywords": [],
-      "text": "The first time each turn you draw Nassim, your opponent removes a random card from their hand."
+      "text": "The first time each turn you draw Omen, your opponent removes a random card from their hand."
     },
     {
       "id": "stoop",
