@@ -499,3 +499,13 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .cache i b::after { content: ''; position: absolute; left: 11px; top: -5px; width: 10px; height: 6px; border-radius: 0 80% 0 80%; background: #5d8a2a; transform: rotate(-15deg); }
 .cache i.on b { display: block; }
 .cache i.soon b { display: block; opacity: .35; }
+
+/* Sketch R: fruit row, ripe = held, green = next turn's income, the last fruit sized to its fraction. */
+.fruitrow { width: 26px; height: 250px; }
+.fruitrow i { position: absolute; left: 0; width: 26px; height: 22px; border-radius: 50%; background: radial-gradient(ellipse at 50% 45%, rgba(40,25,10,.55), rgba(70,45,20,.25) 70%, transparent); }
+.fruitrow i b { display: none; position: absolute; left: 2px; top: -4px; width: 22px; height: 22px; border-radius: 50%; transform: scale(var(--s)); transform-origin: 50% 80%; box-shadow: 1px 2px 2px rgba(0,0,0,.5); }
+.fruitrow i b::after { content: ''; position: absolute; left: 11px; top: -5px; width: 10px; height: 6px; border-radius: 0 80% 0 80%; background: #5d8a2a; transform: rotate(-15deg); }
+.fruitrow i.ripe b { display: block; background: radial-gradient(circle at 35% 30%, #fff1a8, #f2b830 45%, #c77a10 85%); }
+.fruitrow i.green b { display: block; background: radial-gradient(circle at 35% 30%, #d8f0a0, #86b83a 50%, #4f7a1c 90%); }
+.carved.vert { display: flex; flex-direction: column; align-items: center; line-height: .95; }
+.carved.vert small { font-size: 17px; }

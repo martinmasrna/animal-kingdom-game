@@ -197,6 +197,19 @@ function renderField(el, M, g, cards, ui) {
     } else if (F === 'b') {
       s += put(`fgauge ${p}`, p === 'A' ? 110 : 1562, 330, `<div class="inc" style="height:${f2 * 100}%"></div><div class="fill" style="height:${f1 * 100}%"></div>`);
       s += put(`carved ${p}`, p === 'A' ? 136 : 1536, 560, `${food}`);
+    } else if (F === 'r') {
+      // A row of ten hollows leading up to the den mouth: ripe fruit = food held (the last one grown to its fraction),
+      // green fruit = next turn's income. The den is the finish line.
+      let t = '';
+      const ripe = food / 10, next = Math.min(10, (food + inc) / 10);
+      for (let i = 0; i < 10; i++) {
+        const r = Math.max(0, Math.min(1, ripe - i)), u = Math.max(0, Math.min(1, next - i));
+        const cls = r >= 1 ? 'ripe' : r > 0 ? 'ripe part' : u > 0 ? 'green' : '';
+        const sz = r > 0 && r < 1 ? .45 + .55 * r : u > 0 && u < 1 ? .45 + .55 * u : 1;
+        t += `<i class="${cls}" style="top:${(9 - i) * 25}px;--s:${sz}"><b></b></i>`;
+      }
+      s += put(`fruitrow ${p}`, p === 'A' ? 196 : 1476, 566, t);
+      s += put(`carved small vert ${p}`, p === 'A' ? 110 : 1562, 600, `${food}<small>/ ${win}</small>`);
     } else if (F === 'k') {
       // The den's food cache: ten hollows at the den mouth, one portion of food per 10; next turn's income as pale portions.
       let t = '';
