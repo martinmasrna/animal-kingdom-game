@@ -264,6 +264,20 @@ def test_snow_leopard_lets_other_cats_cover_equal_strength():
     assert PlaceAction("caracal", ("cr", "2,2")) in rules.legal_actions(s)  # 4 >= 4
 
 
+def test_second_snow_leopard_benefits_from_the_first():
+    s = make_state(hands={"A": ["snow_leopard"]})
+    put(s, "1,2", "snow_leopard", "A")                   # connects 2,2; the anthem source
+    put(s, "2,2", "grizzly_bear", "B")                   # enemy str 6
+    assert PlaceAction("snow_leopard", ("cr", "2,2")) in rules.legal_actions(s)  # 6 >= 6
+
+
+def test_snow_leopard_alone_needs_strictly_greater():
+    s = make_state(hands={"A": ["snow_leopard"]})
+    put(s, "1,2", "lion", "A")                           # connects 2,2; no anthem on the board
+    put(s, "2,2", "grizzly_bear", "B")                   # enemy str 6
+    assert PlaceAction("snow_leopard", ("cr", "2,2")) not in rules.legal_actions(s)
+
+
 def test_cougar_places_adjacent_to_a_cat_ignoring_connection():
     s = make_state(hands={"A": ["cougar"]})
     put(s, "3,3", "lion", "A")                           # a Cat, disconnected from HQ
