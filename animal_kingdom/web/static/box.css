@@ -168,3 +168,7 @@
 .bx .dcount { width: 76px; height: 76px; margin: -38px 0 0 -38px; display: grid; place-items: center; background: url(/static/kit2/boss_a.webp) center / contain no-repeat; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.55)); }
 .bx .dcount.B { background-image: url(/static/kit2/boss_b.webp); }
 .bx .dcount .chalk { height: 32px; } .bx .dcount img { opacity: 1; height: 100%; }
+/* the den's count: a gem set into the crown boulder, the hero's life gem (screen/kit/nums/crown_study.png, middle) */
+.bx .dcount { width: 84px; height: 84px; margin: -42px 0 0 -42px; display: grid; place-items: center; background: url(/static/kit2/gem_a.webp) center / contain no-repeat; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.5)); }
+.bx .dcount.B { background-image: url(/static/kit2/gem_b.webp); }
+.bx .gemnum { display: flex; height: 34px; } .bx .gemnum img { height: 100%; display: block; margin: 0 -1px; }

@@ -92,7 +92,7 @@ export function renderBoard(el, M, g, cards, ui) {
         fruit += put('pit', px, py, `<img src="/static/kit2/pits/${side === 'A' ? 'a' : 'b'}pit${i % 3 + 1}_${r}_${t - r}.webp" alt="" draggable="false">`);
       });
       const [mx, my] = MOUTH[side], [kx, ky] = CROWN[side];
-      s += fruit + put(`dcount ${side}`, kx, ky, chalk(food), `data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
+      s += fruit + put(`dcount ${side}`, kx, ky, `<span class="gemnum">${String(food).split('').map(d => `<img src="/static/kit2/gemnum/${d}.webp" alt="${d}" draggable="false">`).join('')}</span>`, `data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
         put(`mouth${ring}`, mx, my, '', `data-hq="${side}"`);
       continue;
     }
