@@ -591,19 +591,19 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
    text panel x 6.7-93.2% y 77.9-93.2%; strength plate x 4.2-19.5% y 3.1-14%. */
 .card { --w: 180px; position: relative; width: var(--w); height: calc(var(--w) * 1.467); font-size: calc(var(--w) / 20); flex: none; filter: drop-shadow(.2em .45em .5em rgba(0,0,0,.55)); }
 .card .win { position: absolute; left: 6%; right: 6%; top: 10.5%; bottom: 24%; background: #3a2c1a center / cover no-repeat; border-radius: .6em; display: grid; place-items: center; }
-.card .win span { font: 700 1.4em/1.1 'EB Garamond', serif; color: #f3e3c0; text-align: center; padding: 1em; }
+.card .win span { font: 700 1.3em/1.1 'Source Serif 4', serif; color: #f3e3c0; text-align: center; padding: 1em; }
 .card .frame { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; user-select: none; }
 .card .cname { position: absolute; left: 25.5%; right: 12.4%; top: 2.6%; height: 6.9%; display: grid; place-items: center; padding: 0 .4em;
-  font: 700 1.28em/1 'EB Garamond', serif; color: #2e1c08; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .01em; }
+  font: 700 1.12em/1 'Source Serif 4', serif; color: #2e1c08; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .01em; }
 .card .cstr { position: absolute; left: 5.2%; width: 13.1%; top: 3.55%; height: 10.1%; display: flex; align-items: center; justify-content: center;
-  font: 800 2.15em/0 'EB Garamond', serif; font-variant-numeric: lining-nums tabular-nums; padding-top: .02em; color: #2a1706; text-shadow: 0 .05em 0 rgba(255,240,200,.55), 0 -.03em 0 rgba(0,0,0,.35); }
+  font: 800 1.95em/0 'Source Serif 4', serif; font-variant-numeric: lining-nums tabular-nums; padding-top: .04em; color: #2a1706; text-shadow: 0 .05em 0 rgba(255,240,200,.55), 0 -.03em 0 rgba(0,0,0,.35); }
 .card.common .cstr { color: #f0e2c4; text-shadow: 0 -.05em 0 rgba(0,0,0,.6), 0 .04em 0 rgba(255,240,210,.25); }
 .card .cstr.up { color: #1f6d1a; } .card .cstr.down { color: #9a2414; }
 .card.common .cstr.up { color: #b8f59a; } .card.common .cstr.down { color: #ff9f8a; }
 .card .ctext { position: absolute; left: 9.6%; right: 9.6%; top: 78.8%; bottom: 7.6%; padding-bottom: .75em; display: flex; flex-direction: column; justify-content: center; }
-.card .ctext p { margin: 0; font: 500 1.02em/1.08 'EB Garamond', serif; color: #2e1c08; }
-.card .ctext p b { font-weight: 800; }
-.card .ctext i { position: absolute; right: 0; bottom: .05em; font: 700 .58em/1 'EB Garamond', serif; font-style: normal; letter-spacing: .14em; text-transform: uppercase; color: rgba(80,52,20,.75); }
+.card .ctext p { margin: 0; font: 400 .86em/1.13 'Source Serif 4', serif; letter-spacing: -.005em; color: #2e1c08; }
+.card .ctext p b { font-weight: 700; }
+.card .ctext i { position: absolute; right: 0; bottom: .05em; font: 600 .5em/1 'Source Serif 4', serif; font-style: normal; letter-spacing: .14em; text-transform: uppercase; color: rgba(80,52,20,.75); }
 
 /* Where the card appears. Hand: 176px cards, hovered one grows. */
 .hand .hc { width: 176px; height: 258px; }
