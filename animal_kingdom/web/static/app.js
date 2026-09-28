@@ -163,7 +163,7 @@ function joinScreen(id) {
 function disconnect() { if (live) setLive(false); if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
 // The live look, Martin's picks (2026-09-28): painted map D, sandstone payout stones with engraved numbers,
 // war paint in team colour on each den (proposed, pending his look), bigger hand cards that grow on hover. The lab overrides these per frame.
-const LIVE_LOOK = { v: 'sD', p: '1', d: 'w', h: '1', f: 'o' };
+const LIVE_LOOK = { v: 'sD', p: '1', d: 'w', h: '1', f: 'o', t: '1', k: '1' };
 
 function matchScreen(id) {
   Object.assign(document.documentElement.dataset, LIVE_LOOK);

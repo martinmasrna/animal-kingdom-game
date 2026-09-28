@@ -543,8 +543,8 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 /* T1: each player's label above their trough; series + menu small in the top-right corner. Nothing on the top edge. */
 [data-t="1"] .plq > img, [data-t="2"] .plq > img { display: none; }
 [data-t="1"] .plq, [data-t="2"] .plq { filter: none; height: auto; }
-[data-t="1"] .plq.me { left: 20px; top: 480px; width: 280px; }
-[data-t="1"] .plq.them { right: 20px; top: 480px; width: 280px; }
+[data-t="1"] .plq.me { left: 10px; top: 118px; width: 280px; }
+[data-t="1"] .plq.them { right: 10px; top: 118px; width: 280px; }
 [data-t="1"] .plq .tx, [data-t="2"] .plq .tx { position: static; inset: auto; gap: 1px; }
 [data-t="1"] .plq b, [data-t="2"] .plq b { font: 900 22px/1 'Cinzel', serif; color: #fff6e4; -webkit-text-stroke: 0; text-shadow: 0 2px 3px rgba(0,0,0,.8), 0 0 10px rgba(0,0,0,.5); }
 [data-t="1"] .plq .tx > span, [data-t="2"] .plq .tx > span { font: 600 12px var(--font-text); color: #f3e3c0; text-shadow: 0 1px 2px rgba(0,0,0,.9); }
