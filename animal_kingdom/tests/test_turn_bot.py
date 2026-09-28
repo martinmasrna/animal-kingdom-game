@@ -269,7 +269,7 @@ def test_cats_plays_twin_enabler_before_the_twin():
 def test_canine_buffs_before_the_strength_gated_payoff():
     # Coyote only draws at 5+ strength. Raksha (+2 to your other Canines) must land first so
     # the str-3 Coyote reaches 5 and its Battlecry fires instead of fizzling.
-    s = make_state(current="A", hands={"A": ["raksha", "arctic_fox"]},
+    s = make_state(current="A", hands={"A": ["raksha", "unnamed_canine"]},
                    decks={"A": ["dog", "dog", "dog"], "B": ["mouse"] * 4}, config=TWO_ACTION)
     bot = small_turn()
     first = bot.choose(s.view_for("A"), rules.legal_actions(s), s)

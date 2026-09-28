@@ -36,14 +36,14 @@ def test_lobo_scales_with_other_canines():
     s = make_state()
     lobo = put(s, "1,1", "lobo", "A")
     assert effective_strength(s, lobo) == 4              # base, no other Canines
-    put(s, "1,2", "arctic_fox", "A")
+    put(s, "1,2", "unnamed_canine", "A")
     assert effective_strength(s, lobo) == 6              # +2 per other Canine
 
 
 def test_raksha_buffs_other_canines_but_not_itself():
     s = make_state()
     raksha = put(s, "1,1", "raksha", "A")
-    fox = put(s, "1,2", "arctic_fox", "A")
+    fox = put(s, "1,2", "unnamed_canine", "A")
     assert effective_strength(s, fox) == 4            # 3 + 1 aura
     assert effective_strength(s, raksha) == 5            # body 5; aura excludes itself
 
@@ -102,7 +102,7 @@ def test_dhole_buffs_adjacent_friendly_canine_and_fires_reactor():
 
 def test_clarion_buffs_other_board_canines_by_two_not_hand():
     s = make_state(hands={"A": ["clarion", "gray_wolf"]})
-    fox = put(s, "1,2", "arctic_fox", "A")
+    fox = put(s, "1,2", "unnamed_canine", "A")
     rules.apply_action(s, PlaceAction("clarion", ("cr", "2,2")))
     assert fox.strength_counter == 2                      # +2 to a board Canine
     assert hand_inst(s, "A", "gray_wolf").strength_counter == 0   # hand is no longer buffed
@@ -204,16 +204,16 @@ def test_gray_wolf_removes_enemy_up_to_its_buffed_strength():
     assert s.owner_of("2,3") == "B"                       # 7 > 6 survives
 
 
-def test_arctic_fox_draws_only_when_buffed_to_threshold():
-    s = make_state(hands={"A": ["arctic_fox"]}, decks={"A": ["lion"], "B": []})
-    hand_inst(s, "A", "arctic_fox").strength_counter = 2     # body 5 >= threshold
-    rules.apply_action(s, PlaceAction("arctic_fox", ("cr", "1,2")))
+def test_unnamed_canine_draws_only_when_buffed_to_threshold():
+    s = make_state(hands={"A": ["unnamed_canine"]}, decks={"A": ["lion"], "B": []})
+    hand_inst(s, "A", "unnamed_canine").strength_counter = 2     # body 5 >= threshold
+    rules.apply_action(s, PlaceAction("unnamed_canine", ("cr", "1,2")))
     assert len(s.hands["A"]) == 1                         # drew
 
 
-def test_arctic_fox_does_not_draw_below_threshold():
-    s = make_state(hands={"A": ["arctic_fox"]}, decks={"A": ["lion"], "B": []})
-    rules.apply_action(s, PlaceAction("arctic_fox", ("cr", "1,2")))  # body 3 < 5
+def test_unnamed_canine_does_not_draw_below_threshold():
+    s = make_state(hands={"A": ["unnamed_canine"]}, decks={"A": ["lion"], "B": []})
+    rules.apply_action(s, PlaceAction("unnamed_canine", ("cr", "1,2")))  # body 3 < 5
     assert s.hands["A"] == []
 
 
@@ -490,10 +490,10 @@ def test_deck_reveal_choices_are_tagged_from_deck_reveal():
 def test_apex_eats_a_weaker_enemy_and_occupies():
     s = make_state(hands={"A": ["tiger"]})
     put(s, "1,2", "lion", "A")                          # connects 2,2
-    put(s, "2,2", "arctic_fox", "B")                        # enemy str 3 < tiger 7
+    put(s, "2,2", "unnamed_canine", "B")                        # enemy str 3 < tiger 7
     rules.apply_action(s, PlaceAction("tiger", ("cr", "2,2")))
     assert s.top_unit("2,2").card_id == "tiger"          # occupies (not stacks)
-    assert "arctic_fox" in s.remove_pile                     # the prey was eaten
+    assert "unnamed_canine" in s.remove_pile                     # the prey was eaten
 
 
 def test_apex_cannot_land_on_empty_or_capture_hq():
@@ -733,14 +733,14 @@ def test_aurum_draws_at_the_start_of_its_owners_turn():
 def test_jaguar_and_serval_respect_strength_bounds():
     jag = make_state(hands={"A": ["jaguar"]})
     put(jag, "1,2", "lion", "A")
-    put(jag, "3,2", "arctic_fox", "B")                      # str 3 <= 5
+    put(jag, "3,2", "unnamed_canine", "B")                      # str 3 <= 5
     rules.apply_action(jag, PlaceAction("jaguar", ("cr", "2,2")))
     assert jag.owner_of("3,2") is None
 
     srv = make_state(hands={"A": ["serval"]})
     put(srv, "1,2", "lion", "A")
     put(srv, "3,2", "lion", "B")                        # str 7 >= 6 (Serval's only legal target)
-    put(srv, "2,3", "arctic_fox", "B")                      # str 3 < 6: survives
+    put(srv, "2,3", "unnamed_canine", "B")                      # str 3 < 6: survives
     rules.apply_action(srv, PlaceAction("serval", ("cr", "2,2")))
     assert srv.owner_of("3,2") is None and srv.owner_of("2,3") == "B"
 
@@ -749,14 +749,14 @@ def test_soldier_ant_removal_gated_on_four_colony():
     few = make_state(hands={"A": ["soldier_ant"]})
     put(few, "1,2", "worker_ant", "A")
     put(few, "1,3", "worker_ant", "A")
-    put(few, "3,2", "arctic_fox", "B")
+    put(few, "3,2", "unnamed_canine", "B")
     rules.apply_action(few, PlaceAction("soldier_ant", ("cr", "2,2")))   # only 3 Colony incl. Soldier
     assert few.owner_of("3,2") == "B"
 
     many = make_state(hands={"A": ["soldier_ant"]})
     for cr in ("1,1", "1,2", "1,3"):
         put(many, cr, "worker_ant", "A")               # 3 + Soldier = 4 Colony
-    put(many, "3,2", "arctic_fox", "B")
+    put(many, "3,2", "unnamed_canine", "B")
     rules.apply_action(many, PlaceAction("soldier_ant", ("cr", "2,2")))
     assert many.owner_of("3,2") is None
 
@@ -765,7 +765,7 @@ def test_rhinoceros_sweeps_only_small_adjacent_enemies():
     s = make_state(hands={"A": ["rhinoceros"]})
     put(s, "1,2", "lion", "A")
     put(s, "3,2", "serval", "B")                        # 2 - removed (<= 2)
-    put(s, "2,3", "arctic_fox", "B")                        # 3 - survives (threshold tightened 5->2)
+    put(s, "2,3", "unnamed_canine", "B")                        # 3 - survives (threshold tightened 5->2)
     put(s, "2,1", "lion", "B")                          # 7 - survives
     rules.apply_action(s, PlaceAction("rhinoceros", ("cr", "2,2")))
     assert s.owner_of("3,2") is None
@@ -783,10 +783,10 @@ def test_bulwark_pays_cost_and_clears_all_adjacent_units_friend_and_foe():
 
 
 def test_hippopotamus_removes_a_weak_enemy_placed_adjacent():
-    s = make_state(current="B", hands={"B": ["arctic_fox"]})
+    s = make_state(current="B", hands={"B": ["unnamed_canine"]})
     put(s, "3,2", "hippopotamus", "A")
     put(s, "4,1", "caracal", "B")                       # B front, connects 3,1
-    rules.apply_action(s, PlaceAction("arctic_fox", ("cr", "3,1")))  # str 3 <= 3, adjacent to hippo
+    rules.apply_action(s, PlaceAction("unnamed_canine", ("cr", "3,1")))  # str 3 <= 3, adjacent to hippo
     assert s.owner_of("3,1") is None
 
 
@@ -817,31 +817,31 @@ def test_pestis_wipes_an_entire_adjacent_stack():
     s = make_state(hands={"A": ["pestis"]})
     put(s, "1,2", "caracal", "A")
     put(s, "3,2", "lion", "B")                          # bottom
-    put(s, "3,2", "arctic_fox", "B")                        # top (same owner stacks freely)
+    put(s, "3,2", "unnamed_canine", "B")                        # top (same owner stacks freely)
     rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))
     rules.apply_action(s, ChoiceAction("3,2"))
     assert s.board.get("3,2") is None
-    assert s.remove_pile.count("lion") == 1 and s.remove_pile.count("arctic_fox") == 1
+    assert s.remove_pile.count("lion") == 1 and s.remove_pile.count("unnamed_canine") == 1
 
 
 def test_sirocco_bounces_all_adjacent_enemies_to_hand():
     s = make_state(hands={"A": ["sirocco"]})
     put(s, "1,2", "caracal", "A")
-    put(s, "3,2", "arctic_fox", "B")
+    put(s, "3,2", "unnamed_canine", "B")
     put(s, "2,3", "fox", "B")
     rules.apply_action(s, PlaceAction("sirocco", ("cr", "2,2")))
     assert s.owner_of("3,2") is None and s.owner_of("2,3") is None
-    assert {"arctic_fox", "fox"} <= set(hand_ids(s, "B")) and "arctic_fox" not in s.remove_pile
+    assert {"unnamed_canine", "fox"} <= set(hand_ids(s, "B")) and "unnamed_canine" not in s.remove_pile
 
 
 def test_skunk_bounces_and_locks_the_card():
     s = make_state(current="A", hands={"A": ["skunk"]})
     put(s, "1,2", "caracal", "A")
-    put(s, "3,2", "arctic_fox", "B")
+    put(s, "3,2", "unnamed_canine", "B")
     rules.apply_action(s, PlaceAction("skunk", ("cr", "2,2")))
-    fox = next(u for u in s.hands["B"] if u.card_id == "arctic_fox")
+    fox = next(u for u in s.hands["B"] if u.card_id == "unnamed_canine")
     assert fox.locked_until_turn == 2                # locked through B's next turn
-    assert "arctic_fox" not in {a.card_id for a in rules.legal_actions(s) if isinstance(a, PlaceAction)}
+    assert "unnamed_canine" not in {a.card_id for a in rules.legal_actions(s) if isinstance(a, PlaceAction)}
 
 
 def test_lemming_floods_empty_adjacent_crossroads():
@@ -866,9 +866,9 @@ def test_king_theron_and_queen_adira_combo_on_a_cat_cover():
     put(s, "1,1", "king_theron", "A")
     put(s, "1,3", "queen_adira", "A")
     put(s, "1,2", "caracal", "A")                       # connects 2,2
-    put(s, "2,2", "arctic_fox", "B")                        # a Cat (lion) will cover this enemy
+    put(s, "2,2", "unnamed_canine", "B")                        # a Cat (lion) will cover this enemy
     rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))
-    assert s.owner_of("2,2") == "A" and "arctic_fox" in s.remove_pile    # Theron removed it
+    assert s.owner_of("2,2") == "A" and "unnamed_canine" in s.remove_pile    # Theron removed it
     assert len(s.hands["A"]) == 1                       # Adira drew off the Cat removal
 
 
@@ -949,11 +949,11 @@ def test_scrooge_doubles_this_turns_haul():
 
 
 def test_andean_condor_draws_only_when_its_top_is_stronger():
-    win = make_state(hands={"A": ["andean_condor"]}, decks={"A": ["lion"], "B": ["arctic_fox"]})
+    win = make_state(hands={"A": ["andean_condor"]}, decks={"A": ["lion"], "B": ["unnamed_canine"]})
     rules.apply_action(win, PlaceAction("andean_condor", ("cr", "1,2")))
     assert "lion" in hand_ids(win, "A")
 
-    lose = make_state(hands={"A": ["andean_condor"]}, decks={"A": ["arctic_fox"], "B": ["lion"]})
+    lose = make_state(hands={"A": ["andean_condor"]}, decks={"A": ["unnamed_canine"], "B": ["lion"]})
     rules.apply_action(lose, PlaceAction("andean_condor", ("cr", "1,2")))
     assert lose.hands["A"] == []
 

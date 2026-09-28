@@ -1040,6 +1040,16 @@
       "text": "Battlecry: remove an adjacent enemy with less or equal strength."
     },
     {
+      "id": "unnamed_canine",
+      "name": "Unnamed Canine",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": ["Canine"],
+      "base_strength": 3,
+      "keywords": [],
+      "text": "Battlecry: if this has 5 or more strength, draw a card."
+    },
+    {
       "id": "arctic_fox",
       "name": "Arctic Fox",
       "deck": "reserve",
@@ -1047,7 +1057,7 @@
       "tags": ["Canine"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Battlecry: if this has 5 or more strength, draw a card."
+      "text": ""
     },
     {
       "id": "fox",
