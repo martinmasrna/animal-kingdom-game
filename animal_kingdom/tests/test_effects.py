@@ -117,12 +117,12 @@ def test_red_wolf_buffs_canines_that_enter_after_it():
     assert s.top_unit("1,3").strength_counter == 0           # non-Canine unaffected
 
 
-def test_alpha_places_two_pups():
+def test_scarlett_places_poppy_and_rusty():
     s = make_state(hands={"A": ["alpha"]})
     put(s, "1,2", "dog", "A")                                # HQ-front anchor so 2,2 is connected
     rules.apply_action(s, PlaceAction("alpha", ("cr", "2,2")))
-    pups = [u for st in s.board.values() for u in st if u.card_id == "pup"]
-    assert len(pups) == 2 and all(p.owner == "A" for p in pups)
+    cubs = sorted(u.card_id for st in s.board.values() for u in st if u.owner == "A" and u.card_id in ("poppy", "rusty"))
+    assert cubs == ["poppy", "rusty"]
 
 
 def test_red_wolf_buffs_spawned_pups():
@@ -130,7 +130,7 @@ def test_red_wolf_buffs_spawned_pups():
     s = make_state(hands={"A": ["alpha"]})
     put(s, "1,2", "red_wolf", "A")
     rules.apply_action(s, PlaceAction("alpha", ("cr", "2,2")))
-    pups = [u for st in s.board.values() for u in st if u.card_id == "pup"]
+    pups = [u for st in s.board.values() for u in st if u.card_id in ("poppy", "rusty")]
     assert len(pups) == 2 and all(p.strength_counter == CFG.red_wolf_grant for p in pups)
 
 

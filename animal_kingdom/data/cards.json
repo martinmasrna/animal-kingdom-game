@@ -1107,7 +1107,7 @@
       "tags": ["Canine"],
       "base_strength": 5,
       "keywords": [],
-      "text": "Battlecry: place two Pups on random adjacent empty crossroads."
+      "text": "Battlecry: place Poppy and Rusty, her cubs, on random adjacent empty crossroads."
     },
     {
       "id": "hyena",
@@ -1142,6 +1142,26 @@
     {
       "id": "pup",
       "name": "Pup",
+      "deck": "token",
+      "rarity": "common",
+      "tags": ["Canine"],
+      "base_strength": 1,
+      "keywords": [],
+      "text": ""
+    },
+    {
+      "id": "poppy",
+      "name": "Poppy",
+      "deck": "token",
+      "rarity": "common",
+      "tags": ["Canine"],
+      "base_strength": 1,
+      "keywords": [],
+      "text": ""
+    },
+    {
+      "id": "rusty",
+      "name": "Rusty",
       "deck": "token",
       "rarity": "common",
       "tags": ["Canine"],

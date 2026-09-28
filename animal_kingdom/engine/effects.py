@@ -962,19 +962,20 @@ def _red_wolf_friendly_play(state, watcher, played):
         _grant(state, [played.iid], state.config.red_wolf_grant)
 
 
-def _spawn_pups(state, unit, cr, n):
-    """Land up to `n` Pup tokens on random empty crossroads adjacent to `cr`. Pups enter via the
+def _spawn_pups(state, unit, cr, n, token_ids=("pup",)):
+    """Land up to `n` tokens on random empty crossroads adjacent to `cr`, cycling through
+    `token_ids`. They enter via the
     normal landing path (so Dhole's on-enter buff sees them) but carry no Battlecry, so there
     is no spawn recursion."""
     empty = [nb for nb in state.game_map.neighbors(cr) if not state.board.get(nb)]
     state.rng.shuffle(empty)
-    for spot in empty[:n]:
-        pup = UnitInstance("pup", unit.owner, state.new_iid())
+    for i, spot in enumerate(empty[:n]):
+        pup = UnitInstance(token_ids[i % len(token_ids)], unit.owner, state.new_iid())
         _land_unit(state, unit.owner, pup, spot)
 
 
 def _alpha_place(state, unit, cr):
-    _spawn_pups(state, unit, cr, state.config.alpha_pups)
+    _spawn_pups(state, unit, cr, state.config.alpha_pups, ("poppy", "rusty"))
 
 
 def _african_wild_dog_place(state, unit, cr):
