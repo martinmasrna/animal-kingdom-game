@@ -392,6 +392,11 @@ function drawGame() {
     (V.phase === 'playing' && G.current !== you ? `<span class="their">Their<br>turn</span>` : `Draw 2<small>hand ${G.hand.length}/${G.handLimit}</small>`) +
     `</span><span class="gems">${V.phase === 'playing' && G.current === you ? Array.from({ length: G.actionsTotal }, (_, i) => `<i class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}">${kitImg(teamGem('A'))}</i>`).join('') : ''}</span></div>`;
   document.getElementById('drawbtn').onclick = e => { e.stopPropagation(); if (canDraw) act({ kind: 'draw' }); };
+  // End the turn early: only after the first action (rules.can_pass), quiet and secondary.
+  if (d.mine && G.canPass) {
+    deck.insertAdjacentHTML('beforeend', `<span class="endturn" id="endturn">End turn</span>`);
+    document.getElementById('endturn').onclick = e => { e.stopPropagation(); act({ kind: 'pass' }); };
+  }
 
   // Prompt for a pending choice: the card that asks and its rule, nothing more.
   const bar = document.getElementById('choicebar'), waiting = document.getElementById('waiting');

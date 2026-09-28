@@ -17,12 +17,12 @@ from __future__ import annotations
 from typing import Optional
 
 from . import effects
-from .actions import Action, DrawAction, PlaceAction
+from .actions import Action, DrawAction, PassAction, PlaceAction
 from .state import EngineError, GameState, Result, other_player
 from .strength import effective_strength  # re-exported (used by tests / future eval)
 
 __all__ = [
-    "legal_actions", "apply_action", "is_terminal",
+    "legal_actions", "apply_action", "is_terminal", "can_pass",
     "owner_of", "top_unit", "regions_controlled", "effective_strength",
 ]
 
@@ -48,6 +48,13 @@ def legal_actions(state: GameState) -> list[Action]:
     return _top_level_actions(state)
 
 
+def can_pass(state: GameState) -> bool:
+    """Ending the turn early is allowed once the turn's first action is taken and nothing is resolving.
+    It is kept out of legal_actions: an empty legal list still means exhaustion, and bots never pass."""
+    return (state.result is None and state.pending is None and not state.effect_stack
+            and state.actions_taken_this_turn >= 1)
+
+
 def _top_level_actions(state: GameState) -> list[Action]:
     player = state.current
     actions: list[Action] = []
@@ -67,6 +74,11 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
     regenerating them."""
     if state.result is not None:
         raise EngineError("cannot act: the game is over")
+    if isinstance(action, PassAction):
+        if not can_pass(state):
+            raise EngineError("cannot end the turn before its first action, or mid-resolution")
+        _end_turn(state)
+        return state
     if validate and action not in legal_actions(state):
         raise EngineError(f"illegal action {action!r}")
 

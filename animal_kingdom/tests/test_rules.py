@@ -228,3 +228,32 @@ def test_mulligan_can_be_disabled():
     s = new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 5,
                  config=Config(mulligan=False))
     assert s.pending is None and rules.legal_actions(s)[0].kind == "draw"
+
+
+# ------------------------------------------------------------- ending the turn early (overview.md §5)
+
+def _fresh():
+    from animal_kingdom.decks import load_premade_deck
+    from animal_kingdom.engine.config import Config
+    from animal_kingdom.engine.state import new_game
+    return new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 5, config=Config(mulligan=False))
+
+
+def test_pass_ends_the_turn_after_one_action():
+    from animal_kingdom.engine.actions import DrawAction, PassAction
+    s = _fresh(); first = s.current
+    assert not rules.can_pass(s)                          # not before the first action
+    rules.apply_action(s, DrawAction())
+    assert s.current == first and rules.can_pass(s)
+    rules.apply_action(s, PassAction())
+    assert s.current != first and s.actions_taken_this_turn == 0
+
+
+def test_pass_is_refused_before_the_first_action_and_never_offered():
+    import pytest
+    from animal_kingdom.engine.actions import PassAction
+    from animal_kingdom.engine.state import EngineError
+    s = _fresh()
+    with pytest.raises(EngineError):
+        rules.apply_action(s, PassAction())
+    assert all(a.kind != "pass" for a in rules.legal_actions(s))

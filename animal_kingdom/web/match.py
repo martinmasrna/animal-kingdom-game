@@ -320,6 +320,7 @@ class Match:
             "first": st.first_player,
             "actionsLeft": st.config.actions_per_turn + bonus - st.actions_taken_this_turn,
             "actionsTotal": st.config.actions_per_turn + bonus,
+            "canPass": rules.can_pass(st),
             "food": dict(st.food),
             "income": {p: sum(r.food for r in rules.regions_controlled(st, p)) for p in "AB"},
             "winFood": st.game_map.win_food,
