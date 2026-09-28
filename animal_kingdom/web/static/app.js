@@ -200,13 +200,14 @@ function onView(prev) {
 // (data-v on <html>, read by app.css and board.js). No server match; nothing can be played.
 async function labScreen(name) {
   const q = new URLSearchParams(location.search), de = document.documentElement.dataset;
-  de.v = q.get('v') || ''; de.p = q.get('p') || ''; de.d = q.get('d') || ''; de.h = q.get('h') || '';
+  de.v = q.get('v') || ''; de.p = q.get('p') || ''; de.d = q.get('d') || ''; de.h = q.get('h') || ''; de.f = q.get('f') || '';
   V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
   screen = null; gameScreen(); labBar();
 }
 // A switcher over the lab frame: each row flips one design choice live.
 const LAB = [['p', 'Payout stones', [['', 'dark (now)'], ['1', 'sandstone, carved numbers'], ['2', 'sandstone, white numbers']]],
   ['d', 'Your den vs theirs', [['', 'no hint'], ['w', 'war paint']]],
+  ['f', 'Food (sketches)', [['', 'slab (now)'], ['a', 'A stone track'], ['b', 'B painted gauge'], ['c', 'C stockpile']]],
   ['h', 'Hand (hover a card)', [['', 'small cards (now)'], ['1', 'bigger, hovered card grows'], ['2', 'bigger, Gwent side panel']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {

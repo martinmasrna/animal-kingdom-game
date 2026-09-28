@@ -454,3 +454,27 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .stonetint.B { background: rgb(225,95,80); } .stonetint.B::after { background: rgb(215,35,25); }
 .stonetint.part { opacity: .45; }
 [data-p="1"] .payout.full.A, [data-p="1"] .payout.full.B, [data-p="1"] .payout.part.A, [data-p="1"] .payout.part.B { color: rgba(255,250,240,.95); font-size: 28px; text-shadow: 0 -1.5px 0 rgba(0,0,0,.45), 0 1px 0 rgba(255,255,255,.3); }
+
+/* ---------- food sketches (lab f=a|b|c): code-only, to judge the idea before painting ---------- */
+.grasspatch { position: absolute; width: 246px; height: 164px; background-image: url(/static/kit/sav_D3.webp); background-size: 1672px 941px;
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 80%, transparent 100%); mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 80%, transparent 100%); }
+.carved { font: 900 44px/1 'Cinzel', serif; color: rgba(245,236,215,.95); text-shadow: 0 -2px 0 rgba(0,0,0,.5), 0 2px 0 rgba(255,255,255,.25), 0 0 10px rgba(0,0,0,.35); white-space: nowrap; }
+.carved small { font-size: 20px; }
+/* A: ten stones, sandstone to team colour. */
+.ftrack { width: 26px; height: 250px; }
+.ftrack i { position: absolute; left: 0; width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #efe3c8, #b9a47c 70%, #8d7955); box-shadow: 1px 2px 3px rgba(0,0,0,.45); overflow: hidden; }
+.ftrack i::before, .ftrack i::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; border-radius: 0; }
+.ftrack i::after { height: calc(var(--f) * 100%); background: var(--c); mix-blend-mode: multiply; }
+.ftrack i::before { bottom: calc(var(--f) * 100%); height: calc(var(--g) * 100%); background: var(--c); opacity: .35; mix-blend-mode: multiply; }
+.ftrack.A { --c: rgb(40,120,230); } .ftrack.B { --c: rgb(215,35,25); }
+/* B: a band of paint on the rock. */
+.fgauge { width: 30px; height: 200px; border-radius: 15px; box-shadow: inset 0 0 0 3px rgba(40,25,10,.35); overflow: hidden; }
+.fgauge .fill, .fgauge .inc { position: absolute; left: 0; right: 0; bottom: 0; mix-blend-mode: multiply; border-radius: 12px 12px 0 0; }
+.fgauge.A .fill { background: rgb(40,110,220); } .fgauge.B .fill { background: rgb(200,40,25); }
+.fgauge.A .inc { background: rgba(40,110,220,.35); } .fgauge.B .inc { background: rgba(200,40,25,.35); }
+/* C: a pile of food at the den mouth. */
+.fpile { width: 0; height: 0; }
+.fpile i { position: absolute; width: 24px; height: 18px; border-radius: 50%; transform: translate(-50%, 0); box-shadow: 1px 2px 2px rgba(0,0,0,.45); }
+.fpile i.m { background: radial-gradient(circle at 35% 30%, #d88a78, #9a3a2a); }
+.fpile i.f { background: radial-gradient(circle at 35% 30%, #f0c060, #b87a18); }
+.fpile i.g { background: radial-gradient(circle at 35% 30%, #d8cf8a, #8e8a3a); }

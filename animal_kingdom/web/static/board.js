@@ -176,7 +176,33 @@ function renderField(el, M, g, cards, ui) {
     const x = p === 'A' ? 150 : 1522, target = p === 'B' && ui.hqRing;
     s += put(`denhit ${p}${target ? ' tgt legal' : ''}`, x, 355, '', '', target ? 'data-hq="1"' : '');
     if (document.documentElement.dataset.d === '1') s += put('denflag lift', p === 'A' ? 222 : 1450, 238, kitImg(p === 'A' ? 'flag_blue' : 'flag_red'), p === 'B' ? 'transform:translate(-50%,-50%) scaleX(-1)' : '');
-    s += put(`slab ${p}`, x, 570, `<b class="num">${g.food[p]}</b><span class="num">+${g.income[p]} / turn</span>`);
+    const F = document.documentElement.dataset.f || '';
+    if (!F) { s += put(`slab ${p}`, x, 570, `<b class="num">${g.food[p]}</b><span class="num">+${g.income[p]} / turn</span>`); continue; }
+    // Food sketches (lab): the painted slab is covered with grass cloned from just below it.
+    const sx = p === 'A' ? 12 : 1432;
+    s += `<div class="grasspatch" style="left:${sx}px;top:486px;background-position:${-sx}px ${-(486 + 96)}px"></div>`;
+    const food = g.food[p], inc = g.income[p], win = g.winFood, f1 = Math.min(1, food / win), f2 = Math.min(1, (food + inc) / win);
+    const mouth = p === 'A' ? 252 : 1420;
+    if (F === 'a') {
+      // Ten stones from the grass up to the den mouth, each 10 food; filled from the far end toward the den.
+      let st = '';
+      for (let i = 0; i < 10; i++) {
+        const lo = i / 10, fill = Math.max(0, Math.min(1, (f1 - lo) * 10)), ghost = Math.max(0, Math.min(1, (f2 - lo) * 10)) - fill;
+        st += `<i style="top:${(9 - i) * 25}px;--f:${fill};--g:${ghost}"></i>`;
+      }
+      s += put(`ftrack ${p}`, p === 'A' ? 232 : 1440, 560, st);
+      s += put(`carved ${p}`, p === 'A' ? 136 : 1536, 560, `${food}`);
+    } else if (F === 'b') {
+      s += put(`fgauge ${p}`, p === 'A' ? 110 : 1562, 330, `<div class="inc" style="height:${f2 * 100}%"></div><div class="fill" style="height:${f1 * 100}%"></div>`);
+      s += put(`carved ${p}`, p === 'A' ? 136 : 1536, 560, `${food}`);
+    } else if (F === 'c') {
+      const n = Math.round(f1 * 14);
+      let pile = '';
+      for (let i = 0; i < n; i++) { const row = i < 5 ? 0 : i < 9 ? 1 : i < 12 ? 2 : 3, k = [i, i - 5, i - 9, i - 12][row], w = [5, 4, 3, 2][row];
+        pile += `<i class="${['m', 'f', 'm', 'f', 'g'][i % 5]}" style="left:${(k - (w - 1) / 2) * 22}px;bottom:${row * 16}px"></i>`; }
+      s += put(`fpile ${p}`, p === 'A' ? 262 : 1410, 408, pile);
+      s += put(`carved ${p}`, p === 'A' ? 136 : 1536, 560, `${food}<small> / ${win}</small>`);
+    }
   }
   if (!MAP_) for (const p of ['A', 'B']) {
     const food = g.food[p], inc = g.income[p], win = g.winFood, f1 = Math.min(1, food / win), f2 = Math.min(1, (food + inc) / win);
