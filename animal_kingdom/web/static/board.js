@@ -7,6 +7,8 @@
 import { CROP, hasArt, artUrl } from './art.js';
 
 const key = (c, r) => `${c},${r}`;
+// Map D's clearings as painted: centre x, y and radius (measured in board/r8/kit/clearings.json).
+const CLEAR = {"1,1": [368.7, 182.1, 64.5], "2,1": [601.8, 180.1, 65.0], "3,1": [842.7, 181.2, 67.3], "4,1": [1076.4, 179.2, 70.1], "5,1": [1314.3, 179.9, 68.5], "1,2": [374.1, 368.8, 68.7], "2,2": [603.8, 368.7, 68.5], "3,2": [841.5, 368.4, 67.8], "4,2": [1072.3, 371.5, 67.3], "5,2": [1310.2, 370.7, 69.2], "1,3": [366.8, 555.4, 67.6], "2,3": [604.9, 556.9, 70.0], "3,3": [840.4, 560.6, 71.5], "4,3": [1076.1, 557.8, 70.0], "5,3": [1311.8, 561.4, 69.9]};
 // Medallion sprites (board/r10): sprite size, hole centre and radius, outer radius, strength-plate face centre and size (sprite px).
 const MEDG = {
   D: {"a": {"W": 375, "hx": 188.5, "hy": 196.5, "hr": 117.5, "R": 185.7, "plate": [67.5, 69.5, 95, 103]}, "b": {"W": 375, "hx": 188.5, "hy": 196.5, "hr": 116.5, "R": 186.3, "plate": [67.0, 71.0, 96, 104]}},
@@ -286,11 +288,16 @@ function renderField(el, M, g, cards, ui) {
     if (ui.preview && ui.preview.cr === cr) h = unit({ id: ui.preview.id, owner: 'A', str: ui.preview.str }, stack.slice().reverse(), true);
     else if (stack.length) h = unit(stack[stack.length - 1], stack.slice(0, -1).reverse(), false);
     const dropped = ui.anim && stack.length && ((ui.anim.board[cr] || []).slice(-1)[0] || {}).iid !== stack[stack.length - 1].iid;
+    const SM = document.documentElement.dataset.m === 'S' && VAR === 'sD';
+    if (SM && stack.length) { const top = stack[stack.length - 1], [gx, gy, gr] = CLEAR[cr];
+      s += `<div class="ringtint ${top.owner}" style="left:${gx - gr - 26}px;top:${gy - gr - 26}px;width:${2 * gr + 52}px;height:${2 * gr + 52}px;-webkit-mask-position:${-(gx - gr - 26)}px ${-(gy - gr - 26)}px;mask-position:${-(gx - gr - 26)}px ${-(gy - gr - 26)}px"></div>`; }
     const cls = ['cr', rings.has(cr) ? 'tgt legal' : '', stack.length ? 'occ' : '', recent.has(cr) ? 'recent' : '', dropped ? 'drop' : ''].join(' ');
-    s += put(cls, X(c), Y(r), h, `z-index:${M.rows - r + 1}`, `data-cr="${cr}"`);
+    const at = SM ? CLEAR[cr] : [X(c), Y(r)];
+    s += put(cls, at[0], at[1], h, `z-index:${M.rows - r + 1}`, `data-cr="${cr}"`);
   }
   function unit(u, under, ghost) {
     const MED = document.documentElement.dataset.m;
+    if (MED === 'S' && VAR === 'sD') return stoneUnit(u, under, ghost);
     if (MED) return medUnit(u, under, ghost, MED);
     const card = cards[u.id], base = card.str === '*' ? null : card.str;
     const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';
@@ -304,6 +311,19 @@ function renderField(el, M, g, cards, ui) {
   }
   // Medallion in the card's language (lab m=A|B|C, kit/med<X>_*): matte brass ring with a team-enamel band, the card's
   // square strength plate, a parchment name tab, a small brass tab for the buried count. Geometry measured on each sprite.
+  // Stone mode: the clearing's own stones carry the team colour (.ringtint); the portrait fills the clearing;
+  // strength on a small team-colour plate; no name on the board (hover shows the card).
+  function stoneUnit(u, under, ghost) {
+    const card = cards[u.id], base = card.str === '*' ? null : card.str, D = 128;
+    const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';
+    const kws = (card.kw || []).filter(k => BOARD_KW[k]).map(k => `<img src="${kit(BOARD_KW[k])}" alt="" title="${k}" draggable="false">`).join('');
+    const side = u.owner === 'A' ? 'a' : 'b';
+    return `<div class="unit stone ${u.owner}${ghost ? ' ghost' : ''}" style="--pp:${D}px">${portrait(u.id, D, card.name)}` +
+      `<div class="splate">${kitImg('plate_' + side)}<span class="${delta.trim()}">${u.str}</span></div>` +
+      (under.length && !ghost ? `<div class="under">${kitImg(u.owner === 'A' ? 'token_blue' : 'token_red')}<span class="num">${under.length}</span></div>` : '') +
+      (kws ? `<div class="kws">${kws}</div>` : '') +
+      (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') + '</div>';
+  }
   function medUnit(u, under, ghost, M) {
     // Team-colour kits (D/E/F): per-side sprites med<X>_{a|b}, tab_, num_, ring_; geometry per side.
     const side = u.owner === 'A' ? 'a' : 'b', G = MEDG[M][side], sc = 172 / (2 * G.R), P = 2 * G.hr * sc + 4, C = 82;
