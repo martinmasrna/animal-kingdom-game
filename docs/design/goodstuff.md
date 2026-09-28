@@ -50,6 +50,8 @@ Strength isn't linear either, since covering is strictly-greater: a point is wor
 - **Food costs stay rare,** around 10% of cards, so food never becomes mana.
 - **Gated retrieval over raw draw.** Generic draw helps a pile more than a synergy deck, since almost any card helps a pile and only the missing piece helps a synergy hand; "draw a Cat" helps the committed deck only (the shared-pool study, `~/.claude/knowledge/studies/shared-pool-card-games/`).
 
+**Polar Bear is the benchmark.** It stays a rare 8 with Apex Predator and nothing else, the ceiling of what raw stats buy. If it is simply the best unit in the game, the synergy payoffs aren't strong enough, and the fix belongs to them, not to the Bear (Martin, 2026-09-28).
+
 The per-card measure of all this is **synergy = home value minus pile value**, by paired swaps: a goodstuff card scores near zero, a real synergy card high. Target: synergy cards score high *and* are worth at home at least what the pile's staples are worth.
 
 ## Held in reserve: heroes
