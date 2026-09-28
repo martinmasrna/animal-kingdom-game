@@ -152,3 +152,9 @@
 .bx.paint .stone.carved img { width: 100%; height: 100%; display: block; }
 .bx .dcount { display: flex; justify-content: center; gap: 1px; width: 110px; margin-left: -55px; margin-top: -22px; text-shadow: none; }
 .bx .dcount img { height: 44px; opacity: .92; }
+/* polish pass: in-game tips, calmer neutral stones, readable dimmed cards, End turn contrast */
+.tip { position: fixed; z-index: 80; display: none; pointer-events: none; padding: 5px 10px; border-radius: 6px; background: rgba(28,22,14,.94); border: 1px solid #6b5a40;
+  font: 600 13px 'Source Serif 4', Georgia, serif; color: #f4efe6; box-shadow: 0 4px 12px rgba(0,0,0,.5); }
+.bx.paint .hc.dim::after { background: rgba(20,16,10,.42); }
+.bx.paint .tbtn.A { color: #0f213b; text-shadow: 0 1px 0 rgba(255,255,255,.25); font-size: 18px; }
+.bx.paint .tbtn .pips i { background: #0f213b; } .bx.paint .tbtn .pips i.used { border-color: #0f213b; background: transparent; }

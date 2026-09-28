@@ -35,8 +35,8 @@ function unit(u, under, cards, extra = '') {
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner}" style="transform:translate(${(i + 1) * 7}px,${(i + 1) * 8}px);z-index:${-i - 1}"></div>`).join('');
   const D = PAINT ? 98 : 108, rim = PAINT ? `<img class="rimimg" src="/static/kit2/rim_${u.owner === 'A' ? 'a' : 'b'}.webp" alt="" draggable="false">` : '';
   return `${peek}<div class="ring${hasArt(u.id) ? '' : ' noart'}" style="${portrait(u.id, D)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
-    rim + `<div class="boss num">${u.str}</div>` + (u.timer ? `<div class="timer num" title="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${u.timer}</div>` : '') +
-    (kw.length ? `<div class="kw" title="${(c.keywords || []).filter(k => BOARD_KW[k]).join(', ')}">${kw.join('')}</div>` : '') + extra;
+    rim + `<div class="boss num">${u.str}</div>` + (u.timer ? `<div class="timer num" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${u.timer}</div>` : '') +
+    (kw.length ? `<div class="kw" data-tip="${(c.keywords || []).filter(k => BOARD_KW[k]).join(', ')}">${kw.join('')}</div>` : '') + extra;
 }
 
 // The board band: paths, payout stones, crossroads, and the two dens that are also the food stores.
@@ -89,8 +89,8 @@ export function renderBoard(el, M, g, cards, ui) {
         fruit += put('pit', px, py, `<img src="/static/kit2/pits/${side === 'A' ? 'a' : 'b'}pit${i % 3 + 1}_${r}_${t - r}.webp" alt="" draggable="false">`);
       });
       const [mx, my] = MOUTH[side], [kx, ky] = CROWN[side];
-      s += fruit + put(`dcount ${side}`, kx, ky, String(food).split('').map(d => `<img src="/static/kit2/num/${side === 'A' ? 'a' : 'b'}${d}.webp" alt="${d}" draggable="false">`).join(''), `title="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
-        put(`mouth${ring}`, mx, my, '', `data-hq="${side}" title="${side === 'A' ? 'Your den' : 'Their den'}"`);
+      s += fruit + put(`dcount ${side}`, kx, ky, String(food).split('').map(d => `<img src="/static/kit2/num/${side === 'A' ? 'a' : 'b'}${d}.webp" alt="${d}" draggable="false">`).join(''), `data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
+        put(`mouth${ring}`, mx, my, '', `data-hq="${side}"`);
       continue;
     }
     const H = 404, fh = Math.min(food, win) / win * H, gh = Math.max(0, Math.min(inc, win - food)) / win * H;

@@ -424,6 +424,15 @@ function drawGame() {
 
 
 // ------------------------------------------------------------------ game screen, grey-box layout (box.js)
+// Hover text in the box screen sits on a small dark plaque by the pointer, never in a browser tooltip.
+function wireTips(root) {
+  let tip = document.getElementById('tip');
+  if (!tip) { tip = document.createElement('div'); tip.id = 'tip'; tip.className = 'tip'; document.body.appendChild(tip); }
+  root.addEventListener('mouseover', e => { const t = e.target.closest('[data-tip]'); if (!t) { tip.style.display = 'none'; return; }
+    tip.textContent = t.dataset.tip; tip.style.display = 'block'; });
+  root.addEventListener('mousemove', e => { tip.style.left = (e.clientX + 14) + 'px'; tip.style.top = (e.clientY + 16) + 'px'; });
+  root.addEventListener('mouseleave', () => tip.style.display = 'none');
+}
 function boxScreen() {
   if (screen !== 'game') {
     screen = 'game';
@@ -442,7 +451,7 @@ function boxScreen() {
       <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
       <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
       <div class="endov" id="endov"></div></div></div>`;
-    fitStage(); wireNotes();
+    fitStage(); wireNotes(); wireTips(document.getElementById('scr'));
     const $ = id => document.getElementById(id);
     $('menubtn').onclick = e => { e.stopPropagation(); $('menudrop').classList.toggle('on'); };
     $('livelink').onclick = e => { e.preventDefault(); e.stopPropagation(); $('menudrop').classList.remove('on'); setLive(!live); };
@@ -474,7 +483,6 @@ function drawBox() {
   // The opponent's hand: one card back each, centred across the board from yours.
   const nb = G.handCount[them], step = 52, bx0 = STAGE.w / 2 - (84 + (nb - 1) * step) / 2;
   $('opphand').innerHTML = Array.from({ length: nb }, (_, i) => `<div class="abs back" style="left:${bx0 + i * step}px"></div>`).join('');
-  $('opphand').title = `${nb} card${nb === 1 ? '' : 's'} in their hand · ${Object.values(G.unseen).reduce((a, b) => a + b, 0)} unseen`;
 
   // Your hand, centred under the board.
   const n = G.hand.length, cw = 143, gap = n > 1 ? Math.min(14, (1000 - n * cw) / (n - 1)) : 0, x0 = STAGE.w / 2 - (n * cw + (n - 1) * gap) / 2;
@@ -495,7 +503,6 @@ function drawBox() {
   // The deck is Draw 2; the End turn button is also the turn indicator.
   const canDraw = d.mine && !d.pend && G.legal.draw;
   $('deck').className = 'abs deck num' + (canDraw ? ' can' : ''); $('deck').innerHTML = canDraw ? 'Draw 2' : '';
-  $('deck').title = `${G.deckCount[you]} cards in your deck`;
   const tb = $('tbtn');
   if (playing && G.current === you) {
     const pips = Array.from({ length: G.actionsTotal }, (_, i) => `<i class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}"></i>`).join('');
@@ -664,8 +671,9 @@ function stackAt(cr) {
     return `<div class="sc ${u.owner}">${cardHTML(c, { str: top ? u.str : c.str, attrs: `style="--w:${w}px"` })}` +
       (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `</div>`; };
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
-  stackpop.innerHTML = `<div class="stk"><div class="cap">On top</div>${card(top, 190, true)}</div>` +
-    buried.map((u, i) => `<div class="stk"><div class="cap">${i === 0 ? 'Under it' : ''}</div>${card(u, 150)}</div>`).join('');
+  const cap = t => BOX ? '' : `<div class="cap">${t}</div>`;   // the box screen shows order by size alone: top card first, larger
+  stackpop.innerHTML = `<div class="stk">${cap('On top')}${card(top, 190, true)}</div>` +
+    buried.map((u, i) => `<div class="stk">${cap(i === 0 ? 'Under it' : '')}${card(u, 150)}</div>`).join('');
   stackpop.style.display = 'flex';
   const r = g.getBoundingClientRect(), w = stackpop.offsetWidth, h = stackpop.offsetHeight;
   stackpop.style.left = (r.right + 8 + w > innerWidth ? r.left - 8 - w : r.right + 8) + 'px';
