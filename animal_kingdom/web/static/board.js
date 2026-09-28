@@ -182,7 +182,7 @@ function renderField(el, M, g, cards, ui) {
     if (!F) { s += put(`slab ${p}`, x, 570, `<b class="num">${g.food[p]}</b><span class="num">+${g.income[p]} / turn</span>`); continue; }
     // Food sketches (lab): the painted slab is covered with grass cloned from just below it.
     const sx = p === 'A' ? 12 : 1432;
-    s += `<div class="grasspatch" style="left:${sx}px;top:486px;background-position:${-sx}px ${-(486 + 96)}px"></div>`;
+    if (F !== 'p') s += `<div class="grasspatch" style="left:${sx}px;top:486px;background-position:${-sx}px ${-(486 + 96)}px"></div>`;
     const food = g.food[p], inc = g.income[p], win = g.winFood, f1 = Math.min(1, food / win), f2 = Math.min(1, (food + inc) / win);
     const mouth = p === 'A' ? 252 : 1420;
     if (F === 'a') {
@@ -197,6 +197,10 @@ function renderField(el, M, g, cards, ui) {
     } else if (F === 'b') {
       s += put(`fgauge ${p}`, p === 'A' ? 110 : 1562, 330, `<div class="inc" style="height:${f2 * 100}%"></div><div class="fill" style="height:${f1 * 100}%"></div>`);
       s += put(`carved ${p}`, p === 'A' ? 136 : 1536, 560, `${food}`);
+    } else if (F === 'p') {
+      // Painted trough (kit/trough, fruit_ripe, fruit_green): the fruit strips are clipped to the food, inside the hollow.
+      s += put(`ptrough ${p}`, x, 560, `<div class="hollow"><div class="inc" style="width:${f2 * 100}%"></div><div class="fill" style="width:${f1 * 100}%"></div></div>` + kitImg('trough'));
+      s += put(`carved small ${p}`, x, 612, `${food}<small> / ${win}</small>`);
     } else if (F === 't') {
       // A carved trough filled with fruit toward the win at its end; next turn's income as unripe green fruit.
       s += put(`trough ${p}`, x, 560, `<div class="in"><div class="inc" style="width:${f2 * 100}%"></div><div class="fill" style="width:${f1 * 100}%"></div></div><span class="cap"></span>`);
