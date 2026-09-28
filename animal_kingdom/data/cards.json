@@ -213,14 +213,14 @@
       "text": "Whenever an Egg is removed, gain 10 food."
     },
     {
-      "id": "black_swan",
-      "name": "Black Swan",
+      "id": "nassim",
+      "name": "Nassim",
       "deck": "egg_control",
       "rarity": "legendary",
       "tags": ["Bird"],
       "base_strength": 3,
       "keywords": [],
-      "text": "The first time each turn you draw Black Swan, your opponent removes a random card from their hand."
+      "text": "The first time each turn you draw Nassim, your opponent removes a random card from their hand."
     },
     {
       "id": "stoop",
@@ -263,8 +263,8 @@
       "text": "Apex Predator."
     },
     {
-      "id": "black_mamba",
-      "name": "Black Mamba",
+      "id": "taipan",
+      "name": "Taipan",
       "deck": "egg_control",
       "rarity": "rare",
       "tags": ["Snake"],
@@ -293,8 +293,8 @@
       "text": "Flight. Battlecry: take a random card from your opponent's hand, then shuffle a card from your hand into your deck."
     },
     {
-      "id": "taipan",
-      "name": "Taipan",
+      "id": "black_mamba",
+      "name": "Black Mamba",
       "deck": "egg_control",
       "rarity": "rare",
       "tags": ["Snake"],

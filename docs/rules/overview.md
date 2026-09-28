@@ -61,7 +61,7 @@ One player is chosen to go first (by coin flip, until a better method is decided
 The **first player** draws **3** cards; the **second player** draws **4** cards. The extra card compensates the second player for the turn-order disadvantage of a place-or-draw game. Whether 3/4 is the right split is a tuning question — measure the first-player win rate before changing it.
 
 ## 4.4 Mulligan
-After the opening hands are dealt, each player, **first player first**, may return up to **three** cards from their hand, one at a time. Each returned card is replaced at once by the top card of the deck that is **not a copy of any card returned so far** (the blacklist: send away a Lion and no Lion comes back during the mulligan). A replacement may itself be returned, within the three. When the player stops, or has returned three, the returned cards are shuffled into the deck. This is a hidden decision: neither player sees what the other returned. Mulligan draws and the shuffle are part of setup and trigger nothing (Black Swan, Rattlesnake, Eon do not fire).
+After the opening hands are dealt, each player, **first player first**, may return up to **three** cards from their hand, one at a time. Each returned card is replaced at once by the top card of the deck that is **not a copy of any card returned so far** (the blacklist: send away a Lion and no Lion comes back during the mulligan). A replacement may itself be returned, within the three. When the player stops, or has returned three, the returned cards are shuffled into the deck. This is a hidden decision: neither player sees what the other returned. Mulligan draws and the shuffle are part of setup and trigger nothing (Nassim, Rattlesnake, Eon do not fire).
 
 ---
 
@@ -151,7 +151,7 @@ Some effects resolve on a delay — "in 2 turns, draw 2 cards" (Black Bear), "at
 - **Removal cancels the effect outright.** A unit sent to the Remove Pile is gone, not waiting; its pending effect never resolves. (A **Fragile** unit is removed *by* being covered, so for Fragile cards covering and cancelling are the same event.)
 - **Returning a unit to a hand resets its timer.** A replayed unit starts a fresh timer; it never resumes a partly-elapsed one.
 
-**Venom is the exception: it belongs to the bitten unit, not to the snake.** Black Mamba's bite ("at the start of your next turn, remove it") resolves even if the Mamba has been covered or removed, and even if the bitten unit is buried; it is cancelled only if the bitten unit leaves the board first.
+**Venom is the exception: it belongs to the bitten unit, not to the snake.** Taipan's bite ("at the start of your next turn, remove it") resolves even if the Taipan has been covered or removed, and even if the bitten unit is buried; it is cancelled only if the bitten unit leaves the board first.
 
 This is the same principle as the reaction-fizzle rule above: anything queued re-checks its unit before it resolves. Covering is placement, not an ability, so neither **Immovable** nor **Stealth** protects a timer — only strength (being hard to cover) does.
 

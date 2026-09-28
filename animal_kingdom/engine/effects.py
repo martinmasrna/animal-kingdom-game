@@ -383,7 +383,7 @@ def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True)
 # Discrete events (decision F2/F9): one event per card drawn, shuffled-into-deck, or
 # removed. Board-top units react via on_draw_event / on_shuffle_event / on_remove_event
 # hooks (Eon/Vulture/Egg Eater/Jackal); Rattlesnake's shuffle growth applies in every
-# zone; a *drawn card* may also react to itself via on_draw (Black Swan). Reactors resolve
+# zone; a *drawn card* may also react to itself via on_draw (Nassim). Reactors resolve
 # immediately, so no extra stack steps and no re-entrancy in this stage. state.py stays
 # free of effect imports - these wrappers sit above the card-movement primitives.
 
@@ -452,7 +452,7 @@ def shuffle_back(state: GameState, player: str, card_ids: list) -> None:
 
 def remove_from_hand(state: GameState, player: str, inst: UnitInstance) -> None:
     """Remove a card from hand to the Remove Pile: a *remove* (fires the remove event) but
-    NOT a Deathrattle (it never was on the board). Used by Black Swan, later by Rat."""
+    NOT a Deathrattle (it never was on the board). Used by Nassim, later by Rat."""
     state.hands[player].remove(inst)
     state.remove_pile.append(inst.card_id)
     _fire_remove_event(state, inst.card_id, inst.owner, None)
@@ -1085,11 +1085,11 @@ def _jackal_remove_event(state, unit, cr, event):        # an *adjacent* unit re
             gain_food(state, unit.owner, state.config.jackal_food)
 
 
-def _black_swan_drawn(state, inst):
+def _nassim_drawn(state, inst):
     # Hard, printed-text cap (not a Config dial - card-balance-todo's legendary redesign):
-    # "the first time each turn you draw Black Swan". Keyed by owner, not iid: a reshuffled
+    # "the first time each turn you draw Nassim". Keyed by owner, not iid: a reshuffled
     # redraw gets a fresh UnitInstance/iid, so the cap must survive across instances.
-    key = f"black_swan_turn_cap_{inst.owner}"
+    key = f"nassim_turn_cap_{inst.owner}"
     if state.turn_flags.get(key):
         return
     state.turn_flags[key] = True
@@ -1138,17 +1138,17 @@ def _viper_place(state, unit, cr):
                                    "options": targets})
 
 
-def _black_mamba_place(state, unit, cr):
+def _taipan_place(state, unit, cr):
     targets = _adjacent_enemy_targets(state, unit, cr)
     if targets:
-        state.effect_stack.append({"op": "venom", "kind": "mamba", "chooser": unit.owner,
+        state.effect_stack.append({"op": "venom", "kind": "taipan", "chooser": unit.owner,
                                    "options": targets})
 
 
 def _op_venom(state, step):
-    """Viper: the chosen adjacent enemy gets -3 strength, permanently. Black Mamba: the chosen
-    adjacent enemy is removed at the start of the Mamba owner's next turn. The venom is on the
-    bitten unit, not on the snake (rules §9.1 exception): it resolves even if the Mamba is gone
+    """Viper: the chosen adjacent enemy gets -3 strength, permanently. Taipan: the chosen
+    adjacent enemy is removed at the start of the Taipan owner's next turn. The venom is on the
+    bitten unit, not on the snake (rules §9.1 exception): it resolves even if the Taipan is gone
     or the bitten unit is buried, and is cancelled only if the bitten unit leaves the board."""
     options = step["options"]
     if "choice" not in step:
@@ -1165,13 +1165,13 @@ def _op_venom(state, step):
         state.scheduled.append({"iid": target.iid, "owner": step["chooser"], "remaining": 1,
                                 "while_buried": True,
                                 "step": {"op": "remove_iid", "iid": target.iid,
-                                         "by_player": step["chooser"], "by_card": "black_mamba"}})
+                                         "by_player": step["chooser"], "by_card": "taipan"}})
     return None
 
 
-def _taipan_place(state, unit, cr):
-    _push_remove_choice(state, unit.owner, "taipan",
-                        _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.taipan_max))
+def _black_mamba_place(state, unit, cr):
+    _push_remove_choice(state, unit.owner, "black_mamba",
+                        _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.black_mamba_max))
 
 
 def _eon_end_of_turn(state, unit, cr):
@@ -1690,7 +1690,7 @@ def _mock_removal_place(state, unit, cr):
 
 
 def _mock_saboteur_place(state, unit, cr):
-    # Baseline yardstick card: bare random hand-disruption (reuses Black Swan's seeded discard,
+    # Baseline yardstick card: bare random hand-disruption (reuses Nassim's seeded discard,
     # so it stays honest re: hidden info). No once-per-turn cap - it fires on placement.
     opponent = other_player(unit.owner)
     hand = state.hands[opponent]
@@ -1841,7 +1841,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
                         "on_remove_event": _eon_event},
     "vulture": {"on_remove_event": _vulture_remove_event},
     "egg_eater": {"on_remove_event": _egg_eater_remove_event},
-    "black_swan": {"on_draw": _black_swan_drawn},
+    "nassim": {"on_draw": _nassim_drawn},
     "owl": {"on_place": _owl_place},
     "raven": {"on_place": _raven_place},
     "ember": {"on_remove": _ember_remove},
@@ -1850,9 +1850,9 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "king_cobra": {"on_place": _king_cobra_place},
     "puff_adder": {"on_covered": _puff_adder_covered},
     "viper": {"on_place": _viper_place},
-    "taipan": {"on_place": _taipan_place},
-    "magpie": {"on_place": _magpie_place},
     "black_mamba": {"on_place": _black_mamba_place},
+    "magpie": {"on_place": _magpie_place},
+    "taipan": {"on_place": _taipan_place},
     "bird_egg": {"on_place": _bird_egg_place},
     "snake_egg": {"on_place": _snake_egg_place},
     # Food OTK: filtered draw + Deathrattle payoffs (Opossum's return lives in _dispose).

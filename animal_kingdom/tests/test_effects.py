@@ -385,34 +385,34 @@ def test_jackal_only_fires_on_adjacent_removal():
     assert s.food["A"] == CFG.jackal_food                # unchanged
 
 
-def test_black_swan_when_drawn_discards_from_opponents_hand_only():
-    s = make_state(current="A", decks={"A": ["black_swan"], "B": []})
+def test_nassim_when_drawn_discards_from_opponents_hand_only():
+    s = make_state(current="A", decks={"A": ["nassim"], "B": []})
     s.add_to_hand("A", "lion")
     s.add_to_hand("B", "fox")
-    effects.draw_cards(s, "A", 1)                        # draws Black Swan
-    assert sorted(hand_ids(s, "A")) == ["black_swan", "lion"]
+    effects.draw_cards(s, "A", 1)                        # draws Nassim
+    assert sorted(hand_ids(s, "A")) == ["lion", "nassim"]
     assert len(s.hands["B"]) == 0                        # lost its only card
     assert s.remove_pile == ["fox"]
 
 
-def test_black_swan_hard_cap_fires_once_per_turn():
+def test_nassim_hard_cap_fires_once_per_turn():
     s = make_state(current="A")
     s.add_to_hand("B", "fox")
     s.add_to_hand("B", "lion")
-    first = UnitInstance("black_swan", "A", s.new_iid())
+    first = UnitInstance("nassim", "A", s.new_iid())
     s.hands["A"].append(first)
-    effects._black_swan_drawn(s, first)
+    effects._nassim_drawn(s, first)
     assert len(s.hands["B"]) == 1                        # first trigger this turn: discards one
 
-    second = UnitInstance("black_swan", "A", s.new_iid())  # a fresh instance (e.g. reshuffled+redrawn)
+    second = UnitInstance("nassim", "A", s.new_iid())  # a fresh instance (e.g. reshuffled+redrawn)
     s.hands["A"].append(second)
-    effects._black_swan_drawn(s, second)
+    effects._nassim_drawn(s, second)
     assert len(s.hands["B"]) == 1                        # capped: no second discard this turn
 
     s.turn_flags = {}                                    # simulate rules._end_turn's reset
-    third = UnitInstance("black_swan", "A", s.new_iid())
+    third = UnitInstance("nassim", "A", s.new_iid())
     s.hands["A"].append(third)
-    effects._black_swan_drawn(s, third)
+    effects._nassim_drawn(s, third)
     assert len(s.hands["B"]) == 0                         # cap reset -> fires again next turn
 
 
@@ -1022,15 +1022,15 @@ def test_viper_permanently_shrinks_an_adjacent_enemy_so_a_bird_can_cover_it():
     assert s.owner_of("2,1") == "A"
 
 
-def test_black_mamba_venom_removes_the_bitten_unit_next_turn_even_if_buried_or_the_mamba_is_gone():
-    s = make_state(hands={"A": ["black_mamba"], "B": ["tiger"]},
+def test_taipan_venom_removes_the_bitten_unit_next_turn_even_if_buried_or_the_taipan_is_gone():
+    s = make_state(hands={"A": ["taipan"], "B": ["tiger"]},
                    decks={"A": ["eagle"] * 8, "B": ["eagle"] * 8})
     put(s, "2,1", "lion", "B")
-    rules.apply_action(s, PlaceAction("black_mamba", ("cr", "1,1")))  # bites the Lion at 2,1
+    rules.apply_action(s, PlaceAction("taipan", ("cr", "1,1")))  # bites the Lion at 2,1
     lion = s.top_unit("2,1")
     assert lion.card_id == "lion"
     rules.apply_action(s, DrawAction())                   # A ends the turn
-    put(s, "1,1", "lion", "B")                            # the Mamba is covered...
+    put(s, "1,1", "lion", "B")                            # the Taipan is covered...
     put(s, "2,1", "tiger", "B")                           # ...and the Lion buried under B's own Tiger
     rules.apply_action(s, DrawAction()); rules.apply_action(s, DrawAction())   # B's turn
     assert "lion" in s.remove_pile and s.top_unit("2,1").card_id == "tiger"
@@ -1090,12 +1090,12 @@ def test_magpie_takes_a_random_enemy_card_then_shuffles_one_of_yours_away():
 
 
 def test_taipan_removes_an_adjacent_enemy_of_strength_5_or_less():
-    s = make_state(hands={"A": ["taipan"]})
+    s = make_state(hands={"A": ["black_mamba"]})
     put(s, "2,1", "jaguar", "B")                          # a 5: in reach
-    rules.apply_action(s, PlaceAction("taipan", ("cr", "1,1")))
+    rules.apply_action(s, PlaceAction("black_mamba", ("cr", "1,1")))
     assert "jaguar" in s.remove_pile
 
-    s2 = make_state(hands={"A": ["taipan"]})
+    s2 = make_state(hands={"A": ["black_mamba"]})
     put(s2, "2,1", "cougar", "B")                         # a 6: out of reach
-    rules.apply_action(s2, PlaceAction("taipan", ("cr", "1,1")))
+    rules.apply_action(s2, PlaceAction("black_mamba", ("cr", "1,1")))
     assert s2.top_unit("2,1").card_id == "cougar"

@@ -112,7 +112,7 @@ class Config:
     black_bear_delay: int = 2           # turns until Black Bear draws
     black_bear_draw: int = 2            # baseline-ruler tuning 2026-07-13: 1→2 (draw-1 too weak vs draw-2 default)
     viper_poison: int = 3               # Viper's permanent strength loss on the bitten enemy
-    taipan_max: int = 5                 # Taipan removes an adjacent enemy of at most this strength
+    black_mamba_max: int = 5                 # Black Mamba removes an adjacent enemy of at most this strength
     eon_decay: int = 1                  # Eon's strength lost each time it shuffles itself back
     grizzly_bear_delay: int = 2         # turns until Grizzly Bear's random adjacent removal
 

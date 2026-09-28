@@ -795,3 +795,12 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 [data-v="sN2"] .payout.full { color: #fff !important; }
 [data-v="sN2"] .stonetint { width: 55px; height: 55px; }
 [data-v="sN2"] .stonetint { width: 52px; height: 52px; }
+
+/* sN2: pieces cover their whole stone ring; the food trough larger, count and fruit readable. */
+[data-v="sN2"] .cr .unit { scale: 1.04; }
+[data-v="sN2"] .strough { width: 330px; height: 73px; }
+[data-v="sN2"] .strough .hollow { transform: scale(.955, .9); }
+[data-v="sN2"] .strough .hollow i { width: 13px; height: 13px; }
+[data-v="sN2"] .sboard b { font-size: 40px; }
+[data-v="sN2"] .sboard i { font-size: 14px; }
+[data-v="sN2"] .strough > img { filter: drop-shadow(0 0 10px rgba(0,0,0,.45)) drop-shadow(3px 6px 6px rgba(20,10,0,.6)); }

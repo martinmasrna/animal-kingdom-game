@@ -155,7 +155,7 @@ STRENGTH_LIMITS = {
     "serval": "serval_min",
     "stoop": "stoop_max",
     "rhinoceros": "rhinoceros_max",
-    "taipan": "taipan_max",
+    "black_mamba": "black_mamba_max",
     "mock_sentry": "stoop_max",
     "mock_hunter": "jaguar_max",
     **{f"calib_rm3_{n}": "stoop_max" for n in (2, 3, 4, 5, 6)},

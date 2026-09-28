@@ -21,18 +21,6 @@ Focused follow-up to `decks/flavor-review.md`, including consequences of the Jul
 - [ ] Alternatives if Secretarybird feels too anti-Snake for the mixed tribe: **Goshawk, Harrier, Kite**.
 - [ ] Retire “Stoop” as the card name when the rarity change ships. It reads as an individual legendary name rather than a generic species.
 
-### 1.3 Black Swan becomes legendary
-
-“Black Swan” is a species/description, not an individual legendary name.
-
-- [ ] Shortlist:
-  - **Nocturne, the Black Swan** — elegant, dark, and disruptive.
-  - **Portent, the Black Swan** — directly evokes the unexpected bad event.
-  - **Calamity, the Black Swan** — louder and more playful; fits the random hand loss.
-  - **MARTIN NOTE** -- do some clever reference to Talib or whatever his name is
-- [ ] Recommended: **Nocturne** if the Egg deck should remain lyrical; **Portent** if effect legibility matters more.
-- [ ] Keep the animal a real black swan. The “black swan event” is metaphorical flavor, not a supernatural creature.
-
 ### 1.4 New Aggro cover-retaliation legendary
 
 The effect wants an animal known for aerial speed or evasive maneuvering:
@@ -101,8 +89,8 @@ The present pool mixes original evocative names (`Eon`, `Ember`, `Vesper`) with 
 
 ### Egg Control
 
-- [ ] **Keep:** Eon, Ember, Aurum. (Goliath is now the common Python.)
-- [ ] **Add an individual name to Black Swan** from §1.3.
+- Locked 2026-09-28: Eon (a Titanoboa, the Ouroboros), Ember (a fire-coloured bird, the phoenix), Aurum (a goose, the one that lays golden eggs), Nassim (a black swan, the Taleb wink).
+- [ ] **Peregrine Falcon** breaks the one-species rule against Aggro's Falcon. Aggro keeps Falcon (the fastest bird, the flying Cheetah); the Egg removal bird needs another predator bird.
 
 ### Colony
 
@@ -156,8 +144,8 @@ The present pool mixes original evocative names (`Eon`, `Ember`, `Vesper`) with 
 ## 5. Flavor-first art prompts to preserve mechanics
 
 - [ ] **Secretarybird:** a precise downward kick toward small prey; the bird remains airborne or just landing, supporting Flight plus capped removal.
-- [ ] **Titanoboa:** coils formed from silhouettes of removed animals; its size visibly grows with the Remove Pile.
-- [ ] **Black Swan legendary:** a calm dark bird whose arrival sends a flock scattering, showing hand disruption without magical effects.
+- [ ] **Eon (Titanoboa):** a vast ancient snake coiled in a ring, tail near its mouth; the Ouroboros without the myth's symbolism.
+- [ ] **Nassim (black swan):** a calm dark bird whose arrival sends a flock scattering, showing hand disruption without magical effects.
 - [ ] **Aggro retaliation legendary:** an enemy lunges into empty air while the bird snaps into a new flight line.
 - [ ] **Burrow:** show displaced soil and a distant emergence point; do not depict teleportation.
 - [ ] **Venom:** use visible bite/sting marks and a delayed weakening pose, not instant magical disintegration.

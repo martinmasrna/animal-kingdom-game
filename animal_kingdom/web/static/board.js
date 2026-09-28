@@ -257,7 +257,7 @@ function renderField(el, M, g, cards, ui) {
       const CALM = document.documentElement.dataset.c === '1', hx = p === 'A' ? 150 : 1522;
       if (CALM) {   // one compact block per player under their den: count, next turn's income, the trough
         // One object per player under their den: the trough, the count carved into its end-board, income small beneath it.
-        s += put(`strough ${p}`, hx, 548, `<div class="hollow">${t}</div>` + kitImg('trough_sign') +
+        s += put(`strough ${p}`, hx, document.documentElement.dataset.v === 'sN2' ? 648 : 548, `<div class="hollow">${t}</div>` + kitImg('trough_sign') +
           `<div class="sboard"><b>${food}</b>${inc > 0 ? `<i>+${inc}</i>` : ''}</div>`);
       } else {
       s += put('foodhud', p === 'A' ? 160 : 1512, 592);
