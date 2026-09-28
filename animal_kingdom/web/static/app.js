@@ -3,11 +3,12 @@
 import { renderBoard, portrait, kitImg, teamGem } from './board.js';
 import { hasArt, artUrl } from './art.js';
 import { cardHTML } from './card.js';
+import { renderBoard as renderBox, STAGE } from './box.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const COVER = { cats_midrange: 'king_theron' };
 const RANK = { legendary: 0, rare: 1, common: 2 };
-const COL = { A: 'var(--you)', B: 'var(--them)' };
+const COL = { A: 'var(--you)', B: 'var(--them)' };   // history tiles; box.css maps them onto its team colours
 const SKIP = '__skip__';
 const artStyle = id => hasArt(id) ? `style="background-image:url(${artUrl(id)})"` : '';
 const sv = c => c.str === '*' ? -1 : c.str;
@@ -17,6 +18,8 @@ const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } ca
 const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } catch { /* private mode: the tab just can't reconnect */ } };
 
 let CARDS = {}, MAP, DECKS = [];
+// The game screen: the grey-box layout (box.js, the one being built toward), or the old painted kit with ?look=painted.
+const BOX = new URLSearchParams(location.search).get('look') !== 'painted';
 let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, hover: null, peek: false, menu: false, panel: null };
 
@@ -170,7 +173,7 @@ function disconnect() { if (live) setLive(false); if (ws) { wsId = null; ws.oncl
 const LIVE_LOOK = { v: 'sN2', p: '1', d: 'w', h: '1', f: 'o', t: '1', k: '1', m: 'S', sp: 'B', c: '1' };
 
 function matchScreen(id) {
-  Object.assign(document.documentElement.dataset, LIVE_LOOK);
+  if (!BOX) Object.assign(document.documentElement.dataset, LIVE_LOOK);
   const token = getToken(id);
   if (!token) { location.hash = '#/join/' + id; return; }
   if (wsId === id && ws) return;
@@ -207,9 +210,9 @@ function onView(prev) {
 // (data-v on <html>, read by app.css and board.js). No server match; nothing can be played.
 async function labScreen(name) {
   const q = new URLSearchParams(location.search), de = document.documentElement.dataset;
-  for (const k of ['v', 'p', 'd', 'h', 'f', 't', 'k', 'm', 'sp', 'pv', 'g', 'z', 'c']) de[k] = q.has(k) ? q.get(k) : (LIVE_LOOK[k] || '');
+  if (!BOX) for (const k of ['v', 'p', 'd', 'h', 'f', 't', 'k', 'm', 'sp', 'pv', 'g', 'z', 'c']) de[k] = q.has(k) ? q.get(k) : (LIVE_LOOK[k] || '');
   V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
-  screen = null; gameScreen(); labBar();
+  screen = null; gameScreen(); if (!BOX) labBar();
 }
 // A switcher over the lab frame: each row flips one design choice live.
 // Only the open questions; decided ones live in LIVE_LOOK.
@@ -256,6 +259,7 @@ function prematchScreen() {
 
 // ------------------------------------------------------------------ game screen
 function gameScreen() {
+  if (BOX) return boxScreen();
   if (screen !== 'game') {
     screen = 'game';
     // Everything lives on one stage drawn at the kit's native 1672x941 and scaled to the window (fitStage).
@@ -322,6 +326,7 @@ function decision() {
 
 function drawGame() {
   if (!V || !V.game) return;
+  if (BOX) return drawBox();
   const G = V.game, you = V.you, them = opp(), d = decision();
   const scr = document.getElementById('scr');
   scr.classList.toggle('choosing', !!(d.pend && d.pend.mode === 'choice'));
@@ -331,23 +336,7 @@ function drawGame() {
   const dots = [0, 1, 2].map(i => { const r = V.results[i]; return `<i class="${r ? (r.winner ? rel(r.winner) : '') : i === gameNo - 1 ? 'now' : ''}"></i>`; }).join('');
   const series = V.gauntlet ? `Game ${gameNo} of ${V.gauntlet.total}` : `Game ${gameNo} of 3 <span class="games">${dots}</span>`;
   document.getElementById('series').innerHTML = kitImg('plaque') + `<div class="tx"><b class="num">${series}</b><span>vs ${seatLabel(them)}</span></div>`;
-  const hist = document.getElementById('hist');
-  let hs = '', lastT = null;
-  G.history.forEach((m, i) => {
-    if (m.round !== lastT) { hs += `<div class="t">T${m.round}</div>`; lastT = m.round; }
-    const c = COL[rel(m.seat)];
-    if (m.kind === 'draw') { const dr = m.fx.find(f => f.k === 'draw' && f.seat === m.seat); hs += `<div class="hi draw" style="--c:${c}" data-h="${i}">+${dr ? dr.n : 0}</div>`; }
-    else { const k = m.fx.filter(f => f.k === 'remove').length;
-      hs += `<div class="hi gradart" style="--c:${c};${hasArt(m.card) ? `background-image:url(${artUrl(m.card)})` : ''}" data-h="${i}"><span class="s">${CARDS[m.card].str}</span>${k ? `<span class="k">×${k}</span>` : ''}</div>`; }
-  });
-  hist.innerHTML = hs; hist.scrollTop = hist.scrollHeight;
-  hist.querySelectorAll('[data-h]').forEach(el => {
-    const m = G.history[el.dataset.h];
-    el.onmouseenter = () => { if (m.kind === 'place') cardPop(el, m.card, moveLine(m), 'below'); else { pop.className = 'pop'; pop.innerHTML = `<div class="ev">${moveLine(m)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex'; const r = el.getBoundingClientRect(); pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; } };
-    el.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
-  });
-  const removed = document.getElementById('removed');
-  removed.innerHTML = `Removed <b>${G.removed.length}</b>`;
+  drawHistory(G);
 
   // Player plaques (each opens that player's decklist) and the turn banner with its action gems.
   const sum = o => Object.values(o).reduce((a, b) => a + b, 0);
@@ -360,10 +349,7 @@ function drawGame() {
     turn.innerHTML = kitImg('banner') + `<div class="tx"><b class="num">${cur === you ? 'Your turn' : 'Their turn'}</b><span class="acts">${gems}</span></div>`;
     turn.className = 'turn ' + rel(cur);
   } else turn.innerHTML = '';
-  const mine = document.getElementById('mine'), theirs = document.getElementById('theirs');
-  mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4><div class="rows">${rows(V.lists[you], G.deckLeft)}</div>`;
-  theirs.innerHTML = `<h4>Their cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them], G.unseen)}</div>`;
-  wirePops(mine); wirePops(theirs);
+  drawLists(G);
   showPanel();
 
   // Hand: full-bleed cards along the bottom ledge, overlapping when the hand is long.
@@ -436,6 +422,148 @@ function drawGame() {
   drawEnd();
 }
 
+
+// ------------------------------------------------------------------ game screen, grey-box layout (box.js)
+function boxScreen() {
+  if (screen !== 'game') {
+    screen = 'game';
+    app.innerHTML = `<div class="bx" id="scr"><div id="stage">
+      <div id="board"></div>
+      <div class="abs series" id="series"></div>
+      <div class="abs opphand" id="opphand"></div>
+      <div class="abs menu" id="menubtn">☰<span class="livedot" id="livedot"></span>
+        <div class="abs menudrop" id="menudrop"><a href="#" id="livelink">Live commentary (L)</a><a href="#" id="notelink">Add a note (N)</a><a href="#/">Leave match</a></div></div>
+      <div class="abs hand" id="hand"></div>
+      <div class="abs deck" id="deck"></div>
+      <div class="abs tbtn" id="tbtn"></div>
+      <div class="abs waiting" id="waiting"></div>
+      <div class="abs prompt" id="choicebar"></div>
+      <div class="abs opts" id="opts"></div>
+      <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
+      <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
+      <div class="endov" id="endov"></div></div></div>`;
+    fitStage(); wireNotes();
+    const $ = id => document.getElementById(id);
+    $('menubtn').onclick = e => { e.stopPropagation(); $('menudrop').classList.toggle('on'); };
+    $('livelink').onclick = e => { e.preventDefault(); e.stopPropagation(); $('menudrop').classList.remove('on'); setLive(!live); };
+    $('notelink').onclick = e => { e.preventDefault(); e.stopPropagation(); $('menudrop').classList.remove('on'); openNote(); };
+    // The series opens the history, the opponent's hand their decklist; hovering your deck shows yours.
+    const toggle = k => e => { e.stopPropagation(); ui.panel = ui.panel === k ? null : k; showPanel(); };
+    $('series').onclick = toggle('hist'); $('opphand').onclick = toggle('theirs');
+    $('deck').onmouseenter = () => { ui.panel = 'mine'; showPanel(); };
+    $('deck').onmouseleave = () => { if (ui.panel === 'mine') { ui.panel = null; showPanel(); } };
+    app.querySelectorAll('.panel').forEach(el => el.onclick = e => e.stopPropagation());
+    $('scr').addEventListener('click', () => { $('menudrop').classList.remove('on'); if (ui.panel) { ui.panel = null; showPanel(); } });
+    $('deck').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.legal.draw) act({ kind: 'draw' }); };
+    $('tbtn').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.canPass) act({ kind: 'pass' }); };
+    wireBoard();
+  }
+  drawGame();
+}
+
+function drawBox() {
+  const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
+  const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
+  lastDecision = d;
+
+  const gameNo = playing ? V.results.length + 1 : V.results.length;
+  const dots = [0, 1, 2].map(i => { const r = V.results[i]; return `<i class="${r ? (r.winner ? rel(r.winner) : '') : i === gameNo - 1 ? 'now' : ''}"></i>`; }).join('');
+  $('series').innerHTML = V.gauntlet ? `Game ${gameNo} of ${V.gauntlet.total}` : `Game ${gameNo} of 3 ${dots}`;
+  drawHistory(G); drawLists(G); showPanel();
+
+  // The opponent's hand: one card back each, centred across the board from yours.
+  const nb = G.handCount[them], step = 52, bx0 = STAGE.w / 2 - (84 + (nb - 1) * step) / 2;
+  $('opphand').innerHTML = Array.from({ length: nb }, (_, i) => `<div class="abs back" style="left:${bx0 + i * step}px"></div>`).join('');
+  $('opphand').title = `${nb} card${nb === 1 ? '' : 's'} in their hand · ${Object.values(G.unseen).reduce((a, b) => a + b, 0)} unseen`;
+
+  // Your hand, centred under the board.
+  const n = G.hand.length, cw = 143, gap = n > 1 ? Math.min(14, (1000 - n * cw) / (n - 1)) : 0, x0 = STAGE.w / 2 - (n * cw + (n - 1) * gap) / 2;
+  const hand = $('hand');
+  hand.innerHTML = G.hand.map((h, i) => {
+    const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id], pick = d.handPick.has(h.iid);
+    const cls = [c.rarity, can ? 'can' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick ? 'dim' : ''].join(' ');
+    return `<div class="hc ${cls}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1}">${cardHTML(c, { str: h.str })}</div>`;
+  }).join('');
+  hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
+    e.stopPropagation();
+    const iid = Number(el.dataset.iid), id = el.dataset.id;
+    if (d.handPick.has(iid)) return act({ kind: 'choice', choice: iid });
+    if (!d.mine || !d.places[id]) return;
+    ui.sel = ui.sel === id ? null : id; ui.hover = null; drawGame();
+  });
+
+  // The deck is Draw 2; the End turn button is also the turn indicator.
+  const canDraw = d.mine && !d.pend && G.legal.draw;
+  $('deck').className = 'abs deck num' + (canDraw ? ' can' : ''); $('deck').innerHTML = canDraw ? 'Draw 2' : '';
+  $('deck').title = `${G.deckCount[you]} cards in your deck`;
+  const tb = $('tbtn');
+  if (playing && G.current === you) {
+    const pips = Array.from({ length: G.actionsTotal }, (_, i) => `<i class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}"></i>`).join('');
+    tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass ? ' can' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}</span>`;
+  } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = 'Their turn'; }
+  else { tb.className = 'abs tbtn'; tb.innerHTML = ''; }
+
+  // A pending choice: the asking card and its rule; card options float above the hand.
+  const bar = $('choicebar'), opts = $('opts'), waiting = $('waiting');
+  waiting.textContent = ''; opts.classList.remove('on'); opts.innerHTML = '';
+  if (d.pend && d.pend.kind === 'mulligan') {
+    const k = d.pend.returned;
+    bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b><p>Click a card to replace it; no copy of a card you replace can come back.</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`;
+    bar.classList.add('on');
+    $('skip').onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: SKIP }); };
+  } else if (d.pend) {
+    const src = d.pend.source && CARDS[d.pend.source];
+    const other = d.otherOpts.map((o, i) => `<span class="skip" data-x="${i}">${o.label}</span>`).join('') + (d.pend.optional ? `<span class="skip" id="skip">Skip</span>` : '');
+    bar.innerHTML = (src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>') + (other ? `<div class="btns">${other}</div>` : '');
+    bar.classList.add('on');
+    if (d.cardOpts.length) {
+      opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${cardHTML(c)}</div>`; }).join('');
+      opts.classList.add('on');
+      opts.querySelectorAll('[data-o]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.cardOpts[el.dataset.o].v }); });
+    }
+    bar.querySelectorAll('[data-x]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.otherOpts[el.dataset.x].v }); });
+    const sk = $('skip'); if (sk) sk.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: SKIP }); };
+  } else {
+    bar.classList.remove('on');
+    if (playing && G.opponentChoosing) waiting.textContent = G.history.length ? 'Opponent is choosing' : 'Opponent is mulliganing';
+  }
+  clearTimeout(drawGame.think);
+  if (playing && G.toAct === them && V.seats[them].bot) {
+    const ver = V.version;
+    drawGame.think = setTimeout(() => { if (V && V.version === ver && screen === 'game') waiting.textContent = 'Bot is thinking'; }, 2500);
+  }
+  drawBoard(d);
+  drawEnd();
+}
+
+// The history strip and both decklists, shared by both game screens.
+function drawHistory(G) {
+  const hist = document.getElementById('hist');
+  let hs = '', lastT = null;
+  G.history.forEach((m, i) => {
+    if (m.round !== lastT) { hs += `<div class="t">T${m.round}</div>`; lastT = m.round; }
+    const c = COL[rel(m.seat)];
+    if (m.kind === 'draw') { const dr = m.fx.find(f => f.k === 'draw' && f.seat === m.seat); hs += `<div class="hi draw" style="--c:${c}" data-h="${i}">+${dr ? dr.n : 0}</div>`; }
+    else { const k = m.fx.filter(f => f.k === 'remove').length;
+      hs += `<div class="hi gradart" style="--c:${c};${hasArt(m.card) ? `background-image:url(${artUrl(m.card)})` : ''}" data-h="${i}"><span class="s">${CARDS[m.card].str}</span>${k ? `<span class="k">×${k}</span>` : ''}</div>`; }
+  });
+  hist.innerHTML = hs; hist.scrollTop = hist.scrollHeight;
+  hist.querySelectorAll('[data-h]').forEach(el => {
+    const m = G.history[el.dataset.h];
+    el.onmouseenter = () => { if (m.kind === 'place') cardPop(el, m.card, moveLine(m), 'below'); else { pop.className = 'pop'; pop.innerHTML = `<div class="ev">${moveLine(m)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex'; const r = el.getBoundingClientRect(); pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; } };
+    el.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
+  });
+  const removed = document.getElementById('removed');
+  removed.innerHTML = `Removed <b>${G.removed.length}</b>`;
+}
+function drawLists(G) {
+  const sum = o => Object.values(o).reduce((a, b) => a + b, 0), you = V.you, them = opp();
+  const mine = document.getElementById('mine'), theirs = document.getElementById('theirs');
+  mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4><div class="rows">${rows(V.lists[you], G.deckLeft)}</div>`;
+  theirs.innerHTML = `<h4>Their cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them], G.unseen)}</div>`;
+  wirePops(mine); wirePops(theirs);
+}
+
 function showPanel() {
   for (const [k, id] of [['mine', 'mine'], ['theirs', 'theirs'], ['hist', 'histp']]) document.getElementById(id).classList.toggle('on', ui.panel === k);
   if (ui.panel === 'hist') { const h = document.getElementById('hist'); h.scrollTop = h.scrollHeight; }
@@ -443,7 +571,8 @@ function showPanel() {
 // The stage keeps its 1672x941 design size and scales, letterboxed, to the window.
 function fitStage() {
   const st = document.getElementById('stage'); if (!st) return;
-  st.style.transform = `scale(${Math.min(innerWidth / 1672, innerHeight / 941)}) translate(-50%, -50%)`;
+  const [w, h] = BOX ? [STAGE.w, STAGE.h] : [1672, 941];
+  st.style.transform = `scale(${Math.min(innerWidth / w, innerHeight / h)}) translate(-50%, -50%)`;
 }
 
 function moveLine(m) {
@@ -489,6 +618,7 @@ function drawBoard(d) {
   }
   const H = V.game.history, recent = [];
   for (let i = H.length - 1; i >= 0 && H[i].seat !== V.you; i--) if (H[i].target && H[i].target[0] === 'cr') recent.push(dcr(H[i].target[1]));
+  if (BOX) return renderBox(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent, current: V.phase === 'playing' ? rel(V.game.current) : null });
   renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent, enamel: store('ak:rim') !== 'metal', anim: ui.anim });
   ui.anim = null;   // animations play once, never on hover redraws
 }
