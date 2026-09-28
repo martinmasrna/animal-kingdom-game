@@ -431,7 +431,7 @@ function drawBoard(d) {
   }
   const H = V.game.history, recent = [];
   for (let i = H.length - 1; i >= 0 && H[i].seat !== V.you; i--) if (H[i].target && H[i].target[0] === 'cr') recent.push(dcr(H[i].target[1]));
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent });
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent, enamel: store('ak:rim') === 'enamel' });
 }
 
 function wireBoard() {
@@ -592,6 +592,13 @@ function applyInfo() { const st = document.getElementById('stage'); if (st) { st
 addEventListener('keydown', e => {
   if ((e.key === 'i' || e.key === 'I') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
     const cur = store('ak:info') || 'info-mid'; store('ak:info', INFO[(INFO.indexOf(cur) + 1) % 3]); applyInfo(); toast(`Information layer: ${store('ak:info').slice(5)}`, true);
+  }
+});
+
+// R swaps the unit rims between plain metal and team-colour enamel (a look being judged).
+addEventListener('keydown', e => {
+  if ((e.key === 'r' || e.key === 'R') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
+    store('ak:rim', store('ak:rim') === 'enamel' ? 'metal' : 'enamel'); drawBoard(); toast(`Rims: ${store('ak:rim')}`, true);
   }
 });
 

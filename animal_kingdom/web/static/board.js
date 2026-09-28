@@ -13,7 +13,7 @@ const OWN = { A: { rim: 'rim_a', gem: 'gem_a', token: 'token_a', den: 'den_a' },
 // Crossroads span the plateau; each den stands off its edge, with its food silo and food plaque below it.
 const HQX = { A: 150, B: 1522 }, DEN_Y = 290, PORTRAIT = 136;
 // Keywords that change what can be done to a unit already on the board (Flight and Apex Predator only matter while placing).
-const BOARD_KW = { Immovable: 'Immovable', Stealth: 'Stealth', Fragile: 'Fragile' };
+const BOARD_KW = { Immovable: 'kw_immovable', Stealth: 'kw_stealth', Fragile: 'kw_fragile' };
 
 // A round crop of the card art, `D` stage pixels across; the name stands in for missing art.
 export function portrait(id, D, name) {
@@ -48,7 +48,7 @@ export function renderBoard(el, M, g, cards, ui) {
     s += `<div class="wash ${st.owner}${st.full ? '' : ' part'}" style="left:${X(c)}px;top:${Y(r)}px;width:${X(c + 1) - X(c)}px;height:${Y(r + 1) - Y(r)}px"></div>`;
   }
   // Trails: lit in the owner's metal when both ends are theirs and chained back to their den.
-  const trail = (x, y, w, h, deg, lit) => put(`trail${lit ? ' lit ' + lit : ''}`, x, y, kitImg('trail') + (lit ? '<i class="line"></i>' : ''), `width:${w}px;height:${h}px;transform:translate(-50%,-50%) rotate(${deg}deg)`);
+  const trail = (x, y, w, h, deg, lit) => put(`trail${lit ? ' lit ' + lit : ''}`, x, y, kitImg('trail') + (lit ? `<img class="tint" src="${kit('trail')}" alt="" draggable="false">` : ''), `width:${w}px;height:${h}px;transform:translate(-50%,-50%) rotate(${deg}deg)`);
   const litOf = (a, b) => { const o = owner(a); return o && o === owner(b) && conn[o].has(a) && conn[o].has(b) ? o : ''; };
   for (let r = 1; r <= M.rows; r++) for (let c = 1; c <= M.cols; c++) {
     if (c < M.cols) s += trail((X(c) + X(c + 1)) / 2, Y(r), 170, 60, 0, litOf(key(c, r), key(c + 1, r)));
@@ -92,9 +92,10 @@ export function renderBoard(el, M, g, cards, ui) {
     const card = cards[u.id], base = card.str === '*' ? null : card.str;
     const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';
     const peek = under.slice(0, 3).map((b, i) => `<div class="buried" style="transform:translate(${(i + 1) * 8}px,${(i + 1) * 9}px);z-index:${-i - 1}">${kitImg(OWN[b.owner].rim)}</div>`).join('');
-    const kws = (card.kw || []).filter(k => BOARD_KW[k]).map(k => `<b>${BOARD_KW[k]}</b>`).join('');
-    return `<div class="unit lift ${u.owner}${ghost ? ' ghost' : ''}">${peek}<div class="ring"></div>${portrait(u.id, PORTRAIT, card.name)}<img class="rim" src="${kit(OWN[u.owner].rim)}" alt="" draggable="false">` +
-      `<div class="ribbon"><span>${card.name}</span>${kws}</div>` +
+    const kws = (card.kw || []).filter(k => BOARD_KW[k]).map(k => `<img src="${kit(BOARD_KW[k])}" alt="" title="${k}" draggable="false">`).join('');
+    const rim = ui.enamel ? OWN[u.owner].rim + '_enamel' : OWN[u.owner].rim;
+    return `<div class="unit lift ${u.owner}${ghost ? ' ghost' : ''}">${peek}${portrait(u.id, PORTRAIT, card.name)}<img class="rim" src="${kit(rim)}" alt="" draggable="false">` +
+      `<div class="ribbon">${kitImg(u.owner === 'A' ? 'ribbon_a' : 'ribbon_b')}<span class="num">${card.name}</span></div>` + (kws ? `<div class="kws">${kws}</div>` : '') +
       `<div class="gem">${kitImg(OWN[u.owner].gem)}<span class="num${delta}">${u.str}</span></div>` +
       (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') +
       (under.length && !ghost ? `<div class="under num">+${under.length}</div>` : '') + '</div>';
