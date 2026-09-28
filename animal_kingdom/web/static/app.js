@@ -167,7 +167,7 @@ function joinScreen(id) {
 function disconnect() { if (live) setLive(false); if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
 // The live look, Martin's picks (2026-09-28): painted map D, sandstone payout stones with engraved numbers,
 // war paint in team colour on each den (proposed, pending his look), bigger hand cards that grow on hover. The lab overrides these per frame.
-const LIVE_LOOK = { v: 'sD', p: '1', d: 'w', h: '1', f: 'o', t: '1', k: '1', m: 'S', sp: 'tl' };
+const LIVE_LOOK = { v: 'sD', p: '1', d: 'w', h: '1', f: 'o', t: '1', k: '1', m: 'S', sp: 'B' };
 
 function matchScreen(id) {
   Object.assign(document.documentElement.dataset, LIVE_LOOK);
@@ -213,7 +213,7 @@ async function labScreen(name) {
 }
 // A switcher over the lab frame: each row flips one design choice live.
 // Only the open questions; decided ones live in LIVE_LOOK.
-const LAB = [['sp', 'Strength', [['tl', 'plate top-left'], ['bc', 'plate bottom'], ['b', 'cast boss bottom'], ['t', 'cast boss top'], ['n', 'cast band bottom']]]];
+const LAB = [['sp', 'Strength', [['tl', 'plate top-left'], ['bc', 'plate bottom'], ['b', 'cast boss bottom'], ['B', 'big boss bottom'], ['t', 'cast boss top'], ['n', 'cast band bottom']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {
   let bar = document.getElementById('labbar'); if (!LAB.length) { if (bar) bar.remove(); return; }

@@ -7,6 +7,9 @@
 import { CROP, hasArt, artUrl } from './art.js';
 
 const key = (c, r) => `${c},${r}`;
+// Rim with a large bottom boss (board/r10 sheet_boss2), split so the portrait can sit over the rim's inner edge (a perfect
+// circle) and the boss over the portrait: ring circle fit on the plain arc, boss disc centre/radius, boss sprite offset.
+const BRIM3 = {"a": {"cx": 357.2, "cy": 353.6, "ri": 284.3, "ro": 357.4, "bx": 357.2, "by": 680.2, "br": 114.9, "W": 715, "bl": 241, "bt": 569, "bw": 233}, "b": {"cx": 357.7, "cy": 353.9, "ri": 285.6, "ro": 357.6, "bx": 355.9, "by": 679.7, "br": 115.6, "W": 716, "bl": 239, "bt": 568, "bw": 234}};
 // Rims with the strength seat cast in (board/r10 sheet_boss): ring centre/radii and the seat's centre, sprite px.
 const BRIM = {
   bot_a: { W: 404, cx: 201.5, cy: 197, ro: 202.1, ri: 160, nx: 200.5, ny: 346, ns: 46 }, bot_b: { W: 404, cx: 201.5, cy: 197, ro: 202.3, ri: 160, nx: 202, ny: 346, ns: 46 },
@@ -337,6 +340,16 @@ function renderField(el, M, g, cards, ui) {
     // Buried units peek out behind the portrait as discs in their owners' colours: how many, and whose.
     const peek = ghost ? '' : under.slice(0, 4).map((b, i) => `<i class="disc ${b.owner}" style="inset:${D / 2 - outer}px;transform:translate(${(i + 1) * 6}px,${(i + 1) * 7}px);z-index:${-i - 1}"></i>`).join('');
     const SP = document.documentElement.dataset.sp, BK = { b: 'bot', t: 'top', n: 'band' }[SP];
+    if (SP === 'B') {   // ring, then the portrait over its inner edge (a clean circle), then the boss with the number on top
+      const B = BRIM3[side], bs = outer / B.ro, Db = 2 * (B.ri + 6) * bs, c = Db / 2;
+      return `<div class="unit stone ${u.owner}${ghost ? ' ghost' : ''}" style="--pp:${Db}px">${peek}` +
+        `<img class="srim" src="${kit(`brim3_${side}`)}" alt="" draggable="false" style="z-index:0;width:${B.W * bs}px;left:${c - B.cx * bs}px;top:${c - B.cy * bs}px">` +
+        `<div class="pwrap">${portrait(u.id, Db, card.name)}</div>` +
+        `<img class="srim" src="${kit(`boss_${side}`)}" alt="" draggable="false" style="width:${B.bw * bs}px;left:${c + (B.bl - B.cx) * bs}px;top:${c + (B.bt - B.cy) * bs}px">` +
+        `<div class="bnum ${delta.trim()}" style="left:${c + (B.bx - B.cx) * bs - 20}px;top:${c + (B.by - B.cy) * bs - 20}px;font-size:${B.br * bs * 1.05}px">${u.str}</div>` +
+        (kws ? `<div class="kws">${kws}</div>` : '') +
+        (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') + '</div>';
+    }
     if (BK) {   // the seat is part of the rim sprite; the number is set into it
       const B = BRIM[`${BK}_${side}`], bs = outer / B.ro, Db = 2 * B.ri * bs + 2;
       return `<div class="unit stone ${u.owner}${ghost ? ' ghost' : ''}" style="--pp:${Db}px">${peek}${portrait(u.id, Db, card.name)}` +
