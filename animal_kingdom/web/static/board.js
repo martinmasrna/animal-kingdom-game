@@ -197,6 +197,15 @@ function renderField(el, M, g, cards, ui) {
     } else if (F === 'b') {
       s += put(`fgauge ${p}`, p === 'A' ? 110 : 1562, 330, `<div class="inc" style="height:${f2 * 100}%"></div><div class="fill" style="height:${f1 * 100}%"></div>`);
       s += put(`carved ${p}`, p === 'A' ? 136 : 1536, 560, `${food}`);
+    } else if (F === 'k') {
+      // The den's food cache: ten hollows at the den mouth, one portion of food per 10; next turn's income as pale portions.
+      let t = '';
+      for (let i = 0; i < 10; i++) {
+        const on = f1 >= (i + 1) / 10 - 1e-9, soon = !on && f2 >= (i + 1) / 10 - 1e-9;
+        t += `<i class="${on ? 'on' : soon ? 'soon' : ''}" style="left:${(i % 5) * 34 + (Math.floor(i / 5) ? 17 : 0)}px;top:${Math.floor(i / 5) * 30}px"><b></b></i>`;
+      }
+      s += put(`cache ${p}`, p === 'A' ? 150 : 1522, 548, t);
+      s += put(`carved small ${p}`, p === 'A' ? 150 : 1522, 630, `${food}<small> / ${win}</small>`);
     } else if (F === 'm') {
       // Tally on the den rock: ten paw prints in the owner's paint, one per 10 food.
       let t = '';
