@@ -92,7 +92,7 @@ def test_eon_capped_fires_once_per_turn_across_multiple_events():
     # gain food only once when capped.
     cfg = replace(Config.default(), cap_eon=True)
     s = make_state(config=cfg, hands={"A": ["pestis"]})
-    put(s, "1,1", "eon", "A")
+    put(s, "1,1", "eon_food_engine", "A")
     put(s, "1,2", "mouse", "A")             # connection anchor
     put(s, "2,1", "mouse", "B")
     put(s, "2,1", "rat", "B")               # same crossroad, same owner: stacks freely

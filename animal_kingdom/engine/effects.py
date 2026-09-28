@@ -1169,6 +1169,55 @@ def _op_venom(state, step):
     return None
 
 
+def _taipan_place(state, unit, cr):
+    for nb in sorted(state.game_map.neighbors(cr)):
+        top = state.top_unit(nb)
+        if top and top.owner != unit.owner:          # area venom: automatic, so Stealth doesn't hide
+            top.strength_counter -= state.config.taipan_poison
+
+
+def _eon_end_of_turn(state, unit, cr):
+    # The Ouroboros: it leaves the board (a return, not a remove - no Deathrattle, nothing to
+    # the Remove Pile) and shuffles into its owner's deck, a little smaller each cycle. The loss
+    # is kept per card id, like Rattlesnake's growth, so it survives the trip through the deck.
+    state.board[cr].remove(unit)
+    if not state.board[cr]:
+        del state.board[cr]
+    counters = state.card_strength_counters.setdefault(unit.owner, {})
+    counters["eon"] = counters.get("eon", 0) - state.config.eon_decay
+    shuffle_back(state, unit.owner, ["eon"])
+
+
+def _magpie_place(state, unit, cr):
+    state.effect_stack.append({"op": "magpie_steal", "player": unit.owner})
+
+
+def _op_magpie_steal(state, step):
+    """Take a random card from the opponent's hand (it becomes yours), then shuffle a card of
+    your choice from your hand into your deck. The stolen card isn't a remove: it changes hands."""
+    player = step["player"]
+    if "stolen" not in step:
+        step["stolen"] = True
+        theirs = state.hands[other_player(player)]
+        if theirs:
+            inst = state.rng.choice(theirs)
+            theirs.remove(inst)
+            state.hands[player].append(UnitInstance(inst.card_id, player, state.new_iid()))
+    hand = state.hands[player]
+    if not hand:
+        return None
+    if "choice" not in step:
+        if len(hand) == 1:
+            step["choice"] = hand[0].iid
+        else:
+            return PendingRequest("choice", player, options=[u.iid for u in hand], from_deck_reveal=True)
+    inst = next((u for u in hand if u.iid == step["choice"]), None)
+    if inst is not None:
+        hand.remove(inst)
+        shuffle_back(state, player, [inst.card_id])
+    return None
+
+
 def _puff_adder_covered(state, covered, coverer, cr):
     # "When an enemy unit covers this, remove that enemy if you control a Bird." Every cover,
     # not once; the Adder itself is buried by then, so the Bird has to be another unit on top.
@@ -1766,6 +1815,7 @@ OPS.update({
     "skunk_bounce": _op_skunk_bounce,
     "grizzly_strike": _op_grizzly_strike,
     "venom": _op_venom,
+    "magpie_steal": _op_magpie_steal,
 })
 
 
@@ -1788,8 +1838,9 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "shuck": {"on_place": _shuck_place},
     "jackal": {"on_remove_event": _jackal_remove_event},
     # Egg Control: draw/shuffle/remove food engine + filtered random draws.
-    "eon": {"on_draw_event": _eon_event, "on_shuffle_event": _eon_event,
-            "on_remove_event": _eon_event},
+    "eon": {"on_end_of_turn": _eon_end_of_turn},
+    "eon_food_engine": {"on_draw_event": _eon_event, "on_shuffle_event": _eon_event,
+                        "on_remove_event": _eon_event},
     "vulture": {"on_remove_event": _vulture_remove_event},
     "egg_eater": {"on_remove_event": _egg_eater_remove_event},
     "black_swan": {"on_draw": _black_swan_drawn},
@@ -1801,6 +1852,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "king_cobra": {"on_place": _king_cobra_place},
     "puff_adder": {"on_covered": _puff_adder_covered},
     "viper": {"on_place": _viper_place},
+    "taipan": {"on_place": _taipan_place},
+    "magpie": {"on_place": _magpie_place},
     "black_mamba": {"on_place": _black_mamba_place},
     "bird_egg": {"on_place": _bird_egg_place},
     "snake_egg": {"on_place": _snake_egg_place},

@@ -29,7 +29,7 @@ COSTS_RE = re.compile(r"costs (\d+) food", re.IGNORECASE)
 
 # card_id -> config attrs, one per "gain N food/more" number in text, in order.
 FOOD_CONSTANTS: dict[str, list[str]] = {
-    "eon": ["eon_food"],
+    "eon_food_engine": ["eon_food"],
     "egg_eater": ["egg_eater_food"],
     "queen_marabunta": ["queen_marabunta_per_colony"],
     "queen_honoria": ["queen_honoria_per_play"],
@@ -177,10 +177,16 @@ def test_no_strength_limit_card_escapes_the_check():
     assert printed - {"oxpecker"} == set(STRENGTH_LIMITS)
 
 
-STRENGTH_LOSS_RE = re.compile(r"gets -(\d+) strength", re.IGNORECASE)
+STRENGTH_LOSS_RE = re.compile(r"gets? -(\d+) strength", re.IGNORECASE)
 
 
 def test_strength_loss_text_matches_config():
     """Viper's printed "-N strength" equals viper_poison, and no other card prints a loss unchecked."""
     printed = {cid: int(m.group(1)) for cid, c in _cards().items() if (m := STRENGTH_LOSS_RE.search(c.text))}
-    assert printed == {"viper": Config.default().viper_poison}
+    cfg = Config.default()
+    assert printed == {"viper": cfg.viper_poison, "taipan": cfg.taipan_poison}
+
+
+def test_eon_decay_text_matches_config():
+    (n,) = re.findall(r"with -(\d+) strength", _cards()["eon"].text)
+    assert int(n) == Config.default().eon_decay

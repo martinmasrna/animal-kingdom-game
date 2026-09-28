@@ -340,7 +340,7 @@ def test_clone_is_independent_with_strength_counters():
 
 def test_eon_gains_on_draw_shuffle_and_remove():
     s = make_state(decks={"A": ["lion", "fox"], "B": []})
-    put(s, "1,1", "eon", "A")
+    put(s, "1,1", "eon_food_engine", "A")
     effects.draw_cards(s, "A", 1)
     assert s.food["A"] == CFG.eon_food                   # a draw
     effects.shuffle_back(s, "A", ["rat"])
@@ -1066,3 +1066,33 @@ def test_queen_adira_on_top_still_draws_for_a_cat_removal():
     put(s, "2,2", "grizzly_bear", "B")
     rules.apply_action(s, PlaceAction("tiger", ("cr", "2,2")))
     assert len(s.hands["A"]) == 1
+
+
+def test_eon_eats_then_shuffles_itself_back_one_smaller_each_cycle():
+    s = make_state(hands={"A": ["eon"]}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6})
+    put(s, "1,1", "caracal", "A")
+    put(s, "2,1", "king_theron", "B")                     # an 8: Eon (10) lands on it and eats it
+    rules.apply_action(s, PlaceAction("eon", ("cr", "2,1")))
+    assert "king_theron" in s.remove_pile and s.top_unit("2,1").card_id == "eon"
+    rules.apply_action(s, DrawAction())                   # A's turn ends: Eon leaves
+    assert s.top_unit("2,1") is None and "eon" in s.decks["A"] and "eon" not in s.remove_pile
+    assert card_strength(s, "eon", "A") == 10 - CFG.eon_decay
+
+
+def test_magpie_takes_a_random_enemy_card_then_shuffles_one_of_yours_away():
+    s = make_state(hands={"A": ["magpie", "mouse"], "B": ["lion"]},
+                   decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("magpie", ("cr", "1,1")))
+    assert s.hands["B"] == []                              # the Lion was taken
+    rules.apply_action(s, ChoiceAction(next(u.iid for u in s.hands["A"] if u.card_id == "mouse")))
+    assert hand_ids(s, "A") == ["lion"] and "mouse" in s.decks["A"]
+    assert all(u.owner == "A" for u in s.hands["A"])
+
+
+def test_taipan_poisons_every_adjacent_enemy_by_one():
+    s = make_state(hands={"A": ["taipan"]})
+    put(s, "2,1", "lion", "B")
+    put(s, "1,2", "caracal", "B")
+    rules.apply_action(s, PlaceAction("taipan", ("cr", "1,1")))
+    assert effective_strength(s, s.top_unit("2,1")) == 6
+    assert effective_strength(s, s.top_unit("1,2")) == 5

@@ -33,7 +33,6 @@ There is no mana: every card costs one card and one placement action. Low streng
 - **Closest card:** reject a candidate that an existing card practically dominates, or that practically dominates one.
 - **Rarity sets a card's role in its deck, like Gwent's bronze, silver and gold.** Commons (3 copies) are the consistent engine that makes the deck work. Rares (2 copies) are flexible, situational cards for specific use cases. Legendaries (1 copy) are unique, potentially deck-defining cards.
 - **A higher rarity gets a better rate, never a worse one.** A rare or legendary with the same effect as a common is at least as strong.
-- **Legendaries are named individuals** (King Theron, Borealis, Aurum); species names are commons and rares.
 
 ## Guardrails
 
@@ -49,3 +48,4 @@ There is no mana: every card costs one card and one placement action. Low streng
 - Let the animal's real behaviour suggest the mechanic: birds fly over lines, elephants hold ground, lemmings swarm.
 - Rarity follows how exotic the animal is. Commons are everyday animals, rares exotic ones, legendaries a specific named individual of a real species. A legendary's name may evoke myth or folklore but never cites it (no "Bastet").
 - One species per pool among commons and rares; subspecies, sex and age variants count as the same species. Legendaries are exempt, being named individuals.
+- No "[adjective] animal" names that most people would see as the same animal (a Martial Eagle next to an Eagle). Species people tell apart are fine (Polar Bear, Grizzly, Black Bear). Falcon and Peregrine Falcon break this today.

@@ -147,6 +147,16 @@
       "deck": "egg_control",
       "rarity": "legendary",
       "tags": ["Snake"],
+      "base_strength": 10,
+      "keywords": ["Apex Predator"],
+      "text": "Apex Predator. At the end of your turn, shuffle this into your deck with -1 strength."
+    },
+    {
+      "id": "eon_food_engine",
+      "name": "Eon (food engine)",
+      "deck": "reserve",
+      "rarity": "legendary",
+      "tags": ["Snake"],
       "base_strength": 7,
       "keywords": [],
       "text": "Whenever a card is drawn, shuffled or removed, gain 1 food."
@@ -155,7 +165,7 @@
       "id": "goliath",
       "name": "Goliath",
       "deck": "egg_control",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": ["Snake"],
       "base_strength": "dynamic",
       "dynamic_strength": "removed_units_count",
@@ -186,7 +196,7 @@
       "id": "rattlesnake",
       "name": "Rattlesnake",
       "deck": "egg_control",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": ["Snake"],
       "base_strength": 0,
       "keywords": [],
@@ -225,7 +235,7 @@
     {
       "id": "eagle",
       "name": "Eagle",
-      "deck": "egg_control",
+      "deck": "reserve",
       "rarity": "common",
       "tags": ["Bird"],
       "base_strength": 5,
@@ -245,7 +255,7 @@
     {
       "id": "anaconda",
       "name": "Anaconda",
-      "deck": "egg_control",
+      "deck": "reserve",
       "rarity": "common",
       "tags": ["Snake"],
       "base_strength": 7,
@@ -271,6 +281,26 @@
       "base_strength": 3,
       "keywords": [],
       "text": "Battlecry: an adjacent enemy unit gets -3 strength."
+    },
+    {
+      "id": "magpie",
+      "name": "Magpie",
+      "deck": "egg_control",
+      "rarity": "rare",
+      "tags": ["Bird"],
+      "base_strength": 3,
+      "keywords": ["Flight"],
+      "text": "Flight. Battlecry: take a random card from your opponent's hand, then shuffle a card from your hand into your deck."
+    },
+    {
+      "id": "taipan",
+      "name": "Taipan",
+      "deck": "egg_control",
+      "rarity": "rare",
+      "tags": ["Snake"],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: all adjacent enemy units get -1 strength."
     },
     {
       "id": "king_cobra",
