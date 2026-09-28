@@ -1,8 +1,8 @@
 """The web server: static client, a small JSON API to create and join matches, and one
 WebSocket per player that pushes that seat's view after every change.
 
-Run: `./play` (or `python -m animal_kingdom.web.server --port 8000`). Matches live in memory;
-a restart ends them.
+Run: `./play` (or `python -m animal_kingdom.web.server --port 8000`). Every match is saved to
+`results/web_matches/` after each change and reloaded on start, so a restart doesn't end it.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ import json
 import logging
 import os
 import secrets
+import time
 import webbrowser
 from pathlib import Path
 
@@ -26,6 +27,8 @@ STATIC = Path(__file__).parent / "static"
 # Human games are the best design signal there is: every game with a human seat is kept,
 # one JSONL file per match, replayable with `python -m animal_kingdom.sim.replay FILE --index N`.
 LOG_DIR = Path(__file__).resolve().parents[2] / "results" / "human_games" / "web"
+MATCH_DIR = Path(__file__).resolve().parents[2] / "results" / "web_matches"
+KEEP_FINISHED = 24 * 3600    # seconds a finished match is still reloaded after a restart
 BOT_PAUSE = {"open": 1.6, "move": 1.1, "choice": 0.6}   # seconds: a beat before the bot opens its turn, then time to follow each move
 log = logging.getLogger("animal_kingdom.web")
 
@@ -54,7 +57,38 @@ class Hub:
             if mid not in self.matches:
                 return mid
 
+    def save(self, match: Match) -> None:
+        """Write the match to disk (atomically), so a server restart can resume it."""
+        if os.environ.get("AK_NO_GAME_LOGS"):
+            return
+        try:
+            MATCH_DIR.mkdir(parents=True, exist_ok=True)
+            tmp = MATCH_DIR / f".{match.id}.json.tmp"
+            tmp.write_text(json.dumps(match.to_dict()), encoding="utf-8")
+            tmp.replace(MATCH_DIR / f"{match.id}.json")
+        except Exception:
+            log.exception("could not save match %s", match.id)
+
+    def load(self) -> None:
+        """Reload saved matches: every unfinished one, and finished ones from the last day."""
+        if not MATCH_DIR.is_dir():
+            return
+        now = time.time()
+        for path in MATCH_DIR.glob("*.json"):
+            try:
+                d = json.loads(path.read_text(encoding="utf-8"))
+                if d["phase"] == "match_over" and now - path.stat().st_mtime > KEEP_FINISHED:
+                    continue
+                match = Match.from_dict(d)
+            except Exception:
+                log.exception("could not reload %s", path.name)
+                continue
+            match.on_game_end = save_game
+            self.matches[match.id] = match
+        log.info("reloaded %d saved matches", len(self.matches))
+
     async def broadcast(self, match: Match) -> None:
+        self.save(match)
         for ws, seat in list(self.sockets.get(match.id, ())):
             try:
                 await ws.send_json({"t": "view", "view": match.view(seat)})
@@ -133,6 +167,7 @@ async def create_match(req):
         match.version += 1
     match.on_game_end = save_game
     hub.matches[mid] = match
+    hub.save(match)
     return web.json_response({"id": mid, "token": token, "seat": "A"})
 
 
@@ -210,6 +245,12 @@ def make_app() -> web.Application:
         web.static("/static", STATIC),
     ])
     app.on_response_prepare.append(_revalidate)
+
+    async def resume(_app):
+        hub.load()
+        for match in hub.matches.values():
+            hub.kick_bot(match)
+    app.on_startup.append(resume)
     return app
 
 

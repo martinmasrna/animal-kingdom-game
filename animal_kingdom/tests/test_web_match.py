@@ -129,3 +129,17 @@ def test_gauntlet_runs_its_schedule_opponent_by_opponent_alternating_who_starts(
     g = m.view("A")["gauntlet"]
     assert g["played"] == 4 and g["next"] is None
     assert [(r["w"], r["l"]) for r in g["record"]] == [(1, 1), (1, 1)]
+
+
+def test_a_saved_match_resumes_mid_game_after_a_restart():
+    m = _match()
+    rng = random.Random(3)
+    for _ in range(12):                                  # into the game, some moves made
+        s = m.to_act()
+        m.act(s, rng.choice(rules.legal_actions(m.state)))
+    saved = json.loads(json.dumps(m.to_dict()))          # through JSON, as on disk
+    r = Match.from_dict(saved)
+    assert r.view("A")["game"] == m.view("A")["game"]
+    assert r.to_act() == m.to_act() and set(r.bots) == set(m.bots)
+    s = r.to_act()
+    r.act(s, rules.legal_actions(r.state)[0])            # and it plays on

@@ -11,7 +11,7 @@ import random
 import secrets
 import time
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -79,6 +79,17 @@ def _snapshot(state: GameState) -> dict:
         "food": dict(state.food),
         "turn": state.turn_counter,
     }
+
+
+def _jsonable(x):
+    """Sets (hand iids in a move's snapshot) become sorted lists; membership tests still work."""
+    if isinstance(x, dict):
+        return {k: _jsonable(v) for k, v in x.items()}
+    if isinstance(x, (list, tuple)):
+        return [_jsonable(v) for v in x]
+    if isinstance(x, set):
+        return sorted(x)
+    return x
 
 
 def _effects(state: GameState, move: Move) -> list:
@@ -296,6 +307,33 @@ class Match:
         s = self.to_act()
         state = self.state.clone()
         return self.bots[s].choose(state.view_for(s), rules.legal_actions(state), state)
+
+    # ----------------------------------------------------------------- persistence
+    def to_dict(self) -> dict:
+        """Everything needed to resume this match after a server restart."""
+        return {"id": self.id, "seats": {p: asdict(seat) for p, seat in self.seats.items()},
+                "phase": self.phase, "results": self.results, "seed": self.seed,
+                "actions": self.actions, "notes": self.notes, "action_times": self.action_times,
+                "started_at": self.started_at, "created": self.created.isoformat(),
+                "schedule": self.schedule, "version": self.version,
+                "state": self.state.to_dict() if self.state is not None else None,
+                "history": [_jsonable(asdict(m)) for m in self.history]}
+
+    @staticmethod
+    def from_dict(d: dict) -> "Match":
+        seats = {p: Seat(**s) for p, s in d["seats"].items()}
+        m = Match(d["id"], seats["A"])
+        m.seats = seats
+        m.phase, m.results, m.seed = d["phase"], d["results"], d["seed"]
+        m.actions, m.notes, m.action_times = d["actions"], d["notes"], d["action_times"]
+        m.started_at, m.schedule, m.version = d["started_at"], d["schedule"], d["version"] + 1
+        m.created = datetime.fromisoformat(d["created"])
+        m.state = GameState.from_dict(d["state"]) if d["state"] else None
+        m.history = [Move(**h) for h in d["history"]]
+        if m.state is not None and m.seed is not None:
+            m.bots = {s: bot_for(seat.bot, m.seed + i) for i, (s, seat) in enumerate(m.seats.items())
+                      if seat.is_bot}
+        return m
 
     # ----------------------------------------------------------------- views
     def view(self, s: str) -> dict:
