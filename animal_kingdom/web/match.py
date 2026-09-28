@@ -133,6 +133,14 @@ class Match:
         self.on_game_end = None          # callback(match, log record); the server saves human games
         self.rng = random.Random(secrets.randbits(32))
         self.created = datetime.now(timezone.utc)
+        self.schedule: Optional[list[dict]] = None   # gauntlet: one {deck, first} per game, in order
+
+    def make_gauntlet(self, opponents: list[str], per_seat: int) -> None:
+        """A fixed series instead of a best-of-3: `per_seat` games going first and `per_seat` going
+        second against each opponent deck, alternating who starts, one opponent at a time."""
+        self.schedule = [{"deck": d, "first": "A" if k % 2 == 0 else "B"}
+                         for d in opponents for k in range(2 * per_seat)]
+        self.seats["B"].deck = self.schedule[0]["deck"]
 
     # ----------------------------------------------------------------- seats
     def seat_of(self, token: str) -> Optional[str]:
@@ -180,7 +188,10 @@ class Match:
         # Game 1 is a coin flip; afterwards the loser of the previous game goes first
         # (Martin, 2026-09-26). A drawn game keeps the previous first player.
         first = None
-        if self.results:
+        if self.schedule:
+            entry = self.schedule[len(self.results)]
+            self.seats["B"].deck, first = entry["deck"], entry["first"]
+        elif self.results:
             last = self.results[-1]
             first = other_player(last["winner"]) if last["winner"] else last["first"]
         seed = self.seed = self.rng.randrange(1 << 30)
@@ -252,11 +263,13 @@ class Match:
         self.state.result = result
         self.results.append({"winner": result.winner, "reason": result.reason,
                              "turns": self.state.turn_counter // 2 + 1,
-                             "first": self.state.first_player})
+                             "first": self.state.first_player, "opp_deck": self.seats["B"].deck})
         if self.on_game_end:
             self.on_game_end(self, self.game_log())
         score = self.score()
         over = max(score.values()) >= GAMES_TO_WIN or len(self.results) >= 2 * GAMES_TO_WIN - 1
+        if self.schedule:
+            over = len(self.results) >= len(self.schedule)
         self.phase = "match_over" if over else "game_over"
 
     def add_note(self, s: str, text: str) -> None:
@@ -298,6 +311,18 @@ class Match:
                       for p, seat in self.seats.items() if seat.deck},
             "game": None,
         }
+        if self.schedule:
+            record = {}
+            for r in self.results:
+                w, l = record.get(r["opp_deck"], (0, 0))
+                record[r["opp_deck"]] = (w + (r["winner"] == "A"), l + (r["winner"] == "B"))
+            n = len(self.results)
+            nxt = self.schedule[n] if n < len(self.schedule) else None
+            v["gauntlet"] = {"played": n, "total": len(self.schedule),
+                             "next": nxt and {"deckName": DECK_NAMES.get(nxt["deck"], nxt["deck"]),
+                                              "first": nxt["first"]},
+                             "record": [{"deckName": DECK_NAMES.get(d, d), "w": w, "l": l}
+                                        for d, (w, l) in record.items()]}
         if self.state is not None:
             v["game"] = self._game_view(s, opp)
         return v

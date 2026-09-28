@@ -114,7 +114,17 @@ async def create_match(req):
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
     match = Match(mid, Seat(token, body.get("name") or "You", deck=deck))
     bot = body.get("bot")
-    if bot:
+    gauntlet = body.get("gauntlet")
+    if gauntlet:
+        level = gauntlet.get("level", "normal")
+        if level not in BOT_LEVELS:
+            raise web.HTTPBadRequest(text="bad bot level")
+        opponents = [d for d in sorted(PREMADE_DECKS) if d != deck]
+        match.join(Seat(secrets.token_urlsafe(12), f"Bot · {level.capitalize()}", bot=level, deck=opponents[0]))
+        match.make_gauntlet(opponents, per_seat=5)
+        match._start_game()
+        match.version += 1
+    elif bot:
         if bot.get("level") not in BOT_LEVELS or bot.get("deck") not in PREMADE_DECKS:
             raise web.HTTPBadRequest(text="bad bot")
         match.join(Seat(secrets.token_urlsafe(12), f"Bot · {bot['level'].capitalize()}",

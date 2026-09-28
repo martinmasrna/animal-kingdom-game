@@ -108,3 +108,24 @@ def test_notes_are_pinned_to_the_point_of_the_game():
     notes = logs[0]["notes"]
     assert [(n["at"], n["seat"], n["round"], n["text"]) for n in notes] == [(1, "A", 1, "going wide here")]
     assert len(logs[0]["action_times"]) == len(logs[0]["actions"])
+
+
+def test_gauntlet_runs_its_schedule_opponent_by_opponent_alternating_who_starts():
+    from animal_kingdom.engine.state import Result
+    m = Match("G", Seat("ta", "You", deck="egg_control"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="aggro_hq_rush"))
+    m.make_gauntlet(["aggro_hq_rush", "ramp"], per_seat=1)
+    m._start_game()
+    seen = []
+    for i in range(4):
+        seen.append((m.seats["B"].deck, m.state.first_player))
+        m.state.result = Result("A" if i % 2 else "B", "hq_capture")
+        m._check_end()
+        if i < 3:
+            assert m.phase == "game_over"
+            m.next_game()
+    assert seen == [("aggro_hq_rush", "A"), ("aggro_hq_rush", "B"), ("ramp", "A"), ("ramp", "B")]
+    assert m.phase == "match_over"
+    g = m.view("A")["gauntlet"]
+    assert g["played"] == 4 and g["next"] is None
+    assert [(r["w"], r["l"]) for r in g["record"]] == [(1, 1), (1, 1)]
