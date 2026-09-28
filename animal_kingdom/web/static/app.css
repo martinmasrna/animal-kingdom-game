@@ -804,3 +804,15 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 [data-v="sN2"] .sboard b { font-size: 40px; }
 [data-v="sN2"] .sboard i { font-size: 14px; }
 [data-v="sN2"] .strough > img { filter: drop-shadow(0 0 10px rgba(0,0,0,.45)) drop-shadow(3px 6px 6px rgba(20,10,0,.6)); }
+
+/* sN2 food, sized as the win condition: fully on-screen (20px margin), trough 300px, count 52px, bright fruit on a lit hollow. */
+[data-v="sN2"] .strough { width: 304px; height: 68px; }
+[data-v="sN2"] .strough .hollow { transform: scale(.88, .83); }
+[data-v="sN2"] .strough .hollow i { width: 13px; height: 13px; filter: brightness(1.15) saturate(1.2) drop-shadow(0 1px 1px rgba(0,0,0,.7)); }
+[data-v="sN2"] .strough .hollow i.g { filter: saturate(.5) brightness(1.3); opacity: .45; }
+[data-v="sN2"] .sboard { left: -4%; width: 26%; top: -38%; height: 150%; justify-content: center; }
+[data-v="sN2"] .sboard b { font-size: 50px; color: #fff6e4; text-shadow: 0 2px 4px #000, 0 0 12px rgba(0,0,0,.7); }
+[data-v="sN2"] .sboard i { font-size: 17px; color: #fff !important; text-shadow: 0 1px 3px #000, 0 0 8px rgba(0,0,0,.8); }
+[data-v="sN2"] .strough.A .sboard i { color: #a9ccff !important; } [data-v="sN2"] .strough.B .sboard i { color: #ffb4a8 !important; }
+[data-v="sN2"] .strough { width: 272px; height: 61px; }
+[data-v="sN2"] .strough .hollow { transform: scale(.79, .75); }
