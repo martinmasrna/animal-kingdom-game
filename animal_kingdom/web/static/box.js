@@ -83,7 +83,7 @@ export function renderBoard(el, M, g, cards, ui) {
       let fruit = '';
       PITS(side).forEach(([px, py], i) => {
         const r = Math.max(0, Math.min(unit10, ripe - i * unit10)), t = Math.max(0, Math.min(unit10, ripe + green - i * unit10));
-        fruit += put('pit', px, py, `<img src="/static/kit2/pits/${side === 'A' ? 'a' : 'b'}pit${i % 3 + 1}_${r}_${t - r}.webp" alt="" draggable="false" style="transform:rotate(${(i * 47) % 30 - 15}deg)">`);
+        fruit += put('pit', px, py, `<img src="/static/kit2/pits/${side === 'A' ? 'a' : 'b'}pit${i % 3 + 1}_${r}_${t - r}.webp" alt="" draggable="false">`);
       });
       const [mx, my] = MOUTH[side], [kx, ky] = CROWN[side];
       s += fruit + put(`dcount num ${side}`, kx, ky, food, `title="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +

@@ -1864,7 +1864,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "impala": {"on_remove": _impala_remove},
     # Stage 2.3: extra placements (F1), HQ-adjacency draws (F6), start-of-turn.
     # Apex Predator (tiger/polar_bear/borealis/unnamed_giant/eon) and "Costs X food"
-    # (bulwark/elephant) are handled in _land_unit / legal_placements.
+    # (bulwark/elephant/yuka) are handled in _land_unit / legal_placements.
     "jerboa": {"on_place": _jerboa_place},
     "greywhisker": {"on_place": _greywhisker_place},
     "house_cat": {"on_place": _house_cat_place},

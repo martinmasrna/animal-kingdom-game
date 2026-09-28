@@ -1,8 +1,8 @@
 # Ramp
 
-Bigger, one at a time: Ramp gives up its early turns, then trades card for card with units the opponent can't match. It beats midrange, which trades fairly, and loses to aggro, which wins before the giants land. Food pays for the huge `Costs 15 food` Megafauna (food costs belong to Megafauna only); the Unnamed Giant is a 10 with Apex Predator whose drawback, "your regions produce no food", costs Ramp little because it doesn't win by food race. Delayed "in 2 turns" effects fuel the ramp; their timers only run while the unit is on top of its stack, so covering them is the counterplay.
+Bigger, one at a time: Ramp gives up its early turns, then trades card for card with units the opponent can't match. It beats midrange, which trades fairly, and loses to aggro, which wins before the giants land. Food pays for the huge `Costs 15 food` Megafauna (food costs belong to Megafauna only): Elephant, Yuka the mammoth and Bulwark. Delayed "in 2 turns" effects fuel the ramp; their timers only run while the unit is on top of its stack, so covering them is the counterplay.
 
-Food is both fuel and win condition: the six costed copies total 90 food against a 100-food win, so the deck can deploy its payoffs or threaten the food win, not both. That tension is intended.
+Food is both fuel and win condition: the five costed copies total 75 food against a 100-food win, so the deck can deploy its payoffs or threaten the food win, not both. That tension is intended.
 
 Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reactively, Bulwark stomps. No cheap single-target removal; that's not ramp's identity.
 
@@ -16,8 +16,8 @@ Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reac
 |---|---:|---|---:|---|
 | **Methuselah** | 1 | Megafauna | 3 | Immovable. At the end of your turn, gain 5 food. |
 | **Borealis** | 1 | Bear | 10 | Apex Predator. |
-| **Unnamed Giant** | 1 | — | 10 | Apex Predator. Your regions produce no food. |
-| **Bulwark** | 1 | Megafauna | 10 | Immovable. Costs 15 food. Battlecry: remove all adjacent units. |
+| **Bulwark** | 1 | Megafauna | 8 | Costs 15 food. Battlecry: remove all adjacent units. |
+| **Yuka** | 1 | Megafauna | 10 | Immovable. Costs 15 food. |
 
 ### Rare
 

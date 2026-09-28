@@ -14,7 +14,7 @@ Ignores the connection-to-HQ requirement when placed. (All other placement rules
 ### Immovable
 *Physics.* Cannot be removed, moved (bounced), or eaten by **any** ability — the enemy's **or its own controller's** (Carmilla cannot sacrifice a Giant Tortoise; that cost is deliberate). It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an Immovable enemy; when it removes a stack, a buried Immovable unit is skipped **in place** and everything else is still removed. Immovable is not a shield for the cards beneath it. Scope is **board-only**: an Immovable card in hand can be paid or removed normally.
 
-Carried by: Giant Tortoise, Scrooge, Methuselah, Bulwark, Elephant.
+Carried by: Giant Tortoise, Scrooge, Methuselah, Yuka, Elephant.
 
 ⚠ *Open (`docs/STATUS.md`): the keyword still feels slightly off, in name and footprint.*
 

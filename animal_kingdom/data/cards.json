@@ -525,7 +525,7 @@
     {
       "id": "unnamed_giant",
       "name": "Unnamed Giant",
-      "deck": "ramp",
+      "deck": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 10,
@@ -549,10 +549,21 @@
       "deck": "ramp",
       "rarity": "legendary",
       "tags": ["Megafauna"],
+      "base_strength": 8,
+      "keywords": [],
+      "food_cost": 15,
+      "text": "Costs 15 food. Battlecry: remove all adjacent units."
+    },
+    {
+      "id": "yuka",
+      "name": "Yuka",
+      "deck": "ramp",
+      "rarity": "legendary",
+      "tags": ["Megafauna"],
       "base_strength": 10,
       "keywords": ["Immovable"],
       "food_cost": 15,
-      "text": "Immovable. Costs 15 food. Battlecry: remove all adjacent units."
+      "text": "Immovable. Costs 15 food."
     },
     {
       "id": "polar_bear",
