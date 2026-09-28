@@ -19,7 +19,7 @@ Carried by: Giant Tortoise, Scrooge, Methuselah, Bulwark, Elephant.
 ⚠ *Open (`docs/STATUS.md`): the keyword still feels slightly off, in name and footprint.*
 
 ### Stealth
-Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Stoop/Gray Wolf/Soldier Ant/Rat/Hornet/Skunk), and an Apex Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it instead). **Mass, random, and automatic effects hit it normally**: Pestis/Rhinoceros/Bulwark AoE, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron/Pufferfish triggers. Its own controller may still choose it freely. Scope is board-only.
+Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk), and an Apex Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it instead). **Mass, random, and automatic effects hit it normally**: Pestis/Rhinoceros/Bulwark AoE, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron/Pufferfish triggers. Its own controller may still choose it freely. Scope is board-only.
 
 Carried by: Black Panther (keyword). **Armadillo grants it as an aura** to every friendly unit on an adjacent crossroad while Armadillo tops its own.
 

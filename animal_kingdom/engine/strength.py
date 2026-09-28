@@ -8,8 +8,8 @@ matters (covering, removal thresholds, region holding, conditions like Coyote's 
 
 - base_or_dynamic: the printed int, or a dynamic rule (Goliath = #removed units; Chameleon).
 - global_growth: persistent per-player/card growth that applies in every zone (Rattlesnake).
-- stored_counters: `UnitInstance.strength_counter` - one-time "give +X" grants (Dhole,
-  Clarion, Red Wolf, Dingo, Bush Dog, Shuck). Stored on the instance; persist after the
+- stored_counters: `UnitInstance.strength_counter` - one-time "give +X" grants (Unnamed Rallier,
+  Clarion, Dhole, Dingo, Bush Dog, Shuck). Stored on the instance; persist after the
   granter dies; travel hand->board.
 - active_anthems: live "has +X" auras (Raksha, Lobo, Verminus, Vesper, Guard Hornet).
   Recomputed from the board every time; vanish when their condition lapses.

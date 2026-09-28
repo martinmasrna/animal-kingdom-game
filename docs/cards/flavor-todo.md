@@ -124,6 +124,7 @@ The present pool mixes original evocative names (`Eon`, `Ember`, `Vesper`) with 
 
 ### Canines
 
+- Locked 2026-09-28: one wolf per deck. Dire Wolf → Wolf (the vanilla 7), Gray Wolf → Jackal, Red Wolf → Dhole, Alpha → Scarlett (a red fox vixen with her cubs; the deck's second female legendary after Raksha). The parked reserve Jackal and Dhole became Unnamed Scavenger and Unnamed Rallier.
 - [ ] **Keep:** Clarion.
 - [ ] **Lobo** is a real famous individual wolf and an unusually strong literal fit; keep if historical/literary animals are allowed.
 - [ ] **Raksha** is a direct Kipling character. Keep only under the literary-menagerie policy; otherwise prefer **Ylva**.

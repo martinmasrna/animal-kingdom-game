@@ -228,7 +228,7 @@ def _fire_cover_event(state, coverer, covered) -> None:
 
 def _fire_play_event(state, played) -> None:
     """Fire ON_FRIENDLY_PLAY reactors for a unit its controller just played or spawned
-    (Queen Honoria's food, Red Wolf's on-enter buff). The played unit itself is skipped."""
+    (Queen Honoria's food, Dhole's on-enter buff). The played unit itself is skipped."""
     for st in state.board.values():
         top = st[-1] if st else None
         if not (top and top.owner == played.owner and top.iid != played.iid):
@@ -325,7 +325,7 @@ def _find_unit(state, iid):
 
 def _fire_on_remove(state, unit) -> None:
     # A unit leaving the board: its own Deathrattle. (Board-wide reactors to removal events -
-    # Vulture/Eon/Jackal/Egg Eater - are wired in Stage 2.2's event engine.)
+    # Vulture/Eon/Unnamed Scavenger/Egg Eater - are wired in Stage 2.2's event engine.)
     hook = _hook(state, unit.card_id, "on_remove")
     if hook:
         hook(state, unit)
@@ -382,7 +382,7 @@ def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True)
 #
 # Discrete events (decision F2/F9): one event per card drawn, shuffled-into-deck, or
 # removed. Board-top units react via on_draw_event / on_shuffle_event / on_remove_event
-# hooks (Eon/Vulture/Egg Eater/Jackal); Rattlesnake's shuffle growth applies in every
+# hooks (Eon/Vulture/Egg Eater/Unnamed Scavenger); Rattlesnake's shuffle growth applies in every
 # zone; a *drawn card* may also react to itself via on_draw (Omen). Reactors resolve
 # immediately, so no extra stack steps and no re-entrancy in this stage. state.py stays
 # free of effect imports - these wrappers sit above the card-movement primitives.
@@ -964,7 +964,7 @@ def _red_wolf_friendly_play(state, watcher, played):
 
 def _spawn_pups(state, unit, cr, n):
     """Land up to `n` Pup tokens on random empty crossroads adjacent to `cr`. Pups enter via the
-    normal landing path (so Red Wolf's on-enter buff sees them) but carry no Battlecry, so there
+    normal landing path (so Dhole's on-enter buff sees them) but carry no Battlecry, so there
     is no spawn recursion."""
     empty = [nb for nb in state.game_map.neighbors(cr) if not state.board.get(nb)]
     state.rng.shuffle(empty)

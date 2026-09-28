@@ -28,7 +28,7 @@ What is re-sampled:
 Documented approximations (both err toward the referee knowing *less*, never more):
   - Cards publicly returned to the opponent's hand without a lock marker (Shuck,
     Opossum) are treated as unknown and re-dealt into the pool.
-  - Hidden-hand strength counters (Clarion / Red Wolf buffing Canines in hand) are
+  - Hidden-hand strength counters (Clarion / Dhole buffing Canines in hand) are
     dropped: re-dealt cards are fresh instances with counter 0.
 Skunk-locked hand cards are the exception that *is* tracked: the bounce is public and
 `locked_until_turn` gates legality, so locked instances stay in hand, lock intact.

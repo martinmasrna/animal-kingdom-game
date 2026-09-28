@@ -24,7 +24,7 @@ def _ids_at(state, cr):
 
 def test_stealth_hides_from_chosen_single_target_removal():
     # Jaguar (remove adjacent enemy <=5)... vs Black Panther (str 6) is out of range, so
-    # use Gray Wolf (remove adjacent enemy with less-or-equal strength, wolf buffed high).
+    # use Jackal (remove adjacent enemy with less-or-equal strength, wolf buffed high).
     s = make_state(hands={"A": ["gray_wolf"]})
     wolf_targets_panther = put(s, "2,2", "black_panther", "B")
     put(s, "1,2", "lion", "A")

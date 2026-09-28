@@ -85,7 +85,7 @@ class Config:
     shuck_grant: int = 2                 # to the Canine returned from the Remove Pile; reserve
 
     # --- Token spawns (Canine go-wide; 2026-07-05) ---
-    alpha_pups: int = 2                  # Pups Alpha places on adjacent empty crossroads
+    alpha_pups: int = 2                  # Pups Scarlett places on adjacent empty crossroads
     awd_pups: int = 1                    # Pups African Wild Dog spawns on placement
 
     # --- Thresholds / strength gates ---

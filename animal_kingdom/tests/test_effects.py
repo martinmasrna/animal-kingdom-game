@@ -110,7 +110,7 @@ def test_clarion_buffs_other_board_canines_by_two_not_hand():
 
 def test_red_wolf_buffs_canines_that_enter_after_it():
     s = make_state(hands={"A": ["gray_wolf", "lion"]})
-    put(s, "1,2", "red_wolf", "A")                           # Red Wolf already on the board
+    put(s, "1,2", "red_wolf", "A")                           # Dhole already on the board
     rules.apply_action(s, PlaceAction("gray_wolf", ("cr", "2,2")))
     assert s.top_unit("2,2").strength_counter == CFG.red_wolf_grant           # Canine buffed as it entered
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,3")))
@@ -126,7 +126,7 @@ def test_alpha_places_two_pups():
 
 
 def test_red_wolf_buffs_spawned_pups():
-    # The core token synergy: pups enter play, so Red Wolf's on-enter buff catches them.
+    # The core token synergy: pups enter play, so Dhole's on-enter buff catches them.
     s = make_state(hands={"A": ["alpha"]})
     put(s, "1,2", "red_wolf", "A")
     rules.apply_action(s, PlaceAction("alpha", ("cr", "2,2")))

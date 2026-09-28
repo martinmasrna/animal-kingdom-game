@@ -991,7 +991,7 @@
     },
     {
       "id": "dhole",
-      "name": "Dhole",
+      "name": "Unnamed Rallier",
       "deck": "reserve",
       "rarity": "rare",
       "tags": ["Canine"],
@@ -1011,7 +1011,7 @@
     },
     {
       "id": "jackal",
-      "name": "Jackal",
+      "name": "Unnamed Scavenger",
       "deck": "reserve",
       "rarity": "rare",
       "tags": ["Canine"],
@@ -1021,7 +1021,7 @@
     },
     {
       "id": "red_wolf",
-      "name": "Red Wolf",
+      "name": "Dhole",
       "deck": "canine_buff_tempo",
       "rarity": "rare",
       "tags": ["Canine"],
@@ -1031,7 +1031,7 @@
     },
     {
       "id": "gray_wolf",
-      "name": "Gray Wolf",
+      "name": "Jackal",
       "deck": "canine_buff_tempo",
       "rarity": "common",
       "tags": ["Canine"],
@@ -1101,7 +1101,7 @@
     },
     {
       "id": "alpha",
-      "name": "Alpha",
+      "name": "Scarlett",
       "deck": "canine_buff_tempo",
       "rarity": "legendary",
       "tags": ["Canine"],
@@ -1131,7 +1131,7 @@
     },
     {
       "id": "dire_wolf",
-      "name": "Dire Wolf",
+      "name": "Wolf",
       "deck": "canine_buff_tempo",
       "rarity": "common",
       "tags": ["Canine"],
