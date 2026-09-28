@@ -524,9 +524,19 @@
       "text": "Apex Predator. Costs 15 food."
     },
     {
+      "id": "unnamed_giant",
+      "name": "Unnamed Giant",
+      "deck": "ramp",
+      "rarity": "legendary",
+      "tags": [],
+      "base_strength": 10,
+      "keywords": ["Apex Predator"],
+      "text": "Apex Predator. Your regions produce no food."
+    },
+    {
       "id": "aquila",
       "name": "Aquila",
-      "deck": "ramp",
+      "deck": "reserve",
       "rarity": "legendary",
       "tags": ["Bird"],
       "base_strength": 8,

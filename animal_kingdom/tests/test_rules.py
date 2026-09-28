@@ -257,3 +257,17 @@ def test_pass_is_refused_before_the_first_action_and_never_offered():
     with pytest.raises(EngineError):
         rules.apply_action(s, PassAction())
     assert all(a.kind != "pass" for a in rules.legal_actions(s))
+
+
+def test_unnamed_giant_starves_its_owners_regions_only():
+    from animal_kingdom.engine.state import UnitInstance
+    s = make_state()
+    region = next(iter(s.game_map.regions.values()))
+    for i, cr in enumerate(region.corners):
+        s.board[cr] = [UnitInstance("lion", "A", 900 + i)]
+    assert rules.region_income(s, "A") == region.food
+    far = next(c for c in s.game_map.crossroads if c not in region.corners)
+    s.board[far] = [UnitInstance("unnamed_giant", "A", 950)]
+    assert rules.region_income(s, "A") == 0
+    s.board[far] = [UnitInstance("unnamed_giant", "B", 951)]      # the opponent's giant: no effect on A
+    assert rules.region_income(s, "A") == region.food

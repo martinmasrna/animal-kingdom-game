@@ -109,7 +109,7 @@ def _effects(state: GameState, move: Move) -> list:
     for p in "AB":
         gain = state.food[p] - pre["food"][p]
         if state.turn_counter != pre["turn"] and p == move.seat:
-            gain -= sum(r.food for r in rules.regions_controlled(state, p))  # end-of-turn income
+            gain -= rules.region_income(state, p)  # end-of-turn income
         if gain:
             fx.append({"k": "food", "seat": p, "n": gain})
     return fx
@@ -322,7 +322,7 @@ class Match:
             "actionsTotal": st.config.actions_per_turn + bonus,
             "canPass": rules.can_pass(st),
             "food": dict(st.food),
-            "income": {p: sum(r.food for r in rules.regions_controlled(st, p)) for p in "AB"},
+            "income": {p: rules.region_income(st, p) for p in "AB"},
             "winFood": st.game_map.win_food,
             "board": board,
             "hand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u)}

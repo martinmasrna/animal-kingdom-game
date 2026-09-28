@@ -38,7 +38,7 @@ def run(rec, idx):
         actor = st.player_to_act()
         rnd = st.turn_counter // 2 + 1
         if rnd != last_round and st.pending is None:
-            inc = {p: sum(r.food for r in rules.regions_controlled(st, p)) for p in "AB"}
+            inc = {p: rules.region_income(st, p) for p in "AB"}
             print(f"-- round {rnd} (food M {st.food['A']} +{inc['A']} / B {st.food['B']} +{inc['B']}); Martin hand: " + ", ".join(st.cards[u.card_id].name for u in st.hands['A']))
             print(board(st))
             last_round = rnd

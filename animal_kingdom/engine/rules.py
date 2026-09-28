@@ -16,14 +16,14 @@ from __future__ import annotations
 
 from typing import Optional
 
-from . import effects
+from . import effects, statics
 from .actions import Action, DrawAction, PassAction, PlaceAction
 from .state import EngineError, GameState, Result, other_player
 from .strength import effective_strength  # re-exported (used by tests / future eval)
 
 __all__ = [
     "legal_actions", "apply_action", "is_terminal", "can_pass",
-    "owner_of", "top_unit", "regions_controlled", "effective_strength",
+    "owner_of", "top_unit", "regions_controlled", "region_income", "effective_strength",
 ]
 
 
@@ -147,8 +147,16 @@ def regions_controlled(state: GameState, player: str):
             if all(state.owner_of(c) == player for c in r.corners)]
 
 
+def region_income(state: GameState, player: str) -> int:
+    """Food `player`'s regions produce at the end of their turn (0 while they control the
+    Unnamed Giant: "Your regions produce no food")."""
+    if statics.regions_starved(state, player):
+        return 0
+    return sum(r.food for r in regions_controlled(state, player))
+
+
 def _produce_food(state: GameState, player: str) -> None:
-    total = sum(r.food for r in regions_controlled(state, player))
+    total = region_income(state, player)
     if total:
         effects.gain_food(state, player, total)  # sets result on win; applies Queen Bee
 

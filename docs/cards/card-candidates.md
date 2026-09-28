@@ -178,6 +178,7 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 
 | Name | Type / tags | STR | Candidate text / unresolved variants |
 |---|---|---:|---|
+| **Aquila (giant harpy eagle), carry-off version** | Bird | TBD | Flight. Battlecry: take an adjacent enemy unit with lower strength into your hand. Parked for a control "steal the opponent's cards" deck; broken as first drafted (6 strength took anything up to 5 anywhere), needs balancing. |
 | **Blue Whale — “Sounder”** | Cetacean | 10 | Immovable. Cannot be covered. This cannot cover units or capture an HQ. Costs 15 food to play. |
 | **Hachiko, the Faithful** | Canine | 5 | The first time each turn another friendly Canine would be removed, return it to your hand instead. |
 | **Kanzi** | Primate | 4 | Battlecry: repeat the Battlecry of another adjacent Primate. |

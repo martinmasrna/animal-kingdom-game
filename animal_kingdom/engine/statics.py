@@ -120,3 +120,10 @@ def can_be_chosen(state: GameState, unit: UnitInstance, by_player: str) -> bool:
         if "Stealth" in card.keywords or _adjacent_to_friendly_armadillo(state, unit):
             return False
     return True
+
+
+def regions_starved(state, player: str) -> bool:
+    """The Unnamed Giant: while `player` controls it (on top of its crossroad), their regions
+    produce no food."""
+    return any(st and st[-1].owner == player and st[-1].card_id == "unnamed_giant"
+               for st in state.board.values())
