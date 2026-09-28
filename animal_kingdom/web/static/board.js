@@ -300,7 +300,7 @@ function renderField(el, M, g, cards, ui) {
       `<div class="ribbon">${kitImg(OWN[u.owner].ribbon)}<span class="num">${card.name}</span></div>` + (kws ? `<div class="kws">${kws}</div>` : '') +
       `<div class="gem">${kitImg(OWN[u.owner].gem)}<span class="num${delta}">${u.str}</span></div>` +
       (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') +
-      (under.length && !ghost ? `<div class="under num">+${under.length}</div>` : '') + '</div>';
+      (under.length && !ghost ? `<div class="under">${kitImg(u.owner === 'A' ? 'token_blue' : 'token_red')}<span class="num">${under.length}</span></div>` : '') + '</div>';
   }
   // Medallion in the card's language (lab m=A|B|C, kit/med<X>_*): matte brass ring with a team-enamel band, the card's
   // square strength plate, a parchment name tab, a small brass tab for the buried count. Geometry measured on each sprite.

@@ -210,10 +210,10 @@ async function labScreen(name) {
 }
 // A switcher over the lab frame: each row flips one design choice live.
 // Only the open questions; decided ones live in LIVE_LOOK.
-const LAB = [['m', 'Medallion', [['', 'enamel (now)'], ['A', 'A broad enamel'], ['B', 'B leaf brass'], ['C', 'C plain beads']]]];
+const LAB = [];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {
-  let bar = document.getElementById('labbar');
+  let bar = document.getElementById('labbar'); if (!LAB.length) { if (bar) bar.remove(); return; }
   if (!bar) { bar = document.createElement('div'); bar.id = 'labbar'; bar.className = 'labbar'; document.body.appendChild(bar); }
   const de = document.documentElement.dataset;
   bar.innerHTML = LAB.map(([k, title, opts]) => `<div><b>${title}</b>${opts.map(([v, l]) => `<span class="${(de[k] || '') === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${l}</span>`).join('')}</div>`).join('');
