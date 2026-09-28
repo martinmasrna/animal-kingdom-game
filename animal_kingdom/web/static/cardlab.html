@@ -62,7 +62,9 @@ b.kw { font-weight: 700; }
   background: linear-gradient(#f3e6c6, #d8c49a); clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%); box-shadow: 0 .1em .2em rgba(0,0,0,.4); }
 .cB .panel { position: absolute; left: .4em; right: .4em; bottom: .4em; padding: .55em .65em .75em; border-radius: .25em;
   background: radial-gradient(ellipse at 50% 20%, rgba(246,234,208,.97), rgba(226,208,170,.97)); box-shadow: 0 -.1em .4em rgba(0,0,0,.35); text-align: center; }
-.cB .panel:empty { display: none; }
+.cB .panel .ptg { margin-top: .35em; font: 700 .5em/1 'Cinzel', serif; letter-spacing: .16em; color: rgba(90,60,25,.8); text-transform: uppercase; }
+.cB .panel .tx + .ptg { border-top: .06em solid rgba(90,60,25,.3); padding-top: .35em; }
+.cB > .face > .tg { display: none; }
 .cB .tx { font: 500 .86em/1.2 'EB Garamond', serif; color: #3a2610; }
 .cB .tg { position: absolute; left: 0; right: 0; bottom: .1em; text-align: center; font: 700 .48em/1 'Cinzel', serif; letter-spacing: .14em; color: rgba(90,60,25,.7); text-transform: uppercase; }
 .cB.rare .face { border: .3em solid #8a6a3a; box-shadow: .25em .5em .8em rgba(0,0,0,.65), inset 0 0 0 .12em #d8b070; }
@@ -99,7 +101,7 @@ const text = c => (c.text || '').replace(/^(Battlecry|Immovable|Flight|Stealth|A
 const card = c => `<div class="card c${V} ${c.rarity}"><div class="face">
   <div class="art" style="background-image:url(${artUrl(c.id)})"></div>
   <div class="nm">${c.name}</div>
-  <div class="panel">${c.text ? `<div class="tx">${text(c)}</div>` : ''}</div>
+  <div class="panel">${c.text ? `<div class="tx">${text(c)}</div>` : ''}${V === 'B' ? `<div class="ptg">${c.tags.join(' · ')}</div>` : ''}</div>
   <div class="tg">${c.tags.join(' · ')}</div></div>
   <div class="gem"><img src="/static/kit/gem_b.webp" alt=""><span>${c.str}</span></div>${c.cost ? `<div class="cost">${c.cost}</div>` : ''}</div>`;
 // In C the name sits above the art: reorder.
