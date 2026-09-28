@@ -3,7 +3,7 @@
 import { renderBoard, portrait, kitImg, teamGem } from './board.js';
 import { hasArt, artUrl } from './art.js';
 import { cardHTML } from './card.js';
-import { renderBoard as renderBox, STAGE } from './box.js';
+import { renderBoard as renderBox, STAGE, PAINT } from './box.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const COVER = { cats_midrange: 'king_theron' };
@@ -427,7 +427,7 @@ function drawGame() {
 function boxScreen() {
   if (screen !== 'game') {
     screen = 'game';
-    app.innerHTML = `<div class="bx" id="scr"><div id="stage">
+    app.innerHTML = `<div class="bx${PAINT ? ' paint' : ''}" id="scr"><div id="stage">
       <div id="board"></div>
       <div class="abs series" id="series"></div>
       <div class="abs opphand" id="opphand"></div>

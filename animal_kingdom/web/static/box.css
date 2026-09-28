@@ -112,3 +112,31 @@
 .bx .btn { font: 700 18px 'Source Serif 4', Georgia, serif; letter-spacing: 0; text-transform: none; background: var(--plaque); border-color: var(--plaqueline); }
 .bx .btn.primary { background: var(--act); border-color: var(--act); color: #1c1b19; }
 .bx .prompt .skip { height: auto; margin: 0; border: 1px solid var(--plaqueline); font: 600 14px 'Source Serif 4', Georgia, serif; color: var(--ink); background: #3a3632; }
+
+/* painted board (box.js PAINT): the plate is the whole stage, the world runs under both hands */
+.bx .plate { position: absolute; left: 0; top: 0; width: 1512px; height: 800px; pointer-events: none; user-select: none; }
+.bx.paint #stage { background: #2b2618; }
+.bx.paint .cr.clear { background: none; border: 0; }
+.bx.paint .stone { background: none; border: 0; color: #e9e1d2; font-size: 17px; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+.bx.paint .stone.A { background: var(--A); color: var(--Aink); text-shadow: none; } .bx.paint .stone.B { background: var(--B); text-shadow: none; }
+.bx .pit { width: 52px; height: 44px; margin: -22px 0 0 -26px; pointer-events: none; } .bx .pit img { width: 100%; height: 100%; }
+.bx .fruit { width: 12px; height: 12px; margin: -6px 0 0 -6px; pointer-events: none; background: url(/static/kit2/fruit.webp) center / contain no-repeat; filter: drop-shadow(0 1px 1px rgba(40,20,0,.6)); }
+.bx .fruit.green { background-image: url(/static/kit2/fruit_green.webp); }
+.bx .dcount { width: 90px; margin-left: -45px; margin-top: -28px; text-align: center; font-size: 48px; line-height: 1; text-shadow: 0 0 2px rgba(255,250,240,.9), 0 0 8px rgba(255,250,240,.5); }
+/* the count is painted on the crown boulder in the den's own war paint */
+.bx .dcount.A { color: #1d55b8; } .bx .dcount.B { color: #a8281a; }
+.bx .mouth { width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; }
+.bx .mouth.tgt { cursor: pointer; } .bx .mouth.tgt::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 4px solid var(--act); }
+.bx.paint .hc.dim { opacity: 1; } .bx.paint .hc.dim::after { content: ''; position: absolute; inset: 0; border-radius: 6px; background: rgba(20,16,10,.62); pointer-events: none; }
+/* painted pieces (screen/kit/pieces): stones, card backs, deck, End turn */
+.bx.paint .stone.A, .bx.paint .stone.B { width: 46px; height: 46px; margin: -23px 0 0 -23px; background: url(/static/kit2/stone_a.webp) center / contain no-repeat; border: 0; }
+.bx.paint .stone.B { background-image: url(/static/kit2/stone_b.webp); color: var(--ink); }
+.bx.paint .back { background: url(/static/kit2/back.webp) center / 100% 100% no-repeat; border: 0; border-radius: 0; box-shadow: none; filter: drop-shadow(2px 3px 4px rgba(0,0,0,.5)); }
+.bx.paint .deck { background: url(/static/kit2/deck.webp) center / 100% 100% no-repeat; border: 0; box-shadow: none; border-radius: 0; filter: drop-shadow(3px 5px 6px rgba(0,0,0,.5)); }
+.bx.paint .deck.can { background-image: url(/static/kit2/deck_lit.webp); color: #2a2418; }
+.bx.paint .deck.can:hover { background-color: transparent; transform: translateY(-3px); }
+.bx.paint .tbtn { height: 80px; top: 660px; background: url(/static/kit2/btn_a.webp) center / 100% 100% no-repeat; border: 0; border-radius: 0; filter: drop-shadow(2px 4px 5px rgba(0,0,0,.5)); }
+.bx.paint .tbtn.B { background-image: url(/static/kit2/btn_b.webp); border: 0; }
+.bx.paint .tbtn.A.can:hover { background-color: transparent; transform: translateY(-2px); }
+.bx.paint .tbtn .pips i { background: #f4efe6; } .bx.paint .tbtn .pips i.used { border-color: #f4efe6; background: transparent; }
+.bx.paint .tbtn.A { color: #f4efe6; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
