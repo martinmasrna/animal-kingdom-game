@@ -699,3 +699,9 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 [data-g="3"] .stonecover { filter: saturate(.3) brightness(.42) contrast(.7) blur(1.2px); }
 [data-g="2"] .quietpay, [data-g="3"] .quietpay { color: rgba(235,220,190,.45); text-shadow: none; }
 [data-g="2"] .quietpay.A, [data-g="3"] .quietpay.A { color: #5aa0f0; } [data-g="2"] .quietpay.B, [data-g="3"] .quietpay.B { color: #f06050; }
+
+/* Space test (lab z=1|2): pieces sit inside their clearing, the hand sinks so the board breathes. */
+[data-z="1"] .cr .unit, [data-z="2"] .cr .unit { scale: .8; }
+[data-z="2"] .hand { top: 770px; }
+[data-z="2"] .hand .hc:hover { z-index: 30; }
+[data-z="2"] .deck { top: 790px; }

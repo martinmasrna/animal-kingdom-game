@@ -207,13 +207,13 @@ function onView(prev) {
 // (data-v on <html>, read by app.css and board.js). No server match; nothing can be played.
 async function labScreen(name) {
   const q = new URLSearchParams(location.search), de = document.documentElement.dataset;
-  for (const k of ['v', 'p', 'd', 'h', 'f', 't', 'k', 'm', 'sp', 'pv', 'g']) de[k] = q.has(k) ? q.get(k) : (LIVE_LOOK[k] || '');
+  for (const k of ['v', 'p', 'd', 'h', 'f', 't', 'k', 'm', 'sp', 'pv', 'g', 'z']) de[k] = q.has(k) ? q.get(k) : (LIVE_LOOK[k] || '');
   V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
   screen = null; gameScreen(); labBar();
 }
 // A switcher over the lab frame: each row flips one design choice live.
 // Only the open questions; decided ones live in LIVE_LOOK.
-const LAB = [['g', 'Ground', [['', 'now'], ['1', 'muted'], ['2', 'muted + dark'], ['3', 'dark, near-flat']]], ['pv', 'Payout', [['', 'stones'], ['f', 'fruit + yield'], ['q', 'quiet number']]]];
+const LAB = [['z', 'Space', [['', 'now'], ['1', 'smaller pieces'], ['2', 'smaller pieces + low hand']]], ['g', 'Ground', [['', 'now'], ['1', 'muted'], ['2', 'muted + dark']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {
   let bar = document.getElementById('labbar'); if (!LAB.length) { if (bar) bar.remove(); return; }
