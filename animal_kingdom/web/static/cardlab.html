@@ -60,10 +60,11 @@ b.kw { font-weight: 700; }
 .cB .art { position: absolute; inset: 0; }
 .cB .nm { position: absolute; left: 50%; top: .55em; transform: translateX(-50%); white-space: nowrap; padding: .3em 1.1em .36em; font: 700 1.19em/1 'Cinzel', serif; color: #2a1806;
   background: linear-gradient(#f3e6c6, #d8c49a); clip-path: polygon(0 0, 100% 0, 94% 50%, 100% 100%, 0 100%, 6% 50%); box-shadow: 0 .1em .2em rgba(0,0,0,.4); }
-.cB .panel { position: absolute; left: .4em; right: .4em; bottom: .4em; padding: .55em .65em .75em; border-radius: .25em;
-  background: radial-gradient(ellipse at 50% 20%, rgba(246,234,208,.97), rgba(226,208,170,.97)); box-shadow: 0 -.1em .4em rgba(0,0,0,.35); text-align: center; }
-.cB .panel .ptg { margin-top: .35em; font: 700 .6em/1 'Cinzel', serif; letter-spacing: .16em; color: rgba(90,60,25,.8); text-transform: uppercase; }
-.cB .panel .tx + .ptg { border-top: .06em solid rgba(90,60,25,.3); padding-top: .35em; }
+.cB .panel { position: absolute; left: .4em; right: .4em; bottom: .4em; padding: .55em .7em .5em; border-radius: .25em;
+  background: radial-gradient(ellipse at 50% 20%, rgba(246,234,208,.97), rgba(226,208,170,.97)); box-shadow: 0 -.1em .4em rgba(0,0,0,.35); text-align: left; }
+.cB .panel .ptg { margin-top: .3em; text-align: right; font: 700 .6em/1 'Cinzel', serif; letter-spacing: .16em; color: rgba(90,60,25,.8); text-transform: uppercase; }
+.cB .panel:not(:has(.tx)) { left: auto; padding: .45em .7em; }
+.cB .panel:not(:has(.tx)) .ptg { margin: 0; }
 .cB > .face > .tg { display: none; }
 .cA .panel { flex-direction: column; }
 .cA > .face > .tg { display: none; }
