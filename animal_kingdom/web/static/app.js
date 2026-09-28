@@ -210,7 +210,7 @@ async function labScreen(name) {
 }
 // A switcher over the lab frame: each row flips one design choice live.
 // Only the open questions; decided ones live in LIVE_LOOK.
-const LAB = [];
+const LAB = [['m', 'Medallion', [['', 'now'], ['D', 'D enamel'], ['E', 'E lacquered wood'], ['F', 'F stone']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {
   let bar = document.getElementById('labbar'); if (!LAB.length) { if (bar) bar.remove(); return; }

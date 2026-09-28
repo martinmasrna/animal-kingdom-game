@@ -9,9 +9,9 @@ import { CROP, hasArt, artUrl } from './art.js';
 const key = (c, r) => `${c},${r}`;
 // Medallion sprites (board/r10): sprite size, hole centre and radius, outer radius, strength-plate face centre and size (sprite px).
 const MEDG = {
-  A: { W: 550, hx: 275, hy: 273, hr: 188, R: 262, plate: [79, 104.5, 104, 108] },
-  B: { W: 579, hx: 289, hy: 284.5, hr: 188, R: 280, plate: [110, 95.5, 108, 112] },
-  C: { W: 573, hx: 287, hy: 282, hr: 188, R: 276, plate: [108.5, 91.5, 108, 108] },
+  D: {"a": {"W": 375, "hx": 188.5, "hy": 196.5, "hr": 117.5, "R": 185.7, "plate": [67.5, 69.5, 95, 103]}, "b": {"W": 375, "hx": 188.5, "hy": 196.5, "hr": 116.5, "R": 186.3, "plate": [67.0, 71.0, 96, 104]}},
+  E: {"a": {"W": 393, "hx": 206.0, "hy": 183.0, "hr": 120.0, "R": 187.0, "plate": [67.5, 69.5, 97, 101]}, "b": {"W": 393, "hx": 206.0, "hy": 184.5, "hr": 120.0, "R": 186.8, "plate": [67.0, 70.5, 96, 101]}},
+  F: {"a": {"W": 387, "hx": 203.5, "hy": 179.0, "hr": 115.5, "R": 183.6, "plate": [70.0, 71.5, 96, 99], "outer0": [0, 0]}, "b": {"W": 388, "hx": 203.5, "hy": 179.5, "hr": 115.5, "R": 183.9, "plate": [69.5, 72.0, 97, 98], "outer0": [0, 0]}},
 };
 const PAW = `<svg viewBox="0 0 40 40"><ellipse cx="20" cy="27" rx="10" ry="8.5"/><ellipse cx="8" cy="15" rx="4" ry="5.2" transform="rotate(-20 8 15)"/><ellipse cx="16" cy="9" rx="4" ry="5.5"/><ellipse cx="25" cy="9" rx="4" ry="5.5"/><ellipse cx="32.5" cy="15" rx="4" ry="5.2" transform="rotate(20 32.5 15)"/></svg>`;
 export const kit = n => `/static/kit/${n}.webp`;
@@ -305,18 +305,20 @@ function renderField(el, M, g, cards, ui) {
   // Medallion in the card's language (lab m=A|B|C, kit/med<X>_*): matte brass ring with a team-enamel band, the card's
   // square strength plate, a parchment name tab, a small brass tab for the buried count. Geometry measured on each sprite.
   function medUnit(u, under, ghost, M) {
-    const G = MEDG[M], sc = 172 / (2 * G.R), P = 2 * G.hr * sc + 4, C = 82;   // outer size as the old medallion; the portrait fills the hole
-    const ring = side => `<img class="mring" src="${kit(`med${M}_${side === 'A' ? 'a' : 'b'}`)}" alt="" draggable="false" style="width:${G.W * sc}px;left:${C - G.hx * sc}px;top:${C - G.hy * sc}px">`;
+    // Team-colour kits (D/E/F): per-side sprites med<X>_{a|b}, tab_, num_, ring_; geometry per side.
+    const side = u.owner === 'A' ? 'a' : 'b', G = MEDG[M][side], sc = 172 / (2 * G.R), P = 2 * G.hr * sc + 4, C = 82;
+    const place = (g, name) => `<img class="mring" src="${kit(`med${M}_${name}`)}" alt="" draggable="false" style="width:${g.W * sc}px;left:${C - g.hx * sc}px;top:${C - g.hy * sc}px">`;
     const card = cards[u.id], base = card.str === '*' ? null : card.str;
     const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';
-    const peek = under.slice(0, 3).map((b, i) => `<div class="buried" style="transform:translate(${(i + 1) * 7}px,${(i + 1) * 8}px);z-index:${-i - 1}">${ring(b.owner)}</div>`).join('');
+    const peek = under.slice(0, 3).map((b, i) => { const s2 = b.owner === 'A' ? 'a' : 'b';
+      return `<div class="buried" style="transform:translate(${(i + 1) * 7}px,${(i + 1) * 8}px);z-index:${-i - 1}">${place(MEDG[M][s2], 'ring_' + s2)}</div>`; }).join('');
     const kws = (card.kw || []).filter(k => BOARD_KW[k]).map(k => `<img src="${kit(BOARD_KW[k])}" alt="" title="${k}" draggable="false">`).join('');
     const [px, py, pw, ph] = [(G.plate[0] - G.hx) * sc + C, (G.plate[1] - G.hy) * sc + C, G.plate[2] * sc, G.plate[3] * sc];
     const R = G.R * sc;
-    return `<div class="unit med lift ${u.owner}${ghost ? ' ghost' : ''}">${peek}${portrait(u.id, P, card.name)}${ring(u.owner)}` +
-      `<div class="mstr${delta}" style="left:${px - pw / 2}px;top:${py - ph / 2 - 1}px;width:${pw}px;height:${ph}px">${u.str}</div>` +   // -1: measured optical centre
-      `<div class="mname" style="top:${C + R - 24}px">${kitImg(`med${M}_tab`)}<span>${card.name}</span></div>` +
-      (under.length && !ghost ? `<div class="mnum" style="left:${C + R * .72 - 13}px;top:${C + R * .62 - 13}px">${kitImg(`med${M}_num`)}<span>${under.length}</span></div>` : '') +
+    return `<div class="unit med lift ${u.owner}${ghost ? ' ghost' : ''}" style="--pp:${P}px">${peek}${portrait(u.id, P, card.name)}${place(G, side)}` +
+      `<div class="mstr${delta}" style="left:${px - pw / 2}px;top:${py - ph / 2 - 1.3}px;width:${pw}px;height:${ph}px">${u.str}</div>` +   // -1.3: measured optical centre
+      `<div class="mname" style="top:${C + R - 24}px">${kitImg(`med${M}_tab_${side}`)}<span>${card.name}</span></div>` +
+      (under.length && !ghost ? `<div class="mnum" style="left:${C + R * .72 - 14}px;top:${C + R * .6 - 14}px">${kitImg(`med${M}_num_${side}`)}<span>${under.length}</span></div>` : '') +
       (kws ? `<div class="kws">${kws}</div>` : '') +
       (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') + '</div>';
   }
