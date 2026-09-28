@@ -46,6 +46,6 @@ There is no mana: every card costs one card and one placement action. Low streng
 
 - Every card is an animal. No spells, no objects, no places.
 - Let the animal's real behaviour suggest the mechanic: birds fly over lines, elephants hold ground, lemmings swarm.
-- Rarity follows how exotic the animal is. Commons are everyday animals, rares exotic ones, legendaries a specific named individual of a real species. A legendary's name may evoke myth or folklore but never cites it (no "Bastet").
+- Legendaries are a specific named individual of a real species; commons and rares carry species names. A legendary's name may evoke myth or folklore but never cites it (no "Bastet").
 - One species per pool among commons and rares; subspecies, sex and age variants count as the same species. Legendaries are exempt, being named individuals.
 - No "[adjective] animal" names that most people would see as the same animal (a Martial Eagle next to an Eagle). Species people tell apart are fine (Polar Bear, Grizzly, Black Bear). Falcon and Peregrine Falcon break this today.

@@ -163,7 +163,7 @@
     },
     {
       "id": "goliath",
-      "name": "Goliath",
+      "name": "Python",
       "deck": "egg_control",
       "rarity": "common",
       "tags": ["Snake"],

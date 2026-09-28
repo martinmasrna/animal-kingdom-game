@@ -21,17 +21,6 @@ Focused follow-up to `decks/flavor-review.md`, including consequences of the Jul
 - [ ] Alternatives if Secretarybird feels too anti-Snake for the mixed tribe: **Goshawk, Harrier, Kite**.
 - [ ] Retire “Stoop” as the card name when the rarity change ships. It reads as an individual legendary name rather than a generic species.
 
-### 1.2 Goliath becomes a generic rare Snake
-
-The common **Anaconda** means a rare giant anaconda would violate the one-species rule now that Goliath no longer has the legendary named-individual exemption.
-
-- [ ] Recommended identity: **Titanoboa**.
-  - Real extinct snake, not a mythic creature.
-  - Its extraordinary size fits `strength = number of removed units`.
-  - Exotic enough to read as Rare while remaining a generic species.
-- [ ] Alternative: **African Rock Python**, provided no generic Python is selected elsewhere.
-- [ ] Avoid Green Anaconda/Burmese Anaconda variants; they preserve or blur the collision with common Anaconda.
-
 ### 1.3 Black Swan becomes legendary
 
 “Black Swan” is a species/description, not an individual legendary name.
@@ -112,9 +101,8 @@ The present pool mixes original evocative names (`Eon`, `Ember`, `Vesper`) with 
 
 ### Egg Control
 
-- [ ] **Keep:** Eon, Ember, Aurum.
+- [ ] **Keep:** Eon, Ember, Aurum. (Goliath is now the common Python.)
 - [ ] **Add an individual name to Black Swan** from §1.3.
-- [ ] **Rename/demote Goliath** to Titanoboa or another generic rare species.
 
 ### Colony
 
