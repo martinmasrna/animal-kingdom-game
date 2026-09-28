@@ -48,4 +48,5 @@ There is no mana: every card costs one card and one placement action. Low streng
 - Let the animal's real behaviour suggest the mechanic: birds fly over lines, elephants hold ground, lemmings swarm.
 - Legendaries are a specific named individual of a real species; commons and rares carry species names. A legendary's name may evoke myth or folklore but never cites it (no "Bastet").
 - One species per pool among commons and rares; subspecies, sex and age variants count as the same species. Legendaries are exempt, being named individuals.
-- No "[adjective] animal" names that most people would see as the same animal (a Martial Eagle next to an Eagle). Species people tell apart are fine (Polar Bear, Grizzly, Black Bear). Falcon and Peregrine Falcon break this today.
+- No "[adjective] animal" names that most people would see as the same animal (a Martial Eagle next to an Eagle). Species people tell apart are fine (Polar Bear, Grizzly, Black Bear). Falcon and Peregrine Falcon, and Gray Wolf and Red Wolf, break this today.
+- Tags follow what players believe, not taxonomy: Hyena is a Canine because most players would ask why it isn't (Martin, 2026-09-28).
