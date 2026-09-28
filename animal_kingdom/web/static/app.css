@@ -99,10 +99,25 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .num { font-family: 'Lilita One', var(--font-display); font-weight: 400; color: #fff8e6; paint-order: stroke fill; -webkit-text-stroke: 5px #2a1606; text-shadow: 0 3px 0 #2a1606; line-height: 1; letter-spacing: .01em; }
 .num.up { color: #b8f59a; } .num.down { color: #ff9f8a; }
 
+/* The information layer: ownership, held regions and connected chains in strong team colour over the painted
+   kit. Its strength is one set of variables, cycled live with I (info-lo / info-mid / info-hi on #stage). */
+#stage { --you-c: 255,158,40; --them-c: 64,156,240; --wash: .3; --ringw: 5px; --line: .85; --sock: .7; }
+#stage.info-lo { --wash: .16; --ringw: 3px; --line: .5; --sock: .85; }
+#stage.info-hi { --wash: .45; --ringw: 7px; --line: 1; --sock: .55; }
+.wash { position: absolute; border-radius: 26px; background: rgba(var(--c), var(--wash)); box-shadow: 0 0 30px 10px rgba(var(--c), calc(var(--wash) * .8)); }
+.wash.A { --c: var(--you-c); } .wash.B { --c: var(--them-c); }
+.wash.part { background: none; box-shadow: none; border: 3px dashed rgba(var(--c), calc(var(--wash) * 2.2)); }
+.trail .line { position: absolute; left: 8%; right: 8%; top: 50%; height: 8px; margin-top: -4px; border-radius: 4px; opacity: var(--line); }
+.trail.A .line { background: rgb(var(--you-c)); box-shadow: 0 0 10px rgba(var(--you-c), .9); }
+.trail.B .line { background: rgb(var(--them-c)); box-shadow: 0 0 10px rgba(var(--them-c), .9); }
+.unit .ring { position: absolute; inset: 2px; border-radius: 50%; box-shadow: 0 0 0 var(--ringw) rgb(var(--c)), 0 0 22px calc(var(--ringw) + 4px) rgba(var(--c), .55); }
+.unit.A { --c: var(--you-c); } .unit.B { --c: var(--them-c); }
+.ribbon { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); display: flex; gap: 4px; align-items: center; white-space: nowrap; padding: 3px 10px 4px; border-radius: 6px; background: rgb(var(--c)); box-shadow: 0 2px 0 rgba(0,0,0,.45), 0 3px 8px rgba(0,0,0,.5); font: 15px/1 'Lilita One', var(--font-display); color: #1c1006; z-index: 3; }
+.unit.B .ribbon { color: #061424; }
+.ribbon b { font: 600 10.5px/1 var(--font-text); letter-spacing: .06em; text-transform: uppercase; padding: 2px 5px; border-radius: 4px; background: rgba(0,0,0,.72); color: #fff; }
+.unit.ghost .ribbon { opacity: .8; }
 .trail { opacity: .92; filter: brightness(.9); }
-.trail.lit.A { filter: brightness(1.12) drop-shadow(0 0 5px rgba(255,190,90,.95)); }
-.trail.lit.B { filter: brightness(1.02) drop-shadow(0 0 5px rgba(130,175,235,.95)); }
-.socket { width: 176px; height: 176px; }
+.socket { width: 176px; height: 176px; opacity: var(--sock); }
 .cr { width: 176px; height: 176px; border-radius: 50%; }
 .cr.tgt { cursor: pointer; }
 .unit { position: absolute; left: 6px; top: 6px; width: 164px; height: 164px; isolation: isolate; }

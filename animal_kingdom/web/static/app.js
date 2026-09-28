@@ -241,7 +241,7 @@ function gameScreen() {
       <div class="prompt" id="choicebar"></div>
       <div class="waiting num" id="waiting"></div>
       <div class="endov" id="endov"></div></div></div>`;
-    fitStage();
+    fitStage(); applyInfo();
     wireNotes();
     const menubtn = document.getElementById('menubtn');
     menubtn.onclick = e => { e.stopPropagation(); document.getElementById('menudrop').classList.toggle('on'); };
@@ -583,6 +583,15 @@ addEventListener('keydown', e => {
 addEventListener('keydown', e => {
   if ((e.key === 'n' || e.key === 'N') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
     e.preventDefault(); openNote();
+  }
+});
+
+// I cycles the strength of the information layer (team colour over the painted kit), remembered per browser.
+const INFO = ['info-lo', 'info-mid', 'info-hi'];
+function applyInfo() { const st = document.getElementById('stage'); if (st) { st.classList.remove(...INFO); st.classList.add(store('ak:info') || 'info-mid'); } }
+addEventListener('keydown', e => {
+  if ((e.key === 'i' || e.key === 'I') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
+    const cur = store('ak:info') || 'info-mid'; store('ak:info', INFO[(INFO.indexOf(cur) + 1) % 3]); applyInfo(); toast(`Information layer: ${store('ak:info').slice(5)}`, true);
   }
 });
 
