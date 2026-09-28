@@ -178,7 +178,7 @@
       "deck": "egg_control",
       "rarity": "legendary",
       "tags": ["Bird"],
-      "base_strength": 6,
+      "base_strength": 7,
       "keywords": ["Flight"],
       "text": "Flight. When this is removed, shuffle it back to your deck."
     },
