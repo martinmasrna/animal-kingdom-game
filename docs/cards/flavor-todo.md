@@ -90,7 +90,7 @@ The present pool mixes original evocative names (`Eon`, `Ember`, `Vesper`) with 
 ### Egg Control
 
 - Locked 2026-09-28: Eon (a Titanoboa, the Ouroboros), Ember (a fire-coloured bird, the phoenix), Aurum (a goose, the one that lays golden eggs), Nassim (a black swan, the Taleb wink).
-- [ ] **Peregrine Falcon** breaks the one-species rule against Aggro's Falcon. Aggro keeps Falcon (the fastest bird, the flying Cheetah); the Egg removal bird needs another predator bird.
+- The Egg removal bird is the Hawk (3, removes 3 or less: a mid-size hunter of small prey). Falcon stays in Aggro as the fastest bird. The Eagle stays the vanilla 5; a bigger predator-bird effect, if one is ever made, belongs to the Eagle.
 
 ### Colony
 

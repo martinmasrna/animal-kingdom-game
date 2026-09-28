@@ -4,7 +4,7 @@ Snake and Bird control. The Birds churn the deck: Raven and Owl draw and shuffle
 
 Eon is the Ouroboros: a 10 with Apex Predator that eats what it lands on, then shuffles itself back into the deck at the end of your turn, one strength smaller each cycle. Every return is a shuffle, so it also feeds Rattlesnake.
 
-Rarity follows role: the commons are the engine (Owl, Raven, Eagle, Rattlesnake, Python, Viper), the rares are situational answers (Peregrine Falcon, Taipan, Magpie, Black Mamba).
+Rarity follows role: the commons are the engine (Owl, Raven, Eagle, Rattlesnake, Python, Viper), the rares are situational answers (Hawk, Taipan, Magpie, Black Mamba).
 
 The plan is to survive the midgame by removing threats one at a time, then win late on size: good against midrange and ramp, which commit one big unit at a time, weak against wide aggro and combo. Played by a human it wins by taking the initiative early (flyers deep on the other side, breaking regions) and building a chain to the enemy HQ anchored by the big Snakes; the bots don't play it that way, so its simulated win rate understates it.
 
@@ -25,7 +25,7 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Peregrine Falcon** | 2 | Bird | 3 | Flight. Battlecry: remove an adjacent enemy of strength 3 or less. |
+| **Hawk** | 2 | Bird | 3 | Flight. Battlecry: remove an adjacent enemy of strength 3 or less. |
 | **Taipan** | 2 | Snake | 4 | Battlecry: choose an adjacent enemy unit. At the start of your next turn, remove it. |
 | **Magpie** | 2 | Bird | 3 | Flight. Battlecry: take a random card from your opponent's hand, then shuffle a card from your hand into your deck. |
 | **Black Mamba** | 2 | Snake | 4 | Battlecry: remove an adjacent enemy of strength 5 or less. |

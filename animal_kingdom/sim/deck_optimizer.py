@@ -112,7 +112,7 @@ def random_recipe(rng: random.Random, pools: Optional[dict[str, list[str]]] = No
 # with no "if you control N friendly X" precondition, so cross-deck mixing doesn't break synergy.
 SEED_RECIPE = make_recipe(
     legendary=("gale", "sirocco", "pestis", "alpha"),
-    rare=("jaguar", "stoop", "polar_bear", "rhinoceros"),  # stoop = Peregrine Falcon
+    rare=("jaguar", "stoop", "polar_bear", "rhinoceros"),  # stoop = Hawk
     common=("lion", "tiger", "anaconda", "dire_wolf", "eagle", "bat"),
 )
 
