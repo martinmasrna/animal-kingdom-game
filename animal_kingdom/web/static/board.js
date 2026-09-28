@@ -193,8 +193,22 @@ function renderField(el, M, g, cards, ui) {
     const at = VAR === 'sD' ? [[492, 725, 960, 1194][c - 1], [268, 458][r - 1]] : [(X(c) + X(c + 1)) / 2, (Y(r) + Y(r + 1)) / 2];
     // A held region recolours its painted stone: a disc the stone's size, blended in "color" mode over the painting.
     const MARK = document.documentElement.dataset.f === 'm';
+    const PV = document.documentElement.dataset.pv || '';
+    if (VAR === 'sD' && PV) {
+      // Payout sketches. The painted stone is covered with grass cloned from just above it.
+      const gx = at[0] - 40, gy = at[1] - 40;
+      s += `<div class="stonecover" style="left:${gx}px;top:${gy}px;background-position:${-gx}px ${-(gy - 64)}px"></div>`;
+      const own = st && st.full ? st.owner : '';
+      if (PV === 'f') {   // the region grows fruit: a small cluster, and how much it yields
+        const k = ((c * 7 + r * 3) % 9) * 12.5, k2 = ((c * 5 + r * 11 + 3) % 9) * 12.5, k3 = ((c * 13 + r * 5 + 6) % 9) * 12.5;
+        s += put(`yield ${own}`, at[0], at[1], `<i style="background-position:${k}% 0;left:0;top:6px"></i><i style="background-position:${k2}% 0;left:15px;top:0"></i><i style="background-position:${k3}% 0;left:28px;top:8px"></i><b>${reg.food}</b>`);
+      } else if (PV === 'q') {   // quiet: a small engraved number in the ground, team colour when held
+        s += put(`quietpay ${own}`, at[0], at[1], `${reg.food}`);
+      }
+    } else {
     if (VAR === 'sD' && st && st.full) s += MARK ? put(`pawmark ${st.owner}`, at[0], at[1], PAW) : put(`stonetint ${st.owner}`, at[0], at[1]);
     s += put(`payout${st && st.full ? ' full ' + st.owner : ''}`, at[0], at[1], `<span class="plus">+</span>${reg.food}`);
+    }
   }
   // Side banners: the headquarters. Food toward the win threshold, next turn's income paler above it.
   if (MAP_) for (const p of ['A', 'B']) {
@@ -234,7 +248,8 @@ function renderField(el, M, g, cards, ui) {
       for (let i = 0; i < Math.min(win, food + inc); i++)
         t += `<i class="${i < food ? 'r' : 'g'}${i >= was && i < food ? ' new' : ''}" style="${i >= was && i < food ? `animation-delay:${.55 + (i - was) / Math.max(1, gained) * .5}s;` : ''}left:${Math.floor(i / 3) * 7.4 + jit(i, 1) * 2 - 1}px;top:${(2 - i % 3) * 7 + (Math.floor(i / 3) % 2) * 2 + jit(i, 2) * 2 - 1}px;background-position:${kind(i) * 12.5}% 0;transform:rotate(${jit(i, 3) * 60 - 30}deg)"></i>`;
       const incTag = inc > 0 ? `<b class="incnum num" style="left:${Math.min(Math.floor(Math.min(win, food + inc) / 3) * 7.4 + 14, 236)}px">+${inc}</b>` : '';
-      s += put(`otrough ${p}`, p === 'A' ? 160 : 1514, 560, `<div class="hollow">${t}${incTag}</div>` + kitImg('trough'));
+      s += put('foodhud', p === 'A' ? 160 : 1512, 592);
+      s += put(`otrough big ${p}`, p === 'A' ? 160 : 1514, 560, `<div class="hollow">${t}${incTag}</div>` + kitImg('trough'));
       // Fruit flies from each held stone to where the new fruit lands in the trough.
       if (gained > 0) {
         const tx = (p === 'A' ? 160 : 1514) - 145 + 10 + Math.floor(was / 3) * 7.4, ty = 560;
@@ -243,7 +258,7 @@ function renderField(el, M, g, cards, ui) {
         srcs.forEach(([sx, sy], k) => { for (let j = 0; j < 3; j++)
           fx += `<i class="flyfruit" style="left:${sx}px;top:${sy}px;--dx:${tx - sx}px;--dy:${ty - sy}px;animation-delay:${k * .08 + j * .06}s;background-position:${((k * 3 + j) * 4 % 9) * 12.5}% 0"></i>`; });
       }
-      s += put(`carved small ${p}`, p === 'A' ? 160 : 1514, 616, `${food}<small> / ${win}</small>`);
+      s += put(`carved food ${p}`, p === 'A' ? 160 : 1514, 622, `${food}<small> / ${win}</small>`);
     } else if (F === 't') {
       // A carved trough filled with fruit toward the win at its end; next turn's income as unripe green fruit.
       s += put(`trough ${p}`, x, 560, `<div class="in"><div class="inc" style="width:${f2 * 100}%"></div><div class="fill" style="width:${f1 * 100}%"></div></div><span class="cap"></span>`);

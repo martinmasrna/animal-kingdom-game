@@ -207,13 +207,13 @@ function onView(prev) {
 // (data-v on <html>, read by app.css and board.js). No server match; nothing can be played.
 async function labScreen(name) {
   const q = new URLSearchParams(location.search), de = document.documentElement.dataset;
-  for (const k of ['v', 'p', 'd', 'h', 'f', 't', 'k', 'm', 'sp']) de[k] = q.has(k) ? q.get(k) : (LIVE_LOOK[k] || '');
+  for (const k of ['v', 'p', 'd', 'h', 'f', 't', 'k', 'm', 'sp', 'pv']) de[k] = q.has(k) ? q.get(k) : (LIVE_LOOK[k] || '');
   V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
   screen = null; gameScreen(); labBar();
 }
 // A switcher over the lab frame: each row flips one design choice live.
 // Only the open questions; decided ones live in LIVE_LOOK.
-const LAB = [['sp', 'Strength', [['tl', 'plate top-left'], ['bc', 'plate bottom'], ['b', 'cast boss bottom'], ['B', 'big boss bottom'], ['t', 'cast boss top'], ['n', 'cast band bottom']]]];
+const LAB = [['pv', 'Payout', [['', 'stones (now)'], ['f', 'fruit + yield'], ['q', 'quiet number']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {
   let bar = document.getElementById('labbar'); if (!LAB.length) { if (bar) bar.remove(); return; }
@@ -529,7 +529,7 @@ function stackAt(cr) {
   const g = document.querySelector(`#board [data-cr="${cr}"]`), st = V && V.game && viewerGame().board[cr];
   if (!g || !st) return;
   const card = (u, w, top) => { const c = CARDS[u.id];
-    return `<div class="sc ${u.owner}" style="--w:${w}px">${cardHTML(c, { str: top ? u.str : c.str })}` +
+    return `<div class="sc ${u.owner}">${cardHTML(c, { str: top ? u.str : c.str, attrs: `style="--w:${w}px"` })}` +
       (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `</div>`; };
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
   stackpop.innerHTML = `<div class="stk"><div class="cap">On top</div>${card(top, 190, true)}</div>` +

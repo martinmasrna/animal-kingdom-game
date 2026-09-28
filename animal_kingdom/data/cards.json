@@ -235,7 +235,7 @@
     {
       "id": "eagle",
       "name": "Eagle",
-      "deck": "reserve",
+      "deck": "egg_control",
       "rarity": "common",
       "tags": ["Bird"],
       "base_strength": 5,
@@ -325,7 +325,7 @@
     {
       "id": "secretary_bird",
       "name": "Secretary Bird",
-      "deck": "egg_control",
+      "deck": "reserve",
       "rarity": "common",
       "tags": ["Bird"],
       "base_strength": 3,

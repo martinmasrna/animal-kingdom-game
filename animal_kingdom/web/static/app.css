@@ -620,7 +620,6 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .pop .card { --w: 220px; }
 .pop .ev { border-radius: 8px; border: 1px solid #5a4630; background: rgba(28,18,8,.94); color: #e8d8b8; max-width: 220px; }
 .sc { width: auto; min-height: 0; border: none; background: none; box-shadow: none; overflow: visible; }
-.sc .card { --w: var(--w); }
 .sc .tm { padding: 4px 2px 0; font-size: 12px; color: #f3e3c0; text-shadow: 0 1px 2px #000; }
 .stackpop .cap { color: #f3e3c0; text-shadow: 0 1px 2px #000; }
 .prompt .oc { width: auto; height: auto; border: none; background: none; overflow: visible; }
@@ -668,3 +667,21 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   font-family: 'Source Serif 4', serif; font-weight: 800; font-variant-numeric: lining-nums tabular-nums; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.75); line-height: 1; }
 .unit.stone .pwrap { position: absolute; inset: 0; z-index: 1; border-radius: 50%; box-shadow: 0 0 0 2px rgba(10,6,2,.8); }
 .unit.stone .pwrap .portrait { inset: 0; }
+
+/* Food readout, made prominent: a soft dark backing under trough and count, count large and bright. */
+.foodhud { width: 330px; height: 128px; border-radius: 22px; background: radial-gradient(ellipse at 50% 50%, rgba(18,10,3,.72), rgba(18,10,3,.45) 60%, rgba(18,10,3,0) 100%); z-index: 0; pointer-events: none; }
+.carved.food { font: 800 46px/1 'Source Serif 4', serif; color: #fff6e2; text-shadow: 0 2px 4px rgba(0,0,0,.85), 0 0 14px rgba(0,0,0,.5); }
+.carved.food small { font-size: 22px; font-weight: 700; opacity: .85; }
+.otrough.big { transform: translate(-50%, -50%) scale(1.12); }
+.incnum { font-size: 20px; }
+
+/* Payout sketches (lab pv=f|q) */
+.stonecover { position: absolute; width: 80px; height: 80px; background-image: url(/static/kit/sav_D4.webp); background-size: 1672px 941px;
+  -webkit-mask-image: radial-gradient(circle, #000 55%, transparent 72%); mask-image: radial-gradient(circle, #000 55%, transparent 72%); }
+.yield { width: 42px; height: 44px; }
+.yield i { position: absolute; width: 18px; height: 18px; background: url(/static/kit/fruits.webp) 0 0 / 900% 100% no-repeat; filter: drop-shadow(1px 2px 1px rgba(0,0,0,.55)); }
+.yield b { position: absolute; left: 50%; top: 26px; transform: translateX(-50%); font: 800 17px/1 'Source Serif 4', serif; color: #fff6e2; text-shadow: 0 1px 2px rgba(0,0,0,.9); }
+.yield.A b, .yield.B b { padding: 2px 6px 3px; border-radius: 8px; }
+.yield.A b { background: rgb(40,110,220); } .yield.B b { background: rgb(205,40,30); }
+.quietpay { font: 800 22px/1 'Source Serif 4', serif; color: rgba(70,45,18,.7); text-shadow: 0 1px 0 rgba(255,245,220,.45); }
+.quietpay.A { color: #1f63c4; text-shadow: 0 0 10px rgba(255,255,255,.6); font-size: 26px; } .quietpay.B { color: #b8261a; text-shadow: 0 0 10px rgba(255,255,255,.6); font-size: 26px; }
