@@ -1043,7 +1043,7 @@
       "id": "arctic_fox",
       "name": "Arctic Fox",
       "deck": "reserve",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": ["Canine"],
       "base_strength": 3,
       "keywords": [],
