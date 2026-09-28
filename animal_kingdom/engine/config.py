@@ -79,9 +79,9 @@ class Config:
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
     dhole_grant: int = 3                 # to adjacent friendly Canines (2→3, 2026-07-05); reserve
     clarion_grant: int = 2               # to all other friendly Canines on board (+1→+2, body 4→2, 2026-07-05)
-    red_wolf_grant: int = 1              # to each other Canine that enters play (reworked 2026-07-05)
-    dingo_grant: int = 1                 # to a friendly adjacent Canine, end of turn
-    bush_dog_grant: int = 1              # to friendly adjacent Canines, on gaining strength
+    red_wolf_grant: int = 2              # to each other Canine that enters play (reworked 2026-07-05)
+    dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn
+    bush_dog_grant: int = 2              # to friendly adjacent Canines, on gaining strength
     shuck_grant: int = 2                 # to the Canine returned from the Remove Pile; reserve
 
     # --- Token spawns (Canine go-wide; 2026-07-05) ---

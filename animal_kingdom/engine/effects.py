@@ -957,7 +957,7 @@ def _clarion_place(state, unit, cr):
 
 
 def _red_wolf_friendly_play(state, watcher, played):
-    # Whenever another Canine you control enters play (played or spawned), give it +1 strength.
+    # Whenever another Canine you control enters play (played or spawned), give it +2 strength.
     if "Canine" in state.cards[played.card_id].tags:
         _grant(state, [played.iid], state.config.red_wolf_grant)
 
@@ -990,10 +990,10 @@ def _hyena_place(state, unit, cr):
 
 
 def _dingo_end_of_turn(state, unit, cr):
-    # Give +1 to a friendly adjacent Canine; auto-pick deterministically (lowest iid).
+    # Give +1 to every friendly adjacent Canine.
     iids = _friendly_adjacent_canine_iids(state, unit, cr)
     if iids:
-        _grant(state, [min(iids)], state.config.dingo_grant)
+        _grant(state, iids, state.config.dingo_grant)
 
 
 def _fox_gain_strength(state, unit, cr):

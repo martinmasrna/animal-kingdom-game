@@ -112,7 +112,7 @@ def test_red_wolf_buffs_canines_that_enter_after_it():
     s = make_state(hands={"A": ["gray_wolf", "lion"]})
     put(s, "1,2", "red_wolf", "A")                           # Red Wolf already on the board
     rules.apply_action(s, PlaceAction("gray_wolf", ("cr", "2,2")))
-    assert s.top_unit("2,2").strength_counter == 1           # Canine buffed as it entered
+    assert s.top_unit("2,2").strength_counter == CFG.red_wolf_grant           # Canine buffed as it entered
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,3")))
     assert s.top_unit("1,3").strength_counter == 0           # non-Canine unaffected
 
@@ -131,7 +131,7 @@ def test_red_wolf_buffs_spawned_pups():
     put(s, "1,2", "red_wolf", "A")
     rules.apply_action(s, PlaceAction("alpha", ("cr", "2,2")))
     pups = [u for st in s.board.values() for u in st if u.card_id == "pup"]
-    assert len(pups) == 2 and all(p.strength_counter == 1 for p in pups)
+    assert len(pups) == 2 and all(p.strength_counter == CFG.red_wolf_grant for p in pups)
 
 
 def test_hyena_removal_scales_with_canine_count():

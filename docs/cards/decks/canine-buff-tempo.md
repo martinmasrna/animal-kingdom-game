@@ -21,8 +21,8 @@ Buff wording is binding: "has +X" is a live aura, "give +X" is a permanent count
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Bush Dog** | 2 | Canine | 3 | Once a turn, when this gains strength, give all friendly adjacent Canines +1 strength. |
-| **Red Wolf** | 2 | Canine | 5 | Whenever another Canine you control enters play, give it +1 strength. |
+| **Bush Dog** | 2 | Canine | 3 | Once a turn, when this gains strength, give all friendly adjacent Canines +2 strength. |
+| **Red Wolf** | 2 | Canine | 5 | Whenever another Canine you control enters play, give it +2 strength. |
 | **Hyena** | 2 | Canine | 4 | Battlecry: remove an adjacent enemy with strength less than or equal to the number of Canines you control. |
 | **Outrider** | 2 | Canine | 6 | Your other Canines may be placed adjacent to any Canine you control, ignoring connection. |
 
@@ -33,7 +33,7 @@ Buff wording is binding: "has +X" is a live aura, "give +X" is a permanent count
 | **Gray Wolf** | 3 | Canine | 4 | Battlecry: remove an adjacent enemy with less or equal strength. |
 | **Fox** | 3 | Canine | 4 | Whenever this gains strength, draw a card. |
 | **African Wild Dog** | 3 | Canine | 2 | Battlecry: spawn a Pup on an adjacent empty crossroad. |
-| **Dingo** | 3 | Canine | 5 | At the end of your turn, give a friendly adjacent Canine +1 strength. |
+| **Dingo** | 3 | Canine | 5 | At the end of your turn, give all friendly adjacent Canines +1 strength. |
 | **Dog** | 3 | Canine | 1 | Battlecry: if you control another Canine, play another Canine from your hand. |
 | **Dire Wolf** | 3 | Canine | 7 | — |
 

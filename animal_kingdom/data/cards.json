@@ -1007,7 +1007,7 @@
       "tags": ["Canine"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Once a turn, when this gains strength, give all friendly adjacent Canines +1 strength."
+      "text": "Once a turn, when this gains strength, give all friendly adjacent Canines +2 strength."
     },
     {
       "id": "jackal",
@@ -1027,7 +1027,7 @@
       "tags": ["Canine"],
       "base_strength": 5,
       "keywords": [],
-      "text": "Whenever another Canine you control enters play, give it +1 strength."
+      "text": "Whenever another Canine you control enters play, give it +2 strength."
     },
     {
       "id": "gray_wolf",
@@ -1077,7 +1077,7 @@
       "tags": ["Canine"],
       "base_strength": 5,
       "keywords": [],
-      "text": "At the end of your turn, give a friendly adjacent Canine +1 strength."
+      "text": "At the end of your turn, give all friendly adjacent Canines +1 strength."
     },
     {
       "id": "dog",
