@@ -314,6 +314,12 @@ function renderField(el, M, g, cards, ui) {
   // square strength plate, a parchment name tab, a small brass tab for the buried count. Geometry measured on each sprite.
   // Stone mode: the clearing's own stones carry the team colour (.ringtint); the portrait fills the clearing;
   // strength on a small team-colour plate; no name on the board (hover shows the card).
+  // Where the strength plate sits on the rim (lab switch sp): tl top-left (now), tc top-centre, bc bottom-centre, bl bottom-left.
+  function platePos(D, mid, clasp) {
+    const c = D / 2, w = 23, h = 23.5, P = document.documentElement.dataset.sp || 'tl';
+    const [x, y] = { tl: [c - clasp, c - clasp], tc: [c, c - mid], bc: [c, c + mid], bl: [c - clasp, c + clasp] }[P] || [c - clasp, c - clasp];
+    return `left:${x - w}px;top:${y - h}px`;
+  }
   function stoneUnit(u, under, ghost, cr) {
     // The card frame's rim in team colour, ornament by rarity (kit/crim_<rarity>_<side>), laid over the clearing's stones;
     // the portrait fills it; the strength plate sits on the rim at the top-left like a clasp.
@@ -326,7 +332,7 @@ function renderField(el, M, g, cards, ui) {
     const peek = ghost ? '' : under.slice(0, 4).map((b, i) => `<i class="disc ${b.owner}" style="inset:${D / 2 - outer}px;transform:translate(${(i + 1) * 6}px,${(i + 1) * 7}px);z-index:${-i - 1}"></i>`).join('');
     return `<div class="unit stone ${u.owner}${ghost ? ' ghost' : ''}" style="--pp:${D}px">${peek}${portrait(u.id, D, card.name)}` +
       `<img class="srim" src="${kit(`crim_common_${side}`)}" alt="" draggable="false" style="width:${K.W * rs}px;left:${D / 2 - K.cx * rs}px;top:${D / 2 - K.cy * rs}px">` +
-      `<div class="splate" style="left:${D / 2 - clasp - 23}px;top:${D / 2 - clasp - 23.5}px">${kitImg('plate_' + side)}<span class="${delta.trim()}">${u.str}</span></div>` +
+      `<div class="splate" style="${platePos(D, mid, clasp)}">${kitImg('plate_' + side)}<span class="${delta.trim()}">${u.str}</span></div>` +
       (kws ? `<div class="kws">${kws}</div>` : '') +
       (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') + '</div>';
   }
