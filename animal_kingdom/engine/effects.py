@@ -100,28 +100,36 @@ def resolve(state: GameState) -> None:
 # ================================================================== mulligan
 
 def _op_mulligan(state, step):
-    """Return cards one at a time (SKIP = keep the rest); then draw as many replacements as were
-    returned and shuffle the returned cards into the deck. Raw draws and a raw shuffle: no
-    on-draw or on-shuffle triggers, exactly like the opening deal."""
+    """Gwent-style blacklist mulligan (overview.md §4.4): each returned card is replaced at once by
+    the top deck card that is no copy of anything returned so far, up to `mulligan_max` returns
+    (a replacement may itself be returned); SKIP keeps the rest. Returned cards are shuffled back
+    at the end. Raw draws and a raw shuffle: no on-draw or on-shuffle triggers, like the deal."""
     player, returned = step["player"], step["returned"]
+    deck, hand = state.decks[player], state.hands[player]
     done = False
     if "choice" in step:
         choice = step.pop("choice")
         if choice == SKIP:
             done = True
         else:
-            inst = next((u for u in state.hands[player] if u.iid == choice), None)
-            if inst is not None:
-                state.hands[player].remove(inst)
+            inst = next((u for u in hand if u.iid == choice), None)
+            if inst is not None and _mulligan_replacement(deck, returned + [inst.card_id]) is not None:
+                hand.remove(inst)
                 returned.append(inst.card_id)
-    if not done and state.hands[player]:
-        return PendingRequest("choice", player, optional=True, kind="mulligan",
-                              options=[u.iid for u in state.hands[player]])
+                i = _mulligan_replacement(deck, returned)
+                hand.append(UnitInstance(deck.pop(i), player, state.new_iid()))
+    if not done and hand and len(returned) < state.config.mulligan_max and _mulligan_replacement(deck, returned) is not None:
+        return PendingRequest("choice", player, optional=True, kind="mulligan", options=[u.iid for u in hand])
     if returned:                      # a kept hand leaves the deck order (and the RNG) untouched
-        state.draw(player, len(returned))
-        state.decks[player].extend(returned)
-        state.rng.shuffle(state.decks[player])
+        deck.extend(returned)
+        state.rng.shuffle(deck)
     return None
+
+
+def _mulligan_replacement(deck, blacklist):
+    """Index of the topmost deck card (the end) that is no copy of a blacklisted card, or None."""
+    banned = set(blacklist)
+    return next((i for i in range(len(deck) - 1, -1, -1) if deck[i] not in banned), None)
 
 
 # ============================================================ placement + events
@@ -1369,19 +1377,16 @@ def _hippo_enemy_placed(state, hippo, placed, cr):
 # --- Hand-cost / friendly-sacrifice removal (Aggro / Food OTK) ---
 
 def _rat_place(state, unit, cr):
-    targets = _adjacent_enemy_targets(state, unit, cr)
-    if targets and state.hands[unit.owner]:
-        state.effect_stack.append({"op": "rat_kill", "chooser": unit.owner, "options": targets})
+    # "Remove an adjacent enemy unit, then remove a random card from your hand." The hand card
+    # goes whether or not there was a target; an empty hand pays nothing (Doomguard-style).
+    state.effect_stack.append({"op": "rat_discard", "player": unit.owner})
+    _push_remove_choice(state, unit.owner, "rat", _adjacent_enemy_targets(state, unit, cr))
 
 
-def _op_rat_kill(state, step):
-    chooser = step["chooser"]
-    if "choice" not in step:
-        return PendingRequest("choice", chooser, optional=True, options=step["options"])
-    if step["choice"] == SKIP or not state.hands[chooser]:
-        return None
-    remove_from_hand(state, chooser, state.hands[chooser][0])   # pay a hand card (a remove, not a Deathrattle)
-    remove_top(state, step["choice"], by_player=chooser, by_card="rat")
+def _op_rat_discard(state, step):
+    hand = state.hands[step["player"]]
+    if hand:
+        remove_from_hand(state, step["player"], state.rng.choice(hand))   # a remove, not a Deathrattle
     return None
 
 
@@ -1746,7 +1751,7 @@ def _oxpecker_place(state, unit, cr):
 
 
 OPS.update({
-    "rat_kill": _op_rat_kill,
+    "rat_discard": _op_rat_discard,
     "hornet_kill": _op_hornet_kill,
     "carmilla_sac": _op_carmilla_sac,
     "black_widow_sac": _op_black_widow_sac,

@@ -191,14 +191,34 @@ def test_mulligan_first_player_first_then_second_then_turn_one():
     kept = [u.card_id for u in s.hands[first]]
     returned = s.hands[first][0]
     rules.apply_action(s, ChoiceAction(returned.iid))
+    # the replacement is in hand at once, and it is no copy of the returned card
     assert s.pending["chooser"] == first and returned not in s.hands[first]
+    assert len(s.hands[first]) == len(kept) and s.hands[first][-1].card_id != returned.card_id
     rules.apply_action(s, ChoiceAction(SKIP))
-    # one replacement drawn, the returned card shuffled back, deck size unchanged
+    # the returned card shuffled back, deck size unchanged
     assert len(s.hands[first]) == len(kept) and len(s.decks[first]) == 30 - len(kept)
     assert s.pending["chooser"] == second
     rules.apply_action(s, ChoiceAction(SKIP))
     assert s.pending is None and s.turn_counter == 0 and s.current == first
     assert rules.legal_actions(s)[0].kind == "draw"
+
+
+def test_mulligan_blacklists_every_returned_card_and_stops_at_three():
+    from animal_kingdom.decks import load_premade_deck
+    from animal_kingdom.engine.actions import ChoiceAction
+    from animal_kingdom.engine.state import new_game
+    s = new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 11)
+    first = s.current
+    gone = []
+    for _ in range(3):
+        inst = s.hands[first][-1]                       # always return the newest card, replacements included
+        gone.append(inst.card_id)
+        before = {u.iid for u in s.hands[first]}
+        rules.apply_action(s, ChoiceAction(inst.iid))
+        new = [u for u in s.hands[first] if u.iid not in before]
+        assert len(new) == 1 and new[0].card_id not in gone
+    assert s.pending["chooser"] != first                 # the cap ends this player's mulligan
+    assert len(s.decks[first]) + len(s.hands[first]) == 30
 
 
 def test_mulligan_can_be_disabled():

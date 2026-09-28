@@ -61,7 +61,7 @@ One player is chosen to go first (by coin flip, until a better method is decided
 The **first player** draws **3** cards; the **second player** draws **4** cards. The extra card compensates the second player for the turn-order disadvantage of a place-or-draw game. Whether 3/4 is the right split is a tuning question — measure the first-player win rate before changing it.
 
 ## 4.4 Mulligan
-After the opening hands are dealt, each player, **first player first**, may return any number of cards from their hand. They draw that many replacements, then the returned cards are shuffled into the deck (so a returned card cannot be redrawn). This is a one-time, hidden decision: neither player sees what the other returned. Mulligan draws and the shuffle are part of setup and trigger nothing (Black Swan, Rattlesnake, Eon do not fire).
+After the opening hands are dealt, each player, **first player first**, may return up to **three** cards from their hand, one at a time. Each returned card is replaced at once by the top card of the deck that is **not a copy of any card returned so far** (the blacklist: send away a Lion and no Lion comes back during the mulligan). A replacement may itself be returned, within the three. When the player stops, or has returned three, the returned cards are shuffled into the deck. This is a hidden decision: neither player sees what the other returned. Mulligan draws and the shuffle are part of setup and trigger nothing (Black Swan, Rattlesnake, Eon do not fire).
 
 ---
 

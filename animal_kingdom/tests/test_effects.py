@@ -792,15 +792,6 @@ def test_hippopotamus_removes_a_weak_enemy_placed_adjacent():
 
 # =================================================== Stage 2.4: hand-cost / sacrifice removal
 
-def test_rat_pays_a_hand_card_to_destroy_any_enemy():
-    s = make_state(hands={"A": ["rat", "lion"]})
-    put(s, "1,2", "caracal", "A")
-    put(s, "3,2", "lion", "B")                          # str 7 - any strength
-    rules.apply_action(s, PlaceAction("rat", ("cr", "2,2")))
-    rules.apply_action(s, ChoiceAction("3,2"))
-    assert s.owner_of("3,2") is None and "lion" in s.remove_pile and s.hands["A"] == []
-
-
 def test_hornet_saccs_a_spare_copy_to_destroy_an_enemy():
     s = make_state(hands={"A": ["hornet", "hornet"]})
     put(s, "1,2", "caracal", "A")
@@ -1043,3 +1034,16 @@ def test_black_mamba_venom_removes_the_bitten_unit_next_turn_even_if_buried_or_t
     put(s, "2,1", "tiger", "B")                           # ...and the Lion buried under B's own Tiger
     rules.apply_action(s, DrawAction()); rules.apply_action(s, DrawAction())   # B's turn
     assert "lion" in s.remove_pile and s.top_unit("2,1").card_id == "tiger"
+
+
+def test_rat_removes_any_adjacent_enemy_then_a_random_hand_card_and_works_on_an_empty_hand():
+    s = make_state(hands={"A": ["rat", "lion", "eagle"]})
+    put(s, "2,1", "king_theron", "B")                     # an 8: Rat reaches any strength
+    rules.apply_action(s, PlaceAction("rat", ("cr", "1,1")))
+    assert s.top_unit("2,1") is None and "king_theron" in s.remove_pile
+    assert len(s.hands["A"]) == 1                         # one of Lion / Eagle went, at random
+
+    s2 = make_state(hands={"A": ["rat"]})
+    put(s2, "2,1", "king_theron", "B")
+    rules.apply_action(s2, PlaceAction("rat", ("cr", "1,1")))    # empty hand: nothing to pay
+    assert s2.top_unit("2,1") is None

@@ -359,7 +359,7 @@ function drawGame() {
   waiting.textContent = '';
   if (d.pend && d.pend.kind === 'mulligan') {
     const n = d.pend.returned;
-    bar.innerHTML = `<div><b>Mulligan</b><div class="q">Click the cards you want to replace${n ? ` · ${n} returned` : ''}</div></div><span class="skip" id="skip">${n ? 'Done' : 'Keep hand'}</span>`;
+    bar.innerHTML = `<div><b>Mulligan · ${n} of ${d.pend.cap} replaced</b><div class="q">Click a card to replace it; no copy of a card you replace can come back</div></div><span class="skip" id="skip">${n ? 'Done' : 'Keep hand'}</span>`;
     bar.classList.add('on');
     document.getElementById('skip').onclick = () => act({ kind: 'choice', choice: SKIP });
   } else if (d.pend) {

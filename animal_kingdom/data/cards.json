@@ -878,7 +878,7 @@
       "tags": ["Rodent"],
       "base_strength": 2,
       "keywords": [],
-      "text": "Battlecry: remove a card in your hand to destroy an adjacent enemy unit."
+      "text": "Battlecry: remove an adjacent enemy unit, then remove a random card from your hand."
     },
     {
       "id": "falcon",

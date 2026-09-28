@@ -243,6 +243,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .prompt .oc .nm { padding: 4px 6px 0; font: 14px 'Lilita One', var(--font-display); }
 .prompt .oc .tx { padding: 2px 6px; font-size: 9.5px; line-height: 1.25; color: #d9ccb3; }
 .waiting { position: absolute; left: 0; right: 0; top: 640px; text-align: center; font-size: 26px; pointer-events: none; }
+.waiting .peek { pointer-events: auto; }
 .choosing .hand .hc:not(.pick) { opacity: 0.4; pointer-events: none; }
 
 .endov { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(12,8,3,0.7); }

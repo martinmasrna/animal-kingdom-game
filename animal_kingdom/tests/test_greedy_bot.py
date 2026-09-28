@@ -272,19 +272,20 @@ def test_pending_payoff_surfaces_grizzly_delayed_removal_at_1_ply():
 # --------------------------------------------------------- wasted-battlecry detection
 
 def test_battlecry_fizzles_with_no_target():
-    # Rat's "remove a card in hand to destroy an adjacent enemy" has nothing to hit.
-    s = make_state(hands={"A": ["rat", "mouse"]})
-    action = PlaceAction("rat", ("cr", "1,2"))
+    # Jaguar's "remove an adjacent enemy of strength 4 or less" has nothing to hit.
+    s = make_state(hands={"A": ["jaguar", "mouse"]})
+    action = PlaceAction("jaguar", ("cr", "1,2"))
     nxt = s.clone()
     rules.apply_action(nxt, action)
     assert _battlecry_fizzled(s, nxt, "A", action)
 
 
 def test_battlecry_with_a_pending_choice_is_not_fizzled():
-    # Rat with a valid adjacent target leaves an unresolved pending choice (which enemy) -
+    # Rat with two valid adjacent targets leaves an unresolved pending choice (which enemy) -
     # that's a live effect mid-resolution, not a fizzle, even though nothing has happened yet.
     s = make_state(hands={"A": ["rat", "mouse"]})
-    put(s, "2,2", "mouse", "B")
+    put(s, "2,2", "pup", "B")
+    put(s, "1,3", "pup", "B")
     action = PlaceAction("rat", ("cr", "1,2"))
     nxt = s.clone()
     rules.apply_action(nxt, action)
