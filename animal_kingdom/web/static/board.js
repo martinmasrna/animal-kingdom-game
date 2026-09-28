@@ -167,8 +167,8 @@ function renderField(el, M, g, cards, ui) {
     // On map D the painted stones sit a little off the grid; their measured centres.
     const at = VAR === 'sD' ? [[492, 725, 960, 1194][c - 1], [268, 458][r - 1]] : [(X(c) + X(c + 1)) / 2, (Y(r) + Y(r + 1)) / 2];
     // A held region recolours its painted stone: a disc the stone's size, blended in "color" mode over the painting.
-    if (VAR === 'sD' && st) s += put(`stonetint ${st.owner}${st.full ? '' : ' part'}`, at[0], at[1]);
-    s += put(`payout${st ? ' ' + st.owner + (st.full ? ' full' : ' part') : ''}`, at[0], at[1], `<span class="plus">+</span>${reg.food}`);
+    if (VAR === 'sD' && st && st.full) s += put(`stonetint ${st.owner}`, at[0], at[1]);
+    s += put(`payout${st && st.full ? ' full ' + st.owner : ''}`, at[0], at[1], `<span class="plus">+</span>${reg.food}`);
   }
   // Side banners: the headquarters. Food toward the win threshold, next turn's income paler above it.
   if (MAP_) for (const p of ['A', 'B']) {
