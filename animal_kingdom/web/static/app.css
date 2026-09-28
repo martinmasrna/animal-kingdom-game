@@ -685,3 +685,17 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .yield.A b { background: rgb(40,110,220); } .yield.B b { background: rgb(205,40,30); }
 .quietpay { font: 800 22px/1 'Source Serif 4', serif; color: rgba(70,45,18,.7); text-shadow: 0 1px 0 rgba(255,245,220,.45); }
 .quietpay.A { color: #1f63c4; text-shadow: 0 0 10px rgba(255,255,255,.6); font-size: 26px; } .quietpay.B { color: #b8261a; text-shadow: 0 0 10px rgba(255,255,255,.6); font-size: 26px; }
+
+/* Ground test (lab g=1|2|3): the painted map steps back under the pieces. The stage background moves to a filtered layer. */
+[data-g="1"] #stage, [data-g="2"] #stage, [data-g="3"] #stage { background-image: none !important; background-color: #1a1208; }
+[data-g="1"] #stage::before, [data-g="2"] #stage::before, [data-g="3"] #stage::before { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: url(/static/kit/sav_D4.webp) 0 0 / 100% 100%; }
+[data-g="1"] #stage::before { filter: saturate(.55) brightness(.82) contrast(.85); }
+[data-g="2"] #stage::before { filter: saturate(.45) brightness(.6) contrast(.8); }
+[data-g="3"] #stage::before { filter: saturate(.3) brightness(.42) contrast(.7) blur(1.2px); }
+[data-g="2"] #stage::before, [data-g="3"] #stage::before { background: radial-gradient(ellipse 60% 55% at 50% 45%, transparent 40%, rgba(10,6,2,.55) 100%), url(/static/kit/sav_D4.webp) 0 0 / 100% 100%; }
+[data-g="1"] .stonecover { filter: saturate(.55) brightness(.82) contrast(.85); }
+[data-g="2"] .stonecover { filter: saturate(.45) brightness(.6) contrast(.8); }
+[data-g="3"] .stonecover { filter: saturate(.3) brightness(.42) contrast(.7) blur(1.2px); }
+[data-g="2"] .quietpay, [data-g="3"] .quietpay { color: rgba(235,220,190,.45); text-shadow: none; }
+[data-g="2"] .quietpay.A, [data-g="3"] .quietpay.A { color: #5aa0f0; } [data-g="2"] .quietpay.B, [data-g="3"] .quietpay.B { color: #f06050; }
