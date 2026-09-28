@@ -14,7 +14,7 @@ Python ≥3.11 with a venv at `.venv`: `python3 -m venv .venv && .venv/bin/pip i
 
 - Tests: `.venv/bin/python -m pytest -q` (about a minute).
 - Web client: `./play` (serves `animal_kingdom/web/` at localhost:8000; `AK_NO_GAME_LOGS=1` keeps test games out of `results/human_games/web/`). Terminal: `./run` (interactive setup; `--help` for flags). Recorder UI: `./record` (needs the `tui` extra).
-- Balance report: `./report 200` (round-robin; `--deck X --opponent Y` to scope, `--format files --out DIR` for CSV/JSON, `--log FILE` to record games). Replay a logged game with no bot compute: `.venv/bin/python -m animal_kingdom.sim.replay FILE`.
+- Balance report: `./report 200` (round-robin; `--deck X --opponent Y` to scope, `--format files --out DIR` for CSV/JSON, every run records its games to `results/logs/<time>.jsonl`, `--log FILE` to pick the path, `--no-log` to skip). Every simulation keeps its game log: an ad-hoc script calling `run_pairs` passes `log_actions=True` and writes with `sim.replay.write_game_logs`, so questions about how games went are answered from logs, not new runs. Replay a logged game with no bot compute: `.venv/bin/python -m animal_kingdom.sim.replay FILE`.
 - Paired bot A/B: `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/<name>`.
 - Deckbuilding and the goodstuff problem: `sim.deck_optimizer`, `sim.metagame_search`, `sim.measure_deck`, `sim.benchmark_set` (see `docs/design/goodstuff.md`).
 - After changing `cards.json`, regenerate the deck docs' card tables: `.venv/bin/python -m animal_kingdom.render.deck_docs`.

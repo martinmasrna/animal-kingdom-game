@@ -198,9 +198,16 @@ def main(
     p.add_argument("--out", default="results",
                    help="metrics output directory for --format files/both")
     p.add_argument("--log", default=None,
-                   help="also write a per-game action log (JSONL) to this path, for later "
-                        "move-by-move replay via `python -m animal_kingdom.sim.replay`")
+                   help="per-game action log (JSONL) path, for move-by-move replay via "
+                        "`python -m animal_kingdom.sim.replay`; every run writes one, by default "
+                        "to results/logs/<time>.jsonl")
+    p.add_argument("--no-log", action="store_true", help="skip the per-game action log")
     args = p.parse_args(argv)
+    if args.no_log:
+        args.log = None
+    elif not args.log:
+        os.makedirs("results/logs", exist_ok=True)
+        args.log = time.strftime("results/logs/%Y%m%d-%H%M%S.jsonl")
 
     if args.games is not None and args.games_option is not None:
         p.error("pass games either positionally or with --games, not both")
