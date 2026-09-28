@@ -398,7 +398,7 @@
       "deck": "colony_food_swarm",
       "rarity": "rare",
       "tags": ["Colony"],
-      "base_strength": 5,
+      "base_strength": 6,
       "keywords": [],
       "text": "Battlecry: if you control a Colony Queen, draw 1 card."
     },
@@ -551,7 +551,7 @@
       "deck": "ramp",
       "rarity": "rare",
       "tags": ["Bird"],
-      "base_strength": 4,
+      "base_strength": 5,
       "keywords": ["Flight"],
       "text": "Flight. Reveal top card of both decks. If yours has higher strength, draw it."
     },
