@@ -18,7 +18,7 @@ export const CROP = {
   nurse_bee: [.55, .45, .8], nurse_bumblebee: [.5, .45, .8], termite_king: [.55, .5, .8], termite_queen: [.45, .45, .85],
   yuka: [.58, .35, .75], chipmunk: [.6, .35, .7], gopher: [.55, .42, .75], groundhog: [.48, .3, .6], hamster: [.52, .38, .7], hedgehog: [.5, .45, .8], muskrat: [.55, .45, .8],
   armadillo: [.72, .38, .6], chinchilla: [.68, .38, .7], flying_squirrel: [.62, .5, .7], porcupine: [.35, .48, .62], fathom: [.5, .42, .8],
-  greywhisker: [.45, .35, .7], rat_king: [.52, .25, .6], scrooge: [.55, .38, .65],
+  greywhisker: [.45, .35, .7], rat_king: [.52, .25, .6], scrooge: [.52, .3, .62],
   queen_honoria: [.55, .3, .7], queen_marabunta: [.6, .45, .75], vesper: [.6, .42, .72], falstaff: [.5, .38, .85],
   eon: [.6, .33, .7], ember: [.55, .3, .75], aurum: [.52, .3, .8], omen: [.5, .42, .75],
   dire_wolf: [.65, .3, .6], dingo: [.7, .27, .6], fox: [.55, .45, .8], african_wild_dog: [.7, .3, .55], dog: [.66, .3, .6],
