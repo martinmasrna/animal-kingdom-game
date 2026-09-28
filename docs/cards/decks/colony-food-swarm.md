@@ -31,7 +31,7 @@ Watch Falstaff's "whenever you gain food, gain 3 more" stacking with the food-on
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Queen Bee** | 3 | Colony, Queen | 2 | Battlecry: play a Worker unit. |
-| **Guard Hornet** | 3 | Colony | 3 | Flight. Has +5 strength while you control 4 or more Colony units. |
+| **Guard Wasp** | 3 | Colony | 3 | Flight. Has +5 strength while you control 4 or more Colony units. |
 | **Soldier Ant** | 3 | Colony | 2 | Battlecry: if you control 4 or more Colony units, remove an adjacent enemy. |
 | **Worker Ant** | 3 | Colony, Worker | 1 | Battlecry: gain 12 food. |
 | **Worker Wasp** | 3 | Colony, Worker | 3 | Flight. At the end of your turn, gain 3 food. |

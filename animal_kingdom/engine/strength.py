@@ -11,7 +11,7 @@ matters (covering, removal thresholds, region holding, conditions like Coyote's 
 - stored_counters: `UnitInstance.strength_counter` - one-time "give +X" grants (Unnamed Rallier,
   Clarion, Dhole, Dingo, Bush Dog, Shuck). Stored on the instance; persist after the
   granter dies; travel hand->board.
-- active_anthems: live "has +X" auras (Raksha, Lobo, Verminus, Vesper, Guard Hornet).
+- active_anthems: live "has +X" auras (Raksha, Lobo, Verminus, Vesper, Guard Wasp).
   Recomputed from the board every time; vanish when their condition lapses.
 
 For covering legality a card is still in hand (no board iid yet), so anthems are computed

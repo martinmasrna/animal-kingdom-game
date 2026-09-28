@@ -40,7 +40,7 @@ The effect wants an animal known for aerial speed or evasive maneuvering:
 
 The new version has Flight and consumes another copy from hand/deck to destroy an adjacent enemy.
 
-- [ ] Do **not** rename it simply “Wasp”; Colony already has Worker Wasp.
+- Resolved 2026-09-28: Aggro keeps **Hornet**; Colony's Guard Hornet became **Guard Wasp** (a caste name, like Worker Wasp).
 - [ ] Recommended working species: **Tarantula Hawk**.
   - It flies, has an exceptionally potent sting, and is already the cleanest collision-free candidate in the earlier flavor audit.
   - The “remove another copy” cost is mechanical abstraction rather than literal self-sacrifice.

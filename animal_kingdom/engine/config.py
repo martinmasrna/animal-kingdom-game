@@ -90,7 +90,7 @@ class Config:
 
     # --- Thresholds / strength gates ---
     unnamed_canine_draw_threshold: int = 5   # draw if Unnamed Canine has >= this strength
-    colony_synergy_threshold: int = 4    # Guard Hornet / Soldier Ant / Nurse Bumblebee "4+ Colony"
+    colony_synergy_threshold: int = 4    # Guard Wasp / Soldier Ant / Nurse Bumblebee "4+ Colony"
 
     # --- Removal-strength caps on Battlecry removals ---
     jaguar_max: int = 4
