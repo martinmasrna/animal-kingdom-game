@@ -27,41 +27,41 @@ Picking the best cards becomes a forced dominant strategy once four things hold 
 
 ## The direction
 
-Make synergy decks that beat the pile, while the pile remains as one midrange option. To beat a pile, a synergy deck must be at once:
+Make synergy decks that beat goodstuff, while goodstuff remains as one midrange option. To beat goodstuff, a synergy deck must be at once:
 
 1. **High-ceiling:** its payoff outclasses standalone value.
-2. **Non-decomposable:** a pile can't cherry-pick a few of its pieces, which needs a steep threshold.
-3. **Consistent:** it comes online reliably, since a pile has no variance.
+2. **Non-decomposable:** goodstuff can't cherry-pick a few of its pieces, which needs a steep threshold.
+3. **Consistent:** it comes online reliably, since goodstuff has no variance.
 
-Points 2 and 3 fight each other; that is the core difficulty. The shape that threads them is **payoffs that scale on a currency a dedicated deck accrues reliably and a pile structurally can't**, such as "5 or more of your tribe on the board".
+Points 2 and 3 fight each other; that is the core difficulty. The shape that threads them is **payoffs that scale on a currency a dedicated deck accrues reliably and goodstuff structurally can't**, such as "5 or more of your tribe on the board".
 
-Colony already has that shape and was the first prototype. Lowering its thresholds from 5 to 4 and raising its queens lifted it from 38% to 54% against the field, but it still won only 21% against goodstuff (30% with Martin piloting), and it lost its intended bad matchup against aggro. The likely missing lever is resilience against the pile's removal, not more food. The prototype was reverted.
+Colony already has that shape and was the first prototype. Lowering its thresholds from 5 to 4 and raising its queens lifted it from 38% to 54% against the field, but it still won only 21% against goodstuff (30% with Martin piloting), and it lost its intended bad matchup against aggro. The likely missing lever is resilience against goodstuff's removal, not more food. The prototype was reverted.
 
-## Card pricing, and why the pile gets its cards cheap
+## Card pricing, and why goodstuff gets its cards cheap
 
-Cards have no cost, so an effect is paid for in strength. The common anchors are Lion (vanilla 7, ground) and Eagle (vanilla 5, Flight): a common with an effect sits below 7, and the gap is the effect's price. Read the pool that way and the prices are inconsistent, in one direction: **conditional effects were charged more than unconditional ones.** Bat (4, Flight, draw 1) pays 1 for an unconditional draw; Lynx (3, draw 1 if you control another Cat) pays 4 for a worse draw. A condition makes an effect worse, so it must make it cheaper; and in its home deck a tribe condition is nearly always met. A filter is not a condition: "draw a Rodent" (Mouse) draws a random Rodent and whiffs only when none is left, so it is worth more than a raw draw, and with few Rodents in the deck it becomes a light tutor. A true tutor lets you choose the card; the closest thing in the pool is selection (Owl looks at 3 and keeps 1). Draw prices run conditional < raw < filtered. A filtered draw protects its archetype only if its targets are weak outside it, since a pile can run one searcher and one strong target. The pile is largely the set of cards where the budget came out cheap, and the synergy decks are built from the cards where it came out expensive. The rule: **a condition is a discount, never a surcharge.**
+Cards have no cost, so an effect is paid for in strength. The common anchors are Lion (vanilla 7, ground) and Eagle (vanilla 5, Flight): a common with an effect sits below 7, and the gap is the effect's price. Read the pool that way and the prices are inconsistent, in one direction: **conditional effects were charged more than unconditional ones.** Bat (4, Flight, draw 1) pays 1 for an unconditional draw; Lynx (3, draw 1 if you control another Cat) pays 4 for a worse draw. A condition makes an effect worse, so it must make it cheaper; and in its home deck a tribe condition is nearly always met. A filter is not a condition: "draw a Rodent" (Mouse) draws a random Rodent and whiffs only when none is left, so it is worth more than a raw draw, and with few Rodents in the deck it becomes a light tutor. A true tutor lets you choose the card; the closest thing in the pool is selection (Owl looks at 3 and keeps 1). Draw prices run conditional < raw < filtered. A filtered draw protects its archetype only if its targets are weak outside it, since goodstuff can run one searcher and one strong target. Goodstuff is largely the set of cards where the budget came out cheap, and the synergy decks are built from the cards where it came out expensive. The rule: **a condition is a discount, never a surcharge.**
 
-Strength isn't linear either, since covering is strictly-greater: a point is worth what it lets you cover and what it stops covering you, so it depends on the strength distribution of the field. Measured on GreedyBot against the premades, value rises about 1–2 points of win rate per strength step from 5 to 9 ([`../balance.md`](../balance.md)); how that holds against the pile's field is not measured.
+Strength isn't linear either, since covering is strictly-greater: a point is worth what it lets you cover and what it stops covering you, so it depends on the strength distribution of the field. Measured on GreedyBot against the premades, value rises about 1–2 points of win rate per strength step from 5 to 9 ([`../balance.md`](../balance.md)); how that holds against goodstuff's field is not measured.
 
 ## The ways up
 
 - **Each archetype gets its own answer.** The seven decks cover different playstyles on purpose, so no single mechanic (tribe-count buffs, deck-list conditions, cumulative counters) may become the rule for all of them; each is fine as one deck's signature.
-- **Drawbacks buy strength above the anchor.** A common stronger than Lion needs a real drawback, and a drawback can be a deck's fuel: discard, sacrificing your own units (the parked aristocrat design), Fragile, a food cost. A strong body with a severe drawback is bad in a pile and good in the deck that turns the drawback into value, which is non-separable by construction. The current pool often charges twice instead (Rat is a 2 *and* pays a card; the Eggs are 0 *and* Fragile). A mild drawback just hands the pile a free big body.
+- **Drawbacks buy strength above the anchor.** A common stronger than Lion needs a real drawback, and a drawback can be a deck's fuel: discard, sacrificing your own units (the parked aristocrat design), Fragile, a food cost. A strong body with a severe drawback is bad in goodstuff and good in the deck that turns the drawback into value, which is non-separable by construction. The current pool often charges twice instead (Rat is a 2 *and* pays a card; the Eggs are 0 *and* Fragile). A mild drawback just hands goodstuff a free big body.
 - **Food costs stay rare,** around 10% of cards, so food never becomes mana.
-- **Gated retrieval over raw draw.** Generic draw helps a pile more than a synergy deck, since almost any card helps a pile and only the missing piece helps a synergy hand; "draw a Cat" helps the committed deck only (the shared-pool study, `~/.claude/knowledge/studies/shared-pool-card-games/`).
+- **Gated retrieval over raw draw.** Generic draw helps goodstuff more than a synergy deck, since almost any card helps goodstuff and only the missing piece helps a synergy hand; "draw a Cat" helps the committed deck only (the shared-pool study, `~/.claude/knowledge/studies/shared-pool-card-games/`).
 
 **Polar Bear is the benchmark.** It stays a rare 8 with Apex Predator and nothing else, the ceiling of what raw stats buy. If it is simply the best unit in the game, the synergy payoffs aren't strong enough, and the fix belongs to them, not to the Bear (Martin, 2026-09-28).
 
-The per-card measure of all this is **synergy = home value minus pile value**, by paired swaps: a goodstuff card scores near zero, a real synergy card high. Target: synergy cards score high *and* are worth at home at least what the pile's staples are worth.
+The per-card measure of all this is **synergy = home value minus goodstuff value**, by paired swaps: a goodstuff card scores near zero, a real synergy card high. Target: synergy cards score high *and* are worth at home at least what goodstuff's staples are worth.
 
 ## Held in reserve: heroes
 
-If synergy design alone can't beat the pile, the fallback is a deckbuilding constraint that grows out of the pool instead of being imposed on it: each common and rare is attached to one or more legendaries, and a deck is built around a legendary ("hero") from the cards attached to it. That gives classes without colours. It is the Flesh and Blood shape (a hero card that defines the legal pool), and Hearthstone's classes with the hero as a card. It is a drastic change to deckbuilding and the collection, so it is the last resort, not the next experiment (Martin, 2026-09-26).
+If synergy design alone can't beat goodstuff, the fallback is a deckbuilding constraint that grows out of the pool instead of being imposed on it: each common and rare is attached to one or more legendaries, and a deck is built around a legendary ("hero") from the cards attached to it. That gives classes without colours. It is the Flesh and Blood shape (a hero card that defines the legal pool), and Hearthstone's classes with the hero as a card. It is a drastic change to deckbuilding and the collection, so it is the last resort, not the next experiment (Martin, 2026-09-26).
 
 ## Open questions
 
-1. Which lever lets a synergy deck beat the pile: resilience (survive the removal) or speed (win before it)?
-2. Can several such decks be built that beat the pile yet lose to something else, or does every strong deck collapse toward the pile?
+1. Which lever lets a synergy deck beat goodstuff: resilience (survive the removal) or speed (win before it)?
+2. Can several such decks be built that beat goodstuff yet lose to something else, or does every strong deck collapse toward goodstuff?
 3. Is part of the answer a format change (a deliberately shallow pool with conquest), or is it purely card design?
 4. What is goodstuff's intended predator: go-tall, a faster race, or a combo that goes over the top?
 
@@ -69,7 +69,7 @@ If synergy design alone can't beat the pile, the fallback is a deckbuilding cons
 
 - `sim/deck_optimizer.py` hill-climbs a legal deck against a field (`--evaluate-only` scores a given recipe; `SEED_RECIPE` is the hand-built goodstuff seed).
 - `sim/metagame_search.py` runs the counter search and the full double-oracle expansion.
-- `sim/measure_deck.py` measures one deck against a field under any pilot and config (`--with-goodstuff` adds the pile).
+- `sim/measure_deck.py` measures one deck against a field under any pilot and config (`--with-goodstuff` adds goodstuff).
 - `sim/benchmark_set.py` plays the fixed no-synergy baseline deck against the field; see [`../balance.md`](../balance.md).
 
 The Colony prototype recipe lived in the untracked `results/` folder and is gone. The conquest and roster experiments are archived at tag `archive/research-2026-07`.
