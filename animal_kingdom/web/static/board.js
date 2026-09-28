@@ -316,14 +316,18 @@ function renderField(el, M, g, cards, ui) {
   // Stone mode: the clearing's own stones carry the team colour (.ringtint); the portrait fills the clearing;
   // strength on a small team-colour plate; no name on the board (hover shows the card).
   function stoneUnit(u, under, ghost, cr) {
-    const card = cards[u.id], base = card.str === '*' ? null : card.str, D = cr && CLEAR[cr] ? 2 * CLEAR[cr][2] + 8 : 144;
+    // A thin painted rim (kit/rim_thin_*, cut from kit D's ring) laid over the clearing's stones; the portrait fills it;
+    // the strength plate sits on the rim at the top-left like a clasp.
+    const gr = cr && CLEAR[cr] ? CLEAR[cr][2] : 68, outer = gr + 14, inner = outer * .84, D = 2 * inner + 2, card = cards[u.id], base = card.str === '*' ? null : card.str;
+    const rs = outer / 187, rimW = 375 * rs, mid = (outer + inner) / 2, clasp = mid * Math.SQRT1_2;
     const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';
     const kws = (card.kw || []).filter(k => BOARD_KW[k]).map(k => `<img src="${kit(BOARD_KW[k])}" alt="" title="${k}" draggable="false">`).join('');
     const side = u.owner === 'A' ? 'a' : 'b';
     // Buried units peek out behind the portrait as discs in their owners' colours: how many, and whose.
-    const peek = ghost ? '' : under.slice(0, 4).map((b, i) => `<i class="disc ${b.owner}" style="transform:translate(${(i + 1) * 5}px,${(i + 1) * 6}px);z-index:${-i - 1}"></i>`).join('');
+    const peek = ghost ? '' : under.slice(0, 4).map((b, i) => `<i class="disc ${b.owner}" style="inset:${D / 2 - outer}px;transform:translate(${(i + 1) * 6}px,${(i + 1) * 7}px);z-index:${-i - 1}"></i>`).join('');
     return `<div class="unit stone ${u.owner}${ghost ? ' ghost' : ''}" style="--pp:${D}px">${peek}${portrait(u.id, D, card.name)}` +
-      `<div class="splate">${kitImg('plate_' + side)}<span class="${delta.trim()}">${u.str}</span></div>` +
+      `<img class="srim" src="${kit('rim_thin_' + side)}" alt="" draggable="false" style="width:${rimW}px;left:${D / 2 - 187 * rs}px;top:${D / 2 - 186.5 * rs}px">` +
+      `<div class="splate" style="left:${D / 2 - clasp - 23}px;top:${D / 2 - clasp - 23.5}px">${kitImg('plate_' + side)}<span class="${delta.trim()}">${u.str}</span></div>` +
       (kws ? `<div class="kws">${kws}</div>` : '') +
       (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') + '</div>';
   }
