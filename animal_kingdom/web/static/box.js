@@ -21,6 +21,8 @@ const CX = (c, r) => PAINT ? PX(CLEAR[(r - 1) * 5 + c - 1][0]) : X(c), CY = (c, 
 const RIDGE = { A: 110, B: 1565 }, PIT_Y = [690, 637, 584, 531, 478, 425, 372, 319, 266, 213];
 const PITS = s => PIT_Y.map((y, i) => [PX(RIDGE[s] + (i % 2 ? 6 : -6)), PY(y)]);
 const CROWN = { A: [PX(118), PY(150)], B: [PX(1565), PY(150)] }, MOUTH = { A: [PX(176), PY(390)], B: [PX(1500), PY(378)] };
+// A number in painted chalk digits (kit2/chalk/<d>.webp, '+' as p), for a boss to hold.
+const chalk = n => `<span class="chalk">${String(n).split('').map(d => `<img src="/static/kit2/chalk/${d === '+' ? 'p' : d}.webp" alt="${d}" draggable="false">`).join('')}</span>`;
 const put = (cls, x, y, html = '', attrs = '') => `<div class="abs ${cls}" style="left:${x}px;top:${y}px" ${attrs}>${html}</div>`;
 
 function portrait(id, D) {
@@ -35,7 +37,7 @@ function unit(u, under, cards, extra = '') {
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner}" style="transform:translate(${(i + 1) * 7}px,${(i + 1) * 8}px);z-index:${-i - 1}"></div>`).join('');
   const D = PAINT ? 98 : 108, rim = PAINT ? `<img class="rimimg" src="/static/kit2/rim_${u.owner === 'A' ? 'a' : 'b'}.webp" alt="" draggable="false">` : '';
   return `${peek}<div class="ring${hasArt(u.id) ? '' : ' noart'}" style="${portrait(u.id, D)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
-    rim + `<div class="boss num">${u.str}</div>` + (u.timer ? `<div class="timer num" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${u.timer}</div>` : '') +
+    rim + `<div class="boss num">${PAINT ? chalk(u.str) : u.str}</div>` + (u.timer ? `<div class="timer num" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${u.timer}</div>` : '') +
     (kw.length ? `<div class="kw" data-tip="${(c.keywords || []).filter(k => BOARD_KW[k]).join(', ')}">${kw.join('')}</div>` : '') + extra;
 }
 
@@ -64,7 +66,8 @@ export function renderBoard(el, M, g, cards, ui) {
     const held = o.every(x => x && x === o[0]) ? o[0] : '';
     const sx = (CX(c, r) + CX(c + 1, r + 1)) / 2, sy = (CY(c, r) + CY(c + 1, r + 1)) / 2;
     // painted: the stone with its number carved in, in its holder's paint (kit2/stone<food>_<n|a|b>)
-    s += PAINT ? put('stone carved', sx, sy, `<img src="/static/kit2/stone${reg.food}_${held ? held.toLowerCase() : 'n'}.webp" alt="+${reg.food}" draggable="false">`)
+    // painted: the plate's own stone, with a small boss lying on it holding the payout, in the holder's colour when held
+    s += PAINT ? put(`stone pboss ${held}`, sx, sy, chalk('+' + reg.food))
       : put(`stone num ${held}`, sx, sy, `+${reg.food}`);
   }
 
@@ -89,7 +92,7 @@ export function renderBoard(el, M, g, cards, ui) {
         fruit += put('pit', px, py, `<img src="/static/kit2/pits/${side === 'A' ? 'a' : 'b'}pit${i % 3 + 1}_${r}_${t - r}.webp" alt="" draggable="false">`);
       });
       const [mx, my] = MOUTH[side], [kx, ky] = CROWN[side];
-      s += fruit + put(`dcount ${side}`, kx, ky, String(food).split('').map(d => `<img src="/static/kit2/num/${side === 'A' ? 'a' : 'b'}${d}.webp" alt="${d}" draggable="false">`).join(''), `data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
+      s += fruit + put(`dcount ${side}`, kx, ky, chalk(food), `data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
         put(`mouth${ring}`, mx, my, '', `data-hq="${side}"`);
       continue;
     }
