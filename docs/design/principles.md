@@ -31,7 +31,9 @@ There is no mana: every card costs one card and one placement action. Low streng
 - **Delay ledger:** a delayed payoff gives up board presence now and hands the opponent a window to answer it.
 - **Floor:** price a conditional card for its common failed state, not the screenshot where everything lines up.
 - **Closest card:** reject a candidate that an existing card practically dominates, or that practically dominates one.
-- Rarity doesn't pay for a weak rate. It changes copy count and how singular a pattern may be.
+- **Rarity sets a card's role in its deck, like Gwent's bronze, silver and gold.** Commons (3 copies) are the consistent engine that makes the deck work. Rares (2 copies) are flexible, situational cards for specific use cases. Legendaries (1 copy) are unique, potentially deck-defining cards.
+- **A higher rarity gets a better rate, never a worse one.** A rare or legendary with the same effect as a common is at least as strong.
+- **Legendaries are named individuals** (King Theron, Borealis, Aurum); species names are commons and rares.
 
 ## Guardrails
 
