@@ -41,8 +41,8 @@ b.kw { font-weight: 700; }
 .cA .face::before { content: ''; position: absolute; inset: .12em; border-radius: .6em; box-shadow: inset 0 .08em 0 rgba(255,220,160,.45), inset 0 -.1em .2em rgba(0,0,0,.45); pointer-events: none; }
 .cA .art { position: absolute; left: .45em; right: .45em; top: .45em; height: 70%; border-radius: .35em .35em .15em .15em; box-shadow: inset 0 0 0 .1em rgba(30,15,5,.7), inset 0 -1.2em 1.2em -1em rgba(0,0,0,.45); }
 .cA .panel { position: absolute; left: .45em; right: .45em; bottom: .45em; top: calc(70% + .7em); display: flex; align-items: center; justify-content: center; border-radius: .15em .15em .35em .35em;
-  background: radial-gradient(ellipse at 50% 30%, #f6ead0, #e6d3aa 70%, #d6be8c); box-shadow: inset 0 0 .5em rgba(120,80,30,.45); padding: 1em .7em .9em; text-align: center; }
-.cA .nm { position: absolute; left: 50%; top: calc(70% + .1em); transform: translateX(-50%); z-index: 3; white-space: nowrap; padding: .28em .9em .32em; border-radius: .3em;
+  background: radial-gradient(ellipse at 50% 30%, #f6ead0, #e6d3aa 70%, #d6be8c); box-shadow: inset 0 0 .5em rgba(120,80,30,.45); padding: .5em .7em 1em; text-align: center; }
+.cA .nm { position: absolute; left: 50%; top: .05em; transform: translateX(-50%); z-index: 3; white-space: nowrap; padding: .28em .9em .32em; border-radius: .3em;
   background: linear-gradient(#7a4e26, #4e2e12); box-shadow: 0 .12em .25em rgba(0,0,0,.5), inset 0 .06em 0 rgba(255,220,160,.35); font: 700 .98em/1 'Cinzel', serif; color: #fbeccd; letter-spacing: .02em; }
 .cA .tx { font: 500 .88em/1.2 'EB Garamond', serif; color: #3a2610; }
 .cA .tg { position: absolute; left: 0; right: 0; bottom: .45em; text-align: center; font: 700 .52em/1 'Cinzel', serif; letter-spacing: .14em; color: rgba(90,60,25,.75); text-transform: uppercase; }
@@ -65,6 +65,10 @@ b.kw { font-weight: 700; }
 .cB .panel .ptg { margin-top: .35em; font: 700 .5em/1 'Cinzel', serif; letter-spacing: .16em; color: rgba(90,60,25,.8); text-transform: uppercase; }
 .cB .panel .tx + .ptg { border-top: .06em solid rgba(90,60,25,.3); padding-top: .35em; }
 .cB > .face > .tg { display: none; }
+.cA .panel { flex-direction: column; }
+.cA > .face > .tg { display: none; }
+.cA .panel .ptg { margin-top: .45em; font: 700 .5em/1 'Cinzel', serif; letter-spacing: .16em; color: rgba(90,60,25,.8); text-transform: uppercase; }
+.cA .panel .tx + .ptg { border-top: .06em solid rgba(90,60,25,.3); padding-top: .4em; }
 .cB .tx { font: 500 .86em/1.2 'EB Garamond', serif; color: #3a2610; }
 .cB .tg { position: absolute; left: 0; right: 0; bottom: .1em; text-align: center; font: 700 .48em/1 'Cinzel', serif; letter-spacing: .14em; color: rgba(90,60,25,.7); text-transform: uppercase; }
 .cB.rare .face { border: .3em solid #8a6a3a; box-shadow: .25em .5em .8em rgba(0,0,0,.65), inset 0 0 0 .12em #d8b070; }
@@ -101,7 +105,7 @@ const text = c => (c.text || '').replace(/^(Battlecry|Immovable|Flight|Stealth|A
 const card = c => `<div class="card c${V} ${c.rarity}"><div class="face">
   <div class="art" style="background-image:url(${artUrl(c.id)})"></div>
   <div class="nm">${c.name}</div>
-  <div class="panel">${c.text ? `<div class="tx">${text(c)}</div>` : ''}${V === 'B' ? `<div class="ptg">${c.tags.join(' · ')}</div>` : ''}</div>
+  <div class="panel">${c.text ? `<div class="tx">${text(c)}</div>` : ''}${V === 'B' || V === 'A' ? `<div class="ptg">${c.tags.join(' · ')}</div>` : ''}</div>
   <div class="tg">${c.tags.join(' · ')}</div></div>
   <div class="gem"><img src="/static/kit/gem_b.webp" alt=""><span>${c.str}</span></div>${c.cost ? `<div class="cost">${c.cost}</div>` : ''}</div>`;
 // In C the name sits above the art: reorder.
