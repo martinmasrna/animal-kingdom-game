@@ -207,7 +207,7 @@ async function labScreen(name) {
 // A switcher over the lab frame: each row flips one design choice live.
 const LAB = [['p', 'Payout stones', [['', 'dark (now)'], ['1', 'sandstone, carved numbers'], ['2', 'sandstone, white numbers']]],
   ['d', 'Your den vs theirs', [['', 'no hint'], ['w', 'war paint']]],
-  ['f', 'Food (sketches)', [['', 'slab (now)'], ['a', 'A stone track'], ['b', 'B painted gauge'], ['c', 'C stockpile'], ['m', 'M territory marks + paw tally'], ['k', 'K food cache at the den'], ['r', 'R fruit row to the den']]],
+  ['f', 'Food (sketches)', [['', 'slab (now)'], ['a', 'A stone track'], ['b', 'B painted gauge'], ['c', 'C stockpile'], ['m', 'M territory marks + paw tally'], ['k', 'K food cache at the den'], ['r', 'R fruit row to the den'], ['t', 'T fruit trough + pile']]],
   ['h', 'Hand (hover a card)', [['', 'small cards (now)'], ['1', 'bigger, hovered card grows'], ['2', 'bigger, Gwent side panel']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {

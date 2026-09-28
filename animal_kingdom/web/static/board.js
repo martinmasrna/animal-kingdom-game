@@ -197,6 +197,17 @@ function renderField(el, M, g, cards, ui) {
     } else if (F === 'b') {
       s += put(`fgauge ${p}`, p === 'A' ? 110 : 1562, 330, `<div class="inc" style="height:${f2 * 100}%"></div><div class="fill" style="height:${f1 * 100}%"></div>`);
       s += put(`carved ${p}`, p === 'A' ? 136 : 1536, 560, `${food}`);
+    } else if (F === 't') {
+      // Readout: a carved trough filled with fruit toward the win at its end, next turn's income paler.
+      // Flavour: a pile at the den mouth that grows in four steps; never read, only felt.
+      s += put(`trough ${p}`, x, 560, `<div class="in"><div class="inc" style="width:${f2 * 100}%"></div><div class="fill" style="width:${f1 * 100}%"></div></div><span class="cap"></span>`);
+      s += put(`carved small ${p}`, x, 612, `${food}<small> / ${win}</small>`);
+      const step = food >= 75 ? 4 : food >= 50 ? 3 : food >= 25 ? 2 : food > 0 ? 1 : 0;
+      // A mound: base of `step + 1` fruit, each row one shorter.
+      let pile = '';
+      for (let row = 0; row <= step && step; row++) { const w = step + 1 - row;
+        for (let k = 0; k < w; k++) pile += `<i style="left:${(k - (w - 1) / 2) * 20}px;bottom:${row * 15}px"></i>`; }
+      s += put(`fpile fruit ${p}`, p === 'A' ? 262 : 1410, 438, pile);
     } else if (F === 'r') {
       // A row of ten hollows leading up to the den mouth: ripe fruit = food held (the last one grown to its fraction),
       // green fruit = next turn's income. The den is the finish line.
