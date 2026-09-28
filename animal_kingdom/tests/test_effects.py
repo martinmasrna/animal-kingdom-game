@@ -525,14 +525,14 @@ def test_apex_covers_but_does_not_eat_an_immovable():
 
 
 def test_apex_covers_but_does_not_eat_an_enemy_untargetable():
-    # The reported case: Anaconda (7) vs an enemy Black Panther (6) - can't eat it (enemy
-    # Untargetable), but 7 > 6 so it covers/buries it instead of being unplayable there.
-    s = make_state(current="A", hands={"A": ["anaconda"]})
+    # An Apex can't eat an enemy Black Panther (Stealth: untargetable), but Polar Bear (8)
+    # beats the Panther (7), so it covers/buries it instead of being unplayable there.
+    s = make_state(current="A", hands={"A": ["polar_bear"]})
     put(s, "1,2", "lion", "A")                          # connects 2,2
-    put(s, "2,2", "black_panther", "B")                 # enemy str 6, untargetable
-    assert PlaceAction("anaconda", ("cr", "2,2")) in rules.legal_actions(s)
-    rules.apply_action(s, PlaceAction("anaconda", ("cr", "2,2")))
-    assert s.top_unit("2,2").card_id == "anaconda"      # anaconda on top
+    put(s, "2,2", "black_panther", "B")                 # enemy str 7, untargetable
+    assert PlaceAction("polar_bear", ("cr", "2,2")) in rules.legal_actions(s)
+    rules.apply_action(s, PlaceAction("polar_bear", ("cr", "2,2")))
+    assert s.top_unit("2,2").card_id == "polar_bear"    # the bear on top
     assert s.board["2,2"][0].card_id == "black_panther"  # panther buried, not removed
     assert "black_panther" not in s.remove_pile
 

@@ -77,7 +77,7 @@
       "deck": "cats_midrange",
       "rarity": "rare",
       "tags": ["Cat"],
-      "base_strength": 6,
+      "base_strength": 7,
       "keywords": ["Stealth"],
       "text": "Stealth."
     },
