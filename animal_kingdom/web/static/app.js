@@ -2,6 +2,7 @@
 // The server holds the game; this file only renders the seat's view and sends choices back.
 import { renderBoard, portrait, kitImg, teamGem } from './board.js';
 import { hasArt, artUrl } from './art.js';
+import { cardHTML } from './card.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const COVER = { cats_midrange: 'king_theron' };
@@ -45,7 +46,7 @@ const counted = ids => ids.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {});
 function cardPop(el, id, extra, place) {
   const c = CARDS[id], r = el.getBoundingClientRect();
   pop.className = 'pop ' + c.rarity;
-  pop.innerHTML = `<div class="art gradart" ${artStyle(id)}></div><div class="s">${c.str}</div><div class="nm">${c.name}</div><div class="tx">${c.text || ''}</div><div class="tg">${c.tags.join(' · ')}</div>` + (extra ? `<div class="ev">${extra}</div>` : '');
+  pop.innerHTML = cardHTML(c) + (extra ? `<div class="ev">${extra}</div>` : '');
   pop.style.display = 'flex';
   const h = pop.offsetHeight;
   if (place === 'below') { pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; }
@@ -368,15 +369,14 @@ function drawGame() {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && d.places[h.id], pick = d.handPick.has(h.iid);
     const base = sv(c), cls = [c.rarity, can ? 'can' : '', pick ? 'pick can' : '', h.id === ui.sel ? 'sel' : '', d.mine && !can && !pick ? 'dim' : ''].join(' ');
     const delta = base >= 0 && h.str !== base ? (h.str > base ? ' up' : ' down') : '';
-    return `<div class="hc ${cls}" data-iid="${h.iid}" data-id="${h.id}" style="margin-left:${i ? gap : 0}px;--i:${i - (n - 1) / 2}"><div class="face"><div class="art gradart" ${artStyle(h.id)}></div><div class="nm">${c.name}</div><div class="tx">${c.text}</div></div><div class="gem">${kitImg(teamGem('A'))}<span class="num${delta}">${h.str}</span></div></div>`;
+    return `<div class="hc ${cls}" data-iid="${h.iid}" data-id="${h.id}" style="margin-left:${i ? gap : 0}px;--i:${i - (n - 1) / 2}">${cardHTML(c, { str: h.str })}</div>`;
   }).join('');
   // Hand variant 2 (Gwent): hovering a card shows it large in a fixed panel at the right.
   const zoom = document.getElementById('zoom');
   hand.querySelectorAll('.hc').forEach(el => {
     el.onmouseenter = () => { if (document.documentElement.dataset.h !== '2') return; const c = CARDS[el.dataset.id];
       zoom.className = 'zoom on ' + c.rarity;
-      zoom.innerHTML = `<div class="face"><div class="art" ${artStyle(c.id)}></div><div class="nm">${c.name}</div></div><div class="gem">${kitImg(teamGem('A'))}<span class="num">${c.str}</span></div>` +
-        `<div class="zt">${c.text ? `<p>${c.text}</p>` : ''}<small>${c.tags.join(' · ')}${c.rarity !== 'common' ? ' · ' + c.rarity : ''}</small></div>`; };
+      zoom.innerHTML = cardHTML(c); };
     el.onmouseleave = () => zoom.classList.remove('on');
   });
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
@@ -412,7 +412,7 @@ function drawGame() {
   } else if (d.pend) {
     const src = d.pend.source && CARDS[d.pend.source];
     const head = src ? `<div class="th gradart" ${artStyle(src.id)}><span>${src.str}</span></div><div><b>${src.name}</b><div class="q">${src.text}</div></div>` : `<div><b>Choose</b></div>`;
-    const opts = d.cardOpts.length || d.otherOpts.length ? `<div class="opts">${d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="oc" data-o="${i}"><div class="art gradart" ${artStyle(o.id)}></div><div class="s">${c.str}</div><div class="nm">${c.name}</div><div class="tx">${c.text}</div></div>`; }).join('')}${d.otherOpts.map((o, i) => `<span class="skip" data-x="${i}">${o.label}</span>`).join('')}</div>` : '';
+    const opts = d.cardOpts.length || d.otherOpts.length ? `<div class="opts">${d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="oc" data-o="${i}">${cardHTML(c)}</div>`; }).join('')}${d.otherOpts.map((o, i) => `<span class="skip" data-x="${i}">${o.label}</span>`).join('')}</div>` : '';
     bar.innerHTML = head + opts + (d.pend.optional ? `<span class="skip" id="skip">Skip</span>` : '');
     bar.classList.add('on');
     bar.querySelectorAll('[data-o]').forEach(el => el.onclick = () => act({ kind: 'choice', choice: d.cardOpts[el.dataset.o].v }));
@@ -526,8 +526,8 @@ function stackAt(cr) {
   const g = document.querySelector(`#board [data-cr="${cr}"]`), st = V && V.game && viewerGame().board[cr];
   if (!g || !st) return;
   const card = (u, w, top) => { const c = CARDS[u.id];
-    return `<div class="sc ${c.rarity}" style="--w:${w}px;--c:${COL[u.owner]}"><div class="own"></div><div class="art gradart" ${artStyle(u.id)}></div><div class="s">${top ? u.str : c.str}</div><div class="nm">${c.name}</div><div class="tx">${c.text || ''}</div>` +
-      (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `<div class="tg">${c.tags.join(' · ')}</div></div>`; };
+    return `<div class="sc ${u.owner}" style="--w:${w}px">${cardHTML(c, { str: top ? u.str : c.str })}` +
+      (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `</div>`; };
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
   stackpop.innerHTML = `<div class="stk"><div class="cap">On top</div>${card(top, 190, true)}</div>` +
     buried.map((u, i) => `<div class="stk"><div class="cap">${i === 0 ? 'Under it' : ''}</div>${card(u, 150)}</div>`).join('');
