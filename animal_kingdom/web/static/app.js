@@ -161,7 +161,11 @@ function joinScreen(id) {
 
 // ------------------------------------------------------------------ match connection
 function disconnect() { if (live) setLive(false); if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
+// The live game draws Savanna Expanse as painted map D (Martin's pick, 2026-09-28); the lab overrides it per frame.
+const LIVE_LOOK = 'sD';
+
 function matchScreen(id) {
+  document.documentElement.dataset.v = LIVE_LOOK;
   const token = getToken(id);
   if (!token) { location.hash = '#/join/' + id; return; }
   if (wsId === id && ws) return;
