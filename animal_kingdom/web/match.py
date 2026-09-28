@@ -165,7 +165,7 @@ class Match:
         return "B"
 
     def set_deck(self, s: str, deck: str) -> None:
-        if deck not in PREMADE_DECKS:
+        if deck not in DECK_NAMES:
             raise EngineError(f"unknown deck {deck!r}")
         if self.phase not in ("lobby", "prematch"):
             raise EngineError("decks are fixed for the whole match")

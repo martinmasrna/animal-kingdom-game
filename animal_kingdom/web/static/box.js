@@ -42,10 +42,14 @@ function unit(u, under, cards, extra = '') {
 }
 
 // The board band: paths, payout stones, crossroads, and the two dens that are also the food stores.
-// `ui`: { rings: [cr], hqRing, preview: {cr, id, str}, recent: [cr] }.
+// `ui`: { rings: [cr], hqRing, preview: {cr, id, str}, anim: {board} (the board before this view, so new pieces land) }.
 export function renderBoard(el, M, g, cards, ui) {
   const topOf = cr => (g.board[cr] || []).slice(-1)[0], owner = cr => (topOf(cr) || {}).owner;
-  const rings = new Set(ui.rings || []), recent = new Set(ui.recent || []);
+  const rings = new Set(ui.rings || []);
+  // A piece lands where the top unit changed since the last view; if it covered a piece, that one sinks under it.
+  const topIid = (b, cr) => ((b[cr] || []).slice(-1)[0] || {}).iid;
+  const landed = cr => ui.anim && topIid(g.board, cr) !== undefined && topIid(ui.anim.board, cr) !== topIid(g.board, cr);
+  const covered = cr => landed(cr) && topIid(ui.anim.board, cr) !== undefined;
   let s = '';
   if (PAINT) s += `<img class="plate" src="/static/kit2/plate.webp" alt="" draggable="false">`;
   else {
@@ -72,7 +76,7 @@ export function renderBoard(el, M, g, cards, ui) {
   }
 
   for (let c = 1; c <= M.cols; c++) for (let r = 1; r <= M.rows; r++) {
-    const cr = key(c, r), st = g.board[cr] || [], cls = (rings.has(cr) ? ' tgt' : '') + (recent.has(cr) ? ' recent' : '');
+    const cr = key(c, r), st = g.board[cr] || [], cls = (rings.has(cr) ? ' tgt' : '') + (landed(cr) ? ' land' : '') + (covered(cr) ? ' cover' : '');
     const pv = ui.preview && ui.preview.cr === cr ? ui.preview : null, x = CX(c, r), y = CY(c, r);
     if (pv) { s += put(`cr unit A ghost${cls}`, x, y, unit({ id: pv.id, owner: 'A', str: pv.str }, st.slice().reverse(), cards), `data-cr="${cr}"`); continue; }
     if (!st.length) { s += put(`cr clear${cls}`, x, y, '', `data-cr="${cr}"`); continue; }

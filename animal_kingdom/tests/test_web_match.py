@@ -143,3 +143,30 @@ def test_a_saved_match_resumes_mid_game_after_a_restart():
     assert r.to_act() == m.to_act() and set(r.bots) == set(m.bots)
     s = r.to_act()
     r.act(s, rules.legal_actions(r.state)[0])            # and it plays on
+
+
+def test_decklist_problems_follow_the_deck_rules():
+    from animal_kingdom.decks import PREMADE_DECKS, decklist_problems
+    cats = PREMADE_DECKS["cats_midrange"]
+    assert decklist_problems(cats) == []
+    assert decklist_problems(cats[:-1])                                   # 29 cards
+    two_kings = [c for c in cats if c != "prince_leo"] + ["king_theron"]
+    assert any("King Theron" in p for p in decklist_problems(two_kings))
+    reserve = [c for c in cats if c != "prince_leo"] + ["unnamed_giant"]
+    assert any("collectible" in p for p in decklist_problems(reserve))
+
+
+def test_custom_deck_resolves_to_a_playable_slug(tmp_path, monkeypatch):
+    from animal_kingdom.decks import PREMADE_DECKS, load_premade_deck
+    from animal_kingdom.engine.state import EngineError
+    from animal_kingdom.web import custom_decks
+    from animal_kingdom.web.match import DECK_NAMES
+    monkeypatch.setattr(custom_decks, "DECKS_FILE", tmp_path / "decks.json")
+    cats = PREMADE_DECKS["cats_midrange"]
+    slug = custom_decks.resolve({"name": "My cats", "list": cats})
+    assert slug.startswith("custom_") and DECK_NAMES[slug] == "My cats"
+    assert sorted(load_premade_deck(slug)) == sorted(cats)
+    assert custom_decks.resolve("ramp") == "ramp"
+    import pytest
+    with pytest.raises(EngineError):
+        custom_decks.resolve({"name": "bad", "list": cats[:-1]})

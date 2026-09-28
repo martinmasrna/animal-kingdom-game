@@ -6,7 +6,8 @@ import { cardHTML } from './card.js';
 import { renderBoard as renderBox, STAGE, PAINT } from './box.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
-const COVER = { cats_midrange: 'king_theron' };
+const COVER = { cats_midrange: 'king_theron', canine_buff_tempo: 'lobo', aggro_hq_rush: 'verminus', colony_food_swarm: 'queen_honoria',
+  egg_control: 'eon', food_otk: 'rat_king', ramp: 'borealis' };
 const RANK = { legendary: 0, rare: 1, common: 2 };
 const COL = { A: 'var(--you)', B: 'var(--them)' };   // history tiles; box.css maps them onto its team colours
 const SKIP = '__skip__';
@@ -76,9 +77,16 @@ function miniMap(w, h) {
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
 }
 function deckTile(d, on) {
-  const list = counted(d.list), cv = COVER[d.id] ? artStyle(COVER[d.id]) : '';
-  return `<div class="dk${on ? ' on' : ''}" data-deck="${d.id}"><div class="cv gradart" ${cv}></div><div class="in"><b>${d.name}</b><span>Starter deck · ${d.list.length} cards</span><span>${tribes(list)}</span></div></div>`;
+  const list = counted(d.list), cover = COVER[d.id] || (d.mine && sortIds(Object.keys(list))[0]), cv = cover ? artStyle(cover) : '';
+  return `<div class="dk${on ? ' on' : ''}" data-deck="${d.id}"><div class="cv gradart" ${cv}></div><div class="in"><b>${d.name}</b><span>${d.mine ? 'Your deck' : 'Starter deck'} · ${d.list.length} cards</span><span>${tribes(list)}</span></div></div>`;
 }
+// Player-built decks live in this browser: [{id, name, cards: {cardId: copies}}]. Only complete ones are playable.
+const myDecks = () => { try { return JSON.parse(localStorage.getItem('ak:decks') || '[]').map(d => ({ ...d, cards: Object.fromEntries(Object.entries(d.cards).filter(([id]) => CARDS[id])) })); } catch { return []; } };
+const saveDecks = ds => { try { localStorage.setItem('ak:decks', JSON.stringify(ds)); } catch { /* private mode */ } };
+const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
+const playable = () => DECKS.concat(myDecks().filter(d => deckSize(d.cards) === 30).map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) })));
+const chosenDeck = () => { const all = playable(), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
+const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
 
 // ------------------------------------------------------------------ routing
 async function boot() {
@@ -96,6 +104,7 @@ function route() {
   const id = parts[1] && parts[1].toUpperCase();
   if (parts[0] !== 'm' || id !== wsId) disconnect();
   if (parts[0] === 'play') return playScreen();
+  if (parts[0] === 'collection') return collectionScreen();
   if (parts[0] === 'join' && id) return joinScreen(id);
   if (parts[0] === 'm' && id) return matchScreen(id);
   if (parts[0] === 'lab' && parts[1]) return labScreen(parts[1]);
@@ -105,14 +114,14 @@ function route() {
 function homeScreen() {
   screen = 'home';
   app.innerHTML = `<div class="home-bg"></div><div class="center"><div class="title">Animal<br>Kingdom</div>
-    <div class="nav"><a class="play" href="#/play">Play</a></div></div>`;
+    <div class="nav"><a class="play" href="#/play">Play</a><a href="#/collection">Collection</a></div></div>`;
 }
 
 // ------------------------------------------------------------------ play
 const play = { opp: 'bot', level: 'normal', botDeck: 'random', code: '' };
 function playScreen() {
   screen = 'play';
-  const deck = store('ak:deck') || 'cats_midrange';
+  const chosen = chosenDeck(), deck = chosen.id;
   const chip = (k, v, label) => `<span class="chip${play[k] === v ? ' on' : ''}" data-k="${k}" data-v="${v}">${label}</span>`;
   app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Menu</a><h1>Play</h1></div>
     <div class="body">
@@ -125,7 +134,7 @@ function playScreen() {
         ${play.opp === 'bot' ? `<div class="sub"><div class="lbl">Level</div><div class="row">${chip('level', 'easy', 'Easy')}${chip('level', 'normal', 'Normal')}${chip('level', 'expert', 'Expert')}</div>
           <div class="lbl">Their deck</div><div class="row">${chip('botDeck', 'random', 'Random')}${DECKS.map(d => chip('botDeck', d.id, d.name)).join('')}</div></div>` : ''}
       </div>
-      <div class="decks"><div class="lbl">Your deck</div><div class="grid">${DECKS.map(d => deckTile(d, d.id === deck)).join('')}</div></div>
+      <div class="decks"><div class="lbl">Your deck</div><div class="grid">${playable().map(d => deckTile(d, d.id === deck)).join('')}</div></div>
     </div>
     <div class="bar"><span class="fmt">${play.opp === 'gauntlet' ? '60 games · your deck against the other six · both decklists open' : 'Best of 3 · one deck for the whole match · both decklists open'}</span><button class="btn primary" id="go">${play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Start match'}</button></div>`;
   app.querySelectorAll('[data-opp]').forEach(el => el.onclick = () => { play.opp = el.dataset.opp; playScreen(); });
@@ -138,7 +147,7 @@ function playScreen() {
     document.getElementById('joinbtn').onclick = joinCode;
   }
   document.getElementById('go').onclick = async () => {
-    const body = { deck, name: 'You' };
+    const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
       const bd = play.botDeck === 'random' ? DECKS[Math.floor(Math.random() * DECKS.length)].id : play.botDeck;
       body.bot = { level: play.level, deck: bd };
@@ -154,16 +163,73 @@ function joinCode() { if (play.code) location.hash = '#/join/' + play.code; }
 function joinScreen(id) {
   screen = 'join';
   if (getToken(id)) { location.hash = '#/m/' + id; return; }
-  const deck = store('ak:deck') || 'cats_midrange';
+  const chosen = chosenDeck(), deck = chosen.id;
   app.innerHTML = `<div class="top"><a class="back" href="#/play">‹ Play</a><h1>Join match ${id}</h1></div>
-    <div class="body"><div class="decks"><div class="lbl">Your deck</div><div class="grid">${DECKS.map(d => deckTile(d, d.id === deck)).join('')}</div></div></div>
+    <div class="body"><div class="decks"><div class="lbl">Your deck</div><div class="grid">${playable().map(d => deckTile(d, d.id === deck)).join('')}</div></div></div>
     <div class="bar"><span class="fmt">Best of 3 · one deck for the whole match · both decklists open</span><button class="btn primary" id="go">Join</button></div>`;
   app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:deck', el.dataset.deck); joinScreen(id); });
   document.getElementById('go').onclick = async () => {
-    const r = await fetch(`/api/match/${id}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deck, name: 'Friend' }) });
+    const r = await fetch(`/api/match/${id}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deck: deckSpec(chosen), name: 'Friend' }) });
     if (!r.ok) return toast(r.status === 404 ? `No match ${id}` : await r.text());
     const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
   };
+}
+
+
+// ------------------------------------------------------------------ collection (= the deckbuilder)
+// One screen, Martin's round B1: filters and art tiles on the left, the deck being edited on the right.
+// Click a tile to add a copy, click a deck row to take one out; every change saves.
+const LIMIT = { legendary: 1, rare: 2, common: 3 }, CAP = { legendary: 4, rare: 8 };
+const FAMS = ['Bear', 'Bird', 'Canine', 'Cat', 'Colony', 'Lizard', 'Megafauna', 'Rodent', 'Snake'];
+const coll = { q: '', rar: null, str: null, fam: null, sort: 'str', deck: null };
+function collectionScreen() {
+  screen = 'collection';
+  const pool = Object.values(CARDS).filter(c => DECKS.some(d => d.id === c.deck));
+  let decks = myDecks();
+  if (coll.deck !== '+' && !decks.some(d => d.id === coll.deck)) coll.deck = decks[0] ? decks[0].id : '+';
+  const cur = decks.find(d => d.id === coll.deck);
+  const inDeck = r => cur ? Object.entries(cur.cards).filter(([id]) => !r || CARDS[id].rarity === r).reduce((a, [, n]) => a + n, 0) : 0;
+  const maxed = c => (cur.cards[c.id] || 0) >= (c.copies || LIMIT[c.rarity]) || (CAP[c.rarity] && inDeck(c.rarity) >= CAP[c.rarity]);
+  const canAdd = c => cur && inDeck() < 30 && !maxed(c);
+  const q = coll.q.toLowerCase();
+  const shown = pool.filter(c => (!coll.rar || c.rarity === coll.rar) && (coll.str === null || c.str === coll.str) && (!coll.fam || c.tags.includes(coll.fam))
+    && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(q)))
+    .sort(coll.sort === 'str' ? (a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name)
+                              : (a, b) => RANK[a.rarity] - RANK[b.rarity] || sv(a) - sv(b) || a.name.localeCompare(b.name));
+  const seg = (k, opts) => '<span class="seg">' + opts.map(([v, l]) => `<span class="${coll[k] === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${l}</span>`).join('') + '</span>';
+  const tiles = shown.map(c => { const n = cur ? cur.cards[c.id] || 0 : 0;
+    return `<div class="tl ${c.rarity}${cur && maxed(c) ? ' max' : ''}" data-add="${c.id}" data-card="${c.id}"><div class="im gradart" ${artStyle(c.id)}></div><span class="s">${c.str}</span>${n ? `<span class="c">${n}</span>` : ''}<span class="n">${c.name}</span></div>`; }).join('');
+  const sec = (r, label) => { const n = inDeck(r), cap = CAP[r];
+    const list = cur ? Object.keys(cur.cards).filter(id => CARDS[id].rarity === r) : [];
+    return `<h3><span>${label}</span><span class="${cap && n >= cap ? 'full' : ''}">${n}${cap ? ' / ' + cap : ''}</span></h3>` +
+      rows(Object.fromEntries(list.map(id => [id, cur.cards[id]]))).replace(/class="dr /g, 'data-rm class="dr '); };
+  const panel = cur ? `<div class="dhead"><select id="dsel">${decks.map(d => `<option value="${d.id}"${d.id === cur.id ? ' selected' : ''}>${d.name}</option>`).join('')}<option value="+">+ New deck</option></select>
+      <div class="dname"><input id="dname" maxlength="40" value="${cur.name.replace(/"/g, '&quot;')}"><b class="${inDeck() === 30 ? 'ok' : ''}">${inDeck()}<i> / 30</i></b></div></div>
+      <div class="dlist">${sec('legendary', 'Legendary')}${sec('rare', 'Rare')}${sec('common', 'Common')}</div>
+      <div class="dfoot"><span>${tribes(cur.cards) || 'Click a card to add it'}</span><span class="del" id="ddel">Delete</span></div>`
+    : `<div class="dnew"><div class="lbl">New deck</div><span class="chip on" data-new="">Empty deck</span>${DECKS.map(d => `<span class="chip" data-new="${d.id}">Copy ${d.name}</span>`).join('')}${decks.length ? `<span class="back" data-k="deck" data-v="${decks[0].id}">‹ Back to ${decks[0].name}</span>` : ''}</div>`;
+  app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Menu</a><h1>Collection</h1><span class="r">${pool.length} cards</span></div>
+    <div class="filters"><input class="search" id="q" placeholder="Search" value="${coll.q.replace(/"/g, '&quot;')}">${seg('rar', [[null, 'All'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
+      <span class="strs">${[null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10].map(v => `<span class="${coll.str === v ? 'on' : ''}" data-k="str" data-v="${v}">${v === null ? 'All' : v}</span>`).join('')}</span>
+      <select id="fam"><option value="">All families</option>${FAMS.map(f => `<option${coll.fam === f ? ' selected' : ''}>${f}</option>`).join('')}</select>
+      <span class="gap"></span><span class="lbl">Sort</span>${seg('sort', [['str', 'Strength'], ['rar', 'Rarity']])}</div>
+    <div class="cbody"><div class="tiles">${tiles || '<span class="none">No cards match</span>'}</div><div class="dpanel">${panel}</div></div>`;
+  wirePops(app);
+  const save = () => { saveDecks(decks); collectionScreen(); };
+  app.querySelectorAll('[data-k]').forEach(e => e.onclick = () => { const k = e.dataset.k, v = e.dataset.v; coll[k] = v === 'null' ? null : k === 'str' ? +v : v; collectionScreen(); });
+  const qi = document.getElementById('q');
+  qi.oninput = () => { coll.q = qi.value; const at = qi.selectionStart; collectionScreen(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(at, at); };
+  document.getElementById('fam').onchange = e => { coll.fam = e.target.value || null; collectionScreen(); };
+  app.querySelectorAll('[data-add]').forEach(e => e.onclick = () => { const c = CARDS[e.dataset.add]; if (!cur) return toast('Make a deck first'); if (!canAdd(c)) return;
+    cur.cards[c.id] = (cur.cards[c.id] || 0) + 1; pop.style.display = 'none'; save(); });
+  app.querySelectorAll('[data-rm]').forEach(e => e.onclick = () => { const id = e.dataset.card; if (--cur.cards[id] <= 0) delete cur.cards[id]; pop.style.display = 'none'; save(); });
+  app.querySelectorAll('[data-new]').forEach(e => e.onclick = () => { const src = DECKS.find(d => d.id === e.dataset.new);
+    const d = { id: Date.now().toString(36), name: src ? src.name + ' copy' : 'New deck', cards: src ? counted(src.list) : {} };
+    decks.push(d); coll.deck = d.id; save(); });
+  if (!cur) return;
+  document.getElementById('dsel').onchange = e => { coll.deck = e.target.value; collectionScreen(); };
+  const nm = document.getElementById('dname'); nm.onchange = () => { cur.name = nm.value.trim() || 'New deck'; save(); };
+  document.getElementById('ddel').onclick = () => { decks = decks.filter(d => d.id !== cur.id); coll.deck = null; save(); };
 }
 
 // ------------------------------------------------------------------ match connection
@@ -625,7 +691,8 @@ function drawBoard(d) {
   }
   const H = V.game.history, recent = [];
   for (let i = H.length - 1; i >= 0 && H[i].seat !== V.you; i--) if (H[i].target && H[i].target[0] === 'cr') recent.push(dcr(H[i].target[1]));
-  if (BOX) return renderBox(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent, current: V.phase === 'playing' ? rel(V.game.current) : null });
+  if (BOX) { const A = ui.anim; ui.anim = null;   // the landing plays once, never on hover redraws
+    return renderBox(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, anim: A, current: V.phase === 'playing' ? rel(V.game.current) : null }); }
   renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent, enamel: store('ak:rim') !== 'metal', anim: ui.anim });
   ui.anim = null;   // animations play once, never on hover redraws
 }

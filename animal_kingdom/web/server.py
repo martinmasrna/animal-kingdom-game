@@ -21,6 +21,8 @@ from aiohttp import WSMsgType, web
 
 from ..decks import PREMADE_DECKS
 from ..engine.state import EngineError
+from ..engine.cards import DECK_SLUGS
+from . import custom_decks
 from .match import BOT_LEVELS, DECK_NAMES, Match, Seat, card_pool, map_info
 
 STATIC = Path(__file__).parent / "static"
@@ -134,7 +136,7 @@ async def pool(_req):
     return web.json_response({
         "cards": card_pool(),
         "decks": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": PREMADE_DECKS[slug]}
-                  for slug in DECK_NAMES],
+                  for slug in DECK_NAMES if slug in PREMADE_DECKS],
         "map": map_info(),
         "levels": list(BOT_LEVELS),
     })
@@ -142,9 +144,10 @@ async def pool(_req):
 
 async def create_match(req):
     body = await req.json()
-    deck = body.get("deck")
-    if deck not in PREMADE_DECKS:
-        raise web.HTTPBadRequest(text="unknown deck")
+    try:
+        deck = custom_decks.resolve(body.get("deck"))
+    except EngineError as e:
+        raise web.HTTPBadRequest(text=str(e))
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
     match = Match(mid, Seat(token, body.get("name") or "You", deck=deck))
     bot = body.get("bot")
@@ -153,7 +156,7 @@ async def create_match(req):
         level = gauntlet.get("level", "normal")
         if level not in BOT_LEVELS:
             raise web.HTTPBadRequest(text="bad bot level")
-        opponents = [d for d in sorted(PREMADE_DECKS) if d != deck]
+        opponents = [d for d in sorted(DECK_SLUGS) if d != deck]
         match.join(Seat(secrets.token_urlsafe(12), f"Bot · {level.capitalize()}", bot=level, deck=opponents[0]))
         match.make_gauntlet(opponents, per_seat=5)
         match._start_game()
@@ -176,11 +179,13 @@ async def join_match(req):
     if match is None:
         raise web.HTTPNotFound(text="no such match")
     body = await req.json()
-    if body.get("deck") not in PREMADE_DECKS:
-        raise web.HTTPBadRequest(text="unknown deck")
+    try:
+        deck = custom_decks.resolve(body.get("deck"))
+    except EngineError as e:
+        raise web.HTTPBadRequest(text=str(e))
     token = secrets.token_urlsafe(12)
     try:
-        seat = match.join(Seat(token, body.get("name") or "Friend", deck=body["deck"]))
+        seat = match.join(Seat(token, body.get("name") or "Friend", deck=deck))
     except EngineError as e:
         raise web.HTTPConflict(text=str(e))
     await hub.push(match)
@@ -210,7 +215,7 @@ async def socket(req):
                 if kind == "act":
                     match.act(seat, data["action"])
                 elif kind == "deck":
-                    match.set_deck(seat, data["deck"])
+                    match.set_deck(seat, custom_decks.resolve(data["deck"]))
                 elif kind == "ready":
                     match.ready(seat)
                 elif kind == "next":
@@ -247,6 +252,7 @@ def make_app() -> web.Application:
     app.on_response_prepare.append(_revalidate)
 
     async def resume(_app):
+        custom_decks.load()
         hub.load()
         for match in hub.matches.values():
             hub.kick_bot(match)

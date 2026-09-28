@@ -70,6 +70,36 @@ def register_deck(slug: str, decklist: Sequence[str]) -> None:
         {s: d for s, d in EXTRA_DECKS.items() if s != "baseline"})
 
 
+DECK_SIZE = 30
+RARITY_CAPS = {"rare": 8, "legendary": 4}   # rules §13: at most 8 rares and 4 legendaries in a deck
+
+
+def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card]] = None) -> list[str]:
+    """What makes `decklist` illegal under the deck rules (rules §13); empty when it's legal.
+    Only cards from the seven premade decks are collectible."""
+    cards = cards if cards is not None else load_cards()
+    problems = []
+    if len(decklist) != DECK_SIZE:
+        problems.append(f"a deck has {DECK_SIZE} cards, not {len(decklist)}")
+    counts: dict[str, int] = {}
+    for cid in decklist:
+        counts[cid] = counts.get(cid, 0) + 1
+    by_rarity: dict[str, int] = {}
+    for cid, n in counts.items():
+        card = cards.get(cid)
+        if card is None or card.deck not in DECK_SLUGS:
+            problems.append(f"{cid!r} is not a collectible card")
+            continue
+        limit = card.copies or COPY_LIMITS[card.rarity]
+        if n > limit:
+            problems.append(f"at most {limit} {card.name}")
+        by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + n
+    for rarity, cap in RARITY_CAPS.items():
+        if by_rarity.get(rarity, 0) > cap:
+            problems.append(f"at most {cap} {rarity} cards")
+    return problems
+
+
 def load_premade_deck(slug: str, *, cards: Optional[dict[str, Card]] = None) -> list[str]:
     """Return a fresh copy of the 30-card decklist for `slug`."""
     decks = _build_premade_decks(cards) if cards is not None else PREMADE_DECKS
