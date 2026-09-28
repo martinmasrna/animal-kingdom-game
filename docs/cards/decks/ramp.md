@@ -36,7 +36,7 @@ Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reac
 | **Grizzly Bear** | 3 | Bear | 6 | Battlecry: in 2 turns, remove a random adjacent enemy. |
 | **Oxpecker** | 3 | Bird | 1 | Flight. Gain 1 food for each unit in your starting deck with strength 6 or more. |
 | **Black Bear** | 3 | Bear | 5 | Battlecry: in 2 turns, draw 2 cards. |
-| **Sloth** | 3 | — | 3 | In 2 turns, gain 20 food. |
+| **Sloth** | 3 | — | 3 | In 2 turns, gain 30 food. |
 | **Cape Buffalo** | 3 | Megafauna | 7 | — |
 
 <!-- cards:end -->

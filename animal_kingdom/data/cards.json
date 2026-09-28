@@ -604,7 +604,7 @@
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "In 2 turns, gain 20 food."
+      "text": "In 2 turns, gain 30 food."
     },
     {
       "id": "cape_buffalo",
@@ -662,7 +662,7 @@
       "deck": "food_otk",
       "rarity": "rare",
       "tags": ["Rodent"],
-      "base_strength": 4,
+      "base_strength": 3,
       "keywords": ["Flight"],
       "text": "Flight. Battlecry: gain 10 food."
     },

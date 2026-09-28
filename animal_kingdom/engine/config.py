@@ -64,7 +64,7 @@ class Config:
                                           # single-hit swing overshadowed Impala's draw-2 payoff,
                                           # and the budget moved into Opossum/Tortoise/Porcupine/
                                           # Pufferfish so the deck survives to cash in Scrooge at all
-    sloth_food: int = 20                 # Sloth: gain food when its timer comes due
+    sloth_food: int = 30                 # Sloth: gain food when its timer comes due
     sloth_delay: int = 2                 # owner-turns until Sloth pays out (ticks only while it is
                                           # top of its crossroad - see rules overview.md 9.1)
 
