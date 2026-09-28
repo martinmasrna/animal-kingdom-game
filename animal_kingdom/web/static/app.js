@@ -204,14 +204,13 @@ function onView(prev) {
 // (data-v on <html>, read by app.css and board.js). No server match; nothing can be played.
 async function labScreen(name) {
   const q = new URLSearchParams(location.search), de = document.documentElement.dataset;
-  for (const k of ['v', 'p', 'd', 'h', 'f', 't', 'k']) de[k] = q.has(k) ? q.get(k) : (LIVE_LOOK[k] || '');
+  for (const k of ['v', 'p', 'd', 'h', 'f', 't', 'k', 'm']) de[k] = q.has(k) ? q.get(k) : (LIVE_LOOK[k] || '');
   V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
   screen = null; gameScreen(); labBar();
 }
 // A switcher over the lab frame: each row flips one design choice live.
 // Only the open questions; decided ones live in LIVE_LOOK.
-const LAB = [['t', 'Top', [['', 'plaques'], ['1', 'T1 by each den'], ['2', 'T2 one line']]],
-  ['k', 'Bottom', [['', 'banner'], ['1', 'B1 turn on Draw']]]];
+const LAB = [['m', 'Medallion', [['', 'enamel (now)'], ['A', 'A broad enamel'], ['B', 'B leaf brass'], ['C', 'C plain beads']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {
   let bar = document.getElementById('labbar');
