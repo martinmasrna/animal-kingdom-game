@@ -385,3 +385,6 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .slab b { font-size: 52px; font-weight: 400; }
 .slab span { font-size: 17px; margin-top: 2px; }
 .slab.A span { color: #9fd0ff; } .slab.B span { color: #ffab9f; }
+[data-v="sD"] #stage { background: url(/static/kit/sav_D.webp) 0 0 / 100% 100%; }
+[data-v="sE"] #stage { background: url(/static/kit/sav_E.webp) 0 0 / 100% 100%; }
+[data-v="sF"] #stage { background: url(/static/kit/sav_F.webp) 0 0 / 100% 100%; }
