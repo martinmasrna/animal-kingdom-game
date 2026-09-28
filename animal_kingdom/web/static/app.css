@@ -428,10 +428,10 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .zoom .zt p { font-size: 17px; line-height: 1.4; margin-bottom: 8px; }
 .zoom .zt small { font: 600 12px var(--font-text); letter-spacing: .08em; text-transform: uppercase; color: #c9b48f; }
 
-.labbar { position: fixed; left: 8px; top: 8px; z-index: 200; display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border-radius: 10px; background: rgba(12,10,8,.9); border: 1px solid #5a4630; font: 12px var(--font-text); color: #d8c8a8; }
-.labbar div { display: flex; gap: 4px; align-items: center; }
-.labbar b { width: 130px; font-weight: 600; }
-.labbar span { padding: 4px 8px; border-radius: 6px; border: 1px solid #5a4630; cursor: pointer; }
+.labbar { position: fixed; left: 10px; bottom: 10px; z-index: 200; display: flex; flex-direction: column; gap: 3px; padding: 6px 8px; border-radius: 8px; background: rgba(12,10,8,.82); font: 11px var(--font-text); color: #d8c8a8; }
+.labbar div { display: flex; gap: 3px; align-items: center; }
+.labbar b { width: 48px; font-weight: 600; }
+.labbar span { padding: 2px 6px; border-radius: 5px; border: 1px solid #5a4630; cursor: pointer; }
 .labbar span.on { background: #e0a040; color: #1a1006; border-color: #e0a040; }
 .labbar.hide { display: none; }
 

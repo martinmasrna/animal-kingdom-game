@@ -200,17 +200,14 @@ function onView(prev) {
 // (data-v on <html>, read by app.css and board.js). No server match; nothing can be played.
 async function labScreen(name) {
   const q = new URLSearchParams(location.search), de = document.documentElement.dataset;
-  de.v = q.get('v') || ''; de.p = q.get('p') || ''; de.d = q.get('d') || ''; de.h = q.get('h') || ''; de.f = q.get('f') || ''; de.t = q.get('t') || ''; de.k = q.get('k') || '';
+  for (const k of ['v', 'p', 'd', 'h', 'f', 't', 'k']) de[k] = q.has(k) ? q.get(k) : (LIVE_LOOK[k] || '');
   V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
   screen = null; gameScreen(); labBar();
 }
 // A switcher over the lab frame: each row flips one design choice live.
-const LAB = [['p', 'Payout stones', [['', 'dark (now)'], ['1', 'sandstone, carved numbers'], ['2', 'sandstone, white numbers']]],
-  ['d', 'Your den vs theirs', [['', 'no hint'], ['w', 'war paint']]],
-  ['f', 'Food (sketches)', [['', 'slab (now)'], ['a', 'A stone track'], ['b', 'B painted gauge'], ['c', 'C stockpile'], ['m', 'M territory marks + paw tally'], ['k', 'K food cache at the den'], ['r', 'R fruit row to the den'], ['t', 'T fruit trough (sketch)'], ['p', 'P painted trough'], ['o', 'O one fruit = one food']]],
-  ['t', 'Top chrome', [['', 'plaques (now)'], ['1', 'T1 by each den, corner series'], ['2', 'T2 one carved line']]],
-  ['k', 'Bottom chrome', [['', 'banner + button (now)'], ['1', 'B1 turn on the Draw button']]],
-  ['h', 'Hand (hover a card)', [['', 'small cards (now)'], ['1', 'bigger, hovered card grows'], ['2', 'bigger, Gwent side panel']]]];
+// Only the open questions; decided ones live in LIVE_LOOK.
+const LAB = [['t', 'Top', [['', 'plaques'], ['1', 'T1 by each den'], ['2', 'T2 one line']]],
+  ['k', 'Bottom', [['', 'banner'], ['1', 'B1 turn on Draw']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {
   let bar = document.getElementById('labbar');
