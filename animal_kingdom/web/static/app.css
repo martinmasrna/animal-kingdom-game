@@ -478,3 +478,16 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .fpile i.m { background: radial-gradient(circle at 35% 30%, #d88a78, #9a3a2a); }
 .fpile i.f { background: radial-gradient(circle at 35% 30%, #f0c060, #b87a18); }
 .fpile i.g { background: radial-gradient(circle at 35% 30%, #d8cf8a, #8e8a3a); }
+
+/* Sketch M: team colour is always paint. Held territory gets a paw print on its stone; the den keeps a tally of paw prints. */
+.pawmark { width: 60px; height: 60px; margin-top: -3px; opacity: .75; mix-blend-mode: multiply; }
+.pawmark svg, .tally svg { width: 100%; height: 100%; display: block; }
+.pawmark.A svg { fill: rgb(30,90,200); } .pawmark.B svg { fill: rgb(190,35,20); }
+[data-f="m"] .payout.full { color: #fffaf0; font-size: 30px; text-shadow: 0 0 3px rgba(0,0,0,.9), 0 1px 2px rgba(0,0,0,.8); z-index: 2; }
+.tally { width: 150px; height: 70px; }
+.tally i { position: absolute; width: 26px; height: 26px; }
+.tally i svg { fill: none; stroke: rgba(50,35,20,.55); stroke-width: 2.2; }
+.tally i.on svg { stroke: none; }
+.tally i.on { opacity: .92; mix-blend-mode: multiply; }
+.tally.A i.on svg { fill: rgb(30,90,200); } .tally.B i.on svg { fill: rgb(190,35,20); }
+.carved.small { font-size: 30px; }

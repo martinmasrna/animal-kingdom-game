@@ -7,6 +7,7 @@
 import { CROP, hasArt, artUrl } from './art.js';
 
 const key = (c, r) => `${c},${r}`;
+const PAW = `<svg viewBox="0 0 40 40"><ellipse cx="20" cy="27" rx="10" ry="8.5"/><ellipse cx="8" cy="15" rx="4" ry="5.2" transform="rotate(-20 8 15)"/><ellipse cx="16" cy="9" rx="4" ry="5.5"/><ellipse cx="25" cy="9" rx="4" ry="5.5"/><ellipse cx="32.5" cy="15" rx="4" ry="5.2" transform="rotate(20 32.5 15)"/></svg>`;
 export const kit = n => `/static/kit/${n}.webp`;
 export const kitImg = n => `<img src="${kit(n)}" alt="" draggable="false">`;
 // Team colours: blue for the viewer, red for the opponent (the genre's own-versus-enemy convention).
@@ -167,7 +168,8 @@ function renderField(el, M, g, cards, ui) {
     // On map D the painted stones sit a little off the grid; their measured centres.
     const at = VAR === 'sD' ? [[492, 725, 960, 1194][c - 1], [268, 458][r - 1]] : [(X(c) + X(c + 1)) / 2, (Y(r) + Y(r + 1)) / 2];
     // A held region recolours its painted stone: a disc the stone's size, blended in "color" mode over the painting.
-    if (VAR === 'sD' && st && st.full) s += put(`stonetint ${st.owner}`, at[0], at[1]);
+    const MARK = document.documentElement.dataset.f === 'm';
+    if (VAR === 'sD' && st && st.full) s += MARK ? put(`pawmark ${st.owner}`, at[0], at[1], PAW) : put(`stonetint ${st.owner}`, at[0], at[1]);
     s += put(`payout${st && st.full ? ' full ' + st.owner : ''}`, at[0], at[1], `<span class="plus">+</span>${reg.food}`);
   }
   // Side banners: the headquarters. Food toward the win threshold, next turn's income paler above it.
@@ -195,6 +197,13 @@ function renderField(el, M, g, cards, ui) {
     } else if (F === 'b') {
       s += put(`fgauge ${p}`, p === 'A' ? 110 : 1562, 330, `<div class="inc" style="height:${f2 * 100}%"></div><div class="fill" style="height:${f1 * 100}%"></div>`);
       s += put(`carved ${p}`, p === 'A' ? 136 : 1536, 560, `${food}`);
+    } else if (F === 'm') {
+      // Tally on the den rock: ten paw prints in the owner's paint, one per 10 food.
+      let t = '';
+      for (let i = 0; i < 10; i++) { const on = f1 >= (i + 1) / 10 - 1e-9;
+        t += `<i class="${on ? 'on' : ''}" style="left:${(i % 5) * 30}px;top:${Math.floor(i / 5) * 34 + (i % 2) * 5}px">${PAW}</i>`; }
+      s += put(`tally ${p}`, p === 'A' ? 150 : 1522, 560, t);
+      s += put(`carved small ${p}`, p === 'A' ? 150 : 1522, 640, `${food}<small> / ${win}</small>`);
     } else if (F === 'c') {
       const n = Math.round(f1 * 14);
       let pile = '';
