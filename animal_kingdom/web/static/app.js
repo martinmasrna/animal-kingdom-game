@@ -200,7 +200,7 @@ function onView(prev) {
 // (data-v on <html>, read by app.css and board.js). No server match; nothing can be played.
 async function labScreen(name) {
   const q = new URLSearchParams(location.search), de = document.documentElement.dataset;
-  de.v = q.get('v') || ''; de.p = q.get('p') || ''; de.d = q.get('d') || ''; de.h = q.get('h') || ''; de.f = q.get('f') || '';
+  de.v = q.get('v') || ''; de.p = q.get('p') || ''; de.d = q.get('d') || ''; de.h = q.get('h') || ''; de.f = q.get('f') || ''; de.t = q.get('t') || ''; de.k = q.get('k') || '';
   V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
   screen = null; gameScreen(); labBar();
 }
@@ -208,6 +208,8 @@ async function labScreen(name) {
 const LAB = [['p', 'Payout stones', [['', 'dark (now)'], ['1', 'sandstone, carved numbers'], ['2', 'sandstone, white numbers']]],
   ['d', 'Your den vs theirs', [['', 'no hint'], ['w', 'war paint']]],
   ['f', 'Food (sketches)', [['', 'slab (now)'], ['a', 'A stone track'], ['b', 'B painted gauge'], ['c', 'C stockpile'], ['m', 'M territory marks + paw tally'], ['k', 'K food cache at the den'], ['r', 'R fruit row to the den'], ['t', 'T fruit trough (sketch)'], ['p', 'P painted trough'], ['o', 'O one fruit = one food']]],
+  ['t', 'Top chrome', [['', 'plaques (now)'], ['1', 'T1 by each den, corner series'], ['2', 'T2 one carved line']]],
+  ['k', 'Bottom chrome', [['', 'banner + button (now)'], ['1', 'B1 turn on the Draw button']]],
   ['h', 'Hand (hover a card)', [['', 'small cards (now)'], ['1', 'bigger, hovered card grows'], ['2', 'bigger, Gwent side panel']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {
@@ -389,7 +391,9 @@ function drawGame() {
   const canDraw = d.mine && !d.pend && G.legal.draw;
   const deck = document.getElementById('deck');
   deck.innerHTML = `<div class="pile">${kitImg('deck')}<span class="num">${G.deckCount[you]}</span></div>` +
-    `<div class="drawbtn ${canDraw ? 'can' : d.mine ? 'off' : ''}" id="drawbtn">${kitImg(canDraw ? 'button_lit' : 'button')}<span class="num">Draw 2<small>hand ${G.hand.length}/${G.handLimit}</small></span></div>`;
+    `<div class="drawbtn ${canDraw ? 'can' : d.mine ? 'off' : 'wait'}" id="drawbtn">${kitImg(canDraw ? 'button_lit' : 'button')}<span class="num">` +
+    (V.phase === 'playing' && G.current !== you ? `<span class="their">Their<br>turn</span>` : `Draw 2<small>hand ${G.hand.length}/${G.handLimit}</small>`) +
+    `</span><span class="gems">${V.phase === 'playing' && G.current === you ? Array.from({ length: G.actionsTotal }, (_, i) => `<i class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}">${kitImg(teamGem('A'))}</i>`).join('') : ''}</span></div>`;
   document.getElementById('drawbtn').onclick = e => { e.stopPropagation(); if (canDraw) act({ kind: 'draw' }); };
 
   // Prompt for a pending choice: the card that asks and its rule, nothing more.
