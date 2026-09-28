@@ -340,3 +340,29 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 [data-v="3c"] .hc .tx { opacity: 0; transition: opacity .15s; }
 [data-v="3c"] .hc:hover .tx { opacity: 1; }
 [data-v="3c"] .hc .nm { font-size: 18px; }
+
+/* ---------- lab field mode (fA/fB/fC): one quiet painted field, engraved marks, food banners at the edges ---------- */
+[data-v^="f"] #stage .layer { display: none; }
+[data-v="fA"] #stage { background: url(/static/kit/field_A.webp) 0 0 / 100% 100%; }
+[data-v="fB"] #stage { background: url(/static/kit/field_B.webp) 0 0 / 100% 100%; }
+[data-v="fC"] #stage { background: url(/static/kit/field_C.webp) 0 0 / 100% 100%; }
+.eng { width: 150px; height: 150px; border-radius: 50%; box-shadow: inset 3px 5px 9px rgba(0,0,0,.32), inset -2px -3px 5px rgba(255,240,210,.12), 0 1px 0 rgba(255,240,210,.14); background: rgba(0,0,0,.05); }
+.groove { position: absolute; height: 10px; margin-top: -5px; transform-origin: 0 50%; border-radius: 5px; box-shadow: inset 1px 2px 3px rgba(0,0,0,.35), 0 1px 0 rgba(255,240,210,.12); background: rgba(0,0,0,.06); }
+.groove.A { background: rgba(70,160,245,.75); box-shadow: inset 1px 2px 3px rgba(0,0,0,.3), 0 0 8px rgba(70,160,245,.5); }
+.groove.B { background: rgba(225,55,45,.75); box-shadow: inset 1px 2px 3px rgba(0,0,0,.3), 0 0 8px rgba(225,55,45,.5); }
+.payout { font: 34px/1 'Lilita One', var(--font-display); color: rgba(40,25,10,.28); text-shadow: 0 1px 0 rgba(255,240,210,.18); }
+.payout.full.A { color: #6fb8ff; -webkit-text-stroke: 5px #0c2a4a; paint-order: stroke fill; text-shadow: 0 0 18px rgba(70,160,245,.8); font-size: 40px; }
+.payout.full.B { color: #ff7a6a; -webkit-text-stroke: 5px #4a0e0a; paint-order: stroke fill; text-shadow: 0 0 18px rgba(225,55,45,.8); font-size: 40px; }
+.payout.part.A { color: rgba(70,160,245,.6); } .payout.part.B { color: rgba(225,55,45,.6); }
+.hqbar { width: 170px; height: 500px; }
+.hqbar .meter { position: absolute; left: 50%; top: 0; width: 34px; height: 330px; margin-left: -17px; border-radius: 17px; background: rgba(0,0,0,.45); box-shadow: inset 0 2px 6px rgba(0,0,0,.6), 0 0 0 3px rgba(255,235,200,.14); overflow: hidden; }
+.hqbar .fill, .hqbar .inc { position: absolute; left: 0; right: 0; bottom: 0; }
+.hqbar.A .fill { background: linear-gradient(90deg, #2a7fd6, #7cc4ff, #2a7fd6); } .hqbar.B .fill { background: linear-gradient(90deg, #c8281e, #ff8a7a, #c8281e); }
+.hqbar .inc { background: rgba(255,255,255,.3); }
+.hqbar .food { position: absolute; left: 0; right: 0; top: 344px; text-align: center; font-size: 64px; }
+.hqbar .rate { position: absolute; left: 0; right: 0; top: 414px; text-align: center; font-size: 26px; }
+.hqbar.A .rate { color: #9fd0ff; } .hqbar.B .rate { color: #ffab9f; }
+.hqbar .rate small { font-size: 16px; }
+.hqbar .goal { position: absolute; left: 0; right: 0; top: 452px; text-align: center; font: 600 13px var(--font-text); letter-spacing: .08em; text-transform: uppercase; color: rgba(255,235,200,.55); }
+.hqbar.legal::after { inset: -10px; border-radius: 30px; }
+.hqbar.tgt { cursor: pointer; }

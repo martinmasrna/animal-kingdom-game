@@ -32,6 +32,7 @@ export function portrait(id, D, name) {
 
 export function renderBoard(el, M, g, cards, ui) {
   VAR = document.documentElement.dataset.v || ''; THIN = ['1a', '1b', '1c'].includes(VAR); PORTRAIT = THIN ? 140 : 136;
+  if (VAR[0] === 'f') return renderField(el, M, g, cards, ui);
   const topOf = cr => (g.board[cr] || []).slice(-1)[0], owner = cr => (topOf(cr) || {}).owner;
   const nb = cr => { const [c, r] = cr.split(',').map(Number), out = []; if (c > 1) out.push(key(c - 1, r)); if (c < M.cols) out.push(key(c + 1, r)); if (r > 1) out.push(key(c, r - 1)); if (r < M.rows) out.push(key(c, r + 1)); return out; };
   function connected(p) {
@@ -121,5 +122,73 @@ export function renderBoard(el, M, g, cards, ui) {
       (under.length && !ghost ? `<div class="under num">+${under.length}</div>` : '') + '</div>';
   }
 
+  el.innerHTML = s;
+}
+
+// ---------------------------------------------------------------- field mode (lab variants fA/fB/fC)
+// A quiet painted field (kit/field_<X>.webp) with engraved sockets, shallow grooves and quiet region numbers;
+// each player's food lives in a banner at the screen edge, which is also their headquarters.
+function renderField(el, M, g, cards, ui) {
+  const topOf = cr => (g.board[cr] || []).slice(-1)[0], owner = cr => (topOf(cr) || {}).owner;
+  const nb = cr => { const [c, r] = cr.split(',').map(Number), out = []; if (c > 1) out.push(key(c - 1, r)); if (c < M.cols) out.push(key(c + 1, r)); if (r > 1) out.push(key(c, r - 1)); if (r < M.rows) out.push(key(c, r + 1)); return out; };
+  function connected(p) {
+    const f = p === 'A' ? 1 : M.cols, seen = new Set(), q = [];
+    for (let r = 1; r <= M.rows; r++) if (owner(key(f, r)) === p) { seen.add(key(f, r)); q.push(key(f, r)); }
+    while (q.length) for (const n of nb(q.shift())) if (!seen.has(n) && owner(n) === p) { seen.add(n); q.push(n); }
+    return seen;
+  }
+  function regionState(reg) {
+    const [c, r] = reg.c, cs = [key(c, r), key(c + 1, r), key(c, r + 1), key(c + 1, r + 1)];
+    for (const p of ['A', 'B']) { const n = cs.filter(x => owner(x) === p).length; if (n === 4) return { owner: p, full: true }; if (n === 3 && cs.every(x => owner(x) === p || !topOf(x))) return { owner: p, full: false }; }
+    return null;
+  }
+  const X = c => 335 + (c - 1) * 1002 / (M.cols - 1), Y = r => 200 + (r - 1) * 200, EDGE = { A: 222, B: 1450 };
+  const conn = { A: connected('A'), B: connected('B') }, rings = new Set(ui.rings || []), recent = new Set(ui.recent || []);
+  const put = (cls, x, y, html = '', style = '', attrs = '') => `<div class="sp ${cls}" style="left:${x}px;top:${y}px;${style}" ${attrs}>${html}</div>`;
+  const groove = (x1, y1, x2, y2, lit) => { const len = Math.hypot(x2 - x1, y2 - y1), deg = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+    return `<div class="groove${lit ? ' ' + lit : ''}" style="left:${x1}px;top:${y1}px;width:${len}px;transform:rotate(${deg}deg)"></div>`; };
+  const litOf = (a, b) => { const o = owner(a); return o && o === owner(b) && conn[o].has(a) && conn[o].has(b) ? o : ''; };
+
+  let s = '';
+  for (let r = 1; r <= M.rows; r++) for (let c = 1; c <= M.cols; c++) {
+    if (c < M.cols) s += groove(X(c), Y(r), X(c + 1), Y(r), litOf(key(c, r), key(c + 1, r)));
+    if (r < M.rows) s += groove(X(c), Y(r), X(c), Y(r + 1), litOf(key(c, r), key(c, r + 1)));
+  }
+  for (let r = 1; r <= M.rows; r++) for (const p of ['A', 'B']) {
+    const c = p === 'A' ? 1 : M.cols;
+    s += groove(EDGE[p], Y(r), X(c), Y(r), owner(key(c, r)) === p ? p : '');
+  }
+  for (let r = 1; r <= M.rows; r++) for (let c = 1; c <= M.cols; c++) s += put('eng', X(c), Y(r));
+  for (const reg of M.regions) {
+    const st = regionState(reg), [c, r] = reg.c;
+    s += put(`payout${st ? ' ' + st.owner + (st.full ? ' full' : ' part') : ''}`, (X(c) + X(c + 1)) / 2, (Y(r) + Y(r + 1)) / 2, `+${reg.food}`);
+  }
+  // Side banners: the headquarters. Food toward the win threshold, next turn's income paler above it.
+  for (const p of ['A', 'B']) {
+    const food = g.food[p], inc = g.income[p], win = g.winFood, f1 = Math.min(1, food / win), f2 = Math.min(1, (food + inc) / win);
+    const target = p === 'B' && ui.hqRing, x = p === 'A' ? 108 : 1564;
+    s += put(`hqbar ${p}${target ? ' tgt legal' : ''}`, x, 380,
+      `<div class="meter"><div class="inc" style="height:${f2 * 100}%"></div><div class="fill" style="height:${f1 * 100}%"></div><i style="bottom:100%"></i></div>` +
+      `<div class="food num">${food}</div><div class="rate num">+${inc}<small> / turn</small></div><div class="goal">${win} to win</div>`, '', target ? 'data-hq="1"' : '');
+  }
+  for (let c = M.cols; c >= 1; c--) for (let r = 1; r <= M.rows; r++) {
+    const cr = key(c, r), stack = g.board[cr] || [];
+    let h = '';
+    if (ui.preview && ui.preview.cr === cr) h = unit({ id: ui.preview.id, owner: 'A', str: ui.preview.str }, stack.slice().reverse(), true);
+    else if (stack.length) h = unit(stack[stack.length - 1], stack.slice(0, -1).reverse(), false);
+    const cls = ['cr', rings.has(cr) ? 'tgt legal' : '', stack.length ? 'occ' : '', recent.has(cr) ? 'recent' : ''].join(' ');
+    s += put(cls, X(c), Y(r), h, `z-index:${M.rows - r + 1}`, `data-cr="${cr}"`);
+  }
+  function unit(u, under, ghost) {
+    const card = cards[u.id], base = card.str === '*' ? null : card.str;
+    const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';
+    const peek = under.slice(0, 3).map((b, i) => `<div class="buried" style="transform:translate(${(i + 1) * 8}px,${(i + 1) * 9}px);z-index:${-i - 1}">${kitImg(OWN[b.owner].enamel)}</div>`).join('');
+    const kws = (card.kw || []).filter(k => BOARD_KW[k]).map(k => `<img src="${kit(BOARD_KW[k])}" alt="" title="${k}" draggable="false">`).join('');
+    return `<div class="unit lift ${u.owner}${ghost ? ' ghost' : ''}">${peek}${portrait(u.id, 136, card.name)}<img class="rim" src="${kit(OWN[u.owner].enamel)}" alt="" draggable="false">` +
+      `<div class="ribbon">${kitImg(OWN[u.owner].ribbon)}<span class="num">${card.name}</span></div>` + (kws ? `<div class="kws">${kws}</div>` : '') +
+      `<div class="gem">${kitImg(OWN[u.owner].gem)}<span class="num${delta}">${u.str}</span></div>` +
+      (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') +
+      (under.length && !ghost ? `<div class="under num">+${under.length}</div>` : '') + '</div>';
+  }
   el.innerHTML = s;
 }
