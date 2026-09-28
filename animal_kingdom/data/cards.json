@@ -300,7 +300,7 @@
       "tags": ["Snake"],
       "base_strength": 4,
       "keywords": [],
-      "text": "Battlecry: all adjacent enemy units get -1 strength."
+      "text": "Battlecry: remove an adjacent enemy of strength 5 or less."
     },
     {
       "id": "king_cobra",

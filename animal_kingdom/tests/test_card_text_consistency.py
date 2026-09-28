@@ -155,6 +155,7 @@ STRENGTH_LIMITS = {
     "serval": "serval_min",
     "stoop": "stoop_max",
     "rhinoceros": "rhinoceros_max",
+    "taipan": "taipan_max",
     "mock_sentry": "stoop_max",
     "mock_hunter": "jaguar_max",
     **{f"calib_rm3_{n}": "stoop_max" for n in (2, 3, 4, 5, 6)},
@@ -183,8 +184,7 @@ STRENGTH_LOSS_RE = re.compile(r"gets? -(\d+) strength", re.IGNORECASE)
 def test_strength_loss_text_matches_config():
     """Viper's printed "-N strength" equals viper_poison, and no other card prints a loss unchecked."""
     printed = {cid: int(m.group(1)) for cid, c in _cards().items() if (m := STRENGTH_LOSS_RE.search(c.text))}
-    cfg = Config.default()
-    assert printed == {"viper": cfg.viper_poison, "taipan": cfg.taipan_poison}
+    assert printed == {"viper": Config.default().viper_poison}
 
 
 def test_eon_decay_text_matches_config():

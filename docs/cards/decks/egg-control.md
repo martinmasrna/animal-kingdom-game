@@ -1,6 +1,6 @@
 # Egg Control
 
-Snake and Bird control. The Birds churn the deck: Raven and Owl draw and shuffle, Aurum draws every turn. The Snakes feed on the churn: Rattlesnake grows with every shuffle (in hand too), Python with the Remove Pile. The Snakes also carry venom: Viper permanently takes 3 strength off an adjacent enemy, which opens big units to covers; Taipan takes 1 off every adjacent enemy, which breaks wide boards and brings 4s into Peregrine Falcon's reach; Black Mamba's bite removes any adjacent enemy at the start of your next turn, even if the Mamba is covered or removed. Magpie steals a random card from the opponent's hand and caches one of yours in the deck.
+Snake and Bird control. The Birds churn the deck: Raven and Owl draw and shuffle, Aurum draws every turn. The Snakes feed on the churn: Rattlesnake grows with every shuffle (in hand too), Python with the Remove Pile. The Snakes also carry venom: Viper permanently takes 3 strength off an adjacent enemy, which opens big units to covers; Taipan removes an adjacent enemy of strength 5 or less; Black Mamba's bite removes any adjacent enemy at the start of your next turn, even if the Mamba is covered or removed. Magpie steals a random card from the opponent's hand and caches one of yours in the deck.
 
 Eon is the Ouroboros: a 10 with Apex Predator that eats what it lands on, then shuffles itself back into the deck at the end of your turn, one strength smaller each cycle. Every return is a shuffle, so it also feeds Rattlesnake.
 
@@ -28,7 +28,7 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 | **Peregrine Falcon** | 2 | Bird | 3 | Flight. Battlecry: remove an adjacent enemy of strength 3 or less. |
 | **Black Mamba** | 2 | Snake | 4 | Battlecry: choose an adjacent enemy unit. At the start of your next turn, remove it. |
 | **Magpie** | 2 | Bird | 3 | Flight. Battlecry: take a random card from your opponent's hand, then shuffle a card from your hand into your deck. |
-| **Taipan** | 2 | Snake | 4 | Battlecry: all adjacent enemy units get -1 strength. |
+| **Taipan** | 2 | Snake | 4 | Battlecry: remove an adjacent enemy of strength 5 or less. |
 
 ### Common
 

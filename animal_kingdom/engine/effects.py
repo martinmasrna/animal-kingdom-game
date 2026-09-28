@@ -1170,10 +1170,8 @@ def _op_venom(state, step):
 
 
 def _taipan_place(state, unit, cr):
-    for nb in sorted(state.game_map.neighbors(cr)):
-        top = state.top_unit(nb)
-        if top and top.owner != unit.owner:          # area venom: automatic, so Stealth doesn't hide
-            top.strength_counter -= state.config.taipan_poison
+    _push_remove_choice(state, unit.owner, "taipan",
+                        _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.taipan_max))
 
 
 def _eon_end_of_turn(state, unit, cr):

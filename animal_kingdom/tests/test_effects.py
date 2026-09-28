@@ -1089,10 +1089,13 @@ def test_magpie_takes_a_random_enemy_card_then_shuffles_one_of_yours_away():
     assert all(u.owner == "A" for u in s.hands["A"])
 
 
-def test_taipan_poisons_every_adjacent_enemy_by_one():
+def test_taipan_removes_an_adjacent_enemy_of_strength_5_or_less():
     s = make_state(hands={"A": ["taipan"]})
-    put(s, "2,1", "lion", "B")
-    put(s, "1,2", "caracal", "B")
+    put(s, "2,1", "jaguar", "B")                          # a 5: in reach
     rules.apply_action(s, PlaceAction("taipan", ("cr", "1,1")))
-    assert effective_strength(s, s.top_unit("2,1")) == 6
-    assert effective_strength(s, s.top_unit("1,2")) == 5
+    assert "jaguar" in s.remove_pile
+
+    s2 = make_state(hands={"A": ["taipan"]})
+    put(s2, "2,1", "cougar", "B")                         # a 6: out of reach
+    rules.apply_action(s2, PlaceAction("taipan", ("cr", "1,1")))
+    assert s2.top_unit("2,1").card_id == "cougar"
