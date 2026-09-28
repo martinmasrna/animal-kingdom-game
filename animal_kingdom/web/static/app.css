@@ -434,3 +434,15 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .labbar span { padding: 4px 8px; border-radius: 6px; border: 1px solid #5a4630; cursor: pointer; }
 .labbar span.on { background: #e0a040; color: #1a1006; border-color: #e0a040; }
 .labbar.hide { display: none; }
+
+/* Payout numbers engraved into the sandstone (p1: Cinzel, p3: Lilita), sized to sit inside the stone. */
+[data-p="1"] .payout, [data-p="3"] .payout { width: 70px; height: 70px; display: grid; place-items: center; -webkit-text-stroke: 0; }
+[data-p="1"] .payout .plus, [data-p="3"] .payout .plus { display: none; }
+[data-p="1"] .payout { font: 900 28px/1 'Cinzel', serif; padding-top: 3px; color: rgba(74,52,28,.82); text-shadow: 0 1.5px 0 rgba(255,248,230,.75), 0 -1px 0 rgba(40,25,10,.35); }
+[data-p="3"] .payout { font: 26px/1 'Lilita One', var(--font-display); padding-top: 2px; color: rgba(74,52,28,.8); text-shadow: 0 1.5px 0 rgba(255,248,230,.75), 0 -1px 0 rgba(40,25,10,.35); }
+[data-p="1"] .payout.full.A, [data-p="3"] .payout.full.A { color: #1d5fae; font-size: 30px; text-shadow: 0 1.5px 0 rgba(255,255,255,.7), 0 0 12px rgba(70,160,245,.8); }
+[data-p="1"] .payout.full.B, [data-p="3"] .payout.full.B { color: #b01e14; font-size: 30px; text-shadow: 0 1.5px 0 rgba(255,255,255,.7), 0 0 12px rgba(225,55,45,.8); }
+[data-p="1"] .payout.part.A, [data-p="3"] .payout.part.A { color: rgba(29,95,174,.8); }
+[data-p="1"] .payout.part.B, [data-p="3"] .payout.part.B { color: rgba(176,30,20,.8); }
+[data-v="sD"][data-p="3"] #stage { background-image: url(/static/kit/sav_D2.webp); }
+[data-v="sD"][data-d="w"] #stage { background-image: url(/static/kit/sav_D3.webp); }

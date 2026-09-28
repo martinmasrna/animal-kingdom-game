@@ -161,11 +161,12 @@ function joinScreen(id) {
 
 // ------------------------------------------------------------------ match connection
 function disconnect() { if (live) setLive(false); if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
-// The live game draws Savanna Expanse as painted map D (Martin's pick, 2026-09-28); the lab overrides it per frame.
-const LIVE_LOOK = 'sD';
+// The live look, Martin's picks (2026-09-28): painted map D, sandstone payout stones with engraved numbers,
+// war paint in team colour on each den (proposed, pending his look), bigger hand cards that grow on hover. The lab overrides these per frame.
+const LIVE_LOOK = { v: 'sD', p: '1', d: 'w', h: '1' };
 
 function matchScreen(id) {
-  document.documentElement.dataset.v = LIVE_LOOK;
+  Object.assign(document.documentElement.dataset, LIVE_LOOK);
   const token = getToken(id);
   if (!token) { location.hash = '#/join/' + id; return; }
   if (wsId === id && ws) return;
@@ -205,7 +206,7 @@ async function labScreen(name) {
 }
 // A switcher over the lab frame: each row flips one design choice live.
 const LAB = [['p', 'Payout stones', [['', 'dark (now)'], ['1', 'sandstone, carved numbers'], ['2', 'sandstone, white numbers']]],
-  ['d', 'Your den vs theirs', [['', 'no hint (now)'], ['1', 'pennant flag'], ['2', 'team light on the rock'], ['3', 'team-coloured food slab']]],
+  ['d', 'Your den vs theirs', [['', 'no hint'], ['w', 'war paint']]],
   ['h', 'Hand (hover a card)', [['', 'small cards (now)'], ['1', 'bigger, hovered card grows'], ['2', 'bigger, Gwent side panel']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {

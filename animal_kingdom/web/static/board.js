@@ -166,7 +166,7 @@ function renderField(el, M, g, cards, ui) {
     const st = regionState(reg), [c, r] = reg.c;
     // On map D the painted stones sit a little off the grid; their measured centres.
     const at = VAR === 'sD' ? [[494, 725, 962, 1194][c - 1], [269, 458][r - 1]] : [(X(c) + X(c + 1)) / 2, (Y(r) + Y(r + 1)) / 2];
-    s += put(`payout${st ? ' ' + st.owner + (st.full ? ' full' : ' part') : ''}`, at[0], at[1], `+${reg.food}`);
+    s += put(`payout${st ? ' ' + st.owner + (st.full ? ' full' : ' part') : ''}`, at[0], at[1], `<span class="plus">+</span>${reg.food}`);
   }
   // Side banners: the headquarters. Food toward the win threshold, next turn's income paler above it.
   if (MAP_) for (const p of ['A', 'B']) {
