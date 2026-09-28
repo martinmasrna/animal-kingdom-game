@@ -23,6 +23,7 @@ import textwrap
 from dataclasses import dataclass
 from typing import Collection
 
+from ..engine import rules
 from ..engine import strength as strength_mod
 from ..engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
 
@@ -1042,10 +1043,11 @@ def render(state, reveal_hands: Collection[str] = (),
     width = _terminal_width()
     lines = []
 
-    if state.result is not None:
-        winner = state.result.winner
+    result = rules.is_terminal(state)   # also exhaustion / turn limit, which aren't stored on state
+    if result is not None:
+        winner = result.winner
         style = SEAT_STYLE.get(winner) if winner else "bold yellow"
-        lines.append(_style(f"RESULT: {winner or 'draw'} ({state.result.reason})", style))
+        lines.append(_style(f"RESULT: {winner or 'draw'} ({result.reason})", style))
         lines.append("")
     lines.extend(_render_board(
         state,
