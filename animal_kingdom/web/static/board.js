@@ -292,9 +292,6 @@ function renderField(el, M, g, cards, ui) {
     else if (stack.length) h = unit(stack[stack.length - 1], stack.slice(0, -1).reverse(), false);
     const dropped = ui.anim && stack.length && ((ui.anim.board[cr] || []).slice(-1)[0] || {}).iid !== stack[stack.length - 1].iid;
     const SM = document.documentElement.dataset.m === 'S' && VAR === 'sD';
-    if (SM && stack.length) { const top = stack[stack.length - 1], [gx, gy, gr] = CLEAR[cr];
-      const box = `left:${gx - gr - 30}px;top:${gy - gr - 30}px;width:${2 * gr + 60}px;height:${2 * gr + 60}px;-webkit-mask-position:${-(gx - gr - 30)}px ${-(gy - gr - 30)}px;mask-position:${-(gx - gr - 30)}px ${-(gy - gr - 30)}px`;
-      s += `<div class="ringtint band ${top.owner}" style="${box}"></div><div class="ringtint ${top.owner}" style="${box}"></div>`; }
     const cls = ['cr', rings.has(cr) ? 'tgt legal' : '', stack.length ? 'occ' : '', recent.has(cr) ? 'recent' : '', dropped ? 'drop' : ''].join(' ');
     const at = SM ? CLEAR[cr] : [X(c), Y(r)];
     s += put(cls, at[0], at[1], h, `z-index:${M.rows - r + 1}`, `data-cr="${cr}"`);
@@ -320,7 +317,7 @@ function renderField(el, M, g, cards, ui) {
   function stoneUnit(u, under, ghost, cr) {
     // The card frame's rim in team colour, ornament by rarity (kit/crim_<rarity>_<side>), laid over the clearing's stones;
     // the portrait fills it; the strength plate sits on the rim at the top-left like a clasp.
-    const card = cards[u.id], base = card.str === '*' ? null : card.str, side = u.owner === 'A' ? 'a' : 'b', K = CRIM[`${card.rarity}_${side}`];
+    const card = cards[u.id], base = card.str === '*' ? null : card.str, side = u.owner === 'A' ? 'a' : 'b', K = CRIM[`common_${side}`];   // one plain rim for every unit: rarity lives on the card
     const gr = cr && CLEAR[cr] ? CLEAR[cr][2] : 68, outer = gr + 12, rs = outer / K.ro, inner = K.ri * rs, D = 2 * inner + 2;
     const mid = (outer + inner) / 2, clasp = mid * Math.SQRT1_2;
     const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';
@@ -328,7 +325,7 @@ function renderField(el, M, g, cards, ui) {
     // Buried units peek out behind the portrait as discs in their owners' colours: how many, and whose.
     const peek = ghost ? '' : under.slice(0, 4).map((b, i) => `<i class="disc ${b.owner}" style="inset:${D / 2 - outer}px;transform:translate(${(i + 1) * 6}px,${(i + 1) * 7}px);z-index:${-i - 1}"></i>`).join('');
     return `<div class="unit stone ${u.owner}${ghost ? ' ghost' : ''}" style="--pp:${D}px">${peek}${portrait(u.id, D, card.name)}` +
-      `<img class="srim" src="${kit(`crim_${card.rarity}_${side}`)}" alt="" draggable="false" style="width:${K.W * rs}px;left:${D / 2 - K.cx * rs}px;top:${D / 2 - K.cy * rs}px">` +
+      `<img class="srim" src="${kit(`crim_common_${side}`)}" alt="" draggable="false" style="width:${K.W * rs}px;left:${D / 2 - K.cx * rs}px;top:${D / 2 - K.cy * rs}px">` +
       `<div class="splate" style="left:${D / 2 - clasp - 23}px;top:${D / 2 - clasp - 23.5}px">${kitImg('plate_' + side)}<span class="${delta.trim()}">${u.str}</span></div>` +
       (kws ? `<div class="kws">${kws}</div>` : '') +
       (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') + '</div>';
