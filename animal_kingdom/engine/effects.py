@@ -295,12 +295,15 @@ def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None
     # (Pestis, Rhino/Bulwark, Grizzly, Hippo, King Theron, Pufferfish) hit Stealth units.
     if by_effect and not statics.can_be_removed(state, unit):
         return False
+    was_top = stack[-1] is unit
     stack.remove(unit)
+    # A unit uncovered by this very removal was buried when it happened, so it doesn't react to it.
+    uncovered = stack[-1] if was_top and stack else None
     if not stack:
         del state.board[cr]
     entered_pile = _dispose(state, unit)
     if entered_pile:                        # the remove trigger fires first (F9), then...
-        _fire_remove_event(state, unit.card_id, unit.owner, cr, by_player, by_card)
+        _fire_remove_event(state, unit.card_id, unit.owner, cr, by_player, by_card, uncovered)
     _fire_on_remove(state, unit)            # ...the unit's own Deathrattle (e.g. Ember relocates)
     return True
 
@@ -384,10 +387,13 @@ def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True)
 # immediately, so no extra stack steps and no re-entrancy in this stage. state.py stays
 # free of effect imports - these wrappers sit above the card-movement primitives.
 
-def _fire_event(state, hook_name: str, event: dict) -> None:
-    """Dispatch one event to every board-top unit that reacts to it (deterministic order)."""
+def _fire_event(state, hook_name: str, event: dict, skip=None) -> None:
+    """Dispatch one event to every board-top unit that reacts to it (deterministic order).
+    `skip` is a unit that must not react (one the event itself uncovered)."""
     for cr in sorted(state.board):
         top = state.board[cr][-1]
+        if top is skip:
+            continue
         hook = _hook(state, top.card_id, hook_name)
         if hook:
             hook(state, top, cr, event)
@@ -395,10 +401,10 @@ def _fire_event(state, hook_name: str, event: dict) -> None:
         _rattlesnake_shuffle_event(state, event)
 
 
-def _fire_remove_event(state, card_id: str, owner: str, cr, by_player=None, by_card=None) -> None:
+def _fire_remove_event(state, card_id: str, owner: str, cr, by_player=None, by_card=None, uncovered=None) -> None:
     _fire_event(state, "on_remove_event",
                 {"card_id": card_id, "owner": owner, "cr": cr, "tags": state.cards[card_id].tags,
-                 "by_player": by_player, "by_card": by_card})
+                 "by_player": by_player, "by_card": by_card}, skip=uncovered)
 
 
 def _fire_draw(state, drawn) -> None:

@@ -34,3 +34,7 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 
 - **Oxpecker** counts the fixed 30-card starting decklist: each copy with printed base strength 6 or more.
 - **Once-per-turn caps.** Value and food triggers print no cap and have none. Each one also has a `cap_*` flag in `engine/config.py` (off by default) for tuning experiments.
+
+## A unit uncovered by a removal does not react to it
+
+When removing the top unit of a stack uncovers the unit beneath, that unit was buried at the moment of the removal, so its "when … is removed" reactions (Queen Adira, Jackal, Vulture, Egg Eater, Eon) do not fire for it. Only units already visible when the removal happens react. Found in play (2026-09-28): a Tiger ate the Grizzly covering Queen Adira and she drew a card.

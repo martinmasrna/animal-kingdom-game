@@ -1047,3 +1047,22 @@ def test_rat_removes_any_adjacent_enemy_then_a_random_hand_card_and_works_on_an_
     put(s2, "2,1", "king_theron", "B")
     rules.apply_action(s2, PlaceAction("rat", ("cr", "1,1")))    # empty hand: nothing to pay
     assert s2.top_unit("2,1") is None
+
+
+def test_queen_adira_uncovered_by_the_removal_does_not_draw():
+    # Martin's game 2026-09-28: Tiger ate the Grizzly sitting on Queen Adira; she was buried when
+    # the Grizzly was removed, so she must not see that removal (then the Tiger buries her again).
+    s = make_state(hands={"A": ["tiger"]}, decks={"A": ["lion", "lion"], "B": []})
+    put(s, "1,2", "queen_adira", "A")
+    put(s, "1,2", "grizzly_bear", "B")                  # covers Adira
+    rules.apply_action(s, PlaceAction("tiger", ("cr", "1,2")))
+    assert [u.card_id for u in s.board["1,2"]] == ["queen_adira", "tiger"]
+    assert len(s.hands["A"]) == 0                        # no Adira draw
+
+
+def test_queen_adira_on_top_still_draws_for_a_cat_removal():
+    s = make_state(hands={"A": ["tiger"]}, decks={"A": ["lion", "lion"], "B": []})
+    put(s, "1,2", "queen_adira", "A")                   # visible, connects 2,2
+    put(s, "2,2", "grizzly_bear", "B")
+    rules.apply_action(s, PlaceAction("tiger", ("cr", "2,2")))
+    assert len(s.hands["A"]) == 1
