@@ -164,13 +164,16 @@ function renderField(el, M, g, cards, ui) {
   if (!MAP_) for (let r = 1; r <= M.rows; r++) for (let c = 1; c <= M.cols; c++) s += put('eng', X(c), Y(r));
   for (const reg of M.regions) {
     const st = regionState(reg), [c, r] = reg.c;
-    s += put(`payout${st ? ' ' + st.owner + (st.full ? ' full' : ' part') : ''}`, (X(c) + X(c + 1)) / 2, (Y(r) + Y(r + 1)) / 2, `+${reg.food}`);
+    // On map D the painted stones sit a little off the grid; their measured centres.
+    const at = VAR === 'sD' ? [[494, 725, 962, 1194][c - 1], [269, 458][r - 1]] : [(X(c) + X(c + 1)) / 2, (Y(r) + Y(r + 1)) / 2];
+    s += put(`payout${st ? ' ' + st.owner + (st.full ? ' full' : ' part') : ''}`, at[0], at[1], `+${reg.food}`);
   }
   // Side banners: the headquarters. Food toward the win threshold, next turn's income paler above it.
   if (MAP_) for (const p of ['A', 'B']) {
     // The den is painted; its food total is written on the painted slab below it.
     const x = p === 'A' ? 150 : 1522, target = p === 'B' && ui.hqRing;
-    s += put(`denhit${target ? ' tgt legal' : ''}`, x, 355, '', '', target ? 'data-hq="1"' : '');
+    s += put(`denhit ${p}${target ? ' tgt legal' : ''}`, x, 355, '', '', target ? 'data-hq="1"' : '');
+    if (document.documentElement.dataset.d === '1') s += put('denflag lift', p === 'A' ? 222 : 1450, 238, kitImg(p === 'A' ? 'flag_blue' : 'flag_red'), p === 'B' ? 'transform:translate(-50%,-50%) scaleX(-1)' : '');
     s += put(`slab ${p}`, x, 570, `<b class="num">${g.food[p]}</b><span class="num">+${g.income[p]} / turn</span>`);
   }
   if (!MAP_) for (const p of ['A', 'B']) {

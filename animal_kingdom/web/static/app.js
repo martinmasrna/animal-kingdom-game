@@ -198,9 +198,22 @@ function onView(prev) {
 // Design lab: #/lab/<name>?v=<variant> renders the frozen view static/lab/<name>.json with a design variant
 // (data-v on <html>, read by app.css and board.js). No server match; nothing can be played.
 async function labScreen(name) {
-  document.documentElement.dataset.v = new URLSearchParams(location.search).get('v') || '';
+  const q = new URLSearchParams(location.search), de = document.documentElement.dataset;
+  de.v = q.get('v') || ''; de.p = q.get('p') || ''; de.d = q.get('d') || ''; de.h = q.get('h') || '';
   V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
-  screen = null; gameScreen();
+  screen = null; gameScreen(); labBar();
+}
+// A switcher over the lab frame: each row flips one design choice live.
+const LAB = [['p', 'Payout stones', [['', 'dark (now)'], ['1', 'sandstone, carved numbers'], ['2', 'sandstone, white numbers']]],
+  ['d', 'Your den vs theirs', [['', 'no hint (now)'], ['1', 'pennant flag'], ['2', 'team light on the rock'], ['3', 'team-coloured food slab']]],
+  ['h', 'Hand (hover a card)', [['', 'small cards (now)'], ['1', 'bigger, hovered card grows'], ['2', 'bigger, Gwent side panel']]]];
+addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
+function labBar() {
+  let bar = document.getElementById('labbar');
+  if (!bar) { bar = document.createElement('div'); bar.id = 'labbar'; bar.className = 'labbar'; document.body.appendChild(bar); }
+  const de = document.documentElement.dataset;
+  bar.innerHTML = LAB.map(([k, title, opts]) => `<div><b>${title}</b>${opts.map(([v, l]) => `<span class="${(de[k] || '') === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${l}</span>`).join('')}</div>`).join('');
+  bar.querySelectorAll('span').forEach(el => el.onclick = () => { de[el.dataset.k] = el.dataset.v; screen = null; gameScreen(); labBar(); });
 }
 
 function lobbyScreen() {
@@ -253,6 +266,7 @@ function gameScreen() {
       <div class="deck" id="deck"></div>
       <div class="prompt" id="choicebar"></div>
       <div class="waiting num" id="waiting"></div>
+      <div class="zoom" id="zoom"></div>
       <div class="endov" id="endov"></div></div></div>`;
     fitStage(); applyInfo();
     wireNotes();
@@ -345,13 +359,22 @@ function drawGame() {
   showPanel();
 
   // Hand: full-bleed cards along the bottom ledge, overlapping when the hand is long.
-  const hand = document.getElementById('hand'), n = G.hand.length, cw = { '3a': 190, '3b': 170, '3c': 170 }[document.documentElement.dataset.v] || 150, gap = n > 1 ? Math.min(14, (1000 - n * cw) / (n - 1)) : 0;
+  const hand = document.getElementById('hand'), n = G.hand.length, cw = document.documentElement.dataset.h ? 180 : 150, gap = n > 1 ? Math.min(14, (1000 - n * cw) / (n - 1)) : 0;
   hand.innerHTML = G.hand.map((h, i) => {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && d.places[h.id], pick = d.handPick.has(h.iid);
     const base = sv(c), cls = [c.rarity, can ? 'can' : '', pick ? 'pick can' : '', h.id === ui.sel ? 'sel' : '', d.mine && !can && !pick ? 'dim' : ''].join(' ');
     const delta = base >= 0 && h.str !== base ? (h.str > base ? ' up' : ' down') : '';
     return `<div class="hc ${cls}" data-iid="${h.iid}" data-id="${h.id}" style="margin-left:${i ? gap : 0}px;--i:${i - (n - 1) / 2}"><div class="face"><div class="art gradart" ${artStyle(h.id)}></div><div class="nm">${c.name}</div><div class="tx">${c.text}</div></div><div class="gem">${kitImg(teamGem('A'))}<span class="num${delta}">${h.str}</span></div></div>`;
   }).join('');
+  // Hand variant 2 (Gwent): hovering a card shows it large in a fixed panel at the right.
+  const zoom = document.getElementById('zoom');
+  hand.querySelectorAll('.hc').forEach(el => {
+    el.onmouseenter = () => { if (document.documentElement.dataset.h !== '2') return; const c = CARDS[el.dataset.id];
+      zoom.className = 'zoom on ' + c.rarity;
+      zoom.innerHTML = `<div class="face"><div class="art" ${artStyle(c.id)}></div><div class="nm">${c.name}</div></div><div class="gem">${kitImg(teamGem('A'))}<span class="num">${c.str}</span></div>` +
+        `<div class="zt">${c.text ? `<p>${c.text}</p>` : ''}<small>${c.tags.join(' · ')}${c.rarity !== 'common' ? ' · ' + c.rarity : ''}</small></div>`; };
+    el.onmouseleave = () => zoom.classList.remove('on');
+  });
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
     e.stopPropagation();
     const iid = Number(el.dataset.iid), id = el.dataset.id;
