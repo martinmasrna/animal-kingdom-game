@@ -198,7 +198,14 @@ def make_app() -> web.Application:
         web.get("/ws/{id}", socket),
         web.static("/static", STATIC),
     ])
+    app.on_response_prepare.append(_revalidate)
     return app
+
+
+async def _revalidate(request: web.Request, response: web.StreamResponse) -> None:
+    """Make the browser revalidate the client on every load (a 304 when unchanged), so an edit shows on reload."""
+    if request.path == "/" or request.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "no-cache"
 
 
 def main(argv=None) -> None:
