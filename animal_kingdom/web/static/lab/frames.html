@@ -1,0 +1,28 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Card frames</title>
+<link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/app.css">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Barlow+Condensed:wght@600;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+<style>
+html, body { background: #111315; color: var(--text); overflow: auto !important; margin: 0; height: auto; }
+.bar { position: sticky; top: 0; z-index: 5; display: flex; gap: 8px; align-items: center; padding: 10px 24px; background: #111315; border-bottom: 1px solid var(--line); justify-content: flex-start; }
+.cols { display: flex; gap: 18px; padding: 14px 24px; }
+.col { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.col h2 { font: 700 26px var(--font-display); color: var(--muted); margin: 0; height: 28px; }
+.col.ref { margin-left: 28px; padding-left: 28px; border-left: 1px solid var(--line); }
+.col .card { --w: 196px; }
+.f-light .card .cname { font-weight: 600; } .f-light .card .ctext { font-weight: 400; }
+.f-light .card .cstr { font-weight: 600; }
+.f-barlow .card .cname { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.3em; letter-spacing: .02em; text-transform: none; }
+.f-garamond .card .cname { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.35em; }
+</style></head><body>
+<div class="bar"><span class="lbl">Font</span><span class="chip on" data-f="">Source Serif (now)</span><span class="chip" data-f="f-light">Source Serif, lighter</span><span class="chip" data-f="f-garamond">Garamond</span><span class="chip" data-f="f-barlow">Barlow Condensed</span></div>
+<div id="rows"></div>
+<script type="module">
+import { cardHTML } from '/static/card.js';
+const pool = await fetch('/api/pool').then(r => r.json()), C = Object.fromEntries(pool.cards.map(c => [c.id, c]));
+const show = ['borealis', 'rat_king'];
+const cols = [['now', null], ['1', 'leg_a'], ['2', 'leg_b'], ['3', 'leg_c'], ['4', 'leg_d']];
+document.getElementById('rows').innerHTML = '<div class="cols">' + cols.map(([label, f]) => `<div class="col"><h2>${label}</h2>` +
+  show.map(id => { let h = cardHTML(C[id]); if (f) h = h.replace('/static/kit/frame_legendary.webp', `/static/kit/lab/${f}.webp`); return h; }).join('') + '</div>').join('') +
+  `<div class="col ref"><h2>rare · common</h2>${cardHTML(C.snow_leopard)}${cardHTML(C.lion)}</div></div>`;
+document.querySelectorAll('[data-f]').forEach(e => e.onclick = () => { document.body.className = e.dataset.f; document.querySelectorAll('[data-f]').forEach(x => x.classList.toggle('on', x === e)); });
+</script></body></html>
