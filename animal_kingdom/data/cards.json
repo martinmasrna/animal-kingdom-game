@@ -1741,6 +1741,26 @@
       "text": "Battlecry: draw 2 cards."
     },
     {
+      "id": "mock_sentry",
+      "name": "Sentry",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 3 or less."
+    },
+    {
+      "id": "mock_hunter",
+      "name": "Hunter",
+      "deck": "reserve",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "keywords": [],
+      "text": "Battlecry: remove an adjacent enemy of strength 4 or less."
+    },
+    {
       "id": "mock_saboteur",
       "name": "Saboteur",
       "deck": "reserve",
