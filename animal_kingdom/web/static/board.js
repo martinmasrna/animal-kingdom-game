@@ -214,7 +214,8 @@ function renderField(el, M, g, cards, ui) {
       const was = ui.anim ? Math.min(ui.anim.food[p], food) : food, gained = food - was;
       for (let i = 0; i < Math.min(win, food + inc); i++)
         t += `<i class="${i < food ? 'r' : 'g'}${i >= was && i < food ? ' new' : ''}" style="${i >= was && i < food ? `animation-delay:${.55 + (i - was) / Math.max(1, gained) * .5}s;` : ''}left:${Math.floor(i / 3) * 7.4 + jit(i, 1) * 2 - 1}px;top:${(2 - i % 3) * 7 + (Math.floor(i / 3) % 2) * 2 + jit(i, 2) * 2 - 1}px;background-position:${kind(i) * 12.5}% 0;transform:rotate(${jit(i, 3) * 60 - 30}deg)"></i>`;
-      s += put(`otrough ${p}`, p === 'A' ? 160 : 1514, 560, `<div class="hollow">${t}</div>` + kitImg('trough'));
+      const incTag = inc > 0 ? `<b class="incnum num" style="left:${Math.min(Math.floor(Math.min(win, food + inc) / 3) * 7.4 + 14, 236)}px">+${inc}</b>` : '';
+      s += put(`otrough ${p}`, p === 'A' ? 160 : 1514, 560, `<div class="hollow">${t}${incTag}</div>` + kitImg('trough'));
       // Fruit flies from each held stone to where the new fruit lands in the trough.
       if (gained > 0) {
         const tx = (p === 'A' ? 160 : 1514) - 145 + 10 + Math.floor(was / 3) * 7.4, ty = 560;
