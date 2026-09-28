@@ -36,7 +36,9 @@ export function renderBoard(el, M, g, cards, ui) {
     if (c < M.cols) line(X(c), Y(r), X(c + 1), Y(r));
     if (r < M.rows) line(X(c), Y(r), X(c), Y(r + 1));
   }
-  for (let r = 1; r <= M.rows; r++) { line(DEN_EDGE.A, Y(r), X(1), Y(r)); line(DEN_EDGE.B, Y(r), X(M.cols), Y(r)); }
+  // The three front trails fan in to one point, the den's mouth, halfway down its inner edge.
+  const mouthY = Y((M.rows + 1) / 2);
+  for (let r = 1; r <= M.rows; r++) { line(DEN_EDGE.A, mouthY, X(1), Y(r)); line(DEN_EDGE.B, mouthY, X(M.cols), Y(r)); }
   let s = `<div class="abs boardbg"></div><svg class="paths" width="${STAGE.w}" height="${STAGE.h}"><g>${p}</g></svg>`;
 
   for (const reg of M.regions) {
