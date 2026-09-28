@@ -17,7 +17,7 @@ The deck is being redesigned: the diagnosis and Martin's card-by-card analysis a
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Verminus, the Rat King** | 1 | Rodent | 3 | Has +1 strength for each other unit you control. |
+| **Verminus** | 1 | Rodent | 3 | Has +1 strength for each other unit you control. |
 | **Pestis** | 1 | Rodent | 3 | Battlecry: remove an adjacent enemy and every unit buried under it. |
 | **Sirocco** | 1 | — | 5 | Battlecry: return all enemy units adjacent to this to their owner's hand. |
 | **Gale** | 1 | Bird | 6 | Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand. |

@@ -147,3 +147,8 @@
 .bx.paint .unit .boss { width: 46px; height: 46px; margin-left: -23px; bottom: -16px; border: 0; background: url(/static/kit2/boss_a.webp) center / contain no-repeat; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 .bx.paint .unit.B .boss { background-image: url(/static/kit2/boss_b.webp); }
 .bx.paint .unit .buried { border: 0; inset: 6px; }
+/* painted numbers: payout stones with the number carved in; den counts in painted war-paint digits, laid into the rock */
+.bx.paint .stone.carved { width: 50px; height: 50px; margin: -25px 0 0 -25px; background: none; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.55)); }
+.bx.paint .stone.carved img { width: 100%; height: 100%; display: block; }
+.bx .dcount { display: flex; justify-content: center; gap: 1px; width: 110px; margin-left: -55px; margin-top: -22px; text-shadow: none; }
+.bx .dcount img { height: 44px; opacity: .92; }

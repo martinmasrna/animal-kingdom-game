@@ -62,7 +62,10 @@ export function renderBoard(el, M, g, cards, ui) {
   for (const reg of M.regions) {
     const [c, r] = reg.c, cs = [key(c, r), key(c + 1, r), key(c, r + 1), key(c + 1, r + 1)], o = cs.map(owner);
     const held = o.every(x => x && x === o[0]) ? o[0] : '';
-    s += put(`stone num ${held}`, (CX(c, r) + CX(c + 1, r + 1)) / 2, (CY(c, r) + CY(c + 1, r + 1)) / 2, `+${reg.food}`);
+    const sx = (CX(c, r) + CX(c + 1, r + 1)) / 2, sy = (CY(c, r) + CY(c + 1, r + 1)) / 2;
+    // painted: the stone with its number carved in, in its holder's paint (kit2/stone<food>_<n|a|b>)
+    s += PAINT ? put('stone carved', sx, sy, `<img src="/static/kit2/stone${reg.food}_${held ? held.toLowerCase() : 'n'}.webp" alt="+${reg.food}" draggable="false">`)
+      : put(`stone num ${held}`, sx, sy, `+${reg.food}`);
   }
 
   for (let c = 1; c <= M.cols; c++) for (let r = 1; r <= M.rows; r++) {
@@ -86,7 +89,7 @@ export function renderBoard(el, M, g, cards, ui) {
         fruit += put('pit', px, py, `<img src="/static/kit2/pits/${side === 'A' ? 'a' : 'b'}pit${i % 3 + 1}_${r}_${t - r}.webp" alt="" draggable="false">`);
       });
       const [mx, my] = MOUTH[side], [kx, ky] = CROWN[side];
-      s += fruit + put(`dcount num ${side}`, kx, ky, food, `title="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
+      s += fruit + put(`dcount ${side}`, kx, ky, String(food).split('').map(d => `<img src="/static/kit2/num/${side === 'A' ? 'a' : 'b'}${d}.webp" alt="${d}" draggable="false">`).join(''), `title="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
         put(`mouth${ring}`, mx, my, '', `data-hq="${side}" title="${side === 'A' ? 'Your den' : 'Their den'}"`);
       continue;
     }

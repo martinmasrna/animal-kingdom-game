@@ -114,7 +114,7 @@ The present pool mixes original evocative names (`Eon`, `Ember`, `Vesper`) with 
 - [ ] Decide whether **Carmilla** is the deck's one literary wink. If not, use **Vespera, the Devourer**.
 - [ ] Decide whether **Scrooge** or Carmilla gets that wink; using both plus Fathom's kraken-adjacent art may make the deck's references louder than the others.
 - [ ] If Scrooge changes, develop an original hoarder name rather than defaulting to another famous rich figure. Working direction: **Tally, Keeper of the Stash**.
-- [ ] we now have two legendaries with "Rat King" in name -- sort that out
+- Resolved 2026-09-29: Food's legendary is **Barley, the Rat King** (it counts Rodents); Aggro's is plain **Verminus** (it counts every unit).
 
 ### Aggro
 

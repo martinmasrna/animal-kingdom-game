@@ -22,7 +22,7 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 |---|---:|---|---:|---|
 | **Fathom** | 1 | — | 4 | Battlecry: draw a legendary unit. |
 | **Greywhisker** | 1 | Rodent | 1 | Battlecry: gain 1 food. Draw 1 card. You may play 1 more unit. |
-| **Rat King** | 1 | Rodent | 4 | Battlecry: gain 4 food for each other Rodent you control. Draw 1 card. |
+| **Barley, the Rat King** | 1 | Rodent | 4 | Battlecry: gain 4 food for each other Rodent you control. Draw 1 card. |
 | **Scrooge, Keeper of the Stash** | 1 | Rodent | 4 | Battlecry: gain food equal to the food you gained this turn. |
 
 ### Rare

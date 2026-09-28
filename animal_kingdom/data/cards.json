@@ -688,7 +688,7 @@
     },
     {
       "id": "rat_king",
-      "name": "Rat King",
+      "name": "Barley, the Rat King",
       "deck": "food_otk",
       "rarity": "legendary",
       "tags": ["Rodent"],
@@ -821,7 +821,7 @@
     },
     {
       "id": "verminus",
-      "name": "Verminus, the Rat King",
+      "name": "Verminus",
       "deck": "aggro_hq_rush",
       "rarity": "legendary",
       "tags": ["Rodent"],
