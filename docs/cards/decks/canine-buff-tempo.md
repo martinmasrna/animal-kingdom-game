@@ -1,6 +1,6 @@
 # Canine Buff Tempo
 
-Mono-Canine tribe built on persistent strength buffs and pack reach. Buffs grow the pack in hand and on board; Gray Wolf and Hyena turn pack size and strength into removal; Alpha makes Pup tokens; Outrider deploys Canines away from the connected chain.
+Mono-Canine tribe built on persistent strength buffs and pack reach. Buffs grow the pack in hand and on board; Gray Wolf and Hyena turn pack size and strength into removal; Alpha makes Pup tokens; Coyote deploys Canines away from the connected chain.
 
 Buff wording is binding: "has +X" is a live aura, "give +X" is a permanent counter that also sticks to cards in hand (see [`../../rules/keywords.md`](../../rules/keywords.md), Strength modifiers).
 
@@ -24,7 +24,7 @@ Buff wording is binding: "has +X" is a live aura, "give +X" is a permanent count
 | **Bush Dog** | 2 | Canine | 3 | Once a turn, when this gains strength, give all friendly adjacent Canines +2 strength. |
 | **Red Wolf** | 2 | Canine | 5 | Whenever another Canine you control enters play, give it +2 strength. |
 | **Hyena** | 2 | Canine | 4 | Battlecry: remove an adjacent enemy with strength less than or equal to the number of Canines you control. |
-| **Outrider** | 2 | Canine | 6 | Your other Canines may be placed adjacent to any Canine you control, ignoring connection. |
+| **Coyote** | 2 | Canine | 6 | Your other Canines may be placed adjacent to any Canine you control, ignoring connection. |
 
 ### Common
 

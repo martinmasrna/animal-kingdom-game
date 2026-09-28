@@ -89,7 +89,7 @@ class Config:
     awd_pups: int = 1                    # Pups African Wild Dog spawns on placement
 
     # --- Thresholds / strength gates ---
-    coyote_draw_threshold: int = 5       # draw if Coyote has >= this strength
+    arctic_fox_draw_threshold: int = 5   # draw if Arctic Fox has >= this strength
     colony_synergy_threshold: int = 4    # Guard Hornet / Soldier Ant / Nurse Bumblebee "4+ Colony"
 
     # --- Removal-strength caps on Battlecry removals ---

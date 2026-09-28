@@ -940,8 +940,8 @@ def _gray_wolf_place(state, unit, cr):
              "by_card": "gray_wolf", "options": targets})
 
 
-def _coyote_place(state, unit, cr):
-    if effective_strength(state, unit) >= state.config.coyote_draw_threshold:
+def _arctic_fox_place(state, unit, cr):
+    if effective_strength(state, unit) >= state.config.arctic_fox_draw_threshold:
         state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1})
 
 
@@ -1820,7 +1820,7 @@ OPS.update({
 
 
 EFFECTS: dict[str, dict[str, Callable]] = {
-    # Canine buff/tempo (anthems Raksha/Lobo/Verminus + Outrider's placement static live in
+    # Canine buff/tempo (anthems Raksha/Lobo/Verminus + Coyote's placement static live in
     # strength.py / statics.py - no handler needed here).
     "gray_wolf": {"on_place": _gray_wolf_place},
     "hyena": {"on_place": _hyena_place},
@@ -1833,7 +1833,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "fox": {"on_gain_strength": _fox_gain_strength},
     "bush_dog": {"on_gain_strength": _bush_dog_gain_strength},
     # Reserve designs (not in any playable deck; kept for the future hand-buff deck / fixtures).
-    "coyote": {"on_place": _coyote_place},
+    "arctic_fox": {"on_place": _arctic_fox_place},
     "dhole": {"on_place": _dhole_place},
     "shuck": {"on_place": _shuck_place},
     "jackal": {"on_remove_event": _jackal_remove_event},

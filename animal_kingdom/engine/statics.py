@@ -72,7 +72,7 @@ def extra_placement_crossroads(state: GameState, card_id: str, owner: str) -> se
     """Crossroads a card may target ignoring connection, beyond the normal rules.
 
     Cougar: may be placed adjacent to any Cat you control, ignoring connection.
-    Outrider: while you control one, your *other* Canines may be placed adjacent to any
+    Coyote (id `outrider`): while you control one, your *other* Canines may be placed adjacent to any
     Canine you control, ignoring connection.
     """
     card = state.cards[card_id]

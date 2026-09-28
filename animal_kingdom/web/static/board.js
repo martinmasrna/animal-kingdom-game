@@ -27,7 +27,7 @@ export const teamGem = p => OWN[p].gem;
 // Crossroads span the plateau; each den stands off its edge, with its food silo and food plaque below it.
 const HQX = { A: 150, B: 1522 }, DEN_Y = 290;
 // Design-lab variant (static/lab, #/lab/<name>?v=<id>): '' is the current design.
-let VAR = '', THIN = false, PORTRAIT = 136;
+let VAR = '', THIN = false, PORTRAIT = 136, curCr = null;
 const THIN_RIM = { '1a': { A: 'rim_thin_blue', B: 'rim_thin_red' }, '1b': { A: 'rim_thin_iron', B: 'rim_thin_iron' }, '1c': { A: 'rim_thin_blue', B: 'rim_thin_red' } };
 // Keywords that change what can be done to a unit already on the board (Flight and Apex Predator only matter while placing).
 const BOARD_KW = { Immovable: 'kw_immovable', Stealth: 'kw_stealth', Fragile: 'kw_fragile' };
@@ -285,19 +285,21 @@ function renderField(el, M, g, cards, ui) {
   for (let c = M.cols; c >= 1; c--) for (let r = 1; r <= M.rows; r++) {
     const cr = key(c, r), stack = g.board[cr] || [];
     let h = '';
+    curCr = cr;
     if (ui.preview && ui.preview.cr === cr) h = unit({ id: ui.preview.id, owner: 'A', str: ui.preview.str }, stack.slice().reverse(), true);
     else if (stack.length) h = unit(stack[stack.length - 1], stack.slice(0, -1).reverse(), false);
     const dropped = ui.anim && stack.length && ((ui.anim.board[cr] || []).slice(-1)[0] || {}).iid !== stack[stack.length - 1].iid;
     const SM = document.documentElement.dataset.m === 'S' && VAR === 'sD';
     if (SM && stack.length) { const top = stack[stack.length - 1], [gx, gy, gr] = CLEAR[cr];
-      s += `<div class="ringtint ${top.owner}" style="left:${gx - gr - 26}px;top:${gy - gr - 26}px;width:${2 * gr + 52}px;height:${2 * gr + 52}px;-webkit-mask-position:${-(gx - gr - 26)}px ${-(gy - gr - 26)}px;mask-position:${-(gx - gr - 26)}px ${-(gy - gr - 26)}px"></div>`; }
+      const box = `left:${gx - gr - 30}px;top:${gy - gr - 30}px;width:${2 * gr + 60}px;height:${2 * gr + 60}px;-webkit-mask-position:${-(gx - gr - 30)}px ${-(gy - gr - 30)}px;mask-position:${-(gx - gr - 30)}px ${-(gy - gr - 30)}px`;
+      s += `<div class="ringtint band ${top.owner}" style="${box}"></div><div class="ringtint ${top.owner}" style="${box}"></div>`; }
     const cls = ['cr', rings.has(cr) ? 'tgt legal' : '', stack.length ? 'occ' : '', recent.has(cr) ? 'recent' : '', dropped ? 'drop' : ''].join(' ');
     const at = SM ? CLEAR[cr] : [X(c), Y(r)];
     s += put(cls, at[0], at[1], h, `z-index:${M.rows - r + 1}`, `data-cr="${cr}"`);
   }
   function unit(u, under, ghost) {
     const MED = document.documentElement.dataset.m;
-    if (MED === 'S' && VAR === 'sD') return stoneUnit(u, under, ghost);
+    if (MED === 'S' && VAR === 'sD') return stoneUnit(u, under, ghost, curCr);
     if (MED) return medUnit(u, under, ghost, MED);
     const card = cards[u.id], base = card.str === '*' ? null : card.str;
     const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';
@@ -313,14 +315,15 @@ function renderField(el, M, g, cards, ui) {
   // square strength plate, a parchment name tab, a small brass tab for the buried count. Geometry measured on each sprite.
   // Stone mode: the clearing's own stones carry the team colour (.ringtint); the portrait fills the clearing;
   // strength on a small team-colour plate; no name on the board (hover shows the card).
-  function stoneUnit(u, under, ghost) {
-    const card = cards[u.id], base = card.str === '*' ? null : card.str, D = 128;
+  function stoneUnit(u, under, ghost, cr) {
+    const card = cards[u.id], base = card.str === '*' ? null : card.str, D = cr && CLEAR[cr] ? 2 * CLEAR[cr][2] + 8 : 144;
     const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';
     const kws = (card.kw || []).filter(k => BOARD_KW[k]).map(k => `<img src="${kit(BOARD_KW[k])}" alt="" title="${k}" draggable="false">`).join('');
     const side = u.owner === 'A' ? 'a' : 'b';
-    return `<div class="unit stone ${u.owner}${ghost ? ' ghost' : ''}" style="--pp:${D}px">${portrait(u.id, D, card.name)}` +
+    // Buried units peek out behind the portrait as discs in their owners' colours: how many, and whose.
+    const peek = ghost ? '' : under.slice(0, 4).map((b, i) => `<i class="disc ${b.owner}" style="transform:translate(${(i + 1) * 5}px,${(i + 1) * 6}px);z-index:${-i - 1}"></i>`).join('');
+    return `<div class="unit stone ${u.owner}${ghost ? ' ghost' : ''}" style="--pp:${D}px">${peek}${portrait(u.id, D, card.name)}` +
       `<div class="splate">${kitImg('plate_' + side)}<span class="${delta.trim()}">${u.str}</span></div>` +
-      (under.length && !ghost ? `<div class="under">${kitImg(u.owner === 'A' ? 'token_blue' : 'token_red')}<span class="num">${under.length}</span></div>` : '') +
       (kws ? `<div class="kws">${kws}</div>` : '') +
       (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') + '</div>';
   }

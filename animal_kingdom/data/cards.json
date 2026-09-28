@@ -1040,8 +1040,8 @@
       "text": "Battlecry: remove an adjacent enemy with less or equal strength."
     },
     {
-      "id": "coyote",
-      "name": "Coyote",
+      "id": "arctic_fox",
+      "name": "Arctic Fox",
       "deck": "reserve",
       "rarity": "common",
       "tags": ["Canine"],
@@ -1111,7 +1111,7 @@
     },
     {
       "id": "outrider",
-      "name": "Outrider",
+      "name": "Coyote",
       "deck": "canine_buff_tempo",
       "rarity": "rare",
       "tags": ["Canine"],
