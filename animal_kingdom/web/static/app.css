@@ -659,5 +659,6 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .unit.stone .kws img { width: 44px; height: 44px; }
 
 .ringtint.band { -webkit-mask-image: url(/static/kit/sav_D4_band.png); mask-image: url(/static/kit/sav_D4_band.png); opacity: .55; }
+.ringtint.band.A { background: rgb(10,80,235); opacity: .7; }
 .unit.stone .disc { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px rgba(15,8,2,.7), 2px 4px 6px rgba(20,10,0,.45); }
 .unit.stone .disc.A { background: radial-gradient(circle at 40% 35%, #4d8ee0, #1d4f9a); } .unit.stone .disc.B { background: radial-gradient(circle at 40% 35%, #d8544a, #8a1a12); }
