@@ -753,3 +753,45 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 [data-c="1"] .pinc { font-weight: 700; }
 [data-c="1"] .plq b, [data-c="1"] .pcount { text-shadow: 0 0 4px rgba(0,0,0,.9), 0 0 12px rgba(0,0,0,.6), 0 2px 3px #000; }
 .stonedim { background: rgba(95,72,40,.38); }
+
+/* New map (sN, board/r11 map C) */
+[data-v="sN"] #stage { background: url(/static/kit/sav_N.webp) 0 0 / 100% 100% !important; }
+/* Names off the board: the dens open the lists; the opponent is named in the series line. */
+[data-c="1"] .plq.me, [data-c="1"] .plq.them { display: none; }
+.denhit[data-den] { cursor: pointer; }
+/* The carved trough with the count cut into its end-board (measured on kit/trough_sign: board x 1.5-17%; hollow x 19-93%, y 47-76%). */
+.strough { width: 270px; height: 60px; }
+.strough > img { position: relative; width: 100%; height: 100%; display: block; filter: drop-shadow(3px 5px 5px rgba(20,10,0,.55)); }
+.strough .hollow { position: absolute; left: 19%; top: 44%; width: 254px; height: 25px; z-index: 1; overflow: hidden; transform: scale(.787, .76); transform-origin: 0 0; }
+.strough .hollow i { position: absolute; width: 12px; height: 12px; margin: -1.5px; background: url(/static/kit/fruits.webp) 0 0 / 900% 100% no-repeat; filter: drop-shadow(.5px 1px .6px rgba(0,0,0,.6)); }
+.strough .hollow i.g { opacity: .35; filter: saturate(.4) brightness(1.15); }
+.sboard { position: absolute; left: 1.5%; width: 15.5%; top: 4%; height: 92%; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  font-family: 'Source Serif 4', serif; color: #3a220c; text-shadow: 0 1px 0 rgba(255,235,195,.45); line-height: 1; }
+.sboard b { font-size: 24px; font-weight: 800; font-variant-numeric: lining-nums; }
+.sboard span { font-size: 8px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; opacity: .75; }
+.sboard i { font-style: normal; font-size: 10px; font-weight: 800; margin-top: 1px; }
+.strough.A .sboard i { color: #1d4f9a; } .strough.B .sboard i { color: #9a2414; }
+
+/* sN tuning: the trough bigger (food must read), its count as large as the end-board allows; stones already quiet. */
+.strough { width: 290px; height: 64px; }
+.sboard b { font-size: 33px; letter-spacing: -.01em; }
+.sboard i { font-size: 12px; }
+[data-v="sN"] .payout { color: rgba(246,234,210,.82) !important; text-shadow: 0 1px 2px rgba(0,0,0,.6) !important; font-size: 22px !important; }
+[data-v="sN"] .payout.full { color: #fff !important; }
+[data-v="sN"] .stonetint { width: 55px; height: 55px; }
+/* No floating text: End turn and the series line sit on painted pieces. */
+[data-c="1"] .endturn { left: 176px; top: -62px; width: 112px; height: 58px; filter: drop-shadow(2px 4px 4px rgba(20,10,0,.6)); }
+[data-c="1"] .endturn img { display: block; filter: saturate(.6) brightness(.8); }
+[data-c="1"] .endturn .num { font-size: 15px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px #000; inset: 0 0 4px; }
+[data-c="1"] .endturn.off img { filter: saturate(.3) brightness(.45); }
+[data-c="1"] .plq.series { top: 6px; right: 76px; left: auto; width: 340px; height: 66px; }
+[data-c="1"] .plq.series > img { display: block; }
+[data-c="1"] .plq.series .tx { position: absolute; inset: 0 50px; align-items: center; gap: 1px; }
+[data-c="1"] .plq.series b { color: #3a220c; text-shadow: 0 1px 0 rgba(255,235,195,.5); font-size: 15px; }
+[data-c="1"] .plq.series .tx > span { color: #4a2e12; text-shadow: none; font-size: 11.5px; }
+[data-c="1"] .plq.series .games i { border-color: #3a220c; }
+[data-v="sN2"] #stage { background: url(/static/kit/sav_N2.webp) 0 0 / 100% 100% !important; }
+[data-v="sN2"] .payout { color: rgba(246,234,210,.82) !important; text-shadow: 0 1px 2px rgba(0,0,0,.6) !important; font-size: 22px !important; }
+[data-v="sN2"] .payout.full { color: #fff !important; }
+[data-v="sN2"] .stonetint { width: 55px; height: 55px; }
+[data-v="sN2"] .stonetint { width: 52px; height: 52px; }

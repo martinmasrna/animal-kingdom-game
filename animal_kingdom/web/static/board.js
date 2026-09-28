@@ -19,7 +19,12 @@ const BRIM = {
 // Card-style unit rims in team colour, per rarity (board/r10 sheet_rims): sprite size, circle centre, inner and outer radius.
 const CRIM = {"common_a": {"W": 430, "H": 416, "cx": 215.5, "cy": 207.5, "ri": 174.5, "ro": 212.1}, "rare_a": {"W": 452, "H": 434, "cx": 226.5, "cy": 215.5, "ri": 173.5, "ro": 212.1}, "legendary_a": {"W": 441, "H": 449, "cx": 220.5, "cy": 233.5, "ri": 177.5, "ro": 215.0}, "common_b": {"W": 429, "H": 415, "cx": 215.0, "cy": 207.0, "ri": 174.0, "ro": 211.6}, "rare_b": {"W": 450, "H": 434, "cx": 225.0, "cy": 216.0, "ri": 172.0, "ro": 212.0}, "legendary_b": {"W": 440, "H": 448, "cx": 219.5, "cy": 232.5, "ri": 177.5, "ro": 214.6}};
 // Map D's clearings as painted: centre x, y and radius (measured in board/r8/kit/clearings.json).
-const CLEAR = {"1,1": [368.7, 182.1, 64.5], "2,1": [601.8, 180.1, 65.0], "3,1": [842.7, 181.2, 67.3], "4,1": [1076.4, 179.2, 70.1], "5,1": [1314.3, 179.9, 68.5], "1,2": [374.1, 368.8, 68.7], "2,2": [603.8, 368.7, 68.5], "3,2": [841.5, 368.4, 67.8], "4,2": [1072.3, 371.5, 67.3], "5,2": [1310.2, 370.7, 69.2], "1,3": [366.8, 555.4, 67.6], "2,3": [604.9, 556.9, 70.0], "3,3": [840.4, 560.6, 71.5], "4,3": [1076.1, 557.8, 70.0], "5,3": [1311.8, 561.4, 69.9]};
+const CLEAR_D = {"1,1": [368.7, 182.1, 64.5], "2,1": [601.8, 180.1, 65.0], "3,1": [842.7, 181.2, 67.3], "4,1": [1076.4, 179.2, 70.1], "5,1": [1314.3, 179.9, 68.5], "1,2": [374.1, 368.8, 68.7], "2,2": [603.8, 368.7, 68.5], "3,2": [841.5, 368.4, 67.8], "4,2": [1072.3, 371.5, 67.3], "5,2": [1310.2, 370.7, 69.2], "1,3": [366.8, 555.4, 67.6], "2,3": [604.9, 556.9, 70.0], "3,3": [840.4, 560.6, 71.5], "4,3": [1076.1, 557.8, 70.0], "5,3": [1311.8, 561.4, 69.9]};
+const CLEAR_N = {"1,1": [373.3, 179.7, 66.4], "2,1": [608.8, 179.6, 67.7], "3,1": [842.5, 179.2, 66.7], "4,1": [1074.4, 179.1, 68.2], "5,1": [1311.6, 179.7, 67.9], "1,2": [372.9, 368.4, 67.2], "2,2": [608.8, 367.6, 67.8], "3,2": [843.0, 368.3, 67.9], "4,2": [1076.3, 368.2, 67.9], "5,2": [1311.5, 368.3, 66.8], "1,3": [369.4, 556.2, 68.8], "2,3": [607.6, 557.9, 68.7], "3,3": [842.1, 558.4, 68.7], "4,3": [1075.5, 558.8, 69.1], "5,3": [1313.4, 557.8, 68.8]};
+const CLEAR_N2 = {"1,1": [366.5, 177.5, 55.4], "2,1": [607.2, 177.3, 55.5], "3,1": [838.4, 177.0, 55.7], "4,1": [1069.6, 176.8, 55.0], "5,1": [1305.8, 177.6, 55.7], "1,2": [366.4, 373.1, 55.7], "2,2": [605.9, 372.8, 55.9], "3,2": [837.6, 373.0, 56.2], "4,2": [1068.7, 372.7, 55.8], "5,2": [1304.9, 372.4, 56.2], "1,3": [364.0, 568.4, 56.7], "2,3": [604.2, 569.1, 56.2], "3,3": [836.8, 569.0, 56.0], "4,3": [1068.9, 569.7, 56.1], "5,3": [1305.4, 569.6, 56.9]};
+const STONES = { sN2: [[486.4, 272.3], [722.9, 271.9], [953.9, 272.3], [1189.2, 272.2], [486.8, 468.5], [723.0, 469.4], [954.2, 469.0], [1190.0, 468.8]], sD: [[492, 268], [725, 268], [960, 268], [1194, 268], [492, 458], [725, 458], [960, 458], [1194, 458]], sN: [[490.6, 269.2], [726.4, 269.3], [959.3, 269.3], [1195.3, 269.0], [490.3, 457.1], [726.6, 457.1], [959.6, 457.0], [1196.1, 456.6]] };
+let CLEAR = CLEAR_D;
+const PAINTED = v => v === 'sD' || v === 'sN' || v === 'sN2';
 // Medallion sprites (board/r10): sprite size, hole centre and radius, outer radius, strength-plate face centre and size (sprite px).
 const MEDG = {
   D: {"a": {"W": 375, "hx": 188.5, "hy": 196.5, "hr": 117.5, "R": 185.7, "plate": [67.5, 69.5, 95, 103]}, "b": {"W": 375, "hx": 188.5, "hy": 196.5, "hr": 116.5, "R": 186.3, "plate": [67.0, 71.0, 96, 104]}},
@@ -51,7 +56,7 @@ export function portrait(id, D, name) {
 }
 
 export function renderBoard(el, M, g, cards, ui) {
-  VAR = document.documentElement.dataset.v || ''; THIN = ['1a', '1b', '1c'].includes(VAR); PORTRAIT = THIN ? 140 : 136;
+  VAR = document.documentElement.dataset.v || ''; THIN = ['1a', '1b', '1c'].includes(VAR); PORTRAIT = THIN ? 140 : 136; CLEAR = VAR === 'sN2' ? CLEAR_N2 : VAR === 'sN' ? CLEAR_N : CLEAR_D;
   if (VAR[0] === 'f' || VAR[0] === 's') return renderField(el, M, g, cards, ui);
   const topOf = cr => (g.board[cr] || []).slice(-1)[0], owner = cr => (topOf(cr) || {}).owner;
   const nb = cr => { const [c, r] = cr.split(',').map(Number), out = []; if (c > 1) out.push(key(c - 1, r)); if (c < M.cols) out.push(key(c + 1, r)); if (r > 1) out.push(key(c, r - 1)); if (r < M.rows) out.push(key(c, r + 1)); return out; };
@@ -190,11 +195,11 @@ function renderField(el, M, g, cards, ui) {
   for (const reg of M.regions) {
     const st = regionState(reg), [c, r] = reg.c;
     // On map D the painted stones sit a little off the grid; their measured centres.
-    const at = VAR === 'sD' ? [[492, 725, 960, 1194][c - 1], [268, 458][r - 1]] : [(X(c) + X(c + 1)) / 2, (Y(r) + Y(r + 1)) / 2];
+    const at = PAINTED(VAR) ? STONES[VAR][(r - 1) * 4 + (c - 1)] : [(X(c) + X(c + 1)) / 2, (Y(r) + Y(r + 1)) / 2];
     // A held region recolours its painted stone: a disc the stone's size, blended in "color" mode over the painting.
     const MARK = document.documentElement.dataset.f === 'm';
     const PV = document.documentElement.dataset.pv || '';
-    if (VAR === 'sD' && PV) {
+    if (PAINTED(VAR) && PV) {
       // Payout sketches. The painted stone is covered with grass cloned from just above it.
       const gx = at[0] - 40, gy = at[1] - 40;
       s += `<div class="stonecover" style="left:${gx}px;top:${gy}px;background-position:${-gx}px ${-(gy - 64)}px"></div>`;
@@ -206,8 +211,8 @@ function renderField(el, M, g, cards, ui) {
         s += put(`quietpay ${own}`, at[0], at[1], `${reg.food}`);
       }
     } else {
-    if (VAR === 'sD' && st && st.full) s += MARK ? put(`pawmark ${st.owner}`, at[0], at[1], PAW) : put(`stonetint ${st.owner}`, at[0], at[1]);
-    if (document.documentElement.dataset.c === '1' && !(st && st.full)) s += put('stonedim', at[0], at[1]);   // unheld stones sink into the ground
+    if (PAINTED(VAR) && st && st.full) s += MARK ? put(`pawmark ${st.owner}`, at[0], at[1], PAW) : put(`stonetint ${st.owner}`, at[0], at[1]);
+    if (document.documentElement.dataset.c === '1' && VAR === 'sD' && !(st && st.full)) s += put('stonedim', at[0], at[1]);   // unheld stones sink into the ground
     s += put(`payout${st && st.full ? ' full ' + st.owner : ''}`, at[0], at[1], `<span class="plus">+</span>${reg.food}`);
     }
   }
@@ -215,7 +220,7 @@ function renderField(el, M, g, cards, ui) {
   if (MAP_) for (const p of ['A', 'B']) {
     // The den is painted; its food total is written on the painted slab below it.
     const x = p === 'A' ? 150 : 1522, target = p === 'B' && ui.hqRing;
-    s += put(`denhit ${p}${target ? ' tgt legal' : ''}`, x, 355, '', '', target ? 'data-hq="1"' : '');
+    s += put(`denhit ${p}${target ? ' tgt legal' : ''}`, x, 355, '', '', target ? 'data-hq="1"' : `data-den="${p === 'A' ? 'mine' : 'theirs'}" title="${p === 'A' ? 'Your deck' : 'Their cards'}"`);
     if (document.documentElement.dataset.d === '1') s += put('denflag lift', p === 'A' ? 222 : 1450, 238, kitImg(p === 'A' ? 'flag_blue' : 'flag_red'), p === 'B' ? 'transform:translate(-50%,-50%) scaleX(-1)' : '');
     const F = document.documentElement.dataset.f || '';
     if (!F) { s += put(`slab ${p}`, x, 570, `<b class="num">${g.food[p]}</b><span class="num">+${g.income[p]} / turn</span>`); continue; }
@@ -251,8 +256,9 @@ function renderField(el, M, g, cards, ui) {
       const incTag = inc > 0 ? `<b class="incnum num" style="left:${Math.min(Math.floor(Math.min(win, food + inc) / 3) * 7.4 + 14, 236)}px">+${inc}</b>` : '';
       const CALM = document.documentElement.dataset.c === '1', hx = p === 'A' ? 150 : 1522;
       if (CALM) {   // one compact block per player under their den: count, next turn's income, the trough
-        s += put(`pblock ${p}`, hx, 520, `<div class="pcount"><b>${food}</b><span>/ ${win}</span></div><div class="pinc">${inc > 0 ? `+${inc} next turn` : 'no income'}</div>`);
-        s += put(`otrough calm ${p}`, hx, 592, `<div class="hollow">${t}</div>` + kitImg('trough'));
+        // One object per player under their den: the trough, the count carved into its end-board, income small beneath it.
+        s += put(`strough ${p}`, hx, 548, `<div class="hollow">${t}</div>` + kitImg('trough_sign') +
+          `<div class="sboard"><b>${food}</b>${inc > 0 ? `<i>+${inc}</i>` : ''}</div>`);
       } else {
       s += put('foodhud', p === 'A' ? 160 : 1512, 592);
       s += put(`otrough big ${p}`, p === 'A' ? 160 : 1514, 560, `<div class="hollow">${t}${incTag}</div>` + kitImg('trough'));
@@ -322,14 +328,14 @@ function renderField(el, M, g, cards, ui) {
     if (ui.preview && ui.preview.cr === cr) h = unit({ id: ui.preview.id, owner: 'A', str: ui.preview.str }, stack.slice().reverse(), true);
     else if (stack.length) h = unit(stack[stack.length - 1], stack.slice(0, -1).reverse(), false);
     const dropped = ui.anim && stack.length && ((ui.anim.board[cr] || []).slice(-1)[0] || {}).iid !== stack[stack.length - 1].iid;
-    const SM = document.documentElement.dataset.m === 'S' && VAR === 'sD';
+    const SM = document.documentElement.dataset.m === 'S' && PAINTED(VAR);
     const cls = ['cr', rings.has(cr) ? 'tgt legal' : '', stack.length ? 'occ' : '', recent.has(cr) ? 'recent' : '', dropped ? 'drop' : ''].join(' ');
     const at = SM ? CLEAR[cr] : [X(c), Y(r)];
     s += put(cls, at[0], at[1], h, `z-index:${M.rows - r + 1}`, `data-cr="${cr}"`);
   }
   function unit(u, under, ghost) {
     const MED = document.documentElement.dataset.m;
-    if (MED === 'S' && VAR === 'sD') return stoneUnit(u, under, ghost, curCr);
+    if (MED === 'S' && PAINTED(VAR)) return stoneUnit(u, under, ghost, curCr);
     if (MED) return medUnit(u, under, ghost, MED);
     const card = cards[u.id], base = card.str === '*' ? null : card.str;
     const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';

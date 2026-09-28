@@ -167,7 +167,7 @@ function joinScreen(id) {
 function disconnect() { if (live) setLive(false); if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
 // The live look, Martin's picks (2026-09-28): painted map D, sandstone payout stones with engraved numbers,
 // war paint in team colour on each den (proposed, pending his look), bigger hand cards that grow on hover. The lab overrides these per frame.
-const LIVE_LOOK = { v: 'sD', p: '1', d: 'w', h: '1', f: 'o', t: '1', k: '1', m: 'S', sp: 'B', c: '1' };
+const LIVE_LOOK = { v: 'sN2', p: '1', d: 'w', h: '1', f: 'o', t: '1', k: '1', m: 'S', sp: 'B', c: '1' };
 
 function matchScreen(id) {
   Object.assign(document.documentElement.dataset, LIVE_LOOK);
@@ -213,7 +213,7 @@ async function labScreen(name) {
 }
 // A switcher over the lab frame: each row flips one design choice live.
 // Only the open questions; decided ones live in LIVE_LOOK.
-const LAB = [['c', 'Screen', [['', 'before'], ['1', 'calm pass']]]];
+const LAB = [['v', 'Map', [['sD', 'old map'], ['sN', 'new map'], ['sN2', 'new map, small clearings']]]];
 addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
 function labBar() {
   let bar = document.getElementById('labbar'); if (!LAB.length) { if (bar) bar.remove(); return; }
@@ -330,7 +330,7 @@ function drawGame() {
   const gameNo = V.phase === 'playing' ? V.results.length + 1 : V.results.length;
   const dots = [0, 1, 2].map(i => { const r = V.results[i]; return `<i class="${r ? (r.winner ? rel(r.winner) : '') : i === gameNo - 1 ? 'now' : ''}"></i>`; }).join('');
   const series = V.gauntlet ? `Game ${gameNo} of ${V.gauntlet.total}` : `Game ${gameNo} of 3 <span class="games">${dots}</span>`;
-  document.getElementById('series').innerHTML = kitImg('plaque') + `<div class="tx"><b class="num">${series}</b><span>${MAP.name} · history ▾</span></div>`;
+  document.getElementById('series').innerHTML = kitImg('plaque') + `<div class="tx"><b class="num">${series}</b><span>vs ${seatLabel(them)}</span></div>`;
   const hist = document.getElementById('hist');
   let hs = '', lastT = null;
   G.history.forEach((m, i) => {
@@ -496,6 +496,8 @@ function drawBoard(d) {
 function wireBoard() {
   const board = document.getElementById('board');
   board.addEventListener('click', e => {
+    const den = e.target.closest('[data-den]');   // a den opens that player's list
+    if (den) { e.stopPropagation(); ui.panel = ui.panel === den.dataset.den ? null : den.dataset.den; showPanel(); return; }
     const d = lastDecision; if (!d || !d.mine) return;
     const hq = e.target.closest('[data-hq]');
     if (hq && ui.sel) { const t = d.places[ui.sel].find(t => t[0] === 'hq'); if (t) return act({ kind: 'place', card_id: ui.sel, target: t }); }
