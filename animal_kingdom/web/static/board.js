@@ -204,8 +204,10 @@ function renderField(el, M, g, cards, ui) {
     } else if (F === 'o') {
       // One fruit is one food: whole fruit heaped three deep, filling column by column toward 100; next turn's income unripe.
       let t = '';
+      // Each slot always holds the same kind of fruit (a fixed hash of its index), so the mix doesn't reshuffle as food changes.
+      const kind = i => ((i * 2654435761) >>> 0) % 9, jit = (i, k) => (((i * 40503 + k * 9973) >>> 0) % 100) / 100;
       for (let i = 0; i < Math.min(win, food + inc); i++)
-        t += `<i class="${i < food ? 'r' : 'g'}" style="left:${Math.floor(i / 3) * 7.4}px;top:${(2 - i % 3) * 7.5 + (Math.floor(i / 3) % 2) * 1.5}px"></i>`;
+        t += `<i class="${i < food ? 'r' : 'g'}" style="left:${Math.floor(i / 3) * 7.4 + jit(i, 1) * 2 - 1}px;top:${(2 - i % 3) * 7 + (Math.floor(i / 3) % 2) * 2 + jit(i, 2) * 2 - 1}px;background-position:${kind(i) * 12.5}% 0;transform:rotate(${jit(i, 3) * 60 - 30}deg)"></i>`;
       s += put(`otrough ${p}`, p === 'A' ? 160 : 1514, 560, `<div class="hollow">${t}</div>` + kitImg('trough'));
       s += put(`carved small ${p}`, p === 'A' ? 160 : 1514, 616, `${food}<small> / ${win}</small>`);
     } else if (F === 't') {
