@@ -446,3 +446,11 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 [data-p="1"] .payout.part.B, [data-p="3"] .payout.part.B { color: rgba(176,30,20,.8); }
 [data-v="sD"][data-p="3"] #stage { background-image: url(/static/kit/sav_D2.webp); }
 [data-v="sD"][data-d="w"] #stage { background-image: url(/static/kit/sav_D3.webp); }
+
+/* Held regions: the stone itself turns team colour (texture and shading kept by the blend), the number stays engraved. */
+.stonetint { width: 68px; height: 68px; border-radius: 50%; mix-blend-mode: multiply; }
+.stonetint::after { content: ''; position: absolute; inset: 0; border-radius: 50%; mix-blend-mode: color; }
+.stonetint.A { background: rgb(95,150,225); } .stonetint.A::after { background: rgb(30,120,235); }
+.stonetint.B { background: rgb(225,95,80); } .stonetint.B::after { background: rgb(215,35,25); }
+.stonetint.part { opacity: .45; }
+[data-p="1"] .payout.full.A, [data-p="1"] .payout.full.B, [data-p="1"] .payout.part.A, [data-p="1"] .payout.part.B { color: rgba(255,250,240,.95); font-size: 28px; text-shadow: 0 -1.5px 0 rgba(0,0,0,.45), 0 1px 0 rgba(255,255,255,.3); }
