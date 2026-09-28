@@ -31,7 +31,7 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 |---|---:|---|---:|---|
 | **Flying Squirrel** | 2 | Rodent | 4 | Flight. Battlecry: gain 10 food. |
 | **Porcupine** | 2 | Rodent | 7 | Cannot be covered by enemy units. |
-| **Chinchilla** | 2 | Rodent | 2 | Battlecry: Draw 1 card. Next turn, take 1 additional action. |
+| **Chinchilla** | 2 | Rodent | 4 | Battlecry: next turn, take 1 additional action. |
 | **Armadillo** | 2 | — | 5 | Immovable. Adjacent friendly units can't be chosen by enemy abilities. |
 
 ### Common

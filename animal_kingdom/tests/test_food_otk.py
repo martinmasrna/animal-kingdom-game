@@ -178,11 +178,11 @@ def test_hedgehog_feeds_and_is_immovable():
 
 # ------------------------------------------------------------------- Chinchilla (tempo)
 
-def test_chinchilla_draws_and_grants_an_extra_action_next_turn():
+def test_chinchilla_grants_an_extra_action_next_turn():
     s = make_state(hands={"A": ["chinchilla"]},
                    decks={"A": ["mouse"] * 12, "B": ["mouse"] * 12})
     rules.apply_action(s, PlaceAction("chinchilla", ("cr", "1,2")))   # action 1
-    assert len(s.hands["A"]) == CFG.chinchilla_draw
+    assert len(s.hands["A"]) == 0                                     # no draw
     assert any(x["step"]["op"] == "grant_action" for x in s.scheduled)
     advance_to(s, 2)                                                  # into A's next turn
     assert s.turn_flags.get("bonus_actions_A") == CFG.chinchilla_bonus_actions

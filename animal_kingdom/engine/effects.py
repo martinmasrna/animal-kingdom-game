@@ -1696,8 +1696,7 @@ def _hedgehog_place(state, unit, cr):                                # Immovable
     _push_gain(state, unit.owner, state.config.hedgehog_food)
 
 
-def _chinchilla_place(state, unit, cr):                             # draw 1, +1 action NEXT turn
-    _push_draw(state, unit.owner, state.config.chinchilla_draw)
+def _chinchilla_place(state, unit, cr):                             # +1 action NEXT turn
     schedule(state, unit, 1,
              {"op": "grant_action", "player": unit.owner, "n": state.config.chinchilla_bonus_actions})
 

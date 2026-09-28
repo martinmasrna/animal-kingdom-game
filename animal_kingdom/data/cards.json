@@ -418,7 +418,7 @@
       "deck": "colony_food_swarm",
       "rarity": "common",
       "tags": ["Colony", "Queen"],
-      "base_strength": 3,
+      "base_strength": 2,
       "keywords": [],
       "text": "Battlecry: play a Worker unit."
     },
@@ -682,9 +682,9 @@
       "deck": "food_otk",
       "rarity": "rare",
       "tags": ["Rodent"],
-      "base_strength": 2,
+      "base_strength": 4,
       "keywords": [],
-      "text": "Battlecry: Draw 1 card. Next turn, take 1 additional action."
+      "text": "Battlecry: next turn, take 1 additional action."
     },
     {
       "id": "armadillo",
