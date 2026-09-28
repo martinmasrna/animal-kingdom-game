@@ -119,7 +119,7 @@
 .bx.paint .cr.clear { background: none; border: 0; }
 .bx.paint .stone { background: none; border: 0; color: #e9e1d2; font-size: 17px; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
 .bx.paint .stone.A { background: var(--A); color: var(--Aink); text-shadow: none; } .bx.paint .stone.B { background: var(--B); text-shadow: none; }
-.bx .pit { width: 60px; height: 60px; margin: -30px 0 0 -30px; pointer-events: none; } .bx .pit img { width: 100%; height: 100%; }
+.bx .pit { width: 64px; height: 64px; margin: -32px 0 0 -32px; pointer-events: none; } .bx .pit img { width: 100%; height: 100%; }
 .bx .fruit { width: 12px; height: 12px; margin: -6px 0 0 -6px; pointer-events: none; background: url(/static/kit2/fruit.webp) center / contain no-repeat; filter: drop-shadow(0 1px 1px rgba(40,20,0,.6)); }
 .bx .fruit.green { background-image: url(/static/kit2/fruit_green.webp); }
 .bx .dcount { width: 90px; margin-left: -45px; margin-top: -28px; text-align: center; font-size: 48px; line-height: 1; text-shadow: 0 0 2px rgba(255,250,240,.9), 0 0 8px rgba(255,250,240,.5); }
