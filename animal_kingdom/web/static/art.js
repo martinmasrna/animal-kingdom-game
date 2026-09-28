@@ -17,7 +17,7 @@ export const CROP = {
   eon: [.6, .33, .7], ember: [.55, .3, .75], aurum: [.52, .3, .8], omen: [.5, .42, .75],
   dire_wolf: [.65, .3, .6], dingo: [.7, .27, .6], fox: [.55, .45, .8], african_wild_dog: [.7, .3, .55], dog: [.66, .3, .6],
   pup: [.55, .36, .72], outrider: [.62, .36, .75], red_wolf: [.62, .3, .65], hyena: [.5, .38, .6], bush_dog: [.64, .33, .6],
-  lobo: [.55, .28, .62], raksha: [.6, .33, .6], clarion: [.52, .3, .65], alpha: [.56, .35, .75],
+  lobo: [.6, .25, .62], raksha: [.64, .33, .6], clarion: [.5, .28, .7], alpha: [.56, .36, .8],
 };
 export const hasArt = id => id in CROP;
 export const artUrl = id => `/static/art/${id}.jpg`;
