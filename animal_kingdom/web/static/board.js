@@ -7,6 +7,8 @@
 import { CROP, hasArt, artUrl } from './art.js';
 
 const key = (c, r) => `${c},${r}`;
+// Card-style unit rims in team colour, per rarity (board/r10 sheet_rims): sprite size, circle centre, inner and outer radius.
+const CRIM = {"common_a": {"W": 430, "H": 416, "cx": 215.5, "cy": 207.5, "ri": 174.5, "ro": 212.1}, "rare_a": {"W": 452, "H": 434, "cx": 226.5, "cy": 215.5, "ri": 173.5, "ro": 212.1}, "legendary_a": {"W": 441, "H": 449, "cx": 220.5, "cy": 233.5, "ri": 177.5, "ro": 215.0}, "common_b": {"W": 429, "H": 415, "cx": 215.0, "cy": 207.0, "ri": 174.0, "ro": 211.6}, "rare_b": {"W": 450, "H": 434, "cx": 225.0, "cy": 216.0, "ri": 172.0, "ro": 212.0}, "legendary_b": {"W": 440, "H": 448, "cx": 219.5, "cy": 232.5, "ri": 177.5, "ro": 214.6}};
 // Map D's clearings as painted: centre x, y and radius (measured in board/r8/kit/clearings.json).
 const CLEAR = {"1,1": [368.7, 182.1, 64.5], "2,1": [601.8, 180.1, 65.0], "3,1": [842.7, 181.2, 67.3], "4,1": [1076.4, 179.2, 70.1], "5,1": [1314.3, 179.9, 68.5], "1,2": [374.1, 368.8, 68.7], "2,2": [603.8, 368.7, 68.5], "3,2": [841.5, 368.4, 67.8], "4,2": [1072.3, 371.5, 67.3], "5,2": [1310.2, 370.7, 69.2], "1,3": [366.8, 555.4, 67.6], "2,3": [604.9, 556.9, 70.0], "3,3": [840.4, 560.6, 71.5], "4,3": [1076.1, 557.8, 70.0], "5,3": [1311.8, 561.4, 69.9]};
 // Medallion sprites (board/r10): sprite size, hole centre and radius, outer radius, strength-plate face centre and size (sprite px).
@@ -316,17 +318,17 @@ function renderField(el, M, g, cards, ui) {
   // Stone mode: the clearing's own stones carry the team colour (.ringtint); the portrait fills the clearing;
   // strength on a small team-colour plate; no name on the board (hover shows the card).
   function stoneUnit(u, under, ghost, cr) {
-    // A thin painted rim (kit/rim_thin_*, cut from kit D's ring) laid over the clearing's stones; the portrait fills it;
-    // the strength plate sits on the rim at the top-left like a clasp.
-    const gr = cr && CLEAR[cr] ? CLEAR[cr][2] : 68, outer = gr + 14, inner = outer * .84, D = 2 * inner + 2, card = cards[u.id], base = card.str === '*' ? null : card.str;
-    const rs = outer / 187, rimW = 375 * rs, mid = (outer + inner) / 2, clasp = mid * Math.SQRT1_2;
+    // The card frame's rim in team colour, ornament by rarity (kit/crim_<rarity>_<side>), laid over the clearing's stones;
+    // the portrait fills it; the strength plate sits on the rim at the top-left like a clasp.
+    const card = cards[u.id], base = card.str === '*' ? null : card.str, side = u.owner === 'A' ? 'a' : 'b', K = CRIM[`${card.rarity}_${side}`];
+    const gr = cr && CLEAR[cr] ? CLEAR[cr][2] : 68, outer = gr + 12, rs = outer / K.ro, inner = K.ri * rs, D = 2 * inner + 2;
+    const mid = (outer + inner) / 2, clasp = mid * Math.SQRT1_2;
     const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';
     const kws = (card.kw || []).filter(k => BOARD_KW[k]).map(k => `<img src="${kit(BOARD_KW[k])}" alt="" title="${k}" draggable="false">`).join('');
-    const side = u.owner === 'A' ? 'a' : 'b';
     // Buried units peek out behind the portrait as discs in their owners' colours: how many, and whose.
     const peek = ghost ? '' : under.slice(0, 4).map((b, i) => `<i class="disc ${b.owner}" style="inset:${D / 2 - outer}px;transform:translate(${(i + 1) * 6}px,${(i + 1) * 7}px);z-index:${-i - 1}"></i>`).join('');
     return `<div class="unit stone ${u.owner}${ghost ? ' ghost' : ''}" style="--pp:${D}px">${peek}${portrait(u.id, D, card.name)}` +
-      `<img class="srim" src="${kit('rim_thin_' + side)}" alt="" draggable="false" style="width:${rimW}px;left:${D / 2 - 187 * rs}px;top:${D / 2 - 186.5 * rs}px">` +
+      `<img class="srim" src="${kit(`crim_${card.rarity}_${side}`)}" alt="" draggable="false" style="width:${K.W * rs}px;left:${D / 2 - K.cx * rs}px;top:${D / 2 - K.cy * rs}px">` +
       `<div class="splate" style="left:${D / 2 - clasp - 23}px;top:${D / 2 - clasp - 23.5}px">${kitImg('plate_' + side)}<span class="${delta.trim()}">${u.str}</span></div>` +
       (kws ? `<div class="kws">${kws}</div>` : '') +
       (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') + '</div>';
