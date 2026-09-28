@@ -520,8 +520,7 @@
       "tags": ["Bear"],
       "base_strength": 10,
       "keywords": ["Apex Predator"],
-      "food_cost": 15,
-      "text": "Apex Predator. Costs 15 food."
+      "text": "Apex Predator."
     },
     {
       "id": "unnamed_giant",

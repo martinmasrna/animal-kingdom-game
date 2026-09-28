@@ -15,7 +15,7 @@ Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reac
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Methuselah** | 1 | Megafauna | 3 | Immovable. At the end of your turn, gain 5 food. |
-| **Borealis** | 1 | Bear | 10 | Apex Predator. Costs 15 food. |
+| **Borealis** | 1 | Bear | 10 | Apex Predator. |
 | **Unnamed Giant** | 1 | — | 10 | Apex Predator. Your regions produce no food. |
 | **Bulwark** | 1 | Megafauna | 10 | Immovable. Costs 15 food. Battlecry: remove all adjacent units. |
 

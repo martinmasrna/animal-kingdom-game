@@ -116,7 +116,7 @@ def test_apex_covers_stealth_prey_instead_of_eating_it():
     # The eat is a chosen single-out (C3): Stealth blocks it; the apex buries the panther.
     s = make_state(hands={"A": ["tiger"]})
     prey = put(s, "1,2", "black_panther", "B")
-    prey.strength_counter = -3                            # panther 6 -> 3, tiger can land
+    prey.strength_counter = -3                            # panther 7 -> 4, tiger can land
     rules.apply_action(s, PlaceAction("tiger", ("cr", "1,2")))
     assert _ids_at(s, "1,2") == ["black_panther", "tiger"]  # buried, not eaten
     assert "black_panther" not in s.remove_pile
