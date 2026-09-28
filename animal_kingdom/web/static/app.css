@@ -366,3 +366,22 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .hqbar .goal { position: absolute; left: 0; right: 0; top: 452px; text-align: center; font: 600 13px var(--font-text); letter-spacing: .08em; text-transform: uppercase; color: rgba(255,235,200,.55); }
 .hqbar.legal::after { inset: -10px; border-radius: 30px; }
 .hqbar.tgt { cursor: pointer; }
+
+/* ---------- lab map mode (sA/sB/sC): the painted Savanna Expanse board ---------- */
+[data-v^="s"] #stage .layer { display: none; }
+[data-v="sA"] #stage { background: url(/static/kit/sav_A.webp) 0 0 / 100% 100%; }
+[data-v="sB"] #stage { background: url(/static/kit/sav_B.webp) 0 0 / 100% 100%; }
+[data-v="sC"] #stage { background: url(/static/kit/sav_C.webp) 0 0 / 100% 100%; }
+[data-v^="s"] .groove { background: none; box-shadow: none; height: 26px; margin-top: -13px; }
+[data-v^="s"] .groove.A { background: radial-gradient(closest-side, rgba(70,160,245,.55), rgba(70,160,245,0)); }
+[data-v^="s"] .groove.B { background: radial-gradient(closest-side, rgba(225,55,45,.55), rgba(225,55,45,0)); }
+[data-v^="s"] .payout { font-size: 30px; color: #fff3dc; -webkit-text-stroke: 4px #3a2410; paint-order: stroke fill; text-shadow: none; }
+[data-v^="s"] .payout.full.A { color: #8cc8ff; -webkit-text-stroke: 5px #0c2a4a; text-shadow: 0 0 16px rgba(70,160,245,.9); font-size: 36px; }
+[data-v^="s"] .payout.full.B { color: #ff8e80; -webkit-text-stroke: 5px #4a0e0a; text-shadow: 0 0 16px rgba(225,55,45,.9); font-size: 36px; }
+[data-v^="s"] .payout.part { text-shadow: none; }
+.denhit { width: 220px; height: 230px; border-radius: 40px; }
+.denhit.tgt { cursor: pointer; }
+.slab { width: 170px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.slab b { font-size: 52px; font-weight: 400; }
+.slab span { font-size: 17px; margin-top: 2px; }
+.slab.A span { color: #9fd0ff; } .slab.B span { color: #ffab9f; }

@@ -32,7 +32,7 @@ export function portrait(id, D, name) {
 
 export function renderBoard(el, M, g, cards, ui) {
   VAR = document.documentElement.dataset.v || ''; THIN = ['1a', '1b', '1c'].includes(VAR); PORTRAIT = THIN ? 140 : 136;
-  if (VAR[0] === 'f') return renderField(el, M, g, cards, ui);
+  if (VAR[0] === 'f' || VAR[0] === 's') return renderField(el, M, g, cards, ui);
   const topOf = cr => (g.board[cr] || []).slice(-1)[0], owner = cr => (topOf(cr) || {}).owner;
   const nb = cr => { const [c, r] = cr.split(',').map(Number), out = []; if (c > 1) out.push(key(c - 1, r)); if (c < M.cols) out.push(key(c + 1, r)); if (r > 1) out.push(key(c, r - 1)); if (r < M.rows) out.push(key(c, r + 1)); return out; };
   function connected(p) {
@@ -142,7 +142,10 @@ function renderField(el, M, g, cards, ui) {
     for (const p of ['A', 'B']) { const n = cs.filter(x => owner(x) === p).length; if (n === 4) return { owner: p, full: true }; if (n === 3 && cs.every(x => owner(x) === p || !topOf(x))) return { owner: p, full: false }; }
     return null;
   }
-  const X = c => 335 + (c - 1) * 1002 / (M.cols - 1), Y = r => 200 + (r - 1) * 200, EDGE = { A: 222, B: 1450 };
+  // fX: a quiet field with engraved marks. sX: a painted map (kit/sav_X) that already carries crossroads, paths, dens and markers.
+  const MAP_ = VAR[0] === 's';
+  const X = MAP_ ? c => 390 + (c - 1) * 232.5 : c => 335 + (c - 1) * 1002 / (M.cols - 1);
+  const Y = MAP_ ? r => 185 + (r - 1) * 180 : r => 200 + (r - 1) * 200, EDGE = MAP_ ? { A: 240, B: 1432 } : { A: 222, B: 1450 };
   const conn = { A: connected('A'), B: connected('B') }, rings = new Set(ui.rings || []), recent = new Set(ui.recent || []);
   const put = (cls, x, y, html = '', style = '', attrs = '') => `<div class="sp ${cls}" style="left:${x}px;top:${y}px;${style}" ${attrs}>${html}</div>`;
   const groove = (x1, y1, x2, y2, lit) => { const len = Math.hypot(x2 - x1, y2 - y1), deg = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
@@ -158,13 +161,19 @@ function renderField(el, M, g, cards, ui) {
     const c = p === 'A' ? 1 : M.cols;
     s += groove(EDGE[p], Y(r), X(c), Y(r), owner(key(c, r)) === p ? p : '');
   }
-  for (let r = 1; r <= M.rows; r++) for (let c = 1; c <= M.cols; c++) s += put('eng', X(c), Y(r));
+  if (!MAP_) for (let r = 1; r <= M.rows; r++) for (let c = 1; c <= M.cols; c++) s += put('eng', X(c), Y(r));
   for (const reg of M.regions) {
     const st = regionState(reg), [c, r] = reg.c;
     s += put(`payout${st ? ' ' + st.owner + (st.full ? ' full' : ' part') : ''}`, (X(c) + X(c + 1)) / 2, (Y(r) + Y(r + 1)) / 2, `+${reg.food}`);
   }
   // Side banners: the headquarters. Food toward the win threshold, next turn's income paler above it.
-  for (const p of ['A', 'B']) {
+  if (MAP_) for (const p of ['A', 'B']) {
+    // The den is painted; its food total is written on the painted slab below it.
+    const x = p === 'A' ? 150 : 1522, target = p === 'B' && ui.hqRing;
+    s += put(`denhit${target ? ' tgt legal' : ''}`, x, 355, '', '', target ? 'data-hq="1"' : '');
+    s += put(`slab ${p}`, x, 570, `<b class="num">${g.food[p]}</b><span class="num">+${g.income[p]} / turn</span>`);
+  }
+  if (!MAP_) for (const p of ['A', 'B']) {
     const food = g.food[p], inc = g.income[p], win = g.winFood, f1 = Math.min(1, food / win), f2 = Math.min(1, (food + inc) / win);
     const target = p === 'B' && ui.hqRing, x = p === 'A' ? 108 : 1564;
     s += put(`hqbar ${p}${target ? ' tgt legal' : ''}`, x, 380,
