@@ -193,6 +193,9 @@ function onView(prev) {
   if (V.phase === 'prematch') return prematchScreen();
   if (!prev || prev.phase === 'game_over' && V.phase === 'playing') ui.peek = false;
   if (prev && prev.game && V.game && prev.game.history.length > V.game.history.length) ui.sel = null;
+  // One-shot animation input: what the board and food were before this view (same game only).
+  ui.anim = prev && prev.game && V.game && prev.game.history.length <= V.game.history.length && prev.you === V.you
+    ? { board: viewerBoard(prev), food: { A: prev.game.food[prev.you], B: prev.game.food[prev.you === 'A' ? 'B' : 'A'] } } : null;
   gameScreen();
 }
 
@@ -454,6 +457,14 @@ function moveLine(m) {
   return [`${who} · turn ${m.round}`, what, ...fx].filter(Boolean).join(' · ');
 }
 
+function viewerBoard(v) {
+  const out = {}, rl = p => p === v.you ? 'A' : 'B';
+  for (const [cr, st] of Object.entries(v.game.board)) {
+    const c = v.you === 'A' ? cr : `${MAP.cols + 1 - Number(cr.split(',')[0])},${cr.split(',')[1]}`;
+    out[c] = st.map(u => ({ ...u, owner: rl(u.owner) }));
+  }
+  return out;
+}
 function viewerGame() {
   const G = V.game, you = V.you, them = opp(), board = {};
   for (const [cr, st] of Object.entries(G.board)) board[dcr(cr)] = st.map(u => ({ ...u, owner: rel(u.owner) }));
@@ -475,7 +486,8 @@ function drawBoard(d) {
   }
   const H = V.game.history, recent = [];
   for (let i = H.length - 1; i >= 0 && H[i].seat !== V.you; i--) if (H[i].target && H[i].target[0] === 'cr') recent.push(dcr(H[i].target[1]));
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent, enamel: store('ak:rim') !== 'metal' });
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent, enamel: store('ak:rim') !== 'metal', anim: ui.anim });
+  ui.anim = null;   // animations play once, never on hover redraws
 }
 
 function wireBoard() {

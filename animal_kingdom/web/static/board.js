@@ -130,6 +130,10 @@ export function renderBoard(el, M, g, cards, ui) {
 // A quiet painted field (kit/field_<X>.webp) with engraved sockets, shallow grooves and quiet region numbers;
 // each player's food lives in a banner at the screen edge, which is also their headquarters.
 function renderField(el, M, g, cards, ui) {
+  // Leaving pieces: keep the old DOM of every crossroad whose top changed, to fade it out after the redraw.
+  const A = ui.anim, topIid = (b, cr) => ((b[cr] || []).slice(-1)[0] || {}).iid;
+  const leaving = A ? [...el.querySelectorAll('.cr')].filter(n => n.querySelector('.unit') && topIid(A.board, n.dataset.cr) !== topIid(g.board, n.dataset.cr) && topIid(A.board, n.dataset.cr) !== undefined)
+    .map(n => { const c = n.cloneNode(true); c.classList.add('leaving'); c.removeAttribute('data-cr'); return c; }) : [];
   const topOf = cr => (g.board[cr] || []).slice(-1)[0], owner = cr => (topOf(cr) || {}).owner;
   const nb = cr => { const [c, r] = cr.split(',').map(Number), out = []; if (c > 1) out.push(key(c - 1, r)); if (c < M.cols) out.push(key(c + 1, r)); if (r > 1) out.push(key(c, r - 1)); if (r < M.rows) out.push(key(c, r + 1)); return out; };
   function connected(p) {
@@ -162,6 +166,7 @@ function renderField(el, M, g, cards, ui) {
     const c = p === 'A' ? 1 : M.cols;
     s += groove(EDGE[p], Y(r), X(c), Y(r), owner(key(c, r)) === p ? p : '');
   }
+  let fx = '';
   if (!MAP_) for (let r = 1; r <= M.rows; r++) for (let c = 1; c <= M.cols; c++) s += put('eng', X(c), Y(r));
   for (const reg of M.regions) {
     const st = regionState(reg), [c, r] = reg.c;
@@ -206,9 +211,18 @@ function renderField(el, M, g, cards, ui) {
       let t = '';
       // Each slot always holds the same kind of fruit (a fixed hash of its index), so the mix doesn't reshuffle as food changes.
       const kind = i => ((i * 2654435761) >>> 0) % 9, jit = (i, k) => (((i * 40503 + k * 9973) >>> 0) % 100) / 100;
+      const was = ui.anim ? Math.min(ui.anim.food[p], food) : food, gained = food - was;
       for (let i = 0; i < Math.min(win, food + inc); i++)
-        t += `<i class="${i < food ? 'r' : 'g'}" style="left:${Math.floor(i / 3) * 7.4 + jit(i, 1) * 2 - 1}px;top:${(2 - i % 3) * 7 + (Math.floor(i / 3) % 2) * 2 + jit(i, 2) * 2 - 1}px;background-position:${kind(i) * 12.5}% 0;transform:rotate(${jit(i, 3) * 60 - 30}deg)"></i>`;
+        t += `<i class="${i < food ? 'r' : 'g'}${i >= was && i < food ? ' new' : ''}" style="${i >= was && i < food ? `animation-delay:${.55 + (i - was) / Math.max(1, gained) * .5}s;` : ''}left:${Math.floor(i / 3) * 7.4 + jit(i, 1) * 2 - 1}px;top:${(2 - i % 3) * 7 + (Math.floor(i / 3) % 2) * 2 + jit(i, 2) * 2 - 1}px;background-position:${kind(i) * 12.5}% 0;transform:rotate(${jit(i, 3) * 60 - 30}deg)"></i>`;
       s += put(`otrough ${p}`, p === 'A' ? 160 : 1514, 560, `<div class="hollow">${t}</div>` + kitImg('trough'));
+      // Fruit flies from each held stone to where the new fruit lands in the trough.
+      if (gained > 0) {
+        const tx = (p === 'A' ? 160 : 1514) - 145 + 10 + Math.floor(was / 3) * 7.4, ty = 560;
+        const srcs = M.regions.filter(reg => { const st = regionState(reg); return st && st.full && st.owner === p; })
+          .map(reg => [[492, 725, 960, 1194][reg.c[0] - 1], [268, 458][reg.c[1] - 1]]);
+        srcs.forEach(([sx, sy], k) => { for (let j = 0; j < 3; j++)
+          fx += `<i class="flyfruit" style="left:${sx}px;top:${sy}px;--dx:${tx - sx}px;--dy:${ty - sy}px;animation-delay:${k * .08 + j * .06}s;background-position:${((k * 3 + j) * 4 % 9) * 12.5}% 0"></i>`; });
+      }
       s += put(`carved small ${p}`, p === 'A' ? 160 : 1514, 616, `${food}<small> / ${win}</small>`);
     } else if (F === 't') {
       // A carved trough filled with fruit toward the win at its end; next turn's income as unripe green fruit.
@@ -264,7 +278,8 @@ function renderField(el, M, g, cards, ui) {
     let h = '';
     if (ui.preview && ui.preview.cr === cr) h = unit({ id: ui.preview.id, owner: 'A', str: ui.preview.str }, stack.slice().reverse(), true);
     else if (stack.length) h = unit(stack[stack.length - 1], stack.slice(0, -1).reverse(), false);
-    const cls = ['cr', rings.has(cr) ? 'tgt legal' : '', stack.length ? 'occ' : '', recent.has(cr) ? 'recent' : ''].join(' ');
+    const dropped = ui.anim && stack.length && ((ui.anim.board[cr] || []).slice(-1)[0] || {}).iid !== stack[stack.length - 1].iid;
+    const cls = ['cr', rings.has(cr) ? 'tgt legal' : '', stack.length ? 'occ' : '', recent.has(cr) ? 'recent' : '', dropped ? 'drop' : ''].join(' ');
     s += put(cls, X(c), Y(r), h, `z-index:${M.rows - r + 1}`, `data-cr="${cr}"`);
   }
   function unit(u, under, ghost) {
@@ -278,5 +293,7 @@ function renderField(el, M, g, cards, ui) {
       (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') +
       (under.length && !ghost ? `<div class="under num">+${under.length}</div>` : '') + '</div>';
   }
-  el.innerHTML = s;
+  el.innerHTML = s + fx;
+  for (const n of leaving) el.appendChild(n);
+  setTimeout(() => { for (const n of leaving) n.remove(); for (const n of el.querySelectorAll('.flyfruit')) n.remove(); }, 1400);
 }

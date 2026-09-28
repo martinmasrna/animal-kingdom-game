@@ -311,7 +311,7 @@ class Match:
         for cr, stack in st.board.items():
             if not stack:
                 continue
-            board[cr] = [{"id": u.card_id, "owner": u.owner, "str": effective_strength(st, u),
+            board[cr] = [{"iid": u.iid, "id": u.card_id, "owner": u.owner, "str": effective_strength(st, u),
                           **({"timer": timers[u.iid]} if u.iid in timers else {})} for u in stack]
         g = {
             "round": st.turn_counter // 2 + 1,

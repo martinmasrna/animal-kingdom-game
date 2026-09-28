@@ -567,3 +567,17 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 [data-k="1"] .drawbtn.wait { filter: brightness(.6) drop-shadow(4px 7px 6px rgba(20,10,0,.6)); }
 .endturn { position: absolute; left: 140px; width: 165px; top: 150px; text-align: center; font: 700 15px 'Cinzel', serif; color: #f3e3c0; text-shadow: 0 1px 2px rgba(0,0,0,.9); cursor: pointer; }
 .endturn:hover { color: #fff; text-decoration: underline; }
+
+/* ---------- motion: a placed piece drops in, a leaving piece fades, fruit flies from held stones to the trough ---------- */
+.cr.drop .unit { animation: drop .45s cubic-bezier(.2,.7,.3,1.25) both; }
+@keyframes drop { from { transform: translateY(-46px) scale(1.18); opacity: 0; filter: drop-shadow(14px 26px 14px rgba(20,10,0,.35)); } 60% { opacity: 1; } to { transform: none; } }
+.cr.leaving { pointer-events: none; z-index: 20 !important; animation: leave .6s ease-in forwards; }
+@keyframes leave { to { opacity: 0; transform: translate(-50%, -50%) scale(.7); filter: blur(2px); } }
+.flyfruit { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; z-index: 40; pointer-events: none; opacity: 0;
+  background: url(/static/kit/fruits.webp) 0 0 / 900% 100% no-repeat; filter: drop-shadow(1px 2px 1px rgba(0,0,0,.5));
+  animation: fly .7s cubic-bezier(.45,0,.55,1) both; }
+@keyframes fly { 0% { opacity: 0; transform: translate(0, 0) scale(.6); } 12% { opacity: 1; transform: translate(calc(var(--dx) * .08), -30px) scale(1.1); }
+  85% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.6); } }
+.otrough i.new { animation: pop .25s ease-out both; }
+@keyframes pop { from { opacity: 0; transform: scale(0); } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .cr.drop .unit, .cr.leaving, .flyfruit, .otrough i.new { animation: none !important; } .flyfruit, .cr.leaving { display: none; } }

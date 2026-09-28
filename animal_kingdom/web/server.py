@@ -26,7 +26,7 @@ STATIC = Path(__file__).parent / "static"
 # Human games are the best design signal there is: every game with a human seat is kept,
 # one JSONL file per match, replayable with `python -m animal_kingdom.sim.replay FILE --index N`.
 LOG_DIR = Path(__file__).resolve().parents[2] / "results" / "human_games" / "web"
-BOT_PAUSE = {"move": 0.9, "choice": 0.6}   # seconds, so a human can follow the bot's moves
+BOT_PAUSE = {"open": 1.6, "move": 1.1, "choice": 0.6}   # seconds: a beat before the bot opens its turn, then time to follow each move
 log = logging.getLogger("animal_kingdom.web")
 
 
@@ -75,7 +75,8 @@ class Hub:
 
     async def _run_bot(self, match: Match) -> None:
         while (s := match.to_act()) is not None and match.seats[s].is_bot:
-            await asyncio.sleep(BOT_PAUSE["choice" if match.state.pending else "move"])
+            opening = not match.state.pending and match.state.actions_taken_this_turn == 0
+            await asyncio.sleep(BOT_PAUSE["choice" if match.state.pending else "open" if opening else "move"])
             version = match.version
             try:
                 action = await asyncio.to_thread(match.bot_move)
