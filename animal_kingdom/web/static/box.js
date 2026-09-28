@@ -21,8 +21,6 @@ const CX = (c, r) => PAINT ? PX(CLEAR[(r - 1) * 5 + c - 1][0]) : X(c), CY = (c, 
 const RIDGE = { A: 110, B: 1565 }, PIT_Y = [690, 637, 584, 531, 478, 425, 372, 319, 266, 213];
 const PITS = s => PIT_Y.map((y, i) => [PX(RIDGE[s] + (i % 2 ? 6 : -6)), PY(y)]);
 const CROWN = { A: [PX(118), PY(150)], B: [PX(1565), PY(150)] }, MOUTH = { A: [PX(176), PY(390)], B: [PX(1500), PY(378)] };
-// Ten fruit spots in a pit (3-4-3), relative to its centre, in stage pixels.
-const SPOTS = [[-11, 9], [0, 10], [11, 9], [-16, 0], [-5, 0], [6, 0], [17, 0], [-11, -9], [0, -10], [11, -9]];
 const put = (cls, x, y, html = '', attrs = '') => `<div class="abs ${cls}" style="left:${x}px;top:${y}px" ${attrs}>${html}</div>`;
 
 function portrait(id, D) {
@@ -35,8 +33,9 @@ function portrait(id, D) {
 function unit(u, under, cards, extra = '') {
   const c = cards[u.id], kw = (c.keywords || []).map(k => BOARD_KW[k]).filter(Boolean);
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner}" style="transform:translate(${(i + 1) * 7}px,${(i + 1) * 8}px);z-index:${-i - 1}"></div>`).join('');
-  return `${peek}<div class="ring${hasArt(u.id) ? '' : ' noart'}" style="${portrait(u.id, 108)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
-    `<div class="boss num">${u.str}</div>` + (u.timer ? `<div class="timer num" title="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${u.timer}</div>` : '') +
+  const D = PAINT ? 98 : 108, rim = PAINT ? `<img class="rimimg" src="/static/kit2/rim_${u.owner === 'A' ? 'a' : 'b'}.webp" alt="" draggable="false">` : '';
+  return `${peek}<div class="ring${hasArt(u.id) ? '' : ' noart'}" style="${portrait(u.id, D)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
+    rim + `<div class="boss num">${u.str}</div>` + (u.timer ? `<div class="timer num" title="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${u.timer}</div>` : '') +
     (kw.length ? `<div class="kw" title="${(c.keywords || []).filter(k => BOARD_KW[k]).join(', ')}">${kw.join('')}</div>` : '') + extra;
 }
 
@@ -78,16 +77,13 @@ export function renderBoard(el, M, g, cards, ui) {
   for (const side of ['A', 'B']) {
     const food = g.food[side], inc = g.income[side], win = g.winFood, ring = side === 'B' && ui.hqRing ? ' tgt' : '';
     if (PAINT) {
-      // One fruit per food: ripe for what is stored, unripe green for next turn's income, ten to a pit from the bottom up.
+      // One fruit per food, ten to a pit from the bottom up: ripe for what is stored, ghosts for next turn's income.
       const ripe = Math.min(food, win), green = Math.max(0, Math.min(inc, win - ripe)), unit10 = win / PIT_Y.length;
+      // Each pit shows one painted state: r ripe fruit and g ghost fruit for next turn's income (screen/kit/pits/build.py).
       let fruit = '';
       PITS(side).forEach(([px, py], i) => {
-        fruit += put('pit', px, py, `<img src="/static/kit2/pit_${i % 3 + 1}.webp" alt="" draggable="false" style="transform:rotate(${(i * 47) % 30 - 15}deg)">`);
-        SPOTS.forEach(([dx, dy], k) => {
-          const n = i * unit10 + k * unit10 / SPOTS.length;
-          if (n < ripe) fruit += put('fruit', px + dx, py + dy, '');
-          else if (n < ripe + green) fruit += put('fruit green', px + dx, py + dy, '');
-        });
+        const r = Math.max(0, Math.min(unit10, ripe - i * unit10)), t = Math.max(0, Math.min(unit10, ripe + green - i * unit10));
+        fruit += put('pit', px, py, `<img src="/static/kit2/pits/pit${i % 3 + 1}_${r}_${t - r}.webp" alt="" draggable="false" style="transform:rotate(${(i * 47) % 30 - 15}deg)">`);
       });
       const [mx, my] = MOUTH[side], [kx, ky] = CROWN[side];
       s += fruit + put(`dcount num ${side}`, kx, ky, food, `title="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
