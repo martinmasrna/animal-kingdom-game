@@ -94,6 +94,7 @@ function route() {
   if (parts[0] === 'play') return playScreen();
   if (parts[0] === 'join' && id) return joinScreen(id);
   if (parts[0] === 'm' && id) return matchScreen(id);
+  if (parts[0] === 'lab' && parts[1]) return labScreen(parts[1]);
   homeScreen();
 }
 
@@ -188,6 +189,14 @@ function onView(prev) {
   if (!prev || prev.phase === 'game_over' && V.phase === 'playing') ui.peek = false;
   if (prev && prev.game && V.game && prev.game.history.length > V.game.history.length) ui.sel = null;
   gameScreen();
+}
+
+// Design lab: #/lab/<name>?v=<variant> renders the frozen view static/lab/<name>.json with a design variant
+// (data-v on <html>, read by app.css and board.js). No server match; nothing can be played.
+async function labScreen(name) {
+  document.documentElement.dataset.v = new URLSearchParams(location.search).get('v') || '';
+  V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
+  screen = null; gameScreen();
 }
 
 function lobbyScreen() {
@@ -332,12 +341,12 @@ function drawGame() {
   showPanel();
 
   // Hand: full-bleed cards along the bottom ledge, overlapping when the hand is long.
-  const hand = document.getElementById('hand'), n = G.hand.length, gap = n > 1 ? Math.min(14, (1000 - n * 150) / (n - 1)) : 0;
+  const hand = document.getElementById('hand'), n = G.hand.length, cw = { '3a': 190, '3b': 170, '3c': 170 }[document.documentElement.dataset.v] || 150, gap = n > 1 ? Math.min(14, (1000 - n * cw) / (n - 1)) : 0;
   hand.innerHTML = G.hand.map((h, i) => {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && d.places[h.id], pick = d.handPick.has(h.iid);
     const base = sv(c), cls = [c.rarity, can ? 'can' : '', pick ? 'pick can' : '', h.id === ui.sel ? 'sel' : '', d.mine && !can && !pick ? 'dim' : ''].join(' ');
     const delta = base >= 0 && h.str !== base ? (h.str > base ? ' up' : ' down') : '';
-    return `<div class="hc ${cls}" data-iid="${h.iid}" data-id="${h.id}" style="margin-left:${i ? gap : 0}px"><div class="face"><div class="art gradart" ${artStyle(h.id)}></div><div class="nm">${c.name}</div><div class="tx">${c.text}</div></div><div class="gem">${kitImg(teamGem('A'))}<span class="num${delta}">${h.str}</span></div></div>`;
+    return `<div class="hc ${cls}" data-iid="${h.iid}" data-id="${h.id}" style="margin-left:${i ? gap : 0}px;--i:${i - (n - 1) / 2}"><div class="face"><div class="art gradart" ${artStyle(h.id)}></div><div class="nm">${c.name}</div><div class="tx">${c.text}</div></div><div class="gem">${kitImg(teamGem('A'))}<span class="num${delta}">${h.str}</span></div></div>`;
   }).join('');
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
     e.stopPropagation();

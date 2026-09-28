@@ -283,3 +283,60 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .notebox .rec { width: 9px; height: 9px; border-radius: 999px; background: #c65a4a; animation: pulse 1s infinite; }
 .notebox .rec.off { background: var(--faint); animation: none; }
 .toast.ok { background: var(--surface-2); border-color: var(--line-strong); }
+
+/* ---------- design lab variants (html[data-v]), compared on static/lab frames ---------- */
+/* #1 hierarchy: thin rims and a larger portrait. */
+[data-v="1a"] .unit, [data-v="1b"] .unit, [data-v="1c"] .unit { left: 0; top: 0; width: 176px; height: 176px; }
+[data-v="1a"] .portrait, [data-v="1b"] .portrait, [data-v="1c"] .portrait { inset: 18px; }
+[data-v="1a"] .unit .gem, [data-v="1b"] .unit .gem, [data-v="1c"] .unit .gem { left: -6px; top: -4px; width: 56px; height: 56px; }
+[data-v="1a"] .ribbon { width: 124px; height: 34px; bottom: -14px; }
+[data-v="1a"] .ribbon span { top: 5px; font-size: 13px; left: 18px; right: 18px; }
+[data-v="1b"] .ribbon { width: 136px; height: 38px; bottom: -12px; }
+[data-v="1b"] .ribbon span { top: 6px; font-size: 14px; }
+.nameplate { position: absolute; left: 50%; bottom: -12px; width: 118px; height: 40px; transform: translateX(-50%); z-index: 3; filter: drop-shadow(2px 4px 3px rgba(20,10,0,.55)); }
+.nameplate img { width: 100%; height: 100%; display: block; }
+.nameplate span { position: absolute; inset: 0 14px; display: grid; place-items: center; font: 13px/1 'Lilita One', var(--font-display); color: #3a220c; white-space: nowrap; overflow: hidden; }
+/* #2 economy. A: held regions become team jewels, the silo grows. */
+.token.jewel { width: 100px; height: 100px; }
+.token.jewel span { font-size: 30px; }
+.token.jewel.part { opacity: .55; }
+[data-v="2a"] .silo { width: 190px; height: 280px; top: 500px !important; }
+[data-v="2a"] .silo .win { box-shadow: inset 0 0 18px rgba(255,210,120,.6); }
+[data-v="2a"] .plaque.food { width: 200px; height: 76px; top: 672px !important; }
+[data-v="2a"] .plaque.food span { font-size: 38px; }
+[data-v="2a"] .plaque.food small { font-size: 18px; }
+/* B: glowing ground and a race gauge per player across the top. */
+[data-v="2b"] #stage { --wash: .55; }
+[data-v="2b"] .wash { inset: auto; transform: scale(1.1); }
+[data-v="2b"] .plq.series { display: none; }
+.gauge { width: 380px; height: 100px; }
+.gauge .ch { position: absolute; left: 9.5%; width: 80.7%; top: 33.3%; height: 31.5%; overflow: hidden; border-radius: 12px; background: #2a1a0c; }
+.gauge .fill, .gauge .inc { position: absolute; top: 0; bottom: 0; left: 0; }
+.gauge.A .fill { background: linear-gradient(#7cc4ff, #2a7fd6); } .gauge.B .fill { background: linear-gradient(#ff8a7a, #c8281e); }
+.gauge .inc { background: rgba(255,255,255,.35); }
+.gauge.B .ch { transform: scaleX(-1); }
+.gauge > .num { position: absolute; left: 0; right: 0; top: 70px; text-align: center; font-size: 26px; }
+.gauge small { font-size: 15px; }
+/* C: flags planted on held regions, big food counters on the dens. */
+.flag { width: 108px; height: 118px; }
+.flag span { position: absolute; left: 0; right: 0; bottom: -16px; text-align: center; font-size: 26px; }
+.plaque.food.big { width: 220px; height: 110px; }
+.plaque.food.big span { display: flex; flex-direction: column; font-size: 54px; line-height: .9; }
+.plaque.food.big small { font-size: 17px; margin: 4px 0 0; }
+/* #3 hand. A: bigger cards on the ledge. */
+[data-v="3a"] .hand { top: 690px; }
+[data-v="3a"] .hc { width: 190px; height: 266px; }
+[data-v="3a"] .hc .nm { font-size: 19px; padding-left: 48px; }
+[data-v="3a"] .hc .tx { font-size: 13px; padding: 30px 10px 10px; }
+[data-v="3a"] .hc .gem { width: 56px; height: 56px; } [data-v="3a"] .hc .gem span { font-size: 30px; }
+/* B: a fan, the hovered card zooms. */
+[data-v="3b"] .hand { top: 720px; }
+[data-v="3b"] .hc { width: 170px; height: 238px; transform-origin: 50% 160%; transform: rotate(calc(var(--i) * 5deg)); }
+[data-v="3b"] .hc:hover, [data-v="3c"] .hc:hover { transform: translateY(-190px) scale(1.7); z-index: 20; }
+[data-v="3b"] .hc .tx { font-size: 11.5px; }
+/* C: art-only cards at rest, the full card on hover. */
+[data-v="3c"] .hand { top: 706px; }
+[data-v="3c"] .hc { width: 170px; height: 238px; }
+[data-v="3c"] .hc .tx { opacity: 0; transition: opacity .15s; }
+[data-v="3c"] .hc:hover .tx { opacity: 1; }
+[data-v="3c"] .hc .nm { font-size: 18px; }

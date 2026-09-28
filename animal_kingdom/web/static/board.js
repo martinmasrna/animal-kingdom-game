@@ -16,7 +16,10 @@ const OWN = {
 };
 export const teamGem = p => OWN[p].gem;
 // Crossroads span the plateau; each den stands off its edge, with its food silo and food plaque below it.
-const HQX = { A: 150, B: 1522 }, DEN_Y = 290, PORTRAIT = 136;
+const HQX = { A: 150, B: 1522 }, DEN_Y = 290;
+// Design-lab variant (static/lab, #/lab/<name>?v=<id>): '' is the current design.
+let VAR = '', THIN = false, PORTRAIT = 136;
+const THIN_RIM = { '1a': { A: 'rim_thin_blue', B: 'rim_thin_red' }, '1b': { A: 'rim_thin_iron', B: 'rim_thin_iron' }, '1c': { A: 'rim_thin_blue', B: 'rim_thin_red' } };
 // Keywords that change what can be done to a unit already on the board (Flight and Apex Predator only matter while placing).
 const BOARD_KW = { Immovable: 'kw_immovable', Stealth: 'kw_stealth', Fragile: 'kw_fragile' };
 
@@ -28,6 +31,7 @@ export function portrait(id, D, name) {
 }
 
 export function renderBoard(el, M, g, cards, ui) {
+  VAR = document.documentElement.dataset.v || ''; THIN = ['1a', '1b', '1c'].includes(VAR); PORTRAIT = THIN ? 140 : 136;
   const topOf = cr => (g.board[cr] || []).slice(-1)[0], owner = cr => (topOf(cr) || {}).owner;
   const nb = cr => { const [c, r] = cr.split(',').map(Number), out = []; if (c > 1) out.push(key(c - 1, r)); if (c < M.cols) out.push(key(c + 1, r)); if (r > 1) out.push(key(c, r - 1)); if (r < M.rows) out.push(key(c, r + 1)); return out; };
   function connected(p) {
@@ -68,9 +72,11 @@ export function renderBoard(el, M, g, cards, ui) {
 
   // Regions: a stone token with the payout, set in the holder's metal (faint while one corner is still open).
   for (const reg of M.regions) {
-    const st = regionState(reg), [c, r] = reg.c;
-    s += put(`token lift${st ? (st.full ? '' : ' part') : ' idle'}`, (X(c) + X(c + 1)) / 2, (Y(r) + Y(r + 1)) / 2,
-      kitImg(st ? OWN[st.owner].token : 'token') + `<span class="num">+${reg.food}</span>`);
+    const st = regionState(reg), [c, r] = reg.c, x = (X(c) + X(c + 1)) / 2, y = (Y(r) + Y(r + 1)) / 2;
+    if (VAR === '2a' && st) s += put(`token jewel lift${st.full ? '' : ' part'}`, x, y, kitImg(OWN[st.owner].gem) + `<span class="num">+${reg.food}</span>`);
+    else if (VAR === '2c' && st && st.full) s += put('flag lift', x, y - 24, kitImg(st.owner === 'A' ? 'flag_blue' : 'flag_red') + `<span class="num">+${reg.food}</span>`);
+    else s += put(`token lift${st ? (st.full ? '' : ' part') : ' idle'}`, x, y,
+      kitImg(st && VAR !== '2c' ? OWN[st.owner].token : 'token') + `<span class="num">+${reg.food}</span>`);
   }
 
   // Dens (headquarters), each with its food silo filling toward the win threshold; the paler band is next turn's income.
@@ -78,8 +84,17 @@ export function renderBoard(el, M, g, cards, ui) {
     const x = HQX[p], food = g.food[p], inc = g.income[p], win = g.winFood;
     const f1 = Math.min(1, food / win), f2 = Math.min(1, (food + inc) / win), target = p === 'B' && ui.hqRing;
     s += put(`den lift${target ? ' tgt legal' : ''}`, x, DEN_Y, kitImg(OWN[p].den), '', target ? 'data-hq="1"' : '');
-    s += put('silo lift', x, 520, `<div class="win"><div class="inc" style="height:${f2 * 100}%"></div><div class="fill" style="height:${f1 * 100}%"></div></div>` + kitImg('silo'));
-    s += put('plaque food lift', x, 655, kitImg('plaque') + `<span class="num">${food}<small>+${inc}</small></span>`);
+    if (VAR === '2b') {
+      // One race gauge per player across the top: food toward the win threshold, next turn's income paler.
+      const gx = p === 'A' ? 640 : 1032;
+      s += put(`gauge ${p} lift`, gx, 44, `<div class="ch"><div class="inc" style="width:${f2 * 100}%"></div><div class="fill" style="width:${f1 * 100}%"></div></div>` + kitImg('gauge') +
+        `<span class="num">${food}<small> / ${win} · +${inc}</small></span>`);
+    } else if (VAR === '2c') {
+      s += put('plaque food big lift', x, 520, kitImg('plaque') + `<span class="num">${food}<small>+${inc} / turn</small></span>`);
+    } else {
+      s += put('silo lift', x, 520, `<div class="win"><div class="inc" style="height:${f2 * 100}%"></div><div class="fill" style="height:${f1 * 100}%"></div></div>` + kitImg('silo'));
+      s += put('plaque food lift', x, 655, kitImg('plaque') + `<span class="num">${food}<small>+${inc}${VAR === '2a' ? ' / turn' : ''}</small></span>`);
+    }
   }
 
   // Crossroads: the hit area for everything placed on it.
@@ -89,18 +104,18 @@ export function renderBoard(el, M, g, cards, ui) {
     if (ui.preview && ui.preview.cr === cr) h = unit({ id: ui.preview.id, owner: 'A', str: ui.preview.str }, stack.slice().reverse(), true);
     else if (stack.length) h = unit(stack[stack.length - 1], stack.slice(0, -1).reverse(), false);
     const cls = ['cr', rings.has(cr) ? 'tgt legal' : '', stack.length ? 'occ' : '', recent.has(cr) ? 'recent' : ''].join(' ');
-    s += put(cls, X(c), Y(r), h, '', `data-cr="${cr}"`);
+    s += put(cls, X(c), Y(r), h, `z-index:${M.rows - r + 1}`, `data-cr="${cr}"`);   // upper rows on top, so their names aren't covered
   }
 
   // `under`: the buried units, top first, each peeking out below as a darker rim in its owner's metal.
   function unit(u, under, ghost) {
     const card = cards[u.id], base = card.str === '*' ? null : card.str;
     const delta = base !== null && u.str !== base ? (u.str > base ? ' up' : ' down') : '';
-    const peek = under.slice(0, 3).map((b, i) => `<div class="buried" style="transform:translate(${(i + 1) * 8}px,${(i + 1) * 9}px);z-index:${-i - 1}">${kitImg(OWN[b.owner].rim)}</div>`).join('');
+    const peek = under.slice(0, 3).map((b, i) => `<div class="buried" style="transform:translate(${(i + 1) * 8}px,${(i + 1) * 9}px);z-index:${-i - 1}">${kitImg(THIN ? THIN_RIM[VAR][b.owner] : OWN[b.owner].rim)}</div>`).join('');
     const kws = (card.kw || []).filter(k => BOARD_KW[k]).map(k => `<img src="${kit(BOARD_KW[k])}" alt="" title="${k}" draggable="false">`).join('');
-    const rim = ui.enamel ? OWN[u.owner].enamel : OWN[u.owner].rim;
+    const rim = THIN ? THIN_RIM[VAR][u.owner] : ui.enamel ? OWN[u.owner].enamel : OWN[u.owner].rim;
     return `<div class="unit lift ${u.owner}${ghost ? ' ghost' : ''}">${peek}${portrait(u.id, PORTRAIT, card.name)}<img class="rim" src="${kit(rim)}" alt="" draggable="false">` +
-      `<div class="ribbon">${kitImg(OWN[u.owner].ribbon)}<span class="num">${card.name}</span></div>` + (kws ? `<div class="kws">${kws}</div>` : '') +
+      (VAR === '1c' ? `<div class="nameplate">${kitImg('nameplate')}<span>${card.name}</span></div>` : `<div class="ribbon">${kitImg(OWN[u.owner].ribbon)}<span class="num">${card.name}</span></div>`) + (kws ? `<div class="kws">${kws}</div>` : '') +
       `<div class="gem">${kitImg(OWN[u.owner].gem)}<span class="num${delta}">${u.str}</span></div>` +
       (u.timer && !ghost ? `<div class="timer">${kitImg('token')}<span class="num">${u.timer}</span></div>` : '') +
       (under.length && !ghost ? `<div class="under num">+${under.length}</div>` : '') + '</div>';
