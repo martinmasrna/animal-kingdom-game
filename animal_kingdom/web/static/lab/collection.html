@@ -109,6 +109,12 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .dbtns .cancel { background: none; border: 1px solid #44484c; color: #d8d4cc; } .dbtns .cancel:hover { border-color: #6b6f74; }
 .dbtns .danger { background: #b24a3a; border: 1px solid #b24a3a; color: #fff; } .dbtns .danger:hover { background: #c75443; }
 .dsep { flex: none; height: 1px; margin: 10px 4px; background: #2e3134; }
+.tab { position: relative; width: auto; padding: 5px; }
+.tab .med { width: 40px; height: 40px; }
+.tab.all .med { font-size: 12px; }
+.tab::after { content: attr(data-tip); position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 4px 8px; border-radius: 6px; background: #000d; color: #f0ece4; font: 500 12px var(--font-text); text-transform: none; letter-spacing: 0; opacity: 0; pointer-events: none; transition: opacity .1s; z-index: 30; }
+.tab:hover::after { opacity: 1; }
+.bar .search { width: 200px; margin-right: 8px; }
 </style></head><body>
 <div class="gb" id="gb"></div><div id="modal"></div><div id="toast2"></div><div class="pop" id="pop"></div>
 
@@ -153,11 +159,11 @@ const tribeCount = list => { const t = {}; list.forEach(id => C[id].tags.forEach
 function render() {
   const keep = [...document.querySelectorAll('.decks, .cgrid')].map(e => e.scrollTop);
   const open = all.find(d => d.id === st.open), counts = open ? open.list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {}) : {};
-  const shown = cards.filter(c => (!st.tribe || c.tags.includes(st.tribe)) && (!st.rar || c.rarity === st.rar) && (st.str === '' || String(c.str) === st.str))
+  const shown = cards.filter(c => (!st.tribe || c.tags.includes(st.tribe)) && (!st.rar || c.rarity === st.rar) && (st.str === '' || String(c.str) === st.str) && (!st.q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(st.q.toLowerCase())))
     .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
   const grid = '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0, max = open && n >= (c.copies || LIMIT[c.rarity]);
     return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n ? `<span class="cnt">×${n}</span>` : ''}</div>`; }).join('') + '</div>';
-  const tabs = `<div class="tab all${st.tribe ? '' : ' on'}" data-t=""><div class="med">ALL</div>All</div>` + TRIBES.map(([t, id]) => `<div class="tab${st.tribe === t ? ' on' : ''}" data-t="${t}"><div class="med" style="${med(id, 34)}"></div>${t === 'Megafauna' ? 'Mega' : t}</div>`).join('');
+  const tabs = `<div class="tab all${st.tribe ? '' : ' on'}" data-t="" data-tip="All tribes"><div class="med">ALL</div></div>` + TRIBES.map(([t, id]) => `<div class="tab${st.tribe === t ? ' on' : ''}" data-t="${t}" data-tip="${t}"><div class="med" style="${med(id, 40)}"></div></div>`).join('');
   const seg = (k, o) => '<span class="seg">' + o.map(([v, l]) => `<span class="${(st[k] || '') === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${l}</span>`).join('') + '</span>';
   const strip = id => `<div class="st" data-card="${id}"><div class="art" style="background-image:url(${artUrl(id)})"></div><span class="s">${C[id].str}</span><span class="n">${C[id].name}</span><span class="x">${counts[id]}</span></div>`;
   const byR = r => Object.keys(counts).filter(id => C[id].rarity === r).sort((a, b) => sv(C[a]) - sv(C[b])).map(strip).join('');
@@ -172,10 +178,12 @@ function render() {
     : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${tribeCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>`) + (d.id === st.open ? body(d) : '');
   const side = `<div class="decks">${all.filter(d => d.own).map(tile).join('')}<div class="dsep"></div>${all.filter(d => !d.own).map(tile).join('')}</div>`;
   document.getElementById('gb').innerHTML = `<div class="side">${side}</div><div class="bar"><span class="back">‹ Menu</span><div class="tabs">${tabs}</div><span class="gap"></span>
-      <select class="strsel" id="strsel"><option value="">Any strength</option>${[...new Set(cards.map(c => String(c.str)))].sort((a, b) => (a === '*' ? -1 : +a) - (b === '*' ? -1 : +b)).map(v => `<option value="${v}"${st.str === v ? ' selected' : ''}>${v === '*' ? 'Variable' : 'Strength ' + v}</option>`).join('')}</select>${seg('rar', [['', 'All'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}<input class="search" placeholder="Search"></div>
+      <input class="search" id="q" placeholder="Search" value="${(st.q || '').replace(/"/g, '&quot;')}"><select class="strsel" id="strsel"><option value="">Any strength</option>${[...new Set(cards.map(c => String(c.str)))].sort((a, b) => (a === '*' ? -1 : +a) - (b === '*' ? -1 : +b)).map(v => `<option value="${v}"${st.str === v ? ' selected' : ''}>${v === '*' ? 'Variable' : 'Strength ' + v}</option>`).join('')}</select><select class="strsel" id="rarsel">${[['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']].map(([v, l]) => `<option value="${v}"${(st.rar || '') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
     <div class="cgrid">${grid}</div>`;
   document.querySelectorAll('.decks, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
   document.getElementById('strsel').onchange = e => { st.str = e.target.value; render(); };
+  document.getElementById('rarsel').onchange = e => { st.rar = e.target.value || null; render(); };
+  const q = document.getElementById('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; render(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(at, at); };
   document.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { st.tribe = e.dataset.t || null; render(); });
   document.querySelectorAll('[data-k]').forEach(e => e.onclick = () => { st[e.dataset.k] = e.dataset.v || null; render(); });
   document.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.classList.contains('nm-edit') || ev.target.closest('.tacts')) return; st.open = st.open === e.dataset.d ? null : e.dataset.d; render(); });
