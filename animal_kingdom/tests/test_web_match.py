@@ -170,3 +170,23 @@ def test_custom_deck_resolves_to_a_playable_slug(tmp_path, monkeypatch):
     import pytest
     with pytest.raises(EngineError):
         custom_decks.resolve({"name": "bad", "list": cats[:-1]})
+
+
+def test_reverse_gauntlet_rotates_the_players_deck_against_the_bots_fixed_one():
+    from animal_kingdom.engine.state import Result
+    m = Match("R", Seat("ta", "You", deck="aggro_hq_rush"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="goodstuff"))
+    m.make_gauntlet(["aggro_hq_rush", "ramp"], per_seat=1, rotating="A")
+    m._start_game()
+    seen = []
+    for i in range(4):
+        seen.append((m.seats["A"].deck, m.seats["B"].deck, m.state.first_player))
+        m.state.result = Result("A" if i < 3 else "B", "food")
+        m._check_end()
+        if i < 3:
+            assert m.view("A")["gauntlet"]["next"]["yours"]
+            m.next_game()
+    assert seen == [("aggro_hq_rush", "goodstuff", "A"), ("aggro_hq_rush", "goodstuff", "B"),
+                    ("ramp", "goodstuff", "A"), ("ramp", "goodstuff", "B")]
+    g = m.view("A")["gauntlet"]
+    assert [(r["deckName"], r["w"], r["l"]) for r in g["record"]] == [("Aggro", 2, 0), ("Ramp", 1, 1)]

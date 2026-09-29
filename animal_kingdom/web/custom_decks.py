@@ -31,7 +31,7 @@ def load() -> None:
 def resolve(spec) -> str:
     """A premade slug, or a player's deck given as {"name", "list"}: returns the slug to play it under."""
     if isinstance(spec, str):
-        if spec in PREMADE_DECKS or spec in _saved:
+        if spec in PREMADE_DECKS or spec in _saved or spec == "goodstuff":
             return spec
         raise EngineError("unknown deck")
     if not isinstance(spec, dict) or not isinstance(spec.get("list"), list):

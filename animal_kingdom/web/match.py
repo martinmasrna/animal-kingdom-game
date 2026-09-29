@@ -32,7 +32,8 @@ GAMES_TO_WIN = 2
 
 # Menu labels for the premade decks (the design mockups' names).
 DECK_NAMES = {"cats_midrange": "Cats", "canine_buff_tempo": "Canines", "aggro_hq_rush": "Aggro",
-              "colony_food_swarm": "Colony", "egg_control": "Egg", "food_otk": "Food", "ramp": "Ramp"}
+              "colony_food_swarm": "Colony", "egg_control": "Egg", "food_otk": "Food", "ramp": "Ramp",
+              "goodstuff": "Goodstuff"}
 
 # Easy / Normal / Expert, as in the play screen.
 BOT_LEVELS = {"easy": GreedyBot, "normal": TurnBot, "expert": RefereeBot}
@@ -144,14 +145,15 @@ class Match:
         self.on_game_end = None          # callback(match, log record); the server saves human games
         self.rng = random.Random(secrets.randbits(32))
         self.created = datetime.now(timezone.utc)
-        self.schedule: Optional[list[dict]] = None   # gauntlet: one {deck, first} per game, in order
+        self.schedule: Optional[list[dict]] = None   # gauntlet: one {seat, deck, first} per game, in order
 
-    def make_gauntlet(self, opponents: list[str], per_seat: int) -> None:
+    def make_gauntlet(self, decks: list[str], per_seat: int, rotating: str = "B") -> None:
         """A fixed series instead of a best-of-3: `per_seat` games going first and `per_seat` going
-        second against each opponent deck, alternating who starts, one opponent at a time."""
-        self.schedule = [{"deck": d, "first": "A" if k % 2 == 0 else "B"}
-                         for d in opponents for k in range(2 * per_seat)]
-        self.seats["B"].deck = self.schedule[0]["deck"]
+        second with each of `decks`, alternating who starts, one deck at a time. The decks rotate
+        through seat `rotating`: the bot's seat for a gauntlet, the player's for a reverse one."""
+        self.schedule = [{"seat": rotating, "deck": d, "first": "A" if k % 2 == 0 else "B"}
+                         for d in decks for k in range(2 * per_seat)]
+        self.seats[rotating].deck = self.schedule[0]["deck"]
 
     # ----------------------------------------------------------------- seats
     def seat_of(self, token: str) -> Optional[str]:
@@ -201,7 +203,7 @@ class Match:
         first = None
         if self.schedule:
             entry = self.schedule[len(self.results)]
-            self.seats["B"].deck, first = entry["deck"], entry["first"]
+            self.seats[entry.get("seat", "B")].deck, first = entry["deck"], entry["first"]
         elif self.results:
             last = self.results[-1]
             first = other_player(last["winner"]) if last["winner"] else last["first"]
@@ -274,7 +276,9 @@ class Match:
         self.state.result = result
         self.results.append({"winner": result.winner, "reason": result.reason,
                              "turns": self.state.turn_counter // 2 + 1,
-                             "first": self.state.first_player, "opp_deck": self.seats["B"].deck})
+                             "first": self.state.first_player, "opp_deck": self.seats["B"].deck,
+                             "series_deck": self.seats[self.schedule[len(self.results)].get("seat", "B")].deck
+                             if self.schedule else None})
         if self.on_game_end:
             self.on_game_end(self, self.game_log())
         score = self.score()
@@ -352,13 +356,14 @@ class Match:
         if self.schedule:
             record = {}
             for r in self.results:
-                w, l = record.get(r["opp_deck"], (0, 0))
-                record[r["opp_deck"]] = (w + (r["winner"] == "A"), l + (r["winner"] == "B"))
+                d = r.get("series_deck") or r["opp_deck"]
+                w, l = record.get(d, (0, 0))
+                record[d] = (w + (r["winner"] == "A"), l + (r["winner"] == "B"))
             n = len(self.results)
             nxt = self.schedule[n] if n < len(self.schedule) else None
             v["gauntlet"] = {"played": n, "total": len(self.schedule),
                              "next": nxt and {"deckName": DECK_NAMES.get(nxt["deck"], nxt["deck"]),
-                                              "first": nxt["first"]},
+                                              "first": nxt["first"], "yours": nxt.get("seat", "B") == s},
                              "record": [{"deckName": DECK_NAMES.get(d, d), "w": w, "l": l}
                                         for d, (w, l) in record.items()]}
         if self.state is not None:

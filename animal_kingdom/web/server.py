@@ -19,7 +19,7 @@ from pathlib import Path
 
 from aiohttp import WSMsgType, web
 
-from ..decks import PREMADE_DECKS
+from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine.state import EngineError
 from ..engine.cards import DECK_SLUGS
 from . import custom_decks
@@ -135,8 +135,8 @@ async def index(_req):
 async def pool(_req):
     return web.json_response({
         "cards": card_pool(),
-        "decks": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": PREMADE_DECKS[slug]}
-                  for slug in DECK_NAMES if slug in PREMADE_DECKS],
+        "decks": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug)}
+                  for slug in DECK_NAMES if slug in PREMADE_DECKS or slug == "goodstuff"],
         "map": map_info(),
         "levels": list(BOT_LEVELS),
     })
@@ -156,13 +156,17 @@ async def create_match(req):
         level = gauntlet.get("level", "normal")
         if level not in BOT_LEVELS:
             raise web.HTTPBadRequest(text="bad bot level")
-        opponents = [d for d in sorted(DECK_SLUGS) if d != deck]
-        match.join(Seat(secrets.token_urlsafe(12), f"Bot · {level.capitalize()}", bot=level, deck=opponents[0]))
-        match.make_gauntlet(opponents, per_seat=5)
+        field = [d for d in sorted(DECK_SLUGS) if d != deck]
+        match.join(Seat(secrets.token_urlsafe(12), f"Bot · {level.capitalize()}", bot=level, deck=field[0]))
+        if gauntlet.get("reverse"):     # the bot keeps the chosen deck; the player plays the field
+            match.seats["B"].deck = deck
+            match.make_gauntlet(field, per_seat=5, rotating="A")
+        else:
+            match.make_gauntlet(field, per_seat=5)
         match._start_game()
         match.version += 1
     elif bot:
-        if bot.get("level") not in BOT_LEVELS or bot.get("deck") not in PREMADE_DECKS:
+        if bot.get("level") not in BOT_LEVELS or bot.get("deck") not in {*PREMADE_DECKS, "goodstuff"}:
             raise web.HTTPBadRequest(text="bad bot")
         match.join(Seat(secrets.token_urlsafe(12), f"Bot · {bot['level'].capitalize()}",
                         bot=bot["level"], deck=bot["deck"]))

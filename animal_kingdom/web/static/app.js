@@ -6,7 +6,7 @@ import { renderBoard, STAGE, crossroadAt, denMouthAt } from './board.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const COVER = { cats_midrange: 'king_theron', canine_buff_tempo: 'lobo', aggro_hq_rush: 'verminus', colony_food_swarm: 'queen_honoria',
-  egg_control: 'eon', food_otk: 'rat_king', ramp: 'borealis' };
+  egg_control: 'eon', food_otk: 'rat_king', ramp: 'borealis', goodstuff: 'gale' };
 const RANK = { legendary: 0, rare: 1, common: 2 };
 const COL = { A: 'var(--A)', B: 'var(--B)' };   // history tiles in team colour
 const SKIP = '__skip__';
@@ -121,10 +121,11 @@ function homeScreen() {
 }
 
 // ------------------------------------------------------------------ play
-const play = { opp: 'bot', level: 'normal', botDeck: 'random', code: '' };
+const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', code: '' };
 function playScreen() {
   screen = 'play';
   const chosen = chosenDeck(), deck = chosen.id;
+  const field = DECKS.filter(d => d.id !== 'goodstuff' && d.id !== deck).length, rev = play.opp === 'gauntlet' && play.side === 'theirs';
   const chip = (k, v, label) => `<span class="chip${play[k] === v ? ' on' : ''}" data-k="${k}" data-v="${v}">${label}</span>`;
   app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Menu</a><h1>Play</h1></div>
     <div class="body">
@@ -132,14 +133,15 @@ function playScreen() {
         <div class="opt${play.opp === 'friend' ? ' on' : ''}" data-opp="friend"><b>Friend</b><span>Invite someone with a link or a code</span></div>
         ${play.opp === 'friend' ? `<div class="sub"><div class="lbl">Join with a code</div><div class="row"><input class="codein" id="code" maxlength="6" value="${play.code}" placeholder="CODE"><span class="chip on" id="joinbtn">Join</span></div></div>` : ''}
         <div class="opt${play.opp === 'bot' ? ' on' : ''}" data-opp="bot"><b>Bot</b><span>Play against the computer</span></div>
-        <div class="opt${play.opp === 'gauntlet' ? ' on' : ''}" data-opp="gauntlet"><b>Gauntlet</b><span>10 games against each other deck, 5 going first, 5 going second</span></div>
-        ${play.opp === 'gauntlet' ? `<div class="sub"><div class="lbl">Level</div><div class="row">${chip('level', 'easy', 'Easy')}${chip('level', 'normal', 'Normal')}${chip('level', 'expert', 'Expert')}</div></div>` : ''}
+        <div class="opt${play.opp === 'gauntlet' ? ' on' : ''}" data-opp="gauntlet"><b>Gauntlet</b><span>10 games per starter deck, 5 going first, 5 going second</span></div>
+        ${play.opp === 'gauntlet' ? `<div class="sub"><div class="lbl">Level</div><div class="row">${chip('level', 'easy', 'Easy')}${chip('level', 'normal', 'Normal')}${chip('level', 'expert', 'Expert')}</div>
+          <div class="lbl">The chosen deck</div><div class="row">${chip('side', 'mine', 'You play it')}${chip('side', 'theirs', 'The bot plays it')}</div></div>` : ''}
         ${play.opp === 'bot' ? `<div class="sub"><div class="lbl">Level</div><div class="row">${chip('level', 'easy', 'Easy')}${chip('level', 'normal', 'Normal')}${chip('level', 'expert', 'Expert')}</div>
           <div class="lbl">Their deck</div><div class="row">${chip('botDeck', 'random', 'Random')}${DECKS.map(d => chip('botDeck', d.id, d.name)).join('')}</div></div>` : ''}
       </div>
-      <div class="decks"><div class="lbl">Your deck</div><div class="grid">${playable().map(d => deckTile(d, d.id === deck)).join('')}</div></div>
+      <div class="decks"><div class="lbl">${rev ? 'Bot\'s deck' : 'Your deck'}</div><div class="grid">${playable().map(d => deckTile(d, d.id === deck)).join('')}</div></div>
     </div>
-    <div class="bar"><span class="fmt">${play.opp === 'gauntlet' ? '60 games · your deck against the other six · both decklists open' : 'Best of 3 · one deck for the whole match · both decklists open'}</span><button class="btn primary" id="go">${play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Start match'}</button></div>`;
+    <div class="bar"><span class="fmt">${play.opp === 'gauntlet' ? `${10 * field} games · ${rev ? `you play ${field} starter decks against it` : `your deck against ${field} starter decks`} · both decklists open` : 'Best of 3 · one deck for the whole match · both decklists open'}</span><button class="btn primary" id="go">${play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Start match'}</button></div>`;
   app.querySelectorAll('[data-opp]').forEach(el => el.onclick = () => { play.opp = el.dataset.opp; playScreen(); });
   app.querySelectorAll('.chip[data-k]').forEach(el => el.onclick = () => { play[el.dataset.k] = el.dataset.v; playScreen(); });
   app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:deck', el.dataset.deck); playScreen(); });
@@ -152,10 +154,10 @@ function playScreen() {
   document.getElementById('go').onclick = async () => {
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
-      const bd = play.botDeck === 'random' ? DECKS[Math.floor(Math.random() * DECKS.length)].id : play.botDeck;
+      const pool = DECKS.filter(d => d.id !== 'goodstuff'), bd = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
       body.bot = { level: play.level, deck: bd };
     }
-    if (play.opp === 'gauntlet') body.gauntlet = { level: play.level };
+    if (play.opp === 'gauntlet') body.gauntlet = { level: play.level, reverse: rev };
     const r = await fetch('/api/match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
@@ -623,7 +625,7 @@ function drawEnd() {
     const done = V.phase === 'match_over';
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${done ? 'Gauntlet done' : res[1]}</div><div class="how">${how} · turn ${G.round}</div>
       <div class="how">Game ${g.played} of ${g.total} · overall <b>${tot[0]}–${tot[1]}</b></div><div class="how">${rows}</div>
-      ${done ? '' : `<div class="next">Next: vs ${g.next.deckName} · ${g.next.first === you ? 'you go first' : 'they go first'}</div>`}
+      ${done ? '' : `<div class="next">Next: ${g.next.yours ? `you play ${g.next.deckName}` : `vs ${g.next.deckName}`} · ${g.next.first === you ? 'you go first' : 'they go first'}</div>`}
       <div class="btns">${done ? '<a class="btn primary" href="#/">Menu</a>' : '<button class="btn primary" id="nextg">Next game</button>'}</div>${peek}</div>`;
     if (!done) document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else if (V.phase === 'game_over') {

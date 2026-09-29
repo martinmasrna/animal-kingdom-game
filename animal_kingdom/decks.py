@@ -54,10 +54,20 @@ BASELINE_DECK: list[str] = [
     "greywhisker", "mock_removal", "mock_vanilla_10", "mock_flyer_7",
 ]
 
-# Decks loadable by slug that are not shipped premades: the baseline, plus synthetic decks the sim
-# tools register (optimizer candidates, goodstuff piles). Registered decks are mirrored into
+# The goodstuff pile: the greedy optimizer's best cross-deck list over the current pool
+# (2026-09-29; RefereeBot has it at 73.7% against the seven premades). The web client offers it
+# as a deck, so it can be played and played against.
+GOODSTUFF_DECK: list[str] = (
+    ["alpha", "bulwark", "gale", "pestis"]
+    + ["chinchilla", "polar_bear", "rhinoceros", "taipan"] * 2
+    + ["dire_wolf", "elephant", "lemming", "lion", "mouse", "tiger"] * 3
+)
+
+# Decks loadable by slug that are not shipped premades: the baseline, the goodstuff pile, and
+# synthetic decks the sim tools register (optimizer candidates, other piles, which may take the
+# "goodstuff" slug over for their own run). Registered decks are mirrored into
 # $AK_EXTRA_DECKS so `spawn`ed worker processes, which re-import this module, load them too.
-EXTRA_DECKS: dict[str, list[str]] = {"baseline": BASELINE_DECK}
+EXTRA_DECKS: dict[str, list[str]] = {"baseline": BASELINE_DECK, "goodstuff": GOODSTUFF_DECK}
 EXTRA_DECKS.update(json.loads(os.environ.get("AK_EXTRA_DECKS", "{}")))
 
 
