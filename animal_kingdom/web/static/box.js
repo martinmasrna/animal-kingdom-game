@@ -23,6 +23,8 @@ const PITS = s => PIT_Y.map((y, i) => [PX(RIDGE[s] + (i % 2 ? 6 : -6)), PY(y)]);
 const CROWN = { A: [PX(118), PY(150)], B: [PX(1565), PY(150)] }, MOUTH = { A: [PX(176), PY(390)], B: [PX(1500), PY(378)] };
 // A number in painted chalk digits (kit2/chalk/<d>.webp, '+' as p), for a boss to hold.
 const chalk = n => `<span class="chalk">${String(n).split('').map(d => `<img src="/static/kit2/chalk/${d === '+' ? 'p' : d}.webp" alt="${d}" draggable="false">`).join('')}</span>`;
+// every count animates through all digits, so load them up front (a digit fetched mid-count shows as a gap)
+if (typeof Image !== 'undefined') for (let d = 0; d < 10; d++) { new Image().src = `/static/kit2/gemnum/${d}.webp`; new Image().src = `/static/kit2/chalk/${d}.webp`; }
 const gemDigits = n => `<span class="gemnum">${String(n).split('').map(d => `<img src="/static/kit2/gemnum/${d}.webp" alt="${d}" draggable="false">`).join('')}</span>`;
 const put = (cls, x, y, html = '', attrs = '') => `<div class="abs ${cls}" style="left:${x}px;top:${y}px" ${attrs}>${html}</div>`;
 
@@ -46,7 +48,7 @@ function unit(u, under, cards, extra = '') {
 // `ui`: { rings: [cr], hqRing, preview: {cr, id, str}, anim: {board} (the board before this view, so new pieces land) }.
 export function renderBoard(el, M, g, cards, ui) {
   const topOf = cr => (g.board[cr] || []).slice(-1)[0], owner = cr => (topOf(cr) || {}).owner;
-  const rings = new Set(ui.rings || []);
+  const rings = new Set(ui.rings || []), heldStones = {};
   // A piece lands where the top unit changed since the last view; if it covered a piece, that one sinks under it.
   const topIid = (b, cr) => ((b[cr] || []).slice(-1)[0] || {}).iid;
   const landed = cr => ui.anim && topIid(g.board, cr) !== undefined && topIid(ui.anim.board, cr) !== topIid(g.board, cr);
@@ -70,6 +72,7 @@ export function renderBoard(el, M, g, cards, ui) {
     const [c, r] = reg.c, cs = [key(c, r), key(c + 1, r), key(c, r + 1), key(c + 1, r + 1)], o = cs.map(owner);
     const held = o.every(x => x && x === o[0]) ? o[0] : '';
     const sx = (CX(c, r) + CX(c + 1, r + 1)) / 2, sy = (CY(c, r) + CY(c + 1, r + 1)) / 2;
+    if (held) (heldStones[held] = heldStones[held] || []).push([sx, sy, reg.food]);
     // painted: the stone with its number carved in, in its holder's paint (kit2/stone<food>_<n|a|b>)
     // painted: the plate's own stone, with a small boss lying on it holding the payout, in the holder's colour when held
     s += PAINT ? put(`stone pboss ${held}`, sx, sy, chalk('+' + reg.food))
@@ -95,15 +98,29 @@ export function renderBoard(el, M, g, cards, ui) {
       const now = state(food, inc), src = ([r, t], i) => `/static/kit2/pits/${side === 'A' ? 'a' : 'b'}pit${i % 3 + 1}_${r}_${t - r}.webp`;
       // Food just came in: every pit whose state changed ripens in turn from the bottom up, the old state fading out under it.
       const A = ui.anim, gained = A && A.food && food > A.food[side], was = gained ? state(A.food[side], A.income[side]) : null;
-      let fruit = '', k = 0;
-      PITS(side).forEach(([px, py], i) => {
+      // One fruit per food flies from each stone the side holds to the pit it fills, in the order the pits fill.
+      const FLY = 0.7, GAP = 0.035, pits = PITS(side), arrive = {};
+      let fruit = '';
+      if (gained && heldStones[side]) {
+        const from = A.food[side], n = Math.min(food, win) - from, srcs = [];
+        heldStones[side].forEach(([sx, sy, f]) => { for (let j = 0; j < f; j++) srcs.push([sx, sy]); });
+        for (let j = 0; j < n; j++) {
+          const [sx, sy] = srcs[j % srcs.length], idx = from + j, pi = Math.min(pits.length - 1, Math.floor(idx / unit10));
+          const [tx, ty] = pits[pi], t0 = j * GAP;
+          arrive[pi] = t0 + FLY;
+          fruit += `<i class="flyfruit" style="left:${sx}px;top:${sy}px;--dx:${tx - sx + (j % 3 - 1) * 8}px;--dy:${ty - sy}px;animation-delay:${t0}s;` +
+            `background-image:url(/static/kit2/fly_${side === 'A' ? 'a' : 'b'}${j % 4}.webp)"></i>`;
+        }
+      }
+      let k = 0;
+      pits.forEach(([px, py], i) => {
         const cur = now(i), old = was && was(i), moved = old && (old[0] !== cur[0] || old[1] !== cur[1]);
-        const d = moved ? `style="animation-delay:${0.15 + 0.11 * k++}s"` : '';
+        const d = moved ? `style="animation-delay:${i in arrive ? arrive[i] - 0.12 : 0.15 + 0.11 * k++}s"` : '';
         fruit += put(`pit${moved ? ' ripen' : ''}`, px, py, (moved ? `<img class="was" src="${src(old, i)}" alt="" draggable="false" ${d}>` : '') +
           `<img class="now" src="${src(cur, i)}" alt="" draggable="false" ${d}>`);
       });
       const [mx, my] = MOUTH[side], [kx, ky] = CROWN[side];
-      s += fruit + put(`dcount ${side}${gained ? ' tick' : ''}`, kx, ky, gemDigits(gained ? A.food[side] : food), `data-from="${gained ? A.food[side] : food}" data-to="${food}" data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
+      s += fruit + put(`dcount ${side}${gained ? ' tick' : ''}`, kx, ky, gemDigits(gained ? A.food[side] : food), `data-from="${gained ? A.food[side] : food}" data-to="${food}"${Object.keys(arrive).length ? ` data-lag="${FLY * 1000}" data-dur="${(Math.min(food, win) - A.food[side]) * GAP * 1000}"` : ''} data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
         put(`mouth${ring}`, mx, my, '', `data-hq="${side}"`);
       continue;
     }
@@ -115,7 +132,7 @@ export function renderBoard(el, M, g, cards, ui) {
   el.innerHTML = s;
   // the gem counts up to its new total while the pits ripen
   el.querySelectorAll('.dcount.tick').forEach(g => {
-    const from = +g.dataset.from, to = +g.dataset.to, t0 = performance.now() + 150, dur = 300 + 110 * Math.ceil((to - from) / 10);
+    const from = +g.dataset.from, to = +g.dataset.to, t0 = performance.now() + (+g.dataset.lag || 150), dur = +g.dataset.dur || 300 + 110 * Math.ceil((to - from) / 10);
     const step = t => { const n = Math.round(from + (to - from) * Math.min(1, Math.max(0, (t - t0) / dur)));
       g.innerHTML = gemDigits(n); if (n < to && g.isConnected) requestAnimationFrame(step); };
     requestAnimationFrame(step);

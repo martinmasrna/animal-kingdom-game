@@ -193,3 +193,8 @@
 @keyframes unripe { 0% { opacity: 1; } 100% { opacity: 0; } }
 .bx .dcount.tick { animation: gempulse .5s ease-out .15s both; }
 @keyframes gempulse { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+/* income in flight: painted fruit arc from each held stone to the pit it fills, then the pit ripens */
+.bx .flyfruit { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; z-index: 30; pointer-events: none; background: center / contain no-repeat;
+  filter: drop-shadow(1px 3px 2px rgba(20,12,4,.5)); animation: flyfruit .7s cubic-bezier(.45,0,.55,1) both; }
+@keyframes flyfruit { 0% { opacity: 0; transform: translate(0, 0) scale(.5); } 12% { opacity: 1; transform: translate(calc(var(--dx) * .1), -34px) scale(1.15); }
+  55% { transform: translate(calc(var(--dx) * .6), calc(var(--dy) * .5 - 46px)) scale(1.1); } 92% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.75); } }
