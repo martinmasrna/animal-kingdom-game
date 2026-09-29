@@ -188,3 +188,6 @@
 .coll .frow .backbtn { width: auto; flex: none; min-width: 112px; }
 .coll .fcount { flex-direction: row; align-items: baseline; gap: 5px; }
 .coll .fcount span { margin-top: 0; font-size: 15px; letter-spacing: 0; }
+.coll .fcount { align-items: center; justify-content: center; }
+.coll .fcount b, .coll .fcount span { line-height: 1; display: block; }
+.coll .fcount { display: grid; grid-auto-flow: column; place-content: center; align-items: baseline; column-gap: 5px; }
