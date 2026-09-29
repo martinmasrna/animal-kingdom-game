@@ -36,7 +36,7 @@ const familyCount = list => { const t = {}; list.forEach(id => C[id].tags.forEac
 // Your decks (saved on your profile) then the starters, all as {id, name, list, cover, own}.
 function decks() {
   const mine = X.getDecks().map(d => ({ id: d.id, name: d.name, list: listOf(d.cards), cover: d.cover && C[d.cover] ? d.cover : null, own: true }));
-  mine.forEach(d => d.cover = d.cover || coverOf(d.list.length ? d.list : ['lion']));
+  mine.forEach(d => d.cover = d.cover || (d.list.length ? coverOf(d.list) : null));
   return [...mine, ...X.starters.map(d => ({ id: d.id, name: d.name, list: d.list, cover: X.covers[d.id] || coverOf(d.list), own: false }))];
 }
 function save(all) {
@@ -90,14 +90,14 @@ function render(app, all) {
       ${rhead('Legendary', 'legendary', 4)}${byR('legendary')}${rhead('Rare', 'rare', 8)}${byR('rare')}${rhead('Common', 'common')}${byR('common')}
       ${d.list.length === 30 ? '<div class="play" id="play">Play this deck</div>' : `<div class="play off">${d.list.length} / 30 cards</div>`}</div>`; };
   const tile = d => d.id === st.open
-    ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${esc(d.name)}</b>
+    ? `<div class="dtile on" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${esc(d.name)}</b>
         <div class="tacts">${d.own ? `<button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button>` : ''}<button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>${d.own ? `<button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button>` : ''}</div></div>${body(d)}`
-    : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${esc(d.name)}</b><span>${familyCount(d.list).slice(0, 2).map(([f, n]) => n + ' ' + f).join(' · ')}</span></div>`;
+    : `<div class="dtile" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b>${esc(d.name)}</b><span>${familyCount(d.list).slice(0, 2).map(([f, n]) => n + ' ' + f).join(' · ')}</span></div>`;
   const mine = all.filter(d => d.own), starters = all.filter(d => !d.own);
 
   app.innerHTML = `<div class="coll">${head}<div class="cgrid">${grid}</div>
     <div class="side"><div class="clist">${mine.map(tile).join('')}${mine.length ? '<div class="dsep"></div>' : ''}${starters.map(tile).join('')}</div>
-      <div class="sfoot"><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div><div class="modal" id="cmodal"></div></div>`;
+      <div class="sfoot"><button class="dnew" id="dnew">+ New deck</button><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div><div class="modal" id="cmodal"></div></div>`;
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
   wire(app, all, open);
 }
@@ -120,6 +120,10 @@ function wire(app, all, open) {
   const cp = $('dcopy'); if (cp) cp.onclick = () => navigator.clipboard.writeText(encodeDeck(open.name, open.list, C)).then(() => X.toast('Deck code copied', true), () => X.toast('Could not copy'));
   const cov = $('dcover'); if (cov) cov.onclick = () => pickCover(app, open, change);
   const del = $('ddel'); if (del) del.onclick = () => confirmDelete(app, open, () => { all.splice(all.indexOf(open), 1); st.open = null; change(); X.toast(`Deleted ${open.name}`, true); });
+  // A new deck starts empty, open, with its name ready to type.
+  $('dnew').onclick = () => { const d = { id: Date.now().toString(36), name: 'New deck', list: [], cover: null, own: true };
+    all.splice(all.filter(x => x.own).length, 0, d); st.open = d.id; st.rename = true; change(); };
+  if (st.rename) { st.rename = false; const n = app.querySelector('.nm-edit'); if (n) n.click(); }
   const play = $('play'); if (play) play.onclick = () => X.play(open);
 
   // Click a card to add a copy; a refused add says why. Right-click a card, or click its strip, to take one out.

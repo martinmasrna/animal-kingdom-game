@@ -81,6 +81,18 @@ test('delete asks first', async () => {
   assert.equal((await myDecks()).length, n - 1);
 });
 
+test('New deck starts an empty deck, open, with its name ready to type', async () => {
+  const n = (await myDecks()).length;
+  await page.click('#dnew'); await wait(80);
+  assert.ok(await page.$('.nm-in'), 'the name is being edited');
+  await page.keyboard.type('Scratch'); await page.keyboard.press('Enter'); await wait(120);
+  const decks = await myDecks(); assert.equal(decks.length, n + 1);
+  assert.deepEqual([decks[n].name, decks[n].cards], ['Scratch', {}]);
+  assert.match(await page.$eval('.play', e => e.textContent), /0 \/ 30/);
+  await page.click(card('lion')); await wait(80);
+  assert.deepEqual((await myDecks())[n].cards, { lion: 1 }, 'cards go into the new deck');
+});
+
 test('filters: a family, clearing it, and an empty result', async () => {
   const count = () => page.$$eval('.cgrid .tl', t => t.length);
   const all = await count();
@@ -91,7 +103,7 @@ test('filters: a family, clearing it, and an empty result', async () => {
 });
 
 test('Play opens the play screen with the deck chosen; Back and Escape leave', async () => {
-  await openDeck('.clist .dtile');                         // the first of your decks
+  await openDeck('.clist .dtile:first-child');             // the first of your decks (complete)
   if (!(await page.$('#play'))) return assert.fail('the open deck should be complete');
   await page.click('#play'); await wait(150);
   assert.ok(page.url().endsWith('#/play')); assert.match(await page.evaluate(() => localStorage.getItem('ak:deck')), /^my:/);
