@@ -29,7 +29,8 @@ test('the screen: the grid beside the deck column, the header on the grid\'s edg
 });
 
 test('editing a starter makes your copy; the starter stays', async () => {
-  assert.ok(await page.$('[data-d="cats_midrange"].on'), 'a first visit opens the first starter');
+  assert.equal(await page.$('.dtile.on'), null, 'a first visit opens nothing');
+  await openDeck('[data-d="cats_midrange"]');
   await page.click('.side .st[data-card="lion"]'); await wait(100);
   const decks = await myDecks();
   assert.equal(decks.length, 1); assert.equal(decks[0].name, 'Cats copy');

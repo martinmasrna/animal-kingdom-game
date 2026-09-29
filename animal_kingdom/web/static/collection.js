@@ -55,8 +55,8 @@ export function collectionScreen(app, ctx) {
   cards = Object.values(C).filter(c => starterIds.has(c.deck));
   if (!wired) { wired = true; wireGlobal(); }
   const all = decks();
-  // First visit: your first deck, or else the first starter (adding to it starts your copy).
-  if (st.open === null || !all.some(d => d.id === st.open)) st.open = (all.find(d => d.own) || all[0] || {}).id || null;
+  // Opens your first deck; with none yet, nothing is open and the grid is for browsing.
+  if (st.open === null || !all.some(d => d.id === st.open)) st.open = (all.find(d => d.own) || {}).id || null;
   render(app, all);
 }
 
@@ -78,8 +78,8 @@ function render(app, all) {
     + FAMILIES.map(([f, id]) => `<div class="tab${st.family === f ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
   const strengths = [...new Set(cards.map(c => String(c.str)))].sort((a, b) => (a === '*' ? -1 : +a) - (b === '*' ? -1 : +b));
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
-    <select class="sel" id="strsel"><option value="">Any strength</option>${strengths.map(v => `<option value="${v}"${st.str === v ? ' selected' : ''}>${v === '*' ? 'Variable' : 'Strength ' + v}</option>`).join('')}</select>
-    <select class="sel" id="rarsel">${[['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']].map(([v, l]) => `<option value="${v}"${(st.rar || '') === v ? ' selected' : ''}>${l}</option>`).join('')}</select>
+    <span class="selw"><select class="sel" id="strsel"><option value="">Any strength</option>${strengths.map(v => `<option value="${v}"${st.str === v ? ' selected' : ''}>${v === '*' ? 'Variable' : 'Strength ' + v}</option>`).join('')}</select></span>
+    <span class="selw"><select class="sel" id="rarsel">${[['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']].map(([v, l]) => `<option value="${v}"${(st.rar || '') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></span>
     <input class="search" id="q" placeholder="Search" value="${esc(st.q)}"></div>`;
 
   const strip = id => `<div class="st" data-card="${id}"><div class="art" style="background-image:url(${artUrl(id)})"></div><span class="s">${C[id].str}</span><span class="n">${esc(C[id].name)}</span><span class="x">${C[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
@@ -125,7 +125,7 @@ function wire(app, all, open) {
   // Click a card to add a copy; a refused add says why. Right-click a card, or click its strip, to take one out.
   app.querySelectorAll('.cgrid [data-card]').forEach(e => {
     e.onclick = () => { const c = C[e.dataset.card];
-      if (!open) return X.toast('Open a deck to add cards');
+      if (!open) return X.toast('Open a deck on the right to build it');
       const n = open.list.filter(x => x === c.id).length, inR = open.list.filter(x => C[x].rarity === c.rarity).length;
       const why = open.list.length >= 30 ? 'tot' : n >= limit(c) ? 'pips' : CAP[c.rarity] && inR >= CAP[c.rarity] ? c.rarity : null;
       if (why) return refuse(app, e, why);
