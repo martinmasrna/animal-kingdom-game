@@ -82,8 +82,14 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
   font: 700 22px/1 var(--font-text); color: #f0ece4; text-shadow: 0 1px 3px #000; cursor: pointer; }
 .dtile .keb:hover { background: rgba(0,0,0,.45); }
 .dtile em + .keb { right: 6px; } .dtile:has(.keb) em { right: 40px; }
+.dacts { display: flex; justify-content: space-between; padding: 10px 2px 2px; font: 500 13px var(--font-text); color: #8b8e92; }
+.dacts span { cursor: pointer; } .dacts span:hover { color: #d8d4cc; } .dacts .armed { color: #e8826f; }
+.nm-edit { cursor: text; } .nm-edit:hover { text-decoration: underline dotted #8b8e92; text-underline-offset: 4px; }
+.nm-in { position: absolute; left: 8px; right: 8px; top: 50%; transform: translateY(-50%); height: 32px; border-radius: 6px; border: 1px solid #d8d4cc; background: #16181acc; color: #f0ece4; font: 700 19px 'Fira Sans Condensed', sans-serif; padding: 0 6px; }
+.cgrid .tl:not(.max) { cursor: pointer; } .side .st { cursor: pointer; }
+#toast2 { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 99; padding: 9px 16px; border-radius: 8px; background: #2c3034; color: #f0ece4; font: 600 14px var(--font-text); opacity: 0; transition: opacity .2s; pointer-events: none; }
 </style></head><body>
-<div class="gb" id="gb"></div><div class="pop" id="pop"></div>
+<div class="gb" id="gb"></div><div id="toast2"></div><div class="pop" id="pop"></div>
 
 <script type="module">
 import { cardHTML } from '/static/card.js';
@@ -97,8 +103,27 @@ const RANK = { legendary: 0, rare: 1, common: 2 }, sv = c => c.str === '*' ? -1 
 const med = (id, M) => { const [cx, cy, D] = CROP[id], w = M / D, h = w * 1.5;
   return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${M / 2 - cx * w}px ${M / 2 - cy * h}px`; };
 // The decks: yours first, then the starters. Clicking one opens it in place in the left column; clicking it again closes it.
-const mine = [{ id: 'mine1', name: 'Colony copy', list: decks.find(d => d.id === 'colony_food_swarm').list, cover: 'queen_honoria', own: true }];
-const all = [...mine, ...decks.map(d => ({ ...d, cover: d.list.find(id => C[id].rarity === 'legendary' && CROP[id]) }))];
+const coverOf = list => list.find(id => C[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
+const all = [{ id: 'mine1', name: 'Colony copy', list: [...decks.find(d => d.id === 'colony_food_swarm').list], cover: 'queen_honoria', own: true },
+  ...decks.map(d => ({ ...d, list: [...d.list], cover: coverOf(d.list) }))];
+const CAP = { legendary: 4, rare: 8 };
+let armed = false, toastT;
+const toast = t => { const e = document.getElementById('toast2'); e.textContent = t; e.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => e.style.opacity = 0, 2200); };
+// Deck codes: readable lines for people and agents, then one compact line the game reads. Import takes either.
+const byStr = list => Object.entries(list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {})).sort((a, b) => RANK[C[a[0]].rarity] - RANK[C[b[0]].rarity] || sv(C[a[0]]) - sv(C[b[0]]));
+const deckCode = d => [`### ${d.name}`, ...byStr(d.list).map(([id, n]) => `# ${n}x (${C[id].str}) ${C[id].name}`), '#', 'AK1:' + btoa(byStr(d.list).map(([id, n]) => id + '.' + n).join(',')).replace(/=+$/, '')].join('\n');
+function parseCode(t) {
+  const m = t.match(/AK1:([A-Za-z0-9+/]+)/); let list = [];
+  if (m) { try { atob(m[1]).split(',').forEach(x => { const [id, n] = x.split('.'); if (C[id]) for (let i = 0; i < +n; i++) list.push(id); }); } catch { } }
+  if (!list.length) { const byName = Object.fromEntries(Object.values(C).map(c => [c.name.toLowerCase(), c.id]));
+    for (const line of t.split('\n')) { const q = line.match(/(\d+)\s*x\s*(?:\(\S+\)\s*)?(.+)$/i); const id = q && byName[q[2].trim().toLowerCase()]; if (id) for (let i = 0; i < +q[1]; i++) list.push(id); } }
+  const name = (t.match(/^###\s*(.+)$/m) || [])[1];
+  return list.length ? { name: (name || 'Imported deck').trim(), list } : null;
+}
+// Editing a starter makes your copy of it first; the starter never changes.
+function editable() { let d = all.find(x => x.id === st.open); if (!d || d.own) return d;
+  const copy = { id: 'm' + Date.now(), name: d.name + ' copy', list: [...d.list], cover: d.cover, own: true };
+  all.splice(all.filter(x => x.own).length, 0, copy); st.open = copy.id; toast(`Editing your copy: ${copy.name}`); return copy; }
 const st = { open: 'mine1', tribe: null, rar: null, str: '' };
 const tribeCount = list => { const t = {}; list.forEach(id => C[id].tags.forEach(x => { if (TRIBES.some(y => y[0] === x)) t[x] = (t[x] || 0) + 1; })); return Object.entries(t).sort((a, b) => b[1] - a[1]); };
 function render() {
@@ -116,9 +141,10 @@ function render() {
   const body = d => `<div class="dbody">
       ${tribeCount(d.list).length > 1 ? `<div class="tribes">${tribeCount(d.list).map(([t, n]) => `<div><div class="med" style="${med(TRIBES.find(x => x[0] === t)[1], 26)}"></div>${n}</div>`).join('')}</div>` : ''}
       ${head('Legendary', inR('legendary'), 4)}${byR('legendary')}${head('Rare', inR('rare'), 8)}${byR('rare')}${head('Common', inR('common'))}${byR('common')}
-      <div class="pf"><div class="play">Play this deck</div></div></div>`;
+      <div class="pf"><div class="play">Play this deck</div></div>
+      <div class="dacts"><span id="dcopy">Copy deck code</span>${d.own ? `<span id="ddel" class="${armed ? 'armed' : ''}">${armed ? 'Click again to delete' : 'Delete deck'}</span>` : ''}</div></div>`;
   const tile = d => (d.id === st.open
-    ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}</div>`
+    ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}</div>`
     : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${tribeCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>`) + (d.id === st.open ? body(d) : '');
   const side = `<div class="decks">${all.filter(d => d.own).map(tile).join('')}
       <h4>Starter decks</h4>${all.filter(d => !d.own).map(tile).join('')}</div>`;
@@ -128,12 +154,27 @@ function render() {
   document.getElementById('strsel').onchange = e => { st.str = e.target.value; render(); };
   document.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { st.tribe = e.dataset.t || null; render(); });
   document.querySelectorAll('[data-k]').forEach(e => e.onclick = () => { st[e.dataset.k] = e.dataset.v || null; render(); });
-  document.querySelectorAll('[data-d]').forEach(e => e.onclick = () => { st.open = st.open === e.dataset.d ? null : e.dataset.d; render(); });
+  document.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.classList.contains('nm-edit')) return; st.open = st.open === e.dataset.d ? null : e.dataset.d; armed = false; render(); });
+  const nm = document.querySelector('.nm-edit'); if (nm) nm.onclick = () => { const d = all.find(x => x.id === st.open), inp = document.createElement('input'); inp.className = 'nm-in'; inp.value = d.name;
+    nm.replaceWith(inp); inp.focus(); inp.select(); const done = () => { d.name = inp.value.trim() || d.name; render(); }; inp.onblur = done; inp.onkeydown = k => { if (k.key === 'Enter') inp.blur(); if (k.key === 'Escape') { inp.value = d.name; inp.blur(); } }; };
+  const cp = document.getElementById('dcopy'); if (cp) cp.onclick = () => { const code = deckCode(all.find(x => x.id === st.open)); navigator.clipboard.writeText(code).then(() => toast('Deck code copied'), () => toast('Copy failed')); window.__lastCode = code; };
+  const del = document.getElementById('ddel'); if (del) del.onclick = ev => { ev.stopPropagation(); if (!armed) { armed = true; render(); return; }
+    const i = all.findIndex(x => x.id === st.open); toast(`Deleted ${all[i].name}`); all.splice(i, 1); st.open = null; armed = false; render(); };
+  // Click a grid card to add a copy, a deck strip to take one out.
+  document.querySelectorAll('.cgrid [data-card]').forEach(e => e.onclick = () => { const c = C[e.dataset.card]; if (!st.open) return toast('Open a deck to add cards');
+    const d0 = all.find(x => x.id === st.open), n = d0.list.filter(x => x === c.id).length, inR = d0.list.filter(x => C[x].rarity === c.rarity).length;
+    if (d0.list.length >= 30 || n >= (c.copies || LIMIT[c.rarity]) || (CAP[c.rarity] && inR >= CAP[c.rarity])) return;
+    editable().list.push(c.id); document.getElementById('pop').style.display = 'none'; render(); });
+  document.querySelectorAll('.side [data-card]').forEach(e => e.onclick = () => { const d = editable(); d.list.splice(d.list.indexOf(e.dataset.card), 1); document.getElementById('pop').style.display = 'none'; render(); });
   const pop = document.getElementById('pop');
   document.querySelectorAll('.gb [data-card]').forEach(e => { e.onmouseenter = () => { const r = e.getBoundingClientRect(); pop.className = 'pop'; pop.innerHTML = cardHTML(C[e.dataset.card]); pop.style.display = 'flex';
     const w = pop.offsetWidth, h = pop.offsetHeight, edge = e.closest('.side') ? r.left : document.querySelector('.side').getBoundingClientRect().left;
     pop.style.left = (e.closest('.side') ? r.left - w - 10 : r.right + 10 + w > edge ? r.left - w - 10 : r.right + 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; };
     e.onmouseleave = () => pop.style.display = 'none'; });
 }
+// Paste a deck code anywhere on the screen: it becomes your deck, open.
+document.addEventListener('paste', e => { if (e.target.tagName === 'INPUT') return; const d = parseCode(e.clipboardData.getData('text')); if (!d) return toast('That is not a deck code');
+  const nd = { id: 'm' + Date.now(), name: d.name, list: d.list, cover: coverOf(d.list), own: true }; all.splice(all.filter(x => x.own).length, 0, nd); st.open = nd.id; armed = false; render(); toast(`Imported ${nd.name}`); });
+document.addEventListener('click', e => { if (armed && e.target.id !== 'ddel') { armed = false; render(); } });
 render();
 </script></body></html>
