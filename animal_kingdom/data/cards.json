@@ -885,10 +885,9 @@
       "deck": "aggro_hq_rush",
       "rarity": "rare",
       "tags": ["Lizard"],
-      "base_strength": "dynamic",
-      "dynamic_strength": "chameleon",
+      "base_strength": 0,
       "keywords": [],
-      "text": "May be placed on any unit, and any unit may be placed on top of it."
+      "text": "Can cover enemies of any strength."
     },
     {
       "id": "skunk",

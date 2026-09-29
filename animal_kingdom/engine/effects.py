@@ -540,8 +540,7 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
     """Apex Predator landing rules (decision D + keyword-review C1): it may land wherever it
     could legally cover - free on your own occupants, `statics.can_cover` vs an enemy, so
     the covering statics apply to apexes exactly as to normal placements: Snow Leopard lets
-    an apex Cat land at equal strength, Chameleon is land-on-able regardless of strength,
-    and Porcupine ("cannot be covered by enemy units") blocks the landing entirely - quills
+    an apex Cat land at equal strength, and Porcupine ("cannot be covered by enemy units") blocks the landing entirely - quills
     beat teeth. If the occupant is eat-eligible it gets eaten; if not (Immovable / enemy
     Stealth) it is simply covered (see _land_unit)."""
     if top.owner == placer.owner:

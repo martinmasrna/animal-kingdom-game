@@ -30,13 +30,13 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance) -> b
     target_card = state.cards[target.card_id]
     owner = placer.owner
 
-    # Chameleon bypasses the comparison both ways (may cover anything; may be covered by anything).
-    if placer_card.dynamic_strength == "chameleon" or target_card.dynamic_strength == "chameleon":
-        return True
-
-    # Porcupine cannot be covered by an enemy at all.
+    # Porcupine cannot be covered by an enemy at all, Chameleon included ("can't" beats "can").
     if target_card.id == "porcupine":
         return False
+
+    # Chameleon covers enemies of any strength.
+    if placer_card.id == "chameleon":
+        return True
 
     placer_str = placement_strength(state, placer)
     target_str = effective_strength(state, target)

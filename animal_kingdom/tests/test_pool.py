@@ -19,7 +19,7 @@ from animal_kingdom.engine.cards import (
 from animal_kingdom.decks import PREMADE_DECKS, load_premade_deck
 
 RETIRED_TAGS = {"Reptile", "Insect"}
-DYNAMIC_IDS = {"goliath", "chameleon"}
+DYNAMIC_IDS = {"goliath"}
 
 # food_otk is the one deliberate exception to the locked 4-4-6/14-design template
 # (2026-07-06): a 7th common (2 copies) was added alongside Hedgehog/Hamster dropping to
@@ -83,7 +83,7 @@ def test_copy_limits_locked_446():
 
 # ------------------------------------------------------------------ field domains
 
-def test_dynamic_strength_present_iff_dynamic_and_only_goliath_chameleon():
+def test_dynamic_strength_present_iff_dynamic_and_only_goliath():
     cards = load_cards()
     dynamic = set()
     for c in cards.values():

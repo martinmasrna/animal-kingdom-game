@@ -45,7 +45,7 @@ Taste calls only Martin can make. Nothing here is started.
 
 Reported by Martin from play:
 
-- **Chameleon can cover Porcupine:** confirmed. `statics.can_cover` checks Chameleon's "may be placed on any unit" before Porcupine's "cannot be covered by enemies", so an enemy Chameleon lands on a Porcupine. Nothing else about Porcupine is off (it blocks every other cover, including Apex landings). Waiting on Martin: which text wins.
+None open.
 
 ## Engine debt
 

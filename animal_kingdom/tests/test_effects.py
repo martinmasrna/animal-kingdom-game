@@ -237,15 +237,17 @@ def test_porcupine_cannot_be_covered_by_enemy():
     assert PlaceAction("king_theron", ("cr", "3,2")) not in rules.legal_actions(s)
 
 
-def test_chameleon_covers_anything_and_is_covered_by_anything():
+def test_chameleon_covers_enemies_of_any_strength_but_not_porcupine():
     cover = make_state(hands={"A": ["chameleon"]})
     put(cover, "1,2", "caracal", "A")
     put(cover, "2,2", "lion", "B")                       # str 7 enemy
     assert PlaceAction("chameleon", ("cr", "2,2")) in rules.legal_actions(cover)
+    put(cover, "1,1", "porcupine", "B")                  # "can't" beats "can"
+    assert PlaceAction("chameleon", ("cr", "1,1")) not in rules.legal_actions(cover)
 
     covered = make_state(current="B", hands={"B": ["house_cat"]})
     put(covered, "4,2", "caracal", "B")
-    put(covered, "3,2", "chameleon", "A")                # str 1 house_cat may cover it
+    put(covered, "3,2", "chameleon", "A")                # a plain 0: str 1 house_cat covers it
     assert PlaceAction("house_cat", ("cr", "3,2")) in rules.legal_actions(covered)
 
 

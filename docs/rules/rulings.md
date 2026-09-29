@@ -11,6 +11,7 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 ## Placement and actions
 
 - **Extra placements** ("play another unit", "play one more Cat"): a full normal placement (connection unless Flight, covering strength, any cost) that consumes no action, so they chain. From hand only unless the card says "or deck". "May" makes it optional; it fizzles when nothing qualifies.
+- **"Can't" beats "can".** When one card forbids what another allows, the prohibition wins: Chameleon ("can cover enemies of any strength") can't cover Porcupine ("cannot be covered by enemies").
 - **Next to the opponent's base** means one of the enemy HQ's front crossroads.
 - **Lemming** places the Lemmings from hand on random empty crossroads adjacent to the triggering Lemming; leftovers stay in hand, and the auto-placed copies' Battlecries don't fire.
 - **Recurring timed triggers** ("at the start of your turn") fire every time their window comes while the unit is in play, including the turn it was played if the window is still ahead. "Your turn" means the owner's turn only.

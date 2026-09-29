@@ -38,8 +38,6 @@ def _tops_owned(state: GameState, owner: str) -> list[UnitInstance]:
 def _dynamic_strength(state: GameState, rule: Optional[str], owner: str) -> int:
     if rule == "removed_units_count":    # Goliath: equal to the number of removed units
         return len(state.remove_pile)
-    if rule == "chameleon":              # Chameleon: covering bypass handled in statics.can_cover
-        return 0
     raise EngineError(f"unknown dynamic strength rule {rule!r}")
 
 
