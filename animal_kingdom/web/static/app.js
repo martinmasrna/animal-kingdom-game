@@ -1,7 +1,7 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
 import { hasArt, artUrl } from './art.js';
-import { cardHTML } from './card.js';
+import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, crossroadAt, denMouthAt } from './board.js';
 import { collectionScreen as renderCollection } from './collection.js';
 
@@ -45,7 +45,7 @@ function cardPop(el, id, extra, place) {
   const c = CARDS[id], r = el.getBoundingClientRect();
   pop.className = 'pop ' + c.rarity;
   pop.innerHTML = cardHTML(c) + (extra ? `<div class="ev">${extra}</div>` : '');
-  pop.style.display = 'flex';
+  pop.style.display = 'flex'; fitNames(pop);
   const h = pop.offsetHeight;
   const w = pop.offsetWidth;
   if (place === 'below') { pop.style.left = Math.min(r.left, innerWidth - w - 10) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; }
@@ -444,6 +444,7 @@ function drawGame() {
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
     return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
   }).join('');
+  fitNames(hand);
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
     e.stopPropagation();
     const iid = Number(el.dataset.iid), id = el.dataset.id;
@@ -477,7 +478,7 @@ function drawGame() {
     bar.classList.add('on');
     if (d.cardOpts.length) {
       opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${cardHTML(c)}</div>`; }).join('');
-      opts.classList.add('on');
+      opts.classList.add('on'); fitNames(opts);
       opts.querySelectorAll('[data-o]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.cardOpts[el.dataset.o].v }); });
     }
     bar.querySelectorAll('[data-x]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.otherOpts[el.dataset.x].v }); });
@@ -496,7 +497,7 @@ function drawGame() {
   const last = G.history[G.history.length - 1];
   if (A && G.history.length > A.hist && last && last.seat === them && last.kind === 'place') {
     const [tx, ty] = last.target[0] === 'cr' ? crossroadAt(dcr(last.target[1])) : denMouthAt(rel(last.target[1])), rv = $('reveal');
-    rv.innerHTML = cardHTML(CARDS[last.card]); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty('--ty', `${ty - 300}px`);
+    rv.innerHTML = cardHTML(CARDS[last.card]); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty('--ty', `${ty - 300}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on');
     if (ui.anim) ui.anim.landDelay = 0.95;
   }
@@ -632,7 +633,7 @@ function stackAt(cr) {
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
   stackpop.innerHTML = `<div class="stk">${card(top, 190, true)}</div>` +
     buried.map((u, i) => `<div class="stk">${card(u, 150)}</div>`).join('');
-  stackpop.style.display = 'flex';
+  stackpop.style.display = 'flex'; fitNames(stackpop);
   const r = g.getBoundingClientRect(), w = stackpop.offsetWidth, h = stackpop.offsetHeight;
   stackpop.style.left = (r.right + 8 + w > innerWidth ? r.left - 8 - w : r.right + 8) + 'px';
   stackpop.style.top = Math.max(56, Math.min(r.top - 80, innerHeight - h - 10)) + 'px';

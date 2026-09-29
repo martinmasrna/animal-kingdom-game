@@ -2,7 +2,7 @@
 // family, strength, rarity and search filters over it; the decks on the right, the open one unfolded under its tile.
 // Click a card to add a copy, right-click it or click its strip to take one out; every change saves.
 // app.js hands in what it owns: the cards, the starter decks, the player's decks and how to save them, toast, play, back.
-import { cardHTML } from './card.js';
+import { cardHTML, fitNames } from './card.js';
 import { CROP, artUrl } from './art.js';
 import { encodeDeck, decodeDeck } from './deckcode.js';
 
@@ -102,6 +102,7 @@ function render(app, all) {
 
   app.innerHTML = `<div class="coll">${head}<div class="cgrid">${grid}</div><div class="side">${column}</div><div class="modal" id="cmodal"></div></div>`;
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
+  fitNames(app);
   wire(app, all, open);
 }
 
@@ -193,6 +194,7 @@ function zoom(app, c) {
   const kws = Object.keys(KEYWORDS).filter(k => new RegExp(`(^|\\. )${k}[:.]`).test(c.text || ''));
   const m = app.querySelector('#cmodal'); m.classList.add('on', 'zoom');
   m.innerHTML = `<div class="zbox">${cardHTML(c)}${kws.length ? `<div class="kws">${kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k]}</p></div>`).join('')}</div>` : ''}</div>`;
+  fitNames(m);
   const close = () => { m.classList.remove('on', 'zoom'); m.innerHTML = ''; removeEventListener('keydown', key, true); };
   const key = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
   addEventListener('keydown', key, true);
@@ -208,7 +210,7 @@ function confirmDelete(app, d, done) {
 function pickCover(app, d, done) {
   const ids = [...new Set(d.list)].filter(id => CROP[id]).sort((a, b) => RANK[C[a].rarity] - RANK[C[b].rarity] || sv(C[a]) - sv(C[b]));
   const { m, close } = dialog(app, `<div class="dlg cov"><h3>Choose a cover</h3><div class="covs">${ids.map(id => `<div class="cv${id === d.cover ? ' on' : ''}" data-id="${id}">${cardHTML(C[id], { cls: 'compact' })}</div>`).join('')}</div>
-    <div class="dbtns"><button class="cancel">Cancel</button></div></div>`);
+    <div class="dbtns"><button class="cancel">Cancel</button></div></div>`); fitNames(m);
   m.querySelectorAll('.cv').forEach(e => e.onclick = () => { close(); done(e.dataset.id); });
 }
 

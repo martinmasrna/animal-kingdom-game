@@ -24,3 +24,12 @@ export function cardHTML(c, { str = c.str, cls = '', attrs = '' } = {}) {
     `<div class="stab"><span class="n${String(str).length > 1 ? ' two' : ''}${delta}">${chalk(str)}</span></div>` +
     `<div class="ctext">${c.text ? `<p>${rules(c.text)}</p>` : ''}<i>${c.tags.join(' · ')}</i></div></div>`;
 }
+
+// Names are set at their largest size and shrink only as much as their bar actually needs (measured, not guessed from length).
+export function fitNames(root) {
+  for (const s of root.querySelectorAll('.card .nbar:not(.two) span')) {
+    s.style.fontSize = '';
+    const over = s.scrollWidth / s.clientWidth;
+    if (over > 1.001) s.style.fontSize = (parseFloat(getComputedStyle(s).fontSize) / over * .98) + 'px';
+  }
+}

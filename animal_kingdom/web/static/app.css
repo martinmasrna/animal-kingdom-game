@@ -123,7 +123,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .card .nbar, .card .ctext { position: absolute; left: calc(var(--bw) - .1em); right: calc(var(--bw) - .1em); z-index: 2; border: .55em solid transparent;
   border-image: url(/static/kit2/card_plaque.webp) 36 fill / .55em stretch; }
 .card .nbar { top: calc(var(--bw) - .1em); height: 3.3em; display: flex; align-items: center; justify-content: center; padding: 0 .5em 0 4.4em; filter: drop-shadow(0 .15em .25em rgba(0,0,0,.45)); }
-.card .nbar span { font: 600 min(1.4em, calc(18.5em / var(--n)))/1 'Fira Sans Condensed', sans-serif; letter-spacing: .01em; color: #1d140a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .nbar span { font: 600 1.4em/1 'Fira Sans Condensed', sans-serif; letter-spacing: .01em; color: #1d140a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card .nbar.two span { white-space: normal; text-wrap: balance; text-align: center; font-size: 1.08em; overflow: visible; }
 .card .stab { position: absolute; left: calc(var(--bw) - .1em); top: calc(var(--bw) - .1em); width: 4.4em; height: 6.4em; z-index: 3;
   background: url(/static/kit2/card_banner.webp) center / 100% 100% no-repeat; filter: drop-shadow(.05em .2em .3em rgba(0,0,0,.55)); }
@@ -169,5 +169,5 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .phist .hr i { color: var(--muted); font-style: normal; margin: 0 4px; }
 .login { font-size: 14px; }
 /* On compact cards (grid, hand) the name is the card's main text: larger, about the deck strips' size. */
-.card.compact .nbar span { font-size: min(1.8em, calc(19em / var(--n))); }
+.card.compact .nbar span { font-size: 1.8em; }   /* fitNames (card.js) shrinks a name only if it overflows */
 .card.compact .nbar.two span { font-size: 1.3em; line-height: .98; }
