@@ -12,14 +12,14 @@ Everything on a crossroad is a unit; Eggs are units too.
 Ignores the connection-to-HQ requirement when placed. (All other placement rules still apply.)
 
 ### Immovable
-*Physics.* Cannot be removed, moved (bounced), or eaten by **any** ability — the enemy's **or its own controller's** (Carmilla cannot sacrifice a Giant Tortoise; that cost is deliberate). It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an Immovable enemy; when it removes a stack, a buried Immovable unit is skipped **in place** and everything else is still removed. Immovable is not a shield for the cards beneath it. Scope is **board-only**: an Immovable card in hand can be paid or removed normally.
+*Physics.* Cannot be removed, moved (bounced), or eaten by **any** ability — the enemy's **or its own controller's**. It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an Immovable enemy; when it removes a stack, a buried Immovable unit is skipped **in place** and everything else is still removed. Immovable is not a shield for the cards beneath it. Scope is **board-only**: an Immovable card in hand can be paid or removed normally.
 
 Carried by: Methuselah, Yuka and Elephant (Ramp); Armadillo and Hedgehog (Food).
 
 ⚠ *Open (`docs/STATUS.md`): the keyword still feels slightly off, in name and footprint.*
 
 ### Stealth
-Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis), and an Apex Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it instead). **Mass, random, and automatic effects hit it normally**: Rhinoceros/Bulwark AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron/Pufferfish triggers. Its own controller may still choose it freely. Scope is board-only.
+Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis), and an Apex Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it instead). **Mass, random, and automatic effects hit it normally**: Rhinoceros/Bulwark AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron triggers. Its own controller may still choose it freely. Scope is board-only.
 
 Carried by: Black Panther (keyword). **Armadillo grants it as an aura** to every friendly unit on an adjacent crossroad while Armadillo tops its own.
 
@@ -34,7 +34,7 @@ A predator that must land on prey and eats it.
 - **Must** be placed on top of another **occupant** — it **cannot** be placed on an empty crossroad. If there is no legal occupant to land on, it cannot be played.
 - **Normal covering rules apply in full**: landing on an **enemy** occupant uses the same legality as a normal cover — strictly-greater strength by default, **including every covering static**: Snow Leopard lets an apex Cat land at equal strength, and **Porcupine ("cannot be covered by enemies") blocks the landing entirely** — quills beat teeth. Landing on **your own** occupant has **no** strength requirement.
 - **May target your own occupants** as well as enemy ones — and removes (eats) them too.
-- On placement it **removes** the occupant it lands on **instead of covering/stacking** on it (cf. Boa Constrictor). The removed occupant's Deathrattle / on-remove effects fire normally. The predator then occupies the crossroad (on top of any remaining stack beneath).
+- On placement it **removes** the occupant it lands on **instead of covering/stacking** on it. The removed occupant's leave-the-board and remove effects fire normally. The predator then occupies the crossroad (on top of any remaining stack beneath).
 - **If the occupant can't be eaten** (Immovable, or an enemy with Stealth — the eat is a chosen single-out), the predator is **not** blocked from landing there: it simply **covers** it under the normal placement rules and buries it instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it does *when it can*, not a placement precondition.
 - **Cannot be placed onto a headquarters** — deliberate design choice, so Apex Predators can't capture an enemy HQ directly.
 - **Eats Eggs** it lands on like any other unit.
@@ -47,7 +47,7 @@ An effect that resolves when the unit is placed. Most "when placed…" effects a
 ### Leaving the board  *(not a keyword)*
 An effect that resolves when **a unit leaves the board** is written out in plain words: "When this is removed, …" (Ember). It becomes a keyword only once at least three cards want it.
 
-**Leaving the board vs. "remove":** a unit leaving the board is one kind of *remove*, but not the only one — a card sent to the **Remove Pile** from hand or deck (e.g. Rat's paid card, Omen's hand-remove) is a **remove** but doesn't leave the board. So there are two trigger tiers: a **remove trigger** (any card → Remove Pile, from anywhere) and the narrower **leaving the board**. See `overview.md` for the Remove Pile zone. A "return … instead" effect (e.g. Opossum) is *not* a remove at all — the card never reaches the Remove Pile.
+**Leaving the board vs. "remove":** a unit leaving the board is one kind of *remove*, but not the only one — a card sent to the **Remove Pile** from hand or deck (e.g. Rat's paid card, Omen's hand-remove) is a **remove** but doesn't leave the board. So there are two trigger tiers: a **remove trigger** (any card → Remove Pile, from anywhere) and the narrower **leaving the board**. See `overview.md` for the Remove Pile zone. A return to hand or deck (Skunk, Sirocco, Eon) is *not* a remove at all — the card never reaches the Remove Pile.
 
 ---
 
