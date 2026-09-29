@@ -116,7 +116,8 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   font-size: calc(var(--w) / 20); flex: none; border-radius: .9em; background: var(--edge); box-shadow: .2em .45em .9em rgba(0,0,0,.55); overflow: hidden; isolation: isolate; }
 .card.rare { --bw: .3em; --edge: linear-gradient(160deg, #c9ccce, #8d9196 30%, #4a4e52 60%, #b3b7ba); }
 .card.legendary { --bw: .42em; --edge: linear-gradient(150deg, #fff1c2, #d9a93f 22%, #7e5a16 48%, #f0cd70 70%, #a67a1e 88%, #ffe9a6); }
-.card .pic { position: absolute; inset: var(--bw); border-radius: .7em; background: #3a2c1a center 30% / cover no-repeat; display: grid; place-items: center; }
+/* The painting starts under the name bar (the bar never covers it), its top edge showing. */
+.card .pic { position: absolute; inset: calc(var(--bw) + 3.05em) var(--bw) var(--bw); border-radius: 0 0 .7em .7em; background: #3a2c1a 50% 0 / cover no-repeat; display: grid; place-items: center; }
 .card .pic span { font: 600 1.4em/1.1 'Fira Sans Condensed', sans-serif; color: #f3e3c0; text-align: center; padding: 1em; }
 /* The painted driftwood plaque (kit2/card_plaque.webp), 9-sliced so its bevel stays crisp at any size. */
 .card .nbar, .card .ctext { position: absolute; left: calc(var(--bw) - .1em); right: calc(var(--bw) - .1em); z-index: 2; border: .55em solid transparent;

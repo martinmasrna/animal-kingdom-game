@@ -186,7 +186,7 @@ function render() {
   document.getElementById('strsel').onchange = e => { st.str = e.target.value; render(); };
   document.getElementById('rarsel').onchange = e => { st.rar = e.target.value || null; render(); };
   const q = document.getElementById('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; render(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(at, at); };
-  document.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { st.family = e.dataset.t || null; render(); });
+  document.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const t = e.dataset.t || null; st.family = st.family === t ? null : t; render(); });   // the selected family again clears it
   document.querySelectorAll('[data-k]').forEach(e => e.onclick = () => { st[e.dataset.k] = e.dataset.v || null; render(); });
   document.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.classList.contains('nm-edit') || ev.target.closest('.tacts')) return; st.open = st.open === e.dataset.d ? null : e.dataset.d; render(); });
   const nm = document.querySelector('.nm-edit'); if (nm) nm.onclick = () => { const d = all.find(x => x.id === st.open), inp = document.createElement('input'); inp.className = 'nm-in'; inp.value = d.name;
