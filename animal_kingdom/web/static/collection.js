@@ -15,6 +15,7 @@ const sv = c => c.str === '*' ? -1 : c.str;
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 const svg = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ICON = {
+  search: svg('<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>'),
   plus: svg('<path d="M12 5v14M5 12h14"/>'),
   image: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/>'),
   copy: svg('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>'),
@@ -78,7 +79,7 @@ function render(app, all) {
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
     ${dd('str', 'Any strength', strengths.map(v => [v, 'Strength ' + v]))}
     ${dd('rar', 'Any rarity', [['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
-    <input class="search" id="q" placeholder="Search" value="${esc(st.q)}"></div>`;
+    <label class="searchw">${ICON.search}<input class="search" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
   const strip = id => `<div class="st" data-card="${id}"><div class="art" style="background-image:url(${artUrl(id)})"></div><span class="s">${C[id].str}</span><span class="n">${esc(C[id].name)}</span><span class="x">${C[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
   const byR = r => Object.keys(counts).filter(id => C[id].rarity === r).sort((a, b) => sv(C[a]) - sv(C[b]) || C[a].name.localeCompare(C[b].name)).map(strip).join('');
@@ -142,10 +143,10 @@ function wire(app, all, open) {
       const why = open.list.length >= 30 ? 'tot' : n >= limit(c) ? 'pips' : CAP[c.rarity] && inR >= CAP[c.rarity] ? c.rarity : null;
       if (why) return refuse(app, e, why);
       open.list.push(c.id); hidePop(); flash = c.id; change(); };
-    e.oncontextmenu = ev => { ev.preventDefault(); if (!open || !open.list.includes(e.dataset.card)) return;
-      open.list.splice(open.list.indexOf(e.dataset.card), 1); hidePop(); change(); };
+    e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
   });
-  app.querySelectorAll('.side [data-card]').forEach(e => e.onclick = () => { open.list.splice(open.list.indexOf(e.dataset.card), 1); hidePop(); change(); });
+  app.querySelectorAll('.side [data-card]').forEach(e => { e.onclick = () => { open.list.splice(open.list.indexOf(e.dataset.card), 1); hidePop(); change(); };
+    e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); }; });
   const fl = flash && app.querySelector(`.side .st[data-card="${flash}"]`); flash = null;
   if (fl) { fl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); fl.classList.add('flash'); }
 
@@ -179,6 +180,25 @@ function dialog(app, html) {
   m.querySelector('.cancel').onclick = close;
   return { m, close };
 }
+// Right-click a card: it opens large in the middle of the screen, each keyword on it explained beside it (as in
+// Hearthstone, Arena and Runeterra). Escape, a click or another right-click closes it.
+const KEYWORDS = {
+  'Roar': 'Happens when you place this unit.',
+  'Flight': 'Can be placed on any crossroad, even one not connected to yours. It can\'t take a den that way.',
+  'Armor': 'Can\'t be removed, returned to hand or eaten by any ability, not even your own. It can still be covered.',
+  'Stealth': 'Enemy abilities can\'t choose it. Effects that hit many units, or a random one, still do.',
+  'Apex Predator': 'Must be placed on top of another unit, yours or an enemy\'s, and eats it. Can\'t be placed on a den.',
+};
+function zoom(app, c) {
+  const kws = Object.keys(KEYWORDS).filter(k => new RegExp(`(^|\\. )${k}[:.]`).test(c.text || ''));
+  const m = app.querySelector('#cmodal'); m.classList.add('on', 'zoom');
+  m.innerHTML = `<div class="zbox">${cardHTML(c)}${kws.length ? `<div class="kws">${kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k]}</p></div>`).join('')}</div>` : ''}</div>`;
+  const close = () => { m.classList.remove('on', 'zoom'); m.innerHTML = ''; removeEventListener('keydown', key, true); };
+  const key = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+  addEventListener('keydown', key, true);
+  m.onclick = close; m.oncontextmenu = e => { e.preventDefault(); close(); };
+}
+
 function confirmDelete(app, d, done) {
   const { m, close } = dialog(app, `<div class="dlg"><h3>Delete “${esc(d.name)}”?</h3><p>This can’t be undone. Copy its deck code first if you might want it back.</p>
     <div class="dbtns"><button class="cancel">Cancel</button><button class="danger">Delete deck</button></div></div>`);

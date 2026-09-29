@@ -50,7 +50,7 @@ test('adding says where the card went, and a refused add says why', async () => 
   assert.match(await page.$eval('.play', e => e.textContent), /Play this deck/);
   await page.click(card('lion')); await wait(30);
   assert.ok(await has(card('lion'), 'shake'), 'a full deck refuses'); assert.ok(await has('.fcount', 'shake'), 'and the card count shows why');
-  await page.click(card('lion'), { button: 'right' }); await wait(80);                 // right-click takes one out: 29
+  await page.click('.side .st[data-card="lion"]'); await wait(80);                   // clicking its strip takes one out: 29
   await page.click(card('lion')); await page.click(card('lion')); await wait(30);        // back to 3 of 3 (30), then one too many
   assert.ok(await has(card('lion'), 'max'), 'all copies in: dimmed');
   assert.ok(!(await has(card('dog'), 'max')), 'a full deck does not dim the cards it lacks: only used-up cards are dimmed');
@@ -113,6 +113,14 @@ test('an opened deck is the column alone, starting at its top; Done returns to t
   const decks = await myDecks(); assert.equal(decks.length, n); assert.equal(decks.find(d => d.id === 'ramp').name, 'Big Ramp');
   await page.click('#done'); await wait(60); assert.ok(await page.$('[data-d="ramp"]:not(.on)'), 'Done shows the list again');
   await openDeck('[data-d="ramp"]'); await page.keyboard.press('Escape'); await wait(60); assert.ok(await page.$('#dnew'), 'Escape is Done while editing');
+});
+
+test('right-click opens a card large, its keywords explained', async () => {
+  await page.click(card('eagle'), { button: 'right' }); await wait(80);
+  assert.ok(await page.$('.modal.zoom .card'), 'the card opens');
+  assert.deepEqual(await page.$$eval('.kw b', b => b.map(e => e.textContent)), ['Flight']);
+  await page.keyboard.press('Escape'); await wait(50); assert.equal(await page.$('.modal.zoom'), null, 'Escape closes it');
+  assert.ok(page.url().endsWith('#/collection'), 'without leaving the screen');
 });
 
 test('the strength and rarity lists are the screen\'s own and close on a click elsewhere', async () => {

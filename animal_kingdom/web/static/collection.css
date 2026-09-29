@@ -202,3 +202,19 @@
   color: #f4f8ff; font: 700 19px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
 .coll .play:hover { background: linear-gradient(rgba(52,112,190,.5), rgba(38,88,160,.58)), #2a4a70 url(/static/kit2/coll_slab.webp) center / 300px auto; filter: brightness(1.15); }
 .coll .play { background-blend-mode: color, normal, normal; }
+/* Search is the one field you type into: sunken, like the foot's count, with a magnifier; not a raised slab. */
+.coll .searchw { position: relative; flex: 1 1 auto; min-width: 140px; display: flex; }
+.coll .searchw svg { position: absolute; left: 13px; top: 50%; width: 17px; height: 17px; margin-top: -8.5px; color: #9d917e; pointer-events: none; }
+.coll .search { flex: 1; padding: 0 14px 0 38px; background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); }
+.coll .search:focus { box-shadow: inset 0 1px 3px rgba(0,0,0,.6), 0 0 0 2px rgba(207,195,173,.6); }
+/* Deck tiles answer the pointer: the cover brightens and a light rim appears. */
+.coll .dtile { transition: filter .12s; }
+.coll .dtile:not(.on):hover { filter: brightness(1.18); box-shadow: inset 0 0 0 2px rgba(240,232,218,.45); }
+/* The card zoom. */
+.coll .modal.zoom { background: rgba(0,0,0,.72); cursor: zoom-out; }
+.coll .zbox { display: flex; align-items: center; gap: 22px; }
+.coll .zbox .card { --w: 360px; }
+.coll .kws { display: flex; flex-direction: column; gap: 10px; width: 280px; }
+.coll .kw { padding: 12px 14px; border-radius: 10px; background: #25221f url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.18), 0 4px 10px rgba(0,0,0,.5); }
+.coll .kw b { display: block; font: 700 18px 'Fira Sans Condensed', sans-serif; color: #fff; margin-bottom: 3px; }
+.coll .kw p { margin: 0; font: 500 15px/1.35 'Fira Sans Condensed', sans-serif; color: #e4dccd; }
