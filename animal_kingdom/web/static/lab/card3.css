@@ -65,3 +65,7 @@
 .s-read .card3 .rules i { font-size: .95em; color: #6b5031; }
 .f-franklin .card3 { --rulesfont: 'Libre Franklin', sans-serif; --rulesw: 500; --rules: 1.36em; }
 .f-fira .card3 { --rulesfont: 'Fira Sans Condensed', sans-serif; --rulesw: 500; --rules: 1.38em; }
+.card3 .bar.long span { font-size: 1em; letter-spacing: 0; }
+.s-guide .card3 .bar.long span { font-size: 1.04em; letter-spacing: .02em; }
+.card3 .bar.longer span { font-size: .88em; letter-spacing: 0; }
+.s-guide .card3 .bar.longer span { font-size: .86em; letter-spacing: 0; }

@@ -8,7 +8,8 @@ import { hasArt, artUrl, CROP } from './art.js';
 const VIS = 0.728;
 const focus = id => { const y = CROP[id] ? CROP[id][1] : 0.35; return Math.max(0, Math.min(1, (y - VIS / 2) / (1 - VIS))) * 100; };
 
-const KW = /^(Battlecry|Deathrattle|Immovable|Flight|Stealth|Apex Predator|Fragile)(:|\.)/;
+// Every keyword that opens a sentence is bold ("Flight. Battlecry: ..." bolds both).
+const KW = /(?<=^|\. )(Battlecry|Deathrattle|Immovable|Flight|Stealth|Apex Predator|Fragile)(:|\.)/g;
 const rules = t => (t || '').replace(KW, '<b>$1$2</b>');
 
 // `str`: the strength to show (hand and board strength can differ from the printed one); `cls`: extra classes.
