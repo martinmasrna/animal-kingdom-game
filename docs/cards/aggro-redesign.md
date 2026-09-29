@@ -51,7 +51,7 @@ Let's talk about them one by one now:
 
 
 #### 2.1.2 Mouse
-- unconditional, tribe-specific draw
+- unconditional, family-specific draw
 - again, a strong card, but I don't think it's toxic or too oppresive, and we literally can't make it any weaker since it already has strength 1
 - more of a "neutral card" that happens to be good in this deck, rather than a dedicated HQ rush card
 - I can see this being played in heavy Rodent decks, from aggro to combo to midrange, but also in control decks that want to tutor a specific Rodent. It's possible this might become auto-include in a lot of deck, similar to many other "draw a card" unit -- changing "draw cards" action from drawing 1 card to drawing 2 cards could help with this, I think
@@ -60,7 +60,7 @@ Let's talk about them one by one now:
 #### 2.1.3 Bat
 - unconditional draw that's also a flyer
 - again, neutral card that's played in aggro
-- unlike Mouse, I can see this being played in every single deck, regardless of the tribe or archetype ... the card is simply very strong a flyer with 2 strength can cover enemy backline threats, and the fact it gives a card makes it always strictly better than "draw 1 card" action -- again, chaging the defauly action to "draw 2 cards" could help with this
+- unlike Mouse, I can see this being played in every single deck, regardless of the family or archetype ... the card is simply very strong a flyer with 2 strength can cover enemy backline threats, and the fact it gives a card makes it always strictly better than "draw 1 card" action -- again, chaging the defauly action to "draw 2 cards" could help with this
 - possible nerf -- make it 1 strength instead of 2. If that doesn't help, then maybe having a neutral flyer that draw a card unconditionally is not the best idea (speaking of which, Owl isstrictly better version or Bat, isn't it?)
 
 

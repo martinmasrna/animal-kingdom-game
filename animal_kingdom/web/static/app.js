@@ -38,7 +38,7 @@ function rows(list, counts) {
   });
   return s;
 }
-function tribes(list) {
+function families(list) {
   const FAM = ['Cat', 'Canine', 'Rodent', 'Colony', 'Bird', 'Megafauna', 'Snake', 'Bear', 'Egg', 'Lizard'], t = {};
   Object.entries(list).forEach(([id, n]) => CARDS[id].tags.filter(x => FAM.includes(x)).forEach(x => t[x] = (t[x] || 0) + n));
   return Object.entries(t).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([x, k]) => k + ' ' + x).join(' · ');
@@ -77,7 +77,7 @@ function miniMap(w, h) {
 }
 function deckTile(d, on) {
   const list = counted(d.list), cover = COVER[d.id] || (d.mine && sortIds(Object.keys(list))[0]), cv = cover ? artStyle(cover) : '';
-  return `<div class="dk${on ? ' on' : ''}" data-deck="${d.id}"><div class="cv gradart" ${cv}></div><div class="in"><b>${d.name}</b><span>${d.mine ? 'Your deck' : 'Starter deck'} · ${d.list.length} cards</span><span>${tribes(list)}</span></div></div>`;
+  return `<div class="dk${on ? ' on' : ''}" data-deck="${d.id}"><div class="cv gradart" ${cv}></div><div class="in"><b>${d.name}</b><span>${d.mine ? 'Your deck' : 'Starter deck'} · ${d.list.length} cards</span><span>${families(list)}</span></div></div>`;
 }
 // Your profile: the server knows you by the sign-in code this browser keeps (localStorage 'ak:key').
 const api = (path, opts = {}) => fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', 'X-AK-Key': store('ak:key') || '', ...(opts.headers || {}) } });
@@ -226,7 +226,7 @@ function collectionScreen() {
   const panel = cur ? `<div class="dhead"><select id="dsel">${decks.map(d => `<option value="${d.id}"${d.id === cur.id ? ' selected' : ''}>${d.name}</option>`).join('')}<option value="+">+ New deck</option></select>
       <div class="dname"><input id="dname" maxlength="40" value="${cur.name.replace(/"/g, '&quot;')}"><b class="${inDeck() === 30 ? 'ok' : ''}">${inDeck()}<i> / 30</i></b></div></div>
       <div class="dlist">${sec('legendary', 'Legendary')}${sec('rare', 'Rare')}${sec('common', 'Common')}</div>
-      <div class="dfoot"><span>${tribes(cur.cards) || 'Click a card to add it'}</span><span class="del" id="ddel">Delete</span></div>`
+      <div class="dfoot"><span>${families(cur.cards) || 'Click a card to add it'}</span><span class="del" id="ddel">Delete</span></div>`
     : `<div class="dnew"><div class="lbl">New deck</div><span class="chip on" data-new="">Empty deck</span>${DECKS.map(d => `<span class="chip" data-new="${d.id}">Copy ${d.name}</span>`).join('')}${decks.length ? `<span class="back" data-k="deck" data-v="${decks[0].id}">‹ Back to ${decks[0].name}</span>` : ''}</div>`;
   app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Menu</a><h1>Collection</h1><span class="r">${pool.length} cards</span></div>
     <div class="filters"><input class="search" id="q" placeholder="Search" value="${coll.q.replace(/"/g, '&quot;')}">${seg('rar', [[null, 'All'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
@@ -345,7 +345,7 @@ function seatLabel(p) {
 function prematchScreen() {
   screen = 'prematch';
   const you = V.you, opp = you === 'A' ? 'B' : 'A', me = V.seats[you];
-  const side = (p, cls) => `<div class="pl ${cls}"><div class="hd"><b>${seatLabel(p)} · ${V.seats[p].deckName}</b><span>${tribes(V.lists[p])}</span></div><div>${rows(V.lists[p])}</div></div>`;
+  const side = (p, cls) => `<div class="pl ${cls}"><div class="hd"><b>${seatLabel(p)} · ${V.seats[p].deckName}</b><span>${families(V.lists[p])}</span></div><div>${rows(V.lists[p])}</div></div>`;
   const mp = (n, sub) => `<div class="mp"><div class="h"><b>Game ${n}</b><span>${MAP.name}${sub}</span></div>${miniMap(360, 86)}</div>`;
   app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Leave</a><h1>Match</h1><span class="r">Best of 3</span></div>
     <div class="maps">${mp(1, ` · ${MAP.winFood} food to win`)}${mp(2, '')}${mp(3, ' · only if needed')}</div>

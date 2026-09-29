@@ -1,6 +1,6 @@
 # Canine Buff Tempo
 
-Mono-Canine tribe built on persistent strength buffs and pack reach. Buffs grow the pack in hand and on board; Jackal and Hyena turn pack size and strength into removal; African Wild Dog makes Pup tokens and Scarlett places her cubs Poppy and Rusty; Coyote deploys Canines away from the connected chain.
+Mono-Canine deck built on persistent strength buffs and pack reach. Buffs grow the pack in hand and on board; Jackal and Hyena turn pack size and strength into removal; African Wild Dog makes Pup tokens and Scarlett places her cubs Poppy and Rusty; Coyote deploys Canines away from the connected chain.
 
 Buff wording is binding: "has +X" is a live aura, "give +X" is a permanent counter that also sticks to cards in hand (see [`../../rules/keywords.md`](../../rules/keywords.md), Strength modifiers).
 

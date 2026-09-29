@@ -32,9 +32,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .ph .nm { display: flex; align-items: baseline; justify-content: space-between; margin-top: 8px; }
 .ph .nm b { font: 700 24px/1 'Fira Sans Condensed', sans-serif; color: #f0ece4; }
 .ph .nm span { font: 700 26px/1 'Fira Sans Condensed', sans-serif; color: #7fb2e8; } .ph .nm span i { font-style: normal; color: #5d6166; font-size: 18px; }
-.tribes { display: flex; gap: 10px; margin-top: 12px; }
-.tribes div { display: flex; align-items: center; gap: 6px; font: 700 18px 'Fira Sans Condensed', sans-serif; }
-.tribes .med { width: 30px; height: 30px; }
+.families { display: flex; gap: 10px; margin-top: 12px; }
+.families div { display: flex; align-items: center; gap: 6px; font: 700 18px 'Fira Sans Condensed', sans-serif; }
+.families .med { width: 30px; height: 30px; }
 .caps { display: flex; gap: 8px; margin-top: 12px; }
 .caps div { flex: 1; border: 1px solid #33373b; border-radius: 8px; padding: 5px 8px; font: 600 11px 'Fira Sans Condensed', sans-serif; color: #8b8e92; text-transform: uppercase; letter-spacing: .05em; }
 .caps div b { display: block; font-size: 17px; color: #f0ece4; letter-spacing: 0; } .caps div.full b { color: #7fb2e8; }
@@ -62,7 +62,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .dsum { display: flex; align-items: baseline; justify-content: space-between; padding: 0 2px; }
 .dtot { font: 700 24px/1 'Fira Sans Condensed', sans-serif; color: #7fb2e8; } .dtot i { font-style: normal; font-size: 16px; color: #5d6166; }
 .dcaps { display: flex; gap: 8px; } .dcaps b { font: 700 13px 'Fira Sans Condensed', sans-serif; color: #a8abb0; } .dcaps b.full { color: #7fb2e8; }
-.dbody .tribes { margin-top: 8px; } .dbody .tribes div { font-size: 16px; }
+.dbody .families { margin-top: 8px; } .dbody .families div { font-size: 16px; }
 .dbody .st { height: 27px; } .dbody .st .n { font-size: 14px; }
 .dbody .pf { padding: 10px 0 2px; border: 0; }
 .dtile.on { border-radius: 8px 8px 0 0; outline: 0; }
@@ -71,7 +71,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .dtile em { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font: 700 22px/1 'Fira Sans Condensed', sans-serif; font-style: normal; color: #f0ece4; }
 .dtile em i { font-style: normal; font-size: 14px; color: #c9c5bd; }
 .dtile em, .dtile b { text-shadow: 0 1px 3px #000; }
-.dbody .tribes { margin-top: 0; }
+.dbody .families { margin-top: 0; }
 .decks > * { flex: none; }
 .cgrid, .decks { scrollbar-width: thin; scrollbar-color: #3a3d40 transparent; }
 .dtile.on { outline: 0; box-shadow: inset 0 0 0 2px #d8d4cc; }
@@ -126,7 +126,7 @@ import { CROP, artUrl } from '/static/art.js';
 const pool = await fetch('/api/pool').then(r => r.json()), C = Object.fromEntries(pool.cards.map(c => [c.id, c]));
 const decks = pool.decks.filter(d => d.id !== 'goodstuff');
 const cards = pool.cards.filter(c => decks.some(d => d.id === c.deck));
-const TRIBES = [['Cat', 'lion'], ['Canine', 'gray_wolf'], ['Rodent', 'squirrel'], ['Colony', 'queen_bee'], ['Bird', 'eagle'], ['Snake', 'viper'], ['Bear', 'grizzly_bear'], ['Megafauna', 'elephant'], ['Lizard', 'chameleon']];
+const FAMILIES = [['Cat', 'lion'], ['Canine', 'gray_wolf'], ['Rodent', 'squirrel'], ['Colony', 'queen_bee'], ['Bird', 'eagle'], ['Snake', 'viper'], ['Bear', 'grizzly_bear'], ['Megafauna', 'elephant'], ['Lizard', 'chameleon']];
 const RANK = { legendary: 0, rare: 1, common: 2 }, sv = c => c.str === '*' ? -1 : c.str, LIMIT = { legendary: 1, rare: 2, common: 3 };
 // A round head crop of the card art, M px across (CROP: centre x, centre y, diameter as fractions of width, height, width).
 const med = (id, M) => { const [cx, cy, D] = CROP[id], w = M / D, h = w * 1.5;
@@ -156,28 +156,28 @@ function parseCode(t) {
 function editable() { let d = all.find(x => x.id === st.open); if (!d || d.own) return d;
   const copy = { id: 'm' + Date.now(), name: d.name + ' copy', list: [...d.list], cover: d.cover, own: true };
   all.splice(all.filter(x => x.own).length, 0, copy); st.open = copy.id; toast(`Editing your copy: ${copy.name}`); return copy; }
-const st = { open: 'mine1', tribe: null, rar: null, str: '' };
-const tribeCount = list => { const t = {}; list.forEach(id => C[id].tags.forEach(x => { if (TRIBES.some(y => y[0] === x)) t[x] = (t[x] || 0) + 1; })); return Object.entries(t).sort((a, b) => b[1] - a[1]); };
+const st = { open: 'mine1', family: null, rar: null, str: '' };
+const familyCount = list => { const t = {}; list.forEach(id => C[id].tags.forEach(x => { if (FAMILIES.some(y => y[0] === x)) t[x] = (t[x] || 0) + 1; })); return Object.entries(t).sort((a, b) => b[1] - a[1]); };
 function render() {
   const keep = [...document.querySelectorAll('.decks, .cgrid')].map(e => e.scrollTop);
   const open = all.find(d => d.id === st.open), counts = open ? open.list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {}) : {};
-  const shown = cards.filter(c => (!st.tribe || c.tags.includes(st.tribe)) && (!st.rar || c.rarity === st.rar) && (st.str === '' || String(c.str) === st.str) && (!st.q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(st.q.toLowerCase())))
+  const shown = cards.filter(c => (!st.family || c.tags.includes(st.family)) && (!st.rar || c.rarity === st.rar) && (st.str === '' || String(c.str) === st.str) && (!st.q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(st.q.toLowerCase())))
     .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
   const grid = '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0, max = open && n >= (c.copies || LIMIT[c.rarity]);
     return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n ? `<span class="cnt">×${n}</span>` : ''}</div>`; }).join('') + '</div>';
-  const tabs = `<div class="tab all${st.tribe ? '' : ' on'}" data-t="" data-tip="All families"><div class="med mosaic">${['lion', 'gray_wolf', 'eagle', 'elephant'].map(id => `<i style="${med(id, 19)}"></i>`).join('')}</div></div>` + TRIBES.map(([t, id]) => `<div class="tab${st.tribe === t ? ' on' : ''}" data-t="${t}" data-tip="${t}"><div class="med" style="${med(id, 40)}"></div></div>`).join('');
+  const tabs = `<div class="tab all${st.family ? '' : ' on'}" data-t="" data-tip="All families"><div class="med mosaic">${['lion', 'gray_wolf', 'eagle', 'elephant'].map(id => `<i style="${med(id, 19)}"></i>`).join('')}</div></div>` + FAMILIES.map(([t, id]) => `<div class="tab${st.family === t ? ' on' : ''}" data-t="${t}" data-tip="${t}"><div class="med" style="${med(id, 40)}"></div></div>`).join('');
   const seg = (k, o) => '<span class="seg">' + o.map(([v, l]) => `<span class="${(st[k] || '') === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${l}</span>`).join('') + '</span>';
   const strip = id => `<div class="st" data-card="${id}"><div class="art" style="background-image:url(${artUrl(id)})"></div><span class="s">${C[id].str}</span><span class="n">${C[id].name}</span><span class="x">${counts[id]}</span></div>`;
   const byR = r => Object.keys(counts).filter(id => C[id].rarity === r).sort((a, b) => sv(C[a]) - sv(C[b])).map(strip).join('');
   const inR = r => open.list.filter(id => C[id].rarity === r).length;
   const head = (label, n, cap) => `<h4 class="rh"><span>${label}</span><span class="${cap && n >= cap ? 'full' : ''}">${n}${cap ? ' / ' + cap : ''}</span></h4>`;
   const body = d => `<div class="dbody">
-      ${tribeCount(d.list).length > 1 ? `<div class="tribes">${tribeCount(d.list).map(([t, n]) => `<div><div class="med" style="${med(TRIBES.find(x => x[0] === t)[1], 26)}"></div>${n}</div>`).join('')}</div>` : ''}
+      ${familyCount(d.list).length > 1 ? `<div class="families">${familyCount(d.list).map(([t, n]) => `<div><div class="med" style="${med(FAMILIES.find(x => x[0] === t)[1], 26)}"></div>${n}</div>`).join('')}</div>` : ''}
       ${head('Legendary', inR('legendary'), 4)}${byR('legendary')}${head('Rare', inR('rare'), 8)}${byR('rare')}${head('Common', inR('common'))}${byR('common')}
       <div class="pf"><div class="play">Play this deck</div></div></div>`;
   const tile = d => (d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}<div class="tacts"><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>${d.own ? `<button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button>` : ''}</div></div>`
-    : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${tribeCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>`) + (d.id === st.open ? body(d) : '');
+    : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${familyCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>`) + (d.id === st.open ? body(d) : '');
   const side = `<div class="decks">${all.filter(d => d.own).map(tile).join('')}<div class="dsep"></div>${all.filter(d => !d.own).map(tile).join('')}</div>`;
   document.getElementById('gb').innerHTML = `<div class="side">${side}</div><div class="bar"><span class="back">‹ Menu</span><div class="tabs">${tabs}</div><span class="gap"></span>
       <input class="search" id="q" placeholder="Search" value="${(st.q || '').replace(/"/g, '&quot;')}"><select class="strsel" id="strsel"><option value="">Any strength</option>${[...new Set(cards.map(c => String(c.str)))].sort((a, b) => (a === '*' ? -1 : +a) - (b === '*' ? -1 : +b)).map(v => `<option value="${v}"${st.str === v ? ' selected' : ''}>${v === '*' ? 'Variable' : 'Strength ' + v}</option>`).join('')}</select><select class="strsel" id="rarsel">${[['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']].map(([v, l]) => `<option value="${v}"${(st.rar || '') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
@@ -186,7 +186,7 @@ function render() {
   document.getElementById('strsel').onchange = e => { st.str = e.target.value; render(); };
   document.getElementById('rarsel').onchange = e => { st.rar = e.target.value || null; render(); };
   const q = document.getElementById('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; render(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(at, at); };
-  document.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { st.tribe = e.dataset.t || null; render(); });
+  document.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { st.family = e.dataset.t || null; render(); });
   document.querySelectorAll('[data-k]').forEach(e => e.onclick = () => { st[e.dataset.k] = e.dataset.v || null; render(); });
   document.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.classList.contains('nm-edit') || ev.target.closest('.tacts')) return; st.open = st.open === e.dataset.d ? null : e.dataset.d; render(); });
   const nm = document.querySelector('.nm-edit'); if (nm) nm.onclick = () => { const d = all.find(x => x.id === st.open), inp = document.createElement('input'); inp.className = 'nm-in'; inp.value = d.name;

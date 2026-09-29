@@ -29,7 +29,7 @@ The larger pool should force real deckbuilding decisions. New cards should creat
 - [ ] **Card ledger:** playing a card subtracts one card; the alternative Draw action adds two. “Draw 1” replaces the played card but does not refund the placement action. A STR 0 card that draws only one card later has lost both tempo and card velocity.
 - [ ] **Action ledger:** count every free placement, token, move, and deck-to-board effect. Playing a card from deck is both selection and a saved future placement action.
 - [ ] **Delay ledger:** compare the payoff to what an immediate Lion/Eagle would have accomplished during every opponent turn in the waiting window.
-- [ ] **Floor/ceiling:** price the card for its common unsuccessful state, not only the screenshot where all tribal conditions are active.
+- [ ] **Floor/ceiling:** price the card for its common unsuccessful state, not only the screenshot where all family conditions are active.
 - [ ] **Closest-card test:** reject a candidate that is strictly or practically dominated by an existing card—or that makes an existing card obsolete without creating a meaningful deckbuilding tradeoff.
 
 ---
@@ -207,7 +207,7 @@ Primary risks: snowballing free bodies, timers becoming bookkeeping-heavy, and a
 
 ### 2.2 Wetlands School — Fish, Amphibians, and formation movement
 
-**Identity:** build formations around fragile aquatic Landmarks, relocate along empty crossroads, and gain strength from nearby allies/enemies. This should play as positional midrange, not as a second tribal anthem deck.
+**Identity:** build formations around fragile aquatic Landmarks, relocate along empty crossroads, and gain strength from nearby allies/enemies. This should play as positional midrange, not as a second family anthem deck.
 
 Anchor candidates:
 
@@ -237,7 +237,7 @@ Anchor candidates:
 - [ ] **Mandrill** — Primate · STR 5 · Rare `Your other Primates have +2 strength.`
 - [ ] **Gorilla** — Primate · STR 6 · Rare `Adjacent enemy units have −2 strength.`
 - [ ] **Orangutan** — Primate · STR 6 · Rare `Battlecry: return a Landmark from the Remove Pile to your hand.`
-- [ ] **Kanzi** — Primate · STR 4 · Legendary candidate `Battlecry: repeat the Battlecry of another adjacent Primate.` Copying effects is dangerous even when tribe-restricted; enumerate every Primate Battlecry before approval.
+- [ ] **Kanzi** — Primate · STR 4 · Legendary candidate `Battlecry: repeat the Battlecry of another adjacent Primate.` Copying effects is dangerous even when family-restricted; enumerate every Primate Battlecry before approval.
 - [ ] **Tool Cache** — Landmark · STR 0 · Common `Fragile. When you play a Primate adjacent to this, remove this and draw 3 cards.`
 
 Primary risks: copied Battlecries, permanent-buff overlap with Canines, and Landmarks becoming solitaire engines rather than contested positions.

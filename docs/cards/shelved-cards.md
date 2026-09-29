@@ -10,7 +10,7 @@ food_otk was three half-decks in a trenchcoat (a food-OTK package, a wall packag
 
 ### → future **Aristocrats (Spider)** deck
 
-Carmilla and Black Widow are **Arachnids**, and the whole sacrifice/deathrattle package is a textbook *aristocrats* engine: remove your own units on purpose to convert them into cards and food. That's a coherent, flavourful archetype waiting to be built — a Spider/Arachnid tribe whose payoff is *feeding on its own*:
+Carmilla and Black Widow are **Arachnids**, and the whole sacrifice/deathrattle package is a textbook *aristocrats* engine: remove your own units on purpose to convert them into cards and food. That's a coherent, flavourful archetype waiting to be built — a Spider/Arachnid family whose payoff is *feeding on its own*:
 
 - **Carmilla, the Devourer** (L, Arachnid) — the sacrifice payoff (eat up to 3 friendlies, draw each).
 - **Black Widow** (C, Arachnid) — the repeatable sac-for-value outlet.
@@ -50,9 +50,9 @@ The mechanical thesis, and *why* it must be its own deck: **"if this has ≥N st
 
 Seed pieces (designs, not final cards):
 
-- **Shuck** (reserve) — recursion + hand-buff: "Battlecry: return a removed [tribe] to your hand, give it +2 strength."
+- **Shuck** (reserve) — recursion + hand-buff: "Battlecry: return a removed [family] to your hand, give it +2 strength."
 - **Coyote** (reserve) — a threshold payoff: "Battlecry: if this has 5+ strength, draw a card." (The founding member of the "≥N strength" package.)
-- **Red Wolf's *old* effect** — hand-buff: "Battlecry: give +1 strength to all [tribe] in your hand." (The Canine *animal* kept the name with a new on-enter effect; the hand-buff *effect* belongs here.)
+- **Red Wolf's *old* effect** — hand-buff: "Battlecry: give +1 strength to all [family] in your hand." (The Canine *animal* kept the name with a new on-enter effect; the hand-buff *effect* belongs here.)
 - **New hand-buff common** (proposed) — "STR 3, Battlecry: give +2 strength to two units in your hand." Works from an empty board — the go-tall catch-up tool.
 - **Reused threshold package** — mirror Colony's "5+ units" / OTK's "gained 10 food" payoff trio, but keyed on **strength** ("if this has ≥X strength: remove / draw / +str"). Keying on strength (not unit count) keeps it distinct from Colony and doubles down on the buff identity.
 

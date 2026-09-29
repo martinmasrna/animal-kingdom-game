@@ -1,6 +1,6 @@
 // The one card (design sandbox card2/, Martin 2026-09-29): the painting fills the card inside a rarity edge (graphite,
 // silver, gold); a painted driftwood bar holds the name, a painted banner the strength in chalk digits, a driftwood panel
-// the rules and tribe. `compact` drops the panel (hand and collection show the painting; the full card shows on hover).
+// the rules and family. `compact` drops the panel (hand and collection show the painting; the full card shows on hover).
 // Size it with the CSS variable --w on .card (everything inside scales with it).
 import { hasArt, artUrl } from './art.js';
 

@@ -65,7 +65,7 @@ The initial 14-design packages are premade-deck foundations, not intended final 
   - Aggro ↔ Warren/Burrow: empty-crossroad reach.
   - Canines ↔ general movement: buffs that enable repositioning.
   - Fish ↔ Food sacrifice: fragile prey and on-covered effects.
-- [ ] A bridge card should be slightly less efficient than a tribe's pure payoff when used outside its best home; otherwise it becomes generic goodstuff.
+- [ ] A bridge card should be slightly less efficient than a family's pure payoff when used outside its best home; otherwise it becomes generic goodstuff.
 - [ ] Avoid bridge cards that accidentally combine two complete win engines on one body.
 
 ## 5. Required list-building exercises
@@ -75,7 +75,7 @@ The initial 14-design packages are premade-deck foundations, not intended final 
   1. Colony sacrifice;
   2. Egg/Dinosaur hatch;
   3. Landmark midrange using cards from at least three tags.
-- [ ] Build the strongest apparent legendary-goodstuff list. Verify that tribal/common synergy beats simply selecting the best four one-copy cards.
+- [ ] Build the strongest apparent legendary-goodstuff list. Verify that family/common synergy beats simply selecting the best four one-copy cards.
 - [ ] Build the lowest-curve legal list and search manually for two- and three-card HQ captures.
 - [ ] Build the most deterministic food combo possible and count filtered draws, tutors, recursion, and redundant win pieces.
 - [ ] Build against all three revealed maps with no sideboard. Confirm that map specialization creates tension without making one map an automatic loss.

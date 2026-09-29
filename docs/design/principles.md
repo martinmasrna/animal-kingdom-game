@@ -8,7 +8,7 @@ What the game should become, and the rules every card is designed against. Read 
 - Pilot skill matters more than deck choice at the margin: a strong player on a slightly weaker deck beats a weaker player on a stronger one.
 - The generalist "goodstuff" pile may exist as one archetype (midrange), provided it has predators and isn't the forced best deck. Today it is the forced best deck: see [`goodstuff.md`](goodstuff.md).
 
-**Hard constraints.** No mana or per-card resource cost. No colors or classes that restrict which cards a deck may contain. It stays an open-construction deckbuilding game. Allowed: incentives that reward committing to a tribe (tribe-count thresholds) without a hard rule.
+**Hard constraints.** No mana or per-card resource cost. No colors or classes that restrict which cards a deck may contain. It stays an open-construction deckbuilding game. Allowed: incentives that reward committing to a family (family-count thresholds) without a hard rule.
 
 ## Card design (Martin's four principles)
 

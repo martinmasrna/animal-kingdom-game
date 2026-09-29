@@ -4,7 +4,7 @@ Focused follow-up to `decks/flavor-review.md`, including consequences of the Jul
 
 ## 1. Required by recent rarity/card changes
 
-### 1.0 Tribe-label symmetry: Cat/Dog versus Feline/Canine
+### 1.0 Family-label symmetry: Cat/Dog versus Feline/Canine
 
 - [ ] Choose a deliberate player-facing pair:
   - **Cat / Canine:** keeps the familiar current Cat label but remains grammatically asymmetric.
@@ -18,7 +18,7 @@ Focused follow-up to `decks/flavor-review.md`, including consequences of the Jul
   - It is a real bird famous for killing dangerous prey on the ground.
   - The existing candidate slate already pairs it with the exact proposed line: `Bird · STR 4 · Flight. Battlecry: remove an adjacent enemy of strength 4 or less.`
   - It reads naturally in Egg Control's Bird/Snake ecosystem as a predator among snakes.
-- [ ] Alternatives if Secretarybird feels too anti-Snake for the mixed tribe: **Goshawk, Harrier, Kite**.
+- [ ] Alternatives if Secretarybird feels too anti-Snake for the mixed family: **Goshawk, Harrier, Kite**.
 - [ ] Retire “Stoop” as the card name when the rarity change ships. It reads as an individual legendary name rather than a generic species.
 
 ### 1.4 New Aggro cover-retaliation legendary
