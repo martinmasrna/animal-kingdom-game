@@ -1,0 +1,97 @@
+/* The collection (= the deckbuilder), collection.js. Everything is scoped under .coll. Layout settled in the design sandbox's
+   builder/notes.md (round B2); flat greys until the painted pass. */
+.coll { position: fixed; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: 72px 1fr; background: #16181a; color: #d8d4cc; font-family: var(--font-text); }
+.coll button { font: inherit; }
+
+/* Header: one 40px row on the grid's 24px edges. */
+.coll .chead { grid-column: 1; display: flex; align-items: center; gap: 10px; padding: 0 24px; min-width: 0; border-bottom: 1px solid #2a2d30; }
+.coll .chead > * { flex: none; }
+.coll .tabs { display: flex; gap: 6px; margin-right: 14px; }
+.coll .tab { position: relative; border-radius: 50%; cursor: pointer; }
+.coll .med { box-sizing: border-box; border-radius: 50%; border: 2px solid #44484c; background-repeat: no-repeat; background-color: #3a3d40; }
+.coll .tab .med { width: 40px; height: 40px; }
+.coll .tab:hover .med { border-color: #8b8e92; }
+.coll .tab.on .med { border-color: #f0ece4; box-shadow: 0 0 0 2px #16181a, 0 0 0 4px #f0ece4; }
+.coll .mosaic { display: grid; grid-template: 1fr 1fr / 1fr 1fr; gap: 1px; overflow: hidden; background: #55595e; }
+.coll .mosaic i { display: block; background-repeat: no-repeat; background-color: #3a3d40; }
+.coll .sel, .coll .search { height: 40px; box-sizing: border-box; border-radius: 999px; border: 1px solid #3a3d40; background: #1f2224; color: #d8d4cc; font: 13px var(--font-text); }
+.coll .sel { padding: 0 10px; }
+.coll .search { flex: 1 1 auto; min-width: 140px; padding: 0 14px; }
+.coll [data-tip] { position: relative; }
+.coll [data-tip]::after { content: attr(data-tip); position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 30; white-space: nowrap; padding: 4px 9px; border-radius: 6px;
+  background: #000d; color: #f0ece4; font: 500 12px var(--font-text); opacity: 0; pointer-events: none; transition: opacity .1s; }
+.coll [data-tip]:hover::after { opacity: 1; }
+
+/* The card grid: compact cards filling the columns, copies in the open deck as dots, dimmed when no further copy can go in. */
+.coll .cgrid { grid-column: 1; grid-row: 2; overflow-y: auto; padding: 8px 24px 36px; scrollbar-width: thin; scrollbar-color: #3a3d40 transparent; }
+.coll .crow { display: grid; grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); gap: 18px 16px; }
+.coll .tl { position: relative; cursor: pointer; container-type: inline-size; } .coll .tl .card { --w: 100cqw; }
+.coll .tl.max { cursor: default; } .coll .tl.max .card { filter: brightness(.45) saturate(.6); }
+.coll .pips { position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%); z-index: 6; display: flex; gap: 4px; padding: 4px 7px; border-radius: 999px; background: #16181a; box-shadow: 0 2px 5px rgba(0,0,0,.6); }
+.coll .pips i, .coll .st .x i { display: block; width: 8px; height: 8px; box-sizing: border-box; border-radius: 50%; border: 1.5px solid #e9e4da; }
+.coll .pips i.on, .coll .st .x i.on { background: #e9e4da; }
+.coll .none { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 80px 0; color: #8b8e92; font-size: 15px; }
+.coll .none p { margin: 0; }
+.coll .quiet { height: 36px; padding: 0 16px; border-radius: 8px; border: 1px solid #44484c; background: none; color: #d8d4cc; font: 600 14px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
+
+/* The deck column: your decks, a rule, the starters; the open deck unfolds under its tile; Back docked at the bottom. */
+.coll .side { grid-column: 2; grid-row: 1 / 3; display: flex; flex-direction: column; min-height: 0; border-left: 1px solid #2a2d30; background: #1c1f21; }
+.coll .clist { flex: 1; overflow-y: auto; padding: 16px 12px 14px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; scrollbar-color: #3a3d40 transparent; }
+.coll .clist > * { flex: none; }
+.coll .dsep { height: 1px; margin: 10px 4px; background: #2e3134; }
+.coll .dtile { position: relative; height: 56px; border-radius: 8px; background: #2a2d30 center 30% / cover; cursor: pointer; }
+.coll .dtile::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, rgba(20,22,24,.95) 35%, rgba(20,22,24,.2)); }
+.coll .dtile b { position: absolute; left: 12px; top: 8px; font: 700 17px/1.1 'Fira Sans Condensed', sans-serif; color: #f0ece4; text-shadow: 0 1px 3px #000; }
+.coll .dtile span { position: absolute; left: 12px; bottom: 8px; font: 500 12px/1.1 'Fira Sans Condensed', sans-serif; color: #a8abb0; }
+.coll .dtile.on { border-radius: 8px 8px 0 0; box-shadow: inset 0 0 0 2px #d8d4cc; }
+.coll .dtile.on b { top: 50%; transform: translateY(-50%); font-size: 19px; }
+.coll .nm-edit { cursor: text; } .coll .nm-edit:hover { text-decoration: underline dotted #8b8e92; text-underline-offset: 4px; }
+.coll .nm-in { position: absolute; left: 8px; right: 8px; top: 50%; transform: translateY(-50%); height: 32px; box-sizing: border-box; border-radius: 6px; border: 1px solid #d8d4cc; background: #16181acc; color: #f0ece4; font: 700 19px 'Fira Sans Condensed', sans-serif; padding: 0 6px; }
+.coll .tacts { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); z-index: 5; display: flex; gap: 6px; opacity: 0; transition: opacity .12s; }
+.coll .dtile.on:hover .tacts { opacity: 1; }
+.coll .ic { width: 34px; height: 34px; padding: 0; border-radius: 8px; border: 1px solid #55595e; background: #16181acc; color: #e0dcd4; display: grid; place-items: center; cursor: pointer; }
+.coll .ic:hover { color: #f0ece4; border-color: #8b8e92; }
+.coll .ic.del { color: #ff8a78; border-color: #9a3f33; } .coll .ic.del:hover { color: #fff; background: #b24a3a; border-color: #b24a3a; }
+.coll .dbody { margin: -8px 0 0; padding: 10px 8px 8px; border-radius: 0 0 8px 8px; background: #24272a; }
+.coll .fams { display: flex; gap: 10px; margin-bottom: 4px; }
+.coll .fams div { display: flex; align-items: center; gap: 6px; font: 700 16px 'Fira Sans Condensed', sans-serif; }
+.coll .fams .med { width: 26px; height: 26px; }
+.coll .rh { display: flex; justify-content: space-between; margin: 10px 2px 4px; font: 600 11px var(--font-text); letter-spacing: .08em; text-transform: uppercase; color: #6b6f74; }
+.coll .rh .full { color: #7fb2e8; }
+.coll .st { position: relative; display: flex; align-items: center; height: 27px; margin-bottom: 3px; border-radius: 6px; overflow: hidden; background: #2a2d30; cursor: pointer; }
+.coll .st .art { position: absolute; right: 0; top: 0; bottom: 0; width: 60%; background: center 30% / cover; -webkit-mask-image: linear-gradient(90deg, transparent, #000 70%); mask-image: linear-gradient(90deg, transparent, #000 70%); opacity: .75; }
+.coll .st .s { position: relative; width: 28px; text-align: center; font: 700 15px 'Fira Sans Condensed', sans-serif; }
+.coll .st .n { position: relative; flex: 1; font: 600 14px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.coll .st .x { position: relative; display: flex; gap: 3px; padding: 0 8px; } .coll .st .x i { width: 7px; height: 7px; filter: drop-shadow(0 1px 1px #000); }
+.coll .play { margin-top: 14px; height: 48px; border-radius: 8px; background: #3b6ea8; color: #fff; display: grid; place-items: center; font: 700 19px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
+.coll .play:hover { background: #4579b4; }
+.coll .play.off { background: #2c3034; color: #8b8e92; cursor: default; font-size: 16px; }
+.coll .sfoot { flex: none; padding: 8px 12px 12px; border-top: 1px solid #2a2d30; }
+.coll .backbtn { width: 100%; height: 44px; border-radius: 8px; border: 0; background: #24272a; color: #a8abb0; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 13px; cursor: pointer; }
+.coll .backbtn:hover { color: #f0ece4; background: #2c3034; }
+
+/* Feedback: a refused add shakes the card and flashes the limit that stopped it; an added card flashes in the deck. */
+@keyframes collShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+@keyframes collFlash { 0% { background-color: #7fb2e8; } 100% { background-color: #2a2d30; } }
+@keyframes collPulse { 0%, 60% { color: #ff8a78; transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes collPips { 0%, 60% { transform: translateX(-50%) scale(1.3); background: #b24a3a; } 100% { transform: translateX(-50%); } }
+.coll .shake { animation: collShake .3s; }
+.coll .st.flash { animation: collFlash .9s ease-out; }
+.coll .rh span.flash { display: inline-block; animation: collPulse .7s; }
+.coll .pips.flash { animation: collPips .7s; }
+
+/* Dialogs (delete, cover). */
+.coll .modal { position: fixed; inset: 0; z-index: 100; display: none; place-items: center; background: rgba(0,0,0,.6); }
+.coll .modal.on { display: grid; }
+.coll .dlg { width: 380px; padding: 22px 22px 18px; border-radius: 12px; background: #24272a; border: 1px solid #3a3d40; box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+.coll .dlg h3 { margin: 0 0 8px; font: 700 21px 'Fira Sans Condensed', sans-serif; color: #f0ece4; }
+.coll .dlg p { margin: 0 0 18px; font-size: 14px; line-height: 1.45; color: #a8abb0; }
+.coll .dbtns { display: flex; justify-content: flex-end; gap: 8px; }
+.coll .dbtns button { height: 38px; padding: 0 16px; border-radius: 8px; font: 600 15px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
+.coll .dbtns .cancel { background: none; border: 1px solid #44484c; color: #d8d4cc; } .coll .dbtns .cancel:hover { border-color: #6b6f74; }
+.coll .dbtns .danger { background: #b24a3a; border: 1px solid #b24a3a; color: #fff; } .coll .dbtns .danger:hover { background: #c75443; }
+.coll .dlg.cov { width: 760px; max-width: calc(100vw - 48px); }
+.coll .covs { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 12px; max-height: 60vh; overflow-y: auto; padding: 4px; margin-bottom: 16px; }
+.coll .cv { container-type: inline-size; cursor: pointer; border-radius: 10px; transition: transform .1s; } .coll .cv .card { --w: 100cqw; } .coll .cv:hover { transform: translateY(-3px); }
+.coll .cv.on { box-shadow: 0 0 0 3px #24272a, 0 0 0 5px #f0ece4; }
+.coll .tacts [data-tip]::after { left: auto; right: 0; transform: none; }   /* at the column's right edge */

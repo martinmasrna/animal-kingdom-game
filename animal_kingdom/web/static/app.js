@@ -3,6 +3,7 @@
 import { hasArt, artUrl } from './art.js';
 import { cardHTML } from './card.js';
 import { renderBoard, STAGE, crossroadAt, denMouthAt } from './board.js';
+import { collectionScreen as renderCollection } from './collection.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const COVER = { cats_midrange: 'king_theron', canine_buff_tempo: 'lobo', aggro_hq_rush: 'verminus', colony_food_swarm: 'queen_honoria',
@@ -76,7 +77,7 @@ function miniMap(w, h) {
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
 }
 function deckTile(d, on) {
-  const list = counted(d.list), cover = COVER[d.id] || (d.mine && sortIds(Object.keys(list))[0]), cv = cover ? artStyle(cover) : '';
+  const list = counted(d.list), cover = COVER[d.id] || d.cover || (d.mine && sortIds(Object.keys(list))[0]), cv = cover ? artStyle(cover) : '';
   return `<div class="dk${on ? ' on' : ''}" data-deck="${d.id}"><div class="cv gradart" ${cv}></div><div class="in"><b>${d.name}</b><span>${d.mine ? 'Your deck' : 'Starter deck'} · ${d.list.length} cards</span><span>${families(list)}</span></div></div>`;
 }
 // Your profile: the server knows you by the sign-in code this browser keeps (localStorage 'ak:key').
@@ -93,7 +94,7 @@ async function loadProfile() {
 const myDecks = () => ME.decks.map(d => ({ ...d, cards: Object.fromEntries(Object.entries(d.cards).filter(([id]) => CARDS[id])) }));
 const saveDecks = ds => { ME.decks = ds; api('/api/me/decks', { method: 'PUT', body: JSON.stringify(ds) }).then(r => r.ok || toast('Could not save your decks')); };
 const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
-const playable = () => DECKS.concat(myDecks().filter(d => deckSize(d.cards) === 30).map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) })));
+const playable = () => DECKS.concat(myDecks().filter(d => deckSize(d.cards) === 30).map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) })));
 const chosenDeck = () => { const all = playable(), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
 const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
 
@@ -197,60 +198,11 @@ function joinScreen(id) {
 }
 
 
-// ------------------------------------------------------------------ collection (= the deckbuilder)
-// One screen, Martin's round B1: filters and art tiles on the left, the deck being edited on the right.
-// Click a tile to add a copy, click a deck row to take one out; every change saves.
-const LIMIT = { legendary: 1, rare: 2, common: 3 }, CAP = { legendary: 4, rare: 8 };
-const FAMS = ['Bear', 'Bird', 'Canine', 'Cat', 'Colony', 'Lizard', 'Megafauna', 'Rodent', 'Snake'];
-const coll = { q: '', rar: null, str: null, fam: null, sort: 'str', deck: null };
+// ------------------------------------------------------------------ collection (= the deckbuilder): collection.js
 function collectionScreen() {
   screen = 'collection';
-  const pool = Object.values(CARDS).filter(c => DECKS.some(d => d.id === c.deck));
-  let decks = myDecks();
-  if (coll.deck !== '+' && !decks.some(d => d.id === coll.deck)) coll.deck = decks[0] ? decks[0].id : '+';
-  const cur = decks.find(d => d.id === coll.deck);
-  const inDeck = r => cur ? Object.entries(cur.cards).filter(([id]) => !r || CARDS[id].rarity === r).reduce((a, [, n]) => a + n, 0) : 0;
-  const maxed = c => (cur.cards[c.id] || 0) >= (c.copies || LIMIT[c.rarity]) || (CAP[c.rarity] && inDeck(c.rarity) >= CAP[c.rarity]);
-  const canAdd = c => cur && inDeck() < 30 && !maxed(c);
-  const q = coll.q.toLowerCase();
-  const shown = pool.filter(c => (!coll.rar || c.rarity === coll.rar) && (coll.str === null || c.str === coll.str) && (!coll.fam || c.tags.includes(coll.fam))
-    && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(q)))
-    .sort(coll.sort === 'str' ? (a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name)
-                              : (a, b) => RANK[a.rarity] - RANK[b.rarity] || sv(a) - sv(b) || a.name.localeCompare(b.name));
-  const seg = (k, opts) => '<span class="seg">' + opts.map(([v, l]) => `<span class="${coll[k] === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${l}</span>`).join('') + '</span>';
-  const tiles = shown.map(c => { const n = cur ? cur.cards[c.id] || 0 : 0;
-    return `<div class="tl${cur && maxed(c) ? ' max' : ''}" data-add="${c.id}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n ? `<span class="c">${n}</span>` : ''}</div>`; }).join('');
-  const sec = (r, label) => { const n = inDeck(r), cap = CAP[r];
-    const list = cur ? Object.keys(cur.cards).filter(id => CARDS[id].rarity === r) : [];
-    return `<h3><span>${label}</span><span class="${cap && n >= cap ? 'full' : ''}">${n}${cap ? ' / ' + cap : ''}</span></h3>` +
-      rows(Object.fromEntries(list.map(id => [id, cur.cards[id]]))).replace(/class="dr /g, 'data-rm class="dr '); };
-  const panel = cur ? `<div class="dhead"><select id="dsel">${decks.map(d => `<option value="${d.id}"${d.id === cur.id ? ' selected' : ''}>${d.name}</option>`).join('')}<option value="+">+ New deck</option></select>
-      <div class="dname"><input id="dname" maxlength="40" value="${cur.name.replace(/"/g, '&quot;')}"><b class="${inDeck() === 30 ? 'ok' : ''}">${inDeck()}<i> / 30</i></b></div></div>
-      <div class="dlist">${sec('legendary', 'Legendary')}${sec('rare', 'Rare')}${sec('common', 'Common')}</div>
-      <div class="dfoot"><span>${families(cur.cards) || 'Click a card to add it'}</span><span class="del" id="ddel">Delete</span></div>`
-    : `<div class="dnew"><div class="lbl">New deck</div><span class="chip on" data-new="">Empty deck</span>${DECKS.map(d => `<span class="chip" data-new="${d.id}">Copy ${d.name}</span>`).join('')}${decks.length ? `<span class="back" data-k="deck" data-v="${decks[0].id}">‹ Back to ${decks[0].name}</span>` : ''}</div>`;
-  app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Menu</a><h1>Collection</h1><span class="r">${pool.length} cards</span></div>
-    <div class="filters"><input class="search" id="q" placeholder="Search" value="${coll.q.replace(/"/g, '&quot;')}">${seg('rar', [[null, 'All'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
-      <span class="strs">${[null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10].map(v => `<span class="${coll.str === v ? 'on' : ''}" data-k="str" data-v="${v}">${v === null ? 'All' : v}</span>`).join('')}</span>
-      <select id="fam"><option value="">All families</option>${FAMS.map(f => `<option${coll.fam === f ? ' selected' : ''}>${f}</option>`).join('')}</select>
-      <span class="gap"></span><span class="lbl">Sort</span>${seg('sort', [['str', 'Strength'], ['rar', 'Rarity']])}</div>
-    <div class="cbody"><div class="tiles">${tiles || '<span class="none">No cards match</span>'}</div><div class="dpanel">${panel}</div></div>`;
-  wirePops(app);
-  const save = () => { saveDecks(decks); collectionScreen(); };
-  app.querySelectorAll('[data-k]').forEach(e => e.onclick = () => { const k = e.dataset.k, v = e.dataset.v; coll[k] = v === 'null' ? null : k === 'str' ? +v : v; collectionScreen(); });
-  const qi = document.getElementById('q');
-  qi.oninput = () => { coll.q = qi.value; const at = qi.selectionStart; collectionScreen(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(at, at); };
-  document.getElementById('fam').onchange = e => { coll.fam = e.target.value || null; collectionScreen(); };
-  app.querySelectorAll('[data-add]').forEach(e => e.onclick = () => { const c = CARDS[e.dataset.add]; if (!cur) return toast('Make a deck first'); if (!canAdd(c)) return;
-    cur.cards[c.id] = (cur.cards[c.id] || 0) + 1; pop.style.display = 'none'; save(); });
-  app.querySelectorAll('[data-rm]').forEach(e => e.onclick = () => { const id = e.dataset.card; if (--cur.cards[id] <= 0) delete cur.cards[id]; pop.style.display = 'none'; save(); });
-  app.querySelectorAll('[data-new]').forEach(e => e.onclick = () => { const src = DECKS.find(d => d.id === e.dataset.new);
-    const d = { id: Date.now().toString(36), name: src ? src.name + ' copy' : 'New deck', cards: src ? counted(src.list) : {} };
-    decks.push(d); coll.deck = d.id; save(); });
-  if (!cur) return;
-  document.getElementById('dsel').onchange = e => { coll.deck = e.target.value; collectionScreen(); };
-  const nm = document.getElementById('dname'); nm.onchange = () => { cur.name = nm.value.trim() || 'New deck'; save(); };
-  document.getElementById('ddel').onclick = () => { decks = decks.filter(d => d.id !== cur.id); coll.deck = null; save(); };
+  renderCollection(app, { cards: CARDS, starters: DECKS.filter(d => d.id !== 'goodstuff'), covers: COVER, getDecks: myDecks, saveDecks, toast,
+    play: d => { store('ak:deck', d.own ? 'my:' + d.id : d.id); location.hash = '#/play'; }, back: () => { location.hash = '#/'; } });
 }
 
 // ------------------------------------------------------------------ profile

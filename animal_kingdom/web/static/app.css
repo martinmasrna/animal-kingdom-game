@@ -150,47 +150,6 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .sc { width: auto; min-height: 0; border: none; background: none; box-shadow: none; overflow: visible; }
 .sc .tm { padding: 4px 2px 0; font-size: 12px; color: #f3e3c0; text-shadow: 0 1px 2px #000; }
 
-/* ---------- collection (= the deckbuilder), from the design sandbox's builder/tiles ---------- */
-.filters { height: 52px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 24px; }
-.filters .search { width: 170px; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); font: inherit; font-size: 13px; }
-.filters select, .dhead select { height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); font: inherit; font-size: 13px; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; flex: none; }
-.seg span { height: 28px; padding: 0 11px; display: inline-flex; align-items: center; font-size: 12px; color: var(--muted); cursor: pointer; }
-.seg span.on { background: var(--surface-2); color: var(--text); }
-.strs { display: inline-flex; gap: 2px; }
-.strs span { min-width: 24px; height: 30px; padding: 0 4px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--muted); cursor: pointer; }
-.strs span:first-child { font-size: 12px; font-family: inherit; font-weight: 600; }
-.strs span.on { background: var(--surface-2); color: var(--text); }
-.filters .gap { flex: 1; }
-.cbody { flex: 1; display: flex; min-height: 0; }
-.tiles { flex: 1; min-width: 0; overflow-y: auto; padding: 6px 24px 20px; display: grid; grid-template-columns: repeat(auto-fill, 118px); gap: 12px; justify-content: space-between; align-content: start; }
-.tiles .none { color: var(--muted); font-size: 13px; grid-column: 1 / -1; padding: 20px 0; }
-.tl { position: relative; cursor: pointer; transition: transform .12s; } .tl .card { --w: 118px; }
-.tl:hover { transform: translateY(-3px); }
-/* Copies in the deck: a dark disc at the card's bottom right. */
-.tl .c { position: absolute; right: -5px; bottom: -5px; z-index: 5; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 999px; background: #1d140a; border: 2px solid #c9b48f;
-  display: grid; place-items: center; font: 700 15px/1 'Fira Sans Condensed', sans-serif; color: #f3e3c0; box-shadow: 0 2px 5px rgba(0,0,0,.6); }
-.tl.max .card { filter: brightness(.42) saturate(.6); }
-.dpanel { width: 280px; flex: none; border-left: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; min-height: 0; }
-.dhead { padding: 12px 14px 6px; display: flex; flex-direction: column; gap: 8px; }
-.dhead select { width: 100%; }
-.dname { display: flex; align-items: center; gap: 10px; }
-.dname input { flex: 1; min-width: 0; height: 32px; padding: 0 8px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: var(--text); font-family: var(--font-display); font-weight: 700; font-size: 20px; }
-.dname input:hover, .dname input:focus { border-color: var(--line-strong); background: var(--surface-2); outline: none; }
-.dname b { font-family: var(--font-display); font-weight: 700; font-size: 20px; white-space: nowrap; }
-.dname b i { font-style: normal; color: var(--faint); font-weight: 500; }
-.dname b.ok { color: var(--you); }
-.dlist { flex: 1; overflow-y: auto; padding: 0 10px; }
-.dlist h3 { display: flex; justify-content: space-between; padding: 10px 4px 4px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-.dlist h3 .full { color: var(--you); }
-.dlist .dr { height: 24px; margin-bottom: 2px; cursor: pointer; --c: var(--surface-3, #3a3f44); } .dlist .dr .s { color: var(--text); }
-.dlist .dr .nm { font-size: 13px; }
-.dfoot { border-top: 1px solid var(--line); padding: 10px 14px 12px; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
-.dfoot span:first-child { flex: 1; }
-.dfoot .del { cursor: pointer; } .dfoot .del:hover { color: var(--them); }
-.dnew { padding: 16px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
-.dnew .back { margin-top: 8px; font-size: 12px; color: var(--muted); cursor: pointer; }
-
 /* ---------- profile ---------- */
 .me { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1; padding: 8px 16px; border-radius: 999px; background: rgba(15,17,19,0.72); border: 1px solid rgba(255,255,255,0.12); font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: 0.03em; }
 .me span { color: var(--muted); font-weight: 600; margin-left: 2px; }
