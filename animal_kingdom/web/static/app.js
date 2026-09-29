@@ -121,7 +121,7 @@ function route() {
   const parts = (location.hash.slice(1) || '/').split('/').filter(Boolean);
   const id = parts[1] && parts[1].toUpperCase();
   if (parts[0] !== 'm' || id !== wsId) disconnect();
-  if (parts[0] === 'play') return playScreen();
+  if (parts[0] === 'play' || parts[0] === 'gauntlet') return playScreen();
   if (parts[0] === 'collection') return collectionScreen();
   if (parts[0] === 'profile') return profileScreen();
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
@@ -143,15 +143,18 @@ function homeScreen() {
 const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', code: '' };
 const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']];
 const deckGrid = chosen => `<div class="pdecks"><div class="pgrid">${playable().map(d => deckTile(d, d.id === chosen.id)).join('')}</div></div>`;
+// The gauntlet (every starter deck, ten games each) is a developer's tool: only at #/gauntlet, not among the opponents.
 function playScreen() {
   screen = 'play';
+  const dev = location.hash.startsWith('#/gauntlet');
+  if (dev) play.opp = 'gauntlet'; else if (play.opp === 'gauntlet') play.opp = 'bot';
   const chosen = chosenDeck();
   const seg = (v, label) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${label}</button>`;
   const opts = play.opp === 'bot' ? dd('level', play.level, LEVELS) + dd('botDeck', play.botDeck, [['random', 'Random deck'], ...DECKS.map(d => [d.id, d.name + ' deck'])])
     : play.opp === 'gauntlet' ? dd('level', play.level, LEVELS) + dd('side', play.side, [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']])
     : `<div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`;
   app.innerHTML = `<div class="menu pscr">${deckGrid(chosen)}
-    <div class="side"><div class="popts"><div class="seg">${seg('bot', 'Bot')}${seg('friend', 'Friend')}${seg('gauntlet', 'Gauntlet')}</div>${opts}</div>
+    <div class="side"><div class="popts">${dev ? '' : `<div class="seg">${seg('bot', 'Bot')}${seg('friend', 'Friend')}</div>`}${opts}</div>
       <div class="sfoot"><button class="play" id="go">${play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play'}</button>
         <button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   app.querySelectorAll('[data-opp]').forEach(el => el.onclick = () => { play.opp = el.dataset.opp; playScreen(); });
