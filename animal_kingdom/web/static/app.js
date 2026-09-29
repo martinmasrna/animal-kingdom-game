@@ -91,7 +91,13 @@ async function boot() {
   CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks;
   addEventListener('hashchange', route);
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
-  addEventListener('keydown', e => { if (e.key === 'Escape' && ui.sel) { ui.sel = null; drawGame(); } });
+  addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
+    if (e.key !== 'Escape' || screen !== 'game') return;
+    const menu = document.getElementById('menudrop');
+    if (menu && menu.classList.contains('on')) return menu.classList.remove('on');
+    if (ui.panel) { ui.panel = null; return showPanel(); }
+    if (ui.sel) { ui.sel = null; drawGame(); }
+  });
   route();
 }
 

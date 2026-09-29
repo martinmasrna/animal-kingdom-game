@@ -51,7 +51,8 @@
 .game .series { left: 16px; top: 14px; font-size: 14px; color: var(--mute); cursor: pointer; }
 .game .series i { display: inline-block; width: 8px; height: 8px; margin-left: 4px; border-radius: 50%; border: 1.5px solid var(--mute); }
 .game .series i.now { background: var(--mute); } .game .series i.A { background: var(--A); border-color: var(--A); } .game .series i.B { background: var(--B); border-color: var(--B); }
-.game .opphand { left: 0; right: 0; top: 0; height: 66px; cursor: pointer; }
+.game .opphand { left: 0; right: 0; top: 0; height: 66px; pointer-events: none; }   /* only the card backs take the click */
+.game .opphand .back { pointer-events: auto; cursor: pointer; }
 .game .back { top: -54px; width: 84px; height: 118px; border-radius: 7px; background: var(--Bdk); border: 3px solid var(--B); box-shadow: 3px 3px 6px rgba(0,0,0,.5); }
 .game .menu { right: 16px; top: 8px; width: 44px; height: 44px; display: grid; place-items: center; font-size: 22px; background: var(--plaque); border: 1px solid var(--plaqueline); border-radius: 6px; cursor: pointer; z-index: 40; }
 .game .menudrop { right: 0; top: 50px; background: #22201d; border: 1px solid var(--plaqueline); }
