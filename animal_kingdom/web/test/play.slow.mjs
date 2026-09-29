@@ -16,10 +16,11 @@ async function startMatch(deck, botDeck) {
   page.on('pageerror', e => page.errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error' && !/favicon/.test(m.text())) page.errors.push(m.text()); });
   await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
-  await page.goto(`${server.url}/#/play`, { waitUntil: 'networkidle0' });
+  await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   await page.evaluate(d => localStorage.setItem('ak:deck', d), deck);
-  await page.goto(`${server.url}/#/play`, { waitUntil: 'networkidle0' });
-  for (const [k, v] of [['level', 'easy'], ['botDeck', botDeck]]) {   // the screen's own dropdowns: open, then pick
+  await page.reload({ waitUntil: 'networkidle0' });
+  for (const [k, v] of [['level', 'easy'], ['botDeck', botDeck]]) {   // home's opponent chooser: open it, then its dropdown, then pick
+    if (!(await page.$('.chooser'))) await page.click('#oppbtn');
     await page.click(`.dd[data-dd="${k}"] .sel`); await page.click(`.ddo[data-k="${k}"][data-v="${v}"]`); await wait(100);
   }
   await page.click('#go');

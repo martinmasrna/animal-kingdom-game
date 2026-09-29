@@ -16,14 +16,6 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .top h1 { font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: 0.04em; text-transform: uppercase; }
 .top .r { margin-left: auto; font-size: 12px; color: var(--muted); }
 
-.home-bg { position: fixed; inset: 0; background: linear-gradient(180deg, #7ec3ca 0%, #a9cdb8 44%, #cfab66 56%, #c38f4a 74%, #9b6d37 100%); }
-.home-bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 34% 60% at 50% 50%, rgba(15,17,19,0.82) 0%, rgba(15,17,19,0.55) 55%, rgba(15,17,19,0.15) 100%); }
-.center { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
-.title { font-family: var(--font-display); font-weight: 700; font-size: 60px; line-height: 0.92; letter-spacing: 0.03em; text-transform: uppercase; text-align: center; text-shadow: 0 2px 16px rgba(0,0,0,0.5); }
-.nav { width: 280px; display: flex; flex-direction: column; gap: 8px; }
-.nav a { display: flex; align-items: center; justify-content: center; height: 46px; border-radius: 10px; background: rgba(15,17,19,0.72); border: 1px solid rgba(255,255,255,0.12); font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; }
-.nav a.play { height: 60px; font-size: 28px; background: var(--you); border-color: var(--you); color: #111; margin-bottom: 6px; }
-.nav a:hover { border-color: rgba(255,255,255,0.35); }
 
 .body { flex: 1; display: flex; gap: 32px; padding: 20px 24px; min-height: 0; }
 .row { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -51,37 +43,44 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .lobby .code { font-size: 44px; }
 .lobby .link { font-size: 13px; color: var(--muted); user-select: all; }
 
-/* ---------- play (menu.css): the match on the ground, your decks in the granite column ---------- */
-.pscr { display: grid; grid-template-columns: minmax(0, 1fr) 300px; }
-/* The stage: your deck and the opponent side by side as large portraits of the whole painting, Play centred under them. */
-.pscr .stage { --hh: min(480px, calc(100vh - 290px), calc((100vw - 300px - 48px - 72px) * .75)); --hw: calc(var(--hh) / 1.5); align-self: center; justify-self: center;
-  display: grid; grid-template-columns: var(--hw) var(--hw); grid-template-rows: 40px var(--hh) 40px 48px; column-gap: 72px; row-gap: 12px; }
-.pscr .stage > :nth-child(1) { grid-area: 1 / 2; }
-.pscr .stage > :nth-child(2) { grid-area: 2 / 1; }
-.pscr .stage > :nth-child(3) { grid-area: 2 / 2; }
-.pscr .stage > :nth-child(4) { grid-area: 3 / 2; }
-.pscr .stage > :nth-child(5) { grid-area: 4 / 1 / 5 / 3; justify-self: center; width: var(--hw); margin-top: 12px; }
-.pscr .seg { display: flex; gap: 6px; }
-.pscr .seg .slab { flex: 1; height: 40px; }
-.pscr .seg .slab.on { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); color: #fff; font-weight: 600; filter: brightness(1.12); }
-.pscr .hero { position: relative; border-radius: 12px; overflow: hidden; background: #2a2521 center / cover;
-  box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.28), inset 0 1px 0 rgba(255,245,230,.22), 0 8px 20px rgba(0,0,0,.6); }
-.pscr .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(22,19,16,.9) 0, rgba(22,19,16,.5) 16%, rgba(22,19,16,0) 34%); }
-.pscr .hero b { position: absolute; left: 20px; bottom: 16px; font: 700 30px/1.1 'Fira Sans Condensed', sans-serif; color: #f0ece4; text-shadow: 0 1px 3px #000; }
-/* No deck to show (a random one, a friend's): an empty sunken slot. */
-.pscr .hero.slot { display: grid; place-items: center; background: rgba(10,9,8,.5); box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.16), inset 0 2px 10px rgba(0,0,0,.6); }
-.pscr .hero.slot::before { display: none; }
-.pscr .hero.slot i { font: 700 120px/1 'Fira Sans Condensed', sans-serif; font-style: normal; color: rgba(240,232,218,.22); }
-.pscr .hero.slot i.code { font-size: 44px; color: #f0e8da; }
-.pscr .hero.slot .frow { width: calc(100% - 32px); }
-.pscr .frow .field { flex: 1; min-width: 0; }
-.pscr .frow .field:not(:placeholder-shown) { text-transform: uppercase; }
-.pscr .frow .slab { flex: none; height: 40px; padding: 0 18px; }
-.pscr .ofoot { display: flex; gap: 8px; }
-.pscr .ofoot .dd { flex: 1; min-width: 0; }
-.pscr .ofoot .dd .sel { width: 100%; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* The column: the chosen deck is rimmed (not an open deck, so its corners stay round). */
-.pscr .clist:not(.editing) .dtile.on { border-radius: 8px; }
+/* ---------- home: where a match starts (menu.css pieces; design sandbox play/) ---------- */
+/* The key art (a placeholder until the real painting), the title along its top, the match on its ground. */
+.home { background: #0e0d0b url(/static/kit2/home_keyart.webp) center / cover; }
+.home::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(10,9,8,.3), rgba(10,9,8,0) 30%, rgba(10,9,8,0) 60%, rgba(10,9,8,.55)); }
+.home .title { position: absolute; left: 0; right: 0; top: 36px; text-align: center; font: 800 72px/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; text-shadow: 0 4px 24px rgba(0,0,0,.75); pointer-events: none; }
+/* The granite piece: your deck | the opponent, Play under them; Collection and the profile as smaller stones beside it, on Play's line. */
+.home .bar, .home .flank, .home .chooser { position: absolute; box-sizing: border-box; padding: 10px; border-radius: 16px;
+  background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 16px 40px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,245,230,.12); }
+.home .bar { left: 50%; bottom: 40px; transform: translateX(-50%); display: grid; grid-template-columns: 300px 300px; grid-template-rows: 56px 72px; gap: 10px; }
+.home .bar .play { grid-column: 1 / 3; height: 72px; font-size: 30px; }
+.home .pick { position: relative; height: 56px; border: 0; border-radius: 10px; text-align: left; cursor: pointer; }
+.home .pick.dtile b { left: 14px; }
+.home .pick.open { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); }
+.home .opp { display: flex; flex-direction: column; justify-content: center; padding: 0 36px 0 16px; }
+.home .opp b { font: 700 19px/1.1 'Fira Sans Condensed', sans-serif; color: #f0ece4; } .home .opp span { font: 500 14px/1.2 'Fira Sans Condensed', sans-serif; color: #c9bfae; }
+.home .opp:disabled { cursor: default; filter: none; }
+.home .chev { position: absolute; right: 12px; top: 50%; width: 14px; height: 14px; margin-top: -7px; z-index: 2; filter: drop-shadow(0 1px 2px #000);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0d6c6' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 15l6-6 6 6'/%3E%3C/svg%3E") center / contain no-repeat; }
+.home .pick.open .chev { transform: rotate(180deg); }
+.home .flank { bottom: 40px; }
+.home .flank.l { right: calc(50% + 331px); } .home .flank.r { left: calc(50% + 331px); }   /* 16px from the piece (half of it is 315) */
+.home .flank .backbtn { width: 170px; height: 72px; }
+.home .flank .backbtn span { font-size: 19px; } .home .who i { font-style: normal; color: #b3a996; margin-left: 2px; }
+/* A chooser stands on the piece, on its edges: your decks beside the list of the one under the pointer; or the opponent's settings over its slot. */
+.home .chooser { bottom: 214px; display: grid; gap: 10px; }
+.home .chooser.decks { left: 50%; transform: translateX(-50%); width: 630px; height: min(440px, calc(100vh - 340px)); grid-template-columns: 1fr 1fr; }
+.home .chooser .clist { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #4a4540 transparent; }
+.home .chooser .clist > * { flex: none; }
+.home .chooser .dtile.on { border-radius: 8px; box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); }
+.home .chooser .dl { display: flex; flex-direction: column; min-height: 0; padding: 6px 4px; border-radius: 10px; background: rgba(8,7,6,.55); box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.2), inset 0 2px 6px rgba(0,0,0,.6); }
+.home .chooser .dl .dbody { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; margin: 0; padding: 0; background: none; }
+.home .chooser .dl .backbtn { flex: none; margin: 6px 2px 0; width: auto; }
+.home .chooser.opps { left: calc(50% - 5px); width: 320px; }   /* its controls on the opponent slot's edges */
+.home .seg { display: flex; gap: 6px; } .home .seg .slab { flex: 1; height: 40px; }
+.home .seg .slab.on { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); color: #fff; font-weight: 600; filter: brightness(1.12); }
+.home .chooser .dd .sel { width: 100%; text-align: left; }
+.home .frow .field { flex: 1; min-width: 0; } .home .frow .field:not(:placeholder-shown) { text-transform: uppercase; }
+.home .frow .slab { flex: none; height: 40px; padding: 0 18px; }
 
 /* ---------- deck rows and the card popup (shared) ---------- */
 .dr { position: relative; display: flex; align-items: center; height: 19px; margin-bottom: 1px; border-radius: 4px; background: var(--surface-2); overflow: hidden; cursor: default; }
@@ -166,9 +165,6 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .sc .tm { padding: 4px 2px 0; font-size: 12px; color: #f3e3c0; text-shadow: 0 1px 2px #000; }
 
 /* ---------- profile ---------- */
-.me { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1; padding: 8px 16px; border-radius: 999px; background: rgba(15,17,19,0.72); border: 1px solid rgba(255,255,255,0.12); font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: 0.03em; }
-.me span { color: var(--muted); font-weight: 600; margin-left: 2px; }
-.me:hover { border-color: rgba(255,255,255,0.35); }
 .prof { gap: 48px; }
 .pside { width: 340px; flex: none; display: flex; flex-direction: column; gap: 10px; }
 .pside .lbl { margin-top: 14px; }

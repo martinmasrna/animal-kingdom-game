@@ -3,7 +3,7 @@
 import { hasArt, artUrl, stripArt } from './art.js';
 import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, crossroadAt, denMouthAt } from './board.js';
-import { collectionScreen as renderCollection, coverOf, deckBody, ICON } from './collection.js';
+import { collectionScreen as renderCollection, coverOf, deckBody } from './collection.js';
 import { dd, wireDd } from './menu.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
@@ -101,7 +101,7 @@ async function boot() {
   addEventListener('hashchange', route);
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
-    if (e.key === 'Escape' && (screen === 'play' || screen === 'join') && !/INPUT/.test(e.target.tagName)) return document.getElementById(play.list ? 'done' : 'back').click();
+    if (e.key === 'Escape' && screen === 'home' && play.open) { play.open = null; return route(); }   // Escape closes the open chooser
     if (e.key !== 'Escape' || screen !== 'game') return;
     const menu = document.getElementById('menudrop');
     if (menu && menu.classList.contains('on')) return menu.classList.remove('on');
@@ -116,112 +116,96 @@ function route() {
   const parts = (location.hash.slice(1) || '/').split('/').filter(Boolean);
   const id = parts[1] && parts[1].toUpperCase();
   if (parts[0] !== 'm' || id !== wsId) disconnect();
-  if (parts[0] === 'play' || parts[0] === 'gauntlet') return playScreen();
+  play.open = null;   // a chooser never outlives its screen
+  if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
+  if (parts[0] === 'gauntlet') return homeScreen({ gauntlet: true });
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   if (parts[0] === 'profile') return profileScreen();
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
-  if (parts[0] === 'join' && id) return joinScreen(id);
+  if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : homeScreen({ join: id });
   if (parts[0] === 'm' && id) return matchScreen(id);
   if (parts[0] === 'lab' && parts[1]) return labScreen(parts[1]);
   homeScreen();
 }
 
-function homeScreen() {
+// ------------------------------------------------------------------ home: where a match starts
+// There is no separate Play screen (design sandbox play/, 2026-09-30): the usual visit is one click, so home carries the match.
+// The key art, the title along its top and, on its ground, one granite piece: your deck | the opponent, Play under them. Each
+// side opens its chooser above the piece. Collection and the profile stand beside it for now, until the hub holds more.
+// #/gauntlet is the same screen with the developer's gauntlet as the opponent; #/join/<code> the same with a friend's match.
+const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };
+const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']], SIDES = [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']];
+const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
+function homeScreen(mode = {}) {
   screen = 'home';
-  app.innerHTML = `<div class="home-bg"></div><div class="center"><div class="title">Animal<br>Kingdom</div>
-    <div class="nav"><a class="play" href="#/play">Play</a><a href="#/collection">Collection</a></div></div>
-    <a class="me" href="#/profile">${esc(ME.name)}<span>#${ME.tag}</span></a>`;
-}
-
-// ------------------------------------------------------------------ play
-// The match about to be played, as Hearthstone shows it: your deck large, facing the opponent, Play under them. Your decks
-// are the collection's column (menu.css), where the chosen one can also show its decklist or open in the collection.
-const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', code: '', list: false };
-const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']];
-// A large deck portrait: the whole painting, its name at the foot.
-const hero = (cover, name) => `<div class="hero"${hasArt(cover) ? ` style="background-image:url(${artUrl(cover)})"` : ''}><b>${esc(name)}</b></div>`;
-// The column: your decks (the chosen one with its actions on hover), or the chosen deck's list; Back or Done in the foot.
-function deckColumn(chosen) {
-  const tile = d => { const on = d.id === chosen.id;
-    const acts = on && d.mine ? `<div class="tacts"><button class="ic" id="dlist" data-tip="${play.list ? 'Hide decklist' : 'Decklist'}">${ICON.list}</button><button class="ic" id="dedit" data-tip="Open in collection">${ICON.edit}</button></div>` : '';
-    return `<div class="dtile${on ? ' on' : ''}" data-deck="${d.id}" style="${stripArt(coverFor(d), 284, 56, .7)}"><b>${esc(d.name)}</b>${acts}</div>`; };
-  return play.list
-    ? `<div class="clist editing">${tile(chosen)}${deckBody(chosen.list, CARDS, false)}</div><div class="sfoot"><button class="backbtn" id="done"><span>Done</span></button></div>`
-    : `<div class="clist">${playable().map(tile).join('')}</div><div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div>`;
-}
-function wireColumn(chosen, redraw, back) {
-  app.querySelectorAll('[data-deck]').forEach(el => el.onclick = ev => { if (ev.target.closest('.tacts') || play.list) return; store('ak:deck', el.dataset.deck); redraw(); });
-  const $ = id => document.getElementById(id);
-  if ($('back')) $('back').onclick = back;
-  if ($('done')) $('done').onclick = () => { play.list = false; redraw(); };
-  if ($('dlist')) $('dlist').onclick = () => { play.list = !play.list; redraw(); };
-  if ($('dedit')) $('dedit').onclick = () => { play.list = false; location.hash = '#/collection/' + chosen.id.slice(3); };
-  wirePops(app.querySelector('.side'));
-}
-// The gauntlet (every starter deck, ten games each) is a developer's tool: only at #/gauntlet, not among the opponents.
-function playScreen() {
-  screen = 'play';
-  const dev = location.hash.startsWith('#/gauntlet');
-  if (dev) play.opp = 'gauntlet'; else if (play.opp === 'gauntlet') play.opp = 'bot';
-  const chosen = chosenDeck(), bd = DECKS.find(d => d.id === play.botDeck);
-  const seg = (v, label) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${label}</button>`;
-  // The opponent's side: the bot's deck (a blank slot with ? for a random one), a friend's code, or the gauntlet's settings.
-  const opp = play.opp === 'bot' ? { top: seg('bot', 'Bot') + seg('friend', 'Friend'), hero: bd ? hero(coverFor(bd), bd.name) : '<div class="hero slot"><i>?</i></div>',
-      foot: dd('level', play.level, LEVELS) + dd('botDeck', play.botDeck, [['random', 'Random deck'], ...DECKS.map(d => [d.id, d.name + ' deck'])]) }
-    : play.opp === 'friend' ? { top: seg('bot', 'Bot') + seg('friend', 'Friend'),
-      hero: `<div class="hero slot"><div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div></div>`, foot: '' }
-    : { top: '', hero: '<div class="hero slot"><i>?</i></div>', foot: dd('level', play.level, LEVELS) + dd('side', play.side, [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']]) };
-  app.innerHTML = `<div class="menu pscr"><div class="stage">
-      <div class="seg">${opp.top}</div>${hero(coverFor(chosen), chosen.name)}${opp.hero}<div class="ofoot">${opp.foot}</div>
-      <button class="play" id="go">${play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play'}</button></div>
-    <div class="side">${deckColumn(chosen)}</div></div>`;
-  wireColumn(chosen, playScreen, () => { location.hash = '#/'; });
-  app.querySelectorAll('[data-opp]').forEach(el => el.onclick = () => { play.opp = el.dataset.opp; playScreen(); });
-  wireDd(app, (k, v) => { play[k] = v; playScreen(); });
-  const code = document.getElementById('code');
+  if (mode.gauntlet) play.opp = 'gauntlet'; else if (play.opp === 'gauntlet' || mode.join) play.opp = mode.join ? 'friend' : 'bot';
+  const all = playable(), chosen = chosenDeck(), peek = all.find(d => d.id === play.peek) || chosen;
+  const bd = DECKS.find(d => d.id === play.botDeck), redraw = () => homeScreen(mode);
+  const botDecks = [['random', 'Random deck'], ...DECKS.map(d => [d.id, d.name + ' deck'])];
+  const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
+    : ['Bot', `${label(LEVELS, play.level)} · ${bd ? bd.name + ' deck' : 'Random deck'}`];
+  const go = mode.join ? 'Join match' : play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
+  const tile = (d, W, cls = '') => `<div class="dtile${cls}" data-deck="${d.id}" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b></div>`;
+  // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
+  const deckList = d => deckBody(d.list, CARDS, false) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
+  const chooser = play.open === 'decks'
+    ? `<div class="chooser decks"><div class="clist">${all.map(d => tile(d, 300, d.id === chosen.id ? ' on' : '')).join('')}</div><div class="dl">${deckList(peek)}</div></div>`
+    : play.open === 'opp' ? `<div class="chooser opps">${play.opp === 'gauntlet' ? dd('level', play.level, LEVELS) + dd('side', play.side, SIDES)
+      : `<div class="seg"><button class="slab${play.opp === 'bot' ? ' on' : ''}" data-opp="bot">Bot</button><button class="slab${play.opp === 'friend' ? ' on' : ''}" data-opp="friend">Friend</button></div>`
+        + (play.opp === 'friend' ? `<div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
+          : dd('level', play.level, LEVELS) + dd('botDeck', play.botDeck, botDecks))}</div>` : '';
+  app.innerHTML = `<div class="menu home"><div class="title">Animal Kingdom</div>${chooser}
+    <div class="flank l"><a class="backbtn" href="#/collection"><span>Collection</span></a></div>
+    <div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
+      <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
+      <button class="play" id="go">${go}</button></div>
+    <div class="flank r"><a class="backbtn who" href="#/profile"><span><b>${esc(ME.name)}</b><i>#${ME.tag}</i></span></a></div></div>`;
+  const $ = id => document.getElementById(id), root = app.querySelector('.home');
+  const toggle = k => { play.open = play.open === k ? null : k; play.peek = null; redraw(); };
+  $('deckbtn').onclick = () => toggle('decks');
+  if (!mode.join) $('oppbtn').onclick = () => toggle('opp');
+  root.onclick = e => { if (play.open && !e.target.closest('.chooser, .pick')) { play.open = null; redraw(); } };   // a click elsewhere closes the chooser
+  root.querySelectorAll('.chooser [data-deck]').forEach(el => {
+    el.onmouseenter = () => { const d = all.find(x => x.id === el.dataset.deck); root.querySelector('.dl').innerHTML = deckList(d); play.peek = d.id; wireList(); };
+    el.onclick = () => { store('ak:deck', el.dataset.deck); play.open = null; redraw(); };
+  });
+  const wireList = () => { const e = $('dedit'); if (e) e.onclick = () => { play.open = null; location.hash = "#/collection/" + play.peek.slice(3); };
+    const dl = root.querySelector('.dl'); if (dl) wirePops(dl); };
+  if (play.open === 'decks') { play.peek = peek.id; wireList(); }
+  root.querySelectorAll('[data-opp]').forEach(el => el.onclick = () => { play.opp = el.dataset.opp; redraw(); });
+  wireDd(root, (k, v) => { play[k] = v; redraw(); });
+  const code = $('code');
   if (code) {
     code.oninput = () => play.code = code.value.trim().toUpperCase();
     code.onkeydown = e => { if (e.key === 'Enter') joinCode(); };
-    document.getElementById('joinbtn').onclick = joinCode;
+    $('joinbtn').onclick = joinCode;
   }
-  document.getElementById('go').onclick = async () => {
+  $('go').onclick = async () => {
+    if (mode.join) {
+      const r = await api(`/api/match/${mode.join}/join`, { method: 'POST', body: JSON.stringify({ deck: deckSpec(chosen), name: 'Friend' }) });
+      if (!r.ok) return toast(r.status === 404 ? `No match ${mode.join}` : await r.text());
+      const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id; return;
+    }
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
-      const pool = DECKS.filter(d => d.id !== 'goodstuff'), bd = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
-      body.bot = { level: play.level, deck: bd };
+      const pool = DECKS.filter(d => d.id !== 'goodstuff'), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
+      body.bot = { level: play.level, deck };
     }
     if (play.opp === 'gauntlet') body.gauntlet = { level: play.level, reverse: play.side === 'theirs' };
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
     if (!r.ok) return toast(await r.text());
-    const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+    const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
   };
 }
-function joinCode() { if (play.code) location.hash = '#/join/' + play.code; }
-
-// Joining a friend's match from their link: the same screen, the friend's side holding the match code.
-function joinScreen(id) {
-  screen = 'join';
-  if (getToken(id)) { location.hash = '#/m/' + id; return; }
-  const chosen = chosenDeck();
-  app.innerHTML = `<div class="menu pscr"><div class="stage">
-      <div class="seg"></div>${hero(coverFor(chosen), chosen.name)}<div class="hero slot"><i class="code">${esc(id)}</i></div><div class="ofoot"></div>
-      <button class="play" id="go">Join match</button></div>
-    <div class="side">${deckColumn(chosen)}</div></div>`;
-  wireColumn(chosen, () => joinScreen(id), () => { location.hash = '#/play'; });
-  document.getElementById('go').onclick = async () => {
-    const r = await api(`/api/match/${id}/join`, { method: 'POST', body: JSON.stringify({ deck: deckSpec(chosen), name: 'Friend' }) });
-    if (!r.ok) return toast(r.status === 404 ? `No match ${id}` : await r.text());
-    const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
-  };
-}
+function joinCode() { if (play.code) { play.open = null; location.hash = '#/join/' + play.code; } }
 
 // ------------------------------------------------------------------ collection (= the deckbuilder): collection.js
-// #/collection/<deck id> opens that deck (the play screen's "Open in collection").
+// #/collection/<deck id> opens that deck (home's "Open in collection").
 function collectionScreen(open) {
   screen = 'collection';
   if (open) history.replaceState(null, '', '#/collection');
   renderCollection(app, { open, cards: CARDS, starters: DECKS.filter(d => d.id !== 'goodstuff'), covers: COVER, getDecks: myDecks, saveDecks, toast,
-    play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/play'; }, back: () => { location.hash = '#/'; } });
+    play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
 }
 
 // ------------------------------------------------------------------ profile

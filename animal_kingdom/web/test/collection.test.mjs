@@ -146,11 +146,11 @@ test('filters: a family, clearing it, and an empty result', async () => {
   await page.click('#clearf'); assert.equal(await count(), all);
 });
 
-test('Play opens the play screen with the deck chosen; Back and Escape leave', async () => {
+test('Play goes home with the deck chosen; Back and Escape leave', async () => {
   await openDeck('.clist .dtile:first-child');             // the first of your decks (complete)
   if (!(await page.$('#play'))) return assert.fail('the open deck should be complete');
   await page.click('#play'); await wait(150);
-  assert.ok(page.url().endsWith('#/play')); assert.match(await page.evaluate(() => localStorage.getItem('ak:deck')), /^my:/);
+  assert.ok(page.url().endsWith('#/') && await page.$('.home #go')); assert.match(await page.evaluate(() => localStorage.getItem('ak:deck')), /^my:/);
   await page.goto(`${server.url}/#/collection`, { waitUntil: 'networkidle0' });
   await page.keyboard.press('Escape'); await wait(60); assert.ok(await page.$('#dnew'), 'Escape first closes the deck');
   await page.keyboard.press('Escape'); await wait(80); assert.ok(page.url().endsWith('#/'), 'then goes back to the menu');

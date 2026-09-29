@@ -48,41 +48,47 @@ test('End turn and the deck keep their painting on hover', async () => {
   await page.mouse.move(2, 2);
 });
 
-test('the deck list on the play screen scrolls in a short window, so every deck can be picked', async () => {
-  const p = await browser.newPage(); await p.setViewport({ width: 900, height: 800 });
-  await p.goto(`${server.url}/#/play`, { waitUntil: 'networkidle0' });
-  const last = await p.$$eval('[data-deck]', els => els.length);
-  const tile = (await p.$$('[data-deck]'))[last - 1];
-  await tile.scrollIntoView(); await wait(80);
-  const b = await tile.boundingBox(), hit = await p.evaluate(({ x, y }) => { const e = document.elementFromPoint(x, y); return !!(e && e.closest('[data-deck]')); }, { x: b.x + b.width / 2, y: b.y + b.height * 0.85 });
-  assert.ok(hit, 'the bottom of the last deck tile is clickable');
+test('home starts a match: the deck chooser lists every deck and scrolls in a short window', async () => {
+  const p = await browser.newPage(); await p.setViewport({ width: 1100, height: 640 });
+  await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
+  await p.click('#deckbtn'); await wait(80);
+  const tiles = await p.$$('.chooser [data-deck]'), last = tiles[tiles.length - 1];
+  await last.scrollIntoView(); await wait(80);
+  const b = await last.boundingBox(), hit = await p.evaluate(({ x, y }) => { const e = document.elementFromPoint(x, y); return !!(e && e.closest('[data-deck]')); }, { x: b.x + b.width / 2, y: b.y + b.height / 2 });
+  assert.ok(hit, 'the last deck can be clicked');
+  const id = await p.evaluate(e => e.dataset.deck, last); await last.click(); await wait(80);
+  assert.equal(await p.evaluate(() => localStorage.getItem('ak:deck')), id, 'clicking a deck chooses it');
+  assert.equal(await p.$('.chooser'), null, 'and closes the chooser');
   await p.close();
 });
 
-test('the play screen\'s dropdowns pick, Escape closes an open one first and then goes back', async () => {
+test('the deck chooser shows the list of the deck under the pointer and opens it in the collection', async () => {
   const p = await browser.newPage();
-  await p.goto(`${server.url}/#/play`, { waitUntil: 'networkidle0' });
-  await p.click('.dd[data-dd="botDeck"] .sel'); await p.click('.ddo[data-v="ramp"]'); await wait(80);
-  assert.equal(await p.$eval('.dd[data-dd="botDeck"] .sel', e => e.textContent), 'Ramp deck');
-  await p.click('.dd[data-dd="level"] .sel'); await p.keyboard.press('Escape'); await wait(80);
-  assert.equal(await p.$('.dd.open'), null, 'the dropdown closed');
-  assert.match(await p.evaluate(() => location.hash), /play/, 'still on the play screen');
-  await p.keyboard.press('Escape'); await wait(80);
-  assert.equal(await p.evaluate(() => location.hash), '#/');
-  await p.close();
-});
-
-test('the chosen deck shows its decklist in the column, and opens in the collection', async () => {
-  const p = await browser.newPage();
-  await p.goto(`${server.url}/#/play`, { waitUntil: 'networkidle0' });
-  const name = await p.$eval('.dtile.on b', e => e.textContent);
-  await p.hover('.dtile.on'); await p.click('#dlist'); await wait(80);
-  assert.equal(await p.$$eval('.clist.editing .st', els => els.length > 5), true, 'its strips are listed');
-  await p.keyboard.press('Escape'); await wait(80);
-  assert.equal(await p.$('.clist.editing'), null, 'Escape closes the list, not the screen');
-  await p.hover('.dtile.on'); await p.click('#dedit'); await wait(200);
+  await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
+  await p.click('#deckbtn'); await wait(80);
+  const second = (await p.$$('.chooser [data-deck]'))[1], name = await p.evaluate(e => e.textContent, second);
+  const before = await p.$eval('.dl', e => e.textContent);
+  await second.hover(); await wait(80);
+  assert.notEqual(await p.$eval('.dl', e => e.textContent), before, 'the list follows the pointer');
+  await p.click('#dedit'); await wait(200);
   assert.equal(await p.evaluate(() => location.hash), '#/collection');
-  assert.equal(await p.$eval('.coll .clist.editing .dtile.on b', e => e.textContent), name, 'the same deck, open');
+  assert.equal(await p.$eval('.coll .clist.editing .dtile.on b', e => e.textContent), name, 'that deck, open');
+  await p.close();
+});
+
+test('the opponent chooser picks with its own dropdowns; Escape closes an open dropdown, then the chooser', async () => {
+  const p = await browser.newPage();
+  await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
+  await p.click('#oppbtn'); await wait(80);
+  await p.click('.dd[data-dd="botDeck"] .sel'); await p.click('.ddo[data-v="ramp"]'); await wait(80);
+  assert.match(await p.$eval('#oppbtn', e => e.textContent), /Ramp deck/, 'the slot says what was chosen');
+  assert.ok(await p.$('.chooser'), 'the chooser stays open for the next setting');
+  await p.click('.dd[data-dd="level"] .sel'); await p.keyboard.press('Escape'); await wait(80);
+  assert.equal(await p.$('.dd.open'), null, 'the dropdown closed'); assert.ok(await p.$('.chooser'), 'the chooser stays');
+  await p.keyboard.press('Escape'); await wait(80);
+  assert.equal(await p.$('.chooser'), null, 'then the chooser closes');
+  await p.goto(`${server.url}/#/play`, { waitUntil: 'networkidle0' });
+  assert.equal(await p.evaluate(() => location.hash), '#/', 'the old Play address lands on home');
   await p.close();
 });
 
