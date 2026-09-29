@@ -98,3 +98,16 @@
 .coll .sfoot { display: flex; flex-direction: column; gap: 6px; }
 .coll .dnew { width: 100%; height: 44px; border-radius: 8px; border: 0; background: #24272a; color: #d8d4cc; font: 600 15px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
 .coll .dnew:hover { background: #2c3034; color: #f0ece4; }
+
+/* ---------- a touch of the world (design sandbox coll2/, "10% of concept A"): the grey-box as it is, plus the den's granite under the
+   deck column, the board's stone rims on the family medallions, and End turn's blue river stone for Play. ---------- */
+.coll .side { background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; }
+.coll .tab .med { border: 0; }
+.coll .tab::before { content: ''; position: absolute; inset: -3px; z-index: 2; pointer-events: none; background: url(/static/kit2/rim_n.webp) center / contain no-repeat; }
+.coll .tab.on::before { background-image: url(/static/kit2/rim_a.webp); }
+.coll .tab.on .med { box-shadow: none; }
+.coll .tab:hover:not(.on)::before { filter: brightness(1.25); }
+.coll .play { margin: 16px auto 2px; width: 200px; height: 68px; border-radius: 0; background: url(/static/kit2/btn_a.webp) center / 100% 100% no-repeat; color: #0f213b; text-shadow: 0 1px 0 rgba(255,255,255,.25); font-size: 20px; filter: drop-shadow(1px 3px 4px rgba(0,0,0,.5)); transition: transform .12s; }
+.coll .play:hover { background: url(/static/kit2/btn_a.webp) center / 100% 100% no-repeat; transform: translateY(-2px); }
+.coll .play.off { width: auto; height: 44px; margin-top: 12px; background: #2c3034; border-radius: 8px; color: #8b8e92; text-shadow: none; font-size: 16px; filter: none; }
+.coll .play.off:hover { transform: none; }
