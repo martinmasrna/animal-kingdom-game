@@ -100,8 +100,9 @@
 .game .hc { position: absolute; top: 0; width: 143px; height: 210px; transform-origin: 50% 100%; transition: transform .15s; }
 .game .hc .card { --w: 143px; }
 .game .hc.dim { opacity: .45; filter: none; }
-.game .hc:hover { transform: translateY(-12px) scale(1.65); z-index: 30 !important; }
-.game .hc.sel { transform: translateY(-18px); z-index: 3; } .game .hc.sel:hover { transform: translateY(-12px) scale(1.65); z-index: 30 !important; }
+.game .hc:hover { transform: translateY(-12px) scale(2.1); z-index: 30 !important; }
+.game .hc:hover .card .ctext { display: flex; }   /* the hand shows paintings; the hovered card is read in full */
+.game .hc.sel { transform: translateY(-18px); z-index: 3; } .game .hc.sel:hover { transform: translateY(-12px) scale(2.1); z-index: 30 !important; }
 .game .hc.ready .card { filter: drop-shadow(0 0 1px var(--ready)) drop-shadow(0 0 1px var(--ready)) drop-shadow(0 0 6px var(--ready)) drop-shadow(0 0 12px var(--ready)); }   /* its "if ..." holds right now */
 .game .hc.sel .card, .game .hc.pick .card { filter: drop-shadow(0 0 0 var(--act)) drop-shadow(0 0 3px var(--act)) drop-shadow(0 0 2px var(--act)); }
 .game .hc.can, .game .hc.pick { cursor: pointer; }

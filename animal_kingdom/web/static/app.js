@@ -51,8 +51,9 @@ function cardPop(el, id, extra, place) {
   pop.innerHTML = cardHTML(c) + (extra ? `<div class="ev">${extra}</div>` : '');
   pop.style.display = 'flex';
   const h = pop.offsetHeight;
-  if (place === 'below') { pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; }
-  else { pop.style.left = (r.right + 10 + 190 > innerWidth ? r.left - 200 : r.right + 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; }
+  const w = pop.offsetWidth;
+  if (place === 'below') { pop.style.left = Math.min(r.left, innerWidth - w - 10) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; }
+  else { pop.style.left = (r.right + 10 + w > innerWidth ? r.left - w - 10 : r.right + 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; }
 }
 function wirePops(root) {
   root.querySelectorAll('[data-card]').forEach(el => {
@@ -217,7 +218,7 @@ function collectionScreen() {
                               : (a, b) => RANK[a.rarity] - RANK[b.rarity] || sv(a) - sv(b) || a.name.localeCompare(b.name));
   const seg = (k, opts) => '<span class="seg">' + opts.map(([v, l]) => `<span class="${coll[k] === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${l}</span>`).join('') + '</span>';
   const tiles = shown.map(c => { const n = cur ? cur.cards[c.id] || 0 : 0;
-    return `<div class="tl ${c.rarity}${cur && maxed(c) ? ' max' : ''}" data-add="${c.id}" data-card="${c.id}"><div class="im gradart" ${artStyle(c.id)}></div><span class="s">${c.str}</span>${n ? `<span class="c">${n}</span>` : ''}<span class="n">${c.name}</span></div>`; }).join('');
+    return `<div class="tl${cur && maxed(c) ? ' max' : ''}" data-add="${c.id}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n ? `<span class="c">${n}</span>` : ''}</div>`; }).join('');
   const sec = (r, label) => { const n = inDeck(r), cap = CAP[r];
     const list = cur ? Object.keys(cur.cards).filter(id => CARDS[id].rarity === r) : [];
     return `<h3><span>${label}</span><span class="${cap && n >= cap ? 'full' : ''}">${n}${cap ? ' / ' + cap : ''}</span></h3>` +
@@ -455,7 +456,7 @@ function drawGame() {
     const cls = [c.rarity, can ? 'can' : '', can && h.ready ? 'ready' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick ? 'dim' : ''].join(' ');
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
-    return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str })}</div>`;
+    return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
   }).join('');
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
     e.stopPropagation();
