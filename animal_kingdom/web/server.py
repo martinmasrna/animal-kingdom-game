@@ -282,6 +282,10 @@ async def index(_req):
     return web.FileResponse(STATIC / "index.html")
 
 
+async def privacy(_req):
+    return web.FileResponse(STATIC / "privacy.html")
+
+
 async def pool(_req):
     return web.json_response({
         "cards": card_pool(),
@@ -402,6 +406,7 @@ def make_app() -> web.Application:
     app = web.Application()
     app.add_routes([
         web.get("/", index),
+        web.get("/privacy", privacy),
         web.get("/api/pool", pool),
         web.post("/api/profile", create_profile),
         web.post("/api/signin", sign_in),
@@ -432,7 +437,7 @@ def make_app() -> web.Application:
 
 async def _revalidate(request: web.Request, response: web.StreamResponse) -> None:
     """Make the browser revalidate the client on every load (a 304 when unchanged), so an edit shows on reload."""
-    if request.path == "/" or request.path.startswith("/static/"):
+    if request.path in ("/", "/privacy") or request.path.startswith("/static/"):
         response.headers["Cache-Control"] = "no-cache"
 
 
