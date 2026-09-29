@@ -596,7 +596,7 @@ function stackAt(cr) {
   const g = document.querySelector(`#board [data-cr="${cr}"]`), st = V && V.game && viewerGame().board[cr];
   if (!g || !st) return;
   const card = (u, w, top) => { const c = CARDS[u.id];
-    return `<div class="sc ${u.owner}">${cardHTML(c, { str: top ? u.str : c.str, attrs: `style="--w:${w}px"` })}` +
+    return `<div class="sc ${u.owner}">${cardHTML(c, { str: u.str, attrs: `style="--w:${w}px"` })}` +
       (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `</div>`; };
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
   stackpop.innerHTML = `<div class="stk">${card(top, 190, true)}</div>` +
