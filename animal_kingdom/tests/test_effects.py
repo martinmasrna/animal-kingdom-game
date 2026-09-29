@@ -668,19 +668,6 @@ def test_chipmunk_no_longer_pays_out_after_it_is_destroyed():
     assert s.food["A"] == food_after_roar           # no second helping
 
 
-def test_fragile_still_dies_to_cover_so_its_timer_is_cancelled():
-    """Eggs are Fragile: covering *removes* them, so cover and cancel are the same event. This is
-    the pre-existing behaviour the ruling leaves untouched."""
-    s = make_state(hands={"A": ["bird_egg"]}, decks={"A": ["eagle", "owl"], "B": []})
-    rules.apply_action(s, PlaceAction("bird_egg", ("cr", "1,2")))
-    assert _pending(s, "egg_hatch")
-    put(s, "1,2", "lion", "B")                           # Fragile: removed, not buried
-    assert s.top_unit("1,2").card_id == "lion"
-    for _ in range(CFG.egg_hatch_delay + 1):
-        _tick(s)
-    assert not any("Bird" in CARDS[c].tags for c in hand_ids(s, "A"))   # never hatched
-
-
 # ====================================== Stage 2.3: extra placements (decision F1) + twins
 
 def test_jerboa_plays_another_unit():

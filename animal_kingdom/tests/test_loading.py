@@ -64,7 +64,6 @@ def test_known_cards_present_with_expected_data():
     assert cards["goliath"].dynamic_strength == "removed_units_count"
     assert cards["chameleon"].base_strength == 0
     assert cards["tiger"].has_keyword("Apex Predator")
-    assert cards["bird_egg"].has_keyword("Fragile")
     assert cards["eagle"].has_keyword("Flight")
     assert cards["lion"].has_tag("Cat")
     assert cards["queen_bee"].tags == frozenset({"Colony", "Queen"})

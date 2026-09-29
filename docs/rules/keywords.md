@@ -9,7 +9,7 @@ Everything on a crossroad is a unit; Eggs are units too.
 ## Official keywords
 
 ### Flight
-Ignores the connection-to-HQ requirement when placed. (All other placement rules still apply.)
+Can be placed ignoring connection, except onto an HQ: capturing the enemy HQ still needs a connected path, so Flight alone never captures. All other placement rules still apply.
 
 ### Immovable
 *Physics.* Cannot be removed, moved (bounced), or eaten by **any** ability — the enemy's **or its own controller's**. It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an Immovable enemy; when it removes a stack, a buried Immovable unit is skipped **in place** and everything else is still removed. Immovable is not a shield for the cards beneath it. Scope is **board-only**: an Immovable card in hand can be paid or removed normally.
@@ -21,12 +21,7 @@ Carried by: Methuselah, Yuka and Elephant (Ramp); Armadillo and Hedgehog (Food).
 ### Stealth
 Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis), and an Apex Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it instead). **Mass, random, and automatic effects hit it normally**: Rhinoceros/Bulwark AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron triggers. Its own controller may still choose it freely. Scope is board-only.
 
-Carried by: Black Panther (keyword). **Armadillo grants it as an aura** to every friendly unit on an adjacent crossroad while Armadillo tops its own.
-
-### Fragile
-When another occupant is placed on top of this, this is removed — it does not survive under the stack. (Pairs with timed payoffs: Eggs are Fragile.)
-
-Carried by: nothing in the current decks; the Bird Egg and Snake Egg that carried it are in the reserve.
+Carried by: Black Panther. Armadillo gives it to every friendly unit on an adjacent crossroad while Armadillo tops its own.
 
 ### Apex Predator
 A predator that must land on prey and eats it.

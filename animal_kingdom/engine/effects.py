@@ -255,10 +255,6 @@ def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
         hook = _hook(state, covered.card_id, "on_covered")
         if hook:
             hook(state, covered, unit, cr)
-        if "Fragile" in state.cards[covered.card_id].keywords:
-            state.effect_stack.append(
-                {"op": "remove_iid", "iid": covered.iid, "by_player": unit.owner, "by_effect": False}
-            )
 
 
 def _push_hook(state, unit, cr, hook_name) -> None:
@@ -628,7 +624,7 @@ def _op_draw_filtered(state, step):
 def _op_egg_hatch(state, step):
     cr, egg = _find_unit(state, step["iid"])
     if egg is None:
-        return None  # egg already gone (e.g. covered while Fragile) - no payoff
+        return None  # egg already gone (removed before it hatched) - no payoff
     _remove_specific(state, cr, egg, by_player=egg.owner, by_effect=False)
     draw_filtered_random(state, egg.owner, step["n"], step["spec"])
     return None
@@ -1312,11 +1308,11 @@ def _aurum_start(state, unit, cr):
 
 
 def _sloth_place(state, unit, cr):
-    """"In 2 turns, gain 20 food." Deliberately NOT Fragile and NOT Immovable.
+    """"In 2 turns, gain 30 food." Deliberately NOT Immovable.
 
     Its counterplay is the timed-effect rule (overview.md 9.1), not a keyword: cover the Sloth and
-    the timer suspends for as long as the cover holds. Fragile would delete it outright (wrong for
-    a sloth); Immovable would make the payout unanswerable AND shadow Methuselah.
+    the timer suspends for as long as the cover holds. Immovable would make the payout
+    unanswerable AND shadow Methuselah.
     """
     schedule(state, unit, state.config.sloth_delay,
              {"op": "gain_food", "player": unit.owner, "amount": state.config.sloth_food})

@@ -15,7 +15,7 @@ from .resources import load_bundled_json
 
 # Allowed value domains (validation). Reworked 98-design pool: README decisions B-E.
 RARITIES = {"common", "rare", "legendary"}
-KEYWORDS = {"Flight", "Immovable", "Fragile", "Apex Predator", "Stealth"}  # static keywords only;
+KEYWORDS = {"Flight", "Immovable", "Apex Predator", "Stealth"}  # static keywords only;
 # Roar/Deathrattle are trigger prefixes printed in `text`, not stored keywords.
 # Family + role tags (dec. B). Retired umbrellas (Reptile, Insect) are forbidden.
 TAGS = {

@@ -349,8 +349,8 @@
       "rarity": "common",
       "tags": ["Egg"],
       "base_strength": 0,
-      "keywords": ["Fragile"],
-      "text": "Fragile. After 2 turns, remove this and draw 2 Birds."
+      "keywords": [],
+      "text": "After 2 turns, remove this and draw 2 Birds."
     },
     {
       "id": "snake_egg",
@@ -359,8 +359,8 @@
       "rarity": "common",
       "tags": ["Egg"],
       "base_strength": 0,
-      "keywords": ["Fragile"],
-      "text": "Fragile. After 2 turns, remove this and draw 2 Snakes."
+      "keywords": [],
+      "text": "After 2 turns, remove this and draw 2 Snakes."
     },
     {
       "id": "queen_marabunta",
@@ -744,7 +744,7 @@
       "tags": [],
       "base_strength": 7,
       "keywords": ["Immovable"],
-      "text": "Immovable. Adjacent friendly units can't be chosen by enemy abilities."
+      "text": "Immovable. Adjacent friendly units have Stealth."
     },
     {
       "id": "squirrel",

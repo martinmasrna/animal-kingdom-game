@@ -148,7 +148,7 @@ Unless stated otherwise, a units's effect is resolved after it is placed. Effect
 Some effects resolve on a delay — "in 2 turns, draw 2 cards" (Black Bear), "at the start of next turn, gain 10 more" (Chipmunk). **The timer belongs to the unit, not to the board**, and obeys the same top-of-stack principle as everything else (§7.1):
 
 - **The timer advances only while the unit is the topmost unit of its crossroad.** A buried unit *waits* — its timer is **suspended, not lost** — and resumes advancing if it becomes visible again. A unit that stays buried never pays out. So covering a timed unit is real counterplay (it buys time, and denies the payout entirely for as long as the cover holds), but clearing the coverer gives the payout back.
-- **Removal cancels the effect outright.** A unit sent to the Remove Pile is gone, not waiting; its pending effect never resolves. (A **Fragile** unit is removed *by* being covered, so for Fragile cards covering and cancelling are the same event.)
+- **Removal cancels the effect outright.** A unit sent to the Remove Pile is gone, not waiting; its pending effect never resolves.
 - **Returning a unit to a hand resets its timer.** A replayed unit starts a fresh timer; it never resumes a partly-elapsed one.
 
 **Venom is the exception: it belongs to the bitten unit, not to the snake.** Taipan's bite ("at the start of your next turn, remove it") resolves even if the Taipan has been covered or removed, and even if the bitten unit is buried; it is cancelled only if the bitten unit leaves the board first.

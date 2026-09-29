@@ -32,7 +32,7 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 | **Flying Squirrel** | 2 | Rodent | 3 | Flight. Roar: gain 10 food. |
 | **Porcupine** | 2 | Rodent | 7 | Cannot be covered by enemies. |
 | **Chinchilla** | 2 | Rodent | 4 | Roar: next turn, take 1 additional action. |
-| **Armadillo** | 2 | — | 7 | Immovable. Adjacent friendly units can't be chosen by enemy abilities. |
+| **Armadillo** | 2 | — | 7 | Immovable. Adjacent friendly units have Stealth. |
 
 ### Common
 
