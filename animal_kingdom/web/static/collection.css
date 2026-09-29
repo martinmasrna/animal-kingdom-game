@@ -152,3 +152,5 @@
 .coll .ddo { padding: 7px 12px; border-radius: 6px; white-space: nowrap; font: 500 16px 'Fira Sans Condensed', sans-serif; color: #e8e0d2; cursor: pointer; }
 .coll .ddo:hover { background: rgba(0,0,0,.28); }
 .coll .ddo.on { color: #fff; font-weight: 700; }
+.coll .ddm { max-height: none; overflow: visible; }
+.coll .cgrid, .coll .clist { scrollbar-color: #4a4540 transparent; }
