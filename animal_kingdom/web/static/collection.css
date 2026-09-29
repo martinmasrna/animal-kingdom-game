@@ -1,7 +1,6 @@
 /* The collection (= the deckbuilder), collection.js. Everything is scoped under .coll. Layout settled in the design sandbox's
    builder/notes.md (round B2); the look is layered in the sections below (granite, slabs, strips). */
-.coll { position: fixed; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: 72px 1fr; background: #16181a; color: #d8d4cc; font-family: var(--font-text); }
-.coll button { font: inherit; }
+.coll { position: fixed; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: 72px 1fr; }
 
 /* Header: one 40px row on the grid's 24px edges. */
 .coll .chead { grid-column: 1; display: flex; align-items: center; gap: 10px; padding: 0 24px; min-width: 0; border-bottom: 1px solid #2a2d30; }
@@ -14,13 +13,6 @@
 .coll .tab.on .med { border-color: #f0ece4; box-shadow: 0 0 0 2px #16181a, 0 0 0 4px #f0ece4; }
 .coll .mosaic { display: grid; grid-template: 1fr 1fr / 1fr 1fr; gap: 1px; overflow: hidden; background: #55595e; }
 .coll .mosaic i { display: block; background-repeat: no-repeat; background-color: #3a3d40; }
-.coll .sel, .coll .search { height: 40px; box-sizing: border-box; border-radius: 999px; border: 1px solid #3a3d40; background: #1f2224; color: #d8d4cc; font: 13px var(--font-text); }
-.coll .sel { padding: 0 10px; }
-.coll .search { flex: 1 1 auto; min-width: 140px; padding: 0 14px; }
-.coll [data-tip] { position: relative; }
-.coll [data-tip]::after { content: attr(data-tip); position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 30; white-space: nowrap; padding: 4px 9px; border-radius: 6px;
-  background: #000d; color: #f0ece4; font: 500 12px var(--font-text); opacity: 0; pointer-events: none; transition: opacity .1s; }
-.coll [data-tip]:hover::after { opacity: 1; }
 
 /* The card grid: compact cards filling the columns, copies in the open deck as dots, dimmed when no further copy can go in. */
 .coll .cgrid { grid-column: 1; grid-row: 2; overflow-y: auto; padding: 8px 24px 36px; scrollbar-width: thin; scrollbar-color: #3a3d40 transparent; }
@@ -35,16 +27,11 @@
 .coll .quiet { height: 36px; padding: 0 16px; border-radius: 8px; border: 1px solid #44484c; background: none; color: #d8d4cc; font: 600 14px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
 
 /* The deck column: your decks, a rule, the starters; the open deck unfolds under its tile; Back docked at the bottom. */
-.coll .side { grid-column: 2; grid-row: 1 / 3; display: flex; flex-direction: column; min-height: 0; border-left: 1px solid #2a2d30; background: #1c1f21; }
+.coll .side { grid-column: 2; grid-row: 1 / 3; }
 .coll .clist { flex: 1; overflow-y: auto; padding: 16px 12px 14px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; scrollbar-color: #3a3d40 transparent; }
 .coll .clist > * { flex: none; }
 .coll .dsep { height: 1px; margin: 10px 4px; background: #2e3134; }
-.coll .dtile { position: relative; height: 56px; border-radius: 8px; background: #2a2d30 center 30% / cover; cursor: pointer; }
-.coll .dtile::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, rgba(20,22,24,.95) 35%, rgba(20,22,24,.2)); }
-.coll .dtile b { position: absolute; left: 12px; top: 8px; font: 700 17px/1.1 'Fira Sans Condensed', sans-serif; color: #f0ece4; text-shadow: 0 1px 3px #000; }
-.coll .dtile span { position: absolute; left: 12px; bottom: 8px; font: 500 12px/1.1 'Fira Sans Condensed', sans-serif; color: #a8abb0; }
-.coll .dtile.on { border-radius: 8px 8px 0 0; box-shadow: inset 0 0 0 2px #d8d4cc; }
-.coll .dtile.on b { top: 50%; transform: translateY(-50%); font-size: 19px; }
+.coll .dtile.on { border-radius: 8px 8px 0 0; }
 .coll .nm-edit { cursor: text; } .coll .nm-edit:hover { text-decoration: underline dotted #8b8e92; text-underline-offset: 4px; }
 .coll .nm-in { position: absolute; left: 8px; right: 8px; top: 50%; transform: translateY(-50%); height: 32px; box-sizing: border-box; border-radius: 6px; border: 1px solid #d8d4cc; background: #16181acc; color: #f0ece4; font: 700 19px 'Fira Sans Condensed', sans-serif; padding: 0 6px; }
 .coll .tacts { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); z-index: 5; display: flex; gap: 6px; opacity: 0; transition: opacity .12s; }
@@ -63,12 +50,6 @@
 .coll .st .s { position: relative; width: 28px; text-align: center; font: 700 15px 'Fira Sans Condensed', sans-serif; }
 .coll .st .n { position: relative; flex: 1; font: 600 14px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .coll .st .x { position: relative; display: flex; gap: 3px; padding: 0 8px; } .coll .st .x i { width: 7px; height: 7px; filter: drop-shadow(0 1px 1px #000); }
-.coll .play { margin-top: 14px; height: 48px; border-radius: 8px; background: #3b6ea8; color: #fff; display: grid; place-items: center; font: 700 19px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
-.coll .play:hover { background: #4579b4; }
-.coll .play.off { background: #2c3034; color: #8b8e92; cursor: default; font-size: 16px; }
-.coll .sfoot { flex: none; padding: 8px 12px 12px; border-top: 1px solid #2a2d30; }
-.coll .backbtn { width: 100%; height: 44px; border-radius: 8px; border: 0; background: #24272a; color: #a8abb0; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 13px; cursor: pointer; }
-.coll .backbtn:hover { color: #f0ece4; background: #2c3034; }
 
 /* Feedback: a refused add shakes the card and flashes the limit that stopped it; an added card flashes in the deck. */
 @keyframes collShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
@@ -95,121 +76,34 @@
 .coll .cv { container-type: inline-size; cursor: pointer; border-radius: 10px; transition: transform .1s; } .coll .cv .card { --w: 100cqw; } .coll .cv:hover { transform: translateY(-3px); }
 .coll .cv.on { box-shadow: 0 0 0 3px #24272a, 0 0 0 5px #f0ece4; }
 .coll .tacts [data-tip]::after { left: auto; right: 0; transform: none; }   /* at the column's right edge */
-.coll .sfoot { display: flex; flex-direction: column; gap: 6px; }
-.coll .dnew { width: 100%; height: 44px; border-radius: 8px; border: 0; background: #24272a; color: #d8d4cc; font: 600 15px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
-.coll .dnew:hover { background: #2c3034; color: #f0ece4; }
 
 /* ---------- a touch of the world (design sandbox coll2/, "10% of concept A"): the grey-box as it is, plus the den's granite under the
    deck column, and the board's stone rims on the family medallions. ---------- */
-.coll .side { background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; }
 .coll .tab .med { border: 0; }
 .coll .tab::before { content: ''; position: absolute; inset: -3px; z-index: 2; pointer-events: none; background: url(/static/kit2/rim_n.webp) center / contain no-repeat; }
 .coll .tab.on::before { background-image: url(/static/kit2/rim_a.webp); }
 .coll .tab.on .med { box-shadow: none; }
 .coll .tab:hover:not(.on)::before { filter: brightness(1.25); }
-/* The ground at night instead of flat grey under everything; the deck column keeps the den's granite. */
-.coll { background: #171513 url(/static/kit2/coll_ground.webp) center / cover; }
 .coll .chead { border-bottom: 0; }
-.coll .side { border-left: 0; box-shadow: -6px 0 14px rgba(0,0,0,.45); }
-.coll .sfoot { border-top: 0; }
-.coll .dnew, .coll .backbtn { background: rgba(10,10,10,.35); }
-/* Controls are small granite slabs, the column's rock; the screen speaks the cards' Fira. */
-.coll { font-family: 'Fira Sans Condensed', sans-serif; }
-.coll .sel, .coll .search, .coll .dnew, .coll .backbtn {
-  background: #25221f url(/static/kit2/coll_granite.webp) center / 600px auto; border: 0; border-radius: 10px;
-  box-shadow: inset 0 1px 0 rgba(255,245,230,.08), inset 0 -1px 0 rgba(0,0,0,.4), 0 2px 5px rgba(0,0,0,.45);
-  color: #ddd3c3; font: 500 16px 'Fira Sans Condensed', sans-serif; }
-.coll .search::placeholder { color: #8f8577; }
-.coll .search:focus { outline: 0; box-shadow: inset 0 1px 0 rgba(255,245,230,.08), 0 0 0 2px #cfc3ad, 0 2px 5px rgba(0,0,0,.45); }
-.coll .selw { position: relative; display: inline-flex; }
-.coll .sel { appearance: none; -webkit-appearance: none; padding: 0 32px 0 14px; cursor: pointer; }
-.coll .selw::after { content: ''; position: absolute; right: 12px; top: 50%; width: 13px; height: 13px; margin-top: -6px; pointer-events: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9bda9' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; }
-.coll .sel option { background: #25221f; color: #ddd3c3; }
-.coll .dnew:hover, .coll .backbtn:hover, .coll .sel:hover { filter: brightness(1.2); color: #f3ead8; }
 .coll .rh { font: 600 12px 'Fira Sans Condensed', sans-serif; letter-spacing: .1em; }
 /* The column's surfaces in the rock's warm dark, not the grey-box's cool grey. */
 .coll .dbody { background: rgba(14,12,10,.45); }
 .coll .st { background: #2a2521; }
 @keyframes collFlash { 0% { background-color: #7fb2e8; } 100% { background-color: #2a2521; } }
-.coll .dtile { background-color: #2a2521; }
-.coll .dtile::before { background: linear-gradient(90deg, rgba(22,19,16,.95) 35%, rgba(22,19,16,.2)); }
-.coll .dtile.on { box-shadow: inset 0 0 0 2px #cfc3ad; }
 .coll .rh { color: #8f8577; }
-.coll .play.off { background: #2a2521; color: #8f8577; }
-/* Slabs a step lighter than the ground (the rims' grey stone), with a lit top edge; the dropdown list in the same stone. */
-.coll .sel, .coll .search, .coll .dnew, .coll .backbtn { background: #3a3632 url(/static/kit2/coll_slab.webp) center / 600px auto;
-  box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); color: #f0e8da; }
-.coll .search::placeholder { color: #b3a996; }
-.coll .dd { position: relative; }
-.coll .dd .sel { height: 40px; padding: 0 34px 0 14px; cursor: pointer; }
-.coll .dd .sel::after { content: ''; position: absolute; right: 12px; top: 50%; width: 13px; height: 13px; margin-top: -6px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0d6c6' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; }
-.coll .dd.open .sel::after { transform: rotate(180deg); }
-.coll .ddm { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; min-width: 100%; max-height: 340px; overflow-y: auto; padding: 6px; display: none; border-radius: 10px;
-  background: #34302c url(/static/kit2/coll_slab.webp) center / 600px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 10px 24px rgba(0,0,0,.6); scrollbar-width: thin; }
-.coll .dd.open .ddm { display: block; }
-.coll .ddo { padding: 7px 12px; border-radius: 6px; white-space: nowrap; font: 500 16px 'Fira Sans Condensed', sans-serif; color: #e8e0d2; cursor: pointer; }
-.coll .ddo:hover { background: rgba(0,0,0,.28); }
-.coll .ddo.on { color: #fff; font-weight: 700; }
-.coll .ddm { max-height: none; overflow: visible; }
 .coll .cgrid, .coll .clist { scrollbar-color: #4a4540 transparent; }
-/* The foot of the column: one row, Back compact on the left, New deck filling the rest. Finer grain; hover lifts, not glows. */
-.coll .sfoot { flex-direction: row; gap: 8px; }
-.coll .backbtn { width: auto; flex: none; padding: 0 16px 0 10px; }
-.coll .dnew { flex: 1; }
-.coll .sel, .coll .search, .coll .dnew, .coll .backbtn, .coll .ddm { background-size: 300px auto; }
-.coll .backbtn { order: -1; }
-.coll .dnew:hover, .coll .backbtn:hover { background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; }
-/* Hover: the stone lightens slightly, nothing moves (the flat grey overlay on New deck and Back is gone). */
-.coll .dnew:hover, .coll .backbtn:hover, .coll .dd .sel:hover { filter: brightness(1.2); color: #f3ead8; transform: none; }
-.coll .clist.opened::after { content: ''; flex: none; height: 70vh; }   /* room to bring the last deck to the top */
-/* Back and New deck: a drawn icon (the screen's icon set) then the word, one rhythm for both. */
-.coll .dnew, .coll .backbtn { display: flex; align-items: center; justify-content: flex-start; gap: 8px; padding: 0 16px 0 12px; }
-.coll .dnew svg, .coll .backbtn svg { width: 18px; height: 18px; flex: none; stroke-width: 2.4; opacity: .9; }
-.coll .dnew span, .coll .backbtn span { font: 600 16px 'Fira Sans Condensed', sans-serif; }
-.coll .dnew, .coll .backbtn { justify-content: center; padding: 0 16px; }
-/* The foot of the column: New deck above Back, both full width. */
-.coll .sfoot { flex-direction: column; gap: 8px; }
-.coll .backbtn { order: 0; width: 100%; }
-.coll .dnew { flex: none; width: 100%; }
 /* The deck list: New deck is the next slot after your last deck (an empty-slot look); the foot holds Back, or Play and Done while editing. */
-.coll .clist .dnew { flex: none; width: 100%; height: 56px; border-radius: 8px; background: transparent; border: 1.5px dashed rgba(240,232,218,.28); box-shadow: none; color: #cfc4b2; }
-.coll .clist .dnew:hover { filter: none; background: rgba(240,232,218,.06); border-color: rgba(240,232,218,.5); color: #fff; }
-.coll .sfoot .play { width: 100%; margin: 0; }
+.coll .clist .dnew { flex: none; width: 100%; height: 56px; display: flex; align-items: center; justify-content: center; padding: 0 16px; border-radius: 8px;
+  border: 1.5px dashed rgba(240,232,218,.28); background: transparent; color: #cfc4b2; cursor: pointer; }
+.coll .clist .dnew:hover { background: rgba(240,232,218,.06); border-color: rgba(240,232,218,.5); color: #fff; }
 .coll .clist.editing .dtile.on { margin-top: 2px; }
-/* The foot, as Hearthstone's: a count (decks, or the open deck's cards) beside Back / Done. */
-.coll .frow { display: flex; gap: 8px; width: 100%; }
-.coll .fcount { flex: 1; height: 44px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;
-  background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); color: #ddd3c3; }
-.coll .fcount b { font: 700 17px 'Fira Sans Condensed', sans-serif; }
-.coll .fcount span { font: 500 11px 'Fira Sans Condensed', sans-serif; color: #9d917e; letter-spacing: .06em; margin-top: 2px; }
-.coll .fcount.full b { color: #9cc3ec; }
-.coll .frow .backbtn { width: auto; flex: none; min-width: 112px; }
-.coll .fcount { flex-direction: row; align-items: baseline; gap: 5px; }
-.coll .fcount span { margin-top: 0; font-size: 15px; letter-spacing: 0; }
-.coll .fcount { align-items: center; justify-content: center; }
-.coll .fcount b, .coll .fcount span { line-height: 1; display: block; }
-.coll .fcount { display: grid; grid-auto-flow: column; place-content: center; align-items: baseline; column-gap: 5px; }
-.coll .dtile b { top: 50%; transform: translateY(-50%); font-size: 19px; }   /* the name alone, centred */
 .coll .clist .dnew svg { width: 26px; height: 26px; stroke-width: 2; opacity: .75; }
 .coll .clist .dnew:hover svg { opacity: 1; }
 .coll .clist .dnew[data-tip]::after { top: calc(100% + 6px); }
-/* Play: the stone slab in your team blue (the board's blue), the one loud control. */
-.coll .play { height: 48px; border-radius: 10px; margin: 0;
-  background: linear-gradient(rgba(52,112,190,.5), rgba(38,88,160,.58)), #2a4a70 url(/static/kit2/coll_slab.webp) center / 300px auto;
-  box-shadow: inset 0 1px 0 rgba(200,225,255,.35), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55);
-  color: #f4f8ff; font: 700 19px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
-.coll .play:hover { background: linear-gradient(rgba(52,112,190,.5), rgba(38,88,160,.58)), #2a4a70 url(/static/kit2/coll_slab.webp) center / 300px auto; filter: brightness(1.15); }
-.coll .play { background-blend-mode: color, normal, normal; }
 /* Search is the one field you type into: sunken, like the foot's count, with a magnifier; not a raised slab. */
 .coll .searchw { position: relative; flex: 1 1 auto; min-width: 140px; display: flex; }
+.coll .search { flex: 1; min-width: 140px; padding-left: 38px; }
 .coll .searchw svg { position: absolute; left: 13px; top: 50%; width: 17px; height: 17px; margin-top: -8.5px; color: #9d917e; pointer-events: none; }
-.coll .search { flex: 1; padding: 0 14px 0 38px; background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); }
-.coll .search:focus { box-shadow: inset 0 1px 3px rgba(0,0,0,.6), 0 0 0 2px rgba(207,195,173,.6); }
-/* Deck tiles answer the pointer: the cover brightens and a light rim appears. */
-.coll .dtile { transition: filter .12s; }
-.coll .dtile:not(.on):hover { filter: brightness(1.18); box-shadow: inset 0 0 0 2px rgba(240,232,218,.45); }
 /* The card zoom. */
 .coll .modal.zoom { background: rgba(0,0,0,.72); cursor: zoom-out; }
 .coll .zbox { display: flex; align-items: center; gap: 22px; }
@@ -218,24 +112,10 @@
 .coll .kw { padding: 12px 14px; border-radius: 10px; background: #25221f url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.18), 0 4px 10px rgba(0,0,0,.5); }
 .coll .kw b { display: block; font: 700 18px 'Fira Sans Condensed', sans-serif; color: #fff; margin-bottom: 3px; }
 .coll .kw p { margin: 0; font: 500 15px/1.35 'Fira Sans Condensed', sans-serif; color: #e4dccd; }
-/* Deck tiles get the controls' edge: a thin lit stone rim and the same soft shadow, so they sit on the column like the other pieces. */
-.coll .dtile { box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.28), inset 0 1px 0 rgba(255,245,230,.22), 0 3px 6px rgba(0,0,0,.55); }
-.coll .dtile:not(.on):hover { box-shadow: inset 0 0 0 1.5px rgba(240,232,218,.55), inset 0 1px 0 rgba(255,245,230,.3), 0 3px 6px rgba(0,0,0,.55); }
-.coll .dtile.on { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); }
 
 /* ---------- nitpick pass ---------- */
-/* (1) Hover labels in the screen's own look: a small stone tag in the card font. */
-.coll [data-tip]::after { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; color: #f0e8da; font: 600 14px 'Fira Sans Condensed', sans-serif;
-  padding: 5px 10px; border-radius: 7px; box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 4px 10px rgba(0,0,0,.6); }
 /* (2) Cursors: the system's (a custom one waits for painted art); a pointer over anything you can click. */
 .coll .tab, .coll .tl:not(.max), .coll .st, .coll .dtile, .coll button:not(:disabled), .coll .dd .sel, .coll .ddo, .coll .ic, .coll .nm-edit { cursor: pointer; }
-.coll .tl.max, .coll .play:disabled { cursor: default; }
-/* (3) The dropdown list hangs from its button (no gap, shared edge); a whole row highlights. */
-.coll .dd.open .sel { border-radius: 10px 10px 0 0; box-shadow: inset 0 1px 0 rgba(255,245,230,.22), 0 3px 6px rgba(0,0,0,.55); filter: brightness(1.12); }
-.coll .ddm { top: 100%; left: 0; right: 0; min-width: 0; width: 100%; box-sizing: border-box; padding: 0 0 6px; border-radius: 0 0 10px 10px;
-  box-shadow: inset 0 1px 0 rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.6); }
-.coll .ddo { border-radius: 0; padding: 8px 14px; }
-.coll .ddo:hover { background: rgba(255,245,230,.1); }
 /* (5) Cards fade out as they scroll under the header instead of being cut. */
 .coll .cgrid { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px); mask-image: linear-gradient(to bottom, transparent 0, #000 16px); padding-top: 16px; }
 /* (6) The deck list, tighter (as Hearthstone's): strips close together, little margin either side. */
@@ -243,10 +123,6 @@
 .coll .dbody { padding: 8px 4px 6px; }
 .coll .dbody .st { margin-bottom: 2px; height: 28px; }
 .coll .rh { margin: 8px 4px 3px; }
-/* (7) Play is always there with an open deck; under 30 cards it is stone, not blue, and does nothing. */
-.coll .play { border: 0; width: 100%; }
-.coll .play:disabled { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; color: #8f8577; text-shadow: none; filter: saturate(.3) brightness(.8); }
-.coll .fcount.full b { color: inherit; }
 /* (8) The tile's actions are bare icons; renaming keeps them in view at the right of the name field. */
 .coll .tacts { gap: 2px; }
 .coll .tacts .ic, .coll .ic { width: 30px; height: 30px; border: 0; background: none; box-shadow: none; color: #e4dccd; filter: drop-shadow(0 1px 2px rgba(0,0,0,.9)); }
@@ -255,8 +131,6 @@
 .coll .dtile.on:has(.nm-in) .tacts { opacity: 1; }
 .coll .nm-in { z-index: 4; padding-right: 108px; }
 .coll .tacts { z-index: 5; }
-/* (9) Search answers hover too, quietly. */
-.coll .search:hover { background: rgba(28,25,22,.55); }
 .coll .nm-in { outline: 0; border-color: rgba(207,195,173,.7); box-shadow: 0 0 0 1px rgba(207,195,173,.35); }
 /* Strips touch, as in Hearthstone: no gap, square corners, each separated by its own thin dark edge. */
 .coll .dbody .st { margin-bottom: 0; border-radius: 0; box-shadow: inset 0 -1px 0 rgba(0,0,0,.7), inset 0 1px 0 rgba(255,245,230,.07); }
@@ -313,3 +187,4 @@
 .coll .dbody .st .x { align-self: center; padding: 0 9px 0 0; gap: 3px; }
 .coll .dbody .st .x i { width: 6px; height: 6px; border-color: #d9ceb8; filter: drop-shadow(0 0 2px rgba(0,0,0,.95)) drop-shadow(0 1px 1px rgba(0,0,0,.8)); }
 .coll .dbody .st .x i.on { background: #d9ceb8; }
+

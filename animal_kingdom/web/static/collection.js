@@ -5,6 +5,7 @@
 import { cardHTML, fitNames } from './card.js';
 import { CROP, artUrl, stripArt } from './art.js';
 import { encodeDeck, decodeDeck } from './deckcode.js';
+import { dd, wireDd } from './menu.js';
 
 // Each family's medallion: the card whose animal reads clearest at 40 px (chosen side by side at that size).
 const FAMILIES = [['Cat', 'lion'], ['Canine', 'clarion'], ['Rodent', 'chinchilla'], ['Colony', 'worker_bee'], ['Bird', 'andean_condor'],
@@ -30,7 +31,8 @@ const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${
 
 let X, C, cards, st = { open: null, families: new Set(), rar: null, str: '', q: '' }, flash = null, wired = false;
 const limit = c => c.copies || LIMIT[c.rarity];
-const coverOf = list => list.find(id => C[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
+// A deck's cover until its player chooses one: its first legendary with a head crop (the play screen uses the same).
+export const coverOf = (list, cards = C) => list.find(id => cards[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
 const listOf = cardsObj => Object.entries(cardsObj).flatMap(([id, n]) => Array(n).fill(id));
 const countsOf = list => list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {});
 
@@ -72,13 +74,10 @@ function render(app, all) {
 
   const tabs = FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
   const strengths = [...Array(9).keys()].map(String).concat('9+');   // 0 to 8, then 9 and up together (Hearthstone's 7+)
-  // A dropdown in the screen's own look: a slab showing the choice, a list that opens under it.
-  const dd = (k, any, opts) => { const cur = opts.find(([v]) => v === (st[k] || '')); const all = [['', any], ...opts];
-    return `<div class="dd" data-dd="${k}"><button class="sel">${cur ? cur[1] : any}</button><div class="ddm">${all.map(([v, l]) => `<div class="ddo${(st[k] || '') === v ? ' on' : ''}" data-v="${v}">${l}</div>`).join('')}</div></div>`; };
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
-    ${dd('str', 'Any strength', strengths.map(v => [v, 'Strength ' + v]))}
-    ${dd('rar', 'Any rarity', [['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
-    <label class="searchw">${ICON.search}<input class="search" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
+    ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
+    ${dd('rar', st.rar || '', [['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
+    <label class="searchw">${ICON.search}<input class="search field" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
   const strip = id => `<div class="st ${C[id].rarity}" data-card="${id}"><div class="art" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(C[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(C[id].name)}</span><span class="x">${C[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
   const rhead = (label, r, cap) => `<h4 class="rh" data-r="${r}"><span>${label}</span>${cap ? `<span>${inR(r)}/${cap}</span>` : ''}</h4>`;   // only the capped rarities count
@@ -100,7 +99,7 @@ function render(app, all) {
     : `<div class="clist">${all.map(tile).join('')}${all.length < DECKS_MAX ? `<button class="dnew" id="dnew" data-tip="New deck" aria-label="New deck">${ICON.plus}</button>` : ''}</div>
       <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${DECKS_MAX}</b><span>Decks</span></div><button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
-  app.innerHTML = `<div class="coll">${head}<div class="cgrid">${grid}</div><div class="side">${column}</div><div class="modal" id="cmodal"></div></div>`;
+  app.innerHTML = `<div class="coll menu">${head}<div class="cgrid">${grid}</div><div class="side">${column}</div><div class="modal" id="cmodal"></div></div>`;
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
   fitNames(app);
   wire(app, all, open);
@@ -110,10 +109,7 @@ function wire(app, all, open) {
   const $ = id => app.querySelector('#' + id), redo = () => render(app, all), change = () => { save(all); redo(); };
   const pop = document.getElementById('pop'), hidePop = () => { pop.style.display = 'none'; };
   const bk = $('back'); if (bk) bk.onclick = X.back;
-  app.querySelectorAll('.dd').forEach(d => {
-    d.querySelector('.sel').onclick = ev => { ev.stopPropagation(); const was = d.classList.contains('open'); app.querySelectorAll('.dd.open').forEach(x => x.classList.remove('open')); d.classList.toggle('open', !was); };
-    d.querySelectorAll('.ddo').forEach(o => o.onclick = () => { const k = d.dataset.dd; st[k] = k === 'rar' ? (o.dataset.v || null) : o.dataset.v; redo(); });
-  });
+  wireDd(app, (k, v) => { st[k] = k === 'rar' ? (v || null) : v; redo(); });
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
   app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t; st.families.has(f) ? st.families.delete(f) : st.families.add(f); redo(); });   // toggles; none chosen shows every family
   const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { families: new Set(), rar: null, str: '', q: '' }); redo(); };
@@ -217,9 +213,7 @@ function pickCover(app, d, done) {
 // Screen-wide keys and paste, live only while the collection is on screen.
 function wireGlobal() {
   const here = () => document.querySelector('.coll'), typing = e => /INPUT|SELECT|TEXTAREA/.test(e.target.tagName);
-  addEventListener('click', () => document.querySelectorAll('.coll .dd.open').forEach(d => d.classList.remove('open')));   // a click elsewhere closes a dropdown
   addEventListener('keydown', e => {
-    if (e.key === 'Escape' && document.querySelector('.coll .dd.open')) { document.querySelectorAll('.coll .dd.open').forEach(d => d.classList.remove('open')); return; }
     if (!here() || here().querySelector('.modal.on')) return;
     if (e.key === '/' && !typing(e)) { e.preventDefault(); here().querySelector('#q').focus(); }
     else if (e.key === 'Escape' && !typing(e)) { const done = here().querySelector('#done'); done ? done.click() : X.back(); }   // Done while editing, else Back
