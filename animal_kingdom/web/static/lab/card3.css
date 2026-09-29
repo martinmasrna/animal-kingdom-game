@@ -82,7 +82,7 @@
 .m .card3 .tab .n { top: 1.15em; } .m .card3 .tab .n.two { top: 1.45em; }
 .m .card3 .bar span { font: 600 1.4em/1 'Fira Sans Condensed', sans-serif; font-variant: normal; letter-spacing: .01em; color: #1d140a; }
 .m .card3 .bar.long span { font-size: 1.18em; } .m .card3 .bar.longer span { font-size: 1em; }
-.m .card3 .rules i { font: 600 .82em/1 'Fira Sans Condensed', sans-serif; letter-spacing: .12em; text-transform: uppercase; font-variant: normal; color: #6b5031; }
+.m .card3 .rules i { font: 700 1em/1 'Fira Sans Condensed', sans-serif; letter-spacing: .1em; text-transform: uppercase; font-variant: normal; color: #3a2a18; }
 .m-bone { --plaque: url(/static/kit2/fr_bone_plaque.webp); --banner: url(/static/kit2/fr_bone_banner.webp); }
 .m-sand { --plaque: url(/static/kit2/fr_sand_plaque.webp); --banner: url(/static/kit2/fr_sand_banner.webp); }
 .m-wood { --plaque: url(/static/kit2/fr_wood_plaque.webp); --banner: url(/static/kit2/fr_wood_banner.webp); }
