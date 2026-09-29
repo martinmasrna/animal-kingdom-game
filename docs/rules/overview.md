@@ -6,9 +6,9 @@ This document describes a proposed fast-paced strategy game set in a theme of An
 - competitive tactical board game for two players.
 - theme: Animal Kingdom
 - Players deploy unit (themed as various animals) onto a connected graph of vertices.
-- Units expand the player's territory, capture enemy positions, surround regions with food, and create paths toward the enemy headquarters.
+- Units expand the player's territory, capture enemy positions, surround regions with food, and create paths toward the enemy den.
 
-A player wins immediately by either: (a) placing a unit on an enemy headquarters; or (b) collecting the required number of food
+A player wins immediately by either: (a) placing a unit on an enemy den; or (b) collecting the required number of food
 
 The game can also end through exhaustion if a player can neither draw nor place a unit, or when both players end a turn without acting, back to back.
 
@@ -24,15 +24,15 @@ Each unit has:
 
 ## 3.2 Map
 A map is board on which the game is played. It contains:
-- each player's headquarters
+- each player's den
 - crossroads (vertices in a graph), on which units may be placed
-- paths connecting vertices and headquarters;
+- paths connecting vertices and dens;
 - closed regions with food;
 
 ## 3.3 Path
 A path is a printed connection between two crossroads. Paths determine:
 - whether crossroads are adjacent;
-- whether a crossroad is connected to a player's headquarters;
+- whether a crossroad is connected to a player's den;
 - whether a unit can legally be placed.
 
 ## 3.4 Region
@@ -52,7 +52,7 @@ The Remove Pile is one shared, visible area for cards removed from hands, decks,
 Performed once, before the first turn.
 
 ## 4.1 Starting board
-Both players start with an **empty board** — no units pre-placed, and both headquarters unoccupied.
+Both players start with an **empty board** — no units pre-placed, and both dens unoccupied.
 
 ## 4.2 First player
 One player is chosen to go first (by coin flip, until a better method is decided).
@@ -90,11 +90,11 @@ A unit may be placed on:
 - an empty crossroad;
 - a crossroad occupied by one of the active player's troops;
 - a crossroad occupied by an enemy unit with strictly lower strength;
-- an enemy headquarters.
+- an enemy den.
 
-The crossroad must be connected to the player's headquarters if he wants to place a unit there. Certain troop or map effects can modify these requirements.
+The crossroad must be connected to the player's den if he wants to place a unit there. Certain troop or map effects can modify these requirements.
 
-A player **cannot place a unit on their own headquarters** — it is not in the list above. A player defends their HQ only by occupying the crossroads **in front of it** (the crossroads the HQ connects to). An enemy headquarters *is* a legal target: placing a unit onto it captures it (§11.1), provided it is connected to the active player through their occupied crossroads.
+A player **cannot place a unit on their own den** — it is not in the list above. A player defends their den only by occupying the crossroads **in front of it** (the crossroads the den connects to). An enemy den *is* a legal target: placing a unit onto it captures it (§11.1), provided it is connected to the active player through their occupied crossroads.
 
 ---
 
@@ -120,11 +120,11 @@ When a visible unit is removed, the unit underneath becomes visible and immediat
 
 ---
 
-# 8. Connection to Headquarters
+# 8. Connection to Den
 
-A unit must normally be placed on a location connected to the active player's headquarters. A location is connected when a continuous path can be traced:
+A unit must normally be placed on a location connected to the active player's den. A location is connected when a continuous path can be traced:
 
-1. starting from the player's headquarters;
+1. starting from the player's den;
 2. following printed paths;
 3. passing only through crossroads currently occupied by that player;
 4. ending at the destination.
@@ -165,8 +165,8 @@ A player takes control of a region immediately upon occupying every crossroad su
 
 # 11. Victory Conditions
 
-## 11.1 Capturing an Enemy Headquarters
-If a player places one of their troops on an enemy headquarters, that player wins immediately. If a map gives one player multiple headquarters, capturing any single enemy headquarters is sufficient.
+## 11.1 Capturing an Enemy Den
+If a player places one of their troops on an enemy den, that player wins immediately. If a map gives one player multiple dens, capturing any single enemy den is sufficient.
 
 ## 11.2 Reaching the Food Objective
 If a player obtains at least certain amount of food (specified by the map), the player wins immediately.

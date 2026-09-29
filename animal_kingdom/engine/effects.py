@@ -1303,6 +1303,14 @@ def _twin_place(twin_id):
     return handler
 
 
+def _gale_place(state, unit, cr):
+    # "Roar: draw a card for each unit you control next to the opponent's den" (Gale included).
+    front = state.game_map.hq_front(other_player(unit.owner))
+    n = sum(1 for c in front if (top := state.top_unit(c)) and top.owner == unit.owner)
+    if n:
+        state.effect_stack.append({"op": "draw", "player": unit.owner, "n": n})
+
+
 def _hq_adjacent_draw(state, unit, cr):
     if cr in state.game_map.hq_front(other_player(unit.owner)):  # next to the enemy base (F6)
         state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1})
@@ -1582,21 +1590,9 @@ def _op_bounce_iid(state, step):
     return None
 
 
-def _gale_covered(state, covered, coverer, cr):
-    # "The first time an enemy unit covers this" - once per instance (not per turn), gated
-    # on `retaliation_used` (persists across turns, unlike state.turn_flags). Consumed on any
-    # genuine enemy cover, but Armor still blocks the actual bounce (keyword physics: cf.
-    # Apex Predator vs. an unremovable occupant - the ability resolves, the move just fails).
-    if coverer.owner == covered.owner or covered.retaliation_used:
-        return
-    covered.retaliation_used = True
-    if statics.can_be_removed(state, coverer):
-        state.effect_stack.append({"op": "bounce_iid", "iid": coverer.iid})
-
-
 def _spines_covered(state, covered, coverer, cr):
     # Porcupine, Hedgehog: "The first time an enemy covers this, remove that enemy." Once per
-    # instance, like Gale; after that it's an ordinary unit, so nothing is ever uncoverable.
+    # instance (`retaliation_used` persists across turns); after that it's an ordinary unit.
     if coverer.owner == covered.owner or covered.retaliation_used:
         return
     covered.retaliation_used = True
@@ -2022,5 +2018,5 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "oxpecker": {"on_place": _oxpecker_place},
     # Shared.
     "pufferfish": {"on_covered": _pufferfish_covered},
-    "gale": {"on_covered": _gale_covered},
+    "gale": {"on_place": _gale_place},
 }

@@ -9,7 +9,7 @@ Everything on a crossroad is a unit; Eggs are units too.
 ## Official keywords
 
 ### Flight
-Can be placed ignoring connection, except onto an HQ: capturing the enemy HQ still needs a connected path, so Flight alone never captures. All other placement rules still apply.
+Can be placed ignoring connection, except onto a den: capturing the enemy den still needs a connected path, so Flight alone never captures. All other placement rules still apply.
 
 ### Armor
 A shell, plates or spines: cannot be removed, returned to hand, or eaten by **any** ability — the enemy's **or its own controller's**. It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an enemy with Armor; when it removes a stack, a buried unit with Armor is skipped **in place** and everything else is still removed. Armor is not a shield for the cards beneath it. Scope is **board-only**: a card with Armor in hand can be paid or removed normally.
@@ -29,7 +29,7 @@ A predator that must land on prey and eats it.
 - **May target your own occupants** as well as enemy ones — and removes (eats) them too.
 - **It covers, then eats.** Landing is an ordinary cover, and everything that reacts to being covered happens first (Porcupine's and Hedgehog's spines remove it, Gale sends it back to hand). Then, if the predator is still on top of its prey, it eats it: the prey is removed, its leave-the-board and remove effects fire normally, and the predator sits on whatever remained beneath.
 - **If the occupant can't be eaten** (Armor, or an enemy with Stealth — the eat is a chosen single-out), the predator is **not** blocked from landing there: it simply **covers** it under the normal placement rules and buries it instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it does *when it can*, not a placement precondition.
-- **Cannot be placed onto a headquarters** — deliberate design choice, so Apex Predators can't capture an enemy HQ directly.
+- **Cannot be placed onto a den** — deliberate design choice, so Apex Predators can't capture an enemy den directly.
 
 Carried by: **Tiger** (Cats), **Eon** (Egg), **Polar Bear** and **Borealis** (Ramp).
 

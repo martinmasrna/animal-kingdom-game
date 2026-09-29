@@ -8,7 +8,7 @@ All card candidates that use these mechanics are inventoried in [`../cards/card-
 
 - [ ] A keyword must save meaningful repeated text on at least three cards.
 - [ ] Prefer an existing operation plus a targeting restriction over a new subsystem.
-- [ ] Every mechanic must specify interaction with covering, stacks, Stealth, Armor, Landmarks, Eggs, the Remove Pile, and headquarters where relevant.
+- [ ] Every mechanic must specify interaction with covering, stacks, Stealth, Armor, Landmarks, Eggs, the Remove Pile, and den where relevant.
 - [ ] New mechanics must work for a human tabletop implementation without hidden bookkeeping that only software can manage.
 - [ ] “Once each time this enters play” counters reset only after the physical card leaves the battlefield and is later played again. Covering does not count as leaving play.
 - [ ] Every event trigger must name its controller scope explicitly: `when you draw`, `when your opponent removes`, `when either player shuffles`, or `when a unit is removed`. Do not rely on a global implied default.
@@ -22,25 +22,25 @@ All card candidates that use these mechanics are inventoried in [`../cards/card-
 
 ## 1. First-priority mechanics
 
-### 1.0 Resolve Flight versus headquarters
+### 1.0 Resolve Flight versus den
 
-The current documents say both that Flight ignores connection when placed and that Flight alone cannot capture an HQ. Reach and extra-placement cards cannot be audited until this is stated in one canonical sentence.
+The current documents say both that Flight ignores connection when placed and that Flight alone cannot capture a den. Reach and extra-placement cards cannot be audited until this is stated in one canonical sentence.
 
-- [ ] Recommended rule: **no connection-bypass ability applies when placing onto an enemy headquarters**. The capturing placement must have an ordinary friendly connection.
-- [ ] Add the HQ exception directly to Flight if adopted, rather than relying on deck notes.
-- [ ] Apply the same HQ exception to Burrow, “place adjacent ignoring connection,” and all future reach mechanics.
+- [ ] Recommended rule: **no connection-bypass ability applies when placing onto an enemy den**. The capturing placement must have an ordinary friendly connection.
+- [ ] Add the den exception directly to Flight if adopted, rather than relying on deck notes.
+- [ ] Apply the same den exception to Burrow, “place adjacent ignoring connection,” and all future reach mechanics.
 - [ ] Re-check Falcon, Bat, Cuckoo, Starling, Gecko, Springhare, and the new Aggro legendary after the wording is settled.
 
 ### 1.1 Burrow
 
 Proposed keyword:
 
-> **Burrow** — This may be placed on an empty crossroad without connection to your headquarters.
+> **Burrow** — This may be placed on an empty crossroad without connection to your den.
 
-- [ ] Confirm that Burrow cannot cover any occupant, be placed on either headquarters, or bypass any non-connection restriction.
+- [ ] Confirm that Burrow cannot cover any occupant, be placed on either den, or bypass any non-connection restriction.
 - [ ] Burrowed units do not create connection unless a normal continuous friendly path later reaches them.
 - [ ] Confirm that Burrow is a placement permission, not movement and not Flight. Effects that reference Flight do not see Burrow.
-- [ ] Run an HQ-rush audit with Mole, Hare, Springhare, Pika, and Warren before adoption.
+- [ ] Run a den-rush audit with Mole, Hare, Springhare, Pika, and Warren before adoption.
 
 This is the cleanest proposed keyword: it uses the existing connection bypass but removes Flight's ability to land on occupied crossroads.
 
@@ -96,9 +96,9 @@ Initial wording proposal:
 > **Move N** — choose the unit specified by the card and relocate it along a path of up to N graph edges without treating it as played.
 
 - [ ] Decide whether movement triggers Roar, “when played,” covering, Fragile, and on-covered effects.
-- [ ] Decide whether the moved unit and/or destination must be connected to its controller's HQ. Concern noted: requiring connection may remove much of the mechanic's positional purpose.
+- [ ] Decide whether the moved unit and/or destination must be connected to its controller's den. Concern noted: requiring connection may remove much of the mechanic's positional purpose.
 - [ ] Define when connection, regions, and victory are recalculated after movement.
-- [ ] Decide whether movement may enter or capture either HQ.
+- [ ] Decide whether movement may enter or capture either den.
 - [ ] Decide whether buried units can move or be selected for movement.
 - [ ] Define how moving a visible unit off a stack affects the newly revealed occupant and control.
 - [ ] Define interactions with Armor and Stealth.
@@ -135,7 +135,7 @@ Two distinct mechanics are under consideration:
 - [ ] A token that would leave the battlefield ceases to exist after all relevant leave-play and remove triggers resolve.
 - [ ] Tokens do not enter the shared Remove Pile and cannot be returned to a hand or shuffled into a deck. An effect attempting either makes the token cease to exist.
 - [ ] Decide whether a disappearing token counts as “removed.” Recommended: **yes for battlefield remove/Deathrattle triggers, no for Remove-Pile-counting effects such as Goliath**.
-- [ ] Tokens carry printed type/tags/strength and may control crossroads, regions, and capture an HQ unless their token definition says otherwise.
+- [ ] Tokens carry printed type/tags/strength and may control crossroads, regions, and capture a den unless their token definition says otherwise.
 - [ ] Token-spawning unit proposals place tokens only on adjacent empty crossroads.
 - [ ] Define placement order and what happens when too few adjacent empty crossroads exist.
 - [ ] Add physical-component guidance before accepting a token-heavy archetype.
@@ -188,8 +188,8 @@ Initial note: players receive **2 actions per turn by default**. It remains open
 ### Possible interpretation B — draw and placement both cost one action
 
 - [ ] Each player gets 2 AP; both `Draw 1` and `Place 1` cost 1 AP.
-- [ ] This permits two placements or draw-plus-placement every turn, fundamentally changing game speed, hand pressure, HQ races, first-player advantage, and the value of every existing extra placement/draw card.
-- [ ] Evaluate how this interpretation changes game speed, hand pressure, HQ races, first-player advantage, and existing extra-placement/draw cards.
+- [ ] This permits two placements or draw-plus-placement every turn, fundamentally changing game speed, hand pressure, den races, first-player advantage, and the value of every existing extra placement/draw card.
+- [ ] Evaluate how this interpretation changes game speed, hand pressure, den races, first-player advantage, and existing extra-placement/draw cards.
 
 ### Shared action questions
 
@@ -226,14 +226,14 @@ Cards must remain fully understandable without the ability word.
 - [ ] **Copy a Roar:** enumerate every legal source and loop before approving Kanzi or any similar design. Copied effects should not count as playing the source card.
 - [ ] **Open deck tutors:** continue using random filtered draws or top-card selection. Full-deck choice compresses variance and makes future combo cards dangerous.
 - [ ] **Permanent action denial:** effects that stop drawing, placing, or all covering for a turn can create non-games in a one-action system. Prefer one-unit restrictions with clear answers.
-- [ ] **Connection-granting auras:** these can turn an innocent extra placement into an immediate HQ capture. Burrow's empty-only self-placement is the safer reach tool.
+- [ ] **Connection-granting auras:** these can turn an innocent extra placement into an immediate den capture. Burrow's empty-only self-placement is the safer reach tool.
 
 ---
 
 ## 5. Landmark rules to settle before expansion
 
-- [ ] A Landmark pays the full card and placement-action cost despite having STR 0 and being unable to capture an HQ. Its immediate, recurring, or delayed effect must compensate for all three disadvantages; rarity does not do so.
-- [ ] Keep Landmarks as non-units that occupy crossroads, participate in connection, cannot capture an HQ, and are ignored by text that says “unit.”
+- [ ] A Landmark pays the full card and placement-action cost despite having STR 0 and being unable to capture a den. Its immediate, recurring, or delayed effect must compensate for all three disadvantages; rarity does not do so.
+- [ ] Keep Landmarks as non-units that occupy crossroads, participate in connection, cannot capture a den, and are ignored by text that says “unit.”
 - [ ] Confirm that a player may cover their own Landmark normally. Fragile then removes it.
 - [ ] Create a type-neutral phrase for a Landmark leaving play. Deathrattle currently applies only to units. Candidate wording: `When this leaves the battlefield, ...`
 - [ ] Do not give Landmarks Armor by default; print it only when the delayed engine requires protection from abilities.
@@ -243,7 +243,7 @@ Cards must remain fully understandable without the ability word.
 
 ## 6. Multi-tag and Egg-tag questions
 
-- [ ] Reconsider whether Eggs may capture an enemy headquarters. The current model treats Eggs as units and therefore allows it, but a larger Egg pool turns that flavor wart into a real deckbuilding exploit. Recommended: Eggs may occupy crossroads, provide connection, and control regions, but **cannot be placed onto an enemy HQ**.
+- [ ] Reconsider whether Eggs may capture an enemy den. The current model treats Eggs as units and therefore allows it, but a larger Egg pool turns that flavor wart into a real deckbuilding exploit. Recommended: Eggs may occupy crossroads, provide connection, and control regions, but **cannot be placed onto an enemy den**.
 - [ ] A multi-tag card counts for every matching effect. This makes `Bird/Dinosaur`, `Egg/Amphibian`, and `Egg/Arachnid` mechanically significant.
 - [ ] Decide whether an unhatched Egg should carry the future creature's tag. Recommended first test: **yes for constructed synergy, but exclude Eggs from “draw a Bird/Snake/etc.” unless the effect explicitly says it can draw Eggs**. Otherwise Bird Egg may recursively find Egg cards.
 - [ ] Keep type and tags distinct: Egg is a unit type/subtype even if it also appears in the flat tag list.

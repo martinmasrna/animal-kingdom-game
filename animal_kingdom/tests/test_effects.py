@@ -306,35 +306,30 @@ def test_black_panther_untargetable_by_enemy_effect():
 
 # =============================================================== shared (kept from M2a)
 
-def test_gale_returns_first_enemy_coverer_then_stops_reacting():
-    s = make_state(current="A", hands={"A": ["lion"]})
-    put(s, "1,2", "caracal", "A")                        # connects 2,2
-    gale = put(s, "2,2", "gale", "B")                    # enemy Gale
-    rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))   # lion (7) covers it
-    assert s.owner_of("2,2") == "B"                      # Gale is revealed again on top
-    assert "lion" in hand_ids(s, "A") and "lion" not in s.remove_pile  # bounced, not removed
-    assert gale.retaliation_used is True
-
-    rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))   # covers again: charge already used
-    assert s.owner_of("2,2") == "A" and "lion" not in hand_ids(s, "A")
+def test_gale_draws_for_each_unit_you_control_next_to_the_opponents_den_itself_included():
+    s = make_state(current="A", hands={"A": ["gale"]}, decks={"A": ["lion"] * 5, "B": []})
+    put(s, "4,1", "rat", "A")                            # B's front crossroads: 4,1 4,2 4,3
+    put(s, "4,3", "lion", "B")
+    before = len(s.hands["A"])
+    rules.apply_action(s, PlaceAction("gale", ("cr", "4,2")))   # Gale lands on the third
+    assert len(s.hands["A"]) == before - 1 + 2          # the Rat and Gale itself
 
 
-def test_gale_does_not_react_to_a_friendly_cover():
+def test_spines_ignore_a_friendly_cover():
     s = make_state(current="A", hands={"A": ["lion"]})
     put(s, "1,2", "caracal", "A")
-    gale = put(s, "2,2", "gale", "A")                    # friendly Gale
+    porcupine = put(s, "2,2", "porcupine", "A")
     rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))
-    assert s.owner_of("2,2") == "A"                      # lion just covers normally
-    assert gale.retaliation_used is False
+    assert s.top_unit("2,2").card_id == "lion" and porcupine.retaliation_used is False
 
 
-def test_gale_cannot_bounce_an_armor_coverer():
+def test_spines_cannot_remove_an_armor_coverer():
     s = make_state(current="A", hands={"A": ["cairn"]}, food={"A": 20, "B": 0})
     put(s, "1,2", "caracal", "A")
-    gale = put(s, "2,2", "gale", "B")                    # str 6
+    porcupine = put(s, "2,2", "porcupine", "B")          # str 7
     rules.apply_action(s, PlaceAction("cairn", ("cr", "2,2")))  # str 10 Armor covers it
-    assert s.owner_of("2,2") == "A"                      # Armor resists the bounce
-    assert gale.retaliation_used is True                 # but the charge is still consumed
+    assert s.owner_of("2,2") == "A"                      # Armor resists the spines
+    assert porcupine.retaliation_used is True            # but they're spent
 
 
 # ===================================================================== clone w/ counters

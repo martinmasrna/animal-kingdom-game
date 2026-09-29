@@ -13,8 +13,8 @@ Every map is a graph plus a food layout. Maps are encoded with these fields:
 | Field | Meaning |
 |---|---|
 | **crossroads** | The vertices units may be placed on. Named `(col,row)`. |
-| **edges (paths)** | Printed connections between two crossroads, or between a crossroad and an HQ. Determine adjacency and connection-to-HQ. |
-| **hqs** | One per player. Each HQ lists the crossroads it connects to (its "front"). An HQ is **not** a crossroad — no unit is ever placed there by its owner (see §3). |
+| **edges (paths)** | Printed connections between two crossroads, or between a crossroad and a den. Determine adjacency and connection-to-den. |
+| **hqs** | One per player. Each den lists the crossroads it connects to (its "front"). A den is **not** a crossroad — no unit is ever placed there by its owner (see §3). |
 | **regions** | Closed cells. Each lists its bounding **corners** (crossroads) and its **food** output per turn. A player controls a region when they occupy *all* its corners. |
 | **win_food** | Food total that wins the game on this map (`overview.md` §11.2). |
 
@@ -24,19 +24,19 @@ All food numbers (region output, `win_food`, and every card's food numbers) live
 
 # 3. Setup Rules
 
-Game-wide setup and HQ rules are the source of truth in `overview.md` — **§4 (Game Setup)** and **§6 (Legal Placement)**. As they apply to every map:
+Game-wide setup and den rules are the source of truth in `overview.md` — **§4 (Game Setup)** and **§6 (Legal Placement)**. As they apply to every map:
 
-- **Empty board** start; both HQs unoccupied. *(`overview.md` §4.1)*
+- **Empty board** start; both dens unoccupied. *(`overview.md` §4.1)*
 - **First player** draws **3** cards, **second player** draws **4**. *(`overview.md` §4.3; first-player determination still open — see §6)*
-- A player **cannot place on their own HQ**; they defend it by holding the crossroads **in front of it** (the crossroads the HQ connects to). *(`overview.md` §6)*
+- A player **cannot place on their own den**; they defend it by holding the crossroads **in front of it** (the crossroads the den connects to). *(`overview.md` §6)*
 
-**Capturing an enemy HQ** *(`overview.md` §11.1)*: the attacker places a unit onto the enemy HQ once it is connected to the attacker's own HQ through attacker-occupied crossroads — in practice, hold a front crossroad of the enemy HQ with a connected chain back home, then place onto the HQ to win. The defender's counterplay is to hold their own front crossroads with bodies strong enough not to be covered.
+**Capturing an enemy den** *(`overview.md` §11.1)*: the attacker places a unit onto the enemy den once it is connected to the attacker's own den through attacker-occupied crossroads — in practice, hold a front crossroad of the enemy den with a connected chain back home, then place onto the den to win. The defender's counterplay is to hold their own front crossroads with bodies strong enough not to be covered.
 
 ---
 
 # 4. Map B — "Savanna Expanse" (the game map)
 
-**This is the shipped map** — every game and sim runs on it. A 5×3 lattice of **15 crossroads** (columns 1–5, rows 1–3), HQ_A fronting column 1 and HQ_B fronting column 5, with **8 regions** (R1–R8; the four center cells R2/R3/R6/R7 output **15** food, the flanks **10**) and **win_food 100**. The center was cut from 20→15 on 2026-07-05 to balance the two win conditions: at 20/10 food wins dominated (~63–71% of games); at 15/10 the food/HQ-capture split lands ~50/50 (greedy-vs-greedy, 200 games/matchup). The exact geometry (crossroads, edges, region corners) is canonical in [`animal_kingdom/data/maps.json`](../../animal_kingdom/data/maps.json) — that file is the source of truth; this section is the prose companion. The extra column over the old 4×3 map gives combo/food decks room to develop and opens a genuine row-1/row-3 flank as an HQ-rush lane.
+**This is the shipped map** — every game and sim runs on it. A 5×3 lattice of **15 crossroads** (columns 1–5, rows 1–3), HQ_A fronting column 1 and HQ_B fronting column 5, with **8 regions** (R1–R8; the four center cells R2/R3/R6/R7 output **15** food, the flanks **10**) and **win_food 100**. The center was cut from 20→15 on 2026-07-05 to balance the two win conditions: at 20/10 food wins dominated (~63–71% of games); at 15/10 the food/den-capture split lands ~50/50 (greedy-vs-greedy, 200 games/matchup). The exact geometry (crossroads, edges, region corners) is canonical in [`animal_kingdom/data/maps.json`](../../animal_kingdom/data/maps.json) — that file is the source of truth; this section is the prose companion. The extra column over the old 4×3 map gives combo/food decks room to develop and opens a genuine row-1/row-3 flank as a den-rush lane.
 
 ---
 
@@ -44,7 +44,7 @@ Game-wide setup and HQ rules are the source of truth in `overview.md` — **§4 
 
 > **Legacy.** Map A is **not a playable ruleset** — it is retained in `maps.json` solely as a small, symmetric geometry fixture for engine unit tests. It is never a game or sim default. The section below is kept for those tests' reference only.
 
-A 4×3 lattice of crossroads, HQs on opposite sides, square cells forming 6 regions.
+A 4×3 lattice of crossroads, dens on opposite sides, square cells forming 6 regions.
 
 ```
         (1,3)──────(2,3)──────(3,3)──────(4,3)
@@ -56,7 +56,7 @@ A 4×3 lattice of crossroads, HQs on opposite sides, square cells forming 6 regi
 
 ## 4.1 Topology
 - **12 crossroads**, named `(col,row)`, columns 1–4 (left→right), rows 1–3 (bottom→top).
-- **Paths:** the full orthogonal grid (each crossroad connects to its horizontal and vertical neighbors; no diagonals), plus each HQ's front edges. Totals: 9 horizontal + 8 vertical + 6 HQ = **23 paths**.
+- **Paths:** the full orthogonal grid (each crossroad connects to its horizontal and vertical neighbors; no diagonals), plus each den's front edges. Totals: 9 horizontal + 8 vertical + 6 den = **23 paths**.
 - **HQ_A** connects to all of column 1 — `(1,1) (1,2) (1,3)`. **HQ_B** connects to all of column 4 — `(4,1) (4,2) (4,3)`. (The diagram draws only the middle spine for readability.) The 3-wide base edge avoids a spawn chokepoint that would cause stalls.
 
 ## 4.2 Regions and food
@@ -92,18 +92,18 @@ win_food: 100
 ```
 
 ## 4.4 Design notes — why this shape
-- **All three win conditions are live.** *HQ rush:* build a connected chain across the middle to a column-4 crossroad, then place onto `HQ_B` — long enough to cost real tempo (tests Aggro). *Food win:* the center rewards holding + removal; both centers together require 6 specific crossroads `(2,1)(3,1)(2,2)(3,2)(2,3)(3,3)` held under fire — a real achievement, not a freebie. *Exhaustion:* reachable in grindy mirrors.
+- **All three win conditions are live.** *den rush:* build a connected chain across the middle to a column-4 crossroad, then place onto `HQ_B` — long enough to cost real tempo (tests Aggro). *Food win:* the center rewards holding + removal; both centers together require 6 specific crossroads `(2,1)(3,1)(2,2)(3,2)(2,3)(3,3)` held under fire — a real achievement, not a freebie. *Exhaustion:* reachable in grindy mirrors.
 - **Contested center.** Higher food in the middle pulls both players into the same squares, so removal, covering, and positioning all matter there — the interactions worth stress-testing.
 - **Shared corners create economy.** Adjacent regions share crossroads, so holding two regions overlaps; board states get interesting without the map being large.
 - **Symmetric**, so the only built-in imbalance is turn order — the thing to *measure*, not bury under map asymmetry.
-- **HQ defense uses the front crossroads** (§3): a fat body on a column-4 crossroad is the wall, which is why the biggest bodies (Elephant, Str 9) make the best HQ defenders.
+- **Den defense uses the front crossroads** (§3): a fat body on a column-4 crossroad is the wall, which is why the biggest bodies (Elephant, Str 9) make the best den defenders.
 
 ---
 
 # 5. Tuning targets (Map B)
 - **Food curve:** region outputs (10 / 20) and `win_food` (100) vs. the card `F` scale — set together in the simulator.
 - **First-player win rate:** target ≈ 50% with the 3/4 opening-hand split; adjust the split or add another lever if skewed.
-- **Win-condition split:** healthy if all three (HQ / food / exhaustion) appear; if exhaustion dominates, the map is too stally or decks too removal-heavy.
+- **Win-condition split:** healthy if all three (den / food / exhaustion) appear; if exhaustion dominates, the map is too stally or decks too removal-heavy.
 
 ---
 

@@ -38,8 +38,8 @@ There is no mana: every card costs one card and one placement action. Low streng
 
 ## Guardrails
 
-- No burst extra placements, and an instant-capture audit for every chaining effect near an enemy HQ.
-- No effect that grants a connection-ignoring placement able to reach the HQ. Flight alone never captures.
+- No burst extra placements, and an instant-capture audit for every chaining effect near an enemy den.
+- No effect that grants a connection-ignoring placement able to reach the den. Flight alone never captures.
 - Avoid unconditional body-plus-card cards: a body that replaces itself is already premium.
 - A new keyword needs at least three cards that want the exact same rules object.
 - Mechanics must work on a tabletop too: no hidden bookkeeping only software could track.

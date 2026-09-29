@@ -41,8 +41,8 @@ Flavor MVP deck. **Opossum** ("Deathrattle: return this to hand" = playing dead 
 - **Kraken octopus legendary (—, 4) — weak effect↔animal tie.** "Draw a legendary unit" doesn't obviously read as *octopus*. It works as "the deep summons its monsters," but it's the one Food-OTK effect that's carried by the art note rather than the animal. No reskin needed (it's the combo enabler and an octopus-as-eldritch-thing is evocative enough); just noting it's the soft spot.
 - **Giant Tortoise (rare, —, 5) — tag inconsistency with Ramp (see §2.B).**
 
-### Deck 6 — Aggro HQ Rush
-Reads great as a rush deck: the fastest cat (Cheetah) and a diving falcon both rewarded for hitting the enemy base, lemmings swarming onto empty ground, the plague rat nuking a whole tile, the skunk spraying an enemy back to hand. Strong identity throughout.
+### Deck 6 — Aggro Den Rush
+Reads great as a rush deck: the fastest cat (Cheetah) and a diving falcon both rewarded for hitting the enemy den, lemmings swarming onto empty ground, the plague rat nuking a whole tile, the skunk spraying an enemy back to hand. Strong identity throughout.
 
 - **"Hornet" (rare, —, 2) — cross-pool species collision + retag question (see §2.A).** This tagless expendable "self-sac to kill an adjacent enemy" hornet duplicates the species of Colony's **Guard Hornet** (one-species rule is pool-wide). The self-destruct-on-sting flavor is iconically *bee/wasp*, but bee and wasp are both taken by Colony. Cleanest reskin (pure, no mechanics): rename to a *distinct* stinging insect not used elsewhere — **Tarantula Hawk** (a wasp famous as a brutal single-kill, with one of the most painful stings on Earth) or **Velvet Ant** ("cow killer," another species). Either keeps the "expendable lethal sting" fantasy without colliding with the hornets.
 
@@ -169,7 +169,7 @@ Cats (Prince Leo, Princess Lea, King Theron, Queen Adira) are already named and 
 - **Croesus, Keeper of the Stash** — proverbial "rich as Croesus" (a historical king, not a myth); evokes a vast hoard.
 - **Cache, Keeper of the Stash** — the buried stash as a name; spare and thematic. *(Avoided "Midas" — direct golden-touch myth.)*
 
-### Aggro HQ Rush
+### Aggro Den Rush
 **Rat King** (Rodent 3, +1 str per other unit; "writhing mass of rats"):
 - **Verminus** — a Latinate vermin-monarch; grand and grimy.
 - **Gnashtail** — the tangled, gnashing mass made a name; visceral.
@@ -182,7 +182,7 @@ Cats (Prince Leo, Princess Lea, King Theron, Queen Adira) are already named and 
 
 **Legendary skunk "Choking Cloud"** (—, 5, mass-bounce all adjacent enemies):
 - **Sirocco** — a choking desert wind; the cloud that drives everyone back.
-- **Reek** — blunt, funny, and exactly what clears the HQ front.
+- **Reek** — blunt, funny, and exactly what clears the den front.
 - **Mephitis** — literally the skunk genus (*Mephitis mephitis*) and the old word for noxious vapour; evocative and accurate. *Borderline:* also a minor Roman vapour-deity — flagging, but the genus tie makes it defensible.
 
 **Legendary bird of prey "Great Raptor"** (Bird 6, Flight, remove adjacent ≤6):

@@ -6,7 +6,7 @@ Eon is the Ouroboros: a 10 with Apex Predator that eats what it lands on, then s
 
 Rarity follows role: the commons are the engine (Owl, Raven, Eagle, Rattlesnake, Python, Viper), the rares are situational answers (Hawk, Taipan, Magpie, Black Mamba).
 
-The plan is to survive the midgame by removing threats one at a time, then win late on size: good against midrange and ramp, which commit one big unit at a time, weak against wide aggro and combo. Played by a human it wins by taking the initiative early (flyers deep on the other side, breaking regions) and building a chain to the enemy HQ anchored by the big Snakes; the bots don't play it that way, so its simulated win rate understates it.
+The plan is to survive the midgame by removing threats one at a time, then win late on size: good against midrange and ramp, which commit one big unit at a time, weak against wide aggro and combo. Played by a human it wins by taking the initiative early (flyers deep on the other side, breaking regions) and building a chain to the enemy den anchored by the big Snakes; the bots don't play it that way, so its simulated win rate understates it.
 
 ## Cards
 

@@ -644,7 +644,7 @@ function drawEnd() {
   if (ui.peek) { ov.classList.remove('on'); document.getElementById('waiting').innerHTML = `<span class="peek" id="unpeek" style="cursor:pointer;text-decoration:underline">Back to results</span>`; document.getElementById('unpeek').onclick = () => { ui.peek = false; drawGame(); }; return; }
   const you = V.you, them = opp(), w = G.result.winner, S = V.score;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
-  const how = { hq_capture: w === you ? 'Enemy HQ captured' : 'Your HQ was captured', food: `${w === you ? 'You' : 'They'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins' }[G.result.reason] || G.result.reason;
+  const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'They'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins' }[G.result.reason] || G.result.reason;
   const dots = [0, 1, 2].map(i => { const r = V.results[i]; return `<i class="${r && r.winner ? rel(r.winner) : ''}"></i>`; }).join('');
   const score = `<div class="score"><span class="A">${S[you]}</span><span class="g">${dots}</span><span class="B">${S[them]}</span></div>`;
   const peek = `<span class="peek" id="peek">See the board</span>`;

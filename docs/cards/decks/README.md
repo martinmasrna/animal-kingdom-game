@@ -5,7 +5,7 @@ Every deck is 30 cards in the 4-4-6 shape: 4 legendary designs ×1, 4 rare ×2, 
 | Deck | Identity |
 |---|---|
 | [Cats Midrange](cats-midrange.md) | mono-Cat tempo and removal |
-| [Aggro HQ Rush](aggro-hq-rush.md) | cheap chains and reach to capture the HQ (being redesigned) |
+| [Aggro Den Rush](aggro-hq-rush.md) | cheap chains and reach to capture the den (being redesigned) |
 | [Canine Buff Tempo](canine-buff-tempo.md) | mono-Canine persistent buffs and pack reach |
 | [Colony Food Swarm](colony-food-swarm.md) | mono-Colony swarm converted into food |
 | [Egg Control](egg-control.md) | Snake/Bird/Egg draw-shuffle-remove engine that pays food |

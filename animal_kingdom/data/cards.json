@@ -866,9 +866,9 @@
       "deck": "aggro_hq_rush",
       "rarity": "legendary",
       "tags": ["Bird"],
-      "base_strength": 6,
+      "base_strength": 4,
       "keywords": ["Flight"],
-      "text": "Flight. The first time an enemy covers this, return it to its owner's hand."
+      "text": "Flight. Roar: draw a card for each unit you control next to the opponent's den."
     },
     {
       "id": "jerboa",
@@ -928,7 +928,7 @@
       "tags": ["Cat"],
       "base_strength": 6,
       "keywords": [],
-      "text": "Roar: if you play this next to the opponent's base, draw 1 card."
+      "text": "Roar: if you play this next to the opponent's den, draw 1 card."
     },
     {
       "id": "rat",
@@ -948,7 +948,7 @@
       "tags": ["Bird"],
       "base_strength": 4,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: if you play this next to the opponent's base, draw 1 card."
+      "text": "Flight. Roar: if you play this next to the opponent's den, draw 1 card."
     },
     {
       "id": "bat",
