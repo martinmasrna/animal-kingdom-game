@@ -137,6 +137,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .card .ctext p b { font-weight: 800; }
 .card .ctext i { position: absolute; left: 0; right: 0; bottom: .15em; text-align: center; font: 700 1em/1 'Fira Sans Condensed', sans-serif; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #3a2a18; }
 .card.compact .ctext { display: none; }
+.card:not(.compact) .pic { bottom: calc(var(--bw) + 7.8em); border-radius: 0; background-position: 50% var(--fy, 30%); }
 /* Legendary: a slow sheen crosses the card. */
 .card.legendary::after { content: ''; position: absolute; top: -20%; bottom: -20%; left: 0; width: 35%; z-index: 4; pointer-events: none;
   background: linear-gradient(90deg, rgba(255,240,200,0), rgba(255,240,200,.16), rgba(255,240,200,0)); animation: cardsheen 5.5s ease-in-out infinite; }
