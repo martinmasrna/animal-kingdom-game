@@ -20,7 +20,7 @@ from ..bots.referee_bot import RefereeBot
 from ..bots.turn_bot import TurnBot
 from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine import rules
-from ..engine.actions import DrawAction, PlaceAction, action_from_dict
+from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, action_from_dict
 from ..engine.cards import load_cards
 from ..engine.effects import battlecry_condition
 from ..engine.maps import load_map
@@ -30,6 +30,11 @@ from ..engine.strength import effective_strength, placement_strength
 CARDS = load_cards()
 MAP_ID = "map_b"
 GAMES_TO_WIN = 2
+# The turn clock, for matches between two people (pre-launch.md: a starting guess, to be set from
+# real games). Whoever must act gets a free window each time the decision comes to them (unused
+# time is lost), then spends their bank for the game. At zero, the engine acts for them.
+CLOCK_FREE = 30.0
+CLOCK_BANK = 180.0
 
 # Menu labels for the premade decks (the design mockups' names).
 DECK_NAMES = {"cats_midrange": "Cats", "canine_buff_tempo": "Canines", "aggro_hq_rush": "Aggro",
@@ -147,6 +152,7 @@ class Match:
         self.on_game_end = None          # callback(match, log record); the server saves human games
         self.on_match_end = None         # callback(match); the server adds it to the players' histories
         self.rematches = 0               # a rematch starts a new series in the same match
+        self.clock: Optional[dict] = None   # {bank: {A, B}, holder, turn, free, since}; None when a bot plays
         self.rng = random.Random(secrets.randbits(32))
         self.created = datetime.now(timezone.utc)
         self.schedule: Optional[list[dict]] = None   # gauntlet: one {seat, deck, first} per game, in order
@@ -223,6 +229,9 @@ class Match:
                      if seat.is_bot}
         self.history = []
         self.phase = "playing"
+        self.clock = None if any(seat.is_bot for seat in self.seats.values()) else \
+            {"bank": {"A": CLOCK_BANK, "B": CLOCK_BANK}, "holder": None, "turn": -1, "free": 0.0, "since": time.time()}
+        self._clock_update()
 
     def next_game(self) -> None:
         if self.phase != "game_over":
@@ -258,7 +267,7 @@ class Match:
             action = action_from_dict(action)
         # A placement starts a history entry, including a free extra play inside a Battlecry;
         # draws and sub-choices fold into the entry they belong to.
-        starts_move = state.pending is None or isinstance(action, PlaceAction)
+        starts_move = (state.pending is None and not isinstance(action, PassAction)) or isinstance(action, PlaceAction)
         pre = _snapshot(state) if starts_move else None
         rules.apply_action(state, action)    # validates; raises EngineError if illegal
         self.actions.append(action.to_dict())
@@ -272,7 +281,48 @@ class Match:
         if self.history:
             self.history[-1].fx = _effects(state, self.history[-1])
         self._check_end()
+        self._clock_update()
         self.version += 1
+
+    # ----------------------------------------------------------------- turn clock
+    def _clock_update(self, now: Optional[float] = None) -> None:
+        """Charge the time since the last update to whoever held the decision, then hand the
+        clock to whoever must act now: a fresh free window if it changed hands or a new turn began."""
+        c = self.clock
+        if c is None:
+            return
+        now = time.time() if now is None else now
+        if c["holder"]:
+            spent = now - c["since"]
+            c["bank"][c["holder"]] = max(0.0, c["bank"][c["holder"]] - max(0.0, spent - c["free"]))
+            c["free"] = max(0.0, c["free"] - spent)
+        holder = self.to_act()
+        turn = self.state.turn_counter if self.state else -1
+        if holder != c["holder"] or turn != c["turn"]:
+            c["free"] = CLOCK_FREE
+        c["holder"], c["turn"], c["since"] = holder, turn, now
+
+    def clock_deadline(self) -> Optional[float]:
+        c = self.clock
+        if c is None or c["holder"] is None or self.phase != "playing":
+            return None
+        return c["since"] + c["free"] + c["bank"][c["holder"]]
+
+    def time_out(self, now: Optional[float] = None) -> bool:
+        """If the player to act is out of time, act for them: decline or take the first option of a
+        choice, else end their turn. Returns whether it acted."""
+        deadline = self.clock_deadline()
+        now = time.time() if now is None else now
+        if deadline is None or now < deadline:
+            return False
+        s, st = self.to_act(), self.state
+        self._clock_update(now)
+        if st.pending is None:
+            self.act(s, PassAction())
+        else:
+            legal = rules.legal_actions(st)
+            self.act(s, ChoiceAction(SKIP) if ChoiceAction(SKIP) in legal else legal[0])
+        return True
 
     def _check_end(self) -> None:
         result = rules.is_terminal(self.state)
@@ -326,7 +376,7 @@ class Match:
                 "phase": self.phase, "results": self.results, "seed": self.seed,
                 "actions": self.actions, "notes": self.notes, "action_times": self.action_times,
                 "started_at": self.started_at, "created": self.created.isoformat(),
-                "schedule": self.schedule, "version": self.version, "rematches": self.rematches,
+                "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [_jsonable(asdict(m)) for m in self.history]}
 
@@ -339,6 +389,9 @@ class Match:
         m.actions, m.notes, m.action_times = d["actions"], d["notes"], d["action_times"]
         m.started_at, m.schedule, m.version = d["started_at"], d["schedule"], d["version"] + 1
         m.rematches = d.get("rematches", 0)
+        m.clock = d.get("clock")
+        if m.clock:
+            m.clock["since"] = time.time()      # time the server was down isn't anyone's
         m.created = datetime.fromisoformat(d["created"])
         m.state = GameState.from_dict(d["state"]) if d["state"] else None
         m.history = [Move(**h) for h in d["history"]]
@@ -397,6 +450,8 @@ class Match:
             "actionsLeft": st.config.actions_per_turn + bonus - st.actions_taken_this_turn,
             "actionsTotal": st.config.actions_per_turn + bonus,
             "canPass": rules.can_pass(st),
+            "clock": self.clock and {**{k: self.clock[k] for k in ("bank", "holder", "free", "since")}, "now": time.time(),
+                                     "on": self.clock_deadline() is not None},
             "food": dict(st.food),
             "income": {p: rules.region_income(st, p) for p in "AB"},
             "winFood": st.game_map.win_food,

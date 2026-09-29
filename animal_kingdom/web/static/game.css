@@ -269,3 +269,10 @@
 
 .game .hc.dim .card { filter: brightness(.55) saturate(.7) drop-shadow(.2em .45em .5em rgba(0,0,0,.55)); }
 .game.kit .cr.unit.capture { scale: .8; z-index: 6; }   /* the unit that took a den, in its mouth */
+/* The turn clock, under the series. */
+.game .clock { left: 16px; top: 38px; font-size: 13px; color: var(--mute); pointer-events: none; }
+.game .clock b { font-size: 17px; margin-left: 4px; font-variant-numeric: tabular-nums; }
+.game .clock span { margin-left: 6px; font-variant-numeric: tabular-nums; }
+.game .clock.A b { color: var(--A); } .game .clock.B b { color: var(--B); }
+.game .clock.low b { animation: clocklow .6s ease-in-out infinite alternate; }
+@keyframes clocklow { to { opacity: .35; } }

@@ -54,6 +54,7 @@ class Hub:
         self.matches: dict[str, Match] = {}
         self.sockets: dict[str, set] = {}        # match id -> {(ws, seat)}
         self.bot_tasks: dict[str, asyncio.Task] = {}
+        self.clock_tasks: dict[str, asyncio.Task] = {}
 
     def new_id(self) -> str:
         while True:
@@ -104,7 +105,24 @@ class Hub:
         await self.broadcast(match)
         self.kick_bot(match)
 
+    def kick_clock(self, match: Match) -> None:
+        """Keep a timer running while a clocked game is on; it acts for a player out of time."""
+        task = self.clock_tasks.get(match.id)
+        if match.clock_deadline() is not None and (task is None or task.done()):
+            self.clock_tasks[match.id] = asyncio.create_task(self._run_clock(match))
+
+    async def _run_clock(self, match: Match) -> None:
+        while (deadline := match.clock_deadline()) is not None:
+            await asyncio.sleep(min(1.0, max(0.05, deadline - time.time())))
+            try:
+                if match.time_out():
+                    await self.broadcast(match)
+            except EngineError:
+                log.exception("clock failed in match %s", match.id)
+                return
+
     def kick_bot(self, match: Match) -> None:
+        self.kick_clock(match)
         s = match.to_act()
         if s is None or not match.seats[s].is_bot:
             return

@@ -190,3 +190,51 @@ def test_reverse_gauntlet_rotates_the_players_deck_against_the_bots_fixed_one():
                     ("ramp", "goodstuff", "A"), ("ramp", "goodstuff", "B")]
     g = m.view("A")["gauntlet"]
     assert [(r["deckName"], r["w"], r["l"]) for r in g["record"]] == [("Aggro", 2, 0), ("Ramp", 1, 1)]
+
+
+# ----------------------------------------------------------------- turn clock
+def _two_humans(monkeypatch, t0=1000.0):
+    from animal_kingdom.web import match as M
+    now = [t0]
+    monkeypatch.setattr(M.time, "time", lambda: now[0])
+    m = Match("C", Seat("ta", "A", deck="cats_midrange"))
+    m.join(Seat("tb", "B", deck="ramp"))
+    m._start_game()
+    return m, now
+
+
+def test_bot_games_have_no_clock():
+    m = _match()
+    assert m.clock is None and m.clock_deadline() is None
+
+
+def test_the_free_window_is_lost_then_the_bank_drains(monkeypatch):
+    from animal_kingdom.web.match import CLOCK_BANK, CLOCK_FREE
+    m, now = _two_humans(monkeypatch)
+    s = m.to_act()
+    now[0] += CLOCK_FREE + 12                           # 12 s past the free window
+    m.act(s, rules.legal_actions(m.state)[0])
+    assert m.clock["bank"][s] == CLOCK_BANK - 12
+
+
+def test_out_of_time_declines_the_choice_then_ends_the_turn(monkeypatch):
+    from animal_kingdom.web.match import CLOCK_BANK, CLOCK_FREE
+    m, now = _two_humans(monkeypatch)
+    from animal_kingdom.engine.actions import ChoiceAction
+    while m.state.pending is not None:                  # both keep their opening hands
+        m.act(m.to_act(), ChoiceAction("__skip__"))
+    s, turn = m.to_act(), m.state.turn_counter
+    assert not m.time_out()                             # nobody is out of time yet
+    now[0] += CLOCK_FREE + CLOCK_BANK + 1
+    assert m.time_out()
+    assert m.state.turn_counter == turn + 1 and m.to_act() != s
+    assert m.clock["bank"][s] == 0 and m.history == []  # an ended turn is not a move
+
+
+def test_ending_a_turn_by_hand_is_not_recorded_as_a_draw(monkeypatch):
+    from animal_kingdom.engine.actions import ChoiceAction, PassAction
+    m, _ = _two_humans(monkeypatch)
+    while m.state.pending is not None:
+        m.act(m.to_act(), ChoiceAction("__skip__"))
+    m.act(m.to_act(), PassAction())
+    assert m.history == []

@@ -317,7 +317,7 @@ function matchScreen(id) {
     ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/${id}?token=${encodeURIComponent(token)}`);
     ws.onmessage = e => {
       const m = JSON.parse(e.data);
-      if (m.t === 'view') { const prev = V; V = m.view; onView(prev); }
+      if (m.t === 'view') { const prev = V; V = m.view; V.rx = Date.now() / 1000; onView(prev); }
       else if (m.t === 'error' && m.error === 'unknown match or seat') { disconnect(); location.hash = '#/'; toast('That match has ended'); }
       else if (m.t === 'error') toast(m.error);
     };
@@ -379,6 +379,19 @@ function prematchScreen() {
   wirePops(app);
 }
 
+// The turn clock (matches between two people): the free window, then the game bank, of whoever must act.
+const mmss = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+function drawClock() {
+  const el = document.getElementById('clock'), c = V && V.game && V.game.clock;
+  if (!el) return;
+  if (!c || !c.on) { el.innerHTML = ''; return; }
+  const spent = c.now + (Date.now() / 1000 - V.rx) - c.since, free = Math.max(0, c.free - spent);
+  const bank = Math.max(0, c.bank[c.holder] - Math.max(0, spent - c.free)), left = free + bank;
+  el.className = `abs clock ${rel(c.holder)}${left < 10 ? ' low' : ''}`;
+  el.innerHTML = `${c.holder === V.you ? 'Your' : 'Their'} time <b>${mmss(free > 0 ? free : bank)}</b>${free > 0 ? `<span>+${mmss(bank)}</span>` : ''}`;
+}
+setInterval(() => { if (screen === 'game') drawClock(); }, 250);
+
 // Viewer space: you are always 'A' on the left; the server's seats are mapped through these.
 const opp = () => V.you === 'A' ? 'B' : 'A';
 const rel = p => p === V.you ? 'A' : 'B';
@@ -423,6 +436,7 @@ function gameScreen() {
     app.innerHTML = `<div class="game kit" id="scr"><div id="stage">
       <div id="board"></div>
       <div class="abs series" id="series"></div>
+      <div class="abs clock" id="clock"></div>
       <div class="abs opphand" id="opphand"></div>
       <div class="abs menu" id="menubtn">☰<span class="livedot" id="livedot"></span>
         <div class="abs menudrop" id="menudrop"><a href="#" id="livelink">Live commentary (L)</a><a href="#" id="notelink">Add a note (N)</a><a href="#/">Leave match</a></div></div>
