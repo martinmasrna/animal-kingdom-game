@@ -268,7 +268,8 @@ function onView(prev) {
   if (prev && prev.game && V.game && prev.game.history.length > V.game.history.length) ui.sel = null;
   // One-shot animation input: what the board and food were before this view (same game only).
   ui.anim = prev && prev.game && V.game && prev.game.history.length <= V.game.history.length && prev.you === V.you
-    ? { board: viewerBoard(prev), food: { A: prev.game.food[prev.you], B: prev.game.food[prev.you === 'A' ? 'B' : 'A'] } } : null;
+    ? { board: viewerBoard(prev), food: { A: prev.game.food[prev.you], B: prev.game.food[prev.you === 'A' ? 'B' : 'A'] },
+        income: { A: prev.game.income[prev.you], B: prev.game.income[prev.you === 'A' ? 'B' : 'A'] } } : null;
   gameScreen();
 }
 

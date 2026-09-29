@@ -23,6 +23,7 @@ const PITS = s => PIT_Y.map((y, i) => [PX(RIDGE[s] + (i % 2 ? 6 : -6)), PY(y)]);
 const CROWN = { A: [PX(118), PY(150)], B: [PX(1565), PY(150)] }, MOUTH = { A: [PX(176), PY(390)], B: [PX(1500), PY(378)] };
 // A number in painted chalk digits (kit2/chalk/<d>.webp, '+' as p), for a boss to hold.
 const chalk = n => `<span class="chalk">${String(n).split('').map(d => `<img src="/static/kit2/chalk/${d === '+' ? 'p' : d}.webp" alt="${d}" draggable="false">`).join('')}</span>`;
+const gemDigits = n => `<span class="gemnum">${String(n).split('').map(d => `<img src="/static/kit2/gemnum/${d}.webp" alt="${d}" draggable="false">`).join('')}</span>`;
 const put = (cls, x, y, html = '', attrs = '') => `<div class="abs ${cls}" style="left:${x}px;top:${y}px" ${attrs}>${html}</div>`;
 
 function portrait(id, D) {
@@ -88,15 +89,21 @@ export function renderBoard(el, M, g, cards, ui) {
     const food = g.food[side], inc = g.income[side], win = g.winFood, ring = side === 'B' && ui.hqRing ? ' tgt' : '';
     if (PAINT) {
       // One fruit per food, ten to a pit from the bottom up: ripe for what is stored, ghosts for next turn's income.
-      const ripe = Math.min(food, win), green = Math.max(0, Math.min(inc, win - ripe)), unit10 = win / PIT_Y.length;
-      // Each pit shows one painted state: r ripe fruit and g ghost fruit for next turn's income (screen/kit/pits/build.py).
-      let fruit = '';
+      const unit10 = win / PIT_Y.length;
+      const state = (f, n) => { const ripe = Math.min(f, win), green = Math.max(0, Math.min(n, win - ripe));
+        return i => [Math.max(0, Math.min(unit10, ripe - i * unit10)), Math.max(0, Math.min(unit10, ripe + green - i * unit10))]; };
+      const now = state(food, inc), src = ([r, t], i) => `/static/kit2/pits/${side === 'A' ? 'a' : 'b'}pit${i % 3 + 1}_${r}_${t - r}.webp`;
+      // Food just came in: every pit whose state changed ripens in turn from the bottom up, the old state fading out under it.
+      const A = ui.anim, gained = A && A.food && food > A.food[side], was = gained ? state(A.food[side], A.income[side]) : null;
+      let fruit = '', k = 0;
       PITS(side).forEach(([px, py], i) => {
-        const r = Math.max(0, Math.min(unit10, ripe - i * unit10)), t = Math.max(0, Math.min(unit10, ripe + green - i * unit10));
-        fruit += put('pit', px, py, `<img src="/static/kit2/pits/${side === 'A' ? 'a' : 'b'}pit${i % 3 + 1}_${r}_${t - r}.webp" alt="" draggable="false">`);
+        const cur = now(i), old = was && was(i), moved = old && (old[0] !== cur[0] || old[1] !== cur[1]);
+        const d = moved ? `style="animation-delay:${0.15 + 0.11 * k++}s"` : '';
+        fruit += put(`pit${moved ? ' ripen' : ''}`, px, py, (moved ? `<img class="was" src="${src(old, i)}" alt="" draggable="false" ${d}>` : '') +
+          `<img class="now" src="${src(cur, i)}" alt="" draggable="false" ${d}>`);
       });
       const [mx, my] = MOUTH[side], [kx, ky] = CROWN[side];
-      s += fruit + put(`dcount ${side}`, kx, ky, `<span class="gemnum">${String(food).split('').map(d => `<img src="/static/kit2/gemnum/${d}.webp" alt="${d}" draggable="false">`).join('')}</span>`, `data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
+      s += fruit + put(`dcount ${side}${gained ? ' tick' : ''}`, kx, ky, gemDigits(gained ? A.food[side] : food), `data-from="${gained ? A.food[side] : food}" data-to="${food}" data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
         put(`mouth${ring}`, mx, my, '', `data-hq="${side}"`);
       continue;
     }
@@ -106,4 +113,11 @@ export function renderBoard(el, M, g, cards, ui) {
       `<div class="fill" style="height:${fh}px"></div></div></div>`;
   }
   el.innerHTML = s;
+  // the gem counts up to its new total while the pits ripen
+  el.querySelectorAll('.dcount.tick').forEach(g => {
+    const from = +g.dataset.from, to = +g.dataset.to, t0 = performance.now() + 150, dur = 300 + 110 * Math.ceil((to - from) / 10);
+    const step = t => { const n = Math.round(from + (to - from) * Math.min(1, Math.max(0, (t - t0) / dur)));
+      g.innerHTML = gemDigits(n); if (n < to && g.isConnected) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
 }
