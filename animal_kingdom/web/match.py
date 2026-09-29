@@ -22,6 +22,7 @@ from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine import rules
 from ..engine.actions import DrawAction, PlaceAction, action_from_dict
 from ..engine.cards import load_cards
+from ..engine.effects import battlecry_condition
 from ..engine.maps import load_map
 from ..engine.state import EngineError, GameState, new_game, other_player
 from ..engine.strength import effective_strength, placement_strength
@@ -393,7 +394,8 @@ class Match:
             "income": {p: rules.region_income(st, p) for p in "AB"},
             "winFood": st.game_map.win_food,
             "board": board,
-            "hand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u)}
+            "hand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u),
+                      **({"ready": True} if battlecry_condition(st, s, u.card_id) else {})}
                      for u in st.hands[s]],
             "handCount": {p: len(st.hands[p]) for p in "AB"},
             "handLimit": st.config.hand_limit,

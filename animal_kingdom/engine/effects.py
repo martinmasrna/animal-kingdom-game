@@ -1262,13 +1262,6 @@ def _impala_remove(state, unit):
 
 # --- Extra placements / HQ-adjacency / start-of-turn (Stage 2.3) ---
 
-def _controls_another_tag(state, unit, tag) -> bool:
-    return any(
-        st and st[-1].owner == unit.owner and st[-1].iid != unit.iid and tag in state.cards[st[-1].card_id].tags
-        for st in state.board.values()
-    )
-
-
 def _push_play_extra(state, owner, *, filter=None, optional=False):
     state.effect_stack.append(
         {"op": "play_extra", "chooser": owner, "filter": filter or {}, "optional": optional})
@@ -1287,13 +1280,13 @@ def _greywhisker_place(state, unit, cr):
 
 def _house_cat_place(state, unit, cr):
     # May chain into another House Cat now (self-exclusion dropped 2026-07-05).
-    if _controls_another_tag(state, unit, "Cat"):
+    if battlecry_condition(state, unit.owner, unit.card_id, unit):
         _push_play_extra(state, unit.owner, filter={"tags_all": ["Cat"]})
 
 
 def _dog_place(state, unit, cr):
     # May chain into another Dog now (self-exclusion dropped 2026-07-05).
-    if _controls_another_tag(state, unit, "Canine"):
+    if battlecry_condition(state, unit.owner, unit.card_id, unit):
         _push_play_extra(state, unit.owner, filter={"tags_all": ["Canine"]})
 
 
@@ -1372,6 +1365,36 @@ def _controls_two_same_colony(state, player) -> bool:
     return any(v >= 2 for v in counts.values())
 
 
+def battlecry_condition(state, player, card_id, unit=None):
+    """Whether the "if ..." of `card_id`'s Battlecry holds: None for a card with no such
+    condition, or one that depends on where it lands (Caracal, Cheetah, Falcon). `unit` is the
+    placed unit while its Battlecry resolves; None asks about the card in hand, as if it were
+    played now (the client lights such cards up). The Battlecries below call this too, so the
+    two can't disagree."""
+    on_top = unit is not None and any(st and st[-1].iid == unit.iid for st in state.board.values())
+
+    def others(*tags):          # friendly tops carrying `tags`, not counting this card
+        n = _control_tag_count(state, player, *tags)
+        return n - 1 if on_top and all(t in state.cards[card_id].tags for t in tags) else n
+    colony_min = state.config.colony_synergy_threshold
+    check = {
+        "hamster": lambda: _fed_this_turn(state, player),
+        "muskrat": lambda: _fed_this_turn(state, player),
+        "groundhog": lambda: _fed_this_turn(state, player),
+        "gopher": lambda: _played_rodent_last_turn(state, player),
+        "lynx": lambda: others("Cat") >= 1,
+        "house_cat": lambda: others("Cat") >= 1,
+        "dog": lambda: others("Canine") >= 1,
+        "worker_bee": lambda: others("Worker") >= 1,
+        "termite_king": lambda: _control_tag_count(state, player, "Colony", "Queen") >= 1,
+        "nurse_bumblebee": lambda: others("Colony") + 1 >= colony_min,
+        "soldier_ant": lambda: others("Colony") + 1 >= colony_min,
+        "nurse_bee": lambda: _controls_two_same_colony(state, player) or (unit is None and any(
+            st and st[-1].owner == player and st[-1].card_id == card_id for st in state.board.values())),
+    }.get(card_id)
+    return check() if check else None
+
+
 def _bounce(state, cr, top, *, lock_until=0):
     """Return a board unit to its owner's hand (not a removal: no Remove Pile, no triggers)."""
     state.board[cr].remove(top)
@@ -1398,7 +1421,7 @@ def _stoop_place(state, unit, cr):
 
 
 def _soldier_ant_place(state, unit, cr):
-    if _control_tag_count(state, unit.owner, "Colony") >= state.config.colony_synergy_threshold:
+    if battlecry_condition(state, unit.owner, unit.card_id, unit):
         _push_remove_choice(state, unit.owner, "soldier_ant", _adjacent_enemy_targets(state, unit, cr))
 
 
@@ -1625,7 +1648,7 @@ def _worker_ant_place(state, unit, cr):
 
 def _worker_bee_place(state, unit, cr):
     amount = state.config.worker_bee_food
-    if _control_tag_count(state, unit.owner, "Worker") - 1 > 0:   # another Worker besides itself
+    if battlecry_condition(state, unit.owner, unit.card_id, unit):   # another Worker besides itself
         amount += state.config.worker_bee_extra
     _push_gain(state, unit.owner, amount)
 
@@ -1659,7 +1682,7 @@ def _methuselah_eot(state, unit, cr):
 # --- Conditional draws (Cats / Colony / Aggro) ---
 
 def _lynx_place(state, unit, cr):
-    if _controls_another_tag(state, unit, "Cat"):
+    if battlecry_condition(state, unit.owner, unit.card_id, unit):
         _push_draw(state, unit.owner, 1)
 
 
@@ -1701,17 +1724,17 @@ def _mock_saboteur_place(state, unit, cr):
 
 
 def _nurse_bee_place(state, unit, cr):
-    if _controls_two_same_colony(state, unit.owner):
+    if battlecry_condition(state, unit.owner, unit.card_id, unit):
         _push_draw(state, unit.owner, 2)
 
 
 def _nurse_bumblebee_place(state, unit, cr):
-    if _control_tag_count(state, unit.owner, "Colony") >= state.config.colony_synergy_threshold:
+    if battlecry_condition(state, unit.owner, unit.card_id, unit):
         _push_draw(state, unit.owner, 2)
 
 
 def _termite_king_place(state, unit, cr):
-    if _control_tag_count(state, unit.owner, "Colony", "Queen") >= 1:
+    if battlecry_condition(state, unit.owner, unit.card_id, unit):
         _push_draw(state, unit.owner, 1)
 
 
@@ -1762,23 +1785,23 @@ def _chinchilla_place(state, unit, cr):                             # +1 action 
 
 
 def _hamster_place(state, unit, cr):
-    if _fed_this_turn(state, unit.owner):
+    if battlecry_condition(state, unit.owner, unit.card_id, unit):
         _push_draw(state, unit.owner, state.config.hamster_draw)
 
 
 def _muskrat_place(state, unit, cr):
-    if _fed_this_turn(state, unit.owner):
+    if battlecry_condition(state, unit.owner, unit.card_id, unit):
         _push_remove_choice(state, unit.owner, "muskrat",
                             _adjacent_enemy_targets(state, unit, cr))
 
 
 def _groundhog_place(state, unit, cr):
-    if _fed_this_turn(state, unit.owner):
+    if battlecry_condition(state, unit.owner, unit.card_id, unit):
         _push_gain(state, unit.owner, state.config.groundhog_food)
 
 
 def _gopher_place(state, unit, cr):
-    if _played_rodent_last_turn(state, unit.owner):
+    if battlecry_condition(state, unit.owner, unit.card_id, unit):
         _push_gain(state, unit.owner, state.config.rodent_last_turn_food)
 
 

@@ -410,7 +410,7 @@ function drawGame() {
   let drawnK = 0;
   hand.innerHTML = G.hand.map((h, i) => {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id], pick = d.handPick.has(h.iid);
-    const cls = [c.rarity, can ? 'can' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick ? 'dim' : ''].join(' ');
+    const cls = [c.rarity, can ? 'can' : '', can && h.ready ? 'ready' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick ? 'dim' : ''].join(' ');
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
     return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str })}</div>`;
