@@ -300,7 +300,8 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     # This is deliberately card-agnostic: the engine itself tells us whether a printed
     # Roar would do anything. It values setup states (duplicates, tag thresholds,
     # adjacent targets, eligible follow-up cards) without naming a deck or card.
-    score += w.effect_readiness * _features.enabled_roar_count(state, me)
+    if w.effect_readiness:
+        score += w.effect_readiness * _features.enabled_roar_count(state, me)
 
     # --- Pending delayed payoffs: net scheduled future effects, imminence-discounted ---
     # A just-placed Egg/Bear contributes ~nothing to board_presence (it's weak now) yet is a

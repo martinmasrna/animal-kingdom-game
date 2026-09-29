@@ -173,6 +173,7 @@ def run_bot_comparison(
     bootstrap_resamples: int = DEFAULT_BOOTSTRAP_RESAMPLES,
     bootstrap_seed: int = DEFAULT_BOOTSTRAP_SEED,
     config_id: Optional[str] = None,
+    log_dir: Optional[str] = None,
 ) -> BotComparisonResult:
     """Run the paired baseline/candidate gauntlets for `deck` and return joined stats.
 
@@ -189,14 +190,23 @@ def run_bot_comparison(
                                  bots=(baseline_kind, opponent_kind),
                                  weights=(baseline_weights, None),
                                  bot_kwargs=(baseline_kwargs, opponent_kwargs),
-                                 config=config, map_id=map_id, jobs=jobs)
+                                 config=config, map_id=map_id, jobs=jobs,
+                                 log_actions=log_dir is not None)
     t1 = time.monotonic()
     candidate_records = run_pairs(pairs, n_games, base_seed,
                                   bots=(candidate_kind, opponent_kind),
                                   weights=(candidate_weights, None),
                                   bot_kwargs=(candidate_kwargs, opponent_kwargs),
-                                  config=config, map_id=map_id, jobs=jobs)
+                                  config=config, map_id=map_id, jobs=jobs,
+                                  log_actions=log_dir is not None)
     t2 = time.monotonic()
+    if log_dir is not None:
+        from .replay import write_game_logs
+        os.makedirs(log_dir, exist_ok=True)
+        for side, kind, records in (("baseline", baseline_kind, baseline_records),
+                                    ("candidate", candidate_kind, candidate_records)):
+            write_game_logs(records, os.path.join(log_dir, f"{deck}-{side}.jsonl"),
+                            map_id=map_id, bots=(kind, opponent_kind))
 
     # Join on (opponent_deck, game_seed); deck_a is `deck` in every record of both runs.
     base_by_key = {(r.deck_b, r.seed): r for r in baseline_records}
@@ -502,6 +512,9 @@ def main(argv: Sequence[str] | None = None) -> None:
                    help="JSON file of Config field overrides; 'none' clears a wrapper preset")
     p.add_argument("--deck", default=None,
                    help="only benchmark this one candidate deck (default: all seven)")
+    p.add_argument("--opponents", default=None,
+                   help="comma-separated opponent decks, e.g. goodstuff (default: the seven "
+                        "premades, mirror included)")
     p.add_argument("--out", default="results/bot_quality/turnbot",
                    help="artifact output directory")
     p.add_argument("--bootstrap-resamples", type=int, default=DEFAULT_BOOTSTRAP_RESAMPLES)
@@ -523,7 +536,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     total = len(decks)
     start = time.monotonic()
     print(f"Paired benchmark: {baseline_kind} vs {candidate_kind} on {total} deck(s), "
-          f"{args.games} games/opponent x 7 opponents, map={args.map_id}, "
+          f"{args.games} games/opponent x {args.opponents or '7 opponents'}, map={args.map_id}, "
           f"jobs={args.jobs}, seed={args.seed}...", file=sys.stderr)
 
     def _progress(deck: str, done: int, deck_total: int) -> None:
@@ -532,7 +545,7 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     # run_all always sweeps DECK_SLUGS; for a single --deck we still want the full opponent
     # pool (incl. mirror), so reuse run_bot_comparison directly there.
-    if len(decks) == len(DECK_SLUGS):
+    if len(decks) == len(DECK_SLUGS) and args.opponents is None:
         results = run_all(
             args.games, args.seed,
             baseline_kind=baseline_kind, candidate_kind=candidate_kind,
@@ -543,7 +556,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             bootstrap_resamples=args.bootstrap_resamples,
             bootstrap_seed=args.bootstrap_seed, progress=_progress)
     else:
-        pool = sorted(DECK_SLUGS)
+        pool = (sorted(DECK_SLUGS) if args.opponents is None
+                else [o.strip() for o in args.opponents.split(",") if o.strip()])
         results = {}
         for i, deck in enumerate(decks):
             results[deck] = run_bot_comparison(
@@ -553,13 +567,14 @@ def main(argv: Sequence[str] | None = None) -> None:
                 candidate_kwargs=candidate_kwargs, opponent_kwargs=opponent_kwargs,
                 config=config, map_id=args.map_id,
                 jobs=args.jobs, bootstrap_resamples=args.bootstrap_resamples,
-                bootstrap_seed=args.bootstrap_seed, config_id=args.config)
+                bootstrap_seed=args.bootstrap_seed, config_id=args.config,
+                log_dir=os.path.join(args.out, "logs"))
             _progress(deck, i + 1, len(decks))
 
     gates = evaluate_gates(results)
     print(f"\nDone in {time.monotonic() - start:.1f}s.", file=sys.stderr)
     print(format_table(results, gates))
-    if len(decks) == len(DECK_SLUGS):
+    if len(decks) == len(DECK_SLUGS) and args.opponents is None:
         print(f"\nArtifacts written to {args.out}/ "
               "(summary.json, per_deck.csv, per_opponent.csv)")
 

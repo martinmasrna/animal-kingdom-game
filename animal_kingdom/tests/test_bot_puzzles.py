@@ -1,4 +1,4 @@
-"""Tactical regression puzzles for GreedyBot: hand-built boards with an objectively-correct
+"""Tactical regression puzzles for the bots: hand-built boards with an objectively-correct
 move, asserted directly (not inferred from aggregate win-rate deltas, which can hide a bot
 that regressed on one obvious tactic while improving on average).
 
@@ -7,7 +7,11 @@ Reuses the constructed-state helpers from test_greedy_bot.py rather than reinven
 
 from __future__ import annotations
 
+import pytest
+
 from animal_kingdom.bots.greedy_bot import GreedyBot, GreedyWeights, evaluate
+from animal_kingdom.bots.referee_bot import RefereeBot
+from animal_kingdom.bots.turn_bot import TurnBot
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import PlaceAction
 
@@ -74,3 +78,24 @@ def test_recognizes_grizzly_bear_delayed_removal_as_better_than_a_vanilla_body()
 
     assert grizzly.scheduled, "Grizzly Bear's roar should schedule the delayed removal"
     assert evaluate(grizzly, "A", W) > evaluate(vanilla_twin, "A", W)
+
+
+@pytest.mark.xfail(strict=True, reason="effect_readiness pays +16 for holding a live Roar, "
+                   "so the search keeps Jerboa in hand rather than spend it (gauntlet, 2026-09-29)")
+@pytest.mark.parametrize("bot_cls", [TurnBot, RefereeBot])
+def test_last_action_spends_an_extra_play_roar(bot_cls):
+    # The turn's last action. Jerboa ("Roar: play another unit") lands two units for one
+    # action; Lion alone lands one and keeps Jerboa in hand. Nothing threatens either line,
+    # so the two-unit play is simply better. From Martin's reverse gauntlet, where RefereeBot
+    # piloting the Roar-heavy decks (Egg, Colony, Cats) kept its effect cards in hand while
+    # he played them.
+    deck = ["lion"] * 10
+    s = make_state(hands={"A": ["jerboa", "lion", "tiger", "lynx", "caracal", "cheetah"],
+                          "B": ["lion"] * 3},
+                   decks={"A": list(deck), "B": list(deck)})
+    s.actions_taken_this_turn = 1
+    put(s, "1,2", "mouse", "A")
+    put(s, "3,2", "lion", "B")
+
+    chosen = bot_cls(seed=0).choose(s.view_for("A"), rules.legal_actions(s), s)
+    assert chosen.card_id == "jerboa"

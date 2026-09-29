@@ -60,10 +60,11 @@ class RefereeBot(TurnSearcher):
                  staged: bool = True, root_width: int = 5,
                  reply_width: int = 4,
                  max_search_nodes: Optional[int] = 1_000,
-                 evaluator: Optional[LinearEval] = None):
+                 evaluator: Optional[LinearEval] = None,
+                 quiesce: bool = False):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
-                         evaluator=evaluator)
+                         evaluator=evaluator, quiesce=quiesce)
         self.staged = staged
         self.root_width = root_width
         self.reply_width = reply_width
@@ -189,7 +190,8 @@ class RefereeBot(TurnSearcher):
             for index, action in enumerate(candidates):
                 branches = self._branches_after_action(
                     worlds, action, me, complete_turn=False)
-                score = self._mean_planning_score(branches, me)
+                score = self._mean_planning_score(
+                    [(self._settled(state, me), penalty) for state, penalty in branches], me)
                 scored.append((score, -index, action))
         finally:
             self._screening = False
@@ -272,7 +274,7 @@ class RefereeBot(TurnSearcher):
         for index, action in enumerate(candidates):
             nxt = state.clone()
             rules.apply_action(nxt, action, validate=False)
-            score = self._planning_eval(nxt, me)
+            score = self._planning_eval(self._settled(nxt, me), me)
             scored.append((score, -index, action))
             if (isinstance(action, PlaceAction)
                     and state.cards[action.card_id].has_roar

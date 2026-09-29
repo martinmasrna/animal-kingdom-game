@@ -87,7 +87,8 @@ class TurnSearcher(Bot):
                  determinizations: int = 3, beam_width: int = 8,
                  deck_reveal_choice_width: int = 0,
                  max_search_nodes: Optional[int] = None,
-                 evaluator: Optional[LinearEval] = None):
+                 evaluator: Optional[LinearEval] = None,
+                 quiesce: bool = False):
         self.weights = weights or GreedyWeights()
         # RNG only breaks exact score ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
@@ -118,6 +119,11 @@ class TurnSearcher(Bot):
         # this is the tuned frontier. No honesty change; only fires deeper than the root, where
         # the real revealed cards are known.
         self.deck_reveal_choice_width = deck_reveal_choice_width
+        # Quiescent pruning: score a pruning candidate only after my own sub-choices it opened
+        # (a target, a card to keep, an extra placement) are resolved by the greedy policy.
+        # Without it, a card like "Roar: play another unit" is ranked by its half-played state
+        # (one card spent, nothing gained yet) and cut before the search ever sees its payoff.
+        self.quiesce = quiesce
 
     def choose(
         self,
@@ -444,6 +450,8 @@ class TurnSearcher(Bot):
         score = self._clamped_eval(state, me)
         if state.result is not None or state.current == me:
             return score
+        if self.evaluator is None and not self.weights.effect_readiness:
+            return score
         if self.evaluator is not None:
             # Learned path: `effect_readiness` is already a feature inside phi, so simply
             # re-evaluating the reframed state at my next top-level decision subsumes the
@@ -461,6 +469,31 @@ class TurnSearcher(Bot):
 
     # ------------------------------------------------------------------ pruning
 
+    def _settled(self, state: GameState, me: str) -> GameState:
+        """`state` with my open sub-choices resolved by the greedy policy (a clone if any
+        were open), for pruning scores. Stops at my next top-level decision, the opponent's
+        turn, or a terminal state. Identity when quiescence is off."""
+        if not self.quiesce:
+            return state
+        settled = None
+        for _ in range(_MAX_DEPTH):
+            current = settled or state
+            if (current.pending is None or current.result is not None
+                    or current.player_to_act() != me):
+                break
+            legal = rules.legal_actions(current)
+            if not legal:
+                break
+            if settled is None:
+                settled = state.clone()
+                current = settled
+            action = self._policy.choose(current.view_for(me), legal, current)
+            rules.apply_action(current, action, validate=False)
+        return settled or state
+
+    def _pruning_eval(self, state: GameState, me: str) -> float:
+        return self._clamped_eval(self._settled(state, me), me)
+
     def _beam(self, world: GameState, legal: list[Action], me: str) -> list[Action]:
         """Prune to the `beam_width` most promising candidates by 1-ply eval on a sampled
         world (never the real state).
@@ -475,7 +508,7 @@ class TurnSearcher(Bot):
         for i, action in enumerate(legal):
             nxt = world.clone()
             rules.apply_action(nxt, action, validate=False)
-            scored.append((self._clamped_eval(nxt, me), -i, action))
+            scored.append((self._pruning_eval(nxt, me), -i, action))
         scored.sort(reverse=True)   # -i: stable toward `legal`'s deterministic order
         score_of = {action: score for score, _, action in scored}
         reserved: set[Action] = {
@@ -543,7 +576,7 @@ class TurnSearcher(Bot):
         for i, action in enumerate(legal):
             nxt = world.clone()
             rules.apply_action(nxt, action, validate=False)
-            scored.append((self._clamped_eval(nxt, me), -i, action))
+            scored.append((self._pruning_eval(nxt, me), -i, action))
         scored.sort(reverse=True)
         return [action for _, _, action in scored[:n]]
 

@@ -135,9 +135,15 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
     through the same `extra` kwarg seam every other bot variant uses. `load_eval` is called
     in-worker (this function runs inside the ProcessPoolExecutor worker via `_run_spec`), so
     only the eval *name* needs to be picklable on `MatchSpec` - not the loaded LinearEval.
+
+    An `extra` key `w.<field>` overrides one eval weight instead of a constructor kwarg, so
+    `referee:w.effect_readiness=0` A/Bs a weight change through the same seam.
     """
     kind = kind.strip().lower()
     extra = dict(extra or {})
+    overrides = {k[2:]: extra.pop(k) for k in list(extra) if k.startswith("w.")}
+    if overrides:
+        weights = replace(weights or GreedyWeights(), **overrides)
     if kind in LEARNED_BASE_KIND:
         eval_name = extra.pop("eval", DEFAULT_LEARNED_EVAL)
         extra["evaluator"] = load_eval(eval_name)
