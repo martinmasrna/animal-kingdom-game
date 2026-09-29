@@ -240,10 +240,11 @@
 .coll .ddo:hover { background: rgba(255,245,230,.1); }
 /* (5) Cards fade out as they scroll under the header instead of being cut. */
 .coll .cgrid { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px); mask-image: linear-gradient(to bottom, transparent 0, #000 16px); padding-top: 16px; }
-/* (6) Tighter grid, closer to the edges: the art does the separating. */
-.coll .chead { padding: 0 16px; }
-.coll .cgrid { padding-left: 16px; padding-right: 16px; }
-.coll .crow { gap: 10px; }
+/* (6) The deck list, tighter (as Hearthstone's): strips close together, little margin either side. */
+.coll .clist.editing { padding-left: 12px; padding-right: 12px; }
+.coll .dbody { padding: 8px 4px 6px; }
+.coll .dbody .st { margin-bottom: 2px; height: 28px; }
+.coll .rh { margin: 8px 4px 3px; }
 /* (7) Play is always there with an open deck; under 30 cards it is stone, not blue, and does nothing. */
 .coll .play { border: 0; width: 100%; }
 .coll .play:disabled { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; color: #8f8577; text-shadow: none; filter: saturate(.3) brightness(.8); }
