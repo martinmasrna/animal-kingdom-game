@@ -1,15 +1,14 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
-import { renderBoard, portrait, kitImg, teamGem } from './board.js';
 import { hasArt, artUrl } from './art.js';
 import { cardHTML } from './card.js';
-import { renderBoard as renderBox, STAGE, PAINT, crossroadAt } from './box.js';
+import { renderBoard, STAGE, crossroadAt } from './board.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const COVER = { cats_midrange: 'king_theron', canine_buff_tempo: 'lobo', aggro_hq_rush: 'verminus', colony_food_swarm: 'queen_honoria',
   egg_control: 'eon', food_otk: 'rat_king', ramp: 'borealis' };
 const RANK = { legendary: 0, rare: 1, common: 2 };
-const COL = { A: 'var(--you)', B: 'var(--them)' };   // history tiles; box.css maps them onto its team colours
+const COL = { A: 'var(--A)', B: 'var(--B)' };   // history tiles in team colour
 const SKIP = '__skip__';
 const artStyle = id => hasArt(id) ? `style="background-image:url(${artUrl(id)})"` : '';
 const sv = c => c.str === '*' ? -1 : c.str;
@@ -19,8 +18,6 @@ const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } ca
 const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } catch { /* private mode: the tab just can't reconnect */ } };
 
 let CARDS = {}, MAP, DECKS = [];
-// The game screen: the grey-box layout (box.js, the one being built toward), or the old painted kit with ?look=painted.
-const BOX = new URLSearchParams(location.search).get('look') !== 'painted';
 let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, hover: null, peek: false, menu: false, panel: null };
 
@@ -234,12 +231,8 @@ function collectionScreen() {
 
 // ------------------------------------------------------------------ match connection
 function disconnect() { if (live) setLive(false); if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
-// The live look, Martin's picks (2026-09-28): painted map D, sandstone payout stones with engraved numbers,
-// war paint in team colour on each den (proposed, pending his look), bigger hand cards that grow on hover. The lab overrides these per frame.
-const LIVE_LOOK = { v: 'sN2', p: '1', d: 'w', h: '1', f: 'o', t: '1', k: '1', m: 'S', sp: 'B', c: '1' };
 
 function matchScreen(id) {
-  if (!BOX) Object.assign(document.documentElement.dataset, LIVE_LOOK);
   const token = getToken(id);
   if (!token) { location.hash = '#/join/' + id; return; }
   if (wsId === id && ws) return;
@@ -274,24 +267,11 @@ function onView(prev) {
   gameScreen();
 }
 
-// Design lab: #/lab/<name>?v=<variant> renders the frozen view static/lab/<name>.json with a design variant
-// (data-v on <html>, read by app.css and board.js). No server match; nothing can be played.
+// Lab: #/lab/<name> renders the frozen view static/lab/<name>.json (no server match; nothing can be played).
+// The browser tests start here and feed recorded views through window.__ak.feed.
 async function labScreen(name) {
-  const q = new URLSearchParams(location.search), de = document.documentElement.dataset;
-  if (!BOX) for (const k of ['v', 'p', 'd', 'h', 'f', 't', 'k', 'm', 'sp', 'pv', 'g', 'z', 'c']) de[k] = q.has(k) ? q.get(k) : (LIVE_LOOK[k] || '');
   V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
-  screen = null; gameScreen(); if (!BOX) labBar();
-}
-// A switcher over the lab frame: each row flips one design choice live.
-// Only the open questions; decided ones live in LIVE_LOOK.
-const LAB = [['v', 'Map', [['sD', 'old map'], ['sN', 'new map'], ['sN2', 'new map, small clearings']]]];
-addEventListener('keydown', e => { if ((e.key === 'b' || e.key === 'B') && document.getElementById('labbar')) document.getElementById('labbar').classList.toggle('hide'); });
-function labBar() {
-  let bar = document.getElementById('labbar'); if (!LAB.length) { if (bar) bar.remove(); return; }
-  if (!bar) { bar = document.createElement('div'); bar.id = 'labbar'; bar.className = 'labbar'; document.body.appendChild(bar); }
-  const de = document.documentElement.dataset;
-  bar.innerHTML = LAB.map(([k, title, opts]) => `<div><b>${title}</b>${opts.map(([v, l]) => `<span class="${(de[k] || '') === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${l}</span>`).join('')}</div>`).join('');
-  bar.querySelectorAll('span').forEach(el => el.onclick = () => { de[el.dataset.k] = el.dataset.v; screen = null; gameScreen(); labBar(); });
+  screen = null; gameScreen();
 }
 
 function lobbyScreen() {
@@ -325,45 +305,6 @@ function prematchScreen() {
   wirePops(app);
 }
 
-// ------------------------------------------------------------------ game screen
-function gameScreen() {
-  if (BOX) return boxScreen();
-  if (screen !== 'game') {
-    screen = 'game';
-    // Everything lives on one stage drawn at the kit's native 1672x941 and scaled to the window (fitStage).
-    app.innerHTML = `<div class="screen" id="scr"><div id="stage">
-      <img class="layer" src="/static/kit/surround.jpg" alt=""><img class="layer" src="/static/kit/plateau.webp" alt="">
-      <div id="board"></div>
-      <div class="plq me" id="pa" data-panel="mine"></div><div class="plq them" id="pb" data-panel="theirs"></div>
-      <div class="plq series" id="series" data-panel="hist"></div>
-      <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
-      <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
-      <div class="menu" id="menubtn">${kitImg('button')}<span class="num">☰</span><span class="livedot" id="livedot" title="Live commentary on"></span>
-        <div class="menudrop" id="menudrop"><a href="#" id="livelink">Live commentary (L)</a><a href="#" id="notelink">Add a note (N)</a><a href="#/">Leave match</a></div></div>
-      <div class="turn" id="turn"></div>
-      <div class="hand" id="hand"></div>
-      <div class="deck" id="deck"></div>
-      <div class="prompt" id="choicebar"></div>
-      <div class="waiting num" id="waiting"></div>
-      <div class="zoom" id="zoom"></div>
-      <div class="endov" id="endov"></div></div></div>`;
-    fitStage(); applyInfo();
-    wireNotes();
-    const menubtn = document.getElementById('menubtn');
-    menubtn.onclick = e => { e.stopPropagation(); document.getElementById('menudrop').classList.toggle('on'); };
-    document.getElementById('livelink').onclick = e => { e.preventDefault(); e.stopPropagation(); document.getElementById('menudrop').classList.remove('on'); setLive(!live); };
-    document.getElementById('notelink').onclick = e => { e.preventDefault(); e.stopPropagation(); document.getElementById('menudrop').classList.remove('on'); openNote(); };
-    // The player plaques and the series plaque open the decklists and the history; one panel at a time.
-    app.querySelectorAll('[data-panel]').forEach(el => el.onclick = e => { e.stopPropagation(); ui.panel = ui.panel === el.dataset.panel ? null : el.dataset.panel; showPanel(); });
-    app.querySelectorAll('.panel').forEach(el => el.onclick = e => e.stopPropagation());
-    const scr = document.getElementById('scr');
-    scr.addEventListener('click', () => { document.getElementById('menudrop').classList.remove('on'); if (ui.panel) { ui.panel = null; showPanel(); } });
-    scr.addEventListener('scroll', () => { scr.scrollTop = 0; scr.scrollLeft = 0; });   // hover lifts must never scroll the screen
-    wireBoard();
-  }
-  drawGame();
-}
-
 // Viewer space: you are always 'A' on the left; the server's seats are mapped through these.
 const opp = () => V.you === 'A' ? 'B' : 'A';
 const rel = p => p === V.you ? 'A' : 'B';
@@ -392,106 +333,7 @@ function decision() {
   return d;
 }
 
-function drawGame() {
-  if (!V || !V.game) return;
-  if (BOX) return drawBox();
-  const G = V.game, you = V.you, them = opp(), d = decision();
-  const scr = document.getElementById('scr');
-  scr.classList.toggle('choosing', !!(d.pend && d.pend.mode === 'choice'));
-
-  // Series + history + removed.
-  const gameNo = V.phase === 'playing' ? V.results.length + 1 : V.results.length;
-  const dots = [0, 1, 2].map(i => { const r = V.results[i]; return `<i class="${r ? (r.winner ? rel(r.winner) : '') : i === gameNo - 1 ? 'now' : ''}"></i>`; }).join('');
-  const series = V.gauntlet ? `Game ${gameNo} of ${V.gauntlet.total}` : `Game ${gameNo} of 3 <span class="games">${dots}</span>`;
-  document.getElementById('series').innerHTML = kitImg('plaque') + `<div class="tx"><b class="num">${series}</b><span>vs ${seatLabel(them)}</span></div>`;
-  drawHistory(G);
-
-  // Player plaques (each opens that player's decklist) and the turn banner with its action gems.
-  const sum = o => Object.values(o).reduce((a, b) => a + b, 0);
-  const backs = `<span class="backs" title="Cards in their hand">${'<i></i>'.repeat(G.handCount[them])}</span>`;
-  document.getElementById('pa').innerHTML = kitImg('plaque') + `<div class="tx"><b class="num">${seatLabel(you)}</b><span>${V.seats[you].deckName} · deck ${sum(G.deckLeft)} ▾</span></div>`;
-  document.getElementById('pb').innerHTML = kitImg('plaque') + `<div class="tx"><b class="num">${seatLabel(them)}</b><span>${V.seats[them].deckName} · ${sum(G.unseen)} unseen ▾ ${backs}</span></div>`;
-  const turn = document.getElementById('turn'), cur = G.current;
-  if (V.phase === 'playing') {
-    const gems = Array.from({ length: G.actionsTotal }, (_, i) => `<span class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}">${kitImg(teamGem(rel(cur)))}</span>`).join('');
-    turn.innerHTML = kitImg('banner') + `<div class="tx"><b class="num">${cur === you ? 'Your turn' : 'Their turn'}</b><span class="acts">${gems}</span></div>`;
-    turn.className = 'turn ' + rel(cur);
-  } else turn.innerHTML = '';
-  drawLists(G);
-  showPanel();
-
-  // Hand: full-bleed cards along the bottom ledge, overlapping when the hand is long.
-  const hand = document.getElementById('hand'), n = G.hand.length, cw = document.documentElement.dataset.h ? 180 : 150, gap = n > 1 ? Math.min(14, (1000 - n * cw) / (n - 1)) : 0;
-  hand.innerHTML = G.hand.map((h, i) => {
-    const c = CARDS[h.id], can = d.mine && !d.handPick.size && d.places[h.id], pick = d.handPick.has(h.iid);
-    const base = sv(c), cls = [c.rarity, can ? 'can' : '', pick ? 'pick can' : '', h.id === ui.sel ? 'sel' : '', d.mine && !can && !pick ? 'dim' : ''].join(' ');
-    const delta = base >= 0 && h.str !== base ? (h.str > base ? ' up' : ' down') : '';
-    return `<div class="hc ${cls}" data-iid="${h.iid}" data-id="${h.id}" style="margin-left:${i ? gap : 0}px;--i:${i - (n - 1) / 2}">${cardHTML(c, { str: h.str })}</div>`;
-  }).join('');
-  // Hand variant 2 (Gwent): hovering a card shows it large in a fixed panel at the right.
-  const zoom = document.getElementById('zoom');
-  hand.querySelectorAll('.hc').forEach(el => {
-    el.onmouseenter = () => { if (document.documentElement.dataset.h !== '2') return; const c = CARDS[el.dataset.id];
-      zoom.className = 'zoom on ' + c.rarity;
-      zoom.innerHTML = cardHTML(c); };
-    el.onmouseleave = () => zoom.classList.remove('on');
-  });
-  hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
-    e.stopPropagation();
-    const iid = Number(el.dataset.iid), id = el.dataset.id;
-    if (d.handPick.has(iid)) return act({ kind: 'choice', choice: iid });
-    if (!d.mine || !d.places[id]) return;
-    ui.sel = ui.sel === id ? null : id; ui.hover = null; drawGame();
-  });
-
-  // Deck and the Draw 2 button, lit when drawing is legal.
-  const canDraw = d.mine && !d.pend && G.legal.draw;
-  const deck = document.getElementById('deck');
-  deck.innerHTML = `<div class="pile">${kitImg('deck')}<span class="num">${G.deckCount[you]}</span></div>` +
-    `<div class="drawbtn ${canDraw ? 'can' : d.mine ? 'off' : 'wait'}" id="drawbtn">${kitImg(canDraw ? 'button_lit' : 'button')}<span class="num">` +
-    (V.phase === 'playing' && G.current !== you ? `<span class="their">Their<br>turn</span>` : `Draw 2<small>hand ${G.hand.length}/${G.handLimit}</small>`) +
-    `</span><span class="gems">${V.phase === 'playing' && G.current === you ? Array.from({ length: G.actionsTotal }, (_, i) => `<i class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}">${kitImg(teamGem('A'))}</i>`).join('') : ''}</span></div>`;
-  document.getElementById('drawbtn').onclick = e => { e.stopPropagation(); if (canDraw) act({ kind: 'draw' }); };
-  // End the turn early: only after the first action (rules.can_pass), quiet and secondary.
-  if (d.mine && !d.pend) {
-    deck.insertAdjacentHTML('beforeend', `<div class="endturn ${G.canPass ? 'can' : 'off'}" id="endturn" title="${G.canPass ? 'End your turn now' : 'Take your first action first'}">${kitImg('button')}<span class="num">End <br>turn</span></div>`);
-    document.getElementById('endturn').onclick = e => { e.stopPropagation(); if (G.canPass) act({ kind: 'pass' }); };
-  }
-
-  // Prompt for a pending choice: the card that asks and its rule, nothing more.
-  const bar = document.getElementById('choicebar'), waiting = document.getElementById('waiting');
-  waiting.textContent = '';
-  if (d.pend && d.pend.kind === 'mulligan') {
-    const n = d.pend.returned;
-    bar.innerHTML = `<div><b>Mulligan · ${n} of ${d.pend.cap} replaced</b><div class="q">Click a card to replace it; no copy of a card you replace can come back</div></div><span class="skip" id="skip">${n ? 'Done' : 'Keep hand'}</span>`;
-    bar.classList.add('on');
-    document.getElementById('skip').onclick = () => act({ kind: 'choice', choice: SKIP });
-  } else if (d.pend) {
-    const src = d.pend.source && CARDS[d.pend.source];
-    const head = src ? `<div class="th gradart" ${artStyle(src.id)}><span>${src.str}</span></div><div><b>${src.name}</b><div class="q">${src.text}</div></div>` : `<div><b>Choose</b></div>`;
-    const opts = d.cardOpts.length || d.otherOpts.length ? `<div class="opts">${d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="oc" data-o="${i}">${cardHTML(c)}</div>`; }).join('')}${d.otherOpts.map((o, i) => `<span class="skip" data-x="${i}">${o.label}</span>`).join('')}</div>` : '';
-    bar.innerHTML = head + opts + (d.pend.optional ? `<span class="skip" id="skip">Skip</span>` : '');
-    bar.classList.add('on');
-    bar.querySelectorAll('[data-o]').forEach(el => el.onclick = () => act({ kind: 'choice', choice: d.cardOpts[el.dataset.o].v }));
-    bar.querySelectorAll('[data-x]').forEach(el => el.onclick = () => act({ kind: 'choice', choice: d.otherOpts[el.dataset.x].v }));
-    const sk = document.getElementById('skip'); if (sk) sk.onclick = () => act({ kind: 'choice', choice: SKIP });
-  } else {
-    bar.classList.remove('on');
-    if (V.phase === 'playing' && G.opponentChoosing) waiting.textContent = G.history.length ? 'Opponent is choosing' : 'Opponent is mulliganing';
-  }
-  // A bot can think for several seconds (Expert, under load): say so rather than look frozen.
-  clearTimeout(drawGame.think);
-  if (V.phase === 'playing' && G.toAct === them && V.seats[them].bot) {
-    const ver = V.version;
-    drawGame.think = setTimeout(() => { if (V && V.version === ver && screen === 'game') waiting.textContent = 'Bot is thinking'; }, 2500);
-  }
-
-  drawBoard(d);
-  drawEnd();
-}
-
-
-// ------------------------------------------------------------------ game screen, grey-box layout (box.js)
+// ------------------------------------------------------------------ game screen
 // Hover text in the box screen sits on a small dark plaque by the pointer, never in a browser tooltip.
 function wireTips(root) {
   let tip = document.getElementById('tip');
@@ -501,10 +343,10 @@ function wireTips(root) {
   root.addEventListener('mousemove', e => { tip.style.left = (e.clientX + 14) + 'px'; tip.style.top = (e.clientY + 16) + 'px'; });
   root.addEventListener('mouseleave', () => tip.style.display = 'none');
 }
-function boxScreen() {
+function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
-    app.innerHTML = `<div class="bx${PAINT ? ' paint' : ''}" id="scr"><div id="stage">
+    app.innerHTML = `<div class="bx paint" id="scr"><div id="stage">
       <div id="board"></div>
       <div class="abs series" id="series"></div>
       <div class="abs opphand" id="opphand"></div>
@@ -539,7 +381,7 @@ function boxScreen() {
   drawGame();
 }
 
-function drawBox() {
+function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
   lastDecision = d;
@@ -657,11 +499,10 @@ function showPanel() {
   for (const [k, id] of [['mine', 'mine'], ['theirs', 'theirs'], ['hist', 'histp']]) document.getElementById(id).classList.toggle('on', ui.panel === k);
   if (ui.panel === 'hist') { const h = document.getElementById('hist'); h.scrollTop = h.scrollHeight; }
 }
-// The stage keeps its 1672x941 design size and scales, letterboxed, to the window.
+// The stage keeps its design size (STAGE) and scales, letterboxed, to the window.
 function fitStage() {
   const st = document.getElementById('stage'); if (!st) return;
-  const [w, h] = BOX ? [STAGE.w, STAGE.h] : [1672, 941];
-  st.style.transform = `scale(${Math.min(innerWidth / w, innerHeight / h)}) translate(-50%, -50%)`;
+  st.style.transform = `scale(${Math.min(innerWidth / STAGE.w, innerHeight / STAGE.h)}) translate(-50%, -50%)`;
 }
 
 function moveLine(m) {
@@ -705,12 +546,8 @@ function drawBoard(d) {
     const strs = V.game.hand.filter(h => h.id === ui.sel).map(h => h.str);
     preview = { cr: ui.hover, id: ui.sel, str: Math.max(...strs) };
   }
-  const H = V.game.history, recent = [];
-  for (let i = H.length - 1; i >= 0 && H[i].seat !== V.you; i--) if (H[i].target && H[i].target[0] === 'cr') recent.push(dcr(H[i].target[1]));
-  if (BOX) { const A = ui.anim; ui.anim = null;   // the landing plays once, never on hover redraws
-    return renderBox(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, anim: A, current: V.phase === 'playing' ? rel(V.game.current) : null }); }
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, recent, enamel: store('ak:rim') !== 'metal', anim: ui.anim });
-  ui.anim = null;   // animations play once, never on hover redraws
+  const A = ui.anim; ui.anim = null;   // the animations play once, never on hover redraws
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, anim: A, current: V.phase === 'playing' ? rel(V.game.current) : null });
 }
 
 function wireBoard() {
@@ -754,9 +591,8 @@ function stackAt(cr) {
     return `<div class="sc ${u.owner}">${cardHTML(c, { str: top ? u.str : c.str, attrs: `style="--w:${w}px"` })}` +
       (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `</div>`; };
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
-  const cap = t => BOX ? '' : `<div class="cap">${t}</div>`;   // the box screen shows order by size alone: top card first, larger
-  stackpop.innerHTML = `<div class="stk">${cap('On top')}${card(top, 190, true)}</div>` +
-    buried.map((u, i) => `<div class="stk">${cap(i === 0 ? 'Under it' : '')}${card(u, 150)}</div>`).join('');
+  stackpop.innerHTML = `<div class="stk">${card(top, 190, true)}</div>` +
+    buried.map((u, i) => `<div class="stk">${card(u, 150)}</div>`).join('');
   stackpop.style.display = 'flex';
   const r = g.getBoundingClientRect(), w = stackpop.offsetWidth, h = stackpop.offsetHeight;
   stackpop.style.left = (r.right + 8 + w > innerWidth ? r.left - 8 - w : r.right + 8) + 'px';
@@ -874,22 +710,6 @@ addEventListener('keydown', e => {
 addEventListener('keydown', e => {
   if ((e.key === 'n' || e.key === 'N') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
     e.preventDefault(); openNote();
-  }
-});
-
-// I cycles the strength of the information layer (team colour over the painted kit), remembered per browser.
-const INFO = ['info-lo', 'info-mid', 'info-hi'];
-function applyInfo() { const st = document.getElementById('stage'); if (st) { st.classList.remove(...INFO); st.classList.add(store('ak:info') || 'info-mid'); } }
-addEventListener('keydown', e => {
-  if ((e.key === 'i' || e.key === 'I') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
-    const cur = store('ak:info') || 'info-mid'; store('ak:info', INFO[(INFO.indexOf(cur) + 1) % 3]); applyInfo(); toast(`Information layer: ${store('ak:info').slice(5)}`, true);
-  }
-});
-
-// R swaps the unit rims between plain metal and team-colour enamel (a look being judged).
-addEventListener('keydown', e => {
-  if ((e.key === 'r' || e.key === 'R') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
-    store('ak:rim', store('ak:rim') === 'metal' ? 'enamel' : 'metal'); drawBoard(); toast(`Rims: ${store('ak:rim')}`, true);
   }
 });
 
