@@ -20,7 +20,7 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Fathom** | 1 | — | 4 | Battlecry: draw a legendary unit. |
+| **Fathom** | 1 | — | 7 | Battlecry: draw a legendary unit. |
 | **Greywhisker** | 1 | Rodent | 1 | Battlecry: gain 1 food. Draw 1 card. You may play 1 more unit. |
 | **Barley, the Rat King** | 1 | Rodent | 4 | Battlecry: gain 4 food for each other Rodent you control. Draw 1 card. |
 | **Scrooge, Keeper of the Stash** | 1 | Rodent | 4 | Battlecry: gain food equal to the food you gained this turn. |
@@ -32,7 +32,7 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 | **Flying Squirrel** | 2 | Rodent | 3 | Flight. Battlecry: gain 10 food. |
 | **Porcupine** | 2 | Rodent | 7 | Cannot be covered by enemies. |
 | **Chinchilla** | 2 | Rodent | 4 | Battlecry: next turn, take 1 additional action. |
-| **Armadillo** | 2 | — | 5 | Immovable. Adjacent friendly units can't be chosen by enemy abilities. |
+| **Armadillo** | 2 | — | 7 | Immovable. Adjacent friendly units can't be chosen by enemy abilities. |
 
 ### Common
 

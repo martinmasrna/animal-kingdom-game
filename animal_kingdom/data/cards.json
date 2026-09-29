@@ -672,7 +672,7 @@
       "deck": "food_otk",
       "rarity": "legendary",
       "tags": [],
-      "base_strength": 4,
+      "base_strength": 7,
       "keywords": [],
       "text": "Battlecry: draw a legendary unit."
     },
@@ -742,7 +742,7 @@
       "deck": "food_otk",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 5,
+      "base_strength": 7,
       "keywords": ["Immovable"],
       "text": "Immovable. Adjacent friendly units can't be chosen by enemy abilities."
     },
