@@ -123,6 +123,21 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .st .x { display: flex; gap: 3px; justify-content: flex-end; width: auto; padding-right: 8px; } .st .x i { width: 7px; height: 7px; filter: drop-shadow(0 1px 1px #000); }
 .bar .back.ic { width: 36px; height: 36px; margin-right: 6px; border: 0; }
 .bar .back.ic::after { top: calc(100% + 6px); bottom: auto; left: 0; right: auto; z-index: 30; }
+/* Header as one system: 72px row, the grid's 24px edges, every control 40px on one centre line, search fills the middle. */
+.gb { grid-template-rows: 72px 1fr; }
+.bar { padding: 0 24px; gap: 10px; }
+.bar .back.ic { width: 40px; height: 40px; margin: 0 2px 0 -8px; }
+.tabs { gap: 6px; }
+.tab { padding: 0; border-radius: 50%; background: none !important; }
+.tab .med, .tab.all .med { width: 40px; height: 40px; border: 2px solid #44484c; box-sizing: border-box; }
+.tab:hover .med { border-color: #8b8e92; }
+.tab.on .med { border-color: #f0ece4; box-shadow: 0 0 0 2px #16181a, 0 0 0 4px #f0ece4; }
+.bar .gap { display: none; }
+.bar .search { flex: 1 1 auto; width: auto; min-width: 140px; margin: 0 0 0 14px; }
+.bar .search, .bar .strsel { height: 40px; box-sizing: border-box; }
+.bar .strsel { margin: 0; }
+.decks { padding-top: 4px; }
+.cgrid { padding-top: 8px; }
 </style></head><body>
 <div class="gb" id="gb"></div><div id="modal"></div><div id="toast2"></div><div class="pop" id="pop"></div>
 
