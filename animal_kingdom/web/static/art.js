@@ -9,9 +9,9 @@ export const CROP = {
   chameleon: [.68, .3, .55], cheetah: [.7, .42, .6], falcon: [.66, .5, .6], gale: [.62, .38, .75], gray_wolf: [.65, .3, .6],
   hippopotamus: [.45, .25, .8], hornet: [.5, .3, .7], jerboa: [.65, .32, .65], king_theron: [.55, .3, .62],
   lemming: [.52, .45, .62], mouse: [.55, .28, .55], pestis: [.55, .3, .6], prince_leo: [.66, .29, .5],
-  princess_lea: [.4, .3, .65], queen_adira: [.55, .3, .62], rat: [.58, .32, .62], serval: [.4, .2, .6],
+  princess_lea: [.4, .3, .65], queen_adira: [.55, .3, .62], rat: [.58, .32, .62], serval: [.58, .3, .8],
   sirocco: [.45, .52, .75], skunk: [.42, .45, .75], sloth: [.42, .36, .6], snow_leopard: [.5, .28, .66],
-  squirrel: [.62, .4, .7], verminus: [.6, .28, .65], worker_ant: [.52, .42, .8],
+  squirrel: [.62, .4, .7], verminus: [.6, .28, .65], worker_ant: [.55, .38, .75],
   eagle: [.56, .42, .62], owl: [.57, .25, .55], raven: [.64, .44, .7], goliath: [.55, .5, .62], rattlesnake: [.52, .36, .55],
   viper: [.65, .38, .6], stoop: [.55, .45, .7], magpie: [.6, .38, .75], black_mamba: [.52, .42, .75], taipan: [.45, .4, .8],
   queen_bee: [.55, .42, .75], guard_hornet: [.45, .4, .72], soldier_ant: [.55, .38, .75], worker_wasp: [.6, .38, .75], worker_bee: [.52, .42, .8],
@@ -28,13 +28,13 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
-  prince_leo: [.7, .28, 1], princess_lea: [.4, .29, 1.5], king_theron: [.62, .22, 1], queen_adira: [.57, .17, 1.2], jaguar: [.7, .36, 1], serval: [.52, .23, 1.3],
+  prince_leo: [.7, .28, 1], princess_lea: [.4, .29, 1.5], king_theron: [.62, .22, 1], queen_adira: [.57, .17, 1.2], jaguar: [.7, .36, 1], serval: [.47, .22, 1.5],
   snow_leopard: [.55, .32, 1.3], black_panther: [.7, .43, 1], lion: [.73, .28, 1], lynx: [.52, .24, 1.3], caracal: [.47, .28, 1.5], tiger: [.82, .54, 1],
   cougar: [.73, .38, 1.1], house_cat: [.43, .37, 1.5], eon: [.62, .29, 1], goliath: [.6, .47, 1.2], ember: [.75, .17, 1.5], aurum: [.6, .2, 1.3],
   rattlesnake: [.53, .35, 1.3], omen: [.6, .28, 1.7], stoop: [.58, .47, 1.8], eagle: [.63, .43, 1.8], owl: [.6, .24, 1.2], taipan: [.6, .3, 1],
   viper: [.63, .35, 1], magpie: [.73, .34, 1.7], black_mamba: [.58, .3, 1], raven: [.77, .47, 1.7], queen_marabunta: [.8, .53, 1.7], vesper: [.66, .47, 1.1],
   queen_honoria: [.78, .25, 1.8], falstaff: [.72, .42, 1], nurse_bee: [.6, .4, 1.3], nurse_bumblebee: [.65, .4, 1.1], termite_king: [.73, .47, 1], termite_queen: [.45, .37, 1],
-  queen_bee: [.65, .42, 1.3], guard_hornet: [.43, .4, 1], soldier_ant: [.55, .34, 1.3], worker_ant: [.6, .56, 1.7], worker_wasp: [.62, .4, 1.1], worker_bee: [.6, .42, 1.2],
+  queen_bee: [.65, .42, 1.3], guard_hornet: [.43, .4, 1], soldier_ant: [.55, .34, 1.3], worker_ant: [.52, .32, 1], worker_wasp: [.62, .4, 1.1], worker_bee: [.6, .42, 1.2],
   methuselah: [.62, .33, 1], borealis: [.83, .17, 1], bulwark: [.62, .31, 1], cairn: [.8, .38, 1], polar_bear: [.52, .32, 1.3], rhinoceros: [.68, .42, 1],
   hippopotamus: [.55, .15, 1], andean_condor: [.57, .35, 1.8], elephant: [.68, .28, 1], grizzly_bear: [.72, .3, 1], oxpecker: [.7, .18, 1.8], black_bear: [.38, .28, 1.5],
   sloth: [.57, .43, 1.3], cape_buffalo: [.6, .34, 1], fathom: [.48, .33, 1], greywhisker: [.36, .29, 1.5], rat_king: [.55, .16, 1.3], scrooge: [.55, .24, 1.3],
