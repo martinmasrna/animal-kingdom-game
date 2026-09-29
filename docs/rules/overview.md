@@ -10,7 +10,7 @@ This document describes a proposed fast-paced strategy game set in a theme of An
 
 A player wins immediately by either: (a) placing a unit on an enemy headquarters; or (b) collecting the required number of food
 
-The game can also end through exhaustion if a player can neither draw nor place a unit.
+The game can also end through exhaustion if a player can neither draw nor place a unit, or when both players end a turn without acting, back to back.
 
 ---
 
@@ -71,7 +71,7 @@ Players alternate turns. On a turn, the active player performs **two actions**; 
 1. **Draw 2 cards**
 2. **Place one unit**
 
-The turn ends after two actions, or earlier if no legal action remains. After their first action, a player may also end their turn early, declining the rest. Some troop effects can allow additional placements or draws during the same turn (these are free — they do not consume an action). When taking the place action:
+The turn ends after two actions, or earlier if no legal action remains. A player may also end their turn early, declining the rest, even before taking any action. If both players end a turn without taking an action, one right after the other, the game ends as in exhaustion (§11.3): the player with more food wins, and on a tie the player who passed last loses. Some troop effects can allow additional placements or draws during the same turn (these are free — they do not consume an action). When taking the place action:
 
 1. Choose one unit from the rack.
 2. Choose a legal placement.

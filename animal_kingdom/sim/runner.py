@@ -35,7 +35,7 @@ class GameRecord:
     seed: int
     first_player: str        # "A" / "B" (coin-flipped from the seed)
     winner: Optional[str]    # "A" / "B" / None (draw)
-    reason: str              # "hq_capture" | "food" | "exhaustion" | "max_turns"
+    reason: str              # "hq_capture" | "food" | "exhaustion" | "passes" | "max_turns"
     turns: int
     cards_drawn_a: frozenset[str] = frozenset()
     cards_drawn_b: frozenset[str] = frozenset()

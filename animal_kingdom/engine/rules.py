@@ -49,10 +49,9 @@ def legal_actions(state: GameState) -> list[Action]:
 
 
 def can_pass(state: GameState) -> bool:
-    """Ending the turn early is allowed once the turn's first action is taken and nothing is resolving.
+    """Ending the turn early, even before any action, is allowed while nothing is resolving.
     It is kept out of legal_actions: an empty legal list still means exhaustion, and bots never pass."""
-    return (state.result is None and state.pending is None and not state.effect_stack
-            and state.actions_taken_this_turn >= 1)
+    return state.result is None and state.pending is None and not state.effect_stack
 
 
 def _top_level_actions(state: GameState) -> list[Action]:
@@ -76,7 +75,7 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
         raise EngineError("cannot act: the game is over")
     if isinstance(action, PassAction):
         if not can_pass(state):
-            raise EngineError("cannot end the turn before its first action, or mid-resolution")
+            raise EngineError("cannot end the turn mid-resolution")
         _end_turn(state)
         return state
     if validate and action not in legal_actions(state):
@@ -128,6 +127,12 @@ def _end_turn(state: GameState) -> None:
     _produce_food(state, player)            # end-of-turn region income
     if state.result is not None:
         return  # food win
+    # Both players ending a turn without acting, back to back, ends the game as exhaustion does
+    # (more food wins; on a tie, the player whose pass ended it loses).
+    state.idle_turns = state.idle_turns + 1 if state.actions_taken_this_turn == 0 else 0
+    if state.idle_turns >= 2:
+        state.result = _resolve_exhaustion(state, "passes")
+        return
     state.turn_counter += 1
     state.units_placed_this_turn = 0
     state.actions_taken_this_turn = 0
@@ -174,14 +179,14 @@ def is_terminal(state: GameState) -> Optional[Result]:
     return None
 
 
-def _resolve_exhaustion(state: GameState) -> Result:
-    # more food wins; on a tie, the player who cannot act loses.
+def _resolve_exhaustion(state: GameState, reason: str = "exhaustion") -> Result:
+    # more food wins; on a tie, the player who cannot act (or passed last) loses.
     food_a, food_b = state.food["A"], state.food["B"]
     if food_a > food_b:
-        return Result("A", "exhaustion")
+        return Result("A", reason)
     if food_b > food_a:
-        return Result("B", "exhaustion")
-    return Result(other_player(state.current), "exhaustion")
+        return Result("B", reason)
+    return Result(other_player(state.current), reason)
 
 
 def _resolve_by_food(state: GameState, reason: str) -> Result:

@@ -121,7 +121,7 @@ class Result:
     """Terminal game outcome. winner is 'A'/'B', or None for a draw."""
 
     winner: Optional[str]
-    reason: str  # "hq_capture" | "food" | "exhaustion" | "max_turns"
+    reason: str  # "hq_capture" | "food" | "exhaustion" | "passes" | "max_turns"
 
     def to_dict(self) -> dict:
         return {"winner": self.winner, "reason": self.reason}
@@ -218,6 +218,7 @@ class GameState:
         turn_counter: int = 0,
         units_placed_this_turn: int = 0,
         actions_taken_this_turn: int = 0,
+        idle_turns: int = 0,
         next_iid: int = 0,
         effect_stack: Optional[list[dict]] = None,
         pending: Optional[dict] = None,
@@ -243,6 +244,7 @@ class GameState:
         self.turn_counter = turn_counter
         self.units_placed_this_turn = units_placed_this_turn
         self.actions_taken_this_turn = actions_taken_this_turn
+        self.idle_turns = idle_turns       # consecutive turns ended with no action (two end the game)
         self._next_iid = next_iid
         # Decision-point + effect machinery (decision 6).
         self.effect_stack = effect_stack if effect_stack is not None else []  # op-steps to resolve
@@ -358,6 +360,7 @@ class GameState:
         new.turn_counter = self.turn_counter
         new.units_placed_this_turn = self.units_placed_this_turn
         new.actions_taken_this_turn = self.actions_taken_this_turn
+        new.idle_turns = self.idle_turns
         new._next_iid = self._next_iid
         new.effect_stack = _plain_copy(self.effect_stack)
         new.pending = _plain_copy(self.pending)
@@ -411,6 +414,7 @@ class GameState:
             "turn_counter": self.turn_counter,
             "units_placed_this_turn": self.units_placed_this_turn,
             "actions_taken_this_turn": self.actions_taken_this_turn,
+            "idle_turns": self.idle_turns,
             "next_iid": self._next_iid,
             "effect_stack": copy.deepcopy(self.effect_stack),
             "pending": copy.deepcopy(self.pending),
@@ -451,6 +455,7 @@ class GameState:
             turn_counter=d["turn_counter"],
             units_placed_this_turn=d["units_placed_this_turn"],
             actions_taken_this_turn=d.get("actions_taken_this_turn", 0),
+            idle_turns=d.get("idle_turns", 0),
             next_iid=d["next_iid"],
             effect_stack=copy.deepcopy(d.get("effect_stack") or []),
             pending=copy.deepcopy(d.get("pending")),

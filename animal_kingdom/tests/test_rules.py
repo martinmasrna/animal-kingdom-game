@@ -239,24 +239,41 @@ def _fresh():
     return new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 5, config=Config(mulligan=False))
 
 
-def test_pass_ends_the_turn_after_one_action():
+def test_pass_ends_the_turn_with_or_without_an_action():
     from animal_kingdom.engine.actions import DrawAction, PassAction
     s = _fresh(); first = s.current
-    assert not rules.can_pass(s)                          # not before the first action
+    assert rules.can_pass(s)                              # even before the first action
     rules.apply_action(s, DrawAction())
-    assert s.current == first and rules.can_pass(s)
     rules.apply_action(s, PassAction())
     assert s.current != first and s.actions_taken_this_turn == 0
+    rules.apply_action(s, PassAction())                   # one idle turn: the game goes on
+    assert s.current == first and s.result is None and s.idle_turns == 1
 
 
-def test_pass_is_refused_before_the_first_action_and_never_offered():
-    import pytest
-    from animal_kingdom.engine.actions import PassAction
-    from animal_kingdom.engine.state import EngineError
+def test_pass_is_never_offered_as_a_legal_action():
     s = _fresh()
-    with pytest.raises(EngineError):
-        rules.apply_action(s, PassAction())
     assert all(a.kind != "pass" for a in rules.legal_actions(s))
+
+
+def test_two_idle_turns_back_to_back_end_the_game_on_food():
+    from animal_kingdom.engine.actions import DrawAction, PassAction
+    s = _fresh(); first = s.current
+    rules.apply_action(s, PassAction())
+    rules.apply_action(s, DrawAction())                   # an action in between resets the count
+    rules.apply_action(s, PassAction())
+    assert s.idle_turns == 0 and s.result is None
+    s.food[first] = 5
+    rules.apply_action(s, PassAction())
+    rules.apply_action(s, PassAction())
+    assert rules.is_terminal(s) == Result(first, "passes")
+
+
+def test_two_idle_turns_on_equal_food_lose_for_the_last_to_pass():
+    from animal_kingdom.engine.actions import PassAction
+    s = _fresh(); first = s.current
+    rules.apply_action(s, PassAction())
+    rules.apply_action(s, PassAction())                   # the second player's pass ends it
+    assert s.result == Result(first, "passes")
 
 
 def test_unnamed_giant_starves_its_owners_regions_only():
