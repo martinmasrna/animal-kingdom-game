@@ -14,6 +14,7 @@ from __future__ import annotations
 from animal_kingdom.engine import effects, rules, statics
 from animal_kingdom.engine.actions import ChoiceAction, DrawAction, PlaceAction
 from animal_kingdom.engine.config import Config
+from animal_kingdom.engine.state import UnitInstance
 from animal_kingdom.engine.strength import effective_strength
 
 from ._helpers import hand_ids, make_state, put
@@ -169,11 +170,12 @@ def test_rat_king_gains_food_per_other_rodent_and_draws():
     assert "lion" in hand_ids(s, "A")                                 # drew 1
 
 
-def test_hedgehog_feeds_and_is_armor():
-    s = make_state(hands={"A": ["hedgehog"]})
+def test_hedgehog_feeds_and_cannot_be_covered():
+    s = make_state(hands={"A": ["hedgehog"]}, current="A")
     rules.apply_action(s, PlaceAction("hedgehog", ("cr", "1,2")))
     assert s.food["A"] == CFG.hedgehog_food
-    assert not statics.can_be_removed(s, s.top_unit("1,2"))           # Armor
+    borealis = UnitInstance("borealis", "B", 999)
+    assert not statics.can_cover(s, borealis, s.top_unit("1,2"))       # spines: not even a 10
 
 
 # ------------------------------------------------------------------- Chinchilla (tempo)

@@ -14,7 +14,7 @@ Can be placed ignoring connection, except onto an HQ: capturing the enemy HQ sti
 ### Armor
 A shell, plates or spines: cannot be removed, returned to hand, or eaten by **any** ability — the enemy's **or its own controller's**. It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an enemy with Armor; when it removes a stack, a buried unit with Armor is skipped **in place** and everything else is still removed. Armor is not a shield for the cards beneath it. Scope is **board-only**: a card with Armor in hand can be paid or removed normally.
 
-Carried by: Methuselah the tortoise and Cairn the glyptodont (Ramp); Armadillo and Hedgehog (Food). Only animals a player sees as armored carry it.
+Carried by: Methuselah the tortoise and Cairn the glyptodont (Ramp); Armadillo (Food). Only animals a player sees as armored carry it; the spiny ones (Porcupine, Hedgehog) "cannot be covered by enemies" instead.
 
 ### Stealth
 Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis), and an Apex Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it instead). **Mass, random, and automatic effects hit it normally**: Rhinoceros/Bulwark AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron triggers. Its own controller may still choose it freely. Scope is board-only.
