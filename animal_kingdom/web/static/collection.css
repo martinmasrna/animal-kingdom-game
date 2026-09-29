@@ -306,3 +306,7 @@
 /* Family medallions stay in colour; the rim carries selection: stone when off, saturated team blue with a glow when on. */
 .coll .tab.on::before { background-image: url(/static/kit2/rim_a.webp); filter: saturate(2) brightness(1.02) drop-shadow(0 2px 2px rgba(0,0,0,.55)); }   /* the blue rim alone, no glow */
 .coll .tab:not(.on)::before { filter: brightness(.8) drop-shadow(0 2px 2px rgba(0,0,0,.55)); }
+/* Strip strength, third take: not the hanging banner (it needs a bar to hang from) but a small driftwood plaque centred in the row. */
+.coll .st .s { width: 24px; height: 22px; align-self: center; margin: 0 8px 0 8px; border-radius: 3px;
+  background: url(/static/kit2/card_plaque.webp) center / 240% 240%; box-shadow: inset 0 1px 0 rgba(255,250,240,.35), 0 1px 2px rgba(0,0,0,.6); filter: none; }
+.coll .st .s img { height: 14px; margin-top: 0; }
