@@ -186,3 +186,5 @@
 .coll .fcount span { font: 500 11px 'Fira Sans Condensed', sans-serif; color: #9d917e; letter-spacing: .06em; margin-top: 2px; }
 .coll .fcount.full b { color: #9cc3ec; }
 .coll .frow .backbtn { width: auto; flex: none; min-width: 112px; }
+.coll .fcount { flex-direction: row; align-items: baseline; gap: 5px; }
+.coll .fcount span { margin-top: 0; font-size: 15px; letter-spacing: 0; }
