@@ -144,6 +144,10 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .backbtn:hover { color: #f0ece4; background: #2c3034; }
 .bar .search { margin: 0; }
 .tabs { margin-right: 14px; }
+.dlg.cov { width: 760px; max-width: calc(100vw - 48px); }
+.covs { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 12px; max-height: 60vh; overflow-y: auto; padding: 4px; margin-bottom: 16px; scrollbar-width: thin; scrollbar-color: #3a3d40 transparent; }
+.cv { container-type: inline-size; cursor: pointer; border-radius: 10px; transition: transform .1s; } .cv .card { --w: 100cqw; } .cv:hover { transform: translateY(-3px); }
+.cv.on { box-shadow: 0 0 0 3px #24272a, 0 0 0 5px #f0ece4; }
 </style></head><body>
 <div class="gb" id="gb"></div><div id="modal"></div><div id="toast2"></div><div class="pop" id="pop"></div>
 
@@ -166,6 +170,7 @@ const CAP = { legendary: 4, rare: 8 };
 // Copies as dots: filled for the copies in the deck; with `max`, hollow for the ones still allowed.
 const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
 const ICON = {
+  image: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>',
   back: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   copy: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
   trash: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>' };
@@ -206,7 +211,7 @@ function render() {
       ${head('Legendary', inR('legendary'), 4)}${byR('legendary')}${head('Rare', inR('rare'), 8)}${byR('rare')}${head('Common', inR('common'))}${byR('common')}
       <div class="pf"><div class="play">Play this deck</div></div></div>`;
   const tile = d => (d.id === st.open
-    ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}<div class="tacts"><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>${d.own ? `<button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button>` : ''}</div></div>`
+    ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}<div class="tacts">${d.own ? `<button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button>` : ''}<button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>${d.own ? `<button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button>` : ''}</div></div>`
     : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${familyCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>`) + (d.id === st.open ? body(d) : '');
   const side = `<div class="decks">${all.filter(d => d.own).map(tile).join('')}<div class="dsep"></div>${all.filter(d => !d.own).map(tile).join('')}</div>`;
   document.getElementById('gb').innerHTML = `<div class="side">${side}<div class="sfoot"><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div><div class="bar"><div class="tabs">${tabs}</div><span class="gap"></span>
@@ -223,6 +228,7 @@ function render() {
   const nm = document.querySelector('.nm-edit'); if (nm) nm.onclick = () => { const d = all.find(x => x.id === st.open), inp = document.createElement('input'); inp.className = 'nm-in'; inp.value = d.name;
     nm.replaceWith(inp); inp.focus(); inp.select(); const done = () => { d.name = inp.value.trim() || d.name; render(); }; inp.onblur = done; inp.onkeydown = k => { if (k.key === 'Enter') inp.blur(); if (k.key === 'Escape') { inp.value = d.name; inp.blur(); } }; };
   const cp = document.getElementById('dcopy'); if (cp) cp.onclick = () => { const code = deckCode(all.find(x => x.id === st.open)); navigator.clipboard.writeText(code).then(() => toast('Deck code copied'), () => toast('Copy failed')); window.__lastCode = code; };
+  const cov = document.getElementById('dcover'); if (cov) cov.onclick = ev => { ev.stopPropagation(); pickCover(all.find(x => x.id === st.open)); };
   const del = document.getElementById('ddel'); if (del) del.onclick = ev => { ev.stopPropagation(); confirmDelete(all.find(x => x.id === st.open)); };
   // Click a grid card to add a copy, a deck strip to take one out.
   document.querySelectorAll('.cgrid [data-card]').forEach(e => e.onclick = () => { const c = C[e.dataset.card]; if (!st.open) return toast('Open a deck to add cards');
@@ -239,6 +245,16 @@ function render() {
 // Paste a deck code anywhere on the screen: it becomes your deck, open.
 document.addEventListener('paste', e => { if (e.target.tagName === 'INPUT') return; const d = parseCode(e.clipboardData.getData('text')); if (!d) return toast('That is not a deck code');
   const nd = { id: 'm' + Date.now(), name: d.name, list: d.list, cover: coverOf(d.list), own: true }; all.splice(all.filter(x => x.own).length, 0, nd); st.open = nd.id; render(); toast(`Imported ${nd.name}`); });
+// The cover is any card in the deck, chosen in a dialog; the current one is ringed.
+function pickCover(d) {
+  const m = document.getElementById('modal'), ids = [...new Set(d.list)].filter(id => CROP[id]).sort((a, b) => RANK[C[a].rarity] - RANK[C[b].rarity] || sv(C[a]) - sv(C[b]));
+  m.innerHTML = `<div class="dlg cov"><h3>Choose a cover</h3><div class="covs">${ids.map(id => `<div class="cv${id === d.cover ? ' on' : ''}" data-id="${id}">${cardHTML(C[id], { cls: 'compact' })}</div>`).join('')}</div>
+    <div class="dbtns"><button class="cancel">Cancel</button></div></div>`;
+  m.style.display = 'grid';
+  const close = () => { m.style.display = 'none'; document.removeEventListener('keydown', esc); }, esc = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', esc); m.onclick = e => { if (e.target === m) close(); }; m.querySelector('.cancel').onclick = close;
+  m.querySelectorAll('.cv').forEach(e => e.onclick = () => { d.cover = e.dataset.id; close(); render(); });
+}
 // Delete asks first, in a dialog over the screen: Cancel (or Escape, or a click outside) keeps the deck.
 function confirmDelete(d) {
   const m = document.getElementById('modal');
