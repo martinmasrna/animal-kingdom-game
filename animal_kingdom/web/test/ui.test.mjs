@@ -72,4 +72,18 @@ test('the play screen\'s dropdowns pick, Escape closes an open one first and the
   await p.close();
 });
 
+test('the chosen deck shows its decklist in the column, and opens in the collection', async () => {
+  const p = await browser.newPage();
+  await p.goto(`${server.url}/#/play`, { waitUntil: 'networkidle0' });
+  const name = await p.$eval('.dtile.on b', e => e.textContent);
+  await p.hover('.dtile.on'); await p.click('#dlist'); await wait(80);
+  assert.equal(await p.$$eval('.clist.editing .st', els => els.length > 5), true, 'its strips are listed');
+  await p.keyboard.press('Escape'); await wait(80);
+  assert.equal(await p.$('.clist.editing'), null, 'Escape closes the list, not the screen');
+  await p.hover('.dtile.on'); await p.click('#dedit'); await wait(200);
+  assert.equal(await p.evaluate(() => location.hash), '#/collection');
+  assert.equal(await p.$eval('.coll .clist.editing .dtile.on b', e => e.textContent), name, 'the same deck, open');
+  await p.close();
+});
+
 test('no page errors', () => assert.deepEqual(page.errors, []));

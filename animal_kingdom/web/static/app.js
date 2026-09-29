@@ -1,9 +1,9 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
-import { hasArt, artUrl, CROP } from './art.js';
+import { hasArt, artUrl, stripArt } from './art.js';
 import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, crossroadAt, denMouthAt } from './board.js';
-import { collectionScreen as renderCollection, coverOf } from './collection.js';
+import { collectionScreen as renderCollection, coverOf, deckBody, ICON } from './collection.js';
 import { dd, wireDd } from './menu.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
@@ -71,13 +71,8 @@ function miniMap(w, h) {
   s += `<rect x="4" y="${py}" width="12" height="${h - 2 * py}" rx="3" fill="var(--you)" opacity="0.8"/><rect x="${w - 16}" y="${py}" width="12" height="${h - 2 * py}" rx="3" fill="var(--them)" opacity="0.8"/>`;
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
 }
-// A deck tile as in the collection: the player's chosen cover (else the collection's default), the name alone; the cover is
-// placed on the animal's head (its board-portrait crop).
-function deckTile(d, on) {
-  const cover = d.cover || COVER[d.id] || coverOf(d.list, CARDS);
-  const art = hasArt(cover) ? `<div class="art" style="--art:url(${artUrl(cover)});--cx:${CROP[cover][0]};--cy:${CROP[cover][1]}"></div>` : '';
-  return `<div class="dtile${on ? ' on' : ''}" data-deck="${d.id}">${art}<b>${esc(d.name)}</b></div>`;
-}
+// A deck's cover: the player's chosen one, else the collection's default.
+const coverFor = d => d.cover || COVER[d.id] || coverOf(d.list, CARDS);
 // Your profile: the server knows you by the sign-in code this browser keeps (localStorage 'ak:key').
 const api = (path, opts = {}) => fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', 'X-AK-Key': store('ak:key') || '', ...(opts.headers || {}) } });
 async function loadProfile() {
@@ -106,7 +101,7 @@ async function boot() {
   addEventListener('hashchange', route);
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
-    if (e.key === 'Escape' && (screen === 'play' || screen === 'join') && !/INPUT/.test(e.target.tagName)) return document.getElementById('back').click();
+    if (e.key === 'Escape' && (screen === 'play' || screen === 'join') && !/INPUT/.test(e.target.tagName)) return document.getElementById(play.list ? 'done' : 'back').click();
     if (e.key !== 'Escape' || screen !== 'game') return;
     const menu = document.getElementById('menudrop');
     if (menu && menu.classList.contains('on')) return menu.classList.remove('on');
@@ -122,7 +117,7 @@ function route() {
   const id = parts[1] && parts[1].toUpperCase();
   if (parts[0] !== 'm' || id !== wsId) disconnect();
   if (parts[0] === 'play' || parts[0] === 'gauntlet') return playScreen();
-  if (parts[0] === 'collection') return collectionScreen();
+  if (parts[0] === 'collection') return collectionScreen(parts[1]);
   if (parts[0] === 'profile') return profileScreen();
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
   if (parts[0] === 'join' && id) return joinScreen(id);
@@ -139,28 +134,50 @@ function homeScreen() {
 }
 
 // ------------------------------------------------------------------ play
-// The collection's skeleton (menu.css): your decks on the ground, the opponent in the granite column, Play in its foot.
-const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', code: '' };
+// The match about to be played, as Hearthstone shows it: your deck large, facing the opponent, Play under them. Your decks
+// are the collection's column (menu.css), where the chosen one can also show its decklist or open in the collection.
+const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', code: '', list: false };
 const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']];
-const deckGrid = chosen => `<div class="pdecks"><div class="pgrid">${playable().map(d => deckTile(d, d.id === chosen.id)).join('')}</div></div>`;
+// A large deck portrait: the whole painting, its name at the foot.
+const hero = (cover, name) => `<div class="hero"${hasArt(cover) ? ` style="background-image:url(${artUrl(cover)})"` : ''}><b>${esc(name)}</b></div>`;
+// The column: your decks (the chosen one with its actions on hover), or the chosen deck's list; Back or Done in the foot.
+function deckColumn(chosen) {
+  const tile = d => { const on = d.id === chosen.id;
+    const acts = on && d.mine ? `<div class="tacts"><button class="ic" id="dlist" data-tip="${play.list ? 'Hide decklist' : 'Decklist'}">${ICON.list}</button><button class="ic" id="dedit" data-tip="Open in collection">${ICON.edit}</button></div>` : '';
+    return `<div class="dtile${on ? ' on' : ''}" data-deck="${d.id}" style="${stripArt(coverFor(d), 284, 56, .7)}"><b>${esc(d.name)}</b>${acts}</div>`; };
+  return play.list
+    ? `<div class="clist editing">${tile(chosen)}${deckBody(chosen.list, CARDS, false)}</div><div class="sfoot"><button class="backbtn" id="done"><span>Done</span></button></div>`
+    : `<div class="clist">${playable().map(tile).join('')}</div><div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div>`;
+}
+function wireColumn(chosen, redraw, back) {
+  app.querySelectorAll('[data-deck]').forEach(el => el.onclick = ev => { if (ev.target.closest('.tacts') || play.list) return; store('ak:deck', el.dataset.deck); redraw(); });
+  const $ = id => document.getElementById(id);
+  if ($('back')) $('back').onclick = back;
+  if ($('done')) $('done').onclick = () => { play.list = false; redraw(); };
+  if ($('dlist')) $('dlist').onclick = () => { play.list = !play.list; redraw(); };
+  if ($('dedit')) $('dedit').onclick = () => { play.list = false; location.hash = '#/collection/' + chosen.id.slice(3); };
+  wirePops(app.querySelector('.side'));
+}
 // The gauntlet (every starter deck, ten games each) is a developer's tool: only at #/gauntlet, not among the opponents.
 function playScreen() {
   screen = 'play';
   const dev = location.hash.startsWith('#/gauntlet');
   if (dev) play.opp = 'gauntlet'; else if (play.opp === 'gauntlet') play.opp = 'bot';
-  const chosen = chosenDeck();
+  const chosen = chosenDeck(), bd = DECKS.find(d => d.id === play.botDeck);
   const seg = (v, label) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${label}</button>`;
-  const opts = play.opp === 'bot' ? dd('level', play.level, LEVELS) + dd('botDeck', play.botDeck, [['random', 'Random deck'], ...DECKS.map(d => [d.id, d.name + ' deck'])])
-    : play.opp === 'gauntlet' ? dd('level', play.level, LEVELS) + dd('side', play.side, [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']])
-    : `<div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`;
-  app.innerHTML = `<div class="menu pscr">${deckGrid(chosen)}
-    <div class="side"><div class="popts">${dev ? '' : `<div class="seg">${seg('bot', 'Bot')}${seg('friend', 'Friend')}</div>`}${opts}</div>
-      <div class="sfoot"><button class="play" id="go">${play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play'}</button>
-        <button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
+  // The opponent's side: the bot's deck (a blank slot with ? for a random one), a friend's code, or the gauntlet's settings.
+  const opp = play.opp === 'bot' ? { top: seg('bot', 'Bot') + seg('friend', 'Friend'), hero: bd ? hero(coverFor(bd), bd.name) : '<div class="hero slot"><i>?</i></div>',
+      foot: dd('level', play.level, LEVELS) + dd('botDeck', play.botDeck, [['random', 'Random deck'], ...DECKS.map(d => [d.id, d.name + ' deck'])]) }
+    : play.opp === 'friend' ? { top: seg('bot', 'Bot') + seg('friend', 'Friend'),
+      hero: `<div class="hero slot"><div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div></div>`, foot: '' }
+    : { top: '', hero: '<div class="hero slot"><i>?</i></div>', foot: dd('level', play.level, LEVELS) + dd('side', play.side, [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']]) };
+  app.innerHTML = `<div class="menu pscr"><div class="stage">
+      <div class="seg">${opp.top}</div>${hero(coverFor(chosen), chosen.name)}${opp.hero}<div class="ofoot">${opp.foot}</div>
+      <button class="play" id="go">${play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play'}</button></div>
+    <div class="side">${deckColumn(chosen)}</div></div>`;
+  wireColumn(chosen, playScreen, () => { location.hash = '#/'; });
   app.querySelectorAll('[data-opp]').forEach(el => el.onclick = () => { play.opp = el.dataset.opp; playScreen(); });
   wireDd(app, (k, v) => { play[k] = v; playScreen(); });
-  app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:deck', el.dataset.deck); playScreen(); });
-  document.getElementById('back').onclick = () => { location.hash = '#/'; };
   const code = document.getElementById('code');
   if (code) {
     code.oninput = () => play.code = code.value.trim().toUpperCase();
@@ -181,15 +198,16 @@ function playScreen() {
 }
 function joinCode() { if (play.code) location.hash = '#/join/' + play.code; }
 
-// Joining a friend's match from their link: the same screen, the only choice left is your deck.
+// Joining a friend's match from their link: the same screen, the friend's side holding the match code.
 function joinScreen(id) {
   screen = 'join';
   if (getToken(id)) { location.hash = '#/m/' + id; return; }
   const chosen = chosenDeck();
-  app.innerHTML = `<div class="menu pscr">${deckGrid(chosen)}
-    <div class="side"><div class="popts"></div><div class="sfoot"><button class="play" id="go">Join match</button><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
-  app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:deck', el.dataset.deck); joinScreen(id); });
-  document.getElementById('back').onclick = () => { location.hash = '#/play'; };
+  app.innerHTML = `<div class="menu pscr"><div class="stage">
+      <div class="seg"></div>${hero(coverFor(chosen), chosen.name)}<div class="hero slot"><i class="code">${esc(id)}</i></div><div class="ofoot"></div>
+      <button class="play" id="go">Join match</button></div>
+    <div class="side">${deckColumn(chosen)}</div></div>`;
+  wireColumn(chosen, () => joinScreen(id), () => { location.hash = '#/play'; });
   document.getElementById('go').onclick = async () => {
     const r = await api(`/api/match/${id}/join`, { method: 'POST', body: JSON.stringify({ deck: deckSpec(chosen), name: 'Friend' }) });
     if (!r.ok) return toast(r.status === 404 ? `No match ${id}` : await r.text());
@@ -198,9 +216,11 @@ function joinScreen(id) {
 }
 
 // ------------------------------------------------------------------ collection (= the deckbuilder): collection.js
-function collectionScreen() {
+// #/collection/<deck id> opens that deck (the play screen's "Open in collection").
+function collectionScreen(open) {
   screen = 'collection';
-  renderCollection(app, { cards: CARDS, starters: DECKS.filter(d => d.id !== 'goodstuff'), covers: COVER, getDecks: myDecks, saveDecks, toast,
+  if (open) history.replaceState(null, '', '#/collection');
+  renderCollection(app, { open, cards: CARDS, starters: DECKS.filter(d => d.id !== 'goodstuff'), covers: COVER, getDecks: myDecks, saveDecks, toast,
     play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/play'; }, back: () => { location.hash = '#/'; } });
 }
 
