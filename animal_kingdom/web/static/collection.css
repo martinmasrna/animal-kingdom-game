@@ -310,9 +310,8 @@
 .coll .st .s { width: 24px; height: 22px; align-self: center; margin: 0 8px 0 8px; border-radius: 3px;
   background: url(/static/kit2/card_plaque.webp) center / 240% 240%; box-shadow: inset 0 1px 0 rgba(255,250,240,.35), 0 1px 2px rgba(0,0,0,.6); filter: none; }
 .coll .st .s img { height: 14px; margin-top: 0; }
-/* Copy dots sit in a dark recessed slot at the strip's right end (mirroring the strength plaque), in the card's bone colour. */
-.coll .dbody .st .x { align-self: center; height: 18px; margin-right: 6px; padding: 0 6px; gap: 3px; border-radius: 9px; align-items: center;
-  background: rgba(14,11,8,.82); box-shadow: inset 0 1px 2px rgba(0,0,0,.8), 0 0 0 1px rgba(214,204,188,.18); }
-.coll .dbody .st .x:empty { display: none; }
+/* Copy dots follow the name, in the strip's dark text zone, never on the art. */
+.coll .dbody .st .n { flex: 0 1 auto; }
+.coll .dbody .st .x { align-self: center; padding: 0 0 0 7px; gap: 3px; margin-right: auto; }
 .coll .dbody .st .x i { width: 6px; height: 6px; border-color: #d9ceb8; filter: none; }
 .coll .dbody .st .x i.on { background: #d9ceb8; }
