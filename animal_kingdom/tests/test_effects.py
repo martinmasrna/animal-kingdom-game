@@ -183,6 +183,15 @@ def test_dingo_buffs_adjacent_canine_at_end_of_turn():
     assert fox.strength_counter == 1
 
 
+def test_dingo_buffs_every_adjacent_canine_not_just_one():
+    s = make_state(current="A", decks={"A": ["lion"], "B": ["lynx"]})
+    put(s, "2,2", "dingo", "A")
+    canines = [put(s, cr, "fox", "A") for cr in ("1,2", "3,2", "2,1")]
+    s.actions_taken_this_turn = s.config.actions_per_turn - 1
+    rules.apply_action(s, DrawAction())
+    assert [c.strength_counter for c in canines] == [1, 1, 1]
+
+
 def test_shuck_returns_a_removed_canine_with_counter():
     s = make_state(hands={"A": ["shuck"]})
     s.remove_pile.append("gray_wolf")

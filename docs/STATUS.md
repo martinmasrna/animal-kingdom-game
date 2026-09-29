@@ -45,8 +45,7 @@ Taste calls only Martin can make. Nothing here is started.
 
 Reported by Martin from play:
 
-- **Dingo always buffs the same Canine:** confirmed. The engine gives the end-of-turn +1 to the adjacent Canine with the lowest internal id; the text says "a friendly adjacent Canine" without saying who picks. Decide between the controller's choice and random, then fix.
-- Porcupine may not work properly; Chameleon can land on Porcupine and perhaps shouldn't. Not reproduced yet.
+- **Chameleon can cover Porcupine:** confirmed. `statics.can_cover` checks Chameleon's "may be placed on any unit" before Porcupine's "cannot be covered by enemies", so an enemy Chameleon lands on a Porcupine. Nothing else about Porcupine is off (it blocks every other cover, including Apex landings). Waiting on Martin: which text wins.
 
 ## Engine debt
 
