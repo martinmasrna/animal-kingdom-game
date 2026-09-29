@@ -40,7 +40,7 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 |---|---:|---|---:|---|
 | **Squirrel** | 3 | Rodent | 3 | Battlecry: gain 10 food. |
 | **Chipmunk** | 3 | Rodent | 1 | Battlecry: gain 10 food. At the start of next turn, gain 10 more. |
-| **Hedgehog** | 2 | — | 5 | Immovable. Battlecry: gain 5 food. |
+| **Hedgehog** | 2 | — | 6 | Immovable. Battlecry: gain 6 food. |
 | **Hamster** | 2 | Rodent | 3 | Battlecry: if you gained 10 or more food this turn, draw 2 cards. |
 | **Muskrat** | 3 | Rodent | 2 | Battlecry: if you gained 10 or more food this turn, remove an adjacent enemy. |
 | **Groundhog** | 3 | Rodent | 4 | Battlecry: if you gained 10 or more food this turn, gain 10 food. |

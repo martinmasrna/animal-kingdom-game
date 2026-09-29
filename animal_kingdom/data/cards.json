@@ -772,9 +772,9 @@
       "deck": "food_otk",
       "rarity": "common",
       "tags": [],
-      "base_strength": 5,
+      "base_strength": 6,
       "keywords": ["Immovable"],
-      "text": "Immovable. Battlecry: gain 5 food.",
+      "text": "Immovable. Battlecry: gain 6 food.",
       "copies": 2
     },
     {
