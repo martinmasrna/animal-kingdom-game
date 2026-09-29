@@ -74,7 +74,7 @@
 .game .unit .boss { position: absolute; left: 50%; bottom: -22px; width: 48px; height: 48px; margin-left: -24px; border-radius: 50%; display: grid; place-items: center; font-size: 26px; border: 3px solid; }
 .game .unit.A .boss { background: var(--Adk); border-color: var(--A); } .game .unit.B .boss { background: var(--Bdk); border-color: var(--B); }
 .game .unit.ghost { opacity: .7; }
-.game .timer { position: absolute; right: -8px; top: -6px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; background: var(--ink); color: #1c1b19; border: 3px solid #1c1b19; z-index: 2; }
+.game .timer { position: absolute; right: -8px; top: -6px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 700 20px 'Source Serif 4', Georgia, serif; font-variant-numeric: lining-nums tabular-nums; background: var(--ink); color: #1c1b19; border: 3px solid #1c1b19; z-index: 2; }
 .game .kw { position: absolute; left: -8px; top: -6px; min-width: 38px; height: 38px; padding: 0 6px; border-radius: 8px; display: grid; place-items: center; font-size: 20px; background: #3a3632; border: 2px solid var(--clearline); z-index: 2; }
 /* where you can act: one light neutral, shared by the lit deck, target rings, the selected card and the prompt */
 .game .tgt { cursor: pointer; }
@@ -114,7 +114,7 @@
 .game .waiting { left: 1236px; right: 16px; top: 752px; text-align: right; font-size: 13px; color: var(--mute); }
 
 /* a pending choice: the card that asks and its rule, in the frame's free corner; card options float above the hand */
-.game .prompt { left: 16px; top: 604px; width: 300px; padding: 14px 16px; border-radius: 10px; background: #26241f; border: 2px solid var(--act); display: none; }
+.game .prompt { left: 16px; top: 604px; width: 258px; padding: 14px 16px; border-radius: 10px; background: #26241f; border: 2px solid var(--act); display: none; }
 .game .prompt.on { display: block; }
 .game .prompt b { display: block; font-size: 18px; margin-bottom: 6px; } .game .prompt p { font-size: 14px; line-height: 1.35; color: #d9d2c5; }
 .game .prompt .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
@@ -265,3 +265,4 @@
   .game .flyfruit, .game .leave, .game .pit img.was, .game .reveal { display: none; } }   /* things that only exist in motion are not drawn at all */
 
 .game .hc.dim .card { filter: brightness(.55) saturate(.7) drop-shadow(.2em .45em .5em rgba(0,0,0,.55)); }
+.game.kit .cr.unit.capture { scale: .8; z-index: 6; }   /* the unit that took a den, in its mouth */

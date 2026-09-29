@@ -19,6 +19,8 @@ const CLEARINGS = [[282.3, 225.4], [558.4, 224.0], [831.6, 223.5], [1112.7, 222.
 const at = (c, r) => { const [x, y] = CLEARINGS[(r - 1) * 5 + c - 1]; return [PX(x), PY(y)]; };
 // A crossroad's centre on the stage, for anything that travels to it.
 export const crossroadAt = cr => at(...cr.split(',').map(Number));
+// A den's cave mouth (its HQ) on the stage.
+export const denMouthAt = side => MOUTH[side];
 // Each den's ten pits from the bottom of its ridge up, the gem on its crown boulder, its cave mouth (the HQ).
 const PIT_Y = [690, 637, 584, 531, 478, 425, 372, 319, 266, 213], RIDGE = { A: 110, B: 1565 };
 const PITS = side => PIT_Y.map((y, i) => [PX(RIDGE[side] + (i % 2 ? 6 : -6)), PY(y)]);
@@ -44,17 +46,18 @@ function portrait(id, D) {
 
 // A unit: portrait under its team rim, strength on the boss, buried units peeking out behind, timer and board keywords as badges.
 function unit(u, under, cards) {
-  const c = cards[u.id], kws = (c.keywords || []).filter(k => BOARD_KW[k]);
+  const c = cards[u.id], kws = (c.kw || []).filter(k => BOARD_KW[k]);   // the pool sends a card's keywords as kw
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner}" style="transform:translate(${(i + 1) * 7}px,${(i + 1) * 8}px);z-index:${-i - 1}"></div>`).join('');
   return peek + `<div class="ring${hasArt(u.id) ? '' : ' noart'}" style="${portrait(u.id, 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
     `<img class="rimimg" src="${kit(`rim_${team(u.owner)}.webp`)}" alt="" draggable="false"><div class="boss num">${chalk(u.str)}</div>` +
-    (u.timer ? `<div class="timer num" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${u.timer}</div>` : '') +
+    (u.timer ? `<div class="timer" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${u.timer}</div>` : '') +
     (kws.length ? `<div class="kw" data-tip="${kws.join(', ')}">${kws.map(k => BOARD_KW[k]).join('')}</div>` : '');
 }
 
 // `g` is a viewer-space game { board, food, income, winFood }. `ui`: { rings: [cr] legal targets, hqRing (the enemy den can
 // be taken), preview: {cr, id, str} (the selected card under the pointer), anim: the previous view's { board, food, income,
-// fx, landDelay } when this view follows one (so what changed animates), else null }.
+// fx, landDelay } when this view follows one (so what changed animates), else null, capture: { side, id, owner, str } when a
+// unit took a den, which ends the game (it stands in that den's mouth) }.
 export function renderBoard(el, M, g, cards, ui) {
   const A = ui.anim, rings = new Set(ui.rings || []);
   const { landed, covered, leaving, strength } = boardChanges(A && A.board, g.board, (A && A.fx) || []);
@@ -87,6 +90,9 @@ export function renderBoard(el, M, g, cards, ui) {
 
   const stonesOf = side => held.filter(r => r.owner === side).map(r => { const [x, y] = stoneAt(r); return { x, y, food: r.food }; });
   for (const side of ['A', 'B']) s += den(side, g, A, stonesOf(side), ui);
+  // The unit that took a den stands in its mouth: the game's last move, drawn where it won.
+  if (ui.capture) { const [mx, y] = MOUTH[ui.capture.side], x = mx + (ui.capture.side === 'A' ? -22 : 22);   // seated in the mouth, clear of the crossroad beside it
+    s += put(`cr unit ${ui.capture.owner} capture${A ? ' land' + (late ? ' late' : '') : ''}`, x, y, unit(ui.capture, [], cards)); }
   el.innerHTML = s;
 
   // The gem counts up to its new total as the fruit arrive (with reduced motion, the new total simply shows).

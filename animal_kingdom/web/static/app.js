@@ -2,7 +2,7 @@
 // The server holds the game; this file only renders the seat's view and sends choices back.
 import { hasArt, artUrl } from './art.js';
 import { cardHTML } from './card.js';
-import { renderBoard, STAGE, crossroadAt } from './board.js';
+import { renderBoard, STAGE, crossroadAt, denMouthAt } from './board.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const COVER = { cats_midrange: 'king_theron', canine_buff_tempo: 'lobo', aggro_hq_rush: 'verminus', colony_food_swarm: 'queen_honoria',
@@ -457,8 +457,8 @@ function drawGame() {
   // The opponent's card, shown large at the centre as it is played, then flown down onto its crossroad (the piece lands as it arrives).
   if (A) A.fx = G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
   const last = G.history[G.history.length - 1];
-  if (A && G.history.length > A.hist && last && last.seat === them && last.kind === 'place' && last.target[0] === 'cr') {
-    const [tx, ty] = crossroadAt(dcr(last.target[1])), rv = $('reveal');
+  if (A && G.history.length > A.hist && last && last.seat === them && last.kind === 'place') {
+    const [tx, ty] = last.target[0] === 'cr' ? crossroadAt(dcr(last.target[1])) : denMouthAt(rel(last.target[1])), rv = $('reveal');
     rv.innerHTML = cardHTML(CARDS[last.card]); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty('--ty', `${ty - 300}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on');
     if (ui.anim) ui.anim.landDelay = 0.95;
@@ -547,7 +547,9 @@ function drawBoard(d) {
     preview = { cr: ui.hover, id: ui.sel, str: Math.max(...strs) };
   }
   const A = ui.anim; ui.anim = null;   // the animations play once, never on hover redraws
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, anim: A, current: V.phase === 'playing' ? rel(V.game.current) : null });
+  const last = V.game.history[V.game.history.length - 1], won = V.game.result && V.game.result.reason === 'hq_capture' && last && last.target && last.target[0] === 'hq';
+  const capture = won ? { side: rel(last.target[1]), id: last.card, owner: rel(last.seat), str: CARDS[last.card].str } : null;
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null });
 }
 
 function wireBoard() {
@@ -714,5 +716,6 @@ addEventListener('keydown', e => {
 });
 
 window.__ak = () => ({ V, ui });   // test hook: the headless play-through reads the view
+window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it
 window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client
 boot();
