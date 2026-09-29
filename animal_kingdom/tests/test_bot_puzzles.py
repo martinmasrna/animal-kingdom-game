@@ -7,6 +7,9 @@ Reuses the constructed-state helpers from test_greedy_bot.py rather than reinven
 
 from __future__ import annotations
 
+import json
+import os
+
 import pytest
 
 from animal_kingdom.bots.greedy_bot import GreedyBot, GreedyWeights, evaluate
@@ -18,7 +21,7 @@ from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.maps import load_map
 from animal_kingdom.engine.state import GameState, UnitInstance
 from animal_kingdom.engine import rules
-from animal_kingdom.engine.actions import PlaceAction
+from animal_kingdom.engine.actions import DrawAction, PlaceAction
 
 from ._helpers import make_state, put
 
@@ -140,3 +143,50 @@ def test_canine_develops_instead_of_drawing_a_full_hand(bot_cls):
     for seed in range(5):
         chosen = bot_cls(seed=seed).choose(s.view_for("A"), rules.legal_actions(s), s)
         assert isinstance(chosen, PlaceAction) and chosen.card_id in {"red_wolf", "fox", "dingo"}, seed
+
+
+# Real positions from RefereeBot games (Martin piloting in his head, the goodstuff pile across),
+# saved as GameState snapshots in tests/puzzles/. Each asserts the moves Martin accepts; the
+# bot drew in all three.
+
+def _puzzle(name: str) -> GameState:
+    path = os.path.join(os.path.dirname(__file__), "puzzles", f"{name}.json")
+    with open(path, encoding="utf-8") as fh:
+        return GameState.from_dict(json.load(fh))
+
+
+def _choices(bot_cls, s: GameState, seeds=range(5)):
+    return [bot_cls(seed=seed).choose(s.view_for(s.player_to_act()), rules.legal_actions(s), s)
+            for seed in seeds]
+
+
+@pytest.mark.xfail(strict=True, reason="the search draws with Owl and two Vipers in hand (2026-09-30)")
+@pytest.mark.parametrize("bot_cls", [TurnBot, RefereeBot])
+def test_egg_plays_owl_before_drawing(bot_cls):
+    # Egg vs the pile, round 5, first action: Magpie, Eagle, Owl and Ember on the board, their
+    # Lion in the middle under a Taipan timer; hand Viper, Python, Lemming, Viper, Owl. Martin
+    # plays Owl first.
+    s = _puzzle("egg_owl")
+    for chosen in _choices(bot_cls, s):
+        assert isinstance(chosen, PlaceAction) and chosen.card_id == "owl", chosen
+
+
+@pytest.mark.xfail(strict=True, reason="the search draws with five Cats in hand (2026-09-30)")
+@pytest.mark.parametrize("bot_cls", [TurnBot, RefereeBot])
+def test_cats_plays_lynx_in_the_middle(bot_cls):
+    # Cats vs the pile, round 2, first action: Lion on the den front, their Wolf on theirs;
+    # hand Cougar, Princess Lea, House Cat, Prince Leo, Lynx. Martin: "Lynx in the middle,
+    # almost for sure" (2,2, next to the Lion, so its Roar draws).
+    s = _puzzle("cats_lynx")
+    for chosen in _choices(bot_cls, s):
+        assert chosen == PlaceAction("lynx", ("cr", "2,2")), chosen
+
+
+@pytest.mark.parametrize("bot_cls", [TurnBot, RefereeBot])
+def test_aggro_draws_on_its_opening(bot_cls):
+    # Aggro vs the pile, its first turn, second action, empty board, hand Falcon, Falcon, Rat,
+    # Rat, Skunk. Martin draws here too. A guard: the fix for drawing too much must not stop
+    # this - the bot that flew a Falcon to their den front instead lost these games.
+    s = _puzzle("aggro_opening_draw")
+    for chosen in _choices(bot_cls, s):
+        assert isinstance(chosen, DrawAction), chosen
