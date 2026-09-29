@@ -25,6 +25,6 @@ export const CARD_NUMS = [
   "calib_apex_6", "calib_apex_7", "calib_apex_8", "calib_immov_5", "calib_immov_6", "calib_immov_7", "calib_immov_8", "calib_stealth_5",
   "calib_stealth_6", "calib_stealth_7", "calib_stealth_8", "mock_courier", "mock_skully", "mock_sentry", "mock_hunter", "mock_saboteur",
   "mock_vanilla_5", "mock_vanilla_6", "mock_vanilla_8", "mock_vanilla_9", "mock_vanilla_10", "mock_flyer_7", "mock_armor_6", "mock_removal",
-  "mock_apex_5", "mock_apex_6", "mock_draw2",,
+  "mock_apex_5", "mock_apex_6", "mock_draw2",
   "glyptodont"
 ];
