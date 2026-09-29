@@ -13,7 +13,7 @@ from __future__ import annotations
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import PlaceAction
 
-from ._helpers import make_state, put
+from ._helpers import hand_ids, make_state, put
 
 
 def _ids_at(state, cr):
@@ -91,12 +91,26 @@ def test_pestis_wipes_around_an_armor_unit_not_stopping_at_it():
 
 # ----------------------------------------------------------------- Apex landings (C1/C3)
 
-def test_an_apex_eats_a_porcupine_eating_is_not_covering():
-    # The spines fire when an enemy covers the Porcupine; an Apex that eats it never covers it.
+def test_an_apex_covers_first_so_the_porcupines_spines_remove_it_before_it_eats():
+    # Martin 2026-09-29: an Apex covers, reactions to the cover resolve, then it eats.
     s = make_state(hands={"A": ["borealis"]})
     put(s, "1,2", "porcupine", "B")
     rules.apply_action(s, PlaceAction("borealis", ("cr", "1,2")))
-    assert s.top_unit("1,2").card_id == "borealis" and "porcupine" in s.remove_pile
+    assert s.top_unit("1,2").card_id == "porcupine" and "borealis" in s.remove_pile
+
+
+def test_gale_escapes_an_apex_by_sending_it_back_to_hand():
+    s = make_state(hands={"A": ["borealis"]})
+    put(s, "1,2", "gale", "B")
+    rules.apply_action(s, PlaceAction("borealis", ("cr", "1,2")))
+    assert s.top_unit("1,2").card_id == "gale" and "borealis" in hand_ids(s, "A")
+
+
+def test_an_apex_eats_ordinary_prey_after_covering_it():
+    s = make_state(hands={"A": ["borealis"]})
+    put(s, "1,2", "lion", "B")
+    rules.apply_action(s, PlaceAction("borealis", ("cr", "1,2")))
+    assert [u.card_id for u in s.board["1,2"]] == ["borealis"] and "lion" in s.remove_pile
 
 
 def test_snow_leopard_lets_an_apex_cat_land_at_equal_strength():

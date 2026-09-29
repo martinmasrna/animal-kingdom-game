@@ -176,26 +176,17 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> No
     # The same hand instance lands on the board, carrying its strength counter.
     covered = state.top_unit(cr)
     is_apex = "Apex Predator" in state.cards[unit.card_id].keywords
-    cover_enemy = None
-
-    # Apex Predator (decision D): eat the occupant it lands on instead of covering it; its
-    # Deathrattle / remove triggers fire, then the predator occupies what remains beneath.
-    # If the occupant can't be eaten (Armor, or enemy Stealth - the eat is a chosen
-    # single-out, keyword-review decision C3), the predator falls back to a normal cover,
-    # burying it — it isn't restricted to prey it can eat.
-    if is_apex and covered is not None:
-        if (statics.can_be_chosen(state, covered, player)
-                and _remove_specific(state, cr, covered, by_player=player, by_card=unit.card_id)):
-            covered = state.top_unit(cr)  # ate it: whatever remains beneath is now covered
-        elif covered.owner != player:
-            cover_enemy = covered         # couldn't eat -> normal cover (King Theron watches)
-    elif covered is not None and covered.owner != player:
-        cover_enemy = covered            # a normal cover of an enemy (King Theron watches this)
-
     onto_enemy = covered is not None and covered.owner != player
+    cover_enemy = covered if onto_enemy else None     # King Theron watches enemy covers
 
     unit.placed_on_turn = state.turn_counter
     state.board.setdefault(cr, []).append(unit)
+
+    # Apex Predator: it covers the occupant like any placement, and eats it afterwards
+    # (Martin, 2026-09-29): the roar, then every reaction to the cover (Porcupine's spines,
+    # Gale), then the eat. The stack is LIFO, so the eat goes in first, at the bottom.
+    if is_apex and covered is not None:
+        state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid})
 
     # Reactive triggers resolve AFTER the placed unit's roar (decision 8). The stack
     # is LIFO, so push reactive first (lower) and the roar last (on top).
@@ -309,6 +300,20 @@ def remove_top(state, cr, *, by_player, by_effect=True, by_card=None) -> bool:
     if top is None:
         return False
     return _remove_specific(state, cr, top, by_player=by_player, by_effect=by_effect, by_card=by_card)
+
+
+def _op_apex_eat(state, step):
+    """An Apex eats what it covered, if both are still there, the prey is right beneath it,
+    and it can be eaten (not Armor; not an enemy with Stealth, since the eat is a chosen single-out)."""
+    cr, apex = _find_unit(state, step["iid"])
+    if apex is None:
+        return None
+    stack = state.board[cr]
+    i = stack.index(apex)
+    prey = stack[i - 1] if i > 0 else None
+    if prey is not None and prey.iid == step["prey"] and statics.can_be_chosen(state, prey, apex.owner):
+        _remove_specific(state, cr, prey, by_player=apex.owner, by_card=apex.card_id)
+    return None
 
 
 def _find_unit(state, iid):
@@ -814,6 +819,7 @@ OPS: dict[str, Callable] = {
     "owl_peek": _op_owl_peek,
     "remove_choice": _op_remove_choice,
     "remove_iid": _op_remove_iid,
+    "apex_eat": _op_apex_eat,
     "play_extra": _op_play_extra,
     "play_named": _op_play_named,
     "grant_strength": _op_grant_strength,
