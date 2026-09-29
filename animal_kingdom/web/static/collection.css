@@ -304,5 +304,5 @@
 .coll .rh span.flash { color: #ff8a78; }
 .coll .dbody .st.legendary + .st.rare, .coll .dbody .st.rare + .st.common, .coll .dbody .st.legendary + .st.common { margin-top: 0; }
 /* Family medallions stay in colour; the rim carries selection: stone when off, saturated team blue with a glow when on. */
-.coll .tab.on::before { background-image: url(/static/kit2/rim_a.webp); filter: saturate(2.4) brightness(1.05) drop-shadow(0 0 5px rgba(60,140,240,.95)) drop-shadow(0 0 2px rgba(60,140,240,.9)); }
+.coll .tab.on::before { background-image: url(/static/kit2/rim_a.webp); filter: saturate(2) brightness(1.02) drop-shadow(0 2px 2px rgba(0,0,0,.55)); }   /* the blue rim alone, no glow */
 .coll .tab:not(.on)::before { filter: brightness(.8) drop-shadow(0 2px 2px rgba(0,0,0,.55)); }
