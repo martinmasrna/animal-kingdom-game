@@ -3,19 +3,19 @@
 <style>
 /* Grey-box of the collection composition (design sandbox, 2026-09-29): layout only, flat greys; the cards are the real ones. */
 html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
-.gb { position: fixed; inset: 0; display: grid; grid-template-columns: 1fr 300px; grid-template-rows: 60px 1fr; font-family: var(--font-text); color: #d8d4cc; }
+.gb { position: fixed; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: 60px 1fr; font-family: var(--font-text); color: #d8d4cc; }
 .bar { grid-column: 1; display: flex; align-items: center; gap: 6px; padding: 0 24px; border-bottom: 1px solid #2a2d30; }
-.bar .back { color: #8b8e92; font-size: 13px; margin-right: 10px; cursor: pointer; }
+.bar .back { color: #8b8e92; font-size: 13px; margin-right: 8px; cursor: pointer; white-space: nowrap; }
 .tabs { display: flex; gap: 4px; }
-.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 58px; padding: 4px 0 3px; border-radius: 8px; cursor: pointer; color: #8b8e92; font: 600 11px/1 'Fira Sans Condensed', sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 52px; padding: 4px 0 3px; border-radius: 8px; cursor: pointer; color: #8b8e92; font: 600 11px/1 'Fira Sans Condensed', sans-serif; letter-spacing: .04em; text-transform: uppercase; }
 .tab.on { background: #2c3034; color: #f0ece4; }
 .med { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #55595e; background-repeat: no-repeat; background-color: #3a3d40; }
 .tab.on .med { border-color: #d8d4cc; }
 .tab.all .med { display: grid; place-items: center; font: 700 12px 'Fira Sans Condensed', sans-serif; color: #d8d4cc; }
 .bar .gap { flex: 1; }
-.search { width: 150px; height: 30px; border-radius: 999px; border: 1px solid #3a3d40; background: #1f2224; color: #d8d4cc; padding: 0 12px; font: 13px var(--font-text); }
+.search { width: 120px; height: 30px; border-radius: 999px; border: 1px solid #3a3d40; background: #1f2224; color: #d8d4cc; padding: 0 12px; font: 13px var(--font-text); }
 .seg { display: inline-flex; border: 1px solid #3a3d40; border-radius: 999px; overflow: hidden; }
-.seg span { padding: 6px 10px; font-size: 12px; color: #8b8e92; cursor: pointer; } .seg span.on { background: #2c3034; color: #f0ece4; }
+.seg span { padding: 6px 9px; font-size: 12px; color: #8b8e92; cursor: pointer; } .seg span.on { background: #2c3034; color: #f0ece4; }
 .cgrid { grid-column: 1; grid-row: 2; overflow-y: auto; padding: 18px 24px 36px; }
 .grp { display: flex; align-items: center; gap: 10px; margin: 14px 0 8px; font: 700 13px 'Fira Sans Condensed', sans-serif; color: #8b8e92; letter-spacing: .06em; }
 .grp::after { content: ''; flex: 1; height: 1px; background: #2a2d30; }
@@ -75,6 +75,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .decks > * { flex: none; }
 .cgrid, .decks { scrollbar-width: thin; scrollbar-color: #3a3d40 transparent; }
 .dtile.on { outline: 0; box-shadow: inset 0 0 0 2px #d8d4cc; }
+.strsel { height: 30px; border-radius: 999px; border: 1px solid #3a3d40; background: #1f2224; color: #d8d4cc; padding: 0 10px; font: 13px var(--font-text); margin-right: 6px; }
+.decks > .dtile:first-child { margin-top: 4px; }
+.bar { min-width: 0; } .bar > * { flex: none; } .bar .gap { flex: 1 1 0; min-width: 8px; }
 </style></head><body>
 <div class="gb" id="gb"></div><div class="pop" id="pop"></div>
 
@@ -92,11 +95,11 @@ const med = (id, M) => { const [cx, cy, D] = CROP[id], w = M / D, h = w * 1.5;
 // The decks: yours first, then the starters. Clicking one opens it in place in the left column; clicking it again closes it.
 const mine = [{ id: 'mine1', name: 'Colony copy', list: decks.find(d => d.id === 'colony_food_swarm').list, cover: 'queen_honoria', own: true }];
 const all = [...mine, ...decks.map(d => ({ ...d, cover: d.list.find(id => C[id].rarity === 'legendary' && CROP[id]) }))];
-const st = { open: 'mine1', tribe: null, rar: null };
+const st = { open: 'mine1', tribe: null, rar: null, str: '' };
 const tribeCount = list => { const t = {}; list.forEach(id => C[id].tags.forEach(x => { if (TRIBES.some(y => y[0] === x)) t[x] = (t[x] || 0) + 1; })); return Object.entries(t).sort((a, b) => b[1] - a[1]); };
 function render() {
   const open = all.find(d => d.id === st.open), counts = open ? open.list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {}) : {};
-  const shown = cards.filter(c => (!st.tribe || c.tags.includes(st.tribe)) && (!st.rar || c.rarity === st.rar))
+  const shown = cards.filter(c => (!st.tribe || c.tags.includes(st.tribe)) && (!st.rar || c.rarity === st.rar) && (st.str === '' || String(c.str) === st.str))
     .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
   const grid = '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0, max = open && n >= (c.copies || LIMIT[c.rarity]);
     return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n ? `<span class="cnt">×${n}</span>` : ''}</div>`; }).join('') + '</div>';
@@ -107,17 +110,18 @@ function render() {
   const inR = r => open.list.filter(id => C[id].rarity === r).length;
   const head = (label, n, cap) => `<h4 class="rh"><span>${label}</span><span class="${cap && n >= cap ? 'full' : ''}">${n}${cap ? ' / ' + cap : ''}</span></h4>`;
   const body = d => `<div class="dbody">
-      <div class="tribes">${tribeCount(d.list).map(([t, n]) => `<div><div class="med" style="${med(TRIBES.find(x => x[0] === t)[1], 26)}"></div>${n}</div>`).join('')}</div>
+      ${tribeCount(d.list).length > 1 ? `<div class="tribes">${tribeCount(d.list).map(([t, n]) => `<div><div class="med" style="${med(TRIBES.find(x => x[0] === t)[1], 26)}"></div>${n}</div>`).join('')}</div>` : ''}
       ${head('Legendary', inR('legendary'), 4)}${byR('legendary')}${head('Rare', inR('rare'), 8)}${byR('rare')}${head('Common', inR('common'))}${byR('common')}
       <div class="pf"><div class="play">Play this deck</div><div class="more">⋯</div></div></div>`;
   const tile = d => (d.id === st.open
-    ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><em>${d.list.length}<i> / 30</i></em></div>`
+    ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}</div>`
     : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${tribeCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>`) + (d.id === st.open ? body(d) : '');
-  const side = `<div class="decks"><h4>My decks</h4>${all.filter(d => d.own).map(tile).join('')}<div class="new">+ New deck</div>
+  const side = `<div class="decks">${all.filter(d => d.own).map(tile).join('')}
       <h4>Starter decks</h4>${all.filter(d => !d.own).map(tile).join('')}</div>`;
   document.getElementById('gb').innerHTML = `<div class="side">${side}</div><div class="bar"><span class="back">‹ Menu</span><div class="tabs">${tabs}</div><span class="gap"></span>
-      ${seg('rar', [['', 'All'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}<input class="search" placeholder="Search"></div>
+      <select class="strsel" id="strsel"><option value="">Any strength</option>${[...new Set(cards.map(c => String(c.str)))].sort((a, b) => (a === '*' ? -1 : +a) - (b === '*' ? -1 : +b)).map(v => `<option value="${v}"${st.str === v ? ' selected' : ''}>${v === '*' ? 'Variable' : 'Strength ' + v}</option>`).join('')}</select>${seg('rar', [['', 'All'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}<input class="search" placeholder="Search"></div>
     <div class="cgrid">${grid}</div>`;
+  document.getElementById('strsel').onchange = e => { st.str = e.target.value; render(); };
   document.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { st.tribe = e.dataset.t || null; render(); });
   document.querySelectorAll('[data-k]').forEach(e => e.onclick = () => { st[e.dataset.k] = e.dataset.v || null; render(); });
   document.querySelectorAll('[data-d]').forEach(e => e.onclick = () => { st.open = st.open === e.dataset.d ? null : e.dataset.d; render(); });
