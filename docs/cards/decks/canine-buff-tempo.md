@@ -15,7 +15,7 @@ Buff wording is binding: "has +X" is a live aura, "give +X" is a permanent count
 | **Lobo** | 1 | Canine | 4 | Has +2 strength for each other Canine you control. |
 | **Raksha** | 1 | Canine | 5 | Your other Canines have +1 strength. |
 | **Clarion** | 1 | Canine | 2 | Roar: give +2 strength to all other friendly Canines. |
-| **Scarlett** | 1 | Canine | 5 | Roar: place Poppy and Rusty, her cubs, on random adjacent empty crossroads. |
+| **Scarlett** | 1 | Canine | 5 | Roar: place Poppy and Rusty on random adjacent empty crossroads. |
 
 ### Rare
 
