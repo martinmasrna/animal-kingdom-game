@@ -96,63 +96,43 @@
 .coll .cv.on { box-shadow: 0 0 0 3px #24272a, 0 0 0 5px #f0ece4; }
 .coll .tacts [data-tip]::after { left: auto; right: 0; transform: none; }   /* at the column's right edge */
 
-/* ---------- painted: the savanna at dusk, the dens' granite, the card's driftwood, the board's stones (design sandbox coll2/) ---------- */
-.coll { --wood: url(/static/kit2/card_plaque.webp) 36 fill / .55em stretch; --ink: #1d140a; --ink2: #5a4128;
-  background: #1b140e url(/static/kit2/coll_ground.webp) center / cover; }
+/* ---------- painted, with restraint: the savanna ground at dusk is the one surface; material only where it means something:
+   the board's stone rims on the family medallions, the blue stone for Play (End turn's), the red stone for Delete. Everything
+   else is a quiet dark layer lying on the ground, so the cards stay the loudest thing (design sandbox coll2/). ---------- */
+.coll { background: #1b140e url(/static/kit2/coll_ground.webp) center / cover; --glass: rgba(12,9,6,.55); --line2: rgba(255,240,220,.1); }
 .coll .chead { border-bottom: 0; }
-/* Driftwood controls, dark ink: the same carrier as the card's name bar. */
-.coll .sel, .coll .search { font-size: 14px; }
-.coll .sel, .coll .search { border: 7px solid transparent; border-image: var(--wood); border-radius: 0; background: none; color: var(--ink); font-weight: 600; box-sizing: border-box; filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
-.coll .sel { padding: 0 6px; } .coll .search { padding: 0 10px; } .coll .search::placeholder { color: var(--ink2); font-weight: 500; }
-.coll .search:focus { outline: 2px solid #f0ece4; outline-offset: 1px; }
+.coll .sel, .coll .search { background-color: var(--glass); border-color: var(--line2); color: #e4d9c6; }
+.coll .search::placeholder { color: #9d917e; }
+.coll .selw { position: relative; display: inline-flex; }
+.coll .sel { appearance: none; -webkit-appearance: none; padding-right: 30px; cursor: pointer; }
+.coll .selw::after { content: ''; position: absolute; right: 12px; top: 50%; width: 14px; height: 14px; margin-top: -7px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9bda9' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; }
 /* Family medallions in the board's rim: neutral stone, blue when chosen. */
-.coll .tab .med { border: 0; box-shadow: none; }
+.coll .tab .med { border: 0; }
 .coll .tab::before { content: ''; position: absolute; inset: -4px; z-index: 2; pointer-events: none; background: url(/static/kit2/rim_n.webp) center / contain no-repeat; filter: drop-shadow(0 2px 2px rgba(0,0,0,.55)); }
 .coll .tab.on::before { background-image: url(/static/kit2/rim_a.webp); }
 .coll .tab.on .med { box-shadow: none; }
 .coll .tab:hover:not(.on)::before { filter: brightness(1.25) drop-shadow(0 2px 2px rgba(0,0,0,.55)); }
-/* The deck column: a granite outcrop. */
-.coll .side { border-left: 0; background: none; position: relative; }
-.coll .side::before { content: ''; position: absolute; inset: -18px -26px -22px -10px; background: url(/static/kit2/coll_rock.webp) center / 100% 100% no-repeat; filter: drop-shadow(-6px 6px 10px rgba(0,0,0,.6)); pointer-events: none; }
-.coll .clist, .coll .sfoot { position: relative; }
-.coll .clist { padding: 18px 18px 14px 22px; }
-.coll .dsep { background: rgba(0,0,0,.35); box-shadow: 0 1px 0 rgba(255,255,255,.06); }
-.coll .sfoot { border-top: 0; padding: 4px 18px 16px 22px; display: flex; justify-content: center; }
-/* Deck tiles: the cover painting in a driftwood frame. */
-.coll .dtile { border-radius: 4px; box-shadow: 0 3px 6px rgba(0,0,0,.55); }
-.coll .dtile::after { content: ''; position: absolute; inset: -3px; border: 7px solid transparent; border-image: url(/static/kit2/card_plaque.webp) 36 / 7px stretch; pointer-events: none; }
-.coll .dtile.on { box-shadow: 0 3px 6px rgba(0,0,0,.55); border-radius: 4px 4px 0 0; }
-.coll .dtile::before { border-radius: 4px; }
-/* The open deck: a driftwood board under its tile; headings in ink. */
-.coll .dbody { margin-top: -3px; padding: 12px 12px 14px; border: 9px solid transparent; border-image: var(--wood); background: none; border-radius: 0; filter: drop-shadow(0 4px 6px rgba(0,0,0,.5)); }
-.coll .rh { color: var(--ink2); font-weight: 700; } .coll .rh .full { color: #1f4f86; }
-.coll .fams div { color: var(--ink); }
-.coll .st { background: #2b221a; box-shadow: inset 0 1px 2px rgba(0,0,0,.5); }
-.coll .st .n, .coll .st .s { color: #f3ead8; }
-@keyframes collFlash { 0% { background-color: #7fb2e8; } 100% { background-color: #2b221a; } }
-/* Play is the blue river stone, like End turn; not ready yet, it is grey stone with the count. */
-.coll .play { margin: 16px auto 0; width: 210px; height: 74px; border-radius: 0; background: url(/static/kit2/btn_a.webp) center / 100% 100% no-repeat; color: #0f213b; text-shadow: 0 1px 0 rgba(255,255,255,.25); font-size: 21px; filter: drop-shadow(2px 4px 5px rgba(0,0,0,.5)); transition: transform .12s; }
-.coll .play:hover { background-color: transparent; background-image: url(/static/kit2/btn_a.webp); transform: translateY(-2px); }
-.coll .play.off { background-image: url(/static/kit2/btn_n.webp); color: #3a3530; text-shadow: 0 1px 0 rgba(255,255,255,.2); font-size: 16px; }
+/* The deck column: the same ground, in shade. */
+.coll .side { border-left: 0; background: linear-gradient(90deg, rgba(8,6,4,.35), rgba(8,6,4,.62) 40px); }
+.coll .dsep { background: var(--line2); }
+.coll .sfoot { border-top: 1px solid var(--line2); }
+.coll .dtile { background-color: #241b13; }
+.coll .dtile.on { box-shadow: inset 0 0 0 2px #cfc3ad; }
+.coll .dbody { background: var(--glass); }
+.coll .rh { color: #9d917e; } .coll .rh .full { color: #9cc3ec; }
+.coll .st { background: #2a2119; }
+@keyframes collFlash { 0% { background-color: #7fb2e8; } 100% { background-color: #2a2119; } }
+.coll .backbtn { background: transparent; color: #9d917e; } .coll .backbtn:hover { background: var(--glass); color: #f0ece4; }
+/* Play: the blue river stone, like End turn. Not ready yet: a quiet count in its place. */
+.coll .play { margin: 16px auto 2px; width: 200px; height: 70px; border-radius: 0; background: url(/static/kit2/btn_a.webp) center / 100% 100% no-repeat; color: #0f213b; text-shadow: 0 1px 0 rgba(255,255,255,.25); font-size: 21px; filter: drop-shadow(2px 4px 5px rgba(0,0,0,.5)); transition: transform .12s; }
+.coll .play:hover { background: url(/static/kit2/btn_a.webp) center / 100% 100% no-repeat; transform: translateY(-2px); }
+.coll .play.off { width: auto; height: 44px; margin-top: 12px; background: var(--glass); border: 1px dashed var(--line2); border-radius: 8px; color: #9d917e; text-shadow: none; font-size: 16px; filter: none; }
 .coll .play.off:hover { transform: none; }
-/* Back: a small grey stone at the foot of the outcrop. */
-.coll .backbtn { width: 128px; height: 50px; border-radius: 0; background: url(/static/kit2/btn_n.webp) center / 100% 100% no-repeat; color: #2e2a26; font-weight: 600; text-shadow: 0 1px 0 rgba(255,255,255,.2); filter: drop-shadow(1px 3px 4px rgba(0,0,0,.5)); }
-.coll .backbtn:hover { background-color: transparent; color: #111; transform: translateY(-1px); }
-/* Dialogs: a driftwood board; Delete is the red stone, Cancel the grey one. */
-.coll .dlg { border: 12px solid transparent; border-image: var(--wood); border-radius: 0; background: none; box-shadow: none; filter: drop-shadow(0 16px 30px rgba(0,0,0,.7)); padding: 16px 18px 14px; }
-.coll .dlg h3 { color: var(--ink); } .coll .dlg p { color: var(--ink2); font-weight: 500; }
-.coll .dbtns button { height: 46px; min-width: 120px; border: 0; border-radius: 0; background: url(/static/kit2/btn_n.webp) center / 100% 100% no-repeat; color: #2e2a26; filter: drop-shadow(1px 3px 4px rgba(0,0,0,.45)); }
-.coll .dbtns .cancel, .coll .dbtns .cancel:hover { background: url(/static/kit2/btn_n.webp) center / 100% 100% no-repeat; color: #2e2a26; border: 0; }
-.coll .dbtns .danger, .coll .dbtns .danger:hover { background: url(/static/kit2/btn_b.webp) center / 100% 100% no-repeat; color: #fff3ec; text-shadow: 0 1px 2px rgba(0,0,0,.5); border: 0; }
-.coll .dbtns button:hover { transform: translateY(-1px); }
-.coll .cv.on { box-shadow: 0 0 0 3px #c9b48f, 0 0 0 5px #1d140a; }
-.coll .none { color: #cdbfa6; } .coll .quiet { border: 0; background: url(/static/kit2/btn_n.webp) center / 100% 100% no-repeat; color: #2e2a26; height: 46px; min-width: 130px; }
-/* The open deck's board is darker driftwood than the card's, so the cards stay the brightest thing on screen. */
-.coll .dbody { filter: brightness(.55) saturate(.8) drop-shadow(0 4px 6px rgba(0,0,0,.5)); }
-.coll .dbody > * { filter: brightness(1.82) saturate(1.25); }   /* only the board darkens, not what is on it */
-.coll .rh { color: #1d140a; } .coll .rh .full { color: #16427a; }
-/* Dropdown arrows in ink, over the driftwood. */
-.coll .selw { position: relative; display: inline-flex; }
-.coll .selw::after { content: ''; position: absolute; right: 12px; top: 50%; width: 14px; height: 14px; margin-top: -7px; pointer-events: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d140a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; }
-.coll .sel { appearance: none; -webkit-appearance: none; padding-right: 30px; cursor: pointer; }
+/* Dialogs: a dark layer; Delete is the red stone. */
+.coll .dlg { background: #1f1812; border-color: var(--line2); }
+.coll .dlg p { color: #b3a792; }
+.coll .dbtns .danger, .coll .dbtns .danger:hover { min-width: 132px; height: 50px; border: 0; border-radius: 0; background: url(/static/kit2/btn_b.webp) center / 100% 100% no-repeat; color: #fff3ec; text-shadow: 0 1px 2px rgba(0,0,0,.5); filter: drop-shadow(1px 3px 4px rgba(0,0,0,.45)); }
+.coll .dbtns .danger:hover { transform: translateY(-1px); }
+.coll .cv.on { box-shadow: 0 0 0 3px #1f1812, 0 0 0 5px #cfc3ad; }
+.coll .none { color: #b3a792; }
