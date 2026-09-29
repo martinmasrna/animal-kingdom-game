@@ -154,3 +154,14 @@
 .coll .ddo.on { color: #fff; font-weight: 700; }
 .coll .ddm { max-height: none; overflow: visible; }
 .coll .cgrid, .coll .clist { scrollbar-color: #4a4540 transparent; }
+/* The foot of the column: one row, Back compact on the left, New deck filling the rest. Finer grain; hover lifts, not glows. */
+.coll .sfoot { flex-direction: row; gap: 8px; }
+.coll .backbtn { width: auto; flex: none; padding: 0 16px 0 10px; }
+.coll .dnew { flex: 1; }
+.coll .sel, .coll .search, .coll .dnew, .coll .backbtn, .coll .ddm { background-size: 300px auto; }
+.coll .dnew, .coll .backbtn, .coll .dd .sel { transition: transform .1s, box-shadow .1s; }
+.coll .dnew:hover, .coll .backbtn:hover, .coll .dd .sel:hover { filter: none; transform: translateY(-1px); color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,245,230,.34), inset 0 -2px 0 rgba(0,0,0,.35), 0 5px 9px rgba(0,0,0,.6); }
+.coll .dnew:active, .coll .backbtn:active, .coll .dd .sel:active { transform: translateY(1px); box-shadow: inset 0 1px 3px rgba(0,0,0,.5); }
+.coll .backbtn { order: -1; }
+.coll .dnew:hover, .coll .backbtn:hover { background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; }
