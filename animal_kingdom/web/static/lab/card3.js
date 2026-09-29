@@ -11,6 +11,6 @@ export function cardHTML(c, { str = c.str, cls = '' } = {}) {
   const [name, title] = c.name.includes(', ') ? [c.name.slice(0, c.name.indexOf(', ')), c.name.slice(c.name.indexOf(', ') + 2)] : [c.name, ''];
   const art = hasArt(c.id) ? ` style="background-image:url(${artUrl(c.id)})"` : '';
   return `<div class="card3 ${c.rarity} ${cls}"><div class="art"${art}></div>` +
-    `<div class="bar"><span>${name}</span></div><div class="tab"><div class="face"><span class="n">${chalk(str)}</span></div></div>` +
+    `<div class="bar"><span>${name}</span></div><div class="tab"><div class="face"><span class="n${String(str).length > 1 ? ' two' : ''}">${chalk(str)}</span></div></div>` +
     `<div class="rules">${title ? `<em>${title}</em>` : ''}${c.text ? `<p>${rules(c.text)}</p>` : ''}<i>${c.tags.join(' · ')}</i></div></div>`;
 }
