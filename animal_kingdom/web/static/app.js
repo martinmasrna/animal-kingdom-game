@@ -122,6 +122,7 @@ function route() {
   if (parts[0] === 'play') return playScreen();
   if (parts[0] === 'collection') return collectionScreen();
   if (parts[0] === 'profile') return profileScreen();
+  if (parts[0] === 'auth') return finishSignIn(parts[1]);
   if (parts[0] === 'join' && id) return joinScreen(id);
   if (parts[0] === 'm' && id) return matchScreen(id);
   if (parts[0] === 'lab' && parts[1]) return labScreen(parts[1]);
@@ -254,22 +255,44 @@ function collectionScreen() {
 
 // ------------------------------------------------------------------ profile
 // Your name#tag, the sign-in code that brings this profile to another device, and your finished matches.
+const PROVIDER = { google: 'Google', discord: 'Discord' };
+// Back from Google/Discord: swap the one-time code for this device's own session key.
+async function finishSignIn(code) {
+  history.replaceState(null, '', '#/profile');
+  const r = code && code !== 'failed' ? await api('/api/auth/redeem', { method: 'POST', body: JSON.stringify({ code }) }) : null;
+  if (!r || !r.ok) { toast('Sign-in didn\'t go through, try again'); return profileScreen(); }
+  const m = await r.json(); store('ak:key', m.key); ME = m.profile;
+  toast(`Signed in as ${ME.name}#${ME.tag}`, true); profileScreen();
+}
 function profileScreen() {
   screen = 'profile';
+  const unlinked = ME.providers.filter(p => !ME.logins.some(l => l.provider === p));
   const when = t => new Date(t * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
   const hist = ME.history.map(h => `<div class="hr"><span class="d">${when(h.ended)}</span><b class="${h.won > h.lost ? 'A' : h.won < h.lost ? 'B' : ''}">${h.won}–${h.lost}</b>
     <span>${esc(h.my_deck)} <i>vs</i> ${esc(h.opp_deck)}</span><span class="o">${esc(h.opp)}${h.kind === 'gauntlet' ? ' · gauntlet' : ''}</span></div>`).join('');
   app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Menu</a><h1>Profile</h1></div>
     <div class="body prof"><div class="pside">
       <div class="lbl">Name</div><div class="row"><input class="namein" id="pname" maxlength="20" value="${esc(ME.name)}"><span class="tag">#${ME.tag}</span></div>
-      <div class="lbl">Sign-in code</div><div class="hint">Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</div>
+      ${ME.logins.length ? `<div class="lbl">Account</div>${ME.logins.map(l => `<div class="login">${PROVIDER[l.provider]} · ${esc(l.label)}</div>`).join('')}
+        <div class="row">${unlinked.map(p => `<span class="chip" data-login="${p}">Also sign in with ${PROVIDER[p]}</span>`).join('')}<span class="chip" id="signout">Sign out</span></div>`
+      : ME.providers.length ? `<div class="lbl">Account</div><div class="hint">Sign in to keep your decks and matches on every device.</div>
+        <div class="row">${ME.providers.map(p => `<span class="chip on" data-login="${p}">Sign in with ${PROVIDER[p]}</span>`).join('')}</div>` : ''}
+      ${ME.logins.length ? '' : `<div class="lbl">Sign-in code</div><div class="hint">Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</div>
       <div class="row"><span class="code keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span></div>
       <div class="row"><span class="chip" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</span><span class="chip" id="copykey">Copy</span></div>
-      <div class="lbl">Use a different profile</div><div class="row"><input class="namein" id="other" placeholder="Sign-in code"><span class="chip" id="signin">Sign in</span></div>
+      <div class="lbl">Use a different profile</div><div class="row"><input class="namein" id="other" placeholder="Sign-in code"><span class="chip" id="signin">Sign in</span></div>`}
     </div><div class="phist"><div class="lbl">Matches</div>${hist || '<div class="hint">No finished matches yet.</div>'}</div></div>`;
   const nm = document.getElementById('pname');
   nm.onchange = async () => { const r = await api('/api/me', { method: 'PATCH', body: JSON.stringify({ name: nm.value }) });
     if (!r.ok) return toast(await r.text()); ME = await r.json(); profileScreen(); };
+  app.querySelectorAll('[data-login]').forEach(el => el.onclick = async () => {
+    const r = await api('/api/auth/' + el.dataset.login, { method: 'POST' });
+    if (!r.ok) return toast(await r.text());
+    location.href = (await r.json()).url;
+  });
+  const so = document.getElementById('signout');
+  if (so) so.onclick = async () => { await api('/api/signout', { method: 'POST' }); localStorage.removeItem('ak:key'); await loadProfile(); location.hash = '#/'; };
+  if (ME.logins.length) return;
   document.getElementById('showkey').onclick = () => { ui.showKey = !ui.showKey; profileScreen(); };
   document.getElementById('copykey').onclick = () => navigator.clipboard.writeText(store('ak:key')).then(() => toast('Sign-in code copied', true), () => toast(store('ak:key')));
   const other = document.getElementById('other');

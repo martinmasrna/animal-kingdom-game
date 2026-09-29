@@ -2,7 +2,9 @@
 
 There are no passwords. A first visit creates a guest profile and hands the browser its sign-in
 code, which the browser then sends with every request (header `X-AK-Key`). Typing the same code on
-another device signs that device in to the same profile. Only a hash of the code is stored.
+another device signs that device in to the same profile. Signing in with Google or Discord links
+that identity to the profile; each device that signs in that way gets its own session key, sent
+the same way. Only hashes of codes and session keys are stored.
 
 One SQLite file (`results/web.db`, or `$AK_DB`); in memory when `AK_NO_GAME_LOGS` is set, so test
 servers never touch real profiles.
@@ -32,6 +34,11 @@ CREATE TABLE IF NOT EXISTS profiles (
 CREATE TABLE IF NOT EXISTS decks (
     profile TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, cards TEXT NOT NULL, pos INTEGER NOT NULL,
     PRIMARY KEY (profile, id));
+CREATE TABLE IF NOT EXISTS sessions (
+    key_hash TEXT PRIMARY KEY, profile TEXT NOT NULL, created REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS identities (
+    provider TEXT NOT NULL, subject TEXT NOT NULL, profile TEXT NOT NULL, label TEXT NOT NULL,
+    created REAL NOT NULL, PRIMARY KEY (provider, subject));
 CREATE TABLE IF NOT EXISTS history (
     profile TEXT NOT NULL, match TEXT NOT NULL, ended REAL NOT NULL, kind TEXT NOT NULL,
     my_deck TEXT NOT NULL, opp TEXT NOT NULL, opp_deck TEXT NOT NULL, won INTEGER NOT NULL, lost INTEGER NOT NULL,
@@ -94,8 +101,60 @@ class Profiles:
         return code, self.get(pid)
 
     def by_code(self, code: str) -> Optional[dict]:
-        row = self.db.execute("SELECT id FROM profiles WHERE key_hash = ?", (_hash(code),)).fetchone()
-        return self.get(row["id"]) if row else None
+        """The profile a sign-in code or a device's session key belongs to."""
+        h = _hash(code)
+        row = self.db.execute("SELECT id FROM profiles WHERE key_hash = ? UNION ALL "
+                              "SELECT profile FROM sessions WHERE key_hash = ?", (h, h)).fetchone()
+        return self.get(row[0]) if row else None
+
+    # ------------------------------------------------------------- sign-in with Google / Discord
+    def new_session(self, pid: str) -> str:
+        """A key for one device signed in to `pid`."""
+        key = _new_code()
+        with self.db:
+            self.db.execute("INSERT INTO sessions VALUES (?, ?, ?)", (_hash(key), pid, time.time()))
+        return key
+
+    def end_session(self, key: str) -> None:
+        with self.db:
+            self.db.execute("DELETE FROM sessions WHERE key_hash = ?", (_hash(key),))
+
+    def identities(self, pid: str) -> list[dict]:
+        return [dict(r) for r in self.db.execute(
+            "SELECT provider, label FROM identities WHERE profile = ? ORDER BY created", (pid,))]
+
+    def sign_in(self, provider: str, subject: str, label: str, guest: Optional[str]) -> dict:
+        """Someone proved they own `provider`/`subject`. If that identity already has a profile,
+        that's who they are, and whatever the guest profile `guest` built moves into it;
+        otherwise the identity is linked to the guest profile, which becomes the account."""
+        row = self.db.execute("SELECT profile FROM identities WHERE provider = ? AND subject = ?",
+                              (provider, subject)).fetchone()
+        with self.db:
+            if row:
+                pid = row["profile"]
+                self.db.execute("UPDATE identities SET label = ? WHERE provider = ? AND subject = ?",
+                                (label, provider, subject))
+                if guest and guest != pid:
+                    self._absorb(pid, guest)
+            else:
+                pid = guest or self.create()[1]["id"]
+                self.db.execute("INSERT INTO identities VALUES (?, ?, ?, ?, ?)",
+                                (provider, subject, pid, label, time.time()))
+        return self.get(pid)
+
+    def _absorb(self, pid: str, guest: str) -> None:
+        """Move a guest profile's decks and history into `pid`, unless the guest is itself an account."""
+        if self.db.execute("SELECT 1 FROM identities WHERE profile = ?", (guest,)).fetchone():
+            return
+        pos = self.db.execute("SELECT COALESCE(MAX(pos), -1) FROM decks WHERE profile = ?", (pid,)).fetchone()[0]
+        for d in self.db.execute("SELECT id, name, cards FROM decks WHERE profile = ? ORDER BY pos", (guest,)).fetchall():
+            pos += 1
+            self.db.execute("INSERT OR REPLACE INTO decks VALUES (?, ?, ?, ?, ?)",
+                            (pid, f"{d['id']}-{guest[:4]}", d["name"], d["cards"], pos))
+        self.db.execute("UPDATE OR IGNORE history SET profile = ? WHERE profile = ?", (pid, guest))
+        for table in ("decks", "history", "sessions"):
+            self.db.execute(f"DELETE FROM {table} WHERE profile = ?", (guest,))
+        self.db.execute("DELETE FROM profiles WHERE id = ?", (guest,))
 
     def get(self, pid: str) -> Optional[dict]:
         row = self.db.execute("SELECT id, name, tag FROM profiles WHERE id = ?", (pid,)).fetchone()

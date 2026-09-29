@@ -23,6 +23,7 @@ from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine.state import EngineError
 from ..engine.cards import DECK_SLUGS
 from . import custom_decks
+from . import oauth
 from .profiles import ProfileError, Profiles
 from .match import BOT_LEVELS, DECK_NAMES, Match, Seat, card_pool, map_info
 
@@ -149,7 +150,55 @@ def display(p: dict) -> str:
 
 
 def profile_view(p: dict) -> dict:
-    return {**p, "decks": profiles.decks(p["id"]), "history": profiles.history(p["id"])}
+    return {**p, "decks": profiles.decks(p["id"]), "history": profiles.history(p["id"]),
+            "logins": profiles.identities(p["id"]), "providers": oauth.available()}
+
+
+# ----------------------------------------------------------------- sign in with Google / Discord
+flow = oauth.Flow()
+
+
+def callback_url(req, provider: str) -> str:
+    base = os.environ.get("AK_BASE_URL") or f"{req.headers.get('X-Forwarded-Proto', req.scheme)}://{req.host}"
+    return f"{base}/auth/{provider}/callback"
+
+
+async def auth_start(req):
+    provider, player = req.match_info["provider"], profile_of(req)
+    try:
+        url = flow.start(provider, player and player["id"], callback_url(req, provider))
+    except oauth.OAuthError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    return web.json_response({"url": url})
+
+
+async def auth_callback(req):
+    provider = req.match_info["provider"]
+    try:
+        if "code" not in req.query:
+            raise oauth.OAuthError(req.query.get("error", "sign-in cancelled"))
+        guest = flow.claim(provider, req.query.get("state", ""))
+        subject, label = await oauth.identify(provider, req.query["code"], callback_url(req, provider))
+        p = profiles.sign_in(provider, subject, label, guest)
+        raise web.HTTPFound(f"/#/auth/{flow.hand_off(profiles.new_session(p['id']))}")
+    except oauth.OAuthError as e:
+        log.info("sign-in with %s failed: %s", provider, e)
+        raise web.HTTPFound("/#/auth/failed")
+
+
+async def auth_redeem(req):
+    key = flow.redeem((await req.json()).get("code", ""))
+    p = profiles.by_code(key) if key else None
+    if p is None:
+        raise web.HTTPNotFound(text="that sign-in expired, try again")
+    return web.json_response({"key": key, "profile": profile_view(p)})
+
+
+async def sign_out(req):
+    code = req.headers.get("X-AK-Key")
+    if code:
+        profiles.end_session(code)
+    return web.json_response({})
 
 
 async def create_profile(req):
@@ -341,6 +390,10 @@ def make_app() -> web.Application:
         web.get("/api/me", get_me),
         web.patch("/api/me", patch_me),
         web.put("/api/me/decks", put_decks),
+        web.post("/api/auth/redeem", auth_redeem),
+        web.post("/api/auth/{provider}", auth_start),
+        web.post("/api/signout", sign_out),
+        web.get("/auth/{provider}/callback", auth_callback),
         web.post("/api/match", create_match),
         web.post("/api/match/{id}/join", join_match),
         web.get("/ws/{id}", socket),
