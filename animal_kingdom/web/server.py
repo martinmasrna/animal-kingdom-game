@@ -23,6 +23,7 @@ from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine.state import EngineError
 from ..engine.cards import DECK_SLUGS
 from . import custom_decks
+from .profiles import ProfileError, Profiles
 from .match import BOT_LEVELS, DECK_NAMES, Match, Seat, card_pool, map_info
 
 STATIC = Path(__file__).parent / "static"
@@ -86,6 +87,7 @@ class Hub:
                 log.exception("could not reload %s", path.name)
                 continue
             match.on_game_end = save_game
+            match.on_match_end = record_match
             self.matches[match.id] = match
         log.info("reloaded %d saved matches", len(self.matches))
 
@@ -126,6 +128,87 @@ class Hub:
 
 
 hub = Hub()
+profiles: Profiles = None         # opened at startup (make_app), so importing the module touches no files
+
+
+# ----------------------------------------------------------------- profiles
+def profile_of(req) -> dict | None:
+    code = req.headers.get("X-AK-Key")
+    return profiles.by_code(code) if code else None
+
+
+def me(req) -> dict:
+    p = profile_of(req)
+    if p is None:
+        raise web.HTTPUnauthorized(text="unknown sign-in code")
+    return p
+
+
+def display(p: dict) -> str:
+    return f"{p['name']}#{p['tag']}"
+
+
+def profile_view(p: dict) -> dict:
+    return {**p, "decks": profiles.decks(p["id"]), "history": profiles.history(p["id"])}
+
+
+async def create_profile(req):
+    body = await req.json() if req.can_read_body else {}
+    try:
+        code, p = profiles.create(body.get("name") or "Player")
+        if body.get("decks"):
+            profiles.save_decks(p["id"], body["decks"])
+    except ProfileError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    return web.json_response({"code": code, "profile": profile_view(p)})
+
+
+async def get_me(req):
+    return web.json_response(profile_view(me(req)))
+
+
+async def patch_me(req):
+    body = await req.json()
+    try:
+        p = profiles.rename(me(req)["id"], body.get("name"))
+    except ProfileError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    return web.json_response(profile_view(p))
+
+
+async def put_decks(req):
+    try:
+        decks = profiles.save_decks(me(req)["id"], await req.json())
+    except ProfileError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    return web.json_response(decks)
+
+
+async def sign_in(req):
+    body = await req.json()
+    p = profiles.by_code(body.get("code", ""))
+    if p is None:
+        raise web.HTTPNotFound(text="no profile has that sign-in code")
+    return web.json_response(profile_view(p))
+
+
+def record_match(match: Match) -> None:
+    """Add a finished series to each human player's history."""
+    kind = "gauntlet" if match.schedule else "bot" if any(s.is_bot for s in match.seats.values()) else "friend"
+    rotating = match.schedule[0].get("seat", "B") if match.schedule else None
+    score = match.score()
+    for p, seat in match.seats.items():
+        if not seat.profile or seat.is_bot:
+            continue
+        o = "B" if p == "A" else "A"
+        other = match.seats[o]
+        deck = lambda q: "Starter decks" if q == rotating else DECK_NAMES.get(match.seats[q].deck, match.seats[q].deck)
+        try:
+            profiles.record(seat.profile, f"{match.id}-{match.rematches}", kind=kind, my_deck=deck(p),
+                            opp=f"Bot · {other.bot.capitalize()}" if other.is_bot else other.name,
+                            opp_deck=deck(o), won=score[p], lost=score[o])
+        except Exception:
+            log.exception("could not record match %s in a history", match.id)
 
 
 async def index(_req):
@@ -149,7 +232,9 @@ async def create_match(req):
     except EngineError as e:
         raise web.HTTPBadRequest(text=str(e))
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
-    match = Match(mid, Seat(token, body.get("name") or "You", deck=deck))
+    player = profile_of(req)
+    match = Match(mid, Seat(token, display(player) if player else body.get("name") or "You", deck=deck,
+                            profile=player and player["id"]))
     bot = body.get("bot")
     gauntlet = body.get("gauntlet")
     if gauntlet:
@@ -173,6 +258,7 @@ async def create_match(req):
     else:
         match.version += 1
     match.on_game_end = save_game
+    match.on_match_end = record_match
     hub.matches[mid] = match
     hub.save(match)
     return web.json_response({"id": mid, "token": token, "seat": "A"})
@@ -188,8 +274,10 @@ async def join_match(req):
     except EngineError as e:
         raise web.HTTPBadRequest(text=str(e))
     token = secrets.token_urlsafe(12)
+    player = profile_of(req)
     try:
-        seat = match.join(Seat(token, body.get("name") or "Friend", deck=deck))
+        seat = match.join(Seat(token, display(player) if player else body.get("name") or "Friend", deck=deck,
+                               profile=player and player["id"]))
     except EngineError as e:
         raise web.HTTPConflict(text=str(e))
     await hub.push(match)
@@ -248,6 +336,11 @@ def make_app() -> web.Application:
     app.add_routes([
         web.get("/", index),
         web.get("/api/pool", pool),
+        web.post("/api/profile", create_profile),
+        web.post("/api/signin", sign_in),
+        web.get("/api/me", get_me),
+        web.patch("/api/me", patch_me),
+        web.put("/api/me/decks", put_decks),
         web.post("/api/match", create_match),
         web.post("/api/match/{id}/join", join_match),
         web.get("/ws/{id}", socket),
@@ -256,6 +349,8 @@ def make_app() -> web.Application:
     app.on_response_prepare.append(_revalidate)
 
     async def resume(_app):
+        global profiles
+        profiles = Profiles()
         custom_decks.load()
         hub.load()
         for match in hub.matches.values():

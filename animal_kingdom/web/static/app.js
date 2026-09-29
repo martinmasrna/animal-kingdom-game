@@ -17,7 +17,7 @@ const tokenKey = id => 'ak:seat:' + id;
 const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } catch { return null; } };
 const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } catch { /* private mode: the tab just can't reconnect */ } };
 
-let CARDS = {}, MAP, DECKS = [];
+let CARDS = {}, MAP, DECKS = [], ME = null;   // ME: your profile {id, name, tag, decks, history}
 let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, hover: null, peek: false, menu: false, panel: null };
 
@@ -43,6 +43,7 @@ function tribes(list) {
   Object.entries(list).forEach(([id, n]) => CARDS[id].tags.filter(x => FAM.includes(x)).forEach(x => t[x] = (t[x] || 0) + n));
   return Object.entries(t).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([x, k]) => k + ' ' + x).join(' · ');
 }
+const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 const counted = ids => ids.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {});
 function cardPop(el, id, extra, place) {
   const c = CARDS[id], r = el.getBoundingClientRect();
@@ -50,8 +51,9 @@ function cardPop(el, id, extra, place) {
   pop.innerHTML = cardHTML(c) + (extra ? `<div class="ev">${extra}</div>` : '');
   pop.style.display = 'flex';
   const h = pop.offsetHeight;
-  if (place === 'below') { pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; }
-  else { pop.style.left = (r.right + 10 + 190 > innerWidth ? r.left - 200 : r.right + 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; }
+  const w = pop.offsetWidth;
+  if (place === 'below') { pop.style.left = Math.min(r.left, innerWidth - w - 10) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; }
+  else { pop.style.left = (r.right + 10 + w > innerWidth ? r.left - w - 10 : r.right + 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; }
 }
 function wirePops(root) {
   root.querySelectorAll('[data-card]').forEach(el => {
@@ -77,9 +79,19 @@ function deckTile(d, on) {
   const list = counted(d.list), cover = COVER[d.id] || (d.mine && sortIds(Object.keys(list))[0]), cv = cover ? artStyle(cover) : '';
   return `<div class="dk${on ? ' on' : ''}" data-deck="${d.id}"><div class="cv gradart" ${cv}></div><div class="in"><b>${d.name}</b><span>${d.mine ? 'Your deck' : 'Starter deck'} · ${d.list.length} cards</span><span>${tribes(list)}</span></div></div>`;
 }
-// Player-built decks live in this browser: [{id, name, cards: {cardId: copies}}]. Only complete ones are playable.
-const myDecks = () => { try { return JSON.parse(localStorage.getItem('ak:decks') || '[]').map(d => ({ ...d, cards: Object.fromEntries(Object.entries(d.cards).filter(([id]) => CARDS[id])) })); } catch { return []; } };
-const saveDecks = ds => { try { localStorage.setItem('ak:decks', JSON.stringify(ds)); } catch { /* private mode */ } };
+// Your profile: the server knows you by the sign-in code this browser keeps (localStorage 'ak:key').
+const api = (path, opts = {}) => fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', 'X-AK-Key': store('ak:key') || '', ...(opts.headers || {}) } });
+async function loadProfile() {
+  if (store('ak:key')) { const r = await api('/api/me'); if (r.ok) return ME = await r.json(); }
+  // First visit (or the code no longer exists): a new guest profile, taking along any decks built in this browser before profiles.
+  let decks = []; try { decks = JSON.parse(localStorage.getItem('ak:decks') || '[]'); } catch { /* none */ }
+  const r = await api('/api/profile', { method: 'POST', body: JSON.stringify({ decks }) });
+  if (!r.ok) return ME = { name: 'Player', tag: '', decks: [], history: [] };
+  const m = await r.json(); store('ak:key', m.code); return ME = m.profile;
+}
+// Player-built decks live in the profile: [{id, name, cards: {cardId: copies}}]. Only complete ones are playable.
+const myDecks = () => ME.decks.map(d => ({ ...d, cards: Object.fromEntries(Object.entries(d.cards).filter(([id]) => CARDS[id])) }));
+const saveDecks = ds => { ME.decks = ds; api('/api/me/decks', { method: 'PUT', body: JSON.stringify(ds) }).then(r => r.ok || toast('Could not save your decks')); };
 const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
 const playable = () => DECKS.concat(myDecks().filter(d => deckSize(d.cards) === 30).map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) })));
 const chosenDeck = () => { const all = playable(), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
@@ -89,6 +101,7 @@ const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
   CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks;
+  await loadProfile();
   addEventListener('hashchange', route);
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
@@ -108,6 +121,7 @@ function route() {
   if (parts[0] !== 'm' || id !== wsId) disconnect();
   if (parts[0] === 'play') return playScreen();
   if (parts[0] === 'collection') return collectionScreen();
+  if (parts[0] === 'profile') return profileScreen();
   if (parts[0] === 'join' && id) return joinScreen(id);
   if (parts[0] === 'm' && id) return matchScreen(id);
   if (parts[0] === 'lab' && parts[1]) return labScreen(parts[1]);
@@ -117,7 +131,8 @@ function route() {
 function homeScreen() {
   screen = 'home';
   app.innerHTML = `<div class="home-bg"></div><div class="center"><div class="title">Animal<br>Kingdom</div>
-    <div class="nav"><a class="play" href="#/play">Play</a><a href="#/collection">Collection</a></div></div>`;
+    <div class="nav"><a class="play" href="#/play">Play</a><a href="#/collection">Collection</a></div></div>
+    <a class="me" href="#/profile">${esc(ME.name)}<span>#${ME.tag}</span></a>`;
 }
 
 // ------------------------------------------------------------------ play
@@ -158,7 +173,7 @@ function playScreen() {
       body.bot = { level: play.level, deck: bd };
     }
     if (play.opp === 'gauntlet') body.gauntlet = { level: play.level, reverse: rev };
-    const r = await fetch('/api/match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
   };
@@ -174,7 +189,7 @@ function joinScreen(id) {
     <div class="bar"><span class="fmt">Best of 3 · one deck for the whole match · both decklists open</span><button class="btn primary" id="go">Join</button></div>`;
   app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:deck', el.dataset.deck); joinScreen(id); });
   document.getElementById('go').onclick = async () => {
-    const r = await fetch(`/api/match/${id}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deck: deckSpec(chosen), name: 'Friend' }) });
+    const r = await api(`/api/match/${id}/join`, { method: 'POST', body: JSON.stringify({ deck: deckSpec(chosen), name: 'Friend' }) });
     if (!r.ok) return toast(r.status === 404 ? `No match ${id}` : await r.text());
     const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
   };
@@ -203,7 +218,7 @@ function collectionScreen() {
                               : (a, b) => RANK[a.rarity] - RANK[b.rarity] || sv(a) - sv(b) || a.name.localeCompare(b.name));
   const seg = (k, opts) => '<span class="seg">' + opts.map(([v, l]) => `<span class="${coll[k] === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${l}</span>`).join('') + '</span>';
   const tiles = shown.map(c => { const n = cur ? cur.cards[c.id] || 0 : 0;
-    return `<div class="tl ${c.rarity}${cur && maxed(c) ? ' max' : ''}" data-add="${c.id}" data-card="${c.id}"><div class="im gradart" ${artStyle(c.id)}></div><span class="s">${c.str}</span>${n ? `<span class="c">${n}</span>` : ''}<span class="n">${c.name}</span></div>`; }).join('');
+    return `<div class="tl${cur && maxed(c) ? ' max' : ''}" data-add="${c.id}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n ? `<span class="c">${n}</span>` : ''}</div>`; }).join('');
   const sec = (r, label) => { const n = inDeck(r), cap = CAP[r];
     const list = cur ? Object.keys(cur.cards).filter(id => CARDS[id].rarity === r) : [];
     return `<h3><span>${label}</span><span class="${cap && n >= cap ? 'full' : ''}">${n}${cap ? ' / ' + cap : ''}</span></h3>` +
@@ -235,6 +250,34 @@ function collectionScreen() {
   document.getElementById('dsel').onchange = e => { coll.deck = e.target.value; collectionScreen(); };
   const nm = document.getElementById('dname'); nm.onchange = () => { cur.name = nm.value.trim() || 'New deck'; save(); };
   document.getElementById('ddel').onclick = () => { decks = decks.filter(d => d.id !== cur.id); coll.deck = null; save(); };
+}
+
+// ------------------------------------------------------------------ profile
+// Your name#tag, the sign-in code that brings this profile to another device, and your finished matches.
+function profileScreen() {
+  screen = 'profile';
+  const when = t => new Date(t * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  const hist = ME.history.map(h => `<div class="hr"><span class="d">${when(h.ended)}</span><b class="${h.won > h.lost ? 'A' : h.won < h.lost ? 'B' : ''}">${h.won}–${h.lost}</b>
+    <span>${esc(h.my_deck)} <i>vs</i> ${esc(h.opp_deck)}</span><span class="o">${esc(h.opp)}${h.kind === 'gauntlet' ? ' · gauntlet' : ''}</span></div>`).join('');
+  app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Menu</a><h1>Profile</h1></div>
+    <div class="body prof"><div class="pside">
+      <div class="lbl">Name</div><div class="row"><input class="namein" id="pname" maxlength="20" value="${esc(ME.name)}"><span class="tag">#${ME.tag}</span></div>
+      <div class="lbl">Sign-in code</div><div class="hint">Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</div>
+      <div class="row"><span class="code keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span></div>
+      <div class="row"><span class="chip" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</span><span class="chip" id="copykey">Copy</span></div>
+      <div class="lbl">Use a different profile</div><div class="row"><input class="namein" id="other" placeholder="Sign-in code"><span class="chip" id="signin">Sign in</span></div>
+    </div><div class="phist"><div class="lbl">Matches</div>${hist || '<div class="hint">No finished matches yet.</div>'}</div></div>`;
+  const nm = document.getElementById('pname');
+  nm.onchange = async () => { const r = await api('/api/me', { method: 'PATCH', body: JSON.stringify({ name: nm.value }) });
+    if (!r.ok) return toast(await r.text()); ME = await r.json(); profileScreen(); };
+  document.getElementById('showkey').onclick = () => { ui.showKey = !ui.showKey; profileScreen(); };
+  document.getElementById('copykey').onclick = () => navigator.clipboard.writeText(store('ak:key')).then(() => toast('Sign-in code copied', true), () => toast(store('ak:key')));
+  const other = document.getElementById('other');
+  const signIn = async () => { const r = await api('/api/signin', { method: 'POST', body: JSON.stringify({ code: other.value }) });
+    if (!r.ok) return toast('No profile has that sign-in code');
+    ME = await r.json(); store('ak:key', other.value.trim().toUpperCase()); ui.showKey = false; toast(`Signed in as ${ME.name}#${ME.tag}`, true); profileScreen(); };
+  document.getElementById('signin').onclick = signIn;
+  other.onkeydown = e => { if (e.key === 'Enter') signIn(); };
 }
 
 // ------------------------------------------------------------------ match connection
@@ -296,7 +339,7 @@ function seatLabel(p) {
   const s = V.seats[p];
   if (!s) return '';
   if (s.bot) return `Bot · ${s.bot[0].toUpperCase() + s.bot.slice(1)}`;
-  return p === V.you ? 'You' : 'Opponent';
+  return p === V.you ? 'You' : esc(s.name || 'Opponent');
 }
 
 function prematchScreen() {
@@ -413,7 +456,7 @@ function drawGame() {
     const cls = [c.rarity, can ? 'can' : '', can && h.ready ? 'ready' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick ? 'dim' : ''].join(' ');
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
-    return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str })}</div>`;
+    return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
   }).join('');
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
     e.stopPropagation();

@@ -51,6 +51,7 @@ class Seat:
     bot: Optional[str] = None        # bot level, or None for a human
     deck: Optional[str] = None
     ready: bool = False
+    profile: Optional[str] = None    # the player's profile id, when they have one
 
     @property
     def is_bot(self) -> bool:
@@ -144,6 +145,8 @@ class Match:
         self.action_times: list[float] = []   # seconds since the game started, one per action
         self.started_at = 0.0
         self.on_game_end = None          # callback(match, log record); the server saves human games
+        self.on_match_end = None         # callback(match); the server adds it to the players' histories
+        self.rematches = 0               # a rematch starts a new series in the same match
         self.rng = random.Random(secrets.randbits(32))
         self.created = datetime.now(timezone.utc)
         self.schedule: Optional[list[dict]] = None   # gauntlet: one {seat, deck, first} per game, in order
@@ -233,6 +236,7 @@ class Match:
         self.results = []
         self.state = None
         self.history = []
+        self.rematches += 1
         self.phase = "prematch"
         for seat in self.seats.values():
             seat.ready = seat.is_bot
@@ -287,6 +291,8 @@ class Match:
         if self.schedule:
             over = len(self.results) >= len(self.schedule)
         self.phase = "match_over" if over else "game_over"
+        if over and self.on_match_end:
+            self.on_match_end(self)
 
     def add_note(self, s: str, text: str) -> None:
         """Pin a comment to the current point of the game: it belongs after the first `at` actions."""
@@ -320,7 +326,7 @@ class Match:
                 "phase": self.phase, "results": self.results, "seed": self.seed,
                 "actions": self.actions, "notes": self.notes, "action_times": self.action_times,
                 "started_at": self.started_at, "created": self.created.isoformat(),
-                "schedule": self.schedule, "version": self.version,
+                "schedule": self.schedule, "version": self.version, "rematches": self.rematches,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [_jsonable(asdict(m)) for m in self.history]}
 
@@ -332,6 +338,7 @@ class Match:
         m.phase, m.results, m.seed = d["phase"], d["results"], d["seed"]
         m.actions, m.notes, m.action_times = d["actions"], d["notes"], d["action_times"]
         m.started_at, m.schedule, m.version = d["started_at"], d["schedule"], d["version"] + 1
+        m.rematches = d.get("rematches", 0)
         m.created = datetime.fromisoformat(d["created"])
         m.state = GameState.from_dict(d["state"]) if d["state"] else None
         m.history = [Move(**h) for h in d["history"]]
