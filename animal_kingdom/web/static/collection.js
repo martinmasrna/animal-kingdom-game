@@ -14,7 +14,6 @@ const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;'
 const svg = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ICON = {
   back: svg('<path d="M15 5l-7 7 7 7"/>'),
-  plus: svg('<path d="M12 5v14M5 12h14"/>'),
   image: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/>'),
   copy: svg('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>'),
   trash: svg('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
@@ -95,7 +94,7 @@ function render(app, all) {
 
   app.innerHTML = `<div class="coll">${head}<div class="cgrid">${grid}</div>
     <div class="side"><div class="clist${open ? ' opened' : ''}">${mine.map(tile).join('')}</div>
-      <div class="sfoot"><button class="dnew" id="dnew">${ICON.plus}<span>New deck</span></button><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div><div class="modal" id="cmodal"></div></div>`;
+      <div class="sfoot"><button class="dnew" id="dnew"><span>New deck</span></button><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div><div class="modal" id="cmodal"></div></div>`;
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
   wire(app, all, open);
 }
