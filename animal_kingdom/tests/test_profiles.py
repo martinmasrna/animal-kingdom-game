@@ -38,6 +38,22 @@ def test_decks_are_saved_in_order_and_checked_for_shape(db):
     assert len(db.decks(p["id"])) == 2                                   # a refused save changes nothing
 
 
+def test_a_deck_keeps_its_chosen_cover(db, tmp_path):
+    _, p = db.create()
+    db.save_decks(p["id"], [{"id": "x", "name": "Rats", "cards": {"rat": 3}, "cover": "rat"}, {"id": "y", "name": "Bees", "cards": {}}])
+    assert [d.get("cover") for d in db.decks(p["id"])] == ["rat", None]
+
+
+def test_a_database_from_before_covers_gains_the_column(tmp_path):
+    import sqlite3
+    path = tmp_path / "old.db"
+    old = sqlite3.connect(path)
+    old.executescript("CREATE TABLE decks (profile TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, cards TEXT NOT NULL, pos INTEGER NOT NULL, PRIMARY KEY (profile, id));"
+                      "INSERT INTO decks VALUES ('p', 'x', 'Rats', '{\"rat\": 3}', 0);")
+    old.commit(); old.close()
+    assert Profiles(str(path)).decks("p") == [{"id": "x", "name": "Rats", "cards": {"rat": 3}}]
+
+
 def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch):
     from animal_kingdom.engine.state import Result
     db = Profiles(":memory:")

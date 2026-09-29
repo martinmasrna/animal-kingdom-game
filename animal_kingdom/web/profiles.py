@@ -79,6 +79,8 @@ class Profiles:
         self.db = sqlite3.connect(path)
         self.db.row_factory = sqlite3.Row
         self.db.executescript(SCHEMA)
+        if "cover" not in [r[1] for r in self.db.execute("PRAGMA table_info(decks)")]:   # decks saved before covers
+            self.db.execute("ALTER TABLE decks ADD COLUMN cover TEXT NOT NULL DEFAULT ''")
 
     # ------------------------------------------------------------- identity
     def _free_tag(self, name: str) -> str:
@@ -147,10 +149,10 @@ class Profiles:
         if self.db.execute("SELECT 1 FROM identities WHERE profile = ?", (guest,)).fetchone():
             return
         pos = self.db.execute("SELECT COALESCE(MAX(pos), -1) FROM decks WHERE profile = ?", (pid,)).fetchone()[0]
-        for d in self.db.execute("SELECT id, name, cards FROM decks WHERE profile = ? ORDER BY pos", (guest,)).fetchall():
+        for d in self.db.execute("SELECT id, name, cards, cover FROM decks WHERE profile = ? ORDER BY pos", (guest,)).fetchall():
             pos += 1
-            self.db.execute("INSERT OR REPLACE INTO decks VALUES (?, ?, ?, ?, ?)",
-                            (pid, f"{d['id']}-{guest[:4]}", d["name"], d["cards"], pos))
+            self.db.execute("INSERT OR REPLACE INTO decks (profile, id, name, cards, pos, cover) VALUES (?, ?, ?, ?, ?, ?)",
+                            (pid, f"{d['id']}-{guest[:4]}", d["name"], d["cards"], pos, d["cover"]))
         self.db.execute("UPDATE OR IGNORE history SET profile = ? WHERE profile = ?", (pid, guest))
         for table in ("decks", "history", "sessions"):
             self.db.execute(f"DELETE FROM {table} WHERE profile = ?", (guest,))
@@ -172,11 +174,11 @@ class Profiles:
 
     # ------------------------------------------------------------- decks
     def decks(self, pid: str) -> list[dict]:
-        return [{"id": r["id"], "name": r["name"], "cards": json.loads(r["cards"])} for r in self.db.execute(
-            "SELECT id, name, cards FROM decks WHERE profile = ? ORDER BY pos", (pid,))]
+        return [{"id": r["id"], "name": r["name"], "cards": json.loads(r["cards"]), **({"cover": r["cover"]} if r["cover"] else {})}
+                for r in self.db.execute("SELECT id, name, cards, cover FROM decks WHERE profile = ? ORDER BY pos", (pid,))]
 
     def save_decks(self, pid: str, decks: list) -> list[dict]:
-        """Replace the profile's decks with `decks` ([{id, name, cards: {card id: copies}}]). Drafts
+        """Replace the profile's decks with `decks` ([{id, name, cards: {card id: copies}, cover?}]). Drafts
         are allowed, so this checks shape only; the deck rules are checked when a deck is played."""
         if not isinstance(decks, list) or len(decks) > DECKS_MAX:
             raise ProfileError("bad deck list")
@@ -187,10 +189,10 @@ class Profiles:
                     or sum(cards.values()) > 30:
                 raise ProfileError("bad deck")
             rows.append((pid, str(d.get("id") or pos)[:40], (str(d.get("name") or "").strip() or "New deck")[:40],
-                         json.dumps({str(k): n for k, n in cards.items()}), pos))
+                         json.dumps({str(k): n for k, n in cards.items()}), pos, str(d.get("cover") or "")[:40]))
         with self.db:
             self.db.execute("DELETE FROM decks WHERE profile = ?", (pid,))
-            self.db.executemany("INSERT OR REPLACE INTO decks VALUES (?, ?, ?, ?, ?)", rows)
+            self.db.executemany("INSERT OR REPLACE INTO decks (profile, id, name, cards, pos, cover) VALUES (?, ?, ?, ?, ?, ?)", rows)
         return self.decks(pid)
 
     # ------------------------------------------------------------- history
