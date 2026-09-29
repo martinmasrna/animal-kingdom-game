@@ -132,7 +132,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .card .stab .n img { display: block; height: 100%; filter: brightness(.16) sepia(.6); }
 .card .stab .n.up img { filter: brightness(.3) sepia(1) hue-rotate(60deg) saturate(4); } .card .stab .n.down img { filter: brightness(.35) sepia(1) hue-rotate(-30deg) saturate(5); }
 .card .stab .n b { font: 800 3.5em/.8 'Fira Sans Condensed', sans-serif; color: #1f1409; }
-.card .ctext { bottom: calc(var(--bw) - .1em); height: 10.8em; padding: 0 .3em 1.2em; display: flex; flex-direction: column; justify-content: center; filter: drop-shadow(0 -.1em .25em rgba(0,0,0,.35)); }
+.card .ctext { bottom: calc(var(--bw) - .1em); height: 8em; padding: 0 .3em 1.2em; display: flex; flex-direction: column; justify-content: center; filter: drop-shadow(0 -.1em .25em rgba(0,0,0,.35)); }
 .card .ctext p { margin: 0; font: 500 1.3em/1.14 'Fira Sans Condensed', sans-serif; color: #1a1108; text-align: center; text-wrap: pretty; }
 .card .ctext p b { font-weight: 800; }
 .card .ctext i { position: absolute; left: 0; right: 0; bottom: .15em; text-align: center; font: 700 1em/1 'Fira Sans Condensed', sans-serif; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #3a2a18; }
