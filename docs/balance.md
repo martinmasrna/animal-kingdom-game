@@ -44,26 +44,27 @@ Caveats that survive:
 
 Status: the roster is built and was tuned once, but its run was killed when two of its own cards (Black Bear, Grizzly Bear) turned out to cheat under the old timer bug. Next is the full fresh run: `.venv/bin/python -m animal_kingdom.sim.benchmark_set --pilot referee --games 500`, both seats, all 7 decks.
 
-## Current data (2026-09-26, current ruleset)
+## Current data (2026-09-29, current ruleset and pool)
 
-**Premade matrix, RefereeBot vs RefereeBot, 200 games per matchup, both seats** (`./report 100 --bots referee,referee`; output in the untracked `results/queue-2026-09-26/`):
+**Round robin, RefereeBot vs RefereeBot, 7 premades plus the goodstuff pile, 200 games per matchup, both seats, base seed 12,000,000** (`results/queue-2026-09-29/`, untracked: `2-summary.txt` has the full matchup matrix and per-card table, `logs/` every game). Premade win rates are against the six other premades only (1,200 games, ±2.8 points):
 
-| Deck | Win rate vs field |
+| Deck | Win rate vs premades |
 |---|---:|
-| cats_midrange | 64.8% |
-| aggro_hq_rush | 62.7% |
-| canine_buff_tempo | 61.2% |
-| colony_food_swarm | 55.2% |
-| ramp | 52.1% |
-| food_otk | 41.4% |
-| egg_control | 12.7% |
+| cats_midrange | 69.1% |
+| aggro_hq_rush | 67.8% |
+| canine_buff_tempo | 62.2% |
+| colony_food_swarm | 50.2% |
+| ramp | 49.0% |
+| food_otk | 34.5% |
+| egg_control | 17.2% |
 
-- First player wins 56.3%. Games end 57% on food, 43% on HQ capture, in about 12 rounds.
-- **Egg Control** isn't a bug: since Draw draws 2, an Egg is a slower, riskier Draw. Hatching into 3 instead of 2 (TurnBot, 200 games per matchup) moved it only from 8.9% to 10.9%, so better Eggs alone don't rescue the deck.
+- First player wins 57.7%. Games end 57% on food, 43% on HQ capture, in about 12 rounds.
+- The field is three strong tempo decks, two even ones, and two losers. Food OTK sits below target; Egg Control is far below it.
+- Every card's impact is inside ±10. The largest are Ramp's Borealis (+7.7) and Bulwark (+5.6), Food's Greywhisker (+5.3) and Barley (+5.1), Canine's Scarlett (+5.1).
 
-**Baseline ruler, RefereeBot, 600 games per deck:** the fixed synergy-free pile beats aggro 66.7%, canine 58.2%, colony 54.8%, egg 96.0% and food 65.2%, is even with ramp (49.3%), and loses only to cats (47.0%).
+**Baseline ruler, RefereeBot, 600 games per deck (2026-09-26, before the Egg, Colony, Ramp and Food passes):** the fixed synergy-free pile beats aggro 66.7%, canine 58.2%, colony 54.8%, egg 96.0% and food 65.2%, is even with ramp (49.3%), and loses only to cats (47.0%).
 
-**Goodstuff still dominates.** A greedy hill-climb built a pile that beats all seven premades (92% mean), and RefereeBot confirms it: **80% mean, worst matchup 64% (vs aggro)** (2026-09-25). The structural problem in [`design/goodstuff.md`](design/goodstuff.md) holds under the current rules. The recipe: legendaries Alpha, Gale, Rat King, Sirocco; rares Black Panther, Chinchilla, Polar Bear, Serval; commons Anaconda, Bat, Dire Wolf, Lemming, Lion, Tiger.
+**Goodstuff still dominates.** A greedy hill-climb over the current pool built a pile that beats all seven premades (90% mean on GreedyBot), and RefereeBot confirms it: **73.7% mean, worst matchup 57.5% (vs aggro)**, 81% vs cats, 92% vs egg (2026-09-29). The recipe: legendaries Scarlett, Bulwark, Gale, Pestis; rares Chinchilla, Polar Bear, Rhinoceros, Taipan; commons Wolf, Elephant, Lemming, Lion, Mouse, Tiger. The structural problem in [`design/goodstuff.md`](design/goodstuff.md) holds.
 
 ## Leads to re-check
 
