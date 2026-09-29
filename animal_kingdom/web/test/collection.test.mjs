@@ -41,7 +41,7 @@ test('a new profile has the seven starter decks as its own, the first one open',
   const [cats] = await myDecks();
   assert.equal(cats.name, 'Cats'); assert.equal(Object.values(cats.cards).reduce((a, n) => a + n, 0), 29, 'a starter is edited in place: it is yours');
   assert.equal((await myDecks()).length, 7, 'no copy');
-  assert.match(await page.$eval('.fcount', e => e.textContent), /29\/30/); assert.equal(await page.$('#play'), null, 'Play waits for 30 cards');
+  assert.match(await page.$eval('.fcount', e => e.textContent), /29\/30/); assert.ok(await page.$('#play[disabled]'), 'Play waits for 30 cards');
 });
 
 test('adding says where the card went, and a refused add says why', async () => {
@@ -140,6 +140,8 @@ test('filters: a family, clearing it, and an empty result', async () => {
   const all = await count();
   await page.click('[data-t="Rodent"]'); const rodents = await count(); assert.ok(rodents > 0 && rodents < all);
   await page.click('[data-t="Rodent"]'); assert.equal(await count(), all, 'clicking the selected family clears it');
+  await page.click('[data-t="Snake"]'); const snakes = await count(); await page.click('[data-t="Bird"]'); const both = await count();
+  assert.ok(both > snakes, 'families combine: Snake and Bird shows both'); await page.click('[data-t="Snake"]'); await page.click('[data-t="Bird"]');
   await page.type('#q', 'zzzz'); await wait(50); assert.match(await page.$eval('.cgrid', e => e.textContent), /No cards match/);
   await page.click('#clearf'); assert.equal(await count(), all);
 });

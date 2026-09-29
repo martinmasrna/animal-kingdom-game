@@ -222,3 +222,40 @@
 .coll .dtile { box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.28), inset 0 1px 0 rgba(255,245,230,.22), 0 3px 6px rgba(0,0,0,.55); }
 .coll .dtile:not(.on):hover { box-shadow: inset 0 0 0 1.5px rgba(240,232,218,.55), inset 0 1px 0 rgba(255,245,230,.3), 0 3px 6px rgba(0,0,0,.55); }
 .coll .dtile.on { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); }
+
+/* ---------- nitpick pass ---------- */
+/* (1) Hover labels in the screen's own look: a small stone tag in the card font. */
+.coll [data-tip]::after { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; color: #f0e8da; font: 600 14px 'Fira Sans Condensed', sans-serif;
+  padding: 5px 10px; border-radius: 7px; box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 4px 10px rgba(0,0,0,.6); }
+/* (2) Cursors in the screen's palette: a bone arrow; over anything you can click, the arrow carries a small paw. */
+.coll { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M3 2 L3 21 L8 16.5 L11.5 24 L15 22.5 L11.6 15 L18 15 Z' fill='%23efe6d4' stroke='%231d140a' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default; }
+.coll .tab, .coll .tl:not(.max), .coll .st, .coll .dtile, .coll button:not(:disabled), .coll .dd .sel, .coll .ddo, .coll .play:not(:disabled), .coll .ic, .coll .nm-edit {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M3 2 L3 21 L8 16.5 L11.5 24 L15 22.5 L11.6 15 L18 15 Z' fill='%23efe6d4' stroke='%231d140a' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cg fill='%23f0c060' stroke='%231d140a' stroke-width='1.1'%3E%3Cellipse cx='24' cy='27' rx='3.6' ry='3'/%3E%3Ccircle cx='19.6' cy='22.6' r='1.6'/%3E%3Ccircle cx='22.6' cy='20.4' r='1.6'/%3E%3Ccircle cx='26.2' cy='20.6' r='1.6'/%3E%3Ccircle cx='28.8' cy='23.2' r='1.6'/%3E%3C/g%3E%3C/svg%3E") 3 2, pointer; }
+.coll .tl.max { cursor: inherit; }
+/* (3) The dropdown list hangs from its button (no gap, shared edge); a whole row highlights. */
+.coll .dd.open .sel { border-radius: 10px 10px 0 0; box-shadow: inset 0 1px 0 rgba(255,245,230,.22), 0 3px 6px rgba(0,0,0,.55); filter: brightness(1.12); }
+.coll .ddm { top: 100%; left: 0; right: 0; min-width: 0; width: 100%; box-sizing: border-box; padding: 0 0 6px; border-radius: 0 0 10px 10px;
+  box-shadow: inset 0 1px 0 rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.6); }
+.coll .ddo { border-radius: 0; padding: 8px 14px; }
+.coll .ddo:hover { background: rgba(255,245,230,.1); }
+/* (5) Cards fade out as they scroll under the header instead of being cut. */
+.coll .cgrid { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px); mask-image: linear-gradient(to bottom, transparent 0, #000 16px); padding-top: 16px; }
+/* (6) Tighter grid, closer to the edges: the art does the separating. */
+.coll .chead { padding: 0 16px; }
+.coll .cgrid { padding-left: 16px; padding-right: 16px; }
+.coll .crow { gap: 10px; }
+/* (7) Play is always there with an open deck; under 30 cards it is stone, not blue, and does nothing. */
+.coll .play { border: 0; width: 100%; }
+.coll .play:disabled { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; color: #8f8577; text-shadow: none; filter: saturate(.3) brightness(.8); }
+.coll .fcount.full b { color: inherit; }
+/* (8) The tile's actions are bare icons; renaming keeps them in view at the right of the name field. */
+.coll .tacts { gap: 2px; }
+.coll .tacts .ic, .coll .ic { width: 30px; height: 30px; border: 0; background: none; box-shadow: none; color: #e4dccd; filter: drop-shadow(0 1px 2px rgba(0,0,0,.9)); }
+.coll .tacts .ic:hover { color: #fff; background: none; }
+.coll .tacts .ic.del { color: #ff8a78; } .coll .tacts .ic.del:hover { color: #ffb3a6; background: none; }
+.coll .dtile.on:has(.nm-in) .tacts { opacity: 1; }
+.coll .nm-in { z-index: 4; padding-right: 108px; }
+.coll .tacts { z-index: 5; }
+/* (9) Search answers hover too, quietly. */
+.coll .search:hover { background: rgba(28,25,22,.55); }
+.coll .nm-in { outline: 0; border-color: rgba(207,195,173,.7); box-shadow: 0 0 0 1px rgba(207,195,173,.35); }

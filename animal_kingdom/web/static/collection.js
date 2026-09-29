@@ -28,7 +28,7 @@ const med = (id, M) => { const [cx, cy, D] = CROP[id], w = M / D, h = w * 1.5;
 // Copies as dots: filled for the copies in the deck; with `max`, hollow for the ones still allowed.
 const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
 
-let X, C, cards, st = { open: null, family: null, rar: null, str: '', q: '' }, flash = null, wired = false;
+let X, C, cards, st = { open: null, families: new Set(), rar: null, str: '', q: '' }, flash = null, wired = false;
 const limit = c => c.copies || LIMIT[c.rarity];
 const coverOf = list => list.find(id => C[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
 const listOf = cardsObj => Object.entries(cardsObj).flatMap(([id, n]) => Array(n).fill(id));
@@ -61,7 +61,7 @@ function render(app, all) {
   const open = all.find(d => d.id === st.open), counts = open ? countsOf(open.list) : {};
   const inR = r => open ? open.list.filter(id => C[id].rarity === r).length : 0;
   const q = st.q.toLowerCase();
-  const shown = cards.filter(c => (!st.family || c.tags.includes(st.family)) && (!st.rar || c.rarity === st.rar) && (st.str === '' || (st.str === '9+' ? c.str >= 9 : String(c.str) === st.str))
+  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (st.str === '' || (st.str === '9+' ? c.str >= 9 : String(c.str) === st.str))
     && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(q)))
     .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
 
@@ -70,8 +70,7 @@ function render(app, all) {
       const max = open && n >= limit(c);   // dimmed: every copy is in the deck (the 30 and the rarity caps show on their counters)
       return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n && c.rarity !== 'legendary' ? `<span class="pips">${pips(n, limit(c))}</span>` : ''}</div>`; }).join('') + '</div>';
 
-  const tabs = `<div class="tab${st.family ? '' : ' on'}" data-t="" data-tip="All families"><div class="med mosaic">${['lion', 'clarion', 'andean_condor', 'elephant'].map(id => `<i style="${med(id, 18)}"></i>`).join('')}</div></div>`
-    + FAMILIES.map(([f, id]) => `<div class="tab${st.family === f ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
+  const tabs = FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
   const strengths = [...Array(9).keys()].map(String).concat('9+');   // 0 to 8, then 9 and up together (Hearthstone's 7+)
   // A dropdown in the screen's own look: a slab showing the choice, a list that opens under it.
   const dd = (k, any, opts) => { const cur = opts.find(([v]) => v === (st[k] || '')); const all = [['', any], ...opts];
@@ -96,8 +95,8 @@ function render(app, all) {
   // being edited (only that deck; Play and Done in the foot).
   const column = open
     ? `<div class="clist editing">${tile(open)}</div>
-      <div class="sfoot">${open.list.length === 30 ? '<div class="play" id="play">Play this deck</div>' : ''}
-        <div class="frow"><div class="fcount${open.list.length === 30 ? ' full' : ''}"><b>${open.list.length}/30</b><span>Cards</span></div><button class="backbtn" id="done"><span>Done</span></button></div></div>`
+      <div class="sfoot"><button class="play" id="play"${open.list.length === 30 ? '' : ' disabled'}>Play this deck</button>
+        <div class="frow"><div class="fcount"><b>${open.list.length}/30</b><span>Cards</span></div><button class="backbtn" id="done"><span>Done</span></button></div></div>`
     : `<div class="clist">${all.map(tile).join('')}${all.length < DECKS_MAX ? `<button class="dnew" id="dnew" data-tip="New deck" aria-label="New deck">${ICON.plus}</button>` : ''}</div>
       <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${DECKS_MAX}</b><span>Decks</span></div><button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
@@ -115,8 +114,8 @@ function wire(app, all, open) {
     d.querySelectorAll('.ddo').forEach(o => o.onclick = () => { const k = d.dataset.dd; st[k] = k === 'rar' ? (o.dataset.v || null) : o.dataset.v; redo(); });
   });
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
-  app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t || null; st.family = st.family === f ? null : f; redo(); });   // the selected family again clears it
-  const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { family: null, rar: null, str: '', q: '' }); redo(); };
+  app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t; st.families.has(f) ? st.families.delete(f) : st.families.add(f); redo(); });   // toggles; none chosen shows every family
+  const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { families: new Set(), rar: null, str: '', q: '' }); redo(); };
   app.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.closest('.nm-edit, .tacts, .nm-in')) return; if (!st.open) { st.open = e.dataset.d; redo(); } });
 
   const nm = app.querySelector('.nm-edit');
@@ -133,7 +132,7 @@ function wire(app, all, open) {
     all.push(d); st.open = d.id; st.rename = true; change(); };
   const dn2 = $('done'); if (dn2) dn2.onclick = () => { st.open = null; redo(); };
   if (st.rename) { st.rename = false; const n = app.querySelector('.nm-edit'); if (n) n.click(); }
-  const play = $('play'); if (play) play.onclick = () => X.play(open);
+  const play = $('play'); if (play && !play.disabled) play.onclick = () => X.play(open);
 
   // Click a card to add a copy; a refused add says why. Right-click a card, or click its strip, to take one out.
   app.querySelectorAll('.cgrid [data-card]').forEach(e => {
