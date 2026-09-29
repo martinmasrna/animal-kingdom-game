@@ -39,11 +39,6 @@ function rows(list, counts) {
   });
   return s;
 }
-function families(list) {
-  const FAM = ['Cat', 'Canine', 'Rodent', 'Colony', 'Bird', 'Megafauna', 'Snake', 'Bear', 'Egg', 'Lizard'], t = {};
-  Object.entries(list).forEach(([id, n]) => CARDS[id].tags.filter(x => FAM.includes(x)).forEach(x => t[x] = (t[x] || 0) + n));
-  return Object.entries(t).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([x, k]) => k + ' ' + x).join(' · ');
-}
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 const counted = ids => ids.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {});
 function cardPop(el, id, extra, place) {
@@ -78,7 +73,7 @@ function miniMap(w, h) {
 }
 function deckTile(d, on) {
   const list = counted(d.list), cover = COVER[d.id] || d.cover || (d.mine && sortIds(Object.keys(list))[0]), cv = cover ? artStyle(cover) : '';
-  return `<div class="dk${on ? ' on' : ''}" data-deck="${d.id}"><div class="cv gradart" ${cv}></div><div class="in"><b>${d.name}</b><span>${d.mine ? 'Your deck' : 'Starter deck'} · ${d.list.length} cards</span><span>${families(list)}</span></div></div>`;
+  return `<div class="dk${on ? ' on' : ''}" data-deck="${d.id}"><div class="cv gradart" ${cv}></div><div class="in"><b>${d.name}</b></div></div>`;
 }
 // Your profile: the server knows you by the sign-in code this browser keeps (localStorage 'ak:key').
 const api = (path, opts = {}) => fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', 'X-AK-Key': store('ak:key') || '', ...(opts.headers || {}) } });
@@ -322,7 +317,7 @@ function seatLabel(p) {
 function prematchScreen() {
   screen = 'prematch';
   const you = V.you, opp = you === 'A' ? 'B' : 'A', me = V.seats[you];
-  const side = (p, cls) => `<div class="pl ${cls}"><div class="hd"><b>${seatLabel(p)} · ${V.seats[p].deckName}</b><span>${families(V.lists[p])}</span></div><div>${rows(V.lists[p])}</div></div>`;
+  const side = (p, cls) => `<div class="pl ${cls}"><div class="hd"><b>${seatLabel(p)} · ${V.seats[p].deckName}</b></div><div>${rows(V.lists[p])}</div></div>`;
   const mp = (n, sub) => `<div class="mp"><div class="h"><b>Game ${n}</b><span>${MAP.name}${sub}</span></div>${miniMap(360, 86)}</div>`;
   app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Leave</a><h1>Match</h1><span class="r">Best of 3</span></div>
     <div class="maps">${mp(1, ` · ${MAP.winFood} food to win`)}${mp(2, '')}${mp(3, ' · only if needed')}</div>
