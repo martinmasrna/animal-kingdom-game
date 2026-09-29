@@ -117,6 +117,12 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .bar .search { width: 200px; margin-right: 8px; }
 .tab.all .med.mosaic { place-items: stretch; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1px; padding: 0; overflow: hidden; background: #55595e; }
 .med.mosaic i { display: block; background-repeat: no-repeat; background-color: #3a3d40; }
+.pips { position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%); z-index: 6; display: flex; gap: 4px; padding: 4px 7px; border-radius: 999px; background: #16181a; box-shadow: 0 2px 5px rgba(0,0,0,.6); }
+.pips i, .st .x i { display: block; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid #e9e4da; }
+.pips i.on, .st .x i.on { background: #e9e4da; }
+.st .x { display: flex; gap: 3px; justify-content: flex-end; width: auto; padding-right: 8px; } .st .x i { width: 7px; height: 7px; filter: drop-shadow(0 1px 1px #000); }
+.bar .back.ic { width: 36px; height: 36px; margin-right: 6px; border: 0; }
+.bar .back.ic::after { top: calc(100% + 6px); bottom: auto; left: 0; right: auto; z-index: 30; }
 </style></head><body>
 <div class="gb" id="gb"></div><div id="modal"></div><div id="toast2"></div><div class="pop" id="pop"></div>
 
@@ -136,7 +142,10 @@ const coverOf = list => list.find(id => C[id].rarity === 'legendary' && CROP[id]
 const all = [{ id: 'mine1', name: 'Colony copy', list: [...decks.find(d => d.id === 'colony_food_swarm').list], cover: 'queen_honoria', own: true },
   ...decks.map(d => ({ ...d, list: [...d.list], cover: coverOf(d.list) }))];
 const CAP = { legendary: 4, rare: 8 };
+// Copies as dots: filled for the copies in the deck; with `max`, hollow for the ones still allowed.
+const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
 const ICON = {
+  back: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   copy: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
   trash: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>' };
 let toastT;
@@ -164,10 +173,10 @@ function render() {
   const shown = cards.filter(c => (!st.family || c.tags.includes(st.family)) && (!st.rar || c.rarity === st.rar) && (st.str === '' || String(c.str) === st.str) && (!st.q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(st.q.toLowerCase())))
     .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
   const grid = '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0, max = open && n >= (c.copies || LIMIT[c.rarity]);
-    return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n ? `<span class="cnt">×${n}</span>` : ''}</div>`; }).join('') + '</div>';
+    return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n && c.rarity !== 'legendary' ? `<span class="pips">${pips(n, c.copies || LIMIT[c.rarity])}</span>` : ''}</div>`; }).join('') + '</div>';
   const tabs = `<div class="tab all${st.family ? '' : ' on'}" data-t="" data-tip="All families"><div class="med mosaic">${['lion', 'gray_wolf', 'eagle', 'elephant'].map(id => `<i style="${med(id, 19)}"></i>`).join('')}</div></div>` + FAMILIES.map(([t, id]) => `<div class="tab${st.family === t ? ' on' : ''}" data-t="${t}" data-tip="${t}"><div class="med" style="${med(id, 40)}"></div></div>`).join('');
   const seg = (k, o) => '<span class="seg">' + o.map(([v, l]) => `<span class="${(st[k] || '') === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${l}</span>`).join('') + '</span>';
-  const strip = id => `<div class="st" data-card="${id}"><div class="art" style="background-image:url(${artUrl(id)})"></div><span class="s">${C[id].str}</span><span class="n">${C[id].name}</span><span class="x">${counts[id]}</span></div>`;
+  const strip = id => `<div class="st" data-card="${id}"><div class="art" style="background-image:url(${artUrl(id)})"></div><span class="s">${C[id].str}</span><span class="n">${C[id].name}</span><span class="x">${C[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
   const byR = r => Object.keys(counts).filter(id => C[id].rarity === r).sort((a, b) => sv(C[a]) - sv(C[b])).map(strip).join('');
   const inR = r => open.list.filter(id => C[id].rarity === r).length;
   const head = (label, n, cap) => `<h4 class="rh"><span>${label}</span><span class="${cap && n >= cap ? 'full' : ''}">${n}${cap ? ' / ' + cap : ''}</span></h4>`;
@@ -179,7 +188,7 @@ function render() {
     ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}<div class="tacts"><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>${d.own ? `<button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button>` : ''}</div></div>`
     : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${familyCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>`) + (d.id === st.open ? body(d) : '');
   const side = `<div class="decks">${all.filter(d => d.own).map(tile).join('')}<div class="dsep"></div>${all.filter(d => !d.own).map(tile).join('')}</div>`;
-  document.getElementById('gb').innerHTML = `<div class="side">${side}</div><div class="bar"><span class="back">‹ Menu</span><div class="tabs">${tabs}</div><span class="gap"></span>
+  document.getElementById('gb').innerHTML = `<div class="side">${side}</div><div class="bar"><button class="back ic" data-tip="Menu">${ICON.back}</button><div class="tabs">${tabs}</div><span class="gap"></span>
       <input class="search" id="q" placeholder="Search" value="${(st.q || '').replace(/"/g, '&quot;')}"><select class="strsel" id="strsel"><option value="">Any strength</option>${[...new Set(cards.map(c => String(c.str)))].sort((a, b) => (a === '*' ? -1 : +a) - (b === '*' ? -1 : +b)).map(v => `<option value="${v}"${st.str === v ? ' selected' : ''}>${v === '*' ? 'Variable' : 'Strength ' + v}</option>`).join('')}</select><select class="strsel" id="rarsel">${[['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']].map(([v, l]) => `<option value="${v}"${(st.rar || '') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
     <div class="cgrid">${grid}</div>`;
   document.querySelectorAll('.decks, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
