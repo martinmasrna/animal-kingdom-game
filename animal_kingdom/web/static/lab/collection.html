@@ -88,6 +88,12 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .nm-in { position: absolute; left: 8px; right: 8px; top: 50%; transform: translateY(-50%); height: 32px; border-radius: 6px; border: 1px solid #d8d4cc; background: #16181acc; color: #f0ece4; font: 700 19px 'Fira Sans Condensed', sans-serif; padding: 0 6px; }
 .cgrid .tl:not(.max) { cursor: pointer; } .side .st { cursor: pointer; }
 #toast2 { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 99; padding: 9px 16px; border-radius: 8px; background: #2c3034; color: #f0ece4; font: 600 14px var(--font-text); opacity: 0; transition: opacity .2s; pointer-events: none; }
+.pf { align-items: center; }
+.ic { position: relative; flex: none; width: 40px; height: 40px; border-radius: 8px; border: 1px solid #3a3d40; background: none; color: #a8abb0; display: grid; place-items: center; cursor: pointer; padding: 0; }
+.ic:hover { color: #f0ece4; border-color: #6b6f74; }
+.ic.armed { color: #fff; background: #b24a3a; border-color: #b24a3a; }
+.ic::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); right: 0; white-space: nowrap; padding: 5px 9px; border-radius: 6px; background: #000d; color: #f0ece4; font: 500 12px var(--font-text); opacity: 0; pointer-events: none; transition: opacity .12s; }
+.ic:hover::after, .ic.armed::after { opacity: 1; }
 </style></head><body>
 <div class="gb" id="gb"></div><div id="toast2"></div><div class="pop" id="pop"></div>
 
@@ -107,6 +113,9 @@ const coverOf = list => list.find(id => C[id].rarity === 'legendary' && CROP[id]
 const all = [{ id: 'mine1', name: 'Colony copy', list: [...decks.find(d => d.id === 'colony_food_swarm').list], cover: 'queen_honoria', own: true },
   ...decks.map(d => ({ ...d, list: [...d.list], cover: coverOf(d.list) }))];
 const CAP = { legendary: 4, rare: 8 };
+const ICON = {
+  copy: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>' };
 let armed = false, toastT;
 const toast = t => { const e = document.getElementById('toast2'); e.textContent = t; e.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => e.style.opacity = 0, 2200); };
 // Deck codes: readable lines for people and agents, then one compact line the game reads. Import takes either.
@@ -127,6 +136,7 @@ function editable() { let d = all.find(x => x.id === st.open); if (!d || d.own) 
 const st = { open: 'mine1', tribe: null, rar: null, str: '' };
 const tribeCount = list => { const t = {}; list.forEach(id => C[id].tags.forEach(x => { if (TRIBES.some(y => y[0] === x)) t[x] = (t[x] || 0) + 1; })); return Object.entries(t).sort((a, b) => b[1] - a[1]); };
 function render() {
+  const keep = [...document.querySelectorAll('.decks, .cgrid')].map(e => e.scrollTop);
   const open = all.find(d => d.id === st.open), counts = open ? open.list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {}) : {};
   const shown = cards.filter(c => (!st.tribe || c.tags.includes(st.tribe)) && (!st.rar || c.rarity === st.rar) && (st.str === '' || String(c.str) === st.str))
     .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
@@ -141,8 +151,9 @@ function render() {
   const body = d => `<div class="dbody">
       ${tribeCount(d.list).length > 1 ? `<div class="tribes">${tribeCount(d.list).map(([t, n]) => `<div><div class="med" style="${med(TRIBES.find(x => x[0] === t)[1], 26)}"></div>${n}</div>`).join('')}</div>` : ''}
       ${head('Legendary', inR('legendary'), 4)}${byR('legendary')}${head('Rare', inR('rare'), 8)}${byR('rare')}${head('Common', inR('common'))}${byR('common')}
-      <div class="pf"><div class="play">Play this deck</div></div>
-      <div class="dacts"><span id="dcopy">Copy deck code</span>${d.own ? `<span id="ddel" class="${armed ? 'armed' : ''}">${armed ? 'Click again to delete' : 'Delete deck'}</span>` : ''}</div></div>`;
+      <div class="pf"><div class="play">Play this deck</div>
+        <button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>
+        ${d.own ? `<button class="ic${armed ? ' armed' : ''}" id="ddel" data-tip="${armed ? 'Click again to delete' : 'Delete deck'}">${ICON.trash}</button>` : ''}</div></div>`;
   const tile = d => (d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}</div>`
     : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${tribeCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>`) + (d.id === st.open ? body(d) : '');
@@ -151,6 +162,7 @@ function render() {
   document.getElementById('gb').innerHTML = `<div class="side">${side}</div><div class="bar"><span class="back">‹ Menu</span><div class="tabs">${tabs}</div><span class="gap"></span>
       <select class="strsel" id="strsel"><option value="">Any strength</option>${[...new Set(cards.map(c => String(c.str)))].sort((a, b) => (a === '*' ? -1 : +a) - (b === '*' ? -1 : +b)).map(v => `<option value="${v}"${st.str === v ? ' selected' : ''}>${v === '*' ? 'Variable' : 'Strength ' + v}</option>`).join('')}</select>${seg('rar', [['', 'All'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}<input class="search" placeholder="Search"></div>
     <div class="cgrid">${grid}</div>`;
+  document.querySelectorAll('.decks, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
   document.getElementById('strsel').onchange = e => { st.str = e.target.value; render(); };
   document.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { st.tribe = e.dataset.t || null; render(); });
   document.querySelectorAll('[data-k]').forEach(e => e.onclick = () => { st[e.dataset.k] = e.dataset.v || null; render(); });
