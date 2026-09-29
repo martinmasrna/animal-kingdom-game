@@ -346,7 +346,7 @@ function wireTips(root) {
 function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
-    app.innerHTML = `<div class="bx paint" id="scr"><div id="stage">
+    app.innerHTML = `<div class="game kit" id="scr"><div id="stage">
       <div id="board"></div>
       <div class="abs series" id="series"></div>
       <div class="abs opphand" id="opphand"></div>

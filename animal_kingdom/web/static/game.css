@@ -1,226 +1,267 @@
-/* The game screen in the grey-box layout (box.js). Four value levels (design sandbox screen/plan.md):
+/* The game screen (board.js draws the board; app.js the rest). .game holds the layout; .game.kit the painted kit over it.
+   Four value levels (design sandbox screen/plan.md):
    1 numerals, food counts, the lit deck and End turn; 2 team colours and the food fill, the only saturated colours;
    3 trails, clearings, neutral stones; 4 the board ground, and darker still the frame both hands sit on. */
-.bx { --frame: #121110; --ground: #1c1b19; --path: #3d3a35; --clear: #252321; --clearline: #4a463f; --stone: #302d2a; --stonenum: #a39c90;
+/* Menu drop-down, decklist and history panels, end-of-game overlay (base rules; the .game rules below restyle them). */
+.menudrop { position: absolute; right: 0; top: 66px; z-index: 70; display: none; flex-direction: column; min-width: 190px; padding: 6px; border-radius: 10px; background: #2b1d10; border: 2px solid #b58a4a; box-shadow: 0 10px 28px rgba(0,0,0,0.55); }
+.menudrop.on { display: flex; }
+.menudrop a { padding: 8px 10px; border-radius: 6px; font-size: 14px; color: #f3e3c0; }
+.menudrop a:hover { background: #3d2a16; }
+.livedot { display: none; position: absolute; right: 2px; top: 2px; width: 12px; height: 12px; border-radius: 999px; background: #c65a4a; animation: pulse 1s infinite; }
+.panel { position: absolute; top: 96px; z-index: 30; display: none; flex-direction: column; width: 290px; max-height: 590px; padding: 12px 12px 10px; border-radius: 12px; background: rgba(38,25,12,.95); border: 2px solid #b58a4a; box-shadow: 0 16px 40px rgba(0,0,0,.6); }
+.panel.on { display: flex; }
+.panel.mine { left: 45px; } .panel.theirs { right: 105px; } .panel.histp { left: 646px; width: 380px; }
+.panel h4 { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font: 20px 'Lilita One', var(--font-display); color: #f3e3c0; font-weight: 400; }
+.panel h4 .n, .panel h4 .removed { margin-left: auto; font: 500 12px var(--font-text); color: #c9b48f; }
+.panel h4 .removed b { font-size: 15px; color: #f3e3c0; }
+.panel .rows { overflow-y: auto; scrollbar-width: none; }
+.panel .dr { background: #4a3520; }
+.mine .dr { --c: #3c96f0; } .theirs .dr { --c: #e03228; }
+.hist { display: flex; flex-wrap: wrap; gap: 5px; align-content: flex-start; overflow-y: auto; scrollbar-width: none; }
+.hist .t { width: 100%; font: 13px 'Lilita One', var(--font-display); color: #c9b48f; margin-top: 4px; }
+.hi { position: relative; width: 44px; height: 44px; flex: none; border-radius: 8px; border: 3px solid var(--c); cursor: default; }
+.hi.draw { background: #4a3520; display: flex; align-items: center; justify-content: center; font: 16px 'Lilita One', var(--font-display); color: var(--c); }
+.hi .s { position: absolute; left: 3px; top: 0; font: 16px 'Lilita One', var(--font-display); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.9); }
+.hi .k { position: absolute; right: -5px; bottom: -5px; min-width: 18px; height: 18px; border-radius: 999px; background: #c65a4a; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 3px; }
+.endov { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(12,8,3,0.7); }
+.endov.on { display: flex; }
+.endbox { display: flex; flex-direction: column; align-items: center; gap: 14px; color: #f3e3c0; }
+.endbox .res { font: 110px/0.9 'Lilita One', var(--font-display); paint-order: stroke fill; -webkit-text-stroke: 8px #2a1606; text-shadow: 0 5px 0 #2a1606; }
+.endbox .res.A { color: #5aaaf5; } .endbox .res.B { color: #f0584a; } .endbox .res.D { color: #f3e3c0; }
+.endbox .how { font-size: 18px; }
+.endbox .score { display: flex; align-items: center; gap: 18px; font: 40px 'Lilita One', var(--font-display); margin-top: 6px; }
+.endbox .score .A { color: #5aaaf5; } .endbox .score .B { color: #f0584a; }
+.endbox .score .g { display: flex; gap: 6px; } .endbox .score .g i { width: 16px; height: 16px; border-radius: 999px; border: 2px solid #b58a4a; }
+.endbox .score .g i.A { background: #3c96f0; } .endbox .score .g i.B { background: #e03228; }
+.endbox .next { font-size: 15px; color: #c9b48f; }
+.endbox .btns { display: flex; gap: 12px; margin-top: 10px; }
+.endbox .btn { font-family: 'Lilita One', var(--font-display); font-weight: 400; border: 2px solid #b58a4a; background: #4a3520; color: #f3e3c0; }
+.endbox .btn.primary { background: #e0a040; border-color: #ffe0a0; color: #2a1606; }
+.endbox .peek { font-size: 13px; color: #c9b48f; cursor: pointer; text-decoration: underline; }
+
+.game { --frame: #121110; --ground: #1c1b19; --path: #3d3a35; --clear: #252321; --clearline: #4a463f; --stone: #302d2a; --stonenum: #a39c90;
   --plaque: #2d2b28; --plaqueline: #4a4640; --ink: #f4efe6; --mute: #a39c90; --act: #efe6d4;
   --A: #7ab6f8; --Adk: #1f4a85; --Aghost: #4a7cb4; --Aink: #0f213b; --B: #d9442c; --Bdk: #5a160c; --Bghost: #8a2d1d;
   position: fixed; inset: 0; background: #0b0a09; overflow: hidden; font-family: 'Source Serif 4', Georgia, serif; color: var(--ink); }
-.bx #stage { position: absolute; left: 50%; top: 50%; width: 1512px; height: 800px; transform-origin: 0 0; overflow: hidden; background: var(--frame); }
-.bx .abs { position: absolute; }
-.bx .num { font-weight: 700; font-variant-numeric: lining-nums tabular-nums; font-family: 'Source Serif 4', Georgia, serif; }
+.game #stage { position: absolute; left: 50%; top: 50%; width: 1512px; height: 800px; transform-origin: 0 0; overflow: hidden; background: var(--frame); }
+.game .abs { position: absolute; }
+.game .num { font-weight: 700; font-variant-numeric: lining-nums tabular-nums; font-family: 'Source Serif 4', Georgia, serif; }
 
 /* frame: series, the opponent's hand, the menu */
-.bx .series { left: 16px; top: 14px; font-size: 14px; color: var(--mute); cursor: pointer; }
-.bx .series i { display: inline-block; width: 8px; height: 8px; margin-left: 4px; border-radius: 50%; border: 1.5px solid var(--mute); }
-.bx .series i.now { background: var(--mute); } .bx .series i.A { background: var(--A); border-color: var(--A); } .bx .series i.B { background: var(--B); border-color: var(--B); }
-.bx .opphand { left: 0; right: 0; top: 0; height: 66px; cursor: pointer; }
-.bx .back { top: -54px; width: 84px; height: 118px; border-radius: 7px; background: var(--Bdk); border: 3px solid var(--B); box-shadow: 3px 3px 6px rgba(0,0,0,.5); }
-.bx .menu { right: 16px; top: 8px; width: 44px; height: 44px; display: grid; place-items: center; font-size: 22px; background: var(--plaque); border: 1px solid var(--plaqueline); border-radius: 6px; cursor: pointer; z-index: 40; }
-.bx .menudrop { right: 0; top: 50px; background: #22201d; border: 1px solid var(--plaqueline); }
-.bx .menudrop a { color: var(--ink); } .bx .menudrop a:hover { background: #33302b; }
-.bx .livedot { position: absolute; right: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: #e0452e; display: none; }
+.game .series { left: 16px; top: 14px; font-size: 14px; color: var(--mute); cursor: pointer; }
+.game .series i { display: inline-block; width: 8px; height: 8px; margin-left: 4px; border-radius: 50%; border: 1.5px solid var(--mute); }
+.game .series i.now { background: var(--mute); } .game .series i.A { background: var(--A); border-color: var(--A); } .game .series i.B { background: var(--B); border-color: var(--B); }
+.game .opphand { left: 0; right: 0; top: 0; height: 66px; cursor: pointer; }
+.game .back { top: -54px; width: 84px; height: 118px; border-radius: 7px; background: var(--Bdk); border: 3px solid var(--B); box-shadow: 3px 3px 6px rgba(0,0,0,.5); }
+.game .menu { right: 16px; top: 8px; width: 44px; height: 44px; display: grid; place-items: center; font-size: 22px; background: var(--plaque); border: 1px solid var(--plaqueline); border-radius: 6px; cursor: pointer; z-index: 40; }
+.game .menudrop { right: 0; top: 50px; background: #22201d; border: 1px solid var(--plaqueline); }
+.game .menudrop a { color: var(--ink); } .game .menudrop a:hover { background: #33302b; }
+.game .livedot { position: absolute; right: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: #e0452e; display: none; }
 
 /* board */
-.bx #board { position: absolute; inset: 0; }
-.bx .boardbg { left: 0; right: 0; top: 66px; height: 518px; background: var(--ground); border-top: 1px solid #2a2825; border-bottom: 1px solid #2a2825; }
-.bx svg.paths { position: absolute; left: 0; top: 0; pointer-events: none; } .bx svg.paths g { stroke: var(--path); stroke-width: 12; stroke-linecap: round; }
-.bx .cr { width: 124px; height: 124px; margin: -62px 0 0 -62px; z-index: 1; }
-.bx .clear { border-radius: 50%; background: var(--clear); border: 3px solid var(--clearline); }
-.bx .stone { width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; display: grid; place-items: center; font-size: 19px; background: var(--stone); color: var(--stonenum); border: 2px solid var(--clearline); }
-.bx .stone.A { background: var(--A); border-color: var(--A); color: var(--Aink); } .bx .stone.B { background: var(--B); border-color: var(--B); color: var(--ink); }
-.bx .unit .buried { position: absolute; inset: 0; border-radius: 50%; border: 8px solid; }
-.bx .buried.A { border-color: var(--Adk); background: var(--Adk); } .bx .buried.B { border-color: var(--Bdk); background: var(--Bdk); }
-.bx .unit .ring { position: absolute; inset: 0; border-radius: 50%; border: 8px solid; background-color: #333; background-repeat: no-repeat; display: grid; place-items: center; }
-.bx .unit .ring.noart span { font-size: 13px; font-weight: 600; text-align: center; padding: 0 10px; }
-.bx .unit.A .ring { border-color: var(--A); } .bx .unit.B .ring { border-color: var(--B); }
-.bx .unit .boss { position: absolute; left: 50%; bottom: -22px; width: 48px; height: 48px; margin-left: -24px; border-radius: 50%; display: grid; place-items: center; font-size: 26px; border: 3px solid; }
-.bx .unit.A .boss { background: var(--Adk); border-color: var(--A); } .bx .unit.B .boss { background: var(--Bdk); border-color: var(--B); }
-.bx .unit.ghost { opacity: .7; }
-.bx .timer { position: absolute; right: -8px; top: -6px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; background: var(--ink); color: #1c1b19; border: 3px solid #1c1b19; z-index: 2; }
-.bx .kw { position: absolute; left: -8px; top: -6px; min-width: 38px; height: 38px; padding: 0 6px; border-radius: 8px; display: grid; place-items: center; font-size: 20px; background: #3a3632; border: 2px solid var(--clearline); z-index: 2; }
+.game #board { position: absolute; inset: 0; }
+.game .boardbg { left: 0; right: 0; top: 66px; height: 518px; background: var(--ground); border-top: 1px solid #2a2825; border-bottom: 1px solid #2a2825; }
+.game svg.paths { position: absolute; left: 0; top: 0; pointer-events: none; } .game svg.paths g { stroke: var(--path); stroke-width: 12; stroke-linecap: round; }
+.game .cr { width: 124px; height: 124px; margin: -62px 0 0 -62px; z-index: 1; }
+.game .clear { border-radius: 50%; background: var(--clear); border: 3px solid var(--clearline); }
+.game .stone { width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; display: grid; place-items: center; font-size: 19px; background: var(--stone); color: var(--stonenum); border: 2px solid var(--clearline); }
+.game .stone.A { background: var(--A); border-color: var(--A); color: var(--Aink); } .game .stone.B { background: var(--B); border-color: var(--B); color: var(--ink); }
+.game .unit .buried { position: absolute; inset: 0; border-radius: 50%; border: 8px solid; }
+.game .buried.A { border-color: var(--Adk); background: var(--Adk); } .game .buried.B { border-color: var(--Bdk); background: var(--Bdk); }
+.game .unit .ring { position: absolute; inset: 0; border-radius: 50%; border: 8px solid; background-color: #333; background-repeat: no-repeat; display: grid; place-items: center; }
+.game .unit .ring.noart span { font-size: 13px; font-weight: 600; text-align: center; padding: 0 10px; }
+.game .unit.A .ring { border-color: var(--A); } .game .unit.B .ring { border-color: var(--B); }
+.game .unit .boss { position: absolute; left: 50%; bottom: -22px; width: 48px; height: 48px; margin-left: -24px; border-radius: 50%; display: grid; place-items: center; font-size: 26px; border: 3px solid; }
+.game .unit.A .boss { background: var(--Adk); border-color: var(--A); } .game .unit.B .boss { background: var(--Bdk); border-color: var(--B); }
+.game .unit.ghost { opacity: .7; }
+.game .timer { position: absolute; right: -8px; top: -6px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; background: var(--ink); color: #1c1b19; border: 3px solid #1c1b19; z-index: 2; }
+.game .kw { position: absolute; left: -8px; top: -6px; min-width: 38px; height: 38px; padding: 0 6px; border-radius: 8px; display: grid; place-items: center; font-size: 20px; background: #3a3632; border: 2px solid var(--clearline); z-index: 2; }
 /* where you can act: one light neutral, shared by the lit deck, target rings, the selected card and the prompt */
-.bx .tgt { cursor: pointer; }
-.bx .cr.tgt::after { content: ''; position: absolute; inset: -9px; border-radius: 50%; border: 4px solid var(--act); pointer-events: none; }
+.game .tgt { cursor: pointer; }
+.game .cr.tgt::after { content: ''; position: absolute; inset: -9px; border-radius: 50%; border: 4px solid var(--act); pointer-events: none; }
 
 /* dens: each player's headquarters and food store */
-.bx .den { top: 74px; width: 120px; height: 502px; border-radius: 10px; border: 4px solid; background: #242220; }
-.bx .den.A { left: 16px; border-color: var(--A); } .bx .den.B { left: 1376px; border-color: var(--B); }
-.bx .den.off.A { border-color: var(--Adk); } .bx .den.off.B { border-color: var(--Bdk); }
-.bx .den.tgt { box-shadow: 0 0 0 5px var(--frame), 0 0 0 9px var(--act); }
-.bx .den .count { position: absolute; left: 0; right: 0; top: 10px; text-align: center; font-size: 54px; line-height: 1; }
-.bx .den .bar { position: absolute; left: 14px; right: 14px; top: 76px; bottom: 14px; border-radius: 4px; background: #151413; }
-.bx .den .fill, .bx .den .ghost { position: absolute; left: 0; right: 0; bottom: 0; transition: height .4s, bottom .4s; }
-.bx .den.A .fill { background: var(--A); } .bx .den.B .fill { background: var(--B); }
-.bx .den.A .ghost { background: repeating-linear-gradient(135deg, var(--Aghost) 0 6px, transparent 6px 11px); }
-.bx .den.B .ghost { background: repeating-linear-gradient(135deg, var(--Bghost) 0 6px, transparent 6px 11px); }
-.bx .den .ghost span { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; font-size: 20px; text-shadow: 0 1px 3px #000, 0 0 6px #000; }
-.bx .den .ghost.low span { top: auto; bottom: 100%; transform: none; padding-bottom: 2px; }
+.game .den { top: 74px; width: 120px; height: 502px; border-radius: 10px; border: 4px solid; background: #242220; }
+.game .den.A { left: 16px; border-color: var(--A); } .game .den.B { left: 1376px; border-color: var(--B); }
+.game .den.off.A { border-color: var(--Adk); } .game .den.off.B { border-color: var(--Bdk); }
+.game .den.tgt { box-shadow: 0 0 0 5px var(--frame), 0 0 0 9px var(--act); }
+.game .den .count { position: absolute; left: 0; right: 0; top: 10px; text-align: center; font-size: 54px; line-height: 1; }
+.game .den .bar { position: absolute; left: 14px; right: 14px; top: 76px; bottom: 14px; border-radius: 4px; background: #151413; }
+.game .den .fill, .game .den .ghost { position: absolute; left: 0; right: 0; bottom: 0; transition: height .4s, bottom .4s; }
+.game .den.A .fill { background: var(--A); } .game .den.B .fill { background: var(--B); }
+.game .den.A .ghost { background: repeating-linear-gradient(135deg, var(--Aghost) 0 6px, transparent 6px 11px); }
+.game .den.B .ghost { background: repeating-linear-gradient(135deg, var(--Bghost) 0 6px, transparent 6px 11px); }
+.game .den .ghost span { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; font-size: 20px; text-shadow: 0 1px 3px #000, 0 0 6px #000; }
+.game .den .ghost.low span { top: auto; bottom: 100%; transform: none; padding-bottom: 2px; }
 
 /* hand and controls: the settled card (card.js, painted frame per rarity); the hovered card grows from its bottom edge */
-.bx .hand { left: 0; right: 0; top: 590px; height: 210px; }
-.bx .hc { position: absolute; top: 0; width: 143px; height: 210px; transform-origin: 50% 100%; transition: transform .15s; }
-.bx .hc .card { --w: 143px; }
-.bx .hc.dim { opacity: .45; filter: none; }
-.bx .hc:hover { transform: translateY(-12px) scale(1.65); z-index: 30 !important; }
-.bx .hc.sel { transform: translateY(-18px); z-index: 3; } .bx .hc.sel:hover { transform: translateY(-12px) scale(1.65); z-index: 30 !important; }
-.bx .hc.sel .card, .bx .hc.pick .card { filter: drop-shadow(0 0 0 var(--act)) drop-shadow(0 0 3px var(--act)) drop-shadow(0 0 2px var(--act)); }
-.bx .hc.can, .bx .hc.pick { cursor: pointer; }
-.bx .deck { left: 1236px; top: 614px; width: 126px; height: 166px; border-radius: 10px; background: #2d2b28; border: 2px solid #5b564e; box-shadow: 4px 4px 0 #242220, 8px 8px 0 #1f1d1b; display: grid; place-items: center; font-size: 24px; }
-.bx .deck.can { background: #e9e1d2; border-color: #fff8ea; color: #1c1b19; cursor: pointer; box-shadow: 4px 4px 0 #8f887c, 8px 8px 0 #5f5a52, 0 0 22px 2px rgba(255,240,210,.25); }
-.bx .deck.can:hover { background-color: #fff8ea; }
-.bx .tbtn { left: 1382px; top: 662px; width: 114px; height: 76px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 17px; font-weight: 700; }
-.bx .tbtn.A { background: var(--A); color: var(--Aink); } .bx .tbtn.A.can { cursor: pointer; } .bx .tbtn.A.can:hover { background-color: #a3ccfa; }
-.bx .tbtn.A:not(.can) > b { opacity: .5; }
-.bx .tbtn.B { background: var(--Bdk); border: 2px solid var(--B); }
-.bx .pips { display: flex; gap: 7px; } .bx .pips i { width: 12px; height: 12px; border-radius: 50%; background: var(--Aink); } .bx .pips i.used { background: transparent; border: 2px solid var(--Aink); opacity: .6; }
-.bx .waiting { left: 1236px; right: 16px; top: 752px; text-align: right; font-size: 13px; color: var(--mute); }
+.game .hand { left: 0; right: 0; top: 590px; height: 210px; }
+.game .hc { position: absolute; top: 0; width: 143px; height: 210px; transform-origin: 50% 100%; transition: transform .15s; }
+.game .hc .card { --w: 143px; }
+.game .hc.dim { opacity: .45; filter: none; }
+.game .hc:hover { transform: translateY(-12px) scale(1.65); z-index: 30 !important; }
+.game .hc.sel { transform: translateY(-18px); z-index: 3; } .game .hc.sel:hover { transform: translateY(-12px) scale(1.65); z-index: 30 !important; }
+.game .hc.sel .card, .game .hc.pick .card { filter: drop-shadow(0 0 0 var(--act)) drop-shadow(0 0 3px var(--act)) drop-shadow(0 0 2px var(--act)); }
+.game .hc.can, .game .hc.pick { cursor: pointer; }
+.game .deck { left: 1236px; top: 614px; width: 126px; height: 166px; border-radius: 10px; background: #2d2b28; border: 2px solid #5b564e; box-shadow: 4px 4px 0 #242220, 8px 8px 0 #1f1d1b; display: grid; place-items: center; font-size: 24px; }
+.game .deck.can { background: #e9e1d2; border-color: #fff8ea; color: #1c1b19; cursor: pointer; box-shadow: 4px 4px 0 #8f887c, 8px 8px 0 #5f5a52, 0 0 22px 2px rgba(255,240,210,.25); }
+.game .deck.can:hover { background-color: #fff8ea; }
+.game .tbtn { left: 1382px; top: 662px; width: 114px; height: 76px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 17px; font-weight: 700; }
+.game .tbtn.A { background: var(--A); color: var(--Aink); } .game .tbtn.A.can { cursor: pointer; } .game .tbtn.A.can:hover { background-color: #a3ccfa; }
+.game .tbtn.A:not(.can) > b { opacity: .5; }
+.game .tbtn.B { background: var(--Bdk); border: 2px solid var(--B); }
+.game .pips { display: flex; gap: 7px; } .game .pips i { width: 12px; height: 12px; border-radius: 50%; background: var(--Aink); } .game .pips i.used { background: transparent; border: 2px solid var(--Aink); opacity: .6; }
+.game .waiting { left: 1236px; right: 16px; top: 752px; text-align: right; font-size: 13px; color: var(--mute); }
 
 /* a pending choice: the card that asks and its rule, in the frame's free corner; card options float above the hand */
-.bx .prompt { left: 16px; top: 604px; width: 300px; padding: 14px 16px; border-radius: 10px; background: #26241f; border: 2px solid var(--act); display: none; }
-.bx .prompt.on { display: block; }
-.bx .prompt b { display: block; font-size: 18px; margin-bottom: 6px; } .bx .prompt p { font-size: 14px; line-height: 1.35; color: #d9d2c5; }
-.bx .prompt .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
-.bx .prompt .skip { padding: 6px 16px; border-radius: 6px; background: #3a3632; font-size: 14px; font-weight: 600; cursor: pointer; }
-.bx .prompt .skip:hover { background: #4a4640; }
-.bx .opts { left: 0; right: 0; top: 330px; display: none; justify-content: center; gap: 14px; z-index: 20; }
-.bx .opts.on { display: flex; }
-.bx .opts .hc { position: relative; cursor: pointer; width: 180px; height: 264px; } .bx .opts .hc .card { --w: 180px; } .bx .opts .hc:hover { transform: translateY(-8px); }
+.game .prompt { left: 16px; top: 604px; width: 300px; padding: 14px 16px; border-radius: 10px; background: #26241f; border: 2px solid var(--act); display: none; }
+.game .prompt.on { display: block; }
+.game .prompt b { display: block; font-size: 18px; margin-bottom: 6px; } .game .prompt p { font-size: 14px; line-height: 1.35; color: #d9d2c5; }
+.game .prompt .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.game .prompt .skip { padding: 6px 16px; border-radius: 6px; background: #3a3632; font-size: 14px; font-weight: 600; cursor: pointer; }
+.game .prompt .skip:hover { background: #4a4640; }
+.game .opts { left: 0; right: 0; top: 330px; display: none; justify-content: center; gap: 14px; z-index: 20; }
+.game .opts.on { display: flex; }
+.game .opts .hc { position: relative; cursor: pointer; width: 180px; height: 264px; } .game .opts .hc .card { --w: 180px; } .game .opts .hc:hover { transform: translateY(-8px); }
 
 /* panels (decklists, history) and the end overlay, restyled onto the flat frame */
-.bx .panel { background: rgba(28,27,25,.97); border: 1px solid var(--plaqueline); top: 74px; }
-.bx .panel.mine { left: auto; right: 16px; top: auto; bottom: 200px; } .bx .panel.theirs { left: 50%; right: auto; margin-left: -145px; } .bx .panel.histp { left: 16px; }
-.bx .panel h4 { font: 700 18px 'Source Serif 4', serif; color: var(--ink); } .bx .panel .dr { background: #33302b; }
-.bx .mine .dr { --c: var(--A); } .bx .theirs .dr { --c: var(--B); }
-.bx { --you: var(--A); --them: var(--B); }
+.game .panel { background: rgba(28,27,25,.97); border: 1px solid var(--plaqueline); top: 74px; }
+.game .panel.mine { left: auto; right: 16px; top: auto; bottom: 200px; } .game .panel.theirs { left: 50%; right: auto; margin-left: -145px; } .game .panel.histp { left: 16px; }
+.game .panel h4 { font: 700 18px 'Source Serif 4', serif; color: var(--ink); } .game .panel .dr { background: #33302b; }
+.game .mine .dr { --c: var(--A); } .game .theirs .dr { --c: var(--B); }
+.game { --you: var(--A); --them: var(--B); }
 
 /* app.css was written for the painted kit; reset what it sets on shared class names */
-.bx .num { font-family: 'Source Serif 4', Georgia, serif; font-weight: 700; color: var(--ink); -webkit-text-stroke: 0; text-shadow: none; letter-spacing: 0; line-height: normal; }
-.bx .den .count { line-height: 1; } .bx .den .ghost span { text-shadow: 0 1px 3px #000, 0 0 6px #000; }
-.bx .hand { display: block; width: auto; }
-.bx .deck { display: grid; }
-.bx .prompt { transform: none; align-items: initial; gap: 0; box-shadow: none; max-width: none; color: var(--ink); z-index: 20; }
-.bx .waiting { font-size: 13px; pointer-events: none; }
-.bx .menu { filter: none; }
-.bx .stone { color: var(--stonenum); } .bx .stone.A { color: var(--Aink); } .bx .stone.B { color: var(--ink); }
-.bx .deck.can { color: #1c1b19; } .bx .tbtn.A { color: var(--Aink); }
-.bx .endov { background: rgba(10,9,8,.78); }
-.bx .endbox { color: var(--ink); }
-.bx .endbox .res { font: 700 84px/1 'Source Serif 4', Georgia, serif; -webkit-text-stroke: 0; text-shadow: none; }
-.bx .endbox .res.A, .bx .endbox .score .A { color: var(--A); } .bx .endbox .res.B, .bx .endbox .score .B { color: var(--B); }
-.bx .endbox .score { font: 700 40px 'Source Serif 4', Georgia, serif; }
-.bx .btn { font: 700 18px 'Source Serif 4', Georgia, serif; letter-spacing: 0; text-transform: none; background: var(--plaque); border-color: var(--plaqueline); }
-.bx .btn.primary { background: var(--act); border-color: var(--act); color: #1c1b19; }
-.bx .prompt .skip { height: auto; margin: 0; border: 1px solid var(--plaqueline); font: 600 14px 'Source Serif 4', Georgia, serif; color: var(--ink); background: #3a3632; }
+.game .num { font-family: 'Source Serif 4', Georgia, serif; font-weight: 700; color: var(--ink); -webkit-text-stroke: 0; text-shadow: none; letter-spacing: 0; line-height: normal; }
+.game .den .count { line-height: 1; } .game .den .ghost span { text-shadow: 0 1px 3px #000, 0 0 6px #000; }
+.game .hand { display: block; width: auto; }
+.game .deck { display: grid; }
+.game .prompt { transform: none; align-items: initial; gap: 0; box-shadow: none; max-width: none; color: var(--ink); z-index: 20; }
+.game .waiting { font-size: 13px; pointer-events: none; }
+.game .menu { filter: none; }
+.game .stone { color: var(--stonenum); } .game .stone.A { color: var(--Aink); } .game .stone.B { color: var(--ink); }
+.game .deck.can { color: #1c1b19; } .game .tbtn.A { color: var(--Aink); }
+.game .endov { background: rgba(10,9,8,.78); }
+.game .endbox { color: var(--ink); }
+.game .endbox .res { font: 700 84px/1 'Source Serif 4', Georgia, serif; -webkit-text-stroke: 0; text-shadow: none; }
+.game .endbox .res.A, .game .endbox .score .A { color: var(--A); } .game .endbox .res.B, .game .endbox .score .B { color: var(--B); }
+.game .endbox .score { font: 700 40px 'Source Serif 4', Georgia, serif; }
+.game .btn { font: 700 18px 'Source Serif 4', Georgia, serif; letter-spacing: 0; text-transform: none; background: var(--plaque); border-color: var(--plaqueline); }
+.game .btn.primary { background: var(--act); border-color: var(--act); color: #1c1b19; }
+.game .prompt .skip { height: auto; margin: 0; border: 1px solid var(--plaqueline); font: 600 14px 'Source Serif 4', Georgia, serif; color: var(--ink); background: #3a3632; }
 
-/* painted board (box.js PAINT): the plate is the whole stage, the world runs under both hands */
-.bx .plate { position: absolute; left: 0; top: 0; width: 1512px; height: 800px; pointer-events: none; user-select: none; }
-.bx.paint #stage { background: #2b2618; }
-.bx.paint .cr.clear { background: none; border: 0; }
-.bx.paint .stone { background: none; border: 0; color: #e9e1d2; font-size: 17px; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
-.bx.paint .stone.A { background: var(--A); color: var(--Aink); text-shadow: none; } .bx.paint .stone.B { background: var(--B); text-shadow: none; }
-.bx .pit { width: 64px; height: 64px; margin: -32px 0 0 -32px; pointer-events: none; } .bx .pit img { width: 100%; height: 100%; }
-.bx .fruit { width: 12px; height: 12px; margin: -6px 0 0 -6px; pointer-events: none; background: url(/static/kit2/fruit.webp) center / contain no-repeat; filter: drop-shadow(0 1px 1px rgba(40,20,0,.6)); }
-.bx .fruit.green { background-image: url(/static/kit2/fruit_green.webp); }
-.bx .dcount { width: 90px; margin-left: -45px; margin-top: -28px; text-align: center; font-size: 48px; line-height: 1; text-shadow: 0 0 2px rgba(255,250,240,.9), 0 0 8px rgba(255,250,240,.5); }
+/* the painted board: the plate is the whole stage, the world runs under both hands */
+.game .plate { position: absolute; left: 0; top: 0; width: 1512px; height: 800px; pointer-events: none; user-select: none; }
+.game.kit #stage { background: #2b2618; }
+.game.kit .cr.clear { background: none; border: 0; }
+.game.kit .stone { background: none; border: 0; color: #e9e1d2; font-size: 17px; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+.game.kit .stone.A { background: var(--A); color: var(--Aink); text-shadow: none; } .game.kit .stone.B { background: var(--B); text-shadow: none; }
+.game .pit { width: 64px; height: 64px; margin: -32px 0 0 -32px; pointer-events: none; } .game .pit img { width: 100%; height: 100%; }
+.game .fruit { width: 12px; height: 12px; margin: -6px 0 0 -6px; pointer-events: none; background: url(/static/kit2/fruit.webp) center / contain no-repeat; filter: drop-shadow(0 1px 1px rgba(40,20,0,.6)); }
+.game .fruit.green { background-image: url(/static/kit2/fruit_green.webp); }
+.game .dcount { width: 90px; margin-left: -45px; margin-top: -28px; text-align: center; font-size: 48px; line-height: 1; text-shadow: 0 0 2px rgba(255,250,240,.9), 0 0 8px rgba(255,250,240,.5); }
 /* the count is painted on the crown boulder in the den's own war paint */
-.bx .dcount.A { color: #1d55b8; } .bx .dcount.B { color: #a8281a; }
-.bx .mouth { width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; }
-.bx .mouth.tgt { cursor: pointer; } .bx .mouth.tgt::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 4px solid var(--act); }
-.bx.paint .hc.dim { opacity: 1; } .bx.paint .hc.dim::after { content: ''; position: absolute; inset: 0; border-radius: 6px; background: rgba(20,16,10,.62); pointer-events: none; }
+.game .dcount.A { color: #1d55b8; } .game .dcount.B { color: #a8281a; }
+.game .mouth { width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; }
+.game .mouth.tgt { cursor: pointer; } .game .mouth.tgt::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 4px solid var(--act); }
+.game.kit .hc.dim { opacity: 1; } .game.kit .hc.dim::after { content: ''; position: absolute; inset: 0; border-radius: 6px; background: rgba(20,16,10,.62); pointer-events: none; }
 /* painted pieces (screen/kit/pieces): stones, card backs, deck, End turn */
-.bx.paint .stone.A, .bx.paint .stone.B { width: 46px; height: 46px; margin: -23px 0 0 -23px; background: url(/static/kit2/stone_a.webp) center / contain no-repeat; border: 0; }
-.bx.paint .stone.B { background-image: url(/static/kit2/stone_b.webp); color: var(--ink); }
-.bx.paint .back { background: url(/static/kit2/back.webp) center / 100% 100% no-repeat; border: 0; border-radius: 0; box-shadow: none; filter: drop-shadow(2px 3px 4px rgba(0,0,0,.5)); }
-.bx.paint .deck { background: url(/static/kit2/deck.webp) center / 100% 100% no-repeat; border: 0; box-shadow: none; border-radius: 0; filter: drop-shadow(3px 5px 6px rgba(0,0,0,.5)); }
-.bx.paint .deck.can { background-image: url(/static/kit2/deck_lit.webp); color: #2a2418; }
-.bx.paint .deck.can:hover { background-color: transparent; transform: translateY(-3px); }
-.bx.paint .tbtn { height: 80px; top: 660px; background: url(/static/kit2/btn_a.webp) center / 100% 100% no-repeat; border: 0; border-radius: 0; filter: drop-shadow(2px 4px 5px rgba(0,0,0,.5)); }
-.bx.paint .tbtn.B { background-image: url(/static/kit2/btn_b.webp); border: 0; }
-.bx.paint .tbtn.A.can:hover { background-color: transparent; transform: translateY(-2px); }
-.bx.paint .tbtn .pips i { background: #f4efe6; } .bx.paint .tbtn .pips i.used { border-color: #f4efe6; background: transparent; }
-.bx.paint .tbtn.A { color: #f4efe6; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.game.kit .stone.A, .game.kit .stone.B { width: 46px; height: 46px; margin: -23px 0 0 -23px; background: url(/static/kit2/stone_a.webp) center / contain no-repeat; border: 0; }
+.game.kit .stone.B { background-image: url(/static/kit2/stone_b.webp); color: var(--ink); }
+.game.kit .back { background: url(/static/kit2/back.webp) center / 100% 100% no-repeat; border: 0; border-radius: 0; box-shadow: none; filter: drop-shadow(2px 3px 4px rgba(0,0,0,.5)); }
+.game.kit .deck { background: url(/static/kit2/deck.webp) center / 100% 100% no-repeat; border: 0; box-shadow: none; border-radius: 0; filter: drop-shadow(3px 5px 6px rgba(0,0,0,.5)); }
+.game.kit .deck.can { background-image: url(/static/kit2/deck_lit.webp); color: #2a2418; }
+.game.kit .deck.can:hover { background-color: transparent; transform: translateY(-3px); }
+.game.kit .tbtn { height: 80px; top: 660px; background: url(/static/kit2/btn_a.webp) center / 100% 100% no-repeat; border: 0; border-radius: 0; filter: drop-shadow(2px 4px 5px rgba(0,0,0,.5)); }
+.game.kit .tbtn.B { background-image: url(/static/kit2/btn_b.webp); border: 0; }
+.game.kit .tbtn.A.can:hover { background-color: transparent; transform: translateY(-2px); }
+.game.kit .tbtn .pips i { background: #f4efe6; } .game.kit .tbtn .pips i.used { border-color: #f4efe6; background: transparent; }
+.game.kit .tbtn.A { color: #f4efe6; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 /* painted unit: portrait under a thin painted rim, strength on a painted boss */
-.bx.paint .cr.unit { width: 134px; height: 134px; margin: -67px 0 0 -67px; }
-.bx.paint .unit .ring { inset: 18px; border: 0; background-color: #3a342c; }
-.bx.paint .unit .rimimg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.bx.paint .unit .boss { width: 46px; height: 46px; margin-left: -23px; bottom: -16px; border: 0; background: url(/static/kit2/boss_a.webp) center / contain no-repeat; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
-.bx.paint .unit.B .boss { background-image: url(/static/kit2/boss_b.webp); }
-.bx.paint .unit .buried { border: 0; inset: 6px; }
+.game.kit .cr.unit { width: 134px; height: 134px; margin: -67px 0 0 -67px; }
+.game.kit .unit .ring { inset: 18px; border: 0; background-color: #3a342c; }
+.game.kit .unit .rimimg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.game.kit .unit .boss { width: 46px; height: 46px; margin-left: -23px; bottom: -16px; border: 0; background: url(/static/kit2/boss_a.webp) center / contain no-repeat; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.game.kit .unit.B .boss { background-image: url(/static/kit2/boss_b.webp); }
+.game.kit .unit .buried { border: 0; inset: 6px; }
 /* painted numbers: payout stones with the number carved in; den counts in painted war-paint digits, laid into the rock */
-.bx.paint .stone.carved { width: 50px; height: 50px; margin: -25px 0 0 -25px; background: none; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.55)); }
-.bx.paint .stone.carved img { width: 100%; height: 100%; display: block; }
-.bx .dcount { display: flex; justify-content: center; gap: 1px; width: 110px; margin-left: -55px; margin-top: -22px; text-shadow: none; }
-.bx .dcount img { height: 44px; opacity: .92; }
+.game.kit .stone.carved { width: 50px; height: 50px; margin: -25px 0 0 -25px; background: none; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.55)); }
+.game.kit .stone.carved img { width: 100%; height: 100%; display: block; }
+.game .dcount { display: flex; justify-content: center; gap: 1px; width: 110px; margin-left: -55px; margin-top: -22px; text-shadow: none; }
+.game .dcount img { height: 44px; opacity: .92; }
 /* polish pass: in-game tips, calmer neutral stones, readable dimmed cards, End turn contrast */
 .tip { position: fixed; z-index: 80; display: none; pointer-events: none; padding: 5px 10px; border-radius: 6px; background: rgba(28,22,14,.94); border: 1px solid #6b5a40;
   font: 600 13px 'Source Serif 4', Georgia, serif; color: #f4efe6; box-shadow: 0 4px 12px rgba(0,0,0,.5); }
-.bx.paint .hc.dim::after { background: rgba(20,16,10,.42); }
-.bx.paint .tbtn.A { color: #0f213b; text-shadow: 0 1px 0 rgba(255,255,255,.25); font-size: 18px; }
-.bx.paint .tbtn .pips i { background: #0f213b; } .bx.paint .tbtn .pips i.used { border-color: #0f213b; background: transparent; }
+.game.kit .hc.dim::after { background: rgba(20,16,10,.42); }
+.game.kit .tbtn.A { color: #0f213b; text-shadow: 0 1px 0 rgba(255,255,255,.25); font-size: 18px; }
+.game.kit .tbtn .pips i { background: #0f213b; } .game.kit .tbtn .pips i.used { border-color: #0f213b; background: transparent; }
 /* one number family: painted chalk digits on painted bosses (unit strength, payouts, den counts) */
-.bx .chalk { display: flex; align-items: center; justify-content: center; gap: 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.45)); }
-.bx .chalk img { display: block; height: 100%; }
-.bx.paint .unit .boss .chalk { height: 24px; }
-.bx.paint .stone.pboss { width: 44px; height: 44px; margin: -22px 0 0 -22px; background: url(/static/kit2/boss_n.webp) center / contain no-repeat; display: grid; place-items: center; filter: drop-shadow(1px 2px 2px rgba(20,12,4,.5)); }
-.bx.paint .stone.pboss.A { background-image: url(/static/kit2/boss_a.webp); } .bx.paint .stone.pboss.B { background-image: url(/static/kit2/boss_b.webp); }
-.bx.paint .stone.pboss .chalk { height: 17px; }
-.bx .dcount { width: 76px; height: 76px; margin: -38px 0 0 -38px; display: grid; place-items: center; background: url(/static/kit2/boss_a.webp) center / contain no-repeat; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.55)); }
-.bx .dcount.B { background-image: url(/static/kit2/boss_b.webp); }
-.bx .dcount .chalk { height: 32px; } .bx .dcount img { opacity: 1; height: 100%; }
+.game .chalk { display: flex; align-items: center; justify-content: center; gap: 0; filter: drop-shadow(0 1px 1px rgba(0,0,0,.45)); }
+.game .chalk img { display: block; height: 100%; }
+.game.kit .unit .boss .chalk { height: 24px; }
+.game.kit .stone.pboss { width: 44px; height: 44px; margin: -22px 0 0 -22px; background: url(/static/kit2/boss_n.webp) center / contain no-repeat; display: grid; place-items: center; filter: drop-shadow(1px 2px 2px rgba(20,12,4,.5)); }
+.game.kit .stone.pboss.A { background-image: url(/static/kit2/boss_a.webp); } .game.kit .stone.pboss.B { background-image: url(/static/kit2/boss_b.webp); }
+.game.kit .stone.pboss .chalk { height: 17px; }
+.game .dcount { width: 76px; height: 76px; margin: -38px 0 0 -38px; display: grid; place-items: center; background: url(/static/kit2/boss_a.webp) center / contain no-repeat; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.55)); }
+.game .dcount.B { background-image: url(/static/kit2/boss_b.webp); }
+.game .dcount .chalk { height: 32px; } .game .dcount img { opacity: 1; height: 100%; }
 /* the den's count: a gem set into the crown boulder, the hero's life gem (screen/kit/nums/crown_study.png, middle) */
-.bx .dcount { width: 84px; height: 84px; margin: -42px 0 0 -42px; display: grid; place-items: center; background: url(/static/kit2/gem_a.webp) center / contain no-repeat; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.5)); }
-.bx .dcount.B { background-image: url(/static/kit2/gem_b.webp); }
-.bx .gemnum { display: flex; height: 34px; } .bx .gemnum img { height: 100%; display: block; margin: 0 -1px; }
+.game .dcount { width: 84px; height: 84px; margin: -42px 0 0 -42px; display: grid; place-items: center; background: url(/static/kit2/gem_a.webp) center / contain no-repeat; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.5)); }
+.game .dcount.B { background-image: url(/static/kit2/gem_b.webp); }
+.game .gemnum { display: flex; height: 34px; } .game .gemnum img { height: 100%; display: block; margin: 0 -1px; }
 /* a piece landing: it drops from a little above and larger, its shadow growing and tightening, with a small settle.
    The painted piece moves; nothing new is drawn. A covered piece sinks into the buried disc behind. */
-.bx .cr.unit.land { z-index: 5; animation: land .36s cubic-bezier(.3,.7,.4,1.15) both; }
+.game .cr.unit.land { z-index: 5; animation: land .36s cubic-bezier(.3,.7,.4,1.15) both; }
 @keyframes land {
   0% { transform: translate(-6px, -28px) scale(1.2); opacity: 0; filter: drop-shadow(14px 34px 16px rgba(20,12,4,.0)); }
   30% { opacity: 1; filter: drop-shadow(10px 24px 12px rgba(20,12,4,.35)); }
   78% { transform: translate(0, 1px) scale(.98); filter: drop-shadow(2px 4px 3px rgba(20,12,4,.55)); }
   100% { transform: none; filter: drop-shadow(0 0 0 rgba(20,12,4,0)); } }
-.bx .cr.unit.cover .buried:first-child { animation: sink .34s ease-in both; }
+.game .cr.unit.cover .buried:first-child { animation: sink .34s ease-in both; }
 @keyframes sink { 0% { transform: translate(0, 0) scale(1.06); filter: brightness(1.2); } 100% { } }
 /* the dust kicked up where a piece lands: one painted puff that spreads and fades, under the piece */
-.bx .cr.unit.land::after { content: ''; position: absolute; left: 50%; top: 50%; width: 180px; height: 180px; margin: -90px 0 0 -90px; z-index: -2;
+.game .cr.unit.land::after { content: ''; position: absolute; left: 50%; top: 50%; width: 180px; height: 180px; margin: -90px 0 0 -90px; z-index: -2;
   background: url(/static/kit2/dust.webp) center / contain no-repeat; pointer-events: none; opacity: 0; animation: dust .7s ease-out .22s both; }
 @keyframes dust { 0% { transform: scale(.55); opacity: 0; } 15% { opacity: 1; } 100% { transform: scale(1.3); opacity: 0; } }
 /* food coming in: the changed pits ripen bottom-up (new state fades in over the old, with a small pop); the gem pulses */
-.bx .pit img { position: absolute; inset: 0; }
-.bx .pit.ripen img.now { animation: ripen .38s cubic-bezier(.3,.7,.4,1.3) both; }
-.bx .pit.ripen img.was { animation: unripe .38s ease-in both; }
+.game .pit img { position: absolute; inset: 0; }
+.game .pit.ripen img.now { animation: ripen .38s cubic-bezier(.3,.7,.4,1.3) both; }
+.game .pit.ripen img.was { animation: unripe .38s ease-in both; }
 @keyframes ripen { 0% { opacity: 0; transform: scale(.9); } 60% { opacity: 1; transform: scale(1.08); } 100% { transform: none; } }
 @keyframes unripe { 0% { opacity: 1; } 100% { opacity: 0; } }
-.bx .dcount.tick { animation: gempulse .5s ease-out .15s both; }
+.game .dcount.tick { animation: gempulse .5s ease-out .15s both; }
 @keyframes gempulse { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
 /* income in flight: painted fruit arc from each held stone to the pit it fills, then the pit ripens */
-.bx .flyfruit { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; z-index: 30; pointer-events: none; background: center / contain no-repeat;
+.game .flyfruit { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; z-index: 30; pointer-events: none; background: center / contain no-repeat;
   filter: drop-shadow(1px 3px 2px rgba(20,12,4,.5)); animation: flyfruit .7s cubic-bezier(.45,0,.55,1) both; }
 @keyframes flyfruit { 0% { opacity: 0; transform: translate(0, 0) scale(.5); } 12% { opacity: 1; transform: translate(calc(var(--dx) * .1), -34px) scale(1.15); }
   55% { transform: translate(calc(var(--dx) * .6), calc(var(--dy) * .5 - 46px)) scale(1.1); } 92% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.75); } }
 /* ---- turn events ---- */
 /* the opponent's card: shown large at the centre, held a moment, then flown down onto its crossroad */
-.bx .reveal { left: 50%; top: 300px; z-index: 60; pointer-events: none; opacity: 0; }
-.bx .reveal .card { --w: 220px; position: absolute; left: -110px; top: -161px; }
-.bx .reveal.on { animation: reveal 1.05s cubic-bezier(.4,0,.3,1) both; }
+.game .reveal { left: 50%; top: 300px; z-index: 60; pointer-events: none; opacity: 0; }
+.game .reveal .card { --w: 220px; position: absolute; left: -110px; top: -161px; }
+.game .reveal.on { animation: reveal 1.05s cubic-bezier(.4,0,.3,1) both; }
 @keyframes reveal { 0% { opacity: 0; transform: scale(.6); } 14% { opacity: 1; transform: scale(1); } 62% { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(.35); } }
-.bx .cr.unit.land.late { animation-delay: .9s; } .bx .cr.unit.land.late::after { animation-delay: 1.12s; }
+.game .cr.unit.land.late { animation-delay: .9s; } .game .cr.unit.land.late::after { animation-delay: 1.12s; }
 /* a removed unit: drains, sinks, fades, leaving dust; a returned unit lifts and flies to its owner's side */
-.bx .leave { width: 134px; height: 134px; margin: -67px 0 0 -67px; z-index: 4; pointer-events: none; }
-.bx .leave.removed { animation: removed .7s ease-in .15s both; }
+.game .leave { width: 134px; height: 134px; margin: -67px 0 0 -67px; z-index: 4; pointer-events: none; }
+.game .leave.removed { animation: removed .7s ease-in .15s both; }
 @keyframes removed { 0% { filter: none; } 35% { filter: grayscale(1) brightness(.8); transform: scale(1.04); opacity: 1; } 100% { filter: grayscale(1) brightness(.6); transform: scale(.72) translateY(6px); opacity: 0; } }
-.bx .leave.removed::after { content: ''; position: absolute; left: 50%; top: 50%; width: 180px; height: 180px; margin: -90px 0 0 -90px; z-index: -1;
+.game .leave.removed::after { content: ''; position: absolute; left: 50%; top: 50%; width: 180px; height: 180px; margin: -90px 0 0 -90px; z-index: -1;
   background: url(/static/kit2/dust.webp) center / contain no-repeat; opacity: 0; animation: dust .7s ease-out .5s both; }
-.bx .leave.bounce { animation: bounce .75s cubic-bezier(.5,0,.6,1) .1s both; }
+.game .leave.bounce { animation: bounce .75s cubic-bezier(.5,0,.6,1) .1s both; }
 @keyframes bounce { 0% { transform: none; } 25% { transform: translateY(-22px) scale(1.08); opacity: 1; } 100% { transform: translate(var(--hx), var(--hy)) scale(.4); opacity: 0; } }
 /* drawn cards slide in: yours from the deck, theirs down from the top edge */
-.bx .hc.drawn { animation: drawcard .45s cubic-bezier(.3,.7,.4,1) backwards; }
+.game .hc.drawn { animation: drawcard .45s cubic-bezier(.3,.7,.4,1) backwards; }
 @keyframes drawcard { 0% { transform: translate(var(--fx), 30px) rotate(8deg) scale(.8); opacity: 0; } 30% { opacity: 1; } 100% { transform: none; } }
-.bx .back.drawn { animation: drawback .45s cubic-bezier(.3,.7,.4,1) backwards; }
+.game .back.drawn { animation: drawback .45s cubic-bezier(.3,.7,.4,1) backwards; }
 @keyframes drawback { 0% { transform: translateY(-70px); opacity: 0; } 100% { transform: none; opacity: 1; } }
 /* a strength that changed pops once */
-.bx .cr.unit.strchg .boss { animation: strpop .45s cubic-bezier(.3,.7,.4,1.4) .1s; }
+.game .cr.unit.strchg .boss { animation: strpop .45s cubic-bezier(.3,.7,.4,1.4) .1s; }
 @keyframes strpop { 0% { transform: scale(1); } 45% { transform: scale(1.35); } 100% { transform: scale(1); } }
 /* reduced motion: every state change simply shows */
-@media (prefers-reduced-motion: reduce) { .bx *, .bx *::before, .bx *::after { animation: none !important; transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { .game *, .game *::before, .game *::after { animation: none !important; transition: none !important; }
+  .game .flyfruit, .game .leave, .game .pit img.was, .game .reveal { display: none; } }   /* things that only exist in motion are not drawn at all */
+
+.game .hc.dim .card { filter: brightness(.55) saturate(.7) drop-shadow(.2em .45em .5em rgba(0,0,0,.55)); }
