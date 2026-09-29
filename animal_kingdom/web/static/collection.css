@@ -313,5 +313,3 @@
 .coll .dbody .st .x { align-self: center; padding: 0 9px 0 0; gap: 3px; }
 .coll .dbody .st .x i { width: 6px; height: 6px; border-color: #d9ceb8; filter: drop-shadow(0 0 2px rgba(0,0,0,.95)) drop-shadow(0 1px 1px rgba(0,0,0,.8)); }
 .coll .dbody .st .x i.on { background: #d9ceb8; }
-/* Used up: dimmed enough to say "no more of this", not so much that the grid goes muddy. */
-.coll .tl.max .card { filter: brightness(.62) saturate(.55); }

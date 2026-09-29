@@ -53,7 +53,6 @@ test('adding says where the card went, and a refused add says why', async () => 
   await page.click('.side .st[data-card="lion"]'); await wait(80);                   // clicking its strip takes one out: 29
   await page.click(card('lion')); await page.click(card('lion')); await wait(30);        // back to 3 of 3 (30), then one too many
   assert.ok(await has(card('lion'), 'max'), 'all copies in: dimmed');
-  assert.equal(await page.$(card('lion') + ' .pips'), null, 'a used-up card needs no dots: its dimming says it');
   assert.ok(!(await has(card('dog'), 'max')), 'a full deck does not dim the cards it lacks: only used-up cards are dimmed');
 });
 
