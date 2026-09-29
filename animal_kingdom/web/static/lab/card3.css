@@ -54,3 +54,14 @@
 .s-paint .card3 .rules { left: -1em; right: -1.2em; bottom: -.9em; height: calc(var(--panel) + 1.8em); padding: 1.3em 2em 2.9em; border-radius: 0; box-shadow: none;
   background: url(/static/kit2/paint_patch.webp) center / 100% 100% no-repeat; }
 .s-paint .card3 .rules i { bottom: 1.75em; }
+
+/* Readability pass on the field guide: rules in dark ink on a near-flat pale panel, ~40% larger, heavier;
+   the panel grows to hold the longest text at that size. Font under test via .f-* on an ancestor. */
+.s-read .card3 { --panel: 10.8em; --rules: 1.38em; --rulesfont: 'Source Serif 4', serif; --rulesw: 600; }
+.s-read .card3 .rules { background: linear-gradient(rgba(233,222,199,.86), rgba(233,222,199,.86)), #d8c8ad url(/static/kit2/card_panel.webp) center / 30em auto; padding: .45em .8em 2.1em; }
+.s-read .card3 .rules p { font: var(--rulesw) var(--rules)/1.14 var(--rulesfont); letter-spacing: 0; color: #1a1108; }
+.s-read .card3 .rules p b { font-weight: 800; }
+.s-read .card3 .rules em { font-size: 1em; color: #5e4527; }
+.s-read .card3 .rules i { font-size: .95em; color: #6b5031; }
+.f-franklin .card3 { --rulesfont: 'Libre Franklin', sans-serif; --rulesw: 500; --rules: 1.36em; }
+.f-fira .card3 { --rulesfont: 'Fira Sans Condensed', sans-serif; --rulesw: 500; --rules: 1.42em; }
