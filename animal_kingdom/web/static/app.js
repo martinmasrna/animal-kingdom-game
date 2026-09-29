@@ -3,7 +3,7 @@
 import { renderBoard, portrait, kitImg, teamGem } from './board.js';
 import { hasArt, artUrl } from './art.js';
 import { cardHTML } from './card.js';
-import { renderBoard as renderBox, STAGE, PAINT } from './box.js';
+import { renderBoard as renderBox, STAGE, PAINT, crossroadAt } from './box.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const COVER = { cats_midrange: 'king_theron', canine_buff_tempo: 'lobo', aggro_hq_rush: 'verminus', colony_food_swarm: 'queen_honoria',
@@ -269,7 +269,8 @@ function onView(prev) {
   // One-shot animation input: what the board and food were before this view (same game only).
   ui.anim = prev && prev.game && V.game && prev.game.history.length <= V.game.history.length && prev.you === V.you
     ? { board: viewerBoard(prev), food: { A: prev.game.food[prev.you], B: prev.game.food[prev.you === 'A' ? 'B' : 'A'] },
-        income: { A: prev.game.income[prev.you], B: prev.game.income[prev.you === 'A' ? 'B' : 'A'] } } : null;
+        income: { A: prev.game.income[prev.you], B: prev.game.income[prev.you === 'A' ? 'B' : 'A'] },
+        hand: prev.game.hand.map(h => h.iid), oppHand: prev.game.handCount[prev.you === 'A' ? 'B' : 'A'], hist: prev.game.history.length } : null;
   gameScreen();
 }
 
@@ -515,6 +516,7 @@ function boxScreen() {
       <div class="abs waiting" id="waiting"></div>
       <div class="abs prompt" id="choicebar"></div>
       <div class="abs opts" id="opts"></div>
+      <div class="abs reveal" id="reveal"></div>
       <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
       <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
       <div class="endov" id="endov"></div></div></div>`;
@@ -549,15 +551,19 @@ function drawBox() {
 
   // The opponent's hand: one card back each, centred across the board from yours.
   const nb = G.handCount[them], step = 52, bx0 = STAGE.w / 2 - (84 + (nb - 1) * step) / 2;
-  $('opphand').innerHTML = Array.from({ length: nb }, (_, i) => `<div class="abs back" style="left:${bx0 + i * step}px"></div>`).join('');
+  const A = ui.anim, oppDrew = A ? Math.max(0, nb - A.oppHand) : 0;   // their new cards slide down into their hand
+  $('opphand').innerHTML = Array.from({ length: nb }, (_, i) => `<div class="abs back${i >= nb - oppDrew ? ' drawn' : ''}" style="left:${bx0 + i * step}px;animation-delay:${(i - (nb - oppDrew)) * 0.12}s"></div>`).join('');
 
   // Your hand, centred under the board.
-  const n = G.hand.length, cw = 143, gap = n > 1 ? Math.min(14, (1000 - n * cw) / (n - 1)) : 0, x0 = STAGE.w / 2 - (n * cw + (n - 1) * gap) / 2;
+  const n = G.hand.length, cw = 143, gap = n > 1 ? Math.min(14, (940 - n * cw) / (n - 1)) : 0, x0 = STAGE.w / 2 - (n * cw + (n - 1) * gap) / 2;
   const hand = $('hand');
+  let drawnK = 0;
   hand.innerHTML = G.hand.map((h, i) => {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id], pick = d.handPick.has(h.iid);
     const cls = [c.rarity, can ? 'can' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick ? 'dim' : ''].join(' ');
-    return `<div class="hc ${cls}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1}">${cardHTML(c, { str: h.str })}</div>`;
+    // a card just drawn slides in from the deck (bottom right), the second a beat after the first
+    const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
+    return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str })}</div>`;
   }).join('');
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
     e.stopPropagation();
@@ -605,6 +611,15 @@ function drawBox() {
   if (playing && G.toAct === them && V.seats[them].bot) {
     const ver = V.version;
     drawGame.think = setTimeout(() => { if (V && V.version === ver && screen === 'game') waiting.textContent = 'Bot is thinking'; }, 2500);
+  }
+  // The opponent's card, shown large at the centre as it is played, then flown down onto its crossroad (the piece lands as it arrives).
+  if (A) A.fx = G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
+  const last = G.history[G.history.length - 1];
+  if (A && G.history.length > A.hist && last && last.seat === them && last.kind === 'place' && last.target[0] === 'cr') {
+    const [tx, ty] = crossroadAt(dcr(last.target[1])), rv = $('reveal');
+    rv.innerHTML = cardHTML(CARDS[last.card]); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty('--ty', `${ty - 300}px`);
+    rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on');
+    if (ui.anim) ui.anim.landDelay = 0.95;
   }
   drawBoard(d);
   drawEnd();

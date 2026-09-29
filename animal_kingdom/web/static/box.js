@@ -16,6 +16,8 @@ const PX = x => x / 1.10582, PY = y => y / 1.10582 - 25;   // plate pixels to st
 const CLEAR = [[282.3, 225.4], [558.4, 224.0], [831.6, 223.5], [1112.7, 222.8], [1382.6, 223.7],
   [288.2, 401.2], [559.6, 398.5], [834.1, 399.7], [1110.5, 396.6], [1384.7, 399.6],
   [288.1, 568.2], [557.0, 576.0], [835.9, 575.8], [1111.0, 572.9], [1379.8, 576.2]];
+// A crossroad's centre on the stage, for anything that travels to it.
+export const crossroadAt = cr => { const [c, r] = cr.split(',').map(Number); return [CX(c, r), CY(c, r)]; };
 const CX = (c, r) => PAINT ? PX(CLEAR[(r - 1) * 5 + c - 1][0]) : X(c), CY = (c, r) => PAINT ? PY(CLEAR[(r - 1) * 5 + c - 1][1]) : Y(r);
 // Each den's ten pits from the bottom of its ridge to the top, its food count on the crown boulder, its cave mouth.
 const RIDGE = { A: 110, B: 1565 }, PIT_Y = [690, 637, 584, 531, 478, 425, 372, 319, 266, 213];
@@ -53,6 +55,13 @@ export function renderBoard(el, M, g, cards, ui) {
   const topIid = (b, cr) => ((b[cr] || []).slice(-1)[0] || {}).iid;
   const landed = cr => ui.anim && topIid(g.board, cr) !== undefined && topIid(ui.anim.board, cr) !== topIid(g.board, cr);
   const covered = cr => landed(cr) && topIid(ui.anim.board, cr) !== undefined;
+  // Units gone from the board since the last view: removed (drain, sink, dust) or returned to a hand (lift and fly to its owner's side).
+  const onBoard = new Set(Object.values(g.board).flat().map(u => u.iid));
+  const bounced = new Set(((ui.anim && ui.anim.fx) || []).filter(f => f.k === 'bounce').map(f => f.card + f.owner));
+  const leaving = ui.anim ? Object.entries(ui.anim.board).flatMap(([cr, st]) => { const u = st[st.length - 1];
+    return u && u.iid !== undefined && !onBoard.has(u.iid) ? [[cr, u]] : []; }) : [];
+  const was = ui.anim ? new Map(Object.values(ui.anim.board).flat().map(u => [u.iid, u.str])) : new Map();
+  const late = !!(ui.anim && ui.anim.landDelay);   // the opponent's card is still flying in: the piece lands when it arrives
   let s = '';
   if (PAINT) s += `<img class="plate" src="/static/kit2/plate.webp" alt="" draggable="false">`;
   else {
@@ -84,10 +93,15 @@ export function renderBoard(el, M, g, cards, ui) {
     const pv = ui.preview && ui.preview.cr === cr ? ui.preview : null, x = CX(c, r), y = CY(c, r);
     if (pv) { s += put(`cr unit A ghost${cls}`, x, y, unit({ id: pv.id, owner: 'A', str: pv.str }, st.slice().reverse(), cards), `data-cr="${cr}"`); continue; }
     if (!st.length) { s += put(`cr clear${cls}`, x, y, '', `data-cr="${cr}"`); continue; }
-    const u = st[st.length - 1];
-    s += put(`cr unit ${u.owner}${cls}`, x, y, unit(u, st.slice(0, -1).reverse(), cards), `data-cr="${cr}"`);
+    const u = st[st.length - 1], popped = was.has(u.iid) && was.get(u.iid) !== u.str ? (u.str > was.get(u.iid) ? ' up' : ' down') : '';
+    s += put(`cr unit ${u.owner}${cls}${cls.includes('land') && late ? ' late' : ''}${popped ? ' pop' + popped : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards), `data-cr="${cr}"`);
   }
 
+  for (const [cr, u] of leaving) {
+    const [x, y] = crossroadAt(cr), home = u.owner === 'A' ? [STAGE.w / 2 - x, 700 - y] : [STAGE.w / 2 - x, -40 - y];
+    const how = bounced.has(u.id + u.owner) ? 'bounce' : 'removed';
+    s += `<div class="abs leave ${how} unit ${u.owner}" style="left:${x}px;top:${y}px;--hx:${home[0]}px;--hy:${home[1]}px">${unit(u, [], cards)}</div>`;
+  }
   for (const side of ['A', 'B']) {
     const food = g.food[side], inc = g.income[side], win = g.winFood, ring = side === 'B' && ui.hqRing ? ' tgt' : '';
     if (PAINT) {
