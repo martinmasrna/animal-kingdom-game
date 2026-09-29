@@ -17,7 +17,7 @@ Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reac
 | **Methuselah** | 1 | — | 3 | Armor. At the end of your turn, gain 5 food. |
 | **Borealis** | 1 | Bear | 10 | Apex Predator. |
 | **Bulwark** | 1 | Megafauna | 8 | Costs 15 food. Roar: remove all adjacent units. |
-| **Glyptodont** | 1 | Megafauna | 10 | Armor. Costs 15 food. |
+| **Cairn** | 1 | Megafauna | 10 | Armor. Costs 15 food. |
 
 ### Rare
 

@@ -329,10 +329,10 @@ def test_gale_does_not_react_to_a_friendly_cover():
 
 
 def test_gale_cannot_bounce_an_armor_coverer():
-    s = make_state(current="A", hands={"A": ["glyptodont"]}, food={"A": 20, "B": 0})
+    s = make_state(current="A", hands={"A": ["cairn"]}, food={"A": 20, "B": 0})
     put(s, "1,2", "caracal", "A")
     gale = put(s, "2,2", "gale", "B")                    # str 6
-    rules.apply_action(s, PlaceAction("glyptodont", ("cr", "2,2")))  # str 10 Armor covers it
+    rules.apply_action(s, PlaceAction("cairn", ("cr", "2,2")))  # str 10 Armor covers it
     assert s.owner_of("2,2") == "A"                      # Armor resists the bounce
     assert gale.retaliation_used is True                 # but the charge is still consumed
 
