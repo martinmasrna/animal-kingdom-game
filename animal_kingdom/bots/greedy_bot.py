@@ -90,6 +90,8 @@ class GreedyWeights:
                                       # currently-safe HQ-front defender next turn). Exact
                                       # hypergeometric over the public unseen multiset, no
                                       # determinization; honest (see `_p_opponent_can_cover`).
+    readiness_cap: int = 0            # count at most this many live Roars for effect_readiness
+                                      # (0 = no cap)
     wasted_roar: float = 8.0    # penalty for playing a card whose ability text fired for
                                       # nothing (e.g. a removal roar with no target) - a
                                       # bot policy adjustment, not part of evaluate() (see
@@ -236,6 +238,10 @@ def _opponent_lethal_next_turn(state: GameState, opponent: str) -> bool:
     return can_draw_then_place
 
 
+def _capped(weights: GreedyWeights, live_roars: int) -> int:
+    return min(live_roars, weights.readiness_cap) if weights.readiness_cap else live_roars
+
+
 def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     """Heuristic value of `state` from `me`'s perspective (higher is better).
 
@@ -301,7 +307,7 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     # Roar would do anything. It values setup states (duplicates, tag thresholds,
     # adjacent targets, eligible follow-up cards) without naming a deck or card.
     if w.effect_readiness:
-        score += w.effect_readiness * _features.enabled_roar_count(state, me)
+        score += w.effect_readiness * _capped(w, _features.enabled_roar_count(state, me))
 
     # --- Pending delayed payoffs: net scheduled future effects, imminence-discounted ---
     # A just-placed Egg/Bear contributes ~nothing to board_presence (it's weak now) yet is a

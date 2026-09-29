@@ -42,6 +42,7 @@ from .greedy_bot import (
     _roar_fizzled,
     _enabled_roar_count,
     _opponent_lethal_next_turn,
+    _capped,
     evaluate,
 )
 from .learned_eval import LinearEval
@@ -461,7 +462,8 @@ class TurnSearcher(Bot):
         # top-level decision. It only *reads* the state (its own internal clones absorb the
         # trial placements), so temporarily reframe these four fields and restore them rather
         # than cloning the whole state - byte-identical, one fewer full clone per planning eval.
-        readiness = _reframed_at_my_turn(state, me, lambda: _enabled_roar_count(state, me))
+        readiness = _capped(self.weights, _reframed_at_my_turn(
+            state, me, lambda: _enabled_roar_count(state, me)))
         return max(
             -_DECISIVE,
             min(_DECISIVE, score + self.weights.effect_readiness * readiness),
