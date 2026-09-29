@@ -5,14 +5,6 @@
 .card3.legendary { --bw: .42em; --edge: linear-gradient(150deg, #fff1c2, #d9a93f 22%, #7e5a16 48%, #f0cd70 70%, #a67a1e 88%, #ffe9a6); }
 .card3 .art { position: absolute; inset: var(--bw); border-radius: .7em; }
 .card3 .art { background: #3a2c1a center 30% / cover no-repeat; }
-.card3 .str { position: absolute; left: calc(var(--bw) + .55em); top: calc(var(--bw) + .45em); height: 3.6em; min-width: 3em; display: flex; align-items: center; justify-content: center; z-index: 2;
-  filter: drop-shadow(0 .1em .15em rgba(0,0,0,.9)) drop-shadow(0 0 .5em rgba(0,0,0,.6)); }
-.card3 .str img { display: block; height: 100%; }
-.card3 .str b { font: 800 3.6em/1 'Source Serif 4', serif; color: #f6ecd6; }
-.card3 .nm { position: absolute; left: var(--bw); right: var(--bw); top: var(--bw); padding: .5em 1.2em 2.2em 4.2em; min-height: 3.4em; display: flex; align-items: flex-start; justify-content: center; z-index: 1;
-  border-radius: .7em .7em 0 0; background: linear-gradient(rgba(10,8,6,.78), rgba(10,8,6,.5) 55%, rgba(10,8,6,0)); }
-.card3 .nm span { margin-top: .55em; font: 700 1.3em/1.02 'Source Serif 4', serif; color: #f4ecdc; text-align: center; text-wrap: balance; text-shadow: 0 .06em .2em rgba(0,0,0,.8); }
-.card3 .nm.long span { font-size: 1.1em; }
 .card3 .rules { position: absolute; left: var(--bw); right: var(--bw); bottom: var(--bw); padding: 3.2em 1em 2.2em; z-index: 2; border-radius: 0 0 .7em .7em;
   background: linear-gradient(rgba(10,8,6,0), rgba(10,8,6,.8) 3em, rgba(10,8,6,.9)); }
 .card3 .rules p { margin: 0; font: 500 1.02em/1.2 'Source Serif 4', serif; color: #efe6d4; text-align: center; text-wrap: pretty; text-shadow: 0 .05em .15em rgba(0,0,0,.9); }
@@ -25,4 +17,16 @@
 @media (prefers-reduced-motion: reduce) { .card3.legendary::after { animation: none; display: none; } }
 /* Compact: art, strength, name and rarity edge; the full card shows on hover. */
 .card3.compact .rules { display: none; }
-.card3.compact .nm { padding-bottom: 1.6em; }
+/* The frame's top: a granite bar holding the name, and a notched tab hanging from it holding strength, both edged in the rarity metal. */
+.card3 .bar { position: absolute; left: var(--bw); right: var(--bw); top: var(--bw); height: 2.7em; z-index: 2; display: flex; align-items: center; justify-content: flex-start; padding: 0 .8em 0 5.3em;
+  border-radius: .7em .7em 0 0; background: #2e2a25 url(/static/kit2/card_body.webp) center / 20em auto; box-shadow: 0 .14em 0 0 var(--line), 0 .3em .5em rgba(0,0,0,.45); }
+.card3 .bar span { font: 700 1.2em/1 'Source Serif 4', serif; color: #efe6d4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .01em; }
+.card3 .tab { position: absolute; left: calc(var(--bw) + .7em); top: var(--bw); width: 4em; height: 6em; z-index: 3; background: var(--line);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%); filter: drop-shadow(0 .2em .3em rgba(0,0,0,.5)); }
+.card3 .tab .face { position: absolute; inset: 0 .14em .18em; background: #2e2a25 url(/static/kit2/card_body.webp) center / 20em auto;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%); }
+.card3 .tab .n { position: absolute; left: 0; right: 0; top: .7em; height: 2.9em; display: flex; justify-content: center; }
+.card3 .tab .n img { display: block; height: 100%; }
+.card3 .tab .n b { font: 800 3.5em/.8 'Source Serif 4', serif; color: #f4ecdc; }
+.card3 { --line: #5c5750; } .card3.rare { --line: #c3c9cf; } .card3.legendary { --line: #d8aa48; }
+.card3 .rules em { display: block; margin-bottom: .35em; font: italic 500 .9em/1.1 'Source Serif 4', serif; color: #d9c9a8; text-align: center; }
