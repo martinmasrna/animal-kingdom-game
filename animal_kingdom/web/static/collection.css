@@ -277,3 +277,16 @@
 .coll .clist.editing .dtile.on { border-radius: 8px 8px 0 0; }
 .coll .dbody .rh { margin-left: 6px; margin-right: 6px; }
 .coll .clist.editing { gap: 0; }
+/* Strips are slivers of the cards: strength on a small driftwood tab in the card's dark digits, the card's rarity edge around each. */
+.coll .dbody .st { height: 30px; box-shadow: inset 0 0 0 1px var(--edge-st, rgba(0,0,0,.6)), inset 0 -1px 0 rgba(0,0,0,.7); }
+.coll .dbody .st.rare { --edge-st: #b9c1c9; }
+.coll .dbody .st.legendary { --edge-st: #d9a93f; }
+.coll .st .s { position: relative; align-self: stretch; width: 30px; margin-right: 8px; display: flex; align-items: center; justify-content: center; gap: 0;
+  background: url(/static/kit2/card_plaque.webp) center / 300% 300%; box-shadow: inset -1px 0 0 rgba(0,0,0,.45); }
+.coll .st .s img { height: 17px; filter: brightness(.16) sepia(.6); }
+.coll .dbody .st + .st:not(.legendary):first-of-type { margin-top: 0; }
+.coll .dbody .st.legendary + .st.rare, .coll .dbody .st.rare + .st.common, .coll .dbody .st.legendary + .st.common { margin-top: 6px; }
+.coll .dbody { padding-top: 6px; }
+/* Rarity lives on the tab (its metal frame), not around the whole strip; strips keep dark separators. */
+.coll .dbody .st { box-shadow: inset 0 -1px 0 rgba(0,0,0,.75); }
+.coll .st .s { box-shadow: inset 0 0 0 2px var(--edge-st, #3a3530), inset -1px 0 0 rgba(0,0,0,.45); }
