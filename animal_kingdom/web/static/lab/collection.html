@@ -108,6 +108,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .dbtns button { height: 38px; padding: 0 16px; border-radius: 8px; font: 600 15px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
 .dbtns .cancel { background: none; border: 1px solid #44484c; color: #d8d4cc; } .dbtns .cancel:hover { border-color: #6b6f74; }
 .dbtns .danger { background: #b24a3a; border: 1px solid #b24a3a; color: #fff; } .dbtns .danger:hover { background: #c75443; }
+.dsep { flex: none; height: 1px; margin: 10px 4px; background: #2e3134; }
 </style></head><body>
 <div class="gb" id="gb"></div><div id="modal"></div><div id="toast2"></div><div class="pop" id="pop"></div>
 
@@ -169,8 +170,7 @@ function render() {
   const tile = d => (d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}<div class="tacts"><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>${d.own ? `<button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button>` : ''}</div></div>`
     : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${tribeCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>`) + (d.id === st.open ? body(d) : '');
-  const side = `<div class="decks">${all.filter(d => d.own).map(tile).join('')}
-      <h4>Starter decks</h4>${all.filter(d => !d.own).map(tile).join('')}</div>`;
+  const side = `<div class="decks">${all.filter(d => d.own).map(tile).join('')}<div class="dsep"></div>${all.filter(d => !d.own).map(tile).join('')}</div>`;
   document.getElementById('gb').innerHTML = `<div class="side">${side}</div><div class="bar"><span class="back">‹ Menu</span><div class="tabs">${tabs}</div><span class="gap"></span>
       <select class="strsel" id="strsel"><option value="">Any strength</option>${[...new Set(cards.map(c => String(c.str)))].sort((a, b) => (a === '*' ? -1 : +a) - (b === '*' ? -1 : +b)).map(v => `<option value="${v}"${st.str === v ? ' selected' : ''}>${v === '*' ? 'Variable' : 'Strength ' + v}</option>`).join('')}</select>${seg('rar', [['', 'All'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}<input class="search" placeholder="Search"></div>
     <div class="cgrid">${grid}</div>`;
