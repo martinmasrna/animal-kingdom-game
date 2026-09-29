@@ -6,10 +6,10 @@
 .card3 .art { position: absolute; inset: var(--bw); border-radius: .7em; }
 .card3 .art { background: #3a2c1a center 30% / cover no-repeat; }
 .card3 .rules { position: absolute; left: var(--bw); right: var(--bw); bottom: var(--bw); height: var(--panel); padding: .4em 1em 2.1em; z-index: 2; border-radius: 0 0 .7em .7em;
-  display: flex; flex-direction: column; justify-content: center; background: #2e2a25 url(/static/kit2/card_body.webp) center / 20em auto; box-shadow: 0 -.14em 0 0 var(--line), 0 -.3em .5em rgba(0,0,0,.4); }
-.card3 .rules p { margin: 0; font: 500 1.02em/1.2 'Source Serif 4', serif; color: #efe6d4; text-align: center; text-wrap: pretty; text-shadow: 0 .05em .15em rgba(0,0,0,.9); }
-.card3 .rules p b { font-weight: 700; color: #fff6e2; }
-.card3 .rules i { position: absolute; left: 0; right: 0; bottom: .85em; text-align: center; font: 700 .78em/1 'Source Serif 4', serif; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #a8998a; }
+  display: flex; flex-direction: column; justify-content: center; background: var(--carrier); box-shadow: 0 -.14em 0 0 var(--line), 0 -.3em .5em rgba(0,0,0,.4); }
+.card3 .rules p { margin: 0; font: 500 1.02em/1.2 'Source Serif 4', serif; color: var(--ink); text-align: center; text-wrap: pretty; text-shadow: var(--inkshadow); }
+.card3 .rules p b { font-weight: 700; color: var(--inkstrong); }
+.card3 .rules i { position: absolute; left: 0; right: 0; bottom: .85em; text-align: center; font: 700 .78em/1 'Source Serif 4', serif; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: var(--inkfaint); }
 /* Legendary: a slow sheen crosses the card. */
 .card3.legendary::after { content: ''; position: absolute; top: -20%; bottom: -20%; left: 0; width: 35%; z-index: 3; pointer-events: none;
   background: linear-gradient(90deg, rgba(255,240,200,0), rgba(255,240,200,.16), rgba(255,240,200,0)); animation: sheen3 5.5s ease-in-out infinite; }
@@ -19,28 +19,38 @@
 .card3.compact .rules { display: none; }
 /* The frame's top: a granite bar holding the name, and a notched tab hanging from it holding strength, both edged in the rarity metal. */
 .card3 .bar { position: absolute; left: var(--bw); right: var(--bw); top: var(--bw); height: 2.7em; z-index: 2; display: flex; align-items: center; justify-content: flex-start; padding: 0 .8em 0 5.6em;
-  border-radius: .7em .7em 0 0; background: #2e2a25 url(/static/kit2/card_body.webp) center / 20em auto; box-shadow: 0 .14em 0 0 var(--line), 0 .3em .5em rgba(0,0,0,.45); }
-.card3 .bar span { font: 700 1.2em/1 'Source Serif 4', serif; color: #efe6d4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .01em; }
+  border-radius: .7em .7em 0 0; background: var(--carrier); box-shadow: 0 .14em 0 0 var(--line), 0 .3em .5em rgba(0,0,0,.45); }
+.card3 .bar span { font: 700 1.2em/1 'Source Serif 4', serif; color: var(--inkstrong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .01em; }
 .card3 .tab { position: absolute; left: calc(var(--bw) + .7em); top: var(--bw); width: 4.3em; height: 6.2em; z-index: 3; background: var(--line);
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%); filter: drop-shadow(0 .2em .3em rgba(0,0,0,.5)); }
-.card3 .tab .face { position: absolute; inset: 0 .14em .18em; background: #2e2a25 url(/static/kit2/card_body.webp) center / 20em auto;
+.card3 .tab .face { position: absolute; inset: 0 .14em .18em; background: var(--carrier);
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%); }
 .card3 .tab .n { position: absolute; left: 0; right: 0; top: 1.16em; height: 2.9em; display: flex; justify-content: center; }
-.card3 .tab .n img { display: block; height: 100%; }
-.card3 .tab .n b { font: 800 3.5em/.8 'Source Serif 4', serif; color: #f4ecdc; }
-.card3 { --line: #4f4a44; --panel: 7.7em; } .card3.rare { --line: #a9adb1; } .card3.legendary { --line: #d8aa48; }
-.card3 .rules em { display: block; margin-bottom: .35em; font: italic 500 .9em/1.1 'Source Serif 4', serif; color: #d9c9a8; text-align: center; }
+.card3 .tab .n img { display: block; height: 100%; filter: var(--digit, none); }
+.card3 .tab .n b { font: 800 3.5em/.8 'Source Serif 4', serif; color: var(--inkstrong); }
+.card3 { --carrier: #2e2a25 url(/static/kit2/card_body.webp) center / 20em auto; --ink: #efe6d4; --inkstrong: #f6eedd; --inkfaint: #b0a18f; --inkshadow: 0 .05em .15em rgba(0,0,0,.9); --line: #4f4a44; --panel: 7.7em; } .card3.rare { --line: #a9adb1; } .card3.legendary { --line: #d8aa48; }
+.card3 .rules em { display: block; margin-bottom: .35em; font: italic 500 .9em/1.1 'Source Serif 4', serif; color: var(--inkfaint); text-align: center; }
 .card3 .tab .n.two { top: 1.48em; height: 2.3em; }
 
-/* B: the name on a plate directly under the art (at the bottom when compact, above the rules when full); strength tab stays top-left. */
-.v-b .card3 .bar { top: auto; bottom: var(--bw); border-radius: 0 0 .7em .7em; justify-content: center; padding: 0 .8em; box-shadow: 0 -.14em 0 0 var(--line), 0 -.3em .5em rgba(0,0,0,.4); }
-.v-b .card3:not(.compact) .bar { bottom: calc(var(--bw) + var(--panel)); border-radius: 0; z-index: 3; }
-.v-b .card3:not(.compact) .rules { box-shadow: none; }
-/* C: everything at the bottom: the name plate, and strength in a stone block rising out of its left end. */
-.v-c .card3 .bar { top: auto; bottom: var(--bw); border-radius: 0 0 .7em .7em; padding-left: 5.7em; box-shadow: 0 -.14em 0 0 var(--line), 0 -.3em .5em rgba(0,0,0,.4); }
-.v-c .card3:not(.compact) .bar { bottom: calc(var(--bw) + var(--panel)); border-radius: 0; z-index: 3; }
-.v-c .card3:not(.compact) .rules { box-shadow: none; }
-.v-c .card3 .tab { top: auto; bottom: calc(var(--bw) + .3em); left: calc(var(--bw) + .6em); width: 4.5em; height: 4.5em; clip-path: none; border-radius: .6em; z-index: 4; }
-.v-c .card3:not(.compact) .tab { bottom: calc(var(--bw) + var(--panel) + .3em); }
-.v-c .card3 .tab .face { inset: .16em; clip-path: none; border-radius: .48em; }
-.v-c .card3 .tab .n { top: .6em; } .v-c .card3 .tab .n.two { top: .9em; }
+
+/* Style: field guide. Pale sandstone carriers, dark ink, fine double keylines; digits in charcoal. */
+.s-guide .card3 { --carrier: #d8c8ad url(/static/kit2/card_panel.webp) center / 30em auto; --ink: #2b1d0f; --inkstrong: #1f1409; --inkfaint: #7a5f3e; --inkshadow: none;
+  --digit: brightness(.16) sepia(.6); }
+.s-guide .card3 .bar { box-shadow: 0 .14em 0 0 var(--line), 0 .28em 0 0 #d8c8ad, 0 .36em 0 0 var(--line), 0 .5em .5em rgba(0,0,0,.35); }
+.s-guide .card3 .bar span { font-variant: small-caps; letter-spacing: .05em; font-size: 1.28em; }
+.s-guide .card3 .rules { box-shadow: 0 -.14em 0 0 var(--line), 0 -.28em 0 0 #d8c8ad, 0 -.36em 0 0 var(--line), 0 -.5em .5em rgba(0,0,0,.3); }
+.s-guide .card3 .rules i { font-variant: small-caps; text-transform: none; font-size: .92em; letter-spacing: .08em; }
+.s-guide .card3 .tab .face { box-shadow: inset 0 0 0 .1em rgba(60,40,15,.5); }
+.s-guide .card3 { --line: #6b5334; } .s-guide .card3.rare { --line: #8d9196; } .s-guide .card3.legendary { --line: #b58a2e; }
+
+/* Style: war paint. Carriers are strokes of dark earth pigment; their dry-brush edges bleed onto the painting. */
+.s-paint .card3 { --carrier: transparent; --ink: #efe4cf; --inkstrong: #f7eedb; --inkfaint: #b9a88f; --inkshadow: 0 .05em .2em rgba(0,0,0,.9); }
+.s-paint .card3 .bar { left: -1.2em; right: -1.4em; top: -.7em; height: 4em; padding-top: .7em; padding-left: 6.8em; border-radius: 0; box-shadow: none;
+  background: url(/static/kit2/paint_band.webp) center / 100% 100% no-repeat; }
+.s-paint .card3 .tab { background: url(/static/kit2/paint_daub.webp) center top / 100% 100% no-repeat; clip-path: none; top: -.4em; left: calc(var(--bw) + .3em); width: 4.9em; height: 7.4em;
+  filter: drop-shadow(0 .15em .25em rgba(0,0,0,.55)); }
+.s-paint .card3 .tab .face { background: none; clip-path: none; }
+.s-paint .card3 .tab .n { top: 1.55em; } .s-paint .card3 .tab .n.two { top: 1.85em; }
+.s-paint .card3 .rules { left: -1em; right: -1.2em; bottom: -.9em; height: calc(var(--panel) + 1.8em); padding: 1.3em 2em 2.9em; border-radius: 0; box-shadow: none;
+  background: url(/static/kit2/paint_patch.webp) center / 100% 100% no-repeat; }
+.s-paint .card3 .rules i { bottom: 1.75em; }

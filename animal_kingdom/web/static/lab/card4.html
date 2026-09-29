@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Card variants</title>
+<!doctype html><html><head><meta charset="utf-8"><title>Card styles</title>
 <link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/app.css"><link rel="stylesheet" href="/static/lab/card3.css">
 <style>
 html, body { overflow: auto !important; margin: 0; height: auto; background: #15120f; color: #c9b48f; }
@@ -12,12 +12,12 @@ h2 { font: 600 15px var(--font-text); color: #e8d8b8; margin: 0 0 12px; } h2 spa
 <script type="module">
 import { cardHTML } from '/static/lab/card3.js';
 const pool = await fetch('/api/pool').then(r => r.json()), C = Object.fromEntries(pool.cards.map(c => [c.id, c]));
-const full = ['magpie', 'borealis', 'vesper'], cmp = ['king_theron', 'queen_adira', 'lynx', 'house_cat', 'groundhog', 'rat_king'];
-const V = [['a', 'A · Name bar on top', 'strength tab hangs from the bar'], ['b', 'B · Name plate under the art', 'strength tab top-left; the top of the painting stays clear'], ['c', 'C · Everything at the bottom', 'strength in a stone block on the name plate; nothing covers the painting\'s top']];
-document.getElementById('out').innerHTML = V.map(([v, t, sub]) => `<section class="v-${v}" data-v="${v}"><h2>${t}<span>${sub}</span></h2><div class="row">` +
+const full = ['magpie', 'borealis', 'vesper'], cmp = ['king_theron', 'serval', 'lynx', 'house_cat', 'groundhog', 'rat_king'];
+const S = [['granite', 'Granite', 'dark stone carriers, notched banner (the current one)'], ['guide', 'Field guide', 'pale sandstone, dark ink, double keylines, charcoal digits'], ['paint', 'War paint', 'carriers are strokes of dark earth pigment, ragged dry-brush edges']];
+document.getElementById('out').innerHTML = S.map(([v, t, sub]) => `<section class="s-${v}" data-v="${v}"><h2>${t}<span>${sub}</span></h2><div class="row">` +
   full.map(id => cardHTML(C[id])).join('') + '<div class="gap"></div>' + cmp.map(id => cardHTML(C[id], { cls: 'compact' }).replace('<div class="card3', `<div data-id="${id}" class="card3`)).join('') + '</div></section>').join('');
 const pop = document.getElementById('pop');
-document.querySelectorAll('[data-id]').forEach(e => { e.onmouseenter = () => { const r = e.getBoundingClientRect(); pop.className = 'v-' + e.closest('section').dataset.v; pop.innerHTML = cardHTML(C[e.dataset.id]);
+document.querySelectorAll('[data-id]').forEach(e => { e.onmouseenter = () => { const r = e.getBoundingClientRect(); pop.className = 's-' + e.closest('section').dataset.v; pop.innerHTML = cardHTML(C[e.dataset.id]);
   const w = 250, h = w * 1.467, x = r.right + 12 + w > innerWidth ? r.left - w - 12 : r.right + 12, y = Math.max(8, Math.min(innerHeight - h - 8, r.top + r.height / 2 - h / 2));
   pop.style.left = x + 'px'; pop.style.top = y + 'px'; pop.style.display = 'block'; }; e.onmouseleave = () => pop.style.display = 'none'; });
 </script></body></html>
