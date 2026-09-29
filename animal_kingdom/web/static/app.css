@@ -168,3 +168,6 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .phist .hr b { font-family: var(--font-display); font-weight: 700; font-size: 18px; }
 .phist .hr i { color: var(--muted); font-style: normal; margin: 0 4px; }
 .login { font-size: 14px; }
+/* On compact cards (grid, hand) the name is the card's main text: larger, about the deck strips' size. */
+.card.compact .nbar span { font-size: min(1.8em, calc(19em / var(--n))); }
+.card.compact .nbar.two span { font-size: 1.3em; line-height: .98; }
