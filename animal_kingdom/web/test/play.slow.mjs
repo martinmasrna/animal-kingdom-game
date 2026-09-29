@@ -19,8 +19,9 @@ async function startMatch(deck, botDeck) {
   await page.goto(`${server.url}/#/play`, { waitUntil: 'networkidle0' });
   await page.evaluate(d => localStorage.setItem('ak:deck', d), deck);
   await page.goto(`${server.url}/#/play`, { waitUntil: 'networkidle0' });
-  await page.click(`[data-k="level"][data-v="easy"]`); await wait(100);
-  await page.click(`[data-k="botDeck"][data-v="${botDeck}"]`); await wait(100);
+  for (const [k, v] of [['level', 'easy'], ['botDeck', botDeck]]) {   // the screen's own dropdowns: open, then pick
+    await page.click(`.dd[data-dd="${k}"] .sel`); await page.click(`.ddo[data-k="${k}"][data-v="${v}"]`); await wait(100);
+  }
   await page.click('#go');
   await page.waitForFunction(() => window.__ak().V && window.__ak().V.phase !== 'lobby', { timeout: 10000 });
   if (await page.$('#ready')) await page.click('#ready');

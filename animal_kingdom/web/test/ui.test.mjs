@@ -59,4 +59,17 @@ test('the deck list on the play screen scrolls in a short window, so every deck 
   await p.close();
 });
 
+test('the play screen\'s dropdowns pick, Escape closes an open one first and then goes back', async () => {
+  const p = await browser.newPage();
+  await p.goto(`${server.url}/#/play`, { waitUntil: 'networkidle0' });
+  await p.click('.dd[data-dd="botDeck"] .sel'); await p.click('.ddo[data-v="ramp"]'); await wait(80);
+  assert.equal(await p.$eval('.dd[data-dd="botDeck"] .sel', e => e.textContent), 'Ramp deck');
+  await p.click('.dd[data-dd="level"] .sel'); await p.keyboard.press('Escape'); await wait(80);
+  assert.equal(await p.$('.dd.open'), null, 'the dropdown closed');
+  assert.match(await p.evaluate(() => location.hash), /play/, 'still on the play screen');
+  await p.keyboard.press('Escape'); await wait(80);
+  assert.equal(await p.evaluate(() => location.hash), '#/');
+  await p.close();
+});
+
 test('no page errors', () => assert.deepEqual(page.errors, []));

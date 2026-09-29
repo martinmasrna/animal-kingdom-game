@@ -1,9 +1,10 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
-import { hasArt, artUrl } from './art.js';
+import { hasArt, artUrl, CROP } from './art.js';
 import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, crossroadAt, denMouthAt } from './board.js';
-import { collectionScreen as renderCollection } from './collection.js';
+import { collectionScreen as renderCollection, coverOf } from './collection.js';
+import { dd, wireDd } from './menu.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const COVER = { cats_midrange: 'king_theron', canine_buff_tempo: 'lobo', aggro_hq_rush: 'verminus', colony_food_swarm: 'queen_honoria',
@@ -40,7 +41,6 @@ function rows(list, counts) {
   return s;
 }
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
-const counted = ids => ids.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {});
 function cardPop(el, id, extra, place) {
   const c = CARDS[id], r = el.getBoundingClientRect();
   pop.className = 'pop ' + c.rarity;
@@ -71,9 +71,12 @@ function miniMap(w, h) {
   s += `<rect x="4" y="${py}" width="12" height="${h - 2 * py}" rx="3" fill="var(--you)" opacity="0.8"/><rect x="${w - 16}" y="${py}" width="12" height="${h - 2 * py}" rx="3" fill="var(--them)" opacity="0.8"/>`;
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
 }
+// A deck tile as in the collection: the player's chosen cover (else the collection's default), the name alone; the cover is
+// placed on the animal's head (its board-portrait crop).
 function deckTile(d, on) {
-  const list = counted(d.list), cover = COVER[d.id] || d.cover || (d.mine && sortIds(Object.keys(list))[0]), cv = cover ? artStyle(cover) : '';
-  return `<div class="dk${on ? ' on' : ''}" data-deck="${d.id}"><div class="cv gradart" ${cv}></div><div class="in"><b>${d.name}</b></div></div>`;
+  const cover = d.cover || COVER[d.id] || coverOf(d.list, CARDS);
+  const art = hasArt(cover) ? `<div class="art" style="--art:url(${artUrl(cover)});--cx:${CROP[cover][0]};--cy:${CROP[cover][1]}"></div>` : '';
+  return `<div class="dtile${on ? ' on' : ''}" data-deck="${d.id}">${art}<b>${esc(d.name)}</b></div>`;
 }
 // Your profile: the server knows you by the sign-in code this browser keeps (localStorage 'ak:key').
 const api = (path, opts = {}) => fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', 'X-AK-Key': store('ak:key') || '', ...(opts.headers || {}) } });
@@ -103,6 +106,7 @@ async function boot() {
   addEventListener('hashchange', route);
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
+    if (e.key === 'Escape' && (screen === 'play' || screen === 'join') && !/INPUT/.test(e.target.tagName)) return document.getElementById('back').click();
     if (e.key !== 'Escape' || screen !== 'game') return;
     const menu = document.getElementById('menudrop');
     if (menu && menu.classList.contains('on')) return menu.classList.remove('on');
@@ -135,30 +139,25 @@ function homeScreen() {
 }
 
 // ------------------------------------------------------------------ play
+// The collection's skeleton (menu.css): your decks on the ground, the opponent in the granite column, Play in its foot.
 const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', code: '' };
+const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']];
+const deckGrid = chosen => `<div class="pdecks"><div class="pgrid">${playable().map(d => deckTile(d, d.id === chosen.id)).join('')}</div></div>`;
 function playScreen() {
   screen = 'play';
-  const chosen = chosenDeck(), deck = chosen.id;
-  const field = DECKS.filter(d => d.id !== 'goodstuff' && d.id !== deck).length, rev = play.opp === 'gauntlet' && play.side === 'theirs';
-  const chip = (k, v, label) => `<span class="chip${play[k] === v ? ' on' : ''}" data-k="${k}" data-v="${v}">${label}</span>`;
-  app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Menu</a><h1>Play</h1></div>
-    <div class="body">
-      <div class="opp"><div class="lbl">Opponent</div>
-        <div class="opt${play.opp === 'friend' ? ' on' : ''}" data-opp="friend"><b>Friend</b><span>Invite someone with a link or a code</span></div>
-        ${play.opp === 'friend' ? `<div class="sub"><div class="lbl">Join with a code</div><div class="row"><input class="codein" id="code" maxlength="6" value="${play.code}" placeholder="CODE"><span class="chip on" id="joinbtn">Join</span></div></div>` : ''}
-        <div class="opt${play.opp === 'bot' ? ' on' : ''}" data-opp="bot"><b>Bot</b><span>Play against the computer</span></div>
-        <div class="opt${play.opp === 'gauntlet' ? ' on' : ''}" data-opp="gauntlet"><b>Gauntlet</b><span>10 games per starter deck, 5 going first, 5 going second</span></div>
-        ${play.opp === 'gauntlet' ? `<div class="sub"><div class="lbl">Level</div><div class="row">${chip('level', 'easy', 'Easy')}${chip('level', 'normal', 'Normal')}${chip('level', 'expert', 'Expert')}</div>
-          <div class="lbl">The chosen deck</div><div class="row">${chip('side', 'mine', 'You play it')}${chip('side', 'theirs', 'The bot plays it')}</div></div>` : ''}
-        ${play.opp === 'bot' ? `<div class="sub"><div class="lbl">Level</div><div class="row">${chip('level', 'easy', 'Easy')}${chip('level', 'normal', 'Normal')}${chip('level', 'expert', 'Expert')}</div>
-          <div class="lbl">Their deck</div><div class="row">${chip('botDeck', 'random', 'Random')}${DECKS.map(d => chip('botDeck', d.id, d.name)).join('')}</div></div>` : ''}
-      </div>
-      <div class="decks"><div class="lbl">${rev ? 'Bot\'s deck' : 'Your deck'}</div><div class="grid">${playable().map(d => deckTile(d, d.id === deck)).join('')}</div></div>
-    </div>
-    <div class="bar"><span class="fmt">${play.opp === 'gauntlet' ? `${10 * field} games · ${rev ? `you play ${field} starter decks against it` : `your deck against ${field} starter decks`} · both decklists open` : 'Best of 3 · one deck for the whole match · both decklists open'}</span><button class="btn primary" id="go">${play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Start match'}</button></div>`;
+  const chosen = chosenDeck();
+  const seg = (v, label) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${label}</button>`;
+  const opts = play.opp === 'bot' ? dd('level', play.level, LEVELS) + dd('botDeck', play.botDeck, [['random', 'Random deck'], ...DECKS.map(d => [d.id, d.name + ' deck'])])
+    : play.opp === 'gauntlet' ? dd('level', play.level, LEVELS) + dd('side', play.side, [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']])
+    : `<div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`;
+  app.innerHTML = `<div class="menu pscr">${deckGrid(chosen)}
+    <div class="side"><div class="popts"><div class="seg">${seg('bot', 'Bot')}${seg('friend', 'Friend')}${seg('gauntlet', 'Gauntlet')}</div>${opts}</div>
+      <div class="sfoot"><button class="play" id="go">${play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play'}</button>
+        <button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   app.querySelectorAll('[data-opp]').forEach(el => el.onclick = () => { play.opp = el.dataset.opp; playScreen(); });
-  app.querySelectorAll('.chip[data-k]').forEach(el => el.onclick = () => { play[el.dataset.k] = el.dataset.v; playScreen(); });
+  wireDd(app, (k, v) => { play[k] = v; playScreen(); });
   app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:deck', el.dataset.deck); playScreen(); });
+  document.getElementById('back').onclick = () => { location.hash = '#/'; };
   const code = document.getElementById('code');
   if (code) {
     code.oninput = () => play.code = code.value.trim().toUpperCase();
@@ -171,7 +170,7 @@ function playScreen() {
       const pool = DECKS.filter(d => d.id !== 'goodstuff'), bd = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
       body.bot = { level: play.level, deck: bd };
     }
-    if (play.opp === 'gauntlet') body.gauntlet = { level: play.level, reverse: rev };
+    if (play.opp === 'gauntlet') body.gauntlet = { level: play.level, reverse: play.side === 'theirs' };
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
@@ -179,21 +178,21 @@ function playScreen() {
 }
 function joinCode() { if (play.code) location.hash = '#/join/' + play.code; }
 
+// Joining a friend's match from their link: the same screen, the only choice left is your deck.
 function joinScreen(id) {
   screen = 'join';
   if (getToken(id)) { location.hash = '#/m/' + id; return; }
-  const chosen = chosenDeck(), deck = chosen.id;
-  app.innerHTML = `<div class="top"><a class="back" href="#/play">‹ Play</a><h1>Join match ${id}</h1></div>
-    <div class="body"><div class="decks"><div class="lbl">Your deck</div><div class="grid">${playable().map(d => deckTile(d, d.id === deck)).join('')}</div></div></div>
-    <div class="bar"><span class="fmt">Best of 3 · one deck for the whole match · both decklists open</span><button class="btn primary" id="go">Join</button></div>`;
+  const chosen = chosenDeck();
+  app.innerHTML = `<div class="menu pscr">${deckGrid(chosen)}
+    <div class="side"><div class="popts"></div><div class="sfoot"><button class="play" id="go">Join match</button><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { store('ak:deck', el.dataset.deck); joinScreen(id); });
+  document.getElementById('back').onclick = () => { location.hash = '#/play'; };
   document.getElementById('go').onclick = async () => {
     const r = await api(`/api/match/${id}/join`, { method: 'POST', body: JSON.stringify({ deck: deckSpec(chosen), name: 'Friend' }) });
     if (!r.ok) return toast(r.status === 404 ? `No match ${id}` : await r.text());
     const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
   };
 }
-
 
 // ------------------------------------------------------------------ collection (= the deckbuilder): collection.js
 function collectionScreen() {
