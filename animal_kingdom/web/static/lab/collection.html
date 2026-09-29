@@ -1,0 +1,119 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Collection grey-box</title>
+<link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/app.css">
+<style>
+/* Grey-box of the collection composition (design sandbox, 2026-09-29): layout only, flat greys; the cards are the real ones. */
+html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
+.gb { position: fixed; inset: 0; display: grid; grid-template-columns: 300px 1fr; grid-template-rows: 60px 1fr; font-family: var(--font-text); color: #d8d4cc; }
+.bar { grid-column: 2; display: flex; align-items: center; gap: 6px; padding: 0 20px; border-bottom: 1px solid #2a2d30; }
+.bar .back { color: #8b8e92; font-size: 13px; margin-right: 10px; cursor: pointer; }
+.tabs { display: flex; gap: 4px; }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 58px; padding: 4px 0 3px; border-radius: 8px; cursor: pointer; color: #8b8e92; font: 600 11px/1 'Fira Sans Condensed', sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+.tab.on { background: #2c3034; color: #f0ece4; }
+.med { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #55595e; background-repeat: no-repeat; background-color: #3a3d40; }
+.tab.on .med { border-color: #d8d4cc; }
+.tab.all .med { display: grid; place-items: center; font: 700 12px 'Fira Sans Condensed', sans-serif; color: #d8d4cc; }
+.bar .gap { flex: 1; }
+.search { width: 150px; height: 30px; border-radius: 999px; border: 1px solid #3a3d40; background: #1f2224; color: #d8d4cc; padding: 0 12px; font: 13px var(--font-text); }
+.seg { display: inline-flex; border: 1px solid #3a3d40; border-radius: 999px; overflow: hidden; }
+.seg span { padding: 6px 10px; font-size: 12px; color: #8b8e92; cursor: pointer; } .seg span.on { background: #2c3034; color: #f0ece4; }
+.cgrid { grid-column: 2; grid-row: 2; overflow-y: auto; padding: 16px 20px 30px; }
+.grp { display: flex; align-items: center; gap: 10px; margin: 14px 0 8px; font: 700 13px 'Fira Sans Condensed', sans-serif; color: #8b8e92; letter-spacing: .06em; }
+.grp::after { content: ''; flex: 1; height: 1px; background: #2a2d30; }
+.crow { display: grid; grid-template-columns: repeat(auto-fill, 118px); gap: 14px 12px; justify-content: space-between; }
+.tl { position: relative; cursor: pointer; } .tl .card { --w: 118px; }
+.tl.max .card { filter: brightness(.45) saturate(.6); }
+.cnt { position: absolute; right: 4px; top: 3px; z-index: 6; padding: 2px 6px; border-radius: 6px; background: #1d140a; color: #f3e3c0; font: 700 12px/1.2 'Fira Sans Condensed', sans-serif; }
+.side { grid-column: 1; grid-row: 1 / 3; border-right: 1px solid #2a2d30; background: #1c1f21; display: flex; flex-direction: column; min-height: 0; }
+.side .menu { padding: 20px 16px 6px; color: #8b8e92; font-size: 13px; cursor: pointer; }
+.dk.on { outline: 2px solid #d8d4cc; outline-offset: -2px; }
+.panel { grid-column: 3; grid-row: 1 / 3; border-left: 1px solid #2a2d30; background: #1c1f21; display: flex; flex-direction: column; min-height: 0; }
+.ph { padding: 14px 18px 10px; border-bottom: 1px solid #2a2d30; }
+.ph .back { font-size: 12px; color: #8b8e92; cursor: pointer; }
+.ph .nm { display: flex; align-items: baseline; justify-content: space-between; margin-top: 8px; }
+.ph .nm b { font: 700 24px/1 'Fira Sans Condensed', sans-serif; color: #f0ece4; }
+.ph .nm span { font: 700 26px/1 'Fira Sans Condensed', sans-serif; color: #7fb2e8; } .ph .nm span i { font-style: normal; color: #5d6166; font-size: 18px; }
+.tribes { display: flex; gap: 10px; margin-top: 12px; }
+.tribes div { display: flex; align-items: center; gap: 6px; font: 700 18px 'Fira Sans Condensed', sans-serif; }
+.tribes .med { width: 30px; height: 30px; }
+.caps { display: flex; gap: 8px; margin-top: 12px; }
+.caps div { flex: 1; border: 1px solid #33373b; border-radius: 8px; padding: 5px 8px; font: 600 11px 'Fira Sans Condensed', sans-serif; color: #8b8e92; text-transform: uppercase; letter-spacing: .05em; }
+.caps div b { display: block; font-size: 17px; color: #f0ece4; letter-spacing: 0; } .caps div.full b { color: #7fb2e8; }
+.list { flex: 1; overflow-y: auto; padding: 6px 12px; }
+.list h4 { margin: 10px 4px 4px; font: 600 11px var(--font-text); letter-spacing: .08em; text-transform: uppercase; color: #6b6f74; }
+.st { position: relative; display: flex; align-items: center; height: 30px; margin-bottom: 3px; border-radius: 6px; overflow: hidden; background: #2a2d30; cursor: pointer; }
+.st .art { position: absolute; right: 0; top: 0; bottom: 0; width: 60%; background: center 30% / cover; -webkit-mask-image: linear-gradient(90deg, transparent, #000 70%); opacity: .75; }
+.st .s { position: relative; width: 28px; text-align: center; font: 700 15px 'Fira Sans Condensed', sans-serif; }
+.st .n { position: relative; flex: 1; font: 600 15px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px #000; }
+.st .x { position: relative; width: 26px; text-align: center; font: 700 14px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px #000; }
+.pf { padding: 12px 18px; border-top: 1px solid #2a2d30; display: flex; gap: 8px; }
+.pf .play { flex: 1; height: 40px; border-radius: 8px; background: #3b6ea8; color: #fff; display: grid; place-items: center; font: 700 16px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
+.pf .more { width: 40px; height: 40px; border-radius: 8px; border: 1px solid #3a3d40; display: grid; place-items: center; color: #8b8e92; }
+.decks { flex: 1; overflow-y: auto; padding: 6px 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.decks h4 { margin: 6px 4px 2px; font: 600 11px var(--font-text); letter-spacing: .08em; text-transform: uppercase; color: #6b6f74; }
+.dk { position: relative; flex: none; height: 56px; border-radius: 8px; overflow: hidden; background: #2a2d30 center 30% / cover; cursor: pointer; }
+.dk::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,22,24,.95) 35%, rgba(20,22,24,.2)); }
+.dk b { position: absolute; left: 12px; top: 8px; font: 700 17px/1.1 'Fira Sans Condensed', sans-serif; color: #f0ece4; }
+.dk span { position: absolute; left: 12px; bottom: 8px; font: 500 12px/1.1 'Fira Sans Condensed', sans-serif; color: #a8abb0; }
+.new { height: 44px; border-radius: 8px; border: 1px dashed #44484c; display: grid; place-items: center; color: #a8abb0; font: 600 14px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
+.state { position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 99; display: flex; gap: 6px; background: #000c; padding: 6px; border-radius: 10px; }
+.state span { padding: 5px 10px; border-radius: 6px; font: 600 12px var(--font-text); color: #aaa; cursor: pointer; } .state span.on { background: #333; color: #fff; }
+.dbody { flex: none; margin: -2px 0 6px; padding: 10px 8px 8px; border-radius: 0 0 8px 8px; background: #24272a; }
+.dbody h4 { margin: 10px 2px 4px; }
+.dsum { display: flex; align-items: baseline; justify-content: space-between; padding: 0 2px; }
+.dtot { font: 700 24px/1 'Fira Sans Condensed', sans-serif; color: #7fb2e8; } .dtot i { font-style: normal; font-size: 16px; color: #5d6166; }
+.dcaps { display: flex; gap: 8px; } .dcaps b { font: 700 13px 'Fira Sans Condensed', sans-serif; color: #a8abb0; } .dcaps b.full { color: #7fb2e8; }
+.dbody .tribes { margin-top: 8px; } .dbody .tribes div { font-size: 16px; }
+.dbody .st { height: 27px; } .dbody .st .n { font-size: 14px; }
+.dbody .pf { padding: 10px 0 2px; border: 0; }
+.dk.on { border-radius: 8px 8px 0 0; outline: 0; }
+</style></head><body>
+<div class="gb" id="gb"></div><div class="pop" id="pop"></div>
+
+<script type="module">
+import { cardHTML } from '/static/card.js';
+import { CROP, artUrl } from '/static/art.js';
+const pool = await fetch('/api/pool').then(r => r.json()), C = Object.fromEntries(pool.cards.map(c => [c.id, c]));
+const decks = pool.decks.filter(d => d.id !== 'goodstuff');
+const cards = pool.cards.filter(c => decks.some(d => d.id === c.deck));
+const TRIBES = [['Cat', 'lion'], ['Canine', 'gray_wolf'], ['Rodent', 'squirrel'], ['Colony', 'queen_bee'], ['Bird', 'eagle'], ['Snake', 'viper'], ['Bear', 'grizzly_bear'], ['Megafauna', 'elephant'], ['Lizard', 'chameleon']];
+const RANK = { legendary: 0, rare: 1, common: 2 }, sv = c => c.str === '*' ? -1 : c.str, LIMIT = { legendary: 1, rare: 2, common: 3 };
+// A round head crop of the card art, M px across (CROP: centre x, centre y, diameter as fractions of width, height, width).
+const med = (id, M) => { const [cx, cy, D] = CROP[id], w = M / D, h = w * 1.5;
+  return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${M / 2 - cx * w}px ${M / 2 - cy * h}px`; };
+// The decks: yours first, then the starters. Clicking one opens it in place in the left column; clicking it again closes it.
+const mine = [{ id: 'mine1', name: 'Colony copy', list: decks.find(d => d.id === 'colony_food_swarm').list, cover: 'queen_honoria', own: true }];
+const all = [...mine, ...decks.map(d => ({ ...d, cover: d.list.find(id => C[id].rarity === 'legendary' && CROP[id]) }))];
+const st = { open: 'mine1', tribe: null, rar: null };
+const tribeCount = list => { const t = {}; list.forEach(id => C[id].tags.forEach(x => { if (TRIBES.some(y => y[0] === x)) t[x] = (t[x] || 0) + 1; })); return Object.entries(t).sort((a, b) => b[1] - a[1]); };
+function render() {
+  const open = all.find(d => d.id === st.open), counts = open ? open.list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {}) : {};
+  const shown = cards.filter(c => (!st.tribe || c.tags.includes(st.tribe)) && (!st.rar || c.rarity === st.rar))
+    .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
+  const grid = '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0, max = open && n >= (c.copies || LIMIT[c.rarity]);
+    return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n ? `<span class="cnt">×${n}</span>` : ''}</div>`; }).join('') + '</div>';
+  const tabs = `<div class="tab all${st.tribe ? '' : ' on'}" data-t=""><div class="med">ALL</div>All</div>` + TRIBES.map(([t, id]) => `<div class="tab${st.tribe === t ? ' on' : ''}" data-t="${t}"><div class="med" style="${med(id, 34)}"></div>${t === 'Megafauna' ? 'Mega' : t}</div>`).join('');
+  const seg = (k, o) => '<span class="seg">' + o.map(([v, l]) => `<span class="${(st[k] || '') === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${l}</span>`).join('') + '</span>';
+  const strip = id => `<div class="st" data-card="${id}"><div class="art" style="background-image:url(${artUrl(id)})"></div><span class="s">${C[id].str}</span><span class="n">${C[id].name}</span><span class="x">${counts[id]}</span></div>`;
+  const byR = r => Object.keys(counts).filter(id => C[id].rarity === r).sort((a, b) => sv(C[a]) - sv(C[b])).map(strip).join('');
+  const inR = r => open.list.filter(id => C[id].rarity === r).length;
+  const body = d => `<div class="dbody"><div class="dsum"><span class="dtot">${d.list.length}<i> / 30</i></span>
+      <span class="dcaps"><b class="${inR('legendary') >= 4 ? 'full' : ''}">L ${inR('legendary')}/4</b><b class="${inR('rare') >= 8 ? 'full' : ''}">R ${inR('rare')}/8</b><b>C ${inR('common')}</b></span></div>
+      <div class="tribes">${tribeCount(d.list).map(([t, n]) => `<div><div class="med" style="${med(TRIBES.find(x => x[0] === t)[1], 26)}"></div>${n}</div>`).join('')}</div>
+      <h4>Legendary</h4>${byR('legendary')}<h4>Rare</h4>${byR('rare')}<h4>Common</h4>${byR('common')}
+      <div class="pf"><div class="play">Play this deck</div><div class="more">⋯</div></div></div>`;
+  const tile = d => `<div class="dk${d.id === st.open ? ' on' : ''}" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${tribeCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>` + (d.id === st.open ? body(d) : '');
+  const side = `<div class="menu">‹ Menu</div><div class="decks"><h4>My decks</h4>${all.filter(d => d.own).map(tile).join('')}<div class="new">+ New deck</div>
+      <h4>Starter decks</h4>${all.filter(d => !d.own).map(tile).join('')}</div>`;
+  document.getElementById('gb').innerHTML = `<div class="side">${side}</div><div class="bar"><div class="tabs">${tabs}</div><span class="gap"></span>
+      ${seg('rar', [['', 'All'], ['legendary', 'L'], ['rare', 'R'], ['common', 'C']])}<input class="search" placeholder="Search"></div>
+    <div class="cgrid">${grid}</div>`;
+  document.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { st.tribe = e.dataset.t || null; render(); });
+  document.querySelectorAll('[data-k]').forEach(e => e.onclick = () => { st[e.dataset.k] = e.dataset.v || null; render(); });
+  document.querySelectorAll('[data-d]').forEach(e => e.onclick = () => { st.open = st.open === e.dataset.d ? null : e.dataset.d; render(); });
+  const pop = document.getElementById('pop');
+  document.querySelectorAll('.gb [data-card]').forEach(e => { e.onmouseenter = () => { const r = e.getBoundingClientRect(); pop.className = 'pop'; pop.innerHTML = cardHTML(C[e.dataset.card]); pop.style.display = 'flex';
+    const w = pop.offsetWidth, h = pop.offsetHeight; pop.style.left = (r.right + 10 + w > innerWidth ? r.left - w - 10 : r.right + 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; };
+    e.onmouseleave = () => pop.style.display = 'none'; });
+}
+render();
+</script></body></html>
