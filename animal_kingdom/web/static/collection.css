@@ -107,3 +107,16 @@
 .coll .tab.on::before { background-image: url(/static/kit2/rim_a.webp); }
 .coll .tab.on .med { box-shadow: none; }
 .coll .tab:hover:not(.on)::before { filter: brightness(1.25); }
+/* 20%: the ground at night instead of flat grey; the deck column is your den: the kopje's boulders along its edge, your blue paw print on them. */
+.coll { background: #171513 url(/static/kit2/coll_ground.webp) center / cover; grid-template-columns: minmax(0, 1fr) 330px; }
+.coll .chead { border-bottom: 0; padding-right: 40px; }
+.coll .cgrid { padding-right: 40px; }
+.coll .side { border-left: 0; position: relative; }
+.coll .side::before { content: ''; position: absolute; left: -44px; top: -40px; bottom: 0; width: 84px; pointer-events: none; z-index: 1;
+  background: url(/static/kit2/coll_ridge.webp) left top / 84px auto repeat-y; filter: drop-shadow(-5px 2px 7px rgba(0,0,0,.6)); }
+.coll .side::after { content: ''; position: absolute; left: -26px; top: 150px; width: 36px; height: 48px; pointer-events: none; z-index: 1; opacity: .85;
+  background: url(/static/kit2/paw_a.webp) center / contain no-repeat; transform: rotate(-8deg); }
+.coll .clist { padding-left: 34px; } .coll .sfoot { padding-left: 34px; }
+.coll .clist, .coll .sfoot { position: relative; z-index: 2; }
+.coll .sfoot { border-top: 0; }
+.coll .dnew, .coll .backbtn { background: rgba(10,10,10,.35); }
