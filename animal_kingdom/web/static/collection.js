@@ -14,7 +14,6 @@ const sv = c => c.str === '*' ? -1 : c.str;
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 const svg = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ICON = {
-  back: svg('<path d="M15 5l-7 7 7 7"/>'),
   image: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/>'),
   copy: svg('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>'),
   trash: svg('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
@@ -99,7 +98,7 @@ function render(app, all) {
       <div class="sfoot">${open.list.length === 30 ? '<div class="play" id="play">Play this deck</div>' : ''}
         <div class="frow"><div class="fcount${open.list.length === 30 ? ' full' : ''}"><b>${open.list.length}/30</b><span>Cards</span></div><button class="backbtn" id="done"><span>Done</span></button></div></div>`
     : `<div class="clist">${all.map(tile).join('')}${all.length < DECKS_MAX ? '<button class="dnew" id="dnew"><span>New deck</span></button>' : ''}</div>
-      <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${DECKS_MAX}</b><span>Decks</span></div><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div>`;
+      <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${DECKS_MAX}</b><span>Decks</span></div><button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
   app.innerHTML = `<div class="coll">${head}<div class="cgrid">${grid}</div><div class="side">${column}</div><div class="modal" id="cmodal"></div></div>`;
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
