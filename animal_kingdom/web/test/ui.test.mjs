@@ -60,3 +60,13 @@ test('the deck list on the play screen scrolls in a short window, so every deck 
 });
 
 test('no page errors', () => assert.deepEqual(page.errors, []));
+
+test('the collection lays out its tiles in a grid beside the deck panel', async () => {
+  const p = await browser.newPage(); await p.setViewport({ width: 1512, height: 800 });
+  await p.goto(`${server.url}/#/collection`, { waitUntil: 'networkidle0' });
+  const [a, b] = await p.$$eval('.tl', els => els.slice(0, 2).map(e => { const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width }; }));
+  assert.equal(a.y, b.y, 'the first two tiles share a row'); assert.ok(a.w < 200, 'tiles are tiles, not full-width rows');
+  const panel = await p.$eval('.dpanel', e => e.getBoundingClientRect().x);
+  assert.ok(panel > 1000, 'the deck panel sits on the right');
+  await p.close();
+});
