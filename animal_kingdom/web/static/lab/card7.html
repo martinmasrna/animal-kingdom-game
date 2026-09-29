@@ -10,7 +10,7 @@ h2 { font: 600 13px var(--font-text); letter-spacing: .06em; text-transform: upp
 <script type="module">
 import { cardHTML } from '/static/lab/card3.js';
 const pool = await fetch('/api/pool').then(r => r.json()), C = Object.fromEntries(pool.cards.map(c => [c.id, c]));
-const ids = ['skunk', 'sirocco', 'lemming', 'outrider', 'magpie', 'borealis'];
+const ids = ['skunk', 'sirocco', 'outrider', 'magpie', 'vesper', 'scrooge'];
 const V = new URLSearchParams(location.search).get('v') ? [[new URLSearchParams(location.search).get('v'), '']] :
   [['m m-wood t', 'Proposal: painted driftwood frame'], ['s-guide', 'Now (flat)'], ['m m-bone t', 'Also tried: bone'], ['m m-sand t', 'Also tried: sandstone']];
 document.getElementById('out').innerHTML = V.map(([cls, t]) => `<h2>${t}</h2><div class="row s-guide s-read ${cls}">${ids.map(id => cardHTML(C[id])).join('')}</div>`).join('');
