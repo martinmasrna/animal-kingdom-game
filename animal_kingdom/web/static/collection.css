@@ -268,3 +268,12 @@
 .coll .clist.editing { padding-left: 8px; padding-right: 8px; }
 .coll .dbody { padding-left: 0; padding-right: 0; }
 .coll .dbody .rh { margin-left: 8px; margin-right: 8px; }
+/* The open deck is one framed panel, as in Hearthstone: its tile on top, then a sunken field with the tiles' rim that runs down to the foot;
+   the strips sit inside it with a small inset. */
+.coll .clist.editing { display: flex; flex-direction: column; padding-bottom: 8px; }
+.coll .clist.editing::after { display: none; }
+.coll .clist.editing .dbody { flex: 1 0 auto; margin-top: 0; padding: 4px 4px 8px; border-radius: 0 0 8px 8px;
+  background: rgba(8,7,6,.55); box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.28), inset 0 2px 6px rgba(0,0,0,.6); }
+.coll .clist.editing .dtile.on { border-radius: 8px 8px 0 0; }
+.coll .dbody .rh { margin-left: 6px; margin-right: 6px; }
+.coll .clist.editing { gap: 0; }
