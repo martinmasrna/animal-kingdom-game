@@ -3,7 +3,7 @@
 // Click a card to add a copy, right-click it or click its strip to take one out; every change saves.
 // app.js hands in what it owns: the cards, the starter decks, the player's decks and how to save them, toast, play, back.
 import { cardHTML, fitNames } from './card.js';
-import { CROP, artUrl } from './art.js';
+import { CROP, artUrl, stripArt } from './art.js';
 import { encodeDeck, decodeDeck } from './deckcode.js';
 
 // Each family's medallion: the card whose animal reads clearest at 40 px (chosen side by side at that size).
@@ -80,7 +80,7 @@ function render(app, all) {
     ${dd('rar', 'Any rarity', [['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
     <label class="searchw">${ICON.search}<input class="search" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
-  const strip = id => `<div class="st ${C[id].rarity}" data-card="${id}"><div class="art" style="background-image:url(${artUrl(id)})"></div><span class="s">${String(C[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(C[id].name)}</span><span class="x">${C[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
+  const strip = id => `<div class="st ${C[id].rarity}" data-card="${id}"><div class="art" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(C[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(C[id].name)}</span><span class="x">${C[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
   const rhead = (label, r, cap) => `<h4 class="rh" data-r="${r}"><span>${label}</span>${cap ? `<span>${inR(r)}/${cap}</span>` : ''}</h4>`;   // only the capped rarities count
   const byR = r => Object.keys(counts).filter(id => C[id].rarity === r).sort((a, b) => sv(C[a]) - sv(C[b]) || C[a].name.localeCompare(C[b].name)).map(strip).join('');
   const body = d => {
@@ -88,9 +88,9 @@ function render(app, all) {
       ${rhead('Legendary', 'legendary', 4)}${byR('legendary')}${rhead('Rare', 'rare', 8)}${byR('rare')}${rhead('Common', 'common')}${byR('common')}
 </div>`; };
   const tile = d => d.id === st.open
-    ? `<div class="dtile on" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
+    ? `<div class="dtile on" data-d="${d.id}" style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${body(d)}`
-    : `<div class="dtile" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b>${esc(d.name)}</b></div>`;
+    : `<div class="dtile" data-d="${d.id}" style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b></div>`;
   // Two states, as in Hearthstone: your deck list (New deck is the slot after the last deck, Back in the foot), or one deck
   // being edited (only that deck; Play and Done in the foot).
   const column = open
