@@ -10,7 +10,7 @@ export const CROP = {
   hippopotamus: [.45, .25, .8], hornet: [.58, .42, .8], jerboa: [.65, .32, .65], king_theron: [.55, .3, .62],
   lemming: [.52, .45, .62], mouse: [.55, .28, .55], pestis: [.55, .3, .6], prince_leo: [.66, .29, .5],
   princess_lea: [.4, .3, .65], queen_adira: [.55, .3, .62], rat: [.58, .32, .62], serval: [.58, .3, .8],
-  sirocco: [.45, .52, .75], skunk: [.42, .45, .75], sloth: [.42, .36, .6], snow_leopard: [.5, .28, .66],
+  sirocco: [.45, .52, .75], skunk: [.42, .45, .75], sloth: [.42, .36, .6], snow_leopard: [.55, .34, .8],
   squirrel: [.62, .4, .7], verminus: [.6, .28, .65], worker_ant: [.55, .38, .75],
   eagle: [.56, .42, .62], owl: [.57, .25, .55], raven: [.64, .44, .7], goliath: [.55, .5, .62], rattlesnake: [.52, .36, .55],
   viper: [.65, .38, .6], stoop: [.55, .45, .7], magpie: [.6, .38, .75], black_mamba: [.52, .42, .75], taipan: [.45, .4, .8],
@@ -29,7 +29,7 @@ export const CROP = {
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
   prince_leo: [.7, .28, 1], princess_lea: [.4, .29, 1.5], king_theron: [.62, .22, 1], queen_adira: [.57, .17, 1.2], jaguar: [.7, .36, 1], serval: [.47, .22, 1.5],
-  snow_leopard: [.55, .32, 1.3], black_panther: [.7, .43, 1], lion: [.73, .28, 1], lynx: [.52, .24, 1.3], caracal: [.47, .28, 1.5], tiger: [.82, .54, 1],
+  snow_leopard: [.66, .38, 1], black_panther: [.7, .43, 1], lion: [.73, .28, 1], lynx: [.52, .24, 1.3], caracal: [.47, .28, 1.5], tiger: [.82, .54, 1],
   cougar: [.73, .38, 1.1], house_cat: [.43, .37, 1.5], eon: [.62, .29, 1], goliath: [.6, .47, 1.2], ember: [.75, .17, 1.5], aurum: [.6, .2, 1.3],
   rattlesnake: [.53, .35, 1.3], omen: [.6, .28, 1.7], stoop: [.58, .47, 1.8], eagle: [.63, .43, 1.8], owl: [.6, .24, 1.2], taipan: [.6, .3, 1],
   viper: [.63, .35, 1], magpie: [.73, .34, 1.7], black_mamba: [.58, .3, 1], raven: [.77, .47, 1.7], queen_marabunta: [.8, .53, 1.7], vesper: [.66, .47, 1.1],
