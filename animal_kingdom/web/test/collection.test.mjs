@@ -28,15 +28,15 @@ test('the screen: the grid beside the deck column, the header on the grid\'s edg
   assert.equal(Math.round(b.tabs.left), Math.round(b.grid.left), 'the header starts on the grid\'s edge');
 });
 
-test('editing a starter makes your copy; the starter stays', async () => {
-  assert.equal(await page.$('.dtile.on'), null, 'a first visit opens nothing');
-  await openDeck('[data-d="cats_midrange"]');
-  await page.click('.side .st[data-card="lion"]'); await wait(100);
+test('a new profile has the seven starter decks as its own, the first one open', async () => {
   const decks = await myDecks();
-  assert.equal(decks.length, 1); assert.equal(decks[0].name, 'Cats copy');
-  assert.equal(Object.values(decks[0].cards).reduce((a, n) => a + n, 0), 29, 'the copy lost the Lion');
+  assert.deepEqual(decks.map(d => d.name), ['Cats', 'Canines', 'Aggro', 'Colony', 'Egg', 'Food', 'Ramp']);
+  assert.equal(await page.$eval('.dtile.on', e => e.dataset.d), 'cats_midrange');
+  await page.click('.side .st[data-card="lion"]'); await wait(100);
+  const [cats] = await myDecks();
+  assert.equal(cats.name, 'Cats'); assert.equal(Object.values(cats.cards).reduce((a, n) => a + n, 0), 29, 'a starter is edited in place: it is yours');
+  assert.equal((await myDecks()).length, 7, 'no copy');
   assert.match(await page.$eval('.play', e => e.textContent), /29 \/ 30/, 'Play waits for 30 cards');
-  assert.ok(await page.$('[data-d="cats_midrange"]'), 'the starter is still listed');
 });
 
 test('adding says where the card went, and a refused add says why', async () => {
@@ -66,10 +66,11 @@ test('a deck code copies, and pasting it (or a plain list) makes a deck', async 
   await page.hover('.dtile.on'); await page.click('#dcopy'); await wait(50);
   const code = await page.evaluate(() => window.__clip);
   assert.match(code, /^### Big Cats\n/); assert.ok(code.split('\n').pop().length < 50);
-  await paste(code); await wait(120);
-  let decks = await myDecks(); assert.equal(decks.length, 2); assert.deepEqual(decks[1].cards, decks[0].cards, 'the pasted deck is the same deck');
+  const before = (await myDecks()).length; await paste(code); await wait(120);
+  assert.equal((await myDecks()).length, before + 1);
+  let decks = await myDecks(); const n = decks.length; assert.deepEqual(decks[n - 1].cards, decks[0].cards, 'the pasted deck is the same deck');
   await paste('### From an agent\n3x Lion\n2x House Cat'); await wait(120);
-  decks = await myDecks(); assert.equal(decks[2].name, 'From an agent'); assert.deepEqual(decks[2].cards, { lion: 3, house_cat: 2 });
+  decks = await myDecks(); assert.equal(decks[n].name, 'From an agent'); assert.deepEqual(decks[n].cards, { lion: 3, house_cat: 2 });
 });
 
 test('delete asks first', async () => {
@@ -93,16 +94,14 @@ test('New deck starts an empty deck, open, with its name ready to type', async (
   assert.deepEqual((await myDecks())[n].cards, { lion: 1 }, 'cards go into the new deck');
 });
 
-test('a starter opens at the top of the column; renaming it names your copy', async () => {
+test('an opened deck starts at the top of the column, and a former starter is yours to rename and delete', async () => {
   await page.click('[data-d="ramp"]'); await wait(120);
   const off = await page.evaluate(() => document.querySelector('.dtile.on').getBoundingClientRect().top - document.querySelector('.clist').getBoundingClientRect().top);
   assert.ok(off >= 0 && off < 30, `the open deck starts at the top (${off})`);
   const n = (await myDecks()).length;
-  await page.hover('.dtile.on'); assert.ok(await page.$('#dcover'), 'starters can take a cover (into your copy)'); assert.equal(await page.$('#ddel'), null, 'but cannot be deleted');
+  await page.hover('.dtile.on'); assert.ok(await page.$('#dcover')); assert.ok(await page.$('#ddel'), 'it can be deleted like any deck');
   await page.click('.nm-edit'); await page.keyboard.down('Meta'); await page.keyboard.press('a'); await page.keyboard.up('Meta'); await page.keyboard.type('Big Ramp'); await page.keyboard.press('Enter'); await wait(120);
-  const decks = await myDecks(); assert.equal(decks.length, n + 1); assert.equal(decks[n].name, 'Big Ramp');
-  assert.ok(await page.$('[data-d="ramp"]'), 'the starter is still there, unrenamed');
-  assert.equal(await page.$eval('[data-d="ramp"] b', e => e.textContent), 'Ramp');
+  const decks = await myDecks(); assert.equal(decks.length, n); assert.equal(decks.find(d => d.id === 'ramp').name, 'Big Ramp');
 });
 
 test('the strength and rarity lists are the screen\'s own and close on a click elsewhere', async () => {

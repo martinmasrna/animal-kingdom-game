@@ -81,6 +81,8 @@ class Profiles:
         self.db.executescript(SCHEMA)
         if "cover" not in [r[1] for r in self.db.execute("PRAGMA table_info(decks)")]:   # decks saved before covers
             self.db.execute("ALTER TABLE decks ADD COLUMN cover TEXT NOT NULL DEFAULT ''")
+        if "seeded" not in [r[1] for r in self.db.execute("PRAGMA table_info(profiles)")]:   # profiles from before starter decks were theirs
+            self.db.execute("ALTER TABLE profiles ADD COLUMN seeded INTEGER NOT NULL DEFAULT 0")
 
     # ------------------------------------------------------------- identity
     def _free_tag(self, name: str) -> str:
@@ -98,7 +100,7 @@ class Profiles:
         name = clean_name(name)
         code, pid = _new_code(), secrets.token_hex(8)
         with self.db:
-            self.db.execute("INSERT INTO profiles VALUES (?, ?, ?, ?, ?)",
+            self.db.execute("INSERT INTO profiles (id, name, tag, key_hash, created) VALUES (?, ?, ?, ?, ?)",
                             (pid, name, self._free_tag(name), _hash(code), time.time()))
         return code, self.get(pid)
 
@@ -176,6 +178,17 @@ class Profiles:
     def decks(self, pid: str) -> list[dict]:
         return [{"id": r["id"], "name": r["name"], "cards": json.loads(r["cards"]), **({"cover": r["cover"]} if r["cover"] else {})}
                 for r in self.db.execute("SELECT id, name, cards, cover FROM decks WHERE profile = ? ORDER BY pos", (pid,))]
+
+    def seed_decks(self, pid: str, starters: list[dict]) -> None:
+        """Give a profile the starter decks as its own, once: appended after any decks it already has, and
+        from then on edited, renamed or deleted like any other deck."""
+        if self.db.execute("SELECT seeded FROM profiles WHERE id = ?", (pid,)).fetchone()[0]:
+            return
+        mine = self.decks(pid)
+        taken = {d["id"] for d in mine}
+        self.save_decks(pid, mine + [d for d in starters if d["id"] not in taken])
+        with self.db:
+            self.db.execute("UPDATE profiles SET seeded = 1 WHERE id = ?", (pid,))
 
     def save_decks(self, pid: str, decks: list) -> list[dict]:
         """Replace the profile's decks with `decks` ([{id, name, cards: {card id: copies}, cover?}]). Drafts

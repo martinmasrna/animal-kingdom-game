@@ -167,7 +167,25 @@ def display(p: dict) -> str:
     return f"{p['name']}#{p['tag']}"
 
 
+# A profile starts with the starter decks as its own (covers as on the play screen).
+STARTER_COVERS = {"cats_midrange": "king_theron", "canine_buff_tempo": "lobo", "aggro_hq_rush": "verminus",
+                  "colony_food_swarm": "queen_honoria", "egg_control": "eon", "food_otk": "rat_king", "ramp": "borealis"}
+
+
+def starter_decks() -> list[dict]:
+    out = []
+    for slug in DECK_NAMES:
+        if slug not in PREMADE_DECKS:
+            continue
+        cards: dict = {}
+        for cid in load_premade_deck(slug):
+            cards[cid] = cards.get(cid, 0) + 1
+        out.append({"id": slug, "name": DECK_NAMES[slug], "cards": cards, "cover": STARTER_COVERS.get(slug, "")})
+    return out
+
+
 def profile_view(p: dict) -> dict:
+    profiles.seed_decks(p["id"], starter_decks())
     return {**p, "decks": profiles.decks(p["id"]), "history": profiles.history(p["id"]),
             "logins": profiles.identities(p["id"]), "providers": oauth.available()}
 

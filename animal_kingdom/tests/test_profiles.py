@@ -54,6 +54,17 @@ def test_a_database_from_before_covers_gains_the_column(tmp_path):
     assert Profiles(str(path)).decks("p") == [{"id": "x", "name": "Rats", "cards": {"rat": 3}}]
 
 
+def test_a_profile_gets_the_starter_decks_once(monkeypatch):
+    db = Profiles(":memory:")
+    monkeypatch.setattr(server, "profiles", db)
+    _, p = db.create()
+    decks = server.profile_view(p)["decks"]
+    assert [d["name"] for d in decks][:3] == ["Cats", "Canines", "Aggro"] and len(decks) == 7
+    assert all(sum(d["cards"].values()) == 30 for d in decks)
+    db.save_decks(p["id"], decks[:1])                                   # the player deletes six
+    assert len(server.profile_view(p)["decks"]) == 1                    # and they stay deleted
+
+
 def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch):
     from animal_kingdom.engine.state import Result
     db = Profiles(":memory:")

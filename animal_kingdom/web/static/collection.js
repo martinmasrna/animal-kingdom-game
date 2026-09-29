@@ -14,6 +14,7 @@ const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;'
 const svg = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ICON = {
   back: svg('<path d="M15 5l-7 7 7 7"/>'),
+  plus: svg('<path d="M12 5v14M5 12h14"/>'),
   image: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/>'),
   copy: svg('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>'),
   trash: svg('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
@@ -33,20 +34,14 @@ const countsOf = list => list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {
 const familyCount = list => { const t = {}; list.forEach(id => C[id].tags.forEach(x => { if (FAMILIES.some(f => f[0] === x)) t[x] = (t[x] || 0) + 1; }));
   return Object.entries(t).sort((a, b) => b[1] - a[1]); };
 
-// Your decks (saved on your profile) then the starters, all as {id, name, list, cover, own}.
+// Your decks, saved on your profile (which starts with the starter decks as its own), as {id, name, list, cover}.
 function decks() {
-  const mine = X.getDecks().map(d => ({ id: d.id, name: d.name, list: listOf(d.cards), cover: d.cover && C[d.cover] ? d.cover : null, own: true }));
+  const mine = X.getDecks().map(d => ({ id: d.id, name: d.name, list: listOf(d.cards), cover: d.cover && C[d.cover] ? d.cover : null }));
   mine.forEach(d => d.cover = d.cover || (d.list.length ? coverOf(d.list) : null));
-  return [...mine, ...X.starters.map(d => ({ id: d.id, name: d.name, list: d.list, cover: X.covers[d.id] || coverOf(d.list), own: false }))];
+  return mine;
 }
 function save(all) {
-  X.saveDecks(all.filter(d => d.own).map(d => ({ id: d.id, name: d.name, cards: countsOf(d.list), cover: d.cover })));
-}
-// Editing a starter makes your copy of it first; the starter never changes.
-function editable(all) {
-  const d = all.find(x => x.id === st.open); if (!d || d.own) return d;
-  const copy = { id: Date.now().toString(36), name: (d.name + ' copy').slice(0, 40), list: [...d.list], cover: d.cover, own: true };
-  all.splice(all.filter(x => x.own).length, 0, copy); st.open = copy.id; X.toast(`Editing your copy: ${copy.name}`, true); return copy;
+  X.saveDecks(all.map(d => ({ id: d.id, name: d.name, cards: countsOf(d.list), cover: d.cover })));
 }
 
 export function collectionScreen(app, ctx) {
@@ -56,7 +51,7 @@ export function collectionScreen(app, ctx) {
   if (!wired) { wired = true; wireGlobal(); }
   const all = decks();
   // Opens your first deck; with none yet, nothing is open and the grid is for browsing.
-  if (st.open === null || !all.some(d => d.id === st.open)) st.open = (all.find(d => d.own) || {}).id || null;
+  if (st.open === null || !all.some(d => d.id === st.open)) st.open = (all[0] || {}).id || null;
   render(app, all);
 }
 
@@ -94,13 +89,13 @@ function render(app, all) {
       ${d.list.length === 30 ? '<div class="play" id="play">Play this deck</div>' : `<div class="play off">${d.list.length} / 30 cards</div>`}</div>`; };
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
-        <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>${d.own ? `<button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button>` : ''}</div></div>${body(d)}`
+        <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${body(d)}`
     : `<div class="dtile" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b>${esc(d.name)}</b><span>${familyCount(d.list).slice(0, 2).map(([f, n]) => n + ' ' + f).join(' · ')}</span></div>`;
-  const mine = all.filter(d => d.own), starters = all.filter(d => !d.own);
+  const mine = all;
 
   app.innerHTML = `<div class="coll">${head}<div class="cgrid">${grid}</div>
-    <div class="side"><div class="clist${open ? ' opened' : ''}">${mine.map(tile).join('')}${mine.length ? '<div class="dsep"></div>' : ''}${starters.map(tile).join('')}</div>
-      <div class="sfoot"><button class="dnew" id="dnew">+ New deck</button><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div><div class="modal" id="cmodal"></div></div>`;
+    <div class="side"><div class="clist${open ? ' opened' : ''}">${mine.map(tile).join('')}</div>
+      <div class="sfoot"><button class="dnew" id="dnew">${ICON.plus}<span>New deck</span></button><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div><div class="modal" id="cmodal"></div></div>`;
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
   wire(app, all, open);
 }
@@ -121,15 +116,15 @@ function wire(app, all, open) {
   const nm = app.querySelector('.nm-edit');
   if (nm) nm.onclick = () => { const inp = document.createElement('input'); inp.className = 'nm-in'; inp.maxLength = 40; inp.value = open.name; nm.replaceWith(inp); inp.focus(); inp.select();
     let gone = false; const done = keep => { if (gone) return; gone = true; const name = inp.value.trim();
-      if (keep && name && name !== open.name) { const d = editable(all); d.name = name.slice(0, 40); st.toTop = true; }   // renaming a starter names your copy
+      if (keep && name) open.name = name.slice(0, 40);
       change(); };
     inp.onblur = () => done(true); inp.onkeydown = k => { if (k.key === 'Enter') done(true); if (k.key === 'Escape') { k.stopPropagation(); done(false); } }; };
   const cp = $('dcopy'); if (cp) cp.onclick = () => navigator.clipboard.writeText(encodeDeck(open.name, open.list, C)).then(() => X.toast('Deck code copied', true), () => X.toast('Could not copy'));
-  const cov = $('dcover'); if (cov) cov.onclick = () => pickCover(app, open, id => { const d = editable(all); d.cover = id; st.toTop = true; change(); });
+  const cov = $('dcover'); if (cov) cov.onclick = () => pickCover(app, open, id => { open.cover = id; change(); });
   const del = $('ddel'); if (del) del.onclick = () => confirmDelete(app, open, () => { all.splice(all.indexOf(open), 1); st.open = null; change(); X.toast(`Deleted ${open.name}`, true); });
   // A new deck starts empty, open, with its name ready to type.
-  $('dnew').onclick = () => { const d = { id: Date.now().toString(36), name: 'New deck', list: [], cover: null, own: true };
-    all.splice(all.filter(x => x.own).length, 0, d); st.open = d.id; st.rename = true; change(); };
+  $('dnew').onclick = () => { const d = { id: Date.now().toString(36), name: 'New deck', list: [], cover: null };
+    all.push(d); st.open = d.id; st.rename = true; change(); };
   if (st.toTop) { st.toTop = false; const t = app.querySelector('.dtile.on'), l = app.querySelector('.clist'); if (t) l.scrollTop += t.getBoundingClientRect().top - l.getBoundingClientRect().top - 8; }
   if (st.rename) { st.rename = false; const n = app.querySelector('.nm-edit'); if (n) n.click(); }
   const play = $('play'); if (play) play.onclick = () => X.play(open);
@@ -141,11 +136,11 @@ function wire(app, all, open) {
       const n = open.list.filter(x => x === c.id).length, inR = open.list.filter(x => C[x].rarity === c.rarity).length;
       const why = open.list.length >= 30 ? 'tot' : n >= limit(c) ? 'pips' : CAP[c.rarity] && inR >= CAP[c.rarity] ? c.rarity : null;
       if (why) return refuse(app, e, why);
-      editable(all).list.push(c.id); hidePop(); flash = c.id; change(); };
+      open.list.push(c.id); hidePop(); flash = c.id; change(); };
     e.oncontextmenu = ev => { ev.preventDefault(); if (!open || !open.list.includes(e.dataset.card)) return;
-      const d = editable(all); d.list.splice(d.list.indexOf(e.dataset.card), 1); hidePop(); change(); };
+      open.list.splice(open.list.indexOf(e.dataset.card), 1); hidePop(); change(); };
   });
-  app.querySelectorAll('.side [data-card]').forEach(e => e.onclick = () => { const d = editable(all); d.list.splice(d.list.indexOf(e.dataset.card), 1); hidePop(); change(); });
+  app.querySelectorAll('.side [data-card]').forEach(e => e.onclick = () => { open.list.splice(open.list.indexOf(e.dataset.card), 1); hidePop(); change(); });
   const fl = flash && app.querySelector(`.side .st[data-card="${flash}"]`); flash = null;
   if (fl) { fl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); fl.classList.add('flash'); }
 
@@ -207,8 +202,8 @@ function wireGlobal() {
     if (!here() || typing(e)) return;
     const d = decodeDeck(e.clipboardData.getData('text'), C);
     if (!d) return X.toast('That is not a deck code');
-    const all = decks(), nd = { id: Date.now().toString(36), name: d.name, list: d.list, cover: coverOf(d.list), own: true };
-    all.splice(all.filter(x => x.own).length, 0, nd); st.open = nd.id; save(all);
+    const all = decks(), nd = { id: Date.now().toString(36), name: d.name, list: d.list, cover: coverOf(d.list) };
+    all.push(nd); st.open = nd.id; save(all);
     render(here().parentElement, all); X.toast(`Imported ${nd.name}`, true);
   });
 }

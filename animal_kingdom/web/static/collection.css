@@ -164,3 +164,7 @@
 /* Hover: the stone lightens slightly, nothing moves (the flat grey overlay on New deck and Back is gone). */
 .coll .dnew:hover, .coll .backbtn:hover, .coll .dd .sel:hover { filter: brightness(1.2); color: #f3ead8; transform: none; }
 .coll .clist.opened::after { content: ''; flex: none; height: 70vh; }   /* room to bring the last deck to the top */
+/* Back and New deck: a drawn icon (the screen's icon set) then the word, one rhythm for both. */
+.coll .dnew, .coll .backbtn { display: flex; align-items: center; justify-content: flex-start; gap: 8px; padding: 0 16px 0 12px; }
+.coll .dnew svg, .coll .backbtn svg { width: 18px; height: 18px; flex: none; stroke-width: 2.4; opacity: .9; }
+.coll .dnew span, .coll .backbtn span { font: 600 16px 'Fira Sans Condensed', sans-serif; }

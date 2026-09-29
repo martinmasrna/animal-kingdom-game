@@ -94,7 +94,9 @@ async function loadProfile() {
 const myDecks = () => ME.decks.map(d => ({ ...d, cards: Object.fromEntries(Object.entries(d.cards).filter(([id]) => CARDS[id])) }));
 const saveDecks = ds => { ME.decks = ds; api('/api/me/decks', { method: 'PUT', body: JSON.stringify(ds) }).then(r => r.ok || toast('Could not save your decks')); };
 const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
-const playable = () => DECKS.concat(myDecks().filter(d => deckSize(d.cards) === 30).map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) })));
+// The decks you can play: your complete decks (a profile starts with the starters as its own); with none, the starters.
+const playable = () => { const mine = myDecks().filter(d => deckSize(d.cards) === 30).map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) }));
+  return mine.length ? mine : DECKS.filter(d => d.id !== 'goodstuff'); };
 const chosenDeck = () => { const all = playable(), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
 const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
 
@@ -202,7 +204,7 @@ function joinScreen(id) {
 function collectionScreen() {
   screen = 'collection';
   renderCollection(app, { cards: CARDS, starters: DECKS.filter(d => d.id !== 'goodstuff'), covers: COVER, getDecks: myDecks, saveDecks, toast,
-    play: d => { store('ak:deck', d.own ? 'my:' + d.id : d.id); location.hash = '#/play'; }, back: () => { location.hash = '#/'; } });
+    play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/play'; }, back: () => { location.hash = '#/'; } });
 }
 
 // ------------------------------------------------------------------ profile
