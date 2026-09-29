@@ -98,6 +98,9 @@ test('the strength and rarity lists are the screen\'s own and close on a click e
   await page.click('[data-dd=str] .sel'); assert.ok(await page.$('.dd.open'));
   await page.click('[data-dd=str] .ddo[data-v="4"]'); const four = await count();
   assert.ok(four > 0 && four < 60); assert.equal(await page.$eval('[data-dd=str] .sel', e => e.textContent), 'Strength 4');
+  await page.click('[data-dd=str] .sel'); await page.click('[data-dd=str] .ddo[data-v="9+"]');
+  const big = await page.$$eval('.cgrid .tl .n img, .cgrid .tl', els => els.length); assert.ok(big > 0, 'Strength 9+ finds the 9s and 10s');
+  assert.equal(await page.$$eval('[data-dd=str] .ddo', o => o.length), 11, 'Any, 0 to 8, and 9+');
   await page.click('[data-dd=str] .sel'); await page.click('[data-dd=str] .ddo[data-v=""]');
   await page.click('[data-dd=rar] .sel'); await page.mouse.click(600, 500); assert.equal(await page.$('.dd.open'), null);
 });

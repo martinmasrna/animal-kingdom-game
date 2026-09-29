@@ -65,7 +65,7 @@ function render(app, all) {
   const open = all.find(d => d.id === st.open), counts = open ? countsOf(open.list) : {};
   const inR = r => open ? open.list.filter(id => C[id].rarity === r).length : 0;
   const q = st.q.toLowerCase();
-  const shown = cards.filter(c => (!st.family || c.tags.includes(st.family)) && (!st.rar || c.rarity === st.rar) && (st.str === '' || String(c.str) === st.str)
+  const shown = cards.filter(c => (!st.family || c.tags.includes(st.family)) && (!st.rar || c.rarity === st.rar) && (st.str === '' || (st.str === '9+' ? c.str >= 9 : String(c.str) === st.str))
     && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(q)))
     .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
 
@@ -76,12 +76,12 @@ function render(app, all) {
 
   const tabs = `<div class="tab${st.family ? '' : ' on'}" data-t="" data-tip="All families"><div class="med mosaic">${['lion', 'gray_wolf', 'eagle', 'elephant'].map(id => `<i style="${med(id, 18)}"></i>`).join('')}</div></div>`
     + FAMILIES.map(([f, id]) => `<div class="tab${st.family === f ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
-  const strengths = [...new Set(cards.map(c => String(c.str)))].sort((a, b) => (a === '*' ? -1 : +a) - (b === '*' ? -1 : +b));
+  const strengths = [...Array(9).keys()].map(String).concat('9+');   // 0 to 8, then 9 and up together (Hearthstone's 7+)
   // A dropdown in the screen's own look: a slab showing the choice, a list that opens under it.
   const dd = (k, any, opts) => { const cur = opts.find(([v]) => v === (st[k] || '')); const all = [['', any], ...opts];
     return `<div class="dd" data-dd="${k}"><button class="sel">${cur ? cur[1] : any}</button><div class="ddm">${all.map(([v, l]) => `<div class="ddo${(st[k] || '') === v ? ' on' : ''}" data-v="${v}">${l}</div>`).join('')}</div></div>`; };
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
-    ${dd('str', 'Any strength', strengths.map(v => [v, v === '*' ? 'Variable' : 'Strength ' + v]))}
+    ${dd('str', 'Any strength', strengths.map(v => [v, 'Strength ' + v]))}
     ${dd('rar', 'Any rarity', [['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
     <input class="search" id="q" placeholder="Search" value="${esc(st.q)}"></div>`;
 
