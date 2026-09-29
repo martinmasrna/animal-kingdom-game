@@ -81,10 +81,11 @@ function render(app, all) {
     <label class="searchw">${ICON.search}<input class="search" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
   const strip = id => `<div class="st ${C[id].rarity}" data-card="${id}"><div class="art" style="background-image:url(${artUrl(id)})"></div><span class="s">${String(C[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(C[id].name)}</span><span class="x">${C[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
+  const rhead = (label, r, cap) => `<h4 class="rh" data-r="${r}"><span>${label}</span>${cap ? `<span>${inR(r)}/${cap}</span>` : ''}</h4>`;   // only the capped rarities count
   const byR = r => Object.keys(counts).filter(id => C[id].rarity === r).sort((a, b) => sv(C[a]) - sv(C[b]) || C[a].name.localeCompare(C[b].name)).map(strip).join('');
   const body = d => {
     return `<div class="dbody">
-      ${byR('legendary')}${byR('rare')}${byR('common')}
+      ${rhead('Legendary', 'legendary', 4)}${byR('legendary')}${rhead('Rare', 'rare', 8)}${byR('rare')}${rhead('Common', 'common')}${byR('common')}
 </div>`; };
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
@@ -166,7 +167,7 @@ function refuse(app, el, why) {
   again(el, 'shake');
   if (why === 'tot') { again(app.querySelector('.fcount'), 'shake'); X.toast('The deck is full: take a card out first'); }
   else if (why === 'pips') again(el.querySelector('.pips'), 'flash');
-  else X.toast(`${why === 'legendary' ? 'Legendaries' : 'Rares'} are full: ${CAP[why]} of ${CAP[why]}`);   // a rarity cap shows only when it stops an add
+  else again(app.querySelector(`.rh[data-r="${why}"] span:last-child`), 'flash');
 }
 
 // Dialogs: Cancel, Escape or a click outside close them.

@@ -290,3 +290,16 @@
 /* Rarity lives on the tab (its metal frame), not around the whole strip; strips keep dark separators. */
 .coll .dbody .st { box-shadow: inset 0 -1px 0 rgba(0,0,0,.75); }
 .coll .st .s { box-shadow: inset 0 0 0 2px var(--edge-st, #3a3530), inset -1px 0 0 rgba(0,0,0,.45); }
+/* Strips, second take: the card's own notched banner, small, holds the strength (separate pieces, not a column);
+   rarity is a thin metal bar on the strip's left edge. Rarity labels as plain labels, not dashboard headers. */
+.coll .st .s { width: 22px; margin: 0 8px 0 7px; align-self: stretch; box-shadow: none;
+  background: url(/static/kit2/card_banner.webp) center top / 100% 100% no-repeat; filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
+.coll .st .s img { height: 13px; margin-top: -4px; }
+.coll .dbody .st { padding-left: 0; }
+.coll .dbody .st::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--edge-st, #4a453f); z-index: 1; }
+.coll .dbody .st .art { z-index: 0; }
+.coll .rh { font: 600 14px 'Fira Sans Condensed', sans-serif; letter-spacing: 0; text-transform: none; color: #a89d8c; margin: 10px 6px 4px; }
+.coll .rh span:last-child { color: #a89d8c; }
+.coll .rh .full { color: #a89d8c; }
+.coll .rh span.flash { color: #ff8a78; }
+.coll .dbody .st.legendary + .st.rare, .coll .dbody .st.rare + .st.common, .coll .dbody .st.legendary + .st.common { margin-top: 0; }
