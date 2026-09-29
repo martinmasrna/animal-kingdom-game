@@ -33,6 +33,7 @@ test('a new profile has the seven starter decks as its own, the first one open',
   const decks = await myDecks();
   assert.deepEqual(decks.map(d => d.name), ['Cats', 'Canines', 'Aggro', 'Colony', 'Egg', 'Food', 'Ramp']);
   assert.equal(await page.$('.dtile.on'), null, 'the screen opens on the deck list');
+  assert.match(await page.$eval('.fcount', e => e.textContent), /7\/20/, 'the foot counts decks against the limit');
   assert.ok(await page.$('.clist #dnew'), 'New deck is the slot after the last deck');
   await openDeck('[data-d="cats_midrange"]');
   assert.equal(await page.$$eval('.clist .dtile', t => t.length), 1, 'editing shows only that deck');
@@ -40,7 +41,7 @@ test('a new profile has the seven starter decks as its own, the first one open',
   const [cats] = await myDecks();
   assert.equal(cats.name, 'Cats'); assert.equal(Object.values(cats.cards).reduce((a, n) => a + n, 0), 29, 'a starter is edited in place: it is yours');
   assert.equal((await myDecks()).length, 7, 'no copy');
-  assert.match(await page.$eval('.play', e => e.textContent), /29 \/ 30/, 'Play waits for 30 cards');
+  assert.match(await page.$eval('.fcount', e => e.textContent), /29\/30/); assert.equal(await page.$('#play'), null, 'Play waits for 30 cards');
 });
 
 test('adding says where the card went, and a refused add says why', async () => {
@@ -48,7 +49,7 @@ test('adding says where the card went, and a refused add says why', async () => 
   assert.ok(await has('.side .st[data-card="lion"]', 'flash'), 'the strip flashes');
   assert.match(await page.$eval('.play', e => e.textContent), /Play this deck/);
   await page.click(card('lion')); await wait(30);
-  assert.ok(await has(card('lion'), 'shake'), 'a full deck refuses'); assert.ok(await has('.play', 'shake'), 'and Play shows why');
+  assert.ok(await has(card('lion'), 'shake'), 'a full deck refuses'); assert.ok(await has('.fcount', 'shake'), 'and the card count shows why');
   await page.click(card('lion'), { button: 'right' }); await wait(80);                 // right-click takes one out: 29
   await page.click(card('lion')); await page.click(card('lion')); await wait(30);        // back to 3 of 3 (30), then one too many
   assert.ok(await has(card('lion'), 'max'), 'all copies in: dimmed');
@@ -97,7 +98,7 @@ test('New deck starts an empty deck, open, with its name ready to type', async (
   await page.keyboard.type('Scratch'); await page.keyboard.press('Enter'); await wait(120);
   const decks = await myDecks(); assert.equal(decks.length, n + 1);
   assert.deepEqual([decks[n].name, decks[n].cards], ['Scratch', {}]);
-  assert.match(await page.$eval('.play', e => e.textContent), /0 \/ 30/);
+  assert.match(await page.$eval('.fcount', e => e.textContent), /0\/30/);
   await page.click(card('lion')); await wait(80);
   assert.deepEqual((await myDecks())[n].cards, { lion: 1 }, 'cards go into the new deck');
 });

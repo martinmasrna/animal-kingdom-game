@@ -24,7 +24,7 @@ from typing import Optional
 DB_FILE = Path(__file__).resolve().parents[2] / "results" / "web.db"
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"     # no 0/O, 1/I: codes get typed by hand
 NAME_MAX = 20
-DECKS_MAX = 100
+DECKS_MAX = 20   # the collection shows n / 20 decks
 HISTORY_SHOWN = 100
 
 SCHEMA = """

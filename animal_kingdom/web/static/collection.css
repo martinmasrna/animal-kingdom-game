@@ -178,3 +178,11 @@
 .coll .clist .dnew:hover { filter: none; background: rgba(240,232,218,.06); border-color: rgba(240,232,218,.5); color: #fff; }
 .coll .sfoot .play { width: 100%; margin: 0; }
 .coll .clist.editing .dtile.on { margin-top: 2px; }
+/* The foot, as Hearthstone's: a count (decks, or the open deck's cards) beside Back / Done. */
+.coll .frow { display: flex; gap: 8px; width: 100%; }
+.coll .fcount { flex: 1; height: 44px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;
+  background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); color: #ddd3c3; }
+.coll .fcount b { font: 700 17px 'Fira Sans Condensed', sans-serif; }
+.coll .fcount span { font: 500 11px 'Fira Sans Condensed', sans-serif; color: #9d917e; letter-spacing: .06em; margin-top: 2px; }
+.coll .fcount.full b { color: #9cc3ec; }
+.coll .frow .backbtn { width: auto; flex: none; min-width: 112px; }

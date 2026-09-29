@@ -8,6 +8,7 @@ import { encodeDeck, decodeDeck } from './deckcode.js';
 
 const FAMILIES = [['Cat', 'lion'], ['Canine', 'gray_wolf'], ['Rodent', 'squirrel'], ['Colony', 'queen_bee'], ['Bird', 'eagle'],
   ['Snake', 'viper'], ['Bear', 'grizzly_bear'], ['Megafauna', 'elephant'], ['Lizard', 'chameleon']];
+const DECKS_MAX = 20;   // as the server's profiles.DECKS_MAX
 const RANK = { legendary: 0, rare: 1, common: 2 }, LIMIT = { legendary: 1, rare: 2, common: 3 }, CAP = { legendary: 4, rare: 8 };
 const sv = c => c.str === '*' ? -1 : c.str;
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
@@ -95,10 +96,10 @@ function render(app, all) {
   // being edited (only that deck; Play and Done in the foot).
   const column = open
     ? `<div class="clist editing">${tile(open)}</div>
-      <div class="sfoot">${open.list.length === 30 ? '<div class="play" id="play">Play this deck</div>' : `<div class="play off">${open.list.length} / 30 cards</div>`}
-        <button class="backbtn" id="done"><span>Done</span></button></div>`
-    : `<div class="clist">${all.map(tile).join('')}<button class="dnew" id="dnew"><span>New deck</span></button></div>
-      <div class="sfoot"><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div>`;
+      <div class="sfoot">${open.list.length === 30 ? '<div class="play" id="play">Play this deck</div>' : ''}
+        <div class="frow"><div class="fcount${open.list.length === 30 ? ' full' : ''}"><b>${open.list.length}/30</b><span>Cards</span></div><button class="backbtn" id="done"><span>Done</span></button></div></div>`
+    : `<div class="clist">${all.map(tile).join('')}${all.length < DECKS_MAX ? '<button class="dnew" id="dnew"><span>New deck</span></button>' : ''}</div>
+      <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${DECKS_MAX}</b><span>Decks</span></div><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div>`;
 
   app.innerHTML = `<div class="coll">${head}<div class="cgrid">${grid}</div><div class="side">${column}</div><div class="modal" id="cmodal"></div></div>`;
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
@@ -165,7 +166,7 @@ function wire(app, all, open) {
 function refuse(app, el, why) {
   const again = (e, cls) => { if (!e) return; e.classList.remove(cls); void e.offsetWidth; e.classList.add(cls); };
   again(el, 'shake');
-  if (why === 'tot') { again(app.querySelector('.play'), 'shake'); if (!app.querySelector('.play.off')) X.toast('The deck is full: take a card out first'); }
+  if (why === 'tot') { again(app.querySelector('.fcount'), 'shake'); X.toast('The deck is full: take a card out first'); }
   else again(why === 'pips' ? el.querySelector('.pips') : app.querySelector(`.rh[data-r="${why}"] span:last-child`), 'flash');
 }
 
@@ -207,6 +208,7 @@ function wireGlobal() {
     if (!here() || typing(e)) return;
     const d = decodeDeck(e.clipboardData.getData('text'), C);
     if (!d) return X.toast('That is not a deck code');
+    if (decks().length >= DECKS_MAX) return X.toast(`${DECKS_MAX} decks is the most you can keep: delete one first`);
     const all = decks(), nd = { id: Date.now().toString(36), name: d.name, list: d.list, cover: coverOf(d.list) };
     all.push(nd); st.open = nd.id; save(all);
     render(here().parentElement, all); X.toast(`Imported ${nd.name}`, true);
