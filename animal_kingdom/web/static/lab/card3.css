@@ -23,3 +23,6 @@
   background: linear-gradient(90deg, rgba(255,240,200,0), rgba(255,240,200,.16), rgba(255,240,200,0)); animation: sheen3 5.5s ease-in-out infinite; }
 @keyframes sheen3 { 0% { transform: translateX(-130%) rotate(18deg); } 45%, 100% { transform: translateX(380%) rotate(18deg); } }
 @media (prefers-reduced-motion: reduce) { .card3.legendary::after { animation: none; display: none; } }
+/* Compact: art, strength, name and rarity edge; the full card shows on hover. */
+.card3.compact .rules { display: none; }
+.card3.compact .nm { padding-bottom: 1.6em; }
