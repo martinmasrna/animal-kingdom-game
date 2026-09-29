@@ -78,6 +78,10 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .strsel { height: 30px; border-radius: 999px; border: 1px solid #3a3d40; background: #1f2224; color: #d8d4cc; padding: 0 10px; font: 13px var(--font-text); margin-right: 6px; }
 .decks > .dtile:first-child { margin-top: 4px; }
 .bar { min-width: 0; } .bar > * { flex: none; } .bar .gap { flex: 1 1 0; min-width: 8px; }
+.dtile .keb { border: 0; background: none; padding: 0; position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 28px; height: 36px; border-radius: 6px; display: grid; place-items: center;
+  font: 700 22px/1 var(--font-text); color: #f0ece4; text-shadow: 0 1px 3px #000; cursor: pointer; }
+.dtile .keb:hover { background: rgba(0,0,0,.45); }
+.dtile em + .keb { right: 6px; } .dtile:has(.keb) em { right: 40px; }
 </style></head><body>
 <div class="gb" id="gb"></div><div class="pop" id="pop"></div>
 
@@ -112,9 +116,9 @@ function render() {
   const body = d => `<div class="dbody">
       ${tribeCount(d.list).length > 1 ? `<div class="tribes">${tribeCount(d.list).map(([t, n]) => `<div><div class="med" style="${med(TRIBES.find(x => x[0] === t)[1], 26)}"></div>${n}</div>`).join('')}</div>` : ''}
       ${head('Legendary', inR('legendary'), 4)}${byR('legendary')}${head('Rare', inR('rare'), 8)}${byR('rare')}${head('Common', inR('common'))}${byR('common')}
-      <div class="pf"><div class="play">Play this deck</div><div class="more">⋯</div></div></div>`;
+      <div class="pf"><div class="play">Play this deck</div></div></div>`;
   const tile = d => (d.id === st.open
-    ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}</div>`
+    ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}<button class="keb" title="Duplicate, rename, delete">⋮</button></div>`
     : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${tribeCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>`) + (d.id === st.open ? body(d) : '');
   const side = `<div class="decks">${all.filter(d => d.own).map(tile).join('')}
       <h4>Starter decks</h4>${all.filter(d => !d.own).map(tile).join('')}</div>`;
