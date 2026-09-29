@@ -112,10 +112,10 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .toast.ok { background: var(--surface-2); border-color: var(--line-strong); }
 
 /* ---------- the card (card.js): 20em wide, 29.34em tall, em = --w / 20 ---------- */
-.card { --w: 180px; --bw: .26em; --edge: linear-gradient(160deg, #5d5750, #2b2825 45%, #4a453f); position: relative; width: var(--w); height: calc(var(--w) * 1.467);
+.card { --w: 180px; --bw: .22em; --edge: linear-gradient(160deg, #3d3934, #1f1d1b 45%, #33302c); position: relative; width: var(--w); height: calc(var(--w) * 1.467);
   font-size: calc(var(--w) / 20); flex: none; border-radius: .9em; background: var(--edge); box-shadow: .2em .45em .9em rgba(0,0,0,.55); overflow: hidden; isolation: isolate; }
-.card.rare { --bw: .3em; --edge: linear-gradient(160deg, #c9ccce, #8d9196 30%, #4a4e52 60%, #b3b7ba); }
-.card.legendary { --bw: .42em; --edge: linear-gradient(150deg, #fff1c2, #d9a93f 22%, #7e5a16 48%, #f0cd70 70%, #a67a1e 88%, #ffe9a6); }
+.card.rare { --bw: .42em; --edge: linear-gradient(160deg, #f4f7fa, #c3cbd3 35%, #97a2ad 65%, #e3e9ee); }
+.card.legendary { --bw: .5em; --edge: linear-gradient(150deg, #fff1c2, #d9a93f 22%, #7e5a16 48%, #f0cd70 70%, #a67a1e 88%, #ffe9a6); }
 /* The painting starts under the name bar (the bar never covers it), its top edge showing. */
 .card .pic { position: absolute; inset: calc(var(--bw) + 3.05em) var(--bw) var(--bw); border-radius: 0 0 .7em .7em; background: #3a2c1a 50% 0 / cover no-repeat; display: grid; place-items: center; }
 .card .pic span { font: 600 1.4em/1.1 'Fira Sans Condensed', sans-serif; color: #f3e3c0; text-align: center; padding: 1em; }
