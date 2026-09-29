@@ -189,5 +189,5 @@ def test_strength_loss_text_matches_config():
 
 
 def test_eon_decay_text_matches_config():
-    (n,) = re.findall(r"(\d+) weaker", _cards()["eon"].text)
+    (n,) = re.findall(r"with -(\d+) strength", _cards()["eon"].text)
     assert int(n) == Config.default().eon_decay

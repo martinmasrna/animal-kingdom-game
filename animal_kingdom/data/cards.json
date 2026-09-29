@@ -149,7 +149,7 @@
       "tags": ["Snake"],
       "base_strength": 10,
       "keywords": ["Apex Predator"],
-      "text": "Apex Predator. At the end of your turn, shuffle this into your deck, 1 weaker."
+      "text": "Apex Predator. At the end of your turn, shuffle this into your deck with -1 strength."
     },
     {
       "id": "eon_food_engine",
@@ -290,7 +290,7 @@
       "tags": ["Bird"],
       "base_strength": 3,
       "keywords": ["Flight"],
-      "text": "Flight. Battlecry: take a random card from your opponent's hand, then shuffle a card from your hand into your deck."
+      "text": "Flight. Battlecry: steal a card from your opponent's hand, then discard a card."
     },
     {
       "id": "black_mamba",
@@ -847,7 +847,7 @@
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Battlecry: return all adjacent enemies to their owner's hand."
+      "text": "Battlecry: return all adjacent enemies to your opponent's hand."
     },
     {
       "id": "gale",
@@ -877,7 +877,7 @@
       "tags": [],
       "base_strength": 2,
       "keywords": ["Flight"],
-      "text": "Flight. Battlecry: you may remove another Hornet from your hand or deck. If you do, remove an adjacent enemy."
+      "text": "Flight. Battlecry: discard a Hornet from your hand or deck to remove an adjacent enemy."
     },
     {
       "id": "chameleon",
@@ -898,7 +898,7 @@
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Return an adjacent enemy to your opponent's hand. They can't play it next turn."
+      "text": "Return an adjacent enemy to your opponent's hand. It can't be played next turn."
     },
     {
       "id": "lemming",
@@ -1128,7 +1128,7 @@
       "tags": ["Canine"],
       "base_strength": 4,
       "keywords": [],
-      "text": "Battlecry: remove an adjacent enemy with strength at most your Canine count."
+      "text": "Battlecry: remove an adjacent enemy with strength up to the number of your Canines."
     },
     {
       "id": "outrider",

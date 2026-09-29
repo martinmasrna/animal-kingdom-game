@@ -19,7 +19,7 @@ The deck is being redesigned: the diagnosis and Martin's card-by-card analysis a
 |---|---:|---|---:|---|
 | **Verminus** | 1 | Rodent | 3 | Has +1 strength for each other unit you control. |
 | **Pestis** | 1 | Rodent | 3 | Battlecry: remove an adjacent enemy and every unit buried under it. |
-| **Sirocco** | 1 | — | 5 | Battlecry: return all adjacent enemies to their owner's hand. |
+| **Sirocco** | 1 | — | 5 | Battlecry: return all adjacent enemies to your opponent's hand. |
 | **Gale** | 1 | Bird | 6 | Flight. The first time an enemy covers this, return it to its owner's hand. |
 
 ### Rare
@@ -27,9 +27,9 @@ The deck is being redesigned: the diagnosis and Martin's card-by-card analysis a
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Jerboa** | 2 | Rodent | 2 | Battlecry: play another unit. |
-| **Hornet** | 2 | — | 2 | Flight. Battlecry: you may remove another Hornet from your hand or deck. If you do, remove an adjacent enemy. |
+| **Hornet** | 2 | — | 2 | Flight. Battlecry: discard a Hornet from your hand or deck to remove an adjacent enemy. |
 | **Chameleon** | 2 | Lizard | dynamic | May be placed on any unit, and any unit may be placed on top of it. |
-| **Skunk** | 2 | — | 4 | Return an adjacent enemy to your opponent's hand. They can't play it next turn. |
+| **Skunk** | 2 | — | 4 | Return an adjacent enemy to your opponent's hand. It can't be played next turn. |
 
 ### Common
 

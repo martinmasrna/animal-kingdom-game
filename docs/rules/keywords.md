@@ -65,12 +65,13 @@ Card text grants strength two ways, **distinguished by the verb** — this readi
 **`effective_strength`** = `base_or_dynamic + stored_counters + active_anthems`, clamped ≥ 0, **evaluated live** wherever strength matters (covering, removal thresholds, region-holding, conditions like Coyote's "if this has 5+"). Counters are signed ints (Viper's "−3" is one). The event **`ON_GAIN_STRENGTH`** fires only when a counter is granted (not on live anthem drift).
 
 ### Discard  *(card-text term, not a keyword)*
-**Discard a card** means remove a card from a hand. "Your opponent discards a random card" (Omen) and "discard a random card" (Rat) are the same removal the engine has always done for "removes a random card from their hand".
+**Discard a card** means remove a card from a hand (or from a deck, when the text says so, as on Hornet). "Your opponent discards a random card" (Omen) and "discard a random card" (Rat) are the same removal the engine has always done for "removes a random card from their hand".
 
 ### Card-text conventions
-Card text is at most 80 characters (`docs/design/principles.md`). These phrasings keep it there and are binding:
+Card text fits three lines on the full card (`docs/design/principles.md`). These phrasings are binding:
 
 - **"enemy"** means an enemy unit; **"your Canines"** means friendly Canines.
+- The other player is always **"your opponent"**, never "they", "their" or "them". Stealing from the opponent's hand is random by nature (the hand is hidden), so the text doesn't say "random".
 - Thresholds read **"of strength 4 or less"**, **"6 or more"**, **"10 or more food"**.
 - Timed triggers read **"At the end of your turn, …"** and **"At the start of your next turn, …"**.
 

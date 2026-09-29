@@ -19,7 +19,7 @@ What the game should become, and the rules every card is designed against. Read 
 
 Martin's worked application of these to the aggro deck is in [`../cards/aggro-redesign.md`](../cards/aggro-redesign.md).
 
-**Card text is at most 80 characters.** That is three lines on the full card at a size as readable as Hearthstone's, and it caps how much one card may do: complexity goes into keywords and shared wording, not into sentences. `test_card_text_length.py` enforces it. Wording conventions that keep texts short are in [`../rules/keywords.md`](../rules/keywords.md) (card-text conventions).
+**Card text fits three lines on the full card.** Three lines at a size as readable as Hearthstone's caps how much one card may do: complexity goes into keywords and shared wording, not into sentences. About 80 characters is the budget when writing; a natural sentence may run over it as long as it fits, and a sentence is never squeezed (clipped phrases, parentheses, pronoun shortcuts) to fit. The web test `cardtext.test.mjs` measures every card. Wording conventions are in [`../rules/keywords.md`](../rules/keywords.md) (card-text conventions).
 
 ## Power calibration
 

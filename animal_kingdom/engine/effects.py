@@ -1192,8 +1192,8 @@ def _magpie_place(state, unit, cr):
 
 
 def _op_magpie_steal(state, step):
-    """Take a random card from the opponent's hand (it becomes yours), then shuffle a card of
-    your choice from your hand into your deck. The stolen card isn't a remove: it changes hands."""
+    """Take a random card from the opponent's hand (it becomes yours), then discard a card of
+    your choice. The stolen card isn't a remove: it changes hands; the discard is (Remove Pile)."""
     player = step["player"]
     if "stolen" not in step:
         step["stolen"] = True
@@ -1212,8 +1212,7 @@ def _op_magpie_steal(state, step):
             return PendingRequest("choice", player, options=[u.iid for u in hand], from_deck_reveal=True)
     inst = next((u for u in hand if u.iid == step["choice"]), None)
     if inst is not None:
-        hand.remove(inst)
-        shuffle_back(state, player, [inst.card_id])
+        remove_from_hand(state, player, inst)
     return None
 
 

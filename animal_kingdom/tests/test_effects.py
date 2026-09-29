@@ -1085,13 +1085,13 @@ def test_eon_eats_then_shuffles_itself_back_one_smaller_each_cycle():
     assert card_strength(s, "eon", "A") == 10 - CFG.eon_decay
 
 
-def test_magpie_takes_a_random_enemy_card_then_shuffles_one_of_yours_away():
+def test_magpie_takes_a_random_enemy_card_then_discards_one_of_yours():
     s = make_state(hands={"A": ["magpie", "mouse"], "B": ["lion"]},
                    decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     rules.apply_action(s, PlaceAction("magpie", ("cr", "1,1")))
     assert s.hands["B"] == []                              # the Lion was taken
     rules.apply_action(s, ChoiceAction(next(u.iid for u in s.hands["A"] if u.card_id == "mouse")))
-    assert hand_ids(s, "A") == ["lion"] and "mouse" in s.decks["A"]
+    assert hand_ids(s, "A") == ["lion"] and "mouse" in s.remove_pile and "mouse" not in s.decks["A"]
     assert all(u.owner == "A" for u in s.hands["A"])
 
 
