@@ -16,7 +16,7 @@ The larger pool should force real deckbuilding decisions. New cards should creat
 - [ ] Build toward at least **20–24 plausible cards per established archetype** before considering the first constructed-card-pool milestone.
 - [ ] Preserve the 30-card deck limits: at most 4 legendary and 8 rare cards. Extra designs are choices, not permission to increase those limits.
 - [ ] Avoid printing several unconditional body-plus-card-advantage cards. In a place-or-draw economy, a body that replaces itself is already premium.
-- [ ] Avoid unrestricted extra placements near an enemy HQ. Every chaining effect needs an instant-capture audit.
+- [ ] Avoid unrestricted extra placements near an enemy den. Every chaining effect needs an instant-capture audit.
 - [ ] Prefer cards that are useful in two homes. Tags should suggest archetypes rather than act as hard classes.
 - [ ] Keep Cats expansion cards conditional or narrow until the post-nerf shell is proven fair.
 - [ ] Treat food values as placeholders until the shared food scale is re-tested.
@@ -137,15 +137,15 @@ Aggro's extra cards should split into Rodent chaining, aerial pressure, and empt
 
 - [ ] **Prairie Dog** — Rodent · STR 3 · Common `Roar: play one more Rodent from your hand.` A narrower Jerboa that enables a dedicated Rodent build.
 
-- [ ] **Gecko** — Lizard · STR 7 · Common `May be placed on an empty crossroad adjacent to an enemy unit, ignoring connection.` Reach without covering, removal, or direct HQ capture.
+- [ ] **Gecko** — Lizard · STR 7 · Common `May be placed on an empty crossroad adjacent to an enemy unit, ignoring connection.` Reach without covering, removal, or direct den capture.
 
 - [ ] **Mole** — Rodent · STR 6 · Common `Burrow.` Proposed Burrow definition: ignore connection only when placing onto an empty crossroad.
 
-- [ ] **Starling** — Bird · STR 2 · Common `Flight. Roar: if you control another unit with Flight, play one more unit with Flight from your hand.` High burst-risk. Run an explicit two-card/three-card HQ-capture search before approving.
+- [ ] **Starling** — Bird · STR 2 · Common `Flight. Roar: if you control another unit with Flight, play one more unit with Flight from your hand.` High burst-risk. Run an explicit two-card/three-card den-capture search before approving.
 
 - [ ] **Bombardier Beetle** — Insect · STR 5 · Rare `Roar: return an adjacent enemy of strength 4 or less to its owner's hand.` A smaller, capped alternative to Skunk without the one-turn lock.
 
-- [ ] **Springhare** — Rodent · STR 5 · Rare `Burrow. Roar: if played adjacent to the opponent's headquarters, draw 1 card.` Combines Cheetah's reward with empty-only infiltration and a much smaller body.
+- [ ] **Springhare** — Rodent · STR 5 · Rare `Burrow. Roar: if played adjacent to the opponent's den, draw 1 card.` Combines Cheetah's reward with empty-only infiltration and a much smaller body.
 
 - [ ] **New cover-retaliation legendary** — STR 4 · Legendary `Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand.` Already locked in the balance to-do; species and name remain open.
 
@@ -215,7 +215,7 @@ Anchor candidates:
 
 - [ ] **Coral Reef** — Landmark · STR 0 · Rare `Fragile. Armor. Roar: draw a random Fish from your deck. Your Fish have +2 strength.`
 - [ ] **Kelp Forest** — Landmark · STR 0 · Common `Fragile. Roar: draw a random Fish from your deck, then you may move a friendly Fish to an empty crossroad adjacent to this. Adjacent Fish have Stealth.`
-- [ ] **Salmon** — Fish · STR 5 · Common `Roar: move another friendly Fish to an empty crossroad connected to your headquarters.`
+- [ ] **Salmon** — Fish · STR 5 · Common `Roar: move another friendly Fish to an empty crossroad connected to your den.`
 - [ ] **Clownfish** — Fish · STR 6 · Common `Has Stealth while adjacent to a friendly Landmark.`
 - [ ] **Remora** — Fish · STR 2 · Common `Has +6 strength while adjacent to a friendly unit with strength 6 or more.`
 - [ ] **Great White Shark** — Fish · STR 5 · Rare `Has +2 strength for each adjacent enemy unit.`

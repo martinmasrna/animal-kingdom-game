@@ -80,7 +80,7 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Remora** | Fish | 1 / 2 | **Variant 1:** Has +X strength, where X is the highest strength among adjacent friendly units.<br>**Variant 2:** Has +6 strength while adjacent to a friendly unit with strength 6 or more. |
 | **Rhinoceros Beetle** | Insect | 2 | Has +1 strength for each other friendly Colony or Insect unit. |
 | **Roadrunner** | Bird | 3 | Roar: remove an adjacent enemy Snake or Lizard of any strength. |
-| **Salmon** | Fish | 4 / 5 | **Variant 1:** Roar: move this to any crossroad connected to your HQ.<br>**Variant 2:** Roar: move another friendly Fish to an empty crossroad connected to your HQ. |
+| **Salmon** | Fish | 4 / 5 | **Variant 1:** Roar: move this to any crossroad connected to your den.<br>**Variant 2:** Roar: move another friendly Fish to an empty crossroad connected to your den. |
 | **Salt Lick** | Landmark | 0 | **Variant 1:** Fragile. Armor. At the start of your next turn, give all friendly units +1 strength, then remove this.<br>**Variant 2:** Fragile. At the start of your next turn, give all friendly units +2 strength, then remove this. |
 | **Sand Cat** | Cat | 5 | Has +3 strength while no other friendly unit is adjacent to this. |
 | **Scorpion** | Arachnid | 3 | The first enemy unit that covers this becomes envenomed. |
@@ -160,7 +160,7 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Saltwater Crocodile** | Lizard | 4 | Has +1 strength for each unit buried beneath this. |
 | **Secretarybird** | Bird | 4 | Flight. Roar: remove an adjacent enemy of strength 4 or less. |
 | **Shrike** | Bird | 2 | Flight. Roar: remove an adjacent enemy of strength 3 or less; it cannot be returned to a hand or deck. |
-| **Springhare** | Rodent | 5 | Burrow. Roar: if played adjacent to the opponent's HQ, draw 1 card. |
+| **Springhare** | Rodent | 5 | Burrow. Roar: if played adjacent to the opponent's den, draw 1 card. |
 | **Stick Insect** | Insect | 2 | Cannot be targeted by enemy special effects until it covers an enemy unit. |
 | **Tarantula** | Arachnid | 4 | **Variant 1:** Deathrattle: play a Spiderling token (Arachnid, STR 1) on each adjacent empty crossroad.<br>**Variant 2:** Deathrattle: play up to two Spiderling tokens (Arachnid, STR 2) on adjacent empty crossroads. |
 | **Tardigrade** | — | 1 | Armor. Cannot be removed. After 4 turns, gain 30 food. |
@@ -179,7 +179,7 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | Name | Type / tags | STR | Candidate text / unresolved variants |
 |---|---|---:|---|
 | **Aquila (giant harpy eagle), carry-off version** | Bird | TBD | Flight. Roar: take an adjacent enemy unit with lower strength into your hand. Parked for a control "steal the opponent's cards" deck; broken as first drafted (6 strength took anything up to 5 anywhere), needs balancing. |
-| **Blue Whale — “Sounder”** | Cetacean | 10 | Armor. Cannot be covered. This cannot cover units or capture an HQ. Costs 15 food to play. |
+| **Blue Whale — “Sounder”** | Cetacean | 10 | Armor. Cannot be covered. This cannot cover units or capture a den. Costs 15 food to play. |
 | **Hachiko, the Faithful** | Canine | 5 | The first time each turn another friendly Canine would be removed, return it to your hand instead. |
 | **Kanzi** | Primate | 4 | Roar: repeat the Roar of another adjacent Primate. |
 | **Legendary Parrot (name TBD)** | Bird | TBD | **Variant 1:** Become a copy of the last unit your opponent played.<br>**Variant 2:** Flight. Roar: repeat the Roar of the last unit your opponent played. |

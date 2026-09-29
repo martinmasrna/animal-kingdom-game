@@ -58,7 +58,7 @@ Status: the roster is built and was tuned once, but its run was killed when two 
 | food_otk | 34.5% |
 | egg_control | 17.2% |
 
-- First player wins 57.7%. Games end 57% on food, 43% on HQ capture, in about 12 rounds.
+- First player wins 57.7%. Games end 57% on food, 43% on den capture, in about 12 rounds.
 - The field is three strong tempo decks, two even ones, and two losers. Food OTK sits below target; Egg Control is far below it.
 - Every card's impact is inside ±10. The largest are Ramp's Borealis (+7.7) and Bulwark (+5.6), Food's Greywhisker (+5.3) and Barley (+5.1), Canine's Scarlett (+5.1).
 
@@ -70,7 +70,7 @@ Status: the roster is built and was tuned once, but its run was killed when two 
 
 ## Leads to re-check
 
-- **Food's walls (2026-09-29):** Fathom 4→7, Armadillo 5→7, Hedgehog 5→6 gaining 6 food took Food from 26.5% to **39.3%** against the five non-Egg premades (RefereeBot, the overnight seeds and seats, 1,000 paired games, +12.8 ±2.7). Every matchup improved: Cats +19.5, Canine +15.5, Ramp +12.5, Aggro +12.0, Colony +4.5. HQ-capture losses fell from 39% to 30% of games; going first it now wins 52%, second 26%. Output in `results/food-walls-2026-09-29/`.
-- **Food OTK dies ahead on food (2026-09-29).** Against the five non-Egg premades it wins 26% (RefereeBot, 1,000 games), 37% going first and 16% second. It loses about as often to HQ capture (39% of games) as to the opponent's food (34%), and when its HQ falls it is usually ahead on food (median 55 to 30). The burst turn the deck is named for rarely happens: its food wins end on a median +25 turn from 80, and only 6% of them come from a turn of 50 or more; it gains a steady 10 to 20 a turn instead. Martin's 10 games agree: 3–7 against the goodstuff pile, six of the seven losses by HQ capture, four of them at 87 to 96 food. Its Rodents are 1 to 4 strength and get covered on 25–46% of placements; only Porcupine (2%) holds. The replay scripts are in the session scratchpad; the logs are in `results/queue-2026-09-29/logs/`.
+- **Food's walls (2026-09-29):** Fathom 4→7, Armadillo 5→7, Hedgehog 5→6 gaining 6 food took Food from 26.5% to **39.3%** against the five non-Egg premades (RefereeBot, the overnight seeds and seats, 1,000 paired games, +12.8 ±2.7). Every matchup improved: Cats +19.5, Canine +15.5, Ramp +12.5, Aggro +12.0, Colony +4.5. Den-capture losses fell from 39% to 30% of games; going first it now wins 52%, second 26%. Output in `results/food-walls-2026-09-29/`.
+- **Food OTK dies ahead on food (2026-09-29).** Against the five non-Egg premades it wins 26% (RefereeBot, 1,000 games), 37% going first and 16% second. It loses about as often to den capture (39% of games) as to the opponent's food (34%), and when its den falls it is usually ahead on food (median 55 to 30). The burst turn the deck is named for rarely happens: its food wins end on a median +25 turn from 80, and only 6% of them come from a turn of 50 or more; it gains a steady 10 to 20 a turn instead. Martin's 10 games agree: 3–7 against the goodstuff pile, six of the seven losses by den capture, four of them at 87 to 96 food. Its Rodents are 1 to 4 strength and get covered on 25–46% of placements; only Porcupine (2%) holds. The replay scripts are in the session scratchpad; the logs are in `results/queue-2026-09-29/logs/`.
 - **Methuselah** had the loudest single-card impact (+12.5 points) before its food was cut to 5.
 - **Decision H**, re-deriving every food number on one shared scale against the 100-food win and 10/20 regions, is still open.

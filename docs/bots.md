@@ -24,7 +24,7 @@ All share one evaluation: `bots/greedy_bot.py` holds the terms and `bots/feature
 
 - TurnBot beats greedy on every deck, and RefereeBot beats TurnBot on every deck by roughly 4 to 14 points. The gaps differ per deck, so a TurnBot matrix is directional: it underrates the decks it underplays (ramp, canine, egg) and overrates the ones it plays near-optimally.
 - **The structural ceiling: no bot plans across turns.** The evaluation scores the current position. The `pending_payoff` term credits single delayed payoffs (hatching Eggs, bear timers), but no bot can play a multi-turn grow-then-win plan: a human piloting egg into cats won about 50% of games where the bots win about 24%. Treat any "loses" verdict for a scaling deck (egg, ramp) as unproven until a human has played it.
-- **Known blind spots:** the region-control term overvalues the middle row, so bots never contest the flank rows as an HQ-rush lane. Cats beat aggro about 87% in sims, while Martin's play went 2 of 3 to aggro: the bots dump their hand where they should hold disruption. That matchup is a pilot flaw, not a card problem.
+- **Known blind spots:** the region-control term overvalues the middle row, so bots never contest the flank rows as a den-rush lane. Cats beat aggro about 87% in sims, while Martin's play went 2 of 3 to aggro: the bots dump their hand where they should hold disruption. That matchup is a pilot flaw, not a card problem.
 
 ## The learned evaluator
 
@@ -32,7 +32,7 @@ Self-play TD(λ) (`learn/`) fits the weights of a linear evaluation.
 
 - **rung-0** learns weights for the 11 hand-written terms. It beats the hand weights on 6 of 7 decks and is the shipped learned eval (`rung0.json`); `rung0_identity.json` reproduces the hand weights.
 - **rung-1** added 13 dynamics features and regressed on 5 of 7 decks (food_otk −20 points). Cause: several new features duplicate rung-0 terms, and an unregularized fit on raw features moved weight toward self-play's majority rush dynamic. Training converged, so it wasn't undertrained.
-- **Next experiment:** standardize the features, add L2, and merge the duplicates (the scheduled-payoff pair and `pending_payoff`, HQ distance and HQ threat, income and region control). Then add conditional features such as "food × holding food payoffs". If a well-built linear eval still plateaus, that is the evidence to try a small neural net; time a forward pass at the search's leaf-eval rate first.
+- **Next experiment:** standardize the features, add L2, and merge the duplicates (the scheduled-payoff pair and `pending_payoff`, den distance and den threat, income and region control). Then add conditional features such as "food × holding food payoffs". If a well-built linear eval still plateaus, that is the evidence to try a small neural net; time a forward pass at the search's leaf-eval rate first.
 - A better evaluation alone won't close the planning gap. The egg-vs-cats gap needs search depth plus a good leaf evaluation: this is the horizon problem that quiescence search and extensions solve in chess.
 
 Train with `.venv/bin/python -m animal_kingdom.learn.train --out results/learn/<run>` and promote with `animal_kingdom.learn.promote`.

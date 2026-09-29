@@ -76,7 +76,7 @@ The initial 14-design packages are premade-deck foundations, not intended final 
   2. Egg/Dinosaur hatch;
   3. Landmark midrange using cards from at least three tags.
 - [ ] Build the strongest apparent legendary-goodstuff list. Verify that family/common synergy beats simply selecting the best four one-copy cards.
-- [ ] Build the lowest-curve legal list and search manually for two- and three-card HQ captures.
+- [ ] Build the lowest-curve legal list and search manually for two- and three-card den captures.
 - [ ] Build the most deterministic food combo possible and count filtered draws, tutors, recursion, and redundant win pieces.
 - [ ] Build against all three revealed maps with no sideboard. Confirm that map specialization creates tension without making one map an automatic loss.
 
