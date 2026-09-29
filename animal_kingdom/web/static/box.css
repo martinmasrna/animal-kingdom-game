@@ -67,9 +67,9 @@
 .bx .hc.can, .bx .hc.pick { cursor: pointer; }
 .bx .deck { left: 1236px; top: 614px; width: 126px; height: 166px; border-radius: 10px; background: #2d2b28; border: 2px solid #5b564e; box-shadow: 4px 4px 0 #242220, 8px 8px 0 #1f1d1b; display: grid; place-items: center; font-size: 24px; }
 .bx .deck.can { background: #e9e1d2; border-color: #fff8ea; color: #1c1b19; cursor: pointer; box-shadow: 4px 4px 0 #8f887c, 8px 8px 0 #5f5a52, 0 0 22px 2px rgba(255,240,210,.25); }
-.bx .deck.can:hover { background: #fff8ea; }
+.bx .deck.can:hover { background-color: #fff8ea; }
 .bx .tbtn { left: 1382px; top: 662px; width: 114px; height: 76px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 17px; font-weight: 700; }
-.bx .tbtn.A { background: var(--A); color: var(--Aink); } .bx .tbtn.A.can { cursor: pointer; } .bx .tbtn.A.can:hover { background: #a3ccfa; }
+.bx .tbtn.A { background: var(--A); color: var(--Aink); } .bx .tbtn.A.can { cursor: pointer; } .bx .tbtn.A.can:hover { background-color: #a3ccfa; }
 .bx .tbtn.A:not(.can) > b { opacity: .5; }
 .bx .tbtn.B { background: var(--Bdk); border: 2px solid var(--B); }
 .bx .pips { display: flex; gap: 7px; } .bx .pips i { width: 12px; height: 12px; border-radius: 50%; background: var(--Aink); } .bx .pips i.used { background: transparent; border: 2px solid var(--Aink); opacity: .6; }
@@ -220,5 +220,5 @@
 .bx .back.drawn { animation: drawback .45s cubic-bezier(.3,.7,.4,1) backwards; }
 @keyframes drawback { 0% { transform: translateY(-70px); opacity: 0; } 100% { transform: none; opacity: 1; } }
 /* a strength that changed pops once */
-.bx .cr.unit.pop .boss { animation: strpop .45s cubic-bezier(.3,.7,.4,1.4) .1s; }
+.bx .cr.unit.strchg .boss { animation: strpop .45s cubic-bezier(.3,.7,.4,1.4) .1s; }
 @keyframes strpop { 0% { transform: scale(1); } 45% { transform: scale(1.35); } 100% { transform: scale(1); } }

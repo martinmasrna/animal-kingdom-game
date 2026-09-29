@@ -94,7 +94,7 @@ export function renderBoard(el, M, g, cards, ui) {
     if (pv) { s += put(`cr unit A ghost${cls}`, x, y, unit({ id: pv.id, owner: 'A', str: pv.str }, st.slice().reverse(), cards), `data-cr="${cr}"`); continue; }
     if (!st.length) { s += put(`cr clear${cls}`, x, y, '', `data-cr="${cr}"`); continue; }
     const u = st[st.length - 1], popped = was.has(u.iid) && was.get(u.iid) !== u.str ? (u.str > was.get(u.iid) ? ' up' : ' down') : '';
-    s += put(`cr unit ${u.owner}${cls}${cls.includes('land') && late ? ' late' : ''}${popped ? ' pop' + popped : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards), `data-cr="${cr}"`);
+    s += put(`cr unit ${u.owner}${cls}${cls.includes('land') && late ? ' late' : ''}${popped ? ' strchg' + popped : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards), `data-cr="${cr}"`);
   }
 
   for (const [cr, u] of leaving) {

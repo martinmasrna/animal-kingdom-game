@@ -894,4 +894,5 @@ addEventListener('keydown', e => {
 });
 
 window.__ak = () => ({ V, ui });   // test hook: the headless play-through reads the view
+window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client
 boot();
