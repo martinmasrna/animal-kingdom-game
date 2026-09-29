@@ -15,7 +15,9 @@ const RANK = { legendary: 0, rare: 1, common: 2 }, LIMIT = { legendary: 1, rare:
 const sv = c => c.str === '*' ? -1 : c.str;
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 const svg = d => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
-const ICON = {
+export const ICON = {
+  list: svg('<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>'),
+  edit: svg('<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>'),
   search: svg('<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>'),
   plus: svg('<path d="M12 5v14M5 12h14"/>'),
   image: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/>'),
@@ -53,15 +55,25 @@ export function collectionScreen(app, ctx) {
   if (!wired) { wired = true; wireGlobal(); }
   const all = decks();
   // Opens your first deck; with none yet, nothing is open and the grid is for browsing.
+  if (ctx.open) st.open = ctx.open;   // arriving from the play screen with a deck to open
   if (st.open !== null && !all.some(d => d.id === st.open)) st.open = null;   // the screen opens on your deck list
   render(app, all);
+}
+
+// A deck's strips by rarity, the capped rarities with their counts: the open deck here, the decklist on the play screen.
+// Strips are slivers of the cards: strength on a driftwood plaque, the name, copies as dots (legendaries have one).
+export function deckBody(list, cards, caps = true) {
+  const counts = countsOf(list), inR = r => list.filter(id => cards[id].rarity === r).length;
+  const strip = id => `<div class="st ${cards[id].rarity}" data-card="${id}"><div class="art" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span><span class="x">${cards[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
+  const rhead = (label, r, cap) => `<h4 class="rh" data-r="${r}"><span>${label}</span>${cap && caps ? `<span>${inR(r)}/${cap}</span>` : ''}</h4>`;
+  const byR = r => Object.keys(counts).filter(id => cards[id].rarity === r).sort((a, b) => sv(cards[a]) - sv(cards[b]) || cards[a].name.localeCompare(cards[b].name)).map(strip).join('');
+  return `<div class="dbody">${rhead('Legendary', 'legendary', 4)}${byR('legendary')}${rhead('Rare', 'rare', 8)}${byR('rare')}${rhead('Common', 'common')}${byR('common')}</div>`;
 }
 
 function render(app, all) {
   const keep = [...app.querySelectorAll('.clist, .cgrid')].map(e => e.scrollTop);
   if (st.was !== !!st.open) keep[1] = 0; st.was = !!st.open;   // switching list and deck starts the column at its top
   const open = all.find(d => d.id === st.open), counts = open ? countsOf(open.list) : {};
-  const inR = r => open ? open.list.filter(id => C[id].rarity === r).length : 0;
   const q = st.q.toLowerCase();
   const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (st.str === '' || (st.str === '9+' ? c.str >= 9 : String(c.str) === st.str))
     && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(q)))
@@ -79,13 +91,7 @@ function render(app, all) {
     ${dd('rar', st.rar || '', [['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
     <label class="searchw">${ICON.search}<input class="search field" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
-  const strip = id => `<div class="st ${C[id].rarity}" data-card="${id}"><div class="art" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(C[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(C[id].name)}</span><span class="x">${C[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
-  const rhead = (label, r, cap) => `<h4 class="rh" data-r="${r}"><span>${label}</span>${cap ? `<span>${inR(r)}/${cap}</span>` : ''}</h4>`;   // only the capped rarities count
-  const byR = r => Object.keys(counts).filter(id => C[id].rarity === r).sort((a, b) => sv(C[a]) - sv(C[b]) || C[a].name.localeCompare(C[b].name)).map(strip).join('');
-  const body = d => {
-    return `<div class="dbody">
-      ${rhead('Legendary', 'legendary', 4)}${byR('legendary')}${rhead('Rare', 'rare', 8)}${byR('rare')}${rhead('Common', 'common')}${byR('common')}
-</div>`; };
+  const body = d => deckBody(d.list, C);
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}" style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${body(d)}`

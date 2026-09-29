@@ -7,11 +7,13 @@ export const dd = (key, cur, opts) => { const c = opts.find(([v]) => v === cur) 
 // Every dropdown under root: its button opens it (closing any other), a row calls pick(key, value).
 export function wireDd(root, pick) {
   root.querySelectorAll('.dd').forEach(d => {
-    d.querySelector('.sel').onclick = ev => { ev.stopPropagation(); const was = d.classList.contains('open'); closeAll(); d.classList.toggle('open', !was); };
+    d.querySelector('.sel').onclick = ev => { ev.stopPropagation(); const was = d.classList.contains('open'); closeAll(); d.classList.toggle('open', !was);
+      // The list hangs under its slab, or over it when the window has no room below.
+      d.classList.remove('up'); if (!was && d.querySelector('.ddm').getBoundingClientRect().bottom > innerHeight - 8) d.classList.add('up'); };
     d.querySelectorAll('.ddo').forEach(o => o.onclick = () => pick(d.dataset.dd, o.dataset.v));
   });
 }
-const closeAll = () => { const open = document.querySelectorAll('.dd.open'); open.forEach(d => d.classList.remove('open')); return open.length; };
+const closeAll = () => { const open = document.querySelectorAll('.dd.open'); open.forEach(d => d.classList.remove('open', 'up')); return open.length; };
 // A click elsewhere closes an open dropdown; so does Escape, which then goes no further (the screen's own Escape waits for the next press).
 addEventListener('click', closeAll);
 addEventListener('keydown', e => { if (e.key === 'Escape' && closeAll()) e.stopImmediatePropagation(); }, true);
