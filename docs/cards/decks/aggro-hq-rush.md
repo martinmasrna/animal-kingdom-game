@@ -19,15 +19,15 @@ The deck is being redesigned: the diagnosis and Martin's card-by-card analysis a
 |---|---:|---|---:|---|
 | **Verminus** | 1 | Rodent | 3 | Has +1 strength for each other unit you control. |
 | **Pestis** | 1 | Rodent | 3 | Battlecry: remove an adjacent enemy and every unit buried under it. |
-| **Sirocco** | 1 | — | 5 | Battlecry: return all enemy units adjacent to this to their owner's hand. |
-| **Gale** | 1 | Bird | 6 | Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand. |
+| **Sirocco** | 1 | — | 5 | Battlecry: return all adjacent enemies to their owner's hand. |
+| **Gale** | 1 | Bird | 6 | Flight. The first time an enemy covers this, return it to its owner's hand. |
 
 ### Rare
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Jerboa** | 2 | Rodent | 2 | Battlecry: play another unit. |
-| **Hornet** | 2 | — | 2 | Flight. Battlecry: you may remove another Hornet from your hand or deck. If you do, destroy an adjacent enemy unit. |
+| **Hornet** | 2 | — | 2 | Flight. Battlecry: you may remove another Hornet from your hand or deck. If you do, remove an adjacent enemy. |
 | **Chameleon** | 2 | Lizard | dynamic | May be placed on any unit, and any unit may be placed on top of it. |
 | **Skunk** | 2 | — | 4 | Return an adjacent enemy to your opponent's hand. They can't play it next turn. |
 
@@ -35,9 +35,9 @@ The deck is being redesigned: the diagnosis and Martin's card-by-card analysis a
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Lemming** | 3 | Rodent | 1 | Battlecry: place all Lemmings from your hand and deck on random adjacent empty crossroads. |
+| **Lemming** | 3 | Rodent | 1 | Battlecry: fill adjacent empty crossroads with Lemmings from your hand and deck. |
 | **Cheetah** | 3 | Cat | 6 | Battlecry: if you play this next to the opponent's base, draw 1 card. |
-| **Rat** | 3 | Rodent | 2 | Battlecry: remove an adjacent enemy unit, then remove a random card from your hand. |
+| **Rat** | 3 | Rodent | 2 | Battlecry: remove an adjacent enemy, then discard a random card. |
 | **Falcon** | 3 | Bird | 4 | Flight. Battlecry: if you play this next to the opponent's base, draw 1 card. |
 | **Bat** | 3 | — | 3 | Flight. Battlecry: draw 1 card. |
 | **Mouse** | 3 | Rodent | 5 | Battlecry: draw a Rodent. |

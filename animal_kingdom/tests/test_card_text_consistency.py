@@ -156,6 +156,7 @@ STRENGTH_LIMITS = {
     "stoop": "stoop_max",
     "rhinoceros": "rhinoceros_max",
     "black_mamba": "black_mamba_max",
+    "hippopotamus": "hippopotamus_max",
     "mock_sentry": "stoop_max",
     "mock_hunter": "jaguar_max",
     **{f"calib_rm3_{n}": "stoop_max" for n in (2, 3, 4, 5, 6)},
@@ -188,5 +189,5 @@ def test_strength_loss_text_matches_config():
 
 
 def test_eon_decay_text_matches_config():
-    (n,) = re.findall(r"with -(\d+) strength", _cards()["eon"].text)
+    (n,) = re.findall(r"(\d+) weaker", _cards()["eon"].text)
     assert int(n) == Config.default().eon_decay

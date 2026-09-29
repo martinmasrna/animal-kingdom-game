@@ -14,8 +14,8 @@ Lion is the pool's only true vanilla body and the power reference for every grou
 |---|---:|---|---:|---|
 | **Prince Leo** | 1 | Cat | 3 | Battlecry: you may immediately play Princess Lea from your hand or deck. |
 | **Princess Lea** | 1 | Cat | 3 | Battlecry: you may immediately play Prince Leo from your hand or deck. |
-| **King Theron** | 1 | Cat | 8 | When one of your Cats covers an enemy unit, remove that enemy. |
-| **Queen Adira** | 1 | Cat | 5 | When one of your Cats removes an enemy unit, draw 1 card. |
+| **King Theron** | 1 | Cat | 8 | When one of your Cats covers an enemy, remove that enemy. |
+| **Queen Adira** | 1 | Cat | 5 | When one of your Cats removes an enemy, draw 1 card. |
 
 ### Rare
 
@@ -23,7 +23,7 @@ Lion is the pool's only true vanilla body and the power reference for every grou
 |---|---:|---|---:|---|
 | **Jaguar** | 2 | Cat | 5 | Battlecry: remove an adjacent enemy of strength 4 or less. |
 | **Serval** | 2 | Cat | 2 | Battlecry: remove an adjacent enemy of strength 6 or more. |
-| **Snow Leopard** | 2 | Cat | 6 | Your other Cats may be placed onto enemy units of equal or lower strength. |
+| **Snow Leopard** | 2 | Cat | 6 | Your other Cats may be placed onto enemies of equal or lower strength. |
 | **Black Panther** | 2 | Cat | 7 | Stealth. |
 
 ### Common
@@ -32,7 +32,7 @@ Lion is the pool's only true vanilla body and the power reference for every grou
 |---|---:|---|---:|---|
 | **Lion** | 3 | Cat | 7 | — |
 | **Lynx** | 3 | Cat | 5 | Battlecry: if you control another Cat, draw 1. |
-| **Caracal** | 3 | Cat | 6 | Battlecry: if placed on top of an enemy unit, draw 1 card. |
+| **Caracal** | 3 | Cat | 6 | Battlecry: if placed on top of an enemy, draw 1 card. |
 | **Tiger** | 3 | Cat | 7 | Apex Predator. |
 | **Cougar** | 3 | Cat | 6 | You may place this adjacent to any Cat you control, ignoring connection. |
 | **House Cat** | 3 | Cat | 1 | Battlecry: if you control another Cat, play one more Cat from your hand. |

@@ -29,7 +29,7 @@
       "tags": ["Cat"],
       "base_strength": 8,
       "keywords": [],
-      "text": "When one of your Cats covers an enemy unit, remove that enemy."
+      "text": "When one of your Cats covers an enemy, remove that enemy."
     },
     {
       "id": "queen_adira",
@@ -39,7 +39,7 @@
       "tags": ["Cat"],
       "base_strength": 5,
       "keywords": [],
-      "text": "When one of your Cats removes an enemy unit, draw 1 card."
+      "text": "When one of your Cats removes an enemy, draw 1 card."
     },
     {
       "id": "jaguar",
@@ -69,7 +69,7 @@
       "tags": ["Cat"],
       "base_strength": 6,
       "keywords": [],
-      "text": "Your other Cats may be placed onto enemy units of equal or lower strength."
+      "text": "Your other Cats may be placed onto enemies of equal or lower strength."
     },
     {
       "id": "black_panther",
@@ -109,7 +109,7 @@
       "tags": ["Cat"],
       "base_strength": 6,
       "keywords": [],
-      "text": "Battlecry: if placed on top of an enemy unit, draw 1 card."
+      "text": "Battlecry: if placed on top of an enemy, draw 1 card."
     },
     {
       "id": "tiger",
@@ -149,7 +149,7 @@
       "tags": ["Snake"],
       "base_strength": 10,
       "keywords": ["Apex Predator"],
-      "text": "Apex Predator. At the end of your turn, shuffle this into your deck with -1 strength."
+      "text": "Apex Predator. At the end of your turn, shuffle this into your deck, 1 weaker."
     },
     {
       "id": "eon_food_engine",
@@ -220,7 +220,7 @@
       "tags": ["Bird"],
       "base_strength": 3,
       "keywords": [],
-      "text": "The first time each turn you draw Omen, your opponent removes a random card from their hand."
+      "text": "The first time each turn you draw Omen, your opponent discards a random card."
     },
     {
       "id": "stoop",
@@ -270,7 +270,7 @@
       "tags": ["Snake"],
       "base_strength": 4,
       "keywords": [],
-      "text": "Battlecry: choose an adjacent enemy unit. At the start of your next turn, remove it."
+      "text": "Battlecry: choose an adjacent enemy. At the start of your next turn, remove it."
     },
     {
       "id": "viper",
@@ -280,7 +280,7 @@
       "tags": ["Snake"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Battlecry: an adjacent enemy unit gets -3 strength."
+      "text": "Battlecry: an adjacent enemy gets -3 strength."
     },
     {
       "id": "magpie",
@@ -310,7 +310,7 @@
       "tags": ["Snake"],
       "base_strength": 4,
       "keywords": [],
-      "text": "Battlecry: if you shuffled a card this turn, remove an adjacent enemy unit."
+      "text": "Battlecry: if you shuffled a card this turn, remove an adjacent enemy."
     },
     {
       "id": "puff_adder",
@@ -320,7 +320,7 @@
       "tags": ["Snake"],
       "base_strength": 3,
       "keywords": [],
-      "text": "When an enemy unit covers this, remove that enemy if you control a Bird."
+      "text": "When an enemy covers this, remove that enemy if you control a Bird."
     },
     {
       "id": "secretary_bird",
@@ -410,7 +410,7 @@
       "tags": ["Colony"],
       "base_strength": 3,
       "keywords": ["Flight"],
-      "text": "Flight. Battlecry: if you control two copies of the same Colony unit, draw 2 cards."
+      "text": "Flight. Battlecry: if you control two of the same Colony unit, draw 2 cards."
     },
     {
       "id": "nurse_bumblebee",
@@ -593,7 +593,7 @@
       "tags": ["Megafauna"],
       "base_strength": 6,
       "keywords": [],
-      "text": "When an enemy unit is placed on an adjacent crossroad, remove it if its strength is 3 or less."
+      "text": "When an enemy of strength 3 or less is placed adjacent to this, remove it."
     },
     {
       "id": "andean_condor",
@@ -724,7 +724,7 @@
       "tags": ["Rodent"],
       "base_strength": 7,
       "keywords": [],
-      "text": "Cannot be covered by enemy units."
+      "text": "Cannot be covered by enemies."
     },
     {
       "id": "chinchilla",
@@ -796,7 +796,7 @@
       "tags": ["Rodent"],
       "base_strength": 2,
       "keywords": [],
-      "text": "Battlecry: if you gained 10 or more food this turn, remove an adjacent enemy unit."
+      "text": "Battlecry: if you gained 10 or more food this turn, remove an adjacent enemy."
     },
     {
       "id": "groundhog",
@@ -847,7 +847,7 @@
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Battlecry: return all enemy units adjacent to this to their owner's hand."
+      "text": "Battlecry: return all adjacent enemies to their owner's hand."
     },
     {
       "id": "gale",
@@ -857,7 +857,7 @@
       "tags": ["Bird"],
       "base_strength": 6,
       "keywords": ["Flight"],
-      "text": "Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand."
+      "text": "Flight. The first time an enemy covers this, return it to its owner's hand."
     },
     {
       "id": "jerboa",
@@ -877,7 +877,7 @@
       "tags": [],
       "base_strength": 2,
       "keywords": ["Flight"],
-      "text": "Flight. Battlecry: you may remove another Hornet from your hand or deck. If you do, destroy an adjacent enemy unit."
+      "text": "Flight. Battlecry: you may remove another Hornet from your hand or deck. If you do, remove an adjacent enemy."
     },
     {
       "id": "chameleon",
@@ -908,7 +908,7 @@
       "tags": ["Rodent"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Battlecry: place all Lemmings from your hand and deck on random adjacent empty crossroads."
+      "text": "Battlecry: fill adjacent empty crossroads with Lemmings from your hand and deck."
     },
     {
       "id": "cheetah",
@@ -928,7 +928,7 @@
       "tags": ["Rodent"],
       "base_strength": 2,
       "keywords": [],
-      "text": "Battlecry: remove an adjacent enemy unit, then remove a random card from your hand."
+      "text": "Battlecry: remove an adjacent enemy, then discard a random card."
     },
     {
       "id": "falcon",
@@ -1018,7 +1018,7 @@
       "tags": ["Canine"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Once a turn, when this gains strength, give all friendly adjacent Canines +2 strength."
+      "text": "Once a turn, when this gains strength, give your adjacent Canines +2 strength."
     },
     {
       "id": "jackal",
@@ -1128,7 +1128,7 @@
       "tags": ["Canine"],
       "base_strength": 4,
       "keywords": [],
-      "text": "Battlecry: remove an adjacent enemy with strength less than or equal to the number of Canines you control."
+      "text": "Battlecry: remove an adjacent enemy with strength at most your Canine count."
     },
     {
       "id": "outrider",
@@ -1138,7 +1138,7 @@
       "tags": ["Canine"],
       "base_strength": 6,
       "keywords": [],
-      "text": "Your other Canines may be placed adjacent to any Canine you control, ignoring connection."
+      "text": "Your other Canines may be placed adjacent to your Canines, ignoring connection."
     },
     {
       "id": "dire_wolf",
@@ -1488,7 +1488,7 @@
       "tags": [],
       "base_strength": 1,
       "keywords": [],
-      "text": "Battlecry: remove an adjacent enemy unit."
+      "text": "Battlecry: remove an adjacent enemy."
     },
     {
       "id": "calib_rmany_2",
@@ -1498,7 +1498,7 @@
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Battlecry: remove an adjacent enemy unit."
+      "text": "Battlecry: remove an adjacent enemy."
     },
     {
       "id": "calib_rmany_3",
@@ -1508,7 +1508,7 @@
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "Battlecry: remove an adjacent enemy unit."
+      "text": "Battlecry: remove an adjacent enemy."
     },
     {
       "id": "calib_rmany_4",
@@ -1518,7 +1518,7 @@
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Battlecry: remove an adjacent enemy unit."
+      "text": "Battlecry: remove an adjacent enemy."
     },
     {
       "id": "calib_rmany_5",
@@ -1528,7 +1528,7 @@
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Battlecry: remove an adjacent enemy unit."
+      "text": "Battlecry: remove an adjacent enemy."
     },
     {
       "id": "calib_extra_1",
@@ -1848,7 +1848,7 @@
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Battlecry: your opponent removes a random card from their hand."
+      "text": "Battlecry: your opponent discards a random card."
     },
     {
       "id": "mock_vanilla_5",

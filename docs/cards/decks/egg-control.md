@@ -16,17 +16,17 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Eon** | 1 | Snake | 10 | Apex Predator. At the end of your turn, shuffle this into your deck with -1 strength. |
+| **Eon** | 1 | Snake | 10 | Apex Predator. At the end of your turn, shuffle this into your deck, 1 weaker. |
 | **Ember** | 1 | Bird | 7 | Flight. When this is removed, shuffle it back to your deck. |
 | **Aurum** | 1 | Bird | 1 | At the start of your turn, draw a card. |
-| **Omen, the Black Swan** | 1 | Bird | 3 | The first time each turn you draw Omen, your opponent removes a random card from their hand. |
+| **Omen, the Black Swan** | 1 | Bird | 3 | The first time each turn you draw Omen, your opponent discards a random card. |
 
 ### Rare
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Hawk** | 2 | Bird | 3 | Flight. Battlecry: remove an adjacent enemy of strength 3 or less. |
-| **Taipan** | 2 | Snake | 4 | Battlecry: choose an adjacent enemy unit. At the start of your next turn, remove it. |
+| **Taipan** | 2 | Snake | 4 | Battlecry: choose an adjacent enemy. At the start of your next turn, remove it. |
 | **Magpie** | 2 | Bird | 3 | Flight. Battlecry: take a random card from your opponent's hand, then shuffle a card from your hand into your deck. |
 | **Black Mamba** | 2 | Snake | 4 | Battlecry: remove an adjacent enemy of strength 5 or less. |
 
@@ -38,7 +38,7 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 | **Rattlesnake** | 3 | Snake | 0 | Whenever you shuffle a card, gain 1 strength (wherever this is). |
 | **Eagle** | 3 | Bird | 5 | Flight. |
 | **Owl** | 3 | Bird | 2 | Flight. Battlecry: look at the top 3 cards; draw 1 and shuffle the rest. |
-| **Viper** | 3 | Snake | 3 | Battlecry: an adjacent enemy unit gets -3 strength. |
+| **Viper** | 3 | Snake | 3 | Battlecry: an adjacent enemy gets -3 strength. |
 | **Raven** | 3 | Bird | 2 | Flight. Battlecry: draw 3 cards, then shuffle 2 cards back. |
 
 <!-- cards:end -->

@@ -21,7 +21,7 @@ Watch Falstaff's "whenever you gain food, gain 3 more" stacking with the food-on
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Nurse Bee** | 2 | Colony | 3 | Flight. Battlecry: if you control two copies of the same Colony unit, draw 2 cards. |
+| **Nurse Bee** | 2 | Colony | 3 | Flight. Battlecry: if you control two of the same Colony unit, draw 2 cards. |
 | **Nurse Bumblebee** | 2 | Colony | 3 | Flight. Battlecry: if you control 4 or more Colony units, draw 2 cards. |
 | **Termite King** | 2 | Colony | 6 | Battlecry: if you control a Colony Queen, draw 1 card. |
 | **Termite Queen** | 2 | Colony, Queen | 3 | Battlecry: you may play one additional non-Queen Colony unit this turn. |

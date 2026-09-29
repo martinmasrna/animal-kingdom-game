@@ -21,10 +21,10 @@ Buff wording is binding: "has +X" is a live aura, "give +X" is a permanent count
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Bush Dog** | 2 | Canine | 3 | Once a turn, when this gains strength, give all friendly adjacent Canines +2 strength. |
+| **Bush Dog** | 2 | Canine | 3 | Once a turn, when this gains strength, give your adjacent Canines +2 strength. |
 | **Dhole** | 2 | Canine | 5 | Whenever another Canine you control enters play, give it +2 strength. |
-| **Hyena** | 2 | Canine | 4 | Battlecry: remove an adjacent enemy with strength less than or equal to the number of Canines you control. |
-| **Coyote** | 2 | Canine | 6 | Your other Canines may be placed adjacent to any Canine you control, ignoring connection. |
+| **Hyena** | 2 | Canine | 4 | Battlecry: remove an adjacent enemy with strength at most your Canine count. |
+| **Coyote** | 2 | Canine | 6 | Your other Canines may be placed adjacent to your Canines, ignoring connection. |
 
 ### Common
 

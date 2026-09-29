@@ -32,7 +32,7 @@ Carried by: nothing in the current decks; the Bird Egg and Snake Egg that carrie
 A predator that must land on prey and eats it.
 
 - **Must** be placed on top of another **occupant** — it **cannot** be placed on an empty crossroad. If there is no legal occupant to land on, it cannot be played.
-- **Normal covering rules apply in full**: landing on an **enemy** occupant uses the same legality as a normal cover — strictly-greater strength by default, **including every covering static**: Snow Leopard lets an apex Cat land at equal strength, Chameleon may be landed on regardless of strength, and **Porcupine ("cannot be covered by enemy units") blocks the landing entirely** — quills beat teeth. Landing on **your own** occupant has **no** strength requirement.
+- **Normal covering rules apply in full**: landing on an **enemy** occupant uses the same legality as a normal cover — strictly-greater strength by default, **including every covering static**: Snow Leopard lets an apex Cat land at equal strength, Chameleon may be landed on regardless of strength, and **Porcupine ("cannot be covered by enemies") blocks the landing entirely** — quills beat teeth. Landing on **your own** occupant has **no** strength requirement.
 - **May target your own occupants** as well as enemy ones — and removes (eats) them too.
 - On placement it **removes** the occupant it lands on **instead of covering/stacking** on it (cf. Boa Constrictor). The removed occupant's Deathrattle / on-remove effects fire normally. The predator then occupies the crossroad (on top of any remaining stack beneath).
 - **If the occupant can't be eaten** (Immovable, or an enemy with Stealth — the eat is a chosen single-out), the predator is **not** blocked from landing there: it simply **covers** it under the normal placement rules and buries it instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it does *when it can*, not a placement precondition.
@@ -63,3 +63,14 @@ Card text grants strength two ways, **distinguished by the verb** — this readi
 - **"give +X strength" → a permanent counter** (one-time grant, **stored on the unit instance**, persists after the granter dies). Also applies to **cards in hand** (which carry the counter onto the board when played); hand buffs are **one-time** — a unit drawn *after* the buff is not retroactively buffed. Examples: Dhole ("*give* all adjacent Canines +2"), howl ("*give* +1 to all other Canines in hand and battlefield"), hellhound's returned Canine (+2), the end-of-turn buffer.
 
 **`effective_strength`** = `base_or_dynamic + stored_counters + active_anthems`, clamped ≥ 0, **evaluated live** wherever strength matters (covering, removal thresholds, region-holding, conditions like Coyote's "if this has 5+"). Counters are signed ints (Viper's "−3" is one). The event **`ON_GAIN_STRENGTH`** fires only when a counter is granted (not on live anthem drift).
+
+### Discard  *(card-text term, not a keyword)*
+**Discard a card** means remove a card from a hand. "Your opponent discards a random card" (Omen) and "discard a random card" (Rat) are the same removal the engine has always done for "removes a random card from their hand".
+
+### Card-text conventions
+Card text is at most 80 characters (`docs/design/principles.md`). These phrasings keep it there and are binding:
+
+- **"enemy"** means an enemy unit; **"your Canines"** means friendly Canines.
+- Thresholds read **"of strength 4 or less"**, **"6 or more"**, **"10 or more food"**.
+- Timed triggers read **"At the end of your turn, …"** and **"At the start of your next turn, …"**.
+
