@@ -1,8 +1,10 @@
-"""Tactical regression puzzles for the bots: hand-built boards with an objectively-correct
-move, asserted directly (not inferred from aggregate win-rate deltas, which can hide a bot
-that regressed on one obvious tactic while improving on average).
+"""Tactical regression puzzles for the bots: positions with a known-good move, asserted directly
+(not inferred from aggregate win-rate deltas, which can hide a bot that regressed on one obvious
+tactic while improving on average).
 
-Reuses the constructed-state helpers from test_greedy_bot.py rather than reinventing them.
+Two kinds: hand-built boards (the constructed-state helpers from test_greedy_bot.py), and real
+positions from RefereeBot games against the goodstuff pile, saved as GameState snapshots in
+tests/puzzles/, each asserting the set of moves Martin accepts there.
 """
 
 from __future__ import annotations
@@ -15,17 +17,26 @@ import pytest
 from animal_kingdom.bots.greedy_bot import GreedyBot, GreedyWeights, evaluate
 from animal_kingdom.bots.referee_bot import RefereeBot
 from animal_kingdom.bots.turn_bot import TurnBot
-from animal_kingdom.decks import load_premade_deck
-from animal_kingdom.engine.cards import load_cards
-from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.maps import load_map
-from animal_kingdom.engine.state import GameState, UnitInstance
+from animal_kingdom.engine.state import GameState
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import DrawAction, PlaceAction
 
 from ._helpers import make_state, put
 
 W = GreedyWeights()
+
+
+def _puzzle(name: str) -> GameState:
+    path = os.path.join(os.path.dirname(__file__), "puzzles", f"{name}.json")
+    with open(path, encoding="utf-8") as fh:
+        return GameState.from_dict(json.load(fh))
+
+
+def _choices(bot_cls, s: GameState, seeds=range(5)):
+    """The bot's move on each seed. Near-tied moves make one seed a coin flip, so a puzzle
+    holds only if the accepted move wins on every seed."""
+    return [bot_cls(seed=seed).choose(s.view_for(s.player_to_act()), rules.legal_actions(s), s)
+            for seed in seeds]
 
 
 def test_blocks_imminent_hq_threat_over_unrelated_offense():
@@ -119,45 +130,8 @@ def test_canine_develops_instead_of_drawing_a_full_hand(bot_cls):
     # Fox or Dingo; drawing is the worst and a vanilla Wolf the second worst (Jackal and
     # Raksha are wrong too). One good line is a second Dhole in the middle row, then Fox into a
     # corner next turn (+2 from each Dhole, a draw for each), then Dingo beside them.
-    canine = load_premade_deck("canine_buff_tempo")
-    pile = load_premade_deck("goodstuff")
-    hand_a = ["dire_wolf", "gray_wolf", "dingo", "raksha", "fox", "red_wolf"]
-    hand_b = ["tiger", "elephant", "lemming", "gale", "tiger", "rhinoceros", "rhinoceros", "elephant"]
-    deck_a, deck_b = list(canine), list(pile)
-    for c in hand_a + ["red_wolf"]:
-        deck_a.remove(c)
-    for c in hand_b:
-        deck_b.remove(c)
-    s = GameState(load_map("map_b"), load_cards(), Config.default(), board={},
-                  hands={"A": [], "B": []}, decks={"A": deck_a, "B": deck_b},
-                  remove_pile=[], food={"A": 0, "B": 0}, current="A", first_player="A")
-    for player, ids in (("A", hand_a), ("B", hand_b)):
-        for c in ids:
-            s.add_to_hand(player, c)
-    s.board["1,2"] = [UnitInstance("red_wolf", "A", s.new_iid(), placed_on_turn=0)]
-    s.turn_counter = 2
-    s.actions_taken_this_turn = 1
-
-    # Draw and the placements sit within a point of each other, so one seed is a coin flip:
-    # the right move has to win on every seed.
-    for seed in range(5):
-        chosen = bot_cls(seed=seed).choose(s.view_for("A"), rules.legal_actions(s), s)
-        assert isinstance(chosen, PlaceAction) and chosen.card_id in {"red_wolf", "fox", "dingo"}, seed
-
-
-# Real positions from RefereeBot games (Martin piloting in his head, the goodstuff pile across),
-# saved as GameState snapshots in tests/puzzles/. Each asserts the moves Martin accepts; the
-# bot drew in all three.
-
-def _puzzle(name: str) -> GameState:
-    path = os.path.join(os.path.dirname(__file__), "puzzles", f"{name}.json")
-    with open(path, encoding="utf-8") as fh:
-        return GameState.from_dict(json.load(fh))
-
-
-def _choices(bot_cls, s: GameState, seeds=range(5)):
-    return [bot_cls(seed=seed).choose(s.view_for(s.player_to_act()), rules.legal_actions(s), s)
-            for seed in seeds]
+    for chosen in _choices(bot_cls, _puzzle("canine_develop")):
+        assert isinstance(chosen, PlaceAction) and chosen.card_id in {"red_wolf", "fox", "dingo"}, chosen
 
 
 @pytest.mark.xfail(strict=True, reason="the search draws with Owl and two Vipers in hand (2026-09-30)")
@@ -166,8 +140,7 @@ def test_egg_plays_owl_before_drawing(bot_cls):
     # Egg vs the pile, round 5, first action: Magpie, Eagle, Owl and Ember on the board, their
     # Lion in the middle under a Taipan timer; hand Viper, Python, Lemming, Viper, Owl. Martin
     # plays Owl first.
-    s = _puzzle("egg_owl")
-    for chosen in _choices(bot_cls, s):
+    for chosen in _choices(bot_cls, _puzzle("egg_owl")):
         assert isinstance(chosen, PlaceAction) and chosen.card_id == "owl", chosen
 
 
@@ -177,8 +150,7 @@ def test_cats_plays_lynx_in_the_middle(bot_cls):
     # Cats vs the pile, round 2, first action: Lion on the den front, their Wolf on theirs;
     # hand Cougar, Princess Lea, House Cat, Prince Leo, Lynx. Martin: "Lynx in the middle,
     # almost for sure" (2,2, next to the Lion, so its Roar draws).
-    s = _puzzle("cats_lynx")
-    for chosen in _choices(bot_cls, s):
+    for chosen in _choices(bot_cls, _puzzle("cats_lynx")):
         assert chosen == PlaceAction("lynx", ("cr", "2,2")), chosen
 
 
@@ -187,6 +159,5 @@ def test_aggro_draws_on_its_opening(bot_cls):
     # Aggro vs the pile, its first turn, second action, empty board, hand Falcon, Falcon, Rat,
     # Rat, Skunk. Martin draws here too. A guard: the fix for drawing too much must not stop
     # this - the bot that flew a Falcon to their den front instead lost these games.
-    s = _puzzle("aggro_opening_draw")
-    for chosen in _choices(bot_cls, s):
+    for chosen in _choices(bot_cls, _puzzle("aggro_opening_draw")):
         assert isinstance(chosen, DrawAction), chosen
