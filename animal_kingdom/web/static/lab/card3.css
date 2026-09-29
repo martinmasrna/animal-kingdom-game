@@ -1,15 +1,15 @@
 /* 20em wide, 29.34em tall, em = --w / 20. The edge is the only frame: its width and metal carry rarity. */
-.card3 { --w: 180px; --bw: .22em; --edge: linear-gradient(160deg, #6f6a64, #2e2b28 45%, #55504a); position: relative; width: var(--w); height: calc(var(--w) * 1.467);
+.card3 { --w: 180px; --bw: .26em; --edge: linear-gradient(160deg, #5d5750, #2b2825 45%, #4a453f); position: relative; width: var(--w); height: calc(var(--w) * 1.467);
   font-size: calc(var(--w) / 20); flex: none; border-radius: .9em; background: var(--edge); box-shadow: .2em .45em .9em rgba(0,0,0,.55); overflow: hidden; isolation: isolate; }
-.card3.rare { --bw: .3em; --edge: linear-gradient(160deg, #f4f6f8, #9aa1a8 30%, #50565c 60%, #d8dde2); }
+.card3.rare { --bw: .3em; --edge: linear-gradient(160deg, #c9ccce, #8d9196 30%, #4a4e52 60%, #b3b7ba); }
 .card3.legendary { --bw: .42em; --edge: linear-gradient(150deg, #fff1c2, #d9a93f 22%, #7e5a16 48%, #f0cd70 70%, #a67a1e 88%, #ffe9a6); }
 .card3 .art { position: absolute; inset: var(--bw); border-radius: .7em; }
 .card3 .art { background: #3a2c1a center 30% / cover no-repeat; }
-.card3 .rules { position: absolute; left: var(--bw); right: var(--bw); bottom: var(--bw); padding: 3.2em 1em 2.2em; z-index: 2; border-radius: 0 0 .7em .7em;
-  background: linear-gradient(rgba(10,8,6,0), rgba(10,8,6,.8) 3em, rgba(10,8,6,.9)); }
+.card3 .rules { position: absolute; left: var(--bw); right: var(--bw); bottom: var(--bw); height: var(--panel); padding: .4em 1em 2.1em; z-index: 2; border-radius: 0 0 .7em .7em;
+  display: flex; flex-direction: column; justify-content: center; background: #2e2a25 url(/static/kit2/card_body.webp) center / 20em auto; box-shadow: 0 -.14em 0 0 var(--line), 0 -.3em .5em rgba(0,0,0,.4); }
 .card3 .rules p { margin: 0; font: 500 1.02em/1.2 'Source Serif 4', serif; color: #efe6d4; text-align: center; text-wrap: pretty; text-shadow: 0 .05em .15em rgba(0,0,0,.9); }
 .card3 .rules p b { font-weight: 700; color: #fff6e2; }
-.card3 .rules i { position: absolute; left: 0; right: 0; bottom: .95em; text-align: center; font: 700 .78em/1 'Source Serif 4', serif; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #a8998a; }
+.card3 .rules i { position: absolute; left: 0; right: 0; bottom: .85em; text-align: center; font: 700 .78em/1 'Source Serif 4', serif; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #a8998a; }
 /* Legendary: a slow sheen crosses the card. */
 .card3.legendary::after { content: ''; position: absolute; top: -20%; bottom: -20%; left: 0; width: 35%; z-index: 3; pointer-events: none;
   background: linear-gradient(90deg, rgba(255,240,200,0), rgba(255,240,200,.16), rgba(255,240,200,0)); animation: sheen3 5.5s ease-in-out infinite; }
@@ -28,6 +28,19 @@
 .card3 .tab .n { position: absolute; left: 0; right: 0; top: 1.16em; height: 2.9em; display: flex; justify-content: center; }
 .card3 .tab .n img { display: block; height: 100%; }
 .card3 .tab .n b { font: 800 3.5em/.8 'Source Serif 4', serif; color: #f4ecdc; }
-.card3 { --line: #5c5750; } .card3.rare { --line: #c3c9cf; } .card3.legendary { --line: #d8aa48; }
+.card3 { --line: #4f4a44; --panel: 7.7em; } .card3.rare { --line: #a9adb1; } .card3.legendary { --line: #d8aa48; }
 .card3 .rules em { display: block; margin-bottom: .35em; font: italic 500 .9em/1.1 'Source Serif 4', serif; color: #d9c9a8; text-align: center; }
 .card3 .tab .n.two { top: 1.48em; height: 2.3em; }
+
+/* B: the name on a plate directly under the art (at the bottom when compact, above the rules when full); strength tab stays top-left. */
+.v-b .card3 .bar { top: auto; bottom: var(--bw); border-radius: 0 0 .7em .7em; justify-content: center; padding: 0 .8em; box-shadow: 0 -.14em 0 0 var(--line), 0 -.3em .5em rgba(0,0,0,.4); }
+.v-b .card3:not(.compact) .bar { bottom: calc(var(--bw) + var(--panel)); border-radius: 0; z-index: 3; }
+.v-b .card3:not(.compact) .rules { box-shadow: none; }
+/* C: everything at the bottom: the name plate, and strength in a stone block rising out of its left end. */
+.v-c .card3 .bar { top: auto; bottom: var(--bw); border-radius: 0 0 .7em .7em; padding-left: 5.7em; box-shadow: 0 -.14em 0 0 var(--line), 0 -.3em .5em rgba(0,0,0,.4); }
+.v-c .card3:not(.compact) .bar { bottom: calc(var(--bw) + var(--panel)); border-radius: 0; z-index: 3; }
+.v-c .card3:not(.compact) .rules { box-shadow: none; }
+.v-c .card3 .tab { top: auto; bottom: calc(var(--bw) + .3em); left: calc(var(--bw) + .6em); width: 4.5em; height: 4.5em; clip-path: none; border-radius: .6em; z-index: 4; }
+.v-c .card3:not(.compact) .tab { bottom: calc(var(--bw) + var(--panel) + .3em); }
+.v-c .card3 .tab .face { inset: .16em; clip-path: none; border-radius: .48em; }
+.v-c .card3 .tab .n { top: .6em; } .v-c .card3 .tab .n.two { top: .9em; }
