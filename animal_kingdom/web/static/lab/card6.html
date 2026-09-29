@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Reworded cards</title>
+<link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/app.css"><link rel="stylesheet" href="/static/lab/card3.css">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+html, body { overflow: auto !important; margin: 0; height: auto; background: #15120f; color: #c9b48f; }
+h2 { font: 600 13px var(--font-text); letter-spacing: .06em; text-transform: uppercase; color: #8a7a62; margin: 18px 28px 0; }
+.grid { display: grid; grid-template-columns: repeat(4, 320px); gap: 24px; padding: 14px 28px 28px; justify-content: center; }
+.grid .card3 { --w: 320px; }
+</style></head><body class="f-fira">
+<h2>Every card reworded today, full size, as served by the game</h2>
+<div class="grid s-guide s-read" id="g"></div>
+<script type="module">
+import { cardHTML } from '/static/lab/card3.js';
+const pool = await fetch('/api/pool').then(r => r.json()), C = Object.fromEntries(pool.cards.map(c => [c.id, c]));
+const ids = ['hornet', 'hyena', 'magpie', 'eon', 'skunk', 'sirocco', 'lemming', 'outrider', 'bush_dog', 'hippopotamus', 'gale', 'omen', 'taipan', 'rat', 'nurse_bee', 'muskrat'];
+document.getElementById('g').innerHTML = ids.map(id => cardHTML(C[id])).join('');
+</script></body></html>

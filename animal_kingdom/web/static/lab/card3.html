@@ -1,0 +1,39 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Card proposal</title>
+<link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/app.css"><link rel="stylesheet" href="/static/lab/card3.css">
+<style>
+html, body { overflow: auto !important; margin: 0; height: auto; background: #15120f; color: #c9b48f; }
+h2 { font: 600 13px var(--font-text); letter-spacing: .1em; text-transform: uppercase; color: #8a7a62; margin: 0 0 12px; }
+section { padding: 22px 28px; }
+.row { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; }
+.row .card, .row .card3 { --w: 220px; }
+.ground { background: url(/static/kit2/plate.webp) center 80% / 1512px auto; padding: 40px 28px 30px; }
+.ground .row { gap: 10px; justify-content: center; }
+.ground .card, .ground .card3 { --w: 143px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, 118px); gap: 12px; }
+.grid .card3 { --w: 118px; cursor: pointer; }
+#hcmp .card3 { transition: transform .15s; } #hcmp > div { position: relative; }
+#pop { position: fixed; z-index: 50; pointer-events: none; display: none; } #pop .card3 { --w: 250px; }
+</style></head><body>
+<section><h2>Now</h2><div class="row" id="old"></div></section>
+<section><h2>Proposal</h2><div class="row" id="new"></div></section>
+<div class="ground"><h2 style="color:#f3e3c0;text-shadow:0 1px 2px #000">Hand: now · full · compact (hover a card)</h2><div class="row" id="hold"></div><div class="row" id="hnew" style="margin-top:26px"></div><div class="row" id="hcmp" style="margin-top:26px"></div></div>
+<section><h2>Collection, compact at 118 px (hover a card)</h2><div class="grid" id="grid"></div></section><div id="pop"></div>
+<script type="module">
+import { cardHTML as oldCard } from '/static/card.js';
+import { cardHTML } from '/static/lab/card3.js';
+const pool = await fetch('/api/pool').then(r => r.json()), C = Object.fromEntries(pool.cards.map(c => [c.id, c]));
+const show = ['groundhog', 'magpie', 'borealis', 'vesper', 'worker_ant', 'chameleon'].filter(id => C[id]);
+const hand = ['cougar', 'princess_lea', 'snow_leopard', 'tiger', 'king_theron'].filter(id => C[id]);
+const $ = id => document.getElementById(id);
+$('old').innerHTML = show.map(id => oldCard(C[id])).join('');
+$('new').innerHTML = show.map(id => cardHTML(C[id])).join('');
+$('hold').innerHTML = hand.map(id => oldCard(C[id])).join('');
+$('hnew').innerHTML = hand.map(id => cardHTML(C[id])).join('');
+$('hcmp').innerHTML = hand.map(id => cardHTML(C[id], { cls: 'compact' }).replace('<div class="card3', `<div data-id="${id}" class="card3`)).join('');
+const rank = { legendary: 0, rare: 1, common: 2 }, sv = c => c.str === '*' ? -1 : c.str;
+$('grid').innerHTML = pool.cards.filter(c => pool.decks.some(d => d.id === c.deck)).sort((a, b) => sv(a) - sv(b) || rank[a.rarity] - rank[b.rarity] || a.name.localeCompare(b.name)).map(c => cardHTML(c, { cls: 'compact' }).replace('<div class="card3', `<div data-id="${c.id}" class="card3`)).join('');
+const pop = $('pop');
+document.querySelectorAll('[data-id]').forEach(e => { e.onmouseenter = () => { const r = e.getBoundingClientRect(); pop.innerHTML = cardHTML(C[e.dataset.id]);
+  const w = 250, h = w * 1.467, x = r.right + 12 + w > innerWidth ? r.left - w - 12 : r.right + 12, y = Math.max(8, Math.min(innerHeight - h - 8, r.top + r.height / 2 - h / 2));
+  pop.style.left = x + 'px'; pop.style.top = y + 'px'; pop.style.display = 'block'; }; e.onmouseleave = () => pop.style.display = 'none'; });
+</script></body></html>
