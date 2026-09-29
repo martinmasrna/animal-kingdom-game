@@ -137,3 +137,18 @@
 .coll .dtile.on { box-shadow: inset 0 0 0 2px #cfc3ad; }
 .coll .rh { color: #8f8577; }
 .coll .play.off { background: #2a2521; color: #8f8577; }
+/* Slabs a step lighter than the ground (the rims' grey stone), with a lit top edge; the dropdown list in the same stone. */
+.coll .sel, .coll .search, .coll .dnew, .coll .backbtn { background: #3a3632 url(/static/kit2/coll_slab.webp) center / 600px auto;
+  box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); color: #f0e8da; }
+.coll .search::placeholder { color: #b3a996; }
+.coll .dd { position: relative; }
+.coll .dd .sel { height: 40px; padding: 0 34px 0 14px; cursor: pointer; }
+.coll .dd .sel::after { content: ''; position: absolute; right: 12px; top: 50%; width: 13px; height: 13px; margin-top: -6px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0d6c6' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; }
+.coll .dd.open .sel::after { transform: rotate(180deg); }
+.coll .ddm { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; min-width: 100%; max-height: 340px; overflow-y: auto; padding: 6px; display: none; border-radius: 10px;
+  background: #34302c url(/static/kit2/coll_slab.webp) center / 600px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 10px 24px rgba(0,0,0,.6); scrollbar-width: thin; }
+.coll .dd.open .ddm { display: block; }
+.coll .ddo { padding: 7px 12px; border-radius: 6px; white-space: nowrap; font: 500 16px 'Fira Sans Condensed', sans-serif; color: #e8e0d2; cursor: pointer; }
+.coll .ddo:hover { background: rgba(0,0,0,.28); }
+.coll .ddo.on { color: #fff; font-weight: 700; }

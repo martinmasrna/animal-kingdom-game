@@ -93,6 +93,15 @@ test('New deck starts an empty deck, open, with its name ready to type', async (
   assert.deepEqual((await myDecks())[n].cards, { lion: 1 }, 'cards go into the new deck');
 });
 
+test('the strength and rarity lists are the screen\'s own and close on a click elsewhere', async () => {
+  const count = () => page.$$eval('.cgrid .tl', t => t.length);
+  await page.click('[data-dd=str] .sel'); assert.ok(await page.$('.dd.open'));
+  await page.click('[data-dd=str] .ddo[data-v="4"]'); const four = await count();
+  assert.ok(four > 0 && four < 60); assert.equal(await page.$eval('[data-dd=str] .sel', e => e.textContent), 'Strength 4');
+  await page.click('[data-dd=str] .sel'); await page.click('[data-dd=str] .ddo[data-v=""]');
+  await page.click('[data-dd=rar] .sel'); await page.mouse.click(600, 500); assert.equal(await page.$('.dd.open'), null);
+});
+
 test('filters: a family, clearing it, and an empty result', async () => {
   const count = () => page.$$eval('.cgrid .tl', t => t.length);
   const all = await count();

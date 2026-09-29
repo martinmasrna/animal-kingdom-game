@@ -77,9 +77,12 @@ function render(app, all) {
   const tabs = `<div class="tab${st.family ? '' : ' on'}" data-t="" data-tip="All families"><div class="med mosaic">${['lion', 'gray_wolf', 'eagle', 'elephant'].map(id => `<i style="${med(id, 18)}"></i>`).join('')}</div></div>`
     + FAMILIES.map(([f, id]) => `<div class="tab${st.family === f ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
   const strengths = [...new Set(cards.map(c => String(c.str)))].sort((a, b) => (a === '*' ? -1 : +a) - (b === '*' ? -1 : +b));
+  // A dropdown in the screen's own look: a slab showing the choice, a list that opens under it.
+  const dd = (k, any, opts) => { const cur = opts.find(([v]) => v === (st[k] || '')); const all = [['', any], ...opts];
+    return `<div class="dd" data-dd="${k}"><button class="sel">${cur ? cur[1] : any}</button><div class="ddm">${all.map(([v, l]) => `<div class="ddo${(st[k] || '') === v ? ' on' : ''}" data-v="${v}">${l}</div>`).join('')}</div></div>`; };
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
-    <span class="selw"><select class="sel" id="strsel"><option value="">Any strength</option>${strengths.map(v => `<option value="${v}"${st.str === v ? ' selected' : ''}>${v === '*' ? 'Variable' : 'Strength ' + v}</option>`).join('')}</select></span>
-    <span class="selw"><select class="sel" id="rarsel">${[['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']].map(([v, l]) => `<option value="${v}"${(st.rar || '') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></span>
+    ${dd('str', 'Any strength', strengths.map(v => [v, v === '*' ? 'Variable' : 'Strength ' + v]))}
+    ${dd('rar', 'Any rarity', [['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
     <input class="search" id="q" placeholder="Search" value="${esc(st.q)}"></div>`;
 
   const strip = id => `<div class="st" data-card="${id}"><div class="art" style="background-image:url(${artUrl(id)})"></div><span class="s">${C[id].str}</span><span class="n">${esc(C[id].name)}</span><span class="x">${C[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
@@ -106,8 +109,10 @@ function wire(app, all, open) {
   const $ = id => app.querySelector('#' + id), redo = () => render(app, all), change = () => { save(all); redo(); };
   const pop = document.getElementById('pop'), hidePop = () => { pop.style.display = 'none'; };
   $('back').onclick = X.back;
-  $('strsel').onchange = e => { st.str = e.target.value; redo(); };
-  $('rarsel').onchange = e => { st.rar = e.target.value || null; redo(); };
+  app.querySelectorAll('.dd').forEach(d => {
+    d.querySelector('.sel').onclick = ev => { ev.stopPropagation(); const was = d.classList.contains('open'); app.querySelectorAll('.dd.open').forEach(x => x.classList.remove('open')); d.classList.toggle('open', !was); };
+    d.querySelectorAll('.ddo').forEach(o => o.onclick = () => { const k = d.dataset.dd; st[k] = k === 'rar' ? (o.dataset.v || null) : o.dataset.v; redo(); });
+  });
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
   app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t || null; st.family = st.family === f ? null : f; redo(); });   // the selected family again clears it
   const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { family: null, rar: null, str: '', q: '' }); redo(); };
@@ -187,7 +192,9 @@ function pickCover(app, d, done) {
 // Screen-wide keys and paste, live only while the collection is on screen.
 function wireGlobal() {
   const here = () => document.querySelector('.coll'), typing = e => /INPUT|SELECT|TEXTAREA/.test(e.target.tagName);
+  addEventListener('click', () => document.querySelectorAll('.coll .dd.open').forEach(d => d.classList.remove('open')));   // a click elsewhere closes a dropdown
   addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.querySelector('.coll .dd.open')) { document.querySelectorAll('.coll .dd.open').forEach(d => d.classList.remove('open')); return; }
     if (!here() || here().querySelector('.modal.on')) return;
     if (e.key === '/' && !typing(e)) { e.preventDefault(); here().querySelector('#q').focus(); }
     else if (e.key === 'Escape' && !typing(e)) X.back();
