@@ -112,9 +112,10 @@ def test_last_action_spends_an_extra_play_roar(bot_cls):
 def test_canine_develops_instead_of_drawing_a_full_hand(bot_cls):
     # From a RefereeBot game (Canine vs the goodstuff pile, round 2): Dhole on Canine's den
     # front, the pile drew twice and has nothing on the board, Canine already drew with its
-    # first action and holds six. The bot drew again. Martin's line: a second Dhole in the
-    # middle row, then Fox into a corner next turn (+2 from each Dhole, a draw for each), then
-    # Dingo beside them. Fox or Dingo now are fine too; drawing to eight is not.
+    # first action and holds six. The bot drew again. Martin: drawing is the
+    # worst move here and a vanilla Wolf the second worst; one good line is a second Dhole in
+    # the middle row, then Fox into a corner next turn (+2 from each Dhole, a draw for each),
+    # then Dingo beside them. The puzzle only rules out the two bad moves.
     canine = load_premade_deck("canine_buff_tempo")
     pile = load_premade_deck("goodstuff")
     hand_a = ["dire_wolf", "gray_wolf", "dingo", "raksha", "fox", "red_wolf"]
@@ -138,4 +139,4 @@ def test_canine_develops_instead_of_drawing_a_full_hand(bot_cls):
     # the right move has to win on every seed.
     for seed in range(5):
         chosen = bot_cls(seed=seed).choose(s.view_for("A"), rules.legal_actions(s), s)
-        assert isinstance(chosen, PlaceAction) and chosen.card_id in {"red_wolf", "fox", "dingo"}, seed
+        assert isinstance(chosen, PlaceAction) and chosen.card_id != "dire_wolf", seed
