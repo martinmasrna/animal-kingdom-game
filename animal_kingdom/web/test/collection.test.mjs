@@ -93,6 +93,18 @@ test('New deck starts an empty deck, open, with its name ready to type', async (
   assert.deepEqual((await myDecks())[n].cards, { lion: 1 }, 'cards go into the new deck');
 });
 
+test('a starter opens at the top of the column; renaming it names your copy', async () => {
+  await page.click('[data-d="ramp"]'); await wait(120);
+  const off = await page.evaluate(() => document.querySelector('.dtile.on').getBoundingClientRect().top - document.querySelector('.clist').getBoundingClientRect().top);
+  assert.ok(off >= 0 && off < 30, `the open deck starts at the top (${off})`);
+  const n = (await myDecks()).length;
+  await page.hover('.dtile.on'); assert.ok(await page.$('#dcover'), 'starters can take a cover (into your copy)'); assert.equal(await page.$('#ddel'), null, 'but cannot be deleted');
+  await page.click('.nm-edit'); await page.keyboard.down('Meta'); await page.keyboard.press('a'); await page.keyboard.up('Meta'); await page.keyboard.type('Big Ramp'); await page.keyboard.press('Enter'); await wait(120);
+  const decks = await myDecks(); assert.equal(decks.length, n + 1); assert.equal(decks[n].name, 'Big Ramp');
+  assert.ok(await page.$('[data-d="ramp"]'), 'the starter is still there, unrenamed');
+  assert.equal(await page.$eval('[data-d="ramp"] b', e => e.textContent), 'Ramp');
+});
+
 test('the strength and rarity lists are the screen\'s own and close on a click elsewhere', async () => {
   const count = () => page.$$eval('.cgrid .tl', t => t.length);
   await page.click('[data-dd=str] .sel'); assert.ok(await page.$('.dd.open'));

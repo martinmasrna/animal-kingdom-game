@@ -93,13 +93,13 @@ function render(app, all) {
       ${rhead('Legendary', 'legendary', 4)}${byR('legendary')}${rhead('Rare', 'rare', 8)}${byR('rare')}${rhead('Common', 'common')}${byR('common')}
       ${d.list.length === 30 ? '<div class="play" id="play">Play this deck</div>' : `<div class="play off">${d.list.length} / 30 cards</div>`}</div>`; };
   const tile = d => d.id === st.open
-    ? `<div class="dtile on" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${esc(d.name)}</b>
-        <div class="tacts">${d.own ? `<button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button>` : ''}<button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>${d.own ? `<button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button>` : ''}</div></div>${body(d)}`
+    ? `<div class="dtile on" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
+        <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>${d.own ? `<button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button>` : ''}</div></div>${body(d)}`
     : `<div class="dtile" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b>${esc(d.name)}</b><span>${familyCount(d.list).slice(0, 2).map(([f, n]) => n + ' ' + f).join(' · ')}</span></div>`;
   const mine = all.filter(d => d.own), starters = all.filter(d => !d.own);
 
   app.innerHTML = `<div class="coll">${head}<div class="cgrid">${grid}</div>
-    <div class="side"><div class="clist">${mine.map(tile).join('')}${mine.length ? '<div class="dsep"></div>' : ''}${starters.map(tile).join('')}</div>
+    <div class="side"><div class="clist${open ? ' opened' : ''}">${mine.map(tile).join('')}${mine.length ? '<div class="dsep"></div>' : ''}${starters.map(tile).join('')}</div>
       <div class="sfoot"><button class="dnew" id="dnew">+ New deck</button><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div><div class="modal" id="cmodal"></div></div>`;
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
   wire(app, all, open);
@@ -116,18 +116,21 @@ function wire(app, all, open) {
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
   app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t || null; st.family = st.family === f ? null : f; redo(); });   // the selected family again clears it
   const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { family: null, rar: null, str: '', q: '' }); redo(); };
-  app.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.closest('.nm-edit, .tacts, .nm-in')) return; st.open = st.open === e.dataset.d ? null : e.dataset.d; redo(); });
+  app.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.closest('.nm-edit, .tacts, .nm-in')) return; st.open = st.open === e.dataset.d ? null : e.dataset.d; st.toTop = !!st.open; redo(); });
 
   const nm = app.querySelector('.nm-edit');
   if (nm) nm.onclick = () => { const inp = document.createElement('input'); inp.className = 'nm-in'; inp.maxLength = 40; inp.value = open.name; nm.replaceWith(inp); inp.focus(); inp.select();
-    let gone = false; const done = keep => { if (gone) return; gone = true; if (keep) open.name = inp.value.trim() || open.name; change(); };
+    let gone = false; const done = keep => { if (gone) return; gone = true; const name = inp.value.trim();
+      if (keep && name && name !== open.name) { const d = editable(all); d.name = name.slice(0, 40); st.toTop = true; }   // renaming a starter names your copy
+      change(); };
     inp.onblur = () => done(true); inp.onkeydown = k => { if (k.key === 'Enter') done(true); if (k.key === 'Escape') { k.stopPropagation(); done(false); } }; };
   const cp = $('dcopy'); if (cp) cp.onclick = () => navigator.clipboard.writeText(encodeDeck(open.name, open.list, C)).then(() => X.toast('Deck code copied', true), () => X.toast('Could not copy'));
-  const cov = $('dcover'); if (cov) cov.onclick = () => pickCover(app, open, change);
+  const cov = $('dcover'); if (cov) cov.onclick = () => pickCover(app, open, id => { const d = editable(all); d.cover = id; st.toTop = true; change(); });
   const del = $('ddel'); if (del) del.onclick = () => confirmDelete(app, open, () => { all.splice(all.indexOf(open), 1); st.open = null; change(); X.toast(`Deleted ${open.name}`, true); });
   // A new deck starts empty, open, with its name ready to type.
   $('dnew').onclick = () => { const d = { id: Date.now().toString(36), name: 'New deck', list: [], cover: null, own: true };
     all.splice(all.filter(x => x.own).length, 0, d); st.open = d.id; st.rename = true; change(); };
+  if (st.toTop) { st.toTop = false; const t = app.querySelector('.dtile.on'), l = app.querySelector('.clist'); if (t) l.scrollTop += t.getBoundingClientRect().top - l.getBoundingClientRect().top - 8; }
   if (st.rename) { st.rename = false; const n = app.querySelector('.nm-edit'); if (n) n.click(); }
   const play = $('play'); if (play) play.onclick = () => X.play(open);
 
@@ -186,7 +189,7 @@ function pickCover(app, d, done) {
   const ids = [...new Set(d.list)].filter(id => CROP[id]).sort((a, b) => RANK[C[a].rarity] - RANK[C[b].rarity] || sv(C[a]) - sv(C[b]));
   const { m, close } = dialog(app, `<div class="dlg cov"><h3>Choose a cover</h3><div class="covs">${ids.map(id => `<div class="cv${id === d.cover ? ' on' : ''}" data-id="${id}">${cardHTML(C[id], { cls: 'compact' })}</div>`).join('')}</div>
     <div class="dbtns"><button class="cancel">Cancel</button></div></div>`);
-  m.querySelectorAll('.cv').forEach(e => e.onclick = () => { d.cover = e.dataset.id; close(); done(); });
+  m.querySelectorAll('.cv').forEach(e => e.onclick = () => { close(); done(e.dataset.id); });
 }
 
 // Screen-wide keys and paste, live only while the collection is on screen.

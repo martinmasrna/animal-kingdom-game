@@ -163,3 +163,4 @@
 .coll .dnew:hover, .coll .backbtn:hover { background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; }
 /* Hover: the stone lightens slightly, nothing moves (the flat grey overlay on New deck and Back is gone). */
 .coll .dnew:hover, .coll .backbtn:hover, .coll .dd .sel:hover { filter: brightness(1.2); color: #f3ead8; transform: none; }
+.coll .clist.opened::after { content: ''; flex: none; height: 70vh; }   /* room to bring the last deck to the top */
