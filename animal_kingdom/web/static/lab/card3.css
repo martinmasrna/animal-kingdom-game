@@ -1,0 +1,25 @@
+/* 20em wide, 29.34em tall, em = --w / 20. The edge is the only frame: its width and metal carry rarity. */
+.card3 { --w: 180px; --bw: .22em; --edge: linear-gradient(160deg, #6f6a64, #2e2b28 45%, #55504a); position: relative; width: var(--w); height: calc(var(--w) * 1.467);
+  font-size: calc(var(--w) / 20); flex: none; border-radius: .9em; background: var(--edge); box-shadow: .2em .45em .9em rgba(0,0,0,.55); overflow: hidden; isolation: isolate; }
+.card3.rare { --bw: .3em; --edge: linear-gradient(160deg, #f4f6f8, #9aa1a8 30%, #50565c 60%, #d8dde2); }
+.card3.legendary { --bw: .42em; --edge: linear-gradient(150deg, #fff1c2, #d9a93f 22%, #7e5a16 48%, #f0cd70 70%, #a67a1e 88%, #ffe9a6); }
+.card3 .art { position: absolute; inset: var(--bw); border-radius: .7em; }
+.card3 .art { background: #3a2c1a center 30% / cover no-repeat; }
+.card3 .str { position: absolute; left: calc(var(--bw) + .55em); top: calc(var(--bw) + .45em); height: 3.6em; min-width: 3em; display: flex; align-items: center; justify-content: center; z-index: 2;
+  filter: drop-shadow(0 .1em .15em rgba(0,0,0,.9)) drop-shadow(0 0 .5em rgba(0,0,0,.6)); }
+.card3 .str img { display: block; height: 100%; }
+.card3 .str b { font: 800 3.6em/1 'Source Serif 4', serif; color: #f6ecd6; }
+.card3 .nm { position: absolute; left: var(--bw); right: var(--bw); top: var(--bw); padding: .5em 1.2em 2.2em 4.2em; min-height: 3.4em; display: flex; align-items: flex-start; justify-content: center; z-index: 1;
+  border-radius: .7em .7em 0 0; background: linear-gradient(rgba(10,8,6,.78), rgba(10,8,6,.5) 55%, rgba(10,8,6,0)); }
+.card3 .nm span { margin-top: .55em; font: 700 1.3em/1.02 'Source Serif 4', serif; color: #f4ecdc; text-align: center; text-wrap: balance; text-shadow: 0 .06em .2em rgba(0,0,0,.8); }
+.card3 .nm.long span { font-size: 1.1em; }
+.card3 .rules { position: absolute; left: var(--bw); right: var(--bw); bottom: var(--bw); padding: 3.2em 1em 2.2em; z-index: 2; border-radius: 0 0 .7em .7em;
+  background: linear-gradient(rgba(10,8,6,0), rgba(10,8,6,.8) 3em, rgba(10,8,6,.9)); }
+.card3 .rules p { margin: 0; font: 500 1.02em/1.2 'Source Serif 4', serif; color: #efe6d4; text-align: center; text-wrap: pretty; text-shadow: 0 .05em .15em rgba(0,0,0,.9); }
+.card3 .rules p b { font-weight: 700; color: #fff6e2; }
+.card3 .rules i { position: absolute; left: 0; right: 0; bottom: .95em; text-align: center; font: 700 .78em/1 'Source Serif 4', serif; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #a8998a; }
+/* Legendary: a slow sheen crosses the card. */
+.card3.legendary::after { content: ''; position: absolute; top: -20%; bottom: -20%; left: 0; width: 35%; z-index: 3; pointer-events: none;
+  background: linear-gradient(90deg, rgba(255,240,200,0), rgba(255,240,200,.16), rgba(255,240,200,0)); animation: sheen3 5.5s ease-in-out infinite; }
+@keyframes sheen3 { 0% { transform: translateX(-130%) rotate(18deg); } 45%, 100% { transform: translateX(380%) rotate(18deg); } }
+@media (prefers-reduced-motion: reduce) { .card3.legendary::after { animation: none; display: none; } }
