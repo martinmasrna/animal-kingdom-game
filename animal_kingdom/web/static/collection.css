@@ -192,3 +192,6 @@
 .coll .fcount b, .coll .fcount span { line-height: 1; display: block; }
 .coll .fcount { display: grid; grid-auto-flow: column; place-content: center; align-items: baseline; column-gap: 5px; }
 .coll .dtile b { top: 50%; transform: translateY(-50%); font-size: 19px; }   /* the name alone, centred */
+.coll .clist .dnew svg { width: 26px; height: 26px; stroke-width: 2; opacity: .75; }
+.coll .clist .dnew:hover svg { opacity: 1; }
+.coll .clist .dnew[data-tip]::after { top: calc(100% + 6px); }
