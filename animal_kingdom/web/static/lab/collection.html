@@ -138,6 +138,11 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .bar .strsel { margin: 0; }
 .decks { padding-top: 4px; }
 .cgrid { padding-top: 8px; }
+.sfoot { flex: none; padding: 12px; border-top: 1px solid #2a2d30; }
+.backbtn { width: 100%; height: 44px; border-radius: 8px; border: 1px solid #3a3d40; background: #24272a; color: #d8d4cc; display: flex; align-items: center; justify-content: center; gap: 6px; font: 600 16px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
+.backbtn:hover { border-color: #6b6f74; color: #f0ece4; }
+.bar .search { margin: 0; }
+.tabs { margin-right: 14px; }
 </style></head><body>
 <div class="gb" id="gb"></div><div id="modal"></div><div id="toast2"></div><div class="pop" id="pop"></div>
 
@@ -203,10 +208,11 @@ function render() {
     ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}<div class="tacts"><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>${d.own ? `<button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button>` : ''}</div></div>`
     : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${familyCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>`) + (d.id === st.open ? body(d) : '');
   const side = `<div class="decks">${all.filter(d => d.own).map(tile).join('')}<div class="dsep"></div>${all.filter(d => !d.own).map(tile).join('')}</div>`;
-  document.getElementById('gb').innerHTML = `<div class="side">${side}</div><div class="bar"><button class="back ic" data-tip="Menu">${ICON.back}</button><div class="tabs">${tabs}</div><span class="gap"></span>
-      <input class="search" id="q" placeholder="Search" value="${(st.q || '').replace(/"/g, '&quot;')}"><select class="strsel" id="strsel"><option value="">Any strength</option>${[...new Set(cards.map(c => String(c.str)))].sort((a, b) => (a === '*' ? -1 : +a) - (b === '*' ? -1 : +b)).map(v => `<option value="${v}"${st.str === v ? ' selected' : ''}>${v === '*' ? 'Variable' : 'Strength ' + v}</option>`).join('')}</select><select class="strsel" id="rarsel">${[['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']].map(([v, l]) => `<option value="${v}"${(st.rar || '') === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+  document.getElementById('gb').innerHTML = `<div class="side">${side}<div class="sfoot"><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div><div class="bar"><div class="tabs">${tabs}</div><span class="gap"></span>
+      <select class="strsel" id="strsel"><option value="">Any strength</option>${[...new Set(cards.map(c => String(c.str)))].sort((a, b) => (a === '*' ? -1 : +a) - (b === '*' ? -1 : +b)).map(v => `<option value="${v}"${st.str === v ? ' selected' : ''}>${v === '*' ? 'Variable' : 'Strength ' + v}</option>`).join('')}</select><select class="strsel" id="rarsel">${[['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']].map(([v, l]) => `<option value="${v}"${(st.rar || '') === v ? ' selected' : ''}>${l}</option>`).join('')}</select><input class="search" id="q" placeholder="Search" value="${(st.q || '').replace(/"/g, '&quot;')}"></div>
     <div class="cgrid">${grid}</div>`;
   document.querySelectorAll('.decks, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
+  document.getElementById('back').onclick = goBack;
   document.getElementById('strsel').onchange = e => { st.str = e.target.value; render(); };
   document.getElementById('rarsel').onchange = e => { st.rar = e.target.value || null; render(); };
   const q = document.getElementById('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; render(); const n = document.getElementById('q'); n.focus(); n.setSelectionRange(at, at); };
@@ -244,5 +250,8 @@ function confirmDelete(d) {
   m.querySelector('.cancel').onclick = close;
   m.querySelector('.danger').onclick = () => { close(); const i = all.findIndex(x => x.id === d.id); all.splice(i, 1); st.open = null; render(); toast(`Deleted ${d.name}`); };
 }
+// Back to the menu: the docked button, or Escape when no dialog is open.
+const goBack = () => { location.href = '/#/'; };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('modal').style.display !== 'grid' && e.target.tagName !== 'INPUT') goBack(); });
 render();
 </script></body></html>
