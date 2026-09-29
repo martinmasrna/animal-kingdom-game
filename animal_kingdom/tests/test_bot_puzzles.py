@@ -35,7 +35,7 @@ def test_blocks_imminent_hq_threat_over_unrelated_offense():
 
 
 def test_prefers_big_food_gain_over_marginal_board_presence():
-    # Worker Ant's battlecry (gain 12 food, non-lethal here) trades a strong body (Lion, 7
+    # Worker Ant's roar (gain 12 food, non-lethal here) trades a strong body (Lion, 7
     # strength) for a weak one (1 strength) - the food swing should win out over the
     # marginal board-presence loss.
     s = make_state(hands={"A": ["worker_ant", "lion"]}, food={"A": 50, "B": 0})
@@ -72,5 +72,5 @@ def test_recognizes_grizzly_bear_delayed_removal_as_better_than_a_vanilla_body()
     vanilla_twin = s.clone()
     rules.apply_action(vanilla_twin, PlaceAction("lion", ("cr", "1,2")))
 
-    assert grizzly.scheduled, "Grizzly Bear's battlecry should schedule the delayed removal"
+    assert grizzly.scheduled, "Grizzly Bear's roar should schedule the delayed removal"
     assert evaluate(grizzly, "A", W) > evaluate(vanilla_twin, "A", W)

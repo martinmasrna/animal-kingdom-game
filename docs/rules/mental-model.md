@@ -1,6 +1,6 @@
 # Mental Model — read this before reasoning about cards or balance
 
-**Why this doc exists:** *Animal Kingdom* shares surface vocabulary with Magic/Hearthstone/Slay-the-Spire ("strength", "battlecry", "draw", "remove"), so it is very easy to pattern-match onto their mana + attack/health + combat-damage systems. **It has none of those.** Almost every recurring design mistake in this project comes from importing that model. Recalibrate here first.
+**Why this doc exists:** *Animal Kingdom* shares surface vocabulary with Magic/Hearthstone/Slay-the-Spire ("strength", "draw", "remove"), so it is very easy to pattern-match onto their mana + attack/health + combat-damage systems. **It has none of those.** Almost every recurring design mistake in this project comes from importing that model. Recalibrate here first.
 
 ## The whole system in one breath
 

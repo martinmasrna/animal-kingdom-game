@@ -1,7 +1,7 @@
 """TurnBot: the scalable complete-own-turn planner - the default large-sim pilot.
 
 Where GreedyBot scores one action at a time (and so cannot reliably plan draw -> play,
-ordered Battlecries, or effect-granted extra placements under the two-action rules), and
+ordered Roars, or effect-granted extra placements under the two-action rules), and
 RefereeBot pays for a full sampled opponent reply on every decision (~100-200x greedy),
 TurnBot sits in between: it searches every candidate action until the *current turn is
 completely finished* - all configured top-level actions, a Draw followed by a placement
@@ -13,7 +13,7 @@ simulates the opponent's turn, which is what keeps it cheap enough for large bal
 
 All of that - determinized worlds so unknown draws don't leak, information-set grouping so
 indistinguishable worlds pick the same action, beam pruning, the hard next-turn-HQ-loss
-filter, wasted-battlecry penalties, and the projected end-of-turn readiness eval - lives in
+filter, wasted-roar penalties, and the projected end-of-turn readiness eval - lives in
 the shared `TurnSearcher` (bots/turn_search.py). TurnBot is that searcher with the default
 own-turn hooks: it scores lines by their end-of-turn planning eval, never runs a reply
 rollout, and models any opponent-owned sub-choice opened during its turn adversarially

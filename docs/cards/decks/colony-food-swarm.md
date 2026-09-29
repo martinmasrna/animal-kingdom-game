@@ -12,7 +12,7 @@ Watch Falstaff's "whenever you gain food, gain 3 more" stacking with the food-on
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Queen Marabunta** | 1 | Colony, Queen | 4 | Battlecry: gain 4 food for each other friendly Colony unit. |
+| **Queen Marabunta** | 1 | Colony, Queen | 4 | Roar: gain 4 food for each other friendly Colony unit. |
 | **Vesper, Champion of the Hive** | 1 | Colony | 0 | Flight. Has +2 strength for each other friendly Colony unit. |
 | **Queen Honoria** | 1 | Colony, Queen | 4 | Whenever you play a Colony unit, gain 4 food. |
 | **Falstaff** | 1 | Colony | 3 | Flight. Whenever you gain food, gain 3 additional food. |
@@ -21,20 +21,20 @@ Watch Falstaff's "whenever you gain food, gain 3 more" stacking with the food-on
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Nurse Bee** | 2 | Colony | 3 | Flight. Battlecry: if you control two of the same Colony unit, draw 2 cards. |
-| **Nurse Bumblebee** | 2 | Colony | 3 | Flight. Battlecry: if you control 4 or more Colony units, draw 2 cards. |
-| **Termite King** | 2 | Colony | 6 | Battlecry: if you control a Colony Queen, draw 1 card. |
-| **Termite Queen** | 2 | Colony, Queen | 3 | Battlecry: you may play one additional non-Queen Colony unit this turn. |
+| **Nurse Bee** | 2 | Colony | 3 | Flight. Roar: if you control two of the same Colony unit, draw 2 cards. |
+| **Nurse Bumblebee** | 2 | Colony | 3 | Flight. Roar: if you control 4 or more Colony units, draw 2 cards. |
+| **Termite King** | 2 | Colony | 6 | Roar: if you control a Colony Queen, draw 1 card. |
+| **Termite Queen** | 2 | Colony, Queen | 3 | Roar: you may play one additional non-Queen Colony unit this turn. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Queen Bee** | 3 | Colony, Queen | 2 | Battlecry: play a Worker unit. |
+| **Queen Bee** | 3 | Colony, Queen | 2 | Roar: play a Worker unit. |
 | **Guard Wasp** | 3 | Colony | 3 | Flight. Has +5 strength while you control 4 or more Colony units. |
-| **Soldier Ant** | 3 | Colony | 2 | Battlecry: if you control 4 or more Colony units, remove an adjacent enemy. |
-| **Worker Ant** | 3 | Colony, Worker | 1 | Battlecry: gain 12 food. |
+| **Soldier Ant** | 3 | Colony | 2 | Roar: if you control 4 or more Colony units, remove an adjacent enemy. |
+| **Worker Ant** | 3 | Colony, Worker | 1 | Roar: gain 12 food. |
 | **Worker Wasp** | 3 | Colony, Worker | 3 | Flight. At the end of your turn, gain 3 food. |
-| **Worker Bee** | 3 | Colony, Worker | 1 | Flight. Battlecry: gain 10 food; if you control another Worker, gain 10 more. |
+| **Worker Bee** | 3 | Colony, Worker | 1 | Flight. Roar: gain 10 food; if you control another Worker, gain 10 more. |
 
 <!-- cards:end -->

@@ -6,7 +6,7 @@
 
 ## The trap
 
-The game has no mana, no attack or health, no combat damage. A unit is a single number, strength, and the only resource is the action (two per turn). It borrows Magic/Hearthstone vocabulary ("Battlecry", "draw", "removal"), and pattern-matching onto those games ("dies to a ping", "mana curve", "go wide for damage") is the most common mistake made here.
+The game has no mana, no attack or health, no combat damage. A unit is a single number, strength, and the only resource is the action (two per turn). It borrows Magic/Hearthstone vocabulary ("draw", "removal"), and pattern-matching onto those games ("dies to a ping", "mana curve", "go wide for damage") is the most common mistake made here.
 
 ## Commands
 

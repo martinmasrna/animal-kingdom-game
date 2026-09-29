@@ -16,7 +16,7 @@ Focused follow-up to `decks/flavor-review.md`, including consequences of the Jul
 
 - [ ] Recommended identity: **Secretarybird**.
   - It is a real bird famous for killing dangerous prey on the ground.
-  - The existing candidate slate already pairs it with the exact proposed line: `Bird · STR 4 · Flight. Battlecry: remove an adjacent enemy of strength 4 or less.`
+  - The existing candidate slate already pairs it with the exact proposed line: `Bird · STR 4 · Flight. Roar: remove an adjacent enemy of strength 4 or less.`
   - It reads naturally in Egg Control's Bird/Snake ecosystem as a predator among snakes.
 - [ ] Alternatives if Secretarybird feels too anti-Snake for the mixed family: **Goshawk, Harrier, Kite**.
 - [ ] Retire “Stoop” as the card name when the rarity change ships. It reads as an individual legendary name rather than a generic species.
@@ -49,13 +49,13 @@ The new version has Flight and consumes another copy from hand/deck to destroy a
 
 ### 1.6 Vulture versus Crow
 
-- [ ] Decide whether **Vulture**, **Crow**, **Rook**, or another Bird carries: `Flight. Battlecry: draw 1; if an enemy unit was removed this turn, draw 2 instead.`
+- [ ] Decide whether **Vulture**, **Crow**, **Rook**, or another Bird carries: `Flight. Roar: draw 1; if an enemy unit was removed this turn, draw 2 instead.`
 - [ ] Alternative to compare: reserve **Vulture** for a separate literal consumption/scavenging (“eat”) identity.
 
 ### 1.7 Copy/mimic animal
 
 - [ ] Compare the animal fit for two possible mechanical scopes:
-  - **Parrot, mockingbird, or lyrebird:** repeats a sound, so it should copy/repeat a Battlecry.
+  - **Parrot, mockingbird, or lyrebird:** repeats a sound, so it should copy/repeat a Roar.
   - **Mimic Octopus or cuttlefish:** changes physical appearance/behavior, so it better fits a full copy of strength, tags, keywords, and rules text.
 - [ ] If the full-copy card remains a Parrot, ensure the art sells imitation rather than literal transformation.
 - [ ] A legendary Parrot needs an individual name; defer naming until copy timing and effect scope are locked.

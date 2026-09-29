@@ -22,7 +22,7 @@ from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine import rules
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, action_from_dict
 from ..engine.cards import load_cards
-from ..engine.effects import battlecry_condition
+from ..engine.effects import roar_condition
 from ..engine.maps import load_map
 from ..engine.state import EngineError, GameState, new_game, other_player
 from ..engine.strength import effective_strength, placement_strength
@@ -265,7 +265,7 @@ class Match:
             raise EngineError("not your decision")
         if isinstance(action, dict):
             action = action_from_dict(action)
-        # A placement starts a history entry, including a free extra play inside a Battlecry;
+        # A placement starts a history entry, including a free extra play inside a Roar;
         # draws and sub-choices fold into the entry they belong to.
         starts_move = (state.pending is None and not isinstance(action, PassAction)) or isinstance(action, PlaceAction)
         pre = _snapshot(state) if starts_move else None
@@ -457,7 +457,7 @@ class Match:
             "winFood": st.game_map.win_food,
             "board": board,
             "hand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u),
-                      **({"ready": True} if battlecry_condition(st, s, u.card_id) else {})}
+                      **({"ready": True} if roar_condition(st, s, u.card_id) else {})}
                      for u in st.hands[s]],
             "handCount": {p: len(st.hands[p]) for p in "AB"},
             "handLimit": st.config.hand_limit,

@@ -662,10 +662,10 @@ def test_chipmunk_no_longer_pays_out_after_it_is_destroyed():
     scheduled its second payout with no reference to its unit, so it fired even when destroyed."""
     s = make_state(hands={"A": ["chipmunk"]})
     rules.apply_action(s, PlaceAction("chipmunk", ("cr", "1,2")))
-    food_after_battlecry = s.food["A"]
+    food_after_roar = s.food["A"]
     effects._remove_specific(s, "1,2", s.top_unit("1,2"), by_player="B", by_effect=False)
     _tick(s)
-    assert s.food["A"] == food_after_battlecry           # no second helping
+    assert s.food["A"] == food_after_roar           # no second helping
 
 
 def test_fragile_still_dies_to_cover_so_its_timer_is_cancelled():
@@ -739,7 +739,7 @@ def test_aurum_draws_at_the_start_of_its_owners_turn():
     assert len(s.hands["A"]) == hand_a + 1              # Aurum drew
 
 
-# ============================================ Stage 2.4: removal battlecries / reactive
+# ============================================ Stage 2.4: removal roars / reactive
 
 def test_jaguar_and_serval_respect_strength_bounds():
     jag = make_state(hands={"A": ["jaguar"]})
@@ -958,7 +958,7 @@ def test_grizzly_bear_strikes_a_random_adjacent_enemy_later():
 
 
 def test_scrooge_doubles_this_turns_haul():
-    # Reworked 2026-07-05: Battlecry gains again whatever you gained this turn (no banking).
+    # Reworked 2026-07-05: Roar gains again whatever you gained this turn (no banking).
     s = make_state(current="A", hands={"A": ["scrooge"]}, food={"A": 20, "B": 0})
     s.turn_flags["food_gained_A"] = 20                  # 20 already gained this turn
     rules.apply_action(s, PlaceAction("scrooge", ("cr", "1,2")))

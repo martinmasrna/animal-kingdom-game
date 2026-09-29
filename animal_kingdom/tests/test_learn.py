@@ -91,14 +91,14 @@ def test_no_anchor_yields_both_seats_trajectories():
 
 
 def test_effect_readiness_is_exercised_in_training_phis():
-    # Regression (2026-07-17): every guard in enabled_battlecry_count (opponent to act /
+    # Regression (2026-07-17): every guard in enabled_roar_count (opponent to act /
     # actions already taken / pending choice) fires on every possible *raw* afterstate shape,
     # so recording raw afterstates left the effect_readiness column identically zero across
     # whole training runs - its weight could never receive a TD gradient, while the deployed
     # turn tier (whose _planning_eval reframes end-of-turn states to the owner's next
     # top-level decision) would actually consume the feature. Training now records
     # end-of-turn afterstates through that same reframe (see extract_as_scored); with a
-    # battlecry-heavy deck (cats) the column must be nonzero on some emitted phis.
+    # roar-heavy deck (cats) the column must be nonzero on some emitted phis.
     idx = features.RUNG0_FEATURES.index("effect_readiness")
     nonzero = 0
     total = 0

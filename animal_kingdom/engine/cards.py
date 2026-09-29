@@ -16,7 +16,7 @@ from .resources import load_bundled_json
 # Allowed value domains (validation). Reworked 98-design pool: README decisions B-E.
 RARITIES = {"common", "rare", "legendary"}
 KEYWORDS = {"Flight", "Immovable", "Fragile", "Apex Predator", "Stealth"}  # static keywords only;
-# Battlecry/Deathrattle are trigger prefixes printed in `text`, not stored keywords.
+# Roar/Deathrattle are trigger prefixes printed in `text`, not stored keywords.
 # Family + role tags (dec. B). Retired umbrellas (Reptile, Insect) are forbidden.
 TAGS = {
     "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent",
@@ -66,9 +66,9 @@ class Card:
         return self.base_strength == "dynamic"
 
     @property
-    def has_battlecry(self) -> bool:
-        """Whether the printed rules text declares an on-placement Battlecry."""
-        return "Battlecry:" in self.text
+    def has_roar(self) -> bool:
+        """Whether the printed rules text declares an on-placement Roar."""
+        return "Roar:" in self.text
 
     def has_keyword(self, kw: str) -> bool:
         return kw in self.keywords

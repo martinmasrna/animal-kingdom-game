@@ -27,10 +27,10 @@ A plain STR-7 Immovable wall. Fits Ramp's immovable-megafauna identity; re-home 
 ### Card JSON (paste back to re-home)
 
 ```json
-{"id": "carmilla", "name": "Carmilla, the Devourer", "deck": "food_otk", "rarity": "legendary", "type": "unit", "tags": ["Arachnid"], "base_strength": 5, "keywords": [], "text": "Battlecry: remove up to 3 friendly units. Draw a card for each."}
+{"id": "carmilla", "name": "Carmilla, the Devourer", "deck": "food_otk", "rarity": "legendary", "type": "unit", "tags": ["Arachnid"], "base_strength": 5, "keywords": [], "text": "Roar: remove up to 3 friendly units. Draw a card for each."}
 {"id": "giant_tortoise", "name": "Giant Tortoise", "deck": "food_otk", "rarity": "rare", "type": "unit", "tags": [], "base_strength": 7, "keywords": ["Immovable"], "text": "Immovable."}
-{"id": "opossum", "name": "Opossum", "deck": "food_otk", "rarity": "rare", "type": "unit", "tags": [], "base_strength": 2, "keywords": [], "text": "Battlecry: gain 5 food and draw 1 card. Deathrattle: return this to your hand."}
-{"id": "black_widow", "name": "Black Widow", "deck": "food_otk", "rarity": "common", "type": "unit", "tags": ["Arachnid"], "base_strength": 3, "keywords": [], "text": "Battlecry: remove an adjacent friendly unit to draw 1."}
+{"id": "opossum", "name": "Opossum", "deck": "food_otk", "rarity": "rare", "type": "unit", "tags": [], "base_strength": 2, "keywords": [], "text": "Roar: gain 5 food and draw 1 card. Deathrattle: return this to your hand."}
+{"id": "black_widow", "name": "Black Widow", "deck": "food_otk", "rarity": "common", "type": "unit", "tags": ["Arachnid"], "base_strength": 3, "keywords": [], "text": "Roar: remove an adjacent friendly unit to draw 1."}
 {"id": "pufferfish", "name": "Pufferfish", "deck": "food_otk", "rarity": "common", "type": "unit", "tags": ["Fish"], "base_strength": 2, "keywords": [], "text": "When an enemy unit is placed on top of this, remove that enemy unit and this unit. Draw 1 card."}
 {"id": "impala", "name": "Impala", "deck": "food_otk", "rarity": "common", "type": "unit", "tags": [], "base_strength": 2, "keywords": [], "text": "When this is removed, draw 2."}
 {"id": "gazelle", "name": "Gazelle", "deck": "food_otk", "rarity": "common", "type": "unit", "tags": [], "base_strength": 2, "keywords": [], "text": "When this is removed, gain 30 food."}
@@ -46,14 +46,14 @@ The Canine deck was split into two clean archetypes. Canine kept **tokens + boar
 
 ### → future **hand-buff (Primates?)** deck
 
-The mechanical thesis, and *why* it must be its own deck: **"if this has ≥N strength" battlecries fire on entry — before any board buff can apply — so they can only be satisfied by buffing the card in hand first.** A threshold-payoff package therefore *requires* a hand-buff engine and cannot coexist with Canine's board-buff plan. That's a whole second archetype: pump units in hand, then deploy a pre-grown threat (which, unlike Canine's go-wide plan, can cover a big body from an empty board). Candidate flavor: **primates** — "train/develop the creature before it enters play" reads as intelligence/tool-use.
+The mechanical thesis, and *why* it must be its own deck: **"if this has ≥N strength" roars fire on entry — before any board buff can apply — so they can only be satisfied by buffing the card in hand first.** A threshold-payoff package therefore *requires* a hand-buff engine and cannot coexist with Canine's board-buff plan. That's a whole second archetype: pump units in hand, then deploy a pre-grown threat (which, unlike Canine's go-wide plan, can cover a big body from an empty board). Candidate flavor: **primates** — "train/develop the creature before it enters play" reads as intelligence/tool-use.
 
 Seed pieces (designs, not final cards):
 
-- **Shuck** (reserve) — recursion + hand-buff: "Battlecry: return a removed [family] to your hand, give it +2 strength."
-- **Coyote** (reserve) — a threshold payoff: "Battlecry: if this has 5+ strength, draw a card." (The founding member of the "≥N strength" package.)
-- **Red Wolf's *old* effect** — hand-buff: "Battlecry: give +1 strength to all [family] in your hand." (The Canine *animal* kept the name with a new on-enter effect; the hand-buff *effect* belongs here.)
-- **New hand-buff common** (proposed) — "STR 3, Battlecry: give +2 strength to two units in your hand." Works from an empty board — the go-tall catch-up tool.
+- **Shuck** (reserve) — recursion + hand-buff: "Roar: return a removed [family] to your hand, give it +2 strength."
+- **Coyote** (reserve) — a threshold payoff: "Roar: if this has 5+ strength, draw a card." (The founding member of the "≥N strength" package.)
+- **Red Wolf's *old* effect** — hand-buff: "Roar: give +1 strength to all [family] in your hand." (The Canine *animal* kept the name with a new on-enter effect; the hand-buff *effect* belongs here.)
+- **New hand-buff common** (proposed) — "STR 3, Roar: give +2 strength to two units in your hand." Works from an empty board — the go-tall catch-up tool.
 - **Reused threshold package** — mirror Colony's "5+ units" / OTK's "gained 10 food" payoff trio, but keyed on **strength** ("if this has ≥X strength: remove / draw / +str"). Keying on strength (not unit count) keeps it distinct from Colony and doubles down on the buff identity.
 
 Status: **not built.** When it is, re-home Shuck/Coyote by changing their `deck` from `reserve` to the new slug (add it to `DECK_SLUGS`), and build to the standard 4-4-6. See [`docs/rules/mental-model.md`](../rules/mental-model.md) for why strength/covering — not HP — drives whether a pre-grown threat can cover a given body.

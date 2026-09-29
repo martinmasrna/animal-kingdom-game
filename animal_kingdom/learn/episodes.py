@@ -134,7 +134,7 @@ def extract_as_scored(state: GameState, me: str, feature_set: str) -> list:
     path is `TurnSearcher._planning_eval`: it applies the 4-field reframe to `me`'s next
     top-level decision and re-evaluates the whole feature vector there. Recording the raw
     state instead would leave `effect_readiness` structurally zero on *every* trainable
-    afterstate (each of `enabled_battlecry_count`'s guards - opponent to act, actions already
+    afterstate (each of `enabled_roar_count`'s guards - opponent to act, actions already
     taken, or a pending choice - fires on every possible afterstate shape), so its weight
     could never receive a gradient and the feature the turn tier actually consumes at
     deployment would go untrained. The reframe also keeps `pending_payoff`'s current-player

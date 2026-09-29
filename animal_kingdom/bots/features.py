@@ -4,9 +4,9 @@ and the hand-written `evaluate()` (`bots/greedy_bot.py`).
 **Rung 0** (`feature_set="rung0"`) is exactly the 11 terms `GreedyWeights`/`evaluate()` already
 score - the bodies below are the *same code*, moved here so both the hand path and the learned
 path share one implementation (rung 0 is definitionally identical to the hand eval, not
-re-implemented: see the hand-mimic equivalence test in `test_learned_eval.py`). `wasted_battlecry`
+re-implemented: see the hand-mimic equivalence test in `test_learned_eval.py`). `wasted_roar`
 is a `choose()`-level bot-policy adjustment, not a position feature, and is not included here -
-see `_battlecry_fizzled`'s docstring.
+see `_roar_fizzled`'s docstring.
 
 **Rung 1** (`feature_set="rung1"`) adds ~13 generic "dynamics" features - growth, scheduled
 payoffs, economy, board geometry - so TD learning can price a multi-turn plan (a state where
@@ -19,7 +19,7 @@ what `me` may legitimately know - the public board (including on-board strength 
 which are visible board state, not hidden information - see `evaluate()`'s docstring), own hand
 contents, own food, the shared Remove Pile, deck *sizes* (never contents/order - not even
 `me`'s own deck order), and static card metadata limited to `base_strength`, `is_dynamic`,
-`keywords`, `food_cost`, `has_battlecry` - never a card id, deck slug, or tag. The one belief
+`keywords`, `food_cost`, `has_roar` - never a card id, deck slug, or tag. The one belief
 term (`coverage_exposure`) reads the opponent's hand+deck as one combined unseen multiset (never
 distinguishing which unseen card sits where - see `opponent_unseen_card_ids`), exactly as
 `evaluate()`'s existing `_p_opponent_can_cover` already did.
@@ -145,7 +145,7 @@ def extract(state: GameState, me: str, feature_set: str = "rung0") -> list[float
     values["own_hq_threat"] = -own_threat
     values["coverage_exposure"] = -coverage_exposure_worst(state, me, opp, opp_connection)
     values["card_economy"] = card_economy(state, me, opp)
-    values["effect_readiness"] = float(enabled_battlecry_count(state, me))
+    values["effect_readiness"] = float(enabled_roar_count(state, me))
     values["pending_payoff"] = pending_payoff(state, me, opp)
 
     if feature_set == "rung1":
@@ -283,22 +283,22 @@ def card_economy(state: GameState, me: str, opp: str) -> float:
     return float(len(state.hands[me]) - len(state.hands[opp]))
 
 
-def _battlecry_fizzled(pre: GameState, post: GameState, me: str, action) -> bool:
+def _roar_fizzled(pre: GameState, post: GameState, me: str, action) -> bool:
     """True if `action` played a card with ability text but nothing beyond the unit landing
-    on the board actually happened - e.g. a removal battlecry with no adjacent target.
+    on the board actually happened - e.g. a removal roar with no adjacent target.
 
     Needs the before/after state pair plus the action taken, so it isn't itself a position
     feature (it can't be computed from a single state); it's shared here because
-    `enabled_battlecry_count` (a real feature) uses it to decide whether a candidate
-    Battlecry would actually do anything. Generic over card text - only checks whether
+    `enabled_roar_count` (a real feature) uses it to decide whether a candidate
+    Roar would actually do anything. Generic over card text - only checks whether
     anything *observable* moved, never a specific card id.
     """
     if not isinstance(action, PlaceAction) or action.is_hq_capture:
         return False
-    if not pre.cards[action.card_id].has_battlecry:
-        return False  # passives, keywords, Deathrattles, and vanilla units are not Battlecries
+    if not pre.cards[action.card_id].has_roar:
+        return False  # passives, keywords, Deathrattles, and vanilla units are not Roars
     if post.pending is not None:
-        return False  # battlecry offered a real choice - it hasn't fizzled, its outcome just
+        return False  # roar offered a real choice - it hasn't fizzled, its outcome just
                        # isn't resolved yet
     if post.food != pre.food:
         return False
@@ -314,7 +314,7 @@ def _battlecry_fizzled(pre: GameState, post: GameState, me: str, action) -> bool
     if _total_strength_counters(post) != _total_strength_counters(pre):
         return False  # e.g. a buff granted, even with no removal/draw/food attached
     if len(post.scheduled) != len(pre.scheduled):
-        return False  # delayed Battlecry payoff (Grizzly Bear, Black Bear, Scrooge)
+        return False  # delayed Roar payoff (Grizzly Bear, Black Bear, Scrooge)
     return True
 
 
@@ -328,8 +328,8 @@ def _total_strength_counters(state: GameState) -> int:
     return board + hands
 
 
-def enabled_battlecry_count(state: GameState, player: str) -> int:
-    """Count distinct Battlecries in hand that have at least one live legal placement.
+def enabled_roar_count(state: GameState, player: str) -> int:
+    """Count distinct Roars in hand that have at least one live legal placement.
 
     Only outcome *shape* is observed (draw count, pending choice, removal, and so on);
     drawn card identities never enter the score. Call only at a top-level decision for
@@ -341,14 +341,14 @@ def enabled_battlecry_count(state: GameState, player: str) -> int:
             or state.player_to_act() != player
             or state.actions_taken_this_turn != 0):
         return 0
-    battlecries = {
+    roars = {
         u.card_id for u in state.hands[player]
-        if state.cards[u.card_id].has_battlecry
+        if state.cards[u.card_id].has_roar
     }
-    if not battlecries:
+    if not roars:
         return 0
     placements = [
-        a for a in legal_placements(state, player, allowed_cards=battlecries)
+        a for a in legal_placements(state, player, allowed_cards=roars)
         if not a.is_hq_capture
     ]
     by_card: dict[str, list[PlaceAction]] = {}
@@ -378,7 +378,7 @@ def enabled_battlecry_count(state: GameState, player: str) -> int:
             continue
         nxt = state.clone()
         rules.apply_action(nxt, action, validate=False)
-        if not _battlecry_fizzled(state, nxt, player, action):
+        if not _roar_fizzled(state, nxt, player, action):
             enabled.add(action.card_id)
     return len(enabled)
 
@@ -395,7 +395,7 @@ def pending_payoff(state: GameState, me: str, opp: str) -> float:
 
 # =============================================================== rung-1 dynamics helpers
 # All public-info, card-agnostic (only base_strength/is_dynamic/keywords/food_cost/
-# has_battlecry ever read from Card), and antisymmetric by construction (mine - theirs).
+# has_roar ever read from Card), and antisymmetric by construction (mine - theirs).
 
 def growth_board_diff(state: GameState, me: str, opp: str) -> float:
     """Net accumulated strength growth: on-board stored counters + global per-card growth

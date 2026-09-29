@@ -25,10 +25,10 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Hawk** | 2 | Bird | 3 | Flight. Battlecry: remove an adjacent enemy of strength 3 or less. |
-| **Taipan** | 2 | Snake | 4 | Battlecry: choose an adjacent enemy. At the start of your next turn, remove it. |
-| **Magpie** | 2 | Bird | 3 | Flight. Battlecry: steal a card from your opponent's hand, then discard a card. |
-| **Black Mamba** | 2 | Snake | 4 | Battlecry: remove an adjacent enemy of strength 5 or less. |
+| **Hawk** | 2 | Bird | 3 | Flight. Roar: remove an adjacent enemy of strength 3 or less. |
+| **Taipan** | 2 | Snake | 4 | Roar: choose an adjacent enemy. At the start of your next turn, remove it. |
+| **Magpie** | 2 | Bird | 3 | Flight. Roar: steal a card from your opponent's hand, then discard a card. |
+| **Black Mamba** | 2 | Snake | 4 | Roar: remove an adjacent enemy of strength 5 or less. |
 
 ### Common
 
@@ -37,8 +37,8 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 | **Python** | 3 | Snake | dynamic | This unit's strength is equal to the number of removed units. |
 | **Rattlesnake** | 3 | Snake | 0 | Whenever you shuffle a card, gain 1 strength (wherever this is). |
 | **Eagle** | 3 | Bird | 5 | Flight. |
-| **Owl** | 3 | Bird | 2 | Flight. Battlecry: look at the top 3 cards; draw 1 and shuffle the rest. |
-| **Viper** | 3 | Snake | 3 | Battlecry: an adjacent enemy gets -3 strength. |
-| **Raven** | 3 | Bird | 2 | Flight. Battlecry: draw 3 cards, then shuffle 2 cards back. |
+| **Owl** | 3 | Bird | 2 | Flight. Roar: look at the top 3 cards; draw 1 and shuffle the rest. |
+| **Viper** | 3 | Snake | 3 | Roar: an adjacent enemy gets -3 strength. |
+| **Raven** | 3 | Bird | 2 | Flight. Roar: draw 3 cards, then shuffle 2 cards back. |
 
 <!-- cards:end -->

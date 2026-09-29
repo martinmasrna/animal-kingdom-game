@@ -72,7 +72,7 @@ def test_muskrat_removes_adjacent_enemy_only_when_fed():
 
 
 def test_fed_muskrat_survives_the_hippo_it_removes():
-    """A fed Muskrat placed next to an enemy Hippo removes it FIRST (battlecry before
+    """A fed Muskrat placed next to an enemy Hippo removes it FIRST (roar before
     reactions, decision 8); the Hippo's queued reactive removal then fizzles because its
     source is gone - Muskrat lives. An UNfed Muskrat (str 2 <= Hippo's max) is still
     removed by the Hippo, which survives."""

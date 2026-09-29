@@ -41,13 +41,13 @@ A predator that must land on prey and eats it.
 
 Carried by: **Tiger** (Cats), **Eon** (Egg), **Polar Bear** and **Borealis** (Ramp).
 
-### Battlecry  *(placeholder name — rename pending, `docs/STATUS.md`)*
-An effect that resolves when the unit is placed. Most "when placed…" effects are Battlecries.
+### Roar
+An effect that resolves when the unit is placed. Most "when placed…" effects are Roars.
 
-### Deathrattle  *(placeholder name — rename pending, `docs/STATUS.md`)*
-An effect that resolves when **a unit leaves the board** — the narrow case. **Print as "Deathrattle: …"** (not "When this is removed").
+### Leaving the board  *(not a keyword)*
+An effect that resolves when **a unit leaves the board** is written out in plain words: "When this is removed, …" (Ember). It becomes a keyword only once at least three cards want it.
 
-**Deathrattle vs. "remove":** a unit leaving the board is one kind of *remove*, but not the only one — a card sent to the **Remove Pile** from hand or deck (e.g. Rat's paid card, Omen's hand-remove) is a **remove** but **not** a Deathrattle. So there are two trigger tiers: a **remove trigger** (any card → Remove Pile, from anywhere) and the narrower **Deathrattle** (a unit leaving the board). See `overview.md` for the Remove Pile zone. A "return … instead" effect (e.g. Opossum) is *not* a remove at all — the card never reaches the Remove Pile.
+**Leaving the board vs. "remove":** a unit leaving the board is one kind of *remove*, but not the only one — a card sent to the **Remove Pile** from hand or deck (e.g. Rat's paid card, Omen's hand-remove) is a **remove** but doesn't leave the board. So there are two trigger tiers: a **remove trigger** (any card → Remove Pile, from anywhere) and the narrower **leaving the board**. See `overview.md` for the Remove Pile zone. A "return … instead" effect (e.g. Opossum) is *not* a remove at all — the card never reaches the Remove Pile.
 
 ---
 

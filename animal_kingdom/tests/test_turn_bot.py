@@ -2,7 +2,7 @@
 
 TurnBot shares the determinized information-set search with RefereeBot but stops at the turn
 boundary instead of rolling out the opponent's reply, so the discriminating behaviours are:
-it sequences a whole two-action turn as one plan (draw -> play, ordered Battlecries, effect-
+it sequences a whole two-action turn as one plan (draw -> play, ordered Roars, effect-
 granted extra placements), it stays honest about hidden information, it refuses to hang its
 HQ, and it models any opponent-owned sub-choice opened during its turn adversarially. The
 tests here cover the acceptance list, plus one
@@ -127,7 +127,7 @@ def test_plans_nurse_then_queen_bee_then_worker_as_one_turn():
 
 
 def test_resolves_mandatory_removal_target_choice():
-    # Jaguar's Battlecry must remove one adjacent enemy; the search resolves the pending pick
+    # Jaguar's Roar must remove one adjacent enemy; the search resolves the pending pick
     # rather than leaving the turn unfinished. It should take the stronger legal target.
     s = make_state(current="A", hands={"A": ["jaguar"]},
                    decks={"A": [], "B": ["pup"] * 4}, config=TWO_ACTION)
@@ -254,8 +254,8 @@ def test_beam_prunes_a_wide_flight_fixture():
 # ------------------------------------------- same-turn puzzles, one per non-Colony family
 
 def test_cats_plays_twin_enabler_before_the_twin():
-    # house_cat's Battlecry plays one more Cat when you control another Cat. Playing it first
-    # (extra-casting caracal) avoids the wasted-Battlecry both cards fizzling the other order.
+    # house_cat's Roar plays one more Cat when you control another Cat. Playing it first
+    # (extra-casting caracal) avoids the wasted-Roar both cards fizzling the other order.
     s = make_state(current="A", hands={"A": ["house_cat", "caracal"]},
                    decks={"A": [], "B": ["mouse"] * 4}, config=TWO_ACTION)
     put(s, "1,1", "lion", "A")     # the "another Cat" house_cat needs
@@ -268,7 +268,7 @@ def test_cats_plays_twin_enabler_before_the_twin():
 
 def test_canine_buffs_before_the_strength_gated_payoff():
     # Coyote only draws at 5+ strength. Raksha (+2 to your other Canines) must land first so
-    # the str-3 Coyote reaches 5 and its Battlecry fires instead of fizzling.
+    # the str-3 Coyote reaches 5 and its Roar fires instead of fizzling.
     s = make_state(current="A", hands={"A": ["raksha", "unnamed_canine"]},
                    decks={"A": ["dog", "dog", "dog"], "B": ["mouse"] * 4}, config=TWO_ACTION)
     bot = small_turn()
@@ -287,7 +287,7 @@ def test_rattlesnake_grows_from_ravens_two_shuffles():
     assert s.card_strength_counters["A"]["rattlesnake"] == 2
 
 
-def test_ramp_pays_food_for_the_big_body_battlecry():
+def test_ramp_pays_food_for_the_big_body_roar():
     # Bulwark costs 15 food and clears adjacent enemies. With food in the bank TurnBot spends
     # it to play the big body; placing it on the connected HQ front next to the enemy wipes it.
     s = make_state(current="A", hands={"A": ["bulwark"]},
@@ -305,7 +305,7 @@ def test_ramp_pays_food_for_the_big_body_battlecry():
 
 
 def test_aggro_swarms_extra_body_before_the_filler():
-    # Jerboa's Battlecry plays another unit; leading with it extra-casts the Cheetah for free
+    # Jerboa's Roar plays another unit; leading with it extra-casts the Cheetah for free
     # instead of fizzling one of the two.
     s = make_state(current="A", hands={"A": ["jerboa", "cheetah"]},
                    decks={"A": [], "B": ["mouse"] * 4}, config=TWO_ACTION)

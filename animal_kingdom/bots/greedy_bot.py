@@ -53,8 +53,8 @@ from .learned_eval import LinearEval
 # from greedy_bot (their bodies now live in features.py - the shared rung-0/rung-1 module -
 # see features.py's module docstring for why).
 from .features import (  # noqa: F401
-    _battlecry_fizzled,
-    enabled_battlecry_count as _enabled_battlecry_count,
+    _roar_fizzled,
+    enabled_roar_count as _enabled_roar_count,
 )
 
 
@@ -75,7 +75,7 @@ class GreedyWeights:
                                       # invariant under a draw), and deck size alone isn't a
                                       # real resource with the current card pool - hand size is
                                       # the actual flexibility/tempo/denial resource.
-    effect_readiness: float = 16.0   # per distinct Battlecry in hand that can currently
+    effect_readiness: float = 16.0   # per distinct Roar in hand that can currently
                                       # produce an observable effect on at least one legal play
     pending_payoff: float = 20.0     # per delayed effect I own on state.scheduled (Egg hatch,
                                       # Bear, ...), imminence-discounted. board_presence can't
@@ -90,10 +90,10 @@ class GreedyWeights:
                                       # currently-safe HQ-front defender next turn). Exact
                                       # hypergeometric over the public unseen multiset, no
                                       # determinization; honest (see `_p_opponent_can_cover`).
-    wasted_battlecry: float = 8.0    # penalty for playing a card whose ability text fired for
-                                      # nothing (e.g. a removal battlecry with no target) - a
+    wasted_roar: float = 8.0    # penalty for playing a card whose ability text fired for
+                                      # nothing (e.g. a removal roar with no target) - a
                                       # bot policy adjustment, not part of evaluate() (see
-                                      # `_battlecry_fizzled`)
+                                      # `_roar_fizzled`)
 
 
 class GreedyBot(Bot):
@@ -141,8 +141,8 @@ class GreedyBot(Bot):
             nxt = state.clone()
             rules.apply_action(nxt, action, validate=False)
             score = self._rollout_value(nxt, me, self.depth - 1)
-            if _battlecry_fizzled(state, nxt, me, action):
-                score -= self.weights.wasted_battlecry
+            if _roar_fizzled(state, nxt, me, action):
+                score -= self.weights.wasted_roar
             # Every candidate is a fallback in case *all* of them hang mate (see below).
             if score > fallback_score:
                 fallback_score, fallback = score, [action]
@@ -298,9 +298,9 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
 
     # --- Immediately enabled effects in hand ---
     # This is deliberately card-agnostic: the engine itself tells us whether a printed
-    # Battlecry would do anything. It values setup states (duplicates, tag thresholds,
+    # Roar would do anything. It values setup states (duplicates, tag thresholds,
     # adjacent targets, eligible follow-up cards) without naming a deck or card.
-    score += w.effect_readiness * _features.enabled_battlecry_count(state, me)
+    score += w.effect_readiness * _features.enabled_roar_count(state, me)
 
     # --- Pending delayed payoffs: net scheduled future effects, imminence-discounted ---
     # A just-placed Egg/Bear contributes ~nothing to board_presence (it's weak now) yet is a

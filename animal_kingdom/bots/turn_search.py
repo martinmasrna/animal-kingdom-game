@@ -14,7 +14,7 @@ the opponent. The two differ only in what they do at the turn boundary:
 `TurnSearcher` owns everything shared: determinization, the information-set grouping that
 keeps the search honest (worlds indistinguishable to `me` must pick the same action, and may
 diverge only after an observable event such as drawing a different card), beam pruning with
-the reserved tactical candidates, the hard next-turn-HQ-loss filter, wasted-battlecry penalty
+the reserved tactical candidates, the hard next-turn-HQ-loss filter, wasted-roar penalty
 accumulation, and the projected-readiness planning eval. Narrow hooks let RefereeBot add
 opponent-reply scoring, staged root selection, diagnostics, and contingent-plan collection;
 the base implementations remain TurnBot's behavior.
@@ -39,8 +39,8 @@ from .determinize import determinize
 from .greedy_bot import (
     GreedyBot,
     GreedyWeights,
-    _battlecry_fizzled,
-    _enabled_battlecry_count,
+    _roar_fizzled,
+    _enabled_roar_count,
     _opponent_lethal_next_turn,
     evaluate,
 )
@@ -60,7 +60,7 @@ _MAX_DEPTH = 40
 
 def _reframed_at_my_turn(state: GameState, me: str, fn):
     """Temporarily reframe `state` to `me`'s next top-level decision, call `fn()`, then
-    restore. Shared by `_planning_eval`'s hand path (`_enabled_battlecry_count`) and learned
+    restore. Shared by `_planning_eval`'s hand path (`_enabled_roar_count`) and learned
     path (re-scoring via `_clamped_eval`) - both only *read* the state (their own internal
     clones absorb any trial placements), so this reframe-and-restore is byte-identical to a
     full clone but one fewer clone per planning eval.
@@ -172,8 +172,8 @@ class TurnSearcher(Bot):
         for world in worlds:
             nxt = world.clone()
             rules.apply_action(nxt, action, validate=False)
-            penalty = (self.weights.wasted_battlecry
-                       if _battlecry_fizzled(world, nxt, me, action) else 0.0)
+            penalty = (self.weights.wasted_roar
+                       if _roar_fizzled(world, nxt, me, action) else 0.0)
             branches.append((nxt, penalty))
         if complete_turn:
             return self._complete_own_turn(branches, me, guard=0)
@@ -248,8 +248,8 @@ class TurnSearcher(Bot):
                     for state, penalty in group:
                         nxt = state.clone()
                         rules.apply_action(nxt, action, validate=False)
-                        extra = (self.weights.wasted_battlecry
-                                 if _battlecry_fizzled(state, nxt, me, action) else 0.0)
+                        extra = (self.weights.wasted_roar
+                                 if _roar_fizzled(state, nxt, me, action) else 0.0)
                         next_group.append((nxt, penalty + extra))
                     candidate_group = self._complete_own_turn(
                         next_group, me, guard=guard + 1)
@@ -296,8 +296,8 @@ class TurnSearcher(Bot):
                 for state, penalty in group:
                     nxt = state.clone()
                     rules.apply_action(nxt, action, validate=False)
-                    extra = (self.weights.wasted_battlecry
-                             if _battlecry_fizzled(state, nxt, me, action) else 0.0)
+                    extra = (self.weights.wasted_roar
+                             if _roar_fizzled(state, nxt, me, action) else 0.0)
                     advanced.append((nxt, penalty + extra))
             else:
                 advanced = []
@@ -449,11 +449,11 @@ class TurnSearcher(Bot):
             # re-evaluating the reframed state at my next top-level decision subsumes the
             # hand path's manual readiness addition below - no separate term to add.
             return _reframed_at_my_turn(state, me, lambda: self._clamped_eval(state, me))
-        # Readiness projection: _enabled_battlecry_count needs the position framed at my next
+        # Readiness projection: _enabled_roar_count needs the position framed at my next
         # top-level decision. It only *reads* the state (its own internal clones absorb the
         # trial placements), so temporarily reframe these four fields and restore them rather
         # than cloning the whole state - byte-identical, one fewer full clone per planning eval.
-        readiness = _reframed_at_my_turn(state, me, lambda: _enabled_battlecry_count(state, me))
+        readiness = _reframed_at_my_turn(state, me, lambda: _enabled_roar_count(state, me))
         return max(
             -_DECISIVE,
             min(_DECISIVE, score + self.weights.effect_readiness * readiness),
@@ -467,7 +467,7 @@ class TurnSearcher(Bot):
 
         Besides the numerical top N, preserve tactically distinct candidates that a one-ply
         score commonly underprices: Draw, HQ capture, an enemy cover, a connected placement,
-        and a placement whose Battlecry is live.
+        and a placement whose Roar is live.
         """
         if not self.beam_width or len(legal) <= self.beam_width:
             return legal
@@ -505,11 +505,11 @@ class TurnSearcher(Bot):
                 and world.top_unit(a.crossroad).owner == opponent
             ]
             live = []
-            if world.cards[card_actions[0].card_id].has_battlecry:
+            if world.cards[card_actions[0].card_id].has_roar:
                 for a in card_actions:
                     nxt = world.clone()
                     rules.apply_action(nxt, a, validate=False)
-                    if not _battlecry_fizzled(world, nxt, me, a):
+                    if not _roar_fizzled(world, nxt, me, a):
                         live.append(a)
             for group in (connected, home_front, covers, live):
                 if group:

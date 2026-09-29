@@ -34,7 +34,7 @@ def test_king_theron_uncapped_removes_on_every_cover_this_turn():
     put(s, "1,1", "king_theron", "A")
     put(s, "2,1", "rattlesnake", "B")   # strength 0: coverable by House Cat (1)
     put(s, "2,2", "mouse", "B")
-    # House Cat's battlecry offers "play another Cat" - use it to cover a second enemy
+    # House Cat's roar offers "play another Cat" - use it to cover a second enemy
     # within the same placement's resolution.
     rules.apply_action(s, PlaceAction("house_cat", ("cr", "2,1")))
     assert s.pending is not None

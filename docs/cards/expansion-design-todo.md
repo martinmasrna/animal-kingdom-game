@@ -40,7 +40,7 @@ The larger pool should force real deckbuilding decisions. New cards should creat
 
 Cats already possess the strongest collection of unconditional bodies. Their expansion should open positional and Landmark builds without adding more generic removal.
 
-- [ ] **Fishing Cat** — Cat · STR 4 · Common `Battlecry: if this is adjacent to a Landmark, draw 1 card.` A build-around cantrip that is below rate without a contested Landmark.
+- [ ] **Fishing Cat** — Cat · STR 4 · Common `Roar: if this is adjacent to a Landmark, draw 1 card.` A build-around cantrip that is below rate without a contested Landmark.
 
 - [ ] **Sand Cat** — Cat · STR 5 · Common `Has +3 strength while no other friendly unit is adjacent to this.` Rewards spreading across regions rather than forming the usual Cat death-ball.
 
@@ -48,7 +48,7 @@ Cats already possess the strongest collection of unconditional bodies. Their exp
 
 - [ ] **Clouded Leopard** — Cat · STR 7 · Rare `Camouflage.` Proposed Camouflage definition: Stealth until this covers an enemy unit. It trades Black Panther's permanent protection for a larger pre-attack body.
 
-- [ ] **Ocelot** — Cat · STR 6 · Rare `Battlecry: if this covers an enemy, return one friendly Cat buried beneath it to your hand.` Opens a stack-recovery build and rewards deliberate friendly stacking. Needs a ruling that effects may name a buried card without making buried cards generally targetable.
+- [ ] **Ocelot** — Cat · STR 6 · Rare `Roar: if this covers an enemy, return one friendly Cat buried beneath it to your hand.` Opens a stack-recovery build and rewards deliberate friendly stacking. Needs a ruling that effects may name a buried card without making buried cards generally targetable.
 
 - [ ] **Sable, the Solitary** — Cat · STR 5 · Legendary candidate `At the end of your turn, if no other friendly unit is adjacent to this, draw 1 card.` A slow isolated-value engine. Test carefully: recurring draw plus Cat mobility could still make this an automatic inclusion.
 
@@ -58,17 +58,17 @@ Build two alternatives to the current draw/shuffle engine: delayed board hatchin
 
 - [ ] **Turtle Egg** — Egg · STR 0 · Common `Fragile. Hatch 1 — play two Turtle Hatchling tokens (STR 4) on this crossroad and an adjacent empty crossroad.` The delayed payoff must create both total strength and board width; one ordinary STR 5 body would be dramatically worse than playing Lion immediately.
 
-- [ ] **Crocodile Egg** — Egg · STR 0 · Rare `Fragile. Hatch 2 — play a Crocodile token (Lizard, STR 8) on this crossroad. Its Battlecry removes an adjacent enemy of strength 4 or less.` A delayed premium body plus interaction. Verify that a covered Egg cannot hatch.
+- [ ] **Crocodile Egg** — Egg · STR 0 · Rare `Fragile. Hatch 2 — play a Crocodile token (Lizard, STR 8) on this crossroad. Its Roar removes an adjacent enemy of strength 4 or less.` A delayed premium body plus interaction. Verify that a covered Egg cannot hatch.
 
-- [ ] **Cuckoo** — Bird · STR 3 · Rare `Flight. Battlecry: you may play an Egg from your hand on an empty crossroad adjacent to an enemy unit.` Seeds an Egg behind enemy lines but cannot cover or capture with the bonus placement.
+- [ ] **Cuckoo** — Bird · STR 3 · Rare `Flight. Roar: you may play an Egg from your hand on an empty crossroad adjacent to an enemy unit.` Seeds an Egg behind enemy lines but cannot cover or capture with the bonus placement.
 
 - [ ] **Malleefowl** — Bird · STR 5 · Rare `At the end of your turn, incubate one adjacent Egg.` “Incubate” would advance one Hatch timer by one owner-turn. This is the cleanest reason to formalize an incubation operation.
 
 - [ ] **Emperor Penguin** — Bird · STR 7 · Common `Adjacent friendly Eggs cannot be chosen by enemy abilities.` Covering remains valid, so the protection does not erase the Egg archetype's main weakness.
 
-- [ ] **King Cobra** — Snake · STR 4 · Rare `Battlecry: envenom an adjacent enemy unit.` Gives the control half active interaction without another immediate removal effect.
+- [ ] **King Cobra** — Snake · STR 4 · Rare `Roar: envenom an adjacent enemy unit.` Gives the control half active interaction without another immediate removal effect.
 
-- [ ] **Vulture / Crow / other Bird (identity TBD)** — Bird · STR 3 · Rare `Flight. Battlecry: draw 1 card; if an enemy unit was removed this turn, draw 2 cards instead.`
+- [ ] **Vulture / Crow / other Bird (identity TBD)** — Bird · STR 3 · Rare `Flight. Roar: draw 1 card; if an enemy unit was removed this turn, draw 2 cards instead.`
 - [ ] Decide whether this remains Vulture, becomes Crow/Rook/another Bird, or whether Vulture is reserved for a separate “eat” or scavenging design.
 
 - [ ] **Nesting Ground** — Landmark · STR 0 · Rare `Fragile. Immovable. At the end of your turn, incubate every adjacent Egg.` It can accelerate multiple Eggs immediately; incubating one Egg starting next turn would not repay a card, a placement action, and a STR 0 board slot.
@@ -77,17 +77,17 @@ Build two alternatives to the current draw/shuffle engine: delayed board hatchin
 
 The current package asks Colony to reach a large board before many cards become live. Expansion cards should create playable early turns and alternative engines, not simply add more “control five units” payoffs.
 
-- [ ] **Leafcutter Ant** — Colony · STR 3 · Common `Battlecry: gain 3 food for each other friendly Colony unit.` Scales earlier than the legendary Queen but remains a poor opening play.
+- [ ] **Leafcutter Ant** — Colony · STR 3 · Common `Roar: gain 3 food for each other friendly Colony unit.` Scales earlier than the legendary Queen but remains a poor opening play.
 
 - [ ] **Honeypot Ant** — Colony · STR 2 · Common `Deathrattle: gain 16 food.` Connects Colony to sacrifice decks and gives opponents a reason not to remove every token automatically.
 
-- [ ] **Weaver Ant** — Colony · STR 5 · Rare `Battlecry: move an adjacent Colony unit to an adjacent empty crossroad.` Repairs swarm geometry without creating an additional unit.
+- [ ] **Weaver Ant** — Colony · STR 5 · Rare `Roar: move an adjacent Colony unit to an adjacent empty crossroad.` Repairs swarm geometry without creating an additional unit.
 
 - [ ] **Rhinoceros Beetle** — Insect · STR 2 · Common `Has +1 strength for each other friendly Colony or Insect unit.` Seeds a broader bug deck without making every insect a Colony caste.
 
-- [ ] **Aphid** — Insect · STR 3 · Common `Battlecry: gain 4 food. Whenever you play another Colony or Insect unit adjacent to this, gain 2 food.` A fragile mixed-tag engine; once-per-turn may be necessary if placement chains become excessive.
+- [ ] **Aphid** — Insect · STR 3 · Common `Roar: gain 4 food. Whenever you play another Colony or Insect unit adjacent to this, gain 2 food.` A fragile mixed-tag engine; once-per-turn may be necessary if placement chains become excessive.
 
-- [ ] **Termite Mound** — Landmark · STR 0 · Common `Fragile. Immovable. Battlecry: draw a random Colony unit from your deck. Adjacent Colony units have +2 strength.` A local formation payoff that does not count toward Colony unit thresholds.
+- [ ] **Termite Mound** — Landmark · STR 0 · Common `Fragile. Immovable. Roar: draw a random Colony unit from your deck. Adjacent Colony units have +2 strength.` A local formation payoff that does not count toward Colony unit thresholds.
 
 - [ ] **Royal Jelly** — Landmark · STR 0 · Rare `Fragile. At the start of your next turn, remove this and play a random Queen from your deck on this crossroad.` The delay exchanges Royal Jelly for a filtered free placement, not merely one replacement card. It forces a deckbuilder to decide how many Queens are worth including.
 
@@ -101,13 +101,13 @@ Ramp already has enough giant payoff bodies. Add competing engines, medium-cost 
 
 - [ ] **Gaur** — Megafauna · STR 9 · Rare No effect. A clean large body that tests whether raw strength can be a legitimate rare choice.
 
-- [ ] **Honeyguide** — Bird · STR 3 · Common `Flight. Battlecry: gain 6 food; if you control a Bear or Colony unit, gain 4 more.` A bridge card between Ramp, Colony, and future mixed-food decks.
+- [ ] **Honeyguide** — Bird · STR 3 · Common `Flight. Roar: gain 6 food; if you control a Bear or Colony unit, gain 4 more.` A bridge card between Ramp, Colony, and future mixed-food decks.
 
 - [ ] **Moose** — Megafauna · STR 6 · Common `Has +2 strength while adjacent to a Landmark.` Turns vulnerable infrastructure into a positional reason to contest the board.
 
 - [ ] **Baobab Tree** — Landmark · STR 0 · Rare `Fragile. Immovable. At the end of each of your turns, gain 8 food.` It pays once on the placement turn and remains interactable by covering. Test against Fig Tree's one-shot 20-food benchmark.
 
-- [ ] **Cave** — Landmark · STR 0 · Rare `Fragile. Immovable. Battlecry: draw a random Bear from your deck. Your Bears cost 5 less food to play.` Specify that multiple Caves do not stack. The filtered draw replaces the spent Cave card; the ongoing discount must justify spending a placement action on no body.
+- [ ] **Cave** — Landmark · STR 0 · Rare `Fragile. Immovable. Roar: draw a random Bear from your deck. Your Bears cost 5 less food to play.` Specify that multiple Caves do not stack. The filtered draw replaces the spent Cave card; the ongoing discount must justify spending a placement action on no body.
 
 - [ ] **Salt Lick** — Landmark · STR 0 · Common `Fragile. At the start of your next turn, give all friendly units +2 strength, then remove this.` A temporary setup cost for a permanent wide-board payoff; also attractive to Colony.
 
@@ -115,17 +115,17 @@ Ramp already has enough giant payoff bodies. Add competing engines, medium-cost 
 
 Expand toward a fair sacrifice-value deck as well as the all-in OTK. Do not add more 40-food effects until Gazelle is understood.
 
-- [ ] **Dung Beetle** — Insect · STR 3 · Common `Battlecry: gain 4 food. Deathrattle: gain 8 food.` Splits its value across entry and sacrifice.
+- [ ] **Dung Beetle** — Insect · STR 3 · Common `Roar: gain 4 food. Deathrattle: gain 8 food.` Splits its value across entry and sacrifice.
 
-- [ ] **Mayfly** — Insect · STR 3 · Common `Battlecry: draw 1 card. Deathrattle: draw 1 card. At the end of your next turn, remove this.` Self-expiring fodder that guarantees eventual value without requiring an outlet.
+- [ ] **Mayfly** — Insect · STR 3 · Common `Roar: draw 1 card. Deathrattle: draw 1 card. At the end of your next turn, remove this.` Self-expiring fodder that guarantees eventual value without requiring an outlet.
 
-- [ ] **Pelican** — Bird · STR 4 · Rare `Flight. Battlecry: remove another friendly unit; draw 2 cards.` A mobile sacrifice outlet. “Another” prevents it from paying with itself.
+- [ ] **Pelican** — Bird · STR 4 · Rare `Flight. Roar: remove another friendly unit; draw 2 cards.` A mobile sacrifice outlet. “Another” prevents it from paying with itself.
 
-- [ ] **Carrion Beetle** — Insect · STR 4 · Common `Battlecry: gain 4 food. The first time each turn another friendly unit is removed, gain 4 food.` A fair, capped engine that can appear in Colony token lists.
+- [ ] **Carrion Beetle** — Insect · STR 4 · Common `Roar: gain 4 food. The first time each turn another friendly unit is removed, gain 4 food.` A fair, capped engine that can appear in Colony token lists.
 
 - [ ] **Tarantula** — Arachnid · STR 4 · Rare `Deathrattle: play up to two Spiderling tokens (Arachnid, STR 2) on adjacent empty crossroads.` Converts one sacrifice into width rather than direct food.
 
-- [ ] **Carcass** — Landmark · STR 0 · Common `Fragile. Battlecry: gain 8 food. The first time each turn a unit adjacent to this is removed, gain 4 food.` A contested scavenging site usable by either sacrifice or control shells.
+- [ ] **Carcass** — Landmark · STR 0 · Common `Fragile. Roar: gain 8 food. The first time each turn a unit adjacent to this is removed, gain 4 food.` A contested scavenging site usable by either sacrifice or control shells.
 
 - [ ] **Vulture** — Bird · STR 4 · Rare, currently shelved `Flight. Whenever a card is removed, gain 5 food.` Keep available for the larger pool, but test a once-per-turn cap before release.
 
@@ -133,17 +133,17 @@ Expand toward a fair sacrifice-value deck as well as the all-in OTK. Do not add 
 
 Aggro's extra cards should split into Rodent chaining, aerial pressure, and empty-crossroad infiltration. Avoid adding more unconditional removal.
 
-- [ ] **Prairie Dog** — Rodent · STR 3 · Common `Battlecry: play one more Rodent from your hand.` A narrower Jerboa that enables a dedicated Rodent build.
+- [ ] **Prairie Dog** — Rodent · STR 3 · Common `Roar: play one more Rodent from your hand.` A narrower Jerboa that enables a dedicated Rodent build.
 
 - [ ] **Gecko** — Lizard · STR 7 · Common `May be placed on an empty crossroad adjacent to an enemy unit, ignoring connection.` Reach without covering, removal, or direct HQ capture.
 
 - [ ] **Mole** — Rodent · STR 6 · Common `Burrow.` Proposed Burrow definition: ignore connection only when placing onto an empty crossroad.
 
-- [ ] **Starling** — Bird · STR 2 · Common `Flight. Battlecry: if you control another unit with Flight, play one more unit with Flight from your hand.` High burst-risk. Run an explicit two-card/three-card HQ-capture search before approving.
+- [ ] **Starling** — Bird · STR 2 · Common `Flight. Roar: if you control another unit with Flight, play one more unit with Flight from your hand.` High burst-risk. Run an explicit two-card/three-card HQ-capture search before approving.
 
-- [ ] **Bombardier Beetle** — Insect · STR 5 · Rare `Battlecry: return an adjacent enemy of strength 4 or less to its owner's hand.` A smaller, capped alternative to Skunk without the one-turn lock.
+- [ ] **Bombardier Beetle** — Insect · STR 5 · Rare `Roar: return an adjacent enemy of strength 4 or less to its owner's hand.` A smaller, capped alternative to Skunk without the one-turn lock.
 
-- [ ] **Springhare** — Rodent · STR 5 · Rare `Burrow. Battlecry: if played adjacent to the opponent's headquarters, draw 1 card.` Combines Cheetah's reward with empty-only infiltration and a much smaller body.
+- [ ] **Springhare** — Rodent · STR 5 · Rare `Burrow. Roar: if played adjacent to the opponent's headquarters, draw 1 card.` Combines Cheetah's reward with empty-only infiltration and a much smaller body.
 
 - [ ] **New cover-retaliation legendary** — STR 4 · Legendary `Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand.` Already locked in the balance to-do; species and name remain open.
 
@@ -151,35 +151,35 @@ Aggro's extra cards should split into Rodent chaining, aerial pressure, and empt
 
 Use distinct wild canid species. Domestic dog breeds are one species and should not silently evade the one-species rule.
 
-- [ ] **Bat-eared Fox** — Canine · STR 4 · Common `Battlecry: look at the top 3 cards of your deck; draw a Canine and put the rest on the bottom.` “Draw a Canine” means choose among the revealed cards, not search the full deck.
+- [ ] **Bat-eared Fox** — Canine · STR 4 · Common `Roar: look at the top 3 cards of your deck; draw a Canine and put the rest on the bottom.` “Draw a Canine” means choose among the revealed cards, not search the full deck.
 
 - [ ] **Maned Wolf** — Canine · STR 6 · Common `May be placed on an empty crossroad adjacent to any Canine you control, ignoring connection.` A pack-positioning tool rather than another buff.
 
-- [ ] **Raccoon Dog** — Canine · STR 3 · Common `Battlecry: draw 1 card. Deathrattle: shuffle this into your deck.` The immediate draw repays the weak body; playing dead becomes slow recursion and also crosses into Egg Control's shuffle package.
+- [ ] **Raccoon Dog** — Canine · STR 3 · Common `Roar: draw 1 card. Deathrattle: shuffle this into your deck.` The immediate draw repays the weak body; playing dead becomes slow recursion and also crosses into Egg Control's shuffle package.
 
 - [ ] **Fennec Fox** — Canine · STR 5 · Rare `The first time each turn this gains strength, you may move it to an adjacent empty crossroad.` Turns buffs into board reach without granting an extra placement.
 
-- [ ] **Ethiopian Wolf** — Canine · STR 5 · Rare `Battlecry: if this has a strength counter while in your hand, draw 1 card.` Makes hand buffs a deckbuilding commitment rather than incidental upside.
+- [ ] **Ethiopian Wolf** — Canine · STR 5 · Rare `Roar: if this has a strength counter while in your hand, draw 1 card.` Makes hand buffs a deckbuilding commitment rather than incidental upside.
 
-- [ ] **Culpeo** — Canine · STR 5 · Rare `Battlecry: give one Canine in your hand +2 strength.` A focused alternative to Red Wolf's wide +1.
+- [ ] **Culpeo** — Canine · STR 5 · Rare `Roar: give one Canine in your hand +2 strength.` A focused alternative to Red Wolf's wide +1.
 
 - [ ] **Hachiko, the Faithful** — Canine · STR 5 · Legendary candidate `The first time each turn another friendly Canine would be removed, return it to your hand instead.` A defensive pack build. Check whether using a real famous individual is desirable before flavor-lock, and audit replacement effects against Deathrattles.
 
 #### Dog/Canine copy-scaling candidate
 
-- [ ] **Dog/Canine identity TBD** — Canine · STR 3 · Common `Battlecry: give +3 strength to every other copy, wherever they are.`
+- [ ] **Dog/Canine identity TBD** — Canine · STR 3 · Common `Roar: give +3 strength to every other copy, wherever they are.`
 - [ ] Decide whether this reworks the existing Dog or belongs to another Canine.
 - [ ] Define “wherever,” including whether it covers deck, hand, battlefield, and/or Remove Pile.
 - [ ] Account for its dependence on multiple copies when designing the test deck, as with Lemming.
 
 ### 1.8 Movement and mimicry candidates
 
-- [ ] **Kangaroo** — Marsupial · STR and rarity TBD `Battlecry: Move 1.` Proposed scope: move itself or an ally. Exact targeting and destination rules remain open.
+- [ ] **Kangaroo** — Marsupial · STR and rarity TBD `Roar: Move 1.` Proposed scope: move itself or an ally. Exact targeting and destination rules remain open.
 
 - [ ] **Parrot** — Bird · STR TBD · rarity TBD Original concept: `Become a copy of the last Common unit your opponent played.`
 - [ ] **Legendary Parrot** — named Bird · STR TBD · Legendary Original concept: `Become a copy of the last unit your opponent played.`
-- [ ] Also compare the full-copy proposal with a narrower mimic alternative: `Flight. Battlecry: repeat the Battlecry of the last Common unit your opponent played.` Possible animal fits include Parrot/Lyrebird for repetition and Mimic Octopus/cuttlefish for physical copying; no identity is selected.
-- [ ] Do not assign power numbers until copy timing is settled: copying before placement may fire the copied Battlecry, while becoming a copy after its own Battlecry normally would not.
+- [ ] Also compare the full-copy proposal with a narrower mimic alternative: `Flight. Roar: repeat the Roar of the last Common unit your opponent played.` Possible animal fits include Parrot/Lyrebird for repetition and Mimic Octopus/cuttlefish for physical copying; no identity is selected.
+- [ ] Do not assign power numbers until copy timing is settled: copying before placement may fire the copied Roar, while becoming a copy after its own Roar normally would not.
 
 ---
 
@@ -194,12 +194,12 @@ These are broader card-pool directions, not eighth-through-eleventh premade deck
 Anchor candidates:
 
 - [ ] **Dinosaur Egg** — Egg · STR 0 · Common `Fragile. Hatch 2 — play a random non-Legendary Dinosaur from your deck on this crossroad.`
-- [ ] **Oviraptor** — Dinosaur · STR 3 · Common `Battlecry: draw a random Egg from your deck.`
-- [ ] **Velociraptor** — Dinosaur · STR 5 · Common `Battlecry: if an Egg hatched this turn, draw 1 card.`
+- [ ] **Oviraptor** — Dinosaur · STR 3 · Common `Roar: draw a random Egg from your deck.`
+- [ ] **Velociraptor** — Dinosaur · STR 5 · Common `Roar: if an Egg hatched this turn, draw 1 card.`
 - [ ] **Protoceratops** — Dinosaur · STR 7 · Common No effect.
 - [ ] **Triceratops** — Dinosaur · STR 7 · Rare `When an enemy covers an adjacent Egg, remove that enemy if its strength is 4 or less.`
 - [ ] **Ankylosaurus** — Dinosaur · STR 8 · Rare `Cannot be returned to a hand.`
-- [ ] **Archaeopteryx** — Bird/Dinosaur · STR 4 · Rare `Flight. Battlecry: incubate an adjacent Egg.`
+- [ ] **Archaeopteryx** — Bird/Dinosaur · STR 4 · Rare `Flight. Roar: incubate an adjacent Egg.`
 - [ ] **Sue** — Dinosaur · STR 10 · Legendary candidate `Apex Predator. You may play this only if one of your Eggs has hatched this game.` A real named individual, but verify whether museum-specimen names fit the game's legendary tone.
 - [ ] **Nesting Ground** — Landmark support from Egg Control.
 
@@ -211,13 +211,13 @@ Primary risks: snowballing free bodies, timers becoming bookkeeping-heavy, and a
 
 Anchor candidates:
 
-- [ ] **Coral Reef** — Landmark · STR 0 · Rare `Fragile. Immovable. Battlecry: draw a random Fish from your deck. Your Fish have +2 strength.`
-- [ ] **Kelp Forest** — Landmark · STR 0 · Common `Fragile. Battlecry: draw a random Fish from your deck, then you may move a friendly Fish to an empty crossroad adjacent to this. Adjacent Fish have Stealth.`
-- [ ] **Salmon** — Fish · STR 5 · Common `Battlecry: move another friendly Fish to an empty crossroad connected to your headquarters.`
+- [ ] **Coral Reef** — Landmark · STR 0 · Rare `Fragile. Immovable. Roar: draw a random Fish from your deck. Your Fish have +2 strength.`
+- [ ] **Kelp Forest** — Landmark · STR 0 · Common `Fragile. Roar: draw a random Fish from your deck, then you may move a friendly Fish to an empty crossroad adjacent to this. Adjacent Fish have Stealth.`
+- [ ] **Salmon** — Fish · STR 5 · Common `Roar: move another friendly Fish to an empty crossroad connected to your headquarters.`
 - [ ] **Clownfish** — Fish · STR 6 · Common `Has Stealth while adjacent to a friendly Landmark.`
 - [ ] **Remora** — Fish · STR 2 · Common `Has +6 strength while adjacent to a friendly unit with strength 6 or more.`
 - [ ] **Great White Shark** — Fish · STR 5 · Rare `Has +2 strength for each adjacent enemy unit.`
-- [ ] **Electric Eel** — Fish · STR 5 · Rare `Battlecry: an adjacent enemy has 0 strength until the end of your next turn.`
+- [ ] **Electric Eel** — Fish · STR 5 · Rare `Roar: an adjacent enemy has 0 strength until the end of your next turn.`
 - [ ] **Axolotl** — Amphibian · STR 5 · Rare `The first time this would be removed, return it to this crossroad with base strength 1 instead.`
 - [ ] **Frogspawn** — Egg/Amphibian · STR 0 · Common `Fragile. Hatch 1 — play two Tadpole tokens (Amphibian, STR 4) on adjacent empty crossroads.`
 
@@ -229,32 +229,32 @@ Primary risks: map-independent “aquatic” flavor, too many live strength calc
 
 Anchor candidates:
 
-- [ ] **Capuchin** — Primate · STR 5 · Common `Battlecry: if adjacent to a Landmark, draw 1 card.`
-- [ ] **Lemur** — Primate · STR 2 · Common `Battlecry: if you control another Primate, play another Primate from your hand.`
-- [ ] **Howler Monkey** — Primate · STR 3 · Common `Battlecry: give all other Primates in your hand and battlefield +1 strength.`
-- [ ] **Bonobo** — Primate · STR 5 · Common `Battlecry: move an adjacent friendly unit to an adjacent empty crossroad.`
-- [ ] **Chimpanzee** — Primate · STR 4 · Rare `Battlecry: give an adjacent friendly unit +3 strength.`
+- [ ] **Capuchin** — Primate · STR 5 · Common `Roar: if adjacent to a Landmark, draw 1 card.`
+- [ ] **Lemur** — Primate · STR 2 · Common `Roar: if you control another Primate, play another Primate from your hand.`
+- [ ] **Howler Monkey** — Primate · STR 3 · Common `Roar: give all other Primates in your hand and battlefield +1 strength.`
+- [ ] **Bonobo** — Primate · STR 5 · Common `Roar: move an adjacent friendly unit to an adjacent empty crossroad.`
+- [ ] **Chimpanzee** — Primate · STR 4 · Rare `Roar: give an adjacent friendly unit +3 strength.`
 - [ ] **Mandrill** — Primate · STR 5 · Rare `Your other Primates have +2 strength.`
 - [ ] **Gorilla** — Primate · STR 6 · Rare `Adjacent enemy units have −2 strength.`
-- [ ] **Orangutan** — Primate · STR 6 · Rare `Battlecry: return a Landmark from the Remove Pile to your hand.`
-- [ ] **Kanzi** — Primate · STR 4 · Legendary candidate `Battlecry: repeat the Battlecry of another adjacent Primate.` Copying effects is dangerous even when family-restricted; enumerate every Primate Battlecry before approval.
+- [ ] **Orangutan** — Primate · STR 6 · Rare `Roar: return a Landmark from the Remove Pile to your hand.`
+- [ ] **Kanzi** — Primate · STR 4 · Legendary candidate `Roar: repeat the Roar of another adjacent Primate.` Copying effects is dangerous even when family-restricted; enumerate every Primate Roar before approval.
 - [ ] **Tool Cache** — Landmark · STR 0 · Common `Fragile. When you play a Primate adjacent to this, remove this and draw 3 cards.`
 
-Primary risks: copied Battlecries, permanent-buff overlap with Canines, and Landmarks becoming solitaire engines rather than contested positions.
+Primary risks: copied Roars, permanent-buff overlap with Canines, and Landmarks becoming solitaire engines rather than contested positions.
 
 ### 2.4 Venom Control — delayed answers with visible counterplay
 
-**Identity:** mark a visible unit for delayed removal. The opponent gets one turn to cover it, move it, return it, or otherwise break the condition. This creates control decisions without another family of immediate removal Battlecries.
+**Identity:** mark a visible unit for delayed removal. The opponent gets one turn to cover it, move it, return it, or otherwise break the condition. This creates control decisions without another family of immediate removal Roars.
 
 Anchor candidates:
 
-- [ ] **Cobra** — Snake · STR 3 · Rare `Battlecry: envenom an adjacent enemy.`
-- [ ] **Komodo Dragon** — Lizard · STR 5 · Rare `Battlecry: envenom an adjacent enemy of strength 5 or less.`
+- [ ] **Cobra** — Snake · STR 3 · Rare `Roar: envenom an adjacent enemy.`
+- [ ] **Komodo Dragon** — Lizard · STR 5 · Rare `Roar: envenom an adjacent enemy of strength 5 or less.`
 - [ ] **Scorpion** — Arachnid · STR 3 · Common `The first enemy unit that covers this becomes envenomed.`
 - [ ] **Poison Dart Frog** — Amphibian · STR 4 · Common `Deathrattle: envenom an adjacent enemy.`
-- [ ] **Blue-ringed Octopus** — Cephalopod · STR 3 · Rare `Stealth. Battlecry: envenom an adjacent enemy of strength 5 or less.`
-- [ ] **Mongoose** — STR 5 · Common `Battlecry: clear Venom from an adjacent friendly unit; otherwise remove an adjacent enemy Snake of any strength.`
-- [ ] **Antivenom Grove** — Landmark · STR 0 · Common `Fragile. Battlecry: clear Venom from all friendly units and draw 2 cards. Adjacent friendly units cannot become envenomed.`
+- [ ] **Blue-ringed Octopus** — Cephalopod · STR 3 · Rare `Stealth. Roar: envenom an adjacent enemy of strength 5 or less.`
+- [ ] **Mongoose** — STR 5 · Common `Roar: clear Venom from an adjacent friendly unit; otherwise remove an adjacent enemy Snake of any strength.`
+- [ ] **Antivenom Grove** — Landmark · STR 0 · Common `Fragile. Roar: clear Venom from all friendly units and draw 2 cards. Adjacent friendly units cannot become envenomed.`
 
 Primary risks: delayed-effect memory, unclear behavior when the marked card becomes buried, and Venom becoming functionally identical to immediate removal against bots.
 
@@ -268,7 +268,7 @@ Anchor candidates:
 - [ ] **Hare** — Rabbit · STR 6 · Common `Burrow.`
 - [ ] **Prairie Dog** and **Mole** — cross over from the Aggro module.
 - [ ] **Wombat** — Marsupial · STR 8 · Rare `Burrow. Cannot cover enemy units.`
-- [ ] **Pika** — Rabbit · STR 5 · Common `Battlecry: if played by Burrow, gain 8 food.`
+- [ ] **Pika** — Rabbit · STR 5 · Common `Roar: if played by Burrow, gain 8 food.`
 - [ ] **Warren** — Landmark · STR 0 · Rare `Fragile. At the end of your turn, play a Rabbit token (Rabbit, STR 3) on an adjacent empty crossroad.` This must be optional when no empty destination exists and needs a runaway-width test.
 - [ ] **Burrow Owl** — Bird · STR 4 · Rare `Flight. Your adjacent units with Burrow have +2 strength.`
 
@@ -303,5 +303,5 @@ Eggs can support multiple archetypes if their outcomes differ: cards, units, tok
 
 - [ ] First prototype wave: Burrow, Secretarybird replacement, one new Egg that hatches a body, one incubation card, Baobab Tree, Termite Mound, Dung Beetle, and one movement card.
 - [ ] Second prototype wave: Camouflage, Venom package, Fish/Landmark formation package.
-- [ ] Third prototype wave: tokens, Dinosaur Hatch, Primate Battlecry copying.
+- [ ] Third prototype wave: tokens, Dinosaur Hatch, Primate Roar copying.
 - [ ] Before any wave becomes canonical, build at least two competing 30-card lists using the enlarged pool. A new card has succeeded only if plausible lists sometimes omit it.

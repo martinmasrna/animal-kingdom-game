@@ -84,9 +84,9 @@ Proposed operation:
 - [ ] An Egg played during its owner's turn does not consume a timer step that same turn; its first natural step is the start of the owner's next turn.
 - [ ] A covered Egg remains on the battlefield but is not visible. It cannot hatch and cannot be incubated; decide whether its timer pauses or the Hatch effect permanently expires. Recommended: **pause while buried**, resume if revealed.
 - [ ] If a Fragile Egg is covered, it is removed and its Hatch effect does not resolve.
-- [ ] Incubation may cause an immediate hatch during the end step or a Battlecry. Check victory and region control after the token/unit enters.
+- [ ] Incubation may cause an immediate hatch during the end step or a Roar. Check victory and region control after the token/unit enters.
 - [ ] After the Egg is removed, play the Hatch result using normal placement rules on the Egg's former crossroad. A friendly occupant revealed beneath it may be covered normally; an enemy occupant requires sufficient strength. If the placement is illegal, the Hatch result fizzles.
-- [ ] A card hatched from the deck resolves its Battlecry and must satisfy printed play conditions and food costs. Hatching supplies the placement action, not permission to ignore the card's other requirements.
+- [ ] A card hatched from the deck resolves its Roar and must satisfy printed play conditions and food costs. Hatching supplies the placement action, not permission to ignore the card's other requirements.
 - [ ] Existing Bird Egg and Snake Egg may remain written delayed effects; only convert them to Hatch if the shared wording genuinely improves clarity.
 
 ### 1.5 Move
@@ -95,7 +95,7 @@ Initial wording proposal:
 
 > **Move N** — choose the unit specified by the card and relocate it along a path of up to N graph edges without treating it as played.
 
-- [ ] Decide whether movement triggers Battlecry, “when played,” covering, Fragile, and on-covered effects.
+- [ ] Decide whether movement triggers Roar, “when played,” covering, Fragile, and on-covered effects.
 - [ ] Decide whether the moved unit and/or destination must be connected to its controller's HQ. Concern noted: requiring connection may remove much of the mechanic's positional purpose.
 - [ ] Define when connection, regions, and victory are recalculated after movement.
 - [ ] Decide whether movement may enter or capture either HQ.
@@ -114,18 +114,18 @@ Initial wording proposal:
 Two distinct mechanics are under consideration:
 
 1. **Full copy:** become a copy of the last eligible unit the opponent played.
-2. **Mimic:** repeat only that unit's Battlecry.
+2. **Mimic:** repeat only that unit's Roar.
 
 - [ ] Decide how “last unit played” and “last Common unit played” are tracked, including whether the information is public and whether a later non-Common clears the Common reference.
 - [ ] Decide copy timing before setting card stats:
-  - `As you play this, copy...` copies before placement and may resolve the copied Battlecry.
-  - `Battlecry: become a copy...` transforms after placement; the newly copied Battlecry does not retroactively resolve.
+  - `As you play this, copy...` copies before placement and may resolve the copied Roar.
+  - `Roar: become a copy...` transforms after placement; the newly copied Roar does not retroactively resolve.
 - [ ] Decide which properties a full copy inherits: strength, types/tags, keywords, rules text, counters, modifiers, status markers, name, rarity, and once-per-turn usage.
 - [ ] Define how copied dynamic-strength formulas read controller and game state.
 - [ ] Define the fallback when no eligible opponent unit has been played.
 - [ ] Define copy-of-copy behavior and prevent unintended recursion.
-- [ ] Define whether repeating a Battlecry counts as playing or copying any part of the original unit.
-- [ ] Enumerate dangerous Battlecries before approving an unrestricted legendary mimic: extra placements, sibling fetches, Pestis, Sirocco, Carmilla, Bulwark, and future action modifiers.
+- [ ] Define whether repeating a Roar counts as playing or copying any part of the original unit.
+- [ ] Enumerate dangerous Roars before approving an unrestricted legendary mimic: extra placements, sibling fetches, Pestis, Sirocco, Carmilla, Bulwark, and future action modifiers.
 - [ ] Compare Parrot/Lyrebird, Mimic Octopus/cuttlefish, and other animals before assigning the mechanic's final identity.
 
 ### 1.7 Tokens
@@ -166,7 +166,7 @@ Proposed keyword action:
   - remove a specific buried card.
 - [ ] Buried occupants remain generally untargetable. Every stack card must state an explicit exception rather than making “buried” a normal target class.
 - [ ] Mixed-owner stacks need deterministic control updates after every intermediate reorder.
-- [ ] Reordering is not placement: it does not trigger Battlecry, covering, Fragile, or on-covered effects unless a future card explicitly says to replay an occupant.
+- [ ] Reordering is not placement: it does not trigger Roar, covering, Fragile, or on-covered effects unless a future card explicitly says to replay an occupant.
 - [ ] Ocelot's proposed recovery of a friendly Cat buried under the enemy it just covered is the narrow first test case.
 
 ---
@@ -198,8 +198,8 @@ Initial note: players receive **2 actions per turn by default**. It remains open
 - [ ] Decide when victory and region control are checked within a multi-action turn.
 - [ ] Define how temporary action loss interacts with exhaustion.
 - [ ] Define order for multiple “next turn” modifiers before designing cards.
-- [ ] Candidate positive unit: `Battlecry: you have +1 AP next turn.`
-- [ ] Candidate denial unit: `Battlecry: your opponent has −1 AP next turn.`
+- [ ] Candidate positive unit: `Roar: you have +1 AP next turn.`
+- [ ] Candidate denial unit: `Roar: your opponent has −1 AP next turn.`
 - [ ] Balance both only after choosing Model A or B; their values differ radically.
 
 ---
@@ -223,7 +223,7 @@ Cards must remain fully understandable without the ability word.
 - [ ] **Lure/taunt:** forcing legal cover choices changes the action-selection rules globally. Do not introduce it for one Anglerfish.
 - [ ] **Parasite/attach:** linked cards, shared fate, hidden stack position, and recurring upkeep create a subsystem. Revisit only if a full parasite module is selected.
 - [ ] **Control theft:** taking ownership of a covered card complicates open decklists, Remove Pile ownership, and return-to-hand effects.
-- [ ] **Copy a Battlecry:** enumerate every legal source and loop before approving Kanzi or any similar design. Copied effects should not count as playing the source card.
+- [ ] **Copy a Roar:** enumerate every legal source and loop before approving Kanzi or any similar design. Copied effects should not count as playing the source card.
 - [ ] **Open deck tutors:** continue using random filtered draws or top-card selection. Full-deck choice compresses variance and makes future combo cards dangerous.
 - [ ] **Permanent action denial:** effects that stop drawing, placing, or all covering for a turn can create non-games in a one-action system. Prefer one-unit restrictions with clear answers.
 - [ ] **Connection-granting auras:** these can turn an innocent extra placement into an immediate HQ capture. Burrow's empty-only self-placement is the safer reach tool.
@@ -263,7 +263,7 @@ Candidate tags introduced by the expansion slate:
 
 ## 7. Trigger-name review
 
-Battlecry and Deathrattle remain placeholder terms. Candidate pair for a later language test:
+Roar and Deathrattle remain placeholder terms. Candidate pair for a later language test:
 
 - [ ] **Arrival:** an effect when the card is placed.
 - [ ] **Last Act:** an effect when a unit leaves the battlefield through removal.

@@ -11,8 +11,8 @@ import pytest
 from animal_kingdom.bots.greedy_bot import (
     GreedyBot,
     GreedyWeights,
-    _battlecry_fizzled,
-    _enabled_battlecry_count,
+    _roar_fizzled,
+    _enabled_roar_count,
     evaluate,
 )
 from animal_kingdom.decks import load_premade_deck
@@ -252,7 +252,7 @@ def test_lookahead_is_deterministic():
 def test_pending_payoff_surfaces_grizzly_delayed_removal_at_1_ply():
     # A strength-7 blocker (stronger than Grizzly Bear's str-6 body and my other cards) can't be
     # covered directly by anything I hold - the only way to clear it is Grizzly Bear's "in 2
-    # turns, remove a random adjacent enemy" battlecry. The blind eval (pending_payoff=0)
+    # turns, remove a random adjacent enemy" roar. The blind eval (pending_payoff=0)
     # treats Grizzly as a plain vanilla body and needed deep own-line lookahead to play the
     # position forward until the removal fired; pending_payoff now credits the scheduled
     # removal directly, so the default 1-ply GreedyBot finds it without any lookahead. (That
@@ -269,18 +269,18 @@ def test_pending_payoff_surfaces_grizzly_delayed_removal_at_1_ply():
     assert GreedyBot(seed=0).choose(s.view_for("A"), legal, s) == grizzly  # the fix finds it
 
 
-# --------------------------------------------------------- wasted-battlecry detection
+# --------------------------------------------------------- wasted-roar detection
 
-def test_battlecry_fizzles_with_no_target():
+def test_roar_fizzles_with_no_target():
     # Jaguar's "remove an adjacent enemy of strength 4 or less" has nothing to hit.
     s = make_state(hands={"A": ["jaguar", "mouse"]})
     action = PlaceAction("jaguar", ("cr", "1,2"))
     nxt = s.clone()
     rules.apply_action(nxt, action)
-    assert _battlecry_fizzled(s, nxt, "A", action)
+    assert _roar_fizzled(s, nxt, "A", action)
 
 
-def test_battlecry_with_a_pending_choice_is_not_fizzled():
+def test_roar_with_a_pending_choice_is_not_fizzled():
     # Rat with two valid adjacent targets leaves an unresolved pending choice (which enemy) -
     # that's a live effect mid-resolution, not a fizzle, even though nothing has happened yet.
     s = make_state(hands={"A": ["rat", "mouse"]})
@@ -290,24 +290,24 @@ def test_battlecry_with_a_pending_choice_is_not_fizzled():
     nxt = s.clone()
     rules.apply_action(nxt, action)
     assert nxt.pending is not None
-    assert not _battlecry_fizzled(s, nxt, "A", action)
+    assert not _roar_fizzled(s, nxt, "A", action)
 
 
-def test_passive_rules_text_is_not_a_fizzled_battlecry():
+def test_passive_rules_text_is_not_a_fizzled_roar():
     s = make_state(hands={"A": ["guard_hornet"]})
     action = PlaceAction("guard_hornet", ("cr", "1,2"))
     nxt = s.clone()
     rules.apply_action(nxt, action)
-    assert not _battlecry_fizzled(s, nxt, "A", action)
+    assert not _roar_fizzled(s, nxt, "A", action)
 
 
-def test_scheduled_battlecry_is_not_fizzled():
+def test_scheduled_roar_is_not_fizzled():
     s = make_state(hands={"A": ["grizzly_bear"]})
     action = PlaceAction("grizzly_bear", ("cr", "1,2"))
     nxt = s.clone()
     rules.apply_action(nxt, action)
     assert nxt.scheduled
-    assert not _battlecry_fizzled(s, nxt, "A", action)
+    assert not _roar_fizzled(s, nxt, "A", action)
 
 
 def test_effect_readiness_detects_enabled_condition_without_card_special_case():
@@ -318,8 +318,8 @@ def test_effect_readiness_detects_enabled_condition_without_card_special_case():
     enabled = disabled.clone()
     put(enabled, "1,1", "guard_hornet", "A")
     put(enabled, "1,2", "guard_hornet", "A")
-    assert _enabled_battlecry_count(disabled, "A") == 0
-    assert _enabled_battlecry_count(enabled, "A") == 1
+    assert _enabled_roar_count(disabled, "A") == 0
+    assert _enabled_roar_count(enabled, "A") == 1
 
 
 def test_vanilla_card_is_never_fizzled():
@@ -328,13 +328,13 @@ def test_vanilla_card_is_never_fizzled():
     action = PlaceAction("lion", ("cr", "1,2"))
     nxt = s.clone()
     rules.apply_action(nxt, action)
-    assert not _battlecry_fizzled(s, nxt, "A", action)
+    assert not _roar_fizzled(s, nxt, "A", action)
 
 
-def test_choose_does_not_waste_a_battlecry_when_drawing_has_more_value():
+def test_choose_does_not_waste_a_roar_when_drawing_has_more_value():
     # Mouse is live and Rat is not, but the standard draw produces more immediate card
     # economy than spending Mouse to replace itself. The readiness term must not force a
-    # live Battlecry over a strictly better non-placement action.
+    # live Roar over a strictly better non-placement action.
     s = make_state(hands={"A": ["rat", "mouse"]}, decks={"A": ["mouse"] * 3, "B": []})
     legal = rules.legal_actions(s)
     chosen = GreedyBot(seed=0).choose(s.view_for("A"), legal, s)

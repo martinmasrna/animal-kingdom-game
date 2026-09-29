@@ -14,7 +14,7 @@ Cards that already feel right are **not** listed — only genuine issues. Decks 
 Cleanest deck in the pool. The lion royal-family legendaries (Prince Leo, Princess Lea, King Theron, Queen Adira) all read well — Theron ("hunter") and Adira ("noble/strong") carry light resonance without citing a myth; the Leo/Lea twin fetch is a deliberate designed pair. Keep all four.
 
 - **Black Panther (rare, Cat 6) — species must be pinned, or it self-collides.** A "black panther" is not a species; it is a *melanistic leopard* (Africa/Asia) or a *melanistic jaguar* (Americas). If read as a black **jaguar**, it duplicates the deck's own **Jaguar** (one-species violation within the same deck). Fix (reskin, no mechanics): explicitly treat Black Panther as a melanistic **leopard** (Panthera pardus — a species that appears nowhere else in the pool). Worth a one-line art/flavor note so nobody later draws it as a jaguar. Snow Leopard is a separate species and is fine.
-- **Serval (rare, Cat 2) — mild effect↔animal tension, but intentional.** A tiny serval (str 2) whose Battlecry only removes *big* enemies (str 6+) reads slightly backwards — you expect the small cat to pick off small prey. It's clearly the deliberate mirror of Jaguar (removes ≤5), and servals are famous leapers that punch above their size, so I'd **keep it** — just flagging that the pairing is the only thing carrying the flavor. No change recommended.
+- **Serval (rare, Cat 2) — mild effect↔animal tension, but intentional.** A tiny serval (str 2) whose Roar only removes *big* enemies (str 6+) reads slightly backwards — you expect the small cat to pick off small prey. It's clearly the deliberate mirror of Jaguar (removes ≤5), and servals are famous leapers that punch above their size, so I'd **keep it** — just flagging that the pairing is the only thing carrying the flavor. No change recommended.
 
 ### Deck 2 — Egg Control
 Thematically tight: the egg-eating snake paying out on egg removal, the scavenging vulture, the hoarding raven, the scouting owl, the disruptive "black swan event." Keep almost all of it.
@@ -49,7 +49,7 @@ Reads great as a rush deck: the fastest cat (Cheetah) and a diving falcon both r
 ### Deck 7 — Canine Buff Tempo
 Good pack-buff fantasy (anthems = the alpha's presence, the rallying howl, the jackal scavenging the dead for food). But it carries the audit's two clearest **theme** problems and a size-inversion.
 
-- **"howl, voice of the pack" legendary (Canine 4) — a howl is not an animal (THEME).** As written the card *is* "a howl," which would be a non-animal that isn't a Landmark — a theme violation. The intent is obviously a **named wolf whose Battlecry is the great unifying howl** (the effect, "+1 to all Canines," is perfect). Fix (reskin, no mechanics): make the card a real wolf with a proper name and let "the howl" be its effect/epithet, not its identity. Names in §3.
+- **"howl, voice of the pack" legendary (Canine 4) — a howl is not an animal (THEME).** As written the card *is* "a howl," which would be a non-animal that isn't a Landmark — a theme violation. The intent is obviously a **named wolf whose Roar is the great unifying howl** (the effect, "+1 to all Canines," is perfect). Fix (reskin, no mechanics): make the card a real wolf with a proper name and let "the howl" be its effect/epithet, not its identity. Names in §3.
 - **"hellhound" legendary (Canine 6) — an invented/mythic creature (THEME + §2.1 naming).** A hellhound is a supernatural dog; §2.1 forbids invented creatures and direct myth references, and requires the animal stay real. The *effect* (pull a fallen pack-member back from the Remove Pile = raising the dead) is wonderful and very "black dog of folklore." Fix (reskin, no mechanics): make it a real black wolf/dog and give it a name that *evokes* the black-dog/underworld legend without citing it. Names in §3.
 - **Fox / Dingo strength inversions vs Gray Wolf / Coyote (STRENGTH↔ANIMAL).** Real canid size runs Gray Wolf > Red Wolf > Coyote > Dingo/Jackal/Dhole > Fox (smallest). The cards have **Fox 5** and **Dingo 5** out-bodying **Gray Wolf 4** and **Coyote 3** — a fox out-muscling a wolf reads backwards. The deck file itself invites this flag ("Fox/Dingo/Red Wolf/alpha animals flexible").
   - *Reskin option (no mechanics):* since the animals are flagged flexible, reassign so body size tracks strength — e.g. let the str-5 "gas engine" (draw-when-buffed, a clever-opportunist effect) ride on a **Coyote** or **Jackal** rather than a Fox, and let the small str sit on the Fox.
@@ -206,7 +206,7 @@ Cats (Prince Leo, Princess Lea, King Theron, Queen Adira) are already named and 
 - **Raksha** — the wolf-mother who adopts the pack in Kipling (literary, not myth); perfect for an anthem matriarch.
 - **Luna** — moon-named, classic for a lead wolf; warm and recognizable.
 
-**"howl, voice of the pack"** (Canine 4, give +1 to all other Canines in hand and field; must be a real wolf whose Battlecry *is* the howl — see Deck 7):
+**"howl, voice of the pack"** (Canine 4, give +1 to all other Canines in hand and field; must be a real wolf whose Roar *is* the howl — see Deck 7):
 - **Clarion** — a clarion call; the rallying summons made a name.
 - **Cantor** — the lead voice that the chorus answers; the wolf who starts the howl.
 - **Echo** — the howl carrying across the territory and lifting the whole pack.

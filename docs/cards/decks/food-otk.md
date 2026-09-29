@@ -20,30 +20,30 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Fathom** | 1 | — | 7 | Battlecry: draw a legendary unit. |
-| **Greywhisker** | 1 | Rodent | 1 | Battlecry: gain 1 food. Draw 1 card. You may play 1 more unit. |
-| **Barley, the Rat King** | 1 | Rodent | 4 | Battlecry: gain 4 food for each other Rodent you control. Draw 1 card. |
-| **Scrooge, Keeper of the Stash** | 1 | Rodent | 4 | Battlecry: gain food equal to the food you gained this turn. |
+| **Fathom** | 1 | — | 7 | Roar: draw a legendary unit. |
+| **Greywhisker** | 1 | Rodent | 1 | Roar: gain 1 food. Draw 1 card. You may play 1 more unit. |
+| **Barley, the Rat King** | 1 | Rodent | 4 | Roar: gain 4 food for each other Rodent you control. Draw 1 card. |
+| **Scrooge, Keeper of the Stash** | 1 | Rodent | 4 | Roar: gain food equal to the food you gained this turn. |
 
 ### Rare
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Flying Squirrel** | 2 | Rodent | 3 | Flight. Battlecry: gain 10 food. |
+| **Flying Squirrel** | 2 | Rodent | 3 | Flight. Roar: gain 10 food. |
 | **Porcupine** | 2 | Rodent | 7 | Cannot be covered by enemies. |
-| **Chinchilla** | 2 | Rodent | 4 | Battlecry: next turn, take 1 additional action. |
+| **Chinchilla** | 2 | Rodent | 4 | Roar: next turn, take 1 additional action. |
 | **Armadillo** | 2 | — | 7 | Immovable. Adjacent friendly units can't be chosen by enemy abilities. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Squirrel** | 3 | Rodent | 3 | Battlecry: gain 10 food. |
-| **Chipmunk** | 3 | Rodent | 1 | Battlecry: gain 10 food. At the start of next turn, gain 10 more. |
-| **Hedgehog** | 2 | — | 6 | Immovable. Battlecry: gain 6 food. |
-| **Hamster** | 2 | Rodent | 3 | Battlecry: if you gained 10 or more food this turn, draw 2 cards. |
-| **Muskrat** | 3 | Rodent | 2 | Battlecry: if you gained 10 or more food this turn, remove an adjacent enemy. |
-| **Groundhog** | 3 | Rodent | 4 | Battlecry: if you gained 10 or more food this turn, gain 10 food. |
-| **Gopher** | 2 | Rodent | 4 | Battlecry: if you played a Rodent last turn, gain 10 food. |
+| **Squirrel** | 3 | Rodent | 3 | Roar: gain 10 food. |
+| **Chipmunk** | 3 | Rodent | 1 | Roar: gain 10 food. At the start of next turn, gain 10 more. |
+| **Hedgehog** | 2 | — | 6 | Immovable. Roar: gain 6 food. |
+| **Hamster** | 2 | Rodent | 3 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
+| **Muskrat** | 3 | Rodent | 2 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. |
+| **Groundhog** | 3 | Rodent | 4 | Roar: if you gained 10 or more food this turn, gain 10 food. |
+| **Gopher** | 2 | Rodent | 4 | Roar: if you played a Rodent last turn, gain 10 food. |
 
 <!-- cards:end -->

@@ -48,7 +48,7 @@ from ..engine import rules
 from .base import keep_hand
 from ..engine.actions import Action, DrawAction, PlaceAction
 from ..engine.state import GameState, StateView
-from .greedy_bot import GreedyWeights, _battlecry_fizzled
+from .greedy_bot import GreedyWeights, _roar_fizzled
 from .learned_eval import LinearEval
 from .turn_search import TurnSearcher
 
@@ -275,8 +275,8 @@ class RefereeBot(TurnSearcher):
             score = self._planning_eval(nxt, me)
             scored.append((score, -index, action))
             if (isinstance(action, PlaceAction)
-                    and state.cards[action.card_id].has_battlecry
-                    and not _battlecry_fizzled(state, nxt, me, action)):
+                    and state.cards[action.card_id].has_roar
+                    and not _roar_fizzled(state, nxt, me, action)):
                 live.append((score, -index, action))
         scored.sort(reverse=True)
         self.last_search_stats["reply_min_cutoff_gap"] = min(

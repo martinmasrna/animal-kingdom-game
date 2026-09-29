@@ -197,8 +197,8 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> No
     unit.placed_on_turn = state.turn_counter
     state.board.setdefault(cr, []).append(unit)
 
-    # Reactive triggers resolve AFTER the placed unit's battlecry (decision 8). The stack
-    # is LIFO, so push reactive first (lower) and the battlecry last (on top).
+    # Reactive triggers resolve AFTER the placed unit's roar (decision 8). The stack
+    # is LIFO, so push reactive first (lower) and the roar last (on top).
     _push_reactions(state, unit, cr, covered, onto_enemy)
     if cover_enemy is not None:
         _fire_cover_event(state, unit, cover_enemy)
@@ -704,7 +704,7 @@ def _op_remove_choice(state, step):
 
 def _op_remove_iid(state, step):
     # A reactive removal may name the unit that triggered it (`source_iid`). If that source
-    # has since left the board - e.g. a fed Muskrat's battlecry removed the Hippo before the
+    # has since left the board - e.g. a fed Muskrat's roar removed the Hippo before the
     # Hippo's queued reaction resolves (decision: reactions fizzle when their source is gone) -
     # the removal fizzles rather than firing from a dead trigger.
     src = step.get("source_iid")
@@ -964,7 +964,7 @@ def _red_wolf_friendly_play(state, watcher, played):
 def _spawn_pups(state, unit, cr, n, token_ids=("pup",)):
     """Land up to `n` tokens on random empty crossroads adjacent to `cr`, cycling through
     `token_ids`. They enter via the
-    normal landing path (so Dhole's on-enter buff sees them) but carry no Battlecry, so there
+    normal landing path (so Dhole's on-enter buff sees them) but carry no Roar, so there
     is no spawn recursion."""
     empty = [nb for nb in state.game_map.neighbors(cr) if not state.board.get(nb)]
     state.rng.shuffle(empty)
@@ -1245,7 +1245,7 @@ def _snake_egg_place(state, unit, cr):
 
 
 def _opossum_place(state, unit, cr):
-    # Battlecry (its Deathrattle return is in _dispose); food added 2026-07-04 OTK-lean pass.
+    # Roar (its Deathrattle return is in _dispose); food added 2026-07-04 OTK-lean pass.
     _push_draw(state, unit.owner, 1)
     _push_gain(state, unit.owner, state.config.opossum_food)
 
@@ -1278,13 +1278,13 @@ def _greywhisker_place(state, unit, cr):
 
 def _house_cat_place(state, unit, cr):
     # May chain into another House Cat now (self-exclusion dropped 2026-07-05).
-    if battlecry_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_play_extra(state, unit.owner, filter={"tags_all": ["Cat"]})
 
 
 def _dog_place(state, unit, cr):
     # May chain into another Dog now (self-exclusion dropped 2026-07-05).
-    if battlecry_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_play_extra(state, unit.owner, filter={"tags_all": ["Canine"]})
 
 
@@ -1363,11 +1363,11 @@ def _controls_two_same_colony(state, player) -> bool:
     return any(v >= 2 for v in counts.values())
 
 
-def battlecry_condition(state, player, card_id, unit=None):
-    """Whether the "if ..." of `card_id`'s Battlecry holds: None for a card with no such
+def roar_condition(state, player, card_id, unit=None):
+    """Whether the "if ..." of `card_id`'s Roar holds: None for a card with no such
     condition, or one that depends on where it lands (Caracal, Cheetah, Falcon). `unit` is the
-    placed unit while its Battlecry resolves; None asks about the card in hand, as if it were
-    played now (the client lights such cards up). The Battlecries below call this too, so the
+    placed unit while its Roar resolves; None asks about the card in hand, as if it were
+    played now (the client lights such cards up). The Roars below call this too, so the
     two can't disagree."""
     on_top = unit is not None and any(st and st[-1].iid == unit.iid for st in state.board.values())
 
@@ -1401,7 +1401,7 @@ def _bounce(state, cr, top, *, lock_until=0):
     state.add_to_hand(top.owner, top.card_id).locked_until_turn = lock_until
 
 
-# --- Removal battlecries (Cats / Colony / Ramp) ---
+# --- Removal roars (Cats / Colony / Ramp) ---
 
 def _jaguar_place(state, unit, cr):
     _push_remove_choice(state, unit.owner, "jaguar",
@@ -1419,7 +1419,7 @@ def _stoop_place(state, unit, cr):
 
 
 def _soldier_ant_place(state, unit, cr):
-    if battlecry_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_remove_choice(state, unit.owner, "soldier_ant", _adjacent_enemy_targets(state, unit, cr))
 
 
@@ -1619,7 +1619,7 @@ def _lemming_place(state, unit, cr):
     state.rng.shuffle(sources)
     empty = [nb for nb in state.game_map.neighbors(cr) if not state.board.get(nb)]
     state.rng.shuffle(empty)
-    for (kind, inst), spot in zip(sources, empty):       # auto-placed copies' Battlecries fizzle (F8)
+    for (kind, inst), spot in zip(sources, empty):       # auto-placed copies' Roars fizzle (F8)
         if kind == "hand":
             state.hands[unit.owner].remove(inst)
         else:
@@ -1646,7 +1646,7 @@ def _worker_ant_place(state, unit, cr):
 
 def _worker_bee_place(state, unit, cr):
     amount = state.config.worker_bee_food
-    if battlecry_condition(state, unit.owner, unit.card_id, unit):   # another Worker besides itself
+    if roar_condition(state, unit.owner, unit.card_id, unit):   # another Worker besides itself
         amount += state.config.worker_bee_extra
     _push_gain(state, unit.owner, amount)
 
@@ -1680,7 +1680,7 @@ def _methuselah_eot(state, unit, cr):
 # --- Conditional draws (Cats / Colony / Aggro) ---
 
 def _lynx_place(state, unit, cr):
-    if battlecry_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_draw(state, unit.owner, 1)
 
 
@@ -1722,17 +1722,17 @@ def _mock_saboteur_place(state, unit, cr):
 
 
 def _nurse_bee_place(state, unit, cr):
-    if battlecry_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_draw(state, unit.owner, 2)
 
 
 def _nurse_bumblebee_place(state, unit, cr):
-    if battlecry_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_draw(state, unit.owner, 2)
 
 
 def _termite_king_place(state, unit, cr):
-    if battlecry_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_draw(state, unit.owner, 1)
 
 
@@ -1759,7 +1759,7 @@ def _op_grizzly_strike(state, step):
 
 
 def _scrooge_place(state, unit, cr):
-    # Battlecry: double this turn's haul (reworked 2026-07-05 - the old bank-and-double-in-2-turns
+    # Roar: double this turn's haul (reworked 2026-07-05 - the old bank-and-double-in-2-turns
     # was the food_otk coin-flip). Snapshot now; the gain step resolves as a literal amount.
     haul = _food_gained_this_turn(state, unit.owner)
     _push_gain(state, unit.owner, haul * state.config.scrooge_gain_multiplier)
@@ -1783,23 +1783,23 @@ def _chinchilla_place(state, unit, cr):                             # +1 action 
 
 
 def _hamster_place(state, unit, cr):
-    if battlecry_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_draw(state, unit.owner, state.config.hamster_draw)
 
 
 def _muskrat_place(state, unit, cr):
-    if battlecry_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_remove_choice(state, unit.owner, "muskrat",
                             _adjacent_enemy_targets(state, unit, cr))
 
 
 def _groundhog_place(state, unit, cr):
-    if battlecry_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_gain(state, unit.owner, state.config.groundhog_food)
 
 
 def _gopher_place(state, unit, cr):
-    if battlecry_condition(state, unit.owner, unit.card_id, unit):
+    if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_gain(state, unit.owner, state.config.rodent_last_turn_food)
 
 
@@ -1898,7 +1898,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "falcon": {"on_place": _hq_adjacent_draw},
     "aurum": {"on_start_of_turn": _aurum_start},
     "sloth": {"on_place": _sloth_place},
-    # Stage 2.4: removal battlecries (King Theron's cover trigger fires from _fire_cover_event).
+    # Stage 2.4: removal roars (King Theron's cover trigger fires from _fire_cover_event).
     "jaguar": {"on_place": _jaguar_place},
     "serval": {"on_place": _serval_place},
     "stoop": {"on_place": _stoop_place},
