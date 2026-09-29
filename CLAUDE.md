@@ -13,6 +13,7 @@ The game has no mana, no attack or health, no combat damage. A unit is a single 
 Python ≥3.11 with a venv at `.venv`: `python3 -m venv .venv && .venv/bin/pip install -e '.[dev,cli]'` (add `analysis` for self-play training and plots).
 
 - Tests: `.venv/bin/python -m pytest -q` (about a minute).
+- Web client tests: `cd animal_kingdom/web/test && npm install && node --test` (a private server on a free port plays recorded bot-vs-bot matches through the client in headless Chrome and checks every view against the game state; unit tests for the client's logic run in the same command). Run them after any change to `web/static/`.
 - Web client: `./play` (serves `animal_kingdom/web/` at localhost:8000; `AK_NO_GAME_LOGS=1` keeps test games out of `results/human_games/web/`). Terminal: `./run` (interactive setup; `--help` for flags). Recorder UI: `./record` (needs the `tui` extra).
 - Balance report: `./report 200` (round-robin; `--deck X --opponent Y` to scope, `--format files --out DIR` for CSV/JSON, every run records its games to `results/logs/<time>.jsonl`, `--log FILE` to pick the path, `--no-log` to skip). Every simulation keeps its game log: an ad-hoc script calling `run_pairs` passes `log_actions=True` and writes with `sim.replay.write_game_logs`, so questions about how games went are answered from logs, not new runs. Replay a logged game with no bot compute: `.venv/bin/python -m animal_kingdom.sim.replay FILE`.
 - Paired bot A/B: `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/<name>`.

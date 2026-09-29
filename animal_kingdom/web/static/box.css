@@ -222,3 +222,5 @@
 /* a strength that changed pops once */
 .bx .cr.unit.strchg .boss { animation: strpop .45s cubic-bezier(.3,.7,.4,1.4) .1s; }
 @keyframes strpop { 0% { transform: scale(1); } 45% { transform: scale(1.35); } 100% { transform: scale(1); } }
+/* reduced motion: every state change simply shows */
+@media (prefers-reduced-motion: reduce) { .bx *, .bx *::before, .bx *::after { animation: none !important; transition: none !important; } }

@@ -1,0 +1,8 @@
+{
+  "name": "animal-kingdom-web-tests",
+  "private": true,
+  "type": "module",
+  "description": "Browser and unit tests for the web client. npm install here once, then: node --test",
+  "scripts": { "test": "node --test" },
+  "devDependencies": { "puppeteer-core": "^24.0.0" }
+}
