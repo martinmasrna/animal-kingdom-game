@@ -50,12 +50,13 @@ export function collectionScreen(app, ctx) {
   if (!wired) { wired = true; wireGlobal(); }
   const all = decks();
   // Opens your first deck; with none yet, nothing is open and the grid is for browsing.
-  if (st.open === null || !all.some(d => d.id === st.open)) st.open = (all[0] || {}).id || null;
+  if (st.open !== null && !all.some(d => d.id === st.open)) st.open = null;   // the screen opens on your deck list
   render(app, all);
 }
 
 function render(app, all) {
   const keep = [...app.querySelectorAll('.clist, .cgrid')].map(e => e.scrollTop);
+  if (st.was !== !!st.open) keep[1] = 0; st.was = !!st.open;   // switching list and deck starts the column at its top
   const open = all.find(d => d.id === st.open), counts = open ? countsOf(open.list) : {};
   const inR = r => open ? open.list.filter(id => C[id].rarity === r).length : 0;
   const q = st.q.toLowerCase();
@@ -85,16 +86,21 @@ function render(app, all) {
   const body = d => { const fams = familyCount(d.list);
     return `<div class="dbody">${fams.length > 1 ? `<div class="fams">${fams.map(([f, n]) => `<div data-tip="${f}"><div class="med" style="${med(FAMILIES.find(x => x[0] === f)[1], 26)}"></div>${n}</div>`).join('')}</div>` : ''}
       ${rhead('Legendary', 'legendary', 4)}${byR('legendary')}${rhead('Rare', 'rare', 8)}${byR('rare')}${rhead('Common', 'common')}${byR('common')}
-      ${d.list.length === 30 ? '<div class="play" id="play">Play this deck</div>' : `<div class="play off">${d.list.length} / 30 cards</div>`}</div>`; };
+</div>`; };
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${body(d)}`
     : `<div class="dtile" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b>${esc(d.name)}</b><span>${familyCount(d.list).slice(0, 2).map(([f, n]) => n + ' ' + f).join(' · ')}</span></div>`;
-  const mine = all;
+  // Two states, as in Hearthstone: your deck list (New deck is the slot after the last deck, Back in the foot), or one deck
+  // being edited (only that deck; Play and Done in the foot).
+  const column = open
+    ? `<div class="clist editing">${tile(open)}</div>
+      <div class="sfoot">${open.list.length === 30 ? '<div class="play" id="play">Play this deck</div>' : `<div class="play off">${open.list.length} / 30 cards</div>`}
+        <button class="backbtn" id="done"><span>Done</span></button></div>`
+    : `<div class="clist">${all.map(tile).join('')}<button class="dnew" id="dnew"><span>New deck</span></button></div>
+      <div class="sfoot"><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div>`;
 
-  app.innerHTML = `<div class="coll">${head}<div class="cgrid">${grid}</div>
-    <div class="side"><div class="clist${open ? ' opened' : ''}">${mine.map(tile).join('')}</div>
-      <div class="sfoot"><button class="dnew" id="dnew"><span>New deck</span></button><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div><div class="modal" id="cmodal"></div></div>`;
+  app.innerHTML = `<div class="coll">${head}<div class="cgrid">${grid}</div><div class="side">${column}</div><div class="modal" id="cmodal"></div></div>`;
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
   wire(app, all, open);
 }
@@ -102,7 +108,7 @@ function render(app, all) {
 function wire(app, all, open) {
   const $ = id => app.querySelector('#' + id), redo = () => render(app, all), change = () => { save(all); redo(); };
   const pop = document.getElementById('pop'), hidePop = () => { pop.style.display = 'none'; };
-  $('back').onclick = X.back;
+  const bk = $('back'); if (bk) bk.onclick = X.back;
   app.querySelectorAll('.dd').forEach(d => {
     d.querySelector('.sel').onclick = ev => { ev.stopPropagation(); const was = d.classList.contains('open'); app.querySelectorAll('.dd.open').forEach(x => x.classList.remove('open')); d.classList.toggle('open', !was); };
     d.querySelectorAll('.ddo').forEach(o => o.onclick = () => { const k = d.dataset.dd; st[k] = k === 'rar' ? (o.dataset.v || null) : o.dataset.v; redo(); });
@@ -110,7 +116,7 @@ function wire(app, all, open) {
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
   app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t || null; st.family = st.family === f ? null : f; redo(); });   // the selected family again clears it
   const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { family: null, rar: null, str: '', q: '' }); redo(); };
-  app.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.closest('.nm-edit, .tacts, .nm-in')) return; st.open = st.open === e.dataset.d ? null : e.dataset.d; st.toTop = !!st.open; redo(); });
+  app.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.closest('.nm-edit, .tacts, .nm-in')) return; if (!st.open) { st.open = e.dataset.d; redo(); } });
 
   const nm = app.querySelector('.nm-edit');
   if (nm) nm.onclick = () => { const inp = document.createElement('input'); inp.className = 'nm-in'; inp.maxLength = 40; inp.value = open.name; nm.replaceWith(inp); inp.focus(); inp.select();
@@ -122,9 +128,9 @@ function wire(app, all, open) {
   const cov = $('dcover'); if (cov) cov.onclick = () => pickCover(app, open, id => { open.cover = id; change(); });
   const del = $('ddel'); if (del) del.onclick = () => confirmDelete(app, open, () => { all.splice(all.indexOf(open), 1); st.open = null; change(); X.toast(`Deleted ${open.name}`, true); });
   // A new deck starts empty, open, with its name ready to type.
-  $('dnew').onclick = () => { const d = { id: Date.now().toString(36), name: 'New deck', list: [], cover: null };
+  const dn = $('dnew'); if (dn) dn.onclick = () => { const d = { id: Date.now().toString(36), name: 'New deck', list: [], cover: null };
     all.push(d); st.open = d.id; st.rename = true; change(); };
-  if (st.toTop) { st.toTop = false; const t = app.querySelector('.dtile.on'), l = app.querySelector('.clist'); if (t) l.scrollTop += t.getBoundingClientRect().top - l.getBoundingClientRect().top - 8; }
+  const dn2 = $('done'); if (dn2) dn2.onclick = () => { st.open = null; redo(); };
   if (st.rename) { st.rename = false; const n = app.querySelector('.nm-edit'); if (n) n.click(); }
   const play = $('play'); if (play) play.onclick = () => X.play(open);
 
@@ -194,7 +200,7 @@ function wireGlobal() {
     if (e.key === 'Escape' && document.querySelector('.coll .dd.open')) { document.querySelectorAll('.coll .dd.open').forEach(d => d.classList.remove('open')); return; }
     if (!here() || here().querySelector('.modal.on')) return;
     if (e.key === '/' && !typing(e)) { e.preventDefault(); here().querySelector('#q').focus(); }
-    else if (e.key === 'Escape' && !typing(e)) X.back();
+    else if (e.key === 'Escape' && !typing(e)) { const done = here().querySelector('#done'); done ? done.click() : X.back(); }   // Done while editing, else Back
   });
   // Paste a deck code (or a plain "3x Lion" list) anywhere: it becomes your deck, open.
   addEventListener('paste', e => {

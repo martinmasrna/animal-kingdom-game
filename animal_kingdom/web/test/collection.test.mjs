@@ -7,7 +7,8 @@ import { startServer, openBrowser } from './harness.mjs';
 let server, browser, page;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const card = id => `.cgrid [data-card="${id}"]`;
-const openDeck = async sel => { if (!(await page.$(sel + '.on'))) await page.click(sel); await wait(50); };
+const toList = async () => { if (await page.$('#done')) { await page.click('#done'); await wait(50); } };
+const openDeck = async sel => { if (await page.$(sel + '.on')) return; await toList(); await page.click(sel); await wait(50); };
 const has = (sel, cls) => page.$eval(sel, (e, c) => e.classList.contains(c), cls);
 const myDecks = () => page.evaluate(() => fetch('/api/me', { headers: { 'X-AK-Key': localStorage.getItem('ak:key') } }).then(r => r.json()).then(m => m.decks));
 const paste = text => page.evaluate(t => { const e = new Event('paste', { bubbles: true }); e.clipboardData = { getData: () => t }; document.dispatchEvent(e); }, text);
@@ -31,7 +32,10 @@ test('the screen: the grid beside the deck column, the header on the grid\'s edg
 test('a new profile has the seven starter decks as its own, the first one open', async () => {
   const decks = await myDecks();
   assert.deepEqual(decks.map(d => d.name), ['Cats', 'Canines', 'Aggro', 'Colony', 'Egg', 'Food', 'Ramp']);
-  assert.equal(await page.$eval('.dtile.on', e => e.dataset.d), 'cats_midrange');
+  assert.equal(await page.$('.dtile.on'), null, 'the screen opens on the deck list');
+  assert.ok(await page.$('.clist #dnew'), 'New deck is the slot after the last deck');
+  await openDeck('[data-d="cats_midrange"]');
+  assert.equal(await page.$$eval('.clist .dtile', t => t.length), 1, 'editing shows only that deck');
   await page.click('.side .st[data-card="lion"]'); await wait(100);
   const [cats] = await myDecks();
   assert.equal(cats.name, 'Cats'); assert.equal(Object.values(cats.cards).reduce((a, n) => a + n, 0), 29, 'a starter is edited in place: it is yours');
@@ -58,11 +62,14 @@ test('a chosen name and cover save with the deck', async () => {
   await page.click('.cv[data-id="tiger"]'); await wait(120);
   const [d] = await myDecks(); assert.equal(d.name, 'Big Cats'); assert.equal(d.cover, 'tiger');
   await page.reload({ waitUntil: 'networkidle0' }); await page.evaluate(() => { navigator.clipboard.writeText = t => { window.__clip = t; return Promise.resolve(); }; });
-  assert.equal(await page.$eval('.dtile.on b', e => e.textContent), 'Big Cats', 'a reload keeps it open and named');
+  assert.equal(await page.$('.dtile.on'), null, 'a reload lands on the deck list');
+  await openDeck('.clist .dtile:first-child');
+  assert.equal(await page.$eval('.dtile.on b', e => e.textContent), 'Big Cats', 'the name kept');
   assert.match(await page.$eval('.dtile.on', e => e.style.backgroundImage), /tiger/);
 });
 
 test('a deck code copies, and pasting it (or a plain list) makes a deck', async () => {
+  await openDeck('.clist .dtile:first-child');
   await page.hover('.dtile.on'); await page.click('#dcopy'); await wait(50);
   const code = await page.evaluate(() => window.__clip);
   assert.match(code, /^### Big Cats\n/); assert.ok(code.split('\n').pop().length < 50);
@@ -74,6 +81,7 @@ test('a deck code copies, and pasting it (or a plain list) makes a deck', async 
 });
 
 test('delete asks first', async () => {
+  await openDeck('.clist .dtile:first-child');
   const n = (await myDecks()).length;
   await page.hover('.dtile.on'); await page.click('#ddel'); await wait(50);
   await page.keyboard.press('Escape'); await wait(50);
@@ -83,7 +91,7 @@ test('delete asks first', async () => {
 });
 
 test('New deck starts an empty deck, open, with its name ready to type', async () => {
-  const n = (await myDecks()).length;
+  await toList(); const n = (await myDecks()).length;
   await page.click('#dnew'); await wait(80);
   assert.ok(await page.$('.nm-in'), 'the name is being edited');
   await page.keyboard.type('Scratch'); await page.keyboard.press('Enter'); await wait(120);
@@ -94,14 +102,16 @@ test('New deck starts an empty deck, open, with its name ready to type', async (
   assert.deepEqual((await myDecks())[n].cards, { lion: 1 }, 'cards go into the new deck');
 });
 
-test('an opened deck starts at the top of the column, and a former starter is yours to rename and delete', async () => {
-  await page.click('[data-d="ramp"]'); await wait(120);
+test('an opened deck is the column alone, starting at its top; Done returns to the list; a former starter is yours to rename and delete', async () => {
+  await openDeck('[data-d="ramp"]'); await wait(80);
   const off = await page.evaluate(() => document.querySelector('.dtile.on').getBoundingClientRect().top - document.querySelector('.clist').getBoundingClientRect().top);
   assert.ok(off >= 0 && off < 30, `the open deck starts at the top (${off})`);
   const n = (await myDecks()).length;
   await page.hover('.dtile.on'); assert.ok(await page.$('#dcover')); assert.ok(await page.$('#ddel'), 'it can be deleted like any deck');
   await page.click('.nm-edit'); await page.keyboard.down('Meta'); await page.keyboard.press('a'); await page.keyboard.up('Meta'); await page.keyboard.type('Big Ramp'); await page.keyboard.press('Enter'); await wait(120);
   const decks = await myDecks(); assert.equal(decks.length, n); assert.equal(decks.find(d => d.id === 'ramp').name, 'Big Ramp');
+  await page.click('#done'); await wait(60); assert.ok(await page.$('[data-d="ramp"]:not(.on)'), 'Done shows the list again');
+  await openDeck('[data-d="ramp"]'); await page.keyboard.press('Escape'); await wait(60); assert.ok(await page.$('#dnew'), 'Escape is Done while editing');
 });
 
 test('the strength and rarity lists are the screen\'s own and close on a click elsewhere', async () => {
@@ -131,6 +141,7 @@ test('Play opens the play screen with the deck chosen; Back and Escape leave', a
   await page.click('#play'); await wait(150);
   assert.ok(page.url().endsWith('#/play')); assert.match(await page.evaluate(() => localStorage.getItem('ak:deck')), /^my:/);
   await page.goto(`${server.url}/#/collection`, { waitUntil: 'networkidle0' });
-  await page.keyboard.press('Escape'); await wait(80); assert.ok(page.url().endsWith('#/'), 'Escape goes back to the menu');
+  await page.keyboard.press('Escape'); await wait(60); assert.ok(await page.$('#dnew'), 'Escape first closes the deck');
+  await page.keyboard.press('Escape'); await wait(80); assert.ok(page.url().endsWith('#/'), 'then goes back to the menu');
   assert.deepEqual(page.errors, []);
 });

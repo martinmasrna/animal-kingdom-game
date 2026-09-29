@@ -173,3 +173,8 @@
 .coll .sfoot { flex-direction: column; gap: 8px; }
 .coll .backbtn { order: 0; width: 100%; }
 .coll .dnew { flex: none; width: 100%; }
+/* The deck list: New deck is the next slot after your last deck (an empty-slot look); the foot holds Back, or Play and Done while editing. */
+.coll .clist .dnew { flex: none; width: 100%; height: 56px; border-radius: 8px; background: transparent; border: 1.5px dashed rgba(240,232,218,.28); box-shadow: none; color: #cfc4b2; }
+.coll .clist .dnew:hover { filter: none; background: rgba(240,232,218,.06); border-color: rgba(240,232,218,.5); color: #fff; }
+.coll .sfoot .play { width: 100%; margin: 0; }
+.coll .clist.editing .dtile.on { margin-top: 2px; }
