@@ -1,5 +1,5 @@
 /* The collection (= the deckbuilder), collection.js. Everything is scoped under .coll. Layout settled in the design sandbox's
-   builder/notes.md (round B2); flat greys until the painted pass. */
+   builder/notes.md (round B2); the look is layered in the sections below (granite, slabs, strips). */
 .coll { position: fixed; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) 300px; grid-template-rows: 72px 1fr; background: #16181a; color: #d8d4cc; font-family: var(--font-text); }
 .coll button { font: inherit; }
 
