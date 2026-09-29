@@ -34,7 +34,7 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Python** | 3 | Snake | dynamic | This unit's strength is equal to the number of removed units. |
+| **Python** | 3 | Snake | dynamic | Has +1 strength for each removed unit. |
 | **Rattlesnake** | 3 | Snake | 0 | Whenever you shuffle a card, gain 1 strength (wherever this is). |
 | **Eagle** | 3 | Bird | 5 | Flight. |
 | **Owl** | 3 | Bird | 2 | Flight. Roar: look at the top 3 cards; draw 1 and shuffle the rest. |

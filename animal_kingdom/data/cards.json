@@ -170,7 +170,7 @@
       "base_strength": "dynamic",
       "dynamic_strength": "removed_units_count",
       "keywords": [],
-      "text": "This unit's strength is equal to the number of removed units."
+      "text": "Has +1 strength for each removed unit."
     },
     {
       "id": "ember",

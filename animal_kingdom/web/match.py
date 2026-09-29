@@ -543,7 +543,8 @@ def map_info() -> dict:
 
 def card_pool() -> list[dict]:
     return [{"id": c.id, "name": c.name, "deck": c.deck, "rarity": c.rarity, "tags": sorted(c.tags),
-             "str": "*" if c.is_dynamic else c.base_strength, "text": c.text,
+             # A variable-strength card (Python) prints 0: its text says what it gains ("+1 for each removed unit").
+             "str": 0 if c.is_dynamic else c.base_strength, "text": c.text,
              "kw": sorted(c.keywords), "cost": c.food_cost}
             for c in CARDS.values()]
 
