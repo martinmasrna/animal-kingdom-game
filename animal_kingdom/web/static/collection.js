@@ -6,8 +6,9 @@ import { cardHTML } from './card.js';
 import { CROP, artUrl } from './art.js';
 import { encodeDeck, decodeDeck } from './deckcode.js';
 
-const FAMILIES = [['Cat', 'lion'], ['Canine', 'gray_wolf'], ['Rodent', 'squirrel'], ['Colony', 'queen_bee'], ['Bird', 'eagle'],
-  ['Snake', 'viper'], ['Bear', 'grizzly_bear'], ['Megafauna', 'elephant'], ['Lizard', 'chameleon']];
+// Each family's medallion: the card whose animal reads clearest at 40 px (chosen side by side at that size).
+const FAMILIES = [['Cat', 'lion'], ['Canine', 'clarion'], ['Rodent', 'chinchilla'], ['Colony', 'worker_bee'], ['Bird', 'andean_condor'],
+  ['Snake', 'viper'], ['Bear', 'polar_bear'], ['Megafauna', 'elephant'], ['Lizard', 'chameleon']];
 const DECKS_MAX = 20;   // as the server's profiles.DECKS_MAX
 const RANK = { legendary: 0, rare: 1, common: 2 }, LIMIT = { legendary: 1, rare: 2, common: 3 }, CAP = { legendary: 4, rare: 8 };
 const sv = c => c.str === '*' ? -1 : c.str;
@@ -68,7 +69,7 @@ function render(app, all) {
       const max = open && n >= limit(c);   // dimmed: every copy is in the deck (the 30 and the rarity caps show on their counters)
       return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n && c.rarity !== 'legendary' ? `<span class="pips">${pips(n, limit(c))}</span>` : ''}</div>`; }).join('') + '</div>';
 
-  const tabs = `<div class="tab${st.family ? '' : ' on'}" data-t="" data-tip="All families"><div class="med mosaic">${['lion', 'gray_wolf', 'eagle', 'elephant'].map(id => `<i style="${med(id, 18)}"></i>`).join('')}</div></div>`
+  const tabs = `<div class="tab${st.family ? '' : ' on'}" data-t="" data-tip="All families"><div class="med mosaic">${['lion', 'clarion', 'andean_condor', 'elephant'].map(id => `<i style="${med(id, 18)}"></i>`).join('')}</div></div>`
     + FAMILIES.map(([f, id]) => `<div class="tab${st.family === f ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
   const strengths = [...Array(9).keys()].map(String).concat('9+');   // 0 to 8, then 9 and up together (Hearthstone's 7+)
   // A dropdown in the screen's own look: a slab showing the choice, a list that opens under it.
