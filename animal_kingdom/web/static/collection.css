@@ -168,3 +168,4 @@
 .coll .dnew, .coll .backbtn { display: flex; align-items: center; justify-content: flex-start; gap: 8px; padding: 0 16px 0 12px; }
 .coll .dnew svg, .coll .backbtn svg { width: 18px; height: 18px; flex: none; stroke-width: 2.4; opacity: .9; }
 .coll .dnew span, .coll .backbtn span { font: 600 16px 'Fira Sans Condensed', sans-serif; }
+.coll .dnew, .coll .backbtn { justify-content: center; padding: 0 16px; }
