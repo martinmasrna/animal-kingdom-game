@@ -866,7 +866,7 @@
       "deck": "aggro_hq_rush",
       "rarity": "legendary",
       "tags": ["Bird"],
-      "base_strength": 4,
+      "base_strength": 6,
       "keywords": ["Flight"],
       "text": "Flight. Roar: draw a card for each unit you control next to the opponent's den."
     },

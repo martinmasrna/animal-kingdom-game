@@ -20,7 +20,7 @@ The deck is being redesigned: the diagnosis and Martin's card-by-card analysis a
 | **Verminus** | 1 | Rodent | 3 | Has +1 strength for each other unit you control. |
 | **Pestis** | 1 | Rodent | 3 | Roar: remove an adjacent enemy and every unit buried under it. |
 | **Sirocco** | 1 | — | 5 | Roar: return all adjacent enemies to your opponent's hand. |
-| **Gale** | 1 | Bird | 4 | Flight. Roar: draw a card for each unit you control next to the opponent's den. |
+| **Gale** | 1 | Bird | 6 | Flight. Roar: draw a card for each unit you control next to the opponent's den. |
 
 ### Rare
 
