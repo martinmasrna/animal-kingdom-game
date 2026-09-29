@@ -1,0 +1,21 @@
+/* 20em wide, 29.34em tall (the old card's 1:1.467), em = --w / 20. */
+.card2 { --w: 180px; --body: #2a2420; --edge: #6d5a44; position: relative; width: var(--w); height: calc(var(--w) * 1.467); font-size: calc(var(--w) / 20);
+  flex: none; border-radius: 1em; background: #2e2a25 url(/static/kit2/card_body.webp) center / cover; box-shadow: inset 0 0 0 .12em rgba(255,240,215,.08), .2em .45em .9em rgba(0,0,0,.55); }
+.card2.rare { --edge: #b9bec4; } .card2.legendary { --edge: #d9ad4c; }
+.card2 .art { position: absolute; left: .75em; right: .75em; top: 3.3em; height: 16.6em; border-radius: .45em; background: #3a2c1a center / cover no-repeat;
+  box-shadow: 0 0 0 .16em var(--edge), 0 0 0 .3em rgba(0,0,0,.45); }
+.card2 .nm { position: absolute; left: 5.5em; right: .8em; top: .35em; height: 2.7em; display: flex; align-items: center; justify-content: center; }
+.card2 .nm span { font: 700 1.28em/1.02 'Source Serif 4', serif; color: #f1e8d6; text-align: center; letter-spacing: .005em; text-wrap: balance; }
+.card2 .boss { position: absolute; left: .15em; top: .15em; width: 5.4em; height: 5.4em; display: flex; align-items: center; justify-content: center; z-index: 2;
+  background: url(/static/kit2/boss_a.webp) center / contain no-repeat; filter: drop-shadow(.08em .18em .2em rgba(0,0,0,.6)); }
+.card2 .boss.b { background-image: url(/static/kit2/boss_b.webp); }
+.card2 .boss img { display: block; height: 2.7em; filter: drop-shadow(0 .06em .06em rgba(0,0,0,.5)); }
+.card2 .boss b { font: 800 3.4em/1 'Source Serif 4', serif; color: #f6ecd6; margin-top: .25em; }
+.card2 .rules { position: absolute; left: .75em; right: .75em; top: 20.75em; bottom: .75em; border-radius: .45em; padding: .55em .8em 1.6em;
+  background: #d9c9b0 url(/static/kit2/card_panel.webp) center / cover; box-shadow: inset 0 .08em .25em rgba(60,40,15,.35); display: flex; flex-direction: column; justify-content: center; }
+.card2 .rules p { margin: 0; font: 400 1.02em/1.18 'Source Serif 4', serif; color: #241709; text-align: center; text-wrap: pretty; }
+.card2 .rules p b { font-weight: 700; }
+.card2 .rules i { position: absolute; left: 0; right: 0; bottom: .45em; text-align: center; font: 700 .8em/1 'Source Serif 4', serif; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #6b5031; }
+.card2 .nm.long span { font-size: 1.08em; }
+.card2 .gem { position: absolute; left: 50%; top: 18.55em; width: 2.9em; height: 2.9em; margin-left: -1.45em; z-index: 2; background: url(/static/kit2/rar_common.webp) center / contain no-repeat; filter: drop-shadow(.05em .12em .12em rgba(0,0,0,.6)); }
+.card2.rare .gem { background-image: url(/static/kit2/rar_rare.webp); } .card2.legendary .gem { background-image: url(/static/kit2/rar_legendary.webp); }
