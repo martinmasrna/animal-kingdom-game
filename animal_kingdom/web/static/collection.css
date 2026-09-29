@@ -218,3 +218,7 @@
 .coll .kw { padding: 12px 14px; border-radius: 10px; background: #25221f url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.18), 0 4px 10px rgba(0,0,0,.5); }
 .coll .kw b { display: block; font: 700 18px 'Fira Sans Condensed', sans-serif; color: #fff; margin-bottom: 3px; }
 .coll .kw p { margin: 0; font: 500 15px/1.35 'Fira Sans Condensed', sans-serif; color: #e4dccd; }
+/* Deck tiles get the controls' edge: a thin lit stone rim and the same soft shadow, so they sit on the column like the other pieces. */
+.coll .dtile { box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.28), inset 0 1px 0 rgba(255,245,230,.22), 0 3px 6px rgba(0,0,0,.55); }
+.coll .dtile:not(.on):hover { box-shadow: inset 0 0 0 1.5px rgba(240,232,218,.55), inset 0 1px 0 rgba(255,245,230,.3), 0 3px 6px rgba(0,0,0,.55); }
+.coll .dtile.on { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); }
