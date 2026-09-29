@@ -18,10 +18,10 @@
 /* Compact: art, strength, name and rarity edge; the full card shows on hover. */
 .card3.compact .rules { display: none; }
 /* The frame's top: a granite bar holding the name, and a notched tab hanging from it holding strength, both edged in the rarity metal. */
-.card3 .bar { position: absolute; left: var(--bw); right: var(--bw); top: var(--bw); height: 2.7em; z-index: 2; display: flex; align-items: center; justify-content: flex-start; padding: 0 .8em 0 5.6em;
+.card3 .bar { position: absolute; left: var(--bw); right: var(--bw); top: var(--bw); height: 2.7em; z-index: 2; display: flex; align-items: center; justify-content: flex-start; padding: 0 .8em 0 4.9em;
   border-radius: .7em .7em 0 0; background: var(--carrier); box-shadow: 0 .14em 0 0 var(--line), 0 .3em .5em rgba(0,0,0,.45); }
 .card3 .bar span { font: 700 1.2em/1 'Source Serif 4', serif; color: var(--inkstrong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .01em; }
-.card3 .tab { position: absolute; left: calc(var(--bw) + .7em); top: var(--bw); width: 4.3em; height: 6.2em; z-index: 3; background: var(--line);
+.card3 .tab { position: absolute; left: var(--bw); top: var(--bw); width: 4.3em; height: 6.2em; z-index: 3; background: var(--line);
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%); filter: drop-shadow(0 .2em .3em rgba(0,0,0,.5)); }
 .card3 .tab .face { position: absolute; inset: 0 .14em .18em; background: var(--carrier);
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%); }
@@ -74,10 +74,10 @@
    the strength tab is the painted banner. One typeface for name, rules and tribe. --m is the material, --t '' or '_d' (toned). */
 .m .card3 { --carrier: none; }
 .m .card3 .bar, .m .card3 .rules { background: none; box-shadow: none; border: .55em solid transparent; border-image: var(--plaque) 36 fill / .55em stretch; }
-.m .card3 .bar { top: calc(var(--bw) - .1em); left: calc(var(--bw) - .1em); right: calc(var(--bw) - .1em); height: 3.3em; padding: 0 .3em 0 4.9em; border-radius: 0; filter: drop-shadow(0 .15em .25em rgba(0,0,0,.45)); }
+.m .card3 .bar { top: calc(var(--bw) - .1em); left: calc(var(--bw) - .1em); right: calc(var(--bw) - .1em); height: 3.3em; padding: 0 .3em 0 4.4em; border-radius: 0; filter: drop-shadow(0 .15em .25em rgba(0,0,0,.45)); }
 .m .card3 .rules { left: calc(var(--bw) - .1em); right: calc(var(--bw) - .1em); bottom: calc(var(--bw) - .1em); padding: 0 .3em 1.2em; border-radius: 0; filter: drop-shadow(0 -.1em .25em rgba(0,0,0,.35)); }
 .m .card3 .rules i { bottom: .15em; }
-.m .card3 .tab { clip-path: none; background: var(--banner) center / 100% 100% no-repeat; width: 4.4em; height: 6.4em; top: calc(var(--bw) - .2em); left: calc(var(--bw) + .35em); filter: drop-shadow(.05em .2em .3em rgba(0,0,0,.55)); }
+.m .card3 .tab { clip-path: none; background: var(--banner) center / 100% 100% no-repeat; width: 4.4em; height: 6.4em; top: calc(var(--bw) - .1em); left: calc(var(--bw) - .1em); filter: drop-shadow(.05em .2em .3em rgba(0,0,0,.55)); }
 .m .card3 .tab .face { background: none; clip-path: none; box-shadow: none; }
 .m .card3 .tab .n { top: 1.15em; } .m .card3 .tab .n.two { top: 1.45em; }
 .m .card3 .bar span { font: 600 1.4em/1 'Fira Sans Condensed', sans-serif; font-variant: normal; letter-spacing: .01em; color: #1d140a; }
