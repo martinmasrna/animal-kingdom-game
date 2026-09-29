@@ -113,7 +113,7 @@ def random_recipe(rng: random.Random, pools: Optional[dict[str, list[str]]] = No
 SEED_RECIPE = make_recipe(
     legendary=("gale", "sirocco", "pestis", "alpha"),
     rare=("jaguar", "stoop", "polar_bear", "rhinoceros"),  # stoop = Hawk
-    common=("lion", "tiger", "anaconda", "dire_wolf", "eagle", "bat"),
+    common=("lion", "tiger", "lemming", "dire_wolf", "eagle", "bat"),
 )
 
 
