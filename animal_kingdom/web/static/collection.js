@@ -31,8 +31,6 @@ const limit = c => c.copies || LIMIT[c.rarity];
 const coverOf = list => list.find(id => C[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
 const listOf = cardsObj => Object.entries(cardsObj).flatMap(([id, n]) => Array(n).fill(id));
 const countsOf = list => list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {});
-const familyCount = list => { const t = {}; list.forEach(id => C[id].tags.forEach(x => { if (FAMILIES.some(f => f[0] === x)) t[x] = (t[x] || 0) + 1; }));
-  return Object.entries(t).sort((a, b) => b[1] - a[1]); };
 
 // Your decks, saved on your profile (which starts with the starter decks as its own), as {id, name, list, cover}.
 function decks() {
@@ -84,8 +82,8 @@ function render(app, all) {
   const strip = id => `<div class="st" data-card="${id}"><div class="art" style="background-image:url(${artUrl(id)})"></div><span class="s">${C[id].str}</span><span class="n">${esc(C[id].name)}</span><span class="x">${C[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
   const byR = r => Object.keys(counts).filter(id => C[id].rarity === r).sort((a, b) => sv(C[a]) - sv(C[b]) || C[a].name.localeCompare(C[b].name)).map(strip).join('');
   const rhead = (label, r, cap) => `<h4 class="rh" data-r="${r}"><span>${label}</span>${cap ? `<span class="${inR(r) >= cap ? 'full' : ''}">${inR(r)} / ${cap}</span>` : ''}</h4>`;   // only capped rarities count
-  const body = d => { const fams = familyCount(d.list);
-    return `<div class="dbody">${fams.length > 1 ? `<div class="fams">${fams.map(([f, n]) => `<div data-tip="${f}"><div class="med" style="${med(FAMILIES.find(x => x[0] === f)[1], 26)}"></div>${n}</div>`).join('')}</div>` : ''}
+  const body = d => {
+    return `<div class="dbody">
       ${rhead('Legendary', 'legendary', 4)}${byR('legendary')}${rhead('Rare', 'rare', 8)}${byR('rare')}${rhead('Common', 'common')}${byR('common')}
 </div>`; };
   const tile = d => d.id === st.open
