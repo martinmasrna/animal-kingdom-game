@@ -887,7 +887,7 @@
       "tags": ["Lizard"],
       "base_strength": 0,
       "keywords": [],
-      "text": "Can cover enemies of any strength."
+      "text": "Can cover units of any strength."
     },
     {
       "id": "skunk",

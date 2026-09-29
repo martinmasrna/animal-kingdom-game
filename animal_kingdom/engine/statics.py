@@ -34,7 +34,7 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance) -> b
     if target_card.id == "porcupine":
         return False
 
-    # Chameleon covers enemies of any strength.
+    # Chameleon covers units of any strength (its own side needs no strength anyway).
     if placer_card.id == "chameleon":
         return True
 
