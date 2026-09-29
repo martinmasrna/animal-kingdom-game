@@ -228,22 +228,22 @@ def test_unnamed_canine_does_not_draw_below_threshold():
 
 # ===================================================================== Group A statics
 
-def test_porcupine_cannot_be_covered_by_enemy():
-    s = make_state(current="B", hands={"B": ["king_theron"]})
+def test_porcupine_removes_the_first_enemy_that_covers_it_then_is_an_ordinary_unit():
+    s = make_state(current="B", hands={"B": ["elephant", "elephant"]}, food={"A": 0, "B": 40})
     put(s, "4,2", "caracal", "B")                        # B front connects 3,2
-    put(s, "3,2", "porcupine", "A")                      # A porcupine (str 7)
-    # king_theron (8) is strictly greater than porcupine (7) - if the static block weren't
-    # there, this cover would otherwise be legal by strength alone.
-    assert PlaceAction("king_theron", ("cr", "3,2")) not in rules.legal_actions(s)
+    porcupine = put(s, "3,2", "porcupine", "A")          # A porcupine (str 7)
+    rules.apply_action(s, PlaceAction("elephant", ("cr", "3,2")))   # 9 covers 7...
+    assert s.top_unit("3,2") is porcupine                # ...and the spines remove it
+    assert "elephant" in s.remove_pile
+    rules.apply_action(s, PlaceAction("elephant", ("cr", "3,2")))   # only the first time
+    assert s.top_unit("3,2").card_id == "elephant"
 
 
-def test_chameleon_covers_enemies_of_any_strength_but_not_porcupine():
+def test_chameleon_covers_enemies_of_any_strength():
     cover = make_state(hands={"A": ["chameleon"]})
     put(cover, "1,2", "caracal", "A")
     put(cover, "2,2", "lion", "B")                       # str 7 enemy
     assert PlaceAction("chameleon", ("cr", "2,2")) in rules.legal_actions(cover)
-    put(cover, "1,1", "porcupine", "B")                  # "can't" beats "can"
-    assert PlaceAction("chameleon", ("cr", "1,1")) not in rules.legal_actions(cover)
 
     covered = make_state(current="B", hands={"B": ["house_cat"]})
     put(covered, "4,2", "caracal", "B")

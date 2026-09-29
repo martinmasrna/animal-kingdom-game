@@ -20,9 +20,6 @@ def _controls(state: GameState, player: str, card_id: str) -> bool:
     )
 
 
-UNCOVERABLE = "Cannot be covered by enemies."
-
-
 def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance) -> bool:
     """May the hand instance `placer` be placed onto the enemy `target` unit?
 
@@ -32,11 +29,6 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance) -> b
     placer_card = state.cards[placer.card_id]
     target_card = state.cards[target.card_id]
     owner = placer.owner
-
-    # The spiny ones (Porcupine, Hedgehog) cannot be covered by an enemy at all, Chameleon
-    # included ("can't" beats "can").
-    if UNCOVERABLE in target_card.text:
-        return False
 
     # Chameleon covers units of any strength (its own side needs no strength anyway).
     if placer_card.id == "chameleon":

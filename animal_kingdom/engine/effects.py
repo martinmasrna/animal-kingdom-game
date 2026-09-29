@@ -536,8 +536,7 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
     """Apex Predator landing rules (decision D + keyword-review C1): it may land wherever it
     could legally cover - free on your own occupants, `statics.can_cover` vs an enemy, so
     the covering statics apply to apexes exactly as to normal placements: Snow Leopard lets
-    an apex Cat land at equal strength, and Porcupine ("cannot be covered by enemy units") blocks the landing entirely - quills
-    beat teeth. If the occupant is eat-eligible it gets eaten; if not (Armor / enemy
+    an apex Cat land at equal strength. If the occupant is eat-eligible it gets eaten; if not (Armor / enemy
     Stealth) it is simply covered (see _land_unit)."""
     if top.owner == placer.owner:
         return True
@@ -1589,6 +1588,17 @@ def _gale_covered(state, covered, coverer, cr):
         state.effect_stack.append({"op": "bounce_iid", "iid": coverer.iid})
 
 
+def _spines_covered(state, covered, coverer, cr):
+    # Porcupine, Hedgehog: "The first time an enemy covers this, remove that enemy." Once per
+    # instance, like Gale; after that it's an ordinary unit, so nothing is ever uncoverable.
+    if coverer.owner == covered.owner or covered.retaliation_used:
+        return
+    covered.retaliation_used = True
+    if statics.can_be_removed(state, coverer):
+        state.effect_stack.append({"op": "remove_iid", "iid": coverer.iid, "by_player": covered.owner,
+                                   "by_card": covered.card_id})
+
+
 def _skunk_place(state, unit, cr):
     options = _adjacent_enemy_unit_crossroads(state, unit, cr)
     if options:
@@ -1769,7 +1779,7 @@ def _rat_king_place(state, unit, cr):
     _push_gain(state, unit.owner, state.config.rat_king_per_rodent * max(0, others))
 
 
-def _hedgehog_place(state, unit, cr):                                # Armor body that feeds
+def _hedgehog_place(state, unit, cr):                                # spiny body that feeds
     _push_gain(state, unit.owner, state.config.hedgehog_food)
 
 
@@ -1994,7 +2004,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Food OTK: "food gained this turn" signature + go-wide rodent payoff (2026-07-05 overhaul).
     "scrooge": {"on_place": _scrooge_place},
     "rat_king": {"on_place": _rat_king_place},
-    "hedgehog": {"on_place": _hedgehog_place},
+    "hedgehog": {"on_place": _hedgehog_place, "on_covered": _spines_covered},
+    "porcupine": {"on_covered": _spines_covered},
     "chinchilla": {"on_place": _chinchilla_place},
     "hamster": {"on_place": _hamster_place},
     "muskrat": {"on_place": _muskrat_place},

@@ -14,7 +14,7 @@ Can be placed ignoring connection, except onto an HQ: capturing the enemy HQ sti
 ### Armor
 A shell, plates or spines: cannot be removed, returned to hand, or eaten by **any** ability — the enemy's **or its own controller's**. It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an enemy with Armor; when it removes a stack, a buried unit with Armor is skipped **in place** and everything else is still removed. Armor is not a shield for the cards beneath it. Scope is **board-only**: a card with Armor in hand can be paid or removed normally.
 
-Carried by: Methuselah the tortoise and Cairn the glyptodont (Ramp); Armadillo (Food). Only animals a player sees as armored carry it; the spiny ones (Porcupine, Hedgehog) "cannot be covered by enemies" instead.
+Carried by: Methuselah the tortoise and Cairn the glyptodont (Ramp); Armadillo (Food). Only animals a player sees as armored carry it; the spiny ones (Porcupine, Hedgehog) remove the first enemy that covers them instead.
 
 ### Stealth
 Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis), and an Apex Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it instead). **Mass, random, and automatic effects hit it normally**: Rhinoceros/Bulwark AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron triggers. Its own controller may still choose it freely. Scope is board-only.
@@ -25,7 +25,7 @@ Carried by: Black Panther. Armadillo gives it to every friendly unit on an adjac
 A predator that must land on prey and eats it.
 
 - **Must** be placed on top of another **occupant** — it **cannot** be placed on an empty crossroad. If there is no legal occupant to land on, it cannot be played.
-- **Normal covering rules apply in full**: landing on an **enemy** occupant uses the same legality as a normal cover — strictly-greater strength by default, **including every covering static**: Snow Leopard lets an apex Cat land at equal strength, and **Porcupine ("cannot be covered by enemies") blocks the landing entirely** — quills beat teeth. Landing on **your own** occupant has **no** strength requirement.
+- **Normal covering rules apply in full**: landing on an **enemy** occupant uses the same legality as a normal cover — strictly-greater strength by default, **including every covering static**: Snow Leopard lets an apex Cat land at equal strength. Eating is not covering, so an Apex that eats a Porcupine or Hedgehog doesn't set off their spines. Landing on **your own** occupant has **no** strength requirement.
 - **May target your own occupants** as well as enemy ones — and removes (eats) them too.
 - On placement it **removes** the occupant it lands on **instead of covering/stacking** on it. The removed occupant's leave-the-board and remove effects fire normally. The predator then occupies the crossroad (on top of any remaining stack beneath).
 - **If the occupant can't be eaten** (Armor, or an enemy with Stealth — the eat is a chosen single-out), the predator is **not** blocked from landing there: it simply **covers** it under the normal placement rules and buries it instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it does *when it can*, not a placement precondition.

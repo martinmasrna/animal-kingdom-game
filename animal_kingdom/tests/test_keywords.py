@@ -91,12 +91,12 @@ def test_pestis_wipes_around_an_armor_unit_not_stopping_at_it():
 
 # ----------------------------------------------------------------- Apex landings (C1/C3)
 
-def test_apex_cannot_land_on_porcupine():
-    # "Cannot be covered by enemy units" now blocks the landing entirely - quills beat teeth.
-    s = make_state(hands={"A": ["tiger"]})
+def test_an_apex_eats_a_porcupine_eating_is_not_covering():
+    # The spines fire when an enemy covers the Porcupine; an Apex that eats it never covers it.
+    s = make_state(hands={"A": ["borealis"]})
     put(s, "1,2", "porcupine", "B")
-    legal = rules.legal_actions(s)
-    assert PlaceAction("tiger", ("cr", "1,2")) not in legal
+    rules.apply_action(s, PlaceAction("borealis", ("cr", "1,2")))
+    assert s.top_unit("1,2").card_id == "borealis" and "porcupine" in s.remove_pile
 
 
 def test_snow_leopard_lets_an_apex_cat_land_at_equal_strength():

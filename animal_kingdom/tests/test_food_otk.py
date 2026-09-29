@@ -14,7 +14,6 @@ from __future__ import annotations
 from animal_kingdom.engine import effects, rules, statics
 from animal_kingdom.engine.actions import ChoiceAction, DrawAction, PlaceAction
 from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.state import UnitInstance
 from animal_kingdom.engine.strength import effective_strength
 
 from ._helpers import hand_ids, make_state, put
@@ -170,12 +169,16 @@ def test_rat_king_gains_food_per_other_rodent_and_draws():
     assert "lion" in hand_ids(s, "A")                                 # drew 1
 
 
-def test_hedgehog_feeds_and_cannot_be_covered():
-    s = make_state(hands={"A": ["hedgehog"]}, current="A")
+def test_hedgehog_feeds_and_its_spines_remove_the_first_coverer():
+    s = make_state(hands={"A": ["hedgehog"]})
     rules.apply_action(s, PlaceAction("hedgehog", ("cr", "1,2")))
     assert s.food["A"] == CFG.hedgehog_food
-    borealis = UnitInstance("borealis", "B", 999)
-    assert not statics.can_cover(s, borealis, s.top_unit("1,2"))       # spines: not even a 10
+
+    s = make_state(current="B", hands={"B": ["lion"]})
+    put(s, "4,2", "caracal", "B")                                       # B connects to 3,2
+    hedgehog = put(s, "3,2", "hedgehog", "A")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))           # 7 covers 5...
+    assert s.top_unit("3,2") is hedgehog and "lion" in s.remove_pile    # ...and is removed
 
 
 # ------------------------------------------------------------------- Chinchilla (tempo)

@@ -30,7 +30,7 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Flying Squirrel** | 2 | Rodent | 3 | Flight. Roar: gain 10 food. |
-| **Porcupine** | 2 | Rodent | 7 | Cannot be covered by enemies. |
+| **Porcupine** | 2 | Rodent | 7 | The first time an enemy covers this, remove that enemy. |
 | **Chinchilla** | 2 | Rodent | 4 | Roar: next turn, take 1 additional action. |
 | **Armadillo** | 2 | — | 7 | Armor. Adjacent friendly units have Stealth. |
 
@@ -40,7 +40,7 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 |---|---:|---|---:|---|
 | **Squirrel** | 3 | Rodent | 3 | Roar: gain 10 food. |
 | **Chipmunk** | 3 | Rodent | 1 | Roar: gain 10 food. At the start of next turn, gain 10 more. |
-| **Hedgehog** | 2 | — | 5 | Cannot be covered by enemies. Roar: gain 5 food. |
+| **Hedgehog** | 2 | — | 5 | The first time an enemy covers this, remove that enemy. Roar: gain 5 food. |
 | **Hamster** | 2 | Rodent | 3 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
 | **Muskrat** | 3 | Rodent | 2 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. |
 | **Groundhog** | 3 | Rodent | 4 | Roar: if you gained 10 or more food this turn, gain 10 food. |
