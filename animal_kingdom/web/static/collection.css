@@ -191,3 +191,4 @@
 .coll .fcount { align-items: center; justify-content: center; }
 .coll .fcount b, .coll .fcount span { line-height: 1; display: block; }
 .coll .fcount { display: grid; grid-auto-flow: column; place-content: center; align-items: baseline; column-gap: 5px; }
+.coll .dtile b { top: 50%; transform: translateY(-50%); font-size: 19px; }   /* the name alone, centred */

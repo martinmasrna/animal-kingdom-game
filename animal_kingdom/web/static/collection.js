@@ -90,7 +90,7 @@ function render(app, all) {
   const tile = d => d.id === st.open
     ? `<div class="dtile on" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${body(d)}`
-    : `<div class="dtile" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b>${esc(d.name)}</b><span>${familyCount(d.list).slice(0, 2).map(([f, n]) => n + ' ' + f).join(' · ')}</span></div>`;
+    : `<div class="dtile" data-d="${d.id}" style="${d.cover ? `background-image:url(${artUrl(d.cover)})` : ''}"><b>${esc(d.name)}</b></div>`;
   // Two states, as in Hearthstone: your deck list (New deck is the slot after the last deck, Back in the foot), or one deck
   // being edited (only that deck; Play and Done in the foot).
   const column = open
