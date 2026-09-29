@@ -14,7 +14,7 @@ Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reac
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Methuselah** | 1 | Megafauna | 3 | Immovable. At the end of your turn, gain 5 food. |
+| **Methuselah** | 1 | — | 3 | Immovable. At the end of your turn, gain 5 food. |
 | **Borealis** | 1 | Bear | 10 | Apex Predator. |
 | **Bulwark** | 1 | Megafauna | 8 | Costs 15 food. Roar: remove all adjacent units. |
 | **Yuka** | 1 | Megafauna | 10 | Immovable. Costs 15 food. |

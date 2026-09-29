@@ -507,7 +507,7 @@
       "name": "Methuselah",
       "deck": "ramp",
       "rarity": "legendary",
-      "tags": ["Megafauna"],
+      "tags": [],
       "base_strength": 3,
       "keywords": ["Immovable"],
       "text": "Immovable. At the end of your turn, gain 5 food."
