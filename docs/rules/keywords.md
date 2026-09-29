@@ -11,12 +11,10 @@ Everything on a crossroad is a unit; Eggs are units too.
 ### Flight
 Can be placed ignoring connection, except onto an HQ: capturing the enemy HQ still needs a connected path, so Flight alone never captures. All other placement rules still apply.
 
-### Immovable
-*Physics.* Cannot be removed, moved (bounced), or eaten by **any** ability — the enemy's **or its own controller's**. It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an Immovable enemy; when it removes a stack, a buried Immovable unit is skipped **in place** and everything else is still removed. Immovable is not a shield for the cards beneath it. Scope is **board-only**: an Immovable card in hand can be paid or removed normally.
+### Armor
+A shell, plates or spines: cannot be removed, returned to hand, or eaten by **any** ability — the enemy's **or its own controller's**. It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an enemy with Armor; when it removes a stack, a buried unit with Armor is skipped **in place** and everything else is still removed. Armor is not a shield for the cards beneath it. Scope is **board-only**: a card with Armor in hand can be paid or removed normally.
 
-Carried by: Methuselah, Yuka and Elephant (Ramp); Armadillo and Hedgehog (Food).
-
-⚠ *Open (`docs/STATUS.md`): the keyword still feels slightly off, in name and footprint.*
+Carried by: Methuselah and the Glyptodont (Ramp); Armadillo and Hedgehog (Food). Only animals a player sees as armored carry it.
 
 ### Stealth
 Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis), and an Apex Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it instead). **Mass, random, and automatic effects hit it normally**: Rhinoceros/Bulwark AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron triggers. Its own controller may still choose it freely. Scope is board-only.
@@ -30,7 +28,7 @@ A predator that must land on prey and eats it.
 - **Normal covering rules apply in full**: landing on an **enemy** occupant uses the same legality as a normal cover — strictly-greater strength by default, **including every covering static**: Snow Leopard lets an apex Cat land at equal strength, and **Porcupine ("cannot be covered by enemies") blocks the landing entirely** — quills beat teeth. Landing on **your own** occupant has **no** strength requirement.
 - **May target your own occupants** as well as enemy ones — and removes (eats) them too.
 - On placement it **removes** the occupant it lands on **instead of covering/stacking** on it. The removed occupant's leave-the-board and remove effects fire normally. The predator then occupies the crossroad (on top of any remaining stack beneath).
-- **If the occupant can't be eaten** (Immovable, or an enemy with Stealth — the eat is a chosen single-out), the predator is **not** blocked from landing there: it simply **covers** it under the normal placement rules and buries it instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it does *when it can*, not a placement precondition.
+- **If the occupant can't be eaten** (Armor, or an enemy with Stealth — the eat is a chosen single-out), the predator is **not** blocked from landing there: it simply **covers** it under the normal placement rules and buries it instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it does *when it can*, not a placement precondition.
 - **Cannot be placed onto a headquarters** — deliberate design choice, so Apex Predators can't capture an enemy HQ directly.
 - **Eats Eggs** it lands on like any other unit.
 

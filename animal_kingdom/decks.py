@@ -46,7 +46,7 @@ PREMADE_DECKS: dict[str, list[str]] = _build_premade_decks(load_cards())
 BASELINE_DECK: list[str] = [
     # common
     "lion", "eagle", "bat", "squirrel", "mock_scout", "mock_saboteur", "african_wild_dog",
-    "anaconda", "gray_wolf", "mock_immovable_6", "black_bear", "grizzly_bear", "mock_vanilla_5",
+    "anaconda", "gray_wolf", "mock_armor_6", "black_bear", "grizzly_bear", "mock_vanilla_5",
     "mock_vanilla_6", "mock_vanilla_8", "mock_vanilla_9", "mock_apex_5", "mock_apex_6",
     # rare
     "jerboa", "jaguar", "serval", "stoop", "porcupine", "polar_bear", "rhinoceros", "mock_draw2",

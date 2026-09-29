@@ -24,7 +24,7 @@ class Config:
     chipmunk_food_now: int = 10          # decision H: doubled, same reasoning
     chipmunk_food_later: int = 10        # paid at the start of the owner's next turn (doubled)
     flying_squirrel_food: int = 10       # synced to card text "gain 10 food" (was 8; text/const desync broke groundhog fed-threshold combo, 2026-07-09)
-    hedgehog_food: int = 6               # Immovable wall that also feeds (food_otk 2026-07-05)
+    hedgehog_food: int = 6               # Armor wall that also feeds (food_otk 2026-07-05)
     rat_king_per_rodent: int = 4         # Roar: gain N food per OTHER Rodent you control
     worker_ant_food: int = 12            # trimmed from 15 in the 2026-07-05 balance pass
     worker_bee_food: int = 10            # 5→10; +worker_bee_extra if you control another Worker

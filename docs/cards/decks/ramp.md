@@ -14,10 +14,10 @@ Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reac
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Methuselah** | 1 | — | 3 | Immovable. At the end of your turn, gain 5 food. |
+| **Methuselah** | 1 | — | 3 | Armor. At the end of your turn, gain 5 food. |
 | **Borealis** | 1 | Bear | 10 | Apex Predator. |
 | **Bulwark** | 1 | Megafauna | 8 | Costs 15 food. Roar: remove all adjacent units. |
-| **Yuka** | 1 | Megafauna | 10 | Immovable. Costs 15 food. |
+| **Glyptodont** | 1 | Megafauna | 10 | Armor. Costs 15 food. |
 
 ### Rare
 
@@ -32,7 +32,7 @@ Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reac
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Elephant** | 3 | Megafauna | 8 | Immovable. Costs 15 food. |
+| **Elephant** | 3 | Megafauna | 9 | Costs 15 food. |
 | **Grizzly Bear** | 3 | Bear | 6 | Roar: in 2 turns, remove a random adjacent enemy. |
 | **Oxpecker** | 3 | Bird | 1 | Flight. Gain 1 food for each unit in your starting deck with strength 6 or more. |
 | **Black Bear** | 3 | Bear | 5 | Roar: in 2 turns, draw 2 cards. |

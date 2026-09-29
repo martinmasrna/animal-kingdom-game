@@ -198,7 +198,7 @@ Legendaries should be **splashy and identity-defining** (the current four are an
 - **Empty-hand deck-burst.** Rewards going fully all-in with a tempo explosion pulled straight from the deck. Hoarding piles can't switch it on; sharpens the deck-out clock (a real cost).
 
 🔵 **Mongoose** — tagless · STR 4? · *Roar: remove all effects and keywords from an adjacent enemy unit.*
-- **Silence / tech disruption** (the Hornet-rework idea). Strips Immovable / "can't be covered" / anthem off a defensive wall so you can punch through — answers the exact cards that hard-counter the rush, and does little against a board with no defensive tech.
+- **Silence / tech disruption** (the Hornet-rework idea). Strips Armor / "can't be covered" / anthem off a defensive wall so you can punch through — answers the exact cards that hard-counter the rush, and does little against a board with no defensive tech.
 
 ### 4.3 New Commons
 

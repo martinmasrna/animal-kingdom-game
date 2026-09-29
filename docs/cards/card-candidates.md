@@ -19,7 +19,7 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Aphid** | Insect | 1 / 3 | **Variant 1:** Roar: gain 2 food. Whenever you place another Colony or Insect unit, gain 2 food.<br>**Variant 2:** Roar: gain 4 food. Whenever you play another Colony or Insect unit adjacent to this, gain 2 food. |
 | **Barnacle** | — | X | Has the same strength as the unit directly beneath this; if none, STR 0. |
 | **Bat-eared Fox** | Canine | 4 | Roar: look at the top 3 cards of your deck; draw a Canine and put the rest on the bottom. |
-| **Bighorn Sheep** | — | 6 | Immovable. |
+| **Bighorn Sheep** | — | 6 | Armor. |
 | **Bison** | Megafauna | 8 / 9 | **Variant 1:** Costs 10 food to play.<br>**Variant 2:** Costs 5 food to play. |
 | **Bloodhound** | Canine | 3 | Roar: look at the top 5 cards of your deck; draw a unit of your choice, put the rest on the bottom. |
 | **Bonobo** | Primate | 5 | Roar: move an adjacent friendly unit to an adjacent empty crossroad. |
@@ -34,7 +34,7 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Decoy Egg** | Egg | 0 | Fragile. Deathrattle: draw 3 cards. |
 | **Dinosaur Egg** | Egg | 0 | Fragile. Hatch 2 — play a random non-Legendary Dinosaur from your deck on this crossroad. |
 | **Dog/Canine identity TBD** | Canine | 3 | Roar: give +3 strength to every other copy, wherever they are. |
-| **Dormouse** | Rodent | 2 | Immovable. For 2 turns this does nothing; then gain 12 food. |
+| **Dormouse** | Rodent | 2 | Armor. For 2 turns this does nothing; then gain 12 food. |
 | **Dung Beetle** | Insect | 2 / 3 | **Variant 1:** Roar: gain 4 food. Deathrattle: gain 4 food.<br>**Variant 2:** Roar: gain 4 food. Deathrattle: gain 8 food. |
 | **Earthworm** | — | 1 | When this is removed by being covered, return two copies of it to your hand. |
 | **Echidna** | — | 3 | Cannot be covered by enemy units. Deathrattle: draw 1 card. |
@@ -81,7 +81,7 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Rhinoceros Beetle** | Insect | 2 | Has +1 strength for each other friendly Colony or Insect unit. |
 | **Roadrunner** | Bird | 3 | Roar: remove an adjacent enemy Snake or Lizard of any strength. |
 | **Salmon** | Fish | 4 / 5 | **Variant 1:** Roar: move this to any crossroad connected to your HQ.<br>**Variant 2:** Roar: move another friendly Fish to an empty crossroad connected to your HQ. |
-| **Salt Lick** | Landmark | 0 | **Variant 1:** Fragile. Immovable. At the start of your next turn, give all friendly units +1 strength, then remove this.<br>**Variant 2:** Fragile. At the start of your next turn, give all friendly units +2 strength, then remove this. |
+| **Salt Lick** | Landmark | 0 | **Variant 1:** Fragile. Armor. At the start of your next turn, give all friendly units +1 strength, then remove this.<br>**Variant 2:** Fragile. At the start of your next turn, give all friendly units +2 strength, then remove this. |
 | **Sand Cat** | Cat | 5 | Has +3 strength while no other friendly unit is adjacent to this. |
 | **Scorpion** | Arachnid | 3 | The first enemy unit that covers this becomes envenomed. |
 | **Spider Egg Sac** | Egg / Arachnid | 0 | Fragile. Deathrattle: play two Spiderling tokens (Arachnid, STR 3) on adjacent empty crossroads. |
@@ -90,7 +90,7 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Stingray** | Fish | 3 | Deathrattle: remove the unit that removed this. |
 | **Stoat** | — | 3 | Roar: remove an adjacent enemy of strength 2 or less. |
 | **Tapir** | — | 5 | No effect. |
-| **Termite Mound** | Landmark | 0 | Fragile. Immovable. Roar: draw a random Colony unit from your deck. Adjacent Colony units have +2 strength. |
+| **Termite Mound** | Landmark | 0 | Fragile. Armor. Roar: draw a random Colony unit from your deck. Adjacent Colony units have +2 strength. |
 | **Tool Cache** | Landmark | 0 | Fragile. When you play a Primate adjacent to this, remove this and draw 3 cards. |
 | **Trapdoor Spider** | Arachnid | 2 | When an enemy places a unit on an adjacent crossroad, remove it if its strength is 2 or less. |
 | **Truffle Pig** | — | 3 | Roar: look at the top 4 cards of your deck; draw 1 card and put the rest on the bottom. |
@@ -108,7 +108,7 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Antlion** | Insect | 2 | At the start of your next turn, remove an adjacent enemy of strength 3 or less. |
 | **Archaeopteryx** | Bird / Dinosaur | 4 | Flight. Roar: incubate an adjacent Egg. |
 | **Axolotl** | Amphibian | 3 / 5 | The first time this would be removed, return it to this crossroad with base strength 1 instead. |
-| **Baobab Tree** | Landmark | 0 | **Variant 1:** Fragile. Immovable. At the start of each of your turns, gain 5 food.<br>**Variant 2:** Fragile. Immovable. At the end of each of your turns, gain 8 food. |
+| **Baobab Tree** | Landmark | 0 | **Variant 1:** Fragile. Armor. At the start of each of your turns, gain 5 food.<br>**Variant 2:** Fragile. Armor. At the end of each of your turns, gain 8 food. |
 | **Beagle** | Canine | 2 | Roar: search your deck for a unit of strength 3 or less and put it into your hand. |
 | **Beaver** | — | 5 | At the end of your turn, if this is adjacent to a Landmark, gain 5 food. |
 | **Blue Jay** | Bird | 2 | Flight. Roar: draw 2 cards, then put 1 card from your hand on top of your deck. |
@@ -120,13 +120,13 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Burrow Owl** | Bird | 4 | Flight. Your adjacent units with Burrow have +2 strength. |
 | **Camel** | — | 6 | Roar: gain 12 food. You cannot gain food again until your next turn. |
 | **Capybara** | Rodent | 5 | At the end of your turn, gain 1 food for each unit adjacent to this. |
-| **Cave** | Landmark | 0 | Fragile. Immovable. Roar: draw a random Bear from your deck. Your Bears cost 5 less food to play. |
+| **Cave** | Landmark | 0 | Fragile. Armor. Roar: draw a random Bear from your deck. Your Bears cost 5 less food to play. |
 | **Chimpanzee** | Primate | 4 | Roar: give an adjacent friendly unit +3 strength. |
 | **Cicada** | Insect | 1 | After 3 turns, this gains +8 strength. |
 | **Clouded Leopard** | Cat | 7 | Camouflage. |
 | **Cobra** | Snake | 3 | **Variant 1:** Roar: poison an adjacent enemy; remove it at the start of your next turn.<br>**Variant 2:** Roar: envenom an adjacent enemy. |
 | **Coconut Crab** | — | 5 | Cannot be covered by enemy units. |
-| **Coral Reef** | Landmark | 0 | **Variant 1:** Fragile. Immovable. Your Fish have +2 strength.<br>**Variant 2:** Fragile. Immovable. Roar: draw a random Fish from your deck. Your Fish have +2 strength. |
+| **Coral Reef** | Landmark | 0 | **Variant 1:** Fragile. Armor. Your Fish have +2 strength.<br>**Variant 2:** Fragile. Armor. Roar: draw a random Fish from your deck. Your Fish have +2 strength. |
 | **Crocodile Egg** | Egg | 0 | Fragile. Hatch 2 — play a Crocodile token (Lizard, STR 8) on this crossroad. Its Roar removes an adjacent enemy of strength 4 or less. |
 | **Cuckoo** | Bird | 2 / 3 | **Variant 1:** Flight. Roar: if this covers an enemy unit, gain control of the unit beneath it instead of burying it.<br>**Variant 2:** Flight. Roar: you may play an Egg from your hand on an empty crossroad adjacent to an enemy unit. |
 | **Culpeo** | Canine | 5 | Roar: give one Canine in your hand +2 strength. |
@@ -145,8 +145,8 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Malleefowl** | Bird | 5 | At the end of your turn, incubate one adjacent Egg. |
 | **Mandrill** | Primate | 5 | Your other Primates have +2 strength. |
 | **Musk Ox** | Megafauna | 6 | Has +1 strength for each other unit adjacent to this. |
-| **Naked Mole Rat** | Rodent | 2 | Immovable. Cannot be targeted by enemy special effects. |
-| **Nesting Ground** | Landmark | 0 | Fragile. Immovable. At the end of your turn, incubate every adjacent Egg. |
+| **Naked Mole Rat** | Rodent | 2 | Armor. Cannot be targeted by enemy special effects. |
+| **Nesting Ground** | Landmark | 0 | Fragile. Armor. At the end of your turn, incubate every adjacent Egg. |
 | **Ocelot** | Cat | 6 | Roar: if this covers an enemy, return one friendly Cat buried beneath it to your hand. |
 | **Orangutan** | Primate | 6 | Roar: return a Landmark from the Remove Pile to your hand. |
 | **Osprey** | Bird | 5 | Flight. Apex Predator. |
@@ -163,7 +163,7 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Springhare** | Rodent | 5 | Burrow. Roar: if played adjacent to the opponent's HQ, draw 1 card. |
 | **Stick Insect** | Insect | 2 | Cannot be targeted by enemy special effects until it covers an enemy unit. |
 | **Tarantula** | Arachnid | 4 | **Variant 1:** Deathrattle: play a Spiderling token (Arachnid, STR 1) on each adjacent empty crossroad.<br>**Variant 2:** Deathrattle: play up to two Spiderling tokens (Arachnid, STR 2) on adjacent empty crossroads. |
-| **Tardigrade** | — | 1 | Immovable. Cannot be removed. After 4 turns, gain 30 food. |
+| **Tardigrade** | — | 1 | Armor. Cannot be removed. After 4 turns, gain 30 food. |
 | **Tasmanian Devil** | Marsupial | 3 | Adjacent enemy units have −1 strength. |
 | **Triceratops** | Dinosaur | 7 | When an enemy covers an adjacent Egg, remove that enemy if its strength is 4 or less. |
 | **Vulture** | Bird | 4 | Flight. Whenever a card is removed, gain 5 food. Currently shelved. |
@@ -179,7 +179,7 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | Name | Type / tags | STR | Candidate text / unresolved variants |
 |---|---|---:|---|
 | **Aquila (giant harpy eagle), carry-off version** | Bird | TBD | Flight. Roar: take an adjacent enemy unit with lower strength into your hand. Parked for a control "steal the opponent's cards" deck; broken as first drafted (6 strength took anything up to 5 anywhere), needs balancing. |
-| **Blue Whale — “Sounder”** | Cetacean | 10 | Immovable. Cannot be covered. This cannot cover units or capture an HQ. Costs 15 food to play. |
+| **Blue Whale — “Sounder”** | Cetacean | 10 | Armor. Cannot be covered. This cannot cover units or capture an HQ. Costs 15 food to play. |
 | **Hachiko, the Faithful** | Canine | 5 | The first time each turn another friendly Canine would be removed, return it to your hand instead. |
 | **Kanzi** | Primate | 4 | Roar: repeat the Roar of another adjacent Primate. |
 | **Legendary Parrot (name TBD)** | Bird | TBD | **Variant 1:** Become a copy of the last unit your opponent played.<br>**Variant 2:** Flight. Roar: repeat the Roar of the last unit your opponent played. |

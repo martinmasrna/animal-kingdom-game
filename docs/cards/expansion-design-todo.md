@@ -71,7 +71,7 @@ Build two alternatives to the current draw/shuffle engine: delayed board hatchin
 - [ ] **Vulture / Crow / other Bird (identity TBD)** — Bird · STR 3 · Rare `Flight. Roar: draw 1 card; if an enemy unit was removed this turn, draw 2 cards instead.`
 - [ ] Decide whether this remains Vulture, becomes Crow/Rook/another Bird, or whether Vulture is reserved for a separate “eat” or scavenging design.
 
-- [ ] **Nesting Ground** — Landmark · STR 0 · Rare `Fragile. Immovable. At the end of your turn, incubate every adjacent Egg.` It can accelerate multiple Eggs immediately; incubating one Egg starting next turn would not repay a card, a placement action, and a STR 0 board slot.
+- [ ] **Nesting Ground** — Landmark · STR 0 · Rare `Fragile. Armor. At the end of your turn, incubate every adjacent Egg.` It can accelerate multiple Eggs immediately; incubating one Egg starting next turn would not repay a card, a placement action, and a STR 0 board slot.
 
 ### 1.3 Colony — earlier texture and mixed-insect builds
 
@@ -87,15 +87,17 @@ The current package asks Colony to reach a large board before many cards become 
 
 - [ ] **Aphid** — Insect · STR 3 · Common `Roar: gain 4 food. Whenever you play another Colony or Insect unit adjacent to this, gain 2 food.` A fragile mixed-tag engine; once-per-turn may be necessary if placement chains become excessive.
 
-- [ ] **Termite Mound** — Landmark · STR 0 · Common `Fragile. Immovable. Roar: draw a random Colony unit from your deck. Adjacent Colony units have +2 strength.` A local formation payoff that does not count toward Colony unit thresholds.
+- [ ] **Termite Mound** — Landmark · STR 0 · Common `Fragile. Armor. Roar: draw a random Colony unit from your deck. Adjacent Colony units have +2 strength.` A local formation payoff that does not count toward Colony unit thresholds.
 
 - [ ] **Royal Jelly** — Landmark · STR 0 · Rare `Fragile. At the start of your next turn, remove this and play a random Queen from your deck on this crossroad.` The delay exchanges Royal Jelly for a filtered free placement, not merely one replacement card. It forces a deckbuilder to decide how many Queens are worth including.
 
 ### 1.4 Ramp — more routes upward, not more finishers
 
+- [ ] **Ice Age set:** Yuka, the woolly mammoth, parked in the reserve on 2026-09-29 when Armor went to armored animals only; she needs a new design there.
+
 Ramp already has enough giant payoff bodies. Add competing engines, medium-cost bodies, and Landmarks that make the opponent interact with its setup.
 
-- [ ] **Beaver** — STR 5 · Rare `At the end of your turn, if this is adjacent to a Landmark, gain 5 food.` Recurring ramp that asks for a two-card board rather than carrying Immovable itself.
+- [ ] **Beaver** — STR 5 · Rare `At the end of your turn, if this is adjacent to a Landmark, gain 5 food.` Recurring ramp that asks for a two-card board rather than carrying Armor itself.
 
 - [ ] **Bison** — Megafauna · STR 9 · Common `Costs 5 food to play.` STR 8 for 10 food would be worse than Lion in the turns that matter; the medium rung must buy a meaningful body increase.
 
@@ -105,9 +107,9 @@ Ramp already has enough giant payoff bodies. Add competing engines, medium-cost 
 
 - [ ] **Moose** — Megafauna · STR 6 · Common `Has +2 strength while adjacent to a Landmark.` Turns vulnerable infrastructure into a positional reason to contest the board.
 
-- [ ] **Baobab Tree** — Landmark · STR 0 · Rare `Fragile. Immovable. At the end of each of your turns, gain 8 food.` It pays once on the placement turn and remains interactable by covering. Test against Fig Tree's one-shot 20-food benchmark.
+- [ ] **Baobab Tree** — Landmark · STR 0 · Rare `Fragile. Armor. At the end of each of your turns, gain 8 food.` It pays once on the placement turn and remains interactable by covering. Test against Fig Tree's one-shot 20-food benchmark.
 
-- [ ] **Cave** — Landmark · STR 0 · Rare `Fragile. Immovable. Roar: draw a random Bear from your deck. Your Bears cost 5 less food to play.` Specify that multiple Caves do not stack. The filtered draw replaces the spent Cave card; the ongoing discount must justify spending a placement action on no body.
+- [ ] **Cave** — Landmark · STR 0 · Rare `Fragile. Armor. Roar: draw a random Bear from your deck. Your Bears cost 5 less food to play.` Specify that multiple Caves do not stack. The filtered draw replaces the spent Cave card; the ongoing discount must justify spending a placement action on no body.
 
 - [ ] **Salt Lick** — Landmark · STR 0 · Common `Fragile. At the start of your next turn, give all friendly units +2 strength, then remove this.` A temporary setup cost for a permanent wide-board payoff; also attractive to Colony.
 
@@ -211,7 +213,7 @@ Primary risks: snowballing free bodies, timers becoming bookkeeping-heavy, and a
 
 Anchor candidates:
 
-- [ ] **Coral Reef** — Landmark · STR 0 · Rare `Fragile. Immovable. Roar: draw a random Fish from your deck. Your Fish have +2 strength.`
+- [ ] **Coral Reef** — Landmark · STR 0 · Rare `Fragile. Armor. Roar: draw a random Fish from your deck. Your Fish have +2 strength.`
 - [ ] **Kelp Forest** — Landmark · STR 0 · Common `Fragile. Roar: draw a random Fish from your deck, then you may move a friendly Fish to an empty crossroad adjacent to this. Adjacent Fish have Stealth.`
 - [ ] **Salmon** — Fish · STR 5 · Common `Roar: move another friendly Fish to an empty crossroad connected to your headquarters.`
 - [ ] **Clownfish** — Fish · STR 6 · Common `Has Stealth while adjacent to a friendly Landmark.`
@@ -285,7 +287,7 @@ Landmarks should remain a minority of the total pool, but two cards are not enou
 - [ ] **Fallen Log** — `Fragile. When this leaves the battlefield, play two Insect tokens (STR 3) on adjacent empty crossroads.` Determine whether a Landmark leaving play should use a separate trigger name from Deathrattle.
 - [ ] **Fossil Bed** — `Fragile. At the start of your next turn, remove this and play a random non-Legendary Dinosaur from your deck on this crossroad.`
 - [ ] **Cut Mud Wall.** Bounce immunity on a STR 0 card does not repay its card and placement action; revisit only as a rider on a broader Landmark.
-- [ ] Do not make Immovable a default Landmark keyword. Bounceable Landmarks create useful interaction and allow some designs to be replayed; each card should justify immunity.
+- [ ] Do not make Armor a default Landmark keyword. Bounceable Landmarks create useful interaction and allow some designs to be replayed; each card should justify immunity.
 - [ ] Decide whether an Apex Predator “destroys” or “razes” a Landmark rather than “eats” it. Keep the mechanics identical unless balance testing demands otherwise.
 
 ## 4. Egg queue

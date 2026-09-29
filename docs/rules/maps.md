@@ -96,7 +96,7 @@ win_food: 100
 - **Contested center.** Higher food in the middle pulls both players into the same squares, so removal, covering, and positioning all matter there — the interactions worth stress-testing.
 - **Shared corners create economy.** Adjacent regions share crossroads, so holding two regions overlaps; board states get interesting without the map being large.
 - **Symmetric**, so the only built-in imbalance is turn order — the thing to *measure*, not bury under map asymmetry.
-- **HQ defense uses the front crossroads** (§3): a fat body on a column-4 crossroad is the wall, which is exactly why Matriarch Elephant (Str 8, Immovable) is the premier HQ defender and why Aggro needs Nile Crocodile to out-muscle it.
+- **HQ defense uses the front crossroads** (§3): a fat body on a column-4 crossroad is the wall, which is why the biggest bodies (Elephant, Str 9) make the best HQ defenders.
 
 ---
 

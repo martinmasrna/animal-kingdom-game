@@ -10,7 +10,7 @@ const VIS = 0.61;
 const focus = id => { const y = CROP[id] ? CROP[id][1] : 0.35; return Math.max(0, Math.min(1, (y - VIS / 2) / (1 - VIS))) * 100; };
 
 // Every keyword that opens a sentence is bold ("Flight. Roar: ..." bolds both).
-const KW = /(?<=^|\. )(Roar|Immovable|Flight|Stealth|Apex Predator)(:|\.)/g;
+const KW = /(?<=^|\. )(Roar|Armor|Flight|Stealth|Apex Predator)(:|\.)/g;
 const rules = t => (t || '').replace(KW, '<b>$1$2</b>');
 const chalk = n => String(n).split('').map(d => d === '*' ? '<b>*</b>' : `<img src="/static/kit2/chalk/${d}.webp" alt="${d}" draggable="false">`).join('');
 

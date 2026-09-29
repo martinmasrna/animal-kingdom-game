@@ -1,5 +1,5 @@
 {
-  "_comment": "Static card data for the reworked 98-design pool (7 premade 4-4-6 decks). Source of truth: docs/cards/decks/*.md + docs/cards/decks/README.md (decisions A-J) + docs/rules/keywords.md. Effect LOGIC lives in engine code (effects/statics/strength), bound in Phase 2 - NOT here; numeric tunables live in engine/config.py. Schema: id (globally unique snake_case), name, deck (owning deck slug), rarity, tags (flat list of families + roles, [] for tagless), base_strength (int 0-10 or 'dynamic'), dynamic_strength (rule name iff base 'dynamic'; only Goliath/Chameleon), keywords (subset of Flight/Immovable/Fragile/Apex Predator; Roar/Deathrattle are text prefixes, not keywords), food_cost (int, only on 'Costs X food' cards), text (verbatim printed text).",
+  "_comment": "Static card data for the reworked 98-design pool (7 premade 4-4-6 decks). Source of truth: docs/cards/decks/*.md + docs/cards/decks/README.md (decisions A-J) + docs/rules/keywords.md. Effect LOGIC lives in engine code (effects/statics/strength), bound in Phase 2 - NOT here; numeric tunables live in engine/config.py. Schema: id (globally unique snake_case), name, deck (owning deck slug), rarity, tags (flat list of families + roles, [] for tagless), base_strength (int 0-10 or 'dynamic'), dynamic_strength (rule name iff base 'dynamic'; only Goliath/Chameleon), keywords (subset of Flight/Armor/Fragile/Apex Predator; Roar/Deathrattle are text prefixes, not keywords), food_cost (int, only on 'Costs X food' cards), text (verbatim printed text).",
   "cards": [
     {
       "id": "prince_leo",
@@ -509,8 +509,8 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
-      "keywords": ["Immovable"],
-      "text": "Immovable. At the end of your turn, gain 5 food."
+      "keywords": ["Armor"],
+      "text": "Armor. At the end of your turn, gain 5 food."
     },
     {
       "id": "borealis",
@@ -557,13 +557,24 @@
     {
       "id": "yuka",
       "name": "Yuka",
+      "deck": "reserve",
+      "rarity": "legendary",
+      "tags": ["Megafauna"],
+      "base_strength": 10,
+      "keywords": [],
+      "food_cost": 15,
+      "text": "Costs 15 food."
+    },
+    {
+      "id": "glyptodont",
+      "name": "Glyptodont",
       "deck": "ramp",
       "rarity": "legendary",
       "tags": ["Megafauna"],
       "base_strength": 10,
-      "keywords": ["Immovable"],
+      "keywords": ["Armor"],
       "food_cost": 15,
-      "text": "Immovable. Costs 15 food."
+      "text": "Armor. Costs 15 food."
     },
     {
       "id": "polar_bear",
@@ -611,10 +622,10 @@
       "deck": "ramp",
       "rarity": "common",
       "tags": ["Megafauna"],
-      "base_strength": 8,
-      "keywords": ["Immovable"],
+      "base_strength": 9,
+      "keywords": [],
       "food_cost": 15,
-      "text": "Immovable. Costs 15 food."
+      "text": "Costs 15 food."
     },
     {
       "id": "grizzly_bear",
@@ -743,8 +754,8 @@
       "rarity": "rare",
       "tags": [],
       "base_strength": 7,
-      "keywords": ["Immovable"],
-      "text": "Immovable. Adjacent friendly units have Stealth."
+      "keywords": ["Armor"],
+      "text": "Armor. Adjacent friendly units have Stealth."
     },
     {
       "id": "squirrel",
@@ -773,8 +784,8 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
-      "keywords": ["Immovable"],
-      "text": "Immovable. Roar: gain 6 food.",
+      "keywords": ["Armor"],
+      "text": "Armor. Roar: gain 6 food.",
       "copies": 2
     },
     {
@@ -1726,8 +1737,8 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
-      "keywords": ["Immovable"],
-      "text": "Immovable."
+      "keywords": ["Armor"],
+      "text": "Armor."
     },
     {
       "id": "calib_immov_6",
@@ -1736,8 +1747,8 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
-      "keywords": ["Immovable"],
-      "text": "Immovable."
+      "keywords": ["Armor"],
+      "text": "Armor."
     },
     {
       "id": "calib_immov_7",
@@ -1746,8 +1757,8 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 7,
-      "keywords": ["Immovable"],
-      "text": "Immovable."
+      "keywords": ["Armor"],
+      "text": "Armor."
     },
     {
       "id": "calib_immov_8",
@@ -1756,8 +1767,8 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
-      "keywords": ["Immovable"],
-      "text": "Immovable."
+      "keywords": ["Armor"],
+      "text": "Armor."
     },
     {
       "id": "calib_stealth_5",
@@ -1910,14 +1921,14 @@
       "text": "Flight."
     },
     {
-      "id": "mock_immovable_6",
-      "name": "Immovable 6",
+      "id": "mock_armor_6",
+      "name": "Armor 6",
       "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
-      "keywords": ["Immovable"],
-      "text": "Immovable."
+      "keywords": ["Armor"],
+      "text": "Armor."
     },
     {
       "id": "mock_removal",

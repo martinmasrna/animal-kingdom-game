@@ -8,7 +8,7 @@ All card candidates that use these mechanics are inventoried in [`../cards/card-
 
 - [ ] A keyword must save meaningful repeated text on at least three cards.
 - [ ] Prefer an existing operation plus a targeting restriction over a new subsystem.
-- [ ] Every mechanic must specify interaction with covering, stacks, Stealth, Immovable, Landmarks, Eggs, the Remove Pile, and headquarters where relevant.
+- [ ] Every mechanic must specify interaction with covering, stacks, Stealth, Armor, Landmarks, Eggs, the Remove Pile, and headquarters where relevant.
 - [ ] New mechanics must work for a human tabletop implementation without hidden bookkeeping that only software can manage.
 - [ ] “Once each time this enters play” counters reset only after the physical card leaves the battlefield and is later played again. Covering does not count as leaving play.
 - [ ] Every event trigger must name its controller scope explicitly: `when you draw`, `when your opponent removes`, `when either player shuffles`, or `when a unit is removed`. Do not rely on a global implied default.
@@ -63,7 +63,7 @@ Required by the locked Aggro legendary:
 
 - [ ] Resolve the placement first, then the retaliation. The coverer is returned and this unit becomes visible again.
 - [ ] The retaliation is automatic, not chosen, so Stealth does not protect the coverer.
-- [ ] An Immovable coverer cannot be returned; it remains on top and the one-use retaliation is considered spent.
+- [ ] A coverer with Armor cannot be returned; it remains on top and the one-use retaliation is considered spent.
 - [ ] The returned card is not removed, triggers no Deathrattle/remove event, and receives no Skunk-style play lock.
 - [ ] Track the spent shield on the card instance. Burying and later revealing it does not reset the shield; leaving and re-entering play does.
 - [ ] Confirm ordering against King Theron, Pufferfish, Fragile, and future “when covered” triggers before canonizing the card.
@@ -101,7 +101,7 @@ Initial wording proposal:
 - [ ] Decide whether movement may enter or capture either HQ.
 - [ ] Decide whether buried units can move or be selected for movement.
 - [ ] Define how moving a visible unit off a stack affects the newly revealed occupant and control.
-- [ ] Define interactions with Immovable and Stealth.
+- [ ] Define interactions with Armor and Stealth.
 - [ ] Define eligible movers. The Kangaroo proposal allows moving itself or an ally; adjacency and visibility requirements remain open.
 - [ ] Test two destination models separately:
   1. **Empty-only Move:** pure repositioning.
@@ -149,7 +149,7 @@ Proposed keyword action:
 - [ ] Venom ignores later strength changes.
 - [ ] Covering the marked unit before the timer resolves hides it and causes the Venom to expire. This is intended counterplay.
 - [ ] Moving the marked unit does not clear Venom; returning it to hand/deck or removing it does.
-- [ ] Immovable units may be marked but resist the eventual removal. The mark then clears.
+- [ ] Units with Armor may be marked but resist the eventual removal. The mark then clears.
 - [ ] Stealth prevents an enemy from choosing a unit to envenom.
 - [ ] Multiple Venom marks do not stack or extend the timer.
 - [ ] Clearly mark Venom with a physical token and identify which player's next turn clears it.
@@ -236,7 +236,7 @@ Cards must remain fully understandable without the ability word.
 - [ ] Keep Landmarks as non-units that occupy crossroads, participate in connection, cannot capture an HQ, and are ignored by text that says “unit.”
 - [ ] Confirm that a player may cover their own Landmark normally. Fragile then removes it.
 - [ ] Create a type-neutral phrase for a Landmark leaving play. Deathrattle currently applies only to units. Candidate wording: `When this leaves the battlefield, ...`
-- [ ] Do not make Landmarks Immovable by default; print it only when the delayed engine requires protection from abilities.
+- [ ] Do not give Landmarks Armor by default; print it only when the delayed engine requires protection from abilities.
 - [ ] Decide whether filtered “draw a Landmark” effects are allowed. Recommended: yes, using the same random filtered-draw rule as tags/rarity.
 - [ ] Preserve the current mechanical Apex interaction but change flavor language: an Apex Predator **destroys** or **razes** a Landmark rather than eating it.
 - [ ] If a Landmark returns to hand, all timers/counters on its battlefield instance are cleared unless the effect explicitly preserves them.

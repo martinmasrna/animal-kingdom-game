@@ -85,14 +85,14 @@ def extra_placement_crossroads(state: GameState, card_id: str, owner: str) -> se
 
 
 def can_be_removed(state: GameState, unit: UnitInstance) -> bool:
-    """Immovable (keyword-review decision A2, 2026-07-02): *physics*. The unit cannot be
+    """Armor (keyword-review decision A2, 2026-07-02): *physics*. The unit cannot be
     removed, moved (bounced), or eaten by ANY ability - the enemy's or its own
     controller's (covering is placement, not an ability, and stays legal). Consulted by
     every effect-removal/bounce/eat path regardless of who chose it.
 
     Carriers: Giant Tortoise, Scrooge, Methuselah, Bulwark, Elephant.
     """
-    return "Immovable" not in state.cards[unit.card_id].keywords
+    return "Armor" not in state.cards[unit.card_id].keywords
 
 
 def _adjacent_to_friendly_armadillo(state: GameState, unit: UnitInstance) -> bool:

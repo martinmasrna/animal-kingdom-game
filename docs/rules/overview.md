@@ -153,7 +153,7 @@ Some effects resolve on a delay — "in 2 turns, draw 2 cards" (Black Bear), "at
 
 **Venom is the exception: it belongs to the bitten unit, not to the snake.** Taipan's bite ("at the start of your next turn, remove it") resolves even if the Taipan has been covered or removed, and even if the bitten unit is buried; it is cancelled only if the bitten unit leaves the board first.
 
-This is the same principle as the reaction-fizzle rule above: anything queued re-checks its unit before it resolves. Covering is placement, not an ability, so neither **Immovable** nor **Stealth** protects a timer — only strength (being hard to cover) does.
+This is the same principle as the reaction-fizzle rule above: anything queued re-checks its unit before it resolves. Covering is placement, not an ability, so neither **Armor** nor **Stealth** protects a timer — only strength (being hard to cover) does.
 
 ---
 

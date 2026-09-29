@@ -7,7 +7,7 @@ import { pitStates, heldRegions, boardChanges, incomeFlights } from './turn.js';
 
 export const STAGE = { w: 1512, h: 800 };
 const key = (c, r) => `${c},${r}`;
-const BOARD_KW = { Immovable: '⛨', Stealth: '◐' };
+const BOARD_KW = { Armor: '⛨', Stealth: '◐' };
 const kit = f => `/static/kit2/${f}`;
 const team = side => (side === 'A' ? 'a' : 'b');
 

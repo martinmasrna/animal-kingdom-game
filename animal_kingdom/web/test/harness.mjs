@@ -76,7 +76,7 @@ export function screenMismatches() {
     const timer = el.querySelector('.timer');
     if (top.timer && !(timer && timer.textContent === String(top.timer))) out.push(`${cr}: ${top.id} timer ${top.timer} not shown`);
     if (timer && getComputedStyle(timer).color === getComputedStyle(timer).backgroundColor) out.push(`${cr}: ${top.id} timer text is the colour of its disc`);
-    const kw = (window.__ak.cards()[top.id].kw || []).filter(k => ['Immovable', 'Stealth'].includes(k));
+    const kw = (window.__ak.cards()[top.id].kw || []).filter(k => ['Armor', 'Stealth'].includes(k));
     const badge = el.querySelector('.kw');
     if (kw.length && !(badge && badge.dataset.tip === kw.join(', '))) out.push(`${cr}: ${top.id} is ${kw.join(', ')} but shows ${badge ? badge.dataset.tip : 'no badge'}`);
     const buried = el.querySelectorAll('.buried').length;

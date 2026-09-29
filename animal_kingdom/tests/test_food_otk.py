@@ -169,11 +169,11 @@ def test_rat_king_gains_food_per_other_rodent_and_draws():
     assert "lion" in hand_ids(s, "A")                                 # drew 1
 
 
-def test_hedgehog_feeds_and_is_immovable():
+def test_hedgehog_feeds_and_is_armor():
     s = make_state(hands={"A": ["hedgehog"]})
     rules.apply_action(s, PlaceAction("hedgehog", ("cr", "1,2")))
     assert s.food["A"] == CFG.hedgehog_food
-    assert not statics.can_be_removed(s, s.top_unit("1,2"))           # Immovable
+    assert not statics.can_be_removed(s, s.top_unit("1,2"))           # Armor
 
 
 # ------------------------------------------------------------------- Chinchilla (tempo)

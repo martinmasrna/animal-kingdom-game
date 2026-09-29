@@ -1,7 +1,7 @@
-"""Behavior tests for the Immovable / Stealth keyword split (keyword-review rulings
-A2/B/C1/D/E, 2026-07-02 - see docs/rules/keyword-review-immovable-untargetable.md).
+"""Behavior tests for the Armor / Stealth keyword split (keyword-review rulings
+A2/B/C1/D/E, 2026-07-02 - see docs/rules/keyword-review-armor-untargetable.md).
 
-Immovable = physics: can't be removed/moved/eaten by ANY ability, including its own
+Armor = physics: can't be removed/moved/eaten by ANY ability, including its own
 controller's. Stealth = can't be *chosen* by an enemy ability; mass, random, and
 automatic effects hit it normally. Apex landings route through statics.can_cover.
 
@@ -69,23 +69,23 @@ def test_stealth_top_cannot_be_chosen_by_pestis():
     assert s.top_unit("2,2").card_id == "black_panther"   # Pestis chooses its enemy; Stealth hides it
 
 
-# ------------------------------------------------------------- Immovable: physics for all
+# ------------------------------------------------------------- Armor: physics for all
 
-def test_immovable_survives_mass_aoe():
+def test_armor_survives_mass_aoe():
     s = make_state(hands={"A": ["bulwark"]}, food={"A": 20, "B": 0})
-    put(s, "2,2", "elephant", "B")
+    put(s, "2,2", "methuselah", "B")
     rules.apply_action(s, PlaceAction("bulwark", ("cr", "1,2")))
-    assert _ids_at(s, "2,2") == ["elephant"]
+    assert _ids_at(s, "2,2") == ["methuselah"]
 
 
-def test_pestis_wipes_around_an_immovable_unit_not_stopping_at_it():
-    # Ruling B amendment: Immovable is skipped in place, NOT a shield for the stack.
+def test_pestis_wipes_around_an_armor_unit_not_stopping_at_it():
+    # Ruling B amendment: Armor is skipped in place, NOT a shield for the stack.
     s = make_state(hands={"A": ["pestis"]})
     put(s, "2,2", "mouse", "B")                           # bottom: should die
-    put(s, "2,2", "elephant", "B")                        # middle: Immovable, survives
+    put(s, "2,2", "methuselah", "B")                        # middle: Armor, survives
     put(s, "2,2", "rat", "B")                             # top: should die
     rules.apply_action(s, PlaceAction("pestis", ("cr", "1,2")))
-    assert _ids_at(s, "2,2") == ["elephant"]              # alone where the stack was
+    assert _ids_at(s, "2,2") == ["methuselah"]              # alone where the stack was
     assert "mouse" in s.remove_pile and "rat" in s.remove_pile
 
 
@@ -121,13 +121,13 @@ def test_apex_covers_stealth_prey_instead_of_eating_it():
     assert "black_panther" not in s.remove_pile
 
 
-def test_apex_covers_immovable_prey_instead_of_eating_it():
+def test_apex_covers_armor_prey_instead_of_eating_it():
     s = make_state(hands={"A": ["borealis"]}, food={"A": 20, "B": 0})
-    put(s, "1,2", "elephant", "B")                        # elephant 8 < borealis
+    put(s, "1,2", "methuselah", "B")                      # methuselah 3 < borealis
     legal = rules.legal_actions(s)
     if PlaceAction("borealis", ("cr", "1,2")) in legal:   # only if strength allows the cover
         rules.apply_action(s, PlaceAction("borealis", ("cr", "1,2")))
-        assert _ids_at(s, "1,2") == ["elephant", "borealis"]
-        assert "elephant" not in s.remove_pile
+        assert _ids_at(s, "1,2") == ["methuselah", "borealis"]
+        assert "methuselah" not in s.remove_pile
 
 

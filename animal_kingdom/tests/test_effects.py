@@ -259,11 +259,11 @@ def test_goliath_strength_equals_remove_pile_size():
     assert effective_strength(s, g) == 3
 
 
-def test_immovable_survives_removal_effect():
+def test_armor_survives_removal_effect():
     s = make_state(hands={"A": ["gray_wolf"]})
     hand_inst(s, "A", "gray_wolf").strength_counter = 3  # body 7 - clears Armadillo's str 5
     put(s, "1,2", "lion", "A")
-    put(s, "3,2", "armadillo", "B")                      # str 5 but Immovable
+    put(s, "3,2", "armadillo", "B")                      # str 5 but Armor
     rules.apply_action(s, PlaceAction("gray_wolf", ("cr", "2,2")))
     assert s.owner_of("3,2") == "B"
 
@@ -328,12 +328,12 @@ def test_gale_does_not_react_to_a_friendly_cover():
     assert gale.retaliation_used is False
 
 
-def test_gale_cannot_bounce_an_immovable_coverer():
-    s = make_state(current="A", hands={"A": ["elephant"]}, food={"A": 20, "B": 0})
+def test_gale_cannot_bounce_an_armor_coverer():
+    s = make_state(current="A", hands={"A": ["glyptodont"]}, food={"A": 20, "B": 0})
     put(s, "1,2", "caracal", "A")
     gale = put(s, "2,2", "gale", "B")                    # str 6
-    rules.apply_action(s, PlaceAction("elephant", ("cr", "2,2")))  # str 8 Immovable covers it
-    assert s.owner_of("2,2") == "A"                      # Immovable resists the bounce
+    rules.apply_action(s, PlaceAction("glyptodont", ("cr", "2,2")))  # str 10 Armor covers it
+    assert s.owner_of("2,2") == "A"                      # Armor resists the bounce
     assert gale.retaliation_used is True                 # but the charge is still consumed
 
 
@@ -523,11 +523,11 @@ def test_apex_may_eat_its_own_unit():
     assert eats_own.top_unit("1,2").card_id == "tiger" and "house_cat" in eats_own.remove_pile
 
 
-def test_apex_covers_but_does_not_eat_an_immovable():
-    # Immovable can't be eaten, but the predator may still land on it under normal covering
+def test_apex_covers_but_does_not_eat_an_armor():
+    # Armor can't be eaten, but the predator may still land on it under normal covering
     # rules (strictly-greater) and simply bury it.
     s = make_state(hands={"A": ["tiger"]})
-    put(s, "1,2", "armadillo", "A")                    # own Immovable (str 5)
+    put(s, "1,2", "armadillo", "A")                    # own Armor (str 5)
     assert PlaceAction("tiger", ("cr", "1,2")) in rules.legal_actions(s)
     rules.apply_action(s, PlaceAction("tiger", ("cr", "1,2")))
     assert s.top_unit("1,2").card_id == "tiger"         # tiger on top

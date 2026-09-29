@@ -180,7 +180,7 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> No
 
     # Apex Predator (decision D): eat the occupant it lands on instead of covering it; its
     # Deathrattle / remove triggers fire, then the predator occupies what remains beneath.
-    # If the occupant can't be eaten (Immovable, or enemy Stealth - the eat is a chosen
+    # If the occupant can't be eaten (Armor, or enemy Stealth - the eat is a chosen
     # single-out, keyword-review decision C3), the predator falls back to a normal cover,
     # burying it — it isn't restricted to prey it can eat.
     if is_apex and covered is not None:
@@ -285,7 +285,7 @@ def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None
     stack = state.board.get(cr)
     if not stack or unit not in stack:
         return False
-    # Only the physics gate lives here (Immovable blocks any effect-removal, whoever chose
+    # Only the physics gate lives here (Armor blocks any effect-removal, whoever chose
     # it). Stealth is a *choice* restriction, enforced where enemy option lists are built
     # (and at the Apex eat), never at resolution - so mass/random/automatic removals
     # (Pestis, Rhino/Bulwark, Grizzly, Hippo, King Theron, Pufferfish) hit Stealth units.
@@ -537,7 +537,7 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
     could legally cover - free on your own occupants, `statics.can_cover` vs an enemy, so
     the covering statics apply to apexes exactly as to normal placements: Snow Leopard lets
     an apex Cat land at equal strength, and Porcupine ("cannot be covered by enemy units") blocks the landing entirely - quills
-    beat teeth. If the occupant is eat-eligible it gets eaten; if not (Immovable / enemy
+    beat teeth. If the occupant is eat-eligible it gets eaten; if not (Armor / enemy
     Stealth) it is simply covered (see _land_unit)."""
     if top.owner == placer.owner:
         return True
@@ -888,7 +888,7 @@ def _adjacent_enemy_targets(state, unit, cr, *, max_strength=None, min_strength=
 
 def _adjacent_friendly_units(state, unit, cr):
     """Crossroads adjacent to `cr` whose top is a friendly, removable unit. Stealth never
-    hides from its own controller; Immovable blocks its own controller's sacrifices too
+    hides from its own controller; Armor blocks its own controller's sacrifices too
     (decision A2: that's the keyword's cost - e.g. Carmilla can't eat a Scrooge)."""
     out = []
     for nb in sorted(state.game_map.neighbors(cr)):
@@ -1308,10 +1308,10 @@ def _aurum_start(state, unit, cr):
 
 
 def _sloth_place(state, unit, cr):
-    """"In 2 turns, gain 30 food." Deliberately NOT Immovable.
+    """"In 2 turns, gain 30 food." Deliberately NOT Armor.
 
     Its counterplay is the timed-effect rule (overview.md 9.1), not a keyword: cover the Sloth and
-    the timer suspends for as long as the cover holds. Immovable would make the payout
+    the timer suspends for as long as the cover holds. Armor would make the payout
     unanswerable AND shadow Methuselah.
     """
     schedule(state, unit, state.config.sloth_delay,
@@ -1337,7 +1337,7 @@ def _push_remove_choice(state, owner, by_card, targets):
 
 def _adjacent_enemy_unit_crossroads(state, unit, cr, *, chosen=True):
     """Adjacent crossroads topped by an enemy *unit* that can be moved (for bounces).
-    Immovable can't be moved by anyone; Stealth only hides from a `chosen` pick (Skunk),
+    Armor can't be moved by anyone; Stealth only hides from a `chosen` pick (Skunk),
     not from a mass bounce (Sirocco, `chosen=False`) - keyword-review decision B."""
     out = []
     for nb in sorted(state.game_map.neighbors(cr)):
@@ -1428,7 +1428,7 @@ def _rhinoceros_place(state, unit, cr):
 
 def _bulwark_place(state, unit, cr):
     # Remove ALL adjacent units, friend and foe (2026-07-05 nerf: was enemies only). Automatic
-    # mass effect, so it hits Stealth; Immovable neighbours survive (can_be_removed).
+    # mass effect, so it hits Stealth; Armor neighbours survive (can_be_removed).
     for nb in sorted(state.game_map.neighbors(cr)):
         top = state.top_unit(nb)
         if top and statics.can_be_removed(state, top):
@@ -1531,7 +1531,7 @@ def _op_black_widow_sac(state, step):
 
 
 def _friendly_unit_crossroads(state, player):
-    # Own sacrifices: Stealth never hides from its controller; Immovable still refuses
+    # Own sacrifices: Stealth never hides from its controller; Armor still refuses
     # (decision A2 - Carmilla/Black Widow can't eat a Tortoise or Scrooge).
     return sorted(
         c for c, st in state.board.items()
@@ -1543,7 +1543,7 @@ def _friendly_unit_crossroads(state, player):
 
 def _pestis_place(state, unit, cr):
     # "Remove an adjacent enemy and every unit buried under it": the target is a chosen enemy
-    # (so Stealth and Immovable tops are off limits, as for any removal), the whole stack goes.
+    # (so Stealth and Armor tops are off limits, as for any removal), the whole stack goes.
     options = _adjacent_enemy_unit_crossroads(state, unit, cr)
     if options:
         state.effect_stack.append({"op": "pestis_wipe", "chooser": unit.owner, "options": options})
@@ -1558,7 +1558,7 @@ def _op_pestis_wipe(state, step):
             return PendingRequest("choice", step["chooser"], options=opts)
     target = step["choice"]
     # Remove the entire stack under the enemy, both players' units, top-down. A buried
-    # Immovable unit is skipped in place, not a shield: everything else is still wiped around it.
+    # Armor unit is skipped in place, not a shield: everything else is still wiped around it.
     stack = state.board.get(target)
     for unit in reversed(list(stack or [])):
         _remove_specific(state, target, unit, by_player=step["chooser"], by_card="pestis")
@@ -1580,7 +1580,7 @@ def _op_bounce_iid(state, step):
 def _gale_covered(state, covered, coverer, cr):
     # "The first time an enemy unit covers this" - once per instance (not per turn), gated
     # on `retaliation_used` (persists across turns, unlike state.turn_flags). Consumed on any
-    # genuine enemy cover, but Immovable still blocks the actual bounce (keyword physics: cf.
+    # genuine enemy cover, but Armor still blocks the actual bounce (keyword physics: cf.
     # Apex Predator vs. an unremovable occupant - the ability resolves, the move just fails).
     if coverer.owner == covered.owner or covered.retaliation_used:
         return
@@ -1769,7 +1769,7 @@ def _rat_king_place(state, unit, cr):
     _push_gain(state, unit.owner, state.config.rat_king_per_rodent * max(0, others))
 
 
-def _hedgehog_place(state, unit, cr):                                # Immovable body that feeds
+def _hedgehog_place(state, unit, cr):                                # Armor body that feeds
     _push_gain(state, unit.owner, state.config.hedgehog_food)
 
 

@@ -29,7 +29,7 @@ Excellent eusocial flavor, and a genuinely nice touch: **wingless ants stay grou
 - **Champion of the Hive (legendary, hornet) — minor irony.** Hornets are the bee-hive's *predators* (they raid honeybee nests), so a hornet billed as "Champion of *the* Hive" reads slightly against type. It's defensible — hornets fiercely guard their *own* nests — so I'd keep it, but if you want it airtight, a **giant wasp / "Soldier Wasp"** champion sidesteps the irony. Low priority.
 
 ### Deck 4 — Ramp
-Big-body flavor lands well. **Oxpecker** is the gem — a tiny bird that earns food per *big* unit in your deck is precisely the oxpecker's real symbiosis with rhinos and buffalo. **Hippopotamus** (kills things that wander into its space) and the **Immovable hoarding tortoise** are both spot-on.
+Big-body flavor lands well. **Oxpecker** is the gem — a tiny bird that earns food per *big* unit in your deck is precisely the oxpecker's real symbiosis with rhinos and buffalo. **Hippopotamus** (kills things that wander into its space) and the **Armor hoarding tortoise** are both spot-on.
 
 - **Fig Tree / Watering Hole (Landmarks) — non-animal; see §2.C for my opinion.** Flagged as the permitted exception; the theme question is parked (`docs/STATUS.md`). Opinion in cross-pool section.
 - **Tortoise tag inconsistency (cross-pool, see §2.B):** the colossal tortoise here is `Megafauna`, but Food OTK's Giant Tortoise is tagless. Pick one convention for tortoises.
@@ -128,7 +128,7 @@ Cats (Prince Leo, Princess Lea, King Theron, Queen Adira) are already named and 
 - **Tubbins** — affectionate and round; pure good-natured silliness.
 
 ### Ramp
-**Colossal ancient tortoise** (Megafauna 5, Immovable, +10 food/turn; the ramp wall):
+**Colossal ancient tortoise** (Megafauna 5, Armor, +10 food/turn; the ramp wall):
 - **Methuselah** — the proverbially oldest; light biblical/folklore resonance for an ancient.
 - **Jonathan** — a nod to the real, world-famous oldest living tortoise; "real named individual" taken literally, and quietly funny.
 - **Aldabra** — the giant-tortoise atoll/species name; evocative and unmistakably tortoise.
@@ -143,8 +143,8 @@ Cats (Prince Leo, Princess Lea, King Theron, Queen Adira) are already named and 
 - **Tempest** — the storm that drops out of the sky; matches the Apex dive.
 - **Skyrender** — descriptive epithet-name for a costed sky predator. *(Avoided "Roc" — direct giant-bird myth.)*
 
-**Titanic rhino** (Megafauna 10, Immovable, Costs 15, removes all adjacent; fortress finisher):
-- **Bulwark** — a living rampart; perfect for the Immovable stomp-wall.
+**Titanic rhino** (Megafauna 10, Armor, Costs 15, removes all adjacent; fortress finisher):
+- **Bulwark** — a living rampart; perfect for the Armor stomp-wall.
 - **Bastion** — the fortress that also flattens its surroundings.
 - **Rampart** — same fortress register, slightly more aggressive. *(Avoided "Behemoth/Juggernaut" — both are myth/deity-derived cites.)*
 

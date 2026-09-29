@@ -56,7 +56,7 @@ CKPT_VERSION = 2
 
 def _kw(card) -> str:
     return (",".join(card.keywords)
-            .replace("Apex Predator", "apex").replace("Immovable", "immov").replace("Flight", "fly"))
+            .replace("Apex Predator", "apex").replace("Armor", "immov").replace("Flight", "fly"))
 
 
 def _fold(records) -> dict:
