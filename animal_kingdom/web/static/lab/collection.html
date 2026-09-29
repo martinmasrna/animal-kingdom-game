@@ -148,6 +148,16 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #16181a; }
 .covs { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 12px; max-height: 60vh; overflow-y: auto; padding: 4px; margin-bottom: 16px; scrollbar-width: thin; scrollbar-color: #3a3d40 transparent; }
 .cv { container-type: inline-size; cursor: pointer; border-radius: 10px; transition: transform .1s; } .cv .card { --w: 100cqw; } .cv:hover { transform: translateY(-3px); }
 .cv.on { box-shadow: 0 0 0 3px #24272a, 0 0 0 5px #f0ece4; }
+.play.off { background: #2c3034; color: #8b8e92; cursor: default; font-size: 16px; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+.tl.shake { animation: shake .3s; }
+@keyframes flashbg { 0% { background-color: #7fb2e8; color: #16181a; } 100% { background-color: transparent; } }
+@keyframes flashtx { 0%, 60% { color: #ff8a78; transform: scale(1.25); } 100% { transform: scale(1); } }
+.st.flash { animation: flashbg .9s ease-out; }
+.rh span.flash { display: inline-block; animation: flashtx .7s; } .pips.flash { animation: flashpips .7s; }
+@keyframes flashpips { 0%, 60% { transform: translateX(-50%) scale(1.3); background: #b24a3a; } 100% { transform: translateX(-50%); } } .play.flash { animation: shake .3s; }
+.none { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 80px 0; color: #8b8e92; font: 15px var(--font-text); }
+.none p { margin: 0; } .none button { height: 36px; padding: 0 16px; border-radius: 8px; border: 1px solid #44484c; background: none; color: #d8d4cc; font: 600 14px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
 </style></head><body>
 <div class="gb" id="gb"></div><div id="modal"></div><div id="toast2"></div><div class="pop" id="pop"></div>
 
@@ -198,20 +208,21 @@ function render() {
   const open = all.find(d => d.id === st.open), counts = open ? open.list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {}) : {};
   const shown = cards.filter(c => (!st.family || c.tags.includes(st.family)) && (!st.rar || c.rarity === st.rar) && (st.str === '' || String(c.str) === st.str) && (!st.q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(st.q.toLowerCase())))
     .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
-  const grid = '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0, max = open && n >= (c.copies || LIMIT[c.rarity]);
+  const capped = r => open && CAP[r] && open.list.filter(id => C[id].rarity === r).length >= CAP[r];
+  const grid = !shown.length ? `<div class="none"><p>No cards match</p><button id="clearf">Clear filters</button></div>` : '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0, max = !n && capped(c.rarity);
     return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n && c.rarity !== 'legendary' ? `<span class="pips">${pips(n, c.copies || LIMIT[c.rarity])}</span>` : ''}</div>`; }).join('') + '</div>';
   const tabs = `<div class="tab all${st.family ? '' : ' on'}" data-t="" data-tip="All families"><div class="med mosaic">${['lion', 'gray_wolf', 'eagle', 'elephant'].map(id => `<i style="${med(id, 19)}"></i>`).join('')}</div></div>` + FAMILIES.map(([t, id]) => `<div class="tab${st.family === t ? ' on' : ''}" data-t="${t}" data-tip="${t}"><div class="med" style="${med(id, 40)}"></div></div>`).join('');
   const seg = (k, o) => '<span class="seg">' + o.map(([v, l]) => `<span class="${(st[k] || '') === v ? 'on' : ''}" data-k="${k}" data-v="${v}">${l}</span>`).join('') + '</span>';
   const strip = id => `<div class="st" data-card="${id}"><div class="art" style="background-image:url(${artUrl(id)})"></div><span class="s">${C[id].str}</span><span class="n">${C[id].name}</span><span class="x">${C[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
   const byR = r => Object.keys(counts).filter(id => C[id].rarity === r).sort((a, b) => sv(C[a]) - sv(C[b])).map(strip).join('');
   const inR = r => open.list.filter(id => C[id].rarity === r).length;
-  const head = (label, n, cap) => `<h4 class="rh"><span>${label}</span><span class="${cap && n >= cap ? 'full' : ''}">${n}${cap ? ' / ' + cap : ''}</span></h4>`;
+  const head = (label, n, cap) => `<h4 class="rh" data-r="${label.toLowerCase()}"><span>${label}</span><span class="${cap && n >= cap ? 'full' : ''}">${n}${cap ? ' / ' + cap : ''}</span></h4>`;
   const body = d => `<div class="dbody">
       ${familyCount(d.list).length > 1 ? `<div class="families">${familyCount(d.list).map(([t, n]) => `<div><div class="med" style="${med(FAMILIES.find(x => x[0] === t)[1], 26)}"></div>${n}</div>`).join('')}</div>` : ''}
       ${head('Legendary', inR('legendary'), 4)}${byR('legendary')}${head('Rare', inR('rare'), 8)}${byR('rare')}${head('Common', inR('common'))}${byR('common')}
-      <div class="pf"><div class="play">Play this deck</div></div></div>`;
+      <div class="pf">${d.list.length === 30 ? '<div class="play">Play this deck</div>' : `<div class="play off">${d.list.length} / 30 cards</div>`}</div></div>`;
   const tile = d => (d.id === st.open
-    ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${d.name}</b>${d.list.length === 30 ? '' : `<em>${d.list.length}<i> / 30</i></em>`}<div class="tacts">${d.own ? `<button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button>` : ''}<button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>${d.own ? `<button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button>` : ''}</div></div>`
+    ? `<div class="dtile on" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b${d.own ? ' class="nm-edit" title="Rename"' : ''}>${d.name}</b><div class="tacts">${d.own ? `<button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button>` : ''}<button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button>${d.own ? `<button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button>` : ''}</div></div>`
     : `<div class="dtile" data-d="${d.id}" style="background-image:url(${artUrl(d.cover)})"><b>${d.name}</b><span>${familyCount(d.list).slice(0, 2).map(([x, n]) => n + ' ' + x).join(' · ')}</span></div>`) + (d.id === st.open ? body(d) : '');
   const side = `<div class="decks">${all.filter(d => d.own).map(tile).join('')}<div class="dsep"></div>${all.filter(d => !d.own).map(tile).join('')}</div>`;
   document.getElementById('gb').innerHTML = `<div class="side">${side}<div class="sfoot"><button class="backbtn" id="back">${ICON.back}<span>Back</span></button></div></div><div class="bar"><div class="tabs">${tabs}</div><span class="gap"></span>
@@ -233,8 +244,14 @@ function render() {
   // Click a grid card to add a copy, a deck strip to take one out.
   document.querySelectorAll('.cgrid [data-card]').forEach(e => e.onclick = () => { const c = C[e.dataset.card]; if (!st.open) return toast('Open a deck to add cards');
     const d0 = all.find(x => x.id === st.open), n = d0.list.filter(x => x === c.id).length, inR = d0.list.filter(x => C[x].rarity === c.rarity).length;
-    if (d0.list.length >= 30 || n >= (c.copies || LIMIT[c.rarity]) || (CAP[c.rarity] && inR >= CAP[c.rarity])) return;
-    editable().list.push(c.id); document.getElementById('pop').style.display = 'none'; render(); });
+    const why = d0.list.length >= 30 ? 'tot' : n >= (c.copies || LIMIT[c.rarity]) ? 'pips' : CAP[c.rarity] && inR >= CAP[c.rarity] ? c.rarity : null;
+    if (why) return refuse(e, why);
+    editable().list.push(c.id); document.getElementById('pop').style.display = 'none'; st.flash = c.id; render(); });
+  // Right-click a grid card to take a copy out.
+  document.querySelectorAll('.cgrid [data-card]').forEach(e => e.oncontextmenu = ev => { ev.preventDefault(); const d0 = all.find(x => x.id === st.open); if (!d0 || !d0.list.includes(e.dataset.card)) return;
+    const d = editable(); d.list.splice(d.list.indexOf(e.dataset.card), 1); document.getElementById('pop').style.display = 'none'; render(); });
+  const fl = st.flash && document.querySelector(`.side .st[data-card="${st.flash}"]`); if (fl) { fl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); fl.classList.add('flash'); } st.flash = null;
+  const cf = document.getElementById('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { family: null, rar: null, str: '', q: '' }); render(); };
   document.querySelectorAll('.side [data-card]').forEach(e => e.onclick = () => { const d = editable(); d.list.splice(d.list.indexOf(e.dataset.card), 1); document.getElementById('pop').style.display = 'none'; render(); });
   const pop = document.getElementById('pop');
   document.querySelectorAll('.gb [data-card]').forEach(e => { e.onmouseenter = () => { const r = e.getBoundingClientRect(); pop.className = 'pop'; pop.innerHTML = cardHTML(C[e.dataset.card]); pop.style.display = 'flex';
@@ -255,6 +272,13 @@ function pickCover(d) {
   document.addEventListener('keydown', esc); m.onclick = e => { if (e.target === m) close(); }; m.querySelector('.cancel').onclick = close;
   m.querySelectorAll('.cv').forEach(e => e.onclick = () => { d.cover = e.dataset.id; close(); render(); });
 }
+// A refused add: the card shakes and the limit that stopped it flashes (the deck total, the copy dots or a rarity count).
+function refuse(el, why) {
+  el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+  const t = why === 'tot' ? document.querySelector('.play') : why === 'pips' ? el.querySelector('.pips') : document.querySelector(`.rh[data-r="${why}"] span:last-child`);
+  if (t) { t.classList.remove('flash'); void t.offsetWidth; t.classList.add('flash'); }
+  if (why === 'tot' && !document.querySelector('.play.off')) toast('The deck is full: take a card out first');
+}
 // Delete asks first, in a dialog over the screen: Cancel (or Escape, or a click outside) keeps the deck.
 function confirmDelete(d) {
   const m = document.getElementById('modal');
@@ -270,5 +294,6 @@ function confirmDelete(d) {
 // Back to the menu: the docked button, or Escape when no dialog is open.
 const goBack = () => { location.href = '/#/'; };
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('modal').style.display !== 'grid' && e.target.tagName !== 'INPUT') goBack(); });
+document.addEventListener('keydown', e => { if (e.key === '/' && e.target.tagName !== 'INPUT') { e.preventDefault(); document.getElementById('q').focus(); } });
 render();
 </script></body></html>
