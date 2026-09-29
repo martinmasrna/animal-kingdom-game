@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Legendaries</title>
+<link rel="stylesheet" href="/static/tokens.css">
+<style>
+  body { overflow: auto; padding: 24px 32px 48px; }
+  h1 { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: .04em; text-transform: uppercase; margin: 0 0 20px; }
+  .deck { display: grid; grid-template-columns: 110px repeat(4, 1fr); gap: 18px; align-items: start; margin-bottom: 28px; }
+  .deck h2 { font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: .04em; text-transform: uppercase; margin: 8px 0 0; color: var(--mute, #a39c90); }
+  .card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 8px; display: block; background: #222; }
+  .card b { display: block; font-family: var(--font-display); font-size: 17px; margin: 8px 0 2px; }
+  .card b span { opacity: .6; font-weight: 500; margin-left: 6px; }
+  .card p { margin: 0; font-size: 12.5px; line-height: 1.4; opacity: .75; }
+</style>
+</head>
+<body>
+<h1>Legendaries</h1>
+<div id="decks"></div>
+<script>
+const DECKS = [["cats_midrange", "Cats"], ["canine_buff_tempo", "Canines"], ["aggro_hq_rush", "Aggro"], ["colony_food_swarm", "Colony"],
+               ["egg_control", "Egg"], ["food_otk", "Food"], ["ramp", "Ramp"]];
+fetch("/api/pool").then(r => r.json()).then(({ cards }) => {
+  document.getElementById("decks").innerHTML = DECKS.map(([slug, name]) => {
+    const legs = cards.filter(c => c.deck === slug && c.rarity === "legendary");
+    return `<section class="deck"><h2>${name}</h2>${legs.map(c => `<div class="card">
+      <img src="/static/art/${c.id}.jpg" alt="${c.name}" loading="lazy">
+      <b>${c.name}<span>${c.str ?? ""}</span></b><p>${c.text || ""}</p></div>`).join("")}</section>`;
+  }).join("");
+});
+</script>
+</body>
+</html>
