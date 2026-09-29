@@ -14,7 +14,7 @@ Ignores the connection-to-HQ requirement when placed. (All other placement rules
 ### Immovable
 *Physics.* Cannot be removed, moved (bounced), or eaten by **any** ability — the enemy's **or its own controller's** (Carmilla cannot sacrifice a Giant Tortoise; that cost is deliberate). It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an Immovable enemy; when it removes a stack, a buried Immovable unit is skipped **in place** and everything else is still removed. Immovable is not a shield for the cards beneath it. Scope is **board-only**: an Immovable card in hand can be paid or removed normally.
 
-Carried by: Giant Tortoise, Scrooge, Methuselah, Yuka, Elephant.
+Carried by: Methuselah, Yuka and Elephant (Ramp); Armadillo and Hedgehog (Food).
 
 ⚠ *Open (`docs/STATUS.md`): the keyword still feels slightly off, in name and footprint.*
 
@@ -25,6 +25,8 @@ Carried by: Black Panther (keyword). **Armadillo grants it as an aura** to every
 
 ### Fragile
 When another occupant is placed on top of this, this is removed — it does not survive under the stack. (Pairs with timed payoffs: Eggs are Fragile.)
+
+Carried by: nothing in the current decks; the Bird Egg and Snake Egg that carried it are in the reserve.
 
 ### Apex Predator
 A predator that must land on prey and eats it.
@@ -37,7 +39,7 @@ A predator that must land on prey and eats it.
 - **Cannot be placed onto a headquarters** — deliberate design choice, so Apex Predators can't capture an enemy HQ directly.
 - **Eats Eggs** it lands on like any other unit.
 
-Carried by: **Tiger** (Cats), **Anaconda** (Egg), **Polar Bear** + the giant-polar-bear & giant-harpy-eagle legendaries (Ramp).
+Carried by: **Tiger** (Cats), **Eon** (Egg), **Polar Bear** and **Borealis** (Ramp).
 
 ### Battlecry  *(placeholder name — rename pending, `docs/STATUS.md`)*
 An effect that resolves when the unit is placed. Most "when placed…" effects are Battlecries.
