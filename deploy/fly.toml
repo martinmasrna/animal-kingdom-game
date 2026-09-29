@@ -1,0 +1,21 @@
+# Fly.io app for the web client. Deploy with deploy/deploy.sh; the app name is set on first launch.
+app = "animal-kingdom"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"     # matches and bots live in this process; keep it up
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[mounts]]
+  source = "ak_data"
+  destination = "/app/results"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
