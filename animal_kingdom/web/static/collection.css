@@ -303,3 +303,7 @@
 .coll .rh .full { color: #a89d8c; }
 .coll .rh span.flash { color: #ff8a78; }
 .coll .dbody .st.legendary + .st.rare, .coll .dbody .st.rare + .st.common, .coll .dbody .st.legendary + .st.common { margin-top: 0; }
+/* Family medallions: colour means selected. Unselected (the default, which shows every family) are grey; the rim stays stone. */
+.coll .tab:not(.on) .med { filter: grayscale(1) brightness(.72); }
+.coll .tab:not(.on):hover .med { filter: grayscale(.5) brightness(.9); }
+.coll .tab.on::before { background-image: url(/static/kit2/rim_n.webp); filter: brightness(1.25) drop-shadow(0 2px 2px rgba(0,0,0,.55)); }
