@@ -87,7 +87,7 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
   for (const id of ['intro2', 'lion', 'glow', 'lynx', 'eagleinfo', 'eagle', 'alone', 'buffalo2', 'draw2', 'squirrelinfo', 'squirrel', 'covered', 'mambainfo', 'mamba', 'uncovered', 'goal2', 'apexinfo', 'apex', 'den'])
     assert.ok(seen2.includes(id), `lesson 2's ${id} came up (${seen2})`);
   await page.click('.endbox .play');
-  await page.waitForSelector('.home .bar:not(.first)');   // home, with the full piece: the tutorial counts as learned
+  await page.waitForFunction(() => location.hash.startsWith('#/m/') && window.__ak().V && window.__ak().V.seats.B.bot === 'easy', { timeout: 10000 });   // straight into a real match against the Easy bot
   assert.deepEqual(page.errors, []);
   await page.close();
 });
