@@ -144,12 +144,18 @@ def load_eval(name_or_path: str) -> LinearEval:
 
     A string containing a path separator, or one that names an existing file, is a literal
     filesystem path. Otherwise it's a bare name resolved against the bundled
-    `data/learned/<name>.json` package data (see `pyproject.toml`'s package-data entry).
+    `data/learned/<name>.json` package data (see `pyproject.toml`'s package-data entry). An
+    artifact with `"kind": "mlp"` loads as a `NetEval` (bots/net_eval.py).
     Cached: sim workers passing the same `eval=` name only parse/validate the JSON once per
     process (each ProcessPoolExecutor worker gets its own cache - ok, this is a read-only
     lookup, not shared mutable state).
     """
     if os.sep in name_or_path or "/" in name_or_path or os.path.isfile(name_or_path):
-        return LinearEval.from_file(name_or_path)
-    raw = load_bundled_json(f"learned/{name_or_path}.json")
+        with open(name_or_path, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+    else:
+        raw = load_bundled_json(f"learned/{name_or_path}.json")
+    if raw.get("kind") == "mlp":
+        from .net_eval import NetEval
+        return NetEval.from_dict(raw)
     return LinearEval.from_dict(raw)

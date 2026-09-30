@@ -42,7 +42,7 @@ def test_feature_names_rung1_extends_rung0():
 
 def test_feature_names_rejects_unknown_set():
     with pytest.raises(ValueError):
-        features.feature_names("rung2")
+        features.feature_names("no_such_set")
 
 
 def test_schema_hash_snapshot():
@@ -94,7 +94,8 @@ def test_rung0_extract_matches_evaluate_dot_product():
 
 # ------------------------------------------------------------------------- honesty mirrors
 
-def test_opponent_hand_contents_invariance_rung1():
+@pytest.mark.parametrize("feature_set", ["rung1", "rung2"])
+def test_opponent_hand_contents_invariance(feature_set):
     # Only opponent hand SIZE (and, for the belief feature, the combined unseen multiset) may
     # matter - which exact card ids sit in the opponent's hand must not move any feature.
     common = dict(decks={"A": ["mouse"] * 4, "B": ["mouse"] * 4})
@@ -102,28 +103,31 @@ def test_opponent_hand_contents_invariance_rung1():
     s2 = make_state(hands={"A": ["lion"], "B": ["mouse", "mouse"]}, **common)
     put(s1, "1,2", "lion", "A")
     put(s2, "1,2", "lion", "A")
-    assert features.extract(s1, "A", "rung1") == features.extract(s2, "A", "rung1")
+    assert features.extract(s1, "A", feature_set) == features.extract(s2, "A", feature_set)
 
 
-def test_partition_invariance_rung1():
+@pytest.mark.parametrize("feature_set", ["rung1", "rung2"])
+def test_partition_invariance(feature_set):
     # Holding the unseen multiset (eagle+mouse) and hand size fixed, whether "eagle" sits in
     # hand or deck must not move flight_hand_expected_diff (or anything else).
     a = make_state(hands={"B": ["eagle"]}, decks={"A": [], "B": ["mouse"]})
     b = make_state(hands={"B": ["mouse"]}, decks={"A": [], "B": ["eagle"]})
-    va = _vec(a, "A", "rung1")
-    vb = _vec(b, "A", "rung1")
+    va = _vec(a, "A", feature_set)
+    vb = _vec(b, "A", feature_set)
     assert va == vb
 
 
-def test_deck_order_invariance_rung1():
+@pytest.mark.parametrize("feature_set", ["rung1", "rung2"])
+def test_deck_order_invariance(feature_set):
     s1 = make_state(decks={"A": ["lion", "mouse", "eagle", "mouse"], "B": ["mouse"] * 3})
     s2 = make_state(decks={"A": ["mouse", "eagle", "mouse", "lion"], "B": ["mouse"] * 3})
     put(s1, "1,2", "lion", "A")
     put(s2, "1,2", "lion", "A")
-    assert features.extract(s1, "A", "rung1") == features.extract(s2, "A", "rung1")
+    assert features.extract(s1, "A", feature_set) == features.extract(s2, "A", feature_set)
 
 
-def test_own_deck_order_invariance_rung1():
+@pytest.mark.parametrize("feature_set", ["rung1", "rung2"])
+def test_own_deck_order_invariance(feature_set):
     # The hard invariant explicitly covers *my own* deck order too, not just the opponent's.
     rng = random.Random(0)
     order_a = ["lion", "mouse", "eagle", "mouse", "lion"]
@@ -131,7 +135,7 @@ def test_own_deck_order_invariance_rung1():
     rng.shuffle(order_b)
     s1 = make_state(decks={"A": order_a, "B": []})
     s2 = make_state(decks={"A": order_b, "B": []})
-    assert features.extract(s1, "A", "rung1") == features.extract(s2, "A", "rung1")
+    assert features.extract(s1, "A", feature_set) == features.extract(s2, "A", feature_set)
 
 
 # ---------------------------------------------------------------- rung1 dynamics antisymmetry

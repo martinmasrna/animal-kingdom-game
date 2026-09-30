@@ -19,7 +19,9 @@ what `me` may legitimately know - the public board (including on-board strength 
 which are visible board state, not hidden information - see `evaluate()`'s docstring), own hand
 contents, own food, the shared Remove Pile, deck *sizes* (never contents/order - not even
 `me`'s own deck order), and static card metadata limited to `base_strength`, `is_dynamic`,
-`keywords`, `food_cost`, `has_roar` - never a card id, deck slug, or tag. The one belief
+`keywords`, `food_cost`, `has_roar` - never a card id or deck slug. Rung 2 adds two generic
+reads: whether two cards share a tag (never which tag), and whether a card's text holds an
+ability beyond keywords and a food cost (`has_ability`, never what it does). The one belief
 term (`coverage_exposure`) reads the opponent's hand+deck as one combined unseen multiset (never
 distinguishing which unseen card sits where - see `opponent_unseen_card_ids`), exactly as
 `evaluate()`'s existing `_p_opponent_can_cover` already did.
@@ -81,9 +83,39 @@ RUNG1_EXTRA_FEATURES: tuple[str, ...] = (
     "flight_hand_expected_diff",
 )
 
+# Rung 2: context for a nonlinear evaluator - what is in hand and on the board, so a net can
+# learn when a card is worth more played now than later (a hand of Roars that would fizzle vs.
+# engines that pay for every later unit). Per-side counts rather than differences, since the
+# net can combine them. Tags are read only as "shares a tag with", never by name.
+RUNG2_EXTRA_FEATURES: tuple[str, ...] = (
+    "to_move",
+    "phase",
+    "hand_mine",
+    "hand_theirs",
+    "hand_roars",
+    "hand_dead_roars",
+    "hand_strength_mean",
+    "hand_strength_max",
+    "hand_small",
+    "hand_fliers",
+    "hand_food_cards",
+    "hand_food_affordable",
+    "hand_tag_matches",
+    "units_mine",
+    "units_theirs",
+    "engines_mine",
+    "engines_theirs",
+    "board_tag_pairs",
+    "extra_actions_mine",
+    "extra_actions_theirs",
+    "den_front_held",
+    "den_front_pressure",
+)
+
 FEATURE_SETS: dict[str, tuple[str, ...]] = {
     "rung0": RUNG0_FEATURES,
     "rung1": RUNG0_FEATURES + RUNG1_EXTRA_FEATURES,
+    "rung2": RUNG0_FEATURES + RUNG1_EXTRA_FEATURES + RUNG2_EXTRA_FEATURES,
 }
 
 
@@ -148,7 +180,7 @@ def extract(state: GameState, me: str, feature_set: str = "rung0") -> list[float
     values["effect_readiness"] = float(enabled_roar_count(state, me))
     values["pending_payoff"] = pending_payoff(state, me, opp)
 
-    if feature_set == "rung1":
+    if feature_set in ("rung1", "rung2"):
         phase = min(1.0, state.turn_counter / T_NORM)
         growth = growth_board_diff(state, me, opp)
         values["growth_board_diff"] = growth
@@ -167,6 +199,9 @@ def extract(state: GameState, me: str, feature_set: str = "rung0") -> list[float
         values["phase_x_food"] = phase * food_progress
         values["hq_dist_diff"] = hq_dist_diff(state, me, opp, my_connection, opp_connection)
         values["flight_hand_expected_diff"] = flight_hand_expected_diff(state, me, opp)
+
+    if feature_set == "rung2":
+        values.update(context_features(state, me, opp, opp_connection))
 
     return [values[name] for name in names]
 
@@ -523,3 +558,67 @@ def flight_hand_expected_diff(state: GameState, me: str, opp: str) -> float:
         flight_count = sum(1 for cid in unseen if state.cards[cid].has_keyword("Flight"))
         expected_opp = h * (flight_count / N)
     return float(own) - expected_opp
+
+
+# =============================================================== rung-2 context helpers
+
+def has_ability(card) -> bool:
+    """Rules text beyond keywords and a food cost: a Roar, a trigger, an aura (generic - reads
+    only the printed text's shape, never which card it is)."""
+    rest = [t.strip() for t in card.text.split(".") if t.strip()]
+    rest = [t for t in rest if t not in card.keywords and not t.startswith("Costs ")]
+    return bool(rest)
+
+
+def _extra_actions(state: GameState, player: str) -> float:
+    """Extra top-level actions `player` has coming: granted this turn, or scheduled."""
+    pending = sum(s["step"].get("n", 1) for s in state.scheduled
+                  if s["owner"] == player and s["step"].get("op") == "grant_action")
+    return float(state.turn_flags.get(f"bonus_actions_{player}", 0) + pending)
+
+
+def context_features(state: GameState, me: str, opp: str, opp_connection: set) -> dict:
+    cards = state.cards
+    hand = [cards[u.card_id] for u in state.hands[me]]
+    strengths = [c.base_strength for c in hand if not c.is_dynamic]
+    roars = sum(c.has_roar for c in hand)
+    live = enabled_roar_count(state, me)
+    tops = [st[-1] for st in state.board.values() if st]
+    mine = [u for u in tops if u.owner == me]
+    theirs = [u for u in tops if u.owner == opp]
+    my_tags = [cards[u.card_id].tags for u in mine]
+    board_tags = set().union(*my_tags) if my_tags else set()
+    pairs = sum(1 for i in range(len(my_tags)) for j in range(i + 1, len(my_tags))
+                if my_tags[i] & my_tags[j])
+    gm = state.game_map
+    front = gm.hq_front(me)
+    held = sum(1 for cr in front if state.top_unit(cr) is not None and state.top_unit(cr).owner == me)
+    near_front = {n for cr in front for n in gm.neighbors(cr)} | set(front)
+    pressure = sum(1 for cr in near_front if cr in opp_connection)
+    return {
+        "to_move": float(state.current == me),
+        "phase": min(1.0, state.turn_counter / T_NORM),
+        "hand_mine": float(len(hand)),
+        "hand_theirs": float(len(state.hands[opp])),
+        "hand_roars": float(roars),
+        "hand_dead_roars": float(max(0, roars - live)),
+        "hand_strength_mean": sum(strengths) / len(strengths) if strengths else 0.0,
+        "hand_strength_max": float(max(strengths, default=0)),
+        "hand_small": float(sum(1 for x in strengths if x <= 2)),
+        "hand_fliers": float(sum(c.has_keyword("Flight") for c in hand)),
+        "hand_food_cards": float(sum(bool(c.food_cost) for c in hand)),
+        "hand_food_affordable": float(sum(bool(c.food_cost) and c.food_cost <= state.food[me]
+                                          for c in hand)),
+        "hand_tag_matches": float(sum(bool(c.tags & board_tags) for c in hand)),
+        "units_mine": float(len(mine)),
+        "units_theirs": float(len(theirs)),
+        "engines_mine": float(sum(has_ability(cards[u.card_id]) and not cards[u.card_id].has_roar
+                                  for u in mine)),
+        "engines_theirs": float(sum(has_ability(cards[u.card_id]) and not cards[u.card_id].has_roar
+                                    for u in theirs)),
+        "board_tag_pairs": float(pairs),
+        "extra_actions_mine": _extra_actions(state, me),
+        "extra_actions_theirs": _extra_actions(state, opp),
+        "den_front_held": float(held),
+        "den_front_pressure": float(pressure),
+    }
