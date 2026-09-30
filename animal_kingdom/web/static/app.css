@@ -22,7 +22,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 
 /* ---------- home: where a match starts (menu.css pieces; design sandbox play/) ---------- */
 /* The key art (a placeholder until the real painting), the title along its top, the match on its ground. */
-.home { background: #0e0d0b url(/static/kit2/home_keyart.webp) center / cover; }
+.home { background: #0e0d0b var(--keyart) center / cover; }
 .home::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(10,9,8,.3), rgba(10,9,8,0) 30%, rgba(10,9,8,0) 60%, rgba(10,9,8,.55)); }
 .home .title { position: absolute; left: 0; right: 0; top: 36px; text-align: center; font: 800 72px/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; text-shadow: 0 4px 24px rgba(0,0,0,.75); pointer-events: none; }
 /* The granite piece: your deck | the opponent, Play under them; Collection and the profile as smaller stones beside it, on Play's line. */
@@ -152,7 +152,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 
 
 /* ---------- before the match (menu.css pieces): the key art dimmed, granite pieces ---------- */
-.pre { background: #0e0d0b url(/static/kit2/home_keyart.webp) center / cover; display: grid; place-items: center; }
+.pre { background: #0e0d0b var(--keyart) center / cover; display: grid; place-items: center; }
 .pre::before { content: ''; position: absolute; inset: 0; background: rgba(10,9,8,.7); }
 .pre .piece { position: relative; box-sizing: border-box; padding: 12px; border-radius: 16px;
   background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 16px 40px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,245,230,.12); }
@@ -202,3 +202,9 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .toast.ok { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 8px 20px rgba(0,0,0,.6); }
 .pop .ev { padding: 8px 12px; border: 0; border-radius: 8px; font: 500 15px/1.3 'Fira Sans Condensed', sans-serif; color: #e8e0d2; background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto;
   box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 4px 10px rgba(0,0,0,.6); }
+
+/* The key art follows the viewer's clock: dawn 5-9, day 9-17, dusk 17-20, night otherwise (route() sets data-tod). */
+:root { --keyart: url(/static/kit2/keyart_night.webp); }
+:root[data-tod="dawn"] { --keyart: url(/static/kit2/keyart_dawn.webp); }
+:root[data-tod="day"] { --keyart: url(/static/kit2/keyart_day.webp); }
+:root[data-tod="dusk"] { --keyart: url(/static/kit2/keyart_dusk.webp); }

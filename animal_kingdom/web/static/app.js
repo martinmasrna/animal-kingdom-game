@@ -93,10 +93,13 @@ async function boot() {
   route();
 }
 
+// The home painting at the viewer's time of day (a small easter egg): ?tod=dawn|day|dusk|night overrides it.
+const timeOfDay = h => new URLSearchParams(location.search).get('tod') || (h >= 5 && h < 9 ? 'dawn' : h >= 9 && h < 17 ? 'day' : h >= 17 && h < 20 ? 'dusk' : 'night');
 function route() {
   pop.style.display = 'none'; stackpop.style.display = 'none';
   const tip = document.getElementById('tip'); if (tip) tip.style.display = 'none';   // the game's hover label lives on body: it must not outlive the screen
   const parts = (location.hash.slice(1) || '/').split('/').filter(Boolean);
+  document.documentElement.dataset.tod = timeOfDay(new Date().getHours());
   const id = parts[1] && parts[1].toUpperCase();
   if (parts[0] !== 'm' || id !== wsId) disconnect();
   play.open = null;   // a chooser never outlives its screen
