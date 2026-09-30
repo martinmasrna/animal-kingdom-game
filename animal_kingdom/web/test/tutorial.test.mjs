@@ -20,7 +20,7 @@ test('the first lessons walk the first turn, ringing every place the rules allow
   assert.equal(current(view(), null, CARDS, t).id, 'lion');
   assert.deepEqual(current(view(), 'lion', CARDS, t).only, { card: 'lion' }, 'all three crossroads by the den');
   const L = current(view({ board: { '1,2': u('lion', 'A') }, legal: { place: { cape_buffalo: [['cr', '1,1'], ['cr', '1,2'], ['cr', '1,3'], ['cr', '2,2']] }, draw: true } }), 'cape_buffalo', CARDS, t);   // 1,2 is the Lion's own
-  assert.equal(L.id, 'buffalo'); assert.deepEqual(L.only, { card: 'cape_buffalo', picked: true, crs: ['1,1', '1,3', '2,2'] }); assert.deepEqual(L.at, { cr: '2,2' }, 'the coach stands beside the rightmost ring');
+  assert.equal(L.id, 'buffalo'); assert.deepEqual(L.only, { card: 'cape_buffalo', picked: true, crs: ['1,1', '1,3', '2,2'] }); assert.deepEqual(L.at, { rings: true }, 'the coach stands beside the whole group of rings');
 });
 
 test('the Wolf goes on the food region the first animals started, wherever that is', () => {

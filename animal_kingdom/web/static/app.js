@@ -530,7 +530,7 @@ function drawGame() {
     if (ui.anim) ui.anim.landDelay = 0.95;
     ui.revealEnd = Date.now() + 1050;
   }
-  placeCoach($('coach'), d.lesson);
+  placeCoach($('coach'), d.lesson, d.rings);
   drawBoard(d);
   drawEnd();
 }
@@ -538,9 +538,9 @@ function drawGame() {
 // The tutorial's coach: a granite piece standing beside what the lesson talks about, its notch pointing at it: above a
 // card in the hand, the deck or End turn, beside a crossroad (on the side with more room), a region's stone or a den.
 const COACH_W = 300;
-function placeCoach(el, L) {
+function placeCoach(el, L, rings = []) {
   el.className = 'abs coach';
-  if (!L) { el.innerHTML = ''; return; }
+  if (!L) { el.innerHTML = ''; document.getElementById('board').classList.remove('pulse'); return; }
   const a = L.at || {}, card = a.card && document.querySelector(`#hand .hc[data-id="${a.card}"]`);
   let x, y, side;
   if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, card.classList.contains('sel') ? 572 : 590, 'above'];   // a picked card stands 18px higher
@@ -549,6 +549,12 @@ function placeCoach(el, L) {
   else if (a.endturn) [x, y, side] = [1439, 664, 'above'];
   else if (a.cr) { [x, y] = crossroadAt(a.cr); side = x > STAGE.w / 2 ? 'left' : 'right'; }
   else if (a.den) { [x, y] = denMouthAt(a.den); side = a.den === 'B' ? 'left' : 'right'; }
+  else if (a.rings) {   // beside the group of rings, clear of all of them, with no notch (the rings pulse instead)
+    const rs = rings.map(crossroadAt);   // this frame's rings, before the board redraws
+    const xs = rs.map(r => r[0]), ys = rs.map(r => r[1]), cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const right = Math.max(...xs) + 78;
+    [x, y, side] = right + COACH_W < STAGE.w - 16 ? [right, cy, 'group'] : [Math.min(...xs) - 78 - COACH_W, cy, 'group'];
+  }
   else if (a.gem) [x, y, side] = a.gem === 'A' ? [150, 122, 'right'] : [STAGE.w - 150, 122, 'left'];   // a den's food gem, on its crown
   else if (a.hand) [x, y, side] = [STAGE.w / 2, 590, 'above'];
   else if (a.oppcards) [x, y, side] = [STAGE.w / 2 + 170, 72, 'below'];   // beside the opponent's card backs, clear of their revealed card
@@ -560,9 +566,11 @@ function placeCoach(el, L) {
   const pos = side === 'above' ? `left:${clampX(x - COACH_W / 2)}px;bottom:${STAGE.h - y + 14}px;--nx:${x - clampX(x - COACH_W / 2)}px`
     : side === 'below' ? `left:${clampX(x - COACH_W / 2)}px;top:${y + 14}px;--nx:${x - clampX(x - COACH_W / 2)}px`
     : side === 'mid' ? `left:${x - COACH_W / 2}px;top:${y}px`
+    : side === 'group' ? `left:${x}px;top:${y}px`
     : side === 'right' ? `left:${x + 78}px;top:${y}px` : `left:${x - 78 - COACH_W}px;top:${y}px`;
   // while the opponent's card is shown large in the middle, the coach waits for it to land, then fades in
   const wait = Math.max(0, (ui.revealEnd || 0) - Date.now());
+  document.getElementById('board').classList.toggle('pulse', !!a.rings);
   el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
   el.innerHTML = `<p>${L.text}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
   // an opening step closes on Next (or Enter/Space), and the next one shows

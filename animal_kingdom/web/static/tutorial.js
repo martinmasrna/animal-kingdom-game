@@ -12,7 +12,8 @@
 //
 // Each lesson stands beside what it talks about: `at` names it (a card in hand, the hand, a crossroad, a region's
 // stone, the deck, End turn, a den, a food gem, the opponent's cards, the middle of the board), directly or from
-// the moment's facts. It points at what the sentence is about: the card for a card's power, the rings for where to go.
+// the moment's facts. It points at what the sentence is about: the card for a card's power; for a choice of places, it
+// stands beside the whole group of rings (`rings`), which pulse, since one notch can't point at several.
 
 // Lessons read plain facts of the game view (the player is always seat A here). `c` is:
 //   { G, mine, theirs, choosing, sel, round, at(cr), units, hand(id), acts, places, rightmost(id), roar(id),
@@ -53,10 +54,10 @@ export const LESSONS = [
     only: { card: 'lion' }, at: { card: 'lion' } },
   { id: 'lion2', when: c => opening(c) && c.sel === 'lion',
     text: 'Animals stand on crossroads, the sandy circles. Your first animal goes next to your den: click one of the circled crossroads.',
-    only: { card: 'lion' }, at: { cr: '1,2' } },
+    only: { card: 'lion' }, at: { rings: true } },
   { id: 'buffalo', when: c => c.mine && c.round === 1 && c.units === 1,
     text: 'Now the Buffalo. Animals can only stand next to your den or next to your other animals. Click one of the circles.',
-    only: c => ({ card: 'cape_buffalo', picked: true, crs: c.empty('cape_buffalo') }), at: c => ({ cr: c.rightmost('cape_buffalo') }) },
+    only: c => ({ card: 'cape_buffalo', picked: true, crs: c.empty('cape_buffalo') }), at: { rings: true } },
   { id: 'watch', when: c => c.theirs && c.round === 1, at: { oppcards: true },
     text: 'Now it\'s your opponent\'s turn. Watch where the red animals go.' },
   { id: 'patch', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'), ...talk, at: c => ({ stone: c.home[0] }),
@@ -64,7 +65,7 @@ export const LESSONS = [
   { id: 'wolf', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'),
     text: 'Place the Wolf on one of the circles around the +10 patch.',
     only: c => ({ card: 'dire_wolf', picked: true, crs: c.homeOpen.length ? c.homeOpen : undefined }),
-    at: c => ({ cr: c.homeOpen.length ? c.homeOpen.slice().sort((a, b) => b[0] - a[0])[0] : c.rightmost('dire_wolf') }) },
+    at: { rings: true } },
   { id: 'draw', when: c => c.mine && c.round === 2 && !c.hand('dire_wolf') && c.acts > 0,
     text: 'You\'re out of cards! Click your deck to draw 2 new ones.',
     only: { deck: true }, at: { deck: true } },
@@ -101,7 +102,7 @@ export const LESSONS_2 = [
   { id: 'intro2', when: c => c.mine && c.round === 1 && c.units === 0, ...talk, at: { middle: true },
     text: 'Lesson 2! This time your opponent guards its den with strong animals, so you\'ll win by gathering 100 food.' },
   { id: 'lion', when: c => c.mine && c.round === 1 && c.units === 0,
-    only: c => ({ card: 'lion', picked: true, crs: c.empty('lion') }), at: c => ({ cr: c.rightmost('lion') }),
+    only: c => ({ card: 'lion', picked: true, crs: c.empty('lion') }), at: { rings: true },
     text: 'Start by placing your Lion on a circle.' },
   { id: 'glow', when: c => c.mine && c.ready('lynx'), ...talk, at: { card: 'lynx' },
     text: 'See the Lynx glowing? A glowing card\'s Roar will work right now: you have another Cat, your Lion.' },

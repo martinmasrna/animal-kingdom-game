@@ -344,3 +344,7 @@
 .game .hc.hint .card { animation: hint 1.4s ease-in-out infinite; }
 @keyframes hint { 0%, 100% { filter: drop-shadow(0 0 0 var(--act)) drop-shadow(0 0 2px var(--act)); } 50% { filter: drop-shadow(0 0 1px var(--act)) drop-shadow(0 0 7px var(--act)) drop-shadow(0 0 3px var(--act)); } }
 .game.kit .tbtn.B { padding: 0 14px; box-sizing: border-box; text-align: center; font-size: 17px; line-height: 1.1; }   /* Opponent's turn: two centred lines inside the stone */
+.game .coach.group, .game .coach.mid { transform: translateY(-50%); } .game .coach.group::after { display: none; }
+/* a choice of places: the rings the coach talks about breathe, as the card it asks for does */
+.game #board.pulse .cr.tgt::after { animation: ringpulse 1.4s ease-in-out infinite; }
+@keyframes ringpulse { 0%, 100% { opacity: .55; transform: scale(.97); } 50% { opacity: 1; transform: scale(1.05); } }
