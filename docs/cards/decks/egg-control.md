@@ -42,3 +42,26 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 | **Raven** | 3 | Bird | 2 | Flight. Roar: draw 3 cards, then shuffle 2 cards back. |
 
 <!-- cards:end -->
+
+## Proposal: the Eggs return (not in the card pool)
+
+Martin, 2026-09-30. Eggs tie the deck together: both Snakes and Birds lay them. The old Bird Egg and Snake Egg (0, "After 2 turns, remove this and draw 2 Birds/Snakes") were the right design for control (proactive on turn one, a delayed payoff, deck thinning) until Draw went from 1 card to 2: an Egg then paid what a Draw pays, later and breakable. A hatch of 4 would restore the old ratio but reads absurd and makes a broken Egg too big a swing. The fix is to split the payoff (part on the Roar, part at the hatch) and give each family its own egg.
+
+| Card | Tags | Str | Text |
+|---|---|---:|---|
+| **Snake Egg** | Snake | 0 | Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes. |
+| **Bird Egg** | Bird | 0 | Roar: Discover a Bird. Next turn, remove this and Discover a Bird. |
+
+- The two trade differently: the Snake Egg is quantity and patience (three tutored cards, a two-turn window), the Bird Egg quality and speed (the best of three, twice, a one-turn window). Both remove themselves at the hatch, which feeds Python.
+- A covered Egg only pauses (a timer ticks only while its unit is on top); removing the unit that covers it resumes the hatch. Only removal breaks an Egg, which gives a removal deck counterplay.
+- Open: the numbers, the Bird Egg's timing wording ("At the start of your next turn" is the convention but runs past the 80-character limit), and what the two Eggs replace in the list.
+
+### Discover (working name)
+
+A card-text term like Discard, not a keyword. **Discover a Bird**: look at three random Birds in your deck, draw one and shuffle the others back (all of them, if fewer than three). It draws from the deck, never creates a card, and its shuffle feeds Rattlesnake. It suits "smart" animals across decks. Candidates for the word: Forage (the pick so far), Scout, Seek, Sniff out.
+
+Cards that would use it:
+
+- **Owl** (Egg Control): "Flight. Roar: Discover a card." (now "look at the top 3 cards; draw 1 and shuffle the rest", the same effect).
+- **Fathom** (Food OTK): "Roar: Discover a legendary unit." (now "draw a legendary unit").
+- **Bird Egg** above.
