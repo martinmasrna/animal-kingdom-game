@@ -289,7 +289,8 @@ function matchScreen(id) {
   if (!token) { location.hash = '#/join/' + id; return; }
   if (wsId === id && ws) return;
   screen = null; V = null; ui.sel = null; ui.peek = false;
-  app.innerHTML = `<div class="mscr pre"><p class="wait">Connecting…</p></div>`;
+  // the screen before stays until the game arrives (a bare "Connecting…" page flashed between them); shown only when slow
+  clearTimeout(matchScreen.slow); matchScreen.slow = setTimeout(() => { if (!V && wsId === id) app.innerHTML = `<div class="mscr pre"><p class="wait">Connecting…</p></div>`; }, 600);
   const connect = () => {
     wsId = id;
     ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/${id}?token=${encodeURIComponent(token)}`);
@@ -853,8 +854,8 @@ function drawEnd() {
     const lesson = lessonOf(V), won = w === you;
     if (won) store(lesson === 1 ? 'ak:lesson' : 'ak:learned', '1');
     const next = !won ? '' : lesson === 1 ? '<div class="next">One more lesson to go.</div>' : '<div class="next">You know the basics. Pick a deck and play a match.</div>';
-    const go = !won ? `<a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Try again</button>`
-      : lesson === 1 ? `${peek}<button class="play" id="nextlesson">Next lesson</button>` : `${peek}<a class="play" href="#/">Play a match</a>`;
+    const go = !won ? `<a class="slab" href="#/">Menu</a><button class="play" id="again">Try again</button>`   // no See the board in a lesson
+      : lesson === 1 ? `<button class="play" id="nextlesson">Next lesson</button>` : `<a class="play" href="#/">Play a match</a>`;
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>${next}<div class="btns">${go}</div></div>`;
     if (!won) document.getElementById('again').onclick = () => startTutorial(lesson);
     if (won && lesson === 1) document.getElementById('nextlesson').onclick = () => startTutorial(2);
@@ -866,7 +867,7 @@ function drawEnd() {
       <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="rematch">Rematch</button></div></div>`;
     document.getElementById('rematch').onclick = () => send({ t: 'rematch' });
   }
-  document.getElementById('peek').onclick = () => { ui.peek = true; drawGame(); };
+  const pk = document.getElementById('peek'); if (pk) pk.onclick = () => { ui.peek = true; drawGame(); };   // a lesson has none
   ov.classList.add('on');
 }
 
