@@ -401,7 +401,6 @@ function decision() {
       d.places = Object.fromEntries(Object.entries(d.places).filter(([id]) => !held(V, d.lesson).includes(id))
         .map(([id, ts]) => [id, ts.filter(t => !(t[0] === 'cr' && (V.game.board[t[1]] || []).slice(-1).some(u => u.owner === V.you)))]).filter(([, ts]) => ts.length));
     }
-    if (!ui.sel && d.lesson && d.lesson.only && d.lesson.only.picked && d.places[d.lesson.only.card]) ui.sel = d.lesson.only.card;
     if (ui.sel && !d.places[ui.sel]) ui.sel = null;
     const ids = Object.keys(d.places);
     if (!ui.sel && ids.length === 1 && d.pend) ui.sel = ids[0];   // a "play this card" prompt: preselect it
@@ -499,7 +498,7 @@ function drawGame() {
     const hint = can && d.lesson && d.lesson.only && !ui.sel;   // the card the tutorial asks for
     const talking = d.lesson && d.lesson.next || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
     const shown = d.lesson && d.lesson.read === h.id;   // the card the coach is explaining, shown large as if hovered
-    const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');
+    const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (one || G.hand.find(x => x.id === ui.sel)).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
     return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;

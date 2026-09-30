@@ -20,16 +20,16 @@ test('the first lessons walk the first turn, ringing every place the rules allow
   assert.equal(current(view(), null, CARDS, t).id, 'lion');
   assert.deepEqual(current(view(), 'lion', CARDS, t).only, { card: 'lion' }, 'all three crossroads by the den');
   const L = current(view({ board: { '1,2': u('lion', 'A') }, legal: { place: { cape_buffalo: [['cr', '1,1'], ['cr', '1,2'], ['cr', '1,3'], ['cr', '2,2']] }, draw: true } }), 'cape_buffalo', CARDS, t);   // 1,2 is the Lion's own
-  assert.equal(L.id, 'buffalo'); assert.deepEqual(L.only, { card: 'cape_buffalo', picked: true, crs: ['1,1', '1,3', '2,2'] }); assert.deepEqual(L.at, { rings: true }, 'the coach stands beside the whole group of rings');
+  assert.equal(L.id, 'buffalo'); assert.deepEqual(L.only, { card: 'cape_buffalo', crs: ['1,1', '1,3', '2,2'] }); assert.deepEqual(L.at, { rings: true }, 'the coach stands beside the whole group of rings');
 });
 
 test('the Wolf goes on the food region the first animals started, wherever that is', () => {
   const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'patch'].forEach(id => t.seen.add(id));
   const place = { dire_wolf: [['cr', '1,1'], ['cr', '2,2'], ['cr', '2,3']] }, hand = [{ id: 'dire_wolf' }];
   const upper = current(view({ round: 2, hand, board: { '1,2': u('lion', 'A'), '1,3': u('cape_buffalo', 'A') }, legal: { place, draw: true } }), null, CARDS, t);
-  assert.deepEqual(upper.only, { card: 'dire_wolf', picked: true, crs: ['2,2', '2,3'] });
+  assert.deepEqual(upper.only, { card: 'dire_wolf', crs: ['2,2', '2,3'] });
   const lower = current(view({ round: 2, hand, board: { '1,2': u('lion', 'A'), '2,2': u('cape_buffalo', 'A') }, legal: { place, draw: true } }), null, CARDS, t);
-  assert.deepEqual(lower.only, { card: 'dire_wolf', picked: true, crs: ['1,1'] });
+  assert.deepEqual(lower.only, { card: 'dire_wolf', crs: ['1,1'] });
 });
 
 test('a forced lesson narrows the moves to its card and crossroad, or the deck, and never ends the turn', () => {
@@ -86,13 +86,13 @@ test('covering and Roar are each done once by hand: the Pup beside the patch, th
   const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'patch', 'actions', 'food'].forEach(id => t.seen.add(id));
   const board = { '1,1': u('dire_wolf', 'A'), '1,2': u('lion', 'A'), '2,1': u('lion', 'A'), '2,2': u('cape_buffalo', 'A'), '3,2': [{ id: 'pup', owner: 'B', str: 1 }] };
   const cover = current(view({ round: 3, board, hand: [{ id: 'cape_buffalo' }], legal: { place: { cape_buffalo: [['cr', '3,2'], ['cr', '3,1']] }, draw: true } }), null, CARDS, t);
-  assert.equal(cover.id, 'cover'); assert.deepEqual(cover.only, { card: 'cape_buffalo', picked: true, crs: ['3,2'] });
+  assert.equal(cover.id, 'cover'); assert.deepEqual(cover.only, { card: 'cape_buffalo', crs: ['3,2'] });
   const covered = [{ seat: 'A', kind: 'place', card: 'cape_buffalo', fx: [{ k: 'cover' }] }];
   const g4 = { round: 4, board, history: covered, hand: [{ id: 'lynx' }], legal: { place: { lynx: [['cr', '3,1'], ['cr', '1,3']] }, draw: true } };
   const info = current(view(g4), null, CARDS, t);
   assert.equal(info.id, 'roarinfo'); assert.equal(info.read, 'lynx', 'the card is shown large beside the explanation'); t.seen.add('roarinfo');
   const roar = current(view(g4), null, CARDS, t);
-  assert.equal(roar.id, 'roar'); assert.deepEqual(roar.only, { card: 'lynx', picked: true, crs: ['3,1', '1,3'] });
+  assert.equal(roar.id, 'roar'); assert.deepEqual(roar.only, { card: 'lynx', crs: ['3,1', '1,3'] });
   const roared = current(view({ round: 4, board, history: [...covered, { seat: 'A', kind: 'place', card: 'lynx', fx: [] }], hand: [], legal: { place: {}, draw: true } }), null, CARDS, t);
   assert.equal(roared.id, 'roared'); assert.ok(roared.next);
 });
@@ -110,7 +110,7 @@ test('lesson 2 holds each teaching card back until its own step', () => {
 
 test('lesson 2 puts each animal on its one crossroad, the Eagle anywhere', () => {
   const t = fresh(); t.seen.add('intro2');
-  assert.deepEqual(current(v2({ hand: [{ id: 'lion' }] }), null, CARDS, t).only, { card: 'lion', picked: true, crs: ['1,2'] });
+  assert.deepEqual(current(v2({ hand: [{ id: 'lion' }] }), null, CARDS, t).only, { card: 'lion', crs: ['1,2'] });
   ['lion', 'glow', 'lynx', 'eagleinfo'].forEach(id => t.seen.add(id));
   const L = current(v2({ round: 2, board: { '5,1': [{ id: 'dire_wolf', owner: 'B', str: 7 }] }, hand: [{ id: 'eagle' }], legal: { place: { eagle: [['cr', '1,1'], ['cr', '4,3'], ['cr', '5,1'], ['cr', '3,2']] }, draw: true } }), null, CARDS, t);
   assert.equal(L.id, 'eagle'); assert.deepEqual(L.only.crs, ['1,1', '4,3'], 'anywhere empty, but the spots the lesson needs later');

@@ -59,20 +59,20 @@ export const LESSONS = [
     text: 'Animals stand on crossroads, the sandy circles. Your first animal goes next to your den: click one of the circled crossroads.',
     only: { card: 'lion' }, at: { rings: true } },
   { id: 'buffalo', when: c => c.mine && c.round === 1 && c.units === 1,
-    text: 'Now the Buffalo. Animals can only stand next to your den or next to your other animals. Click one of the circles.',
-    only: c => ({ card: 'cape_buffalo', picked: true, crs: c.empty('cape_buffalo') }), at: { rings: true } },
+    text: 'Now the Buffalo. Animals can only stand next to your den or next to your other animals. Click the Buffalo, then one of the circles.',
+    only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo') }), at: { rings: true } },
   { id: 'watch', when: c => c.theirs && c.round === 1, at: { oppcards: true },
     text: 'Now it\'s your opponent\'s turn. Watch where the red animals go.' },
   { id: 'patch', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'), ...talk, at: c => ({ stone: c.home[0] }),
     text: 'This is a region. Put animals on all four crossroads around it, and you get 10 food every turn.' },
   { id: 'wolf', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'),
-    text: 'Place the Wolf on one of the circles around the +10 region.',
-    only: c => ({ card: 'dire_wolf', picked: true, crs: c.homeOpen.length ? c.homeOpen : undefined }),
+    text: 'Click the Wolf, then one of the circles around the +10 region.',
+    only: c => ({ card: 'dire_wolf', crs: c.homeOpen.length ? c.homeOpen : undefined }),
     at: { rings: true } },
   // the region is finished by hand with the fourth card, only its last corner (shown only when a card can reach it)
   { id: 'corner', when: c => c.mine && c.round >= 2 && !c.hand('dire_wolf') && !c.homeHeld && c.homeOpen.length > 0,
-    only: c => ({ crs: c.homeOpen }), at: c => ({ cr: c.homeOpen[0] }),
-    text: 'Finish the region! Place your Buffalo on the last crossroad.' },
+    only: c => ({ crs: c.homeOpen }), at: { rings: true },
+    text: 'Finish the region! Click your Buffalo, then the last crossroad.' },
   { id: 'food', when: c => c.homeHeld, ...talk, at: c => ({ stone: c.home[0] }),
     text: 'The +10 region is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
   // turn 3: moves and drawing, then covering
@@ -83,16 +83,16 @@ export const LESSONS = [
     only: { deck: true }, at: { deck: true } },
   // covering, by hand: the second move of turn 3, onto the Pup the opponent always leaves beside the patch
   { id: 'cover', when: c => c.mine && c.round >= 3 && c.homeHeld && c.coverable.length > 0, done: c => c.covered,
-    only: c => ({ card: c.coverWith, picked: true, crs: c.coverable }), at: c => ({ cr: c.coverable[0] }),
-    text: 'A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 7 can\'t beat 7. Cover the circled animal!' },
+    only: c => ({ card: c.coverWith, crs: c.coverable }), at: { rings: true },
+    text: 'A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 7 can\'t beat 7. Click an animal, then the circled enemy to cover it!' },
   // Roar, by hand: turn 4 draws the Lynx, whose Roar always works beside the Lion
   { id: 'draw4', when: c => c.mine && c.round === 4 && !c.roared && !c.hand('lynx') && c.canDraw,
     text: 'Click your deck to draw 2 more cards.', only: { deck: true }, at: { deck: true } },
   explain('roarinfo', 'lynx', c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0,
     'The Lynx has a Roar: a power that happens the moment you place it. Its Roar draws a card if you have another Cat, like your Lion.'),
   { id: 'roar', when: c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0, done: c => c.roared,
-    only: c => ({ card: 'lynx', picked: true, crs: c.empty('lynx') }), at: { rings: true },
-    text: 'Place the Lynx on a circle.' },
+    only: c => ({ card: 'lynx', crs: c.empty('lynx') }), at: { rings: true },
+    text: 'Click the Lynx, then one of the circles.' },
   { id: 'roared', when: c => c.roared, ...talk, at: { hand: true },
     text: 'Your Lynx roared and drew you a card! Point at any card to read what it does.' },
   { id: 'free', when: c => c.mine && (c.roared || c.round >= 6), ...talk, at: { middle: true },
@@ -111,30 +111,30 @@ export const LESSONS = [
 // a step in a fixed order on fixed crossroads (connection was taught in lesson 1; here the fixed board is what makes the
 // Eagle's ambush and the Black Mamba's rescue always possible). Only the Eagle, teaching Flight, rings every empty crossroad.
 // Then each move is guided to the best spots for finishing a region, until 100 food.
-const one = (card, cr) => ({ card, picked: true, crs: [cr] });
+const one = (card, cr) => ({ card, crs: [cr] });
 export const LESSONS_2 = [
   { id: 'intro2', when: c => c.mine && c.round === 1 && c.units === 0, ...talk, at: { middle: true },
     text: 'Lesson 2! Many animals have special powers. Let\'s meet some of them.' },
   { id: 'lion', when: c => c.mine && c.hand('lion') && !c.placed('lion'), only: one('lion', '1,2'), at: { rings: true },
-    text: 'Place your Lion on the circle.' },
+    text: 'Click your Lion, then the circle.' },
   explain('glow', 'lynx', c => c.mine && c.ready('lynx'),
     'See the Lynx glowing? A glowing card\'s Roar will work if you place it now.'),
   { id: 'lynx', when: c => c.mine && c.hand('lynx'), only: one('lynx', '2,2'), at: { rings: true },
-    text: 'Place the Lynx on the circle.' },
+    text: 'Click the Lynx, then the circle.' },
   { id: 'wall', when: c => c.theirs && c.round === 1, at: { den: 'B' },
     text: 'Your opponent is building a wall of strong animals in front of its den.' },
   explain('eagleinfo', 'eagle', c => c.mine && c.hand('eagle') && !c.placed('eagle'),
     'Your Lynx drew an Eagle. The Eagle has Flight: it can land on any empty crossroad, even far from your animals.'),
   { id: 'eagle', when: c => c.mine && c.hand('eagle') && !c.placed('eagle'),
-    only: c => ({ card: 'eagle', picked: true, crs: c.empty('eagle').filter(cr => !['2,1', '3,1', '3,2'].includes(cr)) }), at: { rings: true },
-    text: 'Place the Eagle on any circle.' },
+    only: c => ({ card: 'eagle', crs: c.empty('eagle').filter(cr => !['2,1', '3,1', '3,2'].includes(cr)) }), at: { rings: true },
+    text: 'Click the Eagle, then any circle.' },
   { id: 'buffalo2', when: c => c.mine && c.round === 2 && c.placed('eagle') && c.hand('cape_buffalo'), only: one('cape_buffalo', '2,1'), at: { rings: true },
-    text: 'Now place the Buffalo on the circle.' },
+    text: 'Click the Buffalo, then the circle.' },
   { id: 'draw2', when: c => c.mine && c.round >= 3 && !c.hand('squirrel') && !c.placed('squirrel'), only: { deck: true }, at: { deck: true },
     text: 'Your hand is empty. Click your deck to draw 2 cards.' },
   explain('squirrelinfo', 'squirrel', c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), 'The Squirrel\'s Roar gives you 10 food.'),
   { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), only: one('squirrel', '3,2'), at: { rings: true },
-    text: 'Place the Squirrel on the circle.' },
+    text: 'Click the Squirrel, then the circle.' },
   { id: 'foodroar', when: c => c.placed('squirrel'), ...talk, at: { gem: 'A' },
     text: 'Your food went up by 10! Roars like this are another way to gather food, besides regions.' },
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
@@ -142,8 +142,8 @@ export const LESSONS_2 = [
   explain('mambainfo', 'black_mamba', c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
     'The Black Mamba\'s Roar removes an enemy next to it with strength 5 or less, like that Eagle.'),
   { id: 'mamba', when: c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
-    only: c => ({ card: 'black_mamba', picked: true, crs: c.nextToFlier }), at: { rings: true },
-    text: 'Place the Black Mamba on the circle, next to the Eagle.' },
+    only: c => ({ card: 'black_mamba', crs: c.nextToFlier }), at: { rings: true },
+    text: 'Click the Black Mamba, then the circle next to the Eagle.' },
   TARGET,
   { id: 'uncovered', when: c => c.squirrelBack, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'The Eagle is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
@@ -154,8 +154,8 @@ export const LESSONS_2 = [
   explain('apexinfo', 'tiger', c => c.mine && c.hand('tiger') && c.prey.length > 0,
     'The Tiger is an Apex Predator: it must land on top of an animal, and it eats it. An eaten animal is gone for good.'),
   { id: 'apex', when: c => c.mine && c.hand('tiger') && c.prey.length > 0,
-    only: c => ({ card: 'tiger', picked: true, crs: c.prey }), at: { rings: true },
-    text: 'Place the Tiger on a circled animal to eat it.' },
+    only: c => ({ card: 'tiger', crs: c.prey }), at: { rings: true },
+    text: 'Click the Tiger, then a circled animal to eat it.' },
   { id: 'free2', when: c => c.mine && (c.placed('tiger') || c.round >= 8), ...talk, at: { middle: true },
     text: 'Now gather 100 food. Each move, the circles show the best spots for finishing a region.' },
   { id: 'feed', again: true, when: c => c.mine && (c.placed('tiger') || c.round >= 8) && c.feed.length > 0,
@@ -239,13 +239,15 @@ export function current(V, sel, cards, tut) {
     if (L.done && L.done(c)) { tut.seen.add(L.id); continue; }
     if (!L.when(c)) continue;
     if (L.untilAct && tut.shown[L.id] === undefined) tut.shown[L.id] = n;
-    return { ...L, at: now(L.at), only: now(L.only) };
+    // the player always picks the card: until then the coach points at it (or at the hand), then beside its circles
+    const only = now(L.only); let at = now(L.at);
+    if (at && at.rings && only && only.card && c.sel !== only.card) at = { card: only.card };
+    return { ...L, at, only };
   }
   return null;
 }
 
-// Narrow a decision to what the lesson lets happen: only its card and crossroads, only the deck, never End turn. A
-// `picked` card is already chosen, so its rings show as the lesson speaks (only the first card is picked by hand).
+// Narrow a decision to what the lesson lets happen: only its card and crossroads, only the deck, never End turn.
 export function gate(d, only) {
   const places = {};
   const fits = t => only.hq ? t[0] === 'hq' : !only.crs || (t[0] === 'cr' && only.crs.includes(t[1]));
