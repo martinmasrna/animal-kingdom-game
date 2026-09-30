@@ -20,7 +20,7 @@ def _board(m):
 def test_the_deal_is_fixed_the_player_goes_first_and_there_is_no_mulligan():
     m = _tutorial()
     assert m.tutorial and m.phase == "playing" and m.state.current == "A" and m.state.pending is None
-    assert [u.card_id for u in m.state.hands["A"]] == ["lion", "cape_buffalo", "dire_wolf", "lion"]
+    assert [u.card_id for u in m.state.hands["A"]] == ["lion", "cape_buffalo", "dire_wolf", "cape_buffalo"]
 
 
 def test_the_forced_turns_play_out_as_the_lessons_say():
@@ -30,12 +30,12 @@ def test_the_forced_turns_play_out_as_the_lessons_say():
     while m.to_act() == "B":
         m.act("B", m.bot_move())
     assert _board(m)["5,2"] == [("B", "cape_buffalo")] and _board(m)["4,2"] == [("B", "pup")]
-    m.act("A", PlaceAction("dire_wolf", ("cr", "1,1"))); m.act("A", PlaceAction("lion", ("cr", "2,1")))   # the region, closed
+    m.act("A", PlaceAction("dire_wolf", ("cr", "1,1"))); m.act("A", PlaceAction("cape_buffalo", ("cr", "2,1")))   # the region, closed
     assert m.state.food["A"] == 10, "it pays as the turn ends"
     while m.to_act() == "B":
         m.act("B", m.bot_move())
     m.act("A", DrawAction())
-    assert [u.card_id for u in m.state.hands["A"]] == ["dire_wolf", "cape_buffalo"]
+    assert [u.card_id for u in m.state.hands["A"]] == ["dire_wolf", "lion"]
     assert any(isinstance(a, PlaceAction) and _board(m).get(a.crossroad, [("A",)])[-1][0] == "B" for a in rules.legal_actions(m.state)), "a Pup to cover"
 
 
