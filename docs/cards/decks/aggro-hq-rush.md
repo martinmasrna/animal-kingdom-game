@@ -27,7 +27,7 @@ The deck is being redesigned: the diagnosis and Martin's card-by-card analysis a
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Jerboa** | 2 | Rodent | 2 | Roar: play another animal. |
-| **Hornet** | 2 | — | 2 | Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy. |
+| **Hornet** | 2 | Colony | 2 | Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy. |
 | **Chameleon** | 2 | Lizard | 0 | Can cover animals of any strength. |
 | **Skunk** | 2 | — | 4 | Roar: return an adjacent enemy to your opponent's hand. It can't be played next turn. |
 

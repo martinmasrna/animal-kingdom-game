@@ -247,7 +247,6 @@ Cards must remain fully understandable without the ability word.
 - [ ] A multi-tag card counts for every matching effect. This makes `Bird/Dinosaur`, `Egg/Amphibian`, and `Egg/Arachnid` mechanically significant.
 - [ ] Decide whether an unhatched Egg should carry the future creature's tag. Recommended first test: **yes for constructed synergy, but exclude Eggs from “draw a Bird/Snake/etc.” unless the effect explicitly says it can draw Eggs**. Otherwise Bird Egg may recursively find Egg cards.
 - [ ] Keep type and tags distinct: Egg is a unit type/subtype even if it also appears in the flat tag list.
-- [ ] Formalize the narrow Colony caste exception to the one-species rule before adding more ants and bees.
 
 ### 6.1 Proposed taxonomy expansion
 

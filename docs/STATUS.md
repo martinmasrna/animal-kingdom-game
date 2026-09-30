@@ -33,12 +33,6 @@ The map. Read it first each session and keep it current: when something here cha
 7. **The bots are the priority (Martin, 2026-09-29)**: his reverse gauntlet went 35–35 against the goodstuff pile where RefereeBot pilots get 26%, so most balance findings may be pilot artifacts. Found (details in [`bots.md`](bots.md)): the hand eval hoards, drawing and holding Roar cards Martin plays, because `effect_readiness` pays for every live Roar in hand; but the same term carries den-race value Aggro and Canine need, so no weight is right for every deck. Now: a small value network over generic hand-and-board features, trained on self-play outcomes and iterated. The round-2 network (trained with extra den-race games) is the first to improve or tie every deck against goodstuff (Colony +15, Food +13.5, Cats +9, Canine +6.5, Aggro, Egg and Ramp tie), on the 2026-09-29 cards. Running unattended since 2026-09-30 16:46: self-play round 3 on current cards, retrain, every deck against goodstuff (results about 23:00), then the full 7×7 proof (results the morning of 2026-10-01); steps and output paths in [`bots.md`](bots.md) under "The value network". Nothing ships until the 7×7 passes; the overnight matrix re-run waits on it.
 8. **The card is settled (2026-09-29).** Full-bleed painting inside a rarity edge (graphite, silver, gold with a sheen); a painted driftwood bar with the name, a driftwood banner with the strength in chalk digits, a driftwood panel with the rules in Fira Sans Condensed (`static/card.js`, painted pieces `static/kit2/card_*.webp`, made in the design sandbox's `card2/`). The hand and the collection show compact cards (painting, strength, name); the full card shows on hover. Card text fits three lines at every size, enforced by `web/test/cardtext.test.mjs`; wording conventions are in `rules/keywords.md`.
 
-## Waiting on Martin
-
-Taste calls only Martin can make. Nothing here is started.
-
-- **Flavor:** Cat/Canine vs Feline/Canine as the family pair; Black Panther as a melanistic leopard; a Colony exception to one-species-per-pool for castes; re-casting the untagged animals. Details in [`cards/flavor-todo.md`](cards/flavor-todo.md) and [`cards/decks/flavor-review.md`](cards/decks/flavor-review.md).
-
 ## Engine debt
 
 - Some printed numbers are still literals in effect code (Raven's draw 3 / shuffle 2, Owl's look 3, several draw-2s); only food values and costs are guarded against the card text. Move them to `Config` or card data, and extend `test_card_text_consistency.py`.

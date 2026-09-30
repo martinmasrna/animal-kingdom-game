@@ -837,7 +837,7 @@
       "name": "Hornet",
       "deck": "aggro_hq_rush",
       "rarity": "rare",
-      "tags": [],
+      "tags": ["Colony"],
       "base_strength": 2,
       "keywords": ["Flight"],
       "text": "Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy."
