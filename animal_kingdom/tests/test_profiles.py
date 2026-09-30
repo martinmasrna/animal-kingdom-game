@@ -210,6 +210,25 @@ def test_signing_in_on_a_second_device_moves_that_guests_work_into_the_account(d
     assert db.get(second["id"]) is None                                   # the guest is gone
 
 
+def test_the_server_serves_your_replay_and_only_yours(monkeypatch, tmp_path):
+    import asyncio
+    from aiohttp.test_utils import TestClient, TestServer
+    from animal_kingdom.web import replay
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    monkeypatch.setattr(server, "REPLAY_DIR", tmp_path)
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            me, other = [await (await c.post("/api/profile", json={})).json() for _ in range(2)]
+            server.profiles.record(me["profile"]["id"], "M-0", kind="bot", my_deck="Cats", opp="Bot (Easy)", opp_deck="Ramp",
+                                   won=1, lost=0, seat="B")
+            replay.save(tmp_path, "M-0", "B", [{"you": "B"}, {"you": "B"}])
+            r = await c.get("/api/replay/M-0", headers={"X-AK-Key": me["code"]})
+            assert r.status == 200 and await r.json() == [{"you": "B"}, {"you": "B"}]
+            assert (await c.get("/api/replay/M-0", headers={"X-AK-Key": other["code"]})).status == 404
+    asyncio.run(run())
+
+
 def test_the_server_round_trip_signs_the_browser_in(monkeypatch):
     import asyncio
     from aiohttp.test_utils import TestClient, TestServer

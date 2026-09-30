@@ -24,7 +24,7 @@ before(async () => {
   await page.setRequestInterception(true);
   page.on('request', async r => {
     const url = r.url();
-    if (url.includes('/api/replay/AAA-0')) return r.respond({ contentType: 'application/json', body: JSON.stringify({ views }) });
+    if (url.includes('/api/replay/AAA-0')) return r.respond({ contentType: 'application/json', body: JSON.stringify(views) });   // the server's format: the list of views
     if (url.includes('/api/replay/BBB-0')) return r.respond({ status: 409, contentType: 'text/plain', body: 'The cards have changed since this match, so it can\'t be replayed' });
     if (url.endsWith('/api/profile') || url.endsWith('/api/me')) {   // a profile with finished matches
       const res = await fetch(url, { method: r.method(), headers: r.headers(), body: r.postData() });

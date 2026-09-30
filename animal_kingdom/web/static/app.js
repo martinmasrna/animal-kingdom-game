@@ -768,7 +768,7 @@ function drawEnd() {
     // a lesson's end: lesson 1 leads on to lesson 2, lesson 2 to a real match; a loss offers the same lesson again
     const lesson = lessonOf(V), won = w === you;
     if (won) store(lesson === 1 ? 'ak:lesson' : 'ak:learned', '1');
-    const next = !won ? '' : lesson === 1 ? '<div class="next">Well done! One more lesson to go.</div>' : '<div class="next">You know how to play now. Time for a real match!</div>';
+    const next = !won ? '' : lesson === 1 ? '<div class="next">One more lesson to go.</div>' : '<div class="next">You know the basics. Pick a deck and play a match.</div>';
     const go = !won ? `<a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Try again</button>`
       : lesson === 1 ? `${peek}<button class="play" id="nextlesson">Next lesson</button>` : `${peek}<a class="play" href="#/">Play a match</a>`;
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>${next}<div class="btns">${go}</div></div>`;
@@ -794,10 +794,12 @@ async function replayScreen(key) {
   if (RP.key === key && RP.views.length) return;
   stopReplay(); screen = null; RP.key = key;
   app.innerHTML = `<div class="mscr pre"><p class="wait">Loading the replay…</p></div>`;
-  const r = await api('/api/replay/' + encodeURIComponent(key));
+  const back = msg => { RP.key = null; history.replaceState(null, '', '#/profile'); profileScreen(); toast(msg); };
+  let views;
+  try { const r = await api('/api/replay/' + encodeURIComponent(key)); if (!r.ok) throw new Error(await r.text()); views = await r.json(); }
+  catch (e) { if (RP.key === key) back(e.message || 'The replay didn\'t load, try again'); return; }
   if (RP.key !== key) return;   // left while it loaded
-  if (!r.ok) { const msg = await r.text(); RP.key = null; history.replaceState(null, '', '#/profile'); profileScreen(); return toast(msg); }
-  RP.views = (await r.json()).views; ui.peek = false; ui.sel = null; ui.panel = null;
+  RP.views = views; ui.peek = false; ui.sel = null; ui.panel = null;
   replayStep(0); replayPlay(true);
 }
 function stopReplay() { clearTimeout(RP.timer); Object.assign(RP, { key: null, views: [], i: 0, playing: false }); }

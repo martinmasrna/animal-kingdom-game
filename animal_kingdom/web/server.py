@@ -327,7 +327,7 @@ def record_match(match: Match) -> None:
 
 
 async def get_replay(req):
-    """Every view you saw in one of your finished matches (key: the history's match), as saved when it ended."""
+    """Every view you saw in one of your finished matches (key: the history's match), as saved when it ended: a JSON list."""
     p = me(req)
     key = req.match_info["match"]
     row = profiles.match(p["id"], key)
