@@ -142,8 +142,10 @@ class Hub:
         while (s := match.to_act()) is not None and match.seats[s].is_bot:
             opening = not match.state.pending and match.state.actions_taken_this_turn == 0
             await asyncio.sleep(BOT_PAUSE["choice" if match.state.pending else "open" if opening else "move"])
-            while match.hold:                 # the tutorial's coach is talking: the opponent waits for its Next
-                await asyncio.sleep(0.1)      # (checked after the pause: the hold arrives while it runs)
+            if match.hold:                    # the tutorial's coach is talking: the opponent waits for its Next
+                while match.hold:             # (checked after the pause: the hold arrives while it runs)
+                    await asyncio.sleep(0.1)
+                await asyncio.sleep(BOT_PAUSE["open"] + 0.4)   # then a full beat: what Next starts (the fruit) plays out first
             version = match.version
             try:
                 action = await asyncio.to_thread(match.bot_move)

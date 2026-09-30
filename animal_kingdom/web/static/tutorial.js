@@ -62,7 +62,7 @@ export const LESSONS = [
   { id: 'buffalo', when: c => c.mine && c.round === 1 && c.units === 1,
     text: { pick: 'Now the Buffalo. Click it.', place: 'Each new animal must connect to your den, directly or through your other animals. Click one of the circles.' },
     only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo') }), at: { rings: true } },   // every place it may go
-  { id: 'watch', when: c => c.theirs && c.round === 1, at: { oppcards: true },
+  { id: 'watch', when: c => c.theirs && c.round === 1, ...talk, at: { oppcards: true },
     text: 'Now it\'s your opponent\'s turn. Watch where the red animals go.' },
   { id: 'patch', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'), ...talk, at: c => ({ region: c.home }),
     text: 'This is a region. Put animals on all four crossroads around it, and you get 10 food every turn.' },

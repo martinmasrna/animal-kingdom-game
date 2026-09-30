@@ -491,7 +491,7 @@ function drawGame() {
 
   // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.
   { const A0 = ui.anim, l0 = G.history[G.history.length - 1];
-    if (A0 && G.history.length > A0.hist && l0 && l0.seat === them && l0.kind === 'place') ui.revealEnd = Date.now() + 1050; }
+    if (A0 && G.history.length > A0.hist && l0 && l0.seat === them && l0.kind === 'place') ui.revealEnd = Date.now() + 1900; }   // the card shown, flown down, landed and its dust settled
   // The opponent's hand: one card back each, centred across the board from yours; in a replay their cards, face up (the eye hides them).
   const faces = RP.views.length && RP.eye && G.oppHand;
   const nb = G.handCount[them], step = faces ? Math.min(72, 504 / Math.max(1, nb - 1)) : 52,   // face up, a gap between cards as in your hand; a full hand (8) stays clear of the replay's controls
@@ -580,7 +580,7 @@ function drawGame() {
     rv.innerHTML = cardHTML(CARDS[last.card]); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty('--ty', `${ty - 300}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on');
     if (ui.anim) ui.anim.landDelay = 0.95;
-    ui.revealEnd = Date.now() + 1050;
+    ui.revealEnd = Date.now() + 1900;
   }
   placeCoach($('coach'), d.lesson, d.rings);
   drawBoard(d);
