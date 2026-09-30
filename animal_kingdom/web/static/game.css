@@ -400,3 +400,4 @@
 .game .stone.shown::before { inset: -18px; }
 .game .cr.unit.shown::before { inset: -40px; background: radial-gradient(circle, rgba(255,236,190,.6) 40%, rgba(255,226,160,.3) 58%, rgba(255,220,150,0) 72%); }   /* wide enough to show around the piece */
 @keyframes regionglow { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
+.game .endov { inset: calc(-1 * var(--above, 0px)) calc(-1 * var(--side, 0px)); }   /* the dimming reaches the window's edges, where the edge pieces now sit */

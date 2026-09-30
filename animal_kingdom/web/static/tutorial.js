@@ -75,7 +75,7 @@ export const LESSONS = [
     only: c => ({ crs: c.homeOpen }), at: { rings: true },
     text: { pick: 'Finish the region! Click your Buffalo.', place: 'Now click the last crossroad around the region.' } },
   { id: 'food', when: c => c.homeHeld, ...talk, holdFood: true, at: c => ({ stone: c.home[0] }),
-    text: 'The +10 region is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
+    text: 'The region is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
   // turn 3: moves and drawing, then covering
   { id: 'actions', when: c => c.mine && c.round === 3, ...talk, at: { endturn: true },
     text: 'Each turn you get two moves: place an animal or draw cards. The dots show how many moves are left.' },
