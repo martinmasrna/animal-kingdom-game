@@ -137,7 +137,7 @@
 
 /* the painted board: the plate is the whole stage, the world runs under both hands */
 .game .plate { position: absolute; left: 0; top: 0; width: 1512px; height: 800px; pointer-events: none; user-select: none; }
-.game.kit #stage { background: #2b2618; }
+.game.kit #stage { background: transparent; }   /* the painted bleed shows under the plate's anti-aliased edge, no dark seam */
 .game.kit .cr.clear { background: none; border: 0; }
 .game.kit .stone { background: none; border: 0; color: #e9e1d2; font-size: 17px; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
 .game.kit .stone.A { background: var(--A); color: var(--Aink); text-shadow: none; } .game.kit .stone.B { background: var(--B); text-shadow: none; }
@@ -261,7 +261,10 @@
 
 /* ---------- the game's chrome in the menus' materials (menu.css): granite pieces, stone slabs, the blue slab, Fira Sans Condensed ---------- */
 /* The world past the stage's edges: a blurred continuation of the savanna instead of black bars. */
-.game.kit { background: #2b2618 url(/static/kit2/plate.webp) center / cover; }
+.game.kit { background: #685032; }
+/* The savanna beyond the board: the plate's painted bleed (2006 x 1337 plate px, the board's 1672 x 885 at 167, 226), at the stage's scale. */
+.game #bleed { position: absolute; left: 50%; top: 50%; width: 1512px; height: 800px; transform-origin: 0 0; pointer-events: none; }
+.game #bleed img { position: absolute; left: -151px; top: -204.4px; width: 1814px; height: 1209.1px; user-select: none; }
 .game.kit::before { content: ''; position: absolute; inset: 0; backdrop-filter: blur(16px) brightness(.85); -webkit-backdrop-filter: blur(16px) brightness(.85); }
 .game, .game .prompt, .game .panel, .game .endbox, .game .series, .game .clock, .game .waiting, .game .tbtn, .game .deck { font-family: 'Fira Sans Condensed', sans-serif; }
 /* Menu: a stone slab with a drawn icon; its list the dropdowns' stone. */

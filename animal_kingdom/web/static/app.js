@@ -424,7 +424,7 @@ function wireTips(root) {
 function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
-    app.innerHTML = `<div class="game kit" id="scr"><div id="stage">
+    app.innerHTML = `<div class="game kit" id="scr"><div id="bleed"><img src="/static/kit2/plate_bleed.webp" alt="" draggable="false"></div><div id="stage">
       <div id="board"></div>
       <div class="abs series" id="series"></div>
       <div class="abs clock" id="clock"></div>
@@ -675,10 +675,12 @@ function showPanel() {
   for (const [k, id] of [['mine', 'mine'], ['theirs', 'theirs'], ['hist', 'histp']]) document.getElementById(id).classList.toggle('on', ui.panel === k);
   if (ui.panel === 'hist') { const h = document.getElementById('hist'); h.scrollTop = h.scrollHeight; }
 }
-// The stage keeps its design size (STAGE) and scales, letterboxed, to the window.
+// The stage keeps its design size (STAGE) and scales to the window; around it the savanna runs on (the plate's painted bleed,
+// scaled and centred with the stage, so the painting is continuous at every window shape).
 function fitStage() {
   const st = document.getElementById('stage'); if (!st) return;
-  st.style.transform = `scale(${Math.min(innerWidth / STAGE.w, innerHeight / STAGE.h)}) translate(-50%, -50%)`;
+  const t = `scale(${Math.min(innerWidth / STAGE.w, innerHeight / STAGE.h)}) translate(-50%, -50%)`;
+  st.style.transform = t; document.getElementById('bleed').style.transform = t;
 }
 
 function moveLine(m) {
