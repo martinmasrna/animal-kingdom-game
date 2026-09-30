@@ -42,17 +42,17 @@ before(async () => {
 });
 after(async () => { await browser?.close(); server?.stop(); });
 
-test('the profile lists each deck with its record and each match with both decks; a deck filters the matches', async () => {
-  assert.deepEqual(await page.$$eval('.prof .rec', els => els.map(e => `${e.querySelector('b').textContent} ${e.querySelector('.wl').textContent}`)), ['Cats 2–0', 'Egg 0–1']);
+test('the profile lists each match with both decks; the deck filter carries each deck\'s record and filters the matches', async () => {
+  assert.deepEqual(await page.$$eval('.hhead .ddo', els => els.map(e => e.textContent.replace(/\s+/g, ' ').trim())), ['All decks 2–1', 'Cats 2–0', 'Egg 0–1']);
   assert.deepEqual(await page.$$eval('.prof .hr b', els => els.map(e => e.textContent)), ['Won', 'Won', 'Lost']);
   assert.deepEqual(await page.$$eval('.prof .hr:nth-child(2) .dk', els => els.map(e => e.textContent)), ['Cats', 'Ana#1234'], 'a person, not their deck\'s name');
   assert.ok(!(await page.$eval('.prof .hlist', e => e.textContent.includes('Her secret deck'))));
   assert.equal(await page.$$eval('.prof .hr:first-child .pm .face', els => els.length), 2, 'both decks as pieces');
   assert.equal(await page.$$eval('.prof .hr:last-child .pm .face', els => els.length), 2, 'a match from before covers finds the starters\' faces');
-  await page.click('.prof .rec[data-deck="Egg"]');
+  await page.click('.hhead .dd .sel'); await page.click('.hhead .ddo[data-v="Egg"]');
   assert.deepEqual(await page.$$eval('.prof .hr .dk', els => els.map(e => e.textContent)), ['Egg', 'Cats']);
-  await page.click('.prof .rec[data-deck="Egg"]');
-  assert.equal(await page.$$eval('.prof .hr', els => els.length), 3, 'clicked again, the filter clears');
+  await page.click('.hhead .dd .sel'); await page.click('.hhead .ddo[data-v=""]');
+  assert.equal(await page.$$eval('.prof .hr', els => els.length), 3, 'all decks again');
 });
 
 test('a match that can no longer be replayed says so and stays on the profile', async () => {

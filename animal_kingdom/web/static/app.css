@@ -170,23 +170,17 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 
 /* ---------- profile: the collection's skeleton (menu.css) ---------- */
 .prof { display: grid; grid-template-columns: minmax(0, 1fr) 360px; }
-/* The ground, as the collection's: a header row naming the screen, then your decks and your matches filling it to the column,
-   each scrolling on its own (any number of decks), the matches' scrollbar at the ground's edge, both fading in under the header. */
+/* The ground: one column of your matches, its header row (the screen's name, the deck filter) on the same edges. */
 .prof .hist { min-height: 0; display: grid; grid-template-rows: 72px minmax(0, 1fr); }
-.prof .hist h2 { margin: 0; padding: 0 24px; align-self: center; font: 700 28px 'Fira Sans Condensed', sans-serif; color: #f0e8da; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
-.prof .hbody { min-height: 0; display: flex; gap: 24px; padding-left: 24px; }
-.prof .hbody > * { overflow-y: auto; padding: 8px 0 24px; scrollbar-width: thin; scrollbar-color: #4a4540 transparent;
+.prof .hhead, .prof .hlist, .prof .none { width: 100%; max-width: 760px; margin: 0 auto; box-sizing: border-box; }
+.prof .hhead { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 24px; }
+.prof .hhead h2 { margin: 0; font: 700 28px 'Fira Sans Condensed', sans-serif; color: #f0e8da; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+.prof .hhead .dd { min-width: 220px; } .prof .hhead .dd .sel { width: 100%; text-align: left; }
+.prof .hhead .dd i, .prof .hhead .ddo i { font-style: normal; color: #9d917e; margin-left: 6px; }
+.prof .hbody { min-height: 0; overflow-y: auto; padding: 8px 0 24px; scrollbar-width: thin; scrollbar-color: #4a4540 transparent;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 8px); mask-image: linear-gradient(to bottom, transparent 0, #000 8px); }
-.prof .recs { scrollbar-width: none; }
-/* Your decks with their games won–lost; one picked filters the matches. */
-.prof .recs { flex: none; width: 284px; display: flex; flex-direction: column; gap: 8px; }
-.prof .recs > * { flex: none; }
-.prof .dtile.rec.on { border-radius: 8px; }
-.prof .dtile.rec b { top: 8px; transform: none; }
-.prof .dtile .wl { position: absolute; left: 12px; bottom: 7px; font: 700 15px/1 'Fira Sans Condensed', sans-serif; color: #b3a996; text-shadow: 0 1px 3px #000; }
 /* A match: the result (a win bright, a loss dimmed: contrast, not team colour), your deck's piece and theirs (plain rims), who and when; it opens the replay. */
-.prof .hlist { flex: 1; min-width: 0; padding-right: 24px !important; display: flex; flex-direction: column; gap: 6px; }
-.prof .hlist > * { flex: none; }
+.prof .hlist { padding: 0 24px; display: flex; flex-direction: column; gap: 6px; }
 /* Two clusters: the result and the matchup (each deck its piece and name, in fixed columns so the pieces line up), then who and when, quieter, on the right. */
 .prof .hr { display: grid; grid-template-columns: 52px 44px 136px 44px 130px 1fr; align-items: center; column-gap: 10px; height: 56px; padding: 0 16px 0 14px; border-radius: 10px;
   background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); color: #e8e0d2; font-size: 17px; cursor: pointer; }
@@ -198,7 +192,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .prof .hr .pm img { position: absolute; inset: 0; width: 100%; height: 100%; }
 .prof .hr .dk { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .prof .hr .meta { justify-self: end; font-size: 15px; color: #8f8577; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.prof .none { margin: 8px 24px; color: #b3a996; font-size: 17px; }
+.prof .none { padding: 0 24px; margin: 8px auto; color: #b3a996; font-size: 17px; }
 .prof .me { flex: 1; overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 22px; }
 .prof .namerow { display: flex; align-items: center; gap: 8px; }
 .prof .namein { flex: 1; min-width: 0; font: 700 22px 'Fira Sans Condensed', sans-serif; height: 48px; }
