@@ -147,8 +147,8 @@ function homeScreen(mode = {}) {
           : levels + dd('botDeck', play.botDeck, botDecks))}</div>` : '';
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
   const first = !learned() && !mode.join && !mode.gauntlet;
-  app.innerHTML = `<div class="mscr home">${play.open === 'decks' ? '' : '<div class="title">Animal Kingdom</div>'}${chooser}
-    <div class="top"><a class="backbtn who" href="#/profile"><span><b>${esc(ME.name)}</b><i>#${ME.tag}</i></span></a><i class="sp"></i><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : '<button class="backbtn" id="learn2"><span>How to play</span></button>'}</div>
+  app.innerHTML = `<div class="mscr home">${chooser}
+    <div class="top"><div class="title">Animal Kingdom</div><i class="sp"></i><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : '<button class="backbtn" id="learn2"><span>How to play</span></button>'}<a class="backbtn" href="#/profile"><span>Profile</span></a></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
       <button class="play" id="go">${go}</button></div>`}</div>`;
