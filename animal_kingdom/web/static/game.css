@@ -112,7 +112,7 @@
 
 /* panels (decklists, history) and the end overlay, restyled onto the flat frame */
 .game .panel { background: rgba(28,27,25,.97); border: 1px solid var(--plaqueline); top: 74px; }
-.game .panel.mine { left: auto; right: 16px; top: auto; bottom: 200px; } .game .panel.theirs { left: 50%; right: auto; margin-left: -145px; } .game .panel.histp { left: auto; right: 16px; top: auto; bottom: 190px; }   /* opens above the turn plaque */
+.game .panel.mine { left: auto; right: 16px; top: auto; bottom: 200px; } .game .panel.theirs { left: 50%; right: auto; margin-left: -145px; } .game .panel.histp { left: auto; right: 16px; top: 62px; bottom: auto; }   /* opens under the History button */
 .game .panel h4 { font: 700 18px 'Source Serif 4', serif; color: var(--ink); } .game .panel .dr { background: #33302b; }
 .game .mine .dr { --c: var(--A); } .game .theirs .dr { --c: var(--B); }
 .game { --you: var(--A); --them: var(--B); }
@@ -252,14 +252,20 @@
 
 .game .hc.dim .card { filter: brightness(.55) saturate(.7) drop-shadow(.2em .45em .5em rgba(0,0,0,.55)); }
 .game.kit .cr.unit.capture { scale: .8; z-index: 6; }   /* the unit that took a den, in its mouth */
-/* The turn, with the clock of whoever must act in a timed match, on a granite plaque over the End turn stone: whose turn it
-   is, which turn and how long is left, read in one place. It clears the red den's lowest pit. Clicking it opens the history. */
-.game .series { left: 1382px; top: 620px; min-width: 114px; height: 34px; box-sizing: border-box; padding: 0 12px; display: flex; align-items: center; justify-content: center; gap: 8px;
-  border-radius: 10px; cursor: pointer; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 8px 18px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,245,230,.12); }
-.game .series:hover { filter: brightness(1.2); }
+/* The deck and the End turn stone rest on one flat slab of the dens' granite (kit2/ledge.webp), on one centre line. History sits
+   with feedback and the flag in the top-right corner. A timed match's clock rides on the stone; a waiting opponent pulses dots there. */
+.game .ledge { left: 1192px; top: 636px; width: 336px; height: 202px; pointer-events: none; background: url(/static/kit2/ledge.webp) center / 100% 100% no-repeat; filter: drop-shadow(3px 6px 8px rgba(0,0,0,.45)); }
+.game.kit .tbtn { top: 657px; }   /* centred on the deck (614 + 166 / 2) */
+.game .clock { margin-left: 6px; }
+.game .tbtn.B .clock { display: block; margin: 2px 0 0; font-size: 15px; }
+.game .tbtn .think { display: none; }
+.game:has(#waiting:not(:empty)) .tbtn.B .think { display: block; font-size: 14px; letter-spacing: 3px; animation: think 1.2s ease-in-out infinite; }
+.game:has(#waiting:not(:empty)) .tbtn.B .think::before { content: '• • •'; }
+.game:has(.tbtn.B) .waiting { display: none; }
+@keyframes think { 50% { opacity: .35; } }
 .game .clock:empty { display: none; }
 .game .clock b { font-variant-numeric: tabular-nums; }
-.game .clock.A b { color: var(--A); } .game .clock.B b { color: var(--B); }
+.game .tbtn .clock b { color: inherit; font-weight: 700; }
 .game .clock.low b { animation: clocklow .6s ease-in-out infinite alternate; }
 @keyframes clocklow { to { opacity: .35; } }
 
@@ -275,7 +281,6 @@
 .game .menu.fb { right: 68px; } .game .menu.fb.alone { right: 16px; }   /* feedback, left of the flag (alone in a replay) */
 /* The waiting line: bone type that holds on the grass. */
 .game .waiting { color: #efe6d4; text-shadow: 0 1px 2px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.6); }
-.game .series { font-size: 17px; font-weight: 700; color: #f0e8da; }
 .game .waiting { font-size: 15px; }
 /* A pending choice: a granite piece; its button a stone slab. */
 .game .prompt { width: 270px; padding: 14px 16px; border: 0; border-radius: 14px; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto;
@@ -395,7 +400,7 @@
 .game .menu, .game .rbar { translate: var(--side, 0px) calc(-1 * var(--above, 0px)); }
 .game .prompt:not(.mull) { translate: 0 calc(-1 * var(--above, 0px)); }
 .game .hand { translate: 0 var(--above, 0px); }
-.game .deck, .game .tbtn, .game .waiting, .game .series { translate: var(--side, 0px) var(--above, 0px); }
+.game .deck, .game .tbtn, .game .waiting, .game .ledge { translate: var(--side, 0px) var(--above, 0px); }
 .game .hand { z-index: 12; pointer-events: none; } .game .hand .hc { pointer-events: auto; }   /* the hand's translate (window edges) makes it a stacking context: above the board's pieces, so a card read large covers them; only its cards take the pointer (the strip spans the deck) */
 /* a region the tutorial shows: its crossroads and stone glow warm, softly breathing; no ring (a ring means a click acts there) */
 .game .cr.shown::before, .game .stone.shown::before { content: ''; position: absolute; inset: -14px; border-radius: 50%; pointer-events: none; z-index: -1;

@@ -391,7 +391,7 @@ function drawClock() {
   if (!c || !c.on) { el.innerHTML = ''; el.className = 'clock'; return; }
   const spent = c.now + (Date.now() / 1000 - V.rx) - c.since, free = Math.max(0, c.free - spent);
   const bank = Math.max(0, c.bank[c.holder] - Math.max(0, spent - c.free)), left = free + bank;
-  el.className = `clock ${rel(c.holder)}${left < 10 ? ' low' : ''}`;
+  el.className = `clock${left < 10 ? ' low' : ''}`;
   el.innerHTML = `<b>${mmss(free > 0 ? free : bank)}</b>`;
   el.dataset.tip = `${c.holder === V.you ? 'Your' : "Your opponent's"} time: ${mmss(free)} for this move, then ${mmss(bank)} in the bank`;
 }
@@ -454,8 +454,9 @@ function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
     app.innerHTML = `<div class="game kit" id="scr"><div id="world"><img src="/static/kit2/plate_wide.webp" alt="" draggable="false"></div><div id="stage">
+      <div class="abs ledge"></div>
       <div id="board"></div>
-      <div class="abs series" id="series"><span id="turnno"></span><span class="clock" id="clock"></span></div>
+      <div class="abs menu hs" id="series" data-tip="History"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg></div>
       <div class="abs opphand" id="opphand"></div>
       <div class="abs menu fb" id="fbbtn" data-tip="Send feedback"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
       <div class="abs menu" id="menubtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/></svg></div>
@@ -508,6 +509,7 @@ function drawGame() {
   lastDecision = d;
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
+  $('series').style.right = 16 + 52 * [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length + 'px';   // History, left of feedback and the flag
   $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
   // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
   $('menubtn').querySelector('svg').innerHTML = isTutorial() ? '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>'
@@ -517,7 +519,6 @@ function drawGame() {
 
   // Top left: the turn (a match is one game while there is one map); it opens the history. The gauntlet counts its games.
   const gameNo = playing ? V.results.length + 1 : V.results.length;
-  $('turnno').textContent = V.gauntlet ? `Game ${gameNo} of ${V.gauntlet.total} · Turn ${G.round}` : `Turn ${G.round}`;
   drawHistory(G); drawLists(G); showPanel();
 
   // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.
@@ -566,8 +567,8 @@ function drawGame() {
   const tb = $('tbtn');
   if (playing && G.current === you) {
     const pips = Array.from({ length: G.actionsTotal }, (_, i) => `<i class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}"></i>`).join('');
-    tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass && !d.noPass ? ' can' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}</span>`;
-  } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = 'Opponent\'s turn'; }
+    tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass && !d.noPass ? ' can' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}<span class="clock" id="clock"></span></span>`;
+  } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = 'Opponent\'s turn<span class="think"></span><span class="clock" id="clock"></span>'; }
   else { tb.className = 'abs tbtn'; tb.innerHTML = ''; }
 
   // A pending choice: the asking card and its rule; card options float above the hand.
