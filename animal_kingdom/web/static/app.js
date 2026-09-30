@@ -243,7 +243,7 @@ function profileScreen() {
   const result = h => h.won > h.lost ? 'Won' : h.won < h.lost ? 'Lost' : 'Draw';   // a match is one game (older best-of-3s by their result)
   const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
     ${piece(deckFace(h.my_cover, h.my_deck))}<span class="dk">${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck))}<span class="dk">${esc(h.opp_deck)}</span>
-    <span class="o">${esc(h.opp)}</span>` : `${piece(h.opp_cover)}<span class="dk">${esc(h.opp)}</span><span></span>`}<span class="d">${when(h.ended)}</span></div>`).join('');
+    <span class="meta">${esc(h.opp)} · ${when(h.ended)}</span>` : `${piece(h.opp_cover)}<span class="dk">${esc(h.opp)}</span><span class="meta">${when(h.ended)}</span>`}</div>`).join('');
   const sect = (title, body) => `<div class="sect"><h4>${title}</h4>${body}</div>`;
   const account = ME.logins.length
     ? sect('Account', `${ME.logins.map(l => `<div class="login">${PROVIDER[l.provider]} · ${esc(l.label)}</div>`).join('')}
@@ -486,7 +486,8 @@ function drawGame() {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id], pick = d.handPick.has(h.iid);
     const hint = can && d.lesson && d.lesson.only && !ui.sel;   // the card the tutorial asks for
     const talking = d.lesson && d.lesson.next || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
-    const cls = [c.rarity, can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');
+    const shown = d.lesson && d.lesson.read === h.id;   // the card the coach is explaining, shown large as if hovered
+    const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
     return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
@@ -562,7 +563,10 @@ function placeCoach(el, L, rings = []) {
   if (!L) { el.innerHTML = ''; document.getElementById('board').classList.remove('pulse'); return; }
   const a = L.at || {}, card = a.card && document.querySelector(`#hand .hc[data-id="${a.card}"]`);
   let x, y, side;
-  if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, card.classList.contains('sel') ? 572 : 590, 'above'];   // a picked card stands 18px higher
+  const read = a.read && document.querySelector(`#hand .hc[data-id="${a.read}"]`);
+  if (read) { const cx = parseFloat(read.style.left) + 71.5;   // beside the large card (2.1x: 300 wide, so 150 + a 24 gap from its middle)
+    [x, y, side] = cx - 174 - COACH_W >= 16 ? [cx - 96, 568, 'left'] : [cx + 96, 568, 'right']; }
+  else if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, card.classList.contains('sel') ? 572 : 590, 'above'];   // a picked card stands 18px higher
   else if (a.deck) [x, y, side] = [1299, 606, 'above'];
   else if (a.prompt) [x, y, side] = [151, 604, 'above'];   // the pending choice's piece, bottom left
   else if (a.endturn) [x, y, side] = [1439, 664, 'above'];
