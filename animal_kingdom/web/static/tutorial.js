@@ -31,7 +31,7 @@ const TARGET = { id: 'target', when: c => c.choosing, untilAct: true, at: { prom
     text: 'This Roar needs a target. Click one of the circled crossroads, or click Skip.' };
 const EMPTY = { id: 'empty', again: true, when: c => c.mine && c.round >= 3 && !c.offered.length,   // nothing to place: never a silent turn
   at: c => c.canDraw ? { deck: true } : { endturn: true },
-  text: c => c.canDraw ? 'No animals to place. Click your deck to draw 2 new ones.' : 'Nothing to do this turn. Click End turn.' };
+  text: c => c.canDraw ? 'Nothing you can place right now. Click your deck to draw 2 new ones.' : 'Nothing to do this turn. Click End turn.' };
 
 export const LESSONS = [
   // --- the opening: what is on screen ---
@@ -101,42 +101,51 @@ export const LESSONS = [
   EMPTY,
 ];
 
-// Lesson 2: the deeper mechanics, won on food (the opponent walls its den with 7s). Its cards are held back until their
-// own step (see HOLD), so each mechanic is met first where its line explains it.
+// Lesson 2: the deeper mechanics, won on food (the opponent walls its den with 7s). Scripted like lesson 1: every move is
+// a step in a fixed order on fixed crossroads (connection was taught in lesson 1; here the fixed board is what makes the
+// Falcon's ambush and the Jaguar's rescue always possible). Only the Eagle, teaching Flight, rings every empty crossroad.
+// Then each move is guided to the best spots for finishing a region, until 100 food.
+const one = (card, cr) => ({ card, picked: true, crs: [cr] });
 export const LESSONS_2 = [
   { id: 'intro2', when: c => c.mine && c.round === 1 && c.units === 0, ...talk, at: { middle: true },
     text: 'Lesson 2! This time your opponent guards its den with strong animals, so you\'ll win by gathering 100 food.' },
-  { id: 'lion', when: c => c.mine && c.round === 1 && c.units === 0,
-    only: c => ({ card: 'lion', picked: true, crs: c.empty('lion') }), at: { rings: true },
-    text: 'Start by placing your Lion on a circle.' },
+  { id: 'lion', when: c => c.mine && c.hand('lion') && !c.placed('lion'), only: one('lion', '1,2'), at: { rings: true },
+    text: 'Place your Lion on the circle.' },
   { id: 'glow', when: c => c.mine && c.ready('lynx'), ...talk, at: { card: 'lynx' },
     text: 'See the Lynx glowing? A glowing card\'s Roar will work right now: you have another Cat, your Lion.' },
-  { id: 'lynx', when: c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0, done: c => c.placed('lynx'),
-    only: c => ({ card: 'lynx', picked: true, crs: c.empty('lynx') }), at: { card: 'lynx' },
-    text: 'Place the Lynx, and its Roar draws you a card.' },
+  { id: 'lynx', when: c => c.mine && c.hand('lynx'), only: one('lynx', '2,2'), at: { card: 'lynx' },
+    text: 'Place the Lynx on the circle, and its Roar draws you a card.' },
   { id: 'wall', when: c => c.theirs && c.round === 1, at: { den: 'B' },
     text: 'Your opponent is building a wall of strong animals in front of its den.' },
-  { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel') && c.safe.length > 0, done: c => c.placed('squirrel'),
-    only: c => ({ card: 'squirrel', picked: true, crs: c.safe }), at: { card: 'squirrel' },
-    text: 'The Squirrel\'s Roar gives you 10 food. Place it on a circle.' },
+  { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), only: one('squirrel', '3,2'), at: { card: 'squirrel' },
+    text: 'The Squirrel\'s Roar gives you 10 food. Place it on the circle.' },
   { id: 'foodroar', when: c => c.placed('squirrel'), ...talk, at: { gem: 'A' },
     text: 'Your food went up by 10! Roars like this are another way to gather food, besides regions.' },
+  { id: 'buffalo2', when: c => c.mine && c.round === 2 && c.hand('cape_buffalo'), only: one('cape_buffalo', '2,1'), at: { rings: true },
+    text: 'Place the Buffalo on the circle. Then watch what your opponent does.' },
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'Your opponent\'s Falcon has Flight, so it flew over and covered your Squirrel! Your Squirrel isn\'t gone. It waits underneath.' },
-  { id: 'jaguar', when: c => c.mine && c.squirrelCovered && c.hand('jaguar') && c.nextToFalcon.length > 0, done: c => c.placed('jaguar'),
+  { id: 'draw2', when: c => c.mine && c.squirrelCovered && !c.hand('jaguar') && !c.placed('jaguar'), only: { deck: true }, at: { deck: true },
+    text: 'Your hand is empty. Click your deck to draw 2 cards.' },
+  { id: 'jaguar', when: c => c.mine && c.squirrelCovered && c.hand('jaguar') && c.nextToFalcon.length > 0,
     only: c => ({ card: 'jaguar', picked: true, crs: c.nextToFalcon }), at: { card: 'jaguar' },
-    text: 'The Jaguar\'s Roar removes an enemy next to it with strength 4 or less, like the Falcon. Place the Jaguar next to the Falcon.' },
+    text: 'The Jaguar\'s Roar removes an enemy next to it with strength 4 or less, like the Falcon. Place the Jaguar on the circle.' },
   TARGET,
   { id: 'uncovered', when: c => c.squirrelBack, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'The Falcon is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
-  { id: 'eagle', when: c => c.mine && c.hand('eagle') && c.empty('eagle').length > 0 && !c.squirrelCovered, done: c => c.placed('eagle'),
+  { id: 'eagle', when: c => c.mine && c.hand('eagle') && !c.squirrelCovered,
     only: c => ({ card: 'eagle', picked: true, crs: c.empty('eagle') }), at: { card: 'eagle' },
     text: 'The Eagle has Flight, like the Falcon: it can land on any empty crossroad, even far from your animals. Place it on a circle.' },
-  { id: 'apex', when: c => c.mine && c.hand('tiger') && c.prey.length > 0 && !c.squirrelCovered, done: c => c.placed('tiger'),
+  { id: 'draw3', when: c => c.mine && c.placed('eagle') && !c.hand('tiger') && !c.placed('tiger') && c.canDraw, only: { deck: true }, at: { deck: true },
+    text: 'Click your deck to draw 2 more cards.' },
+  { id: 'apex', when: c => c.mine && c.hand('tiger') && c.prey.length > 0,
     only: c => ({ card: 'tiger', picked: true, crs: c.prey }), at: { card: 'tiger' },
-    text: 'The Tiger is an Apex Predator: it must land on top of an animal, and it eats it. An eaten animal is gone for good. Eat the circled animal!' },
-  { id: 'free2', when: c => c.mine && ((c.placed('eagle') && c.placed('tiger')) || c.round >= 7), ...talk, at: { middle: true },
-    text: 'Your opponent\'s den is walled off, so gather 100 food: surround regions, and place animals whose Roar gives food.' },
+    text: 'The Tiger is an Apex Predator: it must land on top of an animal, and it eats it. An eaten animal is gone for good. Eat a circled animal!' },
+  { id: 'free2', when: c => c.mine && (c.placed('tiger') || c.round >= 8), ...talk, at: { middle: true },
+    text: 'Now gather 100 food. Each move, the circles show the best spots for finishing a region.' },
+  { id: 'feed', again: true, when: c => c.mine && (c.placed('tiger') || c.round >= 8) && c.feed.length > 0,
+    only: c => ({ crs: c.feed }), at: { rings: true },
+    text: 'Pick an animal, then click one of the circles.' },
   EMPTY,
 ];
 // Lesson 2 holds each teaching card back until its own step: it can't be placed before its line explains it.
@@ -146,7 +155,7 @@ export const lessonOf = V => V.seats.B.bot === 'tutorial2' ? 2 : 1;
 export function held(V, L) {
   if (lessonOf(V) !== 2) return [];
   const placed = id => V.game.history.some(m => m.seat === V.you && m.kind === 'place' && m.card === id);
-  return HOLD.filter(id => !placed(id) && !(L && L.only && L.only.card === id));
+  return HOLD.filter(id => !placed(id) && !(L && L.only && L.only.card === id) && !(id === 'tiger' && V.game.round >= 8));
 }
 const ADJ = cr => { const [x, y] = cr.split(',').map(Number); return [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].filter(([a, b]) => a >= 1 && a <= 5 && b >= 1 && b <= 3).map(([a, b]) => `${a},${b}`); };
 
@@ -188,8 +197,12 @@ export function context(V, sel, cards) {
   const wasCovered = G.history.some(m => m.seat !== V.you && m.fx.some(f => f.k === 'cover' && f.card === 'squirrel'));
   Object.assign(c, { squirrelCovered: !!under, squirrelBack: !under && wasCovered && !!top, squirrelAt: (under || top || [])[0] });
   c.nextToFalcon = under ? c.empty('jaguar').filter(cr => ADJ(under[0]).includes(cr)) : [];
-  // where the Squirrel may go: a crossroad with an empty neighbour the Jaguar could still reach once the Squirrel is covered
-  c.safe = c.empty('squirrel').filter(cr => ADJ(cr).some(n => !owner(G, n) && (n[0] === '1' || ADJ(n).some(m => m !== cr && owner(G, m) === V.you))));
+  // the best spots for food: the open corners of the region, not yet yours and free of enemies, where you hold the most
+  const regions = [1, 2, 3, 4].flatMap(x => [1, 2].map(y => [`${x},${y}`, `${x + 1},${y}`, `${x},${y + 1}`, `${x + 1},${y + 1}`]));
+  const open = new Set(crs.filter(cr => !owner(G, cr)));
+  const cand = regions.filter(r => !r.every(cr => owner(G, cr) === V.you) && !r.some(cr => owner(G, cr) && owner(G, cr) !== V.you) && r.some(cr => open.has(cr)))
+    .map(r => [r.filter(cr => owner(G, cr) === V.you).length, r]).sort((a, b) => b[0] - a[0]);
+  c.feed = cand.length ? cand.filter(([n]) => n === cand[0][0]).flatMap(([, r]) => r.filter(cr => open.has(cr))).filter((x, i, a) => a.indexOf(x) === i) : [...open];
   // the enemies the Tiger may land on and eat
   c.prey = ((G.legal && G.legal.place && G.legal.place.tiger) || []).filter(t => t[0] === 'cr' && owner(G, t[1]) && owner(G, t[1]) !== V.you).map(t => t[1]);
   const mineAt = cr => owner(G, cr) === V.you, count = h => h.filter(mineAt).length;

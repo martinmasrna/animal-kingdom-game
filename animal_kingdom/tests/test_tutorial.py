@@ -56,23 +56,43 @@ def _lesson2() -> Match:
     return m
 
 
-def test_lesson_2_walls_the_den_flies_the_falcon_onto_the_squirrel_and_is_won_on_food():
-    for seed in range(40):
-        rng, m, flown = random.Random(seed), _lesson2(), False
-        m.act("A", PlaceAction("lion", ("cr", "1,2"))); m.act("A", PlaceAction("lynx", ("cr", "2,2")))   # the Lynx draws the Squirrel
+def test_lesson_2_plays_out_as_its_script_says_and_is_won_on_food():
+    for seed in range(20):
+        rng, m = random.Random(seed), _lesson2()
+        legal = lambda: rules.legal_actions(m.state)
+        top = lambda cr: m.state.board[cr][-1].card_id if m.state.board.get(cr) else None
+
+        def a(action):
+            assert action in legal(), (seed, action)
+            m.act("A", action)
+            while m.state.pending is not None and m.to_act() == "A":   # a Roar's target: the first offered
+                m.act("A", next(x for x in legal() if isinstance(x, ChoiceAction) and x.choice != SKIP))
+
+        def their_turn():
+            while m.phase == "playing" and m.to_act() == "B":
+                m.act("B", m.bot_move())
+
+        a(PlaceAction("lion", ("cr", "1,2"))); a(PlaceAction("lynx", ("cr", "2,2")))   # the Lynx draws the Squirrel
+        their_turn()
+        assert (top("5,2"), top("5,1")) == ("cape_buffalo", "dire_wolf")
+        a(PlaceAction("squirrel", ("cr", "3,2"))); a(PlaceAction("cape_buffalo", ("cr", "2,1")))
+        their_turn()
+        assert top("5,3") == "lion" and top("3,2") == "falcon", "the wall is complete and the Falcon covers the Squirrel"
+        a(DrawAction()); a(PlaceAction("jaguar", ("cr", "3,1")))
+        assert top("3,2") == "squirrel", "the Jaguar removed the Falcon"
+        their_turn()
+        eagle = [x for x in legal() if isinstance(x, PlaceAction) and x.card_id == "eagle" and not m.state.board.get(x.crossroad)]
+        a(rng.choice(eagle)); a(DrawAction())
+        their_turn()
+        prey = [x for x in legal() if isinstance(x, PlaceAction) and x.card_id == "tiger" and m.state.board.get(x.crossroad)
+                and m.state.board[x.crossroad][-1].owner == "B"]
+        assert prey, "a Pup for the Tiger"
+        a(rng.choice(prey))
         while m.phase == "playing":
             if m.to_act() == "B":
-                m.act("B", m.bot_move()); continue
-            legal = rules.legal_actions(m.state)
-            squirrel = [a for a in legal if isinstance(a, PlaceAction) and a.card_id == "squirrel" and not m.state.board.get(a.crossroad)]
-            choices = [a for a in legal if isinstance(a, ChoiceAction)]
-            places = [a for a in legal if isinstance(a, PlaceAction)   # as the client offers: never onto your own animal
-                      and not (a.target[0] == "cr" and m.state.board.get(a.crossroad) and m.state.board[a.crossroad][-1].owner == "A")]
-            m.act("A", squirrel[0] if squirrel and not flown else
-                  rng.choice([c for c in choices if c.choice != SKIP] or choices) if choices else
-                  rng.choice(places) if places else DrawAction() if DrawAction() in legal else PassAction())
-            flown = flown or any(len(st) > 1 and st[-1].card_id == "falcon" for st in m.state.board.values())
-        assert flown, seed
-        assert [m.state.board[cr][0].card_id for cr in ("5,1", "5,2", "5,3")] == ["dire_wolf", "cape_buffalo", "lion"]
-        assert m.results[-1]["winner"] == "A" and m.results[-1]["reason"] in ("food", "exhaustion"), (seed, m.results[-1])
+                their_turn(); continue
+            places = [x for x in legal() if isinstance(x, PlaceAction) and not x.is_hq_capture and not (
+                m.state.board.get(x.crossroad) and m.state.board[x.crossroad][-1].owner == "A")]
+            a(rng.choice(places) if places else DrawAction() if DrawAction() in legal() else PassAction())
+        assert m.results[-1]["winner"] == "A" and m.results[-1]["reason"] == "food", (seed, m.results[-1])
         assert m.state.food["B"] == 0

@@ -105,16 +105,16 @@ test('lesson 2 holds each teaching card back until its own step', () => {
   assert.deepEqual(held(view({}), null), [], 'lesson 1 holds nothing');
 });
 
-test('the Squirrel only goes where the Jaguar can still reach it once it is covered', () => {
-  const t = fresh(); ['intro2', 'glow', 'lynx', 'lion'].forEach(id => t.seen.add(id));
-  const board = { '1,2': u('lion', 'A'), '2,2': u('lynx', 'A') }, hist = [{ seat: 'A', kind: 'place', card: 'lynx', fx: [] }];
-  const L = current(v2({ round: 2, board, history: hist, hand: [{ id: 'squirrel' }], legal: { place: { squirrel: [['cr', '1,1'], ['cr', '1,3'], ['cr', '2,1'], ['cr', '3,2']] }, draw: true } }), null, CARDS, t);
-  assert.equal(L.id, 'squirrel'); assert.ok(L.only.crs.length > 0);
-  for (const cr of L.only.crs) assert.ok(['1,1', '1,3', '2,1', '2,3', '3,2'].includes(cr));
+test('lesson 2 puts each animal on its one crossroad, the Eagle anywhere', () => {
+  const t = fresh(); t.seen.add('intro2');
+  assert.deepEqual(current(v2({ hand: [{ id: 'lion' }] }), null, CARDS, t).only, { card: 'lion', picked: true, crs: ['1,2'] });
+  ['lion', 'glow', 'lynx', 'squirrel', 'foodroar', 'buffalo2', 'covered', 'jaguar', 'uncovered'].forEach(id => t.seen.add(id));
+  const L = current(v2({ round: 4, board: { '5,1': [{ id: 'dire_wolf', owner: 'B', str: 7 }] }, hand: [{ id: 'eagle' }], legal: { place: { eagle: [['cr', '1,1'], ['cr', '4,3'], ['cr', '5,1']] }, draw: true } }), null, CARDS, t);
+  assert.equal(L.id, 'eagle'); assert.deepEqual(L.only.crs, ['1,1', '4,3']);
 });
 
 test('a covered Squirrel is shown, then uncovered by the Jaguar placed next to the Falcon', () => {
-  const t = fresh(); ['intro2', 'glow', 'lynx', 'lion', 'squirrel', 'foodroar'].forEach(id => t.seen.add(id));
+  const t = fresh(); ['intro2', 'glow', 'lynx', 'lion', 'squirrel', 'foodroar', 'buffalo2', 'draw2'].forEach(id => t.seen.add(id));
   const board = { '1,2': u('lion', 'A'), '2,2': [squirrel, falcon] };
   const hist = [{ seat: 'A', kind: 'place', card: 'squirrel', fx: [] }, { seat: 'B', kind: 'place', card: 'falcon', fx: [{ k: 'cover', card: 'squirrel' }] }];
   const g = { round: 3, board, history: hist, hand: [{ id: 'jaguar' }], legal: { place: { jaguar: [['cr', '1,1'], ['cr', '2,1'], ['cr', '1,3']] }, draw: true } };
