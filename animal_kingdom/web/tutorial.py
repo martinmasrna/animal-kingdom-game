@@ -97,6 +97,10 @@ class TutorialBot(Bot):
             done = cr in board and board[cr] and board[cr][-1].owner == "B" and board[cr][-1].card_id == card
             pick = None if done else next((a for a in places if a.card_id == card and a.crossroad == cr), None)
             if pick:
+                # the ambush turn draws first: the Eagle's cover is its last move, so the player's turn follows it at once
+                draw = next((a for a in legal if isinstance(a, DrawAction)), None)
+                if (card, SQUIRREL) == self.ambush and draw and not state.actions_taken_this_turn:
+                    return draw
                 return pick
         quota = self.per_turn[min(state.turn_counter // 2, 2)]
         if state.units_placed_this_turn >= quota:   # its placements done: the other move draws (two moves, like every player)

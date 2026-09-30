@@ -115,8 +115,10 @@ def test_lesson_2_can_always_be_finished_wherever_the_player_puts_its_animals():
                 m.act("A", next(x for x in legal() if isinstance(x, ChoiceAction) and x.choice != SKIP))
 
         def their_turn():
+            moves = []
             while m.phase == "playing" and m.to_act() == "B":
-                m.act("B", m.bot_move())
+                moves.append(m.bot_move()); m.act("B", moves[-1])
+            return moves
 
         place = lambda card, crs: a(PlaceAction(card, ("cr", rng.choice(crs))))
         assert [u.card_id for u in m.state.hands["A"]] == ["lynx"] and own("1,2") == "A" and own("5,2") == "B", "the set-up board"
@@ -131,7 +133,8 @@ def test_lesson_2_can_always_be_finished_wherever_the_player_puts_its_animals():
         a(DrawAction())
         safe = [cr for cr in empty("squirrel") if any(not own(n) and (n[0] == "1" or any(q != cr and q != eagle and own(q) == "A" for q in adj(n)))
                                                      for n in adj(cr))]
-        place("squirrel", safe or empty("squirrel")); their_turn()
+        place("squirrel", safe or empty("squirrel")); moves = their_turn()
+        assert [type(x).__name__ for x in moves][:2] == ["DrawAction", "PlaceAction"] and moves[1].card_id == "eagle", (seed, "it draws, then the Eagle's cover ends its turn", moves)
         sq = next(cr for cr, st in m.state.board.items() if any(u.card_id == "squirrel" and u.owner == "A" for u in st))
         assert own(sq) == "B", (seed, "the Eagle covers the Squirrel")
         beside = [x.crossroad for x in legal() if isinstance(x, PlaceAction) and x.card_id == "black_mamba" and x.crossroad in adj(sq)]
