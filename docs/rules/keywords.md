@@ -59,11 +59,14 @@ Card text grants strength two ways, **distinguished by the verb** — this readi
 ### Discard  *(card-text term, not a keyword)*
 **Discard a card** means remove a card from a hand (or from a deck, when the text says so, as on Hornet). "Your opponent discards a random card" (Omen) and "discard a random card" (Rat) are the same removal the engine has always done for "removes a random card from their hand".
 
+### Scout  *(card-text term, not a keyword)*
+**Scout a card** means look at the top three cards of your deck, draw one and shuffle the other two back. **Scout a Bird** (or a legendary unit, or any other kind) looks at three random cards of that kind in your deck instead, all of them if there are fewer. It draws from the deck and never creates a card; the shuffle counts as shuffling (Rattlesnake grows). The count is `scout_count`. Cards: Owl, Fathom, Bird Egg.
+
 ### Card-text conventions
 Card text fits three lines on the full card (`docs/design/principles.md`). These phrasings are binding:
 
 - **"enemy"** means an enemy unit; **"your Canines"** means friendly Canines.
 - The other player is always **"your opponent"**, never "they", "their" or "them". Stealing from the opponent's hand is random by nature (the hand is hidden), so the text doesn't say "random".
 - Thresholds read **"of strength 4 or less"**, **"6 or more"**, **"10 or more food"**.
-- Timed triggers read **"At the end of your turn, …"** and **"At the start of your next turn, …"**.
+- Timed triggers read **"At the end of your turn, …"** and **"At the start of your next turn, …"**; a delayed effect reads **"In 2 turns, …"**, or **"Next turn, …"** where the long form doesn't fit (Bird Egg).
 

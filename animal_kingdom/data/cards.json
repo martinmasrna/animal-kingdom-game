@@ -235,7 +235,7 @@
     {
       "id": "eagle",
       "name": "Eagle",
-      "deck": "egg_control",
+      "deck": "reserve",
       "rarity": "common",
       "tags": ["Bird"],
       "base_strength": 5,
@@ -250,7 +250,7 @@
       "tags": ["Bird"],
       "base_strength": 2,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: look at the top 3 cards; draw 1 and shuffle the rest."
+      "text": "Flight. Roar: Scout a card."
     },
     {
       "id": "anaconda",
@@ -275,7 +275,7 @@
     {
       "id": "viper",
       "name": "Viper",
-      "deck": "egg_control",
+      "deck": "reserve",
       "rarity": "common",
       "tags": ["Snake"],
       "base_strength": 3,
@@ -345,22 +345,22 @@
     {
       "id": "bird_egg",
       "name": "Bird Egg",
-      "deck": "reserve",
+      "deck": "egg_control",
       "rarity": "common",
       "tags": ["Egg"],
       "base_strength": 0,
       "keywords": [],
-      "text": "After 2 turns, remove this and draw 2 Birds."
+      "text": "Roar: Scout a Bird. Next turn, remove this and Scout a Bird."
     },
     {
       "id": "snake_egg",
       "name": "Snake Egg",
-      "deck": "reserve",
+      "deck": "egg_control",
       "rarity": "common",
       "tags": ["Egg"],
       "base_strength": 0,
       "keywords": [],
-      "text": "After 2 turns, remove this and draw 2 Snakes."
+      "text": "Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes."
     },
     {
       "id": "queen_marabunta",
@@ -685,7 +685,7 @@
       "tags": [],
       "base_strength": 7,
       "keywords": [],
-      "text": "Roar: draw a legendary unit."
+      "text": "Roar: Scout a legendary unit."
     },
     {
       "id": "greywhisker",

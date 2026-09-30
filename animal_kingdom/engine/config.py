@@ -107,8 +107,11 @@ class Config:
     # since a27f0df cut those bodies to 15; it could only mislead a Decision H re-derivation.
 
     # --- Delayed / multi-turn effects (scheduler; "your turns" are 2 apart) ---
-    egg_hatch_delay: int = 2             # Bird/Snake Egg: turns until hatch
-    egg_hatch_draw: int = 2              # cards drawn when an Egg hatches
+    snake_egg_draw: int = 1              # Snake Egg's Roar: Snakes drawn at once
+    egg_hatch_delay: int = 2             # Snake Egg: turns until it hatches
+    egg_hatch_draw: int = 2              # Snakes drawn when a Snake Egg hatches
+    bird_egg_hatch_delay: int = 1        # Bird Egg: turns until it hatches (and Scouts again)
+    scout_count: int = 3                 # Scout: cards looked at, one drawn, the rest shuffled back
     black_bear_delay: int = 2           # turns until Black Bear draws
     black_bear_draw: int = 2            # baseline-ruler tuning 2026-07-13: 1→2 (draw-1 too weak vs draw-2 default)
     viper_poison: int = 3               # Viper's permanent strength loss on the bitten enemy

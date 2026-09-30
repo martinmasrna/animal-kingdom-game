@@ -661,16 +661,24 @@ def _op_raven_dig(state, step):
     return None
 
 
-def _op_owl_peek(state, step):
-    """Look at the top 3 of your deck, draw 1 (chosen), shuffle the other 2 back."""
+def _op_scout(state, step):
+    """Scout: look at `scout_count` cards of your deck, draw one (chosen), shuffle the rest back.
+    Unfiltered (Owl) it looks at the top of the deck; with a `spec` (a Bird, a legendary unit) it
+    looks at that many random matching cards. Nothing matching: nothing happens."""
     player = step["player"]
     if "pulled" not in step:
         deck = state.decks[player]
-        pulled = [deck.pop() for _ in range(min(3, len(deck)))]  # top of deck = end
+        n = state.config.scout_count
+        if step.get("spec") is None:
+            pulled = [deck.pop() for _ in range(min(n, len(deck)))]  # top of deck = end
+        else:
+            matching = [i for i, cid in enumerate(deck) if _matches(state.cards[cid], step["spec"])]
+            picks = sorted(state.rng.sample(matching, min(n, len(matching))), reverse=True)
+            pulled = [deck.pop(i) for i in picks]
         if not pulled:
             return None
         step["pulled"] = pulled
-        if len(pulled) == 1:
+        if len(set(pulled)) == 1:
             step["choice"] = pulled[0]
         else:
             return PendingRequest("choice", player, options=sorted(set(pulled)),
@@ -681,6 +689,15 @@ def _op_owl_peek(state, step):
     state.hands[player].append(inst)
     _fire_draw(state, [inst])
     shuffle_back(state, player, pulled)
+    return None
+
+
+def _op_bird_egg_hatch(state, step):
+    cr, egg = _find_unit(state, step["iid"])
+    if egg is None:
+        return None  # removed before it hatched - no payoff
+    _remove_specific(state, cr, egg, by_player=egg.owner, by_effect=False)
+    state.effect_stack.append({"op": "scout", "player": egg.owner, "spec": "tag:Bird"})
     return None
 
 
@@ -816,7 +833,8 @@ OPS: dict[str, Callable] = {
     "draw_filtered": _op_draw_filtered,
     "egg_hatch": _op_egg_hatch,
     "raven_dig": _op_raven_dig,
-    "owl_peek": _op_owl_peek,
+    "scout": _op_scout,
+    "bird_egg_hatch": _op_bird_egg_hatch,
     "remove_choice": _op_remove_choice,
     "remove_iid": _op_remove_iid,
     "apex_eat": _op_apex_eat,
@@ -1102,7 +1120,7 @@ def _omen_drawn(state, inst):
 
 
 def _owl_place(state, unit, cr):
-    state.effect_stack.append({"op": "owl_peek", "player": unit.owner})
+    state.effect_stack.append({"op": "scout", "player": unit.owner})
 
 
 def _raven_place(state, unit, cr):
@@ -1232,15 +1250,18 @@ def _mouse_place(state, unit, cr):
 
 
 def _fathom_place(state, unit, cr):
-    state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": "rarity:legendary"})
+    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": "rarity:legendary"})
 
 
 def _bird_egg_place(state, unit, cr):
-    schedule(state, unit, state.config.egg_hatch_delay,
-             {"op": "egg_hatch", "iid": unit.iid, "n": state.config.egg_hatch_draw, "spec": "tag:Bird"})
+    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": "tag:Bird"})
+    schedule(state, unit, state.config.bird_egg_hatch_delay,
+             {"op": "bird_egg_hatch", "iid": unit.iid})
 
 
 def _snake_egg_place(state, unit, cr):
+    state.effect_stack.append({"op": "draw_filtered", "player": unit.owner,
+                               "n": state.config.snake_egg_draw, "spec": "tag:Snake"})
     schedule(state, unit, state.config.egg_hatch_delay,
              {"op": "egg_hatch", "iid": unit.iid, "n": state.config.egg_hatch_draw, "spec": "tag:Snake"})
 

@@ -191,3 +191,29 @@ def test_strength_loss_text_matches_config():
 def test_eon_decay_text_matches_config():
     (n,) = re.findall(r"with -(\d+) strength", _cards()["eon"].text)
     assert int(n) == Config.default().eon_decay
+
+
+DELAY_RE = re.compile(r"in (\d+) turns", re.IGNORECASE)
+
+# card_id -> the config attr its printed "in N turns" delay comes from.
+DELAY_CONSTANTS = {
+    "black_bear": "black_bear_delay",
+    "grizzly_bear": "grizzly_bear_delay",
+    "sloth": "sloth_delay",
+    "snake_egg": "egg_hatch_delay",
+}
+
+
+def test_delay_text_matches_config():
+    """Every printed "in N turns" equals its delay constant, and no card prints one unchecked."""
+    cfg = Config.default()
+    printed = {cid: int(m.group(1)) for cid, c in _cards().items() if (m := DELAY_RE.search(c.text))}
+    assert printed == {cid: getattr(cfg, attr) for cid, attr in DELAY_CONSTANTS.items()}
+
+
+def test_egg_text_matches_config():
+    cfg = Config.default()
+    snake = _cards()["snake_egg"].text
+    assert "draw a Snake" in snake and cfg.snake_egg_draw == 1
+    assert f"draw {cfg.egg_hatch_draw} Snakes" in snake
+    assert "Next turn" in _cards()["bird_egg"].text and cfg.bird_egg_hatch_delay == 1

@@ -443,17 +443,48 @@ def test_fathom_draws_a_legendary():
     assert "eon" in hand_ids(s, "A")                    # the only legendary in the deck
 
 
-def test_bird_egg_schedules_and_hatches_into_two_birds():
-    s = make_state(hands={"A": ["bird_egg"]}, decks={"A": ["eagle", "owl", "raven", "lion"], "B": []})
+def test_snake_egg_draws_a_snake_now_and_two_when_it_hatches():
+    snakes = ["goliath", "rattlesnake", "taipan", "black_mamba"]
+    s = make_state(hands={"A": ["snake_egg"]}, decks={"A": snakes + ["owl", "raven"], "B": []})
+    rules.apply_action(s, PlaceAction("snake_egg", ("cr", "1,2")))
+    assert [CARDS[c].tags >= {"Snake"} for c in hand_ids(s, "A")] == [True] * CFG.snake_egg_draw
+    hatch = next(x for x in s.scheduled if x["step"]["op"] == "egg_hatch")
+    assert hatch["remaining"] == CFG.egg_hatch_delay
+    effects._op_egg_hatch(s, hatch["step"])
+    assert s.owner_of("1,2") is None                    # the egg removes itself (feeds Python)
+    assert "snake_egg" in s.remove_pile
+    assert sum("Snake" in CARDS[c].tags for c in hand_ids(s, "A")) == CFG.snake_egg_draw + CFG.egg_hatch_draw
+
+
+def test_bird_egg_scouts_now_and_again_when_it_hatches_next_turn():
+    birds = ["owl", "raven", "stoop", "magpie", "ember"]
+    s = make_state(current="A", hands={"A": ["bird_egg"]},
+                   decks={"A": birds + ["goliath"] * 4, "B": ["lion"] * 6})
     rules.apply_action(s, PlaceAction("bird_egg", ("cr", "1,2")))
-    assert any(x["step"]["op"] == "egg_hatch" for x in s.scheduled)
-    egg = s.top_unit("1,2")
-    effects._op_egg_hatch(s, {"op": "egg_hatch", "iid": egg.iid, "n": 2, "spec": "tag:Bird"})
-    assert s.owner_of("1,2") is None                    # egg removed on hatch
-    assert sum(1 for c in hand_ids(s, "A") if "Bird" in CARDS[c].tags) == 2
+    assert s.pending is not None and s.pending["from_deck_reveal"]
+    options = s.pending["options"]
+    assert len(options) <= CFG.scout_count and all("Bird" in CARDS[c].tags for c in options)
+    rules.apply_action(s, ChoiceAction(options[0]))
+    assert hand_ids(s, "A") == [options[0]]
+    assert len(s.decks["A"]) == 8                       # the others went back
+    rules.apply_action(s, DrawAction())                 # A's second action ends the turn
+    rules.apply_action(s, DrawAction())                 # B's turn
+    rules.apply_action(s, DrawAction())
+    assert s.current == "A" and s.owner_of("1,2") is None   # hatched at the start of A's turn
+    assert s.pending is not None and all("Bird" in CARDS[c].tags for c in s.pending["options"])
 
 
-def test_owl_peeks_draws_one_and_shuffles_the_rest():
+def test_scout_with_a_filter_only_shows_matching_cards():
+    s = make_state(current="A", hands={"A": ["fathom"]},
+                   decks={"A": ["lion", "eon", "aurum", "omen", "ember", "tiger"], "B": []})
+    rules.apply_action(s, PlaceAction("fathom", ("cr", "1,2")))
+    options = s.pending["options"]
+    assert len(options) == CFG.scout_count and all(CARDS[c].rarity == "legendary" for c in options)
+    rules.apply_action(s, ChoiceAction(options[1]))
+    assert hand_ids(s, "A") == [options[1]] and len(s.decks["A"]) == 5
+
+
+def test_owl_scouts_the_top_three_draws_one_and_shuffles_the_rest():
     s = make_state(current="A", hands={"A": ["owl"]},
                    decks={"A": ["lion", "fox", "rat", "eagle"], "B": []})
     rules.apply_action(s, PlaceAction("owl", ("cr", "1,2")))
