@@ -813,7 +813,15 @@ function stackAt(cr) {
 
 function drawEnd() {
   const ov = document.getElementById('endov'), G = V.game;
-  if (V.phase === 'playing' || !G.result) { ov.classList.remove('on'); return; }
+  if (V.phase === 'playing' || !G.result) { drawEnd.live = V.phase === 'playing'; ov.classList.remove('on'); return; }
+  // The move that ended the game plays out first (the opponent's card shown and landed, a piece in the den, the fruit of the
+  // last income or a Roar): the result shows once it has. Only for a game seen ending live, once; with reduced motion at once.
+  const key = `${V.id}-${V.results.length}`;
+  if (drawEnd.key !== key) {
+    const motion = !(typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    drawEnd.until = drawEnd.live && motion && G.result.reason !== 'concede' ? Math.max(Date.now() + 2200, (ui.revealEnd || 0) + 1200) : 0; drawEnd.key = key; drawEnd.live = false; }
+  const wait = (drawEnd.until || 0) - Date.now();
+  if (wait > 0) { ov.classList.remove('on'); clearTimeout(drawEnd.t); drawEnd.t = setTimeout(() => { if (screen === 'game') drawEnd(); }, wait + 20); return; }
   if (ui.peek) { ov.classList.remove('on'); document.getElementById('waiting').innerHTML = `<button class="slab" id="unpeek">Back to results</button>`; document.getElementById('unpeek').onclick = () => { ui.peek = false; drawGame(); }; return; }
   const you = V.you, them = opp(), w = G.result.winner, S = V.score;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
