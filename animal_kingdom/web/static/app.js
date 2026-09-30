@@ -590,9 +590,12 @@ function drawGame() {
 // The tutorial's coach: a granite piece standing beside what the lesson talks about, its notch pointing at it: above a
 // card in the hand, the deck or End turn, beside a crossroad (on the side with more room), a region's stone or a den.
 const COACH_W = 300;
+// While a line waits for Next, the tutorial's opponent waits too: its moves would run over the line (told to the server once per change).
+let botHeld = false;
+const holdBot = on => { if (on !== botHeld && isTutorial()) { botHeld = on; send({ t: 'hold', on }); } };
 function placeCoach(el, L, rings = []) {
   el.className = 'abs coach';
-  if (!L) { el.innerHTML = ''; document.getElementById('board').classList.remove('pulse'); return; }
+  if (!L) { holdBot(false); el.innerHTML = ''; document.getElementById('board').classList.remove('pulse'); return; }
   const a = L.at || {}, card = a.card && document.querySelector(`#hand .hc[data-id="${a.card}"]`);
   let x, y, side;
   const read = a.read && document.querySelector(`#hand .hc[data-id="${a.read}"]`);
@@ -630,6 +633,7 @@ function placeCoach(el, L, rings = []) {
   const wait = Math.max(0, (ui.revealEnd || 0) - Date.now());
   if (wait && L.read) { clearTimeout(placeCoach.t); placeCoach.t = setTimeout(() => { if (screen === 'game') drawGame(); }, wait + 20); }   // then show the card large
   document.getElementById('board').classList.toggle('pulse', !!a.rings);
+  holdBot(!!L.next);
   el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
   el.dataset.iid = side === 'above' && y >= 572 ? (card ? card.dataset.iid : 'any') : '';   // over the hand: a hovered card lifts it   // hovering that card lifts the coach above it (wireCoachHover)
   el.innerHTML = `<p>${L.text}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');

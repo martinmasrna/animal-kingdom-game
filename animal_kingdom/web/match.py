@@ -150,6 +150,7 @@ class Match:
         self.seats: dict[str, Seat] = {"A": host}
         self.phase = "lobby"             # lobby -> prematch -> playing -> game_over -> match_over
         self.results: list[dict] = []    # one {winner, reason, turns} per finished game
+        self.hold = False                # the tutorial's coach is talking: its opponent waits (not saved)
         self.last_game: Optional[dict] = None   # the previous match's last game, so a rematch's loser goes first
         self.state: Optional[GameState] = None
         self.history: list[Move] = []

@@ -138,6 +138,8 @@ class Hub:
 
     async def _run_bot(self, match: Match) -> None:
         while (s := match.to_act()) is not None and match.seats[s].is_bot:
+            while match.hold:                 # the tutorial's coach is talking: the opponent waits for its Next
+                await asyncio.sleep(0.1)
             opening = not match.state.pending and match.state.actions_taken_this_turn == 0
             await asyncio.sleep(BOT_PAUSE["choice" if match.state.pending else "open" if opening else "move"])
             version = match.version
@@ -451,6 +453,9 @@ async def socket(req):
                     if match.phase == "playing":      # the other player already started it
                         continue
                     match.next_game()
+                elif kind == "hold":                  # the tutorial: its coach holds the opponent while a line awaits Next
+                    match.hold = bool(data.get("on")) and match.tutorial
+                    continue
                 elif kind == "concede":
                     match.concede(seat)
                 elif kind == "rematch":
