@@ -61,9 +61,9 @@ export const LESSONS = [
   { id: 'watch', when: c => c.theirs && c.round === 1, at: { oppcards: true },
     text: 'Now it\'s your opponent\'s turn. Watch where the red animals go.' },
   { id: 'patch', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'), ...talk, at: c => ({ stone: c.home[0] }),
-    text: 'The number on a patch of grass is how much food it gives. Stand on all four crossroads around a patch and you get that food every turn.' },
+    text: 'Each patch of grass between four crossroads is a region. Its number is how much food it gives. Stand on all four crossroads around a region and you get that food every turn.' },
   { id: 'wolf', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'),
-    text: 'Place the Wolf on one of the circles around the +10 patch.',
+    text: 'Place the Wolf on one of the circles around the +10 region.',
     only: c => ({ card: 'dire_wolf', picked: true, crs: c.homeOpen.length ? c.homeOpen : undefined }),
     at: { rings: true } },
   { id: 'draw', when: c => c.mine && c.round === 2 && !c.hand('dire_wolf') && c.acts > 0,
@@ -76,9 +76,9 @@ export const LESSONS = [
   // the first patch is finished by hand, any card, only its last corner (shown only when a card can reach it: never a dead end)
   { id: 'corner', when: c => c.mine && c.round >= 3 && !c.homeHeld && c.homeOpen.length > 0,
     only: c => ({ crs: c.homeOpen }), at: c => ({ cr: c.homeOpen[0] }),
-    text: 'Finish the patch! Place an animal on the last crossroad around the +10.' },
+    text: 'Finish the region! Place an animal on the last crossroad around the +10.' },
   { id: 'food', when: c => c.homeHeld, ...talk, at: c => ({ stone: c.home[0] }),
-    text: 'The +10 patch is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
+    text: 'The +10 region is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
   // covering, by hand: the second move of turn 3, onto the Pup the opponent always leaves beside the patch
   { id: 'cover', when: c => c.mine && c.round >= 3 && c.homeHeld && c.coverable.length > 0, done: c => c.covered,
     only: c => ({ card: c.coverWith, picked: true, crs: c.coverable }), at: c => ({ cr: c.coverable[0] }),
@@ -115,7 +115,7 @@ export const LESSONS_2 = [
     only: c => ({ card: 'squirrel', picked: true, crs: c.safe }), at: { card: 'squirrel' },
     text: 'The Squirrel\'s Roar gives you 10 food. Place it on a circle.' },
   { id: 'foodroar', when: c => c.placed('squirrel'), ...talk, at: { gem: 'A' },
-    text: 'Your food went up by 10! Roars like this are another way to gather food, besides patches.' },
+    text: 'Your food went up by 10! Roars like this are another way to gather food, besides regions.' },
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'Your opponent\'s Falcon has Flight, so it flew over and covered your Squirrel! Your Squirrel isn\'t gone. It waits underneath.' },
   { id: 'jaguar', when: c => c.mine && c.squirrelCovered && c.hand('jaguar') && c.nextToFalcon.length > 0, done: c => c.placed('jaguar'),
@@ -131,7 +131,7 @@ export const LESSONS_2 = [
     only: c => ({ card: 'tiger', picked: true, crs: c.prey }), at: { card: 'tiger' },
     text: 'The Tiger is an Apex Predator: it must land on top of an animal, and it eats it. An eaten animal is gone for good. Eat the circled animal!' },
   { id: 'free2', when: c => c.mine && ((c.placed('eagle') && c.placed('tiger')) || c.round >= 7), ...talk, at: { middle: true },
-    text: 'Your opponent\'s den is walled off, so gather 100 food: surround patches, and place animals whose Roar gives food.' },
+    text: 'Your opponent\'s den is walled off, so gather 100 food: surround regions, and place animals whose Roar gives food.' },
   EMPTY,
 ];
 // Lesson 2 holds each teaching card back until its own step: it can't be placed before its line explains it.
