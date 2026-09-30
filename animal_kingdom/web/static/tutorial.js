@@ -56,12 +56,12 @@ export const LESSONS = [
     text: 'Let\'s place your first animal. Click the Lion.',
     only: { card: 'lion' }, at: { card: 'lion' } },
   { id: 'lion2', when: c => opening(c) && c.sel === 'lion',
-    text: 'Animals stand on crossroads, the sandy circles. Your first animal goes next to your den: click one of the circled crossroads.',
-    only: { card: 'lion' }, at: { rings: true } },
+    text: 'Animals stand on crossroads, the sandy circles. Click the circle to place the Lion.',
+    // one place, the middle beside the den: from there every place the Buffalo may go shares a +10 region with it
+    only: { card: 'lion', crs: ['1,2'] }, at: { rings: true } },
   { id: 'buffalo', when: c => c.mine && c.round === 1 && c.units === 1,
     text: { pick: 'Now the Buffalo. Click it.', place: 'Each new animal must connect to your den, directly or through your other animals. Click one of the circles.' },
-    // every place it may go that shares a +10 region with the first animal: two more then close that region on turn 2
-    only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo').filter(cr => HOME.some(h => h.includes(cr) && h.some(q => c.at(q)))) }), at: { rings: true } },
+    only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo') }), at: { rings: true } },   // every place it may go
   { id: 'watch', when: c => c.theirs && c.round === 1, at: { oppcards: true },
     text: 'Now it\'s your opponent\'s turn. Watch where the red animals go.' },
   { id: 'patch', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'), ...talk, at: c => ({ stone: c.home[0] }),

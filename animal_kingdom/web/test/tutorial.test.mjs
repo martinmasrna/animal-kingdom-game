@@ -18,7 +18,7 @@ test('the opening names what is on screen, one Next at a time, with nothing else
 test('the first lessons walk the first turn, ringing every place the rules allow', () => {
   const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards'].forEach(id => t.seen.add(id));
   assert.equal(current(view(), null, CARDS, t).id, 'lion');
-  assert.deepEqual(current(view(), 'lion', CARDS, t).only, { card: 'lion' }, 'all three crossroads by the den');
+  assert.deepEqual(current(view(), 'lion', CARDS, t).only, { card: 'lion', crs: ['1,2'] }, 'the middle crossroad by the den');
   const L = current(view({ board: { '1,2': u('lion', 'A') }, legal: { place: { cape_buffalo: [['cr', '1,1'], ['cr', '1,2'], ['cr', '1,3'], ['cr', '2,2']] }, draw: true } }), 'cape_buffalo', CARDS, t);   // 1,2 is the Lion's own
   assert.equal(L.id, 'buffalo'); assert.deepEqual(L.only, { card: 'cape_buffalo', crs: ['1,1', '1,3', '2,2'] }); assert.deepEqual(L.at, { rings: true }, 'the coach stands beside the whole group of rings');
 });
@@ -131,8 +131,3 @@ test('after the Roar, lesson 1 marches on the den: only the furthest crossroads,
   assert.deepEqual(gate({ places: { lion: [['cr', '4,1'], ['hq', 'B']] } }, den.only).places, { lion: [['hq', 'B']] });
 });
 
-test('the Buffalo only goes where it shares a +10 region with the Lion, so two more cards can close one', () => {
-  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'lion', 'lion2'].forEach(id => t.seen.add(id));
-  const L = current(view({ board: { '1,1': u('lion', 'A') }, legal: { place: { cape_buffalo: [['cr', '1,2'], ['cr', '1,3'], ['cr', '2,1']] }, draw: true } }), 'cape_buffalo', CARDS, t);
-  assert.deepEqual(L.only.crs, ['1,2', '2,1'], '1,3 is in the other region');
-});
