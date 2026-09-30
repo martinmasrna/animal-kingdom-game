@@ -54,7 +54,7 @@ A small network over the rung-2 features (rung 1 plus hand and board context: Ro
 
 ## Open misplays
 
-- **Taipan with no target** (Martin's game `results/human_games/web/web_20260930T223013_DBYAPW.jsonl`, third game, action 33, bot's turn): Taipan on 4,2 with no adjacent enemy, then Wolf on 3,2; Wolf on 4,2 then Taipan on 3,2 marks his Python (8). RefereeBot finds the right line in 4 of 4 seeds, but its evaluation scores a pending delayed removal the same whatever it targets (marking the Python and marking a Raven both evaluate -1.9). Not yet a puzzle.
+- **Taipan marks the wrong animal** (puzzle `test_taipan_marks_the_python`, from Martin's game of 2026-09-30): with Wolf on 4,2 opening 3,2, Taipan there must mark his Python (8). RefereeBot finds Wolf then Taipan but marks the Raven (2) in 5 of 5 seeds: the search ends before the removal fires, and the hand eval's `pending_payoff` pays the same for any delayed effect, so both targets score -1.9. Fix: value a pending removal by what removing its target is worth.
 
 ## Throughput
 
