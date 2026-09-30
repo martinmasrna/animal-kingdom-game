@@ -495,7 +495,7 @@ function gameScreen() {
     // The series opens the history, the opponent's hand their decklist; hovering your deck shows yours.
     const toggle = k => e => { e.stopPropagation(); ui.panel = ui.panel === k ? null : k; showPanel(); };
     $('series').onclick = toggle('hist'); $('opphand').onclick = toggle('theirs');
-    $('deck').onmouseenter = () => { ui.panel = 'mine'; showPanel(); };
+    $('deck').onmouseenter = () => { if (matchMedia('(hover: none)').matches) return; ui.panel = 'mine'; showPanel(); };   // touch: a tap draws, it opens no list
     $('deck').onmouseleave = () => { if (ui.panel === 'mine') { ui.panel = null; showPanel(); } };
     app.querySelectorAll('.panel').forEach(el => el.onclick = e => e.stopPropagation());
     $('scr').addEventListener('click', () => { if (ui.panel) { ui.panel = null; showPanel(); } });
@@ -510,9 +510,10 @@ function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
   lastDecision = d;
+  $('scr').classList.toggle('rp', !!RP.views.length);   // a replay: upright its controls take the deck's corner
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
-  $('series').style.right = 16 + (VIEW.port ? 72 : 52) * [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length + 'px';   // History, left of feedback and the flag
+  $('series').style.right = 16 + (VIEW.port ? 88 : 52) * [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length + 'px';   // History, left of feedback and the flag
   $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
   // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
   $('menubtn').querySelector('svg').innerHTML = isTutorial() ? '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>'
@@ -530,7 +531,7 @@ function drawGame() {
   // The opponent's hand: one card back each, centred across the board from yours; in a replay their cards, face up (the eye hides them).
   const faces = RP.views.length && RP.eye && G.oppHand;
   const nb = G.handCount[them], step = faces ? Math.min(72, 504 / Math.max(1, nb - 1)) : 52,   // face up, a gap between cards as in your hand; a full hand (8) stays clear of the replay's controls
-    bx0 = STAGE.w / 2 - ((faces ? 66 : 84) + (nb - 1) * step) / 2;
+    bx0 = (VIEW.port ? 240 : STAGE.w / 2) - ((faces ? 66 : 84) + (nb - 1) * step) / 2;   // upright, left of the buttons
   const A = ui.anim, oppDrew = A ? Math.max(0, nb - A.oppHand) : 0;   // their new cards slide down into their hand
   const slot = i => `${i >= nb - oppDrew ? ' drawn' : ''}" style="left:${bx0 + i * step}px;animation-delay:${(i - (nb - oppDrew)) * 0.12}s`;
   $('opphand').innerHTML = faces
@@ -642,7 +643,7 @@ function drawGame() {
 let COACH_W = 300;   // 400 upright (game.css .port .coach)
 // Where the edge pieces stand, on the wide stage or the upright one (game.css .port): the hand's top, centre and width, the
 // deck's and End turn's centre tops.
-const PL = () => VIEW.port ? { hand: STAGE.h - 210, handC: 300, handW: 568, deck: [655, 1238], end: [655, 1372] }   // upright the deck and End turn end the hand's row
+const PL = () => VIEW.port ? { hand: STAGE.h - 210, handC: RP.views.length ? 216 : 300, handW: RP.views.length ? 400 : 568, deck: [655, 1238], end: [655, 1372] }   // upright the deck and End turn end the hand's row
   : { hand: 590, handC: STAGE.w / 2, deck: [1299, 606], end: [1439, 664], handW: 940 };
 // While a line waits for Next, the tutorial's opponent waits too: its moves would run over the line (told to the server once per change).
 let botHeld = false;

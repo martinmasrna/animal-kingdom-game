@@ -237,7 +237,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   .home .bar { left: 12px; right: 12px; bottom: 24px; transform: none; grid-template-columns: 1fr 1fr; }
   .home .chooser.decks { left: 12px; right: 12px; width: auto; transform: none; }
   .home .chooser.decks, .home .chooser.opps { bottom: 182px; }
-  .home .chooser.opps { left: auto; right: 12px; }
+  .home .chooser.opps { left: 12px; right: 12px; width: auto; }
   .home .chooser.lessons { top: 78px; right: 12px; }
   .prof { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   .prof > .hist { grid-row: 2; }
