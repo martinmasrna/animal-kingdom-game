@@ -39,21 +39,21 @@ const EMPTY = { id: 'empty', again: true, when: c => c.mine && c.round >= 3 && !
 export const LESSONS = [
   // --- the opening: what is on screen ---
   { id: 'welcome', when: opening, ...talk, at: { middle: true },
-    text: 'You lead the blue animals. Your opponent leads the red ones.' },
+    text: 'Welcome to the savanna! You lead the blue animals. Your opponent leads the red ones.' },
   { id: 'yourden', when: opening, ...talk, at: { den: 'A' },
-    text: 'This rock is your den. Your animals start next to it.' },
+    text: 'This rock is your den, your home. Your animals start next to it.' },
   { id: 'theirden', when: opening, ...talk, at: { den: 'B' },
-    text: 'This is your opponent\'s den. Put any of your animals on it and you win.' },
+    text: 'This is your opponent\'s den. Put any of your animals on it and you win!' },
   { id: 'foodcount', when: opening, ...talk, at: { gem: 'A' },
     text: 'The second way to win is food. This counts your food: gather 100 and you win.' },
   { id: 'oppfood', when: opening, ...talk, at: { gem: 'B' },
-    text: 'This counts your opponent\'s food. If it reaches 100 first, you lose.' },
+    text: 'And this counts your opponent\'s food. Don\'t let it reach 100 first!' },
   { id: 'cards', when: opening, ...talk, at: { hand: true },
     text: 'These are your animal cards. The number on a card is the animal\'s strength.' },
 
   // --- forced: the first two turns ---
   { id: 'lion', when: c => opening(c) && c.sel !== 'lion',
-    text: 'Click the Lion to place your first animal.',
+    text: 'Let\'s place your first animal. Click the Lion.',
     only: { card: 'lion' }, at: { card: 'lion' } },
   { id: 'lion2', when: c => opening(c) && c.sel === 'lion',
     text: 'Animals stand on crossroads, the sandy circles. Your first animal goes next to your den: click one of the circled crossroads.',
@@ -70,7 +70,7 @@ export const LESSONS = [
     only: c => ({ card: 'dire_wolf', picked: true, crs: c.homeOpen.length ? c.homeOpen : undefined }),
     at: { rings: true } },
   { id: 'draw', when: c => c.mine && c.round === 2 && !c.hand('dire_wolf') && c.acts > 0,
-    text: 'You\'re out of cards. Click your deck to draw 2 new ones.',
+    text: 'You\'re out of cards! Click your deck to draw 2 new ones.',
     only: { deck: true }, at: { deck: true } },
 
   // --- free play: each the first time it comes up ---
@@ -79,13 +79,13 @@ export const LESSONS = [
   // the first patch is finished by hand, any card, only its last corner (shown only when a card can reach it: never a dead end)
   { id: 'corner', when: c => c.mine && c.round >= 3 && !c.homeHeld && c.homeOpen.length > 0,
     only: c => ({ crs: c.homeOpen }), at: c => ({ cr: c.homeOpen[0] }),
-    text: 'Place an animal on the last crossroad around the +10 region.' },
+    text: 'Finish the region! Place an animal on the last crossroad around the +10.' },
   { id: 'food', when: c => c.homeHeld, ...talk, at: c => ({ stone: c.home[0] }),
-    text: 'The +10 region is yours: 10 food at the end of each of your turns. The fruit in your den shows your food.' },
+    text: 'The +10 region is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
   // covering, by hand: the second move of turn 3, onto the Pup the opponent always leaves beside the patch
   { id: 'cover', when: c => c.mine && c.round >= 3 && c.homeHeld && c.coverable.length > 0, done: c => c.covered,
     only: c => ({ card: c.coverWith, picked: true, crs: c.coverable }), at: c => ({ cr: c.coverable[0] }),
-    text: 'A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 7 can\'t beat 7. Cover the circled animal.' },
+    text: 'A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 7 can\'t beat 7. Cover the circled animal!' },
   // Roar, by hand: the Lynx (turn 4), whose Roar always works beside the Lion
   explain('roarinfo', 'lynx', c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0,
     'The Lynx has a Roar: a power that happens the moment you place it. Its Roar draws a card if you have another Cat, like your Lion.'),
@@ -93,16 +93,16 @@ export const LESSONS = [
     only: c => ({ card: 'lynx', picked: true, crs: c.empty('lynx') }), at: { rings: true },
     text: 'Place the Lynx on a circle.' },
   { id: 'roared', when: c => c.roared, ...talk, at: { hand: true },
-    text: 'The Lynx\'s Roar drew you a card. Point at any card to read what it does.' },
+    text: 'Your Lynx roared and drew you a card! Point at any card to read what it does.' },
   { id: 'free', when: c => c.mine && (c.roared || c.round >= 6), ...talk, at: { middle: true },
     text: 'Now make your way to your opponent\'s den. Each move, the circles show how to get closer.' },
   TARGET,
   // lesson 1 ends on the den win it teaches: after the Roar every move is forced toward the den, then onto it
   { id: 'den', when: c => c.mine && c.places.some(t => t[0] === 'hq'), only: { hq: true }, at: { den: 'B' },
-    text: 'Your opponent\'s den is open. Put any animal on it to win.' },
+    text: 'Your opponent\'s den is open! Pick any animal and put it on the den to win.' },
   { id: 'march', again: true, when: c => c.mine && (c.roared || c.round >= 6) && c.forward.length > 0,
     only: c => ({ crs: c.forward }), at: { rings: true },
-    text: 'Head for your opponent\'s den: pick an animal, then click one of the circles.' },
+    text: 'Head for your opponent\'s den! Pick an animal, then click one of the circles.' },
   EMPTY,
 ];
 
@@ -113,7 +113,7 @@ export const LESSONS = [
 const one = (card, cr) => ({ card, picked: true, crs: [cr] });
 export const LESSONS_2 = [
   { id: 'intro2', when: c => c.mine && c.round === 1 && c.units === 0, ...talk, at: { middle: true },
-    text: 'Many animals have special powers. This lesson shows the most common ones.' },
+    text: 'Lesson 2! Many animals have special powers. Let\'s meet some of them.' },
   { id: 'lion', when: c => c.mine && c.hand('lion') && !c.placed('lion'), only: one('lion', '1,2'), at: { rings: true },
     text: 'Place your Lion on the circle.' },
   explain('glow', 'lynx', c => c.mine && c.ready('lynx'),
@@ -135,9 +135,9 @@ export const LESSONS_2 = [
   { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), only: one('squirrel', '3,2'), at: { rings: true },
     text: 'Place the Squirrel on the circle.' },
   { id: 'foodroar', when: c => c.placed('squirrel'), ...talk, at: { gem: 'A' },
-    text: 'Your food went up by 10. Roars like this are the other way to gather food, besides regions.' },
+    text: 'Your food went up by 10! Roars like this are another way to gather food, besides regions.' },
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
-    text: 'Your opponent has an Eagle too. It flew over and covered your Squirrel. Your Squirrel isn\'t gone. It waits underneath.' },
+    text: 'Your opponent has an Eagle too! It flew over and covered your Squirrel. Your Squirrel isn\'t gone. It waits underneath.' },
   explain('mambainfo', 'black_mamba', c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
     'The Black Mamba\'s Roar removes an enemy next to it with strength 5 or less, like that Eagle.'),
   { id: 'mamba', when: c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
@@ -145,7 +145,7 @@ export const LESSONS_2 = [
     text: 'Place the Black Mamba on the circle, next to the Eagle.' },
   TARGET,
   { id: 'uncovered', when: c => c.squirrelBack, ...talk, at: c => ({ cr: c.squirrelAt }),
-    text: 'The Eagle is gone, and your Squirrel is back on top. When the top animal leaves, the one below comes back.' },
+    text: 'The Eagle is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
   { id: 'goal2', when: c => c.mine && c.wall, ...talk, at: { den: 'B' },
     text: 'Your opponent\'s den is guarded by three 7s, and a 7 can\'t beat a 7. So this time, you\'ll win by gathering 100 food.' },
   { id: 'draw3', when: c => c.mine && c.placed('black_mamba') && !c.hand('tiger') && !c.placed('tiger') && c.canDraw, only: { deck: true }, at: { deck: true },
