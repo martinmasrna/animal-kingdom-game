@@ -539,6 +539,7 @@ function drawGame() {
   // A pending choice: the asking card and its rule; card options float above the hand.
   const bar = $('choicebar'), opts = $('opts'), waiting = $('waiting');
   waiting.textContent = ''; opts.classList.remove('on'); opts.innerHTML = '';
+  bar.classList.toggle('mull', !!(d.pend && d.pend.kind === 'mulligan'));   // the mulligan asks in the middle of the empty board, over your hand
   if (d.pend && d.pend.kind === 'mulligan') {
     const k = d.pend.returned;
     bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b>` + (RP.views.length ? '' : `<p>Click a card to replace it; no copy of a card you replace can come back.</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`);
