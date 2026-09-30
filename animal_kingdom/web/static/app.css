@@ -170,14 +170,16 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 
 /* ---------- profile: the collection's skeleton (menu.css) ---------- */
 .prof { display: grid; grid-template-columns: minmax(0, 1fr) 360px; }
-.prof .hist { min-height: 0; overflow-y: auto; padding: 24px; display: flex; align-items: flex-start; gap: 24px; scrollbar-width: thin; scrollbar-color: #4a4540 transparent; }
+/* One column centred on the ground, every edge shared: your decks across its top, your matches under them. */
+.prof .hist { min-height: 0; overflow-y: auto; padding: 24px; scrollbar-width: thin; scrollbar-color: #4a4540 transparent; }
+.prof .hcol { width: 100%; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 /* Your decks with their games won–lost; one picked filters the matches. */
-.prof .recs { position: sticky; top: 0; flex: none; width: 284px; display: flex; flex-direction: column; gap: 8px; }
+.prof .recs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .prof .dtile.rec.on { border-radius: 8px; }
 .prof .dtile.rec b { top: 8px; transform: none; }
 .prof .dtile .wl { position: absolute; left: 12px; bottom: 7px; font: 700 15px/1 'Fira Sans Condensed', sans-serif; color: #b3a996; text-shadow: 0 1px 3px #000; }
 /* A match: the result (a win bright, a loss dimmed: contrast, not team colour), your deck's piece and theirs (plain rims), who and when; it opens the replay. */
-.prof .hlist { flex: 1; min-width: 0; max-width: 700px; display: flex; flex-direction: column; gap: 6px; }
+.prof .hlist { display: flex; flex-direction: column; gap: 6px; }
 /* Two clusters: the result and the matchup (each deck its piece and name, in fixed columns so the pieces line up), then who and when, quieter, on the right. */
 .prof .hr { display: grid; grid-template-columns: 52px 44px 136px 44px 130px 1fr; align-items: center; column-gap: 10px; height: 56px; padding: 0 16px 0 14px; border-radius: 10px;
   background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); color: #e8e0d2; font-size: 17px; cursor: pointer; }

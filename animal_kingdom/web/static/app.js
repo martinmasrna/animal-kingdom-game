@@ -236,7 +236,7 @@ function profileScreen() {
   const unlinked = ME.providers.filter(p => !ME.logins.some(l => l.provider === p));
   const when = t => new Date(t * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
   const recs = ME.records.map(r => { const f = deckFace(r.cover, r.deck);
-    return `<div class="dtile rec${ui.histDeck === r.deck ? ' on' : ''}" data-deck="${esc(r.deck)}" style="${f ? stripArt(f, 284, 56, .7) : ''}">
+    return `<div class="dtile rec${ui.histDeck === r.deck ? ' on' : ''}" data-deck="${esc(r.deck)}" style="${f ? stripArt(f, 154, 56, .7) : ''}">
     <b>${esc(r.deck)}</b><span class="wl">${r.won}–${r.lost}</span></div>`; }).join('');
   const shown = ME.history.filter(h => !ui.histDeck || h.my_deck === ui.histDeck);
   const bot = h => h.kind !== 'friend';   // a bot's deck has a name you know; a person's deck name is theirs, so the row names the person
@@ -253,7 +253,7 @@ function profileScreen() {
   const code = ME.logins.length ? '' : sect('Sign-in code', `<p>Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</p>
       <div class="row"><span class="field keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span><button class="slab" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</button><button class="slab" id="copykey">Copy</button></div>`)
     + sect('Use a different profile', `<div class="row"><input class="field" id="other" placeholder="Sign-in code" autocomplete="off"><button class="slab" id="signin">Sign in</button></div>`);
-  app.innerHTML = `<div class="mscr prof"><div class="hist">${hist ? `<div class="recs">${recs}</div><div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
+  app.innerHTML = `<div class="mscr prof"><div class="hist">${hist ? `<div class="hcol"><div class="recs">${recs}</div><div class="hlist">${hist}</div></div>` : '<p class="none">No finished matches yet.</p>'}</div>
     <div class="side"><div class="me"><div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div>${account}${code}</div>
       <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
