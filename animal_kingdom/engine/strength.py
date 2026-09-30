@@ -36,8 +36,11 @@ def _tops_owned(state: GameState, owner: str) -> list[UnitInstance]:
 
 
 def _dynamic_strength(state: GameState, rule: Optional[str], owner: str) -> int:
-    if rule == "removed_units_count":    # Goliath: equal to the number of removed units
+    if rule == "removed_units_count":    # Python: +1 for each removed unit
         return len(state.remove_pile)
+    if rule == "removed_eggs_count":     # Egg Eater: +N for each removed Egg
+        return state.config.egg_eater_growth * sum(
+            "Egg" in state.cards[cid].tags for cid in state.remove_pile)
     raise EngineError(f"unknown dynamic strength rule {rule!r}")
 
 

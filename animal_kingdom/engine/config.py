@@ -55,7 +55,7 @@ class Config:
     # --- Food-event engine reactors (decision F2/F9; magnitudes are dials) ---
     eon_food: int = 1                    # per draw/shuffle/remove event
     vulture_food: int = 5                # per card removed
-    egg_eater_growth: int = 2            # Egg Eater: strength gained per Egg removed (every zone)
+    egg_eater_growth: int = 2            # Egg Eater: +strength for each removed Egg
 
     # --- Deathrattle / payoff food ---
     gazelle_food: int = 30               # Deathrattle: gain food. Was 40 (doubled 2026-07-02);

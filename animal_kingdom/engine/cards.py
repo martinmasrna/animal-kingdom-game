@@ -23,7 +23,7 @@ TAGS = {
     "Arachnid", "Bear", "Megafauna", "Egg", "Fish",   # species families
     "Queen", "Worker",                                # roles
 }
-DYNAMIC_STRENGTHS = {"removed_units_count"}  # only Goliath (Python)
+DYNAMIC_STRENGTHS = {"removed_units_count", "removed_eggs_count"}  # Python, Egg Eater
 
 # The seven premade deck slugs (align to docs/cards/decks/ filenames).
 DECK_SLUGS = {

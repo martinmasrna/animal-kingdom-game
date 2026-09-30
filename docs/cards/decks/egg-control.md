@@ -1,6 +1,6 @@
 # Egg Control
 
-Snake and Bird control, tied together by their Eggs. The Birds churn the deck: Raven draws and shuffles, Owl Scouts, Aurum draws every turn. The Snakes grow: Rattlesnake with every shuffle, Egg Eater with every Egg removed (both in hand and deck too), Python with the Remove Pile. The Snakes also carry the removal: Black Mamba removes an adjacent enemy of strength 5 or less; Taipan's bite removes any adjacent enemy at the start of your next turn, even if the Taipan is covered or removed. Magpie steals a random card from the opponent's hand and discards one of yours, which feeds Python.
+Snake and Bird control, tied together by their Eggs. The Birds churn the deck: Raven draws and shuffles, Owl Scouts, Aurum draws every turn. The Snakes grow: Rattlesnake with every shuffle (in hand and deck too), Python with every removed unit, Egg Eater with every removed Egg. The Snakes also carry the removal: Black Mamba removes an adjacent enemy of strength 5 or less; Taipan's bite removes any adjacent enemy at the start of your next turn, even if the Taipan is covered or removed. Magpie steals a random card from the opponent's hand and discards one of yours, which feeds Python.
 
 Eon is the Ouroboros: a 10 with Apex Predator that eats what it lands on, then shuffles itself back into the deck at the end of your turn, one strength smaller each cycle. Every return is a shuffle, so it also feeds Rattlesnake.
 
@@ -38,7 +38,7 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 |---|---:|---|---:|---|
 | **Python** | 2 | Snake | dynamic | Has +1 strength for each removed unit. |
 | **Rattlesnake** | 2 | Snake | 0 | Whenever you shuffle a card, gain 1 strength (wherever this is). |
-| **Egg Eater** | 2 | Snake | 0 | Whenever an Egg is removed, gain 2 strength (wherever this is). |
+| **Egg Eater** | 2 | Snake | dynamic | Has +2 strength for each removed Egg. |
 | **Owl** | 3 | Bird | 2 | Flight. Roar: Scout a card. |
 | **Raven** | 3 | Bird | 2 | Flight. Roar: draw 3 cards, then shuffle 2 cards back. |
 | **Bird Egg** | 3 | Egg | 0 | Roar: Scout a Bird. Next turn, remove this and Scout a Bird. |

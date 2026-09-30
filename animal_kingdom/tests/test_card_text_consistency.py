@@ -218,5 +218,5 @@ def test_egg_text_matches_config():
 
 
 def test_egg_eater_growth_text_matches_config():
-    (n,) = re.findall(r"gain (\d+) strength \(wherever this is\)", _cards()["egg_eater"].text)
+    (n,) = re.findall(r"Has \+(\d+) strength for each removed Egg", _cards()["egg_eater"].text)
     assert int(n) == Config.default().egg_eater_growth

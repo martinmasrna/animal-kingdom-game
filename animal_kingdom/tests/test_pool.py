@@ -19,7 +19,7 @@ from animal_kingdom.engine.cards import (
 from animal_kingdom.decks import PREMADE_DECKS, load_premade_deck
 
 RETIRED_TAGS = {"Reptile", "Insect"}
-DYNAMIC_IDS = {"goliath"}
+DYNAMIC_IDS = {"goliath", "egg_eater"}
 
 # Two decks deliberately break the locked 4-4-6/14-design template with a 7th common, some
 # commons dropping to 2 copies so the total stays 30: food_otk (Gopher, Hedgehog and Hamster at

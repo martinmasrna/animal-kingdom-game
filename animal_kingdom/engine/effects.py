@@ -383,8 +383,7 @@ def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True)
 #
 # Discrete events (decision F2/F9): one event per card drawn, shuffled-into-deck, or
 # removed. Board-top units react via on_draw_event / on_shuffle_event / on_remove_event
-# hooks (Eon/Vulture); Rattlesnake's shuffle growth and Egg Eater's Egg growth apply in every
-# zone; a *drawn card* may also react to itself via on_draw (Omen). Reactors resolve
+# hooks (Eon/Vulture); Rattlesnake's shuffle growth applies in every zone; a *drawn card* may also react to itself via on_draw (Omen). Reactors resolve
 # immediately, so no extra stack steps and no re-entrancy in this stage. state.py stays
 # free of effect imports - these wrappers sit above the card-movement primitives.
 
@@ -406,7 +405,6 @@ def _fire_remove_event(state, card_id: str, owner: str, cr, by_player=None, by_c
     event = {"card_id": card_id, "owner": owner, "cr": cr, "tags": state.cards[card_id].tags,
              "by_player": by_player, "by_card": by_card}
     _fire_event(state, "on_remove_event", event, skip=uncovered)
-    _egg_eater_egg_removed(state, event)
 
 
 def _fire_draw(state, drawn) -> None:
@@ -1092,16 +1090,6 @@ def _owns_copy(state, player: str, card_id: str) -> bool:
         or any(u.card_id == card_id and u.owner == player
                for stack in state.board.values() for u in stack)
     )
-
-
-def _egg_eater_egg_removed(state, event):
-    """Every Egg Eater grows whenever an Egg is removed, including copies in hand and deck."""
-    if "Egg" not in event["tags"]:
-        return
-    for player in ("A", "B"):
-        if _owns_copy(state, player, "egg_eater"):
-            counters = state.card_strength_counters.setdefault(player, {})
-            counters["egg_eater"] = counters.get("egg_eater", 0) + state.config.egg_eater_growth
 
 
 def _omen_drawn(state, inst):

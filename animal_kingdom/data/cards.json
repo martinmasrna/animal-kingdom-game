@@ -210,9 +210,10 @@
       "deck": "egg_control",
       "rarity": "common",
       "tags": ["Snake"],
-      "base_strength": 0,
+      "base_strength": "dynamic",
+      "dynamic_strength": "removed_eggs_count",
       "keywords": [],
-      "text": "Whenever an Egg is removed, gain 2 strength (wherever this is).",
+      "text": "Has +2 strength for each removed Egg.",
       "copies": 2
     },
     {
