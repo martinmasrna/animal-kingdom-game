@@ -37,8 +37,8 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance) -> b
     placer_str = placement_strength(state, placer)
     target_str = effective_strength(state, target)
 
-    # Snow Leopard anthem: your *other* Cats may cover equal-or-lower while you control one.
-    # "Other" means other than the Snow Leopard granting it: a second Snow Leopard benefits from the first.
+    # Snow Leopard anthem: your Cats may cover equal-or-lower while you control one.
+    # Never the granting Snow Leopard itself (it is placed from hand); a second one benefits from the first.
     anthem = any(stack and stack[-1].owner == owner and stack[-1].card_id == "snow_leopard" and stack[-1] is not placer
                  for stack in state.board.values())
     if "Cat" in placer_card.tags and anthem:

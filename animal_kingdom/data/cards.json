@@ -69,7 +69,7 @@
       "tags": ["Cat"],
       "base_strength": 6,
       "keywords": [],
-      "text": "Your other Cats may be placed onto enemies of equal or lower strength."
+      "text": "Your Cats may be placed on enemies of equal strength."
     },
     {
       "id": "black_panther",

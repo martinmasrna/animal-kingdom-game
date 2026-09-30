@@ -23,7 +23,7 @@ Lion is the pool's only true vanilla body and the power reference for every grou
 |---|---:|---|---:|---|
 | **Jaguar** | 2 | Cat | 5 | Roar: remove an adjacent enemy of strength 4 or less. |
 | **Serval** | 2 | Cat | 2 | Roar: remove an adjacent enemy of strength 6 or more. |
-| **Snow Leopard** | 2 | Cat | 6 | Your other Cats may be placed onto enemies of equal or lower strength. |
+| **Snow Leopard** | 2 | Cat | 6 | Your Cats may be placed on enemies of equal strength. |
 | **Black Panther** | 2 | Cat | 7 | Stealth. |
 
 ### Common
