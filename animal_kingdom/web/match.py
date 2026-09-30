@@ -19,7 +19,7 @@ from ..bots.greedy_bot import GreedyBot
 from ..bots.referee_bot import RefereeBot
 from ..bots.turn_bot import TurnBot
 from ..decks import PREMADE_DECKS, load_premade_deck
-from ..engine import rules
+from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, action_from_dict
 from ..engine.cards import load_cards
 from ..engine.effects import roar_condition
@@ -447,8 +447,10 @@ class Match:
         for cr, stack in st.board.items():
             if not stack:
                 continue
+            # "hidden": the enemy can't choose it right now (Stealth, printed or from an adjacent Armadillo).
             board[cr] = [{"iid": u.iid, "id": u.card_id, "owner": u.owner, "str": effective_strength(st, u),
-                          **({"timer": timers[u.iid]} if u.iid in timers else {})} for u in stack]
+                          **({"timer": timers[u.iid]} if u.iid in timers else {}),
+                          **({"hidden": True} if not statics.can_be_chosen(st, u, other_player(u.owner)) else {})} for u in stack]
         g = {
             "round": st.turn_counter // 2 + 1,
             "current": st.current,
