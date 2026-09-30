@@ -549,6 +549,7 @@ function placeCoach(el, L, rings = []) {
   else if (a.endturn) [x, y, side] = [1439, 664, 'above'];
   else if (a.cr) { [x, y] = crossroadAt(a.cr); side = x > STAGE.w / 2 ? 'left' : 'right'; }
   else if (a.den) { [x, y] = denMouthAt(a.den); side = a.den === 'B' ? 'left' : 'right'; }
+  else if (a.rings && !rings.length) [x, y, side] = [STAGE.w / 2, 590, 'above'];   // no card picked yet: the circles come with one, so point at the hand
   else if (a.rings) {   // beside the group of rings, clear of all of them, with no notch (the rings pulse instead)
     const rs = rings.map(crossroadAt);   // this frame's rings, before the board redraws
     const xs = rs.map(r => r[0]), ys = rs.map(r => r[1]), cy = (Math.min(...ys) + Math.max(...ys)) / 2;

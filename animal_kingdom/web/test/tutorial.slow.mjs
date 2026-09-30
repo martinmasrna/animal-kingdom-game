@@ -57,13 +57,14 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
     await click(pick.t[0] === 'hq' ? '#board [data-hq="B"]' : `#board [data-cr="${pick.t[1]}"]`);
   } };
 
-  // lesson 1: the basics, won by taking the den (or on food, if a slow game gets there first)
+  // lesson 1: the basics, won by taking the den
   const seen1 = []; await play(1, seen1);
   await page.waitForFunction(() => window.__ak().V.phase === 'match_over', { timeout: 20000 });
   await wait(1200);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-end.png` });
   assert.match(await page.$eval('#endov', e => e.textContent), /Victory/);
-  const byDen = await page.evaluate(() => window.__ak().V.game.result.reason === 'hq_capture');   // a food win never needs the den lesson
+  assert.equal(await page.evaluate(() => window.__ak().V.game.result.reason), 'hq_capture', 'lesson 1 is won by taking the den');
+  const byDen = true;
   for (const id of ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'lion', 'lion2', 'buffalo', 'watch', 'patch', 'wolf', 'draw', 'actions', 'corner', 'food', 'cover', 'roar', 'roared', 'free', ...(byDen ? ['den'] : [])])
     assert.ok(seen1.includes(id), `lesson ${id} came up (${seen1})`);
   await page.click('#nextlesson');   // lesson 1 leads straight on to lesson 2

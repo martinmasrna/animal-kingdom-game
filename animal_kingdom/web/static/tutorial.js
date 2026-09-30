@@ -90,10 +90,15 @@ export const LESSONS = [
   { id: 'roared', when: c => c.roared, ...talk, at: { hand: true },
     text: 'Your Lynx roared and drew you a card! Point at any card to read what it does.' },
   { id: 'free', when: c => c.mine && (c.roared || c.round >= 6), ...talk, at: { middle: true },
-    text: 'From here it\'s up to you. Head for your opponent\'s den and put an animal on it!' },
-  TARGET, EMPTY,
-  { id: 'den', when: c => c.mine && c.places.some(t => t[0] === 'hq'), at: { den: 'B' },
-    text: 'Your opponent\'s den is open! Put any animal on it to win.' },
+    text: 'Now make your way to your opponent\'s den. Each move, the circles show how to get closer.' },
+  TARGET,
+  // lesson 1 ends on the den win it teaches: after the Roar every move is forced toward the den, then onto it
+  { id: 'den', when: c => c.mine && c.places.some(t => t[0] === 'hq'), only: { hq: true }, at: { den: 'B' },
+    text: 'Your opponent\'s den is open! Pick any animal and put it on the den to win.' },
+  { id: 'march', again: true, when: c => c.mine && (c.roared || c.round >= 6) && c.forward.length > 0,
+    only: c => ({ crs: c.forward }), at: { rings: true },
+    text: 'Head for your opponent\'s den! Pick an animal, then click one of the circles.' },
+  EMPTY,
 ];
 
 // Lesson 2: the deeper mechanics, won on food (the opponent walls its den with 7s). Its cards are held back until their
@@ -174,6 +179,9 @@ export function context(V, sel, cards) {
   const hold = V.seats && V.seats.B && V.seats.B.bot === 'tutorial2' ? HOLD.filter(id => !c.placed(id)) : [];
   c.offered = Object.entries((G.legal && G.legal.place) || {}).filter(([id]) => !hold.includes(id)).flatMap(([, ts]) => ts)
     .filter(t => !(t[0] === 'cr' && owner(G, t[1]) === V.you));
+  // the crossroads that get closest to the opponent's den (the furthest column a move can reach; covering a weak enemy counts)
+  const crs = c.offered.filter(t => t[0] === 'cr').map(t => t[1]), far = Math.max(0, ...crs.map(cr => +cr[0]));
+  c.forward = [...new Set(crs.filter(cr => +cr[0] === far))];
   // lesson 2's stack: the Squirrel under the opponent's Falcon, then back on top once the Falcon is removed
   const under = Object.entries(G.board).find(([, st]) => st.length > 1 && st[st.length - 1].owner !== V.you && st.slice(0, -1).some(u => u.owner === V.you && u.id === 'squirrel'));
   const top = Object.entries(G.board).find(([, st]) => st.length && st[st.length - 1].owner === V.you && st[st.length - 1].id === 'squirrel');
@@ -196,7 +204,7 @@ export function current(V, sel, cards, tut) {
   const c = context(V, sel, cards), n = V.game.history.filter(m => m.seat === V.you).length;   // the player's own moves
   for (const L of lessonOf(V) === 2 ? LESSONS_2 : LESSONS) {
     const now = f => typeof f === 'function' ? f(c) : f;   // a lesson's target, gate and words can depend on the moment
-    if (L.again) { if (L.when(c)) return { ...L, at: now(L.at), text: now(L.text) }; continue; }   // a safety net: shown whenever it applies, never used up
+    if (L.again) { if (L.when(c)) return { ...L, at: now(L.at), text: now(L.text), only: now(L.only) }; continue; }   // a safety net: shown whenever it applies, never used up
     if (tut.seen.has(L.id)) continue;
     if (L.untilAct && tut.shown[L.id] !== undefined && n > tut.shown[L.id]) { tut.seen.add(L.id); continue; }
     if (L.done && L.done(c)) { tut.seen.add(L.id); continue; }
@@ -211,8 +219,8 @@ export function current(V, sel, cards, tut) {
 // `picked` card is already chosen, so its rings show as the lesson speaks (only the first card is picked by hand).
 export function gate(d, only) {
   const places = {};
-  const fits = t => !only.crs || (t[0] === 'cr' && only.crs.includes(t[1]));
-  for (const [id, ts] of Object.entries(d.places)) if (only.card ? id === only.card : only.crs) {   // its card, or any card to its crossroads
+  const fits = t => only.hq ? t[0] === 'hq' : !only.crs || (t[0] === 'cr' && only.crs.includes(t[1]));
+  for (const [id, ts] of Object.entries(d.places)) if (only.card ? id === only.card : only.crs || only.hq) {   // its card, or any card to its crossroads
     const ok = ts.filter(fits); if (ok.length) places[id] = ok; }
   d.places = places;
   d.noDraw = !only.deck;

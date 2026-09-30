@@ -125,3 +125,13 @@ test('a covered Squirrel is shown, then uncovered by the Jaguar placed next to t
   const back = current(v2({ ...g, board: { '1,2': u('lion', 'A'), '2,2': [squirrel] } }), null, CARDS, t);
   assert.equal(back.id, 'uncovered');
 });
+
+test('after the Roar, lesson 1 marches on the den: only the furthest crossroads, then only the den', () => {
+  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'lion', 'lion2', 'buffalo', 'wolf', 'draw', 'actions', 'corner', 'food', 'cover', 'roar', 'roared', 'free'].forEach(id => t.seen.add(id));
+  const hist = [{ seat: 'A', kind: 'place', card: 'lynx', fx: [] }];
+  const march = current(view({ round: 5, history: hist, board: { '3,2': u('lion', 'A') }, legal: { place: { lion: [['cr', '2,1'], ['cr', '4,2'], ['cr', '3,1']] }, draw: true } }), null, CARDS, t);
+  assert.equal(march.id, 'march'); assert.deepEqual(march.only, { crs: ['4,2'] });
+  const den = current(view({ round: 6, history: hist, legal: { place: { lion: [['cr', '4,1'], ['hq', 'B']] }, draw: true } }), null, CARDS, t);
+  assert.equal(den.id, 'den');
+  assert.deepEqual(gate({ places: { lion: [['cr', '4,1'], ['hq', 'B']] } }, den.only).places, { lion: [['hq', 'B']] });
+});
