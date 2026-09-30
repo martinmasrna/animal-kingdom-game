@@ -459,3 +459,5 @@
 .game.port .rbar .out { order: 6; width: auto; height: 64px; font-size: 22px; margin-left: 0; }
 .game.port .clock { font-size: 24px; } .game.port .tbtn.B .clock { font-size: 22px; }   /* a timed match's clock, read on a phone */
 .game.port .prompt .skip, .game.port .prompt:not(.mull) .line .skip { height: 80px; padding: 0 28px; font-size: 30px; }   /* Skip and Keep hand, thumb-sized */
+.game.port .tbtn:not(.A):not(.B) { display: none; }   /* no game running (See the board): the empty stone leaves the corner to Back to results */
+.game.port .waiting:has(.slab) { top: 1356px; } .game.port .waiting .slab { height: 72px; padding: 0 20px; font-size: 24px; }

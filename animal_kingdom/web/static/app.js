@@ -227,6 +227,9 @@ function feedback() {
   openFeedback({ api, toast, context, view: g });
 }
 
+// On a touch screen the coach's and the mulligan's "click" is a tap.
+const tapWords = t => matchMedia('(hover: none)').matches ? t.replace(/\bClick\b/g, 'Tap').replace(/\bclick\b/g, 'tap') : t;
+
 // ------------------------------------------------------------------ collection (= the deckbuilder): collection.js
 // #/collection/<deck id> opens that deck (home's "Open in collection").
 function collectionScreen(open) {
@@ -594,8 +597,8 @@ function drawGame() {
     const k = d.pend.returned;
     // a player's first real match says what the mulligan is for, in plain words (the tutorial skips it); later ones, the short rule
     const first = !store('ak:mullseen');
-    const how = first ? `This is your starting hand. Don't like a card? Click it to swap it for a new one, up to ${d.pend.cap} times. Then click ${k ? 'Done' : 'Keep hand'}.`
-      : 'Click a card to replace it; no copy of a card you replace can come back.';
+    const how = tapWords(first ? `This is your starting hand. Don't like a card? Click it to swap it for a new one, up to ${d.pend.cap} times. Then click ${k ? 'Done' : 'Keep hand'}.`
+      : 'Click a card to replace it; no copy of a card you replace can come back.');
     bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b>` + (RP.views.length ? '' : `<p>${how}</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`);
     bar.classList.add('on');
     if ($('skip')) $('skip').onclick = e => { e.stopPropagation(); store('ak:mullseen', '1'); act({ kind: 'choice', choice: SKIP }); };
@@ -712,7 +715,7 @@ function placeCoach(el, L, rings = []) {
     : L.text.replace(/\bthe circle\b(?! next)/, 'one of the circles');
   const lit = [...document.querySelectorAll('#hand .hc.can')];
   if (lit.length === 1 && !rings.length) text = text.replace(/Click (any|one) of your animals\./, `Click the ${CARDS[lit[0].dataset.id].name}.`);
-  el.innerHTML = `<p>${text}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
+  el.innerHTML = `<p>${tapWords(text)}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
   // an opening step closes on Next (or Enter/Space), and the next one shows
   if (L.next) el.querySelector('#coachnext').onclick = e => { e.stopPropagation(); tutState().seen.add(L.id);
     if (ui.heldFood) { ui.anim = ui.heldFood; ui.heldFood = null; ui.animUntil = Date.now() + 1800; }   // the held fruit flies now, uninterrupted
