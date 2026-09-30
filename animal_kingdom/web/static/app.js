@@ -466,7 +466,10 @@ function gameScreen() {
     app.querySelectorAll('.panel').forEach(el => el.onclick = e => e.stopPropagation());
     $('scr').addEventListener('click', () => { if (ui.panel) { ui.panel = null; showPanel(); } });
     $('deck').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.legal.draw && !d.noDraw) act({ kind: 'draw' }); };
-    $('tbtn').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.canPass && !d.noPass) act({ kind: 'pass' }); };
+    // The stone moves the game along: End turn, or Skip while an optional choice is asked.
+    $('tbtn').onclick = e => { e.stopPropagation(); const d = lastDecision; if (!d || !d.mine) return;
+      if (d.pend && d.pend.mode === 'choice' && d.pend.optional && d.pend.kind !== 'mulligan') act({ kind: 'choice', choice: SKIP });
+      else if (!d.pend && V.game.canPass && !d.noPass) act({ kind: 'pass' }); };
     wireBoard();
   }
   drawGame();
@@ -535,7 +538,9 @@ function drawGame() {
   const tb = $('tbtn');
   if (playing && G.current === you) {
     const pips = Array.from({ length: G.actionsTotal }, (_, i) => `<i class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}"></i>`).join('');
-    tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass && !d.noPass ? ' can' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}</span>`;
+    const skip = d.mine && d.pend && d.pend.mode === 'choice' && d.pend.optional && d.pend.kind !== 'mulligan';
+    tb.className = 'abs tbtn A num' + (skip || (d.mine && !d.pend && G.canPass && !d.noPass) ? ' can' : '');
+    tb.innerHTML = skip ? '<b>Skip</b>' : `<b>End turn</b><span class="pips">${pips}</span>`;
   } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = 'Opponent\'s turn'; }
   else { tb.className = 'abs tbtn'; tb.innerHTML = ''; }
 
@@ -550,8 +555,9 @@ function drawGame() {
     if ($('skip')) $('skip').onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: SKIP }); };
   } else if (d.pend) {
     const src = d.pend.source && CARDS[d.pend.source];
-    const other = d.otherOpts.map((o, i) => `<span class="skip" data-x="${i}">${o.label}</span>`).join('') + (d.pend.optional ? `<span class="skip" id="skip">Skip</span>` : '');
-    bar.innerHTML = (src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>') + (other && !RP.views.length ? `<div class="btns">${other}</div>` : '');
+    // One line at the top centre, named by the card that asks (its rule); named options as slabs under it; Skip is the End turn stone.
+    const other = d.otherOpts.map((o, i) => `<span class="skip" data-x="${i}">${o.label}</span>`).join('');
+    bar.innerHTML = `<div class="line">${src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>'}</div>` + (other && !RP.views.length ? `<div class="btns">${other}</div>` : '');
     bar.classList.add('on');
     if (d.cardOpts.length) {
       opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${cardHTML(c)}</div>`; }).join('');
@@ -559,7 +565,6 @@ function drawGame() {
       opts.querySelectorAll('[data-o]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.cardOpts[el.dataset.o].v }); });
     }
     bar.querySelectorAll('[data-x]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.otherOpts[el.dataset.x].v }); });
-    const sk = $('skip'); if (sk) sk.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: SKIP }); };
   } else {
     bar.classList.remove('on');
     if (playing && G.opponentChoosing) waiting.textContent = G.history.length ? 'Opponent is choosing' : 'Opponent is mulliganing';
