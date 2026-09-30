@@ -357,3 +357,4 @@
 .game .rbar .track { position: relative; width: 180px; height: 44px; display: flex; align-items: center; cursor: pointer; }
 .game .rbar .track::after { content: ''; position: absolute; left: 0; right: 0; top: 18px; height: 8px; border-radius: 4px; background: rgba(10,9,8,.6); box-shadow: inset 0 1px 3px rgba(0,0,0,.7); }
 .game .rbar .track i { position: relative; z-index: 1; height: 8px; border-radius: 4px; background: #cfc3ad; box-shadow: 0 0 4px rgba(0,0,0,.6); }
+.game .hc.shown { transform: translateY(-12px) scale(2.1); z-index: 30 !important; } .game .hc.shown .card .ctext { display: flex; }   /* explained by the coach */

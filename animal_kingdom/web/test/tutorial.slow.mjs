@@ -65,7 +65,7 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
   assert.match(await page.$eval('#endov', e => e.textContent), /Victory/);
   assert.equal(await page.evaluate(() => window.__ak().V.game.result.reason), 'hq_capture', 'lesson 1 is won by taking the den');
   const byDen = true;
-  for (const id of ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'lion', 'lion2', 'buffalo', 'watch', 'patch', 'wolf', 'draw', 'actions', 'corner', 'food', 'cover', 'roar', 'roared', 'free', ...(byDen ? ['den'] : [])])
+  for (const id of ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'lion', 'lion2', 'buffalo', 'watch', 'patch', 'wolf', 'draw', 'actions', 'corner', 'food', 'cover', 'roarinfo', 'roar', 'roared', 'free', ...(byDen ? ['den'] : [])])
     assert.ok(seen1.includes(id), `lesson ${id} came up (${seen1})`);
   await page.waitForSelector('#nextlesson', { visible: true }); await wait(300);
   await page.click('#nextlesson');   // lesson 1 leads straight on to lesson 2
@@ -76,7 +76,7 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
   await wait(1200);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/2-end.png` });
   assert.equal(await page.evaluate(() => window.__ak().V.game.result.reason), 'food', 'lesson 2 is won on food');
-  for (const id of ['intro2', 'lion', 'glow', 'lynx', 'wall', 'eagle', 'buffalo2', 'draw2', 'squirrel', 'foodroar', 'covered', 'mamba', 'uncovered', 'goal2', 'draw3', 'apex', 'free2', 'feed'])
+  for (const id of ['intro2', 'lion', 'glow', 'lynx', 'wall', 'eagleinfo', 'eagle', 'buffalo2', 'draw2', 'squirrelinfo', 'squirrel', 'foodroar', 'covered', 'mambainfo', 'mamba', 'uncovered', 'goal2', 'draw3', 'apexinfo', 'apex', 'free2', 'feed'])
     assert.ok(seen2.includes(id), `lesson 2's ${id} came up (${seen2})`);
   await page.click('.endbox .play');
   await page.waitForSelector('.home .bar:not(.first)');   // home, with the full piece: the tutorial counts as learned

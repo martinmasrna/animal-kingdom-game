@@ -24,7 +24,10 @@ const owner = (G, cr) => { const st = G.board[cr]; return st && st.length ? st[s
 // lower on a tie); its corners are 'c,r' for c in 1-2 and r in its two rows.
 const HOME = [['1,1', '2,1', '1,2', '2,2'], ['1,2', '2,2', '1,3', '2,3']];
 const opening = c => c.mine && c.round === 1 && c.units === 0;   // the first turn, before the first animal is placed
-const talk = { next: true, only: {} };   // an opening step: read, then Next; nothing else can be clicked meanwhile
+const talk = { next: true, only: {} };
+// A card's power is explained with the card shown large, as if hovered (`read`), its text beside the coach's line; the move
+// that uses it is a separate, short step, so the large card never covers the circles.
+const explain = (id, card, when, text) => ({ id, when, ...talk, read: card, at: { read: card }, text });   // an opening step: read, then Next; nothing else can be clicked meanwhile
 
 // Lines both lessons share: a Roar asking for a target, and the safety net for a hand with nothing to place.
 const TARGET = { id: 'target', when: c => c.choosing, untilAct: true, at: { prompt: true },
@@ -84,9 +87,11 @@ export const LESSONS = [
     only: c => ({ card: c.coverWith, picked: true, crs: c.coverable }), at: c => ({ cr: c.coverable[0] }),
     text: 'A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 7 can\'t beat 7. Cover the circled animal!' },
   // Roar, by hand: the Lynx (turn 4), whose Roar always works beside the Lion
+  explain('roarinfo', 'lynx', c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0,
+    'The Lynx has a Roar: a power that happens the moment you place it. Its Roar draws a card if you have another Cat, like your Lion.'),
   { id: 'roar', when: c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0, done: c => c.roared,
-    only: c => ({ card: 'lynx', picked: true, crs: c.empty('lynx') }), at: { card: 'lynx' },   // the line is about the card's power
-    text: 'The Lynx has a Roar: a power that happens the moment you place it. Its Roar draws a card if you have another Cat, like your Lion. Place the Lynx!' },
+    only: c => ({ card: 'lynx', picked: true, crs: c.empty('lynx') }), at: { rings: true },
+    text: 'Place the Lynx on a circle.' },
   { id: 'roared', when: c => c.roared, ...talk, at: { hand: true },
     text: 'Your Lynx roared and drew you a card! Point at any card to read what it does.' },
   { id: 'free', when: c => c.mine && (c.roared || c.round >= 6), ...talk, at: { middle: true },
@@ -111,28 +116,33 @@ export const LESSONS_2 = [
     text: 'Lesson 2! Many animals have special powers. Let\'s meet some of them.' },
   { id: 'lion', when: c => c.mine && c.hand('lion') && !c.placed('lion'), only: one('lion', '1,2'), at: { rings: true },
     text: 'Place your Lion on the circle.' },
-  { id: 'glow', when: c => c.mine && c.ready('lynx'), ...talk, at: { card: 'lynx' },
-    text: 'See the Lynx glowing? A glowing card\'s Roar will work right now: you have another Cat, your Lion.' },
-  { id: 'lynx', when: c => c.mine && c.hand('lynx'), only: one('lynx', '2,2'), at: { card: 'lynx' },
-    text: 'Place the Lynx on the circle, and its Roar draws you a card.' },
+  explain('glow', 'lynx', c => c.mine && c.ready('lynx'),
+    'See the Lynx glowing? A glowing card\'s Roar will work right now: it draws a card if you have another Cat, and your Lion is one.'),
+  { id: 'lynx', when: c => c.mine && c.hand('lynx'), only: one('lynx', '2,2'), at: { rings: true },
+    text: 'Place the Lynx on the circle.' },
   { id: 'wall', when: c => c.theirs && c.round === 1, at: { den: 'B' },
     text: 'Your opponent is building a wall of strong animals in front of its den.' },
+  explain('eagleinfo', 'eagle', c => c.mine && c.hand('eagle') && !c.placed('eagle'),
+    'Your Lynx drew an Eagle. The Eagle has Flight: it can land on any empty crossroad, even far from your animals.'),
   { id: 'eagle', when: c => c.mine && c.hand('eagle') && !c.placed('eagle'),
-    only: c => ({ card: 'eagle', picked: true, crs: c.empty('eagle').filter(cr => !['2,1', '3,1', '3,2'].includes(cr)) }), at: { card: 'eagle' },
-    text: 'Your Lynx drew an Eagle. The Eagle has Flight: it can land on any empty crossroad, even far from your animals. Place it on a circle.' },
+    only: c => ({ card: 'eagle', picked: true, crs: c.empty('eagle').filter(cr => !['2,1', '3,1', '3,2'].includes(cr)) }), at: { rings: true },
+    text: 'Place the Eagle on any circle.' },
   { id: 'buffalo2', when: c => c.mine && c.round === 2 && c.placed('eagle') && c.hand('cape_buffalo'), only: one('cape_buffalo', '2,1'), at: { rings: true },
     text: 'Now place the Buffalo on the circle.' },
   { id: 'draw2', when: c => c.mine && c.round >= 3 && !c.hand('squirrel') && !c.placed('squirrel'), only: { deck: true }, at: { deck: true },
     text: 'Your hand is empty. Click your deck to draw 2 cards.' },
-  { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), only: one('squirrel', '3,2'), at: { card: 'squirrel' },
-    text: 'The Squirrel\'s Roar gives you 10 food. Place it on the circle.' },
+  explain('squirrelinfo', 'squirrel', c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), 'The Squirrel\'s Roar gives you 10 food.'),
+  { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), only: one('squirrel', '3,2'), at: { rings: true },
+    text: 'Place the Squirrel on the circle.' },
   { id: 'foodroar', when: c => c.placed('squirrel'), ...talk, at: { gem: 'A' },
     text: 'Your food went up by 10! Roars like this are another way to gather food, besides regions.' },
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'Your opponent has an Eagle too! It flew over and covered your Squirrel. Your Squirrel isn\'t gone. It waits underneath.' },
+  explain('mambainfo', 'black_mamba', c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
+    'The Black Mamba\'s Roar removes an enemy next to it with strength 5 or less, like that Eagle.'),
   { id: 'mamba', when: c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
-    only: c => ({ card: 'black_mamba', picked: true, crs: c.nextToFlier }), at: { card: 'black_mamba' },
-    text: 'The Black Mamba\'s Roar removes an enemy next to it with strength 5 or less, like that Eagle. Place the Black Mamba on the circle.' },
+    only: c => ({ card: 'black_mamba', picked: true, crs: c.nextToFlier }), at: { rings: true },
+    text: 'Place the Black Mamba on the circle, next to the Eagle.' },
   TARGET,
   { id: 'uncovered', when: c => c.squirrelBack, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'The Eagle is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
@@ -140,9 +150,11 @@ export const LESSONS_2 = [
     text: 'Your opponent\'s den is guarded by three 7s, and a 7 can\'t beat a 7. So this time, you\'ll win by gathering 100 food.' },
   { id: 'draw3', when: c => c.mine && c.placed('black_mamba') && !c.hand('tiger') && !c.placed('tiger') && c.canDraw, only: { deck: true }, at: { deck: true },
     text: 'Click your deck to draw 2 more cards.' },
+  explain('apexinfo', 'tiger', c => c.mine && c.hand('tiger') && c.prey.length > 0,
+    'The Tiger is an Apex Predator: it must land on top of an animal, and it eats it. An eaten animal is gone for good.'),
   { id: 'apex', when: c => c.mine && c.hand('tiger') && c.prey.length > 0,
-    only: c => ({ card: 'tiger', picked: true, crs: c.prey }), at: { card: 'tiger' },
-    text: 'The Tiger is an Apex Predator: it must land on top of an animal, and it eats it. An eaten animal is gone for good. Eat a circled animal!' },
+    only: c => ({ card: 'tiger', picked: true, crs: c.prey }), at: { rings: true },
+    text: 'Place the Tiger on a circled animal to eat it.' },
   { id: 'free2', when: c => c.mine && (c.placed('tiger') || c.round >= 8), ...talk, at: { middle: true },
     text: 'Now gather 100 food. Each move, the circles show the best spots for finishing a region.' },
   { id: 'feed', again: true, when: c => c.mine && (c.placed('tiger') || c.round >= 8) && c.feed.length > 0,
