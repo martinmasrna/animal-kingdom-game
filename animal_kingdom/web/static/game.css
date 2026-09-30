@@ -393,3 +393,4 @@
 .game .prompt:not(.mull) { translate: 0 calc(-1 * var(--above, 0px)); }
 .game .hand { translate: 0 var(--above, 0px); }
 .game .deck, .game .tbtn, .game .waiting { translate: var(--side, 0px) var(--above, 0px); }
+.game .hand { z-index: 12; pointer-events: none; } .game .hand .hc { pointer-events: auto; }   /* the hand's translate (window edges) makes it a stacking context: above the board's pieces, so a card read large covers them; only its cards take the pointer (the strip spans the deck) */
