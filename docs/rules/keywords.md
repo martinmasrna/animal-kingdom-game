@@ -66,6 +66,8 @@ Card text grants strength two ways, **distinguished by the verb** — this readi
 Card text fits three lines on the full card (`docs/design/principles.md`). These phrasings are binding:
 
 - **"enemy"** means an enemy unit; **"your Canines"** means friendly Canines.
+- Your own units are **"your Canines"** or **"Canines you control"**, never "friendly". **"Play"** means from your hand; only another place is named ("from your hand or deck").
+- One card is **"draw a card"**; more are **"draw 2 cards"**.
 - The other player is always **"your opponent"**, never "they", "their" or "them". Stealing from the opponent's hand is random by nature (the hand is hidden), so the text doesn't say "random".
 - Thresholds read **"of strength 4 or less"**, **"6 or more"**, **"10 or more food"**.
 - Timed triggers read **"At the end of your turn, …"** and **"At the start of your next turn, …"**; a delayed effect reads **"In 2 turns, …"**, or **"Next turn, …"** where the long form doesn't fit (Bird Egg).

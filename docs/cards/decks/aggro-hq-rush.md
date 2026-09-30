@@ -36,10 +36,10 @@ The deck is being redesigned: the diagnosis and Martin's card-by-card analysis a
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Lemming** | 3 | Rodent | 1 | Roar: fill adjacent empty crossroads with Lemmings from your hand and deck. |
-| **Cheetah** | 3 | Cat | 6 | Roar: if placed next to the opponent's den, draw 1 card. |
+| **Cheetah** | 3 | Cat | 6 | Roar: if placed next to the opponent's den, draw a card. |
 | **Rat** | 3 | Rodent | 2 | Roar: remove an adjacent enemy, then discard a random card. |
-| **Falcon** | 3 | Bird | 4 | Flight. Roar: if placed next to the opponent's den, draw 1 card. |
-| **Bat** | 3 | — | 3 | Flight. Roar: draw 1 card. |
+| **Falcon** | 3 | Bird | 4 | Flight. Roar: if placed next to the opponent's den, draw a card. |
+| **Bat** | 3 | — | 3 | Flight. Roar: draw a card. |
 | **Mouse** | 3 | Rodent | 5 | Roar: draw a Rodent. |
 
 <!-- cards:end -->

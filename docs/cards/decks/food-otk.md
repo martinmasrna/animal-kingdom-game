@@ -21,8 +21,8 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Fathom** | 1 | — | 7 | Roar: Scout a legendary unit. |
-| **Greywhisker** | 1 | Rodent | 1 | Roar: gain 1 food. Draw 1 card. You may play another unit. |
-| **Barley** | 1 | Rodent | 4 | Roar: gain 4 food for each other Rodent you control. Draw 1 card. |
+| **Greywhisker** | 1 | Rodent | 1 | Roar: gain 1 food. Draw a card. You may play another unit. |
+| **Barley** | 1 | Rodent | 4 | Roar: gain 4 food for each other Rodent you control. Draw a card. |
 | **Scrooge** | 1 | Rodent | 4 | Roar: gain food equal to the food you gained this turn. |
 
 ### Rare

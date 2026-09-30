@@ -15,7 +15,7 @@ Lion is the pool's only true vanilla body and the power reference for every grou
 | **Prince Leo** | 1 | Cat | 3 | Roar: play Princess Lea from your hand or deck. |
 | **Princess Lea** | 1 | Cat | 3 | Roar: play Prince Leo from your hand or deck. |
 | **King Theron** | 1 | Cat | 8 | When one of your Cats covers an enemy, remove that enemy. |
-| **Queen Adira** | 1 | Cat | 5 | When one of your Cats removes an enemy, draw 1 card. |
+| **Queen Adira** | 1 | Cat | 5 | When one of your Cats removes an enemy, draw a card. |
 
 ### Rare
 
@@ -31,8 +31,8 @@ Lion is the pool's only true vanilla body and the power reference for every grou
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Lion** | 3 | Cat | 7 | — |
-| **Lynx** | 3 | Cat | 5 | Roar: if you control another Cat, draw 1. |
-| **Caracal** | 3 | Cat | 6 | Roar: if placed on top of an enemy, draw 1 card. |
+| **Lynx** | 3 | Cat | 5 | Roar: if you control another Cat, draw a card. |
+| **Caracal** | 3 | Cat | 6 | Roar: if placed on top of an enemy, draw a card. |
 | **Tiger** | 3 | Cat | 7 | Apex Predator. |
 | **Cougar** | 3 | Cat | 6 | You may place this adjacent to any Cat you control, ignoring connection. |
 | **House Cat** | 3 | Cat | 1 | Roar: if you control another Cat, play another Cat. |

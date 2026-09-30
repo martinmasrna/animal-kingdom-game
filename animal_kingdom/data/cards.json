@@ -39,7 +39,7 @@
       "tags": ["Cat"],
       "base_strength": 5,
       "keywords": [],
-      "text": "When one of your Cats removes an enemy, draw 1 card."
+      "text": "When one of your Cats removes an enemy, draw a card."
     },
     {
       "id": "jaguar",
@@ -99,7 +99,7 @@
       "tags": ["Cat"],
       "base_strength": 5,
       "keywords": [],
-      "text": "Roar: if you control another Cat, draw 1."
+      "text": "Roar: if you control another Cat, draw a card."
     },
     {
       "id": "caracal",
@@ -109,7 +109,7 @@
       "tags": ["Cat"],
       "base_strength": 6,
       "keywords": [],
-      "text": "Roar: if placed on top of an enemy, draw 1 card."
+      "text": "Roar: if placed on top of an enemy, draw a card."
     },
     {
       "id": "tiger",
@@ -404,7 +404,7 @@
       "tags": ["Colony"],
       "base_strength": 6,
       "keywords": [],
-      "text": "Roar: if you control a Colony Queen, draw 1 card."
+      "text": "Roar: if you control a Colony Queen, draw a card."
     },
     {
       "id": "termite_queen",
@@ -647,7 +647,7 @@
       "tags": ["Rodent"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: gain 1 food. Draw 1 card. You may play another unit."
+      "text": "Roar: gain 1 food. Draw a card. You may play another unit."
     },
     {
       "id": "rat_king",
@@ -657,7 +657,7 @@
       "tags": ["Rodent"],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: gain 4 food for each other Rodent you control. Draw 1 card."
+      "text": "Roar: gain 4 food for each other Rodent you control. Draw a card."
     },
     {
       "id": "scrooge",
@@ -880,7 +880,7 @@
       "tags": ["Cat"],
       "base_strength": 6,
       "keywords": [],
-      "text": "Roar: if placed next to the opponent's den, draw 1 card."
+      "text": "Roar: if placed next to the opponent's den, draw a card."
     },
     {
       "id": "rat",
@@ -900,7 +900,7 @@
       "tags": ["Bird"],
       "base_strength": 4,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: if placed next to the opponent's den, draw 1 card."
+      "text": "Flight. Roar: if placed next to the opponent's den, draw a card."
     },
     {
       "id": "bat",
@@ -910,7 +910,7 @@
       "tags": [],
       "base_strength": 3,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: draw 1 card."
+      "text": "Flight. Roar: draw a card."
     },
     {
       "id": "mouse",
@@ -1130,7 +1130,7 @@
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Roar: draw 1 card."
+      "text": "Roar: draw a card."
     },
     {
       "id": "mock_draw_3",
@@ -1140,7 +1140,7 @@
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: draw 1 card."
+      "text": "Roar: draw a card."
     },
     {
       "id": "mock_draw_4",
@@ -1150,7 +1150,7 @@
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: draw 1 card."
+      "text": "Roar: draw a card."
     },
     {
       "id": "mock_draw_6",
@@ -1160,7 +1160,7 @@
       "tags": [],
       "base_strength": 6,
       "keywords": [],
-      "text": "Roar: draw 1 card."
+      "text": "Roar: draw a card."
     },
     {
       "id": "mock_draw_7",
@@ -1170,7 +1170,7 @@
       "tags": [],
       "base_strength": 7,
       "keywords": [],
-      "text": "Roar: draw 1 card."
+      "text": "Roar: draw a card."
     },
     {
       "id": "mock_flydraw_2",
@@ -1180,7 +1180,7 @@
       "tags": [],
       "base_strength": 2,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: draw 1 card."
+      "text": "Flight. Roar: draw a card."
     },
     {
       "id": "mock_flydraw_3",
@@ -1190,7 +1190,7 @@
       "tags": [],
       "base_strength": 3,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: draw 1 card."
+      "text": "Flight. Roar: draw a card."
     },
     {
       "id": "mock_flydraw_4",
@@ -1200,7 +1200,7 @@
       "tags": [],
       "base_strength": 4,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: draw 1 card."
+      "text": "Flight. Roar: draw a card."
     },
     {
       "id": "mock_flydraw_5",
@@ -1210,7 +1210,7 @@
       "tags": [],
       "base_strength": 5,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: draw 1 card."
+      "text": "Flight. Roar: draw a card."
     },
     {
       "id": "calib_draw1_1",
@@ -1220,7 +1220,7 @@
       "tags": [],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: draw 1 card."
+      "text": "Roar: draw a card."
     },
     {
       "id": "calib_draw1_2",
@@ -1230,7 +1230,7 @@
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: draw 1 card."
+      "text": "Roar: draw a card."
     },
     {
       "id": "calib_draw2_0",
@@ -1750,7 +1750,7 @@
       "tags": [],
       "base_strength": 3,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: draw 1 card."
+      "text": "Flight. Roar: draw a card."
     },
     {
       "id": "mock_skully",
