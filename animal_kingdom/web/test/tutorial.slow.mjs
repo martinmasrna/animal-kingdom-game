@@ -58,7 +58,7 @@ test('a new player learns the game in the tutorial and wins it', { timeout: 3000
   await wait(1200);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/${seen.length + 1}-end.png` });
   assert.match(await page.$eval('#endov', e => e.textContent), /Victory/);
-  for (const id of ['lion', 'lion2', 'buffalo', 'wolf', 'draw', 'food', 'cover', 'den']) assert.ok(seen.includes(id), `lesson ${id} came up (${seen})`);
+  for (const id of ['lion', 'lion2', 'buffalo', 'wolf', 'draw', 'actions', 'food', 'cover', 'den']) assert.ok(seen.includes(id), `lesson ${id} came up (${seen})`);
   await page.click('.endbox .play');
   await page.waitForSelector('.home .bar:not(.first)');   // home, with the full piece: the tutorial counts as learned
   assert.deepEqual(page.errors, []);

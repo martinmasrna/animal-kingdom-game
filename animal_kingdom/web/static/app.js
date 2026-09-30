@@ -528,7 +528,7 @@ function drawGame() {
 }
 
 // The tutorial's coach: a granite piece standing beside what the lesson talks about, its notch pointing at it: above a
-// card in the hand or the deck, beside a crossroad (on the side with more room), a region's stone or a den.
+// card in the hand, the deck or End turn, beside a crossroad (on the side with more room), a region's stone or a den.
 const COACH_W = 250;
 function placeCoach(el, L) {
   el.className = 'abs coach';
@@ -537,6 +537,7 @@ function placeCoach(el, L) {
   let x, y, side;
   if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, 590, 'above'];
   else if (a.deck) [x, y, side] = [1299, 606, 'above'];
+  else if (a.endturn) [x, y, side] = [1439, 664, 'above'];
   else if (a.cr) { [x, y] = crossroadAt(a.cr); side = x > STAGE.w / 2 ? 'left' : 'right'; }
   else if (a.den) { [x, y] = denMouthAt(a.den); side = a.den === 'B' ? 'left' : 'right'; }
   else if (a.stone) { const [c, r] = a.stone.split(',').map(Number), [x1, y1] = crossroadAt(`${c},${r}`), [x2, y2] = crossroadAt(`${c + 1},${r + 1}`);
@@ -630,8 +631,7 @@ function drawBoard(d) {
   const A = ui.anim; ui.anim = null;   // the animations play once, never on hover redraws
   const last = V.game.history[V.game.history.length - 1], won = V.game.result && V.game.result.reason === 'hq_capture' && last && last.target && last.target[0] === 'hq';
   const capture = won ? { side: rel(last.target[1]), id: last.card, owner: rel(last.seat), str: CARDS[last.card].str } : null;
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null,
-    focus: d.lesson && d.lesson.focus });
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null });
 }
 
 function wireBoard() {

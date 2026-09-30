@@ -28,12 +28,13 @@ test('nothing is taught off your turn, and a lesson read once stays away after y
   assert.equal(current(view({ current: 'B', toAct: 'B', legal: null }), null, CARDS, t), null);
   const board = { '1,1': u('dire_wolf', 'A'), '1,2': u('lion', 'A'), '2,1': u('jaguar', 'A'), '2,2': u('cape_buffalo', 'A') };
   const r4 = { round: 4, board, legal: { place: {}, draw: true } };
+  t.seen.add('actions');
   assert.equal(current(view(r4), null, CARDS, t).id, 'food');
   assert.equal(current(view({ ...r4, history: [{ seat: 'A' }] }), null, CARDS, t), null, 'gone after your next move');
 });
 
 test('the open den is pointed out whenever it can be taken', () => {
-  const t = fresh(); ['lion', 'lion2', 'buffalo', 'wolf', 'draw', 'corner', 'food', 'cover', 'roar'].forEach(id => t.seen.add(id));
+  const t = fresh(); ['lion', 'lion2', 'buffalo', 'wolf', 'draw', 'actions', 'corner', 'food', 'cover', 'roar'].forEach(id => t.seen.add(id));
   const L = current(view({ round: 6, legal: { place: { lion: [['hq', 'B']] }, draw: true } }), null, CARDS, t);
-  assert.equal(L.id, 'den'); assert.deepEqual(L.focus, { den: 'B' });
+  assert.equal(L.id, 'den'); assert.deepEqual(L.at, { den: 'B' });
 });
