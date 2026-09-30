@@ -235,9 +235,9 @@ function profileScreen() {
   screen = 'profile';
   const unlinked = ME.providers.filter(p => !ME.logins.some(l => l.provider === p));
   const when = t => new Date(t * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-  const recs = ME.records.map(r => { const f = deckFace(r.cover, r.deck);
-    return `<div class="dtile rec${ui.histDeck === r.deck ? ' on' : ''}" data-deck="${esc(r.deck)}" style="${f ? stripArt(f, 284, 56, .7) : ''}">
-    <b>${esc(r.deck)}</b><span class="wl">${r.won}–${r.lost}</span></div>`; }).join('');
+  // Which deck's matches: a dropdown in the header, as the collection's filters, each deck with its games won–lost.
+  const wl = (w, l) => `<i>${w}–${l}</i>`, all = ME.records.reduce((a, r) => [a[0] + r.won, a[1] + r.lost], [0, 0]);
+  const filter = dd('deck', ui.histDeck || '', [['', `All decks ${wl(...all)}`], ...ME.records.map(r => [esc(r.deck), `${esc(r.deck)} ${wl(r.won, r.lost)}`])]);
   const shown = ME.history.filter(h => !ui.histDeck || h.my_deck === ui.histDeck);
   const bot = h => h.kind !== 'friend';   // a bot's deck has a name you know; a person's deck name is theirs, so the row names the person
   const result = h => h.won > h.lost ? 'Won' : h.won < h.lost ? 'Lost' : 'Draw';   // a match is one game (older best-of-3s by their result)
@@ -253,11 +253,12 @@ function profileScreen() {
   const code = ME.logins.length ? '' : sect('Sign-in code', `<p>Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</p>
       <div class="row"><span class="field keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span><button class="slab" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</button><button class="slab" id="copykey">Copy</button></div>`)
     + sect('Use a different profile', `<div class="row"><input class="field" id="other" placeholder="Sign-in code" autocomplete="off"><button class="slab" id="signin">Sign in</button></div>`);
-  app.innerHTML = `<div class="mscr prof"><div class="hist"><h2>Match history</h2>${hist ? `<div class="hbody"><div class="recs">${recs}</div><div class="hlist">${hist}</div></div>` : '<p class="none">No finished matches yet.</p>'}</div>
+  app.innerHTML = `<div class="mscr prof"><div class="hist"><div class="hhead"><h2>Match history</h2>${hist || ui.histDeck ? filter : ''}</div>
+    <div class="hbody">${hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div></div>
     <div class="side"><div class="me"><div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div>${account}${code}</div>
       <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
-  app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { ui.histDeck = ui.histDeck === el.dataset.deck ? null : el.dataset.deck; profileScreen(); });
+  wireDd(app, (k, v) => { ui.histDeck = v || null; profileScreen(); });
   app.querySelectorAll('[data-m]').forEach(el => el.onclick = () => { location.hash = '#/replay/' + el.dataset.m; });
   const nm = document.getElementById('pname');
   nm.onchange = async () => { const r = await api('/api/me', { method: 'PATCH', body: JSON.stringify({ name: nm.value }) });
@@ -492,7 +493,9 @@ function drawGame() {
   const hand = $('hand');
   let drawnK = 0;
   hand.innerHTML = G.hand.map((h, i) => {
-    const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id], pick = d.handPick.has(h.iid);
+    // a tutorial step that names a card lights only its leftmost copy: two identical lit cards leave "click the Buffalo" ambiguous
+    const one = d.lesson && d.lesson.only && d.lesson.only.card ? G.hand.find(x => x.id === d.lesson.only.card) : null;
+    const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!one || one.iid === h.iid), pick = d.handPick.has(h.iid);
     const hint = can && d.lesson && d.lesson.only && !ui.sel;   // the card the tutorial asks for
     const talking = d.lesson && d.lesson.next || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
     const shown = d.lesson && d.lesson.read === h.id;   // the card the coach is explaining, shown large as if hovered
