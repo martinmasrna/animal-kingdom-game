@@ -39,11 +39,11 @@ const EMPTY = { id: 'empty', again: true, when: c => c.mine && c.round >= 3 && !
 export const LESSONS = [
   // --- the opening: what is on screen ---
   { id: 'welcome', when: opening, ...talk, at: { middle: true },
-    text: 'Welcome to the savanna! You lead the blue animals. Your opponent leads the red ones.' },
+    text: 'Welcome to the savanna! You start on the left, your opponent on the right.' },
   { id: 'yourden', when: opening, ...talk, at: { den: 'A' },
-    text: 'This rock is your den, your home. Your animals start next to it.' },
+    text: 'This rock with the blue paw prints is your den. Your animals start next to it.' },
   { id: 'theirden', when: opening, ...talk, at: { den: 'B' },
-    text: 'This is your opponent\'s den. Put any of your animals on it and you win!' },
+    text: 'This rock with the red paw prints is your opponent\'s den. Put any of your animals on it and you win!' },
   { id: 'foodcount', when: opening, ...talk, at: { gem: 'A' },
     text: 'The second way to win is food. This counts your food: gather 100 and you win.' },
   { id: 'oppfood', when: opening, ...talk, at: { gem: 'B' },
