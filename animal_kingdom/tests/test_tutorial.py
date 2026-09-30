@@ -152,3 +152,60 @@ def test_lesson_1_guided_to_regions_always_ends_on_100_food():
             m.act("A", choices[0] if choices else rng.choice(pick) if pick else DrawAction() if DrawAction() in legal else PassAction())
         r = m.results[-1]
         assert r["winner"] == "A" and r["reason"] == "food" and r["turns"] < 12, (seed, r)
+
+
+def test_lesson_2_can_always_be_finished_wherever_the_player_puts_its_first_animals():
+    """Lion, Lynx and Buffalo anywhere legal; the Eagle, Squirrel and Black Mamba where the lesson rings them (the same
+    rules as static/tutorial.js); the opponent's Eagle covers the Squirrel, the Mamba frees it, the Polar Bear breaks the
+    wall, the den falls."""
+    adj = lambda cr: {f"{c},{r}" for c, r in ((int(cr[0]) - 1, int(cr[2])), (int(cr[0]) + 1, int(cr[2])),
+                                              (int(cr[0]), int(cr[2]) - 1), (int(cr[0]), int(cr[2]) + 1)) if 1 <= c <= 5 and 1 <= r <= 3}
+    for seed in range(300):
+        rng, m = random.Random(seed), _lesson2()
+        legal = lambda: rules.legal_actions(m.state)
+        own = lambda cr: m.state.board[cr][-1].owner if m.state.board.get(cr) else None
+        empty = lambda card: [x.crossroad for x in legal() if isinstance(x, PlaceAction) and x.card_id == card
+                              and not x.is_hq_capture and not m.state.board.get(x.crossroad)]
+
+        def a(action):
+            assert action in legal(), (seed, action)
+            m.act("A", action)
+            while m.state.pending is not None and m.to_act() == "A":
+                m.act("A", next(x for x in legal() if isinstance(x, ChoiceAction) and x.choice != SKIP))
+
+        def their_turn():
+            while m.phase == "playing" and m.to_act() == "B":
+                m.act("B", m.bot_move())
+
+        place = lambda card, crs: a(PlaceAction(card, ("cr", rng.choice(crs))))
+        place("lion", empty("lion")); place("lynx", empty("lynx")); their_turn()
+        reach = set(empty("cape_buffalo"))
+        unreached = [cr for cr in empty("eagle") if cr not in reach]
+        alone = [cr for cr in unreached if not any(n in reach or own(n) == "A" for n in adj(cr))]
+        place("eagle", alone or unreached or empty("eagle"))
+        eagle = next(cr for cr in m.state.board if own(cr) == "A" and m.state.board[cr][-1].card_id == "eagle")
+        place("cape_buffalo", empty("cape_buffalo")); their_turn()
+        a(DrawAction())
+        safe = [cr for cr in empty("squirrel") if any(not own(n) and (n[0] == "1" or any(q != cr and q != eagle and own(q) == "A" for q in adj(n)))
+                                                     for n in adj(cr))]
+        place("squirrel", safe or empty("squirrel")); their_turn()
+        sq = next(cr for cr, st in m.state.board.items() if any(u.card_id == "squirrel" and u.owner == "A" for u in st))
+        assert own(sq) == "B", (seed, "the Eagle covers the Squirrel")
+        beside = [x.crossroad for x in legal() if isinstance(x, PlaceAction) and x.card_id == "black_mamba" and x.crossroad in adj(sq)]
+        rescue = [cr for cr in beside if not own(cr)] or [cr for cr in beside if own(cr) == "A"]   # else on top of your own
+        assert rescue, (seed, "a crossroad for the Black Mamba beside the Squirrel")
+        place("black_mamba", rescue)
+        assert own(sq) == "A", (seed, "the Squirrel is back on top")
+        for _ in range(12):   # draw, get next to the wall, the Polar Bear eats a 7, the den
+            if m.phase != "playing":
+                break
+            if m.to_act() == "B":
+                their_turn(); continue
+            hq = [x for x in legal() if isinstance(x, PlaceAction) and x.is_hq_capture]
+            bear = [x for x in legal() if isinstance(x, PlaceAction) and x.card_id == "polar_bear" and x.crossroad[0] == "5"]
+            moves = [x for x in legal() if isinstance(x, PlaceAction) and x.card_id != "polar_bear" and not x.is_hq_capture
+                     and own(x.crossroad) != "A"]
+            ahead = [x for x in moves if x.crossroad[0] == max(y.crossroad[0] for y in moves)] if moves else []   # the lesson's 'near': the furthest
+            a(hq[0] if hq else bear[0] if bear else ahead[0] if ahead and any(u.card_id == "polar_bear" for u in m.state.hands["A"])
+              else DrawAction() if DrawAction() in legal() else PassAction())
+        assert m.results and m.results[-1]["reason"] == "hq_capture", (seed, m.results[-1] if m.results else m.phase)

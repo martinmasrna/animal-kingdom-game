@@ -97,7 +97,10 @@ class TutorialBot(Bot):
         # never the last corner of a region: the opponent takes no food, so the tutorial ends on the player's win
         closes = lambda cr: any(cr in r.corners and all(c == cr or mine(c) for c in r.corners)
                                 for r in state.game_map.regions.values())
-        empty = [a for a in places if not board.get(a.crossroad) and not closes(a.crossroad)]
+        # lesson 2: never beside the player's Squirrel, where the Black Mamba must come to its rescue
+        squirrel = {cr for cr, st in board.items() if any(u.owner == "A" and u.card_id == "squirrel" for u in st)}
+        beside = lambda cr: self.ambush and any(abs(int(cr[0]) - int(q[0])) + abs(int(cr[2]) - int(q[2])) == 1 for q in squirrel)
+        empty = [a for a in places if not board.get(a.crossroad) and not closes(a.crossroad) and not beside(a.crossroad)]
         if empty:
             col = lambda a: int(a.crossroad.split(",")[0])
             row = lambda a: abs(int(a.crossroad.split(",")[1]) - 2)

@@ -119,11 +119,11 @@ const one = (card, cr) => ({ card, crs: [cr] });
 export const LESSONS_2 = [
   { id: 'intro2', when: c => c.mine && c.round === 1 && c.units === 0, ...talk, at: { middle: true },
     text: 'Lesson 2! Many animals have special powers. Let\'s meet some of them.' },
-  { id: 'lion', when: c => c.mine && c.hand('lion') && !c.placed('lion'), only: one('lion', '1,2'), at: { rings: true },
+  { id: 'lion', when: c => c.mine && c.hand('lion') && !c.placed('lion'), only: c => ({ card: 'lion', crs: c.empty('lion') }), at: { rings: true },
     text: { pick: 'Click your Lion.', place: 'Now click the circle.' } },
   explain('glow', 'lynx', c => c.mine && c.ready('lynx'),
     'See the Lynx glowing? A glowing card\'s Roar will work if you place it now.'),
-  { id: 'lynx', when: c => c.mine && c.hand('lynx'), only: one('lynx', '2,2'), at: { rings: true },
+  { id: 'lynx', when: c => c.mine && c.hand('lynx'), only: c => ({ card: 'lynx', crs: c.empty('lynx') }), at: { rings: true },
     text: { pick: 'Click the Lynx.', place: 'Now click the circle.' } },
   explain('eagleinfo', 'eagle', c => c.mine && c.hand('eagle') && !c.placed('eagle'),
     'Your Lynx drew an Eagle. The Eagle has Flight: it can land even where it isn\'t connected to your den.'),
@@ -131,14 +131,14 @@ export const LESSONS_2 = [
     only: c => ({ card: 'eagle', crs: c.eagleSpots }), at: { rings: true },
     text: { pick: 'Click the Eagle.', place: 'Now click one of the circles. None of your other animals could stand there.' } },
   // connection again, on a harder board: the Eagle stands alone, and nothing may be placed next to it
-  { id: 'alone', when: c => c.mine && c.round === 2 && c.placed('eagle') && !c.placed('cape_buffalo'), ...talk, at: c => ({ cr: c.eagleAt }),
+  { id: 'alone', when: c => c.mine && c.round === 2 && c.placed('eagle') && !c.placed('cape_buffalo') && c.eagleAlone, ...talk, at: c => ({ cr: c.eagleAt }),
     text: 'Your Eagle isn\'t connected to your den, so new animals can\'t go next to it.' },
-  { id: 'buffalo2', when: c => c.mine && c.round === 2 && c.placed('eagle') && c.hand('cape_buffalo'), only: one('cape_buffalo', '2,1'), at: { rings: true },
+  { id: 'buffalo2', when: c => c.mine && c.round === 2 && c.placed('eagle') && c.hand('cape_buffalo'), only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo') }), at: { rings: true },
     text: { pick: 'Click the Buffalo.', place: 'Now click the circle. Then watch what your opponent does.' } },
   { id: 'draw2', when: c => c.mine && c.round >= 3 && !c.hand('squirrel') && !c.placed('squirrel'), only: { deck: true }, at: { deck: true },
     text: 'Your hand is empty. Click your deck to draw 2 cards.' },
   explain('squirrelinfo', 'squirrel', c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), 'The Squirrel\'s Roar gives you 10 food.'),
-  { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), only: one('squirrel', '3,2'), at: { rings: true },
+  { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), only: c => ({ card: 'squirrel', crs: c.safe.length ? c.safe : c.empty('squirrel') }), at: { rings: true },
     text: { pick: 'Click the Squirrel.', place: 'Now click the circle.' } },
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'Your opponent has an Eagle too! It flew over and covered your Squirrel. Your Squirrel isn\'t gone. It waits underneath.' },
@@ -146,7 +146,7 @@ export const LESSONS_2 = [
     'The Black Mamba\'s Roar removes an enemy next to it with strength 5 or less, like that Eagle.'),
   { id: 'mamba', when: c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
     only: c => ({ card: 'black_mamba', crs: c.nextToFlier }), at: { rings: true },
-    text: { pick: 'Click the Black Mamba.', place: 'Now click the circle next to the Eagle.' } },
+    text: c => ({ pick: 'Click the Black Mamba.', place: c.stackRescue ? 'Now click the circle next to the Eagle. An animal can also go on top of one of your own.' : 'Now click the circle next to the Eagle.' }) },
   TARGET,
   { id: 'uncovered', when: c => c.squirrelBack, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'The Eagle is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
@@ -222,7 +222,12 @@ export function context(V, sel, cards) {
   const top = Object.entries(G.board).find(([, st]) => st.length && st[st.length - 1].owner === V.you && st[st.length - 1].id === 'squirrel');
   const wasCovered = G.history.some(m => m.seat !== V.you && m.fx.some(f => f.k === 'cover' && f.card === 'squirrel'));
   Object.assign(c, { squirrelCovered: !!under, squirrelBack: !under && wasCovered && !!top, squirrelAt: (under || top || [])[0] });
-  c.nextToFlier = under ? c.empty('black_mamba').filter(cr => ADJ(under[0]).includes(cr)) : [];
+  // the Black Mamba's rescue: an empty crossroad beside the covered Squirrel, or, when the board leaves none, one of your own
+  // animals there to go on top of (a real rule, said in its line)
+  const beside = under ? ((G.legal && G.legal.place && G.legal.place.black_mamba) || []).filter(t => t[0] === 'cr' && ADJ(under[0]).includes(t[1])).map(t => t[1]) : [];
+  const free = beside.filter(cr => !owner(G, cr));
+  c.stackRescue = !free.length && beside.some(cr => owner(G, cr) === V.you);
+  c.nextToFlier = free.length ? free : beside.filter(cr => owner(G, cr) === V.you);
   c.wall = ['5,1', '5,2', '5,3'].every(cr => owner(G, cr) && owner(G, cr) !== V.you);   // lesson 2's wall before the den
   // the best spots for food: the corners still to take (empty, or an enemy a card can cover now) of the regions a move
   // can progress, where you hold the most; a region with an enemy no card can cover yet waits
@@ -231,11 +236,18 @@ export function context(V, sel, cards) {
   const cand = regions.filter(r => !r.every(cr => owner(G, cr) === V.you) && r.every(cr => owner(G, cr) === V.you || !owner(G, cr) || takeable.has(cr))
       && r.some(cr => takeable.has(cr))).map(r => [r.filter(cr => owner(G, cr) === V.you).length, r]).sort((a, b) => b[0] - a[0]);
   c.feed = cand.length ? [...new Set(cand.filter(([n]) => n === cand[0][0]).flatMap(([, r]) => r.filter(cr => takeable.has(cr))))] : [...takeable];
-  // lesson 2's Eagle: it lands only where no other animal could, with nothing reachable beside it (off the spots the lesson needs later,
-  // clear of the opponent's den column), so Flight and connection show; then where it stands
+  // lesson 2's Eagle: it lands where no animal without Flight could go and none could go beside it, so 'isn't connected'
+  // shows (else anywhere a walker couldn't go, else anywhere); then where it stands, and whether it stands alone
   const reach = new Set(c.empty('cape_buffalo'));   // where a card without Flight may go now
-  c.eagleSpots = c.empty('eagle').filter(cr => !['2,1', '3,1', '3,2'].includes(cr) && +cr[0] >= 3 && +cr[0] <= 4 && !reach.has(cr) && !ADJ(cr).some(n => reach.has(n)));
+  const unreached = c.empty('eagle').filter(cr => !reach.has(cr));
+  const alone = unreached.filter(cr => !ADJ(cr).some(n => reach.has(n) || owner(G, n) === V.you));
+  c.eagleSpots = alone.length ? alone : unreached.length ? unreached : c.empty('eagle');
   c.eagleAt = (Object.entries(G.board).find(([, st]) => st.length && st[st.length - 1].owner === V.you && st[st.length - 1].id === 'eagle') || [])[0];
+  c.eagleAlone = !!c.eagleAt && !ADJ(c.eagleAt).some(n => reach.has(n) || owner(G, n) === V.you);
+  // lesson 2's Squirrel: only where, once the opponent's Eagle covers it, a free crossroad beside it stays in reach (the
+  // Black Mamba's): next to the den, or next to another animal of yours (not the lone Eagle)
+  c.safe = c.empty('squirrel').filter(cr => ADJ(cr).some(n => !owner(G, n) && (n[0] === '1'
+    || ADJ(n).some(m => m !== cr && m !== c.eagleAt && owner(G, m) === V.you))));
   // the wall pieces the Polar Bear may land on and eat (lesson 2)
   c.prey = ((G.legal && G.legal.place && G.legal.place.polar_bear) || []).filter(t => t[0] === 'cr' && t[1][0] === '5' && owner(G, t[1]) && owner(G, t[1]) !== V.you).map(t => t[1]);   // the wall it can eat
   const mineAt = cr => owner(G, cr) === V.you, count = h => h.filter(mineAt).length;

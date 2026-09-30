@@ -405,7 +405,7 @@ function decision() {
     if (d.lesson && d.lesson.only) gate(d, d.lesson.only);   // a forced lesson lets only its step be taken
     if (isTutorial()) {   // teaching cards wait for their step; placing onto your own animal is legal but never taught, so not offered
       d.places = Object.fromEntries(Object.entries(d.places).filter(([id]) => !held(V, d.lesson).includes(id))
-        .map(([id, ts]) => [id, ts.filter(t => !(t[0] === 'cr' && (V.game.board[t[1]] || []).slice(-1).some(u => u.owner === V.you)))]).filter(([, ts]) => ts.length));
+        .map(([id, ts]) => [id, ts.filter(t => !(t[0] === 'cr' && (V.game.board[t[1]] || []).slice(-1).some(u => u.owner === V.you)) || (d.lesson && d.lesson.only && (d.lesson.only.crs || []).includes(t[1])))]).filter(([, ts]) => ts.length));   // unless the lesson rings it (the Mamba's rescue)
     }
     if (ui.sel && !d.places[ui.sel]) ui.sel = null;
     const ids = Object.keys(d.places);
