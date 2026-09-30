@@ -130,3 +130,9 @@ test('after the Roar, lesson 1 marches on the den: only the furthest crossroads,
   assert.equal(den.id, 'den');
   assert.deepEqual(gate({ places: { lion: [['cr', '4,1'], ['hq', 'B']] } }, den.only).places, { lion: [['hq', 'B']] });
 });
+
+test('the Buffalo only goes where it shares a +10 region with the Lion, so two more cards can close one', () => {
+  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'lion', 'lion2'].forEach(id => t.seen.add(id));
+  const L = current(view({ board: { '1,1': u('lion', 'A') }, legal: { place: { cape_buffalo: [['cr', '1,2'], ['cr', '1,3'], ['cr', '2,1']] }, draw: true } }), 'cape_buffalo', CARDS, t);
+  assert.deepEqual(L.only.crs, ['1,2', '2,1'], '1,3 is in the other region');
+});

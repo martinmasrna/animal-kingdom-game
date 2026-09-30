@@ -60,7 +60,8 @@ export const LESSONS = [
     only: { card: 'lion' }, at: { rings: true } },
   { id: 'buffalo', when: c => c.mine && c.round === 1 && c.units === 1,
     text: { pick: 'Now the Buffalo. Click it.', place: 'Each new animal must connect to your den, directly or through your other animals. Click one of the circles.' },
-    only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo') }), at: { rings: true } },
+    // every place it may go that shares a +10 region with the first animal: two more then close that region on turn 2
+    only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo').filter(cr => HOME.some(h => h.includes(cr) && h.some(q => c.at(q)))) }), at: { rings: true } },
   { id: 'watch', when: c => c.theirs && c.round === 1, at: { oppcards: true },
     text: 'Now it\'s your opponent\'s turn. Watch where the red animals go.' },
   { id: 'patch', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'), ...talk, at: c => ({ stone: c.home[0] }),
@@ -209,7 +210,12 @@ export function context(V, sel, cards) {
     .filter(t => !(t[0] === 'cr' && owner(G, t[1]) === V.you));
   // the crossroads that get closest to the opponent's den (the furthest column a move can reach; covering a weak enemy counts)
   const crs = c.offered.filter(t => t[0] === 'cr').map(t => t[1]), far = Math.max(0, ...crs.map(cr => +cr[0]));
-  c.forward = [...new Set(crs.filter(cr => +cr[0] === far))];
+  // (never one that would complete a region for you, while another way forward exists: the march must reach the den
+  // before 100 food, so lesson 1 ends on the den win it teaches)
+  const REGIONS = [1, 2, 3, 4].flatMap(x => [1, 2].map(y => [`${x},${y}`, `${x + 1},${y}`, `${x},${y + 1}`, `${x + 1},${y + 1}`]));
+  const closes = cr => REGIONS.some(r => r.includes(cr) && r.every(q => q === cr || owner(G, q) === V.you));
+  const ahead = [...new Set(crs.filter(cr => +cr[0] === far))];
+  c.forward = ahead.some(cr => !closes(cr)) ? ahead.filter(cr => !closes(cr)) : ahead;
   // lesson 2's stack: the Squirrel under the opponent's Eagle, then back on top once the Eagle is removed
   const under = Object.entries(G.board).find(([, st]) => st.length > 1 && st[st.length - 1].owner !== V.you && st.slice(0, -1).some(u => u.owner === V.you && u.id === 'squirrel'));
   const top = Object.entries(G.board).find(([, st]) => st.length && st[st.length - 1].owner === V.you && st[st.length - 1].id === 'squirrel');
