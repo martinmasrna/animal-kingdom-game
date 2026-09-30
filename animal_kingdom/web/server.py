@@ -403,6 +403,8 @@ async def socket(req):
                     if match.phase == "playing":      # the other player already started it
                         continue
                     match.next_game()
+                elif kind == "concede":
+                    match.concede(seat)
                 elif kind == "rematch":
                     match.rematch()
                 elif kind == "note":

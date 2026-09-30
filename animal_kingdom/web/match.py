@@ -24,7 +24,7 @@ from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAc
 from ..engine.cards import load_cards
 from ..engine.effects import roar_condition
 from ..engine.maps import load_map
-from ..engine.state import EngineError, GameState, new_game, other_player
+from ..engine.state import EngineError, GameState, Result, new_game, other_player
 from ..engine.strength import effective_strength, placement_strength
 
 CARDS = load_cards()
@@ -324,8 +324,15 @@ class Match:
             self.act(s, ChoiceAction(SKIP) if ChoiceAction(SKIP) in legal else legal[0])
         return True
 
-    def _check_end(self) -> None:
-        result = rules.is_terminal(self.state)
+    def concede(self, s: str) -> None:
+        """The seat gives up the game in play; the series goes on as after any other loss."""
+        if self.phase != "playing" or self.state.result is not None:
+            raise EngineError("no game to concede")
+        self._clock_update()
+        self._check_end(Result(other_player(s), "concede"))
+
+    def _check_end(self, result: Optional[Result] = None) -> None:
+        result = result or rules.is_terminal(self.state)
         if result is None:
             return
         self.state.result = result

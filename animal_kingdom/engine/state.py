@@ -121,7 +121,7 @@ class Result:
     """Terminal game outcome. winner is 'A'/'B', or None for a draw."""
 
     winner: Optional[str]
-    reason: str  # "hq_capture" | "food" | "exhaustion" | "passes" | "max_turns"
+    reason: str  # "hq_capture" | "food" | "exhaustion" | "passes" | "max_turns" | "concede" (web matches)
 
     def to_dict(self) -> dict:
         return {"winner": self.winner, "reason": self.reason}

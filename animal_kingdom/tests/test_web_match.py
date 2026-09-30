@@ -47,6 +47,20 @@ def test_series_ends_at_two_wins_and_loser_goes_first():
     assert max(score.values()) == 2 or len(m.results) == 3
 
 
+def test_conceding_loses_the_game_and_the_series_goes_on():
+    m = Match("T", Seat("ta", "A", deck="ramp"))
+    m.join(Seat("tb", "B", deck="ramp")); m.ready("A"); m.ready("B")
+    m.concede("A")
+    assert m.results[-1]["winner"] == "B" and m.results[-1]["reason"] == "concede"
+    assert m.phase == "game_over" and m.view("A")["game"]["result"]["reason"] == "concede"
+    with pytest.raises(EngineError):
+        m.concede("A")                    # nothing left to concede until the next game starts
+    m.next_game()
+    assert m.state.first_player == "A"    # the loser goes first, as after any loss
+    m.concede("A")
+    assert m.phase == "match_over" and m.score() == {"A": 0, "B": 2}
+
+
 def test_rejects_the_wrong_seat_and_illegal_moves():
     m = _match()
     s = m.to_act()

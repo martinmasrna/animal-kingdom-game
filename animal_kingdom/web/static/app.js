@@ -382,7 +382,7 @@ function gameScreen() {
       <div class="abs clock" id="clock"></div>
       <div class="abs opphand" id="opphand"></div>
       <div class="abs menu" id="menubtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg><span class="livedot" id="livedot"></span>
-        <div class="abs menudrop" id="menudrop"><a href="#" id="livelink">Live commentary (L)</a><a href="#" id="notelink">Add a note (N)</a><a href="#/">Leave match</a></div></div>
+        <div class="abs menudrop" id="menudrop"><a href="#" id="livelink">Live commentary (L)</a><a href="#" id="notelink">Add a note (N)</a><a href="#" id="concede">Concede game</a><a href="#/">Leave match</a></div></div>
       <div class="abs hand" id="hand"></div>
       <div class="abs deck" id="deck"></div>
       <div class="abs tbtn" id="tbtn"></div>
@@ -395,9 +395,13 @@ function gameScreen() {
       <div class="endov" id="endov"></div></div></div>`;
     fitStage(); wireNotes(); wireTips(document.getElementById('scr'));
     const $ = id => document.getElementById(id);
-    $('menubtn').onclick = e => { e.stopPropagation(); $('menudrop').classList.toggle('on'); };
+    $('menubtn').onclick = e => { e.stopPropagation(); $('menudrop').classList.toggle('on'); const c = $('concede'); c.classList.remove('sure'); c.textContent = 'Concede game'; };
     $('livelink').onclick = e => { e.preventDefault(); e.stopPropagation(); $('menudrop').classList.remove('on'); setLive(!live); };
     $('notelink').onclick = e => { e.preventDefault(); e.stopPropagation(); $('menudrop').classList.remove('on'); openNote(); };
+    // Conceding asks once, in place: the entry turns into the confirmation; a click elsewhere closes the menu and forgets it.
+    $('concede').onclick = e => { e.preventDefault(); e.stopPropagation(); const c = $('concede');
+      if (c.classList.contains('sure')) { $('menudrop').classList.remove('on'); send({ t: 'concede' }); }
+      else { c.classList.add('sure'); c.textContent = 'Concede this game?'; } };
     // The series opens the history, the opponent's hand their decklist; hovering your deck shows yours.
     const toggle = k => e => { e.stopPropagation(); ui.panel = ui.panel === k ? null : k; showPanel(); };
     $('series').onclick = toggle('hist'); $('opphand').onclick = toggle('theirs');
@@ -416,6 +420,7 @@ function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
   lastDecision = d;
+  $('concede').style.display = playing && V.id ? '' : 'none';   // only a game in play can be conceded (never in the lab)
 
   const gameNo = playing ? V.results.length + 1 : V.results.length;
   const dots = [0, 1, 2].map(i => { const r = V.results[i]; return `<i class="${r ? (r.winner ? rel(r.winner) : '') : i === gameNo - 1 ? 'now' : ''}"></i>`; }).join('');
@@ -639,7 +644,7 @@ function drawEnd() {
   if (ui.peek) { ov.classList.remove('on'); document.getElementById('waiting').innerHTML = `<span class="peek" id="unpeek" style="cursor:pointer;text-decoration:underline">Back to results</span>`; document.getElementById('unpeek').onclick = () => { ui.peek = false; drawGame(); }; return; }
   const you = V.you, them = opp(), w = G.result.winner, S = V.score;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
-  const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'They'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins' }[G.result.reason] || G.result.reason;
+  const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'They'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'They conceded' : 'You conceded' }[G.result.reason] || G.result.reason;
   const dots = [0, 1, 2].map(i => { const r = V.results[i]; return `<i class="${r && r.winner ? rel(r.winner) : ''}"></i>`; }).join('');
   const score = `<div class="score"><span class="A">${S[you]}</span><span class="g">${dots}</span><span class="B">${S[them]}</span></div>`;
   const peek = `<span class="peek" id="peek">See the board</span>`;
