@@ -31,7 +31,7 @@ const explain = (id, card, when, text) => ({ id, when, ...talk, read: card, at: 
 
 // Lines both lessons share: a Roar asking for a target, and the safety net for a hand with nothing to place.
 const TARGET = { id: 'target', when: c => c.choosing, untilAct: true, at: { prompt: true },
-    text: 'This Roar needs a target. Click one of the circled crossroads, or click Skip.' };
+    text: 'This Roar needs a target. Click one of the circled animals.' };
 const EMPTY = { id: 'empty', again: true, when: c => c.mine && c.round >= 3 && !c.offered.length,   // nothing to place: never a silent turn
   at: c => c.canDraw ? { deck: true } : { endturn: true },
   text: c => c.canDraw ? 'Nothing you can place right now. Click your deck to draw 2 new ones.' : 'Nothing to do this turn. Click End turn.' };

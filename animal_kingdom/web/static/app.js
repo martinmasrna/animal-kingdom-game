@@ -602,7 +602,7 @@ function placeCoach(el, L, rings = []) {
     [x, y, side] = cx - 174 - COACH_W >= 16 ? [cx - 96, 568, 'left'] : [cx + 96, 568, 'right']; }
   else if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, card.classList.contains('sel') ? 572 : 590, 'above'];   // a picked card stands 18px higher
   else if (a.deck) [x, y, side] = [1299, 606, 'above'];
-  else if (a.prompt) [x, y, side] = [151, 604, 'above'];   // the pending choice's piece, bottom left
+  else if (a.prompt) [x, y, side] = [STAGE.w / 2, 100, 'below'];   // under the card's question, one line at the top centre
   else if (a.endturn) [x, y, side] = [1439, 664, 'above'];
   else if (a.cr) { [x, y] = crossroadAt(a.cr); side = x > STAGE.w / 2 ? 'left' : 'right'; }
   else if (a.den) { [x, y] = denMouthAt(a.den); side = a.den === 'B' ? 'left' : 'right'; }
