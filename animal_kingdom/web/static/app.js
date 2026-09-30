@@ -641,7 +641,9 @@ function placeCoach(el, L, rings = []) {
   el.dataset.iid = side === 'above' && y >= 572 ? (card ? card.dataset.iid : 'any') : '';   // over the hand: a hovered card lifts it   // hovering that card lifts the coach above it (wireCoachHover)
   el.innerHTML = `<p>${L.text}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
   // an opening step closes on Next (or Enter/Space), and the next one shows
-  if (L.next) el.querySelector('#coachnext').onclick = e => { e.stopPropagation(); tutState().seen.add(L.id); drawGame(); };
+  if (L.next) el.querySelector('#coachnext').onclick = e => { e.stopPropagation(); tutState().seen.add(L.id);
+    if (ui.heldFood) { ui.anim = ui.heldFood; ui.heldFood = null; }   // the held fruit flies now
+    drawGame(); };
 }
 
 // The history strip and both decklists, shared by both game screens.
@@ -739,7 +741,13 @@ function drawBoard(d) {
     const strs = V.game.hand.filter(h => h.id === ui.sel).map(h => h.str);
     preview = { cr: ui.hover, id: ui.sel, str: Math.max(...strs) };
   }
-  const A = ui.anim; ui.anim = null;   // the animations play once, never on hover redraws
+  let A = ui.anim; ui.anim = null;   // the animations play once, never on hover redraws
+  // The tutorial's "region is yours" line: the fruit waits for its Next. The board keeps the food it had, and the
+  // animation that would have played is kept for the Next click (placeCoach) to play.
+  if (d.lesson && d.lesson.holdFood) {
+    if (A && A.food && A.food.A !== g.food.A) ui.heldFood = A;
+    if (ui.heldFood) { g.food = { ...g.food, A: ui.heldFood.food.A }; A = A && { ...A, food: { ...A.food, A: ui.heldFood.food.A } }; }
+  }
   const last = V.game.history[V.game.history.length - 1], won = V.game.result && V.game.result.reason === 'hq_capture' && last && last.target && last.target[0] === 'hq';
   const capture = won ? { side: rel(last.target[1]), id: last.card, owner: rel(last.seat), str: CARDS[last.card].str } : null;
   renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null });

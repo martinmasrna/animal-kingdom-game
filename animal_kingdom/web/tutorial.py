@@ -16,10 +16,10 @@ from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAc
 from ..engine.config import Config
 
 # Draw order, first card first. One new idea a turn: the player opens with four (Lion, Buffalo, Wolf, Buffalo), places two
-# (turn 1) and closes the +10 region with the other two (turn 2); turn 3 draws a Wolf and a Lion and covers a Pup with
+# (turn 1) and closes the +10 region with the other two (turn 2); turn 3 draws a Wolf and a Pup (1: the cover lesson's other half, 1 can't beat 1) and covers a Pup with
 # one; turn 4 draws the Squirrel, whose Roar (gain 10 food) has no condition, so it doesn't glow: the glow is lesson 2's. No
 # Roar comes before it; the rest are strong animals and Roars to meet later.
-PLAYER_DECK = ["lion", "cape_buffalo", "dire_wolf", "cape_buffalo", "dire_wolf", "lion", "squirrel", "jaguar", "cheetah",
+PLAYER_DECK = ["lion", "cape_buffalo", "dire_wolf", "cape_buffalo", "dire_wolf", "pup", "squirrel", "jaguar", "cheetah",
                "lion", "dire_wolf", "jaguar", "cape_buffalo", "lion", "cheetah", "dire_wolf", "jaguar", "lion",
                "cape_buffalo", "lion"]
 PLAYER_DECK += PLAYER_DECK[7:] + PLAYER_DECK[7:10]   # 36 cards: a slow first game never runs out (no exhaustion loss)
@@ -41,9 +41,10 @@ OPPONENT_DECK_2 = ["cape_buffalo", "dire_wolf", "lion", "eagle"] + OPPONENT_DECK
 DECKS = {"tutorial_you": PLAYER_DECK, "tutorial_them": OPPONENT_DECK, "tutorial2_you": PLAYER_DECK_2, "tutorial2_them": OPPONENT_DECK_2}
 NAMES = {"tutorial_you": "Tutorial", "tutorial_them": "Wild dogs", "tutorial2_you": "Tutorial", "tutorial2_them": "Wild dogs"}
 BOTS = {1: "tutorial", 2: "tutorial2"}
-# Placements a turn: lesson 1's opponent uses both moves, as the lesson says every player does; lesson 2's keeps to one,
-# so no extra dog takes the crossroad the Black Mamba needs beside the Eagle.
-PER_TURN = {1: 2, 2: 1}   # the opponent's bot name per lesson
+# Placements a turn, by the opponent's turn (its first two, then every later one): lesson 1's uses both moves while the
+# two-moves rule is new, then one, so the march on its den stays short; lesson 2's keeps to one, so no extra dog takes the
+# crossroad the Black Mamba needs beside the Eagle.
+PER_TURN = {1: (2, 2, 1), 2: (1, 1, 1)}   # the opponent's bot name per lesson
 
 # The opponent's scripted moves, by its turn (turn_counter): lesson 1 walls the middle of its den and puts a dog beside
 # it; lesson 2 walls all three crossroads, then flies the Eagle onto the player's Squirrel (SQUIRREL: wherever it is).
@@ -81,7 +82,7 @@ class TutorialBot(Bot):
             pick = next((a for a in places if a.card_id == card and a.crossroad == cr), None)
             if pick:
                 return pick
-        if state.units_placed_this_turn >= self.per_turn:   # its placements this turn (a draw first still leaves it one)
+        if state.units_placed_this_turn >= self.per_turn[min(state.turn_counter // 2, 2)]:   # its placements this turn (a draw first still leaves it one)
             return PassAction()
         if self.ambush:   # the ambush card waits for its moment, never an ordinary placement
             places = [a for a in places if a.card_id != self.ambush[0]]

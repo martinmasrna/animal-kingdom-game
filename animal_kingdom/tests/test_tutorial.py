@@ -35,7 +35,7 @@ def test_the_forced_turns_play_out_as_the_lessons_say():
     while m.to_act() == "B":
         m.act("B", m.bot_move())
     m.act("A", DrawAction())
-    assert [u.card_id for u in m.state.hands["A"]] == ["dire_wolf", "lion"]
+    assert [u.card_id for u in m.state.hands["A"]] == ["dire_wolf", "pup"]
     assert any(isinstance(a, PlaceAction) and _board(m).get(a.crossroad, [("A",)])[-1][0] == "B" for a in rules.legal_actions(m.state)), "a Pup to cover"
 
 

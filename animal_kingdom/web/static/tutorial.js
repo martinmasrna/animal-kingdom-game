@@ -73,7 +73,7 @@ export const LESSONS = [
   { id: 'corner', when: c => c.mine && c.round >= 2 && !c.hand('dire_wolf') && !c.homeHeld && c.homeOpen.length > 0,
     only: c => ({ crs: c.homeOpen }), at: { rings: true },
     text: { pick: 'Finish the region! Click your Buffalo.', place: 'Now click the last crossroad around the region.' } },
-  { id: 'food', when: c => c.homeHeld, ...talk, at: c => ({ stone: c.home[0] }),
+  { id: 'food', when: c => c.homeHeld, ...talk, holdFood: true, at: c => ({ stone: c.home[0] }),
     text: 'The +10 region is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
   // turn 3: moves and drawing, then covering
   { id: 'actions', when: c => c.mine && c.round === 3, ...talk, at: { endturn: true },
@@ -84,7 +84,8 @@ export const LESSONS = [
   // covering, by hand: the second move of turn 3, onto the Pup the opponent always leaves beside the patch
   { id: 'cover', when: c => c.mine && c.round >= 3 && c.homeHeld && c.coverable.length > 0, done: c => c.covered,
     only: c => ({ card: c.coverWith, crs: c.coverable }), at: { rings: true },
-    text: { pick: 'A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 7 can\'t beat 7. Click one of your animals.', place: 'Now click the circled enemy to cover it!' } },
+    text: c => ({ pick: `A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 1 can't beat 1. Click the ${c.name(c.coverWith)}.`,
+      place: 'Now click the circled enemy to cover it!' }) },
   // Roar, by hand: turn 4 draws the Lynx, whose Roar always works beside the Lion
   { id: 'draw4', when: c => c.mine && c.round === 4 && !c.roared && !c.hand('squirrel') && c.canDraw,
     text: 'Click your deck to draw 2 more cards.', only: { deck: true }, at: { deck: true } },
@@ -197,6 +198,7 @@ export function context(V, sel, cards) {
     empty: id => ((G.legal && G.legal.place && G.legal.place[id]) || []).filter(t => t[0] === 'cr' && !owner(G, t[1])).map(t => t[1]),
     // the rightmost of them (the coach stands beside it, clear of the others)
     rightmost: id => c.empty(id).sort((a, b) => b[0] - a[0])[0],
+    name: id => (cards[id] || {}).name || id,
     roar: id => /(^|\. )Roar:/.test((cards[id] || {}).text || ''),
     ready: id => G.hand.some(h => h.id === id && h.ready),   // the card glows: its Roar's condition holds now
     placed: id => G.history.some(m => m.seat === V.you && m.kind === 'place' && m.card === id),
