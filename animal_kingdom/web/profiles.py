@@ -84,6 +84,8 @@ class Profiles:
         if "seat" not in [r[1] for r in self.db.execute("PRAGMA table_info(history)")]:   # matches from before replays and deck covers
             for col in ("seat", "my_cover", "opp_cover"):
                 self.db.execute(f"ALTER TABLE history ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
+        with self.db:   # bots were named "Bot · Normal" once
+            self.db.execute("UPDATE history SET opp = 'Bot (' || substr(opp, 7) || ')' WHERE opp LIKE 'Bot · %'")
         if "seeded" not in [r[1] for r in self.db.execute("PRAGMA table_info(profiles)")]:   # profiles from before starter decks were theirs
             self.db.execute("ALTER TABLE profiles ADD COLUMN seeded INTEGER NOT NULL DEFAULT 0")
 

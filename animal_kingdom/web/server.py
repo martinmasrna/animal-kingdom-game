@@ -311,7 +311,7 @@ def record_match(match: Match) -> None:
         deck = lambda q: "Starter decks" if q == rotating else DECK_NAMES.get(match.seats[q].deck, match.seats[q].deck)
         try:
             profiles.record(seat.profile, f"{match.id}-{match.rematches}", kind=kind, my_deck=deck(p),
-                            opp=f"Bot · {other.bot.capitalize()}" if other.is_bot else other.name,
+                            opp=f"Bot ({other.bot.capitalize()})" if other.is_bot else other.name,
                             opp_deck=deck(o) if other.is_bot else "", won=score[p], lost=score[o], seat=p,   # a person's deck name is theirs
                             my_cover="" if p == rotating else deck_cover(seat), opp_cover="" if o == rotating else deck_cover(other))
         except Exception:
@@ -378,7 +378,7 @@ async def create_match(req):
         if level not in BOT_LEVELS:
             raise web.HTTPBadRequest(text="bad bot level")
         field = [d for d in sorted(DECK_SLUGS) if d != deck]
-        match.join(Seat(secrets.token_urlsafe(12), f"Bot · {level.capitalize()}", bot=level, deck=field[0]))
+        match.join(Seat(secrets.token_urlsafe(12), f"Bot ({level.capitalize()})", bot=level, deck=field[0]))
         if gauntlet.get("reverse"):     # the bot keeps the chosen deck; the player plays the field
             match.seats["B"].deck = deck
             match.make_gauntlet(field, per_seat=5, rotating="A")
@@ -389,7 +389,7 @@ async def create_match(req):
     elif bot:
         if bot.get("level") not in BOT_LEVELS or bot.get("deck") not in {*PREMADE_DECKS, "goodstuff"}:
             raise web.HTTPBadRequest(text="bad bot")
-        match.join(Seat(secrets.token_urlsafe(12), f"Bot · {bot['level'].capitalize()}",
+        match.join(Seat(secrets.token_urlsafe(12), f"Bot ({bot['level'].capitalize()})",
                         bot=bot["level"], deck=bot["deck"]))
     else:
         match.version += 1

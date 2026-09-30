@@ -338,7 +338,7 @@ function lobbyScreen() {
 function seatLabel(p) {
   const s = V.seats[p];
   if (!s) return '';
-  if (s.bot) return `Bot · ${s.bot[0].toUpperCase() + s.bot.slice(1)}`;
+  if (s.bot) return `Bot (${s.bot[0].toUpperCase() + s.bot.slice(1)})`;
   return p === V.you ? 'You' : esc(s.name || 'Opponent');
 }
 

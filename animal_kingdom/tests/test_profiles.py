@@ -82,7 +82,7 @@ def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch):
     assert m.phase == "match_over"
     (h,) = db.history(p["id"])
     assert (h["kind"], h["my_deck"], h["opp"], h["opp_deck"], h["won"], h["lost"]) == \
-        ("bot", "Cats", "Bot · Easy", "Ramp", 2, 0)
+        ("bot", "Cats", "Bot (Easy)", "Ramp", 2, 0)
 
 
 def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path):
@@ -160,7 +160,7 @@ def test_every_match_left_in_a_history_has_its_replay(monkeypatch, tmp_path):
     log = {k: v for k, v in m.last_log.items() if k not in ("series", "lists")}   # a log from before replays
     (logs / "web_20260101T000000_OLD1.jsonl").write_text(json.dumps(log) + "\n")
     for key in ("OLD1-0", "GONE-0"):     # GONE was never recorded
-        db.record(p["id"], key, kind="bot", my_deck="Cats", opp="Bot · Easy", opp_deck="Ramp", won=1, lost=0)
+        db.record(p["id"], key, kind="bot", my_deck="Cats", opp="Bot (Easy)", opp_deck="Ramp", won=1, lost=0)
     replay.backfill(db, logs, replays)
     (h,) = db.history(p["id"])
     assert h["match"] == "OLD1-0" and replay.load(replays, "OLD1-0", "A")
@@ -168,10 +168,17 @@ def test_every_match_left_in_a_history_has_its_replay(monkeypatch, tmp_path):
     assert [h["match"] for h in db.history(p["id"])] == ["OLD1-0"]
 
 
+def test_a_bot_named_the_old_way_reads_the_new_way(tmp_path):
+    db = Profiles(str(tmp_path / "web.db"))
+    _, p = db.create("Martin")
+    db.record(p["id"], "M-0", kind="bot", my_deck="Cats", opp="Bot · Normal", opp_deck="Ramp", won=1, lost=0)
+    assert Profiles(str(tmp_path / "web.db")).history(p["id"])[0]["opp"] == "Bot (Normal)"
+
+
 def test_a_deck_record_sums_every_match_with_it(db):
     _, p = db.create("Martin")
-    db.record(p["id"], "M-0", kind="bot", my_deck="Cats", opp="Bot · Easy", opp_deck="Ramp", won=1, lost=0, my_cover="king_theron")
-    db.record(p["id"], "N-0", kind="bot", my_deck="Cats", opp="Bot · Easy", opp_deck="Egg", won=0, lost=1, my_cover="king_theron")
+    db.record(p["id"], "M-0", kind="bot", my_deck="Cats", opp="Bot (Easy)", opp_deck="Ramp", won=1, lost=0, my_cover="king_theron")
+    db.record(p["id"], "N-0", kind="bot", my_deck="Cats", opp="Bot (Easy)", opp_deck="Egg", won=0, lost=1, my_cover="king_theron")
     db.record(p["id"], "O-0", kind="friend", my_deck="Rats", opp="Ana#1234", opp_deck="Cats", won=1, lost=0)
     assert [(r["deck"], r["cover"], r["won"], r["lost"]) for r in db.records(p["id"])] == \
         [("Cats", "king_theron", 1, 1), ("Rats", "", 1, 0)]
@@ -195,7 +202,7 @@ def test_signing_in_on_a_second_device_moves_that_guests_work_into_the_account(d
     db.save_decks(account["id"], [{"id": "a", "name": "Cats", "cards": {"lion": 3}}])
     _, second = db.create("Player")
     db.save_decks(second["id"], [{"id": "a", "name": "Rats", "cards": {"rat": 3}}])
-    db.record(second["id"], "M-0", kind="bot", my_deck="Rats", opp="Bot · Easy", opp_deck="Ramp", won=2, lost=1)
+    db.record(second["id"], "M-0", kind="bot", my_deck="Rats", opp="Bot (Easy)", opp_deck="Ramp", won=2, lost=1)
     again = db.sign_in("discord", "d-1", "martin", second["id"])
     assert again["id"] == account["id"]
     assert [d["name"] for d in db.decks(account["id"])] == ["Cats", "Rats"]
