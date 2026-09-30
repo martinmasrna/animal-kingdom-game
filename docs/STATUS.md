@@ -45,7 +45,7 @@ Taste calls only Martin can make. Nothing here is started.
 
 Reported by Martin from play:
 
-None open.
+- **A profile's starter decks never update.** A profile gets copies of the seven starters once, when created; after a starter changes (the new Egg Control, 2026-09-30) an untouched copy stays on the old list. Martin's Egg copy was fixed by hand in the local `results/web.db`. Needs a product call: follow the starter while the copy is unedited, or offer a reset.
 
 ## Engine debt
 
