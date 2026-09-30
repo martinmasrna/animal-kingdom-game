@@ -61,7 +61,7 @@ export const LESSONS = [
   { id: 'watch', when: c => c.theirs && c.round === 1, at: { oppcards: true },
     text: 'Now it\'s your opponent\'s turn. Watch where the red animals go.' },
   { id: 'patch', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'), ...talk, at: c => ({ stone: c.home[0] }),
-    text: 'Each patch of grass between four crossroads is a region. Its number is how much food it gives. Stand on all four crossroads around a region and you get that food every turn.' },
+    text: 'This is a region. Put animals on all four crossroads around it, and you get 10 food every turn.' },
   { id: 'wolf', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'),
     text: 'Place the Wolf on one of the circles around the +10 region.',
     only: c => ({ card: 'dire_wolf', picked: true, crs: c.homeOpen.length ? c.homeOpen : undefined }),
