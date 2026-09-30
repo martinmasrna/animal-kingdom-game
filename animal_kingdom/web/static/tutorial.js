@@ -86,15 +86,16 @@ export const LESSONS = [
     only: c => ({ card: c.coverWith, crs: c.coverable }), at: { rings: true },
     text: { pick: 'A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 7 can\'t beat 7. Click one of your animals.', place: 'Now click the circled enemy to cover it!' } },
   // Roar, by hand: turn 4 draws the Lynx, whose Roar always works beside the Lion
-  { id: 'draw4', when: c => c.mine && c.round === 4 && !c.roared && !c.hand('lynx') && c.canDraw,
+  { id: 'draw4', when: c => c.mine && c.round === 4 && !c.roared && !c.hand('squirrel') && c.canDraw,
     text: 'Click your deck to draw 2 more cards.', only: { deck: true }, at: { deck: true } },
-  explain('roarinfo', 'lynx', c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0,
-    'The Lynx has a Roar: a power that happens the moment you place it. Its Roar draws a card if you have another Cat, like your Lion.'),
-  { id: 'roar', when: c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0, done: c => c.roared,
-    only: c => ({ card: 'lynx', crs: c.empty('lynx') }), at: { rings: true },
-    text: { pick: 'Click the Lynx.', place: 'Now click one of the circles.' } },
-  { id: 'roared', when: c => c.roared, ...talk, at: { hand: true },
-    text: 'Your Lynx roared and drew you a card! Point at any card to read what it does.' },
+  // lesson 1's Roar has no condition (the Squirrel's), so it never glows: the glow is lesson 2's, on the Lynx
+  explain('roarinfo', 'squirrel', c => c.mine && c.hand('squirrel') && c.empty('squirrel').length > 0,
+    'The Squirrel has a Roar: a power that happens the moment you place it. Its Roar gives you 10 food.'),
+  { id: 'roar', when: c => c.mine && c.hand('squirrel') && c.empty('squirrel').length > 0, done: c => c.roared,
+    only: c => ({ card: 'squirrel', crs: c.empty('squirrel') }), at: { rings: true },
+    text: { pick: 'Click the Squirrel.', place: 'Now click one of the circles.' } },
+  { id: 'roared', when: c => c.roared, ...talk, at: { gem: 'A' },
+    text: 'The Squirrel roared and gave you 10 food! Roars are another way to gather food, besides regions.' },
   { id: 'free', when: c => c.mine && (c.roared || c.round >= 6), ...talk, at: { middle: true },
     text: 'Now make your way to your opponent\'s den. Each move, the circles show how to get closer.' },
   TARGET,
@@ -138,8 +139,6 @@ export const LESSONS_2 = [
   explain('squirrelinfo', 'squirrel', c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), 'The Squirrel\'s Roar gives you 10 food.'),
   { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), only: one('squirrel', '3,2'), at: { rings: true },
     text: { pick: 'Click the Squirrel.', place: 'Now click the circle.' } },
-  { id: 'foodroar', when: c => c.placed('squirrel'), ...talk, at: { gem: 'A' },
-    text: 'Your food went up by 10! Roars like this are another way to gather food, besides regions.' },
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'Your opponent has an Eagle too! It flew over and covered your Squirrel. Your Squirrel isn\'t gone. It waits underneath.' },
   explain('mambainfo', 'black_mamba', c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
@@ -191,7 +190,7 @@ export function context(V, sel, cards) {
     coverable: [...new Set(places.filter(t => t[0] === 'cr' && owner(G, t[1]) && owner(G, t[1]) !== V.you).map(t => t[1]))],
     coverWith: (Object.entries((G.legal && G.legal.place) || {}).find(([, ts]) => ts.some(t => t[0] === 'cr' && owner(G, t[1]) && owner(G, t[1]) !== V.you)) || [])[0],   // a card that can cover now
     covered: G.history.some(m => m.seat === V.you && m.fx.some(f => f.k === 'cover')),
-    roared: G.history.some(m => m.seat === V.you && m.kind === 'place' && m.card === 'lynx'),
+    roared: G.history.some(m => m.seat === V.you && m.kind === 'place' && m.card === 'squirrel'),   // lesson 1's Roar
     units: Object.keys(G.board).filter(cr => owner(G, cr) === V.you).length,
     hand: id => G.hand.some(h => h.id === id),
     // the empty crossroads a card can go to now (placing onto your own animal is legal, but only noise while learning)
