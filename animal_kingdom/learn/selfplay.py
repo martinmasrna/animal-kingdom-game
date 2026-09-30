@@ -8,7 +8,7 @@ position from the mover's side (what RefereeBot scores after the sampled reply).
 uniformly random legal move with probability `epsilon`, recorded like any other.
 
     python -m animal_kingdom.learn.selfplay OUT.npz [--eval PATH] [--games-per-pair 110] \\
-        [--seed 0] [--jobs 8]
+        [--seed 0] [--jobs 8] [--decks aggro_hq_rush,goodstuff]
 """
 
 from __future__ import annotations
@@ -77,18 +77,21 @@ def play(spec: GameSpec) -> dict:
         "deck": [decks[r[0]] for r in rows],
         "opp": [decks[other_player(r[0])] for r in rows],
         "game": [spec.seed] * len(rows),
-        "reason": result.reason,
+        "reason": [result.reason] * len(rows),
     }
 
 
 def generate(out: str, eval_path: Optional[str], games_per_pair: int, seed: int, jobs: int,
-             epsilon: float = 0.05) -> None:
+             epsilon: float = 0.05, decks: Optional[list[str]] = None) -> None:
+    """`decks`, if given, keeps only the pairings that include one of them."""
     import numpy as np
 
+    pairs = [(i, (a, b)) for i, (a, b) in enumerate(pairings())
+             if not decks or a in decks or b in decks]
     specs = [GameSpec(a, b, seed + i * 1000 + k, eval_path, epsilon)
-             for i, (a, b) in enumerate(pairings()) for k in range(games_per_pair)]
+             for i, (a, b) in pairs for k in range(games_per_pair)]
     random.Random(seed).shuffle(specs)          # mixed decks in every progress slice
-    cols: dict[str, list] = {k: [] for k in ("x", "y", "turn", "deck", "opp", "game")}
+    cols: dict[str, list] = {k: [] for k in ("x", "y", "turn", "deck", "opp", "game", "reason")}
     t0 = time.time()
     with ProcessPoolExecutor(max_workers=jobs) as ex:
         for n, rec in enumerate(ex.map(play, specs, chunksize=4), 1):
@@ -99,6 +102,7 @@ def generate(out: str, eval_path: Optional[str], games_per_pair: int, seed: int,
     np.savez_compressed(out, x=np.array(cols["x"], dtype=np.float32), y=np.array(cols["y"]),
                         turn=np.array(cols["turn"]), deck=np.array(cols["deck"]),
                         opp=np.array(cols["opp"]), game=np.array(cols["game"]),
+                        reason=np.array(cols["reason"]),
                         features=np.array(features.feature_names(FEATURE_SET)),
                         eval_path=np.array(eval_path or ""))
 
@@ -111,8 +115,11 @@ def main(argv=None) -> None:
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--epsilon", type=float, default=0.05)
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
+    p.add_argument("--decks", default=None,
+                   help="comma-separated: only the pairings that include one of these decks")
     a = p.parse_args(argv)
-    generate(a.out, a.eval, a.games_per_pair, a.seed, a.jobs, a.epsilon)
+    generate(a.out, a.eval, a.games_per_pair, a.seed, a.jobs, a.epsilon,
+             a.decks.split(",") if a.decks else None)
 
 
 if __name__ == "__main__":
