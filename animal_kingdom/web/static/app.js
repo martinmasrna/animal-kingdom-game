@@ -478,6 +478,9 @@ function drawGame() {
   lastDecision = d;
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';   // the flag: only a game in play (never the lab or a replay)
   $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
+  // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
+  $('menubtn').querySelector('svg').innerHTML = isTutorial() ? '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>'
+    : '<path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/>';
   if (!playing) $('concov').classList.remove('on');
   drawReplayBar();
 
