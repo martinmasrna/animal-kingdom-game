@@ -81,6 +81,9 @@ class Profiles:
         self.db.executescript(SCHEMA)
         if "cover" not in [r[1] for r in self.db.execute("PRAGMA table_info(decks)")]:   # decks saved before covers
             self.db.execute("ALTER TABLE decks ADD COLUMN cover TEXT NOT NULL DEFAULT ''")
+        if "seat" not in [r[1] for r in self.db.execute("PRAGMA table_info(history)")]:   # matches from before replays and deck covers
+            for col in ("seat", "my_cover", "opp_cover"):
+                self.db.execute(f"ALTER TABLE history ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
         if "seeded" not in [r[1] for r in self.db.execute("PRAGMA table_info(profiles)")]:   # profiles from before starter decks were theirs
             self.db.execute("ALTER TABLE profiles ADD COLUMN seeded INTEGER NOT NULL DEFAULT 0")
 
@@ -210,12 +213,23 @@ class Profiles:
 
     # ------------------------------------------------------------- history
     def record(self, pid: str, match: str, *, kind: str, my_deck: str, opp: str, opp_deck: str,
-               won: int, lost: int) -> None:
+               won: int, lost: int, seat: str = "", my_cover: str = "", opp_cover: str = "") -> None:
         with self.db:
-            self.db.execute("INSERT OR REPLACE INTO history VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                            (pid, match, time.time(), kind, my_deck, opp, opp_deck, won, lost))
+            self.db.execute("INSERT OR REPLACE INTO history (profile, match, ended, kind, my_deck, opp, opp_deck, won, lost, "
+                            "seat, my_cover, opp_cover) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            (pid, match, time.time(), kind, my_deck, opp, opp_deck, won, lost, seat, my_cover, opp_cover))
 
     def history(self, pid: str) -> list[dict]:
         return [dict(r) for r in self.db.execute(
-            "SELECT match, ended, kind, my_deck, opp, opp_deck, won, lost FROM history WHERE profile = ? "
-            "ORDER BY ended DESC LIMIT ?", (pid, HISTORY_SHOWN))]
+            "SELECT match, ended, kind, my_deck, opp, opp_deck, won, lost, my_cover, opp_cover FROM history "
+            "WHERE profile = ? ORDER BY ended DESC LIMIT ?", (pid, HISTORY_SHOWN))]
+
+    def match(self, pid: str, match: str) -> Optional[dict]:
+        r = self.db.execute("SELECT * FROM history WHERE profile = ? AND match = ?", (pid, match)).fetchone()
+        return r and dict(r)
+
+    def records(self, pid: str) -> list[dict]:
+        """Games won and lost with each of your decks, over every match (the cover from its latest)."""
+        return [dict(r) for r in self.db.execute(
+            "SELECT my_deck AS deck, my_cover AS cover, SUM(won) AS won, SUM(lost) AS lost, MAX(ended) AS last FROM history "
+            "WHERE profile = ? GROUP BY my_deck ORDER BY SUM(won) + SUM(lost) DESC", (pid,))]

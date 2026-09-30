@@ -15,23 +15,28 @@ import os
 import secrets
 import time
 import webbrowser
+from collections import Counter
 from pathlib import Path
 
 from aiohttp import WSMsgType, web
 
 from ..decks import PREMADE_DECKS, load_premade_deck
-from ..engine.state import EngineError
-from ..engine.cards import DECK_SLUGS
+from ..engine.state import EngineError, other_player
+from ..engine.cards import DECK_SLUGS, load_cards
 from . import custom_decks
 from . import oauth
 from .profiles import ProfileError, Profiles
+from . import replay
 from . import tutorial
 from .match import BOT_LEVELS, DECK_NAMES, Match, Seat, card_pool, map_info
+
+CARDS = load_cards()
 
 STATIC = Path(__file__).parent / "static"
 # Human games are the best design signal there is: every game with a human seat is kept,
 # one JSONL file per match, replayable with `python -m animal_kingdom.sim.replay FILE --index N`.
 LOG_DIR = Path(__file__).resolve().parents[2] / "results" / "human_games" / "web"
+REPLAY_DIR = Path(__file__).resolve().parents[2] / "results" / "replays"
 MATCH_DIR = Path(__file__).resolve().parents[2] / "results" / "web_matches"
 KEEP_FINISHED = 24 * 3600    # seconds a finished match is still reloaded after a restart
 BOT_PAUSE = {"open": 1.6, "move": 1.1, "choice": 0.6}   # seconds: a beat before the bot opens its turn, then time to follow each move
@@ -170,7 +175,8 @@ def display(p: dict) -> str:
 
 # A profile starts with the starter decks as its own (covers as on the play screen).
 STARTER_COVERS = {"cats_midrange": "king_theron", "canine_buff_tempo": "lobo", "aggro_hq_rush": "verminus",
-                  "colony_food_swarm": "queen_honoria", "egg_control": "eon", "food_otk": "rat_king", "ramp": "borealis"}
+                  "colony_food_swarm": "queen_honoria", "egg_control": "eon", "food_otk": "rat_king", "ramp": "borealis",
+                  "goodstuff": "gale"}
 
 
 def starter_decks() -> list[dict]:
@@ -187,7 +193,7 @@ def starter_decks() -> list[dict]:
 
 def profile_view(p: dict) -> dict:
     profiles.seed_decks(p["id"], starter_decks())
-    return {**p, "decks": profiles.decks(p["id"]), "history": profiles.history(p["id"]),
+    return {**p, "decks": profiles.decks(p["id"]), "history": profiles.history(p["id"]), "records": profiles.records(p["id"]),
             "logins": profiles.identities(p["id"]), "providers": oauth.available()}
 
 
@@ -278,6 +284,18 @@ async def sign_in(req):
     return web.json_response(profile_view(p))
 
 
+def deck_cover(seat: Seat) -> str:
+    """The card a seat's deck shows as its face: a starter's cover, the cover its owner chose, else its first legendary."""
+    if seat.deck in STARTER_COVERS:
+        return STARTER_COVERS[seat.deck]
+    cards = Counter(load_premade_deck(seat.deck))
+    if seat.profile:
+        for d in profiles.decks(seat.profile):
+            if d.get("cover") and Counter(d["cards"]) == cards:
+                return d["cover"]
+    return next((c for c in cards if CARDS[c].rarity == "legendary"), next(iter(cards), ""))
+
+
 def record_match(match: Match) -> None:
     """Add a finished series to each human player's history."""
     kind = "gauntlet" if match.schedule else "bot" if any(s.is_bot for s in match.seats.values()) else "friend"
@@ -292,9 +310,41 @@ def record_match(match: Match) -> None:
         try:
             profiles.record(seat.profile, f"{match.id}-{match.rematches}", kind=kind, my_deck=deck(p),
                             opp=f"Bot · {other.bot.capitalize()}" if other.is_bot else other.name,
-                            opp_deck=deck(o), won=score[p], lost=score[o])
+                            opp_deck=deck(o), won=score[p], lost=score[o], seat=p,
+                            my_cover="" if p == rotating else deck_cover(seat), opp_cover="" if o == rotating else deck_cover(other))
         except Exception:
             log.exception("could not record match %s in a history", match.id)
+            continue
+        if os.environ.get("AK_NO_GAME_LOGS"):
+            continue
+        try:
+            names = {p: display(profiles.get(seat.profile)), o: other.name}
+            replay.save(REPLAY_DIR, f"{match.id}-{match.rematches}", p, replay.series_views(match.series_logs, p, names))
+        except Exception:
+            log.exception("could not save the replay of match %s", match.id)
+
+
+async def get_replay(req):
+    """Every view you saw in one of your finished matches (key: the history's match): saved at its end, else rebuilt from its game logs."""
+    p = me(req)
+    key = req.match_info["match"]
+    row = profiles.match(p["id"], key)
+    saved = row and row["seat"] and replay.load(REPLAY_DIR, key, row["seat"])
+    if saved:
+        return web.Response(body=saved, content_type="application/json", headers={"Content-Encoding": "gzip"})
+    mid, _, series = key.rpartition("-")
+    games = replay.series_games(LOG_DIR, mid, int(series)) if row and series.isdigit() else []
+    if not games:
+        raise web.HTTPNotFound(text="This match wasn't recorded")
+    seat = row["seat"] or replay.human_seat(games[0]) or "A"
+    names = {seat: display(p), other_player(seat): row["opp"]}
+    try:
+        views = await asyncio.to_thread(replay.series_views, games, seat, names)
+    except replay.ReplayError as e:
+        raise web.HTTPConflict(text=str(e))
+    resp = web.json_response({"views": views})
+    resp.enable_compression()
+    return resp
 
 
 async def index(_req):
@@ -442,6 +492,7 @@ def make_app() -> web.Application:
         web.post("/api/auth/{provider}", auth_start),
         web.post("/api/signout", sign_out),
         web.get("/auth/{provider}/callback", auth_callback),
+        web.get("/api/replay/{match}", get_replay),
         web.post("/api/match", create_match),
         web.post("/api/match/{id}/join", join_match),
         web.get("/ws/{id}", socket),

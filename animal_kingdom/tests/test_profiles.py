@@ -85,6 +85,44 @@ def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch):
         ("bot", "Cats", "Bot · Easy", "Ramp", 2, 0)
 
 
+def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path):
+    import gzip, json
+    from animal_kingdom.web import replay
+    from animal_kingdom.web.match import bot_for
+    db = Profiles(":memory:")
+    monkeypatch.setattr(server, "profiles", db)
+    monkeypatch.setattr(server, "REPLAY_DIR", tmp_path)
+    monkeypatch.delenv("AK_NO_GAME_LOGS", raising=False)
+    monkeypatch.setattr(server, "save_game", lambda *a: None)
+    _, p = db.create("Martin")
+    m = Match("M2", Seat("ta", "Martin#1", deck="cats_midrange", profile=p["id"]))
+    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m.on_match_end = server.record_match
+    m.ready("A")
+    m.bots["A"] = bot_for("easy", 7)       # a bot plays the human seat
+    live = [m.view("A")["game"]]
+    while m.phase == "playing":
+        m.act(m.to_act(), m.bot_move())
+        live.append(m.view("A")["game"])
+    (h,) = db.history(p["id"])
+    assert h["my_cover"] == "king_theron" and h["opp_cover"] == "borealis"
+    views = json.loads(gzip.decompress(replay.load(tmp_path, h["match"], "A")))
+    assert {v["you"] for v in views} == {"A"} and views[0]["game"]["history"] == []
+    assert views[-1]["game"]["result"]["winner"] == m.results[-1]["winner"]
+    assert [v["game"] for v in views] == live       # exactly what the browser was sent
+    # rebuilt from the game log, the same views
+    assert replay.series_views(m.series_logs, "A", {"A": "Martin#" + p["tag"], "B": "Bot"}) == views
+
+
+def test_a_deck_record_sums_every_match_with_it(db):
+    _, p = db.create("Martin")
+    db.record(p["id"], "M-0", kind="bot", my_deck="Cats", opp="Bot · Easy", opp_deck="Ramp", won=1, lost=0, my_cover="king_theron")
+    db.record(p["id"], "N-0", kind="bot", my_deck="Cats", opp="Bot · Easy", opp_deck="Egg", won=0, lost=1, my_cover="king_theron")
+    db.record(p["id"], "O-0", kind="friend", my_deck="Rats", opp="Ana#1234", opp_deck="Cats", won=1, lost=0)
+    assert [(r["deck"], r["cover"], r["won"], r["lost"]) for r in db.records(p["id"])] == \
+        [("Cats", "king_theron", 1, 1), ("Rats", "", 1, 0)]
+
+
 # ----------------------------------------------------------------- sign in with Google / Discord
 def test_signing_in_turns_the_guest_into_the_account(db):
     _, guest = db.create("Martin")

@@ -61,7 +61,7 @@ async function loadProfile() {
   // First visit (or the code no longer exists): a new guest profile, taking along any decks built in this browser before profiles.
   let decks = []; try { decks = JSON.parse(localStorage.getItem('ak:decks') || '[]'); } catch { /* none */ }
   const r = await api('/api/profile', { method: 'POST', body: JSON.stringify({ decks }) });
-  if (!r.ok) return ME = { name: 'Player', tag: '', decks: [], history: [] };
+  if (!r.ok) return ME = { name: 'Player', tag: '', decks: [], history: [], records: [] };
   const m = await r.json(); store('ak:key', m.code); return ME = m.profile;
 }
 // Player-built decks live in the profile: [{id, name, cards: {cardId: copies}}]. Only complete ones are playable.
@@ -84,6 +84,7 @@ async function boot() {
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
     if (e.key === 'Escape' && screen === 'home' && play.open) { play.open = null; return route(); }   // Escape closes the open chooser
     if (e.key === 'Escape' && screen === 'profile' && !/INPUT/.test(e.target.tagName)) { location.hash = '#/'; return; }
+    if (RP.views.length && screen === 'game' && replayKey(e)) return;
     if (e.key !== 'Escape' || screen !== 'game') return;
     const menu = document.getElementById('menudrop');
     if (menu && menu.classList.contains('on')) return menu.classList.remove('on');
@@ -102,11 +103,13 @@ function route() {
   document.documentElement.dataset.tod = timeOfDay(new Date().getHours());
   const id = parts[1] && parts[1].toUpperCase();
   if (parts[0] !== 'm' || id !== wsId) disconnect();
+  if (parts[0] !== 'replay') stopReplay();
   play.open = null;   // a chooser never outlives its screen
   if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
   if (parts[0] === 'gauntlet') return homeScreen({ gauntlet: true });
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   if (parts[0] === 'profile') return profileScreen();
+  if (parts[0] === 'replay' && parts[1]) return replayScreen(parts[1]);
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
   if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : homeScreen({ join: id });
   if (parts[0] === 'm' && id) return matchScreen(id);
@@ -222,13 +225,24 @@ async function finishSignIn(code) {
   const m = await r.json(); store('ak:key', m.key); ME = m.profile;
   toast(`Signed in as ${ME.name}#${ME.tag}`, true); profileScreen();
 }
-// The collection's skeleton: your matches on the ground, you in the granite column (name, account, sign-in code), Back in its foot.
+// The collection's skeleton: your decks with their records and your matches on the ground, you in the granite column
+// (name, account, sign-in code), Back in its foot. A deck filters the matches; a match opens its replay.
+// A deck's face: its cover, else (matches from before covers were kept) the starter or your deck of that name.
+const deckFace = (cover, name) => cover || COVER[(DECKS.find(d => d.name === name) || {}).id] || (ME.decks.find(d => d.name === name) || {}).cover || '';
+// A deck as a board piece: its face in the team's rim.
+const piece = (id, t) => `<span class="pm">${id && hasArt(id) ? `<span class="face" style="${portrait(id, 35)}"></span>` : ''}<img src="/static/kit2/rim_${t}.webp" alt="" draggable="false"></span>`;
 function profileScreen() {
   screen = 'profile';
   const unlinked = ME.providers.filter(p => !ME.logins.some(l => l.provider === p));
   const when = t => new Date(t * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-  const hist = ME.history.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}"><b>${h.won}–${h.lost}</b>
-    <span class="dk">${esc(h.my_deck)} <i>vs</i> ${esc(h.opp_deck)}</span><span class="o">${esc(h.opp)}${h.kind === 'gauntlet' ? ' · gauntlet' : ''}</span><span class="d">${when(h.ended)}</span></div>`).join('');
+  const recs = ME.records.map(r => { const f = deckFace(r.cover, r.deck);
+    return `<div class="dtile rec${ui.histDeck === r.deck ? ' on' : ''}" data-deck="${esc(r.deck)}" style="${f ? stripArt(f, 284, 56, .7) : ''}">
+    <b>${esc(r.deck)}</b><span class="wl"><i>${r.won}</i>–<i>${r.lost}</i></span></div>`; }).join('');
+  const shown = ME.history.filter(h => !ui.histDeck || h.my_deck === ui.histDeck);
+  const result = h => h.won + h.lost > 1 ? `${h.won}–${h.lost}` : h.won ? 'Won' : h.lost ? 'Lost' : 'Draw';
+  const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
+    ${piece(deckFace(h.my_cover, h.my_deck), 'a')}<span class="dk">${esc(h.my_deck)}</span>${piece(deckFace(h.opp_cover, h.opp_deck), 'b')}<span class="dk">${esc(h.opp_deck)}</span>
+    <span class="o">${esc(h.opp)}${h.kind === 'gauntlet' ? ' · gauntlet' : ''}</span><span class="d">${when(h.ended)}</span></div>`).join('');
   const sect = (title, body) => `<div class="sect"><h4>${title}</h4>${body}</div>`;
   const account = ME.logins.length
     ? sect('Account', `${ME.logins.map(l => `<div class="login">${PROVIDER[l.provider]} · ${esc(l.label)}</div>`).join('')}
@@ -238,10 +252,12 @@ function profileScreen() {
   const code = ME.logins.length ? '' : sect('Sign-in code', `<p>Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</p>
       <div class="row"><span class="field keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span><button class="slab" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</button><button class="slab" id="copykey">Copy</button></div>`)
     + sect('Use a different profile', `<div class="row"><input class="field" id="other" placeholder="Sign-in code" autocomplete="off"><button class="slab" id="signin">Sign in</button></div>`);
-  app.innerHTML = `<div class="mscr prof"><div class="hist">${hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
+  app.innerHTML = `<div class="mscr prof"><div class="hist">${hist ? `<div class="recs">${recs}</div><div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
     <div class="side"><div class="me"><div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div>${account}${code}</div>
       <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
+  app.querySelectorAll('[data-deck]').forEach(el => el.onclick = () => { ui.histDeck = ui.histDeck === el.dataset.deck ? null : el.dataset.deck; profileScreen(); });
+  app.querySelectorAll('[data-m]').forEach(el => el.onclick = () => { location.hash = '#/replay/' + el.dataset.m; });
   const nm = document.getElementById('pname');
   nm.onchange = async () => { const r = await api('/api/me', { method: 'PATCH', body: JSON.stringify({ name: nm.value }) });
     if (!r.ok) return toast(await r.text()); ME = await r.json(); profileScreen(); };
@@ -363,7 +379,7 @@ const tutState = () => { if (!ui.tut || ui.tut.id !== V.id) ui.tut = { id: V.id,
 
 // What the seat can do right now, in viewer space.
 function decision() {
-  const G = V.game, d = { mine: V.phase === 'playing' && G.toAct === V.you, rings: [], hqRing: false, crChoice: {}, handPick: new Set(), cardOpts: [], otherOpts: [], places: {}, pend: null };
+  const G = V.game, d = { mine: V.phase === 'playing' && G.toAct === V.you && !RP.views.length, rings: [], hqRing: false, crChoice: {}, handPick: new Set(), cardOpts: [], otherOpts: [], places: {}, pend: null };
   if (isTutorial() && V.phase === 'playing') d.lesson = lessonNow(V, ui.sel, CARDS, tutState());   // the tutorial's coach: the lesson for this moment
   if (!d.mine) return d;
   d.pend = G.pending; d.places = G.legal.place;
@@ -421,6 +437,7 @@ function gameScreen() {
       <div class="abs reveal" id="reveal"></div>
       <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
       <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
+      <div class="abs rbar" id="rbar"></div>
       <div class="endov" id="endov"></div></div></div>`;
     fitStage(); wireTips(document.getElementById('scr'));
     const $ = id => document.getElementById(id);
@@ -447,7 +464,8 @@ function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
   lastDecision = d;
-  $('menubtn').style.display = playing && V.id ? '' : 'none';   // the menu holds Concede: only a game in play (never the lab)
+  $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';   // the menu holds Concede: only a game in play (never the lab or a replay)
+  drawReplayBar();
 
   // Top left: the turn (a match is one game while there is one map); it opens the history. The gauntlet counts its games.
   const gameNo = playing ? V.results.length + 1 : V.results.length;
@@ -466,7 +484,7 @@ function drawGame() {
   hand.innerHTML = G.hand.map((h, i) => {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id], pick = d.handPick.has(h.iid);
     const hint = can && d.lesson && d.lesson.only && !ui.sel;   // the card the tutorial asks for
-    const talking = d.lesson && d.lesson.next;   // while the coach talks the cards stay lit, and a ready card still glows
+    const talking = d.lesson && d.lesson.next || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
     const cls = [c.rarity, can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
@@ -516,7 +534,7 @@ function drawGame() {
     if (playing && G.opponentChoosing) waiting.textContent = G.history.length ? 'Opponent is choosing' : 'Opponent is mulliganing';
   }
   clearTimeout(drawGame.think);
-  if (playing && G.toAct === them && V.seats[them].bot) {
+  if (playing && G.toAct === them && V.seats[them].bot && !RP.views.length) {
     const ver = V.version;
     drawGame.think = setTimeout(() => { if (V && V.version === ver && screen === 'game') waiting.textContent = 'Bot is thinking'; }, 2500);
   }
@@ -721,7 +739,14 @@ function drawEnd() {
   const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded' }[G.result.reason] || G.result.reason;
   const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;
   const peek = `<button class="slab" id="peek">See the board</button>`;
-  if (V.gauntlet) {
+  if (RP.views.length) {
+    // a replay: the game's result; the next game follows on, the last one offers the replay again or back to the profile
+    const more = RP.i < RP.views.length - 1;
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>${V.results.length > 1 ? score : ''}
+      <div class="btns">${more ? `${peek}<button class="play" id="nextg">Next game</button>` : `<a class="slab" href="#/profile">Back</a>${peek}<button class="play" id="again">Watch again</button>`}</div></div>`;
+    if (more) document.getElementById('nextg').onclick = () => { replayStep(RP.i + 1); replayPlay(true); };
+    else document.getElementById('again').onclick = () => { replayStep(0); replayPlay(true); };
+  } else if (V.gauntlet) {
     const g = V.gauntlet, tot = g.record.reduce((a, r) => [a[0] + r.w, a[1] + r.l], [0, 0]);
     const rows = g.record.map(r => `<div>${r.deckName} <b>${r.w}–${r.l}</b></div>`).join('');
     const done = V.phase === 'match_over';
@@ -756,6 +781,67 @@ function drawEnd() {
   }
   document.getElementById('peek').onclick = () => { ui.peek = true; drawGame(); };
   ov.classList.add('on');
+}
+
+// ------------------------------------------------------------------ replay
+// A finished match played back on the game screen: every view you saw, one per action, stepped or played at the bot's pace.
+// Nothing can be done on the board; the controls sit where the menu does, and the arrows and Space drive them too.
+const RP = { key: null, views: [], i: 0, playing: false, timer: null };
+async function replayScreen(key) {
+  if (RP.key === key && RP.views.length) return;
+  stopReplay(); screen = null; RP.key = key;
+  app.innerHTML = `<div class="mscr pre"><p class="wait">Loading the replay…</p></div>`;
+  const r = await api('/api/replay/' + encodeURIComponent(key));
+  if (RP.key !== key) return;   // left while it loaded
+  if (!r.ok) { const msg = await r.text(); RP.key = null; history.replaceState(null, '', '#/profile'); profileScreen(); return toast(msg); }
+  RP.views = (await r.json()).views; ui.peek = false; ui.sel = null; ui.panel = null;
+  replayStep(0); replayPlay(true);
+}
+function stopReplay() { clearTimeout(RP.timer); Object.assign(RP, { key: null, views: [], i: 0, playing: false }); }
+function replayStep(i) {
+  i = Math.max(0, Math.min(RP.views.length - 1, i));
+  const prev = V, step = i === RP.i + 1; RP.i = i; V = RP.views[i]; V.rx = Date.now() / 1000;
+  onView(step ? prev : null);   // one step forward plays its animation; any jump lands at once
+}
+// Playing: the next view after the same beat the bot takes, longer while the opponent's card is shown; a game's end waits for Next game.
+function replayPlay(on) {
+  clearTimeout(RP.timer); RP.playing = on && RP.i < RP.views.length - 1;
+  if (RP.playing) {
+    const G = V.game, last = G.history[G.history.length - 1], shown = last && last.seat !== V.you && last.kind === 'place';
+    RP.timer = setTimeout(() => {
+      if (V.phase !== 'playing') { RP.playing = false; return drawReplayBar(); }
+      replayStep(RP.i + 1); replayPlay(true);
+    }, RP.i === 0 ? 1400 : shown ? 2200 : 1100);
+  }
+  drawReplayBar();
+}
+const RICON = { back: '<path d="M15 6l-6 6 6 6"/>', fwd: '<path d="M9 6l6 6-6 6"/>', play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>',
+  pause: '<path d="M8.5 6v12M15.5 6v12"/>' };
+const ric = k => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${RICON[k]}</svg>`;
+function drawReplayBar() {
+  const bar = document.getElementById('rbar');
+  if (!bar) return;
+  if (!RP.views.length) { bar.innerHTML = ''; bar.classList.remove('on'); return; }
+  const n = RP.views.length - 1, pct = n ? RP.i / n * 100 : 100;
+  bar.classList.add('on');
+  bar.innerHTML = `<button class="slab" id="rback" tabindex="-1" data-tip="Back one move">${ric('back')}</button>
+    <button class="slab" id="rplay" tabindex="-1" data-tip="${RP.playing ? 'Pause' : 'Play'}">${ric(RP.playing ? 'pause' : 'play')}</button>
+    <button class="slab" id="rfwd" tabindex="-1" data-tip="Forward one move">${ric('fwd')}</button>
+    <div class="track" id="rtrack"><i style="width:${pct}%"></i></div>
+    <a class="slab out" href="#/profile">Leave</a>`;
+  const $ = id => document.getElementById(id), stop = f => e => { e.stopPropagation(); f(e); };
+  $('rback').onclick = stop(() => { replayPlay(false); replayStep(RP.i - 1); });
+  $('rfwd').onclick = stop(() => { replayPlay(false); replayStep(RP.i + 1); });
+  $('rplay').onclick = stop(() => replayPlay(!RP.playing));
+  $('rtrack').onclick = stop(e => { const r = e.currentTarget.getBoundingClientRect(); replayPlay(false); replayStep(Math.round((e.clientX - r.left) / r.width * n)); });
+}
+function replayKey(e) {
+  if (e.key === 'ArrowLeft') { replayPlay(false); replayStep(RP.i - 1); }
+  else if (e.key === 'ArrowRight') { replayPlay(false); replayStep(RP.i + 1); }
+  else if (e.key === ' ') { e.preventDefault(); replayPlay(!RP.playing); }
+  else if (e.key === 'Escape' && !ui.panel) location.hash = '#/profile';
+  else return false;
+  return true;
 }
 
 window.__ak = () => ({ V, ui, d: lastDecision });   // test hook: the headless play-through reads the view
