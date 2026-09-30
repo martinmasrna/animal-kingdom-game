@@ -239,7 +239,7 @@ class Match:
         self.started_at = time.time()
         if self.tutorial:     # the fixed deal the lessons are written for: you first, no mulligan
             self.state = new_game(deck_list(self.seats["A"].deck), deck_list(self.seats["B"].deck), seed,
-                                  map_id=MAP_ID, first_player="A", stacked=True, config=tutorial.config())
+                                  map_id=MAP_ID, first_player="A", stacked=True, config=tutorial.config(2 if self.seats["B"].bot == tutorial.BOTS[2] else 1))
         else:
             self.state = new_game(load_premade_deck(self.seats["A"].deck),
                                   load_premade_deck(self.seats["B"].deck), seed,

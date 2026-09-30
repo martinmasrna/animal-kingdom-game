@@ -15,11 +15,11 @@ from ..bots.base import Bot
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction
 from ..engine.config import Config
 
-# Draw order, first card first. The player opens with the three the first turns place (Lion, Buffalo, Wolf); the deck
-# lesson on turn 2 draws a Lion and a Wolf (plain 7s), for the patch's last corner and the forced cover of turn 3; turn 4 draws the Lynx,
-# whose Roar (draw 1 if you control another Cat) always works beside the Lion, for the Roar lesson. No Roar comes
+# Draw order, first card first. One new idea a turn: the player opens with four (Lion, Buffalo, Wolf, Lion), places two
+# (turn 1) and closes the +10 region with the other two (turn 2); turn 3 draws a Wolf and a Buffalo and covers a Pup with
+# one; turn 4 draws the Lynx, whose Roar (draw 1 if you control another Cat) always works beside the Lion. No Roar comes
 # before it; the rest are strong animals and Roars to meet later.
-PLAYER_DECK = ["lion", "cape_buffalo", "dire_wolf", "lion", "dire_wolf", "lynx", "cape_buffalo", "jaguar", "cheetah",
+PLAYER_DECK = ["lion", "cape_buffalo", "dire_wolf", "lion", "dire_wolf", "cape_buffalo", "lynx", "jaguar", "cheetah",
                "lion", "dire_wolf", "jaguar", "cape_buffalo", "lion", "cheetah", "dire_wolf", "jaguar", "lion",
                "cape_buffalo", "lion"]
 PLAYER_DECK += PLAYER_DECK[7:] + PLAYER_DECK[7:10]   # 36 cards: a slow first game never runs out (no exhaustion loss)
@@ -51,9 +51,10 @@ OPENINGS = {1: {1: [("cape_buffalo", "5,2"), ("pup", "4,2")]},
 AMBUSH = {2: ("eagle", SQUIRREL)}
 
 
-def config() -> Config:
-    """The tutorial skips the mulligan: the deal is already the one the lessons need."""
-    return replace(Config.default(), mulligan=False)
+def config(lesson: int = 1) -> Config:
+    """The tutorial skips the mulligan: the deal is already the one the lessons need. Lesson 1 opens with four cards, so
+    its first two turns build a whole region before any draw (one new idea a turn)."""
+    return replace(Config.default(), mulligan=False, **({"first_player_opening_draw": 4} if lesson == 1 else {}))
 
 
 class TutorialBot(Bot):

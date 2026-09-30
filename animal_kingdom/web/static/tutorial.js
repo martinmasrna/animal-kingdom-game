@@ -69,24 +69,25 @@ export const LESSONS = [
     text: 'Place the Wolf on one of the circles around the +10 region.',
     only: c => ({ card: 'dire_wolf', picked: true, crs: c.homeOpen.length ? c.homeOpen : undefined }),
     at: { rings: true } },
-  { id: 'draw', when: c => c.mine && c.round === 2 && !c.hand('dire_wolf') && c.acts > 0,
-    text: 'You\'re out of cards! Click your deck to draw 2 new ones.',
-    only: { deck: true }, at: { deck: true } },
-
-  // --- free play: each the first time it comes up ---
-  { id: 'actions', when: c => c.mine && c.round === 3, ...talk, at: { endturn: true },
-    text: 'Each turn you get two moves: place an animal or draw cards. The dots show how many moves are left.' },
-  // the first patch is finished by hand, any card, only its last corner (shown only when a card can reach it: never a dead end)
-  { id: 'corner', when: c => c.mine && c.round >= 3 && !c.homeHeld && c.homeOpen.length > 0,
+  // the region is finished by hand with the fourth card, only its last corner (shown only when a card can reach it)
+  { id: 'corner', when: c => c.mine && c.round >= 2 && !c.hand('dire_wolf') && !c.homeHeld && c.homeOpen.length > 0,
     only: c => ({ crs: c.homeOpen }), at: c => ({ cr: c.homeOpen[0] }),
     text: 'Finish the region! Place an animal on the last crossroad around the +10.' },
   { id: 'food', when: c => c.homeHeld, ...talk, at: c => ({ stone: c.home[0] }),
     text: 'The +10 region is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
+  // turn 3: moves and drawing, then covering
+  { id: 'actions', when: c => c.mine && c.round === 3, ...talk, at: { endturn: true },
+    text: 'Each turn you get two moves: place an animal or draw cards. The dots show how many moves are left.' },
+  { id: 'draw', when: c => c.mine && c.round === 3 && c.G.hand.length === 0,
+    text: 'You\'re out of cards! Click your deck to draw 2 new ones.',
+    only: { deck: true }, at: { deck: true } },
   // covering, by hand: the second move of turn 3, onto the Pup the opponent always leaves beside the patch
   { id: 'cover', when: c => c.mine && c.round >= 3 && c.homeHeld && c.coverable.length > 0, done: c => c.covered,
     only: c => ({ card: c.coverWith, picked: true, crs: c.coverable }), at: c => ({ cr: c.coverable[0] }),
     text: 'A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 7 can\'t beat 7. Cover the circled animal!' },
-  // Roar, by hand: the Lynx (turn 4), whose Roar always works beside the Lion
+  // Roar, by hand: turn 4 draws the Lynx, whose Roar always works beside the Lion
+  { id: 'draw4', when: c => c.mine && c.round === 4 && !c.roared && !c.hand('lynx') && c.canDraw,
+    text: 'Click your deck to draw 2 more cards.', only: { deck: true }, at: { deck: true } },
   explain('roarinfo', 'lynx', c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0,
     'The Lynx has a Roar: a power that happens the moment you place it. Its Roar draws a card if you have another Cat, like your Lion.'),
   { id: 'roar', when: c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0, done: c => c.roared,

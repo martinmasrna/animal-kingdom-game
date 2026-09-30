@@ -44,7 +44,7 @@ test('nothing is taught off your turn, and a lesson read once stays away after y
   assert.equal(current(view({ round: 2, current: 'B', toAct: 'B', legal: null }), null, CARDS, t), null);
   assert.equal(current(view({ current: 'B', toAct: 'B', legal: null }), null, CARDS, t).id, 'watch', 'the opponent\'s first turn is announced');
   const board = { '1,1': u('dire_wolf', 'A'), '1,2': u('lion', 'A'), '2,1': u('jaguar', 'A'), '2,2': u('cape_buffalo', 'A') };
-  const r4 = { round: 4, board, legal: { place: {}, draw: true } };
+  const r4 = { round: 5, board, legal: { place: {}, draw: true } };
   t.seen.add('actions');
   const food = current(view(r4), null, CARDS, t);
   assert.equal(food.id, 'food'); assert.ok(food.next, 'a line that only tells waits for Next');
@@ -77,7 +77,7 @@ test('the last corner of the first patch is a step of its own: any card, only th
 
 test('with nothing to place, the coach points at the deck, every time', () => {
   const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'patch', 'actions', 'free'].forEach(id => t.seen.add(id));
-  const stuck = view({ round: 4, board: { '1,3': u('lion', 'A') }, hand: [], legal: { place: {}, draw: true } });
+  const stuck = view({ round: 5, board: { '1,3': u('lion', 'A') }, hand: [], legal: { place: {}, draw: true } });
   assert.equal(current(stuck, null, CARDS, t).id, 'empty');
   assert.equal(current(stuck, null, CARDS, t).id, 'empty', 'never used up');
 });
