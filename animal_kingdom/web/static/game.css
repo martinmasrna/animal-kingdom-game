@@ -374,3 +374,5 @@
 /* A hand card read large (hover, or the tutorial explaining it) shows its rules panel, so it frames its painting as the full
    card does (its FULL height), not as the compact card's top-aligned crop. */
 .game .hc:hover .card .pic, .game .hc.shown .card .pic { bottom: calc(var(--bw) + 7.8em); border-radius: 0; background-position: 50% var(--fy, 30%); }
+/* the coach over a hovered card: the card grows to 2.1x from its bottom (top at y 347), so the coach stands above that */
+.game .coach.above.risen { bottom: 467px !important; z-index: 31; }
