@@ -69,7 +69,7 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
   // lesson 1: the basics, won on food ('watch', on the opponent's turn, passes too fast to catch with no bot pause)
   const seen1 = []; await play(1, seen1);
   await page.waitForFunction(() => window.__ak().V.phase === 'match_over', { timeout: 20000 });
-  await wait(1200);
+  await page.waitForSelector('#endov.on', { timeout: 10000 });   // the result shows once the last move has played out
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-end.png` });
   assert.match(await page.$eval('#endov', e => e.textContent), /Victory/);
   assert.equal(await page.evaluate(() => window.__ak().V.game.result.reason), 'food', 'lesson 1 is won on food');
@@ -81,7 +81,7 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
   // lesson 2: the deeper mechanics, won by taking the den once the Polar Bear has eaten a way through the wall
   const seen2 = []; await play(2, seen2);
   await page.waitForFunction(() => window.__ak().V.phase === 'match_over', { timeout: 20000 });
-  await wait(1200);
+  await page.waitForSelector('#endov.on', { timeout: 10000 });   // the result shows once the last move has played out
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/2-end.png` });
   assert.equal(await page.evaluate(() => window.__ak().V.game.result.reason), 'hq_capture', 'lesson 2 is won by taking the den');
   for (const id of ['intro2', 'lion', 'glow', 'lynx', 'eagleinfo', 'eagle', 'alone', 'buffalo2', 'draw2', 'squirrelinfo', 'squirrel', 'covered', 'mambainfo', 'mamba', 'uncovered', 'goal2', 'apexinfo', 'apex', 'den'])
