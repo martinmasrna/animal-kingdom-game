@@ -69,7 +69,7 @@ async function playOut(page, maxSteps = 500) {
 }
 
 for (const [deck, bot] of [['cats_midrange', 'canine_buff_tempo'], ['egg_control', 'colony_food_swarm'], ['aggro_hq_rush', 'ramp']]) {
-  test(`a best-of-3 by clicks: ${deck} against ${bot}`, { timeout: 600000 }, async () => {
+  test(`a match by clicks: ${deck} against ${bot}`, { timeout: 600000 }, async () => {
     const page = await startMatch(deck, bot);
     await playOut(page);
     assert.deepEqual(page.errors, []);

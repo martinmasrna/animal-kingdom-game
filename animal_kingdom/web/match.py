@@ -1,4 +1,4 @@
-"""A best-of-3 match over the engine: seats, series score, move history, and per-seat views.
+"""A match over the engine (one game for now; best-of-3 once there are three maps to reveal): seats, series score, move history, and per-seat views.
 
 Transport-free: the server feeds it actions and reads views; nothing here does I/O. A view
 carries only what that seat may see (open decklists, public board and Remove Pile, its own
@@ -29,7 +29,9 @@ from ..engine.strength import effective_strength, placement_strength
 
 CARDS = load_cards()
 MAP_ID = "map_b"
-GAMES_TO_WIN = 2
+# One game per match while there is one map: the best-of-3 is part of the game, but its point is the three-map
+# reveal (rules §14), so it comes back with the maps (Martin, 2026-09-30). Rematch carries the loser-first rule.
+GAMES_TO_WIN = 1
 # The turn clock, for matches between two people (pre-launch.md: a starting guess, to be set from
 # real games). Whoever must act gets a free window each time the decision comes to them (unused
 # time is lost), then spends their bank for the game. At zero, the engine acts for them.
@@ -140,6 +142,7 @@ class Match:
         self.seats: dict[str, Seat] = {"A": host}
         self.phase = "lobby"             # lobby -> prematch -> playing -> game_over -> match_over
         self.results: list[dict] = []    # one {winner, reason, turns} per finished game
+        self.last_game: Optional[dict] = None   # the previous match's last game, so a rematch's loser goes first
         self.state: Optional[GameState] = None
         self.history: list[Move] = []
         self.bots: dict[str, object] = {}
@@ -208,14 +211,14 @@ class Match:
         return {p: sum(1 for r in self.results if r["winner"] == p) for p in "AB"}
 
     def _start_game(self) -> None:
-        # Game 1 is a coin flip; afterwards the loser of the previous game goes first
+        # Game 1 is a coin flip; afterwards (and in a rematch) the loser of the previous game goes first
         # (Martin, 2026-09-26). A drawn game keeps the previous first player.
         first = None
         if self.schedule:
             entry = self.schedule[len(self.results)]
             self.seats[entry.get("seat", "B")].deck, first = entry["deck"], entry["first"]
-        elif self.results:
-            last = self.results[-1]
+        elif self.results or self.last_game:
+            last = self.results[-1] if self.results else self.last_game
             first = other_player(last["winner"]) if last["winner"] else last["first"]
         seed = self.seed = self.rng.randrange(1 << 30)
         self.actions = []
@@ -242,6 +245,7 @@ class Match:
     def rematch(self) -> None:
         if self.phase != "match_over":
             raise EngineError("the match is still on")
+        self.last_game = self.results[-1]
         self.results = []
         self.state = None
         self.history = []
@@ -383,7 +387,7 @@ class Match:
                 "phase": self.phase, "results": self.results, "seed": self.seed,
                 "actions": self.actions, "notes": self.notes, "action_times": self.action_times,
                 "started_at": self.started_at, "created": self.created.isoformat(),
-                "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock,
+                "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [_jsonable(asdict(m)) for m in self.history]}
 
@@ -396,6 +400,7 @@ class Match:
         m.actions, m.notes, m.action_times = d["actions"], d["notes"], d["action_times"]
         m.started_at, m.schedule, m.version = d["started_at"], d["schedule"], d["version"] + 1
         m.rematches = d.get("rematches", 0)
+        m.last_game = d.get("last_game")
         m.clock = d.get("clock")
         if m.clock:
             m.clock["since"] = time.time()      # time the server was down isn't anyone's

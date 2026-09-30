@@ -424,9 +424,9 @@ function drawGame() {
   lastDecision = d;
   $('concede').style.display = playing && V.id ? '' : 'none';   // only a game in play can be conceded (never in the lab)
 
+  // Top left: the turn (a match is one game while there is one map); it opens the history. The gauntlet counts its games.
   const gameNo = playing ? V.results.length + 1 : V.results.length;
-  const dots = [0, 1, 2].map(i => { const r = V.results[i]; return `<i class="${r && r.winner ? rel(r.winner) : ''}"></i>`; }).join('');
-  $('series').innerHTML = V.gauntlet ? `Game ${gameNo} of ${V.gauntlet.total}` : `Game ${gameNo} of 3 ${dots}`;
+  $('series').innerHTML = V.gauntlet ? `Game ${gameNo} of ${V.gauntlet.total} · Turn ${G.round}` : `Turn ${G.round}`;
   drawHistory(G); drawLists(G); showPanel();
 
   // The opponent's hand: one card back each, centred across the board from yours.
@@ -665,8 +665,10 @@ function drawEnd() {
       <div class="btns">${peek}<button class="play" id="nextg">Next game</button></div></div>`;
     document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else {
-    const won = S[you] > S[them];
-    ov.innerHTML = `<div class="endbox"><div class="res ${won ? 'A' : 'B'}">${won ? 'Match won' : 'Match lost'}</div><div class="how">${res[1]} in game ${V.results.length} · ${how}</div>${score}
+    // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
+    const won = S[you] > S[them], series = V.results.length > 1;
+    ov.innerHTML = `<div class="endbox">${series ? `<div class="res ${won ? 'A' : 'B'}">${won ? 'Match won' : 'Match lost'}</div><div class="how">${res[1]} in game ${V.results.length} · ${how}</div>${score}`
+      : `<div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>`}
       <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="rematch">Rematch</button></div></div>`;
     document.getElementById('rematch').onclick = () => send({ t: 'rematch' });
   }

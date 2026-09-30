@@ -38,10 +38,8 @@
 .game .abs { position: absolute; }
 .game .num { font-weight: 700; font-variant-numeric: lining-nums tabular-nums; font-family: 'Source Serif 4', Georgia, serif; }
 
-/* frame: series, the opponent's hand, the menu */
+/* frame: the turn, the opponent's hand, the menu */
 .game .series { left: 16px; top: 14px; font-size: 14px; color: var(--mute); cursor: pointer; }
-.game .series i { display: inline-block; width: 15px; height: 15px; margin-left: 3px; vertical-align: -2px; background: url(/static/kit2/boss_n.webp) center / contain no-repeat; }   /* a game still to play: a blank boss */
-.game .series i.A { background-image: url(/static/kit2/boss_a.webp); } .game .series i.B { background-image: url(/static/kit2/boss_b.webp); }   /* won: the winner's boss */
 .game .opphand { left: 0; right: 0; top: 0; height: 66px; pointer-events: none; }   /* only the card backs take the click */
 .game .opphand .back { pointer-events: auto; cursor: pointer; }
 .game .back { top: -54px; width: 84px; height: 118px; border-radius: 7px; background: var(--Bdk); border: 3px solid var(--B); box-shadow: 3px 3px 6px rgba(0,0,0,.5); }
@@ -281,9 +279,9 @@
 .game .menudrop { top: 52px; min-width: 210px; padding: 6px 0; border: 0; border-radius: 10px; background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 10px 24px rgba(0,0,0,.6); }
 .game .menudrop a { padding: 8px 14px; border-radius: 0; font: 500 16px 'Fira Sans Condensed', sans-serif; color: #e8e0d2; }
 .game .menudrop a:hover { background: rgba(255,245,230,.1); }
-/* The series and the clock: bone type that holds on the grass. */
+/* The turn and the clock: bone type that holds on the grass. */
 .game .series, .game .clock, .game .waiting { color: #efe6d4; text-shadow: 0 1px 2px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.6); }
-.game .series { font-size: 17px; font-weight: 600; } .game .series i { filter: drop-shadow(0 1px 1px rgba(0,0,0,.7)); }
+.game .series { font-size: 17px; font-weight: 600; }
 .game .clock { font-size: 15px; } .game .waiting { font-size: 15px; }
 /* A pending choice: a granite piece; its button a stone slab. */
 .game .prompt { width: 270px; padding: 14px 16px; border: 0; border-radius: 14px; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto;

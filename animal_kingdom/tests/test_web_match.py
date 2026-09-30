@@ -33,32 +33,29 @@ def test_humans_start_only_when_both_ready():
     assert m.phase == "playing"
 
 
-def test_series_ends_at_two_wins_and_loser_goes_first():
+def test_a_match_is_one_game_and_a_rematch_lets_the_loser_go_first():
     rng = random.Random(3)
     m = _match()
-    while m.phase != "match_over":
-        _play_out_game(m, rng)
-        last = m.results[-1]
-        if m.phase == "game_over":
-            m.next_game()
-            if last["winner"]:
-                assert m.state.first_player != last["winner"]
-    score = m.score()
-    assert max(score.values()) == 2 or len(m.results) == 3
+    _play_out_game(m, rng)
+    assert m.phase == "match_over" and len(m.results) == 1
+    last = m.results[-1]
+    m.rematch()
+    m.ready("A")                          # bot seats are ready on their own
+    assert m.phase == "playing" and m.results == []
+    if last["winner"]:
+        assert m.state.first_player != last["winner"]
 
 
-def test_conceding_loses_the_game_and_the_series_goes_on():
+def test_conceding_loses_the_game_and_ends_the_match():
     m = Match("T", Seat("ta", "A", deck="ramp"))
     m.join(Seat("tb", "B", deck="ramp")); m.ready("A"); m.ready("B")
     m.concede("A")
     assert m.results[-1]["winner"] == "B" and m.results[-1]["reason"] == "concede"
-    assert m.phase == "game_over" and m.view("A")["game"]["result"]["reason"] == "concede"
+    assert m.phase == "match_over" and m.view("A")["game"]["result"]["reason"] == "concede"
     with pytest.raises(EngineError):
-        m.concede("A")                    # nothing left to concede until the next game starts
-    m.next_game()
+        m.concede("A")                    # nothing left to concede
+    m.rematch(); m.ready("A"); m.ready("B")
     assert m.state.first_player == "A"    # the loser goes first, as after any loss
-    m.concede("A")
-    assert m.phase == "match_over" and m.score() == {"A": 0, "B": 2}
 
 
 def test_the_view_marks_units_the_enemy_cannot_choose():
