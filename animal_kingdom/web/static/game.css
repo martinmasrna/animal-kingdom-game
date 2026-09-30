@@ -401,3 +401,7 @@
 .game .cr.unit.shown::before { inset: -40px; background: radial-gradient(circle, rgba(255,236,190,.6) 40%, rgba(255,226,160,.3) 58%, rgba(255,220,150,0) 72%); }   /* wide enough to show around the piece */
 @keyframes regionglow { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
 .game .endov { inset: calc(-1 * var(--above, 0px)) calc(-1 * var(--side, 0px)); }   /* the dimming reaches the window's edges, where the edge pieces now sit */
+/* a hinted card whose Roar works now pulses in the ready gold, not the act colour: the glow the tutorial just taught stays */
+.game .hc.hint.ready .card { animation: hintready 1.4s ease-in-out infinite; }
+@keyframes hintready { 0%, 100% { filter: drop-shadow(0 0 1px var(--ready)) drop-shadow(0 0 1px var(--ready)) drop-shadow(0 0 6px var(--ready)) drop-shadow(0 0 12px var(--ready)); }
+  50% { filter: drop-shadow(0 0 2px var(--ready)) drop-shadow(0 0 2px var(--ready)) drop-shadow(0 0 10px var(--ready)) drop-shadow(0 0 20px var(--ready)); } }
