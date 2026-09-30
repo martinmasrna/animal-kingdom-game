@@ -92,14 +92,6 @@ def test_nurse_bumblebee_draw_gated_on_four_colony():
 
 # ============================================== counters ("give +X", stored on instance)
 
-def test_dhole_buffs_adjacent_friendly_canine_and_fires_reactor():
-    s = make_state(hands={"A": ["dhole"]}, decks={"A": ["lion", "tiger"], "B": []})
-    fox = put(s, "1,2", "fox", "A")                      # adjacent to 2,2; has on_gain reactor
-    rules.apply_action(s, PlaceAction("dhole", ("cr", "2,2")))
-    assert fox.strength_counter == 3
-    assert len(s.hands["A"]) == 1                        # Fox drew 1 on gaining strength
-
-
 def test_clarion_buffs_other_board_canines_by_two_not_hand():
     s = make_state(hands={"A": ["clarion", "gray_wolf"]})
     fox = put(s, "1,2", "unnamed_canine", "A")
@@ -154,12 +146,12 @@ def test_outrider_lets_canines_ignore_connection():
 
 
 def test_fox_draws_on_each_buff_when_uncapped():
-    s = make_state(hands={"A": ["dhole", "clarion"]},
+    s = make_state(hands={"A": ["clarion", "clarion"]},
                    decks={"A": ["lion", "tiger", "eagle"], "B": []})
     fox = put(s, "1,2", "fox", "A")
-    rules.apply_action(s, PlaceAction("dhole", ("cr", "2,2")))    # +3 -> Fox draws
+    rules.apply_action(s, PlaceAction("clarion", ("cr", "2,2")))  # +2 -> Fox draws
     rules.apply_action(s, PlaceAction("clarion", ("cr", "1,1")))  # +2 -> Fox draws AGAIN (uncapped)
-    assert fox.strength_counter == 5
+    assert fox.strength_counter == 4
     # Two placements from hand, two Fox draws -> hand nets back to 2 (would be 1 if capped once/turn).
     assert len(s.hands["A"]) == 2
 
@@ -378,17 +370,6 @@ def test_egg_eater_only_fires_on_egg_removal():
     egg = put(s, "3,3", "bird_egg", "B")
     effects._remove_specific(s, "3,3", egg, by_player="A", by_effect=False)
     assert s.food["A"] == CFG.egg_eater_food
-
-
-def test_jackal_only_fires_on_adjacent_removal():
-    s = make_state()
-    put(s, "2,2", "jackal", "A")
-    near = put(s, "3,2", "rat", "B")                     # adjacent to 2,2
-    effects._remove_specific(s, "3,2", near, by_player="A")
-    assert s.food["A"] == CFG.jackal_food
-    far = put(s, "4,3", "rat", "B")                      # not adjacent to 2,2
-    effects._remove_specific(s, "4,3", far, by_player="A")
-    assert s.food["A"] == CFG.jackal_food                # unchanged
 
 
 def test_omen_when_drawn_discards_from_opponents_hand_only():
@@ -996,51 +977,6 @@ def test_oxpecker_counts_strong_units_in_the_starting_deck():
 
 
 # ============================================ Snake/Bird control (2026-09-26 redesign)
-
-def test_secretary_bird_draws_a_snake():
-    s = make_state(hands={"A": ["secretary_bird"]}, decks={"A": ["lion", "anaconda", "eagle"], "B": []})
-    rules.apply_action(s, PlaceAction("secretary_bird", ("cr", "1,2")))
-    assert "anaconda" in hand_ids(s, "A") and "anaconda" not in s.decks["A"]
-
-
-def test_king_cobra_removes_any_adjacent_enemy_only_after_a_shuffle_this_turn():
-    s = make_state(hands={"A": ["king_cobra", "king_cobra", "owl"]},
-                   decks={"A": ["lion", "eagle", "raven"], "B": []})
-    put(s, "1,1", "caracal", "A")
-    put(s, "2,2", "king_theron", "B")                     # an 8: nothing else in the deck answers it
-    rules.apply_action(s, PlaceAction("king_cobra", ("cr", "1,2")))   # no shuffle yet this turn
-    assert s.owner_of("2,2") == "B"
-
-    s.current, s.turn_flags, s.actions_taken_this_turn = "A", {}, 0
-    rules.apply_action(s, PlaceAction("owl", ("cr", "1,3")))          # look at 3, shuffle 2 back
-    if s.pending:
-        rules.apply_action(s, rules.legal_actions(s)[0])
-    rules.apply_action(s, PlaceAction("king_cobra", ("cr", "2,1")))   # adjacent to 2,2
-    assert s.top_unit("2,2") is None and "king_theron" in s.remove_pile
-
-
-def test_puff_adder_removes_its_coverer_only_while_you_control_a_bird():
-    s = make_state(current="B", hands={"B": ["lion", "lion"]})
-    put(s, "4,2", "caracal", "B")                         # connects B toward 3,2
-    put(s, "3,2", "puff_adder", "A")
-    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))         # no Bird: the cover stands
-    assert s.owner_of("3,2") == "B"
-
-    s2 = make_state(current="B", hands={"B": ["lion"]})
-    put(s2, "4,2", "caracal", "B")
-    put(s2, "3,2", "puff_adder", "A")
-    put(s2, "1,1", "eagle", "A")                          # a Bird anywhere
-    rules.apply_action(s2, PlaceAction("lion", ("cr", "3,2")))
-    assert s2.owner_of("3,2") == "A" and "lion" in s2.remove_pile     # coverer removed, Adder back on top
-
-    s3 = make_state(current="B", hands={"B": ["lion"]})
-    put(s3, "5,1", "king_theron", "B")
-    put(s3, "4,2", "caracal", "B")
-    put(s3, "3,2", "puff_adder", "A")
-    put(s3, "1,1", "eagle", "A")
-    rules.apply_action(s3, PlaceAction("lion", ("cr", "3,2")))       # Theron removes the Adder first
-    assert "puff_adder" in s3.remove_pile and "lion" in s3.remove_pile  # the trap still fires
-
 
 def test_viper_permanently_shrinks_an_adjacent_enemy_so_a_bird_can_cover_it():
     s = make_state(hands={"A": ["viper", "eagle"]})

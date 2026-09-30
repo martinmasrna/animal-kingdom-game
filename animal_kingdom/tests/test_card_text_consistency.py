@@ -46,7 +46,6 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "hedgehog": ["hedgehog_food"],
     "groundhog": ["groundhog_food"],
     "gopher": ["rodent_last_turn_food"],
-    "jackal": ["jackal_food"],
     **{f"calib_food10_{n}": ["squirrel_food"] for n in (2, 3, 4, 5, 6)},
     **{f"calib_food3t_{n}": ["worker_wasp_food"] for n in (2, 3, 4, 5, 6)},
 }

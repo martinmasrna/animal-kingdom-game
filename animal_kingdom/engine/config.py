@@ -56,7 +56,6 @@ class Config:
     eon_food: int = 1                    # per draw/shuffle/remove event
     vulture_food: int = 5                # per card removed
     egg_eater_food: int = 10             # per Egg removed
-    jackal_food: int = 5                 # per adjacent removal (3→5, 2026-07-05; body 3→5)
 
     # --- Deathrattle / payoff food ---
     gazelle_food: int = 30               # Deathrattle: gain food. Was 40 (doubled 2026-07-02);
@@ -77,7 +76,6 @@ class Config:
     guard_hornet_colony_threshold: int = 4
 
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
-    dhole_grant: int = 3                 # to adjacent friendly Canines (2→3, 2026-07-05); reserve
     clarion_grant: int = 2               # to all other friendly Canines on board (+1→+2, body 4→2, 2026-07-05)
     red_wolf_grant: int = 2              # to each other Canine that enters play (reworked 2026-07-05)
     dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn

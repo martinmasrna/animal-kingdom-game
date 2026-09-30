@@ -303,36 +303,6 @@
       "text": "Roar: remove an adjacent enemy of strength 5 or less."
     },
     {
-      "id": "king_cobra",
-      "name": "King Cobra",
-      "deck": "reserve",
-      "rarity": "rare",
-      "tags": ["Snake"],
-      "base_strength": 4,
-      "keywords": [],
-      "text": "Roar: if you shuffled a card this turn, remove an adjacent enemy."
-    },
-    {
-      "id": "puff_adder",
-      "name": "Puff Adder",
-      "deck": "reserve",
-      "rarity": "common",
-      "tags": ["Snake"],
-      "base_strength": 3,
-      "keywords": [],
-      "text": "When an enemy covers this, remove that enemy if you control a Bird."
-    },
-    {
-      "id": "secretary_bird",
-      "name": "Secretary Bird",
-      "deck": "reserve",
-      "rarity": "common",
-      "tags": ["Bird"],
-      "base_strength": 3,
-      "keywords": ["Flight"],
-      "text": "Flight. Roar: draw a Snake."
-    },
-    {
       "id": "raven",
       "name": "Raven",
       "deck": "egg_control",
@@ -533,17 +503,6 @@
       "text": "Apex Predator. Your regions produce no food."
     },
     {
-      "id": "aquila",
-      "name": "Aquila",
-      "deck": "reserve",
-      "rarity": "legendary",
-      "tags": ["Bird"],
-      "base_strength": 8,
-      "keywords": ["Flight", "Apex Predator"],
-      "food_cost": 15,
-      "text": "Flight. Apex Predator. Costs 15 food."
-    },
-    {
       "id": "bulwark",
       "name": "Bulwark",
       "deck": "ramp",
@@ -553,17 +512,6 @@
       "keywords": [],
       "food_cost": 15,
       "text": "Costs 15 food. Roar: remove all adjacent units."
-    },
-    {
-      "id": "yuka",
-      "name": "Yuka",
-      "deck": "reserve",
-      "rarity": "legendary",
-      "tags": ["Megafauna"],
-      "base_strength": 10,
-      "keywords": [],
-      "food_cost": 15,
-      "text": "Costs 15 food."
     },
     {
       "id": "cairn",
@@ -1011,16 +959,6 @@
       "text": "Roar: give +2 strength to all other friendly Canines."
     },
     {
-      "id": "dhole",
-      "name": "Unnamed Rallier",
-      "deck": "reserve",
-      "rarity": "rare",
-      "tags": ["Canine"],
-      "base_strength": 3,
-      "keywords": [],
-      "text": "Roar: give all adjacent Canines +3 strength."
-    },
-    {
       "id": "bush_dog",
       "name": "Bush Dog",
       "deck": "canine_buff_tempo",
@@ -1029,16 +967,6 @@
       "base_strength": 3,
       "keywords": [],
       "text": "Once a turn, when this gains strength, give your adjacent Canines +2 strength."
-    },
-    {
-      "id": "jackal",
-      "name": "Unnamed Scavenger",
-      "deck": "reserve",
-      "rarity": "rare",
-      "tags": ["Canine"],
-      "base_strength": 5,
-      "keywords": [],
-      "text": "Whenever an adjacent unit is removed, gain 5 food."
     },
     {
       "id": "red_wolf",

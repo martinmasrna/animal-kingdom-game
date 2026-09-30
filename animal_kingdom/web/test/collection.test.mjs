@@ -116,7 +116,7 @@ test('an opened deck is the column alone, starting at its top; Done returns to t
 });
 
 test('right-click opens a card large, its keywords explained', async () => {
-  await page.click(card('eagle'), { button: 'right' }); await wait(80);
+  await page.click(card('ember'), { button: 'right' }); await wait(80);
   assert.ok(await page.$('.modal.zoom .card'), 'the card opens');
   assert.deepEqual(await page.$$eval('.kw b', b => b.map(e => e.textContent)), ['Flight']);
   await page.keyboard.press('Escape'); await wait(50); assert.equal(await page.$('.modal.zoom'), null, 'Escape closes it');

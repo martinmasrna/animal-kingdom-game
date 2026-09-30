@@ -963,10 +963,6 @@ def _unnamed_canine_place(state, unit, cr):
         state.effect_stack.append({"op": "draw", "player": unit.owner, "n": 1})
 
 
-def _dhole_place(state, unit, cr):
-    _grant(state, _friendly_adjacent_canine_iids(state, unit, cr), state.config.dhole_grant)
-
-
 def _clarion_place(state, unit, cr):
     # Give +2 to all OTHER friendly Canines on the board (board-only, 2026-07-05 rework).
     iids = [u.iid for st in state.board.values() for u in st
@@ -1098,12 +1094,6 @@ def _egg_eater_remove_event(state, unit, cr, event):     # an Egg removed -> +10
         gain_food(state, unit.owner, state.config.egg_eater_food)
 
 
-def _jackal_remove_event(state, unit, cr, event):        # an *adjacent* unit removed -> +3
-    if event["cr"] is not None and event["cr"] in state.game_map.neighbors(cr):
-        if not _capped(state, "cap_jackal", unit):
-            gain_food(state, unit.owner, state.config.jackal_food)
-
-
 def _omen_drawn(state, inst):
     # Hard, printed-text cap (not a Config dial - card-balance-todo's legendary redesign):
     # "the first time each turn you draw Omen". Keyed by owner, not iid: a reshuffled
@@ -1132,15 +1122,6 @@ def _ember_remove(state, unit):
     if "ember" in state.remove_pile:
         state.remove_pile.remove("ember")
         shuffle_back(state, unit.owner, ["ember"])
-
-
-def _secretary_bird_place(state, unit, cr):
-    state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": "tag:Snake"})
-
-
-def _king_cobra_place(state, unit, cr):
-    if state.turn_flags.get(f"shuffled_{unit.owner}"):
-        _push_remove_choice(state, unit.owner, "king_cobra", _adjacent_enemy_targets(state, unit, cr))
 
 
 def _enemy_neighbors(state, unit, cr):
@@ -1232,17 +1213,6 @@ def _op_magpie_steal(state, step):
     if inst is not None:
         remove_from_hand(state, player, inst)
     return None
-
-
-def _puff_adder_covered(state, covered, coverer, cr):
-    # "When an enemy unit covers this, remove that enemy if you control a Bird." Every cover,
-    # not once; the Adder itself is buried by then, so the Bird has to be another unit on top.
-    # A trap like Pufferfish: it resolves even if King Theron's cover-removal took the Adder first.
-    if coverer.owner == covered.owner or not _control_tag_count(state, covered.owner, "Bird"):
-        return
-    if statics.can_be_removed(state, coverer):
-        state.effect_stack.append({"op": "remove_iid", "iid": coverer.iid, "by_player": covered.owner,
-                                   "by_card": "puff_adder"})
 
 
 def _mouse_place(state, unit, cr):
@@ -1884,9 +1854,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "bush_dog": {"on_gain_strength": _bush_dog_gain_strength},
     # Reserve designs (not in any playable deck; kept for the future hand-buff deck / fixtures).
     "unnamed_canine": {"on_place": _unnamed_canine_place},
-    "dhole": {"on_place": _dhole_place},
     "shuck": {"on_place": _shuck_place},
-    "jackal": {"on_remove_event": _jackal_remove_event},
     # Egg Control: draw/shuffle/remove food engine + filtered random draws.
     "eon": {"on_end_of_turn": _eon_end_of_turn},
     "eon_food_engine": {"on_draw_event": _eon_event, "on_shuffle_event": _eon_event,
@@ -1898,9 +1866,6 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "raven": {"on_place": _raven_place},
     "ember": {"on_remove": _ember_remove},
     "mouse": {"on_place": _mouse_place},
-    "secretary_bird": {"on_place": _secretary_bird_place},
-    "king_cobra": {"on_place": _king_cobra_place},
-    "puff_adder": {"on_covered": _puff_adder_covered},
     "viper": {"on_place": _viper_place},
     "black_mamba": {"on_place": _black_mamba_place},
     "magpie": {"on_place": _magpie_place},
@@ -1914,7 +1879,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "impala": {"on_remove": _impala_remove},
     # Stage 2.3: extra placements (F1), HQ-adjacency draws (F6), start-of-turn.
     # Apex Predator (tiger/polar_bear/borealis/unnamed_giant/eon) and "Costs X food"
-    # (bulwark/elephant/yuka) are handled in _land_unit / legal_placements.
+    # (bulwark/elephant/cairn) are handled in _land_unit / legal_placements.
     "jerboa": {"on_place": _jerboa_place},
     "greywhisker": {"on_place": _greywhisker_place},
     "house_cat": {"on_place": _house_cat_place},

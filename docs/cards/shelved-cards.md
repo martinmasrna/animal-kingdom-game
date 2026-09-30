@@ -14,17 +14,10 @@ Ids differ from names on several cards; the id is what goes in a decklist.
 | Eagle (`eagle`) | Bird | common | 5 | Flight. | Egg Control, 2026-09-30: cut for the Eggs. |
 | Viper (`viper`) | Snake | common | 3 | Roar: an adjacent enemy gets -3 strength. | Egg Control, 2026-09-30: cut for the Eggs. Martin's note from play: the effect belongs on a flier. |
 | Anaconda (`anaconda`) | Snake | common | 7 | Apex Predator. | Egg Control rebuild, 2026-09-28. |
-| Puff Adder (`puff_adder`) | Snake | common | 3 | When an enemy covers this, remove that enemy if you control a Bird. | Replaced by Viper and Black Mamba, 2026-09-28. |
-| King Cobra (`king_cobra`) | Snake | rare | 4 | Roar: if you shuffled a card this turn, remove an adjacent enemy. | Replaced by Viper and Black Mamba, 2026-09-28. |
-| Secretary Bird (`secretary_bird`) | Bird | common | 3 | Flight. Roar: draw a Snake. | A midrange card, benched for Eagle. |
 | Egg Eater (`egg_eater`) | Snake | rare | 4 | Whenever an Egg is removed, gain 10 food. | Too weak. Martin wants it back with the Eggs once it's made useful. |
 | Eon, food engine (`eon_food_engine`) | Snake | legendary | 7 | Whenever a card is drawn, shuffled or removed, gain 1 food. | The old Eon; Eon is now the Ouroboros. |
-| Aquila (`aquila`) | Bird | legendary | 8 | Flight. Apex Predator. Costs 15 food. | Ramp pass, 2026-09-29. |
 | Unnamed Giant (`unnamed_giant`) | — | legendary | 10 | Apex Predator. Your regions produce no food. | Ramp pass, 2026-09-29: a strictly worse Borealis. |
-| Yuka (`yuka`) | Megafauna | legendary | 10 | Costs 15 food. | Ramp: Cairn took its slot; the mammoth is parked for an Ice Age set. |
 | Shuck (`shuck`) | Canine | legendary | 6 | Roar: return a removed Canine to your hand. Give it +2 strength. | Canine's hand-buff half, see below. |
-| Unnamed Rallier (`dhole`) | Canine | rare | 3 | Roar: give all adjacent Canines +3 strength. | Canine cut. |
-| Unnamed Scavenger (`jackal`) | Canine | rare | 5 | Whenever an adjacent unit is removed, gain 5 food. | Canine cut. |
 | Arctic Fox (`arctic_fox`) | Canine | rare | 3 | — | A bare placeholder for a rare Canine. |
 | Unnamed Canine (`unnamed_canine`) | Canine | common | 3 | Roar: if this has 5 or more strength, draw a card. | The draw-at-5 threshold payoff, see below. |
 
