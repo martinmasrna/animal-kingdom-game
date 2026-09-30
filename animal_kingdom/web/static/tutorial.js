@@ -41,7 +41,7 @@ export const LESSONS = [
   { id: 'welcome', when: opening, ...talk, at: { middle: true },
     text: 'Welcome to the savanna! You start on the left, your opponent on the right.' },
   { id: 'yourden', when: opening, ...talk, at: { den: 'A' },
-    text: 'This rock with the blue paw prints is your den. Your animals start next to it.' },
+    text: 'This rock is your den. Your animals start next to it.' },
   { id: 'theirden', when: opening, ...talk, at: { den: 'B' },
     text: 'This rock with the red paw prints is your opponent\'s den. Put any of your animals on it and you win!' },
   { id: 'foodcount', when: opening, ...talk, at: { gem: 'A' },
