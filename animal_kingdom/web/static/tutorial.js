@@ -1,7 +1,8 @@
 // The tutorial's coach: one short lesson at a time, each at the moment it matters, in a real game against a gentle
 // opponent (web/tutorial.py deals the cards and plays it). Written for a player who has never seen the game or its
 // rules (a bright ten-year-old): every thing is named, pointed at, before a lesson uses its name, one idea a line.
-//   1. The opening: before any card, the coach names what is on screen, one thing per step, each closed with Next.
+//   1. The opening: before any card, the coach names the two dens, one per step, each closed with Next (the food
+//      counters come when there is food, strength when it first matters).
 //   2. The first two turns are forced: a lesson with `only` lets just that step be taken (one card, one crossroad, or
 //      the deck), so the first four moves build the first food region.
 //   3. Free play: lessons appear the first time their situation comes up: the moves a turn, the claimed region,
@@ -44,21 +45,17 @@ export const LESSONS = [
     text: 'This rock is your den. Your animals start next to it.' },
   { id: 'theirden', when: opening, ...talk, at: { den: 'B' },
     text: 'This is your opponent\'s den. Put one of your animals on it and you win!' },
-  { id: 'foodcount', when: opening, ...talk, at: { gem: 'A' },
-    text: 'This is your food. The first player to gather 100 food wins.' },
-  { id: 'oppfood', when: opening, ...talk, at: { gem: 'B' },
-    text: 'And this is your opponent\'s food. Don\'t let it reach 100, or you will lose!' },
-  { id: 'cards', when: opening, ...talk, at: { hand: true },
-    text: 'These are your animal cards. The number on a card is the animal\'s strength.' },
-
   // --- forced: the first two turns ---
   { id: 'lion', when: c => opening(c) && c.sel !== 'lion',
-    text: 'Let\'s place your first animal. Click the Lion.',
+    text: 'These are your animal cards. Click the Lion to place your first animal.',
     only: { card: 'lion' }, at: { card: 'lion' } },
   { id: 'lion2', when: c => opening(c) && c.sel === 'lion',
     text: 'Animals stand on crossroads, the sandy circles. Click the circle to place the Lion.',
     // one place, the middle beside the den: from there every place the Buffalo may go shares a +10 region with it
     only: { card: 'lion', crs: ['1,2'] }, at: { rings: true } },
+  // the turn, right after its first move: two moves, each a placement or a draw
+  { id: 'moves', when: c => c.mine && c.round === 1 && c.units === 1, ...talk, at: { endturn: true },
+    text: 'Each turn you get two moves: place an animal, or draw 2 cards. The dots show how many moves you have left.' },
   { id: 'buffalo', when: c => c.mine && c.round === 1 && c.units === 1,
     text: { pick: 'Now the Buffalo. Click it.', place: 'Each new animal must connect to your den, directly or through your other animals. Click one of the circles.' },
     only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo') }), at: { rings: true } },   // every place it may go
@@ -76,16 +73,19 @@ export const LESSONS = [
     text: { pick: 'Finish the region! Click your Buffalo.', place: 'Now click the last crossroad around the region.' } },
   { id: 'food', when: c => c.homeHeld, ...talk, holdFood: true, at: c => ({ stone: c.home[0] }),
     text: 'The region is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
+  // the food counters, when there is food to count (the fruit flies in as the first one shows)
+  { id: 'foodcount', when: c => c.homeHeld, ...talk, at: { gem: 'A' },
+    text: 'This is your food. The first player to gather 100 food wins.' },
+  { id: 'oppfood', when: c => c.homeHeld, ...talk, at: { gem: 'B' },
+    text: 'And this is your opponent\'s food. Don\'t let it reach 100, or you will lose!' },
   // turn 3: moves and drawing, then covering
-  { id: 'actions', when: c => c.mine && c.round === 3, ...talk, at: { endturn: true },
-    text: 'Each turn you get two moves: place an animal or draw cards. The dots show how many moves are left.' },
   { id: 'draw', when: c => c.mine && c.round === 3 && c.G.hand.length === 0,
-    text: 'You\'re out of cards! Click your deck to draw 2 more.',
+    text: 'You\'re out of cards! Drawing is a move too: click your deck to draw 2 cards.',
     only: { deck: true }, at: { deck: true } },
   // covering, by hand: the second move of turn 3, onto the Pup the opponent always leaves beside the patch
   { id: 'cover', when: c => c.mine && c.round >= 3 && c.homeHeld && c.coverable.length > 0, done: c => c.covered,
     only: c => ({ card: c.coverWith, crs: c.coverable }), at: { rings: true },
-    text: c => ({ pick: `A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 1 can't beat 1. Click the ${c.name(c.coverWith)}.`,
+    text: c => ({ pick: `The number on a card is the animal's strength. A stronger animal can stand on top of a weaker enemy and take its crossroad: 7 beats 1, but 1 can't beat 1. Click the ${c.name(c.coverWith)}.`,
       place: 'Now click one of the circled enemies to cover it!' }) },
   // the region pays again as the cover turn ends: said on the region, the fruit held until Next
   { id: 'food2', when: c => c.covered && c.homeHeld && c.myFood >= 20, ...talk, holdFood: true, at: c => ({ region: c.home }),

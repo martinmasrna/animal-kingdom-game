@@ -73,7 +73,7 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-end.png` });
   assert.match(await page.$eval('#endov', e => e.textContent), /Victory/);
   assert.equal(await page.evaluate(() => window.__ak().V.game.result.reason), 'food', 'lesson 1 is won on food');
-  for (const id of ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'lion', 'lion2', 'buffalo', 'patch', 'wolf', 'corner', 'food', 'actions', 'draw', 'cover', 'food2', 'roarinfo', 'roar', 'roared', 'free'])
+  for (const id of ['welcome', 'yourden', 'theirden', 'lion', 'lion2', 'moves', 'buffalo', 'patch', 'wolf', 'corner', 'food', 'foodcount', 'oppfood', 'draw', 'cover', 'food2', 'roarinfo', 'roar', 'roared', 'free'])
     assert.ok(seen1.includes(id), `lesson ${id} came up (${seen1})`);
   await page.waitForSelector('#nextlesson', { visible: true }); await wait(300);
   await page.click('#nextlesson');   // lesson 1 leads straight on to lesson 2

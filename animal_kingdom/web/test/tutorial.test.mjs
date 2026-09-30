@@ -12,13 +12,15 @@ const fresh = () => ({ seen: new Set(), shown: {} });
 test('the opening names what is on screen, one Next at a time, with nothing else to click', () => {
   const t = fresh(), ids = [];
   for (let L = current(view(), null, CARDS, t); L && L.next; L = current(view(), null, CARDS, t)) { ids.push(L.id); assert.deepEqual(L.only, {}); t.seen.add(L.id); }
-  assert.deepEqual(ids, ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards']);
+  assert.deepEqual(ids, ['welcome', 'yourden', 'theirden']);
 });
 
 test('the first lessons walk the first turn, ringing every place the rules allow', () => {
-  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards'].forEach(id => t.seen.add(id));
+  const t = fresh(); ['welcome', 'yourden', 'theirden'].forEach(id => t.seen.add(id));
   assert.equal(current(view(), null, CARDS, t).id, 'lion');
   assert.deepEqual(current(view(), 'lion', CARDS, t).only, { card: 'lion', crs: ['1,2'] }, 'the middle crossroad by the den');
+  const moves = current(view({ board: { '1,2': u('lion', 'A') } }), null, CARDS, t);
+  assert.equal(moves.id, 'moves', 'the two moves, right after the first'); t.seen.add('moves');
   const L = current(view({ board: { '1,2': u('lion', 'A') }, legal: { place: { cape_buffalo: [['cr', '1,1'], ['cr', '1,2'], ['cr', '1,3'], ['cr', '2,2']] }, draw: true } }), 'cape_buffalo', CARDS, t);   // 1,2 is the Lion's own
   assert.equal(L.id, 'buffalo'); assert.deepEqual(L.only, { card: 'cape_buffalo', crs: ['1,1', '1,3', '2,2'] }); assert.deepEqual(L.at, { rings: true }, 'the coach stands beside the whole group of rings');
 });
@@ -48,7 +50,8 @@ test('nothing is taught off your turn, and a lesson read once stays away after y
   t.seen.add('actions');
   const food = current(view(r4), null, CARDS, t);
   assert.equal(food.id, 'food'); assert.ok(food.next, 'a line that only tells waits for Next');
-  t.seen.add('food'); assert.equal(current(view(r4), null, CARDS, t).id, 'empty', 'then, with nothing to place, points at the deck');
+  t.seen.add('food'); assert.equal(current(view(r4), null, CARDS, t).id, 'foodcount', 'then the food counters, now there is food');
+  t.seen.add('foodcount'); t.seen.add('oppfood'); assert.equal(current(view(r4), null, CARDS, t).id, 'empty', 'then, with nothing to place, points at the deck');
 });
 
 
