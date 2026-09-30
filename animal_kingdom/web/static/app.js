@@ -529,7 +529,7 @@ function drawGame() {
 
 // The tutorial's coach: a granite piece standing beside what the lesson talks about, its notch pointing at it: above a
 // card in the hand, the deck or End turn, beside a crossroad (on the side with more room), a region's stone or a den.
-const COACH_W = 250;
+const COACH_W = 300;
 function placeCoach(el, L) {
   el.className = 'abs coach';
   if (!L) { el.innerHTML = ''; return; }
