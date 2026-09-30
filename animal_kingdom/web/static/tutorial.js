@@ -87,6 +87,9 @@ export const LESSONS = [
     only: c => ({ card: c.coverWith, crs: c.coverable }), at: { rings: true },
     text: c => ({ pick: `A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 1 can't beat 1. Click the ${c.name(c.coverWith)}.`,
       place: 'Now click the circled enemy to cover it!' }) },
+  // the region pays again as the cover turn ends: said on the region, the fruit held until Next
+  { id: 'food2', when: c => c.covered && c.homeHeld && c.myFood >= 20, ...talk, holdFood: true, at: c => ({ region: c.home }),
+    text: 'Your region pays again: 10 food at the end of each of your turns, as long as all four crossroads stay yours.' },
   // Roar, by hand: turn 4 draws the Lynx, whose Roar always works beside the Lion
   { id: 'draw4', when: c => c.mine && c.round === 4 && !c.roared && !c.hand('squirrel') && c.canDraw,
     text: 'Click your deck to draw 2 more cards.', only: { deck: true }, at: { deck: true } },
@@ -188,6 +191,7 @@ export function context(V, sel, cards) {
     choosing: V.phase === 'playing' && G.toAct === V.you && !!G.pending && G.pending.kind !== 'mulligan',
     at: cr => owner(G, cr) === V.you,
     canDraw: !!(G.legal && G.legal.draw),
+    myFood: (G.food || {})[V.you] || 0,
     // enemy crossroads a card can cover now; whether you have covered, and whether the Lynx has roared
     coverable: [...new Set(places.filter(t => t[0] === 'cr' && owner(G, t[1]) && owner(G, t[1]) !== V.you).map(t => t[1]))],
     coverWith: (Object.entries((G.legal && G.legal.place) || {}).find(([, ts]) => ts.some(t => t[0] === 'cr' && owner(G, t[1]) && owner(G, t[1]) !== V.you)) || [])[0],   // a card that can cover now
