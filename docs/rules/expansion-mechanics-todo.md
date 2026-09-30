@@ -125,7 +125,7 @@ Two distinct mechanics are under consideration:
 - [ ] Define the fallback when no eligible opponent unit has been played.
 - [ ] Define copy-of-copy behavior and prevent unintended recursion.
 - [ ] Define whether repeating a Roar counts as playing or copying any part of the original unit.
-- [ ] Enumerate dangerous Roars before approving an unrestricted legendary mimic: extra placements, sibling fetches, Pestis, Sirocco, Carmilla, Bulwark, and future action modifiers.
+- [ ] Enumerate dangerous Roars before approving an unrestricted legendary mimic: extra placements, sibling fetches, Pestis, Sirocco, Carmilla, Brutonius, and future action modifiers.
 - [ ] Compare Parrot/Lyrebird, Mimic Octopus/cuttlefish, and other animals before assigning the mechanic's final identity.
 
 ### 1.7 Tokens

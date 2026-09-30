@@ -1,10 +1,10 @@
 # Ramp
 
-Bigger, one at a time: Ramp gives up its early turns, then trades card for card with units the opponent can't match. It beats midrange, which trades fairly, and loses to aggro, which wins before the giants land. Food pays for the huge `Costs 15 food` Megafauna (food costs belong to Megafauna only): Elephant, Yuka the mammoth and Bulwark. Delayed "in 2 turns" effects fuel the ramp; their timers only run while the unit is on top of its stack, so covering them is the counterplay.
+Bigger, one at a time: Ramp gives up its early turns, then trades card for card with units the opponent can't match. It beats midrange, which trades fairly, and loses to aggro, which wins before the giants land. Food pays for the huge `Costs 15 food` Megafauna (food costs belong to Megafauna only): Elephant, Yuka the mammoth and Brutonius. Delayed "in 2 turns" effects fuel the ramp; their timers only run while the unit is on top of its stack, so covering them is the counterplay.
 
 Food is both fuel and win condition: the five costed copies total 75 food against a 100-food win, so the deck can deploy its payoffs or threaten the food win, not both. That tension is intended.
 
-Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reactively, Bulwark stomps. No cheap single-target removal; that's not ramp's identity.
+Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reactively, Brutonius stomps. No cheap single-target removal; that's not ramp's identity.
 
 ## Cards
 
@@ -16,7 +16,7 @@ Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reac
 |---|---:|---|---:|---|
 | **Methuselah** | 1 | — | 3 | Armor. At the end of your turn, gain 5 food. |
 | **Borealis** | 1 | Bear | 10 | Apex Predator. |
-| **Bulwark** | 1 | Megafauna | 8 | Costs 15 food. Roar: remove all adjacent units. |
+| **Brutonius** | 1 | Megafauna | 8 | Costs 15 food. Roar: remove all adjacent units. |
 | **Cairn** | 1 | Megafauna | 10 | Armor. Costs 15 food. |
 
 ### Rare
