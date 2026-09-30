@@ -40,13 +40,13 @@ To finish the deck you'd want more Arachnids (a web/trap keyword?), and a couple
 
 ### Giant Tortoise → **Ramp** (or a defensive deck)
 
-A plain STR-7 wall with Armor. Re-home it in a deck with a slot for an armored wall (the decks are locked 4-4-6, so it needs a swap, not a free add).
+A plain STR-8 wall with Armor (one above Armadillo, which trades a point for its Stealth aura). Re-home it in a deck with a slot for an armored wall (the decks are locked 4-4-6, so it needs a swap, not a free add).
 
 ### Card JSON (paste back to re-home)
 
 ```json
 {"id": "carmilla", "name": "Carmilla, the Devourer", "deck": "food_otk", "rarity": "legendary", "type": "unit", "tags": ["Arachnid"], "base_strength": 5, "keywords": [], "text": "Roar: remove up to 3 friendly units. Draw a card for each."}
-{"id": "giant_tortoise", "name": "Giant Tortoise", "deck": "food_otk", "rarity": "rare", "type": "unit", "tags": [], "base_strength": 7, "keywords": ["Armor"], "text": "Armor."}
+{"id": "giant_tortoise", "name": "Giant Tortoise", "deck": "food_otk", "rarity": "rare", "type": "unit", "tags": [], "base_strength": 8, "keywords": ["Armor"], "text": "Armor."}
 {"id": "opossum", "name": "Opossum", "deck": "food_otk", "rarity": "rare", "type": "unit", "tags": [], "base_strength": 2, "keywords": [], "text": "Roar: gain 5 food and draw 1 card. Deathrattle: return this to your hand."}
 {"id": "black_widow", "name": "Black Widow", "deck": "food_otk", "rarity": "common", "type": "unit", "tags": ["Arachnid"], "base_strength": 3, "keywords": [], "text": "Roar: remove an adjacent friendly unit to draw 1."}
 {"id": "pufferfish", "name": "Pufferfish", "deck": "food_otk", "rarity": "common", "type": "unit", "tags": ["Fish"], "base_strength": 2, "keywords": [], "text": "When an enemy unit is placed on top of this, remove that enemy unit and this unit. Draw 1 card."}
