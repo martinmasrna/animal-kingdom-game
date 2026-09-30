@@ -1,6 +1,34 @@
 # Shelved Cards
 
-Cards pulled out of an active deck but kept here so their designs (and their effect code, which still lives in `engine/effects.py`) aren't lost. Re-home them by pasting the JSON back into `animal_kingdom/data/cards.json` with an updated `deck` slug.
+Cards pulled out of an active deck and kept so their designs aren't lost. Two kinds:
+
+- **The reserve**: cards still in `animal_kingdom/data/cards.json` with `"deck": "reserve"`, excluded from play. Their effect code lives in `engine/effects.py`; re-home one by changing its `deck`.
+- **Out of the data**: the food_otk cuts below exist only as JSON in this file (their effect handlers are still registered in `effects.py`); re-home one by pasting it back.
+
+## The reserve
+
+Ids differ from names on several cards; the id is what goes in a decklist.
+
+| Card (id) | Family | Rarity | Str | Text | Why it's here |
+|---|---|---|---:|---|---|
+| Eagle (`eagle`) | Bird | common | 5 | Flight. | Egg Control, 2026-09-30: cut for the Eggs. |
+| Viper (`viper`) | Snake | common | 3 | Roar: an adjacent enemy gets -3 strength. | Egg Control, 2026-09-30: cut for the Eggs. Martin's note from play: the effect belongs on a flier. |
+| Anaconda (`anaconda`) | Snake | common | 7 | Apex Predator. | Egg Control rebuild, 2026-09-28. |
+| Puff Adder (`puff_adder`) | Snake | common | 3 | When an enemy covers this, remove that enemy if you control a Bird. | Replaced by Viper and Black Mamba, 2026-09-28. |
+| King Cobra (`king_cobra`) | Snake | rare | 4 | Roar: if you shuffled a card this turn, remove an adjacent enemy. | Replaced by Viper and Black Mamba, 2026-09-28. |
+| Secretary Bird (`secretary_bird`) | Bird | common | 3 | Flight. Roar: draw a Snake. | A midrange card, benched for Eagle. |
+| Egg Eater (`egg_eater`) | Snake | rare | 4 | Whenever an Egg is removed, gain 10 food. | Too weak. Martin wants it back with the Eggs once it's made useful. |
+| Eon, food engine (`eon_food_engine`) | Snake | legendary | 7 | Whenever a card is drawn, shuffled or removed, gain 1 food. | The old Eon; Eon is now the Ouroboros. |
+| Aquila (`aquila`) | Bird | legendary | 8 | Flight. Apex Predator. Costs 15 food. | Ramp pass, 2026-09-29. |
+| Unnamed Giant (`unnamed_giant`) | — | legendary | 10 | Apex Predator. Your regions produce no food. | Ramp pass, 2026-09-29: a strictly worse Borealis. |
+| Yuka (`yuka`) | Megafauna | legendary | 10 | Costs 15 food. | Ramp: Cairn took its slot; the mammoth is parked for an Ice Age set. |
+| Shuck (`shuck`) | Canine | legendary | 6 | Roar: return a removed Canine to your hand. Give it +2 strength. | Canine's hand-buff half, see below. |
+| Unnamed Rallier (`dhole`) | Canine | rare | 3 | Roar: give all adjacent Canines +3 strength. | Canine cut. |
+| Unnamed Scavenger (`jackal`) | Canine | rare | 5 | Whenever an adjacent unit is removed, gain 5 food. | Canine cut. |
+| Arctic Fox (`arctic_fox`) | Canine | rare | 3 | — | A bare placeholder for a rare Canine. |
+| Unnamed Canine (`unnamed_canine`) | Canine | common | 3 | Roar: if this has 5 or more strength, draw a card. | The draw-at-5 threshold payoff, see below. |
+
+---
 
 ---
 
@@ -36,13 +64,13 @@ A plain STR-7 wall with Armor. Re-home it in a deck with a slot for an armored w
 {"id": "gazelle", "name": "Gazelle", "deck": "food_otk", "rarity": "common", "type": "unit", "tags": [], "base_strength": 2, "keywords": [], "text": "When this is removed, gain 30 food."}
 ```
 
-> **Note:** the `deck` field above still reads `"food_otk"` — update it when re-homing (e.g. `"aristocrats_spider"` for the Spider deck). The effect handlers (`_carmilla_place`, `_black_widow_place`, `_gazelle_remove`, `_impala_remove`, `_opossum_place`, `_pufferfish_covered`) remain in `effects.py`.
+> **Note:** the `deck` field above still reads `"food_otk"`; update it when re-homing (e.g. `"aristocrats_spider"` for the Spider deck). The effect handlers (`_carmilla_place`, `_black_widow_place`, `_gazelle_remove`, `_impala_remove`, `_opossum_place`, `_pufferfish_covered`) remain in `effects.py`. The JSON predates later text rules: Opossum's "Deathrattle:" (no longer a keyword) and the 80-character limit need a rewrite when it comes back.
 
 ---
 
-## From the 2026-07-05 Canine tokens+reach rework
+## Canine's hand-buff half
 
-The Canine deck was split into two clean archetypes. Canine kept **tokens + board-buffs** (go wide, pump the board). The other half — **hand-buff / go-tall** — was pulled out to seed a future deck. Shuck and Coyote now sit in the **`reserve` deck slug** (in `cards.json`, excluded from play via `NON_DECK_SLUGS`); their effect handlers (`_shuck_place`, `_coyote_place`) still live in `effects.py`. Jackal and Dhole also moved to `reserve` (fully cut from Canine; available if wanted).
+The Canine deck was split into two archetypes. Canine kept **tokens and board buffs** (go wide, pump the board). The other half, **hand buffs / go tall**, was pulled out to seed a future deck: Shuck and the draw-at-5 Unnamed Canine are its seed pieces in the reserve.
 
 ### → future **hand-buff (Primates?)** deck
 
@@ -50,10 +78,10 @@ The mechanical thesis, and *why* it must be its own deck: **"if this has ≥N st
 
 Seed pieces (designs, not final cards):
 
-- **Shuck** (reserve) — recursion + hand-buff: "Roar: return a removed [family] to your hand, give it +2 strength."
-- **Coyote** (reserve) — a threshold payoff: "Roar: if this has 5+ strength, draw a card." (The founding member of the "≥N strength" package.)
-- **Red Wolf's *old* effect** — hand-buff: "Roar: give +1 strength to all [family] in your hand." (The Canine *animal* kept the name with a new on-enter effect; the hand-buff *effect* belongs here.)
+- **Shuck** (reserve): recursion and a hand buff, "Roar: return a removed [family] to your hand, give it +2 strength."
+- **Unnamed Canine** (reserve): the threshold payoff, "Roar: if this has 5 or more strength, draw a card." The founding member of the "≥N strength" package.
+- **A hand-buff Roar**: "give +1 strength to all [family] in your hand" (once Red Wolf's effect; the Canine that carried it is now Dhole, with a different effect).
 - **New hand-buff common** (proposed) — "STR 3, Roar: give +2 strength to two units in your hand." Works from an empty board — the go-tall catch-up tool.
 - **Reused threshold package** — mirror Colony's "5+ units" / OTK's "gained 10 food" payoff trio, but keyed on **strength** ("if this has ≥X strength: remove / draw / +str"). Keying on strength (not unit count) keeps it distinct from Colony and doubles down on the buff identity.
 
-Status: **not built.** When it is, re-home Shuck/Coyote by changing their `deck` from `reserve` to the new slug (add it to `DECK_SLUGS`), and build to the standard 4-4-6. See [`docs/rules/mental-model.md`](../rules/mental-model.md) for why strength/covering — not HP — drives whether a pre-grown threat can cover a given body.
+Status: **not built.** When it is, re-home Shuck and Unnamed Canine by changing their `deck` from `reserve` to the new slug (add it to `DECK_SLUGS`), and build to the standard 4-4-6. See [`docs/rules/mental-model.md`](../rules/mental-model.md) for why strength/covering — not HP — drives whether a pre-grown threat can cover a given body.
