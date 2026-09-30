@@ -24,18 +24,30 @@ All share one evaluation: `bots/greedy_bot.py` holds the terms and `bots/feature
 
 - TurnBot beats greedy on every deck, and RefereeBot beats TurnBot on every deck by roughly 4 to 14 points. The gaps differ per deck, so a TurnBot matrix is directional: it underrates the decks it underplays (ramp, canine, egg) and overrates the ones it plays near-optimally.
 - **The structural ceiling: no bot plans across turns.** The evaluation scores the current position. The `pending_payoff` term credits single delayed payoffs (hatching Eggs, bear timers), but no bot can play a multi-turn grow-then-win plan: a human piloting egg into cats won about 50% of games where the bots win about 24%. Treat any "loses" verdict for a scaling deck (egg, ramp) as unproven until a human has played it.
+- **The human gap:** in Martin's reverse gauntlet (2026-09-29, 10 games a deck with each premade against the goodstuff pile piloted by RefereeBot) he won 50%, where RefereeBot piloting the same decks gets 26%; Egg 5 of 10 against the bots' 8%, Ramp 8 of 10 against 38%. The gap is the pilot, not the pile: the same bot pilots the pile in both.
+- **Hoarding (the biggest measured flaw):** RefereeBot spends 30-34% of its actions drawing where Martin spends 17-27%, and leaves its Roar cards in hand (Viper played 0.44 times a game it is drawn against his 1.30, Owl 1.02 against 2.10, Termite Queen 0.83 against 1.50). Cause: `effect_readiness` pays 16 points per live Roar held in hand, and `card_economy` counts hand size against the opponent's, while a 7-strength unit on the board is worth 3.5 points of `board_presence`. In Martin's Canine position (tests/puzzles/canine_develop) the bot scores Draw 36 against a Wolf's 22 and draws to eight cards.
+- **Readiness is also a den-race proxy:** removing it (or the learned linear eval, which drops it) fixes the hoarding puzzles but costs Aggro and Canine about 12 points against the pile, almost all in den captures won and lost. Counting at most one live Roar (`readiness_cap=1`) recovers Canine but not Aggro, whose early draws are right (Martin draws there too). One weight can't be right for both decks; the value of holding a card depends on the hand and the board, which is what the value network is for.
 - **Known blind spots:** the region-control term overvalues the middle row, so bots never contest the flank rows as a den-rush lane. Cats beat aggro about 87% in sims, while Martin's play went 2 of 3 to aggro: the bots dump their hand where they should hold disruption. That matchup is a pilot flaw, not a card problem.
 
 ## The learned evaluator
 
-Self-play TD(λ) (`learn/`) fits the weights of a linear evaluation.
+Self-play TD(λ) (`learn/td.py`, `learn/train.py`) fits the weights of a linear evaluation.
 
 - **rung-0** learns weights for the 11 hand-written terms. It beats the hand weights on 6 of 7 decks and is the shipped learned eval (`rung0.json`); `rung0_identity.json` reproduces the hand weights.
 - **rung-1** added 13 dynamics features and regressed on 5 of 7 decks (food_otk −20 points). Cause: several new features duplicate rung-0 terms, and an unregularized fit on raw features moved weight toward self-play's majority rush dynamic. Training converged, so it wasn't undertrained.
-- **Next experiment:** standardize the features, add L2, and merge the duplicates (the scheduled-payoff pair and `pending_payoff`, den distance and den threat, income and region control). Then add conditional features such as "food × holding food payoffs". If a well-built linear eval still plateaus, that is the evidence to try a small neural net; time a forward pass at the search's leaf-eval rate first.
-- A better evaluation alone won't close the planning gap. The egg-vs-cats gap needs search depth plus a good leaf evaluation: this is the horizon problem that quiescence search and extensions solve in chess.
+- A better evaluation alone may not close the planning gap: the egg-vs-cats gap may need search depth plus a good leaf evaluation (the horizon problem quiescence search and extensions solve in chess). The search's pruning has its own horizon bug: it ranks a candidate by its half-resolved position, before its own sub-choice (a target, a kept card, an extra placement) resolves, so Owl never reached RefereeBot's search in any of the 18 turns Martin played it. `quiesce=1` resolves those sub-choices greedily before ranking; it is off by default and not yet benchmarked.
 
 Train with `.venv/bin/python -m animal_kingdom.learn.train --out results/learn/<run>` and promote with `animal_kingdom.learn.promote`.
+
+- **Outcome-fitted linear (2026-09-30):** a logistic fit of the rung-1 features on the outcomes of 5,600 RefereeBot games predicts winners better than the hand eval (held-out log-loss 0.570 against 0.591) but loses Aggro and Canine by 12-13 points as a pilot. Unconstrained, it credits what merely correlates with winning (fewer cards left in deck, live Roars in hand), which a search then exploits; sign constraints and dropping those terms remove the exploit but also the readiness term's den-race value.
+
+## The value network
+
+A small network over the rung-2 features (rung 1 plus hand and board context: Roars in hand against live ones, hand strength, fliers, affordable food cards, hand cards sharing a tag with the board, engines on the board, extra actions coming, den-front defence), trained on who won self-play games and iterated: train, let TurnBot play the next round with it, retrain.
+
+- `learn/selfplay.py` plays TurnBot games (hand eval or a network) across all 36 pairings of the premades and the pile, 5% random moves, and records the positions the search scores; about 4,000 games (150k positions) in 40 minutes on 8 cores.
+- `learn/net.py` fits one hidden ReLU layer on outcomes (split by game, a linear fit alongside as the yardstick) and writes a `NetEval` artifact (`bots/net_eval.py`, stdlib inference, scaled into hand-eval points). Load it as any learned eval: `referee_learned:eval=<path>`.
+- Round 0 (hand-eval pilots): the network predicts winners better than the linear fit on the same inputs, held-out log-loss 0.572 against 0.598.
 
 ## Throughput
 
@@ -45,4 +57,6 @@ Untried: a transposition cache keyed on the existing hidden-info-safe position d
 
 ## Measuring a bot change
 
-Use the paired benchmark: `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/<name>`, with `--baseline-kind` / `--candidate-kind` (for example `turn:deck_reveal_choice_width=0`). A change must improve or tie every deck, not just the average. Freeze the misplayed position as a puzzle in `tests/test_bot_puzzles.py` before fixing it. Mirror self-play is too noisy for small pilot changes; always compare against a fixed opponent.
+Use the paired benchmark: `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/<name>`, with `--baseline-kind` / `--candidate-kind` (for example `turn:deck_reveal_choice_width=0`). A change must improve or tie every deck, not just the average. `--opponents goodstuff` measures every deck against the pile, which is the matchup Martin's gauntlet measured, and the run keeps its game logs under `<out>/logs/`. A weight override goes in the bot spec: `referee:w.effect_readiness=0`. Mirror self-play is too noisy for small pilot changes; always compare against a fixed opponent.
+
+Freeze the misplayed position as a puzzle in `tests/test_bot_puzzles.py` before fixing it. The strongest puzzles are real positions from bot games that Martin has judged: saved as `GameState` snapshots in `tests/puzzles/`, shown to him in the client's lab view (`#/lab/<name>`, card text on hover), asserting the set of moves he accepts (a guard puzzle asserts a move the bot already gets right). Puzzles catch specific misplays but don't prove strength: readiness at 0 passes all of them and still loses games.
