@@ -3,7 +3,7 @@
 // Click a card to add a copy, right-click it or click its strip to take one out; every change saves.
 // app.js hands in what it owns: the cards, the starter decks, the player's decks and how to save them, toast, play, back.
 import { cardHTML, fitNames, KEYWORDS } from './card.js';
-import { CROP, artUrl, stripArt } from './art.js';
+import { CROP, artUrl, stripArt, fitStrips } from './art.js';
 import { encodeDeck, decodeDeck } from './deckcode.js';
 import { dd, wireDd } from './menu.js';
 
@@ -98,9 +98,9 @@ function render(app, all) {
 
   const body = d => deckBody(d.list, C);
   const tile = d => d.id === st.open
-    ? `<div class="dtile on" data-d="${d.id}" style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
+    ? `<div class="dtile on" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b class="nm-edit" title="Rename">${esc(d.name)}</b>
         <div class="tacts"><button class="ic" id="dcover" data-tip="Change cover">${ICON.image}</button><button class="ic" id="dcopy" data-tip="Copy deck code">${ICON.copy}</button><button class="ic del" id="ddel" data-tip="Delete deck">${ICON.trash}</button></div></div>${body(d)}`
-    : `<div class="dtile" data-d="${d.id}" style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b></div>`;
+    : `<div class="dtile" data-d="${d.id}"${d.cover ? ` data-strip="${d.cover}" data-ax=".7"` : ''} style="${d.cover ? stripArt(d.cover, 284, 56, .7) : ''}"><b>${esc(d.name)}</b></div>`;
   // Two states, as in Hearthstone: your deck list (New deck is the slot after the last deck, Back in the foot), or one deck
   // being edited (only that deck; Play and Done in the foot).
   const column = open
@@ -111,6 +111,7 @@ function render(app, all) {
       <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${DECKS_MAX}</b><span>Decks</span></div><button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
   app.innerHTML = `<div class="coll mscr">${head}<div class="cgrid">${grid}</div><div class="side">${column}</div><div class="modal" id="cmodal"></div></div>`;
+  fitStrips(app);   // the deck tiles are as wide as the column (upright, the window)
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
   fitNames(app);
   wire(app, all, open);

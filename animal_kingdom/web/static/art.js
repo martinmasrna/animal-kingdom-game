@@ -69,6 +69,11 @@ export const FULL = {
 export const hasArt = id => id in CROP;
 export const artUrl = id => `/static/art/${id}.jpg`;
 // A strip W x H px with its focus at ax of its width: the art zoomed, shifted as close to the focus as its edges allow.
+// Deck tiles whose width follows the window (upright, one column): refit each [data-strip] tile's art to its drawn size.
+export const fitStrips = root => root.querySelectorAll('[data-strip]').forEach(el => {
+  const { offsetWidth: W, offsetHeight: H } = el; if (!W) return;
+  el.style.cssText += ';' + stripArt(el.dataset.strip, W, H, +el.dataset.ax);
+});
 export const stripArt = (id, W, H, ax) => {
   if (!STRIP[id]) return `background-image:url(${artUrl(id)})`;
   const [x, y, z] = STRIP[id], w = W * z, h = w * 1.5, fit = (v, lo) => Math.min(0, Math.max(lo, v));

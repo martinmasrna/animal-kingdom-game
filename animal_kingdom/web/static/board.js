@@ -7,18 +7,12 @@ import { KEYWORDS } from './card.js';
 import { pitStates, heldRegions, boardChanges, incomeFlights } from './turn.js';
 
 export const STAGE = { w: 1512, h: 800 };
-// A window taller than wide (a phone held upright) gets the board upright: the plate and everything on it turn a quarter
-// left as one layer (your den at the bottom, you attack upward), each piece turned back so it reads upright, on a tall
-// stage (setView). Board coordinates stay the landscape ones; toStage maps them onto the stage for whatever travels to them.
+// A window taller than wide (a phone held upright) gets its own board: a painting made upright (kit2/plate_port.webp,
+// your den at the bottom, you attack upward) on a tall stage, with its own measured places for everything (PORT_AT);
+// nothing is turned. setView picks the layout; every place below reads it.
 export const LAND = { w: 1512, h: 800 }, PORT = { w: 720, h: 1440 };
-export const VIEW = { port: false, s: 1, tx: 0, ty: 0 };
-export function setView(port) {
-  Object.assign(STAGE, port ? PORT : LAND);
-  // the board's content (dens, pits and clearings: x 50-1462, y 80-640) centred across, between the two hands
-  Object.assign(VIEW, port ? { port, s: 0.8, tx: PORT.w / 2 - 0.8 * 360, ty: 650 + 0.8 * 756 } : { port, s: 1, tx: 0, ty: 0 });
-}
-export const toStage = ([x, y]) => VIEW.port ? [VIEW.tx + VIEW.s * y, VIEW.ty - VIEW.s * x] : [x, y];
-export const boardTransform = () => VIEW.port ? `translate(${VIEW.tx}px, ${VIEW.ty}px) rotate(-90deg) scale(${VIEW.s})` : '';
+export const VIEW = { port: false };
+export function setView(port) { Object.assign(STAGE, port ? PORT : LAND); VIEW.port = port; }
 const key = (c, r) => `${c},${r}`;
 const BOARD_KW = ['Armor', 'Stealth'];   // the keywords a unit wears as a badge on the board
 const kit = f => `/static/kit2/${f}`;
@@ -29,15 +23,24 @@ const PX = x => x / 1.10582, PY = y => y / 1.10582 - 25;
 const CLEARINGS = [[282.3, 225.4], [558.4, 224.0], [831.6, 223.5], [1112.7, 222.8], [1382.6, 223.7],
   [288.2, 401.2], [559.6, 398.5], [834.1, 399.7], [1110.5, 396.6], [1384.7, 399.6],
   [288.1, 568.2], [557.0, 576.0], [835.9, 575.8], [1111.0, 572.9], [1379.8, 576.2]];
-const at = (c, r) => { const [x, y] = CLEARINGS[(r - 1) * 5 + c - 1]; return [PX(x), PY(y)]; };
+// Upright (stage px on the 720x1440 stage, measured on plate_port; the design sandbox's screen/kit/plate/port/): the
+// clearings three across (row r left to right) and five up (column c from your den), each den's ridge across the top or
+// bottom with its ten pits filling left to right toward the crown boulder at its right end, the cave mouth mid-ridge.
+const PORT_AT = { cols: [150, 352, 550], rows: [1037, 853, 660, 469, 271],
+  pits: { A: { x: [172, 544], y: 1208 }, B: { x: [172, 544], y: 98 } },
+  crown: { A: [600, 1208], B: [600, 98] }, mouth: { A: [386, 1177], B: [356, 124] } };
+const at = (c, r) => { if (VIEW.port) return [PORT_AT.cols[r - 1], PORT_AT.rows[c - 1]];
+  const [x, y] = CLEARINGS[(r - 1) * 5 + c - 1]; return [PX(x), PY(y)]; };
 // A crossroad's centre on the stage, for anything that travels to it.
-export const crossroadAt = cr => toStage(at(...cr.split(',').map(Number)));
+export const crossroadAt = cr => at(...cr.split(',').map(Number));
 // A den's cave mouth (its HQ) on the stage, and the gem on its crown.
-export const denMouthAt = side => toStage(MOUTH[side]);
-export const gemAt = side => toStage(CROWN[side]);
+export const denMouthAt = side => VIEW.port ? PORT_AT.mouth[side] : MOUTH[side];
+export const gemAt = side => VIEW.port ? PORT_AT.crown[side] : CROWN[side];
 // Each den's ten pits from the bottom of its ridge up, the gem on its crown boulder, its cave mouth (the HQ).
 const PIT_Y = [690, 637, 584, 531, 478, 425, 372, 319, 266, 213], RIDGE = { A: 110, B: 1565 };
-const PITS = side => PIT_Y.map((y, i) => [PX(RIDGE[side] + (i % 2 ? 6 : -6)), PY(y)]);
+const PITS = side => { if (VIEW.port) { const { x: [x0, x1], y } = PORT_AT.pits[side];   // upright: left to right along the ridge
+    return PIT_Y.map((_, i) => [x0 + (x1 - x0) * i / 9, y + (i % 2 ? 5 : -5)]); }
+  return PIT_Y.map((y, i) => [PX(RIDGE[side] + (i % 2 ? 6 : -6)), PY(y)]); };
 const CROWN = { A: [PX(118), PY(150)], B: [PX(1565), PY(150)] }, MOUTH = { A: [PX(176), PY(390)], B: [PX(1500), PY(378)] };
 const FLY = 0.7, GAP = 0.035;   // seconds a fruit takes from its stone to its pit, and between two fruit leaving
 
@@ -104,15 +107,15 @@ export function renderBoard(el, M, g, cards, ui) {
 
   // Removed units drain, sink and leave dust; returned ones lift and fly to their owner's side of the screen.
   for (const { cr, unit: u, how } of leaving) {
-    // toward its owner's hand, in screen directions (upright, a piece is turned back, so its motion reads on the screen)
-    const [x, y] = at(...cr.split(',').map(Number)), [sx, sy] = toStage([x, y]), hx = (STAGE.w / 2 - sx) / VIEW.s, hy = ((u.owner === 'A' ? STAGE.h - 100 : -40) - sy) / VIEW.s;
+    // toward its owner's hand
+    const [x, y] = at(...cr.split(',').map(Number)), hx = STAGE.w / 2 - x, hy = (u.owner === 'A' ? STAGE.h - 100 : -40) - y;
     s += `<div class="abs leave ${how} unit ${u.owner}" style="left:${x}px;top:${y}px;--hx:${hx}px;--hy:${hy}px">${unit(u, [], cards)}</div>`;
   }
 
   const stonesOf = side => held.filter(r => r.owner === side).map(r => { const [x, y] = stoneAt(r); return { x, y, food: r.food }; });
   for (const side of ['A', 'B']) s += den(side, g, A, stonesOf(side), ui);
   // The unit that took a den stands in its mouth: the game's last move, drawn where it won.
-  if (ui.capture) { const [mx, y] = MOUTH[ui.capture.side], x = mx + (ui.capture.side === 'A' ? -22 : 22);   // seated in the mouth, clear of the crossroad beside it
+  if (ui.capture) { const [mx, my] = denMouthAt(ui.capture.side), x = VIEW.port ? mx : mx + (ui.capture.side === 'A' ? -22 : 22), y = VIEW.port ? my + (ui.capture.side === 'A' ? 22 : -22) : my;   // seated in the mouth, clear of the crossroad beside it
     s += put(`cr unit ${ui.capture.owner} capture${A ? ' land' + (late ? ' late' : '') : ''}`, x, y, unit(ui.capture, [], cards)); }
   el.innerHTML = s;
 
@@ -148,7 +151,7 @@ function den(side, g, A, stones, ui) {
     s += put(`pit${changed ? ' ripen' : ''}`, x, y, (changed ? `<img class="was" src="${src(before[i], i)}" alt="" draggable="false" ${delay}>` : '') +
       `<img class="now" src="${src(now[i], i)}" alt="" draggable="false" ${delay}>`);
   });
-  const [kx, ky] = CROWN[side], [mx, my] = MOUTH[side], counting = gained && !reducedMotion();
+  const [kx, ky] = gemAt(side), [mx, my] = denMouthAt(side), counting = gained && !reducedMotion();
   const timing = flights.length ? `data-lag="${FLY * 1000}" data-dur="${flights.length * GAP * 1000}"`
     : `data-lag="150" data-dur="${300 + 110 * Math.ceil((food - (gained ? A.food[side] : food)) / 10)}"`;
   return s + put(`dcount ${side}${gained ? ' tick' : ''}`, kx, ky, gemDigits(counting ? A.food[side] : food),

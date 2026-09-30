@@ -1,8 +1,8 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
-import { hasArt, artUrl, stripArt } from './art.js';
+import { hasArt, artUrl, stripArt, fitStrips } from './art.js';
 import { cardHTML, fitNames } from './card.js';
-import { renderBoard, STAGE, VIEW, setView, boardTransform, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
+import { renderBoard, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML } from './collection.js';
 import { dd, wireDd } from './menu.js';
 import { openFeedback } from './feedback.js';
@@ -137,7 +137,7 @@ function homeScreen(mode = {}) {
   const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
     : ['Bot', `${label(LEVELS, play.level)} · ${bd ? bd.name + ' deck' : 'Random deck'}`];
   const go = mode.join ? 'Join match' : play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
-  const tile = (d, W, cls = '') => `<div class="dtile${cls}" data-deck="${d.id}" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b></div>`;
+  const tile = (d, W, cls = '') => `<div class="dtile${cls}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b></div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
   const deckList = d => deckBody(d.list, CARDS, false, true) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
   const chooser = play.open === 'decks'
@@ -151,10 +151,11 @@ function homeScreen(mode = {}) {
   const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${chooser}
     <div class="top"><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : `<button class="backbtn${play.open === 'learn' ? ' open' : ''}" id="learn2"><span>How to play</span></button>`}<a class="backbtn" href="#/profile"><span>Profile</span></a><button class="backbtn" id="fbhome"><span>Feedback</span></button></div>
-    ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
+    ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
       <button class="play" id="go">${go}</button></div>`}</div>`;
   const $ = id => document.getElementById(id), root = app.querySelector('.home');
+  fitStrips(root);   // the tiles are as wide as the window allows (upright, one column)
   $('fbhome').onclick = feedback;
   if (first) {   // Learn to play picks up at lesson 2 once lesson 1 is won
     $('learn').onclick = () => startTutorial(store('ak:lesson') === '1' ? 2 : 1);
@@ -509,7 +510,7 @@ function drawGame() {
   lastDecision = d;
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
-  $('series').style.right = 16 + (VIEW.port ? 80 : 52) * [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length + 'px';   // History, left of feedback and the flag
+  $('series').style.right = 16 + (VIEW.port ? 72 : 52) * [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length + 'px';   // History, left of feedback and the flag
   $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
   // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
   $('menubtn').querySelector('svg').innerHTML = isTutorial() ? '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>'
@@ -537,7 +538,7 @@ function drawGame() {
     el.onmouseenter = () => cardPop(el, el.dataset.card, null, 'below'); el.onmouseleave = () => pop.style.display = 'none'; }); }
 
   // Your hand, centred under the board.
-  const n = G.hand.length, cw = 143, gap = n > 1 ? Math.min(14, (PL().handW - n * cw) / (n - 1)) : 0, x0 = STAGE.w / 2 - (n * cw + (n - 1) * gap) / 2;
+  const n = G.hand.length, cw = 143, gap = n > 1 ? Math.min(14, (PL().handW - n * cw) / (n - 1)) : 0, x0 = PL().handC - (n * cw + (n - 1) * gap) / 2;
   const hand = $('hand');
   let drawnK = 0;
   hand.innerHTML = G.hand.map((h, i) => {
@@ -553,8 +554,17 @@ function drawGame() {
     return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
   }).join('');
   fitNames(hand);
+  // touch: press and hold a card to read it large (a tap picks it); the click that ends a hold does nothing
+  hand.querySelectorAll('.hc').forEach(el => {
+    let t = null;
+    const end = () => { clearTimeout(t); if (el.classList.contains('peek')) { el.classList.remove('peek'); el.dataset.held = '1'; } };
+    el.ontouchstart = () => { clearTimeout(t); t = setTimeout(() => el.classList.add('peek'), 350); };
+    el.ontouchend = el.ontouchcancel = end; el.ontouchmove = end;
+    el.oncontextmenu = e => e.preventDefault();   // a long press opens no menu
+  });
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
     e.stopPropagation();
+    if (el.dataset.held) { delete el.dataset.held; return; }   // it was held to read, not tapped
     const iid = Number(el.dataset.iid), id = el.dataset.id;
     if (d.handPick.has(iid)) return act({ kind: 'choice', choice: iid });
     if (!d.mine || !d.places[id] || !el.classList.contains('can')) return;   // a dimmed copy (the tutorial lights one) does nothing
@@ -628,10 +638,10 @@ function drawGame() {
 // The tutorial's coach: a granite piece standing beside what the lesson talks about, its notch pointing at it: above a
 // card in the hand, the deck or End turn, beside a crossroad (on the side with more room), a region's stone or a den.
 let COACH_W = 300;   // 400 upright (game.css .port .coach)
-// Where the edge pieces stand, on the wide stage or the upright one (game.css .port): the hand's top, the deck's and End
-// turn's centre tops, the hand's width.
-const PL = () => VIEW.port ? { hand: STAGE.h - 210, deck: [636, 790], end: [636, 970], handW: STAGE.w - 32 }
-  : { hand: 590, deck: [1299, 606], end: [1439, 664], handW: 940 };
+// Where the edge pieces stand, on the wide stage or the upright one (game.css .port): the hand's top, centre and width, the
+// deck's and End turn's centre tops.
+const PL = () => VIEW.port ? { hand: STAGE.h - 210, handC: 300, handW: 568, deck: [655, 1238], end: [655, 1372] }   // upright the deck and End turn end the hand's row
+  : { hand: 590, handC: STAGE.w / 2, deck: [1299, 606], end: [1439, 664], handW: 940 };
 // While a line waits for Next, the tutorial's opponent waits too: its moves would run over the line (told to the server once per change).
 let botHeld = false;
 const holdBot = on => { if (on !== botHeld && isTutorial()) { botHeld = on; send({ t: 'hold', on }); } };
@@ -655,7 +665,7 @@ function placeCoach(el, L, rings = []) {
   else if (a.endturn) [x, y, side] = [P.end[0] + out, P.end[1] + up, 'above'];
   else if (a.cr) { [x, y] = crossroadAt(a.cr); if (port) [x, y, side] = vert(x, y, 52); else side = x > STAGE.w / 2 ? 'left' : 'right'; }
   else if (a.den) { [x, y] = denMouthAt(a.den); if (port) [x, y, side] = vert(x, y, 40); else side = a.den === 'B' ? 'left' : 'right'; }
-  else if (a.rings && !rings.length) [x, y, side] = [STAGE.w / 2, H, 'above'];   // no card picked yet: the circles come with one, so point at the hand
+  else if (a.rings && !rings.length) [x, y, side] = [P.handC, H, 'above'];   // no card picked yet: the circles come with one, so point at the hand
   else if (a.rings) {   // beside the group of rings, clear of all of them, with no notch (the rings pulse instead)
     const rs = rings.map(crossroadAt);   // this frame's rings, before the board redraws
     const xs = rs.map(r => r[0]), ys = rs.map(r => r[1]), cy = (Math.min(...ys) + Math.max(...ys)) / 2;
@@ -667,7 +677,7 @@ function placeCoach(el, L, rings = []) {
       : [STAGE.w / 2, H, 'above'];   // circles across the whole board (Flight): above the hand, pointing at the picked card
   }
   else if (a.gem) { const g = gemAt(a.gem); [x, y, side] = port ? vert(g[0], g[1], 44) : a.gem === 'A' ? [150, 122, 'right'] : [STAGE.w - 150, 122, 'left']; }   // a den's food gem, on its crown
-  else if (a.hand) [x, y, side] = [STAGE.w / 2, H, 'above'];
+  else if (a.hand) [x, y, side] = [P.handC, H, 'above'];
   else if (a.oppcards) [x, y, side] = port ? [STAGE.w / 2, 72, 'below'] : [STAGE.w / 2 + 170, 72, 'below'];   // beside the opponent's card backs, clear of their revealed card
   else if (a.middle) [x, y, side] = port ? [STAGE.w / 2, 650, 'mid'] : [STAGE.w / 2, 250, 'mid'];
   else if (a.region) {   // to the right of the region, which glows (drawBoard), clear of all of it
@@ -756,8 +766,9 @@ function fitStage(redraw = true) {
   const port = innerHeight > innerWidth, flip = port !== VIEW.port;
   setView(port); document.getElementById('scr').classList.toggle('port', port);
   const k = Math.min(innerWidth / STAGE.w, innerHeight / STAGE.h), t = `scale(${k}) translate(${-STAGE.w / 2}px, ${-STAGE.h / 2}px)`;
-  st.style.transform = t; document.getElementById('world').style.transform = `${t} ${boardTransform()}`;
-  document.getElementById('board').style.transform = boardTransform();
+  st.style.transform = t; document.getElementById('world').style.transform = t;
+  const plate = document.querySelector('#world img'), src = `/static/kit2/plate_${port ? 'port' : 'wide'}.webp`;   // upright, its own painting
+  if (!plate.src.endsWith(src)) plate.src = src;
   // the savanna around the stage, in stage px: the pieces at the screen's edges (hands, corners, deck, End turn) sit at the
   // window's edges, not the stage's, so a window of another shape widens the ground between them, never leaves them floating
   st.style.setProperty('--above', `${Math.max(0, (innerHeight / k - STAGE.h) / 2)}px`);

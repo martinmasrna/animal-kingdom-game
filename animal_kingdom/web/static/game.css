@@ -418,12 +418,12 @@
 .game.kit .unit .buried.seen.A .fill { background: var(--Adk); } .game.kit .unit .buried.seen.B .fill { background: var(--Bdk); }
 
 /* Upright (a window taller than wide, board.js setView): its own tall stage and its own painting (kit2/plate_port.webp:
-   canvas 1260x2124 plate px at 0.723 stage px each, centred on the stage), every piece placed on it upright (board.js
+   1260x2524 plate px at 0.723 stage px each), every piece placed on it upright (board.js
    PORT_AT). The opponent's cards along the top, your hand along the bottom, ending in your deck and End turn. On a phone
    the stage shows at about half size, so what is read or tapped grows to stay a thumb's size. */
 .game.port { background: #5d4829; }   /* the ground's dark earth, past the painting's end on the tallest phones */
 .game.port #stage, .game.port #world { width: 720px; height: 1440px; }
-.game.port #world img { left: -95.5px; top: -92.8px; width: 911px; height: 1535.7px; }   /* 45 px above centre: both dens clear of both hands */
+.game.port #world img { left: -95.5px; top: -237.4px; width: 911px; height: 1824.9px; }   /* 45 px above centre (both dens clear of both hands), 200 plate px of savanna beyond each end */
 .game.port .hand { top: 1230px; }
 .game.port .ledge { display: none; }
 .game.port.kit .deck { left: 606px; top: 1238px; width: 98px; height: 128px; font-size: 22px; }   /* the deck over End turn, at the right end of the hand's row */
