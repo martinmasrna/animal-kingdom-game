@@ -139,7 +139,9 @@ export const LESSONS_2 = [
   { id: 'mamba', when: c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
     only: c => ({ card: 'black_mamba', crs: c.nextToFlier }), at: { rings: true },
     text: c => ({ pick: 'Click the Black Mamba.', place: c.stackRescue ? 'Now click the circle next to the Eagle. An animal can also go on top of one of your own.' : 'Now click the circle next to the Eagle.' }) },
-  TARGET,
+  // the Mamba's Roar is for the Eagle: a dog beside the circle would be a legal target too, and leave the Squirrel covered
+  { ...TARGET, only: c => c.squirrelCovered ? { crs: [c.squirrelAt] } : undefined,
+    text: c => c.squirrelCovered ? 'Click the Eagle to remove it.' : TARGET.text },
   { id: 'uncovered', when: c => c.squirrelBack, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'The Eagle is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
   { id: 'goal2', when: c => c.mine && c.wall && c.placed('black_mamba'), ...talk, at: { cr: '5,2' },   // beside its den's middle animal, clear of all three

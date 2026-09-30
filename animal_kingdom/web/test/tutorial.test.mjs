@@ -122,3 +122,12 @@ test('a covered Squirrel is shown, then uncovered by the Jaguar placed next to t
 
 
 
+
+test('the Black Mamba\'s Roar targets only the Eagle on the Squirrel, even with a dog beside it', () => {
+  const t = fresh(); ['intro2', 'glow', 'lynx', 'eagleinfo', 'eagle', 'draw2', 'squirrel', 'covered', 'mambainfo', 'mamba'].forEach(id => t.seen.add(id));
+  const board = { '1,2': u('lion', 'A'), '2,2': [squirrel, falcon], '2,1': u('black_mamba', 'A'), '3,1': u('pup', 'B') };
+  const hist = [{ seat: 'A', kind: 'place', card: 'squirrel', fx: [] }, { seat: 'B', kind: 'place', card: 'eagle', fx: [{ k: 'cover', card: 'squirrel' }] }];
+  const pending = { mode: 'choice', options: [{ kind: 'cr', v: '2,2' }, { kind: 'cr', v: '3,1' }] };
+  const L = current(v2({ round: 3, board, history: hist, pending, legal: null }), null, CARDS, t);
+  assert.equal(L.id, 'target'); assert.deepEqual(L.only, { crs: ['2,2'] }); assert.equal(L.text, 'Click the Eagle to remove it.');
+});

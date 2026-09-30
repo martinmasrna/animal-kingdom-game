@@ -144,11 +144,12 @@ function homeScreen(mode = {}) {
     : play.open === 'opp' ? `<div class="chooser opps">${play.opp === 'gauntlet' ? levels + dd('side', play.side, SIDES)
       : `<div class="seg"><button class="slab${play.opp === 'bot' ? ' on' : ''}" data-opp="bot">Bot</button><button class="slab${play.opp === 'friend' ? ' on' : ''}" data-opp="friend">Friend</button></div>`
         + (play.opp === 'friend' ? `<div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
-          : levels + dd('botDeck', play.botDeck, botDecks))}</div>` : '';
+          : levels + dd('botDeck', play.botDeck, botDecks))}</div>`
+    : play.open === 'learn' ? `<div class="chooser lessons">${LESSON_NAMES.map((n, i) => `<button class="slab" data-lesson="${i + 1}"><b>Lesson ${i + 1}</b>${n}</button>`).join('')}</div>` : '';
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
   const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${chooser}
-    <div class="top"><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : '<button class="backbtn" id="learn2"><span>How to play</span></button>'}<a class="backbtn" href="#/profile"><span>Profile</span></a></div>
+    <div class="top"><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : `<button class="backbtn${play.open === 'learn' ? ' open' : ''}" id="learn2"><span>How to play</span></button>`}<a class="backbtn" href="#/profile"><span>Profile</span></a></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
       <button class="play" id="go">${go}</button></div>`}</div>`;
@@ -156,11 +157,12 @@ function homeScreen(mode = {}) {
   if (first) {   // Learn to play picks up at lesson 2 once lesson 1 is won
     $('learn').onclick = () => startTutorial(store('ak:lesson') === '1' ? 2 : 1);
     $('known').onclick = () => { store('ak:learned', '1'); redraw(); }; return; }
-  $('learn2').onclick = () => startTutorial(1);
   const toggle = k => { play.open = play.open === k ? null : k; play.peek = null; redraw(); };
+  $('learn2').onclick = () => toggle('learn');   // any lesson again, not only from the first
+  root.querySelectorAll('[data-lesson]').forEach(el => el.onclick = () => startTutorial(+el.dataset.lesson));
   $('deckbtn').onclick = () => toggle('decks');
   if (!mode.join) $('oppbtn').onclick = () => toggle('opp');
-  root.onclick = e => { if (play.open && !e.target.closest('.chooser, .pick')) { play.open = null; redraw(); } };   // a click elsewhere closes the chooser
+  root.onclick = e => { if (play.open && !e.target.closest('.chooser, .pick, #learn2')) { play.open = null; redraw(); } };   // a click elsewhere closes the chooser
   root.querySelectorAll('.chooser [data-deck]').forEach(el => {
     // A click picks the deck and shows its list; the chooser stays open to read it (hover changed the list on the way to it).
     el.onclick = () => { store('ak:deck', el.dataset.deck); play.peek = el.dataset.deck; redraw(); };
@@ -196,6 +198,7 @@ function homeScreen(mode = {}) {
 }
 // The tutorial: a real game with a fixed deal against a gentle opponent, a coach teaching one step at a time (tutorial.js).
 // Two lessons: the basics (won by taking the den), then the deeper mechanics (won on food). Learned after the second.
+const LESSON_NAMES = ['The basics', 'Special powers'];   // tutorial.py's lessons, in order
 const learned = () => !!store('ak:learned') || !!(ME && ME.history && ME.history.length);
 async function startTutorial(lesson = 1) {
   const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ tutorial: lesson, name: 'You' }) });
@@ -407,6 +410,8 @@ function decision() {
       else if (o.kind === 'card') d.cardOpts.push(o);
       else d.otherOpts.push(o);
     }
+    if (d.lesson && d.lesson.only && d.lesson.only.crs)   // a lesson's target step: only the target it teaches
+      d.crChoice = Object.fromEntries(Object.entries(d.crChoice).filter(([cr]) => d.lesson.only.crs.includes(cr)));
     d.rings = Object.keys(d.crChoice);
     ui.sel = null;
   } else {
