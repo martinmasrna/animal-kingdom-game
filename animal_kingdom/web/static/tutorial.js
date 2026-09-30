@@ -59,7 +59,7 @@ export const LESSONS = [
     text: 'Animals stand on crossroads, the sandy circles. Your first animal goes next to your den: click one of the circled crossroads.',
     only: { card: 'lion' }, at: { rings: true } },
   { id: 'buffalo', when: c => c.mine && c.round === 1 && c.units === 1,
-    text: { pick: 'Now the Buffalo. Click it.', place: 'Animals can only stand next to your den or next to your other animals. Click one of the circles.' },
+    text: { pick: 'Now the Buffalo. Click it.', place: 'Your animals must form a chain back to your den. Click one of the circles.' },
     only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo') }), at: { rings: true } },
   { id: 'watch', when: c => c.theirs && c.round === 1, at: { oppcards: true },
     text: 'Now it\'s your opponent\'s turn. Watch where the red animals go.' },
