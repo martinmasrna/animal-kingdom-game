@@ -11,31 +11,31 @@
 .mscr .frow { display: flex; gap: 8px; width: 100%; }
 
 /* Stone slabs: a step lighter than the ground, a lit top edge, a soft shadow; hover lightens the stone, nothing moves. */
-.mscr .backbtn, .mscr .dd .sel, .mscr .slab, .game .slab { box-sizing: border-box; border: 0; border-radius: 10px; background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto;
+.mscr .backbtn, .mscr .dd .sel, .mscr .slab, .game .slab, .fbov .slab { box-sizing: border-box; border: 0; border-radius: 10px; background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto;
   box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); color: #f0e8da; font: 500 16px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
-.mscr .backbtn:hover, .mscr .dd .sel:hover, .mscr .slab:hover, .game .slab:hover { filter: brightness(1.2); color: #f3ead8; }
+.mscr .backbtn:hover, .mscr .dd .sel:hover, .mscr .slab:hover, .game .slab:hover, .fbov .slab:hover { filter: brightness(1.2); color: #f3ead8; }
 .mscr .backbtn { width: 100%; height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; }
 .mscr .backbtn span { font: 600 16px 'Fira Sans Condensed', sans-serif; }
 .mscr .frow .backbtn { width: auto; flex: none; min-width: 112px; }
 
 /* The one loud control (the game screen's too): the slab in your team blue (the board's blue). Disabled, it is stone and does nothing. */
-.mscr .play, .game .play { width: 100%; height: 48px; margin: 0; border: 0; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
+.mscr .play, .game .play, .fbov .play { width: 100%; height: 48px; margin: 0; border: 0; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
   background: linear-gradient(rgba(52,112,190,.5), rgba(38,88,160,.58)), #2a4a70 url(/static/kit2/coll_slab.webp) center / 300px auto; background-blend-mode: color, normal, normal;
   box-shadow: inset 0 1px 0 rgba(200,225,255,.35), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55);
   color: #f4f8ff; font: 700 19px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
-.mscr .play:hover, .game .play:hover { filter: brightness(1.15); }
-.mscr .play:disabled { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; color: #8f8577; text-shadow: none; filter: saturate(.3) brightness(.8); cursor: default; }
+.mscr .play:hover, .game .play:hover, .fbov .play:hover { filter: brightness(1.15); }
+.mscr .play:disabled, .fbov .play:disabled { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; color: #8f8577; text-shadow: none; filter: saturate(.3) brightness(.8); cursor: default; }
 
 /* Sunken: a count, or a field you type into. */
 .mscr .fcount { flex: 1; height: 44px; border-radius: 10px; display: grid; grid-auto-flow: column; place-content: center; align-items: baseline; column-gap: 5px; line-height: 1;
   background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); color: #ddd3c3; }
 .mscr .fcount b { display: block; font: 700 17px/1 'Fira Sans Condensed', sans-serif; }
 .mscr .fcount span { display: block; font: 500 15px/1 'Fira Sans Condensed', sans-serif; color: #9d917e; }
-.mscr .field { height: 40px; box-sizing: border-box; padding: 0 14px; border: 0; border-radius: 10px; background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6);
+.mscr .field, .fbov .field { height: 40px; box-sizing: border-box; padding: 0 14px; border: 0; border-radius: 10px; background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6);
   color: #f0e8da; font: 500 16px 'Fira Sans Condensed', sans-serif; }
-.mscr .field::placeholder { color: #b3a996; }
+.mscr .field::placeholder, .fbov .field::placeholder { color: #b3a996; }
 .mscr .field:hover { background: rgba(28,25,22,.55); }
-.mscr .field:focus { outline: 0; box-shadow: inset 0 1px 3px rgba(0,0,0,.6), 0 0 0 2px rgba(207,195,173,.6); }
+.mscr .field:focus, .fbov .field:focus { outline: 0; box-shadow: inset 0 1px 3px rgba(0,0,0,.6), 0 0 0 2px rgba(207,195,173,.6); }
 
 /* The screen's own dropdown: a slab showing the choice, the list hanging from it in the same stone; a whole row highlights. */
 .mscr .dd { position: relative; }
@@ -164,3 +164,14 @@
 :is(.mscr, .game) .dbody .st .x { align-self: stretch; min-width: 26px; padding: 0 9px 0 14px; justify-content: flex-end; align-items: center;
   background: linear-gradient(90deg, rgba(20,17,14,0), rgba(20,17,14,.85) 45%); font: 700 17px 'Fira Sans Condensed', sans-serif; color: #efe3cc; text-shadow: 0 1px 2px #000; }
 :is(.mscr, .game) .dbody .st .x:empty { display: none; }
+
+/* Feedback (feedback.js): one granite piece over any screen, a box to write in, Send. */
+.fbov { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: rgba(10,9,8,.72); }
+.fbbox { width: 520px; max-width: calc(100vw - 32px); box-sizing: border-box; padding: 18px; display: flex; flex-direction: column; gap: 12px; border-radius: 16px;
+  background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 16px 40px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,245,230,.12);
+  color: #d8d4cc; font-family: 'Fira Sans Condensed', sans-serif; }
+.fbbox b { font: 700 22px 'Fira Sans Condensed', sans-serif; color: #f0ece4; }
+.fbbox textarea.field { height: 180px; padding: 12px 14px; resize: none; line-height: 1.35; }
+.fbbox p { margin: 0; font-size: 14px; color: #a99f8e; }
+.fbbox .btns { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+.fbbox .btns .slab { height: 48px; }

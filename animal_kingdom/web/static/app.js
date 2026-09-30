@@ -5,6 +5,7 @@ import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, crossroadAt, denMouthAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML } from './collection.js';
 import { dd, wireDd } from './menu.js';
+import { openFeedback } from './feedback.js';
 import { current as lessonNow, gate, held, lessonOf } from './tutorial.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
@@ -149,11 +150,12 @@ function homeScreen(mode = {}) {
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
   const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${chooser}
-    <div class="top"><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : `<button class="backbtn${play.open === 'learn' ? ' open' : ''}" id="learn2"><span>How to play</span></button>`}<a class="backbtn" href="#/profile"><span>Profile</span></a></div>
+    <div class="top"><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : `<button class="backbtn${play.open === 'learn' ? ' open' : ''}" id="learn2"><span>How to play</span></button>`}<a class="backbtn" href="#/profile"><span>Profile</span></a><button class="backbtn" id="fbhome"><span>Feedback</span></button></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
       <button class="play" id="go">${go}</button></div>`}</div>`;
   const $ = id => document.getElementById(id), root = app.querySelector('.home');
+  $('fbhome').onclick = feedback;
   if (first) {   // Learn to play picks up at lesson 2 once lesson 1 is won
     $('learn').onclick = () => startTutorial(store('ak:lesson') === '1' ? 2 : 1);
     $('known').onclick = () => { store('ak:learned', '1'); redraw(); }; return; }
@@ -214,6 +216,14 @@ async function firstMatch() {
   const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
 }
 function joinCode() { if (play.code) { play.open = null; location.hash = '#/join/' + play.code; } }
+
+// Feedback from anywhere; on the game screen it carries the match, the turn and the seat's whole view (a bug as it happened).
+function feedback() {
+  const g = screen === 'game' && V && V.id ? V : null;
+  const context = g ? { match: g.id, turn: g.game.round, seat: g.you, opponent: (g.seats[opp()] || {}).bot || 'person',
+    replay: RP.views.length ? 'yes' : 'no', ...(isTutorial() ? { lesson: lessonOf(g) } : {}) } : {};
+  openFeedback({ api, toast, context, view: g });
+}
 
 // ------------------------------------------------------------------ collection (= the deckbuilder): collection.js
 // #/collection/<deck id> opens that deck (home's "Open in collection").
@@ -447,6 +457,7 @@ function gameScreen() {
       <div id="board"></div>
       <div class="abs series" id="series"><span id="turnno"></span><span class="clock" id="clock"></span></div>
       <div class="abs opphand" id="opphand"></div>
+      <div class="abs menu fb" id="fbbtn" data-tip="Send feedback"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
       <div class="abs menu" id="menubtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/></svg></div>
       <div class="abs hand" id="hand"></div>
       <div class="abs deck" id="deck"></div>
@@ -472,6 +483,7 @@ function gameScreen() {
     // The flag concedes, after the question in the middle of the board (Keep playing, Escape or a click beside it says no).
     // In a tutorial it leaves for home at once: there is nothing to lose.
     const ask = $('concov');
+    $('fbbtn').onclick = e => { e.stopPropagation(); feedback(); };
     $('menubtn').onclick = e => { e.stopPropagation(); if (isTutorial()) { location.hash = '#/'; return; } ask.classList.add('on'); };
     ask.onclick = e => { e.stopPropagation(); if (e.target === ask) ask.classList.remove('on'); };
     $('keep').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); };
@@ -494,7 +506,8 @@ function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
   lastDecision = d;
-  $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';   // the flag: only a game in play (never the lab or a replay)
+  $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
+  $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
   $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
   // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
   $('menubtn').querySelector('svg').innerHTML = isTutorial() ? '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>'

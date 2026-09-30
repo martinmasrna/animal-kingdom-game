@@ -24,6 +24,7 @@ from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine.state import EngineError
 from ..engine.cards import DECK_SLUGS, load_cards
 from . import custom_decks
+from . import feedback
 from . import oauth
 from .profiles import ProfileError, Profiles
 from . import replay
@@ -350,6 +351,18 @@ async def get_replay(req):
     return web.Response(body=saved, content_type="application/json", headers={"Content-Encoding": "gzip"})
 
 
+async def send_feedback(req):
+    """A player's message and the moment it was sent from: kept, then mailed to Martin in the background."""
+    p, body = me(req), await req.json()
+    context = {k: v for k, v in (body.get("context") or {}).items() if isinstance(v, (str, int, float))}
+    try:
+        feedback.keep(profiles.db, p["id"], display(p), body.get("text"), context, body.get("view"))
+    except feedback.FeedbackError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    asyncio.get_running_loop().run_in_executor(None, feedback.mail, display(p), body["text"].strip(), context, body.get("view"))
+    return web.json_response({})
+
+
 async def index(_req):
     return web.FileResponse(STATIC / "index.html")
 
@@ -499,6 +512,7 @@ def make_app() -> web.Application:
         web.post("/api/signout", sign_out),
         web.get("/auth/{provider}/callback", auth_callback),
         web.get("/api/replay/{match}", get_replay),
+        web.post("/api/feedback", send_feedback),
         web.post("/api/match", create_match),
         web.post("/api/match/{id}/join", join_match),
         web.get("/ws/{id}", socket),
