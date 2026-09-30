@@ -444,9 +444,11 @@ function gameScreen() {
       <div class="endov" id="endov"></div></div></div>`;
     fitStage(); wireTips(document.getElementById('scr'));
     const $ = id => document.getElementById(id);
-    $('menubtn').onclick = e => { e.stopPropagation(); $('menudrop').classList.toggle('on'); const c = $('concede'); c.classList.remove('sure'); c.textContent = 'Concede game'; };
+    $('menubtn').onclick = e => { e.stopPropagation(); $('menudrop').classList.toggle('on'); const c = $('concede'); c.classList.remove('sure'); c.textContent = isTutorial() ? 'Leave tutorial' : 'Concede game'; };
     // Conceding asks once, in place: the entry turns into the confirmation; a click elsewhere closes the menu and forgets it.
+    // In a tutorial the one entry leaves it for home at once: there is nothing to lose.
     $('concede').onclick = e => { e.preventDefault(); e.stopPropagation(); const c = $('concede');
+      if (isTutorial()) { $('menudrop').classList.remove('on'); location.hash = '#/'; return; }
       if (c.classList.contains('sure')) { $('menudrop').classList.remove('on'); send({ t: 'concede' }); }
       else { c.classList.add('sure'); c.textContent = 'Concede this game?'; } };
     // The series opens the history, the opponent's hand their decklist; hovering your deck shows yours.
@@ -467,7 +469,8 @@ function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
   lastDecision = d;
-  $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';   // the menu holds Concede: only a game in play (never the lab or a replay)
+  $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
+  $('concede').textContent = isTutorial() ? 'Leave tutorial' : $('concede').classList.contains('sure') ? 'Concede this game?' : 'Concede game';   // the menu holds Concede: only a game in play (never the lab or a replay)
   drawReplayBar();
 
   // Top left: the turn (a match is one game while there is one map); it opens the history. The gauntlet counts its games.

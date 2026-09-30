@@ -18,6 +18,10 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
   if (SHOTS) await page.setViewport({ width: 1512, height: 800, deviceScaleFactor: 2 });
   await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   assert.ok(await page.$('#learn'), 'a first visit offers the tutorial');
+  // the menu leaves a tutorial for home at once
+  await page.click('#learn'); await page.waitForFunction(() => window.__ak().V && window.__ak().V.phase === 'playing', { timeout: 10000 });
+  await page.click('#menubtn'); assert.equal(await page.$eval('#concede', e => e.textContent), 'Leave tutorial');
+  await page.click('#concede'); await page.waitForSelector('.home #learn');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/0-home.png` });
   await page.click('#learn');
   await page.waitForFunction(() => window.__ak().V && window.__ak().V.phase === 'playing', { timeout: 10000 });
