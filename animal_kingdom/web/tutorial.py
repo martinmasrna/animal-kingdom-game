@@ -23,8 +23,9 @@ PLAYER_DECK = ["lion", "cape_buffalo", "dire_wolf", "cape_buffalo", "dire_wolf",
                "lion", "dire_wolf", "squirrel", "cape_buffalo", "lion", "dire_wolf", "dire_wolf", "cape_buffalo", "lion",
                "cape_buffalo", "lion"]   # after the Squirrel only plain animals and Squirrels: no target Roar, no glow in lesson 1
 PLAYER_DECK += PLAYER_DECK[7:] + PLAYER_DECK[7:10]   # 36 cards: a slow first game never runs out (no exhaustion loss)
-# The opponent: a Buffalo (7) walls the middle of its den, then wild dogs (1) that any animal can cover.
-OPPONENT_DECK = ["cape_buffalo", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup",
+# The opponent: wild dogs (1) that any animal can cover. None of them walls its den: the march must reach it before
+# the player's food reaches 100 (a 7 in front of the den forced a detour, and food won first).
+OPPONENT_DECK = ["rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup",
                  "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup"]
 # Lesson 2. The player opens with Lion, Lynx (it glows once the Lion stands) and a Buffalo; the Lynx's Roar draws the
 # Eagle (Flight, on your own animal first); the next draw brings the Squirrel (food from a Roar) and the Black Mamba
@@ -49,7 +50,7 @@ PER_TURN = {1: (2, 2, 1), 2: (1, 1, 1)}   # the opponent's bot name per lesson
 # The opponent's scripted moves, by its turn (turn_counter): lesson 1 walls the middle of its den and puts a dog beside
 # it; lesson 2 walls all three crossroads, then flies the Eagle onto the player's Squirrel (SQUIRREL: wherever it is).
 SQUIRREL = "squirrel"
-OPENINGS = {1: {1: [("cape_buffalo", "5,2"), ("pup", "4,2")]},
+OPENINGS = {1: {1: [("rusty", "5,2"), ("pup", "4,2")]},
             2: {1: [("cape_buffalo", "5,2"), ("dire_wolf", "5,1")], 3: [("lion", "5,3")]}}
 # Lesson 2's Eagle flies onto the Squirrel the first turn it can (the Squirrel on top of its stack), whenever that is.
 AMBUSH = {2: ("eagle", SQUIRREL)}
@@ -79,7 +80,8 @@ class TutorialBot(Bot):
         for card, cr in self.opening.get(state.turn_counter, []) + ([self.ambush] if self.ambush else []):   # scripted moves, while they can be made
             if cr == SQUIRREL:
                 cr = next((c for c, st in board.items() if st and st[-1].owner == "A" and st[-1].card_id == "squirrel"), None)
-            pick = next((a for a in places if a.card_id == card and a.crossroad == cr), None)
+            done = cr in board and board[cr] and board[cr][-1].owner == "B" and board[cr][-1].card_id == card
+            pick = None if done else next((a for a in places if a.card_id == card and a.crossroad == cr), None)
             if pick:
                 return pick
         quota = self.per_turn[min(state.turn_counter // 2, 2)]

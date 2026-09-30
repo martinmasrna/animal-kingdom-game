@@ -29,7 +29,7 @@ def test_the_forced_turns_play_out_as_the_lessons_say():
         m.act("A", a)
     while m.to_act() == "B":
         m.act("B", m.bot_move())
-    assert _board(m)["5,2"] == [("B", "cape_buffalo")] and _board(m)["4,2"] == [("B", "pup")]
+    assert _board(m)["5,2"] == [("B", "rusty")] and _board(m)["4,2"] == [("B", "pup")]
     m.act("A", PlaceAction("dire_wolf", ("cr", "1,1"))); m.act("A", PlaceAction("cape_buffalo", ("cr", "2,1")))   # the region, closed
     assert m.state.food["A"] == 10, "it pays as the turn ends"
     while m.to_act() == "B":
@@ -115,3 +115,30 @@ def test_lesson_2_plays_out_as_its_script_says_and_is_won_on_food():
             a(rng.choice(places) if places else DrawAction() if DrawAction() in legal() else PassAction())
         assert m.results[-1]["winner"] == "A" and m.results[-1]["reason"] == "food", (seed, m.results[-1])
         assert m.state.food["B"] == 0
+
+
+def test_lesson_1_forced_march_always_takes_the_den_before_100_food():
+    """The client's march (the furthest crossroads a move can reach, avoiding completing a region when it can), with any
+    choice among them, then the den as soon as it opens: always a den win."""
+    regions = [[f"{x},{y}", f"{x + 1},{y}", f"{x},{y + 1}", f"{x + 1},{y + 1}"] for x in range(1, 5) for y in (1, 2)]
+    for seed in range(60):
+        rng, m = random.Random(seed), _tutorial()
+        while m.phase == "playing":
+            if m.to_act() == "B":
+                m.act("B", m.bot_move()); continue
+            legal = rules.legal_actions(m.state)
+            b = m.state.board
+            mine = lambda cr: bool(b.get(cr)) and b[cr][-1].owner == "A"
+            hq = [a for a in legal if isinstance(a, PlaceAction) and a.is_hq_capture]
+            cr = [a for a in legal if isinstance(a, PlaceAction) and not a.is_hq_capture and not mine(a.crossroad)]
+            if hq:
+                m.act("A", hq[0]); continue
+            if cr:
+                far = max(int(a.crossroad[0]) for a in cr)
+                ahead = [a for a in cr if int(a.crossroad[0]) == far]
+                closes = lambda a: any(a.crossroad in r and all(q == a.crossroad or mine(q) for q in r) for r in regions)
+                ahead = [a for a in ahead if not closes(a)] or ahead
+                m.act("A", rng.choice(ahead)); continue
+            choices = [a for a in legal if isinstance(a, ChoiceAction)]
+            m.act("A", choices[0] if choices else DrawAction() if DrawAction() in legal else PassAction())
+        assert m.results[-1]["reason"] == "hq_capture", (seed, m.results[-1], m.state.food)
