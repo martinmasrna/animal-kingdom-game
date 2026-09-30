@@ -831,21 +831,21 @@ function drawEnd() {
   const peek = `<button class="slab" id="peek">See the board</button>`;
   if (RP.views.length) {
     // a replay: the game's result, then the replay again or back to the profile
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}</div>
       <div class="btns"><a class="slab" href="#/profile">Back</a>${peek}<button class="play" id="again">Watch again</button></div></div>`;
     document.getElementById('again').onclick = () => { replayStep(0); replayPlay(true); };
   } else if (V.gauntlet) {
     const g = V.gauntlet, tot = g.record.reduce((a, r) => [a[0] + r.w, a[1] + r.l], [0, 0]);
     const rows = g.record.map(r => `<div>${r.deckName} <b>${r.w}–${r.l}</b></div>`).join('');
     const done = V.phase === 'match_over';
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${done ? 'Gauntlet done' : res[1]}</div><div class="how">${how} · turn ${G.round}</div>
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${done ? 'Gauntlet done' : res[1]}</div><div class="how">${how}</div>
       <div class="how">Game ${g.played} of ${g.total} · overall <b>${tot[0]}–${tot[1]}</b></div><div class="how">${rows}</div>
       ${done ? '' : `<div class="next">Next: ${g.next.yours ? `you play ${g.next.deckName}` : `vs ${g.next.deckName}`} · ${g.next.first === you ? 'you go first' : 'your opponent goes first'}</div>`}
       <div class="btns">${peek}${done ? '<a class="play" href="#/">Menu</a>' : '<button class="play" id="nextg">Next game</button>'}</div></div>`;
     if (!done) document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else if (V.phase === 'game_over') {
     const firstNext = w === null ? G.first : (w === you ? them : you);
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>${score}
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}</div>${score}
       <div class="next">Game ${V.results.length + 1}: ${firstNext === you ? 'you go first' : 'your opponent goes first'}</div>
       <div class="btns">${peek}<button class="play" id="nextg">Next game</button></div></div>`;
     document.getElementById('nextg').onclick = () => send({ t: 'next' });
@@ -853,17 +853,17 @@ function drawEnd() {
     // a lesson's end: lesson 1 leads on to lesson 2, lesson 2 to a real match; a loss offers the same lesson again
     const lesson = lessonOf(V), won = w === you;
     if (won) store(lesson === 1 ? 'ak:lesson' : 'ak:learned', '1');
-    const next = !won ? '' : lesson === 1 ? '<div class="next">One more lesson to go.</div>' : '<div class="next">You know the basics. Pick a deck and play a match.</div>';
+    const next = !won ? '' : lesson === 1 ? '<div class="next">One more lesson to go.</div>' : '<div class="next">You\'re ready! Pick a deck and take on a real opponent.</div>';
     const go = !won ? `<a class="slab" href="#/">Menu</a><button class="play" id="again">Try again</button>`   // no See the board in a lesson
       : lesson === 1 ? `<button class="play" id="nextlesson">Next lesson</button>` : `<a class="play" href="#/">Play a match</a>`;
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>${next}<div class="btns">${go}</div></div>`;
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}</div>${next}<div class="btns">${go}</div></div>`;
     if (!won) document.getElementById('again').onclick = () => startTutorial(lesson);
     if (won && lesson === 1) document.getElementById('nextlesson').onclick = () => startTutorial(2);
   } else {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
     const won = S[you] > S[them], series = V.results.length > 1;
     ov.innerHTML = `<div class="endbox">${series ? `<div class="res ${won ? 'A' : 'B'}">${won ? 'Match won' : 'Match lost'}</div><div class="how">${res[1]} in game ${V.results.length} · ${how}</div>${score}`
-      : `<div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>`}
+      : `<div class="res ${res[0]}">${res[1]}</div><div class="how">${how}</div>`}
       <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="rematch">Rematch</button></div></div>`;
     document.getElementById('rematch').onclick = () => send({ t: 'rematch' });
   }

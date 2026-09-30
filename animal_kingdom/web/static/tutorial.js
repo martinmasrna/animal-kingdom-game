@@ -34,7 +34,7 @@ const TARGET = { id: 'target', when: c => c.choosing, untilAct: true, at: { prom
     text: 'This Roar needs a target. Click one of the circled animals.' };
 const EMPTY = { id: 'empty', again: true, when: c => c.mine && c.round >= 3 && !c.offered.length,   // nothing to place: never a silent turn
   at: c => c.canDraw ? { deck: true } : { endturn: true },
-  text: c => c.canDraw ? 'Nothing you can place right now. Click your deck to draw 2 new ones.' : 'Nothing to do this turn. Click End turn.' };
+  text: c => c.canDraw ? 'None of your animals can be placed right now. Click your deck to draw 2 cards.' : 'Nothing to do this turn. Click End turn.' };
 
 export const LESSONS = [
   // --- the opening: what is on screen ---
@@ -80,7 +80,7 @@ export const LESSONS = [
   { id: 'actions', when: c => c.mine && c.round === 3, ...talk, at: { endturn: true },
     text: 'Each turn you get two moves: place an animal or draw cards. The dots show how many moves are left.' },
   { id: 'draw', when: c => c.mine && c.round === 3 && c.G.hand.length === 0,
-    text: 'You\'re out of cards! Click your deck to draw 2 new ones.',
+    text: 'You\'re out of cards! Click your deck to draw 2 more.',
     only: { deck: true }, at: { deck: true } },
   // covering, by hand: the second move of turn 3, onto the Pup the opponent always leaves beside the patch
   { id: 'cover', when: c => c.mine && c.round >= 3 && c.homeHeld && c.coverable.length > 0, done: c => c.covered,
@@ -95,7 +95,7 @@ export const LESSONS = [
     text: 'Click your deck to draw 2 more cards.', only: { deck: true }, at: { deck: true } },
   // lesson 1's Roar has no condition (the Squirrel's), so it never glows: the glow is lesson 2's, on the Lynx
   explain('roarinfo', 'squirrel', c => c.mine && c.hand('squirrel') && c.empty('squirrel').length > 0,
-    'The Squirrel has a Roar: a power that happens the moment you place it. Its Roar gives you 10 food.'),
+    'The Squirrel has a Roar: an effect that happens the moment you place it. Its Roar gives you 10 food.'),
   { id: 'roar', when: c => c.mine && c.hand('squirrel') && c.empty('squirrel').length > 0, done: c => c.roared,
     only: c => ({ card: 'squirrel', crs: c.empty('squirrel') }), at: { rings: true },
     text: { pick: 'Click the Squirrel.', place: 'Now click one of the circles.' } },
@@ -150,21 +150,21 @@ export const LESSONS_2 = [
   TARGET,
   { id: 'uncovered', when: c => c.squirrelBack, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'The Eagle is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
-  { id: 'goal2', when: c => c.mine && c.wall, ...talk, at: { den: 'B' },
-    text: 'Your opponent\'s den is guarded by three 7s, and a 7 can\'t beat a 7. You\'ll need something special to get in.' },
+  { id: 'goal2', when: c => c.mine && c.wall, ...talk, at: { cr: '5,2' },   // beside its den's middle animal, clear of all three
+    text: 'Your opponent has guarded its den with animals as strong as yours. You\'ll need something special to get past them.' },
   { id: 'draw3', when: c => c.mine && c.placed('black_mamba') && !c.hand('polar_bear') && !c.placed('polar_bear') && c.canDraw, only: { deck: true }, at: { deck: true },
     text: 'Click your deck to draw 2 more cards.' },
   // get an animal next to the wall first, if none is (the Polar Bear can only land where it connects)
   { id: 'near', again: true, when: c => c.mine && c.hand('polar_bear') && c.prey.length === 0 && c.forward.length > 0,
     only: c => ({ crs: c.forward }), at: { rings: true },
-    text: { pick: 'Get close to the wall: click one of your animals.', place: 'Now click one of the circles.' } },
+    text: { pick: 'Move toward your opponent\'s den: click one of your animals.', place: 'Now click one of the circles.' } },
   explain('apexinfo', 'polar_bear', c => c.mine && c.hand('polar_bear') && c.prey.length > 0,
-    'The Polar Bear is an Apex Predator: it must land on top of an animal, and it eats it. At strength 8, it can eat one of those 7s.'),
+    'The Polar Bear is an Apex Predator: it must land on top of an animal, and it eats it. It\'s strong enough to eat one of the animals guarding your opponent\'s den.'),
   { id: 'apex', when: c => c.mine && c.hand('polar_bear') && c.prey.length > 0,
     only: c => ({ card: 'polar_bear', crs: c.prey }), at: { rings: true },
     text: { pick: 'Click the Polar Bear.', place: 'Now click a circled animal to eat it.' } },
   { id: 'den', when: c => c.mine && c.places.some(t => t[0] === 'hq'), only: { hq: true }, at: { den: 'B' },
-    text: { pick: 'The wall is broken and your opponent\'s den is open! Click any of your animals.', place: 'Now click your opponent\'s den to win!' } },
+    text: { pick: 'Your opponent\'s den is open! Click any of your animals.', place: 'Now click your opponent\'s den to win!' } },
   EMPTY,
 ];
 // Lesson 2 holds each teaching card back until its own step: it can't be placed before its line explains it.
