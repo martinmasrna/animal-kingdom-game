@@ -65,11 +65,13 @@ export const LESSONS = [
   // --- free play: each the first time it comes up ---
   { id: 'actions', when: c => c.mine && c.round === 3, ...talk, at: { endturn: true },
     text: 'Each turn you get two moves: place an animal or draw cards. The dots show how many moves are left.' },
-  { id: 'corner', when: c => c.mine && c.round === 3 && !c.homeHeld && c.homeOpen.length > 0, done: c => c.homeHeld || c.round > 3,
-    at: c => ({ cr: c.homeOpen[0] }), text: 'Now you choose! Place an animal on the last crossroad around the +10 patch.' },
+  // the first patch is finished by hand, any card, only its last corner (shown only when a card can reach it: never a dead end)
+  { id: 'corner', when: c => c.mine && c.round >= 3 && !c.homeHeld && c.homeOpen.length > 0,
+    only: c => ({ crs: c.homeOpen }), at: c => ({ cr: c.homeOpen[0] }),
+    text: 'Finish the patch! Place an animal on the last crossroad around the +10.' },
   { id: 'food', when: c => c.homeHeld, ...talk, at: c => ({ stone: c.home[0] }),
     text: 'The +10 patch is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
-  { id: 'free', when: c => c.mine && c.homeHeld, ...talk, at: { middle: true },
+  { id: 'free', when: c => c.mine && (c.homeHeld || c.round >= 4), ...talk, at: { middle: true },
     text: 'From here it\'s up to you. Head for your opponent\'s den, or surround more patches for more food.' },
   { id: 'cover', when: c => c.mine && c.places.some(t => t[0] === 'cr' && owner(c.G, t[1]) === 'B'), ...talk,
     at: c => ({ cr: c.places.find(t => t[0] === 'cr' && owner(c.G, t[1]) === 'B')[1] }),
@@ -79,6 +81,9 @@ export const LESSONS = [
     text: 'Some animals have a special power. Point at a card to read it. A Roar happens as soon as you place the animal.' },
   { id: 'target', when: c => c.choosing, untilAct: true, at: { prompt: true },
     text: 'This Roar needs a target. Click one of the circled crossroads, or click Skip.' },
+  // stuck with nothing to place: point at the deck, every time it happens (after any line still to read)
+  { id: 'empty', again: true, when: c => c.mine && c.round >= 3 && !c.places.length && c.canDraw, at: { deck: true },
+    text: 'No animals to place. Click your deck to draw 2 new ones.' },
   { id: 'den', when: c => c.mine && c.places.some(t => t[0] === 'hq'), at: { den: 'B' },
     text: 'Your opponent\'s den is open! Put any animal on it to win.' },
 ];
@@ -92,6 +97,7 @@ export function context(V, sel, cards) {
     theirs: V.phase === 'playing' && G.current !== V.you,
     choosing: V.phase === 'playing' && G.toAct === V.you && !!G.pending && G.pending.kind !== 'mulligan',
     at: cr => owner(G, cr) === V.you,
+    canDraw: !!(G.legal && G.legal.draw),
     units: Object.keys(G.board).filter(cr => owner(G, cr) === V.you).length,
     hand: id => G.hand.some(h => h.id === id),
     // the rightmost crossroad a card can go to now (the coach stands beside it, clear of the others)
@@ -112,6 +118,7 @@ export function context(V, sel, cards) {
 export function current(V, sel, cards, tut) {
   const c = context(V, sel, cards), n = V.game.history.filter(m => m.seat === V.you).length;   // the player's own moves
   for (const L of LESSONS) {
+    if (L.again) { if (L.when(c)) return { ...L, at: L.at }; continue; }   // a safety net: shown whenever it applies, never used up
     if (tut.seen.has(L.id)) continue;
     if (L.untilAct && tut.shown[L.id] !== undefined && n > tut.shown[L.id]) { tut.seen.add(L.id); continue; }
     if (L.done && L.done(c)) { tut.seen.add(L.id); continue; }
@@ -127,7 +134,9 @@ export function current(V, sel, cards, tut) {
 // `picked` card is already chosen, so its rings show as the lesson speaks (only the first card is picked by hand).
 export function gate(d, only) {
   const places = {};
-  if (only.card && d.places[only.card]) places[only.card] = d.places[only.card].filter(t => !only.crs || (t[0] === 'cr' && only.crs.includes(t[1])));
+  const fits = t => !only.crs || (t[0] === 'cr' && only.crs.includes(t[1]));
+  for (const [id, ts] of Object.entries(d.places)) if (only.card ? id === only.card : only.crs) {   // its card, or any card to its crossroads
+    const ok = ts.filter(fits); if (ok.length) places[id] = ok; }
   d.places = places;
   d.noDraw = !only.deck;
   d.noPass = true;

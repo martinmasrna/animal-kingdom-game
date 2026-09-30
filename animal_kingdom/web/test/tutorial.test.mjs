@@ -52,7 +52,7 @@ test('nothing is taught off your turn, and a lesson read once stays away after y
 });
 
 test('the open den is pointed out whenever it can be taken', () => {
-  const t = fresh(); ['lion', 'lion2', 'buffalo', 'wolf', 'draw', 'actions', 'corner', 'food', 'cover', 'roar'].forEach(id => t.seen.add(id));
+  const t = fresh(); ['lion', 'lion2', 'buffalo', 'wolf', 'draw', 'actions', 'corner', 'food', 'free', 'cover', 'roar'].forEach(id => t.seen.add(id));
   const L = current(view({ round: 6, legal: { place: { lion: [['hq', 'B']] }, draw: true } }), null, CARDS, t);
   assert.equal(L.id, 'den'); assert.deepEqual(L.at, { den: 'B' });
 });
@@ -61,4 +61,23 @@ test('a Roar asking for a target is explained beside its choice', () => {
   const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards'].forEach(id => t.seen.add(id));
   const L = current(view({ round: 4, pending: { mode: 'choice', kind: 'target', source: 'jaguar', options: [] }, legal: { place: {}, draw: false } }), null, CARDS, t);
   assert.equal(L.id, 'target'); assert.deepEqual(L.at, { prompt: true });
+});
+
+test('the last corner of the first patch is a step of its own: any card, only that crossroad, until it is done', () => {
+  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'patch', 'actions'].forEach(id => t.seen.add(id));
+  const board = { '1,3': u('lion', 'A'), '2,3': u('cape_buffalo', 'A'), '2,2': u('dire_wolf', 'A') };
+  const place = { jaguar: [['cr', '1,2'], ['cr', '2,1']], lion: [['cr', '1,2'], ['cr', '1,1']] };
+  for (const round of [3, 4]) {   // still asked on turn 4 if turn 3 went elsewhere
+    const L = current(view({ round, board, hand: [{ id: 'jaguar' }, { id: 'lion' }], legal: { place, draw: true } }), null, CARDS, t);
+    assert.equal(L.id, 'corner'); assert.deepEqual(L.only, { crs: ['1,2'] });
+  }
+  const d = gate({ places: place }, { crs: ['1,2'] });
+  assert.deepEqual(d.places, { jaguar: [['cr', '1,2']], lion: [['cr', '1,2']] });
+});
+
+test('with nothing to place, the coach points at the deck, every time', () => {
+  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'patch', 'actions', 'free'].forEach(id => t.seen.add(id));
+  const stuck = view({ round: 4, board: { '1,3': u('lion', 'A') }, hand: [], legal: { place: {}, draw: true } });
+  assert.equal(current(stuck, null, CARDS, t).id, 'empty');
+  assert.equal(current(stuck, null, CARDS, t).id, 'empty', 'never used up');
 });
