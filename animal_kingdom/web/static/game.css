@@ -343,3 +343,4 @@
 @keyframes hint { 0%, 100% { filter: drop-shadow(0 0 0 var(--act)) drop-shadow(0 0 2px var(--act)); } 50% { filter: drop-shadow(0 0 1px var(--act)) drop-shadow(0 0 7px var(--act)) drop-shadow(0 0 3px var(--act)); } }
 .game .stone.focus::after, .game .mouth.focus::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 3px solid var(--act); pointer-events: none; animation: breathe 1.4s ease-in-out infinite; }
 @keyframes breathe { 0%, 100% { opacity: .35; transform: scale(.96); } 50% { opacity: 1; transform: scale(1.04); } }
+.game.kit .tbtn.B { padding: 0 14px; box-sizing: border-box; text-align: center; font-size: 17px; line-height: 1.1; }   /* Opponent's turn: two centred lines inside the stone */
