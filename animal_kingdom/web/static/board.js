@@ -1,4 +1,4 @@
-// The board: one painted plate (kit2/plate.webp: ground, trails, clearings, blank stones and both dens), with the pieces,
+// The board: one painted plate (kit2/plate_wide.webp, drawn under the stage by the game screen: ground, trails, clearings, blank stones and both dens), with the pieces,
 // payouts and food drawn onto it from painted sprites. Draws in viewer space on the STAGE: the viewer is always 'A'
 // (blue, den on the left), the opponent 'B' (red). What changed since the last view comes from turn.js; this file only
 // draws it. Layout and look: the design sandbox's screen/plan.md and screen/kit/.
@@ -66,7 +66,7 @@ export function renderBoard(el, M, g, cards, ui) {
   const late = !!(A && A.landDelay);   // the opponent's card is still flying in: its piece lands when it arrives
   const held = heldRegions(M.regions, g.board);
   const stoneAt = reg => { const [c, r] = reg.c, [x1, y1] = at(c, r), [x2, y2] = at(c + 1, r + 1); return [(x1 + x2) / 2, (y1 + y2) / 2]; };
-  let s = `<img class="plate" src="${kit('plate.webp')}" alt="" draggable="false">`;
+  let s = '';   // the painted ground is the game screen's (kit2/plate_wide.webp, under the stage), wider than any window
 
   // Payout stones: the plate's stone with a small boss on it holding the payout, in the holder's colour when held.
   for (const reg of M.regions) {
