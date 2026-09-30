@@ -11,19 +11,19 @@
 .mscr .frow { display: flex; gap: 8px; width: 100%; }
 
 /* Stone slabs: a step lighter than the ground, a lit top edge, a soft shadow; hover lightens the stone, nothing moves. */
-.mscr .backbtn, .mscr .dd .sel, .mscr .slab { box-sizing: border-box; border: 0; border-radius: 10px; background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto;
+.mscr .backbtn, .mscr .dd .sel, .mscr .slab, .game .slab { box-sizing: border-box; border: 0; border-radius: 10px; background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto;
   box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); color: #f0e8da; font: 500 16px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
-.mscr .backbtn:hover, .mscr .dd .sel:hover, .mscr .slab:hover { filter: brightness(1.2); color: #f3ead8; }
+.mscr .backbtn:hover, .mscr .dd .sel:hover, .mscr .slab:hover, .game .slab:hover { filter: brightness(1.2); color: #f3ead8; }
 .mscr .backbtn { width: 100%; height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; }
 .mscr .backbtn span { font: 600 16px 'Fira Sans Condensed', sans-serif; }
 .mscr .frow .backbtn { width: auto; flex: none; min-width: 112px; }
 
-/* The one loud control: the slab in your team blue (the board's blue). Disabled, it is stone and does nothing. */
-.mscr .play { width: 100%; height: 48px; margin: 0; border: 0; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
+/* The one loud control (the game screen's too): the slab in your team blue (the board's blue). Disabled, it is stone and does nothing. */
+.mscr .play, .game .play { width: 100%; height: 48px; margin: 0; border: 0; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
   background: linear-gradient(rgba(52,112,190,.5), rgba(38,88,160,.58)), #2a4a70 url(/static/kit2/coll_slab.webp) center / 300px auto; background-blend-mode: color, normal, normal;
   box-shadow: inset 0 1px 0 rgba(200,225,255,.35), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55);
   color: #f4f8ff; font: 700 19px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
-.mscr .play:hover { filter: brightness(1.15); }
+.mscr .play:hover, .game .play:hover { filter: brightness(1.15); }
 .mscr .play:disabled { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; color: #8f8577; text-shadow: none; filter: saturate(.3) brightness(.8); cursor: default; }
 
 /* Sunken: a count, or a field you type into. */

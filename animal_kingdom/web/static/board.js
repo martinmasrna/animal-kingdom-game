@@ -3,11 +3,12 @@
 // (blue, den on the left), the opponent 'B' (red). What changed since the last view comes from turn.js; this file only
 // draws it. Layout and look: the design sandbox's screen/plan.md and screen/kit/.
 import { CROP, hasArt, artUrl } from './art.js';
+import { KEYWORDS } from './card.js';
 import { pitStates, heldRegions, boardChanges, incomeFlights } from './turn.js';
 
 export const STAGE = { w: 1512, h: 800 };
 const key = (c, r) => `${c},${r}`;
-const BOARD_KW = { Armor: '⛨', Stealth: '◐' };
+const BOARD_KW = ['Armor', 'Stealth'];   // the keywords a unit wears as a badge on the board
 const kit = f => `/static/kit2/${f}`;
 const team = side => (side === 'A' ? 'a' : 'b');
 
@@ -30,15 +31,15 @@ const FLY = 0.7, GAP = 0.035;   // seconds a fruit takes from its stone to its p
 // Numbers are painted digits: chalk on a boss (strength, payouts), bold numerals in the den's gem. Every count animates
 // through all digits, so they load up front (a digit fetched mid-count shows as a gap).
 const digits = (dir, n) => String(n).split('').map(d => `<img src="${kit(`${dir}/${d === '+' ? 'p' : d}.webp`)}" alt="${d}" draggable="false">`).join('');
-const chalk = n => `<span class="chalk">${digits('chalk', n)}</span>`;
-const gemDigits = n => `<span class="gemnum">${digits('gemnum', n)}</span>`;
+export const chalk = n => `<span class="chalk">${digits('chalk', n)}</span>`;
+export const gemDigits = n => `<span class="gemnum">${digits('gemnum', n)}</span>`;
 if (typeof Image !== 'undefined') for (let d = 0; d < 10; d++) { new Image().src = kit(`gemnum/${d}.webp`); new Image().src = kit(`chalk/${d}.webp`); }
 const reducedMotion = () => typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const put = (cls, x, y, html = '', attrs = '') => `<div class="abs ${cls}" style="left:${x}px;top:${y}px" ${attrs}>${html}</div>`;
 
 // A round crop of the card art, D stage pixels across.
-function portrait(id, D) {
+export function portrait(id, D) {
   if (!hasArt(id)) return '';
   const [x, y, d] = CROP[id], w = D / d, h = w * 1.5;
   return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${D / 2 - x * w}px ${D / 2 - y * h}px`;
@@ -47,12 +48,12 @@ function portrait(id, D) {
 // A unit: portrait under its team rim, strength on the boss, buried units peeking out behind, timer and board keywords as badges.
 function unit(u, under, cards) {
   // Board keywords: the card's own, plus Stealth whenever the enemy can't choose it (an adjacent Armadillo gives it).
-  const c = cards[u.id], kws = (c.kw || []).filter(k => BOARD_KW[k] && k !== 'Stealth').concat(u.hidden ? ['Stealth'] : []);
+  const c = cards[u.id], kws = (c.kw || []).filter(k => BOARD_KW.includes(k) && k !== 'Stealth').concat(u.hidden ? ['Stealth'] : []);
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner}" style="transform:translate(${(i + 1) * 7}px,${(i + 1) * 8}px);z-index:${-i - 1}"></div>`).join('');
   return peek + `<div class="ring${hasArt(u.id) ? '' : ' noart'}" style="${portrait(u.id, 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
     `<img class="rimimg" src="${kit(`rim_${team(u.owner)}.webp`)}" alt="" draggable="false"><div class="boss num">${chalk(u.str)}</div>` +
-    (u.timer ? `<div class="timer" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${u.timer}</div>` : '') +
-    (kws.length ? `<div class="kw" data-tip="${kws.join(', ')}">${kws.map(k => BOARD_KW[k]).join('')}</div>` : '');
+    (u.timer ? `<div class="timer" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${chalk(u.timer)}</div>` : '') +
+    (kws.length ? `<div class="kws">${kws.map(k => `<div class="kw" data-tip="${k}: ${KEYWORDS[k]}"><img src="${kit(`kw_${k.toLowerCase()}.webp`)}" alt="${k}" draggable="false"></div>`).join('')}</div>` : '');
 }
 
 // `g` is a viewer-space game { board, food, income, winFood }. `ui`: { rings: [cr] legal targets, hqRing (the enemy den can

@@ -2,7 +2,7 @@
 // The server holds the game; this file only renders the seat's view and sends choices back.
 import { hasArt, artUrl, stripArt } from './art.js';
 import { cardHTML, fitNames } from './card.js';
-import { renderBoard, STAGE, crossroadAt, denMouthAt } from './board.js';
+import { renderBoard, STAGE, crossroadAt, denMouthAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML } from './collection.js';
 import { dd, wireDd } from './menu.js';
 
@@ -10,7 +10,6 @@ const app = document.getElementById('app'), pop = document.getElementById('pop')
 const COVER = { cats_midrange: 'king_theron', canine_buff_tempo: 'lobo', aggro_hq_rush: 'verminus', colony_food_swarm: 'queen_honoria',
   egg_control: 'eon', food_otk: 'rat_king', ramp: 'borealis', goodstuff: 'gale' };
 const RANK = { legendary: 0, rare: 1, common: 2 };
-const COL = { A: 'var(--A)', B: 'var(--B)' };   // history tiles in team colour
 const SKIP = '__skip__';
 const artStyle = id => hasArt(id) ? `style="background-image:url(${artUrl(id)})"` : '';
 const sv = c => c.str === '*' ? -1 : c.str;
@@ -426,7 +425,7 @@ function drawGame() {
   $('concede').style.display = playing && V.id ? '' : 'none';   // only a game in play can be conceded (never in the lab)
 
   const gameNo = playing ? V.results.length + 1 : V.results.length;
-  const dots = [0, 1, 2].map(i => { const r = V.results[i]; return `<i class="${r ? (r.winner ? rel(r.winner) : '') : i === gameNo - 1 ? 'now' : ''}"></i>`; }).join('');
+  const dots = [0, 1, 2].map(i => { const r = V.results[i]; return `<i class="${r && r.winner ? rel(r.winner) : ''}"></i>`; }).join('');
   $('series').innerHTML = V.gauntlet ? `Game ${gameNo} of ${V.gauntlet.total}` : `Game ${gameNo} of 3 ${dots}`;
   drawHistory(G); drawLists(G); showPanel();
 
@@ -512,11 +511,11 @@ function drawHistory(G) {
   const hist = document.getElementById('hist');
   let hs = '', lastT = null;
   G.history.forEach((m, i) => {
-    if (m.round !== lastT) { hs += `<div class="t">T${m.round}</div>`; lastT = m.round; }
-    const c = COL[rel(m.seat)];
-    if (m.kind === 'draw') { const dr = m.fx.find(f => f.k === 'draw' && f.seat === m.seat); hs += `<div class="hi draw" style="--c:${c}" data-h="${i}">+${dr ? dr.n : 0}</div>`; }
-    else { const k = m.fx.filter(f => f.k === 'remove').length;
-      hs += `<div class="hi gradart" style="--c:${c};${hasArt(m.card) ? `background-image:url(${artUrl(m.card)})` : ''}" data-h="${i}"><span class="s">${CARDS[m.card].str}</span>${k ? `<span class="k">×${k}</span>` : ''}</div>`; }
+    if (m.round !== lastT) { hs += `<div class="t">Turn ${m.round}</div>`; lastT = m.round; }
+    const side = rel(m.seat), t = side === 'A' ? 'a' : 'b';
+    // a draw is its count on the team's boss (as a held payout); a placement the unit in small, as on the board
+    if (m.kind === 'draw') { const dr = m.fx.find(f => f.k === 'draw' && f.seat === m.seat); hs += `<div class="hi draw ${side}" data-h="${i}">${chalk('+' + (dr ? dr.n : 0))}</div>`; }
+    else hs += `<div class="hi unit ${side}" data-h="${i}"><div class="face" style="${portrait(m.card, 32)}"></div><img src="/static/kit2/rim_${t}.webp" alt="" draggable="false"></div>`;
   });
   hist.innerHTML = hs; hist.scrollTop = hist.scrollHeight;
   hist.querySelectorAll('[data-h]').forEach(el => {
@@ -644,13 +643,12 @@ function stackAt(cr) {
 function drawEnd() {
   const ov = document.getElementById('endov'), G = V.game;
   if (V.phase === 'playing' || !G.result) { ov.classList.remove('on'); return; }
-  if (ui.peek) { ov.classList.remove('on'); document.getElementById('waiting').innerHTML = `<span class="peek" id="unpeek" style="cursor:pointer;text-decoration:underline">Back to results</span>`; document.getElementById('unpeek').onclick = () => { ui.peek = false; drawGame(); }; return; }
+  if (ui.peek) { ov.classList.remove('on'); document.getElementById('waiting').innerHTML = `<button class="slab" id="unpeek">Back to results</button>`; document.getElementById('unpeek').onclick = () => { ui.peek = false; drawGame(); }; return; }
   const you = V.you, them = opp(), w = G.result.winner, S = V.score;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
   const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'They'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'They conceded' : 'You conceded' }[G.result.reason] || G.result.reason;
-  const dots = [0, 1, 2].map(i => { const r = V.results[i]; return `<i class="${r && r.winner ? rel(r.winner) : ''}"></i>`; }).join('');
-  const score = `<div class="score"><span class="A">${S[you]}</span><span class="g">${dots}</span><span class="B">${S[them]}</span></div>`;
-  const peek = `<span class="peek" id="peek">See the board</span>`;
+  const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;
+  const peek = `<button class="slab" id="peek">See the board</button>`;
   if (V.gauntlet) {
     const g = V.gauntlet, tot = g.record.reduce((a, r) => [a[0] + r.w, a[1] + r.l], [0, 0]);
     const rows = g.record.map(r => `<div>${r.deckName} <b>${r.w}–${r.l}</b></div>`).join('');
@@ -658,19 +656,18 @@ function drawEnd() {
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${done ? 'Gauntlet done' : res[1]}</div><div class="how">${how} · turn ${G.round}</div>
       <div class="how">Game ${g.played} of ${g.total} · overall <b>${tot[0]}–${tot[1]}</b></div><div class="how">${rows}</div>
       ${done ? '' : `<div class="next">Next: ${g.next.yours ? `you play ${g.next.deckName}` : `vs ${g.next.deckName}`} · ${g.next.first === you ? 'you go first' : 'they go first'}</div>`}
-      <div class="btns">${done ? '<a class="btn primary" href="#/">Menu</a>' : '<button class="btn primary" id="nextg">Next game</button>'}</div>${peek}</div>`;
+      <div class="btns">${peek}${done ? '<a class="play" href="#/">Menu</a>' : '<button class="play" id="nextg">Next game</button>'}</div></div>`;
     if (!done) document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else if (V.phase === 'game_over') {
     const firstNext = w === null ? G.first : (w === you ? them : you);
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>${score}
-      <div class="next">Game ${V.results.length + 1} · ${MAP.name} · ${firstNext === you ? 'you go first' : 'they go first'}</div>
-      <div class="btns"><button class="btn primary" id="nextg">Next game</button></div>${peek}</div>`;
+      <div class="next">Game ${V.results.length + 1}: ${firstNext === you ? 'you go first' : 'they go first'}</div>
+      <div class="btns">${peek}<button class="play" id="nextg">Next game</button></div></div>`;
     document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else {
     const won = S[you] > S[them];
     ov.innerHTML = `<div class="endbox"><div class="res ${won ? 'A' : 'B'}">${won ? 'Match won' : 'Match lost'}</div><div class="how">${res[1]} in game ${V.results.length} · ${how}</div>${score}
-      <div class="next">${V.seats[you].deckName} vs ${V.seats[them].deckName}</div>
-      <div class="btns"><button class="btn primary" id="rematch">Rematch</button><a class="btn" href="#/">Menu</a></div>${peek}</div>`;
+      <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="rematch">Rematch</button></div></div>`;
     document.getElementById('rematch').onclick = () => send({ t: 'rematch' });
   }
   document.getElementById('peek').onclick = () => { ui.peek = true; drawGame(); };

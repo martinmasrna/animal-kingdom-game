@@ -2,7 +2,7 @@
 // family, strength, rarity and search filters over it; the decks on the right, the open one unfolded under its tile.
 // Click a card to add a copy, right-click it or click its strip to take one out; every change saves.
 // app.js hands in what it owns: the cards, the starter decks, the player's decks and how to save them, toast, play, back.
-import { cardHTML, fitNames } from './card.js';
+import { cardHTML, fitNames, KEYWORDS } from './card.js';
 import { CROP, artUrl, stripArt } from './art.js';
 import { encodeDeck, decodeDeck } from './deckcode.js';
 import { dd, wireDd } from './menu.js';
@@ -190,13 +190,6 @@ function dialog(app, html) {
 }
 // Right-click a card: it opens large in the middle of the screen, each keyword on it explained beside it (as in
 // Hearthstone, Arena and Runeterra). Escape, a click or another right-click closes it.
-const KEYWORDS = {
-  'Roar': 'Happens when you place this unit.',
-  'Flight': 'Can be placed on any crossroad, even one not connected to yours. It can\'t take a den that way.',
-  'Armor': 'Can\'t be removed, returned to hand or eaten by any ability, not even your own. It can still be covered.',
-  'Stealth': 'Enemy abilities can\'t choose it. Effects that hit many units, or a random one, still do.',
-  'Apex Predator': 'Must be placed on top of another unit, yours or an enemy\'s, and eats it. Can\'t be placed on a den.',
-};
 function zoom(app, c) {
   const kws = Object.keys(KEYWORDS).filter(k => new RegExp(`(^|\\. )${k}[:.]`).test(c.text || ''));
   const m = app.querySelector('#cmodal'); m.classList.add('on', 'zoom');

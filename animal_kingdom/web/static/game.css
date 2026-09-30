@@ -19,10 +19,6 @@
 .mine .dr { --c: #3c96f0; } .theirs .dr { --c: #e03228; }
 .hist { display: flex; flex-wrap: wrap; gap: 5px; align-content: flex-start; overflow-y: auto; scrollbar-width: none; }
 .hist .t { width: 100%; font: 13px 'Lilita One', var(--font-display); color: #c9b48f; margin-top: 4px; }
-.hi { position: relative; width: 44px; height: 44px; flex: none; border-radius: 8px; border: 3px solid var(--c); cursor: default; }
-.hi.draw { background: #4a3520; display: flex; align-items: center; justify-content: center; font: 16px 'Lilita One', var(--font-display); color: var(--c); }
-.hi .s { position: absolute; left: 3px; top: 0; font: 16px 'Lilita One', var(--font-display); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.9); }
-.hi .k { position: absolute; right: -5px; bottom: -5px; min-width: 18px; height: 18px; border-radius: 999px; background: #c65a4a; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 3px; }
 .endov { position: absolute; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; background: rgba(12,8,3,0.7); }
 .endov.on { display: flex; }
 .endbox { display: flex; flex-direction: column; align-items: center; gap: 14px; color: #f3e3c0; }
@@ -31,13 +27,8 @@
 .endbox .how { font-size: 18px; }
 .endbox .score { display: flex; align-items: center; gap: 18px; font: 40px 'Lilita One', var(--font-display); margin-top: 6px; }
 .endbox .score .A { color: #5aaaf5; } .endbox .score .B { color: #f0584a; }
-.endbox .score .g { display: flex; gap: 6px; } .endbox .score .g i { width: 16px; height: 16px; border-radius: 999px; border: 2px solid #b58a4a; }
-.endbox .score .g i.A { background: #3c96f0; } .endbox .score .g i.B { background: #e03228; }
 .endbox .next { font-size: 15px; color: #c9b48f; }
 .endbox .btns { display: flex; gap: 12px; margin-top: 10px; }
-.endbox .btn { font-family: 'Lilita One', var(--font-display); font-weight: 400; border: 2px solid #b58a4a; background: #4a3520; color: #f3e3c0; }
-.endbox .btn.primary { background: #e0a040; border-color: #ffe0a0; color: #2a1606; }
-.endbox .peek { font-size: 13px; color: #c9b48f; cursor: pointer; text-decoration: underline; }
 
 .game { --frame: #121110; --ground: #1c1b19; --path: #3d3a35; --clear: #252321; --clearline: #4a463f; --stone: #302d2a; --stonenum: #a39c90;
   --plaque: #2d2b28; --plaqueline: #4a4640; --ink: #f4efe6; --mute: #a39c90; --act: #efe6d4; --ready: #f2c230;
@@ -49,8 +40,8 @@
 
 /* frame: series, the opponent's hand, the menu */
 .game .series { left: 16px; top: 14px; font-size: 14px; color: var(--mute); cursor: pointer; }
-.game .series i { display: inline-block; width: 8px; height: 8px; margin-left: 4px; border-radius: 50%; border: 1.5px solid var(--mute); }
-.game .series i.now { background: var(--mute); } .game .series i.A { background: var(--A); border-color: var(--A); } .game .series i.B { background: var(--B); border-color: var(--B); }
+.game .series i { display: inline-block; width: 15px; height: 15px; margin-left: 3px; vertical-align: -2px; background: url(/static/kit2/boss_n.webp) center / contain no-repeat; }   /* a game still to play: a blank boss */
+.game .series i.A { background-image: url(/static/kit2/boss_a.webp); } .game .series i.B { background-image: url(/static/kit2/boss_b.webp); }   /* won: the winner's boss */
 .game .opphand { left: 0; right: 0; top: 0; height: 66px; pointer-events: none; }   /* only the card backs take the click */
 .game .opphand .back { pointer-events: auto; cursor: pointer; }
 .game .back { top: -54px; width: 84px; height: 118px; border-radius: 7px; background: var(--Bdk); border: 3px solid var(--B); box-shadow: 3px 3px 6px rgba(0,0,0,.5); }
@@ -75,8 +66,11 @@
 .game .unit .boss { position: absolute; left: 50%; bottom: -22px; width: 48px; height: 48px; margin-left: -24px; border-radius: 50%; display: grid; place-items: center; font-size: 26px; border: 3px solid; }
 .game .unit.A .boss { background: var(--Adk); border-color: var(--A); } .game .unit.B .boss { background: var(--Bdk); border-color: var(--B); }
 .game .unit.ghost { opacity: .7; }
-.game .timer { position: absolute; right: -8px; top: -6px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 700 20px 'Source Serif 4', Georgia, serif; font-variant-numeric: lining-nums tabular-nums; background: var(--ink); color: #1c1b19; border: 3px solid #1c1b19; z-index: 2; }
-.game .kw { position: absolute; left: -8px; top: -6px; min-width: 38px; height: 38px; padding: 0 6px; border-radius: 8px; display: grid; place-items: center; font-size: 20px; background: #3a3632; border: 2px solid var(--clearline); z-index: 2; }
+/* Unit badges: the payout stones' blank boss; a keyword's painted mark top left (one boss each), a timer's chalk count top right. */
+.game .kws { position: absolute; left: -2px; top: -2px; display: flex; flex-direction: column; gap: 2px; z-index: 2; }
+.game .kw, .game .timer { width: 38px; height: 38px; display: grid; place-items: center; background: url(/static/kit2/boss_n.webp) center / contain no-repeat; filter: drop-shadow(1px 2px 2px rgba(20,12,4,.55)); }
+.game .kw img { width: 26px; height: 26px; object-fit: contain; display: block; }
+.game .timer { position: absolute; right: -2px; top: -2px; z-index: 2; } .game .timer .chalk { height: 17px; }
 /* where you can act: one light neutral, shared by the lit deck, target rings, the selected card and the prompt */
 .game .tgt { cursor: pointer; }
 .game .cr.tgt::after { content: ''; position: absolute; inset: -9px; border-radius: 50%; border: 4px solid var(--act); pointer-events: none; }
@@ -149,8 +143,6 @@
 .game .endbox .res { font: 700 84px/1 'Source Serif 4', Georgia, serif; -webkit-text-stroke: 0; text-shadow: none; }
 .game .endbox .res.A, .game .endbox .score .A { color: var(--A); } .game .endbox .res.B, .game .endbox .score .B { color: var(--B); }
 .game .endbox .score { font: 700 40px 'Source Serif 4', Georgia, serif; }
-.game .btn { font: 700 18px 'Source Serif 4', Georgia, serif; letter-spacing: 0; text-transform: none; background: var(--plaque); border-color: var(--plaqueline); }
-.game .btn.primary { background: var(--act); border-color: var(--act); color: #1c1b19; }
 .game .prompt .skip { height: auto; margin: 0; border: 1px solid var(--plaqueline); font: 600 14px 'Source Serif 4', Georgia, serif; color: var(--ink); background: #3a3632; }
 
 /* the painted board: the plate is the whole stage, the world runs under both hands */
@@ -291,7 +283,7 @@
 .game .menudrop a:hover { background: rgba(255,245,230,.1); }
 /* The series and the clock: bone type that holds on the grass. */
 .game .series, .game .clock, .game .waiting { color: #efe6d4; text-shadow: 0 1px 2px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.6); }
-.game .series { font-size: 17px; font-weight: 600; } .game .series i { border-color: #efe6d4; box-shadow: 0 1px 2px rgba(0,0,0,.8); } .game .series i.now { background: #efe6d4; }
+.game .series { font-size: 17px; font-weight: 600; } .game .series i { filter: drop-shadow(0 1px 1px rgba(0,0,0,.7)); }
 .game .clock { font-size: 15px; } .game .waiting { font-size: 15px; }
 /* A pending choice: a granite piece; its button a stone slab. */
 .game .prompt { width: 270px; padding: 14px 16px; border: 0; border-radius: 14px; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto;
@@ -311,18 +303,32 @@
 .game .endbox .res { font: 800 84px/1 'Fira Sans Condensed', sans-serif; text-shadow: 0 4px 24px rgba(0,0,0,.7); }
 .game .endbox .score { font: 700 40px 'Fira Sans Condensed', sans-serif; }
 .game .endbox .how, .game .endbox .next { font: 500 18px 'Fira Sans Condensed', sans-serif; color: #d8cfbf; }
-.game .endbox .peek { font: 500 15px 'Fira Sans Condensed', sans-serif; color: #b3a996; }
-.game .endbox .btn { height: 52px; padding: 0 28px; border: 0; border-radius: 10px; font: 700 20px 'Fira Sans Condensed', sans-serif; letter-spacing: 0; text-transform: none; color: #f0e8da;
-  background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); }
-.game .endbox .btn.primary { color: #f4f8ff; text-shadow: 0 1px 2px rgba(0,0,0,.4); background: linear-gradient(rgba(52,112,190,.5), rgba(38,88,160,.58)), #2a4a70 url(/static/kit2/coll_slab.webp) center / 300px auto;
-  background-blend-mode: color, normal, normal; box-shadow: inset 0 1px 0 rgba(200,225,255,.35), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); }
-.game .endbox .btn:hover { filter: brightness(1.15); }
 /* The painted stones' lettering in the screen's one face. */
 .game.kit .tbtn { font: 700 19px 'Fira Sans Condensed', sans-serif; }
 /* The rest of the screen's type and small surfaces: Fira, bone on stone. */
-.game .num, .game .timer, .game .hist .t, .game .hi .s, .game .hi.draw, .game .kw { font-family: 'Fira Sans Condensed', sans-serif; }
+.game .num, .game .hist .t { font-family: 'Fira Sans Condensed', sans-serif; }
 .game .hist .t { font-weight: 600; font-size: 14px; color: #b3a996; }
 .tip { padding: 5px 10px; border: 0; border-radius: 7px; background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 4px 10px rgba(0,0,0,.6);
   font: 600 14px 'Fira Sans Condensed', sans-serif; color: #f0e8da; }
 /* Concede asks once: its confirmation on a red-tinted row. */
 .game .menudrop a.sure { color: #fff; background: linear-gradient(rgba(190,70,52,.55), rgba(160,50,38,.6)); }
+
+/* History: each placement the unit in small under its team rim, each draw its count on the team's boss, grouped by turn. */
+.game .hi { position: relative; width: 44px; height: 44px; flex: none; cursor: default; }
+.game .hi.unit .face { position: absolute; inset: 6px; border-radius: 50%; background-color: #3a342c; }
+.game .hi.unit img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.game .hi.draw { display: grid; place-items: center; background: url(/static/kit2/boss_a.webp) center / 40px no-repeat; }
+.game .hi.draw.B { background-image: url(/static/kit2/boss_b.webp); } .game .hi.draw .chalk { height: 16px; }
+.game .panel.histp { width: 244px; } .game .hist { gap: 4px 6px; } .game .hist .t { margin-top: 6px; }
+/* The end of a game: a granite piece over the dimmed board; the series score in the dens' gems; See the board beside the loud action. */
+.game .endbox { min-width: 440px; box-sizing: border-box; padding: 30px 32px 26px; gap: 10px; border-radius: 16px; text-align: center;
+  background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 20px 50px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,245,230,.12); }
+.game .endbox .res { font-size: 76px; }
+.game .endbox .score { display: flex; gap: 36px; margin: 6px 0 2px; }
+.game .endbox .gem { width: 80px; height: 80px; display: grid; place-items: center; background: url(/static/kit2/gem_a.webp) center / contain no-repeat; filter: drop-shadow(1px 3px 3px rgba(0,0,0,.55)); }
+.game .endbox .gem.B { background-image: url(/static/kit2/gem_b.webp); } .game .endbox .gem .gemnum { height: 32px; }
+.game .endbox .btns { width: 100%; display: flex; gap: 10px; margin-top: 12px; }
+.game .endbox .btns > * { flex: 1 1 auto; padding: 0 18px; white-space: nowrap; height: 48px; display: grid; place-items: center; font-weight: 600; font-size: 17px; text-decoration: none; }
+.game .endbox .btns > .play { flex: 2 1 auto; font-size: 19px; }
+.game .waiting .slab { pointer-events: auto; height: 40px; padding: 0 16px; }
+.tip { max-width: 300px; line-height: 1.3; }

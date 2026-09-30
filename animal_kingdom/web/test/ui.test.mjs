@@ -104,6 +104,11 @@ test('a game can be conceded from the menu, after one confirmation', async () =>
   await p.click('#concede');
   await p.waitForFunction(() => window.__ak().V.phase === 'game_over', { timeout: 5000 });
   assert.match(await p.$eval('#endov', e => e.textContent), /You conceded/);
+  // See the board lifts the results away; Back to results brings them back
+  await p.click('#peek'); await wait(80);
+  assert.ok(await p.$eval('#endov', e => getComputedStyle(e).display === 'none'), 'the board shows');
+  await p.click('#unpeek'); await wait(80);
+  assert.ok(await p.$eval('#endov', e => getComputedStyle(e).display !== 'none'), 'the results are back');
   await p.close();
 });
 
