@@ -371,3 +371,6 @@
 .game .recent { left: 96px; top: 6px; display: flex; align-items: center; gap: 3px; z-index: 20; }
 .game .recent .hi { cursor: pointer; }
 .game .recent .tgap { width: 10px; }
+/* A hand card read large (hover, or the tutorial explaining it) shows its rules panel, so it frames its painting as the full
+   card does (its FULL height), not as the compact card's top-aligned crop. */
+.game .hc:hover .card .pic, .game .hc.shown .card .pic { bottom: calc(var(--bw) + 7.8em); border-radius: 0; background-position: 50% var(--fy, 30%); }
