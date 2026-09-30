@@ -382,6 +382,7 @@ const tutState = () => { if (!ui.tut || ui.tut.id !== V.id) ui.tut = { id: V.id,
 function decision() {
   const G = V.game, d = { mine: V.phase === 'playing' && G.toAct === V.you && !RP.views.length, rings: [], hqRing: false, crChoice: {}, handPick: new Set(), cardOpts: [], otherOpts: [], places: {}, pend: null };
   if (isTutorial() && V.phase === 'playing') d.lesson = lessonNow(V, ui.sel, CARDS, tutState());   // the tutorial's coach: the lesson for this moment
+  if (RP.views.length && V.phase === 'playing' && G.toAct === V.you) d.pend = G.pending;   // a replay shows what you were asked, read-only
   if (!d.mine) return d;
   d.pend = G.pending; d.places = G.legal.place;
   if (d.pend && d.pend.mode === 'choice') {
@@ -439,6 +440,7 @@ function gameScreen() {
       <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
       <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
       <div class="abs rbar" id="rbar"></div>
+      <div class="abs recent" id="recent"></div>
       <div class="endov" id="endov"></div></div></div>`;
     fitStage(); wireTips(document.getElementById('scr'));
     const $ = id => document.getElementById(id);
@@ -523,13 +525,13 @@ function drawGame() {
   waiting.textContent = ''; opts.classList.remove('on'); opts.innerHTML = '';
   if (d.pend && d.pend.kind === 'mulligan') {
     const k = d.pend.returned;
-    bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b><p>Click a card to replace it; no copy of a card you replace can come back.</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`;
+    bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b>` + (RP.views.length ? '' : `<p>Click a card to replace it; no copy of a card you replace can come back.</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`);
     bar.classList.add('on');
-    $('skip').onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: SKIP }); };
+    if ($('skip')) $('skip').onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: SKIP }); };
   } else if (d.pend) {
     const src = d.pend.source && CARDS[d.pend.source];
     const other = d.otherOpts.map((o, i) => `<span class="skip" data-x="${i}">${o.label}</span>`).join('') + (d.pend.optional ? `<span class="skip" id="skip">Skip</span>` : '');
-    bar.innerHTML = (src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>') + (other ? `<div class="btns">${other}</div>` : '');
+    bar.innerHTML = (src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>') + (other && !RP.views.length ? `<div class="btns">${other}</div>` : '');
     bar.classList.add('on');
     if (d.cardOpts.length) {
       opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${cardHTML(c)}</div>`; }).join('');
@@ -609,24 +611,33 @@ function placeCoach(el, L, rings = []) {
 }
 
 // The history strip and both decklists, shared by both game screens.
+// One move in small: a draw is its count on the team's boss (as a held payout); a placement the unit, as on the board.
+function histItem(m, i) {
+  const side = rel(m.seat), t = side === 'A' ? 'a' : 'b';
+  if (m.kind === 'draw') { const dr = m.fx.find(f => f.k === 'draw' && f.seat === m.seat); return `<div class="hi draw ${side}" data-h="${i}">${chalk('+' + (dr ? dr.n : 0))}</div>`; }
+  return `<div class="hi unit ${side}" data-h="${i}"><div class="face" style="${portrait(m.card, 32)}"></div><img src="/static/kit2/rim_${t}.webp" alt="" draggable="false"></div>`;
+}
+// Hovering a move says what it did; in a replay, clicking it goes to that move.
+function wireHist(root, G) {
+  root.querySelectorAll('[data-h]').forEach(el => {
+    const m = G.history[el.dataset.h];
+    el.onmouseenter = () => { if (m.kind === 'place') cardPop(el, m.card, moveLine(m), 'below'); else { pop.className = 'pop'; pop.innerHTML = `<div class="ev">${moveLine(m)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex'; const r = el.getBoundingClientRect(); pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; } };
+    el.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
+    if (RP.views.length) el.onclick = e => { e.stopPropagation(); pop.style.display = 'none'; replayPlay(false); replayStep(replayMoveEnd(Number(el.dataset.h))); };
+  });
+}
 function drawHistory(G) {
   const hist = document.getElementById('hist');
   let hs = '', lastT = null;
   G.history.forEach((m, i) => {
     if (m.round !== lastT) { hs += `<div class="t">Turn ${m.round}</div>`; lastT = m.round; }
-    const side = rel(m.seat), t = side === 'A' ? 'a' : 'b';
-    // a draw is its count on the team's boss (as a held payout); a placement the unit in small, as on the board
-    if (m.kind === 'draw') { const dr = m.fx.find(f => f.k === 'draw' && f.seat === m.seat); hs += `<div class="hi draw ${side}" data-h="${i}">${chalk('+' + (dr ? dr.n : 0))}</div>`; }
-    else hs += `<div class="hi unit ${side}" data-h="${i}"><div class="face" style="${portrait(m.card, 32)}"></div><img src="/static/kit2/rim_${t}.webp" alt="" draggable="false"></div>`;
+    hs += histItem(m, i);
   });
   hist.innerHTML = hs; hist.scrollTop = hist.scrollHeight;
-  hist.querySelectorAll('[data-h]').forEach(el => {
-    const m = G.history[el.dataset.h];
-    el.onmouseenter = () => { if (m.kind === 'place') cardPop(el, m.card, moveLine(m), 'below'); else { pop.className = 'pop'; pop.innerHTML = `<div class="ev">${moveLine(m)}</div>`; pop.style.minHeight = '0'; pop.style.display = 'flex'; const r = el.getBoundingClientRect(); pop.style.left = Math.min(r.left, innerWidth - 200) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; } };
-    el.onmouseleave = () => { pop.style.display = 'none'; pop.style.minHeight = ''; };
-  });
+  wireHist(hist, G);
   const removed = document.getElementById('removed');
   removed.innerHTML = `Removed <b>${G.removed.length}</b>`;
+  drawRecent(G);
 }
 function drawLists(G) {
   const sum = o => Object.values(o).reduce((a, b) => a + b, 0), you = V.you, them = opp();
@@ -796,7 +807,7 @@ function drawEnd() {
 // ------------------------------------------------------------------ replay
 // A finished match played back on the game screen: every view you saw, one per action, stepped or played at the bot's pace.
 // Nothing can be done on the board; the controls sit where the menu does, and the arrows and Space drive them too.
-const RP = { key: null, views: [], i: 0, playing: false, timer: null, eye: true };   // eye: the opponent's hand shown
+const RP = { key: null, views: [], i: 0, playing: false, timer: null, eye: true, shown: [], turns: [] };   // eye: the opponent's hand shown
 async function replayScreen(key) {
   if (RP.key === key && RP.views.length) return;
   stopReplay(); screen = null; RP.key = key;
@@ -806,21 +817,30 @@ async function replayScreen(key) {
   try { const r = await api('/api/replay/' + encodeURIComponent(key)); if (!r.ok) throw new Error(await r.text()); views = await r.json(); }
   catch (e) { if (RP.key === key) back(e.message || 'The replay didn\'t load, try again'); return; }
   if (RP.key !== key) return;   // left while it loaded
+  // A step that changes nothing on screen (the opponent's hidden choices, their kept hand) is skipped; the progress bar marks each turn.
+  const look = v => JSON.stringify([v.phase, v.game.board, v.game.hand.map(h => h.id), (v.game.oppHand || []).map(h => h.id), v.game.food,
+    v.game.current, v.game.round, v.game.toAct === v.you && v.game.pending]);
+  RP.shown = views.map((v, i) => i === 0 || i === views.length - 1 || look(v) !== look(views[i - 1]));
+  RP.turns = views.flatMap((v, i) => i && v.game.round !== views[i - 1].game.round ? [i / (views.length - 1)] : []);
   RP.views = views; RP.eye = true; ui.peek = false; ui.sel = null; ui.panel = null;
   replayStep(0); replayPlay(true);
 }
-function stopReplay() { clearTimeout(RP.timer); Object.assign(RP, { key: null, views: [], i: 0, playing: false }); }
+function stopReplay() { clearTimeout(RP.timer); Object.assign(RP, { key: null, views: [], i: 0, playing: false, shown: [], turns: [] }); }
 function replayStep(i) {
   i = Math.max(0, Math.min(RP.views.length - 1, i));
-  const prev = V, step = i === RP.i + 1; RP.i = i; V = RP.views[i]; V.rx = Date.now() / 1000;
+  const prev = V, step = i === RP.i + 1 || (i > RP.i && RP.shown.slice(RP.i + 1, i).every(s => !s)); RP.i = i; V = RP.views[i]; V.rx = Date.now() / 1000;
   onView(step ? prev : null);   // one step forward plays its animation; any jump lands at once
 }
+const replayNext = () => { let i = RP.i + 1; while (i < RP.views.length - 1 && !RP.shown[i]) i++; return i; };
+const replayPrev = () => { let i = RP.i - 1; while (i > 0 && !RP.shown[i]) i--; return i; };
+// The view where move h has fully resolved (its choices included): the last one before the next move.
+const replayMoveEnd = h => { let i = RP.views.findIndex(v => v.game.history.length > h + 1); return (i < 0 ? RP.views.length : i) - 1; };
 // Playing: the next view after the same beat the bot takes, longer while the opponent's card is shown.
 function replayPlay(on) {
   clearTimeout(RP.timer); RP.playing = on && RP.i < RP.views.length - 1;
   if (RP.playing) {
     const G = V.game, last = G.history[G.history.length - 1], shown = last && last.seat !== V.you && last.kind === 'place';
-    RP.timer = setTimeout(() => { replayStep(RP.i + 1); replayPlay(true); }, RP.i === 0 ? 1400 : shown ? 2200 : 1100);
+    RP.timer = setTimeout(() => { replayStep(replayNext()); replayPlay(true); }, RP.i === 0 ? 1400 : shown ? 2200 : 1100);
   }
   drawReplayBar();
 }
@@ -828,28 +848,49 @@ const RICON = { back: '<path d="M15 6l-6 6 6 6"/>', fwd: '<path d="M9 6l6 6-6 6"
   pause: '<path d="M8.5 6v12M15.5 6v12"/>', eye: '<path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
   eyeoff: '<path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 20L20 4"/>' };
 const ric = k => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${RICON[k]}</svg>`;
+// The controls are built once per screen (a drag on the bar must outlive redraws); each view updates them.
 function drawReplayBar() {
   const bar = document.getElementById('rbar');
   if (!bar) return;
   if (!RP.views.length) { bar.innerHTML = ''; bar.classList.remove('on'); return; }
-  const n = RP.views.length - 1, pct = n ? RP.i / n * 100 : 100;
-  bar.classList.add('on');
-  bar.innerHTML = `<button class="slab" id="rback" tabindex="-1" data-tip="Back one move">${ric('back')}</button>
-    <button class="slab" id="rplay" tabindex="-1" data-tip="${RP.playing ? 'Pause' : 'Play'}">${ric(RP.playing ? 'pause' : 'play')}</button>
-    <button class="slab" id="rfwd" tabindex="-1" data-tip="Forward one move">${ric('fwd')}</button>
-    <div class="track" id="rtrack"><i style="width:${pct}%"></i></div>
-    <button class="slab" id="reye" tabindex="-1" data-tip="${RP.eye ? 'Hide' : 'Show'} your opponent's hand">${ric(RP.eye ? 'eye' : 'eyeoff')}</button>
-    <a class="slab out" href="#/profile">Leave</a>`;
   const $ = id => document.getElementById(id), stop = f => e => { e.stopPropagation(); f(e); };
-  $('rback').onclick = stop(() => { replayPlay(false); replayStep(RP.i - 1); });
-  $('rfwd').onclick = stop(() => { replayPlay(false); replayStep(RP.i + 1); });
-  $('rplay').onclick = stop(() => replayPlay(!RP.playing));
-  $('reye').onclick = stop(() => { RP.eye = !RP.eye; drawGame(); });
-  $('rtrack').onclick = stop(e => { const r = e.currentTarget.getBoundingClientRect(); replayPlay(false); replayStep(Math.round((e.clientX - r.left) / r.width * n)); });
+  if (!$('rtrack')) {
+    bar.innerHTML = `<button class="slab" id="rback" tabindex="-1" data-tip="Back one move">${ric('back')}</button>
+      <button class="slab" id="rplay" tabindex="-1"></button>
+      <button class="slab" id="rfwd" tabindex="-1" data-tip="Forward one move">${ric('fwd')}</button>
+      <div class="track" id="rtrack"><i></i></div>
+      <button class="slab" id="reye" tabindex="-1"></button>
+      <a class="slab out" href="#/profile">Leave</a>`;
+    $('rback').onclick = stop(() => { replayPlay(false); replayStep(replayPrev()); });
+    $('rfwd').onclick = stop(() => { replayPlay(false); replayStep(replayNext()); });
+    $('rplay').onclick = stop(() => replayPlay(!RP.playing));
+    $('reye').onclick = stop(() => { RP.eye = !RP.eye; drawGame(); });
+    // Click or drag along the bar: the game follows the pointer, the turn counter with it.
+    const track = $('rtrack'), seek = e => { const r = track.getBoundingClientRect();
+      const i = Math.round(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (RP.views.length - 1)); if (i !== RP.i) replayStep(i); };
+    track.onclick = e => e.stopPropagation();
+    track.onpointerdown = e => { e.stopPropagation(); track.setPointerCapture(e.pointerId); replayPlay(false); seek(e); track.onpointermove = seek; };
+    track.onpointerup = track.onpointercancel = () => { track.onpointermove = null; };
+  }
+  bar.classList.add('on');
+  const n = RP.views.length - 1;
+  $('rtrack').innerHTML = RP.turns.map(p => `<b style="left:${p * 100}%"></b>`).join('') + `<i style="width:${n ? RP.i / n * 100 : 100}%"></i>`;
+  $('rplay').dataset.tip = RP.playing ? 'Pause' : 'Play'; $('rplay').innerHTML = ric(RP.playing ? 'pause' : 'play');
+  $('reye').dataset.tip = `${RP.eye ? 'Hide' : 'Show'} your opponent's hand`; $('reye').innerHTML = ric(RP.eye ? 'eye' : 'eyeoff');
+}
+// The last few moves beside the turn, newest last (in a replay, where the history is how you find your way).
+function drawRecent(G) {
+  const el = document.getElementById('recent');
+  if (!el) return;
+  if (!RP.views.length || !G.history.length) { el.innerHTML = ''; return; }
+  const from = Math.max(0, G.history.length - 7);
+  el.innerHTML = G.history.slice(from).map((m, k) => { const i = from + k, prev = G.history[i - 1];
+    return (k && prev.round !== m.round ? '<span class="tgap"></span>' : '') + histItem(m, i); }).join('');
+  wireHist(el, G);
 }
 function replayKey(e) {
-  if (e.key === 'ArrowLeft') { replayPlay(false); replayStep(RP.i - 1); }
-  else if (e.key === 'ArrowRight') { replayPlay(false); replayStep(RP.i + 1); }
+  if (e.key === 'ArrowLeft') { replayPlay(false); replayStep(replayPrev()); }
+  else if (e.key === 'ArrowRight') { replayPlay(false); replayStep(replayNext()); }
   else if (e.key === ' ') { e.preventDefault(); replayPlay(!RP.playing); }
   else if (e.key === 'Escape' && !ui.panel) location.hash = '#/profile';
   else return false;

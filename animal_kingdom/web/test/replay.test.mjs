@@ -76,6 +76,28 @@ test('a match opens its replay: every view drawn right, nothing to act on, the c
   assert.ok(await page.evaluate(() => window.__ak().V.version) < i, 'back one move');
 });
 
+test('stepping skips what changes nothing on screen; the bar marks each turn; the recent moves go back to a move', async () => {
+  const look = v => JSON.stringify([v.phase, v.game.board, v.game.hand.map(h => h.id), (v.game.oppHand || []).map(h => h.id), v.game.food, v.game.current, v.game.round, v.game.toAct === v.you && v.game.pending]);
+  const turns = views.filter((v, i) => i && v.game.round !== views[i - 1].game.round).length;
+  assert.equal(await page.$$eval('#rtrack b', els => els.length), turns, 'a mark per turn');
+  const b = await (await page.$('#rtrack')).boundingBox();
+  await page.mouse.click(b.x + 1, b.y + b.height / 2);   // the start
+  let prev = await page.evaluate(() => window.__ak().V);
+  for (let k = 0; k < 40; k++) {
+    await page.keyboard.press('ArrowRight');
+    const v = await page.evaluate(() => window.__ak().V);
+    if (v === prev || v.version === prev.version) break;
+    assert.notEqual(look(v), look(prev), `step ${k} changed something`);
+    prev = v;
+  }
+  await page.keyboard.press('ArrowLeft');   // off the result, which covers the board
+  const n = await page.$$eval('#recent .hi', els => els.length);
+  assert.ok(n > 1 && n <= 7, 'recent moves shown');
+  const h = await page.$eval('#recent .hi', el => Number(el.dataset.h));
+  await page.click('#recent .hi'); await wait(50);
+  assert.equal(await page.evaluate(() => window.__ak().V.game.history.length), h + 1, 'back at that move');
+});
+
 test('the opponent\'s hand shows face up; the eye turns it back into card backs', async () => {
   const n = await page.evaluate(() => window.__ak().V.game.handCount.B);
   assert.equal(await page.$$eval('#opphand .oc', els => els.length), n);
@@ -87,7 +109,9 @@ test('the opponent\'s hand shows face up; the eye turns it back into card backs'
 });
 
 test('the replay ends on the result, offers it again, and Leave goes back to the profile', async () => {
-  await page.evaluate(() => { const t = document.getElementById('rtrack'), r = t.getBoundingClientRect(); t.dispatchEvent(new MouseEvent('click', { clientX: r.right, bubbles: true })); });
+  const b = await (await page.$('#rtrack')).boundingBox();
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await page.mouse.down();
+  await page.mouse.move(b.x + b.width + 40, b.y + b.height / 2, { steps: 4 }); await page.mouse.up();   // dragged past the end: the last view
   await wait(100);
   assert.ok(await page.$('#endov.on #again'), 'Watch again');
   await page.click('#again'); await page.keyboard.press('Space'); await wait(50);
