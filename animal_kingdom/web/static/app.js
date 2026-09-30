@@ -622,6 +622,8 @@ function placeCoach(el, L, rings = []) {
   else if (a.hand) [x, y, side] = [STAGE.w / 2, 590 + up, 'above'];
   else if (a.oppcards) [x, y, side] = [STAGE.w / 2 + 170, 72, 'below'];   // beside the opponent's card backs, clear of their revealed card
   else if (a.middle) [x, y, side] = [STAGE.w / 2, 250, 'mid'];
+  else if (a.region) {   // to the right of the region, which glows (drawBoard), clear of all of it
+    const ps = a.region.map(crossroadAt); [x, y, side] = [Math.max(...ps.map(p => p[0])) + 2, (Math.min(...ps.map(p => p[1])) + Math.max(...ps.map(p => p[1]))) / 2, 'right']; }
   else if (a.stone) { const [c, r] = a.stone.split(',').map(Number), [x1, y1] = crossroadAt(`${c},${r}`), [x2, y2] = crossroadAt(`${c + 1},${r + 1}`);
     [x, y, side] = [(x1 + x2) / 2 - 20, (y1 + y2) / 2, 'right']; }   // a region's payout stone, in the open ground between crossroads
   else [x, y, side] = [STAGE.w / 2, 590 + up, 'above'];
@@ -750,7 +752,7 @@ function drawBoard(d) {
   }
   const last = V.game.history[V.game.history.length - 1], won = V.game.result && V.game.result.reason === 'hq_capture' && last && last.target && last.target[0] === 'hq';
   const capture = won ? { side: rel(last.target[1]), id: last.card, owner: rel(last.seat), str: CARDS[last.card].str } : null;
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null });
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region: d.lesson && d.lesson.at && d.lesson.at.region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null });
 }
 
 function wireBoard() {

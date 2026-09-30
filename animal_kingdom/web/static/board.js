@@ -62,6 +62,8 @@ function unit(u, under, cards) {
 // unit took a den, which ends the game (it stands in that den's mouth) }.
 export function renderBoard(el, M, g, cards, ui) {
   const A = ui.anim, rings = new Set(ui.rings || []);
+  // the tutorial shows a region: its four crossroads and its stone glow (not rings: rings mean a click acts there)
+  const shown = new Set(ui.region || []), shownAt = ui.region && ui.region[0].split(',').map(Number);
   const { landed, covered, leaving, strength } = boardChanges(A && A.board, g.board, (A && A.fx) || []);
   const late = !!(A && A.landDelay);   // the opponent's card is still flying in: its piece lands when it arrives
   const held = heldRegions(M.regions, g.board);
@@ -71,12 +73,12 @@ export function renderBoard(el, M, g, cards, ui) {
   // Payout stones: the plate's stone with a small boss on it holding the payout, in the holder's colour when held.
   for (const reg of M.regions) {
     const [x, y] = stoneAt(reg), h = held.find(r => r.id === reg.id);
-    s += put(`stone pboss ${h ? h.owner : ''}`, x, y, chalk('+' + reg.food));
+    s += put(`stone pboss ${h ? h.owner : ''}${reg.c.every((v, i) => shownAt && v === shownAt[i]) ? ' shown' : ''}`, x, y, chalk('+' + reg.food));
   }
 
   for (let c = 1; c <= M.cols; c++) for (let r = 1; r <= M.rows; r++) {
     const cr = key(c, r), st = g.board[cr] || [], [x, y] = at(c, r);
-    const cls = (rings.has(cr) ? ' tgt' : '') + (landed.has(cr) ? ' land' + (late ? ' late' : '') : '') + (covered.has(cr) ? ' cover' : '');
+    const cls = (rings.has(cr) ? ' tgt' : '') + (shown.has(cr) ? ' shown' : '') + (landed.has(cr) ? ' land' + (late ? ' late' : '') : '') + (covered.has(cr) ? ' cover' : '');
     const pv = ui.preview && ui.preview.cr === cr ? ui.preview : null;
     if (pv) { s += put(`cr unit A ghost${cls}`, x, y, unit({ id: pv.id, owner: 'A', str: pv.str }, st.slice().reverse(), cards), `data-cr="${cr}"`); continue; }
     if (!st.length) { s += put(`cr clear${cls}`, x, y, '', `data-cr="${cr}"`); continue; }

@@ -394,3 +394,9 @@
 .game .hand { translate: 0 var(--above, 0px); }
 .game .deck, .game .tbtn, .game .waiting { translate: var(--side, 0px) var(--above, 0px); }
 .game .hand { z-index: 12; pointer-events: none; } .game .hand .hc { pointer-events: auto; }   /* the hand's translate (window edges) makes it a stacking context: above the board's pieces, so a card read large covers them; only its cards take the pointer (the strip spans the deck) */
+/* a region the tutorial shows: its crossroads and stone glow warm, softly breathing; no ring (a ring means a click acts there) */
+.game .cr.shown::before, .game .stone.shown::before { content: ''; position: absolute; inset: -14px; border-radius: 50%; pointer-events: none; z-index: -1;
+  background: radial-gradient(circle, rgba(255,236,190,.55) 30%, rgba(255,226,160,.28) 55%, rgba(255,220,150,0) 72%); animation: regionglow 1.6s ease-in-out infinite; }
+.game .stone.shown::before { inset: -18px; }
+.game .cr.unit.shown::before { inset: -40px; background: radial-gradient(circle, rgba(255,236,190,.6) 40%, rgba(255,226,160,.3) 58%, rgba(255,220,150,0) 72%); }   /* wide enough to show around the piece */
+@keyframes regionglow { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
