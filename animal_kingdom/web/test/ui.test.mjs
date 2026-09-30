@@ -58,18 +58,20 @@ test('home starts a match: the deck chooser lists every deck and scrolls in a sh
   assert.ok(hit, 'the last deck can be clicked');
   const id = await p.evaluate(e => e.dataset.deck, last); await last.click(); await wait(80);
   assert.equal(await p.evaluate(() => localStorage.getItem('ak:deck')), id, 'clicking a deck chooses it');
-  assert.equal(await p.$('.chooser'), null, 'and closes the chooser');
+  assert.ok(await p.$('.chooser'), 'and keeps the chooser open to read its list');
   await p.close();
 });
 
-test('the deck chooser shows the list of the deck under the pointer and opens it in the collection', async () => {
+test('the deck chooser shows the clicked deck\'s list, not the one under the pointer, and opens it in the collection', async () => {
   const p = await browser.newPage();
   await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   await p.click('#deckbtn'); await wait(80);
   const second = (await p.$$('.chooser [data-deck]'))[1], name = await p.evaluate(e => e.textContent, second);
   const before = await p.$eval('.dl', e => e.textContent);
   await second.hover(); await wait(80);
-  assert.notEqual(await p.$eval('.dl', e => e.textContent), before, 'the list follows the pointer');
+  assert.equal(await p.$eval('.dl', e => e.textContent), before, 'hovering leaves the list alone');
+  await second.click(); await wait(80);
+  assert.notEqual(await p.$eval('.dl', e => e.textContent), before, 'a click shows that deck');
   await p.click('#dedit'); await wait(200);
   assert.equal(await p.evaluate(() => location.hash), '#/collection');
   assert.equal(await p.$eval('.coll .clist.editing .dtile.on b', e => e.textContent), name, 'that deck, open');

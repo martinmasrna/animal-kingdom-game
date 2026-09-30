@@ -160,8 +160,8 @@ function homeScreen(mode = {}) {
   if (!mode.join) $('oppbtn').onclick = () => toggle('opp');
   root.onclick = e => { if (play.open && !e.target.closest('.chooser, .pick')) { play.open = null; redraw(); } };   // a click elsewhere closes the chooser
   root.querySelectorAll('.chooser [data-deck]').forEach(el => {
-    el.onmouseenter = () => { const d = all.find(x => x.id === el.dataset.deck); root.querySelector('.dl').innerHTML = deckList(d); play.peek = d.id; wireList(); };
-    el.onclick = () => { store('ak:deck', el.dataset.deck); play.open = null; redraw(); };
+    // A click picks the deck and shows its list; the chooser stays open to read it (hover changed the list on the way to it).
+    el.onclick = () => { store('ak:deck', el.dataset.deck); play.peek = el.dataset.deck; redraw(); };
   });
   const wireList = () => { const e = $('dedit'); if (e) e.onclick = () => { play.open = null; location.hash = "#/collection/" + play.peek.slice(3); };
     const dl = root.querySelector('.dl'); if (dl) wirePops(dl); };
