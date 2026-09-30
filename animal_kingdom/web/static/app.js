@@ -253,7 +253,7 @@ function profileScreen() {
   const code = ME.logins.length ? '' : sect('Sign-in code', `<p>Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</p>
       <div class="row"><span class="field keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span><button class="slab" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</button><button class="slab" id="copykey">Copy</button></div>`)
     + sect('Use a different profile', `<div class="row"><input class="field" id="other" placeholder="Sign-in code" autocomplete="off"><button class="slab" id="signin">Sign in</button></div>`);
-  app.innerHTML = `<div class="mscr prof"><div class="hist">${hist ? `<div class="recs">${recs}</div><div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
+  app.innerHTML = `<div class="mscr prof"><div class="hist"><h2>Match history</h2>${hist ? `<div class="hbody"><div class="recs">${recs}</div><div class="hlist">${hist}</div></div>` : '<p class="none">No finished matches yet.</p>'}</div>
     <div class="side"><div class="me"><div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div>${account}${code}</div>
       <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
