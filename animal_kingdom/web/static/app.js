@@ -565,10 +565,12 @@ function drawGame() {
   const canDraw = d.mine && !d.pend && G.legal.draw && !d.noDraw;
   $('deck').className = 'abs deck num' + (canDraw ? ' can' : ''); $('deck').innerHTML = canDraw ? 'Draw 2' : '';
   const tb = $('tbtn');
+  // the moves left in the turn, for either player; the next one to be spent pulses while the opponent is thinking
+  const pips = playing ? Array.from({ length: G.actionsTotal }, (_, i) => { const used = G.actionsTotal - G.actionsLeft;
+    return `<i class="${i < used ? 'used' : i === used ? 'next' : ''}"></i>`; }).join('') : '';
   if (playing && G.current === you) {
-    const pips = Array.from({ length: G.actionsTotal }, (_, i) => `<i class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}"></i>`).join('');
     tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass && !d.noPass ? ' can' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}<span class="clock" id="clock"></span></span>`;
-  } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = 'Opponent\'s turn<span class="think"></span><span class="clock" id="clock"></span>'; }
+  } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = `<span class="pips">${pips}<span class="clock" id="clock"></span></span>`; tb.dataset.tip = 'Your opponent\'s turn'; }
   else { tb.className = 'abs tbtn'; tb.innerHTML = ''; }
 
   // A pending choice: the asking card and its rule; card options float above the hand.

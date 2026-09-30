@@ -114,8 +114,8 @@ export function screenMismatches() {
     if (!cap || !visible(cap)) out.push('the unit that took the den is not shown'); }
 
   // whose turn, and the end of a game
-  const tb = document.getElementById('tbtn').textContent;
-  if (V.phase === 'playing' && !(G.current === you ? /End turn/.test(tb) : /Opponent's turn/.test(tb))) out.push(`turn button says "${tb}"`);
+  const tbe = document.getElementById('tbtn'), tb = tbe.textContent;   // yours says End turn; theirs is the red piece, no words
+  if (V.phase === 'playing' && !(G.current === you ? /End turn/.test(tb) && tbe.classList.contains('A') : tbe.classList.contains('B') && !/End turn/.test(tb))) out.push(`turn button says "${tb}"`);
   const ended = V.phase === 'game_over' || V.phase === 'match_over';
   if (ended !== document.getElementById('endov').classList.contains('on')) out.push(`end overlay ${ended ? 'missing' : 'shown mid-game'}`);
   return out;
