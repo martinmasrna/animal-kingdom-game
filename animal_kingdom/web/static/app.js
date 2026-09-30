@@ -635,7 +635,7 @@ function placeCoach(el, L, rings = []) {
     : side === 'right' ? `left:${x + 78}px;top:${y}px` : `left:${x - 78 - COACH_W}px;top:${y}px`;
   // while the opponent's card is shown large in the middle, the coach waits for it to land, then fades in
   const wait = Math.max(0, (ui.revealEnd || 0) - Date.now());
-  if (wait && L.read) { clearTimeout(placeCoach.t); placeCoach.t = setTimeout(() => { if (screen === 'game') drawGame(); }, wait + 20); }   // then show the card large
+  if (wait && (L.read || a.region)) { clearTimeout(placeCoach.t); placeCoach.t = setTimeout(() => { if (screen === 'game') drawGame(); }, wait + 20); }   // then show the card large
   document.getElementById('board').classList.toggle('pulse', !!a.rings);
   holdBot(!!L.next);
   el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
@@ -752,7 +752,8 @@ function drawBoard(d) {
   }
   const last = V.game.history[V.game.history.length - 1], won = V.game.result && V.game.result.reason === 'hq_capture' && last && last.target && last.target[0] === 'hq';
   const capture = won ? { side: rel(last.target[1]), id: last.card, owner: rel(last.seat), str: CARDS[last.card].str } : null;
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region: d.lesson && d.lesson.at && d.lesson.at.region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null });
+  const region = d.lesson && d.lesson.at && d.lesson.at.region && Date.now() >= (ui.revealEnd || 0) ? d.lesson.at.region : null;   // after the opponent's card has landed, with the coach
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null });
 }
 
 function wireBoard() {
