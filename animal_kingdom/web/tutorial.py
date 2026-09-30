@@ -31,14 +31,14 @@ OPPONENT_DECK = ["rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup
 # Eagle (Flight, on your own animal first); the next draw brings the Squirrel (food from a Roar) and the Black Mamba
 # (removes up to 5: the opponent's Eagle), the one after the Polar Bear (8, Apex Predator: it eats a 7 of the wall, and
 # the den falls); then animals.
-PLAYER_DECK_2 = ["lion", "lynx", "cape_buffalo", "eagle", "squirrel", "black_mamba", "polar_bear", "dire_wolf", "lion",
+PLAYER_DECK_2 = ["lynx", "eagle", "squirrel", "black_mamba", "polar_bear", "dire_wolf", "lion",
                  "squirrel", "cape_buffalo", "dire_wolf", "lion", "chipmunk", "cape_buffalo", "dire_wolf", "lion",
                  "squirrel", "cape_buffalo", "dire_wolf", "lion", "chipmunk", "cape_buffalo", "dire_wolf", "lion",
                  "squirrel", "cape_buffalo", "dire_wolf", "lion", "cape_buffalo", "dire_wolf", "lion", "squirrel",
                  "cape_buffalo", "dire_wolf", "lion"]
 # Its opponent walls all three crossroads before its den with 7s (a 7 can't cover a 7: only the Polar Bear gets in), flies its Eagle
 # onto the Squirrel (stacks), then plays wild dogs.
-OPPONENT_DECK_2 = ["cape_buffalo", "dire_wolf", "lion", "eagle"] + OPPONENT_DECK[1:]
+OPPONENT_DECK_2 = ["eagle"] + OPPONENT_DECK[1:]
 
 DECKS = {"tutorial_you": PLAYER_DECK, "tutorial_them": OPPONENT_DECK, "tutorial2_you": PLAYER_DECK_2, "tutorial2_them": OPPONENT_DECK_2}
 NAMES = {"tutorial_you": "Tutorial", "tutorial_them": "Wild dogs", "tutorial2_you": "Tutorial", "tutorial2_them": "Wild dogs"}
@@ -52,15 +52,28 @@ PER_TURN = {1: (2, 2, 1), 2: (1, 1, 1)}   # the opponent's bot name per lesson
 # it; lesson 2 walls all three crossroads, then flies the Eagle onto the player's Squirrel (SQUIRREL: wherever it is).
 SQUIRREL = "squirrel"
 OPENINGS = {1: {1: [("rusty", "5,2"), ("pup", "4,2")]},
-            2: {1: [("cape_buffalo", "5,2"), ("dire_wolf", "5,1")], 3: [("lion", "5,3")]}}
+            2: {}}   # lesson 2's board is set up (set_up): the guard of 7s stands from the start
 # Lesson 2's Eagle flies onto the Squirrel the first turn it can (the Squirrel on top of its stack), whenever that is.
 AMBUSH = {2: ("eagle", SQUIRREL)}
+
+
+# Lesson 2 starts from a set-up board (Martin, from the cold reviews: placing the Lion and Buffalo again taught nothing):
+# the player's Lion and Buffalo in a chain from the den, the opponent's den guarded by three 7s.
+SET_UP = {2: [("A", "lion", "1,2"), ("A", "cape_buffalo", "2,2"),
+              ("B", "dire_wolf", "5,1"), ("B", "cape_buffalo", "5,2"), ("B", "lion", "5,3")]}
+
+
+def set_up(state, lesson: int) -> None:
+    """Put the lesson's starting animals on the board (not from any deck or hand)."""
+    from ..engine.state import UnitInstance
+    for owner, card, cr in SET_UP.get(lesson, []):
+        state.board[cr] = [UnitInstance(card, owner, state.new_iid())]
 
 
 def config(lesson: int = 1) -> Config:
     """The tutorial skips the mulligan: the deal is already the one the lessons need. Lesson 1 opens with four cards, so
     its first two turns build a whole region before any draw (one new idea a turn)."""
-    return replace(Config.default(), mulligan=False, **({"first_player_opening_draw": 4} if lesson == 1 else {}))
+    return replace(Config.default(), mulligan=False, first_player_opening_draw=4 if lesson == 1 else 1)   # lesson 2: the Lynx
 
 
 class TutorialBot(Bot):

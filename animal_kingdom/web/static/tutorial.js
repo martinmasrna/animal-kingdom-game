@@ -111,16 +111,14 @@ export const LESSONS = [
   EMPTY,
 ];
 
-// Lesson 2: the deeper mechanics, won on food (the opponent walls its den with 7s). Scripted like lesson 1: every move is
-// a step in a fixed order on fixed crossroads (connection was taught in lesson 1; here the fixed board is what makes the
+// Lesson 2: the deeper mechanics, from a set-up board (tutorial.py SET_UP: your Lion and Buffalo, the opponent's den
+// guarded by 7s). Scripted like lesson 1: every move is a step in a fixed order (connection was taught in lesson 1; here the fixed board is what makes the
 // Eagle's ambush and the Black Mamba's rescue always possible). Only the Eagle, teaching Flight, rings every empty crossroad.
 // Then each move is guided to the best spots for finishing a region, until 100 food.
 const one = (card, cr) => ({ card, crs: [cr] });
 export const LESSONS_2 = [
-  { id: 'intro2', when: c => c.mine && c.round === 1 && c.units === 0, ...talk, at: { middle: true },
+  { id: 'intro2', when: c => c.mine && c.round === 1 && !c.placed('lynx'), ...talk, at: { middle: true },
     text: 'Lesson 2! Many animals have special powers. Let\'s meet some of them.' },
-  { id: 'lion', when: c => c.mine && c.hand('lion') && !c.placed('lion'), only: c => ({ card: 'lion', crs: c.empty('lion') }), at: { rings: true },
-    text: { pick: 'Click your Lion.', place: 'Now play it.' } },
   explain('glow', 'lynx', c => c.mine && c.ready('lynx'),
     'See the Lynx glowing? A glowing card\'s Roar will work if you place it now.'),
   { id: 'lynx', when: c => c.mine && c.hand('lynx'), only: c => ({ card: 'lynx', crs: c.empty('lynx') }), at: { rings: true },
@@ -130,11 +128,8 @@ export const LESSONS_2 = [
   { id: 'eagle', when: c => c.mine && c.hand('eagle') && !c.placed('eagle'),
     only: c => ({ card: 'eagle', crs: c.eagleSpots }), at: { rings: true },
     text: { pick: 'Click the Eagle.', place: 'Now click one of the circles. None of your other animals could stand there.' } },
-  { id: 'buffalo2', when: c => c.mine && c.round === 2 && c.placed('eagle') && c.hand('cape_buffalo'), only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo') }), at: { rings: true },
-    text: { pick: 'Click the Buffalo.', place: 'Now play it. Then watch what your opponent does.' } },
-  { id: 'draw2', when: c => c.mine && c.round >= 3 && !c.hand('squirrel') && !c.placed('squirrel'), only: { deck: true }, at: { deck: true },
+  { id: 'draw2', when: c => c.mine && c.round >= 2 && !c.hand('squirrel') && !c.placed('squirrel'), only: { deck: true }, at: { deck: true },
     text: 'Your hand is empty. Click your deck to draw 2 cards.' },
-  explain('squirrelinfo', 'squirrel', c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), 'The Squirrel\'s Roar gives you 10 food.'),
   { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), only: c => ({ card: 'squirrel', crs: c.safe.length ? c.safe : c.empty('squirrel') }), at: { rings: true },
     text: { pick: 'Click the Squirrel.', place: 'Now play it.' } },
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
@@ -147,7 +142,7 @@ export const LESSONS_2 = [
   TARGET,
   { id: 'uncovered', when: c => c.squirrelBack, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'The Eagle is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
-  { id: 'goal2', when: c => c.mine && c.wall, ...talk, at: { cr: '5,2' },   // beside its den's middle animal, clear of all three
+  { id: 'goal2', when: c => c.mine && c.wall && c.placed('black_mamba'), ...talk, at: { cr: '5,2' },   // beside its den's middle animal, clear of all three
     text: 'Your opponent has guarded its den with animals as strong as yours. You\'ll need something special to get past them.' },
   { id: 'draw3', when: c => c.mine && c.placed('black_mamba') && !c.hand('polar_bear') && !c.placed('polar_bear') && c.canDraw, only: { deck: true }, at: { deck: true },
     text: 'Click your deck to draw 2 more cards.' },

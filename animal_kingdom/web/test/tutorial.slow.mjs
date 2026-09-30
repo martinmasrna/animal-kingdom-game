@@ -84,7 +84,7 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
   await page.waitForSelector('#endov.on', { timeout: 10000 });   // the result shows once the last move has played out
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/2-end.png` });
   assert.equal(await page.evaluate(() => window.__ak().V.game.result.reason), 'hq_capture', 'lesson 2 is won by taking the den');
-  for (const id of ['intro2', 'lion', 'glow', 'lynx', 'eagleinfo', 'eagle', 'buffalo2', 'draw2', 'squirrelinfo', 'squirrel', 'covered', 'mambainfo', 'mamba', 'uncovered', 'goal2', 'apexinfo', 'apex', 'den'])
+  for (const id of ['intro2', 'glow', 'lynx', 'eagleinfo', 'eagle', 'draw2', 'squirrel', 'covered', 'mambainfo', 'mamba', 'uncovered', 'goal2', 'apexinfo', 'apex', 'den'])
     assert.ok(seen2.includes(id), `lesson 2's ${id} came up (${seen2})`);
   await page.click('.endbox .play');
   await page.waitForFunction(() => location.hash.startsWith('#/m/') && window.__ak().V && window.__ak().V.seats.B.bot === 'easy', { timeout: 10000 });   // straight into a real match against the Easy bot

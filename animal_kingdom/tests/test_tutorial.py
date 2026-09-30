@@ -70,65 +70,6 @@ def _lesson2() -> Match:
     return m
 
 
-def test_lesson_2_plays_out_as_its_script_says_and_is_won_on_the_den():
-    for seed in range(20):
-        rng, m = random.Random(seed), _lesson2()
-        legal = lambda: rules.legal_actions(m.state)
-        top = lambda cr: m.state.board[cr][-1].card_id if m.state.board.get(cr) else None
-
-        def a(action):
-            assert action in legal(), (seed, action)
-            m.act("A", action)
-            while m.state.pending is not None and m.to_act() == "A":   # a Roar's target: the first offered
-                m.act("A", next(x for x in legal() if isinstance(x, ChoiceAction) and x.choice != SKIP))
-
-        def their_turn():
-            while m.phase == "playing" and m.to_act() == "B":
-                m.act("B", m.bot_move())
-
-        a(PlaceAction("lion", ("cr", "1,2"))); a(PlaceAction("lynx", ("cr", "2,2")))   # the Lynx draws the Eagle
-        their_turn()
-        assert (top("5,2"), top("5,1")) == ("cape_buffalo", "dire_wolf")
-        eagle = [x for x in legal() if isinstance(x, PlaceAction) and x.card_id == "eagle" and not m.state.board.get(x.crossroad)
-                 and x.crossroad in ("4,1", "4,3")]   # as the lesson offers: nothing reachable beside it
-        a(rng.choice(eagle))
-        assert not any(isinstance(x, PlaceAction) and x.card_id == "cape_buffalo" and x.crossroad in _adj(eagle_at(m)) for x in legal()), \
-            "nothing may go next to the lone Eagle"
-        a(PlaceAction("cape_buffalo", ("cr", "2,1")))
-        their_turn()
-        a(DrawAction()); a(PlaceAction("squirrel", ("cr", "3,2")))
-        their_turn()
-        assert top("5,3") == "lion" and top("3,2") == "eagle", "the wall is complete and the Eagle covers the Squirrel"
-        a(PlaceAction("black_mamba", ("cr", "3,1")))
-        assert top("3,2") == "squirrel", "the Black Mamba removed the Eagle"
-        a(DrawAction())
-        their_turn()
-        wall = lambda: [x for x in legal() if isinstance(x, PlaceAction) and x.card_id == "polar_bear" and x.crossroad[0] == "5"]
-        for _ in range(4):   # an animal next to the wall first, if the Polar Bear can't reach it yet
-            if wall() or m.phase != "playing":
-                break
-            if m.to_act() == "B":
-                their_turn(); continue
-            near = [x for x in legal() if isinstance(x, PlaceAction) and x.card_id != "polar_bear" and not x.is_hq_capture
-                    and x.crossroad[0] == "4" and not m.state.board.get(x.crossroad)]
-            a(near[0] if near else DrawAction())
-        if m.to_act() == "B":
-            their_turn()
-        assert wall(), "the Polar Bear reaches the wall"
-        a(rng.choice(wall()))
-        if m.to_act() == "B":
-            their_turn()
-        if not m.state.hands["A"]:   # the Polar Bear was the last card: draw one to walk in with (the coach says so)
-            a(DrawAction())
-            if m.to_act() == "B":
-                their_turn()
-        hq = [x for x in legal() if isinstance(x, PlaceAction) and x.is_hq_capture]
-        assert hq, "the den is open"
-        a(hq[0])
-        assert m.results[-1]["winner"] == "A" and m.results[-1]["reason"] == "hq_capture", (seed, m.results[-1])
-        assert m.state.food["B"] == 0
-
-
 def test_lesson_1_guided_to_regions_always_ends_on_100_food():
     """After the Roar the client offers the open corners of the regions where the player holds the most (feed): with any
     choice among them, lesson 1 always ends on food, and before turn 12."""
@@ -154,8 +95,8 @@ def test_lesson_1_guided_to_regions_always_ends_on_100_food():
         assert r["winner"] == "A" and r["reason"] == "food" and r["turns"] < 12, (seed, r)
 
 
-def test_lesson_2_can_always_be_finished_wherever_the_player_puts_its_first_animals():
-    """Lion, Lynx and Buffalo anywhere legal; the Eagle, Squirrel and Black Mamba where the lesson rings them (the same
+def test_lesson_2_can_always_be_finished_wherever_the_player_puts_its_animals():
+    """From the set-up board: the Lynx anywhere legal; the Eagle, Squirrel and Black Mamba where the lesson rings them (the same
     rules as static/tutorial.js); the opponent's Eagle covers the Squirrel, the Mamba frees it, the Polar Bear breaks the
     wall, the den falls."""
     adj = lambda cr: {f"{c},{r}" for c, r in ((int(cr[0]) - 1, int(cr[2])), (int(cr[0]) + 1, int(cr[2])),
@@ -178,13 +119,15 @@ def test_lesson_2_can_always_be_finished_wherever_the_player_puts_its_first_anim
                 m.act("B", m.bot_move())
 
         place = lambda card, crs: a(PlaceAction(card, ("cr", rng.choice(crs))))
-        place("lion", empty("lion")); place("lynx", empty("lynx")); their_turn()
-        reach = set(empty("cape_buffalo"))
+        assert [u.card_id for u in m.state.hands["A"]] == ["lynx"] and own("1,2") == "A" and own("5,2") == "B", "the set-up board"
+        place("lynx", empty("lynx"))   # its Roar draws the Eagle
+        reach = set(x.crossroad for x in legal() if isinstance(x, PlaceAction) and not x.is_hq_capture and x.card_id != "eagle") | {
+            n for cr in m.state.board if own(cr) == "A" for n in adj(cr) if not m.state.board.get(n)} | {"1,1", "1,3"} - set(m.state.board)
         unreached = [cr for cr in empty("eagle") if cr not in reach]
         alone = [cr for cr in unreached if not any(n in reach or own(n) == "A" for n in adj(cr))]
         place("eagle", alone or unreached or empty("eagle"))
         eagle = next(cr for cr in m.state.board if own(cr) == "A" and m.state.board[cr][-1].card_id == "eagle")
-        place("cape_buffalo", empty("cape_buffalo")); their_turn()
+        their_turn()
         a(DrawAction())
         safe = [cr for cr in empty("squirrel") if any(not own(n) and (n[0] == "1" or any(q != cr and q != eagle and own(q) == "A" for q in adj(n)))
                                                      for n in adj(cr))]
