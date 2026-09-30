@@ -43,7 +43,7 @@ export const LESSONS = [
   { id: 'yourden', when: opening, ...talk, at: { den: 'A' },
     text: 'This rock is your den. Your animals start next to it.' },
   { id: 'theirden', when: opening, ...talk, at: { den: 'B' },
-    text: 'This rock with the red paw prints is your opponent\'s den. Put any of your animals on it and you win!' },
+    text: 'This is your opponent\'s den. Put any of your animals on it and you win!' },
   { id: 'foodcount', when: opening, ...talk, at: { gem: 'A' },
     text: 'The second way to win is food. This counts your food: gather 100 and you win.' },
   { id: 'oppfood', when: opening, ...talk, at: { gem: 'B' },
