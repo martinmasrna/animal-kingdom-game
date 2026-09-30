@@ -558,9 +558,13 @@ function drawGame() {
   bar.classList.toggle('mull', !!(d.pend && d.pend.kind === 'mulligan'));   // the mulligan asks in the middle of the empty board, over your hand
   if (d.pend && d.pend.kind === 'mulligan') {
     const k = d.pend.returned;
-    bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b>` + (RP.views.length ? '' : `<p>Click a card to replace it; no copy of a card you replace can come back.</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`);
+    // a player's first real match says what the mulligan is for, in plain words (the tutorial skips it); later ones, the short rule
+    const first = !store('ak:mullseen');
+    const how = first ? `This is your starting hand. Don't like a card? Click it to swap it for a new one, up to ${d.pend.cap} times. Then click ${k ? 'Done' : 'Keep hand'}.`
+      : 'Click a card to replace it; no copy of a card you replace can come back.';
+    bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b>` + (RP.views.length ? '' : `<p>${how}</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`);
     bar.classList.add('on');
-    if ($('skip')) $('skip').onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: SKIP }); };
+    if ($('skip')) $('skip').onclick = e => { e.stopPropagation(); store('ak:mullseen', '1'); act({ kind: 'choice', choice: SKIP }); };
   } else if (d.pend) {
     const src = d.pend.source && CARDS[d.pend.source];
     // One line at the top centre, where the eyes are: the card that asks and its rule, then Skip when it may be declined;
