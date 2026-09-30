@@ -312,12 +312,11 @@ function seatLabel(p) {
 }
 
 // Both decklists are open from the start (a rule), so this screen is the two lists, facing, and Ready between them.
-const coverOfList = counts => { const ids = Object.keys(counts); return ids.find(id => CARDS[id].rarity === 'legendary' && hasArt(id)) || ids.find(hasArt); };
 function prematchScreen() {
   screen = 'prematch';
   const you = V.you, opp = you === 'A' ? 'B' : 'A', me = V.seats[you];
-  const side = (p, cls) => { const counts = V.lists[p], list = Object.entries(counts).flatMap(([id, n]) => Array(n).fill(id)), cv = coverOfList(counts);
-    return `<div class="piece side ${cls}"><div class="who">${seatLabel(p)}</div><div class="dtile" style="${cv ? stripArt(cv, 340, 56, .7) : ''}"><b>${esc(V.seats[p].deckName)}</b></div>
+  const side = (p, cls) => { const counts = V.lists[p], list = Object.entries(counts).flatMap(([id, n]) => Array(n).fill(id));
+    return `<div class="piece side ${cls}"><div class="who">${seatLabel(p)}</div>
       <div class="dl">${deckBody(list, CARDS, false, true)}</div></div>`; };
   app.innerHTML = `<div class="mscr pre"><div class="face">${side(you, 'mine')}
       <div class="mid">${me.ready ? '<p class="wait">Waiting for your opponent</p>' : '<button class="play" id="ready">Ready</button>'}</div>
