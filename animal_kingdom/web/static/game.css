@@ -252,9 +252,12 @@
 
 .game .hc.dim .card { filter: brightness(.55) saturate(.7) drop-shadow(.2em .45em .5em rgba(0,0,0,.55)); }
 .game.kit .cr.unit.capture { scale: .8; z-index: 6; }   /* the unit that took a den, in its mouth */
-/* The deck and the End turn stone share one centre line. History sits
+/* The deck and the End turn stone rest on one rock painted to this corner's footprint (kit2/ledge.webp, master in the design
+   sandbox's screen/kit/ledge/: its top follows the gap under the red den's foot), both bottoms on one line 16px above the edge. History sits
    with feedback and the flag in the top-right corner. A timed match's clock rides on the stone; a waiting opponent pulses dots there. */
-.game.kit .tbtn { top: 657px; }   /* centred on the deck (614 + 166 / 2) */
+.game .ledge { left: 1200px; top: 600px; width: 330px; height: 230px; pointer-events: none; background: url(/static/kit2/ledge.webp) center / 100% 100% no-repeat; filter: drop-shadow(2px 5px 7px rgba(0,0,0,.45)); }
+.game.kit .deck { left: 1236px; top: 639px; width: 110px; height: 145px; }
+.game.kit .tbtn { top: 704px; }
 .game .clock { margin-left: 6px; }
 .game .tbtn.B .clock { display: block; margin: 2px 0 0; font-size: 15px; }
 .game .tbtn .think { display: none; }
@@ -399,7 +402,7 @@
 .game .menu, .game .rbar { translate: var(--side, 0px) calc(-1 * var(--above, 0px)); }
 .game .prompt:not(.mull) { translate: 0 calc(-1 * var(--above, 0px)); }
 .game .hand { translate: 0 var(--above, 0px); }
-.game .deck, .game .tbtn, .game .waiting { translate: var(--side, 0px) var(--above, 0px); }
+.game .deck, .game .tbtn, .game .waiting, .game .ledge { translate: var(--side, 0px) var(--above, 0px); }
 .game .hand { z-index: 12; pointer-events: none; } .game .hand .hc { pointer-events: auto; }   /* the hand's translate (window edges) makes it a stacking context: above the board's pieces, so a card read large covers them; only its cards take the pointer (the strip spans the deck) */
 /* a region the tutorial shows: its crossroads and stone glow warm, softly breathing; no ring (a ring means a click acts there) */
 .game .cr.shown::before, .game .stone.shown::before { content: ''; position: absolute; inset: -14px; border-radius: 50%; pointer-events: none; z-index: -1;
