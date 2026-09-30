@@ -443,8 +443,8 @@ function gameScreen() {
       <div class="abs rbar" id="rbar"></div>
       <div class="abs recent" id="recent"></div>
       <div class="endov" id="endov"></div>
-      <div class="endov" id="concov"><div class="endbox ask"><b>Concede this game?</b><div class="how">It counts as a loss.</div>
-        <div class="btns"><button class="slab" id="keep">Keep playing</button><button class="play" id="concede">Concede</button></div></div></div></div></div>`;
+      <div class="endov" id="concov"><div class="endbox ask"><b>Concede this game?</b>
+        <div class="btns"><button class="slab" id="keep">Keep playing</button><button class="play danger" id="concede">Concede</button></div></div></div></div></div>`;
     fitStage(); wireTips(document.getElementById('scr'));
     // The coach points at a card in the hand; hovering that card enlarges it over the coach, so the coach rises above it.
     const hand = document.getElementById('hand'), coach = document.getElementById('coach');

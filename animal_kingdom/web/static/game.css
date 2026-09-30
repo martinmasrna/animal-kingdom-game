@@ -367,7 +367,11 @@
 /* the coach over a hovered card: the card grows to 2.1x from its bottom (top at y 347), so the coach stands above that */
 .game .coach.above.risen { bottom: 467px !important; z-index: 31; }
 
-/* Conceding asks in the middle of the dimmed board, on the end-of-game piece: the question, what it means, Keep playing or Concede. */
+/* Conceding asks in the middle of the dimmed board, on the end-of-game piece: the question, Keep playing over Concede (the red slab), one width. */
 .game #concov { z-index: 80; }
+.game .endbox.ask { min-width: 0; width: 360px; }
 .game .endbox.ask b { font: 700 30px 'Fira Sans Condensed', sans-serif; color: #f3ead8; }
-.game .endbox.ask .how { margin-top: -6px; color: #b3a996; }
+.game .endbox.ask .btns { flex-direction: column; }
+.game .endbox.ask .btns > * { flex: none; width: 100%; }
+.game .play.danger { background: linear-gradient(rgba(196,64,48,.55), rgba(160,44,34,.62)), #6e2a22 url(/static/kit2/coll_slab.webp) center / 300px auto;
+  box-shadow: inset 0 1px 0 rgba(255,210,200,.35), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); color: #fff6f2; }
