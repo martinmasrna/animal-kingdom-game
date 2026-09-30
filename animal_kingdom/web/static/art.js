@@ -46,6 +46,26 @@ export const STRIP = {
   gray_wolf: [.73, .31, 1], fox: [.7, .56, 1.3], african_wild_dog: [.68, .33, 1], dingo: [.73, .25, 1.1], dog: [.67, .34, 1], alpha: [.6, .19, 1.2],
   hyena: [.5, .38, 1.4], outrider: [.77, .31, 1.3], dire_wolf: [.73, .29, 1], pup: [.57, .27, 1.2], poppy: [.5, .32, 1], rusty: [.5, .32, 1],
 };
+// FULL places the painting in the full card's window, which shows 61% of its height between the name bar and the rules panel:
+// the height, as a fraction of the art, the window centres on (its top edge is that minus .305). Set by hand: the whole animal
+// where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
+// board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
+export const FULL = {
+  african_wild_dog: .425, alpha: .355, anaconda: .485, andean_condor: .335, armadillo: .435, aurum: .415, bat: .305,
+  bird_egg: .445, black_bear: .445, black_mamba: .445, black_panther: .455, borealis: .365, bulwark: .345, bush_dog: .475,
+  cairn: .455, cape_buffalo: .445, caracal: .345, chameleon: .455, cheetah: .415, chinchilla: .365, chipmunk: .405,
+  clarion: .355, cougar: .455, dingo: .375, dire_wolf: .385, dog: .435, egg_eater: .485, elephant: .365, eon: .375,
+  falcon: .385, falstaff: .385, fathom: .405, flying_squirrel: .385, fox: .405, gale: .375, goliath: .345, gopher: .475,
+  gray_wolf: .475, greywhisker: .415, grizzly_bear: .425, groundhog: .385, guard_hornet: .465, hamster: .455, hedgehog: .435,
+  hornet: .425, house_cat: .435, hyena: .475, jaguar: .455, king_theron: .305, lemming: .445, lion: .355, lobo: .385,
+  lynx: .395, magpie: .375, methuselah: .405, mouse: .455, muskrat: .485, nurse_bumblebee: .445, omen: .465, outrider: .365,
+  owl: .385, pestis: .405, poppy: .355, porcupine: .435, prince_leo: .365, princess_lea: .395, pup: .365, queen_adira: .375,
+  queen_bee: .425, queen_marabunta: .455, raksha: .425, rat: .475, rat_king: .365, rattlesnake: .555, raven: .405,
+  red_wolf: .445, rhinoceros: .395, rusty: .345, scrooge: .485, serval: .385, sirocco: .415, skunk: .395, sloth: .405,
+  snake_egg: .445, snow_leopard: .385, soldier_ant: .465, squirrel: .455, taipan: .405, termite_king: .485,
+  termite_queen: .455, tiger: .505, verminus: .345, vesper: .425, viper: .415, worker_ant: .465, worker_bee: .355,
+  worker_wasp: .375,
+};
 export const hasArt = id => id in CROP;
 export const artUrl = id => `/static/art/${id}.jpg`;
 // A strip W x H px with its focus at ax of its width: the art zoomed, shifted as close to the focus as its edges allow.
