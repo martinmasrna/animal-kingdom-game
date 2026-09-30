@@ -17,7 +17,7 @@ const freePort = () => new Promise(res => { const s = net.createServer(); s.list
 export async function startServer() {
   const port = await freePort();
   const proc = spawn(PY, ['-m', 'animal_kingdom.web.server', '--port', String(port), '--no-open'],
-    { cwd: REPO, env: { ...process.env, AK_NO_GAME_LOGS: '1' }, stdio: 'ignore' });
+    { cwd: REPO, env: { ...process.env, AK_NO_GAME_LOGS: '1', AK_BOT_PAUSE: '0' }, stdio: 'ignore' });
   for (let i = 0; i < 100; i++) {
     try { const r = await fetch(`http://localhost:${port}/`); if (r.ok) return { url: `http://localhost:${port}`, stop: () => proc.kill() }; } catch { }
     await new Promise(r => setTimeout(r, 100));

@@ -40,6 +40,8 @@ REPLAY_DIR = Path(__file__).resolve().parents[2] / "results" / "replays"
 MATCH_DIR = Path(__file__).resolve().parents[2] / "results" / "web_matches"
 KEEP_FINISHED = 24 * 3600    # seconds a finished match is still reloaded after a restart
 BOT_PAUSE = {"open": 1.6, "move": 1.1, "choice": 0.6}   # seconds: a beat before the bot opens its turn, then time to follow each move
+if os.environ.get("AK_BOT_PAUSE") is not None:   # the test harness sets 0: tests wait on nothing a player needs to follow
+    BOT_PAUSE = {k: v * float(os.environ["AK_BOT_PAUSE"]) for k, v in BOT_PAUSE.items()}
 log = logging.getLogger("animal_kingdom.web")
 
 
@@ -193,9 +195,16 @@ def starter_decks() -> list[dict]:
     return out
 
 
+def starter_cards() -> dict[str, dict]:
+    """Every starter's id -> its current {card id: copies}, for resolving a profile's unedited copies."""
+    return {d["id"]: d["cards"] for d in starter_decks()}
+
+
 def profile_view(p: dict) -> dict:
-    profiles.seed_decks(p["id"], starter_decks())
-    return {**p, "decks": profiles.decks(p["id"]), "history": profiles.history(p["id"]), "records": profiles.records(p["id"]),
+    starters = starter_decks()
+    profiles.seed_decks(p["id"], starters)
+    return {**p, "decks": profiles.decks(p["id"], {d["id"]: d["cards"] for d in starters}),
+            "history": profiles.history(p["id"]), "records": profiles.records(p["id"]),
             "logins": profiles.identities(p["id"]), "providers": oauth.available()}
 
 
@@ -251,7 +260,7 @@ async def create_profile(req):
     try:
         code, p = profiles.create(body.get("name") or "Player")
         if body.get("decks"):
-            profiles.save_decks(p["id"], body["decks"])
+            profiles.save_decks(p["id"], body["decks"], starter_cards())
     except ProfileError as e:
         raise web.HTTPBadRequest(text=str(e))
     return web.json_response({"code": code, "profile": profile_view(p)})
@@ -272,7 +281,7 @@ async def patch_me(req):
 
 async def put_decks(req):
     try:
-        decks = profiles.save_decks(me(req)["id"], await req.json())
+        decks = profiles.save_decks(me(req)["id"], await req.json(), starter_cards())
     except ProfileError as e:
         raise web.HTTPBadRequest(text=str(e))
     return web.json_response(decks)
@@ -292,7 +301,7 @@ def deck_cover(seat: Seat) -> str:
         return STARTER_COVERS[seat.deck]
     cards = Counter(load_premade_deck(seat.deck))
     if seat.profile:
-        for d in profiles.decks(seat.profile):
+        for d in profiles.decks(seat.profile, starter_cards()):
             if d.get("cover") and Counter(d["cards"]) == cards:
                 return d["cover"]
     return next((c for c in cards if CARDS[c].rarity == "legendary"), next(iter(cards), ""))
@@ -498,6 +507,10 @@ def make_app() -> web.Application:
     async def resume(_app):
         global profiles
         profiles = Profiles()
+        linked, left = profiles.link_starters(starter_cards())
+        if linked or left:
+            log.info("starter decks: %d untouched cop%s now follow their starter, %d left alone",
+                     linked, "y" if linked == 1 else "ies", left)
         custom_decks.load()
         replay.backfill(profiles, LOG_DIR, REPLAY_DIR)
         hub.load()
