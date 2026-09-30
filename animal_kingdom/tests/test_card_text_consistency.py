@@ -30,7 +30,6 @@ COSTS_RE = re.compile(r"costs (\d+) food", re.IGNORECASE)
 # card_id -> config attrs, one per "gain N food/more" number in text, in order.
 FOOD_CONSTANTS: dict[str, list[str]] = {
     "eon_food_engine": ["eon_food"],
-    "egg_eater": ["egg_eater_food"],
     "queen_marabunta": ["queen_marabunta_per_colony"],
     "queen_honoria": ["queen_honoria_per_play"],
     "worker_ant": ["worker_ant_food"],
@@ -216,3 +215,8 @@ def test_egg_text_matches_config():
     assert "draw a Snake" in snake and cfg.snake_egg_draw == 1
     assert f"draw {cfg.egg_hatch_draw} Snakes" in snake
     assert "Next turn" in _cards()["bird_egg"].text and cfg.bird_egg_hatch_delay == 1
+
+
+def test_egg_eater_growth_text_matches_config():
+    (n,) = re.findall(r"gain (\d+) strength \(wherever this is\)", _cards()["egg_eater"].text)
+    assert int(n) == Config.default().egg_eater_growth

@@ -14,7 +14,6 @@ Ids differ from names on several cards; the id is what goes in a decklist.
 | Eagle (`eagle`) | Bird | common | 5 | Flight. | Egg Control, 2026-09-30: cut for the Eggs. |
 | Viper (`viper`) | Snake | common | 3 | Roar: an adjacent enemy gets -3 strength. | Egg Control, 2026-09-30: cut for the Eggs. Martin's note from play: the effect belongs on a flier. |
 | Anaconda (`anaconda`) | Snake | common | 7 | Apex Predator. | Egg Control rebuild, 2026-09-28. |
-| Egg Eater (`egg_eater`) | Snake | rare | 4 | Whenever an Egg is removed, gain 10 food. | Too weak. Martin wants it back with the Eggs once it's made useful. |
 | Eon, food engine (`eon_food_engine`) | Snake | legendary | 7 | Whenever a card is drawn, shuffled or removed, gain 1 food. | The old Eon; Eon is now the Ouroboros. |
 | Unnamed Giant (`unnamed_giant`) | — | legendary | 10 | Apex Predator. Your regions produce no food. | Ramp pass, 2026-09-29: a strictly worse Borealis. |
 | Shuck (`shuck`) | Canine | legendary | 6 | Roar: return a removed Canine to your hand. Give it +2 strength. | Canine's hand-buff half, see below. |

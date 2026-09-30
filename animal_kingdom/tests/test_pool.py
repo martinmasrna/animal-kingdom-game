@@ -21,19 +21,20 @@ from animal_kingdom.decks import PREMADE_DECKS, load_premade_deck
 RETIRED_TAGS = {"Reptile", "Insect"}
 DYNAMIC_IDS = {"goliath"}
 
-# food_otk is the one deliberate exception to the locked 4-4-6/14-design template
-# (2026-07-06): a 7th common (2 copies) was added alongside Hedgehog/Hamster dropping to
-# 2 copies each, so the design count and rarity mix - not the 30-card total - move for
-# this deck only. See Card.copies (engine/cards.py) for the per-design override.
-DESIGN_COUNT_OVERRIDES = {"food_otk": 15}
-RARITY_MIX_OVERRIDES = {"food_otk": {"legendary": 4, "rare": 4, "common": 7}}
+# Two decks deliberately break the locked 4-4-6/14-design template with a 7th common, some
+# commons dropping to 2 copies so the total stays 30: food_otk (Gopher, Hedgehog and Hamster at
+# 2) and egg_control (its three growing Snakes, Python, Rattlesnake and Egg Eater, at 2). The
+# design count and rarity mix move, not the 30-card total. See Card.copies (engine/cards.py).
+DESIGN_COUNT_OVERRIDES = {"food_otk": 15, "egg_control": 15}
+RARITY_MIX_OVERRIDES = {"food_otk": {"legendary": 4, "rare": 4, "common": 7},
+                        "egg_control": {"legendary": 4, "rare": 4, "common": 7}}
 
 
 # ----------------------------------------------------------------- pool composition
 
 def test_98_designs_in_exactly_7_decks():
     cards = load_cards()
-    # 99 draftable designs across the 7 decks (98 base + food_otk's 1 override); tokens/reserve
+    # 100 draftable designs across the 7 decks (98 base + one extra each for food_otk and egg_control); tokens/reserve
     # live outside the deck pool.
     draftable = [c for c in cards.values() if c.deck in DECK_SLUGS]
     expected_total = 14 * len(DECK_SLUGS) + sum(

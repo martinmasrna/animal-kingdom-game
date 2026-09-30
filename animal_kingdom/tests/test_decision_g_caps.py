@@ -55,33 +55,6 @@ def test_king_theron_capped_fires_once_per_turn():
     assert s.board["2,2"][-1].card_id == "black_panther"
 
 
-# -------------------------------------------------------------------- Egg Eater (new cap)
-
-def _pestis_double_egg_state(config: Config) -> GameState:
-    """Egg Eater on board; Pestis wipes one whole crossroad, and stacking both Eggs on
-    the same enemy crossroad means one Pestis activation fires two remove events in a
-    single resolution cascade - exactly the "busy action" decision G is guarding against."""
-    s = make_state(config=config, hands={"A": ["pestis"]})
-    put(s, "1,1", "egg_eater", "A")
-    put(s, "1,2", "mouse", "A")             # connection anchor, adjacent to "2,2"
-    put(s, "2,1", "bird_egg", "B")
-    put(s, "2,1", "snake_egg", "B")         # same crossroad, same owner: stacks freely
-    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))  # the only adjacent enemy: "2,1"
-    return s
-
-
-def test_egg_eater_uncapped_gains_on_every_egg_removed_this_turn():
-    cfg = Config.default()
-    s = _pestis_double_egg_state(cfg)
-    assert s.food["A"] == 2 * cfg.egg_eater_food
-
-
-def test_egg_eater_capped_fires_once_per_turn():
-    cfg = replace(Config.default(), cap_egg_eater=True)
-    s = _pestis_double_egg_state(cfg)
-    assert s.food["A"] == cfg.egg_eater_food
-
-
 # --------------------------------------------------------- existing caps, no prior tests
 
 def test_eon_capped_fires_once_per_turn_across_multiple_events():

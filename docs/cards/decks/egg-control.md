@@ -1,12 +1,12 @@
 # Egg Control
 
-Snake and Bird control, tied together by their Eggs. The Birds churn the deck: Raven draws and shuffles, Owl Scouts, Aurum draws every turn. The Snakes feed on the churn: Rattlesnake grows with every shuffle (in hand too), Python with the Remove Pile. The Snakes also carry the removal: Black Mamba removes an adjacent enemy of strength 5 or less; Taipan's bite removes any adjacent enemy at the start of your next turn, even if the Taipan is covered or removed. Magpie steals a random card from the opponent's hand and discards one of yours, which feeds Python.
+Snake and Bird control, tied together by their Eggs. The Birds churn the deck: Raven draws and shuffles, Owl Scouts, Aurum draws every turn. The Snakes grow: Rattlesnake with every shuffle, Egg Eater with every Egg removed (both in hand and deck too), Python with the Remove Pile. The Snakes also carry the removal: Black Mamba removes an adjacent enemy of strength 5 or less; Taipan's bite removes any adjacent enemy at the start of your next turn, even if the Taipan is covered or removed. Magpie steals a random card from the opponent's hand and discards one of yours, which feeds Python.
 
 Eon is the Ouroboros: a 10 with Apex Predator that eats what it lands on, then shuffles itself back into the deck at the end of your turn, one strength smaller each cycle. Every return is a shuffle, so it also feeds Rattlesnake.
 
-**The Eggs** are the deck's proactive early play: a 0 on the board that pays twice, part on its Roar and part when it hatches, then removes itself (feeding Python). Paying part up front keeps a broken Egg from being a total loss, and the delayed part is priced above a Draw action. The two trade differently: the Snake Egg is quantity and patience (three Snakes over two turns), the Bird Egg quality and speed (the best of three Birds, twice, hatching next turn). A covered Egg only pauses, since a timer ticks only while its unit is on top: removing the unit that covers it resumes the hatch, so only removal breaks an Egg.
+**The Eggs** are the deck's proactive early play: a 0 on the board that pays twice, part on its Roar and part when it hatches, then removes itself (feeding Python and Egg Eater). Paying part up front keeps a broken Egg from being a total loss, and the delayed part is priced above a Draw action. The two trade differently: the Snake Egg is quantity and patience (three Snakes over two turns), the Bird Egg quality and speed (the best of three Birds, twice, hatching next turn). A covered Egg only pauses, since a timer ticks only while its unit is on top: removing the unit that covers it resumes the hatch, so only removal breaks an Egg.
 
-Rarity follows role: the commons are the engine (Snake Egg, Bird Egg, Owl, Raven, Rattlesnake, Python), the rares are situational answers (Hawk, Taipan, Magpie, Black Mamba).
+Rarity follows role: the commons are the engine (Snake Egg, Bird Egg, Owl and Raven at three copies; the three growing Snakes, Python, Rattlesnake and Egg Eater, at two), the rares are situational answers (Hawk, Taipan, Magpie, Black Mamba).
 
 The plan is to survive the midgame by removing threats one at a time, then win late on size: good against midrange and ramp, which commit one big unit at a time, weak against wide aggro and combo. Played by a human it wins by taking the initiative early (flyers deep on the other side, breaking regions) and building a chain to the enemy den anchored by the big Snakes; the bots don't play it that way, so its simulated win rate understates it.
 
@@ -36,8 +36,9 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Python** | 3 | Snake | dynamic | Has +1 strength for each removed unit. |
-| **Rattlesnake** | 3 | Snake | 0 | Whenever you shuffle a card, gain 1 strength (wherever this is). |
+| **Python** | 2 | Snake | dynamic | Has +1 strength for each removed unit. |
+| **Rattlesnake** | 2 | Snake | 0 | Whenever you shuffle a card, gain 1 strength (wherever this is). |
+| **Egg Eater** | 2 | Snake | 0 | Whenever an Egg is removed, gain 2 strength (wherever this is). |
 | **Owl** | 3 | Bird | 2 | Flight. Roar: Scout a card. |
 | **Raven** | 3 | Bird | 2 | Flight. Roar: draw 3 cards, then shuffle 2 cards back. |
 | **Bird Egg** | 3 | Egg | 0 | Roar: Scout a Bird. Next turn, remove this and Scout a Bird. |

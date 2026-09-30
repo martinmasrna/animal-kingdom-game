@@ -361,15 +361,20 @@ def test_rattlesnake_gains_strength_per_own_card_shuffled_in_every_zone():
     assert card_strength(s, "rattlesnake", "A") == 2
 
 
-def test_egg_eater_only_fires_on_egg_removal():
-    s = make_state()
-    put(s, "1,1", "egg_eater", "A")
+def test_egg_eater_grows_on_every_egg_removed_wherever_it_is():
+    s = make_state(hands={"A": ["egg_eater"]}, decks={"A": ["egg_eater"], "B": []})
+    on_board = put(s, "1,1", "egg_eater", "A")
     rat = put(s, "2,2", "rat", "B")
     effects._remove_specific(s, "2,2", rat, by_player="A")
-    assert s.food["A"] == 0                               # not an Egg
+    assert effective_strength(s, on_board) == 0                     # not an Egg
     egg = put(s, "3,3", "bird_egg", "B")
     effects._remove_specific(s, "3,3", egg, by_player="A", by_effect=False)
-    assert s.food["A"] == CFG.egg_eater_food
+    grown = CFG.egg_eater_growth
+    assert effective_strength(s, on_board) == grown                # on the board
+    assert card_strength(s, "egg_eater", "A") == grown              # and every copy in hand and deck
+    mine = put(s, "3,2", "snake_egg", "A")                          # anyone's Egg counts
+    effects._remove_specific(s, "3,2", mine, by_player="A", by_effect=False)
+    assert effective_strength(s, on_board) == 2 * grown
 
 
 def test_omen_when_drawn_discards_from_opponents_hand_only():

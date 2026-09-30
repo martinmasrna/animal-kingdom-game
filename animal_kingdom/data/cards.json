@@ -170,7 +170,8 @@
       "base_strength": "dynamic",
       "dynamic_strength": "removed_units_count",
       "keywords": [],
-      "text": "Has +1 strength for each removed unit."
+      "text": "Has +1 strength for each removed unit.",
+      "copies": 2
     },
     {
       "id": "ember",
@@ -200,17 +201,19 @@
       "tags": ["Snake"],
       "base_strength": 0,
       "keywords": [],
-      "text": "Whenever you shuffle a card, gain 1 strength (wherever this is)."
+      "text": "Whenever you shuffle a card, gain 1 strength (wherever this is).",
+      "copies": 2
     },
     {
       "id": "egg_eater",
       "name": "Egg Eater",
-      "deck": "reserve",
-      "rarity": "rare",
+      "deck": "egg_control",
+      "rarity": "common",
       "tags": ["Snake"],
-      "base_strength": 4,
+      "base_strength": 0,
       "keywords": [],
-      "text": "Whenever an Egg is removed, gain 10 food."
+      "text": "Whenever an Egg is removed, gain 2 strength (wherever this is).",
+      "copies": 2
     },
     {
       "id": "omen",
