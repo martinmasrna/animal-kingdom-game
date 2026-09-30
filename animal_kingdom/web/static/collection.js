@@ -62,13 +62,13 @@ export function collectionScreen(app, ctx) {
 
 // A deck's strips by rarity, the capped rarities with their counts: the open deck here, the decklist on the play screen.
 // Strips are slivers of the cards: strength on a driftwood plaque, the name, copies as dots (legendaries have one).
-// flat: one list by strength (home's chooser), without the rarity groups; each strip keeps its rarity edge.
+// flat: one list in the same order (rarity, then strength) without the group labels (home's chooser); each strip keeps its rarity edge.
 export function deckBody(list, cards, caps = true, flat = false) {
   const counts = countsOf(list), inR = r => list.filter(id => cards[id].rarity === r).length;
   const strip = id => `<div class="st ${cards[id].rarity}" data-card="${id}"><div class="art" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span><span class="x">${cards[id].rarity === 'legendary' ? '' : pips(counts[id])}</span></div>`;
   const rhead = (label, r, cap) => `<h4 class="rh" data-r="${r}"><span>${label}</span>${cap && caps ? `<span>${inR(r)}/${cap}</span>` : ''}</h4>`;
   const byR = r => Object.keys(counts).filter(id => cards[id].rarity === r).sort((a, b) => sv(cards[a]) - sv(cards[b]) || cards[a].name.localeCompare(cards[b].name)).map(strip).join('');
-  if (flat) return `<div class="dbody flat">${Object.keys(counts).sort((a, b) => sv(cards[a]) - sv(cards[b]) || RANK[cards[a].rarity] - RANK[cards[b].rarity] || cards[a].name.localeCompare(cards[b].name)).map(strip).join('')}</div>`;
+  if (flat) return `<div class="dbody flat">${Object.keys(counts).sort((a, b) => RANK[cards[a].rarity] - RANK[cards[b].rarity] || sv(cards[a]) - sv(cards[b]) || cards[a].name.localeCompare(cards[b].name)).map(strip).join('')}</div>`;
   return `<div class="dbody">${rhead('Legendary', 'legendary', 4)}${byR('legendary')}${rhead('Rare', 'rare', 8)}${byR('rare')}${rhead('Common', 'common')}${byR('common')}</div>`;
 }
 
