@@ -40,7 +40,10 @@ OPPONENT_DECK_2 = ["cape_buffalo", "dire_wolf", "lion", "eagle"] + OPPONENT_DECK
 
 DECKS = {"tutorial_you": PLAYER_DECK, "tutorial_them": OPPONENT_DECK, "tutorial2_you": PLAYER_DECK_2, "tutorial2_them": OPPONENT_DECK_2}
 NAMES = {"tutorial_you": "Tutorial", "tutorial_them": "Wild dogs", "tutorial2_you": "Tutorial", "tutorial2_them": "Wild dogs"}
-BOTS = {1: "tutorial", 2: "tutorial2"}   # the opponent's bot name per lesson
+BOTS = {1: "tutorial", 2: "tutorial2"}
+# Placements a turn: lesson 1's opponent uses both moves, as the lesson says every player does; lesson 2's keeps to one,
+# so no extra dog takes the crossroad the Black Mamba needs beside the Eagle.
+PER_TURN = {1: 2, 2: 1}   # the opponent's bot name per lesson
 
 # The opponent's scripted moves, by its turn (turn_counter): lesson 1 walls the middle of its den and puts a dog beside
 # it; lesson 2 walls all three crossroads, then flies the Eagle onto the player's Squirrel (SQUIRREL: wherever it is).
@@ -64,6 +67,7 @@ class TutorialBot(Bot):
 
     def __init__(self, seed: Optional[int] = None, lesson: int = 1):
         self.opening, self.ambush = OPENINGS[lesson], AMBUSH.get(lesson)
+        self.per_turn = PER_TURN[lesson]
 
     def choose(self, view, legal: Sequence, state=None):
         choices = [a for a in legal if isinstance(a, ChoiceAction)]
@@ -77,7 +81,7 @@ class TutorialBot(Bot):
             pick = next((a for a in places if a.card_id == card and a.crossroad == cr), None)
             if pick:
                 return pick
-        if state.units_placed_this_turn:   # one placement a turn (a draw first still leaves it one)
+        if state.units_placed_this_turn >= self.per_turn:   # its placements this turn (a draw first still leaves it one)
             return PassAction()
         if self.ambush:   # the ambush card waits for its moment, never an ordinary placement
             places = [a for a in places if a.card_id != self.ambush[0]]
