@@ -17,7 +17,7 @@ import os
 import random
 from typing import Optional, Sequence
 
-from .engine.cards import COPY_LIMITS, Card, DECK_SLUGS, NON_DECK_SLUGS, load_cards
+from .engine.cards import COLLECTIBLE_SLUGS, COPY_LIMITS, Card, DECK_SLUGS, NON_DECK_SLUGS, load_cards
 
 
 def _build_premade_decks(cards: dict[str, Card]) -> dict[str, list[str]]:
@@ -86,7 +86,7 @@ RARITY_CAPS = {"rare": 8, "legendary": 4}   # rules §13: at most 8 rares and 4 
 
 def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card]] = None) -> list[str]:
     """What makes `decklist` illegal under the deck rules (rules §13); empty when it's legal.
-    Only cards from the seven premade decks are collectible."""
+    Only the premade decks' cards and the bench are collectible."""
     cards = cards if cards is not None else load_cards()
     problems = []
     if len(decklist) != DECK_SIZE:
@@ -97,7 +97,7 @@ def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card
     by_rarity: dict[str, int] = {}
     for cid, n in counts.items():
         card = cards.get(cid)
-        if card is None or card.deck not in DECK_SLUGS:
+        if card is None or card.deck not in COLLECTIBLE_SLUGS:
             problems.append(f"{cid!r} is not a collectible card")
             continue
         limit = card.copies or COPY_LIMITS[card.rarity]

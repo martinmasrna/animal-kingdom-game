@@ -51,7 +51,7 @@ function save(all) {
 export function collectionScreen(app, ctx) {
   X = ctx; C = ctx.cards;
   const starterIds = new Set(ctx.starters.map(d => d.id));
-  cards = Object.values(C).filter(c => starterIds.has(c.deck));
+  cards = Object.values(C).filter(c => starterIds.has(c.deck) || c.deck === 'bench');   // the bench: cleared cards in no starter
   if (!wired) { wired = true; wireGlobal(); }
   const all = decks();
   // Opens your first deck; with none yet, nothing is open and the grid is for browsing.

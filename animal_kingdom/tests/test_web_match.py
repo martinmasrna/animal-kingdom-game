@@ -173,6 +173,9 @@ def test_decklist_problems_follow_the_deck_rules():
     assert any("King Theron" in p for p in decklist_problems(two_kings))
     reserve = [c for c in cats if c != "prince_leo"] + ["unnamed_giant"]
     assert any("collectible" in p for p in decklist_problems(reserve))
+    bench = list(cats)
+    bench[bench.index("lion")] = "eagle"                                  # a common for a common
+    assert decklist_problems(bench) == []                                 # the bench is collectible
 
 
 def test_custom_deck_resolves_to_a_playable_slug(tmp_path, monkeypatch):

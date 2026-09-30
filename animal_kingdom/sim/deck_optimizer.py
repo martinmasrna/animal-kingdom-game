@@ -35,7 +35,7 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 from ..decks import register_deck
-from ..engine.cards import COPY_LIMITS, DECK_SLUGS, NON_DECK_SLUGS, load_cards
+from ..engine.cards import COLLECTIBLE_SLUGS, COPY_LIMITS, DECK_SLUGS, load_cards
 from ..engine.config import Config, load_config_overrides
 from .runner import run_pairs
 
@@ -45,14 +45,14 @@ CANDIDATE_SLUG = "_candidate"  # synthetic deck slug the recipe is injected unde
 
 
 def draftable_by_rarity(cards=None, exclude: frozenset[str] = frozenset()) -> dict[str, list[str]]:
-    """All draftable card ids grouped by rarity (tokens/reserve excluded), id-sorted for determinism.
+    """All collectible card ids grouped by rarity (premade decks and the bench), id-sorted for determinism.
 
     `exclude` drops specific card ids too - used to build a deck from the pool *minus* another
     deck's cards (the disjoint-roster constraint)."""
     cards = cards or load_cards()
     pools: dict[str, list[str]] = {r: [] for r in RARITIES}
     for card in cards.values():
-        if card.deck in NON_DECK_SLUGS or card.id in exclude:
+        if card.deck not in COLLECTIBLE_SLUGS or card.id in exclude:
             continue
         pools[card.rarity].append(card.id)
     return {r: sorted(ids) for r, ids in pools.items()}

@@ -35,7 +35,12 @@ DECK_SLUGS = {
 # "token" = spawned on the board by effects (e.g. Pup); never drawn. "reserve" = shelved
 # designs kept out of play (e.g. cards earmarked for a not-yet-built deck). Both are
 # skipped by the deck builders in decks.py.
-NON_DECK_SLUGS = {"token", "reserve"}
+NON_DECK_SLUGS = {"token", "reserve", "bench"}
+
+# What a player can collect and build with: the premade decks' cards plus the bench, finished
+# cards Martin has cleared that sit in no premade deck. The reserve (design scraps, balance-tool
+# cards) and tokens are never collectible.
+COLLECTIBLE_SLUGS = DECK_SLUGS | {"bench"}
 
 # Copy limits per rarity for the locked 4-4-6 decklist shape (legendary 1 / rare 2 / common 3).
 COPY_LIMITS = {"common": 3, "rare": 2, "legendary": 1}

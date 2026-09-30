@@ -238,7 +238,7 @@
     {
       "id": "eagle",
       "name": "Eagle",
-      "deck": "reserve",
+      "deck": "bench",
       "rarity": "common",
       "tags": ["Bird"],
       "base_strength": 5,
@@ -258,7 +258,7 @@
     {
       "id": "anaconda",
       "name": "Anaconda",
-      "deck": "reserve",
+      "deck": "bench",
       "rarity": "common",
       "tags": ["Snake"],
       "base_strength": 7,
@@ -278,7 +278,7 @@
     {
       "id": "viper",
       "name": "Viper",
-      "deck": "reserve",
+      "deck": "bench",
       "rarity": "common",
       "tags": ["Snake"],
       "base_strength": 3,
