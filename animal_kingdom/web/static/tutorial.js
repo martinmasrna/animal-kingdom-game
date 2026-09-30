@@ -39,7 +39,7 @@ const EMPTY = { id: 'empty', again: true, when: c => c.mine && c.round >= 3 && !
 export const LESSONS = [
   // --- the opening: what is on screen ---
   { id: 'welcome', when: opening, ...talk, at: { middle: true },
-    text: 'Welcome to the savanna! You start on the left, your opponent on the right.' },
+    text: 'Welcome to the savanna! Click "Next" to get started.' },
   { id: 'yourden', when: opening, ...talk, at: { den: 'A' },
     text: 'This rock is your den. Your animals start next to it.' },
   { id: 'theirden', when: opening, ...talk, at: { den: 'B' },
