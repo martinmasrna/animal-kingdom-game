@@ -72,7 +72,7 @@ export const LESSONS = [
   // the region is finished by hand with the fourth card, only its last corner (shown only when a card can reach it)
   { id: 'corner', when: c => c.mine && c.round >= 2 && !c.hand('dire_wolf') && !c.homeHeld && c.homeOpen.length > 0,
     only: c => ({ crs: c.homeOpen }), at: c => ({ cr: c.homeOpen[0] }),
-    text: 'Finish the region! Place an animal on the last crossroad around the +10.' },
+    text: 'Finish the region! Place your Buffalo on the last crossroad.' },
   { id: 'food', when: c => c.homeHeld, ...talk, at: c => ({ stone: c.home[0] }),
     text: 'The +10 region is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
   // turn 3: moves and drawing, then covering
