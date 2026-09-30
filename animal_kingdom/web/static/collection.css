@@ -111,3 +111,15 @@
 .coll .dbtns .danger, .coll .dbtns .danger:hover { border: 0; color: #fff; background: linear-gradient(rgba(190,70,52,.55), rgba(160,50,38,.6)), #6a2a20 url(/static/kit2/coll_slab.webp) center / 300px auto; background-blend-mode: color, normal, normal; }
 .coll .dbtns button:hover, .coll .quiet:hover { filter: brightness(1.18); }
 .coll .cv.on { box-shadow: 0 0 0 3px #1f1d1b, 0 0 0 5px #f3ead8; }
+
+/* Upright (a phone held up): one column; the filters wrap on top, the cards take the width, your decks sit in a panel along the bottom. */
+@media (orientation: portrait) {
+  .coll { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) minmax(0, 40%); }
+  .coll .chead { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+  .coll .tabs { width: 100%; margin-right: 0; overflow-x: auto; scrollbar-width: none; }
+  .coll .chead .dd, .coll .chead .searchw { flex: 1 1 0; min-width: 0; }
+  .coll .cgrid { padding: 8px 12px 24px; }
+  .coll .crow { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 14px 10px; }
+  .coll .side { grid-column: 1; grid-row: 3; box-shadow: 0 -6px 14px rgba(0,0,0,.45); }
+}
+@media (orientation: portrait) { .coll .chead .dd .sel { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }

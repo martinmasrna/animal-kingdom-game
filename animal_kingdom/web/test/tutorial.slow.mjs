@@ -1,6 +1,6 @@
 // The tutorial played through by clicks, as a new player would: Learn to play on home, each forced step (the hinted
 // card, the one ringed crossroad, the deck), then free play toward the den until the win, and Play a match back home.
-// SHOTS=<dir> saves a 2x screenshot at every lesson (for judging the coach's look and words).
+// SHOTS=<dir> saves a 2x screenshot at every lesson (for judging the coach's look and words); PHONE=1 plays it upright on a phone.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { startServer, openBrowser } from './harness.mjs';
@@ -15,7 +15,9 @@ const SHOTS = process.env.SHOTS;
 test('a new player learns the game in both lessons and wins them', { timeout: 600000 }, async () => {
   const page = await browser.newPage(); page.errors = [];
   page.on('pageerror', e => page.errors.push(String(e)));
-  if (SHOTS) await page.setViewport({ width: 1512, height: 800, deviceScaleFactor: 2 });
+  // PHONE=1 plays it on a phone held upright (the upright layout, taps)
+  if (process.env.PHONE) await page.setViewport({ width: 390, height: 844, deviceScaleFactor: SHOTS ? 2 : 1, isMobile: true, hasTouch: true });
+  else if (SHOTS) await page.setViewport({ width: 1512, height: 800, deviceScaleFactor: 2 });
   await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   assert.ok(await page.$('#learn'), 'a first visit offers the tutorial');
   // the menu leaves a tutorial for home at once

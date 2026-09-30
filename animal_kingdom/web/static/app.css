@@ -219,3 +219,18 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 :root[data-tod="dawn"] { --keyart: url(/static/kit2/keyart_dawn.webp); }
 :root[data-tod="day"] { --keyart: url(/static/kit2/keyart_day.webp); }
 :root[data-tod="dusk"] { --keyart: url(/static/kit2/keyart_dusk.webp); }
+
+/* Upright (a phone held up): home keeps the painting's left group (the whole fight needs a painting made upright), the
+   pieces take the width; the profile stacks its account over the history. */
+@media (orientation: portrait) {
+  .home { background-position: 22% center; }
+  .home .top { left: 12px; right: 12px; top: 12px; padding: 8px; gap: 6px; }
+  .home .top .backbtn { flex: 1 1 0; min-width: 0; padding: 0 6px; }
+  .home .top .backbtn span { font-size: 15px; white-space: nowrap; }
+  .home .bar { left: 12px; right: 12px; bottom: 24px; transform: none; grid-template-columns: 1fr 1fr; }
+  .home .chooser.decks { left: 12px; right: 12px; width: auto; transform: none; }
+  .home .chooser.opps { left: auto; right: 12px; }
+  .home .chooser.lessons { top: 78px; right: 12px; }
+  .prof { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .prof > .hist { grid-row: 2; }
+}

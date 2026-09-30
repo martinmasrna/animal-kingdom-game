@@ -2,7 +2,7 @@
 // The server holds the game; this file only renders the seat's view and sends choices back.
 import { hasArt, artUrl, stripArt } from './art.js';
 import { cardHTML, fitNames } from './card.js';
-import { renderBoard, STAGE, crossroadAt, denMouthAt, chalk, gemDigits, portrait } from './board.js';
+import { renderBoard, STAGE, VIEW, setView, boardTransform, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML } from './collection.js';
 import { dd, wireDd } from './menu.js';
 import { openFeedback } from './feedback.js';
@@ -475,7 +475,7 @@ function gameScreen() {
       <div class="endov" id="endov"></div>
       <div class="endov" id="concov"><div class="endbox ask"><b>Concede this game?</b>
         <div class="btns"><button class="slab" id="keep">Keep playing</button><button class="play danger" id="concede">Concede</button></div></div></div></div></div>`;
-    fitStage(); wireTips(document.getElementById('scr'));
+    fitStage(false); wireTips(document.getElementById('scr'));
     // The coach points at a card in the hand; hovering that card enlarges it over the coach, so the coach rises above it.
     const hand = document.getElementById('hand'), coach = document.getElementById('coach');
     hand.addEventListener('mouseover', e => { const h = e.target.closest('.hc'); coach.classList.toggle('risen', !!h && !!coach.dataset.iid && (coach.dataset.iid === 'any' || h.dataset.iid === coach.dataset.iid)); });
@@ -509,7 +509,7 @@ function drawGame() {
   lastDecision = d;
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
-  $('series').style.right = 16 + 52 * [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length + 'px';   // History, left of feedback and the flag
+  $('series').style.right = 16 + (VIEW.port ? 80 : 52) * [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length + 'px';   // History, left of feedback and the flag
   $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
   // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
   $('menubtn').querySelector('svg').innerHTML = isTutorial() ? '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>'
@@ -537,7 +537,7 @@ function drawGame() {
     el.onmouseenter = () => cardPop(el, el.dataset.card, null, 'below'); el.onmouseleave = () => pop.style.display = 'none'; }); }
 
   // Your hand, centred under the board.
-  const n = G.hand.length, cw = 143, gap = n > 1 ? Math.min(14, (940 - n * cw) / (n - 1)) : 0, x0 = STAGE.w / 2 - (n * cw + (n - 1) * gap) / 2;
+  const n = G.hand.length, cw = 143, gap = n > 1 ? Math.min(14, (PL().handW - n * cw) / (n - 1)) : 0, x0 = STAGE.w / 2 - (n * cw + (n - 1) * gap) / 2;
   const hand = $('hand');
   let drawnK = 0;
   hand.innerHTML = G.hand.map((h, i) => {
@@ -549,7 +549,7 @@ function drawGame() {
     const shown = d.lesson && d.lesson.read === h.id && Date.now() >= (ui.revealEnd || 0);   // after the opponent's card has landed   // the card the coach is explaining, shown large as if hovered
     const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (one || G.hand.find(x => x.id === ui.sel)).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
-    const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
+    const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${PL().deck[0] - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
     return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
   }).join('');
   fitNames(hand);
@@ -613,7 +613,7 @@ function drawGame() {
   const last = G.history[G.history.length - 1];
   if (A && G.history.length > A.hist && last && last.seat === them && last.kind === 'place') {
     const [tx, ty] = last.target[0] === 'cr' ? crossroadAt(dcr(last.target[1])) : denMouthAt(rel(last.target[1])), rv = $('reveal');
-    rv.innerHTML = cardHTML(CARDS[last.card]); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty('--ty', `${ty - 300}px`);
+    rv.innerHTML = cardHTML(CARDS[last.card]); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on');
     if (ui.anim) ui.anim.landDelay = 0.95;
     ui.revealEnd = Date.now() + 1900;
@@ -625,7 +625,11 @@ function drawGame() {
 
 // The tutorial's coach: a granite piece standing beside what the lesson talks about, its notch pointing at it: above a
 // card in the hand, the deck or End turn, beside a crossroad (on the side with more room), a region's stone or a den.
-const COACH_W = 300;
+let COACH_W = 300;   // 400 upright (game.css .port .coach)
+// Where the edge pieces stand, on the wide stage or the upright one (game.css .port): the hand's top, the deck's and End
+// turn's centre tops, the hand's width.
+const PL = () => VIEW.port ? { hand: STAGE.h - 210, deck: [636, 790], end: [636, 970], handW: STAGE.w - 32 }
+  : { hand: 590, deck: [1299, 606], end: [1439, 664], handW: 940 };
 // While a line waits for Next, the tutorial's opponent waits too: its moves would run over the line (told to the server once per change).
 let botHeld = false;
 const holdBot = on => { if (on !== botHeld && isTutorial()) { botHeld = on; send({ t: 'hold', on }); } };
@@ -637,37 +641,46 @@ function placeCoach(el, L, rings = []) {
   // the edge pieces sit at the window's edges (fitStage's --above/--side, stage px): anchors on them move with them
   const st = getComputedStyle(document.getElementById('stage')), up = parseFloat(st.getPropertyValue('--above')) || 0, out = parseFloat(st.getPropertyValue('--side')) || 0;
   const read = a.read && document.querySelector(`#hand .hc[data-id="${a.read}"]`);
+  const P = PL(), port = VIEW.port, H = P.hand + up; COACH_W = port ? 400 : 300;
+  // upright, the stage is too narrow for a line beside a thing: the coach stands above it or below it, its notch pointing
+  const vert = (x, y, r) => y > STAGE.h / 2 ? [x, y - r, 'above'] : [x, y + r, 'below'];
   if (read) { const cx = parseFloat(read.style.left) + 71.5;   // beside the large card (2.1x: 300 wide, so 150 + a 24 gap from its middle)
-    [x, y, side] = cx - 174 - COACH_W >= 16 ? [cx - 96, 568 + up, 'left'] : [cx + 96, 568 + up, 'right']; }
-  else if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, (card.classList.contains('sel') ? 572 : 590) + up, 'above'];   // a picked card stands 18px higher
-  else if (a.deck) [x, y, side] = [1299 + out, 606 + up, 'above'];
-  else if (a.prompt) [x, y, side] = [STAGE.w / 2, 100 - up, 'below'];   // under the card's question, one line at the top centre
-  else if (a.endturn) [x, y, side] = [1439 + out, 664 + up, 'above'];
-  else if (a.cr) { [x, y] = crossroadAt(a.cr); side = x > STAGE.w / 2 ? 'left' : 'right'; }
-  else if (a.den) { [x, y] = denMouthAt(a.den); side = a.den === 'B' ? 'left' : 'right'; }
-  else if (a.rings && !rings.length) [x, y, side] = [STAGE.w / 2, 590 + up, 'above'];   // no card picked yet: the circles come with one, so point at the hand
+    [x, y, side] = port ? [cx, H - 243, 'above']   // upright, over it (it grows 2.1x from its foot)
+      : cx - 174 - COACH_W >= 16 ? [cx - 96, 568 + up, 'left'] : [cx + 96, 568 + up, 'right']; }
+  else if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, (card.classList.contains('sel') ? H - 18 : H), 'above'];   // a picked card stands 18px higher
+  else if (a.deck) [x, y, side] = [P.deck[0] + out, P.deck[1] + up, 'above'];
+  else if (a.prompt) [x, y, side] = [STAGE.w / 2, (port ? 250 : 100) - up, 'below'];   // under the card's question, at the top centre
+  else if (a.endturn) [x, y, side] = [P.end[0] + out, P.end[1] + up, 'above'];
+  else if (a.cr) { [x, y] = crossroadAt(a.cr); if (port) [x, y, side] = vert(x, y, 52); else side = x > STAGE.w / 2 ? 'left' : 'right'; }
+  else if (a.den) { [x, y] = denMouthAt(a.den); if (port) [x, y, side] = vert(x, y, 40); else side = a.den === 'B' ? 'left' : 'right'; }
+  else if (a.rings && !rings.length) [x, y, side] = [STAGE.w / 2, H, 'above'];   // no card picked yet: the circles come with one, so point at the hand
   else if (a.rings) {   // beside the group of rings, clear of all of them, with no notch (the rings pulse instead)
     const rs = rings.map(crossroadAt);   // this frame's rings, before the board redraws
     const xs = rs.map(r => r[0]), ys = rs.map(r => r[1]), cy = (Math.min(...ys) + Math.max(...ys)) / 2;
     const right = Math.max(...xs) + 78;
     const left = Math.min(...xs) - 78 - COACH_W;
-    [x, y, side] = right + COACH_W < STAGE.w - 16 ? [right, cy, 'group'] : left >= 16 ? [left, cy, 'group']
-      : [STAGE.w / 2, 590 + up, 'above'];   // circles across the whole board (Flight): above the hand, pointing at the picked card
+    if (port) [x, y, side] = Math.min(...ys) > 420 ? [STAGE.w / 2, Math.min(...ys) - 62, 'gabove']   // over the group, or under it
+      : Math.max(...ys) < 880 ? [STAGE.w / 2, Math.max(...ys) + 62, 'gbelow'] : [STAGE.w / 2, H, 'above'];
+    else [x, y, side] = right + COACH_W < STAGE.w - 16 ? [right, cy, 'group'] : left >= 16 ? [left, cy, 'group']
+      : [STAGE.w / 2, H, 'above'];   // circles across the whole board (Flight): above the hand, pointing at the picked card
   }
-  else if (a.gem) [x, y, side] = a.gem === 'A' ? [150, 122, 'right'] : [STAGE.w - 150, 122, 'left'];   // a den's food gem, on its crown
-  else if (a.hand) [x, y, side] = [STAGE.w / 2, 590 + up, 'above'];
-  else if (a.oppcards) [x, y, side] = [STAGE.w / 2 + 170, 72, 'below'];   // beside the opponent's card backs, clear of their revealed card
-  else if (a.middle) [x, y, side] = [STAGE.w / 2, 250, 'mid'];
+  else if (a.gem) { const g = gemAt(a.gem); [x, y, side] = port ? vert(g[0], g[1], 44) : a.gem === 'A' ? [150, 122, 'right'] : [STAGE.w - 150, 122, 'left']; }   // a den's food gem, on its crown
+  else if (a.hand) [x, y, side] = [STAGE.w / 2, H, 'above'];
+  else if (a.oppcards) [x, y, side] = port ? [STAGE.w / 2, 72, 'below'] : [STAGE.w / 2 + 170, 72, 'below'];   // beside the opponent's card backs, clear of their revealed card
+  else if (a.middle) [x, y, side] = port ? [STAGE.w / 2, 650, 'mid'] : [STAGE.w / 2, 250, 'mid'];
   else if (a.region) {   // to the right of the region, which glows (drawBoard), clear of all of it
-    const ps = a.region.map(crossroadAt); [x, y, side] = [Math.max(...ps.map(p => p[0])) + 2, (Math.min(...ps.map(p => p[1])) + Math.max(...ps.map(p => p[1]))) / 2, 'right']; }
+    const ps = a.region.map(crossroadAt), ys = ps.map(p => p[1]);
+    if (port) [x, y, side] = Math.min(...ys) > 420 ? [STAGE.w / 2, Math.min(...ys) - 62, 'gabove'] : [STAGE.w / 2, Math.max(...ys) + 62, 'gbelow'];
+    else [x, y, side] = [Math.max(...ps.map(p => p[0])) + 2, (Math.min(...ys) + Math.max(...ys)) / 2, 'right']; }
   else if (a.stone) { const [c, r] = a.stone.split(',').map(Number), [x1, y1] = crossroadAt(`${c},${r}`), [x2, y2] = crossroadAt(`${c + 1},${r + 1}`);
-    [x, y, side] = [(x1 + x2) / 2 - 20, (y1 + y2) / 2, 'right']; }   // a region's payout stone, in the open ground between crossroads
-  else [x, y, side] = [STAGE.w / 2, 590 + up, 'above'];
+    [x, y, side] = port ? vert((x1 + x2) / 2, (y1 + y2) / 2, 34) : [(x1 + x2) / 2 - 20, (y1 + y2) / 2, 'right']; }   // a region's payout stone, in the open ground between crossroads
+  else [x, y, side] = [STAGE.w / 2, H, 'above'];
   const clampX = v => Math.max(16, Math.min(STAGE.w - 16 - COACH_W, v));
   const pos = side === 'above' ? `left:${clampX(x - COACH_W / 2)}px;bottom:${STAGE.h - y + 14}px;--nx:${x - clampX(x - COACH_W / 2)}px`
     : side === 'below' ? `left:${clampX(x - COACH_W / 2)}px;top:${y + 14}px;--nx:${x - clampX(x - COACH_W / 2)}px`
     : side === 'mid' ? `left:${x - COACH_W / 2}px;top:${y}px`
     : side === 'group' ? `left:${x}px;top:${y}px`
+    : side === 'gabove' ? `left:${x - COACH_W / 2}px;bottom:${STAGE.h - y}px` : side === 'gbelow' ? `left:${x - COACH_W / 2}px;top:${y}px`
     : side === 'right' ? `left:${x + 78}px;top:${y}px` : `left:${x - 78 - COACH_W}px;top:${y}px`;
   // while the opponent's card is shown large in the middle, the coach waits for it to land, then fades in
   const wait = Math.max(0, (ui.revealEnd || 0) - Date.now());
@@ -676,7 +689,7 @@ function placeCoach(el, L, rings = []) {
   holdBot(!!L.next);
   el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
   el.style.setProperty('--up', `${up}px`);   // a risen coach clears the lifted card, which moved with the hand
-  el.dataset.iid = side === 'above' && y >= 572 ? (card ? card.dataset.iid : 'any') : '';   // over the hand: a hovered card lifts it   // hovering that card lifts the coach above it (wireCoachHover)
+  el.dataset.iid = side === 'above' && y >= P.hand - 18 + up ? (card ? card.dataset.iid : 'any') : '';   // over the hand: a hovered card lifts it   // hovering that card lifts the coach above it (wireCoachHover)
   // the words follow what is on screen: one circle is "the circle" (enemy, animal), several are "one of"; with one card lit,
   // "one of your animals" names it
   let text = rings.length === 1 ? L.text.replace('one of the circles', 'the circle').replace('Click one.', 'Click it.')
@@ -735,14 +748,19 @@ function showPanel() {
 }
 // The stage keeps its design size (STAGE) and scales to fit the window. The painted ground under it is one painting wider
 // and taller than any window (21:9 to 4:3), scaled with the stage, so the window shows more savanna, never bars.
-function fitStage() {
+function fitStage(redraw = true) {
   const st = document.getElementById('stage'); if (!st) return;
-  const k = Math.min(innerWidth / STAGE.w, innerHeight / STAGE.h), t = `scale(${k}) translate(-50%, -50%)`;
-  st.style.transform = t; document.getElementById('world').style.transform = t;
+  // a window taller than wide gets the upright layout (board.js setView); turning the phone redraws the screen
+  const port = innerHeight > innerWidth, flip = port !== VIEW.port;
+  setView(port); document.getElementById('scr').classList.toggle('port', port);
+  const k = Math.min(innerWidth / STAGE.w, innerHeight / STAGE.h), t = `scale(${k}) translate(${-STAGE.w / 2}px, ${-STAGE.h / 2}px)`;
+  st.style.transform = t; document.getElementById('world').style.transform = `${t} ${boardTransform()}`;
+  document.getElementById('board').style.transform = boardTransform();
   // the savanna around the stage, in stage px: the pieces at the screen's edges (hands, corners, deck, End turn) sit at the
   // window's edges, not the stage's, so a window of another shape widens the ground between them, never leaves them floating
   st.style.setProperty('--above', `${Math.max(0, (innerHeight / k - STAGE.h) / 2)}px`);
   st.style.setProperty('--side', `${Math.max(0, (innerWidth / k - STAGE.w) / 2)}px`);
+  if (flip && redraw && V && V.game) drawGame();
 }
 
 function moveLine(m) {

@@ -59,7 +59,7 @@ From his custom Egg Control against Expert goodstuff (`results/human_games/web/w
 - **Taipan fizzled** (action 33): Taipan on 4,2 with no adjacent enemy, then Wolf on 3,2. Wolf on 4,2 then Taipan on 3,2 marks his Python (8). The benchmarked RefereeBot finds that line in 4 of 4 seeds; the web configuration didn't. The hand eval scores a pending delayed removal the same whatever it targets (marking the Python and marking a Raven both evaluate -1.9), so it can't tell a good Taipan from a poor one.
 - **Lemming on its own Pestis** (action 23): not a misplay. With the bot's hand in view (two Tigers, a Polar Bear, two Elephants and Brutus it couldn't afford, two Lemmings) Martin accepts both burying Pestis for three Lemmings and Lemming on 4,3 then drawing. RefereeBot plays the first in 4 of 4 seeds, the round-3 network mostly the second.
 
-The Taipan position isn't frozen as a puzzle yet; the Lemming one is a candidate puzzle accepting either Lemming line.
+The Taipan position isn't frozen as a puzzle yet; the Lemming one stays out of the puzzles (no misplay to guard against).
 
 ## Throughput
 

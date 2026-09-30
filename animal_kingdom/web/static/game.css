@@ -418,3 +418,32 @@
 .game.kit .unit .buried.seen { inset: 0; background: none; border: 0; filter: brightness(.72) saturate(.85); transform-origin: 50% 50%; }   /* a covered animal: itself, peeking out */
 .game.kit .unit .buried.seen .fill { position: absolute; inset: 14px; border-radius: 50%; }
 .game.kit .unit .buried.seen.A .fill { background: var(--Adk); } .game.kit .unit .buried.seen.B .fill { background: var(--Bdk); }
+
+/* Upright (a window taller than wide, board.js setView): a tall stage; the board layer turns a quarter left (fitStage), each
+   piece on it turned back so it reads upright; the opponent's cards along the top, your hand along the bottom, the deck
+   above End turn in the margin beside the board, clear of your den's pits. */
+.game.port #stage { width: 720px; height: 1440px; }
+.game.port #board { inset: auto; left: 0; top: 0; width: 1512px; height: 800px; transform-origin: 0 0; }
+.game.port .cr, .game.port .stone, .game.port .dcount, .game.port .leave { rotate: 90deg; }
+.game.port .hand { top: 1230px; }
+.game.port .ledge { display: none; }   /* its painting is cut to the wide screen's corner: upright the deck and End turn stand on the grass */
+.game.port.kit .deck { left: 585px; top: 835px; width: 100px; height: 132px; }
+.game.port.kit .tbtn { left: 578px; top: 985px; }
+.game.port .waiting { left: auto; right: 16px; top: 1072px; }
+.game.port .coach { width: 400px; } .game.port .coach p { font-size: 26px; } .game.port .coach .slab { height: 48px; font-size: 22px; }
+.game .coach.gabove::after, .game .coach.gbelow::after { display: none; }
+.game.port .prompt:not(.mull) { width: 680px; max-width: 680px; white-space: normal; }
+.game.port .prompt.mull { top: 520px; }
+.game.port .opts { top: 560px; }
+.game.port .reveal { top: 560px; }
+/* upright on a phone the stage shows at about half size: what is read or tapped grows to stay a thumb's size */
+.game.port { background: #5d4829; }   /* the ground's dark earth, past the painting's end on the tallest phones */
+.game.port .menu { width: 72px; height: 72px; border-radius: 14px; } .game.port .menu svg { width: 36px; height: 36px; }
+.game.port .menu.fb { right: 96px; } .game.port .menu.fb.alone { right: 16px; }
+.game.port .rbar .slab { width: 72px; height: 72px; } .game.port .rbar .out { height: 72px; font-size: 22px; } .game.port .rbar .track { width: 180px; height: 72px; } .game.port .rbar .track::after { top: 32px; } .game.port .rbar .track b { top: 29px; }
+.game.port.kit .deck { left: 574px; top: 790px; width: 124px; height: 164px; font-size: 26px; }
+.game.port.kit .tbtn { left: 566px; top: 970px; width: 140px; height: 98px; font-size: 24px; }
+.game.port .prompt:not(.mull) { top: 100px; padding: 14px 20px; } .game.port .prompt:not(.mull) b { font-size: 28px; } .game.port .prompt:not(.mull) p { font-size: 26px; }
+.game.port .prompt:not(.mull) .line { flex-wrap: wrap; } .game.port .prompt:not(.mull) .line .skip { height: 52px; font-size: 22px; }
+.game.port .prompt.mull { width: 520px; margin-left: -260px; } .game.port .prompt.mull b { font-size: 34px; } .game.port .prompt.mull p { font-size: 26px; } .game.port .prompt .skip { height: 56px; font-size: 24px; }
+.game.port .endbox { scale: 1.7; }   /* the end of a game and the concede question, read on a phone */
