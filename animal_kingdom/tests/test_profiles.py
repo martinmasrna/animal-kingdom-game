@@ -65,6 +65,68 @@ def test_a_profile_gets_the_starter_decks_once(monkeypatch):
     assert len(server.profile_view(p)["decks"]) == 1                    # and they stay deleted
 
 
+def test_an_untouched_starter_copy_follows_its_starter(db):
+    _, p = db.create()
+    v1 = {"borealis": 1, "elephant": 2}
+    db.seed_decks(p["id"], [{"id": "ramp", "name": "Ramp", "cards": v1}])
+    assert db.decks(p["id"], {"ramp": v1})[0]["cards"] == v1
+    v2 = {"borealis": 1, "elephant": 1, "cairn": 1}                     # the starter's list changes
+    assert db.decks(p["id"], {"ramp": v2})[0]["cards"] == v2            # the untouched copy follows it
+    assert db.decks(p["id"])[0]["cards"] == v1, "with no starter to resolve against, what was last saved"
+
+
+def test_editing_a_starter_copys_cards_detaches_it_for_good(db):
+    _, p = db.create()
+    v1 = {"lion": 3, "tiger": 2}
+    db.seed_decks(p["id"], [{"id": "cats_midrange", "name": "Cats", "cards": v1}])
+    edited = {"lion": 2, "tiger": 2}                                    # the player takes a copy out: it's theirs now
+    db.save_decks(p["id"], [{"id": "cats_midrange", "name": "Cats", "cards": edited}], {"cats_midrange": v1})
+    new_starter = {"lion": 3, "panther": 2}                             # the starter changes
+    assert db.decks(p["id"], {"cats_midrange": new_starter})[0]["cards"] == edited, "detached: it doesn't follow"
+    # editing it back to match a past starter list doesn't relink it
+    db.save_decks(p["id"], [{"id": "cats_midrange", "name": "Cats", "cards": v1}], {"cats_midrange": new_starter})
+    assert db.decks(p["id"], {"cats_midrange": new_starter})[0]["cards"] == v1, "shown as saved"
+    even_newer = {"lion": 1, "panther": 1, "lynx": 1}
+    assert db.decks(p["id"], {"cats_midrange": even_newer})[0]["cards"] == v1, "still detached, not following"
+
+
+def test_renaming_or_recovering_a_starter_copy_does_not_detach_it(db):
+    _, p = db.create()
+    cards = {"rat": 3}
+    db.seed_decks(p["id"], [{"id": "food_otk", "name": "Food", "cards": cards}])
+    db.save_decks(p["id"], [{"id": "food_otk", "name": "My Food", "cards": cards, "cover": "rat_king"}], {"food_otk": cards})
+    renamed = db.decks(p["id"], {"food_otk": cards})[0]
+    assert renamed["name"] == "My Food" and renamed.get("cover") == "rat_king"
+    changed = {"rat": 2, "mouse": 1}                                    # the starter changes
+    assert db.decks(p["id"], {"food_otk": changed})[0]["cards"] == changed, "still follows it"
+
+
+def test_a_deleted_starter_copy_stays_deleted_even_when_the_starter_changes(db):
+    _, p = db.create()
+    cards = {"lobo": 3}
+    db.seed_decks(p["id"], [{"id": "canine_buff_tempo", "name": "Canines", "cards": cards}])
+    db.save_decks(p["id"], [], {"canine_buff_tempo": cards})            # the player deletes it
+    changed = {"lobo": 2, "clarion": 1}
+    assert db.decks(p["id"], {"canine_buff_tempo": changed}) == []
+
+
+def test_link_starters_backfills_old_rows_leaving_mismatches_alone(tmp_path):
+    import sqlite3
+    path = tmp_path / "old.db"
+    old = sqlite3.connect(path)
+    old.executescript(
+        "CREATE TABLE decks (profile TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, cards TEXT NOT NULL, pos INTEGER NOT NULL, PRIMARY KEY (profile, id));"
+        "INSERT INTO decks VALUES ('p', 'ramp', 'Ramp', '{\"borealis\": 1}', 0);"
+        "INSERT INTO decks VALUES ('p', 'egg_control', 'Egg', '{\"eagle\": 2}', 1);")
+    old.commit(); old.close()
+    db = Profiles(str(path))
+    assert db.link_starters({"ramp": {"borealis": 1}, "egg_control": {"eon": 1}}) == (1, 1)
+    decks = {d["id"]: d for d in db.decks("p", {"ramp": {"borealis": 2}, "egg_control": {"eon": 1}})}
+    assert decks["ramp"]["cards"] == {"borealis": 2}, "matched the current starter: now follows it"
+    assert decks["egg_control"]["cards"] == {"eagle": 2}, "differed: left alone, still its old list"
+    assert db.link_starters({"ramp": {"borealis": 2}, "egg_control": {"eon": 1}}) == (0, 0), "a second run reclassifies nothing"
+
+
 def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch):
     from animal_kingdom.engine.state import Result
     db = Profiles(":memory:")
