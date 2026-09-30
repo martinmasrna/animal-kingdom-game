@@ -20,7 +20,7 @@ export const CROP = {
   armadillo: [.72, .38, .6], chinchilla: [.68, .38, .7], flying_squirrel: [.62, .5, .7], porcupine: [.35, .48, .62], fathom: [.5, .42, .8],
   greywhisker: [.5, .33, .65], rat_king: [.52, .35, .8], scrooge: [.62, .45, .62],
   queen_honoria: [.55, .3, .7], queen_marabunta: [.6, .45, .75], vesper: [.6, .42, .72], falstaff: [.5, .38, .85],
-  eon: [.6, .33, .7], ember: [.55, .3, .75], aurum: [.5, .45, .96], omen: [.5, .42, .75], anaconda: [.49, .6, .62], egg_eater: [.66, .4, .6],
+  eon: [.6, .33, .7], ember: [.55, .3, .75], aurum: [.5, .45, .96], omen: [.5, .42, .75], anaconda: [.49, .6, .62], egg_eater: [.66, .4, .6], snake_egg: [.55, .46, .62], bird_egg: [.52, .42, .82],
   dire_wolf: [.65, .3, .6], dingo: [.7, .27, .6], fox: [.55, .45, .8], african_wild_dog: [.7, .3, .55], dog: [.66, .3, .6],
   pup: [.55, .36, .72], outrider: [.62, .36, .75], red_wolf: [.62, .3, .65], hyena: [.5, .38, .6], bush_dog: [.64, .33, .6],
   lobo: [.6, .25, .62], raksha: [.64, .33, .6], clarion: [.6, .22, .7], alpha: [.56, .36, .8], poppy: [.55, .36, .72], rusty: [.45, .36, .72],
@@ -30,7 +30,7 @@ export const CROP = {
 export const STRIP = {
   prince_leo: [.7, .28, 1], princess_lea: [.4, .29, 1.5], king_theron: [.62, .22, 1], queen_adira: [.57, .17, 1.2], jaguar: [.7, .36, 1], serval: [.47, .22, 1.5],
   snow_leopard: [.66, .38, 1], black_panther: [.7, .43, 1], lion: [.73, .28, 1], lynx: [.52, .24, 1.3], caracal: [.47, .28, 1.5], tiger: [.82, .54, 1],
-  cougar: [.73, .38, 1.1], house_cat: [.43, .37, 1.5], eon: [.62, .29, 1], goliath: [.6, .47, 1.2], ember: [.75, .17, 1.5], aurum: [.6, .2, 1.3], anaconda: [.5, .55, 1.2], egg_eater: [.7, .36, 1.3],
+  cougar: [.73, .38, 1.1], house_cat: [.43, .37, 1.5], eon: [.62, .29, 1], goliath: [.6, .47, 1.2], ember: [.75, .17, 1.5], aurum: [.6, .2, 1.3], anaconda: [.5, .55, 1.2], egg_eater: [.7, .36, 1.3], snake_egg: [.58, .45, 1.3], bird_egg: [.6, .33, 1.2],
   rattlesnake: [.53, .35, 1.3], omen: [.6, .28, 1.7], stoop: [.58, .47, 1.8], eagle: [.63, .43, 1.8], owl: [.6, .24, 1.2], taipan: [.6, .3, 1],
   viper: [.63, .35, 1], magpie: [.73, .34, 1.7], black_mamba: [.58, .3, 1], raven: [.77, .47, 1.7], queen_marabunta: [.8, .53, 1.7], vesper: [.66, .47, 1.1],
   queen_honoria: [.78, .25, 1.8], falstaff: [.72, .42, 1], nurse_bee: [.6, .4, 1.3], nurse_bumblebee: [.65, .4, 1.1], termite_king: [.73, .47, 1], termite_queen: [.45, .37, 1],
