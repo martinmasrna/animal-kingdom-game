@@ -34,7 +34,7 @@ const TARGET = { id: 'target', when: c => c.choosing, untilAct: true, at: { prom
     text: 'This Roar needs a target. Click one of the circled animals.' };
 const EMPTY = { id: 'empty', again: true, when: c => c.mine && c.round >= 3 && !c.offered.length,   // nothing to place: never a silent turn
   at: c => c.canDraw ? { deck: true } : { endturn: true },
-  text: c => c.canDraw ? 'None of your animals can be placed right now. Click your deck to draw 2 cards.' : 'Nothing to do this turn. Click End turn.' };
+  text: c => c.canDraw ? 'Click your deck to draw 2 cards.' : 'Nothing to do this turn. Click End turn.' };
 
 export const LESSONS = [
   // --- the opening: what is on screen ---
@@ -43,7 +43,7 @@ export const LESSONS = [
   { id: 'yourden', when: opening, ...talk, at: { den: 'A' },
     text: 'This rock is your den. Your animals start next to it.' },
   { id: 'theirden', when: opening, ...talk, at: { den: 'B' },
-    text: 'This is your opponent\'s den. Put any of your animals on it and you win!' },
+    text: 'This is your opponent\'s den. Put one of your animals on it and you win!' },
   { id: 'foodcount', when: opening, ...talk, at: { gem: 'A' },
     text: 'This is your food. The first player to gather 100 food wins.' },
   { id: 'oppfood', when: opening, ...talk, at: { gem: 'B' },
@@ -86,7 +86,7 @@ export const LESSONS = [
   { id: 'cover', when: c => c.mine && c.round >= 3 && c.homeHeld && c.coverable.length > 0, done: c => c.covered,
     only: c => ({ card: c.coverWith, crs: c.coverable }), at: { rings: true },
     text: c => ({ pick: `A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 1 can't beat 1. Click the ${c.name(c.coverWith)}.`,
-      place: 'Now click the circled enemy to cover it!' }) },
+      place: 'Now click one of the circled enemies to cover it!' }) },
   // the region pays again as the cover turn ends: said on the region, the fruit held until Next
   { id: 'food2', when: c => c.covered && c.homeHeld && c.myFood >= 20, ...talk, holdFood: true, at: c => ({ region: c.home }),
     text: 'Your region pays again: 10 food at the end of each of your turns, as long as all four crossroads stay yours.' },
@@ -162,7 +162,7 @@ export const LESSONS_2 = [
     'The Polar Bear is an Apex Predator: when you place it on top of another animal, that animal is removed. But an Apex Predator can\'t be placed on an empty crossroad or on your opponent\'s den.'),
   { id: 'apex', when: c => c.mine && c.hand('polar_bear') && c.prey.length > 0,
     only: c => ({ card: 'polar_bear', crs: c.prey }), at: { rings: true },
-    text: { pick: 'Click the Polar Bear.', place: 'Now click a circled animal to eat it.' } },
+    text: { pick: 'Click the Polar Bear.', place: 'Now click one of the circled animals to eat it.' } },
   { id: 'den', when: c => c.mine && c.places.some(t => t[0] === 'hq'), only: { hq: true }, at: { den: 'B' },
     text: { pick: 'Your opponent\'s den is open! Click any of your animals.', place: 'Now click your opponent\'s den to win!' } },
   EMPTY,

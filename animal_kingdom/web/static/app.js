@@ -654,8 +654,13 @@ function placeCoach(el, L, rings = []) {
   el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
   el.style.setProperty('--up', `${up}px`);   // a risen coach clears the lifted card, which moved with the hand
   el.dataset.iid = side === 'above' && y >= 572 ? (card ? card.dataset.iid : 'any') : '';   // over the hand: a hovered card lifts it   // hovering that card lifts the coach above it (wireCoachHover)
-  const text = rings.length === 1 ? L.text.replace('one of the circles', 'the circle').replace('Click one.', 'Click it.')   // one circle: "the circle"
-    : L.text.replace(/\bthe circle\b(?! next)/, 'one of the circles');   // several: never "the circle"
+  // the words follow what is on screen: one circle is "the circle" (enemy, animal), several are "one of"; with one card lit,
+  // "one of your animals" names it
+  let text = rings.length === 1 ? L.text.replace('one of the circles', 'the circle').replace('Click one.', 'Click it.')
+      .replace('one of the circled enemies', 'the circled enemy').replace('one of the circled animals', 'the circled animal')
+    : L.text.replace(/\bthe circle\b(?! next)/, 'one of the circles');
+  const lit = [...document.querySelectorAll('#hand .hc.can')];
+  if (lit.length === 1 && !rings.length) text = text.replace(/Click (any|one) of your animals\./, `Click the ${CARDS[lit[0].dataset.id].name}.`);
   el.innerHTML = `<p>${text}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
   // an opening step closes on Next (or Enter/Space), and the next one shows
   if (L.next) el.querySelector('#coachnext').onclick = e => { e.stopPropagation(); tutState().seen.add(L.id);
