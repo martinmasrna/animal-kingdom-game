@@ -155,7 +155,6 @@ class Match:
         self.version = 0                 # bumped on every change; the server pushes on bumps
         self.seed: Optional[int] = None
         self.actions: list[dict] = []    # the current game's actions, for the replayable log
-        self.notes: list[dict] = []      # a player's spoken or typed commentary, pinned to a point in the game
         self.action_times: list[float] = []   # seconds since the game started, one per action
         self.started_at = 0.0
         self.on_game_end = None          # callback(match, log record); the server saves human games
@@ -233,7 +232,6 @@ class Match:
             first = other_player(last["winner"]) if last["winner"] else last["first"]
         seed = self.seed = self.rng.randrange(1 << 30)
         self.actions = []
-        self.notes = []
         self.action_times = []
         self.started_at = time.time()
         if self.tutorial:     # the fixed deal the lessons are written for: you first, no mulligan
@@ -370,14 +368,6 @@ class Match:
         if over and self.on_match_end:
             self.on_match_end(self)
 
-    def add_note(self, s: str, text: str) -> None:
-        """Pin a comment to the current point of the game: it belongs after the first `at` actions."""
-        text = text.strip()
-        if not text or self.state is None:
-            return
-        self.notes.append({"at": len(self.actions), "seat": s, "round": self.state.turn_counter // 2 + 1,
-                           "t": round(time.time() - self.started_at, 1), "text": text[:2000]})
-
     def game_log(self) -> dict:
         """The finished game in the sim.replay log format (replayable with no bot compute)."""
         r = self.results[-1]
@@ -386,7 +376,6 @@ class Match:
                 "bots": [self.seats[p].bot or "human" for p in "AB"],
                 "winner": r["winner"], "reason": r["reason"], "turns": self.state.turn_counter,
                 "actions": list(self.actions), "action_times": list(self.action_times),
-                "notes": list(self.notes),
                 "match_id": self.id, "game_no": len(self.results)}
 
     def bot_move(self):
@@ -400,7 +389,7 @@ class Match:
         """Everything needed to resume this match after a server restart."""
         return {"id": self.id, "seats": {p: asdict(seat) for p, seat in self.seats.items()},
                 "phase": self.phase, "results": self.results, "seed": self.seed,
-                "actions": self.actions, "notes": self.notes, "action_times": self.action_times,
+                "actions": self.actions, "action_times": self.action_times,
                 "started_at": self.started_at, "created": self.created.isoformat(),
                 "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game,
                 "state": self.state.to_dict() if self.state is not None else None,
@@ -412,7 +401,7 @@ class Match:
         m = Match(d["id"], seats["A"])
         m.seats = seats
         m.phase, m.results, m.seed = d["phase"], d["results"], d["seed"]
-        m.actions, m.notes, m.action_times = d["actions"], d["notes"], d["action_times"]
+        m.actions, m.action_times = d["actions"], d["action_times"]
         m.started_at, m.schedule, m.version = d["started_at"], d["schedule"], d["version"] + 1
         m.rematches = d.get("rematches", 0)
         m.last_game = d.get("last_game")

@@ -120,17 +120,12 @@ def test_game_log_replays_to_the_same_result():
     assert (result.winner, result.reason) == (logs[0]["winner"], logs[0]["reason"])
 
 
-def test_notes_are_pinned_to_the_point_of_the_game():
+def test_the_game_log_times_every_action():
     rng = random.Random(9)
     logs = []
     m = _match()
     m.on_game_end = lambda match, rec: logs.append(rec)
-    m.act(m.to_act(), rng.choice(rules.legal_actions(m.state)).to_dict())
-    m.add_note("A", "  going wide here  ")
-    m.add_note("A", "   ")
     _play_out_game(m, rng)
-    notes = logs[0]["notes"]
-    assert [(n["at"], n["seat"], n["round"], n["text"]) for n in notes] == [(1, "A", 1, "going wide here")]
     assert len(logs[0]["action_times"]) == len(logs[0]["actions"])
 
 

@@ -261,7 +261,7 @@ function profileScreen() {
 }
 
 // ------------------------------------------------------------------ match connection
-function disconnect() { if (live) setLive(false); if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
+function disconnect() { if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
 
 function matchScreen(id) {
   const token = getToken(id);
@@ -402,8 +402,8 @@ function gameScreen() {
       <div class="abs series" id="series"></div>
       <div class="abs clock" id="clock"></div>
       <div class="abs opphand" id="opphand"></div>
-      <div class="abs menu" id="menubtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg><span class="livedot" id="livedot"></span>
-        <div class="abs menudrop" id="menudrop"><a href="#" id="livelink">Live commentary (L)</a><a href="#" id="notelink">Add a note (N)</a><a href="#" id="concede">Concede game</a><a href="#/">Leave match</a></div></div>
+      <div class="abs menu" id="menubtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg>
+        <div class="abs menudrop" id="menudrop"><a href="#" id="concede">Concede game</a></div></div>
       <div class="abs hand" id="hand"></div>
       <div class="abs deck" id="deck"></div>
       <div class="abs tbtn" id="tbtn"></div>
@@ -415,11 +415,9 @@ function gameScreen() {
       <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
       <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
       <div class="endov" id="endov"></div></div></div>`;
-    fitStage(); wireNotes(); wireTips(document.getElementById('scr'));
+    fitStage(); wireTips(document.getElementById('scr'));
     const $ = id => document.getElementById(id);
     $('menubtn').onclick = e => { e.stopPropagation(); $('menudrop').classList.toggle('on'); const c = $('concede'); c.classList.remove('sure'); c.textContent = 'Concede game'; };
-    $('livelink').onclick = e => { e.preventDefault(); e.stopPropagation(); $('menudrop').classList.remove('on'); setLive(!live); };
-    $('notelink').onclick = e => { e.preventDefault(); e.stopPropagation(); $('menudrop').classList.remove('on'); openNote(); };
     // Conceding asks once, in place: the entry turns into the confirmation; a click elsewhere closes the menu and forgets it.
     $('concede').onclick = e => { e.preventDefault(); e.stopPropagation(); const c = $('concede');
       if (c.classList.contains('sure')) { $('menudrop').classList.remove('on'); send({ t: 'concede' }); }
@@ -442,7 +440,7 @@ function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
   lastDecision = d;
-  $('concede').style.display = playing && V.id ? '' : 'none';   // only a game in play can be conceded (never in the lab)
+  $('menubtn').style.display = playing && V.id ? '' : 'none';   // the menu holds Concede: only a game in play (never the lab)
 
   // Top left: the turn (a match is one game while there is one map); it opens the history. The gauntlet counts its games.
   const gameNo = playing ? V.results.length + 1 : V.results.length;
@@ -727,7 +725,7 @@ function drawEnd() {
     if (w === you) store('ak:learned', '1');
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>
       ${w === you ? '<div class="next">You know how to play now. Time for a real match!</div>' : ''}
-      <div class="btns">${peek}${w === you ? '<a class="play" href="#/">Play a match</a>' : '<button class="play" id="again">Try again</button>'}</div></div>`;
+      <div class="btns">${w === you ? `${peek}<a class="play" href="#/">Play a match</a>` : `<a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Try again</button>`}</div></div>`;
     if (w !== you) document.getElementById('again').onclick = startTutorial;
   } else {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
@@ -740,84 +738,6 @@ function drawEnd() {
   document.getElementById('peek').onclick = () => { ui.peek = true; drawGame(); };
   ov.classList.add('on');
 }
-
-// Playtest notes: N opens a box, Chrome's speech recognition fills it while you talk (or type),
-// Enter saves it to the game log at this exact point, Esc discards.
-let noteRec = null;
-function wireNotes() {
-  let box = document.getElementById('notebox');
-  if (!box) {
-    box = document.createElement('div'); box.id = 'notebox'; box.className = 'notebox';
-    box.innerHTML = `<textarea id="notetext" placeholder="Say or type what you're thinking"></textarea>
-      <div class="nb"><span class="rec off" id="noterec"></span><span id="notestate">Enter saves · Esc discards</span></div>`;
-    document.body.appendChild(box);
-  }
-  const ta = document.getElementById('notetext');
-  ta.onkeydown = e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); closeNote(true); }
-    else if (e.key === 'Escape') { e.preventDefault(); closeNote(false); }
-    e.stopPropagation();
-  };
-}
-function openNote() {
-  if (live) { toast('Live commentary is already recording'); return; }
-  const box = document.getElementById('notebox'), ta = document.getElementById('notetext');
-  if (!box || box.classList.contains('on')) return;
-  ta.value = ''; box.classList.add('on'); ta.focus();
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const dot = document.getElementById('noterec'), state = document.getElementById('notestate');
-  if (!SR) { state.textContent = 'No speech recognition in this browser: type · Enter saves · Esc discards'; return; }
-  noteRec = new SR(); noteRec.continuous = true; noteRec.interimResults = true; noteRec.lang = 'en-US';
-  let committed = '';
-  noteRec.onresult = e => {
-    let interim = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) committed += e.results[i][0].transcript.trim() + ' ';
-      else interim += e.results[i][0].transcript;
-    }
-    ta.value = (committed + interim).trim();
-  };
-  noteRec.onstart = () => { dot.classList.remove('off'); state.textContent = 'Listening · Enter saves · Esc discards'; };
-  noteRec.onend = () => { dot.classList.add('off'); if (box.classList.contains('on')) state.textContent = 'Mic off: edit or type · Enter saves · Esc discards'; };
-  noteRec.onerror = e => { state.textContent = `Mic: ${e.error} · type instead · Enter saves`; };
-  try { noteRec.start(); } catch { /* already running */ }
-}
-function closeNote(save) {
-  const box = document.getElementById('notebox'), ta = document.getElementById('notetext');
-  if (noteRec) { noteRec.onend = null; try { noteRec.stop(); } catch { } noteRec = null; }
-  document.getElementById('noterec').classList.add('off');
-  if (save && ta.value.trim()) { send({ t: 'note', text: ta.value.trim() }); toast('Note saved', true); }
-  box.classList.remove('on');
-}
-// Live commentary: the mic stays on for the whole game and every finished sentence is sent as a
-// note the moment it's recognised, so the server pins it next to the moves being made.
-let live = null;
-function setLive(on) {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (on && !SR) { toast('No speech recognition in this browser'); return; }
-  if (live) { live.onend = null; try { live.stop(); } catch { } live = null; }
-  if (on) {
-    live = new SR(); live.continuous = true; live.interimResults = false; live.lang = 'en-US';
-    live.onresult = e => { for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) {
-      const text = e.results[i][0].transcript.trim(); if (text) send({ t: 'note', text }); } };
-    live.onend = () => { if (live) try { live.start(); } catch { } };   // Chrome stops after a pause; keep going
-    live.onerror = e => { if (e.error === 'not-allowed') { toast('Microphone blocked'); setLive(false); } };
-    try { live.start(); } catch { }
-  }
-  const dot = document.getElementById('livedot'); if (dot) dot.style.display = on && live ? 'inline-block' : 'none';
-  const link = document.getElementById('livelink'); if (link) link.textContent = live ? 'Stop live commentary (L)' : 'Live commentary (L)';
-  if (on && live) toast('Live commentary on', true);
-}
-addEventListener('keydown', e => {
-  if ((e.key === 'l' || e.key === 'L') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
-    e.preventDefault(); setLive(!live);
-  }
-});
-addEventListener('keydown', e => {
-  if ((e.key === 'n' || e.key === 'N') && screen === 'game' && !e.metaKey && !e.ctrlKey && document.activeElement.tagName !== 'TEXTAREA') {
-    e.preventDefault(); openNote();
-  }
-});
 
 window.__ak = () => ({ V, ui, d: lastDecision });   // test hook: the headless play-through reads the view
 window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it

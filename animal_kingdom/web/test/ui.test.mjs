@@ -98,7 +98,9 @@ test('a game can be conceded from the menu, after one confirmation', async () =>
   await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   await p.click('#go'); await p.waitForSelector('#ready'); await p.click('#ready');
   await p.waitForFunction(() => window.__ak().V && window.__ak().V.phase === 'playing', { timeout: 10000 });
-  await p.click('#menubtn'); await p.click('#concede'); await wait(80);
+  await p.click('#menubtn');
+  assert.deepEqual(await p.$$eval('#menudrop a', els => els.map(e => e.textContent)), ['Concede game'], 'the menu holds only Concede');
+  await p.click('#concede'); await wait(80);
   assert.equal(await p.$eval('#concede', e => e.textContent), 'Concede this game?', 'it asks first');
   assert.equal(await p.evaluate(() => window.__ak().V.phase), 'playing');
   await p.click('#concede');

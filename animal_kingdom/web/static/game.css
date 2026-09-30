@@ -7,7 +7,6 @@
 .menudrop.on { display: flex; }
 .menudrop a { padding: 8px 10px; border-radius: 6px; font-size: 14px; color: #f3e3c0; }
 .menudrop a:hover { background: #3d2a16; }
-.livedot { display: none; position: absolute; right: 2px; top: 2px; width: 12px; height: 12px; border-radius: 999px; background: #c65a4a; animation: pulse 1s infinite; }
 .panel { position: absolute; top: 96px; z-index: 30; display: none; flex-direction: column; width: 290px; max-height: 590px; padding: 12px 12px 10px; border-radius: 12px; background: rgba(38,25,12,.95); border: 2px solid #b58a4a; box-shadow: 0 16px 40px rgba(0,0,0,.6); }
 .panel.on { display: flex; }
 .panel.mine { left: 45px; } .panel.theirs { right: 105px; } .panel.histp { left: 646px; width: 380px; }
@@ -46,7 +45,6 @@
 .game .menu { right: 16px; top: 8px; width: 44px; height: 44px; display: grid; place-items: center; font-size: 22px; background: var(--plaque); border: 1px solid var(--plaqueline); border-radius: 6px; cursor: pointer; z-index: 40; }
 .game .menudrop { right: 0; top: 50px; background: #22201d; border: 1px solid var(--plaqueline); }
 .game .menudrop a { color: var(--ink); } .game .menudrop a:hover { background: #33302b; }
-.game .livedot { position: absolute; right: 4px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: #e0452e; display: none; }
 
 /* board */
 .game #board { position: absolute; inset: 0; }
