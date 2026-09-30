@@ -4,6 +4,10 @@
 // region. After that the player plays freely and lessons appear when their situation first comes up: covering, Roar,
 // the open den. A lesson shows until its situation passes or the player acts past it, then never again.
 //
+// Each lesson stands beside what it talks about: `at` names it (a card in hand, a crossroad, a region's stone, the deck, a den),
+// directly or from the moment's facts (a card until it is picked, then its crossroad).
+const pickThen = (card, cr) => c => c.sel === card ? { cr } : { card };
+
 // Lessons read plain facts of the game view (the player is always seat A here). `c` is:
 //   { G, mine, sel, round, placed(id), at(cr), hand(id), acts, places, heldR1 }
 
@@ -13,34 +17,35 @@ const owner = (G, cr) => { const st = G.board[cr]; return st && st.length ? st[s
 export const LESSONS = [
   // --- forced: the first two turns ---
   { id: 'lion', when: c => c.mine && c.round === 1 && !c.at('1,2') && c.sel !== 'lion',
-    text: 'Win by putting any animal on their den, far right, or by gathering 100 food first. Click the Lion to start.',
-    only: { card: 'lion' } },
+    text: 'Win by putting any animal on your opponent\'s den, far right, or by gathering 100 food first. Click the Lion to start.',
+    only: { card: 'lion' }, at: { card: 'lion' } },
   { id: 'lion2', when: c => c.mine && c.round === 1 && !c.at('1,2') && c.sel === 'lion',
     text: 'Now click the circled crossroad beside your den.',
-    only: { card: 'lion', cr: '1,2' } },
+    only: { card: 'lion', cr: '1,2' }, at: { cr: '1,2' } },
   { id: 'buffalo', when: c => c.mine && c.round === 1 && c.at('1,2') && !c.at('2,2'),
     text: 'You get two actions each turn. Place the Buffalo next to the Lion: every animal must connect back to your den.',
-    only: { card: 'cape_buffalo', cr: '2,2' } },
+    only: { card: 'cape_buffalo', cr: '2,2' }, at: pickThen('cape_buffalo', '2,2') },
   { id: 'wolf', when: c => c.mine && c.round === 2 && !c.at('1,1'),
     text: 'Hold all four crossroads around a stone and its food is yours every turn. Place the Wolf on the third corner.',
-    only: { card: 'dire_wolf', cr: '1,1' }, focus: { region: '1,1' } },
+    only: { card: 'dire_wolf', cr: '1,1' }, focus: { region: '1,1' }, at: pickThen('dire_wolf', '1,1') },
   { id: 'draw', when: c => c.mine && c.round === 2 && c.at('1,1') && c.acts > 0,
     text: 'Out of animals? Your deck draws 2 cards for one action. Click it.',
-    only: { deck: true } },
+    only: { deck: true }, at: { deck: true } },
 
   // --- free play: each the first time it comes up ---
   { id: 'corner', when: c => c.mine && c.round === 3 && !c.heldR1 && !c.at('2,1'),
     text: 'The rest is up to you. Take the last corner to claim the +10.', done: c => c.heldR1 || c.round > 3,
-    focus: { region: '1,1' } },
+    focus: { region: '1,1' }, at: { cr: '2,1' } },
   { id: 'food', when: c => c.heldR1, text: 'It\'s yours: +10 food at the end of each of your turns. The fruit in your den counts it.',
-    untilAct: true },
+    untilAct: true, at: { stone: '1,1' }, focus: { region: '1,1' } },
   { id: 'cover', when: c => c.mine && c.places.some(t => t[0] === 'cr' && owner(c.G, t[1]) === 'B'),
     text: 'A stronger animal can go on top of a weaker enemy and take its crossroad. Equal strength isn\'t enough.',
-    untilAct: true },
+    untilAct: true, at: c => ({ cr: c.places.find(t => t[0] === 'cr' && owner(c.G, t[1]) === 'B')[1] }) },
   { id: 'roar', when: c => c.mine && c.G.hand.some(h => c.roar(h.id)),
-    text: 'Hover a card to read it. A Roar happens the moment the animal is placed.', untilAct: true },
+    text: 'Hover a card to read it. A Roar happens the moment the animal is placed.', untilAct: true,
+    at: c => ({ card: c.G.hand.find(h => c.roar(h.id)).id }) },
   { id: 'den', when: c => c.mine && c.places.some(t => t[0] === 'hq'),
-    text: 'Their den is open: place any animal on it to win.', focus: { den: 'B' } },
+    text: 'Your opponent\'s den is open: place any animal on it to win.', focus: { den: 'B' }, at: { den: 'B' } },
 ];
 
 // The facts the lessons read, from the view and the client's selection.
@@ -65,7 +70,7 @@ export function current(V, sel, cards, tut) {
     if (L.done && L.done(c)) { tut.seen.add(L.id); continue; }
     if (!L.when(c)) continue;
     if (L.untilAct && tut.shown[L.id] === undefined) tut.shown[L.id] = n;
-    return L;
+    return { ...L, at: typeof L.at === 'function' ? L.at(c) : L.at };
   }
   return null;
 }

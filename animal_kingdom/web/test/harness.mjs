@@ -115,7 +115,7 @@ export function screenMismatches() {
 
   // whose turn, and the end of a game
   const tb = document.getElementById('tbtn').textContent;
-  if (V.phase === 'playing' && !(G.current === you ? /End turn/.test(tb) : /Their turn/.test(tb))) out.push(`turn button says "${tb}"`);
+  if (V.phase === 'playing' && !(G.current === you ? /End turn/.test(tb) : /Opponent's turn/.test(tb))) out.push(`turn button says "${tb}"`);
   const ended = V.phase === 'game_over' || V.phase === 'match_over';
   if (ended !== document.getElementById('endov').classList.contains('on')) out.push(`end overlay ${ended ? 'missing' : 'shown mid-game'}`);
   return out;

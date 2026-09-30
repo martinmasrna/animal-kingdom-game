@@ -345,7 +345,7 @@ function drawClock() {
   const spent = c.now + (Date.now() / 1000 - V.rx) - c.since, free = Math.max(0, c.free - spent);
   const bank = Math.max(0, c.bank[c.holder] - Math.max(0, spent - c.free)), left = free + bank;
   el.className = `abs clock ${rel(c.holder)}${left < 10 ? ' low' : ''}`;
-  el.innerHTML = `${c.holder === V.you ? 'Your' : 'Their'} time <b>${mmss(free > 0 ? free : bank)}</b>${free > 0 ? `<span>+${mmss(bank)}</span>` : ''}`;
+  el.innerHTML = `${c.holder === V.you ? 'Your' : "Opponent's"} time <b>${mmss(free > 0 ? free : bank)}</b>${free > 0 ? `<span>+${mmss(bank)}</span>` : ''}`;
 }
 setInterval(() => { if (screen === 'game') drawClock(); }, 250);
 
@@ -481,7 +481,7 @@ function drawGame() {
   if (playing && G.current === you) {
     const pips = Array.from({ length: G.actionsTotal }, (_, i) => `<i class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}"></i>`).join('');
     tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass && !d.noPass ? ' can' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}</span>`;
-  } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = 'Their turn'; }
+  } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = 'Opponent\'s turn'; }
   else { tb.className = 'abs tbtn'; tb.innerHTML = ''; }
 
   // A pending choice: the asking card and its rule; card options float above the hand.
@@ -508,10 +508,7 @@ function drawGame() {
     bar.classList.remove('on');
     if (playing && G.opponentChoosing) waiting.textContent = G.history.length ? 'Opponent is choosing' : 'Opponent is mulliganing';
   }
-  // The tutorial's coach speaks from its own granite piece, above a pending choice when there is one.
-  const coach = $('coach'), L = d.lesson;
-  coach.classList.toggle('on', !!L); coach.classList.toggle('lifted', !!L && bar.classList.contains('on'));
-  coach.innerHTML = L ? `<p>${L.text}</p>` : '';
+  placeCoach($('coach'), d.lesson);
   clearTimeout(drawGame.think);
   if (playing && G.toAct === them && V.seats[them].bot) {
     const ver = V.version;
@@ -528,6 +525,27 @@ function drawGame() {
   }
   drawBoard(d);
   drawEnd();
+}
+
+// The tutorial's coach: a granite piece standing beside what the lesson talks about, its notch pointing at it: above a
+// card in the hand or the deck, beside a crossroad (on the side with more room), a region's stone or a den.
+const COACH_W = 250;
+function placeCoach(el, L) {
+  el.className = 'abs coach';
+  if (!L) { el.innerHTML = ''; return; }
+  const a = L.at || {}, card = a.card && document.querySelector(`#hand .hc[data-id="${a.card}"]`);
+  let x, y, side;
+  if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, 590, 'above'];
+  else if (a.deck) [x, y, side] = [1299, 606, 'above'];
+  else if (a.cr) { [x, y] = crossroadAt(a.cr); side = x > STAGE.w / 2 ? 'left' : 'right'; }
+  else if (a.den) { [x, y] = denMouthAt(a.den); side = a.den === 'B' ? 'left' : 'right'; }
+  else if (a.stone) { const [c, r] = a.stone.split(',').map(Number), [x1, y1] = crossroadAt(`${c},${r}`), [x2, y2] = crossroadAt(`${c + 1},${r + 1}`);
+    [x, y, side] = [(x1 + x2) / 2 - 20, (y1 + y2) / 2, 'right']; }   // a region's payout stone, in the open ground between crossroads
+  else [x, y, side] = [STAGE.w / 2, 590, 'above'];
+  const clampX = v => Math.max(16, Math.min(STAGE.w - 16 - COACH_W, v));
+  const pos = side === 'above' ? `left:${clampX(x - COACH_W / 2)}px;bottom:${STAGE.h - y + 14}px;--nx:${x - clampX(x - COACH_W / 2)}px`
+    : side === 'right' ? `left:${x + 78}px;top:${y}px` : `left:${x - 78 - COACH_W}px;top:${y}px`;
+  el.className = `abs coach on ${side}`; el.style.cssText = pos; el.innerHTML = `<p>${L.text}</p>`;
 }
 
 // The history strip and both decklists, shared by both game screens.
@@ -554,7 +572,7 @@ function drawLists(G) {
   const sum = o => Object.values(o).reduce((a, b) => a + b, 0), you = V.you, them = opp();
   const mine = document.getElementById('mine'), theirs = document.getElementById('theirs');
   mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4><div class="rows">${rows(V.lists[you], G.deckLeft)}</div>`;
-  theirs.innerHTML = `<h4>Their cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them], G.unseen)}</div>`;
+  theirs.innerHTML = `<h4>Opponent's cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them], G.unseen)}</div>`;
   wirePops(mine); wirePops(theirs);
 }
 
@@ -569,13 +587,13 @@ function fitStage() {
 }
 
 function moveLine(m) {
-  const who = m.seat === V.you ? 'You' : 'They', name = id => CARDS[id] ? CARDS[id].name : id;
+  const who = m.seat === V.you ? 'You' : 'Opponent', name = id => CARDS[id] ? CARDS[id].name : id;
   const fx = m.fx.map(f => {
     if (f.k === 'cover') return `covered ${name(f.card)}`;
     if (f.k === 'remove') return `removed ${name(f.card)}`;
     if (f.k === 'bounce') return `returned ${name(f.card)}`;
-    if (f.k === 'draw') return m.kind === 'draw' && f.seat === m.seat ? null : `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'they '}drew ${f.n}`;
-    if (f.k === 'food') return `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'they '}${f.n > 0 ? 'gained' : 'paid'} ${Math.abs(f.n)} food`;
+    if (f.k === 'draw') return m.kind === 'draw' && f.seat === m.seat ? null : `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'your opponent '}drew ${f.n}`;
+    if (f.k === 'food') return `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'your opponent '}${f.n > 0 ? 'gained' : 'paid'} ${Math.abs(f.n)} food`;
     return null;
   }).filter(Boolean);
   const what = m.kind === 'draw' ? `drew ${(m.fx.find(f => f.k === 'draw' && f.seat === m.seat) || { n: 0 }).n}` : m.target[0] === 'hq' ? 'captured the HQ' : '';
@@ -671,7 +689,7 @@ function drawEnd() {
   if (ui.peek) { ov.classList.remove('on'); document.getElementById('waiting').innerHTML = `<button class="slab" id="unpeek">Back to results</button>`; document.getElementById('unpeek').onclick = () => { ui.peek = false; drawGame(); }; return; }
   const you = V.you, them = opp(), w = G.result.winner, S = V.score;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
-  const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'They'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'They conceded' : 'You conceded' }[G.result.reason] || G.result.reason;
+  const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded' }[G.result.reason] || G.result.reason;
   const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;
   const peek = `<button class="slab" id="peek">See the board</button>`;
   if (V.gauntlet) {
@@ -680,13 +698,13 @@ function drawEnd() {
     const done = V.phase === 'match_over';
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${done ? 'Gauntlet done' : res[1]}</div><div class="how">${how} · turn ${G.round}</div>
       <div class="how">Game ${g.played} of ${g.total} · overall <b>${tot[0]}–${tot[1]}</b></div><div class="how">${rows}</div>
-      ${done ? '' : `<div class="next">Next: ${g.next.yours ? `you play ${g.next.deckName}` : `vs ${g.next.deckName}`} · ${g.next.first === you ? 'you go first' : 'they go first'}</div>`}
+      ${done ? '' : `<div class="next">Next: ${g.next.yours ? `you play ${g.next.deckName}` : `vs ${g.next.deckName}`} · ${g.next.first === you ? 'you go first' : 'your opponent goes first'}</div>`}
       <div class="btns">${peek}${done ? '<a class="play" href="#/">Menu</a>' : '<button class="play" id="nextg">Next game</button>'}</div></div>`;
     if (!done) document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else if (V.phase === 'game_over') {
     const firstNext = w === null ? G.first : (w === you ? them : you);
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>${score}
-      <div class="next">Game ${V.results.length + 1}: ${firstNext === you ? 'you go first' : 'they go first'}</div>
+      <div class="next">Game ${V.results.length + 1}: ${firstNext === you ? 'you go first' : 'your opponent goes first'}</div>
       <div class="btns">${peek}<button class="play" id="nextg">Next game</button></div></div>`;
     document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else if (isTutorial()) {
