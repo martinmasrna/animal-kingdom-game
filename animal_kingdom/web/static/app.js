@@ -686,8 +686,12 @@ function showPanel() {
 // and taller than any window (21:9 to 4:3), scaled with the stage, so the window shows more savanna, never bars.
 function fitStage() {
   const st = document.getElementById('stage'); if (!st) return;
-  const t = `scale(${Math.min(innerWidth / STAGE.w, innerHeight / STAGE.h)}) translate(-50%, -50%)`;
+  const k = Math.min(innerWidth / STAGE.w, innerHeight / STAGE.h), t = `scale(${k}) translate(-50%, -50%)`;
   st.style.transform = t; document.getElementById('world').style.transform = t;
+  // the savanna around the stage, in stage px: the pieces at the screen's edges (hands, corners, deck, End turn) sit at the
+  // window's edges, not the stage's, so a window of another shape widens the ground between them, never leaves them floating
+  st.style.setProperty('--above', `${Math.max(0, (innerHeight / k - STAGE.h) / 2)}px`);
+  st.style.setProperty('--side', `${Math.max(0, (innerWidth / k - STAGE.w) / 2)}px`);
 }
 
 function moveLine(m) {

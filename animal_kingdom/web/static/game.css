@@ -29,13 +29,13 @@
   --plaque: #2d2b28; --plaqueline: #4a4640; --ink: #f4efe6; --mute: #a39c90; --act: #efe6d4; --ready: #f2c230;
   --A: #7ab6f8; --Adk: #1f4a85; --Aghost: #4a7cb4; --Aink: #0f213b; --B: #d9442c; --Bdk: #5a160c; --Bghost: #8a2d1d;
   position: fixed; inset: 0; background: #0b0a09; overflow: hidden; font-family: 'Source Serif 4', Georgia, serif; color: var(--ink); }
-.game #stage { position: absolute; left: 50%; top: 50%; width: 1512px; height: 800px; transform-origin: 0 0; overflow: hidden; background: var(--frame); }
+.game #stage { position: absolute; left: 50%; top: 50%; width: 1512px; height: 800px; transform-origin: 0 0; background: var(--frame); }   /* not clipped: the window clips (.game) */
 .game .abs { position: absolute; }
 .game .num { font-weight: 700; font-variant-numeric: lining-nums tabular-nums; font-family: 'Source Serif 4', Georgia, serif; }
 
 /* frame: the turn, the opponent's hand, the menu */
 .game .series { left: 16px; top: 14px; font-size: 14px; color: var(--mute); cursor: pointer; }
-.game .opphand { left: 0; right: 0; top: 0; height: 66px; pointer-events: none; }   /* only the card backs take the click */
+.game .opphand { left: 0; right: 0; top: calc(-1 * var(--above, 0px)); height: 66px; pointer-events: none; }   /* only the card backs take the click */
 .game .opphand .back { pointer-events: auto; cursor: pointer; }
 .game .back { top: -54px; width: 84px; height: 118px; border-radius: 7px; background: var(--Bdk); border: 3px solid var(--B); box-shadow: 3px 3px 6px rgba(0,0,0,.5); }
 .game .menu { right: 16px; top: 8px; width: 44px; height: 44px; display: grid; place-items: center; font-size: 22px; background: var(--plaque); border: 1px solid var(--plaqueline); border-radius: 6px; cursor: pointer; z-index: 40; }
@@ -386,3 +386,10 @@
 .game .endbox.ask .btns > * { flex: none; width: 100%; }
 .game .play.danger { background: linear-gradient(rgba(196,64,48,.55), rgba(160,44,34,.62)), #6e2a22 url(/static/kit2/coll_slab.webp) center / 300px auto;
   box-shadow: inset 0 1px 0 rgba(255,210,200,.35), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); color: #fff6f2; }
+
+/* The screen's edges are the window's (fitStage sets --above and --side, the savanna beyond the stage in stage px). */
+.game .series, .game .clock, .game .recent { translate: calc(-1 * var(--side, 0px)) calc(-1 * var(--above, 0px)); }
+.game .menu, .game .rbar { translate: var(--side, 0px) calc(-1 * var(--above, 0px)); }
+.game .prompt:not(.mull) { translate: 0 calc(-1 * var(--above, 0px)); }
+.game .hand { translate: 0 var(--above, 0px); }
+.game .deck, .game .tbtn, .game .waiting { translate: var(--side, 0px) var(--above, 0px); }
