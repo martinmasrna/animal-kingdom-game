@@ -130,9 +130,6 @@ export const LESSONS_2 = [
   { id: 'eagle', when: c => c.mine && c.hand('eagle') && !c.placed('eagle'),
     only: c => ({ card: 'eagle', crs: c.eagleSpots }), at: { rings: true },
     text: { pick: 'Click the Eagle.', place: 'Now click one of the circles. None of your other animals could stand there.' } },
-  // connection again, on a harder board: the Eagle stands alone, and nothing may be placed next to it
-  { id: 'alone', when: c => c.mine && c.round === 2 && c.placed('eagle') && !c.placed('cape_buffalo') && c.eagleAlone, ...talk, at: c => ({ cr: c.eagleAt }),
-    text: 'Your Eagle isn\'t connected to your den, so new animals can\'t go next to it.' },
   { id: 'buffalo2', when: c => c.mine && c.round === 2 && c.placed('eagle') && c.hand('cape_buffalo'), only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo') }), at: { rings: true },
     text: { pick: 'Click the Buffalo.', place: 'Now play it. Then watch what your opponent does.' } },
   { id: 'draw2', when: c => c.mine && c.round >= 3 && !c.hand('squirrel') && !c.placed('squirrel'), only: { deck: true }, at: { deck: true },
