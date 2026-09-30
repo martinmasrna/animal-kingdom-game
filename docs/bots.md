@@ -57,9 +57,9 @@ A small network over the rung-2 features (rung 1 plus hand and board context: Ro
 From his custom Egg Control against Expert goodstuff (`results/human_games/web/web_20260930T223013_DBYAPW.jsonl`, the third game). Until that night the client's Expert was a bare `RefereeBot()` (reply width 4, 1,000 nodes), a configuration no simulation measures; it now comes from `make_bot("referee")` like every benchmark.
 
 - **Taipan fizzled** (action 33): Taipan on 4,2 with no adjacent enemy, then Wolf on 3,2. Wolf on 4,2 then Taipan on 3,2 marks his Python (8). The benchmarked RefereeBot finds that line in 4 of 4 seeds; the web configuration didn't. The hand eval scores a pending delayed removal the same whatever it targets (marking the Python and marking a Raven both evaluate -1.9), so it can't tell a good Taipan from a poor one.
-- **Lemming on its own Pestis** (action 23): not a misplay. With the bot's hand in view (two Tigers, a Polar Bear, two Elephants and Brutus it couldn't afford, two Lemmings) Martin judged burying Pestis for three Lemmings the best play. RefereeBot picks it in 4 of 4 seeds; the round-3 network mostly plays Lemming on 4,3 instead.
+- **Lemming on its own Pestis** (action 23): not a misplay. With the bot's hand in view (two Tigers, a Polar Bear, two Elephants and Brutus it couldn't afford, two Lemmings) Martin accepts both burying Pestis for three Lemmings and Lemming on 4,3 then drawing. RefereeBot plays the first in 4 of 4 seeds, the round-3 network mostly the second.
 
-The Taipan position isn't frozen as a puzzle yet; the Lemming one is a candidate guard puzzle (a move the bot already gets right).
+The Taipan position isn't frozen as a puzzle yet; the Lemming one is a candidate puzzle accepting either Lemming line.
 
 ## Throughput
 
