@@ -283,7 +283,8 @@
 .game .prompt .skip:hover { background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; filter: brightness(1.2); }
 /* A card's question: one line at the top centre, under the opponent's hand, the card's name then its rule; named options under it. */
 .game .prompt:not(.mull) { left: 50%; top: 60px; width: auto; max-width: 900px; transform: translateX(-50%); padding: 9px 18px; text-align: center; white-space: nowrap; }
-.game .prompt:not(.mull) .line { display: flex; align-items: baseline; justify-content: center; gap: 10px; }
+.game .prompt:not(.mull) .line { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.game .prompt:not(.mull) .line .skip { height: 34px; margin-left: 6px; cursor: pointer; }
 .game .prompt:not(.mull) b { display: inline; margin: 0; font-size: 19px; } .game .prompt:not(.mull) p { margin: 0; font-size: 17px; }
 .game .prompt:not(.mull) .btns { justify-content: center; margin-top: 8px; }
 .game .prompt.mull { left: 50%; top: 250px; width: 360px; margin-left: -180px; padding: 20px 22px; text-align: center; }
