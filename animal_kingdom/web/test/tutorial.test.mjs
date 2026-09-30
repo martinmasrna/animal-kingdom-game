@@ -24,7 +24,7 @@ test('the first lessons walk the first turn, ringing every place the rules allow
 });
 
 test('the Wolf goes on the food region the first animals started, wherever that is', () => {
-  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards'].forEach(id => t.seen.add(id));
+  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'patch'].forEach(id => t.seen.add(id));
   const place = { dire_wolf: [['cr', '1,1'], ['cr', '2,2'], ['cr', '2,3']] }, hand = [{ id: 'dire_wolf' }];
   const upper = current(view({ round: 2, hand, board: { '1,2': u('lion', 'A'), '1,3': u('cape_buffalo', 'A') }, legal: { place, draw: true } }), null, CARDS, t);
   assert.deepEqual(upper.only, { card: 'dire_wolf', picked: true, crs: ['2,2', '2,3'] });

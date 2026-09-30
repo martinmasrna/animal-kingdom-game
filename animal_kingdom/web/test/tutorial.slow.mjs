@@ -62,7 +62,7 @@ test('a new player learns the game in the tutorial and wins it', { timeout: 3000
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/${seen.length + 1}-end.png` });
   assert.match(await page.$eval('#endov', e => e.textContent), /Victory/);
   const byDen = await page.evaluate(() => window.__ak().V.game.result.reason === 'hq_capture');   // a food win never needs the den lesson
-  for (const id of ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'lion', 'lion2', 'buffalo', 'watch', 'wolf', 'draw', 'actions', 'food', 'cover', ...(byDen ? ['den'] : [])])
+  for (const id of ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'lion', 'lion2', 'buffalo', 'watch', 'patch', 'wolf', 'draw', 'actions', 'food', 'cover', ...(byDen ? ['den'] : [])])
     assert.ok(seen.includes(id), `lesson ${id} came up (${seen})`);
   await page.click('.endbox .play');
   await page.waitForSelector('.home .bar:not(.first)');   // home, with the full piece: the tutorial counts as learned
