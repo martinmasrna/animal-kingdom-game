@@ -705,12 +705,8 @@ def _op_remove_choice(state, step):
     options = step["options"]
     if not options:
         return None
-    if "choice" not in step:
-        if len(options) == 1:
-            step["choice"] = options[0]
-        else:
-            return PendingRequest("choice", step["chooser"], optional=step.get("optional", False),
-                                  options=options)
+    if "choice" not in step:   # asked even with one target: the player clicks what the Roar hits
+        return PendingRequest("choice", step["chooser"], optional=step.get("optional", False), options=options)
     chosen = step["choice"]
     if chosen == SKIP:
         return None
@@ -1149,11 +1145,8 @@ def _op_venom(state, step):
     bitten unit, not on the snake (rules §9.1 exception): it resolves even if the Taipan is gone
     or the bitten unit is buried, and is cancelled only if the bitten unit leaves the board."""
     options = step["options"]
-    if "choice" not in step:
-        if len(options) == 1:
-            step["choice"] = options[0]
-        else:
-            return PendingRequest("choice", step["chooser"], options=options)
+    if "choice" not in step:   # asked even with one target
+        return PendingRequest("choice", step["chooser"], options=options)
     target = state.top_unit(step["choice"])
     if target is None:
         return None
@@ -1552,12 +1545,8 @@ def _pestis_place(state, unit, cr):
 
 
 def _op_pestis_wipe(state, step):
-    if "choice" not in step:
-        opts = step["options"]
-        if len(opts) == 1:
-            step["choice"] = opts[0]
-        else:
-            return PendingRequest("choice", step["chooser"], options=opts)
+    if "choice" not in step:   # asked even with one target
+        return PendingRequest("choice", step["chooser"], options=step["options"])
     target = step["choice"]
     # Remove the entire stack under the enemy, both players' units, top-down. A buried
     # Armor unit is skipped in place, not a shield: everything else is still wiped around it.
@@ -1597,12 +1586,8 @@ def _skunk_place(state, unit, cr):
 
 
 def _op_skunk_bounce(state, step):
-    if "choice" not in step:
-        opts = step["options"]
-        if len(opts) == 1:
-            step["choice"] = opts[0]
-        else:
-            return PendingRequest("choice", step["chooser"], options=opts)
+    if "choice" not in step:   # asked even with one target
+        return PendingRequest("choice", step["chooser"], options=step["options"])
     top = state.top_unit(step["choice"])
     if top is not None:                                  # locked through the owner's next turn (F4)
         _bounce(state, step["choice"], top, lock_until=state.turn_counter + 2)

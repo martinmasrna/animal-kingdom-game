@@ -133,7 +133,7 @@ export const LESSONS_2 = [
   { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), only: c => ({ card: 'squirrel', crs: c.safe.length ? c.safe : c.empty('squirrel') }), at: { rings: true },
     text: { pick: 'Click the Squirrel.', place: 'Now play it.' } },
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
-    text: 'Your opponent has an Eagle too! It flew over and covered your Squirrel. Your Squirrel isn\'t gone. It waits underneath.' },
+    text: 'Your opponent has an Eagle too! It flew over and covered your Squirrel. But your Squirrel isn\'t gone, it\'s just waiting underneath the Eagle.' },
   explain('mambainfo', 'black_mamba', c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
     'The Black Mamba\'s Roar removes an enemy next to it with strength 5 or less, like that Eagle.'),
   { id: 'mamba', when: c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,

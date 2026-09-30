@@ -23,7 +23,7 @@ from animal_kingdom.engine.actions import ChoiceAction, PlaceAction
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.effects import gain_food
 
-from ._helpers import make_state, put
+from ._helpers import apply_click, make_state, put
 
 
 # ------------------------------------------------------------------ King Theron (new cap)
@@ -67,7 +67,7 @@ def test_eon_capped_fires_once_per_turn_across_multiple_events():
     put(s, "1,2", "mouse", "A")             # connection anchor
     put(s, "2,1", "mouse", "B")
     put(s, "2,1", "rat", "B")               # same crossroad, same owner: stacks freely
-    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))  # the only adjacent enemy: "2,1"
+    apply_click(s, PlaceAction("pestis", ("cr", "2,2")))  # the only adjacent enemy: "2,1"
     assert s.food["A"] == cfg.eon_food      # two remove events fired; only the first paid out
 
 

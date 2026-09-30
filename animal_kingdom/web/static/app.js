@@ -875,7 +875,7 @@ function drawEnd() {
     // a lesson's end: lesson 1 leads on to lesson 2, lesson 2 to a real match; a loss offers the same lesson again
     const lesson = lessonOf(V), won = w === you;
     if (won) store(lesson === 1 ? 'ak:lesson' : 'ak:learned', '1');
-    const next = !won ? '' : lesson === 1 ? '<div class="next">One more lesson to go.</div>' : '<div class="next">You\'re ready! Pick a deck and take on a real opponent.</div>';
+    const next = !won ? '' : lesson === 1 ? '<div class="next">One more lesson to go.</div>' : '<div class="next">You\'re ready! Now play a real match with the Cats deck.</div>';
     const go = !won ? `<a class="slab" href="#/">Menu</a><button class="play" id="again">Try again</button>`   // no See the board in a lesson
       : lesson === 1 ? `<button class="play" id="nextlesson">Next lesson</button>` : `<button class="play" id="firstmatch">Play a match</button>`;
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}.</div>${next}<div class="btns">${go}</div></div>`;

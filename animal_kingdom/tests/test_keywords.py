@@ -13,7 +13,7 @@ from __future__ import annotations
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import PlaceAction
 
-from ._helpers import make_state, put
+from ._helpers import apply_click, make_state, put
 
 
 def _ids_at(state, cr):
@@ -84,7 +84,7 @@ def test_pestis_wipes_around_an_armor_unit_not_stopping_at_it():
     put(s, "2,2", "mouse", "B")                           # bottom: should die
     put(s, "2,2", "methuselah", "B")                        # middle: Armor, survives
     put(s, "2,2", "rat", "B")                             # top: should die
-    rules.apply_action(s, PlaceAction("pestis", ("cr", "1,2")))
+    apply_click(s, PlaceAction("pestis", ("cr", "1,2")))
     assert _ids_at(s, "2,2") == ["methuselah"]              # alone where the stack was
     assert "mouse" in s.remove_pile and "rat" in s.remove_pile
 

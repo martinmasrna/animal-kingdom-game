@@ -7,7 +7,7 @@ GameState on it and place units directly, so each test reads as one explicit sce
 from __future__ import annotations
 
 from animal_kingdom.engine import rules
-from animal_kingdom.engine.actions import PlaceAction
+from animal_kingdom.engine.actions import SKIP, ChoiceAction, PlaceAction
 from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.maps import load_map
@@ -39,3 +39,10 @@ def hand_ids(state, player):
 def place_targets(state):
     return {a.target[1] for a in rules.legal_actions(state)
             if isinstance(a, PlaceAction) and a.target[0] == "cr"}
+
+
+def apply_click(state, action):
+    """Apply an action, then click a lone target the way a player would (a Roar with one target still asks)."""
+    rules.apply_action(state, action)
+    while state.pending and state.pending.get("options") and len([o for o in state.pending["options"] if o != SKIP]) == 1:
+        rules.apply_action(state, ChoiceAction(next(o for o in state.pending["options"] if o != SKIP)))

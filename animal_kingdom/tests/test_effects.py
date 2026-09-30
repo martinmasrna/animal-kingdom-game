@@ -14,7 +14,7 @@ from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import UnitInstance
 from animal_kingdom.engine.strength import card_strength, effective_strength, placement_strength
 
-from ._helpers import hand_ids, make_state, place_targets, put
+from ._helpers import apply_click, hand_ids, make_state, place_targets, put
 
 CFG = Config.default()
 CARDS = load_cards()
@@ -132,7 +132,7 @@ def test_hyena_removal_scales_with_canine_count():
     put(s, "1,2", "dog", "A")
     put(s, "3,2", "jerboa", "B")                             # STR 2 enemy adjacent to 2,2
     put(s, "2,3", "lion", "B")                               # STR 7 enemy adjacent to 2,2
-    rules.apply_action(s, PlaceAction("hyena", ("cr", "2,2")))
+    apply_click(s, PlaceAction("hyena", ("cr", "2,2")))
     assert s.owner_of("3,2") is None                         # 2 <= 2 Canines: removed
     assert s.owner_of("2,3") == "B"                          # 7 > 2: survives
 
@@ -200,7 +200,7 @@ def test_gray_wolf_removes_enemy_up_to_its_buffed_strength():
     put(s, "1,2", "lion", "A")                           # connects 2,2
     put(s, "3,2", "snow_leopard", "B")                   # enemy str 6, adjacent to 2,2
     put(s, "2,3", "lion", "B")                            # enemy str 7, adjacent to 2,2
-    rules.apply_action(s, PlaceAction("gray_wolf", ("cr", "2,2")))
+    apply_click(s, PlaceAction("gray_wolf", ("cr", "2,2")))
     assert s.owner_of("3,2") is None                     # 6 <= 6 removed
     assert s.owner_of("2,3") == "B"                       # 7 > 6 survives
 
@@ -743,14 +743,14 @@ def test_jaguar_and_serval_respect_strength_bounds():
     jag = make_state(hands={"A": ["jaguar"]})
     put(jag, "1,2", "lion", "A")
     put(jag, "3,2", "unnamed_canine", "B")                      # str 3 <= 5
-    rules.apply_action(jag, PlaceAction("jaguar", ("cr", "2,2")))
+    apply_click(jag, PlaceAction("jaguar", ("cr", "2,2")))
     assert jag.owner_of("3,2") is None
 
     srv = make_state(hands={"A": ["serval"]})
     put(srv, "1,2", "lion", "A")
     put(srv, "3,2", "lion", "B")                        # str 7 >= 6 (Serval's only legal target)
     put(srv, "2,3", "unnamed_canine", "B")                      # str 3 < 6: survives
-    rules.apply_action(srv, PlaceAction("serval", ("cr", "2,2")))
+    apply_click(srv, PlaceAction("serval", ("cr", "2,2")))
     assert srv.owner_of("3,2") is None and srv.owner_of("2,3") == "B"
 
 
@@ -759,14 +759,14 @@ def test_soldier_ant_removal_gated_on_four_colony():
     put(few, "1,2", "worker_ant", "A")
     put(few, "1,3", "worker_ant", "A")
     put(few, "3,2", "unnamed_canine", "B")
-    rules.apply_action(few, PlaceAction("soldier_ant", ("cr", "2,2")))   # only 3 Colony incl. Soldier
+    apply_click(few, PlaceAction("soldier_ant", ("cr", "2,2")))   # only 3 Colony incl. Soldier
     assert few.owner_of("3,2") == "B"
 
     many = make_state(hands={"A": ["soldier_ant"]})
     for cr in ("1,1", "1,2", "1,3"):
         put(many, cr, "worker_ant", "A")               # 3 + Soldier = 4 Colony
     put(many, "3,2", "unnamed_canine", "B")
-    rules.apply_action(many, PlaceAction("soldier_ant", ("cr", "2,2")))
+    apply_click(many, PlaceAction("soldier_ant", ("cr", "2,2")))
     assert many.owner_of("3,2") is None
 
 
@@ -827,7 +827,7 @@ def test_pestis_wipes_an_adjacent_enemy_and_everything_under_it():
     put(s, "1,2", "caracal", "A")
     put(s, "3,2", "lion", "B")                          # bottom
     put(s, "3,2", "unnamed_canine", "B")                        # top (same owner stacks freely)
-    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))  # the only enemy target: 3,2
+    apply_click(s, PlaceAction("pestis", ("cr", "2,2")))  # the only enemy target: 3,2
     assert s.board.get("3,2") is None
     assert s.remove_pile.count("lion") == 1 and s.remove_pile.count("unnamed_canine") == 1
 
@@ -853,7 +853,7 @@ def test_skunk_bounces_and_locks_the_card():
     s = make_state(current="A", hands={"A": ["skunk"]})
     put(s, "1,2", "caracal", "A")
     put(s, "3,2", "unnamed_canine", "B")
-    rules.apply_action(s, PlaceAction("skunk", ("cr", "2,2")))
+    apply_click(s, PlaceAction("skunk", ("cr", "2,2")))
     fox = next(u for u in s.hands["B"] if u.card_id == "unnamed_canine")
     assert fox.locked_until_turn == 2                # locked through B's next turn
     assert "unnamed_canine" not in {a.card_id for a in rules.legal_actions(s) if isinstance(a, PlaceAction)}
@@ -986,9 +986,9 @@ def test_viper_permanently_shrinks_an_adjacent_enemy_so_a_bird_can_cover_it():
     s = make_state(hands={"A": ["viper", "eagle"]})
     put(s, "2,1", "lion", "B")                            # a 7: Eagle (5) can't cover it
     assert PlaceAction("eagle", ("cr", "2,1")) not in rules.legal_actions(s)
-    rules.apply_action(s, PlaceAction("viper", ("cr", "1,1")))        # bites the Lion: 7 -> 4
+    apply_click(s, PlaceAction("viper", ("cr", "1,1")))        # bites the Lion: 7 -> 4
     assert effective_strength(s, s.top_unit("2,1")) == 4
-    rules.apply_action(s, PlaceAction("eagle", ("cr", "2,1")))
+    apply_click(s, PlaceAction("eagle", ("cr", "2,1")))
     assert s.owner_of("2,1") == "A"
 
 
@@ -996,26 +996,26 @@ def test_taipan_venom_removes_the_bitten_unit_next_turn_even_if_buried_or_the_ta
     s = make_state(hands={"A": ["taipan"], "B": ["tiger"]},
                    decks={"A": ["eagle"] * 8, "B": ["eagle"] * 8})
     put(s, "2,1", "lion", "B")
-    rules.apply_action(s, PlaceAction("taipan", ("cr", "1,1")))  # bites the Lion at 2,1
+    apply_click(s, PlaceAction("taipan", ("cr", "1,1")))  # bites the Lion at 2,1
     lion = s.top_unit("2,1")
     assert lion.card_id == "lion"
-    rules.apply_action(s, DrawAction())                   # A ends the turn
+    apply_click(s, DrawAction())                   # A ends the turn
     put(s, "1,1", "lion", "B")                            # the Taipan is covered...
     put(s, "2,1", "tiger", "B")                           # ...and the Lion buried under B's own Tiger
-    rules.apply_action(s, DrawAction()); rules.apply_action(s, DrawAction())   # B's turn
+    apply_click(s, DrawAction()); apply_click(s, DrawAction())   # B's turn
     assert "lion" in s.remove_pile and s.top_unit("2,1").card_id == "tiger"
 
 
 def test_rat_removes_any_adjacent_enemy_then_a_random_hand_card_and_works_on_an_empty_hand():
     s = make_state(hands={"A": ["rat", "lion", "eagle"]})
     put(s, "2,1", "king_theron", "B")                     # an 8: Rat reaches any strength
-    rules.apply_action(s, PlaceAction("rat", ("cr", "1,1")))
+    apply_click(s, PlaceAction("rat", ("cr", "1,1")))
     assert s.top_unit("2,1") is None and "king_theron" in s.remove_pile
     assert len(s.hands["A"]) == 1                         # one of Lion / Eagle went, at random
 
     s2 = make_state(hands={"A": ["rat"]})
     put(s2, "2,1", "king_theron", "B")
-    rules.apply_action(s2, PlaceAction("rat", ("cr", "1,1")))    # empty hand: nothing to pay
+    apply_click(s2, PlaceAction("rat", ("cr", "1,1")))    # empty hand: nothing to pay
     assert s2.top_unit("2,1") is None
 
 
@@ -1062,10 +1062,10 @@ def test_magpie_takes_a_random_enemy_card_then_discards_one_of_yours():
 def test_taipan_removes_an_adjacent_enemy_of_strength_5_or_less():
     s = make_state(hands={"A": ["black_mamba"]})
     put(s, "2,1", "jaguar", "B")                          # a 5: in reach
-    rules.apply_action(s, PlaceAction("black_mamba", ("cr", "1,1")))
+    apply_click(s, PlaceAction("black_mamba", ("cr", "1,1")))
     assert "jaguar" in s.remove_pile
 
     s2 = make_state(hands={"A": ["black_mamba"]})
     put(s2, "2,1", "cougar", "B")                         # a 6: out of reach
-    rules.apply_action(s2, PlaceAction("black_mamba", ("cr", "1,1")))
+    apply_click(s2, PlaceAction("black_mamba", ("cr", "1,1")))
     assert s2.top_unit("2,1").card_id == "cougar"
