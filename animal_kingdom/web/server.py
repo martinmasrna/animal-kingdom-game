@@ -312,7 +312,7 @@ def record_match(match: Match) -> None:
         try:
             profiles.record(seat.profile, f"{match.id}-{match.rematches}", kind=kind, my_deck=deck(p),
                             opp=f"Bot · {other.bot.capitalize()}" if other.is_bot else other.name,
-                            opp_deck=deck(o), won=score[p], lost=score[o], seat=p,
+                            opp_deck=deck(o) if other.is_bot else "", won=score[p], lost=score[o], seat=p,   # a person's deck name is theirs
                             my_cover="" if p == rotating else deck_cover(seat), opp_cover="" if o == rotating else deck_cover(other))
         except Exception:
             log.exception("could not record match %s in a history", match.id)

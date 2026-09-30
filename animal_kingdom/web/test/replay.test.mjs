@@ -8,9 +8,10 @@ let server, browser, page, views;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const HISTORY = [
   { match: 'AAA-0', ended: 1790700000, kind: 'bot', my_deck: 'Cats', opp: 'Bot · Expert', opp_deck: 'Ramp', won: 1, lost: 0, my_cover: 'king_theron', opp_cover: 'borealis' },
+  { match: 'CCC-0', ended: 1790650000, kind: 'friend', my_deck: 'Cats', opp: 'Ana#1234', opp_deck: 'Her secret deck', won: 1, lost: 0, my_cover: 'king_theron', opp_cover: 'borealis' },
   { match: 'BBB-0', ended: 1790600000, kind: 'bot', my_deck: 'Egg', opp: 'Bot · Normal', opp_deck: 'Cats', won: 0, lost: 1, my_cover: '', opp_cover: '' },
 ];
-const RECORDS = [{ deck: 'Cats', cover: 'king_theron', won: 1, lost: 0 }, { deck: 'Egg', cover: '', won: 0, lost: 1 }];
+const RECORDS = [{ deck: 'Cats', cover: 'king_theron', won: 2, lost: 0 }, { deck: 'Egg', cover: '', won: 0, lost: 1 }];
 
 before(async () => {
   server = await startServer(); browser = await openBrowser();
@@ -38,14 +39,16 @@ before(async () => {
 after(async () => { await browser?.close(); server?.stop(); });
 
 test('the profile lists each deck with its record and each match with both decks; a deck filters the matches', async () => {
-  assert.deepEqual(await page.$$eval('.prof .rec', els => els.map(e => `${e.querySelector('b').textContent} ${e.querySelector('.wl').textContent}`)), ['Cats 1–0', 'Egg 0–1']);
-  assert.deepEqual(await page.$$eval('.prof .hr b', els => els.map(e => e.textContent)), ['Won', 'Lost']);
+  assert.deepEqual(await page.$$eval('.prof .rec', els => els.map(e => `${e.querySelector('b').textContent} ${e.querySelector('.wl').textContent}`)), ['Cats 2–0', 'Egg 0–1']);
+  assert.deepEqual(await page.$$eval('.prof .hr b', els => els.map(e => e.textContent)), ['Won', 'Won', 'Lost']);
+  assert.deepEqual(await page.$$eval('.prof .hr:nth-child(2) .dk', els => els.map(e => e.textContent)), ['Cats', 'Ana#1234'], 'a person, not their deck\'s name');
+  assert.ok(!(await page.$eval('.prof .hlist', e => e.textContent.includes('Her secret deck'))));
   assert.equal(await page.$$eval('.prof .hr:first-child .pm .face', els => els.length), 2, 'both decks as pieces');
   assert.equal(await page.$$eval('.prof .hr:last-child .pm .face', els => els.length), 2, 'a match from before covers finds the starters\' faces');
   await page.click('.prof .rec[data-deck="Egg"]');
   assert.deepEqual(await page.$$eval('.prof .hr .dk', els => els.map(e => e.textContent)), ['Egg', 'Cats']);
   await page.click('.prof .rec[data-deck="Egg"]');
-  assert.equal(await page.$$eval('.prof .hr', els => els.length), 2, 'clicked again, the filter clears');
+  assert.equal(await page.$$eval('.prof .hr', els => els.length), 3, 'clicked again, the filter clears');
 });
 
 test('a match that can no longer be replayed says so and stays on the profile', async () => {

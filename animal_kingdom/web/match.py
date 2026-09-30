@@ -427,8 +427,9 @@ class Match:
         opp = other_player(s)
         v = {
             "id": self.id, "you": s, "phase": self.phase, "version": self.version,
-            "seats": {p: {"name": seat.name, "bot": seat.bot, "deck": seat.deck, "ready": seat.ready,
-                          "deckName": DECK_NAMES.get(seat.deck, seat.deck)}
+            # a seat's deck by name only for you or a bot: a person's deck name is theirs (their list is open, by rule)
+            "seats": {p: {"name": seat.name, "bot": seat.bot, "ready": seat.ready,
+                          **({"deck": seat.deck, "deckName": DECK_NAMES.get(seat.deck, seat.deck)} if p == s or seat.is_bot else {})}
                       for p, seat in self.seats.items()},
             "results": [{k: r[k] for k in ("winner", "reason", "turns")} for r in self.results],
             "score": self.score(),

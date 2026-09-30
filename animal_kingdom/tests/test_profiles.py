@@ -114,6 +114,23 @@ def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path)
     assert replay.game_views(m.last_log, "A", {"A": "Martin#" + p["tag"], "B": "Bot"}) == views
 
 
+def test_a_match_against_a_person_keeps_their_deck_name_private(monkeypatch):
+    from animal_kingdom.engine.state import Result
+    db = Profiles(":memory:")
+    monkeypatch.setattr(server, "profiles", db)
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    _, p = db.create("Martin")
+    m = Match("M4", Seat("ta", "Martin#1", deck="cats_midrange", profile=p["id"]))
+    m.join(Seat("tb", "Ana#1234", deck="ramp"))
+    m.on_match_end = server.record_match
+    m._start_game()
+    m.state.result = Result("A", "food")
+    m._check_end()
+    (h,) = db.history(p["id"])
+    assert (h["kind"], h["opp"], h["opp_deck"], h["opp_cover"]) == ("friend", "Ana#1234", "", "borealis")
+    assert "deckName" not in m.view("A")["seats"]["B"] and m.view("A")["seats"]["A"]["deckName"] == "Cats"
+
+
 def test_the_gauntlet_stays_out_of_the_history(monkeypatch):
     db = Profiles(":memory:")
     monkeypatch.setattr(server, "profiles", db)

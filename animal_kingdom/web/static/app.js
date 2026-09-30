@@ -239,10 +239,11 @@ function profileScreen() {
     return `<div class="dtile rec${ui.histDeck === r.deck ? ' on' : ''}" data-deck="${esc(r.deck)}" style="${f ? stripArt(f, 284, 56, .7) : ''}">
     <b>${esc(r.deck)}</b><span class="wl"><i>${r.won}</i>–<i>${r.lost}</i></span></div>`; }).join('');
   const shown = ME.history.filter(h => !ui.histDeck || h.my_deck === ui.histDeck);
+  const bot = h => h.kind !== 'friend';   // a bot's deck has a name you know; a person's deck name is theirs, so the row names the person
   const result = h => h.won > h.lost ? 'Won' : h.won < h.lost ? 'Lost' : 'Draw';   // a match is one game (older best-of-3s by their result)
   const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
-    ${piece(deckFace(h.my_cover, h.my_deck), 'a')}<span class="dk">${esc(h.my_deck)}</span>${piece(deckFace(h.opp_cover, h.opp_deck), 'b')}<span class="dk">${esc(h.opp_deck)}</span>
-    <span class="o">${esc(h.opp)}</span><span class="d">${when(h.ended)}</span></div>`).join('');
+    ${piece(deckFace(h.my_cover, h.my_deck), 'a')}<span class="dk">${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck), 'b')}<span class="dk">${esc(h.opp_deck)}</span>
+    <span class="o">${esc(h.opp)}</span>` : `${piece(h.opp_cover, 'b')}<span class="dk">${esc(h.opp)}</span><span></span>`}<span class="d">${when(h.ended)}</span></div>`).join('');
   const sect = (title, body) => `<div class="sect"><h4>${title}</h4>${body}</div>`;
   const account = ME.logins.length
     ? sect('Account', `${ME.logins.map(l => `<div class="login">${PROVIDER[l.provider]} · ${esc(l.label)}</div>`).join('')}
