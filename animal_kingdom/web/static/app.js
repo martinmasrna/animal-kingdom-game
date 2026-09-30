@@ -416,7 +416,9 @@ function wireTips(root) {
   if (!tip) { tip = document.createElement('div'); tip.id = 'tip'; tip.className = 'tip'; document.body.appendChild(tip); }
   root.addEventListener('mouseover', e => { const t = e.target.closest('[data-tip]'); if (!t) { tip.style.display = 'none'; return; }
     tip.textContent = t.dataset.tip; tip.style.display = 'block'; });
-  root.addEventListener('mousemove', e => { tip.style.left = (e.clientX + 14) + 'px'; tip.style.top = (e.clientY + 16) + 'px'; });
+  // beside the pointer on its right, or on its left where the window has no room (the flag, the replay's controls)
+  root.addEventListener('mousemove', e => { const w = tip.offsetWidth, right = e.clientX + 14 + w <= innerWidth - 8;
+    tip.style.left = (right ? e.clientX + 14 : e.clientX - 14 - w) + 'px'; tip.style.top = (e.clientY + 16) + 'px'; });
   root.addEventListener('mouseleave', () => tip.style.display = 'none');
 }
 function gameScreen() {
@@ -484,6 +486,9 @@ function drawGame() {
   $('series').innerHTML = V.gauntlet ? `Game ${gameNo} of ${V.gauntlet.total} · Turn ${G.round}` : `Turn ${G.round}`;
   drawHistory(G); drawLists(G); showPanel();
 
+  // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.
+  { const A0 = ui.anim, l0 = G.history[G.history.length - 1];
+    if (A0 && G.history.length > A0.hist && l0 && l0.seat === them && l0.kind === 'place') ui.revealEnd = Date.now() + 1050; }
   // The opponent's hand: one card back each, centred across the board from yours; in a replay their cards, face up (the eye hides them).
   const faces = RP.views.length && RP.eye && G.oppHand;
   const nb = G.handCount[them], step = faces ? Math.min(72, 504 / Math.max(1, nb - 1)) : 52,   // face up, a gap between cards as in your hand; a full hand (8) stays clear of the replay's controls
@@ -506,7 +511,7 @@ function drawGame() {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!one || one.iid === h.iid), pick = d.handPick.has(h.iid);
     const hint = can && d.lesson && d.lesson.only && !ui.sel;   // the card the tutorial asks for
     const talking = d.lesson && d.lesson.next || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
-    const shown = d.lesson && d.lesson.read === h.id;   // the card the coach is explaining, shown large as if hovered
+    const shown = d.lesson && d.lesson.read === h.id && Date.now() >= (ui.revealEnd || 0);   // after the opponent's card has landed   // the card the coach is explaining, shown large as if hovered
     const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (one || G.hand.find(x => x.id === ui.sel)).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
@@ -597,7 +602,9 @@ function placeCoach(el, L, rings = []) {
     const rs = rings.map(crossroadAt);   // this frame's rings, before the board redraws
     const xs = rs.map(r => r[0]), ys = rs.map(r => r[1]), cy = (Math.min(...ys) + Math.max(...ys)) / 2;
     const right = Math.max(...xs) + 78;
-    [x, y, side] = right + COACH_W < STAGE.w - 16 ? [right, cy, 'group'] : [Math.min(...xs) - 78 - COACH_W, cy, 'group'];
+    const left = Math.min(...xs) - 78 - COACH_W;
+    [x, y, side] = right + COACH_W < STAGE.w - 16 ? [right, cy, 'group'] : left >= 16 ? [left, cy, 'group']
+      : [STAGE.w / 2, 590, 'above'];   // circles across the whole board (Flight): above the hand, pointing at the picked card
   }
   else if (a.gem) [x, y, side] = a.gem === 'A' ? [150, 122, 'right'] : [STAGE.w - 150, 122, 'left'];   // a den's food gem, on its crown
   else if (a.hand) [x, y, side] = [STAGE.w / 2, 590, 'above'];
@@ -614,6 +621,7 @@ function placeCoach(el, L, rings = []) {
     : side === 'right' ? `left:${x + 78}px;top:${y}px` : `left:${x - 78 - COACH_W}px;top:${y}px`;
   // while the opponent's card is shown large in the middle, the coach waits for it to land, then fades in
   const wait = Math.max(0, (ui.revealEnd || 0) - Date.now());
+  if (wait && L.read) { clearTimeout(placeCoach.t); placeCoach.t = setTimeout(() => { if (screen === 'game') drawGame(); }, wait + 20); }   // then show the card large
   document.getElementById('board').classList.toggle('pulse', !!a.rings);
   el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
   el.dataset.iid = card && side === 'above' ? card.dataset.iid : '';   // hovering that card lifts the coach above it (wireCoachHover)

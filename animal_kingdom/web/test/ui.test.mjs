@@ -129,4 +129,13 @@ test('a hover label in the game does not stay on screen after leaving', async ()
   await p.close();
 });
 
+test('a hover label by the window\'s right edge opens to the left, on screen', async () => {
+  const b = await (await page.$('#menubtn')).boundingBox();
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await page.mouse.move(b.x + b.width / 2 + 1, b.y + b.height / 2); await wait(60);
+  const [text, right, left] = await page.$eval('#tip', e => { const r = e.getBoundingClientRect(); return [e.textContent, r.right, r.left]; });
+  assert.equal(text, 'Concede');
+  assert.ok(right <= await page.evaluate(() => innerWidth) && left < b.x, 'left of the flag, inside the window');
+  await page.mouse.move(2, 2);
+});
+
 test('no page errors', () => assert.deepEqual(page.errors, []));
