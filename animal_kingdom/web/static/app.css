@@ -24,7 +24,6 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 /* The key art, the match on its ground. */
 .home { background: #0e0d0b var(--keyart) center / cover; }
 .home::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(10,9,8,.3), rgba(10,9,8,0) 30%, rgba(10,9,8,0) 60%, rgba(10,9,8,.55)); }
-.home .title { padding-left: 8px; font: 800 34px/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; text-shadow: 0 2px 8px rgba(0,0,0,.6); pointer-events: none; }
 /* The granite piece: your deck | the opponent, Play under them. */
 .home .bar, .home .chooser { position: absolute; box-sizing: border-box; padding: 10px; border-radius: 16px;
   background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 16px 40px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,245,230,.12); }
@@ -39,19 +38,16 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .home .chev { position: absolute; right: 12px; top: 50%; width: 14px; height: 14px; margin-top: -7px; z-index: 2; filter: drop-shadow(0 1px 2px #000);
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0d6c6' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 15l6-6 6 6'/%3E%3C/svg%3E") center / contain no-repeat; }
 .home .pick.open .chev { transform: rotate(180deg); }
-/* The places beyond the match live in a granite bar along the top, the collection's material and its 72px top row:
-   the game's name on the left, the places on the right (you among them, as Profile); its lower edge softens 10px into the painting, which starts just under it. */
-.home { background-position: center 36px; }
-.home .top { position: absolute; left: 0; right: 0; top: 0; z-index: 5; height: 82px; box-sizing: border-box; padding: 0 16px 10px; display: flex; align-items: center; gap: 10px;
-  background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; -webkit-mask-image: linear-gradient(#000 72px, transparent); mask-image: linear-gradient(#000 72px, transparent); }
+/* The places beyond the match stand together on one granite piece in the top-right corner (the painting keeps the whole screen). */
+.home .top { position: absolute; right: 16px; top: 16px; z-index: 5; box-sizing: border-box; padding: 10px; display: flex; gap: 10px; border-radius: 16px;
+  background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 16px 40px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,245,230,.12); }
 .home .top .backbtn { width: auto; height: 44px; padding: 0 18px; }
-.home .top .sp { flex: 1; }
 .home .bar.first { grid-template-rows: 84px 44px; }   /* a new player's piece: learn by playing, or skip to the full piece */
 .home .bar.first .slab { grid-column: 1 / 3; height: 44px; font-size: 16px; }
 /* A chooser stands on the piece, on its edges: your decks beside the list of the one under the pointer; or the opponent's settings over its slot. */
 .home .chooser { bottom: 214px; display: grid; gap: 10px; }
-.home .chooser.decks { left: 50%; transform: translateX(-50%); width: 630px; max-height: calc(100vh - 302px); display: flex; }
-.home .chooser.decks > * { flex: 1 1 0; min-width: 0; }   /* tall enough for a starter deck's list; the title steps aside meanwhile */
+.home .chooser.decks { left: 50%; transform: translateX(-50%); width: 630px; max-height: calc(100vh - 230px); display: flex; }
+.home .chooser.decks > * { flex: 1 1 0; min-width: 0; }   /* tall enough for a starter deck's list */
 .home .chooser .clist { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #4a4540 transparent; }
 .home .chooser .clist > * { flex: none; }
 /* The chosen deck: a thick light rim, the others a step darker. */
