@@ -10,15 +10,17 @@
 //
 // Each lesson stands beside what it talks about: `at` names it (a card in hand, the hand, a crossroad, a region's
 // stone, the deck, End turn, a den, your food gem, the opponent's cards, the middle of the board), directly or from
-// the moment's facts (a card until it is picked, then its crossroad).
-const pickThen = (card, cr) => c => c.sel === card ? { cr } : { card };
+// the moment's facts (beside the rightmost of a picked card's rings).
 
 // Lessons read plain facts of the game view (the player is always seat A here). `c` is:
-//   { G, mine, theirs, choosing, sel, round, at(cr), acts, places, heldR1, roar(id) }
+//   { G, mine, theirs, choosing, sel, round, at(cr), units, hand(id), acts, places, rightmost(id), roar(id),
+//     home (the first food region's corners), homeHeld, homeOpen (its corners a placement can take now) }
 
-const R1 = ['1,1', '1,2', '2,1', '2,2'];   // the +10 region by the player's den the first turns build
 const owner = (G, cr) => { const st = G.board[cr]; return st && st.length ? st[st.length - 1].owner : null; };
-const opening = c => c.mine && c.round === 1 && !c.at('1,2');   // the first turn, before the first animal is placed
+// The first food region is one of the two +10 regions by the player's den, whichever the first animals started (the
+// lower on a tie); its corners are 'c,r' for c in 1-2 and r in its two rows.
+const HOME = [['1,1', '2,1', '1,2', '2,2'], ['1,2', '2,2', '1,3', '2,3']];
+const opening = c => c.mine && c.round === 1 && c.units === 0;   // the first turn, before the first animal is placed
 const talk = { next: true, only: {} };   // an opening step: read, then Next; nothing else can be clicked meanwhile
 
 export const LESSONS = [
@@ -39,26 +41,27 @@ export const LESSONS = [
     text: 'Let\'s place your first animal. Click the Lion.',
     only: { card: 'lion' }, at: { card: 'lion' } },
   { id: 'lion2', when: c => opening(c) && c.sel === 'lion',
-    text: 'Animals stand on crossroads, the sandy circles. Click the circled one next to your den.',
-    only: { card: 'lion', cr: '1,2' }, at: { cr: '1,2' } },
-  { id: 'buffalo', when: c => c.mine && c.round === 1 && c.at('1,2') && !c.at('2,2'),
-    text: 'Now place the Buffalo next to the Lion. Your animals must make a chain back to your den.',
-    only: { card: 'cape_buffalo', cr: '2,2' }, at: pickThen('cape_buffalo', '2,2') },
+    text: 'Animals stand on crossroads, the sandy circles. Your first animal goes next to your den: click one of the circled crossroads.',
+    only: { card: 'lion' }, at: { cr: '1,2' } },
+  { id: 'buffalo', when: c => c.mine && c.round === 1 && c.units === 1,
+    text: 'Now the Buffalo. Animals can only stand next to your den or next to your other animals. Click one of the circles.',
+    only: c => ({ card: 'cape_buffalo', picked: true, crs: c.empty('cape_buffalo') }), at: c => ({ cr: c.rightmost('cape_buffalo') }) },
   { id: 'watch', when: c => c.theirs && c.round === 1, at: { oppcards: true },
     text: 'Now it\'s your opponent\'s turn. Watch where the red animals go.' },
-  { id: 'wolf', when: c => c.mine && c.round === 2 && !c.at('1,1'),
-    text: 'A stone with a number gives food. Stand on all four crossroads around it and you get that food every turn. Place the Wolf on the third one.',
-    only: { card: 'dire_wolf', cr: '1,1' }, at: pickThen('dire_wolf', '1,1') },
-  { id: 'draw', when: c => c.mine && c.round === 2 && c.at('1,1') && c.acts > 0,
+  { id: 'wolf', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'),
+    text: 'A stone with a number gives food. Stand on all four crossroads around it and you get that food every turn. Place the Wolf on a circled crossroad around the +10 stone.',
+    only: c => ({ card: 'dire_wolf', picked: true, crs: c.homeOpen.length ? c.homeOpen : undefined }),
+    at: c => ({ cr: c.homeOpen.length ? c.homeOpen.slice().sort((a, b) => b[0] - a[0])[0] : c.rightmost('dire_wolf') }) },
+  { id: 'draw', when: c => c.mine && c.round === 2 && !c.hand('dire_wolf') && c.acts > 0,
     text: 'You\'re out of cards! Click your deck to draw 2 new ones.',
     only: { deck: true }, at: { deck: true } },
 
   // --- free play: each the first time it comes up ---
   { id: 'actions', when: c => c.mine && c.round === 3, untilAct: true, at: { endturn: true },
     text: 'Each turn you get two moves: place an animal or draw cards. The dots show how many moves are left.' },
-  { id: 'corner', when: c => c.mine && c.round === 3 && !c.heldR1 && !c.at('2,1'), done: c => c.heldR1 || c.round > 3,
-    at: { cr: '2,1' }, text: 'Now you choose! Place an animal on the last crossroad around the +10 stone.' },
-  { id: 'food', when: c => c.heldR1, untilAct: true, at: { stone: '1,1' },
+  { id: 'corner', when: c => c.mine && c.round === 3 && !c.homeHeld && c.homeOpen.length > 0, done: c => c.homeHeld || c.round > 3,
+    at: c => ({ cr: c.homeOpen[0] }), text: 'Now you choose! Place an animal on the last crossroad around the +10 stone.' },
+  { id: 'food', when: c => c.homeHeld, untilAct: true, at: c => ({ stone: c.home[0] }),
     text: 'The +10 stone is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
   { id: 'cover', when: c => c.mine && c.places.some(t => t[0] === 'cr' && owner(c.G, t[1]) === 'B'), untilAct: true,
     at: c => ({ cr: c.places.find(t => t[0] === 'cr' && owner(c.G, t[1]) === 'B')[1] }),
@@ -75,15 +78,25 @@ export const LESSONS = [
 // The facts the lessons read, from the view and the client's selection.
 export function context(V, sel, cards) {
   const G = V.game, places = Object.values((G.legal && G.legal.place) || {}).flat();   // no legal moves off your turn
-  return {
+  const c = {
     G, sel, places, round: G.round, acts: G.actionsLeft,
     mine: V.phase === 'playing' && G.current === V.you && G.toAct === V.you && !G.pending,
     theirs: V.phase === 'playing' && G.current !== V.you,
     choosing: V.phase === 'playing' && G.toAct === V.you && !!G.pending && G.pending.kind !== 'mulligan',
     at: cr => owner(G, cr) === V.you,
-    heldR1: R1.every(cr => owner(G, cr) === V.you),
+    units: Object.keys(G.board).filter(cr => owner(G, cr) === V.you).length,
+    hand: id => G.hand.some(h => h.id === id),
+    // the rightmost crossroad a card can go to now (the coach stands beside it, clear of the others)
+    // the empty crossroads a card can go to now (placing onto your own animal is legal, but only noise while learning)
+    empty: id => ((G.legal && G.legal.place && G.legal.place[id]) || []).filter(t => t[0] === 'cr' && !owner(G, t[1])).map(t => t[1]),
+    // the rightmost of them (the coach stands beside it, clear of the others)
+    rightmost: id => c.empty(id).sort((a, b) => b[0] - a[0])[0],
     roar: id => /(^|\. )Roar:/.test((cards[id] || {}).text || ''),
   };
+  const mineAt = cr => owner(G, cr) === V.you, count = h => h.filter(mineAt).length;
+  const home = count(HOME[1]) > count(HOME[0]) ? HOME[1] : HOME[0];
+  const legal = new Set(Object.values((G.legal && G.legal.place) || {}).flat().filter(t => t[0] === 'cr').map(t => t[1]));
+  return Object.assign(c, { home, homeHeld: HOME.some(h => h.every(mineAt)), homeOpen: home.filter(cr => !mineAt(cr) && legal.has(cr)) });
 }
 
 // The lesson to show now, or null. `seen` holds finished lessons; `shown` when each untilAct lesson first showed
@@ -96,15 +109,17 @@ export function current(V, sel, cards, tut) {
     if (L.done && L.done(c)) { tut.seen.add(L.id); continue; }
     if (!L.when(c)) continue;
     if (L.untilAct && tut.shown[L.id] === undefined) tut.shown[L.id] = n;
-    return { ...L, at: typeof L.at === 'function' ? L.at(c) : L.at };
+    const now = f => typeof f === 'function' ? f(c) : f;   // a lesson's target and gate can depend on the moment
+    return { ...L, at: now(L.at), only: now(L.only) };
   }
   return null;
 }
 
-// Narrow a decision to what the lesson lets happen: only its card and crossroad, only the deck, never End turn.
+// Narrow a decision to what the lesson lets happen: only its card and crossroads, only the deck, never End turn. A
+// `picked` card is already chosen, so its rings show as the lesson speaks (only the first card is picked by hand).
 export function gate(d, only) {
   const places = {};
-  if (only.card && d.places[only.card]) places[only.card] = d.places[only.card].filter(t => !only.cr || (t[0] === 'cr' && t[1] === only.cr));
+  if (only.card && d.places[only.card]) places[only.card] = d.places[only.card].filter(t => !only.crs || (t[0] === 'cr' && only.crs.includes(t[1])));
   d.places = places;
   d.noDraw = !only.deck;
   d.noPass = true;

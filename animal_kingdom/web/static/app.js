@@ -375,6 +375,7 @@ function decision() {
     ui.sel = null;
   } else {
     if (d.lesson && d.lesson.only) gate(d, d.lesson.only);   // a forced lesson lets only its step be taken
+    if (!ui.sel && d.lesson && d.lesson.only && d.lesson.only.picked && d.places[d.lesson.only.card]) ui.sel = d.lesson.only.card;
     if (ui.sel && !d.places[ui.sel]) ui.sel = null;
     const ids = Object.keys(d.places);
     if (!ui.sel && ids.length === 1 && d.pend) ui.sel = ids[0];   // a "play this card" prompt: preselect it
