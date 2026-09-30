@@ -86,8 +86,8 @@ async function boot() {
     if (e.key === 'Escape' && screen === 'profile' && !/INPUT/.test(e.target.tagName)) { location.hash = '#/'; return; }
     if (RP.views.length && screen === 'game' && replayKey(e)) return;
     if (e.key !== 'Escape' || screen !== 'game') return;
-    const menu = document.getElementById('menudrop');
-    if (menu && menu.classList.contains('on')) return menu.classList.remove('on');
+    const ask = document.getElementById('concov');
+    if (ask && ask.classList.contains('on')) return ask.classList.remove('on');
     if (ui.panel) { ui.panel = null; return showPanel(); }
     if (ui.sel) { ui.sel = null; drawGame(); }
   });
@@ -427,8 +427,7 @@ function gameScreen() {
       <div class="abs series" id="series"></div>
       <div class="abs clock" id="clock"></div>
       <div class="abs opphand" id="opphand"></div>
-      <div class="abs menu" id="menubtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg>
-        <div class="abs menudrop" id="menudrop"><a href="#" id="concede">Concede game</a></div></div>
+      <div class="abs menu" id="menubtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/></svg></div>
       <div class="abs hand" id="hand"></div>
       <div class="abs deck" id="deck"></div>
       <div class="abs tbtn" id="tbtn"></div>
@@ -441,27 +440,29 @@ function gameScreen() {
       <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
       <div class="abs rbar" id="rbar"></div>
       <div class="abs recent" id="recent"></div>
-      <div class="endov" id="endov"></div></div></div>`;
+      <div class="endov" id="endov"></div>
+      <div class="endov" id="concov"><div class="endbox ask"><b>Concede this game?</b><div class="how">It counts as a loss.</div>
+        <div class="btns"><button class="slab" id="keep">Keep playing</button><button class="play" id="concede">Concede</button></div></div></div></div></div>`;
     fitStage(); wireTips(document.getElementById('scr'));
     // The coach points at a card in the hand; hovering that card enlarges it over the coach, so the coach rises above it.
     const hand = document.getElementById('hand'), coach = document.getElementById('coach');
     hand.addEventListener('mouseover', e => { const h = e.target.closest('.hc'); coach.classList.toggle('risen', !!h && !!coach.dataset.iid && h.dataset.iid === coach.dataset.iid); });
     hand.addEventListener('mouseleave', () => coach.classList.remove('risen'));
     const $ = id => document.getElementById(id);
-    $('menubtn').onclick = e => { e.stopPropagation(); $('menudrop').classList.toggle('on'); const c = $('concede'); c.classList.remove('sure'); c.textContent = isTutorial() ? 'Leave tutorial' : 'Concede game'; };
-    // Conceding asks once, in place: the entry turns into the confirmation; a click elsewhere closes the menu and forgets it.
-    // In a tutorial the one entry leaves it for home at once: there is nothing to lose.
-    $('concede').onclick = e => { e.preventDefault(); e.stopPropagation(); const c = $('concede');
-      if (isTutorial()) { $('menudrop').classList.remove('on'); location.hash = '#/'; return; }
-      if (c.classList.contains('sure')) { $('menudrop').classList.remove('on'); send({ t: 'concede' }); }
-      else { c.classList.add('sure'); c.textContent = 'Concede this game?'; } };
+    // The flag concedes, after the question in the middle of the board (Keep playing, Escape or a click beside it says no).
+    // In a tutorial it leaves for home at once: there is nothing to lose.
+    const ask = $('concov');
+    $('menubtn').onclick = e => { e.stopPropagation(); if (isTutorial()) { location.hash = '#/'; return; } ask.classList.add('on'); };
+    ask.onclick = e => { e.stopPropagation(); if (e.target === ask) ask.classList.remove('on'); };
+    $('keep').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); };
+    $('concede').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); send({ t: 'concede' }); };
     // The series opens the history, the opponent's hand their decklist; hovering your deck shows yours.
     const toggle = k => e => { e.stopPropagation(); ui.panel = ui.panel === k ? null : k; showPanel(); };
     $('series').onclick = toggle('hist'); $('opphand').onclick = toggle('theirs');
     $('deck').onmouseenter = () => { ui.panel = 'mine'; showPanel(); };
     $('deck').onmouseleave = () => { if (ui.panel === 'mine') { ui.panel = null; showPanel(); } };
     app.querySelectorAll('.panel').forEach(el => el.onclick = e => e.stopPropagation());
-    $('scr').addEventListener('click', () => { $('menudrop').classList.remove('on'); if (ui.panel) { ui.panel = null; showPanel(); } });
+    $('scr').addEventListener('click', () => { if (ui.panel) { ui.panel = null; showPanel(); } });
     $('deck').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.legal.draw && !d.noDraw) act({ kind: 'draw' }); };
     $('tbtn').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.canPass && !d.noPass) act({ kind: 'pass' }); };
     wireBoard();
@@ -473,8 +474,9 @@ function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
   lastDecision = d;
-  $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
-  $('concede').textContent = isTutorial() ? 'Leave tutorial' : $('concede').classList.contains('sure') ? 'Concede this game?' : 'Concede game';   // the menu holds Concede: only a game in play (never the lab or a replay)
+  $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';   // the flag: only a game in play (never the lab or a replay)
+  $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
+  if (!playing) $('concov').classList.remove('on');
   drawReplayBar();
 
   // Top left: the turn (a match is one game while there is one map); it opens the history. The gauntlet counts its games.

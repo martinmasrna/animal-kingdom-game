@@ -28,10 +28,10 @@ test('hovering your deck shows your decklist', async () => {
   assert.ok(!(await shown('#mine')));
 });
 
-test('Escape closes the menu, then a panel, then deselects the card', async () => {
-  await clickAt('#menubtn'); assert.ok(await page.$eval('#menudrop', e => e.classList.contains('on')));
+test('Escape closes the concede question, then a panel, then deselects the card', async () => {
+  await clickAt('#menubtn'); assert.ok(await page.$eval('#concov', e => e.classList.contains('on')));
   await page.keyboard.press('Escape'); await wait(60);
-  assert.ok(!(await page.$eval('#menudrop', e => e.classList.contains('on'))), 'menu closed');
+  assert.ok(!(await page.$eval('#concov', e => e.classList.contains('on'))), 'question closed');
   await clickAt('#series'); await page.keyboard.press('Escape'); await wait(60);
   assert.ok(!(await shown('#histp')), 'panel closed');
   await clickAt('#hand .hc.can'); await page.mouse.move(2, 2); await wait(60);
@@ -95,16 +95,19 @@ test('the opponent chooser picks with its own dropdowns; Escape closes an open d
   await p.close();
 });
 
-test('a game can be conceded from the menu, after one confirmation', async () => {
+test('the flag concedes the game, after a question in the middle of the board', async () => {
   const p = await browser.newPage();
   await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   await p.click('#go'); await p.waitForSelector('#ready'); await p.click('#ready');
   await p.waitForFunction(() => window.__ak().V && window.__ak().V.phase === 'playing', { timeout: 10000 });
-  await p.click('#menubtn');
-  assert.deepEqual(await p.$$eval('#menudrop a', els => els.map(e => e.textContent)), ['Concede game'], 'the menu holds only Concede');
-  await p.click('#concede'); await wait(80);
-  assert.equal(await p.$eval('#concede', e => e.textContent), 'Concede this game?', 'it asks first');
-  assert.equal(await p.evaluate(() => window.__ak().V.phase), 'playing');
+  const asking = () => p.$eval('#concov', e => e.classList.contains('on'));
+  await p.click('#menubtn'); await wait(80);
+  assert.ok(await asking(), 'it asks first');
+  await p.click('#keep'); await wait(80);
+  assert.ok(!(await asking()) && await p.evaluate(() => window.__ak().V.phase) === 'playing', 'Keep playing goes back to the game');
+  await p.click('#menubtn'); await p.keyboard.press('Escape'); await wait(80);
+  assert.ok(!(await asking()), 'Escape says no too');
+  await p.click('#menubtn'); await wait(80);
   await p.click('#concede');
   await p.waitForFunction(() => window.__ak().V.phase === 'match_over', { timeout: 5000 });
   assert.match(await p.$eval('#endov', e => e.textContent), /You conceded/);
