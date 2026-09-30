@@ -46,8 +46,9 @@ test('nothing is taught off your turn, and a lesson read once stays away after y
   const board = { '1,1': u('dire_wolf', 'A'), '1,2': u('lion', 'A'), '2,1': u('jaguar', 'A'), '2,2': u('cape_buffalo', 'A') };
   const r4 = { round: 4, board, legal: { place: {}, draw: true } };
   t.seen.add('actions');
-  assert.equal(current(view(r4), null, CARDS, t).id, 'food');
-  assert.equal(current(view({ ...r4, history: [{ seat: 'A' }] }), null, CARDS, t), null, 'gone after your next move');
+  const food = current(view(r4), null, CARDS, t);
+  assert.equal(food.id, 'food'); assert.ok(food.next, 'a line that only tells waits for Next');
+  t.seen.add('food'); assert.equal(current(view(r4), null, CARDS, t).id, 'free', 'then says what to aim for');
 });
 
 test('the open den is pointed out whenever it can be taken', () => {

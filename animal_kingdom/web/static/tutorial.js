@@ -6,7 +6,9 @@
 //      the deck), so the first four moves build the first food region.
 //   3. Free play: lessons appear the first time their situation comes up: the moves a turn, the claimed region,
 //      covering, Roar, the open den.
-// A lesson shows until its situation passes, the player acts past it (`untilAct`) or clicks Next, then never again.
+// Every line is one of two kinds: it tells (a Next step: nothing else can be clicked until it is read) or it asks for one
+// thing (and only that thing, or the obvious next click, is open). A line never informs while leaving the player to
+// guess what to do. A lesson shows until Next, its situation passing, or the player acting past it (`untilAct`).
 //
 // Each lesson stands beside what it talks about: `at` names it (a card in hand, the hand, a crossroad, a region's
 // stone, the deck, End turn, a den, a food gem, the opponent's cards, the middle of the board), directly or from
@@ -61,16 +63,18 @@ export const LESSONS = [
     only: { deck: true }, at: { deck: true } },
 
   // --- free play: each the first time it comes up ---
-  { id: 'actions', when: c => c.mine && c.round === 3, untilAct: true, at: { endturn: true },
+  { id: 'actions', when: c => c.mine && c.round === 3, ...talk, at: { endturn: true },
     text: 'Each turn you get two moves: place an animal or draw cards. The dots show how many moves are left.' },
   { id: 'corner', when: c => c.mine && c.round === 3 && !c.homeHeld && c.homeOpen.length > 0, done: c => c.homeHeld || c.round > 3,
     at: c => ({ cr: c.homeOpen[0] }), text: 'Now you choose! Place an animal on the last crossroad around the +10 patch.' },
-  { id: 'food', when: c => c.homeHeld, untilAct: true, at: c => ({ stone: c.home[0] }),
+  { id: 'food', when: c => c.homeHeld, ...talk, at: c => ({ stone: c.home[0] }),
     text: 'The +10 patch is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
-  { id: 'cover', when: c => c.mine && c.places.some(t => t[0] === 'cr' && owner(c.G, t[1]) === 'B'), untilAct: true,
+  { id: 'free', when: c => c.mine && c.homeHeld, ...talk, at: { middle: true },
+    text: 'From here it\'s up to you. Head for your opponent\'s den, or surround more patches for more food.' },
+  { id: 'cover', when: c => c.mine && c.places.some(t => t[0] === 'cr' && owner(c.G, t[1]) === 'B'), ...talk,
     at: c => ({ cr: c.places.find(t => t[0] === 'cr' && owner(c.G, t[1]) === 'B')[1] }),
     text: 'A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 7 can\'t beat 7.' },
-  { id: 'roar', when: c => c.mine && c.G.hand.some(h => c.roar(h.id)), untilAct: true,
+  { id: 'roar', when: c => c.mine && c.G.hand.some(h => c.roar(h.id)), ...talk,
     at: c => ({ card: c.G.hand.find(h => c.roar(h.id)).id }),
     text: 'Some animals have a special power. Point at a card to read it. A Roar happens as soon as you place the animal.' },
   { id: 'target', when: c => c.choosing, untilAct: true, at: { prompt: true },
