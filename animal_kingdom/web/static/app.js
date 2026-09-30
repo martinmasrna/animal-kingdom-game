@@ -229,21 +229,21 @@ async function finishSignIn(code) {
 // (name, account, sign-in code), Back in its foot. A deck filters the matches; a match opens its replay.
 // A deck's face: its cover, else (matches from before covers were kept) the starter or your deck of that name.
 const deckFace = (cover, name) => cover || COVER[(DECKS.find(d => d.name === name) || {}).id] || (ME.decks.find(d => d.name === name) || {}).cover || '';
-// A deck as a board piece: its face in the team's rim.
-const piece = (id, t) => `<span class="pm">${id && hasArt(id) ? `<span class="face" style="${portrait(id, 35)}"></span>` : ''}<img src="/static/kit2/rim_${t}.webp" alt="" draggable="false"></span>`;
+// A deck as a board piece: its face in the plain rim (the row's sides already say whose; colour is left to nothing here).
+const piece = id => `<span class="pm">${id && hasArt(id) ? `<span class="face" style="${portrait(id, 35)}"></span>` : ''}<img src="/static/kit2/rim_n.webp" alt="" draggable="false"></span>`;
 function profileScreen() {
   screen = 'profile';
   const unlinked = ME.providers.filter(p => !ME.logins.some(l => l.provider === p));
   const when = t => new Date(t * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
   const recs = ME.records.map(r => { const f = deckFace(r.cover, r.deck);
     return `<div class="dtile rec${ui.histDeck === r.deck ? ' on' : ''}" data-deck="${esc(r.deck)}" style="${f ? stripArt(f, 284, 56, .7) : ''}">
-    <b>${esc(r.deck)}</b><span class="wl"><i>${r.won}</i>–<i>${r.lost}</i></span></div>`; }).join('');
+    <b>${esc(r.deck)}</b><span class="wl">${r.won}–${r.lost}</span></div>`; }).join('');
   const shown = ME.history.filter(h => !ui.histDeck || h.my_deck === ui.histDeck);
   const bot = h => h.kind !== 'friend';   // a bot's deck has a name you know; a person's deck name is theirs, so the row names the person
   const result = h => h.won > h.lost ? 'Won' : h.won < h.lost ? 'Lost' : 'Draw';   // a match is one game (older best-of-3s by their result)
   const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
-    ${piece(deckFace(h.my_cover, h.my_deck), 'a')}<span class="dk">${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck), 'b')}<span class="dk">${esc(h.opp_deck)}</span>
-    <span class="o">${esc(h.opp)}</span>` : `${piece(h.opp_cover, 'b')}<span class="dk">${esc(h.opp)}</span><span></span>`}<span class="d">${when(h.ended)}</span></div>`).join('');
+    ${piece(deckFace(h.my_cover, h.my_deck))}<span class="dk">${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck))}<span class="dk">${esc(h.opp_deck)}</span>
+    <span class="o">${esc(h.opp)}</span>` : `${piece(h.opp_cover)}<span class="dk">${esc(h.opp)}</span><span></span>`}<span class="d">${when(h.ended)}</span></div>`).join('');
   const sect = (title, body) => `<div class="sect"><h4>${title}</h4>${body}</div>`;
   const account = ME.logins.length
     ? sect('Account', `${ME.logins.map(l => `<div class="login">${PROVIDER[l.provider]} · ${esc(l.label)}</div>`).join('')}

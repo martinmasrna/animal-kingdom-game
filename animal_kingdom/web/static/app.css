@@ -176,14 +176,13 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .prof .dtile.rec.on { border-radius: 8px; }
 .prof .dtile.rec b { top: 8px; transform: none; }
 .prof .dtile .wl { position: absolute; left: 12px; bottom: 7px; font: 700 15px/1 'Fira Sans Condensed', sans-serif; color: #b3a996; text-shadow: 0 1px 3px #000; }
-.prof .dtile .wl i { font-style: normal; } .prof .dtile .wl i:first-child { color: var(--you); } .prof .dtile .wl i:last-child { color: var(--them); }
-/* A match: the result, your deck's piece and theirs (the board's rims), who and when; it opens the replay. */
+/* A match: the result (a win bright, a loss dimmed: contrast, not team colour), your deck's piece and theirs (plain rims), who and when; it opens the replay. */
 .prof .hlist { flex: 1; min-width: 0; max-width: 760px; display: flex; flex-direction: column; gap: 6px; }
 .prof .hr { display: grid; grid-template-columns: 56px 44px 1fr 44px 1fr 150px 56px; align-items: center; column-gap: 10px; height: 56px; padding: 0 16px 0 14px; border-radius: 10px;
   background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); color: #e8e0d2; font-size: 17px; cursor: pointer; }
 .prof .hr:hover { background: rgba(28,25,22,.62); box-shadow: inset 0 0 0 1.5px rgba(240,232,218,.4); }
 .prof .hr b { font: 700 19px 'Fira Sans Condensed', sans-serif; color: #b3a996; }
-.prof .hr.won b { color: var(--you); } .prof .hr.lost b { color: var(--them); }
+.prof .hr.won b { color: #f3ead8; } .prof .hr.lost b { color: #857b6d; font-weight: 600; }
 .prof .hr .pm { position: relative; width: 44px; height: 44px; }
 .prof .hr .pm .face { position: absolute; inset: 4.5px; border-radius: 50%; background-color: #3a342c; }
 .prof .hr .pm img { position: absolute; inset: 0; width: 100%; height: 100%; }
