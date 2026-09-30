@@ -405,3 +405,6 @@
 .game .hc.hint.ready .card { animation: hintready 1.4s ease-in-out infinite; }
 @keyframes hintready { 0%, 100% { filter: drop-shadow(0 0 1px var(--ready)) drop-shadow(0 0 1px var(--ready)) drop-shadow(0 0 6px var(--ready)) drop-shadow(0 0 12px var(--ready)); }
   50% { filter: drop-shadow(0 0 2px var(--ready)) drop-shadow(0 0 2px var(--ready)) drop-shadow(0 0 10px var(--ready)) drop-shadow(0 0 20px var(--ready)); } }
+.game.kit .unit .buried.seen { inset: 0; background: none; border: 0; filter: brightness(.72) saturate(.85); transform-origin: 50% 50%; }   /* a covered animal: itself, peeking out */
+.game.kit .unit .buried.seen .fill { position: absolute; inset: 14px; border-radius: 50%; }
+.game.kit .unit .buried.seen.A .fill { background: var(--Adk); } .game.kit .unit .buried.seen.B .fill { background: var(--Bdk); }
