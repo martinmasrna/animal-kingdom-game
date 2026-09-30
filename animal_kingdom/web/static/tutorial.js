@@ -159,7 +159,7 @@ export const LESSONS_2 = [
     only: c => ({ crs: c.forward }), at: { rings: true },
     text: { pick: 'Move toward your opponent\'s den: click one of your animals.', place: 'Now click one of the circles.' } },
   explain('apexinfo', 'polar_bear', c => c.mine && c.hand('polar_bear') && c.prey.length > 0,
-    'The Polar Bear is an Apex Predator: it must land on top of an animal, and it eats it. It\'s strong enough to eat one of the animals guarding your opponent\'s den.'),
+    'The Polar Bear is an Apex Predator: when you place it on top of another animal, that animal is removed. But an Apex Predator can\'t be placed on an empty crossroad or on your opponent\'s den.'),
   { id: 'apex', when: c => c.mine && c.hand('polar_bear') && c.prey.length > 0,
     only: c => ({ card: 'polar_bear', crs: c.prey }), at: { rings: true },
     text: { pick: 'Click the Polar Bear.', place: 'Now click a circled animal to eat it.' } },
