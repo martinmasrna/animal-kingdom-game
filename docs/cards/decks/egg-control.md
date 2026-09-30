@@ -36,7 +36,7 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Python** | 2 | Snake | dynamic | Has +1 strength for each removed unit. |
+| **Python** | 2 | Snake | dynamic | Has +1 strength for each removed animal. |
 | **Rattlesnake** | 2 | Snake | 0 | Whenever you shuffle a card, gain 1 strength (wherever this is). |
 | **Egg Eater** | 2 | Snake | dynamic | Has +2 strength for each removed Egg. |
 | **Owl** | 3 | Bird | 2 | Flight. Roar: Scout a card. |

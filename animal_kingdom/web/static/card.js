@@ -37,9 +37,9 @@ export function fitNames(root) {
 
 // Each keyword in one line, for players learning the rules: the collection's zoom lists them, the board's badges show them on hover.
 export const KEYWORDS = {
-  'Roar': 'Happens when you place this unit.',
+  'Roar': 'Happens when you place this animal.',
   'Flight': 'Can be placed on any crossroad, even one not connected to yours. It can\'t take a den that way.',
   'Armor': 'Can\'t be removed, returned to hand or eaten by any ability, not even your own. It can still be covered.',
-  'Stealth': 'Enemy abilities can\'t choose it. Effects that hit many units, or a random one, still do.',
-  'Apex Predator': 'Must be placed on top of another unit, yours or an enemy\'s, and eats it. Can\'t be placed on a den.',
+  'Stealth': 'Enemy abilities can\'t choose it. Effects that hit many animals, or a random one, still do.',
+  'Apex Predator': 'Must be placed on top of another animal, yours or an enemy\'s, and eats it. Can\'t be placed on a den.',
 };

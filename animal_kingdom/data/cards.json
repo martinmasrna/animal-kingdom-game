@@ -170,7 +170,7 @@
       "base_strength": "dynamic",
       "dynamic_strength": "removed_units_count",
       "keywords": [],
-      "text": "Has +1 strength for each removed unit.",
+      "text": "Has +1 strength for each removed animal.",
       "copies": 2
     },
     {
@@ -344,7 +344,7 @@
       "tags": ["Colony", "Queen"],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: gain 4 food for each other Colony unit you control."
+      "text": "Roar: gain 4 food for each other Colony animal you control."
     },
     {
       "id": "vesper",
@@ -354,7 +354,7 @@
       "tags": ["Colony"],
       "base_strength": 0,
       "keywords": ["Flight"],
-      "text": "Flight. Has +2 strength for each other Colony unit you control."
+      "text": "Flight. Has +2 strength for each other Colony animal you control."
     },
     {
       "id": "queen_honoria",
@@ -364,7 +364,7 @@
       "tags": ["Colony", "Queen"],
       "base_strength": 4,
       "keywords": [],
-      "text": "Whenever you play a Colony unit, gain 4 food."
+      "text": "Whenever you play a Colony animal, gain 4 food."
     },
     {
       "id": "falstaff",
@@ -384,7 +384,7 @@
       "tags": ["Colony"],
       "base_strength": 3,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: if you control two of the same Colony unit, draw 2 cards."
+      "text": "Flight. Roar: if you control two of the same Colony animal, draw 2 cards."
     },
     {
       "id": "nurse_bumblebee",
@@ -394,7 +394,7 @@
       "tags": ["Colony"],
       "base_strength": 3,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: if you control 4 or more Colony units, draw 2 cards."
+      "text": "Flight. Roar: if you control 4 or more Colony animals, draw 2 cards."
     },
     {
       "id": "termite_king",
@@ -414,7 +414,7 @@
       "tags": ["Colony", "Queen"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: you may play another non-Queen Colony unit."
+      "text": "Roar: you may play another non-Queen Colony animal."
     },
     {
       "id": "queen_bee",
@@ -424,7 +424,7 @@
       "tags": ["Colony", "Queen"],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: play a Worker unit."
+      "text": "Roar: play a Worker animal."
     },
     {
       "id": "guard_hornet",
@@ -434,7 +434,7 @@
       "tags": ["Colony"],
       "base_strength": 3,
       "keywords": ["Flight"],
-      "text": "Flight. Has +5 strength while you control 4 or more Colony units."
+      "text": "Flight. Has +5 strength while you control 4 or more Colony animals."
     },
     {
       "id": "soldier_ant",
@@ -444,7 +444,7 @@
       "tags": ["Colony"],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: if you control 4 or more Colony units, remove an adjacent enemy."
+      "text": "Roar: if you control 4 or more Colony animals, remove an adjacent enemy."
     },
     {
       "id": "worker_ant",
@@ -508,14 +508,14 @@
     },
     {
       "id": "bulwark",
-      "name": "Brutonius",
+      "name": "Brutus",
       "deck": "ramp",
       "rarity": "legendary",
       "tags": ["Megafauna"],
       "base_strength": 8,
       "keywords": [],
       "food_cost": 15,
-      "text": "Costs 15 food. Roar: remove all adjacent units."
+      "text": "Costs 15 food. Roar: remove all adjacent animals."
     },
     {
       "id": "cairn",
@@ -597,7 +597,7 @@
       "tags": ["Bird"],
       "base_strength": 1,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: gain 1 food for each unit of strength 6 or more in your starting deck."
+      "text": "Flight. Roar: gain 1 food for each animal of strength 6 or more in your starting deck."
     },
     {
       "id": "black_bear",
@@ -637,7 +637,7 @@
       "tags": [],
       "base_strength": 7,
       "keywords": [],
-      "text": "Roar: Scout a legendary unit."
+      "text": "Roar: Scout a legendary animal."
     },
     {
       "id": "greywhisker",
@@ -647,7 +647,7 @@
       "tags": ["Rodent"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: gain 1 food. Draw a card. You may play another unit."
+      "text": "Roar: gain 1 food. Draw a card. You may play another animal."
     },
     {
       "id": "rat_king",
@@ -707,7 +707,7 @@
       "tags": [],
       "base_strength": 7,
       "keywords": ["Armor"],
-      "text": "Armor. Your adjacent units have Stealth."
+      "text": "Armor. Your adjacent animals have Stealth."
     },
     {
       "id": "squirrel",
@@ -790,7 +790,7 @@
       "tags": ["Rodent"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Has +1 strength for each other unit you control."
+      "text": "Has +1 strength for each other animal you control."
     },
     {
       "id": "pestis",
@@ -800,7 +800,7 @@
       "tags": ["Rodent"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy and every unit buried under it."
+      "text": "Roar: remove an adjacent enemy and every animal buried under it."
     },
     {
       "id": "sirocco",
@@ -820,7 +820,7 @@
       "tags": ["Bird"],
       "base_strength": 5,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: draw a card for each unit you control next to the opponent's den."
+      "text": "Flight. Roar: draw a card for each animal you control next to the opponent's den."
     },
     {
       "id": "jerboa",
@@ -830,7 +830,7 @@
       "tags": ["Rodent"],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: play another unit."
+      "text": "Roar: play another animal."
     },
     {
       "id": "hornet",
@@ -850,7 +850,7 @@
       "tags": ["Lizard"],
       "base_strength": 0,
       "keywords": [],
-      "text": "Can cover units of any strength."
+      "text": "Can cover animals of any strength."
     },
     {
       "id": "skunk",
@@ -1480,7 +1480,7 @@
       "tags": [],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: play another unit."
+      "text": "Roar: play another animal."
     },
     {
       "id": "calib_extra_2",
@@ -1490,7 +1490,7 @@
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: play another unit."
+      "text": "Roar: play another animal."
     },
     {
       "id": "calib_extra_3",
@@ -1500,7 +1500,7 @@
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: play another unit."
+      "text": "Roar: play another animal."
     },
     {
       "id": "calib_extra_4",
@@ -1510,7 +1510,7 @@
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: play another unit."
+      "text": "Roar: play another animal."
     },
     {
       "id": "calib_extra_5",
@@ -1520,7 +1520,7 @@
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Roar: play another unit."
+      "text": "Roar: play another animal."
     },
     {
       "id": "calib_food10_2",

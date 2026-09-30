@@ -60,11 +60,11 @@ Status: the roster is built and was tuned once, but its run was killed when two 
 
 - First player wins 57.7%. Games end 57% on food, 43% on den capture, in about 12 rounds.
 - The field is three strong tempo decks, two even ones, and two losers. Food OTK sits below target; Egg Control is far below it.
-- Every card's impact is inside ±10. The largest are Ramp's Borealis (+7.7) and Brutonius (+5.6), Food's Greywhisker (+5.3) and Barley (+5.1), Canine's Scarlett (+5.1).
+- Every card's impact is inside ±10. The largest are Ramp's Borealis (+7.7) and Brutus (+5.6), Food's Greywhisker (+5.3) and Barley (+5.1), Canine's Scarlett (+5.1).
 
 **Baseline ruler, RefereeBot, 600 games per deck (2026-09-26, before the Egg, Colony, Ramp and Food passes):** the fixed synergy-free pile beats aggro 66.7%, canine 58.2%, colony 54.8%, egg 96.0% and food 65.2%, is even with ramp (49.3%), and loses only to cats (47.0%).
 
-**Goodstuff still dominates.** A greedy hill-climb over the current pool built a pile that beats all seven premades (90% mean on GreedyBot), and RefereeBot confirms it: **73.7% mean, worst matchup 57.5% (vs aggro)**, 81% vs cats, 92% vs egg (2026-09-29). The recipe: legendaries Scarlett, Brutonius, Gale, Pestis; rares Chinchilla, Polar Bear, Rhinoceros, Taipan; commons Wolf, Elephant, Lemming, Lion, Mouse, Tiger. The structural problem in [`design/goodstuff.md`](design/goodstuff.md) holds.
+**Goodstuff still dominates.** A greedy hill-climb over the current pool built a pile that beats all seven premades (90% mean on GreedyBot), and RefereeBot confirms it: **73.7% mean, worst matchup 57.5% (vs aggro)**, 81% vs cats, 92% vs egg (2026-09-29). The recipe: legendaries Scarlett, Brutus, Gale, Pestis; rares Chinchilla, Polar Bear, Rhinoceros, Taipan; commons Wolf, Elephant, Lemming, Lion, Mouse, Tiger. The structural problem in [`design/goodstuff.md`](design/goodstuff.md) holds.
 
 **Martin against the pile (reverse gauntlet, 2026-09-29).** Martin played each premade 10 times (5 first, 5 second) against the same pile piloted by RefereeBot, in the web client (`results/human_games/web/web_20260929T103600_SJWERG.jsonl`). He went **35–35**, where RefereeBot piloting the premades gets 26%. Per deck, Martin vs the bots' rate against the pile: Ramp 8–2 (38%), Aggro 5–5 (42.5%), Cats 5–5 (19%), Colony 5–5 (33.5%), Egg 5–5 (8%), Canine 4–6 (23.5%), Food 3–7 (19.5%). Ten games per deck is ±30 points, so only Egg, Ramp and Cats are clear of the bot rate on their own; the overall 50% against 26% is not noise (p < 0.0001). The bots underplay the premades far more than the pile, so part of the goodstuff gap is a pilot artifact. How much is still open: Martin knows the pile's list and the bot's habits, and one player's 70 games isn't a field.
 

@@ -20,8 +20,8 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Fathom** | 1 | — | 7 | Roar: Scout a legendary unit. |
-| **Greywhisker** | 1 | Rodent | 1 | Roar: gain 1 food. Draw a card. You may play another unit. |
+| **Fathom** | 1 | — | 7 | Roar: Scout a legendary animal. |
+| **Greywhisker** | 1 | Rodent | 1 | Roar: gain 1 food. Draw a card. You may play another animal. |
 | **Barley** | 1 | Rodent | 4 | Roar: gain 4 food for each other Rodent you control. Draw a card. |
 | **Scrooge** | 1 | Rodent | 4 | Roar: gain food equal to the food you gained this turn. |
 
@@ -32,7 +32,7 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 | **Flying Squirrel** | 2 | Rodent | 3 | Flight. Roar: gain 10 food. |
 | **Porcupine** | 2 | Rodent | 7 | The first time an enemy covers this, remove that enemy. |
 | **Chinchilla** | 2 | Rodent | 4 | Roar: next turn, take 1 additional action. |
-| **Armadillo** | 2 | — | 7 | Armor. Your adjacent units have Stealth. |
+| **Armadillo** | 2 | — | 7 | Armor. Your adjacent animals have Stealth. |
 
 ### Common
 

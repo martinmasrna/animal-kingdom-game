@@ -45,7 +45,7 @@ def test_stealth_hides_from_skunk_bounce():
 
 
 def test_stealth_does_not_hide_from_mass_aoe():
-    # Brutonius: remove all adjacent enemy units - mass, so the panther dies.
+    # Brutus: remove all adjacent enemy units - mass, so the panther dies.
     s = make_state(hands={"A": ["bulwark"]}, food={"A": 20, "B": 0})
     put(s, "2,2", "black_panther", "B")
     rules.apply_action(s, PlaceAction("bulwark", ("cr", "1,2")))

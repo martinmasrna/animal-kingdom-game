@@ -279,7 +279,7 @@ def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None
     # Only the physics gate lives here (Armor blocks any effect-removal, whoever chose
     # it). Stealth is a *choice* restriction, enforced where enemy option lists are built
     # (and at the Apex eat), never at resolution - so mass/random/automatic removals
-    # (Pestis, Rhino/Brutonius, Grizzly, Hippo, King Theron, Pufferfish) hit Stealth units.
+    # (Pestis, Rhino/Brutus, Grizzly, Hippo, King Theron, Pufferfish) hit Stealth units.
     if by_effect and not statics.can_be_removed(state, unit):
         return False
     was_top = stack[-1] is unit

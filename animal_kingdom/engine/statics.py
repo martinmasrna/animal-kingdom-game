@@ -106,7 +106,7 @@ def can_be_chosen(state: GameState, unit: UnitInstance, by_player: str) -> bool:
     """Stealth (keyword-review decisions A2/B/E, 2026-07-02): the unit cannot be *chosen*
     by an enemy ability - consulted ONLY when building option lists an enemy chooser picks
     from (and the Apex eat, a chosen single-out). Mass, random, and automatic effects
-    (Pestis/Rhinoceros/Brutonius/Sirocco, Grizzly Bear, Hippopotamus, King Theron,
+    (Pestis/Rhinoceros/Brutus/Sirocco, Grizzly Bear, Hippopotamus, King Theron,
     Pufferfish) do NOT consult this and hit Stealth units normally.
 
     Carriers: Black Panther (keyword); Armadillo grants it to adjacent friendly units (aura).

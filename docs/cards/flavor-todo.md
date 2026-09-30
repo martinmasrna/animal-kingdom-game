@@ -106,7 +106,7 @@ The present pool mixes original evocative names (`Eon`, `Ember`, `Vesper`) with 
   - Keep Methuselah only if the card should feel mythic rather than natural-history grounded.
 - [ ] Revisit **Borealis** only for individuality. It is excellent northern flavor but sounds like a phenomenon rather than a bear's name. Alternatives: **Tundra**, **Whiteclaw**, or a new short individual name.
 - [ ] Revisit **Aquila** only for individuality; **Tempest** better communicates the diving giant-eagle effect.
-- Settled 2026-09-30: the rhino that clears everything around it is **Brutonius** (a Brutus that also removes your own adjacent units). The other open legendaries keep their names: Queen Marabunta, Queen Honoria, Falstaff, Vesper, Methuselah, Borealis, Fathom, Greywhisker, Scrooge, Pestis, Sirocco, Lobo, Raksha, Clarion.
+- Settled 2026-09-30: the rhino that clears everything around it is **Brutus** (the betrayer: it also removes your own adjacent animals). The other open legendaries keep their names: Queen Marabunta, Queen Honoria, Falstaff, Vesper, Methuselah, Borealis, Fathom, Greywhisker, Scrooge, Pestis, Sirocco, Lobo, Raksha, Clarion.
 
 ### Food OTk
 

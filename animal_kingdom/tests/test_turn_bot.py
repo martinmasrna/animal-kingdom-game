@@ -288,7 +288,7 @@ def test_rattlesnake_grows_from_ravens_two_shuffles():
 
 
 def test_ramp_pays_food_for_the_big_body_roar():
-    # Brutonius costs 15 food and clears adjacent enemies. With food in the bank TurnBot spends
+    # Brutus costs 15 food and clears adjacent enemies. With food in the bank TurnBot spends
     # it to play the big body; placing it on the connected HQ front next to the enemy wipes it.
     s = make_state(current="A", hands={"A": ["bulwark"]},
                    decks={"A": ["mouse"] * 3, "B": ["mouse"] * 4},
