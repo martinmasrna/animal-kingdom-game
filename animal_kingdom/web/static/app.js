@@ -57,20 +57,6 @@ function wirePops(root) {
     el.onmouseleave = () => pop.style.display = 'none';
   });
 }
-function miniMap(w, h) {
-  const { cols, rows: rs } = MAP, px = 34, py = 16, sx = (w - 2 * px) / (cols - 1), sy = (h - 2 * py) / (rs - 1);
-  const P = (c, r) => [px + (c - 1) * sx, py + (r - 1) * sy];
-  let s = '';
-  for (const reg of MAP.regions) { const [c, r] = reg.c, [x, y] = P(c, r), a = reg.food >= 15 ? 0.28 : 0.12;
-    s += `<rect x="${x + 5}" y="${y + 5}" width="${sx - 10}" height="${sy - 10}" rx="3" fill="rgba(207,171,102,${a})"/>`;
-    s += `<text x="${x + sx / 2}" y="${y + sy / 2}" text-anchor="middle" dominant-baseline="central" font-family="var(--font-display)" font-weight="600" font-size="12" fill="var(--muted)">+${reg.food}</text>`; }
-  for (let c = 1; c <= cols; c++) for (let r = 1; r <= rs; r++) { const [x, y] = P(c, r);
-    if (c < cols) { const [x2] = P(c + 1, r); s += `<line x1="${x}" y1="${y}" x2="${x2}" y2="${y}" stroke="var(--line-strong)" stroke-width="1.5"/>`; }
-    if (r < rs) { const [, y2] = P(c, r + 1); s += `<line x1="${x}" y1="${y}" x2="${x}" y2="${y2}" stroke="var(--line-strong)" stroke-width="1.5"/>`; } }
-  for (let c = 1; c <= cols; c++) for (let r = 1; r <= rs; r++) { const [x, y] = P(c, r); s += `<circle cx="${x}" cy="${y}" r="4" fill="var(--muted)"/>`; }
-  s += `<rect x="4" y="${py}" width="12" height="${h - 2 * py}" rx="3" fill="var(--you)" opacity="0.8"/><rect x="${w - 16}" y="${py}" width="12" height="${h - 2 * py}" rx="3" fill="var(--them)" opacity="0.8"/>`;
-  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="xMidYMid meet">${s}</svg>`;
-}
 // A deck's cover: the player's chosen one, else the collection's default.
 const coverFor = d => d.cover || COVER[d.id] || coverOf(d.list, CARDS);
 // Your profile: the server knows you by the sign-in code this browser keeps (localStorage 'ak:key').
@@ -102,6 +88,7 @@ async function boot() {
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
     if (e.key === 'Escape' && screen === 'home' && play.open) { play.open = null; return route(); }   // Escape closes the open chooser
+    if (e.key === 'Escape' && screen === 'profile' && !/INPUT/.test(e.target.tagName)) { location.hash = '#/'; return; }
     if (e.key !== 'Escape' || screen !== 'game') return;
     const menu = document.getElementById('menudrop');
     if (menu && menu.classList.contains('on')) return menu.classList.remove('on');
@@ -222,24 +209,26 @@ async function finishSignIn(code) {
   const m = await r.json(); store('ak:key', m.key); ME = m.profile;
   toast(`Signed in as ${ME.name}#${ME.tag}`, true); profileScreen();
 }
+// The collection's skeleton: your matches on the ground, you in the granite column (name, account, sign-in code), Back in its foot.
 function profileScreen() {
   screen = 'profile';
   const unlinked = ME.providers.filter(p => !ME.logins.some(l => l.provider === p));
   const when = t => new Date(t * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
-  const hist = ME.history.map(h => `<div class="hr"><span class="d">${when(h.ended)}</span><b class="${h.won > h.lost ? 'A' : h.won < h.lost ? 'B' : ''}">${h.won}–${h.lost}</b>
-    <span>${esc(h.my_deck)} <i>vs</i> ${esc(h.opp_deck)}</span><span class="o">${esc(h.opp)}${h.kind === 'gauntlet' ? ' · gauntlet' : ''}</span></div>`).join('');
-  app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Menu</a><h1>Profile</h1></div>
-    <div class="body prof"><div class="pside">
-      <div class="lbl">Name</div><div class="row"><input class="namein" id="pname" maxlength="20" value="${esc(ME.name)}"><span class="tag">#${ME.tag}</span></div>
-      ${ME.logins.length ? `<div class="lbl">Account</div>${ME.logins.map(l => `<div class="login">${PROVIDER[l.provider]} · ${esc(l.label)}</div>`).join('')}
-        <div class="row">${unlinked.map(p => `<span class="chip" data-login="${p}">Also sign in with ${PROVIDER[p]}</span>`).join('')}<span class="chip" id="signout">Sign out</span></div>`
-      : ME.providers.length ? `<div class="lbl">Account</div><div class="hint">Sign in to keep your decks and matches on every device.</div>
-        <div class="row">${ME.providers.map(p => `<span class="chip on" data-login="${p}">Sign in with ${PROVIDER[p]}</span>`).join('')}</div>` : ''}
-      ${ME.logins.length ? '' : `<div class="lbl">Sign-in code</div><div class="hint">Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</div>
-      <div class="row"><span class="code keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span></div>
-      <div class="row"><span class="chip" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</span><span class="chip" id="copykey">Copy</span></div>
-      <div class="lbl">Use a different profile</div><div class="row"><input class="namein" id="other" placeholder="Sign-in code"><span class="chip" id="signin">Sign in</span></div>`}
-    </div><div class="phist"><div class="lbl">Matches</div>${hist || '<div class="hint">No finished matches yet.</div>'}</div></div>`;
+  const hist = ME.history.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}"><b>${h.won}–${h.lost}</b>
+    <span class="dk">${esc(h.my_deck)} <i>vs</i> ${esc(h.opp_deck)}</span><span class="o">${esc(h.opp)}${h.kind === 'gauntlet' ? ' · gauntlet' : ''}</span><span class="d">${when(h.ended)}</span></div>`).join('');
+  const sect = (title, body) => `<div class="sect"><h4>${title}</h4>${body}</div>`;
+  const account = ME.logins.length
+    ? sect('Account', `${ME.logins.map(l => `<div class="login">${PROVIDER[l.provider]} · ${esc(l.label)}</div>`).join('')}
+        <div class="row">${unlinked.map(p => `<button class="slab" data-login="${p}">Also ${PROVIDER[p]}</button>`).join('')}<button class="slab" id="signout">Sign out</button></div>`)
+    : ME.providers.length ? sect('Account', `<p>Sign in to keep your decks and matches on every device.</p>
+        <div class="row">${ME.providers.map(p => `<button class="slab" data-login="${p}">${PROVIDER[p]}</button>`).join('')}</div>`) : '';
+  const code = ME.logins.length ? '' : sect('Sign-in code', `<p>Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</p>
+      <div class="row"><span class="field keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span><button class="slab" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</button><button class="slab" id="copykey">Copy</button></div>`)
+    + sect('Use a different profile', `<div class="row"><input class="field" id="other" placeholder="Sign-in code" autocomplete="off"><button class="slab" id="signin">Sign in</button></div>`);
+  app.innerHTML = `<div class="menu prof"><div class="hist">${hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
+    <div class="side"><div class="me"><div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div>${account}${code}</div>
+      <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
+  document.getElementById('back').onclick = () => { location.hash = '#/'; };
   const nm = document.getElementById('pname');
   nm.onchange = async () => { const r = await api('/api/me', { method: 'PATCH', body: JSON.stringify({ name: nm.value }) });
     if (!r.ok) return toast(await r.text()); ME = await r.json(); profileScreen(); };
@@ -269,7 +258,7 @@ function matchScreen(id) {
   if (!token) { location.hash = '#/join/' + id; return; }
   if (wsId === id && ws) return;
   screen = null; V = null; ui.sel = null; ui.peek = false;
-  app.innerHTML = `<div class="lobby"><div class="lbl">Connecting…</div></div>`;
+  app.innerHTML = `<div class="menu pre"><p class="wait">Connecting…</p></div>`;
   const connect = () => {
     wsId = id;
     ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/${id}?token=${encodeURIComponent(token)}`);
@@ -306,13 +295,13 @@ async function labScreen(name) {
   screen = null; gameScreen();
 }
 
+// Before the match: the key art dimmed, the menus' granite. Waiting for a friend: the code to send, on one piece.
 function lobbyScreen() {
   screen = 'lobby';
   const link = `${location.origin}/#/join/${V.id}`;
-  app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Leave</a><h1>Match</h1><span class="r">Best of 3</span></div>
-    <div class="lobby"><div class="lbl">Invite a friend</div><div class="code">${V.id}</div>
-      <div class="link">${link}</div><span class="chip on" id="copy">Copy link</span>
-      <div class="lbl" style="margin-top:24px">Waiting for them to join</div></div>`;
+  app.innerHTML = `<div class="menu pre"><div class="piece lobbyp"><div class="bigcode">${V.id}</div>
+      <button class="slab" id="copy">Copy link</button><p>Waiting for your friend to join</p></div>
+    <a class="backbtn leave" href="#/"><span>Leave</span></a></div>`;
   document.getElementById('copy').onclick = () => navigator.clipboard.writeText(link).then(() => toast('Link copied', true), () => toast(link));
 }
 
@@ -323,16 +312,17 @@ function seatLabel(p) {
   return p === V.you ? 'You' : esc(s.name || 'Opponent');
 }
 
+// Both decklists are open from the start (a rule), so this screen is the two lists, facing, and Ready between them.
+const coverOfList = counts => { const ids = Object.keys(counts); return ids.find(id => CARDS[id].rarity === 'legendary' && hasArt(id)) || ids.find(hasArt); };
 function prematchScreen() {
   screen = 'prematch';
   const you = V.you, opp = you === 'A' ? 'B' : 'A', me = V.seats[you];
-  const side = (p, cls) => `<div class="pl ${cls}"><div class="hd"><b>${seatLabel(p)} · ${V.seats[p].deckName}</b></div><div>${rows(V.lists[p])}</div></div>`;
-  const mp = (n, sub) => `<div class="mp"><div class="h"><b>Game ${n}</b><span>${MAP.name}${sub}</span></div>${miniMap(360, 86)}</div>`;
-  app.innerHTML = `<div class="top"><a class="back" href="#/">‹ Leave</a><h1>Match</h1><span class="r">Best of 3</span></div>
-    <div class="maps">${mp(1, ` · ${MAP.winFood} food to win`)}${mp(2, '')}${mp(3, ' · only if needed')}</div>
-    <div class="lists">${side(you, 'A')}
-      <div class="vs"><div class="big">VS</div>${me.ready ? `<div class="t">Waiting for your opponent</div>` : `<button class="btn primary" id="ready">Ready</button>`}</div>
-      ${side(opp, 'B')}</div>`;
+  const side = (p, cls) => { const counts = V.lists[p], list = Object.entries(counts).flatMap(([id, n]) => Array(n).fill(id)), cv = coverOfList(counts);
+    return `<div class="piece side ${cls}"><div class="who">${seatLabel(p)}</div><div class="dtile" style="${cv ? stripArt(cv, 340, 56, .7) : ''}"><b>${esc(V.seats[p].deckName)}</b></div>
+      <div class="dl">${deckBody(list, CARDS, false, true)}</div></div>`; };
+  app.innerHTML = `<div class="menu pre"><div class="face">${side(you, 'mine')}
+      <div class="mid">${me.ready ? '<p class="wait">Waiting for your opponent</p>' : '<button class="play" id="ready">Ready</button>'}</div>
+      ${side(opp, 'theirs')}</div><a class="backbtn leave" href="#/"><span>Leave</span></a></div>`;
   const b = document.getElementById('ready'); if (b) b.onclick = () => send({ t: 'ready' });
   wirePops(app);
 }
