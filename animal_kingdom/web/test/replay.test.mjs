@@ -16,6 +16,10 @@ const RECORDS = [{ deck: 'Cats', cover: 'king_theron', won: 2, lost: 0 }, { deck
 before(async () => {
   server = await startServer(); browser = await openBrowser();
   views = recordMatches(1).find(m => m.name.endsWith('_A.json')).views;
+  for (const v of views) {   // the server adds the opponent's hand to a replay: any cards of theirs, one per card in hand
+    const ids = Object.keys(v.lists.B);
+    v.game.oppHand = Array.from({ length: v.game.handCount.B }, (_, i) => ({ iid: 900 + i, id: ids[i % ids.length], str: 1 }));
+  }
   page = await browser.newPage();
   page.errors = [];
   page.on('pageerror', e => page.errors.push(e.message));
@@ -70,6 +74,16 @@ test('a match opens its replay: every view drawn right, nothing to act on, the c
   const i = await page.evaluate(() => window.__ak().V.version);
   await page.click('#rback'); await wait(50);
   assert.ok(await page.evaluate(() => window.__ak().V.version) < i, 'back one move');
+});
+
+test('the opponent\'s hand shows face up; the eye turns it back into card backs', async () => {
+  const n = await page.evaluate(() => window.__ak().V.game.handCount.B);
+  assert.equal(await page.$$eval('#opphand .oc', els => els.length), n);
+  await page.click('#reye'); await wait(50);
+  assert.equal(await page.$$eval('#opphand .oc', els => els.length), 0);
+  assert.equal(await page.$$eval('#opphand .back', els => els.length), n);
+  await page.click('#reye'); await wait(50);
+  assert.equal(await page.$$eval('#opphand .oc', els => els.length), n);
 });
 
 test('the replay ends on the result, offers it again, and Leave goes back to the profile', async () => {

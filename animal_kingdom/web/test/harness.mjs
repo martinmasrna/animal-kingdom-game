@@ -104,8 +104,8 @@ export function screenMismatches() {
   }
 
   // both hands
-  const backs = document.querySelectorAll('#opphand .back').length;
-  if (backs !== G.handCount[them]) out.push(`${backs} card backs, they hold ${G.handCount[them]}`);
+  const backs = document.querySelectorAll('#opphand .back, #opphand .oc').length;   // a replay shows their cards face up
+  if (backs !== G.handCount[them]) out.push(`${backs} cards of theirs shown, they hold ${G.handCount[them]}`);
   const hand = [...document.querySelectorAll('#hand .hc')].map(e => +e.dataset.iid);
   if (hand.join() !== G.hand.map(h => h.iid).join()) out.push(`hand shows ${hand}, is ${G.hand.map(h => h.iid)}`);
 

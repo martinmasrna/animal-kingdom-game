@@ -109,9 +109,13 @@ def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path)
     views = json.loads(gzip.decompress(replay.load(tmp_path, h["match"], "A")))
     assert {v["you"] for v in views} == {"A"} and views[0]["game"]["history"] == []
     assert views[-1]["game"]["result"]["winner"] == m.results[-1]["winner"]
-    assert [v["game"] for v in views] == live       # exactly what the browser was sent
+    hands = [v["game"].pop("oppHand") for v in views]
+    assert [v["game"] for v in views] == live       # exactly what the browser was sent, plus
+    assert [len(h) for h in hands] == [g["handCount"]["B"] for g in live]      # the opponent's hand
+    assert [h["id"] for h in hands[-1]] == [u.card_id for u in m.state.hands["B"]]
     # rebuilt from the game log, the same views
-    assert replay.game_views(m.last_log, "A", {"A": "Martin#" + p["tag"], "B": "Bot"}) == views
+    rebuilt = replay.game_views(m.last_log, "A", {"A": "Martin#" + p["tag"], "B": "Bot"})
+    assert [v["game"].pop("oppHand") for v in rebuilt] == hands and rebuilt == views
 
 
 def test_a_match_against_a_person_keeps_their_deck_name_private(monkeypatch):
@@ -159,13 +163,17 @@ def test_every_match_left_in_a_history_has_its_replay(monkeypatch, tmp_path):
         m.act(m.to_act(), m.bot_move())
     log = {k: v for k, v in m.last_log.items() if k not in ("series", "lists")}   # a log from before replays
     (logs / "web_20260101T000000_OLD1.jsonl").write_text(json.dumps(log) + "\n")
-    for key in ("OLD1-0", "GONE-0"):     # GONE was never recorded
-        db.record(p["id"], key, kind="bot", my_deck="Cats", opp="Bot (Easy)", opp_deck="Ramp", won=1, lost=0)
+    for key in ("OLD1-0", "GONE-0", "KEPT-0"):     # GONE was never recorded; KEPT neither, but has a replay from before
+        db.record(p["id"], key, kind="bot", my_deck="Cats", opp="Bot (Easy)", opp_deck="Ramp", won=1, lost=0, seat="A")
+    replays.mkdir()
+    (replays / "OLD1-0-A.json.gz").write_bytes(b"old")
+    (replays / "KEPT-0-A.json.gz").write_bytes(b"old")
     replay.backfill(db, logs, replays)
-    (h,) = db.history(p["id"])
-    assert h["match"] == "OLD1-0" and replay.load(replays, "OLD1-0", "A")
+    assert sorted(h["match"] for h in db.history(p["id"])) == ["KEPT-0", "OLD1-0"]
+    assert replay.load(replays, "OLD1-0", "A") != b"old" and not (replays / "OLD1-0-A.json.gz").exists()   # upgraded
+    assert replay.load(replays, "KEPT-0", "A") == b"old"
     replay.backfill(db, logs, replays)      # a second start changes nothing
-    assert [h["match"] for h in db.history(p["id"])] == ["OLD1-0"]
+    assert sorted(h["match"] for h in db.history(p["id"])) == ["KEPT-0", "OLD1-0"]
 
 
 def test_a_bot_named_the_old_way_reads_the_new_way(tmp_path):
