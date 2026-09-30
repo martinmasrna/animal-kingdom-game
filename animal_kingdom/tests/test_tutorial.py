@@ -54,6 +54,15 @@ def test_the_opponent_never_wins_and_never_takes_food():
         assert m.state.food["B"] == 0
 
 
+def _adj(cr):
+    c, r = map(int, cr.split(","))
+    return {f"{a},{b}" for a, b in ((c - 1, r), (c + 1, r), (c, r - 1), (c, r + 1))}
+
+
+def eagle_at(m):
+    return next(cr for cr, st in m.state.board.items() if st and st[-1].owner == "A" and st[-1].card_id == "eagle")
+
+
 def _lesson2() -> Match:
     m = Match("T", Seat("ta", "You", deck="tutorial2_you"))
     m.join(Seat("tb", "Wild dogs", bot="tutorial2", deck="tutorial2_them"))
@@ -81,8 +90,11 @@ def test_lesson_2_plays_out_as_its_script_says_and_is_won_on_food():
         their_turn()
         assert (top("5,2"), top("5,1")) == ("cape_buffalo", "dire_wolf")
         eagle = [x for x in legal() if isinstance(x, PlaceAction) and x.card_id == "eagle" and not m.state.board.get(x.crossroad)
-                 and x.crossroad not in ("2,1", "3,1", "3,2")]
-        a(rng.choice(eagle)); a(PlaceAction("cape_buffalo", ("cr", "2,1")))
+                 and x.crossroad in ("4,1", "4,3")]   # as the lesson offers: nothing reachable beside it
+        a(rng.choice(eagle))
+        assert not any(isinstance(x, PlaceAction) and x.card_id == "cape_buffalo" and x.crossroad in _adj(eagle_at(m)) for x in legal()), \
+            "nothing may go next to the lone Eagle"
+        a(PlaceAction("cape_buffalo", ("cr", "2,1")))
         their_turn()
         a(DrawAction()); a(PlaceAction("squirrel", ("cr", "3,2")))
         their_turn()

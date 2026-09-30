@@ -59,7 +59,7 @@ export const LESSONS = [
     text: 'Animals stand on crossroads, the sandy circles. Your first animal goes next to your den: click one of the circled crossroads.',
     only: { card: 'lion' }, at: { rings: true } },
   { id: 'buffalo', when: c => c.mine && c.round === 1 && c.units === 1,
-    text: { pick: 'Now the Buffalo. Click it.', place: 'Your animals must form a chain back to your den. Click one of the circles.' },
+    text: { pick: 'Now the Buffalo. Click it.', place: 'Each new animal must connect to your den, directly or through your other animals. Click one of the circles.' },
     only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo') }), at: { rings: true } },
   { id: 'watch', when: c => c.theirs && c.round === 1, at: { oppcards: true },
     text: 'Now it\'s your opponent\'s turn. Watch where the red animals go.' },
@@ -124,10 +124,13 @@ export const LESSONS_2 = [
   { id: 'wall', when: c => c.theirs && c.round === 1, at: { den: 'B' },
     text: 'Your opponent is building a wall of strong animals in front of its den.' },
   explain('eagleinfo', 'eagle', c => c.mine && c.hand('eagle') && !c.placed('eagle'),
-    'Your Lynx drew an Eagle. The Eagle has Flight: it can land on any empty crossroad, even far from your animals.'),
+    'Your Lynx drew an Eagle. The Eagle has Flight: it can land even where it isn\'t connected to your den.'),
   { id: 'eagle', when: c => c.mine && c.hand('eagle') && !c.placed('eagle'),
-    only: c => ({ card: 'eagle', crs: c.empty('eagle').filter(cr => !['2,1', '3,1', '3,2'].includes(cr)) }), at: { rings: true },
-    text: { pick: 'Click the Eagle.', place: 'It can fly to any of the circles. Click one.' } },
+    only: c => ({ card: 'eagle', crs: c.eagleSpots }), at: { rings: true },
+    text: { pick: 'Click the Eagle.', place: 'The circles are places no other animal of yours could go. Click one.' } },
+  // connection again, on a harder board: the Eagle stands alone, and nothing may be placed next to it
+  { id: 'alone', when: c => c.mine && c.round === 2 && c.placed('eagle') && !c.placed('cape_buffalo'), ...talk, at: c => ({ cr: c.eagleAt }),
+    text: 'Your Eagle isn\'t connected to your den, so new animals can\'t go next to it.' },
   { id: 'buffalo2', when: c => c.mine && c.round === 2 && c.placed('eagle') && c.hand('cape_buffalo'), only: one('cape_buffalo', '2,1'), at: { rings: true },
     text: { pick: 'Click the Buffalo.', place: 'Now click the circle. Then watch what your opponent does.' } },
   { id: 'draw2', when: c => c.mine && c.round >= 3 && !c.hand('squirrel') && !c.placed('squirrel'), only: { deck: true }, at: { deck: true },
@@ -219,6 +222,11 @@ export function context(V, sel, cards) {
   const cand = regions.filter(r => !r.every(cr => owner(G, cr) === V.you) && !r.some(cr => owner(G, cr) && owner(G, cr) !== V.you) && r.some(cr => open.has(cr)))
     .map(r => [r.filter(cr => owner(G, cr) === V.you).length, r]).sort((a, b) => b[0] - a[0]);
   c.feed = cand.length ? cand.filter(([n]) => n === cand[0][0]).flatMap(([, r]) => r.filter(cr => open.has(cr))).filter((x, i, a) => a.indexOf(x) === i) : [...open];
+  // lesson 2's Eagle: it lands only where no other animal could, with nothing reachable beside it (off the spots the lesson needs later,
+  // clear of the opponent's den column), so Flight and connection show; then where it stands
+  const reach = new Set(c.empty('cape_buffalo'));   // where a card without Flight may go now
+  c.eagleSpots = c.empty('eagle').filter(cr => !['2,1', '3,1', '3,2'].includes(cr) && +cr[0] >= 3 && +cr[0] <= 4 && !reach.has(cr) && !ADJ(cr).some(n => reach.has(n)));
+  c.eagleAt = (Object.entries(G.board).find(([, st]) => st.length && st[st.length - 1].owner === V.you && st[st.length - 1].id === 'eagle') || [])[0];
   // the enemies the Tiger may land on and eat
   c.prey = ((G.legal && G.legal.place && G.legal.place.tiger) || []).filter(t => t[0] === 'cr' && owner(G, t[1]) && owner(G, t[1]) !== V.you).map(t => t[1]);
   const mineAt = cr => owner(G, cr) === V.you, count = h => h.filter(mineAt).length;
