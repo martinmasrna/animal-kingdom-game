@@ -21,7 +21,8 @@ async function startMatch(deck, botDeck) {
   await page.reload({ waitUntil: 'networkidle0' });
   for (const [k, v] of [['level', 'easy'], ['botDeck', botDeck]]) {   // home's opponent chooser: open it, then its dropdown, then pick
     if (!(await page.$('.chooser'))) await page.click('#oppbtn');
-    await page.click(`.dd[data-dd="${k}"] .sel`); await page.click(`.ddo[data-k="${k}"][data-v="${v}"]`); await wait(100);
+    if (k === 'level') await page.click(`[data-level="${v}"]`); else { await page.click(`.dd[data-dd="${k}"] .sel`); await page.click(`.ddo[data-k="${k}"][data-v="${v}"]`); }
+    await wait(100);
   }
   await page.click('#go');
   await page.waitForFunction(() => window.__ak().V && window.__ak().V.phase !== 'lobby', { timeout: 10000 });

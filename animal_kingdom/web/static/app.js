@@ -142,19 +142,21 @@ function homeScreen(mode = {}) {
   const all = playable(), chosen = chosenDeck(), peek = all.find(d => d.id === play.peek) || chosen;
   const bd = DECKS.find(d => d.id === play.botDeck), redraw = () => homeScreen(mode);
   const botDecks = [['random', 'Random deck'], ...DECKS.map(d => [d.id, d.name + ' deck'])];
+  // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
+  const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
   const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
     : ['Bot', `${label(LEVELS, play.level)} · ${bd ? bd.name + ' deck' : 'Random deck'}`];
   const go = mode.join ? 'Join match' : play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
   const tile = (d, W, cls = '') => `<div class="dtile${cls}" data-deck="${d.id}" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b></div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
-  const deckList = d => deckBody(d.list, CARDS, false) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
+  const deckList = d => deckBody(d.list, CARDS, false, true) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
   const chooser = play.open === 'decks'
     ? `<div class="chooser decks"><div class="clist">${all.map(d => tile(d, 300, d.id === chosen.id ? ' on' : '')).join('')}</div><div class="dl">${deckList(peek)}</div></div>`
-    : play.open === 'opp' ? `<div class="chooser opps">${play.opp === 'gauntlet' ? dd('level', play.level, LEVELS) + dd('side', play.side, SIDES)
+    : play.open === 'opp' ? `<div class="chooser opps">${play.opp === 'gauntlet' ? levels + dd('side', play.side, SIDES)
       : `<div class="seg"><button class="slab${play.opp === 'bot' ? ' on' : ''}" data-opp="bot">Bot</button><button class="slab${play.opp === 'friend' ? ' on' : ''}" data-opp="friend">Friend</button></div>`
         + (play.opp === 'friend' ? `<div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
-          : dd('level', play.level, LEVELS) + dd('botDeck', play.botDeck, botDecks))}</div>` : '';
-  app.innerHTML = `<div class="menu home"><div class="title">Animal Kingdom</div>${chooser}
+          : levels + dd('botDeck', play.botDeck, botDecks))}</div>` : '';
+  app.innerHTML = `<div class="menu home">${play.open === 'decks' ? '' : '<div class="title">Animal Kingdom</div>'}${chooser}
     <div class="flank l"><a class="backbtn" href="#/collection"><span>Collection</span></a></div>
     <div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
@@ -173,6 +175,7 @@ function homeScreen(mode = {}) {
     const dl = root.querySelector('.dl'); if (dl) wirePops(dl); };
   if (play.open === 'decks') { play.peek = peek.id; wireList(); }
   root.querySelectorAll('[data-opp]').forEach(el => el.onclick = () => { play.opp = el.dataset.opp; redraw(); });
+  root.querySelectorAll('[data-level]').forEach(el => el.onclick = () => { play.level = el.dataset.level; redraw(); });
   wireDd(root, (k, v) => { play[k] = v; redraw(); });
   const code = $('code');
   if (code) {

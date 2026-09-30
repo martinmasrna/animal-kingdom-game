@@ -83,7 +83,8 @@ test('the opponent chooser picks with its own dropdowns; Escape closes an open d
   await p.click('.dd[data-dd="botDeck"] .sel'); await p.click('.ddo[data-v="ramp"]'); await wait(80);
   assert.match(await p.$eval('#oppbtn', e => e.textContent), /Ramp deck/, 'the slot says what was chosen');
   assert.ok(await p.$('.chooser'), 'the chooser stays open for the next setting');
-  await p.click('.dd[data-dd="level"] .sel'); await p.keyboard.press('Escape'); await wait(80);
+  await p.click('[data-level="expert"]'); await wait(80); assert.match(await p.$eval('#oppbtn', e => e.textContent), /Expert/, 'the level is a picker');
+  await p.click('.dd[data-dd="botDeck"] .sel'); await p.keyboard.press('Escape'); await wait(80);
   assert.equal(await p.$('.dd.open'), null, 'the dropdown closed'); assert.ok(await p.$('.chooser'), 'the chooser stays');
   await p.keyboard.press('Escape'); await wait(80);
   assert.equal(await p.$('.chooser'), null, 'then the chooser closes');
