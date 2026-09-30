@@ -112,7 +112,7 @@
 
 /* panels (decklists, history) and the end overlay, restyled onto the flat frame */
 .game .panel { background: rgba(28,27,25,.97); border: 1px solid var(--plaqueline); top: 74px; }
-.game .panel.mine { left: auto; right: 16px; top: auto; bottom: 200px; } .game .panel.theirs { left: 50%; right: auto; margin-left: -145px; } .game .panel.histp { left: auto; right: 16px; top: 62px; bottom: auto; }   /* opens under the History button */
+.game .panel.mine { left: auto; right: 16px; top: auto; bottom: 200px; } .game .panel.theirs { left: 50%; right: auto; margin-left: -145px; } .game .panel.histp { left: auto; right: 150px; top: 62px; bottom: auto; }   /* opens under the History button, left of the opponent's food gem (always visible) */
 .game .panel h4 { font: 700 18px 'Source Serif 4', serif; color: var(--ink); } .game .panel .dr { background: #33302b; }
 .game .mine .dr { --c: var(--A); } .game .theirs .dr { --c: var(--B); }
 .game { --you: var(--A); --them: var(--B); }
@@ -422,7 +422,7 @@
    above End turn in the margin beside the board, clear of your den's pits. */
 .game.port #stage { width: 720px; height: 1440px; }
 .game.port #board { inset: auto; left: 0; top: 0; width: 1512px; height: 800px; transform-origin: 0 0; }
-.game.port .cr, .game.port .stone, .game.port .dcount, .game.port .leave { rotate: 90deg; }
+.game.port .cr, .game.port .stone, .game.port .dcount, .game.port .leave, .game.port .pit, .game.port .flyfruit { rotate: 90deg; }   /* every painted sprite keeps its light */
 .game.port .hand { top: 1230px; }
 .game.port .ledge { display: none; }   /* its painting is cut to the wide screen's corner: upright the deck and End turn stand on the grass */
 .game.port.kit .deck { left: 585px; top: 835px; width: 100px; height: 132px; }
@@ -445,3 +445,9 @@
 .game.port .prompt:not(.mull) .line { flex-wrap: wrap; } .game.port .prompt:not(.mull) .line .skip { height: 52px; font-size: 22px; }
 .game.port .prompt.mull { width: 520px; margin-left: -260px; } .game.port .prompt.mull b { font-size: 34px; } .game.port .prompt.mull p { font-size: 26px; } .game.port .prompt .skip { height: 56px; font-size: 24px; }
 .game.port .endbox { scale: 1.7; }   /* the end of a game and the concede question, read on a phone */
+/* Touch (no hover): a tap only picks a card (it rises, the board stays clear); pressing and holding shows it large to read. */
+@media (hover: none) {
+  .game .hc:hover { transform: none; } .game .hc:hover .card .ctext { display: none; }
+  .game .hc.sel, .game .hc.sel:hover { transform: translateY(-18px); }
+  .game .hc.peek, .game .hc.peek:hover { transform: translateY(-12px) scale(2.1); z-index: 30 !important; } .game .hc.peek .card .ctext { display: flex; }
+}
