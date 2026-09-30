@@ -47,7 +47,8 @@ A small network over the rung-2 features (rung 1 plus hand and board context: Ro
 
 - `learn/selfplay.py` plays TurnBot games (hand eval or a network) across all 36 pairings of the premades and the pile, 5% random moves, and records the positions the search scores; about 4,000 games (150k positions) in 40 minutes on 8 cores.
 - `learn/net.py` fits one hidden ReLU layer on outcomes (split by game, a linear fit alongside as the yardstick) and writes a `NetEval` artifact (`bots/net_eval.py`, stdlib inference, scaled into hand-eval points). Load it as any learned eval: `referee_learned:eval=<path>`.
-- Round 0 (hand-eval pilots): the network predicts winners better than the linear fit on the same inputs, held-out log-loss 0.572 against 0.598.
+- Round 0 (hand-eval pilots) and round 1 (TurnBot on the round-0 net, trained on both rounds, 317k positions): the network predicts winners better than a linear fit on the same inputs, held-out log-loss 0.562 against 0.585.
+- As RefereeBot's evaluation, round 1 against RefereeBot on the pile (`results/bot_quality/net-r1-vs-gs`, 200 paired games a deck): Colony +20.5 [+13.5, +28], Food +8.5 [+1.5, +15.5], Canine +6.5, Cats +4.5, Ramp −2.5, Egg −2, Aggro −8.5 [−17.5, +0.5]. Aggro loses its den race as with every other replacement for the readiness term: den wins 41 → 25, den losses 36 → 45, Rat spent more eagerly. About 1.5x slower than the hand eval.
 
 ## Throughput
 
