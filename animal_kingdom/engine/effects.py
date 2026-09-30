@@ -383,7 +383,7 @@ def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True)
 #
 # Discrete events (decision F2/F9): one event per card drawn, shuffled-into-deck, or
 # removed. Board-top units react via on_draw_event / on_shuffle_event / on_remove_event
-# hooks (Eon/Vulture); Rattlesnake's shuffle growth applies in every zone; a *drawn card* may also react to itself via on_draw (Omen). Reactors resolve
+# hooks (Eon/Vulture); Rattlesnake's shuffle growth applies in every zone; a *drawn card* may also react to itself via on_draw (Black Swan). Reactors resolve
 # immediately, so no extra stack steps and no re-entrancy in this stage. state.py stays
 # free of effect imports - these wrappers sit above the card-movement primitives.
 
@@ -452,7 +452,7 @@ def shuffle_back(state: GameState, player: str, card_ids: list) -> None:
 
 def remove_from_hand(state: GameState, player: str, inst: UnitInstance) -> None:
     """Remove a card from hand to the Remove Pile: a *remove* (fires the remove event) but
-    NOT a Deathrattle (it never was on the board). Used by Omen, later by Rat."""
+    NOT a Deathrattle (it never was on the board). Used by Black Swan, later by Rat."""
     state.hands[player].remove(inst)
     state.remove_pile.append(inst.card_id)
     _fire_remove_event(state, inst.card_id, inst.owner, None)
@@ -1094,7 +1094,7 @@ def _owns_copy(state, player: str, card_id: str) -> bool:
 
 def _omen_drawn(state, inst):
     # Hard, printed-text cap (not a Config dial - card-balance-todo's legendary redesign):
-    # "the first time each turn you draw Omen". Keyed by owner, not iid: a reshuffled
+    # "the first time each turn you draw Black Swan". Keyed by owner, not iid: a reshuffled
     # redraw gets a fresh UnitInstance/iid, so the cap must survive across instances.
     key = f"omen_turn_cap_{inst.owner}"
     if state.turn_flags.get(key):
@@ -1710,7 +1710,7 @@ def _mock_removal_place(state, unit, cr):
 
 
 def _mock_saboteur_place(state, unit, cr):
-    # Baseline yardstick card: bare random hand-disruption (reuses Omen's seeded discard,
+    # Baseline yardstick card: bare random hand-disruption (reuses Black Swan's seeded discard,
     # so it stays honest re: hidden info). No once-per-turn cap - it fires on placement.
     opponent = other_player(unit.owner)
     hand = state.hands[opponent]

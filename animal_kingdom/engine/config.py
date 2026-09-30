@@ -84,7 +84,7 @@ class Config:
 
     # --- Token spawns (Canine go-wide; 2026-07-05) ---
     alpha_pups: int = 2                  # Pups Scarlett places on adjacent empty crossroads
-    awd_pups: int = 1                    # Pups African Wild Dog spawns on placement
+    awd_pups: int = 1                    # Pups Painted Dog spawns on placement
 
     # --- Thresholds / strength gates ---
     unnamed_canine_draw_threshold: int = 5   # draw if Unnamed Canine has >= this strength

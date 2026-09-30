@@ -380,7 +380,7 @@ def test_omen_when_drawn_discards_from_opponents_hand_only():
     s = make_state(current="A", decks={"A": ["omen"], "B": []})
     s.add_to_hand("A", "lion")
     s.add_to_hand("B", "fox")
-    effects.draw_cards(s, "A", 1)                        # draws Omen
+    effects.draw_cards(s, "A", 1)                        # draws Black Swan
     assert sorted(hand_ids(s, "A")) == ["lion", "omen"]
     assert len(s.hands["B"]) == 0                        # lost its only card
     assert s.remove_pile == ["fox"]

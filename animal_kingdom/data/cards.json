@@ -218,13 +218,13 @@
     },
     {
       "id": "omen",
-      "name": "Omen, the Black Swan",
+      "name": "Black Swan",
       "deck": "egg_control",
       "rarity": "legendary",
       "tags": ["Bird"],
       "base_strength": 3,
       "keywords": [],
-      "text": "The first time each turn you draw Omen, your opponent discards a random card."
+      "text": "The first time each turn you draw Black Swan, your opponent discards a random card."
     },
     {
       "id": "stoop",
@@ -348,7 +348,7 @@
     },
     {
       "id": "vesper",
-      "name": "Vesper, Champion of the Hive",
+      "name": "Vesper",
       "deck": "colony_food_swarm",
       "rarity": "legendary",
       "tags": ["Colony"],
@@ -651,7 +651,7 @@
     },
     {
       "id": "rat_king",
-      "name": "Barley, the Rat King",
+      "name": "Barley",
       "deck": "food_otk",
       "rarity": "legendary",
       "tags": ["Rodent"],
@@ -661,7 +661,7 @@
     },
     {
       "id": "scrooge",
-      "name": "Scrooge, Keeper of the Stash",
+      "name": "Scrooge",
       "deck": "food_otk",
       "rarity": "legendary",
       "tags": ["Rodent"],
@@ -1024,7 +1024,7 @@
     },
     {
       "id": "african_wild_dog",
-      "name": "African Wild Dog",
+      "name": "Painted Dog",
       "deck": "canine_buff_tempo",
       "rarity": "common",
       "tags": ["Canine"],

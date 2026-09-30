@@ -39,7 +39,7 @@ An effect that resolves when the unit is placed. Most "when placed…" effects a
 ### Leaving the board  *(not a keyword)*
 An effect that resolves when **a unit leaves the board** is written out in plain words: "When this is removed, …" (Ember). It becomes a keyword only once at least three cards want it.
 
-**Leaving the board vs. "remove":** a unit leaving the board is one kind of *remove*, but not the only one — a card sent to the **Remove Pile** from hand or deck (e.g. Rat's paid card, Omen's hand-remove) is a **remove** but doesn't leave the board. So there are two trigger tiers: a **remove trigger** (any card → Remove Pile, from anywhere) and the narrower **leaving the board**. See `overview.md` for the Remove Pile zone. A return to hand or deck (Skunk, Sirocco, Eon) is *not* a remove at all — the card never reaches the Remove Pile.
+**Leaving the board vs. "remove":** a unit leaving the board is one kind of *remove*, but not the only one — a card sent to the **Remove Pile** from hand or deck (e.g. Rat's paid card, Black Swan's hand-remove) is a **remove** but doesn't leave the board. So there are two trigger tiers: a **remove trigger** (any card → Remove Pile, from anywhere) and the narrower **leaving the board**. See `overview.md` for the Remove Pile zone. A return to hand or deck (Skunk, Sirocco, Eon) is *not* a remove at all — the card never reaches the Remove Pile.
 
 ---
 
@@ -51,13 +51,13 @@ A printed cost, handled by the engine, not a keyword. The placement is offered o
 ### Strength modifiers  *(card-text convention, not a keyword)*
 Card text grants strength two ways, **distinguished by the verb** — this reading is binding:
 
-- **"has +X strength" → an anthem** (live, conditional aura). Recomputed live; **vanishes** when its source leaves play or its condition stops holding. Examples: wolf matriarch ("your other Canines *have* +2"), African Wild Dog ("*has* +1 for each friendly Canine"), Champion of the Hive, Guard Hornet ("*has* +5 while ≥4 Colony"). The same live layer also computes **dynamic strength** (e.g. the giant-anaconda legendary = number of removed units).
+- **"has +X strength" → an anthem** (live, conditional aura). Recomputed live; **vanishes** when its source leaves play or its condition stops holding. Examples: wolf matriarch ("your other Canines *have* +2"), Painted Dog ("*has* +1 for each friendly Canine"), Champion of the Hive, Guard Hornet ("*has* +5 while ≥4 Colony"). The same live layer also computes **dynamic strength** (e.g. the giant-anaconda legendary = number of removed units).
 - **"give +X strength" → a permanent counter** (one-time grant, **stored on the unit instance**, persists after the granter dies). Also applies to **cards in hand** (which carry the counter onto the board when played); hand buffs are **one-time** — a unit drawn *after* the buff is not retroactively buffed. Examples: Dhole ("*give* all adjacent Canines +2"), howl ("*give* +1 to all other Canines in hand and battlefield"), hellhound's returned Canine (+2), the end-of-turn buffer.
 
 **`effective_strength`** = `base_or_dynamic + stored_counters + active_anthems`, clamped ≥ 0, **evaluated live** wherever strength matters (covering, removal thresholds, region-holding, conditions like Coyote's "if this has 5+"). Counters are signed ints (Viper's "−3" is one). The event **`ON_GAIN_STRENGTH`** fires only when a counter is granted (not on live anthem drift).
 
 ### Discard  *(card-text term, not a keyword)*
-**Discard a card** means remove a card from a hand (or from a deck, when the text says so, as on Hornet). "Your opponent discards a random card" (Omen) and "discard a random card" (Rat) are the same removal the engine has always done for "removes a random card from their hand".
+**Discard a card** means remove a card from a hand (or from a deck, when the text says so, as on Hornet). "Your opponent discards a random card" (Black Swan) and "discard a random card" (Rat) are the same removal the engine has always done for "removes a random card from their hand".
 
 ### Scout  *(card-text term, not a keyword)*
 **Scout a card** means look at the top three cards of your deck, draw one and shuffle the other two back. **Scout a Bird** (or a legendary unit, or any other kind) looks at three random cards of that kind in your deck instead, all of them if there are fewer. It draws from the deck and never creates a card; the shuffle counts as shuffling (Rattlesnake grows). The count is `scout_count`. Cards: Owl, Fathom, Bird Egg.

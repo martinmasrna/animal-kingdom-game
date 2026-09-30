@@ -15,7 +15,7 @@ without reworking the action/bot contract:
   - turn advancement is gated on "stack empty & nothing pending" (see rules.py).
 
 Randomness is a **carried seeded RNG** (`rng`): used by setup and by chance effects
-(e.g. Omen's random discard, filtered random draws). It is serialized and cloned,
+(e.g. Black Swan's random discard, filtered random draws). It is serialized and cloned,
 so games replay identically from (seed, action sequence) even with chance events.
 """
 

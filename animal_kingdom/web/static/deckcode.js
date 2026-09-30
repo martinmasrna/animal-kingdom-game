@@ -1,6 +1,6 @@
 // Deck codes (Hearthstone-style): readable lines for people and agents, then one compact line the game reads.
 //   ### Colony copy
-//   # 1x (0) Vesper, Champion of the Hive
+//   # 1x (0) Vesper
 //   # 3x (1) Worker Ant
 //   AK1:BAUEfw...
 // The AK1 line is each card as a varint of (card number * 4 + copies), base64url. Import takes the AK1 line, or failing that,

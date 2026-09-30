@@ -89,7 +89,7 @@ The present pool mixes original evocative names (`Eon`, `Ember`, `Vesper`) with 
 
 ### Egg Control
 
-- Locked 2026-09-28: Eon (a Titanoboa, the Ouroboros), Ember (a fire-coloured bird, the phoenix), Aurum (a goose, the one that lays golden eggs), Omen, the Black Swan (the "black swan event").
+- Locked 2026-09-28: Eon (a Titanoboa, the Ouroboros), Ember (a fire-coloured bird, the phoenix), Aurum (a goose, the one that lays golden eggs), Black Swan (the "black swan event").
 - The Egg removal bird is the Hawk (3, removes 3 or less: a mid-size hunter of small prey). Falcon stays in Aggro as the fastest bird. The Eagle stays the vanilla 5; a bigger predator-bird effect, if one is ever made, belongs to the Eagle.
 
 ### Colony
@@ -111,10 +111,10 @@ The present pool mixes original evocative names (`Eon`, `Ember`, `Vesper`) with 
 ### Food OTk
 
 - [ ] **Keep:** Fathom, Greywhisker.
-- [ ] Decide whether **Carmilla** is the deck's one literary wink. If not, use **Vespera, the Devourer**.
+- [ ] Decide whether **Carmilla** is the deck's one literary wink. If not, use **Vespera**.
 - [ ] Decide whether **Scrooge** or Carmilla gets that wink; using both plus Fathom's kraken-adjacent art may make the deck's references louder than the others.
-- [ ] If Scrooge changes, develop an original hoarder name rather than defaulting to another famous rich figure. Working direction: **Tally, Keeper of the Stash**.
-- Resolved 2026-09-29: Food's legendary is **Barley, the Rat King** (it counts Rodents); Aggro's is plain **Verminus** (it counts every unit).
+- [ ] If Scrooge changes, develop an original hoarder name rather than defaulting to another famous rich figure. Working direction: **Tally**. Legendaries carry no epithets (2026-09-30): a single name, or a title and a name.
+- Resolved 2026-09-29: Food's legendary is **Barley** (the rat king) (it counts Rodents); Aggro's is plain **Verminus** (it counts every unit).
 
 ### Aggro
 
@@ -146,7 +146,7 @@ The present pool mixes original evocative names (`Eon`, `Ember`, `Vesper`) with 
 
 - [ ] **Secretarybird:** a precise downward kick toward small prey; the bird remains airborne or just landing, supporting Flight plus capped removal.
 - [ ] **Eon (Titanoboa):** a vast ancient snake coiled in a ring, tail near its mouth; the Ouroboros without the myth's symbolism.
-- [ ] **Omen, the Black Swan:** a calm dark bird whose arrival sends a flock scattering, showing hand disruption without magical effects.
+- [ ] **Black Swan:** a calm dark bird whose arrival sends a flock scattering, showing hand disruption without magical effects.
 - [ ] **Aggro retaliation legendary:** an enemy lunges into empty air while the bird snaps into a new flight line.
 - [ ] **Burrow:** show displaced soil and a distant emergence point; do not depict teleportation.
 - [ ] **Venom:** use visible bite/sting marks and a delayed weakening pose, not instant magical disintegration.

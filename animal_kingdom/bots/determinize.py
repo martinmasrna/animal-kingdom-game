@@ -22,7 +22,7 @@ What is re-sampled:
     deliberately forgets transient peek-order knowledge, e.g. Owl; conservative),
   - the opponent's hand/deck split and their deck's order,
   - the chance stream (`clone.rng` is reseeded from `rng`, so worlds sampled from one
-    RNG resolve random effects - Omen discards, shuffle-backs, Grizzly Bear
+    RNG resolve random effects - Black Swan discards, shuffle-backs, Grizzly Bear
     targets - differently instead of replaying the original stream's outcomes).
 
 Documented approximations (both err toward the referee knowing *less*, never more):
