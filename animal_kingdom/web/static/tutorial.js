@@ -12,7 +12,7 @@
 //
 // Each lesson stands beside what it talks about: `at` names it (a card in hand, the hand, a crossroad, a region's
 // stone, the deck, End turn, a den, a food gem, the opponent's cards, the middle of the board), directly or from
-// the moment's facts (beside the rightmost of a picked card's rings).
+// the moment's facts. It points at what the sentence is about: the card for a card's power, the rings for where to go.
 
 // Lessons read plain facts of the game view (the player is always seat A here). `c` is:
 //   { G, mine, theirs, choosing, sel, round, at(cr), units, hand(id), acts, places, rightmost(id), roar(id),
@@ -77,7 +77,7 @@ export const LESSONS = [
     text: 'A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 7 can\'t beat 7. Cover the circled animal!' },
   // Roar, by hand: the Lynx (turn 4), whose Roar always works beside the Lion
   { id: 'roar', when: c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0, done: c => c.roared,
-    only: c => ({ card: 'lynx', picked: true, crs: c.empty('lynx') }), at: c => ({ cr: c.rightmost('lynx') }),
+    only: c => ({ card: 'lynx', picked: true, crs: c.empty('lynx') }), at: { card: 'lynx' },   // the line is about the card's power
     text: 'The Lynx has a Roar: a power that happens the moment you place it. Its Roar draws a card if you have another Cat, like your Lion. Place the Lynx!' },
   { id: 'roared', when: c => c.roared, ...talk, at: { hand: true },
     text: 'Your Lynx roared and drew you a card! Point at any card to read what it does.' },

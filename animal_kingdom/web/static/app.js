@@ -536,7 +536,7 @@ function placeCoach(el, L) {
   if (!L) { el.innerHTML = ''; return; }
   const a = L.at || {}, card = a.card && document.querySelector(`#hand .hc[data-id="${a.card}"]`);
   let x, y, side;
-  if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, 590, 'above'];
+  if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, card.classList.contains('sel') ? 572 : 590, 'above'];   // a picked card stands 18px higher
   else if (a.deck) [x, y, side] = [1299, 606, 'above'];
   else if (a.prompt) [x, y, side] = [151, 604, 'above'];   // the pending choice's piece, bottom left
   else if (a.endturn) [x, y, side] = [1439, 664, 'above'];
