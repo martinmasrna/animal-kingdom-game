@@ -26,7 +26,7 @@ Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reac
 | **Polar Bear** | 2 | Bear | 8 | Apex Predator. |
 | **Rhinoceros** | 2 | Megafauna | 6 | Roar: remove all adjacent enemies of strength 2 or less. |
 | **Hippopotamus** | 2 | Megafauna | 6 | When an enemy of strength 3 or less is placed adjacent to this, remove it. |
-| **Andean Condor** | 2 | Bird | 5 | Flight. Roar: reveal the top card of each deck. If yours is stronger, draw it. |
+| **Andean Condor** | 2 | Bird | 5 | Flight. Roar: reveal the top card of each deck. If yours has higher strength, draw it. |
 
 ### Common
 

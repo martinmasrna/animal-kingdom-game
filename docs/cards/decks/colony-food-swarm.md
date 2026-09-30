@@ -12,8 +12,8 @@ Watch Falstaff's "whenever you gain food, gain 3 more" stacking with the food-on
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Queen Marabunta** | 1 | Colony, Queen | 4 | Roar: gain 4 food for each other friendly Colony unit. |
-| **Vesper** | 1 | Colony | 0 | Flight. Has +2 strength for each other friendly Colony unit. |
+| **Queen Marabunta** | 1 | Colony, Queen | 4 | Roar: gain 4 food for each other Colony unit you control. |
+| **Vesper** | 1 | Colony | 0 | Flight. Has +2 strength for each other Colony unit you control. |
 | **Queen Honoria** | 1 | Colony, Queen | 4 | Whenever you play a Colony unit, gain 4 food. |
 | **Falstaff** | 1 | Colony | 3 | Flight. Whenever you gain food, gain 3 additional food. |
 

@@ -770,8 +770,8 @@ def _op_play_extra(state, step):
 
 def _op_play_named(state, step):
     """Play a specific named card from hand OR deck (the Prince Leo / Princess Lea twins -
-    the one F10 exception to "filtered draws are random"). Optional; if it was fetched from
-    the deck and not played, it goes back."""
+    the one F10 exception to "filtered draws are random"). Mandatory when it has a legal
+    place (Martin, 2026-09-30); a twin fetched from the deck that can't be placed goes back."""
     player, cid = step["chooser"], step["card_id"]
     if "fetched" not in step:                       # fetch the twin from deck if not in hand
         in_hand = any(u.card_id == cid for u in state.hands[player])
@@ -798,7 +798,7 @@ def _op_play_named(state, step):
     if not placements:
         _return_if_fetched()
         return None
-    return PendingRequest("place", player, optional=True,
+    return PendingRequest("place", player, optional=False,
                           placements=[{"card_id": p.card_id, "target": list(p.target)} for p in placements])
 
 

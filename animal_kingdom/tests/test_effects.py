@@ -712,7 +712,7 @@ def test_prince_leo_plays_the_twin_from_deck():
     s = make_state(current="A", hands={"A": ["prince_leo"]},
                    decks={"A": ["princess_lea", "lion"], "B": []})
     rules.apply_action(s, PlaceAction("prince_leo", ("cr", "1,2")))
-    assert s.pending is not None                         # may immediately play Princess Lea
+    assert s.pending is not None and not s.pending["optional"]   # must play Princess Lea
     rules.apply_action(s, PlaceAction("princess_lea", ("cr", "1,1")))
     assert s.top_unit("1,1").card_id == "princess_lea"
     assert "princess_lea" not in s.decks["A"]            # fetched from the deck

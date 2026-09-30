@@ -9,7 +9,7 @@
       "tags": ["Cat"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: you may immediately play Princess Lea from your hand or deck."
+      "text": "Roar: play Princess Lea from your hand or deck."
     },
     {
       "id": "princess_lea",
@@ -19,7 +19,7 @@
       "tags": ["Cat"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: you may immediately play Prince Leo from your hand or deck."
+      "text": "Roar: play Prince Leo from your hand or deck."
     },
     {
       "id": "king_theron",
@@ -139,7 +139,7 @@
       "tags": ["Cat"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: if you control another Cat, play one more Cat from your hand."
+      "text": "Roar: if you control another Cat, play another Cat."
     },
     {
       "id": "eon",
@@ -181,7 +181,7 @@
       "tags": ["Bird"],
       "base_strength": 7,
       "keywords": ["Flight"],
-      "text": "Flight. When this is removed, shuffle it back to your deck."
+      "text": "Flight. When this is removed, shuffle it into your deck."
     },
     {
       "id": "aurum",
@@ -284,7 +284,7 @@
       "tags": ["Snake"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: an adjacent enemy gets -3 strength."
+      "text": "Roar: give an adjacent enemy -3 strength."
     },
     {
       "id": "magpie",
@@ -344,7 +344,7 @@
       "tags": ["Colony", "Queen"],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: gain 4 food for each other friendly Colony unit."
+      "text": "Roar: gain 4 food for each other Colony unit you control."
     },
     {
       "id": "vesper",
@@ -354,7 +354,7 @@
       "tags": ["Colony"],
       "base_strength": 0,
       "keywords": ["Flight"],
-      "text": "Flight. Has +2 strength for each other friendly Colony unit."
+      "text": "Flight. Has +2 strength for each other Colony unit you control."
     },
     {
       "id": "queen_honoria",
@@ -566,7 +566,7 @@
       "tags": ["Bird"],
       "base_strength": 5,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: reveal the top card of each deck. If yours is stronger, draw it."
+      "text": "Flight. Roar: reveal the top card of each deck. If yours has higher strength, draw it."
     },
     {
       "id": "elephant",
@@ -647,7 +647,7 @@
       "tags": ["Rodent"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: gain 1 food. Draw 1 card. You may play 1 more unit."
+      "text": "Roar: gain 1 food. Draw 1 card. You may play another unit."
     },
     {
       "id": "rat_king",
@@ -707,7 +707,7 @@
       "tags": [],
       "base_strength": 7,
       "keywords": ["Armor"],
-      "text": "Armor. Adjacent friendly units have Stealth."
+      "text": "Armor. Your adjacent units have Stealth."
     },
     {
       "id": "squirrel",
@@ -880,7 +880,7 @@
       "tags": ["Cat"],
       "base_strength": 6,
       "keywords": [],
-      "text": "Roar: if you play this next to the opponent's den, draw 1 card."
+      "text": "Roar: if placed next to the opponent's den, draw 1 card."
     },
     {
       "id": "rat",
@@ -900,7 +900,7 @@
       "tags": ["Bird"],
       "base_strength": 4,
       "keywords": ["Flight"],
-      "text": "Flight. Roar: if you play this next to the opponent's den, draw 1 card."
+      "text": "Flight. Roar: if placed next to the opponent's den, draw 1 card."
     },
     {
       "id": "bat",
@@ -960,7 +960,7 @@
       "tags": ["Canine"],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: give +2 strength to all other friendly Canines."
+      "text": "Roar: give your other Canines +2 strength."
     },
     {
       "id": "bush_dog",
@@ -970,7 +970,7 @@
       "tags": ["Canine"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Once a turn, when this gains strength, give your adjacent Canines +2 strength."
+      "text": "The first time each turn this gains strength, give your adjacent Canines +2 strength."
     },
     {
       "id": "red_wolf",
@@ -990,7 +990,7 @@
       "tags": ["Canine"],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy with less or equal strength."
+      "text": "Roar: remove an adjacent enemy of equal or lower strength."
     },
     {
       "id": "unnamed_canine",
@@ -1040,7 +1040,7 @@
       "tags": ["Canine"],
       "base_strength": 5,
       "keywords": [],
-      "text": "At the end of your turn, give all friendly adjacent Canines +1 strength."
+      "text": "At the end of your turn, give your adjacent Canines +1 strength."
     },
     {
       "id": "dog",
@@ -1050,7 +1050,7 @@
       "tags": ["Canine"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: if you control another Canine, play another Canine from your hand."
+      "text": "Roar: if you control another Canine, play another Canine."
     },
     {
       "id": "alpha",

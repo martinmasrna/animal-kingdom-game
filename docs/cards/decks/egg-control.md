@@ -19,7 +19,7 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Eon** | 1 | Snake | 10 | Apex Predator. At the end of your turn, shuffle this into your deck with -1 strength. |
-| **Ember** | 1 | Bird | 7 | Flight. When this is removed, shuffle it back to your deck. |
+| **Ember** | 1 | Bird | 7 | Flight. When this is removed, shuffle it into your deck. |
 | **Aurum** | 1 | Bird | 1 | At the start of your turn, draw a card. |
 | **Black Swan** | 1 | Bird | 3 | The first time each turn you draw Black Swan, your opponent discards a random card. |
 

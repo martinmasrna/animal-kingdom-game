@@ -14,14 +14,14 @@ Buff wording is binding: "has +X" is a live aura, "give +X" is a permanent count
 |---|---:|---|---:|---|
 | **Lobo** | 1 | Canine | 4 | Has +2 strength for each other Canine you control. |
 | **Raksha** | 1 | Canine | 5 | Your other Canines have +1 strength. |
-| **Clarion** | 1 | Canine | 2 | Roar: give +2 strength to all other friendly Canines. |
+| **Clarion** | 1 | Canine | 2 | Roar: give your other Canines +2 strength. |
 | **Scarlett** | 1 | Canine | 5 | Roar: place Poppy and Rusty on random adjacent empty crossroads. |
 
 ### Rare
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Bush Dog** | 2 | Canine | 3 | Once a turn, when this gains strength, give your adjacent Canines +2 strength. |
+| **Bush Dog** | 2 | Canine | 3 | The first time each turn this gains strength, give your adjacent Canines +2 strength. |
 | **Dhole** | 2 | Canine | 5 | Whenever another Canine you control enters play, give it +2 strength. |
 | **Hyena** | 2 | Canine | 4 | Roar: remove an adjacent enemy with strength up to the number of your Canines. |
 | **Coyote** | 2 | Canine | 6 | Your other Canines may be placed adjacent to your Canines, ignoring connection. |
@@ -30,11 +30,11 @@ Buff wording is binding: "has +X" is a live aura, "give +X" is a permanent count
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Jackal** | 3 | Canine | 4 | Roar: remove an adjacent enemy with less or equal strength. |
+| **Jackal** | 3 | Canine | 4 | Roar: remove an adjacent enemy of equal or lower strength. |
 | **Fox** | 3 | Canine | 4 | Whenever this gains strength, draw a card. |
 | **African Wild Dog** | 3 | Canine | 2 | Roar: spawn a Pup on an adjacent empty crossroad. |
-| **Dingo** | 3 | Canine | 5 | At the end of your turn, give all friendly adjacent Canines +1 strength. |
-| **Dog** | 3 | Canine | 1 | Roar: if you control another Canine, play another Canine from your hand. |
+| **Dingo** | 3 | Canine | 5 | At the end of your turn, give your adjacent Canines +1 strength. |
+| **Dog** | 3 | Canine | 1 | Roar: if you control another Canine, play another Canine. |
 | **Wolf** | 3 | Canine | 7 | — |
 
 <!-- cards:end -->
