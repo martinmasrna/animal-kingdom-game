@@ -202,6 +202,14 @@ async function startTutorial(lesson = 1) {
   if (!r.ok) return toast(await r.text());
   const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
 }
+// After the tutorial, straight into a real match: Cats against an Easy bot playing Aggro (the deck chosen for later games too).
+async function firstMatch() {
+  const cats = playable().find(d => d.name === 'Cats');   // the player's own Cats deck (a copy of the starter), else the starter
+  if (cats) store('ak:deck', cats.id);
+  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: cats ? deckSpec(cats) : 'cats_midrange', name: 'You', bot: { level: 'easy', deck: 'aggro_hq_rush' } }) });
+  if (!r.ok) return toast(await r.text());
+  const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+}
 function joinCode() { if (play.code) { play.open = null; location.hash = '#/join/' + play.code; } }
 
 // ------------------------------------------------------------------ collection (= the deckbuilder): collection.js
@@ -855,10 +863,11 @@ function drawEnd() {
     if (won) store(lesson === 1 ? 'ak:lesson' : 'ak:learned', '1');
     const next = !won ? '' : lesson === 1 ? '<div class="next">One more lesson to go.</div>' : '<div class="next">You\'re ready! Pick a deck and take on a real opponent.</div>';
     const go = !won ? `<a class="slab" href="#/">Menu</a><button class="play" id="again">Try again</button>`   // no See the board in a lesson
-      : lesson === 1 ? `<button class="play" id="nextlesson">Next lesson</button>` : `<a class="play" href="#/">Play a match</a>`;
+      : lesson === 1 ? `<button class="play" id="nextlesson">Next lesson</button>` : `<button class="play" id="firstmatch">Play a match</button>`;
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}.</div>${next}<div class="btns">${go}</div></div>`;
     if (!won) document.getElementById('again').onclick = () => startTutorial(lesson);
     if (won && lesson === 1) document.getElementById('nextlesson').onclick = () => startTutorial(2);
+    if (won && lesson === 2) document.getElementById('firstmatch').onclick = firstMatch;
   } else {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
     const won = S[you] > S[them], series = V.results.length > 1;
