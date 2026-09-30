@@ -1,6 +1,6 @@
 # Canine Buff Tempo
 
-Mono-Canine deck built on persistent strength buffs and pack reach. Buffs grow the pack in hand and on board; Jackal and Hyena turn pack size and strength into removal; Painted Dog makes Pup tokens and Scarlett places her cubs Poppy and Rusty; Coyote deploys Canines away from the connected chain.
+Mono-Canine deck built on persistent strength buffs and pack reach. Buffs grow the pack in hand and on board; Jackal and Hyena turn pack size and strength into removal; African Wild Dog makes Pup tokens and Scarlett places her cubs Poppy and Rusty; Coyote deploys Canines away from the connected chain.
 
 Buff wording is binding: "has +X" is a live aura, "give +X" is a permanent counter that also sticks to cards in hand (see [`../../rules/keywords.md`](../../rules/keywords.md), Strength modifiers).
 
@@ -32,7 +32,7 @@ Buff wording is binding: "has +X" is a live aura, "give +X" is a permanent count
 |---|---:|---|---:|---|
 | **Jackal** | 3 | Canine | 4 | Roar: remove an adjacent enemy with less or equal strength. |
 | **Fox** | 3 | Canine | 4 | Whenever this gains strength, draw a card. |
-| **Painted Dog** | 3 | Canine | 2 | Roar: spawn a Pup on an adjacent empty crossroad. |
+| **African Wild Dog** | 3 | Canine | 2 | Roar: spawn a Pup on an adjacent empty crossroad. |
 | **Dingo** | 3 | Canine | 5 | At the end of your turn, give all friendly adjacent Canines +1 strength. |
 | **Dog** | 3 | Canine | 1 | Roar: if you control another Canine, play another Canine from your hand. |
 | **Wolf** | 3 | Canine | 7 | — |

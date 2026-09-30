@@ -1024,7 +1024,7 @@
     },
     {
       "id": "african_wild_dog",
-      "name": "Painted Dog",
+      "name": "African Wild Dog",
       "deck": "canine_buff_tempo",
       "rarity": "common",
       "tags": ["Canine"],

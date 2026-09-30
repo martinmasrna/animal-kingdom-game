@@ -22,7 +22,7 @@ from .runner import GameRecord
 GREEDY_CAVEAT = (
     "Balance conclusions are only as good as the bots. GreedyBot now credits scheduled/delayed "
     "single-card payoffs (Egg hatch, Bear removal) via pending_payoff, but a 1-ply eval still "
-    "underplays multi-card combos and in-turn sequencing chains (e.g. Painted Dogs / Domestic "
+    "underplays multi-card combos and in-turn sequencing chains (e.g. Wild Dogs / Domestic "
     "Cat) that need turn search. Treat these numbers as bot-limited; confirm suspect verdicts "
     "with the turn/referee pilots."
 )
