@@ -307,6 +307,11 @@ const send = msg => ws && ws.readyState === 1 && ws.send(JSON.stringify(msg));
 const act = action => { ui.sel = null; ui.hover = null; send({ t: 'act', action }); };
 
 function onView(prev) {
+  // While an animation the player started must play out (the tutorial's fruit on Next), new views wait: a redraw would cut
+  // it short. The first held view's predecessor is kept, so what changed meanwhile still animates when they apply.
+  const hold = (ui.animUntil || 0) - Date.now();
+  if (screen === 'game' && hold > 0) { if (!onView.kept) onView.kept = prev; clearTimeout(onView.t);
+    onView.t = setTimeout(() => { const p = onView.kept; onView.kept = null; onView(p); }, hold + 20); return; }
   if (V.phase === 'lobby') return lobbyScreen();
   if (V.phase === 'prematch') return prematchScreen();
   if (!prev || prev.phase === 'game_over' && V.phase === 'playing') ui.peek = false;
@@ -525,7 +530,7 @@ function drawGame() {
     e.stopPropagation();
     const iid = Number(el.dataset.iid), id = el.dataset.id;
     if (d.handPick.has(iid)) return act({ kind: 'choice', choice: iid });
-    if (!d.mine || !d.places[id]) return;
+    if (!d.mine || !d.places[id] || !el.classList.contains('can')) return;   // a dimmed copy (the tutorial lights one) does nothing
     ui.sel = ui.sel === id ? null : id; ui.hover = null; drawGame();
   });
 
@@ -641,10 +646,11 @@ function placeCoach(el, L, rings = []) {
   el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
   el.style.setProperty('--up', `${up}px`);   // a risen coach clears the lifted card, which moved with the hand
   el.dataset.iid = side === 'above' && y >= 572 ? (card ? card.dataset.iid : 'any') : '';   // over the hand: a hovered card lifts it   // hovering that card lifts the coach above it (wireCoachHover)
-  el.innerHTML = `<p>${L.text}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
+  const text = rings.length === 1 ? L.text.replace('one of the circles', 'the circle').replace('Click one.', 'Click it.') : L.text;   // one circle: "the circle"
+  el.innerHTML = `<p>${text}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
   // an opening step closes on Next (or Enter/Space), and the next one shows
   if (L.next) el.querySelector('#coachnext').onclick = e => { e.stopPropagation(); tutState().seen.add(L.id);
-    if (ui.heldFood) { ui.anim = ui.heldFood; ui.heldFood = null; }   // the held fruit flies now
+    if (ui.heldFood) { ui.anim = ui.heldFood; ui.heldFood = null; ui.animUntil = Date.now() + 1800; }   // the held fruit flies now, uninterrupted
     drawGame(); };
 }
 

@@ -42,9 +42,9 @@ DECKS = {"tutorial_you": PLAYER_DECK, "tutorial_them": OPPONENT_DECK, "tutorial2
 NAMES = {"tutorial_you": "Tutorial", "tutorial_them": "Wild dogs", "tutorial2_you": "Tutorial", "tutorial2_them": "Wild dogs"}
 BOTS = {1: "tutorial", 2: "tutorial2"}
 # Placements a turn, by the opponent's turn (its first two, then every later one): lesson 1's uses both moves while the
-# two-moves rule is new, then draws with both moves, so no dog blocks the march on its den (it must beat 100 food); lesson 2's keeps to one, so no extra dog takes the
+# two-moves rule is new, then one dog on the player's way and a draw: the march covers it (covering drilled, not slowed); lesson 2's keeps to one, so no extra dog takes the
 # crossroad the Black Mamba needs beside the Eagle.
-PER_TURN = {1: (2, 2, 0), 2: (1, 1, 1)}   # 0: it draws instead (a real move), leaving the march on its den open   # the opponent's bot name per lesson
+PER_TURN = {1: (2, 2, 1), 2: (1, 1, 1)}   # the opponent's bot name per lesson
 
 # The opponent's scripted moves, by its turn (turn_counter): lesson 1 walls the middle of its den and puts a dog beside
 # it; lesson 2 walls all three crossroads, then flies the Eagle onto the player's Squirrel (SQUIRREL: wherever it is).
@@ -83,10 +83,10 @@ class TutorialBot(Bot):
             if pick:
                 return pick
         quota = self.per_turn[min(state.turn_counter // 2, 2)]
-        if quota == 0:   # both moves on draws: two moves, like every player, and no dog in the march's way
+        if state.units_placed_this_turn >= quota:   # its placements done: the other move draws (two moves, like every player)
             draw = next((a for a in legal if isinstance(a, DrawAction)), None)
-            return draw or PassAction()
-        if state.units_placed_this_turn >= quota:   # its placements this turn (a draw first still leaves it one)
+            if draw and state.actions_taken_this_turn:
+                return draw
             return PassAction()
         if self.ambush:   # the ambush card waits for its moment, never an ordinary placement
             places = [a for a in places if a.card_id != self.ambush[0]]
