@@ -317,7 +317,7 @@ async def pool(_req):
 async def create_match(req):
     body = await req.json()
     try:
-        deck = custom_decks.resolve(body.get("deck"))
+        deck = "tutorial_you" if body.get("tutorial") else custom_decks.resolve(body.get("deck"))
     except EngineError as e:
         raise web.HTTPBadRequest(text=str(e))
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
@@ -326,7 +326,10 @@ async def create_match(req):
                             profile=player and player["id"]))
     bot = body.get("bot")
     gauntlet = body.get("gauntlet")
-    if gauntlet:
+    if body.get("tutorial"):     # the fixed deal against the tutorial's opponent, straight into the game
+        match.join(Seat(secrets.token_urlsafe(12), "Wild dogs", bot="tutorial", deck="tutorial_them"))
+        match.ready("A")
+    elif gauntlet:
         level = gauntlet.get("level", "normal")
         if level not in BOT_LEVELS:
             raise web.HTTPBadRequest(text="bad bot level")
@@ -346,8 +349,9 @@ async def create_match(req):
                         bot=bot["level"], deck=bot["deck"]))
     else:
         match.version += 1
-    match.on_game_end = save_game
-    match.on_match_end = record_match
+    if not match.tutorial:      # a tutorial is neither a game log for balance nor a match in the history
+        match.on_game_end = save_game
+        match.on_match_end = record_match
     hub.matches[mid] = match
     hub.save(match)
     return web.json_response({"id": mid, "token": token, "seat": "A"})

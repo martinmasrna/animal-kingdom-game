@@ -483,6 +483,7 @@ def new_game(
     cards: Optional[dict[str, Card]] = None,
     config: Optional[Config] = None,
     first_player: Optional[str] = None,
+    stacked: bool = False,
 ) -> GameState:
     """Set up a fresh game: shuffle decks, pick first player, deal opening hands.
 
@@ -491,6 +492,7 @@ def new_game(
     `first_player`, if given ("A"/"B"), forces who goes first instead of the coin flip below -
     the RNG is still drawn from so the rest of the stream (shuffles already happened, later
     chance effects) is identical either way.
+    `stacked` keeps both decks in the given order, first card drawn first (the tutorial's fixed deal).
     """
     rng = random.Random(seed)
     cards = cards or load_cards()
@@ -499,8 +501,11 @@ def new_game(
 
     decks = {"A": list(deck_a), "B": list(deck_b)}
     starting_decks = {"A": tuple(deck_a), "B": tuple(deck_b)}  # the fixed lists, for Oxpecker (F12)
-    rng.shuffle(decks["A"])
-    rng.shuffle(decks["B"])
+    if stacked:
+        decks = {p: d[::-1] for p, d in decks.items()}   # draws pop from the end
+    else:
+        rng.shuffle(decks["A"])
+        rng.shuffle(decks["B"])
 
     coin_flip = "A" if rng.random() < 0.5 else "B"  # coin flip via injected seed
     first = first_player if first_player is not None else coin_flip

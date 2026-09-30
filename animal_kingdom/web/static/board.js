@@ -71,7 +71,8 @@ export function renderBoard(el, M, g, cards, ui) {
   // Payout stones: the plate's stone with a small boss on it holding the payout, in the holder's colour when held.
   for (const reg of M.regions) {
     const [x, y] = stoneAt(reg), h = held.find(r => r.id === reg.id);
-    s += put(`stone pboss ${h ? h.owner : ''}`, x, y, chalk('+' + reg.food));
+    const focus = ui.focus && ui.focus.region === reg.c.join(',') ? ' focus' : '';   // the tutorial points at it
+    s += put(`stone pboss ${h ? h.owner : ''}${focus}`, x, y, chalk('+' + reg.food));
   }
 
   for (let c = 1; c <= M.cols; c++) for (let r = 1; r <= M.rows; r++) {
@@ -134,5 +135,5 @@ function den(side, g, A, stones, ui) {
     : `data-lag="150" data-dur="${300 + 110 * Math.ceil((food - (gained ? A.food[side] : food)) / 10)}"`;
   return s + put(`dcount ${side}${gained ? ' tick' : ''}`, kx, ky, gemDigits(counting ? A.food[side] : food),
     `data-from="${gained ? A.food[side] : food}" data-to="${food}" ${timing} data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
-    put(`mouth${side === 'B' && ui.hqRing ? ' tgt' : ''}`, mx, my, '', `data-hq="${side}"`);
+    put(`mouth${side === 'B' && ui.hqRing ? ' tgt' : ''}${ui.focus && ui.focus.den === side ? ' focus' : ''}`, mx, my, '', `data-hq="${side}"`);
 }

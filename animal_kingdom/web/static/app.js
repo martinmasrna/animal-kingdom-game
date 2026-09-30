@@ -5,6 +5,7 @@ import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, crossroadAt, denMouthAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML } from './collection.js';
 import { dd, wireDd } from './menu.js';
+import { current as lessonNow, gate } from './tutorial.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const COVER = { cats_midrange: 'king_theron', canine_buff_tempo: 'lobo', aggro_hq_rush: 'verminus', colony_food_swarm: 'queen_honoria',
@@ -141,13 +142,17 @@ function homeScreen(mode = {}) {
       : `<div class="seg"><button class="slab${play.opp === 'bot' ? ' on' : ''}" data-opp="bot">Bot</button><button class="slab${play.opp === 'friend' ? ' on' : ''}" data-opp="friend">Friend</button></div>`
         + (play.opp === 'friend' ? `<div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
           : levels + dd('botDeck', play.botDeck, botDecks))}</div>` : '';
+  // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
+  const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${play.open === 'decks' ? '' : '<div class="title">Animal Kingdom</div>'}${chooser}
-    <div class="flank l"><a class="backbtn" href="#/collection"><span>Collection</span></a></div>
-    <div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
+    <div class="flank l"><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : '<button class="backbtn" id="learn2"><span>How to play</span></button>'}</div>
+    ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
-      <button class="play" id="go">${go}</button></div>
+      <button class="play" id="go">${go}</button></div>`}
     <div class="flank r"><a class="backbtn who" href="#/profile"><span><b>${esc(ME.name)}</b><i>#${ME.tag}</i></span></a></div></div>`;
   const $ = id => document.getElementById(id), root = app.querySelector('.home');
+  if (first) { $('learn').onclick = startTutorial; $('known').onclick = () => { store('ak:learned', '1'); redraw(); }; return; }
+  $('learn2').onclick = startTutorial;
   const toggle = k => { play.open = play.open === k ? null : k; play.peek = null; redraw(); };
   $('deckbtn').onclick = () => toggle('decks');
   if (!mode.join) $('oppbtn').onclick = () => toggle('opp');
@@ -184,6 +189,13 @@ function homeScreen(mode = {}) {
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
   };
+}
+// The tutorial: a real game with a fixed deal against a gentle opponent, a coach teaching one step at a time (tutorial.js).
+const learned = () => !!store('ak:learned') || !!(ME && ME.history && ME.history.length);
+async function startTutorial() {
+  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ tutorial: true, name: 'You' }) });
+  if (!r.ok) return toast(await r.text());
+  const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
 }
 function joinCode() { if (play.code) { play.open = null; location.hash = '#/join/' + play.code; } }
 
@@ -342,9 +354,14 @@ const opp = () => V.you === 'A' ? 'B' : 'A';
 const rel = p => p === V.you ? 'A' : 'B';
 const dcr = cr => { if (V.you === 'A') return cr; const [c, r] = cr.split(','); return `${MAP.cols + 1 - Number(c)},${r}`; };
 
+// The tutorial: its opponent is the tutorial's bot. Its lessons seen, per match (a new tutorial starts them over).
+const isTutorial = () => !!(V && V.seats && V.seats.B && V.seats.B.bot === 'tutorial');
+const tutState = () => { if (!ui.tut || ui.tut.id !== V.id) ui.tut = { id: V.id, seen: new Set(), shown: {} }; return ui.tut; };
+
 // What the seat can do right now, in viewer space.
 function decision() {
   const G = V.game, d = { mine: V.phase === 'playing' && G.toAct === V.you, rings: [], hqRing: false, crChoice: {}, handPick: new Set(), cardOpts: [], otherOpts: [], places: {}, pend: null };
+  if (isTutorial() && V.phase === 'playing') d.lesson = lessonNow(V, ui.sel, CARDS, tutState());   // the tutorial's coach: the lesson for this moment
   if (!d.mine) return d;
   d.pend = G.pending; d.places = G.legal.place;
   if (d.pend && d.pend.mode === 'choice') {
@@ -357,6 +374,7 @@ function decision() {
     d.rings = Object.keys(d.crChoice);
     ui.sel = null;
   } else {
+    if (d.lesson && d.lesson.only) gate(d, d.lesson.only);   // a forced lesson lets only its step be taken
     if (ui.sel && !d.places[ui.sel]) ui.sel = null;
     const ids = Object.keys(d.places);
     if (!ui.sel && ids.length === 1 && d.pend) ui.sel = ids[0];   // a "play this card" prompt: preselect it
@@ -390,6 +408,7 @@ function gameScreen() {
       <div class="abs tbtn" id="tbtn"></div>
       <div class="abs waiting" id="waiting"></div>
       <div class="abs prompt" id="choicebar"></div>
+      <div class="abs coach" id="coach"></div>
       <div class="abs opts" id="opts"></div>
       <div class="abs reveal" id="reveal"></div>
       <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
@@ -411,8 +430,8 @@ function gameScreen() {
     $('deck').onmouseleave = () => { if (ui.panel === 'mine') { ui.panel = null; showPanel(); } };
     app.querySelectorAll('.panel').forEach(el => el.onclick = e => e.stopPropagation());
     $('scr').addEventListener('click', () => { $('menudrop').classList.remove('on'); if (ui.panel) { ui.panel = null; showPanel(); } });
-    $('deck').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.legal.draw) act({ kind: 'draw' }); };
-    $('tbtn').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.canPass) act({ kind: 'pass' }); };
+    $('deck').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.legal.draw && !d.noDraw) act({ kind: 'draw' }); };
+    $('tbtn').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.canPass && !d.noPass) act({ kind: 'pass' }); };
     wireBoard();
   }
   drawGame();
@@ -440,7 +459,8 @@ function drawGame() {
   let drawnK = 0;
   hand.innerHTML = G.hand.map((h, i) => {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id], pick = d.handPick.has(h.iid);
-    const cls = [c.rarity, can ? 'can' : '', can && h.ready ? 'ready' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick ? 'dim' : ''].join(' ');
+    const hint = can && d.lesson && d.lesson.only && !ui.sel;   // the card the tutorial asks for
+    const cls = [c.rarity, can ? 'can' : '', can && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick ? 'dim' : ''].join(' ');
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
     return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
@@ -455,12 +475,12 @@ function drawGame() {
   });
 
   // The deck is Draw 2; the End turn button is also the turn indicator.
-  const canDraw = d.mine && !d.pend && G.legal.draw;
+  const canDraw = d.mine && !d.pend && G.legal.draw && !d.noDraw;
   $('deck').className = 'abs deck num' + (canDraw ? ' can' : ''); $('deck').innerHTML = canDraw ? 'Draw 2' : '';
   const tb = $('tbtn');
   if (playing && G.current === you) {
     const pips = Array.from({ length: G.actionsTotal }, (_, i) => `<i class="${i < G.actionsTotal - G.actionsLeft ? 'used' : ''}"></i>`).join('');
-    tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass ? ' can' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}</span>`;
+    tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass && !d.noPass ? ' can' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}</span>`;
   } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = 'Their turn'; }
   else { tb.className = 'abs tbtn'; tb.innerHTML = ''; }
 
@@ -488,6 +508,10 @@ function drawGame() {
     bar.classList.remove('on');
     if (playing && G.opponentChoosing) waiting.textContent = G.history.length ? 'Opponent is choosing' : 'Opponent is mulliganing';
   }
+  // The tutorial's coach speaks from its own granite piece, above a pending choice when there is one.
+  const coach = $('coach'), L = d.lesson;
+  coach.classList.toggle('on', !!L); coach.classList.toggle('lifted', !!L && bar.classList.contains('on'));
+  coach.innerHTML = L ? `<p>${L.text}</p>` : '';
   clearTimeout(drawGame.think);
   if (playing && G.toAct === them && V.seats[them].bot) {
     const ver = V.version;
@@ -588,7 +612,8 @@ function drawBoard(d) {
   const A = ui.anim; ui.anim = null;   // the animations play once, never on hover redraws
   const last = V.game.history[V.game.history.length - 1], won = V.game.result && V.game.result.reason === 'hq_capture' && last && last.target && last.target[0] === 'hq';
   const capture = won ? { side: rel(last.target[1]), id: last.card, owner: rel(last.seat), str: CARDS[last.card].str } : null;
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null });
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null,
+    focus: d.lesson && d.lesson.focus });
 }
 
 function wireBoard() {
@@ -664,6 +689,13 @@ function drawEnd() {
       <div class="next">Game ${V.results.length + 1}: ${firstNext === you ? 'you go first' : 'they go first'}</div>
       <div class="btns">${peek}<button class="play" id="nextg">Next game</button></div></div>`;
     document.getElementById('nextg').onclick = () => send({ t: 'next' });
+  } else if (isTutorial()) {
+    // the tutorial's end: a win sends the player on to a real match; otherwise, the same lesson again
+    if (w === you) store('ak:learned', '1');
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>
+      ${w === you ? '<div class="next">That\'s the game. Pick a deck and play.</div>' : ''}
+      <div class="btns">${peek}${w === you ? '<a class="play" href="#/">Play a match</a>' : '<button class="play" id="again">Try again</button>'}</div></div>`;
+    if (w !== you) document.getElementById('again').onclick = startTutorial;
   } else {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
     const won = S[you] > S[them], series = V.results.length > 1;
@@ -754,7 +786,7 @@ addEventListener('keydown', e => {
   }
 });
 
-window.__ak = () => ({ V, ui });   // test hook: the headless play-through reads the view
+window.__ak = () => ({ V, ui, d: lastDecision });   // test hook: the headless play-through reads the view
 window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it
 window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client
 boot();

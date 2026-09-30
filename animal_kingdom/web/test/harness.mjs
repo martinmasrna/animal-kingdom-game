@@ -32,8 +32,12 @@ export function recordMatches(n = 7) {
   return readdirSync(dir).filter(f => f.endsWith('.json')).sort().map(f => ({ name: f, views: JSON.parse(readFileSync(join(dir, f))) }));
 }
 
-export async function openBrowser() {
-  return puppeteer.launch({ executablePath: CHROME, headless: 'new', defaultViewport: { width: 1512, height: 800 } });
+// Pages open as a player who has done the tutorial (home shows the full piece); `newPlayer` opens them as a first visit.
+export async function openBrowser({ newPlayer = false } = {}) {
+  const b = await puppeteer.launch({ executablePath: CHROME, headless: 'new', defaultViewport: { width: 1512, height: 800 } });
+  if (!newPlayer) { const open = b.newPage.bind(b);
+    b.newPage = async () => { const p = await open(); await p.evaluateOnNewDocument(() => { try { localStorage.setItem('ak:learned', '1'); } catch { /* no storage */ } }); return p; }; }
+  return b;
 }
 
 // A game page showing the frozen lab view, ready to be fed; `still` asks for reduced motion, which the client honours by
@@ -74,11 +78,11 @@ export function screenMismatches() {
     const str = digits(el.querySelector('.boss'));
     if (str !== String(top.str)) out.push(`${cr}: ${top.id} shows strength ${str}, is ${top.str}`);
     const timer = el.querySelector('.timer');
-    if (top.timer && !(timer && timer.textContent === String(top.timer))) out.push(`${cr}: ${top.id} timer ${top.timer} not shown`);
-    if (timer && getComputedStyle(timer).color === getComputedStyle(timer).backgroundColor) out.push(`${cr}: ${top.id} timer text is the colour of its disc`);
+    const alts = e => [...e.querySelectorAll('img')].map(i => i.alt).join('');   // painted digits: their alt text
+    if (top.timer && !(timer && alts(timer) === String(top.timer))) out.push(`${cr}: ${top.id} timer ${top.timer} not shown`);
     const kw = (window.__ak.cards()[top.id].kw || []).filter(k => ['Armor', 'Stealth'].includes(k));
-    const badge = el.querySelector('.kw');
-    if (kw.length && !(badge && badge.dataset.tip === kw.join(', '))) out.push(`${cr}: ${top.id} is ${kw.join(', ')} but shows ${badge ? badge.dataset.tip : 'no badge'}`);
+    const badges = [...el.querySelectorAll('.kw img')].map(i => i.alt).join(', ');   // one painted badge per keyword
+    if (kw.length && badges !== kw.join(', ')) out.push(`${cr}: ${top.id} is ${kw.join(', ')} but shows ${badges || 'no badge'}`);
     const buried = el.querySelectorAll('.buried').length;
     if (buried !== Math.min(3, st.length - 1)) out.push(`${cr}: ${buried} buried discs for a stack of ${st.length}`);
     delete want[cr];

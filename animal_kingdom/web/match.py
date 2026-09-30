@@ -26,6 +26,7 @@ from ..engine.effects import roar_condition
 from ..engine.maps import load_map
 from ..engine.state import EngineError, GameState, Result, new_game, other_player
 from ..engine.strength import effective_strength, placement_strength
+from . import tutorial
 
 CARDS = load_cards()
 MAP_ID = "map_b"
@@ -41,14 +42,19 @@ CLOCK_BANK = 180.0
 # Menu labels for the premade decks (the design mockups' names).
 DECK_NAMES = {"cats_midrange": "Cats", "canine_buff_tempo": "Canines", "aggro_hq_rush": "Aggro",
               "colony_food_swarm": "Colony", "egg_control": "Egg", "food_otk": "Food", "ramp": "Ramp",
-              "goodstuff": "Goodstuff"}
+              "goodstuff": "Goodstuff", **tutorial.NAMES}
 
 # Easy / Normal / Expert, as in the play screen.
 BOT_LEVELS = {"easy": GreedyBot, "normal": TurnBot, "expert": RefereeBot}
 
 
 def bot_for(level: str, seed: int):
-    return BOT_LEVELS[level](seed=seed)
+    return tutorial.TutorialBot(seed=seed) if level == "tutorial" else BOT_LEVELS[level](seed=seed)
+
+
+def deck_list(slug: str) -> list[str]:
+    """A seat's deck as card ids: a premade deck, or one of the tutorial's fixed deals."""
+    return list(tutorial.DECKS[slug]) if slug in tutorial.DECKS else load_premade_deck(slug)
 
 
 @dataclass
@@ -207,6 +213,11 @@ class Match:
         self.version += 1
 
     # ----------------------------------------------------------------- games
+    @property
+    def tutorial(self) -> bool:
+        """The tutorial: its opponent is the tutorial's bot."""
+        return "B" in self.seats and self.seats["B"].bot == "tutorial"
+
     def score(self) -> dict:
         return {p: sum(1 for r in self.results if r["winner"] == p) for p in "AB"}
 
@@ -225,9 +236,13 @@ class Match:
         self.notes = []
         self.action_times = []
         self.started_at = time.time()
-        self.state = new_game(load_premade_deck(self.seats["A"].deck),
-                              load_premade_deck(self.seats["B"].deck), seed,
-                              map_id=MAP_ID, first_player=first)
+        if self.tutorial:     # the fixed deal the lessons are written for: you first, no mulligan
+            self.state = new_game(deck_list(self.seats["A"].deck), deck_list(self.seats["B"].deck), seed,
+                                  map_id=MAP_ID, first_player="A", stacked=True, config=tutorial.config())
+        else:
+            self.state = new_game(load_premade_deck(self.seats["A"].deck),
+                                  load_premade_deck(self.seats["B"].deck), seed,
+                                  map_id=MAP_ID, first_player=first)
         self.bots = {s: bot_for(seat.bot, seed + i) for i, (s, seat) in enumerate(self.seats.items())
                      if seat.is_bot}
         self.history = []
@@ -422,7 +437,7 @@ class Match:
                       for p, seat in self.seats.items()},
             "results": [{k: r[k] for k in ("winner", "reason", "turns")} for r in self.results],
             "score": self.score(),
-            "lists": {p: dict(Counter(load_premade_deck(seat.deck)))
+            "lists": {p: dict(Counter(deck_list(seat.deck)))
                       for p, seat in self.seats.items() if seat.deck},
             "game": None,
         }
