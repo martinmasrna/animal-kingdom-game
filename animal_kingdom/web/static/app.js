@@ -544,7 +544,7 @@ function placeCoach(el, L) {
   else if (a.endturn) [x, y, side] = [1439, 664, 'above'];
   else if (a.cr) { [x, y] = crossroadAt(a.cr); side = x > STAGE.w / 2 ? 'left' : 'right'; }
   else if (a.den) { [x, y] = denMouthAt(a.den); side = a.den === 'B' ? 'left' : 'right'; }
-  else if (a.gem) [x, y, side] = [150, 122, 'right'];
+  else if (a.gem) [x, y, side] = a.gem === 'A' ? [150, 122, 'right'] : [STAGE.w - 150, 122, 'left'];   // a den's food gem, on its crown
   else if (a.hand) [x, y, side] = [STAGE.w / 2, 590, 'above'];
   else if (a.oppcards) [x, y, side] = [STAGE.w / 2 + 170, 72, 'below'];   // beside the opponent's card backs, clear of their revealed card
   else if (a.middle) [x, y, side] = [STAGE.w / 2, 250, 'mid'];

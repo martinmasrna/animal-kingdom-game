@@ -12,11 +12,11 @@ const fresh = () => ({ seen: new Set(), shown: {} });
 test('the opening names what is on screen, one Next at a time, with nothing else to click', () => {
   const t = fresh(), ids = [];
   for (let L = current(view(), null, CARDS, t); L && L.next; L = current(view(), null, CARDS, t)) { ids.push(L.id); assert.deepEqual(L.only, {}); t.seen.add(L.id); }
-  assert.deepEqual(ids, ['welcome', 'yourden', 'theirden', 'foodcount', 'cards']);
+  assert.deepEqual(ids, ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards']);
 });
 
 test('the first lessons walk the first turn, ringing every place the rules allow', () => {
-  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'cards'].forEach(id => t.seen.add(id));
+  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards'].forEach(id => t.seen.add(id));
   assert.equal(current(view(), null, CARDS, t).id, 'lion');
   assert.deepEqual(current(view(), 'lion', CARDS, t).only, { card: 'lion' }, 'all three crossroads by the den');
   const L = current(view({ board: { '1,2': u('lion', 'A') }, legal: { place: { cape_buffalo: [['cr', '1,1'], ['cr', '1,2'], ['cr', '1,3'], ['cr', '2,2']] }, draw: true } }), 'cape_buffalo', CARDS, t);   // 1,2 is the Lion's own
@@ -24,7 +24,7 @@ test('the first lessons walk the first turn, ringing every place the rules allow
 });
 
 test('the Wolf goes on the food region the first animals started, wherever that is', () => {
-  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'cards'].forEach(id => t.seen.add(id));
+  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards'].forEach(id => t.seen.add(id));
   const place = { dire_wolf: [['cr', '1,1'], ['cr', '2,2'], ['cr', '2,3']] }, hand = [{ id: 'dire_wolf' }];
   const upper = current(view({ round: 2, hand, board: { '1,2': u('lion', 'A'), '1,3': u('cape_buffalo', 'A') }, legal: { place, draw: true } }), null, CARDS, t);
   assert.deepEqual(upper.only, { card: 'dire_wolf', picked: true, crs: ['2,2', '2,3'] });
@@ -57,7 +57,7 @@ test('the open den is pointed out whenever it can be taken', () => {
 });
 
 test('a Roar asking for a target is explained beside its choice', () => {
-  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'cards'].forEach(id => t.seen.add(id));
+  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards'].forEach(id => t.seen.add(id));
   const L = current(view({ round: 4, pending: { mode: 'choice', kind: 'target', source: 'jaguar', options: [] }, legal: { place: {}, draw: false } }), null, CARDS, t);
   assert.equal(L.id, 'target'); assert.deepEqual(L.at, { prompt: true });
 });

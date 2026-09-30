@@ -9,7 +9,7 @@
 // A lesson shows until its situation passes, the player acts past it (`untilAct`) or clicks Next, then never again.
 //
 // Each lesson stands beside what it talks about: `at` names it (a card in hand, the hand, a crossroad, a region's
-// stone, the deck, End turn, a den, your food gem, the opponent's cards, the middle of the board), directly or from
+// stone, the deck, End turn, a den, a food gem, the opponent's cards, the middle of the board), directly or from
 // the moment's facts (beside the rightmost of a picked card's rings).
 
 // Lessons read plain facts of the game view (the player is always seat A here). `c` is:
@@ -32,7 +32,9 @@ export const LESSONS = [
   { id: 'theirden', when: opening, ...talk, at: { den: 'B' },
     text: 'This is your opponent\'s den. Put any of your animals on it and you win!' },
   { id: 'foodcount', when: opening, ...talk, at: { gem: 'A' },
-    text: 'This counts your food. Gather 100 food and you win too.' },
+    text: 'The second way to win is food. This counts your food: gather 100 and you win.' },
+  { id: 'oppfood', when: opening, ...talk, at: { gem: 'B' },
+    text: 'And this counts your opponent\'s food. Don\'t let it reach 100 first!' },
   { id: 'cards', when: opening, ...talk, at: { hand: true },
     text: 'These are your animal cards. The number on a card is the animal\'s strength.' },
 
