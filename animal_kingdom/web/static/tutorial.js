@@ -101,15 +101,13 @@ export const LESSONS = [
     text: { pick: 'Click the Squirrel.', place: 'Now click one of the circles.' } },
   { id: 'roared', when: c => c.roared, ...talk, at: { gem: 'A' },
     text: 'The Squirrel roared and gave you 10 food! Roars are another way to gather food, besides regions.' },
+  // lesson 1 ends on food, the win its regions teach: after the Roar every move is guided to the best spots for a region
   { id: 'free', when: c => c.mine && (c.roared || c.round >= 6), ...talk, at: { middle: true },
-    text: 'Now make your way to your opponent\'s den. Each move, the circles show how to get closer.' },
+    text: 'Now gather 100 food to win. Each move, the circles show the best spots for finishing a region.' },
   TARGET,
-  // lesson 1 ends on the den win it teaches: after the Roar every move is forced toward the den, then onto it
-  { id: 'den', when: c => c.mine && c.places.some(t => t[0] === 'hq'), only: { hq: true }, at: { den: 'B' },
-    text: { pick: 'Your opponent\'s den is open! Click any of your animals.', place: 'Now click your opponent\'s den to win!' } },
-  { id: 'march', again: true, when: c => c.mine && (c.roared || c.round >= 6) && c.forward.length > 0,
-    only: c => ({ crs: c.forward }), at: { rings: true },
-    text: { pick: 'Head for your opponent\'s den! Click one of your animals.', place: 'Now click one of the circles.' } },
+  { id: 'feed', again: true, when: c => c.mine && (c.roared || c.round >= 6) && c.feed.length > 0,
+    only: c => ({ crs: c.feed }), at: { rings: true },
+    text: { pick: 'Click one of your animals.', place: 'Now click one of the circles.' } },
   EMPTY,
 ];
 
@@ -155,29 +153,30 @@ export const LESSONS_2 = [
   { id: 'uncovered', when: c => c.squirrelBack, ...talk, at: c => ({ cr: c.squirrelAt }),
     text: 'The Eagle is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
   { id: 'goal2', when: c => c.mine && c.wall, ...talk, at: { den: 'B' },
-    text: 'Your opponent\'s den is guarded by three 7s, and a 7 can\'t beat a 7. So this time, you\'ll win by gathering 100 food.' },
-  { id: 'draw3', when: c => c.mine && c.placed('black_mamba') && !c.hand('tiger') && !c.placed('tiger') && c.canDraw, only: { deck: true }, at: { deck: true },
+    text: 'Your opponent\'s den is guarded by three 7s, and a 7 can\'t beat a 7. You\'ll need something special to get in.' },
+  { id: 'draw3', when: c => c.mine && c.placed('black_mamba') && !c.hand('polar_bear') && !c.placed('polar_bear') && c.canDraw, only: { deck: true }, at: { deck: true },
     text: 'Click your deck to draw 2 more cards.' },
-  explain('apexinfo', 'tiger', c => c.mine && c.hand('tiger') && c.prey.length > 0,
-    'The Tiger is an Apex Predator: it must land on top of an animal, and it eats it. An eaten animal is gone for good.'),
-  { id: 'apex', when: c => c.mine && c.hand('tiger') && c.prey.length > 0,
-    only: c => ({ card: 'tiger', crs: c.prey }), at: { rings: true },
-    text: { pick: 'Click the Tiger.', place: 'Now click a circled animal to eat it.' } },
-  { id: 'free2', when: c => c.mine && (c.placed('tiger') || c.round >= 8), ...talk, at: { middle: true },
-    text: 'Now gather 100 food. Each move, the circles show the best spots for finishing a region.' },
-  { id: 'feed', again: true, when: c => c.mine && (c.placed('tiger') || c.round >= 8) && c.feed.length > 0,
-    only: c => ({ crs: c.feed }), at: { rings: true },
-    text: { pick: 'Click one of your animals.', place: 'Now click one of the circles.' } },
+  // get an animal next to the wall first, if none is (the Polar Bear can only land where it connects)
+  { id: 'near', again: true, when: c => c.mine && c.hand('polar_bear') && c.prey.length === 0 && c.forward.length > 0,
+    only: c => ({ crs: c.forward }), at: { rings: true },
+    text: { pick: 'Get close to the wall: click one of your animals.', place: 'Now click one of the circles.' } },
+  explain('apexinfo', 'polar_bear', c => c.mine && c.hand('polar_bear') && c.prey.length > 0,
+    'The Polar Bear is an Apex Predator: it must land on top of an animal, and it eats it. At strength 8, it can eat one of those 7s.'),
+  { id: 'apex', when: c => c.mine && c.hand('polar_bear') && c.prey.length > 0,
+    only: c => ({ card: 'polar_bear', crs: c.prey }), at: { rings: true },
+    text: { pick: 'Click the Polar Bear.', place: 'Now click a circled animal to eat it.' } },
+  { id: 'den', when: c => c.mine && c.places.some(t => t[0] === 'hq'), only: { hq: true }, at: { den: 'B' },
+    text: { pick: 'The wall is broken and your opponent\'s den is open! Click any of your animals.', place: 'Now click your opponent\'s den to win!' } },
   EMPTY,
 ];
 // Lesson 2 holds each teaching card back until its own step: it can't be placed before its line explains it.
-const HOLD = ['lynx', 'squirrel', 'black_mamba', 'eagle', 'tiger'];
+const HOLD = ['lynx', 'squirrel', 'black_mamba', 'eagle', 'polar_bear'];
 export const lessonOf = V => V.seats.B.bot === 'tutorial2' ? 2 : 1;
 // The cards not to offer now: in lesson 2, a teaching card never yet placed, unless its step is the one showing.
 export function held(V, L) {
   if (lessonOf(V) !== 2) return [];
   const placed = id => V.game.history.some(m => m.seat === V.you && m.kind === 'place' && m.card === id);
-  return HOLD.filter(id => !placed(id) && !(L && L.only && L.only.card === id) && !(id === 'tiger' && V.game.round >= 8));
+  return HOLD.filter(id => !placed(id) && !(L && L.only && L.only.card === id) && !(id === 'polar_bear' && V.game.round >= 9));
 }
 const ADJ = cr => { const [x, y] = cr.split(',').map(Number); return [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].filter(([a, b]) => a >= 1 && a <= 5 && b >= 1 && b <= 3).map(([a, b]) => `${a},${b}`); };
 
@@ -227,19 +226,20 @@ export function context(V, sel, cards) {
   Object.assign(c, { squirrelCovered: !!under, squirrelBack: !under && wasCovered && !!top, squirrelAt: (under || top || [])[0] });
   c.nextToFlier = under ? c.empty('black_mamba').filter(cr => ADJ(under[0]).includes(cr)) : [];
   c.wall = ['5,1', '5,2', '5,3'].every(cr => owner(G, cr) && owner(G, cr) !== V.you);   // lesson 2's wall before the den
-  // the best spots for food: the open corners of the region, not yet yours and free of enemies, where you hold the most
+  // the best spots for food: the corners still to take (empty, or an enemy a card can cover now) of the regions a move
+  // can progress, where you hold the most; a region with an enemy no card can cover yet waits
   const regions = [1, 2, 3, 4].flatMap(x => [1, 2].map(y => [`${x},${y}`, `${x + 1},${y}`, `${x},${y + 1}`, `${x + 1},${y + 1}`]));
-  const open = new Set(crs.filter(cr => !owner(G, cr)));
-  const cand = regions.filter(r => !r.every(cr => owner(G, cr) === V.you) && !r.some(cr => owner(G, cr) && owner(G, cr) !== V.you) && r.some(cr => open.has(cr)))
-    .map(r => [r.filter(cr => owner(G, cr) === V.you).length, r]).sort((a, b) => b[0] - a[0]);
-  c.feed = cand.length ? cand.filter(([n]) => n === cand[0][0]).flatMap(([, r]) => r.filter(cr => open.has(cr))).filter((x, i, a) => a.indexOf(x) === i) : [...open];
+  const takeable = new Set(c.offered.filter(t => t[0] === 'cr').map(t => t[1]));
+  const cand = regions.filter(r => !r.every(cr => owner(G, cr) === V.you) && r.every(cr => owner(G, cr) === V.you || !owner(G, cr) || takeable.has(cr))
+      && r.some(cr => takeable.has(cr))).map(r => [r.filter(cr => owner(G, cr) === V.you).length, r]).sort((a, b) => b[0] - a[0]);
+  c.feed = cand.length ? [...new Set(cand.filter(([n]) => n === cand[0][0]).flatMap(([, r]) => r.filter(cr => takeable.has(cr))))] : [...takeable];
   // lesson 2's Eagle: it lands only where no other animal could, with nothing reachable beside it (off the spots the lesson needs later,
   // clear of the opponent's den column), so Flight and connection show; then where it stands
   const reach = new Set(c.empty('cape_buffalo'));   // where a card without Flight may go now
   c.eagleSpots = c.empty('eagle').filter(cr => !['2,1', '3,1', '3,2'].includes(cr) && +cr[0] >= 3 && +cr[0] <= 4 && !reach.has(cr) && !ADJ(cr).some(n => reach.has(n)));
   c.eagleAt = (Object.entries(G.board).find(([, st]) => st.length && st[st.length - 1].owner === V.you && st[st.length - 1].id === 'eagle') || [])[0];
-  // the enemies the Tiger may land on and eat
-  c.prey = ((G.legal && G.legal.place && G.legal.place.tiger) || []).filter(t => t[0] === 'cr' && owner(G, t[1]) && owner(G, t[1]) !== V.you).map(t => t[1]);
+  // the wall pieces the Polar Bear may land on and eat (lesson 2)
+  c.prey = ((G.legal && G.legal.place && G.legal.place.polar_bear) || []).filter(t => t[0] === 'cr' && t[1][0] === '5' && owner(G, t[1]) && owner(G, t[1]) !== V.you).map(t => t[1]);   // the wall it can eat
   const mineAt = cr => owner(G, cr) === V.you, count = h => h.filter(mineAt).length;
   const home = count(HOME[1]) > count(HOME[0]) ? HOME[1] : HOME[0];
   const legal = new Set(Object.values((G.legal && G.legal.place) || {}).flat().filter(t => t[0] === 'cr').map(t => t[1]));

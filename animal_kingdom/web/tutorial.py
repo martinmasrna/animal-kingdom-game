@@ -1,7 +1,7 @@
 """The tutorial: two lessons, each a real game on the real map with a fixed deal and a gentle opponent.
 
-Lesson 1 teaches the basics and ends on taking the den; lesson 2 the deeper mechanics (the glow, food from a Roar,
-stacks and removal, Flight, Apex Predator) and ends on 100 food, since its opponent walls its den. The client (static/
+Lesson 1 teaches the basics and ends on 100 food (its regions); lesson 2 the deeper mechanics (the glow, Flight, stacks
+and removal, Apex Predator) and ends on taking the den, once the Polar Bear has eaten a way through its wall of 7s. The client (static/
 tutorial.js) forces the steps it teaches, so each lesson's deal and the opponent's first turns are fixed to match what it
 says. After them the opponent keeps to one placement a turn on the empty crossroad nearest the player, never closes a
 region, never covers (but for lesson 2's one scripted cover) and never takes the den: the player always wins.
@@ -29,13 +29,14 @@ OPPONENT_DECK = ["rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup
                  "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup"]
 # Lesson 2. The player opens with Lion, Lynx (it glows once the Lion stands) and a Buffalo; the Lynx's Roar draws the
 # Eagle (Flight, on your own animal first); the next draw brings the Squirrel (food from a Roar) and the Black Mamba
-# (removes up to 5: the opponent's Eagle), the one after the Tiger (Apex Predator); then animals and food Roars.
-PLAYER_DECK_2 = ["lion", "lynx", "cape_buffalo", "eagle", "squirrel", "black_mamba", "tiger", "dire_wolf", "lion",
+# (removes up to 5: the opponent's Eagle), the one after the Polar Bear (8, Apex Predator: it eats a 7 of the wall, and
+# the den falls); then animals.
+PLAYER_DECK_2 = ["lion", "lynx", "cape_buffalo", "eagle", "squirrel", "black_mamba", "polar_bear", "dire_wolf", "lion",
                  "squirrel", "cape_buffalo", "dire_wolf", "lion", "chipmunk", "cape_buffalo", "dire_wolf", "lion",
                  "squirrel", "cape_buffalo", "dire_wolf", "lion", "chipmunk", "cape_buffalo", "dire_wolf", "lion",
                  "squirrel", "cape_buffalo", "dire_wolf", "lion", "cape_buffalo", "dire_wolf", "lion", "squirrel",
                  "cape_buffalo", "dire_wolf", "lion"]
-# Its opponent walls all three crossroads before its den with 7s (a 7 can't cover a 7, so no den win), flies its Eagle
+# Its opponent walls all three crossroads before its den with 7s (a 7 can't cover a 7: only the Polar Bear gets in), flies its Eagle
 # onto the Squirrel (stacks), then plays wild dogs.
 OPPONENT_DECK_2 = ["cape_buffalo", "dire_wolf", "lion", "eagle"] + OPPONENT_DECK[1:]
 

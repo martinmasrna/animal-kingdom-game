@@ -70,7 +70,7 @@ def _lesson2() -> Match:
     return m
 
 
-def test_lesson_2_plays_out_as_its_script_says_and_is_won_on_food():
+def test_lesson_2_plays_out_as_its_script_says_and_is_won_on_the_den():
     for seed in range(20):
         rng, m = random.Random(seed), _lesson2()
         legal = lambda: rules.legal_actions(m.state)
@@ -103,23 +103,35 @@ def test_lesson_2_plays_out_as_its_script_says_and_is_won_on_food():
         assert top("3,2") == "squirrel", "the Black Mamba removed the Eagle"
         a(DrawAction())
         their_turn()
-        prey = [x for x in legal() if isinstance(x, PlaceAction) and x.card_id == "tiger" and m.state.board.get(x.crossroad)
-                and m.state.board[x.crossroad][-1].owner == "B"]
-        assert prey, "a Pup for the Tiger"
-        a(rng.choice(prey))
-        while m.phase == "playing":
+        wall = lambda: [x for x in legal() if isinstance(x, PlaceAction) and x.card_id == "polar_bear" and x.crossroad[0] == "5"]
+        for _ in range(4):   # an animal next to the wall first, if the Polar Bear can't reach it yet
+            if wall() or m.phase != "playing":
+                break
             if m.to_act() == "B":
                 their_turn(); continue
-            places = [x for x in legal() if isinstance(x, PlaceAction) and not x.is_hq_capture and not (
-                m.state.board.get(x.crossroad) and m.state.board[x.crossroad][-1].owner == "A")]
-            a(rng.choice(places) if places else DrawAction() if DrawAction() in legal() else PassAction())
-        assert m.results[-1]["winner"] == "A" and m.results[-1]["reason"] == "food", (seed, m.results[-1])
+            near = [x for x in legal() if isinstance(x, PlaceAction) and x.card_id != "polar_bear" and not x.is_hq_capture
+                    and x.crossroad[0] == "4" and not m.state.board.get(x.crossroad)]
+            a(near[0] if near else DrawAction())
+        if m.to_act() == "B":
+            their_turn()
+        assert wall(), "the Polar Bear reaches the wall"
+        a(rng.choice(wall()))
+        if m.to_act() == "B":
+            their_turn()
+        if not m.state.hands["A"]:   # the Polar Bear was the last card: draw one to walk in with (the coach says so)
+            a(DrawAction())
+            if m.to_act() == "B":
+                their_turn()
+        hq = [x for x in legal() if isinstance(x, PlaceAction) and x.is_hq_capture]
+        assert hq, "the den is open"
+        a(hq[0])
+        assert m.results[-1]["winner"] == "A" and m.results[-1]["reason"] == "hq_capture", (seed, m.results[-1])
         assert m.state.food["B"] == 0
 
 
-def test_lesson_1_forced_march_always_takes_the_den_before_100_food():
-    """The client's march (the furthest crossroads a move can reach, avoiding completing a region when it can), with any
-    choice among them, then the den as soon as it opens: always a den win."""
+def test_lesson_1_guided_to_regions_always_ends_on_100_food():
+    """After the Roar the client offers the open corners of the regions where the player holds the most (feed): with any
+    choice among them, lesson 1 always ends on food, and before turn 12."""
     regions = [[f"{x},{y}", f"{x + 1},{y}", f"{x},{y + 1}", f"{x + 1},{y + 1}"] for x in range(1, 5) for y in (1, 2)]
     for seed in range(60):
         rng, m = random.Random(seed), _tutorial()
@@ -128,17 +140,15 @@ def test_lesson_1_forced_march_always_takes_the_den_before_100_food():
                 m.act("B", m.bot_move()); continue
             legal = rules.legal_actions(m.state)
             b = m.state.board
-            mine = lambda cr: bool(b.get(cr)) and b[cr][-1].owner == "A"
-            hq = [a for a in legal if isinstance(a, PlaceAction) and a.is_hq_capture]
-            cr = [a for a in legal if isinstance(a, PlaceAction) and not a.is_hq_capture and not mine(a.crossroad)]
-            if hq:
-                m.act("A", hq[0]); continue
-            if cr:
-                far = max(int(a.crossroad[0]) for a in cr)
-                ahead = [a for a in cr if int(a.crossroad[0]) == far]
-                closes = lambda a: any(a.crossroad in r and all(q == a.crossroad or mine(q) for q in r) for r in regions)
-                ahead = [a for a in ahead if not closes(a)] or ahead
-                m.act("A", rng.choice(ahead)); continue
+            own = lambda cr: b[cr][-1].owner if b.get(cr) else None
+            places = [a for a in legal if isinstance(a, PlaceAction) and not a.is_hq_capture and own(a.crossroad) != "A"]
+            take = {a.crossroad for a in places}   # empty, or an enemy a card can cover
+            cand = [(sum(own(q) == "A" for q in r), r) for r in regions if not all(own(q) == "A" for q in r)
+                    and all(own(q) == "A" or not own(q) or q in take for q in r) and any(q in take for q in r)]
+            top = max((n for n, _ in cand), default=None)
+            feed = {q for n, r in cand if n == top for q in r if q in take} or take
+            pick = [a for a in places if a.crossroad in feed]
             choices = [a for a in legal if isinstance(a, ChoiceAction)]
-            m.act("A", choices[0] if choices else DrawAction() if DrawAction() in legal else PassAction())
-        assert m.results[-1]["reason"] == "hq_capture", (seed, m.results[-1], m.state.food)
+            m.act("A", choices[0] if choices else rng.choice(pick) if pick else DrawAction() if DrawAction() in legal else PassAction())
+        r = m.results[-1]
+        assert r["winner"] == "A" and r["reason"] == "food" and r["turns"] < 12, (seed, r)
