@@ -47,7 +47,7 @@ export const LESSONS = [
   { id: 'foodcount', when: opening, ...talk, at: { gem: 'A' },
     text: 'This is your food. The first player to gather 100 food wins.' },
   { id: 'oppfood', when: opening, ...talk, at: { gem: 'B' },
-    text: 'And this is your opponent\'s food. Don\'t let it reach 100 first!' },
+    text: 'And this is your opponent\'s food. Don\'t let it reach 100, or you will lose!' },
   { id: 'cards', when: opening, ...talk, at: { hand: true },
     text: 'These are your animal cards. The number on a card is the animal\'s strength.' },
 
