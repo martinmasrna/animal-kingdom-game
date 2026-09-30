@@ -276,3 +276,51 @@
 .game .clock.A b { color: var(--A); } .game .clock.B b { color: var(--B); }
 .game .clock.low b { animation: clocklow .6s ease-in-out infinite alternate; }
 @keyframes clocklow { to { opacity: .35; } }
+
+/* ---------- the game's chrome in the menus' materials (menu.css): granite pieces, stone slabs, the blue slab, Fira Sans Condensed ---------- */
+/* The world past the stage's edges: a blurred continuation of the savanna instead of black bars. */
+.game.kit { background: #2b2618 url(/static/kit2/plate.webp) center / cover; }
+.game.kit::before { content: ''; position: absolute; inset: 0; backdrop-filter: blur(16px) brightness(.85); -webkit-backdrop-filter: blur(16px) brightness(.85); }
+.game, .game .prompt, .game .panel, .game .endbox, .game .menudrop, .game .series, .game .clock, .game .waiting, .game .tbtn, .game .deck { font-family: 'Fira Sans Condensed', sans-serif; }
+/* Menu: a stone slab with a drawn icon; its list the dropdowns' stone. */
+.game .menu { width: 44px; height: 44px; border: 0; border-radius: 10px; color: #f0e8da; background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto;
+  box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); }
+.game .menu:hover { filter: brightness(1.2); }
+.game .menudrop { top: 52px; min-width: 210px; padding: 6px 0; border: 0; border-radius: 10px; background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 10px 24px rgba(0,0,0,.6); }
+.game .menudrop a { padding: 8px 14px; border-radius: 0; font: 500 16px 'Fira Sans Condensed', sans-serif; color: #e8e0d2; }
+.game .menudrop a:hover { background: rgba(255,245,230,.1); }
+/* The series and the clock: bone type that holds on the grass. */
+.game .series, .game .clock, .game .waiting { color: #efe6d4; text-shadow: 0 1px 2px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.6); }
+.game .series { font-size: 17px; font-weight: 600; } .game .series i { border-color: #efe6d4; box-shadow: 0 1px 2px rgba(0,0,0,.8); } .game .series i.now { background: #efe6d4; }
+.game .clock { font-size: 15px; } .game .waiting { font-size: 15px; }
+/* A pending choice: a granite piece; its button a stone slab. */
+.game .prompt { width: 270px; padding: 14px 16px; border: 0; border-radius: 14px; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto;
+  box-shadow: 0 0 0 2px var(--act), 0 12px 30px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,245,230,.12); }
+.game .prompt b { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f3ead8; } .game .prompt p { font: 500 16px/1.3 'Fira Sans Condensed', sans-serif; color: #d8cfbf; }
+.game .prompt .skip { height: 40px; padding: 0 18px; display: inline-flex; align-items: center; border: 0; border-radius: 10px; font: 600 16px 'Fira Sans Condensed', sans-serif; color: #f0e8da;
+  background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); }
+.game .prompt .skip:hover { background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; filter: brightness(1.2); }
+/* Panels (decklists, history): granite pieces; the decklists the collection's strips. */
+.game .panel { border: 0; border-radius: 14px; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 16px 40px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,245,230,.12); }
+.game .panel h4 { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f3ead8; } .game .panel h4 .n, .game .panel h4 .removed { font: 500 15px 'Fira Sans Condensed', sans-serif; color: #b3a996; }
+.game .panel .rows { padding: 6px 4px; border-radius: 10px; background: rgba(8,7,6,.55); box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.2), inset 0 2px 6px rgba(0,0,0,.6); }
+.game .panel .dbody.flat .st:first-child { border-radius: 4px 4px 0 0; } .game .panel .dbody.flat .st:last-child { border-radius: 0 0 4px 4px; }
+.game .panel .st.gone { opacity: .35; }
+.game .panel .hist { font: 500 15px/1.35 'Fira Sans Condensed', sans-serif; color: #e0d8c8; }
+/* The end of a game: Fira, the stone and blue slabs. */
+.game .endbox .res { font: 800 84px/1 'Fira Sans Condensed', sans-serif; text-shadow: 0 4px 24px rgba(0,0,0,.7); }
+.game .endbox .score { font: 700 40px 'Fira Sans Condensed', sans-serif; }
+.game .endbox .how, .game .endbox .next { font: 500 18px 'Fira Sans Condensed', sans-serif; color: #d8cfbf; }
+.game .endbox .peek { font: 500 15px 'Fira Sans Condensed', sans-serif; color: #b3a996; }
+.game .endbox .btn { height: 52px; padding: 0 28px; border: 0; border-radius: 10px; font: 700 20px 'Fira Sans Condensed', sans-serif; letter-spacing: 0; text-transform: none; color: #f0e8da;
+  background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); }
+.game .endbox .btn.primary { color: #f4f8ff; text-shadow: 0 1px 2px rgba(0,0,0,.4); background: linear-gradient(rgba(52,112,190,.5), rgba(38,88,160,.58)), #2a4a70 url(/static/kit2/coll_slab.webp) center / 300px auto;
+  background-blend-mode: color, normal, normal; box-shadow: inset 0 1px 0 rgba(200,225,255,.35), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); }
+.game .endbox .btn:hover { filter: brightness(1.15); }
+/* The painted stones' lettering in the screen's one face. */
+.game.kit .tbtn { font: 700 19px 'Fira Sans Condensed', sans-serif; }
+/* The rest of the screen's type and small surfaces: Fira, bone on stone. */
+.game .num, .game .timer, .game .hist .t, .game .hi .s, .game .hi.draw, .game .kw { font-family: 'Fira Sans Condensed', sans-serif; }
+.game .hist .t { font-weight: 600; font-size: 14px; color: #b3a996; }
+.tip { padding: 5px 10px; border: 0; border-radius: 7px; background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 4px 10px rgba(0,0,0,.6);
+  font: 600 14px 'Fira Sans Condensed', sans-serif; color: #f0e8da; }

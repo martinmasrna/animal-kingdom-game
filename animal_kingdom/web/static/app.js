@@ -3,7 +3,7 @@
 import { hasArt, artUrl, stripArt } from './art.js';
 import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, crossroadAt, denMouthAt } from './board.js';
-import { collectionScreen as renderCollection, coverOf, deckBody } from './collection.js';
+import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML } from './collection.js';
 import { dd, wireDd } from './menu.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
@@ -31,14 +31,9 @@ function toast(msg, ok) {
 function sortIds(ids) {
   return ids.sort((a, b) => RANK[CARDS[a].rarity] - RANK[CARDS[b].rarity] || sv(CARDS[a]) - sv(CARDS[b]) || CARDS[a].name.localeCompare(CARDS[b].name));
 }
+// A decklist in the game's panels: the collection's strips, copies left as filled dots of the copies in the deck.
 function rows(list, counts) {
-  let s = '', g = null;
-  sortIds(Object.keys(list)).forEach(id => {
-    const c = CARDS[id], k = counts ? (counts[id] || 0) : list[id];
-    if (c.rarity !== g) { if (g) s += '<div class="grp"></div>'; g = c.rarity; }
-    s += `<div class="dr ${c.rarity}${k ? '' : ' gone'}" data-card="${id}"><div class="ban gradart" ${artStyle(id)}></div><span class="s">${c.str}</span><span class="nm">${c.name}</span><span class="x">${k}</span></div>`;
-  });
-  return s;
+  return `<div class="dbody flat">${sortIds(Object.keys(list)).map(id => stripHTML(id, CARDS, counts ? (counts[id] || 0) : list[id], list[id])).join('')}</div>`;
 }
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 function cardPop(el, id, extra, place) {
@@ -143,7 +138,7 @@ function homeScreen(mode = {}) {
       : `<div class="seg"><button class="slab${play.opp === 'bot' ? ' on' : ''}" data-opp="bot">Bot</button><button class="slab${play.opp === 'friend' ? ' on' : ''}" data-opp="friend">Friend</button></div>`
         + (play.opp === 'friend' ? `<div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
           : levels + dd('botDeck', play.botDeck, botDecks))}</div>` : '';
-  app.innerHTML = `<div class="menu home">${play.open === 'decks' ? '' : '<div class="title">Animal Kingdom</div>'}${chooser}
+  app.innerHTML = `<div class="mscr home">${play.open === 'decks' ? '' : '<div class="title">Animal Kingdom</div>'}${chooser}
     <div class="flank l"><a class="backbtn" href="#/collection"><span>Collection</span></a></div>
     <div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
@@ -225,7 +220,7 @@ function profileScreen() {
   const code = ME.logins.length ? '' : sect('Sign-in code', `<p>Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</p>
       <div class="row"><span class="field keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span><button class="slab" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</button><button class="slab" id="copykey">Copy</button></div>`)
     + sect('Use a different profile', `<div class="row"><input class="field" id="other" placeholder="Sign-in code" autocomplete="off"><button class="slab" id="signin">Sign in</button></div>`);
-  app.innerHTML = `<div class="menu prof"><div class="hist">${hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
+  app.innerHTML = `<div class="mscr prof"><div class="hist">${hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
     <div class="side"><div class="me"><div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div>${account}${code}</div>
       <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
@@ -258,7 +253,7 @@ function matchScreen(id) {
   if (!token) { location.hash = '#/join/' + id; return; }
   if (wsId === id && ws) return;
   screen = null; V = null; ui.sel = null; ui.peek = false;
-  app.innerHTML = `<div class="menu pre"><p class="wait">Connecting…</p></div>`;
+  app.innerHTML = `<div class="mscr pre"><p class="wait">Connecting…</p></div>`;
   const connect = () => {
     wsId = id;
     ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/${id}?token=${encodeURIComponent(token)}`);
@@ -299,7 +294,7 @@ async function labScreen(name) {
 function lobbyScreen() {
   screen = 'lobby';
   const link = `${location.origin}/#/join/${V.id}`;
-  app.innerHTML = `<div class="menu pre"><div class="piece lobbyp"><div class="bigcode">${V.id}</div>
+  app.innerHTML = `<div class="mscr pre"><div class="piece lobbyp"><div class="bigcode">${V.id}</div>
       <button class="slab" id="copy">Copy link</button><p>Waiting for your friend to join</p></div>
     <a class="backbtn leave" href="#/"><span>Leave</span></a></div>`;
   document.getElementById('copy').onclick = () => navigator.clipboard.writeText(link).then(() => toast('Link copied', true), () => toast(link));
@@ -320,7 +315,7 @@ function prematchScreen() {
   const side = (p, cls) => { const counts = V.lists[p], list = Object.entries(counts).flatMap(([id, n]) => Array(n).fill(id)), cv = coverOfList(counts);
     return `<div class="piece side ${cls}"><div class="who">${seatLabel(p)}</div><div class="dtile" style="${cv ? stripArt(cv, 340, 56, .7) : ''}"><b>${esc(V.seats[p].deckName)}</b></div>
       <div class="dl">${deckBody(list, CARDS, false, true)}</div></div>`; };
-  app.innerHTML = `<div class="menu pre"><div class="face">${side(you, 'mine')}
+  app.innerHTML = `<div class="mscr pre"><div class="face">${side(you, 'mine')}
       <div class="mid">${me.ready ? '<p class="wait">Waiting for your opponent</p>' : '<button class="play" id="ready">Ready</button>'}</div>
       ${side(opp, 'theirs')}</div><a class="backbtn leave" href="#/"><span>Leave</span></a></div>`;
   const b = document.getElementById('ready'); if (b) b.onclick = () => send({ t: 'ready' });
@@ -386,7 +381,7 @@ function gameScreen() {
       <div class="abs series" id="series"></div>
       <div class="abs clock" id="clock"></div>
       <div class="abs opphand" id="opphand"></div>
-      <div class="abs menu" id="menubtn">☰<span class="livedot" id="livedot"></span>
+      <div class="abs menu" id="menubtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg><span class="livedot" id="livedot"></span>
         <div class="abs menudrop" id="menudrop"><a href="#" id="livelink">Live commentary (L)</a><a href="#" id="notelink">Add a note (N)</a><a href="#/">Leave match</a></div></div>
       <div class="abs hand" id="hand"></div>
       <div class="abs deck" id="deck"></div>

@@ -1,162 +1,162 @@
 /* The menus' shared look, settled on the collection (design sandbox builder/notes.md, round B2): the night ground, the den's
    granite for the column, lighter stone slabs for every control, the one loud action as a slab in team blue, the screen's own
-   dropdowns, sunken fields, stone hover tags and deck tiles. A menu screen's root carries .menu; its own layout lives in its own
+   dropdowns, sunken fields, stone hover tags and deck tiles. A menu screen's root carries .mscr (not .menu: the game screen's menu button owns that name); its own layout lives in its own
    stylesheet (collection.css) or below. */
-.menu { position: fixed; inset: 0; background: #171513 url(/static/kit2/coll_ground.webp) center / cover; color: #d8d4cc; font-family: 'Fira Sans Condensed', sans-serif; }
-.menu button { font: inherit; }
+.mscr { position: fixed; inset: 0; background: #171513 url(/static/kit2/coll_ground.webp) center / cover; color: #d8d4cc; font-family: 'Fira Sans Condensed', sans-serif; }
+.mscr button { font: inherit; }
 
 /* The column: the den's granite, casting a soft shadow on the ground; its foot holds the actions. */
-.menu .side { display: flex; flex-direction: column; min-height: 0; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: -6px 0 14px rgba(0,0,0,.45); }
-.menu .sfoot { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 8px 12px 12px; }
-.menu .frow { display: flex; gap: 8px; width: 100%; }
+.mscr .side { display: flex; flex-direction: column; min-height: 0; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: -6px 0 14px rgba(0,0,0,.45); }
+.mscr .sfoot { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 8px 12px 12px; }
+.mscr .frow { display: flex; gap: 8px; width: 100%; }
 
 /* Stone slabs: a step lighter than the ground, a lit top edge, a soft shadow; hover lightens the stone, nothing moves. */
-.menu .backbtn, .menu .dd .sel, .menu .slab { box-sizing: border-box; border: 0; border-radius: 10px; background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto;
+.mscr .backbtn, .mscr .dd .sel, .mscr .slab { box-sizing: border-box; border: 0; border-radius: 10px; background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto;
   box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); color: #f0e8da; font: 500 16px 'Fira Sans Condensed', sans-serif; cursor: pointer; }
-.menu .backbtn:hover, .menu .dd .sel:hover, .menu .slab:hover { filter: brightness(1.2); color: #f3ead8; }
-.menu .backbtn { width: 100%; height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; }
-.menu .backbtn span { font: 600 16px 'Fira Sans Condensed', sans-serif; }
-.menu .frow .backbtn { width: auto; flex: none; min-width: 112px; }
+.mscr .backbtn:hover, .mscr .dd .sel:hover, .mscr .slab:hover { filter: brightness(1.2); color: #f3ead8; }
+.mscr .backbtn { width: 100%; height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; }
+.mscr .backbtn span { font: 600 16px 'Fira Sans Condensed', sans-serif; }
+.mscr .frow .backbtn { width: auto; flex: none; min-width: 112px; }
 
 /* The one loud control: the slab in your team blue (the board's blue). Disabled, it is stone and does nothing. */
-.menu .play { width: 100%; height: 48px; margin: 0; border: 0; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
+.mscr .play { width: 100%; height: 48px; margin: 0; border: 0; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
   background: linear-gradient(rgba(52,112,190,.5), rgba(38,88,160,.58)), #2a4a70 url(/static/kit2/coll_slab.webp) center / 300px auto; background-blend-mode: color, normal, normal;
   box-shadow: inset 0 1px 0 rgba(200,225,255,.35), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55);
   color: #f4f8ff; font: 700 19px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
-.menu .play:hover { filter: brightness(1.15); }
-.menu .play:disabled { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; color: #8f8577; text-shadow: none; filter: saturate(.3) brightness(.8); cursor: default; }
+.mscr .play:hover { filter: brightness(1.15); }
+.mscr .play:disabled { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; color: #8f8577; text-shadow: none; filter: saturate(.3) brightness(.8); cursor: default; }
 
 /* Sunken: a count, or a field you type into. */
-.menu .fcount { flex: 1; height: 44px; border-radius: 10px; display: grid; grid-auto-flow: column; place-content: center; align-items: baseline; column-gap: 5px; line-height: 1;
+.mscr .fcount { flex: 1; height: 44px; border-radius: 10px; display: grid; grid-auto-flow: column; place-content: center; align-items: baseline; column-gap: 5px; line-height: 1;
   background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); color: #ddd3c3; }
-.menu .fcount b { display: block; font: 700 17px/1 'Fira Sans Condensed', sans-serif; }
-.menu .fcount span { display: block; font: 500 15px/1 'Fira Sans Condensed', sans-serif; color: #9d917e; }
-.menu .field { height: 40px; box-sizing: border-box; padding: 0 14px; border: 0; border-radius: 10px; background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6);
+.mscr .fcount b { display: block; font: 700 17px/1 'Fira Sans Condensed', sans-serif; }
+.mscr .fcount span { display: block; font: 500 15px/1 'Fira Sans Condensed', sans-serif; color: #9d917e; }
+.mscr .field { height: 40px; box-sizing: border-box; padding: 0 14px; border: 0; border-radius: 10px; background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6);
   color: #f0e8da; font: 500 16px 'Fira Sans Condensed', sans-serif; }
-.menu .field::placeholder { color: #b3a996; }
-.menu .field:hover { background: rgba(28,25,22,.55); }
-.menu .field:focus { outline: 0; box-shadow: inset 0 1px 3px rgba(0,0,0,.6), 0 0 0 2px rgba(207,195,173,.6); }
+.mscr .field::placeholder { color: #b3a996; }
+.mscr .field:hover { background: rgba(28,25,22,.55); }
+.mscr .field:focus { outline: 0; box-shadow: inset 0 1px 3px rgba(0,0,0,.6), 0 0 0 2px rgba(207,195,173,.6); }
 
 /* The screen's own dropdown: a slab showing the choice, the list hanging from it in the same stone; a whole row highlights. */
-.menu .dd { position: relative; }
-.menu .dd .sel { height: 40px; padding: 0 34px 0 14px; }
-.menu .dd .sel::after { content: ''; position: absolute; right: 12px; top: 50%; width: 13px; height: 13px; margin-top: -6px;
+.mscr .dd { position: relative; }
+.mscr .dd .sel { height: 40px; padding: 0 34px 0 14px; }
+.mscr .dd .sel::after { content: ''; position: absolute; right: 12px; top: 50%; width: 13px; height: 13px; margin-top: -6px;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0d6c6' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; }
-.menu .dd.open .sel { border-radius: 10px 10px 0 0; box-shadow: inset 0 1px 0 rgba(255,245,230,.22), 0 3px 6px rgba(0,0,0,.55); filter: brightness(1.12); }
-.menu .dd.open .sel::after { transform: rotate(180deg); }
-.menu .ddm { position: absolute; top: 100%; left: 0; right: 0; z-index: 40; box-sizing: border-box; padding: 0 0 6px; display: none; border-radius: 0 0 10px 10px;
+.mscr .dd.open .sel { border-radius: 10px 10px 0 0; box-shadow: inset 0 1px 0 rgba(255,245,230,.22), 0 3px 6px rgba(0,0,0,.55); filter: brightness(1.12); }
+.mscr .dd.open .sel::after { transform: rotate(180deg); }
+.mscr .ddm { position: absolute; top: 100%; left: 0; right: 0; z-index: 40; box-sizing: border-box; padding: 0 0 6px; display: none; border-radius: 0 0 10px 10px;
   background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.6); }
-.menu .dd.open .ddm { display: block; }
-.menu .dd.up .ddm { top: auto; bottom: 100%; padding: 6px 0 0; border-radius: 10px 10px 0 0; box-shadow: inset 0 -1px 0 rgba(0,0,0,.35), 0 -10px 24px rgba(0,0,0,.6); }
-.menu .dd.up.open .sel { border-radius: 0 0 10px 10px; }
-.menu .dd.up .sel::after { transform: rotate(180deg); } .menu .dd.up.open .sel::after { transform: none; }
-.menu .ddo { padding: 8px 14px; white-space: nowrap; font: 500 16px 'Fira Sans Condensed', sans-serif; color: #e8e0d2; cursor: pointer; }
-.menu .ddo:hover { background: rgba(255,245,230,.1); }
-.menu .ddo.on { color: #fff; font-weight: 700; }
+.mscr .dd.open .ddm { display: block; }
+.mscr .dd.up .ddm { top: auto; bottom: 100%; padding: 6px 0 0; border-radius: 10px 10px 0 0; box-shadow: inset 0 -1px 0 rgba(0,0,0,.35), 0 -10px 24px rgba(0,0,0,.6); }
+.mscr .dd.up.open .sel { border-radius: 0 0 10px 10px; }
+.mscr .dd.up .sel::after { transform: rotate(180deg); } .mscr .dd.up.open .sel::after { transform: none; }
+.mscr .ddo { padding: 8px 14px; white-space: nowrap; font: 500 16px 'Fira Sans Condensed', sans-serif; color: #e8e0d2; cursor: pointer; }
+.mscr .ddo:hover { background: rgba(255,245,230,.1); }
+.mscr .ddo.on { color: #fff; font-weight: 700; }
 
 /* Hover labels: a small stone tag under the thing. */
-.menu [data-tip] { position: relative; }
-.menu [data-tip]::after { content: attr(data-tip); position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 30; white-space: nowrap; padding: 5px 10px; border-radius: 7px;
+.mscr [data-tip] { position: relative; }
+.mscr [data-tip]::after { content: attr(data-tip); position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 30; white-space: nowrap; padding: 5px 10px; border-radius: 7px;
   background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 4px 10px rgba(0,0,0,.6);
   color: #f0e8da; font: 600 14px 'Fira Sans Condensed', sans-serif; opacity: 0; pointer-events: none; transition: opacity .1s; }
-.menu [data-tip]:hover::after { opacity: 1; }
+.mscr [data-tip]:hover::after { opacity: 1; }
 
 /* Deck tiles: the cover with a fade from the left, the name alone, a thin lit stone rim; hover brightens, a light rim marks the chosen one. */
-.menu .dtile { position: relative; height: 56px; border-radius: 8px; background: #2a2521 center 30% / cover; cursor: pointer; transition: filter .12s;
+.mscr .dtile { position: relative; height: 56px; border-radius: 8px; background: #2a2521 center 30% / cover; cursor: pointer; transition: filter .12s;
   box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.28), inset 0 1px 0 rgba(255,245,230,.22), 0 3px 6px rgba(0,0,0,.55); }
-.menu .dtile::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, rgba(22,19,16,.95) 35%, rgba(22,19,16,.2)); }
-.menu .dtile b { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font: 700 19px/1.1 'Fira Sans Condensed', sans-serif; color: #f0ece4; text-shadow: 0 1px 3px #000; }
-.menu .dtile:not(.on):hover { filter: brightness(1.18); box-shadow: inset 0 0 0 1.5px rgba(240,232,218,.55), inset 0 1px 0 rgba(255,245,230,.3), 0 3px 6px rgba(0,0,0,.55); }
-.menu .dtile.on { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); }
+.mscr .dtile::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, rgba(22,19,16,.95) 35%, rgba(22,19,16,.2)); }
+.mscr .dtile b { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font: 700 19px/1.1 'Fira Sans Condensed', sans-serif; color: #f0ece4; text-shadow: 0 1px 3px #000; }
+.mscr .dtile:not(.on):hover { filter: brightness(1.18); box-shadow: inset 0 0 0 1.5px rgba(240,232,218,.55), inset 0 1px 0 rgba(255,245,230,.3), 0 3px 6px rgba(0,0,0,.55); }
+.mscr .dtile.on { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); }
 
 /* ---------- The deck column (the collection's decks, the play screen's): the list of tiles, one deck open as a framed panel of
    strips, the open tile's bare icon actions. Layered as it was settled in the collection (builder/notes.md, round B2). ---------- */
-.menu .st .x i { display: block; width: 8px; height: 8px; box-sizing: border-box; border-radius: 50%; border: 1.5px solid #e9e4da; }
-.menu .st .x i.on { background: #e9e4da; }
-.menu .clist { flex: 1; overflow-y: auto; padding: 16px 12px 14px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; scrollbar-color: #3a3d40 transparent; }
-.menu .clist > * { flex: none; }
-.menu .dsep { height: 1px; margin: 10px 4px; background: #2e3134; }
-.menu .dtile.on { border-radius: 8px 8px 0 0; }
-.menu .tacts { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); z-index: 5; display: flex; gap: 6px; opacity: 0; transition: opacity .12s; }
-.menu .dtile.on:hover .tacts { opacity: 1; }
-.menu .ic { width: 34px; height: 34px; padding: 0; border-radius: 8px; border: 1px solid #55595e; background: #16181acc; color: #e0dcd4; display: grid; place-items: center; cursor: pointer; }
-.menu .ic:hover { color: #f0ece4; border-color: #8b8e92; }
-.menu .ic.del { color: #ff8a78; border-color: #9a3f33; } .menu .ic.del:hover { color: #fff; background: #b24a3a; border-color: #b24a3a; }
-.menu .dbody { margin: -8px 0 0; padding: 10px 8px 8px; border-radius: 0 0 8px 8px; background: #24272a; }
-.menu .rh { display: flex; justify-content: space-between; margin: 10px 2px 4px; font: 600 11px var(--font-text); letter-spacing: .08em; text-transform: uppercase; color: #6b6f74; }
-.menu .rh .full { color: #7fb2e8; }
-.menu .st { position: relative; display: flex; align-items: center; height: 27px; margin-bottom: 3px; border-radius: 6px; overflow: hidden; background: #2a2d30; cursor: pointer; }
-.menu .st .art { position: absolute; right: 0; top: 0; bottom: 0; width: 60%; background: center 30% / cover; -webkit-mask-image: linear-gradient(90deg, transparent, #000 70%); mask-image: linear-gradient(90deg, transparent, #000 70%); opacity: .75; }
-.menu .st .s { position: relative; width: 28px; text-align: center; font: 700 15px 'Fira Sans Condensed', sans-serif; }
-.menu .st .n { position: relative; flex: 1; font: 600 14px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.menu .st .x { position: relative; display: flex; gap: 3px; padding: 0 8px; } .menu .st .x i { width: 7px; height: 7px; filter: drop-shadow(0 1px 1px #000); }
-.menu .tacts [data-tip]::after { left: auto; right: 0; transform: none; }   /* at the column's right edge */
-.menu .rh { font: 600 12px 'Fira Sans Condensed', sans-serif; letter-spacing: .1em; }
-.menu .dbody { background: rgba(14,12,10,.45); }
-.menu .st { background: #2a2521; }
-.menu .rh { color: #8f8577; }
-.menu .clist { scrollbar-color: #4a4540 transparent; }
-.menu .clist.editing .dtile.on { margin-top: 2px; }
+:is(.mscr, .game) .st .x i { display: block; width: 8px; height: 8px; box-sizing: border-box; border-radius: 50%; border: 1.5px solid #e9e4da; }
+:is(.mscr, .game) .st .x i.on { background: #e9e4da; }
+.mscr .clist { flex: 1; overflow-y: auto; padding: 16px 12px 14px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; scrollbar-color: #3a3d40 transparent; }
+.mscr .clist > * { flex: none; }
+.mscr .dsep { height: 1px; margin: 10px 4px; background: #2e3134; }
+.mscr .dtile.on { border-radius: 8px 8px 0 0; }
+.mscr .tacts { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); z-index: 5; display: flex; gap: 6px; opacity: 0; transition: opacity .12s; }
+.mscr .dtile.on:hover .tacts { opacity: 1; }
+.mscr .ic { width: 34px; height: 34px; padding: 0; border-radius: 8px; border: 1px solid #55595e; background: #16181acc; color: #e0dcd4; display: grid; place-items: center; cursor: pointer; }
+.mscr .ic:hover { color: #f0ece4; border-color: #8b8e92; }
+.mscr .ic.del { color: #ff8a78; border-color: #9a3f33; } .mscr .ic.del:hover { color: #fff; background: #b24a3a; border-color: #b24a3a; }
+:is(.mscr, .game) .dbody { margin: -8px 0 0; padding: 10px 8px 8px; border-radius: 0 0 8px 8px; background: #24272a; }
+.mscr .rh { display: flex; justify-content: space-between; margin: 10px 2px 4px; font: 600 11px var(--font-text); letter-spacing: .08em; text-transform: uppercase; color: #6b6f74; }
+.mscr .rh .full { color: #7fb2e8; }
+:is(.mscr, .game) .st { position: relative; display: flex; align-items: center; height: 27px; margin-bottom: 3px; border-radius: 6px; overflow: hidden; background: #2a2d30; cursor: pointer; }
+:is(.mscr, .game) .st .art { position: absolute; right: 0; top: 0; bottom: 0; width: 60%; background: center 30% / cover; -webkit-mask-image: linear-gradient(90deg, transparent, #000 70%); mask-image: linear-gradient(90deg, transparent, #000 70%); opacity: .75; }
+:is(.mscr, .game) .st .s { position: relative; width: 28px; text-align: center; font: 700 15px 'Fira Sans Condensed', sans-serif; }
+:is(.mscr, .game) .st .n { position: relative; flex: 1; font: 600 14px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+:is(.mscr, .game) .st .x { position: relative; display: flex; gap: 3px; padding: 0 8px; } :is(.mscr, .game) .st .x i { width: 7px; height: 7px; filter: drop-shadow(0 1px 1px #000); }
+.mscr .tacts [data-tip]::after { left: auto; right: 0; transform: none; }   /* at the column's right edge */
+.mscr .rh { font: 600 12px 'Fira Sans Condensed', sans-serif; letter-spacing: .1em; }
+:is(.mscr, .game) .dbody { background: rgba(14,12,10,.45); }
+:is(.mscr, .game) .st { background: #2a2521; }
+.mscr .rh { color: #8f8577; }
+.mscr .clist { scrollbar-color: #4a4540 transparent; }
+.mscr .clist.editing .dtile.on { margin-top: 2px; }
 /* (6) The deck list, tighter (as Hearthstone's): strips close together, little margin either side. */
-.menu .clist.editing { padding-left: 12px; padding-right: 12px; }
-.menu .dbody { padding: 8px 4px 6px; }
-.menu .dbody .st { margin-bottom: 2px; height: 28px; }
-.menu .rh { margin: 8px 4px 3px; }
+.mscr .clist.editing { padding-left: 12px; padding-right: 12px; }
+:is(.mscr, .game) .dbody { padding: 8px 4px 6px; }
+:is(.mscr, .game) .dbody .st { margin-bottom: 2px; height: 28px; }
+.mscr .rh { margin: 8px 4px 3px; }
 /* (8) The tile's actions are bare icons; renaming keeps them in view at the right of the name field. */
-.menu .tacts { gap: 2px; }
-.menu .tacts .ic, .menu .ic { width: 30px; height: 30px; border: 0; background: none; box-shadow: none; color: #e4dccd; filter: drop-shadow(0 1px 2px rgba(0,0,0,.9)); }
-.menu .tacts .ic:hover { color: #fff; background: none; }
-.menu .tacts .ic.del { color: #ff8a78; } .menu .tacts .ic.del:hover { color: #ffb3a6; background: none; }
-.menu .tacts { z-index: 5; }
+.mscr .tacts { gap: 2px; }
+.mscr .tacts .ic, .mscr .ic { width: 30px; height: 30px; border: 0; background: none; box-shadow: none; color: #e4dccd; filter: drop-shadow(0 1px 2px rgba(0,0,0,.9)); }
+.mscr .tacts .ic:hover { color: #fff; background: none; }
+.mscr .tacts .ic.del { color: #ff8a78; } .mscr .tacts .ic.del:hover { color: #ffb3a6; background: none; }
+.mscr .tacts { z-index: 5; }
 /* Strips touch, as in Hearthstone: no gap, square corners, each separated by its own thin dark edge. */
-.menu .dbody .st { margin-bottom: 0; border-radius: 0; box-shadow: inset 0 -1px 0 rgba(0,0,0,.7), inset 0 1px 0 rgba(255,245,230,.07); }
-.menu .dbody .rh + .st { border-radius: 4px 4px 0 0; }
-.menu .dbody .st:has(+ .rh), .menu .dbody .st:last-child { border-radius: 0 0 4px 4px; }
+:is(.mscr, .game) .dbody .st { margin-bottom: 0; border-radius: 0; box-shadow: inset 0 -1px 0 rgba(0,0,0,.7), inset 0 1px 0 rgba(255,245,230,.07); }
+:is(.mscr, .game) .dbody .rh + .st { border-radius: 4px 4px 0 0; }
+:is(.mscr, .game) .dbody .st:has(+ .rh), :is(.mscr, .game) .dbody .st:last-child { border-radius: 0 0 4px 4px; }
 /* Left/right: strips flush with the deck tile above them, the column's side padding trimmed. */
-.menu .clist.editing { padding-left: 8px; padding-right: 8px; }
-.menu .dbody { padding-left: 0; padding-right: 0; }
-.menu .dbody .rh { margin-left: 8px; margin-right: 8px; }
+.mscr .clist.editing { padding-left: 8px; padding-right: 8px; }
+:is(.mscr, .game) .dbody { padding-left: 0; padding-right: 0; }
+:is(.mscr, .game) .dbody .rh { margin-left: 8px; margin-right: 8px; }
 /* The open deck is one framed panel, as in Hearthstone: its tile on top, then a sunken field with the tiles' rim that runs down to the foot;
    the strips sit inside it with a small inset. */
-.menu .clist.editing { display: flex; flex-direction: column; padding-bottom: 8px; }
-.menu .clist.editing::after { display: none; }
-.menu .clist.editing .dbody { flex: 1 0 auto; margin-top: 0; padding: 4px 4px 8px; border-radius: 0 0 8px 8px;
+.mscr .clist.editing { display: flex; flex-direction: column; padding-bottom: 8px; }
+.mscr .clist.editing::after { display: none; }
+.mscr .clist.editing .dbody { flex: 1 0 auto; margin-top: 0; padding: 4px 4px 8px; border-radius: 0 0 8px 8px;
   background: rgba(8,7,6,.55); box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.28), inset 0 2px 6px rgba(0,0,0,.6); }
-.menu .clist.editing .dtile.on { border-radius: 8px 8px 0 0; }
-.menu .dbody .rh { margin-left: 6px; margin-right: 6px; }
-.menu .clist.editing { gap: 0; }
+.mscr .clist.editing .dtile.on { border-radius: 8px 8px 0 0; }
+:is(.mscr, .game) .dbody .rh { margin-left: 6px; margin-right: 6px; }
+.mscr .clist.editing { gap: 0; }
 /* Strips are slivers of the cards: strength on a small driftwood tab in the card's dark digits, the card's rarity edge around each. */
-.menu .dbody .st { height: 30px; box-shadow: inset 0 0 0 1px var(--edge-st, rgba(0,0,0,.6)), inset 0 -1px 0 rgba(0,0,0,.7); }
-.menu .dbody .st.rare { --edge-st: #b9c1c9; }
-.menu .dbody .st.legendary { --edge-st: #d9a93f; }
-.menu .st .s { position: relative; align-self: stretch; width: 30px; margin-right: 8px; display: flex; align-items: center; justify-content: center; gap: 0;
+:is(.mscr, .game) .dbody .st { height: 30px; box-shadow: inset 0 0 0 1px var(--edge-st, rgba(0,0,0,.6)), inset 0 -1px 0 rgba(0,0,0,.7); }
+:is(.mscr, .game) .dbody .st.rare { --edge-st: #b9c1c9; }
+:is(.mscr, .game) .dbody .st.legendary { --edge-st: #d9a93f; }
+:is(.mscr, .game) .st .s { position: relative; align-self: stretch; width: 30px; margin-right: 8px; display: flex; align-items: center; justify-content: center; gap: 0;
   background: url(/static/kit2/card_plaque.webp) center / 300% 300%; box-shadow: inset -1px 0 0 rgba(0,0,0,.45); }
-.menu .st .s img { height: 17px; filter: brightness(.16) sepia(.6); }
-.menu .dbody .st + .st:not(.legendary):first-of-type { margin-top: 0; }
-.menu .dbody .st.legendary + .st.rare, .menu .dbody .st.rare + .st.common, .menu .dbody .st.legendary + .st.common { margin-top: 6px; }
-.menu .dbody { padding-top: 6px; }
+:is(.mscr, .game) .st .s img { height: 17px; filter: brightness(.16) sepia(.6); }
+:is(.mscr, .game) .dbody .st + .st:not(.legendary):first-of-type { margin-top: 0; }
+:is(.mscr, .game) .dbody .st.legendary + .st.rare, :is(.mscr, .game) .dbody .st.rare + .st.common, :is(.mscr, .game) .dbody .st.legendary + .st.common { margin-top: 6px; }
+:is(.mscr, .game) .dbody { padding-top: 6px; }
 /* Rarity lives on the tab (its metal frame), not around the whole strip; strips keep dark separators. */
-.menu .dbody .st { box-shadow: inset 0 -1px 0 rgba(0,0,0,.75); }
-.menu .st .s { box-shadow: inset 0 0 0 2px var(--edge-st, #3a3530), inset -1px 0 0 rgba(0,0,0,.45); }
+:is(.mscr, .game) .dbody .st { box-shadow: inset 0 -1px 0 rgba(0,0,0,.75); }
+:is(.mscr, .game) .st .s { box-shadow: inset 0 0 0 2px var(--edge-st, #3a3530), inset -1px 0 0 rgba(0,0,0,.45); }
 /* Strips, second take: the card's own notched banner, small, holds the strength (separate pieces, not a column);
    rarity is a thin metal bar on the strip's left edge. Rarity labels as plain labels, not dashboard headers. */
-.menu .st .s { width: 22px; margin: 0 8px 0 7px; align-self: stretch; box-shadow: none;
+:is(.mscr, .game) .st .s { width: 22px; margin: 0 8px 0 7px; align-self: stretch; box-shadow: none;
   background: url(/static/kit2/card_banner.webp) center top / 100% 100% no-repeat; filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
-.menu .st .s img { height: 13px; margin-top: -4px; }
-.menu .dbody .st { padding-left: 0; }
-.menu .dbody .st::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--edge-st, #4a453f); z-index: 1; }
-.menu .dbody .st .art { z-index: 0; }
-.menu .rh { font: 600 14px 'Fira Sans Condensed', sans-serif; letter-spacing: 0; text-transform: none; color: #a89d8c; margin: 10px 6px 4px; }
-.menu .rh span:last-child { color: #a89d8c; }
-.menu .rh .full { color: #a89d8c; }
-.menu .rh span.flash { color: #ff8a78; }
-.menu .dbody .st.legendary + .st.rare, .menu .dbody .st.rare + .st.common, .menu .dbody .st.legendary + .st.common { margin-top: 0; }
+:is(.mscr, .game) .st .s img { height: 13px; margin-top: -4px; }
+:is(.mscr, .game) .dbody .st { padding-left: 0; }
+:is(.mscr, .game) .dbody .st::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--edge-st, #4a453f); z-index: 1; }
+:is(.mscr, .game) .dbody .st .art { z-index: 0; }
+.mscr .rh { font: 600 14px 'Fira Sans Condensed', sans-serif; letter-spacing: 0; text-transform: none; color: #a89d8c; margin: 10px 6px 4px; }
+.mscr .rh span:last-child { color: #a89d8c; }
+.mscr .rh .full { color: #a89d8c; }
+.mscr .rh span.flash { color: #ff8a78; }
+:is(.mscr, .game) .dbody .st.legendary + .st.rare, :is(.mscr, .game) .dbody .st.rare + .st.common, :is(.mscr, .game) .dbody .st.legendary + .st.common { margin-top: 0; }
 /* Strip strength, third take: not the hanging banner (it needs a bar to hang from) but a small driftwood plaque centred in the row. */
-.menu .st .s { width: 24px; height: 22px; align-self: center; margin: 0 8px 0 8px; border-radius: 3px;
+:is(.mscr, .game) .st .s { width: 24px; height: 22px; align-self: center; margin: 0 8px 0 8px; border-radius: 3px;
   background: url(/static/kit2/card_plaque.webp) center / 240% 240%; box-shadow: inset 0 1px 0 rgba(255,250,240,.35), 0 1px 2px rgba(0,0,0,.6); filter: none; }
-.menu .st .s img { height: 14px; margin-top: 0; }
+:is(.mscr, .game) .st .s img { height: 14px; margin-top: 0; }
 /* Copy dots at the strip's right end (an aligned column), in the card's bone, with a soft shadow to hold on the art. */
-.menu .dbody .st .n { flex: 1; }
-.menu .dbody .st .x { align-self: center; padding: 0 9px 0 0; gap: 3px; }
-.menu .dbody .st .x i { width: 6px; height: 6px; border-color: #d9ceb8; filter: drop-shadow(0 0 2px rgba(0,0,0,.95)) drop-shadow(0 1px 1px rgba(0,0,0,.8)); }
-.menu .dbody .st .x i.on { background: #d9ceb8; }
+:is(.mscr, .game) .dbody .st .n { flex: 1; }
+:is(.mscr, .game) .dbody .st .x { align-self: center; padding: 0 9px 0 0; gap: 3px; }
+:is(.mscr, .game) .dbody .st .x i { width: 6px; height: 6px; border-color: #d9ceb8; filter: drop-shadow(0 0 2px rgba(0,0,0,.95)) drop-shadow(0 1px 1px rgba(0,0,0,.8)); }
+:is(.mscr, .game) .dbody .st .x i.on { background: #d9ceb8; }
