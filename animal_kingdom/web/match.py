@@ -162,7 +162,7 @@ class Match:
         self.on_game_end = None          # callback(match, log record); the server saves human games
         self.on_match_end = None         # callback(match); the server adds it to the players' histories
         self.rematches = 0               # a rematch starts a new series in the same match
-        self.series_logs: list[dict] = []   # this series' finished games (game_log), for its replay
+        self.last_log: Optional[dict] = None   # the last finished game (game_log), for its replay
         self.clock: Optional[dict] = None   # {bank: {A, B}, holder, turn, free, since}; None when a bot plays
         self.rng = random.Random(secrets.randbits(32))
         self.created = datetime.now(timezone.utc)
@@ -263,7 +263,6 @@ class Match:
             raise EngineError("the match is still on")
         self.last_game = self.results[-1]
         self.results = []
-        self.series_logs = []
         self.state = None
         self.history = []
         self.rematches += 1
@@ -362,9 +361,9 @@ class Match:
                              "first": self.state.first_player, "opp_deck": self.seats["B"].deck,
                              "series_deck": self.seats[self.schedule[len(self.results)].get("seat", "B")].deck
                              if self.schedule else None})
-        self.series_logs.append(self.game_log())
+        self.last_log = self.game_log()
         if self.on_game_end:
-            self.on_game_end(self, self.series_logs[-1])
+            self.on_game_end(self, self.last_log)
         score = self.score()
         over = max(score.values()) >= GAMES_TO_WIN or len(self.results) >= 2 * GAMES_TO_WIN - 1
         if self.schedule:
@@ -397,7 +396,7 @@ class Match:
                 "phase": self.phase, "results": self.results, "seed": self.seed,
                 "actions": self.actions, "action_times": self.action_times,
                 "started_at": self.started_at, "created": self.created.isoformat(),
-                "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game, "series_logs": self.series_logs,
+                "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game, "last_log": self.last_log,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [_jsonable(asdict(m)) for m in self.history]}
 
@@ -411,7 +410,7 @@ class Match:
         m.started_at, m.schedule, m.version = d["started_at"], d["schedule"], d["version"] + 1
         m.rematches = d.get("rematches", 0)
         m.last_game = d.get("last_game")
-        m.series_logs = d.get("series_logs", [])
+        m.last_log = d.get("last_log")
         m.clock = d.get("clock")
         if m.clock:
             m.clock["since"] = time.time()      # time the server was down isn't anyone's

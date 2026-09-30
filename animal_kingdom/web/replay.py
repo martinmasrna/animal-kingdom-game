@@ -1,9 +1,9 @@
-"""A finished match played back: every view one seat saw, one per action.
+"""A finished match (one game) played back: every view one seat saw, one per action.
 
-The views are rebuilt through the real `Match` from each game's seed and actions (`Match.game_log`), so they are
+The views are rebuilt through the real `Match` from the game's seed and actions (`Match.game_log`), so they are
 exactly what the player's browser was sent. That only holds while the cards are as they were, so a match's replay
-is rendered once when it ends and saved (`save`/`load`); matches from before that are rebuilt from their game logs,
-and one that no longer ends the way it did is refused rather than shown wrong.
+is rendered once when it ends and saved (`save`/`load`). Every match in a history has its replay: `backfill` gives
+older ones theirs from the game logs, and drops from the history any that can no longer be replayed.
 """
 
 from __future__ import annotations
@@ -23,9 +23,6 @@ class ReplayError(ValueError):
     pass
 
 
-CHANGED = "The cards have changed since this match, so it can't be replayed"
-
-
 def _path(replay_dir: Path, key: str, seat: str) -> Path:
     return replay_dir / f"{key}-{seat}.json.gz"
 
@@ -42,7 +39,7 @@ def load(replay_dir: Path, key: str, seat: str) -> Optional[bytes]:
 
 
 def series_games(log_dir: Path, match_id: str, series: int) -> list[dict]:
-    """The logged games of one series (a match, or one of its rematches), in order."""
+    """The logged games of one series (a match, or one of its rematches; best-of-3 once), in order."""
     games = []
     for path in sorted(log_dir.glob(f"web_*_{match_id}.jsonl")):
         games += [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -61,35 +58,47 @@ def human_seat(game: dict) -> Optional[str]:
     return humans[0] if len(humans) == 1 else None
 
 
-def series_views(games: list[dict], seat: str, names: dict) -> list[dict]:
-    """Every view `seat` received across the series, one per action, games back to back."""
-    g0 = games[0]
-    m = Match(g0.get("match_id", "replay"), Seat("", names.get("A", ""), deck=g0["deck_a"]))
-    m.seats["B"] = Seat("", names.get("B", ""), deck=g0["deck_b"])
-    for p, b in zip("AB", g0["bots"]):
-        m.seats[p].bot = None if b == "human" else b
-    out = []
-    for g in games:
-        m.seats["A"].deck, m.seats["B"].deck = g["deck_a"], g["deck_b"]
+def backfill(profiles, log_dir: Path, replay_dir: Path) -> None:
+    """Save the replay of every match in a history that has none, rebuilt from its game log. A match that can't be
+    (not recorded, a best-of-3 from before a match was one game, a gauntlet, or its cards changed since) leaves the history."""
+    for r in profiles.all_matches():
+        if r["seat"] and _path(replay_dir, r["match"], r["seat"]).is_file():
+            continue
+        mid, _, series = r["match"].rpartition("-")
+        games = series_games(log_dir, mid, int(series)) if series.isdigit() and r["kind"] != "gauntlet" else []
+        seat = r["seat"] or (human_seat(games[0]) if games else None)
         try:
-            lists = g.get("lists") or [load_premade_deck(g["deck_a"]), load_premade_deck(g["deck_b"])]
-            m.seed, m.phase, m.history, m.actions, m.clock = g["seed"], "playing", [], [], None
-            m.state = new_game(lists[0], lists[1], g["seed"], map_id=g["map_id"], first_player=g["first_player"])
-            views = [m.view(seat)]
-            for a in g["actions"]:
-                m.act(m.to_act(), a)
-                views.append(m.view(seat))
-            if m.state.result is None and g["reason"] == "concede":
-                m.concede(other_player(g["winner"]))
-                views.append(m.view(seat))
-        except (EngineError, KeyError, ValueError) as e:
-            raise ReplayError(CHANGED) from e
-        r = m.state.result
-        if r is None or r.winner != g["winner"] or r.reason != g["reason"]:
-            raise ReplayError(CHANGED)
-        counts = {"A": dict(Counter(lists[0])), "B": dict(Counter(lists[1]))}
-        for v in views:
-            v["lists"] = counts     # the lists as played, not as the decks read today
-        views[-1]["phase"] = "game_over" if g is not games[-1] else "match_over"   # the series as it was (best-of-3 once)
-        out += views
-    return out
+            if len(games) != 1 or not seat:
+                raise ReplayError("no single game to replay")
+            save(replay_dir, r["match"], seat, game_views(games[0], seat, {}))
+            profiles.set_seat(r["profile"], r["match"], seat)
+        except ReplayError:
+            profiles.forget(r["profile"], r["match"])
+
+
+def game_views(g: dict, seat: str, names: dict) -> list[dict]:
+    """Every view `seat` received in the game, one per action."""
+    m = Match(g.get("match_id", "replay"), Seat("", names.get("A", ""), deck=g["deck_a"]))
+    m.seats["B"] = Seat("", names.get("B", ""), deck=g["deck_b"])
+    for p, b in zip("AB", g["bots"]):
+        m.seats[p].bot = None if b == "human" else b
+    try:
+        lists = g.get("lists") or [load_premade_deck(g["deck_a"]), load_premade_deck(g["deck_b"])]
+        m.seed, m.phase = g["seed"], "playing"
+        m.state = new_game(lists[0], lists[1], g["seed"], map_id=g["map_id"], first_player=g["first_player"])
+        views = [m.view(seat)]
+        for a in g["actions"]:
+            m.act(m.to_act(), a)
+            views.append(m.view(seat))
+        if m.state.result is None and g["reason"] == "concede":
+            m.concede(other_player(g["winner"]))
+            views.append(m.view(seat))
+    except (EngineError, KeyError, ValueError) as e:
+        raise ReplayError("its cards have changed since") from e
+    r = m.state.result
+    if r is None or r.winner != g["winner"] or r.reason != g["reason"]:
+        raise ReplayError("its cards have changed since")
+    counts = {"A": dict(Counter(lists[0])), "B": dict(Counter(lists[1]))}
+    for v in views:
+        v["lists"] = counts     # the lists as played, not as the decks read today
+    return views

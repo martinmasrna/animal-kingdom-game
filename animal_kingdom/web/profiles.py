@@ -228,6 +228,17 @@ class Profiles:
         r = self.db.execute("SELECT * FROM history WHERE profile = ? AND match = ?", (pid, match)).fetchone()
         return r and dict(r)
 
+    def all_matches(self) -> list[dict]:
+        return [dict(r) for r in self.db.execute("SELECT profile, match, kind, seat FROM history")]
+
+    def set_seat(self, pid: str, match: str, seat: str) -> None:
+        with self.db:
+            self.db.execute("UPDATE history SET seat = ? WHERE profile = ? AND match = ?", (seat, pid, match))
+
+    def forget(self, pid: str, match: str) -> None:
+        with self.db:
+            self.db.execute("DELETE FROM history WHERE profile = ? AND match = ?", (pid, match))
+
     def records(self, pid: str) -> list[dict]:
         """Games won and lost with each of your decks, over every match (the cover from its latest)."""
         return [dict(r) for r in self.db.execute(

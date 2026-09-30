@@ -111,7 +111,44 @@ def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path)
     assert views[-1]["game"]["result"]["winner"] == m.results[-1]["winner"]
     assert [v["game"] for v in views] == live       # exactly what the browser was sent
     # rebuilt from the game log, the same views
-    assert replay.series_views(m.series_logs, "A", {"A": "Martin#" + p["tag"], "B": "Bot"}) == views
+    assert replay.game_views(m.last_log, "A", {"A": "Martin#" + p["tag"], "B": "Bot"}) == views
+
+
+def test_the_gauntlet_stays_out_of_the_history(monkeypatch):
+    db = Profiles(":memory:")
+    monkeypatch.setattr(server, "profiles", db)
+    _, p = db.create("Martin")
+    m = Match("M3", Seat("ta", "Martin#1", deck="cats_midrange", profile=p["id"]))
+    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m.make_gauntlet(["ramp", "egg_control"], per_seat=1)
+    server.record_match(m)
+    assert db.history(p["id"]) == []
+
+
+def test_every_match_left_in_a_history_has_its_replay(monkeypatch, tmp_path):
+    """Matches from before replays were saved get theirs from the game log; any that can't be replayed are dropped."""
+    import json
+    from animal_kingdom.web import replay
+    from animal_kingdom.web.match import bot_for
+    logs, replays = tmp_path / "logs", tmp_path / "replays"
+    logs.mkdir()
+    db = Profiles(":memory:")
+    _, p = db.create("Martin")
+    m = Match("OLD1", Seat("ta", "Martin#1", deck="cats_midrange"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m.ready("A")
+    m.bots["A"] = bot_for("easy", 3)
+    while m.phase == "playing":
+        m.act(m.to_act(), m.bot_move())
+    log = {k: v for k, v in m.last_log.items() if k not in ("series", "lists")}   # a log from before replays
+    (logs / "web_20260101T000000_OLD1.jsonl").write_text(json.dumps(log) + "\n")
+    for key in ("OLD1-0", "GONE-0"):     # GONE was never recorded
+        db.record(p["id"], key, kind="bot", my_deck="Cats", opp="Bot · Easy", opp_deck="Ramp", won=1, lost=0)
+    replay.backfill(db, logs, replays)
+    (h,) = db.history(p["id"])
+    assert h["match"] == "OLD1-0" and replay.load(replays, "OLD1-0", "A")
+    replay.backfill(db, logs, replays)      # a second start changes nothing
+    assert [h["match"] for h in db.history(p["id"])] == ["OLD1-0"]
 
 
 def test_a_deck_record_sums_every_match_with_it(db):

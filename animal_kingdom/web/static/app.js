@@ -239,10 +239,10 @@ function profileScreen() {
     return `<div class="dtile rec${ui.histDeck === r.deck ? ' on' : ''}" data-deck="${esc(r.deck)}" style="${f ? stripArt(f, 284, 56, .7) : ''}">
     <b>${esc(r.deck)}</b><span class="wl"><i>${r.won}</i>–<i>${r.lost}</i></span></div>`; }).join('');
   const shown = ME.history.filter(h => !ui.histDeck || h.my_deck === ui.histDeck);
-  const result = h => h.won + h.lost > 1 ? `${h.won}–${h.lost}` : h.won ? 'Won' : h.lost ? 'Lost' : 'Draw';
+  const result = h => h.won > h.lost ? 'Won' : h.won < h.lost ? 'Lost' : 'Draw';   // a match is one game (older best-of-3s by their result)
   const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
     ${piece(deckFace(h.my_cover, h.my_deck), 'a')}<span class="dk">${esc(h.my_deck)}</span>${piece(deckFace(h.opp_cover, h.opp_deck), 'b')}<span class="dk">${esc(h.opp_deck)}</span>
-    <span class="o">${esc(h.opp)}${h.kind === 'gauntlet' ? ' · gauntlet' : ''}</span><span class="d">${when(h.ended)}</span></div>`).join('');
+    <span class="o">${esc(h.opp)}</span><span class="d">${when(h.ended)}</span></div>`).join('');
   const sect = (title, body) => `<div class="sect"><h4>${title}</h4>${body}</div>`;
   const account = ME.logins.length
     ? sect('Account', `${ME.logins.map(l => `<div class="login">${PROVIDER[l.provider]} · ${esc(l.label)}</div>`).join('')}
@@ -740,12 +740,10 @@ function drawEnd() {
   const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;
   const peek = `<button class="slab" id="peek">See the board</button>`;
   if (RP.views.length) {
-    // a replay: the game's result; the next game follows on, the last one offers the replay again or back to the profile
-    const more = RP.i < RP.views.length - 1;
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>${V.results.length > 1 ? score : ''}
-      <div class="btns">${more ? `${peek}<button class="play" id="nextg">Next game</button>` : `<a class="slab" href="#/profile">Back</a>${peek}<button class="play" id="again">Watch again</button>`}</div></div>`;
-    if (more) document.getElementById('nextg').onclick = () => { replayStep(RP.i + 1); replayPlay(true); };
-    else document.getElementById('again').onclick = () => { replayStep(0); replayPlay(true); };
+    // a replay: the game's result, then the replay again or back to the profile
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>
+      <div class="btns"><a class="slab" href="#/profile">Back</a>${peek}<button class="play" id="again">Watch again</button></div></div>`;
+    document.getElementById('again').onclick = () => { replayStep(0); replayPlay(true); };
   } else if (V.gauntlet) {
     const g = V.gauntlet, tot = g.record.reduce((a, r) => [a[0] + r.w, a[1] + r.l], [0, 0]);
     const rows = g.record.map(r => `<div>${r.deckName} <b>${r.w}–${r.l}</b></div>`).join('');
@@ -803,15 +801,12 @@ function replayStep(i) {
   const prev = V, step = i === RP.i + 1; RP.i = i; V = RP.views[i]; V.rx = Date.now() / 1000;
   onView(step ? prev : null);   // one step forward plays its animation; any jump lands at once
 }
-// Playing: the next view after the same beat the bot takes, longer while the opponent's card is shown; a game's end waits for Next game.
+// Playing: the next view after the same beat the bot takes, longer while the opponent's card is shown.
 function replayPlay(on) {
   clearTimeout(RP.timer); RP.playing = on && RP.i < RP.views.length - 1;
   if (RP.playing) {
     const G = V.game, last = G.history[G.history.length - 1], shown = last && last.seat !== V.you && last.kind === 'place';
-    RP.timer = setTimeout(() => {
-      if (V.phase !== 'playing') { RP.playing = false; return drawReplayBar(); }
-      replayStep(RP.i + 1); replayPlay(true);
-    }, RP.i === 0 ? 1400 : shown ? 2200 : 1100);
+    RP.timer = setTimeout(() => { replayStep(RP.i + 1); replayPlay(true); }, RP.i === 0 ? 1400 : shown ? 2200 : 1100);
   }
   drawReplayBar();
 }

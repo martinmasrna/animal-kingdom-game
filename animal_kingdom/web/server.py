@@ -21,7 +21,7 @@ from pathlib import Path
 from aiohttp import WSMsgType, web
 
 from ..decks import PREMADE_DECKS, load_premade_deck
-from ..engine.state import EngineError, other_player
+from ..engine.state import EngineError
 from ..engine.cards import DECK_SLUGS, load_cards
 from . import custom_decks
 from . import oauth
@@ -297,7 +297,9 @@ def deck_cover(seat: Seat) -> str:
 
 
 def record_match(match: Match) -> None:
-    """Add a finished series to each human player's history."""
+    """Add a finished match to each human player's history (the gauntlet, a developer's tool, stays out of it)."""
+    if match.schedule:
+        return
     kind = "gauntlet" if match.schedule else "bot" if any(s.is_bot for s in match.seats.values()) else "friend"
     rotating = match.schedule[0].get("seat", "B") if match.schedule else None
     score = match.score()
@@ -319,32 +321,20 @@ def record_match(match: Match) -> None:
             continue
         try:
             names = {p: display(profiles.get(seat.profile)), o: other.name}
-            replay.save(REPLAY_DIR, f"{match.id}-{match.rematches}", p, replay.series_views(match.series_logs, p, names))
+            replay.save(REPLAY_DIR, f"{match.id}-{match.rematches}", p, replay.game_views(match.last_log, p, names))
         except Exception:
             log.exception("could not save the replay of match %s", match.id)
 
 
 async def get_replay(req):
-    """Every view you saw in one of your finished matches (key: the history's match): saved at its end, else rebuilt from its game logs."""
+    """Every view you saw in one of your finished matches (key: the history's match), as saved when it ended."""
     p = me(req)
     key = req.match_info["match"]
     row = profiles.match(p["id"], key)
     saved = row and row["seat"] and replay.load(REPLAY_DIR, key, row["seat"])
-    if saved:
-        return web.Response(body=saved, content_type="application/json", headers={"Content-Encoding": "gzip"})
-    mid, _, series = key.rpartition("-")
-    games = replay.series_games(LOG_DIR, mid, int(series)) if row and series.isdigit() else []
-    if not games:
-        raise web.HTTPNotFound(text="This match wasn't recorded")
-    seat = row["seat"] or replay.human_seat(games[0]) or "A"
-    names = {seat: display(p), other_player(seat): row["opp"]}
-    try:
-        views = await asyncio.to_thread(replay.series_views, games, seat, names)
-    except replay.ReplayError as e:
-        raise web.HTTPConflict(text=str(e))
-    resp = web.json_response({"views": views})
-    resp.enable_compression()
-    return resp
+    if not saved:
+        raise web.HTTPNotFound(text="This match can't be replayed")
+    return web.Response(body=saved, content_type="application/json", headers={"Content-Encoding": "gzip"})
 
 
 async def index(_req):
@@ -504,6 +494,7 @@ def make_app() -> web.Application:
         global profiles
         profiles = Profiles()
         custom_decks.load()
+        replay.backfill(profiles, LOG_DIR, REPLAY_DIR)
         hub.load()
         for match in hub.matches.values():
             hub.kick_bot(match)
