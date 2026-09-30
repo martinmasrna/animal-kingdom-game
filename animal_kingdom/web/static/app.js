@@ -375,11 +375,12 @@ const mmss = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2
 function drawClock() {
   const el = document.getElementById('clock'), c = V && V.game && V.game.clock;
   if (!el) return;
-  if (!c || !c.on) { el.innerHTML = ''; return; }
+  if (!c || !c.on) { el.innerHTML = ''; el.className = 'clock'; return; }
   const spent = c.now + (Date.now() / 1000 - V.rx) - c.since, free = Math.max(0, c.free - spent);
   const bank = Math.max(0, c.bank[c.holder] - Math.max(0, spent - c.free)), left = free + bank;
-  el.className = `abs clock ${rel(c.holder)}${left < 10 ? ' low' : ''}`;
-  el.innerHTML = `${c.holder === V.you ? 'Your' : "Opponent's"} time <b>${mmss(free > 0 ? free : bank)}</b>${free > 0 ? `<span>+${mmss(bank)}</span>` : ''}`;
+  el.className = `clock ${rel(c.holder)}${left < 10 ? ' low' : ''}`;
+  el.innerHTML = `<b>${mmss(free > 0 ? free : bank)}</b>`;
+  el.dataset.tip = `${c.holder === V.you ? 'Your' : "Your opponent's"} time: ${mmss(free)} for this move, then ${mmss(bank)} in the bank`;
 }
 setInterval(() => { if (screen === 'game') drawClock(); }, 250);
 
@@ -439,8 +440,7 @@ function gameScreen() {
     screen = 'game';
     app.innerHTML = `<div class="game kit" id="scr"><div id="world"><img src="/static/kit2/plate_wide.webp" alt="" draggable="false"></div><div id="stage">
       <div id="board"></div>
-      <div class="abs series" id="series"></div>
-      <div class="abs clock" id="clock"></div>
+      <div class="abs series" id="series"><span id="turnno"></span><span class="clock" id="clock"></span></div>
       <div class="abs opphand" id="opphand"></div>
       <div class="abs menu" id="menubtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/></svg></div>
       <div class="abs hand" id="hand"></div>
@@ -499,7 +499,7 @@ function drawGame() {
 
   // Top left: the turn (a match is one game while there is one map); it opens the history. The gauntlet counts its games.
   const gameNo = playing ? V.results.length + 1 : V.results.length;
-  $('series').innerHTML = V.gauntlet ? `Game ${gameNo} of ${V.gauntlet.total} · Turn ${G.round}` : `Turn ${G.round}`;
+  $('turnno').textContent = V.gauntlet ? `Game ${gameNo} of ${V.gauntlet.total} · Turn ${G.round}` : `Turn ${G.round}`;
   drawHistory(G); drawLists(G); showPanel();
 
   // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.
