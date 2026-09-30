@@ -5,7 +5,7 @@
 import { hasArt, artUrl, CROP, FULL } from './art.js';
 
 // The full card shows the painting between the name bar and the rules panel: about 61% of its height, so it centres on
-// the animal (the middle of the painting, or the card's FULL height) instead of the painting's top; the compact card shows
+// the animal (its FULL height, set per card, else the portrait crop's centre) instead of the painting's top; the compact card shows
 // ~88% from the top.
 const VIS = 0.61;
 const focus = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35); return Math.max(0, Math.min(1, (y - VIS / 2) / (1 - VIS))) * 100; };
