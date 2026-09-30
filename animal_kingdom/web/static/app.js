@@ -460,7 +460,8 @@ function drawGame() {
   hand.innerHTML = G.hand.map((h, i) => {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id], pick = d.handPick.has(h.iid);
     const hint = can && d.lesson && d.lesson.only && !ui.sel;   // the card the tutorial asks for
-    const cls = [c.rarity, can ? 'can' : '', can && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick ? 'dim' : ''].join(' ');
+    const talking = d.lesson && d.lesson.next;   // the opening names the cards: they stay lit while it talks
+    const cls = [c.rarity, can ? 'can' : '', can && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
     return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
@@ -508,7 +509,6 @@ function drawGame() {
     bar.classList.remove('on');
     if (playing && G.opponentChoosing) waiting.textContent = G.history.length ? 'Opponent is choosing' : 'Opponent is mulliganing';
   }
-  placeCoach($('coach'), d.lesson);
   clearTimeout(drawGame.think);
   if (playing && G.toAct === them && V.seats[them].bot) {
     const ver = V.version;
@@ -522,7 +522,9 @@ function drawGame() {
     rv.innerHTML = cardHTML(CARDS[last.card]); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty('--ty', `${ty - 300}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on');
     if (ui.anim) ui.anim.landDelay = 0.95;
+    ui.revealEnd = Date.now() + 1050;
   }
+  placeCoach($('coach'), d.lesson);
   drawBoard(d);
   drawEnd();
 }
@@ -537,16 +539,28 @@ function placeCoach(el, L) {
   let x, y, side;
   if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, 590, 'above'];
   else if (a.deck) [x, y, side] = [1299, 606, 'above'];
+  else if (a.prompt) [x, y, side] = [151, 604, 'above'];   // the pending choice's piece, bottom left
   else if (a.endturn) [x, y, side] = [1439, 664, 'above'];
   else if (a.cr) { [x, y] = crossroadAt(a.cr); side = x > STAGE.w / 2 ? 'left' : 'right'; }
   else if (a.den) { [x, y] = denMouthAt(a.den); side = a.den === 'B' ? 'left' : 'right'; }
+  else if (a.gem) [x, y, side] = [150, 122, 'right'];
+  else if (a.hand) [x, y, side] = [STAGE.w / 2, 590, 'above'];
+  else if (a.oppcards) [x, y, side] = [STAGE.w / 2 + 170, 72, 'below'];   // beside the opponent's card backs, clear of their revealed card
+  else if (a.middle) [x, y, side] = [STAGE.w / 2, 250, 'mid'];
   else if (a.stone) { const [c, r] = a.stone.split(',').map(Number), [x1, y1] = crossroadAt(`${c},${r}`), [x2, y2] = crossroadAt(`${c + 1},${r + 1}`);
     [x, y, side] = [(x1 + x2) / 2 - 20, (y1 + y2) / 2, 'right']; }   // a region's payout stone, in the open ground between crossroads
   else [x, y, side] = [STAGE.w / 2, 590, 'above'];
   const clampX = v => Math.max(16, Math.min(STAGE.w - 16 - COACH_W, v));
   const pos = side === 'above' ? `left:${clampX(x - COACH_W / 2)}px;bottom:${STAGE.h - y + 14}px;--nx:${x - clampX(x - COACH_W / 2)}px`
+    : side === 'below' ? `left:${clampX(x - COACH_W / 2)}px;top:${y + 14}px;--nx:${x - clampX(x - COACH_W / 2)}px`
+    : side === 'mid' ? `left:${x - COACH_W / 2}px;top:${y}px`
     : side === 'right' ? `left:${x + 78}px;top:${y}px` : `left:${x - 78 - COACH_W}px;top:${y}px`;
-  el.className = `abs coach on ${side}`; el.style.cssText = pos; el.innerHTML = `<p>${L.text}</p>`;
+  // while the opponent's card is shown large in the middle, the coach waits for it to land, then fades in
+  const wait = Math.max(0, (ui.revealEnd || 0) - Date.now());
+  el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
+  el.innerHTML = `<p>${L.text}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
+  // an opening step closes on Next (or Enter/Space), and the next one shows
+  if (L.next) el.querySelector('#coachnext').onclick = e => { e.stopPropagation(); tutState().seen.add(L.id); drawGame(); };
 }
 
 // The history strip and both decklists, shared by both game screens.
@@ -711,7 +725,7 @@ function drawEnd() {
     // the tutorial's end: a win sends the player on to a real match; otherwise, the same lesson again
     if (w === you) store('ak:learned', '1');
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>
-      ${w === you ? '<div class="next">That\'s the game. Pick a deck and play.</div>' : ''}
+      ${w === you ? '<div class="next">You know how to play now. Time for a real match!</div>' : ''}
       <div class="btns">${peek}${w === you ? '<a class="play" href="#/">Play a match</a>' : '<button class="play" id="again">Try again</button>'}</div></div>`;
     if (w !== you) document.getElementById('again').onclick = startTutorial;
   } else {
@@ -808,3 +822,7 @@ window.__ak = () => ({ V, ui, d: lastDecision });   // test hook: the headless p
 window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it
 window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client
 boot();
+addEventListener('keydown', e => {   // the tutorial's Next also answers Enter and Space
+  const next = screen === 'game' && document.getElementById('coachnext');
+  if (next && (e.key === 'Enter' || e.key === ' ') && document.activeElement.tagName !== 'TEXTAREA') { e.preventDefault(); next.click(); }
+});
