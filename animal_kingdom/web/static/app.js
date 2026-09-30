@@ -475,8 +475,8 @@ function drawGame() {
 
   // The opponent's hand: one card back each, centred across the board from yours; in a replay their cards, face up (the eye hides them).
   const faces = RP.views.length && RP.eye && G.oppHand;
-  const nb = G.handCount[them], step = faces ? Math.min(90, 456 / Math.max(1, nb - 1)) : 52,   // face up, the hand stays clear of the replay's controls
-    bx0 = STAGE.w / 2 - (84 + (nb - 1) * step) / 2;
+  const nb = G.handCount[them], step = faces ? Math.min(72, 504 / Math.max(1, nb - 1)) : 52,   // face up, a gap between cards as in your hand; a full hand (8) stays clear of the replay's controls
+    bx0 = STAGE.w / 2 - ((faces ? 66 : 84) + (nb - 1) * step) / 2;
   const A = ui.anim, oppDrew = A ? Math.max(0, nb - A.oppHand) : 0;   // their new cards slide down into their hand
   const slot = i => `${i >= nb - oppDrew ? ' drawn' : ''}" style="left:${bx0 + i * step}px;animation-delay:${(i - (nb - oppDrew)) * 0.12}s`;
   $('opphand').innerHTML = faces
