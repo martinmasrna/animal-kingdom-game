@@ -20,8 +20,8 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
   assert.ok(await page.$('#learn'), 'a first visit offers the tutorial');
   // the menu leaves a tutorial for home at once
   await page.click('#learn'); await page.waitForFunction(() => window.__ak().V && window.__ak().V.phase === 'playing', { timeout: 10000 });
-  await page.click('#menubtn'); assert.equal(await page.$eval('#concede', e => e.textContent), 'Leave tutorial');
-  await page.click('#concede'); await page.waitForSelector('.home #learn');
+  assert.equal(await page.$eval('#menubtn', e => e.dataset.tip), 'Leave tutorial');   // the flag leaves a tutorial at once
+  await page.click('#menubtn'); await page.waitForSelector('.home #learn');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/0-home.png` });
   await page.click('#learn');
   await page.waitForFunction(() => window.__ak().V && window.__ak().V.phase === 'playing', { timeout: 10000 });
@@ -33,6 +33,9 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
     await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2); await wait(250); await page.mouse.move(5, 5); await wait(150); };
   const owner = (s, cr) => { const st = s.board[cr]; return st && st.length ? st[st.length - 1].owner : null; };
 
+  const picked = new Set();   // SHOTS: each step also once right after its card is picked (its second line, its circles)
+  const shootPicked = async (lesson, s) => { const k = `${lesson}-${s.lesson}`; if (!SHOTS || !s.lesson || picked.has(k)) return;
+    picked.add(k); await wait(350); await page.screenshot({ path: `${SHOTS}/${lesson}-p-${s.lesson}.png` }); };
   const play = async (lesson, seen) => { for (let step = 0; step < 300; step++) {
     await wait(300);
     const s = await state();
@@ -46,7 +49,7 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
     if (s.only && (s.only.card || s.only.deck)) {   // a forced step: exactly one thing can be done
       if (s.only.deck) { await click('#deck'); continue; }
       const sel = await page.evaluate(() => window.__ak().ui.sel);
-      if (sel !== s.only.card) { await click(`.hc[data-id="${s.only.card}"]`); continue; }   // pick it, and read the next line
+      if (sel !== s.only.card) { await click(`.hc[data-id="${s.only.card}"]`); await shootPicked(lesson, s); continue; }   // pick it, and read the next line
       const rings = (await state()).places[s.only.card].filter(t => t[0] === 'cr'), t = process.env.PICK === 'last' ? rings[rings.length - 1] : rings[0];   // any ringed crossroad: the lesson allows them all
       await click(`#board [data-cr="${t[1]}"]`);
       continue;
@@ -54,10 +57,10 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
     // free play, as a newcomer following the coach: the den when it's open, the corner it points at, a cover, else push
     // right; draw when the hand is empty
     const moves = Object.entries(s.places).flatMap(([id, ts]) => ts.map(t => ({ id, t })));
-    const pick = moves.find(m => m.t[0] === 'hq') || (s.lesson === 'corner' && moves.find(m => m.t[1] === s.at.cr))
+    const pick = moves.find(m => m.t[0] === 'hq')
       || moves.find(m => owner(s, m.t[1]) === 'B') || moves.filter(m => !s.board[m.t[1]]).sort((a, b) => b.t[1][0] - a.t[1][0])[0];
     if (!pick) { await click(s.canDraw ? '#deck' : '#tbtn'); continue; }
-    await click(`.hc[data-id="${pick.id}"]`);
+    await click(`.hc[data-id="${pick.id}"]`); await shootPicked(lesson, s);
     await click(pick.t[0] === 'hq' ? '#board [data-hq="B"]' : `#board [data-cr="${pick.t[1]}"]`);
   } };
 
