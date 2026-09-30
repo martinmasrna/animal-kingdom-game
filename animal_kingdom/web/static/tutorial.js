@@ -117,7 +117,7 @@ export const LESSONS_2 = [
   { id: 'lion', when: c => c.mine && c.hand('lion') && !c.placed('lion'), only: one('lion', '1,2'), at: { rings: true },
     text: 'Place your Lion on the circle.' },
   explain('glow', 'lynx', c => c.mine && c.ready('lynx'),
-    'See the Lynx glowing? A glowing card\'s Roar will work right now: it draws a card if you have another Cat, and your Lion is one.'),
+    'See the Lynx glowing? A glowing card\'s Roar will work if you place it now.'),
   { id: 'lynx', when: c => c.mine && c.hand('lynx'), only: one('lynx', '2,2'), at: { rings: true },
     text: 'Place the Lynx on the circle.' },
   { id: 'wall', when: c => c.theirs && c.round === 1, at: { den: 'B' },
