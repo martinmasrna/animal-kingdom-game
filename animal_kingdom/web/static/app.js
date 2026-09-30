@@ -454,7 +454,6 @@ function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
     app.innerHTML = `<div class="game kit" id="scr"><div id="world"><img src="/static/kit2/plate_wide.webp" alt="" draggable="false"></div><div id="stage">
-      <div class="abs ledge"></div>
       <div id="board"></div>
       <div class="abs menu hs" id="series" data-tip="History"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg></div>
       <div class="abs opphand" id="opphand"></div>
