@@ -77,7 +77,9 @@ def _board_owners(state: GameState) -> dict[str, str]:
 def replay(log: dict, *, config: Optional[Config] = None) -> list[dict]:
     """Re-run one logged game by applying its stored actions (no bots). Returns a step list,
     each step diffing state before/after the action (food, region control, board ownership)."""
-    state = new_game(load_premade_deck(log["deck_a"]), load_premade_deck(log["deck_b"]),
+    # A web game logs both lists (custom decks have no premade slug); older logs name premades only.
+    deck_a, deck_b = log.get("lists") or (load_premade_deck(log["deck_a"]), load_premade_deck(log["deck_b"]))
+    state = new_game(list(deck_a), list(deck_b),
                      log["seed"], map_id=log.get("map_id", "map_b"), config=config,
                      first_player=log["first_player"])
     steps: list[dict] = []

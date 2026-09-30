@@ -41,6 +41,16 @@ def test_replay_is_deterministic():
     assert (r1.winner, r1.reason) == (r2.winner, r2.reason)
 
 
+def test_replay_uses_logged_lists_for_custom_decks():
+    # A web game with a custom deck logs both lists and a slug no premade has.
+    from animal_kingdom.decks import load_premade_deck
+    rec, log = _logged_game()
+    log = {**log, "deck_a": "custom_0123456789",
+           "lists": [load_premade_deck("colony_food_swarm"), load_premade_deck("ramp")]}
+    _, result, _ = replay.replay(log)
+    assert (result.winner, result.reason) == (rec.winner, rec.reason)
+
+
 def test_replay_reproduces_a_forced_first_player():
     # run_pairs forces first_player independently of the seed's coin flip (see runner.py); the
     # logged record and replay must agree on which player actually moved first.
