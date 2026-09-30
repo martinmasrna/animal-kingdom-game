@@ -24,7 +24,7 @@ Watch Falstaff's "whenever you gain food, gain 3 more" stacking with the food-on
 | **Nurse Bee** | 2 | Colony | 3 | Flight. Roar: if you control two of the same Colony unit, draw 2 cards. |
 | **Nurse Bumblebee** | 2 | Colony | 3 | Flight. Roar: if you control 4 or more Colony units, draw 2 cards. |
 | **Termite King** | 2 | Colony | 6 | Roar: if you control a Colony Queen, draw 1 card. |
-| **Termite Queen** | 2 | Colony, Queen | 3 | Roar: you may play one additional non-Queen Colony unit this turn. |
+| **Termite Queen** | 2 | Colony, Queen | 3 | Roar: you may play another non-Queen Colony unit. |
 
 ### Common
 

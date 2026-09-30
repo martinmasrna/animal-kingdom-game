@@ -26,7 +26,7 @@ Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reac
 | **Polar Bear** | 2 | Bear | 8 | Apex Predator. |
 | **Rhinoceros** | 2 | Megafauna | 6 | Roar: remove all adjacent enemies of strength 2 or less. |
 | **Hippopotamus** | 2 | Megafauna | 6 | When an enemy of strength 3 or less is placed adjacent to this, remove it. |
-| **Andean Condor** | 2 | Bird | 5 | Flight. Reveal top card of both decks. If yours has higher strength, draw it. |
+| **Andean Condor** | 2 | Bird | 5 | Flight. Roar: reveal the top card of each deck. If yours is stronger, draw it. |
 
 ### Common
 
@@ -34,9 +34,9 @@ Removal is area-only by design: Rhinoceros sweeps proactively, Hippopotamus reac
 |---|---:|---|---:|---|
 | **Elephant** | 3 | Megafauna | 9 | Costs 15 food. |
 | **Grizzly Bear** | 3 | Bear | 6 | Roar: in 2 turns, remove a random adjacent enemy. |
-| **Oxpecker** | 3 | Bird | 1 | Flight. Gain 1 food for each unit in your starting deck with strength 6 or more. |
+| **Oxpecker** | 3 | Bird | 1 | Flight. Roar: gain 1 food for each unit of strength 6 or more in your starting deck. |
 | **Black Bear** | 3 | Bear | 5 | Roar: in 2 turns, draw 2 cards. |
-| **Sloth** | 3 | — | 3 | In 2 turns, gain 30 food. |
+| **Sloth** | 3 | — | 3 | Roar: in 2 turns, gain 30 food. |
 | **Cape Buffalo** | 3 | Megafauna | 7 | — |
 
 <!-- cards:end -->

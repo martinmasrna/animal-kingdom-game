@@ -414,7 +414,7 @@
       "tags": ["Colony", "Queen"],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: you may play one additional non-Queen Colony unit this turn."
+      "text": "Roar: you may play another non-Queen Colony unit."
     },
     {
       "id": "queen_bee",
@@ -566,7 +566,7 @@
       "tags": ["Bird"],
       "base_strength": 5,
       "keywords": ["Flight"],
-      "text": "Flight. Reveal top card of both decks. If yours has higher strength, draw it."
+      "text": "Flight. Roar: reveal the top card of each deck. If yours is stronger, draw it."
     },
     {
       "id": "elephant",
@@ -597,7 +597,7 @@
       "tags": ["Bird"],
       "base_strength": 1,
       "keywords": ["Flight"],
-      "text": "Flight. Gain 1 food for each unit in your starting deck with strength 6 or more."
+      "text": "Flight. Roar: gain 1 food for each unit of strength 6 or more in your starting deck."
     },
     {
       "id": "black_bear",
@@ -617,7 +617,7 @@
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "In 2 turns, gain 30 food."
+      "text": "Roar: in 2 turns, gain 30 food."
     },
     {
       "id": "cape_buffalo",
@@ -727,7 +727,7 @@
       "tags": ["Rodent"],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: gain 10 food. At the start of next turn, gain 10 more."
+      "text": "Roar: gain 10 food. At the start of your next turn, gain 10 more."
     },
     {
       "id": "hedgehog",
@@ -860,7 +860,7 @@
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Return an adjacent enemy to your opponent's hand. It can't be played next turn."
+      "text": "Roar: return an adjacent enemy to your opponent's hand. It can't be played next turn."
     },
     {
       "id": "lemming",

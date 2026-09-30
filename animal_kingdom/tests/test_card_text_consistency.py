@@ -220,3 +220,18 @@ def test_egg_text_matches_config():
 def test_egg_eater_growth_text_matches_config():
     (n,) = re.findall(r"Has \+(\d+) strength for each removed Egg", _cards()["egg_eater"].text)
     assert int(n) == Config.default().egg_eater_growth
+
+
+def test_roar_label_matches_placement_effect():
+    """"Roar:" in the text exactly when the engine runs an effect on placement (Caracal's
+    only when placed onto an enemy).
+
+    The bots read `has_roar` off the text, so an unlabelled placement effect (Andean
+    Condor, Oxpecker, Sloth and Skunk until 2026-09-30) was invisible to them.
+    """
+    from animal_kingdom.engine.effects import EFFECTS
+
+    mismatched = sorted(
+        cid for cid, card in load_cards().items()
+        if card.has_roar != any(hook.startswith("on_place") for hook in EFFECTS.get(cid, {})))
+    assert mismatched == []

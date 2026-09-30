@@ -39,7 +39,7 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Squirrel** | 3 | Rodent | 3 | Roar: gain 10 food. |
-| **Chipmunk** | 3 | Rodent | 1 | Roar: gain 10 food. At the start of next turn, gain 10 more. |
+| **Chipmunk** | 3 | Rodent | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. |
 | **Hedgehog** | 2 | — | 5 | The first time an enemy covers this, remove that enemy. Roar: gain 5 food. |
 | **Hamster** | 2 | Rodent | 3 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
 | **Muskrat** | 3 | Rodent | 2 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. |

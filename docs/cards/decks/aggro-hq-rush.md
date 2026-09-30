@@ -29,7 +29,7 @@ The deck is being redesigned: the diagnosis and Martin's card-by-card analysis a
 | **Jerboa** | 2 | Rodent | 2 | Roar: play another unit. |
 | **Hornet** | 2 | — | 2 | Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy. |
 | **Chameleon** | 2 | Lizard | 0 | Can cover units of any strength. |
-| **Skunk** | 2 | — | 4 | Return an adjacent enemy to your opponent's hand. It can't be played next turn. |
+| **Skunk** | 2 | — | 4 | Roar: return an adjacent enemy to your opponent's hand. It can't be played next turn. |
 
 ### Common
 
