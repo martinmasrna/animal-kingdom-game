@@ -598,31 +598,33 @@ function placeCoach(el, L, rings = []) {
   if (!L) { holdBot(false); el.innerHTML = ''; document.getElementById('board').classList.remove('pulse'); return; }
   const a = L.at || {}, card = a.card && document.querySelector(`#hand .hc[data-id="${a.card}"]`);
   let x, y, side;
+  // the edge pieces sit at the window's edges (fitStage's --above/--side, stage px): anchors on them move with them
+  const st = getComputedStyle(document.getElementById('stage')), up = parseFloat(st.getPropertyValue('--above')) || 0, out = parseFloat(st.getPropertyValue('--side')) || 0;
   const read = a.read && document.querySelector(`#hand .hc[data-id="${a.read}"]`);
   if (read) { const cx = parseFloat(read.style.left) + 71.5;   // beside the large card (2.1x: 300 wide, so 150 + a 24 gap from its middle)
-    [x, y, side] = cx - 174 - COACH_W >= 16 ? [cx - 96, 568, 'left'] : [cx + 96, 568, 'right']; }
-  else if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, card.classList.contains('sel') ? 572 : 590, 'above'];   // a picked card stands 18px higher
-  else if (a.deck) [x, y, side] = [1299, 606, 'above'];
-  else if (a.prompt) [x, y, side] = [STAGE.w / 2, 100, 'below'];   // under the card's question, one line at the top centre
-  else if (a.endturn) [x, y, side] = [1439, 664, 'above'];
+    [x, y, side] = cx - 174 - COACH_W >= 16 ? [cx - 96, 568 + up, 'left'] : [cx + 96, 568 + up, 'right']; }
+  else if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, (card.classList.contains('sel') ? 572 : 590) + up, 'above'];   // a picked card stands 18px higher
+  else if (a.deck) [x, y, side] = [1299 + out, 606 + up, 'above'];
+  else if (a.prompt) [x, y, side] = [STAGE.w / 2, 100 - up, 'below'];   // under the card's question, one line at the top centre
+  else if (a.endturn) [x, y, side] = [1439 + out, 664 + up, 'above'];
   else if (a.cr) { [x, y] = crossroadAt(a.cr); side = x > STAGE.w / 2 ? 'left' : 'right'; }
   else if (a.den) { [x, y] = denMouthAt(a.den); side = a.den === 'B' ? 'left' : 'right'; }
-  else if (a.rings && !rings.length) [x, y, side] = [STAGE.w / 2, 590, 'above'];   // no card picked yet: the circles come with one, so point at the hand
+  else if (a.rings && !rings.length) [x, y, side] = [STAGE.w / 2, 590 + up, 'above'];   // no card picked yet: the circles come with one, so point at the hand
   else if (a.rings) {   // beside the group of rings, clear of all of them, with no notch (the rings pulse instead)
     const rs = rings.map(crossroadAt);   // this frame's rings, before the board redraws
     const xs = rs.map(r => r[0]), ys = rs.map(r => r[1]), cy = (Math.min(...ys) + Math.max(...ys)) / 2;
     const right = Math.max(...xs) + 78;
     const left = Math.min(...xs) - 78 - COACH_W;
     [x, y, side] = right + COACH_W < STAGE.w - 16 ? [right, cy, 'group'] : left >= 16 ? [left, cy, 'group']
-      : [STAGE.w / 2, 590, 'above'];   // circles across the whole board (Flight): above the hand, pointing at the picked card
+      : [STAGE.w / 2, 590 + up, 'above'];   // circles across the whole board (Flight): above the hand, pointing at the picked card
   }
   else if (a.gem) [x, y, side] = a.gem === 'A' ? [150, 122, 'right'] : [STAGE.w - 150, 122, 'left'];   // a den's food gem, on its crown
-  else if (a.hand) [x, y, side] = [STAGE.w / 2, 590, 'above'];
+  else if (a.hand) [x, y, side] = [STAGE.w / 2, 590 + up, 'above'];
   else if (a.oppcards) [x, y, side] = [STAGE.w / 2 + 170, 72, 'below'];   // beside the opponent's card backs, clear of their revealed card
   else if (a.middle) [x, y, side] = [STAGE.w / 2, 250, 'mid'];
   else if (a.stone) { const [c, r] = a.stone.split(',').map(Number), [x1, y1] = crossroadAt(`${c},${r}`), [x2, y2] = crossroadAt(`${c + 1},${r + 1}`);
     [x, y, side] = [(x1 + x2) / 2 - 20, (y1 + y2) / 2, 'right']; }   // a region's payout stone, in the open ground between crossroads
-  else [x, y, side] = [STAGE.w / 2, 590, 'above'];
+  else [x, y, side] = [STAGE.w / 2, 590 + up, 'above'];
   const clampX = v => Math.max(16, Math.min(STAGE.w - 16 - COACH_W, v));
   const pos = side === 'above' ? `left:${clampX(x - COACH_W / 2)}px;bottom:${STAGE.h - y + 14}px;--nx:${x - clampX(x - COACH_W / 2)}px`
     : side === 'below' ? `left:${clampX(x - COACH_W / 2)}px;top:${y + 14}px;--nx:${x - clampX(x - COACH_W / 2)}px`
@@ -635,6 +637,7 @@ function placeCoach(el, L, rings = []) {
   document.getElementById('board').classList.toggle('pulse', !!a.rings);
   holdBot(!!L.next);
   el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
+  el.style.setProperty('--up', `${up}px`);   // a risen coach clears the lifted card, which moved with the hand
   el.dataset.iid = side === 'above' && y >= 572 ? (card ? card.dataset.iid : 'any') : '';   // over the hand: a hovered card lifts it   // hovering that card lifts the coach above it (wireCoachHover)
   el.innerHTML = `<p>${L.text}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
   // an opening step closes on Next (or Enter/Space), and the next one shows
