@@ -95,6 +95,7 @@ async function boot() {
 
 function route() {
   pop.style.display = 'none'; stackpop.style.display = 'none';
+  const tip = document.getElementById('tip'); if (tip) tip.style.display = 'none';   // the game's hover label lives on body: it must not outlive the screen
   const parts = (location.hash.slice(1) || '/').split('/').filter(Boolean);
   const id = parts[1] && parts[1].toUpperCase();
   if (parts[0] !== 'm' || id !== wsId) disconnect();

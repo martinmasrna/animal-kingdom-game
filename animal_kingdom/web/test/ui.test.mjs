@@ -107,4 +107,14 @@ test('a game can be conceded from the menu, after one confirmation', async () =>
   await p.close();
 });
 
+test('a hover label in the game does not stay on screen after leaving', async () => {
+  const p = await browser.newPage();
+  await p.goto(`${server.url}/#/lab/mid`, { waitUntil: 'networkidle0' });
+  const b = await (await p.$('#board [data-tip]')).boundingBox(); await p.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await wait(80);
+  assert.ok(await p.$eval('#tip', e => getComputedStyle(e).display !== 'none'), 'the label shows');
+  await p.evaluate(() => { location.hash = '#/'; }); await wait(150);
+  assert.ok(await p.$eval('#tip', e => getComputedStyle(e).display === 'none'), 'and is gone at home');
+  await p.close();
+});
+
 test('no page errors', () => assert.deepEqual(page.errors, []));
