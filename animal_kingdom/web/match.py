@@ -15,9 +15,6 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
-from ..bots.greedy_bot import GreedyBot
-from ..bots.referee_bot import RefereeBot
-from ..bots.turn_bot import TurnBot
 from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, action_from_dict
@@ -26,6 +23,7 @@ from ..engine.effects import roar_condition
 from ..engine.maps import load_map
 from ..engine.state import EngineError, GameState, Result, new_game, other_player
 from ..engine.strength import effective_strength, placement_strength
+from ..sim.runner import make_bot
 from . import tutorial
 
 CARDS = load_cards()
@@ -44,14 +42,15 @@ DECK_NAMES = {"cats_midrange": "Cats", "canine_buff_tempo": "Canines", "aggro_hq
               "colony_food_swarm": "Colony", "egg_control": "Egg", "food_otk": "Food", "ramp": "Ramp",
               "goodstuff": "Goodstuff", **tutorial.NAMES}
 
-# Easy / Normal / Expert, as in the play screen.
-BOT_LEVELS = {"easy": GreedyBot, "normal": TurnBot, "expert": RefereeBot}
+# Easy / Normal / Expert, as in the play screen: the same bot kinds, with the same settings, the
+# simulations measure (a bare RefereeBot() is an untested configuration).
+BOT_LEVELS = {"easy": "greedy", "normal": "turn", "expert": "referee"}
 
 
 def bot_for(level: str, seed: int):
     if level in tutorial.BOTS.values():
         return tutorial.TutorialBot(seed=seed, lesson=next(n for n, b in tutorial.BOTS.items() if b == level))
-    return BOT_LEVELS[level](seed=seed)
+    return make_bot(BOT_LEVELS[level], seed)
 
 
 def deck_list(slug: str) -> list[str]:

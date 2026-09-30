@@ -52,6 +52,15 @@ A small network over the rung-2 features (rung 1 plus hand and board context: Ro
 - Round 2 plus 2,250 extra games in every pairing with Aggro or goodstuff (`--decks aggro_hq_rush,goodstuff`), trained on 571k positions (`results/netlearn/net_r2d.json`, hidden 32, l2 1e-3): **the first candidate that improves or ties every deck against goodstuff** (`results/bot_quality/net-r2d-vs-gs`): Colony +15.0, Food +13.5, Cats +9.0 (all clear), Canine +6.5, Aggro −1.0, Egg −2.0, Ramp 0.0. On the 2026-09-29 cards, so before the new Egg Control.
 - Round 3: self-play on current cards (`results/netlearn/round3.npz`, played by `net_r2d`, launched 2026-09-30 16:46, about two hours, log `round3.log`). A chained run follows it unattended: retrain on rounds 0–3 plus the den games (`results/netlearn/net_r3.json`, hidden 32, l2 1e-3), then every deck against goodstuff with the r2d run's seed (`results/bot_quality/net-r3-vs-gs.txt`, about 4 hours), then the full proof, every deck against all seven premades with the opponent on RefereeBot (`results/bot_quality/net-r3-7x7.txt`, about 12 hours). Both comparisons run from a worktree pinned at 79f8154 so edits can't reach running workers. If it improves or ties every deck, the network becomes RefereeBot's evaluation (ship `net` as `data/learned/`, make the referee kind load it), then re-run the balance matrix with it.
 
+## Misplays Martin flagged (2026-09-30 night)
+
+From his custom Egg Control against Expert goodstuff (`results/human_games/web/web_20260930T223013_DBYAPW.jsonl`, the third game). Until that night the client's Expert was a bare `RefereeBot()` (reply width 4, 1,000 nodes), a configuration no simulation measures; it now comes from `make_bot("referee")` like every benchmark.
+
+- **Taipan fizzled** (action 33): Taipan on 4,2 with no adjacent enemy, then Wolf on 3,2. Wolf on 4,2 then Taipan on 3,2 marks his Python (8). The benchmarked RefereeBot finds that line in 4 of 4 seeds; the web configuration didn't. The hand eval scores a pending delayed removal the same whatever it targets (marking the Python and marking a Raven both evaluate -1.9), so it can't tell a good Taipan from a poor one.
+- **Lemming on its own Pestis** (action 23): buries Pestis (3) under a 1 on the den front for one extra Lemming. RefereeBot does it in 4 of 4 seeds even though its own end-of-turn eval prefers Lemming on 4,3 then Tiger on 3,3 (21.4 against 11.0), so the reply rollout overturns it. The round-3 network plays Lemming on 4,3 in 3 of 4 seeds.
+
+Neither is frozen as a puzzle yet.
+
 ## Throughput
 
 The complete-turn search is bushy, not deep: turn trees are only 2 to 6 plies but explode in breadth on combo decks. The shipped levers are a node budget (`TURN_MAX_SEARCH_NODES=80`, byte-identical play on all decks) and collapsing Owl/Raven's keep-or-shuffle choices to the top 2 in lookahead. food_otk remains the slowest deck, about 13× greedy.

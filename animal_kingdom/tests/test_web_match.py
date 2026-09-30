@@ -260,3 +260,13 @@ def test_ending_a_turn_by_hand_is_not_recorded_as_a_draw(monkeypatch):
         m.act(m.to_act(), ChoiceAction("__skip__"))
     m.act(m.to_act(), PassAction())
     assert m.history == []
+
+
+def test_bot_levels_are_the_configurations_the_simulations_measure():
+    from animal_kingdom.sim.runner import make_bot
+    from animal_kingdom.web.match import BOT_LEVELS, bot_for
+    for level, kind in BOT_LEVELS.items():
+        assert vars(bot_for(level, 7)).keys() == vars(make_bot(kind, 7)).keys()
+        web, sim = bot_for(level, 7), make_bot(kind, 7)
+        for attr in ("determinizations", "beam_width", "root_width", "reply_width", "max_search_nodes"):
+            assert getattr(web, attr, None) == getattr(sim, attr, None), (level, attr)
