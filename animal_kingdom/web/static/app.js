@@ -31,9 +31,9 @@ function toast(msg, ok) {
 function sortIds(ids) {
   return ids.sort((a, b) => RANK[CARDS[a].rarity] - RANK[CARDS[b].rarity] || sv(CARDS[a]) - sv(CARDS[b]) || CARDS[a].name.localeCompare(CARDS[b].name));
 }
-// A decklist in the game's panels: the collection's strips, copies left as filled dots of the copies in the deck.
+// A decklist in the game's panels: the collection's strips, each with the copies left.
 function rows(list, counts) {
-  return `<div class="dbody flat">${sortIds(Object.keys(list)).map(id => stripHTML(id, CARDS, counts ? (counts[id] || 0) : list[id], list[id])).join('')}</div>`;
+  return `<div class="dbody flat">${sortIds(Object.keys(list)).map(id => stripHTML(id, CARDS, counts ? (counts[id] || 0) : list[id])).join('')}</div>`;
 }
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 function cardPop(el, id, extra, place) {

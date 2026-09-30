@@ -160,3 +160,7 @@
 :is(.mscr, .game) .dbody .st .x { align-self: center; padding: 0 9px 0 0; gap: 3px; }
 :is(.mscr, .game) .dbody .st .x i { width: 6px; height: 6px; border-color: #d9ceb8; filter: drop-shadow(0 0 2px rgba(0,0,0,.95)) drop-shadow(0 1px 1px rgba(0,0,0,.8)); }
 :is(.mscr, .game) .dbody .st .x i.on { background: #d9ceb8; }
+/* The copies as a number in the card's bone, on a dark ground at the strip's end so it holds on any painting. */
+:is(.mscr, .game) .dbody .st .x { align-self: stretch; min-width: 26px; padding: 0 9px 0 14px; justify-content: flex-end; align-items: center;
+  background: linear-gradient(90deg, rgba(20,17,14,0), rgba(20,17,14,.85) 45%); font: 700 17px 'Fira Sans Condensed', sans-serif; color: #efe3cc; text-shadow: 0 1px 2px #000; }
+:is(.mscr, .game) .dbody .st .x:empty { display: none; }
