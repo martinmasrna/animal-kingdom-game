@@ -1030,7 +1030,7 @@
       "tags": ["Canine"],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: spawn a Pup on an adjacent empty crossroad."
+      "text": "Roar: place a Pup on an adjacent empty crossroad."
     },
     {
       "id": "dingo",

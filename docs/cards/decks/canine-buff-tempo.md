@@ -32,7 +32,7 @@ Buff wording is binding: "has +X" is a live aura, "give +X" is a permanent count
 |---|---:|---|---:|---|
 | **Jackal** | 3 | Canine | 4 | Roar: remove an adjacent enemy of equal or lower strength. |
 | **Fox** | 3 | Canine | 4 | Whenever this gains strength, draw a card. |
-| **African Wild Dog** | 3 | Canine | 2 | Roar: spawn a Pup on an adjacent empty crossroad. |
+| **African Wild Dog** | 3 | Canine | 2 | Roar: place a Pup on an adjacent empty crossroad. |
 | **Dingo** | 3 | Canine | 5 | At the end of your turn, give your adjacent Canines +1 strength. |
 | **Dog** | 3 | Canine | 1 | Roar: if you control another Canine, play another Canine. |
 | **Wolf** | 3 | Canine | 7 | — |
