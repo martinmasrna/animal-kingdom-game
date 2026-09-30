@@ -37,7 +37,6 @@ The map. Read it first each session and keep it current: when something here cha
 
 Taste calls only Martin can make. Nothing here is started.
 
-- **Card notes from play:** Queen Adira 5→4; Colony's 5-unit thresholds to 4.
 - **Flavor:** the legendary-name review (only the Cats legendaries are final); Cat/Canine vs Feline/Canine as the family pair; Black Panther as a melanistic leopard; a new name for Hornet (Tarantula Hawk?); a Colony exception to one-species-per-pool for castes; re-casting the untagged animals. Details in [`cards/flavor-todo.md`](cards/flavor-todo.md) and [`cards/decks/flavor-review.md`](cards/decks/flavor-review.md).
 - **Candidates that depended on Landmarks** (14 Landmark cards plus 6 that reference them) in [`cards/card-candidates.md`](cards/card-candidates.md): strike them, or recast the bear den as an animal.
 
