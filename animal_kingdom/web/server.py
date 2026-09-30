@@ -140,10 +140,10 @@ class Hub:
 
     async def _run_bot(self, match: Match) -> None:
         while (s := match.to_act()) is not None and match.seats[s].is_bot:
-            while match.hold:                 # the tutorial's coach is talking: the opponent waits for its Next
-                await asyncio.sleep(0.1)
             opening = not match.state.pending and match.state.actions_taken_this_turn == 0
             await asyncio.sleep(BOT_PAUSE["choice" if match.state.pending else "open" if opening else "move"])
+            while match.hold:                 # the tutorial's coach is talking: the opponent waits for its Next
+                await asyncio.sleep(0.1)      # (checked after the pause: the hold arrives while it runs)
             version = match.version
             try:
                 action = await asyncio.to_thread(match.bot_move)
