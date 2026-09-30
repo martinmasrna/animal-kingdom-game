@@ -177,7 +177,7 @@ def test_no_strength_limit_card_escapes_the_check():
     assert printed - {"oxpecker"} == set(STRENGTH_LIMITS)
 
 
-STRENGTH_LOSS_RE = re.compile(r"-(\d+) strength")
+STRENGTH_LOSS_RE = re.compile(r"(?:gets?|enemy) -(\d+) strength", re.IGNORECASE)
 
 
 def test_strength_loss_text_matches_config():
