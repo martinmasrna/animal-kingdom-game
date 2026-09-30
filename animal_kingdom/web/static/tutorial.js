@@ -71,14 +71,18 @@ export const LESSONS = [
     text: 'Finish the patch! Place an animal on the last crossroad around the +10.' },
   { id: 'food', when: c => c.homeHeld, ...talk, at: c => ({ stone: c.home[0] }),
     text: 'The +10 patch is yours! You get 10 food at the end of every turn. Watch the fruit fill your den.' },
-  { id: 'free', when: c => c.mine && (c.homeHeld || c.round >= 4), ...talk, at: { middle: true },
+  // covering, by hand: the second move of turn 3, onto the Pup the opponent always leaves beside the patch
+  { id: 'cover', when: c => c.mine && c.round >= 3 && c.homeHeld && c.coverable.length > 0, done: c => c.covered,
+    only: c => ({ card: c.coverWith, picked: true, crs: c.coverable }), at: c => ({ cr: c.coverable[0] }),
+    text: 'A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 7 can\'t beat 7. Cover the circled animal!' },
+  // Roar, by hand: the Lynx (turn 4), whose Roar always works beside the Lion
+  { id: 'roar', when: c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0, done: c => c.roared,
+    only: c => ({ card: 'lynx', picked: true, crs: c.empty('lynx') }), at: c => ({ cr: c.rightmost('lynx') }),
+    text: 'The Lynx has a Roar: a power that happens the moment you place it. Its Roar draws a card if you have another Cat, like your Lion. Place the Lynx!' },
+  { id: 'roared', when: c => c.roared, ...talk, at: { hand: true },
+    text: 'Your Lynx roared and drew you a card! Point at any card to read what it does.' },
+  { id: 'free', when: c => c.mine && (c.roared || c.round >= 6), ...talk, at: { middle: true },
     text: 'From here it\'s up to you. Head for your opponent\'s den, or surround more patches for more food.' },
-  { id: 'cover', when: c => c.mine && c.places.some(t => t[0] === 'cr' && owner(c.G, t[1]) === 'B'), ...talk,
-    at: c => ({ cr: c.places.find(t => t[0] === 'cr' && owner(c.G, t[1]) === 'B')[1] }),
-    text: 'A stronger animal can stand on top of a weaker enemy and take its crossroad. 7 beats 1, but 7 can\'t beat 7.' },
-  { id: 'roar', when: c => c.mine && c.G.hand.some(h => c.roar(h.id)), ...talk,
-    at: c => ({ card: c.G.hand.find(h => c.roar(h.id)).id }),
-    text: 'Some animals have a special power. Point at a card to read it. A Roar happens as soon as you place the animal.' },
   { id: 'target', when: c => c.choosing, untilAct: true, at: { prompt: true },
     text: 'This Roar needs a target. Click one of the circled crossroads, or click Skip.' },
   // stuck with nothing to place: point at the deck, every time it happens (after any line still to read)
@@ -98,6 +102,11 @@ export function context(V, sel, cards) {
     choosing: V.phase === 'playing' && G.toAct === V.you && !!G.pending && G.pending.kind !== 'mulligan',
     at: cr => owner(G, cr) === V.you,
     canDraw: !!(G.legal && G.legal.draw),
+    // enemy crossroads a card can cover now; whether you have covered, and whether the Lynx has roared
+    coverable: [...new Set(places.filter(t => t[0] === 'cr' && owner(G, t[1]) && owner(G, t[1]) !== V.you).map(t => t[1]))],
+    coverWith: (Object.entries((G.legal && G.legal.place) || {}).find(([, ts]) => ts.some(t => t[0] === 'cr' && owner(G, t[1]) && owner(G, t[1]) !== V.you)) || [])[0],   // a card that can cover now
+    covered: G.history.some(m => m.seat === V.you && m.fx.some(f => f.k === 'cover')),
+    roared: G.history.some(m => m.seat === V.you && m.kind === 'place' && m.card === 'lynx'),
     units: Object.keys(G.board).filter(cr => owner(G, cr) === V.you).length,
     hand: id => G.hand.some(h => h.id === id),
     // the rightmost crossroad a card can go to now (the coach stands beside it, clear of the others)

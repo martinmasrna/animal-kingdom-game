@@ -14,11 +14,14 @@ from ..bots.base import Bot
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction
 from ..engine.config import Config
 
-# Draw order, first card first. The player opens with the three the first turns place (Lion, Buffalo, Wolf) and draws a
-# Jaguar and a Lion with the deck lesson; the rest are plain strong animals and a few Roars to meet later.
-PLAYER_DECK = ["lion", "cape_buffalo", "dire_wolf", "jaguar", "lion", "cheetah", "dire_wolf", "jaguar", "lion",
-               "cape_buffalo", "cheetah", "dire_wolf", "lion", "jaguar", "cape_buffalo", "dire_wolf", "lion", "cheetah",
-               "jaguar", "lion"]
+# Draw order, first card first. The player opens with the three the first turns place (Lion, Buffalo, Wolf); the deck
+# lesson on turn 2 draws two plain 7s, for the patch's last corner and the forced cover of turn 3; turn 4 draws the Lynx,
+# whose Roar (draw 1 if you control another Cat) always works beside the Lion, for the Roar lesson. No Roar comes
+# before it; the rest are strong animals and Roars to meet later.
+PLAYER_DECK = ["lion", "cape_buffalo", "dire_wolf", "lion", "cape_buffalo", "lynx", "dire_wolf", "jaguar", "cheetah",
+               "lion", "dire_wolf", "jaguar", "cape_buffalo", "lion", "cheetah", "dire_wolf", "jaguar", "lion",
+               "cape_buffalo", "lion"]
+PLAYER_DECK += PLAYER_DECK[7:] + PLAYER_DECK[7:10]   # 36 cards: a slow first game never runs out (no exhaustion loss)
 # The opponent: a Buffalo (7) walls the middle of its den, then wild dogs (1) that any animal can cover.
 OPPONENT_DECK = ["cape_buffalo", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup",
                  "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup"]

@@ -31,11 +31,11 @@ def test_the_forced_turns_play_out_as_the_lessons_say():
         m.act("B", m.bot_move())
     assert _board(m)["5,2"] == [("B", "cape_buffalo")] and _board(m)["4,2"] == [("B", "pup")]
     m.act("A", PlaceAction("dire_wolf", ("cr", "1,1"))); m.act("A", DrawAction())
-    assert [u.card_id for u in m.state.hands["A"]] == ["jaguar", "lion"]
+    assert [u.card_id for u in m.state.hands["A"]] == ["lion", "cape_buffalo"]
 
 
 def test_the_opponent_never_wins_and_never_takes_food():
-    for seed in range(20):
+    for seed in range(60):
         rng, m = random.Random(seed), _tutorial()
         while m.phase == "playing":
             if m.to_act() == "B":

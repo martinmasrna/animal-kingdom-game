@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { current, gate } from '../static/tutorial.js';
 
-const CARDS = { lion: { text: '' }, cape_buffalo: { text: '' }, dire_wolf: { text: '' }, jaguar: { text: 'Roar: remove an adjacent enemy of strength 4 or less.' } };
+const CARDS = { lynx: { text: 'Roar: if you control another Cat, draw 1.' }, lion: { text: '' }, cape_buffalo: { text: '' }, dire_wolf: { text: '' }, jaguar: { text: 'Roar: remove an adjacent enemy of strength 4 or less.' } };
 const u = (id, owner) => [{ id, owner, str: 7 }];
 const view = (g = {}) => ({ you: 'A', phase: 'playing', game: { round: 1, current: 'A', toAct: 'A', pending: null, actionsLeft: 2, board: {}, hand: [],
   history: [], legal: { place: { lion: [['cr', '1,1'], ['cr', '1,2'], ['cr', '1,3']] }, draw: true }, ...g } });
@@ -48,7 +48,7 @@ test('nothing is taught off your turn, and a lesson read once stays away after y
   t.seen.add('actions');
   const food = current(view(r4), null, CARDS, t);
   assert.equal(food.id, 'food'); assert.ok(food.next, 'a line that only tells waits for Next');
-  t.seen.add('food'); assert.equal(current(view(r4), null, CARDS, t).id, 'free', 'then says what to aim for');
+  t.seen.add('food'); assert.equal(current(view(r4), null, CARDS, t).id, 'empty', 'then, with nothing to place, points at the deck');
 });
 
 test('the open den is pointed out whenever it can be taken', () => {
@@ -80,4 +80,16 @@ test('with nothing to place, the coach points at the deck, every time', () => {
   const stuck = view({ round: 4, board: { '1,3': u('lion', 'A') }, hand: [], legal: { place: {}, draw: true } });
   assert.equal(current(stuck, null, CARDS, t).id, 'empty');
   assert.equal(current(stuck, null, CARDS, t).id, 'empty', 'never used up');
+});
+
+test('covering and Roar are each done once by hand: the Pup beside the patch, then the Lynx', () => {
+  const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'patch', 'actions', 'food'].forEach(id => t.seen.add(id));
+  const board = { '1,1': u('dire_wolf', 'A'), '1,2': u('lion', 'A'), '2,1': u('lion', 'A'), '2,2': u('cape_buffalo', 'A'), '3,2': [{ id: 'pup', owner: 'B', str: 1 }] };
+  const cover = current(view({ round: 3, board, hand: [{ id: 'cape_buffalo' }], legal: { place: { cape_buffalo: [['cr', '3,2'], ['cr', '3,1']] }, draw: true } }), null, CARDS, t);
+  assert.equal(cover.id, 'cover'); assert.deepEqual(cover.only, { card: 'cape_buffalo', picked: true, crs: ['3,2'] });
+  const covered = [{ seat: 'A', kind: 'place', card: 'cape_buffalo', fx: [{ k: 'cover' }] }];
+  const roar = current(view({ round: 4, board, history: covered, hand: [{ id: 'lynx' }], legal: { place: { lynx: [['cr', '3,1'], ['cr', '1,3']] }, draw: true } }), null, CARDS, t);
+  assert.equal(roar.id, 'roar'); assert.deepEqual(roar.only, { card: 'lynx', picked: true, crs: ['3,1', '1,3'] });
+  const roared = current(view({ round: 4, board, history: [...covered, { seat: 'A', kind: 'place', card: 'lynx', fx: [] }], hand: [], legal: { place: {}, draw: true } }), null, CARDS, t);
+  assert.equal(roared.id, 'roared'); assert.ok(roared.next);
 });
