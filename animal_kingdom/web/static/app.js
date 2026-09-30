@@ -646,7 +646,8 @@ function placeCoach(el, L, rings = []) {
   el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
   el.style.setProperty('--up', `${up}px`);   // a risen coach clears the lifted card, which moved with the hand
   el.dataset.iid = side === 'above' && y >= 572 ? (card ? card.dataset.iid : 'any') : '';   // over the hand: a hovered card lifts it   // hovering that card lifts the coach above it (wireCoachHover)
-  const text = rings.length === 1 ? L.text.replace('one of the circles', 'the circle').replace('Click one.', 'Click it.') : L.text;   // one circle: "the circle"
+  const text = rings.length === 1 ? L.text.replace('one of the circles', 'the circle').replace('Click one.', 'Click it.')   // one circle: "the circle"
+    : L.text.replace(/\bthe circle\b(?! next)/, 'one of the circles');   // several: never "the circle"
   el.innerHTML = `<p>${text}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
   // an opening step closes on Next (or Enter/Space), and the next one shows
   if (L.next) el.querySelector('#coachnext').onclick = e => { e.stopPropagation(); tutState().seen.add(L.id);
