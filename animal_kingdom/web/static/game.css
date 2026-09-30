@@ -295,7 +295,8 @@
 .game .prompt:not(.mull) .line .skip { height: 34px; margin-left: 6px; cursor: pointer; }
 .game .prompt:not(.mull) b { display: inline; margin: 0; font-size: 19px; } .game .prompt:not(.mull) p { margin: 0; font-size: 17px; }
 .game .prompt:not(.mull) .btns { justify-content: center; margin-top: 8px; }
-.game .prompt.mull { left: 50%; top: 250px; width: 360px; margin-left: -180px; padding: 20px 22px; text-align: center; }
+.game .prompt.mull { left: 50%; top: 378px; width: 360px; margin-left: -180px; padding: 20px 22px; text-align: center; }   /* just above the hand it talks about */
+.game:has(.prompt.mull.on) .hand { z-index: 25; }   /* a hovered card rises over the box, read whole */
 .game .prompt.mull b { font-size: 24px; margin-bottom: 8px; }
 .game .prompt.mull .btns { justify-content: center; margin-top: 14px; }
 /* Panels (decklists, history): granite pieces; the decklists the collection's strips. */
@@ -431,10 +432,9 @@
 .game.port .waiting { left: auto; right: 16px; top: 1390px; }
 .game.port .coach { width: 400px; } .game.port .coach p { font-size: 26px; } .game.port .coach .slab { height: 48px; font-size: 22px; }
 .game .coach.gabove::after, .game .coach.gbelow::after { display: none; }
-.game.port .menu { top: 4px; width: 64px; height: 64px; border-radius: 12px; } .game.port .menu svg { width: 36px; height: 36px; }
-.game.port .menu.fb { right: 88px; } .game.port .menu.fb.alone { right: 16px; }
-.game.port .rbar .slab { width: 72px; height: 72px; } .game.port .rbar .out { height: 72px; font-size: 22px; } .game.port .rbar .track { width: 180px; height: 72px; } .game.port .rbar .track::after { top: 32px; } .game.port .rbar .track b { top: 29px; }
-.game.port .prompt:not(.mull) { top: 100px; width: 680px; max-width: 680px; white-space: normal; padding: 14px 20px; } .game.port .prompt:not(.mull) b { font-size: 28px; } .game.port .prompt:not(.mull) p { font-size: 26px; }
+.game.port .menu { top: 4px; width: 80px; height: 80px; border-radius: 14px; }   /* 44 CSS px on a phone: a thumb's size */ .game.port .menu svg { width: 40px; height: 40px; }
+.game.port .menu.fb { right: 104px; } .game.port .menu.fb.alone { right: 16px; }
+.game.port .prompt:not(.mull) { top: 6px; left: 16px; transform: none; width: 420px; max-width: 420px; white-space: normal; padding: 12px 16px; }   /* top left beside the buttons: the opponent's gem stays in sight */ .game.port .prompt:not(.mull) b { font-size: 28px; } .game.port .prompt:not(.mull) p { font-size: 26px; }
 .game.port .prompt:not(.mull) .line { flex-wrap: wrap; } .game.port .prompt:not(.mull) .line .skip { height: 52px; font-size: 22px; }
 .game.port .prompt.mull { top: 520px; width: 520px; margin-left: -260px; } .game.port .prompt.mull b { font-size: 34px; } .game.port .prompt.mull p { font-size: 26px; } .game.port .prompt .skip { height: 56px; font-size: 24px; }
 .game.port .opts { top: 560px; }
@@ -450,3 +450,12 @@
 
 /* Sideways on a phone the wide stage shows at about half size: the end of a game and the concede question grow to be read and tapped. */
 .game:not(.port) .endbox { scale: max(1, calc(.75 / var(--k, 1))); }
+/* A replay held upright: the deck and End turn do nothing, so its controls take their corner at the end of the hand's
+   row, in two rows (step, play, step and the eye; the bar and Leave), clear of the opponent's hand and both dens. */
+.game.port.rp .deck, .game.port.rp .tbtn { display: none; }
+.game.port .rbar { top: 1250px; right: 12px; width: 288px; flex-wrap: wrap; justify-content: flex-end; gap: 8px; translate: var(--side, 0px) var(--above, 0px); }
+.game.port .rbar .slab { width: 64px; height: 64px; } .game.port .rbar .slab svg { width: 30px; height: 30px; }
+.game.port .rbar .track { order: 5; width: 190px; height: 64px; } .game.port .rbar .track::after { top: 28px; } .game.port .rbar .track b { top: 25px; }
+.game.port .rbar .out { order: 6; width: auto; height: 64px; font-size: 22px; margin-left: 0; }
+.game.port .clock { font-size: 24px; } .game.port .tbtn.B .clock { font-size: 22px; }   /* a timed match's clock, read on a phone */
+.game.port .prompt .skip, .game.port .prompt:not(.mull) .line .skip { height: 80px; padding: 0 28px; font-size: 30px; }   /* Skip and Keep hand, thumb-sized */
