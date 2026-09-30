@@ -72,17 +72,19 @@ def test_lesson_2_plays_out_as_its_script_says_and_is_won_on_food():
             while m.phase == "playing" and m.to_act() == "B":
                 m.act("B", m.bot_move())
 
-        a(PlaceAction("lion", ("cr", "1,2"))); a(PlaceAction("lynx", ("cr", "2,2")))   # the Lynx draws the Squirrel
+        a(PlaceAction("lion", ("cr", "1,2"))); a(PlaceAction("lynx", ("cr", "2,2")))   # the Lynx draws the Eagle
         their_turn()
         assert (top("5,2"), top("5,1")) == ("cape_buffalo", "dire_wolf")
-        a(PlaceAction("squirrel", ("cr", "3,2"))); a(PlaceAction("cape_buffalo", ("cr", "2,1")))
+        eagle = [x for x in legal() if isinstance(x, PlaceAction) and x.card_id == "eagle" and not m.state.board.get(x.crossroad)
+                 and x.crossroad not in ("2,1", "3,1", "3,2")]
+        a(rng.choice(eagle)); a(PlaceAction("cape_buffalo", ("cr", "2,1")))
         their_turn()
-        assert top("5,3") == "lion" and top("3,2") == "falcon", "the wall is complete and the Falcon covers the Squirrel"
-        a(DrawAction()); a(PlaceAction("jaguar", ("cr", "3,1")))
-        assert top("3,2") == "squirrel", "the Jaguar removed the Falcon"
+        a(DrawAction()); a(PlaceAction("squirrel", ("cr", "3,2")))
         their_turn()
-        eagle = [x for x in legal() if isinstance(x, PlaceAction) and x.card_id == "eagle" and not m.state.board.get(x.crossroad)]
-        a(rng.choice(eagle)); a(DrawAction())
+        assert top("5,3") == "lion" and top("3,2") == "eagle", "the wall is complete and the Eagle covers the Squirrel"
+        a(PlaceAction("black_mamba", ("cr", "3,1")))
+        assert top("3,2") == "squirrel", "the Black Mamba removed the Eagle"
+        a(DrawAction())
         their_turn()
         prey = [x for x in legal() if isinstance(x, PlaceAction) and x.card_id == "tiger" and m.state.board.get(x.crossroad)
                 and m.state.board[x.crossroad][-1].owner == "B"]

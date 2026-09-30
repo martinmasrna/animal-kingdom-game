@@ -103,12 +103,12 @@ export const LESSONS = [
 
 // Lesson 2: the deeper mechanics, won on food (the opponent walls its den with 7s). Scripted like lesson 1: every move is
 // a step in a fixed order on fixed crossroads (connection was taught in lesson 1; here the fixed board is what makes the
-// Falcon's ambush and the Jaguar's rescue always possible). Only the Eagle, teaching Flight, rings every empty crossroad.
+// Eagle's ambush and the Black Mamba's rescue always possible). Only the Eagle, teaching Flight, rings every empty crossroad.
 // Then each move is guided to the best spots for finishing a region, until 100 food.
 const one = (card, cr) => ({ card, picked: true, crs: [cr] });
 export const LESSONS_2 = [
   { id: 'intro2', when: c => c.mine && c.round === 1 && c.units === 0, ...talk, at: { middle: true },
-    text: 'Lesson 2! This time your opponent guards its den with strong animals, so you\'ll win by gathering 100 food.' },
+    text: 'Lesson 2! Many animals have special powers. Let\'s meet some of them.' },
   { id: 'lion', when: c => c.mine && c.hand('lion') && !c.placed('lion'), only: one('lion', '1,2'), at: { rings: true },
     text: 'Place your Lion on the circle.' },
   { id: 'glow', when: c => c.mine && c.ready('lynx'), ...talk, at: { card: 'lynx' },
@@ -117,26 +117,28 @@ export const LESSONS_2 = [
     text: 'Place the Lynx on the circle, and its Roar draws you a card.' },
   { id: 'wall', when: c => c.theirs && c.round === 1, at: { den: 'B' },
     text: 'Your opponent is building a wall of strong animals in front of its den.' },
+  { id: 'eagle', when: c => c.mine && c.hand('eagle') && !c.placed('eagle'),
+    only: c => ({ card: 'eagle', picked: true, crs: c.empty('eagle').filter(cr => !['2,1', '3,1', '3,2'].includes(cr)) }), at: { card: 'eagle' },
+    text: 'Your Lynx drew an Eagle. The Eagle has Flight: it can land on any empty crossroad, even far from your animals. Place it on a circle.' },
+  { id: 'buffalo2', when: c => c.mine && c.round === 2 && c.placed('eagle') && c.hand('cape_buffalo'), only: one('cape_buffalo', '2,1'), at: { rings: true },
+    text: 'Now place the Buffalo on the circle.' },
+  { id: 'draw2', when: c => c.mine && c.round >= 3 && !c.hand('squirrel') && !c.placed('squirrel'), only: { deck: true }, at: { deck: true },
+    text: 'Your hand is empty. Click your deck to draw 2 cards.' },
   { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), only: one('squirrel', '3,2'), at: { card: 'squirrel' },
     text: 'The Squirrel\'s Roar gives you 10 food. Place it on the circle.' },
   { id: 'foodroar', when: c => c.placed('squirrel'), ...talk, at: { gem: 'A' },
     text: 'Your food went up by 10! Roars like this are another way to gather food, besides regions.' },
-  { id: 'buffalo2', when: c => c.mine && c.round === 2 && c.hand('cape_buffalo'), only: one('cape_buffalo', '2,1'), at: { rings: true },
-    text: 'Place the Buffalo on the circle. Then watch what your opponent does.' },
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
-    text: 'Your opponent\'s Falcon has Flight, so it flew over and covered your Squirrel! Your Squirrel isn\'t gone. It waits underneath.' },
-  { id: 'draw2', when: c => c.mine && c.squirrelCovered && !c.hand('jaguar') && !c.placed('jaguar'), only: { deck: true }, at: { deck: true },
-    text: 'Your hand is empty. Click your deck to draw 2 cards.' },
-  { id: 'jaguar', when: c => c.mine && c.squirrelCovered && c.hand('jaguar') && c.nextToFalcon.length > 0,
-    only: c => ({ card: 'jaguar', picked: true, crs: c.nextToFalcon }), at: { card: 'jaguar' },
-    text: 'The Jaguar\'s Roar removes an enemy next to it with strength 4 or less, like the Falcon. Place the Jaguar on the circle.' },
+    text: 'Your opponent has an Eagle too! It flew over and covered your Squirrel. Your Squirrel isn\'t gone. It waits underneath.' },
+  { id: 'mamba', when: c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
+    only: c => ({ card: 'black_mamba', picked: true, crs: c.nextToFlier }), at: { card: 'black_mamba' },
+    text: 'The Black Mamba\'s Roar removes an enemy next to it with strength 5 or less, like that Eagle. Place the Black Mamba on the circle.' },
   TARGET,
   { id: 'uncovered', when: c => c.squirrelBack, ...talk, at: c => ({ cr: c.squirrelAt }),
-    text: 'The Falcon is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
-  { id: 'eagle', when: c => c.mine && c.hand('eagle') && !c.squirrelCovered,
-    only: c => ({ card: 'eagle', picked: true, crs: c.empty('eagle') }), at: { card: 'eagle' },
-    text: 'The Eagle has Flight, like the Falcon: it can land on any empty crossroad, even far from your animals. Place it on a circle.' },
-  { id: 'draw3', when: c => c.mine && c.placed('eagle') && !c.hand('tiger') && !c.placed('tiger') && c.canDraw, only: { deck: true }, at: { deck: true },
+    text: 'The Eagle is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
+  { id: 'goal2', when: c => c.mine && c.wall, ...talk, at: { den: 'B' },
+    text: 'Your opponent\'s den is guarded by three 7s, and a 7 can\'t beat a 7. So this time, you\'ll win by gathering 100 food.' },
+  { id: 'draw3', when: c => c.mine && c.placed('black_mamba') && !c.hand('tiger') && !c.placed('tiger') && c.canDraw, only: { deck: true }, at: { deck: true },
     text: 'Click your deck to draw 2 more cards.' },
   { id: 'apex', when: c => c.mine && c.hand('tiger') && c.prey.length > 0,
     only: c => ({ card: 'tiger', picked: true, crs: c.prey }), at: { card: 'tiger' },
@@ -149,7 +151,7 @@ export const LESSONS_2 = [
   EMPTY,
 ];
 // Lesson 2 holds each teaching card back until its own step: it can't be placed before its line explains it.
-const HOLD = ['lynx', 'squirrel', 'jaguar', 'eagle', 'tiger'];
+const HOLD = ['lynx', 'squirrel', 'black_mamba', 'eagle', 'tiger'];
 export const lessonOf = V => V.seats.B.bot === 'tutorial2' ? 2 : 1;
 // The cards not to offer now: in lesson 2, a teaching card never yet placed, unless its step is the one showing.
 export function held(V, L) {
@@ -191,12 +193,13 @@ export function context(V, sel, cards) {
   // the crossroads that get closest to the opponent's den (the furthest column a move can reach; covering a weak enemy counts)
   const crs = c.offered.filter(t => t[0] === 'cr').map(t => t[1]), far = Math.max(0, ...crs.map(cr => +cr[0]));
   c.forward = [...new Set(crs.filter(cr => +cr[0] === far))];
-  // lesson 2's stack: the Squirrel under the opponent's Falcon, then back on top once the Falcon is removed
+  // lesson 2's stack: the Squirrel under the opponent's Eagle, then back on top once the Eagle is removed
   const under = Object.entries(G.board).find(([, st]) => st.length > 1 && st[st.length - 1].owner !== V.you && st.slice(0, -1).some(u => u.owner === V.you && u.id === 'squirrel'));
   const top = Object.entries(G.board).find(([, st]) => st.length && st[st.length - 1].owner === V.you && st[st.length - 1].id === 'squirrel');
   const wasCovered = G.history.some(m => m.seat !== V.you && m.fx.some(f => f.k === 'cover' && f.card === 'squirrel'));
   Object.assign(c, { squirrelCovered: !!under, squirrelBack: !under && wasCovered && !!top, squirrelAt: (under || top || [])[0] });
-  c.nextToFalcon = under ? c.empty('jaguar').filter(cr => ADJ(under[0]).includes(cr)) : [];
+  c.nextToFlier = under ? c.empty('black_mamba').filter(cr => ADJ(under[0]).includes(cr)) : [];
+  c.wall = ['5,1', '5,2', '5,3'].every(cr => owner(G, cr) && owner(G, cr) !== V.you);   // lesson 2's wall before the den
   // the best spots for food: the open corners of the region, not yet yours and free of enemies, where you hold the most
   const regions = [1, 2, 3, 4].flatMap(x => [1, 2].map(y => [`${x},${y}`, `${x + 1},${y}`, `${x},${y + 1}`, `${x + 1},${y + 1}`]));
   const open = new Set(crs.filter(cr => !owner(G, cr)));

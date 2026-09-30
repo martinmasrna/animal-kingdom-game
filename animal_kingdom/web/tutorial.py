@@ -27,28 +27,28 @@ PLAYER_DECK += PLAYER_DECK[7:] + PLAYER_DECK[7:10]   # 36 cards: a slow first ga
 OPPONENT_DECK = ["cape_buffalo", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup",
                  "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup"]
 # Lesson 2. The player opens with Lion, Lynx (it glows once the Lion stands) and a Buffalo; the Lynx's Roar draws the
-# Squirrel (food from a Roar); the next draw brings the Jaguar (removal) and the Eagle (Flight), the one after the Tiger
-# (Apex Predator); then strong animals and food Roars to win on food.
-PLAYER_DECK_2 = ["lion", "lynx", "cape_buffalo", "squirrel", "jaguar", "eagle", "tiger", "dire_wolf", "lion",
+# Eagle (Flight, on your own animal first); the next draw brings the Squirrel (food from a Roar) and the Black Mamba
+# (removes up to 5: the opponent's Eagle), the one after the Tiger (Apex Predator); then animals and food Roars.
+PLAYER_DECK_2 = ["lion", "lynx", "cape_buffalo", "eagle", "squirrel", "black_mamba", "tiger", "dire_wolf", "lion",
                  "squirrel", "cape_buffalo", "dire_wolf", "lion", "chipmunk", "cape_buffalo", "dire_wolf", "lion",
                  "squirrel", "cape_buffalo", "dire_wolf", "lion", "chipmunk", "cape_buffalo", "dire_wolf", "lion",
                  "squirrel", "cape_buffalo", "dire_wolf", "lion", "cape_buffalo", "dire_wolf", "lion", "squirrel",
                  "cape_buffalo", "dire_wolf", "lion"]
-# Its opponent walls all three crossroads before its den with 7s (a 7 can't cover a 7, so no den win), flies its Falcon
+# Its opponent walls all three crossroads before its den with 7s (a 7 can't cover a 7, so no den win), flies its Eagle
 # onto the Squirrel (stacks), then plays wild dogs.
-OPPONENT_DECK_2 = ["cape_buffalo", "dire_wolf", "lion", "falcon"] + OPPONENT_DECK[1:]
+OPPONENT_DECK_2 = ["cape_buffalo", "dire_wolf", "lion", "eagle"] + OPPONENT_DECK[1:]
 
 DECKS = {"tutorial_you": PLAYER_DECK, "tutorial_them": OPPONENT_DECK, "tutorial2_you": PLAYER_DECK_2, "tutorial2_them": OPPONENT_DECK_2}
 NAMES = {"tutorial_you": "Tutorial", "tutorial_them": "Wild dogs", "tutorial2_you": "Tutorial", "tutorial2_them": "Wild dogs"}
 BOTS = {1: "tutorial", 2: "tutorial2"}   # the opponent's bot name per lesson
 
 # The opponent's scripted moves, by its turn (turn_counter): lesson 1 walls the middle of its den and puts a dog beside
-# it; lesson 2 walls all three crossroads, then flies the Falcon onto the player's Squirrel (SQUIRREL: wherever it is).
+# it; lesson 2 walls all three crossroads, then flies the Eagle onto the player's Squirrel (SQUIRREL: wherever it is).
 SQUIRREL = "squirrel"
 OPENINGS = {1: {1: [("cape_buffalo", "5,2"), ("pup", "4,2")]},
             2: {1: [("cape_buffalo", "5,2"), ("dire_wolf", "5,1")], 3: [("lion", "5,3")]}}
-# Lesson 2's Falcon flies onto the Squirrel the first turn it can (the Squirrel on top of its stack), whenever that is.
-AMBUSH = {2: ("falcon", SQUIRREL)}
+# Lesson 2's Eagle flies onto the Squirrel the first turn it can (the Squirrel on top of its stack), whenever that is.
+AMBUSH = {2: ("eagle", SQUIRREL)}
 
 
 def config() -> Config:
@@ -76,7 +76,7 @@ class TutorialBot(Bot):
             pick = next((a for a in places if a.card_id == card and a.crossroad == cr), None)
             if pick:
                 return pick
-        if state.actions_taken_this_turn:   # one placement a turn
+        if state.units_placed_this_turn:   # one placement a turn (a draw first still leaves it one)
             return PassAction()
         if self.ambush:   # the ambush card waits for its moment, never an ordinary placement
             places = [a for a in places if a.card_id != self.ambush[0]]

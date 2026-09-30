@@ -76,7 +76,7 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
   await wait(1200);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/2-end.png` });
   assert.equal(await page.evaluate(() => window.__ak().V.game.result.reason), 'food', 'lesson 2 is won on food');
-  for (const id of ['intro2', 'lion', 'glow', 'lynx', 'wall', 'squirrel', 'foodroar', 'buffalo2', 'covered', 'draw2', 'jaguar', 'uncovered', 'eagle', 'draw3', 'apex', 'free2', 'feed'])
+  for (const id of ['intro2', 'lion', 'glow', 'lynx', 'wall', 'eagle', 'buffalo2', 'draw2', 'squirrel', 'foodroar', 'covered', 'mamba', 'uncovered', 'goal2', 'draw3', 'apex', 'free2', 'feed'])
     assert.ok(seen2.includes(id), `lesson 2's ${id} came up (${seen2})`);
   await page.click('.endbox .play');
   await page.waitForSelector('.home .bar:not(.first)');   // home, with the full piece: the tutorial counts as learned
