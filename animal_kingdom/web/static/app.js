@@ -448,7 +448,7 @@ function gameScreen() {
     fitStage(); wireTips(document.getElementById('scr'));
     // The coach points at a card in the hand; hovering that card enlarges it over the coach, so the coach rises above it.
     const hand = document.getElementById('hand'), coach = document.getElementById('coach');
-    hand.addEventListener('mouseover', e => { const h = e.target.closest('.hc'); coach.classList.toggle('risen', !!h && !!coach.dataset.iid && h.dataset.iid === coach.dataset.iid); });
+    hand.addEventListener('mouseover', e => { const h = e.target.closest('.hc'); coach.classList.toggle('risen', !!h && !!coach.dataset.iid && (coach.dataset.iid === 'any' || h.dataset.iid === coach.dataset.iid)); });
     hand.addEventListener('mouseleave', () => coach.classList.remove('risen'));
     const $ = id => document.getElementById(id);
     // The flag concedes, after the question in the middle of the board (Keep playing, Escape or a click beside it says no).
@@ -631,7 +631,7 @@ function placeCoach(el, L, rings = []) {
   if (wait && L.read) { clearTimeout(placeCoach.t); placeCoach.t = setTimeout(() => { if (screen === 'game') drawGame(); }, wait + 20); }   // then show the card large
   document.getElementById('board').classList.toggle('pulse', !!a.rings);
   el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
-  el.dataset.iid = card && side === 'above' ? card.dataset.iid : '';   // hovering that card lifts the coach above it (wireCoachHover)
+  el.dataset.iid = side === 'above' && y >= 572 ? (card ? card.dataset.iid : 'any') : '';   // over the hand: a hovered card lifts it   // hovering that card lifts the coach above it (wireCoachHover)
   el.innerHTML = `<p>${L.text}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
   // an opening step closes on Next (or Enter/Space), and the next one shows
   if (L.next) el.querySelector('#coachnext').onclick = e => { e.stopPropagation(); tutState().seen.add(L.id); drawGame(); };
