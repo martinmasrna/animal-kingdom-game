@@ -1,11 +1,11 @@
 // The tutorial's coach (static/tutorial.js): which lesson shows when, and what a forced lesson lets happen.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { current, gate } from '../static/tutorial.js';
+import { current, gate, held } from '../static/tutorial.js';
 
-const CARDS = { lynx: { text: 'Roar: if you control another Cat, draw 1.' }, lion: { text: '' }, cape_buffalo: { text: '' }, dire_wolf: { text: '' }, jaguar: { text: 'Roar: remove an adjacent enemy of strength 4 or less.' } };
+const CARDS = { squirrel: { text: 'Roar: gain 10 food.' }, jaguar: { text: 'Roar: remove an adjacent enemy of strength 4 or less.' }, lynx: { text: 'Roar: if you control another Cat, draw 1.' }, lion: { text: '' }, cape_buffalo: { text: '' }, dire_wolf: { text: '' }, jaguar: { text: 'Roar: remove an adjacent enemy of strength 4 or less.' } };
 const u = (id, owner) => [{ id, owner, str: 7 }];
-const view = (g = {}) => ({ you: 'A', phase: 'playing', game: { round: 1, current: 'A', toAct: 'A', pending: null, actionsLeft: 2, board: {}, hand: [],
+const view = (g = {}, bot = 'tutorial') => ({ you: 'A', phase: 'playing', seats: { A: {}, B: { bot } }, game: { round: 1, current: 'A', toAct: 'A', pending: null, actionsLeft: 2, board: {}, hand: [],
   history: [], legal: { place: { lion: [['cr', '1,1'], ['cr', '1,2'], ['cr', '1,3']] }, draw: true }, ...g } });
 const fresh = () => ({ seen: new Set(), shown: {} });
 
@@ -92,4 +92,36 @@ test('covering and Roar are each done once by hand: the Pup beside the patch, th
   assert.equal(roar.id, 'roar'); assert.deepEqual(roar.only, { card: 'lynx', picked: true, crs: ['3,1', '1,3'] });
   const roared = current(view({ round: 4, board, history: [...covered, { seat: 'A', kind: 'place', card: 'lynx', fx: [] }], hand: [], legal: { place: {}, draw: true } }), null, CARDS, t);
   assert.equal(roared.id, 'roared'); assert.ok(roared.next);
+});
+
+// ---- lesson 2
+const v2 = g => view(g, 'tutorial2');
+const falcon = { id: 'falcon', owner: 'B', str: 4 }, squirrel = { id: 'squirrel', owner: 'A', str: 3 };
+
+test('lesson 2 holds each teaching card back until its own step', () => {
+  const V = v2({ hand: [{ id: 'jaguar' }, { id: 'eagle' }, { id: 'lion' }] });
+  assert.deepEqual(held(V, null), ['lynx', 'squirrel', 'jaguar', 'eagle', 'tiger']);
+  assert.ok(!held(V, { only: { card: 'jaguar' } }).includes('jaguar'), 'released while its step shows');
+  assert.deepEqual(held(view({}), null), [], 'lesson 1 holds nothing');
+});
+
+test('the Squirrel only goes where the Jaguar can still reach it once it is covered', () => {
+  const t = fresh(); ['intro2', 'glow', 'lynx', 'lion'].forEach(id => t.seen.add(id));
+  const board = { '1,2': u('lion', 'A'), '2,2': u('lynx', 'A') }, hist = [{ seat: 'A', kind: 'place', card: 'lynx', fx: [] }];
+  const L = current(v2({ round: 2, board, history: hist, hand: [{ id: 'squirrel' }], legal: { place: { squirrel: [['cr', '1,1'], ['cr', '1,3'], ['cr', '2,1'], ['cr', '3,2']] }, draw: true } }), null, CARDS, t);
+  assert.equal(L.id, 'squirrel'); assert.ok(L.only.crs.length > 0);
+  for (const cr of L.only.crs) assert.ok(['1,1', '1,3', '2,1', '2,3', '3,2'].includes(cr));
+});
+
+test('a covered Squirrel is shown, then uncovered by the Jaguar placed next to the Falcon', () => {
+  const t = fresh(); ['intro2', 'glow', 'lynx', 'lion', 'squirrel', 'foodroar'].forEach(id => t.seen.add(id));
+  const board = { '1,2': u('lion', 'A'), '2,2': [squirrel, falcon] };
+  const hist = [{ seat: 'A', kind: 'place', card: 'squirrel', fx: [] }, { seat: 'B', kind: 'place', card: 'falcon', fx: [{ k: 'cover', card: 'squirrel' }] }];
+  const g = { round: 3, board, history: hist, hand: [{ id: 'jaguar' }], legal: { place: { jaguar: [['cr', '1,1'], ['cr', '2,1'], ['cr', '1,3']] }, draw: true } };
+  const covered = current(v2(g), null, CARDS, t);
+  assert.equal(covered.id, 'covered'); assert.deepEqual(covered.at, { cr: '2,2' }); t.seen.add('covered');
+  const jag = current(v2(g), null, CARDS, t);
+  assert.equal(jag.id, 'jaguar'); assert.deepEqual(jag.only.crs, ['2,1'], 'only the empty crossroads next to the Falcon');
+  const back = current(v2({ ...g, board: { '1,2': u('lion', 'A'), '2,2': [squirrel] } }), null, CARDS, t);
+  assert.equal(back.id, 'uncovered');
 });

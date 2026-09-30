@@ -1,9 +1,10 @@
-"""The tutorial: a real game on the real map with a fixed deal and a gentle opponent.
+"""The tutorial: two lessons, each a real game on the real map with a fixed deal and a gentle opponent.
 
-The first two turns are forced in the client (it teaches one step at a time and lets only that step be taken), so the
-deal and the opponent's first turn are fixed to match what it says. After that the opponent keeps to one placement a
-turn, on the empty crossroad nearest the player, never covers and never takes the den: the player meets weak enemies to
-cover and an open path to the den, and wins. The lessons themselves live in the client (static/tutorial.js).
+Lesson 1 teaches the basics and ends on taking the den; lesson 2 the deeper mechanics (the glow, food from a Roar,
+stacks and removal, Flight, Apex Predator) and ends on 100 food, since its opponent walls its den. The client (static/
+tutorial.js) forces the steps it teaches, so each lesson's deal and the opponent's first turns are fixed to match what it
+says. After them the opponent keeps to one placement a turn on the empty crossroad nearest the player, never closes a
+region, never covers (but for lesson 2's one scripted cover) and never takes the den: the player always wins.
 """
 from __future__ import annotations
 
@@ -15,21 +16,39 @@ from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAc
 from ..engine.config import Config
 
 # Draw order, first card first. The player opens with the three the first turns place (Lion, Buffalo, Wolf); the deck
-# lesson on turn 2 draws two plain 7s, for the patch's last corner and the forced cover of turn 3; turn 4 draws the Lynx,
+# lesson on turn 2 draws a Lion and a Wolf (plain 7s), for the patch's last corner and the forced cover of turn 3; turn 4 draws the Lynx,
 # whose Roar (draw 1 if you control another Cat) always works beside the Lion, for the Roar lesson. No Roar comes
 # before it; the rest are strong animals and Roars to meet later.
-PLAYER_DECK = ["lion", "cape_buffalo", "dire_wolf", "lion", "cape_buffalo", "lynx", "dire_wolf", "jaguar", "cheetah",
+PLAYER_DECK = ["lion", "cape_buffalo", "dire_wolf", "lion", "dire_wolf", "lynx", "cape_buffalo", "jaguar", "cheetah",
                "lion", "dire_wolf", "jaguar", "cape_buffalo", "lion", "cheetah", "dire_wolf", "jaguar", "lion",
                "cape_buffalo", "lion"]
 PLAYER_DECK += PLAYER_DECK[7:] + PLAYER_DECK[7:10]   # 36 cards: a slow first game never runs out (no exhaustion loss)
 # The opponent: a Buffalo (7) walls the middle of its den, then wild dogs (1) that any animal can cover.
 OPPONENT_DECK = ["cape_buffalo", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup",
                  "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup"]
-DECKS = {"tutorial_you": PLAYER_DECK, "tutorial_them": OPPONENT_DECK}
-NAMES = {"tutorial_you": "Tutorial", "tutorial_them": "Wild dogs"}
+# Lesson 2. The player opens with Lion, Lynx (it glows once the Lion stands) and a Buffalo; the Lynx's Roar draws the
+# Squirrel (food from a Roar); the next draw brings the Jaguar (removal) and the Eagle (Flight), the one after the Tiger
+# (Apex Predator); then strong animals and food Roars to win on food.
+PLAYER_DECK_2 = ["lion", "lynx", "cape_buffalo", "squirrel", "jaguar", "eagle", "tiger", "dire_wolf", "lion",
+                 "squirrel", "cape_buffalo", "dire_wolf", "lion", "chipmunk", "cape_buffalo", "dire_wolf", "lion",
+                 "squirrel", "cape_buffalo", "dire_wolf", "lion", "chipmunk", "cape_buffalo", "dire_wolf", "lion",
+                 "squirrel", "cape_buffalo", "dire_wolf", "lion", "cape_buffalo", "dire_wolf", "lion", "squirrel",
+                 "cape_buffalo", "dire_wolf", "lion"]
+# Its opponent walls all three crossroads before its den with 7s (a 7 can't cover a 7, so no den win), flies its Falcon
+# onto the Squirrel (stacks), then plays wild dogs.
+OPPONENT_DECK_2 = ["cape_buffalo", "dire_wolf", "lion", "falcon"] + OPPONENT_DECK[1:]
 
-# The opponent's first turn, fixed: the wall in front of its den, then a dog beside it.
-OPENING = [("cape_buffalo", "5,2"), ("pup", "4,2")]
+DECKS = {"tutorial_you": PLAYER_DECK, "tutorial_them": OPPONENT_DECK, "tutorial2_you": PLAYER_DECK_2, "tutorial2_them": OPPONENT_DECK_2}
+NAMES = {"tutorial_you": "Tutorial", "tutorial_them": "Wild dogs", "tutorial2_you": "Tutorial", "tutorial2_them": "Wild dogs"}
+BOTS = {1: "tutorial", 2: "tutorial2"}   # the opponent's bot name per lesson
+
+# The opponent's scripted moves, by its turn (turn_counter): lesson 1 walls the middle of its den and puts a dog beside
+# it; lesson 2 walls all three crossroads, then flies the Falcon onto the player's Squirrel (SQUIRREL: wherever it is).
+SQUIRREL = "squirrel"
+OPENINGS = {1: {1: [("cape_buffalo", "5,2"), ("pup", "4,2")]},
+            2: {1: [("cape_buffalo", "5,2"), ("dire_wolf", "5,1")], 3: [("lion", "5,3")]}}
+# Lesson 2's Falcon flies onto the Squirrel the first turn it can (the Squirrel on top of its stack), whenever that is.
+AMBUSH = {2: ("falcon", SQUIRREL)}
 
 
 def config() -> Config:
@@ -42,22 +61,25 @@ class TutorialBot(Bot):
     can reach (never one that would close a region for it), drawing when its hand is empty. It never covers and never
     takes the den."""
 
-    def __init__(self, seed: Optional[int] = None):
-        pass
+    def __init__(self, seed: Optional[int] = None, lesson: int = 1):
+        self.opening, self.ambush = OPENINGS[lesson], AMBUSH.get(lesson)
 
     def choose(self, view, legal: Sequence, state=None):
         choices = [a for a in legal if isinstance(a, ChoiceAction)]
         if choices:
             return next((a for a in choices if a.choice == SKIP), choices[0])
         places = [a for a in legal if isinstance(a, PlaceAction) and not a.is_hq_capture]
-        if state.turn_counter <= 1:       # the opponent's first turn: the fixed opening
-            for card, cr in OPENING:
-                pick = next((a for a in places if a.card_id == card and a.crossroad == cr), None)
-                if pick:
-                    return pick
+        board = state.board
+        for card, cr in self.opening.get(state.turn_counter, []) + ([self.ambush] if self.ambush else []):   # scripted moves, while they can be made
+            if cr == SQUIRREL:
+                cr = next((c for c, st in board.items() if st and st[-1].owner == "A" and st[-1].card_id == "squirrel"), None)
+            pick = next((a for a in places if a.card_id == card and a.crossroad == cr), None)
+            if pick:
+                return pick
         if state.actions_taken_this_turn:   # one placement a turn
             return PassAction()
-        board = state.board
+        if self.ambush:   # the ambush card waits for its moment, never an ordinary placement
+            places = [a for a in places if a.card_id != self.ambush[0]]
         mine = lambda cr: bool(board.get(cr)) and board[cr][-1].owner == "B"
         # never the last corner of a region: the opponent takes no food, so the tutorial ends on the player's win
         closes = lambda cr: any(cr in r.corners and all(c == cr or mine(c) for c in r.corners)

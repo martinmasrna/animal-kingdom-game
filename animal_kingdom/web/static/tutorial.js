@@ -25,6 +25,13 @@ const HOME = [['1,1', '2,1', '1,2', '2,2'], ['1,2', '2,2', '1,3', '2,3']];
 const opening = c => c.mine && c.round === 1 && c.units === 0;   // the first turn, before the first animal is placed
 const talk = { next: true, only: {} };   // an opening step: read, then Next; nothing else can be clicked meanwhile
 
+// Lines both lessons share: a Roar asking for a target, and the safety net for a hand with nothing to place.
+const TARGET = { id: 'target', when: c => c.choosing, untilAct: true, at: { prompt: true },
+    text: 'This Roar needs a target. Click one of the circled crossroads, or click Skip.' };
+const EMPTY = { id: 'empty', again: true, when: c => c.mine && c.round >= 3 && !c.offered.length,   // nothing to place: never a silent turn
+  at: c => c.canDraw ? { deck: true } : { endturn: true },
+  text: c => c.canDraw ? 'No animals to place. Click your deck to draw 2 new ones.' : 'Nothing to do this turn. Click End turn.' };
+
 export const LESSONS = [
   // --- the opening: what is on screen ---
   { id: 'welcome', when: opening, ...talk, at: { middle: true },
@@ -82,15 +89,60 @@ export const LESSONS = [
   { id: 'roared', when: c => c.roared, ...talk, at: { hand: true },
     text: 'Your Lynx roared and drew you a card! Point at any card to read what it does.' },
   { id: 'free', when: c => c.mine && (c.roared || c.round >= 6), ...talk, at: { middle: true },
-    text: 'From here it\'s up to you. Head for your opponent\'s den, or surround more patches for more food.' },
-  { id: 'target', when: c => c.choosing, untilAct: true, at: { prompt: true },
-    text: 'This Roar needs a target. Click one of the circled crossroads, or click Skip.' },
-  // stuck with nothing to place: point at the deck, every time it happens (after any line still to read)
-  { id: 'empty', again: true, when: c => c.mine && c.round >= 3 && !c.places.length && c.canDraw, at: { deck: true },
-    text: 'No animals to place. Click your deck to draw 2 new ones.' },
+    text: 'From here it\'s up to you. Head for your opponent\'s den and put an animal on it!' },
+  TARGET, EMPTY,
   { id: 'den', when: c => c.mine && c.places.some(t => t[0] === 'hq'), at: { den: 'B' },
     text: 'Your opponent\'s den is open! Put any animal on it to win.' },
 ];
+
+// Lesson 2: the deeper mechanics, won on food (the opponent walls its den with 7s). Its cards are held back until their
+// own step (see HOLD), so each mechanic is met first where its line explains it.
+export const LESSONS_2 = [
+  { id: 'intro2', when: c => c.mine && c.round === 1 && c.units === 0, ...talk, at: { middle: true },
+    text: 'Lesson 2! This time your opponent guards its den with strong animals, so you\'ll win by gathering 100 food.' },
+  { id: 'lion', when: c => c.mine && c.round === 1 && c.units === 0,
+    only: c => ({ card: 'lion', picked: true, crs: c.empty('lion') }), at: c => ({ cr: c.rightmost('lion') }),
+    text: 'Start by placing your Lion on a circle.' },
+  { id: 'glow', when: c => c.mine && c.ready('lynx'), ...talk, at: { card: 'lynx' },
+    text: 'See the Lynx glowing? A glowing card\'s Roar will work right now: you have another Cat, your Lion.' },
+  { id: 'lynx', when: c => c.mine && c.hand('lynx') && c.empty('lynx').length > 0, done: c => c.placed('lynx'),
+    only: c => ({ card: 'lynx', picked: true, crs: c.empty('lynx') }), at: { card: 'lynx' },
+    text: 'Place the Lynx, and its Roar draws you a card.' },
+  { id: 'wall', when: c => c.theirs && c.round === 1, at: { den: 'B' },
+    text: 'Your opponent is building a wall of strong animals in front of its den.' },
+  { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel') && c.safe.length > 0, done: c => c.placed('squirrel'),
+    only: c => ({ card: 'squirrel', picked: true, crs: c.safe }), at: { card: 'squirrel' },
+    text: 'The Squirrel\'s Roar gives you 10 food. Place it on a circle.' },
+  { id: 'foodroar', when: c => c.placed('squirrel'), ...talk, at: { gem: 'A' },
+    text: 'Your food went up by 10! Roars like this are another way to gather food, besides patches.' },
+  { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
+    text: 'Your opponent\'s Falcon has Flight, so it flew over and covered your Squirrel! Your Squirrel isn\'t gone. It waits underneath.' },
+  { id: 'jaguar', when: c => c.mine && c.squirrelCovered && c.hand('jaguar') && c.nextToFalcon.length > 0, done: c => c.placed('jaguar'),
+    only: c => ({ card: 'jaguar', picked: true, crs: c.nextToFalcon }), at: { card: 'jaguar' },
+    text: 'The Jaguar\'s Roar removes an enemy next to it with strength 4 or less, like the Falcon. Place the Jaguar next to the Falcon.' },
+  TARGET,
+  { id: 'uncovered', when: c => c.squirrelBack, ...talk, at: c => ({ cr: c.squirrelAt }),
+    text: 'The Falcon is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
+  { id: 'eagle', when: c => c.mine && c.hand('eagle') && c.empty('eagle').length > 0 && !c.squirrelCovered, done: c => c.placed('eagle'),
+    only: c => ({ card: 'eagle', picked: true, crs: c.empty('eagle') }), at: { card: 'eagle' },
+    text: 'The Eagle has Flight, like the Falcon: it can land on any empty crossroad, even far from your animals. Place it on a circle.' },
+  { id: 'apex', when: c => c.mine && c.hand('tiger') && c.prey.length > 0 && !c.squirrelCovered, done: c => c.placed('tiger'),
+    only: c => ({ card: 'tiger', picked: true, crs: c.prey }), at: { card: 'tiger' },
+    text: 'The Tiger is an Apex Predator: it must land on top of an animal, and it eats it. An eaten animal is gone for good. Eat the circled animal!' },
+  { id: 'free2', when: c => c.mine && ((c.placed('eagle') && c.placed('tiger')) || c.round >= 7), ...talk, at: { middle: true },
+    text: 'Your opponent\'s den is walled off, so gather 100 food: surround patches, and place animals whose Roar gives food.' },
+  EMPTY,
+];
+// Lesson 2 holds each teaching card back until its own step: it can't be placed before its line explains it.
+const HOLD = ['lynx', 'squirrel', 'jaguar', 'eagle', 'tiger'];
+export const lessonOf = V => V.seats.B.bot === 'tutorial2' ? 2 : 1;
+// The cards not to offer now: in lesson 2, a teaching card never yet placed, unless its step is the one showing.
+export function held(V, L) {
+  if (lessonOf(V) !== 2) return [];
+  const placed = id => V.game.history.some(m => m.seat === V.you && m.kind === 'place' && m.card === id);
+  return HOLD.filter(id => !placed(id) && !(L && L.only && L.only.card === id));
+}
+const ADJ = cr => { const [x, y] = cr.split(',').map(Number); return [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].filter(([a, b]) => a >= 1 && a <= 5 && b >= 1 && b <= 3).map(([a, b]) => `${a},${b}`); };
 
 // The facts the lessons read, from the view and the client's selection.
 export function context(V, sel, cards) {
@@ -109,13 +161,28 @@ export function context(V, sel, cards) {
     roared: G.history.some(m => m.seat === V.you && m.kind === 'place' && m.card === 'lynx'),
     units: Object.keys(G.board).filter(cr => owner(G, cr) === V.you).length,
     hand: id => G.hand.some(h => h.id === id),
-    // the rightmost crossroad a card can go to now (the coach stands beside it, clear of the others)
     // the empty crossroads a card can go to now (placing onto your own animal is legal, but only noise while learning)
     empty: id => ((G.legal && G.legal.place && G.legal.place[id]) || []).filter(t => t[0] === 'cr' && !owner(G, t[1])).map(t => t[1]),
     // the rightmost of them (the coach stands beside it, clear of the others)
     rightmost: id => c.empty(id).sort((a, b) => b[0] - a[0])[0],
     roar: id => /(^|\. )Roar:/.test((cards[id] || {}).text || ''),
+    ready: id => G.hand.some(h => h.id === id && h.ready),   // the card glows: its Roar's condition holds now
+    placed: id => G.history.some(m => m.seat === V.you && m.kind === 'place' && m.card === id),
   };
+  // the moves the tutorial offers: never onto your own animal, never a teaching card before its step (lesson 2)
+  const hold = V.seats && V.seats.B && V.seats.B.bot === 'tutorial2' ? HOLD.filter(id => !c.placed(id)) : [];
+  c.offered = Object.entries((G.legal && G.legal.place) || {}).filter(([id]) => !hold.includes(id)).flatMap(([, ts]) => ts)
+    .filter(t => !(t[0] === 'cr' && owner(G, t[1]) === V.you));
+  // lesson 2's stack: the Squirrel under the opponent's Falcon, then back on top once the Falcon is removed
+  const under = Object.entries(G.board).find(([, st]) => st.length > 1 && st[st.length - 1].owner !== V.you && st.slice(0, -1).some(u => u.owner === V.you && u.id === 'squirrel'));
+  const top = Object.entries(G.board).find(([, st]) => st.length && st[st.length - 1].owner === V.you && st[st.length - 1].id === 'squirrel');
+  const wasCovered = G.history.some(m => m.seat !== V.you && m.fx.some(f => f.k === 'cover' && f.card === 'squirrel'));
+  Object.assign(c, { squirrelCovered: !!under, squirrelBack: !under && wasCovered && !!top, squirrelAt: (under || top || [])[0] });
+  c.nextToFalcon = under ? c.empty('jaguar').filter(cr => ADJ(under[0]).includes(cr)) : [];
+  // where the Squirrel may go: a crossroad with an empty neighbour the Jaguar could still reach once the Squirrel is covered
+  c.safe = c.empty('squirrel').filter(cr => ADJ(cr).some(n => !owner(G, n) && (n[0] === '1' || ADJ(n).some(m => m !== cr && owner(G, m) === V.you))));
+  // the enemies the Tiger may land on and eat
+  c.prey = ((G.legal && G.legal.place && G.legal.place.tiger) || []).filter(t => t[0] === 'cr' && owner(G, t[1]) && owner(G, t[1]) !== V.you).map(t => t[1]);
   const mineAt = cr => owner(G, cr) === V.you, count = h => h.filter(mineAt).length;
   const home = count(HOME[1]) > count(HOME[0]) ? HOME[1] : HOME[0];
   const legal = new Set(Object.values((G.legal && G.legal.place) || {}).flat().filter(t => t[0] === 'cr').map(t => t[1]));
@@ -126,14 +193,14 @@ export function context(V, sel, cards) {
 // (the count of the player's moves then): it is finished once the player has acted since.
 export function current(V, sel, cards, tut) {
   const c = context(V, sel, cards), n = V.game.history.filter(m => m.seat === V.you).length;   // the player's own moves
-  for (const L of LESSONS) {
-    if (L.again) { if (L.when(c)) return { ...L, at: L.at }; continue; }   // a safety net: shown whenever it applies, never used up
+  for (const L of lessonOf(V) === 2 ? LESSONS_2 : LESSONS) {
+    const now = f => typeof f === 'function' ? f(c) : f;   // a lesson's target, gate and words can depend on the moment
+    if (L.again) { if (L.when(c)) return { ...L, at: now(L.at), text: now(L.text) }; continue; }   // a safety net: shown whenever it applies, never used up
     if (tut.seen.has(L.id)) continue;
     if (L.untilAct && tut.shown[L.id] !== undefined && n > tut.shown[L.id]) { tut.seen.add(L.id); continue; }
     if (L.done && L.done(c)) { tut.seen.add(L.id); continue; }
     if (!L.when(c)) continue;
     if (L.untilAct && tut.shown[L.id] === undefined) tut.shown[L.id] = n;
-    const now = f => typeof f === 'function' ? f(c) : f;   // a lesson's target and gate can depend on the moment
     return { ...L, at: now(L.at), only: now(L.only) };
   }
   return null;

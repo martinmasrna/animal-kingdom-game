@@ -25,6 +25,7 @@ from ..engine.cards import DECK_SLUGS
 from . import custom_decks
 from . import oauth
 from .profiles import ProfileError, Profiles
+from . import tutorial
 from .match import BOT_LEVELS, DECK_NAMES, Match, Seat, card_pool, map_info
 
 STATIC = Path(__file__).parent / "static"
@@ -317,7 +318,10 @@ async def pool(_req):
 async def create_match(req):
     body = await req.json()
     try:
-        deck = "tutorial_you" if body.get("tutorial") else custom_decks.resolve(body.get("deck"))
+        lesson = int(body.get("tutorial") or 0)    # the tutorial's lesson: 1 or 2
+        if lesson not in (0, *tutorial.BOTS):
+            raise EngineError("no such lesson")
+        deck = f"{tutorial.BOTS[lesson]}_you" if lesson else custom_decks.resolve(body.get("deck"))
     except EngineError as e:
         raise web.HTTPBadRequest(text=str(e))
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
@@ -326,8 +330,8 @@ async def create_match(req):
                             profile=player and player["id"]))
     bot = body.get("bot")
     gauntlet = body.get("gauntlet")
-    if body.get("tutorial"):     # the fixed deal against the tutorial's opponent, straight into the game
-        match.join(Seat(secrets.token_urlsafe(12), "Wild dogs", bot="tutorial", deck="tutorial_them"))
+    if lesson:     # the lesson's fixed deal against its opponent, straight into the game
+        match.join(Seat(secrets.token_urlsafe(12), "Wild dogs", bot=tutorial.BOTS[lesson], deck=f"{tutorial.BOTS[lesson]}_them"))
         match.ready("A")
     elif gauntlet:
         level = gauntlet.get("level", "normal")

@@ -5,7 +5,7 @@ import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, crossroadAt, denMouthAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML } from './collection.js';
 import { dd, wireDd } from './menu.js';
-import { current as lessonNow, gate } from './tutorial.js';
+import { current as lessonNow, gate, held, lessonOf } from './tutorial.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const COVER = { cats_midrange: 'king_theron', canine_buff_tempo: 'lobo', aggro_hq_rush: 'verminus', colony_food_swarm: 'queen_honoria',
@@ -151,8 +151,10 @@ function homeScreen(mode = {}) {
       <button class="play" id="go">${go}</button></div>`}
     <div class="flank r"><a class="backbtn who" href="#/profile"><span><b>${esc(ME.name)}</b><i>#${ME.tag}</i></span></a></div></div>`;
   const $ = id => document.getElementById(id), root = app.querySelector('.home');
-  if (first) { $('learn').onclick = startTutorial; $('known').onclick = () => { store('ak:learned', '1'); redraw(); }; return; }
-  $('learn2').onclick = startTutorial;
+  if (first) {   // Learn to play picks up at lesson 2 once lesson 1 is won
+    $('learn').onclick = () => startTutorial(store('ak:lesson') === '1' ? 2 : 1);
+    $('known').onclick = () => { store('ak:learned', '1'); redraw(); }; return; }
+  $('learn2').onclick = () => startTutorial(1);
   const toggle = k => { play.open = play.open === k ? null : k; play.peek = null; redraw(); };
   $('deckbtn').onclick = () => toggle('decks');
   if (!mode.join) $('oppbtn').onclick = () => toggle('opp');
@@ -191,9 +193,10 @@ function homeScreen(mode = {}) {
   };
 }
 // The tutorial: a real game with a fixed deal against a gentle opponent, a coach teaching one step at a time (tutorial.js).
+// Two lessons: the basics (won by taking the den), then the deeper mechanics (won on food). Learned after the second.
 const learned = () => !!store('ak:learned') || !!(ME && ME.history && ME.history.length);
-async function startTutorial() {
-  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ tutorial: true, name: 'You' }) });
+async function startTutorial(lesson = 1) {
+  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ tutorial: lesson, name: 'You' }) });
   if (!r.ok) return toast(await r.text());
   const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
 }
@@ -355,7 +358,7 @@ const rel = p => p === V.you ? 'A' : 'B';
 const dcr = cr => { if (V.you === 'A') return cr; const [c, r] = cr.split(','); return `${MAP.cols + 1 - Number(c)},${r}`; };
 
 // The tutorial: its opponent is the tutorial's bot. Its lessons seen, per match (a new tutorial starts them over).
-const isTutorial = () => !!(V && V.seats && V.seats.B && V.seats.B.bot === 'tutorial');
+const isTutorial = () => !!(V && V.seats && V.seats.B && /^tutorial/.test(V.seats.B.bot || ''));
 const tutState = () => { if (!ui.tut || ui.tut.id !== V.id) ui.tut = { id: V.id, seen: new Set(), shown: {} }; return ui.tut; };
 
 // What the seat can do right now, in viewer space.
@@ -375,6 +378,10 @@ function decision() {
     ui.sel = null;
   } else {
     if (d.lesson && d.lesson.only) gate(d, d.lesson.only);   // a forced lesson lets only its step be taken
+    if (isTutorial()) {   // teaching cards wait for their step; placing onto your own animal is legal but never taught, so not offered
+      d.places = Object.fromEntries(Object.entries(d.places).filter(([id]) => !held(V, d.lesson).includes(id))
+        .map(([id, ts]) => [id, ts.filter(t => !(t[0] === 'cr' && (V.game.board[t[1]] || []).slice(-1).some(u => u.owner === V.you)))]).filter(([, ts]) => ts.length));
+    }
     if (!ui.sel && d.lesson && d.lesson.only && d.lesson.only.picked && d.places[d.lesson.only.card]) ui.sel = d.lesson.only.card;
     if (ui.sel && !d.places[ui.sel]) ui.sel = null;
     const ids = Object.keys(d.places);
@@ -459,8 +466,8 @@ function drawGame() {
   hand.innerHTML = G.hand.map((h, i) => {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id], pick = d.handPick.has(h.iid);
     const hint = can && d.lesson && d.lesson.only && !ui.sel;   // the card the tutorial asks for
-    const talking = d.lesson && d.lesson.next;   // the opening names the cards: they stay lit while it talks
-    const cls = [c.rarity, can ? 'can' : '', can && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');
+    const talking = d.lesson && d.lesson.next;   // while the coach talks the cards stay lit, and a ready card still glows
+    const cls = [c.rarity, can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${1299 - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
     return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
@@ -721,12 +728,15 @@ function drawEnd() {
       <div class="btns">${peek}<button class="play" id="nextg">Next game</button></div></div>`;
     document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else if (isTutorial()) {
-    // the tutorial's end: a win sends the player on to a real match; otherwise, the same lesson again
-    if (w === you) store('ak:learned', '1');
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>
-      ${w === you ? '<div class="next">You know how to play now. Time for a real match!</div>' : ''}
-      <div class="btns">${w === you ? `${peek}<a class="play" href="#/">Play a match</a>` : `<a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Try again</button>`}</div></div>`;
-    if (w !== you) document.getElementById('again').onclick = startTutorial;
+    // a lesson's end: lesson 1 leads on to lesson 2, lesson 2 to a real match; a loss offers the same lesson again
+    const lesson = lessonOf(V), won = w === you;
+    if (won) store(lesson === 1 ? 'ak:lesson' : 'ak:learned', '1');
+    const next = !won ? '' : lesson === 1 ? '<div class="next">Well done! One more lesson to go.</div>' : '<div class="next">You know how to play now. Time for a real match!</div>';
+    const go = !won ? `<a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Try again</button>`
+      : lesson === 1 ? `${peek}<button class="play" id="nextlesson">Next lesson</button>` : `${peek}<a class="play" href="#/">Play a match</a>`;
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how} · turn ${G.round}</div>${next}<div class="btns">${go}</div></div>`;
+    if (!won) document.getElementById('again').onclick = () => startTutorial(lesson);
+    if (won && lesson === 1) document.getElementById('nextlesson').onclick = () => startTutorial(2);
   } else {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
     const won = S[you] > S[them], series = V.results.length > 1;

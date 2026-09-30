@@ -49,7 +49,9 @@ BOT_LEVELS = {"easy": GreedyBot, "normal": TurnBot, "expert": RefereeBot}
 
 
 def bot_for(level: str, seed: int):
-    return tutorial.TutorialBot(seed=seed) if level == "tutorial" else BOT_LEVELS[level](seed=seed)
+    if level in tutorial.BOTS.values():
+        return tutorial.TutorialBot(seed=seed, lesson=next(n for n, b in tutorial.BOTS.items() if b == level))
+    return BOT_LEVELS[level](seed=seed)
 
 
 def deck_list(slug: str) -> list[str]:
@@ -215,7 +217,7 @@ class Match:
     @property
     def tutorial(self) -> bool:
         """The tutorial: its opponent is the tutorial's bot."""
-        return "B" in self.seats and self.seats["B"].bot == "tutorial"
+        return "B" in self.seats and self.seats["B"].bot in tutorial.BOTS.values()
 
     def score(self) -> dict:
         return {p: sum(1 for r in self.results if r["winner"] == p) for p in "AB"}

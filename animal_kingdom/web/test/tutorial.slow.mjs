@@ -12,7 +12,7 @@ after(async () => { await browser?.close(); server?.stop(); });
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const SHOTS = process.env.SHOTS;
 
-test('a new player learns the game in the tutorial and wins it', { timeout: 300000 }, async () => {
+test('a new player learns the game in both lessons and wins them', { timeout: 600000 }, async () => {
   const page = await browser.newPage(); page.errors = [];
   page.on('pageerror', e => page.errors.push(String(e)));
   if (SHOTS) await page.setViewport({ width: 1512, height: 800, deviceScaleFactor: 2 });
@@ -27,13 +27,13 @@ test('a new player learns the game in the tutorial and wins it', { timeout: 3000
       places: d ? d.places : {}, pend: !!V.game.pending, hand: V.game.hand.map(h => h.id), board: V.game.board, canDraw: !!(V.game.legal && V.game.legal.draw) }; });
   const click = async sel => { const el = await page.$(sel); assert.ok(el, `nothing to click at ${sel}`); const b = await el.boundingBox();
     await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2); await wait(250); await page.mouse.move(5, 5); await wait(150); };
-  const seen = [], owner = (s, cr) => { const st = s.board[cr]; return st && st.length ? st[st.length - 1].owner : null; };
+  const owner = (s, cr) => { const st = s.board[cr]; return st && st.length ? st[st.length - 1].owner : null; };
 
-  for (let step = 0; step < 200; step++) {
+  const play = async (lesson, seen) => { for (let step = 0; step < 300; step++) {
     await wait(300);
     const s = await state();
     if (s.phase !== 'playing') break;
-    if (s.lesson && !seen.includes(s.lesson)) { seen.push(s.lesson); if (SHOTS) await page.screenshot({ path: `${SHOTS}/${seen.length}-${s.lesson}.png` }); }
+    if (s.lesson && !seen.includes(s.lesson)) { seen.push(s.lesson); if (SHOTS) await page.screenshot({ path: `${SHOTS}/${lesson}-${seen.length}-${s.lesson}.png` }); }
     if (s.next) { await click('#coachnext'); continue; }   // an opening step: read it, then Next
     if (!s.mine) continue;
     if (s.pend) {   // a Roar asking for a target: take the first ringed crossroad, or skip
@@ -55,15 +55,27 @@ test('a new player learns the game in the tutorial and wins it', { timeout: 3000
     if (!pick) { await click(s.canDraw ? '#deck' : '#tbtn'); continue; }
     await click(`.hc[data-id="${pick.id}"]`);
     await click(pick.t[0] === 'hq' ? '#board [data-hq="B"]' : `#board [data-cr="${pick.t[1]}"]`);
-  }
+  } };
 
+  // lesson 1: the basics, won by taking the den (or on food, if a slow game gets there first)
+  const seen1 = []; await play(1, seen1);
   await page.waitForFunction(() => window.__ak().V.phase === 'match_over', { timeout: 20000 });
   await wait(1200);
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/${seen.length + 1}-end.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/1-end.png` });
   assert.match(await page.$eval('#endov', e => e.textContent), /Victory/);
   const byDen = await page.evaluate(() => window.__ak().V.game.result.reason === 'hq_capture');   // a food win never needs the den lesson
   for (const id of ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'lion', 'lion2', 'buffalo', 'watch', 'patch', 'wolf', 'draw', 'actions', 'corner', 'food', 'cover', 'roar', 'roared', 'free', ...(byDen ? ['den'] : [])])
-    assert.ok(seen.includes(id), `lesson ${id} came up (${seen})`);
+    assert.ok(seen1.includes(id), `lesson ${id} came up (${seen1})`);
+  await page.click('#nextlesson');   // lesson 1 leads straight on to lesson 2
+  await page.waitForFunction(() => window.__ak().V.phase === 'playing' && window.__ak().V.seats.B.bot === 'tutorial2', { timeout: 10000 });
+  // lesson 2: the deeper mechanics, won on food (the den is walled off)
+  const seen2 = []; await play(2, seen2);
+  await page.waitForFunction(() => window.__ak().V.phase === 'match_over', { timeout: 20000 });
+  await wait(1200);
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/2-end.png` });
+  assert.equal(await page.evaluate(() => window.__ak().V.game.result.reason), 'food', 'lesson 2 is won on food');
+  for (const id of ['intro2', 'lion', 'glow', 'lynx', 'wall', 'squirrel', 'foodroar', 'covered', 'jaguar', 'uncovered', 'eagle', 'apex', 'free2'])
+    assert.ok(seen2.includes(id), `lesson 2's ${id} came up (${seen2})`);
   await page.click('.endbox .play');
   await page.waitForSelector('.home .bar:not(.first)');   // home, with the full piece: the tutorial counts as learned
   assert.deepEqual(page.errors, []);
