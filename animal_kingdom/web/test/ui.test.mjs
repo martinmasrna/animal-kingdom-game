@@ -98,7 +98,7 @@ test('the opponent chooser picks with its own dropdowns; Escape closes an open d
 test('the flag concedes the game, after a question in the middle of the board', async () => {
   const p = await browser.newPage();
   await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
-  await p.click('#go'); await p.waitForSelector('#ready'); await p.click('#ready');
+  await p.click('#go');
   await p.waitForFunction(() => window.__ak().V && window.__ak().V.phase === 'playing', { timeout: 10000 });
   const asking = () => p.$eval('#concov', e => e.classList.contains('on'));
   await p.click('#menubtn'); await wait(80);

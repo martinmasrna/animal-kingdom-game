@@ -22,14 +22,12 @@ def _play_out_game(m: Match, rng: random.Random) -> None:
         m.act(s, rng.choice(rules.legal_actions(m.state)).to_dict())
 
 
-def test_humans_start_only_when_both_ready():
+def test_a_match_starts_as_soon_as_both_seats_are_filled():
     m = Match("T", Seat("ta", "A", deck="ramp"))
     assert m.phase == "lobby"
     m.join(Seat("tb", "B", deck="ramp"))
-    assert m.phase == "prematch"
-    m.ready("A")
-    assert m.phase == "prematch"
-    m.ready("B")
+    assert m.phase == "playing"
+    m.ready("A")                          # an older client's Ready changes nothing
     assert m.phase == "playing"
 
 

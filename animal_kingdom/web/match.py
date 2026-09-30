@@ -198,17 +198,17 @@ class Match:
 
     def _maybe_prematch(self) -> None:
         if len(self.seats) == 2 and all(seat.deck for seat in self.seats.values()):
+            # No Ready step (Martin, 2026-10-01): both decklists are one hover away in the game, so a match starts as
+            # soon as both seats are filled.
             self.phase = "prematch"
-            for s, seat in self.seats.items():
-                if seat.is_bot:
-                    seat.ready = True
-            if all(seat.ready for seat in self.seats.values()):
-                self._start_game()
+            for seat in self.seats.values():
+                seat.ready = True
+            self._start_game()
         self.version += 1
 
     def ready(self, s: str) -> None:
         if self.phase != "prematch":
-            raise EngineError("not in pre-match")
+            return   # every match starts on its own now; an older client's Ready is harmless
         self.seats[s].ready = True
         if all(seat.ready for seat in self.seats.values()):
             self._start_game()
@@ -269,7 +269,8 @@ class Match:
         self.rematches += 1
         self.phase = "prematch"
         for seat in self.seats.values():
-            seat.ready = seat.is_bot
+            seat.ready = True
+        self._start_game()
         self.version += 1
 
     def to_act(self) -> Optional[str]:
