@@ -242,3 +242,29 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   .prof { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   .prof > .hist { grid-row: 2; }
 }
+
+/* Small screens (a phone either way up). */
+@media (max-width: 700px), (max-height: 500px) {
+  /* before a match: one scrolling column, Ready first */
+  .pre { place-items: start center; overflow-y: auto; }
+  .pre .face { flex-direction: column; gap: 12px; padding: 16px 12px 88px; }
+  .pre .mid { order: -1; width: auto; } .pre .mid .play { width: 220px; }
+  .pre .side { width: min(340px, calc(100vw - 24px)); }
+  .pre .leave { position: fixed; z-index: 3; }
+  /* the profile: one scrolling column, your matches then your account, Back kept at the foot */
+  .prof { display: block; overflow-y: auto; }
+  .prof .hist { display: block; } .prof .hbody { overflow: visible; -webkit-mask-image: none; mask-image: none; }
+  .prof .hhead { padding: 14px 12px 6px; } .prof .hhead h2 { font-size: 24px; white-space: nowrap; } .prof .hhead .dd { min-width: 0; }
+  .prof .hlist { padding: 0 12px; }
+  .prof .side { box-shadow: none; } .prof .me { overflow: visible; }
+  .prof .sfoot { position: sticky; bottom: 0; z-index: 2; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; }
+  /* a choice hangs clear of the top bar, scrolling inside when the window is short */
+  .home .chooser { max-height: calc(100vh - 290px); overflow-y: auto; }
+  .home .opp span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+/* A match row, narrow: the result, both pieces with their decks, who and when on a second line. */
+@media (max-width: 700px) {
+  .prof .hr { grid-template-columns: 44px 36px minmax(0, 1fr) 36px minmax(0, 1fr); grid-template-rows: 36px 18px; height: auto; padding: 8px 10px; row-gap: 2px; column-gap: 6px; }
+  .prof .hr b { grid-row: 1 / 3; font-size: 17px; } .prof .hr .pm { width: 36px; height: 36px; } .prof .hr .dk { font-size: 15px; }
+  .prof .hr .meta { grid-column: 2 / 6; grid-row: 2; justify-self: start; font-size: 13px; }
+}

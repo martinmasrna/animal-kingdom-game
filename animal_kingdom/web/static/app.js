@@ -4,7 +4,7 @@ import { hasArt, artUrl, stripArt, fitStrips } from './art.js';
 import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML } from './collection.js';
-import { dd, wireDd } from './menu.js';
+import { dd, wireDd, onHold } from './menu.js';
 import { openFeedback } from './feedback.js';
 import { current as lessonNow, gate, held, lessonOf } from './tutorial.js';
 
@@ -51,6 +51,7 @@ function wirePops(root) {
   root.querySelectorAll('[data-card]').forEach(el => {
     el.onmouseenter = () => cardPop(el, el.dataset.card);
     el.onmouseleave = () => pop.style.display = 'none';
+    onHold(el, () => cardPop(el, el.dataset.card), () => pop.style.display = 'none');   // touch: shown while held
   });
 }
 // A deck's cover: the player's chosen one, else the collection's default.
@@ -109,7 +110,7 @@ function route() {
   if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
   if (parts[0] === 'gauntlet') return homeScreen({ gauntlet: true });
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
-  if (parts[0] === 'profile') return profileScreen();
+  if (parts[0] === 'profile') { profileScreen(); return loadProfile().then(() => { if (location.hash.startsWith('#/profile')) profileScreen(); }); }   // a match just played shows
   if (parts[0] === 'replay' && parts[1]) return replayScreen(parts[1]);
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
   if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : homeScreen({ join: id });
@@ -442,6 +443,7 @@ function decision() {
 // ------------------------------------------------------------------ game screen
 // Hover text in the box screen sits on a small dark plaque by the pointer, never in a browser tooltip.
 function wireTips(root) {
+  if (matchMedia('(hover: none)').matches) return;   // touch: a tap would leave the label standing
   let tip = document.getElementById('tip');
   if (!tip) { tip = document.createElement('div'); tip.id = 'tip'; tip.className = 'tip'; document.body.appendChild(tip); }
   root.addEventListener('mouseover', e => { const t = e.target.closest('[data-tip]'); if (!t) { tip.style.display = 'none'; return; }
@@ -773,6 +775,7 @@ function fitStage(redraw = true) {
   // window's edges, not the stage's, so a window of another shape widens the ground between them, never leaves them floating
   st.style.setProperty('--above', `${Math.max(0, (innerHeight / k - STAGE.h) / 2)}px`);
   st.style.setProperty('--side', `${Math.max(0, (innerWidth / k - STAGE.w) / 2)}px`);
+  st.style.setProperty('--k', k);   // the stage's scale: a phone held sideways shows it at half size
   if (flip && redraw && V && V.game) drawGame();
 }
 

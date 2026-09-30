@@ -122,4 +122,12 @@
   .coll .crow { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 14px 10px; }
   .coll .side { grid-column: 1; grid-row: 3; box-shadow: 0 -6px 14px rgba(0,0,0,.45); }
 }
-@media (orientation: portrait) { .coll .chead .dd .sel { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
+/* A narrow collection (a phone held sideways): the filters wrap onto a second row over the cards. */
+@media (max-width: 1000px) {
+  .coll .chead { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+  .coll .chead .dd, .coll .chead .searchw { flex: 1 1 120px; min-width: 0; }
+  .coll .chead .dd .sel { width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .coll .search { min-width: 0; }
+}
+@media (max-width: 700px) { .coll .tab .med { width: 34px; height: 34px; } .coll .tabs { gap: 5px; } }   /* all nine families on one row */
+@media (max-width: 1000px) and (orientation: landscape) { .coll { grid-template-rows: auto minmax(0, 1fr); } }

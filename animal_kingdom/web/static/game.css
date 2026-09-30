@@ -447,3 +447,6 @@
   .game .hc.sel, .game .hc.sel:hover { transform: translateY(-18px); }
   .game .hc.peek, .game .hc.peek:hover { transform: translateY(-12px) scale(2.1); z-index: 30 !important; } .game .hc.peek .card .ctext { display: flex; }
 }
+
+/* Sideways on a phone the wide stage shows at about half size: the end of a game and the concede question grow to be read and tapped. */
+.game:not(.port) .endbox { scale: max(1, calc(.75 / var(--k, 1))); }

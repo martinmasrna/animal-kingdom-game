@@ -178,3 +178,14 @@
 
 /* Touch: a quick second tap is a second click, never a zoom. */
 html { touch-action: manipulation; }
+
+/* Touch (no hover): hover labels would stick after a tap, so there are none; the open deck's actions show without hover, thumb-sized. */
+@media (hover: none) {
+  .mscr [data-tip]::after { display: none; }
+  .mscr .dtile.on .tacts { opacity: 1; } .mscr .tacts .ic { width: 40px; height: 40px; }
+}
+/* A long deck name ends in an ellipsis, clear of the tile's actions and chevron. */
+.mscr .dtile b { right: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mscr .dtile.on b { right: 140px; }
+/* Feedback over a phone's keyboard (a short window): the box starts at the top and scrolls. */
+@media (max-height: 500px) { .fbov { align-items: flex-start; overflow-y: auto; padding: 8px 0; } .fbbox textarea.field { height: 90px; } }

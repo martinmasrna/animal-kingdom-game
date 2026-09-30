@@ -17,3 +17,14 @@ const closeAll = () => { const open = document.querySelectorAll('.dd.open'); ope
 // A click elsewhere closes an open dropdown; so does Escape, which then goes no further (the screen's own Escape waits for the next press).
 addEventListener('click', closeAll);
 addEventListener('keydown', e => { if (e.key === 'Escape' && closeAll()) e.stopImmediatePropagation(); }, true);
+
+// Touch has no hover or right-click: pressing and holding does what they do (read a card large); the tap that ends the
+// hold does nothing else. fn(el) starts the reading, done(el) ends it (for a reading shown only while held).
+export function onHold(el, fn, done) {
+  let t = null, held = false;
+  el.addEventListener('touchstart', () => { held = false; clearTimeout(t); t = setTimeout(() => { held = true; fn(el); }, 420); }, { passive: true });
+  const end = e => { clearTimeout(t); if (held) { if (e.cancelable) e.preventDefault(); if (done) done(el); } };   // no click follows a hold
+  el.addEventListener('touchend', end); el.addEventListener('touchcancel', end); el.addEventListener('touchmove', () => clearTimeout(t), { passive: true });
+  el.addEventListener('click', e => { if (held) { held = false; e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+  el.addEventListener('contextmenu', e => e.preventDefault());
+}

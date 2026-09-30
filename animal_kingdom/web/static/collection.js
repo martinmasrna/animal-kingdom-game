@@ -5,7 +5,7 @@
 import { cardHTML, fitNames, KEYWORDS } from './card.js';
 import { CROP, artUrl, stripArt, fitStrips } from './art.js';
 import { encodeDeck, decodeDeck } from './deckcode.js';
-import { dd, wireDd } from './menu.js';
+import { dd, wireDd, onHold } from './menu.js';
 
 // Each family's medallion: the card whose animal reads clearest at 40 px (chosen side by side at that size).
 const FAMILIES = [['Cat', 'lion'], ['Canine', 'clarion'], ['Rodent', 'chinchilla'], ['Colony', 'worker_bee'], ['Bird', 'andean_condor'],
@@ -152,9 +152,11 @@ function wire(app, all, open) {
       if (why) return refuse(app, e, why);
       open.list.push(c.id); hidePop(); flash = c.id; change(); };
     e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
+    onHold(e, () => { hidePop(); zoom(app, C[e.dataset.card]); });   // touch: hold to read it large
   });
   app.querySelectorAll('.side [data-card]').forEach(e => { e.onclick = () => { open.list.splice(open.list.indexOf(e.dataset.card), 1); hidePop(); change(); };
-    e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); }; });
+    e.oncontextmenu = ev => { ev.preventDefault(); hidePop(); zoom(app, C[e.dataset.card]); };
+    onHold(e, () => { hidePop(); zoom(app, C[e.dataset.card]); }); });
   const fl = flash && app.querySelector(`.side .st[data-card="${flash}"]`); flash = null;
   if (fl) { fl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); fl.classList.add('flash'); }
 
