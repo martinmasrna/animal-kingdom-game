@@ -3,10 +3,11 @@
 import { hasArt, artUrl, stripArt, fitStrips } from './art.js';
 import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
-import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML } from './collection.js';
+import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold } from './menu.js';
 import { play as sfx, soundsFor, preload, muted, setMuted } from './sound.js';
 import { openFeedback } from './feedback.js';
+import { openPresence, showChallenge, confirmFriend, shareLink, friendRow } from './friends.js';
 import { current as lessonNow, gate, held, lessonOf } from './tutorial.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
@@ -82,6 +83,8 @@ async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
   CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks;
   await loadProfile();
+  openPresence({ api, toast, key: () => store('ak:key'), deck: () => deckSpec(chosenDeck()),   // friends see you online; challenges arrive
+    busy: () => screen === 'game' && V && V.phase === 'playing', accept: m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; } });
   addEventListener('hashchange', route);
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
@@ -116,7 +119,9 @@ function route() {
   if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
   if (parts[0] === 'gauntlet') return homeScreen({ gauntlet: true });
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
+  showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'leaderboard') return leaderboardScreen();
+  if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
   if (parts[0] === 'profile') { profileScreen(); return loadProfile().then(() => { if (location.hash.startsWith('#/profile')) profileScreen(); }); }   // a match just played shows
   if (parts[0] === 'replay' && parts[1]) return replayScreen(parts[1]);
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
@@ -142,10 +147,11 @@ function homeScreen(mode = {}) {
   const botDecks = [['random', 'Random deck'], ...DECKS.map(d => [d.id, d.name + ' deck'])];
   // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
   const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
-  const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
+  const fr = play.opp === 'friend' && (play.friends || []).find(f => f.id === play.friend);
+  const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', fr ? fr.name : ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
     : play.opp === 'ranked' ? ['Ranked', `your rating ${(ME && ME.rating) || '1500?'}`]
     : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name + ' deck' : 'Random deck'}`];
-  const go = mode.join ? 'Join match' : play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
+  const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(fr.name.split('#')[0])}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
   const tile = (d, W, cls = '') => `<div class="dtile${cls}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b></div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
   const deckList = d => deckBody(d.list, CARDS, false, true) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
@@ -153,7 +159,8 @@ function homeScreen(mode = {}) {
     ? `<div class="chooser decks"><div class="clist">${all.map(d => tile(d, 300, d.id === chosen.id ? ' on' : '')).join('')}</div><div class="dl">${deckList(peek)}</div></div>`
     : play.open === 'opp' ? `<div class="chooser opps">${play.opp === 'gauntlet' ? levels + dd('side', play.side, SIDES)
       : `<div class="seg">${[['bot', 'Practice'], ['ranked', 'Ranked'], ['friend', 'Friend']].map(([v, l]) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${l}</button>`).join('')}</div>`
-        + (play.opp === 'ranked' ? '' : play.opp === 'friend' ? `<div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
+        + (play.opp === 'ranked' ? '' : play.opp === 'friend' ? `<div class="flist">${(play.friends || []).map(f => `<button class="slab fr${f.id === play.friend ? ' on' : ''}" data-friend="${f.id}">${friendRow(f)}</button>`).join('')}
+          <button class="slab" id="addfriend">Add a friend</button></div><div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
           : levels + dd('botDeck', play.botDeck, botDecks))}</div>`
     : play.open === 'learn' ? `<div class="chooser lessons">${LESSON_NAMES.map((n, i) => `<button class="slab" data-lesson="${i + 1}"><b>Lesson ${i + 1}</b>${n}</button>`).join('')}</div>` : '';
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
@@ -182,6 +189,10 @@ function homeScreen(mode = {}) {
   const wireList = () => { const e = $('dedit'); if (e) e.onclick = () => { play.open = null; location.hash = "#/collection/" + play.peek.slice(3); };
     const dl = root.querySelector('.dl'); if (dl) wirePops(dl); };
   if (play.open === 'decks') { play.peek = peek.id; wireList(); }
+  if (play.open === 'opp' && play.opp === 'friend' && !play.friends) api('/api/friends').then(r => r.ok && r.json()).then(j => {
+    play.friends = j ? j.friends : []; play.code = play.code || ''; play.friendCode = j && j.code; if (screen === 'home') redraw(); });
+  root.querySelectorAll('[data-friend]').forEach(el => el.onclick = () => { play.friend = play.friend === el.dataset.friend ? null : el.dataset.friend; redraw(); });
+  if ($('addfriend')) $('addfriend').onclick = () => play.friendCode && shareLink(`${location.origin}/#/friend/${play.friendCode}`, 'Be my friend in Animal Kingdom');
   root.querySelectorAll('[data-opp]').forEach(el => el.onclick = () => { play.opp = el.dataset.opp; redraw(); });
   root.querySelectorAll('[data-level]').forEach(el => el.onclick = () => { play.level = el.dataset.level; redraw(); });
   wireDd(root, (k, v) => { play[k] = v; redraw(); });
@@ -198,6 +209,7 @@ function homeScreen(mode = {}) {
       const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id; return;
     }
     if (play.opp === 'ranked') return findRanked($('go'), deckSpec(chosen));
+    if (play.opp === 'friend' && fr && fr.online) return findChallenge($('go'), fr, deckSpec(chosen));
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
       const pool = DECKS.filter(d => d.id !== 'goodstuff'), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
@@ -206,7 +218,9 @@ function homeScreen(mode = {}) {
     if (play.opp === 'gauntlet') body.gauntlet = { level: play.level, reverse: play.side === 'theirs' };
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
     if (!r.ok) return toast(await r.text());
-    const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
+    const m = await r.json(); setToken(m.id, m.token); play.open = null;
+    if (play.opp === 'friend' && fr) await shareLink(`${location.origin}/#/join/${m.id}`, 'A match in Animal Kingdom');   // an offline friend: the match's link
+    location.hash = '#/m/' + m.id;
   };
 }
 // Ranked (web/ladder.py): the button that started it shows the search while the server finds an opponent (a person near
@@ -223,6 +237,21 @@ async function findRanked(btn, deck) {
     if (!r.ok) throw new Error(await r.text());
     const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
   } catch (e) { if (e.name !== 'AbortError') toast(e.message || 'Could not find a match'); btn.innerHTML = label; btn.classList.remove('searching'); }
+  finally { clearInterval(iv); ranked = null; }
+}
+
+// A challenge to an online friend: the button waits for their answer; clicking it again withdraws it.
+async function findChallenge(btn, f, deck) {
+  if (ranked) { ranked.abort(); return; }
+  const ctl = ranked = new AbortController(), t0 = Date.now(), label = btn.innerHTML, who = esc(f.name.split('#')[0]);
+  const tick = () => { const s = Math.floor((Date.now() - t0) / 1000);
+    btn.innerHTML = `<span class="search">Waiting for ${who} · 0:${String(s).padStart(2, '0')}<small>click to cancel</small></span>`; };
+  tick(); const iv = setInterval(tick, 1000); btn.classList.add('searching');
+  try {
+    const r = await api('/api/challenge', { method: 'POST', body: JSON.stringify({ friend: f.id, deck }), signal: ctl.signal });
+    if (!r.ok) throw new Error(r.status === 409 ? `${f.name.split('#')[0]} is busy` : await r.text());
+    const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
+  } catch (e) { if (e.name !== 'AbortError') toast(e.message); btn.innerHTML = label; btn.classList.remove('searching'); play.friends = null; }
   finally { clearInterval(iv); ranked = null; }
 }
 
@@ -318,10 +347,25 @@ function profileScreen() {
     + sect('Use a different profile', `<div class="row"><input class="field" id="other" placeholder="Sign-in code" autocomplete="off"><button class="slab" id="signin">Sign in</button></div>`);
   app.innerHTML = `<div class="mscr prof"><div class="hist"><div class="hhead"><h2>Match history</h2>${hist || ui.histDeck ? filter : ''}</div>
     <div class="hbody">${hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div></div>
-    <div class="side"><div class="me"><div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div>${account}${code}</div>
+    <div class="side"><div class="me"><div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div><div class="sect" id="pfriends"></div>${account}${code}</div>
       <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
   wireDd(app, (k, v) => { ui.histDeck = v || null; profileScreen(); });
+  // Friends: each with when they were last on and a way to remove them; Add a friend shares your friend link.
+  const fillFriends = async () => {
+    const r = await api('/api/friends'), j = r.ok ? await r.json() : { friends: [] }, box = document.getElementById('pfriends');
+    if (!box || screen !== 'profile') return;
+    box.innerHTML = `<h4>Friends</h4>${j.friends.map(f => `<div class="pfr">${friendRow(f, `<button class="ic" data-unfriend="${f.id}" data-name="${esc(f.name)}" aria-label="Remove">${ICON.trash}</button>`)}</div>`).join('')}
+      <button class="slab" id="paddfriend">Add a friend</button>`;
+    document.getElementById('paddfriend').onclick = () => shareLink(`${location.origin}/#/friend/${j.code}`, 'Be my friend in Animal Kingdom');
+    box.querySelectorAll('[data-unfriend]').forEach(el => el.onclick = async () => {
+      const ov = document.createElement('div'); ov.className = 'fbov';   // asked first, as deleting a deck is
+      ov.innerHTML = `<div class="fbbox ask"><b>Remove ${el.dataset.name} from your friends?</b><div class="btns"><button class="slab" data-x="no">Keep</button><button class="play danger" data-x="yes">Remove</button></div></div>`;
+      document.body.appendChild(ov); ov.onclick = e => { if (e.target === ov) ov.remove(); };
+      ov.querySelector('[data-x="no"]').onclick = () => ov.remove();
+      ov.querySelector('[data-x="yes"]').onclick = async () => { ov.remove(); await api('/api/friends/' + el.dataset.unfriend, { method: 'DELETE' }); fillFriends(); }; });
+  };
+  fillFriends();
   app.querySelectorAll('[data-m]').forEach(el => el.onclick = () => { location.hash = '#/replay/' + el.dataset.m; });
   const nm = document.getElementById('pname');
   nm.onchange = async () => { const r = await api('/api/me', { method: 'PATCH', body: JSON.stringify({ name: nm.value }) });
@@ -379,6 +423,7 @@ function onView(prev) {
   if (V.phase === 'lobby') return lobbyScreen();
   if (V.phase === 'prematch') return prematchScreen();
   if (!prev || prev.phase === 'game_over' && V.phase === 'playing') ui.peek = false;
+  if (prev && prev.phase === 'playing' && V.phase !== 'playing') showChallenge();
   if (prev && prev.game && V.game && prev.game.history.length > V.game.history.length) ui.sel = null;
   // One-shot animation input: what the board and food were before this view (same game only).
   ui.anim = prev && prev.game && V.game && prev.game.history.length <= V.game.history.length && prev.you === V.you

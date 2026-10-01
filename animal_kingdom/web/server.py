@@ -26,6 +26,7 @@ from ..engine.state import EngineError
 from ..engine.cards import DECK_SLUGS, load_cards
 from . import custom_decks
 from . import feedback
+from .friends import FriendError, Friends
 from . import ladder as ranking
 from . import oauth
 from .profiles import ProfileError, Profiles
@@ -459,6 +460,133 @@ async def leaderboard(req):
                                "you": bool(p and lid == p["id"])} for lid, r in ladder.table()])
 
 
+# ----------------------------------------------------------------- friends and challenges (web/friends.py)
+CHALLENGE_WAIT = 60          # seconds a challenge stands before it lapses
+presence: dict[str, set] = {}   # profile id -> its open presence sockets (one per tab or device): online while any is open
+challenges: dict[str, dict] = {}   # challenge id -> {from, to, deck, fut}
+friends: Friends = None
+
+
+async def _tell(pid: str, msg: dict) -> None:
+    for ws in list(presence.get(pid, ())):
+        try:
+            await ws.send_json(msg)
+        except Exception:
+            pass
+
+
+async def presence_socket(req):
+    """Online while open; carries challenges to you. The client opens it once it knows its profile."""
+    p = profiles.by_code(req.query.get("key", ""))
+    ws = web.WebSocketResponse(heartbeat=20)
+    await ws.prepare(req)
+    if p is None:
+        await ws.close()
+        return ws
+    presence.setdefault(p["id"], set()).add(ws)
+    for cid, c in challenges.items():   # a challenge already standing reaches a tab opened since
+        if c["to"] == p["id"]:
+            await ws.send_json({"t": "challenge", "id": cid, "from": c["name"]})
+    try:
+        async for _ in ws:
+            pass
+    finally:
+        presence[p["id"]].discard(ws)
+        if not presence[p["id"]]:
+            del presence[p["id"]]
+            friends.seen(p["id"])
+    return ws
+
+
+async def friends_list(req):
+    """Your friends (online first, then by when they were last on) and your friend code."""
+    p = me(req)
+    out = []
+    for fid in friends.of(p["id"]):
+        f = profiles.get(fid)
+        if f:
+            out.append({"id": fid, "name": display(f), "online": fid in presence, "seen": friends.last_seen(fid)})
+    out.sort(key=lambda f: (not f["online"], -(f["seen"] or 0)))
+    return web.json_response({"friends": out, "code": friends.code_for(p["id"])})
+
+
+async def friend_peek(req):
+    """Whose friend link this is (for the confirmation)."""
+    owner = friends.owner(req.match_info["code"])
+    o = owner and profiles.get(owner)
+    if not o:
+        raise web.HTTPNotFound(text="that friend link no longer works")
+    p = profile_of(req)
+    return web.json_response({"name": display(o), "self": bool(p and p["id"] == owner),
+                              "already": bool(p and friends.are(p["id"], owner))})
+
+
+async def friend_add(req):
+    p, body = me(req), await req.json()
+    try:
+        other = friends.add(p["id"], body.get("code"))
+    except FriendError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    return web.json_response({"name": display(profiles.get(other))})
+
+
+async def friend_remove(req):
+    friends.remove(me(req)["id"], req.match_info["id"])
+    return web.json_response({})
+
+
+async def challenge(req):
+    """Challenge an online friend with a deck; the answer is your match once they accept, or 409 when they decline, the
+    challenge lapses, or they are offline. Leaving the request withdraws it."""
+    p, body = me(req), await req.json()
+    to = body.get("friend")
+    if not friends.are(p["id"], to):
+        raise web.HTTPBadRequest(text="not your friend")
+    if to not in presence:
+        raise web.HTTPConflict(text="offline")
+    try:
+        deck = custom_decks.resolve(body.get("deck"))
+    except EngineError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    cid = secrets.token_urlsafe(8)
+    c = challenges[cid] = {"from": p["id"], "name": display(p), "to": to, "deck": deck,
+                           "fut": asyncio.get_running_loop().create_future()}
+    await _tell(to, {"t": "challenge", "id": cid, "from": c["name"]})
+    try:
+        m = await asyncio.wait_for(asyncio.shield(c["fut"]), CHALLENGE_WAIT)
+    except asyncio.TimeoutError:
+        m = None
+    finally:
+        challenges.pop(cid, None)
+        if not c["fut"].done():
+            c["fut"].set_result(None)
+        await _tell(to, {"t": "challenge_gone", "id": cid})
+    if not m:
+        raise web.HTTPConflict(text=f"{display(profiles.get(to)).split('#')[0]} is busy")
+    return web.json_response(m)
+
+
+async def challenge_answer(req):
+    """Accept (with your deck: the match starts) or decline a challenge to you."""
+    p, body = me(req), await req.json()
+    c = challenges.get(req.match_info["id"])
+    if not c or c["to"] != p["id"] or c["fut"].done():
+        raise web.HTTPGone(text="that challenge has gone")
+    if not body.get("accept"):
+        c["fut"].set_result(None)
+        return web.json_response({})
+    try:
+        deck = custom_decks.resolve(body.get("deck"))
+    except EngineError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    mid, ta, tb = hub.new_id(), secrets.token_urlsafe(12), secrets.token_urlsafe(12)
+    match = Match(mid, Seat(ta, c["name"], deck=c["deck"], profile=c["from"]))
+    match.join(Seat(tb, display(p), deck=deck, profile=p["id"]))
+    _open(match)
+    c["fut"].set_result({"id": mid, "token": ta, "seat": "A"})
+    return web.json_response({"id": mid, "token": tb, "seat": "B"})
+
+
 async def index(_req):
     return web.FileResponse(STATIC / "index.html")
 
@@ -611,6 +739,13 @@ def make_app() -> web.Application:
         web.post("/api/feedback", send_feedback),
         web.post("/api/ranked", join_ranked),
         web.get("/api/leaderboard", leaderboard),
+        web.get("/api/friends", friends_list),
+        web.post("/api/friends", friend_add),
+        web.get("/api/friends/link/{code}", friend_peek),
+        web.delete("/api/friends/{id}", friend_remove),
+        web.post("/api/challenge", challenge),
+        web.post("/api/challenge/{id}/answer", challenge_answer),
+        web.get("/ws/presence", presence_socket),
         web.post("/api/match", create_match),
         web.post("/api/match/{id}/join", join_match),
         web.get("/ws/{id}", socket),
@@ -625,7 +760,8 @@ def make_app() -> web.Application:
         if linked or left:
             log.info("starter decks: %d untouched cop%s now follow their starter, %d left alone",
                      linked, "y" if linked == 1 else "ies", left)
-        global ladder
+        global ladder, friends
+        friends = Friends(profiles.db)
         ladder = ranking.Ladder(profiles.db, [d for d in sorted(PREMADE_DECKS) if d != "goodstuff"])
         custom_decks.load()
         replay.backfill(profiles, LOG_DIR, REPLAY_DIR)
