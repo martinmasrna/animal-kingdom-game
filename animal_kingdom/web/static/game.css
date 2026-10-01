@@ -426,7 +426,7 @@
 .game.port #stage, .game.port #world { width: 720px; height: 1440px; }
 .game.port #world img { left: -95.5px; top: -237.4px; width: 911px; height: 1824.9px; }   /* 45 px above centre (both dens clear of both hands), 200 plate px of savanna beyond each end */
 .game.port .hand { top: 1230px; }
-.game.port .ledge { display: none; }
+.game.port .ledge { left: 588px; top: 1222px; width: 132px; height: 218px; background-image: url(/static/kit2/ledge_port.webp); }   /* upright, its own rock painted to this corner (design sandbox screen/kit/ledge/port/) */
 .game.port.kit .deck { left: 606px; top: 1238px; width: 98px; height: 128px; font-size: 22px; }   /* the deck over End turn, at the right end of the hand's row */
 .game.port.kit .tbtn { left: 600px; top: 1372px; width: 110px; height: 62px; font-size: 19px; gap: 3px; }
 .game.port .waiting { left: auto; right: 16px; top: 1390px; }
@@ -491,7 +491,7 @@
 @keyframes yourplate { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.85); } 18%, 70% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.03); } }
 /* The versus moment upright: as the board, the opponent at the top, you at the bottom, each card in from its own end. */
 @media (orientation: portrait) {
-  .game .intro { flex-direction: column-reverse; gap: 14px; background-position: 22% center; }   /* the key art as home crops it upright */
+  .game .intro { flex-direction: column-reverse; gap: 14px; }
   .game .intro .card { --w: 140px; } .game .intro .iside { gap: 8px; }
   .game .intro .iname b { font-size: 24px; } .game .intro .iname span { font-size: 16px; }
   .game .intro .ivs { font-size: 52px; }

@@ -151,8 +151,9 @@ function homeScreen(mode = {}) {
   screen = 'home';
   if (mode.gauntlet) play.opp = 'gauntlet'; else if (play.opp === 'gauntlet' || mode.join) play.opp = mode.join ? 'friend' : 'bot';
   const all = playable(), chosen = chosenDeck(), peek = all.find(d => d.id === play.peek) || chosen;
+  if (play.botDeck === 'goodstuff') play.botDeck = 'random';
   const bd = DECKS.find(d => d.id === play.botDeck), redraw = () => homeScreen(mode);
-  const botDecks = [['random', 'Random deck'], ...DECKS.map(d => [d.id, d.name + ' deck'])];
+  const botDecks = [['random', 'Random deck'], ...DECKS.filter(d => d.id !== 'goodstuff').map(d => [d.id, d.name + ' deck'])];   // the seven starters only
   // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
   const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
   const fr = play.opp === 'friend' && (play.friends || []).find(f => f.id === play.friend);

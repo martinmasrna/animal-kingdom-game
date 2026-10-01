@@ -228,11 +228,17 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 :root[data-tod="dawn"] { --keyart: url(/static/kit2/keyart_dawn.webp); }
 :root[data-tod="day"] { --keyart: url(/static/kit2/keyart_day.webp); }
 :root[data-tod="dusk"] { --keyart: url(/static/kit2/keyart_dusk.webp); }
+/* A window taller than wide (a phone held upright) gets the key art painted upright (design sandbox home-art/r3/). */
+@media (orientation: portrait) {
+  :root { --keyart: url(/static/kit2/keyart_port_night.webp); }
+  :root[data-tod="dawn"] { --keyart: url(/static/kit2/keyart_port_dawn.webp); }
+  :root[data-tod="day"] { --keyart: url(/static/kit2/keyart_port_day.webp); }
+  :root[data-tod="dusk"] { --keyart: url(/static/kit2/keyart_port_dusk.webp); }
+}
 
 /* Upright (a phone held up): home keeps the painting's left group (the whole fight needs a painting made upright), the
    pieces take the width; the profile stacks its account over the history. */
 @media (orientation: portrait) {
-  .home { background-position: 22% center; }
   .home .top { right: 12px; top: 12px; padding: 8px; gap: 6px; }
   .home .top .backbtn.ico { width: 48px; height: 48px; }
   .home .bar { left: 12px; right: 12px; bottom: 24px; transform: none; grid-template-columns: 1fr 1fr; }
