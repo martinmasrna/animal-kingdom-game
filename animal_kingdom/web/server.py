@@ -25,7 +25,7 @@ from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine.state import EngineError
 from ..engine.cards import DECK_SLUGS, load_cards
 from . import custom_decks
-from . import feedback
+from . import events, feedback
 from .friends import FriendError, Friends
 from . import ladder as ranking
 from . import oauth
@@ -70,6 +70,7 @@ class Hub:
         self.matches: dict[str, Match] = {}
         self.sockets: dict[str, set] = {}        # match id -> {(ws, seat)}
         self.bot_tasks: dict[str, asyncio.Task] = {}
+        self.noted: dict[str, tuple] = {}        # match id -> (phase, games ended) as last recorded (note)
         self.clock_tasks: dict[str, asyncio.Task] = {}
 
     def new_id(self) -> str:
@@ -111,11 +112,36 @@ class Hub:
 
     async def broadcast(self, match: Match) -> None:
         self.save(match)
+        self.note(match)
         for ws, seat in list(self.sockets.get(match.id, ())):
             try:
                 await ws.send_json({"t": "view", "view": match.view(seat)})
             except (ConnectionResetError, RuntimeError):
                 self.sockets[match.id].discard((ws, seat))
+
+    def note(self, match: Match) -> None:
+        """Every game's start and end, for each person in it (web/events.py). Every change passes through broadcast,
+        so a game ended by a bot or the clock is seen too."""
+        now = (match.phase, len(match.results))
+        was = self.noted.get(match.id)
+        self.noted[match.id] = now
+        if now == was:
+            return
+        people = [(p, s) for p, s in match.seats.items() if not s.is_bot and s.profile]
+        lesson = match.lesson() if match.tutorial else 0
+        if match.phase == "playing" and (was is None or was[0] != "playing"):
+            for p, s in people:
+                opp = match.seats.get("B" if p == "A" else "A")
+                events.record(profiles.db, s.profile, "game_start", {
+                    "match": match.id, "game": len(match.results) + 1, "lesson": lesson, "deck": s.deck,
+                    "opp": opp and (f"bot:{opp.bot}" if opp.is_bot else "person"), "opp_deck": opp and opp.deck,
+                    "ranked": bool(s.ladder)})
+        if len(match.results) > (was[1] if was else 0):
+            r = match.results[-1]
+            for p, s in people:
+                events.record(profiles.db, s.profile, "game_end", {
+                    "match": match.id, "game": len(match.results), "lesson": lesson, "won": r["winner"] == p,
+                    "reason": r["reason"], "rounds": r["turns"]})
 
     async def push(self, match: Match) -> None:
         await self.broadcast(match)
@@ -282,6 +308,7 @@ async def create_profile(req):
     body = await req.json() if req.can_read_body else {}
     try:
         code, p = profiles.create(body.get("name") or "Player")
+        events.record(profiles.db, p["id"], "profile_created", {"agent": req.headers.get("User-Agent", "")[:200]})
         if body.get("decks"):
             profiles.save_decks(p["id"], body["decks"], starter_cards())
     except ProfileError as e:
@@ -375,6 +402,12 @@ async def get_replay(req):
     if not saved:
         raise web.HTTPNotFound(text="This match can't be replayed")
     return web.Response(body=saved, content_type="application/json", headers={"Content-Encoding": "gzip"})
+
+
+async def client_events(req):
+    """What the client saw the player do (web/events.py), in batches."""
+    p, body = me(req), await req.json()
+    return web.json_response({"kept": events.record_client(profiles.db, p["id"], body.get("events"))})
 
 
 async def send_feedback(req):
@@ -809,6 +842,11 @@ async def socket(req):
             await hub.push(match)
     finally:
         conns.discard((ws, seat))
+        s = match.seats.get(seat)
+        if s and s.profile and match.phase == "playing":   # left a game in progress (closed the tab, lost the connection)
+            events.record(profiles.db, s.profile, "left_mid_game", {
+                "match": match.id, "round": match.state.turn_counter // 2 + 1 if match.state else 0,
+                "lesson": match.lesson() if match.tutorial else 0})
     return ws
 
 
@@ -829,6 +867,7 @@ def make_app() -> web.Application:
         web.get("/auth/{provider}/callback", auth_callback),
         web.get("/api/replay/{match}", get_replay),
         web.post("/api/feedback", send_feedback),
+        web.post("/api/events", client_events),
         web.post("/api/ranked", join_ranked),
         web.get("/api/leaderboard", leaderboard),
         web.get("/api/friends", friends_list),

@@ -4,6 +4,7 @@
 // (Martin, 2026-10-01: the tutorial kept separate from ordinary games). bindCoach hands over what it reads from the screen.
 import { crossroadAt, denMouthAt, gemAt, STAGE, VIEW } from './board.js';
 import { current, gate, held, lessonOf } from './tutorial.js';
+import { track } from './log.js';
 
 let C;   // { V(), ui, CARDS(), send, drawGame, tapWords, PL, store, startTutorial, firstMatch }
 export function bindCoach(ctx) { C = ctx; }
@@ -84,8 +85,10 @@ const holdBot = on => {
     clearTimeout(holdBot.t); holdBot.t = setTimeout(() => holdBot(false), C.ui.animUntil - Date.now() + 20); return; }
   if (on) clearTimeout(holdBot.t);
   if (on !== botHeld && isLesson(C.V())) { botHeld = on; C.send({ t: 'hold', on }); } };
+let lastStep = null;
 export function drawCoach(el, L, rings = []) {
   el.className = 'abs coach';
+  if (L && L.id && L.id !== lastStep) { lastStep = L.id; track('tutorial_step', { lesson: lessonOf(C.V()), step: L.id }); }   // how far each player gets
   if (!L) { if (!C.ui.step) holdBot(false); el.innerHTML = ''; document.getElementById('board').classList.remove('pulse'); return; }
   const a = L.at || {}, card = a.card && document.querySelector(`#hand .hc[data-id="${a.card}"]`);
   let x, y, side;

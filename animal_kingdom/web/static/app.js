@@ -8,6 +8,7 @@ import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICO
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
+import { track } from './log.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
 import { bindCoach, isLesson, lessonOf, lessonNow, narrowChoice, narrowPlaces, handLights, holdFood, shownRegion, lessonEnd, drawCoach } from './coach.js';
 
@@ -140,6 +141,7 @@ async function rejoin(only) {
 // The home painting at the viewer's time of day (a small easter egg): ?tod=dawn|day|dusk|night overrides it.
 const timeOfDay = h => new URLSearchParams(location.search).get('tod') || (h >= 5 && h < 9 ? 'dawn' : h >= 9 && h < 17 ? 'day' : h >= 17 && h < 20 ? 'dusk' : 'night');
 function route() {
+  track('screen', { route: (location.hash.slice(1) || '/').split('/').slice(0, 2).join('/'), w: innerWidth, h: innerHeight });
   pop.style.display = 'none'; stackpop.style.display = 'none';
   if (!location.hash.startsWith('#/m/')) keepAwake(false);
   const tip = document.getElementById('tip'); if (tip) tip.style.display = 'none';   // the game's hover label lives on body: it must not outlive the screen
@@ -215,8 +217,8 @@ function homeScreen(mode = {}) {
   fitStrips(root);   // the tiles are as wide as the window allows (upright, one column)
   $('fbhome').onclick = feedback;
   if (first) {   // Learn to play picks up at lesson 2 once lesson 1 is won
-    $('learn').onclick = () => startTutorial(store('ak:lesson') === '1' ? 2 : 1);
-    $('known').onclick = () => { store('ak:learned', '1'); redraw(); }; return; }
+    $('learn').onclick = () => { track('learn_to_play'); startTutorial(store('ak:lesson') === '1' ? 2 : 1); };
+    $('known').onclick = () => { track('skip_tutorial'); store('ak:learned', '1'); redraw(); }; return; }
   const toggle = k => { play.open = play.open === k ? null : k; play.peek = null; redraw(); };
   $('learn2').onclick = () => toggle('learn');   // any lesson again, not only from the first
   root.querySelectorAll('[data-lesson]').forEach(el => el.onclick = () => startTutorial(+el.dataset.lesson));
@@ -374,6 +376,7 @@ function feedback() {
   const g = screen === 'game' && V && V.id ? V : null;
   const context = g ? { match: g.id, turn: g.game.round, seat: g.you, opponent: (g.seats[opp()] || {}).bot || 'person',
     replay: RP.views.length ? 'yes' : 'no', ...(isTutorial() ? { lesson: lessonOf(g) } : {}) } : {};
+  track('feedback_open', { screen: context.screen });
   openFeedback({ api, toast, context, view: g });
 }
 

@@ -235,6 +235,11 @@ class Match:
         """The tutorial: its opponent is the tutorial's bot."""
         return "B" in self.seats and self.seats["B"].bot in tutorial.BOTS.values()
 
+    def lesson(self) -> int:
+        """The tutorial's lesson (1 or 2); 0 for any other match."""
+        bot = self.seats["B"].bot if "B" in self.seats else None
+        return next((n for n, b in tutorial.BOTS.items() if b == bot), 0)
+
     def score(self) -> dict:
         return {p: sum(1 for r in self.results if r["winner"] == p) for p in "AB"}
 

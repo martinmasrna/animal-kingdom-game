@@ -6,6 +6,7 @@ import { cardHTML, fitNames, KEYWORDS } from './card.js';
 import { CROP, artUrl, stripArt, fitStrips, lazyArt } from './art.js';
 import { encodeDeck, decodeDeck } from './deckcode.js';
 import { dd, wireDd, onHold } from './menu.js';
+import { track } from './log.js';
 
 // Each family's medallion: the card whose animal reads clearest at 40 px (chosen side by side at that size).
 const FAMILIES = [['Cat', 'lion'], ['Canine', 'clarion'], ['Rodent', 'chinchilla'], ['Colony', 'worker_bee'], ['Bird', 'andean_condor'],
@@ -45,12 +46,22 @@ function decks() {
   mine.forEach(d => d.cover = d.cover || (d.list.length ? coverOf(d.list) : null));
   return mine;
 }
+let saved = null;   // each deck's list as last saved: a save logs what changed (log.js)
 function save(all) {
   X.saveDecks(all.map(d => ({ id: d.id, name: d.name, cards: countsOf(d.list), cover: d.cover })));
+  const now = Object.fromEntries(all.map(d => [d.id, [...d.list]]));
+  if (saved) for (const d of all) {
+    const was = saved[d.id] || [], rest = [...was], added = [];
+    for (const c of d.list) { const i = rest.indexOf(c); if (i >= 0) rest.splice(i, 1); else added.push(c); }
+    if (added.length || rest.length || !saved[d.id]) track('deck_change', { deck: d.id, name: d.name, size: d.list.length, added, removed: rest });
+  }
+  for (const id in saved || {}) if (!now[id]) track('deck_deleted', { deck: id });
+  saved = now;
 }
 
 export function collectionScreen(app, ctx) {
   X = ctx; C = ctx.cards;
+  if (!saved) saved = Object.fromEntries(decks().map(d => [d.id, [...d.list]]));
   const starterIds = new Set(ctx.starters.map(d => d.id));
   cards = Object.values(C).filter(c => starterIds.has(c.deck) || c.deck === 'bench');   // the bench: cleared cards in no starter
   if (!wired) { wired = true; wireGlobal(); }
