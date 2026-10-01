@@ -7,6 +7,7 @@ hand); the opponent's hand and both deck orders never leave this module.
 
 from __future__ import annotations
 
+import logging
 import random
 import secrets
 import time
@@ -44,6 +45,7 @@ DECK_NAMES = {"cats_midrange": "Cats", "canine_buff_tempo": "Canines", "aggro_hq
 
 # Easy / Normal / Expert, as in the play screen: the same bot kinds, with the same settings, the
 # simulations measure (a bare RefereeBot() is an untested configuration).
+log = logging.getLogger(__name__)
 BOT_LEVELS = {"easy": "greedy", "normal": "turn", "expert": "referee"}
 
 
@@ -391,6 +393,17 @@ class Match:
         s = self.to_act()
         state = self.state.clone()
         return self.bots[s].choose(state.view_for(s), rules.legal_actions(state), state)
+
+    def fallback_move(self):
+        """A legal move when the bot's own choice failed: the Easy bot's, else the first legal action."""
+        s = self.to_act()
+        state = self.state.clone()
+        legal = rules.legal_actions(state)
+        try:
+            return make_bot("greedy", self.seed).choose(state.view_for(s), legal, state)
+        except Exception:
+            log.exception("fallback bot failed in match %s", self.id)
+            return legal[0]
 
     # ----------------------------------------------------------------- persistence
     def to_dict(self) -> dict:

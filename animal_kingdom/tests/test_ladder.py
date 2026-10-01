@@ -81,3 +81,31 @@ def test_a_seed_file_sets_the_bots_once(tmp_path):
     L.result("p1", "bot:expert:ramp")   # the bot moves after a game
     assert not L.apply_seed(f), "the same seed is applied once"
     assert round(L.get("bot:expert:ramp").rating) != 1777
+
+
+def test_a_bot_that_fails_or_overthinks_still_moves(monkeypatch):
+    """Never a frozen match (feedback 2026-10-01): a bot that raises, or thinks past BOT_THINK_MAX, plays the Easy bot's move."""
+    import asyncio, time
+    from aiohttp.test_utils import TestClient, TestServer
+    from animal_kingdom.web import server
+    from animal_kingdom.web.match import Match
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    monkeypatch.setattr(server, "RANKED_WAIT", 0.1)
+    monkeypatch.setattr(server, "BOT_THINK_MAX", 0.3)
+    monkeypatch.setattr(server, "BOT_PAUSE", {"choice": 0, "open": 0, "move": 0})
+    for broken in (lambda self: 1 / 0, lambda self: time.sleep(2)):
+        monkeypatch.setattr(Match, "bot_move", broken)
+
+        async def run():
+            async with TestClient(TestServer(server.make_app())) as c:
+                a = await (await c.post("/api/profile", json={})).json()
+                m = await (await c.post("/api/ranked", json={"deck": "cats_midrange"}, headers={"X-AK-Key": a["code"]})).json()
+                match = server.hub.matches[m["id"]]
+                match.ready("A") if match.phase != "playing" else None
+                server.hub.kick_bot(match)
+                for _ in range(40):   # the bot's mulligan, or its first moves, get played for it
+                    await asyncio.sleep(0.1)
+                    if any(p == "B" for p in (getattr(h, "seat", None) for h in match.history)) or len(match.actions) > 0:
+                        break
+                assert len(match.actions) > 0 or match.to_act() == "A", "the bot moved"
+        asyncio.run(run())

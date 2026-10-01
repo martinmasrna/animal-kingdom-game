@@ -49,16 +49,20 @@ function cardPop(el, id, extra, place) {
   if (place === 'below') { pop.style.left = Math.min(r.left, innerWidth - w - 10) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; }
   else { pop.style.left = (r.right + 10 + w > innerWidth ? r.left - w - 10 : r.right + 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; }
 }
-// A card read large in the middle of the screen, each keyword on it explained under it (as the collection's); a tap closes it.
+// Touch reads a card in the middle of the screen, clear of the finger, until the next tap (feedback 2026-10-01): a hand card
+// with each keyword on it explained under it (as the collection's), or a board piece's stack (readStack). `down`: the finger
+// that opened it is still down, so the click its lift sends is not the closing tap.
+const touch = () => matchMedia('(hover: none)').matches;
+function readOverlay(html, down) {
+  const ov = document.createElement('div'); ov.className = 'readov'; ov.innerHTML = `<div class="rbox">${html}</div>`;
+  document.body.appendChild(ov); fitNames(ov);
+  let lifted = down ? 0 : 1; if (down) addEventListener('touchend', () => { lifted = Date.now(); }, { once: true, capture: true });
+  ov.addEventListener('click', e => { e.stopPropagation(); if (lifted && Date.now() - lifted > 150) ov.remove(); });
+}
 function readCard(id, str) {
   const c = CARDS[id]; if (!c) return;
   const kws = Object.keys(KEYWORDS).filter(k => new RegExp(`(^|\\. )${k}[:.]`).test(c.text || ''));
-  const ov = document.createElement('div'); ov.className = 'readov';
-  ov.innerHTML = `<div class="rbox">${cardHTML(c, str == null ? {} : { str })}${kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k]}</p></div>`).join('')}</div>`;
-  document.body.appendChild(ov); fitNames(ov);
-  // the click a browser sends as the holding finger lifts is not the closing tap: only a click after that lift closes it
-  let lifted = 0; addEventListener('touchend', () => { lifted = Date.now(); }, { once: true, capture: true });
-  ov.addEventListener('click', e => { e.stopPropagation(); if (lifted && Date.now() - lifted > 150) ov.remove(); });
+  readOverlay(cardHTML(c, str == null ? {} : { str }) + kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k]}</p></div>`).join(''), true);
 }
 function wirePops(root) {
   root.querySelectorAll('[data-card]').forEach(el => {
@@ -1050,13 +1054,15 @@ function wireBoard() {
   board.addEventListener('click', e => {
     const den = e.target.closest('[data-den]');   // a den opens that player's list
     if (den) { e.stopPropagation(); ui.panel = ui.panel === den.dataset.den ? null : den.dataset.den; showPanel(); return; }
-    const d = lastDecision; if (!d || !d.mine) return;
+    const d = lastDecision;
+    if (!d || !d.mine) { const g = touch() && e.target.closest('[data-cr]'); if (g) readStack(g.dataset.cr); return; }   // off your turn a tap only reads
     const hq = e.target.closest('[data-hq]');
     if (hq && ui.sel) { const t = d.places[ui.sel].find(t => t[0] === 'hq'); if (t) return act({ kind: 'place', card_id: ui.sel, target: t }); }
     const g = e.target.closest('[data-cr]'); if (!g) return;
     const cr = g.dataset.cr;
     if (cr in d.crChoice) return act({ kind: 'choice', choice: d.crChoice[cr] });
     if (ui.sel && d.rings.includes(cr)) return act({ kind: 'place', card_id: ui.sel, target: ['cr', dcr(cr)] });
+    if (touch() && !ui.sel) readStack(cr);
   });
   board.addEventListener('mouseover', e => {
     const g = e.target.closest('[data-cr]'), cr = g ? g.dataset.cr : null;
@@ -1065,7 +1071,14 @@ function wireBoard() {
     ui.hover = cr;
     if (ui.sel) drawBoard();
   });
-  board.addEventListener('touchstart', e => { const g = e.target.closest('[data-cr]'); showStack(g, g ? g.dataset.cr : null); }, { passive: true });   // touch: holding a piece reads it too
+  // touch: holding a piece reads its stack; so does tapping one when the tap would do nothing else
+  let holdT = null, held = false, x0 = 0, y0 = 0;
+  board.addEventListener('touchstart', e => { held = false; clearTimeout(holdT); const g = e.target.closest('[data-cr]'); if (!g) return;
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    holdT = setTimeout(() => { held = true; readStack(g.dataset.cr, true); }, 350); }, { passive: true });
+  board.addEventListener('touchmove', e => { if (moved(e, x0, y0)) clearTimeout(holdT); }, { passive: true });
+  board.addEventListener('touchend', () => clearTimeout(holdT));
+  board.addEventListener('click', e => { if (held) { held = false; e.stopImmediatePropagation(); } }, true);   // a hold's lift does nothing else
   board.addEventListener('mouseleave', () => { showStack(null, null); if (ui.hover) { ui.hover = null; if (ui.sel) drawBoard(); } });
   board.addEventListener('contextmenu', e => { if (ui.sel) { e.preventDefault(); ui.sel = null; drawGame(); } });
 }
@@ -1074,11 +1087,19 @@ function wireBoard() {
 // Shown after a short rest on the piece, and never while targets are ringed (it would cover them).
 let stackTimer = null, stackCr = null;
 function showStack(g, cr) {
+  if (touch()) return;   // touch reads a piece by holding or tapping it (readStack)
   if (cr === stackCr) return;
   stackCr = cr; clearTimeout(stackTimer); stackpop.style.display = 'none';
   const st = cr && viewerGame().board[cr];
   if (!st || !st.length || ui.sel || (lastDecision && lastDecision.rings.length)) return;
   stackTimer = setTimeout(() => stackAt(cr), 350);
+}
+function readStack(cr, down) {
+  const st = V && V.game && viewerGame().board[cr]; if (!st || !st.length) return;
+  const card = u => `<div class="sc ${u.owner}">${cardHTML(CARDS[u.id], { str: u.str })}` +
+    (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `</div>`;
+  const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
+  readOverlay(card(top) + (buried.length ? `<div class="under">${buried.map(card).join('')}</div>` : ''), down);
 }
 function stackAt(cr) {
   const g = document.querySelector(`#board [data-cr="${cr}"]`), st = V && V.game && viewerGame().board[cr];

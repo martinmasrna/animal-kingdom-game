@@ -514,3 +514,7 @@
 .readov .kw { align-self: stretch; padding: 10px 12px; border-radius: 10px; background: #25221f url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.18), 0 4px 10px rgba(0,0,0,.5); }
 .readov .kw b { display: block; font: 700 17px 'Fira Sans Condensed', sans-serif; color: #fff; margin-bottom: 2px; }
 .readov .kw p { margin: 0; font: 500 14px/1.35 'Fira Sans Condensed', sans-serif; color: #e4dccd; }
+.readov .sc { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.readov .under { display: flex; justify-content: center; gap: 8px; width: 100%; }
+.readov .under .card { --w: min(30vw, 120px); }
+.readov .tm { font: 600 14px 'Fira Sans Condensed', sans-serif; color: #f3ead8; }

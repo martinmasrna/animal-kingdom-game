@@ -61,6 +61,9 @@ def save_game(match: Match, record: dict) -> None:
         log.exception("could not save the game log for match %s", match.id)
 
 
+BOT_THINK_MAX = 15          # seconds a bot may think before the Easy bot's move is played for it
+
+
 class Hub:
     def __init__(self):
         self.matches: dict[str, Match] = {}
@@ -152,10 +155,13 @@ class Hub:
                 await asyncio.sleep(BOT_PAUSE["open"] + 0.4)   # then a full beat: what Next starts (the fruit) plays out first
             version = match.version
             try:
-                action = await asyncio.to_thread(match.bot_move)
-            except Exception:
-                log.exception("bot failed in match %s", match.id)
-                return
+                action = await asyncio.wait_for(asyncio.to_thread(match.bot_move), BOT_THINK_MAX)
+            except asyncio.TimeoutError:   # never a hanging opponent (feedback 2026-10-01: an Expert move took 4 minutes on a throttled CPU)
+                log.warning("bot over %ss in match %s; playing a fallback move", BOT_THINK_MAX, match.id)
+                action = match.fallback_move()
+            except Exception:   # nor a frozen match when a bot fails: a plain legal move instead
+                log.exception("bot failed in match %s; playing a fallback move", match.id)
+                action = match.fallback_move()
             if match.version != version:     # the position moved under the bot (rematch etc.)
                 continue
             match.act(s, action)

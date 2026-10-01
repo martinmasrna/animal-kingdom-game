@@ -31,7 +31,7 @@ test('collection: a tap reads a card while browsing; while building, a hold read
   assert.equal(await page.$eval('.fcount b', e => e.textContent), n, 'and adds nothing');
 });
 
-test('game: a hold opens a hand card large until a tap, and picks nothing; a held piece shows its stack', async () => {
+test('game: a hold opens a hand card large until a tap, and picks nothing; a held or tapped piece opens its stack in the middle', async () => {
   await page.goto(`${server.url}/#/lab/mid`, { waitUntil: 'networkidle0' }); await wait(600);
   const up = await hold('.hc');
   assert.ok(await page.$('.readov .card'), 'the held card opens large');
@@ -43,6 +43,13 @@ test('game: a hold opens a hand card large until a tap, and picks nothing; a hel
   assert.equal(await page.$$eval('.hc.sel', e => e.length), 0, 'and picks nothing either');
   const cr = await page.evaluate(() => Object.entries(window.__ak().V.game.board).find(([, st]) => st && st.length)[0]);
   const up2 = await hold(`#board [data-cr="${cr}"]`);
-  assert.ok(await page.$eval('#stackpop', e => e.style.display !== 'none'), 'a held piece shows its stack while held');
+  assert.ok(await page.$('.readov .sc .card'), 'a held piece opens its stack in the middle');
   await up2();
+  const box = await page.$eval('.readov .card', e => { const r = e.getBoundingClientRect(); return [r.left, r.right]; });
+  assert.ok(box[0] >= 0 && box[1] <= 390, `on screen (${box})`);
+  await page.tap('.readov'); await wait(200);
+  await page.tap(`#board [data-cr="${cr}"]`); await wait(300);
+  assert.ok(await page.$('.readov .sc'), 'a tap on a piece reads it too');
+  await page.tap('.readov'); await wait(200);
+  assert.equal(await page.$('.readov'), null);
 });

@@ -17,5 +17,5 @@ primary_region = "fra"
   destination = "/app/results"
 
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "512mb"
+  size = "performance-1x"   # a dedicated core: on a shared one the Expert bot was throttled to minutes per move (2026-10-01)
+  memory = "2048mb"
