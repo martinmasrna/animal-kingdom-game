@@ -89,3 +89,25 @@ def test_friend_request_from_the_leaderboard(monkeypatch):
             assert (await (await c.post("/api/friends/request", json={"to": d["profile"]["id"]}, headers=ha)).json()) == {"friends": True}
             assert (await c.post("/api/friends/request", json={"to": aid}, headers=ha)).status == 400
     asyncio.run(run())
+
+
+def test_the_match_you_are_playing_can_be_rejoined_from_anywhere(monkeypatch):
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a = await (await c.post("/api/profile", json={})).json()
+            ha = {"X-AK-Key": a["code"]}
+            assert await (await c.get("/api/current", headers=ha)).json() == {}
+            await c.post("/api/match", json={"tutorial": 1}, headers=ha)   # a lesson is never brought back
+            assert await (await c.get("/api/current", headers=ha)).json() == {}
+            m = await (await c.post("/api/match", json={"deck": "cats_midrange", "bot": {"level": "easy", "deck": "ramp"}}, headers=ha)).json()
+            match = server.hub.matches[m["id"]]
+            if match.phase != "playing":
+                match.ready("A")
+            cur = await (await c.get("/api/current", headers=ha)).json()
+            assert cur["id"] == m["id"] and match.seat_of(cur["token"]) == "A"
+            assert await (await c.get("/api/current")).json() == {}   # no profile, no match
+            match.started_at -= server.REJOIN_WITHIN + 60; match.action_times = []   # an abandoned match is left alone
+            assert await (await c.get("/api/current", headers=ha)).json() == {}
+    asyncio.run(run())

@@ -555,6 +555,25 @@ async def friend_add(req):
     return web.json_response({"name": display(profiles.get(other))})
 
 
+REJOIN_WITHIN = 3600      # seconds since a match's last move within which opening the game takes you back to it
+
+
+async def current_match(req):
+    """The match you are still playing, with your seat's token, so any tab or device can get back into it (a closed tab,
+    a phone that dropped the page). Not a tutorial or a gauntlet: leaving those leaves them."""
+    p = profile_of(req)
+    if not p:
+        return web.json_response({})
+    lessons = set(tutorial.BOTS.values())
+    live = lambda m: time.time() - (m.started_at + (m.action_times[-1] if m.action_times else 0)) < REJOIN_WITHIN
+    mine = [(m, s) for m in hub.matches.values() if m.phase == "playing" and not m.schedule and live(m)
+            for s in m.seats.values() if s.profile == p["id"] and not any(o.bot in lessons for o in m.seats.values())]
+    if not mine:
+        return web.json_response({})
+    m, s = max(mine, key=lambda ms: ms[0].started_at)
+    return web.json_response({"id": m.id, "token": s.token})
+
+
 async def friend_request(req):
     """Ask a player on the leaderboard to be friends: they get it on their presence socket now, or when they next come."""
     p, body = me(req), await req.json()
@@ -799,6 +818,7 @@ def make_app() -> web.Application:
         web.get("/api/friends/link/{code}", friend_peek),
         web.delete("/api/friends/{id}", friend_remove),
         web.post("/api/friends/request", friend_request),
+        web.get("/api/current", current_match),
         web.post("/api/friends/request/{frm}/answer", friend_request_answer),
         web.post("/api/challenge", challenge),
         web.delete("/api/challenge", challenge_cancel),

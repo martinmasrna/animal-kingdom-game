@@ -121,7 +121,18 @@ async function boot() {
     if (ui.panel) { ui.panel = null; return showPanel(); }
     if (ui.sel) { ui.sel = null; drawGame(); }
   });
+  await rejoin();
   route();
+}
+
+// Back into the match you're still playing (after a closed tab, a phone that dropped the page, another device): the server
+// keeps your seat, so opening the game anywhere takes you to it.
+async function rejoin(only) {
+  const r = await api('/api/current').catch(() => null), m = r && r.ok ? await r.json() : {};
+  if (!m.id || (only && m.id !== only)) return false;
+  setToken(m.id, m.token);
+  if (!only && !location.hash.startsWith('#/m/' + m.id)) location.hash = '#/m/' + m.id;
+  return true;
 }
 
 // The home painting at the viewer's time of day (a small easter egg): ?tod=dawn|day|dusk|night overrides it.
@@ -461,9 +472,9 @@ function profileScreen() {
 // ------------------------------------------------------------------ match connection
 function disconnect() { if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
 
-function matchScreen(id) {
+async function matchScreen(id) {
+  if (!getToken(id) && !(await rejoin(id))) { location.hash = '#/join/' + id; return; }   // a new tab: the server knows your seat
   const token = getToken(id);
-  if (!token) { location.hash = '#/join/' + id; return; }
   if (wsId === id && ws) return;
   screen = null; V = null; ui.sel = null; ui.peek = false;
   // the screen before stays until the game arrives (a bare "Connecting…" page flashed between them); shown only when slow
@@ -480,6 +491,9 @@ function matchScreen(id) {
     ws.onclose = () => { if (wsId === id) setTimeout(() => { if (wsId === id) connect(); }, 1000); };
   };
   connect();
+  // back from the background (a phone switched apps, a laptop woke): a socket that died quietly reconnects at once
+  matchScreen.wake = () => { if (document.hidden || wsId !== id) return;
+    if (!ws || ws.readyState > 1) { if (ws) ws.onclose = null; connect(); } };
 }
 const send = msg => ws && ws.readyState === 1 && ws.send(JSON.stringify(msg));
 const act = action => { ui.sel = null; ui.hover = null; send({ t: 'act', action }); };
@@ -710,7 +724,7 @@ function turnCue(mine) {
   if (!mine || !document.hidden) document.title = 'Animal Kingdom';
   turnCue.was = mine;
 }
-addEventListener('visibilitychange', () => { if (!document.hidden) document.title = 'Animal Kingdom'; });
+addEventListener('visibilitychange', () => { if (!document.hidden) { document.title = 'Animal Kingdom'; if (matchScreen.wake) matchScreen.wake(); } });
 // Hearthstone's plate, on granite, with the knock.
 function turnPlate() {
   sfx('yourturn');
