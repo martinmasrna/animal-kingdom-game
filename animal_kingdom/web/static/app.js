@@ -1162,11 +1162,12 @@ function drawEnd() {
 }
 
 // A ranked game seen ending live: once the result has landed, the rating counts from before to after, then the change shows.
+// The server sends the ratings as shown ("1781", "1500?" while provisional): count on the numbers, land on its text.
 function countRating(rt) {
-  const t0 = performance.now() + 700, dur = 1100;
+  const t0 = performance.now() + 700, dur = 1100, from = parseInt(rt.before, 10);
   const step = now => { const n = document.getElementById('rnum'); if (!n) return;
     const k = Math.min(1, Math.max(0, (now - t0) / dur)), e = 1 - (1 - k) ** 3;
-    n.textContent = Math.round(rt.before + (rt.after - rt.before) * e);
+    n.textContent = k < 1 ? Math.round(from + rt.delta * e) : rt.after;
     if (k < 1) requestAnimationFrame(step); else n.nextElementSibling.classList.add('on'); };
   requestAnimationFrame(step);
 }
