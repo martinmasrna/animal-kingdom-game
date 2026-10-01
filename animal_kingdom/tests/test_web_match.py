@@ -231,6 +231,10 @@ def test_bot_games_have_no_clock():
 def test_the_free_window_is_lost_then_the_bank_drains(monkeypatch):
     from animal_kingdom.web.match import CLOCK_BANK, CLOCK_FREE
     m, now = _two_humans(monkeypatch)
+    from animal_kingdom.engine.actions import ChoiceAction
+    while m.state.pending is not None:                  # the mulligan's shared window touches no bank
+        m.act(m.to_act(), ChoiceAction("__skip__"))
+    assert m.clock["bank"] == {"A": CLOCK_BANK, "B": CLOCK_BANK}
     s = m.to_act()
     now[0] += CLOCK_FREE + 12                           # 12 s past the free window
     m.act(s, rules.legal_actions(m.state)[0])

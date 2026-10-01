@@ -334,3 +334,36 @@ def test_both_players_mulligan_at_once_and_a_log_replays_it():
         rules.apply_logged(r, a)
     assert [u.card_id for u in r.hands[first]] == [u.card_id for u in st.hands[first]]
     assert [u.card_id for u in r.hands[second]] == [u.card_id for u in st.hands[second]] and r.decks == st.decks
+
+
+def test_one_shared_mulligan_window_then_three_timeouts_in_a_row_lose():
+    from animal_kingdom.engine.state import other_player
+    from animal_kingdom.web import match as mm
+    from animal_kingdom.web.match import Match, Seat
+    m = Match("CLK", Seat("ta", "A", deck="cats_midrange"))
+    m.join(Seat("tb", "B", deck="ramp"))
+    m._start_game()
+    st, c = m.state, m.clock
+    first, second = st.current, other_player(st.current)
+    assert m.clock_deadline() == c["mull_until"], "both mulligans run on one window"
+    assert m.view(second)["game"]["clock"]["holder"] == second, "each sees it as their own time"
+    assert not m.time_out(c["mull_until"] - 1)
+    assert m.time_out(c["mull_until"] + 1) and not m.mulliganing(), "the window over: both keep their hands, the game starts"
+    assert c["bank"] == {"A": mm.CLOCK_BANK, "B": mm.CLOCK_BANK}, "no bank was spent on the mulligan"
+    # the second player has gone: their clock runs out each turn while the first keeps playing; the third in a row loses
+    from animal_kingdom.engine.actions import DrawAction, PassAction
+    def play_turn(p):
+        assert st.player_to_act() == p
+        m.act(p, DrawAction())
+        while st.result is None and st.player_to_act() == p:
+            m.act(p, PassAction() if st.pending is None else {"kind": "choice", "choice": "__skip__"})
+    if st.player_to_act() == first:
+        play_turn(first)
+    for n in range(1, 4):
+        assert st.player_to_act() == second and st.result is None
+        m.time_out(m.clock_deadline() + 1)
+        assert c["out"][second] == n
+        if n < 3:
+            play_turn(first)
+    assert st.result is not None and st.result.winner == first and st.result.reason == "timeout"
+    assert c["out"][first] == 0, "a player who moves is never counted"

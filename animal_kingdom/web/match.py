@@ -37,6 +37,8 @@ GAMES_TO_WIN = 1
 # time is lost), then spends their bank for the game. At zero, the engine acts for them.
 CLOCK_FREE = 30.0
 CLOCK_BANK = 180.0
+CLOCK_MULLIGAN = 30.0        # one window for both players' mulligans at once (Martin, 2026-10-01); what's left is kept
+TIMEOUTS_TO_LOSE = 3         # turns in a row a player's clock ran out: they have left, and lose (Martin, 2026-10-01)
 
 # Menu labels for the premade decks (the design mockups' names).
 DECK_NAMES = {"cats_midrange": "Cats", "canine_buff_tempo": "Canines", "aggro_hq_rush": "Aggro",
@@ -253,7 +255,8 @@ class Match:
         self.history = []
         self.phase = "playing"
         self.clock = None if any(seat.is_bot for seat in self.seats.values()) else \
-            {"bank": {"A": CLOCK_BANK, "B": CLOCK_BANK}, "holder": None, "turn": -1, "free": 0.0, "since": time.time()}
+            {"bank": {"A": CLOCK_BANK, "B": CLOCK_BANK}, "holder": None, "turn": -1, "free": 0.0, "since": time.time(),
+             "mull_until": time.time() + CLOCK_MULLIGAN, "out": {"A": 0, "B": 0}}
         self._clock_update()
 
     def next_game(self) -> None:
@@ -281,8 +284,15 @@ class Match:
             return None
         return self.state.player_to_act()
 
-    def act(self, s: str, action) -> None:
-        """Apply one action for seat `s`: a top-level move or a pending sub-choice."""
+    def mulliganing(self) -> bool:
+        """The game's opening mulligans are under way (both at once, on one shared clock window)."""
+        st = self.state
+        return bool(st and st.result is None and st.pending and st.pending.get("kind") == "mulligan")
+
+    def act(self, s: str, action, auto: bool = False) -> None:
+        """Apply one action for seat `s`: a top-level move or a pending sub-choice. `auto`: the clock acted for them."""
+        if not auto and self.clock and "out" in self.clock:
+            self.clock["out"][s] = 0
         if self.phase != "playing":
             raise EngineError("no game in progress")
         state = self.state
@@ -323,12 +333,14 @@ class Match:
         if c is None:
             return
         now = time.time() if now is None else now
-        if c["holder"]:
+        if c["holder"] and c.get("mull_until") and c["turn"] == -2:   # the mulligan's window charges no one's bank
+            pass
+        elif c["holder"]:
             spent = now - c["since"]
             c["bank"][c["holder"]] = max(0.0, c["bank"][c["holder"]] - max(0.0, spent - c["free"]))
             c["free"] = max(0.0, c["free"] - spent)
         holder = self.to_act()
-        turn = self.state.turn_counter if self.state else -1
+        turn = -2 if self.mulliganing() else self.state.turn_counter if self.state else -1
         if holder != c["holder"] or turn != c["turn"]:
             c["free"] = CLOCK_FREE
         c["holder"], c["turn"], c["since"] = holder, turn, now
@@ -337,6 +349,8 @@ class Match:
         c = self.clock
         if c is None or c["holder"] is None or self.phase != "playing":
             return None
+        if self.mulliganing() and c.get("mull_until"):
+            return c["mull_until"]
         return c["since"] + c["free"] + c["bank"][c["holder"]]
 
     def time_out(self, now: Optional[float] = None) -> bool:
@@ -347,12 +361,23 @@ class Match:
         if deadline is None or now < deadline:
             return False
         s, st = self.to_act(), self.state
+        if self.mulliganing():   # the shared window is over: whoever is still mulliganing keeps the hand they have
+            for p in "AB":
+                if rules.early_mulligan(st, p) is not None:
+                    self.act(p, ChoiceAction(SKIP), auto=True)
+            while self.mulliganing():
+                self.act(self.to_act(), ChoiceAction(SKIP), auto=True)
+            return True
         self._clock_update(now)
         if st.pending is None:
-            self.act(s, PassAction())
+            self.act(s, PassAction(), auto=True)
+            out = self.clock.setdefault("out", {"A": 0, "B": 0})
+            out[s] += 1
+            if out[s] >= TIMEOUTS_TO_LOSE and self.state.result is None:   # gone: the match is the opponent's
+                self._check_end(Result(other_player(s), "timeout"))
         else:
             legal = rules.legal_actions(st)
-            self.act(s, ChoiceAction(SKIP) if ChoiceAction(SKIP) in legal else legal[0])
+            self.act(s, ChoiceAction(SKIP) if ChoiceAction(SKIP) in legal else legal[0], auto=True)
         return True
 
     def concede(self, s: str) -> None:
@@ -500,8 +525,9 @@ class Match:
             "actionsLeft": st.config.actions_per_turn + bonus - st.actions_taken_this_turn,
             "actionsTotal": st.config.actions_per_turn + bonus,
             "canPass": rules.can_pass(st),
-            "clock": self.clock and {**{k: self.clock[k] for k in ("bank", "holder", "free", "since")}, "now": time.time(),
-                                     "on": self.clock_deadline() is not None},
+            "clock": self.clock and (self._mulligan_clock(s) if self.mulliganing() and self.clock.get("mull_until") else
+                                     {**{k: self.clock[k] for k in ("bank", "holder", "free", "since")}, "now": time.time(),
+                                     "on": self.clock_deadline() is not None}),
             "food": dict(st.food),
             "income": {p: rules.region_income(st, p) for p in "AB"},
             "winFood": st.game_map.win_food,
@@ -532,6 +558,12 @@ class Match:
         elif st.pending is not None and to_act == opp:
             g["opponentChoosing"] = True
         return g
+
+    def _mulligan_clock(self, s: str) -> dict:
+        """The shared mulligan window, shown to each player as their own time (no bank is touched)."""
+        now = time.time()
+        return {"bank": {"A": 0.0, "B": 0.0}, "holder": s, "free": max(0.0, self.clock["mull_until"] - now), "since": now,
+                "now": now, "on": True}
 
     def _decision(self, s: str):
         st = self.state

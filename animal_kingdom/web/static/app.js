@@ -509,7 +509,8 @@ function onView(prev) {
   const g0 = prev && prev.game, g1 = V.game;
   if (screen === 'game' && g0 && g1 && V.phase === 'playing' && prev.you === V.you && !RP.views.length && !isTutorial()
       && g0.current !== V.you && g1.current === V.you && onView.staged !== V.version
-      && turnCue.key !== V.id + ':' + V.results.length + ':' + g1.round && yoursChanged(g0, g1, V.you)) {
+      && turnCue.key !== V.id + ':' + V.results.length + ':' + g1.round && yoursChanged(g0, g1, V.you)
+      && !g1.history.slice(g0.history.length).some(m => m.seat !== V.you)) {   // not the opponent's own move (a Polar Bear eating yours)
     onView.staged = V.version; turnCue.key = V.id + ':' + V.results.length + ':' + g1.round; turnCue.was = true;
     turnPlate(); ui.animUntil = Date.now() + 1500; onView.kept = prev; clearTimeout(onView.t);
     onView.t = setTimeout(() => { const p = onView.kept; onView.kept = null; ui.choiceAt = Date.now() + 1100; onView(p); }, 1520); return;
@@ -711,6 +712,9 @@ function drawIntro() {
   el.onclick = done; setTimeout(done, matchMedia('(prefers-reduced-motion: reduce)').matches ? 1400 : 2600);
 }
 
+// How long the opponent's played card takes: shown large, flown down, landed; then what it did (an animal eaten or covered).
+const revealTime = m => 1900 + (m.fx && m.fx.some(f => f.k === 'remove' || f.k === 'bounce') ? 700 : 0);
+
 // Your turn begins: the tablet lights up once, and a tab in the background says so in its title (a friend's clock is running).
 function turnCue(mine) {
   const key = V.id + ':' + V.results.length + ':' + (V.game && V.game.round);
@@ -758,7 +762,7 @@ function drawGame() {
 
   // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.
   { const A0 = ui.anim, l0 = G.history[G.history.length - 1];
-    if (A0 && G.history.length > A0.hist && l0 && l0.seat === them && l0.kind === 'place') ui.revealEnd = Date.now() + 1900; }
+    if (A0 && G.history.length > A0.hist && l0 && l0.seat === them && l0.kind === 'place') ui.revealEnd = Date.now() + revealTime(l0); }
   turnCue(playing && G.current === you);   // the card shown, flown down, landed and its dust settled
   // The opponent's hand: one card back each, centred across the board from yours; in a replay their cards, face up (the eye hides them).
   const faces = RP.views.length && RP.eye && G.oppHand;
@@ -871,7 +875,7 @@ function drawGame() {
     rv.innerHTML = cardHTML(CARDS[last.card]); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
     if (ui.anim) ui.anim.landDelay = 0.95;
-    ui.revealEnd = Date.now() + 1900;
+    ui.revealEnd = Date.now() + revealTime(last);
   }
   placeCoach($('coach'), d.lesson, d.rings);
   drawBoard(d);
@@ -1157,7 +1161,7 @@ function drawEnd() {
   if (drawEnd.sounded !== key && drawEnd.until && w !== null && !RP.views.length) sfx(w === you ? 'victory' : 'defeat');   // a game seen ending live
   drawEnd.sounded = key;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
-  const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded' }[G.result.reason] || G.result.reason;
+  const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded', timeout: w === you ? 'Your opponent ran out of time three turns in a row' : 'You ran out of time three turns in a row' }[G.result.reason] || G.result.reason;
   const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;
   const peek = `<button class="slab" id="peek">See the board</button>`;
   if (RP.views.length) {
