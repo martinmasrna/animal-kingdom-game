@@ -5,6 +5,7 @@ import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML } from './collection.js';
 import { dd, wireDd, onHold } from './menu.js';
+import { play as sfx, soundsFor, preload, muted, setMuted } from './sound.js';
 import { openFeedback } from './feedback.js';
 import { current as lessonNow, gate, held, lessonOf } from './tutorial.js';
 
@@ -499,6 +500,7 @@ function gameScreen() {
     app.innerHTML = `<div class="game kit" id="scr"><div id="world"><img src="/static/kit2/plate_wide.webp" alt="" draggable="false"></div><div id="stage">
       <div class="abs ledge"></div>
       <div id="board"></div>
+      <div class="abs menu snd" id="sndbtn"></div>
       <div class="abs menu hs" id="series" data-tip="History"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg></div>
       <div class="abs opphand" id="opphand"></div>
       <div class="abs menu fb" id="fbbtn" data-tip="Send feedback"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
@@ -540,7 +542,10 @@ function gameScreen() {
     app.querySelectorAll('.panel').forEach(el => el.onclick = e => e.stopPropagation());
     $('scr').addEventListener('click', () => { if (ui.panel) { ui.panel = null; showPanel(); } });
     $('deck').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.legal.draw && !d.noDraw) act({ kind: 'draw' }); };
-    $('tbtn').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.canPass && !d.noPass) act({ kind: 'pass' }); };
+    $('tbtn').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.canPass && !d.noPass) { sfx('endturn'); act({ kind: 'pass' }); } };
+    const sndIcon = () => { const b = $('sndbtn'); b.dataset.tip = muted() ? 'Sound off' : 'Sound on';
+      b.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/>${muted() ? '<path d="M17 9l5 6M22 9l-5 6"/>' : '<path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/>'}</svg>`; };
+    $('sndbtn').onclick = e => { e.stopPropagation(); setMuted(!muted()); sndIcon(); }; sndIcon(); preload();
     wireBoard();
   }
   drawGame();
@@ -559,7 +564,7 @@ function drawIntro() {
     return `<div class="iside ${p === V.you ? 'A' : 'B'}">${cardHTML(CARDS[cover], { cls: 'compact' })}<div class="iname"><b>${seatLabel(p)}</b>${s.deckName ? `<span>${esc(own ? own.name : s.deckName)}</span>` : ''}</div></div>`; };
   const el = document.createElement('div'); el.className = 'intro'; el.id = 'intro';
   el.innerHTML = `${side(V.you)}<div class="ivs">vs</div>${side(opp())}`;
-  document.getElementById('scr').appendChild(el); fitNames(el);
+  document.getElementById('scr').appendChild(el); fitNames(el); sfx('versus', .55);
   const done = () => { el.classList.add('out'); setTimeout(() => el.remove(), 600); };
   el.onclick = done; setTimeout(done, matchMedia('(prefers-reduced-motion: reduce)').matches ? 1400 : 2600);
 }
@@ -568,7 +573,7 @@ function drawIntro() {
 function turnCue(mine) {
   const key = V.id + ':' + V.results.length + ':' + (V.game && V.game.round);
   if (mine && turnCue.was === false && turnCue.key !== key && !RP.views.length) {
-    turnCue.key = key; turnCue.until = Date.now() + 900;   // drawGame gives the tablet 'yours' meanwhile
+    turnCue.key = key; turnCue.until = Date.now() + 900; sfx('yourturn');   // drawGame gives the tablet 'yours' meanwhile
     if (document.hidden) document.title = 'Your turn · Animal Kingdom';
   }
   if (!mine || !document.hidden) document.title = 'Animal Kingdom';
@@ -584,7 +589,8 @@ function drawGame() {
   $('scr').classList.toggle('rp', !!RP.views.length);   // a replay: upright its controls take the deck's corner
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
-  $('series').style.right = 16 + (VIEW.port ? 88 : 52) * [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length + 'px';   // History, left of feedback and the flag
+  { const n = [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length, w = VIEW.port ? 88 : 52;
+    $('series').style.right = 16 + w * n + 'px'; $('sndbtn').style.right = 16 + w * (n + 1) + 'px'; }   // sound, left of History   // History, left of feedback and the flag
   $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
   // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
   $('menubtn').querySelector('svg').innerHTML = isTutorial() ? '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>'
@@ -644,6 +650,7 @@ function drawGame() {
     const iid = Number(el.dataset.iid), id = el.dataset.id;
     if (d.handPick.has(iid)) return act({ kind: 'choice', choice: iid });
     if (!d.mine || !d.places[id] || !el.classList.contains('can')) return;   // a dimmed copy (the tutorial lights one) does nothing
+    if (ui.sel !== id) sfx('pick');
     ui.sel = ui.sel === id ? null : id; ui.hover = null; drawGame();
   });
 
@@ -702,12 +709,13 @@ function drawGame() {
   if (A && G.history.length > A.hist && last && last.seat === them && last.kind === 'place') {
     const [tx, ty] = last.target[0] === 'cr' ? crossroadAt(dcr(last.target[1])) : denMouthAt(rel(last.target[1])), rv = $('reveal');
     rv.innerHTML = cardHTML(CARDS[last.card]); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
-    rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on');
+    rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
     if (ui.anim) ui.anim.landDelay = 0.95;
     ui.revealEnd = Date.now() + 1900;
   }
   placeCoach($('coach'), d.lesson, d.rings);
   drawBoard(d);
+  if (A && !RP.views.length) soundsFor(document);   // one sound per thing that just moved
   drawEnd();
 }
 
