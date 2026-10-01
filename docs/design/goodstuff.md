@@ -6,6 +6,7 @@ The central open design problem. A deck of the individually strongest cards from
 
 - A hill-climbing optimizer over legal 4-4-6 decks converged on a pile of premium standalone value: big Apex bodies, efficient removal, draw engines. It beat the seven premades about 95% of the time under GreedyBot and 88% under RefereeBot (200 games per matchup); its worst matchup was still about 82%.
 - Martin, the strongest pilot on record, piloted each premade into the bot-piloted pile and lost heavily. The edge is real, not a bot artifact.
+- Martin's view (2026-10-01): the problem is largely the bots' skill. The bots plan poorly ([`../bots.md`](../bots.md), the planning gap), and a pile with no dead draws needs no planning while a synergy deck needs a lot, so every bot-piloted number above overstates the pile's edge by an unknown amount. The alpha's ranked games are the test: people piloting themed decks against people piloting piles.
 - A double-oracle search (build the best deck against the current field, add it, repeat) produced only more value piles; the best counter it found reached 22% against goodstuff. The replicator dynamics over the resulting matrix collapse to a monoculture.
 - The pool is deep: with goodstuff's 14 designs removed, the leftovers still built a 53.7% deck. Nerfing a handful of cards doesn't help; the search just finds the next handful.
 - The core the piles converged on is action economy. Chinchilla (an extra action) and Polar Bear were in every pile, then Bat, Lemming, Tiger, Greywhisker, Black Bear, Alpha, Mouse, Raven and Rhinoceros. In a game whose only resource is the action, cards that manufacture actions are unconditionally strong.
@@ -53,6 +54,14 @@ Strength isn't linear either, since covering is strictly-greater: a point is wor
 **Polar Bear is the benchmark.** It stays a rare 8 with Apex Predator and nothing else, the ceiling of what raw stats buy. If it is simply the best unit in the game, the synergy payoffs aren't strong enough, and the fix belongs to them, not to the Bear (Martin, 2026-09-28).
 
 The per-card measure of all this is **synergy = home value minus goodstuff value**, by paired swaps: a goodstuff card scores near zero, a real synergy card high. Target: synergy cards score high *and* are worth at home at least what goodstuff's staples are worth.
+
+## The deckbuilding pass (after the alpha)
+
+Deckbuilding is thin today: a player can edit a starter only with its own family's cards (Cheetah is the one Cat outside Cats; every Colony card is already in Colony) or with other decks' cards, which are generic and pull toward the pile. Martin's idea (2026-10-01): new cards so each deck has real choices, to make it stronger against aggro, control or ramp. The kind of card decides whether that helps or feeds goodstuff:
+
+- **Family cards, not neutral ones.** Per family a legendary or two, a rare or two and three or four commons that are good only beside that family (the gated shapes above: a family condition as a discount, gated retrieval, drawbacks the family turns to fuel). A neutral card that fits any deck is one more goodstuff card; archetype tech ("good against aggro") is neutral unless a family condition ties it down.
+- **Same work as the goodstuff fix.** These cards are the synergy payoffs this document asks for, aimed at a second goal: choices inside a family that the pile can't copy. One design pass serves both.
+- **After the alpha.** New players play the starters first; twenty cards are twenty paintings and a balance pass; and the alpha's ranked games show which matchups are lopsided ("Cats can't beat Aggro"), which names the cards each family is missing.
 
 ## Held in reserve: heroes
 
