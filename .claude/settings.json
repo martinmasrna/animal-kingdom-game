@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(deploy/deploy.sh feedback)",
-      "Bash(/Users/martin/Work/fun/animal-kingdom-game/deploy/deploy.sh feedback)"
+      "Bash(/Users/martin/Work/fun/animal-kingdom-game/deploy/deploy.sh feedback)",
+      "Bash(deploy/deploy.sh players)",
+      "Bash(/Users/martin/Work/fun/animal-kingdom-game/deploy/deploy.sh players)"
     ]
   }
 }
