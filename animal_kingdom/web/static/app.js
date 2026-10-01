@@ -508,7 +508,7 @@ function onView(prev) {
   if (PB.busy) { PB.queue.push(V); V = PB.shown; return; }   // keep showing the step in play
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;   // reduced motion: the new view at once
   const steps = motion && (screen === 'game' || screen === null) ? plan(prev, V, CARDS) : [{ view: V, step: null }];
-  if (steps.length === 1) { ui.step = null; return showView(prev); }
+  if (steps.length === 1) { ui.step = null; showView(prev); return played(); }
   PB.busy = true;
   const run = (i, before) => {
     const { view, step } = steps[i];
@@ -518,7 +518,7 @@ function onView(prev) {
     clearTimeout(PB.t); PB.t = setTimeout(() => run(i + 1, view), step.dur * 1000 / (window.AK_SPEED || 1));   // AK_SPEED: tests only
   };
   const finish = shown => {
-    PB.busy = false; ui.step = null;
+    PB.busy = false; ui.step = null; played();
     if (PB.queue.length) { const latest = PB.queue[PB.queue.length - 1]; PB.queue = []; V = latest; return onView(shown); }
     if (RP.playing) replayPlay(true);   // a replay moves on once this one has played out
   };
@@ -535,6 +535,12 @@ function strengthFlash(step) {
     else for (const st of Object.values(V.game.board)) for (const u of st) if (u.id === c.card && u.owner === c.owner) m.set(u.iid, dir);
   }
   return m;
+}
+// Tell the server the screen has played the events out: a bot opponent waits for it before its next move (server._watched).
+function played() {
+  if (!wsId || RP.views.length || !V || !V.game) return;
+  const ev = V.game.events || [];
+  if (ev.length && ev[ev.length - 1].seq !== played.seq) { played.seq = ev[ev.length - 1].seq; send({ t: 'played', seq: played.seq }); }
 }
 function stopPlayback() { clearTimeout(PB.t); PB.busy = false; PB.queue = []; ui.step = null; }
 

@@ -43,7 +43,8 @@ LOG_DIR = Path(__file__).resolve().parents[2] / "results" / "human_games" / "web
 REPLAY_DIR = Path(__file__).resolve().parents[2] / "results" / "replays"
 MATCH_DIR = Path(__file__).resolve().parents[2] / "results" / "web_matches"
 KEEP_FINISHED = 24 * 3600    # seconds a finished match is still reloaded after a restart
-BOT_PAUSE = {"open": 1.6, "move": 1.1, "choice": 0.6}   # seconds: a beat before the bot opens its turn, then time to follow each move
+BOT_PAUSE = {"open": 0.6, "move": 0.4, "choice": 0.3}   # seconds: the bot's thinking beat, once the players have watched its last move
+BOT_WAIT_MAX = 6.0          # seconds a bot waits for a player's screen to play its last move out (a stalled client never stalls it)
 if os.environ.get("AK_BOT_PAUSE") is not None:   # the test harness sets 0: tests wait on nothing a player needs to follow
     BOT_PAUSE = {k: v * float(os.environ["AK_BOT_PAUSE"]) for k, v in BOT_PAUSE.items()}
 log = logging.getLogger("animal_kingdom.web")
@@ -145,14 +146,23 @@ class Hub:
         if task is None or task.done():
             self.bot_tasks[match.id] = asyncio.create_task(self._run_bot(match))
 
+    async def _watched(self, match: Match) -> None:
+        """Until every person watching has played the match's events out on screen (their client says so, 'played'), at
+        most BOT_WAIT_MAX: the bot moves as fast as they can follow, never on a guessed pause."""
+        t0 = time.time()
+        while time.time() - t0 < BOT_WAIT_MAX:
+            watchers = {seat for _, seat in self.sockets.get(match.id, ()) if not match.seats[seat].is_bot}
+            if all(match.played.get(w, 0) >= match.seq for w in watchers):
+                return
+            await asyncio.sleep(0.05)
+
     async def _run_bot(self, match: Match) -> None:
         while (s := match.to_act()) is not None and match.seats[s].is_bot:
             opening = not match.state.pending and match.state.actions_taken_this_turn == 0
+            await self._watched(match)
             await asyncio.sleep(BOT_PAUSE["choice" if match.state.pending else "open" if opening else "move"])
-            if match.hold:                    # the tutorial's coach is talking: the opponent waits for its Next
-                while match.hold:             # (checked after the pause: the hold arrives while it runs)
-                    await asyncio.sleep(0.1)
-                await asyncio.sleep(BOT_PAUSE["open"] + 0.4)   # then a full beat: what Next starts (the fruit) plays out first
+            while match.hold:                 # the tutorial's coach is talking: the opponent waits for its Next (the client
+                await asyncio.sleep(0.1)      # lets go only once what Next set off has played)
             version = match.version
             try:
                 action = await asyncio.wait_for(asyncio.to_thread(match.bot_move), BOT_THINK_MAX)
@@ -780,6 +790,9 @@ async def socket(req):
                     if match.phase == "playing":      # the other player already started it
                         continue
                     match.next_game()
+                elif kind == "played":                # the client has played the events up to this one on screen (_watched)
+                    match.played[seat] = int(data.get("seq") or 0)
+                    continue
                 elif kind == "hold":                  # the tutorial: its coach holds the opponent while a line awaits Next
                     match.hold = bool(data.get("on")) and match.tutorial
                     continue

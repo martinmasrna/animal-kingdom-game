@@ -272,3 +272,27 @@ def test_bot_levels_are_the_configurations_the_simulations_measure():
         web, sim = bot_for(level, 7), make_bot(kind, 7)
         for attr in ("determinizations", "beam_width", "root_width", "reply_width", "max_search_nodes"):
             assert getattr(web, attr, None) == getattr(sim, attr, None), (level, attr)
+
+
+def test_a_bot_waits_for_the_watching_players_screen_never_longer_than_the_cap(monkeypatch):
+    """The bot's next move waits until each person watching has played the events out (their 'played' report), and no
+    longer than BOT_WAIT_MAX if a screen never reports (server._watched)."""
+    import asyncio, time
+    from animal_kingdom.web import server
+    m = Match("WAT", Seat("ta", "A", deck="cats_midrange"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m._start_game()
+    m.seq = 7
+    hub = server.Hub()
+    hub.sockets[m.id] = {(object(), "A")}            # player A watches
+    monkeypatch.setattr(server, "BOT_WAIT_MAX", 0.4)
+    async def run():
+        t0 = time.time(); await hub._watched(m); waited = time.time() - t0
+        assert 0.35 < waited < 0.8, f"a silent screen holds the bot only to the cap ({waited:.2f} s)"
+        m.played["A"] = 7
+        t0 = time.time(); await hub._watched(m)
+        assert time.time() - t0 < 0.1, "a screen that has played everything lets it go at once"
+        hub.sockets[m.id] = set()                    # nobody watching: no wait at all
+        m.played.clear(); t0 = time.time(); await hub._watched(m)
+        assert time.time() - t0 < 0.1
+    asyncio.run(run())

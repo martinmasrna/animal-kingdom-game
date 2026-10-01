@@ -159,6 +159,7 @@ class Match:
         self.seats: dict[str, Seat] = {"A": host}
         self.events: list[dict] = []     # the game's engine events, numbered (`seq`); see _take_events
         self.seq = 0
+        self.played: dict[str, int] = {}   # seat -> the last event its screen has played out (server._watched); not saved
         self.phase = "lobby"             # lobby -> prematch -> playing -> game_over -> match_over
         self.results: list[dict] = []    # one {winner, reason, turns} per finished game
         self.hold = False                # the tutorial's coach is talking: its opponent waits (not saved)

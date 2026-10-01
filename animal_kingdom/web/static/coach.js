@@ -79,7 +79,11 @@ addEventListener('keydown', e => {
 let COACH_W = 300;   // 400 upright (game.css .port .coach)
 // While a line waits for Next, the tutorial's opponent waits too: its moves would run over the line (told to the server once per change).
 let botHeld = false;
-const holdBot = on => { if (on !== botHeld && isLesson(C.V())) { botHeld = on; C.send({ t: 'hold', on }); } };
+const holdBot = on => {
+  if (!on && (C.ui.animUntil || 0) > Date.now()) {   // what Next set off (the fruit) plays out before the opponent moves on
+    clearTimeout(holdBot.t); holdBot.t = setTimeout(() => holdBot(false), C.ui.animUntil - Date.now() + 20); return; }
+  if (on) clearTimeout(holdBot.t);
+  if (on !== botHeld && isLesson(C.V())) { botHeld = on; C.send({ t: 'hold', on }); } };
 export function drawCoach(el, L, rings = []) {
   el.className = 'abs coach';
   if (!L) { if (!C.ui.step) holdBot(false); el.innerHTML = ''; document.getElementById('board').classList.remove('pulse'); return; }
