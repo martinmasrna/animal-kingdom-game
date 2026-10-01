@@ -76,8 +76,10 @@ test('a match opens its replay: every view drawn right, nothing to act on, the c
   assert.ok(await page.evaluate(() => window.__ak().V.version) < i, 'back one move');
 });
 
-test('stepping skips what changes nothing on screen; the bar marks each turn; the recent moves go back to a move', async () => {
-  const look = v => JSON.stringify([v.phase, v.game.board, v.game.hand.map(h => h.id), (v.game.oppHand || []).map(h => h.id), v.game.food, v.game.current, v.game.round, v.game.toAct === v.you && v.game.pending]);
+test('stepping skips what brought nothing; the bar marks each turn; the recent moves go back to a move', async () => {
+  // a step brings something: new events, a changed choice put to you, or a new phase (the opponent's hidden choices bring none)
+  const seq = v => { const ev = v.game.events || []; return ev.length ? ev[ev.length - 1].seq : 0; };
+  const look = v => JSON.stringify([v.phase, seq(v), v.game.toAct === v.you && v.game.pending]);
   const turns = views.filter((v, i) => i && v.game.round !== views[i - 1].game.round).length;
   assert.equal(await page.$$eval('#rtrack b', els => els.length), turns, 'a mark per turn');
   const b = await (await page.$('#rtrack')).boundingBox();

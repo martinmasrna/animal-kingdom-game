@@ -1160,10 +1160,15 @@ async function replayScreen(key) {
   try { const r = await api('/api/replay/' + encodeURIComponent(key)); if (!r.ok) throw new Error(await r.text()); views = await r.json(); }
   catch (e) { if (RP.key === key) back(e.message || 'The replay didn\'t load, try again'); return; }
   if (RP.key !== key) return;   // left while it loaded
-  // A step that changes nothing on screen (the opponent's hidden choices, their kept hand) is skipped; the progress bar marks each turn.
+  // A step is a view that brought something: new events (static/timeline.js plays them), a choice put to you, or the game's
+  // end. The rest (the opponent's hidden choices, their kept hand) is skipped; the progress bar marks each turn.
+  const seq = v => { const ev = v.game.events || []; return ev.length ? ev[ev.length - 1].seq : 0; };
+  const yours = v => JSON.stringify(v.game.toAct === v.you && v.game.pending);   // the choice put to you, if any
+  const legacy = !views.some(v => (v.game.events || []).length);   // matches from before events (2026-10-01): the old screen comparison
   const look = v => JSON.stringify([v.phase, v.game.board, v.game.hand.map(h => h.id), (v.game.oppHand || []).map(h => h.id), v.game.food,
-    v.game.current, v.game.round, v.game.toAct === v.you && v.game.pending]);
-  RP.shown = views.map((v, i) => i === 0 || i === views.length - 1 || look(v) !== look(views[i - 1]));
+    v.game.current, v.game.round, yours(v)]);
+  RP.shown = views.map((v, i) => i === 0 || i === views.length - 1 || (legacy ? look(v) !== look(views[i - 1])
+    : seq(v) !== seq(views[i - 1]) || yours(v) !== yours(views[i - 1]) || v.phase !== views[i - 1].phase));
   RP.turns = views.flatMap((v, i) => i && v.game.round !== views[i - 1].game.round ? [i / (views.length - 1)] : []);
   RP.views = views; RP.eye = true; ui.peek = false; ui.sel = null; ui.panel = null;
   replayStep(0); replayPlay(true);
