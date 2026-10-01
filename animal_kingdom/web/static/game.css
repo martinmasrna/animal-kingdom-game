@@ -481,3 +481,11 @@
 /* Your turn begins: the tablet lifts and glows once. */
 .game.kit .tbtn.A.yours { animation: yourturn .9s cubic-bezier(.3,.7,.4,1); }
 @keyframes yourturn { 30% { transform: translateY(-6px) scale(1.08); filter: drop-shadow(0 0 14px rgba(160,205,255,.9)) drop-shadow(2px 4px 5px rgba(0,0,0,.45)); } }
+
+/* Your turn: a granite plate across the board's middle for a moment; clicks pass through it to the board. */
+.game .yourturn { position: absolute; left: 50%; top: 330px; z-index: 60; pointer-events: none; transform: translate(-50%, -50%);
+  padding: 18px 54px; border-radius: 18px; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto;
+  box-shadow: 0 18px 44px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,245,230,.14), inset 0 0 0 2px rgba(122,182,248,.55);
+  animation: yourplate 1.5s cubic-bezier(.2,.8,.3,1) both; }
+.game .yourturn b { font: 800 46px/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; letter-spacing: .01em; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
+@keyframes yourplate { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.85); } 18%, 70% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.03); } }

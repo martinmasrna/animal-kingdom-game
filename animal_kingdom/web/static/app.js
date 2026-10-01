@@ -618,7 +618,12 @@ function drawIntro() {
 function turnCue(mine) {
   const key = V.id + ':' + V.results.length + ':' + (V.game && V.game.round);
   if (mine && turnCue.was === false && turnCue.key !== key && !RP.views.length) {
-    turnCue.key = key; turnCue.until = Date.now() + 900; sfx('yourturn');   // drawGame gives the tablet 'yours' meanwhile
+    turnCue.key = key;
+    // once the opponent's last card has been shown and has landed: the plate, the tablet's lift and the knock, together
+    const wait = Math.max(0, (ui.revealEnd || 0) - Date.now()); turnCue.until = Date.now() + wait + 900;   // drawGame gives the tablet 'yours' meanwhile
+    setTimeout(() => { if (screen !== 'game') return; sfx('yourturn'); drawGame();
+      const b = document.createElement('div'); b.className = 'yourturn'; b.innerHTML = '<b>Your turn</b>';   // Hearthstone's plate, on granite
+      document.getElementById('stage').appendChild(b); setTimeout(() => b.remove(), 1500); }, wait);
     if (document.hidden) document.title = 'Your turn · Animal Kingdom';
   }
   if (!mine || !document.hidden) document.title = 'Animal Kingdom';
@@ -630,7 +635,7 @@ function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
   lastDecision = d;
-  drawIntro(); turnCue(playing && G.current === you);
+  drawIntro();
   $('scr').classList.toggle('rp', !!RP.views.length);   // a replay: upright its controls take the deck's corner
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
@@ -649,7 +654,8 @@ function drawGame() {
 
   // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.
   { const A0 = ui.anim, l0 = G.history[G.history.length - 1];
-    if (A0 && G.history.length > A0.hist && l0 && l0.seat === them && l0.kind === 'place') ui.revealEnd = Date.now() + 1900; }   // the card shown, flown down, landed and its dust settled
+    if (A0 && G.history.length > A0.hist && l0 && l0.seat === them && l0.kind === 'place') ui.revealEnd = Date.now() + 1900; }
+  turnCue(playing && G.current === you);   // the card shown, flown down, landed and its dust settled
   // The opponent's hand: one card back each, centred across the board from yours; in a replay their cards, face up (the eye hides them).
   const faces = RP.views.length && RP.eye && G.oppHand;
   const nb = G.handCount[them], step = faces ? Math.min(VIEW.port ? 40 : 72, 504 / Math.max(1, nb - 1)) : VIEW.port ? 36 : 52,   // face up, a gap between cards as in your hand; a full hand (8) stays clear of the replay's controls
