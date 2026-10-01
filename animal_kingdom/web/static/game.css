@@ -434,7 +434,7 @@
 .game .coach.gabove::after, .game .coach.gbelow::after, .game .coach.cleft::after { display: none; }
 .game.port .menu { top: 4px; width: 80px; height: 80px; border-radius: 14px; }   /* 44 CSS px on a phone: a thumb's size */ .game.port .menu svg { width: 40px; height: 40px; }
 .game.port .menu.fb { right: 104px; } .game.port .menu.fb.alone { right: 16px; }
-.game.port .prompt:not(.mull) { top: 6px; left: 16px; transform: none; width: 420px; max-width: 420px; white-space: normal; padding: 12px 16px; }   /* top left beside the buttons: the opponent's gem stays in sight */ .game.port .prompt:not(.mull) b { font-size: 28px; } .game.port .prompt:not(.mull) p { font-size: 26px; }
+.game.port .prompt:not(.mull) { top: 6px; left: 16px; transform: none; width: 330px; max-width: 330px; white-space: normal; padding: 12px 16px; }   /* top left beside the buttons: the opponent's gem stays in sight */ .game.port .prompt:not(.mull) b { font-size: 28px; } .game.port .prompt:not(.mull) p { font-size: 26px; }
 .game.port .prompt:not(.mull) .line { flex-wrap: wrap; } .game.port .prompt:not(.mull) .line .skip { height: 52px; font-size: 22px; }
 .game.port .prompt.mull { top: 520px; width: 520px; margin-left: -260px; } .game.port .prompt.mull b { font-size: 34px; } .game.port .prompt.mull p { font-size: 26px; } .game.port .prompt .skip { height: 56px; font-size: 24px; }
 .game.port .opts { top: 560px; }
