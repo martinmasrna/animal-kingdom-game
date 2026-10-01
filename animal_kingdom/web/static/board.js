@@ -77,14 +77,13 @@ function unit(u, under, cards) {
 
 // `g` is a viewer-space game { board, food, income, winFood }. `ui`: { rings: [cr] legal targets, hqRing (the enemy den can
 // be taken), preview: {cr, id, str} (the selected card under the pointer), anim: the previous view's { board, food, income,
-// fx, landDelay } when this view follows one (so what changed animates), else null, capture: { side, id, owner, str } when a
+// fx, fromStones } when this view follows one (so what changed animates; static/timeline.js plays one step per view), else null, capture: { side, id, owner, str } when a
 // unit took a den, which ends the game (it stands in that den's mouth) }.
 export function renderBoard(el, M, g, cards, ui) {
   const A = ui.anim, rings = new Set(ui.rings || []);
   // the tutorial shows a region: its four crossroads and its stone glow (not rings: rings mean a click acts there)
   const shown = new Set(ui.region || []), shownAt = ui.region && ui.region[0].split(',').map(Number);
   const { landed, covered, leaving, strength } = boardChanges(A && A.board, g.board, (A && A.fx) || []);
-  const late = !!(A && A.landDelay);   // the opponent's card is still flying in: its piece lands when it arrives
   const held = heldRegions(M.regions, g.board);
   const stoneAt = reg => { const [c, r] = reg.c, [x1, y1] = at(c, r), [x2, y2] = at(c + 1, r + 1); return [(x1 + x2) / 2, (y1 + y2) / 2]; };
   let s = '';   // the painted ground is the game screen's (kit2/plate_wide.webp, under the stage), wider than any window
@@ -97,7 +96,7 @@ export function renderBoard(el, M, g, cards, ui) {
 
   for (let c = 1; c <= M.cols; c++) for (let r = 1; r <= M.rows; r++) {
     const cr = key(c, r), st = g.board[cr] || [], [x, y] = at(c, r);
-    const cls = (rings.has(cr) ? ' tgt' : '') + (shown.has(cr) ? ' shown' : '') + (landed.has(cr) ? ' land' + (late ? ' late' : '') : '') + (covered.has(cr) ? ' cover' : '');
+    const cls = (rings.has(cr) ? ' tgt' : '') + (shown.has(cr) ? ' shown' : '') + (landed.has(cr) ? ' land' : '') + (covered.has(cr) ? ' cover' : '');
     const pv = ui.preview && ui.preview.cr === cr ? ui.preview : null;
     if (pv) { s += put(`cr unit A ghost${cls}`, x, y, unit({ id: pv.id, owner: 'A', str: pv.str }, st.slice().reverse(), cards), `data-cr="${cr}"`); continue; }
     if (!st.length) { s += put(`cr clear${cls}`, x, y, '', `data-cr="${cr}"`); continue; }
@@ -112,11 +111,11 @@ export function renderBoard(el, M, g, cards, ui) {
     s += `<div class="abs leave ${how} unit ${u.owner}" style="left:${x}px;top:${y}px;--hx:${hx}px;--hy:${hy}px">${unit(u, [], cards)}</div>`;
   }
 
-  const stonesOf = side => held.filter(r => r.owner === side).map(r => { const [x, y] = stoneAt(r); return { x, y, food: r.food }; });
+  const stonesOf = side => A && A.fromStones === false ? [] : held.filter(r => r.owner === side)   // a card's food comes from no stone.map(r => { const [x, y] = stoneAt(r); return { x, y, food: r.food }; });
   for (const side of ['A', 'B']) s += den(side, g, A, stonesOf(side), ui);
   // The unit that took a den stands in its mouth: the game's last move, drawn where it won.
   if (ui.capture) { const [mx, my] = denMouthAt(ui.capture.side), x = VIEW.port ? mx : mx + (ui.capture.side === 'A' ? -22 : 22), y = VIEW.port ? my + (ui.capture.side === 'A' ? 22 : -22) : my;   // seated in the mouth, clear of the crossroad beside it
-    s += put(`cr unit ${ui.capture.owner} capture${A ? ' land' + (late ? ' late' : '') : ''}`, x, y, unit(ui.capture, [], cards)); }
+    s += put(`cr unit ${ui.capture.owner} capture${A ? ' land' : ''}`, x, y, unit(ui.capture, [], cards)); }
   el.innerHTML = s;
 
   // The gem counts up to its new total as the fruit arrive (with reduced motion, the new total simply shows).

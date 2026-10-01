@@ -33,7 +33,7 @@ class PendingRequest:
     """What an op returns when it needs a choice; converted into state.pending."""
     mode: str                       # "choice" or "place"
     chooser: str
-    optional: bool = False
+    optional: bool                  # may the player skip it: always said, never assumed
     options: Optional[list] = None        # mode == "choice": serializable option values
     placements: Optional[list] = None     # mode == "place": [{card_id, target}]
     kind: Optional[str] = None            # "mulligan" for the setup choice (bots keep by default)
@@ -64,7 +64,7 @@ def legal_pending(state: GameState) -> list:
         acts = [ChoiceAction(o) for o in p["options"]]
     else:  # "place"
         acts = [PlaceAction(pl["card_id"], tuple(pl["target"])) for pl in p["placements"]]
-    if p.get("optional"):
+    if p["optional"]:
         acts.append(ChoiceAction(SKIP))
     return acts
 
@@ -138,6 +138,8 @@ def _op_mulligan(state, step):
     if returned:                      # a kept hand leaves the deck order (and the RNG) untouched
         deck.extend(returned)
         state.rng.shuffle(deck)
+    if not any(st.get("op") == "mulligan" for st in state.effect_stack):   # both done: the first turn begins
+        state.emit("turn_start", player=state.current, turn=state.turn_counter)
     return None
 
 
@@ -165,7 +167,7 @@ def do_placement(state: GameState, player: str, card_id: str, target) -> None:
         state.emit("capture", player=player, iid=unit.iid, card=card_id, den=where)
         state.result = Result(player, "hq_capture")
         return
-    _land_unit(state, player, unit, where)
+    _land_unit(state, player, unit, where, from_hand=True)
 
 
 def playable_copy(state: GameState, player: str, card_id: str) -> Optional[UnitInstance]:
@@ -189,7 +191,7 @@ def _take_from_hand(state: GameState, player: str, card_id: str) -> UnitInstance
     return unit
 
 
-def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> None:
+def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, from_hand: bool) -> None:
     # The same hand instance lands on the board, carrying its strength counter.
     covered = state.top_unit(cr)
     is_apex = "Apex Predator" in state.cards[unit.card_id].keywords
@@ -198,7 +200,7 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> No
 
     unit.placed_on_turn = state.turn_counter
     state.board.setdefault(cr, []).append(unit)
-    state.emit("place", player=player, iid=unit.iid, card=unit.card_id, cr=cr)
+    state.emit("place", player=player, iid=unit.iid, card=unit.card_id, cr=cr, from_hand=from_hand)
     if covered is not None:
         state.emit("cover", cr=cr, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
 
@@ -232,8 +234,7 @@ def _fire_cover_event(state, coverer, covered) -> None:
         if top and top.owner == coverer.owner and top.card_id == "king_theron":
             if not _capped(state, "cap_king_theron", top):
                 state.effect_stack.append(
-                    {"op": "remove_iid", "iid": covered.iid, "by_player": coverer.owner,
-                     "by_card": coverer.card_id})
+                    remove_iid_step(covered.iid, by_player=coverer.owner, by_effect=True, source_iid=None, by_card=coverer.card_id))
             return
 
 
@@ -589,7 +590,7 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
 
 # ============================================================= delayed scheduler
 
-def schedule(state: GameState, unit, owner_turn_delay: int, step: dict) -> None:
+def schedule(state: GameState, unit, owner_turn_delay: int, step: dict, *, while_buried: bool) -> None:
     """Queue `step` to fire after `owner_turn_delay` more of `unit`'s owner's turns.
 
     The timer belongs to the **unit**, not the board (rules `overview.md` §9.1): it advances only
@@ -598,7 +599,7 @@ def schedule(state: GameState, unit, owner_turn_delay: int, step: dict) -> None:
     timer rather than resuming this one - "bounce resets".
     """
     step.setdefault("by_card", unit.card_id)   # a delayed effect still names its card when it fires
-    state.scheduled.append({"iid": unit.iid, "owner": unit.owner,
+    state.scheduled.append({"iid": unit.iid, "owner": unit.owner, "while_buried": while_buried,   # keep ticking under a cover?
                             "remaining": owner_turn_delay, "step": step})
 
 
@@ -618,7 +619,7 @@ def start_of_turn(state: GameState, player: str) -> None:
             keep.append(s)
         elif s["iid"] not in on_board:
             continue                       # removed: cancelled outright (§9.1)
-        elif s["iid"] not in tops and not s.get("while_buried"):
+        elif s["iid"] not in tops and not s["while_buried"]:
             keep.append(s)                 # buried: suspended, does not tick (§9.1)
         else:
             s["remaining"] -= 1
@@ -695,7 +696,7 @@ def _op_raven_dig(state, step):
         if len(options) == 1:
             step["choice"] = options[0]
             return _op_raven_dig(state, step)
-        return PendingRequest("choice", player, options=options, from_deck_reveal=True)
+        return PendingRequest("choice", player, optional=False, options=options, from_deck_reveal=True)
 
     if step["shuffled"]:
         shuffle_back(state, player, step["shuffled"])
@@ -710,7 +711,7 @@ def _op_scout(state, step):
     if "pulled" not in step:
         deck = state.decks[player]
         n = state.config.scout_count
-        if step.get("spec") is None:
+        if step["spec"] is None:   # the deck's top cards; a spec: random cards of that kind
             pulled = [deck.pop() for _ in range(min(n, len(deck)))]  # top of deck = end
         else:
             matching = [i for i, cid in enumerate(deck) if _matches(state.cards[cid], step["spec"])]
@@ -722,7 +723,7 @@ def _op_scout(state, step):
         if len(set(pulled)) == 1:
             step["choice"] = pulled[0]
         else:
-            return PendingRequest("choice", player, options=sorted(set(pulled)),
+            return PendingRequest("choice", player, optional=False, options=sorted(set(pulled)),
                                   from_deck_reveal=True)
     pulled = list(step["pulled"])
     pulled.remove(step["choice"])
@@ -748,7 +749,7 @@ def _op_remove_choice(state, step):
     if not options:
         return None
     if "choice" not in step:   # asked even with one target: the player clicks what the Roar hits
-        return PendingRequest("choice", step["chooser"], optional=step.get("optional", False), options=options)
+        return PendingRequest("choice", step["chooser"], optional=step["optional"], options=options)
     chosen = step["choice"]
     if chosen == SKIP:
         return None
@@ -756,18 +757,30 @@ def _op_remove_choice(state, step):
     return None
 
 
+def remove_iid_step(iid, *, by_player, by_effect, source_iid, by_card=None) -> dict:
+    """A queued removal of one unit. Every fact is required: who removes it (the friendly/enemy-removal reactions read it),
+    whether as an effect (Armor stops only those), and the unit whose leaving makes it fizzle (None: nothing)."""
+    return {"op": "remove_iid", "iid": iid, "by_player": by_player, "by_effect": by_effect, "source_iid": source_iid,
+            **({"by_card": by_card} if by_card else {})}
+
+
+def remove_choice_step(chooser, options, *, by_card, optional) -> dict:
+    """A removal the player aims (a Roar's target among `options`)."""
+    return {"op": "remove_choice", "chooser": chooser, "by_player": chooser, "by_card": by_card, "options": options,
+            "optional": optional}
+
+
 def _op_remove_iid(state, step):
     # A reactive removal may name the unit that triggered it (`source_iid`). If that source
     # has since left the board - e.g. a fed Muskrat's roar removed the Hippo before the
     # Hippo's queued reaction resolves (decision: reactions fizzle when their source is gone) -
     # the removal fizzles rather than firing from a dead trigger.
-    src = step.get("source_iid")
+    src = step["source_iid"]
     if src is not None and _find_unit(state, src)[1] is None:
         return None
     cr, unit = _find_unit(state, step["iid"])
     if unit is not None:
-        _remove_specific(state, cr, unit, by_player=step.get("by_player", unit.owner),
-                         by_effect=step.get("by_effect", True), by_card=step.get("by_card"))
+        _remove_specific(state, cr, unit, by_player=step["by_player"], by_effect=step["by_effect"], by_card=step.get("by_card"))
     return None
 
 
@@ -798,11 +811,11 @@ def _op_play_extra(state, step):
             do_placement(state, step["chooser"], pa["card_id"], tuple(pa["target"]))
         step["played"] = True
         return None
-    allowed = _hand_allowed(state, step["chooser"], step.get("filter", {}))
+    allowed = _hand_allowed(state, step["chooser"], step["filter"])   # {} means any card, and is said so
     placements = legal_placements(state, step["chooser"], allowed)
     if not placements:
         return None
-    return PendingRequest("place", step["chooser"], optional=step.get("optional", False),
+    return PendingRequest("place", step["chooser"], optional=step["optional"],
                           placements=[{"card_id": p.card_id, "target": list(p.target)} for p in placements])
 
 
@@ -993,8 +1006,7 @@ def _gray_wolf_place(state, unit, cr):
     targets = _adjacent_enemy_targets(state, unit, cr, max_strength=effective_strength(state, unit))
     if targets:
         state.effect_stack.append(
-            {"op": "remove_choice", "chooser": unit.owner, "by_player": unit.owner,
-             "by_card": "gray_wolf", "options": targets})
+            remove_choice_step(unit.owner, targets, by_card="gray_wolf", optional=False))
 
 
 def _unnamed_canine_place(state, unit, cr):
@@ -1024,7 +1036,7 @@ def _spawn_pups(state, unit, cr, n, token_ids=("pup",)):
     state.rng.shuffle(empty)
     for i, spot in enumerate(empty[:n]):
         pup = UnitInstance(token_ids[i % len(token_ids)], unit.owner, state.new_iid())
-        _land_unit(state, unit.owner, pup, spot)
+        _land_unit(state, unit.owner, pup, spot, from_hand=False)   # a new Pup, from nowhere
 
 
 def _alpha_place(state, unit, cr):
@@ -1078,7 +1090,7 @@ def _shuck_return(state, owner, card_id):
 def _op_shuck_return(state, step):
     options = step["options"]
     if "choice" not in step:
-        return PendingRequest("choice", step["chooser"], options=options)
+        return PendingRequest("choice", step["chooser"], optional=False, options=options)
     _shuck_return(state, step["chooser"], step["choice"])
     return None
 
@@ -1096,9 +1108,9 @@ def _pufferfish_covered(state, covered, coverer, cr):
     # that its payoff needed raising, not its trigger rate) - pushed first, resolves last.
     state.effect_stack.append({"op": "draw", "player": covered.owner, "n": 1})
     state.effect_stack.append(
-        {"op": "remove_iid", "iid": covered.iid, "by_player": covered.owner, "by_effect": False})
+        remove_iid_step(covered.iid, by_player=covered.owner, by_effect=False, source_iid=None))
     state.effect_stack.append(
-        {"op": "remove_iid", "iid": coverer.iid, "by_player": covered.owner, "by_effect": True})
+        remove_iid_step(coverer.iid, by_player=covered.owner, by_effect=True, source_iid=None))
 
 
 # --- Egg Control deck: draw/shuffle/remove food engine + filtered draws (Stage 2.2) ---
@@ -1148,7 +1160,7 @@ def _omen_drawn(state, inst):
 
 
 def _owl_place(state, unit, cr):
-    state.effect_stack.append({"op": "scout", "player": unit.owner, "by_card": unit.card_id})
+    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": None, "by_card": unit.card_id})   # the deck's top cards
 
 
 def _raven_place(state, unit, cr):
@@ -1190,7 +1202,7 @@ def _op_venom(state, step):
     or the bitten unit is buried, and is cancelled only if the bitten unit leaves the board."""
     options = step["options"]
     if "choice" not in step:   # asked even with one target
-        return PendingRequest("choice", step["chooser"], options=options)
+        return PendingRequest("choice", step["chooser"], optional=False, options=options)
     target = state.top_unit(step["choice"])
     if target is None:
         return None
@@ -1199,8 +1211,8 @@ def _op_venom(state, step):
     else:
         state.scheduled.append({"iid": target.iid, "owner": step["chooser"], "remaining": 1,
                                 "while_buried": True,
-                                "step": {"op": "remove_iid", "iid": target.iid,
-                                         "by_player": step["chooser"], "by_card": "taipan"}})
+                                "step": remove_iid_step(target.iid, by_player=step["chooser"], by_effect=True,
+                                                        source_iid=None, by_card="taipan")})
     return None
 
 
@@ -1246,7 +1258,7 @@ def _op_magpie_steal(state, step):
         if len(hand) == 1:
             step["choice"] = hand[0].iid
         else:
-            return PendingRequest("choice", player, options=[u.iid for u in hand], from_deck_reveal=True)
+            return PendingRequest("choice", player, optional=False, options=[u.iid for u in hand], from_deck_reveal=True)
     inst = next((u for u in hand if u.iid == step["choice"]), None)
     if inst is not None:
         remove_from_hand(state, player, inst)
@@ -1264,14 +1276,14 @@ def _fathom_place(state, unit, cr):
 def _bird_egg_place(state, unit, cr):
     state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": "tag:Bird", "by_card": unit.card_id})
     schedule(state, unit, state.config.bird_egg_hatch_delay,
-             {"op": "bird_egg_hatch", "iid": unit.iid})
+             {"op": "bird_egg_hatch", "iid": unit.iid}, while_buried=False)
 
 
 def _snake_egg_place(state, unit, cr):
     state.effect_stack.append({"op": "draw_filtered", "player": unit.owner,
                                "n": state.config.snake_egg_draw, "spec": "tag:Snake"})
     schedule(state, unit, state.config.egg_hatch_delay,
-             {"op": "egg_hatch", "iid": unit.iid, "n": state.config.egg_hatch_draw, "spec": "tag:Snake"})
+             {"op": "egg_hatch", "iid": unit.iid, "n": state.config.egg_hatch_draw, "spec": "tag:Snake"}, while_buried=False)
 
 
 def _opossum_place(state, unit, cr):
@@ -1357,7 +1369,7 @@ def _sloth_place(state, unit, cr):
     unanswerable AND shadow Methuselah.
     """
     schedule(state, unit, state.config.sloth_delay,
-             {"op": "gain_food", "player": unit.owner, "amount": state.config.sloth_food})
+             {"op": "gain_food", "player": unit.owner, "amount": state.config.sloth_food}, while_buried=False)
 
 
 # ===================================== Stage 2.4: remaining triggered / removal / utility
@@ -1373,8 +1385,7 @@ def _push_draw(state, owner, n):
 
 def _push_remove_choice(state, owner, by_card, targets):
     if targets:
-        state.effect_stack.append({"op": "remove_choice", "chooser": owner, "by_player": owner,
-                                   "by_card": by_card, "options": targets})
+        state.effect_stack.append(remove_choice_step(owner, targets, by_card=by_card, optional=False))
 
 
 def _adjacent_enemy_unit_crossroads(state, unit, cr, *, chosen=True):
@@ -1465,8 +1476,8 @@ def _soldier_ant_place(state, unit, cr):
 def _rhinoceros_place(state, unit, cr):
     for nb in _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.rhinoceros_max,
                                       chosen=False):        # mass AoE hits Stealth
-        state.effect_stack.append({"op": "remove_iid", "iid": state.top_unit(nb).iid,
-                                   "by_player": unit.owner, "by_card": "rhinoceros"})
+        state.effect_stack.append(remove_iid_step(state.top_unit(nb).iid, by_player=unit.owner, by_effect=True,
+                                                  source_iid=None, by_card="rhinoceros"))
 
 
 def _bulwark_place(state, unit, cr):
@@ -1475,17 +1486,16 @@ def _bulwark_place(state, unit, cr):
     for nb in sorted(state.game_map.neighbors(cr)):
         top = state.top_unit(nb)
         if top and statics.can_be_removed(state, top):
-            state.effect_stack.append({"op": "remove_iid", "iid": top.iid,
-                                       "by_player": unit.owner, "by_card": "bulwark"})
+            state.effect_stack.append(remove_iid_step(top.iid, by_player=unit.owner, by_effect=True,
+                                                      source_iid=None, by_card="bulwark"))
 
 
 def _hippo_enemy_placed(state, hippo, placed, cr):
     # Automatic trigger, nobody "chose" the target: Stealth doesn't hide (decision B).
     if (effective_strength(state, placed) <= state.config.hippopotamus_max
             and statics.can_be_removed(state, placed)):
-        state.effect_stack.append({"op": "remove_iid", "iid": placed.iid,
-                                   "by_player": hippo.owner, "by_card": "hippopotamus",
-                                   "source_iid": hippo.iid})
+        state.effect_stack.append(remove_iid_step(placed.iid, by_player=hippo.owner, by_effect=True,
+                                                  source_iid=hippo.iid, by_card="hippopotamus"))
 
 
 # --- Hand-cost / friendly-sacrifice removal (Aggro / Food OTK) ---
@@ -1595,7 +1605,7 @@ def _pestis_place(state, unit, cr):
 
 def _op_pestis_wipe(state, step):
     if "choice" not in step:   # asked even with one target
-        return PendingRequest("choice", step["chooser"], options=step["options"])
+        return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
     target = step["choice"]
     # Remove the entire stack under the enemy, both players' units, top-down. A buried
     # Armor unit is skipped in place, not a shield: everything else is still wiped around it.
@@ -1624,8 +1634,8 @@ def _spines_covered(state, covered, coverer, cr):
         return
     covered.retaliation_used = True
     if statics.can_be_removed(state, coverer):
-        state.effect_stack.append({"op": "remove_iid", "iid": coverer.iid, "by_player": covered.owner,
-                                   "by_card": covered.card_id})
+        state.effect_stack.append(remove_iid_step(coverer.iid, by_player=covered.owner, by_effect=True,
+                                                  source_iid=None, by_card=covered.card_id))
 
 
 def _skunk_place(state, unit, cr):
@@ -1636,7 +1646,7 @@ def _skunk_place(state, unit, cr):
 
 def _op_skunk_bounce(state, step):
     if "choice" not in step:   # asked even with one target
-        return PendingRequest("choice", step["chooser"], options=step["options"])
+        return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
     top = state.top_unit(step["choice"])
     if top is not None:                                  # locked through the owner's next turn (F4)
         _bounce(state, step["choice"], top, lock_until=state.turn_counter + 2)
@@ -1658,7 +1668,7 @@ def _lemming_place(state, unit, cr):
             inst = UnitInstance("lemming", unit.owner, state.new_iid())
         inst.placed_on_turn = state.turn_counter
         state.board.setdefault(spot, []).append(inst)
-        state.emit("place", player=unit.owner, iid=inst.iid, card=inst.card_id, cr=spot)
+        state.emit("place", player=unit.owner, iid=inst.iid, card=inst.card_id, cr=spot, from_hand=kind == "hand")
 
 
 # --- Team triggers (Cats); King Theron's cover trigger fires from _fire_cover_event ---
@@ -1693,7 +1703,7 @@ def _squirrel_place(state, unit, cr):
 
 def _chipmunk_place(state, unit, cr):
     _push_gain(state, unit.owner, state.config.chipmunk_food_now)
-    schedule(state, unit, 1, {"op": "gain_food", "player": unit.owner, "amount": state.config.chipmunk_food_later})
+    schedule(state, unit, 1, {"op": "gain_food", "player": unit.owner, "amount": state.config.chipmunk_food_later}, while_buried=False)
 
 
 def _queen_marabunta_place(state, unit, cr):
@@ -1740,8 +1750,7 @@ def _mock_removal_place(state, unit, cr):
     targets = _adjacent_enemy_targets(state, unit, cr)
     if targets:
         state.effect_stack.append(
-            {"op": "remove_choice", "chooser": unit.owner, "by_player": unit.owner,
-             "by_card": "mock_removal", "options": targets})
+            remove_choice_step(unit.owner, targets, by_card="mock_removal", optional=False))
 
 
 def _mock_saboteur_place(state, unit, cr):
@@ -1772,12 +1781,12 @@ def _termite_king_place(state, unit, cr):
 
 def _black_bear_place(state, unit, cr):
     schedule(state, unit, state.config.black_bear_delay,
-             {"op": "draw", "player": unit.owner, "n": state.config.black_bear_draw})
+             {"op": "draw", "player": unit.owner, "n": state.config.black_bear_draw}, while_buried=False)
 
 
 def _grizzly_place(state, unit, cr):
     schedule(state, unit, state.config.grizzly_bear_delay,
-             {"op": "grizzly_strike", "iid": unit.iid, "by_player": unit.owner})
+             {"op": "grizzly_strike", "iid": unit.iid, "by_player": unit.owner}, while_buried=False)
 
 
 def _op_grizzly_strike(state, step):
@@ -1811,7 +1820,7 @@ def _hedgehog_place(state, unit, cr):                                # spiny bod
 
 def _chinchilla_place(state, unit, cr):                             # +1 action NEXT turn
     schedule(state, unit, 1,
-             {"op": "grant_action", "player": unit.owner, "n": state.config.chinchilla_bonus_actions})
+             {"op": "grant_action", "player": unit.owner, "n": state.config.chinchilla_bonus_actions}, while_buried=False)
 
 
 def _hamster_place(state, unit, cr):

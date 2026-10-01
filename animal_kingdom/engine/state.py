@@ -193,6 +193,20 @@ def _rng_from_dict(d: dict) -> random.Random:
     return rng
 
 
+def _upgrade_step(step: dict) -> dict:
+    """A step saved before its facts were required (2026-10-01) gets them as the engine used to assume them."""
+    op = step.get("op")
+    if op == "remove_iid":
+        step.setdefault("by_effect", True); step.setdefault("source_iid", None)
+    elif op == "remove_choice":
+        step.setdefault("optional", False)
+    elif op == "play_extra":
+        step.setdefault("filter", {}); step.setdefault("optional", False)
+    elif op == "scout":
+        step.setdefault("spec", None)
+    return step
+
+
 class GameState:
     """The full mutable position. Construct via new_game() or from_dict().
 
@@ -467,9 +481,10 @@ class GameState:
             actions_taken_this_turn=d.get("actions_taken_this_turn", 0),
             idle_turns=d.get("idle_turns", 0),
             next_iid=d["next_iid"],
-            effect_stack=copy.deepcopy(d.get("effect_stack") or []),
+            effect_stack=[_upgrade_step(x) for x in copy.deepcopy(d.get("effect_stack") or [])],
             pending=copy.deepcopy(d.get("pending")),
-            scheduled=copy.deepcopy(d.get("scheduled") or []),
+            scheduled=[{**x, "while_buried": x.get("while_buried", False), "step": _upgrade_step(x["step"])}
+                       for x in copy.deepcopy(d.get("scheduled") or [])],
             turn_flags=copy.deepcopy(d.get("turn_flags") or {}),
             card_strength_counters=copy.deepcopy(
                 d.get("card_strength_counters") or {"A": {}, "B": {}}

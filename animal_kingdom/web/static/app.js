@@ -2,6 +2,7 @@
 // The server holds the game; this file only renders the seat's view and sends choices back.
 import { hasArt, artUrl, stripArt, fitStrips } from './art.js';
 import { cardHTML, fitNames, KEYWORDS } from './card.js';
+import { plan } from './timeline.js';
 import { renderBoard, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
@@ -498,23 +499,37 @@ async function matchScreen(id) {
 const send = msg => ws && ws.readyState === 1 && ws.send(JSON.stringify(msg));
 const act = action => { ui.sel = null; ui.hover = null; send({ t: 'act', action }); };
 
+// A new view: its events (static/timeline.js) play as steps, each view drawn for its step's length, the new view last.
+// Views arriving meanwhile wait their turn: the next playback starts from the last step shown, so nothing is cut short.
+const PB = { busy: false, queue: [], t: null };
 function onView(prev) {
+  if (PB.busy) { PB.queue.push(V); V = PB.shown; return; }   // keep showing the step in play
+  const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;   // reduced motion: the new view at once
+  const steps = motion && (screen === 'game' || screen === null) ? plan(prev, V, CARDS) : [{ view: V, step: null }];
+  if (steps.length === 1) { ui.step = null; return showView(prev); }
+  PB.busy = true;
+  const run = (i, before) => {
+    const { view, step } = steps[i];
+    V = PB.shown = view; ui.step = step; V.rx = Date.now() / 1000;
+    showView(before);
+    if (!step) return finish(view);
+    clearTimeout(PB.t); PB.t = setTimeout(() => run(i + 1, view), step.dur * 1000);
+  };
+  const finish = shown => {
+    PB.busy = false; ui.step = null;
+    if (PB.queue.length) { const latest = PB.queue[PB.queue.length - 1]; PB.queue = []; V = latest; return onView(shown); }
+    if (RP.playing) replayPlay(true);   // a replay moves on once this one has played out
+  };
+  run(0, prev);
+}
+function stopPlayback() { clearTimeout(PB.t); PB.busy = false; PB.queue = []; ui.step = null; }
+
+function showView(prev) {
   // While an animation the player started must play out (the tutorial's fruit on Next), new views wait: a redraw would cut
   // it short. The first held view's predecessor is kept, so what changed meanwhile still animates when they apply.
   const hold = (ui.animUntil || 0) - Date.now();
-  if (screen === 'game' && hold > 0) { if (!onView.kept) onView.kept = prev; clearTimeout(onView.t);
-    onView.t = setTimeout(() => { const p = onView.kept; onView.kept = null; onView(p); }, hold + 20); return; }
-  // Your turn begins with something of yours happening (an Egg hatches, its Scout asks): first the plate over the board as
-  // it was, then the change plays out, then its choice appears, so a new player sees where the choice came from.
-  const g0 = prev && prev.game, g1 = V.game;
-  if (screen === 'game' && g0 && g1 && V.phase === 'playing' && prev.you === V.you && !RP.views.length && !isTutorial()
-      && g0.current !== V.you && g1.current === V.you && onView.staged !== V.version
-      && turnCue.key !== V.id + ':' + V.results.length + ':' + g1.round && yoursChanged(g0, g1, V.you)
-      && !g1.history.slice(g0.history.length).some(m => m.seat !== V.you)) {   // not the opponent's own move (a Polar Bear eating yours)
-    onView.staged = V.version; turnCue.key = V.id + ':' + V.results.length + ':' + g1.round; turnCue.was = true;
-    turnPlate(); ui.animUntil = Date.now() + 1500; onView.kept = prev; clearTimeout(onView.t);
-    onView.t = setTimeout(() => { const p = onView.kept; onView.kept = null; ui.choiceAt = Date.now() + 1100; onView(p); }, 1520); return;
-  }
+  if (screen === 'game' && hold > 0) { if (!showView.kept) showView.kept = prev; clearTimeout(showView.t);
+    showView.t = setTimeout(() => { const p = showView.kept; showView.kept = null; showView(p); }, hold + 20); return; }
   if (prev && prev.phase === 'lobby' && V.phase === 'playing') sfx('found');   // your friend joined
   if (V.phase === 'lobby') return lobbyScreen();
   if (V.phase === 'prematch') return prematchScreen();
@@ -525,7 +540,9 @@ function onView(prev) {
   ui.anim = prev && prev.game && V.game && prev.game.history.length <= V.game.history.length && prev.you === V.you
     ? { board: viewerBoard(prev), food: { A: prev.game.food[prev.you], B: prev.game.food[prev.you === 'A' ? 'B' : 'A'] },
         income: { A: prev.game.income[prev.you], B: prev.game.income[prev.you === 'A' ? 'B' : 'A'] },
-        hand: prev.game.hand.map(h => h.iid), oppHand: prev.game.handCount[prev.you === 'A' ? 'B' : 'A'], hist: prev.game.history.length } : null;
+        hand: prev.game.hand.map(h => h.iid), oppHand: prev.game.handCount[prev.you === 'A' ? 'B' : 'A'], hist: prev.game.history.length,
+        fromStones: !(ui.step && ui.step.kind === 'food' && !ui.step.income) } : null;   // only region income flies from the stones
+  if (ui.step && ui.step.kind === 'yourturn' && screen === 'game') { turnPlate(); turnCue.until = Date.now() + 900; }
   gameScreen();
 }
 
@@ -593,7 +610,7 @@ const tutState = () => { if (!ui.tut || ui.tut.id !== V.id) ui.tut = { id: V.id,
 // What the seat can do right now, in viewer space.
 function decision() {
   const G = V.game, d = { mine: V.phase === 'playing' && G.toAct === V.you && !RP.views.length, rings: [], hqRing: false, crChoice: {}, handPick: new Set(), cardOpts: [], otherOpts: [], places: {}, pend: null };
-  if (isTutorial() && V.phase === 'playing') d.lesson = lessonNow(V, ui.sel, CARDS, tutState());   // the tutorial's coach: the lesson for this moment
+  if (isTutorial() && V.phase === 'playing' && !ui.step) d.lesson = lessonNow(V, ui.sel, CARDS, tutState());   // the tutorial's coach: the lesson for this moment, once the steps have played
   if (RP.views.length && V.phase === 'playing' && G.toAct === V.you) d.pend = G.pending;   // a replay shows what you were asked, read-only
   if (!d.mine) return d;
   d.pend = G.pending; d.places = G.legal.place;
@@ -712,17 +729,11 @@ function drawIntro() {
   el.onclick = done; setTimeout(done, matchMedia('(prefers-reduced-motion: reduce)').matches ? 1400 : 2600);
 }
 
-// How long the opponent's played card takes: shown large, flown down, landed; then what it did (an animal eaten or covered).
-const revealTime = m => 1900 + (m.fx && m.fx.some(f => f.k === 'remove' || f.k === 'bounce') ? 700 : 0);
-
 // Your turn begins: the tablet lights up once, and a tab in the background says so in its title (a friend's clock is running).
 function turnCue(mine) {
   const key = V.id + ':' + V.results.length + ':' + (V.game && V.game.round);
   if (mine && turnCue.was === false && turnCue.key !== key && !RP.views.length) {
-    turnCue.key = key;
-    // once the opponent's last card has been shown and has landed: the plate, the tablet's lift and the knock, together
-    const wait = Math.max(0, (ui.revealEnd || 0) - Date.now()); turnCue.until = Date.now() + wait + 900;   // drawGame gives the tablet 'yours' meanwhile
-    setTimeout(() => { if (screen !== 'game') return; turnPlate(); drawGame(); }, wait);
+    turnCue.key = key;   // the plate itself is the timeline's step (showView), after everything before it has played
     if (document.hidden) document.title = 'Your turn · Animal Kingdom';
   }
   if (!mine || !document.hidden) document.title = 'Animal Kingdom';
@@ -761,8 +772,6 @@ function drawGame() {
   drawHistory(G); drawLists(G); showPanel();
 
   // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.
-  { const A0 = ui.anim, l0 = G.history[G.history.length - 1];
-    if (A0 && G.history.length > A0.hist && l0 && l0.seat === them && l0.kind === 'place') ui.revealEnd = Date.now() + revealTime(l0); }
   turnCue(playing && G.current === you);   // the card shown, flown down, landed and its dust settled
   // The opponent's hand: one card back each, centred across the board from yours; in a replay their cards, face up (the eye hides them).
   const faces = RP.views.length && RP.eye && G.oppHand;
@@ -786,7 +795,7 @@ function drawGame() {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!one || one.iid === h.iid), pick = d.handPick.has(h.iid);
     const hint = can && d.lesson && d.lesson.only && !ui.sel;   // the card the tutorial asks for
     const talking = d.lesson && d.lesson.next || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
-    const shown = d.lesson && d.lesson.read === h.id && Date.now() >= (ui.revealEnd || 0);   // after the opponent's card has landed   // the card the coach is explaining, shown large as if hovered
+    const shown = d.lesson && d.lesson.read === h.id && !ui.step;   // after the opponent's card has landed   // the card the coach is explaining, shown large as if hovered
     const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (one || G.hand.find(x => x.id === ui.sel)).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${PL().deck[0] - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
@@ -837,9 +846,7 @@ function drawGame() {
     bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b>` + (RP.views.length ? '' : `<p>${how}</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`);
     bar.classList.add('on');
     if ($('skip')) $('skip').onclick = e => { e.stopPropagation(); store('ak:mullseen', '1'); act({ kind: 'choice', choice: SKIP }); };
-  } else if (d.pend && Date.now() < (ui.choiceAt || 0)) {   // the change that asks is still playing out on the board
-    clearTimeout(drawGame.choice); drawGame.choice = setTimeout(() => { if (screen === 'game') drawGame(); }, ui.choiceAt - Date.now() + 20);
-  } else if (d.pend) {
+  } else if (d.pend) {   // a choice only ever reaches the screen after the steps that led to it have played
     const src = d.pend.source && CARDS[d.pend.source];
     // One line at the top centre, where the eyes are: the card that asks and its rule, then Skip when it may be declined;
     // named options as slabs under it.
@@ -868,16 +875,15 @@ function drawGame() {
     drawGame.think = setTimeout(() => { if (V && V.version === ver && screen === 'game') waiting.textContent = 'Bot is thinking'; }, 2500);
   }
   // The opponent's card, shown large at the centre as it is played, then flown down onto its crossroad (the piece lands as it arrives).
-  if (A) A.fx = G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
-  const last = G.history[G.history.length - 1];
-  if (A && G.history.length > A.hist && last && last.seat === them && last.kind === 'place') {
-    const [tx, ty] = last.target[0] === 'cr' ? crossroadAt(dcr(last.target[1])) : denMouthAt(rel(last.target[1])), rv = $('reveal');
-    rv.innerHTML = cardHTML(CARDS[last.card]); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
+  const st = ui.step;   // what this step shows (static/timeline.js); a view without events just shows what changed
+  if (A) A.fx = st ? (st.kind === 'bounce' ? [{ k: 'bounce', card: st.card, owner: rel(st.owner) }] : [])
+    : G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
+  if (st && st.kind === 'reveal') {   // the opponent's card, shown large and flown down onto its crossroad; the next step lands it
+    const [tx, ty] = crossroadAt(dcr(st.cr)), rv = $('reveal');
+    rv.innerHTML = cardHTML(CARDS[st.card]); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
-    if (ui.anim) ui.anim.landDelay = 0.95;
-    ui.revealEnd = Date.now() + revealTime(last);
   }
-  placeCoach($('coach'), d.lesson, d.rings);
+  placeCoach($('coach'), d.lesson, d.rings);   // no lesson while steps play (decision)
   drawBoard(d);
   if (A && !RP.views.length) soundsFor(document, CARDS);   // one sound per thing that just moved
   drawEnd();
@@ -895,7 +901,7 @@ let botHeld = false;
 const holdBot = on => { if (on !== botHeld && isTutorial()) { botHeld = on; send({ t: 'hold', on }); } };
 function placeCoach(el, L, rings = []) {
   el.className = 'abs coach';
-  if (!L) { holdBot(false); el.innerHTML = ''; document.getElementById('board').classList.remove('pulse'); return; }
+  if (!L) { if (!ui.step) holdBot(false); el.innerHTML = ''; document.getElementById('board').classList.remove('pulse'); return; }
   const a = L.at || {}, card = a.card && document.querySelector(`#hand .hc[data-id="${a.card}"]`);
   let x, y, side;
   // the edge pieces sit at the window's edges (fitStage's --above/--side, stage px): anchors on them move with them
@@ -944,9 +950,7 @@ function placeCoach(el, L, rings = []) {
     : side === 'cleft' ? `left:${x - 24 - COACH_W}px;bottom:${16 - up}px`   // upright, along the bottom edge left of the deck and End turn
     : side === 'gabove' ? `left:${x - COACH_W / 2}px;bottom:${STAGE.h - y}px` : side === 'gbelow' ? `left:${x - COACH_W / 2}px;top:${y}px`
     : side === 'right' ? `left:${x + 78}px;top:${y}px` : `left:${x - 78 - COACH_W}px;top:${y}px`;
-  // while the opponent's card is shown large in the middle, the coach waits for it to land, then fades in
-  const wait = Math.max(0, (ui.revealEnd || 0) - Date.now());
-  if (wait && (L.read || a.region)) { clearTimeout(placeCoach.t); placeCoach.t = setTimeout(() => { if (screen === 'game') drawGame(); }, wait + 20); }   // then show the card large
+  const wait = 0;   // the coach only speaks on a settled view: while the timeline plays, it is hidden (above)
   document.getElementById('board').classList.toggle('pulse', !!a.rings);
   holdBot(!!L.next);
   el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
@@ -1077,7 +1081,7 @@ function drawBoard(d) {
   }
   const last = V.game.history[V.game.history.length - 1], won = V.game.result && V.game.result.reason === 'hq_capture' && last && last.target && last.target[0] === 'hq';
   const capture = won ? { side: rel(last.target[1]), id: last.card, owner: rel(last.seat), str: CARDS[last.card].str } : null;
-  const region = d.lesson && d.lesson.at && d.lesson.at.region && Date.now() >= (ui.revealEnd || 0) ? d.lesson.at.region : null;   // after the opponent's card has landed, with the coach
+  const region = d.lesson && d.lesson.at && d.lesson.at.region && !ui.step ? d.lesson.at.region : null;   // after the opponent's card has landed, with the coach
   renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null });
 }
 
@@ -1153,7 +1157,7 @@ function drawEnd() {
   const key = `${V.id}-${V.results.length}`;
   if (drawEnd.key !== key) {
     const motion = !(typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches);
-    drawEnd.until = drawEnd.live && motion && G.result.reason !== 'concede' ? Math.max(Date.now() + 2200, (ui.revealEnd || 0) + 1200) : 0; drawEnd.key = key; drawEnd.live = false; }
+    drawEnd.until = drawEnd.live && motion && G.result.reason !== 'concede' ? Date.now() + 900 : 0; drawEnd.key = key; drawEnd.live = false; }
   const wait = (drawEnd.until || 0) - Date.now();
   if (wait > 0) { ov.classList.remove('on'); clearTimeout(drawEnd.t); drawEnd.t = setTimeout(() => { if (screen === 'game') drawEnd(); }, wait + 20); return; }
   if (ui.peek) { ov.classList.remove('on'); document.getElementById('waiting').innerHTML = `<button class="slab" id="unpeek">Back to results</button>`; document.getElementById('unpeek').onclick = () => { ui.peek = false; drawGame(); }; return; }
@@ -1249,8 +1253,7 @@ const replayMoveEnd = h => { let i = RP.views.findIndex(v => v.game.history.leng
 function replayPlay(on) {
   clearTimeout(RP.timer); RP.playing = on && RP.i < RP.views.length - 1;
   if (RP.playing) {
-    const G = V.game, last = G.history[G.history.length - 1], shown = last && last.seat !== V.you && last.kind === 'place';
-    RP.timer = setTimeout(() => { replayStep(replayNext()); replayPlay(true); }, RP.i === 0 ? 1400 : shown ? 2200 : 1100);
+    if (!PB.busy) RP.timer = setTimeout(() => { replayStep(replayNext()); }, RP.i === 0 ? 1200 : 500);   // a beat after the last step
   }
   drawReplayBar();
 }
@@ -1307,7 +1310,7 @@ function replayKey(e) {
   return true;
 }
 
-window.__ak = () => ({ V, ui, d: lastDecision });   // test hook: the headless play-through reads the view
+window.__ak = () => ({ V, ui, d: lastDecision, PB });   // test hook: the headless play-through reads the view (and whether steps are playing)
 window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it
 window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client
 boot();

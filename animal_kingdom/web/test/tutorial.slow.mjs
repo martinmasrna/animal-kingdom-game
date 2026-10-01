@@ -44,6 +44,7 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
     picked.add(k); await wait(350); await page.screenshot({ path: `${SHOTS}/${lesson}-p-${s.lesson}.png` }); };
   const play = async (lesson, seen) => { for (let step = 0; step < 300; step++) {
     await wait(300);
+    await page.waitForFunction(() => !window.__ak().PB.busy, { timeout: 15000 });   // a player waits for the steps to play out
     const s = await state();
     if (s.phase !== 'playing') break;
     if (s.lesson && !seen.includes(s.lesson)) { seen.push(s.lesson); if (SHOTS) await page.screenshot({ path: `${SHOTS}/${lesson}-${seen.length}-${s.lesson}.png` }); }

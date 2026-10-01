@@ -34,7 +34,9 @@ export function boardChanges(before, after, fx = []) {
   if (!before) return { landed, covered, leaving: [], strength };
   for (const cr of Object.keys(after)) {
     const now = top(after, cr), was = top(before, cr);
-    if (now && (!was || was.iid !== now.iid)) { landed.add(cr); if (was) covered.add(cr); }
+    // a new top that was already in the stack was uncovered (its coverer left), not landed
+    const uncovered = now && (before[cr] || []).some(u => u.iid === now.iid);
+    if (now && (!was || was.iid !== now.iid) && !uncovered) { landed.add(cr); if (was) covered.add(cr); }
   }
   const onBoard = new Set(Object.values(after).flat().map(u => u.iid));
   const bounced = new Set(fx.filter(f => f.k === 'bounce').map(f => f.card + f.owner));
