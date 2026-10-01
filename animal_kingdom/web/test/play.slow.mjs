@@ -48,7 +48,7 @@ async function playOut(page, maxSteps = 500) {
     assert.deepEqual(await page.evaluate(screenMismatches), [], `your turn, step ${i}`);
     if (s.pend === 'mulligan') { await tap(page, '#skip'); }
     else if (s.pend) { if (!(await tap(page, '#board .cr.tgt') || await tap(page, '#board .mouth.tgt') || await tap(page, '#opts [data-o]') ||
-        await tap(page, '#hand .hc.pick') || await tap(page, '#choicebar [data-x]') || await tap(page, '#skip') || await tap(page, '#hand .hc.can'))) assert.fail(`stuck on a ${s.pend} choice`); }
+        await tap(page, '#hand .hc.pick') || await tap(page, '#opts .hc') || await tap(page, '#choicebar [data-x]') || await tap(page, '#skip') || await tap(page, '#hand .hc.can'))) assert.fail(`stuck on a ${s.pend} choice`); }
     else {
       if (!hovered && await page.$('#tbtn.can') && await page.$('#deck.can')) {   // the painted controls keep their image on hover
         for (const [sel, img] of [['#tbtn', 'btn_a'], ['#deck', 'deck_lit']]) {

@@ -310,3 +310,20 @@ def test_every_view_states_the_decision_and_the_clock():
         m.act(m.to_act(), ChoiceAction("__skip__"))
     me = m.to_act(); them = "B" if me == "A" else "A"
     assert m.view(me)["game"]["decision"] == "yours" and m.view(them)["game"]["decision"] == "theirs"
+
+
+def test_a_pick_from_your_own_hand_names_what_it_does():
+    """Magpie's discard and Raven's shuffle say so in the view, so the client can head them (feedback 2026-10-01: a lit hand read as 'play one')."""
+    from animal_kingdom.engine.actions import ChoiceAction, PlaceAction
+    from animal_kingdom.engine.state import UnitInstance
+    m = Match("ASK", Seat("ta", "A", deck="cats_midrange"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m._start_game()
+    while m.state.pending:
+        m.act(m.to_act(), ChoiceAction("__skip__"))
+    me = m.to_act()
+    m.state.hands[me] = [UnitInstance(c, me, m.state.new_iid()) for c in ("magpie", "mouse", "lion")]
+    target = m.view(me)["game"]["legal"]["place"]["magpie"][0]
+    m.act(me, PlaceAction("magpie", tuple(target)))
+    p = m.view(me)["game"]["pending"]
+    assert p["kind"] == "discard" and {o["kind"] for o in p["options"]} == {"hand"}

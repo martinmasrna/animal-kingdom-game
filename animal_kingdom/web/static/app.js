@@ -637,7 +637,8 @@ function decision() {
   if (d.pend && d.pend.mode === 'choice') {
     for (const o of d.pend.options) {
       if (o.kind === 'cr') d.crChoice[dcr(o.cr || o.v)] = o.v;
-      else if (o.kind === 'hand') d.handPick.add(o.v);
+      else if (o.kind === 'hand' && d.pend.kind === 'mulligan') d.handPick.add(o.v);   // the mulligan picks in the hand itself
+      else if (o.kind === 'hand') d.cardOpts.push({ ...o, str: (G.hand.find(h => h.iid === o.v) || {}).str });   // any other pick from your hand is laid out in the middle: a lit hand reads as "play one" (feedback 2026-10-01)
       else if (o.kind === 'card') d.cardOpts.push(o);
       else d.otherOpts.push(o);
     }
@@ -879,10 +880,12 @@ function drawGame() {
     // offered cards float over the board: a toggle lowers them to read the board, and raises them again (a new choice shows them)
     const pk = JSON.stringify(d.cardOpts.map(o => o.v)); if (ui.optsKey !== pk) { ui.optsKey = pk; ui.optsHidden = false; }
     const peek = d.cardOpts.length ? `<span class="skip" id="optpeek">${ui.optsHidden ? 'Show cards' : 'Hide cards'}</span>` : '';
-    bar.innerHTML = `<div class="line">${src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>'}${peek}${skip}</div>` + (other && !RP.views.length ? `<div class="btns">${other}</div>` : '');
+    // a pick from your hand is headed by what it does; the asking card's rule stays under it
+    const ask = { discard: 'Discard a card', shuffle: `Shuffle ${d.pend.left === 1 ? 'a card' : d.pend.left + ' cards'} into your deck` }[d.pend.kind];
+    bar.innerHTML = `<div class="line">${ask ? `<b>${ask}</b>${src ? `<p>${src.name}: ${src.text}</p>` : ''}` : src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>'}${peek}${skip}</div>` + (other && !RP.views.length ? `<div class="btns">${other}</div>` : '');
     bar.classList.add('on');
     if (d.cardOpts.length) {
-      opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${cardHTML(c)}</div>`; }).join('');
+      opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${cardHTML(c, o.str == null ? {} : { str: o.str })}</div>`; }).join('');
       opts.classList.add('on'); opts.classList.toggle('hid', !!ui.optsHidden); fitNames(opts);
       $('optpeek').onclick = e => { e.stopPropagation(); ui.optsHidden = !ui.optsHidden; drawGame(); };
       opts.querySelectorAll('[data-o]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.cardOpts[el.dataset.o].v }); });

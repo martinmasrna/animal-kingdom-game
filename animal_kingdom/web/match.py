@@ -28,6 +28,8 @@ from ..sim.runner import make_bot
 from . import tutorial
 
 CARDS = load_cards()
+# What a pending choice asks, by the effect step asking it: a choice from your own hand names its verb (the client heads it).
+ASKS = {"mulligan": "mulligan", "magpie_steal": "discard", "raven_dig": "shuffle"}
 MAP_ID = "map_b"
 # One game per match while there is one map: the best-of-3 is part of the game, but its point is the three-map
 # reveal (rules §14), so it comes back with the maps (Martin, 2026-09-30). Rematch carries the loser-first rule.
@@ -607,12 +609,14 @@ class Match:
         p = st.pending
         step = st.effect_stack[-1] if st.effect_stack else {}
         pending = {"mode": p["mode"], "optional": bool(p.get("optional")), "source": self._source(),
-                   "kind": step.get("op") if step.get("op") == "mulligan" else "effect",
+                   "kind": ASKS.get(step.get("op"), "effect"),
                    "returned": len(step.get("returned", ())) if step.get("op") == "mulligan" else 0,
                    "cap": st.config.mulligan_cap(step.get("player"), st.first_player) if step.get("op") == "mulligan" else 0,
                    "options": []}
         if p["mode"] == "choice":
             pending["options"] = [self._describe_option(o) for o in p["options"]]
+        if pending["kind"] == "shuffle":
+            pending["left"] = step.get("remaining", 0)   # the Raven's cards still to shuffle back
         return out, pending
 
     def _source(self) -> Optional[str]:
