@@ -564,7 +564,9 @@ function drawGame() {
   hand.querySelectorAll('.hc').forEach(el => {
     let t = null;
     const end = () => { clearTimeout(t); if (el.classList.contains('peek')) { el.classList.remove('peek'); el.dataset.held = '1'; } };
-    el.ontouchstart = () => { clearTimeout(t); t = setTimeout(() => el.classList.add('peek'), 350); };
+    el.ontouchstart = () => { clearTimeout(t); t = setTimeout(() => {   // shown 2.1x from its foot: kept inside the stage's edges
+      const c = parseFloat(el.style.left) + 71.5, half = 143 * 2.1 / 2;
+      el.style.setProperty('--peekx', `${Math.max(0, 16 + half - c) - Math.max(0, c + half - (STAGE.w - 16))}px`); el.classList.add('peek'); }, 350); };
     el.ontouchend = el.ontouchcancel = end; el.ontouchmove = end;
     el.oncontextmenu = e => e.preventDefault();   // a long press opens no menu
   });
@@ -666,9 +668,10 @@ function placeCoach(el, L, rings = []) {
     [x, y, side] = port ? [cx, H - 243, 'above']   // upright, over it (it grows 2.1x from its foot)
       : cx - 174 - COACH_W >= 16 ? [cx - 96, 568 + up, 'left'] : [cx + 96, 568 + up, 'right']; }
   else if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, (card.classList.contains('sel') ? H - 18 : H), 'above'];   // a picked card stands 18px higher
-  else if (a.deck) [x, y, side] = [P.deck[0] + out, P.deck[1] + up, 'above'];
-  else if (a.prompt) [x, y, side] = [STAGE.w / 2, (port ? 250 : 100) - up, 'below'];   // under the card's question, at the top centre
-  else if (a.endturn) [x, y, side] = [P.end[0] + out, P.end[1] + up, 'above'];
+  else if (a.deck) [x, y, side] = port ? [P.deck[0] - 50 + out, 0, 'cleft'] : [P.deck[0] + out, P.deck[1] + up, 'above'];   // upright, left of the corner: the deck and End turn stand together
+  else if (a.prompt) { const pb = document.getElementById('choicebar');   // under the card's question (upright it stands top left, and wraps)
+    [x, y, side] = port ? [16 + pb.offsetWidth / 2, pb.offsetTop + pb.offsetHeight - 14 - up, 'below'] : [STAGE.w / 2, 100 - up, 'below']; }
+  else if (a.endturn) [x, y, side] = port ? [P.end[0] - 55 + out, 0, 'cleft'] : [P.end[0] + out, P.end[1] + up, 'above'];
   else if (a.cr) { [x, y] = crossroadAt(a.cr); if (port) [x, y, side] = vert(x, y, 52); else side = x > STAGE.w / 2 ? 'left' : 'right'; }
   else if (a.den) { [x, y] = denMouthAt(a.den); if (port) [x, y, side] = vert(x, y, 40); else side = a.den === 'B' ? 'left' : 'right'; }
   else if (a.rings && !rings.length) [x, y, side] = [P.handC, H, 'above'];   // no card picked yet: the circles come with one, so point at the hand
@@ -698,6 +701,7 @@ function placeCoach(el, L, rings = []) {
     : side === 'below' ? `left:${clampX(x - COACH_W / 2)}px;top:${y + 14}px;--nx:${x - clampX(x - COACH_W / 2)}px`
     : side === 'mid' ? `left:${x - COACH_W / 2}px;top:${y}px`
     : side === 'group' ? `left:${x}px;top:${y}px`
+    : side === 'cleft' ? `left:${x - 24 - COACH_W}px;bottom:${16 - up}px`   // upright, along the bottom edge left of the deck and End turn
     : side === 'gabove' ? `left:${x - COACH_W / 2}px;bottom:${STAGE.h - y}px` : side === 'gbelow' ? `left:${x - COACH_W / 2}px;top:${y}px`
     : side === 'right' ? `left:${x + 78}px;top:${y}px` : `left:${x - 78 - COACH_W}px;top:${y}px`;
   // while the opponent's card is shown large in the middle, the coach waits for it to land, then fades in
