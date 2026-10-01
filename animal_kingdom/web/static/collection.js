@@ -33,7 +33,7 @@ const med = (id, M) => { const [cx, cy, D] = CROP[id], w = M / D, h = w * 1.5;
 const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
 
 let X, C, cards, st = { open: null, families: new Set(), rar: null, str: '', q: '', sheet: false }, flash = null, wired = false;
-const limit = c => c.copies || LIMIT[c.rarity];
+const limit = c => LIMIT[c.rarity];   // copies per deck: the rarity's (a card's starter count is the starter's business)
 // A deck's cover until its player chooses one: its first legendary with a head crop (the play screen uses the same).
 export const coverOf = (list, cards = C) => list.find(id => cards[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
 const listOf = cardsObj => Object.entries(cardsObj).flatMap(([id, n]) => Array(n).fill(id));

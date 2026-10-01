@@ -100,7 +100,7 @@ def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card
         if card is None or card.deck not in COLLECTIBLE_SLUGS:
             problems.append(f"{cid!r} is not a collectible card")
             continue
-        limit = card.copies or COPY_LIMITS[card.rarity]
+        limit = COPY_LIMITS[card.rarity]   # a card's `copies` sizes its starter deck only (Martin, 2026-10-01): any deck may hold the rarity's full count
         if n > limit:
             problems.append(f"at most {limit} {card.name}")
         by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + n
