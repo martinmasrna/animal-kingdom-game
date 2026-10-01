@@ -1,7 +1,7 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
 import { hasArt, artUrl, stripArt, fitStrips } from './art.js';
-import { cardHTML, fitNames } from './card.js';
+import { cardHTML, fitNames, KEYWORDS } from './card.js';
 import { renderBoard, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, moved } from './menu.js';
@@ -48,6 +48,17 @@ function cardPop(el, id, extra, place) {
   const w = pop.offsetWidth;
   if (place === 'below') { pop.style.left = Math.min(r.left, innerWidth - w - 10) + 'px'; pop.style.top = (r.bottom + 8) + 'px'; }
   else { pop.style.left = (r.right + 10 + w > innerWidth ? r.left - w - 10 : r.right + 10) + 'px'; pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; }
+}
+// A card read large in the middle of the screen, each keyword on it explained under it (as the collection's); a tap closes it.
+function readCard(id, str) {
+  const c = CARDS[id]; if (!c) return;
+  const kws = Object.keys(KEYWORDS).filter(k => new RegExp(`(^|\\. )${k}[:.]`).test(c.text || ''));
+  const ov = document.createElement('div'); ov.className = 'readov';
+  ov.innerHTML = `<div class="rbox">${cardHTML(c, str == null ? {} : { str })}${kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k]}</p></div>`).join('')}</div>`;
+  document.body.appendChild(ov); fitNames(ov);
+  // the click a browser sends as the holding finger lifts is not the closing tap: only a click after that lift closes it
+  let lifted = 0; addEventListener('touchend', () => { lifted = Date.now(); }, { once: true, capture: true });
+  ov.addEventListener('click', e => { e.stopPropagation(); if (lifted && Date.now() - lifted > 150) ov.remove(); });
 }
 function wirePops(root) {
   root.querySelectorAll('[data-card]').forEach(el => {
@@ -746,15 +757,13 @@ function drawGame() {
     return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
   }).join('');
   fitNames(hand);
-  // touch: press and hold a card to read it large (a tap picks it); the click that ends a hold does nothing
+  // touch: press and hold a card to read it (a tap picks it): it opens large in the middle, clear of the finger, and stays
+  // after the finger lifts until the next tap (feedback 2026-10-01); the click that ends a hold does nothing
   hand.querySelectorAll('.hc').forEach(el => {
-    let t = null;
-    const end = () => { clearTimeout(t); if (el.classList.contains('peek')) { el.classList.remove('peek'); el.dataset.held = '1'; } };
-    let x0 = 0, y0 = 0;
-    el.ontouchstart = e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; clearTimeout(t); t = setTimeout(() => {   // shown 2.1x from its foot: kept inside the stage's edges
-      const c = parseFloat(el.style.left) + 71.5, half = 143 * 2.1 / 2;
-      el.style.setProperty('--peekx', `${Math.max(0, 16 + half - c) - Math.max(0, c + half - (STAGE.w - 16))}px`); el.classList.add('peek'); }, 350); };
-    el.ontouchend = el.ontouchcancel = end; el.ontouchmove = e => { if (moved(e, x0, y0)) end(); };
+    let t = null, x0 = 0, y0 = 0;
+    el.ontouchstart = e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; clearTimeout(t);
+      t = setTimeout(() => { el.dataset.held = '1'; const h = (V.game.hand || []).find(h => String(h.iid) === el.dataset.iid); readCard(el.dataset.id, h && h.str); }, 350); };
+    el.ontouchend = el.ontouchcancel = () => clearTimeout(t); el.ontouchmove = e => { if (moved(e, x0, y0)) clearTimeout(t); };
     el.oncontextmenu = e => e.preventDefault();   // a long press opens no menu
   });
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {

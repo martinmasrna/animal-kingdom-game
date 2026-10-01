@@ -31,12 +31,16 @@ test('collection: a tap reads a card while browsing; while building, a hold read
   assert.equal(await page.$eval('.fcount b', e => e.textContent), n, 'and adds nothing');
 });
 
-test('game: a hold shows a hand card large and picks nothing; a held piece shows its stack', async () => {
+test('game: a hold opens a hand card large until a tap, and picks nothing; a held piece shows its stack', async () => {
   await page.goto(`${server.url}/#/lab/mid`, { waitUntil: 'networkidle0' }); await wait(600);
   const up = await hold('.hc');
-  assert.ok(await page.$eval('.hc', e => e.classList.contains('peek')), 'the held card is shown large');
+  assert.ok(await page.$('.readov .card'), 'the held card opens large');
   await up();
+  assert.ok(await page.$('.readov'), 'and stays after the finger lifts');
   assert.equal(await page.$$eval('.hc.sel', e => e.length), 0, 'releasing a hold picks nothing');
+  await page.tap('.readov'); await wait(200);
+  assert.equal(await page.$('.readov'), null, 'a tap closes it');
+  assert.equal(await page.$$eval('.hc.sel', e => e.length), 0, 'and picks nothing either');
   const cr = await page.evaluate(() => Object.entries(window.__ak().V.game.board).find(([, st]) => st && st.length)[0]);
   const up2 = await hold(`#board [data-cr="${cr}"]`);
   assert.ok(await page.$eval('#stackpop', e => e.style.display !== 'none'), 'a held piece shows its stack while held');
