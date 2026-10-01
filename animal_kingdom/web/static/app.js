@@ -5,7 +5,7 @@ import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold } from './menu.js';
-import { play as sfx, soundsFor, preload, muted, setMuted } from './sound.js';
+import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow } from './friends.js';
 import { current as lessonNow, gate, held, lessonOf } from './tutorial.js';
@@ -121,6 +121,7 @@ function route() {
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'leaderboard') return leaderboardScreen();
+  if (parts[0] === 'settings') return settingsScreen();
   if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
   if (parts[0] === 'profile') { profileScreen(); return loadProfile().then(() => { if (location.hash.startsWith('#/profile')) profileScreen(); }); }   // a match just played shows
   if (parts[0] === 'replay' && parts[1]) return replayScreen(parts[1]);
@@ -166,7 +167,7 @@ function homeScreen(mode = {}) {
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
   const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${chooser}
-    <div class="top"><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : `<button class="backbtn${play.open === 'learn' ? ' open' : ''}" id="learn2"><span>How to play</span></button>`}<a class="backbtn" href="#/leaderboard"><span>Leaderboard</span></a><a class="backbtn" href="#/profile"><span>Profile</span></a><button class="backbtn" id="fbhome"><span>Feedback</span></button></div>
+    <div class="top"><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : `<button class="backbtn${play.open === 'learn' ? ' open' : ''}" id="learn2"><span>How to play</span></button>`}<a class="backbtn" href="#/leaderboard"><span>Leaderboard</span></a><a class="backbtn" href="#/profile"><span>Profile</span></a><a class="backbtn" href="#/settings"><span>Settings</span></a><button class="backbtn" id="fbhome"><span>Feedback</span></button></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
       <button class="play" id="go">${go}</button></div>`}</div>`;
@@ -256,6 +257,29 @@ async function findChallenge(btn, f, deck) {
 }
 
 // The leaderboard: everyone on the ladder, people and bots together, best first; your row marked and in view.
+// Settings: one column on the ground, like the leaderboard. Sound volume (0 is off) and the sound credits. The game screen
+// opens the same controls over the board from its gear (settingsBody is shared).
+const CREDITS_URL = '/static/kit2/snd/CREDITS.txt';
+function settingsBody() {
+  const v = Math.round(volume() * 100);
+  return `<div class="srow"><span>Sound</span><input type="range" id="vol" min="0" max="100" step="5" value="${v}" aria-label="Sound volume"><b id="volv">${v ? v + '%' : 'Off'}</b></div>`;
+}
+function wireSettings(root) {
+  const r = root.querySelector('#vol'), out = root.querySelector('#volv');
+  r.oninput = () => { setVolume(r.value / 100); out.textContent = +r.value ? r.value + '%' : 'Off'; };
+  r.onchange = () => sfx('land');   // a sample at the new volume
+}
+async function settingsScreen() {
+  screen = 'settings';
+  app.innerHTML = `<div class="mscr lead sets"><div class="lcol"><div class="hhead"><h2>Settings</h2></div>
+    <div class="lbody">${settingsBody()}<div class="credits"><h3>Sound credits</h3><pre id="credits"></pre></div></div>
+    <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
+  document.getElementById('back').onclick = () => { location.hash = '#/'; };
+  wireSettings(app);
+  const r = await fetch(CREDITS_URL).catch(() => null), t = r && r.ok ? await r.text() : '';
+  const el = document.getElementById('credits'); if (el) el.textContent = t.trim();
+}
+
 async function leaderboardScreen() {
   screen = 'leaderboard';
   const r = await api('/api/leaderboard'), rows = r.ok ? await r.json() : [];
@@ -545,7 +569,7 @@ function gameScreen() {
     app.innerHTML = `<div class="game kit" id="scr"><div id="world"><img src="/static/kit2/plate_wide.webp" alt="" draggable="false"></div><div id="stage">
       <div class="abs ledge"></div>
       <div id="board"></div>
-      <div class="abs menu snd" id="sndbtn"></div>
+      <div class="abs menu snd" id="sndbtn"></div><div class="panel setp" id="setp"></div>
       <div class="abs menu hs" id="series" data-tip="History"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg></div>
       <div class="abs opphand" id="opphand"></div>
       <div class="abs menu fb" id="fbbtn" data-tip="Send feedback"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
@@ -588,9 +612,11 @@ function gameScreen() {
     $('scr').addEventListener('click', () => { if (ui.panel) { ui.panel = null; showPanel(); } });
     $('deck').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.legal.draw && !d.noDraw) act({ kind: 'draw' }); };
     $('tbtn').onclick = e => { e.stopPropagation(); const d = lastDecision; if (d && d.mine && !d.pend && V.game.canPass && !d.noPass) { sfx('endturn'); act({ kind: 'pass' }); } };
-    const sndIcon = () => { const b = $('sndbtn'); b.dataset.tip = muted() ? 'Sound off' : 'Sound on';
-      b.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/>${muted() ? '<path d="M17 9l5 6M22 9l-5 6"/>' : '<path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/>'}</svg>`; };
-    $('sndbtn').onclick = e => { e.stopPropagation(); setMuted(!muted()); sndIcon(); }; sndIcon(); preload();
+    $('sndbtn').dataset.tip = 'Settings';
+    $('sndbtn').innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+    $('sndbtn').onclick = e => { e.stopPropagation(); if (ui.panel !== 'set') { const p = $('setp'); p.innerHTML = `<h4>Settings</h4>${settingsBody()}`; wireSettings(p); }
+      ui.panel = ui.panel === 'set' ? null : 'set'; showPanel(); };
+    $('setp').onclick = e => e.stopPropagation(); preload();
     wireBoard();
   }
   drawGame();
@@ -892,7 +918,7 @@ function drawLists(G) {
 
 function showPanel() {
   if (isTutorial()) ui.panel = null;   // the tutorial never opens the decklists or the history: nothing it teaches, and they give away its deal
-  for (const [k, id] of [['mine', 'mine'], ['theirs', 'theirs'], ['hist', 'histp']]) document.getElementById(id).classList.toggle('on', ui.panel === k);
+  for (const [k, id] of [['mine', 'mine'], ['theirs', 'theirs'], ['hist', 'histp'], ['set', 'setp']]) document.getElementById(id).classList.toggle('on', ui.panel === k);
   if (ui.panel === 'hist') { const h = document.getElementById('hist'); h.scrollTop = h.scrollHeight; }
 }
 // The stage keeps its design size (STAGE) and scales to fit the window. The painted ground under it is one painting wider

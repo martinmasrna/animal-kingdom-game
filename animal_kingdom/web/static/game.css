@@ -498,3 +498,7 @@
   .game .intro .iside.A { animation-name: introD; } .game .intro .iside.B { animation-name: introU; }
 }
 @keyframes introD { from { transform: translateY(60vh); } } @keyframes introU { from { transform: translateY(-60vh); } }
+
+/* Settings over the board: from the gear, hanging from the button row like History. */
+.game .panel.setp { width: 300px; left: auto; right: 16px; top: 58px; bottom: auto; translate: var(--side, 0px) calc(-1 * var(--above, 0px)); }
+.game .panel.setp .srow { grid-template-columns: 60px 1fr 46px; height: 44px; padding: 0 12px; }

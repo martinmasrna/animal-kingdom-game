@@ -1,6 +1,6 @@
 // The game's sounds (Kenney CC0 packs: casino-audio, impact-sounds, rpg-audio; picked and levelled in the design sandbox's
 // screen/sound/). One short mp3 per variant in kit2/snd/; a sound with several variants picks one at random so repeats
-// don't drill. Muted state lives in localStorage ('ak:mute'). Browsers allow audio only after a click, which every match
+// don't drill. The volume (0..1, 0 is off) lives in localStorage ('ak:vol'), set in Settings. Browsers allow audio only after a click, which every match
 // starts with (Play), so nothing needs unlocking.
 const SND = {
   land: ['land_1', 'land_2', 'land_3'],          // a piece lands on a clearing
@@ -18,8 +18,9 @@ const SND = {
 const VOL = { fruit: .55, oppdraw: .5, pick: .5, draw: .8 };
 const cache = {};
 const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
-export const muted = () => store('ak:mute') === '1';
-export const setMuted = m => store('ak:mute', m ? '1' : '0');
+export const volume = () => { const v = store('ak:vol'); return v === null ? (store('ak:mute') === '1' ? 0 : .8) : Math.max(0, Math.min(1, +v)); };
+export const setVolume = v => store('ak:vol', String(Math.max(0, Math.min(1, v))));
+export const muted = () => volume() === 0;
 
 // play('land') now; play('land', 0.4) in 0.4 s
 export function play(name, delay = 0) {
@@ -27,7 +28,7 @@ export function play(name, delay = 0) {
   const go = () => {
     const v = SND[name][Math.floor(Math.random() * SND[name].length)];
     const a = (cache[v] = cache[v] || new Audio(`/static/kit2/snd/${v}.mp3`)).cloneNode();
-    a.volume = VOL[name] ?? 1; a.play().catch(() => {});
+    a.volume = (VOL[name] ?? 1) * volume(); a.play().catch(() => {});
   };
   delay > 0 ? setTimeout(go, delay * 1000) : go();
 }
