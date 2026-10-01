@@ -477,3 +477,7 @@
 .game .intro .ivs { font: 800 80px/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; text-shadow: 0 4px 20px rgba(0,0,0,.8); animation: introVs .4s ease .55s both; }
 @keyframes introVs { from { opacity: 0; transform: scale(1.6); } }
 .game.port .hc.peek, .game.port .hc.peek:hover { translate: var(--peekx, 0px) 0; }   /* a card read large stays on screen */
+
+/* Your turn begins: the tablet lifts and glows once. */
+.game.kit .tbtn.A.yours { animation: yourturn .9s cubic-bezier(.3,.7,.4,1); }
+@keyframes yourturn { 30% { transform: translateY(-6px) scale(1.08); filter: drop-shadow(0 0 14px rgba(160,205,255,.9)) drop-shadow(2px 4px 5px rgba(0,0,0,.45)); } }

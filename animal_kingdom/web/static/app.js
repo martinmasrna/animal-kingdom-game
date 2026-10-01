@@ -87,6 +87,11 @@ async function boot() {
     if (e.key === 'Escape' && screen === 'home' && play.open) { play.open = null; return route(); }   // Escape closes the open chooser
     if (e.key === 'Escape' && screen === 'profile' && !/INPUT/.test(e.target.tagName)) { location.hash = '#/'; return; }
     if (RP.views.length && screen === 'game' && replayKey(e)) return;
+    // Space ends your turn, D draws: the same checks as clicking the tablet or the deck (never in a lesson, whose Space is Next)
+    if (screen === 'game' && !RP.views.length && !isTutorial() && !/INPUT|TEXTAREA/.test(e.target.tagName) && !e.repeat) {
+      if (e.key === ' ' && document.querySelector('#tbtn.can')) { e.preventDefault(); return document.getElementById('tbtn').click(); }
+      if ((e.key === 'd' || e.key === 'D') && document.querySelector('#deck.can')) return document.getElementById('deck').click();
+    }
     if (e.key !== 'Escape' || screen !== 'game') return;
     const ask = document.getElementById('concov');
     if (ask && ask.classList.contains('on')) return ask.classList.remove('on');
@@ -527,11 +532,23 @@ function drawIntro() {
   el.onclick = done; setTimeout(done, matchMedia('(prefers-reduced-motion: reduce)').matches ? 1400 : 2600);
 }
 
+// Your turn begins: the tablet lights up once, and a tab in the background says so in its title (a friend's clock is running).
+function turnCue(mine) {
+  const key = V.id + ':' + V.results.length + ':' + (V.game && V.game.round);
+  if (mine && turnCue.was === false && turnCue.key !== key && !RP.views.length) {
+    turnCue.key = key; turnCue.until = Date.now() + 900;   // drawGame gives the tablet 'yours' meanwhile
+    if (document.hidden) document.title = 'Your turn · Animal Kingdom';
+  }
+  if (!mine || !document.hidden) document.title = 'Animal Kingdom';
+  turnCue.was = mine;
+}
+addEventListener('visibilitychange', () => { if (!document.hidden) document.title = 'Animal Kingdom'; });
+
 function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
   lastDecision = d;
-  drawIntro();
+  drawIntro(); turnCue(playing && G.current === you);
   $('scr').classList.toggle('rp', !!RP.views.length);   // a replay: upright its controls take the deck's corner
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
@@ -606,7 +623,7 @@ function drawGame() {
   const pips = playing ? Array.from({ length: G.actionsTotal }, (_, i) => { const used = G.actionsTotal - G.actionsLeft;
     return `<i class="${i < used ? 'used' : i === used ? 'next' : ''}"></i>`; }).join('') : '';
   if (playing && G.current === you) {
-    tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass && !d.noPass ? ' can' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}<span class="clock" id="clock"></span></span>`;
+    tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass && !d.noPass ? ' can' : '') + (Date.now() < (turnCue.until || 0) ? ' yours' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}<span class="clock" id="clock"></span></span>`;
   } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = `<span class="pips">${pips}<span class="clock" id="clock"></span></span>`; tb.dataset.tip = 'Your opponent\'s turn'; }
   else { tb.className = 'abs tbtn'; tb.innerHTML = ''; }
 
