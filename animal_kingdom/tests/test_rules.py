@@ -203,7 +203,7 @@ def test_mulligan_first_player_first_then_second_then_turn_one():
     assert rules.legal_actions(s)[0].kind == "draw"
 
 
-def test_mulligan_blacklists_every_returned_card_and_stops_at_three():
+def test_mulligan_blacklists_every_returned_card_and_stops_at_three():   # the first player's cap: its 3-card opening hand
     from animal_kingdom.decks import load_premade_deck
     from animal_kingdom.engine.actions import ChoiceAction
     from animal_kingdom.engine.state import new_game
@@ -219,6 +219,19 @@ def test_mulligan_blacklists_every_returned_card_and_stops_at_three():
         assert len(new) == 1 and new[0].card_id not in gone
     assert s.pending["chooser"] != first                 # the cap ends this player's mulligan
     assert len(s.decks[first]) + len(s.hands[first]) == 30
+
+
+def test_mulligan_cap_is_the_opening_hand_three_first_four_second():
+    from animal_kingdom.decks import load_premade_deck
+    from animal_kingdom.engine.actions import SKIP, ChoiceAction
+    from animal_kingdom.engine.state import new_game, other_player
+    s = new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 11)
+    first, second = s.current, other_player(s.current)
+    rules.apply_action(s, ChoiceAction(SKIP))
+    for _ in range(4):
+        assert s.pending["chooser"] == second
+        rules.apply_action(s, ChoiceAction(s.hands[second][0].iid))
+    assert s.pending is None or s.pending["chooser"] != second   # four returns, the whole opening hand, then it ends
 
 
 def test_mulligan_can_be_disabled():

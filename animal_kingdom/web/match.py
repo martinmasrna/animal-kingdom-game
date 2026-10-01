@@ -522,7 +522,7 @@ class Match:
         pending = {"mode": p["mode"], "optional": bool(p.get("optional")), "source": self._source(),
                    "kind": step.get("op") if step.get("op") == "mulligan" else "effect",
                    "returned": len(step.get("returned", ())) if step.get("op") == "mulligan" else 0,
-                   "cap": st.config.mulligan_max,
+                   "cap": st.config.mulligan_cap(step.get("player"), st.first_player) if step.get("op") == "mulligan" else 0,
                    "options": []}
         if p["mode"] == "choice":
             pending["options"] = [self._describe_option(o) for o in p["options"]]

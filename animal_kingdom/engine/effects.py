@@ -101,7 +101,7 @@ def resolve(state: GameState) -> None:
 
 def _op_mulligan(state, step):
     """Gwent-style blacklist mulligan (overview.md §4.4): each returned card is replaced at once by
-    the top deck card that is no copy of anything returned so far, up to `mulligan_max` returns
+    the top deck card that is no copy of anything returned so far, up to the config's mulligan_cap returns (the opening hand's size)
     (a replacement may itself be returned); SKIP keeps the rest. Returned cards are shuffled back
     at the end. Raw draws and a raw shuffle: no on-draw or on-shuffle triggers, like the deal."""
     player, returned = step["player"], step["returned"]
@@ -118,7 +118,7 @@ def _op_mulligan(state, step):
                 returned.append(inst.card_id)
                 i = _mulligan_replacement(deck, returned)
                 hand.append(UnitInstance(deck.pop(i), player, state.new_iid()))
-    if not done and hand and len(returned) < state.config.mulligan_max and _mulligan_replacement(deck, returned) is not None:
+    if not done and hand and len(returned) < state.config.mulligan_cap(player, state.first_player) and _mulligan_replacement(deck, returned) is not None:
         return PendingRequest("choice", player, optional=True, kind="mulligan", options=[u.iid for u in hand])
     if returned:                      # a kept hand leaves the deck order (and the RNG) untouched
         deck.extend(returned)

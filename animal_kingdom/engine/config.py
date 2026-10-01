@@ -138,7 +138,13 @@ class Config:
     first_player_opening_draw: int = 3   # overview.md §4.3
     second_player_opening_draw: int = 4
     mulligan: bool = True                # overview.md §4.4: blacklist mulligan, first player first
-    mulligan_max: int = 3                # returns per mulligan (Martin 2026-09-28, Gwent's round-1 number)
+    mulligan_max: Optional[int] = None   # returns per mulligan; None: as many as the player's opening hand, 3 first and 4
+                                          # second (Hearthstone's rule, Martin 2026-10-01; was 3 for both)
+
+    def mulligan_cap(self, player: str, first_player: str) -> int:
+        if self.mulligan_max is not None:
+            return self.mulligan_max
+        return self.first_player_opening_draw if player == first_player else self.second_player_opening_draw
     draw_action_count: int = 2           # cards drawn by one Draw action (overview.md §5); 1→2
                                           # 2026-07-12 after a 42-game human draw-2 cohort — plays
                                           # better and de-fangs free "draw 1" riders (they no longer

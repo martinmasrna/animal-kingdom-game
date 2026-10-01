@@ -51,7 +51,8 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             # alone: a bot near your rating, on the ladder
             m = await (await c.post("/api/ranked", json={"deck": "cats_midrange"}, headers=ha)).json()
             match = server.hub.matches[m["id"]]
-            assert match.seats["B"].is_bot and match.seats["B"].ladder.startswith("bot:normal:")
+            bot = match.seats["B"]   # a seeded bot within reach of a new player's 1500 (nearest_bot: the nearest, or within 100 of it)
+            assert bot.is_bot and bot.ladder.startswith("bot:") and abs(server.ladder.get(bot.ladder).rating - 1500) < 250
             assert match.seats["A"].ladder == a["profile"]["id"]
             # two people at once: they meet each other
             ra, rb = await asyncio.gather(c.post("/api/ranked", json={"deck": "ramp"}, headers=ha),
@@ -67,7 +68,7 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             assert not any(r["you"] for r in board["rows"]), "placing: not ranked yet"
             pl = board["placing"]
             assert pl["rating"].endswith("?") and int(pl["rating"][:-1]) > 1500 and (pl["games"], pl["of"]) == (1, 10)
-            assert sum(r["bot"] for r in board["rows"]) == 21 and board["rows"][0]["name"].startswith("Expert Bot")
+            assert sum(r["bot"] for r in board["rows"]) == 21 and board["rows"][0]["name"].endswith("(Expert Bot)")
     asyncio.run(run())
 
 
