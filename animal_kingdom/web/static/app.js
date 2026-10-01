@@ -1110,7 +1110,8 @@ function drawEnd() {
   if (wait > 0) { ov.classList.remove('on'); clearTimeout(drawEnd.t); drawEnd.t = setTimeout(() => { if (screen === 'game') drawEnd(); }, wait + 20); return; }
   if (ui.peek) { ov.classList.remove('on'); document.getElementById('waiting').innerHTML = `<button class="slab" id="unpeek">Back to results</button>`; document.getElementById('unpeek').onclick = () => { ui.peek = false; drawGame(); }; return; }
   const you = V.you, them = opp(), w = G.result.winner, S = V.score;
-  if (drawEnd.sounded !== key && drawEnd.until && w !== null && !RP.views.length) sfx(w === you ? 'victory' : 'defeat');   // a game seen ending live
+  const live = drawEnd.sounded !== key && drawEnd.until && w !== null && !RP.views.length;   // a game seen ending live: its sound and its entrance, once
+  if (live) sfx(w === you ? 'victory' : 'defeat');
   drawEnd.sounded = key;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
   const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded', timeout: w === you ? 'Your opponent ran out of time three turns in a row' : 'You ran out of time three turns in a row' }[G.result.reason] || G.result.reason;
@@ -1154,6 +1155,7 @@ function drawEnd() {
     document.getElementById('rematch').onclick = () => send({ t: 'rematch' });
   }
   const pk = document.getElementById('peek'); if (pk) pk.onclick = () => { ui.peek = true; drawGame(); };   // a lesson has none
+  if (live) { const r = ov.querySelector('.res'); if (r) r.classList.add('enter'); }
   ov.classList.add('on');
 }
 

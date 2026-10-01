@@ -329,6 +329,16 @@
 .game .endbox { min-width: 440px; box-sizing: border-box; padding: 30px 32px 26px; gap: 10px; border-radius: 16px; text-align: center;
   background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 20px 50px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,245,230,.12); }
 .game .endbox .res { font-size: 76px; }
+/* A win is warm and celebrated, a loss quiet (feedback 2026-10-01: a red Defeat read as aggressive, a blue Victory as barely
+   positive): Victory in gold, rising in with one shine across it; Defeat in stone, smaller, fading in. Team colours stay on the gems. */
+.game .endbox .res.A { color: transparent; background: linear-gradient(105deg, #f4c95d 42%, #fff4d2 50%, #f4c95d 58%) 100% 0 / 260% 100%;
+  -webkit-background-clip: text; background-clip: text; text-shadow: none; filter: drop-shadow(0 0 22px rgba(244,190,80,.35)) drop-shadow(0 4px 16px rgba(0,0,0,.7)); }
+.game .endbox .res.B { color: #b9b1a4; font-size: 64px; }
+.game .endbox .res.A.enter { animation: winrise .5s cubic-bezier(.2,1.4,.4,1) both, winshine .9s ease-in-out .35s both; }
+.game .endbox .res.B.enter { animation: losefade .6s ease-out both; }
+@keyframes winrise { from { opacity: 0; transform: translateY(14px) scale(.86); } }
+@keyframes winshine { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@keyframes losefade { from { opacity: 0; } }
 .game .endbox .score { display: flex; gap: 36px; margin: 6px 0 2px; }
 .game .endbox .gem { width: 80px; height: 80px; display: grid; place-items: center; background: url(/static/kit2/gem_a.webp) center / contain no-repeat; filter: drop-shadow(1px 3px 3px rgba(0,0,0,.55)); }
 .game .endbox .gem.B { background-image: url(/static/kit2/gem_b.webp); } .game .endbox .gem .gemnum { height: 32px; }
