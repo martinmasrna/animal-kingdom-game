@@ -322,7 +322,8 @@ def test_both_players_mulligan_at_once_and_a_log_replays_it():
     assert [u.card_id for u in st.hands[second]] != before, "the replacement comes at once"
     assert st.player_to_act() == first and m.view(first)["game"]["pending"]["kind"] == "mulligan", "the first still chooses"
     m.act(second, {"kind": "choice", "choice": SKIP})
-    assert m.view(second)["game"].get("opponentChoosing"), "done: waiting for the opponent"
+    v = m.view(second)["game"]
+    assert v["decision"] == "mulligan" and v["toAct"] != second, "done: waiting for the opponent's mulligan"
     m.act(first, {"kind": "choice", "choice": st.hands[first][0].iid})
     m.act(first, {"kind": "choice", "choice": SKIP})
     assert st.pending is None and st.turn_counter == 0 and st.current == first, "both done: the game starts"

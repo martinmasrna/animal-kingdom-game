@@ -26,7 +26,7 @@ test('two people mulligan at the same time', async () => {
   await p2.evaluate(() => document.querySelector(".hc").click()); await wait(600);
   assert.match(await box(p2) || '', /1 of 4/, 'the second returns a card while the first still chooses');
   await p2.evaluate(() => document.getElementById("skip").click()); await wait(600);
-  assert.equal(await p2.evaluate(() => window.__ak().V.game.opponentChoosing), true, 'done: waiting for the first');
+  assert.equal(await p2.evaluate(() => { const g = window.__ak().V.game; return g.decision === 'mulligan' && g.toAct !== window.__ak().V.you; }), true, 'done: waiting for the first');
   await p1.evaluate(() => document.getElementById("skip").click()); await wait(800);
   for (const p of [p1, p2]) assert.equal(await p.evaluate(() => window.__ak().V.game.pending), null, 'the game has begun');
 });

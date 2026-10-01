@@ -36,7 +36,7 @@ export function plan(prev, next, cards = {}) {
   const view = () => {
     const v = clone(next);
     Object.assign(v.game, { board: clone(s.board), food: { ...s.food }, handCount: { ...s.handCount }, hand: clone(s.hand),
-      current: s.current, toAct: null, pending: null, legal: null, result: null, opponentChoosing: false, history: g0.history,
+      current: s.current, toAct: null, pending: null, legal: null, result: null, decision: 'playing_out', history: g0.history,
       events: g0.events ? [...g0.events] : [] });
     v.phase = 'playing';
     return v;

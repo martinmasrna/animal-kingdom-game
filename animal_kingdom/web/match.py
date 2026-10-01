@@ -549,7 +549,7 @@ class Match:
             "actionsLeft": st.config.actions_per_turn + bonus - st.actions_taken_this_turn,
             "actionsTotal": st.config.actions_per_turn + bonus,
             "canPass": rules.can_pass(st),
-            "clock": self.clock and (self._mulligan_clock(s) if self.mulliganing() and self.clock.get("mull_until") else
+            "clock": {"on": False} if not self.clock else (self._mulligan_clock(s) if self.mulliganing() and self.clock.get("mull_until") else
                                      {**{k: self.clock[k] for k in ("bank", "holder", "free", "since")}, "now": time.time(),
                                      "on": self.clock_deadline() is not None}),
             "food": dict(st.food),
@@ -580,8 +580,12 @@ class Match:
             g["pending"] = {"mode": "choice", "optional": True, "source": None, "kind": "mulligan",
                             "returned": len(st.effect_stack[i]["returned"]), "cap": st.config.mulligan_cap(s, st.first_player),
                             "options": [self._describe_option(u.iid) for u in st.hands[s]]}
-        elif st.pending is not None and to_act == opp:
-            g["opponentChoosing"] = True
+        # who decides what, always stated (never left to a missing field): over, mulligan (both at once), yours / your
+        # choice, theirs / their choice
+        mull = st.pending is not None and st.pending.get("kind") == "mulligan"
+        g["decision"] = ("over" if st.result is not None else "mulligan" if mull
+                         else ("your_choice" if st.pending else "yours") if g["toAct"] == s
+                         else "their_choice" if st.pending else "theirs")
         return g
 
     def _mulligan_clock(self, s: str) -> dict:

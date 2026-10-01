@@ -296,3 +296,17 @@ def test_a_bot_waits_for_the_watching_players_screen_never_longer_than_the_cap(m
         m.played.clear(); t0 = time.time(); await hub._watched(m)
         assert time.time() - t0 < 0.1
     asyncio.run(run())
+
+
+def test_every_view_states_the_decision_and_the_clock():
+    """Who decides what, and the clock, are always in the view (never a missing field read as 'no')."""
+    m = Match("DEC", Seat("ta", "A", deck="cats_midrange"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m._start_game()
+    v = m.view("A")["game"]
+    assert v["decision"] == "mulligan" and v["clock"] == {"on": False}   # a bot game has no clock, and says so
+    from animal_kingdom.engine.actions import ChoiceAction
+    while m.state.pending:
+        m.act(m.to_act(), ChoiceAction("__skip__"))
+    me = m.to_act(); them = "B" if me == "A" else "A"
+    assert m.view(me)["game"]["decision"] == "yours" and m.view(them)["game"]["decision"] == "theirs"

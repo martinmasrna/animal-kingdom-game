@@ -610,7 +610,7 @@ const mmss = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2
 function drawClock() {
   const el = document.getElementById('clock'), c = V && V.game && V.game.clock;
   if (!el) return;
-  if (!c || !c.on) { el.innerHTML = ''; el.className = 'clock'; return; }
+  if (!c || !c.on) { el.innerHTML = ''; el.className = 'clock'; return; }   // every view states the clock: {on: false} when there is none
   const spent = c.now + (Date.now() / 1000 - V.rx) - c.since, free = Math.max(0, c.free - spent);
   const bank = Math.max(0, c.bank[c.holder] - Math.max(0, spent - c.free)), left = free + bank;
   el.className = `clock${left < 10 ? ' low' : ''}`;
@@ -891,7 +891,8 @@ function drawGame() {
     const sk = $('skip'); if (sk) sk.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: SKIP }); };
   } else {
     bar.classList.remove('on');
-    if (playing && G.opponentChoosing) waiting.textContent = G.history.length ? 'Opponent is choosing' : 'Opponent is mulliganing';
+    if (playing && G.decision === 'their_choice') waiting.textContent = 'Opponent is choosing';
+    else if (playing && G.decision === 'mulligan' && G.toAct !== you) waiting.textContent = 'Opponent is mulliganing';
   }
   clearTimeout(drawGame.think);
   if (playing && G.toAct === them && V.seats[them].bot && !RP.views.length) {
