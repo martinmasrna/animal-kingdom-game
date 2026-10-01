@@ -244,6 +244,10 @@
 @keyframes drawback { 0% { transform: translateY(-70px); opacity: 0; } 100% { transform: none; opacity: 1; } }
 /* a strength that changed pops once */
 .game .cr.unit.strchg .boss { animation: strpop .45s cubic-bezier(.3,.7,.4,1.4) .1s; }
+/* What removed a unit answers in the removal's beat (Martin, 2026-10-02: a Hippo or a Hedgehog removed your animal and
+   nothing showed it): it lunges at its victim and back; one buried under its victim rises where it surfaces. */
+.game .cr.unit.strike { z-index: 6; animation: strike .55s cubic-bezier(.3,.7,.4,1) both; }
+@keyframes strike { 0% { translate: 0 0; scale: 1; } 35% { translate: var(--sx, 0) var(--sy, 0); scale: 1.16; } 100% { translate: 0 0; scale: 1; } }
 @keyframes strpop { 0% { transform: scale(1); } 45% { transform: scale(1.35); } 100% { transform: scale(1); } }
 /* reduced motion: every state change simply shows */
 @media (prefers-reduced-motion: reduce) { .game *, .game *::before, .game *::after { animation: none !important; transition: none !important; }

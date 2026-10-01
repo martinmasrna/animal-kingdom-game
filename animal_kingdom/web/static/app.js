@@ -1033,7 +1033,8 @@ function drawBoard(d) {
   const cap = V.game.result && V.game.result.reason === 'hq_capture' && (V.game.events || []).filter(e => e.e === 'capture').pop();
   const capture = cap ? { side: rel(cap.den), id: cap.card, owner: rel(cap.player), str: cap.str } : null;
   const region = shownRegion(d);
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null });
+  const st = ui.step, strike = st && st.by ? { from: dcr(st.by), to: dcr(st.cr) } : null;   // what removed a unit answers in its beat
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, strike, current: V.phase === 'playing' ? rel(V.game.current) : null });
 }
 
 function wireBoard() {

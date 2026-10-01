@@ -7,6 +7,21 @@
 // the last step is done.
 
 // How long each step holds the screen, in seconds: the one place these lengths live (the board's animations fit inside).
+// The animal whose effect removed or moved a unit (the engine stamps each event with its cause card): the one on the
+// board nearest the victim, often right under it (spines) or beside it (Hippopotamus, Grizzly Bear). It answers in the
+// removal's beat, so a player sees what did it (Martin, 2026-10-02). None when the cause isn't on the board.
+function culprit(board, cause, cr) {
+  if (!cause || !cr) return null;
+  const [c0, r0] = cr.split(',').map(Number);
+  let best = null, bd = Infinity;
+  for (const [at, st] of Object.entries(board)) {
+    if (!st.some(u => u.id === cause)) continue;
+    const [c, r] = at.split(',').map(Number), d = Math.abs(c - c0) + Math.abs(r - r0);
+    if (d < bd) { bd = d; best = at; }
+  }
+  return best;
+}
+
 export const DUR = { strength: 0.6, to_hand: 0.5, leave_hand: 0.4, steal: 0.7, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, bounce: 0.85, to_deck: 0.85, draw: 0.5, pay: 0.4, capture: 0.6, yourturn: 1.5 };
 // Food in flight: one fruit per food, 0.035 s apart, each flying 0.7 s, then the count settles.
 export const foodDur = n => Math.min(2.4, 0.7 + 0.035 * Math.max(0, n - 1) + 0.3);
@@ -67,7 +82,7 @@ export function plan(prev, next, cards = {}) {
         if (e.cr) {
           take(e.cr, e.iid);
           if (e.e === 'bounce' && fresh[i + 1] && fresh[i + 1].e === 'to_hand') toHand(fresh[++i]);   // it flies back into the hand
-          push({ kind: e.e, dur: DUR[e.e], cr: e.cr, card: e.card, owner: e.owner });
+          push({ kind: e.e, dur: DUR[e.e], cr: e.cr, card: e.card, owner: e.owner, by: culprit(s.board, e.cause, e.cr) });
         }
         else if (e.zone === 'hand') {   // discarded from a hand
           s.handCount[e.owner] = Math.max(0, s.handCount[e.owner] - 1);

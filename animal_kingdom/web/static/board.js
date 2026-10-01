@@ -52,7 +52,7 @@ export const gemDigits = n => `<span class="gemnum">${digits('gemnum', n)}</span
 if (typeof Image !== 'undefined') for (let d = 0; d < 10; d++) { new Image().src = kit(`gemnum/${d}.webp`); new Image().src = kit(`chalk/${d}.webp`); }
 const reducedMotion = () => typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const put = (cls, x, y, html = '', attrs = '') => `<div class="abs ${cls}" style="left:${x}px;top:${y}px" ${attrs}>${html}</div>`;
+const put = (cls, x, y, html = '', attrs = '', style = '') => `<div class="abs ${cls}" style="left:${x}px;top:${y}px;${style}" ${attrs}>${html}</div>`;
 
 // A round crop of the card art, D stage pixels across.
 export function portrait(id, D) {
@@ -102,7 +102,11 @@ export function renderBoard(el, M, g, cards, ui) {
     if (pv) { s += put(`cr unit A ghost${cls}`, x, y, unit({ id: pv.id, owner: 'A', str: pv.str }, st.slice().reverse(), cards), `data-cr="${cr}"`); continue; }
     if (!st.length) { s += put(`cr clear${cls}`, x, y, '', `data-cr="${cr}"`); continue; }
     const u = st[st.length - 1], chg = strength.get(u.iid);
-    s += put(`cr unit ${u.owner}${cls}${chg ? ' strchg ' + chg : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards), `data-cr="${cr}" data-card="${u.id}"`);
+    // the animal that removed a unit lunges at it (a buried one surfacing under its victim rises where it is)
+    let strike = '';
+    if (ui.strike && ui.strike.from === cr) { const [tx, ty] = at(...ui.strike.to.split(',').map(Number)), dx = tx - x, dy = ty - y, n = Math.hypot(dx, dy) || 1;
+      strike = `--sx:${(dx / n * 26).toFixed(1)}px;--sy:${(dy / n * 26).toFixed(1)}px`; }
+    s += put(`cr unit ${u.owner}${cls}${chg ? ' strchg ' + chg : ''}${strike ? ' strike' : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards), `data-cr="${cr}" data-card="${u.id}"`, strike);
   }
 
   // Removed units drain, sink and leave dust; returned ones lift and fly to their owner's side of the screen.
