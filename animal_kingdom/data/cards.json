@@ -312,7 +312,7 @@
       "deck": "egg_control",
       "rarity": "common",
       "tags": ["Bird"],
-      "base_strength": 2,
+      "base_strength": 1,
       "keywords": ["Flight"],
       "text": "Flight. Roar: draw 3 cards, then shuffle 2 cards back."
     },

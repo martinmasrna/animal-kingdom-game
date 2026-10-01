@@ -40,7 +40,7 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 | **Rattlesnake** | 2 | Snake | 0 | Whenever you shuffle a card, gain 1 strength (wherever this is). |
 | **Egg Eater** | 2 | Snake | dynamic | Has +2 strength for each removed Egg. |
 | **Owl** | 3 | Bird | 2 | Flight. Roar: Scout a card. |
-| **Raven** | 3 | Bird | 2 | Flight. Roar: draw 3 cards, then shuffle 2 cards back. |
+| **Raven** | 3 | Bird | 1 | Flight. Roar: draw 3 cards, then shuffle 2 cards back. |
 | **Bird Egg** | 3 | Egg | 0 | Roar: Scout a Bird. Next turn, remove this and Scout a Bird. |
 | **Snake Egg** | 3 | Egg | 0 | Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes. |
 
