@@ -7,7 +7,7 @@ import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICO
 import { dd, wireDd, onHold } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume, setCalls } from './sound.js';
 import { openFeedback } from './feedback.js';
-import { openPresence, showChallenge, confirmFriend, shareLink, friendRow } from './friends.js';
+import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
 import { current as lessonNow, gate, held, lessonOf } from './tutorial.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
@@ -156,7 +156,7 @@ function homeScreen(mode = {}) {
   // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
   const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
   const fr = play.opp === 'friend' && (play.friends || []).find(f => f.id === play.friend);
-  const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', fr ? fr.name : ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
+  const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', fr ? friendLabel(fr, play.friends) : ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
     : play.opp === 'ranked' ? ['Ranked', `your rating ${(ME && ME.rating) || '1500?'}`]
     : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name + ' deck' : 'Random deck'}`];
   const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
@@ -167,7 +167,7 @@ function homeScreen(mode = {}) {
     ? `<div class="chooser decks"><div class="clist">${all.map(d => tile(d, 300, d.id === chosen.id ? ' on' : '')).join('')}</div><div class="dl">${deckList(peek)}</div></div>`
     : play.open === 'opp' ? `<div class="chooser opps">${play.opp === 'gauntlet' ? levels + dd('side', play.side, SIDES)
       : `<div class="seg">${[['bot', 'Practice'], ['ranked', 'Ranked'], ['friend', 'Friend']].map(([v, l]) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${l}</button>`).join('')}</div>`
-        + (play.opp === 'ranked' ? '' : play.opp === 'friend' ? `<div class="flist">${(play.friends || []).map(f => `<button class="slab fr${f.id === play.friend ? ' on' : ''}" data-friend="${f.id}">${friendRow(f)}</button>`).join('')}</div>
+        + (play.opp === 'ranked' ? '' : play.opp === 'friend' ? `<div class="flist">${(play.friends || []).map(f => `<button class="slab fr${f.id === play.friend ? ' on' : ''}" data-friend="${f.id}">${friendRow(f, '', play.friends)}</button>`).join('')}</div>
           <button class="slab" id="addfriend">Add a friend</button><div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
           : levels + dd('botDeck', play.botDeck, botDecks))}</div>`
     : play.open === 'learn' ? `<div class="chooser lessons">${LESSON_NAMES.map((n, i) => `<button class="slab" data-lesson="${i + 1}"><b>Lesson ${i + 1}</b>${n}</button>`).join('')}</div>` : '';
@@ -266,8 +266,6 @@ async function startSearch(kind, btn, url, body, who) {
 const refreshFriends = () => api('/api/friends').then(r => r.ok && r.json()).then(j => { if (j) { play.friends = j.friends; play.friendCode = j.code; }
   if (screen === 'home' && !search) homeScreen(); }, () => {});
 const findRanked = (btn, deck) => startSearch('ranked', btn, '/api/ranked', { deck });
-const friendLabel = (f, all) => { const first = f.name.split('#')[0];   // the name, with its tag when another friend shares it
-  return (all || []).filter(g => g.name.split('#')[0] === first).length > 1 ? f.name : first; };
 
 // The leaderboard: everyone on the ladder, people and bots together, best first; your row marked and in view.
 // Settings: one column on the ground, like the leaderboard. Sound volume (0 is off) and the sound credits. The game screen
@@ -394,7 +392,7 @@ function profileScreen() {
   const fillFriends = async () => {
     const r = await api('/api/friends'), j = r.ok ? await r.json() : { friends: [] }, box = document.getElementById('pfriends');
     if (!box || screen !== 'profile') return;
-    box.innerHTML = `<h4>Friends</h4>${j.friends.map(f => `<div class="pfr">${friendRow(f, `<button class="ic" data-unfriend="${f.id}" data-name="${esc(f.name)}" aria-label="Remove">${ICON.trash}</button>`)}</div>`).join('')}
+    box.innerHTML = `<h4>Friends</h4>${j.friends.map(f => `<div class="pfr">${friendRow(f, `<button class="ic" data-unfriend="${f.id}" data-name="${esc(f.name)}" aria-label="Remove">${ICON.trash}</button>`, j.friends)}</div>`).join('')}
       <button class="slab" id="paddfriend">Add a friend</button>`;
     document.getElementById('paddfriend').onclick = () => shareLink(`${location.origin}/#/friend/${j.code}`, 'Be my friend in Animal Kingdom');
     box.querySelectorAll('[data-unfriend]').forEach(el => el.onclick = async () => {

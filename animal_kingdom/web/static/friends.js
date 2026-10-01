@@ -72,4 +72,7 @@ export const seen = f => {
   const d = Math.floor((Date.now() / 1000 - f.seen) / 86400);
   return d < 1 ? 'today' : d < 2 ? 'yesterday' : `${d} days ago`;
 };
-export const friendRow = (f, extra = '') => `<span class="dot${f.online ? ' on' : ''}"></span><span class="nm">${esc(f.name)}</span><small>${seen(f)}</small>${extra}`;
+// A friend's name without its #tag, unless another of your friends shares the name.
+export const friendLabel = (f, all) => { const first = f.name.split('#')[0];
+  return (all || []).filter(g => g.name.split('#')[0] === first).length > 1 ? f.name : first; };
+export const friendRow = (f, extra = '', all = []) => `<span class="dot${f.online ? ' on' : ''}"></span><span class="nm">${esc(friendLabel(f, all))}</span><small>${seen(f)}</small>${extra}`;

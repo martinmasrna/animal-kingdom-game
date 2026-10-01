@@ -30,7 +30,7 @@ def test_friends_by_link_challenge_accept_decline_and_remove(monkeypatch):
             assert (await (await c.get("/api/friends", headers=ha)).json())["friends"][0]["online"]
             ask = asyncio.ensure_future(c.post("/api/challenge", json={"friend": b["profile"]["id"], "deck": "ramp"}, headers=ha))
             msg = await ws.receive_json(timeout=2)
-            assert msg["t"] == "challenge" and msg["from"] == peek["name"] and "deck" not in msg
+            assert msg["t"] == "challenge" and msg["from"] == peek["name"].split("#")[0] and "deck" not in msg   # the only friend so named: no tag
             mb = await (await c.post(f"/api/challenge/{msg['id']}/answer", json={"accept": True, "deck": "cats_midrange"}, headers=hb)).json()
             ma = await (await ask).json()
             assert ma["id"] == mb["id"] and (ma["seat"], mb["seat"]) == ("A", "B")

@@ -472,6 +472,13 @@ challenges: dict[str, dict] = {}   # challenge id -> {from, to, deck, fut}
 friends: Friends = None
 
 
+def friend_label(viewer: str, other: str) -> str:
+    """`other`'s name as `viewer` sees it: without its #tag, unless another of viewer's friends shares the name."""
+    full = display(profiles.get(other)); first = full.split("#")[0]
+    same = sum(1 for f in friends.of(viewer) if (q := profiles.get(f)) and q["name"] == first)
+    return full if same > 1 else first
+
+
 async def _tell(pid: str, msg: dict) -> None:
     for ws in list(presence.get(pid, ())):
         try:
@@ -491,7 +498,7 @@ async def presence_socket(req):
     presence.setdefault(p["id"], set()).add(ws)
     for cid, c in challenges.items():   # a challenge already standing reaches a tab opened since
         if c["to"] == p["id"]:
-            await ws.send_json({"t": "challenge", "id": cid, "from": c["name"]})
+            await ws.send_json({"t": "challenge", "id": cid, "from": friend_label(p["id"], c["from"])})
     try:
         async for _ in ws:
             pass
@@ -556,7 +563,7 @@ async def challenge(req):
     cid = secrets.token_urlsafe(8)
     c = challenges[cid] = {"from": p["id"], "name": display(p), "to": to, "deck": deck,
                            "fut": asyncio.get_running_loop().create_future()}
-    await _tell(to, {"t": "challenge", "id": cid, "from": c["name"]})
+    await _tell(to, {"t": "challenge", "id": cid, "from": friend_label(to, p["id"])})
     try:
         m = await asyncio.wait_for(asyncio.shield(c["fut"]), CHALLENGE_WAIT)
     except asyncio.TimeoutError:
