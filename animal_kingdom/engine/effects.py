@@ -86,12 +86,21 @@ def apply_pending(state: GameState, action) -> None:
 
 # ===================================================================== resolve loop
 
+REQUIRE_SOURCE = False   # tests turn it on: every choice but the mulligan must name the card asking (`by_card`)
+
+
 def resolve(state: GameState) -> None:
     """Drain the effect stack until empty, a choice is needed, or the game is won."""
     while state.pending is None and state.result is None and state.effect_stack:
         step = state.effect_stack.pop()
+        n = len(state.effect_stack)
         req = OPS[step["op"]](state, step)
+        if step.get("by_card"):       # what a step sets off is that card's doing too
+            for new in state.effect_stack[n:]:
+                new.setdefault("by_card", step["by_card"])
         if req is not None:           # op needs a choice: put the step back and pause
+            if REQUIRE_SOURCE and step["op"] != "mulligan" and not step.get("by_card"):
+                raise AssertionError(f"a {step['op']!r} choice with no source card")
             state.effect_stack.append(step)
             state.pending = req.to_pending()
             return
@@ -255,7 +264,18 @@ def _push_hook(state, unit, cr, hook_name) -> None:
 
 
 def _hook(state, card_id, hook_name) -> Optional[Callable]:
-    return EFFECTS.get(card_id, {}).get(hook_name)
+    """A card's hook, wrapped so every step it pushes carries the card as its source (`by_card`): the player is always
+    told which card is asking, never left to a guess."""
+    fn = EFFECTS.get(card_id, {}).get(hook_name)
+    if fn is None:
+        return None
+    def stamped(state, *args, **kw):
+        n = len(state.effect_stack)
+        out = fn(state, *args, **kw)
+        for step in state.effect_stack[n:]:
+            step.setdefault("by_card", card_id)
+        return out
+    return stamped
 
 
 # ================================================================= removal & food
@@ -557,6 +577,7 @@ def schedule(state: GameState, unit, owner_turn_delay: int, step: dict) -> None:
     A bounced unit re-enters play as a fresh instance with a new iid, so replaying it starts a new
     timer rather than resuming this one - "bounce resets".
     """
+    step.setdefault("by_card", unit.card_id)   # a delayed effect still names its card when it fires
     state.scheduled.append({"iid": unit.iid, "owner": unit.owner,
                             "remaining": owner_turn_delay, "step": step})
 

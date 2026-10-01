@@ -587,19 +587,9 @@ class Match:
         return out, pending
 
     def _source(self) -> Optional[str]:
-        """The card whose effect is asking: named on the paused step, else the last card played."""
+        """The card whose effect is asking: every step carries it (effects.resolve stamps it), so nothing is guessed."""
         step = self.state.effect_stack[-1] if self.state.effect_stack else {}
-        if step.get("by_card") in CARDS:
-            return step["by_card"]
-        op = step.get("op", "")
-        for cid in sorted(CARDS, key=len, reverse=True):
-            if op.startswith(cid + "_"):
-                return cid
-        chooser = step.get("player") or (self.state.pending or {}).get("chooser")
-        for m in reversed(self.history):
-            if m.kind == "place":   # the last card placed, if it was the chooser's: never the opponent's (a hatching egg's
-                return m.card if m.seat == chooser else None   # choice once named their Black Panther)
-        return None
+        return step.get("by_card") if step.get("by_card") in CARDS else None
 
     def _describe_option(self, o) -> dict:
         st = self.state
