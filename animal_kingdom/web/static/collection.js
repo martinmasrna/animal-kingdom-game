@@ -3,7 +3,7 @@
 // Click a card to add a copy, right-click it or click its strip to take one out; every change saves.
 // app.js hands in what it owns: the cards, the starter decks, the player's decks and how to save them, toast, play, back.
 import { cardHTML, fitNames, KEYWORDS } from './card.js';
-import { CROP, artUrl, stripArt, fitStrips } from './art.js';
+import { CROP, artUrl, stripArt, fitStrips, lazyArt } from './art.js';
 import { encodeDeck, decodeDeck } from './deckcode.js';
 import { dd, wireDd, onHold } from './menu.js';
 
@@ -87,7 +87,7 @@ function render(app, all) {
   const grid = !shown.length ? `<div class="none"><p>No cards match</p><button class="quiet" id="clearf">Clear filters</button></div>`
     : '<div class="crow">' + shown.map(c => { const n = counts[c.id] || 0;
       const max = open && n >= limit(c);   // dimmed: every copy is in the deck (the 30 and the rarity caps show on their counters)
-      return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact' })}${n && c.rarity !== 'legendary' ? `<span class="pips">${pips(n, limit(c))}</span>` : ''}</div>`; }).join('') + '</div>';
+      return `<div class="tl${max ? ' max' : ''}" data-card="${c.id}">${cardHTML(c, { cls: 'compact', lazy: true })}${n && c.rarity !== 'legendary' ? `<span class="pips">${pips(n, limit(c))}</span>` : ''}</div>`; }).join('') + '</div>';
 
   const tabs = FAMILIES.map(([f, id]) => `<div class="tab${st.families.has(f) ? ' on' : ''}" data-t="${f}" data-tip="${f}"><div class="med" style="${med(id, 36)}"></div></div>`).join('');
   const strengths = [...Array(9).keys()].map(String).concat('9+');   // 0 to 8, then 9 and up together (Hearthstone's 7+)
@@ -111,6 +111,7 @@ function render(app, all) {
       <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${DECKS_MAX}</b><span>Decks</span></div><button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
   app.innerHTML = `<div class="coll mscr">${head}<div class="cgrid">${grid}</div><div class="side">${column}</div><div class="modal" id="cmodal"></div></div>`;
+  lazyArt(app.querySelector('.cgrid'));
   fitStrips(app);   // the deck tiles are as wide as the column (upright, the window)
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
   fitNames(app);

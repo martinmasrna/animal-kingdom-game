@@ -1,4 +1,4 @@
-// Card art: /static/art/<id>.jpg (placeholder paintings from the design sandbox, cards/).
+// Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
   lion: [.64, .28, .62], lynx: [.52, .30, .62], house_cat: [.58, .36, .62], tiger: [.6, .5, .66], cougar: [.72, .36, .6],
@@ -67,9 +67,15 @@ export const FULL = {
   worker_wasp: .375,
 };
 export const hasArt = id => id in CROP;
-export const artUrl = id => `/static/art/${id}.jpg`;
-// A strip W x H px with its focus at ax of its width: the art zoomed, shifted as close to the focus as its edges allow.
-// Deck tiles whose width follows the window (upright, one column): refit each [data-strip] tile's art to its drawn size.
+export const artUrl = id => `/static/art/${id}.webp`;
+// A long grid's art loads as its cards near view in `scroller` (data-art, from cardHTML's `lazy`), not all hundred at once.
+let seen;
+export const lazyArt = scroller => {
+  seen?.disconnect();
+  seen = new IntersectionObserver((es, o) => es.forEach(e => { if (!e.isIntersecting) return;
+    e.target.style.backgroundImage = `url(${e.target.dataset.art})`; o.unobserve(e.target); }), { root: scroller, rootMargin: '600px 0px' });
+  scroller.querySelectorAll('[data-art]').forEach(el => seen.observe(el));
+};
 export const fitStrips = root => root.querySelectorAll('[data-strip]').forEach(el => {
   const { offsetWidth: W, offsetHeight: H } = el; if (!W) return;
   el.style.cssText += ';' + stripArt(el.dataset.strip, W, H, +el.dataset.ax);

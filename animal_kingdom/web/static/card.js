@@ -15,11 +15,13 @@ const KW = /(?<=^|\. )(Roar|Armor|Flight|Stealth|Apex Predator)(:|\.)/g;
 const rules = t => (t || '').replace(KW, '<b>$1$2</b>');
 const chalk = n => String(n).split('').map(d => d === '*' ? '<b>*</b>' : `<img src="/static/kit2/chalk/${d}.webp" alt="${d}" draggable="false">`).join('');
 
-// `str`: the strength to show (hand strength can differ from the printed one); `cls`: extra classes ('compact').
+// `str`: the strength to show (hand strength can differ from the printed one); `cls`: extra classes ('compact'); `lazy`: the
+// art waits for lazyArt (art.js) to bring it near the screen.
 // The name is centred in the bar; a longer name sets smaller in proportion to its length (--n), one over 18 characters may wrap.
-export function cardHTML(c, { str = c.str, cls = '', attrs = '' } = {}) {
+export function cardHTML(c, { str = c.str, cls = '', attrs = '', lazy = false } = {}) {
   const base = c.str === '*' ? null : c.str, delta = base !== null && str !== base ? (str > base ? ' up' : ' down') : '';
-  const art = hasArt(c.id) ? ` style="background-image:url(${artUrl(c.id)});--fy:${focus(c.id).toFixed(0)}%"` : '';
+  const art = !hasArt(c.id) ? '' : lazy ? ` data-art="${artUrl(c.id)}" style="--fy:${focus(c.id).toFixed(0)}%"`
+    : ` style="background-image:url(${artUrl(c.id)});--fy:${focus(c.id).toFixed(0)}%"`;
   return `<div class="card ${c.rarity} ${cls}" ${attrs}><div class="pic"${art}>${hasArt(c.id) ? '' : `<span>${c.name}</span>`}</div>` +
     `<div class="nbar${c.name.length > 18 ? ' two' : ''}" style="--n:${c.name.length}"><span>${c.name}</span></div>` +
     `<div class="stab"><span class="n${String(str).length > 1 ? ' two' : ''}${delta}">${chalk(str)}</span></div>` +
