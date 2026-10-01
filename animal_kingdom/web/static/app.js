@@ -9,7 +9,7 @@ import { dd, wireDd, onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
-import { current as lessonNow, gate, held, lessonOf } from './tutorial.js';
+import { bindCoach, isLesson, lessonOf, lessonNow, narrowChoice, narrowPlaces, handLights, holdFood, shownRegion, lessonEnd, drawCoach } from './coach.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
 const COVER = { cats_midrange: 'king_theron', canine_buff_tempo: 'lobo', aggro_hq_rush: 'verminus', colony_food_swarm: 'queen_honoria',
@@ -103,6 +103,7 @@ async function boot() {
   CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks;
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
+  bindCoach({ V: () => V, ui, CARDS: () => CARDS, send: m => send(m), drawGame: () => drawGame(), tapWords, PL: () => PL(), store, startTutorial, firstMatch });
   openPresence({ api, toast, key: () => store('ak:key'), deck: () => deckSpec(chosenDeck()),   // friends see you online; challenges arrive
     busy: () => screen === 'game' && V && V.phase === 'playing', accept: m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; } });
   addEventListener('hashchange', route);
@@ -603,14 +604,13 @@ const opp = () => V.you === 'A' ? 'B' : 'A';
 const rel = p => p === V.you ? 'A' : 'B';
 const dcr = cr => { if (V.you === 'A') return cr; const [c, r] = cr.split(','); return `${MAP.cols + 1 - Number(c)},${r}`; };
 
-// The tutorial: its opponent is the tutorial's bot. Its lessons seen, per match (a new tutorial starts them over).
-const isTutorial = () => !!(V && V.seats && V.seats.B && /^tutorial/.test(V.seats.B.bot || ''));
-const tutState = () => { if (!ui.tut || ui.tut.id !== V.id) ui.tut = { id: V.id, seen: new Set(), shown: {} }; return ui.tut; };
+// A lesson (coach.js holds everything the tutorial does on this screen).
+const isTutorial = () => isLesson(V);
 
 // What the seat can do right now, in viewer space.
 function decision() {
   const G = V.game, d = { mine: V.phase === 'playing' && G.toAct === V.you && !RP.views.length, rings: [], hqRing: false, crChoice: {}, handPick: new Set(), cardOpts: [], otherOpts: [], places: {}, pend: null };
-  if (isTutorial() && V.phase === 'playing' && !ui.step) d.lesson = lessonNow(V, ui.sel, CARDS, tutState());   // the tutorial's coach: the lesson for this moment, once the steps have played
+  d.lesson = lessonNow();   // a lesson's step for this moment (coach.js), else null
   if (RP.views.length && V.phase === 'playing' && G.toAct === V.you) d.pend = G.pending;   // a replay shows what you were asked, read-only
   if (!d.mine) return d;
   d.pend = G.pending; d.places = G.legal.place;
@@ -621,16 +621,11 @@ function decision() {
       else if (o.kind === 'card') d.cardOpts.push(o);
       else d.otherOpts.push(o);
     }
-    if (d.lesson && d.lesson.only && d.lesson.only.crs)   // a lesson's target step: only the target it teaches
-      d.crChoice = Object.fromEntries(Object.entries(d.crChoice).filter(([cr]) => d.lesson.only.crs.includes(cr)));
+    narrowChoice(d);   // a lesson's target step: only the target it teaches
     d.rings = Object.keys(d.crChoice);
     ui.sel = null;
   } else {
-    if (d.lesson && d.lesson.only) gate(d, d.lesson.only);   // a forced lesson lets only its step be taken
-    if (isTutorial()) {   // teaching cards wait for their step; placing onto your own animal is legal but never taught, so not offered
-      d.places = Object.fromEntries(Object.entries(d.places).filter(([id]) => !held(V, d.lesson).includes(id))
-        .map(([id, ts]) => [id, ts.filter(t => !(t[0] === 'cr' && (V.game.board[t[1]] || []).slice(-1).some(u => u.owner === V.you)) || (d.lesson && d.lesson.only && (d.lesson.only.crs || []).includes(t[1])))]).filter(([, ts]) => ts.length));   // unless the lesson rings it (the Mamba's rescue)
-    }
+    narrowPlaces(d);   // what a lesson lets be placed
     if (ui.sel && !d.places[ui.sel]) ui.sel = null;
     const ids = Object.keys(d.places);
     if (!ui.sel && ids.length === 1 && d.pend) ui.sel = ids[0];   // a "play this card" prompt: preselect it
@@ -789,14 +784,12 @@ function drawGame() {
   const n = G.hand.length, cw = 143, gap = n > 1 ? Math.min(14, (PL().handW - n * cw) / (n - 1)) : 0, x0 = PL().handC - (n * cw + (n - 1) * gap) / 2;
   const hand = $('hand');
   let drawnK = 0;
+  const lit = handLights(d, G.hand);   // a lesson's hints (coach.js)
   hand.innerHTML = G.hand.map((h, i) => {
-    // a tutorial step that names a card lights only its leftmost copy: two identical lit cards leave "click the Buffalo" ambiguous
-    const one = d.lesson && d.lesson.only && d.lesson.only.card ? G.hand.find(x => x.id === d.lesson.only.card) : null;
-    const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!one || one.iid === h.iid), pick = d.handPick.has(h.iid);
-    const hint = can && d.lesson && d.lesson.only && !ui.sel;   // the card the tutorial asks for
-    const talking = d.lesson && d.lesson.next || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
-    const shown = d.lesson && d.lesson.read === h.id && !ui.step;   // after the opponent's card has landed   // the card the coach is explaining, shown large as if hovered
-    const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (one || G.hand.find(x => x.id === ui.sel)).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises
+    const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
+    const hint = lit.hint(can), shown = lit.shown(h.id);
+    const talking = lit.talking || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
+    const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (lit.one || G.hand.find(x => x.id === ui.sel)).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${PL().deck[0] - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
     return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
@@ -883,92 +876,16 @@ function drawGame() {
     rv.innerHTML = cardHTML(CARDS[st.card]); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
   }
-  placeCoach($('coach'), d.lesson, d.rings);   // no lesson while steps play (decision)
+  drawCoach($('coach'), d.lesson, d.rings);   // a lesson's coach (coach.js); none while steps play
   drawBoard(d);
   if (A && !RP.views.length) soundsFor(document, CARDS);   // one sound per thing that just moved
   drawEnd();
 }
 
-// The tutorial's coach: a granite piece standing beside what the lesson talks about, its notch pointing at it: above a
-// card in the hand, the deck or End turn, beside a crossroad (on the side with more room), a region's stone or a den.
-let COACH_W = 300;   // 400 upright (game.css .port .coach)
 // Where the edge pieces stand, on the wide stage or the upright one (game.css .port): the hand's top, centre and width, the
 // deck's and End turn's centre tops.
 const PL = () => VIEW.port ? { hand: STAGE.h - 210, handC: RP.views.length ? 216 : 300, handW: RP.views.length ? 400 : 568, deck: [655, 1238], end: [655, 1372] }   // upright the deck and End turn end the hand's row
   : { hand: 590, handC: STAGE.w / 2, deck: [1299, 606], end: [1439, 664], handW: 940 };
-// While a line waits for Next, the tutorial's opponent waits too: its moves would run over the line (told to the server once per change).
-let botHeld = false;
-const holdBot = on => { if (on !== botHeld && isTutorial()) { botHeld = on; send({ t: 'hold', on }); } };
-function placeCoach(el, L, rings = []) {
-  el.className = 'abs coach';
-  if (!L) { if (!ui.step) holdBot(false); el.innerHTML = ''; document.getElementById('board').classList.remove('pulse'); return; }
-  const a = L.at || {}, card = a.card && document.querySelector(`#hand .hc[data-id="${a.card}"]`);
-  let x, y, side;
-  // the edge pieces sit at the window's edges (fitStage's --above/--side, stage px): anchors on them move with them
-  const st = getComputedStyle(document.getElementById('stage')), up = parseFloat(st.getPropertyValue('--above')) || 0, out = parseFloat(st.getPropertyValue('--side')) || 0;
-  const read = a.read && document.querySelector(`#hand .hc[data-id="${a.read}"]`);
-  const P = PL(), port = VIEW.port, H = P.hand + up; COACH_W = port ? 400 : 300;
-  // upright, the stage is too narrow for a line beside a thing: the coach stands above it or below it, its notch pointing
-  const vert = (x, y, r) => y > STAGE.h / 2 ? [x, y - r, 'above'] : [x, y + r, 'below'];
-  if (read) { const cx = parseFloat(read.style.left) + 71.5;   // beside the large card (2.1x: 300 wide, so 150 + a 24 gap from its middle)
-    [x, y, side] = port ? [cx, H - 243, 'above']   // upright, over it (it grows 2.1x from its foot)
-      : cx - 174 - COACH_W >= 16 ? [cx - 96, 568 + up, 'left'] : [cx + 96, 568 + up, 'right']; }
-  else if (card) [x, y, side] = [parseFloat(card.style.left) + 71.5, (card.classList.contains('sel') ? H - 18 : H), 'above'];   // a picked card stands 18px higher
-  else if (a.deck) [x, y, side] = port ? [P.deck[0] - 50 + out, 0, 'cleft'] : [P.deck[0] + out, P.deck[1] + up, 'above'];   // upright, left of the corner: the deck and End turn stand together
-  else if (a.prompt) { const pb = document.getElementById('choicebar');   // under the card's question (upright it stands top left, and wraps)
-    [x, y, side] = port ? [16 + pb.offsetWidth / 2, pb.offsetTop + pb.offsetHeight - 14 - up, 'below'] : [STAGE.w / 2, 100 - up, 'below']; }
-  else if (a.endturn) [x, y, side] = port ? [P.end[0] - 55 + out, 0, 'cleft'] : [P.end[0] + out, P.end[1] + up, 'above'];
-  else if (a.cr) { [x, y] = crossroadAt(a.cr); if (port) [x, y, side] = vert(x, y, 52); else side = x > STAGE.w / 2 ? 'left' : 'right'; }
-  else if (a.den) { [x, y] = denMouthAt(a.den); if (port) [x, y, side] = vert(x, y, 40); else side = a.den === 'B' ? 'left' : 'right'; }
-  else if (a.rings && !rings.length) [x, y, side] = [P.handC, H, 'above'];   // no card picked yet: the circles come with one, so point at the hand
-  else if (a.rings) {   // beside the group of rings, clear of all of them, with no notch (the rings pulse instead)
-    const rs = rings.map(crossroadAt);   // this frame's rings, before the board redraws
-    const xs = rs.map(r => r[0]), ys = rs.map(r => r[1]), cy = (Math.min(...ys) + Math.max(...ys)) / 2;
-    const right = Math.max(...xs) + 78;
-    const left = Math.min(...xs) - 78 - COACH_W;
-    if (port) [x, y, side] = Math.min(...ys) > 420 ? [STAGE.w / 2, Math.min(...ys) - 62, 'gabove']   // over the group, or under it
-      : Math.max(...ys) < 880 ? [STAGE.w / 2, Math.max(...ys) + 62, 'gbelow'] : [STAGE.w / 2, H, 'above'];
-    else [x, y, side] = right + COACH_W < STAGE.w - 16 ? [right, cy, 'group'] : left >= 16 ? [left, cy, 'group']
-      : [STAGE.w / 2, H, 'above'];   // circles across the whole board (Flight): above the hand, pointing at the picked card
-  }
-  else if (a.gem) { const g = gemAt(a.gem); [x, y, side] = port ? vert(g[0], g[1], 44) : a.gem === 'A' ? [150, 122, 'right'] : [STAGE.w - 150, 122, 'left']; }   // a den's food gem, on its crown
-  else if (a.hand) [x, y, side] = [P.handC, H, 'above'];
-  else if (a.oppcards) [x, y, side] = port ? [STAGE.w / 2, 72, 'below'] : [STAGE.w / 2 + 170, 72, 'below'];   // beside the opponent's card backs, clear of their revealed card
-  else if (a.middle) [x, y, side] = port ? [STAGE.w / 2, 650, 'mid'] : [STAGE.w / 2, 250, 'mid'];
-  else if (a.region) {   // to the right of the region, which glows (drawBoard), clear of all of it
-    const ps = a.region.map(crossroadAt), ys = ps.map(p => p[1]);
-    if (port) [x, y, side] = Math.min(...ys) > 420 ? [STAGE.w / 2, Math.min(...ys) - 62, 'gabove'] : [STAGE.w / 2, Math.max(...ys) + 62, 'gbelow'];
-    else [x, y, side] = [Math.max(...ps.map(p => p[0])) + 2, (Math.min(...ys) + Math.max(...ys)) / 2, 'right']; }
-  else if (a.stone) { const [c, r] = a.stone.split(',').map(Number), [x1, y1] = crossroadAt(`${c},${r}`), [x2, y2] = crossroadAt(`${c + 1},${r + 1}`);
-    [x, y, side] = port ? vert((x1 + x2) / 2, (y1 + y2) / 2, 34) : [(x1 + x2) / 2 - 20, (y1 + y2) / 2, 'right']; }   // a region's payout stone, in the open ground between crossroads
-  else [x, y, side] = [STAGE.w / 2, H, 'above'];
-  const clampX = v => Math.max(16, Math.min(STAGE.w - 16 - COACH_W, v));
-  const pos = side === 'above' ? `left:${clampX(x - COACH_W / 2)}px;bottom:${STAGE.h - y + 14}px;--nx:${x - clampX(x - COACH_W / 2)}px`
-    : side === 'below' ? `left:${clampX(x - COACH_W / 2)}px;top:${y + 14}px;--nx:${x - clampX(x - COACH_W / 2)}px`
-    : side === 'mid' ? `left:${x - COACH_W / 2}px;top:${y}px`
-    : side === 'group' ? `left:${x}px;top:${y}px`
-    : side === 'cleft' ? `left:${x - 24 - COACH_W}px;bottom:${16 - up}px`   // upright, along the bottom edge left of the deck and End turn
-    : side === 'gabove' ? `left:${x - COACH_W / 2}px;bottom:${STAGE.h - y}px` : side === 'gbelow' ? `left:${x - COACH_W / 2}px;top:${y}px`
-    : side === 'right' ? `left:${x + 78}px;top:${y}px` : `left:${x - 78 - COACH_W}px;top:${y}px`;
-  const wait = 0;   // the coach only speaks on a settled view: while the timeline plays, it is hidden (above)
-  document.getElementById('board').classList.toggle('pulse', !!a.rings);
-  holdBot(!!L.next);
-  el.className = `abs coach on ${side}${L.next ? ' talk' : ''}${wait ? ' late' : ''}`; el.style.cssText = pos + (wait ? `;animation-delay:${wait}ms` : '');
-  el.style.setProperty('--up', `${up}px`);   // a risen coach clears the lifted card, which moved with the hand
-  el.dataset.iid = side === 'above' && y >= P.hand - 18 + up ? (card ? card.dataset.iid : 'any') : '';   // over the hand: a hovered card lifts it   // hovering that card lifts the coach above it (wireCoachHover)
-  // the words follow what is on screen: one circle is "the circle" (enemy, animal), several are "one of"; with one card lit,
-  // "one of your animals" names it
-  let text = rings.length === 1 ? L.text.replace('one of the circles', 'the circle').replace('Click one.', 'Click it.')
-      .replace('one of the circled enemies', 'the circled enemy').replace('one of the circled animals', 'the circled animal')
-    : L.text.replace(/\bthe circle\b(?! next)/, 'one of the circles');
-  const lit = [...document.querySelectorAll('#hand .hc.can')];
-  if (lit.length === 1 && !rings.length) text = text.replace(/Click (any|one) of your animals\./, `Click the ${CARDS[lit[0].dataset.id].name}.`);
-  el.innerHTML = `<p>${tapWords(text)}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
-  // an opening step closes on Next (or Enter/Space), and the next one shows
-  if (L.next) el.querySelector('#coachnext').onclick = e => { e.stopPropagation(); tutState().seen.add(L.id);
-    if (ui.heldFood) { ui.anim = ui.heldFood; ui.heldFood = null; ui.animUntil = Date.now() + 1800; }   // the held fruit flies now, uninterrupted
-    drawGame(); };
-}
 
 // The history strip and both decklists, shared by both game screens.
 // One move in small: a draw is its count on the team's boss (as a held payout); a placement the unit, as on the board.
@@ -1066,22 +983,17 @@ function viewerMap() {
 let lastDecision = null;
 function drawBoard(d) {
   d = d || lastDecision; lastDecision = d;
-  const g = viewerGame();
+  let g = viewerGame();
   let preview = null;
   if (ui.sel && ui.hover && d.rings.includes(ui.hover)) {
     const strs = V.game.hand.filter(h => h.id === ui.sel).map(h => h.str);
     preview = { cr: ui.hover, id: ui.sel, str: Math.max(...strs) };
   }
   let A = ui.anim; ui.anim = null;   // the animations play once, never on hover redraws
-  // The tutorial's "region is yours" line: the fruit waits for its Next. The board keeps the food it had, and the
-  // animation that would have played is kept for the Next click (placeCoach) to play.
-  if (d.lesson && d.lesson.holdFood) {
-    if (A && A.food && A.food.A !== g.food.A) ui.heldFood = A;
-    if (ui.heldFood) { g.food = { ...g.food, A: ui.heldFood.food.A }; A = A && { ...A, food: { ...A.food, A: ui.heldFood.food.A } }; }
-  }
+  [A, g] = holdFood(d, A, g);   // a lesson may hold the fruit until its Next (coach.js)
   const last = V.game.history[V.game.history.length - 1], won = V.game.result && V.game.result.reason === 'hq_capture' && last && last.target && last.target[0] === 'hq';
   const capture = won ? { side: rel(last.target[1]), id: last.card, owner: rel(last.seat), str: CARDS[last.card].str } : null;
-  const region = d.lesson && d.lesson.at && d.lesson.at.region && !ui.step ? d.lesson.at.region : null;   // after the opponent's card has landed, with the coach
+  const region = shownRegion(d);
   renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null });
 }
 
@@ -1189,16 +1101,7 @@ function drawEnd() {
       <div class="btns">${peek}<button class="play" id="nextg">Next game</button></div></div>`;
     document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else if (isTutorial()) {
-    // a lesson's end: lesson 1 leads on to lesson 2, lesson 2 to a real match; a loss offers the same lesson again
-    const lesson = lessonOf(V), won = w === you;
-    if (won) store(lesson === 1 ? 'ak:lesson' : 'ak:learned', '1');
-    const next = !won ? '' : lesson === 1 ? '<div class="next">One more lesson to go.</div>' : '<div class="next">You\'re ready! Now play a real match with the Cats deck.</div>';
-    const go = !won ? `<a class="slab" href="#/">Menu</a><button class="play" id="again">Try again</button>`   // no See the board in a lesson
-      : lesson === 1 ? `<button class="play" id="nextlesson">Next lesson</button>` : `<button class="play" id="firstmatch">Play a match</button>`;
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}.</div>${next}<div class="btns">${go}</div></div>`;
-    if (!won) document.getElementById('again').onclick = () => startTutorial(lesson);
-    if (won && lesson === 1) document.getElementById('nextlesson').onclick = () => startTutorial(2);
-    if (won && lesson === 2) document.getElementById('firstmatch').onclick = firstMatch;
+    lessonEnd(ov, { res, how, won: w === you });
   } else if (V.ranked) {
     // a ranked game: its result and your rating before and after; Play again looks for the next opponent (no rematch)
     const rt = V.rating, d = rt && rt.delta;
@@ -1314,7 +1217,4 @@ window.__ak = () => ({ V, ui, d: lastDecision, PB });   // test hook: the headle
 window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it
 window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client
 boot();
-addEventListener('keydown', e => {   // the tutorial's Next also answers Enter and Space
-  const next = screen === 'game' && document.getElementById('coachnext');
-  if (next && (e.key === 'Enter' || e.key === ' ') && document.activeElement.tagName !== 'TEXTAREA') { e.preventDefault(); next.click(); }
-});
+
