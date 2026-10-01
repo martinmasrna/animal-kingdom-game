@@ -22,3 +22,13 @@ test('a live ranked win counts the rating up to the server\'s number', async () 
   assert.ok(await page.$eval('#rnum + .rd', e => e.classList.contains('on')), 'the change shows when the count lands');
   assert.deepEqual(page.errors, []);
 });
+
+test('a provisional rating ("1500?") counts and lands on the server\'s text, never NaN', async () => {
+  await page.goto(page.url().replace(/#.*/, '#/lab/mid'), { waitUntil: 'networkidle0' });
+  await endRanked({ before: '1500?', after: '1532?', delta: 32 });
+  await wait(1600);
+  assert.match(await page.$eval('#rnum', e => e.textContent), /^\d+\??$/, 'mid-count: a number');
+  await wait(1600);
+  assert.equal(await page.$eval('#rnum', e => e.textContent), '1532?');
+  assert.deepEqual(page.errors, []);
+});
