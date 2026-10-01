@@ -31,7 +31,7 @@ const med = (id, M) => { const [cx, cy, D] = CROP[id], w = M / D, h = w * 1.5;
 // Copies as dots: filled for the copies in the deck; with `max`, hollow for the ones still allowed.
 const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
 
-let X, C, cards, st = { open: null, families: new Set(), rar: null, str: '', q: '' }, flash = null, wired = false;
+let X, C, cards, st = { open: null, families: new Set(), rar: null, str: '', q: '', sheet: false }, flash = null, wired = false;
 const limit = c => c.copies || LIMIT[c.rarity];
 // A deck's cover until its player chooses one: its first legendary with a head crop (the play screen uses the same).
 export const coverOf = (list, cards = C) => list.find(id => cards[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
@@ -110,13 +110,15 @@ function render(app, all) {
     : `<div class="clist">${all.map(tile).join('')}${all.length < DECKS_MAX ? `<button class="dnew" id="dnew" data-tip="New deck" aria-label="New deck">${ICON.plus}</button>` : ''}</div>
       <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${DECKS_MAX}</b><span>Decks</span></div><button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
-  app.innerHTML = `<div class="coll mscr">${head}<div class="cgrid">${grid}</div><div class="side">${column}</div><div class="modal" id="cmodal"></div></div>`;
+  app.innerHTML = `<div class="coll mscr">${head}<div class="cgrid">${grid}</div><div class="side${st.sheet ? ' up' : ''}"><button class="grip" id="grip" aria-label="Decks"></button>${column}</div><div class="modal" id="cmodal"></div></div>`;
   lazyArt(app.querySelector('.cgrid'));
   fitStrips(app);   // the deck tiles are as wide as the column (upright, the window)
   app.querySelectorAll('.clist, .cgrid').forEach((e, i) => { if (keep[i] != null) e.scrollTop = keep[i]; });
   fitNames(app);
   wire(app, all, open);
 }
+
+const portrait = () => matchMedia('(orientation: portrait)').matches;
 
 function wire(app, all, open) {
   const $ = id => app.querySelector('#' + id), redo = () => render(app, all), change = () => { save(all); redo(); };
@@ -126,7 +128,7 @@ function wire(app, all, open) {
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
   app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t; st.families.has(f) ? st.families.delete(f) : st.families.add(f); redo(); });   // toggles; none chosen shows every family
   const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { families: new Set(), rar: null, str: '', q: '' }); redo(); };
-  app.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.closest('.nm-edit, .tacts, .nm-in')) return; if (!st.open) { st.open = e.dataset.d; redo(); } });
+  app.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.closest('.nm-edit, .tacts, .nm-in')) return; if (!st.open) { st.open = e.dataset.d; st.sheet = false; redo(); } });
 
   const nm = app.querySelector('.nm-edit');
   if (nm) nm.onclick = () => { const inp = document.createElement('input'); inp.className = 'nm-in'; inp.maxLength = 40; inp.value = open.name; nm.replaceWith(inp); inp.focus(); inp.select();
@@ -139,15 +141,18 @@ function wire(app, all, open) {
   const del = $('ddel'); if (del) del.onclick = () => confirmDelete(app, open, () => { all.splice(all.indexOf(open), 1); st.open = null; change(); X.toast(`Deleted ${open.name}`, true); });
   // A new deck starts empty, open, with its name ready to type.
   const dn = $('dnew'); if (dn) dn.onclick = () => { const d = { id: Date.now().toString(36), name: 'New deck', list: [], cover: null };
-    all.push(d); st.open = d.id; st.rename = true; change(); };
-  const dn2 = $('done'); if (dn2) dn2.onclick = () => { st.open = null; redo(); };
+    all.push(d); st.open = d.id; st.sheet = false; st.rename = true; change(); };
+  const dn2 = $('done'); if (dn2) dn2.onclick = () => { st.open = null; st.sheet = true; redo(); };
+  // Upright the deck column is a sheet along the bottom: shut, the cards take the screen; the grip or the count opens it.
+  const sheet = () => { st.sheet = !st.sheet; redo(); };
+  $('grip').onclick = sheet; const fc = app.querySelector('.fcount'); if (fc && portrait()) fc.onclick = sheet;
   if (st.rename) { st.rename = false; const n = app.querySelector('.nm-edit'); if (n) n.click(); }
   const play = $('play'); if (play && !play.disabled) play.onclick = () => X.play(open);
 
   // Click a card to add a copy; a refused add says why. Right-click a card, or click its strip, to take one out.
   app.querySelectorAll('.cgrid [data-card]').forEach(e => {
     e.onclick = () => { const c = C[e.dataset.card];
-      if (!open) return X.toast(`Open a deck ${matchMedia('(orientation: portrait)').matches ? 'below' : 'on the right'} to build it`);
+      if (!open) { if (portrait() && !st.sheet) { st.sheet = true; redo(); } return X.toast(`Open a deck ${portrait() ? 'below' : 'on the right'} to build it`); }
       const n = open.list.filter(x => x === c.id).length, inR = open.list.filter(x => C[x].rarity === c.rarity).length;
       const why = open.list.length >= 30 ? 'tot' : n >= limit(c) ? 'pips' : CAP[c.rarity] && inR >= CAP[c.rarity] ? c.rarity : null;
       if (why) return refuse(app, e, why);
@@ -179,7 +184,8 @@ function refuse(app, el, why) {
   again(el, 'shake');
   if (why === 'tot') { again(app.querySelector('.fcount'), 'shake'); X.toast('The deck is full: take a card out first'); }
   else if (why === 'pips') again(el.querySelector('.pips'), 'flash');
-  else again(app.querySelector(`.rh[data-r="${why}"] span:last-child`), 'flash');
+  else { const rh = app.querySelector(`.rh[data-r="${why}"] span:last-child`); again(rh, 'flash');
+    if (!rh || !rh.offsetParent) X.toast(`At most ${CAP[why]} ${why} cards`); }   // the sheet is shut: say it
 }
 
 // Dialogs: Cancel, Escape or a click outside close them.

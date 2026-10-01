@@ -120,8 +120,9 @@
   .coll .chead .dd, .coll .chead .searchw { flex: 1 1 0; min-width: 0; }
   .coll .cgrid { padding: 8px 12px 24px; }
   .coll .crow { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 14px 10px; }
-  .coll .side { grid-column: 1; grid-row: 3; box-shadow: 0 -6px 14px rgba(0,0,0,.45); }
+  .coll .side { grid-column: 1; grid-row: 3; max-height: 72dvh; box-shadow: 0 -6px 14px rgba(0,0,0,.45); }
 }
+
 /* A narrow collection (a phone held sideways): the filters wrap onto a second row over the cards. */
 @media (max-width: 1000px) {
   .coll .chead { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
@@ -131,3 +132,17 @@
 }
 @media (max-width: 700px) { .coll .tab .med { width: 34px; height: 34px; } .coll .tabs { gap: 5px; } }   /* all nine families on one row */
 @media (max-width: 1000px) and (orientation: landscape) { .coll { grid-template-rows: auto minmax(0, 1fr); } }
+/* Upright, last so it wins over the narrow rules: the filters on two rows (families; strength, rarity, search), and the deck
+   column as a sheet along the bottom, shut by default so the cards take the screen (collection.js: the grip or the count opens it). */
+.coll .grip { display: none; }
+@media (orientation: portrait) {
+  .coll { grid-template-rows: auto minmax(0, 1fr) auto; }
+  .coll .chead .dd, .coll .chead .searchw { flex: 1 1 0; }
+  .coll .chead .dd .sel { font-size: 15px; padding: 0 26px 0 10px; } .coll .chead .dd .sel::after { right: 8px; }
+  .coll .grip { display: block; flex: none; height: 22px; border: 0; padding: 0; background: none; cursor: pointer; }
+  .coll .grip::before { content: ''; display: block; width: 44px; height: 5px; margin: 0 auto; border-radius: 3px; background: #8b8e92; }
+  .coll .side:not(.up) .clist:not(.editing), .coll .side:not(.up) .clist.editing > :not(.dtile), .coll .side:not(.up) .sfoot .play { display: none; }
+  .coll .side:not(.up) .clist.editing { flex: none; padding-top: 0; padding-bottom: 0; }
+  .coll .side:not(.up) .clist.editing .dtile.on { border-radius: 8px; }
+  .coll .fcount { cursor: pointer; }
+}
