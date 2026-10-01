@@ -502,3 +502,7 @@
 /* Settings over the board: from the gear, hanging from the button row like History. */
 .game .panel.setp { width: 300px; left: auto; right: 16px; top: 58px; bottom: auto; translate: var(--side, 0px) calc(-1 * var(--above, 0px)); }
 .game .panel.setp .srow { grid-template-columns: 60px 1fr 46px; height: 44px; padding: 0 12px; }
+
+/* Offered cards lowered to read the board under them ('Hide cards' in the prompt); 'Show cards' raises them. */
+.game .opts.hid { pointer-events: none; } .game .opts.hid .hc { opacity: 0; transform: translateY(60px) scale(.9); }
+.game .opts .hc { transition: opacity .25s ease, transform .25s ease; }

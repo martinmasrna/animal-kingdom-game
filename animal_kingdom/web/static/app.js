@@ -762,11 +762,15 @@ function drawGame() {
     // named options as slabs under it.
     const other = d.otherOpts.map((o, i) => `<span class="skip" data-x="${i}">${o.label}</span>`).join('');
     const skip = d.pend.optional && !RP.views.length ? '<span class="skip" id="skip">Skip</span>' : '';
-    bar.innerHTML = `<div class="line">${src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>'}${skip}</div>` + (other && !RP.views.length ? `<div class="btns">${other}</div>` : '');
+    // offered cards float over the board: a toggle lowers them to read the board, and raises them again (a new choice shows them)
+    const pk = JSON.stringify(d.cardOpts.map(o => o.v)); if (ui.optsKey !== pk) { ui.optsKey = pk; ui.optsHidden = false; }
+    const peek = d.cardOpts.length ? `<span class="skip" id="optpeek">${ui.optsHidden ? 'Show cards' : 'Hide cards'}</span>` : '';
+    bar.innerHTML = `<div class="line">${src ? `<b>${src.name}</b><p>${src.text}</p>` : '<b>Choose</b>'}${peek}${skip}</div>` + (other && !RP.views.length ? `<div class="btns">${other}</div>` : '');
     bar.classList.add('on');
     if (d.cardOpts.length) {
       opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${cardHTML(c)}</div>`; }).join('');
-      opts.classList.add('on'); fitNames(opts);
+      opts.classList.add('on'); opts.classList.toggle('hid', !!ui.optsHidden); fitNames(opts);
+      $('optpeek').onclick = e => { e.stopPropagation(); ui.optsHidden = !ui.optsHidden; drawGame(); };
       opts.querySelectorAll('[data-o]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.cardOpts[el.dataset.o].v }); });
     }
     bar.querySelectorAll('[data-x]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.otherOpts[el.dataset.x].v }); });
