@@ -1156,7 +1156,8 @@ function drawEnd() {
     document.getElementById('rematch').onclick = () => send({ t: 'rematch' });
   }
   const pk = document.getElementById('peek'); if (pk) pk.onclick = () => { ui.peek = true; drawGame(); };   // a lesson has none
-  if (live) { const r = ov.querySelector('.res'); if (r) r.classList.add('enter'); }
+  ov.classList.toggle('won', w === you); ov.classList.toggle('lost', w !== null && w !== you);   // the board behind: lit for a win, dusk for a loss
+  ov.classList.toggle('enter', !!live);
   ov.classList.add('on');
 }
 

@@ -298,7 +298,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .game .endbox .rating > div { position: relative; }
 .game .endbox .rating b { font: 700 44px/1.05 'Fira Sans Condensed', sans-serif; font-variant-numeric: tabular-nums; }
 .game .endbox .rating .rd { position: absolute; left: 100%; bottom: 8px; margin-left: 10px; font: 700 22px 'Fira Sans Condensed', sans-serif; opacity: 0; transition: opacity .3s; }
-.game .endbox .rating .rd.on { opacity: 1; } .game .endbox .rating .rd.up { color: #f4c95d; } .game .endbox .rating .rd.down { color: #b9b1a4; }
+.game .endbox .rating .rd.on { opacity: 1; } .game .endbox .rating .rd.up { color: #7cc46a; } .game .endbox .rating .rd.down { color: #c9705f; }
 
 /* ---------- settings: the leaderboard's column; a row per setting, the slider a groove with a slab knob ---------- */
 .srow { display: grid; grid-template-columns: 90px 1fr 56px; align-items: center; gap: 14px; height: 56px; padding: 0 18px; border-radius: 10px;
