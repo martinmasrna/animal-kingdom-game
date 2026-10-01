@@ -141,6 +141,7 @@ async function rejoin(only) {
 const timeOfDay = h => new URLSearchParams(location.search).get('tod') || (h >= 5 && h < 9 ? 'dawn' : h >= 9 && h < 17 ? 'day' : h >= 17 && h < 20 ? 'dusk' : 'night');
 function route() {
   pop.style.display = 'none'; stackpop.style.display = 'none';
+  if (!location.hash.startsWith('#/m/')) keepAwake(false);
   const tip = document.getElementById('tip'); if (tip) tip.style.display = 'none';   // the game's hover label lives on body: it must not outlive the screen
   const parts = (location.hash.slice(1) || '/').split('/').filter(Boolean);
   document.documentElement.dataset.tod = timeOfDay(new Date().getHours());
@@ -745,9 +746,20 @@ function turnPlate() {
 const yoursChanged = (a, b, you) => { const mine = g => JSON.stringify(Object.entries(g.board).map(([cr, st]) => [cr, st.filter(u => u.owner === you).map(u => u.iid)]).filter(([, l]) => l.length).sort());
   return mine(a) !== mine(b) || !!(b.pending && b.toAct === you); };
 
+// A phone in a match: a swipe down never reloads the page (pull-to-refresh is off on the game screen, game.css), and the
+// screen stays awake while a game is being played, so it can't lock and drop the connection during the opponent's turn.
+let wake = null;
+function keepAwake(on) {
+  if (on && !wake && navigator.wakeLock && !document.hidden) {
+    wake = navigator.wakeLock.request('screen').then(l => { l.onrelease = () => { wake = null; }; return l; }).catch(() => { wake = null; });
+  } else if (!on && wake) { wake.then(l => l && l.release()).catch(() => {}); wake = null; }
+}
+addEventListener('visibilitychange', () => { if (!document.hidden && screen === 'game' && V && V.phase === 'playing' && !RP.views.length) keepAwake(true); });   // the lock lapses while hidden
+
 function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
+  keepAwake(playing && !RP.views.length);
   lastDecision = d;
   drawIntro();
   $('scr').classList.toggle('rp', !!RP.views.length);   // a replay: upright its controls take the deck's corner
