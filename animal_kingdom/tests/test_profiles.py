@@ -280,6 +280,31 @@ def test_signing_in_on_a_second_device_moves_that_guests_work_into_the_account(d
     assert db.get(second["id"]) is None                                   # the guest is gone
 
 
+def test_signing_in_brings_no_second_copy_of_the_starters(db, tmp_path):
+    starters = [{"id": "cats", "name": "Cats", "cards": {"lion": 3}}, {"id": "ramp", "name": "Ramp", "cards": {"elephant": 3}}]
+    _, first = db.create("Martin")
+    db.seed_decks(first["id"], starters)
+    account = db.sign_in("discord", "d-1", "martin", first["id"])
+    for n in range(2):   # two more devices, each a guest with the starters, one with a deck of its own
+        _, guest = db.create("Player")
+        db.seed_decks(guest["id"], starters)
+        if n:
+            db.save_decks(guest["id"], db.decks(guest["id"]) + [{"id": "mine", "name": "Rats", "cards": {"rat": 3}}], {d["id"]: d["cards"] for d in starters})
+        db.sign_in("discord", "d-1", "martin", guest["id"])
+    assert [d["name"] for d in db.decks(account["id"])] == ["Cats", "Ramp", "Rats"]
+
+
+def test_duplicate_untouched_starters_from_old_sign_ins_are_cleared(tmp_path):
+    from animal_kingdom.web.profiles import Profiles
+    path = str(tmp_path / "p.db"); a = Profiles(path)
+    _, p = a.create("Martin")
+    with a.db:   # what an old sign-in left: the starter twice, untouched, and an edited copy
+        for i, (did, edited) in enumerate([("cats", 0), ("cats-ab12", 0), ("cats-cd34", 1)]):
+            a.db.execute("INSERT INTO decks (profile, id, name, cards, pos, cover, starter, edited) VALUES (?, ?, 'Cats', '{}', ?, '', 'cats', ?)", (p["id"], did, i, edited))
+    b = Profiles(path)
+    assert [r[0] for r in b.db.execute("SELECT id FROM decks WHERE profile = ? ORDER BY pos", (p["id"],))] == ["cats", "cats-cd34"]
+
+
 def test_the_server_serves_your_replay_and_only_yours(monkeypatch, tmp_path):
     import asyncio
     from aiohttp.test_utils import TestClient, TestServer

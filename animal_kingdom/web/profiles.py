@@ -93,6 +93,9 @@ class Profiles:
         if "starter" not in [r[1] for r in self.db.execute("PRAGMA table_info(decks)")]:   # decks saved before a copy could follow its starter
             self.db.execute("ALTER TABLE decks ADD COLUMN starter TEXT NOT NULL DEFAULT ''")
             self.db.execute("ALTER TABLE decks ADD COLUMN edited INTEGER NOT NULL DEFAULT 0")
+        with self.db:   # sign-ins once brought each device's untouched starters along: keep one untouched copy of each starter
+            self.db.execute("DELETE FROM decks WHERE starter != '' AND edited = 0 AND rowid NOT IN "
+                            "(SELECT MIN(rowid) FROM decks WHERE starter != '' AND edited = 0 GROUP BY profile, starter)")
 
     # ------------------------------------------------------------- identity
     def _free_tag(self, name: str) -> str:
@@ -157,11 +160,14 @@ class Profiles:
         return self.get(pid)
 
     def _absorb(self, pid: str, guest: str) -> None:
-        """Move a guest profile's decks and history into `pid`, unless the guest is itself an account."""
+        """Move a guest profile's decks and history into `pid`, unless the guest is itself an account. Only decks the guest
+        built or edited come along: its untouched starters are the account's already (each device's guest gets them)."""
         if self.db.execute("SELECT 1 FROM identities WHERE profile = ?", (guest,)).fetchone():
             return
         pos = self.db.execute("SELECT COALESCE(MAX(pos), -1) FROM decks WHERE profile = ?", (pid,)).fetchone()[0]
         for d in self.db.execute("SELECT id, name, cards, cover, starter, edited FROM decks WHERE profile = ? ORDER BY pos", (guest,)).fetchall():
+            if d["starter"] and not d["edited"]:
+                continue
             pos += 1
             self.db.execute("INSERT OR REPLACE INTO decks (profile, id, name, cards, pos, cover, starter, edited) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                             (pid, f"{d['id']}-{guest[:4]}", d["name"], d["cards"], pos, d["cover"], d["starter"], d["edited"]))
