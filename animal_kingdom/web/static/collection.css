@@ -139,8 +139,8 @@
   .coll { grid-template-rows: auto minmax(0, 1fr) auto; }
   .coll .chead .dd, .coll .chead .searchw { flex: 1 1 0; }
   .coll .chead .dd .sel { font-size: 15px; padding: 0 26px 0 10px; } .coll .chead .dd .sel::after { right: 8px; }
-  .coll .grip { display: block; flex: none; height: 22px; border: 0; padding: 0; background: none; cursor: pointer; }
-  .coll .grip::before { content: ''; display: block; width: 44px; height: 5px; margin: 0 auto; border-radius: 3px; background: #8b8e92; }
+  .coll .grip { display: block; flex: none; height: 30px; margin-bottom: -8px; border: 0; padding: 0; background: none; cursor: grab; touch-action: none; }
+  .coll .grip::before { content: ''; display: block; width: 44px; height: 5px; margin: -6px auto 0; border-radius: 3px; background: #8b8e92; }
   .coll .side:not(.up) .clist:not(.editing), .coll .side:not(.up) .clist.editing > :not(.dtile), .coll .side:not(.up) .sfoot .play { display: none; }
   .coll .side:not(.up) .clist.editing { flex: none; padding-top: 0; padding-bottom: 0; }
   .coll .side:not(.up) .clist.editing .dtile.on { border-radius: 8px; }

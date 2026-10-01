@@ -145,7 +145,14 @@ function wire(app, all, open) {
   const dn2 = $('done'); if (dn2) dn2.onclick = () => { st.open = null; st.sheet = true; redo(); };
   // Upright the deck column is a sheet along the bottom: shut, the cards take the screen; the grip or the count opens it.
   const sheet = () => { st.sheet = !st.sheet; redo(); };
-  $('grip').onclick = sheet; const fc = app.querySelector('.fcount'); if (fc && portrait()) fc.onclick = sheet;
+  // A swipe on the grip moves the sheet the way it goes (up opens, down shuts); a tap toggles it.
+  const g = $('grip'); let y0 = null;
+  g.onpointerdown = e => { y0 = e.clientY; g.setPointerCapture(e.pointerId); };
+  g.onpointerup = e => { if (y0 === null) return; const dy = e.clientY - y0; y0 = null;
+    if (Math.abs(dy) >= 12 && (dy < 0) !== st.sheet) sheet(); };   // a swipe; a tap is the click (acting here would let the
+  g.onclick = sheet;                                                // click land on whatever the sheet just put under the finger)
+  g.onpointercancel = () => { y0 = null; };
+  const fc = app.querySelector('.fcount'); if (fc && portrait()) fc.onclick = sheet;
   if (st.rename) { st.rename = false; const n = app.querySelector('.nm-edit'); if (n) n.click(); }
   const play = $('play'); if (play && !play.disabled) play.onclick = () => X.play(open);
 
