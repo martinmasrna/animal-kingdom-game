@@ -5,7 +5,7 @@ import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold } from './menu.js';
-import { play as sfx, soundsFor, preload, volume, setVolume, setCalls } from './sound.js';
+import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
 import { current as lessonNow, gate, held, lessonOf } from './tutorial.js';
@@ -82,7 +82,7 @@ const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
   CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks;
-  fetch('/static/kit2/snd/calls.json').then(r => r.ok ? r.json() : {}).then(setCalls, () => {});   // the animals' calls, by family
+  // the animals' calls (kit2/snd/call_*, calls.json) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
   openPresence({ api, toast, key: () => store('ak:key'), deck: () => deckSpec(chosenDeck()),   // friends see you online; challenges arrive
     busy: () => screen === 'game' && V && V.phase === 'playing', accept: m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; } });
