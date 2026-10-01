@@ -457,10 +457,25 @@ def run_all(
             baseline_weights=baseline_weights, candidate_weights=candidate_weights,
             config=config, map_id=map_id, jobs=jobs,
             bootstrap_resamples=bootstrap_resamples, bootstrap_seed=bootstrap_seed,
-            config_id=config_id)
+            config_id=config_id, log_dir=os.path.join(out_dir, "logs"))
+        # A full run takes most of a day: each finished deck is on disk (its games, and the
+        # bundle over the decks so far) and reported at once, never only at the end.
+        _write_bundle(out_dir, results, n_games=n_games, base_seed=base_seed, decks=decks,
+                      pool=pool, baseline_kind=baseline_kind, candidate_kind=candidate_kind,
+                      opponent_kind=opponent_kind, baseline_kwargs=baseline_kwargs,
+                      candidate_kwargs=candidate_kwargs, opponent_kwargs=opponent_kwargs,
+                      map_id=map_id, config_id=config_id,
+                      bootstrap_resamples=bootstrap_resamples, bootstrap_seed=bootstrap_seed)
         if progress is not None:
-            progress(deck, i + 1, len(decks))
+            progress(deck, i + 1, len(decks), results[deck])
+    return results
 
+
+def _write_bundle(out_dir: str, results: dict, *, n_games, base_seed, decks, pool,
+                  baseline_kind, candidate_kind, opponent_kind, baseline_kwargs,
+                  candidate_kwargs, opponent_kwargs, map_id, config_id,
+                  bootstrap_resamples, bootstrap_seed) -> None:
+    """summary.json, per_deck.csv and per_opponent.csv over the decks finished so far."""
     gates = evaluate_gates(results)
     os.makedirs(out_dir, exist_ok=True)
     summary = {
@@ -468,6 +483,7 @@ def run_all(
             "games_per_opponent": n_games,
             "base_seed": base_seed,
             "decks": decks,
+            "decks_done": sorted(results),
             "opponent_pool": pool,
             "baseline_kind": baseline_kind,
             "candidate_kind": candidate_kind,
@@ -488,7 +504,6 @@ def run_all(
         json.dump(summary, f, indent=2)
     _write_per_deck_csv(os.path.join(out_dir, "per_deck.csv"), results)
     _write_per_opponent_csv(os.path.join(out_dir, "per_opponent.csv"), results)
-    return results
 
 
 # ------------------------------------------------------------------------------- CLI
@@ -539,9 +554,13 @@ def main(argv: Sequence[str] | None = None) -> None:
           f"{args.games} games/opponent x {args.opponents or '7 opponents'}, map={args.map_id}, "
           f"jobs={args.jobs}, seed={args.seed}...", file=sys.stderr)
 
-    def _progress(deck: str, done: int, deck_total: int) -> None:
+    def _progress(deck: str, done: int, deck_total: int, result=None) -> None:
         elapsed = time.monotonic() - start
-        print(f"  [{done}/{deck_total}] {elapsed:6.1f}s  {deck} done", file=sys.stderr)
+        line = f"  [{done}/{deck_total}] {elapsed:6.1f}s  {deck} done"
+        if result is not None:
+            table = format_table({deck: result}, evaluate_gates({deck: result})).splitlines()
+            line += "\n" + next(row for row in table if row.startswith(deck))
+        print(line, file=sys.stderr, flush=True)
 
     # run_all always sweeps DECK_SLUGS; for a single --deck we still want the full opponent
     # pool (incl. mirror), so reuse run_bot_comparison directly there.
@@ -569,7 +588,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                 jobs=args.jobs, bootstrap_resamples=args.bootstrap_resamples,
                 bootstrap_seed=args.bootstrap_seed, config_id=args.config,
                 log_dir=os.path.join(args.out, "logs"))
-            _progress(deck, i + 1, len(decks))
+            _progress(deck, i + 1, len(decks), results[deck])
 
     gates = evaluate_gates(results)
     print(f"\nDone in {time.monotonic() - start:.1f}s.", file=sys.stderr)
