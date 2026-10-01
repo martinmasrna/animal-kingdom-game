@@ -17,4 +17,13 @@ tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 git -C "$repo" archive HEAD animal_kingdom | tar -x -C "$tmp"
 cp "$repo/deploy/Dockerfile" "$cfg" "$tmp/"
 echo "deploying $(git -C "$repo" log --oneline -1)"
-fly deploy "$tmp" --config "$tmp/fly.toml" --remote-only
+# Fly's deploy sometimes hangs on its own API: give it 10 minutes, then stop it and try once more; a second hang fails loudly.
+attempt() {
+  fly deploy "$tmp" --config "$tmp/fly.toml" --remote-only & local pid=$! waited=0
+  while kill -0 "$pid" 2>/dev/null; do
+    if (( waited >= 600 )); then kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null; echo "deploy hung for 10 minutes: stopped"; return 124; fi
+    sleep 5; waited=$((waited + 5))
+  done
+  wait "$pid"
+}
+attempt || { echo "retrying the deploy once"; attempt || { echo "DEPLOY FAILED twice"; exit 1; }; }

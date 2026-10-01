@@ -1106,7 +1106,7 @@ function drawEnd() {
     // a ranked game: its result and your rating before and after; Play again looks for the next opponent (no rematch)
     const rt = V.rating, d = rt && rt.delta;
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}.</div>
-      ${rt ? `<div class="next rating">Rating ${rt.before} → ${rt.after} (${d >= 0 ? '+' : '−'}${Math.abs(d)})</div>` : ''}
+      ${rt ? `<div class="next rating">Rating: ${rt.before} → ${rt.after} (${d >= 0 ? '+' : '−'}${Math.abs(d)})</div>` : ''}
       <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Play again</button></div></div>`;
     document.getElementById('again').onclick = () => findRanked('again', deckSpec(chosenDeck()));
   } else {
