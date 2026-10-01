@@ -1,1 +1,1 @@
-{}
+{"cat": ["call_cat_1", "call_cat_2"], "canine": ["call_canine_1", "call_canine_2"], "rodent": ["call_rodent_1", "call_rodent_2"], "bird": ["call_bird_1", "call_bird_2", "call_bird_3"], "snake": ["call_snake_1"], "colony": ["call_colony_1", "call_colony_2"], "bear": ["call_bear_1", "call_bear_2"], "megafauna": ["call_megafauna_1", "call_megafauna_2"], "lizard": ["call_lizard_1", "call_lizard_2"], "fish": ["call_fish_1"]}
