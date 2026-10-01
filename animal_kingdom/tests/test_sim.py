@@ -128,6 +128,7 @@ def test_make_bot_referee_kind_uses_module_knobs():
     assert bot.max_search_nodes == REFEREE_MAX_SEARCH_NODES
 
 
+@pytest.mark.slow
 def test_run_pairs_referee_parallel_matches_serial():
     # The referee kind must survive the ProcessPoolExecutor round-trip like any other.
     pairs = [("ramp", "aggro_hq_rush")]
@@ -153,6 +154,7 @@ def test_make_bot_extra_overrides_kind_defaults():
     assert overridden.deck_reveal_choice_width == 0
 
 
+@pytest.mark.slow
 def test_run_pairs_bot_kwargs_thread_and_survive_the_pool():
     # A config A/B of the same kind: one arm width 0, one arm width 2, over the process pool.
     pairs = [("egg_control", "ramp")]

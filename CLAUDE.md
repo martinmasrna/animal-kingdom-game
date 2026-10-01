@@ -12,7 +12,7 @@ The game has no mana, no attack or health, no combat damage. A unit is a single 
 
 Python ≥3.11 with a venv at `.venv`: `python3 -m venv .venv && .venv/bin/pip install -e '.[dev,cli]'` (add `analysis` for self-play training and plots).
 
-- Tests: `.venv/bin/python -m pytest -q` (about a minute).
+- Tests: `.venv/bin/python -m pytest -q -m 'not slow'` is the fast tier (seconds: engine, rules, events, server, timeline sources); run it after any change. `.venv/bin/python -m pytest -q` adds the bot simulations and training (`@pytest.mark.slow`, about two and a half minutes): run it in the background before a deploy, never in the foreground.
 - Web client tests: `cd animal_kingdom/web/test && npm install` once. `node --test` is the fast suite (seconds: UI, board logic, card text); run it after any change to `web/static/`. `npm run test:full` adds the slow ones (about 15 minutes: recorded bot-vs-bot matches checked view by view, clicked matches against the bot, the tutorial played through by clicks; `SHOTS=<dir> node --test tutorial.slow.mjs` saves a 2x screenshot of each lesson); after changes to the engine, the server, or the game screen's drawing and animation, run it in the background and keep working. Never make Martin wait on it; report only if it fails.
 - Web client: `./play` (serves `animal_kingdom/web/` at localhost:8000; `AK_NO_GAME_LOGS=1` keeps test games out of `results/human_games/web/`). Terminal: `./run` (interactive setup; `--help` for flags). Recorder UI: `./record` (needs the `tui` extra).
 - Hosting: https://animal-kingdom.fly.dev/ (Fly.io app `animal-kingdom`). `deploy/deploy.sh` ships the committed HEAD, never the working tree; `deploy/deploy.sh pull` brings the server's human game logs into `results/human_games/web/`, to commit.

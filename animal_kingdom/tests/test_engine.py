@@ -69,6 +69,7 @@ def assert_board_legal(state: GameState) -> None:
 
 # ------------------------------------------------------------------------- fuzz
 
+@pytest.mark.slow
 def test_fuzz_random_games_stay_legal_and_terminate():
     cfg = Config.default()
     for seed in range(1000):

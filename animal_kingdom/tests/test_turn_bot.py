@@ -12,7 +12,10 @@ Map A geometry: A's HQ fronts are column 1, B's column 4; a 4x3 grid of "col,row
 crossroads with orthogonal neighbours.
 """
 
+
 from __future__ import annotations
+
+import pytest
 
 from animal_kingdom.bots.turn_bot import TurnBot
 from animal_kingdom.decks import load_premade_deck
@@ -228,6 +231,7 @@ def test_choose_is_deterministic():
     assert a1 == a2
 
 
+@pytest.mark.slow
 def test_serial_and_parallel_simulations_match():
     pairs = [("ramp", "cats_midrange")]
     kw = dict(bots=("turn", "greedy"), map_id="map_b", config=TWO_ACTION)

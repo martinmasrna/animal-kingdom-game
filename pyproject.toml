@@ -38,3 +38,4 @@ animal_kingdom = ["data/*.json", "data/learned/*.json", "web/static/*", "web/sta
 
 [tool.pytest.ini_options]
 testpaths = ["animal_kingdom/tests"]
+markers = ["slow: bot simulations and training (minutes); the fast tier is `pytest -m 'not slow'`"]

@@ -136,6 +136,7 @@ def test_canine_develops_instead_of_drawing_a_full_hand(bot_cls):
 
 @pytest.mark.parametrize("bot_cls", [pytest.param(TurnBot, marks=pytest.mark.xfail(strict=True,
     reason="the search draws with Owl and two Vipers in hand (2026-09-30)")), RefereeBot])   # RefereeBot plays Owl since single targets are asked
+@pytest.mark.slow
 def test_egg_plays_owl_before_drawing(bot_cls):
     # Egg vs the pile, round 5, first action: Magpie, Eagle, Owl and Ember on the board, their
     # Lion in the middle under a Taipan timer; hand Viper, Python, Lemming, Viper, Owl. Martin
@@ -144,6 +145,7 @@ def test_egg_plays_owl_before_drawing(bot_cls):
         assert isinstance(chosen, PlaceAction) and chosen.card_id == "owl", chosen
 
 
+@pytest.mark.slow
 @pytest.mark.xfail(strict=True, reason="the search draws with five Cats in hand (2026-09-30)")
 @pytest.mark.parametrize("bot_cls", [TurnBot, RefereeBot])
 def test_cats_plays_lynx_in_the_middle(bot_cls):

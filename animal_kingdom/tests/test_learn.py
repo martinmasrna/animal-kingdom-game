@@ -68,6 +68,7 @@ def test_play_episode_is_deterministic():
     assert a == b
 
 
+@pytest.mark.slow
 def test_play_episode_20_games_deterministic_batch():
     cfg = TrainConfig(feature_set="rung0", batch_size=20, run_seed=123)
     specs_a = learn_train._make_batch_specs(cfg, [0.0] * (N_RUNG0 + 1), iteration=0)
@@ -343,6 +344,7 @@ def test_run_training_2_iterations_completes_and_writes_artifacts(tmp_path):
     assert len(trainer.weights) == N_RUNG0 + 1
 
 
+@pytest.mark.slow
 def test_training_moves_weights_away_from_zero_init(tmp_path):
     # A real (small) self-play run through the actual train.py machinery: starting from an
     # all-zero scorecard, weights must move meaningfully - i.e. TD is actually learning
