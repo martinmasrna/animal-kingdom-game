@@ -454,10 +454,15 @@ def ladder_name(lid: str) -> str:
 
 
 async def leaderboard(req):
-    """Everyone on the ladder, best first: name, rating as shown (a "?" while new), whether it's a bot, and whether it's you."""
+    """Everyone ranked on the ladder, best first (name, rating, whether it's a bot, whether it's you); a player still placing
+    (under ladder.PROVISIONAL games) isn't ranked yet and sees their own progress instead."""
     p = profile_of(req)
-    return web.json_response([{"name": ladder_name(lid), "rating": r.shown(), "bot": lid.startswith("bot:"),
-                               "you": bool(p and lid == p["id"])} for lid, r in ladder.table()])
+    rows = [{"name": ladder_name(lid), "rating": r.shown(), "bot": lid.startswith("bot:"), "you": bool(p and lid == p["id"])}
+            for lid, r in ladder.table() if not r.provisional]   # still placing: not ranked yet (as on Lichess)
+    me_ = ladder.get(p["id"]) if p else None
+    placing = {"name": display(p), "rating": me_.shown(), "games": me_.games, "of": ranking.PROVISIONAL} \
+        if me_ and me_.provisional and me_.games else None
+    return web.json_response({"rows": rows, "placing": placing})
 
 
 # ----------------------------------------------------------------- friends and challenges (web/friends.py)

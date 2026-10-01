@@ -300,3 +300,4 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .sets .credits pre { margin: 0; white-space: pre-wrap; font: 500 14px/1.45 'Fira Sans Condensed', sans-serif; color: #b3a996; }
 
 @media (max-width: 700px), (max-height: 500px) { .pre { padding-top: 16px; } .pre .lobbyp { margin-top: 16px; } }   /* the waiting lobby clear of the screen's top */
+.lead .lr.placing { margin-top: 10px; } .lead .lr .nm small { margin-left: 10px; font-weight: 500; font-size: 15px; color: #a99f8e; }   /* not ranked yet: your progress */

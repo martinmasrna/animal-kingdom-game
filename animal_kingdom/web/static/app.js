@@ -120,8 +120,8 @@ function route() {
   if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
   if (parts[0] === 'gauntlet') return homeScreen({ gauntlet: true });
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
-  showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (search && parts[0] !== 'm' && !(search.btn === 'go' && !parts[0])) cancelSearch();   // leaving the screen it started on withdraws a search or a challenge
+  showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'leaderboard') return leaderboardScreen();
   if (parts[0] === 'settings') return settingsScreen();
   if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
@@ -260,6 +260,7 @@ async function startSearch(kind, btn, url, body, who) {
 const findRanked = (btn, deck) => startSearch('ranked', btn, '/api/ranked', { deck });
 const friendLabel = (f, all) => { const first = f.name.split('#')[0];   // the name, with its tag when another friend shares it
   return (all || []).filter(g => g.name.split('#')[0] === first).length > 1 ? f.name : first; };
+
 // The leaderboard: everyone on the ladder, people and bots together, best first; your row marked and in view.
 // Settings: one column on the ground, like the leaderboard. Sound volume (0 is off) and the sound credits. The game screen
 // opens the same controls over the board from its gear (settingsBody is shared).
@@ -286,10 +287,11 @@ async function settingsScreen() {
 
 async function leaderboardScreen() {
   screen = 'leaderboard';
-  const r = await api('/api/leaderboard'), rows = r.ok ? await r.json() : [];
+  const r = await api('/api/leaderboard'), j = r.ok ? await r.json() : { rows: [] }, rows = j.rows, pl = j.placing;
   if (screen !== 'leaderboard') return;
   app.innerHTML = `<div class="mscr lead"><div class="lcol"><div class="hhead"><h2>Leaderboard</h2></div>
-    <div class="lbody">${rows.map((x, i) => `<div class="lr${x.bot ? ' bot' : ''}${x.you ? ' you' : ''}"><span>${i + 1}</span><span class="nm">${esc(x.name)}</span><b>${x.rating}</b></div>`).join('')}</div>
+    <div class="lbody">${rows.map((x, i) => `<div class="lr${x.bot ? ' bot' : ''}${x.you ? ' you' : ''}"><span>${i + 1}</span><span class="nm">${esc(x.name)}</span><b>${x.rating}</b></div>`).join('')}
+      ${pl ? `<div class="lr you placing"><span></span><span class="nm">${esc(pl.name)}<small>placing, ${pl.games} of ${pl.of}</small></span><b>${pl.rating}</b></div>` : ''}</div>
     <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
   const mine = app.querySelector('.lr.you'); if (mine) mine.scrollIntoView({ block: 'center' });

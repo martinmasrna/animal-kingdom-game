@@ -63,8 +63,9 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             # a ranked result moves both ratings; the leaderboard shows the bots and the rated person
             pair.results = [{"winner": ma["seat"], "reason": "food", "turns": 9}]
             server.rate_match(pair)
-            table = await (await c.get("/api/leaderboard", headers=ha)).json()
-            mine = next(r for r in table if r["you"])
-            assert mine["rating"].endswith("?") and int(mine["rating"][:-1]) > 1500
-            assert sum(r["bot"] for r in table) == 21 and table[0]["name"].startswith("Expert Bot")
+            board = await (await c.get("/api/leaderboard", headers=ha)).json()
+            assert not any(r["you"] for r in board["rows"]), "placing: not ranked yet"
+            pl = board["placing"]
+            assert pl["rating"].endswith("?") and int(pl["rating"][:-1]) > 1500 and (pl["games"], pl["of"]) == (1, 10)
+            assert sum(r["bot"] for r in board["rows"]) == 21 and board["rows"][0]["name"].startswith("Expert Bot")
     asyncio.run(run())
