@@ -20,6 +20,8 @@ START_RD = 350.0
 START_VOL = 0.06
 BOT_RD = 60.0           # a seeded bot's uncertainty: it moves, slowly
 PROVISIONAL = 10        # games before the "?" goes
+PLAYER_RD_FLOOR = 75.0  # a person's uncertainty never settles below this: an even game stays worth about +-15 (Martin,
+                        # 2026-10-01: a rating that keeps up with a player still learning beats a precise one; bots keep BOT_RD)
 
 
 @dataclass(frozen=True)
@@ -155,6 +157,8 @@ class Ladder:
     def result(self, winner: str, loser: str) -> tuple[Rating, Rating]:
         """Rate one finished game; returns both new ratings."""
         w, l = play(self.get(winner), self.get(loser), True)
+        floor = lambda lid, r: r if lid.startswith("bot:") or r.rd >= PLAYER_RD_FLOOR else replace(r, rd=PLAYER_RD_FLOOR)
+        w, l = floor(winner, w), floor(loser, l)
         with self.db:
             self._put(winner, w); self._put(loser, l)
         return w, l

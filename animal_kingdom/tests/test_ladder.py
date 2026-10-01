@@ -109,3 +109,25 @@ def test_a_bot_that_fails_or_overthinks_still_moves(monkeypatch):
                         break
                 assert len(match.actions) > 0 or match.to_act() == "A", "the bot moved"
         asyncio.run(run())
+
+
+def test_a_settled_player_still_moves_about_15_for_an_even_game():
+    """People keep an uncertainty of at least PLAYER_RD_FLOOR (Martin, 2026-10-01): about +-15 an even game, however many
+    games they've played; bots keep their own steady BOT_RD."""
+    import sqlite3
+    from animal_kingdom.web.ladder import Ladder, PLAYER_RD_FLOOR, BOT_RD, bot_id
+    lad = Ladder(sqlite3.connect(":memory:"), ["cats_midrange"])
+    bot = bot_id("normal", "cats_midrange")
+    for _ in range(60):   # a long record: without the floor its uncertainty would shrink far below
+        lad.result("me", bot); lad.result(bot, "me")
+    me = lad.get("me")
+    assert me.rd >= PLAYER_RD_FLOOR and lad.get(bot).rd <= BOT_RD + 5
+    before = me.rating
+    lad._put(bot, replace_rating(lad.get(bot), rating=before))
+    w, _ = lad.result("me", bot)
+    assert 13 <= w.rating - before <= 18
+
+
+def replace_rating(r, **kw):
+    from dataclasses import replace
+    return replace(r, **kw)
