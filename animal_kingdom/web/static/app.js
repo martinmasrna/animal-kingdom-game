@@ -1016,8 +1016,9 @@ function drawBoard(d) {
   }
   let A = ui.anim; ui.anim = null;   // the animations play once, never on hover redraws
   [A, g] = holdFood(d, A, g);   // a lesson may hold the fruit until its Next (coach.js)
-  const last = V.game.history[V.game.history.length - 1], won = V.game.result && V.game.result.reason === 'hq_capture' && last && last.target && last.target[0] === 'hq';
-  const capture = won ? { side: rel(last.target[1]), id: last.card, owner: rel(last.seat), str: CARDS[last.card].str } : null;
+  // a den taken: the animal that took it, as it was played (the engine's capture event), standing in the den's mouth
+  const cap = V.game.result && V.game.result.reason === 'hq_capture' && (V.game.events || []).filter(e => e.e === 'capture').pop();
+  const capture = cap ? { side: rel(cap.den), id: cap.card, owner: rel(cap.player), str: cap.str } : null;
   const region = shownRegion(d);
   renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, current: V.phase === 'playing' ? rel(V.game.current) : null });
 }

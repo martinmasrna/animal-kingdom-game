@@ -112,3 +112,33 @@ def test_a_stored_gain_is_an_event_and_fox_draws_after_it():
     kinds = [(e["e"], e.get("iid"), e.get("n"), e.get("cause")) for e in s.events if e["e"] in ("strength", "draw")]
     assert kinds[0] == ("strength", fox.iid, 2, "alpha")
     assert kinds[1][0] == "draw" and kinds[1][3] == "fox"
+
+
+def test_a_den_capture_carries_the_strength_it_was_played_at():
+    """The capture event names the animal and its strength as played (a buffed or poisoned one included): the screen
+    draws it from that, not from the printed card."""
+    from animal_kingdom.engine.strength import placement_strength
+    s = _fresh()
+    me, them = s.current, "B" if s.current == "A" else "A"
+    # walk an animal of ours up to the enemy den's front, then take it with a hand card given +3
+    front = sorted(s.game_map.hq_front(them))[0]
+    path = []
+    from collections import deque
+    starts = [cr for cr in s.game_map.crossroads if s.is_connected(me, cr, s.connected_occupied(me))]
+    prev, q = {c: None for c in starts}, deque(starts)
+    while q:
+        c = q.popleft()
+        if c == front: break
+        for nb in s.game_map.neighbors(c):
+            if nb not in prev: prev[nb] = c; q.append(nb)
+    while front: path.append(front); front = prev[front]
+    for cr in path:
+        s.board[cr] = [UnitInstance("lion", me, s.new_iid())]
+    taker = s.add_to_hand(me, "lynx", strength_counter=3)
+    s.events = []
+    legal = [a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "lynx" and a.target[0] == "hq"]
+    assert legal, "the den is open to it"
+    shown = placement_strength(s, taker)
+    rules.apply_action(s, legal[0])
+    cap = next(e for e in s.events if e["e"] == "capture")
+    assert cap["str"] == shown and cap["str"] == s.cards["lynx"].base_strength + 3 and cap["card"] == "lynx"

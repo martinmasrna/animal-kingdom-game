@@ -23,7 +23,7 @@ from typing import Callable, Optional
 from .actions import SKIP, ChoiceAction, PlaceAction
 from .state import EngineError, GameState, Result, UnitInstance, other_player
 from . import statics
-from .strength import effective_strength
+from .strength import effective_strength, placement_strength
 
 
 # ============================================================== pending / requests
@@ -156,6 +156,7 @@ def do_placement(state: GameState, player: str, card_id: str, target) -> None:
     unit = playable_copy(state, player, card_id)
     if unit is None:
         raise EngineError(f"{player} has no playable {card_id!r} in hand")
+    strength = placement_strength(state, unit)   # as it is played (a den capture shows it)
     state.hands[player].remove(unit)
     cost = state.cards[card_id].food_cost          # "Costs X food" (decision F): paid on placement
     if cost:
@@ -164,7 +165,7 @@ def do_placement(state: GameState, player: str, card_id: str, target) -> None:
     state.units_placed_this_turn += 1
     kind, where = target
     if kind == "hq":
-        state.emit("capture", player=player, iid=unit.iid, card=card_id, den=where)
+        state.emit("capture", player=player, iid=unit.iid, card=card_id, den=where, str=strength)
         state.result = Result(player, "hq_capture")
         return
     _land_unit(state, player, unit, where, from_hand=True)
