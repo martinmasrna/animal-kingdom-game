@@ -34,7 +34,9 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
   const click = async sel => { let el, b;   // the target may still be appearing: wait up to 2 s for it to be on screen
     for (let t = 0; t < 40 && !b; t++) { el = await page.$(sel); b = el && await el.boundingBox(); if (!b) await new Promise(r => setTimeout(r, 50)); }
     assert.ok(b, `nothing to click at ${sel}`);
-    await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2); await wait(250); await page.mouse.move(5, 5); await wait(150); };
+    // a hand card is clicked where it shows: a full hand overlaps on a phone, and its middle may lie under the next card
+    const x = sel.startsWith('.hc') ? b.x + Math.min(b.width / 2, 14) : b.x + b.width / 2;
+    await page.mouse.click(x, b.y + b.height / 2); await wait(250); await page.mouse.move(5, 5); await wait(150); };
   const owner = (s, cr) => { const st = s.board[cr]; return st && st.length ? st[st.length - 1].owner : null; };
 
   const picked = new Set();   // SHOTS: each step also once right after its card is picked (its second line, its circles)
