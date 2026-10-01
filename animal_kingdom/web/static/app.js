@@ -886,7 +886,7 @@ function drawGame() {
     bar.classList.add('on');
     if (d.cardOpts.length) {
       opts.innerHTML = d.cardOpts.map((o, i) => { const c = CARDS[o.id]; return `<div class="hc ${c.rarity}" data-o="${i}">${cardHTML(c, o.str == null ? {} : { str: o.str })}</div>`; }).join('');
-      opts.classList.add('on'); opts.classList.toggle('hid', !!ui.optsHidden); fitNames(opts);
+      opts.classList.add('on'); opts.classList.toggle('hid', !!ui.optsHidden); opts.classList.toggle('many', d.cardOpts.length > 6); fitNames(opts);
       $('optpeek').onclick = e => { e.stopPropagation(); ui.optsHidden = !ui.optsHidden; drawGame(); };
       opts.querySelectorAll('[data-o]').forEach(el => el.onclick = e => { e.stopPropagation(); act({ kind: 'choice', choice: d.cardOpts[el.dataset.o].v }); });
     }
