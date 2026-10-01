@@ -3,6 +3,7 @@
 // a computer), and a friend's row as home and the profile show it.
 
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
+import { play as sfx } from './sound.js';
 let ctx = null, ws = null, pending = null;   // ctx: { api, toast, key(), busy(), accept(challenge) }
 
 // Online while this is open; a challenge arrives on it. Reconnects after a drop.
@@ -12,7 +13,7 @@ export function openPresence(c) {
     if (!ctx.key()) return;
     ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/presence?key=${encodeURIComponent(ctx.key())}`);
     ws.onmessage = e => { const m = JSON.parse(e.data);
-      if (m.t === 'challenge') { pending = m; showChallenge(); }
+      if (m.t === 'challenge') { pending = m; showChallenge(); sfx('challenge'); }
       if (m.t === 'challenge_gone' && pending && pending.id === m.id) { pending = null; showChallenge(); } };
     ws.onclose = () => setTimeout(connect, 3000);
   };

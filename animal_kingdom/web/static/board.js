@@ -102,7 +102,7 @@ export function renderBoard(el, M, g, cards, ui) {
     if (pv) { s += put(`cr unit A ghost${cls}`, x, y, unit({ id: pv.id, owner: 'A', str: pv.str }, st.slice().reverse(), cards), `data-cr="${cr}"`); continue; }
     if (!st.length) { s += put(`cr clear${cls}`, x, y, '', `data-cr="${cr}"`); continue; }
     const u = st[st.length - 1], chg = strength.get(u.iid);
-    s += put(`cr unit ${u.owner}${cls}${chg ? ' strchg ' + chg : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards), `data-cr="${cr}"`);
+    s += put(`cr unit ${u.owner}${cls}${chg ? ' strchg ' + chg : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards), `data-cr="${cr}" data-card="${u.id}"`);
   }
 
   // Removed units drain, sink and leave dust; returned ones lift and fly to their owner's side of the screen.

@@ -5,7 +5,7 @@ import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold } from './menu.js';
-import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
+import { play as sfx, soundsFor, preload, volume, setVolume, setCalls } from './sound.js';
 import { openFeedback } from './feedback.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow } from './friends.js';
 import { current as lessonNow, gate, held, lessonOf } from './tutorial.js';
@@ -82,6 +82,7 @@ const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
   CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks;
+  fetch('/static/kit2/snd/calls.json').then(r => r.ok ? r.json() : {}).then(setCalls, () => {});   // the animals' calls, by family
   await loadProfile();
   openPresence({ api, toast, key: () => store('ak:key'), deck: () => deckSpec(chosenDeck()),   // friends see you online; challenges arrive
     busy: () => screen === 'game' && V && V.phase === 'playing', accept: m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; } });
@@ -256,7 +257,6 @@ async function startSearch(kind, btn, url, body, who) {
   } catch (e) { if (e.name !== 'AbortError' && search && search.ctl === ctl) toast(e.message || 'Could not find a match'); }
   finally { clearInterval(iv); if (search && search.ctl === ctl) search = null; drawSearch(); if (kind === 'challenge') play.friends = null; }
 }
-
 const findRanked = (btn, deck) => startSearch('ranked', btn, '/api/ranked', { deck });
 const friendLabel = (f, all) => { const first = f.name.split('#')[0];   // the name, with its tag when another friend shares it
   return (all || []).filter(g => g.name.split('#')[0] === first).length > 1 ? f.name : first; };
@@ -448,6 +448,17 @@ function onView(prev) {
   const hold = (ui.animUntil || 0) - Date.now();
   if (screen === 'game' && hold > 0) { if (!onView.kept) onView.kept = prev; clearTimeout(onView.t);
     onView.t = setTimeout(() => { const p = onView.kept; onView.kept = null; onView(p); }, hold + 20); return; }
+  // Your turn begins with something of yours happening (an Egg hatches, its Scout asks): first the plate over the board as
+  // it was, then the change plays out, then its choice appears, so a new player sees where the choice came from.
+  const g0 = prev && prev.game, g1 = V.game;
+  if (screen === 'game' && g0 && g1 && V.phase === 'playing' && prev.you === V.you && !RP.views.length && !isTutorial()
+      && g0.current !== V.you && g1.current === V.you && onView.staged !== V.version
+      && turnCue.key !== V.id + ':' + V.results.length + ':' + g1.round && yoursChanged(g0, g1, V.you)) {
+    onView.staged = V.version; turnCue.key = V.id + ':' + V.results.length + ':' + g1.round; turnCue.was = true;
+    turnPlate(); ui.animUntil = Date.now() + 1500; onView.kept = prev; clearTimeout(onView.t);
+    onView.t = setTimeout(() => { const p = onView.kept; onView.kept = null; ui.choiceAt = Date.now() + 1100; onView(p); }, 1520); return;
+  }
+  if (prev && prev.phase === 'lobby' && V.phase === 'playing') sfx('found');   // your friend joined
   if (V.phase === 'lobby') return lobbyScreen();
   if (V.phase === 'prematch') return prematchScreen();
   if (!prev || prev.phase === 'game_over' && V.phase === 'playing') ui.peek = false;
@@ -651,15 +662,22 @@ function turnCue(mine) {
     turnCue.key = key;
     // once the opponent's last card has been shown and has landed: the plate, the tablet's lift and the knock, together
     const wait = Math.max(0, (ui.revealEnd || 0) - Date.now()); turnCue.until = Date.now() + wait + 900;   // drawGame gives the tablet 'yours' meanwhile
-    setTimeout(() => { if (screen !== 'game') return; sfx('yourturn'); drawGame();
-      const b = document.createElement('div'); b.className = 'yourturn'; b.innerHTML = '<b>Your turn</b>';   // Hearthstone's plate, on granite
-      document.getElementById('stage').appendChild(b); setTimeout(() => b.remove(), 1500); }, wait);
+    setTimeout(() => { if (screen !== 'game') return; turnPlate(); drawGame(); }, wait);
     if (document.hidden) document.title = 'Your turn · Animal Kingdom';
   }
   if (!mine || !document.hidden) document.title = 'Animal Kingdom';
   turnCue.was = mine;
 }
 addEventListener('visibilitychange', () => { if (!document.hidden) document.title = 'Animal Kingdom'; });
+// Hearthstone's plate, on granite, with the knock.
+function turnPlate() {
+  sfx('yourturn');
+  const b = document.createElement('div'); b.className = 'yourturn'; b.innerHTML = '<b>Your turn</b>';
+  document.getElementById('stage').appendChild(b); setTimeout(() => b.remove(), 1500);
+}
+// Did your turn's start change something of yours (an Egg hatching), or ask you something? Then it plays after the plate.
+const yoursChanged = (a, b, you) => { const mine = g => JSON.stringify(Object.entries(g.board).map(([cr, st]) => [cr, st.filter(u => u.owner === you).map(u => u.iid)]).filter(([, l]) => l.length).sort());
+  return mine(a) !== mine(b) || !!(b.pending && b.toAct === you); };
 
 function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
@@ -760,6 +778,8 @@ function drawGame() {
     bar.innerHTML = `<b>Mulligan · ${k} of ${d.pend.cap} replaced</b>` + (RP.views.length ? '' : `<p>${how}</p><div class="btns"><span class="skip" id="skip">${k ? 'Done' : 'Keep hand'}</span></div>`);
     bar.classList.add('on');
     if ($('skip')) $('skip').onclick = e => { e.stopPropagation(); store('ak:mullseen', '1'); act({ kind: 'choice', choice: SKIP }); };
+  } else if (d.pend && Date.now() < (ui.choiceAt || 0)) {   // the change that asks is still playing out on the board
+    clearTimeout(drawGame.choice); drawGame.choice = setTimeout(() => { if (screen === 'game') drawGame(); }, ui.choiceAt - Date.now() + 20);
   } else if (d.pend) {
     const src = d.pend.source && CARDS[d.pend.source];
     // One line at the top centre, where the eyes are: the card that asks and its rule, then Skip when it may be declined;
@@ -800,7 +820,7 @@ function drawGame() {
   }
   placeCoach($('coach'), d.lesson, d.rings);
   drawBoard(d);
-  if (A && !RP.views.length) soundsFor(document);   // one sound per thing that just moved
+  if (A && !RP.views.length) soundsFor(document, CARDS);   // one sound per thing that just moved
   drawEnd();
 }
 
@@ -1064,6 +1084,8 @@ function drawEnd() {
   if (wait > 0) { ov.classList.remove('on'); clearTimeout(drawEnd.t); drawEnd.t = setTimeout(() => { if (screen === 'game') drawEnd(); }, wait + 20); return; }
   if (ui.peek) { ov.classList.remove('on'); document.getElementById('waiting').innerHTML = `<button class="slab" id="unpeek">Back to results</button>`; document.getElementById('unpeek').onclick = () => { ui.peek = false; drawGame(); }; return; }
   const you = V.you, them = opp(), w = G.result.winner, S = V.score;
+  if (drawEnd.sounded !== key && drawEnd.until && w !== null && !RP.views.length) sfx(w === you ? 'victory' : 'defeat');   // a game seen ending live
+  drawEnd.sounded = key;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
   const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded' }[G.result.reason] || G.result.reason;
   const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;

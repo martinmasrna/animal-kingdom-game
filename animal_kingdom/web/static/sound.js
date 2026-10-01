@@ -14,8 +14,16 @@ const SND = {
   endturn: ['endturn_1'],                        // you end your turn
   yourturn: ['yourturn_1'],                      // your turn begins
   versus: ['versus_1'],                          // the match's versus moment
+  victory: ['victory_1'], defeat: ['defeat_1'],  // the end of a game
+  found: ['found_1'],                            // a match was found (ranked queue, a friend's answer)
+  challenge: ['challenge_1'],                    // a friend challenges you
 };
-const VOL = { fruit: .55, oppdraw: .5, pick: .5, draw: .8 };
+// An animal calls as it lands, by its family (a card's first family tag that has a call); FAM fills from sound files present.
+const FAM = { Cat: 'cat', Canine: 'canine', Rodent: 'rodent', Bird: 'bird', Snake: 'snake', Colony: 'colony', Bear: 'bear',
+  Megafauna: 'megafauna', Lizard: 'lizard', Arachnid: 'arachnid', Egg: 'egg', Fish: 'fish' };
+export const CALLS = {};   // family -> variants, set by setCalls() from kit2/snd/calls.json
+export const setCalls = c => Object.assign(CALLS, c);
+const VOL = { fruit: .55, oppdraw: .5, pick: .5, draw: .8, call: .6 };
 const cache = {};
 const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
 export const volume = () => { const v = store('ak:vol'); return v === null ? (store('ak:mute') === '1' ? 0 : .8) : Math.max(0, Math.min(1, +v)); };
@@ -24,23 +32,26 @@ export const muted = () => volume() === 0;
 
 // play('land') now; play('land', 0.4) in 0.4 s
 export function play(name, delay = 0) {
-  if (muted() || !SND[name] || (document.hidden && name !== 'yourturn')) return;   // a background tab hears only its turn
+  const vs = SND[name] || (name.startsWith('call:') && CALLS[name.slice(5)]);
+  if (muted() || !vs || (document.hidden && !['yourturn', 'found', 'challenge'].includes(name))) return;   // a background tab hears only what calls you back
   const go = () => {
-    const v = SND[name][Math.floor(Math.random() * SND[name].length)];
+    const v = vs[Math.floor(Math.random() * vs.length)];
     const a = (cache[v] = cache[v] || new Audio(`/static/kit2/snd/${v}.mp3`)).cloneNode();
-    a.volume = (VOL[name] ?? 1) * volume(); a.play().catch(() => {});
+    a.volume = (VOL[name.startsWith('call:') ? 'call' : name] ?? 1) * volume(); a.play().catch(() => {});
   };
   delay > 0 ? setTimeout(go, delay * 1000) : go();
 }
 // warm the cache so the first sounds of a match aren't late
-export const preload = () => Object.values(SND).flat().forEach(v => { if (!cache[v]) { cache[v] = new Audio(`/static/kit2/snd/${v}.mp3`); cache[v].preload = 'auto'; } });
+export const preload = () => [...Object.values(SND), ...Object.values(CALLS)].flat().forEach(v => { if (!cache[v]) { cache[v] = new Audio(`/static/kit2/snd/${v}.mp3`); cache[v].preload = 'auto'; } });
 
 // After a render that animated: one sound per thing that moved, timed to its CSS animation (delay, then arrival).
 const secs = t => t.split(',').map(x => parseFloat(x) * (x.includes('ms') ? .001 : 1))[0] || 0;
 const timing = el => { const s = getComputedStyle(el); return [secs(s.animationDelay), secs(s.animationDuration)]; };
-export function soundsFor(root) {
+export function soundsFor(root, cards = {}) {
   if (muted()) return;
-  root.querySelectorAll('#board .cr.land').forEach(el => { const [d, t] = timing(el); play(el.classList.contains('cover') ? 'cover' : 'land', d + t * .75); });
+  root.querySelectorAll('#board .cr.land').forEach(el => { const [d, t] = timing(el); play(el.classList.contains('cover') ? 'cover' : 'land', d + t * .75);
+    const c = cards[el.dataset.card], fam = c && (c.tags || []).map(t => FAM[t]).find(f => f && CALLS[f]);
+    if (fam) play('call:' + fam, d + t * .6); });   // the animal calls as it lands
   root.querySelectorAll('#board .leave.removed').forEach(el => { const [d] = timing(el); play('remove', d); });
   const fruit = [...root.querySelectorAll('#board .flyfruit')].map(el => { const [d, t] = timing(el); return d + t; }).sort((a, b) => a - b);
   fruit.filter((t, i) => i === 0 || t - fruit[i - 1] > .07).slice(0, 8).forEach(t => play('fruit', t));   // a patter, not a roar
