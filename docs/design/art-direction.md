@@ -28,4 +28,6 @@ Kept so far (generated, by look): hand-painted gouache in a bright palette (turq
 
 Cairn, the glyptodont (2026-09-29): a calm grazing portrait read as a common; the legendary needed the heroic low angle of Borealis and Brutus, its own phenomenon (an erupting volcano) and its trait supercharged (a dome plated almost in gold). A real but unfamiliar feature (the spiked club tail of a related species) read as fantasy: paint the animal a player expects. The model miscounts legs in low three-quarter views; count them before a picture is shown.
 
+Egg Eater (settled 2026-10-01): a slate-olive egg-eating snake coiled on a blossoming branch, filling the picture, jaws around a plain white egg. The first version (a grey-brown snake with a bright blue egg) was mistaken for Snake Egg in play: two cards sharing a subject must differ at a glance, so the card's own animal dominates, its palette differs, and no bright prop steals the read.
+
 The image model paints only the animal and its world. Every frame, piece of text and UI element is designed by hand. Cards carry only name, effect, strength and tag.
