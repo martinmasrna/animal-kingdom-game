@@ -41,6 +41,10 @@ test('game: a hold opens a hand card large until a tap, and picks nothing; a hel
   await page.tap('.readov'); await wait(200);
   assert.equal(await page.$('.readov'), null, 'a tap closes it');
   assert.equal(await page.$$eval('.hc.sel', e => e.length), 0, 'and picks nothing either');
+  await page.tap('.hc'); await wait(300);   // the card held a moment ago still picks with a plain tap
+  assert.equal(await page.$$eval('.hc.sel', e => e.length), 1, 'a tap after a hold picks the card');
+  await page.tap('.hc'); await wait(300);   // and a second tap puts it back
+  assert.equal(await page.$$eval('.hc.sel', e => e.length), 0);
   const cr = await page.evaluate(() => Object.entries(window.__ak().V.game.board).find(([, st]) => st && st.length)[0]);
   const up2 = await hold(`#board [data-cr="${cr}"]`);
   assert.ok(await page.$('.readov .sc .card'), 'a held piece opens its stack in the middle');

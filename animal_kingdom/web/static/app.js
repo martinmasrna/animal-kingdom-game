@@ -776,7 +776,7 @@ function drawGame() {
   // after the finger lifts until the next tap (feedback 2026-10-01); the click that ends a hold does nothing
   hand.querySelectorAll('.hc').forEach(el => {
     let t = null, x0 = 0, y0 = 0;
-    el.ontouchstart = e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; clearTimeout(t);
+    el.ontouchstart = e => { delete el.dataset.held; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; clearTimeout(t);   // each touch starts unheld
       t = setTimeout(() => { el.dataset.held = '1'; const h = (V.game.hand || []).find(h => String(h.iid) === el.dataset.iid); readCard(el.dataset.id, h && h.str); }, 350); };
     el.ontouchend = el.ontouchcancel = () => clearTimeout(t); el.ontouchmove = e => { if (moved(e, x0, y0)) clearTimeout(t); };
     el.oncontextmenu = e => e.preventDefault();   // a long press opens no menu
