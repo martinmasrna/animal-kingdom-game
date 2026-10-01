@@ -1,0 +1,27 @@
+{
+ "version": "2026-10-01",
+ "games": 1260,
+ "ratings": {
+  "bot:easy:aggro_hq_rush": 1468.3,
+  "bot:easy:canine_buff_tempo": 1366.4,
+  "bot:easy:cats_midrange": 1502.7,
+  "bot:easy:colony_food_swarm": 1172.5,
+  "bot:easy:egg_control": 1029.7,
+  "bot:easy:food_otk": 1381.7,
+  "bot:easy:ramp": 1468.3,
+  "bot:expert:aggro_hq_rush": 1716.1,
+  "bot:expert:canine_buff_tempo": 1669.8,
+  "bot:expert:cats_midrange": 1775.7,
+  "bot:expert:colony_food_swarm": 1536.8,
+  "bot:expert:egg_control": 1256.0,
+  "bot:expert:food_otk": 1684.9,
+  "bot:expert:ramp": 1669.8,
+  "bot:normal:aggro_hq_rush": 1612.3,
+  "bot:normal:canine_buff_tempo": 1530.0,
+  "bot:normal:cats_midrange": 1716.1,
+  "bot:normal:colony_food_swarm": 1640.6,
+  "bot:normal:egg_control": 1283.6,
+  "bot:normal:food_otk": 1543.6,
+  "bot:normal:ramp": 1475.2
+ }
+}
