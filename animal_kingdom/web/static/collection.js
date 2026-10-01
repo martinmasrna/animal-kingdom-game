@@ -143,15 +143,31 @@ function wire(app, all, open) {
   const dn = $('dnew'); if (dn) dn.onclick = () => { const d = { id: Date.now().toString(36), name: 'New deck', list: [], cover: null };
     all.push(d); st.open = d.id; st.sheet = false; st.rename = true; change(); };
   const dn2 = $('done'); if (dn2) dn2.onclick = () => { st.open = null; st.sheet = true; redo(); };
-  // Upright the deck column is a sheet along the bottom: shut, the cards take the screen; the grip or the count opens it.
-  const sheet = () => { st.sheet = !st.sheet; redo(); };
-  // A swipe on the grip moves the sheet the way it goes (up opens, down shuts); a tap toggles it.
-  const g = $('grip'); let y0 = null;
-  g.onpointerdown = e => { y0 = e.clientY; g.setPointerCapture(e.pointerId); };
-  g.onpointerup = e => { if (y0 === null) return; const dy = e.clientY - y0; y0 = null;
-    if (Math.abs(dy) >= 12 && (dy < 0) !== st.sheet) sheet(); };   // a swipe; a tap is the click (acting here would let the
-  g.onclick = sheet;                                                // click land on whatever the sheet just put under the finger)
-  g.onpointercancel = () => { y0 = null; };
+  // Upright the deck column is a sheet along the bottom: shut, the cards take the screen. Its grip drags it with the finger
+  // and lets go to the nearer state (a flick goes its way); a tap on the grip or on the count opens or shuts it.
+  const sh = app.querySelector('.side'), g = $('grip');
+  const heights = () => { const was = sh.classList.contains('up'); sh.style.height = '';
+    sh.classList.remove('up'); const lo = sh.offsetHeight; sh.classList.add('up'); const hi = sh.offsetHeight;
+    sh.classList.toggle('up', was); return [lo, hi]; };
+  const settle = (to, [lo, hi] = heights()) => { const from = sh.offsetHeight, h = to ? hi : lo;
+    sh.classList.add('up'); sh.style.height = from + 'px'; void sh.offsetHeight;
+    const done = () => { st.sheet = to; redo(); };
+    if (Math.abs(from - h) < 2) return done();
+    sh.style.transition = 'height .22s ease-out'; sh.style.height = h + 'px'; sh.addEventListener('transitionend', done, { once: true }); };
+  const sheet = () => settle(!st.sheet);
+  let drag = null, tapped = false;
+  g.onpointerdown = e => { tapped = false; const hs = heights(), h0 = sh.offsetHeight;
+    sh.classList.add('up'); sh.style.transition = 'none'; sh.style.height = h0 + 'px'; fitStrips(app);   // measured now they show
+    drag = { hs, h0, y0: e.clientY, y: e.clientY, t: e.timeStamp, v: 0, h: h0 }; g.setPointerCapture(e.pointerId); };
+  g.onpointermove = e => { if (!drag) return; const [lo, hi] = drag.hs;
+    drag.v = (e.clientY - drag.y) / Math.max(1, e.timeStamp - drag.t); drag.y = e.clientY; drag.t = e.timeStamp;
+    drag.h = Math.max(lo, Math.min(hi, drag.h0 - (e.clientY - drag.y0))); sh.style.height = drag.h + 'px'; };
+  g.onpointerup = e => { if (!drag) return; const d = drag; drag = null; const [lo, hi] = d.hs;
+    if (Math.abs(e.clientY - d.y0) < 8) { tapped = true; return settle(!st.sheet, d.hs); }   // a tap (its click is swallowed below)
+    if (e.timeStamp - d.t > 100) d.v = 0;   // held still before letting go: not a flick
+    settle(Math.abs(d.v) > .4 ? d.v < 0 : d.h > (lo + hi) / 2, d.hs); };
+  g.onpointercancel = () => { if (drag) { const d = drag; drag = null; settle(st.sheet, d.hs); } };
+  g.onclick = () => { if (tapped) tapped = false; else sheet(); };
   const fc = app.querySelector('.fcount'); if (fc && portrait()) fc.onclick = sheet;
   if (st.rename) { st.rename = false; const n = app.querySelector('.nm-edit'); if (n) n.click(); }
   const play = $('play'); if (play && !play.disabled) play.onclick = () => X.play(open);
