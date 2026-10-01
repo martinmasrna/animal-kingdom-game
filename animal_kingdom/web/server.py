@@ -464,7 +464,10 @@ async def leaderboard(req):
     """Everyone ranked on the ladder, best first (name, rating, whether it's a bot, whether it's you); a player still placing
     (under ladder.PROVISIONAL games) isn't ranked yet and sees their own progress instead."""
     p = profile_of(req)
-    rows = [{"name": ladder_name(lid), "rating": r.shown(), "bot": lid.startswith("bot:"), "you": bool(p and lid == p["id"])}
+    mine, asked = (set(friends.of(p["id"])), friends.asked(p["id"])) if p else (set(), set())
+    rows = [{"name": ladder_name(lid), "rating": r.shown(), "bot": lid.startswith("bot:"), "you": bool(p and lid == p["id"]),
+             **({} if lid.startswith("bot:") or (p and lid == p["id"]) else   # a person: whether you're friends or have asked
+                {"id": lid, "friend": lid in mine, "asked": lid in asked})}
             for lid, r in ladder.table() if not r.provisional]   # still placing: not ranked yet (as on Lichess)
     me_ = ladder.get(p["id"]) if p else None
     placing = {"name": display(p), "rating": me_.shown(), "games": me_.games, "of": ranking.PROVISIONAL} \
@@ -506,6 +509,9 @@ async def presence_socket(req):
     for cid, c in challenges.items():   # a challenge already standing reaches a tab opened since
         if c["to"] == p["id"]:
             await ws.send_json({"t": "challenge", "id": cid, "from": friend_label(p["id"], c["from"])})
+    for frm in friends.requests_to(p["id"]):   # so does a friend request sent while you were away
+        if (f := profiles.get(frm)):
+            await ws.send_json({"t": "friendreq", "from": frm, "name": display(f)})
     try:
         async for _ in ws:
             pass
@@ -547,6 +553,27 @@ async def friend_add(req):
     except FriendError as e:
         raise web.HTTPBadRequest(text=str(e))
     return web.json_response({"name": display(profiles.get(other))})
+
+
+async def friend_request(req):
+    """Ask a player on the leaderboard to be friends: they get it on their presence socket now, or when they next come."""
+    p, body = me(req), await req.json()
+    other = str(body.get("to") or "")
+    if not profiles.get(other):
+        raise web.HTTPNotFound(text="no such player")
+    try:
+        done = friends.request(p["id"], other)
+    except FriendError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    if not done:
+        await _tell(other, {"t": "friendreq", "from": p["id"], "name": display(p)})
+    return web.json_response({"friends": done})
+
+
+async def friend_request_answer(req):
+    p, body = me(req), await req.json()
+    friends.answer(p["id"], req.match_info["frm"], bool(body.get("accept")))
+    return web.json_response({})
 
 
 async def friend_remove(req):
@@ -771,6 +798,8 @@ def make_app() -> web.Application:
         web.post("/api/friends", friend_add),
         web.get("/api/friends/link/{code}", friend_peek),
         web.delete("/api/friends/{id}", friend_remove),
+        web.post("/api/friends/request", friend_request),
+        web.post("/api/friends/request/{frm}/answer", friend_request_answer),
         web.post("/api/challenge", challenge),
         web.delete("/api/challenge", challenge_cancel),
         web.post("/api/challenge/{id}/answer", challenge_answer),

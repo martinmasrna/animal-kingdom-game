@@ -20,6 +20,7 @@ export const ICON = {
   edit: svg('<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>'),
   search: svg('<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>'),
   plus: svg('<path d="M12 5v14M5 12h14"/>'),
+  addfriend: svg('<circle cx="10" cy="8" r="4"/><path d="M3 20c1.2-3.5 3.8-5.5 7-5.5 1.6 0 3 .5 4.2 1.4M18 13v6M15 16h6"/>'),
   image: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/>'),
   copy: svg('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>'),
   trash: svg('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'),

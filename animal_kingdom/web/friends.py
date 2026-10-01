@@ -15,6 +15,7 @@ SCHEMA = """
 CREATE TABLE IF NOT EXISTS friends (a TEXT NOT NULL, b TEXT NOT NULL, created REAL NOT NULL, PRIMARY KEY (a, b));
 CREATE TABLE IF NOT EXISTS friend_codes (profile TEXT PRIMARY KEY, code TEXT NOT NULL UNIQUE);
 CREATE TABLE IF NOT EXISTS last_seen (profile TEXT PRIMARY KEY, at REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS friend_requests (frm TEXT NOT NULL, dest TEXT NOT NULL, created REAL NOT NULL, PRIMARY KEY (frm, dest));
 """
 ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789"
 
@@ -54,6 +55,39 @@ class Friends:
             self.db.execute("INSERT OR IGNORE INTO friends VALUES (?, ?, ?)", (pid, other, now))
             self.db.execute("INSERT OR IGNORE INTO friends VALUES (?, ?, ?)", (other, pid, now))
         return other
+
+    def befriend(self, a: str, b: str) -> None:
+        now = time.time()
+        with self.db:
+            self.db.execute("INSERT OR IGNORE INTO friends VALUES (?, ?, ?)", (a, b, now))
+            self.db.execute("INSERT OR IGNORE INTO friends VALUES (?, ?, ?)", (b, a, now))
+            self.db.execute("DELETE FROM friend_requests WHERE (frm = ? AND dest = ?) OR (frm = ? AND dest = ?)", (a, b, b, a))
+
+    def request(self, pid: str, other: str) -> bool:
+        """Ask `other` to be friends (from the leaderboard); True when that made you friends (they had asked you)."""
+        if other == pid:
+            raise FriendError("that's you")
+        if self.are(pid, other):
+            return True
+        if self.db.execute("SELECT 1 FROM friend_requests WHERE frm = ? AND dest = ?", (other, pid)).fetchone():
+            self.befriend(pid, other)
+            return True
+        with self.db:
+            self.db.execute("INSERT OR IGNORE INTO friend_requests VALUES (?, ?, ?)", (pid, other, time.time()))
+        return False
+
+    def requests_to(self, pid: str) -> list[str]:
+        return [r[0] for r in self.db.execute("SELECT frm FROM friend_requests WHERE dest = ? ORDER BY created", (pid,))]
+
+    def asked(self, pid: str) -> set[str]:
+        return {r[0] for r in self.db.execute("SELECT dest FROM friend_requests WHERE frm = ?", (pid,))}
+
+    def answer(self, pid: str, frm: str, accept: bool) -> None:
+        if accept and self.db.execute("SELECT 1 FROM friend_requests WHERE frm = ? AND dest = ?", (frm, pid)).fetchone():
+            self.befriend(pid, frm)
+        else:
+            with self.db:
+                self.db.execute("DELETE FROM friend_requests WHERE frm = ? AND dest = ?", (frm, pid))
 
     def remove(self, pid: str, other: str) -> None:
         with self.db:

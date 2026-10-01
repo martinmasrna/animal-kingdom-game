@@ -56,3 +56,36 @@ def test_friends_by_link_challenge_accept_decline_and_remove(monkeypatch):
             assert (await (await c.get("/api/friends", headers=ha)).json())["friends"] == []
             await ws.close()
     asyncio.run(run())
+
+
+def test_friend_request_from_the_leaderboard(monkeypatch):
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a, b, d = [await (await c.post("/api/profile", json={})).json() for _ in range(3)]
+            ha, hb, hd = ({"X-AK-Key": x["code"]} for x in (a, b, d))
+            bid, aid = b["profile"]["id"], a["profile"]["id"]
+            # B online: the request reaches B at once; declining leaves no friends
+            ws = await c.ws_connect(f"/ws/presence?key={b['code']}")
+            await asyncio.sleep(0.05)
+            assert (await (await c.post("/api/friends/request", json={"to": bid}, headers=ha)).json()) == {"friends": False}
+            msg = await ws.receive_json(timeout=2)
+            assert msg["t"] == "friendreq" and msg["from"] == aid
+            await c.post(f"/api/friends/request/{aid}/answer", json={"accept": False}, headers=hb)
+            assert (await (await c.get("/api/friends", headers=ha)).json())["friends"] == []
+            await ws.close()
+            # B offline: the request waits and arrives when B comes; accepting makes them friends both ways
+            await c.post("/api/friends/request", json={"to": bid}, headers=ha)
+            ws = await c.ws_connect(f"/ws/presence?key={b['code']}")
+            msg = await ws.receive_json(timeout=2)
+            assert msg["t"] == "friendreq" and msg["from"] == aid
+            await c.post(f"/api/friends/request/{aid}/answer", json={"accept": True}, headers=hb)
+            assert [f["id"] for f in (await (await c.get("/api/friends", headers=ha)).json())["friends"]] == [bid]
+            assert [f["id"] for f in (await (await c.get("/api/friends", headers=hb)).json())["friends"]] == [aid]
+            await ws.close()
+            # asking someone who asked you makes you friends at once; you can't ask yourself
+            await c.post("/api/friends/request", json={"to": aid}, headers=hd)
+            assert (await (await c.post("/api/friends/request", json={"to": d["profile"]["id"]}, headers=ha)).json()) == {"friends": True}
+            assert (await c.post("/api/friends/request", json={"to": aid}, headers=ha)).status == 400
+    asyncio.run(run())

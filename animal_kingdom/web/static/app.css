@@ -316,3 +316,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   input, textarea, .field, pre { -webkit-user-select: text; user-select: text; }
 }
+.lead .lr .addf { margin-left: 10px; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 8px; background: none; color: #cfc3ad; cursor: pointer; vertical-align: middle; opacity: .75; }
+.lead .lr .addf:hover { opacity: 1; background: rgba(240,232,218,.08); }
+.lead .lr .addf svg { width: 20px; height: 20px; }
+.lead .lr .asked { margin-left: 10px; font-size: 13px; font-weight: 500; color: #8f8574; }

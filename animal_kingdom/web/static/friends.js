@@ -4,7 +4,7 @@
 
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 import { play as sfx } from './sound.js';
-let ctx = null, ws = null, pending = null;   // ctx: { api, toast, key(), busy(), accept(challenge) }
+let ctx = null, ws = null, pending = null, asks = [];   // asks: friend requests waiting for an answer   // ctx: { api, toast, key(), busy(), accept(challenge) }
 
 // Online while this is open; a challenge arrives on it. Reconnects after a drop.
 export function openPresence(c) {
@@ -14,7 +14,8 @@ export function openPresence(c) {
     ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/presence?key=${encodeURIComponent(ctx.key())}`);
     ws.onmessage = e => { const m = JSON.parse(e.data);
       if (m.t === 'challenge') { pending = m; showChallenge(); sfx('challenge'); }
-      if (m.t === 'challenge_gone' && pending && pending.id === m.id) { pending = null; showChallenge(); } };
+      if (m.t === 'challenge_gone' && pending && pending.id === m.id) { pending = null; showChallenge(); }
+      if (m.t === 'friendreq' && !asks.some(a => a.from === m.from)) { asks.push(m); showChallenge(); } };
     ws.onclose = () => setTimeout(connect, 3000);
   };
   connect();
@@ -22,6 +23,7 @@ export function openPresence(c) {
 
 // The challenge piece: at the top centre over any menu, never over a match in play (it waits until that ends).
 export function showChallenge() {
+  showAsk();
   let el = document.getElementById('chal');
   if (!pending || ctx.busy()) { if (el) el.remove(); return; }
   if (el && el.dataset.id === pending.id) return;
@@ -34,6 +36,26 @@ export function showChallenge() {
     const r = await ctx.api(`/api/challenge/${c.id}/answer`, { method: 'POST', body: JSON.stringify({ accept, deck: ctx.deck() }) });
     if (!r.ok) return accept && ctx.toast(await r.text());
     if (accept) ctx.accept(await r.json());
+  };
+  el.querySelector('[data-x="no"]').onclick = () => answer(false);
+  el.querySelector('[data-x="yes"]').onclick = () => answer(true);
+}
+
+// A friend request (sent from the leaderboard): the same piece as a challenge, after any challenge, one at a time.
+function showAsk() {
+  let el = document.getElementById('fask');
+  const a = asks[0];
+  if (!a || ctx.busy() || document.getElementById('chal')) { if (el) el.remove(); return; }
+  if (el && el.dataset.from === a.from) return;
+  if (el) el.remove();
+  el = document.createElement('div'); el.id = 'fask'; el.className = 'chal'; el.dataset.from = a.from;
+  el.innerHTML = `<b>${esc(a.name)} wants to be friends</b><div class="btns"><button class="slab" data-x="no">Not now</button><button class="play" data-x="yes">Add friend</button></div>`;
+  document.body.appendChild(el);
+  const answer = async accept => {
+    asks.shift(); el.remove();
+    const r = await ctx.api(`/api/friends/request/${encodeURIComponent(a.from)}/answer`, { method: 'POST', body: JSON.stringify({ accept }) });
+    if (r.ok && accept) ctx.toast(`You and ${a.name.split('#')[0]} are friends`, true);
+    showChallenge();
   };
   el.querySelector('[data-x="no"]').onclick = () => answer(false);
   el.querySelector('[data-x="yes"]').onclick = () => answer(true);

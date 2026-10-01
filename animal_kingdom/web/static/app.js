@@ -308,17 +308,28 @@ async function settingsScreen() {
 }
 
 // A name with its #tag small and dim: the tag only tells two players of one name apart.
+// On a person's row (not yours, not a friend's): Add friend, or that you've asked.
+const addFriend = x => !x.id || x.friend ? '' : x.asked ? '<small class="asked">Request sent</small>'
+  : `<button class="addf" data-addf="${esc(x.id)}" data-tip="Add friend" aria-label="Add friend">${ICON.addfriend}</button>`;
 const nameTag = n => { const [a, t] = String(n).split('#'); return esc(a) + (t ? `<i class="tg">#${esc(t)}</i>` : ''); };
 async function leaderboardScreen() {
   screen = 'leaderboard';
   const r = await api('/api/leaderboard'), j = r.ok ? await r.json() : { rows: [] }, rows = j.rows, pl = j.placing;
   if (screen !== 'leaderboard') return;
   app.innerHTML = `<div class="mscr lead"><div class="lcol"><div class="hhead"><h2>Leaderboard</h2></div>
-    <div class="lbody">${rows.map((x, i) => `<div class="lr${x.bot ? ' bot' : ''}${x.you ? ' you' : ''}"><span>${i + 1}</span><span class="nm">${nameTag(x.name)}</span><b>${x.rating}</b></div>`).join('')}
+    <div class="lbody">${rows.map((x, i) => `<div class="lr${x.bot ? ' bot' : ''}${x.you ? ' you' : ''}"><span>${i + 1}</span><span class="nm">${nameTag(x.name)}${addFriend(x)}</span><b>${x.rating}</b></div>`).join('')}
 </div>
     ${pl ? `<div class="lpin"><div class="lr you placing"><span></span><span class="nm">${nameTag(pl.name)}<small>placing, ${pl.games} of ${pl.of}</small></span><b>${pl.rating}</b></div></div>` : ''}
     <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
+  app.querySelectorAll('[data-addf]').forEach(b => b.onclick = async () => {
+    b.disabled = true;
+    const r = await api('/api/friends/request', { method: 'POST', body: JSON.stringify({ to: b.dataset.addf }) });
+    if (!r.ok) { b.disabled = false; return toast(await r.text()); }
+    const name = b.closest('.nm').firstChild.textContent;
+    if ((await r.json()).friends) { b.replaceWith(''); toast(`You and ${name} are friends`, true); }
+    else { b.outerHTML = '<small class="asked">Request sent</small>'; toast(`Friend request sent to ${name}`, true); }
+  });
   const mine = app.querySelector('.lr.you'); if (mine) mine.scrollIntoView({ block: 'center' });
 }
 
