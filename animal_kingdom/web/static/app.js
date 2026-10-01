@@ -1143,9 +1143,10 @@ function drawEnd() {
     // a ranked game: its result and your rating before and after; Play again looks for the next opponent (no rematch)
     const rt = V.rating, d = rt && rt.delta;
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}.</div>
-      ${rt ? `<div class="next rating">Rating: ${rt.before} → ${rt.after} (${d >= 0 ? '+' : '−'}${Math.abs(d)})</div>` : ''}
+      ${rt ? `<div class="rating"><small>Rating</small><div><b id="rnum">${live ? rt.before : rt.after}</b><span class="rd ${d >= 0 ? 'up' : 'down'}${live ? '' : ' on'}">${d >= 0 ? '+' : '−'}${Math.abs(d)}</span></div></div>` : ''}
       <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Play again</button></div></div>`;
     document.getElementById('again').onclick = () => findRanked('again', deckSpec(chosenDeck()));
+    if (live && rt) countRating(rt);
   } else {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
     const won = S[you] > S[them], series = V.results.length > 1;
@@ -1157,6 +1158,16 @@ function drawEnd() {
   const pk = document.getElementById('peek'); if (pk) pk.onclick = () => { ui.peek = true; drawGame(); };   // a lesson has none
   if (live) { const r = ov.querySelector('.res'); if (r) r.classList.add('enter'); }
   ov.classList.add('on');
+}
+
+// A ranked game seen ending live: once the result has landed, the rating counts from before to after, then the change shows.
+function countRating(rt) {
+  const t0 = performance.now() + 700, dur = 1100;
+  const step = now => { const n = document.getElementById('rnum'); if (!n) return;
+    const k = Math.min(1, Math.max(0, (now - t0) / dur)), e = 1 - (1 - k) ** 3;
+    n.textContent = Math.round(rt.before + (rt.after - rt.before) * e);
+    if (k < 1) requestAnimationFrame(step); else n.nextElementSibling.classList.add('on'); };
+  requestAnimationFrame(step);
 }
 
 // ------------------------------------------------------------------ replay

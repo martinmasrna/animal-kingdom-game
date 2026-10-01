@@ -293,7 +293,12 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 /* Ranked: Play shows the search (click again to cancel); a ranked game's end shows the rating's change. */
 .mscr .play.searching, .game .play.searching { filter: saturate(.4) brightness(.85); }
 .play .search { display: flex; flex-direction: column; align-items: center; line-height: 1.1; font-size: .8em; } .play .search small { font-size: .55em; font-weight: 500; opacity: .85; margin-top: 3px; }
-.game .endbox .rating { font-size: 18px; color: #e8dfcf; }
+.game .endbox .rating { display: flex; flex-direction: column; align-items: center; margin-top: 4px; color: #e8dfcf; }
+.game .endbox .rating small { font: 500 15px 'Fira Sans Condensed', sans-serif; color: #b9b1a4; }
+.game .endbox .rating > div { position: relative; }
+.game .endbox .rating b { font: 700 44px/1.05 'Fira Sans Condensed', sans-serif; font-variant-numeric: tabular-nums; }
+.game .endbox .rating .rd { position: absolute; left: 100%; bottom: 8px; margin-left: 10px; font: 700 22px 'Fira Sans Condensed', sans-serif; opacity: 0; transition: opacity .3s; }
+.game .endbox .rating .rd.on { opacity: 1; } .game .endbox .rating .rd.up { color: #f4c95d; } .game .endbox .rating .rd.down { color: #b9b1a4; }
 
 /* ---------- settings: the leaderboard's column; a row per setting, the slider a groove with a slab knob ---------- */
 .srow { display: grid; grid-template-columns: 90px 1fr 56px; align-items: center; gap: 14px; height: 56px; padding: 0 18px; border-radius: 10px;
