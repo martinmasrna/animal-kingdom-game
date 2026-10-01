@@ -105,7 +105,7 @@ def _adjacent_to_friendly_armadillo(state: GameState, unit: UnitInstance) -> boo
 def can_be_chosen(state: GameState, unit: UnitInstance, by_player: str) -> bool:
     """Stealth (keyword-review decisions A2/B/E, 2026-07-02): the unit cannot be *chosen*
     by an enemy ability - consulted ONLY when building option lists an enemy chooser picks
-    from (and the Apex eat, a chosen single-out). Mass, random, and automatic effects
+    from. Mass, random, and automatic effects (and an Apex Predator's eat)
     (Pestis/Rhinoceros/Brutus/Sirocco, Grizzly Bear, Hippopotamus, King Theron,
     Pufferfish) do NOT consult this and hit Stealth units normally.
 

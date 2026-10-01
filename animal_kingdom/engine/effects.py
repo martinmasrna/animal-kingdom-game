@@ -314,8 +314,8 @@ def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None
     if not stack or unit not in stack:
         return False
     # Only the physics gate lives here (Armor blocks any effect-removal, whoever chose
-    # it). Stealth is a *choice* restriction, enforced where enemy option lists are built
-    # (and at the Apex eat), never at resolution - so mass/random/automatic removals
+    # it). Stealth is a *choice* restriction, enforced where enemy option lists are built,
+    # never at resolution - so mass/random/automatic removals
     # (Pestis, Rhino/Brutus, Grizzly, Hippo, King Theron, Pufferfish) hit Stealth units.
     if by_effect and not statics.can_be_removed(state, unit):
         return False
@@ -342,14 +342,15 @@ def remove_top(state, cr, *, by_player, by_effect=True, by_card=None) -> bool:
 
 def _op_apex_eat(state, step):
     """An Apex eats what it covered, if both are still there, the prey is right beneath it,
-    and it can be eaten (not Armor; not an enemy with Stealth, since the eat is a chosen single-out)."""
+    and it can be eaten (not Armor, which _remove_specific refuses). Stealth doesn't save it: a predator eats what it
+    lands on, nobody chooses a target (Martin, 2026-10-01)."""
     cr, apex = _find_unit(state, step["iid"])
     if apex is None:
         return None
     stack = state.board[cr]
     i = stack.index(apex)
     prey = stack[i - 1] if i > 0 else None
-    if prey is not None and prey.iid == step["prey"] and statics.can_be_chosen(state, prey, apex.owner):
+    if prey is not None and prey.iid == step["prey"]:
         _remove_specific(state, cr, prey, by_player=apex.owner, by_card=apex.card_id)
     return None
 
@@ -582,8 +583,8 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
     """Apex Predator landing rules (decision D + keyword-review C1): it may land wherever it
     could legally cover - free on your own occupants, `statics.can_cover` vs an enemy, so
     the covering statics apply to apexes exactly as to normal placements: Snow Leopard lets
-    an apex Cat land at equal strength. If the occupant is eat-eligible it gets eaten; if not (Armor / enemy
-    Stealth) it is simply covered (see _land_unit)."""
+    an apex Cat land at equal strength. If the occupant can be eaten it is; if not (Armor) it is simply
+    covered (see _land_unit)."""
     if top.owner == placer.owner:
         return True
     return statics.can_cover(state, placer, top)

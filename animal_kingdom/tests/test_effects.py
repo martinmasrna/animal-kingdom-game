@@ -546,17 +546,15 @@ def test_apex_covers_but_does_not_eat_an_armor():
     assert "armadillo" not in s.remove_pile
 
 
-def test_apex_covers_but_does_not_eat_an_enemy_untargetable():
-    # An Apex can't eat an enemy Black Panther (Stealth: untargetable), but Polar Bear (8)
-    # beats the Panther (7), so it covers/buries it instead of being unplayable there.
+def test_apex_eats_an_enemy_with_stealth():
+    # Stealth hides from chosen targets, not from a predator landing on it (Martin, 2026-10-01).
     s = make_state(current="A", hands={"A": ["polar_bear"]})
     put(s, "1,2", "lion", "A")                          # connects 2,2
     put(s, "2,2", "black_panther", "B")                 # enemy str 7, untargetable
     assert PlaceAction("polar_bear", ("cr", "2,2")) in rules.legal_actions(s)
     rules.apply_action(s, PlaceAction("polar_bear", ("cr", "2,2")))
-    assert s.top_unit("2,2").card_id == "polar_bear"    # the bear on top
-    assert s.board["2,2"][0].card_id == "black_panther"  # panther buried, not removed
-    assert "black_panther" not in s.remove_pile
+    assert [u.card_id for u in s.board["2,2"]] == ["polar_bear"]
+    assert "black_panther" in s.remove_pile
 
 
 def test_apex_destroys_an_egg():

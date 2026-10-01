@@ -118,14 +118,14 @@ def test_snow_leopard_lets_an_apex_cat_land_at_equal_strength():
     assert "lion" in s.remove_pile                        # and it eats normally
 
 
-def test_apex_covers_stealth_prey_instead_of_eating_it():
-    # The eat is a chosen single-out (C3): Stealth blocks it; the apex buries the panther.
+def test_apex_eats_stealth_prey():
+    # A predator eats what it lands on; nobody chooses, so Stealth doesn't save it (Martin, 2026-10-01).
     s = make_state(hands={"A": ["tiger"]})
     prey = put(s, "1,2", "black_panther", "B")
     prey.strength_counter = -3                            # panther 7 -> 4, tiger can land
     rules.apply_action(s, PlaceAction("tiger", ("cr", "1,2")))
-    assert _ids_at(s, "1,2") == ["black_panther", "tiger"]  # buried, not eaten
-    assert "black_panther" not in s.remove_pile
+    assert _ids_at(s, "1,2") == ["tiger"]
+    assert "black_panther" in s.remove_pile
 
 
 def test_apex_covers_armor_prey_instead_of_eating_it():

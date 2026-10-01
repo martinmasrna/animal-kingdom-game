@@ -17,7 +17,7 @@ A shell, plates or spines: cannot be removed, returned to hand, or eaten by **an
 Carried by: Methuselah the tortoise and Cairn the glyptodont (Ramp); Armadillo (Food). Only animals a player sees as armored carry it; the spiny ones (Porcupine, Hedgehog) remove the first enemy that covers them instead.
 
 ### Stealth
-Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis), and an Apex Predator cannot *eat* it (the eat is a chosen single-out — it covers/buries it instead). **Mass, random, and automatic effects hit it normally**: Rhinoceros/Brutus AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron triggers. Its own controller may still choose it freely. Scope is board-only.
+Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis). **Mass, random, and automatic effects hit it normally**, and so does an Apex Predator's eat (a predator eats what it lands on; nobody chooses): Rhinoceros/Brutus AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron triggers. Its own controller may still choose it freely. Scope is board-only.
 
 Carried by: Black Panther. Armadillo gives it to every friendly unit on an adjacent crossroad while Armadillo tops its own.
 
@@ -28,7 +28,7 @@ A predator that must land on prey and eats it.
 - **Normal covering rules apply in full**: landing on an **enemy** occupant uses the same legality as a normal cover — strictly-greater strength by default, **including every covering static**: Snow Leopard lets an apex Cat land at equal strength. Landing on **your own** occupant has **no** strength requirement.
 - **May target your own occupants** as well as enemy ones — and removes (eats) them too.
 - **It covers, then eats.** Landing is an ordinary cover, and everything that reacts to being covered happens first (Porcupine's and Hedgehog's spines remove it, Gale sends it back to hand). Then, if the predator is still on top of its prey, it eats it: the prey is removed, its leave-the-board and remove effects fire normally, and the predator sits on whatever remained beneath.
-- **If the occupant can't be eaten** (Armor, or an enemy with Stealth — the eat is a chosen single-out), the predator is **not** blocked from landing there: it simply **covers** it under the normal placement rules and buries it instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it does *when it can*, not a placement precondition.
+- **If the occupant can't be eaten** (Armor), the predator is **not** blocked from landing there: it simply **covers** it under the normal placement rules and buries it instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it does *when it can*, not a placement precondition.
 - **Cannot be placed onto a den** — deliberate design choice, so Apex Predators can't capture an enemy den directly.
 
 Carried by: **Tiger** (Cats), **Eon** (Egg), **Polar Bear** and **Borealis** (Ramp).
