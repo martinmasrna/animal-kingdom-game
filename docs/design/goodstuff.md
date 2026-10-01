@@ -1,6 +1,6 @@
 # The goodstuff problem
 
-The central open design problem. A deck of the individually strongest cards from across all seven decks beats every themed deck, and nothing beats it. Until that changes, the game has one correct deck, not an archetype metagame.
+Not a design problem (Martin, 2026-10-01): a side effect of bot skill. Under bot pilots a deck of the individually strongest cards from across all seven decks beat every themed deck; human players and deckbuilders don't see it (Martin and his brother built a deck in 12 hours far beyond what the bots find). The measurements below are bot measurements.
 
 ## What was measured
 
