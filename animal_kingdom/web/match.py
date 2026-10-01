@@ -595,9 +595,10 @@ class Match:
         for cid in sorted(CARDS, key=len, reverse=True):
             if op.startswith(cid + "_"):
                 return cid
+        chooser = step.get("player") or (self.state.pending or {}).get("chooser")
         for m in reversed(self.history):
-            if m.kind == "place":
-                return m.card
+            if m.kind == "place":   # the last card placed, if it was the chooser's: never the opponent's (a hatching egg's
+                return m.card if m.seat == chooser else None   # choice once named their Black Panther)
         return None
 
     def _describe_option(self, o) -> dict:

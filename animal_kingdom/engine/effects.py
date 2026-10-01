@@ -696,7 +696,7 @@ def _op_bird_egg_hatch(state, step):
     if egg is None:
         return None  # removed before it hatched - no payoff
     _remove_specific(state, cr, egg, by_player=egg.owner, by_effect=False)
-    state.effect_stack.append({"op": "scout", "player": egg.owner, "spec": "tag:Bird"})
+    state.effect_stack.append({"op": "scout", "player": egg.owner, "spec": "tag:Bird", "by_card": egg.card_id})
     return None
 
 
@@ -1104,7 +1104,7 @@ def _omen_drawn(state, inst):
 
 
 def _owl_place(state, unit, cr):
-    state.effect_stack.append({"op": "scout", "player": unit.owner})
+    state.effect_stack.append({"op": "scout", "player": unit.owner, "by_card": unit.card_id})
 
 
 def _raven_place(state, unit, cr):
@@ -1211,11 +1211,11 @@ def _mouse_place(state, unit, cr):
 
 
 def _fathom_place(state, unit, cr):
-    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": "rarity:legendary"})
+    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": "rarity:legendary", "by_card": unit.card_id})
 
 
 def _bird_egg_place(state, unit, cr):
-    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": "tag:Bird"})
+    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": "tag:Bird", "by_card": unit.card_id})
     schedule(state, unit, state.config.bird_egg_hatch_delay,
              {"op": "bird_egg_hatch", "iid": unit.iid})
 
