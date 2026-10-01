@@ -153,13 +153,13 @@ function homeScreen(mode = {}) {
   const all = playable(), chosen = chosenDeck(), peek = all.find(d => d.id === play.peek) || chosen;
   if (play.botDeck === 'goodstuff') play.botDeck = 'random';
   const bd = DECKS.find(d => d.id === play.botDeck), redraw = () => homeScreen(mode);
-  const botDecks = [['random', 'Random deck'], ...DECKS.filter(d => d.id !== 'goodstuff').map(d => [d.id, d.name + ' deck'])];   // the seven starters only
+  const botDecks = [['random', 'Random'], ...DECKS.filter(d => d.id !== 'goodstuff').map(d => [d.id, d.name])];   // the seven starters only
   // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
   const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
   const fr = play.opp === 'friend' && (play.friends || []).find(f => f.id === play.friend);
   const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', fr ? friendLabel(fr, play.friends) : ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
     : play.opp === 'ranked' ? ['Ranked', `your rating ${(ME && ME.rating) || '1500?'}`]
-    : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name + ' deck' : 'Random deck'}`];
+    : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name : 'Random'}`];
   const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
   const tile = (d, W, cls = '') => `<div class="dtile${cls}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b></div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
@@ -292,14 +292,16 @@ async function settingsScreen() {
   const el = document.getElementById('credits'); if (el) el.textContent = t.trim();
 }
 
+// A name with its #tag small and dim: the tag only tells two players of one name apart.
+const nameTag = n => { const [a, t] = String(n).split('#'); return esc(a) + (t ? `<i class="tg">#${esc(t)}</i>` : ''); };
 async function leaderboardScreen() {
   screen = 'leaderboard';
   const r = await api('/api/leaderboard'), j = r.ok ? await r.json() : { rows: [] }, rows = j.rows, pl = j.placing;
   if (screen !== 'leaderboard') return;
   app.innerHTML = `<div class="mscr lead"><div class="lcol"><div class="hhead"><h2>Leaderboard</h2></div>
-    <div class="lbody">${rows.map((x, i) => `<div class="lr${x.bot ? ' bot' : ''}${x.you ? ' you' : ''}"><span>${i + 1}</span><span class="nm">${esc(x.name)}</span><b>${x.rating}</b></div>`).join('')}
+    <div class="lbody">${rows.map((x, i) => `<div class="lr${x.bot ? ' bot' : ''}${x.you ? ' you' : ''}"><span>${i + 1}</span><span class="nm">${nameTag(x.name)}</span><b>${x.rating}</b></div>`).join('')}
 </div>
-    ${pl ? `<div class="lpin"><div class="lr you placing"><span></span><span class="nm">${esc(pl.name)}<small>placing, ${pl.games} of ${pl.of}</small></span><b>${pl.rating}</b></div></div>` : ''}
+    ${pl ? `<div class="lpin"><div class="lr you placing"><span></span><span class="nm">${nameTag(pl.name)}<small>placing, ${pl.games} of ${pl.of}</small></span><b>${pl.rating}</b></div></div>` : ''}
     <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
   const mine = app.querySelector('.lr.you'); if (mine) mine.scrollIntoView({ block: 'center' });
@@ -370,10 +372,11 @@ function profileScreen() {
   const filter = dd('deck', ui.histDeck || '', [['', `All decks ${wl(...all)}`], ...ME.records.map(r => [esc(r.deck), `${esc(r.deck)} ${wl(r.won, r.lost)}`])]);
   const shown = ME.history.filter(h => !ui.histDeck || h.my_deck === ui.histDeck);
   const bot = h => h.kind !== 'friend';   // a bot's deck has a name you know; a person's deck name is theirs, so the row names the person
-  const result = h => h.won > h.lost ? 'Won' : h.won < h.lost ? 'Lost' : 'Draw';   // a match is one game (older best-of-3s by their result)
+  const result = h => h.won > h.lost ? 'Won' : h.won < h.lost ? 'Lost' : 'Draw';
+  const mode = h => ({ ranked: 'Ranked · ', practice: 'Practice · ', friendly: 'Friendly · ' })[h.mode] || '';   // older matches: unknown   // a match is one game (older best-of-3s by their result)
   const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
     ${piece(deckFace(h.my_cover, h.my_deck))}<span class="dk">${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck))}<span class="dk">${esc(h.opp_deck)}</span>
-    <span class="meta">${esc(h.opp)} · ${when(h.ended)}</span>` : `${piece(h.opp_cover)}<span class="dk">${esc(h.opp)}</span><span class="meta">${when(h.ended)}</span>`}</div>`).join('');
+    <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}</span>` : `${piece(h.opp_cover)}<span class="dk">${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}</span>`}</div>`).join('');
   const sect = (title, body) => `<div class="sect"><h4>${title}</h4>${body}</div>`;
   const account = ME.logins.length
     ? sect('Account', `${ME.logins.map(l => `<div class="login">${PROVIDER[l.provider]} · ${esc(l.label)}</div>`).join('')}

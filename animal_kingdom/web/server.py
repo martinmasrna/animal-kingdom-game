@@ -324,6 +324,7 @@ def record_match(match: Match) -> None:
     except Exception:
         log.exception("could not rate match %s", match.id)
     kind = "gauntlet" if match.schedule else "bot" if any(s.is_bot for s in match.seats.values()) else "friend"
+    mode = "ranked" if all(s.ladder for s in match.seats.values()) else "practice" if kind == "bot" else "friendly"
     rotating = match.schedule[0].get("seat", "B") if match.schedule else None
     score = match.score()
     for p, seat in match.seats.items():
@@ -336,7 +337,7 @@ def record_match(match: Match) -> None:
             profiles.record(seat.profile, f"{match.id}-{match.rematches}", kind=kind, my_deck=deck(p),
                             opp=f"Bot ({other.bot.capitalize()})" if other.is_bot else other.name,
                             opp_deck=deck(o) if other.is_bot else "", won=score[p], lost=score[o], seat=p,   # a person's deck name is theirs
-                            my_cover="" if p == rotating else deck_cover(seat), opp_cover="" if o == rotating else deck_cover(other))
+                            my_cover="" if p == rotating else deck_cover(seat), opp_cover="" if o == rotating else deck_cover(other), mode=mode)
         except Exception:
             log.exception("could not record match %s in a history", match.id)
             continue
@@ -448,7 +449,7 @@ def rate_match(match: Match) -> None:
 def ladder_name(lid: str) -> str:
     bot = ranking.parse_bot(lid)
     if bot:
-        return f"{bot[0].capitalize()} Bot · {DECK_NAMES.get(bot[1], bot[1])}"
+        return f"{DECK_NAMES.get(bot[1], bot[1])} ({bot[0].capitalize()} Bot)"
     p = profiles.get(lid)
     return display(p) if p else "?"
 

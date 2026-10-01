@@ -84,6 +84,8 @@ class Profiles:
         if "seat" not in [r[1] for r in self.db.execute("PRAGMA table_info(history)")]:   # matches from before replays and deck covers
             for col in ("seat", "my_cover", "opp_cover"):
                 self.db.execute(f"ALTER TABLE history ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
+        if "mode" not in [r[1] for r in self.db.execute("PRAGMA table_info(history)")]:   # matches from before the mode was kept
+            self.db.execute("ALTER TABLE history ADD COLUMN mode TEXT NOT NULL DEFAULT ''")
         with self.db:   # bots were named "Bot · Normal" once
             self.db.execute("UPDATE history SET opp = 'Bot (' || substr(opp, 7) || ')' WHERE opp LIKE 'Bot · %'")
         if "seeded" not in [r[1] for r in self.db.execute("PRAGMA table_info(profiles)")]:   # profiles from before starter decks were theirs
@@ -259,15 +261,17 @@ class Profiles:
 
     # ------------------------------------------------------------- history
     def record(self, pid: str, match: str, *, kind: str, my_deck: str, opp: str, opp_deck: str,
-               won: int, lost: int, seat: str = "", my_cover: str = "", opp_cover: str = "") -> None:
+               won: int, lost: int, seat: str = "", my_cover: str = "", opp_cover: str = "", mode: str = "") -> None:
+        """`kind`: who the opponent was ("bot" or "friend", a person); `mode`: what the match was ("ranked", "practice",
+        "friendly"; empty for matches from before it was kept)."""
         with self.db:
             self.db.execute("INSERT OR REPLACE INTO history (profile, match, ended, kind, my_deck, opp, opp_deck, won, lost, "
-                            "seat, my_cover, opp_cover) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                            (pid, match, time.time(), kind, my_deck, opp, opp_deck, won, lost, seat, my_cover, opp_cover))
+                            "seat, my_cover, opp_cover, mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            (pid, match, time.time(), kind, my_deck, opp, opp_deck, won, lost, seat, my_cover, opp_cover, mode))
 
     def history(self, pid: str) -> list[dict]:
         return [dict(r) for r in self.db.execute(
-            "SELECT match, ended, kind, my_deck, opp, opp_deck, won, lost, my_cover, opp_cover FROM history "
+            "SELECT match, ended, kind, mode, my_deck, opp, opp_deck, won, lost, my_cover, opp_cover FROM history "
             "WHERE profile = ? ORDER BY ended DESC LIMIT ?", (pid, HISTORY_SHOWN))]
 
     def match(self, pid: str, match: str) -> Optional[dict]:
