@@ -12,6 +12,7 @@ import asyncio
 import json
 import logging
 import os
+import random
 import secrets
 import time
 import webbrowser
@@ -25,6 +26,7 @@ from ..engine.state import EngineError
 from ..engine.cards import DECK_SLUGS, load_cards
 from . import custom_decks
 from . import feedback
+from . import ladder as ranking
 from . import oauth
 from .profiles import ProfileError, Profiles
 from . import replay
@@ -208,7 +210,8 @@ def profile_view(p: dict) -> dict:
     profiles.seed_decks(p["id"], starters)
     return {**p, "decks": profiles.decks(p["id"], {d["id"]: d["cards"] for d in starters}),
             "history": profiles.history(p["id"]), "records": profiles.records(p["id"]),
-            "logins": profiles.identities(p["id"]), "providers": oauth.available()}
+            "logins": profiles.identities(p["id"]), "providers": oauth.available(),
+            "rating": ladder.get(p["id"]).shown() if ladder else None}
 
 
 # ----------------------------------------------------------------- sign in with Google / Discord
@@ -311,9 +314,14 @@ def deck_cover(seat: Seat) -> str:
 
 
 def record_match(match: Match) -> None:
-    """Add a finished match to each human player's history (the gauntlet, a developer's tool, stays out of it)."""
+    """Add a finished match to each human player's history (the gauntlet, a developer's tool, stays out of it), and
+    rate it when it was ranked."""
     if match.schedule:
         return
+    try:
+        rate_match(match)
+    except Exception:
+        log.exception("could not rate match %s", match.id)
     kind = "gauntlet" if match.schedule else "bot" if any(s.is_bot for s in match.seats.values()) else "friend"
     rotating = match.schedule[0].get("seat", "B") if match.schedule else None
     score = match.score()
@@ -361,6 +369,94 @@ async def send_feedback(req):
         raise web.HTTPBadRequest(text=str(e))
     asyncio.get_running_loop().run_in_executor(None, feedback.mail, display(p), body["text"].strip(), context, body.get("view"))
     return web.json_response({})
+
+
+# ----------------------------------------------------------------- the ladder (web/ladder.py)
+RANKED_WAIT = 15            # seconds the queue waits for a person near your rating before giving you a bot
+waiting: list[dict] = []    # people in the ranked queue: {pid, name, deck, rating, since, fut}
+ladder: ranking.Ladder = None
+
+
+def _window(entry: dict, now: float) -> float:
+    """How far apart two people's ratings may be to meet: wider the longer they've waited."""
+    return 200 + 20 * (now - entry["since"])
+
+
+async def join_ranked(req):
+    """Join the ranked queue with a deck; the answer is your match ({id, token, seat}) once there is one: a person near
+    your rating if one is waiting or arrives within RANKED_WAIT seconds, else the nearest bot. Leaving the request leaves
+    the queue."""
+    p, body = me(req), await req.json()
+    try:
+        deck = custom_decks.resolve(body.get("deck"))
+    except EngineError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    r, now = ladder.get(p["id"]).rating, time.time()
+    for w in waiting:   # someone already waiting near enough: the match is theirs and yours
+        if w["pid"] != p["id"] and not w["fut"].done() and abs(w["rating"] - r) <= _window(w, now):
+            waiting.remove(w)
+            mid, ta, tb = hub.new_id(), secrets.token_urlsafe(12), secrets.token_urlsafe(12)
+            match = Match(mid, Seat(ta, w["name"], deck=w["deck"], profile=w["pid"], ladder=w["pid"]))
+            match.join(Seat(tb, display(p), deck=deck, profile=p["id"], ladder=p["id"]))
+            _open(match)
+            w["fut"].set_result({"id": mid, "token": ta, "seat": "A"})
+            return web.json_response({"id": mid, "token": tb, "seat": "B"})
+    entry = {"pid": p["id"], "name": display(p), "deck": deck, "rating": r, "since": now,
+             "fut": asyncio.get_running_loop().create_future()}
+    waiting[:] = [w for w in waiting if w["pid"] != p["id"]] + [entry]   # one place in the queue per person
+    try:
+        return web.json_response(await asyncio.wait_for(asyncio.shield(entry["fut"]), RANKED_WAIT))
+    except asyncio.TimeoutError:
+        pass
+    finally:
+        if entry in waiting:
+            waiting.remove(entry)
+    if entry["fut"].done():   # paired in the instant the wait ran out
+        return web.json_response(entry["fut"].result())
+    bid = ladder.nearest_bot(r, random)
+    level, bdeck = ranking.parse_bot(bid)
+    mid, token = hub.new_id(), secrets.token_urlsafe(12)
+    match = Match(mid, Seat(token, display(p), deck=deck, profile=p["id"], ladder=p["id"]))
+    match.join(Seat(secrets.token_urlsafe(12), ladder_name(bid), bot=level, deck=bdeck, ladder=bid))
+    _open(match)
+    return web.json_response({"id": mid, "token": token, "seat": "A"})
+
+
+def _open(match: Match) -> None:
+    match.on_game_end = save_game
+    match.on_match_end = record_match
+    hub.matches[match.id] = match
+    hub.save(match)
+    hub.kick_bot(match)
+
+
+def rate_match(match: Match) -> None:
+    """A ranked match's result moves both ratings (a draw moves nothing)."""
+    a, b = match.seats["A"].ladder, match.seats["B"].ladder
+    score = match.score()
+    if not (a and b) or score["A"] == score["B"]:
+        return
+    win, lose = (a, b) if score["A"] > score["B"] else (b, a)
+    before = {p: ladder.get(match.seats[p].ladder) for p in "AB"}
+    ladder.result(win, lose)
+    match.rating_change = {p: {"before": before[p].shown(), "after": ladder.get(match.seats[p].ladder).shown(),
+                               "delta": round(ladder.get(match.seats[p].ladder).rating - before[p].rating)} for p in "AB"}
+    match.version += 1
+
+
+def ladder_name(lid: str) -> str:
+    bot = ranking.parse_bot(lid)
+    if bot:
+        return f"{bot[0].capitalize()} Bot · {DECK_NAMES.get(bot[1], bot[1])}"
+    p = profiles.get(lid)
+    return display(p) if p else "?"
+
+
+async def leaderboard(req):
+    """Everyone on the ladder, best first: name, rating as shown (a "?" while new), whether it's a bot, and whether it's you."""
+    p = profile_of(req)
+    return web.json_response([{"name": ladder_name(lid), "rating": r.shown(), "bot": lid.startswith("bot:"),
+                               "you": bool(p and lid == p["id"])} for lid, r in ladder.table()])
 
 
 async def index(_req):
@@ -513,6 +609,8 @@ def make_app() -> web.Application:
         web.get("/auth/{provider}/callback", auth_callback),
         web.get("/api/replay/{match}", get_replay),
         web.post("/api/feedback", send_feedback),
+        web.post("/api/ranked", join_ranked),
+        web.get("/api/leaderboard", leaderboard),
         web.post("/api/match", create_match),
         web.post("/api/match/{id}/join", join_match),
         web.get("/ws/{id}", socket),
@@ -527,6 +625,8 @@ def make_app() -> web.Application:
         if linked or left:
             log.info("starter decks: %d untouched cop%s now follow their starter, %d left alone",
                      linked, "y" if linked == 1 else "ies", left)
+        global ladder
+        ladder = ranking.Ladder(profiles.db, [d for d in sorted(PREMADE_DECKS) if d != "goodstuff"])
         custom_decks.load()
         replay.backfill(profiles, LOG_DIR, REPLAY_DIR)
         hub.load()

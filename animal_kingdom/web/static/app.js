@@ -115,13 +115,14 @@ function route() {
   if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
   if (parts[0] === 'gauntlet') return homeScreen({ gauntlet: true });
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
+  if (parts[0] === 'leaderboard') return leaderboardScreen();
   if (parts[0] === 'profile') { profileScreen(); return loadProfile().then(() => { if (location.hash.startsWith('#/profile')) profileScreen(); }); }   // a match just played shows
   if (parts[0] === 'replay' && parts[1]) return replayScreen(parts[1]);
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
   if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : homeScreen({ join: id });
   if (parts[0] === 'm' && id) return matchScreen(id);
   if (parts[0] === 'lab' && parts[1]) return labScreen(parts[1]);
-  homeScreen();
+  homeScreen(); if (play.opp === 'ranked') loadProfile().then(() => { if (screen === 'home' && !play.open) homeScreen(); });   // your rating after a ranked game
 }
 
 // ------------------------------------------------------------------ home: where a match starts
@@ -141,7 +142,8 @@ function homeScreen(mode = {}) {
   // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
   const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
   const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
-    : ['Bot', `${label(LEVELS, play.level)} · ${bd ? bd.name + ' deck' : 'Random deck'}`];
+    : play.opp === 'ranked' ? ['Ranked', `your rating ${(ME && ME.rating) || '1500?'}`]
+    : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name + ' deck' : 'Random deck'}`];
   const go = mode.join ? 'Join match' : play.opp === 'friend' ? 'Create match' : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
   const tile = (d, W, cls = '') => `<div class="dtile${cls}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b></div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
@@ -149,14 +151,14 @@ function homeScreen(mode = {}) {
   const chooser = play.open === 'decks'
     ? `<div class="chooser decks"><div class="clist">${all.map(d => tile(d, 300, d.id === chosen.id ? ' on' : '')).join('')}</div><div class="dl">${deckList(peek)}</div></div>`
     : play.open === 'opp' ? `<div class="chooser opps">${play.opp === 'gauntlet' ? levels + dd('side', play.side, SIDES)
-      : `<div class="seg"><button class="slab${play.opp === 'bot' ? ' on' : ''}" data-opp="bot">Bot</button><button class="slab${play.opp === 'friend' ? ' on' : ''}" data-opp="friend">Friend</button></div>`
-        + (play.opp === 'friend' ? `<div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
+      : `<div class="seg">${[['bot', 'Practice'], ['ranked', 'Ranked'], ['friend', 'Friend']].map(([v, l]) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${l}</button>`).join('')}</div>`
+        + (play.opp === 'ranked' ? '' : play.opp === 'friend' ? `<div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
           : levels + dd('botDeck', play.botDeck, botDecks))}</div>`
     : play.open === 'learn' ? `<div class="chooser lessons">${LESSON_NAMES.map((n, i) => `<button class="slab" data-lesson="${i + 1}"><b>Lesson ${i + 1}</b>${n}</button>`).join('')}</div>` : '';
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
   const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${chooser}
-    <div class="top"><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : `<button class="backbtn${play.open === 'learn' ? ' open' : ''}" id="learn2"><span>How to play</span></button>`}<a class="backbtn" href="#/profile"><span>Profile</span></a><button class="backbtn" id="fbhome"><span>Feedback</span></button></div>
+    <div class="top"><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : `<button class="backbtn${play.open === 'learn' ? ' open' : ''}" id="learn2"><span>How to play</span></button>`}<a class="backbtn" href="#/leaderboard"><span>Leaderboard</span></a><a class="backbtn" href="#/profile"><span>Profile</span></a><button class="backbtn" id="fbhome"><span>Feedback</span></button></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
       <button class="play" id="go">${go}</button></div>`}</div>`;
@@ -194,6 +196,7 @@ function homeScreen(mode = {}) {
       if (!r.ok) return toast(r.status === 404 ? `No match ${mode.join}` : await r.text());
       const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id; return;
     }
+    if (play.opp === 'ranked') return findRanked($('go'), deckSpec(chosen));
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
       const pool = DECKS.filter(d => d.id !== 'goodstuff'), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
@@ -205,6 +208,35 @@ function homeScreen(mode = {}) {
     const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
   };
 }
+// Ranked (web/ladder.py): the button that started it shows the search while the server finds an opponent (a person near
+// your rating, else after a few seconds the nearest bot); clicking it again cancels.
+let ranked = null;
+async function findRanked(btn, deck) {
+  if (ranked) { ranked.abort(); return; }
+  const ctl = ranked = new AbortController(), t0 = Date.now(), label = btn.innerHTML;
+  const tick = () => { const s = Math.floor((Date.now() - t0) / 1000);
+    btn.innerHTML = `<span class="search">Finding an opponent · 0:${String(s).padStart(2, '0')}<small>click to cancel</small></span>`; };
+  tick(); const iv = setInterval(tick, 1000); btn.classList.add('searching');
+  try {
+    const r = await api('/api/ranked', { method: 'POST', body: JSON.stringify({ deck }), signal: ctl.signal });
+    if (!r.ok) throw new Error(await r.text());
+    const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
+  } catch (e) { if (e.name !== 'AbortError') toast(e.message || 'Could not find a match'); btn.innerHTML = label; btn.classList.remove('searching'); }
+  finally { clearInterval(iv); ranked = null; }
+}
+
+// The leaderboard: everyone on the ladder, people and bots together, best first; your row marked and in view.
+async function leaderboardScreen() {
+  screen = 'leaderboard';
+  const r = await api('/api/leaderboard'), rows = r.ok ? await r.json() : [];
+  if (screen !== 'leaderboard') return;
+  app.innerHTML = `<div class="mscr lead"><div class="lcol"><div class="hhead"><h2>Leaderboard</h2></div>
+    <div class="lbody">${rows.map((x, i) => `<div class="lr${x.bot ? ' bot' : ''}${x.you ? ' you' : ''}"><span>${i + 1}</span><span class="nm">${esc(x.name)}</span><b>${x.rating}</b></div>`).join('')}</div>
+    <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
+  document.getElementById('back').onclick = () => { location.hash = '#/'; };
+  const mine = app.querySelector('.lr.you'); if (mine) mine.scrollIntoView({ block: 'center' });
+}
+
 // The tutorial: a real game with a fixed deal against a gentle opponent, a coach teaching one step at a time (tutorial.js).
 // Two lessons: the basics (won by taking the den), then the deeper mechanics (won on food). Learned after the second.
 const LESSON_NAMES = ['The basics', 'Special powers'];   // tutorial.py's lessons, in order
@@ -974,6 +1006,13 @@ function drawEnd() {
     if (!won) document.getElementById('again').onclick = () => startTutorial(lesson);
     if (won && lesson === 1) document.getElementById('nextlesson').onclick = () => startTutorial(2);
     if (won && lesson === 2) document.getElementById('firstmatch').onclick = firstMatch;
+  } else if (V.ranked) {
+    // a ranked game: its result and your rating before and after; Play again looks for the next opponent (no rematch)
+    const rt = V.rating, d = rt && rt.delta;
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}.</div>
+      ${rt ? `<div class="next rating">Rating ${rt.before} → ${rt.after} (${d >= 0 ? '+' : '−'}${Math.abs(d)})</div>` : ''}
+      <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Play again</button></div></div>`;
+    document.getElementById('again').onclick = e => findRanked(e.currentTarget, deckSpec(chosenDeck()));
   } else {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
     const won = S[you] > S[them], series = V.results.length > 1;

@@ -66,6 +66,7 @@ class Seat:
     deck: Optional[str] = None
     ready: bool = False
     profile: Optional[str] = None    # the player's profile id, when they have one
+    ladder: Optional[str] = None     # on the ladder (a ranked match): a person's profile id, or a bot's ladder id
 
     @property
     def is_bot(self) -> bool:
@@ -438,7 +439,10 @@ class Match:
             "lists": {p: dict(Counter(deck_list(seat.deck)))
                       for p, seat in self.seats.items() if seat.deck},
             "game": None,
+            "ranked": bool(self.seats["A"].ladder and self.seats.get("B") and self.seats["B"].ladder),
         }
+        if getattr(self, "rating_change", None) and s in self.rating_change:   # a ranked match just rated: your before and after
+            v["rating"] = self.rating_change[s]
         if self.schedule:
             record = {}
             for r in self.results:
