@@ -514,7 +514,7 @@ function onView(prev) {
     V = PB.shown = view; ui.step = step; V.rx = Date.now() / 1000;
     showView(before);
     if (!step) return finish(view);
-    clearTimeout(PB.t); PB.t = setTimeout(() => run(i + 1, view), step.dur * 1000);
+    clearTimeout(PB.t); PB.t = setTimeout(() => run(i + 1, view), step.dur * 1000 / (window.AK_SPEED || 1));   // AK_SPEED: tests only
   };
   const finish = shown => {
     PB.busy = false; ui.step = null;

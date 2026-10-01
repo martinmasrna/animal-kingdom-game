@@ -146,6 +146,6 @@ export function drawCoach(el, L, rings = []) {
   el.innerHTML = `<p>${C.tapWords(text)}</p>` + (L.next ? '<button class="slab" id="coachnext">Next</button>' : '');
   // an opening step closes on Next (or Enter/Space), and the next one shows
   if (L.next) el.querySelector('#coachnext').onclick = e => { e.stopPropagation(); tutState().seen.add(L.id);
-    const ui = C.ui; if (ui.heldFood) { ui.anim = ui.heldFood; ui.heldFood = null; ui.animUntil = Date.now() + 1800; }   // the held fruit flies now, uninterrupted
+    const ui = C.ui; if (ui.heldFood) { ui.anim = ui.heldFood; ui.heldFood = null; ui.animUntil = Date.now() + 1800 / (window.AK_SPEED || 1); }   // the held fruit flies now, uninterrupted
     C.drawGame(); };
 }

@@ -15,6 +15,10 @@ const SHOTS = process.env.SHOTS;
 test('a new player learns the game in both lessons and wins them', { timeout: 600000 }, async () => {
   const page = await browser.newPage(); page.errors = [];
   page.on('pageerror', e => page.errors.push(String(e)));
+  // the game's animations at 20x (the client's test-only AK_SPEED): the same clicks and checks in seconds, not minutes;
+  // SHOTS keeps real time, for screenshots of what a player sees
+  const FAST = SHOTS ? 1 : 20;
+  await page.evaluateOnNewDocument(f => { window.AK_SPEED = f; }, FAST);
   // PHONE=1 plays it on a phone held upright (the upright layout, taps)
   if (process.env.PHONE) await page.setViewport({ width: 390, height: 844, deviceScaleFactor: SHOTS ? 2 : 1, isMobile: true, hasTouch: true });
   else if (SHOTS) await page.setViewport({ width: 1512, height: 800, deviceScaleFactor: 2 });
@@ -36,14 +40,14 @@ test('a new player learns the game in both lessons and wins them', { timeout: 60
     assert.ok(b, `nothing to click at ${sel}`);
     // a hand card is clicked where it shows: a full hand overlaps on a phone, and its middle may lie under the next card
     const x = sel.startsWith('.hc') ? b.x + Math.min(b.width / 2, 14) : b.x + b.width / 2;
-    await page.mouse.click(x, b.y + b.height / 2); await wait(250); await page.mouse.move(5, 5); await wait(150); };
+    await page.mouse.click(x, b.y + b.height / 2); await wait(250 / FAST + 30); await page.mouse.move(5, 5); await wait(150 / FAST + 20); };
   const owner = (s, cr) => { const st = s.board[cr]; return st && st.length ? st[st.length - 1].owner : null; };
 
   const picked = new Set();   // SHOTS: each step also once right after its card is picked (its second line, its circles)
   const shootPicked = async (lesson, s) => { const k = `${lesson}-${s.lesson}`; if (!SHOTS || !s.lesson || picked.has(k)) return;
     picked.add(k); await wait(350); await page.screenshot({ path: `${SHOTS}/${lesson}-p-${s.lesson}.png` }); };
   const play = async (lesson, seen) => { for (let step = 0; step < 300; step++) {
-    await wait(300);
+    await wait(300 / FAST + 40);
     await page.waitForFunction(() => !window.__ak().PB.busy, { timeout: 15000 });   // a player waits for the steps to play out
     const s = await state();
     if (s.phase !== 'playing') break;
