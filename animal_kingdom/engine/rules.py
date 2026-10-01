@@ -65,6 +65,50 @@ def _top_level_actions(state: GameState) -> list[Action]:
 
 # ------------------------------------------------------------- apply / resolve
 
+def early_mulligan(state: GameState, player: str) -> Optional[int]:
+    """Where `player`'s mulligan waits under the one being chosen now, if it does: both players mulligan at once
+    (overview.md §4.4), though the stack resolves one step at a time. Its index on the effect stack, else None."""
+    if not state.pending or state.pending.get("kind") != "mulligan" or state.pending.get("chooser") == player:
+        return None
+    return next((i for i, st in enumerate(state.effect_stack[:-1]) if st["op"] == "mulligan" and st["player"] == player), None)
+
+
+def mulligan_request(state: GameState, player: str) -> dict:
+    return {"mode": "choice", "chooser": player, "optional": True, "kind": "mulligan",
+            "options": [u.iid for u in state.hands[player]]}
+
+
+def apply_early_mulligan(state: GameState, player: str, action: Action) -> None:
+    """Apply `player`'s mulligan choice while the other player is still choosing theirs: their step comes to the top,
+    takes the choice (a returned card is replaced at once), and goes back under the other's if it isn't done. A step
+    that finishes leaves the other's request pending as before."""
+    i = early_mulligan(state, player)
+    if i is None:
+        raise EngineError("not your decision")
+    stack, waiting = state.effect_stack, state.pending
+    step = stack.pop(i); stack.append(step)
+    state.pending = mulligan_request(state, player)
+    try:
+        apply_action(state, action)
+    except Exception:
+        stack.remove(step); stack.insert(i, step); state.pending = waiting
+        raise
+    if state.pending and state.pending.get("chooser") == player and stack and stack[-1] is step:   # more to choose: back underneath
+        stack.pop(); stack.insert(i, step)
+        state.pending = waiting
+
+
+def apply_logged(state: GameState, adict: dict) -> None:
+    """Apply one action as a game log records it: one marked "by" a player is their mulligan choice made while the other
+    player was choosing theirs (apply_early_mulligan); the rest go through apply_action."""
+    from .actions import action_from_dict
+    by, action = adict.get("by"), action_from_dict(adict)
+    if by and early_mulligan(state, by) is not None:
+        apply_early_mulligan(state, by, action)
+    else:
+        apply_action(state, action)
+
+
 def apply_action(state: GameState, action: Action, *, validate: bool = True) -> GameState:
     """Apply one action (a top-level move or a pending sub-choice), mutating `state`.
 

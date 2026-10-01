@@ -301,3 +301,36 @@ def test_unnamed_giant_starves_its_owners_regions_only():
     assert rules.region_income(s, "A") == 0
     s.board[far] = [UnitInstance("unnamed_giant", "B", 951)]      # the opponent's giant: no effect on A
     assert rules.region_income(s, "A") == region.food
+
+
+def test_both_players_mulligan_at_once_and_a_log_replays_it():
+    """The second player may mulligan while the first still does (overview.md §4.4); a log marks those choices "by" them."""
+    import copy
+    from animal_kingdom.decks import load_premade_deck
+    from animal_kingdom.engine.actions import SKIP, ChoiceAction
+    from animal_kingdom.engine.state import new_game, other_player
+    from animal_kingdom.web.match import Match, Seat
+    m = Match("MUL", Seat("ta", "A", deck="cats_midrange"))
+    m.join(Seat("tb", "B", deck="ramp"))
+    m._start_game()
+    st = m.state
+    first, second = st.current, other_player(st.current)
+    v = m.view(second)["game"]
+    assert v["toAct"] == second and v["pending"]["kind"] == "mulligan" and v["pending"]["cap"] == 4   # their own, at once
+    before = [u.card_id for u in st.hands[second]]
+    m.act(second, {"kind": "choice", "choice": st.hands[second][0].iid})
+    assert [u.card_id for u in st.hands[second]] != before, "the replacement comes at once"
+    assert st.player_to_act() == first and m.view(first)["game"]["pending"]["kind"] == "mulligan", "the first still chooses"
+    m.act(second, {"kind": "choice", "choice": SKIP})
+    assert m.view(second)["game"].get("opponentChoosing"), "done: waiting for the opponent"
+    m.act(first, {"kind": "choice", "choice": st.hands[first][0].iid})
+    m.act(first, {"kind": "choice", "choice": SKIP})
+    assert st.pending is None and st.turn_counter == 0 and st.current == first, "both done: the game starts"
+    assert [a.get("by") for a in m.actions] == [second, second, None, None]
+    # the log replays to the same position
+    from animal_kingdom.engine import rules
+    r = new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), m.seed, first_player=first)
+    for a in m.actions:
+        rules.apply_logged(r, a)
+    assert [u.card_id for u in r.hands[first]] == [u.card_id for u in st.hands[first]]
+    assert [u.card_id for u in r.hands[second]] == [u.card_id for u in st.hands[second]] and r.decks == st.decks

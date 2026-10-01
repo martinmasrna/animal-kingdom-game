@@ -35,7 +35,7 @@ def run(rec, idx):
     for i, ad in enumerate(rec["actions"]):
         say(i)
         a = action_from_dict(ad)
-        actor = st.player_to_act()
+        actor = ad.get("by") or st.player_to_act()
         rnd = st.turn_counter // 2 + 1
         if rnd != last_round and st.pending is None:
             inc = {p: rules.region_income(st, p) for p in "AB"}
@@ -47,7 +47,7 @@ def run(rec, idx):
         tgt_before = None
         if ad["kind"] == "place" and ad["target"][0] == "cr":
             s = st.board.get(ad["target"][1]); tgt_before = s[-1] if s else None
-        rules.apply_action(st, a)
+        rules.apply_logged(st, ad)
         name = lambda c: st.cards[c].name
         if ad["kind"] == "draw": txt = "draw"
         elif ad["kind"] == "place":

@@ -101,7 +101,7 @@ def game_views(g: dict, seat: str, names: dict) -> list[dict]:
         their = lambda: [{"iid": u.iid, "id": u.card_id, "str": placement_strength(m.state, u)} for u in m.state.hands[opp]]
         views, hands = [m.view(seat)], [their()]
         for a in g["actions"]:
-            m.act(m.to_act(), a)
+            m.act(a.get("by") or m.to_act(), a)   # "by": a mulligan choice made while the other player chose theirs
             views.append(m.view(seat)); hands.append(their())
         if m.state.result is None and g["reason"] == "concede":
             m.concede(other_player(g["winner"]))

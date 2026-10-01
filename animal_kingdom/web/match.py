@@ -286,10 +286,16 @@ class Match:
         if self.phase != "playing":
             raise EngineError("no game in progress")
         state = self.state
+        if isinstance(action, dict):
+            action = action_from_dict({k: v for k, v in action.items() if k != "by"})
+        if state.player_to_act() != s and rules.early_mulligan(state, s) is not None:   # both mulligan at once
+            rules.apply_early_mulligan(state, s, action)
+            self.actions.append({**action.to_dict(), "by": s})   # replays apply it the same way (replay.game_views)
+            self.action_times.append(round(time.time() - self.started_at, 1))
+            self.version += 1
+            return
         if state.player_to_act() != s:
             raise EngineError("not your decision")
-        if isinstance(action, dict):
-            action = action_from_dict(action)
         # A placement starts a history entry, including a free extra play inside a Roar;
         # draws and sub-choices fold into the entry they belong to.
         starts_move = (state.pending is None and not isinstance(action, PassAction)) or isinstance(action, PlaceAction)
@@ -516,6 +522,13 @@ class Match:
         }
         if to_act == s:
             g["legal"], g["pending"] = self._decision(s)
+        elif st.result is None and rules.early_mulligan(st, s) is not None:   # your mulligan, while theirs goes on too
+            g["toAct"] = s
+            i = rules.early_mulligan(st, s)
+            g["legal"] = {"draw": False, "place": {}}
+            g["pending"] = {"mode": "choice", "optional": True, "source": None, "kind": "mulligan",
+                            "returned": len(st.effect_stack[i]["returned"]), "cap": st.config.mulligan_cap(s, st.first_player),
+                            "options": [self._describe_option(u.iid) for u in st.hands[s]]}
         elif st.pending is not None and to_act == opp:
             g["opponentChoosing"] = True
         return g

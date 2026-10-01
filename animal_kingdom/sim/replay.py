@@ -89,9 +89,9 @@ def replay(log: dict, *, config: Optional[Config] = None) -> list[dict]:
         while state.pending is not None and state.effect_stack[-1].get("op") == "mulligan" \
                 and adict["kind"] != "choice":
             rules.apply_action(state, ChoiceAction(SKIP))
-        actor = state.player_to_act()
+        actor = adict.get("by") or state.player_to_act()
         food0, reg0, own0 = dict(state.food), regions_controlled(state), _board_owners(state)
-        rules.apply_action(state, action)
+        rules.apply_logged(state, adict)
         food1, reg1, own1 = dict(state.food), regions_controlled(state), _board_owners(state)
         changed = {cr: (own0.get(cr), own1.get(cr))
                    for cr in set(own0) | set(own1) if own0.get(cr) != own1.get(cr)}
