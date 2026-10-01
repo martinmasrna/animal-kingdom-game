@@ -47,21 +47,31 @@ def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--games", type=int, default=3, help="games per pair of bots")
     ap.add_argument("--jobs", type=int, default=4)
+    ap.add_argument("--batch", type=int, default=32, help="games per batch written to disk")
     ap.add_argument("--out", default="results/ladder/seed.json")
     args = ap.parse_args(argv)
-    field, specs, who = bots(), [], []
+    out = Path(args.out); out.parent.mkdir(parents=True, exist_ok=True)
+    log = out.with_suffix(".games.jsonl")   # every finished game, appended batch by batch: a rerun resumes where it stopped
+    done = {json.loads(l)["seed"] for l in log.read_text().splitlines() if l.strip()} if log.exists() else set()
+    field, todo = bots(), []
     for k, (a, b) in enumerate(itertools.combinations(field, 2)):
         for g in range(args.games):
             x, y = (a, b) if g % 2 == 0 else (b, a)
-            specs.append(MatchSpec(x[1], y[1], 1000 * k + g, bot_a=BOT_LEVELS[x[0]], bot_b=BOT_LEVELS[y[0]]))
-            who.append((bot_id(*x), bot_id(*y)))
-    print(f"{len(specs)} games, {args.jobs} jobs", flush=True)
-    records = run_specs(specs, jobs=args.jobs)
-    games = [{"a": a, "b": b, "winner": r.winner, "reason": r.reason, "turns": r.turns} for (a, b), r in zip(who, records)]
+            seed = 1000 * k + g
+            if seed not in done:
+                todo.append((MatchSpec(x[1], y[1], seed, bot_a=BOT_LEVELS[x[0]], bot_b=BOT_LEVELS[y[0]]), bot_id(*x), bot_id(*y)))
+    print(f"{len(done)} games done, {len(todo)} to play, {args.jobs} jobs", flush=True)
+    for i in range(0, len(todo), args.batch):
+        chunk = todo[i:i + args.batch]
+        records = run_specs([c[0] for c in chunk], jobs=args.jobs)
+        with log.open("a") as fh:
+            for (spec, a, b), r in zip(chunk, records):
+                fh.write(json.dumps({"seed": spec.seed, "a": a, "b": b, "winner": r.winner, "reason": r.reason, "turns": r.turns}) + "\n")
+        print(f"{len(done) + i + len(chunk)} games written", flush=True)
+    games = [json.loads(l) for l in log.read_text().splitlines() if l.strip()]
     rated = [(g["a"], g["b"]) if g["winner"] == "A" else (g["b"], g["a"]) for g in games if g["winner"]]
     ratings = fit(rated)
-    out = Path(args.out); out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps({"games": games, "ratings": ratings}, indent=1))
+    out.write_text(json.dumps({"games": len(games), "ratings": ratings}, indent=1))
     for lid, r in sorted(ratings.items(), key=lambda kv: -kv[1]):
         print(f"{round(r):5d}  {lid}")
 

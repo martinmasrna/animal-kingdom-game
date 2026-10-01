@@ -127,6 +127,24 @@ class Ladder:
                     r = bot_seed(LEVEL_START[level])
                     db.execute("INSERT OR IGNORE INTO ladder VALUES (?, ?, ?, ?, ?)", (bot_id(level, deck), r.rating, r.rd, r.vol, r.games))
 
+    def apply_seed(self, path) -> bool:
+        """Seed the bots from a seed file (sim/ladder_seed.py's output, shipped as web/ladder_seed.json) once per seed:
+        a new file resets every bot to its seeded rating; people's ratings are left as they are."""
+        import json
+        from pathlib import Path
+        p = Path(path)
+        if not p.is_file():
+            return False
+        data = json.loads(p.read_text()); version = str(data.get("version") or data.get("games"))
+        self.db.execute("CREATE TABLE IF NOT EXISTS ladder_meta (k TEXT PRIMARY KEY, v TEXT NOT NULL)")
+        row = self.db.execute("SELECT v FROM ladder_meta WHERE k = 'seed'").fetchone()
+        if row and row[0] == version:
+            return False
+        self.seed_bots({lid: r for lid, r in data["ratings"].items() if parse_bot(lid)})
+        with self.db:
+            self.db.execute("INSERT OR REPLACE INTO ladder_meta VALUES ('seed', ?)", (version,))
+        return True
+
     def get(self, lid: str) -> Rating:
         row = self.db.execute("SELECT rating, rd, vol, games FROM ladder WHERE id = ?", (lid,)).fetchone()
         return Rating(*row) if row else Rating()

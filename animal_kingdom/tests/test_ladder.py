@@ -69,3 +69,14 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             assert pl["rating"].endswith("?") and int(pl["rating"][:-1]) > 1500 and (pl["games"], pl["of"]) == (1, 10)
             assert sum(r["bot"] for r in board["rows"]) == 21 and board["rows"][0]["name"].startswith("Expert Bot")
     asyncio.run(run())
+
+
+def test_a_seed_file_sets_the_bots_once(tmp_path):
+    import json, sqlite3
+    L = ladder.Ladder(sqlite3.connect(":memory:"), ["cats_midrange", "ramp"])
+    f = tmp_path / "seed.json"
+    f.write_text(json.dumps({"version": "v1", "ratings": {"bot:expert:ramp": 1777.0, "bot:easy:cats_midrange": 1111.0}}))
+    assert L.apply_seed(f) and round(L.get("bot:expert:ramp").rating) == 1777
+    L.result("p1", "bot:expert:ramp")   # the bot moves after a game
+    assert not L.apply_seed(f), "the same seed is applied once"
+    assert round(L.get("bot:expert:ramp").rating) != 1777

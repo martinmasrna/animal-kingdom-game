@@ -785,6 +785,8 @@ def make_app() -> web.Application:
         global ladder, friends
         friends = Friends(profiles.db)
         ladder = ranking.Ladder(profiles.db, [d for d in sorted(PREMADE_DECKS) if d != "goodstuff"])
+        if ladder.apply_seed(Path(__file__).parent / "ladder_seed.json"):   # the bots' ratings from simulation (sim/ladder_seed.py)
+            log.info("ladder: bots seeded from ladder_seed.json")
         custom_decks.load()
         replay.backfill(profiles, LOG_DIR, REPLAY_DIR)
         hub.load()
