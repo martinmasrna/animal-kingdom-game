@@ -51,7 +51,7 @@ DECK_NAMES = {"cats_midrange": "Cats", "canine_buff_tempo": "Canines", "aggro_hq
 # Easy / Normal / Expert, as in the play screen: the same bot kinds, with the same settings, the
 # simulations measure (a bare RefereeBot() is an untested configuration).
 log = logging.getLogger(__name__)
-BOT_LEVELS = {"easy": "greedy", "normal": "turn", "expert": "referee"}
+BOT_LEVELS = {"easy": "easy", "normal": "turn", "expert": "referee"}
 
 
 def bot_for(level: str, seed: int):

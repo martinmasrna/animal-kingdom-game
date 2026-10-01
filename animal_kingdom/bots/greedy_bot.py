@@ -44,7 +44,7 @@ from dataclasses import dataclass
 from typing import Optional, Sequence
 
 from ..engine import rules
-from ..engine.actions import Action, DrawAction
+from ..engine.actions import Action, DrawAction, PassAction
 from ..engine.state import GameState, StateView, other_player
 from .base import Bot, keep_hand
 from . import features as _features
@@ -102,7 +102,7 @@ class GreedyBot(Bot):
     def __init__(self, weights: Optional[GreedyWeights] = None,
                  rng: Optional[random.Random] = None, seed: Optional[int] = None,
                  depth: int = 1, beam_width: int = 8,
-                 evaluator: Optional[LinearEval] = None):
+                 evaluator: Optional[LinearEval] = None, slip: float = 0.0):
         self.weights = weights or GreedyWeights()
         # RNG only breaks exact eval ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
@@ -111,6 +111,10 @@ class GreedyBot(Bot):
         # Learned-pilot seam (default None => the hand path below is byte-identical to
         # before this existed). See `_eval`.
         self.evaluator = evaluator
+        # Easy (the web client's gentlest bot): the share of decisions that take a random legal move instead of the
+        # best one, from its own RNG so a slip-free bot plays exactly as before. It never slips into ending its turn.
+        self.slip = slip
+        self.slip_rng = random.Random(None if seed is None else seed ^ 0x51195)
 
     def _eval(self, state: GameState, me: str) -> float:
         """Routes to the learned evaluator if one was supplied, else the hand-written
@@ -128,6 +132,9 @@ class GreedyBot(Bot):
         legal = list(legal)
         if (keep := keep_hand(view, legal)) is not None:
             return keep
+        if self.slip and self.slip_rng.random() < self.slip:
+            moves = [a for a in legal if not isinstance(a, PassAction)] or legal
+            return self.slip_rng.choice(moves)
         me = view.player
         if state is None:
             # No search context (shouldn't happen via cli/sim, which always pass state).

@@ -67,7 +67,11 @@ def crossed_progress_decile(done: int, total: int) -> bool:
     return total > 0 and (done * 10) // total > ((done - 1) * 10) // total
 
 
-BOT_KINDS = ("greedy", "lookahead", "random", "referee", "turn", "greedy_belief",
+# The web client's Easy: GreedyBot taking a random legal move on 30% of decisions. Against plain GreedyBot (every
+# premade pairing, both seats, 392 games, 2026-10-02) it wins 22%; slip 0 wins 48%, 0.25 27%, 0.4 14%. Tuned for a
+# player still learning the cards (the 2026-10-02 playtest read: a new player broke even with plain GreedyBot).
+EASY_SLIP = 0.3
+BOT_KINDS = ("easy", "greedy", "lookahead", "random", "referee", "turn", "greedy_belief",
              "greedy_learned", "turn_learned", "referee_learned")
 
 # '<kind>_learned' -> the base kind it otherwise builds exactly like (see make_bot). The
@@ -150,6 +154,8 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
         kind = LEARNED_BASE_KIND[kind]
     if kind == "greedy":
         return GreedyBot(weights=weights, seed=seed, **extra)
+    if kind == "easy":
+        return GreedyBot(weights=weights, seed=seed, **{"slip": EASY_SLIP, **extra})
     if kind == "greedy_belief":
         base = weights or GreedyWeights()
         belief = replace(base, coverage_exposure=GREEDY_BELIEF_COVERAGE_EXPOSURE)
