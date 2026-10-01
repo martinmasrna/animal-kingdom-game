@@ -28,10 +28,9 @@ export function heldRegions(regions, board) {
 //   landed    crossroads whose top unit is new (a piece arrived there);
 //   covered   the subset where the new piece covered one that is still under it;
 //   leaving   top units gone from the board: [{ cr, unit, how: 'removed' | 'bounce' }];
-//   strength  units still on the board whose strength changed: Map iid -> 'up' | 'down'.
 export function boardChanges(before, after, fx = []) {
-  const landed = new Set(), covered = new Set(), strength = new Map();
-  if (!before) return { landed, covered, leaving: [], strength };
+  const landed = new Set(), covered = new Set();
+  if (!before) return { landed, covered, leaving: [] };
   for (const cr of Object.keys(after)) {
     const now = top(after, cr), was = top(before, cr);
     // a new top that was already in the stack was uncovered (its coverer left), not landed
@@ -44,9 +43,7 @@ export function boardChanges(before, after, fx = []) {
     const u = st[st.length - 1];
     return u && u.iid !== undefined && !onBoard.has(u.iid) ? [{ cr, unit: u, how: bounced.has(u.id + u.owner) ? 'bounce' : 'removed' }] : [];
   });
-  const was = new Map(Object.values(before).flat().map(u => [u.iid, u.str]));
-  for (const u of Object.values(after).flat()) if (was.has(u.iid) && was.get(u.iid) !== u.str) strength.set(u.iid, u.str > was.get(u.iid) ? 'up' : 'down');
-  return { landed, covered, leaving, strength };
+  return { landed, covered, leaving };   // strength changes are events (the timeline's strength step), not a diff
 }
 
 // Income in flight: one fruit per food gained, flown from the player's held stones (each sends as many as it pays) to the

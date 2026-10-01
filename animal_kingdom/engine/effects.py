@@ -864,6 +864,7 @@ def _op_grant_strength(state, step):
         if inst is None:
             continue
         inst.strength_counter += amount
+        state.emit("strength", iid=iid, card=inst.card_id, owner=inst.owner, n=amount)   # a stored gain (what Fox reacts to)
         if amount > 0 and _crossroad_of(state, iid) is not None:
             _fire_on_gain_strength(state, inst)
     return None
@@ -1131,6 +1132,7 @@ def _rattlesnake_shuffle_event(state, event):
     if _owns_copy(state, player, "rattlesnake"):
         counters = state.card_strength_counters.setdefault(player, {})
         counters["rattlesnake"] = counters.get("rattlesnake", 0) + 1
+        state.emit("strength", card="rattlesnake", owner=player, n=1)   # every copy, wherever it is
 
 
 def _owns_copy(state, player: str, card_id: str) -> bool:
@@ -1208,6 +1210,7 @@ def _op_venom(state, step):
         return None
     if step["kind"] == "viper":
         target.strength_counter -= state.config.viper_poison
+        state.emit("strength", iid=target.iid, card=target.card_id, owner=target.owner, n=-state.config.viper_poison)
     else:
         state.scheduled.append({"iid": target.iid, "owner": step["chooser"], "remaining": 1,
                                 "while_buried": True,
@@ -1231,6 +1234,7 @@ def _eon_end_of_turn(state, unit, cr):
         del state.board[cr]
     counters = state.card_strength_counters.setdefault(unit.owner, {})
     counters["eon"] = counters.get("eon", 0) - state.config.eon_decay
+    state.emit("strength", card="eon", owner=unit.owner, n=-state.config.eon_decay)   # every copy (this one is in the deck now)
     shuffle_back(state, unit.owner, ["eon"])
 
 

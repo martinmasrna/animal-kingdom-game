@@ -83,7 +83,8 @@ export function renderBoard(el, M, g, cards, ui) {
   const A = ui.anim, rings = new Set(ui.rings || []);
   // the tutorial shows a region: its four crossroads and its stone glow (not rings: rings mean a click acts there)
   const shown = new Set(ui.region || []), shownAt = ui.region && ui.region[0].split(',').map(Number);
-  const { landed, covered, leaving, strength } = boardChanges(A && A.board, g.board, (A && A.fx) || []);
+  const { landed, covered, leaving } = boardChanges(A && A.board, g.board, (A && A.fx) || []);
+  const strength = (A && A.strength) || new Map();   // the stored changes this step made (a grant, a poison), iid to up or down
   const held = heldRegions(M.regions, g.board);
   const stoneAt = reg => { const [c, r] = reg.c, [x1, y1] = at(c, r), [x2, y2] = at(c + 1, r + 1); return [(x1 + x2) / 2, (y1 + y2) / 2]; };
   let s = '';   // the painted ground is the game screen's (kit2/plate_wide.webp, under the stage), wider than any window

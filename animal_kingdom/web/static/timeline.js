@@ -7,7 +7,7 @@
 // the last step is done.
 
 // How long each step holds the screen, in seconds: the one place these lengths live (the board's animations fit inside).
-export const DUR = { to_hand: 0.5, leave_hand: 0.4, steal: 0.7, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, bounce: 0.85, to_deck: 0.85, draw: 0.5, pay: 0.4, capture: 0.6, yourturn: 1.5 };
+export const DUR = { strength: 0.6, to_hand: 0.5, leave_hand: 0.4, steal: 0.7, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, bounce: 0.85, to_deck: 0.85, draw: 0.5, pay: 0.4, capture: 0.6, yourturn: 1.5 };
 // Food in flight: one fruit per food, 0.035 s apart, each flying 0.7 s, then the count settles.
 export const foodDur = n => Math.min(2.4, 0.7 + 0.035 * Math.max(0, n - 1) + 0.3);
 
@@ -104,6 +104,12 @@ export function plan(prev, next, cards = {}) {
         if (e.player === you) s.hand.push(finalCard(e.new) || { iid: e.new, id: e.card, str: (cards[e.card] || {}).str });
         push({ kind: 'steal', dur: DUR.steal, player: e.player, card: e.card });
         break;
+      case 'strength': {   // a stored change (a Roar's grant, Rattlesnake's growth, Viper's poison): auras are not events
+        const ch = { iid: e.iid, card: e.card, owner: e.owner, n: e.n }, last = out[out.length - 1];
+        if (last && last.step && last.step.kind === 'strength') last.step.changes.push(ch);   // several in a row show together
+        else push({ kind: 'strength', dur: DUR.strength, changes: [ch] });
+        break;
+      }
       case 'turn_start':
         s.current = e.player;
         if (e.player === you) push({ kind: 'yourturn', dur: DUR.yourturn });

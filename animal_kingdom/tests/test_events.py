@@ -96,3 +96,19 @@ def test_the_events_alone_rebuild_the_board_after_every_action():
             assert board == real, f"{a} vs {b}: the events missed a board change"
             assert food == s.food, f"{a} vs {b}: the events missed food"
             assert hands == {q: {u.iid for u in s.hands[q]} for q in "AB"}, f"{a} vs {b}: the events missed a hand change {last}"
+
+
+def test_a_stored_gain_is_an_event_and_fox_draws_after_it():
+    """Strength a card stores (a grant) is an event, in order before what reacts to it (Fox draws); an aura is not one."""
+    from animal_kingdom.engine import effects
+    s = _fresh()
+    me = s.current
+    cr = next(a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.target[0] == "cr")
+    fox = UnitInstance("fox", me, s.new_iid())
+    s.board[cr] = [fox]
+    s.events = []
+    s.effect_stack.append({"op": "grant_strength", "iids": [fox.iid], "amount": 2, "by_card": "alpha"})
+    effects.resolve(s)
+    kinds = [(e["e"], e.get("iid"), e.get("n"), e.get("cause")) for e in s.events if e["e"] in ("strength", "draw")]
+    assert kinds[0] == ("strength", fox.iid, 2, "alpha")
+    assert kinds[1][0] == "draw" and kinds[1][3] == "fox"

@@ -52,14 +52,9 @@ test('a unit moved under another is still on the board, so it does not leave', (
   assert.deepEqual(boardChanges(before, after).leaving, []);
 });
 
-test('a strength change is noted up or down, on units still on the board', () => {
-  const before = { '1,1': [u(1, 'A', 3)], '2,1': [u(2, 'A', 5)] }, after = { '1,1': [u(1, 'A', 4)], '2,1': [u(2, 'A', 2)] };
-  assert.deepEqual([...boardChanges(before, after).strength], [[1, 'up'], [2, 'down']]);
-});
-
 test('with no previous view nothing changed', () => {
   const ch = boardChanges(null, { '1,1': [u(1, 'A')] });
-  assert.equal(ch.landed.size + ch.covered.size + ch.leaving.length + ch.strength.size, 0);
+  assert.equal(ch.landed.size + ch.covered.size + ch.leaving.length, 0);
 });
 
 test('one fruit flies per food gained, from the held stones, to the pit it fills', () => {

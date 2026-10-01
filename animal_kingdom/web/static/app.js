@@ -524,6 +524,18 @@ function onView(prev) {
   };
   run(0, prev);
 }
+// A strength step's changes as the board flashes them: each unit named, or every copy of a card that grows as one
+// (Rattlesnake, Eon) on its owner's side.
+function strengthFlash(step) {
+  const m = new Map();
+  if (!step || step.kind !== 'strength') return m;
+  for (const c of step.changes) {
+    const dir = c.n > 0 ? 'up' : 'down';
+    if (c.iid != null) m.set(c.iid, dir);
+    else for (const st of Object.values(V.game.board)) for (const u of st) if (u.id === c.card && u.owner === c.owner) m.set(u.iid, dir);
+  }
+  return m;
+}
 function stopPlayback() { clearTimeout(PB.t); PB.busy = false; PB.queue = []; ui.step = null; }
 
 function showView(prev) {
@@ -543,7 +555,8 @@ function showView(prev) {
     ? { board: viewerBoard(prev), food: { A: prev.game.food[prev.you], B: prev.game.food[prev.you === 'A' ? 'B' : 'A'] },
         income: { A: prev.game.income[prev.you], B: prev.game.income[prev.you === 'A' ? 'B' : 'A'] },
         hand: prev.game.hand.map(h => h.iid), oppHand: prev.game.handCount[prev.you === 'A' ? 'B' : 'A'], hist: prev.game.history.length,
-        fromStones: !(ui.step && ui.step.kind === 'food' && !ui.step.income) } : null;   // only region income flies from the stones
+        fromStones: !(ui.step && ui.step.kind === 'food' && !ui.step.income),   // only region income flies from the stones
+        strength: strengthFlash(ui.step) } : null;
   if (ui.step && ui.step.kind === 'yourturn' && screen === 'game') { turnPlate(); turnCue.until = Date.now() + 900; }
   gameScreen();
 }
