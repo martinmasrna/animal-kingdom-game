@@ -96,6 +96,9 @@ export const LESSONS = [
   // lesson 1's Roar has no condition (the Squirrel's), so it never glows: the glow is lesson 2's, on the Lynx
   explain('roarinfo', 'squirrel', c => c.mine && c.hand('squirrel') && c.empty('squirrel').length > 0,
     'The Squirrel has a Roar: an effect that happens the moment you place it. Its Roar gives you 10 food.'),
+  // touch has no hover: say once how a card is read (player feedback 2026-10-01: phone players never found the hold)
+  { id: 'holdread', when: c => c.mine && c.hand('squirrel') && c.empty('squirrel').length > 0 && globalThis.matchMedia?.('(hover: none)').matches,
+    ...talk, at: { card: 'squirrel' }, text: 'Press and hold any card to read what it does.' },
   { id: 'roar', when: c => c.mine && c.hand('squirrel') && c.empty('squirrel').length > 0, done: c => c.roared,
     only: c => ({ card: 'squirrel', crs: c.empty('squirrel') }), at: { rings: true },
     text: { pick: 'Click the Squirrel.', place: 'Now click one of the circles.' } },

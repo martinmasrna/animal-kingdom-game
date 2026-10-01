@@ -90,6 +90,9 @@ test('covering and Roar are each done once by hand: the Pup beside the patch, th
   const g4 = { round: 4, board, history: covered, hand: [{ id: 'squirrel' }], legal: { place: { squirrel: [['cr', '3,1'], ['cr', '1,3']] }, draw: true } };
   const info = current(view(g4), null, CARDS, t);
   assert.equal(info.id, 'roarinfo'); assert.equal(info.read, 'squirrel', 'the card is shown large beside the explanation'); t.seen.add('roarinfo');
+  globalThis.matchMedia = q => ({ matches: q === '(hover: none)' });   // on a phone: how to read a card, once, before the Roar
+  const hold = current(view(g4), null, CARDS, t);
+  assert.equal(hold.id, 'holdread'); assert.ok(hold.next); t.seen.add('holdread'); delete globalThis.matchMedia;
   const roar = current(view(g4), null, CARDS, t);
   assert.equal(roar.id, 'roar'); assert.deepEqual(roar.only, { card: 'squirrel', crs: ['3,1', '1,3'] });
   const roared = current(view({ round: 4, board, history: [...covered, { seat: 'A', kind: 'place', card: 'squirrel', fx: [] }], hand: [], legal: { place: {}, draw: true } }), null, CARDS, t);
