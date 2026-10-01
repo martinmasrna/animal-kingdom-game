@@ -310,3 +310,9 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 @media (max-width: 700px), (max-height: 500px) { .pre { padding-top: 16px; } .pre .lobbyp { margin-top: 16px; } }   /* the waiting lobby clear of the screen's top */
 .lead .lpin { padding: 10px 24px 0; } .lead .lpin .lr { margin: 0; }   /* still placing: your row pinned under the list, always in sight */ .lead .lr .nm small { margin-left: 10px; font-weight: 500; font-size: 15px; color: #a99f8e; }   /* not ranked yet: your progress */
 @media (max-width: 700px) { .lead .lpin { padding-left: 12px; padding-right: 12px; } }
+
+/* Touch: a long press reads a card (onHold), so it must not select text or open the browser's callout; fields stay editable. */
+@media (hover: none) {
+  body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea, .field, pre { -webkit-user-select: text; user-select: text; }
+}

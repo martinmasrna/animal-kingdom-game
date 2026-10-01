@@ -175,7 +175,8 @@ function wire(app, all, open) {
   // Click a card to add a copy; a refused add says why. Right-click a card, or click its strip, to take one out.
   app.querySelectorAll('.cgrid [data-card]').forEach(e => {
     e.onclick = () => { const c = C[e.dataset.card];
-      if (!open) { if (portrait() && !st.sheet) { st.sheet = true; redo(); } return X.toast(`Open a deck ${portrait() ? 'below' : 'on the right'} to build it`); }
+      if (!open && matchMedia('(hover: none)').matches) { hidePop(); return zoom(app, c); }   // touch, browsing: a tap reads it
+      if (!open) return X.toast(`Open a deck ${portrait() ? 'below' : 'on the right'} to build it`);
       const n = open.list.filter(x => x === c.id).length, inR = open.list.filter(x => C[x].rarity === c.rarity).length;
       const why = open.list.length >= 30 ? 'tot' : n >= limit(c) ? 'pips' : CAP[c.rarity] && inR >= CAP[c.rarity] ? c.rarity : null;
       if (why) return refuse(app, e, why);

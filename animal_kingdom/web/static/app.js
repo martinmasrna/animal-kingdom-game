@@ -4,7 +4,7 @@ import { hasArt, artUrl, stripArt, fitStrips } from './art.js';
 import { cardHTML, fitNames } from './card.js';
 import { renderBoard, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
-import { dd, wireDd, onHold } from './menu.js';
+import { dd, wireDd, onHold, moved } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
@@ -750,10 +750,11 @@ function drawGame() {
   hand.querySelectorAll('.hc').forEach(el => {
     let t = null;
     const end = () => { clearTimeout(t); if (el.classList.contains('peek')) { el.classList.remove('peek'); el.dataset.held = '1'; } };
-    el.ontouchstart = () => { clearTimeout(t); t = setTimeout(() => {   // shown 2.1x from its foot: kept inside the stage's edges
+    let x0 = 0, y0 = 0;
+    el.ontouchstart = e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; clearTimeout(t); t = setTimeout(() => {   // shown 2.1x from its foot: kept inside the stage's edges
       const c = parseFloat(el.style.left) + 71.5, half = 143 * 2.1 / 2;
       el.style.setProperty('--peekx', `${Math.max(0, 16 + half - c) - Math.max(0, c + half - (STAGE.w - 16))}px`); el.classList.add('peek'); }, 350); };
-    el.ontouchend = el.ontouchcancel = end; el.ontouchmove = end;
+    el.ontouchend = el.ontouchcancel = end; el.ontouchmove = e => { if (moved(e, x0, y0)) end(); };
     el.oncontextmenu = e => e.preventDefault();   // a long press opens no menu
   });
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
@@ -1055,6 +1056,7 @@ function wireBoard() {
     ui.hover = cr;
     if (ui.sel) drawBoard();
   });
+  board.addEventListener('touchstart', e => { const g = e.target.closest('[data-cr]'); showStack(g, g ? g.dataset.cr : null); }, { passive: true });   // touch: holding a piece reads it too
   board.addEventListener('mouseleave', () => { showStack(null, null); if (ui.hover) { ui.hover = null; if (ui.sel) drawBoard(); } });
   board.addEventListener('contextmenu', e => { if (ui.sel) { e.preventDefault(); ui.sel = null; drawGame(); } });
 }

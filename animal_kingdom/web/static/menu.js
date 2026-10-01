@@ -20,11 +20,14 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && closeAll()) e.stopI
 
 // Touch has no hover or right-click: pressing and holding does what they do (read a card large); the tap that ends the
 // hold does nothing else. fn(el) starts the reading, done(el) ends it (for a reading shown only while held).
+// A held finger always wobbles a little: only a real move (a scroll, a drag) cancels a hold.
+export const moved = (e, x0, y0) => Math.hypot(e.touches[0].clientX - x0, e.touches[0].clientY - y0) > 10;
 export function onHold(el, fn, done) {
-  let t = null, held = false;
-  el.addEventListener('touchstart', () => { held = false; clearTimeout(t); t = setTimeout(() => { held = true; fn(el); }, 420); }, { passive: true });
+  let t = null, held = false, x0 = 0, y0 = 0;
+  el.addEventListener('touchstart', e => { held = false; clearTimeout(t); x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    t = setTimeout(() => { held = true; fn(el); }, 420); }, { passive: true });
   const end = e => { clearTimeout(t); if (held) { if (e.cancelable) e.preventDefault(); if (done) done(el); } };   // no click follows a hold
-  el.addEventListener('touchend', end); el.addEventListener('touchcancel', end); el.addEventListener('touchmove', () => clearTimeout(t), { passive: true });
+  el.addEventListener('touchend', end); el.addEventListener('touchcancel', end); el.addEventListener('touchmove', e => { if (moved(e, x0, y0)) clearTimeout(t); }, { passive: true });
   el.addEventListener('click', e => { if (held) { held = false; e.stopImmediatePropagation(); e.preventDefault(); } }, true);
   el.addEventListener('contextmenu', e => e.preventDefault());
 }
