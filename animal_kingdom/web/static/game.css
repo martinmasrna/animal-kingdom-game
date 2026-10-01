@@ -461,4 +461,19 @@
 .game.port .prompt .skip, .game.port .prompt:not(.mull) .line .skip { height: 80px; padding: 0 28px; font-size: 30px; }   /* Skip and Keep hand, thumb-sized */
 .game.port .tbtn:not(.A):not(.B) { display: none; }   /* no game running (See the board): the empty stone leaves the corner to Back to results */
 .game.port .waiting:has(.slab) { top: 1356px; } .game.port .waiting .slab { height: 72px; padding: 0 20px; font-size: 24px; }
+
+/* The versus moment at a match's start: the key art dimmed, the two decks' cover cards meeting from either side. */
+.game .intro { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; gap: 64px; cursor: pointer;
+  background: linear-gradient(rgba(10,9,8,.55), rgba(10,9,8,.55)), #0e0d0b var(--keyart) center / cover; transition: opacity .5s ease; }
+.game .intro.out { opacity: 0; pointer-events: none; }
+.game .intro .iside { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.game .intro .card { --w: 300px; filter: drop-shadow(0 18px 30px rgba(0,0,0,.7)); }
+.game .intro .card .stab { display: none; } .game .intro .card .nbar { padding: 0 .5em; }   /* a deck's face here, not a card to weigh: no strength, the name centred */
+.game .intro .iside.A { animation: introL .7s cubic-bezier(.2,.8,.3,1) both; } .game .intro .iside.B { animation: introR .7s cubic-bezier(.2,.8,.3,1) both; }
+@keyframes introL { from { transform: translateX(-60vw); } } @keyframes introR { from { transform: translateX(60vw); } }
+.game .intro .iname { display: flex; flex-direction: column; align-items: center; gap: 2px; font-family: 'Fira Sans Condensed', sans-serif; text-shadow: 0 2px 8px rgba(0,0,0,.85); }
+.game .intro .iname b { font-size: 34px; font-weight: 800; } .game .intro .A .iname b { color: var(--A); } .game .intro .B .iname b { color: var(--B); }
+.game .intro .iname span { font-size: 22px; font-weight: 600; color: #e8dfcf; }
+.game .intro .ivs { font: 800 80px/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; text-shadow: 0 4px 20px rgba(0,0,0,.8); animation: introVs .4s ease .55s both; }
+@keyframes introVs { from { opacity: 0; transform: scale(1.6); } }
 .game.port .hc.peek, .game.port .hc.peek:hover { translate: var(--peekx, 0px) 0; }   /* a card read large stays on screen */

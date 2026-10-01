@@ -509,10 +509,29 @@ function gameScreen() {
   drawGame();
 }
 
+// A match opens on its versus moment (Martin, 2026-10-01, after Hearthstone's "Jaina vs Gul'dan"): over the key art, your
+// deck's cover card comes in from the left and the opponent's from the right, "vs" between them; it holds, then lifts off
+// the board. Nothing to press; a click skips it. Once per game, never in a lesson or a replay.
+function drawIntro() {
+  const G = V.game, key = V.id + ':' + V.results.length;
+  if (V.phase !== 'playing' || !G || G.history.length || isTutorial() || RP.views.length || !V.id || ui.intro === key) return;
+  ui.intro = key;
+  const side = p => { const s = V.seats[p] || {}, list = Object.keys(V.lists[p] || {}), mine = p === V.you;
+    const own = mine && playable().find(d => d.id === s.deck || d.id === 'my:' + s.deck);
+    const cover = own ? coverFor(own) : COVER[s.deck] || coverOf(list, CARDS);
+    return `<div class="iside ${p === V.you ? 'A' : 'B'}">${cardHTML(CARDS[cover], { cls: 'compact' })}<div class="iname"><b>${seatLabel(p)}</b>${s.deckName ? `<span>${esc(own ? own.name : s.deckName)}</span>` : ''}</div></div>`; };
+  const el = document.createElement('div'); el.className = 'intro'; el.id = 'intro';
+  el.innerHTML = `${side(V.you)}<div class="ivs">vs</div>${side(opp())}`;
+  document.getElementById('scr').appendChild(el); fitNames(el);
+  const done = () => { el.classList.add('out'); setTimeout(() => el.remove(), 600); };
+  el.onclick = done; setTimeout(done, matchMedia('(prefers-reduced-motion: reduce)').matches ? 1400 : 2600);
+}
+
 function drawGame() {
   const G = V.game, you = V.you, them = opp(), d = decision(), $ = id => document.getElementById(id);
   const playing = V.phase === 'playing', choosing = !!(d.pend && d.pend.mode === 'choice');
   lastDecision = d;
+  drawIntro();
   $('scr').classList.toggle('rp', !!RP.views.length);   // a replay: upright its controls take the deck's corner
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)

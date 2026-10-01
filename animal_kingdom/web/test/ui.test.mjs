@@ -100,6 +100,9 @@ test('the flag concedes the game, after a question in the middle of the board', 
   await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   await p.click('#go');
   await p.waitForFunction(() => window.__ak().V && window.__ak().V.phase === 'playing', { timeout: 10000 });
+  await p.waitForSelector('#intro', { timeout: 3000 });   // the match opens on its versus moment; a click skips it
+  await p.click('#intro'); await wait(700);
+  assert.equal(await p.$('#intro'), null, 'the versus moment is gone after a click');
   const asking = () => p.$eval('#concov', e => e.classList.contains('on'));
   await p.click('#menubtn'); await wait(80);
   assert.ok(await asking(), 'it asks first');
