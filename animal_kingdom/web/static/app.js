@@ -82,7 +82,7 @@ const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
   CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks;
-  // the animals' calls (kit2/snd/call_*, calls.json) are parked (Martin, 2026-10-01): only the basic sounds play for now
+  // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
   openPresence({ api, toast, key: () => store('ak:key'), deck: () => deckSpec(chosenDeck()),   // friends see you online; challenges arrive
     busy: () => screen === 'game' && V && V.phase === 'playing', accept: m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; } });

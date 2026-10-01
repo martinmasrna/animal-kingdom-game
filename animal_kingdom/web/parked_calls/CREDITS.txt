@@ -1,0 +1,22 @@
+The animals' calls, parked (docs/pre-launch.md): move these files back to static/kit2/snd/ and this list back into its CREDITS.txt.
+
+Animal recordings:
+jaguar sawing call (zoo) — About Zoos, CC BY 4.0, https://commons.wikimedia.org/wiki/File:Jaguar_saw.flac
+wolf howl — Data Clock, CC BY 4.0, https://commons.wikimedia.org/wiki/File:11wolf.wav
+spotted hyena giggle — Mathevon N, Koralek A, Weldele M, Glickman S, Theunissen F, CC BY 2.0, https://commons.wikimedia.org/wiki/File:Giggling_call_of_a_spotted_hyena_(Crocuta_crocuta)_-_1472-6785-10-9-S1.oga
+Cape crow caw — British Library Sound Archive recordings (Europeana Sounds / Wikimedia Commons upload; author field blank on Commons), CC BY 4.0, https://commons.wikimedia.org/wiki/File:Black_Crow_(Corvus_capensis)_(W1CDR0000989_BD23).ogg
+honeybee buzz — BioAcoustica (author blank on Commons), CC BY 3.0, https://commons.wikimedia.org/wiki/File:BioAcoustica_413-2_Apis_mellifera_524_.flac
+African elephant alarm rumble — King L, Soltis J, Douglas-Hamilton I, Savage A, Vollrath F, CC BY 2.5, https://commons.wikimedia.org/wiki/File:Bee-Threat-Elicits-Alarm-Call-in-African-Elephants-pone.0010346.s001.ogg
+barking gecko call — British Library Sound Archive recordings (Europeana Sounds / Wikimedia Commons upload; author field blank on Commons), CC BY 4.0, https://commons.wikimedia.org/wiki/File:Barking_Gecko_(Ptenopus_garrulus)_(W1CDR0000666_BD5).ogg
+lion roar (Tamil Nadu) — public domain / CC0, https://commons.wikimedia.org/wiki/File:Lion_raring-sound1TamilNadu178.ogg
+rat squeaks (attack/pain) — public domain / CC0, https://opengameart.org/content/squeaky-rat
+squirrel chatter (Yellowstone) — public domain / CC0, https://www.nps.gov/subjects/sound/sounds-squirrel.htm
+roadside hawk call — public domain / CC0, https://commons.wikimedia.org/wiki/File:Roadside_Hawk_Belize.mp3
+bald eagle call — public domain / CC0, https://commons.wikimedia.org/wiki/File:Yellowstone_sound_library_-_Bald_Eagle_-_001.mp3
+rattlesnake rattle/hiss — public domain / CC0, https://commons.wikimedia.org/wiki/File:Rattlesnake.ogg
+bumblebee buzz — public domain / CC0, https://commons.wikimedia.org/wiki/File:Bombus_buzz.ogg
+grizzly bear roar — public domain / CC0, https://commons.wikimedia.org/wiki/File:Yellowstone_sound_library_-_Grizzly_Bears_Roar_-_001.mp3
+grizzly bear vocalisation — public domain / CC0, https://commons.wikimedia.org/wiki/File:Yellowstone_sound_library_-_Grizzly_Bear_vocalizations_-_001.mp3
+elephant trumpet — public domain / CC0, https://commons.wikimedia.org/wiki/File:Elephant_voice_-_trumpeting.ogg
+Tokay gecko call — public domain / CC0, https://commons.wikimedia.org/wiki/File:Mating_call_of_a_male_Tokay_gecko_(Gekko_gecko).ogg
+water splash (no fish recording found) — public domain / CC0, https://opengameart.org/content/6-short-water-splashes

@@ -21,7 +21,7 @@ const SND = {
 // An animal calls as it lands, by its family (a card's first family tag that has a call); FAM fills from sound files present.
 const FAM = { Cat: 'cat', Canine: 'canine', Rodent: 'rodent', Bird: 'bird', Snake: 'snake', Colony: 'colony', Bear: 'bear',
   Megafauna: 'megafauna', Lizard: 'lizard', Arachnid: 'arachnid', Egg: 'egg', Fish: 'fish' };
-export const CALLS = {};   // family -> variants, set by setCalls() from kit2/snd/calls.json
+export const CALLS = {};   // family -> variants, set by setCalls() from kit2/snd/calls.json (parked: web/parked_calls/)
 export const setCalls = c => Object.assign(CALLS, c);
 const VOL = { fruit: .55, oppdraw: .5, pick: .5, draw: .8, call: .6 };
 const cache = {};
