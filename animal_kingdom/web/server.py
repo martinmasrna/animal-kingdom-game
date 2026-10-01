@@ -566,6 +566,15 @@ async def challenge(req):
     return web.json_response(m)
 
 
+async def challenge_cancel(req):
+    """Withdraw your challenges (the waiting request may not notice its client left): each friend's piece goes."""
+    p = me(req)
+    for c in list(challenges.values()):
+        if c["from"] == p["id"] and not c["fut"].done():
+            c["fut"].set_result(None)
+    return web.json_response({})
+
+
 async def challenge_answer(req):
     """Accept (with your deck: the match starts) or decline a challenge to you."""
     p, body = me(req), await req.json()
@@ -744,6 +753,7 @@ def make_app() -> web.Application:
         web.get("/api/friends/link/{code}", friend_peek),
         web.delete("/api/friends/{id}", friend_remove),
         web.post("/api/challenge", challenge),
+        web.delete("/api/challenge", challenge_cancel),
         web.post("/api/challenge/{id}/answer", challenge_answer),
         web.get("/ws/presence", presence_socket),
         web.post("/api/match", create_match),

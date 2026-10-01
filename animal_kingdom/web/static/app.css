@@ -298,3 +298,5 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .srow input[type=range]:focus-visible { outline: 2px solid rgba(207,195,173,.7); outline-offset: 4px; }
 .sets .credits { margin-top: 14px; } .sets .credits h3 { margin: 0 0 6px; font: 700 18px 'Fira Sans Condensed', sans-serif; color: #c9bfae; }
 .sets .credits pre { margin: 0; white-space: pre-wrap; font: 500 14px/1.45 'Fira Sans Condensed', sans-serif; color: #b3a996; }
+
+@media (max-width: 700px), (max-height: 500px) { .pre { padding-top: 16px; } .pre .lobbyp { margin-top: 16px; } }   /* the waiting lobby clear of the screen's top */

@@ -42,6 +42,15 @@ def test_friends_by_link_challenge_accept_decline_and_remove(monkeypatch):
                 msg = await ws.receive_json(timeout=2)
             await c.post(f"/api/challenge/{msg['id']}/answer", json={"accept": False}, headers=hb)
             assert (await ask).status == 409
+            # withdrawn: the friend's piece goes, and a late accept finds it gone
+            ask = asyncio.ensure_future(c.post("/api/challenge", json={"friend": b["profile"]["id"], "deck": "ramp"}, headers=ha))
+            msg = None
+            while not msg or msg["t"] != "challenge":
+                msg = await ws.receive_json(timeout=2)
+            await c.delete("/api/challenge", headers=ha)
+            gone = await ws.receive_json(timeout=2)
+            assert gone == {"t": "challenge_gone", "id": msg["id"]} and (await ask).status == 409
+            assert (await c.post(f"/api/challenge/{msg['id']}/answer", json={"accept": True, "deck": "ramp"}, headers=hb)).status == 410
             # removed: friends no more, both ways
             await c.delete(f"/api/friends/{a['profile']['id']}", headers=hb)
             assert (await (await c.get("/api/friends", headers=ha)).json())["friends"] == []

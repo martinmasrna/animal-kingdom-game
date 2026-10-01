@@ -120,6 +120,7 @@ function route() {
   if (parts[0] === 'gauntlet') return homeScreen({ gauntlet: true });
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
+  if (search && parts[0] !== 'm' && !(search.btn === 'go' && !parts[0])) cancelSearch();   // leaving the screen it started on withdraws a search or a challenge
   if (parts[0] === 'leaderboard') return leaderboardScreen();
   if (parts[0] === 'settings') return settingsScreen();
   if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
@@ -152,7 +153,7 @@ function homeScreen(mode = {}) {
   const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', fr ? fr.name : ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
     : play.opp === 'ranked' ? ['Ranked', `your rating ${(ME && ME.rating) || '1500?'}`]
     : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name + ' deck' : 'Random deck'}`];
-  const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(fr.name.split('#')[0])}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
+  const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
   const tile = (d, W, cls = '') => `<div class="dtile${cls}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b></div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
   const deckList = d => deckBody(d.list, CARDS, false, true) + (d.mine ? '<button class="backbtn" id="dedit"><span>Open in collection</span></button>' : '');
@@ -160,8 +161,8 @@ function homeScreen(mode = {}) {
     ? `<div class="chooser decks"><div class="clist">${all.map(d => tile(d, 300, d.id === chosen.id ? ' on' : '')).join('')}</div><div class="dl">${deckList(peek)}</div></div>`
     : play.open === 'opp' ? `<div class="chooser opps">${play.opp === 'gauntlet' ? levels + dd('side', play.side, SIDES)
       : `<div class="seg">${[['bot', 'Practice'], ['ranked', 'Ranked'], ['friend', 'Friend']].map(([v, l]) => `<button class="slab${play.opp === v ? ' on' : ''}" data-opp="${v}">${l}</button>`).join('')}</div>`
-        + (play.opp === 'ranked' ? '' : play.opp === 'friend' ? `<div class="flist">${(play.friends || []).map(f => `<button class="slab fr${f.id === play.friend ? ' on' : ''}" data-friend="${f.id}">${friendRow(f)}</button>`).join('')}
-          <button class="slab" id="addfriend">Add a friend</button></div><div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
+        + (play.opp === 'ranked' ? '' : play.opp === 'friend' ? `<div class="flist">${(play.friends || []).map(f => `<button class="slab fr${f.id === play.friend ? ' on' : ''}" data-friend="${f.id}">${friendRow(f)}</button>`).join('')}</div>
+          <button class="slab" id="addfriend">Add a friend</button><div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
           : levels + dd('botDeck', play.botDeck, botDecks))}</div>`
     : play.open === 'learn' ? `<div class="chooser lessons">${LESSON_NAMES.map((n, i) => `<button class="slab" data-lesson="${i + 1}"><b>Lesson ${i + 1}</b>${n}</button>`).join('')}</div>` : '';
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
@@ -170,7 +171,7 @@ function homeScreen(mode = {}) {
     <div class="top"><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : `<button class="backbtn${play.open === 'learn' ? ' open' : ''}" id="learn2"><span>How to play</span></button>`}<a class="backbtn" href="#/leaderboard"><span>Leaderboard</span></a><a class="backbtn" href="#/profile"><span>Profile</span></a><a class="backbtn" href="#/settings"><span>Settings</span></a><button class="backbtn" id="fbhome"><span>Feedback</span></button></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
-      <button class="play" id="go">${go}</button></div>`}</div>`;
+      <button class="play${search && search.btn === 'go' ? ' searching' : ''}" id="go">${search && search.btn === 'go' ? searchLabel() : go}</button></div>`}</div>`;
   const $ = id => document.getElementById(id), root = app.querySelector('.home');
   fitStrips(root);   // the tiles are as wide as the window allows (upright, one column)
   $('fbhome').onclick = feedback;
@@ -209,8 +210,9 @@ function homeScreen(mode = {}) {
       if (!r.ok) return toast(r.status === 404 ? `No match ${mode.join}` : await r.text());
       const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id; return;
     }
-    if (play.opp === 'ranked') return findRanked($('go'), deckSpec(chosen));
-    if (play.opp === 'friend' && fr && fr.online) return findChallenge($('go'), fr, deckSpec(chosen));
+    if (search) return cancelSearch();
+    if (play.opp === 'ranked') return findRanked('go', deckSpec(chosen));
+    if (play.opp === 'friend' && fr && fr.online) return startSearch('challenge', 'go', '/api/challenge', { friend: fr.id, deck: deckSpec(chosen) }, friendLabel(fr, play.friends));
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
       const pool = DECKS.filter(d => d.id !== 'goodstuff'), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
@@ -220,42 +222,44 @@ function homeScreen(mode = {}) {
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); play.open = null;
-    if (play.opp === 'friend' && fr) await shareLink(`${location.origin}/#/join/${m.id}`, 'A match in Animal Kingdom');   // an offline friend: the match's link
     location.hash = '#/m/' + m.id;
   };
 }
-// Ranked (web/ladder.py): the button that started it shows the search while the server finds an opponent (a person near
-// your rating, else after a few seconds the nearest bot); clicking it again cancels.
-let ranked = null;
-async function findRanked(btn, deck) {
-  if (ranked) { ranked.abort(); return; }
-  const ctl = ranked = new AbortController(), t0 = Date.now(), label = btn.innerHTML;
-  const tick = () => { const s = Math.floor((Date.now() - t0) / 1000);
-    btn.innerHTML = `<span class="search">Finding an opponent · 0:${String(s).padStart(2, '0')}<small>click to cancel</small></span>`; };
-  tick(); const iv = setInterval(tick, 1000); btn.classList.add('searching');
+// One search at a time: the ranked queue (a person near your rating, else the nearest bot) or a challenge to an online
+// friend. Its state lives here, so the button that started it (home's Play, or Play again after a ranked game) shows it
+// across redraws; clicking it again, or leaving the screen, cancels it (a cancelled challenge tells the server, so the
+// friend's piece goes).
+let search = null, searchShown = '';   // search: { kind, btn, who, t0, ctl }
+const searchLabel = () => { const t = Math.floor((Date.now() - search.t0) / 1000);
+  return `<span class="search">${search.kind === 'ranked' ? 'Finding an opponent' : `Waiting for ${esc(search.who)}`} · 0:${String(t).padStart(2, '0')}<small>click to cancel</small></span>`; };
+function drawSearch() {
+  const b = search ? document.getElementById(search.btn) : document.querySelector('.play.searching');
+  if (!b) return;
+  if (search) { b.innerHTML = searchLabel(); b.classList.add('searching'); } else { b.innerHTML = searchShown; b.classList.remove('searching'); }
+}
+function cancelSearch() {
+  if (!search) return;
+  const s = search; search = null; s.ctl.abort();
+  if (s.kind === 'challenge') api('/api/challenge', { method: 'DELETE' });
+  drawSearch();
+}
+async function startSearch(kind, btn, url, body, who) {
+  if (search) return cancelSearch();
+  const ctl = new AbortController(), el = document.getElementById(btn);
+  searchShown = el ? el.innerHTML : 'Play';
+  search = { kind, btn, who, t0: Date.now(), ctl }; drawSearch();
+  const iv = setInterval(drawSearch, 1000);
   try {
-    const r = await api('/api/ranked', { method: 'POST', body: JSON.stringify({ deck }), signal: ctl.signal });
-    if (!r.ok) throw new Error(await r.text());
-    const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
-  } catch (e) { if (e.name !== 'AbortError') toast(e.message || 'Could not find a match'); btn.innerHTML = label; btn.classList.remove('searching'); }
-  finally { clearInterval(iv); ranked = null; }
+    const r = await api(url, { method: 'POST', body: JSON.stringify(body), signal: ctl.signal });
+    if (!r.ok) throw new Error(r.status === 409 && kind === 'challenge' ? `${who} is busy` : await r.text());
+    const m = await r.json(); search = null; setToken(m.id, m.token); play.open = null; sfx('found'); location.hash = '#/m/' + m.id;
+  } catch (e) { if (e.name !== 'AbortError' && search && search.ctl === ctl) toast(e.message || 'Could not find a match'); }
+  finally { clearInterval(iv); if (search && search.ctl === ctl) search = null; drawSearch(); if (kind === 'challenge') play.friends = null; }
 }
 
-// A challenge to an online friend: the button waits for their answer; clicking it again withdraws it.
-async function findChallenge(btn, f, deck) {
-  if (ranked) { ranked.abort(); return; }
-  const ctl = ranked = new AbortController(), t0 = Date.now(), label = btn.innerHTML, who = esc(f.name.split('#')[0]);
-  const tick = () => { const s = Math.floor((Date.now() - t0) / 1000);
-    btn.innerHTML = `<span class="search">Waiting for ${who} · 0:${String(s).padStart(2, '0')}<small>click to cancel</small></span>`; };
-  tick(); const iv = setInterval(tick, 1000); btn.classList.add('searching');
-  try {
-    const r = await api('/api/challenge', { method: 'POST', body: JSON.stringify({ friend: f.id, deck }), signal: ctl.signal });
-    if (!r.ok) throw new Error(r.status === 409 ? `${f.name.split('#')[0]} is busy` : await r.text());
-    const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
-  } catch (e) { if (e.name !== 'AbortError') toast(e.message); btn.innerHTML = label; btn.classList.remove('searching'); play.friends = null; }
-  finally { clearInterval(iv); ranked = null; }
-}
-
+const findRanked = (btn, deck) => startSearch('ranked', btn, '/api/ranked', { deck });
+const friendLabel = (f, all) => { const first = f.name.split('#')[0];   // the name, with its tag when another friend shares it
+  return (all || []).filter(g => g.name.split('#')[0] === first).length > 1 ? f.name : first; };
 // The leaderboard: everyone on the ladder, people and bots together, best first; your row marked and in view.
 // Settings: one column on the ground, like the leaderboard. Sound volume (0 is off) and the sound credits. The game screen
 // opens the same controls over the board from its gear (settingsBody is shared).
@@ -469,9 +473,9 @@ function lobbyScreen() {
   screen = 'lobby';
   const link = `${location.origin}/#/join/${V.id}`;
   app.innerHTML = `<div class="mscr pre"><div class="piece lobbyp"><div class="bigcode">${V.id}</div>
-      <button class="slab" id="copy">Copy link</button><p>Waiting for your friend to join</p></div>
+      <button class="slab" id="copy">${matchMedia('(hover: none)').matches ? 'Share link' : 'Copy link'}</button><p>Waiting for your friend to join</p></div>
     <a class="backbtn leave" href="#/"><span>Leave</span></a></div>`;
-  document.getElementById('copy').onclick = () => navigator.clipboard.writeText(link).then(() => toast('Link copied', true), () => toast(link));
+  document.getElementById('copy').onclick = () => shareLink(link, 'A match in Animal Kingdom');   // a phone's share sheet, straight from the tap
 }
 
 function seatLabel(p) {
@@ -1101,7 +1105,7 @@ function drawEnd() {
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}.</div>
       ${rt ? `<div class="next rating">Rating ${rt.before} → ${rt.after} (${d >= 0 ? '+' : '−'}${Math.abs(d)})</div>` : ''}
       <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Play again</button></div></div>`;
-    document.getElementById('again').onclick = e => findRanked(e.currentTarget, deckSpec(chosenDeck()));
+    document.getElementById('again').onclick = () => findRanked('again', deckSpec(chosenDeck()));
   } else {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
     const won = S[you] > S[them], series = V.results.length > 1;

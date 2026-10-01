@@ -206,13 +206,13 @@ html { touch-action: manipulation; }
    the friend-link and remove questions on the feedback box's granite. */
 .mscr .fr, .mscr .pfr { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto auto; align-items: center; gap: 8px; text-align: left; }
 .mscr .fr { height: 40px; padding: 0 12px; } .mscr .fr.on { box-shadow: inset 0 0 0 2px #cfc3ad, 0 3px 6px rgba(0,0,0,.55); }
-.mscr .pfr { height: 40px; padding: 0 2px 0 4px; } .mscr .pfr .ic { width: 36px; height: 36px; color: #ff8a78; }
+.mscr .pfr { height: 44px; padding: 0 2px 0 4px; } .mscr .pfr .ic { width: 44px; height: 44px; color: #ff8a78; }
 .mscr .dot { width: 10px; height: 10px; border-radius: 50%; box-sizing: border-box; border: 1.5px solid #8f8577; }
 .mscr .dot.on { border: 0; background: #7fd07a; box-shadow: 0 0 6px rgba(127,208,122,.6); }
 .mscr .fr .nm, .mscr .pfr .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
 .mscr .fr small, .mscr .pfr small { color: #a99f8e; font-size: 13px; }
 .mscr .flist { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
-.mscr .flist > * { flex: none; } .mscr .flist #addfriend, .prof #paddfriend { height: 40px; }
+.mscr .flist > * { flex: none; } .mscr #addfriend, .prof #paddfriend { height: 40px; }
 .prof #pfriends { display: flex; flex-direction: column; gap: 6px; }
 .chal { position: fixed; left: 50%; top: 16px; transform: translateX(-50%); z-index: 150; width: min(380px, calc(100vw - 24px)); box-sizing: border-box; padding: 16px;
   display: flex; flex-direction: column; gap: 12px; border-radius: 16px; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto;
