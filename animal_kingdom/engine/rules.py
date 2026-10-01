@@ -164,6 +164,7 @@ def _resolve_and_maybe_end_turn(state: GameState) -> None:
 
 def _end_turn(state: GameState) -> None:
     player = state.current
+    state.emit("turn_end", player=player)
     effects.end_of_turn(state, player)      # on_end_of_turn triggers (Dingo, Worker Wasp, Methuselah)
     effects.resolve(state)                  # choice-free by design, so it drains fully
     if state.result is not None:
@@ -182,6 +183,7 @@ def _end_turn(state: GameState) -> None:
     state.actions_taken_this_turn = 0
     state.turn_flags = {}                    # reset once-per-turn trigger flags
     state.current = other_player(player)
+    state.emit("turn_start", player=state.current, turn=state.turn_counter)
     # Start of the new player's turn: delayed effects + start-of-turn triggers, then resolve.
     effects.start_of_turn(state, state.current)
     effects.resolve(state)
@@ -207,7 +209,7 @@ def region_income(state: GameState, player: str) -> int:
 def _produce_food(state: GameState, player: str) -> None:
     total = region_income(state, player)
     if total:
-        effects.gain_food(state, player, total)  # sets result on win; applies Queen Bee
+        effects.gain_food(state, player, total, income=True)  # sets result on win; applies Queen Bee
 
 
 # ------------------------------------------------------------------ terminal

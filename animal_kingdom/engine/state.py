@@ -260,6 +260,14 @@ class GameState:
         # the fact that one was played last turn (which would disarm Gopher - see effects.py).
         self.rodent_played_turns = rodent_played_turns if rodent_played_turns is not None else {}
         self.result = result
+        # What happened, in order, as it happened (placed, covered, removed, bounced, drawn, food, turns): the server
+        # hands these to the players instead of anyone diffing positions. Not part of the position: never saved, and a
+        # clone starts empty. `cause` is the card whose effect is running, stamped on each event.
+        self.events: list[dict] = []
+        self.cause: Optional[str] = None
+
+    def emit(self, e: str, **fields) -> None:
+        self.events.append({"e": e, **fields, **({"cause": self.cause} if self.cause else {})})
 
     # --- instance ids ---
     def new_iid(self) -> int:
@@ -286,6 +294,7 @@ class GameState:
         """Create a fresh hand instance of `card_id` for `player` (test setup, Opossum return)."""
         inst = UnitInstance(card_id, player, self.new_iid(), strength_counter=strength_counter)
         self.hands[player].append(inst)
+        self.emit("to_hand", player=player, iid=inst.iid, card=card_id)
         return inst
 
     # --- board queries (shared by rules and effects, hence here on the state) ---
@@ -362,6 +371,7 @@ class GameState:
         new.actions_taken_this_turn = self.actions_taken_this_turn
         new.idle_turns = self.idle_turns
         new._next_iid = self._next_iid
+        new.events, new.cause = [], None
         new.effect_stack = _plain_copy(self.effect_stack)
         new.pending = _plain_copy(self.pending)
         new.scheduled = _plain_copy(self.scheduled)

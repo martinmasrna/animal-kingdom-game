@@ -38,6 +38,7 @@ GAMES_TO_WIN = 1
 CLOCK_FREE = 30.0
 CLOCK_BANK = 180.0
 CLOCK_MULLIGAN = 30.0        # one window for both players' mulligans at once (Martin, 2026-10-01); what's left is kept
+EVENTS_KEPT = 200            # a view carries the game's last events: enough for a client that missed a few views
 TIMEOUTS_TO_LOSE = 3         # turns in a row a player's clock ran out: they have left, and lose (Martin, 2026-10-01)
 
 # Menu labels for the premade decks (the design mockups' names).
@@ -87,6 +88,7 @@ class Move:
     target: Optional[list] = None
     fx: list = field(default_factory=list)
     pre: dict = field(default_factory=dict, repr=False)
+    events: list = field(default_factory=list, repr=False)   # the engine's events under this move, in order
 
     def public(self) -> dict:
         return {"round": self.round, "seat": self.seat, "kind": self.kind, "card": self.card,
@@ -114,44 +116,49 @@ def _jsonable(x):
     return x
 
 
-def _effects(state: GameState, move: Move) -> list:
-    """What a move did, by diffing the position before it against now (public facts only)."""
-    pre, fx = move.pre, []
-    if move.kind == "place" and move.target and move.target[0] == "cr":
-        below = pre["board"].get(move.target[1])
-        if below and below[-1][2] != move.seat:
-            fx.append({"k": "cover", "card": below[-1][1], "owner": below[-1][2]})
-    on_board_now = {u.iid for st in state.board.values() for u in st}
-    vanished = [(cid, owner) for st in pre["board"].values() for iid, cid, owner in st
-                if iid not in on_board_now]
-    # New hand instances are draws, unless they are a unit that just left the board: a
-    # bounced unit comes back to hand as a fresh instance (new iid), so match it by card.
-    new_in_hand = {p: [u.card_id for u in state.hands[p] if u.iid not in pre["hands"][p]] for p in "AB"}
-    for cid in state.remove_pile[pre["remove"]:]:
-        owner = next((o for c, o in vanished if c == cid), None)
-        if owner:
-            vanished.remove((cid, owner))
-        fx.append({"k": "remove", "card": cid, "owner": owner})
-    for cid, owner in vanished:
-        if cid in new_in_hand[owner]:
-            new_in_hand[owner].remove(cid)
-            fx.append({"k": "bounce", "card": cid, "owner": owner})
-    for p in "AB":
-        if new_in_hand[p]:
-            fx.append({"k": "draw", "seat": p, "n": len(new_in_hand[p])})
-    for p in "AB":
-        gain = state.food[p] - pre["food"][p]
-        if state.turn_counter != pre["turn"] and p == move.seat:
-            gain -= rules.region_income(state, p)  # end-of-turn income
-        if gain:
-            fx.append({"k": "food", "seat": p, "n": gain})
-    return fx
+def _effects(events: list, move: Move) -> list:
+    """What a move did, read from the engine's events in the order they happened (public facts only): an enemy covered,
+    each removal and bounce (exactly which unit), cards drawn, food from cards (a turn's region income is not the move's)."""
+    fx = []
+    for e in events:
+        if e["e"] == "cover" and e["owner"] != move.seat:
+            fx.append({"k": "cover", "card": e["card"], "owner": e["owner"]})
+        elif e["e"] == "remove" and e.get("cr"):
+            fx.append({"k": "remove", "card": e["card"], "owner": e["owner"]})
+        elif e["e"] == "bounce":
+            fx.append({"k": "bounce", "card": e["card"], "owner": e["owner"]})
+        elif e["e"] == "to_deck":
+            fx.append({"k": "to_deck", "card": e["card"], "owner": e["owner"]})
+        elif e["e"] == "draw":
+            fx.append({"k": "draw", "seat": e["player"], "n": len(e["cards"])})
+        elif e["e"] == "food" and not e.get("income"):
+            fx.append({"k": "food", "seat": e["player"], "n": e["n"]})
+    merged = []   # several draws or food gains by one player in a row read as one
+    for f in fx:
+        if merged and f["k"] in ("draw", "food") and merged[-1]["k"] == f["k"] and merged[-1]["seat"] == f["seat"]:
+            merged[-1] = {**merged[-1], "n": merged[-1]["n"] + f["n"]}
+        else:
+            merged.append(f)
+    return merged
+
+
+def public_event(e: dict, viewer: str) -> dict:
+    """An event as `viewer` may see it: the cards drawn into the other player's hand stay hidden (only how many)."""
+    if e["e"] == "draw" and e["player"] != viewer:
+        return {**{k: v for k, v in e.items() if k != "cards"}, "n": len(e["cards"])}
+    if e["e"] == "to_hand" and e["player"] != viewer and not e.get("public"):
+        return {k: v for k, v in e.items() if k not in ("card",)}
+    if e["e"] == "leave_hand" and e["owner"] != viewer:   # which card went back to their deck is theirs to know
+        return {k: v for k, v in e.items() if k not in ("card",)}
+    return e
 
 
 class Match:
     def __init__(self, match_id: str, host: Seat):
         self.id = match_id
         self.seats: dict[str, Seat] = {"A": host}
+        self.events: list[dict] = []     # the game's engine events, numbered (`seq`); see _take_events
+        self.seq = 0
         self.phase = "lobby"             # lobby -> prematch -> playing -> game_over -> match_over
         self.results: list[dict] = []    # one {winner, reason, turns} per finished game
         self.hold = False                # the tutorial's coach is talking: its opponent waits (not saved)
@@ -253,6 +260,7 @@ class Match:
         self.bots = {s: bot_for(seat.bot, seed + i) for i, (s, seat) in enumerate(self.seats.items())
                      if seat.is_bot}
         self.history = []
+        self.events, self.seq = [], 0
         self.phase = "playing"
         self.clock = None if any(seat.is_bot for seat in self.seats.values()) else \
             {"bank": {"A": CLOCK_BANK, "B": CLOCK_BANK}, "holder": None, "turn": -1, "free": 0.0, "since": time.time(),
@@ -272,6 +280,7 @@ class Match:
         self.results = []
         self.state = None
         self.history = []
+        self.events, self.seq = [], 0
         self.rematches += 1
         self.phase = "prematch"
         for seat in self.seats.values():
@@ -283,6 +292,15 @@ class Match:
         if self.phase != "playing":
             return None
         return self.state.player_to_act()
+
+    def _take_events(self) -> list:
+        """The engine's new events, numbered for the game (the view sends them; a client plays what it hasn't seen)."""
+        new, self.state.events = self.state.events, []
+        for e in new:
+            self.seq += 1
+            e["seq"] = self.seq
+        self.events = (self.events + new)[-EVENTS_KEPT:]
+        return new
 
     def mulliganing(self) -> bool:
         """The game's opening mulligans are under way (both at once, on one shared clock window)."""
@@ -300,6 +318,7 @@ class Match:
             action = action_from_dict({k: v for k, v in action.items() if k != "by"})
         if state.player_to_act() != s and rules.early_mulligan(state, s) is not None:   # both mulligan at once
             rules.apply_early_mulligan(state, s, action)
+            self._take_events()
             self.actions.append({**action.to_dict(), "by": s})   # replays apply it the same way (replay.game_views)
             self.action_times.append(round(time.time() - self.started_at, 1))
             self.version += 1
@@ -311,6 +330,7 @@ class Match:
         starts_move = (state.pending is None and not isinstance(action, PassAction)) or isinstance(action, PlaceAction)
         pre = _snapshot(state) if starts_move else None
         rules.apply_action(state, action)    # validates; raises EngineError if illegal
+        new = self._take_events()
         self.actions.append(action.to_dict())
         self.action_times.append(round(time.time() - self.started_at, 1))
         if starts_move:
@@ -320,7 +340,8 @@ class Match:
                 card=action.card_id if placed else None,
                 target=list(action.target) if placed else None))
         if self.history:
-            self.history[-1].fx = _effects(state, self.history[-1])
+            self.history[-1].events += new
+            self.history[-1].fx = _effects(self.history[-1].events, self.history[-1])
         self._check_end()
         self._clock_update()
         self.version += 1
@@ -445,7 +466,8 @@ class Match:
                 "started_at": self.started_at, "created": self.created.isoformat(),
                 "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game, "last_log": self.last_log,
                 "state": self.state.to_dict() if self.state is not None else None,
-                "history": [_jsonable(asdict(m)) for m in self.history]}
+                "history": [_jsonable(asdict(m)) for m in self.history],
+                "events": self.events, "seq": self.seq}
 
     @staticmethod
     def from_dict(d: dict) -> "Match":
@@ -464,6 +486,7 @@ class Match:
         m.created = datetime.fromisoformat(d["created"])
         m.state = GameState.from_dict(d["state"]) if d["state"] else None
         m.history = [Move(**h) for h in d["history"]]
+        m.events, m.seq = d.get("events", []), d.get("seq", 0)
         if m.state is not None and m.seed is not None:
             m.bots = {s: bot_for(seat.bot, m.seed + i) for i, (s, seat) in enumerate(m.seats.items())
                       if seat.is_bot}
@@ -543,6 +566,7 @@ class Match:
             "removed": list(st.remove_pile),
             "result": st.result.to_dict() if st.result else None,
             "history": [m.public() for m in self.history],
+            "events": [public_event(e, s) for e in self.events if not (e["e"] == "mulligan" and e["player"] != s)],
             "legal": None,
             "pending": None,
         }

@@ -93,8 +93,12 @@ def resolve(state: GameState) -> None:
     """Drain the effect stack until empty, a choice is needed, or the game is won."""
     while state.pending is None and state.result is None and state.effect_stack:
         step = state.effect_stack.pop()
-        n = len(state.effect_stack)
-        req = OPS[step["op"]](state, step)
+        n, was = len(state.effect_stack), state.cause
+        state.cause = step.get("by_card")
+        try:
+            req = OPS[step["op"]](state, step)
+        finally:
+            state.cause = was
         if step.get("by_card"):       # what a step sets off is that card's doing too
             for new in state.effect_stack[n:]:
                 new.setdefault("by_card", step["by_card"])
@@ -126,7 +130,9 @@ def _op_mulligan(state, step):
                 hand.remove(inst)
                 returned.append(inst.card_id)
                 i = _mulligan_replacement(deck, returned)
-                hand.append(UnitInstance(deck.pop(i), player, state.new_iid()))
+                new = UnitInstance(deck.pop(i), player, state.new_iid())
+                hand.append(new)
+                state.emit("mulligan", player=player, returned=inst.iid, drawn=[new.iid, new.card_id])   # hidden from the other
     if not done and hand and len(returned) < state.config.mulligan_cap(player, state.first_player) and _mulligan_replacement(deck, returned) is not None:
         return PendingRequest("choice", player, optional=True, kind="mulligan", options=[u.iid for u in hand])
     if returned:                      # a kept hand leaves the deck order (and the RNG) untouched
@@ -152,9 +158,11 @@ def do_placement(state: GameState, player: str, card_id: str, target) -> None:
     cost = state.cards[card_id].food_cost          # "Costs X food" (decision F): paid on placement
     if cost:
         state.food[player] -= cost
+        state.emit("pay", player=player, n=cost, card=card_id)
     state.units_placed_this_turn += 1
     kind, where = target
     if kind == "hq":
+        state.emit("capture", player=player, iid=unit.iid, card=card_id, den=where)
         state.result = Result(player, "hq_capture")
         return
     _land_unit(state, player, unit, where)
@@ -190,12 +198,15 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str) -> No
 
     unit.placed_on_turn = state.turn_counter
     state.board.setdefault(cr, []).append(unit)
+    state.emit("place", player=player, iid=unit.iid, card=unit.card_id, cr=cr)
+    if covered is not None:
+        state.emit("cover", cr=cr, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
 
     # Apex Predator: it covers the occupant like any placement, and eats it afterwards
     # (Martin, 2026-09-29): the roar, then every reaction to the cover (Porcupine's spines,
     # Gale), then the eat. The stack is LIFO, so the eat goes in first, at the bottom.
     if is_apex and covered is not None:
-        state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid})
+        state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id})
 
     # Reactive triggers resolve AFTER the placed unit's roar (decision 8). The stack
     # is LIFO, so push reactive first (lower) and the roar last (on top).
@@ -270,8 +281,12 @@ def _hook(state, card_id, hook_name) -> Optional[Callable]:
     if fn is None:
         return None
     def stamped(state, *args, **kw):
-        n = len(state.effect_stack)
-        out = fn(state, *args, **kw)
+        n, was = len(state.effect_stack), state.cause
+        state.cause = card_id                 # what it does now is this card's doing (events say so)
+        try:
+            out = fn(state, *args, **kw)
+        finally:
+            state.cause = was
         for step in state.effect_stack[n:]:
             step.setdefault("by_card", card_id)
         return out
@@ -303,6 +318,7 @@ def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None
     if by_effect and not statics.can_be_removed(state, unit):
         return False
     was_top = stack[-1] is unit
+    state.emit("remove", cr=cr, iid=unit.iid, card=unit.card_id, owner=unit.owner, by=by_player)
     stack.remove(unit)
     # A unit uncovered by this very removal was buried when it happened, so it doesn't react to it.
     uncovered = stack[-1] if was_top and stack else None
@@ -381,10 +397,11 @@ def _track_rodent_play(state: GameState, unit: UnitInstance) -> None:
         state.rodent_played_turns.setdefault(unit.owner, set()).add(state.turn_counter)
 
 
-def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True) -> None:
+def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True, income: bool = False) -> None:
     if amount <= 0:
         return
     state.food[player] += amount
+    state.emit("food", player=player, n=amount, **({"income": True} if income else {}))
     state.turn_flags[f"food_gained_{player}"] = _food_gained_this_turn(state, player) + amount
     if state.food[player] >= state.game_map.win_food:
         state.result = Result(player, "food")
@@ -428,6 +445,8 @@ def _fire_remove_event(state, card_id: str, owner: str, cr, by_player=None, by_c
 
 
 def _fire_draw(state, drawn) -> None:
+    if drawn:
+        state.emit("draw", player=drawn[0].owner, cards=[[u.iid, u.card_id] for u in drawn])
     for inst in drawn:
         _fire_event(state, "on_draw_event", {"card_id": inst.card_id, "player": inst.owner})
         hook = _hook(state, inst.card_id, "on_draw")     # the drawn card reacting to itself
@@ -475,6 +494,7 @@ def remove_from_hand(state: GameState, player: str, inst: UnitInstance) -> None:
     NOT a Deathrattle (it never was on the board). Used by Black Swan, later by Rat."""
     state.hands[player].remove(inst)
     state.remove_pile.append(inst.card_id)
+    state.emit("remove", zone="hand", iid=inst.iid, card=inst.card_id, owner=inst.owner)
     _fire_remove_event(state, inst.card_id, inst.owner, None)
 
 
@@ -666,6 +686,7 @@ def _op_raven_dig(state, step):
         inst = next((u for u in state.hands[player] if u.iid == iid), None)
         if inst is not None:
             state.hands[player].remove(inst)
+            state.emit("leave_hand", zone="hand", owner=player, iid=inst.iid, card=inst.card_id, to="deck")
             step["shuffled"].append(inst.card_id)
             step["remaining"] -= 1
 
@@ -801,7 +822,9 @@ def _op_play_named(state, step):
 
     def _return_if_fetched():
         if step["fetched"] and any(u.card_id == cid for u in state.hands[player]):
-            state.decks[player].append(_take_from_hand(state, player, cid).card_id)
+            back = _take_from_hand(state, player, cid)
+            state.emit("leave_hand", zone="hand", owner=player, iid=back.iid, card=cid, to="deck")
+            state.decks[player].append(cid)
 
     if "place_action" in step:
         pa = step["place_action"]
@@ -1190,6 +1213,7 @@ def _eon_end_of_turn(state, unit, cr):
     # The Ouroboros: it leaves the board (a return, not a remove - no Deathrattle, nothing to
     # the Remove Pile) and shuffles into its owner's deck, a little smaller each cycle. The loss
     # is kept per card id, like Rattlesnake's growth, so it survives the trip through the deck.
+    state.emit("to_deck", cr=cr, iid=unit.iid, card=unit.card_id, owner=unit.owner)
     state.board[cr].remove(unit)
     if not state.board[cr]:
         del state.board[cr]
@@ -1212,7 +1236,9 @@ def _op_magpie_steal(state, step):
         if theirs:
             inst = state.rng.choice(theirs)
             theirs.remove(inst)
-            state.hands[player].append(UnitInstance(inst.card_id, player, state.new_iid()))
+            new = UnitInstance(inst.card_id, player, state.new_iid())
+            state.hands[player].append(new)
+            state.emit("steal", player=player, victim=other_player(player), iid=inst.iid, new=new.iid, card=inst.card_id)
     hand = state.hands[player]
     if not hand:
         return None
@@ -1407,6 +1433,7 @@ def roar_condition(state, player, card_id, unit=None):
 
 def _bounce(state, cr, top, *, lock_until=0):
     """Return a board unit to its owner's hand (not a removal: no Remove Pile, no triggers)."""
+    state.emit("bounce", cr=cr, iid=top.iid, card=top.card_id, owner=top.owner)
     state.board[cr].remove(top)
     if not state.board[cr]:
         del state.board[cr]
@@ -1491,6 +1518,7 @@ def _remove_another_copy(state, player, card_id) -> None:
             return
     state.decks[player].remove(card_id)
     state.remove_pile.append(card_id)
+    state.emit("remove", zone="deck", card=card_id, owner=player)
     _fire_remove_event(state, card_id, player, None)
 
 
@@ -1630,6 +1658,7 @@ def _lemming_place(state, unit, cr):
             inst = UnitInstance("lemming", unit.owner, state.new_iid())
         inst.placed_on_turn = state.turn_counter
         state.board.setdefault(spot, []).append(inst)
+        state.emit("place", player=unit.owner, iid=inst.iid, card=inst.card_id, cr=spot)
 
 
 # --- Team triggers (Cats); King Theron's cover trigger fires from _fire_cover_event ---
