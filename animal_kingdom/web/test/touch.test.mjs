@@ -57,3 +57,23 @@ test('game: a hold opens a hand card large until a tap, and picks nothing; a hel
   await page.tap('.readov'); await wait(200);
   assert.equal(await page.$('.readov'), null);
 });
+
+test('a laptop with a touchscreen or pen (a Surface): a pen hold reads a hand card, and so does a right-click', async () => {
+  await page.setViewport({ width: 1512, height: 800 });   // a computer: hover and a mouse, plus a pen
+  await page.goto(`${server.url}/#/lab/mid`, { waitUntil: 'networkidle0' }); await wait(600);
+  const [x, y] = await page.$eval('.hc', e => { const r = e.getBoundingClientRect(); return [r.x + 20, r.y + r.height / 2]; });
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1, pointerType: 'pen' });
+  await wait(600);
+  assert.ok(await page.$('.readov .card'), 'a held pen reads the card');
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1, pointerType: 'pen' }); await wait(300);
+  assert.ok(await page.$('.readov'), 'and it stays after the pen lifts');
+  assert.equal(await page.$$eval('.hc.sel', e => e.length), 0, 'picking nothing');
+  await page.mouse.click(30, 30); await wait(300);
+  assert.equal(await page.$('.readov'), null, 'a click closes it');
+  await page.mouse.click(x, y, { button: 'right' }); await wait(300);
+  assert.ok(await page.$('.readov .card'), 'a right-click reads the card');
+  await page.mouse.click(30, 30); await wait(300);
+  assert.equal(await page.$('.readov'), null);
+  await page.mouse.click(x, y); await wait(300);
+  assert.equal(await page.$$eval('.hc.sel', e => e.length), 1, 'and a plain click still picks it');
+});

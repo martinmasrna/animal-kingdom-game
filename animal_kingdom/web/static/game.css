@@ -518,3 +518,5 @@
 .readov .under { display: flex; justify-content: center; gap: 8px; width: 100%; }
 .readov .under .card { --w: min(30vw, 120px); }
 .readov .tm { font: 600 14px 'Fira Sans Condensed', sans-serif; color: #f3ead8; }
+/* Nothing on the game screen is text to select: a long press anywhere reads, never selects (every device, not only phones). */
+.game, .game * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }

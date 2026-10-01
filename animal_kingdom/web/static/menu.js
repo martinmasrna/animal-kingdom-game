@@ -21,13 +21,22 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && closeAll()) e.stopI
 // Touch has no hover or right-click: pressing and holding does what they do (read a card large); the tap that ends the
 // hold does nothing else. fn(el) starts the reading, done(el) ends it (for a reading shown only while held).
 // A held finger always wobbles a little: only a real move (a scroll, a drag) cancels a hold.
-export const moved = (e, x0, y0) => Math.hypot(e.touches[0].clientX - x0, e.touches[0].clientY - y0) > 10;
+// A finger holds through touch events (a pointer's would be cancelled by the first wobble in a scrolling list); a pen sends no
+// touch events (a Surface; feedback 2026-10-01), so it holds through pointer events. A mouse keeps hover and right-click.
+export const moved = (e, x0, y0) => { const p = e.touches ? e.touches[0] : e; return Math.hypot(p.clientX - x0, p.clientY - y0) > 10; };
+export function holdEvents(el, start, cancel, end) {
+  let x0 = 0, y0 = 0;
+  el.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; start(e); }, { passive: true });
+  el.addEventListener('touchmove', e => { if (moved(e, x0, y0)) cancel(); }, { passive: true });
+  el.addEventListener('touchend', end); el.addEventListener('touchcancel', end);
+  el.addEventListener('pointerdown', e => { if (e.pointerType === 'pen') { x0 = e.clientX; y0 = e.clientY; start(e); } });
+  el.addEventListener('pointermove', e => { if (e.pointerType === 'pen' && moved(e, x0, y0)) cancel(); });
+  el.addEventListener('pointerup', e => { if (e.pointerType === 'pen') end(e); }); el.addEventListener('pointercancel', e => { if (e.pointerType === 'pen') end(e); });
+}
 export function onHold(el, fn, done) {
-  let t = null, held = false, x0 = 0, y0 = 0;
-  el.addEventListener('touchstart', e => { held = false; clearTimeout(t); x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
-    t = setTimeout(() => { held = true; fn(el); }, 420); }, { passive: true });
-  const end = e => { clearTimeout(t); if (held) { if (e.cancelable) e.preventDefault(); if (done) done(el); } };   // no click follows a hold
-  el.addEventListener('touchend', end); el.addEventListener('touchcancel', end); el.addEventListener('touchmove', e => { if (moved(e, x0, y0)) clearTimeout(t); }, { passive: true });
+  let t = null, held = false;
+  holdEvents(el, () => { held = false; clearTimeout(t); t = setTimeout(() => { held = true; fn(el); }, 420); }, () => clearTimeout(t),
+    e => { clearTimeout(t); if (held) { if (e && e.cancelable) e.preventDefault(); if (done) done(el); } });   // no click follows a hold
   el.addEventListener('click', e => { if (held) { held = false; e.stopImmediatePropagation(); e.preventDefault(); } }, true);
   el.addEventListener('contextmenu', e => e.preventDefault());
 }
