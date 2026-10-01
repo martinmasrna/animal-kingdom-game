@@ -270,7 +270,7 @@ function homeScreen(mode = {}) {
 // friend's piece goes).
 let search = null, searchShown = '';   // search: { kind, btn, who, t0, ctl }
 const searchLabel = () => { const t = Math.floor((Date.now() - search.t0) / 1000);
-  return `<span class="search">${search.kind === 'ranked' ? 'Finding an opponent' : `Waiting for ${esc(search.who)}`} · 0:${String(t).padStart(2, '0')}<small>${tapWords('click to cancel')}</small></span>`; };
+  return `<span class="search">${search.kind === 'ranked' ? 'Finding an opponent' : `Waiting for ${esc(search.who)}`} · ${mmss(t)}<small>${tapWords('click to cancel')}</small></span>`; };
 function drawSearch() {
   const b = search ? document.getElementById(search.btn) : document.querySelector('.play.searching');
   if (!b) return;

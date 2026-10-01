@@ -332,9 +332,9 @@
 .game .endbox .score { display: flex; gap: 36px; margin: 6px 0 2px; }
 .game .endbox .gem { width: 80px; height: 80px; display: grid; place-items: center; background: url(/static/kit2/gem_a.webp) center / contain no-repeat; filter: drop-shadow(1px 3px 3px rgba(0,0,0,.55)); }
 .game .endbox .gem.B { background-image: url(/static/kit2/gem_b.webp); } .game .endbox .gem .gemnum { height: 32px; }
-.game .endbox .btns { width: 100%; display: flex; gap: 10px; margin-top: 12px; }
+.game .endbox .btns { width: 100%; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 .game .endbox .btns > * { flex: 1 1 auto; padding: 0 18px; white-space: nowrap; height: 48px; display: grid; place-items: center; font-weight: 600; font-size: 17px; text-decoration: none; }
-.game .endbox .btns > .play { flex: 2 1 auto; font-size: 19px; }
+.game .endbox .btns > .play { flex: 1 0 100%; order: 1; font-size: 19px; }   /* the loud action on its own row under the rest (a ranked search's timer grows in it) */
 .game .waiting .slab { pointer-events: auto; height: 40px; padding: 0 16px; }
 .tip { max-width: 300px; line-height: 1.3; }
 /* The tutorial's coach: a granite piece beside what it talks about (placeCoach in app.js), a notch of the same stone
