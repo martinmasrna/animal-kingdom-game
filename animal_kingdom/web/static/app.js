@@ -119,8 +119,8 @@ function route() {
   play.open = null;   // a chooser never outlives its screen
   if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
   if (parts[0] === 'gauntlet') return homeScreen({ gauntlet: true });
-  if (parts[0] === 'collection') return collectionScreen(parts[1]);
   if (search && parts[0] !== 'm' && !(search.btn === 'go' && !parts[0])) cancelSearch();   // leaving the screen it started on withdraws a search or a challenge
+  if (parts[0] === 'collection') return collectionScreen(parts[1]);
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'leaderboard') return leaderboardScreen();
   if (parts[0] === 'settings') return settingsScreen();
@@ -237,7 +237,7 @@ function homeScreen(mode = {}) {
 // friend's piece goes).
 let search = null, searchShown = '';   // search: { kind, btn, who, t0, ctl }
 const searchLabel = () => { const t = Math.floor((Date.now() - search.t0) / 1000);
-  return `<span class="search">${search.kind === 'ranked' ? 'Finding an opponent' : `Waiting for ${esc(search.who)}`} · 0:${String(t).padStart(2, '0')}<small>click to cancel</small></span>`; };
+  return `<span class="search">${search.kind === 'ranked' ? 'Finding an opponent' : `Waiting for ${esc(search.who)}`} · 0:${String(t).padStart(2, '0')}<small>${tapWords('click to cancel')}</small></span>`; };
 function drawSearch() {
   const b = search ? document.getElementById(search.btn) : document.querySelector('.play.searching');
   if (!b) return;
@@ -260,8 +260,11 @@ async function startSearch(kind, btn, url, body, who) {
     if (!r.ok) throw new Error(r.status === 409 && kind === 'challenge' ? `${who} is busy` : await r.text());
     const m = await r.json(); search = null; setToken(m.id, m.token); play.open = null; sfx('found'); location.hash = '#/m/' + m.id;
   } catch (e) { if (e.name !== 'AbortError' && search && search.ctl === ctl) toast(e.message || 'Could not find a match'); }
-  finally { clearInterval(iv); if (search && search.ctl === ctl) search = null; drawSearch(); if (kind === 'challenge') play.friends = null; }
+  finally { clearInterval(iv); if (search && search.ctl === ctl) search = null; drawSearch(); if (kind === 'challenge') refreshFriends(); }
 }
+// The friends list again (who is online changes): kept until the fresh one arrives, so the chosen friend stays chosen.
+const refreshFriends = () => api('/api/friends').then(r => r.ok && r.json()).then(j => { if (j) { play.friends = j.friends; play.friendCode = j.code; }
+  if (screen === 'home' && !search) homeScreen(); }, () => {});
 const findRanked = (btn, deck) => startSearch('ranked', btn, '/api/ranked', { deck });
 const friendLabel = (f, all) => { const first = f.name.split('#')[0];   // the name, with its tag when another friend shares it
   return (all || []).filter(g => g.name.split('#')[0] === first).length > 1 ? f.name : first; };
