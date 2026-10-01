@@ -448,7 +448,8 @@ def rate_match(match: Match) -> None:
     before = {p: ladder.get(match.seats[p].ladder) for p in "AB"}
     ladder.result(win, lose)
     match.rating_change = {p: {"before": before[p].shown(), "after": ladder.get(match.seats[p].ladder).shown(),
-                               "delta": round(ladder.get(match.seats[p].ladder).rating - before[p].rating)} for p in "AB"}
+                               # the change between the numbers shown, so "1502 → 1490 (−12)" always adds up
+                               "delta": round(ladder.get(match.seats[p].ladder).rating) - round(before[p].rating)} for p in "AB"}
     match.version += 1
 
 
