@@ -105,6 +105,9 @@ def test_the_match_you_are_playing_can_be_rejoined_from_anywhere(monkeypatch):
             match = server.hub.matches[m["id"]]
             if match.phase != "playing":
                 match.ready("A")
+            assert await (await c.get("/api/current", headers=ha)).json() == {}, "a bot match left before your first move is left"
+            from animal_kingdom.web.match import Move
+            match.history.append(Move(round=1, seat="A", kind="draw", pre={}))   # you made a move: now it's yours to return to
             cur = await (await c.get("/api/current", headers=ha)).json()
             assert cur["id"] == m["id"] and match.seat_of(cur["token"]) == "A"
             assert await (await c.get("/api/current")).json() == {}   # no profile, no match
