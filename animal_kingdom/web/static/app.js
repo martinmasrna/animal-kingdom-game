@@ -142,6 +142,17 @@ function route() {
 const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };
 const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']], SIDES = [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']];
 const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
+// The places on home's corner piece, as icons (Martin, 2026-10-01: six words were clunky); a name shows on hover. Feedback
+// is the usual feedback glyph (a speech bubble with an exclamation mark) and moves into Settings at launch.
+const TI = p => `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const TOPICON = {
+  collection: TI('<rect x="3" y="6" width="10" height="14" rx="1.5" transform="rotate(-12 8 13)"/><rect x="11" y="4" width="10" height="14" rx="1.5" transform="rotate(10 16 11)"/>'),
+  leaderboard: TI('<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a2 2 0 0 0 2 4h1M16 6h3a2 2 0 0 1-2 4h-1"/><path d="M12 13v4M8 20h8"/>'),
+  learn: TI('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14"/><path d="M12 17.5h.01"/>'),
+  profile: TI('<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>'),
+  feedback: TI('<path d="M4 5h16v11H9l-5 4z"/><path d="M12 8v4"/><path d="M12 14.5h.01"/>'),
+  settings: TI('<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>'),
+};
 function homeScreen(mode = {}) {
   screen = 'home';
   if (mode.gauntlet) play.opp = 'gauntlet'; else if (play.opp === 'gauntlet' || mode.join) play.opp = mode.join ? 'friend' : 'bot';
@@ -169,7 +180,7 @@ function homeScreen(mode = {}) {
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
   const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${chooser}
-    <div class="top"><a class="backbtn" href="#/collection"><span>Collection</span></a>${first ? '' : `<button class="backbtn${play.open === 'learn' ? ' open' : ''}" id="learn2"><span>How to play</span></button>`}<a class="backbtn" href="#/leaderboard"><span>Leaderboard</span></a><a class="backbtn" href="#/profile"><span>Profile</span></a><a class="backbtn" href="#/settings"><span>Settings</span></a><button class="backbtn" id="fbhome"><span>Feedback</span></button></div>
+    <div class="top"><a class="backbtn ico" href="#/collection" data-tip="Collection" aria-label="Collection">${TOPICON.collection}</a><a class="backbtn ico" href="#/leaderboard" data-tip="Leaderboard" aria-label="Leaderboard">${TOPICON.leaderboard}</a>${first ? '' : `<button class="backbtn ico${play.open === 'learn' ? ' open' : ''}" id="learn2" data-tip="How to play" aria-label="How to play">${TOPICON.learn}</button>`}<a class="backbtn ico" href="#/profile" data-tip="Profile" aria-label="Profile">${TOPICON.profile}</a><button class="backbtn ico" id="fbhome" data-tip="Feedback" aria-label="Feedback">${TOPICON.feedback}</button><a class="backbtn ico" href="#/settings" data-tip="Settings" aria-label="Settings">${TOPICON.settings}</a></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
       <button class="play${search && search.btn === 'go' ? ' searching' : ''}" id="go">${search && search.btn === 'go' ? searchLabel() : go}</button></div>`}</div>`;
