@@ -302,7 +302,8 @@ async function leaderboardScreen() {
   if (screen !== 'leaderboard') return;
   app.innerHTML = `<div class="mscr lead"><div class="lcol"><div class="hhead"><h2>Leaderboard</h2></div>
     <div class="lbody">${rows.map((x, i) => `<div class="lr${x.bot ? ' bot' : ''}${x.you ? ' you' : ''}"><span>${i + 1}</span><span class="nm">${esc(x.name)}</span><b>${x.rating}</b></div>`).join('')}
-      ${pl ? `<div class="lr you placing"><span></span><span class="nm">${esc(pl.name)}<small>placing, ${pl.games} of ${pl.of}</small></span><b>${pl.rating}</b></div>` : ''}</div>
+</div>
+    ${pl ? `<div class="lpin"><div class="lr you placing"><span></span><span class="nm">${esc(pl.name)}<small>placing, ${pl.games} of ${pl.of}</small></span><b>${pl.rating}</b></div></div>` : ''}
     <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
   const mine = app.querySelector('.lr.you'); if (mine) mine.scrollIntoView({ block: 'center' });

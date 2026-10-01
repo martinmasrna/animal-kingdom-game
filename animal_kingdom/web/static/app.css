@@ -271,7 +271,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 
 /* ---------- leaderboard: one column on the ground, the menus' header row and rows; bots quieter, your row marked ---------- */
 .lead { display: flex; justify-content: center; }
-.lead .lcol { width: 100%; max-width: 560px; display: grid; grid-template-rows: 72px minmax(0, 1fr) auto; min-height: 0; height: 100%; }
+.lead .lcol { width: 100%; max-width: 560px; display: grid; grid-template-rows: 72px minmax(0, 1fr) auto auto; min-height: 0; height: 100%; }
 .lead .hhead { display: flex; align-items: center; padding: 0 24px; } .lead .hhead h2 { margin: 0; font: 700 28px 'Fira Sans Condensed', sans-serif; color: #f0e8da; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
 .lead .lbody { overflow-y: auto; padding: 4px 24px 16px; display: flex; flex-direction: column; gap: 6px; scrollbar-width: thin; scrollbar-color: #4a4540 transparent; }
 .lead .lr { flex: none; display: grid; grid-template-columns: 44px 1fr 80px; align-items: center; height: 48px; padding: 0 16px; border-radius: 10px;
@@ -300,4 +300,5 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .sets .credits pre { margin: 0; white-space: pre-wrap; font: 500 14px/1.45 'Fira Sans Condensed', sans-serif; color: #b3a996; }
 
 @media (max-width: 700px), (max-height: 500px) { .pre { padding-top: 16px; } .pre .lobbyp { margin-top: 16px; } }   /* the waiting lobby clear of the screen's top */
-.lead .lr.placing { margin-top: 10px; } .lead .lr .nm small { margin-left: 10px; font-weight: 500; font-size: 15px; color: #a99f8e; }   /* not ranked yet: your progress */
+.lead .lpin { padding: 10px 24px 0; } .lead .lpin .lr { margin: 0; }   /* still placing: your row pinned under the list, always in sight */ .lead .lr .nm small { margin-left: 10px; font-weight: 500; font-size: 15px; color: #a99f8e; }   /* not ranked yet: your progress */
+@media (max-width: 700px) { .lead .lpin { padding-left: 12px; padding-right: 12px; } }
