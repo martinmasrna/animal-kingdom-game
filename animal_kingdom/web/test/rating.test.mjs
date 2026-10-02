@@ -17,7 +17,7 @@ const endRanked = rating => page.evaluate(async rating => {
 
 test('a live ranked win counts the rating up to the server\'s number', async () => {
   await endRanked({ before: '1781', after: '1792', delta: 11 });
-  await wait(3200);   // the result's entrance, then the count
+  await wait(5200);   // the den's beat (2 s), the result's entrance, then the count
   assert.equal(await page.$eval('#rnum', e => e.textContent), '1792');
   assert.ok(await page.$eval('#rnum + .rd', e => e.classList.contains('on')), 'the change shows when the count lands');
   assert.deepEqual(page.errors, []);
@@ -26,7 +26,7 @@ test('a live ranked win counts the rating up to the server\'s number', async () 
 test('a provisional rating ("1500?") counts and lands on the server\'s text, never NaN', async () => {
   await page.goto(page.url().replace(/#.*/, '#/lab/mid'), { waitUntil: 'networkidle0' });
   await endRanked({ before: '1500?', after: '1532?', delta: 32 });
-  await wait(1600);
+  await wait(3600);
   assert.match(await page.$eval('#rnum', e => e.textContent), /^\d+\??$/, 'mid-count: a number');
   await wait(1600);
   assert.equal(await page.$eval('#rnum', e => e.textContent), '1532?');
@@ -36,7 +36,7 @@ test('a provisional rating ("1500?") counts and lands on the server\'s text, nev
 test('Play again holds still while it searches: the timer counts inside the button, nothing grows or shifts as it ticks', async () => {
   await page.goto(page.url().replace(/#.*/, '#/lab/mid'), { waitUntil: 'networkidle0' });
   await endRanked({ before: '1781', after: '1792', delta: 11 });
-  await wait(3200);
+  await wait(5200);
   const size = () => page.$eval('#endov .endbox', e => { const r = e.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; });
   const btn = () => page.$eval('#again', e => Math.round(e.getBoundingClientRect().width));
   const was = await size(), b0 = await btn();

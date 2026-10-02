@@ -3,7 +3,7 @@
 import { hasArt, artUrl, stripArt, fitStrips } from './art.js';
 import { cardHTML, fitNames, KEYWORDS, hasKeyword } from './card.js';
 import { plan } from './timeline.js';
-import { renderBoard, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
+import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
 import { dd, wireDd, onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
@@ -1077,8 +1077,36 @@ function drawBoard(d) {
   const capture = cap ? { side: rel(cap.den), id: cap.card, owner: rel(cap.player), str: cap.str } : null;
   const region = shownRegion(d);
   const st = ui.step, strike = st && st.by ? { from: dcr(st.by), to: dcr(st.cr) } : null;   // what removed a unit answers in its beat
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, ago, capture, strike, current: V.phase === 'playing' ? rel(V.game.current) : null });
+  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, ago, capture, strike,
+    beat: endBeat(), current: V.phase === 'playing' ? rel(V.game.current) : null });
+  draw();
+  if (startBeat(g, A, ago, capture)) draw();
 }
+
+// The end's beat (board.js): the game's last move shown rather than told. A den taken falls apart once the animal that took it
+// has landed in its mouth; a den that reached the food to win lights up once its gem has counted to the total. It starts once
+// per game (beat.key), as the move plays; a game already over when drawn (a reload, a replay's end) shows how it ended at once.
+function startBeat(g, A, ago, capture) {
+  const res = V.game.result, key = `${V.id}-${V.results.length}`;
+  if (!res || (ui.beat && ui.beat.key === key) || !['hq_capture', 'food'].includes(res.reason) || res.winner === null) return false;
+  const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches, now = Date.now();
+  if (res.reason === 'hq_capture') {
+    if (!capture) return false;   // its step hasn't come yet
+    ui.beat = { key, kind: 'fall', side: capture.side, t0: A && motion ? now - ago + 400 : now - BEAT_MS - 1 };   // the landing takes .36 s
+  } else {
+    const side = rel(res.winner);
+    if (g.food[side] < V.game.food[res.winner]) return false;   // the winning food hasn't arrived yet
+    const gem = document.querySelector(`#board .dcount.${side}.tick`), count = gem ? +gem.dataset.lag + +gem.dataset.dur : 0;
+    ui.beat = { key, kind: 'lit', side, t0: A && motion ? now - ago + count + 150 : now - BEAT_MS - 1 };
+  }
+  if (ui.beat.t0 > now - BEAT_MS) {   // the board shakes as a den is struck (once, not on a redraw)
+    if (ui.beat.kind === 'fall') setTimeout(() => document.getElementById('board')?.animate([0, 1, 2, 3, 4, 5, 6].map(i => ({ transform: i === 6 ? 'none'
+      : `translate(${Math.sin(i * 2.3) * 16 * (1 - i / 6)}px, ${Math.cos(i * 3.1) * 16 * (1 - i / 6)}px)` })), { duration: 800 }), ui.beat.t0 - now);
+  }
+  return true;
+}
+const endBeat = () => { const key = V && `${V.id}-${V.results.length}`;
+  return ui.beat && ui.beat.key === key ? { kind: ui.beat.kind, side: ui.beat.side, ago: Date.now() - ui.beat.t0 } : null; };
 
 function wireBoard() {
   const board = document.getElementById('board');
@@ -1152,7 +1180,11 @@ function drawEnd() {
   const key = `${V.id}-${V.results.length}`;
   if (drawEnd.key !== key) {
     const motion = !(typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches);
-    drawEnd.until = drawEnd.live && motion && G.result.reason !== 'concede' ? Date.now() + 900 : 0; drawEnd.key = key; drawEnd.live = false; }
+    drawEnd.until = drawEnd.live && motion && G.result.reason !== 'concede' ? Date.now() + 900 : 0; drawEnd.key = key; drawEnd.live = false; drawEnd.since = Date.now(); }
+  // a den taken or a full den: the result waits for its beat (which waits for the move), never longer than 9 s
+  if (drawEnd.until && ['hq_capture', 'food'].includes(G.result.reason) && G.result.winner !== null) {
+    const b = ui.beat && ui.beat.key === key ? ui.beat : null;
+    drawEnd.until = b ? Math.max(drawEnd.until, b.t0 + BEAT_MS) : Math.max(drawEnd.until, Math.min(Date.now() + 200, drawEnd.since + 9000)); }
   const wait = (drawEnd.until || 0) - Date.now();
   if (wait > 0) { ov.classList.remove('on'); clearTimeout(drawEnd.t); drawEnd.t = setTimeout(() => { if (screen === 'game') drawEnd(); }, wait + 20); return; }
   if (ui.peek) { ov.classList.remove('on'); document.getElementById('waiting').innerHTML = `<button class="slab" id="unpeek">Back to results</button>`; document.getElementById('unpeek').onclick = () => { ui.peek = false; drawGame(); }; return; }
@@ -1162,25 +1194,26 @@ function drawEnd() {
   drawEnd.sounded = key;
   const res = w === null ? ['D', 'Draw'] : w === you ? ['A', 'Victory'] : ['B', 'Defeat'];
   const how = { hq_capture: w === you ? 'Enemy den captured' : 'Your den was captured', food: `${w === you ? 'You' : 'Your opponent'} reached ${G.winFood} food`, exhaustion: 'Exhaustion · more food wins', passes: 'Both passed · more food wins', max_turns: 'Turn limit · more food wins', concede: w === you ? 'Your opponent conceded' : 'You conceded', timeout: w === you ? 'Your opponent ran out of time three turns in a row' : 'You ran out of time three turns in a row' }[G.result.reason] || G.result.reason;
+  const howLine = ['hq_capture', 'food'].includes(G.result.reason) && w !== null ? '' : `<div class="how">${how}.</div>`;   // a den taken, a full den: the board showed it
   const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;
   const peek = `<button class="slab" id="peek">See the board</button>`;
   if (RP.views.length) {
     // a replay: the game's result, then the replay again or back to the profile
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}.</div>
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}
       <div class="btns"><a class="slab" href="#/profile">Back</a>${peek}<button class="play" id="again">Watch again</button></div></div>`;
     document.getElementById('again').onclick = () => { replayStep(0); replayPlay(true); };
   } else if (V.gauntlet) {
     const g = V.gauntlet, tot = g.record.reduce((a, r) => [a[0] + r.w, a[1] + r.l], [0, 0]);
     const rows = g.record.map(r => `<div>${r.deckName} <b>${r.w}–${r.l}</b></div>`).join('');
     const done = V.phase === 'match_over';
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${done ? 'Gauntlet done' : res[1]}</div><div class="how">${how}.</div>
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${done ? 'Gauntlet done' : res[1]}</div>${howLine}
       <div class="how">Game ${g.played} of ${g.total} · overall <b>${tot[0]}–${tot[1]}</b></div><div class="how">${rows}</div>
       ${done ? '' : `<div class="next">Next: ${g.next.yours ? `you play ${g.next.deckName}` : `vs ${g.next.deckName}`} · ${g.next.first === you ? 'you go first' : 'your opponent goes first'}</div>`}
       <div class="btns">${peek}${done ? '<a class="play" href="#/">Menu</a>' : '<button class="play" id="nextg">Next game</button>'}</div></div>`;
     if (!done) document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else if (V.phase === 'game_over') {
     const firstNext = w === null ? G.first : (w === you ? them : you);
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}.</div>${score}
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}${score}
       <div class="next">Game ${V.results.length + 1}: ${firstNext === you ? 'you go first' : 'your opponent goes first'}</div>
       <div class="btns">${peek}<button class="play" id="nextg">Next game</button></div></div>`;
     document.getElementById('nextg').onclick = () => send({ t: 'next' });
@@ -1189,7 +1222,7 @@ function drawEnd() {
   } else if (V.ranked) {
     // a ranked game: its result and your rating before and after; Play again looks for the next opponent (no rematch)
     const rt = V.rating, d = rt && rt.delta;
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div><div class="how">${how}.</div>
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}
       ${rt ? `<div class="rating"><small>Rating</small><div><b id="rnum">${live ? rt.before : rt.after}</b><span class="rd ${d >= 0 ? 'up' : 'down'}${live ? '' : ' on'}">${d >= 0 ? '+' : '−'}${Math.abs(d)}</span></div></div>` : ''}
       <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Play again</button></div></div>`;
     document.getElementById('again').onclick = () => findRanked('again', deckSpec(chosenDeck()));
@@ -1198,7 +1231,7 @@ function drawEnd() {
     // one game: its result; a series (best-of-3, back with the maps): the match's result and the score in the gems
     const won = S[you] > S[them], series = V.results.length > 1;
     ov.innerHTML = `<div class="endbox">${series ? `<div class="res ${won ? 'A' : 'B'}">${won ? 'Match won' : 'Match lost'}</div><div class="how">${res[1]} in game ${V.results.length} · ${how}</div>${score}`
-      : `<div class="res ${res[0]}">${res[1]}</div><div class="how">${how}.</div>`}
+      : `<div class="res ${res[0]}">${res[1]}</div>${howLine}`}
       <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="rematch">Rematch</button></div></div>`;
     document.getElementById('rematch').onclick = () => send({ t: 'rematch' });
   }

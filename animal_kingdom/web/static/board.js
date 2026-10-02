@@ -50,6 +50,10 @@ const digits = (dir, n) => String(n).split('').map(d => `<img src="${kit(`${dir}
 export const chalk = n => `<span class="chalk">${digits('chalk', n)}</span>`;
 export const gemDigits = n => `<span class="gemnum">${digits('gemnum', n)}</span>`;
 if (typeof Image !== 'undefined') for (let d = 0; d < 10; d++) { new Image().src = kit(`gemnum/${d}.webp`); new Image().src = kit(`chalk/${d}.webp`); }
+// The end's beat (ui.beat: { kind: 'fall' | 'lit', side, ago }): a den taken falls apart, a full den lights up from the bottom.
+// Its pieces are timed from the beat's start (ago ms ago), so a redraw carries them on. BEAT_MS: how long it plays.
+export const BEAT_MS = 2000;
+const BEAT_ANIMS = new Set(['pitfall', 'gemfall', 'pitlit', 'gemflare', 'bflash', 'bdust', 'bdark', 'bglow', 'bwave']);
 const reducedMotion = () => typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const put = (cls, x, y, html = '', attrs = '', style = '') => `<div class="abs ${cls}" style="left:${x}px;top:${y}px;${style}" ${attrs}>${html}</div>`;
@@ -126,7 +130,7 @@ export function renderBoard(el, M, g, cards, ui) {
 
   // A redraw of the same moment (ui.ago ms after it began) carries every CSS animation on from where it is, never from the start.
   const ago = ui.ago || 0;
-  if (ago > 0) for (const a of el.getAnimations({ subtree: true })) a.currentTime = ago;
+  if (ago > 0) for (const a of el.getAnimations({ subtree: true })) if (!BEAT_ANIMS.has(a.animationName)) a.currentTime = ago;   // the end's beat keeps its own clock
   // The gem counts up to its new total as the fruit arrive (with reduced motion, the new total simply shows).
   if (!reducedMotion()) el.querySelectorAll('.dcount.tick').forEach(gem => {
     const from = +gem.dataset.from, to = +gem.dataset.to, t0 = performance.now() - ago + +gem.dataset.lag, dur = +gem.dataset.dur;
@@ -152,17 +156,23 @@ function den(side, g, A, stones, ui) {
       `background-image:url(${kit(`fly_${team(side)}${j % 4}.webp`)})"></i>`;
   });
   const src = (p, i) => kit(`pits/${team(side)}pit${i % 3 + 1}_${p.ripe}_${p.ghost}.webp`);
+  const b = ui.beat && ui.beat.side === side ? ui.beat : null, at = ms => `animation-delay:${(ms - b.ago) / 1000}s;`;   // the end's beat on this den
   let k = 0;
   pits.forEach(([x, y], i) => {
     const changed = before && (before[i].ripe !== now[i].ripe || before[i].ghost !== now[i].ghost);
     const delay = changed ? `style="animation-delay:${i in arrive ? arrive[i] - 0.12 : 0.15 + 0.11 * k++}s"` : '';
-    s += put(`pit${changed ? ' ripen' : ''}`, x, y, (changed ? `<img class="was" src="${src(before[i], i)}" alt="" draggable="false" ${delay}>` : '') +
-      `<img class="now" src="${src(now[i], i)}" alt="" draggable="false" ${delay}>`);
+    // a den taken falls apart from the crown down (each pit thrown aside and dropping); a full den lights up from the bottom
+    const j = 9 - i, fall = b && b.kind === 'fall' ? at(240 + j * 55) + `--fx:${(j % 2 ? 1 : -1) * (20 + j * 3)}px;--fy:${300 + j * 18}px;--fr:${(j % 2 ? 1 : -1) * 70}deg;` : '';
+    s += put(`pit${changed ? ' ripen' : ''}${b ? ` ${b.kind}` : ''}`, x, y, (changed ? `<img class="was" src="${src(before[i], i)}" alt="" draggable="false" ${delay}>` : '') +
+      `<img class="now" src="${src(now[i], i)}" alt="" draggable="false" ${delay}>`, '', fall || (b ? at(i * 75) : ''));
   });
   const [kx, ky] = gemAt(side), [mx, my] = denMouthAt(side), counting = gained && !reducedMotion();
   const timing = flights.length ? `data-lag="${FLY * 1000}" data-dur="${flights.length * GAP * 1000}"`
     : `data-lag="150" data-dur="${300 + 110 * Math.ceil((food - (gained ? A.food[side] : food)) / 10)}"`;
-  return s + put(`dcount ${side}${gained ? ' tick' : ''}`, kx, ky, gemDigits(counting ? A.food[side] : food),
-    `data-from="${gained ? A.food[side] : food}" data-to="${food}" ${timing} data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`) +
+  if (b && b.kind === 'fall') s += put('beat bflash', mx, my, '', '', at(0)) + put('beat bdust', mx, my, '', '', at(0)) + put('beat bdark', mx, my, '', '', at(80));
+  if (b && b.kind === 'lit') s += put('beat bglow', kx, ky, '', '', at(870)) + put(`beat bwave`, kx, ky, '', '', at(870));
+  const gemBeat = !b ? '' : b.kind === 'fall' ? at(830) : `animation-delay:${gained ? '.15s, ' : ''}${(870 - b.ago) / 1000}s;`;
+  return s + put(`dcount ${side}${gained ? ' tick' : ''}${b ? (b.kind === 'fall' ? ' fall' : ' flare') : ''}`, kx, ky, gemDigits(counting ? A.food[side] : food),
+    `data-from="${gained ? A.food[side] : food}" data-to="${food}" ${timing} data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`, gemBeat) +
     put(`mouth${side === 'B' && ui.hqRing ? ' tgt' : ''}`, mx, my, '', `data-hq="${side}"`);
 }
