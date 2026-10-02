@@ -58,7 +58,7 @@ test('Play again holds still while it searches: the timer counts inside the butt
   assert.deepEqual(page.errors, []);
 });
 
-test('the versus moment of a ranked match shows each side\'s rating under its name; an unrated match shows none', async () => {
+test('the versus moment: each card carries its player\'s name, a ranked match each side\'s rating under it, an unrated match none', async () => {
   const intro = (ranked, id) => page.evaluate(async ([ranked, id]) => {
     const v = await fetch('/static/lab/mid.json').then(r => r.json()), o = v.you === 'A' ? 'B' : 'A';
     v.id = id; v.version += 50; v.game.history = []; v.results = []; v.ranked = ranked;
@@ -68,6 +68,8 @@ test('the versus moment of a ranked match shows each side\'s rating under its na
   await page.goto(page.url().replace(/#.*/, '#/lab/mid'), { waitUntil: 'networkidle0' });
   await intro(true, 'VS1'); await wait(400);
   assert.deepEqual(await page.$$eval('#intro .irating', e => e.map(x => x.textContent)), ['1500?', '1724']);
+  assert.deepEqual(await page.$$eval('#intro .nbar span', e => e.map(x => x.textContent)), ['You', await page.evaluate(() => { const V = window.__ak().V, o = V.you === 'A' ? 'B' : 'A'; return V.seats[o].bot ? `Bot (${V.seats[o].bot[0].toUpperCase()}${V.seats[o].bot.slice(1)})` : V.seats[o].name; })], 'each card carries its player\'s name');
+  assert.deepEqual(await page.$$eval('#intro .iname', e => e.map(x => x.textContent)), ['1500?', '1724'], 'under the cards only the ratings: no deck name');
   await page.reload({ waitUntil: 'networkidle0' });
   await intro(false, 'VS2'); await wait(400);
   assert.ok(await page.$('#intro'), 'the versus moment shows');

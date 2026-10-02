@@ -487,9 +487,7 @@
 .game .intro .iside.A { animation: introL .7s cubic-bezier(.2,.8,.3,1) both; } .game .intro .iside.B { animation: introR .7s cubic-bezier(.2,.8,.3,1) both; }
 @keyframes introL { from { transform: translateX(-60vw); } } @keyframes introR { from { transform: translateX(60vw); } }
 .game .intro .iname { display: flex; flex-direction: column; align-items: center; gap: 2px; font-family: 'Fira Sans Condensed', sans-serif; text-shadow: 0 2px 8px rgba(0,0,0,.85); }
-.game .intro .iname b { font-size: 34px; font-weight: 800; } .game .intro .A .iname b { color: var(--A); } .game .intro .B .iname b { color: var(--B); }
-.game .intro .iname span { font-size: 22px; font-weight: 600; color: #e8dfcf; }
-.game .intro .iname .irating { font-weight: 500; color: #c9bfae; font-variant-numeric: tabular-nums; }   /* a ranked match: the rating under the deck, a step quieter */
+.game .intro .iname .irating { font-size: 32px; font-weight: 700; color: #f3ead8; font-variant-numeric: tabular-nums; }   /* a ranked match: the rating, alone under the card (the name is in its bar) */
 .game .intro .ivs { font: 800 80px/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; text-shadow: 0 4px 20px rgba(0,0,0,.8); animation: introVs .4s ease .55s both; }
 @keyframes introVs { from { opacity: 0; transform: scale(1.6); } }
 .game.port .hc.peek, .game.port .hc.peek:hover { translate: var(--peekx, 0px) 0; }   /* a card read large stays on screen */
@@ -509,7 +507,7 @@
 @media (orientation: portrait) {
   .game .intro { flex-direction: column-reverse; gap: 14px; }
   .game .intro .card { --w: 140px; } .game .intro .iside { gap: 8px; }
-  .game .intro .iname b { font-size: 24px; } .game .intro .iname span { font-size: 16px; }
+  .game .intro .iname .irating { font-size: 24px; }
   .game .intro .ivs { font-size: 52px; }
   .game .intro .iside.A { animation-name: introD; } .game .intro .iside.B { animation-name: introU; }
 }

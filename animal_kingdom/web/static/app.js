@@ -761,8 +761,10 @@ function drawIntro() {
   const side = p => { const s = V.seats[p] || {}, list = Object.keys(V.lists[p] || {}), mine = p === V.you;
     const own = mine && playable().find(d => d.id === s.deck || d.id === 'my:' + s.deck);
     const cover = own ? coverFor(own) : COVER[s.deck] || coverOf(list, CARDS);
-    // a ranked match: each side's rating under its name, as it stands going in
-    return `<div class="iside ${p === V.you ? 'A' : 'B'}">${cardHTML(CARDS[cover], { cls: 'compact' })}<div class="iname"><b>${seatLabel(p)}</b>${s.deckName ? `<span>${esc(own ? own.name : s.deckName)}</span>` : ''}${V.ranked && s.rating ? `<span class="irating">${esc(s.rating)}</span>` : ''}</div></div>`; };
+    // the player's name in the card's bar (the card stands for them), and in a ranked match their rating under it, as it
+    // stands going in; no deck name (a person's deck name is never shown to their opponent; Martin, 2026-10-02)
+    return `<div class="iside ${p === V.you ? 'A' : 'B'}">${cardHTML({ ...CARDS[cover], name: seatLabel(p) }, { cls: 'compact' })}`
+      + `${V.ranked && s.rating ? `<div class="iname"><span class="irating">${esc(s.rating)}</span></div>` : ''}</div>`; };
   const el = document.createElement('div'); el.className = 'intro'; el.id = 'intro';
   el.innerHTML = `${side(V.you)}<div class="ivs">vs</div>${side(opp())}`;
   document.getElementById('scr').appendChild(el); fitNames(el); sfx('versus', .55);
