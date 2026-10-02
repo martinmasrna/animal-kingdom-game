@@ -51,7 +51,7 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             # alone: a bot near your rating, on the ladder
             m = await (await c.post("/api/ranked", json={"deck": "cats_midrange"}, headers=ha)).json()
             match = server.hub.matches[m["id"]]
-            bot = match.seats["B"]   # a seeded bot within reach of a new player's 1500 (nearest_bot: the nearest, or within 100 of it)
+            bot = match.seats["B"]   # a seeded bot within reach of a new player's 1500 (nearest_bot: among the five nearest decks)
             assert bot.is_bot and bot.ladder.startswith("bot:") and abs(server.ladder.get(bot.ladder).rating - 1500) < 250
             assert match.seats["A"].ladder == a["profile"]["id"]
             # the match states both ratings as they stood going in, for the versus moment; an unrated match states none
@@ -71,7 +71,8 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             assert not any(r["you"] for r in board["rows"]), "placing: not ranked yet"
             pl = board["placing"]
             assert pl["rating"].endswith("?") and int(pl["rating"][:-1]) > 1500 and (pl["games"], pl["of"]) == (1, 10)
-            assert sum(r["bot"] for r in board["rows"]) == 21 and board["rows"][0]["name"].endswith("(Expert Bot)")
+            bots = [r for r in board["rows"] if r["bot"]]   # one row per level, not one per level and deck
+            assert [r["name"] for r in bots] == ["Expert Bot", "Normal Bot", "Easy Bot"]
             me = await (await c.get("/api/me", headers=ha)).json()   # home's name piece: placement progress, no rank yet
             assert me["placing"] == {"games": 1, "of": 10} and "rank" not in me
     asyncio.run(run())
@@ -136,3 +137,24 @@ def test_a_settled_player_still_moves_about_15_for_an_even_game():
 def replace_rating(r, **kw):
     from dataclasses import replace
     return replace(r, **kw)
+
+
+def test_a_player_at_the_top_meets_five_decks_and_never_the_same_one_twice_running():
+    """The ladder's bots are rated per level and deck, and a bot plays some decks far better than others (Expert Egg rates
+    under Easy Cats). A player far above them all still meets the five nearest decks, at random, never the deck of their
+    last bot games (Martin, 2026-10-02: variety at the top)."""
+    import random, sqlite3
+    from animal_kingdom.web.ladder import Ladder, bot_id, parse_bot
+    decks = ["cats_midrange", "aggro_hq_rush", "food_otk", "canine_buff_tempo", "ramp", "colony_food_swarm", "egg_control"]
+    lad = Ladder(sqlite3.connect(":memory:"), decks)
+    seed = {("expert", "cats_midrange"): 1776, ("expert", "aggro_hq_rush"): 1716, ("normal", "cats_midrange"): 1716, ("expert", "food_otk"): 1685,
+            ("expert", "canine_buff_tempo"): 1670, ("expert", "ramp"): 1670, ("normal", "colony_food_swarm"): 1641, ("expert", "colony_food_swarm"): 1537,
+            ("expert", "egg_control"): 1256}
+    lad.seed_bots({bot_id(l, d): r for (l, d), r in seed.items()})
+    rng = random.Random(7)
+    met = {parse_bot(lad.nearest_bot(2200, rng))[1] for _ in range(300)}
+    assert met == {"cats_midrange", "aggro_hq_rush", "food_otk", "canine_buff_tempo", "ramp"}, met
+    for _ in range(100):
+        assert parse_bot(lad.nearest_bot(2200, rng, avoid={"cats_midrange", "ramp"}))[1] not in {"cats_midrange", "ramp"}
+    picks = [lad.nearest_bot(2200, rng) for _ in range(200)]
+    assert bot_id("normal", "cats_midrange") not in picks, "of one deck, only its nearest bot"

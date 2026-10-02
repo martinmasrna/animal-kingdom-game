@@ -504,7 +504,9 @@ async def join_ranked(req):
             waiting.remove(entry)
     if entry["fut"].done():   # paired in the instant the wait ran out
         return web.json_response(entry["fut"].result())
-    bid = ladder.nearest_bot(r, random)
+    recent = [h["opp_deck"] for h in profiles.history(p["id"]) if h.get("mode") == "ranked" and h["opp"].startswith("Bot (")][:2]
+    slug = {name: s for s, name in DECK_NAMES.items()}
+    bid = ladder.nearest_bot(r, random, avoid={slug.get(d, d) for d in recent})   # never the deck of your last two bot games
     level, bdeck = ranking.parse_bot(bid)
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
     match = Match(mid, Seat(token, display(p), deck=deck, profile=p["id"], ladder=p["id"]))
@@ -552,10 +554,20 @@ async def leaderboard(req):
     (under ladder.PROVISIONAL games) isn't ranked yet and sees their own progress instead."""
     p = profile_of(req)
     mine, asked = (set(friends.of(p["id"])), friends.asked(p["id"])) if p else (set(), set())
-    rows = [{"name": ladder_name(lid), "rating": r.shown(), "bot": lid.startswith("bot:"), "you": bool(p and lid == p["id"]),
-             **({} if lid.startswith("bot:") or (p and lid == p["id"]) else   # a person: whether you're friends or have asked
-                {"id": lid, "friend": lid in mine, "asked": lid in asked})}
-            for lid, r in ladder.table() if not r.provisional]   # still placing: not ranked yet (as on Lichess)
+    table = ladder.table()
+    rows = [(r.rating, {"name": ladder_name(lid), "rating": r.shown(), "bot": False, "you": bool(p and lid == p["id"]),
+                        **({} if p and lid == p["id"] else {"id": lid, "friend": lid in mine, "asked": lid in asked})})   # whether you're friends or have asked
+            for lid, r in table if not lid.startswith("bot:") and not r.provisional]   # still placing: not ranked yet (as on Lichess)
+    # The bots as one row per level (Martin, 2026-10-02: 21 level-and-deck rows cluttered it): its decks' ratings averaged
+    # by games played. Matchmaking still rates each deck on its own (a bot plays some decks far better than others).
+    levels: dict[str, list] = {}
+    for lid, r in table:
+        if (b := ranking.parse_bot(lid)):
+            levels.setdefault(b[0], []).append(r)
+    for level, rs in levels.items():
+        avg = sum(r.rating * max(1, r.games) for r in rs) / sum(max(1, r.games) for r in rs)
+        rows.append((avg, {"name": f"{level.capitalize()} Bot", "rating": str(round(avg)), "bot": True, "you": False}))
+    rows = [row for _, row in sorted(rows, key=lambda x: -x[0])]
     me_ = ladder.get(p["id"]) if p else None
     placing = {"name": display(p), "rating": me_.shown(), "games": me_.games, "of": ranking.PROVISIONAL} \
         if me_ and me_.provisional and me_.games else None

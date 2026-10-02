@@ -172,11 +172,18 @@ class Ladder:
     def bots(self) -> dict[str, Rating]:
         return {lid: Rating(*rest) for lid, *rest in self.db.execute("SELECT id, rating, rd, vol, games FROM ladder WHERE id LIKE 'bot:%'")}
 
-    def nearest_bot(self, rating: float, rng) -> str:
-        """A bot near `rating`: one of those within 100 of the nearest, at random (so a player meets several decks)."""
-        bots = sorted(self.bots().items(), key=lambda kv: abs(kv[1].rating - rating))
-        near = [lid for lid, r in bots if abs(r.rating - rating) <= abs(bots[0][1].rating - rating) + 100]
-        return rng.choice(near)
+    def nearest_bot(self, rating: float, rng, avoid=()) -> str:
+        """A bot for a player at `rating`: the nearest of each deck, the five nearest decks, minus `avoid` (the decks of the
+        player's last bot games), one at random. Every game stays as close as the ladder allows, and a player at the top
+        still meets five decks and never the same one twice running (Martin, 2026-10-02)."""
+        nearest: dict[str, tuple[float, str]] = {}
+        for lid, r in self.bots().items():
+            deck = parse_bot(lid)[1]
+            if deck not in nearest or abs(r.rating - rating) < nearest[deck][0]:
+                nearest[deck] = (abs(r.rating - rating), lid)
+        five = [(lid, deck) for deck, (_, lid) in sorted(nearest.items(), key=lambda kv: kv[1][0])][:5]
+        fresh = [lid for lid, deck in five if deck not in avoid]
+        return rng.choice(fresh or [lid for lid, _ in five])
 
     def table(self) -> list[tuple[str, Rating]]:
         """Everyone who has a rating, people with at least one game, best first."""
