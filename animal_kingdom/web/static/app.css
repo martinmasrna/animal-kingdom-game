@@ -330,15 +330,22 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .home .top .backbtn.ico { position: relative; }
 .home .top .ndot { position: absolute; right: 7px; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: #f0e8da; box-shadow: 0 0 0 2px #2b2825, 0 1px 3px rgba(0,0,0,.6); }
 .news .nrel { flex: none; border-radius: 10px; background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); color: #f0e8da; }
-.news .nhead { width: 100%; height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border: 0; background: none; color: inherit; cursor: pointer; font: 700 18px 'Fira Sans Condensed', sans-serif; }
+.news .nhead { width: 100%; height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border: 0; background: none; color: inherit; cursor: pointer; font: 700 20px 'Fira Sans Condensed', sans-serif; }
 .news .nhead .chev { opacity: .6; } .news .nrel.open .nhead .chev { transform: rotate(180deg); }
-.news .nbody { padding: 0 16px 14px; }
-.news .nbody h3 { margin: 10px 0 6px; font: 700 15px 'Fira Sans Condensed', sans-serif; color: #cfc3ad; text-transform: none; }
-.news .nbody ul, .since ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
-.news .nbody li > p, .since li > p, .since .more { margin: 0; font: 500 16px/1.35 'Fira Sans Condensed', sans-serif; color: #f0e8da; }
-.news .nbody li > p.why, .since li > p.why { margin-top: 2px; font-size: 14px; color: #a99f8e; }
-.news li.chg { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; padding: 4px 0; }
-.news li.chg > .nwords > p { margin: 0; font: 500 16px/1.35 'Fira Sans Condensed', sans-serif; color: #f0e8da; } .news li.chg > .nwords > p.why { margin-top: 4px; font-size: 14px; color: #a99f8e; }
+.news .nbody { padding: 0 20px 10px; }
+/* a group is a section: a small spaced label on a hairline, its changes split by hairlines, each a plain sentence over its muted why */
+.news .nbody h3 { display: flex; align-items: center; gap: 12px; margin: 14px 0 2px; font: 600 12px 'Fira Sans Condensed', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #a99f8e; }
+.news .nbody h3::after { content: ''; flex: 1; height: 1px; background: rgba(240,232,218,.14); }
+.news .nbody h3:first-child { margin-top: 0; }
+.news .nbody ul { margin: 0 0 6px; padding: 0; list-style: none; }
+.news .nbody li { padding: 12px 0; } .news .nbody li + li { border-top: 1px solid rgba(240,232,218,.07); }
+.news .nbody li > p, .news li.chg > .nwords > p { margin: 0; font: 500 17px/1.4 'Fira Sans Condensed', sans-serif; color: #f0e8da; }
+.news .nbody li > p.why, .news li.chg > .nwords > p.why { margin-top: 4px; font-size: 15px; color: #9d917e; }
+.news .lbody { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); }   /* the cut-off fades: more below */
+.since ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.since li > p, .since .more { margin: 0; font: 500 16px/1.35 'Fira Sans Condensed', sans-serif; color: #f0e8da; }
+.since li > p.why { margin-top: 2px; font-size: 14px; color: #a99f8e; }
+.news li.chg { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; }
 .news .ncard .card { --w: 170px; }
 @media (max-width: 700px) { .news .ncard .card { --w: 128px; } .news li.chg { gap: 12px; } }
 /* new rules words marked as with a highlighter: bold, on a warm band (a change can be a buff or a nerf, so not green) */
