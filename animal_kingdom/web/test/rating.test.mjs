@@ -32,3 +32,25 @@ test('a provisional rating ("1500?") counts and lands on the server\'s text, nev
   assert.equal(await page.$eval('#rnum', e => e.textContent), '1532?');
   assert.deepEqual(page.errors, []);
 });
+
+test('Play again keeps the result\'s width while it searches: the timer counts inside the button, the box never grows', async () => {
+  await page.goto(page.url().replace(/#.*/, '#/lab/mid'), { waitUntil: 'networkidle0' });
+  await endRanked({ before: '1781', after: '1792', delta: 11 });
+  await wait(3200);
+  const size = () => page.$eval('#endov .endbox', e => { const r = e.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; });
+  const btn = () => page.$eval('#again', e => Math.round(e.getBoundingClientRect().width));
+  const was = await size(), b0 = await btn();
+  await page.setRequestInterception(true);   // the search never finds anyone here: it stays open while we measure
+  const hold = r => { if (r.url().includes('/api/ranked')) return; r.continue(); };
+  page.on('request', hold);
+  await page.click('#again');
+  for (const t of [300, 1200, 2200]) {
+    await wait(t === 300 ? 300 : 1000);
+    assert.ok(await page.$eval('#again', e => e.classList.contains('searching')), 'searching');
+    assert.deepEqual(await size(), was, `the box at ${t} ms`);
+    assert.equal(await btn(), b0, `the button at ${t} ms`);
+    assert.ok(await page.$eval('#again', e => e.scrollWidth <= e.clientWidth), `its label fits at ${t} ms`);
+  }
+  page.off('request', hold); await page.setRequestInterception(false);
+  assert.deepEqual(page.errors, []);
+});
