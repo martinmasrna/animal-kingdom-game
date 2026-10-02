@@ -74,3 +74,24 @@ test("what one effect puts down lands in one beat, and only the opponent's own p
     assert.equal(steps.filter(s => s.kind === 'reveal').length, places.filter(e => e.player === them && e.from_hand && !e.cause).length, 'reveals');
   }
 });
+
+test('a strength change shows on a unit already on the board, from its flash on', () => {
+  let seen = 0;
+  const unitIn = (board, iid) => { for (const st of Object.values(board)) for (const u of st) if (u.iid === iid) return u; return null; };
+  for (const { name, views } of matches) for (let i = 1; i < views.length; i++) {
+    const prev = views[i - 1], next = views[i];
+    if (!prev.game || !next.game || !newEvents(prev, next)) continue;
+    const p = plan(prev, next), sum = {};
+    for (const { view, step } of p) {
+      if (!step || step.kind !== 'strength') continue;
+      for (const ch of step.changes) if (ch.iid) sum[ch.iid] = (sum[ch.iid] || 0) + ch.n;
+      for (const [iid, n] of Object.entries(sum)) {
+        const before = unitIn(prev.game.board, +iid), now = unitIn(view.game.board, +iid);
+        if (!before || !now) continue;
+        assert.equal(now.str, before.str + n, `${name} view ${i}: ${now.id} shows ${now.str}, was ${before.str}, changed by ${n}`);
+        seen++;
+      }
+    }
+  }
+  assert.ok(seen > 0, 'some strength change on a unit already on the board');
+});

@@ -66,6 +66,7 @@ export function plan(prev, next, cards = {}) {
   const take = (cr, iid) => { const st = s.board[cr] || [], i = st.findIndex(u => u.iid === iid); if (i < 0) return null;
     const [u] = st.splice(i, 1); if (!st.length) delete s.board[cr]; return u; };
   let food = null;   // food gains in a row by one player fly together
+  const landed = new Set();   // units put down in these steps: they already show their final strength
   const flushFood = () => { if (food) { push({ kind: 'food', dur: foodDur(food.n), ...food }); food = null; } };
   const toHand = e => { s.handCount[e.player] += 1;
     if (e.player === you) s.hand.push(finalCard(e.iid) || { iid: e.iid, id: e.card, str: (cards[e.card] || {}).str }); };
@@ -77,6 +78,7 @@ export function plan(prev, next, cards = {}) {
         // a card they played is shown large first; units an effect puts down (a Lemming's swarm) are its doing, not plays
         if (e.player === them && e.from_hand && !e.cause) push({ kind: 'reveal', dur: DUR.reveal, card: e.card, cr: e.cr, player: e.player });
         const put = p => { const u = finalUnit(p.iid) || { iid: p.iid, id: p.card, owner: p.player, str: (cards[p.card] || {}).str };
+          landed.add(p.iid);
           (s.board[p.cr] = s.board[p.cr] || []).push(u);
           if (p.from_hand) {   // from a hand (an effect putting a unit down from the deck leaves the hand alone)
             s.handCount[p.player] = Math.max(0, s.handCount[p.player] - 1);
@@ -131,6 +133,11 @@ export function plan(prev, next, cards = {}) {
         break;
       case 'strength': {   // a stored change (a Roar's grant, Rattlesnake's growth, Viper's poison): auras are not events
         const ch = { iid: e.iid, card: e.card, owner: e.owner, n: e.n }, last = out[out.length - 1];
+        // the number changes as it flashes, and stays changed through the steps after (a unit already on the board)
+        const hit = u => (e.iid ? u.iid === e.iid : u.id === e.card && u.owner === e.owner) && !landed.has(u.iid);
+        for (const st of Object.values(s.board)) for (const u of st) if (hit(u)) u.str += e.n;
+        if (last && last.step && last.step.kind === 'strength')   // shown with the change before it: in that step's board too
+          for (const st of Object.values(last.view.game.board)) for (const u of st) if (hit(u)) u.str += e.n;
         if (last && last.step && last.step.kind === 'strength') last.step.changes.push(ch);   // several in a row show together
         else push({ kind: 'strength', dur: DUR.strength, changes: [ch] });
         break;
