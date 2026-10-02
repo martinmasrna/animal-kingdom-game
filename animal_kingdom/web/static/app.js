@@ -770,10 +770,12 @@ function drawIntro() {
   const side = p => { const s = V.seats[p] || {}, list = Object.keys(V.lists[p] || {}), mine = p === V.you;
     const own = mine && playable().find(d => d.id === s.deck || d.id === 'my:' + s.deck);
     const cover = own ? coverFor(own) : COVER[s.deck] || coverOf(list, CARDS);
-    // the player's name in the card's bar (the card stands for them), and in a ranked match their rating under it, as it
-    // stands going in; no deck name (a person's deck name is never shown to their opponent; Martin, 2026-10-02)
-    return `<div class="iside ${p === V.you ? 'A' : 'B'}">${cardHTML({ ...CARDS[cover], name: seatLabel(p) }, { cls: 'compact' })}`
-      + `${V.ranked && s.rating ? `<div class="iname"><span class="irating">${esc(s.rating)}</span></div>` : ''}</div>`; };
+    // One object per player (Martin, 2026-10-02): their cover card, their name in its bar (yours too: a nameplate, not a
+    // sentence; the #tag only tells namesakes apart, so it stays on the profile), and in a ranked match their rating as it
+    // stands going in, in a gem set into the card's bottom edge. No deck name: a person's deck name is never shown to their opponent.
+    const name = s.bot ? seatLabel(p) : esc((s.name || 'Opponent').split('#')[0]), c = CARDS[cover], r = V.ranked && s.rating;
+    const gem = r ? `<div class="iring edge ${c.rarity}"><div class="jewel">${gemDigits(parseInt(r, 10))}${r.endsWith('?') ? '<span class="q">?</span>' : ''}</div></div>` : '';
+    return `<div class="iside ${p === V.you ? 'A' : 'B'}"><div class="iobj">${cardHTML({ ...c, name }, { cls: 'compact' })}${gem}</div></div>`; };
   const el = document.createElement('div'); el.className = 'intro'; el.id = 'intro';
   el.innerHTML = `${side(V.you)}<div class="ivs">vs</div>${side(opp())}`;
   document.getElementById('scr').appendChild(el); fitNames(el); sfx('versus', .55);

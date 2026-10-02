@@ -482,12 +482,19 @@
   background: linear-gradient(rgba(10,9,8,.55), rgba(10,9,8,.55)), #0e0d0b var(--keyart) center / cover; transition: opacity .5s ease; }
 .game .intro.out { opacity: 0; pointer-events: none; }
 .game .intro .iside { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-.game .intro .card { --w: 300px; filter: drop-shadow(0 18px 30px rgba(0,0,0,.7)); }
+.game .intro .iobj { position: relative; filter: drop-shadow(0 18px 30px rgba(0,0,0,.7)); }
+.game .intro .iobj, .game .intro .card { --w: 300px; }
+/* a ranked match: the rating gem set into the card's bottom edge, in a ring of the card's own edge (its wall the edge's
+   width), the jewel alone inside it (its painted bezel cropped away: the ring is its setting; Martin, 2026-10-02) */
+.game .intro .iring { position: absolute; left: 50%; top: 100%; translate: -50% -50%; z-index: 1; font-size: calc(var(--w) / 20);
+  width: 5.07em; height: 5.07em; padding: var(--bw); box-sizing: border-box; border-radius: 50%; background: var(--edge); box-shadow: 0 .2em .5em rgba(0,0,0,.45); }
+.game .intro .iring .jewel { width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: url(/static/kit2/gem_a.webp) center / 142% no-repeat; }
+.game .intro .iside.B .iring .jewel { background-image: url(/static/kit2/gem_b.webp); }
+.game .intro .iring .gemnum { height: 1em; } .game .intro .iring .q { font: 700 .95em/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; margin-left: .05em; }
 .game .intro .card .stab { display: none; } .game .intro .card .nbar { padding: 0 .5em; }   /* a deck's face here, not a card to weigh: no strength, the name centred */
 .game .intro .iside.A { animation: introL .7s cubic-bezier(.2,.8,.3,1) both; } .game .intro .iside.B { animation: introR .7s cubic-bezier(.2,.8,.3,1) both; }
 @keyframes introL { from { transform: translateX(-60vw); } } @keyframes introR { from { transform: translateX(60vw); } }
-.game .intro .iname { display: flex; flex-direction: column; align-items: center; gap: 2px; font-family: 'Fira Sans Condensed', sans-serif; text-shadow: 0 2px 8px rgba(0,0,0,.85); }
-.game .intro .iname .irating { font-size: 32px; font-weight: 700; color: #f3ead8; font-variant-numeric: tabular-nums; }   /* a ranked match: the rating, alone under the card (the name is in its bar) */
 .game .intro .ivs { font: 800 80px/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; text-shadow: 0 4px 20px rgba(0,0,0,.8); animation: introVs .4s ease .55s both; }
 @keyframes introVs { from { opacity: 0; transform: scale(1.6); } }
 .game.port .hc.peek, .game.port .hc.peek:hover { translate: var(--peekx, 0px) 0; }   /* a card read large stays on screen */
@@ -506,8 +513,7 @@
 /* The versus moment upright: as the board, the opponent at the top, you at the bottom, each card in from its own end. */
 @media (orientation: portrait) {
   .game .intro { flex-direction: column-reverse; gap: 14px; }
-  .game .intro .card { --w: 140px; } .game .intro .iside { gap: 8px; }
-  .game .intro .iname .irating { font-size: 24px; }
+  .game .intro .iobj, .game .intro .card { --w: 190px; } .game .intro .iside { gap: 8px; }   /* the gem's digits stay legible */
   .game .intro .ivs { font-size: 52px; }
   .game .intro .iside.A { animation-name: introD; } .game .intro .iside.B { animation-name: introU; }
 }

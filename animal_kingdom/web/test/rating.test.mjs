@@ -58,21 +58,24 @@ test('Play again holds still while it searches: the timer counts inside the butt
   assert.deepEqual(page.errors, []);
 });
 
-test('the versus moment: each card carries its player\'s name, a ranked match each side\'s rating under it, an unrated match none', async () => {
+test('the versus moment: one object per player, the card with their name (no #tag) in its bar and, ranked, their rating in a gem set into its bottom edge; unrated, no gem', async () => {
   const intro = (ranked, id) => page.evaluate(async ([ranked, id]) => {
     const v = await fetch('/static/lab/mid.json').then(r => r.json()), o = v.you === 'A' ? 'B' : 'A';
     v.id = id; v.version += 50; v.game.history = []; v.results = []; v.ranked = ranked;
-    v.seats[v.you] = { ...v.seats[v.you], rating: '1500?' }; v.seats[o] = { ...v.seats[o], rating: '1724' };
+    v.seats[v.you] = { ...v.seats[v.you], name: 'Martin#1234', bot: null, rating: '1500?' }; v.seats[o] = { ...v.seats[o], name: 'Kalista#0042', bot: null, rating: '1724' };
     window.__ak.feed(v);
   }, [ranked, id]);
   await page.goto(page.url().replace(/#.*/, '#/lab/mid'), { waitUntil: 'networkidle0' });
-  await intro(true, 'VS1'); await wait(400);
-  assert.deepEqual(await page.$$eval('#intro .irating', e => e.map(x => x.textContent)), ['1500?', '1724']);
-  assert.deepEqual(await page.$$eval('#intro .nbar span', e => e.map(x => x.textContent)), ['You', await page.evaluate(() => { const V = window.__ak().V, o = V.you === 'A' ? 'B' : 'A'; return V.seats[o].bot ? `Bot (${V.seats[o].bot[0].toUpperCase()}${V.seats[o].bot.slice(1)})` : V.seats[o].name; })], 'each card carries its player\'s name');
-  assert.deepEqual(await page.$$eval('#intro .iname', e => e.map(x => x.textContent)), ['1500?', '1724'], 'under the cards only the ratings: no deck name');
+  await intro(true, 'VS1'); await wait(900);   // the sides have slid in
+  assert.deepEqual(await page.$$eval('#intro .nbar span', e => e.map(x => x.textContent)), ['Martin', 'Kalista'], 'each card carries its player\'s name, yours too, without the tag');
+  assert.deepEqual(await page.$$eval('#intro .iring .jewel', e => e.map(j => [...j.querySelectorAll('img')].map(i => i.alt).join('') + (j.querySelector('.q') ? '?' : ''))), ['1500?', '1724']);
+  const fit = await page.$$eval('#intro .iobj', os => os.map(o => { const c = o.querySelector('.card').getBoundingClientRect(), g = o.querySelector('.iring').getBoundingClientRect();
+    return [Math.abs((g.top + g.bottom) / 2 - c.bottom), Math.abs((g.left + g.right) / 2 - (c.left + c.right) / 2), getComputedStyle(o.querySelector('.iring')).backgroundImage === getComputedStyle(o.querySelector('.card')).backgroundImage]; }));
+  for (const [dy, dx, same] of fit) { assert.ok(dy < 1.5 && dx < 1.5, `the gem sits centred on the card's bottom edge (${dy}, ${dx})`); assert.ok(same, 'its ring is the card\'s own edge'); }
+  assert.equal(await page.$$eval('#intro .iname, #intro .irating', e => e.length), 0, 'nothing floats under the cards');
   await page.reload({ waitUntil: 'networkidle0' });
   await intro(false, 'VS2'); await wait(400);
   assert.ok(await page.$('#intro'), 'the versus moment shows');
-  assert.equal((await page.$$('#intro .irating')).length, 0, 'with no rating');
+  assert.equal((await page.$$('#intro .iring')).length, 0, 'unrated: no gem');
   assert.deepEqual(page.errors, []);
 });
