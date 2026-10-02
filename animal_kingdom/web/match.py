@@ -571,11 +571,11 @@ class Match:
             "handLimit": st.config.hand_limit,
             "deckCount": {p: len(st.decks[p]) for p in "AB"},
             "deckLeft": dict(Counter(st.decks[s])),
-            # what the opponent may still hold: their deck, their hand, and while they mulligan the cards they've set aside
-            # (those go back into the deck when they're done; counted out of it meanwhile, they told which cards went back)
+            # what the opponent may still hold: their deck, their hand, and the cards a choice of theirs holds in between
+            # (the mulligan's set-aside, a Scout's three, a Raven's put-back): counted out meanwhile, they told what was there
             "unseen": dict(Counter(st.decks[opp]) + Counter(u.card_id for u in st.hands[opp])
-                           + Counter(c for step in st.effect_stack if step.get("op") == "mulligan" and step.get("player") == opp
-                                     for c in step.get("returned", ()))),
+                           + Counter(c for step in st.effect_stack if step.get("player") == opp
+                                     for k in ("returned", "pulled", "shuffled") for c in step.get(k, ()))),
             "removed": list(st.remove_pile),
             "result": st.result.to_dict() if st.result else None,
             "history": [m.public() for m in self.history],

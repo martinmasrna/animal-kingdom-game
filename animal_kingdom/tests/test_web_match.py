@@ -357,3 +357,20 @@ def test_the_opponents_mulligan_never_shows_in_their_unseen_cards():
     m.act("B", ChoiceAction(m.state.hands["B"][0].iid))
     v = m.view("A")
     assert Counter(v["game"]["unseen"]) == Counter(v["lists"]["B"])
+
+
+def test_a_choice_holding_the_opponents_cards_never_shows_in_their_unseen_cards():
+    """A Scout's three cards and a Raven's put-back sit outside the deck and hand while the opponent chooses: their
+    'unseen' cards still count them, or the decklist panel shows what they're looking at (Martin, 2026-10-02)."""
+    from collections import Counter
+    m = Match("SCO", Seat("ta", "A", deck="cats_midrange"))
+    m.join(Seat("tb", "B", deck="ramp"))
+    m._start_game()
+    st = m.state
+    st.effect_stack.append({"op": "scout", "player": "B", "spec": None, "pulled": [st.decks["B"].pop() for _ in range(3)]})
+    v = m.view("A")
+    assert Counter(v["game"]["unseen"]) == Counter(v["lists"]["B"])
+    st.decks["B"] += st.effect_stack.pop()["pulled"]
+    st.effect_stack.append({"op": "raven_dig", "player": "B", "remaining": 1, "shuffled": [st.hands["B"].pop().card_id]})
+    v = m.view("A")
+    assert Counter(v["game"]["unseen"]) == Counter(v["lists"]["B"])
