@@ -750,7 +750,10 @@ function drawIntro() {
   el.innerHTML = `${side(V.you)}<div class="ivs">vs</div>${side(opp())}`;
   document.getElementById('scr').appendChild(el); fitNames(el); sfx('versus', .55);
   const done = () => { el.classList.add('out'); setTimeout(() => el.remove(), 600); };
-  el.onclick = done; setTimeout(done, matchMedia('(prefers-reduced-motion: reduce)').matches ? 1400 : 2600);
+  // it never takes a click: the first press anywhere sends it off and still reaches what's under it (a mulligan card;
+  // Martin, 2026-10-02: the first mulligan clicks were lost to it)
+  addEventListener('pointerdown', done, { once: true, capture: true });
+  setTimeout(done, matchMedia('(prefers-reduced-motion: reduce)').matches ? 1400 : 2600);
 }
 
 // Your turn begins: the tablet lights up once, and a tab in the background says so in its title (a friend's clock is running).
