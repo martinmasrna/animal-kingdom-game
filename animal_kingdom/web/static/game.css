@@ -106,7 +106,7 @@
 .game .prompt .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
 .game .prompt .skip { padding: 6px 16px; border-radius: 6px; background: #3a3632; font-size: 14px; font-weight: 600; cursor: pointer; }
 .game .prompt .skip:hover { background: #4a4640; }
-.game .opts { left: 0; right: 0; top: 330px; display: none; justify-content: center; gap: 14px; z-index: 20; }
+.game .opts { left: 16px; right: 16px; top: 330px; display: none; flex-wrap: wrap; justify-content: center; gap: 14px; z-index: 20; }
 .game .opts.on { display: flex; }
 .game .opts .hc { position: relative; cursor: pointer; width: 180px; height: 264px; } .game .opts .hc .card { --w: 180px; } .game .opts .hc:hover { transform: translateY(-8px); }
 
@@ -452,7 +452,7 @@
 .game.port .prompt:not(.mull) .line { flex-wrap: wrap; } .game.port .prompt:not(.mull) .line .skip { height: 52px; font-size: 22px; }
 .game.port .prompt.mull { top: 520px; width: 520px; margin-left: -260px; } .game.port .prompt.mull b { font-size: 34px; } .game.port .prompt.mull p { font-size: 26px; } .game.port .prompt .skip { height: 56px; font-size: 24px; }
 .game.port .opts { top: 250px; bottom: 300px; left: 16px; right: 16px; flex-wrap: wrap; align-content: center; }   /* upright: the offered cards wrap into rows, never wider than the phone */
-.game.port .opts.many .hc { width: 140px; height: 205px; } .game.port .opts.many .hc .card { --w: 140px; }   /* more than six: smaller, four to a row */
+.game .opts.many .hc { width: 140px; height: 205px; } .game .opts.many .hc .card { --w: 140px; }   /* more than six: smaller (nine in one row on PC; four to a row upright) */
 .game.port .reveal { top: 560px; }
 .game.port .pit { scale: .72; }   /* ten to a ridge, 41 stage px apart */
 .game.port .endbox { scale: 1.5; max-width: 440px; text-align: center; }   /* the end of a game and the concede question, read on a phone */
@@ -478,7 +478,7 @@
 .game.port .waiting:has(.slab) { top: 1356px; } .game.port .waiting .slab { height: 72px; padding: 0 20px; font-size: 24px; }
 
 /* The versus moment at a match's start: the key art dimmed, the two decks' cover cards meeting from either side. */
-.game .intro { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; gap: 64px; cursor: pointer;
+.game .intro { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; gap: 64px; pointer-events: none;
   background: linear-gradient(rgba(10,9,8,.55), rgba(10,9,8,.55)), #0e0d0b var(--keyart) center / cover; transition: opacity .5s ease; }
 .game .intro.out { opacity: 0; pointer-events: none; }
 .game .intro .iside { display: flex; flex-direction: column; align-items: center; gap: 16px; }
