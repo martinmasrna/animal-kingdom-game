@@ -118,7 +118,8 @@ def flags(game: dict) -> list:
             eaten = any(e["e"] == "remove" and e.get("card") == below[0] and e.get("cr") == cr for e in under)
             if not eaten:
                 out.append({"i": k, "f": "apex_did_not_eat", "card": card, "prey": below[0], "seat": s["seat"]})
-        if roar(card) and not any(e.get("cause") == card and e["e"] not in ("place", "cover") for e in under):
+        # a Roar on a move that takes the den: the game is over, so nothing to act on is no surprise
+        if roar(card) and cr and not any(e.get("cause") == card and e["e"] not in ("place", "cover") for e in under):
             out.append({"i": k, "f": "roar_did_nothing", "card": card, "seat": s["seat"]})
         placed = next((e.get("iid") for e in ev if e["e"] == "place" and e.get("card") == card and not e.get("cause")), None)
         mine_gone = [e for e in under if e["e"] in ("remove", "bounce", "to_deck") and placed is not None and e.get("iid") == placed]
@@ -146,8 +147,19 @@ def describe(step: dict, me: str) -> str:
         c = a.get("choice")
         what = ("skips / keeps" if c == "__skip__" else f"chooses {name(b['chosen'])}" if b.get("chosen")
                 else f"chooses {name(c)}" if isinstance(c, str) and c in CARDS else f"chooses {c}")
+    # what the move did, and apart from it what the turn's change set off (start-of-turn food, a hatching egg): read as one,
+    # the second looked caused by the move (a Luna read took the opponent's income for a bug in yours)
+    ev = step["events"]
+    cut = next((j for j, e in enumerate(ev) if e["e"] in ("turn_end", "turn_start")), len(ev))
+    line = f"{t} R{b['round']:<2} {who} {what}" + effects(ev[:cut], me, step) + (f"  [thought {step['dt']:.0f}s]" if step["seat"] == me and step["dt"] and step["dt"] >= LONG_THINK else "")
+    after = effects(ev[cut:], me, step)
+    return line + (f"\n{'':>7} R{b['round']:<2} the turn passes{after}" if after else "")
+
+
+def effects(events: list, me: str, step: dict) -> str:
+    whose = lambda owner: "your" if owner == me else "their"
     fx = []
-    for e in step["events"]:
+    for e in events:
         if e["e"] == "remove" and e.get("cr"):
             fx.append(f"{whose(e['owner'])} {name(e['card'])} removed")
         elif e["e"] == "bounce":
@@ -160,8 +172,7 @@ def describe(step: dict, me: str) -> str:
             fx.append(f"{'you stole' if e.get('player') == me else 'they stole'} {name(e['card'])}")
         elif e["e"] == "food" and not e.get("income"):
             fx.append(f"{whose(e['player'])} +{e['n']} food")
-    think = f"  [thought {step['dt']:.0f}s]" if step["seat"] == me and step["dt"] and step["dt"] >= LONG_THINK else ""
-    return f"{t} R{b['round']:<2} {who} {what}" + (f"  -> {'; '.join(fx)}" if fx else "") + think
+    return f"  -> {'; '.join(fx)}" if fx else ""
 
 
 def render(game: dict) -> str:
