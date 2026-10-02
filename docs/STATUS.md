@@ -35,7 +35,7 @@ The map. Read it first each session and keep it current: when something here cha
 
 ## Engine debt
 
-- Some printed numbers are still literals in effect code (Raven's draw 3 / shuffle 2, Owl's look 3, several draw-2s); only food values and costs are guarded against the card text. Move them to `Config` or card data, and extend `test_card_text_consistency.py`.
+- Printed numbers are in `Config` and guarded against the card text for food, costs, draws ("draw N cards/Snakes") and Raven's shuffle (`test_card_text_consistency.py`). The "draw a card" riders print no number and stay 1 in effect code.
 - `benchmark_set` checkpoints don't fingerprint card data or config values.
 - Before any neural-net bot: move game state to struct-of-arrays for cheap clones (measure clone cost first).
 

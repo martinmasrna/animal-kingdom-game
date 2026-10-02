@@ -235,3 +235,41 @@ def test_roar_label_matches_placement_effect():
         cid for cid, card in load_cards().items()
         if card.has_roar != any(hook.startswith("on_place") for hook in EFFECTS.get(cid, {})))
     assert mismatched == []
+
+
+DRAW_RE = re.compile(r"\bdraw (\d+) (?:cards|snakes)", re.IGNORECASE)
+SHUFFLE_RE = re.compile(r"\bshuffle (\d+) cards back", re.IGNORECASE)
+
+# card_id -> config attrs, one per printed "draw N cards/Snakes" number in text, in order. Every card printing such a
+# number must be listed (checked below), so a new draw card can't print a number its effect doesn't use.
+DRAW_CONSTANTS: dict[str, list[str]] = {
+    "raven": ["raven_draw"],
+    "nurse_bee": ["nurse_bee_draw"],
+    "nurse_bumblebee": ["nurse_bumblebee_draw"],
+    "black_bear": ["black_bear_draw"],
+    "hamster": ["hamster_draw"],
+    "snake_egg": ["egg_hatch_draw"],   # "draw a Snake" now (snake_egg_draw, no printed number), "draw 2 Snakes" at the hatch
+    **{cid: ["test_draw"] for cid in ("mock_draw2", "mock_skully", *(f"calib_draw2_{n}" for n in range(4)))},
+}
+SHUFFLE_CONSTANTS = {"raven": "raven_shuffle"}
+
+
+def test_draw_and_shuffle_text_matches_config():
+    """Every printed "draw N cards" and "shuffle N cards back" equals the constant its effect uses, and no card prints one
+    unlisted (Raven's 3 and 2 and the Nurse Bees' 2 were literals in effect code until 2026-10-02)."""
+    cfg, cards = Config.default(), _cards()
+    problems = []
+    for cid, card in cards.items():
+        nums = [int(n) for n in DRAW_RE.findall(card.text)]
+        if nums and cid not in DRAW_CONSTANTS:
+            problems.append(f"{cid}: text prints draw {nums} but DRAW_CONSTANTS doesn't list it")
+        for n, attr in zip(nums, DRAW_CONSTANTS.get(cid, [])):
+            if n != getattr(cfg, attr):
+                problems.append(f"{cid}: text says draw {n}, config.{attr} = {getattr(cfg, attr)}")
+        for n in (int(x) for x in SHUFFLE_RE.findall(card.text)):
+            attr = SHUFFLE_CONSTANTS.get(cid)
+            if attr is None or n != getattr(cfg, attr):
+                problems.append(f"{cid}: text says shuffle {n} back, config.{attr} = {attr and getattr(cfg, attr)}")
+    for cid in DRAW_CONSTANTS:
+        assert cid in cards, f"{cid}: in DRAW_CONSTANTS but not a card"
+    assert not problems, "card text / config desync:\n  " + "\n  ".join(problems)

@@ -686,8 +686,8 @@ def _op_egg_hatch(state, step):
 def _op_raven_dig(state, step):
     player = step["player"]
     if "remaining" not in step:
-        draw_cards(state, player, 3)                 # draw 3 (fires ON_DRAW), then...
-        step["remaining"] = min(2, len(state.hands[player]))
+        draw_cards(state, player, state.config.raven_draw)   # draw (fires ON_DRAW), then...
+        step["remaining"] = min(state.config.raven_shuffle, len(state.hands[player]))
         step["shuffled"] = []
 
     if "choice" in step:
@@ -1762,7 +1762,7 @@ def _mock_scout_place(state, unit, cr):
 
 def _mock_draw2_place(state, unit, cr):
     # Baseline yardstick legendary: bare "draw 2" on a tiny body - prices raw card draw.
-    _push_draw(state, unit.owner, 2)
+    _push_draw(state, unit.owner, state.config.test_draw)
 
 
 def _mock_removal_place(state, unit, cr):
@@ -1785,12 +1785,12 @@ def _mock_saboteur_place(state, unit, cr):
 
 def _nurse_bee_place(state, unit, cr):
     if roar_condition(state, unit.owner, unit.card_id, unit):
-        _push_draw(state, unit.owner, 2)
+        _push_draw(state, unit.owner, state.config.nurse_bee_draw)
 
 
 def _nurse_bumblebee_place(state, unit, cr):
     if roar_condition(state, unit.owner, unit.card_id, unit):
-        _push_draw(state, unit.owner, 2)
+        _push_draw(state, unit.owner, state.config.nurse_bumblebee_draw)
 
 
 def _termite_king_place(state, unit, cr):
