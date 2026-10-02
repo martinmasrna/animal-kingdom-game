@@ -38,6 +38,8 @@ export function fitNames(root) {
 }
 
 // Each keyword in one line, for players learning the rules: the collection's zoom lists them, the board's badges show them on hover.
+// Scout is a card-text term ("Roar: Scout a Bird."), explained the same way (hasKeyword finds it).
+export const hasKeyword = (c, k) => new RegExp(`(^|\\. |: )${k}[:. ]`).test(c.text || '');
 export const KEYWORDS = {
   'Roar': 'Happens when you place this animal.',
   'Flight': 'Can be placed on any crossroad, even one not connected to yours. It can\'t take a den that way.',
@@ -45,4 +47,5 @@ export const KEYWORDS = {
   'Stealth': 'Enemy abilities can\'t choose it. Effects that hit many animals, or a random one, still do.',
   'Apex Predator': 'Must be placed on top of another animal, yours or an enemy\'s, and eats it. Can\'t be placed on a den.',
   'Spikes': 'The first time an enemy covers it, that enemy is removed.',
+  'Scout': 'Look at three different cards of your deck, draw one and shuffle the others back.',
 };

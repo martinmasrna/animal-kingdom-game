@@ -2,7 +2,7 @@
 // family, strength, rarity and search filters over it; the decks on the right, the open one unfolded under its tile.
 // Click a card to add a copy, right-click it or click its strip to take one out; every change saves.
 // app.js hands in what it owns: the cards, the starter decks, the player's decks and how to save them, toast, play, back.
-import { cardHTML, fitNames, KEYWORDS } from './card.js';
+import { cardHTML, fitNames, KEYWORDS, hasKeyword } from './card.js';
 import { CROP, artUrl, stripArt, fitStrips, lazyArt } from './art.js';
 import { encodeDeck, decodeDeck } from './deckcode.js';
 import { dd, wireDd, onHold } from './menu.js';
@@ -237,7 +237,7 @@ function dialog(app, html) {
 // Right-click a card: it opens large in the middle of the screen, each keyword on it explained beside it (as in
 // Hearthstone, Arena and Runeterra). Escape, a click or another right-click closes it.
 function zoom(app, c) {
-  const kws = Object.keys(KEYWORDS).filter(k => new RegExp(`(^|\\. )${k}[:.]`).test(c.text || ''));
+  const kws = Object.keys(KEYWORDS).filter(k => hasKeyword(c, k));
   const m = app.querySelector('#cmodal'); m.classList.add('on', 'zoom');
   m.innerHTML = `<div class="zbox">${cardHTML(c)}${kws.length ? `<div class="kws">${kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k]}</p></div>`).join('')}</div>` : ''}</div>`;
   fitNames(m);

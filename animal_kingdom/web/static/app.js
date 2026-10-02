@@ -1,7 +1,7 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
 import { hasArt, artUrl, stripArt, fitStrips } from './art.js';
-import { cardHTML, fitNames, KEYWORDS } from './card.js';
+import { cardHTML, fitNames, KEYWORDS, hasKeyword } from './card.js';
 import { plan } from './timeline.js';
 import { renderBoard, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
@@ -67,7 +67,7 @@ function readOverlay(html) {
 }
 function readCard(id, str) {
   const c = CARDS[id]; if (!c) return;
-  const kws = Object.keys(KEYWORDS).filter(k => new RegExp(`(^|\\. )${k}[:.]`).test(c.text || ''));
+  const kws = Object.keys(KEYWORDS).filter(k => hasKeyword(c, k));
   readOverlay(cardHTML(c, str == null ? {} : { str }) + kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k]}</p></div>`).join(''));
 }
 function wirePops(root) {
