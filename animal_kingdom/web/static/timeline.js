@@ -33,7 +33,10 @@ const lastSeq = v => { const ev = v && v.game && v.game.events; return ev && ev.
 // or events from before the oldest one kept): then the new view simply replaces the old.
 export function newEvents(prev, next) {
   if (!prev || !next || !prev.game || !next.game || prev.you !== next.you || prev.id !== next.id) return null;
-  if ((prev.results || []).length !== (next.results || []).length) return null;
+  // A new game in a series starts its own events: nothing of the last one plays. The view that ends a game also adds a
+  // result, but its last move still plays in full before the end shows (Martin, 2026-10-02: a food win was announced as
+  // the card landed, before its fruit had flown).
+  if ((prev.results || []).length !== (next.results || []).length && next.phase === 'playing') return null;
   const ev = next.game.events || [], seen = lastSeq(prev);
   if (!ev.length || (ev[0].seq > seen + 1 && seen > 0)) return null;
   return ev.filter(e => e.seq > seen);
