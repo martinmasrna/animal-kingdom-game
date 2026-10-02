@@ -276,12 +276,15 @@ class GameState:
         self.result = result
         # What happened, in order, as it happened (placed, covered, removed, bounced, drawn, food, turns): the server
         # hands these to the players instead of anyone diffing positions. Not part of the position: never saved, and a
-        # clone starts empty. `cause` is the card whose effect is running, stamped on each event.
+        # clone starts empty. `cause` is the card whose effect is running, `cause_iid` the very unit when it's known
+        # (two Servals on the board: which one roared), both stamped on each event.
         self.events: list[dict] = []
         self.cause: Optional[str] = None
+        self.cause_iid: Optional[int] = None
 
     def emit(self, e: str, **fields) -> None:
-        self.events.append({"e": e, **fields, **({"cause": self.cause} if self.cause else {})})
+        self.events.append({"e": e, **fields, **({"cause": self.cause} if self.cause else {}),
+                            **({"cause_iid": self.cause_iid} if self.cause and self.cause_iid is not None else {})})
 
     # --- instance ids ---
     def new_iid(self) -> int:
@@ -385,7 +388,7 @@ class GameState:
         new.actions_taken_this_turn = self.actions_taken_this_turn
         new.idle_turns = self.idle_turns
         new._next_iid = self._next_iid
-        new.events, new.cause = [], None
+        new.events, new.cause, new.cause_iid = [], None, None
         new.effect_stack = _plain_copy(self.effect_stack)
         new.pending = _plain_copy(self.pending)
         new.scheduled = _plain_copy(self.scheduled)

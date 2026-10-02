@@ -93,15 +93,17 @@ def resolve(state: GameState) -> None:
     """Drain the effect stack until empty, a choice is needed, or the game is won."""
     while state.pending is None and state.result is None and state.effect_stack:
         step = state.effect_stack.pop()
-        n, was = len(state.effect_stack), state.cause
-        state.cause = step.get("by_card")
+        n, was = len(state.effect_stack), (state.cause, state.cause_iid)
+        state.cause, state.cause_iid = step.get("by_card"), step.get("by_iid")
         try:
             req = OPS[step["op"]](state, step)
         finally:
-            state.cause = was
-        if step.get("by_card"):       # what a step sets off is that card's doing too
+            state.cause, state.cause_iid = was
+        if step.get("by_card"):       # what a step sets off is that card's doing too (that very unit's, when the card matches)
             for new in state.effect_stack[n:]:
                 new.setdefault("by_card", step["by_card"])
+                if "by_iid" in step and new["by_card"] == step["by_card"]:
+                    new.setdefault("by_iid", step["by_iid"])
         if req is not None:           # op needs a choice: put the step back and pause
             if REQUIRE_SOURCE and step["op"] != "mulligan" and not step.get("by_card"):
                 raise AssertionError(f"a {step['op']!r} choice with no source card")
@@ -284,15 +286,17 @@ def _hook(state, card_id, hook_name) -> Optional[Callable]:
     fn = EFFECTS.get(card_id, {}).get(hook_name)
     if fn is None:
         return None
-    def stamped(state, *args, **kw):
-        n, was = len(state.effect_stack), state.cause
-        state.cause = card_id                 # what it does now is this card's doing (events say so)
+    def stamped(state, unit, *args, **kw):   # every hook gets its own card's unit first
+        n, was = len(state.effect_stack), (state.cause, state.cause_iid)
+        state.cause, state.cause_iid = card_id, unit.iid   # what it does now is this unit's doing (events say so)
         try:
-            out = fn(state, *args, **kw)
+            out = fn(state, unit, *args, **kw)
         finally:
-            state.cause = was
+            state.cause, state.cause_iid = was
         for step in state.effect_stack[n:]:
             step.setdefault("by_card", card_id)
+            if step["by_card"] == card_id:
+                step.setdefault("by_iid", unit.iid)
         return out
     return stamped
 

@@ -49,3 +49,17 @@ test('an opponent placement is shown large, then lands; a view with nothing new 
   const v = matches[0].views[5];
   assert.equal(plan(v, v).length, 1);
 });
+
+test('what removed a unit strikes from the very unit the engine names, never another copy of its card', () => {
+  let n = 0;
+  for (const { views } of matches) for (let i = 1; i < views.length; i++) {
+    const fresh = newEvents(views[i - 1], views[i]); if (!fresh) continue;
+    const named = fresh.filter(e => e.cause_iid != null && ['remove', 'bounce', 'to_deck'].includes(e.e) && e.cr);
+    const struck = plan(views[i - 1], views[i]).filter(s => s.step && s.step.by && ['remove', 'bounce', 'to_deck'].includes(s.step.kind));
+    for (const s of struck) {
+      const e = named.find(e => e.cr === s.step.cr && e.card === s.step.card); if (!e) continue;
+      assert.ok(s.view.game.board[s.step.by].some(u => u.iid === e.cause_iid), `strikes from unit ${e.cause_iid}`); n++;
+    }
+  }
+  assert.ok(n > 5, `enough covered (${n})`);
+});

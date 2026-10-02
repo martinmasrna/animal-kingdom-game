@@ -142,3 +142,25 @@ def test_a_den_capture_carries_the_strength_it_was_played_at():
     rules.apply_action(s, legal[0])
     cap = next(e for e in s.events if e["e"] == "capture")
     assert cap["str"] == shown and cap["str"] == s.cards["lynx"].base_strength + 3 and cap["card"] == "lynx"
+
+
+def test_a_removal_names_the_very_unit_that_did_it_when_two_of_that_card_are_out():
+    """Of two Servals beside the same enemy, the one just placed roared: its removal says which (`cause_iid`), so the
+    screen strikes from that one, never the nearest copy (Martin, 2026-10-02: the wrong Serval struck)."""
+    s = _fresh()
+    me, them = s.current, "B" if s.current == "A" else "A"
+    m = s.game_map
+    spots = [a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.target[0] == "cr"]
+    cr, prey_cr, old_cr = next((c, p, o) for c in spots for p in m.neighbors(c) for o in m.neighbors(p)
+                               if o not in (c, p) and not s.board.get(p) and not s.board.get(o))
+    s.board[prey_cr] = [UnitInstance("rhinoceros", them, s.new_iid())]
+    old = UnitInstance("serval", me, s.new_iid())
+    s.board[old_cr] = [old]
+    s.add_to_hand(me, "serval")
+    s.events = []
+    rules.apply_action(s, PlaceAction("serval", ("cr", cr)))
+    new = s.board[cr][-1]
+    while s.pending:
+        rules.apply_action(s, ChoiceAction(next(o for o in s.pending["options"] if o != SKIP)))
+    rm = next(e for e in s.events if e["e"] == "remove")
+    assert (rm["cause"], rm["cause_iid"]) == ("serval", new.iid) and new.iid != old.iid

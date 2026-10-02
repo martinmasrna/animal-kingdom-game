@@ -9,9 +9,12 @@
 // How long each step holds the screen, in seconds: the one place these lengths live (the board's animations fit inside).
 // The animal whose effect removed or moved a unit (the engine stamps each event with its cause card): the one on the
 // board nearest the victim, often right under it (spines) or beside it (Hippopotamus, Grizzly Bear). It answers in the
-// removal's beat, so a player sees what did it (Martin, 2026-10-02). None when the cause isn't on the board.
-function culprit(board, cause, cr) {
+// removal's beat, so a player sees what did it (Martin, 2026-10-02). The engine names the very unit when it knows it
+// (`causeIid`: of two Servals, the one that roared); only an event without it falls back to the nearest of that card.
+// None when the cause isn't on the board.
+function culprit(board, cause, cr, causeIid) {
   if (!cause || !cr) return null;
+  if (causeIid != null) { for (const [at, st] of Object.entries(board)) if (st.some(u => u.iid === causeIid)) return at; return null; }
   const [c0, r0] = cr.split(',').map(Number);
   let best = null, bd = Infinity;
   for (const [at, st] of Object.entries(board)) {
@@ -85,7 +88,7 @@ export function plan(prev, next, cards = {}) {
         if (e.cr) {
           take(e.cr, e.iid);
           if (e.e === 'bounce' && fresh[i + 1] && fresh[i + 1].e === 'to_hand') toHand(fresh[++i]);   // it flies back into the hand
-          push({ kind: e.e, dur: DUR[e.e], cr: e.cr, card: e.card, owner: e.owner, by: culprit(s.board, e.cause, e.cr) });
+          push({ kind: e.e, dur: DUR[e.e], cr: e.cr, card: e.card, owner: e.owner, by: culprit(s.board, e.cause, e.cr, e.cause_iid) });
         }
         else if (e.zone === 'hand') {   // discarded from a hand
           s.handCount[e.owner] = Math.max(0, s.handCount[e.owner] - 1);
