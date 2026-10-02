@@ -489,6 +489,7 @@
 .game .intro .iname { display: flex; flex-direction: column; align-items: center; gap: 2px; font-family: 'Fira Sans Condensed', sans-serif; text-shadow: 0 2px 8px rgba(0,0,0,.85); }
 .game .intro .iname b { font-size: 34px; font-weight: 800; } .game .intro .A .iname b { color: var(--A); } .game .intro .B .iname b { color: var(--B); }
 .game .intro .iname span { font-size: 22px; font-weight: 600; color: #e8dfcf; }
+.game .intro .iname .irating { font-weight: 500; color: #c9bfae; font-variant-numeric: tabular-nums; }   /* a ranked match: the rating under the deck, a step quieter */
 .game .intro .ivs { font: 800 80px/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; text-shadow: 0 4px 20px rgba(0,0,0,.8); animation: introVs .4s ease .55s both; }
 @keyframes introVs { from { opacity: 0; transform: scale(1.6); } }
 .game.port .hc.peek, .game.port .hc.peek:hover { translate: var(--peekx, 0px) 0; }   /* a card read large stays on screen */

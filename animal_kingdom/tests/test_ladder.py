@@ -54,6 +54,9 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             bot = match.seats["B"]   # a seeded bot within reach of a new player's 1500 (nearest_bot: the nearest, or within 100 of it)
             assert bot.is_bot and bot.ladder.startswith("bot:") and abs(server.ladder.get(bot.ladder).rating - 1500) < 250
             assert match.seats["A"].ladder == a["profile"]["id"]
+            # the match states both ratings as they stood going in, for the versus moment; an unrated match states none
+            seats = match.view("A")["seats"]
+            assert seats["A"]["rating"] == "1500?" and seats["B"]["rating"] == server.ladder.get(bot.ladder).shown()
             # two people at once: they meet each other
             ra, rb = await asyncio.gather(c.post("/api/ranked", json={"deck": "ramp"}, headers=ha),
                                           c.post("/api/ranked", json={"deck": "aggro_hq_rush"}, headers=hb))

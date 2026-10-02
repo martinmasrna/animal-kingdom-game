@@ -57,3 +57,20 @@ test('Play again holds still while it searches: the timer counts inside the butt
   page.off('request', hold); await page.setRequestInterception(false);
   assert.deepEqual(page.errors, []);
 });
+
+test('the versus moment of a ranked match shows each side\'s rating under its name; an unrated match shows none', async () => {
+  const intro = (ranked, id) => page.evaluate(async ([ranked, id]) => {
+    const v = await fetch('/static/lab/mid.json').then(r => r.json()), o = v.you === 'A' ? 'B' : 'A';
+    v.id = id; v.version += 50; v.game.history = []; v.results = []; v.ranked = ranked;
+    v.seats[v.you] = { ...v.seats[v.you], rating: '1500?' }; v.seats[o] = { ...v.seats[o], rating: '1724' };
+    window.__ak.feed(v);
+  }, [ranked, id]);
+  await page.goto(page.url().replace(/#.*/, '#/lab/mid'), { waitUntil: 'networkidle0' });
+  await intro(true, 'VS1'); await wait(400);
+  assert.deepEqual(await page.$$eval('#intro .irating', e => e.map(x => x.textContent)), ['1500?', '1724']);
+  await page.reload({ waitUntil: 'networkidle0' });
+  await intro(false, 'VS2'); await wait(400);
+  assert.ok(await page.$('#intro'), 'the versus moment shows');
+  assert.equal((await page.$$('#intro .irating')).length, 0, 'with no rating');
+  assert.deepEqual(page.errors, []);
+});

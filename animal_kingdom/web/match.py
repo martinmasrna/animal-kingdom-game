@@ -74,6 +74,7 @@ class Seat:
     ready: bool = False
     profile: Optional[str] = None    # the player's profile id, when they have one
     ladder: Optional[str] = None     # on the ladder (a ranked match): a person's profile id, or a bot's ladder id
+    rating: Optional[str] = None     # a ranked match: the seat's rating as shown when it opened ("1781", "1500?")
 
     @property
     def is_bot(self) -> bool:
@@ -506,7 +507,7 @@ class Match:
         v = {
             "id": self.id, "you": s, "phase": self.phase, "version": self.version,
             # a seat's deck by name only for you or a bot: a person's deck name is theirs (their list is open, by rule)
-            "seats": {p: {"name": seat.name, "bot": seat.bot, "ready": seat.ready,
+            "seats": {p: {"name": seat.name, "bot": seat.bot, "ready": seat.ready, **({"rating": seat.rating} if seat.rating else {}),
                           **({"deck": seat.deck, "deckName": DECK_NAMES.get(seat.deck, seat.deck)} if p == s or seat.is_bot else {})}
                       for p, seat in self.seats.items()},
             "results": [{k: r[k] for k in ("winner", "reason", "turns")} for r in self.results],

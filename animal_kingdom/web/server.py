@@ -503,6 +503,9 @@ async def join_ranked(req):
 
 
 def _open(match: Match) -> None:
+    for seat in match.seats.values():   # a ranked match states both ratings as they stand going in (the versus moment shows them)
+        if seat.ladder:
+            seat.rating = ladder.get(seat.ladder).shown()
     match.on_game_end = save_game
     match.on_match_end = record_match
     hub.matches[match.id] = match
