@@ -124,9 +124,12 @@ export function renderBoard(el, M, g, cards, ui) {
     s += put(`cr unit ${ui.capture.owner} capture${A ? ' land' : ''}`, x, y, unit(ui.capture, [], cards)); }
   el.innerHTML = s;
 
+  // A redraw of the same moment (ui.ago ms after it began) carries every CSS animation on from where it is, never from the start.
+  const ago = ui.ago || 0;
+  if (ago > 0) for (const a of el.getAnimations({ subtree: true })) a.currentTime = ago;
   // The gem counts up to its new total as the fruit arrive (with reduced motion, the new total simply shows).
   if (!reducedMotion()) el.querySelectorAll('.dcount.tick').forEach(gem => {
-    const from = +gem.dataset.from, to = +gem.dataset.to, t0 = performance.now() + +gem.dataset.lag, dur = +gem.dataset.dur;
+    const from = +gem.dataset.from, to = +gem.dataset.to, t0 = performance.now() - ago + +gem.dataset.lag, dur = +gem.dataset.dur;
     const step = t => { const n = Math.round(from + (to - from) * Math.min(1, Math.max(0, (t - t0) / dur)));
       gem.innerHTML = gemDigits(n); if (n < to && gem.isConnected) requestAnimationFrame(step); };
     requestAnimationFrame(step);

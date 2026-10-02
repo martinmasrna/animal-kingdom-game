@@ -1027,6 +1027,7 @@ function viewerMap() {
 }
 
 let lastDecision = null;
+const ANIM_MAX = 3500;   // ms: longer than any board animation a step starts (fruit, pits, gem, landings)
 function drawBoard(d) {
   d = d || lastDecision; lastDecision = d;
   let g = viewerGame();
@@ -1035,14 +1036,20 @@ function drawBoard(d) {
     const strs = V.game.hand.filter(h => h.id === ui.sel).map(h => h.str);
     preview = { cr: ui.hover, id: ui.sel, str: Math.max(...strs) };
   }
-  let A = ui.anim; ui.anim = null;   // the animations play once, never on hover redraws
+  // A step's animations play once. A redraw while they run (the pointer moving over the board, a card picked) draws the
+  // same moment and carries them on from where they are, never restarting them nor cutting them short (Martin, 2026-10-02:
+  // the food gem glitched while counting up).
+  const now = performance.now();
+  if (ui.anim) { ui.animKeep = { A: ui.anim, t0: now }; ui.anim = null; }
+  const keep = ui.animKeep && now - ui.animKeep.t0 < ANIM_MAX ? ui.animKeep : null;
+  let A = keep ? keep.A : null; const ago = keep ? now - keep.t0 : 0;
   [A, g] = holdFood(d, A, g);   // a lesson may hold the fruit until its Next (coach.js)
   // a den taken: the animal that took it, as it was played (the engine's capture event), standing in the den's mouth
   const cap = V.game.result && V.game.result.reason === 'hq_capture' && (V.game.events || []).filter(e => e.e === 'capture').pop();
   const capture = cap ? { side: rel(cap.den), id: cap.card, owner: rel(cap.player), str: cap.str } : null;
   const region = shownRegion(d);
   const st = ui.step, strike = st && st.by ? { from: dcr(st.by), to: dcr(st.cr) } : null;   // what removed a unit answers in its beat
-  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, capture, strike, current: V.phase === 'playing' ? rel(V.game.current) : null });
+  renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, preview, anim: A, ago, capture, strike, current: V.phase === 'playing' ? rel(V.game.current) : null });
 }
 
 function wireBoard() {
