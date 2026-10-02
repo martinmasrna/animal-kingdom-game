@@ -63,3 +63,14 @@ test('what removed a unit strikes from the very unit the engine names, never ano
   }
   assert.ok(n > 5, `enough covered (${n})`);
 });
+
+test("what one effect puts down lands in one beat, and only the opponent's own plays are revealed (a Lemming swarm is neither)", () => {
+  for (const { views } of matches) for (let i = 1; i < views.length; i++) {
+    const fresh = newEvents(views[i - 1], views[i]); if (!fresh) continue;
+    const them = views[i].you === 'A' ? 'B' : 'A', places = fresh.filter(e => e.e === 'place');
+    const steps = plan(views[i - 1], views[i]).map(s => s.step).filter(Boolean);
+    const groups = places.filter((e, k) => !e.cause || !(k && places[k - 1].cause === e.cause && places[k - 1].cause_iid === e.cause_iid && fresh.indexOf(places[k - 1]) === fresh.indexOf(e) - 1));
+    assert.equal(steps.filter(s => s.kind === 'land').length, groups.length, 'one landing per play or per effect');
+    assert.equal(steps.filter(s => s.kind === 'reveal').length, places.filter(e => e.player === them && e.from_hand && !e.cause).length, 'reveals');
+  }
+});

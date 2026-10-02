@@ -74,13 +74,17 @@ export function plan(prev, next, cards = {}) {
     if (e.e !== 'food') flushFood();
     switch (e.e) {
       case 'place': {
-        if (e.player === them && e.from_hand) push({ kind: 'reveal', dur: DUR.reveal, card: e.card, cr: e.cr, player: e.player });   // a card they played, shown large first
-        const u = finalUnit(e.iid) || { iid: e.iid, id: e.card, owner: e.player, str: (cards[e.card] || {}).str };
-        (s.board[e.cr] = s.board[e.cr] || []).push(u);
-        if (e.from_hand) {   // played from a hand (an effect putting a unit down from the deck leaves the hand alone)
-          s.handCount[e.player] = Math.max(0, s.handCount[e.player] - 1);
-          if (e.player === you) s.hand = s.hand.filter(h => h.iid !== e.iid);
-        }
+        // a card they played is shown large first; units an effect puts down (a Lemming's swarm) are its doing, not plays
+        if (e.player === them && e.from_hand && !e.cause) push({ kind: 'reveal', dur: DUR.reveal, card: e.card, cr: e.cr, player: e.player });
+        const put = p => { const u = finalUnit(p.iid) || { iid: p.iid, id: p.card, owner: p.player, str: (cards[p.card] || {}).str };
+          (s.board[p.cr] = s.board[p.cr] || []).push(u);
+          if (p.from_hand) {   // from a hand (an effect putting a unit down from the deck leaves the hand alone)
+            s.handCount[p.player] = Math.max(0, s.handCount[p.player] - 1);
+            if (p.player === you) s.hand = s.hand.filter(h => h.iid !== p.iid);
+          } };
+        put(e);
+        // what one effect puts down lands together, in one beat: a swarm, not a string of separate plays (Martin, 2026-10-02)
+        while (e.cause && fresh[i + 1] && fresh[i + 1].e === 'place' && fresh[i + 1].cause === e.cause && fresh[i + 1].cause_iid === e.cause_iid) put(fresh[++i]);
         push({ kind: 'land', dur: DUR.land, cr: e.cr, card: e.card, player: e.player });
         break;
       }
