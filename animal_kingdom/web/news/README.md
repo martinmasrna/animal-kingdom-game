@@ -1,6 +1,6 @@
 # News
 
-What changed in the game, one file per release (`YYYY-MM-DD.md`, the day it went live), shown on the News screen newest first. Each release is drafted from its commits and redlined by Martin before it ships; a deploy that changes cards or rules without a new release here stops and says so.
+What changed in the game, one file per release, shown on the News screen newest first. A release is a working session, named for the day it began (`YYYY-MM-DD.md`): changes deployed before 06:00 belong to the previous day's release, so a night's work never shows as tomorrow's news at breakfast (Martin, 2026-10-02). Each release is drafted from its commits and redlined by Martin before it ships; a deploy that changes cards or rules without a new release here stops and says so.
 
 ## How a release reads
 
