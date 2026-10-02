@@ -38,7 +38,7 @@ before(async () => {
     }
     r.continue();
   });
-  await page.goto(`${server.url}/#/profile`, { waitUntil: 'networkidle0' });
+  await page.goto(`${server.url}/#/profile/history`, { waitUntil: 'networkidle0' });
 });
 after(async () => { await browser?.close(); server?.stop(); });
 
@@ -57,7 +57,7 @@ test('the profile lists each match with both decks; the deck filter carries each
 
 test('a match that can no longer be replayed says so and stays on the profile', async () => {
   await page.click('.prof .hr:last-child'); await wait(300);
-  assert.equal(await page.evaluate(() => location.hash), '#/profile');
+  assert.equal(await page.evaluate(() => location.hash), '#/profile/history');
   assert.match(await page.$eval('#toast', e => e.textContent), /can't be replayed/);
 });
 

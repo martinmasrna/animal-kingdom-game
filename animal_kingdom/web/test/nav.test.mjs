@@ -33,10 +33,10 @@ test('Feedback: a tab where the edge is free, beside Back where a side panel hol
   await page.close();
 });
 
-test('the leaderboard is the profile\'s tab, and its old address leads there', async () => {
+test('the profile opens on its leaderboard, the match history its second tab; the old address leads there', async () => {
   const page = await browser.newPage();
   await page.goto(`${server.url}/#/leaderboard`, { waitUntil: 'networkidle0' }); await page.waitForSelector('#lboard .lr');
-  assert.equal(await page.evaluate(() => location.hash), '#/profile/leaderboard');
+  assert.equal(await page.evaluate(() => location.hash), '#/profile');
   assert.equal(await page.$eval('.ptab.on', e => e.textContent), 'Leaderboard');
   await page.click('.ptab:not(.on)'); await page.waitForSelector('.hbody .none, .hbody .hlist');
   assert.equal(await page.$eval('.ptab.on', e => e.textContent), 'Match history');

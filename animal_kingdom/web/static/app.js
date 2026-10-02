@@ -173,7 +173,7 @@ function route() {
   if (search && parts[0] !== 'm' && !(search.btn === 'go' && !parts[0])) cancelSearch();   // leaving the screen it started on withdraws a search or a challenge
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
-  if (parts[0] === 'leaderboard') { history.replaceState(null, '', '#/profile/leaderboard'); parts[0] = 'profile'; }   // the leaderboard is the profile's tab
+  if (parts[0] === 'leaderboard') { history.replaceState(null, '', '#/profile'); parts[0] = 'profile'; }   // the leaderboard is the profile's first tab
   if (parts[0] === 'settings') return settingsScreen();
   if (parts[0] === 'news') { screen = 'news'; return newsScreen(app, { api, cards: CARDS, back: () => { location.hash = '#/'; } }); }
   if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
@@ -455,8 +455,9 @@ function profileScreen() {
   const code = ME.logins.length ? '' : sect('Sign-in code', `<p>Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</p>
       <div class="row"><span class="field keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span><button class="slab" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</button><button class="slab" id="copykey">Copy</button></div>`)
     + sect('Use a different profile', `<div class="row"><input class="field" id="other" placeholder="Sign-in code" autocomplete="off"><button class="slab" id="signin">Sign in</button></div>`);
-  const lead = location.hash === '#/profile/leaderboard';   // the history's tab or the leaderboard's
-  app.innerHTML = `<div class="mscr prof"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? '' : ' on'}" href="#/profile">Match history</a><a class="ptab${lead ? ' on' : ''}" href="#/profile/leaderboard">Leaderboard</a></div>${!lead && (hist || ui.histDeck) ? filter : ''}</div>
+  // the leaderboard first (Martin, 2026-10-02: what a profile opens on), the match history its second tab
+  const lead = location.hash !== '#/profile/history';
+  app.innerHTML = `<div class="mscr prof"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? ' on' : ''}" href="#/profile">Leaderboard</a><a class="ptab${lead ? '' : ' on'}" href="#/profile/history">Match history</a></div>${!lead && (hist || ui.histDeck) ? filter : ''}</div>
     <div class="hbody">${lead ? '<div class="lead lb" id="lboard"></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div></div>
     <div class="side"><div class="me"><div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div><div class="sect" id="pfriends"></div>${account}${code}</div>
       <div class="sfoot"><div class="frow"><button class="backbtn fbx" id="fbside" data-tip="Feedback" aria-label="Feedback">${TOPICON.feedback}</button><button class="backbtn" id="back"><span>Back</span></button></div></div></div></div>`;
@@ -1202,7 +1203,7 @@ function drawEnd() {
   if (RP.views.length) {
     // a replay: the game's result, then the replay again or back to the profile
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}
-      <div class="btns"><a class="slab" href="#/profile">Back</a>${peek}<button class="play" id="again">Watch again</button></div></div>`;
+      <div class="btns"><a class="slab" href="#/profile/history">Back</a>${peek}<button class="play" id="again">Watch again</button></div></div>`;
     document.getElementById('again').onclick = () => { replayStep(0); replayPlay(true); };
   } else if (V.gauntlet) {
     const g = V.gauntlet, tot = g.record.reduce((a, r) => [a[0] + r.w, a[1] + r.l], [0, 0]);
@@ -1262,7 +1263,7 @@ async function replayScreen(key) {
   if (RP.key === key && RP.views.length) return;
   stopReplay(); screen = null; RP.key = key;
   app.innerHTML = `<div class="mscr pre"><p class="wait">Loading the replay…</p></div>`;
-  const back = msg => { RP.key = null; history.replaceState(null, '', '#/profile'); profileScreen(); toast(msg); };
+  const back = msg => { RP.key = null; history.replaceState(null, '', '#/profile/history'); profileScreen(); toast(msg); };
   let views;
   try { const r = await api('/api/replay/' + encodeURIComponent(key)); if (!r.ok) throw new Error(await r.text()); views = await r.json(); }
   catch (e) { if (RP.key === key) back(e.message || 'The replay didn\'t load, try again'); return; }
@@ -1314,7 +1315,7 @@ function drawReplayBar() {
       <button class="slab" id="rfwd" tabindex="-1" data-tip="Forward one move">${ric('fwd')}</button>
       <div class="track" id="rtrack"><i></i></div>
       <button class="slab" id="reye" tabindex="-1"></button>
-      <a class="slab out" href="#/profile">Leave</a>`;
+      <a class="slab out" href="#/profile/history">Leave</a>`;
     $('rback').onclick = stop(() => { replayPlay(false); replayStep(replayPrev()); });
     $('rfwd').onclick = stop(() => { replayPlay(false); replayStep(replayNext()); });
     $('rplay').onclick = stop(() => replayPlay(!RP.playing));
@@ -1346,7 +1347,7 @@ function replayKey(e) {
   if (e.key === 'ArrowLeft') { replayPlay(false); replayStep(replayPrev()); }
   else if (e.key === 'ArrowRight') { replayPlay(false); replayStep(replayNext()); }
   else if (e.key === ' ') { e.preventDefault(); replayPlay(!RP.playing); }
-  else if (e.key === 'Escape' && !ui.panel) location.hash = '#/profile';
+  else if (e.key === 'Escape' && !ui.panel) location.hash = '#/profile/history';
   else return false;
   return true;
 }
