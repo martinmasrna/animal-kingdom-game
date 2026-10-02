@@ -158,3 +158,43 @@ def test_a_player_at_the_top_meets_five_decks_and_never_the_same_one_twice_runni
         assert parse_bot(lad.nearest_bot(2200, rng, avoid={"cats_midrange", "ramp"}))[1] not in {"cats_midrange", "ramp"}
     picks = [lad.nearest_bot(2200, rng) for _ in range(200)]
     assert bot_id("normal", "cats_midrange") not in picks, "of one deck, only its nearest bot"
+
+
+def test_home_shows_the_rank_your_leaderboard_row_has(monkeypatch):
+    # home's name piece and the leaderboard count the same rows: ranked people and one row per bot level
+    import asyncio
+    from aiohttp.test_utils import TestClient, TestServer
+    from animal_kingdom.web import server
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a = await (await c.post("/api/profile", json={})).json()
+            h = {"X-AK-Key": a["code"]}
+            for rating in (900, 1500, 2600):   # below every bot level, among them, above them all
+                server.ladder._put(a["profile"]["id"], Rating(rating, 60, 0.06, 20))
+                rows = (await (await c.get("/api/leaderboard", headers=h)).json())["rows"]
+                me = await (await c.get("/api/me", headers=h)).json()
+                assert me["rank"] == next(i for i, r in enumerate(rows) if r["you"]) + 1, rating
+    asyncio.run(run())
+
+
+def test_cancelling_a_ranked_search_leaves_the_queue(monkeypatch):
+    # the server never notices the browser dropping its request: Cancel says it, and nobody is paired with a player gone
+    import asyncio
+    from aiohttp.test_utils import TestClient, TestServer
+    from animal_kingdom.web import server
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    monkeypatch.setattr(server, "RANKED_WAIT", 1.0)
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a, b = [await (await c.post("/api/profile", json={})).json() for _ in range(2)]
+            ha, hb = {"X-AK-Key": a["code"]}, {"X-AK-Key": b["code"]}
+            first = asyncio.ensure_future(c.post("/api/ranked", json={"deck": "ramp"}, headers=ha))
+            await asyncio.sleep(0.2)
+            await c.delete("/api/ranked", headers=ha)
+            assert (await (await first).json()) == {"cancelled": True}
+            m = await (await c.post("/api/ranked", json={"deck": "ramp"}, headers=hb)).json()
+            assert server.hub.matches[m["id"]].seats["B"].is_bot, "paired with a person who had left"
+    asyncio.run(run())

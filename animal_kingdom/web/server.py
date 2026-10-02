@@ -268,6 +268,15 @@ def profile_view(p: dict) -> dict:
             "rating": ladder.get(p["id"]).shown() if ladder else None, **standing(p["id"])}
 
 
+def bot_levels(table) -> dict[str, float]:
+    """Each bot level's rating on the leaderboard: its decks' ratings averaged by games played."""
+    levels: dict[str, list] = {}
+    for lid, r in table:
+        if (b := ranking.parse_bot(lid)):
+            levels.setdefault(b[0], []).append(r)
+    return {level: sum(r.rating * max(1, r.games) for r in rs) / sum(max(1, r.games) for r in rs) for level, rs in levels.items()}
+
+
 def standing(pid: str) -> dict:
     """Where you stand, for home's name piece: your place among the ranked (people and bots), or your placement games so far."""
     if not ladder:
@@ -275,8 +284,10 @@ def standing(pid: str) -> dict:
     r = ladder.get(pid)
     if r.provisional:
         return {"placing": {"games": r.games, "of": ranking.PROVISIONAL}}
-    ranked = [lid for lid, x in ladder.table() if not x.provisional]
-    return {"rank": ranked.index(pid) + 1} if pid in ranked else {}
+    # your row's place on the leaderboard: the ranked people and the bot levels above you
+    table = ladder.table()
+    above = sum(1 for lid, x in table if not lid.startswith("bot:") and not x.provisional and x.rating > r.rating)
+    return {"rank": 1 + above + sum(1 for avg in bot_levels(table).values() if avg > r.rating)}
 
 
 # ----------------------------------------------------------------- sign in with Google / Discord
@@ -496,14 +507,16 @@ async def join_ranked(req):
              "fut": asyncio.get_running_loop().create_future()}
     waiting[:] = [w for w in waiting if w["pid"] != p["id"]] + [entry]   # one place in the queue per person
     try:
-        return web.json_response(await asyncio.wait_for(asyncio.shield(entry["fut"]), RANKED_WAIT))
+        res = await asyncio.wait_for(asyncio.shield(entry["fut"]), RANKED_WAIT)
+        return web.json_response(res if res else {"cancelled": True})
     except asyncio.TimeoutError:
         pass
     finally:
         if entry in waiting:
             waiting.remove(entry)
-    if entry["fut"].done():   # paired in the instant the wait ran out
-        return web.json_response(entry["fut"].result())
+    if entry["fut"].done():   # paired in the instant the wait ran out, or cancelled
+        res = entry["fut"].result()
+        return web.json_response(res if res else {"cancelled": True})
     recent = [h["opp_deck"] for h in profiles.history(p["id"]) if h.get("mode") == "ranked" and h["opp"].startswith("Bot (")][:2]
     slug = {name: s for s, name in DECK_NAMES.items()}
     bid = ladder.nearest_bot(r, random, avoid={slug.get(d, d) for d in recent})   # never the deck of your last two bot games
@@ -513,6 +526,17 @@ async def join_ranked(req):
     match.join(Seat(secrets.token_urlsafe(12), ladder_name(bid), bot=level, deck=bdeck, ladder=bid))
     _open(match)
     return web.json_response({"id": mid, "token": token, "seat": "A"})
+
+
+async def leave_ranked(req):
+    """Leave the ranked queue (Cancel): said outright, since the server doesn't notice the browser dropping its request, and a
+    person searching meanwhile would be paired with someone gone."""
+    p = me(req)
+    for w in [w for w in waiting if w["pid"] == p["id"]]:
+        waiting.remove(w)
+        if not w["fut"].done():
+            w["fut"].set_result(None)
+    return web.json_response({})
 
 
 def _open(match: Match) -> None:
@@ -560,12 +584,7 @@ async def leaderboard(req):
             for lid, r in table if not lid.startswith("bot:") and not r.provisional]   # still placing: not ranked yet (as on Lichess)
     # The bots as one row per level (Martin, 2026-10-02: 21 level-and-deck rows cluttered it): its decks' ratings averaged
     # by games played. Matchmaking still rates each deck on its own (a bot plays some decks far better than others).
-    levels: dict[str, list] = {}
-    for lid, r in table:
-        if (b := ranking.parse_bot(lid)):
-            levels.setdefault(b[0], []).append(r)
-    for level, rs in levels.items():
-        avg = sum(r.rating * max(1, r.games) for r in rs) / sum(max(1, r.games) for r in rs)
+    for level, avg in bot_levels(table).items():
         rows.append((avg, {"name": f"{level.capitalize()} Bot", "rating": str(round(avg)), "bot": True, "you": False}))
     rows = [row for _, row in sorted(rows, key=lambda x: -x[0])]
     me_ = ladder.get(p["id"]) if p else None
@@ -929,6 +948,7 @@ def make_app() -> web.Application:
         web.get("/api/news", get_news),
         web.post("/api/news/seen", news_seen),
         web.post("/api/ranked", join_ranked),
+        web.delete("/api/ranked", leave_ranked),
         web.get("/api/leaderboard", leaderboard),
         web.get("/api/friends", friends_list),
         web.post("/api/friends", friend_add),
