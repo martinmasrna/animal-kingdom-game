@@ -479,6 +479,19 @@ def test_owl_scouts_the_top_three_draws_one_and_shuffles_the_rest():
     assert sorted(s.decks["A"]) == ["eagle", "lion", "rat"]   # the other two shuffled back
 
 
+def test_scout_shows_three_different_cards_when_the_deck_has_them():
+    # Owl: copies near the top are passed over until three different cards are found (they stay where they were).
+    s = make_state(current="A", hands={"A": ["owl"]},
+                   decks={"A": ["eagle", "rat", "lion", "lion", "lion"], "B": []})
+    rules.apply_action(s, PlaceAction("owl", ("cr", "1,2")))
+    assert sorted(s.pending["options"]) == ["eagle", "lion", "rat"]
+    # Scout a Bird: three different Birds however many copies of one the deck holds.
+    s = make_state(current="A", hands={"A": ["fathom"]},
+                   decks={"A": ["eon", "eon", "eon", "aurum", "aurum", "omen"], "B": []})
+    rules.apply_action(s, PlaceAction("fathom", ("cr", "1,2")))
+    assert sorted(s.pending["options"]) == ["aurum", "eon", "omen"]
+
+
 def test_raven_draws_three_then_shuffles_two_cards_from_hand():
     s = make_state(current="A", hands={"A": ["raven"]},
                    decks={"A": ["lion", "fox", "rat", "eagle", "owl"], "B": []})

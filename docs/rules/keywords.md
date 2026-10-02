@@ -65,7 +65,7 @@ Card text grants strength two ways, **distinguished by the verb** — this readi
 **Discard a card** means remove a card from a hand (or from a deck, when the text says so, as on Hornet). "Your opponent discards a random card" (Black Swan) and "discard a random card" (Rat) are the same removal the engine has always done for "removes a random card from their hand".
 
 ### Scout  *(card-text term, not a keyword)*
-**Scout a card** means look at the top three cards of your deck, draw one and shuffle the other two back. **Scout a Bird** (or a legendary unit, or any other kind) looks at three random cards of that kind in your deck instead, all of them if there are fewer. It draws from the deck and never creates a card; the shuffle counts as shuffling (Rattlesnake grows). The count is `scout_count`. Cards: Owl, Fathom, Bird Egg.
+**Scout a card** means look at three different cards from the top of your deck, draw one and shuffle the other two back (copies of a card already seen are passed over and stay where they are). **Scout a Bird** (or a legendary unit, or any other kind) looks at three different random cards of that kind in your deck instead, all of them if there are fewer kinds. It draws from the deck and never creates a card; the shuffle counts as shuffling (Rattlesnake grows). The count is `scout_count`. Cards: Owl, Fathom, Bird Egg.
 
 ### Card-text conventions
 Card text fits three lines on the full card (`docs/design/principles.md`). These phrasings are binding:

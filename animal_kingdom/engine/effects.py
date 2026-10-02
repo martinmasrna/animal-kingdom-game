@@ -708,19 +708,27 @@ def _op_raven_dig(state, step):
 
 
 def _op_scout(state, step):
-    """Scout: look at `scout_count` cards of your deck, draw one (chosen), shuffle the rest back.
-    Unfiltered (Owl) it looks at the top of the deck; with a `spec` (a Bird, a legendary unit) it
-    looks at that many random matching cards. Nothing matching: nothing happens."""
+    """Scout: look at `scout_count` different cards of your deck, draw one (chosen), shuffle the rest back.
+    Unfiltered (Owl) it looks from the top of the deck down; with a `spec` (a Bird, a legendary unit)
+    at random matching cards. Either way it takes one copy of a card and passes over its other copies,
+    so the choice is between that many different cards whenever the deck holds them (Martin, 2026-10-02:
+    three Owls in the deck showed one card three times). Nothing matching: nothing happens."""
     player = step["player"]
     if "pulled" not in step:
         deck = state.decks[player]
         n = state.config.scout_count
-        if step["spec"] is None:   # the deck's top cards; a spec: random cards of that kind
-            pulled = [deck.pop() for _ in range(min(n, len(deck)))]  # top of deck = end
-        else:
-            matching = [i for i, cid in enumerate(deck) if _matches(state.cards[cid], step["spec"])]
-            picks = sorted(state.rng.sample(matching, min(n, len(matching))), reverse=True)
-            pulled = [deck.pop(i) for i in picks]
+        if step["spec"] is None:   # from the top of the deck (its end) down
+            order = list(range(len(deck) - 1, -1, -1))
+        else:                      # random cards of that kind
+            order = [i for i, cid in enumerate(deck) if _matches(state.cards[cid], step["spec"])]
+            state.rng.shuffle(order)
+        picks, seen = [], set()
+        for i in order:
+            if len(picks) == n:
+                break
+            if deck[i] not in seen:
+                seen.add(deck[i]); picks.append(i)
+        pulled = [deck.pop(i) for i in sorted(picks, reverse=True)]
         if not pulled:
             return None
         step["pulled"] = pulled
