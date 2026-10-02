@@ -11,7 +11,7 @@ const VIS = 0.61;
 const focus = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35); return Math.max(0, Math.min(1, (y - VIS / 2) / (1 - VIS))) * 100; };
 
 // Every keyword that opens a sentence is bold ("Flight. Roar: ..." bolds both).
-const KW = /(?<=^|\. )(Roar|Armor|Flight|Stealth|Apex Predator)(:|\.)/g;
+const KW = /(?<=^|\. )(Roar|Armor|Flight|Stealth|Spikes|Apex Predator)(:|\.)/g;
 const rules = t => (t || '').replace(KW, '<b>$1$2</b>');
 const chalk = n => String(n).split('').map(d => d === '*' ? '<b>*</b>' : `<img src="/static/kit2/chalk/${d}.webp" alt="${d}" draggable="false">`).join('');
 
@@ -44,4 +44,5 @@ export const KEYWORDS = {
   'Armor': 'Can\'t be removed, returned to hand or eaten by any ability, not even your own. It can still be covered.',
   'Stealth': 'Enemy abilities can\'t choose it. Effects that hit many animals, or a random one, still do.',
   'Apex Predator': 'Must be placed on top of another animal, yours or an enemy\'s, and eats it. Can\'t be placed on a den.',
+  'Spikes': 'The first time an enemy covers it, that enemy is removed.',
 };

@@ -14,7 +14,7 @@ export const LAND = { w: 1512, h: 800 }, PORT = { w: 720, h: 1440 };
 export const VIEW = { port: false };
 export function setView(port) { Object.assign(STAGE, port ? PORT : LAND); VIEW.port = port; }
 const key = (c, r) => `${c},${r}`;
-const BOARD_KW = ['Armor', 'Stealth'];   // the keywords a unit wears as a badge on the board
+const BOARD_KW = ['Armor', 'Stealth', 'Spikes'];   // the keywords a unit wears as a badge on the board
 const kit = f => `/static/kit2/${f}`;
 const team = side => (side === 'A' ? 'a' : 'b');
 
@@ -64,7 +64,8 @@ export function portrait(id, D) {
 // A unit: portrait under its team rim, strength on the boss, buried units peeking out behind, timer and board keywords as badges.
 function unit(u, under, cards) {
   // Board keywords: the card's own, plus Stealth whenever the enemy can't choose it (an adjacent Armadillo gives it).
-  const c = cards[u.id], kws = (c.kw || []).filter(k => BOARD_KW.includes(k) && k !== 'Stealth').concat(u.hidden ? ['Stealth'] : []);
+  // Spikes only until they've removed a coverer (the view says so): after that it's an ordinary animal.
+  const c = cards[u.id], kws = (c.kw || []).filter(k => BOARD_KW.includes(k) && k !== 'Stealth' && k !== 'Spikes').concat(u.hidden ? ['Stealth'] : [], u.spikes ? ['Spikes'] : []);
   // the animals underneath peek out behind, down and right: each a solid disc under its team rim, a step darker (at this
   // offset a portrait showed only as a sliver, which read as a gap)
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner} seen" style="transform:translate(${22 + i * 7}px,${20 + i * 6}px) scale(.82);z-index:${-i - 1}">`

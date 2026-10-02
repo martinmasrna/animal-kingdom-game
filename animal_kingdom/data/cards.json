@@ -686,8 +686,8 @@
       "rarity": "rare",
       "tags": ["Rodent"],
       "base_strength": 7,
-      "keywords": [],
-      "text": "The first time an enemy covers this, remove that enemy."
+      "keywords": ["Spikes"],
+      "text": "Spikes."
     },
     {
       "id": "chinchilla",
@@ -736,8 +736,8 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
-      "keywords": [],
-      "text": "The first time an enemy covers this, remove that enemy. Roar: gain 5 food.",
+      "keywords": ["Spikes"],
+      "text": "Spikes. Roar: gain 5 food.",
       "copies": 2
     },
     {

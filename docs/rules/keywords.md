@@ -21,6 +21,11 @@ Cannot be **chosen** by an enemy ability: excluded from any option list an enemy
 
 Carried by: Black Panther. Armadillo gives it to every friendly unit on an adjacent crossroad while Armadillo tops its own.
 
+### Spikes
+The first time an enemy covers it, that enemy is removed (a remove, so Armor resists it). Once per animal: a Spikes animal that has removed a coverer is an ordinary animal from then on, and its badge on the board goes. Covering is placement, so the coverer's own Roar resolves first, then the spikes (and an Apex Predator landing on it is removed before it can eat). A friendly cover doesn't set it off.
+
+Carried by: Porcupine and Hedgehog (Food).
+
 ### Apex Predator
 A predator that must land on prey and eats it.
 

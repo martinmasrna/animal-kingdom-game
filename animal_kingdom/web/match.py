@@ -547,7 +547,8 @@ class Match:
             # "hidden": the enemy can't choose it right now (Stealth, printed or from an adjacent Armadillo).
             board[cr] = [{"iid": u.iid, "id": u.card_id, "owner": u.owner, "str": effective_strength(st, u),
                           **({"timer": timers[u.iid]} if u.iid in timers else {}),
-                          **({"hidden": True} if not statics.can_be_chosen(st, u, other_player(u.owner)) else {})} for u in stack]
+                          **({"hidden": True} if not statics.can_be_chosen(st, u, other_player(u.owner)) else {}),
+                          **({"spikes": True} if "Spikes" in st.cards[u.card_id].keywords and not u.retaliation_used else {})} for u in stack]   # until used
         g = {
             "round": st.turn_counter // 2 + 1,
             "current": st.current,

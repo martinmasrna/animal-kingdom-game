@@ -327,3 +327,20 @@ def test_a_pick_from_your_own_hand_names_what_it_does():
     m.act(me, PlaceAction("magpie", tuple(target)))
     p = m.view(me)["game"]["pending"]
     assert p["kind"] == "discard" and {o["kind"] for o in p["options"]} == {"hand"}
+
+
+def test_a_spikes_animal_wears_its_badge_until_its_spikes_are_used():
+    """Spikes fire once: the view marks the animal until then, so the board shows the danger only while it's real."""
+    from animal_kingdom.engine.actions import ChoiceAction
+    from animal_kingdom.engine.state import UnitInstance
+    m = Match("SPK", Seat("ta", "A", deck="cats_midrange"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m._start_game()
+    while m.state.pending:
+        m.act(m.to_act(), ChoiceAction("__skip__"))
+    hog = UnitInstance("hedgehog", "B", m.state.new_iid())
+    m.state.board["3,2"] = [hog]
+    top = lambda: m.view("A")["game"]["board"]["3,2"][-1]
+    assert top().get("spikes") is True
+    hog.retaliation_used = True
+    assert "spikes" not in top()

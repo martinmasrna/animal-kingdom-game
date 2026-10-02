@@ -206,7 +206,7 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
         state.emit("cover", cr=cr, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
 
     # Apex Predator: it covers the occupant like any placement, and eats it afterwards
-    # (Martin, 2026-09-29): the roar, then every reaction to the cover (Porcupine's spines,
+    # (Martin, 2026-09-29): the roar, then every reaction to the cover (Porcupine's Spikes,
     # Gale), then the eat. The stack is LIFO, so the eat goes in first, at the bottom.
     if is_apex and covered is not None:
         state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id})
@@ -265,6 +265,8 @@ def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
             if hook:
                 hook(state, top, unit, cr)
     if covered is not None:
+        if "Spikes" in state.cards[covered.card_id].keywords:   # the keyword is the behaviour: any card with Spikes has it
+            _spikes_covered(state, covered, unit, cr)
         hook = _hook(state, covered.card_id, "on_covered")
         if hook:
             hook(state, covered, unit, cr)
@@ -1633,9 +1635,10 @@ def _op_bounce_iid(state, step):
     return None
 
 
-def _spines_covered(state, covered, coverer, cr):
-    # Porcupine, Hedgehog: "The first time an enemy covers this, remove that enemy." Once per
-    # instance (`retaliation_used` persists across turns); after that it's an ordinary unit.
+def _spikes_covered(state, covered, coverer, cr):
+    # Spikes (Porcupine, Hedgehog): the first time an enemy covers this, remove that enemy. Once per
+    # instance (`retaliation_used` persists across turns, and the board's badge goes with it); after that
+    # it's an ordinary unit.
     if coverer.owner == covered.owner or covered.retaliation_used:
         return
     covered.retaliation_used = True
@@ -2039,8 +2042,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Food OTK: "food gained this turn" signature + go-wide rodent payoff (2026-07-05 overhaul).
     "scrooge": {"on_place": _scrooge_place},
     "rat_king": {"on_place": _rat_king_place},
-    "hedgehog": {"on_place": _hedgehog_place, "on_covered": _spines_covered},
-    "porcupine": {"on_covered": _spines_covered},
+    "hedgehog": {"on_place": _hedgehog_place},
     "chinchilla": {"on_place": _chinchilla_place},
     "hamster": {"on_place": _hamster_place},
     "muskrat": {"on_place": _muskrat_place},
