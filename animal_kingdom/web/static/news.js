@@ -12,11 +12,25 @@ export async function loadNews(api) {
 }
 export const unread = () => !!(N && N.unread);
 
-// A card change shows the card as it was, faded, beside the card as it is; a rule or a new thing is words alone.
+// The words of `now` that aren't in `was`, in order (a longest common subsequence of words), marked as the change.
+function markNew(was, now) {
+  const a = was.split(/\s+/), b = now.split(/\s+/), L = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+  for (let i = a.length - 1; i >= 0; i--) for (let j = b.length - 1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const out = []; let i = 0, j = 0;
+  while (j < b.length) {
+    if (i < a.length && a[i] === b[j]) { out.push(b[j]); i++; j++; }
+    else if (i < a.length && L[i + 1][j] >= L[i][j + 1]) i++;
+    else out.push(`<mark>${b[j++]}</mark>`);
+  }
+  return out.join(' ').replace(/<\/mark> <mark>/g, ' ');
+}
+// A card change shows the card as it is with the change marked on it (as Hearthstone does): a strength that went up or down
+// tinted as a changed strength is in the hand, new rules words highlighted. A rule or a new thing is words alone.
 function itemHTML(it, cards) {
   const c = it.cards.length === 1 && Object.keys(it.was || {}).length ? cards[it.cards[0]] : null;
-  const pair = c ? `<div class="npair"><div class="ncard was">${cardHTML({ ...c, ...it.was })}</div><i class="narrow"></i><div class="ncard">${cardHTML(c)}</div></div>` : '';
-  return `<li><p>${esc(it.text)}</p>${it.why ? `<p class="why">${esc(it.why[0].toUpperCase() + it.why.slice(1))}</p>` : ''}${pair}</li>`;
+  const card = c ? `<div class="ncard">${cardHTML({ ...c, str: it.was.str ?? c.str, text: it.was.text ? markNew(it.was.text, c.text) : c.text }, { str: c.str })}</div>` : '';
+  const words = `<p>${esc(it.text)}</p>${it.why ? `<p class="why">${esc(it.why[0].toUpperCase() + it.why.slice(1))}</p>` : ''}`;
+  return card ? `<li class="chg">${card}<div class="nwords">${words}</div></li>` : `<li>${words}</li>`;   // a card change: the card beside its words
 }
 function releaseHTML(r, open, cards) {
   return `<section class="nrel${open ? ' open' : ''}" data-rel="${r.id}"><button class="nhead"><b>${esc(r.date.replace(/ \d{4}$/, ''))}</b><i class="chev"></i></button>`

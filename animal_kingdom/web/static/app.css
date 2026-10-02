@@ -337,9 +337,12 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .news .nbody ul, .since ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
 .news .nbody li > p, .since li > p, .since .more { margin: 0; font: 500 16px/1.35 'Fira Sans Condensed', sans-serif; color: #f0e8da; }
 .news .nbody li > p.why, .since li > p.why { margin-top: 2px; font-size: 14px; color: #a99f8e; }
-.news .npair { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
-.news .ncard .card { --w: min(200px, calc((100vw - 112px) / 2)); } .news .ncard.was .card { filter: grayscale(.85) brightness(.62); }   /* as it was: drained, beside the card as it is */
-.news .narrow { width: 0; height: 0; border-left: 10px solid #cfc3ad; border-top: 7px solid transparent; border-bottom: 7px solid transparent; opacity: .8; }
+.news li.chg { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; padding: 4px 0; }
+.news li.chg > .nwords > p { margin: 0; font: 500 16px/1.35 'Fira Sans Condensed', sans-serif; color: #f0e8da; } .news li.chg > .nwords > p.why { margin-top: 4px; font-size: 14px; color: #a99f8e; }
+.news .ncard .card { --w: 170px; }
+@media (max-width: 700px) { .news .ncard .card { --w: 128px; } .news li.chg { gap: 12px; } }
+/* new rules words marked as with a highlighter: bold, on a warm band (a change can be a buff or a nerf, so not green) */
+.news .ncard .card .ctext mark { color: inherit; font-weight: 800; background: rgba(236,178,52,.72); border-radius: .25em; padding: 0 .22em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .news .none { color: #a99f8e; font: 500 16px 'Fira Sans Condensed', sans-serif; }
 .since { width: min(420px, calc(100vw - 24px)); gap: 12px; }
 .since b { text-align: left; }
