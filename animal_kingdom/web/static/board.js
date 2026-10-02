@@ -121,7 +121,8 @@ export function renderBoard(el, M, g, cards, ui) {
     s += `<div class="abs leave ${how} unit ${u.owner}" style="left:${x}px;top:${y}px;--hx:${hx}px;--hy:${hy}px">${unit(u, [], cards)}</div>`;
   }
 
-  const stonesOf = side => A && A.fromStones === false ? [] : held.filter(r => r.owner === side)   // a card's food comes from no stone.map(r => { const [x, y] = stoneAt(r); return { x, y, food: r.food }; });
+  // a region's income flies from its stone; a card's food comes from no stone
+  const stonesOf = side => A && A.fromStones === false ? [] : held.filter(r => r.owner === side).map(r => { const [x, y] = stoneAt(r); return { x, y, food: r.food }; });
   for (const side of ['A', 'B']) s += den(side, g, A, stonesOf(side), ui);
   // The unit that took a den stands in its mouth: the game's last move, drawn where it won.
   if (ui.capture) { const [mx, my] = denMouthAt(ui.capture.side), x = VIEW.port ? mx : mx + (ui.capture.side === 'A' ? -22 : 22), y = VIEW.port ? my + (ui.capture.side === 'A' ? 22 : -22) : my;   // seated in the mouth, clear of the crossroad beside it
