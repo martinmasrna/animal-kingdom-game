@@ -344,3 +344,16 @@ def test_a_spikes_animal_wears_its_badge_until_its_spikes_are_used():
     assert top().get("spikes") is True
     hog.retaliation_used = True
     assert "spikes" not in top()
+
+
+def test_the_opponents_mulligan_never_shows_in_their_unseen_cards():
+    """A card the opponent sends back in their mulligan is set aside until they're done: their 'unseen' cards still count
+    it, or the decklist panel would show which cards they threw back (Martin, 2026-10-02)."""
+    from collections import Counter
+    from animal_kingdom.engine.actions import ChoiceAction
+    m = Match("MUL", Seat("ta", "A", deck="cats_midrange"))
+    m.join(Seat("tb", "B", deck="ramp"))
+    m._start_game()
+    m.act("B", ChoiceAction(m.state.hands["B"][0].iid))
+    v = m.view("A")
+    assert Counter(v["game"]["unseen"]) == Counter(v["lists"]["B"])
