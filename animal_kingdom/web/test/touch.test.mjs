@@ -58,6 +58,21 @@ test('game: a hold opens a hand card large until a tap, and picks nothing; a hel
   assert.equal(await page.$('.readov'), null);
 });
 
+test('game: holding the deck opens your decklist and draws nothing; a tap beside it closes it', async () => {
+  await page.goto(`${server.url}/#/lab/mid`, { waitUntil: 'networkidle0' }); await wait(600);
+  const n = await page.$$eval('.hc', e => e.length);
+  const up = await hold('#deck');
+  assert.ok(await page.$eval('#mine', e => e.classList.contains('on')), 'the held deck opens your decklist');
+  await up();
+  assert.ok(await page.$eval('#mine', e => e.classList.contains('on')), 'and it stays after the finger lifts');
+  assert.equal(await page.$$eval('.hc', e => e.length), n, 'releasing the hold draws nothing');
+  const box = await page.$eval('#mine', e => { const r = e.getBoundingClientRect(); return [r.left, r.right, r.top, r.bottom]; });
+  assert.ok(box[0] >= 0 && box[1] <= 390 && box[2] >= 0 && box[3] <= 844, `on screen (${box})`);
+  await page.screenshot({ path: process.env.SHOT || '/dev/null' });
+  await page.tap('#board'); await wait(300);
+  assert.ok(!(await page.$eval('#mine', e => e.classList.contains('on'))), 'a tap beside it closes it');
+});
+
 test('a laptop with a touchscreen or pen (a Surface): a pen hold reads a hand card, and so does a right-click', async () => {
   await page.setViewport({ width: 1512, height: 800 });   // a computer: hover and a mouse, plus a pen
   await page.goto(`${server.url}/#/lab/mid`, { waitUntil: 'networkidle0' }); await wait(600);
