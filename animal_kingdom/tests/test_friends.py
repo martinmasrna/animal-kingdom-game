@@ -26,6 +26,7 @@ def test_friends_by_link_challenge_accept_decline_and_remove(monkeypatch):
             assert r.status == 409
             # B comes online; A challenges; B is told and accepts with its deck: one match, both seats
             ws = await c.ws_connect(f"/ws/presence?key={b['code']}")
+            assert (await ws.receive_json(timeout=2))["t"] == "build"   # the server's client build, for a stale tab to reload
             await asyncio.sleep(0.05)
             assert (await (await c.get("/api/friends", headers=ha)).json())["friends"][0]["online"]
             ask = asyncio.ensure_future(c.post("/api/challenge", json={"friend": b["profile"]["id"], "deck": "ramp"}, headers=ha))
@@ -68,6 +69,7 @@ def test_friend_request_from_the_leaderboard(monkeypatch):
             bid, aid = b["profile"]["id"], a["profile"]["id"]
             # B online: the request reaches B at once; declining leaves no friends
             ws = await c.ws_connect(f"/ws/presence?key={b['code']}")
+            assert (await ws.receive_json(timeout=2))["t"] == "build"   # the server's client build, for a stale tab to reload
             await asyncio.sleep(0.05)
             assert (await (await c.post("/api/friends/request", json={"to": bid}, headers=ha)).json()) == {"friends": False}
             msg = await ws.receive_json(timeout=2)
@@ -80,6 +82,7 @@ def test_friend_request_from_the_leaderboard(monkeypatch):
             ws = await c.ws_connect(f"/ws/presence?key={b['code']}")
             msg = await ws.receive_json(timeout=2)
             assert msg["t"] == "friendreq" and msg["from"] == aid
+            assert (await ws.receive_json(timeout=2))["t"] == "build"   # after what was waiting
             await c.post(f"/api/friends/request/{aid}/answer", json={"accept": True}, headers=hb)
             assert [f["id"] for f in (await (await c.get("/api/friends", headers=ha)).json())["friends"]] == [bid]
             assert [f["id"] for f in (await (await c.get("/api/friends", headers=hb)).json())["friends"]] == [aid]

@@ -37,6 +37,17 @@ from .match import BOT_LEVELS, DECK_NAMES, Match, Seat, card_pool, map_info
 CARDS = load_cards()
 
 STATIC = Path(__file__).parent / "static"
+# The client this server serves, as one fingerprint: its files and the card data. A tab left open across a deploy keeps
+# running the old client (the page never reloads by itself), so the sockets tell every tab, and one on another build
+# reloads (Martin, 2026-10-02: the Spikes badge never showed in a tab opened before it shipped).
+def _build_id() -> str:
+    import hashlib
+    h = hashlib.sha1()
+    for f in sorted(STATIC.rglob("*")) + [Path(__file__).resolve().parents[1] / "data" / "cards.json"]:
+        if f.is_file() and f.suffix in (".js", ".css", ".html", ".json"):
+            h.update(f.name.encode()); h.update(f.read_bytes())
+    return h.hexdigest()[:12]
+BUILD = _build_id()
 # Human games are the best design signal there is: every game with a human seat is kept,
 # one JSONL file per match, replayable with `python -m animal_kingdom.sim.replay FILE --index N`.
 LOG_DIR = Path(__file__).resolve().parents[2] / "results" / "human_games" / "web"
@@ -574,6 +585,7 @@ async def presence_socket(req):
     for frm in friends.requests_to(p["id"]):   # so does a friend request sent while you were away
         if (f := profiles.get(frm)):
             await ws.send_json({"t": "friendreq", "from": frm, "name": display(f)})
+    await ws.send_json({"t": "build", "build": BUILD})
     try:
         async for _ in ws:
             pass
@@ -742,6 +754,7 @@ async def pool(_req):
                   for slug in DECK_NAMES if slug in PREMADE_DECKS or slug == "goodstuff"],
         "map": map_info(),
         "levels": list(BOT_LEVELS),
+        "build": BUILD,
     })
 
 
@@ -822,6 +835,7 @@ async def socket(req):
         return ws
     conns = hub.sockets.setdefault(match.id, set())
     conns.add((ws, seat))
+    await ws.send_json({"t": "build", "build": BUILD})
     await ws.send_json({"t": "view", "view": match.view(seat)})
     hub.kick_bot(match)
     try:

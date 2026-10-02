@@ -100,13 +100,23 @@ const chosenDeck = () => { const all = playable(), id = store('ak:deck'); return
 const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
 
 // ------------------------------------------------------------------ routing
+// The client's build, from the server that served it. A socket (presence, or a match) names the server's build each time
+// it connects, so a tab left open across a deploy learns it runs an old client and reloads: at once, or, while you're
+// typing, when you next come back to the tab. A match picks up where it was (the tab keeps its seat).
+let BUILD = null;
+function checkBuild(b) {
+  if (!b || !BUILD || b === BUILD) return;
+  const typing = () => document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
+  if (!typing()) return location.reload();
+  addEventListener('visibilitychange', () => { if (!document.hidden && !typing()) location.reload(); });
+}
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
-  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks;
+  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BUILD = p.build;
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
   bindCoach({ V: () => V, ui, CARDS: () => CARDS, send: m => send(m), drawGame: () => drawGame(), tapWords, PL: () => PL(), store, startTutorial, firstMatch });
-  openPresence({ api, toast, key: () => store('ak:key'), deck: () => deckSpec(chosenDeck()),   // friends see you online; challenges arrive
+  openPresence({ api, toast, build: checkBuild, key: () => store('ak:key'), deck: () => deckSpec(chosenDeck()),   // friends see you online; challenges arrive
     busy: () => screen === 'game' && V && V.phase === 'playing', accept: m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; } });
   addEventListener('hashchange', route);
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
@@ -495,6 +505,7 @@ async function matchScreen(id) {
     ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/${id}?token=${encodeURIComponent(token)}`);
     ws.onmessage = e => {
       const m = JSON.parse(e.data);
+      if (m.t === 'build') return checkBuild(m.build);
       if (m.t === 'view') { const prev = V; V = m.view; V.rx = Date.now() / 1000; onView(prev); }
       else if (m.t === 'error' && m.error === 'unknown match or seat') { disconnect(); location.hash = '#/'; toast('That match has ended'); }
       else if (m.t === 'error') toast(m.error);
@@ -1293,6 +1304,7 @@ function replayKey(e) {
 
 window.__ak = () => ({ V, ui, d: lastDecision, PB });   // test hook: the headless play-through reads the view (and whether steps are playing)
 window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it
+window.__ak.build = checkBuild;   // test hook: a socket naming another build
 window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client
 boot();
 

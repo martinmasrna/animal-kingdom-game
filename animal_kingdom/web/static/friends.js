@@ -13,6 +13,7 @@ export function openPresence(c) {
     if (!ctx.key()) return;
     ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/presence?key=${encodeURIComponent(ctx.key())}`);
     ws.onmessage = e => { const m = JSON.parse(e.data);
+      if (m.t === 'build') ctx.build(m.build);
       if (m.t === 'challenge') { pending = m; showChallenge(); sfx('challenge'); }
       if (m.t === 'challenge_gone' && pending && pending.id === m.id) { pending = null; showChallenge(); }
       if (m.t === 'friendreq' && !asks.some(a => a.from === m.from)) { asks.push(m); showChallenge(); } };
