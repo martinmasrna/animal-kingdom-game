@@ -122,7 +122,7 @@ async function boot() {
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
     if (e.key === 'Escape' && screen === 'home' && play.open) { play.open = null; return route(); }   // Escape closes the open chooser
-    if (e.key === 'Escape' && ['profile', 'news', 'settings', 'leaderboard'].includes(screen) && !/INPUT|TEXTAREA/.test(e.target.tagName)) {   // a screen with Back: Escape is Back
+    if (e.key === 'Escape' && ['profile', 'news', 'settings'].includes(screen) && !/INPUT|TEXTAREA/.test(e.target.tagName)) {   // a screen with Back: Escape is Back
       const back = document.getElementById('back'); if (back) back.click(); return;
     }
     if (RP.views.length && screen === 'game' && replayKey(e)) return;
@@ -169,7 +169,7 @@ function route() {
   if (search && parts[0] !== 'm' && !(search.btn === 'go' && !parts[0])) cancelSearch();   // leaving the screen it started on withdraws a search or a challenge
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
-  if (parts[0] === 'leaderboard') return leaderboardScreen();
+  if (parts[0] === 'leaderboard') { history.replaceState(null, '', '#/profile/leaderboard'); parts[0] = 'profile'; }   // the leaderboard is the profile's tab
   if (parts[0] === 'settings') return settingsScreen();
   if (parts[0] === 'news') { screen = 'news'; return newsScreen(app, { api, cards: CARDS, back: () => { location.hash = '#/'; } }); }
   if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
@@ -190,12 +190,16 @@ function route() {
 const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };
 const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']], SIDES = [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']];
 const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
-// The places on home's corner piece, as icons painted in the board numbers' chalk (Martin, 2026-10-01: six words were
-// clunky; design sandbox screen/kit/topicons/), a name on hover. Feedback is the usual feedback sign (a speech bubble with
-// an exclamation mark) and moves into Settings at launch.
+// Home's corner piece (design sandbox screen/nav/, 2026-10-02): you (your name and where you stand, to the profile and its
+// leaderboard), Collection by name, and a gear listing the rest; seven equal icons were too many. Feedback is a tab on the
+// screen's edge while the game is in testing (moves into the gear's list at launch). Icons painted in the board numbers' chalk.
 const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" draggable="false">`;
 const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), profile: TI('person'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news') };
 let newsAsked = false;
+const mePiece = () => {   // your rating and place once ranked, your placement games while placing, else the name alone
+  const sub = !ME ? '' : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
+  return `<a class="backbtn me" href="#/profile" aria-label="Profile">${TOPICON.profile}<span><b>${esc(ME ? ME.name : 'Profile')}</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
+};
 function homeScreen(mode = {}) {
   screen = 'home';
   if (!newsAsked) { newsAsked = true; loadNews(api).then(() => { if (screen === 'home') homeScreen(mode); }); }   // the dot and "Since you last played" once it's known
@@ -221,11 +225,13 @@ function homeScreen(mode = {}) {
         + (play.opp === 'ranked' ? '' : play.opp === 'friend' ? `<div class="flist">${(play.friends || []).map(f => `<button class="slab fr${f.id === play.friend ? ' on' : ''}" data-friend="${f.id}">${friendRow(f, '', play.friends)}</button>`).join('')}</div>
           <button class="slab" id="addfriend">Add a friend</button><div class="frow"><input class="field" id="code" maxlength="6" value="${play.code}" placeholder="Friend's code" autocomplete="off"><button class="slab" id="joinbtn">Join</button></div>`
           : levels + dd('botDeck', play.botDeck, botDecks))}</div>`
+    : play.open === 'menu' ? `<div class="chooser gear">${!learned() ? '' : `<button class="slab" id="learn2">${TOPICON.learn}How to play</button>`}<a class="slab" href="#/news">${TOPICON.news}News${newsUnread() ? '<i class="ndot"></i>' : ''}</a><a class="slab" href="#/settings">${TOPICON.settings}Settings</a></div>`
     : play.open === 'learn' ? `<div class="chooser lessons">${LESSON_NAMES.map((n, i) => `<button class="slab" data-lesson="${i + 1}"><b>Lesson ${i + 1}</b>${n}</button>`).join('')}</div>` : '';
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
   const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${chooser}
-    <div class="top"><a class="backbtn ico" href="#/collection" data-tip="Collection" aria-label="Collection">${TOPICON.collection}</a><a class="backbtn ico" href="#/leaderboard" data-tip="Leaderboard" aria-label="Leaderboard">${TOPICON.leaderboard}</a>${first ? '' : `<button class="backbtn ico${play.open === 'learn' ? ' open' : ''}" id="learn2" data-tip="How to play" aria-label="How to play">${TOPICON.learn}</button>`}<a class="backbtn ico" href="#/profile" data-tip="Profile" aria-label="Profile">${TOPICON.profile}</a><a class="backbtn ico" href="#/news" data-tip="News" aria-label="News">${TOPICON.news}${newsUnread() ? '<i class="ndot"></i>' : ''}</a><button class="backbtn ico" id="fbhome" data-tip="Feedback" aria-label="Feedback">${TOPICON.feedback}</button><a class="backbtn ico" href="#/settings" data-tip="Settings" aria-label="Settings">${TOPICON.settings}</a></div>
+    <div class="top">${mePiece()}<a class="backbtn lab" href="#/collection">${TOPICON.collection}<span>Collection</span></a><button class="backbtn ico${play.open === 'menu' || play.open === 'learn' ? ' open' : ''}" id="gearbtn"${play.open === 'menu' || play.open === 'learn' ? '' : ' data-tip="Menu"'} aria-label="Menu">${TOPICON.settings}${newsUnread() ? '<i class="ndot"></i>' : ''}</button></div>
+    <button class="ftab" id="fbhome">${TOPICON.feedback}<span>Feedback</span></button>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
       <button class="play${search && search.btn === 'go' ? ' searching' : ''}" id="go">${search && search.btn === 'go' ? searchLabel() : go}</button></div>`}</div>`;
@@ -233,15 +239,16 @@ function homeScreen(mode = {}) {
   fitStrips(root);   // the tiles are as wide as the window allows (upright, one column)
   $('fbhome').onclick = feedback;
   if (!first && !mode.join && !mode.gauntlet) showSince(api, { onRead: () => { location.hash = '#/news'; } });   // a returning player, once
+  $('gearbtn').onclick = () => { play.open = play.open === 'menu' || play.open === 'learn' ? null : 'menu'; play.peek = null; redraw(); };   // the gear opens its list, or closes the lessons it led to
   if (first) {   // Learn to play picks up at lesson 2 once lesson 1 is won
     $('learn').onclick = () => { track('learn_to_play'); startTutorial(store('ak:lesson') === '1' ? 2 : 1); };
     $('known').onclick = () => { track('skip_tutorial'); store('ak:learned', '1'); redraw(); }; return; }
   const toggle = k => { play.open = play.open === k ? null : k; play.peek = null; redraw(); };
-  $('learn2').onclick = () => toggle('learn');   // any lesson again, not only from the first
+  if ($('learn2')) $('learn2').onclick = () => toggle('learn');   // any lesson again, not only from the first
   root.querySelectorAll('[data-lesson]').forEach(el => el.onclick = () => startTutorial(+el.dataset.lesson));
   $('deckbtn').onclick = () => toggle('decks');
   if (!mode.join) $('oppbtn').onclick = () => toggle('opp');
-  root.onclick = e => { if (play.open && !e.target.closest('.chooser, .pick, #learn2')) { play.open = null; redraw(); } };   // a click elsewhere closes the chooser
+  root.onclick = e => { if (play.open && !e.target.closest('.chooser, .pick, #gearbtn')) { play.open = null; redraw(); } };   // a click elsewhere closes the chooser
   root.querySelectorAll('.chooser [data-deck]').forEach(el => {
     // A click picks the deck and shows its list; the chooser stays open to read it (hover changed the list on the way to it).
     el.onclick = () => { store('ak:deck', el.dataset.deck); play.peek = el.dataset.deck; redraw(); };
@@ -348,17 +355,14 @@ async function settingsScreen() {
 const addFriend = x => !x.id || x.friend ? '' : x.asked ? '<small class="asked">Request sent</small>'
   : `<button class="addf" data-addf="${esc(x.id)}" data-tip="Add friend" aria-label="Add friend">${ICON.addfriend}</button>`;
 const nameTag = n => { const [a, t] = String(n).split('#'); return esc(a) + (t ? `<i class="tg">#${esc(t)}</i>` : ''); };
-async function leaderboardScreen() {
-  screen = 'leaderboard';
-  const r = await api('/api/leaderboard'), j = r.ok ? await r.json() : { rows: [] }, rows = j.rows, pl = j.placing;
-  if (screen !== 'leaderboard') return;
-  app.innerHTML = `<div class="mscr lead"><div class="lcol"><div class="hhead"><h2>Leaderboard</h2></div>
-    <div class="lbody">${rows.map((x, i) => `<div class="lr${x.bot ? ' bot' : ''}${x.you ? ' you' : ''}"><span>${i + 1}</span><span class="nm">${nameTag(x.name)}${addFriend(x)}</span><b>${x.rating}</b></div>`).join('')}
-</div>
-    ${pl ? `<div class="lpin"><div class="lr you placing"><span></span><span class="nm">${nameTag(pl.name)}<small>placing, ${pl.games} of ${pl.of}</small></span><b>${pl.rating}</b></div></div>` : ''}
-    <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
-  document.getElementById('back').onclick = () => { location.hash = '#/'; };
-  app.querySelectorAll('[data-addf]').forEach(b => b.onclick = async () => {
+// The leaderboard, a tab of the profile: everyone on the ladder, people and bots together, best first; your row marked and
+// in view, or, while you're placing, your progress pinned over it.
+async function fillLeaderboard() {
+  const r = await api('/api/leaderboard'), j = r.ok ? await r.json() : { rows: [] }, pl = j.placing, box = document.getElementById('lboard');
+  if (!box) return;
+  box.innerHTML = (pl ? `<div class="lr you placing"><span></span><span class="nm">${nameTag(pl.name)}<small>placing, ${pl.games} of ${pl.of}</small></span><b>${pl.rating}</b></div>` : '')
+    + j.rows.map((x, i) => `<div class="lr${x.bot ? ' bot' : ''}${x.you ? ' you' : ''}"><span>${i + 1}</span><span class="nm">${nameTag(x.name)}${addFriend(x)}</span><b>${x.rating}</b></div>`).join('');
+  box.querySelectorAll('[data-addf]').forEach(b => b.onclick = async () => {
     b.disabled = true;
     const r = await api('/api/friends/request', { method: 'POST', body: JSON.stringify({ to: b.dataset.addf }) });
     if (!r.ok) { b.disabled = false; return toast(await r.text()); }
@@ -366,7 +370,7 @@ async function leaderboardScreen() {
     if ((await r.json()).friends) { b.replaceWith(''); toast(`You and ${name} are friends`, true); }
     else { b.outerHTML = '<small class="asked">Request sent</small>'; toast(`Friend request sent to ${name}`, true); }
   });
-  const mine = app.querySelector('.lr.you'); if (mine) mine.scrollIntoView({ block: 'center' });
+  const mine = box.querySelector('.lr.you:not(.placing)'); if (mine) mine.scrollIntoView({ block: 'center' });
 }
 
 // The tutorial: a real game with a fixed deal against a gentle opponent, a coach teaching one step at a time (tutorial.js).
@@ -449,11 +453,13 @@ function profileScreen() {
   const code = ME.logins.length ? '' : sect('Sign-in code', `<p>Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</p>
       <div class="row"><span class="field keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span><button class="slab" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</button><button class="slab" id="copykey">Copy</button></div>`)
     + sect('Use a different profile', `<div class="row"><input class="field" id="other" placeholder="Sign-in code" autocomplete="off"><button class="slab" id="signin">Sign in</button></div>`);
-  app.innerHTML = `<div class="mscr prof"><div class="hist"><div class="hhead"><h2>Match history</h2>${hist || ui.histDeck ? filter : ''}</div>
-    <div class="hbody">${hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div></div>
+  const lead = location.hash === '#/profile/leaderboard';   // the history's tab or the leaderboard's
+  app.innerHTML = `<div class="mscr prof"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? '' : ' on'}" href="#/profile">Match history</a><a class="ptab${lead ? ' on' : ''}" href="#/profile/leaderboard">Leaderboard</a></div>${!lead && (hist || ui.histDeck) ? filter : ''}</div>
+    <div class="hbody">${lead ? '<div class="lead lb" id="lboard"></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div></div>
     <div class="side"><div class="me"><div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div><div class="sect" id="pfriends"></div>${account}${code}</div>
       <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
+  if (lead) fillLeaderboard();
   wireDd(app, (k, v) => { ui.histDeck = v || null; profileScreen(); });
   // Friends: each with when they were last on and a way to remove them; Add a friend shares your friend link.
   const fillFriends = async () => {

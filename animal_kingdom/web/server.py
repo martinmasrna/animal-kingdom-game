@@ -265,7 +265,18 @@ def profile_view(p: dict) -> dict:
     return {**p, "decks": profiles.decks(p["id"], {d["id"]: d["cards"] for d in starters}),
             "history": profiles.history(p["id"]), "records": profiles.records(p["id"]),
             "logins": profiles.identities(p["id"]), "providers": oauth.available(),
-            "rating": ladder.get(p["id"]).shown() if ladder else None}
+            "rating": ladder.get(p["id"]).shown() if ladder else None, **standing(p["id"])}
+
+
+def standing(pid: str) -> dict:
+    """Where you stand, for home's name piece: your place among the ranked (people and bots), or your placement games so far."""
+    if not ladder:
+        return {}
+    r = ladder.get(pid)
+    if r.provisional:
+        return {"placing": {"games": r.games, "of": ranking.PROVISIONAL}}
+    ranked = [lid for lid, x in ladder.table() if not x.provisional]
+    return {"rank": ranked.index(pid) + 1} if pid in ranked else {}
 
 
 # ----------------------------------------------------------------- sign in with Google / Discord

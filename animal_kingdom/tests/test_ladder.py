@@ -72,6 +72,8 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             pl = board["placing"]
             assert pl["rating"].endswith("?") and int(pl["rating"][:-1]) > 1500 and (pl["games"], pl["of"]) == (1, 10)
             assert sum(r["bot"] for r in board["rows"]) == 21 and board["rows"][0]["name"].endswith("(Expert Bot)")
+            me = await (await c.get("/api/me", headers=ha)).json()   # home's name piece: placement progress, no rank yet
+            assert me["placing"] == {"games": 1, "of": 10} and "rank" not in me
     asyncio.run(run())
 
 
