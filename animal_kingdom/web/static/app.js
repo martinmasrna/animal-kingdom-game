@@ -308,6 +308,7 @@ function cancelSearch() {
   if (!search) return;
   const s = search; search = null; s.ctl.abort();
   if (s.kind === 'challenge') api('/api/challenge', { method: 'DELETE' });
+  if (s.kind === 'ranked') api('/api/ranked', { method: 'DELETE' });   // the server doesn't notice the request dropped
   drawSearch();
 }
 async function startSearch(kind, btn, url, body, who) {
@@ -503,7 +504,7 @@ function profileScreen() {
 }
 
 // ------------------------------------------------------------------ match connection
-function disconnect() { if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } V = null; }
+function disconnect() { if (ws) { wsId = null; ws.onclose = null; ws.close(); ws = null; } stopPlayback(); V = null; }   // a step still timed would redraw the game over the next screen
 
 async function matchScreen(id) {
   if (!getToken(id) && !(await rejoin(id))) { location.hash = '#/join/' + id; return; }   // a new tab: the server knows your seat
@@ -539,7 +540,7 @@ function onView(prev) {
   if (PB.busy) { PB.queue.push(V); V = PB.shown; return; }   // keep showing the step in play
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;   // reduced motion: the new view at once
   const steps = motion && (screen === 'game' || screen === null) ? plan(prev, V, CARDS) : [{ view: V, step: null }];
-  if (steps.length === 1) { ui.step = null; showView(prev); return played(); }
+  if (steps.length === 1) { ui.step = null; showView(prev); played(); if (RP.playing) replayPlay(true); return; }   // a replay moves on after an update with nothing to animate too
   PB.busy = true;
   const run = (i, before) => {
     const { view, step } = steps[i];
@@ -1177,7 +1178,9 @@ function stackAt(cr) {
 
 function drawEnd() {
   const ov = document.getElementById('endov'), G = V.game;
-  if (V.phase === 'playing' || !G.result) { drawEnd.live = V.phase === 'playing'; ov.classList.remove('on'); return; }
+  if (V.phase === 'playing' || !G.result) { drawEnd.live = V.phase === 'playing'; ov.classList.remove('on');
+    if (drawEnd.live && G.decision !== 'playing_out') { drawEnd.key = drawEnd.sounded = null; ui.beat = null; }   // a new game (a rematch reuses the match's id and count): its end is new; not a step of the last move
+    return; }
   // The move that ended the game plays out first (the opponent's card shown and landed, a piece in the den, the fruit of the
   // last income or a Roar): the result shows once it has. Only for a game seen ending live, once; with reduced motion at once.
   const key = `${V.id}-${V.results.length}`;
@@ -1281,7 +1284,7 @@ async function replayScreen(key) {
   RP.views = views; RP.eye = true; ui.peek = false; ui.sel = null; ui.panel = null;
   replayStep(0); replayPlay(true);
 }
-function stopReplay() { clearTimeout(RP.timer); Object.assign(RP, { key: null, views: [], i: 0, playing: false, shown: [], turns: [] }); }
+function stopReplay() { clearTimeout(RP.timer); if (RP.views.length) stopPlayback(); Object.assign(RP, { key: null, views: [], i: 0, playing: false, shown: [], turns: [] }); }
 function replayStep(i) {
   i = Math.max(0, Math.min(RP.views.length - 1, i));
   const prev = V, step = i === RP.i + 1 || (i > RP.i && RP.shown.slice(RP.i + 1, i).every(s => !s)); RP.i = i; V = RP.views[i]; V.rx = Date.now() / 1000;
@@ -1352,7 +1355,7 @@ function replayKey(e) {
   return true;
 }
 
-window.__ak = () => ({ V, ui, d: lastDecision, PB });   // test hook: the headless play-through reads the view (and whether steps are playing)
+window.__ak = () => ({ V, ui, d: lastDecision, PB, RP });   // test hook: the headless play-through reads the view (and whether steps are playing, where a replay is)
 window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it
 window.__ak.build = checkBuild;   // test hook: a socket naming another build
 window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client

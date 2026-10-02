@@ -122,3 +122,22 @@ test('the replay ends on the result, offers it again, and Leave goes back to the
 });
 
 test('no page errors', () => assert.deepEqual(page.errors, []));
+
+test('a replay plays on through updates with nothing to animate (every update, with reduced motion)', async () => {
+  await page.goto(`${server.url}/#/replay/AAA-0`, { waitUntil: 'networkidle0' }); await page.waitForSelector('#rbar.on');
+  if (!(await page.evaluate(() => window.__ak().RP.playing))) await page.click('#rplay');   // a replay opens playing
+  await wait(3500);
+  assert.ok(await page.evaluate(() => window.__ak().RP.i) >= 3, 'autoplay stopped after its first step');
+  await page.click('#rplay');
+});
+
+test('leaving a replay while a step animates stays left: the step in play never redraws the game', async () => {
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);
+  await page.goto(`${server.url}/#/replay/AAA-0`, { waitUntil: 'networkidle0' }); await page.waitForSelector('#rbar.on');
+  if (!(await page.evaluate(() => window.__ak().RP.playing))) await page.click('#rplay');
+  await page.waitForFunction(() => window.__ak().PB.busy, { timeout: 15000 });
+  await page.keyboard.press('Escape'); await wait(2500);
+  assert.equal(await page.$('#scr'), null, 'the game screen came back');
+  assert.ok(await page.$('.prof'), 'the profile');
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+});
