@@ -115,6 +115,10 @@ async function boot() {
   CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BUILD = p.build;
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
+  // Feedback while the game is in testing: a tab on the screen's edge where the edge is free (home, News, Settings: app.css shows
+  // it by screen); Collection and the profile have it beside Back, their side panels holding the edge; the game its own button.
+  document.body.insertAdjacentHTML('beforeend', `<button class="ftab" id="ftab">${TOPICON.feedback}<span>Feedback</span></button>`);
+  document.getElementById('ftab').onclick = feedback;
   bindCoach({ V: () => V, ui, CARDS: () => CARDS, send: m => send(m), drawGame: () => drawGame(), tapWords, PL: () => PL(), store, startTutorial, firstMatch });
   openPresence({ api, toast, build: checkBuild, key: () => store('ak:key'), deck: () => deckSpec(chosenDeck()),   // friends see you online; challenges arrive
     busy: () => screen === 'game' && V && V.phase === 'playing', accept: m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; } });
@@ -192,7 +196,7 @@ const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']], S
 const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
 // Home's corner piece (design sandbox screen/nav/, 2026-10-02): you (your name and where you stand, to the profile and its
 // leaderboard), Collection by name, and a gear listing the rest; seven equal icons were too many. Feedback is a tab on the
-// screen's edge while the game is in testing (moves into the gear's list at launch). Icons painted in the board numbers' chalk.
+// screen's edge while the game is in testing (moves into the gear's list at launch; see boot). Icons painted in the board numbers' chalk.
 const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" draggable="false">`;
 const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), profile: TI('person'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news') };
 let newsAsked = false;
@@ -231,13 +235,11 @@ function homeScreen(mode = {}) {
   const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${chooser}
     <div class="top">${mePiece()}<a class="backbtn lab" href="#/collection">${TOPICON.collection}<span>Collection</span></a><button class="backbtn ico${play.open === 'menu' || play.open === 'learn' ? ' open' : ''}" id="gearbtn"${play.open === 'menu' || play.open === 'learn' ? '' : ' data-tip="Menu"'} aria-label="Menu">${TOPICON.settings}${newsUnread() ? '<i class="ndot"></i>' : ''}</button></div>
-    <button class="ftab" id="fbhome">${TOPICON.feedback}<span>Feedback</span></button>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
       <button class="play${search && search.btn === 'go' ? ' searching' : ''}" id="go">${search && search.btn === 'go' ? searchLabel() : go}</button></div>`}</div>`;
   const $ = id => document.getElementById(id), root = app.querySelector('.home');
   fitStrips(root);   // the tiles are as wide as the window allows (upright, one column)
-  $('fbhome').onclick = feedback;
   if (!first && !mode.join && !mode.gauntlet) showSince(api, { onRead: () => { location.hash = '#/news'; } });   // a returning player, once
   $('gearbtn').onclick = () => { play.open = play.open === 'menu' || play.open === 'learn' ? null : 'menu'; play.peek = null; redraw(); };   // the gear opens its list, or closes the lessons it led to
   if (first) {   // Learn to play picks up at lesson 2 once lesson 1 is won
@@ -409,7 +411,7 @@ const tapWords = t => matchMedia('(hover: none)').matches ? t.replace(/\bClick\b
 function collectionScreen(open) {
   screen = 'collection';
   if (open) history.replaceState(null, '', '#/collection');
-  renderCollection(app, { open, cards: CARDS, starters: DECKS.filter(d => d.id !== 'goodstuff'), covers: COVER, getDecks: myDecks, saveDecks, toast,
+  renderCollection(app, { open, cards: CARDS, starters: DECKS.filter(d => d.id !== 'goodstuff'), covers: COVER, getDecks: myDecks, saveDecks, toast, feedback,
     play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
 }
 
@@ -457,8 +459,9 @@ function profileScreen() {
   app.innerHTML = `<div class="mscr prof"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? '' : ' on'}" href="#/profile">Match history</a><a class="ptab${lead ? ' on' : ''}" href="#/profile/leaderboard">Leaderboard</a></div>${!lead && (hist || ui.histDeck) ? filter : ''}</div>
     <div class="hbody">${lead ? '<div class="lead lb" id="lboard"></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div></div>
     <div class="side"><div class="me"><div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div><div class="sect" id="pfriends"></div>${account}${code}</div>
-      <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
+      <div class="sfoot"><div class="frow"><button class="backbtn fbx" id="fbside" data-tip="Feedback" aria-label="Feedback">${TOPICON.feedback}</button><button class="backbtn" id="back"><span>Back</span></button></div></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
+  document.getElementById('fbside').onclick = feedback;
   if (lead) fillLeaderboard();
   wireDd(app, (k, v) => { ui.histDeck = v || null; profileScreen(); });
   // Friends: each with when they were last on and a way to remove them; Add a friend shares your friend link.

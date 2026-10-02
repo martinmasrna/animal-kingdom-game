@@ -59,6 +59,8 @@ function save(all) {
   saved = now;
 }
 
+// Feedback beside Back (or Done) while the game is in testing: the side panel holds the screen's edge, where home has its tab.
+const FB = '<button class="backbtn fbx" data-tip="Feedback" aria-label="Feedback"><img class="tic" src="/static/kit2/top/feedback.webp" alt="" draggable="false"></button>';
 export function collectionScreen(app, ctx) {
   X = ctx; C = ctx.cards;
   if (!saved) saved = Object.fromEntries(decks().map(d => [d.id, [...d.list]]));
@@ -118,9 +120,9 @@ function render(app, all) {
   const column = open
     ? `<div class="clist editing">${tile(open)}</div>
       <div class="sfoot"><button class="play" id="play"${open.list.length === 30 ? '' : ' disabled'}>Play this deck</button>
-        <div class="frow"><div class="fcount"><b>${open.list.length}/30</b><span>Cards</span></div><button class="backbtn" id="done"><span>Done</span></button></div></div>`
+        <div class="frow"><div class="fcount"><b>${open.list.length}/30</b><span>Cards</span></div>${FB}<button class="backbtn" id="done"><span>Done</span></button></div></div>`
     : `<div class="clist">${all.map(tile).join('')}${all.length < DECKS_MAX ? `<button class="dnew" id="dnew" data-tip="New deck" aria-label="New deck">${ICON.plus}</button>` : ''}</div>
-      <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${DECKS_MAX}</b><span>Decks</span></div><button class="backbtn" id="back"><span>Back</span></button></div></div>`;
+      <div class="sfoot"><div class="frow"><div class="fcount"><b>${all.length}/${DECKS_MAX}</b><span>Decks</span></div>${FB}<button class="backbtn" id="back"><span>Back</span></button></div></div>`;
 
   app.innerHTML = `<div class="coll mscr">${head}<div class="cgrid">${grid}</div><div class="side${st.sheet ? ' up' : ''}"><button class="grip" id="grip" aria-label="Decks"></button>${column}</div><div class="modal" id="cmodal"></div></div>`;
   lazyArt(app.querySelector('.cgrid'));
@@ -136,6 +138,7 @@ function wire(app, all, open) {
   const $ = id => app.querySelector('#' + id), redo = () => render(app, all), change = () => { save(all); redo(); };
   const pop = document.getElementById('pop'), hidePop = () => { pop.style.display = 'none'; };
   const bk = $('back'); if (bk) bk.onclick = X.back;
+  app.querySelectorAll('.fbx').forEach(b => b.onclick = X.feedback);
   wireDd(app, (k, v) => { st[k] = k === 'rar' ? (v || null) : v; redo(); });
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
   app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t; st.families.has(f) ? st.families.delete(f) : st.families.add(f); redo(); });   // toggles; none chosen shows every family
