@@ -25,7 +25,7 @@ from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine.state import EngineError
 from ..engine.cards import DECK_SLUGS, load_cards
 from . import custom_decks
-from . import events, feedback
+from . import events, feedback, news
 from .friends import FriendError, Friends
 from . import ladder as ranking
 from . import oauth
@@ -402,6 +402,24 @@ async def get_replay(req):
     if not saved:
         raise web.HTTPNotFound(text="This match can't be replayed")
     return web.Response(body=saved, content_type="application/json", headers={"Content-Encoding": "gzip"})
+
+
+async def get_news(req):
+    """Every release, and what this player hasn't read (web/news.py)."""
+    p = profile_of(req)
+    rels = news.releases()
+    if p is None:
+        return web.json_response({"releases": rels, "unread": False, "newest": rels[0]["id"] if rels else "", "since": []})
+    decks = profile_view(p)["decks"]
+    created = profiles.db.execute("SELECT created FROM profiles WHERE id = ?", (p["id"],)).fetchone()[0]
+    return web.json_response({"releases": rels, **news.state(profiles.db, {**p, "created": created}, decks, rels)})
+
+
+async def news_seen(req):
+    """The player opened the News screen (opened), or saw "Since you last played" (shown), up to a release."""
+    p, body = me(req), await req.json()
+    news.mark(profiles.db, p["id"], opened=str(body.get("opened") or "")[:10], shown=str(body.get("shown") or "")[:10])
+    return web.json_response({})
 
 
 async def client_events(req):
@@ -868,6 +886,8 @@ def make_app() -> web.Application:
         web.get("/api/replay/{match}", get_replay),
         web.post("/api/feedback", send_feedback),
         web.post("/api/events", client_events),
+        web.get("/api/news", get_news),
+        web.post("/api/news/seen", news_seen),
         web.post("/api/ranked", join_ranked),
         web.get("/api/leaderboard", leaderboard),
         web.get("/api/friends", friends_list),

@@ -43,6 +43,15 @@ if [[ "${1:-}" == "players" ]]; then
   exit 0
 fi
 
+# News: a change to the rules or the cards after the newest release's day needs its release first (animal_kingdom/web/news/README.md).
+# NEWS_OK=1 deploys anyway (a change players won't notice).
+latest="$(ls "$repo/animal_kingdom/web/news" | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail -1 | cut -c1-10)"
+unwritten="$(git -C "$repo" log --since="$latest 23:59:59" --format='  %h %s' -- animal_kingdom/engine animal_kingdom/data/cards.json | cut -c1-110)"
+if [[ -n "$unwritten" && -z "${NEWS_OK:-}" ]]; then
+  echo "rules or cards changed since the last news ($latest), with no release written for them:"; echo "$unwritten"
+  echo "write animal_kingdom/web/news/$(date +%F).md (or NEWS_OK=1 if players won't notice), then deploy again"; exit 1
+fi
+
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 git -C "$repo" archive HEAD animal_kingdom | tar -x -C "$tmp"
 cp "$repo/deploy/Dockerfile" "$cfg" "$tmp/"

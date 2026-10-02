@@ -9,6 +9,7 @@ import { dd, wireDd, onHold, holdEvents } from './menu.js';
 import { play as sfx, soundsFor, preload, volume, setVolume } from './sound.js';
 import { openFeedback } from './feedback.js';
 import { track } from './log.js';
+import { loadNews, unread as newsUnread, newsScreen, showSince, hideSince } from './news.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
 import { bindCoach, isLesson, lessonOf, lessonNow, narrowChoice, narrowPlaces, handLights, holdFood, shownRegion, lessonEnd, drawCoach } from './coach.js';
 
@@ -142,7 +143,7 @@ async function rejoin(only) {
 const timeOfDay = h => new URLSearchParams(location.search).get('tod') || (h >= 5 && h < 9 ? 'dawn' : h >= 9 && h < 17 ? 'day' : h >= 17 && h < 20 ? 'dusk' : 'night');
 function route() {
   track('screen', { route: (location.hash.slice(1) || '/').split('/').slice(0, 2).join('/'), w: innerWidth, h: innerHeight });
-  pop.style.display = 'none'; stackpop.style.display = 'none';
+  pop.style.display = 'none'; stackpop.style.display = 'none'; hideSince();
   if (!location.hash.startsWith('#/m/')) keepAwake(false);
   const tip = document.getElementById('tip'); if (tip) tip.style.display = 'none';   // the game's hover label lives on body: it must not outlive the screen
   const parts = (location.hash.slice(1) || '/').split('/').filter(Boolean);
@@ -158,6 +159,7 @@ function route() {
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'leaderboard') return leaderboardScreen();
   if (parts[0] === 'settings') return settingsScreen();
+  if (parts[0] === 'news') { screen = 'news'; return newsScreen(app, { api, cards: CARDS, back: () => { location.hash = '#/'; } }); }
   if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
   if (parts[0] === 'profile') { profileScreen(); return loadProfile().then(() => { if (location.hash.startsWith('#/profile')) profileScreen(); }); }   // a match just played shows
   if (parts[0] === 'replay' && parts[1]) return replayScreen(parts[1]);
@@ -180,9 +182,11 @@ const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
 // clunky; design sandbox screen/kit/topicons/), a name on hover. Feedback is the usual feedback sign (a speech bubble with
 // an exclamation mark) and moves into Settings at launch.
 const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" draggable="false">`;
-const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), profile: TI('person'), feedback: TI('feedback'), settings: TI('settings') };
+const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), profile: TI('person'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news') };
+let newsAsked = false;
 function homeScreen(mode = {}) {
   screen = 'home';
+  if (!newsAsked) { newsAsked = true; loadNews(api).then(() => { if (screen === 'home') homeScreen(mode); }); }   // the dot and "Since you last played" once it's known
   if (mode.gauntlet) play.opp = 'gauntlet'; else if (play.opp === 'gauntlet' || mode.join) play.opp = mode.join ? 'friend' : 'bot';
   const all = playable(), chosen = chosenDeck(), peek = all.find(d => d.id === play.peek) || chosen;
   if (play.botDeck === 'goodstuff') play.botDeck = 'random';
@@ -209,13 +213,14 @@ function homeScreen(mode = {}) {
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
   const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${chooser}
-    <div class="top"><a class="backbtn ico" href="#/collection" data-tip="Collection" aria-label="Collection">${TOPICON.collection}</a><a class="backbtn ico" href="#/leaderboard" data-tip="Leaderboard" aria-label="Leaderboard">${TOPICON.leaderboard}</a>${first ? '' : `<button class="backbtn ico${play.open === 'learn' ? ' open' : ''}" id="learn2" data-tip="How to play" aria-label="How to play">${TOPICON.learn}</button>`}<a class="backbtn ico" href="#/profile" data-tip="Profile" aria-label="Profile">${TOPICON.profile}</a><button class="backbtn ico" id="fbhome" data-tip="Feedback" aria-label="Feedback">${TOPICON.feedback}</button><a class="backbtn ico" href="#/settings" data-tip="Settings" aria-label="Settings">${TOPICON.settings}</a></div>
+    <div class="top"><a class="backbtn ico" href="#/collection" data-tip="Collection" aria-label="Collection">${TOPICON.collection}</a><a class="backbtn ico" href="#/leaderboard" data-tip="Leaderboard" aria-label="Leaderboard">${TOPICON.leaderboard}</a>${first ? '' : `<button class="backbtn ico${play.open === 'learn' ? ' open' : ''}" id="learn2" data-tip="How to play" aria-label="How to play">${TOPICON.learn}</button>`}<a class="backbtn ico" href="#/profile" data-tip="Profile" aria-label="Profile">${TOPICON.profile}</a><a class="backbtn ico" href="#/news" data-tip="News" aria-label="News">${TOPICON.news}${newsUnread() ? '<i class="ndot"></i>' : ''}</a><button class="backbtn ico" id="fbhome" data-tip="Feedback" aria-label="Feedback">${TOPICON.feedback}</button><a class="backbtn ico" href="#/settings" data-tip="Settings" aria-label="Settings">${TOPICON.settings}</a></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
       <button class="play${search && search.btn === 'go' ? ' searching' : ''}" id="go">${search && search.btn === 'go' ? searchLabel() : go}</button></div>`}</div>`;
   const $ = id => document.getElementById(id), root = app.querySelector('.home');
   fitStrips(root);   // the tiles are as wide as the window allows (upright, one column)
   $('fbhome').onclick = feedback;
+  if (!first && !mode.join && !mode.gauntlet) showSince(api, { onRead: () => { location.hash = '#/news'; } });   // a returning player, once
   if (first) {   // Learn to play picks up at lesson 2 once lesson 1 is won
     $('learn').onclick = () => { track('learn_to_play'); startTutorial(store('ak:lesson') === '1' ? 2 : 1); };
     $('known').onclick = () => { track('skip_tutorial'); store('ak:learned', '1'); redraw(); }; return; }

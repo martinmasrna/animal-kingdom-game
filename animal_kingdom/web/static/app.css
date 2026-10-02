@@ -325,3 +325,22 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .lead .lr .addf:hover { opacity: 1; background: rgba(240,232,218,.08); }
 .lead .lr .addf svg { width: 20px; height: 20px; }
 .lead .lr .asked { margin-left: 10px; font-size: 13px; font-weight: 500; color: #8f8574; }
+
+/* ---------- news (news.js): the corner piece's dot, the News screen's releases, "Since you last played" ---------- */
+.home .top .backbtn.ico { position: relative; }
+.home .top .ndot { position: absolute; right: 7px; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: #f0e8da; box-shadow: 0 0 0 2px #2b2825, 0 1px 3px rgba(0,0,0,.6); }
+.news .nrel { flex: none; border-radius: 10px; background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6); color: #f0e8da; }
+.news .nhead { width: 100%; height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border: 0; background: none; color: inherit; cursor: pointer; font: 700 18px 'Fira Sans Condensed', sans-serif; }
+.news .nhead .chev { opacity: .6; } .news .nrel.open .nhead .chev { transform: rotate(180deg); }
+.news .nbody { padding: 0 16px 14px; }
+.news .nbody h3 { margin: 10px 0 6px; font: 700 15px 'Fira Sans Condensed', sans-serif; color: #cfc3ad; text-transform: none; }
+.news .nbody ul, .since ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.news .nbody li > p, .since li > p, .since .more { margin: 0; font: 500 16px/1.35 'Fira Sans Condensed', sans-serif; color: #f0e8da; }
+.news .nbody li > p.why, .since li > p.why { margin-top: 2px; font-size: 14px; color: #a99f8e; }
+.news .npair { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
+.news .ncard .card { --w: min(200px, calc((100vw - 112px) / 2)); } .news .ncard.was .card { filter: grayscale(.85) brightness(.62); }   /* as it was: drained, beside the card as it is */
+.news .narrow { width: 0; height: 0; border-left: 10px solid #cfc3ad; border-top: 7px solid transparent; border-bottom: 7px solid transparent; opacity: .8; }
+.news .none { color: #a99f8e; font: 500 16px 'Fira Sans Condensed', sans-serif; }
+.since { width: min(420px, calc(100vw - 24px)); gap: 12px; }
+.since b { text-align: left; }
+.since .more { font-size: 14px; color: #a99f8e; }
