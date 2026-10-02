@@ -122,7 +122,9 @@ async function boot() {
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
     if (e.key === 'Escape' && screen === 'home' && play.open) { play.open = null; return route(); }   // Escape closes the open chooser
-    if (e.key === 'Escape' && screen === 'profile' && !/INPUT/.test(e.target.tagName)) { location.hash = '#/'; return; }
+    if (e.key === 'Escape' && ['profile', 'news', 'settings', 'leaderboard'].includes(screen) && !/INPUT|TEXTAREA/.test(e.target.tagName)) {   // a screen with Back: Escape is Back
+      const back = document.getElementById('back'); if (back) back.click(); return;
+    }
     if (RP.views.length && screen === 'game' && replayKey(e)) return;
     // Space ends your turn, D draws: the same checks as clicking the tablet or the deck (never in a lesson, whose Space is Next)
     if (screen === 'game' && !RP.views.length && !isTutorial() && !/INPUT|TEXTAREA/.test(e.target.tagName) && !e.repeat) {
