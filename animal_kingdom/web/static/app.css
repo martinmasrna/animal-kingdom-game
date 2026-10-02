@@ -292,7 +292,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 @media (max-width: 700px) { .lead .hhead, .lead .lbody, .lead .sfoot { padding-left: 12px; padding-right: 12px; } .lead .lr { font-size: 16px; grid-template-columns: 36px 1fr 64px; } }
 /* Ranked: Play shows the search (click again to cancel); a ranked game's end shows the rating's change. */
 .mscr .play.searching, .game .play.searching { filter: saturate(.4) brightness(.85); }
-.play .search { display: flex; flex-direction: column; align-items: center; line-height: 1.1; font-size: .8em; } .play .search small { font-size: .55em; font-weight: 500; opacity: .85; margin-top: 3px; }
+.play .search { display: flex; flex-direction: column; align-items: center; line-height: 1.1; font-size: .8em; font-variant-numeric: tabular-nums; }   /* the count's digits keep one width: the label holds still as it ticks */ .play .search small { font-size: .55em; font-weight: 500; opacity: .85; margin-top: 3px; }
 .game .endbox .rating { display: flex; flex-direction: column; align-items: center; margin-top: 4px; color: #e8dfcf; }
 .game .endbox .rating small { font: 500 15px 'Fira Sans Condensed', sans-serif; color: #b9b1a4; }
 .game .endbox .rating > div { position: relative; }
