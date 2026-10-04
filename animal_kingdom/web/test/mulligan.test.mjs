@@ -23,10 +23,12 @@ test('two people mulligan at the same time', async () => {
   const box = p => p.evaluate(() => { const b = document.querySelector('#choicebar.mull b'); return b ? b.textContent : null; });
   assert.match(await box(p1) || '', /0 of 3/, 'the first player mulligans');
   assert.match(await box(p2) || '', /0 of 4/, 'and so does the second, at the same time');
-  await p2.evaluate(() => document.querySelector(".hc").click()); await wait(600);
-  assert.match(await box(p2) || '', /1 of 4/, 'the second returns a card while the first still chooses');
-  await p2.evaluate(() => document.getElementById("skip").click()); await wait(600);
-  assert.equal(await p2.evaluate(() => { const g = window.__ak().V.game; return g.decision === 'mulligan' && g.toAct !== window.__ak().V.you; }), true, 'done: waiting for the first');
-  await p1.evaluate(() => document.getElementById("skip").click()); await wait(800);
-  for (const p of [p1, p2]) assert.equal(await p.evaluate(() => window.__ak().V.game.pending), null, 'the game has begun');
+  // each step waits for the server's answer, not a fixed time: under a parallel test run it can take over a second
+  const until = (p, fn, what) => p.waitForFunction(fn, { timeout: 5000 }).catch(() => assert.fail(what));
+  await p2.evaluate(() => document.querySelector(".hc").click());
+  await until(p2, () => /1 of 4/.test(document.querySelector('#choicebar.mull b')?.textContent), 'the second returns a card while the first still chooses');
+  await p2.evaluate(() => document.getElementById("skip").click());
+  await until(p2, () => { const g = window.__ak().V.game; return g.decision === 'mulligan' && g.toAct !== window.__ak().V.you; }, 'done: waiting for the first');
+  await p1.evaluate(() => document.getElementById("skip").click());
+  for (const p of [p1, p2]) await until(p, () => window.__ak().V.game.pending === null, 'the game has begun');
 });

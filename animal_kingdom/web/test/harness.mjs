@@ -16,8 +16,12 @@ const freePort = () => new Promise(res => { const s = net.createServer(); s.list
 
 export async function startServer() {
   const port = await freePort();
-  const proc = spawn(PY, ['-m', 'animal_kingdom.web.server', '--port', String(port), '--no-open'],
-    { cwd: REPO, env: { ...process.env, AK_NO_GAME_LOGS: '1', AK_BOT_PAUSE: '0' }, stdio: 'ignore' });
+  // The server exits when its stdin closes, so a test process that dies without reaching after() takes it down too
+  // (otherwise each killed run left a server running for days).
+  const boot = 'import os, sys, threading, runpy; threading.Thread(target=lambda: (sys.stdin.read(), os._exit(0)), daemon=True).start(); '
+    + `sys.argv = ['server', '--port', '${port}', '--no-open']; runpy.run_module('animal_kingdom.web.server', run_name='__main__')`;
+  const proc = spawn(PY, ['-c', boot],
+    { cwd: REPO, env: { ...process.env, AK_NO_GAME_LOGS: '1', AK_BOT_PAUSE: '0' }, stdio: ['pipe', 'ignore', 'ignore'] });
   for (let i = 0; i < 100; i++) {
     try { const r = await fetch(`http://localhost:${port}/`); if (r.ok) return { url: `http://localhost:${port}`, stop: () => proc.kill() }; } catch { }
     await new Promise(r => setTimeout(r, 100));
@@ -35,6 +39,10 @@ export function recordMatches(n = 7) {
 // Pages open as a player who has done the tutorial (home shows the full piece); `newPlayer` opens them as a first visit.
 export async function openBrowser({ newPlayer = false } = {}) {
   const b = await puppeteer.launch({ executablePath: CHROME, headless: 'new', defaultViewport: { width: 1512, height: 800 } });
+  // Chrome's crash reporter (chrome_crashpad_handler) inherits its stdout and stderr and can outlive it; our end of those
+  // pipes then keeps the test process alive for minutes after its last test (a hang seen on 2026-10-04). Close our end.
+  const close = b.close.bind(b), proc = b.process();
+  b.close = async () => { await close(); proc?.stdout?.destroy(); proc?.stderr?.destroy(); };
   if (!newPlayer) { const open = b.newPage.bind(b);
     b.newPage = async () => { const p = await open(); await p.evaluateOnNewDocument(() => { try { localStorage.setItem('ak:learned', '1'); } catch { /* no storage */ } }); return p; }; }
   return b;
