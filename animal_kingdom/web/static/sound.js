@@ -17,6 +17,7 @@ const SND = {
   victory: ['victory_1'], defeat: ['defeat_1'],  // the end of a game
   found: ['found_1'],                            // a match was found (ranked queue, a friend's answer)
   challenge: ['challenge_1'],                    // a friend challenges you
+  msg: ['msg_1'],                                // a friend's message (a soft pop, synthesised with ffmpeg: no pack)
 };
 // An animal calls as it lands, by its family (a card's first family tag that has a call); FAM fills from sound files present.
 const FAM = { Cat: 'cat', Canine: 'canine', Rodent: 'rodent', Bird: 'bird', Snake: 'snake', Colony: 'colony', Bear: 'bear',
@@ -33,7 +34,7 @@ export const muted = () => volume() === 0;
 // play('land') now; play('land', 0.4) in 0.4 s
 export function play(name, delay = 0) {
   const vs = SND[name] || (name.startsWith('call:') && CALLS[name.slice(5)]);
-  if (muted() || !vs || (document.hidden && !['yourturn', 'found', 'challenge'].includes(name))) return;   // a background tab hears only what calls you back
+  if (muted() || !vs || (document.hidden && !['yourturn', 'found', 'challenge', 'msg'].includes(name))) return;   // a background tab hears only what calls you back
   const go = () => {
     const v = vs[Math.floor(Math.random() * vs.length)];
     const a = (cache[v] = cache[v] || new Audio(`/static/kit2/snd/${v}.mp3`)).cloneNode();

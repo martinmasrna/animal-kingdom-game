@@ -4,7 +4,9 @@
 
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 import { play as sfx } from './sound.js';
-let ctx = null, ws = null, pending = null, asks = [];   // asks: friend requests waiting for an answer   // ctx: { api, toast, key(), busy(), accept(challenge) }
+let ctx = null, ws = null, pending = null, asks = [];
+const hears = [];   // others listening on the presence socket (chat.js)
+export const onPresence = fn => hears.push(fn);   // asks: friend requests waiting for an answer   // ctx: { api, toast, key(), busy(), accept(challenge) }
 
 // Online while this is open; a challenge arrives on it. Reconnects after a drop.
 export function openPresence(c) {
@@ -16,7 +18,8 @@ export function openPresence(c) {
       if (m.t === 'build') ctx.build(m.build);
       if (m.t === 'challenge') { pending = m; showChallenge(); sfx('challenge'); }
       if (m.t === 'challenge_gone' && pending && pending.id === m.id) { pending = null; showChallenge(); }
-      if (m.t === 'friendreq' && !asks.some(a => a.from === m.from)) { asks.push(m); showChallenge(); } };
+      if (m.t === 'friendreq' && !asks.some(a => a.from === m.from)) { asks.push(m); showChallenge(); }
+      hears.forEach(fn => fn(m)); };
     ws.onclose = () => setTimeout(connect, 3000);
   };
   connect();

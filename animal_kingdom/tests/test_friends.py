@@ -117,3 +117,60 @@ def test_the_match_you_are_playing_can_be_rejoined_from_anywhere(monkeypatch):
             match.started_at -= server.REJOIN_WITHIN + 60; match.action_times = []   # an abandoned match is left alone
             assert await (await c.get("/api/current", headers=ha)).json() == {}
     asyncio.run(run())
+
+
+def test_chat_between_friends(monkeypatch):
+    """Chat (web/chat.py): only friends; a message reaches an online friend at once and waits for one away, counted unread
+    until they open the conversation; a conversation keeps its last KEEP messages; a sender is held to PER_MINUTE."""
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    from animal_kingdom.web import chat as chatmod
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a, b, d = [await (await c.post("/api/profile", json={})).json() for _ in range(3)]
+            ha, hb, hd = ({"X-AK-Key": x["code"]} for x in (a, b, d))
+            aid, bid = a["profile"]["id"], b["profile"]["id"]
+            code = (await (await c.get("/api/friends", headers=ha)).json())["code"]
+            await c.post("/api/friends", json={"code": code}, headers=hb)
+            # not friends: no message, no history
+            assert (await c.post(f"/api/chat/{aid}", json={"text": "hi"}, headers=hd)).status == 400
+            assert (await c.get(f"/api/chat/{aid}", headers=hd)).status == 400
+            assert (await c.post(f"/api/chat/{bid}", json={"text": "   "}, headers=ha)).status == 400
+            # B away: the message waits, unread, and shows as the last line in A's and B's lists
+            m = await (await c.post(f"/api/chat/{bid}", json={"text": "  want a   game tonight? "}, headers=ha)).json()
+            assert m["text"] == "want a game tonight?"
+            fb = (await (await c.get("/api/friends", headers=hb)).json())["friends"][0]
+            assert fb["unread"] == 1 and fb["last"] == {"text": "want a game tonight?", "at": m["at"], "mine": False}
+            fa = (await (await c.get("/api/friends", headers=ha)).json())["friends"][0]
+            assert fa["unread"] == 0 and fa["last"]["mine"]
+            # B comes on: told of the unread at once; a message from A arrives live, on A's own tabs too
+            wb = await c.ws_connect(f"/ws/presence?key={b['code']}")
+            wa = await c.ws_connect(f"/ws/presence?key={a['code']}")
+            assert (await wb.receive_json(timeout=2))["t"] == "build"
+            assert await wb.receive_json(timeout=2) == {"t": "unread", "unread": {aid: 1}}
+            assert (await wa.receive_json(timeout=2))["t"] == "build"
+            await c.post(f"/api/chat/{bid}", json={"text": "you there?"}, headers=ha)
+            got = await wb.receive_json(timeout=2)
+            assert got["t"] == "msg" and got["with"] == aid and got["msg"]["text"] == "you there?" and "#" not in got["name"]
+            echo = await wa.receive_json(timeout=2)
+            assert echo["t"] == "msg" and echo["with"] == bid
+            # opening the conversation reads it
+            hist = (await (await c.get(f"/api/chat/{aid}", headers=hb)).json())["messages"]
+            assert [x["text"] for x in hist] == ["want a game tonight?", "you there?"] and hist[0]["from"] == aid
+            assert (await (await c.get("/api/friends", headers=hb)).json())["friends"][0]["unread"] == 0
+            await wa.close(); await wb.close()
+        # the store on its own: the last KEEP kept, the rate held
+        ch = server.chat
+        for i in range(chatmod.KEEP + 5):
+            ch.send("x", "y", f"m{i}", now=1000.0 + i * 3)
+        h = ch.history("x", "y")
+        assert len(h) == chatmod.KEEP and h[-1]["text"] == f"m{chatmod.KEEP + 4}"
+        for i in range(chatmod.PER_MINUTE):
+            ch.send("z", "y", "hi", now=5000.0 + i)
+        try:
+            ch.send("z", "y", "hi", now=5000.0 + chatmod.PER_MINUTE)
+            assert False, "the rate should hold"
+        except chatmod.ChatError:
+            pass
+        ch.send("z", "y", "hi", now=5061.0)   # a minute later: fine again
+    asyncio.run(run())

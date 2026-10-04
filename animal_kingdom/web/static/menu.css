@@ -225,3 +225,58 @@ html { touch-action: manipulation; }
 .fbbox.ask b { text-align: center; } .fbbox.ask .slab, .fbbox.ask .play { height: 48px; }
 .fbov .play.danger { background: linear-gradient(rgba(196,64,48,.55), rgba(160,44,34,.62)), #6e2a22 url(/static/kit2/coll_slab.webp) center / 300px auto; }
 @keyframes chalin { from { opacity: 0; transform: translate(-50%, calc(-50% - 12px)); } }
+
+/* Chat between friends (chat.js): the panel down the right edge, under the corner piece (in a match, under the icon row),
+   one granite piece; the whole screen on a phone. A message arriving: a small piece by the Friends button. */
+.chatbtn { position: relative; }
+.cbadge { position: absolute; right: -5px; top: -5px; min-width: 20px; height: 20px; box-sizing: border-box; padding: 0 5px; border-radius: 10px; background: #e03228; color: #fff;
+  font: 700 13px/20px 'Fira Sans Condensed', sans-serif; font-style: normal; text-align: center; box-shadow: 0 0 0 2px #2b2825, 0 1px 3px rgba(0,0,0,.6); pointer-events: none; }
+.chatp { position: fixed; right: 16px; top: 100px; min-height: 320px; max-height: calc(100vh - 116px); z-index: 120; width: min(340px, calc(100vw - 24px)); box-sizing: border-box; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+  border-radius: 16px; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 16px 40px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,245,230,.12);
+  color: #f0e8da; font: 500 16px 'Fira Sans Condensed', sans-serif; }
+.chatp.inmatch { top: 64px; max-height: min(520px, calc(100vh - 80px)); }   /* as tall as the conversation, up to a limit */
+.chatp .chead { flex: none; display: flex; align-items: center; gap: 8px; min-height: 36px; }
+.chatp .chead b { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font: 700 19px 'Fira Sans Condensed', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chatp .cx { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #cfc3ad; font: 400 26px/1 'Fira Sans Condensed', sans-serif; cursor: pointer; }
+.chatp .cx:hover { background: rgba(255,245,230,.08); color: #f3ead8; }
+.chatp .slab, .chatp .play { box-sizing: border-box; border: 0; border-radius: 10px; cursor: pointer; color: #f0e8da; font: 600 16px 'Fira Sans Condensed', sans-serif;
+  background: #3a3632 url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.22), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55); }
+.chatp .slab:hover, .chatp .play:hover { filter: brightness(1.2); }
+.chatp > .slab, .chatp > .play { flex: none; height: 42px; }
+.chatp .play { background: linear-gradient(rgba(52,112,190,.5), rgba(38,88,160,.58)), #2a4a70 url(/static/kit2/coll_slab.webp) center / 300px auto; color: #f4f8ff; font-weight: 700; }
+.chatp .clist { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.chatp .cfr { flex: none; display: grid; grid-template-columns: 10px 1fr auto; column-gap: 10px; align-items: center; padding: 8px 12px; text-align: left; }
+.chatp .cfr .nm { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chatp .cfr small { grid-column: 2 / 4; color: #a99f8e; font: 400 14px 'Fira Sans Condensed', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chatp .cfr .n { min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px; background: #e03228; color: #fff; font: 700 13px/20px 'Fira Sans Condensed', sans-serif; font-style: normal; text-align: center; }
+.chatp .dot { flex: none; width: 10px; height: 10px; border-radius: 50%; box-sizing: border-box; border: 1.5px solid #8f8577; }
+.chatp .dot.on { border: 0; background: #7fd07a; box-shadow: 0 0 6px rgba(127,208,122,.6); }
+.chatp .away, .chatp .none { margin: 0; color: #a99f8e; font-size: 14px; }
+.chatp .none { padding: 12px 4px; text-align: center; }
+.chatp .msgs { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 4px 2px; }
+.chatp .msgs > :first-child { margin-top: auto; }   /* a short conversation sits at the bottom, by the box */
+.chatp .msg { max-width: 80%; align-self: flex-start; padding: 7px 11px; border-radius: 12px 12px 12px 4px; background: #4a4540; color: #f0e8da; font-size: 15px; line-height: 1.3; overflow-wrap: anywhere;
+  -webkit-user-select: text; user-select: text; }
+.chatp .msg.me { align-self: flex-end; border-radius: 12px 12px 4px 12px; background: #2f5584; color: #f4f8ff; }
+.chatp .when { align-self: center; margin-top: 6px; color: #8f8577; font-size: 12px; }
+.chatp .field { flex: none; height: 42px; box-sizing: border-box; padding: 0 14px; border: 0; border-radius: 10px; background: rgba(10,9,8,.5); box-shadow: inset 0 1px 3px rgba(0,0,0,.6);
+  color: #f0e8da; font: 500 16px 'Fira Sans Condensed', sans-serif; outline: none; -webkit-user-select: text; user-select: text; }
+.chatp .field::placeholder { color: #8f8577; }
+.chatp .field:focus { box-shadow: inset 0 1px 3px rgba(0,0,0,.6), 0 0 0 2px #cfc3ad; }
+.chatt { position: fixed; z-index: 130; display: flex; align-items: center; gap: 8px; max-width: 320px; box-sizing: border-box; padding: 8px 10px 8px 14px; border-radius: 12px; cursor: pointer;
+  background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 10px 28px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,245,230,.12); color: #f0e8da;
+  opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .2s, transform .2s; }
+.chatt.on { opacity: 1; transform: none; pointer-events: auto; }
+.chatt .who { min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+.chatt b { font: 700 16px 'Fira Sans Condensed', sans-serif; }
+.chatt span { font: 400 15px 'Fira Sans Condensed', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chatt .mute { flex: none; width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 8px; background: rgba(255,245,230,.08); color: #cfc3ad; cursor: pointer; }
+.chatt .mute:hover { background: rgba(255,245,230,.16); color: #f3ead8; }
+@media (prefers-reduced-motion: reduce) { .chatt { transition: none; } }
+@media (max-width: 700px) {
+  .chatp, .chatp.inmatch { inset: 0; top: 0; width: auto; height: auto; max-height: none; border-radius: 0; padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .chatt { left: 12px; right: 12px !important; max-width: none; }
+}
+.mscr .pfr[data-chatwith] { cursor: pointer; border-radius: 8px; } .mscr .pfr[data-chatwith]:hover { background: rgba(255,245,230,.06); }   /* a friend row opens your conversation */
+@media (max-width: 440px) { .home .top .backbtn.lab { width: 48px; padding: 0; } .home .top .backbtn.lab span { display: none; } }   /* a phone: Collection is its icon, as the gear is, so Friends fits */
+.chatopen .ftab { display: none !important; }   /* the panel holds the right edge */

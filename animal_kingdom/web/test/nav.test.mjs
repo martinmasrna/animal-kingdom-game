@@ -11,10 +11,10 @@ after(async () => { await browser?.close(); server?.stop(); });
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const shown = (page, sel) => page.$eval(sel, e => getComputedStyle(e).display !== 'none').catch(() => false);
 
-test('the corner piece: you, Collection, and a gear listing How to play, News and Settings', async () => {
+test('the corner piece: Friends, you, Collection, and a gear listing How to play, News and Settings', async () => {
   const page = await browser.newPage();
   await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' }); await wait(500);
-  assert.deepEqual(await page.$$eval('.home .top > *', els => els.map(e => e.getAttribute('href') || e.id)), ['#/profile', '#/collection', 'gearbtn']);
+  assert.deepEqual(await page.$$eval('.home .top > *', els => els.map(e => e.getAttribute('href') || e.id)), ['hchat', '#/profile', '#/collection', 'gearbtn']);
   await page.click('#gearbtn'); await page.waitForSelector('.chooser.gear');
   assert.deepEqual(await page.$$eval('.chooser.gear .slab', els => els.map(e => e.textContent.trim())), ['How to play', 'News', 'Settings']);
   await page.click('#learn2'); await page.waitForSelector('.chooser.lessons');   // How to play: the lessons, in its place

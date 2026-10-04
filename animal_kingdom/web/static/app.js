@@ -11,6 +11,7 @@ import { openFeedback } from './feedback.js';
 import { track } from './log.js';
 import { loadNews, unread as newsUnread, newsScreen, showSince, hideSince } from './news.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
+import { initChat, badge as chatBadge, wireChatButton, ICON_FRIENDS, hasFriends, openChat, refreshChat } from './chat.js';
 import { bindCoach, isLesson, lessonOf, lessonNow, narrowChoice, narrowPlaces, handLights, holdFood, shownRegion, lessonEnd, drawCoach } from './coach.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
@@ -122,6 +123,13 @@ async function boot() {
   bindCoach({ V: () => V, ui, CARDS: () => CARDS, send: m => send(m), drawGame: () => drawGame(), tapWords, PL: () => PL(), store, startTutorial, firstMatch });
   openPresence({ api, toast, build: checkBuild, key: () => store('ak:key'), deck: () => deckSpec(chosenDeck()),   // friends see you online; challenges arrive
     busy: () => screen === 'game' && V && V.phase === 'playing', accept: m => { setToken(m.id, m.token); location.hash = '#/m/' + m.id; } });
+  initChat({ api, toast, inMatch: () => screen === 'game' && !!V && V.phase === 'playing' && !RP.views.length,
+    changed: () => { if (screen === 'game' && V) drawGame(); },   // the game's Friends button shows once you have a friend
+    challenge: (f, all) => {   // a conversation's Challenge: home's Play with that friend picked
+      play.opp = 'friend'; play.friend = f.id; play.friends = all; play.open = null;
+      if (location.hash.replace(/^#\/?/, '')) location.hash = '#/'; else homeScreen();
+      setTimeout(() => { const go = document.getElementById('go'); if (go && screen === 'home') go.click(); });
+    } });
   addEventListener('hashchange', route);
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
@@ -198,7 +206,7 @@ const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
 // leaderboard), Collection by name, and a gear listing the rest; seven equal icons were too many. Feedback is a tab on the
 // screen's edge while the game is in testing (moves into the gear's list at launch; see boot). Icons painted in the board numbers' chalk.
 const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" draggable="false">`;
-const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), profile: TI('person'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news') };
+const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), profile: TI('person'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news'), friends: TI('friends') };
 let newsAsked = false;
 const mePiece = () => {   // your rating and place once ranked, your placement games while placing, else the name alone
   const sub = !ME ? '' : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
@@ -234,13 +242,14 @@ function homeScreen(mode = {}) {
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
   const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${chooser}
-    <div class="top">${mePiece()}<a class="backbtn lab" href="#/collection">${TOPICON.collection}<span>Collection</span></a><button class="backbtn ico${play.open === 'menu' || play.open === 'learn' ? ' open' : ''}" id="gearbtn"${play.open === 'menu' || play.open === 'learn' ? '' : ' data-tip="Menu"'} aria-label="Menu">${TOPICON.settings}${newsUnread() ? '<i class="ndot"></i>' : ''}</button></div>
+    <div class="top"><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button>${mePiece()}<a class="backbtn lab" href="#/collection" aria-label="Collection">${TOPICON.collection}<span>Collection</span></a><button class="backbtn ico${play.open === 'menu' || play.open === 'learn' ? ' open' : ''}" id="gearbtn"${play.open === 'menu' || play.open === 'learn' ? '' : ' data-tip="Menu"'} aria-label="Menu">${TOPICON.settings}${newsUnread() ? '<i class="ndot"></i>' : ''}</button></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
       <button class="play${search && search.btn === 'go' ? ' searching' : ''}" id="go">${search && search.btn === 'go' ? searchLabel() : go}</button></div>`}</div>`;
   const $ = id => document.getElementById(id), root = app.querySelector('.home');
   fitStrips(root);   // the tiles are as wide as the window allows (upright, one column)
   if (!first && !mode.join && !mode.gauntlet) showSince(api, { onRead: () => { location.hash = '#/news'; } });   // a returning player, once
+  wireChatButton($('hchat'));
   $('gearbtn').onclick = () => { play.open = play.open === 'menu' || play.open === 'learn' ? null : 'menu'; play.peek = null; redraw(); };   // the gear opens its list, or closes the lessons it led to
   if (first) {   // Learn to play picks up at lesson 2 once lesson 1 is won
     $('learn').onclick = () => { track('learn_to_play'); startTutorial(store('ak:lesson') === '1' ? 2 : 1); };
@@ -470,9 +479,11 @@ function profileScreen() {
   const fillFriends = async () => {
     const r = await api('/api/friends'), j = r.ok ? await r.json() : { friends: [] }, box = document.getElementById('pfriends');
     if (!box || screen !== 'profile') return;
-    box.innerHTML = `<h4>Friends</h4>${j.friends.map(f => `<div class="pfr">${friendRow(f, `<button class="ic" data-unfriend="${f.id}" data-name="${esc(f.name)}" aria-label="Remove">${ICON.trash}</button>`, j.friends)}</div>`).join('')}
+    box.innerHTML = `<h4>Friends</h4>${j.friends.map(f => `<div class="pfr" data-chatwith="${f.id}">${friendRow(f, `<button class="ic" data-unfriend="${f.id}" data-name="${esc(f.name)}" aria-label="Remove">${ICON.trash}</button>`, j.friends)}</div>`).join('')}
       <button class="slab" id="paddfriend">Add a friend</button>`;
     document.getElementById('paddfriend').onclick = () => shareLink(`${location.origin}/#/friend/${j.code}`, 'Be my friend in Animal Kingdom');
+    box.querySelectorAll('[data-chatwith]').forEach(el => el.onclick = e => { if (!e.target.closest('[data-unfriend]')) openChat(el.dataset.chatwith); });   // a row opens your conversation
+    refreshChat();
     box.querySelectorAll('[data-unfriend]').forEach(el => el.onclick = async () => {
       const ov = document.createElement('div'); ov.className = 'fbov';   // asked first, as deleting a deck is
       ov.innerHTML = `<div class="fbbox ask"><b>Remove ${el.dataset.name} from your friends?</b><div class="btns"><button class="slab" data-x="no">Keep</button><button class="play danger" data-x="yes">Remove</button></div></div>`;
@@ -710,6 +721,7 @@ function gameScreen() {
       <div class="abs menu hs" id="series" data-tip="History"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg></div>
       <div class="abs opphand" id="opphand"></div>
       <div class="abs menu fb" id="fbbtn" data-tip="Send feedback"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
+      <div class="abs menu chatbtn" id="chatbtn" data-tip="Friends">${ICON_FRIENDS}${chatBadge()}</div>
       <div class="abs menu" id="menubtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3.5"/><path d="M6 4h12l-3 4.5 3 4.5H6"/></svg></div>
       <div class="abs hand" id="hand"></div>
       <div class="abs deck" id="deck"></div>
@@ -736,6 +748,7 @@ function gameScreen() {
     // In a tutorial it leaves for home at once: there is nothing to lose.
     const ask = $('concov');
     $('fbbtn').onclick = e => { e.stopPropagation(); feedback(); };
+    wireChatButton($('chatbtn'));
     $('menubtn').onclick = e => { e.stopPropagation(); if (isTutorial()) { location.hash = '#/'; return; } ask.classList.add('on'); };
     ask.onclick = e => { e.stopPropagation(); if (e.target === ask) ask.classList.remove('on'); };
     $('keep').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); };
@@ -829,7 +842,8 @@ function drawGame() {
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
   { const n = [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length, w = VIEW.port ? 88 : 52;
-    $('series').style.right = 16 + w * n + 'px'; $('sndbtn').style.right = 16 + w * (n + 1) + 'px'; }   // sound, left of History   // History, left of feedback and the flag
+    $('series').style.right = 16 + w * n + 'px'; $('sndbtn').style.right = 16 + w * (n + 1) + 'px'; $('chatbtn').style.right = 16 + w * (n + 2) + 'px'; }   // Friends, left of sound
+  $('chatbtn').style.display = V.id && !isTutorial() && hasFriends() ? '' : 'none';   // a real match or replay, once you have a friend   // sound, left of History   // History, left of feedback and the flag
   $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
   // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
   $('menubtn').querySelector('svg').innerHTML = isTutorial() ? '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>'

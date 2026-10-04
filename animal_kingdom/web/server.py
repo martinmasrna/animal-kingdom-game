@@ -26,6 +26,7 @@ from ..engine.state import EngineError
 from ..engine.cards import DECK_SLUGS, load_cards
 from . import custom_decks
 from . import events, feedback, news
+from .chat import Chat, ChatError
 from .friends import FriendError, Friends
 from . import ladder as ranking
 from . import oauth
@@ -598,6 +599,7 @@ CHALLENGE_WAIT = 60          # seconds a challenge stands before it lapses
 presence: dict[str, set] = {}   # profile id -> its open presence sockets (one per tab or device): online while any is open
 challenges: dict[str, dict] = {}   # challenge id -> {from, to, deck, fut}
 friends: Friends = None
+chat: Chat = None
 
 
 def friend_label(viewer: str, other: str) -> str:
@@ -631,6 +633,8 @@ async def presence_socket(req):
         if (f := profiles.get(frm)):
             await ws.send_json({"t": "friendreq", "from": frm, "name": display(f)})
     await ws.send_json({"t": "build", "build": BUILD})
+    if (unread := chat.unread(p["id"])):   # messages that came while you were away
+        await ws.send_json({"t": "unread", "unread": unread})
     try:
         async for _ in ws:
             pass
@@ -645,11 +649,12 @@ async def presence_socket(req):
 async def friends_list(req):
     """Your friends (online first, then by when they were last on) and your friend code."""
     p = me(req)
-    out = []
+    out, unread, last = [], chat.unread(p["id"]), chat.last(p["id"])
     for fid in friends.of(p["id"]):
         f = profiles.get(fid)
         if f:
-            out.append({"id": fid, "name": display(f), "online": fid in presence, "seen": friends.last_seen(fid)})
+            out.append({"id": fid, "name": display(f), "online": fid in presence, "seen": friends.last_seen(fid),
+                        "unread": unread.get(fid, 0), "last": last.get(fid)})
     out.sort(key=lambda f: (not f["online"], -(f["seen"] or 0)))
     return web.json_response({"friends": out, "code": friends.code_for(p["id"])})
 
@@ -720,6 +725,35 @@ async def friend_request_answer(req):
 
 async def friend_remove(req):
     friends.remove(me(req)["id"], req.match_info["id"])
+    return web.json_response({})
+
+
+async def chat_history(req):
+    """Your conversation with a friend (web/chat.py), oldest first; opening it reads it."""
+    p, other = me(req), req.match_info["id"]
+    if not friends.are(p["id"], other):
+        raise web.HTTPBadRequest(text="not your friend")
+    chat.read(p["id"], other)
+    return web.json_response({"messages": chat.history(p["id"], other)})
+
+
+async def chat_send(req):
+    """Send a friend a message: it reaches them at once if they are on (any tab), else waits in the conversation."""
+    p, other, body = me(req), req.match_info["id"], await req.json()
+    if not friends.are(p["id"], other):
+        raise web.HTTPBadRequest(text="not your friend")
+    try:
+        m = chat.send(p["id"], other, body.get("text"))
+    except ChatError as e:
+        raise web.HTTPBadRequest(text=str(e))
+    await _tell(other, {"t": "msg", "with": p["id"], "name": friend_label(other, p["id"]), "msg": m})
+    await _tell(p["id"], {"t": "msg", "with": other, "msg": m})   # your other tabs show it too
+    return web.json_response(m)
+
+
+async def chat_read(req):
+    """You have seen the conversation (it was open when a message came)."""
+    chat.read(me(req)["id"], req.match_info["id"])
     return web.json_response({})
 
 
@@ -957,6 +991,9 @@ def make_app() -> web.Application:
         web.post("/api/friends/request", friend_request),
         web.get("/api/current", current_match),
         web.post("/api/friends/request/{frm}/answer", friend_request_answer),
+        web.get("/api/chat/{id}", chat_history),
+        web.post("/api/chat/{id}", chat_send),
+        web.post("/api/chat/{id}/read", chat_read),
         web.post("/api/challenge", challenge),
         web.delete("/api/challenge", challenge_cancel),
         web.post("/api/challenge/{id}/answer", challenge_answer),
@@ -975,8 +1012,9 @@ def make_app() -> web.Application:
         if linked or left:
             log.info("starter decks: %d untouched cop%s now follow their starter, %d left alone",
                      linked, "y" if linked == 1 else "ies", left)
-        global ladder, friends
+        global ladder, friends, chat
         friends = Friends(profiles.db)
+        chat = Chat(profiles.db)
         ladder = ranking.Ladder(profiles.db, [d for d in sorted(PREMADE_DECKS) if d != "goodstuff"])
         if ladder.apply_seed(Path(__file__).parent / "ladder_seed.json"):   # the bots' ratings from simulation (sim/ladder_seed.py)
             log.info("ladder: bots seeded from ladder_seed.json")
