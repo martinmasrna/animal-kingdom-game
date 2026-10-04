@@ -135,12 +135,13 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets) .ftab { 
 .toast.ok { background: var(--surface-2); border-color: var(--line-strong); }
 
 /* ---------- the card (card.js): 20em wide, 29.34em tall, em = --w / 20 ---------- */
-/* The rarity edge is a material (--edge, --bw) a card wears, and anything set into a card can wear too (.edge: the versus moment's gem ring). */
-.card, .edge { --bw: .22em; --edge: linear-gradient(160deg, #3d3934, #1f1d1b 45%, #33302c); }
+/* The rarity edge is a material (--edge, --bw) a card wears, and anything set into a card can wear too (.edge: the versus moment's gem ring):
+   driftwood, blue steel, gold. The name plaque and strength banner take the same material's tint (Martin, 2026-10-04). */
+.card, .edge { --bw: .5em; --edge: linear-gradient(160deg, #cdbfa6, #8f8068 35%, #5e5242 65%, #b3a58c); }
 .card { --w: 180px; position: relative; width: var(--w); height: calc(var(--w) * 1.467);
   font-size: calc(var(--w) / 20); flex: none; border-radius: .9em; background: var(--edge); box-shadow: .2em .45em .9em rgba(0,0,0,.55); overflow: hidden; isolation: isolate; }
-.card.rare, .edge.rare { --bw: .42em; --edge: linear-gradient(160deg, #f4f7fa, #c3cbd3 35%, #97a2ad 65%, #e3e9ee); }
-.card.legendary, .edge.legendary { --bw: .5em; --edge: linear-gradient(150deg, #fff1c2, #d9a93f 22%, #7e5a16 48%, #f0cd70 70%, #a67a1e 88%, #ffe9a6); }
+.card.rare, .edge.rare { --edge: linear-gradient(160deg, #d6e9fb, #6e9fd0 32%, #2f5c8f 62%, #a8cdf2 85%, #4a78ab); }
+.card.legendary, .edge.legendary { --edge: linear-gradient(150deg, #fff1c2, #d9a93f 22%, #7e5a16 48%, #f0cd70 70%, #a67a1e 88%, #ffe9a6); }
 /* The painting starts under the name bar (the bar never covers it), its top edge showing. */
 .card .pic { position: absolute; inset: calc(var(--bw) + 3.05em) var(--bw) var(--bw); border-radius: 0 0 .7em .7em; background: #3a2c1a 50% 0 / cover no-repeat; display: grid; place-items: center; }
 .card .pic span { font: 600 1.4em/1.1 'Fira Sans Condensed', sans-serif; color: #f3e3c0; text-align: center; padding: 1em; }
@@ -152,6 +153,13 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets) .ftab { 
 .card .nbar.two span { white-space: normal; text-wrap: balance; text-align: center; font-size: 1.08em; overflow: visible; }
 .card .stab { position: absolute; left: calc(var(--bw) - .1em); top: calc(var(--bw) - .1em); width: 4.4em; height: 6.4em; z-index: 3;
   background: url(/static/kit2/card_banner.webp) center / 100% 100% no-repeat; filter: drop-shadow(.05em .2em .3em rgba(0,0,0,.55)); }
+.card:is(.rare, .legendary) .nbar { border-image: none; }
+.card:is(.rare, .legendary) .stab { background: none; }
+.card:is(.rare, .legendary) .nbar::before { content: ''; position: absolute; inset: -.55em; z-index: -1; border: .55em solid transparent;
+  border-image: url(/static/kit2/card_plaque.webp) 36 fill / .55em stretch; filter: var(--tint); }
+.card:is(.rare, .legendary) .stab::before { content: ''; position: absolute; inset: 0; z-index: -1; background: url(/static/kit2/card_banner.webp) center / 100% 100% no-repeat; filter: var(--tint); }
+.card.rare { --tint: saturate(.3) brightness(1.05) sepia(.15) hue-rotate(180deg) saturate(1.2); }
+.card.legendary { --tint: sepia(.5) saturate(1.95) brightness(1.07); }
 .card .stab .n { position: absolute; left: 0; right: 0; top: 1.36em; height: 2.9em; display: flex; justify-content: center; }
 .card .stab .n.two { top: 1.66em; height: 2.3em; }
 .card .stab .n img { display: block; height: 100%; filter: brightness(.16) sepia(.6); }
