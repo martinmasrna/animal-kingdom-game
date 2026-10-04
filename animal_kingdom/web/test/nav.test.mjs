@@ -1,6 +1,6 @@
 // Home's navigation (static/app.js): the corner piece (you, Collection, the gear and its list), Feedback on every screen
 // outside a match (a tab on the edge where it's free, a square beside Back where a side panel holds the edge), and the
-// leaderboard as the profile's tab.
+// leaderboard as the ladder's first tab.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { startServer, openBrowser } from './harness.mjs';
@@ -14,7 +14,7 @@ const shown = (page, sel) => page.$eval(sel, e => getComputedStyle(e).display !=
 test('the corner piece: Friends, you, Collection, and a gear listing How to play, News and Settings', async () => {
   const page = await browser.newPage();
   await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' }); await wait(500);
-  assert.deepEqual(await page.$$eval('.home .top > *', els => els.map(e => e.getAttribute('href') || e.id)), ['hchat', '#/profile', '#/collection', 'gearbtn']);
+  assert.deepEqual(await page.$$eval('.home .top > *', els => els.map(e => e.getAttribute('href') || e.id)), ['hchat', '#/ladder', '#/collection', 'gearbtn']);
   await page.click('#gearbtn'); await page.waitForSelector('.chooser.gear');
   assert.deepEqual(await page.$$eval('.chooser.gear .slab', els => els.map(e => e.textContent.trim())), ['How to play', 'News', 'Settings']);
   await page.click('#learn2'); await page.waitForSelector('.chooser.lessons');   // How to play: the lessons, in its place
@@ -25,7 +25,7 @@ test('the corner piece: Friends, you, Collection, and a gear listing How to play
 
 test('Feedback: a tab where the edge is free, beside Back where a side panel holds it', async () => {
   const page = await browser.newPage();
-  for (const [hash, tab] of [['#/', true], ['#/news', true], ['#/settings', true], ['#/collection', false], ['#/profile', false]]) {
+  for (const [hash, tab] of [['#/', true], ['#/news', true], ['#/settings', true], ['#/collection', false], ['#/ladder', true]]) {
     await page.goto(`${server.url}/${hash}`, { waitUntil: 'networkidle0' }); await wait(400);
     assert.equal(await shown(page, '#ftab'), tab, `${hash}: the tab`);
     assert.equal(!!(await page.$('.sfoot .fbx')), !tab, `${hash}: the square beside Back`);
@@ -33,10 +33,10 @@ test('Feedback: a tab where the edge is free, beside Back where a side panel hol
   await page.close();
 });
 
-test('the profile opens on its leaderboard, the match history its second tab; the old address leads there', async () => {
+test('the ladder opens on its leaderboard, the match history its second tab; the old addresses lead there', async () => {
   const page = await browser.newPage();
   await page.goto(`${server.url}/#/leaderboard`, { waitUntil: 'networkidle0' }); await page.waitForSelector('#lboard .lr');
-  assert.equal(await page.evaluate(() => location.hash), '#/profile');
+  assert.equal(await page.evaluate(() => location.hash), '#/ladder');
   assert.equal(await page.$eval('.ptab.on', e => e.textContent), 'Leaderboard');
   await page.click('.ptab:not(.on)'); await page.waitForSelector('.hbody .none, .hbody .hlist');
   assert.equal(await page.$eval('.ptab.on', e => e.textContent), 'Match history');

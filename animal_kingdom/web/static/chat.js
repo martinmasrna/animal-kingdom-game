@@ -11,6 +11,8 @@ const store = (k, v) => { try { if (v === undefined) return localStorage.getItem
 export const ICON_FRIENDS = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M15.5 4.8a3.5 3.5 0 0 1 0 6.4"/><path d="M18 14.3c2.1.7 3.5 2.8 3.5 5.7"/></svg>';
 const BELL = '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>';
 const BELL_OFF = BELL + '<path d="M4 4l16 16"/>';
+const TRASH = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>';
+const SEND = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6l6 6-6 6"/></svg>';
 const bell = off => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${off ? BELL_OFF : BELL}</svg>`;
 
 let ctx = null;   // { api, inMatch(), challenge(friend, friends), toast(msg, ok) }
@@ -138,30 +140,42 @@ function draw(scrollDown) {
     const lines = (msgs || []).map(m => { const gap = m.at - prev > 600; prev = m.at;
       return (gap ? `<span class="when">${when(m.at)}</span>` : '') + `<div class="msg${m.from === f.id ? '' : ' me'}">${esc(m.text)}</div>`; }).join('');
     const html = `<div class="chead"><button class="cx back" id="chatback" aria-label="All friends">‹</button><b><span class="dot${f.online ? ' on' : ''}"></span>${esc(name)}</b>
-        ${match ? `<button class="cx" id="chatmute" aria-label="${mutedInMatch() ? 'Unmute' : 'Mute'} messages during matches" data-tip="${mutedInMatch() ? 'Muted during matches' : 'Mute during matches'}">${bell(mutedInMatch())}</button>` : ''}<button class="cx" id="chatx" aria-label="Close">×</button></div>
+        ${match ? `<button class="cx" id="chatmute" aria-label="${mutedInMatch() ? 'Unmute' : 'Mute'} messages during matches" data-tip="${mutedInMatch() ? 'Muted during matches' : 'Mute during matches'}">${bell(mutedInMatch())}</button>` : ''}${match ? '' : `<button class="cx" id="chatrm" aria-label="Remove friend" data-tip="Remove friend">${TRASH}</button>`}<button class="cx" id="chatx" aria-label="Close">×</button></div>
       ${f.online ? '' : `<p class="away">Away · they'll see it when they're back</p>`}
       ${match ? '' : `<button class="play" id="chatchal">${f.online ? `Challenge ${esc(name)}` : 'Send a match link'}</button>`}
       <div class="msgs" id="chatmsgs">${msgs ? lines || `<p class="none">Say hello to ${esc(name)}.</p>` : ''}</div>
-      <input class="field" id="chatin" maxlength="500" placeholder="Message ${esc(name)}…" autocomplete="off">`;
+      <div class="csend"><input class="field" id="chatin" maxlength="500" placeholder="Message ${esc(name)}…" autocomplete="off"><button class="play" id="chatgo" aria-label="Send">${SEND}</button></div>`;
     if (p.dataset.view === f.id && p._html === html) return;
     p.innerHTML = p._html = html; p.dataset.view = f.id;
     p.querySelector('#chatin').value = typed;
     p.querySelector('#chatback').onclick = () => { S.with = null; draw(); };
     const ch = p.querySelector('#chatchal'); if (ch) ch.onclick = () => { closeChat(); ctx.challenge(f, all); };
+    const rm = p.querySelector('#chatrm'); if (rm) rm.onclick = () => removeFriend(f, name);
     const mu = p.querySelector('#chatmute'); if (mu) mu.onclick = () => { setMuted(!mutedInMatch()); draw(); };
     const box = p.querySelector('#chatmsgs'); if (scrollDown !== false) box.scrollTop = box.scrollHeight;
     const inp = p.querySelector('#chatin');
-    inp.onkeydown = async e => {
-      e.stopPropagation();   // Space and D belong to the box here, not the game
-      if (e.key !== 'Enter' || !inp.value.trim()) return;
+    const send = async () => {
+      if (!inp.value.trim()) return;
       const text = inp.value; inp.value = '';
       const r = await ctx.api(`/api/chat/${f.id}`, { method: 'POST', body: JSON.stringify({ text }) });
       if (!r.ok) { inp.value = text; return ctx.toast(await r.text()); }
       arrive({ with: f.id, msg: await r.json() });   // the socket echoes it too; the id keeps it once
     };
+    inp.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') send(); };   // Space and D belong to the box here, not the game
+    // Send by the box (Enter alone was invisible, above all on a phone); the box keeps the focus and the keyboard stays up
+    const go = p.querySelector('#chatgo'); go.onpointerdown = e => e.preventDefault(); go.onclick = () => { send(); inp.focus(); };
     if (focused || (!('ontouchstart' in window) && !typed)) inp.focus();
   }
   p.querySelector('#chatx').onclick = closeChat;
+}
+
+// Removing a friend is asked first, as deleting a deck is; the panel goes back to the list.
+function removeFriend(f, name) {
+  const ov = document.createElement('div'); ov.className = 'fbov';
+  ov.innerHTML = `<div class="fbbox ask"><b>Remove ${esc(name)} from your friends?</b><div class="btns"><button class="slab" data-x="no">Keep</button><button class="play danger" data-x="yes">Remove</button></div></div>`;
+  document.body.appendChild(ov); ov.onclick = e => { if (e.target === ov) ov.remove(); };
+  ov.querySelector('[data-x="no"]').onclick = () => ov.remove();
+  ov.querySelector('[data-x="yes"]').onclick = async () => { ov.remove(); await ctx.api('/api/friends/' + f.id, { method: 'DELETE' }); S.with = null; loadFriends(); };
 }
 
 // Your friends list changed elsewhere (added one, removed one): the panel's list follows.

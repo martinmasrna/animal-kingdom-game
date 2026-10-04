@@ -11,7 +11,7 @@ import { openFeedback } from './feedback.js';
 import { track } from './log.js';
 import { loadNews, unread as newsUnread, newsScreen, showSince, hideSince } from './news.js';
 import { openPresence, showChallenge, confirmFriend, shareLink, friendRow, friendLabel } from './friends.js';
-import { initChat, badge as chatBadge, wireChatButton, ICON_FRIENDS, hasFriends, openChat, refreshChat } from './chat.js';
+import { initChat, badge as chatBadge, wireChatButton, ICON_FRIENDS, hasFriends } from './chat.js';
 import { bindCoach, isLesson, lessonOf, lessonNow, narrowChoice, narrowPlaces, handLights, holdFood, shownRegion, lessonEnd, drawCoach } from './coach.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
@@ -144,7 +144,7 @@ async function boot() {
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
     if (e.key === 'Escape' && screen === 'home' && play.open) { play.open = null; return route(); }   // Escape closes the open chooser
-    if (e.key === 'Escape' && ['profile', 'news', 'settings'].includes(screen) && !/INPUT|TEXTAREA/.test(e.target.tagName)) {   // a screen with Back: Escape is Back
+    if (e.key === 'Escape' && ['ladder', 'news', 'settings'].includes(screen) && !/INPUT|TEXTAREA/.test(e.target.tagName)) {   // a screen with Back: Escape is Back
       const back = document.getElementById('back'); if (back) back.click(); return;
     }
     if (RP.views.length && screen === 'game' && replayKey(e)) return;
@@ -191,11 +191,11 @@ function route() {
   if (parts[0] === 'gauntlet') return homeScreen({ gauntlet: true });
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
-  if (parts[0] === 'leaderboard') { history.replaceState(null, '', '#/profile'); parts[0] = 'profile'; }   // the leaderboard is the profile's first tab
+  if (parts[0] === 'leaderboard' || parts[0] === 'profile') { history.replaceState(null, '', '#/ladder' + (parts[1] ? '/' + parts[1] : '')); parts[0] = 'ladder'; }   // the old addresses
   if (parts[0] === 'settings') return settingsScreen();
   if (parts[0] === 'news') { screen = 'news'; return newsScreen(app, { api, cards: CARDS, back: () => { location.hash = '#/'; } }); }
   if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
-  if (parts[0] === 'profile') { profileScreen(); return loadProfile().then(() => { if (location.hash.startsWith('#/profile')) profileScreen(); }); }   // a match just played shows
+  if (parts[0] === 'ladder') { ladderScreen(); return loadProfile().then(() => { if (location.hash.startsWith('#/ladder')) ladderScreen(); }); }   // a match just played shows
   if (parts[0] === 'replay' && parts[1]) return replayScreen(parts[1]);
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
   if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : homeScreen({ join: id });
@@ -213,14 +213,14 @@ const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', cod
 const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']], SIDES = [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']];
 const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
 // Home's corner piece (design sandbox screen/nav/, 2026-10-02): you (your name and where you stand, to the profile and its
-// leaderboard), Collection by name, and a gear listing the rest; seven equal icons were too many. Feedback is a tab on the
+// leaderboard), Collection by name, and a menu (three bars) listing the rest, the gear kept for Settings in it; seven equal icons were too many. Feedback is a tab on the
 // screen's edge while the game is in testing (moves into the gear's list at launch; see boot). Icons painted in the board numbers' chalk.
 const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" draggable="false">`;
-const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), profile: TI('person'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news'), friends: TI('friends') };
+const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), profile: TI('person'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news'), friends: TI('friends'), menu: TI('menu') };
 let newsAsked = false;
 const mePiece = () => {   // your rating and place once ranked, your placement games while placing, else the name alone
   const sub = !ME ? '' : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
-  return `<a class="backbtn me" href="#/profile" aria-label="Profile">${TOPICON.profile}<span><b>${esc(ME ? ME.name : 'Profile')}</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
+  return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${TOPICON.profile}<span><b>${esc(ME ? ME.name : 'Profile')}</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
 };
 function homeScreen(mode = {}) {
   screen = 'home';
@@ -252,7 +252,7 @@ function homeScreen(mode = {}) {
   // A new player's piece holds one thing: learn by playing (the tutorial), or say you know how and get the full piece.
   const first = !learned() && !mode.join && !mode.gauntlet;
   app.innerHTML = `<div class="mscr home">${chooser}
-    <div class="top"><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button>${mePiece()}<a class="backbtn lab" href="#/collection" aria-label="Collection">${TOPICON.collection}<span>Collection</span></a><button class="backbtn ico${play.open === 'menu' || play.open === 'learn' ? ' open' : ''}" id="gearbtn"${play.open === 'menu' || play.open === 'learn' ? '' : ' data-tip="Menu"'} aria-label="Menu">${TOPICON.settings}${newsUnread() ? '<i class="ndot"></i>' : ''}</button></div>
+    <div class="top"><button class="backbtn ico chatbtn" id="hchat" data-tip="Friends" aria-label="Friends">${TOPICON.friends}${chatBadge()}</button>${mePiece()}<a class="backbtn lab" href="#/collection" aria-label="Collection">${TOPICON.collection}<span>Collection</span></a><button class="backbtn ico${play.open === 'menu' || play.open === 'learn' ? ' open' : ''}" id="gearbtn"${play.open === 'menu' || play.open === 'learn' ? '' : ' data-tip="Menu"'} aria-label="Menu">${TOPICON.menu}${newsUnread() ? '<i class="ndot"></i>' : ''}</button></div>
     ${first ? `<div class="bar first"><button class="play" id="learn">Learn to play</button><button class="slab" id="known">I already know how to play</button></div>` : `<div class="bar"><button class="dtile pick${play.open === 'decks' ? ' open' : ''}" id="deckbtn" data-strip="${coverFor(chosen)}" data-ax=".62" style="${stripArt(coverFor(chosen), 300, 56, .62)}"><b>${esc(chosen.name)}</b><i class="chev"></i></button>
       <button class="slab pick opp${play.open === 'opp' ? ' open' : ''}" id="oppbtn"${mode.join ? ' disabled' : ''}><b>${opp[0]}</b>${opp[1] ? `<span>${esc(opp[1])}</span>` : ''}${mode.join ? '' : '<i class="chev"></i>'}</button>
       <button class="play${search && search.btn === 'go' ? ' searching' : ''}" id="go">${search && search.btn === 'go' ? searchLabel() : go}</button></div>`}</div>`;
@@ -368,10 +368,10 @@ function wireSettings(root) {
 async function settingsScreen() {
   screen = 'settings';
   app.innerHTML = `<div class="mscr lead sets"><div class="lcol"><div class="hhead"><h2>Settings</h2></div>
-    <div class="lbody">${settingsBody()}<div class="credits"><h3>Sound credits</h3><pre id="credits"></pre></div></div>
+    <div class="lbody">${accountBody()}${settingsBody()}<div class="credits"><h3>Sound credits</h3><pre id="credits"></pre></div></div>
     <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
-  wireSettings(app);
+  wireSettings(app); wireAccount(app, settingsScreen);
   const r = await fetch(CREDITS_URL).catch(() => null), t = r && r.ok ? await r.text() : '';
   const el = document.getElementById('credits'); if (el) el.textContent = t.trim();
 }
@@ -439,26 +439,24 @@ function collectionScreen(open) {
     play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
 }
 
-// ------------------------------------------------------------------ profile
-// Your name#tag, the sign-in code that brings this profile to another device, and your finished matches.
+// ------------------------------------------------------------------ ladder, and your account (in Settings)
+// The ladder: the leaderboard and your match history as its two tabs, one column on the ground; your account (name,
+// sign-in, the sign-in code) lives in Settings and your friends in the Friends panel (Martin, 2026-10-04).
 const PROVIDER = { google: 'Google', discord: 'Discord' };
 // Back from Google/Discord: swap the one-time code for this device's own session key.
 async function finishSignIn(code) {
-  history.replaceState(null, '', '#/profile');
+  history.replaceState(null, '', '#/settings');
   const r = code && code !== 'failed' ? await api('/api/auth/redeem', { method: 'POST', body: JSON.stringify({ code }) }) : null;
-  if (!r || !r.ok) { toast('Sign-in didn\'t go through, try again'); return profileScreen(); }
+  if (!r || !r.ok) { toast('Sign-in didn\'t go through, try again'); return settingsScreen(); }
   const m = await r.json(); store('ak:key', m.key); ME = m.profile;
-  toast(`Signed in as ${ME.name}#${ME.tag}`, true); profileScreen();
+  toast(`Signed in as ${ME.name}#${ME.tag}`, true); settingsScreen();
 }
-// The collection's skeleton: your decks with their records and your matches on the ground, you in the granite column
-// (name, account, sign-in code), Back in its foot. A deck filters the matches; a match opens its replay.
 // A deck's face: its cover, else (matches from before covers were kept) the starter or your deck of that name.
 const deckFace = (cover, name) => cover || COVER[(DECKS.find(d => d.name === name) || {}).id] || (ME.decks.find(d => d.name === name) || {}).cover || '';
 // A deck as a board piece: its face in the plain rim (the row's sides already say whose; colour is left to nothing here).
 const piece = id => `<span class="pm">${id && hasArt(id) ? `<span class="face" style="${portrait(id, 35)}"></span>` : ''}<img src="/static/kit2/rim_n.webp" alt="" draggable="false"></span>`;
-function profileScreen() {
-  screen = 'profile';
-  const unlinked = ME.providers.filter(p => !ME.logins.some(l => l.provider === p));
+function ladderScreen() {
+  screen = 'ladder';
   const when = t => new Date(t * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
   // Which deck's matches: a dropdown in the header, as the collection's filters, each deck with its games won–lost.
   const wl = (w, l) => `<i>${w}–${l}</i>`, all = ME.records.reduce((a, r) => [a[0] + r.won, a[1] + r.lost], [0, 0]);
@@ -470,6 +468,20 @@ function profileScreen() {
   const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
     ${piece(deckFace(h.my_cover, h.my_deck))}<span class="dk">${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck))}<span class="dk">${esc(h.opp_deck)}</span>
     <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}</span>` : `${piece(h.opp_cover)}<span class="dk">${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}</span>`}</div>`).join('');
+  // the leaderboard first (Martin, 2026-10-02), the match history its second tab
+  const lead = location.hash !== '#/ladder/history';
+  app.innerHTML = `<div class="mscr ladder"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${lead ? '' : ' on'}" href="#/ladder/history">Match history</a></div>${!lead && (hist || ui.histDeck) ? filter : ''}</div>
+    <div class="hbody">${lead ? '<div class="lead lb" id="lboard"></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
+    <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
+  document.getElementById('back').onclick = () => { location.hash = '#/'; };
+  if (lead) fillLeaderboard();
+  wireDd(app, (k, v) => { ui.histDeck = v || null; ladderScreen(); });
+  app.querySelectorAll('[data-m]').forEach(el => el.onclick = () => { location.hash = '#/replay/' + el.dataset.m; });
+}
+// Your account, at the top of Settings: your name#tag (renamed in place), Google/Discord, and while you have neither, the
+// sign-in code that brings this profile to another device.
+function accountBody() {
+  const unlinked = ME.providers.filter(p => !ME.logins.some(l => l.provider === p));
   const sect = (title, body) => `<div class="sect"><h4>${title}</h4>${body}</div>`;
   const account = ME.logins.length
     ? sect('Account', `${ME.logins.map(l => `<div class="login">${PROVIDER[l.provider]} · ${esc(l.label)}</div>`).join('')}
@@ -479,52 +491,28 @@ function profileScreen() {
   const code = ME.logins.length ? '' : sect('Sign-in code', `<p>Type it on another device to play there as ${esc(ME.name)}. Anyone with it can too.</p>
       <div class="row"><span class="field keycode" id="key">${ui.showKey ? esc(store('ak:key')) : '••••-••••-••••-••••'}</span><button class="slab" id="showkey">${ui.showKey ? 'Hide' : 'Show'}</button><button class="slab" id="copykey">Copy</button></div>`)
     + sect('Use a different profile', `<div class="row"><input class="field" id="other" placeholder="Sign-in code" autocomplete="off"><button class="slab" id="signin">Sign in</button></div>`);
-  // the leaderboard first (Martin, 2026-10-02: what a profile opens on), the match history its second tab
-  const lead = location.hash !== '#/profile/history';
-  app.innerHTML = `<div class="mscr prof"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? ' on' : ''}" href="#/profile">Leaderboard</a><a class="ptab${lead ? '' : ' on'}" href="#/profile/history">Match history</a></div>${!lead && (hist || ui.histDeck) ? filter : ''}</div>
-    <div class="hbody">${lead ? '<div class="lead lb" id="lboard"></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div></div>
-    <div class="side"><div class="me"><div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div><div class="sect" id="pfriends"></div>${account}${code}</div>
-      <div class="sfoot"><div class="frow"><button class="backbtn fbx" id="fbside" data-tip="Feedback" aria-label="Feedback">${TOPICON.feedback}</button><button class="backbtn" id="back"><span>Back</span></button></div></div></div></div>`;
-  document.getElementById('back').onclick = () => { location.hash = '#/'; };
-  document.getElementById('fbside').onclick = feedback;
-  if (lead) fillLeaderboard();
-  wireDd(app, (k, v) => { ui.histDeck = v || null; profileScreen(); });
-  // Friends: each with when they were last on and a way to remove them; Add a friend shares your friend link.
-  const fillFriends = async () => {
-    const r = await api('/api/friends'), j = r.ok ? await r.json() : { friends: [] }, box = document.getElementById('pfriends');
-    if (!box || screen !== 'profile') return;
-    box.innerHTML = `<h4>Friends</h4>${j.friends.map(f => `<div class="pfr" data-chatwith="${f.id}">${friendRow(f, `<button class="ic" data-unfriend="${f.id}" data-name="${esc(f.name)}" aria-label="Remove">${ICON.trash}</button>`, j.friends)}</div>`).join('')}
-      <button class="slab" id="paddfriend">Add a friend</button>`;
-    document.getElementById('paddfriend').onclick = () => shareLink(`${location.origin}/#/friend/${j.code}`, 'Be my friend in Animal Kingdom');
-    box.querySelectorAll('[data-chatwith]').forEach(el => el.onclick = e => { if (!e.target.closest('[data-unfriend]')) openChat(el.dataset.chatwith); });   // a row opens your conversation
-    refreshChat();
-    box.querySelectorAll('[data-unfriend]').forEach(el => el.onclick = async () => {
-      const ov = document.createElement('div'); ov.className = 'fbov';   // asked first, as deleting a deck is
-      ov.innerHTML = `<div class="fbbox ask"><b>Remove ${el.dataset.name} from your friends?</b><div class="btns"><button class="slab" data-x="no">Keep</button><button class="play danger" data-x="yes">Remove</button></div></div>`;
-      document.body.appendChild(ov); ov.onclick = e => { if (e.target === ov) ov.remove(); };
-      ov.querySelector('[data-x="no"]').onclick = () => ov.remove();
-      ov.querySelector('[data-x="yes"]').onclick = async () => { ov.remove(); await api('/api/friends/' + el.dataset.unfriend, { method: 'DELETE' }); fillFriends(); }; });
-  };
-  fillFriends();
-  app.querySelectorAll('[data-m]').forEach(el => el.onclick = () => { location.hash = '#/replay/' + el.dataset.m; });
-  const nm = document.getElementById('pname');
+  return sect('Name', `<div class="namerow"><input class="field namein" id="pname" maxlength="20" value="${esc(ME.name)}" title="Rename"><span class="tag">#${ME.tag}</span></div>`) + account + code;
+}
+function wireAccount(root, redraw) {
+  const $r = id => root.querySelector('#' + id);
+  const nm = $r('pname');
   nm.onchange = async () => { const r = await api('/api/me', { method: 'PATCH', body: JSON.stringify({ name: nm.value }) });
-    if (!r.ok) return toast(await r.text()); ME = await r.json(); profileScreen(); };
-  app.querySelectorAll('[data-login]').forEach(el => el.onclick = async () => {
+    if (!r.ok) return toast(await r.text()); ME = await r.json(); redraw(); };
+  root.querySelectorAll('[data-login]').forEach(el => el.onclick = async () => {
     const r = await api('/api/auth/' + el.dataset.login, { method: 'POST' });
     if (!r.ok) return toast(await r.text());
     location.href = (await r.json()).url;
   });
-  const so = document.getElementById('signout');
+  const so = $r('signout');
   if (so) so.onclick = async () => { await api('/api/signout', { method: 'POST' }); localStorage.removeItem('ak:key'); await loadProfile(); location.hash = '#/'; };
   if (ME.logins.length) return;
-  document.getElementById('showkey').onclick = () => { ui.showKey = !ui.showKey; profileScreen(); };
-  document.getElementById('copykey').onclick = () => navigator.clipboard.writeText(store('ak:key')).then(() => toast('Sign-in code copied', true), () => toast(store('ak:key')));
-  const other = document.getElementById('other');
+  $r('showkey').onclick = () => { ui.showKey = !ui.showKey; redraw(); };
+  $r('copykey').onclick = () => navigator.clipboard.writeText(store('ak:key')).then(() => toast('Sign-in code copied', true), () => toast(store('ak:key')));
+  const other = $r('other');
   const signIn = async () => { const r = await api('/api/signin', { method: 'POST', body: JSON.stringify({ code: other.value }) });
     if (!r.ok) return toast('No profile has that sign-in code');
-    ME = await r.json(); store('ak:key', other.value.trim().toUpperCase()); ui.showKey = false; toast(`Signed in as ${ME.name}#${ME.tag}`, true); profileScreen(); };
-  document.getElementById('signin').onclick = signIn;
+    ME = await r.json(); store('ak:key', other.value.trim().toUpperCase()); ui.showKey = false; toast(`Signed in as ${ME.name}#${ME.tag}`, true); redraw(); };
+  $r('signin').onclick = signIn;
   other.onkeydown = e => { if (e.key === 'Enter') signIn(); };
 }
 
@@ -1236,7 +1224,7 @@ function drawEnd() {
   if (RP.views.length) {
     // a replay: the game's result, then the replay again or back to the profile
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}
-      <div class="btns"><a class="slab" href="#/profile/history">Back</a>${peek}<button class="play" id="again">Watch again</button></div></div>`;
+      <div class="btns"><a class="slab" href="#/ladder/history">Back</a>${peek}<button class="play" id="again">Watch again</button></div></div>`;
     document.getElementById('again').onclick = () => { replayStep(0); replayPlay(true); };
   } else if (V.gauntlet) {
     const g = V.gauntlet, tot = g.record.reduce((a, r) => [a[0] + r.w, a[1] + r.l], [0, 0]);
@@ -1296,7 +1284,7 @@ async function replayScreen(key) {
   if (RP.key === key && RP.views.length) return;
   stopReplay(); screen = null; RP.key = key;
   app.innerHTML = `<div class="mscr pre"><p class="wait">Loading the replay…</p></div>`;
-  const back = msg => { RP.key = null; history.replaceState(null, '', '#/profile/history'); profileScreen(); toast(msg); };
+  const back = msg => { RP.key = null; history.replaceState(null, '', '#/ladder/history'); ladderScreen(); toast(msg); };
   let views;
   try { const r = await api('/api/replay/' + encodeURIComponent(key)); if (!r.ok) throw new Error(await r.text()); views = await r.json(); }
   catch (e) { if (RP.key === key) back(e.message || 'The replay didn\'t load, try again'); return; }
@@ -1348,7 +1336,7 @@ function drawReplayBar() {
       <button class="slab" id="rfwd" tabindex="-1" data-tip="Forward one move">${ric('fwd')}</button>
       <div class="track" id="rtrack"><i></i></div>
       <button class="slab" id="reye" tabindex="-1"></button>
-      <a class="slab out" href="#/profile/history">Leave</a>`;
+      <a class="slab out" href="#/ladder/history">Leave</a>`;
     $('rback').onclick = stop(() => { replayPlay(false); replayStep(replayPrev()); });
     $('rfwd').onclick = stop(() => { replayPlay(false); replayStep(replayNext()); });
     $('rplay').onclick = stop(() => replayPlay(!RP.playing));
@@ -1380,7 +1368,7 @@ function replayKey(e) {
   if (e.key === 'ArrowLeft') { replayPlay(false); replayStep(replayPrev()); }
   else if (e.key === 'ArrowRight') { replayPlay(false); replayStep(replayNext()); }
   else if (e.key === ' ') { e.preventDefault(); replayPlay(!RP.playing); }
-  else if (e.key === 'Escape' && !ui.panel) location.hash = '#/profile/history';
+  else if (e.key === 'Escape' && !ui.panel) location.hash = '#/ladder/history';
   else return false;
   return true;
 }

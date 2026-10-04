@@ -1,4 +1,4 @@
-// The profile's match history and a match's replay: decks with their records filter the matches, a match opens its replay,
+// The ladder's match history and a match's replay: decks with their records filter the matches, a match opens its replay,
 // and the replay steps through the views the player saw with nothing on the board to act on.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -38,31 +38,31 @@ before(async () => {
     }
     r.continue();
   });
-  await page.goto(`${server.url}/#/profile/history`, { waitUntil: 'networkidle0' });
+  await page.goto(`${server.url}/#/ladder/history`, { waitUntil: 'networkidle0' });
 });
 after(async () => { await browser?.close(); server?.stop(); });
 
-test('the profile lists each match with both decks; the deck filter carries each deck\'s record and filters the matches', async () => {
+test('the match history lists each match with both decks; the deck filter carries each deck\'s record and filters the matches', async () => {
   assert.deepEqual(await page.$$eval('.hhead .ddo', els => els.map(e => e.textContent.replace(/\s+/g, ' ').trim())), ['All decks 2–1', 'Cats 2–0', 'Egg 0–1']);
-  assert.deepEqual(await page.$$eval('.prof .hr b', els => els.map(e => e.textContent)), ['Won', 'Won', 'Lost']);
-  assert.deepEqual(await page.$$eval('.prof .hr:nth-child(2) .dk', els => els.map(e => e.textContent)), ['Cats', 'Ana#1234'], 'a person, not their deck\'s name');
-  assert.ok(!(await page.$eval('.prof .hlist', e => e.textContent.includes('Her secret deck'))));
-  assert.equal(await page.$$eval('.prof .hr:first-child .pm .face', els => els.length), 2, 'both decks as pieces');
-  assert.equal(await page.$$eval('.prof .hr:last-child .pm .face', els => els.length), 2, 'a match from before covers finds the starters\' faces');
+  assert.deepEqual(await page.$$eval('.ladder .hr b', els => els.map(e => e.textContent)), ['Won', 'Won', 'Lost']);
+  assert.deepEqual(await page.$$eval('.ladder .hr:nth-child(2) .dk', els => els.map(e => e.textContent)), ['Cats', 'Ana#1234'], 'a person, not their deck\'s name');
+  assert.ok(!(await page.$eval('.ladder .hlist', e => e.textContent.includes('Her secret deck'))));
+  assert.equal(await page.$$eval('.ladder .hr:first-child .pm .face', els => els.length), 2, 'both decks as pieces');
+  assert.equal(await page.$$eval('.ladder .hr:last-child .pm .face', els => els.length), 2, 'a match from before covers finds the starters\' faces');
   await page.click('.hhead .dd .sel'); await page.click('.hhead .ddo[data-v="Egg"]');
-  assert.deepEqual(await page.$$eval('.prof .hr .dk', els => els.map(e => e.textContent)), ['Egg', 'Cats']);
+  assert.deepEqual(await page.$$eval('.ladder .hr .dk', els => els.map(e => e.textContent)), ['Egg', 'Cats']);
   await page.click('.hhead .dd .sel'); await page.click('.hhead .ddo[data-v=""]');
-  assert.equal(await page.$$eval('.prof .hr', els => els.length), 3, 'all decks again');
+  assert.equal(await page.$$eval('.ladder .hr', els => els.length), 3, 'all decks again');
 });
 
-test('a match that can no longer be replayed says so and stays on the profile', async () => {
-  await page.click('.prof .hr:last-child'); await wait(300);
-  assert.equal(await page.evaluate(() => location.hash), '#/profile/history');
+test('a match that can no longer be replayed says so and stays on the match history', async () => {
+  await page.click('.ladder .hr:last-child'); await wait(300);
+  assert.equal(await page.evaluate(() => location.hash), '#/ladder/history');
   assert.match(await page.$eval('#toast', e => e.textContent), /can't be replayed/);
 });
 
 test('a match opens its replay: every view drawn right, nothing to act on, the controls step through it', async () => {
-  await page.click('.prof .hr:first-child'); await page.waitForSelector('#rbar.on');
+  await page.click('.ladder .hr:first-child'); await page.waitForSelector('#rbar.on');
   await page.keyboard.press('Space');   // pause the playback
   assert.equal(await page.$eval('#menubtn', e => getComputedStyle(e).display), 'none', 'no Concede in a replay');
   for (let i = 0; i < Math.min(views.length, 60); i++) {
@@ -110,7 +110,7 @@ test('the opponent\'s hand shows face up; the eye turns it back into card backs'
   assert.equal(await page.$$eval('#opphand .oc', els => els.length), n);
 });
 
-test('the replay ends on the result, offers it again, and Leave goes back to the profile', async () => {
+test('the replay ends on the result, offers it again, and Leave goes back to the match history', async () => {
   const b = await (await page.$('#rtrack')).boundingBox();
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await page.mouse.down();
   await page.mouse.move(b.x + b.width + 40, b.y + b.height / 2, { steps: 4 }); await page.mouse.up();   // dragged past the end: the last view
@@ -118,7 +118,7 @@ test('the replay ends on the result, offers it again, and Leave goes back to the
   assert.ok(await page.$('#endov.on #again'), 'Watch again');
   await page.click('#again'); await page.keyboard.press('Space'); await wait(50);
   assert.equal(await page.evaluate(() => window.__ak().V.game.history.length), 0, 'back at the start');
-  await page.click('#rbar .out'); await page.waitForSelector('.prof');
+  await page.click('#rbar .out'); await page.waitForSelector('.ladder');
 });
 
 test('no page errors', () => assert.deepEqual(page.errors, []));
@@ -138,6 +138,6 @@ test('leaving a replay while a step animates stays left: the step in play never 
   await page.waitForFunction(() => window.__ak().PB.busy, { timeout: 15000 });
   await page.keyboard.press('Escape'); await wait(2500);
   assert.equal(await page.$('#scr'), null, 'the game screen came back');
-  assert.ok(await page.$('.prof'), 'the profile');
+  assert.ok(await page.$('.ladder'), 'the match history');
   await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
 });

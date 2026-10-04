@@ -47,7 +47,7 @@ test('a message reaches a friend on home: a piece under the corner, a count, and
   await bob.click('#chatt');
   await bob.waitForFunction(() => [...document.querySelectorAll('#chatp .msg:not(.me)')].some(m => m.textContent === 'want a game tonight?'));
   await bob.waitForFunction(() => document.querySelector('#hchat .cbadge').hidden, { timeout: 3000 });   // read
-  await say(bob, 'yes! after dinner');
+  await bob.type('#chatin', 'yes! after dinner'); await bob.click('#chatgo');   // the send button, as Enter
   await ann.waitForFunction(() => [...document.querySelectorAll('#chatp .msg:not(.me)')].some(m => m.textContent === 'yes! after dinner'), { timeout: 4000 });
   assert.equal(await count(ann), 0, 'a message into the open conversation is read at once');
   await bob.keyboard.press('Escape');
