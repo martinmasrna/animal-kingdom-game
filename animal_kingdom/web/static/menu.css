@@ -127,8 +127,6 @@
 .mscr .clist.editing { gap: 0; }
 /* Strips are slivers of the cards: strength on a small driftwood tab in the card's dark digits, the card's rarity edge around each. */
 :is(.mscr, .game) .dbody .st { height: 30px; box-shadow: inset 0 0 0 1px var(--edge-st, rgba(0,0,0,.6)), inset 0 -1px 0 rgba(0,0,0,.7); }
-:is(.mscr, .game) .dbody .st.rare { --edge-st: #6e9fd0; }
-:is(.mscr, .game) .dbody .st.legendary { --edge-st: #d9a93f; }
 :is(.mscr, .game) .st .s { position: relative; align-self: stretch; width: 30px; margin-right: 8px; display: flex; align-items: center; justify-content: center; gap: 0;
   background: url(/static/kit2/card_plaque.webp) center / 300% 300%; box-shadow: inset -1px 0 0 rgba(0,0,0,.45); }
 :is(.mscr, .game) .st .s img { height: 17px; filter: brightness(.16) sepia(.6); }
@@ -139,12 +137,11 @@
 :is(.mscr, .game) .dbody .st { box-shadow: inset 0 -1px 0 rgba(0,0,0,.75); }
 :is(.mscr, .game) .st .s { box-shadow: inset 0 0 0 2px var(--edge-st, #3a3530), inset -1px 0 0 rgba(0,0,0,.45); }
 /* Strips, second take: the card's own notched banner, small, holds the strength (separate pieces, not a column);
-   rarity is a thin metal bar on the strip's left edge. Rarity labels as plain labels, not dashboard headers. */
+   rarity is the tab's tint (below). Rarity labels as plain labels, not dashboard headers. */
 :is(.mscr, .game) .st .s { width: 22px; margin: 0 8px 0 7px; align-self: stretch; box-shadow: none;
   background: url(/static/kit2/card_banner.webp) center top / 100% 100% no-repeat; filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
 :is(.mscr, .game) .st .s img { height: 13px; margin-top: -4px; }
 :is(.mscr, .game) .dbody .st { padding-left: 0; }
-:is(.mscr, .game) .dbody .st::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--edge-st, #8f8068); z-index: 1; }
 :is(.mscr, .game) .dbody .st .art { z-index: 0; }
 .mscr .rh { font: 600 14px 'Fira Sans Condensed', sans-serif; letter-spacing: 0; text-transform: none; color: #a89d8c; margin: 10px 6px 4px; }
 .mscr .rh span:last-child { color: #a89d8c; }
