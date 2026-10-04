@@ -42,3 +42,16 @@ test('the ladder opens on its leaderboard, the match history its second tab; the
   assert.equal(await page.$eval('.ptab.on', e => e.textContent), 'Match history');
   await page.close();
 });
+
+test('a friend\'s match link holds the opponent, and its piece lets go of it: the usual choice opens', async () => {
+  const page = await browser.newPage();
+  await page.goto(`${server.url}/#/join/QKQQGA`, { waitUntil: 'networkidle0' });
+  assert.match(await page.$eval('#oppbtn', e => e.textContent), /Match QKQQGA/);
+  assert.equal(await page.$eval('#go', e => e.textContent), 'Join match');
+  await page.click('#oppbtn'); await page.waitForSelector('[data-opp="ranked"]');
+  assert.equal(await page.evaluate(() => location.hash), '#/');
+  await page.click('[data-opp="ranked"]');
+  assert.match(await page.$eval('#oppbtn', e => e.textContent), /^Ranked/);
+  assert.equal(await page.$eval('#go', e => e.textContent), 'Play');
+  await page.close();
+});
