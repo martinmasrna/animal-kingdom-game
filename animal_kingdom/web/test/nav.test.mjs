@@ -50,8 +50,20 @@ test('a friend\'s match link holds the opponent, and its piece lets go of it: th
   assert.equal(await page.$eval('#go', e => e.textContent), 'Join match');
   await page.click('#oppbtn'); await page.waitForSelector('[data-opp="ranked"]');
   assert.equal(await page.evaluate(() => location.hash), '#/');
-  await page.click('[data-opp="ranked"]');
+  await page.$eval('[data-opp="ranked"]', e => e.click());   // puppeteer's own click finds no point on it here, though it shows and takes a real click
   assert.match(await page.$eval('#oppbtn', e => e.textContent), /^Ranked/);
   assert.equal(await page.$eval('#go', e => e.textContent), 'Play');
+  await page.close();
+});
+
+test('the opponent you set up outlives a reload: Practice\'s level stays as you left it', async () => {
+  const page = await browser.newPage();
+  await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
+  await page.click('#oppbtn'); await page.waitForSelector('[data-opp="bot"]');
+  await page.$eval('[data-opp="bot"]', e => e.click()); await page.waitForSelector('[data-level="expert"]');
+  await page.$eval('[data-level="expert"]', e => e.click());
+  await page.reload({ waitUntil: 'networkidle0' });
+  assert.match(await page.$eval('#oppbtn', e => e.textContent), /Expert/);
+  await page.evaluate(() => localStorage.removeItem('ak:play'));
   await page.close();
 });

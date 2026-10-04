@@ -210,6 +210,14 @@ function route() {
 // side opens its chooser above the piece. Collection and the profile stand beside it for now, until the hub holds more.
 // #/gauntlet is the same screen with the developer's gauntlet as the opponent; #/join/<code> the same with a friend's match.
 const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };
+// The opponent you set up (Practice or Ranked, the bot's level and deck, who plays your deck) is kept in the browser, as
+// the chosen deck is: a reload (a new build reloads open tabs) or another visit finds it as you left it.
+try { const k = JSON.parse(store('ak:play') || '{}');
+  if (['bot', 'ranked'].includes(k.opp)) play.opp = k.opp;
+  if (['easy', 'normal', 'expert'].includes(k.level)) play.level = k.level;
+  if (typeof k.botDeck === 'string') play.botDeck = k.botDeck;
+  if (['mine', 'theirs'].includes(k.side)) play.side = k.side; } catch { /* nothing kept */ }
+const keepPlay = () => { if (['bot', 'ranked'].includes(play.opp)) store('ak:play', JSON.stringify({ opp: play.opp, level: play.level, botDeck: play.botDeck, side: play.side })); };
 const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']], SIDES = [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']];
 const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
 // Home's corner piece (design sandbox screen/nav/, 2026-10-02): the Ladder (where you stand on it), Collection by name, and a menu (three bars) listing the rest, the gear kept for Settings in it; seven equal icons were too many. Feedback is a tab on the
@@ -221,12 +229,14 @@ const mePiece = () => {   // the Ladder, with your rating and place once ranked,
   const sub = !ME ? '' : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
   return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${TOPICON.leaderboard}<span><b>Ladder</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
 };
+let homeMode = {};   // the mode home was last drawn in: a late redraw keeps to it (not to the mode it was first opened with)
 function homeScreen(mode = {}) {
-  screen = 'home';
-  if (!newsAsked) { newsAsked = true; loadNews(api).then(() => { if (screen === 'home') homeScreen(mode); }); }   // the dot and "Since you last played" once it's known
+  screen = 'home'; homeMode = mode;
+  if (!newsAsked) { newsAsked = true; loadNews(api).then(() => { if (screen === 'home') homeScreen(homeMode); }); }   // the dot and "Since you last played" once it's known
   if (mode.gauntlet) play.opp = 'gauntlet'; else if (play.opp === 'gauntlet' || mode.join) play.opp = mode.join ? 'friend' : 'bot';
   const all = playable(), chosen = chosenDeck(), peek = all.find(d => d.id === play.peek) || chosen;
   if (play.botDeck === 'goodstuff') play.botDeck = 'random';
+  keepPlay();   // home draws on every change of the choice: what it draws is what's kept
   const bd = DECKS.find(d => d.id === play.botDeck), redraw = () => homeScreen(mode);
   const botDecks = [['random', 'Random'], ...DECKS.filter(d => d.id !== 'goodstuff').map(d => [d.id, d.name])];   // the seven starters only
   // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
