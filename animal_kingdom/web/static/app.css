@@ -159,6 +159,13 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .card:is(.rare, .legendary) .stab::before { content: ''; position: absolute; inset: 0; z-index: -1; background: url(/static/kit2/card_banner.webp) center / 100% 100% no-repeat; filter: var(--tint); }
 .card.rare, .st.rare { --tint: saturate(0) brightness(1.1) sepia(.35) hue-rotate(180deg) saturate(1.6); }
 .card.legendary, .st.legendary { --tint: sepia(.6) saturate(2.2) brightness(1.08); }
+/* The rules panel takes a paler tint of the same metal: the card one material, the panel quieter than the name plaque
+   (Martin, 2026-10-04: pale gold on legendaries, paler steel on rares). */
+.card:is(.rare, .legendary) .ctext { border-image: none; }
+.card:is(.rare, .legendary) .ctext::before { content: ''; position: absolute; inset: -.55em; z-index: -1; border: .55em solid transparent;
+  border-image: url(/static/kit2/card_plaque.webp) 36 fill / .55em stretch; filter: var(--ptint); }
+.card.rare { --ptint: saturate(0) brightness(1.27) sepia(.25) hue-rotate(180deg) saturate(1.1); }
+.card.legendary { --ptint: sepia(.6) saturate(1.5) brightness(1.16); }
 .card .stab .n { position: absolute; left: 0; right: 0; top: 1.36em; height: 2.9em; display: flex; justify-content: center; }
 .card .stab .n.two { top: 1.66em; height: 2.3em; }
 .card .stab .n img { display: block; height: 100%; filter: brightness(.16) sepia(.6); }
