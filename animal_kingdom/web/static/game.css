@@ -397,8 +397,8 @@
 .game .recent .tgap { width: 10px; }
 /* A hand card read large (hover, or the tutorial explaining it) shows its rules panel, so it frames its painting as the full
    card does (its FULL height), not as the compact card's top-aligned crop. */
-.game .hc:hover .card .pic, .game .hc.shown .card .pic { bottom: 8em; background-position: 50% var(--fy, 30%); }
-.game .hc:hover .card, .game .hc.shown .card { --fr: url(/static/kit2/card_frame.webp); --cut: 72.1%; }   /* read in full: the frame with its rules panel */
+.game .hc:hover .card .pic, .game .hc.shown .card .pic { bottom: 8.15em; background-position: 50% var(--fy, 30%); }
+.game .hc:hover .card, .game .hc.shown .card { --fr: url(/static/kit2/card_frame.webp); --cut: 71.7%; }   /* read in full: the frame with its rules panel */
 /* the coach over a hovered card: the card grows to 2.1x from its bottom (top at y 347), so the coach stands above that */
 .game .coach.above.risen { bottom: calc(467px - var(--up, 0px)) !important; z-index: 31; }
 
@@ -460,9 +460,9 @@
 /* Touch (no hover): a tap only picks a card (it rises, the board stays clear); pressing and holding shows it large to read. */
 @media (hover: none) {
   .game .hc:hover { transform: none; } .game .hc:hover .card .ctext { display: none; }
-  .game .hc:hover:not(.peek):not(.shown) .card { --fr: url(/static/kit2/card_frame_compact.webp); --cut: 100%; } .game .hc:hover:not(.peek):not(.shown) .card .pic { bottom: .6em; }
+  .game .hc:hover:not(.peek):not(.shown) .card { --fr: url(/static/kit2/card_frame_compact.webp); --cut: 100%; } .game .hc:hover:not(.peek):not(.shown) .card .pic { bottom: .4em; }
   .game .hc.sel, .game .hc.sel:hover { transform: translateY(-18px); }
-  .game .hc.peek, .game .hc.peek:hover { transform: translateY(-12px) scale(2.1); z-index: 30 !important; } .game .hc.peek .card .ctext { display: flex; } .game .hc.peek .card { --fr: url(/static/kit2/card_frame.webp); --cut: 72.1%; } .game .hc.peek .card .pic { bottom: 8em; }
+  .game .hc.peek, .game .hc.peek:hover { transform: translateY(-12px) scale(2.1); z-index: 30 !important; } .game .hc.peek .card .ctext { display: flex; } .game .hc.peek .card { --fr: url(/static/kit2/card_frame.webp); --cut: 71.7%; } .game .hc.peek .card .pic { bottom: 8.15em; }
 }
 
 /* Sideways on a phone the wide stage shows at about half size: the end of a game and the concede question grow to be read and tapped. */
@@ -493,7 +493,7 @@
   background: url(/static/kit2/gem_a.webp) center / 142% no-repeat; }
 .game .intro .iside.B .iring .jewel { background-image: url(/static/kit2/gem_b.webp); }
 .game .intro .iring .gemnum { height: 1em; } .game .intro .iring .q { font: 700 .95em/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; margin-left: .05em; }
-.game .intro .card .stab { display: none; } .game .intro .card .nbar { left: .8em; padding: 0 .5em; }   /* a deck's face here, not a card to weigh: no strength, the name centred */
+.game .intro .card .stab { display: none; } .game .intro .card .nbar { left: .55em; padding: 0 .5em; }   /* a deck's face here, not a card to weigh: no strength, the name centred */
 .game .intro .iside.A { animation: introL .7s cubic-bezier(.2,.8,.3,1) both; } .game .intro .iside.B { animation: introR .7s cubic-bezier(.2,.8,.3,1) both; }
 @keyframes introL { from { transform: translateX(-60vw); } } @keyframes introR { from { transform: translateX(60vw); } }
 .game .intro .ivs { font: 800 80px/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; text-shadow: 0 4px 20px rgba(0,0,0,.8); animation: introVs .4s ease .55s both; }

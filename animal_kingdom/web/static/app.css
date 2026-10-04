@@ -141,34 +141,34 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 /* Anything set into a card wears its frame (.edge: the versus moment's gem ring): the frame's wood, tinted as the card is. */
 .edge { --bw: .55em; isolation: isolate; }
 .edge::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: url(/static/kit2/card_frame.webp) 50% 3% / 420% auto; filter: var(--tint, none); }
-.card { --w: 180px; --bw: .73em; --fr: url(/static/kit2/card_frame.webp); --cut: 72.1%; position: relative; width: var(--w); height: calc(var(--w) * 1.467);
+.card { --w: 180px; --bw: .49em; --fr: url(/static/kit2/card_frame.webp); --cut: 71.7%; position: relative; width: var(--w); height: calc(var(--w) * 1.467);
   font-size: calc(var(--w) / 20); flex: none; border-radius: .45em; box-shadow: .2em .45em .9em rgba(0,0,0,.55); overflow: hidden; isolation: isolate; }
 .card.compact { --fr: url(/static/kit2/card_frame_compact.webp); --cut: 100%; }
 .card .cframe { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: var(--fr) 0 0 / 100% 100% no-repeat;
   filter: var(--tint, none); clip-path: inset(0 0 calc(100% - var(--cut)) 0); }
 .card .cframe.pf { filter: var(--ptint, none); clip-path: inset(var(--cut) 0 0 0); }
 /* The painting fills the window, a hair under the frame's edge all round. */
-.card .pic { position: absolute; inset: 3.4em .6em .6em; background: #3a2c1a 50% 0 / cover no-repeat; display: grid; place-items: center; }
+.card .pic { position: absolute; inset: 3.05em .4em .4em; background: #3a2c1a 50% 0 / cover no-repeat; display: grid; place-items: center; }
 .card .pic span { font: 600 1.4em/1.1 'Fira Sans Condensed', sans-serif; color: #f3e3c0; text-align: center; padding: 1em; }
-.card .nbar { position: absolute; z-index: 2; top: .15em; height: 3.3em; left: 4.6em; right: .8em; display: flex; align-items: center; justify-content: center; padding: 0 .3em; }
+.card .nbar { position: absolute; z-index: 2; top: .1em; height: 3em; left: 4.45em; right: .55em; display: flex; align-items: center; justify-content: center; padding: 0 .3em; }
 .card .nbar span { font: 600 1.4em/1 'Fira Sans Condensed', sans-serif; letter-spacing: .01em; color: #1d140a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card .nbar.two span { white-space: normal; text-wrap: balance; text-align: center; font-size: 1.08em; overflow: visible; }
-.card .stab { position: absolute; left: 0; top: 0; width: 4.53em; height: 5.91em; z-index: 3; }
+.card .stab { position: absolute; left: 0; top: 0; width: 4.39em; height: 5.57em; z-index: 3; }
 .card.rare, .st.rare, .edge.rare { --tint: saturate(0) brightness(1.1) sepia(.35) hue-rotate(180deg) saturate(1.6); }
 .card.legendary, .st.legendary, .edge.legendary { --tint: sepia(.6) saturate(2.2) brightness(1.08); }
 .card.rare { --ptint: saturate(0) brightness(1.27) sepia(.25) hue-rotate(180deg) saturate(1.1); }   /* Martin, 2026-10-04: paler steel on rares, */
 .card.legendary { --ptint: sepia(.6) saturate(1.5) brightness(1.16); }                             /* pale gold on legendaries */
-.card .stab .n { position: absolute; left: 0; right: 0; top: 1.15em; height: 2.9em; display: flex; justify-content: center; }
-.card .stab .n.two { top: 1.45em; height: 2.3em; }
+.card .stab .n { position: absolute; left: 0; right: 0; top: 1em; height: 2.9em; display: flex; justify-content: center; }
+.card .stab .n.two { top: 1.3em; height: 2.3em; }
 .card .stab .n img { display: block; height: 100%; filter: brightness(.16) sepia(.6); }
 .card .stab .n.up img { filter: brightness(.3) sepia(1) hue-rotate(60deg) saturate(4); } .card .stab .n.down img { filter: brightness(.35) sepia(1) hue-rotate(-30deg) saturate(5); }
 .card .stab .n b { font: 800 3.5em/.8 'Fira Sans Condensed', sans-serif; color: #1f1409; }
-.card .ctext { position: absolute; z-index: 2; left: .9em; right: .9em; bottom: .35em; height: 7.6em; padding: 0 .3em 1.2em; display: flex; flex-direction: column; justify-content: center; }
+.card .ctext { position: absolute; z-index: 2; left: .7em; right: .7em; bottom: .35em; height: 7.6em; padding: 0 .3em 1.2em; display: flex; flex-direction: column; justify-content: center; }
 .card .ctext p { margin: 0; font: 500 1.3em/1.14 'Fira Sans Condensed', sans-serif; color: #1a1108; text-align: center; text-wrap: pretty; }
 .card .ctext p b { font-weight: 800; }
 .card .ctext i { position: absolute; left: 0; right: 0; bottom: .15em; text-align: center; font: 700 1em/1 'Fira Sans Condensed', sans-serif; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #3a2a18; }
 .card.compact .ctext { display: none; }
-.card:not(.compact) .pic { bottom: 8em; background-position: 50% var(--fy, 30%); }
+.card:not(.compact) .pic { bottom: 8.15em; background-position: 50% var(--fy, 30%); }
 /* Legendary: a slow sheen crosses the card. */
 .card.legendary::after { content: ''; position: absolute; top: -20%; bottom: -20%; left: 0; width: 35%; z-index: 4; pointer-events: none;
   background: linear-gradient(90deg, rgba(255,240,200,0), rgba(255,240,200,.16), rgba(255,240,200,0)); animation: cardsheen 5.5s ease-in-out infinite; }
