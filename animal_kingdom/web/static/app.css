@@ -158,8 +158,8 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets) .ftab { 
 .card:is(.rare, .legendary) .nbar::before { content: ''; position: absolute; inset: -.55em; z-index: -1; border: .55em solid transparent;
   border-image: url(/static/kit2/card_plaque.webp) 36 fill / .55em stretch; filter: var(--tint); }
 .card:is(.rare, .legendary) .stab::before { content: ''; position: absolute; inset: 0; z-index: -1; background: url(/static/kit2/card_banner.webp) center / 100% 100% no-repeat; filter: var(--tint); }
-.card.rare { --tint: saturate(.3) brightness(1.05) sepia(.15) hue-rotate(180deg) saturate(1.2); }
-.card.legendary { --tint: sepia(.5) saturate(1.95) brightness(1.07); }
+.card.rare, .st.rare { --tint: saturate(0) brightness(1.1) sepia(.35) hue-rotate(180deg) saturate(1.6); }
+.card.legendary, .st.legendary { --tint: sepia(.6) saturate(2.2) brightness(1.08); }
 .card .stab .n { position: absolute; left: 0; right: 0; top: 1.36em; height: 2.9em; display: flex; justify-content: center; }
 .card .stab .n.two { top: 1.66em; height: 2.3em; }
 .card .stab .n img { display: block; height: 100%; filter: brightness(.16) sepia(.6); }

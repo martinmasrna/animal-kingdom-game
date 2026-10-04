@@ -144,7 +144,7 @@
   background: url(/static/kit2/card_banner.webp) center top / 100% 100% no-repeat; filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
 :is(.mscr, .game) .st .s img { height: 13px; margin-top: -4px; }
 :is(.mscr, .game) .dbody .st { padding-left: 0; }
-:is(.mscr, .game) .dbody .st::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--edge-st, #4a453f); z-index: 1; }
+:is(.mscr, .game) .dbody .st::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--edge-st, #8f8068); z-index: 1; }
 :is(.mscr, .game) .dbody .st .art { z-index: 0; }
 .mscr .rh { font: 600 14px 'Fira Sans Condensed', sans-serif; letter-spacing: 0; text-transform: none; color: #a89d8c; margin: 10px 6px 4px; }
 .mscr .rh span:last-child { color: #a89d8c; }
@@ -280,3 +280,7 @@ html { touch-action: manipulation; }
 .mscr .pfr[data-chatwith] { cursor: pointer; border-radius: 8px; } .mscr .pfr[data-chatwith]:hover { background: rgba(255,245,230,.06); }   /* a friend row opens your conversation */
 @media (max-width: 440px) { .home .top .backbtn.lab { width: 48px; padding: 0; } .home .top .backbtn.lab span { display: none; } }   /* a phone: Collection is its icon, as the gear is, so Friends fits */
 .chatopen .ftab { display: none !important; }   /* the panel holds the right edge */
+/* The tab takes its rarity's tint (steel, gold) like the card's plaque, under the digits; commons stay driftwood. */
+:is(.mscr, .game) .st:is(.rare, .legendary) .s { background: none; isolation: isolate; }
+:is(.mscr, .game) .st:is(.rare, .legendary) .s::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
+  background: url(/static/kit2/card_plaque.webp) center / 240% 240%; filter: var(--tint); }
