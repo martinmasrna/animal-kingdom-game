@@ -205,16 +205,22 @@ function wire(app, all, open) {
   const fl = flash && app.querySelector(`.side .st[data-card="${flash}"]`); flash = null;
   if (fl) { fl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); fl.classList.add('flash'); }
 
-  // Hovering a card or a strip shows the full card, beside it and clear of the deck column.
+  // Hovering a card or a strip shows the full card, beside it and clear of the deck column. Only the pointer moving opens
+  // it: a scroll slides cards under a still pointer, so it closes the card and none opens until the pointer moves again
+  // (the browser's own move after a scroll carries no movement).
   const side = app.querySelector('.side').getBoundingClientRect().left;
-  app.querySelectorAll('[data-card]').forEach(e => {
-    e.onmouseenter = () => { const r = e.getBoundingClientRect(), inSide = !!e.closest('.side');
-      pop.className = 'pop'; pop.innerHTML = cardHTML(C[e.dataset.card]); pop.style.display = 'flex';
-      const w = pop.offsetWidth, h = pop.offsetHeight;
-      pop.style.left = (inSide || r.right + 10 + w > side ? r.left - w - 10 : r.right + 10) + 'px';
-      pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; };
-    e.onmouseleave = hidePop;
-  });
+  let on = null;
+  const show = e => { on = e; const r = e.getBoundingClientRect(), inSide = !!e.closest('.side');
+    pop.className = 'pop'; pop.innerHTML = cardHTML(C[e.dataset.card]); pop.style.display = 'flex';
+    const w = pop.offsetWidth, h = pop.offsetHeight;
+    pop.style.left = (inSide || r.right + 10 + w > side ? r.left - w - 10 : r.right + 10) + 'px';
+    pop.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 10)) + 'px'; };
+  const root = app.querySelector('.coll');
+  root.onmousemove = ev => { if (!ev.movementX && !ev.movementY) return;
+    const e = ev.target.closest('[data-card]'); if (e === on) return;
+    if (e) show(e); else { on = null; hidePop(); } };
+  root.onmouseleave = () => { on = null; hidePop(); };
+  root.addEventListener('scroll', () => { if (on) { on = null; hidePop(); } }, { capture: true, passive: true });
 }
 
 // A refused add: the card shakes and the limit that stopped it flashes (the deck total, the copy dots or a rarity count).

@@ -29,6 +29,18 @@ test('the screen: the grid beside the deck column, the header on the grid\'s edg
   assert.equal(Math.round(b.tabs.left), Math.round(b.grid.left), 'the header starts on the grid\'s edge');
 });
 
+test('the full card shows as the pointer moves onto a card, and a scroll under a still pointer opens none', async () => {
+  const shown = () => page.$eval('#pop', e => e.style.display !== 'none');
+  const r = await page.$eval('.cgrid .tl', e => { const b = e.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; });
+  await page.mouse.move(r.x - 30, r.y); await page.mouse.move(r.x, r.y, { steps: 3 }); await wait(50);
+  assert.ok(await shown(), 'moving onto a card shows it');
+  await page.mouse.wheel({ deltaY: 400 }); await wait(250);
+  assert.ok(!(await shown()), 'scrolling closes it and opens none under the still pointer');
+  await page.mouse.move(r.x + 4, r.y, { steps: 2 }); await wait(50);
+  assert.ok(await shown(), 'moving again shows the card now under the pointer');
+  await page.mouse.move(5, 5); await page.$eval('.cgrid', e => { e.scrollTop = 0; }); await wait(50);
+});
+
 test('a new profile has the seven starter decks as its own, the first one open', async () => {
   const decks = await myDecks();
   assert.deepEqual(decks.map(d => d.name), ['Cats', 'Canines', 'Aggro', 'Colony', 'Egg', 'Food', 'Ramp']);
