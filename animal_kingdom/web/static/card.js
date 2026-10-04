@@ -1,6 +1,6 @@
-// The one card (design sandbox card2/, Martin 2026-09-29): the painting fills the card inside a rarity edge (graphite,
-// silver, gold); a painted driftwood bar holds the name, a painted banner the strength in chalk digits, a driftwood panel
-// the rules and family. `compact` drops the panel (hand and collection show the painting; the full card shows on hover).
+// The one card (design sandbox card3/, Martin 2026-10-04): one painted driftwood frame, tinted per rarity (driftwood, steel,
+// gold), its name bar holding the name, its banner the strength in chalk digits, its panel the rules and family, the
+// painting set into its window. `compact` drops the panel (hand and collection show the painting; the full card shows on hover).
 // Size it with the CSS variable --w on .card (everything inside scales with it).
 import { hasArt, artUrl, CROP, FULL } from './art.js';
 
@@ -22,7 +22,7 @@ export function cardHTML(c, { str = c.str, cls = '', attrs = '', lazy = false } 
   const base = c.str === '*' ? null : c.str, delta = base !== null && str !== base ? (str > base ? ' up' : ' down') : '';
   const art = !hasArt(c.id) ? '' : lazy ? ` data-art="${artUrl(c.id)}" style="--fy:${focus(c.id).toFixed(0)}%"`
     : ` style="background-image:url(${artUrl(c.id)});--fy:${focus(c.id).toFixed(0)}%"`;
-  return `<div class="card ${c.rarity} ${cls}" ${attrs}><div class="pic"${art}>${hasArt(c.id) ? '' : `<span>${c.name}</span>`}</div>` +
+  return `<div class="card ${c.rarity} ${cls}" ${attrs}><div class="pic"${art}>${hasArt(c.id) ? '' : `<span>${c.name}</span>`}</div><div class="cframe"></div><div class="cframe pf"></div>` +
     `<div class="nbar${c.name.length > 18 ? ' two' : ''}" style="--n:${c.name.length}"><span>${c.name}</span></div>` +
     `<div class="stab"><span class="n${String(str).length > 1 ? ' two' : ''}${delta}">${chalk(str)}</span></div>` +
     `<div class="ctext">${c.text ? `<p>${rules(c.text)}</p>` : ''}<i>${c.tags.join(' · ')}</i></div></div>`;
