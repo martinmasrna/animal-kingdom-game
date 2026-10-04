@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import gzip
 import json
 import logging
 import os
@@ -436,6 +437,21 @@ async def get_replay(req):
     if not saved:
         raise web.HTTPNotFound(text="This match can't be replayed")
     return web.Response(body=saved, content_type="application/json", headers={"Content-Encoding": "gzip"})
+
+
+async def replay_lists(req):
+    """Both decklists of one of your finished matches, as played ({mine, theirs}: card id -> copies), for the match history
+    to show without loading the whole replay. Decklists are open in this game, the opponent's too."""
+    p = me(req)
+    key = req.match_info["match"]
+    row = profiles.match(p["id"], key)
+    saved = row and row["seat"] and replay.load(REPLAY_DIR, key, row["seat"])
+    if not saved:
+        raise web.HTTPNotFound(text="This match's decklists weren't kept")
+    lists = json.loads(gzip.decompress(saved))[0].get("lists")   # replays saved before lists were kept have none
+    if not lists:
+        raise web.HTTPNotFound(text="This match's decklists weren't kept")
+    return web.json_response({"mine": lists[row["seat"]], "theirs": lists["B" if row["seat"] == "A" else "A"]})
 
 
 async def get_news(req):
@@ -991,6 +1007,7 @@ def make_app() -> web.Application:
         web.post("/api/signout", sign_out),
         web.get("/auth/{provider}/callback", auth_callback),
         web.get("/api/replay/{match}", get_replay),
+        web.get("/api/replay/{match}/lists", replay_lists),
         web.post("/api/feedback", send_feedback),
         web.post("/api/events", client_events),
         web.get("/api/news", get_news),

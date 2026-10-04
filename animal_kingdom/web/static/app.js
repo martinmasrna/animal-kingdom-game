@@ -464,7 +464,7 @@ async function finishSignIn(code) {
 // A deck's face: its cover, else (matches from before covers were kept) the starter or your deck of that name.
 const deckFace = (cover, name) => cover || COVER[(DECKS.find(d => d.name === name) || {}).id] || (ME.decks.find(d => d.name === name) || {}).cover || '';
 // A deck as a board piece: its face in the plain rim (the row's sides already say whose; colour is left to nothing here).
-const piece = id => `<span class="pm">${id && hasArt(id) ? `<span class="face" style="${portrait(id, 35)}"></span>` : ''}<img src="/static/kit2/rim_n.webp" alt="" draggable="false"></span>`;
+const piece = (id, attrs = '') => `<span class="pm" ${attrs}>${id && hasArt(id) ? `<span class="face" style="${portrait(id, 35)}"></span>` : ''}<img src="/static/kit2/rim_n.webp" alt="" draggable="false"></span>`;
 function ladderScreen() {
   screen = 'ladder';
   const when = t => new Date(t * 1000).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
@@ -475,9 +475,10 @@ function ladderScreen() {
   const bot = h => h.kind !== 'friend';   // a bot's deck has a name you know; a person's deck name is theirs, so the row names the person
   const result = h => h.won > h.lost ? 'Won' : h.won < h.lost ? 'Lost' : 'Draw';
   const mode = h => ({ ranked: 'Ranked · ', practice: 'Practice · ', friendly: 'Friendly · ' })[h.mode] || '';   // older matches: unknown   // a match is one game (older best-of-3s by their result)
+  const side = (s, name) => `data-side="${s}" data-name="${esc(name)}"`;   // a deck in the row: hovered (tapped), its list shows
   const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
-    ${piece(deckFace(h.my_cover, h.my_deck))}<span class="dk">${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck))}<span class="dk">${esc(h.opp_deck)}</span>
-    <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}</span>` : `${piece(h.opp_cover)}<span class="dk">${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}</span>`}</div>`).join('');
+    ${piece(deckFace(h.my_cover, h.my_deck), side('mine', h.my_deck))}<span class="dk" ${side('mine', h.my_deck)}>${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck), side('theirs', h.opp_deck))}<span class="dk" ${side('theirs', h.opp_deck)}>${esc(h.opp_deck)}</span>
+    <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}</span>` : `${piece(h.opp_cover, side('theirs', h.opp))}<span class="dk" ${side('theirs', h.opp)}>${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}</span>`}</div>`).join('');
   // the leaderboard first (Martin, 2026-10-02), the match history its second tab
   const lead = location.hash !== '#/ladder/history';
   app.innerHTML = `<div class="mscr ladder"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${lead ? '' : ' on'}" href="#/ladder/history">Match history</a></div>${!lead && (hist || ui.histDeck) ? filter : ''}</div>
@@ -487,6 +488,35 @@ function ladderScreen() {
   if (lead) fillLeaderboard();
   wireDd(app, (k, v) => { ui.histDeck = v || null; ladderScreen(); });
   app.querySelectorAll('[data-m]').forEach(el => el.onclick = () => { location.hash = '#/replay/' + el.dataset.m; });
+  wireDeckPeek(app);
+}
+// A deck in a match's row shows its list as it was played, beside the row: on hover, or on a touch screen a tap (which
+// there opens no replay; the rest of the row does).
+// Lists come from the saved replay (/api/replay/<match>/lists), fetched once per match.
+const listsOf = {};
+function wireDeckPeek(root) {
+  const box = document.createElement('div'); box.className = 'hpeek'; box.style.display = 'none'; root.querySelector('.ladder').append(box);
+  let on = null;
+  const hide = () => { on = null; box.style.display = 'none'; };
+  const show = async el => {
+    on = el; const key = el.closest('[data-m]').dataset.m;
+    listsOf[key] = listsOf[key] || api(`/api/replay/${encodeURIComponent(key)}/lists`).then(r => r.ok ? r.json() : null).catch(() => null);
+    const lists = await listsOf[key]; if (on !== el) return;
+    const list = lists && lists[el.dataset.side];
+    if (!list) { box.innerHTML = `<h4>${esc(el.dataset.name)}</h4><p class="none">This match's decklists weren't kept.</p>`; }
+    else box.innerHTML = `<h4>${esc(el.dataset.name)}</h4>${deckBody(Object.entries(list).flatMap(([id, n]) => Array(n).fill(id)).filter(id => CARDS[id]), CARDS, false)}`;
+    box.style.display = 'block';
+    const r = el.closest('.hr').getBoundingClientRect(), w = box.offsetWidth, h = box.offsetHeight;
+    box.style.left = (r.right + 12 + w <= innerWidth - 8 ? r.right + 12 : Math.max(8, r.left - 12 - w)) + 'px';
+    box.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 8)) + 'px';
+  };
+  root.querySelectorAll('[data-side]').forEach(el => {
+    el.onmouseenter = () => { if (!matchMedia('(hover: none)').matches) show(el); };
+    el.onmouseleave = () => { if (!matchMedia('(hover: none)').matches) hide(); };
+    el.onclick = e => { if (!matchMedia('(hover: none)').matches) return; e.stopPropagation(); on === el ? hide() : show(el); };   // a click opens the replay as anywhere on the row
+  });
+  root.querySelector('.hbody').addEventListener('scroll', hide, { passive: true });
+  root.addEventListener('pointerdown', e => { if (on && !e.target.closest('[data-side], .hpeek')) hide(); });
 }
 // Your account, at the top of Settings: your name#tag (renamed in place), Google/Discord, and while you have neither, the
 // sign-in code that brings this profile to another device.

@@ -321,6 +321,14 @@ def test_the_server_serves_your_replay_and_only_yours(monkeypatch, tmp_path):
             r = await c.get("/api/replay/M-0", headers={"X-AK-Key": me["code"]})
             assert r.status == 200 and await r.json() == [{"you": "B"}, {"you": "B"}]
             assert (await c.get("/api/replay/M-0", headers={"X-AK-Key": other["code"]})).status == 404
+            assert (await c.get("/api/replay/M-0/lists", headers={"X-AK-Key": me["code"]})).status == 404   # saved before lists were kept
+            # its decklists alone, yours (seat B) and theirs, for the match history
+            server.profiles.record(me["profile"]["id"], "N-0", kind="bot", my_deck="Cats", opp="Bot (Easy)", opp_deck="Ramp",
+                                   won=1, lost=0, seat="B")
+            replay.save(tmp_path, "N-0", "B", [{"you": "B", "lists": {"A": {"owl": 3}, "B": {"lion": 2}}}])
+            r = await c.get("/api/replay/N-0/lists", headers={"X-AK-Key": me["code"]})
+            assert r.status == 200 and await r.json() == {"mine": {"lion": 2}, "theirs": {"owl": 3}}
+            assert (await c.get("/api/replay/N-0/lists", headers={"X-AK-Key": other["code"]})).status == 404
     asyncio.run(run())
 
 

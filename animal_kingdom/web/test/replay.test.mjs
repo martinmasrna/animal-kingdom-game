@@ -28,6 +28,7 @@ before(async () => {
   await page.setRequestInterception(true);
   page.on('request', async r => {
     const url = r.url();
+    if (url.includes('/api/replay/AAA-0/lists')) return r.respond({ contentType: 'application/json', body: JSON.stringify({ mine: views[0].lists.A, theirs: views[0].lists.B }) });
     if (url.includes('/api/replay/AAA-0')) return r.respond({ contentType: 'application/json', body: JSON.stringify(views) });   // the server's format: the list of views
     if (url.includes('/api/replay/BBB-0')) return r.respond({ status: 409, contentType: 'text/plain', body: 'The cards have changed since this match, so it can\'t be replayed' });
     if (url.endsWith('/api/profile') || url.endsWith('/api/me')) {   // a profile with finished matches
@@ -53,6 +54,18 @@ test('the match history lists each match with both decks; the deck filter carrie
   assert.deepEqual(await page.$$eval('.ladder .hr .dk', els => els.map(e => e.textContent)), ['Egg', 'Cats']);
   await page.click('.hhead .dd .sel'); await page.click('.hhead .ddo[data-v=""]');
   assert.equal(await page.$$eval('.ladder .hr', els => els.length), 3, 'all decks again');
+});
+
+test('a deck in a match\'s row shows its list beside the row, on hover', async () => {
+  const first = '.ladder .hr:first-child';
+  await page.hover(`${first} .dk[data-side="mine"]`);
+  await page.waitForFunction(() => { const b = document.querySelector('.hpeek'); return b && b.style.display === 'block' && b.querySelectorAll('.st').length > 0; });
+  const n = await page.$$eval('.hpeek .st', els => els.length);
+  assert.ok(n >= 5, `the deck's strips (${n})`);
+  await page.hover(`${first} .dk[data-side="theirs"]`); await wait(200);
+  assert.ok(await page.$eval('.hpeek h4', h => h.textContent.length > 0), 'the other deck\'s list');
+  await page.mouse.move(5, 5); await wait(100);
+  assert.equal(await page.$eval('.hpeek', b => b.style.display), 'none', 'leaving the deck hides the list');
 });
 
 test('a match that can no longer be replayed says so and stays on the match history', async () => {
