@@ -541,9 +541,13 @@ async def leave_ranked(req):
 
 
 def _open(match: Match) -> None:
-    for seat in match.seats.values():   # a ranked match states both ratings as they stand going in (the versus moment shows them)
+    # A ranked match states both ratings as they stand going in (the versus moment shows them). A bot shows its level's
+    # rating, the one the leaderboard lists (Martin, 2026-10-04: one number per bot everywhere); matchmaking still rates
+    # each of its decks on its own, out of sight.
+    for seat in match.seats.values():
         if seat.ladder:
-            seat.rating = ladder.get(seat.ladder).shown()
+            bot = ranking.parse_bot(seat.ladder)
+            seat.rating = str(round(bot_levels(ladder.table())[bot[0]])) if bot else ladder.get(seat.ladder).shown()
     match.on_game_end = save_game
     match.on_match_end = record_match
     hub.matches[match.id] = match
