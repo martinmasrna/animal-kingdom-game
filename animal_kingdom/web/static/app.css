@@ -400,5 +400,4 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
   background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 16px 40px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,245,230,.12); pointer-events: none; }
 .hpeek h4 { margin: 2px 6px 6px; font: 700 18px 'Fira Sans Condensed', sans-serif; color: #f0e8da; }
 .hpeek .none { margin: 4px 6px; color: #b3a996; font-size: 15px; }
-.ladder .hr [data-side] { cursor: help; }
 @media (hover: none) { .hpeek { pointer-events: auto; } }
