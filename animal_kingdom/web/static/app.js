@@ -594,7 +594,7 @@ function onView(prev) {
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;   // reduced motion: the new view at once
   const steps = motion && (screen === 'game' || screen === null) ? plan(prev, V, CARDS) : [{ view: V, step: null }];
   if (steps.length === 1) { ui.step = null; showView(prev); played(); if (RP.playing) replayPlay(true); return; }   // a replay moves on after an update with nothing to animate too
-  PB.busy = true;
+  PB.busy = true; PB.target = V;   // the view these steps play towards
   const run = (i, before) => {
     const { view, step } = steps[i];
     V = PB.shown = view; ui.step = step; V.rx = Date.now() / 1000;
@@ -628,6 +628,29 @@ function played() {
   if (ev.length && ev[ev.length - 1].seq !== played.seq) { played.seq = ev[ev.length - 1].seq; send({ t: 'played', seq: played.seq }); }
 }
 function stopPlayback() { clearTimeout(PB.t); PB.busy = false; PB.queue = []; ui.step = null; }
+// Your move never waits on an animation (player report 2026-10-04: clicks on cards did nothing while the opponent's moves
+// were still playing, the clock running; after the mulligan, the clicks during the 1.5 s 'your turn' step did nothing). A
+// press while steps play, when the newest view puts a decision to you, skips to that view, and the click lands on what is
+// there now.
+let skipped = null;
+function skipToYourMove(e) {
+  if (!PB.busy || RP.views.length || screen !== 'game') return;
+  const latest = PB.queue.length ? PB.queue[PB.queue.length - 1] : PB.target;   // the newest view: queued, else the one playing
+  if (!latest || !latest.game || latest.game.toAct !== latest.you) return;
+  const shown = PB.shown; clearTimeout(PB.t); PB.busy = false; PB.queue = []; ui.step = null; V = latest; V.rx = Date.now() / 1000;
+  showView(shown); played();
+  skipped = { x: e.clientX, y: e.clientY, at: Date.now() };
+}
+addEventListener('pointerdown', skipToYourMove, true);
+// The press began on the screen as it was, so the browser has no click to give (its press and release fell on different
+// elements): on the release, what now stands under the pointer is clicked, and a late native click is dropped.
+let noClickUntil = 0;
+addEventListener('pointerup', e => {
+  if (!skipped || Date.now() - skipped.at > 1500) { skipped = null; return; }
+  skipped = null; noClickUntil = Date.now() + 400;
+  const el = document.elementFromPoint(e.clientX, e.clientY); if (el) el.click();
+}, true);
+addEventListener('click', e => { if (e.isTrusted && Date.now() < noClickUntil) { noClickUntil = 0; e.stopPropagation(); e.preventDefault(); } }, true);
 
 function showView(prev) {
   // While an animation the player started must play out (the tutorial's fruit on Next), new views wait: a redraw would cut
