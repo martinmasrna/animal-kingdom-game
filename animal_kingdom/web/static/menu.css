@@ -148,9 +148,12 @@
 .mscr .rh .full { color: #a89d8c; }
 .mscr .rh span.flash { color: #ff8a78; }
 :is(.mscr, .game) .dbody .st.legendary + .st.rare, :is(.mscr, .game) .dbody .st.rare + .st.common, :is(.mscr, .game) .dbody .st.legendary + .st.common { margin-top: 0; }
-/* Strip strength, third take: not the hanging banner (it needs a bar to hang from) but a small driftwood plaque centred in the row. */
-:is(.mscr, .game) .st .s { width: 24px; height: 22px; align-self: center; margin: 0 8px 0 8px; border-radius: 3px;
-  background: url(/static/kit2/card_plaque.webp) center / 240% 240%; box-shadow: inset 0 1px 0 rgba(255,250,240,.35), 0 1px 2px rgba(0,0,0,.6); filter: none; }
+/* Strip strength: a driftwood tile capping the strip's left end, full height, bevelled so stacked tiles stay separate pieces
+   (Martin, 2026-10-04); together they close the group's left edge. */
+:is(.mscr, .game) .st .s { width: 30px; align-self: stretch; margin: 0 10px 0 0; border-radius: 0; box-shadow: none; filter: none;
+  background: url(/static/kit2/card_plaque.webp) center / 240% 240%; }
+:is(.mscr, .game) .st .s::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,.8), inset 0 1px 0 rgba(255,250,240,.45), inset -1px 0 0 rgba(0,0,0,.5); }
 :is(.mscr, .game) .st .s img { height: 14px; margin-top: 0; }
 /* Copy dots at the strip's right end (an aligned column), in the card's bone, with a soft shadow to hold on the art. */
 :is(.mscr, .game) .dbody .st .n { flex: 1; }
