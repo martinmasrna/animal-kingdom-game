@@ -23,7 +23,7 @@ export const CROP = {
   eon: [.6, .33, .7], ember: [.55, .3, .75], aurum: [.52, .5, .85], omen: [.5, .42, .75], anaconda: [.49, .6, .62], egg_eater: [.71, .33, .62], snake_egg: [.55, .46, .62], bird_egg: [.52, .42, .82],
   dire_wolf: [.55, .33, .62], dingo: [.7, .27, .6], fox: [.62, .42, .7], african_wild_dog: [.7, .3, .55], dog: [.66, .3, .6],
   pup: [.55, .36, .72], outrider: [.62, .36, .75], red_wolf: [.66, .36, .66], hyena: [.5, .38, .6], bush_dog: [.64, .33, .6],
-  lobo: [.6, .25, .62], raksha: [.64, .33, .6], clarion: [.6, .22, .7], alpha: [.56, .36, .8], poppy: [.55, .36, .72], rusty: [.45, .36, .72],
+  lobo: [.55, .42, .75], raksha: [.64, .33, .6], clarion: [.6, .22, .7], alpha: [.56, .36, .8], poppy: [.55, .36, .72], rusty: [.45, .36, .72],
 };
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
@@ -42,7 +42,7 @@ export const STRIP = {
   hedgehog: [.47, .47, 1], hamster: [.52, .38, 1], muskrat: [.4, .38, 1.3], groundhog: [.58, .3, 1], gopher: [.62, .37, 1], verminus: [.7, .22, 1],
   pestis: [.66, .48, 1], sirocco: [.47, .62, 1.5], gale: [.7, .36, 1.7], jerboa: [.73, .38, 1.3], hornet: [.5, .45, 1], chameleon: [.62, .28, 1.3],
   skunk: [.53, .52, 1.7], lemming: [.82, .38, 1.4], cheetah: [.87, .4, 1.3], rat: [.8, .48, 1], falcon: [.8, .6, 1.7], bat: [.53, .44, 1.3],
-  mouse: [.47, .33, 1], lobo: [.64, .23, 1.1], raksha: [.63, .38, 1.1], clarion: [.63, .16, 1.1], bush_dog: [.63, .25, 1.1], red_wolf: [.7, .32, 1.4],
+  mouse: [.47, .33, 1], lobo: [.55, .38, 1.2], raksha: [.63, .38, 1.1], clarion: [.63, .16, 1.1], bush_dog: [.63, .25, 1.1], red_wolf: [.7, .32, 1.4],
   gray_wolf: [.73, .31, 1], fox: [.7, .4, 1.3], african_wild_dog: [.68, .33, 1], dingo: [.73, .25, 1.1], dog: [.67, .34, 1], alpha: [.6, .19, 1.2],
   hyena: [.5, .38, 1.4], outrider: [.77, .31, 1.3], dire_wolf: [.56, .36, 1.3], pup: [.57, .27, 1.2], poppy: [.5, .32, 1], rusty: [.5, .32, 1],
 };
@@ -57,7 +57,7 @@ export const FULL = {
   clarion: .355, cougar: .455, dingo: .375, dire_wolf: .385, dog: .435, egg_eater: .485, elephant: .365, eon: .375,
   falcon: .385, falstaff: .41, fathom: .405, flying_squirrel: .385, fox: .45, gale: .375, goliath: .45, gopher: .475,
   gray_wolf: .475, greywhisker: .415, grizzly_bear: .425, groundhog: .385, guard_hornet: .465, hamster: .455, hedgehog: .435,
-  hornet: .425, house_cat: .435, hyena: .475, jaguar: .455, king_theron: .305, lemming: .445, lion: .355, lobo: .385,
+  hornet: .425, house_cat: .435, hyena: .475, jaguar: .455, king_theron: .305, lemming: .445, lion: .355, lobo: .45,
   lynx: .395, magpie: .375, methuselah: .405, mouse: .455, muskrat: .48, nurse_bumblebee: .445, omen: .465, outrider: .365,
   owl: .385, pestis: .405, poppy: .355, porcupine: .435, prince_leo: .365, princess_lea: .395, pup: .365, queen_adira: .375,
   queen_bee: .425, queen_marabunta: .455, raksha: .425, rat: .475, rat_king: .365, rattlesnake: .555, raven: .405,
