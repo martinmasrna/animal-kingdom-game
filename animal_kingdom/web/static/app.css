@@ -136,17 +136,20 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 /* ---------- the card (card.js): 20em wide, 29.34em tall, em = --w / 20 ---------- */
 /* The card is one painted driftwood frame (kit2/card_frame.webp, design sandbox card3/, Martin 2026-10-04): name bar,
    strength banner, rails and rules panel carved from one board, the painting set into its window. Rarity tints the frame
-   (driftwood, steel, gold), its rules panel paler (--ptint). The compact card (hand, collection) wears the frame without
+   (driftwood, steel, gold), its rules panel paler. The compact card (hand, collection) wears the frame without
    the panel, the window running down to a bottom rail. The slots below are the frame's, in em (card width = 20em). */
 /* Anything set into a card wears its frame (.edge: the versus moment's gem ring): the frame's wood, tinted as the card is. */
 .edge { --bw: .55em; isolation: isolate; }
-.edge::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: url(/static/kit2/card_frame.webp) 50% 3% / 420% auto; filter: var(--tint, none); }
-.card { --w: 180px; --bw: .49em; --fr: url(/static/kit2/card_frame.webp); --cut: 71.7%; position: relative; width: var(--w); height: calc(var(--w) * 1.467);
+.edge::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--frf) 50% 3% / 420% auto; }
+.card { --w: 180px; --bw: .49em; --fr: var(--frf); position: relative; width: var(--w); height: calc(var(--w) * 1.467);
   font-size: calc(var(--w) / 20); flex: none; border-radius: .45em; box-shadow: .2em .45em .9em rgba(0,0,0,.55); overflow: hidden; isolation: isolate; }
-.card.compact { --fr: url(/static/kit2/card_frame_compact.webp); --cut: 100%; }
-.card .cframe { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: var(--fr) 0 0 / 100% 100% no-repeat;
-  filter: var(--tint, none); clip-path: inset(0 0 calc(100% - var(--cut)) 0); }
-.card .cframe.pf { filter: var(--ptint, none); clip-path: inset(var(--cut) 0 0 0); }
+.card.compact { --fr: var(--frc); }
+/* The frames come tinted (kit2/card_frame_<rarity>[_compact].webp, baked by the design sandbox's card3/bake.mjs): a live
+   filter on every card's frame overran the browser's graphics memory while cards moved. */
+.card, .edge { --frf: url(/static/kit2/card_frame_common.webp); --frc: url(/static/kit2/card_frame_common_compact.webp); }
+.card.rare, .edge.rare { --frf: url(/static/kit2/card_frame_rare.webp); --frc: url(/static/kit2/card_frame_rare_compact.webp); }
+.card.legendary, .edge.legendary { --frf: url(/static/kit2/card_frame_legendary.webp); --frc: url(/static/kit2/card_frame_legendary_compact.webp); }
+.card .cframe { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: var(--fr) 0 0 / 100% 100% no-repeat; }
 /* The painting fills the window, a hair under the frame's edge all round. */
 .card .pic { position: absolute; inset: 3.05em .4em .4em; background: #3a2c1a 50% 0 / cover no-repeat; display: grid; place-items: center; }
 .card .pic span { font: 600 1.4em/1.1 'Fira Sans Condensed', sans-serif; color: #f3e3c0; text-align: center; padding: 1em; }
@@ -154,10 +157,8 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .card .nbar span { font: 600 1.4em/1 'Fira Sans Condensed', sans-serif; letter-spacing: .01em; color: #1d140a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card .nbar.two span { white-space: normal; text-wrap: balance; text-align: center; font-size: 1.08em; overflow: visible; }
 .card .stab { position: absolute; left: 0; top: 0; width: 4.39em; height: 5.57em; z-index: 3; }
-.card.rare, .st.rare, .edge.rare { --tint: saturate(0) brightness(1.1) sepia(.35) hue-rotate(180deg) saturate(1.6); }
-.card.legendary, .st.legendary, .edge.legendary { --tint: sepia(.6) saturate(2.2) brightness(1.08); }
-.card.rare { --ptint: saturate(0) brightness(1.27) sepia(.25) hue-rotate(180deg) saturate(1.1); }   /* Martin, 2026-10-04: paler steel on rares, */
-.card.legendary { --ptint: sepia(.6) saturate(1.5) brightness(1.16); }                             /* pale gold on legendaries */
+.st.rare { --tint: saturate(0) brightness(1.1) sepia(.35) hue-rotate(180deg) saturate(1.6); }
+.st.legendary { --tint: sepia(.6) saturate(2.2) brightness(1.08); }
 .card .stab .n { position: absolute; left: 0; right: 0; top: 1em; height: 2.9em; display: flex; justify-content: center; }
 .card .stab .n.two { top: 1.3em; height: 2.3em; }
 .card .stab .n img { display: block; height: 100%; filter: brightness(.16) sepia(.6); }
