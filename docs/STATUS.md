@@ -42,7 +42,7 @@ The map. Read it first each session and keep it current: when something here cha
 ## Where things live
 
 - [`rules/`](rules/): [`mental-model.md`](rules/mental-model.md) (read before any card or balance reasoning), [`overview.md`](rules/overview.md), [`keywords.md`](rules/keywords.md), [`rulings.md`](rules/rulings.md), [`maps.md`](rules/maps.md), and the unadopted [`expansion-mechanics-todo.md`](rules/expansion-mechanics-todo.md).
-- [`design/`](design/): [`principles.md`](design/principles.md) (the game we want, card-design rules), [`art-direction.md`](design/art-direction.md) (what the art must make people feel) and [`goodstuff.md`](design/goodstuff.md).
+- [`design/`](design/): [`principles.md`](design/principles.md) (the game we want, card-design rules), [`art-direction.md`](design/art-direction.md) (a pointer: card art lives in the design sandbox's `cards/art-principles.md`) and [`goodstuff.md`](design/goodstuff.md).
 - [`cards/`](cards/): the seven [`decks/`](cards/decks/README.md) (tables generated from `cards.json`), [`to-look-at.md`](cards/to-look-at.md) (cards Martin flagged from play), [`card-candidates.md`](cards/card-candidates.md), [`shelved-cards.md`](cards/shelved-cards.md), and the idea banks [`expansion-design-todo.md`](cards/expansion-design-todo.md) and [`deckbuilding-todo.md`](cards/deckbuilding-todo.md).
 - [`bots.md`](bots.md), [`balance.md`](balance.md).
 - [`pre-launch.md`](pre-launch.md): what must be settled before going public, and not before.
