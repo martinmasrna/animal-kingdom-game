@@ -52,6 +52,8 @@ test('a message reaches a friend on home: a piece under the corner, a count, and
   assert.equal(await count(ann), 0, 'a message into the open conversation is read at once');
   await bob.keyboard.press('Escape');
   assert.equal(await bob.$('#chatp'), null, 'Escape closes the panel');
+  await ann.mouse.click(200, 300);
+  assert.equal(await ann.$('#chatp'), null, 'a press off the panel closes it');
   assert.deepEqual([...ann.errors, ...bob.errors], []);
 });
 

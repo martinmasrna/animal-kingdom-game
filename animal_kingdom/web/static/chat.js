@@ -30,6 +30,9 @@ export function initChat(c) {
     if (m.t === 'online') loadFriends();   // a friend came on or went away: the count and the list follow
   });
   addEventListener('keydown', e => { if (e.key === 'Escape' && S.open) { e.stopImmediatePropagation(); closeChat(); } }, true);
+  // a press anywhere off the panel closes it, as a popup does (the Friends button toggles it itself; the message piece and
+  // the remove-friend question belong to it). On the press, not the click: a redraw inside the panel would detach the target.
+  addEventListener('pointerdown', e => { if (S.open && !e.target.closest('#chatp, .chatbtn, #chatt, .fbov')) closeChat(); }, true);
   loadFriends();
 }
 
