@@ -9,7 +9,7 @@ export const CROP = {
   chameleon: [.68, .3, .55], cheetah: [.7, .42, .6], falcon: [.66, .5, .6], gale: [.62, .38, .75], gray_wolf: [.65, .3, .6],
   hippopotamus: [.45, .25, .8], hornet: [.58, .42, .8], jerboa: [.65, .32, .65], king_theron: [.6, .3, .62],
   lemming: [.65, .36, .7], mouse: [.5, .33, .55], pestis: [.6, .38, .8], prince_leo: [.64, .33, .66],
-  princess_lea: [.42, .36, .66], queen_adira: [.6, .29, .62], rat: [.68, .48, .62], serval: [.58, .3, .8],
+  princess_lea: [.42, .36, .66], queen_adira: [.6, .29, .62], rat: [.68, .48, .62], serval: [.64, .6, .7],
   sirocco: [.45, .52, .75], skunk: [.42, .45, .75], sloth: [.42, .36, .6], snow_leopard: [.55, .34, .8],
   squirrel: [.62, .4, .7], verminus: [.6, .38, .8], worker_ant: [.55, .38, .75],
   eagle: [.56, .42, .62], owl: [.57, .25, .55], raven: [.64, .44, .7], goliath: [.62, .56, .62], rattlesnake: [.52, .36, .55],
@@ -28,7 +28,7 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
-  prince_leo: [.72, .3, 1.2], princess_lea: [.34, .34, 1.2], king_theron: [.6, .28, 1], queen_adira: [.62, .22, 1.2], jaguar: [.7, .36, 1], serval: [.47, .22, 1.5],
+  prince_leo: [.72, .3, 1.2], princess_lea: [.34, .34, 1.2], king_theron: [.6, .28, 1], queen_adira: [.62, .22, 1.2], jaguar: [.7, .36, 1], serval: [.66, .48, 1.3],
   snow_leopard: [.66, .38, 1], black_panther: [.7, .43, 1], lion: [.73, .28, 1], lynx: [.52, .24, 1.3], caracal: [.47, .28, 1.5], tiger: [.82, .54, 1],
   cougar: [.73, .38, 1.1], house_cat: [.43, .37, 1.5], eon: [.62, .29, 1], goliath: [.62, .55, 1.2], ember: [.75, .17, 1.5], aurum: [.6, .2, 1.3], anaconda: [.5, .55, 1.2], egg_eater: [.76, .32, 1.3], snake_egg: [.58, .45, 1.3], bird_egg: [.6, .33, 1.2],
   rattlesnake: [.53, .35, 1.3], omen: [.6, .28, 1.7], stoop: [.58, .47, 1.8], eagle: [.63, .43, 1.8], owl: [.6, .24, 1.2], taipan: [.6, .3, 1],
