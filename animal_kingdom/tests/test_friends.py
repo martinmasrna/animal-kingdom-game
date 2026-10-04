@@ -149,6 +149,7 @@ def test_chat_between_friends(monkeypatch):
             assert (await wb.receive_json(timeout=2))["t"] == "build"
             assert await wb.receive_json(timeout=2) == {"t": "unread", "unread": {aid: 1}}
             assert (await wa.receive_json(timeout=2))["t"] == "build"
+            assert await wb.receive_json(timeout=2) == {"t": "online", "id": aid, "on": True}   # A came on: B's Friends button counts it
             await c.post(f"/api/chat/{bid}", json={"text": "you there?"}, headers=ha)
             got = await wb.receive_json(timeout=2)
             assert got["t"] == "msg" and got["with"] == aid and got["msg"]["text"] == "you there?" and "#" not in got["name"]
@@ -158,7 +159,9 @@ def test_chat_between_friends(monkeypatch):
             hist = (await (await c.get(f"/api/chat/{aid}", headers=hb)).json())["messages"]
             assert [x["text"] for x in hist] == ["want a game tonight?", "you there?"] and hist[0]["from"] == aid
             assert (await (await c.get("/api/friends", headers=hb)).json())["friends"][0]["unread"] == 0
-            await wa.close(); await wb.close()
+            await wa.close()
+            assert await wb.receive_json(timeout=2) == {"t": "online", "id": aid, "on": False}   # and went away
+            await wb.close()
         # the store on its own: the last KEEP kept, the rate held
         ch = server.chat
         for i in range(chatmod.KEEP + 5):

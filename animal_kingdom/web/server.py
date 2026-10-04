@@ -617,6 +617,12 @@ async def _tell(pid: str, msg: dict) -> None:
             pass
 
 
+async def _tell_friends_online(pid: str, on: bool) -> None:
+    """A player came online (their first open tab) or went away (their last closed): their friends' Friends buttons count it."""
+    for fid in friends.of(pid):
+        await _tell(fid, {"t": "online", "id": pid, "on": on})
+
+
 async def presence_socket(req):
     """Online while open; carries challenges to you. The client opens it once it knows its profile."""
     p = profiles.by_code(req.query.get("key", ""))
@@ -625,6 +631,7 @@ async def presence_socket(req):
     if p is None:
         await ws.close()
         return ws
+    first = p["id"] not in presence
     presence.setdefault(p["id"], set()).add(ws)
     for cid, c in challenges.items():   # a challenge already standing reaches a tab opened since
         if c["to"] == p["id"]:
@@ -635,6 +642,8 @@ async def presence_socket(req):
     await ws.send_json({"t": "build", "build": BUILD})
     if (unread := chat.unread(p["id"])):   # messages that came while you were away
         await ws.send_json({"t": "unread", "unread": unread})
+    if first:
+        await _tell_friends_online(p["id"], True)
     try:
         async for _ in ws:
             pass
@@ -643,6 +652,7 @@ async def presence_socket(req):
         if not presence[p["id"]]:
             del presence[p["id"]]
             friends.seen(p["id"])
+            await _tell_friends_online(p["id"], False)
     return ws
 
 

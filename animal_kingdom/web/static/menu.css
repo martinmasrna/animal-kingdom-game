@@ -232,6 +232,8 @@ html { touch-action: manipulation; }
 .chatbtn { position: relative; }
 .cbadge { position: absolute; right: -5px; top: -5px; min-width: 20px; height: 20px; box-sizing: border-box; padding: 0 5px; border-radius: 10px; background: #e03228; color: #fff;
   font: 700 13px/20px 'Fira Sans Condensed', sans-serif; font-style: normal; text-align: center; box-shadow: 0 0 0 2px #2b2825, 0 1px 3px rgba(0,0,0,.6); pointer-events: none; }
+.conline { position: absolute; right: -5px; bottom: -5px; min-width: 20px; height: 20px; box-sizing: border-box; padding: 0 5px; border-radius: 10px; background: #3f9a4a; color: #fff;
+  font: 700 13px/20px 'Fira Sans Condensed', sans-serif; font-style: normal; text-align: center; box-shadow: 0 0 0 2px #2b2825, 0 1px 3px rgba(0,0,0,.6); pointer-events: none; }
 .chatp { position: fixed; right: 16px; top: 100px; min-height: 320px; max-height: calc(100vh - 116px); z-index: 120; width: min(340px, calc(100vw - 24px)); box-sizing: border-box; padding: 12px; display: flex; flex-direction: column; gap: 8px;
   border-radius: 16px; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 16px 40px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,245,230,.12);
   color: #f0e8da; font: 500 16px 'Fira Sans Condensed', sans-serif; }

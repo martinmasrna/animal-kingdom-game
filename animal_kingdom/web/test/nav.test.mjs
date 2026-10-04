@@ -14,7 +14,7 @@ const shown = (page, sel) => page.$eval(sel, e => getComputedStyle(e).display !=
 test('the corner piece: Friends, you, Collection, and a gear listing How to play, News and Settings', async () => {
   const page = await browser.newPage();
   await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' }); await wait(500);
-  assert.deepEqual(await page.$$eval('.home .top > *', els => els.map(e => e.getAttribute('href') || e.id)), ['hchat', '#/ladder', '#/collection', 'gearbtn']);
+  assert.deepEqual(await page.$$eval('.home .top > *', els => els.map(e => e.getAttribute('href') || e.id)), ['#/ladder', '#/collection', 'hchat', 'gearbtn']);
   await page.click('#gearbtn'); await page.waitForSelector('.chooser.gear');
   assert.deepEqual(await page.$$eval('.chooser.gear .slab', els => els.map(e => e.textContent.trim())), ['How to play', 'News', 'Settings']);
   await page.click('#learn2'); await page.waitForSelector('.chooser.lessons');   // How to play: the lessons, in its place

@@ -27,6 +27,7 @@ export function initChat(c) {
   onPresence(m => {
     if (m.t === 'unread') { S.unread = { ...m.unread }; badges(); }
     if (m.t === 'msg') arrive(m);
+    if (m.t === 'online') loadFriends();   // a friend came on or went away: the count and the list follow
   });
   addEventListener('keydown', e => { if (e.key === 'Escape' && S.open) { e.stopImmediatePropagation(); closeChat(); } }, true);
   loadFriends();
@@ -42,10 +43,13 @@ async function loadFriends() {
   if (S.open && !S.with) draw();
 }
 
-// The Friends button's count, wherever a Friends button stands.
-export const badge = () => `<i class="cbadge"${total() ? '' : ' hidden'}>${total()}</i>`;
+// The Friends button's counts, wherever a Friends button stands: unread messages (red, top) and friends online now
+// (green, bottom), as games mark their friends list.
+const online = () => (S.friends || []).filter(f => f.online).length;
+export const badge = () => `<i class="cbadge"${total() ? '' : ' hidden'}>${total()}</i><i class="conline"${online() ? '' : ' hidden'}>${online()}</i>`;
 function badges() {
   document.querySelectorAll('.chatbtn .cbadge').forEach(b => { b.textContent = total(); b.hidden = !total(); });
+  document.querySelectorAll('.chatbtn .conline').forEach(b => { b.textContent = online(); b.hidden = !online(); });
 }
 export const wireChatButton = el => { el.onclick = e => { e.stopPropagation(); S.open && !S.with ? closeChat() : openChat(); }; };
 
