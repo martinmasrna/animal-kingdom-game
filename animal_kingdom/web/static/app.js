@@ -572,18 +572,34 @@ async function matchScreen(id) {
     ws.onmessage = e => {
       const m = JSON.parse(e.data);
       if (m.t === 'build') return checkBuild(m.build);
-      if (m.t === 'view') { const prev = V; V = m.view; V.rx = Date.now() / 1000; onView(prev); }
+      if (m.t === 'view') { const prev = V; V = m.view; V.rx = Date.now() / 1000; clog(`view in: toAct=${V.game && V.game.toAct} pend=${V.game && V.game.pending ? V.game.pending.kind : '-'}${PB.busy ? ' (queued: steps playing)' : ''}`); onView(prev); }
       else if (m.t === 'error' && m.error === 'unknown match or seat') { disconnect(); location.hash = '#/'; toast('That match has ended'); }
-      else if (m.t === 'error') toast(m.error);
+      else if (m.t === 'error') { clog('server refused: ' + m.error); toast(m.error); }
     };
-    ws.onclose = () => { if (wsId === id) setTimeout(() => { if (wsId === id) connect(); }, 1000); };
+    ws.onclose = () => { clog('socket closed, reconnecting'); if (wsId === id) setTimeout(() => { if (wsId === id) connect(); }, 1000); };
   };
   connect();
   // back from the background (a phone switched apps, a laptop woke): a socket that died quietly reconnects at once
   matchScreen.wake = () => { if (document.hidden || wsId !== id) return;
     if (!ws || ws.readyState > 1) { if (ws) ws.onclose = null; connect(); } };
 }
-const send = msg => ws && ws.readyState === 1 && ws.send(JSON.stringify(msg));
+const send = msg => { clog('send ' + (msg.t === 'act' ? JSON.stringify(msg.action).slice(0, 50) : msg.t) + (ws && ws.readyState === 1 ? '' : ' DROPPED (socket ' + (ws ? ws.readyState : 'none') + ')')); return ws && ws.readyState === 1 && ws.send(JSON.stringify(msg)); };
+// ?clicklog: a live record of presses, clicks and what the game did with them, in a corner (chasing clicks that do
+// nothing, 2026-10-04). Off unless asked for; it costs nothing then.
+const CLOG = new URLSearchParams(location.search).has('clicklog');
+function clog(line) {
+  if (!CLOG) return;
+  let box = document.getElementById('clog');
+  if (!box) { box = document.createElement('pre'); box.id = 'clog'; box.style.cssText = 'position:fixed;left:6px;bottom:6px;z-index:9999;max-width:520px;max-height:46vh;overflow:hidden;margin:0;padding:6px 8px;background:rgba(0,0,0,.82);color:#9f9;font:11px/1.35 ui-monospace,monospace;pointer-events:none;white-space:pre-wrap'; document.body.append(box); }
+  const t = (performance.now() / 1000).toFixed(2);
+  box.textContent = (t + ' ' + line + '\n' + box.textContent).split('\n').slice(0, 30).join('\n');
+}
+if (CLOG) {
+  const what = el => { const h = el && el.closest && (el.closest('.hc') || el.closest('[id], [class]')); return !h ? String(el && el.tagName) : (h.dataset.id ? 'card ' + h.dataset.id : h.id ? '#' + h.id : '.' + String(h.className.baseVal ?? h.className).split(' ').slice(0, 2).join('.')); };
+  const state = () => { try { const v = V && V.game; return `busy=${PB.busy} step=${ui.step ? ui.step.kind : '-'} toAct=${v ? v.toAct : '-'} you=${V ? V.you : '-'} pend=${v && v.pending ? v.pending.kind : '-'} ws=${ws ? ws.readyState : '-'}`; } catch { return ''; } };
+  addEventListener('pointerdown', e => clog(`down ${what(e.target)} | ${state()}`), true);
+  addEventListener('click', e => clog(`click ${what(e.target)}${e.isTrusted ? '' : ' (redirected)'}`), true);
+}
 const act = action => { ui.sel = null; ui.hover = null; send({ t: 'act', action }); };
 
 // A new view: its events (static/timeline.js) play as steps, each view drawn for its step's length, the new view last.
@@ -962,10 +978,10 @@ function drawGame() {
   });
   hand.querySelectorAll('.hc').forEach(el => el.onclick = e => {
     e.stopPropagation();
-    if (el.dataset.held) { delete el.dataset.held; return; }   // it was held to read, not tapped
+    if (el.dataset.held) { delete el.dataset.held; clog('card: ignored (it was held to read)'); return; }   // it was held to read, not tapped
     const iid = Number(el.dataset.iid), id = el.dataset.id;
-    if (d.handPick.has(iid)) return act({ kind: 'choice', choice: iid });
-    if (!d.mine || !d.places[id] || !el.classList.contains('can')) return;   // a dimmed copy (the tutorial lights one) does nothing
+    if (d.handPick.has(iid)) { clog('card: picked for the choice'); return act({ kind: 'choice', choice: iid }); }
+    if (!d.mine || !d.places[id] || !el.classList.contains('can')) { clog(`card: refused (mine=${d.mine} places=${!!d.places[id]} can=${el.classList.contains('can')} pend=${d.pend ? d.pend.kind : '-'} picks=${d.handPick.size})`); return; }   // a dimmed copy (the tutorial lights one) does nothing
     if (ui.sel !== id) sfx('pick');
     ui.sel = ui.sel === id ? null : id; ui.hover = null; drawGame();
   });
