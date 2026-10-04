@@ -5,10 +5,13 @@
 import { hasArt, artUrl, CROP, FULL } from './art.js';
 
 // The full card shows the painting between the name bar and the rules panel: about 61% of its height, so it centres on
-// the animal (its FULL height, set per card, else the portrait crop's centre) instead of the painting's top; the compact card shows
-// ~88% from the top.
+// the animal (its FULL height, set per card, else the portrait crop's centre) instead of the painting's top; the compact card centres on
+// the same height as far as its painting can move (lift).
 const VIS = 0.61;
 const focus = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35); return Math.max(0, Math.min(1, (y - VIS / 2) / (1 - VIS))) * 100; };
+// The compact card shows the painting (20em wide, so 30em tall) from under the band (3.05em) to the bottom (29.34em): it moves up
+// to centre on the same height, never further than its top below the band or its bottom at the card's edge.
+const lift = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35); return Math.max(-3.71, Math.min(0, 13.15 - 30 * y)); };
 
 // Every keyword that opens a sentence is bold ("Flight. Roar: ..." bolds both).
 const KW = /(?<=^|\. )(Roar|Armor|Flight|Stealth|Spikes|Apex Predator)(:|\.)/g;
@@ -20,8 +23,8 @@ const chalk = n => String(n).split('').map(d => d === '*' ? '<b>*</b>' : `<img s
 // The name is centred in the bar; a longer name sets smaller in proportion to its length (--n), one over 18 characters may wrap.
 export function cardHTML(c, { str = c.str, cls = '', attrs = '', lazy = false } = {}) {
   const base = c.str === '*' ? null : c.str, delta = base !== null && str !== base ? (str > base ? ' up' : ' down') : '';
-  const art = !hasArt(c.id) ? '' : lazy ? ` data-art="${artUrl(c.id)}" style="--fy:${focus(c.id).toFixed(0)}%"`
-    : ` style="background-image:url(${artUrl(c.id)});--fy:${focus(c.id).toFixed(0)}%"`;
+  const art = !hasArt(c.id) ? '' : lazy ? ` data-art="${artUrl(c.id)}" style="--fy:${focus(c.id).toFixed(0)}%;--oy:${lift(c.id).toFixed(2)}em"`
+    : ` style="background-image:url(${artUrl(c.id)});--fy:${focus(c.id).toFixed(0)}%;--oy:${lift(c.id).toFixed(2)}em"`;
   return `<div class="card ${c.rarity} ${cls}" ${attrs}><div class="pic"${art}>${hasArt(c.id) ? '' : `<span>${c.name}</span>`}</div><div class="cframe"></div>` +
     `<div class="nbar${c.name.length > 18 ? ' two' : ''}" style="--n:${c.name.length}"><span>${c.name}</span></div>` +
     `<div class="stab"><span class="n${String(str).length > 1 ? ' two' : ''}${delta}">${chalk(str)}</span></div>` +

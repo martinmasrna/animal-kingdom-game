@@ -134,10 +134,11 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .toast.ok { background: var(--surface-2); border-color: var(--line-strong); }
 
 /* ---------- the card (card.js): 20em wide, 29.34em tall, em = --w / 20 ---------- */
-/* The card is one painted driftwood frame (kit2/card_frame.webp, design sandbox card3/, Martin 2026-10-04): name bar,
-   strength banner, rails and rules panel carved from one board, the painting set into its window. Rarity tints the frame
-   (driftwood, steel, gold), its rules panel paler. The compact card (hand, collection) wears the frame without
-   the panel, the window running down to a bottom rail. The slots below are the frame's, in em (card width = 20em). */
+/* The card is the painting, edge to edge, under a painted driftwood band (design sandbox card3/ and rarity2/r5/, Martin
+   2026-10-05): the name bar and the strength banner across the top, and on the full card the rules panel below. Rarity tints
+   the wood (driftwood, steel, gold), the rules panel paler; the colour meets the painting along one edge only. The compact
+   card (hand, collection) has no panel, the painting running to the bottom edge. The slots below are the frame's, in em
+   (card width = 20em). */
 /* Anything set into a card wears its frame (.edge: the versus moment's gem ring): the frame's wood, tinted as the card is. */
 .edge { --bw: .55em; isolation: isolate; }
 .edge::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--frf) 50% 3% / 420% auto; }
@@ -150,8 +151,10 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .card.rare, .edge.rare { --frf: url(/static/kit2/card_frame_rare.webp); --frc: url(/static/kit2/card_frame_rare_compact.webp); }
 .card.legendary, .edge.legendary { --frf: url(/static/kit2/card_frame_legendary.webp); --frc: url(/static/kit2/card_frame_legendary_compact.webp); }
 .card .cframe { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: var(--fr) 0 0 / 100% 100% no-repeat; }
-/* The painting fills the window, a hair under the frame's edge all round. */
-.card .pic { position: absolute; inset: 3.05em .4em .4em; background: #3a2c1a 50% 0 / cover no-repeat; display: grid; place-items: center; }
+/* The painting runs from under the band to the card's edges; the compact card shifts it to centre on the animal (--oy, card.js).
+   A soft shade under the band's edge. */
+.card .pic { position: absolute; inset: 3.05em 0 0; background: #3a2c1a 50% var(--oy, 0) / cover no-repeat; display: grid; place-items: center; }
+.card .pic::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1.2em; background: linear-gradient(rgba(0,0,0,.45), transparent); pointer-events: none; }
 .card .pic span { font: 600 1.4em/1.1 'Fira Sans Condensed', sans-serif; color: #f3e3c0; text-align: center; padding: 1em; }
 .card .nbar { position: absolute; z-index: 2; top: .1em; height: 3em; left: 4.45em; right: .55em; display: flex; align-items: center; justify-content: center; padding: 0 .3em; }
 .card .nbar span { font: 600 1.4em/1 'Fira Sans Condensed', sans-serif; letter-spacing: .01em; color: #1d140a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
