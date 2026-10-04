@@ -31,6 +31,16 @@ let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, hover: null, peek: false, menu: false, panel: null };
 
 // ------------------------------------------------------------------ shared bits
+// The menus' hover labels (menu.css: a tag under the thing) turn to stay in the window: above the thing near the bottom,
+// held to its left or right end near a side. The label's width is measured in its own font before it shows.
+const tipFont = document.createElement('canvas').getContext('2d');
+document.addEventListener('mouseover', e => {
+  const t = e.target.closest && e.target.closest('.mscr [data-tip]'); if (!t) return;
+  const r = t.getBoundingClientRect(), mid = (r.left + r.right) / 2;
+  tipFont.font = "600 14px 'Fira Sans Condensed', sans-serif"; const w = tipFont.measureText(t.dataset.tip).width + 20;
+  t.classList.toggle('tip-up', r.bottom + 8 + 32 > innerHeight - 4);
+  t.classList.toggle('tip-l', mid - w / 2 < 8); t.classList.toggle('tip-r', mid + w / 2 > innerWidth - 8);
+});
 function toast(msg, ok) {
   const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; t.classList.toggle('ok', !!ok);
   clearTimeout(toast.h); toast.h = setTimeout(() => t.style.display = 'none', 3500);
@@ -171,6 +181,7 @@ function route() {
   if (!location.hash.startsWith('#/m/')) keepAwake(false);
   const tip = document.getElementById('tip'); if (tip) tip.style.display = 'none';   // the game's hover label lives on body: it must not outlive the screen
   const parts = (location.hash.slice(1) || '/').split('/').filter(Boolean);
+  queueMicrotask(drawSearch);   // the search's pill, on a screen without its button
   document.documentElement.dataset.tod = timeOfDay(new Date().getHours());
   const id = parts[1] && parts[1].toUpperCase();
   if (parts[0] !== 'm' || id !== wsId) disconnect();
@@ -178,7 +189,6 @@ function route() {
   play.open = null;   // a chooser never outlives its screen
   if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
   if (parts[0] === 'gauntlet') return homeScreen({ gauntlet: true });
-  if (search && parts[0] !== 'm' && !(search.btn === 'go' && !parts[0])) cancelSearch();   // leaving the screen it started on withdraws a search or a challenge
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'leaderboard') { history.replaceState(null, '', '#/profile'); parts[0] = 'profile'; }   // the leaderboard is the profile's first tab
@@ -303,15 +313,19 @@ function homeScreen(mode = {}) {
 }
 // One search at a time: the ranked queue (a person near your rating, else the nearest bot) or a challenge to an online
 // friend. Its state lives here, so the button that started it (home's Play, or Play again after a ranked game) shows it
-// across redraws; clicking it again, or leaving the screen, cancels it (a cancelled challenge tells the server, so the
-// friend's piece goes).
+// across redraws; clicking it again cancels it (a cancelled challenge tells the server, so the friend's piece goes). It
+// carries on while you look around (collection, profile, leaderboard): there a pill at the bottom keeps its count and cancels
+// it on a click, and a match found opens from wherever you are.
 let search = null, searchShown = '';   // search: { kind, btn, who, t0, ctl }
 const searchLabel = () => { const t = Math.floor((Date.now() - search.t0) / 1000);
   return `<span class="search">${search.kind === 'ranked' ? 'Finding an opponent' : `Waiting for ${esc(search.who)}`} · ${mmss(t)}<small>${tapWords('click to cancel')}</small></span>`; };
 function drawSearch() {
   const b = search ? document.getElementById(search.btn) : document.querySelector('.play.searching');
-  if (!b) return;
-  if (search) { b.innerHTML = searchLabel(); b.classList.add('searching'); } else { b.innerHTML = searchShown; b.classList.remove('searching'); }
+  if (b) { if (search) { b.innerHTML = searchLabel(); b.classList.add('searching'); } else { b.innerHTML = searchShown; b.classList.remove('searching'); } }
+  let pill = document.getElementById('qpill');
+  if (!search || b || location.hash.startsWith('#/m/')) return pill && pill.remove();
+  if (!pill) { pill = document.createElement('button'); pill.id = 'qpill'; pill.className = 'play searching'; pill.onclick = cancelSearch; document.body.append(pill); }
+  pill.innerHTML = searchLabel();
 }
 function cancelSearch() {
   if (!search) return;
@@ -707,8 +721,10 @@ function wireTips(root) {
   root.addEventListener('mouseover', e => { const t = e.target.closest('[data-tip]'); if (!t) { tip.style.display = 'none'; return; }
     tip.textContent = t.dataset.tip; tip.style.display = 'block'; });
   // beside the pointer on its right, or on its left where the window has no room (the flag, the replay's controls)
-  root.addEventListener('mousemove', e => { const w = tip.offsetWidth, right = e.clientX + 14 + w <= innerWidth - 8;
-    tip.style.left = (right ? e.clientX + 14 : e.clientX - 14 - w) + 'px'; tip.style.top = (e.clientY + 16) + 'px'; });
+  // and under it, or above it at the window's bottom
+  root.addEventListener('mousemove', e => { const w = tip.offsetWidth, h = tip.offsetHeight, right = e.clientX + 14 + w <= innerWidth - 8;
+    tip.style.left = (right ? e.clientX + 14 : e.clientX - 14 - w) + 'px';
+    tip.style.top = (e.clientY + 16 + h <= innerHeight - 8 ? e.clientY + 16 : e.clientY - 10 - h) + 'px'; });
   root.addEventListener('mouseleave', () => tip.style.display = 'none');
 }
 function gameScreen() {

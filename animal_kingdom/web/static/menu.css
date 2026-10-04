@@ -19,11 +19,11 @@
 .mscr .frow .backbtn { width: auto; flex: none; min-width: 112px; }
 
 /* The one loud control (the game screen's too): the slab in your team blue (the board's blue). Disabled, it is stone and does nothing. */
-.mscr .play, .game .play, .fbov .play { width: 100%; height: 48px; margin: 0; border: 0; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
+.mscr .play, .game .play, .fbov .play, #qpill { width: 100%; height: 48px; margin: 0; border: 0; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
   background: linear-gradient(rgba(52,112,190,.5), rgba(38,88,160,.58)), #2a4a70 url(/static/kit2/coll_slab.webp) center / 300px auto; background-blend-mode: color, normal, normal;
   box-shadow: inset 0 1px 0 rgba(200,225,255,.35), inset 0 -2px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.55);
   color: #f4f8ff; font: 700 19px 'Fira Sans Condensed', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
-.mscr .play:hover, .game .play:hover, .fbov .play:hover { filter: brightness(1.15); }
+.mscr .play:hover, .game .play:hover, .fbov .play:hover, #qpill:hover { filter: brightness(1.15); }
 .mscr .play:disabled, .fbov .play:disabled { background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; color: #8f8577; text-shadow: none; filter: saturate(.3) brightness(.8); cursor: default; }
 
 /* Sunken: a count, or a field you type into. */
@@ -60,6 +60,8 @@
   background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 4px 10px rgba(0,0,0,.6);
   color: #f0e8da; font: 600 14px 'Fira Sans Condensed', sans-serif; opacity: 0; pointer-events: none; transition: opacity .1s; }
 .mscr [data-tip]:hover::after { opacity: 1; }
+.mscr [data-tip].tip-up::after { top: auto; bottom: calc(100% + 8px); }
+.mscr [data-tip].tip-l::after { left: 0; right: auto; transform: none; } .mscr [data-tip].tip-r::after { left: auto; right: 0; transform: none; }
 
 /* Deck tiles: the cover with a fade from the left, the name alone, a thin lit stone rim; hover brightens, a light rim marks the chosen one. */
 .mscr .dtile { position: relative; height: 56px; border-radius: 8px; background: #2a2521 center 30% / cover; cursor: pointer; transition: filter .12s;

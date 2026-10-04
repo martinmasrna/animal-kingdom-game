@@ -394,3 +394,5 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets) .ftab { 
 .since { width: min(420px, calc(100vw - 24px)); gap: 12px; }
 .since b { text-align: left; }
 .since .more { font-size: 14px; color: #a99f8e; }
+/* The search carried onto another screen (app.js drawSearch): Play's searching face, small, floating at the bottom. */
+#qpill { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 80; width: auto; height: auto; padding: 7px 22px; font-size: 20px; }
