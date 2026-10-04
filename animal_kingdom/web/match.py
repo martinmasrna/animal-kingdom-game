@@ -39,6 +39,7 @@ GAMES_TO_WIN = 1
 # time is lost), then spends their bank for the game. At zero, the engine acts for them.
 CLOCK_FREE = 30.0
 CLOCK_BANK = 180.0
+CLOCK_CATCHUP_MAX = 8.0      # at most this long, a turn's clock waits for its player's screen to show the opponent's moves
 CLOCK_MULLIGAN = 30.0        # one window for both players' mulligans at once (Martin, 2026-10-01); what's left is kept
 EVENTS_KEPT = 200            # a view carries the game's last events: enough for a client that missed a few views
 TIMEOUTS_TO_LOSE = 3         # turns in a row a player's clock ran out: they have left, and lose (Martin, 2026-10-01)
@@ -373,7 +374,23 @@ class Match:
         turn = -2 if self.mulliganing() else self.state.turn_counter if self.state else -1
         if holder != c["holder"] or turn != c["turn"]:
             c["free"] = CLOCK_FREE
+            # the new holder's clock starts once their screen has played out what led here (played_out), not before
+            c["catchup"] = self.seq if holder and turn != -2 and self.played.get(holder, 0) < self.seq else None
         c["holder"], c["turn"], c["since"] = holder, turn, now
+
+    def played_out(self, s: str, seq: int, now: Optional[float] = None) -> bool:
+        """Seat `s`'s screen has played the events up to `seq`: if its clock was waiting for that, the wait (up to
+        CLOCK_CATCHUP_MAX) is given back, the clock starting from now (player report 2026-10-04: the opponent's moves
+        animated while the clock ran). Returns whether the clock changed."""
+        self.played[s] = seq
+        c = self.clock
+        if not c or c.get("catchup") is None or c["holder"] != s or seq < c["catchup"]:
+            return False
+        now = time.time() if now is None else now
+        c["since"] += min(CLOCK_CATCHUP_MAX, max(0.0, now - c["since"]))
+        c["catchup"] = None
+        self.version += 1
+        return True
 
     def clock_deadline(self) -> Optional[float]:
         c = self.clock

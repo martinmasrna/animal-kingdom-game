@@ -241,6 +241,29 @@ def test_the_free_window_is_lost_then_the_bank_drains(monkeypatch):
     assert m.clock["bank"][s] == CLOCK_BANK - 12
 
 
+def test_a_turns_clock_waits_for_its_player_to_see_the_opponents_moves(monkeypatch):
+    """The turn's clock starts once the player's screen has played out what led to it (played_out), at most
+    CLOCK_CATCHUP_MAX later; a screen that never says so is charged from the turn's start."""
+    from animal_kingdom.engine.actions import ChoiceAction, PassAction
+    from animal_kingdom.web.match import CLOCK_BANK, CLOCK_FREE, CLOCK_CATCHUP_MAX
+    m, now = _two_humans(monkeypatch)
+    while m.state.pending is not None:
+        m.act(m.to_act(), ChoiceAction("__skip__"))
+    s = m.to_act(); m.act(s, PassAction())
+    o = m.to_act()
+    now[0] += 5                                         # the opponent's moves play out on o's screen for 5 s
+    assert m.played_out(o, m.seq)
+    now[0] += CLOCK_FREE + 12
+    m.act(o, rules.legal_actions(m.state)[0])
+    assert m.clock["bank"][o] == CLOCK_BANK - 12        # the 5 s of watching cost nothing
+    while m.to_act() == o:
+        m.act(o, PassAction() if m.state.pending is None else ChoiceAction("__skip__"))
+    now[0] += 30                                        # a screen that took 30 s gets CLOCK_CATCHUP_MAX back
+    assert m.played_out(s, m.seq)
+    assert m.clock["since"] == now[0] - 30 + CLOCK_CATCHUP_MAX
+    assert not m.played_out(s, m.seq)                   # once only
+
+
 def test_out_of_time_declines_the_choice_then_ends_the_turn(monkeypatch):
     from animal_kingdom.web.match import CLOCK_BANK, CLOCK_FREE
     m, now = _two_humans(monkeypatch)

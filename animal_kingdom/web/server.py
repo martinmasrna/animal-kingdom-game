@@ -964,9 +964,9 @@ async def socket(req):
                     if match.phase == "playing":      # the other player already started it
                         continue
                     match.next_game()
-                elif kind == "played":                # the client has played the events up to this one on screen (_watched)
-                    match.played[seat] = int(data.get("seq") or 0)
-                    continue
+                elif kind == "played":                # the client has played the events up to this one on screen (_watched);
+                    if not match.played_out(seat, int(data.get("seq") or 0)):   # a clock that waited for it starts now
+                        continue
                 elif kind == "hold":                  # the tutorial: its coach holds the opponent while a line awaits Next
                     match.hold = bool(data.get("on")) and match.tutorial
                     continue
