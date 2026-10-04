@@ -212,15 +212,14 @@ function route() {
 const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };
 const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']], SIDES = [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']];
 const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
-// Home's corner piece (design sandbox screen/nav/, 2026-10-02): you (your name and where you stand, to the profile and its
-// leaderboard), Collection by name, and a menu (three bars) listing the rest, the gear kept for Settings in it; seven equal icons were too many. Feedback is a tab on the
-// screen's edge while the game is in testing (moves into the gear's list at launch; see boot). Icons painted in the board numbers' chalk.
+// Home's corner piece (design sandbox screen/nav/, 2026-10-02): the Ladder (where you stand on it), Collection by name, and a menu (three bars) listing the rest, the gear kept for Settings in it; seven equal icons were too many. Feedback is a tab on the
+// screen's edge while the game is in testing (moves into the menu's list at launch; see boot). Icons painted in the board numbers' chalk.
 const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" draggable="false">`;
-const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), profile: TI('person'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news'), friends: TI('friends'), menu: TI('menu') };
+const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news'), friends: TI('friends'), menu: TI('menu') };
 let newsAsked = false;
-const mePiece = () => {   // your rating and place once ranked, your placement games while placing, else the name alone
+const mePiece = () => {   // the Ladder, with your rating and place once ranked, your placement games while placing
   const sub = !ME ? '' : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
-  return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${TOPICON.profile}<span><b>${esc(ME ? ME.name : 'Profile')}</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
+  return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${TOPICON.leaderboard}<span><b>Ladder</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
 };
 function homeScreen(mode = {}) {
   screen = 'home';
