@@ -46,8 +46,8 @@ async function loadFriends() {
   if (S.open && !S.with) draw();
 }
 
-// The Friends button's counts, wherever a Friends button stands: unread messages (red, top) and friends online now
-// (green, bottom), as games mark their friends list.
+// The Friends button's counts, wherever a Friends button stands: unread messages (a red badge) and friends online now
+// (a plain number beside the icon, as Hearthstone's social button has it).
 const online = () => (S.friends || []).filter(f => f.online).length;
 export const badge = () => `<i class="cbadge"${total() ? '' : ' hidden'}>${total()}</i><i class="conline"${online() ? '' : ' hidden'}>${online()}</i>`;
 function badges() {
