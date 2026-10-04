@@ -20,7 +20,7 @@ export const CROP = {
   armadillo: [.72, .38, .6], chinchilla: [.68, .38, .7], flying_squirrel: [.62, .5, .7], porcupine: [.35, .48, .62], fathom: [.5, .42, .8],
   greywhisker: [.5, .33, .65], rat_king: [.52, .35, .8], scrooge: [.62, .45, .62],
   queen_honoria: [.6, .38, .7], queen_marabunta: [.6, .45, .75], vesper: [.6, .42, .72], falstaff: [.55, .36, 1],
-  eon: [.6, .33, .7], ember: [.55, .3, .75], aurum: [.5, .45, .96], omen: [.5, .42, .75], anaconda: [.49, .6, .62], egg_eater: [.71, .33, .62], snake_egg: [.55, .46, .62], bird_egg: [.52, .42, .82],
+  eon: [.6, .33, .7], ember: [.55, .3, .75], aurum: [.52, .5, .85], omen: [.5, .42, .75], anaconda: [.49, .6, .62], egg_eater: [.71, .33, .62], snake_egg: [.55, .46, .62], bird_egg: [.52, .42, .82],
   dire_wolf: [.55, .33, .62], dingo: [.7, .27, .6], fox: [.62, .42, .7], african_wild_dog: [.7, .3, .55], dog: [.66, .3, .6],
   pup: [.55, .36, .72], outrider: [.62, .36, .75], red_wolf: [.66, .36, .66], hyena: [.5, .38, .6], bush_dog: [.64, .33, .6],
   lobo: [.6, .25, .62], raksha: [.64, .33, .6], clarion: [.6, .22, .7], alpha: [.56, .36, .8], poppy: [.55, .36, .72], rusty: [.45, .36, .72],
@@ -30,7 +30,7 @@ export const CROP = {
 export const STRIP = {
   prince_leo: [.72, .3, 1.2], princess_lea: [.34, .34, 1.2], king_theron: [.6, .28, 1], queen_adira: [.62, .22, 1.2], jaguar: [.7, .36, 1], serval: [.66, .48, 1.3],
   snow_leopard: [.66, .38, 1], black_panther: [.7, .43, 1], lion: [.42, .3, 1.2], lynx: [.52, .24, 1.3], caracal: [.47, .28, 1.5], tiger: [.82, .54, 1],
-  cougar: [.73, .38, 1.1], house_cat: [.43, .37, 1.5], eon: [.62, .29, 1], goliath: [.62, .55, 1.2], ember: [.75, .17, 1.5], aurum: [.6, .2, 1.3], anaconda: [.5, .55, 1.2], egg_eater: [.76, .32, 1.3], snake_egg: [.58, .45, 1.3], bird_egg: [.6, .33, 1.2],
+  cougar: [.73, .38, 1.1], house_cat: [.43, .37, 1.5], eon: [.62, .29, 1], goliath: [.62, .55, 1.2], ember: [.75, .17, 1.5], aurum: [.6, .45, 1.2], anaconda: [.5, .55, 1.2], egg_eater: [.76, .32, 1.3], snake_egg: [.58, .45, 1.3], bird_egg: [.6, .33, 1.2],
   rattlesnake: [.53, .35, 1.3], omen: [.6, .28, 1.7], stoop: [.58, .47, 1.8], eagle: [.63, .43, 1.8], owl: [.6, .24, 1.2], taipan: [.6, .3, 1],
   viper: [.63, .35, 1], magpie: [.73, .34, 1.7], black_mamba: [.58, .3, 1], raven: [.77, .47, 1.7], queen_marabunta: [.8, .53, 1.7], vesper: [.66, .47, 1.1],
   queen_honoria: [.62, .32, 1.2], falstaff: [.45, .4, 1.1], nurse_bee: [.58, .45, 1.2], nurse_bumblebee: [.65, .4, 1.1], termite_king: [.73, .47, 1], termite_queen: [.45, .37, 1],
@@ -51,7 +51,7 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
-  african_wild_dog: .425, alpha: .355, anaconda: .485, andean_condor: .335, armadillo: .435, aurum: .415, bat: .305,
+  african_wild_dog: .425, alpha: .355, anaconda: .485, andean_condor: .335, armadillo: .435, aurum: .5, bat: .305,
   bird_egg: .445, black_bear: .445, black_mamba: .445, black_panther: .455, borealis: .365, bulwark: .345, bush_dog: .475,
   cairn: .42, cape_buffalo: .445, caracal: .345, chameleon: .38, cheetah: .415, chinchilla: .365, chipmunk: .405,
   clarion: .355, cougar: .455, dingo: .375, dire_wolf: .385, dog: .435, egg_eater: .485, elephant: .365, eon: .375,
