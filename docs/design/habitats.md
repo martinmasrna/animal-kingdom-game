@@ -22,13 +22,14 @@ Named so shelved cards have a home to wait for: Coral Reef, Deep Sea, Coast, Riv
 
 Every family archetype has a core habitat, two at most, holding enough of that family to build a deck (a deck is 14 designs, so roughly 10 to 14 family designs, legendaries included). A deck that needs five habitats in rotation at once isn't viable; one that lives on its core survives most rotations. Count after each habitat is locked:
 
-| Family | Today | Verdict |
+| Family | With the launch six locked | Verdict |
 |---|---|---|
-| Cats | Savanna 9 (Lion, Cheetah, Leopard, Serval, Caracal, the four lion legendaries), Jungle 3, Forest 1, City 1 | fine on Savanna + Jungle; this is why Caracal stays |
-| Canines | Forest 6, Savanna 2, City 2, Jungle 2 | weak: no two habitats reach 10 |
-| Colony | Meadow 6, Forest 5, Savanna 2, Jungle 2 | scattered; Meadow + Forest makes 11 |
-| Rodents | City 7, Forest 5, Meadow 4, Savanna 1 | City with Forest or Meadow |
-| Snakes | Jungle 5, Savanna 2, Forest 1, Meadow 1 | thin; Egg Control also runs Birds |
+| Cats | Savanna 9 (Lion, Cheetah, Leopard, Serval, Caracal, the four lion legendaries), Jungle 3, Forest 1, City 1 | Savanna + Jungle makes 12 |
+| Canines | Forest 6 (Fox, Wolf, Lobo, Raksha, Clarion, Scarlett), Savanna 2, City 2, Jungle 2 | weakest: Forest + any one makes 8; Dingo's effect still needs its canine |
+| Colony | Meadow 6, Forest 5, Savanna 2, Jungle 2 | Meadow + Forest makes 11 |
+| Rodents | City 7, Forest 5, Meadow 4, Savanna 1, Jungle 1 | City + Forest makes 12 |
+| Snakes | Jungle 4 (Anaconda, King Cobra, Python, Eon), Savanna 2, Forest 1 | thin: Jungle + Savanna makes 6; Egg Control also runs Birds |
+| Birds | Forest 8, Meadow 8, Jungle 4, Savanna 3, City 2, Open Ocean 2 | 27 of 210, about 13%: a little over the ~10% aim |
 
 Families are also spread on purpose, so later sets can feed them. An expansion (likely three habitats at once) has two jobs: bring one to four archetypes into the competitive game (new, or newly viable), and give the existing archetypes new cards so they evolve instead of going stale. So a family keeps its core in one or two launch habitats and leaves some of its animals for the habitats still to come (Snow Leopard for Polar, Cougar for Mountains), and every new habitat brings one to three cards to the families it touches. By the public launch, the first expansions are planned (Martin, 2026-10-05).
 
