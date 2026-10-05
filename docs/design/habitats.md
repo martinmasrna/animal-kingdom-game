@@ -73,4 +73,8 @@ Shelved until their habitat's set:
 | Andean Condor | Mountains |
 | Cairn | Ice Age |
 
-Still open: Dingo, Jerboa (it launches; which animal carries it), Rattlesnake.
+Still open:
+
+- Dingo: its pack growth is Canine's core and launches; find the canine in the launch six that carries it (a well-known one; Wolf stays as it is).
+- Jerboa: it launches; which animal carries it (Jumping Mouse in Meadow proposed).
+- Rattlesnake.
