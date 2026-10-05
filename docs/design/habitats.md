@@ -75,7 +75,7 @@ Great White Shark, Hammerhead, Whale Shark, Blue Whale, Humpback Whale, Sperm Wh
 Cards that keep their animal, by habitat:
 
 - **Savanna:** Prince Leo, Princess Lea, King Theron, Queen Adira, Serval, Lion, Caracal, Cheetah, Egg Eater, Black Mamba, Termite King, Termite Queen, Rhinoceros, Brutus, Methuselah, Hippopotamus, Elephant, Oxpecker, Cape Buffalo, Jackal, African Wild Dog, Hyena, Pup.
-- **Forest:** Lynx, Cougar, Ember (golden pheasant), Hawk, Owl, Magpie, Raven, Vesper, Guard Wasp, Worker Wasp, Worker Ant, Grizzly Bear, Black Bear, Flying Squirrel, Squirrel, Chipmunk, Hedgehog, Porcupine, Sirocco, Skunk, Hornet, Bat, Falcon, Lobo, Raksha, Clarion, Scarlett, Fox, Wolf, Poppy, Rusty, Viper, Bird Egg.
+- **Forest:** Lynx, Ember (golden pheasant), Hawk, Owl, Magpie, Raven, Vesper, Guard Wasp, Worker Wasp, Worker Ant, Grizzly Bear, Black Bear, Flying Squirrel, Squirrel, Chipmunk, Hedgehog, Porcupine, Sirocco, Skunk, Hornet, Bat, Falcon, Lobo, Raksha, Clarion, Scarlett, Fox, Wolf, Poppy, Rusty, Viper, Bird Egg.
 - **City:** House Cat, Dog, Verminus, Pestis, Rat, Mouse, Greywhisker, Barley, Scrooge.
 - **Jungle:** Jaguar, Black Panther, Tiger, Eon, Python, Queen Marabunta, Soldier Ant, Sloth, Chameleon, Armadillo, Bush Dog, Dhole, Anaconda, Snake Egg.
 - **Ocean:** Fathom, Gale.
