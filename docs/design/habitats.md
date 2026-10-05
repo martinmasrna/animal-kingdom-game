@@ -57,20 +57,20 @@ Cards that keep their animal, by habitat:
 
 Reprints: the effect stays, the animal changes to one from the launch six.
 
-| Card | Today | Why it can move | Proposed animal |
-|---|---|---|---|
-| Snow Leopard | Mountains | "your Cats may cover equal strength" isn't the snow leopard's | Leopard (Savanna) |
-| Andean Condor | Mountains | a big bird revealing the top card | Vulture (Savanna) |
-| Taipan | Australia | a delayed bite fits any venomous snake | King Cobra (Jungle) |
-| Dingo | Australia | an end-of-turn pack buff | open (Forest or Savanna canine) |
-| Coyote | Desert | Canine's reach engine; nothing about it is the coyote's | open (a Forest canine) |
+| Card | Becomes | Why |
+|---|---|---|
+| Snow Leopard | Leopard (Savanna) | the snow leopard belongs to Polar; its effect, a Cats staple, stays in the launch on the leopard |
+| Taipan | King Cobra (Jungle) | a delayed venomous bite fits any deadly snake, and the cobra is the more iconic one |
 
 Shelved until their habitat's set:
 
-| Card | Waits for | Why it can't move |
-|---|---|---|
-| Polar Bear, Borealis | Polar (ice and snow) | the polar bear is the card |
-| Lemming | Tundra | filling crossroads with Lemmings is the lemming; its art must show snowy tundra |
-| Rattlesnake | Desert | the rattle is the shuffle |
-| Jerboa | Desert | the hop is the extra placement; a Meadow hopper (a hare) would carry it but isn't a Rodent |
-| Cairn | Ice Age | the glyptodont; the Giants redesign drops it anyway |
+| Card | Waits for |
+|---|---|
+| Snow Leopard (as an animal) | Polar |
+| Polar Bear, Borealis | Polar |
+| Lemming | Tundra |
+| Coyote | Desert |
+| Andean Condor | Mountains |
+| Cairn | Ice Age |
+
+Still open: Dingo, Jerboa (it launches; which animal carries it), Rattlesnake.
