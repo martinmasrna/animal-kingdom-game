@@ -276,6 +276,10 @@ Anchor candidates:
 
 Primary risks: automated token growth, unconnected units creating confusing pseudo-fronts, and overlap with Aggro/Colony width.
 
+### 2.6 Beetles — a mini-set across habitats
+
+A small set of the beetles people know: dung beetle, stag beetle, ladybird, firefly, rhinoceros beetle, scarab, bombardier beetle, Goliath beetle. About eight recognisable ones, so a mini-set rather than a habitat (Martin, 2026-10-05: the dung beetle missed the Savanna 25 and waits here).
+
 ---
 
 ## 3. Landmark queue
