@@ -35,9 +35,9 @@ Designed as one archetype across the habitats, not card by card (Martin, 2026-10
 
 - Commons (a deck runs six of these): Gazelle, Giraffe, Wildebeest (as locked above); Zebra, "Flee. While grazing, this has Stealth."; Deer (Forest), "Flee. At the end of your turn, if this is grazing, draw a card."; Cape Buffalo (as locked); Moose (Forest), "Your other grazing animals have +2 strength."; Boar (Forest), "Roar: remove an adjacent enemy that is grazing."
 - Rares: Warthog (as locked), Rhinoceros, Hippopotamus (shared with the Giants), one open.
-- Legendaries: the migration's wildebeest, "Your regions produce 5 more food."; the white stag, "Flee. Roar: draw a card for each region you control."; the herd's bull (a Cape Buffalo), "When an enemy covers one of your grazing animals, remove that enemy."; one open.
+- Legendaries: the migration's wildebeest, "Your regions produce 5 more food."; the white stag, "Flee. Roar: draw a card for each region you control."; two open. Rejected: "when an enemy covers one of your grazing animals, remove that enemy" (every corner uncoverable, so the region can't be broken).
 
-Zebra, Deer, Moose, Boar and the three legendaries are proposals not yet stress-tested.
+Zebra, Deer, Moose, Boar and the two legendaries are proposals.
 
 ## Elsewhere, settled in passing
 
