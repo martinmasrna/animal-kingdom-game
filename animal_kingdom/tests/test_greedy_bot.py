@@ -85,6 +85,21 @@ def test_blocks_draw_then_capture_threat_during_an_effect_choice():
     assert chosen == ChoiceAction("1,2")
 
 
+def test_plugs_an_open_front_beside_the_enemy_chain():
+    # B's chain reaches 2,2, next to A's empty front 1,2, and B holds two cards: B steps
+    # onto 1,2, then onto A's HQ. With its last action A must take 1,2 itself (Martin's
+    # 2026-10-05 game: the Expert drew, then covered elsewhere and lost to Rat + Chameleon).
+    s = make_state(hands={"A": ["mouse"], "B": ["pup", "pup"]},
+                   decks={"A": ["pup"], "B": ["pup"]})
+    s.actions_taken_this_turn = 1
+    for cr in ("4,2", "3,2", "2,2"):
+        put(s, cr, "pup", "B")
+
+    legal = rules.legal_actions(s)
+    chosen = GreedyBot(seed=0).choose(s.view_for("A"), legal, s)
+    assert chosen == PlaceAction("mouse", ("cr", "1,2"))
+
+
 # ------------------------------------------------------------------- evaluate
 
 def test_controlling_more_board_scores_higher():
