@@ -18,7 +18,7 @@ Named so shelved cards have a home to wait for: Polar (ice and snow, both poles)
 
 ## Rosters
 
-A habitat's set is its 30 most iconic animals (18 common, 12 rare) plus 12 legendaries, mythic individuals of those animals: 42 cards in the 3:2:2 ratio, 252 across the launch six. The 25 start from a cold ranking (an agent that never saw the pool ranks what a nature fan pictures first), then Martin's calls. The rosters below still unlocked are the first drafts; what a set leaves out is reserved for the habitat's return. An animal has one home, where people picture it. ✓ marks an animal already in the pool.
+A habitat's set is its 30 most iconic animals (18 common, 12 rare) plus 12 legendaries, mythic individuals of those animals: 42 cards in the 3:2:2 ratio. A smaller world gets half a set, 21 cards (15 animals, 6 legendaries); City is one. The launch six come to 231. The 25 start from a cold ranking (an agent that never saw the pool ranks what a nature fan pictures first), then Martin's calls. The rosters below still unlocked are the first drafts; what a set leaves out is reserved for the habitat's return. An animal has one home, where people picture it. ✓ marks an animal already in the pool.
 
 ### Savanna (locked 2026-10-05)
 
@@ -30,15 +30,17 @@ Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Impala (peop
 
 ### Forest
 
-Wolf ✓, Red Fox ✓, Brown Bear ✓, Black Bear ✓, Lynx ✓, Cougar ✓, Red Deer, White-tailed Deer, Moose, Wild Boar, Badger, Wolverine, Raccoon, Beaver, Squirrel ✓, Flying Squirrel ✓, Chipmunk ✓, Hedgehog ✓, Porcupine ✓, Skunk ✓, Owl ✓, Woodpecker, Raven ✓, Magpie ✓, Hawk ✓, Bald Eagle, Falcon ✓, Bat ✓, Hornet ✓, Stag Beetle, Adder ✓ (Viper, bench).
+Wolf ✓, Red Fox ✓, Brown Bear ✓, Black Bear ✓, Lynx ✓, Cougar ✓, Red Deer, White-tailed Deer, Moose, Wild Boar, Badger, Wolverine, Raccoon, Beaver, Squirrel ✓, Flying Squirrel ✓, Chipmunk ✓, Hedgehog ✓, Porcupine ✓, Skunk ✓, Owl ✓, Woodpecker, Raven ✓, Magpie ✓, Hawk ✓, Eagle ✓ (bench; the bald eagle, the vanilla bird, painted so it never reads as a hawk), Falcon ✓, Bat ✓, Hornet ✓, Stag Beetle, Adder ✓ (Viper, bench).
 
 ### Meadow
 
 Honeybee ✓, Bumblebee ✓, Butterfly, Ladybird, Grasshopper, Dragonfly, Snail, Hare, Rabbit, Field Mouse, Vole, Hamster ✓, Groundhog ✓, Gopher ✓, Mole, Chinchilla ✓, Muskrat ✓, Frog, Toad, Grass Snake, Stork, Swallow, Skylark, Goose ✓ (Aurum), Swan ✓ (Black Swan), Kestrel, Red Fox (if not Forest), Deer (at the meadow's edge).
 
-### City
+### City (locked 2026-10-05, a 21-card set)
 
-Rat ✓, Mouse ✓, Pigeon, House Cat ✓, Stray Dog ✓, Raccoon (if not Forest), Crow, Seagull, Sparrow, Starling, Opossum, Macaque, Gecko, Cockroach, House Spider, Mosquito, Moth, Housefly, Bed Bug.
+Animals (15; 9 common and 6 rare, rarities set with the effects): Rat, Mouse, Stray Cat (today's House Cat, renamed), Stray Dog (today's Dog, renamed), Raccoon, Opossum, Macaque, Gecko, Cockroach, Spider, Mosquito, Coyote (the urban coyote, back from the shelf), Bat (painted pouring out of a church tower at dusk), Pigeon, Sparrow.
+
+Legendaries (6): the rat family, Verminus, Pestis, Greywhisker, Barley and Scrooge, and one new, chosen with the effects (the raccoon is a natural one).
 
 ### Jungle
 
@@ -46,7 +48,7 @@ Jaguar ✓, Tiger ✓, Black Panther ✓, Gorilla, Chimpanzee, Orangutan, Howler
 
 ### Ocean
 
-Great White Shark, Hammerhead, Whale Shark, Blue Whale, Humpback Whale, Sperm Whale, Orca, Dolphin, Octopus ✓ (Fathom), Giant Squid, Jellyfish, Sea Turtle, Manta Ray, Stingray, Clownfish, Seahorse, Swordfish, Tuna, Barracuda, Moray Eel, Anglerfish, Crab, Lobster, Starfish, Sea Otter, Seal, Sea Lion, Pelican, Albatross ✓ (Gale).
+Great White Shark, Hammerhead, Whale Shark, Blue Whale, Humpback Whale, Sperm Whale, Orca, Dolphin, Octopus ✓ (Fathom), Giant Squid, Jellyfish, Sea Turtle, Manta Ray, Stingray, Clownfish, Seahorse, Swordfish, Tuna, Barracuda, Moray Eel, Anglerfish, Crab, Lobster, Starfish, Sea Otter, Seal, Sea Lion, Pelican, Seagull, Albatross ✓ (Gale).
 
 ## Today's pool by habitat
 
@@ -76,7 +78,6 @@ Shelved until their habitat's set:
 | Polar Bear, Borealis | Polar |
 | Lemming | Tundra |
 | Rattlesnake | Desert |
-| Coyote | Desert |
 | Andean Condor | Mountains |
 | Cairn | Ice Age |
 

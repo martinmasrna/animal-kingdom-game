@@ -52,4 +52,6 @@ There is no mana: every card costs one card and one placement action. Low streng
 - Legendaries are a specific named individual of a real species; commons and rares carry species names. A legendary's name may evoke myth or folklore but never cites it (no "Bastet").
 - One species per pool among commons and rares; subspecies, sex and age variants count as the same species. Legendaries are exempt, being named individuals. Colony castes are the one exception: castes of one eusocial species may repeat in Colony when the name gives the caste (Worker Ant, Soldier Ant); never breeds, sexes or ages elsewhere.
 - No "[adjective] animal" names that most people would see as the same animal (a Martial Eagle next to an Eagle). Species people tell apart are fine (Polar Bear, Grizzly, Black Bear).
+- Birds blend together for most people, so a bird gets a card only when a normal person has a clear picture of it no other bird shares (Falcon, the fastest bird; Eagle, the bald eagle; one parrot, never three), and the picture must differ, not only the name (the bald eagle passes next to the Hawk). Birds stay at most about 12% of each habitat's set (Martin, 2026-10-05).
+- A domestic animal carries its City name: Stray Cat, Stray Dog.
 - Tags follow what players believe, not taxonomy: Hyena is a Canine because most players would ask why it isn't (Martin, 2026-09-28).
