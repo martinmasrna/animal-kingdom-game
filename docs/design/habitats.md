@@ -76,5 +76,5 @@ Shelved until their habitat's set:
 Still open:
 
 - Dingo: its pack growth is Canine's core and launches; find the canine in the launch six that carries it (a well-known one; Wolf stays as it is).
-- Jerboa: it launches; which animal carries it (Jumping Mouse in Meadow proposed).
+- Jerboa: it launches, nerfed to "Roar: play another animal next to this"; find the animal that carries it (not a flier; the Rodent tag isn't needed). Tried and rejected: Gopher and Meerkat (their famous traits are popping up and keeping watch), Capybara, Seahorse (its trait is the father's brood), Sea Otter (its trait is holding hands: "has +5 strength while next to another Sea Otter", an Ocean common of its own).
 - Rattlesnake.
