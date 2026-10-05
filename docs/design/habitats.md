@@ -46,11 +46,11 @@ Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Impala (peop
 
 ### Forest (locked 2026-10-05)
 
-Animals (29 of 30 while its last slot is open; 18 common and 12 rare, rarities set with the effects): Fox, Wolf, Grizzly Bear, Black Bear, Deer, Moose, Boar, Badger, Lynx, Beaver, Porcupine, Skunk, Squirrel, Chipmunk, Flying Squirrel, Wolverine, Owl, Raven, Hawk, Eagle (the bald eagle, the vanilla bird), Falcon, Magpie, Salamander, Viper, Stag Beetle, Hornet, Guard Wasp, Worker Wasp, Worker Ant.
+Animals (30; 18 common and 12 rare, rarities set with the effects): Fox, Wolf, Grizzly Bear, Black Bear, Deer, Moose, Boar, Badger, Lynx, Beaver, Porcupine, Skunk, Squirrel, Chipmunk, Flying Squirrel, Woodpecker, Firefly, Owl, Raven, Hawk, Eagle (the bald eagle, the vanilla bird), Falcon, Magpie, Salamander, Viper, Stag Beetle, Hornet, Guard Wasp, Worker Wasp, Worker Ant.
 
 Legendaries (12): Lobo, Raksha, Clarion (the wolves), Scarlett (fox), Sirocco (skunk), Vesper (hornet), Ember (pheasant, like Methuselah a legendary without its animal among the 30), and five new, chosen with the effects.
 
-Out of Forest: Hedgehog (Meadow), Raccoon (City), Rattlesnake (waits for Desert), Woodpecker, Blue Jay.
+Out of Forest: Hedgehog (Meadow), Raccoon (City), Rattlesnake (waits for Desert), Cougar (waits for Mountains), Blue Jay. Waiting for a Forest II: Wolverine, Cuckoo, Salmon.
 
 ### Meadow
 
