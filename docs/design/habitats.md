@@ -16,7 +16,13 @@ Legendaries are mythic individuals of real animals (Brutus is a rhino, Fathom an
 
 ## Later habitats
 
-Named so shelved cards have a home to wait for: Coral Reef, Deep Sea, Coast, River and Lake, Swamp, Islands, Polar (ice and snow, both poles, with the snowy northern land: reindeer, musk ox, lemming, arctic fox, snowy owl), Desert, Australia, Mountains, Ice Age.
+Surveyed 2026-10-05 (a cold agent per habitat counting the remarkable animals ordinary people recognise; results in the session, re-run to refresh):
+
+- Full sets: Coral Reef, Australia, Islands, Mountains (with China's bamboo forests: giant panda, red panda), Polar (ice and snow of both poles, with the snowy northern land: reindeer, musk ox, lemming, arctic fox, snowy owl), Prehistoric (dinosaurs, pterosaurs and the ancient seas).
+- Half sets: River and Lake (with swamps), Desert, Deep Sea, Ice Age, Coast.
+- Mini-sets, several habitats or none: Beetles, Caves, Back from the Brink (animals saved from extinction: bison, Przewalski's horse, black-footed ferret, California condor, kakapo), Extinct (dodo, thylacine, aurochs, passenger pigeon, great auk, Steller's sea cow, quagga).
+- Not a habitat: Prairie (about nine animals of its own; pronghorn, prairie dog, burrowing owl, saiga and manul still need homes), Tundra (folded into Polar), Swamp (folded into River and Lake).
+- One home still to choose for: Platypus (Australia or River and Lake), Flamingo, Penguin and Puffin (Polar or Coast), Dodo and Thylacine (Islands or Extinct), Andean Condor (Mountains or Back from the Brink).
 
 ## Families across habitats
 
