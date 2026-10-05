@@ -25,7 +25,19 @@ Locked:
 | Cape Buffalo | R | 6 | While grazing, this has +3 strength. | stands its ground on its own land |
 | Crocodile | R | 8 | Apex Predator. | the ambush at the river crossing; art: the huge Nile crocodile, not the Jaguar's caiman |
 
-Open: Zebra, Meerkat, Secretarybird, Aardvark, the legendaries.
+| Meerkat | C | 2 | Roar: draw a card. When an enemy is placed next to this, draw a card. | the sentry |
+
+Open: Secretarybird, Aardvark, the legendaries; Warthog moves to rare (the herd's den guard), which shifts Savanna's split to rebalance later.
+
+## The herd (Hoofed grazing), draft
+
+Designed as one archetype across the habitats, not card by card (Martin, 2026-10-05). The plan: take a region early and hold it, put grazers on its corners, win on food; the opponent breaks the region. An animal, yours or the opponent's, is grazing while it's a corner of a region its owner controls. Grazing checks stay out of Roars, since region control is checked after a Roar resolves.
+
+- Commons (a deck runs six of these): Gazelle, Giraffe, Wildebeest (as locked above); Zebra, "Flee. While grazing, this has Stealth."; Deer (Forest), "Flee. At the end of your turn, if this is grazing, draw a card."; Cape Buffalo (as locked); Moose (Forest), "Your other grazing animals have +2 strength."; Boar (Forest), "Roar: remove an adjacent enemy that is grazing."
+- Rares: Warthog (as locked), Rhinoceros, Hippopotamus (shared with the Giants), one open.
+- Legendaries: the migration's wildebeest, "Your regions produce 5 more food."; the white stag, "Flee. Roar: draw a card for each region you control."; the herd's bull (a Cape Buffalo), "When an enemy covers one of your grazing animals, remove that enemy."; one open.
+
+Zebra, Deer, Moose, Boar and the three legendaries are proposals not yet stress-tested.
 
 ## Elsewhere, settled in passing
 
