@@ -1,18 +1,20 @@
 # Habitats
 
-A habitat is a complete world: its own set of cards and its own map. It is the unit of release (the launch is five habitats; each expansion is a habitat) and the unit of rotation, switched on after launch. Every card belongs to exactly one habitat: the animal's real, well-known home, and its art shows that home (a lemming on snowy tundra, not on grass). Calls are made the way a nature fan sees animals, never by subspecies or local range. A deck may mix habitats freely; the habitat decides which cards exist, not how you build.
+A habitat is a complete world: its own set of cards and its own map. It is the unit of release (the launch is six habitats; each expansion is a habitat) and the unit of rotation, switched on after launch. Every card belongs to exactly one habitat: the animal's real, well-known home, and its art shows that home (a lemming on snowy tundra, not on grass). Calls are made the way a nature fan sees animals, never by subspecies or local range. A deck may mix habitats freely; the habitat decides which cards exist, not how you build.
 
 Status: proposal from the 2026-10-05 Ramp session, not yet reviewed by Martin line by line.
 
-## The launch five
+## The launch six
 
-Savanna, Forest, City, Jungle, Ocean. Each gets its own map, and the maps look nothing alike: gold, green and brown, grey, deep wet green, blue.
+Savanna, Forest, Meadow, City, Jungle, Ocean. Each gets its own map, and the maps look nothing alike: gold, green and brown, bright flowering green, grey, deep wet green, blue. How each one is painted, so its cards read as one collection, is in the design sandbox's `cards/art-principles.md`.
+
+A card's effect is the competitive asset and its animal is the skin: moving a card to a habitat never loses an effect the game leans on. When the animal has a fitting home in the launch six, it moves there with new art if needed; when it doesn't, the effect goes onto an animal that does.
 
 Legendaries are mythic individuals of real animals (Brutus is a rhino, Fathom an octopus); there is no separate mythic set. Farm animals appear as their wild forms in real habitats (aurochs, wild boar, mouflon, red junglefowl); House Cat and Dog are City strays.
 
 ## Later habitats
 
-Named so shelved cards have a home to wait for: Meadow (open flowering fields; a candidate for launch), Polar (ice and snow, both poles), Tundra (the treeless snowy north), Desert, Australia, Mountains, Ice Age.
+Named so shelved cards have a home to wait for: Polar (ice and snow, both poles), Tundra (the treeless snowy north), Desert, Australia, Mountains, Ice Age.
 
 ## Rosters
 
@@ -24,7 +26,11 @@ Lion ✓, Leopard, Cheetah ✓, Serval ✓, Caracal ✓, African Elephant ✓, W
 
 ### Forest
 
-Wolf ✓, Red Fox ✓, Brown Bear ✓, Black Bear ✓, Lynx ✓, Cougar ✓, Red Deer, White-tailed Deer, Moose, Wild Boar, Badger, Wolverine, Raccoon, Beaver, Squirrel ✓, Flying Squirrel ✓, Chipmunk ✓, Hedgehog ✓, Porcupine ✓, Groundhog ✓, Skunk ✓, Owl ✓, Woodpecker, Raven ✓, Magpie ✓, Hawk ✓, Bald Eagle, Falcon ✓, Bat ✓, Hornet ✓, Bumblebee ✓, Honeybee ✓, Stag Beetle, Adder ✓ (Viper, bench).
+Wolf ✓, Red Fox ✓, Brown Bear ✓, Black Bear ✓, Lynx ✓, Cougar ✓, Red Deer, White-tailed Deer, Moose, Wild Boar, Badger, Wolverine, Raccoon, Beaver, Squirrel ✓, Flying Squirrel ✓, Chipmunk ✓, Hedgehog ✓, Porcupine ✓, Skunk ✓, Owl ✓, Woodpecker, Raven ✓, Magpie ✓, Hawk ✓, Bald Eagle, Falcon ✓, Bat ✓, Hornet ✓, Stag Beetle, Adder ✓ (Viper, bench).
+
+### Meadow
+
+Honeybee ✓, Bumblebee ✓, Butterfly, Ladybird, Grasshopper, Dragonfly, Snail, Hare, Rabbit, Field Mouse, Vole, Hamster ✓, Groundhog ✓, Gopher ✓, Mole, Chinchilla ✓, Muskrat ✓, Frog, Toad, Grass Snake, Stork, Swallow, Skylark, Goose ✓ (Aurum), Swan ✓ (Black Swan), Kestrel, Red Fox (if not Forest), Deer (at the meadow's edge).
 
 ### City
 
@@ -43,24 +49,21 @@ Great White Shark, Hammerhead, Whale Shark, Blue Whale, Humpback Whale, Sperm Wh
 Cards that keep their animal, by habitat:
 
 - **Savanna:** Prince Leo, Princess Lea, King Theron, Queen Adira, Serval, Lion, Caracal, Cheetah, Egg Eater, Black Mamba, Termite King, Termite Queen, Rhinoceros, Brutus, Methuselah, Hippopotamus, Elephant, Oxpecker, Cape Buffalo, Jackal, African Wild Dog, Hyena, Pup.
-- **Forest:** Lynx, Cougar, Ember (golden pheasant, Chinese mountain forest), Hawk, Owl, Magpie, Raven, Vesper, Guard Wasp, Worker Wasp, Queen Honoria, Falstaff, Nurse Bee, Nurse Bumblebee, Queen Bee, Worker Bee, Worker Ant, Grizzly Bear, Black Bear, Flying Squirrel, Squirrel, Chipmunk, Hedgehog, Porcupine, Groundhog, Sirocco, Skunk, Hornet, Bat, Falcon, Lobo, Raksha, Clarion, Scarlett, Fox, Wolf, Poppy, Rusty, Viper, Bird Egg.
+- **Forest:** Lynx, Cougar, Ember (golden pheasant), Hawk, Owl, Magpie, Raven, Vesper, Guard Wasp, Worker Wasp, Worker Ant, Grizzly Bear, Black Bear, Flying Squirrel, Squirrel, Chipmunk, Hedgehog, Porcupine, Sirocco, Skunk, Hornet, Bat, Falcon, Lobo, Raksha, Clarion, Scarlett, Fox, Wolf, Poppy, Rusty, Viper, Bird Egg.
 - **City:** House Cat, Dog, Verminus, Pestis, Rat, Mouse, Greywhisker, Barley, Scrooge.
 - **Jungle:** Jaguar, Black Panther, Tiger, Eon, Python, Queen Marabunta, Soldier Ant, Sloth, Chameleon, Armadillo, Bush Dog, Dhole, Anaconda, Snake Egg.
 - **Ocean:** Fathom, Gale.
+- **Meadow:** Aurum (a goose on the meadow pond), Black Swan (the one black swan on a pond of white ones), Queen Honoria, Falstaff, Nurse Bee, Nurse Bumblebee, Queen Bee, Worker Bee, Groundhog, Hamster, Gopher, Muskrat, Chinchilla.
 
-Reprints: the effect stays, the animal changes to one from the launch five.
+Reprints: the effect stays, the animal changes to one from the launch six.
 
 | Card | Today | Why it can move | Proposed animal |
 |---|---|---|---|
 | Snow Leopard | Mountains | "your Cats may cover equal strength" isn't the snow leopard's | Leopard (Savanna) |
 | Andean Condor | Mountains | a big bird revealing the top card | Vulture (Savanna) |
 | Taipan | Australia | a delayed bite fits any venomous snake | King Cobra (Jungle) |
-| Aurum | Tundra (snow goose) | "draw a card each turn" isn't the snow goose's | a Jungle or Forest bird, open |
 | Dingo | Australia | an end-of-turn pack buff | open (Forest or Savanna canine) |
-| Chinchilla | Mountains | the extra action isn't the chinchilla's | Dormouse (Forest) |
-| Gopher | Prairie | a Rodent-chain food payoff | a Forest rodent (Vole) |
-| Hamster | Steppe / pet | a fed-draw payoff | a Forest or City rodent |
-| Muskrat | Wetland | a fed removal | Beaver (Forest) |
+| Coyote | Desert | Canine's reach engine; nothing about it is the coyote's | open (a Forest canine) |
 
 Shelved until their habitat's set:
 
@@ -69,7 +72,5 @@ Shelved until their habitat's set:
 | Polar Bear, Borealis | Polar (ice and snow) | the polar bear is the card |
 | Lemming | Tundra | filling crossroads with Lemmings is the lemming; its art must show snowy tundra |
 | Rattlesnake | Desert | the rattle is the shuffle |
-| Coyote | Desert | a normal player pictures the coyote in the desert |
-| Jerboa | Desert | no City or Forest rodent reads as the hopping extra placement |
-| Black Swan | Australia | the black swan, the rare surprise, is the card |
+| Jerboa | Desert | the hop is the extra placement; a Meadow hopper (a hare) would carry it but isn't a Rodent |
 | Cairn | Ice Age | the glyptodont; the Giants redesign drops it anyway |
