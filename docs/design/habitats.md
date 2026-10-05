@@ -54,9 +54,13 @@ Legendaries (12): Lobo, Raksha, Clarion (the wolves), Scarlett (fox), Sirocco (s
 
 Out of Forest: Hedgehog (Meadow), Raccoon (City), Rattlesnake (waits for Desert), Cougar (waits for Mountains), Blue Jay. Waiting for a Forest II: Wolverine, Cuckoo, Salmon.
 
-### Meadow
+### Meadow (locked 2026-10-05)
 
-Honeybee ✓, Bumblebee ✓, Butterfly, Ladybird, Grasshopper, Dragonfly, Snail, Hare, Rabbit, Field Mouse, Vole, Hamster ✓, Groundhog ✓, Gopher ✓, Mole, Chinchilla ✓, Muskrat ✓, Frog, Toad, Grass Snake, Stork, Swallow, Skylark, Goose ✓ (Aurum), Swan ✓ (Black Swan), Kestrel, Red Fox (if not Forest), Deer (at the meadow's edge).
+Animals (30; 18 common and 12 rare, rarities set with the effects): Hare, Hedgehog, Mole, Weasel, Hamster, Groundhog, Gopher, Muskrat, Queen Bee, Worker Bee, Nurse Bee, Nurse Bumblebee, Butterfly, Dragonfly, Ladybird, Grasshopper, Praying Mantis, Pond Skater, Frog, Toad, Snail, Earthworm, Tick, Centipede, Goose, Swan, Duck, Stork, Swallow, Cuckoo.
+
+Legendaries (12): Aurum (goose), Black Swan (swan), Queen Honoria (honeybee), Falstaff (bumblebee), and eight new, chosen with the effects.
+
+Out of Meadow: Grass Snake (nothing about it is its own), Newt (people can't tell it from the Salamander), Tree Frog (a third frog), Heron (River and Lake), Chinchilla (its effect is the Octopus's).
 
 ### City (locked 2026-10-05, a 21-card set)
 
@@ -80,11 +84,11 @@ Great White Shark, Hammerhead, Whale Shark, Blue Whale, Humpback Whale, Sperm Wh
 Cards that keep their animal, by habitat:
 
 - **Savanna:** Prince Leo, Princess Lea, King Theron, Queen Adira, Serval, Lion, Caracal, Cheetah, Egg Eater, Black Mamba, Termite King, Termite Queen, Rhinoceros, Brutus, Methuselah, Hippopotamus, Elephant, Oxpecker, Cape Buffalo, Jackal, African Wild Dog, Hyena, Pup.
-- **Forest:** Lynx, Ember (golden pheasant), Hawk, Owl, Magpie, Raven, Vesper, Guard Wasp, Worker Wasp, Worker Ant, Grizzly Bear, Black Bear, Flying Squirrel, Squirrel, Chipmunk, Hedgehog, Porcupine, Sirocco, Skunk, Hornet, Bat, Falcon, Lobo, Raksha, Clarion, Scarlett, Fox, Wolf, Poppy, Rusty, Viper, Bird Egg.
+- **Forest:** Lynx, Ember (golden pheasant), Hawk, Owl, Magpie, Raven, Vesper, Guard Wasp, Worker Wasp, Worker Ant, Grizzly Bear, Black Bear, Flying Squirrel, Squirrel, Chipmunk, Porcupine, Sirocco, Skunk, Hornet, Bat, Falcon, Lobo, Raksha, Clarion, Scarlett, Fox, Wolf, Poppy, Rusty, Viper, Bird Egg.
 - **City:** House Cat, Dog, Verminus, Pestis, Rat, Mouse, Greywhisker, Barley, Scrooge.
 - **Jungle:** Jaguar, Black Panther, Tiger, Eon, Python, Queen Marabunta, Soldier Ant, Sloth, Chameleon, Armadillo, Bush Dog, Dhole, Anaconda, Snake Egg.
 - **Open Ocean:** Fathom (the giant octopus rising from the depths), Gale.
-- **Meadow:** Aurum (a goose on the meadow pond), Black Swan (the one black swan on a pond of white ones), Queen Honoria, Falstaff, Nurse Bee, Nurse Bumblebee, Queen Bee, Worker Bee, Groundhog, Hamster, Gopher, Muskrat, Chinchilla.
+- **Meadow:** Aurum (a goose on the meadow pond), Black Swan (the one black swan on a pond of white ones), Queen Honoria, Falstaff, Nurse Bee, Nurse Bumblebee, Queen Bee, Worker Bee, Hedgehog, Groundhog, Hamster, Gopher, Muskrat.
 
 Reprints: the effect stays, the animal changes to one from the launch six.
 
