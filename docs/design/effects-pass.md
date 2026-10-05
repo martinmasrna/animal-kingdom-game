@@ -10,7 +10,7 @@ Locked:
 
 | Animal | Rarity | Str | Effect | Note |
 |---|---|---:|---|---|
-| Elephant | C | 9 | Costs 10 food. Hungry 3. | the vanilla giant ~ |
+| Elephant | C | 9 | Hungry 5. | the vanilla giant; the bigger, the hungrier ~ |
 | Ostrich | C | 4 | Roar: place an Ostrich Egg (0, no effect) on an adjacent empty crossroad. | the biggest egg |
 | Giraffe | C | 5 | During your opponent's turn, this has +4 strength. | its kick |
 | Wildebeest | C | 5 | At the end of your turn, if this is grazing, gain 5 food. | wording to follow the grazing decision |
@@ -20,8 +20,12 @@ Locked:
 | Dung Beetle | C | 1 | At the end of your turn, gain 2 food for each of your animals of strength 8 or more. | lives off the giants |
 | Honey Badger | R | 3 | Roar: remove an adjacent enemy of strength 6 or more. | the Big Game Hunter (Serval's old effect) |
 | Serval | R | 2 | Roar: set an adjacent enemy's strength to 1. | the Cats' answer to big animals: pin the prey, the pride covers it |
+| Rhinoceros | R | 8 | Hungry 3. Roar: remove all adjacent enemies of strength 2 or less. | a Giant ~ |
+| Hippopotamus | R | 8 | Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it. | a Giant; the reaction stays (the client is to show what removed an animal) ~ |
+| Cape Buffalo | R | 6 | While grazing, this has +3 strength. | stands its ground on its own land |
+| Crocodile | R | 8 | Apex Predator. | the ambush at the river crossing; art: the huge Nile crocodile, not the Jaguar's caiman |
 
-Open: Zebra, Meerkat, Secretarybird, Aardvark, Hippopotamus, Cape Buffalo, Crocodile, the legendaries.
+Open: Zebra, Meerkat, Secretarybird, Aardvark, the legendaries.
 
 ## Elsewhere, settled in passing
 
