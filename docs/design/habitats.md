@@ -62,6 +62,8 @@ Reprints: the effect stays, the animal changes to one from the launch six.
 | Snow Leopard | Leopard (Savanna) | the snow leopard belongs to Polar; its effect, a Cats staple, stays in the launch on the leopard |
 | Taipan | King Cobra (Jungle) | a delayed venomous bite fits any deadly snake, and the cobra is the more iconic one |
 
+Egg Control's growing snake launches as **Boa Constrictor** (Jungle, common, 0: "At the start of your turn, gain 1 strength (wherever this is)."), the constrictor's squeeze tightening every turn; any deck can run it, and the long games Egg Control plays pay it most.
+
 Shelved until their habitat's set:
 
 | Card | Waits for |
@@ -69,6 +71,7 @@ Shelved until their habitat's set:
 | Snow Leopard (as an animal) | Polar |
 | Polar Bear, Borealis | Polar |
 | Lemming | Tundra |
+| Rattlesnake | Desert |
 | Coyote | Desert |
 | Andean Condor | Mountains |
 | Cairn | Ice Age |
@@ -77,4 +80,3 @@ Still open:
 
 - Dingo: its pack growth is Canine's core and launches; find the canine in the launch six that carries it (a well-known one; Wolf stays as it is).
 - Jerboa: it launches, nerfed to "Roar: play another animal next to this"; find the animal that carries it (not a flier; the Rodent tag isn't needed). Tried and rejected: Gopher and Meerkat (their famous traits are popping up and keeping watch), Capybara, Seahorse (its trait is the father's brood), Sea Otter (its trait is holding hands: "has +5 strength while next to another Sea Otter", an Ocean common of its own).
-- Rattlesnake.
