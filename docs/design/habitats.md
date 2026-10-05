@@ -22,11 +22,13 @@ Every family archetype has a core habitat, two at most, holding enough of that f
 
 | Family | Today | Verdict |
 |---|---|---|
-| Cats | Savanna 9 (Lion, Cheetah, Leopard, Serval, Caracal, the four lion legendaries), Jungle 3, Forest 2, City 1 | fine on Savanna + Jungle; this is why Caracal stays |
+| Cats | Savanna 9 (Lion, Cheetah, Leopard, Serval, Caracal, the four lion legendaries), Jungle 3, Forest 1, City 1 | fine on Savanna + Jungle; this is why Caracal stays |
 | Canines | Forest 6, Savanna 2, City 2, Jungle 2 | weak: no two habitats reach 10 |
 | Colony | Meadow 6, Forest 5, Savanna 2, Jungle 2 | scattered; Meadow + Forest makes 11 |
 | Rodents | City 7, Forest 5, Meadow 4, Savanna 1 | City with Forest or Meadow |
 | Snakes | Jungle 5, Savanna 2, Forest 1, Meadow 1 | thin; Egg Control also runs Birds |
+
+Families are also spread on purpose, so later sets can feed them. An expansion (likely three habitats at once) has two jobs: bring one to four archetypes into the competitive game (new, or newly viable), and give the existing archetypes new cards so they evolve instead of going stale. So a family keeps its core in one or two launch habitats and leaves some of its animals for the habitats still to come (Snow Leopard for Polar, Cougar for Mountains), and every new habitat brings one to three cards to the families it touches. By the public launch, the first expansions are planned (Martin, 2026-10-05).
 
 A habitat's first set is a starting selection, not its whole cast: a habitat can return as a later set (a Savanna II) and bring the animals the first one left out.
 
@@ -44,7 +46,7 @@ Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Impala (peop
 
 ### Forest (locked 2026-10-05)
 
-Animals (30; 18 common and 12 rare, rarities set with the effects): Fox, Wolf, Grizzly Bear, Black Bear, Deer, Moose, Boar, Badger, Lynx, Cougar, Beaver, Porcupine, Skunk, Squirrel, Chipmunk, Flying Squirrel, Wolverine, Owl, Raven, Hawk, Eagle (the bald eagle, the vanilla bird), Falcon, Magpie, Salamander, Viper, Stag Beetle, Hornet, Guard Wasp, Worker Wasp, Worker Ant.
+Animals (29 of 30 while its last slot is open; 18 common and 12 rare, rarities set with the effects): Fox, Wolf, Grizzly Bear, Black Bear, Deer, Moose, Boar, Badger, Lynx, Beaver, Porcupine, Skunk, Squirrel, Chipmunk, Flying Squirrel, Wolverine, Owl, Raven, Hawk, Eagle (the bald eagle, the vanilla bird), Falcon, Magpie, Salamander, Viper, Stag Beetle, Hornet, Guard Wasp, Worker Wasp, Worker Ant.
 
 Legendaries (12): Lobo, Raksha, Clarion (the wolves), Scarlett (fox), Sirocco (skunk), Vesper (hornet), Ember (pheasant, like Methuselah a legendary without its animal among the 30), and five new, chosen with the effects.
 
@@ -99,6 +101,7 @@ Shelved until their habitat's set:
 | Lemming | Tundra |
 | Rattlesnake | Desert |
 | Andean Condor | Mountains |
+| Cougar | Mountains (the mountain lion; a Cats card for a later set) |
 | Cairn | Ice Age |
 
 Still open:
