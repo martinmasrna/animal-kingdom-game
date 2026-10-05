@@ -16,17 +16,31 @@ Legendaries are mythic individuals of real animals (Brutus is a rhino, Fathom an
 
 Named so shelved cards have a home to wait for: Polar (ice and snow, both poles), Tundra (the treeless snowy north), Desert, Australia, Mountains, Ice Age.
 
+## Families across habitats
+
+Every family archetype has a core habitat, two at most, holding enough of that family to build a deck (a deck is 14 designs, so roughly 10 to 14 family designs, legendaries included). A deck that needs five habitats in rotation at once isn't viable; one that lives on its core survives most rotations. Count after each habitat is locked:
+
+| Family | Today | Verdict |
+|---|---|---|
+| Cats | Savanna 9 (Lion, Cheetah, Leopard, Serval, Caracal, the four lion legendaries), Jungle 3, Forest 2, City 1 | fine on Savanna + Jungle; this is why Caracal stays |
+| Canines | Forest 6, Savanna 2, City 2, Jungle 2 | weak: no two habitats reach 10 |
+| Colony | Meadow 6, Forest 5, Savanna 2, Jungle 2 | scattered; Meadow + Forest makes 11 |
+| Rodents | City 7, Forest 5, Meadow 4, Savanna 1 | City with Forest or Meadow |
+| Snakes | Jungle 5, Savanna 2, Forest 1, Meadow 1 | thin; Egg Control also runs Birds |
+
+A habitat's first set is a starting selection, not its whole cast: a habitat can return as a later set (a Savanna II) and bring the animals the first one left out.
+
 ## Rosters
 
 A habitat's set is its 30 most iconic animals (18 common, 12 rare) plus 12 legendaries, mythic individuals of those animals: 42 cards in the 3:2:2 ratio. A smaller world gets half a set, 21 cards (15 animals, 6 legendaries); City is one. The launch six come to 231. The 25 start from a cold ranking (an agent that never saw the pool ranks what a nature fan pictures first), then Martin's calls. The rosters below still unlocked are the first drafts; what a set leaves out is reserved for the habitat's return. An animal has one home, where people picture it. ✓ marks an animal already in the pool.
 
 ### Savanna (locked 2026-10-05)
 
-Animals (30; 18 common and 12 rare, rarities set with the effects): Lion, Elephant, Giraffe, Zebra, Cheetah, Wildebeest, Cape Buffalo, Warthog, Ostrich, African Wild Dog, Vulture, Baboon, Gazelle, Meerkat, Oxpecker, Leopard, Rhinoceros, Hippopotamus, Crocodile, Hyena, Honey Badger, Serval, Black Mamba, Termite King, Termite Queen, Egg Eater, Caracal, Secretarybird, Dung Beetle, Aardvark.
+Animals (30; 18 common and 12 rare, rarities set with the effects): Lion, Elephant, Giraffe, Zebra, Cheetah, Wildebeest, Cape Buffalo, Warthog, Ostrich, African Wild Dog, Naked Mole-Rat (carries Jerboa's effect), Baboon, Gazelle, Meerkat, Oxpecker, Leopard, Rhinoceros, Hippopotamus, Crocodile, Hyena, Honey Badger, Serval, Black Mamba, Termite King, Termite Queen, Egg Eater, Caracal, Secretarybird, Dung Beetle, Aardvark.
 
 Legendaries (12): Prince Leo, Princess Lea, King Theron, Queen Adira (the lion family), Brutus (rhino), Methuselah (tortoise, the one legendary without its animal among the 30; its effect may find a better animal), and six new mythic versions of the 30 chosen with the effects (candidates: Elephant, the Giants' Matriarch; Crocodile; Honey Badger; Cheetah, Leopard, Cape Buffalo or Hippo).
 
-Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Impala (people can't tell it from the Gazelle).
+Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Impala (people can't tell it from the Gazelle), Vulture. Waiting for a Savanna II: Pangolin, Flamingo, Vulture.
 
 ### Forest (locked 2026-10-05)
 
@@ -71,6 +85,8 @@ Reprints: the effect stays, the animal changes to one from the launch six.
 |---|---|---|
 | Snow Leopard | Leopard (Savanna) | the snow leopard belongs to Polar; its effect, a Cats staple, stays in the launch on the leopard |
 | Taipan | King Cobra (Jungle) | a delayed venomous bite fits any deadly snake, and the cobra is the more iconic one |
+| Jerboa | Naked Mole-Rat (Savanna), nerfed to "Roar: play another animal next to this" | a launch-defining effect on a small, one-of-a-kind animal that never lives alone |
+| Chinchilla | Octopus (Ocean) | eight arms working at once: next turn, an extra action |
 
 Egg Control's growing snake launches as **Boa Constrictor** (Jungle, common, 0: "At the start of your turn, gain 1 strength (wherever this is)."), the constrictor's squeeze tightening every turn; any deck can run it, and the long games Egg Control plays pay it most.
 
@@ -88,4 +104,3 @@ Shelved until their habitat's set:
 Still open:
 
 - Dingo: its pack growth is Canine's core and launches; find the canine in the launch six that carries it (a well-known one; Wolf stays as it is).
-- Jerboa: it launches, nerfed to "Roar: play another animal next to this"; find the animal that carries it (not a flier; the Rodent tag isn't needed). Tried and rejected: Gopher and Meerkat (their famous traits are popping up and keeping watch), Capybara, Seahorse (its trait is the father's brood), Sea Otter (its trait is holding hands: "has +5 strength while next to another Sea Otter", an Ocean common of its own).
