@@ -48,6 +48,7 @@ There is no mana: every card costs one card and one placement action. Low streng
 
 - Every card is an animal. No spells, no objects, no places.
 - Let the animal's real behaviour suggest the mechanic: birds fly over lines, elephants hold ground, lemmings swarm.
+- **Animal–effect fit** runs both ways: the effect is the best one for the animal (its most famous trait, as a normal person knows it, turned into a rule), and the animal is the best one for the effect (the first animal the effect brings to mind). Rattlesnake (the rattle is the shuffle), Owl (sees what's hidden: Scout), Raven, Cheetah and Falcon have it. A card that passes only one direction is a weak fit.
 - Legendaries are a specific named individual of a real species; commons and rares carry species names. A legendary's name may evoke myth or folklore but never cites it (no "Bastet").
 - One species per pool among commons and rares; subspecies, sex and age variants count as the same species. Legendaries are exempt, being named individuals. Colony castes are the one exception: castes of one eusocial species may repeat in Colony when the name gives the caste (Worker Ant, Soldier Ant); never breeds, sexes or ages elsewhere.
 - No "[adjective] animal" names that most people would see as the same animal (a Martial Eagle next to an Eagle). Species people tell apart are fine (Polar Bear, Grizzly, Black Bear).
