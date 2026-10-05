@@ -18,11 +18,17 @@ Named so shelved cards have a home to wait for: Polar (ice and snow, both poles)
 
 ## Rosters
 
-The roster is the habitat's full cast, written before its first set so no iconic animal is forgotten: the first set picks from it, and what it leaves out is reserved for the habitat's return. An animal has one home, where people picture it. ✓ marks an animal already in the pool.
+A habitat's set is its 25 most iconic animals (15 common, 10 rare) plus 10 legendaries, mythic individuals of those animals: 35 cards, 210 across the launch six. The 25 start from a cold ranking (an agent that never saw the pool ranks what a nature fan pictures first), then Martin's calls. The rosters below still unlocked are the first drafts; what a set leaves out is reserved for the habitat's return. An animal has one home, where people picture it. ✓ marks an animal already in the pool.
 
-### Savanna
+### Savanna (locked 2026-10-05)
 
-Lion ✓, Leopard, Cheetah ✓, Serval ✓, Caracal ✓, African Elephant ✓, White Rhinoceros ✓, Black Rhinoceros, Hippopotamus ✓, Giraffe, Zebra, Wildebeest, Cape Buffalo ✓, Thomson's Gazelle, Impala, Warthog, Spotted Hyena ✓, African Wild Dog ✓, Jackal ✓, Meerkat, Honey Badger, Baboon, Aardvark, Ostrich, Vulture, Secretary Bird, Marabou Stork, Oxpecker ✓, Nile Crocodile, Black Mamba ✓, Termite ✓, Dung Beetle.
+Commons (15): Lion, Elephant, Giraffe, Zebra, Cheetah, Wildebeest, Cape Buffalo, Warthog, Ostrich, African Wild Dog, Vulture, Baboon, Gazelle, Meerkat, Oxpecker.
+
+Rares (10): Leopard, Rhinoceros, Hippopotamus, Crocodile, Hyena, Honey Badger, Serval, Black Mamba, Termite King, Termite Queen.
+
+Legendaries (10): Prince Leo, Princess Lea, King Theron, Queen Adira (the lion family), Brutus (rhino), Methuselah (tortoise, the one legendary without its animal among the 25; its effect may find a better animal), and four new mythic versions of the 25 chosen with the effects (candidates: Elephant, the Giants' Matriarch; Crocodile; Honey Badger; Cheetah, Leopard, Cape Buffalo or Hippo).
+
+Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Caracal, Egg Eater, Secretarybird, Impala (people can't tell it from the Gazelle), Dung Beetle (waits for a beetles mini-set).
 
 ### Forest
 
