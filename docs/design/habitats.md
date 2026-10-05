@@ -32,7 +32,7 @@ A habitat's first set is a starting selection, not its whole cast: a habitat can
 
 ## Rosters
 
-A habitat's set is its 30 most iconic animals (18 common, 12 rare) plus 12 legendaries, mythic individuals of those animals: 42 cards in the 3:2:2 ratio. A smaller world gets half a set, 21 cards (15 animals, 6 legendaries); City is one. The launch six come to 231. The 25 start from a cold ranking (an agent that never saw the pool ranks what a nature fan pictures first), then Martin's calls. The rosters below still unlocked are the first drafts; what a set leaves out is reserved for the habitat's return. An animal has one home, where people picture it. ✓ marks an animal already in the pool.
+A habitat's set is its 30 most iconic animals (18 common, 12 rare) plus 12 legendaries, mythic individuals of those animals: 42 cards in the 3:2:2 ratio. A smaller world gets half a set, 21 cards (15 animals, 6 legendaries); City is one. A richer world can get more, in any multiple of 7 that keeps the ratio (49: 35 animals and 14 legendaries). The launch six come to 231. The 25 start from a cold ranking (an agent that never saw the pool ranks what a nature fan pictures first), then Martin's calls. The rosters below still unlocked are the first drafts; what a set leaves out is reserved for the habitat's return. An animal has one home, where people picture it. ✓ marks an animal already in the pool.
 
 ### Savanna (locked 2026-10-05)
 
