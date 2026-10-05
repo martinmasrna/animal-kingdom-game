@@ -36,7 +36,7 @@ A habitat's first set is a starting selection, not its whole cast: a habitat can
 
 ## Rosters
 
-A habitat's set is its 30 most iconic animals (18 common, 12 rare) plus 12 legendaries, mythic individuals of those animals: 42 cards in the 3:2:2 ratio. A smaller world gets half a set, 21 cards (15 animals, 6 legendaries); City is one. A richer world can get more, in any multiple of 7 that keeps the ratio (49: 35 animals and 14 legendaries). The launch six come to 231. The 25 start from a cold ranking (an agent that never saw the pool ranks what a nature fan pictures first), then Martin's calls. The rosters below still unlocked are the first drafts; what a set leaves out is reserved for the habitat's return. An animal has one home, where people picture it. ✓ marks an animal already in the pool.
+A habitat's set is its 30 most iconic animals (18 common, 12 rare) plus 12 legendaries, mythic individuals of those animals: 42 cards in the 3:2:2 ratio. A smaller world gets half a set, 21 cards (15 animals, 6 legendaries); City and Open Ocean are. A richer world can get more, in any multiple of 7 that keeps the ratio (49: 35 animals and 14 legendaries). The launch six come to 210 (four sets of 42, two of 21). The 25 start from a cold ranking (an agent that never saw the pool ranks what a nature fan pictures first), then Martin's calls. The rosters below still unlocked are the first drafts; what a set leaves out is reserved for the habitat's return. An animal has one home, where people picture it. ✓ marks an animal already in the pool.
 
 ### Savanna (locked 2026-10-05)
 
@@ -76,12 +76,15 @@ Legendaries (12): Eon (snake), Queen Marabunta (army ant), and ten new, chosen w
 
 Out of Jungle as lookalikes of animals elsewhere: Howler Monkey, Red-eyed Tree Frog, Morpho Butterfly, Vampire Bat, Pink River Dolphin, Asian Elephant, Harpy Eagle, Hornbill. Boa: one archetype doesn't get two near-identical cards in one habitat; its growth effect ("At the start of your turn, gain 1 strength (wherever this is)") waits on the bench for a snake of a later habitat.
 
-### Open Ocean
+### Open Ocean (locked 2026-10-05, a 21-card set)
 
-The base sea, open blue water with the seafloor beneath it; the special waters (Coral Reef, Deep Sea, Coast, River and Lake, Swamp) are later habitats, and the polar seas belong to Polar. Draft cast:
+The base sea, open blue water with the seafloor beneath it. The special waters are later habitats: Coral Reef (Seahorse, Pufferfish, Clownfish, Mantis Shrimp, Cuttlefish, Moray Eel, Lionfish, Parrotfish), Deep Sea (Anglerfish, Giant Squid, Vampire Squid), Coast (Sea Otter, the hand-holding pair designed in this session; Starfish, Horseshoe Crab, Seagull, Pelican, Manatee), River and Lake, Swamp; the polar seas (Narwhal, Penguin, Walrus) belong to Polar.
 
+Animals (15; 9 common and 6 rare, rarities set with the effects): Great White Shark, Hammerhead, Whale Shark, Blue Whale (Titan, a launch keyword), Sperm Whale, Orca, Dolphin, Octopus (carries Chinchilla's effect), Squid, Jellyfish, Sea Turtle, Manta Ray, Sunfish, Swordfish, Albatross.
 
-Great White Shark, Hammerhead, Whale Shark, Blue Whale, Humpback Whale, Sperm Whale, Orca, Dolphin, Octopus ✓ (Fathom), Giant Squid, Jellyfish, Sea Turtle, Manta Ray, Stingray, Clownfish, Seahorse, Swordfish, Tuna, Barracuda, Moray Eel, Anglerfish, Crab, Lobster, Starfish, Sea Otter, Seal, Sea Lion, Pelican, Seagull, Albatross ✓ (Gale). The cast moves to the special waters where it belongs (Clownfish, Seahorse and the reef fish to Coral Reef, Anglerfish to Deep Sea, Crab, Starfish, Seal and Seagull to Coast) when Open Ocean is locked.
+Legendaries (6): Fathom (octopus, rising from the depths), Gale (albatross), and four new, chosen with the effects.
+
+Waiting for an Open Ocean II: Humpback Whale (it blends with the Blue Whale), Flying Fish.
 
 ## Today's pool by habitat
 
