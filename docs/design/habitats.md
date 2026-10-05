@@ -6,7 +6,7 @@ Status: proposal from the 2026-10-05 Ramp session, not yet reviewed by Martin li
 
 ## The launch six
 
-Savanna, Forest, Meadow, City, Jungle, Ocean. Each gets its own map, and the maps look nothing alike: gold, green and brown, bright flowering green, grey, deep wet green, blue. How each one is painted, so its cards read as one collection, is in the design sandbox's `cards/art-principles.md`.
+Savanna, Forest, Meadow, City, Jungle, Open Ocean. Each gets its own map, and the maps look nothing alike: gold, green and brown, bright flowering green, grey, deep wet green, blue. How each one is painted, so its cards read as one collection, is in the design sandbox's `cards/art-principles.md`.
 
 What the launch must contain is the game's core card effects, not particular animals: a great animal without a home in the launch habitats waits for its habitat's set (the axolotl for River and Lake, the platypus and kangaroo for Australia, the Komodo dragon and giant tortoise for Islands).
 
@@ -16,7 +16,7 @@ Legendaries are mythic individuals of real animals (Brutus is a rhino, Fathom an
 
 ## Later habitats
 
-Named so shelved cards have a home to wait for: Polar (ice and snow, both poles), Tundra (the treeless snowy north), Desert, Australia, Mountains, Ice Age.
+Named so shelved cards have a home to wait for: Coral Reef, Deep Sea, Coast, River and Lake, Swamp, Islands, Polar (ice and snow, both poles), Tundra (the treeless snowy north), Desert, Australia, Mountains, Ice Age.
 
 ## Families across habitats
 
@@ -68,9 +68,12 @@ Legendaries (6): the rat family, Verminus, Pestis, Greywhisker, Barley and Scroo
 
 Jaguar ✓, Tiger ✓, Black Panther ✓, Gorilla, Chimpanzee, Orangutan, Howler Monkey, Sloth ✓, Tapir, Okapi, Asian Elephant, Gaur, Sun Bear, Capybara, Anaconda ✓ (bench), Python ✓, King Cobra, Boa, Poison Dart Frog, Red-eyed Tree Frog, Chameleon ✓, Macaw, Toucan, Harpy Eagle, Hornbill, Bird-of-paradise, Army Ant ✓, Leafcutter Ant, Tarantula, Piranha, Bush Dog ✓, Dhole ✓.
 
-### Ocean
+### Open Ocean
 
-Great White Shark, Hammerhead, Whale Shark, Blue Whale, Humpback Whale, Sperm Whale, Orca, Dolphin, Octopus ✓ (Fathom), Giant Squid, Jellyfish, Sea Turtle, Manta Ray, Stingray, Clownfish, Seahorse, Swordfish, Tuna, Barracuda, Moray Eel, Anglerfish, Crab, Lobster, Starfish, Sea Otter, Seal, Sea Lion, Pelican, Seagull, Albatross ✓ (Gale).
+The base sea, open blue water with the seafloor beneath it; the special waters (Coral Reef, Deep Sea, Coast, River and Lake, Swamp) are later habitats, and the polar seas belong to Polar. Draft cast:
+
+
+Great White Shark, Hammerhead, Whale Shark, Blue Whale, Humpback Whale, Sperm Whale, Orca, Dolphin, Octopus ✓ (Fathom), Giant Squid, Jellyfish, Sea Turtle, Manta Ray, Stingray, Clownfish, Seahorse, Swordfish, Tuna, Barracuda, Moray Eel, Anglerfish, Crab, Lobster, Starfish, Sea Otter, Seal, Sea Lion, Pelican, Seagull, Albatross ✓ (Gale). The cast moves to the special waters where it belongs (Clownfish, Seahorse and the reef fish to Coral Reef, Anglerfish to Deep Sea, Crab, Starfish, Seal and Seagull to Coast) when Open Ocean is locked.
 
 ## Today's pool by habitat
 
@@ -80,7 +83,7 @@ Cards that keep their animal, by habitat:
 - **Forest:** Lynx, Ember (golden pheasant), Hawk, Owl, Magpie, Raven, Vesper, Guard Wasp, Worker Wasp, Worker Ant, Grizzly Bear, Black Bear, Flying Squirrel, Squirrel, Chipmunk, Hedgehog, Porcupine, Sirocco, Skunk, Hornet, Bat, Falcon, Lobo, Raksha, Clarion, Scarlett, Fox, Wolf, Poppy, Rusty, Viper, Bird Egg.
 - **City:** House Cat, Dog, Verminus, Pestis, Rat, Mouse, Greywhisker, Barley, Scrooge.
 - **Jungle:** Jaguar, Black Panther, Tiger, Eon, Python, Queen Marabunta, Soldier Ant, Sloth, Chameleon, Armadillo, Bush Dog, Dhole, Anaconda, Snake Egg.
-- **Ocean:** Fathom, Gale.
+- **Open Ocean:** Fathom (the giant octopus rising from the depths), Gale.
 - **Meadow:** Aurum (a goose on the meadow pond), Black Swan (the one black swan on a pond of white ones), Queen Honoria, Falstaff, Nurse Bee, Nurse Bumblebee, Queen Bee, Worker Bee, Groundhog, Hamster, Gopher, Muskrat, Chinchilla.
 
 Reprints: the effect stays, the animal changes to one from the launch six.
@@ -90,7 +93,7 @@ Reprints: the effect stays, the animal changes to one from the launch six.
 | Snow Leopard | Leopard (Savanna) | the snow leopard belongs to Polar; its effect, a Cats staple, stays in the launch on the leopard |
 | Taipan | King Cobra (Jungle) | a delayed venomous bite fits any deadly snake, and the cobra is the more iconic one |
 | Jerboa | Naked Mole-Rat (Savanna), nerfed to "Roar: play another animal next to this" | a launch-defining effect on a small, one-of-a-kind animal that never lives alone |
-| Chinchilla | Octopus (Ocean) | eight arms working at once: next turn, an extra action |
+| Chinchilla | Octopus (Open Ocean) | eight arms working at once: next turn, an extra action |
 
 Egg Control's growing snake launches as **Boa Constrictor** (Jungle, common, 0: "At the start of your turn, gain 1 strength (wherever this is)."), the constrictor's squeeze tightening every turn; any deck can run it, and the long games Egg Control plays pay it most.
 
