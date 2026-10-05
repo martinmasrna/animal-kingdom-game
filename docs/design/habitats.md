@@ -16,7 +16,7 @@ Legendaries are mythic individuals of real animals (Brutus is a rhino, Fathom an
 
 ## Later habitats
 
-Named so shelved cards have a home to wait for: Coral Reef, Deep Sea, Coast, River and Lake, Swamp, Islands, Polar (ice and snow, both poles), Tundra (the treeless snowy north), Desert, Australia, Mountains, Ice Age.
+Named so shelved cards have a home to wait for: Coral Reef, Deep Sea, Coast, River and Lake, Swamp, Islands, Polar (ice and snow, both poles, with the snowy northern land: reindeer, musk ox, lemming, arctic fox, snowy owl), Desert, Australia, Mountains, Ice Age.
 
 ## Families across habitats
 
@@ -113,7 +113,7 @@ Shelved until their habitat's set:
 |---|---|
 | Snow Leopard (as an animal) | Polar |
 | Polar Bear, Borealis | Polar |
-| Lemming | Tundra |
+| Lemming | Polar (painted on snow) |
 | Rattlesnake | Desert |
 | Andean Condor | Mountains |
 | Cougar | Mountains (the mountain lion; a Cats card for a later set) |
