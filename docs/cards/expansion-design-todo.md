@@ -278,7 +278,7 @@ Primary risks: automated token growth, unconnected units creating confusing pseu
 
 ### 2.6 Beetles — a mini-set across habitats
 
-A small set of the beetles people know: stag beetle, ladybird, firefly, rhinoceros beetle, scarab, bombardier beetle, Goliath beetle. About eight recognisable ones, so a mini-set rather than a habitat (Martin, 2026-10-05). The dung beetle is a Savanna card.
+A small set of the beetles people know: stag beetle, ladybird, firefly, rhinoceros beetle, scarab, bombardier beetle, Goliath beetle. Seven recognisable ones, so a mini-set rather than a habitat (Martin, 2026-10-05). The dung beetle is a Savanna card.
 
 ---
 
