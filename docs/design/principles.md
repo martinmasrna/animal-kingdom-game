@@ -47,6 +47,7 @@ There is no mana: every card costs one card and one placement action. Low streng
 ## Theme and naming
 
 - Every card is an animal. No spells, no objects, no places.
+- The pool celebrates what evolution made. An animal earns its card by being recognisable, one of a kind (nothing else looks like it to a normal person) and astonishing (the axolotl regrowing its legs, the chameleon changing colour). A group of lookalikes (rodents, small brown birds, most antelopes, most fish) gets its single most remarkable member, not fifteen. The most unique effects go on the most unique animals (Martin, 2026-10-05).
 - Let the animal's real behaviour suggest the mechanic: birds fly over lines, elephants hold ground, lemmings swarm.
 - **Animal–effect fit** runs both ways: the effect is the best one for the animal (its most famous trait, as a normal person knows it, turned into a rule), and the animal is the best one for the effect (the first animal the effect brings to mind). Rattlesnake (the rattle is the shuffle), Owl (sees what's hidden: Scout), Raven, Cheetah and Falcon have it. A card that passes only one direction is a weak fit.
 - Legendaries are a specific named individual of a real species; commons and rares carry species names. A legendary's name may evoke myth or folklore but never cites it (no "Bastet").
