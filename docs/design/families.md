@@ -15,8 +15,42 @@ Tags name kinds of animal people recognise. The broad umbrellas stay retired: no
 | Bears | hibernation: hoarding cards, growing in hand | the handlock half of the hand deck | big drops once stocked |
 | Primates | training and tools: buff cards in hand, Roars that pay off past a strength threshold ("if this has 6 or more strength") | the hand-buff half of the hand deck, with Bears | trained threats |
 | Hoofed | the herd grazing: regions it holds produce more food (the Herd mechanic); prey that Flee | region control, the third food route beside Rodents' card food and Colony's numbers | food, through regions |
-| Lizards | slippery, the ones you can't pin down: drop the tail to survive (a keyword candidate), go where others can't (walls, water), camouflage | tempo and evasion | outmanoeuvring |
-| Fish | schools and formations | the water sets | to be designed |
+| Lizards | no archetype: a handful of individually unique cards (Chameleon's camouflage, the Basilisk over water, the Gecko on walls) | support | — |
+| Fish | the school: Fish care how close they are, not how many (Canines and Colony count); tight clusters are strong, and fish predators pick off the stray | a positional family for the water sets | to be designed |
 | Arachnids | webs and traps that punish what lands near them | reactive control | to be designed |
 | Marsupials | the pouch: carrying another animal, joeys | Australia | to be designed |
 | Dinosaurs | eggs hatching into huge bodies, Titan | Prehistoric | to be designed |
+
+Not every family needs an archetype: a family can be a handful of individually unique cards until a set gives it a reason.
+
+## Fish sketch
+
+The shape of the family, not final cards (agreed as a sketch with Martin, 2026-10-05):
+
+- Sardine (common, 1): "Has +2 strength for each of your Fish next to this." Alone nothing, a school a wall.
+- Tuna (common, 4): "Roar: if this is next to another of your Fish, draw a card."
+- Manta Ray (rare, 5): "Your Fish next to this have +2 strength." A local aura, unlike Raksha's board-wide one.
+- Shoal (common, 2): "While this is next to two or more of your Fish, it can't be removed." Answered by covering or splitting the school.
+- Great White Shark (rare, 8): "Roar: remove an adjacent enemy that has no other enemy next to it." The predator picks off the stray, against any deck.
+
+## The target meta
+
+Once the game runs, the meta should hold 2–3 clearly different decks in each of five categories, each with its own gameplay and win route (two midrange decks that both win on board are fine when their mechanics differ, like Hearthstone's midrange Paladin and Shaman):
+
+| Category | Archetypes | Status |
+|---|---|---|
+| Aggro | Den Rush (reach and removal through the den front, wins on the den) | exists |
+| | Region rush (cheap wide bodies and flyers complete regions early, wins on food before the opponent settles; Flight places anywhere but never on a den) | gap; must stay clearly faster than Hoofed's grazing |
+| Midrange | Cats (trade up, cover and remove) | exists |
+| | Canines (go wide, pump the pack) | exists |
+| Control | Egg Control (removal, card flow, big snakes late) | exists |
+| | Remove everything, then bring back the best (Hearthstone's Control Warrior), on a Scavenge keyword for the animals that live off the dead (Vulture, Hyena, Raccoon, Crow) | new |
+| | Arachnid traps (punish what lands near them) | sketch |
+| Combo | Food OTK (one burst turn) | exists |
+| | Colony (numbers into food) | exists |
+| | Apex Predators eating fodder for value (aristocrats), keyword-based across families (Tiger, Polar Bear, Eon, the sharks) with fodder from any token maker | new |
+| Special | The hand deck (Bears hoard, Primates train) | new |
+| | Giants (big, Hungry, needing pasture) | redesign |
+| | Hoofed (graze regions for food) | new |
+
+Movement, disruption and copying are a few cards each (frogs and grasshoppers moving, tech cards against tokens, a mimic or two), never archetypes.
