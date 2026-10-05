@@ -13,6 +13,8 @@ Buffs given in hand are stored on the card ("give +X", `keywords.md`); a bounced
 
 ## The cards (version 3, after the review and the runs)
 
+Version 3 is version 2 with the first draft's Gorilla sweep restored; it was not run as an exact set.
+
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
 | Black Bear | Forest | C | 5 | Roar: in 2 turns, draw 2 cards. (unchanged) |
