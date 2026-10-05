@@ -8,6 +8,8 @@ Status: proposal from the 2026-10-05 Ramp session, not yet reviewed by Martin li
 
 Savanna, Forest, Meadow, City, Jungle, Ocean. Each gets its own map, and the maps look nothing alike: gold, green and brown, bright flowering green, grey, deep wet green, blue. How each one is painted, so its cards read as one collection, is in the design sandbox's `cards/art-principles.md`.
 
+What the launch must contain is the game's core card effects, not particular animals: a great animal without a home in the launch habitats waits for its habitat's set (the axolotl for River and Lake, the platypus and kangaroo for Australia, the Komodo dragon and giant tortoise for Islands).
+
 A card's effect is the competitive asset and its animal is the skin: moving a card to a habitat never loses an effect the game leans on. When the animal has a fitting home in the launch six, it moves there with new art if needed; when it doesn't, the effect goes onto an animal that does.
 
 Legendaries are mythic individuals of real animals (Brutus is a rhino, Fathom an octopus); there is no separate mythic set. Farm animals appear as their wild forms in real habitats (aurochs, wild boar, mouflon, red junglefowl); House Cat and Dog are City strays.
