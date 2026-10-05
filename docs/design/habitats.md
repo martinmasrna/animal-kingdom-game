@@ -28,9 +28,13 @@ Legendaries (12): Prince Leo, Princess Lea, King Theron, Queen Adira (the lion f
 
 Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Impala (people can't tell it from the Gazelle).
 
-### Forest
+### Forest (locked 2026-10-05)
 
-Wolf ✓, Red Fox ✓, Brown Bear ✓, Black Bear ✓, Lynx ✓, Cougar ✓, Red Deer, White-tailed Deer, Moose, Wild Boar, Badger, Wolverine, Raccoon, Beaver, Squirrel ✓, Flying Squirrel ✓, Chipmunk ✓, Hedgehog ✓, Porcupine ✓, Skunk ✓, Owl ✓, Woodpecker, Raven ✓, Magpie ✓, Hawk ✓, Eagle ✓ (bench; the bald eagle, the vanilla bird, painted so it never reads as a hawk), Falcon ✓, Bat ✓, Hornet ✓, Stag Beetle, Adder ✓ (Viper, bench).
+Animals (30; 18 common and 12 rare, rarities set with the effects): Fox, Wolf, Grizzly Bear, Black Bear, Deer, Moose, Boar, Badger, Lynx, Cougar, Beaver, Porcupine, Skunk, Squirrel, Chipmunk, Flying Squirrel, Wolverine, Owl, Raven, Hawk, Eagle (the bald eagle, the vanilla bird), Falcon, Magpie, Salamander, Viper, Stag Beetle, Hornet, Guard Wasp, Worker Wasp, Worker Ant.
+
+Legendaries (12): Lobo, Raksha, Clarion (the wolves), Scarlett (fox), Sirocco (skunk), Vesper (hornet), Ember (pheasant, like Methuselah a legendary without its animal among the 30), and five new, chosen with the effects.
+
+Out of Forest: Hedgehog (Meadow), Raccoon (City), Rattlesnake (waits for Desert), Woodpecker, Blue Jay.
 
 ### Meadow
 
