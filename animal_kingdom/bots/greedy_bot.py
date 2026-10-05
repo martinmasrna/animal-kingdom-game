@@ -228,12 +228,25 @@ def _opponent_lethal_next_turn(state: GameState, opponent: str) -> bool:
     see `test_eval_ignores_opponent_hand_contents`), never hidden card identities. With two
     actions per turn an empty-handed opponent can draw and *then* capture if their deck is
     non-empty; the hand check covers the case where they already hold a card.
+
+    Once the turn has passed to them, it also catches the two-action walk-in: an empty
+    crossroad in front of my HQ beside their connected chain, and two cards in hand (step
+    onto it, then onto the HQ). Mid-turn that check would be premature - my remaining
+    action can still plug the gap - so it waits for the action that ends my turn.
     """
     me = other_player(opponent)
     gm = state.game_map
-    reaches_my_hq = any(cr in state.connected_occupied(opponent) for cr in gm.hq_front(me))
+    opp_connection = state.connected_occupied(opponent)
+    reaches_my_hq = any(cr in opp_connection for cr in gm.hq_front(me))
     if not reaches_my_hq:
-        return False
+        return (
+            state.current == opponent
+            and state.config.actions_per_turn >= 2
+            and len(state.hands[opponent]) >= 2
+            and any(cr not in state.board or not state.board[cr]
+                    for cr in gm.hq_front(me)
+                    if any(nb in opp_connection for nb in gm.neighbors(cr)))
+        )
     if state.hands[opponent]:
         return True
     can_draw_then_place = (

@@ -68,9 +68,13 @@ Animals (15; 9 common and 6 rare, rarities set with the effects): Rat, Mouse, St
 
 Legendaries (6): the rat family, Verminus, Pestis, Greywhisker, Barley and Scrooge, and one new, chosen with the effects (the raccoon is a natural one).
 
-### Jungle
+### Jungle (locked 2026-10-05)
 
-Jaguar ✓, Tiger ✓, Black Panther ✓, Gorilla, Chimpanzee, Orangutan, Howler Monkey, Sloth ✓, Tapir, Okapi, Asian Elephant, Gaur, Sun Bear, Capybara, Anaconda ✓ (bench), Python ✓, King Cobra, Boa, Poison Dart Frog, Red-eyed Tree Frog, Chameleon ✓, Macaw, Toucan, Harpy Eagle, Hornbill, Bird-of-paradise, Army Ant ✓, Leafcutter Ant, Tarantula, Piranha, Bush Dog ✓, Dhole ✓.
+Animals (30; 18 common and 12 rare, rarities set with the effects): Jaguar, Black Panther, Tiger, Bush Dog, Dhole, Anaconda, King Cobra, Python, Soldier Ant, Gorilla, Orangutan, Chimpanzee, Sloth, Capybara, Giant Anteater, Tarsier, Armadillo, Tapir, Chameleon, Poison Dart Frog, Basilisk, Iguana, Toucan, Macaw, Hummingbird, Peacock, Piranha, Electric Eel, Tarantula, Leech.
+
+Legendaries (12): Eon (snake), Queen Marabunta (army ant), and ten new, chosen with the effects.
+
+Out of Jungle as lookalikes of animals elsewhere: Howler Monkey, Red-eyed Tree Frog, Morpho Butterfly, Vampire Bat, Pink River Dolphin, Asian Elephant, Harpy Eagle, Hornbill. Boa: one archetype doesn't get two near-identical cards in one habitat; its growth effect ("At the start of your turn, gain 1 strength (wherever this is)") waits on the bench for a snake of a later habitat.
 
 ### Open Ocean
 
@@ -86,7 +90,7 @@ Cards that keep their animal, by habitat:
 - **Savanna:** Prince Leo, Princess Lea, King Theron, Queen Adira, Serval, Lion, Caracal, Cheetah, Egg Eater, Black Mamba, Termite King, Termite Queen, Rhinoceros, Brutus, Methuselah, Hippopotamus, Elephant, Oxpecker, Cape Buffalo, Jackal, African Wild Dog, Hyena, Pup.
 - **Forest:** Lynx, Ember (golden pheasant), Hawk, Owl, Magpie, Raven, Vesper, Guard Wasp, Worker Wasp, Worker Ant, Grizzly Bear, Black Bear, Flying Squirrel, Squirrel, Chipmunk, Porcupine, Sirocco, Skunk, Hornet, Bat, Falcon, Lobo, Raksha, Clarion, Scarlett, Fox, Wolf, Poppy, Rusty, Viper, Bird Egg.
 - **City:** House Cat, Dog, Verminus, Pestis, Rat, Mouse, Greywhisker, Barley, Scrooge.
-- **Jungle:** Jaguar, Black Panther, Tiger, Eon, Python, Queen Marabunta, Soldier Ant, Sloth, Chameleon, Armadillo, Bush Dog, Dhole, Anaconda, Snake Egg.
+- **Jungle:** Jaguar, Black Panther, Tiger, Eon, Python, Queen Marabunta, Soldier Ant, Sloth, Chameleon, Armadillo, Bush Dog, Dhole, Anaconda, Snake Egg, King Cobra (Taipan's effect).
 - **Open Ocean:** Fathom (the giant octopus rising from the depths), Gale.
 - **Meadow:** Aurum (a goose on the meadow pond), Black Swan (the one black swan on a pond of white ones), Queen Honoria, Falstaff, Nurse Bee, Nurse Bumblebee, Queen Bee, Worker Bee, Hedgehog, Groundhog, Hamster, Gopher, Muskrat.
 
@@ -98,8 +102,6 @@ Reprints: the effect stays, the animal changes to one from the launch six.
 | Taipan | King Cobra (Jungle) | a delayed venomous bite fits any deadly snake, and the cobra is the more iconic one |
 | Jerboa | Naked Mole-Rat (Savanna), nerfed to "Roar: play another animal next to this" | a launch-defining effect on a small, one-of-a-kind animal that never lives alone |
 | Chinchilla | Octopus (Open Ocean) | eight arms working at once: next turn, an extra action |
-
-Egg Control's growing snake launches as **Boa Constrictor** (Jungle, common, 0: "At the start of your turn, gain 1 strength (wherever this is)."), the constrictor's squeeze tightening every turn; any deck can run it, and the long games Egg Control plays pay it most.
 
 Shelved until their habitat's set:
 
