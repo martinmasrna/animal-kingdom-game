@@ -28,7 +28,9 @@ Rares (10): Leopard, Rhinoceros, Hippopotamus, Crocodile, Hyena, Honey Badger, S
 
 Legendaries (10): Prince Leo, Princess Lea, King Theron, Queen Adira (the lion family), Brutus (rhino), Methuselah (tortoise, the one legendary without its animal among the 25; its effect may find a better animal), and four new mythic versions of the 25 chosen with the effects (candidates: Elephant, the Giants' Matriarch; Crocodile; Honey Badger; Cheetah, Leopard, Cape Buffalo or Hippo).
 
-Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Caracal, Egg Eater, Secretarybird, Impala (people can't tell it from the Gazelle), Dung Beetle (waits for a beetles mini-set).
+Open: Egg Eater (Egg Control's engine, "+2 strength for each removed Egg"; not in the cold ranking), to be decided.
+
+Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Caracal, Secretarybird, Impala (people can't tell it from the Gazelle), Dung Beetle (waits for a beetles mini-set).
 
 ### Forest
 
