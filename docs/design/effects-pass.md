@@ -89,6 +89,10 @@ How it's built:
 
 Expected weak points, untested: few cards that kill your own (Spiders die to any cover), and few bodies bigger than a 4. The Tarantula is aimed at both.
 
+## Egg Control
+
+Its fourth legendary: Omen (a raven; Forest, L, ~3, Bird): "Flight. Roar: put an animal from your opponent's Remove Pile into your hand." The deck removes more than any other, so the opponent's pile holds their best cards; a Bird, so the Bird Egg's Scout can find it. Wording to bring in line on the deck's cards: Eon's end-of-turn shuffle is a Dusk effect, Aurum is "Dawn: draw a card.", the Python counts removed animals (not units), and the Egg Eater counts removed Eggs.
+
 ## Open topics
 
 - The bloodsuckers drain strength: Mosquito's −2, Leech's swap, the Tick's effect still to design, likely a slow drain.
