@@ -19,7 +19,7 @@ Locked:
 | Baboon | C | 4 | Roar: give an animal in your hand +2 strength. | Primates train |
 | Dung Beetle | C | 1 | At the end of your turn, gain 2 food for each of your animals of strength 8 or more. | lives off the giants |
 | Honey Badger | R | 3 | Roar: remove an adjacent enemy of strength 6 or more. | the Big Game Hunter (Serval's old effect) |
-| Serval | R | 2 | Roar: set an adjacent enemy's strength to 1. | the Cats' answer to big animals: pin the prey, the pride covers it |
+| Serval | R | 4 | Roar: set an adjacent enemy's strength to 1. | 4, not 2, so the Leech's swap doesn't dominate it: the Serval can cover a 3 and pin in one placement | the Cats' answer to big animals: pin the prey, the pride covers it |
 | Rhinoceros | R | 8 | Hungry 3. Roar: remove all adjacent enemies of strength 2 or less. | a Giant ~ |
 | Hippopotamus | R | 8 | Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it. | a Giant; the reaction stays (the client is to show what removed an animal) ~ |
 | Cape Buffalo | R | 6 | While grazing, this has +3 strength. | stands its ground on its own land |
@@ -87,4 +87,5 @@ Opossum (City, R, 2, Marsupial): "Roar: return one of your animals next to this 
 
 - Cats, filling the Cougar's slot (the Cougar and its effect wait for Mountains): Caracal (Savanna, C, 6) becomes "Reach 2.", the leap over the front line onto the engines behind it, which every other Cat can only hit when adjacent (at 5 or less the Eagle practically dominates it); Lynx (Forest, C, 6) takes the Caracal's old "Roar: if placed on top of an enemy, draw a card."; Bobcat (Forest, C, 5) joins with the Lynx's old "Roar: if you control another Cat, draw a card."
 - Mosquito (City, C, ~1): "Flight. Roar: give an adjacent enemy −2 strength."
-- Hermit Crab (Coast, later): the strength swap ("Roar: swap strength with an adjacent enemy") is reserved for it; its signature is moving into a bigger shell.
+- Leech (Jungle, 1): "Roar: swap strength with an adjacent animal." It drains its host: the host shrinks, the leech swells. At 1 it can't cover anything, so it lands only on an empty crossroad or one of your own.
+- Hermit Crab (Coast, later): Armor plus something about moving into another's shell; the strength swap went to the Leech, which fits it far better.
