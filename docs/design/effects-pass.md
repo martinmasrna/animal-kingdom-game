@@ -2,7 +2,7 @@
 
 Each launch animal's card, settled habitat by habitat with Martin. Existing cards keep their effect unless noted. Strengths of existing cards wait for the strength-realism pass; numbers marked ~ are first guesses.
 
-Keywords proposed in this pass: **Hungry N** (at the start of your turn, eat N food; if you can't, this gets −N strength), **Flee** (when an enemy covers this, return it to your hand), and grazing as a condition (an animal grazes while it's a corner of a region you control; card wording still to choose between "if this is grazing" and "if this controls a region").
+Keywords proposed in this pass: **Hungry N** (at the start of your turn, eat N food; if you can't, this gets −N strength), **Flee** (when an enemy covers this, return it to your hand), **Reach N** (lands up to N crossroads from your connected units; [`../rules/keywords.md`](../rules/keywords.md)), and grazing as a condition (an animal grazes while it's a corner of a region you control; card wording still to choose between "if this is grazing" and "if this controls a region").
 
 ## Savanna
 
@@ -41,5 +41,6 @@ Zebra, Deer, Moose, Boar and the two legendaries are proposals.
 
 ## Elsewhere, settled in passing
 
+- Bobcat (Forest, C, 4): "Reach 2." Takes the Cougar's slot in Cats (the Cougar and its effect wait for Mountains): the pounce over the front line onto the engines behind it, which every other Cat can only hit when adjacent.
 - Mosquito (City, C, ~1): "Flight. Roar: give an adjacent enemy −2 strength."
 - Hermit Crab (Coast, later): the strength swap ("Roar: swap strength with an adjacent enemy") is reserved for it; its signature is moving into a bigger shell.
