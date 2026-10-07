@@ -34,7 +34,7 @@ Open: Secretarybird, Aardvark, the legendaries; Warthog moves to rare (the herd'
 Designed as one archetype across the habitats, not card by card (Martin, 2026-10-05). The plan: take a region early and hold it, put grazers on its corners, win on food; the opponent breaks the region. An animal, yours or the opponent's, is grazing while it's a corner of a region its owner controls. Grazing checks stay out of Roars, since region control is checked after a Roar resolves.
 
 - Commons (a deck runs six of these): Gazelle, Giraffe, Wildebeest (as locked above); Zebra, "Flee. While grazing, this has Stealth."; Deer (Forest), "Flee. At the end of your turn, if this is grazing, draw a card."; Cape Buffalo (as locked); Moose (Forest), "Your other grazing animals have +2 strength."; Boar (Forest), "Roar: remove an adjacent enemy that is grazing."
-- Rares: Warthog (as locked), Rhinoceros, Hippopotamus (shared with the Giants), one open.
+- Rares: Warthog (as locked), Rhinoceros, Hippopotamus (shared with the Giants), Beaver (Forest, R, 4), "Your regions next to this produce 5 more food." (beaver ponds make the land around them richer; a local version of the migration legendary).
 - Legendaries: the migration's wildebeest, "Your regions produce 5 more food."; the white stag, "Flee. Roar: draw a card for each region you control."; two open. Rejected: "when an enemy covers one of your grazing animals, remove that enemy" (every corner uncoverable, so the region can't be broken).
 
 Zebra, Deer, Moose, Boar and the two legendaries are proposals.
@@ -54,11 +54,10 @@ The defensive cards, one answer for each way to reach the squirrel (removal, a g
 |---|---|---|---:|---|---|
 | Poison Dart Frog (locked) | Jungle | C | 1 | Reach 2. Poison. | a removal ability |
 | Jellyfish (locked) | Open Ocean | R | 3 | Poison. | a removal ability |
-| Beaver | Forest | C | 4 | Enemies can't be placed on empty crossroads next to this. | cover it (5+), or remove it |
 | Spider (locked) | City | C | 3 | When an enemy with Flight is placed next to this, remove it. | cover it (a flyer needs 4+); ground animals ignore the web |
 | Capybara | Jungle | R | 5 | Your animals next to this have Armor. | cover its neighbours, cover it (6+), or remove it |
 
-Open: a Capybara beside a Porcupine is the strongest wall these build (unremovable, kills its first coverer, broken by a second cover of 8+). Rejected: plain Spikes on a small body (Hedgehog dominates it); an animal that removes every coverer at once (an unbreakable wall, the herd draft's rejected rule); "when this is removed" survivors on small bodies (Opossum, Cockroach, Earthworm): nobody removes a 1 or a 2, they cover it, so the text never fires; turned into "when covered", the Cockroach becomes a dominated Flee and the Opossum a weaker Poison, and the Earthworm's two 0-strength Worms block nothing (anything covers a 0): they are free bodies for regions and connection, an action-economy card for another deck.
+Open: a Capybara beside a Porcupine is the strongest wall these build (unremovable, kills its first coverer, broken by a second cover of 8+). Rejected: plain Spikes on a small body (Hedgehog dominates it); an animal that removes every coverer at once (an unbreakable wall, the herd draft's rejected rule); "when this is removed" survivors on small bodies (Opossum, Cockroach, Earthworm): nobody removes a 1 or a 2, they cover it, so the text never fires; turned into "when covered", the Cockroach becomes a dominated Flee and the Opossum a weaker Poison, and the Earthworm's two 0-strength Worms block nothing (anything covers a 0): they are free bodies for regions and connection, an action-economy card for another deck; a dam that keeps enemies off the crossroads next to it: permanent, it guards its own approach, so with hand buffs and Armor it can't be answered at all (an exception for Flight still hard-locks every deck without flyers); for one turn it barely matters; Dam tokens block nothing (anything covers a 0), burst free placements and aren't animals.
 
 ## Elsewhere, settled in passing
 
