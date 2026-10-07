@@ -9,8 +9,7 @@ All card candidates that use these mechanics are inventoried in [`../cards/card-
 - [ ] A keyword must save meaningful repeated text on at least three cards.
 - [ ] Prefer an existing operation plus a targeting restriction over a new subsystem.
 - [ ] Every mechanic must specify interaction with covering, stacks, Stealth, Armor, Landmarks, Eggs, the Remove Pile, and den where relevant.
-- [ ] New mechanics must work for a human tabletop implementation without hidden bookkeeping that only software can manage.
-- [ ] “Once each time this enters play” counters reset only after the physical card leaves the battlefield and is later played again. Covering does not count as leaving play.
+- [ ] “Once each time this enters play” counters reset only after the card leaves the battlefield and is later played again. Covering does not count as leaving play.
 - [ ] Every event trigger must name its controller scope explicitly: `when you draw`, `when your opponent removes`, `when either player shuffles`, or `when a unit is removed`. Do not rely on a global implied default.
 - [ ] Audit existing ambiguous triggers before adding more event cards:
   - Eon: whose draws, shuffles, and removals?
@@ -138,7 +137,6 @@ Two distinct mechanics are under consideration:
 - [ ] Tokens carry printed type/tags/strength and may control crossroads, regions, and capture a den unless their token definition says otherwise.
 - [ ] Token-spawning unit proposals place tokens only on adjacent empty crossroads.
 - [ ] Define placement order and what happens when too few adjacent empty crossroads exist.
-- [ ] Add physical-component guidance before accepting a token-heavy archetype.
 
 ### 1.8 Venom
 
@@ -152,7 +150,7 @@ Proposed keyword action:
 - [ ] Units with Armor may be marked but resist the eventual removal. The mark then clears.
 - [ ] Stealth prevents an enemy from choosing a unit to envenom.
 - [ ] Multiple Venom marks do not stack or extend the timer.
-- [ ] Clearly mark Venom with a physical token and identify which player's next turn clears it.
+- [ ] Show which player's next turn clears a Venom mark.
 - [ ] Decide whether “Venom” is the noun printed on cards or whether cards use “Poisoned.” Avoid the verb/noun ambiguity before flavor-lock.
 
 ### 1.9 Stack-order interaction — later module
