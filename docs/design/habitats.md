@@ -77,11 +77,11 @@ Legendaries (6): the rat family, Verminus, Pestis, Greywhisker, Barley and Scroo
 
 ### Jungle (locked 2026-10-05)
 
-Animals (30; 18 common and 12 rare, rarities set with the effects): Jaguar, Black Panther, Tiger, Bush Dog, Dhole, Anaconda, King Cobra, Python, Soldier Ant, Gorilla, Orangutan, Chimpanzee, Sloth, Capybara, Giant Anteater, Tarsier, Armadillo, Tapir, Chameleon, Poison Dart Frog, Basilisk, Iguana, Toucan, Macaw, Hummingbird, Peacock, Piranha, Electric Eel, Tarantula, Leech.
+Animals (30; 18 common and 12 rare, rarities set with the effects): Jaguar, Black Panther, Tiger, Bush Dog, Dhole, Anaconda, King Cobra, Python, Soldier Ant, Gorilla, Orangutan, Chimpanzee, Sloth, Capybara, Giant Anteater, Tarsier, Armadillo, Tapir, Chameleon, Poison Dart Frog, Basilisk, Iguana, Golden Orb-Weaver, Macaw, Hummingbird, Peacock, Piranha, Electric Eel, Tarantula, Leech.
 
 Legendaries (12): Eon (snake), Queen Marabunta (army ant), and ten new, chosen with the effects.
 
-Out of Jungle as lookalikes of animals elsewhere: Howler Monkey, Red-eyed Tree Frog, Morpho Butterfly, Vampire Bat, Pink River Dolphin, Asian Elephant, Harpy Eagle, Hornbill. Boa: one archetype doesn't get two near-identical cards in one habitat; its growth effect ("At the start of your turn, gain 1 strength (wherever this is)") waits on the bench for a snake of a later habitat.
+Out of Jungle as lookalikes of animals elsewhere: Howler Monkey, Red-eyed Tree Frog, Morpho Butterfly, Vampire Bat, Pink River Dolphin, Asian Elephant, Harpy Eagle, Hornbill. Boa: one archetype doesn't get two near-identical cards in one habitat; its growth effect ("At the start of your turn, gain 1 strength (wherever this is)") waits on the bench for a snake of a later habitat. Waiting for a Jungle II: Toucan (its slot went to the Golden Orb-Weaver, the spider whose webs catch birds, 2026-10-07).
 
 ### Open Ocean (locked 2026-10-05, a 21-card set)
 
