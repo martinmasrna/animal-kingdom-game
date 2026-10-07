@@ -98,7 +98,7 @@ The pack: go wide, buff the pack, win on the board, then the den. Settled so far
 | Wolf | Forest | C | 3 | Has +1 strength for each other Canine you control. (The wolf pack; the game needs only one vanilla 7, the Lion.) |
 | Jackal | Savanna | R | 4 | Roar: remove an adjacent enemy with strength up to the number of your Canines. (Jackals hunt as families.) |
 
-Open: Lobo's new effect (a tutor with a free placement only if it fetches commons), the Bush Dog and the Dingo's growth effect, the Coyote's habitat.
+Open: Lobo's new effect (no tutor with a free placement: Lobo fetching the Stray Dog, whose Roar plays another Canine, makes three placements from one action); the Bush Dog and the Dingo's growth effect; the Coyote's effect (rebuilding a cut chain among Canines) without the Coyote, which waits for Desert.
 
 ## Egg Control
 
