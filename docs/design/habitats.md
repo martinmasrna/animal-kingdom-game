@@ -51,7 +51,7 @@ Animals (30; 18 common and 12 rare, rarities set with the effects): Lion, Elepha
 
 Legendaries (12): Prince Leo, Princess Lea, King Theron, Queen Adira (the lion family), Brutus (rhino), Methuselah (tortoise, the one legendary without its animal among the 30; its effect may find a better animal), and six new mythic versions of the 30 chosen with the effects (candidates: Elephant, the Giants' Matriarch; Crocodile; Honey Badger; Cheetah, Leopard, Cape Buffalo or Hippo).
 
-Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Impala (people can't tell it from the Gazelle). Waiting for a Savanna II: Pangolin, Flamingo, Secretarybird (its slot went to the Vulture, the aristocrats' scavenger, 2026-10-07).
+Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Impala (people can't tell it from the Gazelle). Waiting for a Savanna II: Pangolin, Flamingo, Secretarybird.
 
 ### Forest (locked 2026-10-05)
 
@@ -81,7 +81,7 @@ Animals (30; 18 common and 12 rare, rarities set with the effects): Jaguar, Blac
 
 Legendaries (12): Eon (snake), Queen Marabunta (army ant), and ten new, chosen with the effects.
 
-Out of Jungle as lookalikes of animals elsewhere: Howler Monkey, Red-eyed Tree Frog, Morpho Butterfly, Vampire Bat, Pink River Dolphin, Asian Elephant, Harpy Eagle, Hornbill. Boa: one archetype doesn't get two near-identical cards in one habitat; its growth effect ("At the start of your turn, gain 1 strength (wherever this is)") waits on the bench for a snake of a later habitat. Waiting for a Jungle II: Toucan (its slot went to the Golden Orb-Weaver, the spider whose webs catch birds, 2026-10-07).
+Out of Jungle as lookalikes of animals elsewhere: Howler Monkey, Red-eyed Tree Frog, Morpho Butterfly, Vampire Bat, Pink River Dolphin, Asian Elephant, Harpy Eagle, Hornbill. Boa: one archetype doesn't get two near-identical cards in one habitat; its growth effect ("At the start of your turn, gain 1 strength (wherever this is)") waits on the bench for a snake of a later habitat. Waiting for a Jungle II: Toucan.
 
 ### Open Ocean (locked 2026-10-05, a 21-card set)
 
