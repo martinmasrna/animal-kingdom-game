@@ -85,7 +85,7 @@ How it's built:
 | Earthworm | fodder | Meadow | C | 1 | When this is removed, place two Worms on its crossroad. (Worm, token, 0: "When this is removed, draw a card.") |
 | Piranha (locked; Fish) | removal | Jungle | C | 2 | Roar: if one of your animals was removed this turn, remove an adjacent enemy. (Blood in the water, then the frenzy: the deck's way to fight for the board.) |
 | Vulture (locked; Bird) | payoff: cards | Savanna | C | 3 | Flight. At the end of your turn, if one of your animals was removed this turn, draw a card. |
-| Hyena (no tag) | finisher | Savanna | C | 4 | At the end of your turn, if one of your animals was removed this turn, gain 6 food. (The laughing scavenger: deaths into food. The clock is the number of Hyenas on the board, about 6 food a turn each; if games run long, the dial is the 6. The Canine pack removal belongs on the Dhole, to settle with the Canine deck.) |
+| Hyena (no tag) | finisher | Savanna | C | 4 | Dusk: gain 3 food for each of your animals removed this turn. (The laughing scavenger: deaths into food. It scales with the turn's deaths, so a big turn pays big: that's the deck's puzzle, how many deaths out of two actions. Copies stack, and the Sloth doubles it; if games end too fast or too slow, the dial is the 3. On a tabletop, the turn's deaths have to be counted. The Canine pack removal belongs on the Dhole, to settle with the Canine deck.) |
 
 Expected weak points, untested: few cards that kill your own (Spiders die to any cover), and few bodies bigger than a 4. The Tarantula is aimed at both.
 
