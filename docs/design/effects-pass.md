@@ -59,6 +59,30 @@ The defensive cards, one answer for each way to reach the squirrel (removal, a g
 
 Open: a Capybara beside a Porcupine is the strongest wall these build (unremovable, kills its first coverer, broken by a second cover of 8+). Rejected: plain Spikes on a small body (Hedgehog dominates it); an animal that removes every coverer at once (an unbreakable wall, the herd draft's rejected rule); "when this is removed" survivors on small bodies (Opossum, Cockroach, Earthworm): nobody removes a 1 or a 2, they cover it, so the text never fires; turned into "when covered", the Cockroach becomes a dominated Flee and the Opossum a weaker Poison, and the Earthworm's two 0-strength Worms block nothing (anything covers a 0): they are free bodies for regions and connection, an action-economy card for another deck; a dam that keeps enemies off the crossroads next to it: permanent, it guards its own approach, so with hand buffs and Armor it can't be answered at all (an exception for Flight still hard-locks every deck without flyers); for one turn it barely matters; Dam tokens block nothing (anything covers a 0), burst free placements and aren't animals.
 
+## The aristocrats, draft (2026-10-07)
+
+The combo deck from `families.md`: your own animals die on purpose and every death pays. It wins on the board (growing payoffs, predators eating enemies), not on food, which keeps it apart from both food decks. Every piece of fodder pays on its own death; the payoffs multiply that. Each loop costs a placement, so two actions a turn bound it; any future "play another animal" effect needs an audit against these loops.
+
+| Card | Role | Habitat | Rarity | Str | Text |
+|---|---|---|---|---:|---|
+| City Spider (Arachnid) | engine | City | C | 2 | When an animal of strength 2 or less is placed next to this, remove it. (Both sides: a trap for the opponent's small animals and tokens, a repeatable death for yours.) |
+| Anaconda | engine | Jungle | C | | Apex Predator. (exists) |
+| Crocodile | engine | Savanna | R | 8 | Apex Predator. (locked) |
+| Praying Mantis | engine | Meadow | R | 3 | Roar: remove one of your animals next to this. If you do, draw 2 cards. |
+| Cockroach | fodder | City | C | 1 | When this is removed, return it to your hand and draw a card. |
+| Earthworm | fodder | Meadow | C | 1 | When this is removed, place two Worms on its crossroad. (Worm, token, 0: "When this is removed, draw a card.") |
+| Ostrich | fodder | Savanna | C | 4 | Roar: place an Ostrich Egg (0) on an adjacent empty crossroad. (locked; the Egg feeds the Egg Eater) |
+| Python | payoff: strength, board-wide | Jungle | C | | Has +1 strength for each removed animal. (exists) |
+| Egg Eater | payoff: strength from Eggs | Savanna | C | | Has +2 strength for each removed Egg. (exists) |
+| Piranha | payoff: strength, local | Jungle | C | 2 | Whenever an animal next to this is removed, give this +2 strength. (the feeding frenzy) |
+| Great White Shark | payoff: removal | Open Ocean | R | 7 | Apex Predator. If an animal was removed this turn, this can be placed on an animal of any strength. (smells blood; at 7 it is worse than the Crocodile with no death, better after one) |
+| Raccoon | payoff: recursion | City | R | 3 | Roar: return an animal from the Remove Pile to your hand. |
+| the great crocodile (legendary, name to come) | payoff: cards | Savanna | L | 9 | Apex Predator. When this eats one of your animals, draw 2 cards. |
+
+Open: the other three legendaries (Eon fits); the Tarantula (Jungle, Arachnid) as a Goliath birdeater, "Apex Predator. Can land on animals with Flight of any strength.", or its slot stays open (a second anti-flyer card in a small family). Rejected: a Spider Egg (its payoff needs the egg to survive, which this deck works against; a version paying on death is the Earthworm); an unlimited "whenever one of your animals is removed, draw a card" (with the loops, five cards from one action); food for each death (a third food deck); the Opossum as fodder (the Earthworm does more).
+
+Opossum (City, R, 2, Marsupial): "Roar: return another of your animals of strength 2 or less to your hand." A mother gathering her young onto her back; it replays a small animal's Roar (Skully, Chipmunk), a value card for other decks, and the City's seed for the Marsupials' "carrying the young" identity when Australia comes.
+
 ## Elsewhere, settled in passing
 
 - Cats, filling the Cougar's slot (the Cougar and its effect wait for Mountains): Caracal (Savanna, C, 6) becomes "Reach 2.", the leap over the front line onto the engines behind it, which every other Cat can only hit when adjacent (at 5 or less the Eagle practically dominates it); Lynx (Forest, C, 6) takes the Caracal's old "Roar: if placed on top of an enemy, draw a card."; Bobcat (Forest, C, 5) joins with the Lynx's old "Roar: if you control another Cat, draw a card."
