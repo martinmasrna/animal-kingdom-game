@@ -52,8 +52,8 @@ The defensive cards, one answer for each way to reach the squirrel (removal, a g
 
 | Animal | Habitat | Rarity | Str | Text | The opponent's answer |
 |---|---|---|---:|---|---|
-| Poison Dart Frog | Jungle | C | 1 | Reach 2. Poison. | a removal ability |
-| Jellyfish | Open Ocean | R | 3 | Poison. | a removal ability |
+| Poison Dart Frog (locked) | Jungle | C | 1 | Reach 2. Poison. | a removal ability |
+| Jellyfish (locked) | Open Ocean | R | 3 | Poison. | a removal ability |
 | Beaver | Forest | C | 4 | Enemies can't be placed on empty crossroads next to this. | cover it (5+), or remove it |
 | Spider | City | C | 1 | When an enemy with Flight is placed next to this, remove it. | cover it, even with a flyer; ground animals ignore the web |
 | Capybara | Jungle | R | 5 | Your animals next to this can't be removed. | cover its neighbours, cover it (6+), or remove it |
