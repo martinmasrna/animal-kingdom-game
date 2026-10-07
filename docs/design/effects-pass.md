@@ -66,7 +66,7 @@ Your own animals die on purpose and every death pays. What makes it worth playin
 How it's built:
 
 - Every piece of fodder pays on its own death; the payoffs multiply that.
-- Cards and food per death are checked once a turn (the Vulture, the Hyena): per-death draws would turn the loops into five cards from one action.
+- Food scales with the turn's deaths (the Hyena), since food is the win clock; cards don't (the Vulture checks once a turn), since per-death draws would turn the loops into five cards from one action.
 - Payoffs count deaths as they happen, not the Remove Pile, since the best fodder leaves the pile (the Cockroach to hand, the Ember to deck).
 - Each loop costs a placement, so two actions a turn bound it; any "play another animal" effect needs an audit against these loops.
 
