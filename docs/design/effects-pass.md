@@ -55,8 +55,8 @@ The defensive cards, one answer for each way to reach the squirrel (removal, a g
 | Poison Dart Frog (locked) | Jungle | C | 1 | Reach 2. Poison. | a removal ability |
 | Jellyfish (locked) | Open Ocean | R | 3 | Poison. | a removal ability |
 | Beaver | Forest | C | 4 | Enemies can't be placed on empty crossroads next to this. | cover it (5+), or remove it |
-| Spider | City | C | 1 | When an enemy with Flight is placed next to this, remove it. | cover it, even with a flyer; ground animals ignore the web |
-| Capybara | Jungle | R | 5 | Your animals next to this can't be removed. | cover its neighbours, cover it (6+), or remove it |
+| Spider (locked) | City | C | 3 | When an enemy with Flight is placed next to this, remove it. | cover it (a flyer needs 4+); ground animals ignore the web |
+| Capybara | Jungle | R | 5 | Your animals next to this have Armor. | cover its neighbours, cover it (6+), or remove it |
 
 Open: a Capybara beside a Porcupine is the strongest wall these build (unremovable, kills its first coverer, broken by a second cover of 8+). Rejected: plain Spikes on a small body (Hedgehog dominates it); an animal that removes every coverer at once (an unbreakable wall, the herd draft's rejected rule); "when this is removed" survivors on small bodies (Opossum, Cockroach, Earthworm): nobody removes a 1 or a 2, they cover it, so the text never fires; turned into "when covered", the Cockroach becomes a dominated Flee and the Opossum a weaker Poison, and the Earthworm's two 0-strength Worms block nothing (anything covers a 0): they are free bodies for regions and connection, an action-economy card for another deck.
 
