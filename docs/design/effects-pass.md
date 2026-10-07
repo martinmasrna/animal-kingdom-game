@@ -89,6 +89,17 @@ How it's built:
 
 Expected weak points, untested: few cards that kill your own (Spiders die to any cover), and few bodies bigger than a 4. The Tarantula is aimed at both.
 
+## Canines
+
+The pack: go wide, buff the pack, win on the board, then the den. Settled so far:
+
+| Card | Habitat | Rarity | Str | Text |
+|---|---|---|---:|---|
+| Wolf | Forest | C | 3 | Has +1 strength for each other Canine you control. (The wolf pack; the game needs only one vanilla 7, the Lion.) |
+| Jackal | Savanna | R | 4 | Roar: remove an adjacent enemy with strength up to the number of your Canines. (Jackals hunt as families.) |
+
+Open: Lobo's new effect (a tutor with a free placement only if it fetches commons), the Bush Dog and the Dingo's growth effect, the Coyote's habitat.
+
 ## Egg Control
 
 Its fourth legendary: Omen (a raven; Forest, L, ~3, Bird): "Flight. Roar: put an animal from your opponent's Remove Pile into your hand." The deck removes more than any other, so the opponent's pile holds their best cards; a Bird, so the Bird Egg's Scout can find it. Wording to bring in line on the deck's cards: Eon's end-of-turn shuffle is a Dusk effect, Aurum is "Dawn: draw a card.", the Python counts removed animals (not units), and the Egg Eater counts removed Eggs.
