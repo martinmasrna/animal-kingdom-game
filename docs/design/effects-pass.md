@@ -61,29 +61,25 @@ Open: a Capybara beside a Porcupine is the strongest wall these build (unremovab
 
 ## The aristocrats, draft (2026-10-07)
 
-The combo deck from `families.md`: your own animals die on purpose and every death pays. It wins on the board (growing payoffs, predators eating enemies), not on food, which keeps it apart from both food decks. Every piece of fodder pays on its own death; the payoffs multiply that. Each loop costs a placement, so two actions a turn bound it; any future "play another animal" effect needs an audit against these loops.
+The combo deck from `families.md`: your own animals die on purpose and every death pays. What makes it worth playing: the opponent's interaction feeds it (their covers are your deaths), each turn is a puzzle (how many deaths and payoffs out of two actions), and it wins from behind, on food the opponent can't block, while they seem to hold the board. Every piece of fodder pays on its own death; the payoffs multiply that. Each loop costs a placement, so two actions a turn bound it; any future "play another animal" effect needs an audit against these loops.
 
 | Card | Role | Habitat | Rarity | Str | Text |
 |---|---|---|---|---:|---|
-| City Spider (Arachnid) | engine | City | C | 2 | When an animal of strength 2 or less is placed next to this, remove it. (Both sides: a trap for the opponent's small animals and tokens, a repeatable death for yours.) |
-| Anaconda | engine | Jungle | C | | Apex Predator. (exists) |
-| Crocodile | engine | Savanna | R | 8 | Apex Predator. (locked) |
+| Eon (exists) | engine | Jungle | L | 10 | Apex Predator. At the end of your turn, shuffle this into your deck with -1 strength. |
+| Ember (exists) | fodder | Forest | L | 7 | Flight. When this is removed, shuffle it into your deck. |
+| the playing-dead opossum (legendary, name to come) | engine | City | L | 2 | When one of your animals is covered, remove it and draw a card. (Covers by either player: your own cover onto your fodder is a death and a card, so every placement runs the engine, and every enemy cover feeds you. The answer: cover or remove it, a 2.) |
 | Praying Mantis | engine | Meadow | R | 3 | Roar: remove one of your animals next to this. If you do, draw 2 cards. |
+| City Spider (Arachnid) | engine | City | C | 2 | When an animal of strength 2 or less is placed next to this, remove it. (Both sides: a trap for the opponent's small animals and tokens, a repeatable death for yours.) |
 | Cockroach | fodder | City | C | 1 | When this is removed, return it to your hand and draw a card. |
 | Earthworm | fodder | Meadow | C | 1 | When this is removed, place two Worms on its crossroad. (Worm, token, 0: "When this is removed, draw a card.") |
-| Ostrich | fodder | Savanna | C | 4 | Roar: place an Ostrich Egg (0) on an adjacent empty crossroad. (locked; the Egg feeds the Egg Eater) |
-| the playing-dead opossum (legendary, name to come) | engine | City | L | 2 | When one of your animals is covered, remove it and draw a card. (Covers by either player: your own cover onto your fodder is a death and a card, so every placement runs the engine, and every enemy cover feeds you. The answer: cover or remove it, a 2.) |
-| Egg Eater | payoff: strength from Eggs | Savanna | C | | Has +2 strength for each removed Egg. (exists) |
 | Piranha (locked) | removal | Jungle | C | 2 | Roar: if one of your animals was removed this turn, remove an adjacent enemy. (Blood in the water, then the frenzy; the Muskrat's shape on this deck's condition: the deck's way to fight for the board.) |
-| Great White Shark | payoff: removal | Open Ocean | R | 7 | Apex Predator. If an animal was removed this turn, this can be placed on an animal of any strength. (smells blood; at 7 it is worse than the Crocodile with no death, better after one) |
 | Vulture (locked; Bird) | payoff: cards | Savanna | C | 3 | Flight. At the end of your turn, if one of your animals was removed this turn, draw a card. (Once a turn, so the loops can't blow it up.) |
 | Hyena (no tag) | finisher | Savanna | R | 4 | Whenever one of your animals is removed, gain 3 food. (The laughing scavenger; the deck's Blood Artist: deaths into food, so it wins from behind while the opponent holds the board. Its old Canine pack removal goes to the Dhole, settled with the Canine deck.) |
 | Raccoon | payoff: recursion | City | R | 2 | Roar: return one of your removed animals to your hand. (Only your own: the Remove Pile is shared, and taking the opponent's best card would be legendary-level.) |
-| the great crocodile (legendary, name to come) | payoff: removal | Savanna | L | 9 | Apex Predator. When this eats one of your animals, remove an enemy of that strength or less. (Proposed. Eating an enemy needs no text: then it is only a bigger Crocodile. "Draw 2 when it eats your own" was too weak for a legendary: a Skully with extra steps.) |
 
 Played out in the head (2026-10-07), the first version lost with eight cards in hand: an engine with no finisher and no board. Hence the Piranha (removal), the Hyena (deaths into food) and the opossum (the opponent's covers feed you). The Python goes back to Egg Control: it counts the Remove Pile, and this deck's best fodder leaves it (Cockroach to hand, Ember to deck).
 
-Open: the fourth legendary (Eon and Ember are in); the Tarantula's effect (rare, 5). Rejected: the Ostrich as a body (its Egg pays nothing on its own death); a Tarantula that removes your small animals placed next to it (a worse Spider, no fit). Rejected: a Spider Egg (its payoff needs the egg to survive, which this deck works against; a version paying on death is the Earthworm); an unlimited "whenever one of your animals is removed, draw a card" (with the loops, five cards from one action); food for each death (a third food deck); the Opossum as fodder (the Earthworm does more).
+Open: the fourth legendary; the Tarantula's effect (rare, 5); one common slot. Rejected: a great crocodile legendary (eating your own to draw 2 is a Skully with extra steps; eating your own to remove an enemy is worse than eating that enemy directly; landing anywhere on your own animals solved no problem the deck has); the Great White Shark (any-strength eat after a death; dropped with the Apex framing, which was an agent's guess, not the deck); the Ostrich as a body (its Egg pays nothing on its own death); a Tarantula that removes your small animals placed next to it (a worse Spider, no fit). Rejected: a Spider Egg (its payoff needs the egg to survive, which this deck works against; a version paying on death is the Earthworm); an unlimited "whenever one of your animals is removed, draw a card" (with the loops, five cards from one action); food for each death (a third food deck); the Opossum as fodder (the Earthworm does more).
 
 Open topics: the bloodsuckers drain strength (Mosquito's −2, Leech's swap, the Tick's effect still to design, likely a slow drain); taking the opponent's food belongs to thieves (Seagull later, the monkeys) and gets its own session. Rejected: a Worm tag with a Mole that grows per removed Worm (forced, and growing in strength is the Snakes' identity).
 
