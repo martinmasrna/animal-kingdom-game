@@ -2,7 +2,7 @@
 
 Each launch animal's card, settled habitat by habitat with Martin. Existing cards keep their effect unless noted. Strengths of existing cards wait for the strength-realism pass; numbers marked ~ are first guesses.
 
-Keywords proposed in this pass: **Hungry N** (at the start of your turn, eat N food; if you can't, this gets −N strength), **Flee** (when an enemy covers this, return it to your hand), **Reach N** (lands up to N crossroads from your connected units; [`../rules/keywords.md`](../rules/keywords.md)), **Poison**, **Dusk** and **Dawn** (end and start of your turn; card text in this doc still spells them out until the cards are rewritten), and grazing as a condition (an animal grazes while it's a corner of a region you control; card wording still to choose between "if this is grazing" and "if this controls a region").
+Keywords proposed in this pass: **Hungry N** (at the start of your turn, eat N food; if you can't, this gets −N strength), **Flee** (when an enemy covers this, return it to your hand), **Reach N** (lands up to N crossroads from your connected units; [`../rules/keywords.md`](../rules/keywords.md)), **Poison**, **Wake** and **Sleep** (start and end of your turn; card text in this doc still spells them out until the cards are rewritten), and grazing as a condition (an animal grazes while it's a corner of a region you control; card wording still to choose between "if this is grazing" and "if this controls a region").
 
 ## Savanna
 
