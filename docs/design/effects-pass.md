@@ -81,7 +81,7 @@ The combo deck from `families.md`: your own animals die on purpose and every dea
 
 Open: the other three legendaries (Eon fits); the Tarantula (Jungle, Arachnid) as a Goliath birdeater, "Apex Predator. Can land on animals with Flight of any strength.", or its slot stays open (a second anti-flyer card in a small family). Rejected: a Spider Egg (its payoff needs the egg to survive, which this deck works against; a version paying on death is the Earthworm); an unlimited "whenever one of your animals is removed, draw a card" (with the loops, five cards from one action); food for each death (a third food deck); the Opossum as fodder (the Earthworm does more).
 
-Opossum (City, R, 2, Marsupial): "Roar: return another of your animals of strength 2 or less to your hand." A mother gathering her young onto her back; it replays a small animal's Roar (Skully, Chipmunk), a value card for other decks, and the City's seed for the Marsupials' "carrying the young" identity when Australia comes.
+Opossum (City, R, 2, Marsupial): "Roar: return one of your animals next to this to your hand." A mother gathering her young onto her back; it replays an animal's Roar (Skully, Chipmunk, a removal), a value card for other decks, and the City's seed for the Marsupials' "carrying the young" identity when Australia comes.
 
 ## Elsewhere, settled in passing
 
