@@ -13,9 +13,9 @@ const focus = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35); ret
 // to centre on the same height, never further than its top below the band or its bottom at the card's edge.
 const lift = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35); return Math.max(-3.71, Math.min(0, 13.15 - 30 * y)); };
 
-// Every keyword that opens a sentence is bold ("Flight. Roar: ..." bolds both).
-const KW = /(?<=^|\. )(Roar|Armor|Flight|Stealth|Spikes|Apex Predator)(:|\.)/g;
-const rules = t => (t || '').replace(KW, '<b>$1$2</b>');
+// Every keyword is bold wherever it stands, with its number and the colon or full stop after it ("Reach 2." is bold whole,
+// and so is Scout in "Roar: Scout a Bird."). The keywords are those KEYWORDS explains, below.
+const rules = t => (t || '').replace(KW, '<b>$&</b>');
 const chalk = n => String(n).split('').map(d => d === '*' ? '<b>*</b>' : `<img src="/static/kit2/chalk/${d}.webp" alt="${d}" draggable="false">`).join('');
 
 // `str`: the strength to show (hand strength can differ from the printed one); `cls`: extra classes ('compact'); `lazy`: the
@@ -52,3 +52,4 @@ export const KEYWORDS = {
   'Spikes': 'The first time an enemy covers it, that enemy is removed.',
   'Scout': 'Look at three different cards of your deck, draw one and shuffle the others back.',
 };
+const KW = new RegExp(`\\b(${Object.keys(KEYWORDS).join('|')})\\b( \\d+)?[:.]?`, 'g');

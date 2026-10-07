@@ -75,6 +75,7 @@ Card text grants strength two ways, **distinguished by the verb** — this readi
 ### Card-text conventions
 Card text fits three lines on the full card (`docs/design/principles.md`). These phrasings are binding:
 
+- Every keyword is **bold** wherever it stands on a card, with its number (**Reach 2.**, "Roar: **Scout** a Bird."); a numbered keyword is written "Reach 2", never "Reach [2]". The client bolds whatever its keyword list explains (`static/card.js`), so a new keyword goes on that list.
 - **"enemy"** means an enemy unit; **"your Canines"** means friendly Canines.
 - A unit is an **"animal"** on the cards and in the client ("play another animal", "Colony animal"); Eggs and tokens are animals too. "Unit" stays the word in the rules docs and code.
 - Your own units are **"your Canines"** or **"Canines you control"**, never "friendly". **"Play"** means from your hand; only another place is named ("from your hand or deck").
