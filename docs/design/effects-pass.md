@@ -74,7 +74,7 @@ The combo deck from `families.md`: your own animals die on purpose and every dea
 | Ostrich | fodder | Savanna | C | 4 | Roar: place an Ostrich Egg (0) on an adjacent empty crossroad. (locked; the Egg feeds the Egg Eater) |
 | Python | payoff: strength, board-wide | Jungle | C | | Has +1 strength for each removed animal. (exists) |
 | Egg Eater | payoff: strength from Eggs | Savanna | C | | Has +2 strength for each removed Egg. (exists) |
-| Piranha | payoff: strength, local | Jungle | C | 2 | Whenever an animal next to this is removed, give this +2 strength. (the feeding frenzy) |
+| Piranha (locked) | removal | Jungle | C | 2 | Roar: if one of your animals was removed this turn, remove an adjacent enemy. (Blood in the water, then the frenzy; the Muskrat's shape on this deck's condition: the deck's way to fight for the board.) |
 | Great White Shark | payoff: removal | Open Ocean | R | 7 | Apex Predator. If an animal was removed this turn, this can be placed on an animal of any strength. (smells blood; at 7 it is worse than the Crocodile with no death, better after one) |
 | Vulture (locked; Bird) | payoff: cards | Savanna | C | 3 | Flight. At the end of your turn, if one of your animals was removed this turn, draw a card. (Once a turn, so the loops can't blow it up.) |
 | Raccoon | payoff: recursion | City | R | 2 | Roar: return one of your removed animals to your hand. (Only your own: the Remove Pile is shared, and taking the opponent's best card would be legendary-level.) |
