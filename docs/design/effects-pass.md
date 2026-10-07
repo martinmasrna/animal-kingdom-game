@@ -48,6 +48,20 @@ Today's Food OTK deck plays as food aggro: nearly every card gains about 10 food
 
 The payoff, a legendary squirrel (name to come): "Roar: lose all your food. In 2 turns, gain twice that much." No Armor and a modest body: the deck has to protect it, and covering pauses its timer. Removing it loses the whole stake; that risk is the point (doubling the food at payout instead would be a win button: any opening reaches 50 by then). Fathom ("Roar: Scout a legendary animal") is its tutor.
 
+The defensive cards, one answer for each way to reach the squirrel (removal, a ground cover, a cover from behind the lines). Each must be beaten by no existing card and must leave the opponent an ordinary answer:
+
+| Animal | Habitat | Rarity | Str | Text | The opponent's answer |
+|---|---|---|---:|---|---|
+| Poison Dart Frog | Jungle | C | 1 | Reach 2. Poison. | a removal ability |
+| Jellyfish | Open Ocean | R | 3 | Poison. | a removal ability |
+| Beaver | Forest | C | 4 | Enemies can't be placed on empty crossroads next to this. | cover it (5+), or remove it |
+| Spider | City | C | 1 | When an enemy with Flight is placed next to this, remove it. | cover it, even with a flyer; ground animals ignore the web |
+| Capybara | Jungle | R | 5 | Your animals next to this can't be removed. | cover its neighbours, cover it (6+), or remove it |
+| Cockroach | City | C | 1 | When this is removed, return it to your hand. | cover it |
+| Earthworm | Meadow | C | 1 | When this is removed, place two Worms (0, no effect) on adjacent empty crossroads. | cover it |
+
+Open: Cockroach takes the "nine lives" the signatures registry offered the Stray Cat (the Stray Cat keeps its Cats glue); a Capybara beside a Porcupine is the strongest wall these build (unremovable, kills its first coverer, broken by a second cover of 8+). Cut: plain Spikes on a small body (Hedgehog dominates it), an animal that removes every coverer at once (an unbreakable wall, the herd draft's rejected rule), Opossum (its return needs a remembered crossroad, which a tabletop can't track).
+
 ## Elsewhere, settled in passing
 
 - Cats, filling the Cougar's slot (the Cougar and its effect wait for Mountains): Caracal (Savanna, C, 6) becomes "Reach 2.", the leap over the front line onto the engines behind it, which every other Cat can only hit when adjacent (at 5 or less the Eagle practically dominates it); Lynx (Forest, C, 6) takes the Caracal's old "Roar: if placed on top of an enemy, draw a card."; Bobcat (Forest, C, 5) joins with the Lynx's old "Roar: if you control another Cat, draw a card."

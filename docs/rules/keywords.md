@@ -31,6 +31,11 @@ The first time an enemy covers it, that enemy is removed (a remove, so Armor res
 
 Carried by: Porcupine and Hedgehog (Food).
 
+### Poison (proposed, 2026-10-07)
+When an enemy covers it, that enemy is removed at the start of your next turn. Every time, not once: the coverer gets the rest of the turn it covered in, then dies and the poisoned animal resurfaces, cutting whatever chain the opponent built through that crossroad. Like venom (§9.1 of `overview.md`), the poison belongs to the coverer: it resolves even if the Poison animal is gone by then, and is cancelled only if the coverer leaves the board first. An Apex Predator landing on it is poisoned and still eats it. A friendly cover doesn't set it off. The clean answer is a removal ability; Poison doesn't stop a two-action walk-in (cover, then take the den), so it guards crossroads the opponent can't win through in one turn. Unlike Spikes (at once, the first time only), it never wears off.
+
+For poisonous animals: Poison Dart Frog, Jellyfish; later Pufferfish, Scorpion, Lionfish.
+
 ### Apex Predator
 A predator that must land on prey and eats it.
 
