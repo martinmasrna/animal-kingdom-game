@@ -47,11 +47,11 @@ A habitat's set is its 30 most iconic animals (18 common, 12 rare) plus 12 legen
 
 ### Savanna (locked 2026-10-05)
 
-Animals (30; 18 common and 12 rare, rarities set with the effects): Lion, Elephant, Giraffe, Zebra, Cheetah, Wildebeest, Cape Buffalo, Warthog, Ostrich, African Wild Dog, Naked Mole-Rat (carries Jerboa's effect), Baboon, Gazelle, Meerkat, Oxpecker, Leopard, Rhinoceros, Hippopotamus, Crocodile, Hyena, Honey Badger, Serval, Black Mamba, Termite King, Termite Queen, Egg Eater, Caracal, Secretarybird, Dung Beetle, Aardvark.
+Animals (30; 18 common and 12 rare, rarities set with the effects): Lion, Elephant, Giraffe, Zebra, Cheetah, Wildebeest, Cape Buffalo, Warthog, Ostrich, African Wild Dog, Naked Mole-Rat (carries Jerboa's effect), Baboon, Gazelle, Meerkat, Oxpecker, Leopard, Rhinoceros, Hippopotamus, Crocodile, Hyena, Honey Badger, Serval, Black Mamba, Termite King, Termite Queen, Egg Eater, Caracal, Vulture, Dung Beetle, Aardvark.
 
 Legendaries (12): Prince Leo, Princess Lea, King Theron, Queen Adira (the lion family), Brutus (rhino), Methuselah (tortoise, the one legendary without its animal among the 30; its effect may find a better animal), and six new mythic versions of the 30 chosen with the effects (candidates: Elephant, the Giants' Matriarch; Crocodile; Honey Badger; Cheetah, Leopard, Cape Buffalo or Hippo).
 
-Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Impala (people can't tell it from the Gazelle), Vulture. Waiting for a Savanna II: Pangolin, Flamingo, Vulture.
+Out of Savanna: Jackal (its removal belongs to the hand-buff deck), Impala (people can't tell it from the Gazelle). Waiting for a Savanna II: Pangolin, Flamingo, Secretarybird (its slot went to the Vulture, the aristocrats' scavenger, 2026-10-07).
 
 ### Forest (locked 2026-10-05)
 

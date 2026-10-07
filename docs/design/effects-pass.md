@@ -76,10 +76,13 @@ The combo deck from `families.md`: your own animals die on purpose and every dea
 | Egg Eater | payoff: strength from Eggs | Savanna | C | | Has +2 strength for each removed Egg. (exists) |
 | Piranha | payoff: strength, local | Jungle | C | 2 | Whenever an animal next to this is removed, give this +2 strength. (the feeding frenzy) |
 | Great White Shark | payoff: removal | Open Ocean | R | 7 | Apex Predator. If an animal was removed this turn, this can be placed on an animal of any strength. (smells blood; at 7 it is worse than the Crocodile with no death, better after one) |
+| Vulture (locked; Bird) | payoff: cards | Savanna | C | 3 | Flight. At the end of your turn, if one of your animals was removed this turn, draw a card. (Once a turn, so the loops can't blow it up.) |
 | Raccoon | payoff: recursion | City | R | 2 | Roar: return one of your removed animals to your hand. (Only your own: the Remove Pile is shared, and taking the opponent's best card would be legendary-level.) |
-| the great crocodile (legendary, name to come) | payoff: cards | Savanna | L | 9 | Apex Predator. When this eats one of your animals, draw 2 cards. |
+| the great crocodile (legendary, name to come) | payoff: removal | Savanna | L | 9 | Apex Predator. When this eats one of your animals, remove an enemy of that strength or less. (Proposed. Eating an enemy needs no text: then it is only a bigger Crocodile. "Draw 2 when it eats your own" was too weak for a legendary: a Skully with extra steps.) |
 
 Open: the other three legendaries (Eon fits); the Tarantula (Jungle, Arachnid) as a Goliath birdeater, "Apex Predator. Can land on animals with Flight of any strength.", or its slot stays open (a second anti-flyer card in a small family). Rejected: a Spider Egg (its payoff needs the egg to survive, which this deck works against; a version paying on death is the Earthworm); an unlimited "whenever one of your animals is removed, draw a card" (with the loops, five cards from one action); food for each death (a third food deck); the Opossum as fodder (the Earthworm does more).
+
+Open topics: the bloodsuckers drain strength (Mosquito's −2, Leech's swap, the Tick's effect still to design, likely a slow drain); taking the opponent's food belongs to thieves (Seagull later, the monkeys) and gets its own session. Rejected: a Worm tag with a Mole that grows per removed Worm (forced, and growing in strength is the Snakes' identity).
 
 Opossum (City, R, 2, Marsupial): "Roar: return one of your animals next to this to your hand." A mother gathering her young onto her back; it replays an animal's Roar (Skully, Chipmunk, a removal), a value card for other decks, and the City's seed for the Marsupials' "carrying the young" identity when Australia comes.
 
