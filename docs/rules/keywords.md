@@ -51,6 +51,9 @@ Carried by: **Tiger** (Cats), **Eon** (Egg), **Polar Bear** and **Borealis** (Ra
 ### Roar
 An effect that resolves when the unit is placed. Most "when placed…" effects are Roars.
 
+### Dusk and Dawn (proposed, 2026-10-07)
+**Dusk:** an effect that resolves at the end of your turn; **Dawn:** at the start of your turn. Like Roar they label when an effect happens, and they replace the longer "At the end of your turn, …" and "At the start of your turn, …" (the timed-trigger wording below). They fire only while the unit tops its crossroad, unless the card says otherwise (a Grizzly growing in hand). Cards today: Dusk on Worker Wasp, Methuselah, Eon, Dingo, Wildebeest, Dung Beetle, Hyena, Vulture; Dawn on Aurum, Grizzly Bear and the Hungry keyword.
+
 ### Leaving the board  *(not a keyword)*
 An effect that resolves when **a unit leaves the board** is written out in plain words: "When this is removed, …" (Ember). It becomes a keyword only once at least three cards want it.
 
