@@ -41,6 +41,6 @@ Zebra, Deer, Moose, Boar and the two legendaries are proposals.
 
 ## Elsewhere, settled in passing
 
-- Bobcat (Forest, C, 4): "Reach 2." Takes the Cougar's slot in Cats (the Cougar and its effect wait for Mountains): the pounce over the front line onto the engines behind it, which every other Cat can only hit when adjacent.
+- Cats, filling the Cougar's slot (the Cougar and its effect wait for Mountains): Caracal (Savanna, C, 6) becomes "Reach 2.", the leap over the front line onto the engines behind it, which every other Cat can only hit when adjacent (at 5 or less the Eagle practically dominates it); Lynx (Forest, C, 6) takes the Caracal's old "Roar: if placed on top of an enemy, draw a card."; Bobcat (Forest, C, 5) joins with the Lynx's old "Roar: if you control another Cat, draw a card."
 - Mosquito (City, C, ~1): "Flight. Roar: give an adjacent enemy −2 strength."
 - Hermit Crab (Coast, later): the strength swap ("Roar: swap strength with an adjacent enemy") is reserved for it; its signature is moving into a bigger shell.

@@ -14,7 +14,7 @@ Can be placed ignoring connection, except onto a den: capturing the enemy den st
 ### Reach N (proposed, 2026-10-07)
 Can be placed on a crossroad up to N crossroads away from one of your connected units, counting along paths and jumping over whatever stands between. Ordinary placement is Reach 1, so the number is how far it lands: Reach 2 jumps over one crossroad. Connection still applies at the launch point, so a Reach unit can't hop off another stranded unit, and it never captures: a den needs an unbroken chain of your units. All other placement rules still apply (covering an enemy still needs greater strength).
 
-For animals that leap or pounce: Bobcat (Reach 2); frogs and grasshoppers to come.
+For animals that leap or pounce: Caracal (Reach 2); frogs and grasshoppers to come.
 
 ### Armor
 A shell, plates or spines: cannot be removed, returned to hand, or eaten by **any** ability — the enemy's **or its own controller's**. It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an enemy with Armor; when it removes a stack, a buried unit with Armor is skipped **in place** and everything else is still removed. Armor is not a shield for the cards beneath it. Scope is **board-only**: a card with Armor in hand can be paid or removed normally.
