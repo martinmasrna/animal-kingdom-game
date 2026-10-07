@@ -39,6 +39,15 @@ Designed as one archetype across the habitats, not card by card (Martin, 2026-10
 
 Zebra, Deer, Moose, Boar and the two legendaries are proposals.
 
+## The food split (2026-10-07)
+
+Today's Food OTK deck plays as food aggro: nearly every card gains about 10 food, so each action ticks a steady clock and there is nothing to assemble. It becomes two decks:
+
+- **Rodent food aggro:** the Rodents (Barley, Scrooge, Squirrel, Flying Squirrel, Chipmunk, Hamster, Muskrat, Groundhog, Hedgehog) and about four new finishers and speed cards. Scrooge's one-turn burst belongs here.
+- **The hoard (true combo):** draw, assemble, stall, execute. Its food sources must be slow, so the fair route is too slow and the payoff is the plan. It takes the stall pieces (Porcupine, Armadillo, Octopus, Fathom) and Black Bear, and gives the game the defensive cards it lacks: spines and poison that punish a cover (Porcupine, Hedgehog, Poison Dart Frog, Jellyfish, Toad), builders that block the way in (Beaver's dam against the den rush, Spider's web against Flight and Reach), survivors as support (Opossum, Cockroach, Earthworm, Gecko). It loses to food aggro by design: food from Roars can't be touched.
+
+The payoff, a legendary squirrel (name to come): "Roar: lose all your food. In 2 turns, gain twice that much." No Armor and a modest body: the deck has to protect it, and covering pauses its timer. Removing it loses the whole stake; that risk is the point (doubling the food at payout instead would be a win button: any opening reaches 50 by then). Fathom ("Roar: Scout a legendary animal") is its tutor.
+
 ## Elsewhere, settled in passing
 
 - Cats, filling the Cougar's slot (the Cougar and its effect wait for Mountains): Caracal (Savanna, C, 6) becomes "Reach 2.", the leap over the front line onto the engines behind it, which every other Cat can only hit when adjacent (at 5 or less the Eagle practically dominates it); Lynx (Forest, C, 6) takes the Caracal's old "Roar: if placed on top of an enemy, draw a card."; Bobcat (Forest, C, 5) joins with the Lynx's old "Roar: if you control another Cat, draw a card."
