@@ -76,7 +76,7 @@ The combo deck from `families.md`: your own animals die on purpose and every dea
 | Egg Eater | payoff: strength from Eggs | Savanna | C | | Has +2 strength for each removed Egg. (exists) |
 | Piranha | payoff: strength, local | Jungle | C | 2 | Whenever an animal next to this is removed, give this +2 strength. (the feeding frenzy) |
 | Great White Shark | payoff: removal | Open Ocean | R | 7 | Apex Predator. If an animal was removed this turn, this can be placed on an animal of any strength. (smells blood; at 7 it is worse than the Crocodile with no death, better after one) |
-| Raccoon | payoff: recursion | City | R | 3 | Roar: return an animal from the Remove Pile to your hand. |
+| Raccoon | payoff: recursion | City | R | 2 | Roar: return one of your removed animals to your hand. (Only your own: the Remove Pile is shared, and taking the opponent's best card would be legendary-level.) |
 | the great crocodile (legendary, name to come) | payoff: cards | Savanna | L | 9 | Apex Predator. When this eats one of your animals, draw 2 cards. |
 
 Open: the other three legendaries (Eon fits); the Tarantula (Jungle, Arachnid) as a Goliath birdeater, "Apex Predator. Can land on animals with Flight of any strength.", or its slot stays open (a second anti-flyer card in a small family). Rejected: a Spider Egg (its payoff needs the egg to survive, which this deck works against; a version paying on death is the Earthworm); an unlimited "whenever one of your animals is removed, draw a card" (with the loops, five cards from one action); food for each death (a third food deck); the Opossum as fodder (the Earthworm does more).
