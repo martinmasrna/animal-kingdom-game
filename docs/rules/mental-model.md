@@ -42,7 +42,8 @@ You may normally only place on a crossroad **connected back to your den through 
 
 - **Region control ignores strength.** A STR 1 token holds a region corner exactly as well as a STR
   10. Cheap wide bodies are legitimately strong for the food win — don't dismiss them as "weak".
-- **Den capture ignores strength.** *Any* unit on the enemy den wins; the enemy can't sit on their own den to defend it. So the den rush is a **connection/pathing problem, not a strength problem** — reach (Flight/Cougar) matters more than big bodies for that line.
+- **Den capture ignores strength.** *Any* unit on the enemy den wins; the enemy can't sit on their own den to defend it. So the den rush is a **connection/pathing problem, not a strength problem**.
+- **Reach is disruption, not a road to the den.** Flight and Cougar-style placement land behind the opponent's lines to cut their connection or cover their engines (board-wide buffs, ongoing effects). Flight never captures a den.
 - **Covered units aren't dead.** They wait under the stack; recursion/resurface effects and removing the coverer bring them back.
 - **The unit of resource is the action.** Evaluate a card by what it does *per action* and whether it grants free actions — not by an imaginary mana cost.
 
