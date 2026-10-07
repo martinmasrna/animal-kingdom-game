@@ -91,7 +91,7 @@ Expected weak points, untested: few cards that kill your own (Spiders die to any
 
 ## Canines
 
-The pack: go wide, buff the pack, win on the board, then the den. Settled so far:
+The pack growing stronger on the board, over time (Primates buff in hand, Canines on the board). Width only feeds that growth: the Canines' young grow up. Pup (token, 0): "Dusk: this gains +1 strength."; Scarlett's Poppy and Rusty grow the same way. The dials are numbers: the tokens start at 0, the African Wild Dog is a 2, Scarlett a 3 (or one kit instead of two). Count-based effects (stronger the more of them) belong to the Fish, by adjacency. Settled so far:
 
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
