@@ -82,7 +82,7 @@ How it's built:
 | City Spider (Arachnid) | engine | City | C | 2 | When an animal of strength 2 or less is placed next to this, remove it. (Both sides: a trap for the opponent's small animals and tokens, a repeatable death for yours.) |
 | Cockroach | fodder | City | C | 1 | When this is removed, return it to your hand and draw a card. |
 | Earthworm | fodder | Meadow | C | 1 | When this is removed, place two Worms on its crossroad. (Worm, token, 0: "When this is removed, draw a card.") |
-| the blood-scenting removal (animal open; Great White Shark proposed, as a rare ~6) | removal | | | | Roar: if one of your animals was removed this turn, remove an adjacent enemy. (Smells blood: the deck's way to fight for the board. The Piranha that carried it moved to the Fish.) |
+| Piranha (locked; Fish) | removal | Jungle | C | 2 | Roar: if one of your animals was removed this turn, remove an adjacent enemy. (Blood in the water, then the frenzy: the deck's way to fight for the board. A tiny animal that kills anything, so no big animal can carry it.) |
 | Vulture (locked; Bird) | payoff: cards | Savanna | C | 3 | Flight. At the end of your turn, if one of your animals was removed this turn, draw a card. |
 | Hyena (no tag) | finisher | Savanna | C | 4 | Dusk: gain 3 food for each of your animals removed this turn. (The laughing scavenger: deaths into food. It scales with the turn's deaths, so a big turn pays big: that's the deck's puzzle, how many deaths out of two actions. Copies stack, and the Sloth doubles it; if games end too fast or too slow, the dial is the 3.) |
 
@@ -130,17 +130,17 @@ The list (Martin, 2026-10-08; animals and strengths set, wording to the card-tex
 | a Manta Ray (name to come) | Open Ocean | L | 4 | **Dusk:** if you control 2 or more regions, draw a card. |
 | a Piranha (name to come) | Jungle | L | 7 | Your Fish can be placed on enemies of strength up to the number of Fish you control. (The school strips something far bigger: once the board is full, it lets the small Fish win crossroads back. Snow Leopard's shape.) |
 | Swordfish | Open Ocean | R | 3 | Roar: remove a random adjacent enemy for each of your Fish next to this. |
-| Piranha | Jungle | R | 4 | Roar: remove an adjacent enemy of strength up to the number of your Fish. |
+| Barracuda | Open Ocean | R | 4 | Roar: remove an adjacent enemy of strength up to the number of your Fish. |
 | Manta Ray | Open Ocean | R | 6 | Whenever your opponent covers one of your Fish, draw a card. |
 | Remora | Open Ocean | R | 3 | Roar: play another Fish. (It arrives riding a bigger fish.) |
-| Tuna | Open Ocean | C | 4 | Roar: draw a card for each of your Fish next to this. |
+| Cod | Open Ocean | C | 4 | Roar: draw a card for each of your Fish next to this. |
 | Sardine | Open Ocean | C | 1 | Roar: place all Sardines from your hand and deck on random adjacent empty crossroads. (Lemming's effect, fine in play.) |
 | Mahi-mahi | Open Ocean | C | 3 | Roar: give your other Fish +1 strength. |
 | Mackerel | Open Ocean | C | 2 | Your other Fish have +1 strength. |
-| Barracuda | Open Ocean | C | 3 | Has +1 strength for each other Fish you control. |
+| Tuna | Open Ocean | C | 3 | Has +1 strength for each other Fish you control. |
 | Sunfish | Open Ocean | C | 4 | Roar: place a Baby Fish (token, Fish, 0) on an empty crossroad next to this. (It lays more eggs than any other animal.) |
 
-Sharks stay out of the count cards: they're lone hunters. Fish's predator is weak on this map (area removal reaches only the edge of a school built at home); Giants need a way to hit the middle of a school. Open Ocean's roster gains Sardine, Tuna, Remora, Mahi-mahi and Mackerel, to settle in the roster pass after the decks. Rejected: Baby Fish spawners at legendary and rare (empty crossroads exist only in the first turns), a food common (Food Aggro's ground), Goldfish (a pet), Salmon (a river fish, for River and Lake).
+Sharks stay out of the count cards: they're lone hunters. Fish's predator is weak on this map (area removal reaches only the edge of a school built at home); Giants need a way to hit the middle of a school. Open Ocean's roster gains Sardine, Tuna, Cod, Remora, Barracuda, Mahi-mahi and Mackerel, to settle in the roster pass after the decks. Rejected: Baby Fish spawners at legendary and rare (empty crossroads exist only in the first turns), a food common (Food Aggro's ground), Goldfish (a pet), Salmon (a river fish, for River and Lake).
 
 ## Egg Control
 
