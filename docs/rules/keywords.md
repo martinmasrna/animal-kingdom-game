@@ -39,6 +39,9 @@ When an enemy covers it, that enemy is removed at the start of your next turn. E
 
 For poisonous animals: Poison Dart Frog, Jellyfish; later Pufferfish, Scorpion, Lionfish.
 
+### Titan (proposed, 2026-10-08)
+Playing it costs two actions instead of one. A free placement (Jerboa, the Remora, the Elephant's kind of "play another animal") can't pay for it; an extra action can. For the biggest animals: Blue Whale, Whale Shark.
+
 ### Apex Predator
 A predator that must land on prey and eats it.
 

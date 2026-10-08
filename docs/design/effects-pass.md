@@ -192,6 +192,31 @@ The list (Martin, 2026-10-08; animals and strengths set, wording to the card-tex
 
 Sharks stay out of the count cards: they're lone hunters. Fish's predator is weak on this map (area removal reaches only the edge of a school built at home); Giants need a way to hit the middle of a school. Open Ocean's roster gains Sardine, Tuna, Cod, Remora, Barracuda, Mahi-mahi and Mackerel, to settle in the roster pass after the decks. Rejected: Baby Fish spawners at legendary and rare (empty crossroads exist only in the first turns), a food common (Food Aggro's ground), Goldfish (a pet), Salmon (a river fish, for River and Lake).
 
+## Giants, draft
+
+Feed the giants (Martin, 2026-10-08): Magic's Eldrazi Ramp, Hearthstone's Ramp and Big Druid. The ramp resource is food, which is also the win counter: every point a giant eats is a point not counting toward 100, so Giants win on the board and the den, rarely on food. Hungry animals eat each turn or shrink; the food cards keep them fed. The fun is landing bodies nothing can cover and running the feeding economy. It beats boards of small and mid-sized animals by covering them with bodies they can't cover back (Fish, Cats, Canines: Giants prey on Fish by covering their region corners, not by area removal, which reaches only a school's edge); it loses to races it can't touch (Food Aggro), unconditional removal (King Cobra, the Octopus's ink) and fortresses (Spikes kills any coverer).
+
+Imagined games (reasoning, not evidence): the board dominance works from turn 4, once the chain delivers the bodies; the feeding economy bites only when the ramp pieces come late (three giants eat about 11 a turn); the Oxpecker is a big ramp piece (about fifteen animals of 8 or more in the starting deck).
+
+| Card | Habitat | Rarity | Str | Text |
+|---|---|---|---:|---|
+| Brutus (Hoofed) | Savanna | L | 8 | **Hungry 6.** Roar: remove all adjacent animals. |
+| Methuselah | Savanna | L | 3 | **Armor.** At the end of your turn, gain 5 food. |
+| a Sperm Whale (name evoking Moby Dick without citing it, as Eon evokes the Ouroboros: Mocha, the real white whale that inspired the novel, proposed) | Open Ocean | L | | effect open; needs a common or rare Sperm Whale |
+| an Oxpecker (proposed; name to come; Bird) | Savanna | L | ~2 | **Flight.** Your Hungry animals next to this don't need to eat. (Oxpeckers live on giants, eating their ticks. Placed between giants, it's guarded by them: an enemy has to reach one of its free sides.) |
+| Rhinoceros (Hoofed) | Savanna | R | 8 | **Hungry 3.** Roar: remove all adjacent enemies of strength 2 or less. |
+| Hippopotamus (Hoofed) | Savanna | R | 8 | **Hungry 3.** When an enemy of strength 3 or less is placed next to this, remove it. |
+| Crocodile | Savanna | R | 8 | **Apex Predator.** |
+| Whale Shark (Fish) | Open Ocean | R | 8 | **Titan. Hungry 4.** At the end of your turn, draw 2 cards. |
+| Oxpecker (Bird) | Savanna | C | 1 | **Flight.** Roar: gain 1 food for each animal of strength 8 or more in your starting deck. |
+| Anteater | Jungle | C | 4 | Roar: draw a card. Gain food equal to its strength. (It rips open termite mounds: the bigger the mound, the bigger the meal.) |
+| Dung Beetle | Savanna | C | 1 | At the end of your turn, gain 2 food for each Hungry animal you control. |
+| Blue Whale | Open Ocean | C | 10 | **Titan.** |
+| Sloth | Jungle | C | 3 | Roar: in 2 turns, gain 30 food. |
+| Elephant | Savanna | C | 9 | **Hungry 5.** |
+
+Titan means playing it costs two actions (Martin): the Blue Whale is a whole turn for a 10 that never eats, the Elephant one action for a 9 that eats 5 a turn. Rejected: the Anteater as an anti-Colony card (Martin: a card that only punishes one deck is bad design), and "Giant" in its name (it's a 4).
+
 ## Handlock, draft
 
 Train in secret, then unveil (Martin, 2026-10-08): Hearthstone's Handlock and hand-buff decks (Don Han'Cho, the Grimy Goons); Magic has almost nothing like it. Two hand themes: hand size (Macaque, Grizzly) and training cards in hand (Baboon, Silverback, Orangutan, Tarsier), paid off by thresholds and triggers (Chimpanzee, Gorilla, Capuchin). The fun is hidden power: the opponent sees how many cards you hold, never how strong they are. Strength past about 8 buys almost nothing on the board, so training has to pay off through thresholds, triggers and removal, not raw size. It beats midrange and strength-gated removal; it loses to speed and to hand disruption (Egg Control's Black Swan and Magpie). The first version is [`hand-deck.md`](hand-deck.md); this list replaces it. Commons and rares locked (Martin, 2026-10-08); the legendaries are drafted, the Butterfly's stages and Silverback's +2 to try.
