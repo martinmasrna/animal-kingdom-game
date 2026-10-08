@@ -99,8 +99,8 @@
       "tags": [
         "Colony"
       ],
-      "base_strength": 0,
-      "text": "Flight. Has +2 strength for each other Colony animal you control.",
+      "base_strength": 5,
+      "text": "Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck.",
       "keywords": [
         "Flight"
       ],
@@ -184,7 +184,7 @@
         "Colony"
       ],
       "base_strength": 6,
-      "text": "Roar: if you control a Colony Queen, draw a card.",
+      "text": "Roar: if you control a Colony Queen, draw 2 cards.",
       "keywords": [],
       "species": "Termite",
       "habitat": "Savanna",
@@ -311,7 +311,9 @@
       "name": "Cuckoo",
       "deck": "aristocrats",
       "rarity": "legendary",
-      "tags": [],
+      "tags": [
+        "Bird"
+      ],
       "base_strength": 6,
       "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal.",
       "keywords": [],
@@ -513,7 +515,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 7,
+      "base_strength": 8,
       "text": "Apex Predator. Roam. Reach 2.",
       "keywords": [
         "Apex Predator",
@@ -591,8 +593,8 @@
       "workbench_id": "canines-4"
     },
     {
-      "id": "african_wild_dog",
-      "name": "African Wild Dog",
+      "id": "fox",
+      "name": "Fox",
       "deck": "canines",
       "rarity": "rare",
       "tags": [
@@ -603,8 +605,8 @@
       "keywords": [
         "Roam"
       ],
-      "species": "African Wild Dog",
-      "habitat": "Savanna",
+      "species": "Fox",
+      "habitat": "Forest",
       "workbench_id": "canines-5"
     },
     {
@@ -687,8 +689,8 @@
       "workbench_id": "canines-10"
     },
     {
-      "id": "fox",
-      "name": "Fox",
+      "id": "african_wild_dog",
+      "name": "African Wild Dog",
       "deck": "canines",
       "rarity": "common",
       "tags": [
@@ -697,8 +699,8 @@
       "base_strength": 3,
       "text": "Dusk: give your adjacent animals +1 strength.",
       "keywords": [],
-      "species": "Fox",
-      "habitat": "Forest",
+      "species": "African Wild Dog",
+      "habitat": "Savanna",
       "workbench_id": "canines-11"
     },
     {
@@ -785,8 +787,8 @@
       "keywords": [
         "Flight"
       ],
-      "species": "Albatross",
-      "habitat": "Open Ocean",
+      "species": "Falcon",
+      "habitat": "Forest",
       "workbench_id": "den-rush-3"
     },
     {
@@ -1199,7 +1201,7 @@
         "Fish"
       ],
       "base_strength": 4,
-      "text": "Dusk: if you control 2 or more regions, draw a card.",
+      "text": "Dusk: if you control 2 or more regions, draw 2 cards.",
       "keywords": [],
       "unnamed": true,
       "species": "Manta Ray",
@@ -1400,8 +1402,8 @@
       "text": "Roar: draw cards until you have as many as your opponent.",
       "keywords": [],
       "unnamed": true,
-      "species": "Chipmunk",
-      "habitat": "Forest",
+      "species": "Rat",
+      "habitat": "City",
       "workbench_id": "food-aggro-1"
     },
     {
@@ -1430,8 +1432,8 @@
       "base_strength": 4,
       "text": "Roar: gain food equal to the food you gained this turn.",
       "keywords": [],
-      "species": "Hamster",
-      "habitat": "Meadow",
+      "species": "Chipmunk",
+      "habitat": "Forest",
       "workbench_id": "food-aggro-3"
     },
     {
@@ -1819,7 +1821,7 @@
       "keywords": [
         "Apex Predator"
       ],
-      "species": "Snake",
+      "species": "Anaconda",
       "habitat": "Jungle",
       "workbench_id": "egg-control-0"
     },
@@ -2071,7 +2073,7 @@
       "keywords": [],
       "unnamed": true,
       "species": "Butterfly",
-      "habitat": "Jungle",
+      "habitat": "Meadow",
       "workbench_id": "handlock-2"
     },
     {
@@ -2228,7 +2230,7 @@
       "text": "When this gains strength in your hand, draw a card and turn this into a Butterfly.",
       "keywords": [],
       "species": "Butterfly",
-      "habitat": "Jungle",
+      "habitat": "Meadow",
       "workbench_id": "handlock-12"
     },
     {
@@ -2271,7 +2273,7 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
-      "text": "Armor. Dusk: gain 5 food.",
+      "text": "Armor. Each player gains at most 20 food per turn. Dusk: gain 5 food.",
       "keywords": [
         "Armor"
       ],
@@ -2372,7 +2374,7 @@
         "Fish"
       ],
       "base_strength": 8,
-      "text": "Titan. Hungry 4. Dusk: draw 2 cards.",
+      "text": "Titan. Hungry 4. Dusk: draw a card.",
       "keywords": [
         "Titan",
         "Hungry"
@@ -2510,7 +2512,7 @@
         "Hoofed"
       ],
       "base_strength": 4,
-      "text": "Roar: draw a card for each different Hoofed ally adjacent to this.",
+      "text": "Roar: draw a card for each different Hoofed animal you control.",
       "keywords": [],
       "unnamed": true,
       "species": "Zebra",
@@ -2929,7 +2931,7 @@
         "Rodent"
       ],
       "base_strength": 1,
-      "text": "Roar: fill adjacent empty crossroads with Lemmings from your hand and deck.",
+      "text": "",
       "keywords": [],
       "species": "Lemming",
       "habitat": "Polar",

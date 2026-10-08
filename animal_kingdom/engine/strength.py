@@ -11,7 +11,7 @@ matters (covering, removal thresholds, region holding, conditions like Coyote's 
 - stored_counters: `UnitInstance.strength_counter` - one-time "give +X" grants (Unnamed Rallier,
   Clarion, Dhole, Dingo, Bush Dog, Shuck). Stored on the instance; persist after the
   granter dies; travel hand->board.
-- active_anthems: live "has +X" auras (Raksha, Lobo, Verminus, Vesper, Guard Wasp).
+- active_anthems: live "has +X" auras (Raksha, Lobo, Verminus, Guard Wasp).
   Recomputed from the board every time; vanish when their condition lapses.
 
 For covering legality a card is still in hand (no board iid yet), so anthems are computed
@@ -93,8 +93,6 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
     if not _inked(state, self_iid):
         if cid == "verminus":                   # +1 for each OTHER unit you control (any tag)
             bonus += cfg.anthem_verminus_per * sum(1 for u in tops if u.iid != self_iid)
-        elif cid == "vesper":                   # +2 for each OTHER friendly Colony unit
-            bonus += cfg.anthem_vesper_per * count("Colony", include_self=False)
         elif cid == "guard_hornet":             # +5 while you control >= threshold Colony units (incl. itself)
             if count("Colony", include_self=True) >= cfg.guard_hornet_colony_threshold:
                 bonus += cfg.guard_hornet_bonus

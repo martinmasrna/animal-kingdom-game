@@ -11,7 +11,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Queen Marabunta** | 1 | Colony, Queen | 4 | Roar: gain 4 food for each other Colony animal you control. |
-| **Vesper** | 1 | Colony | 0 | Flight. Has +2 strength for each other Colony animal you control. |
+| **Vesper** | 1 | Colony | 5 | Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck. |
 | **Queen Honoria** | 1 | Colony, Queen | 4 | Whenever you play a Colony animal, gain 4 food. |
 | **Falstaff** | 1 | Colony | 3 | Flight. Whenever you gain food, gain 3 additional food. |
 
@@ -21,7 +21,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 |---|---:|---|---:|---|
 | **Nurse Bee** | 2 | Colony | 3 | Flight. Roar: if you control two of the same Colony animal, draw 2 cards. |
 | **Nurse Bumblebee** | 2 | Colony | 3 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. |
-| **Termite King** | 2 | Colony | 6 | Roar: if you control a Colony Queen, draw a card. |
+| **Termite King** | 2 | Colony | 6 | Roar: if you control a Colony Queen, draw 2 cards. |
 | **Termite Queen** | 2 | Colony, Queen | 3 | Roar: you may play another non-Queen Colony animal. |
 
 ### Common

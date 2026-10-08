@@ -13,6 +13,8 @@ from animal_kingdom.engine.actions import SKIP, ChoiceAction, DrawAction, PassAc
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.strength import effective_strength, placement_strength
 
+from animal_kingdom.engine.cards import load_cards
+
 from ._helpers import apply_click, hand_ids, make_state, put
 
 CFG = Config.default()
@@ -271,10 +273,10 @@ def test_the_legendary_wolf_buffs_its_new_neighbours_when_it_roams():
     assert ally.strength_counter == CFG.wolf_legend_grant and old.strength_counter == 0
 
 
-def test_african_wild_dog_draws_whenever_it_covers_an_enemy():
-    s = make_state(hands={"A": ["african_wild_dog"]}, decks={"A": ["lion"] * 3, "B": []})
+def test_the_fox_draws_whenever_it_covers_an_enemy():
+    s = make_state(hands={"A": ["fox"]}, decks={"A": ["lion"] * 3, "B": []})
     put(s, "1,1", "squirrel", "B")
-    rules.apply_action(s, PlaceAction("african_wild_dog", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("fox", ("cr", "1,2")))
     assert hand_ids(s, "A") == []
     put(s, "2,2", "worker_ant", "B")
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))   # roams onto the 1
@@ -400,13 +402,13 @@ def test_the_legendary_tuna_pays_per_region():
     assert s.food["A"] == CFG.tuna_legend_food and len(s.hands["A"]) == 1
 
 
-def test_the_legendary_manta_ray_draws_at_dusk_with_two_regions():
+def test_the_legendary_manta_ray_draws_two_at_dusk_with_two_regions():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     for cr in ("1,1", "2,1", "2,2", "1,3", "2,3"):
         put(s, cr, "sardine", "A")
     put(s, "1,2", "fish_legend_manta_ray", "A")                # R1 and R4
     end_turn(s)
-    assert len(s.hands["A"]) == 1
+    assert len(s.hands["A"]) == CFG.manta_legend_draw == 2
 
 
 def test_the_legendary_piranha_lets_fish_cover_up_to_the_school_size():
@@ -605,11 +607,11 @@ def test_dung_beetle_feeds_on_hungry_animals_and_anteater_eats_the_drawn_cards_s
     assert s2.food["A"] == 7 and hand_ids(s2, "A") == ["tiger"]
 
 
-def test_whale_shark_draws_two_at_the_end_of_your_turn():
+def test_whale_shark_draws_a_card_at_the_end_of_your_turn():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "whale_shark", "A")
     end_turn(s)
-    assert len(s.hands["A"]) == CFG.whale_shark_draw
+    assert len(s.hands["A"]) == 1
 
 
 # ================================================================================ Handlock
@@ -712,12 +714,14 @@ def test_the_legendary_giraffe_reveals_the_opponents_hand():
     assert s.view_for("A").opponent_hand == ("lion",) and s.view_for("B").opponent_hand is None
 
 
-def test_the_legendary_zebra_draws_per_different_adjacent_hoofed_ally():
-    s = make_state(hands={"A": ["hoofed_legend_zebra"]}, decks={"A": ["lion"] * 3, "B": []})
-    put(s, "1,2", "gazelle", "A"); put(s, "2,1", "gazelle", "A"); put(s, "2,3", "deer", "A")
+def test_the_legendary_zebra_draws_per_different_hoofed_animal_you_control_anywhere():
+    s = make_state(hands={"A": ["hoofed_legend_zebra"]}, decks={"A": ["lion"] * 5, "B": []})
+    put(s, "1,2", "gazelle", "A"); put(s, "4,3", "gazelle", "A")   # two copies count once; far away counts
+    put(s, "3,1", "deer", "A")
     put(s, "3,2", "boar", "B")                                  # an enemy's Hoofed animal doesn't count
+    put(s, "1,1", "lion", "A")                                  # nor an ally that isn't Hoofed
     rules.apply_action(s, PlaceAction("hoofed_legend_zebra", ("cr", "2,2")))
-    assert len(s.hands["A"]) == 2
+    assert len(s.hands["A"]) == 3                               # Gazelle, Deer and the Zebra itself
 
 
 def test_grazing_okapi_draws_wildebeest_feeds_and_boar_grows():
@@ -793,3 +797,160 @@ def test_the_macaw_makes_the_next_roar_this_turn_happen_twice():
     rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,1")))
     assert s.food["A"] == 2 * s.config.squirrel_food
     assert "A" not in s.roar_twice                              # spent by that Roar
+
+
+# ================================================================================ 2026-10-09: the fit and rarity passes
+
+def test_the_fox_and_the_african_wild_dog_ids_follow_their_animals():
+    cards = load_cards()
+    fox, dog = cards["fox"], cards["african_wild_dog"]
+    assert (fox.name, fox.rarity, "Roam" in fox.keywords) == ("Fox", "rare", True)
+    assert (dog.name, dog.rarity, dog.text) == ("African Wild Dog", "common", "Dusk: give your adjacent animals +1 strength.")
+
+
+def test_the_african_wild_dog_gives_its_adjacent_allies_one_at_dusk():
+    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "2,2", "african_wild_dog", "A")
+    ally, far, enemy = put(s, "1,2", "lion", "A"), put(s, "4,2", "lion", "A"), put(s, "3,2", "lion", "B")
+    end_turn(s)
+    assert (ally.strength_counter, far.strength_counter, enemy.strength_counter) == (CFG.wild_dog_grant, 0, 0)
+
+
+def test_the_termite_king_draws_two_with_a_colony_queen():
+    s = make_state(hands={"A": ["termite_king"]}, decks={"A": ["lion"] * 3, "B": []})
+    put(s, "1,1", "termite_queen", "A")
+    rules.apply_action(s, PlaceAction("termite_king", ("cr", "1,2")))
+    assert len(s.hands["A"]) == CFG.termite_king_draw == 2
+
+
+def test_the_legendary_leopard_is_eight():
+    assert load_cards()["canines_legend_leopard"].base_strength == 8
+
+
+def test_the_lemming_is_a_plain_one_now():
+    s = make_state(hands={"A": ["lemming", "lemming"]}, decks={"A": ["lemming"], "B": []})
+    rules.apply_action(s, PlaceAction("lemming", ("cr", "1,2")))
+    assert sum(len(st) for st in s.board.values()) == 1 and hand_ids(s, "A") == ["lemming"]
+
+
+def test_the_legendary_cuckoo_is_a_bird():
+    assert "Bird" in load_cards()["aristocrats_legend_cuckoo"].tags
+
+
+# --- Vesper: "Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck." -------------
+
+def _queen_covered_by(coverer, *, b_hand=(), b_deck=(), extra=None):
+    """A's `coverer` covers B's Queen Bee on 2,2 (A holds 1,2, so 2,2 is in reach)."""
+    s = make_state(hands={"A": [coverer], "B": list(b_hand)}, decks={"A": ["lion"] * 3, "B": list(b_deck)})
+    put(s, "1,2", "lion", "A")
+    put(s, "2,2", "queen_bee", "B")
+    if extra:
+        extra(s)
+    rules.apply_action(s, PlaceAction(coverer, ("cr", "2,2")))
+    return s
+
+
+def test_vesper_is_placed_from_hand_on_the_enemy_that_covers_an_allied_queen():
+    s = _queen_covered_by("lion", b_hand=["vesper", "lion"])
+    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "lion", "vesper"]
+    assert hand_ids(s, "B") == ["lion"] and s.board["2,2"][-1].owner == "B"
+    place = next(e for e in s.events if e["e"] == "place" and e["card"] == "vesper")
+    assert place["from_hand"] and place["reveal"] and place["cause"] == "vesper"
+    assert s.current == "A" and s.actions_taken_this_turn == 1   # B spent nothing; A's turn goes on
+
+
+def test_vesper_is_placed_from_the_deck_too():
+    s = _queen_covered_by("lion", b_deck=["lion", "vesper", "lion"])
+    assert s.board["2,2"][-1].card_id == "vesper" and s.decks["B"] == ["lion", "lion"]
+    place = next(e for e in s.events if e["e"] == "place" and e["card"] == "vesper")
+    assert not place["from_hand"]
+
+
+def test_vesper_lands_on_any_strength_and_skips_connection():
+    s = _queen_covered_by("mock_vanilla_10", b_hand=["vesper"])   # 5 on a 10, far from B's den
+    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "mock_vanilla_10", "vesper"]
+
+
+def test_vesper_on_the_board_or_in_the_remove_pile_does_nothing():
+    s = _queen_covered_by("lion", extra=lambda s: put(s, "4,1", "vesper", "B"))
+    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "lion"]
+    s = _queen_covered_by("lion", extra=lambda s: s.pile_add("vesper", "B"))
+    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "lion"]
+
+
+def test_vesper_ignores_a_non_queen_ally_and_a_friendly_cover():
+    s = make_state(hands={"A": ["lion"], "B": ["vesper"]}, decks={"A": [], "B": []})
+    put(s, "1,2", "lion", "A")
+    put(s, "2,2", "worker_bee", "B")                            # Colony, but no Queen
+    rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))
+    assert s.board["2,2"][-1].card_id == "lion" and hand_ids(s, "B") == ["vesper"]
+    s = make_state(current="B", hands={"B": ["lion", "vesper"]}, decks={"A": [], "B": []})
+    put(s, "4,2", "lion", "B"); put(s, "3,2", "queen_bee", "B")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))      # B covers its own Queen
+    assert s.board["3,2"][-1].card_id == "lion" and hand_ids(s, "B") == ["vesper"]
+
+
+def test_vesper_answers_a_roaming_cover_too():
+    s = make_state(decks={"A": [], "B": []}, hands={"B": ["vesper"]})
+    put(s, "1,2", "fox", "A"); put(s, "2,2", "queen_bee", "B")
+    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
+    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "fox", "vesper"]
+
+
+def test_vesper_resolves_after_the_coverers_roar_and_is_placed_not_played():
+    """The Bat's Roar draws first; Vesper comes after it, without an action and without Queen Honoria's food (placing
+    isn't playing)."""
+    s = _queen_covered_by("bat", b_hand=["vesper"], extra=lambda s: put(s, "4,1", "queen_honoria", "B"))
+    order = [e["e"] for e in s.events if e["e"] in ("draw", "place")]
+    assert order == ["place", "draw", "place"] and s.board["2,2"][-1].card_id == "vesper"
+    assert s.food["B"] == 0
+
+
+def test_vesper_fires_identically_from_any_determinized_world():
+    """Honesty: the bots' sampled worlds re-deal B's hand and deck, but Vesper is in one or the other in every world,
+    so a search that covers B's Queen sees the same answer whatever it may not know."""
+    import random
+    from animal_kingdom.bots.determinize import determinize
+    s = make_state(hands={"A": ["lion"], "B": ["lion", "lion"]}, decks={"A": [], "B": ["vesper", "lion", "lion"]})
+    put(s, "1,2", "lion", "A"); put(s, "2,2", "queen_bee", "B")
+    for seed in range(6):
+        w = determinize(s, "A", random.Random(seed))
+        rules.apply_action(w, PlaceAction("lion", ("cr", "2,2")), validate=False)
+        assert w.board["2,2"][-1].card_id == "vesper"
+
+
+# --- Methuselah: "Armor. Each player gains at most 20 food per turn. Dusk: gain 5 food." --------------------------
+
+def test_methuselah_caps_each_players_food_per_turn_from_any_source():
+    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "4,3", "methuselah", "B")
+    effects.gain_food(s, "A", 15); effects.gain_food(s, "A", 15)
+    effects.gain_food(s, "B", 30)                               # the opponent's gains this turn are capped too
+    assert (s.food["A"], s.food["B"]) == (CFG.methuselah_food_cap, CFG.methuselah_food_cap) == (20, 20)
+    end_turn(s)                                                  # a new turn: a fresh 20
+    effects.gain_food(s, "A", 30)
+    assert s.food["A"] == 40
+
+
+def test_methuselahs_own_dusk_counts_toward_the_cap_before_region_income():
+    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    for cr in ("1,1", "2,1", "2,2", "1,3", "2,3"):
+        put(s, cr, "lion", "A")
+    put(s, "1,2", "methuselah", "A")                            # R1 and R4: 20 food of income
+    assert rules.region_income(s, "A") == 20
+    end_turn(s)
+    assert s.food["A"] == 20                                    # Dusk's 5, then 15 of the 20
+
+
+def test_a_buried_methuselah_caps_nothing():
+    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "2,2", "methuselah", "A"); put(s, "2,2", "lion", "B")
+    effects.gain_food(s, "A", 30)
+    assert s.food["A"] == 30
+
+
+def test_vesper_landing_is_a_cover_spikes_remove_it_and_an_apex_still_eats_the_queen():
+    s = _queen_covered_by("hedgehog", b_hand=["vesper"])           # Spikes: the first enemy to cover it is removed
+    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "hedgehog"] and removed(s, "vesper")
+    s = _queen_covered_by("polar_bear", b_hand=["vesper"])
+    assert [u.card_id for u in s.board["2,2"]] == ["polar_bear", "vesper"] and removed(s, "queen_bee")

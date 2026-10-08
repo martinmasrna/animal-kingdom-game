@@ -197,10 +197,11 @@ def _take_from_hand(state: GameState, player: str, card_id: str) -> UnitInstance
 
 
 def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, from_hand: bool,
-               roar: bool = True) -> None:
+               roar: bool = True, play: bool = True, reveal: bool = False) -> None:
     """The same hand instance lands on the board, carrying its strength counter. `roar=False` is a placement by an
-    effect that doesn't set off the animal's Roar (the Sardines and Lemmings an effect fills in); every reaction to the
-    landing still happens."""
+    effect that doesn't set off the animal's Roar (the Sardines an effect fills in); every reaction to the landing still
+    happens. `play=False`: the animal is placed, not played (rulings.md, "Place versus play"), so "when you play"
+    reactions (Queen Honoria) don't see it. `reveal`: the client shows the card large as it lands (Vesper)."""
     covered = state.top_unit(cr)
     is_apex = "Apex Predator" in state.cards[unit.card_id].keywords
     onto_enemy = covered is not None and covered.owner != player
@@ -208,7 +209,8 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
     unit.placed_on_turn = state.turn_counter
     state.stamp_played(unit)
     state.board.setdefault(cr, []).append(unit)
-    state.emit("place", player=player, iid=unit.iid, card=unit.card_id, cr=cr, from_hand=from_hand)
+    state.emit("place", player=player, iid=unit.iid, card=unit.card_id, cr=cr, from_hand=from_hand,
+               **({"reveal": True} if reveal else {}))
     if covered is not None:
         state.emit("cover", cr=cr, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
 
@@ -224,7 +226,8 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
     if onto_enemy:
         _fire_cover_event(state, unit, covered)
         _push_flee(state, covered, unit, cr)
-    _fire_play_event(state, unit)        # Queen Honoria: gain food when you play a Colony unit
+    if play:
+        _fire_play_event(state, unit)    # Queen Honoria: gain food when you play a Colony unit
     if roar:
         times = 1
         if (state.roar_twice.get(unit.owner) == state.turn_counter and unit.card_id != "macaw"
@@ -241,7 +244,7 @@ def _fire_cover_event(state, coverer, covered) -> None:
     """King Theron: when one of your Cats covers an enemy unit, remove that enemy (now buried).
     Decision G: House Cat/extra-placement chains can cover multiple enemies in one turn -
     `cap_king_theron` (off by default) limits Theron to one free removal per turn."""
-    hook = _hook(state, coverer.card_id, "on_cover_enemy")   # "Whenever this covers an enemy" (African Wild Dog)
+    hook = _hook(state, coverer.card_id, "on_cover_enemy")   # "Whenever this covers an enemy" (Fox)
     if hook:
         hook(state, coverer, covered)
     if "Cat" not in state.cards[coverer.card_id].tags:
@@ -274,8 +277,8 @@ def _op_flee(state, step):
 
 
 def _fire_play_event(state, played) -> None:
-    """Fire ON_FRIENDLY_PLAY reactors for a unit its controller just played or spawned
-    (Queen Honoria's food, Dhole's on-enter buff). The played unit itself is skipped."""
+    """Fire ON_FRIENDLY_PLAY reactors for a unit its controller just played (Queen Honoria's food). An animal an effect
+    places isn't played and doesn't come here. The played unit itself is skipped."""
     for st in state.board.values():
         top = st[-1] if st else None
         if not (top and top.owner == played.owner and top.iid != played.iid):
@@ -309,6 +312,8 @@ def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
         hook = _hook(state, covered.card_id, "on_covered")
         if hook:
             hook(state, covered, unit, cr)
+        if covered.owner != unit.owner and "Queen" in state.cards[covered.card_id].tags:
+            _push_queen_guards(state, covered.owner, unit, cr)
         # "When an ally is covered" / "Whenever your opponent covers an allied Fish": the covered unit's side watches.
         for st in list(state.board.values()):
             top = st[-1] if st else None
@@ -316,6 +321,42 @@ def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
                 hook = _hook(state, top.card_id, "on_ally_covered")
                 if hook:
                     hook(state, top, covered, unit, cr)
+
+
+# Cards whose trigger works from their owner's hand or deck: when an enemy covers an allied Queen, they're placed on it.
+QUEEN_GUARDS = frozenset({"vesper"})
+
+
+def _push_queen_guards(state, owner, coverer, cr) -> None:
+    """Vesper: "When an enemy covers an allied Queen, place Vesper on it from your hand or deck." A trigger that works
+    while the card is in its owner's hand or deck: one step per such card there, pushed with the other reactions to the
+    cover, so it resolves after the coverer's Roar (as Spikes does). Whether the card is in hand or deck changes nothing,
+    and the two together are public (open decklists, minus what has been seen leaving them), so the engine reading them
+    here tells a bot nothing hidden."""
+    held = {u.card_id for u in state.hands[owner]} | set(state.decks[owner])
+    for cid in sorted(held & QUEEN_GUARDS):
+        state.effect_stack.append({"op": "queen_guard", "card": cid, "player": owner, "coverer": coverer.iid, "cr": cr,
+                                   "by_card": cid})
+
+
+def _op_queen_guard(state, step):
+    """The guard leaves its owner's hand (first) or deck and is placed on top of the enemy that covered the Queen: no
+    action, no connection or strength check, no Roar. Nothing happens if that enemy has left the crossroad meanwhile, or
+    the guard has left the hand and deck (played, discarded, stolen)."""
+    cid, owner, cr = step["card"], step["player"], step["cr"]
+    if not any(u.iid == step["coverer"] for u in state.board.get(cr, [])):
+        return None
+    inst = next((u for u in state.hands[owner] if u.card_id == cid), None)
+    from_hand = inst is not None
+    if from_hand:
+        state.hands[owner].remove(inst)
+    elif cid in state.decks[owner]:
+        state.decks[owner].remove(cid)
+        inst = UnitInstance(cid, owner, state.new_iid())
+    else:
+        return None
+    _land_unit(state, owner, inst, cr, from_hand=from_hand, roar=False, play=False, reveal=True)
+    return None
 
 
 def _push_hook(state, unit, cr, hook_name) -> None:
@@ -449,6 +490,9 @@ def lose_food(state: GameState, player: str, amount: int, *, card: Optional[str]
 
 
 def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True, income: bool = False) -> None:
+    cap = statics.food_cap(state)          # Methuselah: every gain this turn, from any source, counts toward the cap
+    if cap is not None:
+        amount = min(amount, cap - _food_gained_this_turn(state, player))
     if amount <= 0:
         return
     state.food[player] += amount
@@ -1174,6 +1218,7 @@ OPS: dict[str, Callable] = {
     "grant_free_roam": _op_grant_free_roam,
     "timed_hook": _op_timed_hook,
     "flee": _op_flee,
+    "queen_guard": _op_queen_guard,
 }
 
 
@@ -1319,7 +1364,7 @@ def _bounce(state, cr, top, *, lock_until=0):
 
 def _spawn(state, owner, card_id, cr):
     """A token made on `cr` by an effect: it lands as a placement would (traps see it), with nothing to Roar."""
-    _land_unit(state, owner, UnitInstance(card_id, owner, state.new_iid()), cr, from_hand=False)
+    _land_unit(state, owner, UnitInstance(card_id, owner, state.new_iid()), cr, from_hand=False, play=False)
 
 
 def _empty_neighbors(state, cr):
@@ -1713,7 +1758,7 @@ def _wolf_legend_roam(state, unit, cr, event):
     _grant(state, [top.iid for _, top in _adjacent_tops(state, cr, unit.owner)], state.config.wolf_legend_grant)
 
 
-def _awd_cover(state, unit, covered):
+def _fox_cover(state, unit, covered):
     """Whenever this covers an enemy (placed or roaming), draw a card."""
     _push_draw(state, unit.owner, 1)
 
@@ -1739,9 +1784,9 @@ def _raccoon_dog_friendly_roam(state, watcher, roamer, event):
         _grant(state, [roamer.iid], state.config.raccoon_dog_grant)
 
 
-def _fox_eot(state, unit, cr):
+def _wild_dog_eot(state, unit, cr):
     """Dusk: give your adjacent animals +1 strength."""
-    _grant(state, [top.iid for _, top in _adjacent_tops(state, cr, unit.owner)], state.config.fox_grant)
+    _grant(state, [top.iid for _, top in _adjacent_tops(state, cr, unit.owner)], state.config.wild_dog_grant)
 
 
 def _stray_dog_place(state, unit, cr):
@@ -1980,7 +2025,7 @@ def _op_skunk_bounce(state, step):
 
 
 def _fill(state, unit, cr):
-    """Lemming, Sardine: place every copy of this card from your hand and deck on random adjacent empty crossroads.
+    """Sardine: place every copy of this card from your hand and deck on random adjacent empty crossroads.
     Hand copies go first; the placed copies don't Roar, and leftovers stay where they are."""
     cid, o = unit.card_id, unit.owner
     hand = [u for u in state.hands[o] if u.card_id == cid]
@@ -2000,7 +2045,7 @@ def _fill(state, unit, cr):
                 continue
             state.decks[o].remove(cid)
             inst = UnitInstance(cid, o, state.new_iid())
-        _land_unit(state, o, inst, spot, from_hand=kind == "hand", roar=False)
+        _land_unit(state, o, inst, spot, from_hand=kind == "hand", roar=False, play=False)
 
 
 # --- Egg Control ------------------------------------------------------------------------------------------------
@@ -2161,9 +2206,9 @@ def _tuna_legend_place(state, unit, cr):
 
 
 def _manta_legend_eot(state, unit, cr):
-    """Dusk: if you control 2 or more regions, draw a card."""
+    """Dusk: if you control 2 or more regions, draw 2 cards."""
     if len(statics.regions_of(state, unit.owner)) >= state.config.manta_legend_regions:
-        _push_draw(state, unit.owner, 1)
+        _push_draw(state, unit.owner, state.config.manta_legend_draw)
 
 
 def _adjacent_ally_fish(state, unit, cr) -> int:
@@ -2496,9 +2541,10 @@ def _gorilla_place(state, unit, cr):
 # --- Hoofed -----------------------------------------------------------------------------------------------------
 
 def _zebra_legend_place(state, unit, cr):
-    """Roar: draw a card for each different Hoofed ally adjacent to this (allies only; different cards)."""
-    kinds = {top.card_id for _, top in _adjacent_tops(state, cr)
-             if top.owner == unit.owner and "Hoofed" in state.cards[top.card_id].tags}
+    """Roar: draw a card for each different Hoofed animal you control (the whole board, this one included; different
+    cards, so two copies of one count once)."""
+    kinds = {st[-1].card_id for st in state.board.values()
+             if st and st[-1].owner == unit.owner and "Hoofed" in state.cards[st[-1].card_id].tags}
     _push_draw(state, unit.owner, len(kinds))
 
 
@@ -2656,11 +2702,11 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Canines (Clarion's free roam and Dhole's equal roams are statics).
     "lobo": {"on_friendly_roam": _lobo_friendly_roam},
     "canines_legend_wolf": {"on_roam": _wolf_legend_roam},
-    "african_wild_dog": {"on_cover_enemy": _awd_cover},
+    "fox": {"on_cover_enemy": _fox_cover},
     "gray_wolf": {"on_place": _jackal_place},
     "bush_dog": {"on_place": _bush_dog_place},
     "raccoon_dog": {"on_friendly_roam": _raccoon_dog_friendly_roam},
-    "fox": {"on_end_of_turn": _fox_eot},
+    "african_wild_dog": {"on_end_of_turn": _wild_dog_eot},
     "badger": {"on_place": _draws_filtered("keyword:Roam")},
     "dog": {"on_place": _stray_dog_place},
     # Cats (King Theron fires from _fire_cover_event; Leopard is a static).
@@ -2677,7 +2723,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "queen_honoria": {"on_friendly_play": _queen_honoria_friendly_play},
     "nurse_bee": {"on_place": _conditional(_draws("nurse_bee_draw"))},
     "nurse_bumblebee": {"on_place": _conditional(_draws("nurse_bumblebee_draw"))},
-    "termite_king": {"on_place": _conditional(_draw1)},
+    "termite_king": {"on_place": _conditional(_draws("termite_king_draw"))},
     "termite_queen": {"on_place": lambda state, unit, cr: _push_play_extra(
         state, unit.owner, filter={"tags_all": ["Colony"], "tags_none": ["Queen"]}, optional=True)},
     "queen_bee": {"on_place": lambda state, unit, cr: _push_play_extra(state, unit.owner,
@@ -2754,7 +2800,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "mocha": {"on_place": _mocha_place},
     "rhinoceros": {"on_place": _rhinoceros_place},
     "hippopotamus": {"on_enemy_placed_adjacent": _hippo_enemy_placed},
-    "whale_shark": {"on_end_of_turn": _draws("whale_shark_draw")},
+    "whale_shark": {"on_end_of_turn": _draw1},
     "oxpecker": {"on_place": _oxpecker_place},
     "anteater": {"on_place": _anteater_place},
     "dung_beetle": {"on_end_of_turn": _dung_beetle_eot},
@@ -2798,7 +2844,6 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "opossum": {"on_place": _opossum_place},
     "alpha": {"on_place": _alpha_place},
     "viper": {"on_place": _viper_place},
-    "lemming": {"on_place": _fill},
     "andean_condor": {"on_place": _andean_condor_place},
     "dingo": {"on_end_of_turn": _dingo_eot},
     # The tutorial's own cards, as they were when it was written.

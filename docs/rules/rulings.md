@@ -10,11 +10,11 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 
 ## Placement and actions
 
-- **"Place" versus "play":** an effect that *places* an animal (Vesper, Sunfish's Baby Fish, Scarlett's cubs) puts it there outright: no connection, no strength check, no action. *Playing* is a full normal placement (below).
+- **"Place" versus "play":** an effect that *places* an animal (Vesper, Sunfish's Baby Fish, Scarlett's cubs) puts it there outright: no connection, no strength check, no action. It isn't a play: its Roar doesn't happen, and "when you play" reactions (Queen Honoria) and counts of animals played (Hare) don't see it. Everything else that reacts to an animal arriving does: a placed animal that lands on an enemy covers it (Spikes, Poison, Flee react), and traps beside it see it. *Playing* is a full normal placement (below).
 - **Extra placements** ("play another unit", "play one more Cat"): a full normal placement (connection unless Flight, covering strength, any cost) that consumes no action, so they chain. From hand only unless the card says "or deck". "May" makes it optional; it fizzles when nothing qualifies.
 - **"Can't" beats "can".** When one card forbids what another allows, the prohibition wins.
 - **Next to the opponent's den** means one of the enemy den's front crossroads.
-- **Lemming and Sardine** place the copies from hand and deck on random empty crossroads adjacent to the triggering one; leftovers stay where they are. The copies are placed (traps beside them see them, a City Spider eats them), but their Roars don't fire.
+- **Sardine** places the copies from hand and deck on random empty crossroads adjacent to the triggering one; leftovers stay where they are. The copies are placed (traps beside them see them, a City Spider eats them), but their Roars don't fire.
 - **Recurring timed triggers** ("at the start of your turn") fire every time their window comes while the unit is in play, including the turn it was played if the window is still ahead. "Your turn" means the owner's turn only.
 
 ## Drawing and hidden information
@@ -82,7 +82,7 @@ Cards:
 - **Clarion's** free roam is for a Canine only, one per Clarion each turn, spent before an action.
 - **Jackal's** flanker must be another of your Canines, not the Jackal itself.
 - **Street Dog** picks another ally with Roam anywhere, gives it +2, then it roams for free under the Roam rules (it must be connected and not have roamed this turn). That roam can't take a den.
-- **African Wild Dog** draws for a cover by placement or by roaming.
+- **Fox** draws for a cover by placement or by roaming.
 - **Serval** sets the strength by storing the difference: later buffs and auras count on top of the 1.
 - **Leopard** (Cats) changes placements only, not roams; an Apex Cat landing is a placement.
 - **The legendary Piranha** counts the Fish you control now, itself included; it changes placements only.
@@ -100,10 +100,15 @@ Cards:
 - **Orangutan's** copy keeps the original's counter. **Baboon** (common): the player picks two different cards; **Baboon** (legendary): two random ones. **Stork**: two different younglings.
 - **Gorilla** reads its strength as it lands; **Anteater** gains the drawn card's strength as it would be played now.
 - **Mocha** removes every enemy adjacent to any of your top animals, itself included; Armor stays.
-- **The legendary Zebra** counts different cards among the Hoofed allies adjacent to it; enemies never count (Martin, 2026-10-08).
+- **The legendary Zebra** counts the different Hoofed cards among your top animals anywhere on the board, itself included: two copies of one card count once, enemies and buried animals never count. Different cards, not species: the legendary Zebra and the rare Zebra count as two.
 - **Cape Buffalo** removes an enemy sitting directly on top of one of your Hoofed animals.
 - **The legendary Wildebeest and Boar** move each region's food by 5 (each copy counts; a region never produces less than nothing).
 - **The legendary Giraffe** shows its controller the opponent's hand face up in the client; the bots don't use it.
 - **Great White Shark** has Reach 3 after any animal, of either side, left the board this turn.
 - **Cuckoo's** eggs count as the Cuckoo player's shuffles (their Rattlesnake grows, not the opponent's).
 - **Opossum** (the pool's) must return an adjacent ally if one can be returned (Armor can't).
+
+## The fit and rarity passes: the engine's reading (2026-10-09)
+
+- **Vesper** works only from its owner's hand or deck: on the board or in the Remove Pile it does nothing. It answers an enemy covering one of your top animals tagged Queen, by placement or by roaming; your own cover of your Queen doesn't count. It resolves with the other reactions to the cover, after the coverer's Roar (as Spikes does), and only if that enemy is still on the crossroad by then. Vesper comes from your hand if it's there, else from the deck, and is placed on top of the enemy: no action, no connection or strength check (a 5 lands on a 10), no Roar, not a play. Landing there is a cover like any other: a Hedgehog's Spikes remove Vesper, a Flee animal runs. An Apex Predator that covered the Queen still eats her under Vesper (it is still right on top of its prey). Vesper's trigger reads only where it is, which is public: the decklist is open and hand plus deck is everything not yet seen, so the bots anticipate it without reading hidden information. The client shows Vesper large as it lands, whoever's it is.
+- **Methuselah's cap** counts every food a player gains in the current turn, whoever's turn it is and from any source: Roars, Dawn and Dusk, region income, Falstaff's rider. Methuselah's own Dusk 5 counts, and Dusk comes before region income, so its controller's turn ends with at most 20 food gained in all. Food over the cap is lost, not saved for later; food paid or eaten doesn't make room. Like every static, the cap holds only while a Methuselah tops its crossroad and isn't inked: buried, it caps nothing. "The food you gained this turn" (Scrooge, the fed threshold) counts what was actually gained.

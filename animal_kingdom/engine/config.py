@@ -32,6 +32,7 @@ class Config:
     worker_wasp_food: int = 3            # at end of your turn
     methuselah_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
                                           # recurring passive in the pool - ruled down 2026-07-02)
+    methuselah_food_cap: int = 20        # Methuselah: each player gains at most this much food per turn
     greywhisker_food: int = 1            # Roar: gain 1 food (+ draw 1, + play 1 more, then discard 1)
     queen_marabunta_per_colony: int = 4  # per other friendly Colony unit
     queen_honoria_per_play: int = 4      # per Colony unit you play (5→4, 2026-07-05)
@@ -57,7 +58,6 @@ class Config:
 
     # --- Strength anthems ("has +X", live; decision E) ---
     anthem_verminus_per: int = 1         # per other unit you control
-    anthem_vesper_per: int = 2           # per other friendly Colony unit
     raksha_anthem: int = 1               # your other Canines have +X (2→1, 2026-07-05; body 4→5 to compensate)
     guard_hornet_bonus: int = 5          # while >= threshold Colony units
     guard_hornet_colony_threshold: int = 4
@@ -75,7 +75,7 @@ class Config:
     raccoon_dog_grant: int = 1           # Raccoon Dog: an allied Canine that roams gets +1
     wolf_legend_grant: int = 2           # the legendary Wolf: when it roams, your adjacent animals gain +2
     stray_dog_grant: int = 2             # Stray Dog: give an ally with Roam +2, then it roams
-    fox_grant: int = 1                   # Fox: Dusk: your adjacent animals +1
+    wild_dog_grant: int = 1              # African Wild Dog: Dusk: your adjacent animals +1
     mahi_mahi_grant: int = 1             # Mahi-mahi: Roar: your other Fish +1
     silverback_grant: int = 2            # Silverback: Roar: every animal in your hand +2
     baboon_grant: int = 1                # Baboon: Roar: 2 animals in your hand +1...
@@ -101,7 +101,8 @@ class Config:
     hare_played_min: int = 3             # Hare: draw if you played this many animals this turn
     macaque_hand_min: int = 5            # Macaque: remove if you have this many cards in hand
     gorilla_min: int = 8                 # Gorilla: draw if this has this much strength
-    manta_legend_regions: int = 2        # the legendary Manta Ray: draw at Dusk with this many regions
+    manta_legend_regions: int = 2        # the legendary Manta Ray: draw at Dusk with this many regions...
+    manta_legend_draw: int = 2           # ...this many cards
     oxpecker_min: int = 8                # Oxpecker: count starting-deck animals of strength >= this
 
     # --- Removal-strength caps on Roar removals ---
@@ -120,7 +121,7 @@ class Config:
     mantis_draw: int = 2                 # Praying Mantis: remove an adjacent ally to draw 2
     hyena_food_per: int = 3              # Hyena: Dusk: 3 food for each of your animals removed this turn
     hummingbird_draw: int = 2            # Hummingbird: Roar: draw 2
-    whale_shark_draw: int = 2            # Whale Shark: at the end of your turn, draw 2
+    termite_king_draw: int = 2           # Termite King: Roar: draw 2 if you control a Colony Queen
     mole_food: int = 5                   # Mole: gain 5 food...
     mole_draw: int = 2                   # ...and draw 2 if your hand is empty
     dormouse_food: int = 10              # Dormouse: Dusk: gain 10 if your hand is empty

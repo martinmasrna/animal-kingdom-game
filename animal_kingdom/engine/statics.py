@@ -281,6 +281,15 @@ def region_food_modifier(state: GameState, player: str) -> int:
             - cfg.boar_penalty * len(active_tops(state, other_player(player), "hoofed_legend_boar")))
 
 
+def food_cap(state: GameState) -> Optional[int]:
+    """Methuselah: "Each player gains at most 20 food per turn." While either player tops a crossroad with a working
+    Methuselah (a buried or inked one rules nothing, like every static), the most food each player may gain in the
+    current turn; None when no cap holds."""
+    if any(active_tops(state, p, "methuselah") for p in ("A", "B")):
+        return state.config.methuselah_food_cap
+    return None
+
+
 # ------------------------------------------------------------------- hidden info
 
 def hand_revealed(state: GameState, player: str) -> bool:

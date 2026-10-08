@@ -261,7 +261,8 @@ DRAW_CONSTANTS: dict[str, list[str]] = {
     "praying_mantis": ["mantis_draw"],
     "mole": ["mole_draw"],
     "hummingbird": ["hummingbird_draw"],
-    "whale_shark": ["whale_shark_draw"],
+    "termite_king": ["termite_king_draw"],
+    "fish_legend_manta_ray": ["manta_legend_draw"],
     "handlock_legend_butterfly_5": ["butterfly_legend_stage5_draw"],
     "snake_egg": ["egg_hatch_draw"],   # "draw a Snake" now (snake_egg_draw, no printed number), "draw 2 Snakes" at the hatch
     **{cid: ["test_draw"] for cid in ("mock_draw2", "mock_skully", *(f"calib_draw2_{n}" for n in range(4)))},
@@ -295,7 +296,6 @@ STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
 # card_id -> config attrs, one per printed "+N strength" (a "give" counter or a "has/have" anthem), in order. Every card
 # printing one must be listed (checked below): the launch decks brought a dozen of them at once.
 STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
-    "vesper": ["anthem_vesper_per"],
     "guard_hornet": ["guard_hornet_bonus"],
     "verminus": ["anthem_verminus_per"],
     "goliath": [],                             # dynamic strength: its +1 per removed animal is the rule itself
@@ -306,7 +306,7 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "canines_legend_wolf": ["wolf_legend_grant"],
     "bush_dog": ["bush_dog_grant"],
     "raccoon_dog": ["raccoon_dog_grant"],
-    "fox": ["fox_grant"],
+    "african_wild_dog": ["wild_dog_grant"],
     "dog": ["stray_dog_grant"],
     "mahi_mahi": ["mahi_mahi_grant"],
     "mackerel": ["mackerel_anthem"],
@@ -401,3 +401,16 @@ def test_hungry_and_reach_numbers_match_their_fields():
             m = re.match(r"(?:\w+(?: \w+)?\. )*" + kw + r" (\d+)\.", card.text)
             if kw in card.keywords:
                 assert m and int(m.group(1)) == field, f"{cid}: {kw} {field} vs text {card.text!r}"
+
+
+FOOD_CAP_RE = re.compile(r"gains at most (\d+) food per turn", re.IGNORECASE)
+FOOD_CAPS = {"methuselah": "methuselah_food_cap"}
+
+
+def test_food_cap_text_matches_config():
+    """Methuselah's printed per-turn food cap equals the constant the engine caps at, and no card prints one unlisted."""
+    cfg, cards = Config.default(), _cards()
+    printed = {cid: int(m.group(1)) for cid, card in cards.items() if (m := FOOD_CAP_RE.search(card.text))}
+    assert set(printed) == set(FOOD_CAPS)
+    for cid, n in printed.items():
+        assert n == getattr(cfg, FOOD_CAPS[cid]), cid

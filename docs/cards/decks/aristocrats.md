@@ -10,7 +10,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Cuckoo** | 1 | — | 6 | Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal. |
+| **Cuckoo** | 1 | Bird | 6 | Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal. |
 | **Ember** | 1 | Bird | 7 | Flight. When this is removed, shuffle it into your deck. |
 | **Opossum** | 1 | — | 3 | When an ally is covered, remove it and draw a card. |
 | **Sloth** | 1 | — | 4 | Your Dusk effects happen twice. |
