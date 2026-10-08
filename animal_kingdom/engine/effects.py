@@ -226,9 +226,15 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
         _push_flee(state, covered, unit, cr)
     _fire_play_event(state, unit)        # Queen Honoria: gain food when you play a Colony unit
     if roar:
-        _push_hook(state, unit, cr, "on_place")
-        if onto_enemy:
-            _push_hook(state, unit, cr, "on_place_onto_enemy")
+        times = 1
+        if (state.roar_twice.get(unit.owner) == state.turn_counter and unit.card_id != "macaw"
+                and (_hook(state, unit.card_id, "on_place") or (onto_enemy and _hook(state, unit.card_id, "on_place_onto_enemy")))):
+            del state.roar_twice[unit.owner]            # the Macaw: this Roar happens twice, then the double is spent
+            times = 2
+        for _ in range(times):
+            _push_hook(state, unit, cr, "on_place")
+            if onto_enemy:
+                _push_hook(state, unit, cr, "on_place_onto_enemy")
 
 
 def _fire_cover_event(state, coverer, covered) -> None:
@@ -2486,8 +2492,9 @@ def _gorilla_place(state, unit, cr):
 # --- Hoofed -----------------------------------------------------------------------------------------------------
 
 def _zebra_legend_place(state, unit, cr):
-    """Roar: draw a card for each different adjacent Hoofed animal (yours or not; different cards)."""
-    kinds = {top.card_id for _, top in _adjacent_tops(state, cr) if "Hoofed" in state.cards[top.card_id].tags}
+    """Roar: draw a card for each different Hoofed ally adjacent to this (allies only; different cards)."""
+    kinds = {top.card_id for _, top in _adjacent_tops(state, cr)
+             if top.owner == unit.owner and "Hoofed" in state.cards[top.card_id].tags}
     _push_draw(state, unit.owner, len(kinds))
 
 
@@ -2536,6 +2543,11 @@ def _then_ink(state, step, cr):
 
 
 THEN["ink"] = _then_ink
+
+
+def _macaw_place(state, unit, cr):
+    """Roar: your next Roar this turn happens twice."""
+    state.roar_twice[unit.owner] = state.turn_counter
 
 
 def _cuckoo_place(state, unit, cr):
@@ -2774,6 +2786,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "deer": {"on_place": _draws_filtered("tag:Hoofed")},
     # The pool (Great White Shark's Reach is a static; Raksha, Verminus are anthems; Coyote, Cougar statics).
     "octopus": {"on_place": _octopus_ink_place},
+    "macaw": {"on_place": _macaw_place},
     "sperm_whale": {"on_place": _remove_all_adjacent},
     "butterfly": {"on_place": _draw_then_give_one},
     "cuckoo": {"on_place": _cuckoo_place},

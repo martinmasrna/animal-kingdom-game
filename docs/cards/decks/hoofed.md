@@ -12,7 +12,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 |---|---:|---|---:|---|
 | **Wildebeest** | 1 | Hoofed | 5 | Your regions produce 5 more food. |
 | **Boar** | 1 | Hoofed | 5 | Your opponent's regions produce 5 less food. |
-| **Zebra** | 1 | Hoofed | 4 | Roar: draw a card for each different adjacent Hoofed animal. |
+| **Zebra** | 1 | Hoofed | 4 | Roar: draw a card for each different Hoofed ally adjacent to this. |
 | **Giraffe** | 1 | Hoofed | 7 | Your opponent's hand is revealed. |
 
 ### Rare

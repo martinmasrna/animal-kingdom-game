@@ -248,6 +248,7 @@ class GameState:
         result: Optional[Result] = None,
         pile_owners: Optional[list] = None,
         inked: Optional[dict[int, int]] = None,
+        roar_twice: Optional[dict[str, int]] = None,
     ):
         self.game_map = game_map
         self.cards = cards
@@ -264,6 +265,8 @@ class GameState:
         # Octopus ink: iid -> the turn_counter its ink lasts until (the inking player's next turn starts then). An inked
         # animal has no keywords and no effects meanwhile (statics.inked).
         self.inked = inked if inked is not None else {}
+        # Macaw: player -> the turn_counter in which that player's next Roar happens twice (spent by that Roar).
+        self.roar_twice = roar_twice if roar_twice is not None else {}
         self.food = food
         self.current = current
         self.first_player = first_player
@@ -447,6 +450,7 @@ class GameState:
         new.card_strength_counters = _plain_copy(self.card_strength_counters)
         new.pile_owners = list(self.pile_owners)
         new.inked = dict(self.inked)
+        new.roar_twice = dict(self.roar_twice)
         new.result = self.result  # Result is frozen/immutable - safe to share
         return new
 
@@ -510,6 +514,7 @@ class GameState:
             "result": self.result.to_dict() if self.result else None,
             "pile_owners": list(self.pile_owners),
             "inked": [[i, t] for i, t in sorted(self.inked.items())],
+            "roar_twice": dict(sorted(self.roar_twice.items())),
         }
 
     @staticmethod
@@ -556,6 +561,7 @@ class GameState:
             result=Result.from_dict(d["result"]) if d["result"] else None,
             pile_owners=list(d["pile_owners"]) if "pile_owners" in d else None,
             inked={int(i): t for i, t in (d.get("inked") or [])},
+            roar_twice=dict(d.get("roar_twice") or {}),
         )
 
 

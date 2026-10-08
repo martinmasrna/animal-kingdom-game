@@ -1,5 +1,5 @@
 {
- "_comment": "Snapshot of the card workbench database (https://claude.ai/artifact/4LbvDkhN1qawhdc3f4dcQU), the source of truth for the card lists. Regenerate from the workbench before using; never edit by hand.",
+ "_comment": "Snapshot of the card workbench database (https://claude.ai/artifact/4LbvDkhN1qawhdc3f4dcQU), the source of truth for the card lists. Regenerate from the workbench; never edit by hand.",
  "decks": {
   "aristocrats": {
    "name": "Aristocrats",
@@ -1965,7 +1965,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Hoofed",
-     "text": "Roar: draw a card for each different adjacent Hoofed animal."
+     "text": "Roar: draw a card for each different Hoofed ally adjacent to this."
     },
     {
      "habitat": "Savanna",
@@ -2161,8 +2161,8 @@
      "note": "",
      "rarity": "R",
      "species": "Macaw",
-     "status": "open",
-     "str": null,
+     "status": "proposed",
+     "str": 3,
      "tag": "Bird",
      "text": "Roar: your next Roar this turn happens twice."
     },

@@ -99,7 +99,7 @@ Cards:
 - **Orangutan's** copy keeps the original's counter. **Baboon** (common): the player picks two different cards; **Baboon** (legendary): two random ones. **Stork**: two different younglings.
 - **Gorilla** reads its strength as it lands; **Anteater** gains the drawn card's strength as it would be played now.
 - **Mocha** removes every enemy adjacent to any of your top animals, itself included; Armor stays.
-- **The legendary Zebra** counts different cards among the Hoofed animals adjacent to it, of either side.
+- **The legendary Zebra** counts different cards among the Hoofed allies adjacent to it; enemies never count (Martin, 2026-10-08).
 - **Cape Buffalo** removes an enemy sitting directly on top of one of your Hoofed animals.
 - **The legendary Wildebeest and Boar** move each region's food by 5 (each copy counts; a region never produces less than nothing).
 - **The legendary Giraffe** shows its controller the opponent's hand face up in the client; the bots don't use it.

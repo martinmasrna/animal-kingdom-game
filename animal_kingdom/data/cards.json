@@ -2510,7 +2510,7 @@
         "Hoofed"
       ],
       "base_strength": 4,
-      "text": "Roar: draw a card for each different adjacent Hoofed animal.",
+      "text": "Roar: draw a card for each different Hoofed ally adjacent to this.",
       "keywords": [],
       "unnamed": true,
       "species": "Zebra",
@@ -2746,6 +2746,21 @@
       "species": "Butterfly",
       "habitat": "Jungle",
       "workbench_id": "pool-3"
+    },
+    {
+      "id": "macaw",
+      "name": "Macaw",
+      "deck": "bench",
+      "rarity": "rare",
+      "tags": [
+        "Bird"
+      ],
+      "base_strength": 3,
+      "text": "Roar: your next Roar this turn happens twice.",
+      "keywords": [],
+      "species": "Macaw",
+      "habitat": "Jungle",
+      "workbench_id": "pool-4"
     },
     {
       "id": "eagle",

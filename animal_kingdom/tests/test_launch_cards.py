@@ -712,10 +712,11 @@ def test_the_legendary_giraffe_reveals_the_opponents_hand():
     assert s.view_for("A").opponent_hand == ("lion",) and s.view_for("B").opponent_hand is None
 
 
-def test_the_legendary_zebra_draws_per_different_adjacent_hoofed():
+def test_the_legendary_zebra_draws_per_different_adjacent_hoofed_ally():
     s = make_state(hands={"A": ["hoofed_legend_zebra"]}, decks={"A": ["lion"] * 3, "B": []})
-    put(s, "1,1", "gazelle", "A"); put(s, "1,3", "gazelle", "A"); put(s, "2,2", "deer", "A")
-    rules.apply_action(s, PlaceAction("hoofed_legend_zebra", ("cr", "1,2")))
+    put(s, "1,2", "gazelle", "A"); put(s, "2,1", "gazelle", "A"); put(s, "2,3", "deer", "A")
+    put(s, "3,2", "boar", "B")                                  # an enemy's Hoofed animal doesn't count
+    rules.apply_action(s, PlaceAction("hoofed_legend_zebra", ("cr", "2,2")))
     assert len(s.hands["A"]) == 2
 
 
@@ -784,3 +785,11 @@ def test_every_launch_card_can_be_played_by_the_bots_without_crashing():
             if rules.is_terminal(s) is not None:
                 break
             rules.apply_action(s, rng.choice(rules.legal_actions(s)))
+
+
+def test_the_macaw_makes_the_next_roar_this_turn_happen_twice():
+    s = make_state(hands={"A": ["macaw", "squirrel", "squirrel"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("macaw", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,1")))
+    assert s.food["A"] == 2 * s.config.squirrel_food
+    assert "A" not in s.roar_twice                              # spent by that Roar
