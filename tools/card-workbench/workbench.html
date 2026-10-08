@@ -154,6 +154,7 @@ const WORDING2 = [
   [/ {2,}/, "double space"],
   [/\b(Roar|Dawn|Dusk): (Draw|Gain|Remove|Give|Place|Play|Return|Choose|Repeat|Duplicate|Lose|Add|Put|Set|Steal|Fill|Discard|Shuffle)\b/, "lowercase after the colon"],
   [/\byou hand\b|\bYou Fish\b|\bSavannah\b|\bRacoon\b/, "spelling"],
+  [/\b(flight|armor|stealth|spikes|poison|titan|reach \d|apex predator|flee|hungry \d|scout)\b/, "capitalise the keyword"],
 ];
 function cardIssues(c, ctx) {
   const out = [];
