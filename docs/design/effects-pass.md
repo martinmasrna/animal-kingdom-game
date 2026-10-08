@@ -200,14 +200,14 @@ The deck is two halves (the fix for Flee fighting the pasture, found in the imag
 
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
-| a Wildebeest (the Great Migration; name to come) | Savanna | L | | Your regions produce 5 more food. |
-| a Giraffe (name to come) | Savanna | L | 5 | Your opponent plays with their hand revealed. (The tallest animal sees the lions first. Good in any reactive deck.) |
-| a Zebra (proposed; name to come) | Savanna | L | | Enemy regions produce 5 less food. (Martin's: a tech card against every deck that farms regions, the mirror of the Migration.) |
-| — | | L | | open |
+| a Wildebeest (the Great Migration; name to come; Hoofed) | Savanna | L | 5 | Your regions produce 5 more food. (5, not the common's 6: an engine has to stay coverable.) |
+| a Giraffe (name to come; Hoofed) | Savanna | L | 5 | Your opponent plays with their hand revealed. (The tallest animal sees the lions first. Good in any reactive deck.) |
+| a Boar (name to come; Hoofed) | Forest | L | 5 | Your opponent's regions produce 5 less food. (Martin's: a tech card against every deck that farms regions, the mirror of the Migration. Wild boars tearing up fields is what farmers know them for.) |
+| a Gazelle (name to come; Hoofed) | Savanna | L | 4 | Roar: draw a card for each different Hoofed animal next to this. (The mixed herd: zebras, wildebeest and gazelles grazing side by side. Counts kinds, not numbers, a synergy no other family has; at most 4 neighbours, usually 2 or 3 cards.) |
 | Zebra | Savanna | R | 5 | **Flee.** When this flees, return the enemy that covered it to its owner's hand. (Stripes: the striped herd blurs and the attacker lunges at nothing. The corner is left empty, not taken, so you play the Zebra back onto it; taking it costs the opponent two actions.) |
 | Moose | Forest | R | 6 | Your other Hoofed animals have +1 strength during your opponent's turn. (+2 put every front corner out of reach, Martin.) |
 | Honey Badger | Savanna | R | 2 | Roar: remove an adjacent enemy of strength 6 or more. |
-| Okapi | Jungle (roster addition) | R | | At the end of your turn, if this is grazing, draw a card. (The herd's card flow, on a stander. The one-of-a-kind forest giraffe with zebra legs; the Impala was the other option, a Gazelle lookalike.) |
+| Okapi | Jungle (roster addition) | R | 4 | At the end of your turn, if this is grazing, draw a card. (The herd's card flow, on a stander. The one-of-a-kind forest giraffe with zebra legs; the Impala was the other option, a Gazelle lookalike.) |
 | Cape Buffalo (stander) | Savanna | C | 4 | Roar: remove an adjacent enemy covering one of your Hoofed animals. (Martin's: the buffalo drives the predator off and the animal underneath is safe. Common, since it's the deck's core loop.) |
 | Wildebeest (stander) | Savanna | C | 6 | At the end of your turn, if this is grazing, gain 5 food. |
 | Giraffe (stander) | Savanna | C | 4 | Has +5 strength during your opponent's turn. |
