@@ -69,6 +69,7 @@ Open from the first read: food before the payoff (only the Hedgehog's 5 so far; 
 |---|---|---|---:|---|
 | Fathom | Open Ocean | L | 7 | Roar: **Scout** a legendary animal. |
 | a Squirrel (name to come; Rodent) | | L | 3 | Roar: lose all your food. In 2 turns, gain three times that much. (Three times, Martin: twice is a net gain of only the stake, two turns late, so fair decks just raced it in the imagined games, and neither side touched the other. Three times makes the siege compulsory: fired at 35, it's 105.) |
+| a Mimic Octopus (name to come) | Open Ocean | L | ~3 | Roar: this becomes a copy of an adjacent animal. (An amplifier, Martin's pick: a second Capybara, Porcupine or Honey Badger where the fortress needs it; elsewhere it copies any deck's best piece, an enemy's too. The copy takes the animal's strength, keywords and text, but not its Roar, so copying the Squirrel does nothing to the payoff. Fathom and this both need a common or rare Octopus in the pool.) |
 | Capybara (Rodent) | Jungle | R | 6 | Your animals next to this have **Armor**. |
 | Porcupine | Forest | R | 7 | **Spikes.** |
 | Golden Orb-Weaver (Arachnid) | Jungle | R | 4 | When an enemy with **Flight** is placed next to this, remove it. |
@@ -208,6 +209,8 @@ Its fourth legendary: Omen (a raven; Forest, L, ~3, Bird): "Flight. Roar: put an
 - Leech (Jungle, 1): "Roar: swap strength with an adjacent animal." It drains its host: the host shrinks, the leech swells. At 1 it can't cover anything, so it lands only on an empty crossroad or one of your own.
 - Opossum (City, R, 2, Marsupial): "Roar: return one of your animals next to this to your hand." A mother gathering her young onto her back; it replays an animal's Roar (Skully, Chipmunk, a removal), a value card for other decks, and the City's seed for the Marsupials' "carrying the young" identity when Australia comes.
 - Clownfish (Coral Reef, later): its "play another Fish" went to the Remora; Coral Reef gives it its own trait (safe in a stinging anemone). Electric Eel (Jungle) is the stun.
+- The decoy (Lapwing, needs a common or rare Lapwing): "Enemy abilities that choose an animal must choose this, if able." It fakes a broken wing to lead predators from the nest. A protector of any deck's engine.
+- The lure (a legendary Firefly): "Roar: your opponent's next animal must be placed next to this, if able." The femme-fatale firefly copies another species' flash and eats the males that come. First candidate for the Arachnid traps deck.
 - Platypus (Australia, later): its family tag is "All", counting as every family (Martin, 2026-10-08).
 - Hermit Crab (Coast, later): Armor plus something about moving into another's shell.
 - Macaw (Jungle, Bird; rarity and strength with its deck): "Roar: your next Roar this turn happens twice." (This turn only: cleaner, Martin.) The parrot repeats what it hears. A card for a deck with few, high-impact Roars; Handlock is the first candidate (a doubled Gorilla sweep, an Orangutan training the hand twice). In Food Aggro it was mostly a second Squirrel.
