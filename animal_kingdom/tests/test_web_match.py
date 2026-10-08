@@ -209,7 +209,7 @@ def test_reverse_gauntlet_rotates_the_players_deck_against_the_bots_fixed_one():
     assert seen == [("den_rush", "goodstuff", "A"), ("den_rush", "goodstuff", "B"),
                     ("giants", "goodstuff", "A"), ("giants", "goodstuff", "B")]
     g = m.view("A")["gauntlet"]
-    assert [(r["deckName"], r["w"], r["l"]) for r in g["record"]] == [("Aggro", 2, 0), ("Ramp", 1, 1)]
+    assert [(r["deckName"], r["w"], r["l"]) for r in g["record"]] == [("Aggro Den Rush", 2, 0), ("Giants", 1, 1)]
 
 
 # ----------------------------------------------------------------- turn clock

@@ -1672,19 +1672,13 @@ def _city_spider_trap(state, spider, placed, cr):
 
 
 def _earthworm_remove(state, unit, cr, pos):
-    """When this is removed, place two Worms on its crossroad: where it stood. Off the top, they land as placements do;
-    from under a stack, they take its place underneath."""
-    n = state.config.earthworm_worms
-    stack = state.board.get(cr, [])
-    if pos >= len(stack):                      # it was on top
-        for _ in range(n):
-            _spawn(state, unit.owner, "worm", cr)
-    else:
-        for _ in range(n):
-            worm = UnitInstance("worm", unit.owner, state.new_iid(), placed_on_turn=state.turn_counter)
-            state.stamp_played(worm)
-            stack.insert(pos, worm)
-            state.emit("place", player=unit.owner, iid=worm.iid, card="worm", cr=cr, from_hand=False, under=True)
+    """When this is removed, place two Worms on its crossroad: they land on top, as placements do, while the crossroad is
+    empty or yours. Under an enemy there is no room for them (rulings.md: Worms never cover an enemy)."""
+    for _ in range(state.config.earthworm_worms):
+        top = state.top_unit(cr)
+        if top is not None and top.owner != unit.owner or state.result is not None:
+            return
+        _spawn(state, unit.owner, "worm", cr)
 
 
 def _worm_remove(state, unit, cr, pos):

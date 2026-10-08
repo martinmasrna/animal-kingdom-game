@@ -26,14 +26,16 @@ from animal_kingdom.tui.app import (
 
 
 def _human_first_seed() -> int:
-    for seed in range(100):
+    """A seed where the human moves first holding a card they can't play yet (an Apex Predator on an empty board), so
+    the shelf shows a disabled card."""
+    for seed in range(400):
         state = new_game(
             load_premade_deck("giants"),
             load_premade_deck("egg_control"),
             seed,
             map_id="map_b",
         )
-        if state.first_player == "A":
+        if state.first_player == "A" and any("Apex Predator" in state.cards[u.card_id].keywords for u in state.hands["A"]):
             return seed
     raise AssertionError("no human-first seed found")
 

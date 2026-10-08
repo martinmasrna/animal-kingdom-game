@@ -59,9 +59,9 @@ def test_a_profile_gets_the_starter_decks_once(monkeypatch):
     monkeypatch.setattr(server, "profiles", db)
     _, p = db.create()
     decks = server.profile_view(p)["decks"]
-    assert [d["name"] for d in decks][:3] == ["Cats", "Canines", "Aggro"] and len(decks) == 7
+    assert [d["name"] for d in decks][:3] == ["Colony Food Swarm", "Aristocrats", "Canine Roam Tempo"] and len(decks) == 12
     assert all(sum(d["cards"].values()) == 30 for d in decks)
-    db.save_decks(p["id"], decks[:1])                                   # the player deletes six
+    db.save_decks(p["id"], decks[:1])                                   # the player deletes eleven
     assert len(server.profile_view(p)["decks"]) == 1                    # and they stay deleted
 
 
@@ -144,7 +144,7 @@ def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch):
     assert m.phase == "match_over"
     (h,) = db.history(p["id"])
     assert (h["kind"], h["my_deck"], h["opp"], h["opp_deck"], h["won"], h["lost"]) == \
-        ("bot", "Cats", "Bot (Easy)", "Ramp", 2, 0)
+        ("bot", "Cats Midrange Tempo", "Bot (Easy)", "Giants", 2, 0)
 
 
 def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path):
@@ -167,7 +167,7 @@ def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path)
         m.act(m.to_act(), m.bot_move())
         live.append(m.view("A")["game"])
     (h,) = db.history(p["id"])
-    assert h["my_cover"] == "king_theron" and h["opp_cover"] == "borealis"
+    assert h["my_cover"] == "king_theron" and h["opp_cover"] == "bulwark"
     views = json.loads(gzip.decompress(replay.load(tmp_path, h["match"], "A")))
     assert {v["you"] for v in views} == {"A"} and views[0]["game"]["history"] == []
     assert views[-1]["game"]["result"]["winner"] == m.results[-1]["winner"]
@@ -193,8 +193,8 @@ def test_a_match_against_a_person_keeps_their_deck_name_private(monkeypatch):
     m.state.result = Result("A", "food")
     m._check_end()
     (h,) = db.history(p["id"])
-    assert (h["kind"], h["opp"], h["opp_deck"], h["opp_cover"]) == ("friend", "Ana#1234", "", "borealis")
-    assert "deckName" not in m.view("A")["seats"]["B"] and m.view("A")["seats"]["A"]["deckName"] == "Cats"
+    assert (h["kind"], h["opp"], h["opp_deck"], h["opp_cover"]) == ("friend", "Ana#1234", "", "bulwark")
+    assert "deckName" not in m.view("A")["seats"]["B"] and m.view("A")["seats"]["A"]["deckName"] == "Cats Midrange Tempo"
 
 
 def test_the_gauntlet_stays_out_of_the_history(monkeypatch):

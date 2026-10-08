@@ -946,14 +946,15 @@ function drawGame() {
 
   // The opponent's card is about to be shown large (below): note when it will have landed, before anything is drawn over it.
   turnCue(playing && G.current === you);   // the card shown, flown down, landed and its dust settled
-  // The opponent's hand: one card back each, centred across the board from yours; in a replay their cards, face up (the eye hides them).
-  const faces = RP.views.length && RP.eye && G.oppHand;
+  // The opponent's hand: one card back each, centred across the board from yours; in a replay their cards, face up (the eye
+  // hides them), and face up in a game while they play with their hand revealed (your legendary Giraffe).
+  const shown = (RP.views.length && RP.eye && G.oppHand) || G.revealedHand, faces = !!shown;
   const nb = G.handCount[them], step = faces ? Math.min(VIEW.port ? 40 : 72, 504 / Math.max(1, nb - 1)) : VIEW.port ? 36 : 52,   // face up, a gap between cards as in your hand; a full hand (10) stays clear of the replay's controls
     bx0 = (VIEW.port ? 184 : STAGE.w / 2) - ((faces ? 66 : 84) + (nb - 1) * step) / 2;   // upright, left of the buttons
   const A = ui.anim, oppDrew = A ? Math.max(0, nb - A.oppHand) : 0;   // their new cards slide down into their hand
   const slot = i => `${i >= nb - oppDrew ? ' drawn' : ''}" style="left:${bx0 + i * step}px;animation-delay:${(i - (nb - oppDrew)) * 0.12}s`;
   $('opphand').innerHTML = faces
-    ? G.oppHand.map((h, i) => `<div class="abs oc ${CARDS[h.id].rarity}${slot(i)}" data-card="${h.id}">${cardHTML(CARDS[h.id], { str: h.str, cls: 'compact' })}</div>`).join('')
+    ? shown.map((h, i) => `<div class="abs oc ${CARDS[h.id].rarity}${slot(i)}" data-card="${h.id}">${cardHTML(CARDS[h.id], { str: h.str, cls: 'compact' })}</div>`).join('')
     : Array.from({ length: nb }, (_, i) => `<div class="abs back${slot(i)}"></div>`).join('');
   if (faces) { fitNames($('opphand')); $('opphand').querySelectorAll('[data-card]').forEach(el => {
     el.onmouseenter = () => cardPop(el, el.dataset.card, null, 'below'); el.onmouseleave = () => pop.style.display = 'none'; }); }

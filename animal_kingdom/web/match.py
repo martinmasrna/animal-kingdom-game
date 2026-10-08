@@ -587,6 +587,9 @@ class Match:
                       **({"ready": True} if roar_condition(st, s, u.card_id) else {})}
                      for u in st.hands[s]],
             "handCount": {p: len(st.hands[p]) for p in "AB"},
+            # the opponent's hand, face up, while they play with it revealed (your legendary Giraffe)
+            **({"revealedHand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u)} for u in st.hands[opp]]}
+               if statics.hand_revealed(st, opp) else {}),
             "handLimit": st.config.hand_limit,
             "deckCount": {p: len(st.decks[p]) for p in "AB"},
             "deckLeft": dict(Counter(st.decks[s])),

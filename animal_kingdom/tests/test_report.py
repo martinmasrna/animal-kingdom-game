@@ -53,9 +53,9 @@ def test_format_report_groups_by_deck_sorted_by_impact():
     report = format_report(records, load_cards())
 
     assert "### egg_control" in report
-    assert "### ramp" in report
+    assert "### giants" in report
     # `good` (drawn only in the win) must appear before `bad` (drawn only in the loss).
-    ramp_section = report.split("### ramp")[1]
+    ramp_section = report.split("### giants")[1]
     assert ramp_section.index(good) < ramp_section.index(bad)
     # every card line is prefixed with a rarity marker.
     assert "\U0001F7E1" in report or "\U0001F535" in report or "⚪" in report
@@ -64,7 +64,7 @@ def test_format_report_groups_by_deck_sorted_by_impact():
 def test_resolve_deck_matches_exact_and_abbreviation():
     slugs = sorted(DECK_SLUGS)
     assert _resolve_deck("den_rush", slugs) == "den_rush"
-    assert _resolve_deck("aggro", slugs) == "den_rush"
+    assert _resolve_deck("rush", slugs) == "den_rush"
 
 
 def test_resolve_deck_rejects_no_match_or_ambiguous_match():
@@ -72,7 +72,7 @@ def test_resolve_deck_rejects_no_match_or_ambiguous_match():
     with pytest.raises(SystemExit):
         _resolve_deck("zzz", slugs)
     with pytest.raises(SystemExit):
-        _resolve_deck("ca", slugs)          # matches both canine_buff_tempo and cats_midrange
+        _resolve_deck("ca", slugs)          # matches both canines and cats
 
 
 def test_format_focused_matrix_shows_both_movers_for_each_opponent():
@@ -83,8 +83,8 @@ def test_format_focused_matrix_shows_both_movers_for_each_opponent():
     ]
     matrix = format_focused_matrix(records, "giants")
 
-    assert "### ramp matchups" in matrix
-    assert "ramp (mirror)" in matrix
+    assert "### giants matchups" in matrix
+    assert "giants (mirror)" in matrix
     assert "cats" not in matrix        # never played, shouldn't appear as a row
     # ramp went 1-0 moving first and 0-1 moving second against egg_control.
     egg_line = next(line for line in matrix.splitlines() if line.startswith("egg_control"))
@@ -94,8 +94,8 @@ def test_format_focused_matrix_shows_both_movers_for_each_opponent():
 def test_format_report_with_focus_deck_only_prints_that_decks_table():
     records = [GameRecord("giants", "egg_control", 0, "A", "A", "hq_capture", 10)]
     report = format_report(records, load_cards(), focus_deck="giants")
-    assert "### ramp matchups" in report
-    assert "### ramp (deck win rate" in report
+    assert "### giants matchups" in report
+    assert "### giants (deck win rate" in report
     assert "### egg_control" not in report
     assert "### Matchup matrix" not in report
 
@@ -131,10 +131,10 @@ def test_report_cli_prints_game_progress_and_completed_matchup_win_rates(monkeyp
     report_module.main(["5", "--deck", "giants", "--opponent", "giants"])
 
     output = capsys.readouterr().err
-    assert "[ 20%] ramp vs ramp | 1/5 games" in output
-    assert "[ 40%] ramp vs ramp | 2/5 games" in output
-    assert "[100%] ramp vs ramp | 5/5 games" in output
-    assert "=== MATCHUP 1/1 COMPLETE === ramp vs ramp" in output
+    assert "[ 20%] giants vs giants | 1/5 games" in output
+    assert "[ 40%] giants vs giants | 2/5 games" in output
+    assert "[100%] giants vs giants | 5/5 games" in output
+    assert "=== MATCHUP 1/1 COMPLETE === giants vs giants" in output
     assert "WR A=50.0%, B=50.0%, draws=20.0%" in output
     banner_start = output.index("  === MATCHUP 1/1 COMPLETE ===")
     banner_end = output.index("\n", banner_start)

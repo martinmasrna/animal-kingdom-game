@@ -69,6 +69,11 @@ def test_the_events_alone_rebuild_the_board_after_every_action():
             for e in s.events:
                 if e["e"] == "place":
                     board.setdefault(e["cr"], []).append(e["iid"])
+                elif e["e"] == "roam" and e.get("to"):            # Roam: the unit moves (a den capture doesn't)
+                    board[e["cr"]].remove(e["iid"])
+                    if not board[e["cr"]]:
+                        del board[e["cr"]]
+                    board.setdefault(e["to"], []).append(e["iid"])
                 elif e["e"] in ("remove", "bounce", "to_deck") and e.get("cr"):
                     board[e["cr"]].remove(e["iid"])
                     if not board[e["cr"]]:
@@ -98,20 +103,19 @@ def test_the_events_alone_rebuild_the_board_after_every_action():
             assert hands == {q: {u.iid for u in s.hands[q]} for q in "AB"}, f"{a} vs {b}: the events missed a hand change {last}"
 
 
-def test_a_stored_gain_is_an_event_and_fox_draws_after_it():
-    """Strength a card stores (a grant) is an event, in order before what reacts to it (Fox draws); an aura is not one."""
+def test_a_stored_gain_is_an_event_and_what_reacts_comes_after_it():
+    """Strength a card stores (a grant) is an event, in order before what reacts to it (a Caterpillar in hand turns into
+    a Butterfly and draws); an aura is not one."""
     from animal_kingdom.engine import effects
     s = _fresh()
     me = s.current
-    cr = next(a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.target[0] == "cr")
-    fox = UnitInstance("fox", me, s.new_iid())
-    s.board[cr] = [fox]
+    cat = s.add_to_hand(me, "caterpillar")
     s.events = []
-    s.effect_stack.append({"op": "grant_strength", "iids": [fox.iid], "amount": 2, "by_card": "alpha"})
+    s.effect_stack.append({"op": "grant_strength", "iids": [cat.iid], "amount": 1, "by_card": "baboon"})
     effects.resolve(s)
-    kinds = [(e["e"], e.get("iid"), e.get("n"), e.get("cause")) for e in s.events if e["e"] in ("strength", "draw")]
-    assert kinds[0] == ("strength", fox.iid, 2, "alpha")
-    assert kinds[1][0] == "draw" and kinds[1][3] == "fox"
+    kinds = [(e["e"], e.get("iid"), e.get("cause")) for e in s.events if e["e"] in ("strength", "transform", "draw")]
+    assert kinds[0] == ("strength", cat.iid, "baboon")
+    assert kinds[1] == ("transform", cat.iid, "caterpillar") and kinds[2][0] == "draw" and kinds[2][2] == "caterpillar"
 
 
 def test_a_den_capture_carries_the_strength_it_was_played_at():
@@ -145,8 +149,8 @@ def test_a_den_capture_carries_the_strength_it_was_played_at():
 
 
 def test_a_removal_names_the_very_unit_that_did_it_when_two_of_that_card_are_out():
-    """Of two Servals beside the same enemy, the one just placed roared: its removal says which (`cause_iid`), so the
-    screen strikes from that one, never the nearest copy (Martin, 2026-10-02: the wrong Serval struck)."""
+    """Of two Honey Badgers beside the same enemy, the one just placed roared: its removal says which (`cause_iid`), so
+    the screen strikes from that one, never the nearest copy (Martin, 2026-10-02: the wrong Serval struck)."""
     s = _fresh()
     me, them = s.current, "B" if s.current == "A" else "A"
     m = s.game_map
@@ -154,13 +158,13 @@ def test_a_removal_names_the_very_unit_that_did_it_when_two_of_that_card_are_out
     cr, prey_cr, old_cr = next((c, p, o) for c in spots for p in m.neighbors(c) for o in m.neighbors(p)
                                if o not in (c, p) and not s.board.get(p) and not s.board.get(o))
     s.board[prey_cr] = [UnitInstance("rhinoceros", them, s.new_iid())]
-    old = UnitInstance("serval", me, s.new_iid())
+    old = UnitInstance("honey_badger", me, s.new_iid())
     s.board[old_cr] = [old]
-    s.add_to_hand(me, "serval")
+    s.add_to_hand(me, "honey_badger")
     s.events = []
-    rules.apply_action(s, PlaceAction("serval", ("cr", cr)))
+    rules.apply_action(s, PlaceAction("honey_badger", ("cr", cr)))
     new = s.board[cr][-1]
     while s.pending:
         rules.apply_action(s, ChoiceAction(next(o for o in s.pending["options"] if o != SKIP)))
     rm = next(e for e in s.events if e["e"] == "remove")
-    assert (rm["cause"], rm["cause_iid"]) == ("serval", new.iid) and new.iid != old.iid
+    assert (rm["cause"], rm["cause_iid"]) == ("honey_badger", new.iid) and new.iid != old.iid
