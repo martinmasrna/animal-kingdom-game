@@ -59,6 +59,8 @@ Run every card in a batch through these, from the opponent's seat, before showin
 
 Games imagined while designing are reasoning, not evidence: only real play settles balance.
 
+**Effects speak only of the board's graph:** adjacent, connected, a number of crossroads away, regions. Never rows, columns, lines or directions: maps won't all be grids (Martin, 2026-10-08).
+
 ## Theme and naming
 
 - Every card is an animal. No spells, no objects, no places.
