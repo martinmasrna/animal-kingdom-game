@@ -15,7 +15,7 @@
      "species": "Cuckoo",
      "status": "proposed",
      "str": 6,
-     "tag": "",
+     "tag": "Bird",
      "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal."
     },
     {
@@ -25,7 +25,7 @@
      "note": "",
      "rarity": "L",
      "species": "Pheasant",
-     "status": "proposed",
+     "status": "locked",
      "str": 7,
      "tag": "Bird",
      "text": "Flight. When this is removed, shuffle it into your deck."
@@ -189,7 +189,7 @@
      "rarity": "L",
      "species": "Leopard",
      "status": "proposed",
-     "str": 7,
+     "str": 8,
      "tag": "Cat",
      "text": "Apex Predator. Roam. Reach 2."
     },
@@ -242,12 +242,12 @@
      "text": "Apex Predator. Roam."
     },
     {
-     "habitat": "Savanna",
+     "habitat": "Forest",
      "id": "canines-5",
-     "name": "African Wild Dog",
+     "name": "Fox",
      "note": "",
      "rarity": "R",
-     "species": "African Wild Dog",
+     "species": "Fox",
      "status": "proposed",
      "str": 4,
      "tag": "Canine",
@@ -314,12 +314,12 @@
      "text": "Whenever an allied Canine roams, give it +1 strength."
     },
     {
-     "habitat": "Forest",
+     "habitat": "Savanna",
      "id": "canines-11",
-     "name": "Fox",
+     "name": "African Wild Dog",
      "note": "",
      "rarity": "C",
-     "species": "Fox",
+     "species": "African Wild Dog",
      "status": "proposed",
      "str": 3,
      "tag": "Canine",
@@ -551,9 +551,9 @@
      "rarity": "L",
      "species": "Hornet",
      "status": "proposed",
-     "str": 0,
+     "str": 5,
      "tag": "Colony",
-     "text": "Flight. Has +2 strength for each other Colony animal you control."
+     "text": "Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck."
     },
     {
      "habitat": "Meadow",
@@ -613,7 +613,7 @@
      "status": "proposed",
      "str": 6,
      "tag": "Colony",
-     "text": "Roar: if you control a Colony Queen, draw a card."
+     "text": "Roar: if you control a Colony Queen, draw 2 cards."
     },
     {
      "habitat": "Savanna",
@@ -743,12 +743,12 @@
      "text": "Roar: return all adjacent enemies to your opponent's hand."
     },
     {
-     "habitat": "Open Ocean",
+     "habitat": "Forest",
      "id": "den-rush-3",
      "name": "Gale",
      "note": "",
      "rarity": "L",
-     "species": "Albatross",
+     "species": "Falcon",
      "status": "proposed",
      "str": 5,
      "tag": "Bird",
@@ -785,7 +785,7 @@
      "note": "",
      "rarity": "R",
      "species": "Chameleon",
-     "status": "proposed",
+     "status": "locked",
      "str": 0,
      "tag": "Lizard",
      "text": "Can cover animals of any strength."
@@ -821,7 +821,7 @@
      "note": "",
      "rarity": "C",
      "species": "Cheetah",
-     "status": "proposed",
+     "status": "locked",
      "str": 6,
      "tag": "Cat",
      "text": "Roar: if placed adjacent to the opponent's den, draw a card."
@@ -845,7 +845,7 @@
      "note": "",
      "rarity": "C",
      "species": "Falcon",
-     "status": "proposed",
+     "status": "locked",
      "str": 4,
      "tag": "Bird",
      "text": "Flight. Roar: if placed adjacent to the opponent's den, draw a card."
@@ -887,7 +887,7 @@
      "name": "Eon",
      "note": "",
      "rarity": "L",
-     "species": "Snake",
+     "species": "Anaconda",
      "status": "proposed",
      "str": 10,
      "tag": "Snake",
@@ -924,7 +924,7 @@
      "note": "",
      "rarity": "L",
      "species": "Swan",
-     "status": "proposed",
+     "status": "locked",
      "str": 3,
      "tag": "Bird",
      "text": "Whenever you draw Black Swan, your opponent discards a random card."
@@ -996,7 +996,7 @@
      "note": "",
      "rarity": "C",
      "species": "Egg Eater",
-     "status": "proposed",
+     "status": "locked",
      "str": 0,
      "tag": "Snake",
      "text": "Has +2 strength for each removed Egg."
@@ -1032,7 +1032,7 @@
      "note": "",
      "rarity": "C",
      "species": "",
-     "status": "proposed",
+     "status": "locked",
      "str": 0,
      "tag": "Egg",
      "text": "Roar: Scout a Bird. Next turn, remove this and draw a Bird."
@@ -1044,7 +1044,7 @@
      "note": "",
      "rarity": "C",
      "species": "",
-     "status": "proposed",
+     "status": "locked",
      "str": 0,
      "tag": "Egg",
      "text": "Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes."
@@ -1090,7 +1090,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Fish",
-     "text": "Dusk: if you control 2 or more regions, draw a card."
+     "text": "Dusk: if you control 2 or more regions, draw 2 cards."
     },
     {
      "habitat": "Jungle",
@@ -1244,12 +1244,12 @@
      "text": "Roar: repeat the Roar of each of your adjacent Rodents."
     },
     {
-     "habitat": "Forest",
+     "habitat": "City",
      "id": "food-aggro-1",
      "name": "",
      "note": "",
      "rarity": "L",
-     "species": "Chipmunk",
+     "species": "Rat",
      "status": "proposed",
      "str": 2,
      "tag": "Rodent",
@@ -1268,12 +1268,12 @@
      "text": "Roar: gain 4 food for each other Rodent you control. Draw a card."
     },
     {
-     "habitat": "Meadow",
+     "habitat": "Forest",
      "id": "food-aggro-3",
      "name": "Scrooge",
      "note": "",
      "rarity": "L",
-     "species": "Hamster",
+     "species": "Chipmunk",
      "status": "proposed",
      "str": 4,
      "tag": "Rodent",
@@ -1603,13 +1603,13 @@
      "status": "proposed",
      "str": 3,
      "tag": "",
-     "text": "Armor. Dusk: gain 5 food."
+     "text": "Armor. Each player gains at most 20 food per turn. Dusk: gain 5 food."
     },
     {
      "habitat": "Open Ocean",
      "id": "giants-2",
      "name": "Mocha",
-     "note": "Watch in play: close to a full board wipe (dials: of strength 7 or less, next to your Hungry animals, or only its own neighbours).",
+     "note": "Watch in play: close to a full board wipe.",
      "rarity": "L",
      "species": "Sperm Whale",
      "status": "proposed",
@@ -1660,7 +1660,7 @@
      "note": "",
      "rarity": "R",
      "species": "Crocodile",
-     "status": "proposed",
+     "status": "locked",
      "str": 8,
      "tag": "",
      "text": "Apex Predator."
@@ -1675,7 +1675,7 @@
      "status": "proposed",
      "str": 8,
      "tag": "Fish",
-     "text": "Titan. Hungry 4. Dusk: draw 2 cards."
+     "text": "Titan. Hungry 4. Dusk: draw a card."
     },
     {
      "habitat": "Savanna",
@@ -1781,7 +1781,7 @@
      "text": "Roar: give all animals in your hand +2 strength."
     },
     {
-     "habitat": "Jungle",
+     "habitat": "Meadow",
      "id": "handlock-2",
      "name": "",
      "note": "Watch in play: the five stages and their power ladder.",
@@ -1883,7 +1883,7 @@
      "note": "",
      "rarity": "C",
      "species": "Stork",
-     "status": "proposed",
+     "status": "locked",
      "str": 4,
      "tag": "Bird",
      "text": "Flight. Roar: add two random younglings to your hand."
@@ -1901,7 +1901,7 @@
      "text": "Has +1 strength for each card in your hand."
     },
     {
-     "habitat": "Jungle",
+     "habitat": "Meadow",
      "id": "handlock-12",
      "name": "Caterpillar",
      "note": "",
@@ -1965,7 +1965,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Hoofed",
-     "text": "Roar: draw a card for each different Hoofed ally adjacent to this."
+     "text": "Roar: draw a card for each different Hoofed animal you control."
     },
     {
      "habitat": "Savanna",
@@ -2019,7 +2019,7 @@
      "habitat": "Savanna",
      "id": "hoofed-7",
      "name": "Zebra",
-     "note": "",
+     "note": "Art: the zebra kicking away a lion about to catch it (sells the bounce).",
      "rarity": "R",
      "species": "Zebra",
      "status": "proposed",
@@ -2173,7 +2173,7 @@
      "note": "The vanilla flyer.",
      "rarity": "C",
      "species": "Eagle",
-     "status": "proposed",
+     "status": "locked",
      "str": 5,
      "tag": "Bird",
      "text": "Flight."
@@ -2296,7 +2296,7 @@
      "status": "proposed",
      "str": 1,
      "tag": "Rodent",
-     "text": "Roar: fill adjacent empty crossroads with Lemmings from your hand and deck."
+     "text": ""
     },
     {
      "habitat": "Polar",
