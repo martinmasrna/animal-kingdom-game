@@ -69,17 +69,17 @@ Imagined games (reasoning, not evidence) showed the clock runs on cards, not foo
 | a Rodent (name to come) | | L | 2 | Roar: draw cards until you have as many as your opponent. (Hearthstone's Divine Favor: a big refill against control, a small one against aggro.) |
 | Barley | City | L | 4 | Roar: gain 4 food for each other Rodent you control. Draw a card. |
 | Scrooge (rename: the name cites Dickens) | City | L | 4 | Roar: gain food equal to the food you gained this turn. |
-| a Rodent (name to come) | | L | ~3 | Roar: repeat the Roar of each of your Rodents next to this. (Martin's wording. The Rodent finisher, played last into your own board; the grid caps it at 4 neighbours, and every Rodent the opponent covers is one fewer Roar. A repeated Scrooge quadruples the turn: Scrooge is the dial.) |
+| a Rodent (name to come) | | L | 6 | Roar: repeat the Roar of each of your Rodents next to this. (Martin's wording. The Rodent finisher, played last into your own board; the grid caps it at 4 neighbours, and every Rodent the opponent covers is one fewer Roar. A repeated Scrooge quadruples the turn: Scrooge is the dial.) |
 | Flying Squirrel | Forest | R | 3 | **Flight.** Roar: gain 10 food. |
 | Chipmunk | Forest | R | 4 | Roar: next turn, take 1 additional action. (The frantic one; the effect stays in the launch, and the Chinchilla waits for Mountains.) |
-| Dormouse | Forest (roster addition) | R | 2 | **Dusk:** if your hand is empty, gain 10 food. (The top-deck mode: out of cards, you can pass and it still pays. Nocturnal: it comes out at dusk to forage.) |
+| Dormouse | Forest (roster addition) | R | 3 | **Dusk:** if your hand is empty, gain 10 food. (The top-deck mode: out of cards, you can pass and it still pays. Nocturnal: it comes out at dusk to forage.) |
 | Meerkat (tagged Rodent) | Savanna | R | 2 | Roar: draw a card. When an enemy is placed next to this, draw a card. (The sentry at the den front: den pressure turns into cards, often the Muskrat that pushes it back.) |
 | Squirrel | Forest | C | 3 | Roar: gain 10 food. |
 | Hamster | Meadow | C | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. (Cheek pouches.) |
 | Gopher | Meadow | C | 3 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
 | Muskrat | Meadow | C | 2 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. (The den defence.) |
 | Groundhog | Meadow | C | 4 | Roar: if you gained 10 or more food this turn, gain 10 food. |
-| Mole (tagged Rodent) | Meadow | C | ~3 | Roar: gain 5 food. If your hand is empty, draw 2 cards. (Hearthstone's Quick Shot. The mole digs until it finds something; a Rodent by what players believe.) |
+| Mole (tagged Rodent) | Meadow | C | 3 | Roar: gain 5 food. If your hand is empty, draw 2 cards. (Hearthstone's Quick Shot. The mole digs until it finds something; a Rodent by what players believe, as are the Meerkat and the Hare.) |
 
 Rejected: the Octopus carrying the extra action (its octopus is Fathom, the clever one, and a sea animal in the Rodent deck); Greywhisker and the Naked Mole-Rat (Den Rush's); Mouse and other draw-one cards (tempo, not value); a "protect it and it wins" food engine (a control card); "discard your hand, gain food for each"; "gain food for each card your opponent has more than you"; "the next Roar you play this turn happens twice" (here it's mostly a second Squirrel; banked as the Macaw); a Squirrel that shuffles Acorns into your deck (20 food eventually, in a deck that barely draws; banked for Food OTK, the hoard); the Mouse raid ("gain 10 food for each enemy next to this": Mouse is already a card, and a common animal); a Prairie Dog town rare (Meerkat filled the slot).
 

@@ -94,12 +94,12 @@ The long-term pool may expand to at most **6 legendaries, 12 rares, and 18 commo
 
 | Mechanism | Later candidates | Gate before promotion |
 |---|---|---|
-| Forward pressure | Prairie Dog, Warren Rally, Mole/Burrow, Springhare | Must create legal pressure without granting an unconnected den capture; Burrow remains empty-crossroad only. |
+| Forward pressure | Prairie Dog, Warren Rally | Must create legal pressure without granting an unconnected den capture. |
 | Front payoff | Vanguard Vole, Shrike, a narrowed Cheetah variant | Must require a pre-existing den-front state rather than be satisfied by Flight alone. |
 | Conversion / disruption | Plague Warden, Mongoose, Bombardier Beetle, a Hornet replacement | Must occupy as it clears or be bounded to a placement sequence; no unrestricted removal donor. |
 | Neutral support | alternate Rodent consistency, stack-flex cards, limited flyers | Must improve a real action/pathing role in Aggro without being an automatic inclusion in slow decks. |
 
-Starling and any other multi-flyer extra-placement burst are explicitly held behind a two-card and three-card den-capture search. The expansion queue already identifies that risk, as well as the empty-only requirement for Burrow ([expansion to-do, Aggro alternatives](expansion-design-todo.md#16-aggro--alternative-rush-packages)).
+Starling and any other multi-flyer extra-placement burst are explicitly held behind a two-card and three-card den-capture search. The expansion queue already identifies that risk.
 
 ### Full candidate reservoir — manual-review list
 
@@ -127,7 +127,6 @@ For a chain condition, “two or more other units were placed this turn” exclu
 | **Weasel** | STR 5. May cover any-strength enemy only when it is den-front. | Chameleon |
 | **Skunk rework** | STR 5. If you control a den-front unit, bounce an adjacent enemy and lock it. | Existing Skunk |
 | **Vanguard Vole** | STR 5. Whenever you place a unit den-front, this gains +2 strength wherever it is. | Rattlesnake-style growth; must prove it is not just a generic scaler |
-| **Springhare** | STR 5. Burrow. If placed den-front, draw 1. | Scout, Falcon, Mole |
 | **Gundi** | STR 8. May only be placed on an empty non-den crossroad adjacent to an enemy, ignoring connection, if two other Rodents were placed this turn. | Gecko; harder placement fence buys the body |
 | **Mongoose** | STR 5. If you control a den-front unit, clear an adjacent enemy’s effects and keywords. | Chameleon and anti-wall tech; no generic removal |
 | **Hornet rework** | STR 5, Flight. If two other units were placed, clear an adjacent enemy’s effects and keywords. | Mongoose; Flight is offset by the chain gate |
@@ -147,12 +146,10 @@ For a chain condition, “two or more other units were placed this turn” exclu
 | **Scurry** | STR 2. If two other units were placed, remove an adjacent enemy up to its eventual tested cap. | Serval and Soldier Ant |
 | **Gambian Pouched Rat** | STR 5. If two other units were placed, draw two random Rodents. | Scout; chain-gated refill |
 | **Mara** | STR 5. Has +4 strength while two other units were placed this turn. | Lion; a one-turn cover tool, not a persistent wall |
-| **Mole** | STR 6. Burrow. | Cougar; empty-only reach |
 | **Gecko** | STR 6. May be placed on an empty crossroad adjacent to an enemy, ignoring connection. | Cougar and Mole |
 | **Starling** | STR 2, Flight. If another friendly flyer exists, play another flyer from hand. | Jerboa and Bat; held behind capture-combo audit |
 | **Cornered Rat** | STR 5. Has +4 strength while you have one or fewer cards in hand. | Lion and King Ratbeard |
 | **Bat rework** | STR 3, Flight. Draw 1 only if you control another den-front unit. | Bat, Falcon, and Scout |
-| **Hare** | STR 6. Burrow. Alternate non-Rodent empty-crossroad reach body. | Mole |
 | **Warthog** | STR 8. Can only be placed adjacent to an enemy unit or enemy den. Neutral front-only body. | Lion and Sapper Mole |
 | **Gopher** | STR 6. May cover an equal-strength enemy only if two other Rodents were placed this turn. | Weasel and equal-cover statics |
 | **Agouti** | STR 5. If two other Rodents were placed, remove an adjacent enemy of STR 7 or more. | Serval; chain-gated answer to a large wall |
@@ -180,7 +177,7 @@ The aim is therefore an RPS relationship, not simply a higher aggregate win rate
 
 No simulation is requested in this design session. Once an implemented candidate list exists:
 
-1. **Rule and burst safety first.** Exhaustively inspect the legal two-card and three-card sequences involving Flight, free placement, Weasel, and any later Burrow/Starling candidate. Confirm no sequence gains an unconnected or automatic den capture, and confirm General cannot place on den.
+1. **Rule and burst safety first.** Exhaustively inspect the legal two-card and three-card sequences involving Flight, free placement, Weasel, and any later Starling candidate. Confirm no sequence gains an unconnected or automatic den capture, and confirm General cannot place on den.
 2. **Pilot-aware matchup cohort.** Run TurnBot and RefereeBot separately, at **at least 200 games per matchup**, paired seeds, and both seats. Compare the 30-card list with every premade deck and with variants that replace each first-wave card by its closest retained role.
 3. **Inspect pathing, not only win rates.** Log/replay the games. Record den-front reaches, front turns held, conversion attempts, successful capture after a conversion, and whether the decisive route used row 1, 2, or 3.
 4. **Bot-blind-spot control.** Give both pilots a small, fixed set of row-1/3 den-lane positions. If RefereeBot routinely finds a line TurnBot misses, classify the delta as a bot issue. If both decline the line or the line fails after replay, revise the card/pathing hypothesis.

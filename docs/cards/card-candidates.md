@@ -48,7 +48,6 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Goshawk** | Bird | 4 | Flight. Roar: remove an adjacent enemy of strength 2 or less. |
 | **Groundhog** | Rodent | 3 | At the start of your next turn, gain 4 food and draw 1 card. |
 | **Hamster** | Rodent | 1 | Roar: draw 2 cards, then remove 1 from your hand. |
-| **Hare** | Rabbit | 6 | Burrow. |
 | **Honeyguide** | Bird | 1 / 3 | Flight. Roar: gain 6 food; if you control a Bear or Colony unit, gain 4 more. |
 | **Honeypot Ant** | Colony | 2 | Deathrattle: gain 16 food. |
 | **Howler Monkey** | Primate | 3 | Roar: give all other Primates in your hand and on the battlefield +1 strength. |
@@ -65,13 +64,11 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Margay** | Cat | 7 | May be placed on an empty crossroad adjacent to any Cat you control, ignoring connection. |
 | **Mayfly** | Insect | 3 | **Variant 1:** Deathrattle: draw 1 card. This is removed at the end of your next turn.<br>**Variant 2:** Roar: draw 1 card. Deathrattle: draw 1 card. At the end of your next turn, remove this. |
 | **Meerkat** | — | 2 | Roar: draw 1 card. |
-| **Mole** | Rodent | 5 / 6 | Burrow. |
 | **Mongoose** | — | 3 / 5 | **Variant 1:** Roar: remove an adjacent enemy Snake of any strength; otherwise remove an adjacent enemy of strength 3 or less.<br>**Variant 2:** Roar: clear Venom from an adjacent friendly unit; otherwise remove an adjacent enemy Snake of any strength. |
 | **Moose** | Megafauna | 6 | Has +2 strength while adjacent to a Landmark. |
 | **Mosquito** | Insect | 1 | Roar: steal 4 food from the opponent. |
 | **Oviraptor** | Dinosaur | 3 | Roar: draw a random Egg from your deck. |
 | **Pangolin** | — | 3 | Cannot be covered by enemy units. |
-| **Pika** | Rabbit | 5 | Roar: if played by Burrow, gain 8 food. |
 | **Poison Dart Frog** | Amphibian | 4 | Deathrattle: envenom an adjacent enemy. |
 | **Prairie Dog** | Rodent | 1 / 3 | Roar: play one more Rodent from your hand. |
 | **Protoceratops** | Dinosaur | 7 | No effect. |
@@ -117,7 +114,6 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Box Jellyfish** | — | 2 | Roar: lock an adjacent enemy unit—until your next turn it cannot move, be removed, cover, or use its effects. |
 | **Bull** | — | 7 | Whenever this gains strength, give an adjacent friendly unit +1 strength. |
 | **Bull Shark** | Fish | 7 | Apex Predator. |
-| **Burrow Owl** | Bird | 4 | Flight. Your adjacent units with Burrow have +2 strength. |
 | **Camel** | — | 6 | Roar: gain 12 food. You cannot gain food again until your next turn. |
 | **Capybara** | Rodent | 5 | At the end of your turn, gain 1 food for each unit adjacent to this. |
 | **Cave** | Landmark | 0 | Fragile. Armor. Roar: draw a random Bear from your deck. Your Bears cost 5 less food to play. |
@@ -160,7 +156,6 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Saltwater Crocodile** | Lizard | 4 | Has +1 strength for each unit buried beneath this. |
 | **Secretarybird** | Bird | 4 | Flight. Roar: remove an adjacent enemy of strength 4 or less. |
 | **Shrike** | Bird | 2 | Flight. Roar: remove an adjacent enemy of strength 3 or less; it cannot be returned to a hand or deck. |
-| **Springhare** | Rodent | 5 | Burrow. Roar: if played adjacent to the opponent's den, draw 1 card. |
 | **Stick Insect** | Insect | 2 | Cannot be targeted by enemy special effects until it covers an enemy unit. |
 | **Tarantula** | Arachnid | 4 | **Variant 1:** Deathrattle: play a Spiderling token (Arachnid, STR 1) on each adjacent empty crossroad.<br>**Variant 2:** Deathrattle: play up to two Spiderling tokens (Arachnid, STR 2) on adjacent empty crossroads. |
 | **Tardigrade** | — | 1 | Armor. Cannot be removed. After 4 turns, gain 30 food. |
@@ -172,7 +167,6 @@ Vulture (Rare table) is a shelved card whose `config.py` dials and `effects.py` 
 | **Weaver Ant** | Colony | 5 | Roar: move an adjacent Colony unit to an adjacent empty crossroad. |
 | **Wildebeest** | — | 4 | Roar: move a friendly unit to an adjacent crossroad. |
 | **Wolverine** | — | 5 | Apex Predator. Cannot be covered by enemy units. |
-| **Wombat** | Marsupial | 8 | Burrow. Cannot cover enemy units. |
 
 ## Legendary
 

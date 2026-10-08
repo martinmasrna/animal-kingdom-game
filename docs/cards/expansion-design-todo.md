@@ -139,13 +139,9 @@ Aggro's extra cards should split into Rodent chaining, aerial pressure, and empt
 
 - [ ] **Gecko** — Lizard · STR 7 · Common `May be placed on an empty crossroad adjacent to an enemy unit, ignoring connection.` Reach without covering, removal, or direct den capture.
 
-- [ ] **Mole** — Rodent · STR 6 · Common `Burrow.` Proposed Burrow definition: ignore connection only when placing onto an empty crossroad.
-
 - [ ] **Starling** — Bird · STR 2 · Common `Flight. Roar: if you control another unit with Flight, play one more unit with Flight from your hand.` High burst-risk. Run an explicit two-card/three-card den-capture search before approving.
 
 - [ ] **Bombardier Beetle** — Insect · STR 5 · Rare `Roar: return an adjacent enemy of strength 4 or less to its owner's hand.` A smaller, capped alternative to Skunk without the one-turn lock.
-
-- [ ] **Springhare** — Rodent · STR 5 · Rare `Burrow. Roar: if played adjacent to the opponent's den, draw 1 card.` Combines Cheetah's reward with empty-only infiltration and a much smaller body.
 
 - [ ] **New cover-retaliation legendary** — STR 4 · Legendary `Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand.` Already locked in the balance to-do; species and name remain open.
 
@@ -260,22 +256,6 @@ Anchor candidates:
 
 Primary risks: delayed-effect memory, unclear behavior when the marked card becomes buried, and Venom becoming functionally identical to immediate removal against bots.
 
-### 2.5 Warren/Burrow — breeding and empty-crossroad infiltration
-
-**Identity:** multiply small Rabbits/Rodents over time and use Burrow to occupy open ground behind the front. The package races for regions and connection but struggles to cover defenders.
-
-Anchor candidates:
-
-- [ ] **Rabbit** — Rabbit · STR 3 · Common `At the start of each of your turns, draw a random Rabbit from your deck.`
-- [ ] **Hare** — Rabbit · STR 6 · Common `Burrow.`
-- [ ] **Prairie Dog** and **Mole** — cross over from the Aggro module.
-- [ ] **Wombat** — Marsupial · STR 8 · Rare `Burrow. Cannot cover enemy units.`
-- [ ] **Pika** — Rabbit · STR 5 · Common `Roar: if played by Burrow, gain 8 food.`
-- [ ] **Warren** — Landmark · STR 0 · Rare `Fragile. At the end of your turn, play a Rabbit token (Rabbit, STR 3) on an adjacent empty crossroad.` This must be optional when no empty destination exists and needs a runaway-width test.
-- [ ] **Burrow Owl** — Bird · STR 4 · Rare `Flight. Your adjacent units with Burrow have +2 strength.`
-
-Primary risks: automated token growth, unconnected units creating confusing pseudo-fronts, and overlap with Aggro/Colony width.
-
 ### 2.6 Beetles — a mini-set across habitats
 
 A small set of the beetles people know: stag beetle, ladybird, firefly, rhinoceros beetle, scarab, bombardier beetle, Goliath beetle. Seven recognisable ones, so a mini-set rather than a habitat (Martin, 2026-10-05). The dung beetle is a Savanna card.
@@ -307,7 +287,7 @@ Eggs can support multiple archetypes if their outcomes differ: cards, units, tok
 
 ## 5. Selection order
 
-- [ ] First prototype wave: Burrow, Secretarybird replacement, one new Egg that hatches a body, one incubation card, Baobab Tree, Termite Mound, Dung Beetle, and one movement card.
+- [ ] First prototype wave: Secretarybird replacement, one new Egg that hatches a body, one incubation card, Baobab Tree, Termite Mound, Dung Beetle, and one movement card.
 - [ ] Second prototype wave: Camouflage, Venom package, Fish/Landmark formation package.
 - [ ] Third prototype wave: tokens, Dinosaur Hatch, Primate Roar copying.
 - [ ] Before any wave becomes canonical, build at least two competing 30-card lists using the enlarged pool. A new card has succeeded only if plausible lists sometimes omit it.

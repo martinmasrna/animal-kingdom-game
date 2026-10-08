@@ -28,7 +28,7 @@ The initial 14-design packages are premade-deck foundations, not intended final 
   - Colony: pure caste swarm / mixed Insect food / token-sacrifice.
   - Ramp: Bear-cost / Landmark engines / medium-curve Megafauna.
   - Food: OTK / sacrifice value / scavenger attrition.
-  - Aggro: Rodent chain / aerial rush / Burrow-region pressure.
+  - Aggro: Rodent chain / aerial rush.
   - Canines: hand-buff / movement tempo / resilient pack.
 - [ ] Competing builds should differ by at least **8–10 cards**, not merely swap one legendary and two commons.
 - [ ] Include cards that are matchup or map calls, but avoid narrow hate cards that are dead outside one pairing.
@@ -62,7 +62,6 @@ The initial 14-design packages are premade-deck foundations, not intended final 
   - Egg ↔ Dinosaur Hatch: Eggs, incubation, delayed bodies.
   - Egg ↔ Venom: Snakes and delayed control.
   - Ramp ↔ Primate/other Landmark decks: contested ecological structures.
-  - Aggro ↔ Warren/Burrow: empty-crossroad reach.
   - Canines ↔ general movement: buffs that enable repositioning.
   - Fish ↔ Food sacrifice: fragile prey and on-covered effects.
 - [ ] A bridge card should be slightly less efficient than a family's pure payoff when used outside its best home; otherwise it becomes generic goodstuff.

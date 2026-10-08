@@ -27,21 +27,9 @@ The current documents say both that Flight ignores connection when placed and th
 
 - [ ] Recommended rule: **no connection-bypass ability applies when placing onto an enemy den**. The capturing placement must have an ordinary friendly connection.
 - [ ] Add the den exception directly to Flight if adopted, rather than relying on deck notes.
-- [ ] Apply the same den exception to Burrow, “place adjacent ignoring connection,” and all future reach mechanics.
-- [ ] Re-check Falcon, Bat, Cuckoo, Starling, Gecko, Springhare, and the new Aggro legendary after the wording is settled.
+- [ ] Apply the same den exception to “place adjacent ignoring connection” and all future reach mechanics.
+- [ ] Re-check Falcon, Bat, Cuckoo, Starling, Gecko, and the new Aggro legendary after the wording is settled.
 
-### 1.1 Burrow
-
-Proposed keyword:
-
-> **Burrow** — This may be placed on an empty crossroad without connection to your den.
-
-- [ ] Confirm that Burrow cannot cover any occupant, be placed on either den, or bypass any non-connection restriction.
-- [ ] Burrowed units do not create connection unless a normal continuous friendly path later reaches them.
-- [ ] Confirm that Burrow is a placement permission, not movement and not Flight. Effects that reference Flight do not see Burrow.
-- [ ] Run a den-rush audit with Mole, Hare, Springhare, Pika, and Warren before adoption.
-
-This is the cleanest proposed keyword: it uses the existing connection bypass but removes Flight's ability to land on occupied crossroads.
 
 ### 1.2 Camouflage
 
@@ -224,7 +212,7 @@ Cards must remain fully understandable without the ability word.
 - [ ] **Copy a Roar:** enumerate every legal source and loop before approving Kanzi or any similar design. Copied effects should not count as playing the source card.
 - [ ] **Open deck tutors:** continue using random filtered draws or top-card selection. Full-deck choice compresses variance and makes future combo cards dangerous.
 - [ ] **Permanent action denial:** effects that stop drawing, placing, or all covering for a turn can create non-games in a one-action system. Prefer one-unit restrictions with clear answers.
-- [ ] **Connection-granting auras:** these can turn an innocent extra placement into an immediate den capture. Burrow's empty-only self-placement is the safer reach tool.
+- [ ] **Connection-granting auras:** these can turn an innocent extra placement into an immediate den capture.
 
 ---
 

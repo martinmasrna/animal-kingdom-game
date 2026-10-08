@@ -32,7 +32,7 @@ Columns: **Shape** is the rule the signature suggests, in this game's terms, wit
 | Termite (Queen) | builds giant mounds; the queen lays endlessly | queen lays the colony: play another Colony animal | on card ✓ (Termite Queen) |
 | Secretarybird | stomps snakes to death | remove an adjacent Snake of any strength | new |
 | Dung Beetle | rolls a ball of dung | ? push: roll an adjacent animal to an adjacent empty crossroad | new |
-| Aardvark | digs, eats termites | ? Burrow, or anti-Colony (Anteater does it better) | new |
+| Aardvark | digs, eats termites | ? anti-Colony (Anteater does it better) | new |
 | African Wild Dog | the pack hunt | pack: place a Pup next to this | on card ✓ |
 | Baboon | bold troop that raids and steals food | ? steal food from the opponent | new |
 | Vulture (out; Savanna II) | circles over the dying, eats the dead | scavenger: food or strength per removed animal | ~ Python |
@@ -72,7 +72,7 @@ Columns: **Shape** is the rule the signature suggests, in this game's terms, wit
 | Honey Bee | makes honey; queen and hive | Colony food; queen plays workers | on card ✓ (Queen Bee, Worker Bee, Honoria) |
 | Bumblebee | fat, fuzzy, "shouldn't be able to fly" | Colony flyer | on card ✓ (Falstaff, Nurse Bumblebee) |
 | Hedgehog | rolls into a spiky ball | Spikes | on card ✓ |
-| Mole | digs tunnels, blind | Burrow: place on an empty crossroad by tunnelling, not onto a den | new (candidate keyword Burrow) |
+| Mole | digs tunnels, blind | digging up what it needs (Food Aggro: if your hand is empty, draw 2 cards) | on card |
 | Hare | fast; the tortoise and the hare | ? sprint reach | ~ Cheetah |
 | Groundhog | Groundhog Day: sees its shadow, forecasts winter | ? forecast: look at the top of your deck | on card ✗ (food chain), low stakes |
 | Butterfly | caterpillar becomes butterfly | transform: in N turns becomes a stronger flyer | new |
@@ -360,7 +360,6 @@ Columns: **Shape** is the rule the signature suggests, in this game's terms, wit
 | Cave Bat Colony | Caves | millions pour out at dusk | Flight swarm fill | ~ Lemming |
 | Glowworm | Caves | glowing ceiling lures insects | lure (runner-up) | new |
 | Antlion | Caves | sand-pit trap | trap: remove an enemy placed adjacent | = Hippopotamus |
-| Star-nosed Mole | Caves | star-shaped nose | Burrow (Mole lookalike) | — |
 | Olm | Caves | blind, lives 100 years | — | — |
 | Bison | Back from the Brink | herds nearly wiped out, came back | back from the Remove Pile | new |
 | California Condor | Back from the Brink | brought back from 22 birds | back from the Remove Pile | new |
@@ -368,7 +367,7 @@ Columns: **Shape** is the rule the signature suggests, in this game's terms, wit
 | Thylacine | Extinct or Islands | extinct striped "tiger", still "sighted" | ? Stealth, or from the Remove Pile | — |
 | Passenger Pigeon | Extinct | billions darkened the sky, then none | ? swarm that leaves | — |
 | Aurochs, Great Auk, Steller's Sea Cow, Quagga | Extinct | the lost ones | bodies | — |
-| Prairie Dog | none yet (Prairie folded) | towns of tunnels, pops up | Burrow; play another Rodent (candidate) | new |
+| Prairie Dog | none yet (Prairie folded) | towns of tunnels, pops up | play another Rodent (candidate) | new |
 | Pronghorn | none yet | second-fastest land animal | sprint (runner-up to Cheetah) | — |
 | Saiga, Manul | none yet | odd nose; grumpy flat cat | — | — |
 
@@ -425,7 +424,6 @@ Best animal, runner-up. **None** means no animal fits naturally: put it on an or
 | Place next to a family member ignoring connection | Cougar (pounce) | Coyote |
 | Place next to any of your animals ignoring connection | Mountain Goat (cliffs) | Grasshopper |
 | Sprint one crossroad beyond the chain (new) | Cheetah | Pronghorn, Roadrunner |
-| Burrow (new keyword candidate) | Mole | Prairie Dog, Naked Mole-Rat |
 | Climb in next to an enemy | Gecko | Mountain Goat |
 | Ranged target, two crossroads away (new) | Archerfish | Llama (spit) |
 
@@ -557,7 +555,7 @@ Rhinoceros (charge), Hippopotamus (territorial), Skunk and Sirocco (spray), Porc
 
 ### Signatures on the launch rosters with no card yet (reserve these effects for them)
 
-Honey Badger (cover any), Zebra (herd Stealth), Piranha (small kills big), Electric Eel (stun: opponent loses an action), Macaw (copy a Roar), Giant Anteater (anti-Colony), Secretarybird (anti-Snake), Spider (anti-Flight web), Cuckoo (plant in the opponent's deck), Praying Mantis (sacrifice), Butterfly (transform), Earthworm (split), Firefly (reveal Stealth), Beaver (dam), Raccoon (raid the Remove Pile), Opossum (plays dead), Cockroach (survivor), Stray Cat (nine lives), Stray Dog (fetch), Leech (drain), Mosquito or Baboon (steal food), Squid (ink escape), Dolphin (rescue), Mole (Burrow), Poison Dart Frog (poison Spikes), Elephant legendary (never forgets), Stork (delivery), Oxpecker (hitchhike).
+Honey Badger (cover any), Zebra (herd Stealth), Piranha (small kills big), Electric Eel (stun: opponent loses an action), Macaw (copy a Roar), Giant Anteater (anti-Colony), Secretarybird (anti-Snake), Spider (anti-Flight web), Cuckoo (plant in the opponent's deck), Praying Mantis (sacrifice), Butterfly (transform), Earthworm (split), Firefly (reveal Stealth), Beaver (dam), Raccoon (raid the Remove Pile), Opossum (plays dead), Cockroach (survivor), Stray Cat (nine lives), Stray Dog (fetch), Leech (drain), Mosquito or Baboon (steal food), Squid (ink escape), Dolphin (rescue), Poison Dart Frog (poison Spikes), Elephant legendary (never forgets), Stork (delivery), Oxpecker (hitchhike).
 
 ## For Martin
 
