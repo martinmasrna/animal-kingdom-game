@@ -63,6 +63,8 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   font: 600 17px 'Fira Sans Condensed', sans-serif; box-shadow: 0 6px 16px rgba(0,0,0,.6); }
 body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app > .mscr.ladder) .ftab { display: flex; }   /* where the screen's edge is free */
 .ftab:hover { filter: brightness(1.2); }
+.home .chooser.gear .fbm { display: none; }
+@media (orientation: portrait) { body .ftab { display: none !important; } .home .chooser.gear .fbm { display: flex; } }   /* a phone's edge is never free: Feedback moves into the menu */
 .ftab .tic { width: 24px; height: 24px; rotate: 90deg; filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
 .home .bar.first { grid-template-rows: 84px 44px; }   /* a new player's piece: learn by playing, or skip to the full piece */
 .home .bar.first .slab { grid-column: 1 / 3; height: 44px; font-size: 16px; }
@@ -198,7 +200,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
   background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: 0 16px 40px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,245,230,.12); }
 .pre .leave { position: absolute; left: 24px; bottom: 24px; width: 140px; }
 /* Waiting for a friend: the code, Copy link. */
-.pre .lobbyp { width: 360px; display: flex; flex-direction: column; align-items: stretch; gap: 12px; padding: 24px; text-align: center; }
+.pre .lobbyp { width: 360px; max-width: calc(100vw - 72px); display: flex; flex-direction: column; align-items: stretch; gap: 12px; padding: 24px; text-align: center; }
 .pre .bigcode { font: 800 64px/1 'Fira Sans Condensed', sans-serif; letter-spacing: .08em; color: #f3ead8; user-select: all; }
 .pre .lobbyp .slab { height: 44px; } .pre .lobbyp p { margin: 0; color: #b3a996; font-size: 16px; }
 /* The two lists facing, Ready between. */
@@ -284,7 +286,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
   .ftab { padding: 12px 8px; font-size: 15px; } .ftab .tic { width: 20px; height: 20px; }
   .home .bar { left: 12px; right: 12px; bottom: 24px; transform: none; grid-template-columns: 1fr 1fr; }
   .home .chooser.decks { left: 12px; right: 12px; width: auto; transform: none; }
-  .home .chooser.decks, .home .chooser.opps { bottom: 182px; }
+  .home .chooser.decks, .home .chooser.opps { bottom: 182px; max-height: calc(100dvh - 182px - 84px); }   /* clear of the top bar too */
   .home .chooser.opps { left: 12px; right: 12px; width: auto; }
   .home .chooser.lessons, .home .chooser.gear { top: 82px; right: 12px; }
   .ladder { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
@@ -302,7 +304,8 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
   /* the ladder: one scrolling column, Back kept at the foot */
   .ladder { display: block; overflow-y: auto; }
   .ladder .hist { display: block; height: auto; } .ladder .hbody { overflow: visible; -webkit-mask-image: none; mask-image: none; }
-  .ladder .hhead { padding: 14px 12px 6px; } .ladder .hhead h2 { font-size: 24px; white-space: nowrap; } .ladder .hhead .dd { min-width: 0; }
+  .ladder .hhead { padding: 14px 12px 6px; flex-wrap: wrap; row-gap: 10px; } .ladder .hhead h2 { font-size: 24px; white-space: nowrap; }
+  .ladder .hhead .dd { min-width: 0; flex: 1 1 100%; } .ladder .hhead .dd .sel { white-space: nowrap; }   /* the deck filter on its own row under the tabs */
   .ladder .hlist { padding: 0 12px; }
   .ladder .ptabs { gap: 16px; } .ladder .ptab { font-size: 24px; } .ladder .lead.lb { padding: 0 12px; }
   .ladder .sfoot { position: sticky; bottom: 0; z-index: 2; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; }
