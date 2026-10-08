@@ -16,22 +16,16 @@ Tags name kinds of animal people recognise. The broad umbrellas stay retired: no
 | Primates | training and tools: buff cards in hand, Roars that pay off past a strength threshold ("if this has 6 or more strength") | the hand-buff half of the hand deck, with Bears | trained threats |
 | Hoofed | the herd grazing: regions it holds produce more food (the Herd mechanic); prey that Flee | region control, the third food route beside Rodents' card food and Colony's numbers | food, through regions |
 | Lizards | no archetype: a handful of individually unique cards (Chameleon's camouflage, the Basilisk over water, the Gecko on walls) | support | — |
-| Fish | the school: Fish care how close they are, not how many (Canines and Colony count); tight clusters are strong, and fish predators pick off the stray | a positional family for the water sets | to be designed |
+| Fish | the swarm: payoffs grow with every Fish you control (a smooth count, where Colony checks thresholds), and some reward Fish next to each other | token aggro | food, through regions taken early |
 | Arachnids | webs and traps that punish what lands near them | reactive control | to be designed |
 | Marsupials | the pouch: carrying another animal, joeys | Australia | to be designed |
 | Dinosaurs | eggs hatching into huge bodies, Titan | Prehistoric | to be designed |
 
 Not every family needs an archetype: a family can be a handful of individually unique cards until a set gives it a reason.
 
-## Fish sketch
+## Fish
 
-The shape of the family, not final cards (agreed as a sketch with Martin, 2026-10-05):
-
-- Sardine (common, 1): "Has +2 strength for each of your Fish next to this." Alone nothing, a school a wall.
-- Tuna (common, 4): "Roar: if this is next to another of your Fish, draw a card."
-- Manta Ray (rare, 5): "Your Fish next to this have +2 strength." A local aura, unlike Raksha's board-wide one.
-- Shoal (common, 2): "While this is next to two or more of your Fish, it can't be removed." Answered by covering or splitting the school.
-- Great White Shark (rare, 8): "Roar: remove an adjacent enemy that has no other enemy next to it." The predator picks off the stray, against any deck.
+The launch deck, Fish Token Aggro, is drafted in [`effects-pass.md`](effects-pass.md).
 
 ## The target meta
 

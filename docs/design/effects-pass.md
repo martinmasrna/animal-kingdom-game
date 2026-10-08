@@ -111,6 +111,23 @@ The pack that roams the board, buffs itself on the board (Primates buff in hand)
 
 Open: the Dhole's strength (~6); a slot for the Raccoon Dog on the Forest roster. "Your animals next to this have Roam" waits for a legendary in a deck without roamers of its own.
 
+## Fish Token Aggro, draft
+
+The swarm (Martin, 2026-10-08). Gwent's Arachas, Hearthstone's Murlocs: one card becomes a school, and every Fish makes the others better. The opponent should feel outnumbered, not outmuscled: each fish is small, but covering them one by one costs a card and an action each. A 2×2 square of Fish is a region, so the packed school wins on food. It preys on slow decks and on decks that answer one threat at a time; area removal (Rhinoceros, Hippopotamus, City Spider, Brutus) is its predator, which puts Giants on top of it.
+
+Payoffs count every Fish you control: a plain count keeps the swarm feeling, and a smooth count (each Fish a bit more) plays differently from Colony's thresholds. Adjacency cards stay wherever they make sense; on map_b a crossroad has at most 4 neighbours, so "for each adjacent Fish" pays about 1, at best 2.
+
+| Card | Rarity | Str | Text | Status |
+|---|---|---:|---|---|
+| Swordfish | R | 3 | Roar: remove a random adjacent enemy for each of your Fish next to this. | in |
+| a shark (which one open) | R | | Roar: remove an adjacent enemy of strength up to the number of your Fish. | proposed |
+| Tuna | C | 4 | Roar: draw a card for each of your Fish next to this. | in |
+| Sardine | C | 1 | Roar: place all Sardines from your hand and deck on random adjacent empty crossroads. | in (Lemming's effect, fine in play) |
+| a Fish (Hammerhead?) | C | | Has +1 strength for each other Fish you control. | proposed |
+| a Fish | C | | Roar: gain 5 food for each of your Fish next to this. | proposed |
+
+Open: four legendaries, two rares, two or three commons; Sardine and Tuna aren't on the Open Ocean roster yet.
+
 ## Egg Control
 
 Its fourth legendary: Omen (a raven; Forest, L, ~3, Bird): "Flight. Roar: put an animal from your opponent's Remove Pile into your hand." The deck removes more than any other, so the opponent's pile holds their best cards; a Bird, so the Bird Egg's Scout can find it. Wording to bring in line on the deck's cards: Eon's end-of-turn shuffle is a Dusk effect, Aurum is "Dawn: draw a card.", the Python counts removed animals (not units), and the Egg Eater counts removed Eggs.
