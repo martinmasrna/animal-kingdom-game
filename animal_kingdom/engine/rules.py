@@ -207,8 +207,8 @@ def _end_turn(state: GameState) -> None:
     effects.resolve(state)
     # A player who can neither draw nor place nor roam passes; the game goes on.
     if state.result is None and state.pending is None and not state.effect_stack \
-            and not _top_level_actions(state):
-        _end_turn(state)
+            and state.turn_counter < state.config.max_turns and not _top_level_actions(state):
+        _end_turn(state)                     # (never past the turn cap: is_terminal ends the game there)
 
 
 # ------------------------------------------------------------- regions / food
