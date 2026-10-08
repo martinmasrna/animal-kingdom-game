@@ -145,4 +145,8 @@
   .coll .side:not(.up) .clist.editing { flex: none; padding-top: 0; padding-bottom: 0; }
   .coll .side:not(.up) .clist.editing .dtile.on { border-radius: 8px; }
   .coll .fcount { cursor: pointer; }
+  /* the zoom: the keywords explained under the card, as in the game's card view */
+  .coll .zbox { flex-direction: column; gap: 10px; max-height: 100dvh; overflow-y: auto; padding: 12px 0; }
+  .coll .zbox .card { --w: min(78vw, 340px); flex: none; }
+  .coll .kws { width: min(78vw, 340px); }
 }

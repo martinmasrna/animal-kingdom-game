@@ -127,6 +127,19 @@ test('an opened deck is the column alone, starting at its top; Done returns to t
   await openDeck('[data-d="ramp"]'); await page.keyboard.press('Escape'); await wait(60); assert.ok(await page.$('#dnew'), 'Escape is Done while editing');
 });
 
+test('on a phone held upright the zoom explains its keywords under the card, all on screen', async () => {
+  const ph = await browser.newPage(); await ph.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+  try {
+    await ph.goto(`${server.url}/#/collection`, { waitUntil: 'networkidle0' });
+    await ph.$eval(card('chipmunk'), e => e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true }))); await wait(80);
+    const r = await ph.evaluate(() => { const R = s => { const b = document.querySelector(s).getBoundingClientRect(); return { top: b.top, bottom: b.bottom, left: b.left, right: b.right }; };
+      return { card: R('.modal.zoom .card'), kw: R('.modal.zoom .kw') }; });
+    if (process.env.SHOT) await ph.screenshot({ path: process.env.SHOT });
+    assert.ok(r.kw.top >= r.card.bottom - 1, `the keyword sits under the card (${r.kw.top} vs ${r.card.bottom})`);
+    assert.ok(r.kw.left >= 0 && r.kw.right <= 390, `and inside the screen (${r.kw.left}..${r.kw.right})`);
+  } finally { await ph.close(); await page.bringToFront(); }
+});
+
 test('right-click opens a card large, its keywords explained', async () => {
   await page.click(card('ember'), { button: 'right' }); await wait(80);
   assert.ok(await page.$('.modal.zoom .card'), 'the card opens');
