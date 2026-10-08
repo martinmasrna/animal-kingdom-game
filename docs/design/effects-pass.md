@@ -202,12 +202,12 @@ The deck is two halves (the fix for Flee fighting the pasture, found in the imag
 |---|---|---|---:|---|
 | a Wildebeest (the Great Migration; name to come) | Savanna | L | | Your regions produce 5 more food. |
 | a Giraffe (name to come) | Savanna | L | 5 | Your opponent plays with their hand revealed. (The tallest animal sees the lions first. Good in any reactive deck.) |
+| a Zebra (proposed; name to come) | Savanna | L | | Enemy regions produce 5 less food. (Martin's: a tech card against every deck that farms regions, the mirror of the Migration.) |
 | — | | L | | open |
-| — | | L | | open (to judge: a Gazelle, "Whenever one of your animals flees, gain 10 food.") |
 | Zebra | Savanna | R | 5 | **Flee.** When this flees, return the enemy that covered it to its owner's hand. (Stripes: the striped herd blurs and the attacker lunges at nothing. The corner is left empty, not taken, so you play the Zebra back onto it; taking it costs the opponent two actions.) |
-| Moose | Forest | R | 6 | Your other Hoofed animals have +2 strength during your opponent's turn. |
+| Moose | Forest | R | 6 | Your other Hoofed animals have +1 strength during your opponent's turn. (+2 put every front corner out of reach, Martin.) |
 | Honey Badger | Savanna | R | 2 | Roar: remove an adjacent enemy of strength 6 or more. |
-| — | | R | | open (a regroup card, "Roar: play a Hoofed animal from your hand.", once it's through the burst check) |
+| Okapi | Jungle (roster addition) | R | | At the end of your turn, if this is grazing, draw a card. (The herd's card flow, on a stander. The one-of-a-kind forest giraffe with zebra legs; the Impala was the other option, a Gazelle lookalike.) |
 | Cape Buffalo (stander) | Savanna | C | 4 | Roar: remove an adjacent enemy covering one of your Hoofed animals. (Martin's: the buffalo drives the predator off and the animal underneath is safe. Common, since it's the deck's core loop.) |
 | Wildebeest (stander) | Savanna | C | 6 | At the end of your turn, if this is grazing, gain 5 food. |
 | Giraffe (stander) | Savanna | C | 4 | Has +5 strength during your opponent's turn. |
@@ -215,7 +215,7 @@ The deck is two halves (the fix for Flee fighting the pasture, found in the imag
 | Gazelle (fleer) | Savanna | C | 3 | **Flee.** Roar: gain 5 food. |
 | Deer (fleer) | Forest | C | 4 | **Flee.** Roar: draw a Hoofed animal. |
 
-Rejected: Flee on animals whose value is where they stand (a fled corner can't be retaken, since the coverer is bigger); Stealth, Armor and Spikes while grazing (Food OTK's identity); a den that can't be captured while grazing; a +1 anthem legendary; a herd bull that stops covers on your other grazing animals (on the back corner nothing reaches it: a lock); a stampede and a 3-of-4-corners region (clunky); the Zebra kicking an enemy back to hand (Zebra is its stripes).
+Rejected: a regroup rare ("play a Hoofed animal from your hand": spends the hand this deck is short of); the fleeing payoff, the white stag that re-lands on an empty crossroad (there rarely is one) and the herd that bolts back to hand (it wastes your own actions, the opposite of Flee); "enemy regions next to your grazing animals produce no food" (an animal next to a region is one of its corners, so no enemy region is ever next to yours); Flee on animals whose value is where they stand (a fled corner can't be retaken, since the coverer is bigger); Stealth, Armor and Spikes while grazing (Food OTK's identity); a den that can't be captured while grazing; a +1 anthem legendary; a herd bull that stops covers on your other grazing animals (on the back corner nothing reaches it: a lock); a stampede and a 3-of-4-corners region (clunky); the Zebra kicking an enemy back to hand (Zebra is its stripes).
 
 ## Giants, draft
 
@@ -288,6 +288,7 @@ Its fourth legendary: Omen (a raven; Forest, L, ~3, Bird): "Flight. Roar: put an
 - The lure (a legendary Firefly): "Roar: your opponent's next animal must be placed next to this, if able." The femme-fatale firefly copies another species' flash and eats the males that come. First candidate for the Arachnid traps deck.
 - Octopus (Open Ocean, R, ~4; locked, Martin): "Roar: until your next turn, adjacent enemies lose their keywords and effects." The ink cloud: a one-turn blackout of Spikes, Poison, Armor, traps and auras, the hard answer to Food OTK's fortress and any engine. It gives Fathom and the Mimic Octopus their species.
 - Great White Shark (Open Ocean, R, 7; locked, Martin): "**Apex Predator.** If an animal was removed this turn, this has **Reach 3**." It smells blood from a mile away and strikes deep from your own side. Reach, not "ignoring connection": it launches from your connected animals. The blood condition keeps it apart from the legendary Leopard (Apex, Roam, Reach 2).
+- The herd over its young (Martin likes it, for another deck): "Your animals placed on top of your own animals have +2 strength." A mechanic only this game has; Fish landing on their own Fish late is the first fit.
 - Platypus (Australia, later): its family tag is "All", counting as every family (Martin, 2026-10-08).
 - Hermit Crab (Coast, later): Armor plus something about moving into another's shell.
 - Macaw (Jungle, Bird; rarity and strength with its deck): "Roar: your next Roar this turn happens twice." (This turn only: cleaner, Martin.) The parrot repeats what it hears. A card for a deck with few, high-impact Roars; Handlock is the first candidate (a doubled Gorilla sweep, an Orangutan training the hand twice). In Food Aggro it was mostly a second Squirrel.
