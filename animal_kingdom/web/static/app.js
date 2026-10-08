@@ -879,7 +879,7 @@ function drawIntro() {
     // stands going in, in a gem set into the card's bottom edge. No deck name: a person's deck name is never shown to their opponent.
     const name = s.bot ? seatLabel(p) : esc((s.name || 'Opponent').split('#')[0]), c = CARDS[cover], r = V.ranked && s.rating;
     const gem = r ? `<div class="iring edge ${c.rarity}"><div class="jewel">${gemDigits(parseInt(r, 10))}${r.endsWith('?') ? '<span class="q">?</span>' : ''}</div></div>` : '';
-    return `<div class="iside ${p === V.you ? 'A' : 'B'}"><div class="iobj">${cardHTML({ ...c, name }, { cls: 'compact' })}${gem}</div></div>`; };
+    return `<div class="iside ${p === V.you ? 'A' : 'B'}"><div class="iobj">${cardHTML({ ...c, name, label: c.name }, { cls: 'compact' })}${gem}</div></div>`; };
   const el = document.createElement('div'); el.className = 'intro'; el.id = 'intro';
   el.innerHTML = `${side(V.you)}<div class="ivs">vs</div>${side(opp())}`;
   document.getElementById('scr').appendChild(el); fitNames(el); sfx('versus', .55);

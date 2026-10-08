@@ -25,7 +25,7 @@ export function cardHTML(c, { str = c.str, cls = '', attrs = '', lazy = false } 
   const base = c.str === '*' ? null : c.str, delta = base !== null && str !== base ? (str > base ? ' up' : ' down') : '';
   const art = !hasArt(c.id) ? '' : lazy ? ` data-art="${artUrl(c.id)}" style="--fy:${focus(c.id).toFixed(0)}%;--oy:${lift(c.id).toFixed(2)}em"`
     : ` style="background-image:url(${artUrl(c.id)});--fy:${focus(c.id).toFixed(0)}%;--oy:${lift(c.id).toFixed(2)}em"`;
-  return `<div class="card ${c.rarity} ${cls}" ${attrs}><div class="pic"${art}>${hasArt(c.id) ? '' : `<span>${c.name}</span>`}</div><div class="cframe"></div>` +
+  return `<div class="card ${c.rarity} ${cls}" ${attrs}><div class="pic"${art}>${hasArt(c.id) ? '' : `<span>${c.label || c.name}</span>`}</div><div class="cframe"></div>` +
     `<div class="nbar${c.name.length > 18 ? ' two' : ''}" style="--n:${c.name.length}"><span>${c.name}</span></div>` +
     `<div class="stab"><span class="n${String(str).length > 1 ? ' two' : ''}${delta}">${chalk(str)}</span></div>` +
     `<div class="ctext">${c.text ? `<p>${rules(c.text)}</p>` : ''}<i>${c.tags.join(' · ')}</i></div></div>`;
