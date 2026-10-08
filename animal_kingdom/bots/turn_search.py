@@ -32,7 +32,7 @@ from collections import defaultdict
 from typing import Optional, Sequence
 
 from ..engine import rules
-from ..engine.actions import Action, DrawAction, PlaceAction
+from ..engine.actions import Action, DrawAction, PlaceAction, RoamAction
 from ..engine.state import GameState, StateView, other_player
 from .base import Bot, keep_hand
 from .determinize import determinize
@@ -516,7 +516,7 @@ class TurnSearcher(Bot):
         reserved: set[Action] = {
             a for a in legal
             if isinstance(a, DrawAction)
-            or (isinstance(a, PlaceAction) and a.is_hq_capture)
+            or (isinstance(a, (PlaceAction, RoamAction)) and a.is_hq_capture)
         }
 
         by_card: dict[str, list[PlaceAction]] = defaultdict(list)
