@@ -82,7 +82,7 @@ How it's built:
 | City Spider (Arachnid) | engine | City | C | 2 | When an animal of strength 2 or less is placed next to this, remove it. (Both sides: a trap for the opponent's small animals and tokens, a repeatable death for yours.) |
 | Cockroach | fodder | City | C | 1 | When this is removed, return it to your hand and draw a card. |
 | Earthworm | fodder | Meadow | C | 1 | When this is removed, place two Worms on its crossroad. (Worm, token, 0: "When this is removed, draw a card.") |
-| Piranha (locked; Fish) | removal | Jungle | C | 2 | Roar: if one of your animals was removed this turn, remove an adjacent enemy. (Blood in the water, then the frenzy: the deck's way to fight for the board.) |
+| the blood-scenting removal (animal open; Great White Shark proposed, as a rare ~6) | removal | | | | Roar: if one of your animals was removed this turn, remove an adjacent enemy. (Smells blood: the deck's way to fight for the board. The Piranha that carried it moved to the Fish.) |
 | Vulture (locked; Bird) | payoff: cards | Savanna | C | 3 | Flight. At the end of your turn, if one of your animals was removed this turn, draw a card. |
 | Hyena (no tag) | finisher | Savanna | C | 4 | Dusk: gain 3 food for each of your animals removed this turn. (The laughing scavenger: deaths into food. It scales with the turn's deaths, so a big turn pays big: that's the deck's puzzle, how many deaths out of two actions. Copies stack, and the Sloth doubles it; if games end too fast or too slow, the dial is the 3.) |
 
@@ -90,7 +90,7 @@ Expected weak points, untested: few cards that kill your own (Spiders die to any
 
 ## Canines
 
-The pack that roams the board, buffs itself on the board (Primates buff in hand) and hunts by position. High skill: each turn is a puzzle of moves and placements across two actions. Built on Roam ([`../rules/keywords.md`](../rules/keywords.md)), a game-wide keyword that Canines carry most. Count-based effects (stronger the more of them) belong to the Fish: Hammerhead, "Has +1 strength for each other Fish you control."; a count-based removal waits for the Tuna. Scarlett stays in the pool, outside this precon.
+The pack that roams the board, buffs itself on the board (Primates buff in hand) and hunts by position. High skill: each turn is a puzzle of moves and placements across two actions. Built on Roam ([`../rules/keywords.md`](../rules/keywords.md)), a game-wide keyword that Canines carry most. Count-based effects (stronger the more of them) belong to the Fish. Scarlett stays in the pool, outside this precon.
 
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
@@ -121,21 +121,26 @@ Payoffs count every Fish you control: a plain count keeps the swarm feeling, and
 
 Legendaries are drawn at a random point, often after the board is full, so each must work then; the opening is the commons' job (three copies each).
 
-| Card | Rarity | Str | Text | Status |
-|---|---|---:|---|---|
-| a Fish | L | 4 | Your Fish next to this have **Poison**. | to try (Martin: feels a bit weak). The hold: one region hard to break. "Your other Fish have Poison" makes every corner uncoverable (the herd's rejected card again) |
-| a Fish | L | 4 | Roar: for each region you control, draw a card and gain 5 food. | to try. The closer and the late reload; food number to tune |
-| Swordfish | R | 3 | Roar: remove a random adjacent enemy for each of your Fish next to this. | in |
-| a shark (which one open) | R | | Roar: remove an adjacent enemy of strength up to the number of your Fish. | proposed |
-| a Fish | R | 4 | Whenever your opponent covers one of your Fish, draw a card. | proposed |
-| a Fish | R | 4 | Roar: play another Fish. | proposed. Early two Fish for one action, late a second Roar on your own Fish |
-| Tuna | C | 4 | Roar: draw a card for each of your Fish next to this. | in |
-| Sardine | C | 1 | Roar: place all Sardines from your hand and deck on random adjacent empty crossroads. | in (Lemming's effect, fine in play) |
-| a Fish | C | 3 | Has +1 strength for each other Fish you control. | proposed |
-| a Fish | C | 1–2 | Your other Fish have +1 strength. | proposed; the deck's one buff card |
-| a Fish | C | 4 | Roar: place a Baby Fish (token, Fish, 0) on an empty crossroad next to this. | proposed |
+The list (Martin, 2026-10-08; animals and strengths set, wording to the card-text conventions):
 
-Open: two legendaries, one common. Rejected: Baby Fish spawners at legendary and rare (empty crossroads exist only in the first turns), the food common (boring, and Food Aggro's ground), a second buff card.
+| Card | Habitat | Rarity | Str | Text |
+|---|---|---|---:|---|
+| a Jellyfish (no Fish tag; name to come) | Open Ocean | L | 6 | Your Fish next to this have **Poison**. (Young fish shelter among jellyfish tentacles. "Your other Fish have Poison" would make every corner uncoverable: the herd's rejected card again.) |
+| a Bluefin Tuna (name to come) | Open Ocean | L | 5 | Roar: for each region you control, draw a card and gain 5 food. (The closer and the late reload; the most expensive fish ever sold. The herd's white stag, "draw a card for each region you control", needs another effect.) |
+| a Manta Ray (name to come) | Open Ocean | L | 4 | **Dusk:** if you control 2 or more regions, draw a card. |
+| a Piranha (name to come) | Jungle | L | 7 | Your Fish can be placed on enemies of strength up to the number of Fish you control. (The school strips something far bigger: once the board is full, it lets the small Fish win crossroads back. Snow Leopard's shape.) |
+| Swordfish | Open Ocean | R | 3 | Roar: remove a random adjacent enemy for each of your Fish next to this. |
+| Piranha | Jungle | R | 4 | Roar: remove an adjacent enemy of strength up to the number of your Fish. |
+| Manta Ray | Open Ocean | R | 6 | Whenever your opponent covers one of your Fish, draw a card. |
+| Remora | Open Ocean | R | 3 | Roar: play another Fish. (It arrives riding a bigger fish.) |
+| Tuna | Open Ocean | C | 4 | Roar: draw a card for each of your Fish next to this. |
+| Sardine | Open Ocean | C | 1 | Roar: place all Sardines from your hand and deck on random adjacent empty crossroads. (Lemming's effect, fine in play.) |
+| Mahi-mahi | Open Ocean | C | 3 | Roar: give your other Fish +1 strength. |
+| Mackerel | Open Ocean | C | 2 | Your other Fish have +1 strength. |
+| Barracuda | Open Ocean | C | 3 | Has +1 strength for each other Fish you control. |
+| Sunfish | Open Ocean | C | 4 | Roar: place a Baby Fish (token, Fish, 0) on an empty crossroad next to this. (It lays more eggs than any other animal.) |
+
+Sharks stay out of the count cards: they're lone hunters. Fish's predator is weak on this map (area removal reaches only the edge of a school built at home); Giants need a way to hit the middle of a school. Open Ocean's roster gains Sardine, Tuna, Remora, Mahi-mahi and Mackerel, to settle in the roster pass after the decks. Rejected: Baby Fish spawners at legendary and rare (empty crossroads exist only in the first turns), a food common (Food Aggro's ground), Goldfish (a pet), Salmon (a river fish, for River and Lake).
 
 ## Egg Control
 
@@ -153,5 +158,5 @@ Its fourth legendary: Omen (a raven; Forest, L, ~3, Bird): "Flight. Roar: put an
 - Mosquito (City, C, ~1): "Flight. Roar: give an adjacent enemy −2 strength."
 - Leech (Jungle, 1): "Roar: swap strength with an adjacent animal." It drains its host: the host shrinks, the leech swells. At 1 it can't cover anything, so it lands only on an empty crossroad or one of your own.
 - Opossum (City, R, 2, Marsupial): "Roar: return one of your animals next to this to your hand." A mother gathering her young onto her back; it replays an animal's Roar (Skully, Chipmunk, a removal), a value card for other decks, and the City's seed for the Marsupials' "carrying the young" identity when Australia comes.
-- Clownfish (Coral Reef, later; Fish, C, 2): "Roar: if this is next to one of your Fish, play another Fish." Reserved for the Fish deck.
+- Clownfish (Coral Reef, later): its "play another Fish" went to the Remora; Coral Reef gives it its own trait (safe in a stinging anemone). Electric Eel (Jungle) is the stun.
 - Hermit Crab (Coast, later): Armor plus something about moving into another's shell.
