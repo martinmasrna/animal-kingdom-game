@@ -21,8 +21,8 @@ from typing import Optional
 class Config:
     # --- One-off food gains on placement (Roar "gain N food") ---
     squirrel_food: int = 10              # trimmed from 12 in the 2026-07-05 balance pass
-    hamster_food_now: int = 10           # Hamster (the old Chipmunk's text): gain 10 now...
-    hamster_food_later: int = 10         # ...and 10 more at the start of the owner's next turn
+    chipmunk_food_now: int = 10          # Chipmunk: gain 10 now...
+    chipmunk_food_later: int = 10         # ...and 10 more at the start of the owner's next turn
     flying_squirrel_food: int = 10       # synced to card text "gain 10 food" (was 8; text/const desync broke groundhog fed-threshold combo, 2026-07-09)
     hedgehog_food: int = 5               # Hedgehog: a spiny body that also feeds
     rat_king_per_rodent: int = 4         # Roar: gain N food per OTHER Rodent you control
@@ -38,12 +38,12 @@ class Config:
     falstaff_food_rider: int = 3         # extra food whenever you gain food
 
     # --- "Food gained this turn" signature mechanic (food_otk pure-OTK overhaul 2026-07-05) ---
-    # A shared threshold read by Hamster/Muskrat/Groundhog; Scrooge instead doubles the raw haul.
+    # A shared threshold read by Gopher/Muskrat/Groundhog; Scrooge instead doubles the raw haul.
     fed_threshold: int = 10              # food gained this turn to arm Gopher/Muskrat/Groundhog
     gopher_draw: int = 2                # Gopher: draw N if fed this turn
     groundhog_food: int = 10            # Groundhog: gain N food if fed this turn (was +5 str)
     scrooge_gain_multiplier: int = 1    # Scrooge: gain (food gained this turn) x this
-    chipmunk_bonus_actions: int = 1     # Chipmunk: extra top-level actions on your NEXT turn
+    beaver_bonus_actions: int = 1       # Beaver: extra top-level actions on your NEXT turn
 
     # --- Food-event engine reactors (decision F2/F9; magnitudes are dials) ---
     eon_food: int = 1                    # per draw/shuffle/remove event

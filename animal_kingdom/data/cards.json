@@ -1467,8 +1467,8 @@
       "workbench_id": "food-aggro-5"
     },
     {
-      "id": "chipmunk",
-      "name": "Chipmunk",
+      "id": "beaver",
+      "name": "Beaver",
       "deck": "food_aggro",
       "rarity": "rare",
       "tags": [
@@ -1477,7 +1477,7 @@
       "base_strength": 4,
       "text": "Roar: next turn, take 1 additional action.",
       "keywords": [],
-      "species": "Chipmunk",
+      "species": "Beaver",
       "habitat": "Forest",
       "workbench_id": "food-aggro-6"
     },
@@ -1512,8 +1512,8 @@
       "workbench_id": "food-aggro-8"
     },
     {
-      "id": "hamster",
-      "name": "Hamster",
+      "id": "chipmunk",
+      "name": "Chipmunk",
       "deck": "food_aggro",
       "rarity": "common",
       "tags": [
@@ -1522,8 +1522,8 @@
       "base_strength": 1,
       "text": "Roar: gain 10 food. At the start of your next turn, gain 10 more.",
       "keywords": [],
-      "species": "Hamster",
-      "habitat": "Meadow",
+      "species": "Chipmunk",
+      "habitat": "Forest",
       "workbench_id": "food-aggro-9"
     },
     {

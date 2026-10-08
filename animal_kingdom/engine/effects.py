@@ -427,7 +427,7 @@ def _fire_on_remove(state, unit, cr, pos) -> None:
 
 def _food_gained_this_turn(state: GameState, player: str) -> int:
     """Food `player` has gained since the start of their current turn (turn_flags reset each
-    turn end). Powers the food_otk signature cards: Scrooge / Hamster / Muskrat / Groundhog."""
+    turn end). Powers the food_otk signature cards: Scrooge / Gopher / Muskrat / Groundhog."""
     return state.turn_flags.get(f"food_gained_{player}", 0)
 
 
@@ -2244,9 +2244,9 @@ def _meerkat_enemy_placed(state, meerkat, placed, cr):
     _push_draw(state, meerkat.owner, 1)
 
 
-def _chipmunk_place(state, unit, cr):
+def _beaver_place(state, unit, cr):
     """Roar: next turn, take 1 additional action."""
-    schedule(state, unit, 1, {"op": "grant_action", "player": unit.owner, "n": state.config.chipmunk_bonus_actions},
+    schedule(state, unit, 1, {"op": "grant_action", "player": unit.owner, "n": state.config.beaver_bonus_actions},
              while_buried=False)
 
 
@@ -2256,10 +2256,10 @@ def _dormouse_eot(state, unit, cr):
         _push_gain(state, unit.owner, state.config.dormouse_food)
 
 
-def _hamster_place(state, unit, cr):
+def _chipmunk_place(state, unit, cr):
     """Roar: gain 10 food. At the start of your next turn, gain 10 more."""
-    _push_gain(state, unit.owner, state.config.hamster_food_now)
-    schedule(state, unit, 1, {"op": "gain_food", "player": unit.owner, "amount": state.config.hamster_food_later},
+    _push_gain(state, unit.owner, state.config.chipmunk_food_now)
+    schedule(state, unit, 1, {"op": "gain_food", "player": unit.owner, "amount": state.config.chipmunk_food_later},
              while_buried=False)
 
 
@@ -2731,10 +2731,10 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "scrooge": {"on_place": _scrooge_place},
     "flying_squirrel": {"on_place": _gains("flying_squirrel_food")},
     "meerkat": {"on_place": _draw1, "on_enemy_placed_adjacent": _meerkat_enemy_placed},
-    "chipmunk": {"on_place": _chipmunk_place},
+    "beaver": {"on_place": _beaver_place},
     "dormouse": {"on_end_of_turn": _dormouse_eot},
     "squirrel": {"on_place": _gains("squirrel_food")},
-    "hamster": {"on_place": _hamster_place},
+    "chipmunk": {"on_place": _chipmunk_place},
     "gopher": {"on_place": _conditional(_draws("gopher_draw"))},
     "muskrat": {"on_place": _conditional(_removes())},
     "groundhog": {"on_place": _conditional(_gains("groundhog_food"))},
@@ -2803,7 +2803,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "dingo": {"on_end_of_turn": _dingo_eot},
     # The tutorial's own cards, as they were when it was written.
     "tutorial_lynx": {"on_place": _conditional(_draw1)},
-    "tutorial_chipmunk": {"on_place": _hamster_place},
+    "tutorial_chipmunk": {"on_place": _chipmunk_place},
     # Reserve designs and the sim tools' calibration bodies.
     "eon_food_engine": {"on_draw_event": _eon_event, "on_shuffle_event": _eon_event, "on_remove_event": _eon_event},
     "unnamed_canine": {"on_place": _unnamed_canine_place},

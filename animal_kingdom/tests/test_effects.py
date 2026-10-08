@@ -620,11 +620,11 @@ def test_bounce_resets_the_timer():
     assert live[0]["remaining"] == CFG.sloth_delay       # full timer, not the partly-elapsed one
 
 
-def test_hamster_no_longer_pays_out_after_it_is_destroyed():
+def test_chipmunk_no_longer_pays_out_after_it_is_destroyed():
     """The 2026-07-12 finding ("chipmunk works when covered as well?"), now ruled: Chipmunk
     scheduled its second payout with no reference to its unit, so it fired even when destroyed."""
-    s = make_state(hands={"A": ["hamster"]})
-    rules.apply_action(s, PlaceAction("hamster", ("cr", "1,2")))
+    s = make_state(hands={"A": ["chipmunk"]})
+    rules.apply_action(s, PlaceAction("chipmunk", ("cr", "1,2")))
     food_after_roar = s.food["A"]
     effects._remove_specific(s, "1,2", s.top_unit("1,2"), by_player="B", by_effect=False)
     _tick(s)
@@ -868,15 +868,15 @@ def test_queen_marabunta_scales_with_other_colony():
     assert s.food["A"] == 2 * CFG.queen_marabunta_per_colony   # two other Colony units
 
 
-def test_hamster_pays_now_and_next_turn():
-    s = make_state(current="A", hands={"A": ["hamster"]},
+def test_chipmunk_pays_now_and_next_turn():
+    s = make_state(current="A", hands={"A": ["chipmunk"]},
                    decks={"A": ["lion"], "B": ["lynx", "lynx"]})
     s.actions_taken_this_turn = s.config.actions_per_turn - 1  # Place ends A's turn
-    rules.apply_action(s, PlaceAction("hamster", ("cr", "1,2")))
-    assert s.food["A"] == CFG.hamster_food_now
+    rules.apply_action(s, PlaceAction("chipmunk", ("cr", "1,2")))
+    assert s.food["A"] == CFG.chipmunk_food_now
     s.actions_taken_this_turn = s.config.actions_per_turn - 1  # Draw ends B's turn -> start of A's next
     rules.apply_action(s, DrawAction())                 # B's turn -> start of A's next turn
-    assert s.food["A"] == CFG.hamster_food_now + CFG.hamster_food_later
+    assert s.food["A"] == CFG.chipmunk_food_now + CFG.chipmunk_food_later
 
 
 def test_methuselah_gains_food_at_end_of_turn():

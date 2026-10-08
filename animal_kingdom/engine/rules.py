@@ -73,7 +73,7 @@ TITAN_ACTIONS = 2   # Titan (keywords.md): playing it costs two actions instead 
 
 def _actions_left(state: GameState) -> int:
     limit = (state.config.actions_per_turn
-             + state.turn_flags.get(f"bonus_actions_{state.current}", 0))  # Chipmunk
+             + state.turn_flags.get(f"bonus_actions_{state.current}", 0))  # Beaver
     return limit - state.actions_taken_this_turn
 
 

@@ -1306,10 +1306,10 @@
     {
      "habitat": "Forest",
      "id": "food-aggro-6",
-     "name": "Chipmunk",
+     "name": "Beaver",
      "note": "",
      "rarity": "R",
-     "species": "Chipmunk",
+     "species": "Beaver",
      "status": "proposed",
      "str": 4,
      "tag": "Rodent",
@@ -1340,12 +1340,12 @@
      "text": "Roar: gain 10 food."
     },
     {
-     "habitat": "Meadow",
+     "habitat": "Forest",
      "id": "food-aggro-9",
-     "name": "Hamster",
+     "name": "Chipmunk",
      "note": "",
      "rarity": "C",
-     "species": "Hamster",
+     "species": "Chipmunk",
      "status": "proposed",
      "str": 1,
      "tag": "Rodent",

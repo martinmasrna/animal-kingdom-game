@@ -1,7 +1,7 @@
 """Golden tests for the pure-OTK food_otk overhaul (2026-07-05).
 
 Covers the signature mechanic ("food gained this turn") and its cards (Food Aggro's since the launch decks): Barley,
-Scrooge, Chipmunk (bonus action), Hedgehog, Gopher, Muskrat, Groundhog, and the Armadillo Stealth aura. Map A geometry
+Scrooge, Beaver (bonus action), Hedgehog, Gopher, Muskrat, Groundhog, and the Armadillo Stealth aura. Map A geometry
 (4x3): "2,2" neighbours "1,2","3,2","2,1","2,3"; A's HQ fronts column 1, B's column 4.
 """
 
@@ -109,7 +109,7 @@ def test_groundhog_gains_food_only_when_fed():
 def test_rat_king_gains_food_per_other_rodent_and_draws():
     s = make_state(hands={"A": ["rat_king"]}, decks={"A": ["lion"], "B": []})
     put(s, "1,1", "squirrel", "A")                                    # Rodent
-    put(s, "1,3", "hamster", "A")                                     # Rodent
+    put(s, "1,3", "chipmunk", "A")                                     # Rodent
     rules.apply_action(s, PlaceAction("rat_king", ("cr", "1,2")))
     assert s.food["A"] == 2 * CFG.rat_king_per_rodent                 # two OTHER rodents
     assert "lion" in hand_ids(s, "A")                                 # drew 1
@@ -127,19 +127,19 @@ def test_hedgehog_feeds_and_its_spines_remove_the_first_coverer():
     assert s.top_unit("3,2") is hedgehog and "lion" in s.remove_pile    # ...and is removed
 
 
-# ------------------------------------------------------------------- Chipmunk (tempo)
+# --------------------------------------------------------------------- Beaver (tempo)
 
-def test_chipmunk_grants_an_extra_action_next_turn():
-    s = make_state(hands={"A": ["chipmunk"]},
+def test_beaver_grants_an_extra_action_next_turn():
+    s = make_state(hands={"A": ["beaver"]},
                    decks={"A": ["mouse"] * 12, "B": ["mouse"] * 12})
-    rules.apply_action(s, PlaceAction("chipmunk", ("cr", "1,2")))     # action 1
+    rules.apply_action(s, PlaceAction("beaver", ("cr", "1,2")))     # action 1
     assert len(s.hands["A"]) == 0                                     # no draw
     assert any(x["step"]["op"] == "grant_action" for x in s.scheduled)
     advance_to(s, 2)                                                  # into A's next turn
-    assert s.turn_flags.get("bonus_actions_A") == CFG.chipmunk_bonus_actions
+    assert s.turn_flags.get("bonus_actions_A") == CFG.beaver_bonus_actions
 
     before = s.turn_counter
-    for _ in range(CFG.actions_per_turn + CFG.chipmunk_bonus_actions):
+    for _ in range(CFG.actions_per_turn + CFG.beaver_bonus_actions):
         assert s.current == "A"                                       # turn stays open for 3 actions
         rules.apply_action(s, DrawAction())
     assert s.turn_counter == before + 1                              # ended only after the 3rd
