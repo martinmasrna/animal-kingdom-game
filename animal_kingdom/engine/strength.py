@@ -54,16 +54,33 @@ def _global_growth(state: GameState, card_id: str, owner: str) -> int:
     return state.card_strength_counters.get(owner, {}).get(card_id, 0)
 
 
+def _inked(state: GameState, iid: Optional[int]) -> bool:
+    """Octopus ink (statics.inked, inlined here: statics imports this module): the unit's effects are off."""
+    until = state.inked.get(iid) if iid is not None and state.inked else None
+    return until is not None and state.turn_counter < until
+
+
+# Auras on the board that give your other animals of a family strength: card id -> (family, config attr of the
+# bonus, whether only during your opponent's turn). Each source counts, and none counts for itself.
+FAMILY_AURAS = {
+    "raksha": ("Canine", "raksha_anthem", False),     # "Your other Canines have +1 strength."
+    "mackerel": ("Fish", "mackerel_anthem", False),   # "Your other Fish have +1 strength."
+    "moose": ("Hoofed", "moose_anthem", True),        # "Your other Hoofed animals have +1 strength during your opponent's turn."
+}
+
+
 def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) -> int:
     """The live "has +X" anthem bonus for a unit of `card` controlled by `owner`.
 
     `self_iid` is the unit's iid if it is on the board, or None for a prospective placement
     (a card still in hand). "Other X" auras exclude the unit itself; "each friendly X" auras
     include it (and add 1 for a prospective placement, since it is not on the board yet).
+    An inked unit has no anthem of its own, and an inked source gives none.
     """
     tops = _tops_owned(state, owner)
     prospective = self_iid is None
     cfg = state.config
+    their_turn = state.current != owner
 
     def count(tag: str, *, include_self: bool) -> int:
         if include_self:
@@ -73,26 +90,43 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
 
     cid = card.id
     bonus = 0
-    if cid == "lobo":                       # +2 for each OTHER Canine you control
-        bonus += cfg.anthem_lobo_per * count("Canine", include_self=False)
-    elif cid == "verminus":                 # +1 for each OTHER unit you control (any tag)
-        others = sum(1 for u in tops if u.iid != self_iid)
-        bonus += cfg.anthem_verminus_per * others
-    elif cid == "vesper":                   # +2 for each OTHER friendly Colony unit
-        bonus += cfg.anthem_vesper_per * count("Colony", include_self=False)
-    elif cid == "guard_hornet":             # +5 while you control >= threshold Colony units (incl. itself)
-        if count("Colony", include_self=True) >= cfg.guard_hornet_colony_threshold:
-            bonus += cfg.guard_hornet_bonus
+    if not _inked(state, self_iid):
+        if cid == "verminus":                   # +1 for each OTHER unit you control (any tag)
+            bonus += cfg.anthem_verminus_per * sum(1 for u in tops if u.iid != self_iid)
+        elif cid == "vesper":                   # +2 for each OTHER friendly Colony unit
+            bonus += cfg.anthem_vesper_per * count("Colony", include_self=False)
+        elif cid == "guard_hornet":             # +5 while you control >= threshold Colony units (incl. itself)
+            if count("Colony", include_self=True) >= cfg.guard_hornet_colony_threshold:
+                bonus += cfg.guard_hornet_bonus
+        elif cid == "tuna":                     # +1 for each other Fish you control
+            bonus += cfg.tuna_per_fish * count("Fish", include_self=False)
+        elif cid == "grizzly_bear":             # +1 for each card in your hand (it has left it when placed)
+            bonus += cfg.grizzly_per_card * max(0, len(state.hands[owner]) - (1 if prospective else 0))
+        elif cid == "giraffe":                  # +5 during your opponent's turn
+            bonus += cfg.giraffe_bonus if their_turn else 0
+        elif cid == "boar" and not prospective:  # +3 while grazing
+            from .statics import grazing
+            unit = next((u for u in tops if u.iid == self_iid), None)
+            if unit is not None and grazing(state, unit):
+                bonus += cfg.boar_grazing_bonus
 
-    # Raksha aura: your *other* Canines have +2 while you control a Raksha.
-    if "Canine" in card.tags and cid != "raksha" and any(u.card_id == "raksha" for u in tops):
-        bonus += cfg.raksha_anthem
+    for u in tops:
+        aura = FAMILY_AURAS.get(u.card_id)
+        if aura is None or u.iid == self_iid or aura[0] not in card.tags or _inked(state, u.iid):
+            continue
+        if aura[2] and not their_turn:
+            continue
+        bonus += getattr(cfg, aura[1])
     return bonus
 
 
 def effective_strength(state: GameState, unit: UnitInstance) -> int:
     """Strength of a unit in play: base/dynamic + its stored counter + live anthems, >= 0."""
     card = state.cards[unit.card_id]
+    if _inked(state, unit.iid):             # its own effects are off: a dynamic strength is its printed 0
+        base = card.base_strength if isinstance(card.base_strength, int) else 0
+        return max(0, base + _global_growth(state, card.id, unit.owner) + unit.strength_counter
+                   + anthem_bonus(state, card, unit.owner, unit.iid))
     val = (_base_or_dynamic(state, card, unit.owner)
            + _global_growth(state, card.id, unit.owner)
            + unit.strength_counter

@@ -158,10 +158,12 @@ class StateView:
     card_strength_counters: Mapping[str, Mapping[str, int]]
     pending: Optional[Mapping[str, Any]]
     result: Optional[Result]
+    opponent_hand: Optional[tuple[str, ...]] = None   # only while their hand is revealed (the legendary Giraffe)
 
     def to_dict(self) -> dict:
         """Return a JSON-safe snapshot of exactly what this player may observe."""
         return {
+            **({"opponent_hand": list(self.opponent_hand)} if self.opponent_hand is not None else {}),
             "player": self.player,
             "to_act": self.to_act,
             "current": self.current,
@@ -243,8 +245,9 @@ class GameState:
         scheduled: Optional[list[dict]] = None,
         turn_flags: Optional[dict] = None,
         card_strength_counters: Optional[dict[str, dict[str, int]]] = None,
-        rodent_played_turns: Optional[dict[str, set[int]]] = None,
         result: Optional[Result] = None,
+        pile_owners: Optional[list] = None,
+        inked: Optional[dict[int, int]] = None,
     ):
         self.game_map = game_map
         self.cards = cards
@@ -255,6 +258,12 @@ class GameState:
         # The fixed 30-card starting decklists (immutable tuples), read by Oxpecker (F12).
         self.starting_decks = starting_decks if starting_decks is not None else {"A": (), "B": ()}
         self.remove_pile = remove_pile     # shared, public (formerly "discard")
+        # Whose each Remove Pile card is, in step with remove_pile ("your Remove Pile": Raccoon, the legendary Raven).
+        # None for a card put there by hand (tests) or by a state saved before owners were kept.
+        self.pile_owners = pile_owners if pile_owners is not None else [None] * len(remove_pile)
+        # Octopus ink: iid -> the turn_counter its ink lasts until (the inking player's next turn starts then). An inked
+        # animal has no keywords and no effects meanwhile (statics.inked).
+        self.inked = inked if inked is not None else {}
         self.food = food
         self.current = current
         self.first_player = first_player
@@ -274,10 +283,6 @@ class GameState:
         self.card_strength_counters = (
             card_strength_counters if card_strength_counters is not None else {"A": {}, "B": {}}
         )
-        # player -> set of turn_counters on which they placed a Rodent (Gopher's "last turn"
-        # payoff). A set, not a single latest turn: playing a Rodent this turn must not erase
-        # the fact that one was played last turn (which would disarm Gopher - see effects.py).
-        self.rodent_played_turns = rodent_played_turns if rodent_played_turns is not None else {}
         self.result = result
         # What happened, in order, as it happened (placed, covered, removed, bounced, drawn, food, turns): the server
         # hands these to the players instead of anyone diffing positions. Not part of the position: never saved, and a
@@ -290,6 +295,31 @@ class GameState:
     def emit(self, e: str, **fields) -> None:
         self.events.append({"e": e, **fields, **({"cause": self.cause} if self.cause else {}),
                             **({"cause_iid": self.cause_iid} if self.cause and self.cause_iid is not None else {})})
+
+    # --- the Remove Pile, with each card's owner ---
+    def _sync_pile(self) -> None:
+        if len(self.pile_owners) != len(self.remove_pile):   # a pile edited by hand: owners unknown past what's kept
+            self.pile_owners = (self.pile_owners + [None] * len(self.remove_pile))[:len(self.remove_pile)]
+
+    def pile_add(self, card_id: str, owner: Optional[str]) -> None:
+        self._sync_pile()
+        self.remove_pile.append(card_id)
+        self.pile_owners.append(owner)
+
+    def pile_cards_of(self, owner: str) -> list[str]:
+        """The Remove Pile cards `owner` owns (their Remove Pile), oldest first."""
+        self._sync_pile()
+        return [c for c, o in zip(self.remove_pile, self.pile_owners) if o == owner]
+
+    def pile_take(self, card_id: str, owner: Optional[str] = None) -> bool:
+        """Take one `card_id` out of the Remove Pile (the newest one `owner` owns, when given). False if there is none."""
+        self._sync_pile()
+        for i in range(len(self.remove_pile) - 1, -1, -1):
+            if self.remove_pile[i] == card_id and (owner is None or self.pile_owners[i] in (owner, None)):
+                del self.remove_pile[i]
+                del self.pile_owners[i]
+                return True
+        return False
 
     def stamp_played(self, unit: "UnitInstance") -> None:
         """Mark `unit` as entering the board now (its place in the play order Dawn and Dusk resolve by)."""
@@ -322,7 +352,17 @@ class GameState:
         inst = UnitInstance(card_id, player, self.new_iid(), strength_counter=strength_counter)
         self.hands[player].append(inst)
         self.emit("to_hand", player=player, iid=inst.iid, card=card_id)
+        self.ensure_mates(player)
         return inst
+
+    def ensure_mates(self, player: str) -> None:
+        """A card that brings its mate (the legendary Eagle: "When this enters your hand, add its mate to your hand") has
+        it in `player`'s hand. The mate itself (a token) brings nothing back."""
+        hand = self.hands[player]
+        for u in list(hand):
+            card = self.cards[u.card_id]
+            if card.mate and card.deck != "token" and not any(h.card_id == card.mate for h in hand):
+                self.add_to_hand(player, card.mate)
 
     # --- board queries (shared by rules and effects, hence here on the state) ---
     def top_unit(self, cr: str) -> Optional["UnitInstance"]:
@@ -405,7 +445,8 @@ class GameState:
         new.scheduled = _plain_copy(self.scheduled)
         new.turn_flags = _plain_copy(self.turn_flags)
         new.card_strength_counters = _plain_copy(self.card_strength_counters)
-        new.rodent_played_turns = {p: set(v) for p, v in self.rodent_played_turns.items()}
+        new.pile_owners = list(self.pile_owners)
+        new.inked = dict(self.inked)
         new.result = self.result  # Result is frozen/immutable - safe to share
         return new
 
@@ -434,7 +475,13 @@ class GameState:
             }),
             pending=MappingProxyType(copy.deepcopy(self.pending)) if self.pending else None,
             result=self.result,
+            opponent_hand=tuple(u.card_id for u in self.hands[opp]) if self.hand_revealed(opp) else None,
         )
+
+    def hand_revealed(self, player: str) -> bool:
+        """Whether `player` plays with their hand revealed (their opponent controls the legendary Giraffe)."""
+        from .statics import hand_revealed   # statics reads the board (ink included); it imports this module
+        return hand_revealed(self, player)
 
     # --- serialization ---
     def to_dict(self) -> dict:
@@ -460,8 +507,9 @@ class GameState:
             "scheduled": copy.deepcopy(self.scheduled),
             "turn_flags": copy.deepcopy(self.turn_flags),
             "card_strength_counters": copy.deepcopy(self.card_strength_counters),
-            "rodent_played_turns": {p: sorted(v) for p, v in self.rodent_played_turns.items()},
             "result": self.result.to_dict() if self.result else None,
+            "pile_owners": list(self.pile_owners),
+            "inked": [[i, t] for i, t in sorted(self.inked.items())],
         }
 
     @staticmethod
@@ -505,13 +553,9 @@ class GameState:
             card_strength_counters=copy.deepcopy(
                 d.get("card_strength_counters") or {"A": {}, "B": {}}
             ),
-            rodent_played_turns={
-                # Tolerate the legacy scalar form ({"A": 1}) from older serialized states.
-                p: (set(v) if isinstance(v, (list, set)) else {v})
-                for p, v in (d.get("rodent_played_turns")
-                             or d.get("rodent_played_turn") or {}).items()
-            },
             result=Result.from_dict(d["result"]) if d["result"] else None,
+            pile_owners=list(d["pile_owners"]) if "pile_owners" in d else None,
+            inked={int(i): t for i, t in (d.get("inked") or [])},
         )
 
 
@@ -578,4 +622,7 @@ def new_game(
             chooser = state.effect_stack[-1]["player"]
             state.pending = {"mode": "choice", "chooser": chooser, "optional": True,
                              "kind": "mulligan", "options": [u.iid for u in state.hands[chooser]]}
+    if not state.effect_stack:            # no mulligan: the opening hands are final now (else the mulligan's end does this)
+        for player in (first, second):
+            state.ensure_mates(player)
     return state

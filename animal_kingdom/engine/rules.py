@@ -57,19 +57,23 @@ def can_pass(state: GameState) -> bool:
 
 def _top_level_actions(state: GameState) -> list[Action]:
     player = state.current
-    if not _actions_left(state):                   # the turn stays open only for a free roam (Roam)
-        return list(effects.legal_roams(state, player)) if effects.free_roams_left(state, player) else []
+    left = _actions_left(state)
+    if left <= 0:                                  # the turn stays open only for a free roam (Roam)
+        return list(effects.legal_roams(state, player, free_only=True)) if effects.free_roams_left(state, player) else []
     actions: list[Action] = []
     if state.decks[player]:
         actions.append(DrawAction())
-    actions.extend(effects.legal_placements(state, player))
+    actions.extend(effects.legal_placements(state, player, titan_ok=left >= TITAN_ACTIONS))
     actions.extend(effects.legal_roams(state, player))
     return actions
 
 
+TITAN_ACTIONS = 2   # Titan (keywords.md): playing it costs two actions instead of one
+
+
 def _actions_left(state: GameState) -> int:
     limit = (state.config.actions_per_turn
-             + state.turn_flags.get(f"bonus_actions_{state.current}", 0))  # Chinchilla
+             + state.turn_flags.get(f"bonus_actions_{state.current}", 0))  # Chipmunk
     return limit - state.actions_taken_this_turn
 
 
@@ -141,10 +145,12 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
         state.actions_taken_this_turn += 1
         _do_draw(state, state.current)
     elif isinstance(action, PlaceAction):
-        state.actions_taken_this_turn += 1
+        titan = "Titan" in state.cards[action.card_id].keywords
+        state.actions_taken_this_turn += TITAN_ACTIONS if titan else 1
         effects.do_placement(state, state.current, action.card_id, action.target)
     elif isinstance(action, RoamAction):
-        effects.pay_for_roam(state, state.current)
+        stack = state.board.get(action.origin)
+        effects.pay_for_roam(state, state.current, stack[-1] if stack else None)
         effects.do_roam(state, state.current, action.origin, action.target)
     else:
         raise EngineError(f"unexpected action {action!r}")
@@ -192,6 +198,8 @@ def _end_turn(state: GameState) -> None:
     state.units_placed_this_turn = 0
     state.actions_taken_this_turn = 0
     state.turn_flags = {}                    # reset once-per-turn trigger flags
+    if state.inked:                          # ink that has worn off
+        state.inked = {i: t for i, t in state.inked.items() if t > state.turn_counter}
     state.current = other_player(player)
     state.emit("turn_start", player=state.current, turn=state.turn_counter)
     # Start of the new player's turn: delayed effects + start-of-turn triggers, then resolve.
@@ -207,17 +215,16 @@ def _end_turn(state: GameState) -> None:
 
 def regions_controlled(state: GameState, player: str):
     """Regions where `player` occupies every corner (overview.md §10)."""
-    gm = state.game_map
-    return [r for r in gm.regions.values()
-            if all(state.owner_of(c) == player for c in r.corners)]
+    return statics.regions_of(state, player)
 
 
 def region_income(state: GameState, player: str) -> int:
-    """Food `player`'s regions produce at the end of their turn (0 while they control the
-    Unnamed Giant: "Your regions produce no food")."""
+    """Food `player`'s regions produce at the end of their turn: each its printed food, moved by the legendary
+    Wildebeest and Boar (never below nothing); 0 while they control the Unnamed Giant ("Your regions produce no food")."""
     if statics.regions_starved(state, player):
         return 0
-    return sum(r.food for r in regions_controlled(state, player))
+    mod = statics.region_food_modifier(state, player)
+    return sum(max(0, r.food + mod) for r in regions_controlled(state, player))
 
 
 def _produce_food(state: GameState, player: str) -> None:
