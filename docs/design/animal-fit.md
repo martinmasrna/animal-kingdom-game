@@ -35,8 +35,9 @@ Some animals are one of a kind: nothing else looks or behaves like them (Chamele
 
 ## Calls so far
 
-- Perfect: Rattlesnake (the rattle shuffles), Owl (sees the hidden: Scout), Raven, Cheetah, Falcon, Cockroach (returns when it dies), Caterpillar and the Butterfly legendary (stacked metamorphosis), Zebra (stripes: flee bounce), Lemming (the swarm), Chameleon (blends in: covers anything).
+- Perfect: Rattlesnake (the rattle shuffles), Owl (sees the hidden: Scout), Raven, Cheetah, Falcon, Cockroach (returns when it dies), Caterpillar and the Butterfly legendary (stacked metamorphosis), Lemming (the swarm), Chameleon (blends in: covers anything).
 - Better fit chosen: Taipan → Cobra; Snow Leopard → Leopard (habitat); the Serval's effect → Honey Badger; Weasel removal rejected (too small to remove a 10); Mahi-mahi too big for a 2; the Gazelle didn't fit a draw engine; a Remora reads as "draw a Shark".
+- Open: the Zebra's card should be about its stripes, but the current one (the flee bounce) is awkward.
 - Animals picked for the effect's picture: Flee goes on fast prey (gazelles, antelopes, zebra, deer, hare); a Capybara is a "rodent hippo", not a utility rodent; a Meerkat keeps watch; a Jerboa or a frog jumps, so they don't fit an extra placement.
 - Rejected as trivia: "Battle at Kruger" for the Buffalo, Mocha Dick for the whale (Moby Dick, known to everyone, is fine).
 - Unfamiliar animals rejected: a card many decks play needs an animal a person would list among 200 animals (not a vole or a shrew).
