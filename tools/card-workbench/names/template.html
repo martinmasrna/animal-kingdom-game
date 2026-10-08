@@ -1,0 +1,142 @@
+<title>Animal Kingdom Legend Names</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Cinzel:wght@700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: a sticky filter bar over one column of legendaries; each row is art, the card, and the name choice. Single dark look, the game's own. */
+:root {
+  --bg: #101214; --surface: #181b1e; --surface-2: #20252a; --line: #2e353c; --text: #ece9e2; --muted: #8d939a; --faint: #5d636a;
+  --gold: #e2b553; --pick: #5fb878; --flag: #e39b3c;
+  --display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --legend: 'Cinzel', Georgia, serif;
+  --body: 'Inter', system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font: 14px/1.45 var(--body); padding-inline: 16px; padding-block: 0 48px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 26px; text-transform: uppercase; margin: 0; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); margin-inline: -16px; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 3px 11px; font-size: 13px; color: var(--muted); }
+.chip[aria-pressed="true"] { color: var(--text); border-color: var(--text); background: var(--surface-2); }
+.sync { font-size: 12px; color: var(--faint); margin-left: auto; }
+.sync.bad { color: var(--flag); }
+.rules { max-width: 72ch; color: var(--muted); margin: 18px 0 8px; }
+.rules ol { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 2px; }
+main { display: grid; gap: 12px; margin-top: 14px; max-width: 1100px; }
+.row { display: grid; grid-template-columns: 180px minmax(0, 1fr) minmax(0, 1.1fr); gap: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; align-items: start; }
+.row.done { border-color: color-mix(in srgb, var(--pick) 50%, var(--line)); }
+.art { aspect-ratio: 3 / 2; max-width: 100%; border-radius: 6px; overflow: hidden; background: var(--surface-2); display: grid; place-items: center; color: var(--faint); font-family: var(--display); text-transform: uppercase; letter-spacing: .08em; font-size: 13px; }
+.art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.card { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.now { font-family: var(--legend); font-size: 22px; color: var(--gold); line-height: 1.15; }
+.now.none { font-family: var(--display); font-size: 20px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.meta { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.flag { font-size: 12px; color: var(--flag); }
+.text { font-size: 13px; opacity: .88; }
+.pick { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.opt { border: 1px solid var(--line); background: var(--surface-2); border-radius: 6px; padding: 4px 10px; font-family: var(--legend); font-size: 15px; }
+.opt.keep { font-family: var(--body); font-size: 13px; color: var(--muted); }
+.opt[aria-pressed="true"] { background: var(--pick); border-color: var(--pick); color: #0d1a10; }
+.own, .note { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-size: 13px; }
+.own { font-family: var(--legend); font-size: 15px; }
+.own::placeholder, .note::placeholder { color: var(--faint); font-family: var(--body); font-size: 13px; }
+.chosen { font-size: 12px; color: var(--pick); min-height: 1em; }
+@media (max-width: 820px) { .row { grid-template-columns: 1fr; } .art { width: 100%; } .sync { margin-left: 0; width: 100%; } }
+</style>
+
+<div class="bar">
+  <h1>Legend Names</h1>
+  <span class="count" id="count"></span>
+  <div class="filters" id="filters"></div>
+  <div class="sync" id="sync">Connecting…</div>
+</div>
+
+<div class="rules">
+  <b>Draft rules</b>, from the names that already work (Gale, Eon, Aurum, Fathom, Vesper):
+  <ol>
+    <li>One or two words: a name, not a description.</li>
+    <li>It evokes the card's effect or the animal's essence.</li>
+    <li>Myth and folklore may be evoked, never cited: no specific work, character or real individual.</li>
+    <li>Titles only where the animal really has royalty (the lion pride, the colony queens).</li>
+    <li>Unique in sound across the pool.</li>
+    <li>No pun that needs explaining.</li>
+  </ol>
+</div>
+
+<main id="main"></main>
+
+<script>
+const DATA = /*DATA*/null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const state = { show: "To decide", picks: {} };
+try { state.show = localStorage.getItem("names-filter") || state.show; } catch (e) {}
+let db = null;
+const pick = k => state.picks[k] || {};
+const final = c => pick(c.key).custom || (pick(c.key).choice === "__keep" ? c.name : pick(c.key).choice) || "";
+const decided = c => !!final(c);
+const FILTERS = { "All": () => true, "To decide": c => !decided(c), "Unnamed": c => !c.name, "Cites a source": c => !!c.cites, "Decided": decided, "Launch only": c => !c.pool };
+
+function render() {
+  const n = DATA.filter(decided).length;
+  $("#count").textContent = `${n} / ${DATA.length} decided`;
+  $("#filters").innerHTML = Object.keys(FILTERS).map(f => `<button class="chip" data-f="${f}" aria-pressed="${state.show === f}">${f}</button>`).join("");
+  const list = DATA.filter(FILTERS[state.show]);
+  const active = document.activeElement && document.activeElement.id;
+  $("#main").innerHTML = list.length ? list.map(c => {
+    const p = pick(c.key), f = final(c);
+    const opts = (c.name ? [["__keep", "Keep " + c.name]] : []).concat(c.candidates.map(x => [x, x]));
+    return `<article class="row ${f ? "done" : ""}">
+      <div class="art">${c.art ? `<img src="art/${esc(c.art)}.webp" alt="${esc(c.name || c.species)}" loading="lazy">` : "No art yet"}</div>
+      <div class="card">
+        ${c.name ? `<div class="now">${esc(c.name)}</div>` : `<div class="now none">Unnamed ${esc(c.species)}</div>`}
+        <div class="meta"><span>${esc(c.species)}</span><span>${esc(c.str)} strength</span><span>${esc(c.deck)}</span>${c.status === "locked" ? "<span>locked</span>" : ""}</div>
+        ${c.cites ? `<div class="flag">Cites ${esc(c.cites)}</div>` : ""}
+        <div class="text">${esc(c.text)}</div>
+      </div>
+      <div class="pick">
+        <div class="opts">${opts.map(([v, l]) => `<button class="opt ${v === "__keep" ? "keep" : ""}" data-key="${esc(c.key)}" data-v="${esc(v)}" aria-pressed="${!p.custom && p.choice === v}">${esc(l)}</button>`).join("") || `<span class="meta">No candidates yet.</span>`}</div>
+        <input class="own" id="own-${esc(c.key)}" data-key="${esc(c.key)}" data-field="custom" placeholder="Or write your own name" value="${esc(p.custom || "")}">
+        <input class="note" id="note-${esc(c.key)}" data-key="${esc(c.key)}" data-field="note" placeholder="Note (why, or what to look for)" value="${esc(p.note || "")}">
+        <div class="chosen">${f ? "Chosen: " + esc(f) : ""}</div>
+      </div></article>`;
+  }).join("") : `<p class="rules">Nothing here.</p>`;
+  if (active) { const el = document.getElementById(active); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+}
+
+const timers = {};
+async function write(key, patch) {
+  state.picks[key] = { ...pick(key), ...patch, at: Date.now() };
+  if (!db) { $("#sync").textContent = "Not saved: open this page on claude.ai to keep picks."; $("#sync").classList.add("bad"); return; }
+  try { await db.doc("picks/" + key).set(state.picks[key]); $("#sync").textContent = "Saved"; $("#sync").classList.remove("bad"); }
+  catch (e) { $("#sync").textContent = "Couldn't save. Your change is still on screen; try again."; $("#sync").classList.add("bad"); }
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.dataset.f) { state.show = t.dataset.f; try { localStorage.setItem("names-filter", state.show); } catch (er) {} render(); }
+  else if (t.dataset.v) { const p = pick(t.dataset.key); write(t.dataset.key, { choice: p.choice === t.dataset.v && !p.custom ? null : t.dataset.v, custom: "" }); render(); }
+});
+document.addEventListener("input", e => {
+  const el = e.target; if (!el.dataset.field) return;
+  const key = el.dataset.key, field = el.dataset.field;
+  state.picks[key] = { ...pick(key), [field]: el.value };
+  clearTimeout(timers[key + field]);
+  timers[key + field] = setTimeout(() => { write(key, { [field]: el.value }); render(); }, 700);
+});
+
+render();
+(async () => {
+  try { db = window.claude ? await window.claude.use("db") : null; } catch (e) { db = null; }
+  if (!db) { $("#sync").textContent = "Picks can't be saved here: open the page on claude.ai."; $("#sync").classList.add("bad"); return; }
+  $("#sync").textContent = "Loading picks…";
+  db.collection("picks").onSnapshot(snap => {
+    const r = {}; snap.docs.forEach(d => r[d.id] = d.data());
+    state.picks = { ...r }; $("#sync").textContent = "Picks are saved as you go"; $("#sync").classList.remove("bad"); render();
+  }, () => { $("#sync").textContent = "Lost the connection to the picks. Reload to retry."; $("#sync").classList.add("bad"); });
+})();
+</script>
