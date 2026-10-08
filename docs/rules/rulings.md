@@ -10,6 +10,7 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 
 ## Placement and actions
 
+- **"Place" versus "play":** an effect that *places* an animal (Vesper, Sunfish's Baby Fish, Scarlett's cubs) puts it there outright: no connection, no strength check, no action. *Playing* is a full normal placement (below).
 - **Extra placements** ("play another unit", "play one more Cat"): a full normal placement (connection unless Flight, covering strength, any cost) that consumes no action, so they chain. From hand only unless the card says "or deck". "May" makes it optional; it fizzles when nothing qualifies.
 - **"Can't" beats "can".** When one card forbids what another allows, the prohibition wins.
 - **Next to the opponent's den** means one of the enemy den's front crossroads.
