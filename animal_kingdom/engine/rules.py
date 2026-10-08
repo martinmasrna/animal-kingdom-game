@@ -40,7 +40,8 @@ def top_unit(state: GameState, cr: str):
 # --------------------------------------------------------------- legal actions
 
 def legal_actions(state: GameState) -> list[Action]:
-    """Every legal action for the player to act. Empty list ⇒ exhaustion (see is_terminal)."""
+    """Every legal action for the player to act. Empty only once the game is over: a turn that
+    opens with nothing to do passes at once (_end_turn)."""
     if state.result is not None:
         return []
     if state.pending is not None:          # mid-resolution: offer the sub-choices
@@ -50,7 +51,7 @@ def legal_actions(state: GameState) -> list[Action]:
 
 def can_pass(state: GameState) -> bool:
     """Ending the turn early, even before any action, is allowed while nothing is resolving.
-    It is kept out of legal_actions: an empty legal list still means exhaustion, and bots never pass."""
+    It is kept out of legal_actions: bots never pass."""
     return state.result is None and state.pending is None and not state.effect_stack
 
 
@@ -180,12 +181,12 @@ def _end_turn(state: GameState) -> None:
     _produce_food(state, player)            # end-of-turn region income
     if state.result is not None:
         return  # food win
-    # Both players ending a turn without acting, back to back, ends the game as exhaustion does
-    # (more food wins; on a tie, the player whose pass ended it loses).
+    # Both players ending a turn without acting, back to back, ends the game (more food wins;
+    # on a tie, the player whose pass ended it loses). A player with no move passes too.
     acted = state.actions_taken_this_turn or state.turn_flags.get(f"roams_{player}")   # a free roam is acting too
     state.idle_turns = 0 if acted else state.idle_turns + 1
     if state.idle_turns >= 2:
-        state.result = _resolve_exhaustion(state, "passes")
+        state.result = _resolve_passes(state)
         return
     state.turn_counter += 1
     state.units_placed_this_turn = 0
@@ -196,6 +197,10 @@ def _end_turn(state: GameState) -> None:
     # Start of the new player's turn: delayed effects + start-of-turn triggers, then resolve.
     effects.start_of_turn(state, state.current)
     effects.resolve(state)
+    # A player who can neither draw nor place nor roam passes; the game goes on.
+    if state.result is None and state.pending is None and not state.effect_stack \
+            and not _top_level_actions(state):
+        _end_turn(state)
 
 
 # ------------------------------------------------------------- regions / food
@@ -224,24 +229,22 @@ def _produce_food(state: GameState, player: str) -> None:
 # ------------------------------------------------------------------ terminal
 
 def is_terminal(state: GameState) -> Optional[Result]:
-    """The game's Result if over, else None. Authoritative (also detects exhaustion)."""
+    """The game's Result if over, else None. Authoritative (also detects the turn limit)."""
     if state.result is not None:
         return state.result
     if state.turn_counter >= state.config.max_turns:
         return _resolve_by_food(state, "max_turns")
-    if not legal_actions(state):
-        return _resolve_exhaustion(state)
     return None
 
 
-def _resolve_exhaustion(state: GameState, reason: str = "exhaustion") -> Result:
-    # more food wins; on a tie, the player who cannot act (or passed last) loses.
+def _resolve_passes(state: GameState) -> Result:
+    # more food wins; on a tie, the player who passed last loses.
     food_a, food_b = state.food["A"], state.food["B"]
     if food_a > food_b:
-        return Result("A", reason)
+        return Result("A", "passes")
     if food_b > food_a:
-        return Result("B", reason)
-    return Result(other_player(state.current), reason)
+        return Result("B", "passes")
+    return Result(other_player(state.current), "passes")
 
 
 def _resolve_by_food(state: GameState, reason: str) -> Result:
