@@ -363,7 +363,7 @@
      "note": "",
      "rarity": "L",
      "species": "Lion",
-     "status": "proposed",
+     "status": "locked",
      "str": 3,
      "tag": "Cat",
      "text": "Roar: play Princess Lea from your hand or deck."
@@ -375,7 +375,7 @@
      "note": "",
      "rarity": "L",
      "species": "Lion",
-     "status": "proposed",
+     "status": "locked",
      "str": 3,
      "tag": "Cat",
      "text": "Roar: play Prince Leo from your hand or deck."
@@ -387,7 +387,7 @@
      "note": "",
      "rarity": "L",
      "species": "Lion",
-     "status": "proposed",
+     "status": "locked",
      "str": 8,
      "tag": "Cat",
      "text": "When an allied Cat covers an enemy, remove that enemy."
@@ -399,7 +399,7 @@
      "note": "",
      "rarity": "L",
      "species": "Lion",
-     "status": "proposed",
+     "status": "locked",
      "str": 5,
      "tag": "Cat",
      "text": "When an allied Cat removes an enemy, draw a card."
@@ -447,8 +447,8 @@
      "note": "",
      "rarity": "R",
      "species": "Black Panther",
-     "status": "proposed",
-     "str": 6,
+     "status": "locked",
+     "str": 7,
      "tag": "Cat",
      "text": "Stealth."
     },
@@ -459,7 +459,7 @@
      "note": "",
      "rarity": "C",
      "species": "Lion",
-     "status": "proposed",
+     "status": "locked",
      "str": 7,
      "tag": "Cat",
      "text": "—"
@@ -495,7 +495,7 @@
      "note": "",
      "rarity": "C",
      "species": "Tiger",
-     "status": "proposed",
+     "status": "locked",
      "str": 7,
      "tag": "Cat",
      "text": "Apex Predator."
