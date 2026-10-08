@@ -34,6 +34,9 @@ There is no mana: every card costs one card and one placement action. Low streng
 - **Floor:** price a conditional card for its common failed state, not the screenshot where everything lines up.
 - **Closest card:** reject a candidate that an existing card practically dominates, or that practically dominates one.
 - **Rarity sets a card's role in its deck, like Gwent's bronze, silver and gold.** Commons (3 copies) are the consistent engine that makes the deck work. Rares (2 copies) are flexible, situational cards for specific use cases. Legendaries (1 copy) are unique, potentially deck-defining cards.
+- **Copies change reliability.** Going from one copy to two doubles how often you see a card; going from two to three adds half again. A legendary can't be counted on in a given game, so a game plan is never built on drawing one (unless the deck tutors for it).
+- **Rares** are the deck's stronger, more situational cards (conditional or unconditional removal, the reactive answers), or upgrades that would be too much at three copies: with two, drawing one is a real risk and you play it carefully (the Leopard). A rare advances the plan significantly but doesn't win on its own. Heuristic: if you could play three, would you? If not, that often marks a true rare.
+- **Legendaries** come in three kinds. The build-around (a deck's whole plan, like Black Swan; few of these). The amplifier, which takes the plan the commons and rares already have and pushes it over the edge, without changing it (King Theron, Queen Adira: Cats play the same with or without them). The generally excellent card, far stronger than a common and good in many decks (Prince Leo and Princess Lea, Aurum, Scarlett). Test: if two copies in a deck would be balanced, it isn't a legendary.
 - **A higher rarity gets a better rate, never a worse one.** A rare or legendary with the same effect as a common is at least as strong.
 
 ## Guardrails
