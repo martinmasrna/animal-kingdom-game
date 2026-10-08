@@ -14,9 +14,9 @@ from animal_kingdom.engine.maps import load_map
 from animal_kingdom.engine.state import GameState, UnitInstance
 
 
-def make_state(*, current="A", hands=None, decks=None, food=None, config=None) -> GameState:
+def make_state(*, current="A", hands=None, decks=None, food=None, config=None, cards=None) -> GameState:
     state = GameState(
-        load_map("map_a"), load_cards(), config or Config.default(),
+        load_map("map_a"), cards or load_cards(), config or Config.default(),
         board={}, hands={"A": [], "B": []}, decks=decks or {"A": [], "B": []},
         remove_pile=[], food=food or {"A": 0, "B": 0}, current=current, first_player="A",
     )
@@ -28,8 +28,19 @@ def make_state(*, current="A", hands=None, decks=None, food=None, config=None) -
 
 def put(state: GameState, cr: str, card_id: str, owner: str) -> UnitInstance:
     u = UnitInstance(card_id, owner, state.new_iid(), placed_on_turn=state.turn_counter)
+    state.stamp_played(u)
     state.board.setdefault(cr, []).append(u)
     return u
+
+
+def cards_with(*records) -> dict:
+    """The card registry plus test-only cards (a new keyword's fixtures, before any real card carries it). Each record
+    needs only an id, a strength and its keywords/tags; the rest is filled in."""
+    from animal_kingdom.engine.resources import load_bundled_json
+    raw = load_bundled_json("cards.json")
+    extra = [{"name": r["id"], "deck": "reserve", "rarity": "common", "tags": [], "keywords": [], "text": "", **r}
+             for r in records]
+    return load_cards({**raw, "cards": raw["cards"] + extra})
 
 
 def hand_ids(state, player):

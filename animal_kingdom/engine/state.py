@@ -53,10 +53,11 @@ class UnitInstance:
     """
 
     __slots__ = ("card_id", "owner", "iid", "placed_on_turn", "strength_counter", "locked_until_turn",
-                 "retaliation_used")
+                 "retaliation_used", "play_seq")
 
     def __init__(self, card_id: str, owner: str, iid: int, placed_on_turn: int = 0,
-                 strength_counter: int = 0, locked_until_turn: int = 0, retaliation_used: bool = False):
+                 strength_counter: int = 0, locked_until_turn: int = 0, retaliation_used: bool = False,
+                 play_seq: int = 0):
         self.card_id = card_id
         self.owner = owner
         self.iid = iid
@@ -64,17 +65,19 @@ class UnitInstance:
         self.strength_counter = strength_counter  # stored "give +X" buffs (signed); travels hand->board
         self.locked_until_turn = locked_until_turn  # Skunk: unplayable from hand while turn < this
         self.retaliation_used = retaliation_used  # Gale: "first time covered" fires once per instance
+        self.play_seq = play_seq  # when it entered the board, game-wide (Dawn/Dusk resolve in play order); 0 in hand
 
     def to_dict(self) -> dict:
         return {"card_id": self.card_id, "owner": self.owner, "iid": self.iid,
                 "placed_on_turn": self.placed_on_turn, "strength_counter": self.strength_counter,
-                "locked_until_turn": self.locked_until_turn, "retaliation_used": self.retaliation_used}
+                "locked_until_turn": self.locked_until_turn, "retaliation_used": self.retaliation_used,
+                "play_seq": self.play_seq}
 
     @staticmethod
     def from_dict(d: dict) -> "UnitInstance":
         return UnitInstance(d["card_id"], d["owner"], d["iid"], d.get("placed_on_turn", 0),
                             d.get("strength_counter", 0), d.get("locked_until_turn", 0),
-                            d.get("retaliation_used", False))
+                            d.get("retaliation_used", False), d.get("play_seq", 0))
 
     def __repr__(self) -> str:
         c = f", +{self.strength_counter}" if self.strength_counter else ""
@@ -84,7 +87,7 @@ class UnitInstance:
 def _copy_unit(u: UnitInstance) -> UnitInstance:
     """An independent copy of a unit instance (used by clone, now that instances mutate)."""
     return UnitInstance(u.card_id, u.owner, u.iid, u.placed_on_turn, u.strength_counter,
-                        u.locked_until_turn, u.retaliation_used)
+                        u.locked_until_turn, u.retaliation_used, u.play_seq)
 
 
 def _plain_copy(v):
@@ -234,6 +237,7 @@ class GameState:
         actions_taken_this_turn: int = 0,
         idle_turns: int = 0,
         next_iid: int = 0,
+        play_seq: int = 0,
         effect_stack: Optional[list[dict]] = None,
         pending: Optional[dict] = None,
         scheduled: Optional[list[dict]] = None,
@@ -260,6 +264,7 @@ class GameState:
         self.actions_taken_this_turn = actions_taken_this_turn
         self.idle_turns = idle_turns       # consecutive turns ended with no action (two end the game)
         self._next_iid = next_iid
+        self.play_seq = play_seq           # board entries so far: stamps each unit's play order (UnitInstance.play_seq)
         # Decision-point + effect machinery (decision 6).
         self.effect_stack = effect_stack if effect_stack is not None else []  # op-steps to resolve
         self.pending = pending                                   # current choice awaiting an action
@@ -285,6 +290,11 @@ class GameState:
     def emit(self, e: str, **fields) -> None:
         self.events.append({"e": e, **fields, **({"cause": self.cause} if self.cause else {}),
                             **({"cause_iid": self.cause_iid} if self.cause and self.cause_iid is not None else {})})
+
+    def stamp_played(self, unit: "UnitInstance") -> None:
+        """Mark `unit` as entering the board now (its place in the play order Dawn and Dusk resolve by)."""
+        self.play_seq += 1
+        unit.play_seq = self.play_seq
 
     # --- instance ids ---
     def new_iid(self) -> int:
@@ -388,6 +398,7 @@ class GameState:
         new.actions_taken_this_turn = self.actions_taken_this_turn
         new.idle_turns = self.idle_turns
         new._next_iid = self._next_iid
+        new.play_seq = self.play_seq
         new.events, new.cause, new.cause_iid = [], None, None
         new.effect_stack = _plain_copy(self.effect_stack)
         new.pending = _plain_copy(self.pending)
@@ -443,6 +454,7 @@ class GameState:
             "actions_taken_this_turn": self.actions_taken_this_turn,
             "idle_turns": self.idle_turns,
             "next_iid": self._next_iid,
+            "play_seq": self.play_seq,
             "effect_stack": copy.deepcopy(self.effect_stack),
             "pending": copy.deepcopy(self.pending),
             "scheduled": copy.deepcopy(self.scheduled),
@@ -484,6 +496,7 @@ class GameState:
             actions_taken_this_turn=d.get("actions_taken_this_turn", 0),
             idle_turns=d.get("idle_turns", 0),
             next_iid=d["next_iid"],
+            play_seq=d.get("play_seq", 0),
             effect_stack=[_upgrade_step(x) for x in copy.deepcopy(d.get("effect_stack") or [])],
             pending=copy.deepcopy(d.get("pending")),
             scheduled=[{**x, "while_buried": x.get("while_buried", False), "step": _upgrade_step(x["step"])}

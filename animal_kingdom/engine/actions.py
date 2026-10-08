@@ -48,6 +48,31 @@ class PlaceAction:
 
 
 @dataclass(frozen=True)
+class RoamAction:
+    """Roam (keywords.md): move the animal on top of `origin` to an adjacent crossroad, or onto the enemy
+    den next to it. Costs one of the turn's actions, unless the player holds a free roam.
+
+    `target` has PlaceAction's shape: ("cr", "<crossroad>") or ("hq", "<player>") for a den capture.
+    """
+
+    origin: str
+    target: tuple[str, str]
+    kind: ClassVar[str] = "roam"
+
+    def to_dict(self) -> dict:
+        return {"kind": self.kind, "from": self.origin, "target": list(self.target)}
+
+    @property
+    def is_hq_capture(self) -> bool:
+        return self.target[0] == "hq"
+
+    @property
+    def crossroad(self) -> str:
+        """The destination crossroad (only valid when not an HQ capture)."""
+        return self.target[1]
+
+
+@dataclass(frozen=True)
 class PassAction:
     """End the turn early, declining the remaining actions (overview.md §5). Legal only after the
     turn's first action and outside effect resolution; never offered by legal_actions (see rules.can_pass)."""
@@ -76,7 +101,7 @@ class ChoiceAction:
 
 SKIP = "__skip__"  # the ChoiceAction value that declines an optional effect
 
-Action = Union[DrawAction, PlaceAction, PassAction, ChoiceAction]
+Action = Union[DrawAction, PlaceAction, RoamAction, PassAction, ChoiceAction]
 
 
 def action_from_dict(d: dict) -> Action:
@@ -85,6 +110,8 @@ def action_from_dict(d: dict) -> Action:
         return DrawAction()
     if kind == "place":
         return PlaceAction(card_id=d["card_id"], target=tuple(d["target"]))
+    if kind == "roam":
+        return RoamAction(origin=d["from"], target=tuple(d["target"]))
     if kind == "choice":
         return ChoiceAction(choice=d["choice"])
     if kind == "pass":

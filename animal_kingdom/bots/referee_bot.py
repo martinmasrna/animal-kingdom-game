@@ -46,7 +46,7 @@ from typing import Optional, Sequence
 
 from ..engine import rules
 from .base import keep_hand
-from ..engine.actions import Action, DrawAction, PlaceAction
+from ..engine.actions import Action, DrawAction, PlaceAction, RoamAction
 from ..engine.state import GameState, StateView
 from .greedy_bot import GreedyWeights, _roar_fizzled
 from .learned_eval import LinearEval
@@ -98,7 +98,7 @@ class RefereeBot(TurnSearcher):
         if self.staged:
             captures = [
                 action for action in legal
-                if isinstance(action, PlaceAction) and action.is_hq_capture
+                if isinstance(action, (PlaceAction, RoamAction)) and action.is_hq_capture
             ]
             if captures:
                 self._continuation_plan = {}
@@ -292,7 +292,7 @@ class RefereeBot(TurnSearcher):
         selected.update(a for a in candidates if isinstance(a, DrawAction))
         selected.update(
             a for a in candidates
-            if isinstance(a, PlaceAction) and a.is_hq_capture
+            if isinstance(a, (PlaceAction, RoamAction)) and a.is_hq_capture
         )
         home = [
             row for row in scored

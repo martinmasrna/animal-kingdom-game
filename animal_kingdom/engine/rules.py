@@ -17,7 +17,7 @@ from __future__ import annotations
 from typing import Optional
 
 from . import effects, statics
-from .actions import Action, DrawAction, PassAction, PlaceAction
+from .actions import Action, DrawAction, PassAction, PlaceAction, RoamAction
 from .state import EngineError, GameState, Result, other_player
 from .strength import effective_strength  # re-exported (used by tests / future eval)
 
@@ -56,11 +56,20 @@ def can_pass(state: GameState) -> bool:
 
 def _top_level_actions(state: GameState) -> list[Action]:
     player = state.current
+    if not _actions_left(state):                   # the turn stays open only for a free roam (Roam)
+        return list(effects.legal_roams(state, player)) if effects.free_roams_left(state, player) else []
     actions: list[Action] = []
     if state.decks[player] and len(state.hands[player]) < state.config.hand_limit:
         actions.append(DrawAction())
     actions.extend(effects.legal_placements(state, player))
+    actions.extend(effects.legal_roams(state, player))
     return actions
+
+
+def _actions_left(state: GameState) -> int:
+    limit = (state.config.actions_per_turn
+             + state.turn_flags.get(f"bonus_actions_{state.current}", 0))  # Chinchilla
+    return limit - state.actions_taken_this_turn
 
 
 # ------------------------------------------------------------- apply / resolve
@@ -133,6 +142,9 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
     elif isinstance(action, PlaceAction):
         state.actions_taken_this_turn += 1
         effects.do_placement(state, state.current, action.card_id, action.target)
+    elif isinstance(action, RoamAction):
+        effects.pay_for_roam(state, state.current)
+        effects.do_roam(state, state.current, action.origin, action.target)
     else:
         raise EngineError(f"unexpected action {action!r}")
 
@@ -154,11 +166,8 @@ def _resolve_and_maybe_end_turn(state: GameState) -> None:
         return  # game decided (HQ capture / food)
     if state.effect_stack or state.pending is not None:
         return  # still resolving (a choice is pending or steps remain)
-    action_limit = (state.config.actions_per_turn
-                    + state.turn_flags.get(f"bonus_actions_{state.current}", 0))  # Chinchilla
-    if (state.actions_taken_this_turn < action_limit
-            and _top_level_actions(state)):
-        return  # actions remain and something is playable: the turn stays open
+    if _top_level_actions(state):
+        return  # actions (or a free roam) remain and something is playable: the turn stays open
     _end_turn(state)
 
 
@@ -174,7 +183,8 @@ def _end_turn(state: GameState) -> None:
         return  # food win
     # Both players ending a turn without acting, back to back, ends the game as exhaustion does
     # (more food wins; on a tie, the player whose pass ended it loses).
-    state.idle_turns = state.idle_turns + 1 if state.actions_taken_this_turn == 0 else 0
+    acted = state.actions_taken_this_turn or state.turn_flags.get(f"roams_{player}")   # a free roam is acting too
+    state.idle_turns = 0 if acted else state.idle_turns + 1
     if state.idle_turns >= 2:
         state.result = _resolve_exhaustion(state, "passes")
         return
