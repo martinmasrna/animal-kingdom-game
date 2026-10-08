@@ -151,7 +151,8 @@ function cardIssues(c, ctx) {
 function context() {
   const cards = allCards();
   const cr = cards.filter(c => c.rarity !== "L");
-  const crSpecies = new Set(cr.map(speciesOf));
+  // a legendary's species is covered by a common or rare of that species, or of that kind (Eon is "a snake")
+  const crSpecies = new Set([...cr.map(speciesOf), ...cr.flatMap(c => String(c.tag || "").split(",").map(norm))].filter(Boolean));
   const count = {};
   for (const c of cr) {
     if (/colony/i.test(c.tag || "")) continue;            // castes may repeat
