@@ -17,7 +17,7 @@ Version 3 is version 2 with the first draft's Gorilla sweep restored; it was not
 
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
-| Black Bear | Forest | C | 5 | Roar: in 2 turns, draw 2 cards. (unchanged) |
+| Black Bear | Forest | C | 5 | Roar: in 2 turns, draw 2 cards. (moved to Food OTK, 2026-10-08) |
 | Grizzly Bear | Forest | C | 6 | At the start of your turn, if this is in your hand and you hold 6 or more cards, give it +1 strength. |
 | Sloth | Jungle | C | 3 | Roar: in 2 turns, give each animal in your hand +2 strength. |
 | Baboon | Savanna | C | 4 | Roar: give an animal in your hand +2 strength. (locked) |
