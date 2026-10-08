@@ -1,0 +1,67 @@
+{
+ "name": "Pool, no deck yet",
+ "order": 12,
+ "precon": false,
+ "cards": [
+  {
+   "id": "pool-0",
+   "rarity": "R",
+   "name": "Octopus",
+   "species": "Octopus",
+   "tag": "",
+   "str": 4,
+   "habitat": "Open Ocean",
+   "text": "Roar: until your next turn, adjacent enemies lose their keywords and effects.",
+   "status": "locked",
+   "note": ""
+  },
+  {
+   "id": "pool-1",
+   "rarity": "R",
+   "name": "Great White Shark",
+   "species": "Great White Shark",
+   "tag": "Fish",
+   "str": 7,
+   "habitat": "Open Ocean",
+   "text": "Apex Predator. If an animal was removed this turn, this has Reach 3.",
+   "status": "locked",
+   "note": ""
+  },
+  {
+   "id": "pool-2",
+   "rarity": "R",
+   "name": "Sperm Whale",
+   "species": "Sperm Whale",
+   "tag": "",
+   "str": 8,
+   "habitat": "Open Ocean",
+   "text": "Titan. Roar: remove all adjacent animals.",
+   "status": "locked",
+   "note": ""
+  },
+  {
+   "id": "pool-3",
+   "rarity": "R",
+   "name": "Butterfly",
+   "species": "Butterfly",
+   "tag": "",
+   "str": 2,
+   "habitat": "Jungle",
+   "text": "Flight. Roar: draw a card, then give an animal in your hand +1 strength.",
+   "status": "locked",
+   "note": ""
+  },
+  {
+   "id": "pool-4",
+   "rarity": "R",
+   "name": "Macaw",
+   "species": "Macaw",
+   "tag": "Bird",
+   "str": null,
+   "habitat": "Jungle",
+   "text": "Roar: your next Roar this turn happens twice.",
+   "status": "proposed",
+   "note": ""
+  }
+ ]
+}

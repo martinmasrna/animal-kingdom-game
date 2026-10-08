@@ -1,0 +1,42 @@
+{
+ "name": "Jungle",
+ "order": 4,
+ "target": {
+  "C": 18,
+  "R": 12,
+  "L": 12
+ },
+ "roster": [
+  "Jaguar",
+  "Black Panther",
+  "Tiger",
+  "Bush Dog",
+  "Dhole",
+  "Anaconda",
+  "King Cobra",
+  "Python",
+  "Soldier Ant",
+  "Gorilla",
+  "Orangutan",
+  "Chimpanzee",
+  "Sloth",
+  "Capybara",
+  "Giant Anteater",
+  "Tarsier",
+  "Armadillo",
+  "Tapir",
+  "Chameleon",
+  "Poison Dart Frog",
+  "Basilisk",
+  "Iguana",
+  "Golden Orb-Weaver",
+  "Macaw",
+  "Hummingbird",
+  "Peacock",
+  "Piranha",
+  "Electric Eel",
+  "Tarantula",
+  "Leech"
+ ],
+ "note": ""
+}

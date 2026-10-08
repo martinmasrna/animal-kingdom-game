@@ -14,7 +14,7 @@ The map. Read it first each session and keep it current: when something here cha
 
 **Current stage: 2, getting other people playing.** The game is hosted and people other than Martin play it. The goodstuff problem that blocked stage 1 was a side effect of bot skill, not a design problem (Martin, 2026-10-01).
 
-**Now (Martin, 2026-10-08): finish the launch decks, then wire every new card and keyword into the localhost game for human testing.** Designed in [`design/effects-pass.md`](design/effects-pass.md): Canines, Aristocrats, Egg Control's fourth legendary. Six to go: Fish Token Aggro, Food Aggro, Food OTK, Hoofed Graze, Giants, Handlock ([`design/hand-deck.md`](design/hand-deck.md) is its first version). The keywords Roam, Reach, Poison and Dawn/Dusk are being built in the engine ahead of the cards.
+**Now (Martin, 2026-10-08): finish the launch decks, then wire every new card and keyword into the localhost game for human testing.** Designed in [`design/effects-pass.md`](design/effects-pass.md): Canines, Aristocrats, Egg Control's fourth legendary. Six to go: Fish Token Aggro, Food Aggro, Food OTK, Hoofed Graze, Giants, Handlock ([`design/hand-deck.md`](design/hand-deck.md) is its first version). All twelve are drafted (2026-10-08). The card lists live in the shared card workbench, https://claude.ai/artifact/4LbvDkhN1qawhdc3f4dcQU (Martin and Claude both edit it; its database is the source of truth for the card lists, read and written with the ArtifactData tool; the page and its seed snapshot are in `tools/card-workbench/`); `design/effects-pass.md` keeps the reasoning. The keywords Roam, Reach, Poison and Dawn/Dusk are in the engine; next are the roster pass and wiring the cards into the localhost game.
 
 ## What exists
 

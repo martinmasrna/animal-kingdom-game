@@ -1,0 +1,26 @@
+{
+ "name": "City",
+ "order": 3,
+ "target": {
+  "C": 9,
+  "R": 6,
+  "L": 6
+ },
+ "roster": [
+  "Rat",
+  "Mouse",
+  "Stray Cat",
+  "Stray Dog",
+  "Raccoon",
+  "Opossum",
+  "Macaque",
+  "Gecko",
+  "Cockroach",
+  "City Spider",
+  "Mosquito",
+  "Bat",
+  "Pigeon",
+  "Sparrow"
+ ],
+ "note": ""
+}

@@ -1,0 +1,356 @@
+<title>Animal Kingdom Card Workbench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@400;500;600;700&family=Fira+Sans:wght@400;500&family=Fira+Mono&display=swap">
+<style>
+/* Layout: a granite sidebar of decks and habitats, the open sheet on the right; rarity reads as the card edge (gold, silver, graphite). */
+:root {
+  --bg: #eceae6; --panel: #f7f6f3; --line: #d6d2cb; --fg: #24272b; --muted: #6c6f74;
+  --accent: #8a5a2b; --accent-soft: #e9dccd; --field: #ffffff;
+  --gold: #c4962e; --gold-bg: #f6ecd2; --silver: #8f9aa6; --silver-bg: #e6ebf0; --graphite: #5b5f66; --graphite-bg: #ebeae7;
+  --warn: #b5651d; --warn-bg: #f8e7d4; --bad: #a83a32; --bad-bg: #f6dedb; --ok: #3f7a4d; --ok-bg: #dcefe0;
+  --display: "Fira Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Fira Sans", system-ui, sans-serif;
+  --mono: "Fira Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1b1d20; --panel: #23262a; --line: #363a40; --fg: #e6e4df; --muted: #9a9ea5;
+  --accent: #d79b5e; --accent-soft: #3a2e22; --field: #1f2125;
+  --gold: #d9ad4a; --gold-bg: #33291a; --silver: #a8b3bf; --silver-bg: #262c33; --graphite: #8d9198; --graphite-bg: #26282b;
+  --warn: #e19a55; --warn-bg: #3a2b1d; --bad: #e07a70; --bad-bg: #3a2220; --ok: #79c08a; --ok-bg: #1f3325; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #1b1d20; --panel: #23262a; --line: #363a40; --fg: #e6e4df; --muted: #9a9ea5;
+  --accent: #d79b5e; --accent-soft: #3a2e22; --field: #1f2125;
+  --gold: #d9ad4a; --gold-bg: #33291a; --silver: #a8b3bf; --silver-bg: #262c33; --graphite: #8d9198; --graphite-bg: #26282b;
+  --warn: #e19a55; --warn-bg: #3a2b1d; --bad: #e07a70; --bad-bg: #3a2220; --ok: #79c08a; --ok-bg: #1f3325; color-scheme: dark }
+* { box-sizing: border-box }
+html, body { height: 100% }
+body { background: var(--bg); color: var(--fg); font: 14px/1.45 var(--body); margin: 0 }
+.app { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100% }
+nav { background: var(--panel); border-right: 1px solid var(--line); padding-block: 18px; padding-inline: 14px; display: flex; flex-direction: column; gap: 18px; position: sticky; top: env(safe-area-inset-top, 0px); height: 100vh; overflow-y: auto }
+nav h1 { font: 700 19px/1.1 var(--display); margin: 0; letter-spacing: .01em }
+nav h1 small { display: block; font: 500 12px var(--display); color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-top: 4px }
+nav h2 { font: 600 11px var(--display); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 0 0 6px }
+nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px }
+nav button { all: unset; cursor: pointer; display: flex; justify-content: space-between; gap: 8px; width: 100%; padding: 5px 8px; border-radius: 4px; font: 500 14px var(--display); box-sizing: border-box }
+nav button:hover { background: var(--accent-soft) }
+nav button[aria-current="true"] { background: var(--accent); color: var(--panel) }
+nav button:focus-visible, .btn:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px }
+.badge { font: 600 11px var(--mono); padding: 1px 6px; border-radius: 9px; background: var(--warn-bg); color: var(--warn) }
+nav button[aria-current="true"] .badge { background: var(--panel); color: var(--accent) }
+.sync { font: 12px var(--body); color: var(--muted); margin-top: auto }
+main { padding-block: 22px 60px; padding-inline: 28px; min-width: 0 }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px; margin-bottom: 14px }
+.head h2 { font: 700 28px/1.1 var(--display); margin: 0; text-wrap: balance }
+.pills { display: flex; flex-wrap: wrap; gap: 6px }
+.pill { font: 600 12px var(--display); letter-spacing: .03em; padding: 2px 9px; border-radius: 10px; background: var(--graphite-bg); color: var(--muted) }
+.pill.ok { background: var(--ok-bg); color: var(--ok) } .pill.warn { background: var(--warn-bg); color: var(--warn) } .pill.bad { background: var(--bad-bg); color: var(--bad) }
+.lede { color: var(--muted); max-width: 70ch; margin: -4px 0 16px }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--panel) }
+table { border-collapse: collapse; width: 100%; min-width: 900px }
+th { font: 600 11px var(--display); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0 }
+td { padding: 3px 4px; border-bottom: 1px solid var(--line); vertical-align: top }
+tr:last-child td { border-bottom: 0 }
+tr.L td:first-child { box-shadow: inset 4px 0 0 var(--gold) } tr.L { background: var(--gold-bg) }
+tr.R td:first-child { box-shadow: inset 4px 0 0 var(--silver) } tr.R { background: var(--silver-bg) }
+tr.C td:first-child { box-shadow: inset 4px 0 0 var(--graphite) }
+.rar { font: 700 12px var(--display); padding: 6px 4px 0 10px; width: 34px }
+input, textarea, select { font: inherit; color: var(--fg); background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 4px 6px; width: 100% }
+input:hover, textarea:hover, select:hover { border-color: var(--line); background: var(--field) }
+input:focus, textarea:focus, select:focus { background: var(--field); border-color: var(--accent) }
+input.name { font: 600 15px var(--display) }
+input.num { font: 600 15px var(--mono); text-align: center; width: 46px; font-variant-numeric: tabular-nums }
+textarea { resize: none; overflow: hidden; min-height: 30px; line-height: 1.4 }
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: .6; font-style: italic }
+.kw { font-weight: 600 }
+.flagcell { width: 26px; text-align: center; padding-top: 7px }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50% }
+.dot.warn { background: var(--warn) } .dot.bad { background: var(--bad) }
+.rowtools { white-space: nowrap; width: 1% }
+.btn { all: unset; cursor: pointer; font: 600 12px var(--display); letter-spacing: .03em; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--line); color: var(--fg); background: var(--panel) }
+.btn:hover { border-color: var(--accent); color: var(--accent) }
+.btn.quiet { border-color: transparent; color: var(--muted); padding: 4px 6px }
+.addrow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding-block: 12px 14px; padding-inline: 14px; min-width: 0 }
+.box h3 { font: 700 15px var(--display); margin: 0 0 8px; letter-spacing: .02em }
+.box p.hint { margin: 0 0 8px; color: var(--muted); font-size: 13px }
+.meter { display: grid; grid-template-columns: 90px minmax(0, 1fr) 70px; gap: 8px; align-items: center; margin: 5px 0; font: 500 13px var(--display) }
+.bar { height: 10px; background: var(--graphite-bg); border-radius: 5px; overflow: hidden }
+.bar span { display: block; height: 100% }
+.meter b { font: 600 13px var(--mono); text-align: right; font-variant-numeric: tabular-nums }
+.list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px }
+.list li { display: flex; gap: 8px; align-items: baseline; font-size: 13px }
+.list li .where { color: var(--muted); font-size: 12px; margin-left: auto; white-space: nowrap }
+.chips { display: flex; flex-wrap: wrap; gap: 5px }
+.chip { font: 500 13px var(--display); padding: 2px 8px; border-radius: 4px; background: var(--graphite-bg) }
+.chip.L { background: var(--gold-bg); box-shadow: inset 3px 0 0 var(--gold) } .chip.R { background: var(--silver-bg); box-shadow: inset 3px 0 0 var(--silver) }
+.chip.C { box-shadow: inset 3px 0 0 var(--graphite) } .chip.todo { color: var(--muted); font-style: italic }
+.empty { padding: 40px 20px; text-align: center; color: var(--muted) }
+.empty strong { display: block; color: var(--fg); font: 600 18px var(--display); margin-bottom: 6px }
+.saved { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: var(--bg); font: 600 12px var(--display); padding: 6px 12px; border-radius: 4px; opacity: 0; transition: opacity .2s }
+.saved.on { opacity: .92 }
+@media (prefers-reduced-motion: reduce) { .saved { transition: none } }
+.mobilenav { display: none }
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr) }
+  nav { display: none }
+  .mobilenav { display: flex; gap: 8px; align-items: center; padding-block: 12px; padding-inline: 16px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2 }
+  .mobilenav strong { font: 700 16px var(--display); white-space: nowrap }
+  .mobilenav select { border-color: var(--line); background: var(--field); font: 600 14px var(--display) }
+  main { padding-inline: 16px }
+  .head h2 { font-size: 23px }
+}
+</style>
+
+<div class="mobilenav"><strong>Workbench</strong><select id="mobilePick" aria-label="Open a deck or habitat"></select></div>
+<div class="app">
+  <nav aria-label="Decks and habitats">
+    <h1>Animal Kingdom<small>Card workbench</small></h1>
+    <div><h2>Decks</h2><ul id="deckNav"></ul></div>
+    <div><h2>Habitats</h2><ul id="habNav"></ul></div>
+    <div><h2>Pool</h2><ul id="poolNav"></ul></div>
+    <p class="sync" id="sync">Connecting to the shared sheet…</p>
+  </nav>
+  <main id="main" tabindex="-1">
+    <div class="empty"><strong>Loading the card pool</strong>The twelve launch decks, the habitats and the checks appear here once the shared sheet answers.</div>
+  </main>
+</div>
+<div class="saved" id="saved" role="status" aria-live="polite">Saved</div>
+
+<script>
+const KEYWORDS = ["Apex Predator", "Flight", "Reach", "Roam", "Armor", "Stealth", "Spikes", "Poison", "Flee", "Hungry", "Titan", "Scout", "Dawn", "Dusk", "Roar"];
+const STATUSES = ["locked", "to try", "proposed", "open"];
+const RARITY = { L: "Legendary", R: "Rare", C: "Common" };
+const SLOTS = { L: 4, R: 4, C: 6 };
+const WORDING = [[/Battlecry/i, "Battlecry: write Roar"], [/adjanced/i, "typo: adjanced"], [/\bfriendly\b/i, "friendly: write \"your\""], [/Fishes/, "Fishes: write Fish"], [/\bunits?\b/i, "unit: write animal"]];
+const SPECIES_EXCEPT = new Set(["pheasant"]); // Ember: a known exception to the legendary rule
+const state = { decks: {}, habitats: {}, view: null, editing: false };
+let db = null;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const norm = s => String(s || "").trim().toLowerCase();
+const speciesOf = c => norm(c.species || c.name);
+const decksSorted = () => Object.entries(state.decks).sort((a, b) => (a[1].order ?? 99) - (b[1].order ?? 99));
+const habsSorted = () => Object.entries(state.habitats).sort((a, b) => (a[1].order ?? 99) - (b[1].order ?? 99));
+const allCards = () => decksSorted().flatMap(([id, d]) => (d.cards || []).map(c => ({ ...c, deckId: id, deckName: d.name })));
+
+function cardIssues(c, ctx) {
+  const out = [];
+  if (!c.text) out.push(["bad", "no effect text"]);
+  if (c.str === null || c.str === undefined || c.str === "") out.push(["warn", "no strength"]);
+  if (!c.habitat) out.push(["warn", "no habitat"]);
+  if (c.rarity !== "L" && !c.name) out.push(["bad", "no animal"]);
+  if (c.rarity === "L" && !c.species) out.push(["warn", "species unknown"]);
+  if (c.rarity === "L" && c.species && !SPECIES_EXCEPT.has(norm(c.species)) && !ctx.crSpecies.has(norm(c.species))) out.push(["bad", `no common or rare ${c.species}`]);
+  if ((c.text || "").length > 95) out.push(["warn", `long text (${c.text.length} chars)`]);
+  for (const [re, msg] of WORDING) if (re.test(c.text || "")) out.push(["warn", msg]);
+  if (c.rarity !== "L" && ctx.dupes.has(speciesOf(c))) out.push(["bad", "species used twice"]);
+  return out;
+}
+function context() {
+  const cards = allCards();
+  const cr = cards.filter(c => c.rarity !== "L");
+  const crSpecies = new Set(cr.map(speciesOf));
+  const count = {};
+  for (const c of cr) {
+    if (/colony/i.test(c.tag || "")) continue;            // castes may repeat
+    if (["butterfly"].includes(speciesOf(c))) continue;    // metamorphosis may repeat
+    const k = speciesOf(c); if (!k) continue; count[k] = (count[k] || 0) + 1;
+  }
+  return { cards, crSpecies, dupes: new Set(Object.keys(count).filter(k => count[k] > 1)) };
+}
+
+/* ---------- navigation ---------- */
+function navItem(kind, id, label, badge) {
+  const cur = state.view && state.view.kind === kind && state.view.id === id;
+  return `<li><button data-kind="${kind}" data-id="${esc(id)}" aria-current="${cur}">${esc(label)}${badge ? `<span class="badge">${badge}</span>` : ""}</button></li>`;
+}
+function renderNav(ctx) {
+  const issuesIn = id => (state.decks[id].cards || []).filter(c => cardIssues(c, ctx).some(i => i[0] === "bad")).length;
+  $("#deckNav").innerHTML = decksSorted().filter(([, d]) => d.precon !== false).map(([id, d]) => navItem("deck", id, d.name, issuesIn(id) || "")).join("");
+  $("#habNav").innerHTML = habsSorted().map(([id, h]) => navItem("hab", id, h.name, "")).join("");
+  const pool = decksSorted().filter(([, d]) => d.precon === false);
+  $("#poolNav").innerHTML = pool.map(([id, d]) => navItem("deck", id, d.name, "")).join("") + navItem("checks", "all", "Checks", ctx.totalBad || "");
+  const opts = [...decksSorted().map(([id, d]) => [`deck:${id}`, d.name]), ...habsSorted().map(([id, h]) => [`hab:${id}`, h.name]), ["checks:all", "Checks"]];
+  $("#mobilePick").innerHTML = opts.map(([v, l]) => `<option value="${v}" ${state.view && `${state.view.kind}:${state.view.id}` === v ? "selected" : ""}>${esc(l)}</option>`).join("");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("nav button[data-kind]");
+  if (b) { go(b.dataset.kind, b.dataset.id); }
+});
+$("#mobilePick").addEventListener("change", e => { const [k, id] = e.target.value.split(":"); go(k, id); });
+function go(kind, id) {
+  state.view = { kind, id };
+  try { history.replaceState(null, "", "#" + kind + "-" + id); } catch {}
+  render(); $("#main").focus({ preventScroll: true }); window.scrollTo(0, 0);
+}
+
+/* ---------- deck sheet ---------- */
+function habitatOptions(cur) {
+  const names = habsSorted().map(([, h]) => h.name);
+  if (cur && !names.includes(cur)) names.push(cur);
+  return `<option value="" ${!cur ? "selected" : ""}>—</option>` + names.map(n => `<option ${n === cur ? "selected" : ""}>${esc(n)}</option>`).join("");
+}
+function deckView(id, ctx) {
+  const d = state.decks[id]; const cards = d.cards || [];
+  const n = r => cards.filter(c => c.rarity === r).length;
+  const pills = d.precon === false ? "" : ["L", "R", "C"].map(r => `<span class="pill ${n(r) === SLOTS[r] ? "ok" : "warn"}">${RARITY[r]} ${n(r)}/${SLOTS[r]}</span>`).join("");
+  const bad = cards.filter(c => cardIssues(c, ctx).some(i => i[0] === "bad")).length;
+  const order = { L: 0, R: 1, C: 2 };
+  const rows = cards.map((c, i) => ({ c, i })).sort((a, b) => order[a.c.rarity] - order[b.c.rarity] || a.i - b.i).map(({ c, i }) => {
+    const iss = cardIssues(c, ctx);
+    const worst = iss.some(x => x[0] === "bad") ? "bad" : iss.length ? "warn" : "";
+    const moveOpts = decksSorted().map(([did, dd]) => `<option value="${esc(did)}" ${did === id ? "selected" : ""}>${esc(dd.name)}</option>`).join("");
+    return `<tr class="${c.rarity}" data-i="${i}">
+      <td class="rar"><select data-f="rarity" aria-label="Rarity">${["L", "R", "C"].map(r => `<option ${r === c.rarity ? "selected" : ""}>${r}</option>`).join("")}</select></td>
+      <td style="min-width:150px"><input class="name" data-f="name" value="${esc(c.name)}" placeholder="${c.rarity === "L" ? "name to come" : "animal"}" aria-label="Name"></td>
+      <td style="min-width:120px"><input data-f="species" value="${esc(c.species)}" placeholder="species" aria-label="Species"></td>
+      <td style="min-width:110px"><input data-f="tag" value="${esc(c.tag)}" placeholder="no tag" aria-label="Tag"></td>
+      <td><input class="num" data-f="str" value="${c.str ?? ""}" inputmode="numeric" aria-label="Strength"></td>
+      <td style="min-width:120px"><select data-f="habitat" aria-label="Habitat">${habitatOptions(c.habitat)}</select></td>
+      <td style="min-width:300px;width:40%"><textarea data-f="text" rows="1" placeholder="no effect yet" aria-label="Effect">${esc(c.text)}</textarea></td>
+      <td style="min-width:95px"><select data-f="status" aria-label="Status">${STATUSES.map(s => `<option ${s === c.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>
+      <td style="min-width:140px"><textarea data-f="note" rows="1" placeholder="note" aria-label="Note">${esc(c.note)}</textarea></td>
+      <td class="flagcell">${worst ? `<span class="dot ${worst}" title="${esc(iss.map(x => x[1]).join("; "))}"></span>` : ""}</td>
+      <td class="rowtools"><select data-act="move" aria-label="Move to deck" style="width:auto;max-width:130px">${moveOpts}</select> <button class="btn quiet" data-act="del" title="Delete this card">Delete</button></td>
+    </tr>`;
+  }).join("");
+  return `<div class="head"><h2>${esc(d.name)}</h2><div class="pills">${pills}${bad ? `<span class="pill bad">${bad} to fix</span>` : ""}</div></div>
+    ${d.precon === false ? `<p class="lede">Cards designed outside the twelve decks: they're in the pool, and count for the habitats and the checks.</p>` : ""}
+    <div class="tablewrap"><table data-deck="${esc(id)}">
+      <thead><tr><th></th><th>Name</th><th>Species</th><th>Tag</th><th>Str</th><th>Habitat</th><th>Effect</th><th>Status</th><th>Note</th><th></th><th></th></tr></thead>
+      <tbody>${rows || `<tr><td colspan="11" class="empty">No cards yet. Add one below.</td></tr>`}</tbody></table></div>
+    <div class="addrow"><button class="btn" data-add="L">Add legendary</button><button class="btn" data-add="R">Add rare</button><button class="btn" data-add="C">Add common</button></div>`;
+}
+
+/* ---------- habitat view ---------- */
+function meter(label, have, want, color) {
+  const pct = Math.min(100, want ? (have / want) * 100 : 0);
+  return `<div class="meter"><span>${label}</span><span class="bar"><span style="width:${pct}%;background:var(${color})"></span></span><b>${have}/${want}</b></div>`;
+}
+function habView(id, ctx) {
+  const h = state.habitats[id];
+  const cards = ctx.cards.filter(c => norm(c.habitat) === norm(h.name));
+  const by = r => cards.filter(c => c.rarity === r);
+  const t = h.target || {};
+  const roster = (h.roster || []);
+  const has = new Set(cards.flatMap(c => [norm(c.name), norm(c.species)]));
+  const noCard = roster.filter(a => !has.has(norm(a)));
+  const rosterSet = new Set(roster.map(norm));
+  const offRoster = cards.filter(c => c.rarity !== "L" && !rosterSet.has(norm(c.name)) && !rosterSet.has(norm(c.species)));
+  const chip = c => `<span class="chip ${c.rarity}" title="${esc(c.deckName)}: ${esc(c.text)}">${esc(c.name || ("legendary " + (c.species || "?")))}</span>`;
+  const total = (t.C || 0) + (t.R || 0) + (t.L || 0);
+  return `<div class="head"><h2>${esc(h.name)}</h2><div class="pills"><span class="pill">${cards.length} cards · set of ${total}</span></div></div>
+    <div class="grid2">
+      <div class="box"><h3>Against the set</h3><p class="hint">Commons, rares and legendaries keep the 3 : 2 : 2 ratio.</p>
+        ${meter("Commons", by("C").length, t.C, "--graphite")}${meter("Rares", by("R").length, t.R, "--silver")}${meter("Legendaries", by("L").length, t.L, "--gold")}</div>
+      <div class="box"><h3>Roster animals with no card (${noCard.length})</h3><p class="hint">On the roster in habitats.md, not yet on any card.</p>
+        <div class="chips">${noCard.map(a => `<span class="chip todo">${esc(a)}</span>`).join("") || "<span class='chip'>None</span>"}</div></div>
+      <div class="box"><h3>Cards not on the roster (${offRoster.length})</h3><p class="hint">Roster additions for the habitat pass.</p>
+        <div class="chips">${offRoster.map(chip).join("") || "<span class='chip'>None</span>"}</div></div>
+      <div class="box"><h3>Legendaries (${by("L").length})</h3><div class="chips">${by("L").map(chip).join("") || "<span class='chip'>None</span>"}</div></div>
+      <div class="box"><h3>Rares (${by("R").length})</h3><div class="chips">${by("R").map(chip).join("") || "<span class='chip'>None</span>"}</div></div>
+      <div class="box"><h3>Commons (${by("C").length})</h3><div class="chips">${by("C").map(chip).join("") || "<span class='chip'>None</span>"}</div></div>
+    </div>`;
+}
+
+/* ---------- checks ---------- */
+function checksView(ctx) {
+  const rows = ctx.cards.map(c => ({ c, iss: cardIssues(c, ctx) })).filter(x => x.iss.length);
+  const group = {};
+  for (const { c, iss } of rows) for (const [lvl, msg] of iss) {
+    const key = msg.replace(/\(.*\)|no common or rare .*/, m => m.startsWith("no common") ? "legendary with no common or rare of its species" : "").trim();
+    (group[key] ||= { lvl, items: [] }).items.push({ c, msg });
+  }
+  const kw = KEYWORDS.filter(k => k !== "Roar").map(k => [k, ctx.cards.filter(c => new RegExp(`\\b${k}\\b`).test(c.text || "")).length]);
+  const deckCounts = decksSorted().filter(([, d]) => d.precon !== false).map(([id, d]) => {
+    const n = r => (d.cards || []).filter(c => c.rarity === r).length;
+    const ok = n("L") === 4 && n("R") === 4 && n("C") === 6;
+    return `<li><span class="dot ${ok ? "" : "warn"}" style="${ok ? "background:var(--ok)" : ""}"></span>${esc(d.name)}<span class="where">${n("L")} / ${n("R")} / ${n("C")}</span></li>`;
+  }).join("");
+  const boxes = Object.entries(group).sort((a, b) => (a[1].lvl === "bad" ? 0 : 1) - (b[1].lvl === "bad" ? 0 : 1)).map(([k, g]) => `
+    <div class="box"><h3><span class="dot ${g.lvl}"></span> ${esc(k[0].toUpperCase() + k.slice(1))} (${g.items.length})</h3><ul class="list">
+    ${g.items.map(({ c, msg }) => `<li><button class="btn quiet" data-goto="${esc(c.deckId)}">${esc(c.name || "legendary " + (c.species || ""))}</button><span>${esc(msg)}</span><span class="where">${esc(c.deckName)}</span></li>`).join("")}</ul></div>`).join("");
+  return `<div class="head"><h2>Checks</h2><div class="pills"><span class="pill ${ctx.totalBad ? "bad" : "ok"}">${ctx.totalBad} to fix</span></div></div>
+    <p class="lede">Computed from every card in every deck. Red must change before the cards go into the game; amber is worth a look.</p>
+    <div class="grid2">
+      <div class="box"><h3>Deck slots (L / R / C, aim 4 / 4 / 6)</h3><ul class="list">${deckCounts}</ul></div>
+      <div class="box"><h3>Keywords (a keyword needs 3 or more cards)</h3><ul class="list">${kw.map(([k, n]) => `<li><span class="dot ${n < 3 ? "warn" : ""}" style="${n < 3 ? "" : "background:var(--ok)"}"></span><span class="kw">${k}</span><span class="where">${n} cards</span></li>`).join("")}</ul></div>
+      ${boxes}
+    </div>`;
+}
+document.addEventListener("click", e => { const g = e.target.closest("[data-goto]"); if (g) go("deck", g.dataset.goto); });
+
+/* ---------- render ---------- */
+function render() {
+  if (state.editing) return;
+  const ctx = context();
+  ctx.totalBad = ctx.cards.filter(c => cardIssues(c, ctx).some(i => i[0] === "bad")).length;
+  if (!state.view) {
+    const h = (location.hash || "").slice(1); const m = h.match(/^(deck|hab|checks)-(.+)$/);
+    if (m && (m[1] === "checks" || (m[1] === "deck" ? state.decks[m[2]] : state.habitats[m[2]]))) state.view = { kind: m[1], id: m[2] };
+    else { const first = decksSorted()[0]; if (first) state.view = { kind: "deck", id: first[0] }; }
+  }
+  renderNav(ctx);
+  const v = state.view; const main = $("#main");
+  if (!v) { main.innerHTML = `<div class="empty"><strong>The shared sheet is empty</strong>Claude seeds the twelve decks and six habitats into it; they appear here as soon as they're written.</div>`; return; }
+  if (v.kind === "deck" && state.decks[v.id]) main.innerHTML = deckView(v.id, ctx);
+  else if (v.kind === "hab" && state.habitats[v.id]) main.innerHTML = habView(v.id, ctx);
+  else main.innerHTML = checksView(ctx);
+  main.querySelectorAll("textarea").forEach(autosize);
+}
+function autosize(t) { t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; }
+
+/* ---------- editing ---------- */
+const main = $("#main");
+main.addEventListener("focusin", e => { if (e.target.matches("input, textarea")) state.editing = true; });
+main.addEventListener("focusout", e => { if (e.target.matches("input, textarea")) { state.editing = false; setTimeout(() => { if (!state.editing) render(); }, 50); } });
+main.addEventListener("input", e => { if (e.target.matches("textarea")) autosize(e.target); });
+main.addEventListener("change", async e => {
+  const el = e.target; const table = el.closest("table[data-deck]"); if (!table) return;
+  const deckId = table.dataset.deck; const tr = el.closest("tr[data-i]"); if (!tr) return;
+  const i = +tr.dataset.i; const deck = state.decks[deckId];
+  const cards = structuredClone(deck.cards || []);
+  if (el.dataset.act === "move") {
+    const to = el.value; if (to === deckId) return;
+    const [card] = cards.splice(i, 1);
+    const target = structuredClone(state.decks[to].cards || []); target.push(card);
+    await save(deckId, cards); await save(to, target); return;
+  }
+  const f = el.dataset.f; if (!f) return;
+  let val = el.value;
+  if (f === "str") { val = val.trim() === "" ? null : Number(val); if (Number.isNaN(val)) { el.value = cards[i].str ?? ""; return; } }
+  else val = typeof val === "string" ? val.trim() : val;
+  if (cards[i][f] === val) return;
+  cards[i][f] = val;
+  await save(deckId, cards);
+});
+main.addEventListener("click", async e => {
+  const add = e.target.closest("[data-add]"); const del = e.target.closest("[data-act='del']");
+  const table = main.querySelector("table[data-deck]"); if (!table || (!add && !del)) return;
+  const deckId = table.dataset.deck; const cards = structuredClone(state.decks[deckId].cards || []);
+  if (add) cards.push({ id: deckId + "-" + Date.now().toString(36), rarity: add.dataset.add, name: "", species: "", tag: "", str: null, habitat: "", text: "", status: "open", note: "" });
+  if (del) { const tr = del.closest("tr[data-i]"); const i = +tr.dataset.i; if (del.dataset.armed !== "1") { del.dataset.armed = "1"; del.textContent = "Confirm"; setTimeout(() => { del.dataset.armed = ""; del.textContent = "Delete"; }, 3000); return; } cards.splice(i, 1); }
+  await save(deckId, cards);
+});
+async function save(deckId, cards) {
+  state.decks[deckId] = { ...state.decks[deckId], cards };
+  render();
+  if (!db) return flash("Not saved: the shared sheet isn't connected");
+  try { await db.doc("decks/" + deckId).update({ cards }); flash("Saved"); }
+  catch (err) { flash(err && err.code === "invalid_argument" ? "Not saved: you can view this sheet but not edit it" : "Not saved: try again in a moment"); }
+}
+let flashT; function flash(msg) { const s = $("#saved"); s.textContent = msg; s.classList.add("on"); clearTimeout(flashT); flashT = setTimeout(() => s.classList.remove("on"), 1600); }
+
+/* ---------- data ---------- */
+(async () => {
+  render();
+  db = window.claude ? await window.claude.use("db") : null;
+  if (!db) { $("#sync").textContent = "Offline: the shared sheet isn't available in this view."; return; }
+  const live = { decks: false, habs: false };
+  const status = () => { $("#sync").textContent = live.decks && live.habs ? "Live: edits save for both of us." : "Connecting to the shared sheet…"; };
+  db.collection("decks").onSnapshot(snap => { const d = {}; snap.docs.forEach(s => d[s.id] = s.data()); state.decks = d; live.decks = true; status(); render(); }, () => { $("#sync").textContent = "Lost the connection to the decks. Reload to retry."; });
+  db.collection("habitats").onSnapshot(snap => { const h = {}; snap.docs.forEach(s => h[s.id] = s.data()); state.habitats = h; live.habs = true; status(); render(); }, () => { $("#sync").textContent = "Lost the connection to the habitats. Reload to retry."; });
+})();
+</script>

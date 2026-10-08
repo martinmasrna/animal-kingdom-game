@@ -1,0 +1,42 @@
+{
+ "name": "Forest",
+ "order": 1,
+ "target": {
+  "C": 18,
+  "R": 12,
+  "L": 12
+ },
+ "roster": [
+  "Fox",
+  "Wolf",
+  "Grizzly Bear",
+  "Black Bear",
+  "Deer",
+  "Moose",
+  "Boar",
+  "Badger",
+  "Lynx",
+  "Beaver",
+  "Porcupine",
+  "Skunk",
+  "Squirrel",
+  "Chipmunk",
+  "Flying Squirrel",
+  "Woodpecker",
+  "Firefly",
+  "Owl",
+  "Raven",
+  "Hawk",
+  "Eagle",
+  "Falcon",
+  "Magpie",
+  "Salamander",
+  "Viper",
+  "Stag Beetle",
+  "Hornet",
+  "Guard Wasp",
+  "Worker Wasp",
+  "Worker Ant"
+ ],
+ "note": ""
+}

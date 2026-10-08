@@ -1,0 +1,42 @@
+{
+ "name": "Meadow",
+ "order": 2,
+ "target": {
+  "C": 18,
+  "R": 12,
+  "L": 12
+ },
+ "roster": [
+  "Hare",
+  "Hedgehog",
+  "Mole",
+  "Weasel",
+  "Hamster",
+  "Groundhog",
+  "Gopher",
+  "Muskrat",
+  "Queen Bee",
+  "Worker Bee",
+  "Nurse Bee",
+  "Nurse Bumblebee",
+  "Butterfly",
+  "Dragonfly",
+  "Ladybird",
+  "Grasshopper",
+  "Praying Mantis",
+  "Pond Skater",
+  "Frog",
+  "Toad",
+  "Snail",
+  "Earthworm",
+  "Tick",
+  "Centipede",
+  "Goose",
+  "Swan",
+  "Duck",
+  "Stork",
+  "Swallow",
+  "Cuckoo"
+ ],
+ "note": ""
+}

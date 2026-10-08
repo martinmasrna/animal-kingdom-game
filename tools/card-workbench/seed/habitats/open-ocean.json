@@ -1,0 +1,27 @@
+{
+ "name": "Open Ocean",
+ "order": 5,
+ "target": {
+  "C": 15,
+  "R": 10,
+  "L": 10
+ },
+ "roster": [
+  "Great White Shark",
+  "Hammerhead",
+  "Whale Shark",
+  "Blue Whale",
+  "Sperm Whale",
+  "Orca",
+  "Dolphin",
+  "Octopus",
+  "Squid",
+  "Jellyfish",
+  "Sea Turtle",
+  "Manta Ray",
+  "Sunfish",
+  "Swordfish",
+  "Albatross"
+ ],
+ "note": ""
+}

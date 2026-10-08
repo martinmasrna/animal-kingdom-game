@@ -1,0 +1,42 @@
+{
+ "name": "Savanna",
+ "order": 0,
+ "target": {
+  "C": 18,
+  "R": 12,
+  "L": 12
+ },
+ "roster": [
+  "Lion",
+  "Elephant",
+  "Giraffe",
+  "Zebra",
+  "Cheetah",
+  "Wildebeest",
+  "Cape Buffalo",
+  "Warthog",
+  "Ostrich",
+  "African Wild Dog",
+  "Naked Mole-Rat",
+  "Baboon",
+  "Gazelle",
+  "Meerkat",
+  "Oxpecker",
+  "Leopard",
+  "Rhinoceros",
+  "Hippopotamus",
+  "Crocodile",
+  "Hyena",
+  "Honey Badger",
+  "Serval",
+  "Black Mamba",
+  "Termite King",
+  "Termite Queen",
+  "Egg Eater",
+  "Caracal",
+  "Vulture",
+  "Dung Beetle",
+  "Jackal"
+ ],
+ "note": ""
+}
