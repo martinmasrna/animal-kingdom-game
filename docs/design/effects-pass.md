@@ -208,6 +208,7 @@ Imagined games (reasoning, not evidence): the board dominance works from turn 4,
 | Hippopotamus (Hoofed) | Savanna | R | 8 | **Hungry 3.** When an enemy of strength 3 or less is placed next to this, remove it. |
 | Crocodile | Savanna | R | 8 | **Apex Predator.** |
 | Whale Shark (Fish) | Open Ocean | R | 8 | **Titan. Hungry 4.** At the end of your turn, draw 2 cards. |
+| Sperm Whale | Open Ocean | R | 8 | **Titan.** Roar: remove all adjacent animals. (Brutus's Roar, paid with a whole turn instead of Hungry 6, Martin. Its own neighbours die too, so it lands at the front. Gives Moby's whale its species.) |
 | Oxpecker (Bird) | Savanna | C | 1 | **Flight.** Roar: gain 1 food for each animal of strength 8 or more in your starting deck. |
 | Anteater | Jungle | C | 4 | Roar: draw a card. Gain food equal to its strength. (It rips open termite mounds: the bigger the mound, the bigger the meal.) |
 | Dung Beetle | Savanna | C | 1 | At the end of your turn, gain 2 food for each Hungry animal you control. |
