@@ -31,7 +31,7 @@ The failures this procedure exists to stop, each a real miss:
 
 - **The default play.** Compare the card with simply placing the card it consumes, or pressing Draw (2 cards for one action). Drawing one card is tempo, not value. A card that replaces itself is not card draw. Discarding a big animal to remove a smaller one is worse than covering with it.
 - **The real grid.** A crossroad has at most 4 neighbours (corners 2). Count them before stating any "for each adjacent" payoff.
-- **Answerable without losing a card every time.** "Protect it and it wins" is a control card; at home behind walls it may be unreachable. Static auras that make every corner uncoverable are unbreakable walls.
+- **Answerable without losing a card every time.** "Protect it and it wins" is a control card; at home behind walls it may be unreachable: a card on a back corner of a home region can't be reached at all, so anything that guards its neighbours from there is a lock. A strength-10 body can't be covered, so anything that keeps working after it lands is unanswerable for decks without removal. Static auras that make every corner uncoverable are unbreakable walls.
 - **Timing.** Food or cards arriving after the game is decided count for nothing; ask when the deck needs the resource.
 - **Legendaries amplify the plan, they don't replace it** (Theron and Adira in Cats). One clear, unique idea worth a legendary, good in other decks too, a strong fit here. Never another win condition, never a reprint of an existing card, never a plain card-draw or +1 anthem.
 - **Power ladders climb evenly.** A card with stages (the Butterfly) adds one thing or one number per stage; no single giant jump at the end.
@@ -43,7 +43,7 @@ Give a recommendation, not a menu. For a legendary, three to five proposals are 
 
 ## 4. Animals
 
-- The effect is the animal's most famous trait as a normal person knows it, and the animal is the first one the effect brings to mind.
+- The effect is the animal's most famous trait as a normal person knows it, and the animal is the first one the effect brings to mind. Justify a fit only by what an ordinary player already knows: viral clips, named real individuals, documentary scenes and record-book facts are trivia, and never make a fit.
 - A legendary needs its species on a common or rare in the pool. Metamorphosis and Colony castes are the only species exceptions.
 - Rarity is the card's role, but the most special effects go on the most special animals; an ordinary animal on a premium effect reads wrong.
 - Strength follows real size for commons and rares; when size forces a small body, give a stronger effect.

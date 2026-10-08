@@ -176,7 +176,7 @@ The list (Martin, 2026-10-08; animals and strengths set, wording to the card-tex
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
 | a Jellyfish (no Fish tag; name to come) | Open Ocean | L | 6 | Your Fish next to this have **Poison**. (Young fish shelter among jellyfish tentacles. "Your other Fish have Poison" would make every corner uncoverable: the herd's rejected card again.) |
-| a Bluefin Tuna (name to come) | Open Ocean | L | 5 | Roar: for each region you control, draw a card and gain 5 food. (The closer and the late reload; the most expensive fish ever sold. The herd's white stag, "draw a card for each region you control", needs another effect.) |
+| a Bluefin Tuna (name to come) | Open Ocean | L | 5 | Roar: for each region you control, draw a card and gain 5 food. (The closer and the late reload; tuna is the fish people know as food. The herd's white stag, "draw a card for each region you control", needs another effect.) |
 | a Manta Ray (name to come) | Open Ocean | L | 4 | **Dusk:** if you control 2 or more regions, draw a card. |
 | a Piranha (name to come) | Jungle | L | 7 | Your Fish can be placed on enemies of strength up to the number of Fish you control. (The school strips something far bigger: once the board is full, it lets the small Fish win crossroads back. Snow Leopard's shape.) |
 | Swordfish | Open Ocean | R | 3 | Roar: remove a random adjacent enemy for each of your Fish next to this. |
@@ -202,7 +202,7 @@ Imagined games (reasoning, not evidence): the board dominance works from turn 4,
 |---|---|---|---:|---|
 | Brutus (Hoofed) | Savanna | L | 8 | **Hungry 6.** Roar: remove all adjacent animals. |
 | Methuselah | Savanna | L | 3 | **Armor.** At the end of your turn, gain 5 food. |
-| a Sperm Whale (name evoking Moby Dick without citing it, as Eon evokes the Ouroboros; Mocha, the real white whale behind the novel, proposed) | Open Ocean | L | 10 | **Titan.** Roar: remove all enemies next to your animals. (To try, Martin: on map_b it's close to a full board wipe, everything touching your herd. A 10 can't be covered, so the power has to be in the arrival and nothing may keep working after it: "an enemy placed next to this is removed" locked whole regions for decks without a removal Roar. Dials if too strong: "of strength 7 or less", "next to your Hungry animals", or Brutus's own neighbours. Needs a common or rare Sperm Whale.) |
+| a Sperm Whale (Moby Dick's whale: the white sperm whale in the art, a name evoking it without citing it, as Eon evokes the Ouroboros; the name must work for players, so no obscure real whale's name) | Open Ocean | L | 10 | **Titan.** Roar: remove all enemies next to your animals. (To try, Martin: on map_b it's close to a full board wipe, everything touching your herd. A 10 can't be covered, so the power has to be in the arrival and nothing may keep working after it: "an enemy placed next to this is removed" locked whole regions for decks without a removal Roar. Dials if too strong: "of strength 7 or less", "next to your Hungry animals", or Brutus's own neighbours. Needs a common or rare Sperm Whale.) |
 | an Oxpecker (proposed; name to come; Bird) | Savanna | L | ~2 | **Flight.** Your Hungry animals next to this don't need to eat. (Oxpeckers live on giants, eating their ticks. Placed between giants, it's guarded by them: an enemy has to reach one of its free sides.) |
 | Rhinoceros (Hoofed) | Savanna | R | 8 | **Hungry 3.** Roar: remove all adjacent enemies of strength 2 or less. |
 | Hippopotamus (Hoofed) | Savanna | R | 8 | **Hungry 3.** When an enemy of strength 3 or less is placed next to this, remove it. |
@@ -236,7 +236,7 @@ Train in secret, then unveil (Martin, 2026-10-08): Hearthstone's Handlock and ha
 | Chimpanzee (Primate) | Jungle | C | 4 | Roar: remove an adjacent enemy of equal or lower strength. (The chimp with its stone or stick: the tool is as heavy as the arm that swings it. It took the Capuchin's effect, since everyone knows a chimp.) |
 | Baboon (Primate) | Savanna | C | 4 | Roar: give 2 animals in your hand +1 strength. |
 | Stork (Bird) | Meadow | C | 4 | **Flight.** Roar: add two random younglings to your hand. (Younglings, 1, no text, one per family: Baby Lion (Cat), Baby Wolf (Canine), Baby Squirrel (Rodent), Baby Owl (Bird), Baby Python (Snake), Baby Bear (Bear), Baby Gorilla (Primate), Baby Zebra (Hoofed).) |
-| Grizzly Bear (Bear) | Forest | C | 2 | Has +1 strength for each card in your hand. (Fat Bear Week: a bear fattening for winter. Live, so it shrinks as you play your hand out.) |
+| Grizzly Bear (Bear) | Forest | C | 2 | Has +1 strength for each card in your hand. (A bear fattening for winter. Live, so it shrinks as you play your hand out.) |
 | Caterpillar | Meadow | C | 1 | When this gains strength in your hand, draw a card and turn this into a Butterfly. (Replaces the Chimpanzee's draw on every training step, the deck's strongest common.) |
 | Gorilla (Primate) | Jungle | C | 6 | Roar: if this has 8 or more strength, draw a card. |
 
