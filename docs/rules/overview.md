@@ -10,7 +10,7 @@ This document describes a proposed fast-paced strategy game set in a theme of An
 
 A player wins immediately by either: (a) placing a unit on an enemy den; or (b) collecting the required number of food
 
-The game can also end through exhaustion if a player can neither draw nor place a unit, or when both players end a turn without acting, back to back.
+The game can also end when both players end a turn without acting, back to back (§11.3).
 
 ---
 
@@ -71,7 +71,7 @@ Players alternate turns. On a turn, the active player performs **two actions**; 
 1. **Draw 2 cards**
 2. **Place one unit**
 
-The turn ends after two actions, or earlier if no legal action remains. A player may also end their turn early, declining the rest, even before taking any action. If both players end a turn without taking an action, one right after the other, the game ends as in exhaustion (§11.3): the player with more food wins, and on a tie the player who passed last loses. Some troop effects can allow additional placements or draws during the same turn (these are free — they do not consume an action). When taking the place action:
+The turn ends after two actions, or earlier if no legal action remains. A player may also end their turn early, declining the rest, even before taking any action. If both players end a turn without taking an action, one right after the other, the game ends (§11.3). Some troop effects can allow additional placements or draws during the same turn (these are free — they do not consume an action). When taking the place action:
 
 1. Choose one unit from the rack.
 2. Choose a legal placement.
@@ -171,15 +171,13 @@ If a player places one of their troops on an enemy den, that player wins immedia
 ## 11.2 Reaching the Food Objective
 If a player obtains at least certain amount of food (specified by the map), the player wins immediately.
 
-## 11.3 Exhaustion
-The game also ends when the active player can perform neither standard action:
-- they cannot legally draw; and
-- they cannot legally place any unit from their rack.
+## 11.3 Both Players Pass
+A player whose turn starts with no legal action (they cannot draw, place or roam) passes: their turn ends at once and the game goes on.
 
-When this happens:
+The game ends when both players end a turn without taking an action, one right after the other, whether they chose to pass or had no move. When this happens:
 1. compare collected food;
 2. the player with more food wins;
-3. if tied, the player whose inability to act ended the game loses.
+3. if tied, the player who passed last loses.
 
 
 # 12. Deck-Building Premise

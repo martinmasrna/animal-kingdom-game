@@ -62,7 +62,7 @@ def test_stack_reveal_on_removal():
 # ------------------------------------------------------------------ region & food
 
 def test_region_control_produces_food_at_end_of_turn():
-    s = make_state(current="A", decks={"A": ["lion"], "B": []})
+    s = make_state(current="A", hands={"B": ["lion"]}, decks={"A": ["lion"], "B": []})
     for cr in ("1,1", "2,1", "1,2", "2,2"):  # all corners of R1 (food 10)
         put(s, cr, "caracal", "A")
     s.actions_taken_this_turn = s.config.actions_per_turn - 1  # make the Draw A's last action
@@ -92,15 +92,24 @@ def test_hq_capture_win():
     assert s.result == Result("A", "hq_capture")
 
 
-def test_exhaustion_more_food_wins():
-    s = make_state(current="A", food={"A": 5, "B": 3})  # A cannot draw or place
-    assert rules.legal_actions(s) == []
-    assert rules.is_terminal(s) == Result("A", "exhaustion")
+def test_a_player_with_no_move_passes_and_the_game_goes_on():
+    s = make_state(current="A", hands={"A": ["lion"] * 3}, food={"A": 0, "B": 50})   # B: no hand, no deck
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
+    assert s.result is None and rules.is_terminal(s) is None
+    assert s.current == "A" and s.idle_turns == 1   # B had no move: its turn passed at once
 
 
-def test_exhaustion_tie_breaks_against_player_who_cannot_act():
-    s = make_state(current="A", food={"A": 3, "B": 3})
-    assert rules.is_terminal(s) == Result("B", "exhaustion")  # A is stuck → A loses
+def test_both_players_without_a_move_end_the_game_on_food():
+    s = make_state(current="A", hands={"A": ["lion"]}, food={"A": 5, "B": 3})
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,2")))   # then neither can act
+    assert s.result == Result("A", "passes")
+
+
+def test_both_stuck_on_equal_food_the_last_to_pass_loses():
+    s = make_state(current="A", hands={"A": ["lion"]}, food={"A": 3, "B": 3})
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,2")))   # B passes, then A
+    assert s.result == Result("B", "passes")
 
 
 # ------------------------------------------------- actions per turn (2 per turn, the default)

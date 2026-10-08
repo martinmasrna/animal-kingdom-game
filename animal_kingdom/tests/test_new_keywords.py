@@ -72,7 +72,7 @@ def test_an_animal_without_roam_does_not_roam():
 
 
 def test_each_animal_roams_at_most_once_per_turn():
-    s = state(hands={"A": ["t_body", "t_body"]})
+    s = state(hands={"A": ["t_body", "t_body"], "B": ["t_body"]})
     put(s, "1,2", "t_roamer", "A")
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
     assert roams(s) == set()                            # it has roamed this turn; nothing else roams
@@ -191,7 +191,7 @@ def test_roam_hooks_fire_for_the_roamer_and_its_friends(monkeypatch):
 
 
 def test_a_free_roam_spends_no_action_and_keeps_the_turn_open():
-    s = state(hands={"A": ["t_body", "t_body"]})
+    s = state(hands={"A": ["t_body", "t_body"], "B": ["t_body"]})
     put(s, "1,2", "t_roamer", "A")
     s.effect_stack.append({"op": "grant_free_roam", "player": "A", "n": 1, "by_card": "t_roamer"})
     effects.resolve(s)
@@ -228,7 +228,7 @@ def test_roam_is_serialisable_and_replays():
 
 
 def test_a_free_roam_alone_is_not_an_idle_turn():
-    s = state()
+    s = state(hands={"B": ["t_body"]})
     put(s, "1,2", "t_roamer", "A")
     s.turn_flags["free_roams_A"] = 1
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
@@ -301,7 +301,7 @@ def _cover_poison(s, coverer="t_body", cr="2,2"):
 
 
 def _poisoned_board(hand=("t_body",)):
-    s = state(current="B", hands={"B": list(hand) + ["t_dusk"]})   # a spare card keeps B's turn open
+    s = state(current="B", hands={"A": ["t_dusk"], "B": list(hand) + ["t_dusk"]})   # spare cards keep both turns open
     put(s, "1,2", "t_body", "A")
     poison = put(s, "2,2", "t_poison", "A")
     put(s, "4,2", "t_body", "B"); put(s, "3,2", "t_body", "B")
@@ -376,7 +376,7 @@ def test_poison_reaches_a_buried_coverer():
 
 
 def test_covering_poison_by_roaming_sets_it_off():
-    s = state()
+    s = state(hands={"B": ["t_body"]})
     put(s, "1,2", "t_poison", "B")
     put(s, "1,1", "t_roamer", "A")
     rules.apply_action(s, RoamAction("1,1", ("cr", "1,2")))

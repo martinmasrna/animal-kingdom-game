@@ -607,7 +607,7 @@ def _pending(s, op):
 
 
 def test_sloth_schedules_a_delayed_food_payout():
-    s = make_state(hands={"A": ["sloth"]})
+    s = make_state(hands={"A": ["sloth"], "B": ["lion"]})
     rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
     sched = _pending(s, "gain_food")
     assert len(sched) == 1
@@ -617,7 +617,7 @@ def test_sloth_schedules_a_delayed_food_payout():
 
 
 def test_sloth_pays_out_after_its_delay_when_left_uncovered():
-    s = make_state(hands={"A": ["sloth"]})
+    s = make_state(hands={"A": ["sloth"], "B": ["lion"]})
     rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
     food_before = s.food["A"]
     for _ in range(CFG.sloth_delay - 1):
@@ -629,7 +629,7 @@ def test_sloth_pays_out_after_its_delay_when_left_uncovered():
 
 
 def test_timer_is_suspended_while_the_unit_is_buried():
-    s = make_state(hands={"A": ["sloth"]})
+    s = make_state(hands={"A": ["sloth"], "B": ["lion"]})
     rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
     food_before = s.food["A"]
     put(s, "1,2", "lion", "B")                           # cover the str-3 Sloth with a str-7
@@ -640,7 +640,7 @@ def test_timer_is_suspended_while_the_unit_is_buried():
 
 
 def test_timer_resumes_when_the_unit_is_uncovered():
-    s = make_state(hands={"A": ["sloth"]})
+    s = make_state(hands={"A": ["sloth"], "B": ["lion"]})
     rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
     food_before = s.food["A"]
     put(s, "1,2", "lion", "B")
@@ -652,7 +652,7 @@ def test_timer_resumes_when_the_unit_is_uncovered():
 
 
 def test_removal_cancels_the_timer_outright():
-    s = make_state(hands={"A": ["sloth"]})
+    s = make_state(hands={"A": ["sloth"], "B": ["lion"]})
     rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
     food_before = s.food["A"]
     effects._remove_specific(s, "1,2", s.top_unit("1,2"), by_player="B", by_effect=False)
@@ -664,7 +664,7 @@ def test_removal_cancels_the_timer_outright():
 
 def test_bounce_resets_the_timer():
     """A bounced unit returns as a fresh instance, so replaying it starts a new timer."""
-    s = make_state(hands={"A": ["sloth"]})
+    s = make_state(hands={"A": ["sloth"], "B": ["lion"]})
     rules.apply_action(s, PlaceAction("sloth", ("cr", "1,2")))
     first_iid = s.top_unit("1,2").iid
     _tick(s)                                             # burn one turn off the timer

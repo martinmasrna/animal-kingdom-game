@@ -17,7 +17,7 @@ from animal_kingdom.sim.runner import (
     GameRecord, make_bot, play_game, run_matchup, run_pairs, run_round_robin,
 )
 
-REASONS = {"hq_capture", "food", "exhaustion", "max_turns"}
+REASONS = {"hq_capture", "food", "passes", "max_turns"}
 
 
 # ---------------------------------------------------------------------- runner

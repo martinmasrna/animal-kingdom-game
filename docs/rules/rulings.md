@@ -44,7 +44,7 @@ The keywords are defined in [`keywords.md`](keywords.md); these are the calls th
 - **Roam lands like a placement in everything but the Roar.** Arriving sets off every adjacent trap (Hippopotamus), even one the animal already stood next to before it moved. A cover by roaming is a cover: Spikes, Poison, Pufferfish, King Theron and an Apex Predator's eat all happen. What is printed as a Roar does not (Caracal's "if placed on top of an enemy"), nor do "when you play" reactions (Queen Honoria, Red Wolf). An Apex Predator roams only onto an animal, its own included, and eats it; it never roams onto a den.
 - **A roam keeps the animal's place in the play order.** Moving isn't playing; a bounced animal played again is newly played.
 - **Roaming onto a den ends the game where it stands.** The animal never leaves its crossroad.
-- **A player who can roam is not exhausted.** Exhaustion is having no legal action, and a roam is one.
+- **A player who can roam has a move.** Only a player with no legal action passes automatically, and a roam is one.
 - **A free roam is spent before an action** and keeps the turn open after its two actions until it is used or the player ends the turn. No card grants one yet.
 - **Poison ticks under a cover.** The poisoned coverer is removed at the start of the Poison animal's controller's next turn even if something has covered it since (it comes out from under the stack), as with venom.
 - **Dawn and Dusk resolve one at a time, in play order, each in full before the next.** One that an earlier one removed or buried does nothing. Dawn effects resolve before the delayed "at the start of your next turn" payouts (Chipmunk, Taipan's venom, Poison).

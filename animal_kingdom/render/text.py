@@ -1048,7 +1048,7 @@ def render(state, reveal_hands: Collection[str] = (),
     width = _terminal_width()
     lines = []
 
-    result = rules.is_terminal(state)   # also exhaustion / turn limit, which aren't stored on state
+    result = rules.is_terminal(state)   # also the turn limit, which isn't stored on state
     if result is not None:
         winner = result.winner
         style = SEAT_STYLE.get(winner) if winner else "bold yellow"

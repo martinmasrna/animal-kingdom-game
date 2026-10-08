@@ -92,7 +92,7 @@ win_food: 100
 ```
 
 ## 4.4 Design notes — why this shape
-- **All three win conditions are live.** *den rush:* build a connected chain across the middle to a column-4 crossroad, then place onto `HQ_B` — long enough to cost real tempo (tests Aggro). *Food win:* the center rewards holding + removal; both centers together require 6 specific crossroads `(2,1)(3,1)(2,2)(3,2)(2,3)(3,3)` held under fire — a real achievement, not a freebie. *Exhaustion:* reachable in grindy mirrors.
+- **Every way to win is live.** *den rush:* build a connected chain across the middle to a column-4 crossroad, then place onto `HQ_B` — long enough to cost real tempo (tests Aggro). *Food win:* the center rewards holding + removal; both centers together require 6 specific crossroads `(2,1)(3,1)(2,2)(3,2)(2,3)(3,3)` held under fire — a real achievement, not a freebie. *Both pass:* reachable in grindy mirrors.
 - **Contested center.** Higher food in the middle pulls both players into the same squares, so removal, covering, and positioning all matter there — the interactions worth stress-testing.
 - **Shared corners create economy.** Adjacent regions share crossroads, so holding two regions overlaps; board states get interesting without the map being large.
 - **Symmetric**, so the only built-in imbalance is turn order — the thing to *measure*, not bury under map asymmetry.
@@ -103,7 +103,7 @@ win_food: 100
 # 5. Tuning targets (Map B)
 - **Food curve:** region outputs (10 / 20) and `win_food` (100) vs. the card `F` scale — set together in the simulator.
 - **First-player win rate:** target ≈ 50% with the 3/4 opening-hand split; adjust the split or add another lever if skewed.
-- **Win-condition split:** healthy if all three (den / food / exhaustion) appear; if exhaustion dominates, the map is too stally or decks too removal-heavy.
+- **Win-condition split:** healthy if all three (den / food / both pass) appear; if both-pass endings dominate, the map is too stally or decks too removal-heavy.
 
 ---
 

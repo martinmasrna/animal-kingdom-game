@@ -338,7 +338,7 @@ class RefereeBot(TurnSearcher):
         guard = 0
         while guard < 40:
             guard += 1
-            result = rules.is_terminal(state)   # also catches exhaustion/max_turns,
+            result = rules.is_terminal(state)   # also catches max_turns,
             if result is not None:              # which is_terminal returns without
                 state.result = result           # writing to state.result itself
                 return

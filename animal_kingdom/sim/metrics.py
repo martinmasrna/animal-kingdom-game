@@ -125,7 +125,7 @@ def matchup_matrix(records: Iterable[GameRecord]) -> dict:
 
 
 def win_condition_split(records: Iterable[GameRecord]) -> dict:
-    """Counts and percentages of how games ended (hq_capture / food / exhaustion / max_turns)."""
+    """Counts and percentages of how games ended (hq_capture / food / passes / max_turns)."""
     counts: dict[str, int] = defaultdict(int)
     total = 0
     for r in records:

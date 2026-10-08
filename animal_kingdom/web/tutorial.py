@@ -22,7 +22,7 @@ from ..engine.config import Config
 PLAYER_DECK = ["lion", "cape_buffalo", "dire_wolf", "cape_buffalo", "dire_wolf", "pup", "squirrel", "lion", "cape_buffalo",
                "lion", "dire_wolf", "squirrel", "cape_buffalo", "lion", "dire_wolf", "dire_wolf", "cape_buffalo", "lion",
                "cape_buffalo", "lion"]   # after the Squirrel only plain animals and Squirrels: no target Roar, no glow in lesson 1
-PLAYER_DECK += PLAYER_DECK[7:] + PLAYER_DECK[7:10]   # 36 cards: a slow first game never runs out (no exhaustion loss)
+PLAYER_DECK += PLAYER_DECK[7:] + PLAYER_DECK[7:10]   # 36 cards: a slow first game never runs out
 # The opponent: wild dogs (1) that any animal can cover. None of them walls its den: the march must reach it before
 # the player's food reaches 100 (a 7 in front of the den forced a detour, and food won first).
 OPPONENT_DECK = ["rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup",
