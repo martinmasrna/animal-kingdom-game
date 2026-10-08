@@ -340,10 +340,10 @@
     {
      "habitat": "City",
      "id": "canines-13",
-     "name": "Stray Dog",
+     "name": "Street Dog",
      "note": "",
      "rarity": "C",
-     "species": "Stray Dog",
+     "species": "Street Dog",
      "status": "proposed",
      "str": 1,
      "tag": "Canine",
@@ -515,10 +515,10 @@
     {
      "habitat": "City",
      "id": "cats-13",
-     "name": "Stray Cat",
+     "name": "Alley Cat",
      "note": "",
      "rarity": "C",
-     "species": "Stray Cat",
+     "species": "Alley Cat",
      "status": "proposed",
      "str": 1,
      "tag": "Cat",
@@ -870,7 +870,7 @@
      "rarity": "C",
      "species": "Mouse",
      "status": "proposed",
-     "str": 5,
+     "str": 4,
      "tag": "Rodent",
      "text": "Roar: draw a Rodent."
     }

@@ -33,6 +33,6 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Rat** | 3 | Rodent | 2 | Roar: remove an adjacent enemy, then discard a random card. |
 | **Falcon** | 3 | Bird | 4 | Flight. Roar: if placed adjacent to the opponent's den, draw a card. |
 | **Bat** | 3 | — | 3 | Flight. Roar: draw a card. |
-| **Mouse** | 3 | Rodent | 5 | Roar: draw a Rodent. |
+| **Mouse** | 3 | Rodent | 4 | Roar: draw a Rodent. |
 
 <!-- cards:end -->

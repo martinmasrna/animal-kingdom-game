@@ -716,7 +716,7 @@
     },
     {
       "id": "dog",
-      "name": "Stray Dog",
+      "name": "Street Dog",
       "deck": "canines",
       "rarity": "common",
       "tags": [
@@ -725,7 +725,7 @@
       "base_strength": 1,
       "text": "Roar: give an ally with Roam +2 strength. It roams.",
       "keywords": [],
-      "species": "Stray Dog",
+      "species": "Street Dog",
       "habitat": "City",
       "workbench_id": "canines-13"
     },
@@ -936,7 +936,7 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 5,
+      "base_strength": 4,
       "text": "Roar: draw a Rodent.",
       "keywords": [],
       "species": "Mouse",
@@ -1147,7 +1147,7 @@
     },
     {
       "id": "house_cat",
-      "name": "Stray Cat",
+      "name": "Alley Cat",
       "deck": "cats",
       "rarity": "common",
       "tags": [
@@ -1156,7 +1156,7 @@
       "base_strength": 1,
       "text": "Roar: if you control another Cat, play another Cat.",
       "keywords": [],
-      "species": "Stray Cat",
+      "species": "Alley Cat",
       "habitat": "City",
       "workbench_id": "cats-13"
     },

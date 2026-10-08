@@ -157,7 +157,7 @@ The pack that roams the board, buffs itself on the board (Primates buff in hand)
 | Raccoon Dog | Forest | C | 3 | Whenever one of your Canines roams, give it +1 strength. |
 | Fox | Forest | C | 3 | Dusk: give your adjacent animals +1 strength. |
 | Badger | Forest | C | 4 | Roar: draw an animal with Roam. (It digs the prey out for the runners, as badgers do for coyotes.) |
-| Stray Dog | City | C | 1 | Roar: give one of your animals with Roam +2 strength. It roams. |
+| Street Dog | City | C | 1 | Roar: give one of your animals with Roam +2 strength. It roams. |
 
 Open: the Dhole's strength (~6); a slot for the Raccoon Dog on the Forest roster. "Your animals next to this have Roam" waits for a legendary in a deck without roamers of its own.
 

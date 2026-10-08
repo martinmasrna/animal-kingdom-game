@@ -33,6 +33,6 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Raccoon Dog** | 3 | Canine | 3 | Whenever an allied Canine roams, give it +1 strength. |
 | **Fox** | 3 | Canine | 3 | Dusk: give your adjacent animals +1 strength. |
 | **Badger** | 3 | — | 4 | Roar: draw an animal with Roam. |
-| **Stray Dog** | 3 | Canine | 1 | Roar: give an ally with Roam +2 strength. It roams. |
+| **Street Dog** | 3 | Canine | 1 | Roar: give an ally with Roam +2 strength. It roams. |
 
 <!-- cards:end -->

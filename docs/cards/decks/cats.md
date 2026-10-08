@@ -33,6 +33,6 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Caracal** | 3 | Cat | 6 | Reach 2. |
 | **Tiger** | 3 | Cat | 7 | Apex Predator. |
 | **Bobcat** | 3 | Cat | 5 | Roar: if you control another Cat, draw a card. |
-| **Stray Cat** | 3 | Cat | 1 | Roar: if you control another Cat, play another Cat. |
+| **Alley Cat** | 3 | Cat | 1 | Roar: if you control another Cat, play another Cat. |
 
 <!-- cards:end -->

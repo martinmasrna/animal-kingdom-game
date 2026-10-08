@@ -71,7 +71,7 @@ Out of Meadow: Grass Snake (nothing about it is its own), Newt (people can't tel
 
 ### City (locked 2026-10-05, a 21-card set)
 
-Animals (15; 9 common and 6 rare, rarities set with the effects): Rat, Mouse, Stray Cat (today's House Cat, renamed), Stray Dog (today's Dog, renamed), Raccoon, Opossum, Macaque, Gecko, Cockroach, Spider, Mosquito, one open (the Coyote waits for Desert: everywhere outside the US it reads as a desert animal), Bat (painted pouring out of a church tower at dusk), Pigeon, Sparrow.
+Animals (15; 9 common and 6 rare, rarities set with the effects): Rat, Mouse, Alley Cat (today's House Cat, renamed), Street Dog (today's Dog, renamed), Raccoon, Opossum, Macaque, Gecko, Cockroach, Spider, Mosquito, one open (the Coyote waits for Desert: everywhere outside the US it reads as a desert animal), Bat (painted pouring out of a church tower at dusk), Pigeon, Sparrow.
 
 Legendaries (6): the rat family, Verminus, Pestis, Greywhisker, Barley and Scrooge, and one new, chosen with the effects (the raccoon is a natural one).
 
