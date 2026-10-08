@@ -14,7 +14,7 @@ Can be placed ignoring connection, except onto a den: capturing the enemy den st
 ### Reach N (proposed, 2026-10-07)
 Can be placed on a crossroad up to N crossroads away from one of your connected units, counting along paths and jumping over whatever stands between. Ordinary placement is Reach 1, so the number is how far it lands: Reach 2 jumps over one crossroad. Connection still applies at the launch point, so a Reach unit can't hop off another stranded unit, and it never captures: a den needs an unbroken chain of your units. All other placement rules still apply (covering an enemy still needs greater strength).
 
-For animals that leap or pounce: Caracal (Reach 2); frogs and grasshoppers to come.
+For animals that leap or pounce: Caracal (Reach 2); frogs and grasshoppers to come. In `cards.json` the number sits beside the keyword: `"keywords": ["Reach"], "reach": 2`.
 
 ### Roam (proposed, 2026-10-08)
 As an action, move this to an adjacent crossroad, following the normal placement rules: onto an empty crossroad, onto one of your own animals, onto an enemy it beats (covering it), or onto the enemy den (capturing it). Only an animal connected to your den can roam, and each animal roams at most once per turn. Moving isn't placing, so its Roar doesn't happen again; arriving next to a trap (Hippopotamus, the Spiders, Meerkat) sets it off as a placement would, and covering by roaming sets off Spikes and Poison. Leaving a crossroad uncovers whatever was beneath. An Apex Predator is one whenever it lands: it roams only onto an animal, and eats it.

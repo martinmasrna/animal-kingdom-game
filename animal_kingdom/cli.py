@@ -28,7 +28,7 @@ from .bots.turn_bot import TurnBot
 from .decks import PREMADE_DECKS, load_premade_deck, make_vanilla_deck
 from .engine import rules
 from .engine import strength as strength_mod
-from .engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
+from .engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction, RoamAction
 from .engine.config import load_config_overrides
 from .engine.state import GameState, StateView, new_game
 from .render.text import HIGHLIGHT_STYLE, SEAT_STYLE, describe_action, parse_cr, render
@@ -144,6 +144,10 @@ class HumanController:
                 by_card.setdefault(a.card_id, []).append(a)
         # Menu order follows hand order, so it lines up with the card boxes on screen.
         card_ids = [u.card_id for u in state.hands[view.player] if u.card_id in by_card]
+        by_origin: dict[str, list[RoamAction]] = {}
+        for a in legal:
+            if isinstance(a, RoamAction):
+                by_origin.setdefault(a.origin, []).append(a)
 
         while True:
             entries: list[tuple[str, PlaceAction | None]] = []
@@ -156,12 +160,24 @@ class HumanController:
                 entries.append(
                     (f"{state.cards[cid].name} — {n} legal target{'s' if n != 1 else ''}{hq_note}",
                      cid))
+            for origin in sorted(by_origin):
+                name = state.cards[state.top_unit(origin).card_id].name
+                entries.append((f"roam {name} from {origin}", ("roam", origin)))
             for i, (label, _) in enumerate(entries):
                 self.console.print(f"  [bold]{i}[/bold] {label}")
             i = self._read(f"player {view.player} choose a card #: ", len(entries))
             _, picked = entries[i]
             if picked is None:
                 return draw
+            if isinstance(picked, tuple):
+                options = by_origin[picked[1]]
+                for j, a in enumerate(options):
+                    dest = f"HQ {a.target[1]} — capture and win!" if a.is_hq_capture else a.crossroad
+                    self.console.print(f"  [bold]{j}[/bold] {dest}")
+                choice = self._read(f"player {view.player} roam to # ('b' to go back): ", len(options), extra=("b",))
+                if choice != "b":
+                    return options[choice]
+                continue
             action = self._choose_target(view, state, picked, by_card[picked])
             if action is not None:
                 return action

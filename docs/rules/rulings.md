@@ -36,6 +36,19 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 - **Oxpecker** counts the fixed 30-card starting decklist: each copy with printed base strength 6 or more.
 - **Once-per-turn caps.** Value and food triggers print no cap and have none. Each one also has a `cap_*` flag in `engine/config.py` (off by default) for tuning experiments.
 
+## Roam, Reach, Poison, Dawn and Dusk: the engine's reading
+
+The keywords are defined in [`keywords.md`](keywords.md); these are the calls the engine makes where the definitions leave room.
+
+- **Reach N counts from the den too.** Ordinary placement is Reach 1 and lands on the den's front crossroads, so the den is a launch point: its front crossroads are one step away. Reach never takes a den; a den is taken only along the ordinary chain.
+- **Roam lands like a placement in everything but the Roar.** Arriving sets off every adjacent trap (Hippopotamus), even one the animal already stood next to before it moved. A cover by roaming is a cover: Spikes, Poison, Pufferfish, King Theron and an Apex Predator's eat all happen. What is printed as a Roar does not (Caracal's "if placed on top of an enemy"), nor do "when you play" reactions (Queen Honoria, Red Wolf). An Apex Predator roams only onto an animal, its own included, and eats it; it never roams onto a den.
+- **A roam keeps the animal's place in the play order.** Moving isn't playing; a bounced animal played again is newly played.
+- **Roaming onto a den ends the game where it stands.** The animal never leaves its crossroad.
+- **A player who can roam is not exhausted.** Exhaustion is having no legal action, and a roam is one.
+- **A free roam is spent before an action** and keeps the turn open after its two actions until it is used or the player ends the turn. No card grants one yet.
+- **Poison ticks under a cover.** The poisoned coverer is removed at the start of the Poison animal's controller's next turn even if something has covered it since (it comes out from under the stack), as with venom.
+- **Dawn and Dusk resolve one at a time, in play order, each in full before the next.** One that an earlier one removed or buried does nothing. Dawn effects resolve before the delayed "at the start of your next turn" payouts (Chipmunk, Taipan's venom, Poison).
+
 ## A unit uncovered by a removal does not react to it
 
 When removing the top unit of a stack uncovers the unit beneath, that unit was buried at the moment of the removal, so its "when … is removed" reactions (Queen Adira, Jackal, Vulture, Egg Eater, Eon) do not fire for it. Only units already visible when the removal happens react. Found in play (2026-09-28): a Tiger ate the Grizzly covering Queen Adira and she drew a card.

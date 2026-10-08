@@ -20,7 +20,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Optional
 
-from .actions import SKIP, ChoiceAction, PlaceAction
+from .actions import SKIP, ChoiceAction, PlaceAction, RoamAction
 from .state import EngineError, GameState, Result, UnitInstance, other_player
 from . import statics
 from .strength import effective_strength, placement_strength
@@ -202,6 +202,7 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
     cover_enemy = covered if onto_enemy else None     # King Theron watches enemy covers
 
     unit.placed_on_turn = state.turn_counter
+    state.stamp_played(unit)
     state.board.setdefault(cr, []).append(unit)
     state.emit("place", player=player, iid=unit.iid, card=unit.card_id, cr=cr, from_hand=from_hand)
     if covered is not None:
@@ -259,7 +260,8 @@ def _queen_honoria_friendly_play(state, watcher, played) -> None:
 
 
 def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
-    # Enemy hippos etc. reacting to a unit placed adjacent.
+    # Enemy traps (Hippopotamus) reacting to a unit arriving adjacent: placed, or roamed in (keywords.md, Roam). A trap
+    # that cares which it was can tell from the arriving unit's `roamed_{iid}` turn flag.
     for nb in state.game_map.neighbors(cr):
         top = state.top_unit(nb)
         if top and top.owner != unit.owner:
@@ -267,8 +269,11 @@ def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
             if hook:
                 hook(state, top, unit, cr)
     if covered is not None:
-        if "Spikes" in state.cards[covered.card_id].keywords:   # the keyword is the behaviour: any card with Spikes has it
+        keywords = state.cards[covered.card_id].keywords
+        if "Spikes" in keywords:   # the keyword is the behaviour: any card with Spikes has it
             _spikes_covered(state, covered, unit, cr)
+        if "Poison" in keywords:
+            _poison_covered(state, covered, unit)
         hook = _hook(state, covered.card_id, "on_covered")
         if hook:
             hook(state, covered, unit, cr)
@@ -560,6 +565,7 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
             best[card_id] = placer
 
     out = []
+    reach_sets: dict[int, set] = {}                   # Reach N's crossroads, once per N
     for card_id in sorted(best):
         placer = best[card_id]
         card = state.cards[card_id]
@@ -568,6 +574,10 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
         is_apex = "Apex Predator" in card.keywords
         flight = statics.ignores_connection(state, card_id)
         extra = statics.extra_placement_crossroads(state, card_id, player)
+        if card.reach:
+            if card.reach not in reach_sets:
+                reach_sets[card.reach] = statics.reach_crossroads(state, player, card.reach, occ)
+            extra = extra | reach_sets[card.reach]
         for cr in sorted_crossroads:
             if not (flight or cr in connectable or cr in extra):
                 continue
@@ -594,6 +604,114 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
     if top.owner == placer.owner:
         return True
     return statics.can_cover(state, placer, top)
+
+
+# ======================================================================== Roam
+#
+# Roam (keywords.md): as an action, move an animal you own that is connected to your den to an adjacent crossroad under
+# the placement rules, at most once per animal per turn. Moving isn't placing: no Roar, no "when you play" reactions, no
+# new place in the play order. Arriving is: adjacency traps, covering reactions (Spikes, Poison, Gale, King Theron) and
+# an Apex Predator's eat all happen as on a placement.
+#
+# Hooks for the cards that build on it (none exist yet):
+#   - EFFECTS[card]["on_roam"](state, unit, cr, event): "whenever this roams…", resolves first, where a Roar would;
+#   - EFFECTS[card]["on_friendly_roam"](state, watcher, roamer, event): "whenever one of your animals roams…" (any of
+#     the player's other top units; event["onto_enemy"] tells a cover);
+#   - statics.can_roam / statics.roam_covers_equal: who roams, and who may roam onto an equal enemy;
+#   - free roams: statics.free_roams(state, player) per turn, plus turn_flags["free_roams_<player>"] granted by the
+#     `grant_free_roam` op; a free roam is spent before an action.
+# The event dict: {"player", "iid", "from", "to" (None for a den), "covered" (iid or None), "onto_enemy"}.
+# turn_flags: "roamed_<iid>" (this animal has roamed this turn), "roams_<player>" (how many this turn).
+
+def legal_roams(state: GameState, player: str) -> list:
+    """Every legal Roam for `player`, in a deterministic order."""
+    if not any(st and st[-1].owner == player and statics.can_roam(state, st[-1]) for st in state.board.values()):
+        return []                                     # the usual case, and the search's hot path: skip the BFS
+    gm = state.game_map
+    occ = state.connected_occupied(player)
+    enemy = other_player(player)
+    enemy_front = gm.hq_front(enemy)
+    out = []
+    for cr in sorted(occ):
+        unit = state.board[cr][-1]
+        if not statics.can_roam(state, unit) or state.turn_flags.get(f"roamed_{unit.iid}"):
+            continue
+        is_apex = "Apex Predator" in state.cards[unit.card_id].keywords
+        for nb in gm.neighbors(cr):
+            top = state.top_unit(nb)
+            if top is None:
+                ok = not is_apex                      # an Apex roams only onto an animal
+            elif top.owner == player:
+                ok = True
+            else:
+                ok = statics.can_cover(state, unit, top, roaming=True)
+            if ok:
+                out.append(RoamAction(cr, ("cr", nb)))
+        if cr in enemy_front and not is_apex:         # an Apex never takes a den
+            out.append(RoamAction(cr, ("hq", enemy)))
+    return out
+
+
+def free_roams_left(state: GameState, player: str) -> int:
+    granted = statics.free_roams(state, player) + state.turn_flags.get(f"free_roams_{player}", 0)
+    return max(0, granted - state.turn_flags.get(f"free_roams_used_{player}", 0))
+
+
+def pay_for_roam(state: GameState, player: str) -> None:
+    """A roam spends a free roam if the player holds one, else one of the turn's actions."""
+    if free_roams_left(state, player):
+        state.turn_flags[f"free_roams_used_{player}"] = state.turn_flags.get(f"free_roams_used_{player}", 0) + 1
+    else:
+        state.actions_taken_this_turn += 1
+
+
+def do_roam(state: GameState, player: str, origin: str, target) -> None:
+    """Move the top animal of `origin` to `target`. Leaving uncovers whatever was beneath it."""
+    stack = state.board.get(origin)
+    if not stack or stack[-1].owner != player:
+        raise EngineError(f"{player} has no animal on {origin!r} to roam")
+    unit = stack[-1]
+    state.turn_flags[f"roamed_{unit.iid}"] = True
+    state.turn_flags[f"roams_{player}"] = state.turn_flags.get(f"roams_{player}", 0) + 1
+    kind, where = target
+    if kind == "hq":                                  # the game ends as it steps onto the den
+        state.emit("roam", player=player, iid=unit.iid, card=unit.card_id, cr=origin, to=None, den=where)
+        state.emit("capture", player=player, iid=unit.iid, card=unit.card_id, den=where,
+                   str=effective_strength(state, unit), roam=True)
+        state.result = Result(player, "hq_capture")
+        return
+    stack.pop()
+    if not stack:
+        del state.board[origin]
+    state.emit("roam", player=player, iid=unit.iid, card=unit.card_id, cr=origin, to=where)
+    covered = state.top_unit(where)
+    onto_enemy = covered is not None and covered.owner != player
+    state.board.setdefault(where, []).append(unit)
+    if covered is not None:
+        state.emit("cover", cr=where, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
+    if "Apex Predator" in state.cards[unit.card_id].keywords and covered is not None:
+        state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id})
+    _push_reactions(state, unit, where, covered, onto_enemy)
+    if onto_enemy:
+        _fire_cover_event(state, unit, covered)
+    event = {"player": player, "iid": unit.iid, "from": origin, "to": where,
+             "covered": covered.iid if covered is not None else None, "onto_enemy": onto_enemy}
+    for st in list(state.board.values()):
+        top = st[-1] if st else None
+        if top and top.owner == player and top.iid != unit.iid:
+            hook = _hook(state, top.card_id, "on_friendly_roam")
+            if hook:
+                hook(state, top, unit, event)
+    hook = _hook(state, unit.card_id, "on_roam")
+    if hook:
+        hook(state, unit, where, event)
+
+
+def _op_grant_free_roam(state, step):
+    """A free roam for `player` this turn (the turn it resolves in): spent before an action."""
+    key = f"free_roams_{step['player']}"
+    state.turn_flags[key] = state.turn_flags.get(key, 0) + step["n"]
+    return None
 
 
 # ============================================================= delayed scheduler
@@ -635,26 +753,39 @@ def start_of_turn(state: GameState, player: str) -> None:
     state.scheduled = keep
     for s in reversed(fired):  # earliest-scheduled ends on top of the stack -> resolves first
         state.effect_stack.append(s["step"])
-    for cr, stack in sorted(state.board.items()):
-        top = stack[-1]
-        if top.owner == player:
-            hook = _hook(state, top.card_id, "on_start_of_turn")
-            if hook:
-                hook(state, top, cr)
+    _push_timed_hooks(state, player, "on_start_of_turn")   # Dawn, above the timers: it resolves first
 
 
 def end_of_turn(state: GameState, player: str) -> None:
-    """Fire on_end_of_turn hooks for `player`'s units (then caller resolves).
+    """Queue `player`'s Dusk effects (on_end_of_turn hooks); the caller resolves them.
 
     End-of-turn effects are choice-free (auto/deterministic) so the turn can still advance
     without a pending decision - see rules._end_turn.
     """
-    for cr, stack in sorted(state.board.items()):
-        top = stack[-1]
-        if top.owner == player:
-            hook = _hook(state, top.card_id, "on_end_of_turn")
-            if hook:
-                hook(state, top, cr)
+    _push_timed_hooks(state, player, "on_end_of_turn")
+
+
+def _push_timed_hooks(state: GameState, player: str, hook_name: str) -> None:
+    """Dawn and Dusk: several of one player's resolve in the order their animals were played (keywords.md), each in
+    full before the next begins. Each is a `timed_hook` step, earliest-played on top of the stack, and re-checks its
+    animal when its turn comes: one an earlier effect removed or buried does nothing (overview.md §9, a queued reaction
+    fizzles when its unit is gone)."""
+    due = sorted((stack[-1].play_seq, cr, stack[-1].iid, stack[-1].card_id)
+                 for cr, stack in state.board.items()
+                 if stack and stack[-1].owner == player and hook_name in EFFECTS.get(stack[-1].card_id, {}))
+    for _, _, iid, card_id in reversed(due):
+        state.effect_stack.append({"op": "timed_hook", "hook": hook_name, "iid": iid, "player": player,
+                                   "by_card": card_id, "by_iid": iid})
+
+
+def _op_timed_hook(state, step):
+    cr, unit = _find_unit(state, step["iid"])
+    if unit is None or state.board[cr][-1] is not unit or unit.owner != step["player"]:
+        return None
+    hook = _hook(state, unit.card_id, step["hook"])
+    if hook:
+        hook(state, unit, cr)
+    return None
 
 
 # ===================================================================== op registry
@@ -911,6 +1042,8 @@ OPS: dict[str, Callable] = {
     "play_named": _op_play_named,
     "grant_strength": _op_grant_strength,
     "grant_action": _op_grant_action,
+    "grant_free_roam": _op_grant_free_roam,
+    "timed_hook": _op_timed_hook,
 }
 
 
@@ -1659,6 +1792,20 @@ def _spikes_covered(state, covered, coverer, cr):
                                                   source_iid=None, by_card=covered.card_id))
 
 
+def _poison_covered(state, covered, coverer):
+    """Poison (keywords.md): an enemy that covers this is removed at the start of this animal's controller's next
+    turn, every time. Like Taipan's venom (overview.md §9.1) the poison belongs to the coverer: it is queued on the
+    coverer's iid, ticks while the coverer is buried, resolves whether or not the Poison animal is still there, and is
+    cancelled only if the coverer leaves the board first (a bounce or a return gives it a new iid). It's a remove, so
+    Armor resists it. An Apex Predator landing here is poisoned and still eats."""
+    if coverer.owner == covered.owner:
+        return
+    state.scheduled.append({"iid": coverer.iid, "owner": covered.owner, "remaining": 1, "while_buried": True,
+                            "step": remove_iid_step(coverer.iid, by_player=covered.owner, by_effect=True,
+                                                    source_iid=None, by_card=covered.card_id)})
+    state.emit("poisoned", iid=coverer.iid, card=coverer.card_id, owner=coverer.owner, by=covered.iid)
+
+
 def _skunk_place(state, unit, cr):
     options = _adjacent_enemy_unit_crossroads(state, unit, cr)
     if options:
@@ -1688,6 +1835,7 @@ def _lemming_place(state, unit, cr):
             state.decks[unit.owner].remove("lemming")
             inst = UnitInstance("lemming", unit.owner, state.new_iid())
         inst.placed_on_turn = state.turn_counter
+        state.stamp_played(inst)
         state.board.setdefault(spot, []).append(inst)
         state.emit("place", player=unit.owner, iid=inst.iid, card=inst.card_id, cr=spot, from_hand=kind == "hand")
 

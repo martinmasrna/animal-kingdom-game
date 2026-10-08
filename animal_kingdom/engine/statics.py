@@ -8,6 +8,8 @@ predicates the rules and effects call.
 
 from __future__ import annotations
 
+from collections import deque
+
 from .state import GameState, UnitInstance
 from .strength import effective_strength, placement_strength
 
@@ -20,22 +22,25 @@ def _controls(state: GameState, player: str, card_id: str) -> bool:
     )
 
 
-def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance) -> bool:
-    """May the hand instance `placer` be placed onto the enemy `target` unit?
+def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, roaming: bool = False) -> bool:
+    """May `placer` cover the enemy `target` unit? `placer` is a hand instance being placed, or (`roaming`) a board
+    unit moving onto it, whose strength is its live one on the board.
 
     Only called for covering an ENEMY top unit (own-stacking needs no strength check).
     Base rule is strictly-greater strength; the modifiers below override it.
     """
     placer_card = state.cards[placer.card_id]
-    target_card = state.cards[target.card_id]
     owner = placer.owner
 
     # Chameleon covers units of any strength (its own side needs no strength anyway).
     if placer_card.id == "chameleon":
         return True
 
-    placer_str = placement_strength(state, placer)
+    placer_str = effective_strength(state, placer) if roaming else placement_strength(state, placer)
     target_str = effective_strength(state, target)
+
+    if roaming and roam_covers_equal(state, placer) and placer_str >= target_str:
+        return True
 
     # Snow Leopard anthem: your Cats may cover equal-or-lower while you control one.
     # Never the granting Snow Leopard itself (it is placed from hand); a second one benefits from the first.
@@ -46,6 +51,61 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance) -> b
             return True
 
     return placer_str > target_str  # default: strictly greater
+
+
+# ------------------------------------------------------------------------- Roam
+
+# Card ids whose roams may cover an enemy of equal strength ("can roam onto enemies of equal strength"). A card
+# that grants this to others belongs in roam_covers_equal below instead.
+ROAM_COVERS_EQUAL: set[str] = set()
+
+
+def can_roam(state: GameState, unit: UnitInstance) -> bool:
+    """Whether `unit` has Roam (printed today; a card that grants it to others hooks in here)."""
+    return "Roam" in state.cards[unit.card_id].keywords
+
+
+# Card ids that, while on top of their crossroad, give their controller one free roam each turn ("once per turn, one of
+# your animals may roam without spending an action").
+FREE_ROAM_CARDS: set[str] = set()
+
+
+def free_roams(state: GameState, player: str) -> int:
+    """Free roams `player`'s board gives them each turn (spent before an action; effects.free_roams_left)."""
+    if not FREE_ROAM_CARDS:
+        return 0
+    return sum(1 for st in state.board.values()
+               if st and st[-1].owner == player and st[-1].card_id in FREE_ROAM_CARDS)
+
+
+def roam_covers_equal(state: GameState, unit: UnitInstance) -> bool:
+    """Whether `unit`'s roams may cover an enemy of equal strength (no card does this yet)."""
+    return unit.card_id in ROAM_COVERS_EQUAL
+
+
+# ------------------------------------------------------------------------ Reach
+
+def reach_crossroads(state: GameState, player: str, n: int, occ: set) -> set[str]:
+    """Crossroads within `n` steps of a launch point, counting along paths and jumping over whatever stands on them
+    (Reach N, keywords.md). The launch points are `player`'s den (its front crossroads are one step away, as for an
+    ordinary placement: Reach 1) and the connected crossroads `occ` they occupy. Never a den: a Reach unit captures
+    only along an unbroken chain, which ordinary placement already covers."""
+    gm = state.game_map
+    dist = {cr: 0 for cr in occ}
+    for cr in gm.hq_front(player):
+        dist.setdefault(cr, 1)
+    frontier = sorted(dist, key=dist.get)
+    queue = deque(frontier)
+    while queue:
+        cr = queue.popleft()
+        d = dist[cr]
+        if d >= n:
+            continue
+        for nb in gm.neighbors(cr):
+            if nb not in dist or dist[nb] > d + 1:
+                dist[nb] = d + 1
+                queue.append(nb)
+    return {cr for cr, d in dist.items() if d <= n}
 
 
 def ignores_connection(state: GameState, card_id: str) -> bool:

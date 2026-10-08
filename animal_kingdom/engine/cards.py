@@ -15,8 +15,9 @@ from .resources import load_bundled_json
 
 # Allowed value domains (validation). Reworked 98-design pool: README decisions B-E.
 RARITIES = {"common", "rare", "legendary"}
-KEYWORDS = {"Flight", "Armor", "Apex Predator", "Stealth", "Spikes"}  # static keywords only;
-# Roar/Deathrattle are trigger prefixes printed in `text`, not stored keywords.
+KEYWORDS = {"Flight", "Armor", "Apex Predator", "Stealth", "Spikes", "Poison", "Roam", "Reach"}  # static keywords only;
+# Roar/Dawn/Dusk/Deathrattle are trigger prefixes printed in `text`, not stored keywords. Reach carries its number
+# in the record's `reach` field: Reach 2 is {"keywords": ["Reach"], "reach": 2}.
 # Family + role tags (dec. B). Retired umbrellas (Reptile, Insect) are forbidden.
 TAGS = {
     "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent",
@@ -65,6 +66,7 @@ class Card:
     food_cost: int = 0             # placement cost; only on "Costs X food" cards
     text: str = ""
     copies: Optional[int] = None   # override COPY_LIMITS[rarity] for this one design (rare exception)
+    reach: int = 0                 # Reach N: lands up to N crossroads from a connected unit (0: no Reach)
 
     @property
     def is_dynamic(self) -> bool:
@@ -131,6 +133,12 @@ def validate_card_record(rec: dict) -> None:
         if kw not in KEYWORDS:
             raise CardDataError(f"card {cid!r}: unknown keyword {kw!r}, expected subset of {sorted(KEYWORDS)}")
 
+    reach = rec.get("reach")
+    if reach is not None and (isinstance(reach, bool) or not isinstance(reach, int) or reach < 2):
+        raise CardDataError(f"card {cid!r}: reach must be an int >= 2 (Reach 1 is ordinary placement), got {reach!r}")
+    if ("Reach" in rec.get("keywords", [])) != (reach is not None):
+        raise CardDataError(f"card {cid!r}: the Reach keyword and its `reach` number go together")
+
     copies = rec.get("copies")
     if copies is not None and (isinstance(copies, bool) or not isinstance(copies, int) or copies < 1):
         raise CardDataError(f"card {cid!r}: copies must be a positive int if set, got {copies!r}")
@@ -149,6 +157,7 @@ def _build_card(rec: dict) -> Card:
         food_cost=rec.get("food_cost", 0),
         text=rec.get("text", ""),
         copies=rec.get("copies"),
+        reach=rec.get("reach", 0),
     )
 
 

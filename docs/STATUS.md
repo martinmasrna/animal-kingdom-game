@@ -16,7 +16,7 @@ The map. Read it first each session and keep it current: when something here cha
 
 ## What exists
 
-- **Engine** (`animal_kingdom/engine/`): complete rules for the seven-deck pool, deterministic and serializable, validating every action. Solid and well tested.
+- **Engine** (`animal_kingdom/engine/`): complete rules for the seven-deck pool, deterministic and serializable, validating every action. Solid and well tested. Roam (a third action kind, `RoamAction`), Reach N (`reach` in a card's record), Poison and Dawn/Dusk play order are in the engine, the bots and the web client (click a dashed-ringed animal, then where it goes), tested on test-only cards (`tests/test_new_keywords.py`); no card in `cards.json` carries them yet. The engine's calls on their edge cases are in [`rules/rulings.md`](rules/rulings.md).
 - **Bots:** random, greedy, turn and referee, plus a learned evaluator. Good enough to be an opponent and to give directional balance reads. They can't plan across turns. See [`bots.md`](bots.md).
 - **Simulation:** round-robin reports, paired A/B benchmarks, a deckbuilding optimizer, metagame search, and the baseline-deck ruler. See [`balance.md`](balance.md).
 - **Web client** (`./play`, `animal_kingdom/web/`): the menu flow and the horizontal game screen from the design mockups, over the real engine. One game a match (the best-of-3 returns with more maps, `docs/pre-launch.md`) against Easy/Normal/Expert bots (greedy/turn/referee), or against a friend by link or code (two browser tabs work). Rematch lets the loser go first. Every game with a human seat is saved to `results/human_games/web/` in the replay format. Hosted at https://animal-kingdom.fly.dev/ (Fly.io, Frankfurt, about $4 a month) as well as `./play` locally.
