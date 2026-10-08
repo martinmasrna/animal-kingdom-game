@@ -201,7 +201,6 @@ Train in secret, then unveil (Martin, 2026-10-08): Hearthstone's Handlock and ha
 | a Baboon (name to come; Primate) | Savanna | L | 5 | At the end of your turn, give 2 random animals in your hand +1 strength. |
 | Silverback (Gorilla, Primate) | Jungle | L | 7 | Roar: give all animals in your hand +1 strength. |
 | a Butterfly (name to come) | Meadow | L | ~1 | Whenever this gains strength in your hand, it evolves. (Five stages, proposed: Egg (no text); Caterpillar, "Roar: draw a card."; Chrysalis, **Armor**; Butterfly, "**Flight.** Roar: give an animal in your hand +2 strength."; Monarch, "**Flight.** Roar: give all animals in your hand +2 strength." The art changes with each stage.) |
-| a Chimpanzee (proposed; name to come; Primate) | Jungle | L | ~3 | Roar: discard an animal from your hand. Remove an adjacent enemy with less strength than it. (The thrower: trained strength becomes removal.) |
 | Hummingbird (Bird) | Jungle | R | 1 | **Flight.** Roar: draw 2 cards. |
 | Macaque (Primate) | City | R | 2 | Roar: if you have 5 or more cards in your hand, remove an adjacent enemy. |
 | Orangutan (Primate) | Jungle | R | 5 | Roar: duplicate a Primate in your hand. |
