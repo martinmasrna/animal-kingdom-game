@@ -95,22 +95,22 @@ The pack that roams the board, buffs itself on the board (Primates buff in hand)
 
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
-| Clarion | Forest | L | ~4 | Once each turn, one of your Canines can roam without using an action. (The deck is short of actions, not cards.) |
-| Lobo | Forest | L | | Whenever one of your animals roams onto an enemy, draw a card. (The wolf king feeds the pack; bounded by one roam per animal per turn, each costing an action.) |
-| legendary wolf (name to come) | Forest | L | | Roam. When this roams onto an enemy, your animals next to it gain +2 strength. |
-| legendary Leopard (name to come) | Savanna | L | 7 | Apex Predator. Reach 2. Roam. (Drops onto its prey from a tree, then waits: landing by Reach leaves it unconnected, so it roams again once the chain reaches it.) |
-| Dhole | Jungle | R | 6 | Roam. Your animals can roam onto enemies of equal strength. (Dhole packs take prey bigger than themselves.) |
-| Jackal | Savanna | R | 4 | Roar: remove an adjacent enemy that has another of your Canines next to it. |
-| Bush Dog | Jungle | R | | open |
+| legendary Leopard (name to come; Cat) | Savanna | L | 7 | Apex Predator. Roam. Reach 2. (Drops onto its prey from a tree, then waits: landing by Reach leaves it unconnected, so it roams again once the chain reaches it.) |
+| Clarion | Forest | L | 5 | Once each turn, one of your Canines can roam for free. (The deck is short of actions, not cards.) |
+| Lobo | Forest | L | 6 | Whenever one of your animals roams onto an enemy, draw a card. (The wolf king feeds the pack; bounded by one roam per animal per turn.) |
+| legendary wolf (name to come) | Forest | L | 4 | Roam. When this roams, your animals next to it gain +2 strength. |
 | Orca | Open Ocean | R | 7 | Apex Predator. Roam. (The wolf of the sea; it eats with every roam, so its strength is the dial.) |
+| African Wild Dog | Savanna | R | 4 | Roam. Whenever this covers an enemy, draw a card. (The most successful hunter. Rare, not common: three copies would keep one on the board in every game against decks of small animals.) |
+| Jackal | Savanna | R | 4 | Roar: remove an adjacent enemy that has another of your Canines next to it. |
+| Dhole | Jungle | R | ~6 | Roam. Your animals can roam onto enemies of equal strength. (Dhole packs take prey bigger than themselves.) |
 | Wolf | Forest | C | 6 | Roam. (The plain hunter, one below the Lion.) |
-| African Wild Dog | Savanna | C | 4 | Roam. Whenever this covers an enemy, draw a card. (The most successful hunter: buff it, then let it hunt.) |
+| Bush Dog | Jungle | C | 3 | Roar: give an adjacent Canine +3 strength. |
 | Raccoon Dog | Forest | C | 3 | Whenever one of your Canines roams, give it +1 strength. |
 | Fox | Forest | C | 3 | Dusk: give your adjacent animals +1 strength. |
-| Badger | Forest | C | 4 | Roar: draw a card with Roam. (It digs the prey out for the runners, as badgers do for coyotes.) |
+| Badger | Forest | C | 4 | Roar: draw an animal with Roam. (It digs the prey out for the runners, as badgers do for coyotes.) |
 | Stray Dog | City | C | 1 | Roar: give one of your animals with Roam +2 strength. It roams. |
 
-Open: the Bush Dog's effect (a Canine synergy that doesn't go through Roam; the deck is short on removal); the Dhole's strength (~6); a slot for the Raccoon Dog on the Forest roster. "Your animals next to this have Roam" waits for a legendary in a deck without roamers of its own.
+Open: the Dhole's strength (~6); a slot for the Raccoon Dog on the Forest roster. "Your animals next to this have Roam" waits for a legendary in a deck without roamers of its own.
 
 ## Egg Control
 
