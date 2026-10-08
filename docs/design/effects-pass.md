@@ -45,7 +45,7 @@ Food is the win counter itself, so a deck whose cards each gain about 10 food is
 - **Rodent food aggro:** drafted below as Food Aggro. Scrooge's one-turn burst belongs here.
 - **The hoard (true combo), drafted below as Food OTK:** draw, assemble, stall, execute. Its food sources are slow, so the fair route is too slow and the payoff is the plan. It holds the stall pieces (Porcupine, Armadillo, Octopus, Fathom), Black Bear for slow draw, and the defensive cards below. It loses to food aggro by design: food from Roars can't be touched.
 
-The payoff, a legendary squirrel (name to come): "Roar: lose all your food. In 2 turns, gain twice that much." No Armor and a modest body: the deck has to protect it, and covering pauses its timer. Removing it loses the whole stake; that risk is the point. Doubling only the food put at risk keeps it from being a win button. Fathom ("Roar: Scout a legendary animal") is its tutor.
+The payoff, a legendary squirrel (name to come): "Roar: lose all your food. In 2 turns, gain three times that much." No Armor and a modest body: the deck has to protect it, and covering pauses its timer. Removing it loses the whole stake; that risk is the point. Multiplying only the food put at risk keeps it from being a win button at once; the two turns are the opponent's window. Fathom ("Roar: Scout a legendary animal") is its tutor.
 
 The defensive cards, one answer for each way to reach the squirrel (removal, a ground cover, a cover from behind the lines). A defensive card must be beaten by no existing card and must leave the opponent an ordinary answer (a cover with more strength, or a removal ability); an animal that can never be covered is an unbreakable wall. "When this is removed" text on a small body never fires (opponents cover small animals instead), and 0-strength tokens block nothing (anything covers a 0).
 
@@ -60,24 +60,25 @@ Open: a Capybara beside a Porcupine is the strongest wall these build (unremovab
 
 ## Food OTK, draft
 
-The hoard (Martin, 2026-10-08): a fortress around a bomb. Magic's Approach of the Second Sun, Hearthstone's Freeze Mage and Quest decks. The legendary squirrel ("Roar: lose all your food. In 2 turns, gain twice that much.") stakes everything on one animal for two turns; the rest of the deck reaches a stake worth doubling (about 50 food) and builds the walls that make those two turns survivable. The fun is the siege: a visible timer, the opponent throwing everything at the walls, and the puzzle of building an answer for each way their deck can reach the squirrel. It beats midrange and slow interaction (answers one at a time), loses to speed (Food Aggro, Fish, Den Rush), and gives the meta a reason to carry hard answers.
+The hoard (Martin, 2026-10-08): a fortress around a bomb. Magic's Approach of the Second Sun, Hearthstone's Freeze Mage and Quest decks. The legendary squirrel ("Roar: lose all your food. In 2 turns, gain three times that much.") stakes everything on one animal for two turns; the rest of the deck reaches a stake worth doubling (about 50 food) and builds the walls that make those two turns survivable. The fun is the siege: a visible timer, the opponent throwing everything at the walls, and the puzzle of building an answer for each way their deck can reach the squirrel. It beats midrange and slow interaction (answers one at a time), loses to speed (Food Aggro, Fish, Den Rush), and gives the meta a reason to carry hard answers.
 
-Open from the first read: food before the doubling (only the Hedgehog's 5 so far; the walls on home regions, the Acorn Squirrel and a Dusk engine are the candidates), and finding the one-copy payoff (Fathom's Scout always sees it; the deck needs real draw to dig).
+Open from the first read: food before the payoff (only the Hedgehog's 5 so far; the walls on home regions pay 20 a turn, and the Acorns and a Dusk engine are the candidates), and finding the one-copy payoff (Fathom's Scout always sees it; the Owl digs).
 
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
 | Fathom | Open Ocean | L | 7 | Roar: **Scout** a legendary animal. |
-| the legendary squirrel (name to come) | | L | | Roar: lose all your food. In 2 turns, gain twice that much. |
+| the legendary squirrel (name to come) | | L | | Roar: lose all your food. In 2 turns, gain three times that much. (Three times, Martin: twice is a net gain of only the stake, two turns late, so fair decks just raced it in the imagined games, and neither side touched the other. Three times makes the siege compulsory: fired at 35, it's 105.) |
 | Capybara | Jungle | R | 5 | Your animals next to this have **Armor**. |
 | Porcupine | Forest | R | 7 | **Spikes.** |
 | Golden Orb-Weaver (Arachnid) | Jungle | R | 4 | When an enemy with **Flight** is placed next to this, remove it. |
 | Armadillo | Jungle | R | 7 | **Armor.** Your adjacent animals have **Stealth**. |
 | Black Bear | Forest | C | 5 | Roar: in 2 turns, draw 2 cards. (From Handlock: slow draw fits the hoard better, Martin.) |
+| Owl | Forest | C | 2 | **Flight.** Roar: **Scout** a card. (From Egg Control, Martin: the dig that finds the squirrel or Fathom.) |
 | Hedgehog | Meadow | C | 5 | **Spikes.** Roar: gain 5 food. |
 | Poison Dart Frog | Jungle | C | 1 | **Reach 2. Poison.** |
 | Jellyfish | Open Ocean | C | 4 | **Poison.** |
 
-Banked for it: the Squirrel that shuffles Acorns into your deck (Food Aggro's rejected rare).
+Banked for it: Acorns shuffled into your deck (each, when drawn, gives 10 food and replaces itself: food at no card cost, not card draw). Squirrel is taken by Food Aggro's common, so the card needs another animal that caches food.
 
 ## Food Aggro, draft
 
