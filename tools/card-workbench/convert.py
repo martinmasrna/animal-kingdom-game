@@ -158,6 +158,8 @@ def convert(export: dict, old_data: dict) -> tuple[dict, list[str]]:
                 raise SystemExit(f"two workbench cards map to the id {cid!r} ({wc['id']}); add one to UNNAMED or RENAMED")
             taken.add(cid)
             text = wc["text"].strip()
+            if text == "—":                              # the workbench's mark for a deliberately vanilla animal
+                text = ""
             unnamed = not wc["name"].strip()
             name = UNNAMED[wc["id"]][1] if wc["id"] in UNNAMED else (wc["species"] if unnamed else wc["name"].strip())
             in_deck = dslug

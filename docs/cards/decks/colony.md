@@ -32,7 +32,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Guard Wasp** | 3 | Colony | 3 | Flight. Has +5 strength while you control 4 or more Colony animals. |
 | **Soldier Ant** | 3 | Colony | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. |
 | **Worker Ant** | 3 | Colony, Worker | 1 | Roar: gain 12 food. |
-| **Worker Wasp** | 3 | Colony, Worker | 3 | Flight. At the end of your turn, gain 3 food. |
+| **Worker Wasp** | 3 | Colony, Worker | 3 | Flight. Dusk: gain 3 food. |
 | **Worker Bee** | 3 | Colony, Worker | 1 | Flight. Roar: gain 10 food; if you control another Worker, gain 10 more. |
 
 <!-- cards:end -->

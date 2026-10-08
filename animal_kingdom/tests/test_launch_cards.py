@@ -94,7 +94,7 @@ def test_the_zebra_flees_and_sends_its_coverer_home_too():
     assert "zebra" in hand_ids(s, "A") and "lion" in hand_ids(s, "B") and s.top_unit("3,2") is None
 
 
-def test_octopus_ink_switches_keywords_and_effects_off_until_the_inkers_next_turn():
+def test_octopus_ink_switches_one_chosen_enemys_effects_off_until_the_inkers_next_turn():
     s = make_state(hands={"A": ["octopus", "lion"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
     put(s, "1,2", "caracal", "A")
     porc = put(s, "3,2", "porcupine", "B")                     # Spikes, 7
@@ -102,12 +102,13 @@ def test_octopus_ink_switches_keywords_and_effects_off_until_the_inkers_next_tur
     s.pile_add("lion", "A"); s.pile_add("lion", "A")
     assert effective_strength(s, py) == 2
     rules.apply_action(s, PlaceAction("octopus", ("cr", "2,2")))
-    assert statics.inked(s, porc) and effective_strength(s, py) == 0
+    choose(s, "3,2")                                            # one target: the Porcupine
+    assert statics.inked(s, porc) and not statics.inked(s, py) and effective_strength(s, py) == 2
     assert "Spikes" not in statics.unit_keywords(s, porc)
     end_turn(s)                                                 # the opponent's turn: still inked
     assert statics.inked(s, porc)
     end_turn(s)                                                 # the inking player's next turn: the ink is gone
-    assert not statics.inked(s, porc) and effective_strength(s, py) == 2
+    assert not statics.inked(s, porc)
 
 
 def test_capybara_gives_its_neighbours_armor():

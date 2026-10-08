@@ -7,7 +7,7 @@
    "precon": true,
    "cards": [
     {
-     "habitat": "",
+     "habitat": "Meadow",
      "id": "aristocrats-0",
      "name": "",
      "note": "",
@@ -31,7 +31,7 @@
      "text": "Flight. When this is removed, shuffle it into your deck."
     },
     {
-     "habitat": "",
+     "habitat": "City",
      "id": "aristocrats-2",
      "name": "",
      "note": "",
@@ -194,7 +194,7 @@
      "text": "Apex Predator. Roam. Reach 2."
     },
     {
-     "habitat": "",
+     "habitat": "Forest",
      "id": "canines-1",
      "name": "Clarion",
      "note": "",
@@ -206,7 +206,7 @@
      "text": "Once each turn, an allied Canine can roam for free."
     },
     {
-     "habitat": "",
+     "habitat": "Forest",
      "id": "canines-2",
      "name": "Lobo",
      "note": "",
@@ -218,7 +218,7 @@
      "text": "Whenever an ally roams onto an enemy, draw a card."
     },
     {
-     "habitat": "",
+     "habitat": "Forest",
      "id": "canines-3",
      "name": "",
      "note": "",
@@ -462,7 +462,7 @@
      "status": "proposed",
      "str": 7,
      "tag": "Cat",
-     "text": ""
+     "text": "—"
     },
     {
      "habitat": "Forest",
@@ -685,7 +685,7 @@
      "status": "proposed",
      "str": 3,
      "tag": "Colony, Worker",
-     "text": "Flight. At the end of your turn, gain 3 food."
+     "text": "Flight. Dusk: gain 3 food."
     },
     {
      "habitat": "Meadow",
@@ -752,7 +752,7 @@
      "status": "proposed",
      "str": 5,
      "tag": "Bird",
-     "text": "Flight. Roar: draw a card for each animal you control adjacent to the opponent's den."
+     "text": "Flight. Roar: draw a card for each ally adjacent to the opponent's den."
     },
     {
      "habitat": "Savanna",
@@ -800,7 +800,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "",
-     "text": "Roar: return an adjacent enemy to your opponent's hand. It can't be played next turn."
+     "text": "Roar: return an adjacent enemy to its owner's hand. It can't be played next turn."
     },
     {
      "habitat": "Meadow",
@@ -894,7 +894,7 @@
      "text": "Apex Predator. Dusk: shuffle this into your deck with -1 strength."
     },
     {
-     "habitat": "",
+     "habitat": "Forest",
      "id": "egg-control-1",
      "name": "",
      "note": "",
@@ -1026,7 +1026,7 @@
      "text": "Flight. Roar: draw 3 cards, then shuffle 2 cards back."
     },
     {
-     "habitat": "",
+     "habitat": "Forest",
      "id": "egg-control-12",
      "name": "Bird Egg",
      "note": "",
@@ -1038,7 +1038,7 @@
      "text": "Roar: Scout a Bird. Next turn, remove this and Scout a Bird."
     },
     {
-     "habitat": "",
+     "habitat": "Jungle",
      "id": "egg-control-13",
      "name": "Snake Egg",
      "note": "",
@@ -1102,7 +1102,7 @@
      "status": "proposed",
      "str": 7,
      "tag": "Fish",
-     "text": "Your Fish can be placed on enemies with strength up to the number of Fish you control."
+     "text": "Your Fish can cover enemies of strength up to the number of your Fish."
     },
     {
      "habitat": "Open Ocean",
@@ -1174,7 +1174,7 @@
      "status": "proposed",
      "str": 1,
      "tag": "Fish",
-     "text": "Roar: place all Sardines from your hand and deck on random adjacent empty crossroads."
+     "text": "Roar: fill adjacent empty crossroads with Sardines from your hand and deck."
     },
     {
      "habitat": "Open Ocean",
@@ -1232,48 +1232,48 @@
    "precon": true,
    "cards": [
     {
-     "habitat": "",
+     "habitat": "Jungle",
      "id": "food-aggro-0",
      "name": "",
      "note": "",
      "rarity": "L",
-     "species": "",
-     "status": "open",
+     "species": "Capybara",
+     "status": "proposed",
      "str": 6,
      "tag": "Rodent",
      "text": "Roar: repeat the Roar of each of your adjacent Rodents."
     },
     {
-     "habitat": "",
+     "habitat": "Forest",
      "id": "food-aggro-1",
      "name": "",
      "note": "",
      "rarity": "L",
-     "species": "",
-     "status": "open",
+     "species": "Chipmunk",
+     "status": "proposed",
      "str": 2,
      "tag": "Rodent",
      "text": "Roar: draw cards until you have as many as your opponent."
     },
     {
-     "habitat": "",
+     "habitat": "City",
      "id": "food-aggro-2",
      "name": "Barley",
      "note": "",
      "rarity": "L",
-     "species": "",
+     "species": "Mouse",
      "status": "proposed",
      "str": 4,
      "tag": "Rodent",
      "text": "Roar: gain 4 food for each other Rodent you control. Draw a card."
     },
     {
-     "habitat": "",
+     "habitat": "Meadow",
      "id": "food-aggro-3",
      "name": "Scrooge",
      "note": "",
      "rarity": "L",
-     "species": "",
+     "species": "Hamster",
      "status": "proposed",
      "str": 4,
      "tag": "Rodent",
@@ -1419,7 +1419,7 @@
      "text": "Roar: Scout a legendary animal."
     },
     {
-     "habitat": "",
+     "habitat": "Forest",
      "id": "food-otk-1",
      "name": "",
      "note": "",
@@ -1431,7 +1431,7 @@
      "text": "Roar: lose all your food. In 2 turns, gain three times as much."
     },
     {
-     "habitat": "",
+     "habitat": "Savanna",
      "id": "food-otk-2",
      "name": "",
      "note": "",
@@ -1603,7 +1603,7 @@
      "status": "proposed",
      "str": 3,
      "tag": "",
-     "text": "Armor. At the end of your turn, gain 5 food."
+     "text": "Armor. Dusk: gain 5 food."
     },
     {
      "habitat": "Open Ocean",
@@ -1651,7 +1651,7 @@
      "status": "proposed",
      "str": 8,
      "tag": "Hoofed",
-     "text": "Hungry 3. When an enemy of strength 3 or less is placed adjacent to this, remove it."
+     "text": "Hungry 3. Remove any enemy of strength 3 or less placed adjacent to this."
     },
     {
      "habitat": "Savanna",
@@ -1675,7 +1675,7 @@
      "status": "proposed",
      "str": 8,
      "tag": "Fish",
-     "text": "Titan. Hungry 4. At the end of your turn, draw 2 cards."
+     "text": "Titan. Hungry 4. Dusk: draw 2 cards."
     },
     {
      "habitat": "Savanna",
@@ -1711,7 +1711,7 @@
      "status": "proposed",
      "str": 1,
      "tag": "",
-     "text": "At the end of your turn, gain 2 food for each Hungry animal you control."
+     "text": "Dusk: gain 2 food for each Hungry animal you control."
     },
     {
      "habitat": "Open Ocean",
@@ -1793,7 +1793,7 @@
      "text": "Whenever this gains strength in your hand, it evolves."
     },
     {
-     "habitat": "",
+     "habitat": "Forest",
      "id": "handlock-3",
      "name": "",
      "note": "",
@@ -1977,7 +1977,7 @@
      "status": "proposed",
      "str": 7,
      "tag": "Hoofed",
-     "text": "Your opponent plays with their hand revealed."
+     "text": "Your opponent's hand is revealed."
     },
     {
      "habitat": "Savanna",
@@ -2073,7 +2073,7 @@
      "status": "proposed",
      "str": 6,
      "tag": "Hoofed",
-     "text": "At the end of your turn, if this is grazing, gain 5 food."
+     "text": "Dusk: if this is grazing, gain 5 food."
     },
     {
      "habitat": "Forest",
@@ -2116,7 +2116,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "",
-     "text": "Roar: until your next turn, adjacent enemies lose their keywords and effects."
+     "text": "Roar: choose an adjacent enemy. Until your next turn, it loses all its effects."
     },
     {
      "habitat": "Open Ocean",
@@ -2161,7 +2161,7 @@
      "note": "",
      "rarity": "R",
      "species": "Macaw",
-     "status": "proposed",
+     "status": "open",
      "str": null,
      "tag": "Bird",
      "text": "Roar: your next Roar this turn happens twice."

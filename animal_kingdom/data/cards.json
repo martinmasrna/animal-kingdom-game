@@ -280,7 +280,7 @@
         "Worker"
       ],
       "base_strength": 3,
-      "text": "Flight. At the end of your turn, gain 3 food.",
+      "text": "Flight. Dusk: gain 3 food.",
       "keywords": [
         "Flight"
       ],
@@ -317,7 +317,7 @@
       "keywords": [],
       "unnamed": true,
       "species": "Cuckoo",
-      "habitat": "",
+      "habitat": "Meadow",
       "workbench_id": "aristocrats-0"
     },
     {
@@ -348,7 +348,7 @@
       "keywords": [],
       "unnamed": true,
       "species": "Opossum",
-      "habitat": "",
+      "habitat": "City",
       "workbench_id": "aristocrats-2"
     },
     {
@@ -538,7 +538,7 @@
       "text": "Once each turn, an allied Canine can roam for free.",
       "keywords": [],
       "species": "Wolf",
-      "habitat": "",
+      "habitat": "Forest",
       "workbench_id": "canines-1"
     },
     {
@@ -553,7 +553,7 @@
       "text": "Whenever an ally roams onto an enemy, draw a card.",
       "keywords": [],
       "species": "Wolf",
-      "habitat": "",
+      "habitat": "Forest",
       "workbench_id": "canines-2"
     },
     {
@@ -571,7 +571,7 @@
       ],
       "unnamed": true,
       "species": "Wolf",
-      "habitat": "",
+      "habitat": "Forest",
       "workbench_id": "canines-3"
     },
     {
@@ -781,7 +781,7 @@
         "Bird"
       ],
       "base_strength": 5,
-      "text": "Flight. Roar: draw a card for each animal you control adjacent to the opponent's den.",
+      "text": "Flight. Roar: draw a card for each ally adjacent to the opponent's den.",
       "keywords": [
         "Flight"
       ],
@@ -843,7 +843,7 @@
       "rarity": "rare",
       "tags": [],
       "base_strength": 4,
-      "text": "Roar: return an adjacent enemy to your opponent's hand. It can't be played next turn.",
+      "text": "Roar: return an adjacent enemy to its owner's hand. It can't be played next turn.",
       "keywords": [],
       "species": "Skunk",
       "habitat": "Forest",
@@ -1215,7 +1215,7 @@
         "Fish"
       ],
       "base_strength": 7,
-      "text": "Your Fish can be placed on enemies with strength up to the number of Fish you control.",
+      "text": "Your Fish can cover enemies of strength up to the number of your Fish.",
       "keywords": [],
       "unnamed": true,
       "species": "Piranha",
@@ -1306,7 +1306,7 @@
         "Fish"
       ],
       "base_strength": 1,
-      "text": "Roar: place all Sardines from your hand and deck on random adjacent empty crossroads.",
+      "text": "Roar: fill adjacent empty crossroads with Sardines from your hand and deck.",
       "keywords": [],
       "species": "Sardine",
       "habitat": "Open Ocean",
@@ -1384,8 +1384,8 @@
       "text": "Roar: repeat the Roar of each of your adjacent Rodents.",
       "keywords": [],
       "unnamed": true,
-      "species": "",
-      "habitat": "",
+      "species": "Capybara",
+      "habitat": "Jungle",
       "workbench_id": "food-aggro-0"
     },
     {
@@ -1400,8 +1400,8 @@
       "text": "Roar: draw cards until you have as many as your opponent.",
       "keywords": [],
       "unnamed": true,
-      "species": "",
-      "habitat": "",
+      "species": "Chipmunk",
+      "habitat": "Forest",
       "workbench_id": "food-aggro-1"
     },
     {
@@ -1415,8 +1415,8 @@
       "base_strength": 4,
       "text": "Roar: gain 4 food for each other Rodent you control. Draw a card.",
       "keywords": [],
-      "species": "",
-      "habitat": "",
+      "species": "Mouse",
+      "habitat": "City",
       "workbench_id": "food-aggro-2"
     },
     {
@@ -1430,8 +1430,8 @@
       "base_strength": 4,
       "text": "Roar: gain food equal to the food you gained this turn.",
       "keywords": [],
-      "species": "",
-      "habitat": "",
+      "species": "Hamster",
+      "habitat": "Meadow",
       "workbench_id": "food-aggro-3"
     },
     {
@@ -1612,7 +1612,7 @@
       "keywords": [],
       "unnamed": true,
       "species": "Squirrel",
-      "habitat": "",
+      "habitat": "Forest",
       "workbench_id": "food-otk-1"
     },
     {
@@ -1631,7 +1631,7 @@
       ],
       "unnamed": true,
       "species": "Honey Badger",
-      "habitat": "",
+      "habitat": "Savanna",
       "workbench_id": "food-otk-2"
     },
     {
@@ -1838,7 +1838,7 @@
       ],
       "unnamed": true,
       "species": "Raven",
-      "habitat": "",
+      "habitat": "Forest",
       "workbench_id": "egg-control-1"
     },
     {
@@ -2011,7 +2011,7 @@
       "text": "Roar: Scout a Bird. Next turn, remove this and Scout a Bird.",
       "keywords": [],
       "species": "",
-      "habitat": "",
+      "habitat": "Forest",
       "workbench_id": "egg-control-12"
     },
     {
@@ -2026,7 +2026,7 @@
       "text": "Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes.",
       "keywords": [],
       "species": "",
-      "habitat": "",
+      "habitat": "Jungle",
       "workbench_id": "egg-control-13"
     },
     {
@@ -2091,7 +2091,7 @@
       "mate": "handlock_legend_eagle_mate",
       "unnamed": true,
       "species": "Eagle",
-      "habitat": "",
+      "habitat": "Forest",
       "workbench_id": "handlock-3"
     },
     {
@@ -2271,7 +2271,7 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
-      "text": "Armor. At the end of your turn, gain 5 food.",
+      "text": "Armor. Dusk: gain 5 food.",
       "keywords": [
         "Armor"
       ],
@@ -2339,7 +2339,7 @@
         "Hoofed"
       ],
       "base_strength": 8,
-      "text": "Hungry 3. When an enemy of strength 3 or less is placed adjacent to this, remove it.",
+      "text": "Hungry 3. Remove any enemy of strength 3 or less placed adjacent to this.",
       "keywords": [
         "Hungry"
       ],
@@ -2372,7 +2372,7 @@
         "Fish"
       ],
       "base_strength": 8,
-      "text": "Titan. Hungry 4. At the end of your turn, draw 2 cards.",
+      "text": "Titan. Hungry 4. Dusk: draw 2 cards.",
       "keywords": [
         "Titan",
         "Hungry"
@@ -2419,7 +2419,7 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "text": "At the end of your turn, gain 2 food for each Hungry animal you control.",
+      "text": "Dusk: gain 2 food for each Hungry animal you control.",
       "keywords": [],
       "species": "Dung Beetle",
       "habitat": "Savanna",
@@ -2526,7 +2526,7 @@
         "Hoofed"
       ],
       "base_strength": 7,
-      "text": "Your opponent plays with their hand revealed.",
+      "text": "Your opponent's hand is revealed.",
       "keywords": [],
       "unnamed": true,
       "species": "Giraffe",
@@ -2649,7 +2649,7 @@
         "Hoofed"
       ],
       "base_strength": 6,
-      "text": "At the end of your turn, if this is grazing, gain 5 food.",
+      "text": "Dusk: if this is grazing, gain 5 food.",
       "keywords": [],
       "species": "Wildebeest",
       "habitat": "Savanna",
@@ -2694,7 +2694,7 @@
       "rarity": "rare",
       "tags": [],
       "base_strength": 4,
-      "text": "Roar: until your next turn, adjacent enemies lose their keywords and effects.",
+      "text": "Roar: choose an adjacent enemy. Until your next turn, it loses all its effects.",
       "keywords": [],
       "species": "Octopus",
       "habitat": "Open Ocean",

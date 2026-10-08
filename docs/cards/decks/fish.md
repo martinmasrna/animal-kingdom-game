@@ -13,7 +13,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Jellyfish** | 1 | — | 6 | Your adjacent Fish have Poison. |
 | **Tuna** | 1 | Fish | 5 | Roar: for each region you control, draw a card and gain 5 food. |
 | **Manta Ray** | 1 | Fish | 4 | Dusk: if you control 2 or more regions, draw a card. |
-| **Piranha** | 1 | Fish | 7 | Your Fish can be placed on enemies with strength up to the number of Fish you control. |
+| **Piranha** | 1 | Fish | 7 | Your Fish can cover enemies of strength up to the number of your Fish. |
 
 ### Rare
 
@@ -29,7 +29,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Cod** | 3 | Fish | 4 | Roar: draw a card for each adjacent allied Fish. |
-| **Sardine** | 3 | Fish | 1 | Roar: place all Sardines from your hand and deck on random adjacent empty crossroads. |
+| **Sardine** | 3 | Fish | 1 | Roar: fill adjacent empty crossroads with Sardines from your hand and deck. |
 | **Mahi-mahi** | 3 | Fish | 3 | Roar: give your other Fish +1 strength. |
 | **Mackerel** | 3 | Fish | 2 | Your other Fish have +1 strength. |
 | **Tuna** | 3 | Fish | 3 | Has +1 strength for each other Fish you control. |

@@ -2520,12 +2520,22 @@ def _wildebeest_eot(state, unit, cr):
 # --- The pool ---------------------------------------------------------------------------------------------------
 
 def _octopus_ink_place(state, unit, cr):
-    """Roar: until your next turn, adjacent enemies lose their keywords and effects."""
-    until = state.turn_counter + 2                       # the inking player's next turn starts then
-    for _, top in _adjacent_tops(state, cr):
-        if top.owner != unit.owner:
-            state.inked[top.iid] = until
-            state.emit("inked", iid=top.iid, card=top.card_id, owner=top.owner)
+    """Roar: choose an adjacent enemy. Until your next turn, it loses all its effects (keywords included, so an
+    animal with Armor can be inked; Stealth still keeps it from being chosen)."""
+    options = [nb for nb in sorted(state.game_map.neighbors(cr))
+               if (top := state.top_unit(nb)) is not None and top.owner != unit.owner
+               and statics.can_be_chosen(state, top, unit.owner, nb)]
+    _push_choose(state, unit.owner, options, "ink", until=state.turn_counter + 2)   # the inking player's next turn
+
+
+def _then_ink(state, step, cr):
+    top = state.top_unit(cr)
+    if top is not None and top.owner != step["chooser"]:
+        state.inked[top.iid] = step["until"]
+        state.emit("inked", iid=top.iid, card=top.card_id, owner=top.owner)
+
+
+THEN["ink"] = _then_ink
 
 
 def _cuckoo_place(state, unit, cr):

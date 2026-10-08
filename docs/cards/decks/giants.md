@@ -11,7 +11,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Brutus** | 1 | Hoofed | 8 | Hungry 6. Roar: remove all adjacent animals. |
-| **Methuselah** | 1 | — | 3 | Armor. At the end of your turn, gain 5 food. |
+| **Methuselah** | 1 | — | 3 | Armor. Dusk: gain 5 food. |
 | **Mocha** | 1 | — | 10 | Titan. Roar: remove all enemies adjacent to your animals. |
 | **Oxpecker** | 1 | Bird | 4 | Flight. Your adjacent Hungry animals don't need to eat. |
 
@@ -20,9 +20,9 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Rhinoceros** | 2 | Hoofed | 8 | Hungry 3. Roar: remove all adjacent enemies of strength 2 or less. |
-| **Hippopotamus** | 2 | Hoofed | 8 | Hungry 3. When an enemy of strength 3 or less is placed adjacent to this, remove it. |
+| **Hippopotamus** | 2 | Hoofed | 8 | Hungry 3. Remove any enemy of strength 3 or less placed adjacent to this. |
 | **Crocodile** | 2 | — | 8 | Apex Predator. |
-| **Whale Shark** | 2 | Fish | 8 | Titan. Hungry 4. At the end of your turn, draw 2 cards. |
+| **Whale Shark** | 2 | Fish | 8 | Titan. Hungry 4. Dusk: draw 2 cards. |
 
 ### Common
 
@@ -30,7 +30,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 |---|---:|---|---:|---|
 | **Oxpecker** | 3 | Bird | 1 | Flight. Roar: gain 1 food for each animal of strength 8 or more in your starting deck. |
 | **Anteater** | 3 | — | 4 | Roar: draw a card. Gain food equal to its strength. |
-| **Dung Beetle** | 3 | — | 1 | At the end of your turn, gain 2 food for each Hungry animal you control. |
+| **Dung Beetle** | 3 | — | 1 | Dusk: gain 2 food for each Hungry animal you control. |
 | **Blue Whale** | 3 | — | 10 | Titan. |
 | **Sloth** | 3 | — | 3 | Roar: in 2 turns, gain 30 food. |
 | **Elephant** | 3 | — | 9 | Hungry 5. |
