@@ -194,6 +194,8 @@ Sharks stay out of the count cards: they're lone hunters. Fish's predator is wea
 
 ## Egg Control
 
+The Owl went to Food OTK; its common slot goes to the Mosquito (Martin, 2026-10-08): with Flight it shrinks any enemy on the board, setting up the flying Hawk (a 5 becomes a 3) or the Black Mamba (a 7 becomes a 5). The Viper does the same job next to your chain only, a midrange card. Rejected for the slot: a Magpie that filters (a weaker Raven, and the Magpie exists), the Monitor Lizard (anti-token removal that replaces itself: good everywhere, nothing special here; banked; eating your own Egg only throws away its hatch).
+
 Its fourth legendary: Omen (a raven; Forest, L, ~3, Bird): "Flight. Roar: put an animal from your opponent's Remove Pile into your hand." The deck removes more than any other, so the opponent's pile holds their best cards; a Bird, so the Bird Egg's Scout can find it. Wording to bring in line on the deck's cards: Eon's end-of-turn shuffle is a Dusk effect, Aurum is "Dawn: draw a card.", the Python counts removed animals (not units), and the Egg Eater counts removed Eggs.
 
 ## Open topics
@@ -211,6 +213,7 @@ Its fourth legendary: Omen (a raven; Forest, L, ~3, Bird): "Flight. Roar: put an
 - Clownfish (Coral Reef, later): its "play another Fish" went to the Remora; Coral Reef gives it its own trait (safe in a stinging anemone). Electric Eel (Jungle) is the stun.
 - The decoy (Lapwing, needs a common or rare Lapwing): "Enemy abilities that choose an animal must choose this, if able." It fakes a broken wing to lead predators from the nest. A protector of any deck's engine.
 - The lure (a legendary Firefly): "Roar: your opponent's next animal must be placed next to this, if able." The femme-fatale firefly copies another species' flash and eats the males that come. First candidate for the Arachnid traps deck.
+- Octopus (Open Ocean, R, ~4; locked, Martin): "Roar: until your next turn, adjacent enemies lose their keywords and effects." The ink cloud: a one-turn blackout of Spikes, Poison, Armor, traps and auras, the hard answer to Food OTK's fortress and any engine. It gives Fathom and the Mimic Octopus their species.
 - Platypus (Australia, later): its family tag is "All", counting as every family (Martin, 2026-10-08).
 - Hermit Crab (Coast, later): Armor plus something about moving into another's shell.
 - Macaw (Jungle, Bird; rarity and strength with its deck): "Roar: your next Roar this turn happens twice." (This turn only: cleaner, Martin.) The parrot repeats what it hears. A card for a deck with few, high-impact Roars; Handlock is the first candidate (a doubled Gorilla sweep, an Orangutan training the hand twice). In Food Aggro it was mostly a second Squirrel.
