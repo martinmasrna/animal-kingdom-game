@@ -98,7 +98,7 @@ The pack that roams the board, buffs itself on the board (Primates buff in hand)
 | Clarion | Forest | L | ~4 | Once each turn, one of your Canines can roam without using an action. (The deck is short of actions, not cards.) |
 | Lobo | Forest | L | | Whenever one of your animals roams onto an enemy, draw a card. (The wolf king feeds the pack; bounded by one roam per animal per turn, each costing an action.) |
 | legendary wolf (name to come) | Forest | L | | Roam. When this roams onto an enemy, your animals next to it gain +2 strength. |
-| legendary Leopard (proposal; or a Jaguar) | Savanna | L | 7 | Apex Predator. Reach 2. Roam. (Drops onto its prey from a tree, then waits: landing by Reach leaves it unconnected, so it roams again once the chain reaches it.) |
+| legendary Leopard (name to come) | Savanna | L | 7 | Apex Predator. Reach 2. Roam. (Drops onto its prey from a tree, then waits: landing by Reach leaves it unconnected, so it roams again once the chain reaches it.) |
 | Dhole | Jungle | R | 6 | Roam. Your animals can roam onto enemies of equal strength. (Dhole packs take prey bigger than themselves.) |
 | Jackal | Savanna | R | 4 | Roar: remove an adjacent enemy that has another of your Canines next to it. |
 | Bush Dog | Jungle | R | | open |
