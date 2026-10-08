@@ -42,7 +42,7 @@ Zebra, Deer, Moose, Boar and the two legendaries are proposals.
 
 Food is the win counter itself, so a deck whose cards each gain about 10 food is a clock, not a combo: there is nothing to assemble. The food cards split into two decks:
 
-- **Rodent food aggro:** the Rodents (Barley, Scrooge, Squirrel, Flying Squirrel, Chipmunk, Hamster, Muskrat, Groundhog, Hedgehog) and about four finishers and speed cards still to design. Scrooge's one-turn burst belongs here.
+- **Rodent food aggro:** drafted below as Food Aggro. Scrooge's one-turn burst belongs here.
 - **The hoard (true combo):** draw, assemble, stall, execute. Its food sources are slow, so the fair route is too slow and the payoff is the plan. It holds the stall pieces (Porcupine, Armadillo, Octopus, Fathom), Black Bear for slow draw, and the defensive cards below. It loses to food aggro by design: food from Roars can't be touched.
 
 The payoff, a legendary squirrel (name to come): "Roar: lose all your food. In 2 turns, gain twice that much." No Armor and a modest body: the deck has to protect it, and covering pauses its timer. Removing it loses the whole stake; that risk is the point. Doubling only the food put at risk keeps it from being a win button. Fathom ("Roar: Scout a legendary animal") is its tutor.
@@ -57,6 +57,31 @@ The defensive cards, one answer for each way to reach the squirrel (removal, a g
 | Capybara | Jungle | R | 5 | Your animals next to this have Armor. | cover its neighbours, cover it (6+), or remove it |
 
 Open: a Capybara beside a Porcupine is the strongest wall these build (unremovable, kills its first coverer, broken by a second cover of 8+).
+
+## Food Aggro, draft
+
+Burn (Martin, 2026-10-08): Magic's Red Deck Wins, Hearthstone's Face Hunter. Food from a Roar can't be undone, so every card is a chunk of the opponent's life and nothing on the board blocks it. The fun is counting to lethal: the "10 or more this turn" payoffs make sequencing matter, and the Chipmunk's extra action with Scrooge makes the burst turn. It preys on control and stall (removal touches nothing here); it loses to den pressure, hand disruption, covering its Rodents (Barley, the Rodent legendary) and, once they exist, the food thieves. It must stay fragile, or it's solitaire.
+
+Imagined games (reasoning, not evidence) showed the clock runs on cards, not food: the hand is empty by turn 4. A card that draws one card is tempo, not value (a Draw action draws two); only cards that draw two or more, or make food over several turns, refill the clock. Face Hunter's hero power, renewable reach at no card cost, has its answer in the empty-hand cards: running out of cards is this deck's best moment, not its end (Magic's Hellbent). A Roar checks the hand after its card has left it, so "if your hand is empty" means "if this was your last card".
+
+| Card | Habitat | Rarity | Str | Text |
+|---|---|---|---:|---|
+| a Rodent (name to come) | | L | 2 | Roar: draw cards until you have as many as your opponent. (Hearthstone's Divine Favor: a big refill against control, a small one against aggro.) |
+| Barley | City | L | 4 | Roar: gain 4 food for each other Rodent you control. Draw a card. |
+| Scrooge (rename: the name cites Dickens) | City | L | 4 | Roar: gain food equal to the food you gained this turn. |
+| a Rodent (name to come) | | L | ~3 | Roar: repeat the Roar of each of your Rodents next to this. (Martin's wording. The Rodent finisher, played last into your own board; the grid caps it at 4 neighbours, and every Rodent the opponent covers is one fewer Roar. A repeated Scrooge quadruples the turn: Scrooge is the dial.) |
+| Flying Squirrel | Forest | R | 3 | **Flight.** Roar: gain 10 food. |
+| Chipmunk | Forest | R | 4 | Roar: next turn, take 1 additional action. (The frantic one; the effect stays in the launch, and the Chinchilla waits for Mountains.) |
+| a Rodent | | R | 2 | **Dusk:** if your hand is empty, gain 10 food. (The top-deck mode: out of cards, you can pass and it still pays.) |
+| — | | R | | open |
+| Squirrel | Forest | C | 3 | Roar: gain 10 food. |
+| Hamster | Meadow | C | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. (Cheek pouches.) |
+| Gopher | Meadow | C | 3 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
+| Muskrat | Meadow | C | 2 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. (The den defence.) |
+| Groundhog | Meadow | C | 4 | Roar: if you gained 10 or more food this turn, gain 10 food. |
+| a Rodent | | C | ~3 | Roar: gain 5 food. If your hand is empty, draw 2 cards. (Hearthstone's Quick Shot.) |
+
+Rejected: the Octopus carrying the extra action (its octopus is Fathom, the clever one, and a sea animal in the Rodent deck); Greywhisker and the Naked Mole-Rat (Den Rush's); Mouse and other draw-one cards (tempo, not value); a "protect it and it wins" food engine (a control card); "discard your hand, gain food for each"; "gain food for each card your opponent has more than you"; "the next Roar you play this turn happens twice" (here it's mostly a second Squirrel; banked for a deck with few, big Roars).
 
 ## The aristocrats, draft
 
