@@ -1,5 +1,7 @@
 # The hand deck (Bears and Primates)
 
+Superseded by the Handlock list in [`effects-pass.md`](effects-pass.md) (2026-10-08); kept for its review and its bot runs.
+
 Result of the autonomous session of 2026-10-05, for Martin's review: designed, checked by me against the rules and the decks, attacked by a cold Sol review, prototyped in the engine and played by TurnBot (2,800 games). Bears hoard (hibernation: growing while held), Primates train (buffing cards in hand, Roars that pay off past a strength threshold). It fills the "special" slot of the target meta in [`families.md`](families.md): Hearthstone's Handlock, built from this game's pieces.
 
 ## How the deck plays

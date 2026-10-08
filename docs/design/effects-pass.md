@@ -192,6 +192,29 @@ The list (Martin, 2026-10-08; animals and strengths set, wording to the card-tex
 
 Sharks stay out of the count cards: they're lone hunters. Fish's predator is weak on this map (area removal reaches only the edge of a school built at home); Giants need a way to hit the middle of a school. Open Ocean's roster gains Sardine, Tuna, Cod, Remora, Barracuda, Mahi-mahi and Mackerel, to settle in the roster pass after the decks. Rejected: Baby Fish spawners at legendary and rare (empty crossroads exist only in the first turns), a food common (Food Aggro's ground), Goldfish (a pet), Salmon (a river fish, for River and Lake).
 
+## Handlock, draft
+
+Train in secret, then unveil (Martin, 2026-10-08): Hearthstone's Handlock and hand-buff decks (Don Han'Cho, the Grimy Goons); Magic has almost nothing like it. Two hand themes: hand size (Macaque, Grizzly) and training cards in hand (Baboon, Silverback, Orangutan, Tarsier), paid off by thresholds and triggers (Chimpanzee, Gorilla, Capuchin). The fun is hidden power: the opponent sees how many cards you hold, never how strong they are. Strength past about 8 buys almost nothing on the board, so training has to pay off through thresholds, triggers and removal, not raw size. It beats midrange and strength-gated removal; it loses to speed and to hand disruption (Egg Control's Black Swan and Magpie). The first version is [`hand-deck.md`](hand-deck.md); this list replaces it.
+
+| Card | Habitat | Rarity | Str | Text |
+|---|---|---|---:|---|
+| a Baboon (name to come; Primate) | Savanna | L | 5 | At the end of your turn, give 2 random animals in your hand +1 strength. |
+| Silverback (Gorilla, Primate) | Jungle | L | 7 | Roar: give all animals in your hand +1 strength. |
+| a Butterfly (name to come) | Meadow | L | ~1 | Whenever this gains strength in your hand, it evolves. (Five stages, proposed: Egg (no text); Caterpillar, "Roar: draw a card."; Chrysalis, **Armor**; Butterfly, "**Flight.** Roar: give an animal in your hand +2 strength."; Monarch, "**Flight.** Roar: give all animals in your hand +2 strength." The art changes with each stage.) |
+| a Chimpanzee (proposed; name to come; Primate) | Jungle | L | ~3 | Roar: discard an animal from your hand. Remove an adjacent enemy with less strength than it. (The thrower: trained strength becomes removal.) |
+| Hummingbird (Bird) | Jungle | R | 1 | **Flight.** Roar: draw 2 cards. |
+| Macaque (Primate) | City | R | 2 | Roar: if you have 5 or more cards in your hand, remove an adjacent enemy. |
+| Orangutan (Primate) | Jungle | R | 5 | Roar: duplicate a Primate in your hand. |
+| Tarsier (Primate) | Jungle | R | 2 | Roar: **Scout** a Primate and give it +1 strength. |
+| Capuchin (Primate) | Jungle (roster addition) | C | 4 | Roar: remove an adjacent enemy of equal or lower strength. (The stone is as heavy as the arm that swings it.) |
+| Baboon (Primate) | Savanna | C | 4 | Roar: give 2 animals in your hand +1 strength. |
+| Stork (Bird) | Meadow | C | 4 | **Flight.** Roar: add two random younglings to your hand. (Younglings, 1, no text, one per family: Baby Lion (Cat), Baby Wolf (Canine), Baby Squirrel (Rodent), Baby Owl (Bird), Baby Python (Snake), Baby Bear (Bear), Baby Gorilla (Primate), Baby Zebra (Hoofed).) |
+| Grizzly Bear (Bear) | Forest | C | 2 | Has +1 strength for each card in your hand. (Fat Bear Week: a bear fattening for winter. Live, so it shrinks as you play your hand out.) |
+| Chimpanzee (Primate) | Jungle | C | 1 | Whenever this gains strength in your hand, draw a card. |
+| Gorilla (Primate) | Jungle | C | 6 | Roar: if this has 8 or more strength, draw a card. |
+
+The common Butterfly (proposed, a pool card outside this list): a Caterpillar (1, no text), "When this gains strength in your hand, it becomes a Butterfly." The Butterfly: "**Flight.** Roar: give an animal in your hand +2 strength." Gaining only Flight was rejected: that's a worse 2-strength flyer.
+
 ## Egg Control
 
 The Owl went to Food OTK; its common slot goes to the Mosquito (Martin, 2026-10-08): with Flight it shrinks any enemy on the board, setting up the flying Hawk (a 5 becomes a 3) or the Black Mamba (a 7 becomes a 5). The Viper does the same job next to your chain only, a midrange card. Rejected for the slot: a Magpie that filters (a weaker Raven, and the Magpie exists), the Monitor Lizard (anti-token removal that replaces itself: good everywhere, nothing special here; banked; eating your own Egg only throws away its hatch).
