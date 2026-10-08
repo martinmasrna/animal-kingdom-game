@@ -135,17 +135,41 @@ const decksSorted = () => Object.entries(state.decks).sort((a, b) => (a[1].order
 const habsSorted = () => Object.entries(state.habitats).sort((a, b) => (a[1].order ?? 99) - (b[1].order ?? 99));
 const allCards = () => decksSorted().flatMap(([id, d]) => (d.cards || []).map(c => ({ ...c, deckId: id, deckName: d.name })));
 
+// Stage 1: a card is complete when it has an animal, a strength, a habitat and an effect ("—" marks a deliberately vanilla animal).
+function missing(c) {
+  const m = [];
+  if (!(c.rarity === "L" ? c.species : (c.name || c.species))) m.push("animal");
+  if (c.str === null || c.str === undefined || c.str === "") m.push("strength");
+  if (!c.habitat) m.push("habitat");
+  if (!c.text) m.push("effect");
+  return m;
+}
+// Stage 2: the wording pass, run only on complete cards.
+const WORDING2 = [
+  [/\bAt the end of your turn\b/i, "write Dusk: instead of \"At the end of your turn\""],
+  [/\bAt the start of your turn\b/i, "write Dawn: instead of \"At the start of your turn\""],
+  [/\bdraw 1\b/i, "write \"draw a card\""],
+  [/\b(they|their|them)\b/i, "write \"your opponent\""],
+  [/\(|\)/, "no parentheses on cards"],
+  [/ {2,}/, "double space"],
+  [/\b(Roar|Dawn|Dusk): (Draw|Gain|Remove|Give|Place|Play|Return|Choose|Repeat|Duplicate|Lose|Add|Put|Set|Steal|Fill|Discard|Shuffle)\b/, "lowercase after the colon"],
+  [/\byou hand\b|\bYou Fish\b|\bSavannah\b|\bRacoon\b/, "spelling"],
+];
 function cardIssues(c, ctx) {
   const out = [];
-  if (!c.text && c.status === "open") out.push(["bad", "no effect yet"]); // a locked card with no text is a vanilla animal (Lion)
-  if (c.str === null || c.str === undefined || c.str === "") out.push(["warn", "no strength"]);
-  if (!c.habitat) out.push(["warn", "no habitat"]);
-  if (c.rarity !== "L" && !c.name) out.push(["bad", "no animal"]);
-  if (c.rarity === "L" && !c.species) out.push(["warn", "species unknown"]);
-  if (c.rarity === "L" && c.species && !SPECIES_EXCEPT.has(norm(c.species)) && !ctx.crSpecies.has(norm(c.species))) out.push(["bad", `no common or rare ${c.species}`]);
-  if ((c.text || "").length > 95) out.push(["warn", `long text (${c.text.length} chars)`]);
-  for (const [re, msg] of WORDING) if (re.test(c.text || "")) out.push(["warn", msg]);
+  const miss = missing(c);
+  if (miss.length) {
+    if (c.status !== "open") out.push(["bad", `incomplete (no ${miss.join(", ")}): status should be open`]);
+    return out; // nothing else is checked until the card is complete
+  }
+  if (c.status === "open") out.push(["warn", "complete: ready to be proposed"]);
+  const text = c.text === "—" ? "" : c.text;
+  if (text.length > 80) out.push(["warn", `long text (${text.length} chars, aim 80)`]);
+  if (text && !/[.!]$/.test(text)) out.push(["warn", "end with a full stop"]);
+  for (const [re, msg] of [...WORDING, ...WORDING2]) if (re.test(text)) out.push(["warn", msg]);
+  if (c.rarity === "L" && !SPECIES_EXCEPT.has(norm(c.species)) && !ctx.crSpecies.has(norm(c.species))) out.push(["bad", `no common or rare ${c.species}`]);
   if (c.rarity !== "L" && ctx.dupes.has(speciesOf(c))) out.push(["bad", "species used twice"]);
+  if (c.status === "locked" && out.length) out.push(["bad", "locked but not passing every check"]);
   return out;
 }
 function context() {
