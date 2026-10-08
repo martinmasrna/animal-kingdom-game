@@ -119,16 +119,23 @@ How a game goes (agreed with Martin, 2026-10-08): the deck's resource is the emp
 
 Payoffs count every Fish you control: a plain count keeps the swarm feeling, and a smooth count (each Fish a bit more) plays differently from Colony's thresholds. Adjacency cards stay wherever they make sense; on map_b a crossroad has at most 4 neighbours, so "for each adjacent Fish" pays about 1, at best 2.
 
+Legendaries are drawn at a random point, often after the board is full, so each must work then; the opening is the commons' job (three copies each).
+
 | Card | Rarity | Str | Text | Status |
 |---|---|---:|---|---|
+| a Fish | L | 4 | Your Fish next to this have **Poison**. | to try (Martin: feels a bit weak). The hold: one region hard to break. "Your other Fish have Poison" makes every corner uncoverable (the herd's rejected card again) |
+| a Fish | L | 4 | Roar: for each region you control, draw a card and gain 5 food. | to try. The closer and the late reload; food number to tune |
 | Swordfish | R | 3 | Roar: remove a random adjacent enemy for each of your Fish next to this. | in |
 | a shark (which one open) | R | | Roar: remove an adjacent enemy of strength up to the number of your Fish. | proposed |
+| a Fish | R | 4 | Whenever your opponent covers one of your Fish, draw a card. | proposed |
+| a Fish | R | 4 | Roar: play another Fish. | proposed. Early two Fish for one action, late a second Roar on your own Fish |
 | Tuna | C | 4 | Roar: draw a card for each of your Fish next to this. | in |
 | Sardine | C | 1 | Roar: place all Sardines from your hand and deck on random adjacent empty crossroads. | in (Lemming's effect, fine in play) |
-| a Fish (Hammerhead?) | C | | Has +1 strength for each other Fish you control. | proposed |
-| a Fish | C | | Roar: gain 5 food for each of your Fish next to this. | proposed |
+| a Fish | C | 3 | Has +1 strength for each other Fish you control. | proposed |
+| a Fish | C | 1–2 | Your other Fish have +1 strength. | proposed; the deck's one buff card |
+| a Fish | C | 4 | Roar: place a Baby Fish (token, Fish, 0) on an empty crossroad next to this. | proposed |
 
-Open: four legendaries, two rares, two or three commons; Sardine and Tuna aren't on the Open Ocean roster yet.
+Open: two legendaries, one common. Rejected: Baby Fish spawners at legendary and rare (empty crossroads exist only in the first turns), the food common (boring, and Food Aggro's ground), a second buff card.
 
 ## Egg Control
 
