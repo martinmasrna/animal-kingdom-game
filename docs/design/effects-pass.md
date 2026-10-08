@@ -54,7 +54,7 @@ The defensive cards, one answer for each way to reach the squirrel (removal, a g
 | Poison Dart Frog (locked) | Jungle | C | 1 | Reach 2. Poison. | a removal ability |
 | Jellyfish (locked) | Open Ocean | R | 3 | Poison. | a removal ability |
 | Golden Orb-Weaver (locked; Arachnid) | Jungle | R | 3 | When an enemy with Flight is placed next to this, remove it. | cover it (a flyer needs 4+); ground animals ignore the web |
-| the abomination (animal open; legendary Honey Badger proposed) | | L | 5 | **Armor. Stealth. Spikes. Poison.** (Martin's: every keyword on one animal. Spikes takes the first coverer at once, which cancels that cover's Poison; every later coverer is poisoned. One crossroad the opponent never truly takes, not a wall: the region breaks through any other corner.) |
+| a Honey Badger (name to come) | | L | 5 | **Armor. Stealth. Spikes. Poison.** (Martin's: every keyword on one animal. Spikes takes the first coverer at once, which cancels that cover's Poison; every later coverer is poisoned. One crossroad the opponent never truly takes, not a wall: the region breaks through any other corner.) |
 | Capybara | Jungle | R | 5 | Your animals next to this have Armor. | cover its neighbours, cover it (6+), or remove it |
 
 Open: a Capybara beside a Porcupine is the strongest wall these build (unremovable, kills its first coverer, broken by a second cover of 8+).
@@ -68,18 +68,19 @@ Open from the first read: food before the payoff (only the Hedgehog's 5 so far; 
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
 | Fathom | Open Ocean | L | 7 | Roar: **Scout** a legendary animal. |
-| the legendary squirrel (name to come) | | L | | Roar: lose all your food. In 2 turns, gain three times that much. (Three times, Martin: twice is a net gain of only the stake, two turns late, so fair decks just raced it in the imagined games, and neither side touched the other. Three times makes the siege compulsory: fired at 35, it's 105.) |
-| Capybara | Jungle | R | 5 | Your animals next to this have **Armor**. |
+| a Squirrel (name to come; Rodent) | | L | 3 | Roar: lose all your food. In 2 turns, gain three times that much. (Three times, Martin: twice is a net gain of only the stake, two turns late, so fair decks just raced it in the imagined games, and neither side touched the other. Three times makes the siege compulsory: fired at 35, it's 105.) |
+| Capybara (Rodent) | Jungle | R | 6 | Your animals next to this have **Armor**. |
 | Porcupine | Forest | R | 7 | **Spikes.** |
 | Golden Orb-Weaver (Arachnid) | Jungle | R | 4 | When an enemy with **Flight** is placed next to this, remove it. |
 | Armadillo | Jungle | R | 7 | **Armor.** Your adjacent animals have **Stealth**. |
+| Tortoise | Savanna (roster addition) | C | 4 | **Armor.** Roar: gain 5 food for each of your animals with **Armor**. (The early stake: with the Capybara's neighbours, the Armadillo and the Honey Badger, 20–30 food. A common Tortoise also gives Methuselah its species.) |
 | Black Bear | Forest | C | 5 | Roar: in 2 turns, draw 2 cards. (From Handlock: slow draw fits the hoard better, Martin.) |
 | Owl | Forest | C | 2 | **Flight.** Roar: **Scout** a card. (From Egg Control, Martin: the dig that finds the squirrel or Fathom.) |
-| Hedgehog | Meadow | C | 5 | **Spikes.** Roar: gain 5 food. |
+| Hedgehog (tagged Rodent) | Meadow | C | 5 | **Spikes.** Roar: gain 5 food. |
 | Poison Dart Frog | Jungle | C | 1 | **Reach 2. Poison.** |
 | Jellyfish | Open Ocean | C | 4 | **Poison.** |
 
-Every 10 food on the board by turn 4 is about 30 at the finish, and food arriving on turn 7 counts for nothing: the stake has to be early. Rejected: a common paying food for each Armor, Spikes or Poison animal (clunky; reworded to "each of your animals next to this" it's generic food that Food Aggro wants more; scrapped, Martin); the Acorns (late, random food; banked for a deck that draws all game, Egg Control first; Jay as the animal, since Squirrel is taken).
+Every 10 food on the board by turn 4 is about 30 at the finish, and food arriving on turn 7 counts for nothing: the stake has to be early. Rejected: a common paying food for each Armor, Spikes or Poison animal (clunky; the Tortoise counts Armor alone), and its "each of your animals next to this" rewording (generic food that Food Aggro wants more); the Acorns (late, random food; banked for a deck that draws all game, Egg Control first; Jay as the animal, since Squirrel is taken).
 
 ## Food Aggro, draft
 
