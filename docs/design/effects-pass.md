@@ -192,6 +192,31 @@ The list (Martin, 2026-10-08; animals and strengths set, wording to the card-tex
 
 Sharks stay out of the count cards: they're lone hunters. Fish's predator is weak on this map (area removal reaches only the edge of a school built at home); Giants need a way to hit the middle of a school. Open Ocean's roster gains Sardine, Tuna, Cod, Remora, Barracuda, Mahi-mahi and Mackerel, to settle in the roster pass after the decks. Rejected: Baby Fish spawners at legendary and rare (empty crossroads exist only in the first turns), a food common (Food Aggro's ground), Goldfish (a pet), Salmon (a river fish, for River and Lake).
 
+## Hoofed Graze, draft
+
+The herd on its pasture (Martin, 2026-10-08): the nearest card-game match is Magic's Pillowfort, a deck that makes attacking it unprofitable while a slow engine wins, here on a piece of land. Hold regions with grazers, win on food; grazing is all or nothing, so one covered corner breaks the region and switches off every grazing bonus, and the opponent always has a weak corner to aim at. It beats decks that win by covering (Cats, Canines, Fish) and Giants' coverers (the Buffalo removes whatever covers your animal); it loses to decks that just race. The plan that's fast enough is both home regions (six crossroads, shared corners at the den front), not one.
+
+The deck is two halves (the fix for Flee fighting the pasture, found in the imagined games): fleers hold their value in their Roar, so running home is a refund and the Roar comes again; standers hold their value on the corners, and the Buffalo frees them when they're covered. Fleers fill the empty pasture early; standers are then placed on top of them (Flee triggers only on an enemy cover); the opponent attacks a stander's corner and the Buffalo frees it.
+
+| Card | Habitat | Rarity | Str | Text |
+|---|---|---|---:|---|
+| a Wildebeest (the Great Migration; name to come) | Savanna | L | | Your regions produce 5 more food. |
+| a Giraffe (name to come) | Savanna | L | 5 | Your opponent plays with their hand revealed. (The tallest animal sees the lions first. Good in any reactive deck.) |
+| — | | L | | open |
+| — | | L | | open (to judge: a Gazelle, "Whenever one of your animals flees, gain 10 food.") |
+| Zebra | Savanna | R | 5 | **Flee.** When this flees, return the enemy that covered it to its owner's hand. (Stripes: the striped herd blurs and the attacker lunges at nothing. The corner is left empty, not taken, so you play the Zebra back onto it; taking it costs the opponent two actions.) |
+| Moose | Forest | R | 6 | Your other Hoofed animals have +2 strength during your opponent's turn. |
+| Honey Badger | Savanna | R | 2 | Roar: remove an adjacent enemy of strength 6 or more. |
+| — | | R | | open (a regroup card, "Roar: play a Hoofed animal from your hand.", once it's through the burst check) |
+| Cape Buffalo (stander) | Savanna | C | 4 | Roar: remove an adjacent enemy covering one of your Hoofed animals. (Martin's: the buffalo drives the predator off and the animal underneath is safe. Common, since it's the deck's core loop.) |
+| Wildebeest (stander) | Savanna | C | 6 | At the end of your turn, if this is grazing, gain 5 food. |
+| Giraffe (stander) | Savanna | C | 4 | Has +5 strength during your opponent's turn. |
+| Boar (stander) | Forest | C | 5 | Has +3 strength while grazing. |
+| Gazelle (fleer) | Savanna | C | 3 | **Flee.** Roar: gain 5 food. |
+| Deer (fleer) | Forest | C | 4 | **Flee.** Roar: draw a Hoofed animal. |
+
+Rejected: Flee on animals whose value is where they stand (a fled corner can't be retaken, since the coverer is bigger); Stealth, Armor and Spikes while grazing (Food OTK's identity); a den that can't be captured while grazing; a +1 anthem legendary; a herd bull that stops covers on your other grazing animals (on the back corner nothing reaches it: a lock); a stampede and a 3-of-4-corners region (clunky); the Zebra kicking an enemy back to hand (Zebra is its stripes).
+
 ## Giants, draft
 
 Feed the giants (Martin, 2026-10-08): Magic's Eldrazi Ramp, Hearthstone's Ramp and Big Druid. The ramp resource is food, which is also the win counter: every point a giant eats is a point not counting toward 100, so Giants win on the board and the den, rarely on food. Hungry animals eat each turn or shrink; the food cards keep them fed. The fun is landing bodies nothing can cover and running the feeding economy. It beats boards of small and mid-sized animals by covering them with bodies they can't cover back (Fish, Cats, Canines: Giants prey on Fish by covering their region corners, not by area removal, which reaches only a school's edge); it loses to races it can't touch (Food Aggro), unconditional removal (King Cobra, the Octopus's ink) and fortresses (Spikes kills any coverer).
