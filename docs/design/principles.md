@@ -46,6 +46,19 @@ There is no mana: every card costs one card and one placement action. Low streng
 - Avoid unconditional body-plus-card cards: a body that replaces itself is already premium.
 - A new keyword needs at least three cards that want the exact same rules object.
 
+## Before proposing a card
+
+Run every card in a batch through these, from the opponent's seat, before showing it:
+
+1. **Against the references.** Compare it with Lion (7, vanilla) and with every card that has the same or an overlapping effect. If one has the same effect with more strength or an extra rider, the proposal is dominated. When the size rule forces a small body, give the animal a different effect, never the same one on a smaller body.
+2. **Answerable.** The opponent can still beat it by ordinary play, a cover with more strength or a removal ability, without being forced to lose a card every time. An animal that can never be covered is an unbreakable wall.
+3. **The trigger fires.** Ask what the opponent will actually do to it. Covering is the everyday answer to small animals and fires no removal trigger, so "when this is removed" on a 1 or 2 is dead text.
+4. **It does what it claims.** A 0-strength token blocks nothing (anything covers it); strength on the board defends and dodges removal but never covers anything, since covering is placement from hand.
+5. **Balance with numbers.** Fix a card that's too strong through its strength, magnitude or count, never by bolting on a cap or condition.
+6. **A real design.** A known keyword with a word added is a patch, not a new mechanic; an animal isn't dropped because one wording fails.
+
+Games imagined while designing are reasoning, not evidence: only real play settles balance.
+
 ## Theme and naming
 
 - Every card is an animal. No spells, no objects, no places.
