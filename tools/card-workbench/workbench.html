@@ -137,7 +137,7 @@ const allCards = () => decksSorted().flatMap(([id, d]) => (d.cards || []).map(c 
 
 function cardIssues(c, ctx) {
   const out = [];
-  if (!c.text) out.push(["bad", "no effect text"]);
+  if (!c.text && c.status === "open") out.push(["bad", "no effect yet"]); // a locked card with no text is a vanilla animal (Lion)
   if (c.str === null || c.str === undefined || c.str === "") out.push(["warn", "no strength"]);
   if (!c.habitat) out.push(["warn", "no habitat"]);
   if (c.rarity !== "L" && !c.name) out.push(["bad", "no animal"]);
