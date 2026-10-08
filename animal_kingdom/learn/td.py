@@ -80,7 +80,7 @@ class TrainConfig:
     # experience*, not by warm-starting on the hand-tuned values it's supposed to validate).
     init_weights: Optional[tuple[float, ...]] = None
     arena_every: int = 10
-    arena_decks: tuple[str, ...] = ("egg_control", "cats_midrange", "ramp")
+    arena_decks: tuple[str, ...] = ("egg_control", "cats", "giants")
     arena_games_per_deck: int = 20
 
 

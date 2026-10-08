@@ -49,7 +49,7 @@ def test_prefers_stronger_of_two_placements():
 
 
 def test_choose_is_deterministic():
-    s = new_game(load_premade_deck("ramp"), load_premade_deck("aggro_hq_rush"), seed=3)
+    s = new_game(load_premade_deck("giants"), load_premade_deck("den_rush"), seed=3)
     actor = s.player_to_act()
     legal = rules.legal_actions(s)
     a1 = GreedyBot(seed=0).choose(s.view_for(actor), legal, s)
@@ -249,14 +249,14 @@ def test_coverage_exposure_needs_reachability():
 
 def test_default_depth_matches_original_1_ply_score():
     # depth=1 (the default) must be exactly the old behaviour: no fast-forwarding at all.
-    s = new_game(load_premade_deck("ramp"), load_premade_deck("aggro_hq_rush"), seed=3)
+    s = new_game(load_premade_deck("giants"), load_premade_deck("den_rush"), seed=3)
     nxt = s.clone()
     rules.apply_action(nxt, rules.legal_actions(nxt)[0])
     assert GreedyBot(seed=0)._rollout_value(nxt, "A", 0) == evaluate(nxt, "A", W)
 
 
 def test_lookahead_is_deterministic():
-    s = new_game(load_premade_deck("ramp"), load_premade_deck("aggro_hq_rush"), seed=3)
+    s = new_game(load_premade_deck("giants"), load_premade_deck("den_rush"), seed=3)
     actor = s.player_to_act()
     legal = rules.legal_actions(s)
     a1 = GreedyBot(depth=3, seed=0).choose(s.view_for(actor), legal, s)

@@ -21,8 +21,8 @@ def _rows(db):
 def test_a_game_start_and_end_are_recorded_for_the_person_in_it(monkeypatch):
     monkeypatch.setattr(server, "profiles", _Profiles())
     hub = server.Hub()
-    m = Match("EVT", Seat("ta", "A", deck="cats_midrange", profile="p1"))
-    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m = Match("EVT", Seat("ta", "A", deck="cats", profile="p1"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="giants"))
     m._start_game()
     hub.note(m)
     hub.note(m)                                   # nothing new: nothing recorded twice

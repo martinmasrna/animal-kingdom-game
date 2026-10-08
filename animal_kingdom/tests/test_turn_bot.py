@@ -223,7 +223,7 @@ def test_ignores_hidden_information():
 # --------------------------------------------------------------------- 7: determinism
 
 def test_choose_is_deterministic():
-    s = new_game(load_premade_deck("ramp"), load_premade_deck("aggro_hq_rush"), seed=3)
+    s = new_game(load_premade_deck("giants"), load_premade_deck("den_rush"), seed=3)
     actor = s.player_to_act()
     legal = rules.legal_actions(s)
     a1 = small_turn(seed=0).choose(s.view_for(actor), legal, s)
@@ -233,7 +233,7 @@ def test_choose_is_deterministic():
 
 @pytest.mark.slow
 def test_serial_and_parallel_simulations_match():
-    pairs = [("ramp", "cats_midrange")]
+    pairs = [("giants", "cats")]
     kw = dict(bots=("turn", "greedy"), map_id="map_b", config=TWO_ACTION)
     serial = run_pairs(pairs, 4, base_seed=683470156, jobs=1, **kw)
     parallel = run_pairs(pairs, 4, base_seed=683470156, jobs=2, **kw)

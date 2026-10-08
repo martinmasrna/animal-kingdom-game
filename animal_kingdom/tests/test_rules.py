@@ -154,10 +154,10 @@ def test_turn_ends_early_when_no_second_action_exists():
 
 
 def test_effect_granted_extra_play_consumes_no_action():
-    s = make_state(hands={"A": ["jerboa", "house_cat", "caracal"], "B": ["lion"]},
+    s = make_state(hands={"A": ["calib_extra_1", "house_cat", "caracal"], "B": ["lion"]},
                    config=TWO_ACTIONS)
-    rules.apply_action(s, PlaceAction("jerboa", ("cr", "1,1")))
-    assert s.pending is not None                 # Jerboa: play another unit (mandatory)
+    rules.apply_action(s, PlaceAction("calib_extra_1", ("cr", "1,1")))
+    assert s.pending is not None                 # "play another animal" (mandatory)
     extra = next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction))
     rules.apply_action(s, extra)                 # the free play resolves the pending
     assert s.current == "A"                      # still action 1 of 2
@@ -204,7 +204,7 @@ def test_mulligan_first_player_first_then_second_then_turn_one():
     from animal_kingdom.decks import load_premade_deck
     from animal_kingdom.engine.actions import SKIP, ChoiceAction
     from animal_kingdom.engine.state import new_game, other_player
-    s = new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 5)
+    s = new_game(load_premade_deck("cats"), load_premade_deck("giants"), 5)
     first, second = s.current, other_player(s.current)
     assert s.pending["chooser"] == first
     kept = [u.card_id for u in s.hands[first]]
@@ -226,7 +226,7 @@ def test_mulligan_blacklists_every_returned_card_and_stops_at_three():   # the f
     from animal_kingdom.decks import load_premade_deck
     from animal_kingdom.engine.actions import ChoiceAction
     from animal_kingdom.engine.state import new_game
-    s = new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 11)
+    s = new_game(load_premade_deck("cats"), load_premade_deck("giants"), 11)
     first = s.current
     gone = []
     for _ in range(3):
@@ -244,7 +244,7 @@ def test_mulligan_cap_is_the_opening_hand_three_first_four_second():
     from animal_kingdom.decks import load_premade_deck
     from animal_kingdom.engine.actions import SKIP, ChoiceAction
     from animal_kingdom.engine.state import new_game, other_player
-    s = new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 11)
+    s = new_game(load_premade_deck("cats"), load_premade_deck("giants"), 11)
     first, second = s.current, other_player(s.current)
     rules.apply_action(s, ChoiceAction(SKIP))
     for _ in range(4):
@@ -257,7 +257,7 @@ def test_mulligan_can_be_disabled():
     from animal_kingdom.decks import load_premade_deck
     from animal_kingdom.engine.config import Config
     from animal_kingdom.engine.state import new_game
-    s = new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 5,
+    s = new_game(load_premade_deck("cats"), load_premade_deck("giants"), 5,
                  config=Config(mulligan=False))
     assert s.pending is None and rules.legal_actions(s)[0].kind == "draw"
 
@@ -268,7 +268,7 @@ def _fresh():
     from animal_kingdom.decks import load_premade_deck
     from animal_kingdom.engine.config import Config
     from animal_kingdom.engine.state import new_game
-    return new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 5, config=Config(mulligan=False))
+    return new_game(load_premade_deck("cats"), load_premade_deck("giants"), 5, config=Config(mulligan=False))
 
 
 def test_pass_ends_the_turn_with_or_without_an_action():
@@ -329,8 +329,8 @@ def test_both_players_mulligan_at_once_and_a_log_replays_it():
     from animal_kingdom.engine.actions import SKIP, ChoiceAction
     from animal_kingdom.engine.state import new_game, other_player
     from animal_kingdom.web.match import Match, Seat
-    m = Match("MUL", Seat("ta", "A", deck="cats_midrange"))
-    m.join(Seat("tb", "B", deck="ramp"))
+    m = Match("MUL", Seat("ta", "A", deck="cats"))
+    m.join(Seat("tb", "B", deck="giants"))
     m._start_game()
     st = m.state
     first, second = st.current, other_player(st.current)
@@ -349,7 +349,7 @@ def test_both_players_mulligan_at_once_and_a_log_replays_it():
     assert [a.get("by") for a in m.actions] == [second, second, None, None]
     # the log replays to the same position
     from animal_kingdom.engine import rules
-    r = new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), m.seed, first_player=first)
+    r = new_game(load_premade_deck("cats"), load_premade_deck("giants"), m.seed, first_player=first)
     for a in m.actions:
         rules.apply_logged(r, a)
     assert [u.card_id for u in r.hands[first]] == [u.card_id for u in st.hands[first]]
@@ -360,8 +360,8 @@ def test_one_shared_mulligan_window_then_three_timeouts_in_a_row_lose():
     from animal_kingdom.engine.state import other_player
     from animal_kingdom.web import match as mm
     from animal_kingdom.web.match import Match, Seat
-    m = Match("CLK", Seat("ta", "A", deck="cats_midrange"))
-    m.join(Seat("tb", "B", deck="ramp"))
+    m = Match("CLK", Seat("ta", "A", deck="cats"))
+    m.join(Seat("tb", "B", deck="giants"))
     m._start_game()
     st, c = m.state, m.clock
     first, second = st.current, other_player(st.current)

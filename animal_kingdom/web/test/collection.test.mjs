@@ -47,7 +47,7 @@ test('a new profile has the seven starter decks as its own, the first one open',
   assert.equal(await page.$('.dtile.on'), null, 'the screen opens on the deck list');
   assert.match(await page.$eval('.fcount', e => e.textContent), /7\/20/, 'the foot counts decks against the limit');
   assert.ok(await page.$('.clist #dnew'), 'New deck is the slot after the last deck');
-  await openDeck('[data-d="cats_midrange"]');
+  await openDeck('[data-d="cats"]');
   assert.equal(await page.$$eval('.clist .dtile', t => t.length), 1, 'editing shows only that deck');
   await page.click('.side .st[data-card="lion"]'); await wait(100);
   const [cats] = await myDecks();
@@ -116,15 +116,15 @@ test('New deck starts an empty deck, open, with its name ready to type', async (
 });
 
 test('an opened deck is the column alone, starting at its top; Done returns to the list; a former starter is yours to rename and delete', async () => {
-  await openDeck('[data-d="ramp"]'); await wait(80);
+  await openDeck('[data-d="giants"]'); await wait(80);
   const off = await page.evaluate(() => document.querySelector('.dtile.on').getBoundingClientRect().top - document.querySelector('.clist').getBoundingClientRect().top);
   assert.ok(off >= 0 && off < 30, `the open deck starts at the top (${off})`);
   const n = (await myDecks()).length;
   await page.hover('.dtile.on'); assert.ok(await page.$('#dcover')); assert.ok(await page.$('#ddel'), 'it can be deleted like any deck');
   await page.click('.nm-edit'); await page.keyboard.down('Meta'); await page.keyboard.press('a'); await page.keyboard.up('Meta'); await page.keyboard.type('Big Ramp'); await page.keyboard.press('Enter'); await wait(120);
-  const decks = await myDecks(); assert.equal(decks.length, n); assert.equal(decks.find(d => d.id === 'ramp').name, 'Big Ramp');
-  await page.click('#done'); await wait(60); assert.ok(await page.$('[data-d="ramp"]:not(.on)'), 'Done shows the list again');
-  await openDeck('[data-d="ramp"]'); await page.keyboard.press('Escape'); await wait(60); assert.ok(await page.$('#dnew'), 'Escape is Done while editing');
+  const decks = await myDecks(); assert.equal(decks.length, n); assert.equal(decks.find(d => d.id === 'giants').name, 'Big Ramp');
+  await page.click('#done'); await wait(60); assert.ok(await page.$('[data-d="giants"]:not(.on)'), 'Done shows the list again');
+  await openDeck('[data-d="giants"]'); await page.keyboard.press('Escape'); await wait(60); assert.ok(await page.$('#dnew'), 'Escape is Done while editing');
 });
 
 test('on a phone held upright the zoom explains its keywords under the card, all on screen', async () => {

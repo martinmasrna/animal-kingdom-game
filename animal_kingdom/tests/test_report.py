@@ -18,36 +18,36 @@ from animal_kingdom.sim.runner import GameRecord, crossed_progress_decile
 
 def test_format_matrix_shows_each_deck_and_its_win_rate():
     records = [
-        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10),  # ramp first, ramp won
-        GameRecord("ramp", "egg_control", 1, "B", "A", "food", 20),        # egg first, ramp won
+        GameRecord("giants", "egg_control", 0, "A", "A", "hq_capture", 10),  # ramp first, ramp won
+        GameRecord("giants", "egg_control", 1, "B", "A", "food", 20),        # egg first, ramp won
     ]
     matrix = format_matrix(records)
 
     assert "### Matchup matrix" in matrix
-    assert "ramp" in matrix and "egg_" in matrix  # row label + column abbreviation
+    assert "giants" in matrix and "egg_" in matrix  # row label + column abbreviation
     assert "100%" in matrix  # ramp beat egg_control every time
     assert "egg_ = egg_control" not in matrix  # legend dropped
     assert "TotA" not in matrix and "TotB" not in matrix  # seat concept retired
 
     # ramp won both moving first and moving second -> vs/1st/2nd/Both all read 100%.
-    ramp_line = next(line for line in matrix.splitlines() if line.startswith("ramp"))
+    ramp_line = next(line for line in matrix.splitlines() if line.startswith("giants"))
     assert "1st" in matrix and "2nd" in matrix and "Both" in matrix
     assert ramp_line.count("100%") == 4  # vs egg_control, 1st, 2nd, Both
 
 
 def test_format_report_leads_with_the_matrix():
-    records = [GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10)]
+    records = [GameRecord("giants", "egg_control", 0, "A", "A", "hq_capture", 10)]
     report = format_report(records, load_cards())
     assert report.index("### Matchup matrix") < report.index("### egg_control")
 
 
 def test_format_report_groups_by_deck_sorted_by_impact():
-    ramp = load_premade_deck("ramp")
+    ramp = load_premade_deck("giants")
     good, bad = ramp[0], ramp[1]
     records = [
-        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10,
+        GameRecord("giants", "egg_control", 0, "A", "A", "hq_capture", 10,
                   cards_drawn_a=frozenset({good})),
-        GameRecord("ramp", "egg_control", 1, "A", "B", "food", 20,
+        GameRecord("giants", "egg_control", 1, "A", "B", "food", 20,
                   cards_drawn_a=frozenset({bad})),
     ]
     report = format_report(records, load_cards())
@@ -63,8 +63,8 @@ def test_format_report_groups_by_deck_sorted_by_impact():
 
 def test_resolve_deck_matches_exact_and_abbreviation():
     slugs = sorted(DECK_SLUGS)
-    assert _resolve_deck("aggro_hq_rush", slugs) == "aggro_hq_rush"
-    assert _resolve_deck("aggro", slugs) == "aggro_hq_rush"
+    assert _resolve_deck("den_rush", slugs) == "den_rush"
+    assert _resolve_deck("aggro", slugs) == "den_rush"
 
 
 def test_resolve_deck_rejects_no_match_or_ambiguous_match():
@@ -77,23 +77,23 @@ def test_resolve_deck_rejects_no_match_or_ambiguous_match():
 
 def test_format_focused_matrix_shows_both_movers_for_each_opponent():
     records = [
-        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10),   # ramp moved first, won
-        GameRecord("ramp", "egg_control", 1, "B", "B", "food", 20),         # egg moved first, won
-        GameRecord("ramp", "ramp", 2, "A", "A", "hq_capture", 10),          # mirror
+        GameRecord("giants", "egg_control", 0, "A", "A", "hq_capture", 10),   # ramp moved first, won
+        GameRecord("giants", "egg_control", 1, "B", "B", "food", 20),         # egg moved first, won
+        GameRecord("giants", "giants", 2, "A", "A", "hq_capture", 10),          # mirror
     ]
-    matrix = format_focused_matrix(records, "ramp")
+    matrix = format_focused_matrix(records, "giants")
 
     assert "### ramp matchups" in matrix
     assert "ramp (mirror)" in matrix
-    assert "cats_midrange" not in matrix        # never played, shouldn't appear as a row
+    assert "cats" not in matrix        # never played, shouldn't appear as a row
     # ramp went 1-0 moving first and 0-1 moving second against egg_control.
     egg_line = next(line for line in matrix.splitlines() if line.startswith("egg_control"))
     assert "100%" in egg_line and "0%" in egg_line
 
 
 def test_format_report_with_focus_deck_only_prints_that_decks_table():
-    records = [GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10)]
-    report = format_report(records, load_cards(), focus_deck="ramp")
+    records = [GameRecord("giants", "egg_control", 0, "A", "A", "hq_capture", 10)]
+    report = format_report(records, load_cards(), focus_deck="giants")
     assert "### ramp matchups" in report
     assert "### ramp (deck win rate" in report
     assert "### egg_control" not in report
@@ -114,21 +114,21 @@ def test_progress_deciles_scale_with_matchup_size():
 
 def test_report_cli_prints_game_progress_and_completed_matchup_win_rates(monkeypatch, capsys):
     records = [
-        GameRecord("ramp", "ramp", 0, "A", "A", "food", 10),
-        GameRecord("ramp", "ramp", 1, "A", "A", "food", 10),
-        GameRecord("ramp", "ramp", 2, "A", "B", "food", 10),
-        GameRecord("ramp", "ramp", 3, "A", "B", "food", 10),
-        GameRecord("ramp", "ramp", 4, "A", None, "max_turns", 10),
+        GameRecord("giants", "giants", 0, "A", "A", "food", 10),
+        GameRecord("giants", "giants", 1, "A", "A", "food", 10),
+        GameRecord("giants", "giants", 2, "A", "B", "food", 10),
+        GameRecord("giants", "giants", 3, "A", "B", "food", 10),
+        GameRecord("giants", "giants", 4, "A", None, "max_turns", 10),
     ]
 
     def fake_run_pairs(pairs, n_games, base_seed, **kwargs):
         for done in range(1, n_games + 1):
-            kwargs["game_progress"]("ramp", "ramp", done, n_games)
-        kwargs["matchup_progress"]("ramp", "ramp", 1, 1, records)
+            kwargs["game_progress"]("giants", "giants", done, n_games)
+        kwargs["matchup_progress"]("giants", "giants", 1, 1, records)
         return records
 
     monkeypatch.setattr(report_module, "run_pairs", fake_run_pairs)
-    report_module.main(["5", "--deck", "ramp", "--opponent", "ramp"])
+    report_module.main(["5", "--deck", "giants", "--opponent", "giants"])
 
     output = capsys.readouterr().err
     assert "[ 20%] ramp vs ramp | 1/5 games" in output
@@ -143,10 +143,10 @@ def test_report_cli_prints_game_progress_and_completed_matchup_win_rates(monkeyp
 
 
 def test_unified_cli_files_mode_accepts_legacy_arguments(monkeypatch, tmp_path, capsys):
-    records = [GameRecord("ramp", "ramp", 0, "A", "A", "food", 10)]
+    records = [GameRecord("giants", "giants", 0, "A", "A", "food", 10)]
     writes = []
 
-    monkeypatch.setattr(report_module, "DECK_SLUGS", ("ramp",))
+    monkeypatch.setattr(report_module, "DECK_SLUGS", ("giants",))
     monkeypatch.setattr(report_module, "run_pairs", lambda *args, **kwargs: records)
     monkeypatch.setattr(
         report_module.metrics,

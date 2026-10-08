@@ -69,7 +69,7 @@ test('a message waits for a friend who is away, counted when they come back', as
 });
 
 test('in a match the piece stands beside the icon row, and its bell mutes messages there (they only count)', async () => {
-  const m = await call(bob, '/api/match', { deck: 'cats_midrange', name: 'You', bot: { level: 'easy', deck: 'ramp' } });
+  const m = await call(bob, '/api/match', { deck: 'cats', name: 'You', bot: { level: 'easy', deck: 'giants' } });
   await bob.evaluate(m => sessionStorage.setItem('ak:seat:' + m.id, m.token), m);
   await bob.goto(`${server.url}/#/m/${m.id}`, { waitUntil: 'networkidle0' });
   await bob.waitForFunction(() => window.__ak().V && window.__ak().V.phase === 'playing', { timeout: 8000 });

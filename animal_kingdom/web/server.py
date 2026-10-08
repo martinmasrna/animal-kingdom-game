@@ -34,7 +34,7 @@ from . import oauth
 from .profiles import ProfileError, Profiles
 from . import replay
 from . import tutorial
-from .match import BOT_LEVELS, DECK_NAMES, Match, Seat, card_pool, map_info
+from .match import BOT_LEVELS, DECK_NAMES, STARTER_COVERS, Match, Seat, card_pool, map_info
 
 CARDS = load_cards()
 
@@ -238,12 +238,7 @@ def display(p: dict) -> str:
     return f"{p['name']}#{p['tag']}"
 
 
-# A profile starts with the starter decks as its own (covers as on the play screen).
-STARTER_COVERS = {"cats_midrange": "king_theron", "canine_buff_tempo": "lobo", "aggro_hq_rush": "verminus",
-                  "colony_food_swarm": "queen_honoria", "egg_control": "eon", "food_otk": "rat_king", "ramp": "borealis",
-                  "goodstuff": "gale"}
-
-
+# A profile starts with the starter decks as its own (their covers, as on the play screen, from cards.json).
 def starter_decks() -> list[dict]:
     out = []
     for slug in DECK_NAMES:
@@ -859,8 +854,9 @@ async def privacy(_req):
 async def pool(_req):
     return web.json_response({
         "cards": card_pool(),
-        "decks": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug)}
-                  for slug in DECK_NAMES if slug in PREMADE_DECKS or slug == "goodstuff"],
+        "decks": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug),
+                   "cover": STARTER_COVERS.get(slug, "")}
+                  for slug in DECK_NAMES if slug in PREMADE_DECKS],
         "map": map_info(),
         "levels": list(BOT_LEVELS),
         "build": BUILD,
@@ -899,7 +895,7 @@ async def create_match(req):
         match._start_game()
         match.version += 1
     elif bot:
-        if bot.get("level") not in BOT_LEVELS or bot.get("deck") not in {*PREMADE_DECKS, "goodstuff"}:
+        if bot.get("level") not in BOT_LEVELS or bot.get("deck") not in PREMADE_DECKS:
             raise web.HTTPBadRequest(text="bad bot")
         match.join(Seat(secrets.token_urlsafe(12), f"Bot ({bot['level'].capitalize()})",
                         bot=bot["level"], deck=bot["deck"]))
@@ -1046,7 +1042,7 @@ def make_app() -> web.Application:
         global ladder, friends, chat
         friends = Friends(profiles.db)
         chat = Chat(profiles.db)
-        ladder = ranking.Ladder(profiles.db, [d for d in sorted(PREMADE_DECKS) if d != "goodstuff"])
+        ladder = ranking.Ladder(profiles.db, sorted(PREMADE_DECKS))
         if ladder.apply_seed(Path(__file__).parent / "ladder_seed.json"):   # the bots' ratings from simulation (sim/ladder_seed.py)
             log.info("ladder: bots seeded from ladder_seed.json")
         custom_decks.load()

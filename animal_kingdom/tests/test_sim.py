@@ -23,9 +23,9 @@ REASONS = {"hq_capture", "food", "passes", "max_turns"}
 # ---------------------------------------------------------------------- runner
 
 def test_play_game_returns_a_complete_record():
-    rec = play_game("ramp", "aggro_hq_rush", 0,
+    rec = play_game("giants", "den_rush", 0,
                     bot_a=make_bot("random", 1), bot_b=make_bot("random", 2))
-    assert rec.deck_a == "ramp" and rec.deck_b == "aggro_hq_rush"
+    assert rec.deck_a == "giants" and rec.deck_b == "den_rush"
     assert rec.winner in ("A", "B", None)
     assert rec.reason in REASONS
     assert rec.first_player in ("A", "B")
@@ -34,21 +34,21 @@ def test_play_game_returns_a_complete_record():
 
 
 def test_play_game_tracks_drawn_cards_end_to_end():
-    rec = play_game("ramp", "aggro_hq_rush", 0,
+    rec = play_game("giants", "den_rush", 0,
                     bot_a=make_bot("random", 1), bot_b=make_bot("random", 2))
     assert rec.cards_drawn_a and rec.cards_drawn_b   # opening hand alone guarantees non-empty
-    assert rec.cards_drawn_a <= set(load_premade_deck("ramp"))
-    assert rec.cards_drawn_b <= set(load_premade_deck("aggro_hq_rush"))
+    assert rec.cards_drawn_a <= set(load_premade_deck("giants"))
+    assert rec.cards_drawn_b <= set(load_premade_deck("den_rush"))
 
 
 def test_matchup_is_deterministic():
-    a = run_matchup("ramp", "egg_control", 3, base_seed=0, bots=("random", "random"))
-    b = run_matchup("ramp", "egg_control", 3, base_seed=0, bots=("random", "random"))
+    a = run_matchup("giants", "egg_control", 3, base_seed=0, bots=("random", "random"))
+    b = run_matchup("giants", "egg_control", 3, base_seed=0, bots=("random", "random"))
     assert a == b
 
 
 def test_parallel_matches_serial():
-    slugs = ["ramp", "aggro_hq_rush"]
+    slugs = ["giants", "den_rush"]
     serial = run_round_robin(slugs, 2, base_seed=0, bots=("random", "random"), jobs=1)
     parallel = run_round_robin(slugs, 2, base_seed=0, bots=("random", "random"), jobs=2)
     assert serial == parallel
@@ -56,7 +56,7 @@ def test_parallel_matches_serial():
 
 def test_run_round_robin_delegates_to_run_pairs():
     # run_round_robin should be run_pairs over the unordered non-mirror pairs only.
-    slugs = ["ramp", "aggro_hq_rush"]
+    slugs = ["giants", "den_rush"]
     via_round_robin = run_round_robin(slugs, 2, base_seed=0, bots=("random", "random"))
     pairs = [(a, b) for i, a in enumerate(slugs) for b in slugs[i + 1:]]
     via_pairs = run_pairs(pairs, 2, base_seed=0, bots=("random", "random"))
@@ -67,28 +67,28 @@ def test_run_round_robin_reports_per_game_progress():
     # A single non-mirror pair runs 2 * n_games (n forced-A-first, n forced-B-first).
     updates = []
     run_round_robin(
-        ["ramp", "aggro_hq_rush"], 3, base_seed=0, bots=("random", "random"),
+        ["giants", "den_rush"], 3, base_seed=0, bots=("random", "random"),
         game_progress=lambda a, b, done, total: updates.append((a, b, done, total)),
     )
     assert updates == [
-        ("ramp", "aggro_hq_rush", 1, 6),
-        ("ramp", "aggro_hq_rush", 2, 6),
-        ("ramp", "aggro_hq_rush", 3, 6),
-        ("ramp", "aggro_hq_rush", 4, 6),
-        ("ramp", "aggro_hq_rush", 5, 6),
-        ("ramp", "aggro_hq_rush", 6, 6),
+        ("giants", "den_rush", 1, 6),
+        ("giants", "den_rush", 2, 6),
+        ("giants", "den_rush", 3, 6),
+        ("giants", "den_rush", 4, 6),
+        ("giants", "den_rush", 5, 6),
+        ("giants", "den_rush", 6, 6),
     ]
 
 
 def test_run_round_robin_reports_completed_matchup_records():
     updates = []
     records = run_round_robin(
-        ["ramp", "aggro_hq_rush"], 3, base_seed=0, bots=("random", "random"),
+        ["giants", "den_rush"], 3, base_seed=0, bots=("random", "random"),
         matchup_progress=lambda a, b, done, total, batch: updates.append(
             (a, b, done, total, batch)
         ),
     )
-    assert updates == [("ramp", "aggro_hq_rush", 1, 1, records)]
+    assert updates == [("giants", "den_rush", 1, 1, records)]
     assert len(records) == 6
 
 
@@ -131,7 +131,7 @@ def test_make_bot_referee_kind_uses_module_knobs():
 @pytest.mark.slow
 def test_run_pairs_referee_parallel_matches_serial():
     # The referee kind must survive the ProcessPoolExecutor round-trip like any other.
-    pairs = [("ramp", "aggro_hq_rush")]
+    pairs = [("giants", "den_rush")]
     serial = run_pairs(pairs, 1, base_seed=0, bots=("referee", "greedy"), jobs=1)
     parallel = run_pairs(pairs, 1, base_seed=0, bots=("referee", "greedy"), jobs=2)
     assert serial == parallel
@@ -157,7 +157,7 @@ def test_make_bot_extra_overrides_kind_defaults():
 @pytest.mark.slow
 def test_run_pairs_bot_kwargs_thread_and_survive_the_pool():
     # A config A/B of the same kind: one arm width 0, one arm width 2, over the process pool.
-    pairs = [("egg_control", "ramp")]
+    pairs = [("egg_control", "giants")]
     a = run_pairs(pairs, 1, base_seed=0, bots=("turn", "greedy"),
                   bot_kwargs=((("deck_reveal_choice_width", 0),), ()), jobs=2)
     b = run_pairs(pairs, 1, base_seed=0, bots=("turn", "greedy"),
@@ -169,9 +169,9 @@ def test_run_matchup_threads_weights_and_stays_deterministic():
     custom = GreedyWeights(food_progress=99.0, food_proximity=0.0, board_presence=0.0,
                            connection=0.0, region_control=0.0, enemy_hq_threat=0.0,
                            own_hq_threat=0.0, card_economy=0.0)
-    a = run_matchup("ramp", "egg_control", 3, base_seed=0, bots=("greedy", "greedy"),
+    a = run_matchup("giants", "egg_control", 3, base_seed=0, bots=("greedy", "greedy"),
                     weights=(custom, None))
-    b = run_matchup("ramp", "egg_control", 3, base_seed=0, bots=("greedy", "greedy"),
+    b = run_matchup("giants", "egg_control", 3, base_seed=0, bots=("greedy", "greedy"),
                     weights=(custom, None))
     assert a == b
 
@@ -179,7 +179,7 @@ def test_run_matchup_threads_weights_and_stays_deterministic():
 def test_run_pairs_parallel_matches_serial_with_weights():
     # Custom GreedyWeights must survive the ProcessPoolExecutor round-trip (picklability).
     custom = GreedyWeights(enemy_hq_threat=999.0)
-    pairs = [("ramp", "aggro_hq_rush")]
+    pairs = [("giants", "den_rush")]
     serial = run_pairs(pairs, 2, base_seed=0, bots=("greedy", "greedy"),
                        weights=(custom, None), jobs=1)
     parallel = run_pairs(pairs, 2, base_seed=0, bots=("greedy", "greedy"),
@@ -223,7 +223,7 @@ def test_learned_kind_identity_artifact_matches_hand_kind_one_game():
     # 1-game integration smoke: the shipped dev fixture (an exact GreedyWeights() mimic)
     # must choose identically to plain 'greedy' over a full game, through the whole
     # make_bot -> MatchSpec -> ProcessPoolExecutor path (not just direct construction).
-    pairs = [("cats_midrange", "ramp")]
+    pairs = [("cats", "giants")]
     hand = run_pairs(pairs, 1, base_seed=0, bots=("greedy", "greedy"))
     learned = run_pairs(pairs, 1, base_seed=0, bots=("greedy_learned", "greedy"),
                         bot_kwargs=((("eval", "rung0_identity"),), ()))
@@ -231,7 +231,7 @@ def test_learned_kind_identity_artifact_matches_hand_kind_one_game():
 
 
 def test_learned_kind_survives_the_process_pool():
-    pairs = [("cats_midrange", "ramp")]
+    pairs = [("cats", "giants")]
     serial = run_pairs(pairs, 2, base_seed=0, bots=("greedy_learned", "greedy"),
                        bot_kwargs=((("eval", "rung0_identity"),), ()), jobs=1)
     parallel = run_pairs(pairs, 2, base_seed=0, bots=("greedy_learned", "greedy"),
@@ -246,17 +246,17 @@ def _records():
     # new schedule never runs the reversed-labeled pair, so `deck_a`/`deck_b` stay fixed and
     # only `first_player` varies within the pair.
     return [
-        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10),
-        GameRecord("ramp", "egg_control", 1, "A", "B", "food", 20),   # second player wins
-        GameRecord("ramp", "egg_control", 2, "B", None, "max_turns", 400),  # draw, egg moved first
+        GameRecord("giants", "egg_control", 0, "A", "A", "hq_capture", 10),
+        GameRecord("giants", "egg_control", 1, "A", "B", "food", 20),   # second player wins
+        GameRecord("giants", "egg_control", 2, "B", None, "max_turns", 400),  # draw, egg moved first
     ]
 
 
 def test_matchup_matrix_shape_and_values():
     m = metrics.matchup_matrix(_records())
-    assert m["decks"] == ["egg_control", "ramp"]
-    assert m["win_rate"]["ramp"]["egg_control"] == 0.5      # one A-win, one B-win, one draw
-    assert m["win_rate"]["egg_control"]["ramp"] == 0.5      # derived as the exact complement
+    assert m["decks"] == ["egg_control", "giants"]
+    assert m["win_rate"]["giants"]["egg_control"] == 0.5      # one A-win, one B-win, one draw
+    assert m["win_rate"]["egg_control"]["giants"] == 0.5      # derived as the exact complement
 
 
 def test_matchup_matrix_derives_reverse_from_a_single_pooled_batch():
@@ -264,27 +264,27 @@ def test_matchup_matrix_derives_reverse_from_a_single_pooled_batch():
     # must be the exact complement of win_rate[a][b] (same games, opposite perspective), and
     # the mover split must be correctly attributed regardless of which deck is "deck_a".
     records = [
-        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10),  # ramp first, ramp won
-        GameRecord("ramp", "egg_control", 1, "A", "A", "hq_capture", 10),  # ramp first, ramp won
-        GameRecord("ramp", "egg_control", 2, "B", "B", "food", 20),        # egg first, egg won
+        GameRecord("giants", "egg_control", 0, "A", "A", "hq_capture", 10),  # ramp first, ramp won
+        GameRecord("giants", "egg_control", 1, "A", "A", "hq_capture", 10),  # ramp first, ramp won
+        GameRecord("giants", "egg_control", 2, "B", "B", "food", 20),        # egg first, egg won
     ]
     m = metrics.matchup_matrix(records)
-    assert m["win_rate"]["ramp"]["egg_control"] == pytest.approx(2 / 3)
-    assert m["win_rate"]["egg_control"]["ramp"] == pytest.approx(1 / 3)
-    assert m["win_rate"]["ramp"]["egg_control"] + m["win_rate"]["egg_control"]["ramp"] == 1.0
+    assert m["win_rate"]["giants"]["egg_control"] == pytest.approx(2 / 3)
+    assert m["win_rate"]["egg_control"]["giants"] == pytest.approx(1 / 3)
+    assert m["win_rate"]["giants"]["egg_control"] + m["win_rate"]["egg_control"]["giants"] == 1.0
 
-    assert m["win_rate_first"]["ramp"]["egg_control"] == 1.0     # ramp always won moving first
-    assert m["win_rate_second"]["ramp"]["egg_control"] == 0.0    # ramp never won moving second
-    assert m["win_rate_first"]["egg_control"]["ramp"] == 1.0     # egg's WR moving first
-    assert m["win_rate_second"]["egg_control"]["ramp"] == 0.0    # egg's WR moving second
+    assert m["win_rate_first"]["giants"]["egg_control"] == 1.0     # ramp always won moving first
+    assert m["win_rate_second"]["giants"]["egg_control"] == 0.0    # ramp never won moving second
+    assert m["win_rate_first"]["egg_control"]["giants"] == 1.0     # egg's WR moving first
+    assert m["win_rate_second"]["egg_control"]["giants"] == 0.0    # egg's WR moving second
     # each side's "moved first" rate is the complement of the other's "moved second" rate,
     # since both read off the exact same sub-batch of games.
-    assert m["win_rate_first"]["egg_control"]["ramp"] == 1.0 - m["win_rate_second"]["ramp"]["egg_control"]
-    assert m["win_rate_second"]["egg_control"]["ramp"] == 1.0 - m["win_rate_first"]["ramp"]["egg_control"]
+    assert m["win_rate_first"]["egg_control"]["giants"] == 1.0 - m["win_rate_second"]["giants"]["egg_control"]
+    assert m["win_rate_second"]["egg_control"]["giants"] == 1.0 - m["win_rate_first"]["giants"]["egg_control"]
 
     # mirror: no meaningful mover identity when both sides run the same deck.
-    assert m["win_rate_first"]["ramp"]["ramp"] is None
-    assert m["win_rate_second"]["ramp"]["ramp"] is None
+    assert m["win_rate_first"]["giants"]["giants"] is None
+    assert m["win_rate_second"]["giants"]["giants"] is None
 
 
 def test_win_condition_split_sums_to_one():
@@ -308,9 +308,9 @@ def test_avg_game_length():
 
 def test_final_food_summary():
     records = [
-        GameRecord("ramp", "egg_control", 0, "A", "A", "food", 10,
+        GameRecord("giants", "egg_control", 0, "A", "A", "food", 10,
                    final_food_a=100, final_food_b=40),
-        GameRecord("ramp", "egg_control", 1, "A", "B", "food", 12,
+        GameRecord("giants", "egg_control", 1, "A", "B", "food", 12,
                    final_food_a=30, final_food_b=110),
     ]
     summary = metrics.final_food_summary(records)
@@ -324,14 +324,14 @@ def test_deck_win_rate_and_impact_ignore_mirror_games():
     # A mirror game a deck always wins would drag its baseline toward 50% if counted; since
     # mirrors can't reflect true field strength, they must be excluded from both the deck
     # baseline and per-card impact (see _deck_win_rates' docstring).
-    deck = load_premade_deck("ramp")
+    deck = load_premade_deck("giants")
     good = deck[0]
     records = [
-        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10,
+        GameRecord("giants", "egg_control", 0, "A", "A", "hq_capture", 10,
                   cards_drawn_a=frozenset({good})),
-        GameRecord("ramp", "ramp", 1, "A", "A", "hq_capture", 10,
+        GameRecord("giants", "giants", 1, "A", "A", "hq_capture", 10,
                   cards_drawn_a=frozenset({good})),
-        GameRecord("ramp", "ramp", 2, "A", "B", "food", 20),
+        GameRecord("giants", "giants", 2, "A", "B", "food", 20),
     ]
     rows = {r["card_id"]: r for r in metrics.per_card_stats(records)}
     # Only the single non-mirror game counts: ramp is 1-for-1, not 2-for-3.
@@ -341,7 +341,7 @@ def test_deck_win_rate_and_impact_ignore_mirror_games():
 
     # matchup_matrix.csv / the diagonal itself is unaffected - mirrors stay visible there.
     m = metrics.matchup_matrix(records)
-    assert m["win_rate"]["ramp"]["ramp"] == 0.5
+    assert m["win_rate"]["giants"]["giants"] == 0.5
 
 
 def test_per_card_stats_shape():
@@ -353,15 +353,15 @@ def test_per_card_stats_shape():
 
 
 def test_per_card_stats_differentiates_drawn_vs_never_drawn():
-    deck = load_premade_deck("ramp")
+    deck = load_premade_deck("giants")
     always_drawn, never_drawn = deck[0], deck[1]
     assert always_drawn != never_drawn
     records = [
-        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10,
+        GameRecord("giants", "egg_control", 0, "A", "A", "hq_capture", 10,
                   cards_drawn_a=frozenset({always_drawn})),
-        GameRecord("ramp", "egg_control", 1, "A", "A", "hq_capture", 12,
+        GameRecord("giants", "egg_control", 1, "A", "A", "hq_capture", 12,
                   cards_drawn_a=frozenset({always_drawn})),
-        GameRecord("ramp", "egg_control", 2, "A", "B", "food", 20,
+        GameRecord("giants", "egg_control", 2, "A", "B", "food", 20,
                   cards_drawn_a=frozenset()),
     ]
     rows = {r["card_id"]: r for r in metrics.per_card_stats(records)}
@@ -379,12 +379,12 @@ def test_per_card_stats_differentiates_drawn_vs_never_drawn():
 
 
 def test_per_card_stats_sorted_by_impact_desc():
-    deck = load_premade_deck("ramp")
+    deck = load_premade_deck("giants")
     good, bad = deck[0], deck[1]
     records = [
-        GameRecord("ramp", "egg_control", 0, "A", "A", "hq_capture", 10,
+        GameRecord("giants", "egg_control", 0, "A", "A", "hq_capture", 10,
                   cards_drawn_a=frozenset({good})),
-        GameRecord("ramp", "egg_control", 1, "A", "B", "food", 20,
+        GameRecord("giants", "egg_control", 1, "A", "B", "food", 20,
                   cards_drawn_a=frozenset({bad})),
     ]
     rows = metrics.per_card_stats(records)

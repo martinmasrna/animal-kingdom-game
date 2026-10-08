@@ -95,9 +95,9 @@ def main(argv: Sequence[str] | None = None) -> None:
                    help="bot kind for both seats (default: referee, the oracle)")
     p.add_argument("--games", type=int, default=50,
                    help="games/matchup PER MOVER (total per matchup = 2x this)")
-    p.add_argument("--exclude", default="egg_control,colony_food_swarm",
-                   help="comma-separated premade slugs to drop from the field (bots under-pilot "
-                        "these two by default); pass '' to keep the full 7-deck field")
+    p.add_argument("--exclude", default="",
+                   help="comma-separated premade slugs to drop from the field "
+                        "(default: none, the full field)")
     p.add_argument("--field", default="",
                    help="explicit comma-separated field (overrides --exclude entirely)")
     # Re-rolled 2026-07-15 for the fresh both-seats run (was 902000). Pass the old value

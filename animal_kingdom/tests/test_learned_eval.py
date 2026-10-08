@@ -124,7 +124,7 @@ def test_hand_mimic_chooses_identically_over_a_seeded_game():
     # A full seeded game, decision by decision: the learned (hand-mimic) GreedyBot must pick
     # the exact same action as the hand-eval GreedyBot at every single choice point.
     ev = LinearEval.hand_mimic()
-    state = new_game(load_premade_deck("ramp"), load_premade_deck("aggro_hq_rush"), seed=7)
+    state = new_game(load_premade_deck("giants"), load_premade_deck("den_rush"), seed=7)
     hand_bot = GreedyBot(seed=0)
     learned_bot = GreedyBot(seed=0, evaluator=ev)
 
@@ -149,7 +149,7 @@ def test_hand_mimic_matches_turn_bot_planning_eval():
     from animal_kingdom.bots.turn_bot import TurnBot
 
     ev = LinearEval.hand_mimic()
-    state = new_game(load_premade_deck("cats_midrange"), load_premade_deck("egg_control"), seed=11)
+    state = new_game(load_premade_deck("cats"), load_premade_deck("egg_control"), seed=11)
     hand_bot = TurnBot(seed=0, determinizations=1, beam_width=4, max_search_nodes=40)
     learned_bot = TurnBot(seed=0, determinizations=1, beam_width=4, max_search_nodes=40,
                          evaluator=ev)

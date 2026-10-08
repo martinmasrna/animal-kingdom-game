@@ -68,7 +68,7 @@ async function playOut(page, maxSteps = 500) {
   assert.fail('the match did not end');
 }
 
-for (const [deck, bot] of [['cats_midrange', 'canine_buff_tempo'], ['egg_control', 'colony_food_swarm'], ['aggro_hq_rush', 'ramp']]) {
+for (const [deck, bot] of [['cats', 'canines'], ['egg_control', 'colony'], ['den_rush', 'giants']]) {
   test(`a match by clicks: ${deck} against ${bot}`, { timeout: 600000 }, async () => {
     const page = await startMatch(deck, bot);
     await playOut(page);

@@ -15,8 +15,7 @@ import { initChat, badge as chatBadge, wireChatButton, ICON_FRIENDS, hasFriends 
 import { bindCoach, isLesson, lessonOf, lessonNow, narrowChoice, narrowPlaces, handLights, holdFood, shownRegion, lessonEnd, drawCoach } from './coach.js';
 
 const app = document.getElementById('app'), pop = document.getElementById('pop'), stackpop = document.getElementById('stackpop');
-const COVER = { cats_midrange: 'king_theron', canine_buff_tempo: 'lobo', aggro_hq_rush: 'verminus', colony_food_swarm: 'queen_honoria',
-  egg_control: 'eon', food_otk: 'rat_king', ramp: 'borealis', goodstuff: 'gale' };
+let COVER = {};   // starter deck id -> the card covering it (the server's pool says, from cards.json)
 const RANK = { legendary: 0, rare: 1, common: 2 };
 const SKIP = '__skip__';
 const artStyle = id => hasArt(id) ? `style="background-image:url(${artUrl(id)})"` : '';
@@ -106,7 +105,7 @@ const saveDecks = ds => { ME.decks = ds; api('/api/me/decks', { method: 'PUT', b
 const deckSize = cards => Object.values(cards).reduce((a, n) => a + n, 0);
 // The decks you can play: your complete decks (a profile starts with the starters as its own); with none, the starters.
 const playable = () => { const mine = myDecks().filter(d => deckSize(d.cards) === 30).map(d => ({ id: 'my:' + d.id, name: d.name, mine: true, cover: d.cover, list: Object.entries(d.cards).flatMap(([id, n]) => Array(n).fill(id)) }));
-  return mine.length ? mine : DECKS.filter(d => d.id !== 'goodstuff'); };
+  return mine.length ? mine : DECKS; };
 const chosenDeck = () => { const all = playable(), id = store('ak:deck'); return all.find(d => d.id === id) || all[0]; };
 const deckSpec = d => d.mine ? { name: d.name, list: d.list } : d.id;
 
@@ -124,6 +123,7 @@ function checkBuild(b) {
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
   CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BUILD = p.build;
+  COVER = Object.fromEntries(DECKS.map(d => [d.id, d.cover]));
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
   // Feedback while the game is in testing: a tab on the screen's edge where the edge is free (home, News, Settings: app.css shows
@@ -235,10 +235,10 @@ function homeScreen(mode = {}) {
   if (!newsAsked) { newsAsked = true; loadNews(api).then(() => { if (screen === 'home') homeScreen(homeMode); }); }   // the dot and "Since you last played" once it's known
   if (mode.gauntlet) play.opp = 'gauntlet'; else if (play.opp === 'gauntlet' || mode.join) play.opp = mode.join ? 'friend' : 'bot';
   const all = playable(), chosen = chosenDeck(), peek = all.find(d => d.id === play.peek) || chosen;
-  if (play.botDeck === 'goodstuff') play.botDeck = 'random';
+  if (play.botDeck && play.botDeck !== 'random' && !DECKS.some(d => d.id === play.botDeck)) play.botDeck = 'random';   // a deck that's gone
   keepPlay();   // home draws on every change of the choice: what it draws is what's kept
   const bd = DECKS.find(d => d.id === play.botDeck), redraw = () => homeScreen(mode);
-  const botDecks = [['random', 'Random'], ...DECKS.filter(d => d.id !== 'goodstuff').map(d => [d.id, d.name])];   // the seven starters only
+  const botDecks = [['random', 'Random'], ...DECKS.map(d => [d.id, d.name])];   // the starters
   // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
   const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
   const fr = play.opp === 'friend' && (play.friends || []).find(f => f.id === play.friend);
@@ -312,7 +312,7 @@ function homeScreen(mode = {}) {
     if (play.opp === 'friend' && fr && fr.online) return startSearch('challenge', 'go', '/api/challenge', { friend: fr.id, deck: deckSpec(chosen) }, friendLabel(fr, play.friends));
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
-      const pool = DECKS.filter(d => d.id !== 'goodstuff'), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
+      const pool = DECKS, deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
       body.bot = { level: play.level, deck };
     }
     if (play.opp === 'gauntlet') body.gauntlet = { level: play.level, reverse: play.side === 'theirs' };
@@ -419,11 +419,12 @@ async function startTutorial(lesson = 1) {
   if (!r.ok) return toast(await r.text());
   const m = await r.json(); setToken(m.id, m.token); play.open = null; location.hash = '#/m/' + m.id;
 }
-// After the tutorial, straight into a real match: Cats against an Easy bot playing Aggro (the deck chosen for later games too).
+// After the tutorial, straight into a real match: Cats against an Easy bot playing Den Rush (the deck chosen for later games too).
 async function firstMatch() {
-  const cats = playable().find(d => d.name === 'Cats');   // the player's own Cats deck (a copy of the starter), else the starter
+  const name = (DECKS.find(d => d.id === 'cats') || {}).name;
+  const cats = playable().find(d => d.name === name);   // the player's own Cats deck (a copy of the starter), else the starter
   if (cats) store('ak:deck', cats.id);
-  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: cats ? deckSpec(cats) : 'cats_midrange', name: 'You', bot: { level: 'easy', deck: 'aggro_hq_rush' } }) });
+  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: cats ? deckSpec(cats) : 'cats', name: 'You', bot: { level: 'easy', deck: 'den_rush' } }) });
   if (!r.ok) return toast(await r.text());
   const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
 }
@@ -446,7 +447,7 @@ const tapWords = t => matchMedia('(hover: none)').matches ? t.replace(/\bClick\b
 function collectionScreen(open) {
   screen = 'collection';
   if (open) history.replaceState(null, '', '#/collection');
-  renderCollection(app, { open, cards: CARDS, starters: DECKS.filter(d => d.id !== 'goodstuff'), covers: COVER, getDecks: myDecks, saveDecks, toast, feedback,
+  renderCollection(app, { open, cards: CARDS, starters: DECKS, covers: COVER, getDecks: myDecks, saveDecks, toast, feedback,
     play: d => { store('ak:deck', 'my:' + d.id); location.hash = '#/'; }, back: () => { location.hash = '#/'; } });
 }
 

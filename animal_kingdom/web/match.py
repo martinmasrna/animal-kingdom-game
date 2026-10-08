@@ -19,7 +19,7 @@ from typing import Optional
 from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
-from ..engine.cards import load_cards
+from ..engine.cards import STARTER_DECKS, load_cards
 from ..engine.effects import roar_condition
 from ..engine.maps import load_map
 from ..engine.state import EngineError, GameState, Result, new_game, other_player
@@ -45,9 +45,9 @@ EVENTS_KEPT = 200            # a view carries the game's last events: enough for
 TIMEOUTS_TO_LOSE = 3         # turns in a row a player's clock ran out: they have left, and lose (Martin, 2026-10-01)
 
 # Menu labels for the premade decks (the design mockups' names).
-DECK_NAMES = {"cats_midrange": "Cats", "canine_buff_tempo": "Canines", "aggro_hq_rush": "Aggro",
-              "colony_food_swarm": "Colony", "egg_control": "Egg", "food_otk": "Food", "ramp": "Ramp",
-              "goodstuff": "Goodstuff", **tutorial.NAMES}
+DECK_NAMES = {**{d["slug"]: d["name"] for d in STARTER_DECKS}, **tutorial.NAMES}
+# The card whose art covers each starter deck (cards.json, from the card workbench).
+STARTER_COVERS = {d["slug"]: d.get("cover", "") for d in STARTER_DECKS}
 
 # Easy / Normal / Expert, as in the play screen: the same bot kinds, with the same settings, the
 # simulations measure (a bare RefereeBot() is an untested configuration).

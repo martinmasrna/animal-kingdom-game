@@ -19,10 +19,8 @@
 <h1>Legendaries</h1>
 <div id="decks"></div>
 <script>
-const DECKS = [["cats_midrange", "Cats"], ["canine_buff_tempo", "Canines"], ["aggro_hq_rush", "Aggro"], ["colony_food_swarm", "Colony"],
-               ["egg_control", "Egg"], ["food_otk", "Food"], ["ramp", "Ramp"]];
-fetch("/api/pool").then(r => r.json()).then(({ cards }) => {
-  document.getElementById("decks").innerHTML = DECKS.map(([slug, name]) => {
+fetch("/api/pool").then(r => r.json()).then(({ cards, decks }) => {
+  document.getElementById("decks").innerHTML = decks.map(({ id: slug, name }) => {
     const legs = cards.filter(c => c.deck === slug && c.rarity === "legendary");
     return `<section class="deck"><h2>${name}</h2>${legs.map(c => `<div class="card">
       <img src="/static/art/${c.id}.jpg" alt="${c.name}" loading="lazy">

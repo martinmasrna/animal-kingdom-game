@@ -8,7 +8,7 @@ position from the mover's side (what RefereeBot scores after the sampled reply).
 uniformly random legal move with probability `epsilon`, recorded like any other.
 
     python -m animal_kingdom.learn.selfplay OUT.npz [--eval PATH] [--games-per-pair 110] \\
-        [--seed 0] [--jobs 8] [--decks aggro_hq_rush,goodstuff]
+        [--seed 0] [--jobs 8] [--decks den_rush,goodstuff]
 """
 
 from __future__ import annotations

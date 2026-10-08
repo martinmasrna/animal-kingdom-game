@@ -1,8 +1,6 @@
 # Colony Food Swarm
 
-Mono-Colony insect swarm that converts a wide board into food. Heavy Flight. Queen and Worker are role tags inside the Colony family, so effects can ask for "a Worker" or "a non-Queen Colony unit". Several payoffs are gated on controlling 4 or more Colony units: the family-count threshold is the deck's defence against goodstuff, which can't reach it (see [`../../design/goodstuff.md`](../../design/goodstuff.md)).
-
-Watch Falstaff's "whenever you gain food, gain 3 more" stacking with the food-on-play queens: it is the likeliest runaway loop in the deck.
+Its cards carried over from the old pool; their reasoning is in the git history of this file. The cards themselves come from the card workbench (`tools/card-workbench/`, converted by `convert.py`); the table below is generated from cards.json.
 
 ## Cards
 

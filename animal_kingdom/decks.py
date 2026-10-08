@@ -1,13 +1,12 @@
 """Deck construction helpers.
 
-The reworked pool ships as **7 premade 4-4-6 decks** (`PREMADE_DECKS` /
-`load_premade_deck`), each a fixed 30-card list expanded from its 14 designs by the
+The pool ships as **12 starter 4-4-6 decks** (`PREMADE_DECKS` / `load_premade_deck`, from the
+card workbench via cards.json), each a fixed 30-card list expanded from its 14 designs by the
 per-rarity copy limits (4 legendary ×1 + 4 rare ×2 + 6 common ×3 = 30). These are the
 real decks games are played with.
 
 `make_vanilla_deck` survives as a fuzz/CLI helper: it builds a legal-ish deck from
-integer-strength cards only (the two dynamic cards, Goliath and Chameleon, are excluded
-until their strength rules land), respecting the copy limits.
+integer-strength cards only (the dynamic ones are excluded), respecting the copy limits.
 """
 
 from __future__ import annotations
@@ -54,12 +53,12 @@ BASELINE_DECK: list[str] = [
     "greywhisker", "mock_removal", "mock_vanilla_10", "mock_flyer_7",
 ]
 
-# The goodstuff pile: the greedy optimizer's best cross-deck list over the current pool
-# (2026-09-29; RefereeBot has it at 73.7% against the seven premades). The web client offers it
-# as a deck, so it can be played and played against.
+# The goodstuff pile: the greedy optimizer's best cross-deck list over the old seven-deck pool
+# (2026-09-29), its cards as they are now (King Cobra for the retired Taipan). Stale since the
+# launch decks: kept loadable as the sim tools' default pile until the optimizer runs again.
 GOODSTUFF_DECK: list[str] = (
     ["alpha", "bulwark", "gale", "pestis"]
-    + ["chinchilla", "polar_bear", "rhinoceros", "taipan"] * 2
+    + ["chinchilla", "polar_bear", "rhinoceros", "king_cobra"] * 2
     + ["dire_wolf", "elephant", "lemming", "lion", "mouse", "tiger"] * 3
 )
 

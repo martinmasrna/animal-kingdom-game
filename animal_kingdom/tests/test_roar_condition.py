@@ -17,15 +17,15 @@ def test_fed_cards_light_up_once_ten_food_came_in_this_turn():
     s = make_state()
     assert roar_condition(s, "A", "groundhog") is False
     s.turn_flags["food_gained_A"] = 10
-    assert all(roar_condition(s, "A", c) for c in ("groundhog", "hamster", "muskrat"))
+    assert all(roar_condition(s, "A", c) for c in ("groundhog", "gopher", "muskrat"))
 
 
 def test_another_cat_means_a_cat_other_than_the_one_being_played():
     s = make_state()
-    assert roar_condition(s, "A", "lynx") is False
-    lynx = put(s, "1,2", "lynx", "A")
-    assert roar_condition(s, "A", "lynx", lynx) is False   # placed alone: itself doesn't count
-    assert roar_condition(s, "A", "lynx") is True          # a second Lynx in hand now has one
+    assert roar_condition(s, "A", "bobcat") is False
+    bobcat = put(s, "1,2", "bobcat", "A")
+    assert roar_condition(s, "A", "bobcat", bobcat) is False   # placed alone: itself doesn't count
+    assert roar_condition(s, "A", "bobcat") is True          # a second Bobcat in hand now has one
 
 
 def test_colony_threshold_counts_the_card_itself():
@@ -46,10 +46,10 @@ def test_nurse_bee_pairs_with_itself_from_hand():
 
 
 def test_the_hand_prediction_matches_what_the_roar_does():
-    s = make_state(hands={"A": ["lynx", "lynx"]}, decks={"A": ["lion"] * 5, "B": []})
+    s = make_state(hands={"A": ["bobcat", "bobcat"]}, decks={"A": ["lion"] * 5, "B": []})
     put(s, "1,1", "lion", "A")                                  # a Cat already on the board
-    assert roar_condition(s, "A", "lynx") is True
-    place = next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "lynx"
+    assert roar_condition(s, "A", "bobcat") is True
+    place = next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "bobcat"
                  and a.target[1] not in s.board)                # beside the Lion, not on top of it
     before = len(s.hands["A"])
     rules.apply_action(s, place)

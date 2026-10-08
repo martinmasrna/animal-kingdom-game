@@ -28,7 +28,7 @@ from animal_kingdom.tui.app import (
 def _human_first_seed() -> int:
     for seed in range(100):
         state = new_game(
-            load_premade_deck("ramp"),
+            load_premade_deck("giants"),
             load_premade_deck("egg_control"),
             seed,
             map_id="map_b",
@@ -41,7 +41,7 @@ def _human_first_seed() -> int:
 def _manifest():
     return generate_manifest(
         cohort_id="ui-test",
-        human_decks=("ramp",),
+        human_decks=("giants",),
         opponent_decks=("egg_control",),
         opponent_kinds=("random",),
         repetitions=1,
@@ -482,7 +482,7 @@ def test_help_overlay_keeps_recorder_controls_out_of_footer(tmp_path):
 def test_tui_runs_bot_first_without_blocking_input_loop(tmp_path):
     manifest = generate_manifest(
         cohort_id="bot-first",
-        human_decks=("ramp",),
+        human_decks=("giants",),
         opponent_decks=("egg_control",),
         opponent_kinds=("random",),
         repetitions=1,

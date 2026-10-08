@@ -9,7 +9,7 @@ from animal_kingdom.web.match import Match, Seat, public_event
 
 
 def _fresh():
-    s = new_game(load_premade_deck("cats_midrange"), load_premade_deck("ramp"), 5, config=Config(mulligan=False))
+    s = new_game(load_premade_deck("cats"), load_premade_deck("giants"), 5, config=Config(mulligan=False))
     s.events = []
     return s
 
@@ -32,8 +32,8 @@ def test_an_apex_covering_an_enemy_places_covers_then_eats_naming_itself():
 
 
 def test_the_opponent_sees_how_many_cards_were_drawn_not_which():
-    m = Match("EV", Seat("ta", "A", deck="cats_midrange"))
-    m.join(Seat("tb", "B", deck="ramp"))
+    m = Match("EV", Seat("ta", "A", deck="cats"))
+    m.join(Seat("tb", "B", deck="giants"))
     m._start_game()
     while m.state.pending:
         m.act(m.to_act(), ChoiceAction(SKIP))

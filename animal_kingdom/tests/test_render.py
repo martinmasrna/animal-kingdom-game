@@ -41,7 +41,7 @@ def _assert_valid_markup(markup: str) -> str:
 
 @pytest.mark.parametrize("map_id", ["map_a", "map_b"])
 def test_render_runs_and_emits_valid_markup(map_id: str) -> None:
-    state = new_game(load_premade_deck("cats_midrange"), load_premade_deck("aggro_hq_rush"),
+    state = new_game(load_premade_deck("cats"), load_premade_deck("den_rush"),
                      seed=7, map_id=map_id)
     _advance(state, plies=30, seed=7)
 
@@ -56,7 +56,7 @@ def test_render_runs_and_emits_valid_markup(map_id: str) -> None:
 
 def test_render_highlights_and_result() -> None:
     """Selection highlights and a terminal result banner both stay well-formed."""
-    state = new_game(load_premade_deck("ramp"), load_premade_deck("egg_control"), seed=3)
+    state = new_game(load_premade_deck("giants"), load_premade_deck("egg_control"), seed=3)
     _advance(state, plies=4, seed=3)
 
     legal = rules.legal_actions(state)
@@ -77,7 +77,7 @@ def test_render_highlights_and_result() -> None:
 
 def test_diagonal_projection_orients_each_player_bottom_left() -> None:
     state = new_game(
-        load_premade_deck("ramp"),
+        load_premade_deck("giants"),
         load_premade_deck("egg_control"),
         seed=7,
         map_id="map_b",
@@ -103,7 +103,7 @@ def test_diagonal_projection_orients_each_player_bottom_left() -> None:
 
 def test_vertical_projection_orients_each_player_bottom_to_top() -> None:
     state = new_game(
-        load_premade_deck("ramp"),
+        load_premade_deck("giants"),
         load_premade_deck("egg_control"),
         seed=7,
         map_id="map_b",
@@ -131,8 +131,8 @@ def test_vertical_projection_orients_each_player_bottom_to_top() -> None:
 
 def test_diagonal_crossroad_shows_card_name_and_strength_without_seat_label() -> None:
     state = new_game(
-        load_premade_deck("aggro_hq_rush"),
-        load_premade_deck("ramp"),
+        load_premade_deck("den_rush"),
+        load_premade_deck("giants"),
         seed=7,
         map_id="map_b",
     )
@@ -158,8 +158,8 @@ def test_diagonal_crossroad_shows_card_name_and_strength_without_seat_label() ->
 
 def test_vertical_projection_compacts_to_fit_short_board_panes() -> None:
     state = new_game(
-        load_premade_deck("aggro_hq_rush"),
-        load_premade_deck("ramp"),
+        load_premade_deck("den_rush"),
+        load_premade_deck("giants"),
         seed=7,
         map_id="map_b",
     )
@@ -184,8 +184,8 @@ def test_vertical_projection_compacts_to_fit_short_board_panes() -> None:
 
 def test_standard_board_hides_coordinates_and_prioritizes_unit_identity() -> None:
     state = new_game(
-        load_premade_deck("aggro_hq_rush"),
-        load_premade_deck("ramp"),
+        load_premade_deck("den_rush"),
+        load_premade_deck("giants"),
         seed=7,
         map_id="map_a",
     )
@@ -205,8 +205,8 @@ def test_standard_board_hides_coordinates_and_prioritizes_unit_identity() -> Non
 
 def test_region_food_chip_uses_color_not_owner_letter_for_control() -> None:
     state = new_game(
-        load_premade_deck("aggro_hq_rush"),
-        load_premade_deck("ramp"),
+        load_premade_deck("den_rush"),
+        load_premade_deck("giants"),
         seed=7,
         map_id="map_b",
     )
