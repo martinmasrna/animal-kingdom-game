@@ -54,6 +54,7 @@ The defensive cards, one answer for each way to reach the squirrel (removal, a g
 | Poison Dart Frog (locked) | Jungle | C | 1 | Reach 2. Poison. | a removal ability |
 | Jellyfish (locked) | Open Ocean | R | 3 | Poison. | a removal ability |
 | Golden Orb-Weaver (locked; Arachnid) | Jungle | R | 3 | When an enemy with Flight is placed next to this, remove it. | cover it (a flyer needs 4+); ground animals ignore the web |
+| the abomination (animal open; legendary Honey Badger proposed) | | L | 5 | **Armor. Stealth. Spikes. Poison.** (Martin's: every keyword on one animal. Spikes takes the first coverer at once, which cancels that cover's Poison; every later coverer is poisoned. One crossroad the opponent never truly takes, not a wall: the region breaks through any other corner.) |
 | Capybara | Jungle | R | 5 | Your animals next to this have Armor. | cover its neighbours, cover it (6+), or remove it |
 
 Open: a Capybara beside a Porcupine is the strongest wall these build (unremovable, kills its first coverer, broken by a second cover of 8+).
@@ -72,13 +73,14 @@ Open from the first read: food before the payoff (only the Hedgehog's 5 so far; 
 | Porcupine | Forest | R | 7 | **Spikes.** |
 | Golden Orb-Weaver (Arachnid) | Jungle | R | 4 | When an enemy with **Flight** is placed next to this, remove it. |
 | Armadillo | Jungle | R | 7 | **Armor.** Your adjacent animals have **Stealth**. |
+| a fortress animal (animal open) | | C | ~3 | Roar: gain 5 food for each of your animals with **Armor**, **Spikes** or **Poison**. (Martin's: a one-time Roar, so nothing to protect; builds the early stake.) |
 | Black Bear | Forest | C | 5 | Roar: in 2 turns, draw 2 cards. (From Handlock: slow draw fits the hoard better, Martin.) |
 | Owl | Forest | C | 2 | **Flight.** Roar: **Scout** a card. (From Egg Control, Martin: the dig that finds the squirrel or Fathom.) |
 | Hedgehog | Meadow | C | 5 | **Spikes.** Roar: gain 5 food. |
 | Poison Dart Frog | Jungle | C | 1 | **Reach 2. Poison.** |
 | Jellyfish | Open Ocean | C | 4 | **Poison.** |
 
-Banked for it: Acorns shuffled into your deck (each, when drawn, gives 10 food and replaces itself: food at no card cost, not card draw). Squirrel is taken by Food Aggro's common, so the card needs another animal that caches food.
+Every 10 food on the board by turn 4 is about 30 at the finish, and food arriving on turn 7 counts for nothing: the stake has to be early. Rejected: the Acorns (late, random food; banked for a deck that draws all game, Egg Control first; Jay as the animal, since Squirrel is taken).
 
 ## Food Aggro, draft
 
@@ -206,5 +208,6 @@ Its fourth legendary: Omen (a raven; Forest, L, ~3, Bird): "Flight. Roar: put an
 - Leech (Jungle, 1): "Roar: swap strength with an adjacent animal." It drains its host: the host shrinks, the leech swells. At 1 it can't cover anything, so it lands only on an empty crossroad or one of your own.
 - Opossum (City, R, 2, Marsupial): "Roar: return one of your animals next to this to your hand." A mother gathering her young onto her back; it replays an animal's Roar (Skully, Chipmunk, a removal), a value card for other decks, and the City's seed for the Marsupials' "carrying the young" identity when Australia comes.
 - Clownfish (Coral Reef, later): its "play another Fish" went to the Remora; Coral Reef gives it its own trait (safe in a stinging anemone). Electric Eel (Jungle) is the stun.
+- Platypus (Australia, later): its family tag is "All", counting as every family (Martin, 2026-10-08).
 - Hermit Crab (Coast, later): Armor plus something about moving into another's shell.
 - Macaw (Jungle, Bird; rarity and strength with its deck): "Roar: your next Roar this turn happens twice." (This turn only: cleaner, Martin.) The parrot repeats what it hears. A card for a deck with few, high-impact Roars; Handlock is the first candidate (a doubled Gorilla sweep, an Orangutan training the hand twice). In Food Aggro it was mostly a second Squirrel.
