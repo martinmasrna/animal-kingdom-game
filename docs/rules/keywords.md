@@ -16,6 +16,9 @@ Can be placed on a crossroad up to N crossroads away from one of your connected 
 
 For animals that leap or pounce: Caracal (Reach 2); frogs and grasshoppers to come.
 
+### Roam (proposed, 2026-10-08)
+As an action, move this to an adjacent crossroad, following the normal placement rules: onto an empty crossroad, onto one of your own animals, onto an enemy it beats (covering it), or onto the enemy den (capturing it). Only an animal connected to your den can roam, and each animal roams at most once per turn. Moving isn't placing, so its Roar doesn't happen again; arriving next to a trap (Hippopotamus, the Spiders, Meerkat) sets it off as a placement would, and covering by roaming sets off Spikes and Poison. Leaving a crossroad uncovers whatever was beneath. An Apex Predator is one whenever it lands: it roams only onto an animal, and eats it.
+
 ### Armor
 A shell, plates or spines: cannot be removed, returned to hand, or eaten by **any** ability — the enemy's **or its own controller's**. It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an enemy with Armor; when it removes a stack, a buried unit with Armor is skipped **in place** and everything else is still removed. Armor is not a shield for the cards beneath it. Scope is **board-only**: a card with Armor in hand can be paid or removed normally.
 

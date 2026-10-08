@@ -91,14 +91,23 @@ Expected weak points, untested: few cards that kill your own (Spiders die to any
 
 ## Canines
 
-The pack growing stronger on the board, over time (Primates buff in hand, Canines on the board). Width only feeds that growth: the Canines' young grow up. Pup (token, 0): "Dusk: this gains +1 strength."; Scarlett's Poppy and Rusty grow the same way. The dials are numbers: the tokens start at 0, the African Wild Dog is a 2, Scarlett a 3 (or one kit instead of two). Count-based effects (stronger the more of them) belong to the Fish, by adjacency. Settled so far:
+The pack that roams the board, buffs itself on the board (Primates buff in hand) and hunts by position. High skill: each turn is a puzzle of moves and placements across two actions. Built on Roam ([`../rules/keywords.md`](../rules/keywords.md)), a game-wide keyword that Canines carry most. Count-based effects (stronger the more of them) belong to the Fish: Hammerhead, "Has +1 strength for each other Fish you control."; a count-based removal waits for the Tuna. Scarlett stays in the pool, outside this precon.
 
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
-| Wolf | Forest | C | 3 | Has +1 strength for each other Canine you control. (The wolf pack; the game needs only one vanilla 7, the Lion.) |
-| Jackal | Savanna | R | 4 | Roar: remove an adjacent enemy with strength up to the number of your Canines. (Jackals hunt as families.) |
+| legendary (name to come) | | L | 6 | Your animals next to this have Roam. |
+| Dhole | Jungle | R | 6 | Roam. Your animals can roam onto enemies of equal strength. (Dhole packs take prey bigger than themselves.) |
+| Jackal | Savanna | R | 4 | Roar: remove an adjacent enemy that has another of your Canines next to it. |
+| Bush Dog | Jungle | R | | open; proposal, the whistle: "Roar: each of your Canines next to this roams." |
+| Orca (proposal) | Open Ocean | R | 6 | Apex Predator. Roam. (The wolf of the sea; it eats with every roam, so its strength is the dial.) |
+| Wolf | Forest | C | 6 | Roam. (The plain hunter, one below the Lion.) |
+| African Wild Dog | Savanna | C | 4 | Roam. Whenever this covers an enemy, draw a card. (The most successful hunter: buff it, then let it hunt.) |
+| Raccoon Dog | Forest | C | 3 | Whenever one of your Canines roams, give it +1 strength. |
+| Fox | Forest | C | 3 | Dusk: give your adjacent animals +1 strength. |
+| Badger (proposal) | Forest | C | 5 | Roar: draw a card with Roam. (It digs the prey out for the runners, as badgers do for coyotes.) |
+| Stray Dog | City | C | 1 | Roar: give one of your animals with Roam +2 strength. It roams. |
 
-Open: Lobo's new effect (no tutor with a free placement: Lobo fetching the Stray Dog, whose Roar plays another Canine, makes three placements from one action); the Bush Dog and the Dingo's growth effect; the Coyote's effect (rebuilding a cut chain among Canines) without the Coyote, which waits for Desert.
+Open: three legendaries (proposal for one: "Once each turn, one of your animals can roam without using an action."); the Bush Dog's effect.
 
 ## Egg Control
 
