@@ -50,6 +50,11 @@ export const KEYWORDS = {
   'Stealth': 'Enemy abilities can\'t choose it. Effects that hit many animals, or a random one, still do.',
   'Apex Predator': 'Must be placed on top of another animal, yours or an enemy\'s, and eats it. Can\'t be placed on a den.',
   'Spikes': 'The first time an enemy covers it, that enemy is removed.',
+  'Poison': 'Whenever an enemy covers it, that enemy is removed at the start of your next turn.',
+  'Roam': 'As an action, move it to a crossroad next to it: empty, onto your own animal, onto an enemy it beats, or onto the enemy den. Once per turn, only while connected to your den.',
+  'Reach': 'Can be placed up to that many crossroads away from one of your connected animals, jumping over what stands between. It can\'t take a den that way.',
+  'Dawn': 'Happens at the start of your turn.',
+  'Dusk': 'Happens at the end of your turn.',
   'Scout': 'Look at three different cards of your deck, draw one and shuffle the others back.',
 };
 const KW = new RegExp(`\\b(${Object.keys(KEYWORDS).join('|')})\\b( \\d+)?[:.]?`, 'g');

@@ -85,7 +85,7 @@ function unit(u, under, cards) {
 // fx, fromStones } when this view follows one (so what changed animates; static/timeline.js plays one step per view), else null, capture: { side, id, owner, str } when a
 // unit took a den, which ends the game (it stands in that den's mouth) }.
 export function renderBoard(el, M, g, cards, ui) {
-  const A = ui.anim, rings = new Set(ui.rings || []);
+  const A = ui.anim, rings = new Set(ui.rings || []), roamable = new Set(ui.roamable || []);   // your animals that can roam now
   // the tutorial shows a region: its four crossroads and its stone glow (not rings: rings mean a click acts there)
   const shown = new Set(ui.region || []), shownAt = ui.region && ui.region[0].split(',').map(Number);
   const { landed, covered, leaving } = boardChanges(A && A.board, g.board, (A && A.fx) || []);
@@ -102,7 +102,7 @@ export function renderBoard(el, M, g, cards, ui) {
 
   for (let c = 1; c <= M.cols; c++) for (let r = 1; r <= M.rows; r++) {
     const cr = key(c, r), st = g.board[cr] || [], [x, y] = at(c, r);
-    const cls = (rings.has(cr) ? ' tgt' : '') + (shown.has(cr) ? ' shown' : '') + (landed.has(cr) ? ' land' : '') + (covered.has(cr) ? ' cover' : '');
+    const cls = (rings.has(cr) ? ' tgt' : '') + (roamable.has(cr) ? (ui.roamFrom === cr ? ' roamsel' : ' roamable') : '') + (shown.has(cr) ? ' shown' : '') + (landed.has(cr) ? ' land' : '') + (covered.has(cr) ? ' cover' : '');
     const pv = ui.preview && ui.preview.cr === cr ? ui.preview : null;
     if (pv) { s += put(`cr unit A ghost${cls}`, x, y, unit({ id: pv.id, owner: 'A', str: pv.str }, st.slice().reverse(), cards), `data-cr="${cr}"`); continue; }
     if (!st.length) { s += put(`cr clear${cls}`, x, y, '', `data-cr="${cr}"`); continue; }

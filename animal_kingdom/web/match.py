@@ -18,7 +18,7 @@ from typing import Optional
 
 from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine import rules, statics
-from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, action_from_dict
+from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
 from ..engine.cards import load_cards
 from ..engine.effects import roar_condition
 from ..engine.maps import load_map
@@ -87,7 +87,7 @@ class Move:
     """One top-level action and everything that resolved under it (choices included)."""
     round: int
     seat: str
-    kind: str                        # "draw" | "place"
+    kind: str                        # "draw" | "place" | "roam" (card: the animal that roamed)
     card: Optional[str] = None
     target: Optional[list] = None
     fx: list = field(default_factory=list)
@@ -339,16 +339,17 @@ class Match:
         # draws and sub-choices fold into the entry they belong to.
         starts_move = (state.pending is None and not isinstance(action, PassAction)) or isinstance(action, PlaceAction)
         pre = _snapshot(state) if starts_move else None
+        roamer = state.top_unit(action.origin).card_id if isinstance(action, RoamAction) and state.top_unit(action.origin) else None
         rules.apply_action(state, action)    # validates; raises EngineError if illegal
         new = self._take_events()
         self.actions.append(action.to_dict())
         self.action_times.append(round(time.time() - self.started_at, 1))
         if starts_move:
-            placed = isinstance(action, PlaceAction)
+            placed, roamed = isinstance(action, PlaceAction), isinstance(action, RoamAction)
             self.history.append(Move(
-                round=pre["turn"] // 2 + 1, seat=s, kind="place" if placed else "draw", pre=pre,
-                card=action.card_id if placed else None,
-                target=list(action.target) if placed else None))
+                round=pre["turn"] // 2 + 1, seat=s, kind="place" if placed else "roam" if roamed else "draw", pre=pre,
+                card=action.card_id if placed else roamer,
+                target=list(action.target) if placed or roamed else None))
         if self.history:
             self.history[-1].events += new
             self.history[-1].fx = _effects(self.history[-1].events, self.history[-1])
@@ -606,7 +607,7 @@ class Match:
         elif st.result is None and rules.early_mulligan(st, s) is not None:   # your mulligan, while theirs goes on too
             g["toAct"] = s
             i = rules.early_mulligan(st, s)
-            g["legal"] = {"draw": False, "place": {}}
+            g["legal"] = {"draw": False, "place": {}, "roam": {}}
             g["pending"] = {"mode": "choice", "optional": True, "source": None, "kind": "mulligan",
                             "returned": len(st.effect_stack[i]["returned"]), "cap": st.config.mulligan_cap(s, st.first_player),
                             "options": [self._describe_option(u.iid) for u in st.hands[s]]}
@@ -628,10 +629,13 @@ class Match:
         st = self.state
         legal = rules.legal_actions(st)
         places: dict[str, list] = {}
+        roams: dict[str, list] = {}       # crossroad of a roaming animal -> where it may go (Roam)
         for a in legal:
             if isinstance(a, PlaceAction):
                 places.setdefault(a.card_id, []).append(list(a.target))
-        out = {"draw": any(isinstance(a, DrawAction) for a in legal), "place": places}
+            elif isinstance(a, RoamAction):
+                roams.setdefault(a.origin, []).append(list(a.target))
+        out = {"draw": any(isinstance(a, DrawAction) for a in legal), "place": places, "roam": roams}
         if st.pending is None:
             return out, None
         p = st.pending

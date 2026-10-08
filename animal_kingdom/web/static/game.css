@@ -63,6 +63,10 @@
 /* where you can act: one light neutral, shared by the lit deck, target rings, the selected card and the prompt */
 .game .tgt { cursor: pointer; }
 .game .cr.tgt::after { content: ''; position: absolute; inset: -9px; border-radius: 50%; border: 4px solid var(--act); pointer-events: none; }
+/* Roam: an animal that can move wears a dashed ring; the one picked to move, a solid one (its destinations ring as targets) */
+.game .cr.roamable, .game .cr.roamsel { cursor: pointer; }
+.game .cr.roamable::after, .game .cr.roamsel::after { content: ''; position: absolute; inset: -9px; border-radius: 50%; border: 3px dashed var(--act); pointer-events: none; }
+.game .cr.roamsel::after { border: 4px solid var(--ready); }
 
 /* dens: each player's headquarters and food store */
 .game .den { top: 74px; width: 120px; height: 502px; border-radius: 10px; border: 4px solid; background: #242220; }

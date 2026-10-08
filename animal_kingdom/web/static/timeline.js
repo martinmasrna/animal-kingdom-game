@@ -90,6 +90,13 @@ export function plan(prev, next, cards = {}) {
         push({ kind: 'land', dur: DUR.land, cr: e.cr, card: e.card, player: e.player });
         break;
       }
+      case 'roam': {   // an animal moves along a path: it lands where it went (a den taken by roaming is the capture step)
+        if (!e.to) break;
+        const u = take(e.cr, e.iid) || finalUnit(e.iid) || { iid: e.iid, id: e.card, owner: e.player, str: (cards[e.card] || {}).str };
+        (s.board[e.to] = s.board[e.to] || []).push(u);
+        push({ kind: 'land', dur: DUR.land, cr: e.to, card: e.card, player: e.player, from: e.cr });
+        break;
+      }
       case 'remove': case 'bounce': case 'to_deck':
         if (e.cr) {
           take(e.cr, e.iid);
@@ -147,8 +154,10 @@ export function plan(prev, next, cards = {}) {
         if (e.player === you) push({ kind: 'yourturn', dur: DUR.yourturn });
         break;
       case 'capture':
-        s.handCount[e.player] = Math.max(0, s.handCount[e.player] - 1);
-        if (e.player === you) s.hand = s.hand.filter(h => h.iid !== e.iid);
+        if (!e.roam) {   // played from the hand (a roaming animal walks in from the board)
+          s.handCount[e.player] = Math.max(0, s.handCount[e.player] - 1);
+          if (e.player === you) s.hand = s.hand.filter(h => h.iid !== e.iid);
+        }
         push({ kind: 'capture', dur: DUR.capture, card: e.card, player: e.player, den: e.den });
         break;
       // cover (the land step shows it), turn_end, mulligan (its own screen) need no step of their own
