@@ -11,7 +11,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Greywhisker** | 1 | Rodent | 1 | Roar: gain 1 food, draw a card, play another animal, then discard a card. |
-| **Pestis** | 1 | Rodent | 3 | Roar: remove an adjacent enemy and every animal buried under it. |
+| **Pestis** | 1 | Rodent | 3 | Roar: remove an adjacent animal and every animal under it. |
 | **Sirocco** | 1 | — | 5 | Roar: return all adjacent enemies to your opponent's hand. |
 | **Gale** | 1 | Bird | 5 | Flight. Roar: draw a card for each ally adjacent to the opponent's den. |
 

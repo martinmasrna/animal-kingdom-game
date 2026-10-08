@@ -728,7 +728,7 @@
      "status": "proposed",
      "str": 3,
      "tag": "Rodent",
-     "text": "Roar: remove an adjacent enemy and every animal buried under it."
+     "text": "Roar: remove an adjacent animal and every animal under it."
     },
     {
      "habitat": "Forest",

@@ -1931,16 +1931,19 @@ def _op_hornet_kill(state, step):
 
 
 def _pestis_place(state, unit, cr):
-    # "Remove an adjacent enemy and every unit buried under it": the target is a chosen enemy
-    # (so Stealth and Armor tops are off limits, as for any removal), the whole stack goes.
-    options = _adjacent_enemy_unit_crossroads(state, unit, cr)
+    # "Remove an adjacent animal and every animal under it": the target is a chosen top, an enemy
+    # (Stealth and Armor off limits, as for any removal) or an ally (Armor off limits), and the whole
+    # stack goes. Declinable, so a Pestis next to only its own animals never has to wipe them.
+    options = sorted(_adjacent_enemy_unit_crossroads(state, unit, cr) + _adjacent_friendly_units(state, unit, cr))
     if options:
         state.effect_stack.append({"op": "pestis_wipe", "chooser": unit.owner, "options": options})
 
 
 def _op_pestis_wipe(state, step):
     if "choice" not in step:   # asked even with one target
-        return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
+        return PendingRequest("choice", step["chooser"], optional=True, options=step["options"])
+    if step["choice"] == SKIP:
+        return None
     target = step["choice"]
     # Remove the entire stack under the enemy, both players' units, top-down. A buried
     # Armor unit is skipped in place, not a shield: everything else is still wiped around it.

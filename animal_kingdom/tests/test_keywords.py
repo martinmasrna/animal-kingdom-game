@@ -11,7 +11,7 @@ Map A geometry: A's HQ fronts are column 1, B's are column 4; orthogonal neighbo
 from __future__ import annotations
 
 from animal_kingdom.engine import rules
-from animal_kingdom.engine.actions import PlaceAction
+from animal_kingdom.engine.actions import ChoiceAction, PlaceAction
 
 from ._helpers import apply_click, make_state, put
 
@@ -138,3 +138,13 @@ def test_apex_covers_armor_prey_instead_of_eating_it():
         assert "methuselah" not in s.remove_pile
 
 
+
+
+def test_pestis_may_wipe_an_allied_stack_and_the_enemies_under_it():
+    s = make_state(hands={"A": ["pestis"]})
+    put(s, "2,2", "mouse", "B")                           # buried enemy
+    put(s, "2,2", "rat", "A")                             # our top
+    rules.apply_action(s, PlaceAction("pestis", ("cr", "1,2")))
+    assert s.pending["optional"] and "2,2" in s.pending["options"]
+    rules.apply_action(s, ChoiceAction("2,2"))
+    assert "2,2" not in s.board

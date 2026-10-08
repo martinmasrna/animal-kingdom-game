@@ -785,16 +785,19 @@ def test_pestis_wipes_an_adjacent_enemy_and_everything_under_it():
     put(s, "1,2", "caracal", "A")
     put(s, "3,2", "lion", "B")                          # bottom
     put(s, "3,2", "unnamed_canine", "B")                        # top (same owner stacks freely)
-    apply_click(s, PlaceAction("pestis", ("cr", "2,2")))  # the only enemy target: 3,2
+    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))
+    rules.apply_action(s, ChoiceAction("3,2"))            # the enemy stack
     assert s.board.get("3,2") is None
     assert s.remove_pile.count("lion") == 1 and s.remove_pile.count("unnamed_canine") == 1
 
 
-def test_pestis_never_hits_its_own_side():
+def test_pestis_next_to_only_allies_may_decline():
     s = make_state(hands={"A": ["pestis"]})
-    put(s, "1,2", "caracal", "A")                       # the only adjacent unit is friendly
+    put(s, "1,2", "caracal", "A")                       # the only adjacent animal is an ally
     rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))
-    assert s.pending is None and s.top_unit("1,2").card_id == "caracal"
+    assert s.pending["optional"]
+    rules.apply_action(s, ChoiceAction(SKIP))
+    assert s.top_unit("1,2").card_id == "caracal"
 
 
 def test_sirocco_bounces_all_adjacent_enemies_to_hand():

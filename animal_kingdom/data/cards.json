@@ -753,7 +753,7 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Roar: remove an adjacent enemy and every animal buried under it.",
+      "text": "Roar: remove an adjacent animal and every animal under it.",
       "keywords": [],
       "species": "Rat",
       "habitat": "City",

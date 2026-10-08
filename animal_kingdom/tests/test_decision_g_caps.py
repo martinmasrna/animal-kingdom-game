@@ -67,7 +67,8 @@ def test_eon_capped_fires_once_per_turn_across_multiple_events():
     put(s, "1,2", "mouse", "A")             # connection anchor
     put(s, "2,1", "mouse", "B")
     put(s, "2,1", "rat", "B")               # same crossroad, same owner: stacks freely
-    apply_click(s, PlaceAction("pestis", ("cr", "2,2")))  # the only adjacent enemy: "2,1"
+    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))
+    rules.apply_action(s, ChoiceAction("2,1"))              # the adjacent enemy stack
     assert s.food["A"] == cfg.eon_food      # two remove events fired; only the first paid out
 
 
