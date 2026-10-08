@@ -73,14 +73,13 @@ Open from the first read: food before the payoff (only the Hedgehog's 5 so far; 
 | Porcupine | Forest | R | 7 | **Spikes.** |
 | Golden Orb-Weaver (Arachnid) | Jungle | R | 4 | When an enemy with **Flight** is placed next to this, remove it. |
 | Armadillo | Jungle | R | 7 | **Armor.** Your adjacent animals have **Stealth**. |
-| a fortress animal (animal open) | | C | ~3 | Roar: gain 5 food for each of your animals with **Armor**, **Spikes** or **Poison**. (Martin's: a one-time Roar, so nothing to protect; builds the early stake.) |
 | Black Bear | Forest | C | 5 | Roar: in 2 turns, draw 2 cards. (From Handlock: slow draw fits the hoard better, Martin.) |
 | Owl | Forest | C | 2 | **Flight.** Roar: **Scout** a card. (From Egg Control, Martin: the dig that finds the squirrel or Fathom.) |
 | Hedgehog | Meadow | C | 5 | **Spikes.** Roar: gain 5 food. |
 | Poison Dart Frog | Jungle | C | 1 | **Reach 2. Poison.** |
 | Jellyfish | Open Ocean | C | 4 | **Poison.** |
 
-Every 10 food on the board by turn 4 is about 30 at the finish, and food arriving on turn 7 counts for nothing: the stake has to be early. Rejected: the Acorns (late, random food; banked for a deck that draws all game, Egg Control first; Jay as the animal, since Squirrel is taken).
+Every 10 food on the board by turn 4 is about 30 at the finish, and food arriving on turn 7 counts for nothing: the stake has to be early. Rejected: a common paying food for each Armor, Spikes or Poison animal (clunky; reworded to "each of your animals next to this" it's generic food that Food Aggro wants more; scrapped, Martin); the Acorns (late, random food; banked for a deck that draws all game, Egg Control first; Jay as the animal, since Squirrel is taken).
 
 ## Food Aggro, draft
 
