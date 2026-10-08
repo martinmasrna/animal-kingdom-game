@@ -1,0 +1,270 @@
+<title>Animal Kingdom Art Pass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: one sticky filter bar; habitats as sections, commons then rares then legendaries; a lightbox for judging art at size. Single dark look, the game's own. */
+:root {
+  --bg: #101214; --surface: #181b1e; --surface-2: #20252a; --line: #2e353c; --text: #ece9e2; --muted: #8d939a; --faint: #5d636a;
+  --common: #a9b0b6; --rare: #5aa7e8; --legendary: #e2b553;
+  --keep: #5fb878; --redo: #e39b3c; --paint: #8f7ae6; --drop: #d0564c;
+  --display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --body: 'Inter', system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font: 14px/1.45 var(--body); padding-inline: 16px; padding-block: 0 48px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: .01em; text-wrap: balance; margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--rare); outline-offset: 2px; }
+
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); margin-inline: -16px; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.bar h1 { font-size: 26px; text-transform: uppercase; }
+.progress { display: flex; align-items: center; gap: 8px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.meter { width: 120px; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--keep); width: 0; transition: width .3s; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 3px 11px; font-size: 13px; color: var(--muted); }
+.chip[aria-pressed="true"] { color: var(--text); border-color: var(--text); background: var(--surface-2); }
+.sync { font-size: 12px; color: var(--faint); margin-left: auto; }
+.sync.bad { color: var(--drop); }
+
+.help { color: var(--muted); max-width: 70ch; margin: 18px 0 6px; }
+section { margin-top: 30px; }
+section > header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+section > header h2 { font-size: 30px; text-transform: uppercase; }
+section > header span { color: var(--muted); font-variant-numeric: tabular-nums; }
+.rarity-label { font-family: var(--display); text-transform: uppercase; letter-spacing: .08em; font-size: 15px; color: var(--muted); margin: 18px 0 8px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.tile[data-v="keep"] { border-color: color-mix(in srgb, var(--keep) 55%, var(--line)); }
+.tile[data-v="redo"] { border-color: color-mix(in srgb, var(--redo) 60%, var(--line)); }
+.tile[data-v="paint"] { border-color: color-mix(in srgb, var(--paint) 60%, var(--line)); }
+.tile[data-v="drop"] { border-color: color-mix(in srgb, var(--drop) 60%, var(--line)); }
+.art { aspect-ratio: 3 / 2; max-width: 100%; width: 100%; background: var(--surface-2); border: 0; padding: 0; display: block; position: relative; }
+.art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.art .none { position: absolute; inset: 10px; border: 1px dashed var(--faint); border-radius: 6px; display: grid; place-items: center; color: var(--faint); font-family: var(--display); text-transform: uppercase; letter-spacing: .08em; }
+.body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.name { font-family: var(--display); font-size: 21px; font-weight: 600; line-height: 1.1; }
+.name em { font-style: normal; color: var(--muted); }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 12px; color: var(--muted); }
+.pill { font-family: var(--display); text-transform: uppercase; letter-spacing: .06em; font-size: 12px; font-weight: 600; }
+.pill.C { color: var(--common); } .pill.R { color: var(--rare); } .pill.L { color: var(--legendary); }
+.text { font-size: 12.5px; color: var(--text); opacity: .85; }
+.verdicts { display: flex; gap: 6px; margin-top: auto; padding-top: 4px; }
+.v { flex: 1; border: 1px solid var(--line); background: var(--surface-2); border-radius: 6px; padding: 5px 0; font-size: 13px; color: var(--muted); }
+.v[aria-pressed="true"][data-v="keep"] { background: var(--keep); border-color: var(--keep); color: #0d1a10; }
+.v[aria-pressed="true"][data-v="redo"] { background: var(--redo); border-color: var(--redo); color: #221505; }
+.v[aria-pressed="true"][data-v="paint"] { background: var(--paint); border-color: var(--paint); color: #120d26; }
+.v[aria-pressed="true"][data-v="drop"] { background: var(--drop); border-color: var(--drop); color: #230807; }
+.v[aria-pressed="true"][data-v="reuse"] { background: var(--keep); border-color: var(--keep); color: #0d1a10; }
+textarea { width: 100%; min-height: 54px; resize: vertical; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: 13px/1.4 var(--body); }
+textarea::placeholder { color: var(--faint); }
+.empty { color: var(--muted); padding: 30px 0; }
+
+.box { position: fixed; inset: 0; z-index: 10; background: rgba(6, 7, 8, .94); display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 0; }
+.box[hidden] { display: none !important; }
+.stage { display: grid; place-items: center; padding: 24px; min-width: 0; min-height: 0; }
+.stage img { max-width: 100%; max-height: calc(100vh - 48px); object-fit: contain; border-radius: 6px; }
+.stage .none { width: min(100%, 720px); aspect-ratio: 3 / 2; border: 1px dashed var(--faint); border-radius: 8px; display: grid; place-items: center; color: var(--faint); font-family: var(--display); font-size: 22px; text-transform: uppercase; letter-spacing: .08em; }
+.side { background: var(--surface); border-left: 1px solid var(--line); padding: 20px; padding-top: calc(20px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+.side .name { font-size: 30px; }
+.side .text { font-size: 14px; }
+.side textarea { min-height: 120px; }
+.keys { color: var(--faint); font-size: 12px; }
+.nav { display: flex; gap: 6px; }
+.nav button { flex: 1; border: 1px solid var(--line); background: var(--surface-2); border-radius: 6px; padding: 6px 0; }
+@media (max-width: 760px) {
+  .box { grid-template-columns: 1fr; grid-template-rows: auto 1fr; overflow-y: auto; }
+  .stage img { max-height: 50vh; }
+  .side { border-left: 0; border-top: 1px solid var(--line); }
+  .sync { margin-left: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .meter i { transition: none; } }
+</style>
+
+<div class="bar">
+  <h1>Art Pass</h1>
+  <div class="progress"><div class="meter"><i id="meter"></i></div><span id="count">0 / 0 reviewed</span></div>
+  <div class="filters" id="habs" aria-label="Habitat"></div>
+  <div class="filters" id="rars" aria-label="Rarity"></div>
+  <div class="filters" id="states" aria-label="Review state"></div>
+  <div class="sync" id="sync">Connecting…</div>
+</div>
+
+<p class="help">Every launch card with its current art, by habitat, commons first. Mark each one <b>Keep</b> or <b>Redo</b>, or <b>Paint</b> where there's no art yet, and write what you want changed. Open any picture to judge it at full size: arrow keys move between cards, <b>K</b>, <b>R</b> and <b>P</b> set the verdict. Reviews save as you go, for Claude to read.</p>
+
+<main id="main"></main>
+
+<div class="box" id="box" hidden role="dialog" aria-modal="true" aria-label="Card art">
+  <div class="stage" id="stage"></div>
+  <div class="side" id="side"></div>
+</div>
+
+<script>
+const DATA = /*DATA*/null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const RARITY = { C: "Common", R: "Rare", L: "Legendary" };
+const VERDICTS = { card: ["keep", "redo"], missing: ["paint"], bg: ["paint"], orphan: ["reuse", "drop"] };
+const LABEL = { keep: "Keep", redo: "Redo", paint: "Paint", reuse: "Reuse", drop: "Drop" };
+
+// Every reviewable item: the habitat backgrounds, the cards, and art that no card uses.
+const items = [];
+for (const h of DATA.habitats) items.push({ key: "bg-" + h.replace(/\s+/g, "-"), kind: "bg", habitat: h, title: h + " background", text: "The habitat's board and card background. Nothing painted yet." });
+for (const c of DATA.cards) items.push({ ...c, kind: c.art ? "card" : "missing" });
+for (const o of DATA.orphans) items.push({ key: "orphan-" + o, kind: "orphan", art: o, title: o.replace(/_/g, " "), text: "Painted for a card that's no longer in a launch deck." });
+const byKey = Object.fromEntries(items.map(i => [i.key, i]));
+
+const state = { hab: "All", rar: "All", show: "All", reviews: {}, open: null };
+try { Object.assign(state, JSON.parse(localStorage.getItem("artpass-filters") || "{}")); } catch (e) {}
+const saveFilters = () => { try { localStorage.setItem("artpass-filters", JSON.stringify({ hab: state.hab, rar: state.rar, show: state.show })); } catch (e) {} };
+
+let db = null;
+const review = k => state.reviews[k] || {};
+const done = k => !!(review(k).verdict);
+
+function chips(el, opts, key) {
+  el.innerHTML = opts.map(o => `<button class="chip" aria-pressed="${state[key] === o}" data-k="${key}" data-o="${esc(o)}">${esc(o)}</button>`).join("");
+}
+function renderBar() {
+  chips($("#habs"), ["All", ...DATA.habitats, "Unused art"], "hab");
+  chips($("#rars"), ["All", "Common", "Rare", "Legendary"], "rar");
+  chips($("#states"), ["All", "To review", "Keep", "Redo", "Paint"], "show");
+  const n = items.filter(i => done(i.key)).length;
+  $("#count").textContent = `${n} / ${items.length} reviewed`;
+  $("#meter").style.width = (100 * n / items.length) + "%";
+}
+function visible(i) {
+  if (state.hab === "Unused art") { if (i.kind !== "orphan") return false; }
+  else { if (i.kind === "orphan") return state.hab === "All" && state.rar === "All"; if (state.hab !== "All" && i.habitat !== state.hab) return false; }
+  if (state.rar !== "All" && (i.kind === "bg" || RARITY[i.rarity] !== state.rar)) return false;
+  const v = review(i.key).verdict;
+  if (state.show === "To review" && v) return false;
+  if (["Keep", "Redo", "Paint"].includes(state.show) && v !== state.show.toLowerCase()) return false;
+  return true;
+}
+const order = () => items.filter(visible);
+
+function artHTML(i, big) {
+  if (i.art) return `<img src="art/${esc(i.art)}.webp" alt="${esc(i.name || i.species || i.title)}" ${big ? "" : 'loading="lazy"'}>`;
+  return `<div class="none">${i.kind === "bg" ? "No background yet" : "No art yet"}</div>`;
+}
+function nameHTML(i) {
+  if (i.kind === "bg" || i.kind === "orphan") return esc(i.title);
+  return i.name ? esc(i.name) : `<em>${esc(i.species)}</em>`;
+}
+function metaHTML(i) {
+  if (i.kind === "bg" || i.kind === "orphan") return "";
+  return `<div class="meta"><span class="pill ${i.rarity}">${RARITY[i.rarity]}</span><span>${esc(i.str)} strength</span>${i.tag ? `<span>${esc(i.tag)}</span>` : ""}<span>${esc(i.deck)}</span>${i.name ? `<span>${esc(i.species)}</span>` : ""}</div>`;
+}
+function verdictHTML(i) {
+  const v = review(i.key).verdict;
+  return `<div class="verdicts">${VERDICTS[i.kind].map(x => `<button class="v" data-v="${x}" data-key="${esc(i.key)}" aria-pressed="${v === x}">${LABEL[x]}</button>`).join("")}</div>`;
+}
+function noteHTML(i, id) {
+  const ph = i.kind === "card" ? "What to change, if anything" : i.kind === "orphan" ? "Which card could use it" : "What to paint";
+  return `<textarea id="${id}" data-key="${esc(i.key)}" placeholder="${ph}">${esc(review(i.key).note || "")}</textarea>`;
+}
+function tileHTML(i) {
+  return `<article class="tile" data-v="${esc(review(i.key).verdict || "")}">
+    <button class="art" data-open="${esc(i.key)}" aria-label="Open ${esc(i.name || i.species || i.title)}">${artHTML(i)}</button>
+    <div class="body"><div class="name">${nameHTML(i)}</div>${metaHTML(i)}
+      ${i.text ? `<div class="text">${esc(i.text === "—" ? "No effect (vanilla)." : i.text)}</div>` : ""}
+      ${verdictHTML(i)}${noteHTML(i, "n-" + i.key)}</div></article>`;
+}
+function render() {
+  renderBar();
+  const vis = new Set(order().map(i => i.key));
+  let html = "";
+  const habs = state.hab === "All" ? DATA.habitats : DATA.habitats.filter(h => h === state.hab);
+  for (const h of habs) {
+    const inH = items.filter(i => i.habitat === h && vis.has(i.key));
+    if (!inH.length) continue;
+    const total = items.filter(i => i.habitat === h), rev = total.filter(i => done(i.key)).length;
+    html += `<section><header><h2>${esc(h)}</h2><span>${rev} / ${total.length} reviewed</span></header>`;
+    const bg = inH.filter(i => i.kind === "bg");
+    if (bg.length) html += `<div class="grid">${bg.map(tileHTML).join("")}</div>`;
+    for (const r of ["C", "R", "L"]) {
+      const g = inH.filter(i => i.rarity === r);
+      if (g.length) html += `<div class="rarity-label">${RARITY[r]}s · ${g.length}</div><div class="grid">${g.map(tileHTML).join("")}</div>`;
+    }
+    html += `</section>`;
+  }
+  const orph = items.filter(i => i.kind === "orphan" && vis.has(i.key));
+  if (orph.length) html += `<section><header><h2>Unused art</h2><span>${orph.length} pictures no launch card uses</span></header><div class="grid">${orph.map(tileHTML).join("")}</div></section>`;
+  const active = document.activeElement && document.activeElement.id;
+  $("#main").innerHTML = html || `<p class="empty">Nothing matches these filters.</p>`;
+  if (active && active.startsWith("n-")) { const el = document.getElementById(active); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+  if (state.open) renderBox();
+}
+
+function renderBox() {
+  const i = byKey[state.open];
+  $("#stage").innerHTML = artHTML(i, true);
+  $("#side").innerHTML = `<div class="name">${nameHTML(i)}</div>${metaHTML(i)}
+    ${i.text ? `<div class="text">${esc(i.text === "—" ? "No effect (vanilla)." : i.text)}</div>` : ""}
+    ${verdictHTML(i)}${noteHTML(i, "boxnote")}
+    <div class="nav"><button data-step="-1">← Previous</button><button data-step="1">Next →</button><button data-close>Close</button></div>
+    <div class="keys">Arrow keys move · K keep · R redo · P paint · Esc closes</div>`;
+}
+function openBox(key) { state.open = key; $("#box").hidden = false; renderBox(); }
+function closeBox() { state.open = null; $("#box").hidden = true; }
+function step(d) {
+  const list = order(); if (!list.length) return;
+  const at = list.findIndex(i => i.key === state.open);
+  openBox(list[(at + d + list.length) % list.length].key);
+}
+
+const timers = {};
+async function write(key, patch) {
+  state.reviews[key] = { ...review(key), ...patch, at: Date.now() };
+  if (!db) { $("#sync").textContent = "Not saved: open this page on claude.ai to keep reviews."; $("#sync").classList.add("bad"); return; }
+  try { await db.doc("reviews/" + key).set(state.reviews[key]); $("#sync").textContent = "Saved"; $("#sync").classList.remove("bad"); }
+  catch (e) { $("#sync").textContent = "Couldn't save. Your last change is still on screen; try again."; $("#sync").classList.add("bad"); }
+}
+function setVerdict(key, v) {
+  const cur = review(key).verdict;
+  write(key, { verdict: cur === v ? null : v });
+  render();
+}
+
+document.addEventListener("click", e => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.dataset.k) { state[t.dataset.k] = t.dataset.o; saveFilters(); render(); }
+  else if (t.dataset.open) openBox(t.dataset.open);
+  else if (t.dataset.v) setVerdict(t.dataset.key, t.dataset.v);
+  else if (t.dataset.step) step(+t.dataset.step);
+  else if ("close" in t.dataset) closeBox();
+});
+$("#box").addEventListener("click", e => { if (e.target === $("#box") || e.target === $("#stage")) closeBox(); });
+document.addEventListener("input", e => {
+  const ta = e.target; if (ta.tagName !== "TEXTAREA") return;
+  const key = ta.dataset.key;
+  state.reviews[key] = { ...review(key), note: ta.value };
+  clearTimeout(timers[key]);
+  timers[key] = setTimeout(() => write(key, { note: ta.value }), 700);
+});
+document.addEventListener("keydown", e => {
+  if (!state.open || e.target.tagName === "TEXTAREA") { if (e.key === "Escape" && state.open) closeBox(); return; }
+  const i = byKey[state.open], k = e.key.toLowerCase();
+  if (e.key === "ArrowRight") step(1);
+  else if (e.key === "ArrowLeft") step(-1);
+  else if (e.key === "Escape") closeBox();
+  else if (k === "k" && VERDICTS[i.kind].includes("keep")) setVerdict(i.key, "keep");
+  else if (k === "r" && VERDICTS[i.kind].includes("redo")) setVerdict(i.key, "redo");
+  else if (k === "p" && VERDICTS[i.kind].includes("paint")) setVerdict(i.key, "paint");
+});
+
+render();
+(async () => {
+  try { db = window.claude ? await window.claude.use("db") : null; } catch (e) { db = null; }
+  if (!db) { $("#sync").textContent = "Reviews can't be saved here: open the page on claude.ai."; $("#sync").classList.add("bad"); return; }
+  $("#sync").textContent = "Loading reviews…";
+  db.collection("reviews").onSnapshot(snap => {
+    const r = {}; snap.docs.forEach(d => r[d.id] = d.data());
+    for (const k of Object.keys(timers)) if (state.reviews[k]) r[k] = { ...r[k], note: state.reviews[k].note };
+    state.reviews = r; $("#sync").textContent = "Reviews are saved as you go"; $("#sync").classList.remove("bad"); render();
+  }, () => { $("#sync").textContent = "Lost the connection to the reviews. Reload to retry."; $("#sync").classList.add("bad"); });
+})();
+</script>
