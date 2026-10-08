@@ -194,7 +194,7 @@ Sharks stay out of the count cards: they're lone hunters. Fish's predator is wea
 
 ## Handlock, draft
 
-Train in secret, then unveil (Martin, 2026-10-08): Hearthstone's Handlock and hand-buff decks (Don Han'Cho, the Grimy Goons); Magic has almost nothing like it. Two hand themes: hand size (Macaque, Grizzly) and training cards in hand (Baboon, Silverback, Orangutan, Tarsier), paid off by thresholds and triggers (Chimpanzee, Gorilla, Capuchin). The fun is hidden power: the opponent sees how many cards you hold, never how strong they are. Strength past about 8 buys almost nothing on the board, so training has to pay off through thresholds, triggers and removal, not raw size. It beats midrange and strength-gated removal; it loses to speed and to hand disruption (Egg Control's Black Swan and Magpie). The first version is [`hand-deck.md`](hand-deck.md); this list replaces it.
+Train in secret, then unveil (Martin, 2026-10-08): Hearthstone's Handlock and hand-buff decks (Don Han'Cho, the Grimy Goons); Magic has almost nothing like it. Two hand themes: hand size (Macaque, Grizzly) and training cards in hand (Baboon, Silverback, Orangutan, Tarsier), paid off by thresholds and triggers (Chimpanzee, Gorilla, Capuchin). The fun is hidden power: the opponent sees how many cards you hold, never how strong they are. Strength past about 8 buys almost nothing on the board, so training has to pay off through thresholds, triggers and removal, not raw size. It beats midrange and strength-gated removal; it loses to speed and to hand disruption (Egg Control's Black Swan and Magpie). The first version is [`hand-deck.md`](hand-deck.md); this list replaces it. Commons and rares locked (Martin, 2026-10-08); the two legendaries other than the Baboon and the Silverback are open.
 
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
@@ -206,14 +206,13 @@ Train in secret, then unveil (Martin, 2026-10-08): Hearthstone's Handlock and ha
 | Macaque (Primate) | City | R | 2 | Roar: if you have 5 or more cards in your hand, remove an adjacent enemy. |
 | Orangutan (Primate) | Jungle | R | 5 | Roar: duplicate a Primate in your hand. |
 | Tarsier (Primate) | Jungle | R | 2 | Roar: **Scout** a Primate and give it +1 strength. |
-| Capuchin (Primate) | Jungle (roster addition) | C | 4 | Roar: remove an adjacent enemy of equal or lower strength. (The stone is as heavy as the arm that swings it.) |
+| Butterfly | Meadow | R | 2 | **Flight.** Roar: draw a card, then give an animal in your hand +1 strength. (Also what the Caterpillar becomes.) |
+| Chimpanzee (Primate) | Jungle | C | 4 | Roar: remove an adjacent enemy of equal or lower strength. (The chimp with its stone or stick: the tool is as heavy as the arm that swings it. It took the Capuchin's effect, since everyone knows a chimp.) |
 | Baboon (Primate) | Savanna | C | 4 | Roar: give 2 animals in your hand +1 strength. |
 | Stork (Bird) | Meadow | C | 4 | **Flight.** Roar: add two random younglings to your hand. (Younglings, 1, no text, one per family: Baby Lion (Cat), Baby Wolf (Canine), Baby Squirrel (Rodent), Baby Owl (Bird), Baby Python (Snake), Baby Bear (Bear), Baby Gorilla (Primate), Baby Zebra (Hoofed).) |
 | Grizzly Bear (Bear) | Forest | C | 2 | Has +1 strength for each card in your hand. (Fat Bear Week: a bear fattening for winter. Live, so it shrinks as you play your hand out.) |
-| Chimpanzee (Primate) | Jungle | C | 1 | Whenever this gains strength in your hand, draw a card. |
+| Caterpillar | Meadow | C | 1 | When this gains strength in your hand, draw a card and turn this into a Butterfly. (Replaces the Chimpanzee's draw on every training step, the deck's strongest common.) |
 | Gorilla (Primate) | Jungle | C | 6 | Roar: if this has 8 or more strength, draw a card. |
-
-The common Butterfly (proposed, a pool card outside this list): a Caterpillar (1, no text), "When this gains strength in your hand, it becomes a Butterfly." The Butterfly: "**Flight.** Roar: give an animal in your hand +2 strength." Gaining only Flight was rejected: that's a worse 2-strength flyer.
 
 ## Egg Control
 
