@@ -53,4 +53,4 @@ Once the game runs, the meta should hold 2–3 clearly different decks in each o
 | | Giants (big, Hungry, needing pasture) | redesign |
 | | Hoofed (graze regions for food) | new |
 
-Movement, disruption and copying are a few cards each (frogs and grasshoppers moving, tech cards against tokens, a mimic or two), never archetypes.
+Disruption and copying are a few cards each (tech cards against tokens, a mimic or two), never archetypes.
