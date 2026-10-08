@@ -24,7 +24,7 @@ Locked:
 | Hippopotamus | R | 8 | Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it. | a Giant; the reaction stays (the client is to show what removed an animal) ~ |
 | Cape Buffalo | R | 6 | While grazing, this has +3 strength. | stands its ground on its own land |
 | Crocodile | R | 8 | Apex Predator. | the ambush at the river crossing; art: the huge Nile crocodile, not the Jaguar's caiman |
-| Meerkat | C | 2 | Roar: draw a card. When an enemy is placed next to this, draw a card. | the sentry |
+| Meerkat | R | 2 | Roar: draw a card. When an enemy is placed next to this, draw a card. | the sentry; a Rodent by what players believe (it's a mongoose); rare for a unique effect (Martin, 2026-10-08), in Food Aggro as the den guard |
 
 Open: Aardvark, the legendaries; Warthog moves to rare (the herd's den guard), which shifts Savanna's split to rebalance later.
 
@@ -73,7 +73,7 @@ Imagined games (reasoning, not evidence) showed the clock runs on cards, not foo
 | Flying Squirrel | Forest | R | 3 | **Flight.** Roar: gain 10 food. |
 | Chipmunk | Forest | R | 4 | Roar: next turn, take 1 additional action. (The frantic one; the effect stays in the launch, and the Chinchilla waits for Mountains.) |
 | a Rodent | | R | 2 | **Dusk:** if your hand is empty, gain 10 food. (The top-deck mode: out of cards, you can pass and it still pays.) |
-| — | | R | | open |
+| Meerkat (tagged Rodent) | Savanna | R | 2 | Roar: draw a card. When an enemy is placed next to this, draw a card. (The sentry at the den front: den pressure turns into cards, often the Muskrat that pushes it back.) |
 | Squirrel | Forest | C | 3 | Roar: gain 10 food. |
 | Hamster | Meadow | C | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. (Cheek pouches.) |
 | Gopher | Meadow | C | 3 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
@@ -81,7 +81,7 @@ Imagined games (reasoning, not evidence) showed the clock runs on cards, not foo
 | Groundhog | Meadow | C | 4 | Roar: if you gained 10 or more food this turn, gain 10 food. |
 | a Rodent | | C | ~3 | Roar: gain 5 food. If your hand is empty, draw 2 cards. (Hearthstone's Quick Shot.) |
 
-Rejected: the Octopus carrying the extra action (its octopus is Fathom, the clever one, and a sea animal in the Rodent deck); Greywhisker and the Naked Mole-Rat (Den Rush's); Mouse and other draw-one cards (tempo, not value); a "protect it and it wins" food engine (a control card); "discard your hand, gain food for each"; "gain food for each card your opponent has more than you"; "the next Roar you play this turn happens twice" (here it's mostly a second Squirrel; banked for a deck with few, big Roars).
+Rejected: the Octopus carrying the extra action (its octopus is Fathom, the clever one, and a sea animal in the Rodent deck); Greywhisker and the Naked Mole-Rat (Den Rush's); Mouse and other draw-one cards (tempo, not value); a "protect it and it wins" food engine (a control card); "discard your hand, gain food for each"; "gain food for each card your opponent has more than you"; "the next Roar you play this turn happens twice" (here it's mostly a second Squirrel; banked as the Macaw); a Squirrel that shuffles Acorns into your deck (20 food eventually, in a deck that barely draws; banked for Food OTK, the hoard); the Mouse raid ("gain 10 food for each enemy next to this": Mouse is already a card, and a common animal); a Prairie Dog town rare (Meerkat filled the slot).
 
 ## The aristocrats, draft
 
