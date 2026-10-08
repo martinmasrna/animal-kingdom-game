@@ -199,8 +199,8 @@ Train in secret, then unveil (Martin, 2026-10-08): Hearthstone's Handlock and ha
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
 | a Baboon (name to come; Primate) | Savanna | L | 5 | At the end of your turn, give 2 random animals in your hand +1 strength. |
-| Silverback (Gorilla, Primate) | Jungle | L | 7 | Roar: give all animals in your hand +1 strength. |
-| a Butterfly (name to come) | Meadow | L | ~1 | Whenever this gains strength in your hand, it evolves. (Five stages, proposed: Egg (no text); Caterpillar, "Roar: draw a card."; Chrysalis, **Armor**; Butterfly, "**Flight.** Roar: give an animal in your hand +2 strength."; Monarch, "**Flight.** Roar: give all animals in your hand +2 strength." The art changes with each stage.) |
+| Silverback (Gorilla, Primate) | Jungle | L | 7 | Roar: give all animals in your hand +2 strength. (Raised from +1, which was thin for a legendary next to the common Baboon; to try, Martin: may be too strong. The dial is the +2 or the 7.) |
+| a Butterfly (name to come) | Meadow | L | 1 | Whenever this gains strength in your hand, it evolves. (Stages stack, each adding to the last: 1 Egg, no text; 2 Caterpillar, "Roar: draw a card."; 3 Chrysalis, "**Stealth.** Roar: draw a card, then give an animal in your hand +1 strength."; 4 Butterfly, "**Stealth. Flight.** Roar: draw a card, then give all animals in your hand +1 strength."; 5 Monarch, "**Stealth. Flight.** Roar: draw 2 cards, then give all animals in your hand +2 strength." Power climbs evenly: below a common, then common to rare, rare to legendary, above an average legendary. Every buff adds its strength and moves it one stage, so the egg's 1 plus its buffs is its strength; one buff is one stage. The stage shows as a badge on the art, explained on hover; the art changes with each stage. Stealth, not Armor: a chrysalis is famous for hiding, and butterflies hide too.) |
 | Hummingbird (Bird) | Jungle | R | 1 | **Flight.** Roar: draw 2 cards. |
 | Macaque (Primate) | City | R | 2 | Roar: if you have 5 or more cards in your hand, remove an adjacent enemy. |
 | Orangutan (Primate) | Jungle | R | 5 | Roar: duplicate a Primate in your hand. |
