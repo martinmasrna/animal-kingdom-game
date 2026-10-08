@@ -69,6 +69,9 @@ An effect that resolves when **a unit leaves the board** is written out in plain
 
 ## Not a keyword
 
+### Effects  *(card-text term, not a keyword)*
+An animal's **effects** are everything in its text box, keywords included. "Loses all its effects" switches off its Armor, Spikes, Poison and Stealth as well as its Roar, Dawn and Dusk text and any ongoing rule (Martin, 2026-10-08).
+
 ### Costs X food  *(placement cost)*
 A printed cost, handled by the engine, not a keyword. The placement is offered only if the controller has ≥ X food; X food is paid on placement. (e.g. Ramp's `Costs 15 food` bodies, some legendaries.) X is card-intrinsic — `food_cost` in `cards.json`, next to `base_strength` — not a `config.py` constant; tune it there.
 
