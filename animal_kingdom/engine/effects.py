@@ -2206,9 +2206,10 @@ def _sunfish_place(state, unit, cr):
 # --- Food Aggro -------------------------------------------------------------------------------------------------
 
 def _repeat_legend_place(state, unit, cr):
-    """Roar: repeat the Roar of each of your adjacent Rodents (as if each roared again where it stands)."""
+    """Roar: repeat the Roar of each of your adjacent Rodents (as if each roared again where it stands). Another of these
+    (a mimic Octopus's copy) isn't repeated: two side by side would repeat each other for ever."""
     for nb, top in reversed(_adjacent_tops(state, cr, unit.owner)):
-        if "Rodent" in state.cards[top.card_id].tags:
+        if "Rodent" in state.cards[top.card_id].tags and top.card_id != unit.card_id:
             _push_hook(state, top, nb, "on_place")
 
 

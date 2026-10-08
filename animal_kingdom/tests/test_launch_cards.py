@@ -491,6 +491,14 @@ def test_the_repeat_legend_roars_its_adjacent_rodents_again():
     assert s.food["A"] == 2 * CFG.squirrel_food
 
 
+def test_two_repeat_legends_side_by_side_do_not_repeat_each_other_for_ever():
+    s = make_state(hands={"A": ["food_aggro_legend_repeat"]})
+    put(s, "1,1", "food_aggro_legend_repeat", "A")             # a mimic Octopus's copy, say
+    put(s, "2,2", "squirrel", "A")
+    rules.apply_action(s, PlaceAction("food_aggro_legend_repeat", ("cr", "1,2")))
+    assert s.food["A"] == CFG.squirrel_food
+
+
 def test_the_refill_legend_draws_up_to_the_opponents_hand():
     s = make_state(hands={"A": ["food_aggro_legend_refill"], "B": ["lion"] * 4}, decks={"A": ["lion"] * 9, "B": []})
     rules.apply_action(s, PlaceAction("food_aggro_legend_refill", ("cr", "1,2")))
