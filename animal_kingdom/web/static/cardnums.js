@@ -26,5 +26,19 @@ export const CARD_NUMS = [
   "calib_stealth_6", "calib_stealth_7", "calib_stealth_8", "mock_courier", "mock_skully", "mock_sentry", "mock_hunter", "mock_saboteur",
   "mock_vanilla_5", "mock_vanilla_6", "mock_vanilla_8", "mock_vanilla_9", "mock_vanilla_10", "mock_flyer_7", "mock_armor_6", "mock_removal",
   "mock_apex_5", "mock_apex_6", "mock_draw2",
-  "cairn"
+  "cairn",
+  "aristocrats_legend_cuckoo", "aristocrats_legend_opossum", "aristocrats_legend_sloth", "praying_mantis", "tarantula", "sea_turtle", "raccoon", "piranha",
+  "vulture", "city_spider", "earthworm", "cockroach", "canines_legend_leopard", "canines_legend_wolf", "orca", "raccoon_dog",
+  "badger", "naked_mole_rat", "hare", "leopard", "bobcat", "fish_legend_jellyfish", "fish_legend_tuna", "fish_legend_manta_ray",
+  "fish_legend_piranha", "swordfish", "barracuda", "manta_ray", "remora", "cod", "sardine", "mahi_mahi",
+  "mackerel", "tuna", "sunfish", "food_aggro_legend_repeat", "food_aggro_legend_refill", "meerkat", "dormouse", "mole",
+  "food_otk_legend_squirrel", "food_otk_legend_honey_badger", "food_otk_legend_octopus", "capybara", "golden_orb_weaver", "dart_frog", "jellyfish", "tortoise",
+  "egg_control_legend_raven", "mosquito", "handlock_legend_baboon", "silverback", "handlock_legend_butterfly", "handlock_legend_eagle", "hummingbird", "macaque",
+  "orangutan", "tarsier", "chimpanzee", "baboon", "stork", "caterpillar", "gorilla", "mocha",
+  "giants_legend_oxpecker", "crocodile", "whale_shark", "anteater", "dung_beetle", "blue_whale", "hoofed_legend_wildebeest", "hoofed_legend_boar",
+  "hoofed_legend_zebra", "hoofed_legend_giraffe", "honey_badger", "okapi", "moose", "zebra", "giraffe", "gazelle",
+  "wildebeest", "deer", "boar", "octopus", "great_white_shark", "sperm_whale", "butterfly", "cuckoo",
+  "opossum", "baby_turtle", "worm", "baby_fish", "cuckoo_egg", "baby_lion", "baby_wolf", "baby_squirrel",
+  "baby_owl", "baby_python", "baby_bear", "baby_gorilla", "baby_zebra", "handlock_legend_butterfly_2", "handlock_legend_butterfly_3", "handlock_legend_butterfly_4",
+  "handlock_legend_butterfly_5", "handlock_legend_eagle_mate", "tutorial_cape_buffalo", "tutorial_dire_wolf", "tutorial_lynx", "tutorial_chipmunk"
 ];

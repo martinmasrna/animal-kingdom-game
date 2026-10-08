@@ -25,7 +25,7 @@ test('a deck survives its code, and the code is short', () => {
 });
 
 test('a readable list works without the code line (typed by hand or by an agent)', () => {
-  const d = decodeDeck('### Agent cats\n3x Lion\n2x (1) House Cat\n1x King Theron\nnonsense line', C);
+  const d = decodeDeck('### Agent cats\n3x Lion\n2x (1) Stray Cat\n1x King Theron\nnonsense line', C);
   assert.equal(d.name, 'Agent cats'); assert.deepEqual(sorted(d.list), sorted(['lion', 'lion', 'lion', 'house_cat', 'house_cat', 'king_theron']));
 });
 

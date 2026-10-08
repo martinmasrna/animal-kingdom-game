@@ -25,7 +25,7 @@ after(async () => { await browser?.close(); server?.stop(); });
 test('the screen: the grid beside the deck column, the header on the grid\'s edges', async () => {
   const b = await page.evaluate(() => { const R = s => { const r = document.querySelector(s).getBoundingClientRect(); return { left: r.left, right: r.right }; };
     return { grid: R('.cgrid .tl'), side: R('.side'), tabs: R('.chead .tab'), search: R('.chead .search'), cards: document.querySelectorAll('.cgrid .tl').length }; });
-  assert.ok(b.cards > 90, 'every card of the seven decks'); assert.ok(b.side.left > b.grid.right, `the deck column is right of the grid (${JSON.stringify(b.side)})`);
+  assert.ok(b.cards > 160, 'every card of the twelve decks'); assert.ok(b.side.left > b.grid.right, `the deck column is right of the grid (${JSON.stringify(b.side)})`);
   assert.equal(Math.round(b.tabs.left), Math.round(b.grid.left), 'the header starts on the grid\'s edge');
 });
 
@@ -41,18 +41,18 @@ test('the full card shows as the pointer moves onto a card, and a scroll under a
   await page.mouse.move(5, 5); await page.$eval('.cgrid', e => { e.scrollTop = 0; }); await wait(50);
 });
 
-test('a new profile has the seven starter decks as its own, the first one open', async () => {
+test('a new profile has the twelve starter decks as its own, none open', async () => {
   const decks = await myDecks();
-  assert.deepEqual(decks.map(d => d.name), ['Cats', 'Canines', 'Aggro', 'Colony', 'Egg', 'Food', 'Ramp']);
+  assert.deepEqual(decks.map(d => d.name), ['Colony Food Swarm', 'Aristocrats', 'Canine Roam Tempo', 'Aggro Den Rush', 'Cats Midrange Tempo', 'Fish Token Aggro', 'Food Aggro', 'Food OTK', 'Egg Control', 'Handlock', 'Giants', 'Hoofed Graze']);
   assert.equal(await page.$('.dtile.on'), null, 'the screen opens on the deck list');
-  assert.match(await page.$eval('.fcount', e => e.textContent), /7\/20/, 'the foot counts decks against the limit');
+  assert.match(await page.$eval('.fcount', e => e.textContent), /12\/20/, 'the foot counts decks against the limit');
   assert.ok(await page.$('.clist #dnew'), 'New deck is the slot after the last deck');
   await openDeck('[data-d="cats"]');
   assert.equal(await page.$$eval('.clist .dtile', t => t.length), 1, 'editing shows only that deck');
   await page.click('.side .st[data-card="lion"]'); await wait(100);
-  const [cats] = await myDecks();
-  assert.equal(cats.name, 'Cats'); assert.equal(Object.values(cats.cards).reduce((a, n) => a + n, 0), 29, 'a starter is edited in place: it is yours');
-  assert.equal((await myDecks()).length, 7, 'no copy');
+  const cats = (await myDecks()).find(d => d.id === 'cats');
+  assert.equal(cats.name, 'Cats Midrange Tempo'); assert.equal(Object.values(cats.cards).reduce((a, n) => a + n, 0), 29, 'a starter is edited in place: it is yours');
+  assert.equal((await myDecks()).length, 12, 'no copy');
   assert.match(await page.$eval('.fcount', e => e.textContent), /29\/30/); assert.ok(await page.$('#play[disabled]'), 'Play waits for 30 cards');
 });
 
@@ -73,23 +73,23 @@ test('a chosen name and cover save with the deck', async () => {
   await page.keyboard.type('Big Cats'); await page.keyboard.press('Enter'); await wait(80);
   await page.hover('.dtile.on'); await page.click('#dcover'); await wait(80);
   await page.click('.cv[data-id="tiger"]'); await wait(120);
-  const [d] = await myDecks(); assert.equal(d.name, 'Big Cats'); assert.equal(d.cover, 'tiger');
+  const d = (await myDecks()).find(x => x.id === 'cats'); assert.equal(d.name, 'Big Cats'); assert.equal(d.cover, 'tiger');
   await page.reload({ waitUntil: 'networkidle0' }); await page.evaluate(() => { navigator.clipboard.writeText = t => { window.__clip = t; return Promise.resolve(); }; });
   assert.equal(await page.$('.dtile.on'), null, 'a reload lands on the deck list');
-  await openDeck('.clist .dtile:first-child');
+  await openDeck('[data-d="cats"]');
   assert.equal(await page.$eval('.dtile.on b', e => e.textContent), 'Big Cats', 'the name kept');
   assert.match(await page.$eval('.dtile.on', e => e.style.backgroundImage), /tiger/);
 });
 
 test('a deck code copies, and pasting it (or a plain list) makes a deck', async () => {
-  await openDeck('.clist .dtile:first-child');
+  await openDeck('[data-d="cats"]');
   await page.hover('.dtile.on'); await page.click('#dcopy'); await wait(50);
   const code = await page.evaluate(() => window.__clip);
   assert.match(code, /^### Big Cats\n/); assert.ok(code.split('\n').pop().length < 50);
   const before = (await myDecks()).length; await paste(code); await wait(120);
   assert.equal((await myDecks()).length, before + 1);
-  let decks = await myDecks(); const n = decks.length; assert.deepEqual(decks[n - 1].cards, decks[0].cards, 'the pasted deck is the same deck');
-  await paste('### From an agent\n3x Lion\n2x House Cat'); await wait(120);
+  let decks = await myDecks(); const n = decks.length; assert.deepEqual(decks[n - 1].cards, decks.find(d => d.id === 'cats').cards, 'the pasted deck is the same deck');
+  await paste('### From an agent\n3x Lion\n2x Stray Cat'); await wait(120);
   decks = await myDecks(); assert.equal(decks[n].name, 'From an agent'); assert.deepEqual(decks[n].cards, { lion: 3, house_cat: 2 });
 });
 

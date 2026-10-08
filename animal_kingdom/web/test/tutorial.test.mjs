@@ -27,7 +27,7 @@ test('the first lessons walk the first turn, ringing every place the rules allow
 
 test('the Wolf goes on the food region the first animals started, wherever that is', () => {
   const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'patch'].forEach(id => t.seen.add(id));
-  const place = { tutorial_dire_wolf: [['cr', '1,1'], ['cr', '2,2'], ['cr', '2,3']] }, hand = [{ id: 'dire_wolf' }];
+  const place = { tutorial_dire_wolf: [['cr', '1,1'], ['cr', '2,2'], ['cr', '2,3']] }, hand = [{ id: 'tutorial_dire_wolf' }];
   const upper = current(view({ round: 2, hand, board: { '1,2': u('lion', 'A'), '1,3': u('tutorial_cape_buffalo', 'A') }, legal: { place, draw: true } }), null, CARDS, t);
   assert.deepEqual(upper.only, { card: 'tutorial_dire_wolf', crs: ['2,2', '2,3'] });
   const lower = current(view({ round: 2, hand, board: { '1,2': u('lion', 'A'), '2,2': u('tutorial_cape_buffalo', 'A') }, legal: { place, draw: true } }), null, CARDS, t);
@@ -84,7 +84,7 @@ test('with nothing to place, the coach points at the deck, every time', () => {
 test('covering and Roar are each done once by hand: the Pup beside the patch, then the Lynx', () => {
   const t = fresh(); ['welcome', 'yourden', 'theirden', 'foodcount', 'oppfood', 'cards', 'patch', 'actions', 'food'].forEach(id => t.seen.add(id));
   const board = { '1,1': u('tutorial_dire_wolf', 'A'), '1,2': u('lion', 'A'), '2,1': u('lion', 'A'), '2,2': u('tutorial_cape_buffalo', 'A'), '3,2': [{ id: 'pup', owner: 'B', str: 1 }] };
-  const cover = current(view({ round: 3, board, hand: [{ id: 'cape_buffalo' }], legal: { place: { tutorial_cape_buffalo: [['cr', '3,2'], ['cr', '3,1']] }, draw: true } }), null, CARDS, t);
+  const cover = current(view({ round: 3, board, hand: [{ id: 'tutorial_cape_buffalo' }], legal: { place: { tutorial_cape_buffalo: [['cr', '3,2'], ['cr', '3,1']] }, draw: true } }), null, CARDS, t);
   assert.equal(cover.id, 'cover'); assert.deepEqual(cover.only, { card: 'tutorial_cape_buffalo', crs: ['3,2'] });
   const covered = [{ seat: 'A', kind: 'place', card: 'tutorial_cape_buffalo', fx: [{ k: 'cover' }] }];
   const g4 = { round: 4, board, history: covered, hand: [{ id: 'squirrel' }], legal: { place: { squirrel: [['cr', '3,1'], ['cr', '1,3']] }, draw: true } };

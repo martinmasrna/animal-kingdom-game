@@ -51,6 +51,7 @@
 .game .buried.A { border-color: var(--Adk); background: var(--Adk); } .game .buried.B { border-color: var(--Bdk); background: var(--Bdk); }
 .game .unit .ring { position: absolute; inset: 0; border-radius: 50%; border: 8px solid; background-color: #333; background-repeat: no-repeat; display: grid; place-items: center; }
 .game .unit .ring.noart span { font-size: 13px; font-weight: 600; text-align: center; padding: 0 10px; }
+.game .unit .ring.inked { filter: grayscale(.85) brightness(.6); }   /* Octopus ink: keywords and effects off */
 .game .unit.A .ring { border-color: var(--A); } .game .unit.B .ring { border-color: var(--B); }
 .game .unit .boss { position: absolute; left: 50%; bottom: -22px; width: 48px; height: 48px; margin-left: -24px; border-radius: 50%; display: grid; place-items: center; font-size: 26px; border: 3px solid; }
 .game .unit.A .boss { background: var(--Adk); border-color: var(--A); } .game .unit.B .boss { background: var(--Bdk); border-color: var(--B); }

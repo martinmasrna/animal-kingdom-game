@@ -7,11 +7,11 @@ import { startServer, openBrowser, recordMatches, screenMismatches } from './har
 let server, browser, page, views;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const HISTORY = [
-  { match: 'AAA-0', ended: 1790700000, kind: 'bot', my_deck: 'Cats', opp: 'Bot (Expert)', opp_deck: 'Ramp', won: 1, lost: 0, my_cover: 'king_theron', opp_cover: 'borealis' },
-  { match: 'CCC-0', ended: 1790650000, kind: 'friend', my_deck: 'Cats', opp: 'Ana#1234', opp_deck: 'Her secret deck', won: 1, lost: 0, my_cover: 'king_theron', opp_cover: 'borealis' },
-  { match: 'BBB-0', ended: 1790600000, kind: 'bot', my_deck: 'Egg', opp: 'Bot (Normal)', opp_deck: 'Cats', won: 0, lost: 1, my_cover: '', opp_cover: '' },
+  { match: 'AAA-0', ended: 1790700000, kind: 'bot', my_deck: 'Cats Midrange Tempo', opp: 'Bot (Expert)', opp_deck: 'Giants', won: 1, lost: 0, my_cover: 'king_theron', opp_cover: 'bulwark' },
+  { match: 'CCC-0', ended: 1790650000, kind: 'friend', my_deck: 'Cats Midrange Tempo', opp: 'Ana#1234', opp_deck: 'Her secret deck', won: 1, lost: 0, my_cover: 'king_theron', opp_cover: 'bulwark' },
+  { match: 'BBB-0', ended: 1790600000, kind: 'bot', my_deck: 'Egg Control', opp: 'Bot (Normal)', opp_deck: 'Cats Midrange Tempo', won: 0, lost: 1, my_cover: '', opp_cover: '' },
 ];
-const RECORDS = [{ deck: 'Cats', cover: 'king_theron', won: 2, lost: 0 }, { deck: 'Egg', cover: '', won: 0, lost: 1 }];
+const RECORDS = [{ deck: 'Cats Midrange Tempo', cover: 'king_theron', won: 2, lost: 0 }, { deck: 'Egg Control', cover: '', won: 0, lost: 1 }];
 
 before(async () => {
   server = await startServer(); browser = await openBrowser();
@@ -44,14 +44,14 @@ before(async () => {
 after(async () => { await browser?.close(); server?.stop(); });
 
 test('the match history lists each match with both decks; the deck filter carries each deck\'s record and filters the matches', async () => {
-  assert.deepEqual(await page.$$eval('.hhead .ddo', els => els.map(e => e.textContent.replace(/\s+/g, ' ').trim())), ['All decks 2–1', 'Cats 2–0', 'Egg 0–1']);
+  assert.deepEqual(await page.$$eval('.hhead .ddo', els => els.map(e => e.textContent.replace(/\s+/g, ' ').trim())), ['All decks 2–1', 'Cats Midrange Tempo 2–0', 'Egg Control 0–1']);
   assert.deepEqual(await page.$$eval('.ladder .hr b', els => els.map(e => e.textContent)), ['Won', 'Won', 'Lost']);
-  assert.deepEqual(await page.$$eval('.ladder .hr:nth-child(2) .dk', els => els.map(e => e.textContent)), ['Cats', 'Ana#1234'], 'a person, not their deck\'s name');
+  assert.deepEqual(await page.$$eval('.ladder .hr:nth-child(2) .dk', els => els.map(e => e.textContent)), ['Cats Midrange Tempo', 'Ana#1234'], 'a person, not their deck\'s name');
   assert.ok(!(await page.$eval('.ladder .hlist', e => e.textContent.includes('Her secret deck'))));
   assert.equal(await page.$$eval('.ladder .hr:first-child .pm .face', els => els.length), 2, 'both decks as pieces');
   assert.equal(await page.$$eval('.ladder .hr:last-child .pm .face', els => els.length), 2, 'a match from before covers finds the starters\' faces');
-  await page.click('.hhead .dd .sel'); await page.click('.hhead .ddo[data-v="Egg"]');
-  assert.deepEqual(await page.$$eval('.ladder .hr .dk', els => els.map(e => e.textContent)), ['Egg', 'Cats']);
+  await page.click('.hhead .dd .sel'); await page.click('.hhead .ddo[data-v="Egg Control"]');
+  assert.deepEqual(await page.$$eval('.ladder .hr .dk', els => els.map(e => e.textContent)), ['Egg Control', 'Cats Midrange Tempo']);
   await page.click('.hhead .dd .sel'); await page.click('.hhead .ddo[data-v=""]');
   assert.equal(await page.$$eval('.ladder .hr', els => els.length), 3, 'all decks again');
 });

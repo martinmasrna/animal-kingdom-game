@@ -84,6 +84,7 @@ export const fitStrips = root => root.querySelectorAll('[data-strip]').forEach(e
   el.style.cssText += ';' + stripArt(el.dataset.strip, W, H, +el.dataset.ax);
 });
 export const stripArt = (id, W, H, ax) => {
+  if (!hasArt(id)) return '';                    // not painted yet: the strip shows its plain ground
   if (!STRIP[id]) return `background-image:url(${artUrl(id)})`;
   const [x, y, z] = STRIP[id], w = W * z, h = w * 1.5, fit = (v, lo) => Math.min(0, Math.max(lo, v));
   return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${fit(ax * W - x * w, W - w)}px ${fit(H / 2 - y * h, H - h)}px`;

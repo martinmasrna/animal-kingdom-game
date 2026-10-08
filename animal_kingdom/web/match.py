@@ -29,7 +29,7 @@ from . import tutorial
 
 CARDS = load_cards()
 # What a pending choice asks, by the effect step asking it: a choice from your own hand names its verb (the client heads it).
-ASKS = {"mulligan": "mulligan", "magpie_steal": "discard", "raven_dig": "shuffle"}
+ASKS = {"mulligan": "mulligan", "magpie_steal": "discard", "raven_dig": "shuffle", "discard": "discard"}
 MAP_ID = "map_b"
 # One game per match while there is one map: the best-of-3 is part of the game, but its point is the three-map
 # reveal (rules §14), so it comes back with the maps (Martin, 2026-09-30). Rematch carries the loser-first rule.
@@ -566,8 +566,11 @@ class Match:
             # "hidden": the enemy can't choose it right now (Stealth, printed or from an adjacent Armadillo).
             board[cr] = [{"iid": u.iid, "id": u.card_id, "owner": u.owner, "str": effective_strength(st, u),
                           **({"timer": timers[u.iid]} if u.iid in timers else {}),
-                          **({"hidden": True} if not statics.can_be_chosen(st, u, other_player(u.owner)) else {}),
-                          **({"spikes": True} if "Spikes" in st.cards[u.card_id].keywords and not u.retaliation_used else {})} for u in stack]   # until used
+                          **({"hidden": True} if not statics.can_be_chosen(st, u, other_player(u.owner), cr) else {}),
+                          **({"spikes": True} if statics.has_keyword(st, u, "Spikes", cr) and not u.retaliation_used else {}),   # until used
+                          # "armor": it can't be removed (printed, or a neighbour's Capybara); "inked": the Octopus's ink is on it
+                          **({"armor": True} if not statics.can_be_removed(st, u, cr) else {}),
+                          **({"inked": True} if statics.inked(st, u) else {})} for u in stack]
         g = {
             "round": st.turn_counter // 2 + 1,
             "current": st.current,
@@ -644,7 +647,7 @@ class Match:
         p = st.pending
         step = st.effect_stack[-1] if st.effect_stack else {}
         pending = {"mode": p["mode"], "optional": bool(p.get("optional")), "source": self._source(),
-                   "kind": ASKS.get(step.get("op"), "effect"),
+                   "kind": ASKS.get(step.get("then") if step.get("op") == "choose" else step.get("op"), "effect"),
                    "returned": len(step.get("returned", ())) if step.get("op") == "mulligan" else 0,
                    "cap": st.config.mulligan_cap(step.get("player"), st.first_player) if step.get("op") == "mulligan" else 0,
                    "options": []}
