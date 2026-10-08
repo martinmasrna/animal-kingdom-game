@@ -2008,7 +2008,7 @@
         "Egg"
       ],
       "base_strength": 0,
-      "text": "Roar: Scout a Bird. Next turn, remove this and Scout a Bird.",
+      "text": "Roar: Scout a Bird. Next turn, remove this and draw a Bird.",
       "keywords": [],
       "species": "",
       "habitat": "Forest",
@@ -2664,7 +2664,7 @@
         "Hoofed"
       ],
       "base_strength": 4,
-      "text": "Flee. Roar: draw a Hoofed animal.",
+      "text": "Flee. Roar: draw a card.",
       "keywords": [
         "Flee"
       ],

@@ -32,7 +32,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Egg Eater** | 3 | Snake | dynamic | Has +2 strength for each removed Egg. |
 | **Mosquito** | 3 | — | 2 | Flight. Roar: give an adjacent enemy -2 strength. |
 | **Raven** | 3 | Bird | 1 | Flight. Roar: draw 3 cards, then shuffle 2 cards back. |
-| **Bird Egg** | 3 | Egg | 0 | Roar: Scout a Bird. Next turn, remove this and Scout a Bird. |
+| **Bird Egg** | 3 | Egg | 0 | Roar: Scout a Bird. Next turn, remove this and draw a Bird. |
 | **Snake Egg** | 3 | Egg | 0 | Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes. |
 
 <!-- cards:end -->

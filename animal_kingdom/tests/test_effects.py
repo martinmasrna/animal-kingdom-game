@@ -380,7 +380,7 @@ def test_snake_egg_draws_a_snake_now_and_two_when_it_hatches():
     assert sum("Snake" in CARDS[c].tags for c in hand_ids(s, "A")) == CFG.snake_egg_draw + CFG.egg_hatch_draw
 
 
-def test_bird_egg_scouts_now_and_again_when_it_hatches_next_turn():
+def test_bird_egg_scouts_now_and_draws_a_bird_when_it_hatches_next_turn():
     birds = ["owl", "raven", "stoop", "magpie", "ember"]
     s = make_state(current="A", hands={"A": ["bird_egg"]},
                    decks={"A": birds + ["goliath"] * 4, "B": ["lion"] * 6})
@@ -392,10 +392,12 @@ def test_bird_egg_scouts_now_and_again_when_it_hatches_next_turn():
     assert hand_ids(s, "A") == [options[0]]
     assert len(s.decks["A"]) == 8                       # the others went back
     rules.apply_action(s, DrawAction())                 # A's second action ends the turn
+    birds_in_hand = sum("Bird" in CARDS[c].tags for c in hand_ids(s, "A"))
     rules.apply_action(s, DrawAction())                 # B's turn
     rules.apply_action(s, DrawAction())
     assert s.current == "A" and s.owner_of("1,2") is None   # hatched at the start of A's turn
-    assert s.pending is not None and all("Bird" in CARDS[c].tags for c in s.pending["options"])
+    assert s.pending is None                            # no choice at the start of a turn: it draws a Bird
+    assert sum("Bird" in CARDS[c].tags for c in hand_ids(s, "A")) == birds_in_hand + 1
 
 
 def test_scout_with_a_filter_only_shows_matching_cards():

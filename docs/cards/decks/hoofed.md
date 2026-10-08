@@ -32,7 +32,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Cape Buffalo** | 3 | Hoofed | 4 | Roar: remove an adjacent enemy covering an allied Hoofed animal. |
 | **Gazelle** | 3 | Hoofed | 3 | Flee. Roar: gain 5 food. |
 | **Wildebeest** | 3 | Hoofed | 6 | Dusk: if this is grazing, gain 5 food. |
-| **Deer** | 3 | Hoofed | 4 | Flee. Roar: draw a Hoofed animal. |
+| **Deer** | 3 | Hoofed | 4 | Flee. Roar: draw a card. |
 | **Boar** | 3 | Hoofed | 5 | Has +3 strength while grazing. |
 
 <!-- cards:end -->

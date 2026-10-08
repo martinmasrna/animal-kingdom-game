@@ -989,7 +989,8 @@ def _op_bird_egg_hatch(state, step):
     if egg is None:
         return None  # removed before it hatched - no payoff
     _remove_specific(state, cr, egg, by_player=egg.owner, by_effect=False)
-    state.effect_stack.append({"op": "scout", "player": egg.owner, "spec": "tag:Bird", "by_card": egg.card_id})
+    # the hatch draws a Bird, no choice: nothing asks a player to decide at the start of their turn (Martin, 2026-10-08)
+    state.effect_stack.append({"op": "draw_filtered", "player": egg.owner, "n": 1, "spec": "tag:Bird"})
     return None
 
 
@@ -2783,7 +2784,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "cape_buffalo": {"on_place": _cape_buffalo_place},
     "gazelle": {"on_place": _gains("gazelle_food")},
     "wildebeest": {"on_end_of_turn": _wildebeest_eot},
-    "deer": {"on_place": _draws_filtered("tag:Hoofed")},
+    "deer": {"on_place": lambda state, unit, cr: _push_draw(state, unit.owner, 1)},
     # The pool (Great White Shark's Reach is a static; Raksha, Verminus are anthems; Coyote, Cougar statics).
     "octopus": {"on_place": _octopus_ink_place},
     "macaw": {"on_place": _macaw_place},

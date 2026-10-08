@@ -1035,7 +1035,7 @@
      "status": "proposed",
      "str": 0,
      "tag": "Egg",
-     "text": "Roar: Scout a Bird. Next turn, remove this and Scout a Bird."
+     "text": "Roar: Scout a Bird. Next turn, remove this and draw a Bird."
     },
     {
      "habitat": "Jungle",
@@ -2085,7 +2085,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Hoofed",
-     "text": "Flee. Roar: draw a Hoofed animal."
+     "text": "Flee. Roar: draw a card."
     },
     {
      "habitat": "Forest",
