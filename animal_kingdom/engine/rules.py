@@ -59,7 +59,7 @@ def _top_level_actions(state: GameState) -> list[Action]:
     if not _actions_left(state):                   # the turn stays open only for a free roam (Roam)
         return list(effects.legal_roams(state, player)) if effects.free_roams_left(state, player) else []
     actions: list[Action] = []
-    if state.decks[player] and len(state.hands[player]) < state.config.hand_limit:
+    if state.decks[player]:
         actions.append(DrawAction())
     actions.extend(effects.legal_placements(state, player))
     actions.extend(effects.legal_roams(state, player))
@@ -153,9 +153,8 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
 
 
 def _do_draw(state: GameState, player: str) -> None:
-    # Draw up to the per-action count, capped by the hand limit (state.draw caps by deck).
-    n = min(state.config.draw_action_count, state.config.hand_limit - len(state.hands[player]))
-    effects.draw_cards(state, player, n)    # the wrapper fires ON_DRAW (Eon, Black Swan, ...)
+    # Cards past the hand limit burn (effects._fire_draw); state.draw caps by deck.
+    effects.draw_cards(state, player, state.config.draw_action_count)    # the wrapper fires ON_DRAW (Eon, Black Swan, ...)
 
 
 def _resolve_and_maybe_end_turn(state: GameState) -> None:

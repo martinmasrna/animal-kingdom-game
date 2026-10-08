@@ -253,7 +253,6 @@ def _opponent_lethal_next_turn(state: GameState, opponent: str) -> bool:
         state.config.actions_per_turn >= 2
         and state.config.draw_action_count > 0
         and bool(state.decks[opponent])
-        and len(state.hands[opponent]) < state.config.hand_limit
     )
     return can_draw_then_place
 

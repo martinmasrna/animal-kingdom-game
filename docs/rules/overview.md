@@ -39,7 +39,7 @@ A path is a printed connection between two crossroads. Paths determine:
 A region is a closed area surrounded by paths and crossroads. A player controls a region when they occupy every crossroad surrounding it.
 
 ## 3.5 Hand
-'Hand' stands for available units of each player. A hand can contain no more than eight units.
+'Hand' stands for available units of each player. A hand can contain no more than ten units. A player at the limit may still draw: each card drawn past it is revealed and burns, going straight to the Remove Pile (a remove, §3.7; it does not count as drawn, so draw triggers ignore it).
 
 ## 3.6 Deck
 Player's face-down cards, pile he draws from.

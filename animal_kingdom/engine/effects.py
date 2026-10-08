@@ -461,6 +461,12 @@ def _fire_remove_event(state, card_id: str, owner: str, cr, by_player=None, by_c
 def _fire_draw(state, drawn) -> None:
     if drawn:
         state.emit("draw", player=drawn[0].owner, cards=[[u.iid, u.card_id] for u in drawn])
+        # Over the hand limit, the newest cards burn: a remove from hand, and no ON_DRAW.
+        over = len(state.hands[drawn[0].owner]) - state.config.hand_limit
+        if over > 0:
+            burned, drawn = drawn[-over:], drawn[:-over]
+            for inst in burned:
+                remove_from_hand(state, inst.owner, inst)
     for inst in drawn:
         _fire_event(state, "on_draw_event", {"card_id": inst.card_id, "player": inst.owner})
         hook = _hook(state, inst.card_id, "on_draw")     # the drawn card reacting to itself

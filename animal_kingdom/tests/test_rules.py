@@ -128,6 +128,16 @@ def test_two_actions_draw_draws_two_and_keeps_turn_open():
     assert s.current == "B"
 
 
+def test_draw_at_the_hand_limit_burns_the_overflow():
+    full = ["house_cat"] * (TWO_ACTIONS.hand_limit - 1)
+    s = make_state(hands={"A": full, "B": ["lion"]},
+                   decks={"A": ["lion", "caracal", "cheetah"], "B": []}, config=TWO_ACTIONS)
+    rules.apply_action(s, DrawAction())          # one card fits, the newest burns
+    assert len(s.hands["A"]) == TWO_ACTIONS.hand_limit
+    assert s.remove_pile == ["caracal"]          # the deck's top is its end: cheetah came first
+    assert DrawAction() in rules.legal_actions(s)  # a full hand may still draw (and burn)
+
+
 def test_turn_ends_early_when_no_second_action_exists():
     s = make_state(hands={"A": ["lion"], "B": ["lion"]}, config=TWO_ACTIONS)
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))  # hand and deck now empty

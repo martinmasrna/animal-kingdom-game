@@ -139,7 +139,7 @@ class Config:
     # duplicated here - maps are the single source of truth for board food.
 
     # --- Core rules constants (overview.md) ---
-    hand_limit: int = 8                  # max hand size (overview.md §3.5)
+    hand_limit: int = 10                 # max hand size (overview.md §3.5)
     first_player_opening_draw: int = 3   # overview.md §4.3
     second_player_opening_draw: int = 4
     mulligan: bool = True                # overview.md §4.4: blacklist mulligan, first player first

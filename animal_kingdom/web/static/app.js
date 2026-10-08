@@ -946,7 +946,7 @@ function drawGame() {
   turnCue(playing && G.current === you);   // the card shown, flown down, landed and its dust settled
   // The opponent's hand: one card back each, centred across the board from yours; in a replay their cards, face up (the eye hides them).
   const faces = RP.views.length && RP.eye && G.oppHand;
-  const nb = G.handCount[them], step = faces ? Math.min(VIEW.port ? 40 : 72, 504 / Math.max(1, nb - 1)) : VIEW.port ? 36 : 52,   // face up, a gap between cards as in your hand; a full hand (8) stays clear of the replay's controls
+  const nb = G.handCount[them], step = faces ? Math.min(VIEW.port ? 40 : 72, 504 / Math.max(1, nb - 1)) : VIEW.port ? 36 : 52,   // face up, a gap between cards as in your hand; a full hand (10) stays clear of the replay's controls
     bx0 = (VIEW.port ? 184 : STAGE.w / 2) - ((faces ? 66 : 84) + (nb - 1) * step) / 2;   // upright, left of the buttons
   const A = ui.anim, oppDrew = A ? Math.max(0, nb - A.oppHand) : 0;   // their new cards slide down into their hand
   const slot = i => `${i >= nb - oppDrew ? ' drawn' : ''}" style="left:${bx0 + i * step}px;animation-delay:${(i - (nb - oppDrew)) * 0.12}s`;
