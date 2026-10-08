@@ -7,7 +7,7 @@ Tags name kinds of animal people recognise. The broad umbrellas stay retired: no
 | Family | Identity | Role | How it wins |
 |---|---|---|---|
 | Cats | strong on their own, rewarded for taking enemies down (cover then remove, draw on a removal) | midrange, simple, good for newer players | board, then the den |
-| Canines | the pack: stronger the more Canines, buffs that grow the pack | midrange and tempo, simple | board, then the den |
+| Canines | the roaming pack: they move across the board (Roam), buff each other on the board and hunt by position | midrange and tempo, high skill | board, then the den |
 | Rodents | small and many; either stockpile food for one burst turn or swarm the den | combo (Food OTK) or aggro | a food burst, or the den rush |
 | Colony | numbers and castes: queens produce workers, effects count your Colony | a wide engine | food, through numbers |
 | Birds | scouting and card flow (draw, Scout, shuffle), Flight's reach | value and control | outlasting |
@@ -42,7 +42,7 @@ Once the game runs, the meta should hold 2–3 clearly different decks in each o
 | Aggro | Den Rush (reach and removal through the den front, wins on the den) | exists |
 | | Region rush (cheap wide bodies and flyers complete regions early, wins on food before the opponent settles; Flight places anywhere but never on a den) | gap; must stay clearly faster than Hoofed's grazing |
 | Midrange | Cats (trade up, cover and remove) | exists |
-| | Canines (go wide, pump the pack) | exists |
+| | Canines (the roaming pack, hunting by position) | redesign |
 | Control | Egg Control (removal, card flow, big snakes late) | exists |
 | | Remove everything, then bring back the best (Hearthstone's Control Warrior), on a Scavenge keyword for the animals that live off the dead (Vulture, Hyena, Raccoon, Crow) | new |
 | | Arachnid traps (punish what lands near them) | sketch |

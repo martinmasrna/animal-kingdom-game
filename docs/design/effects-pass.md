@@ -24,7 +24,6 @@ Locked:
 | Hippopotamus | R | 8 | Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it. | a Giant; the reaction stays (the client is to show what removed an animal) ~ |
 | Cape Buffalo | R | 6 | While grazing, this has +3 strength. | stands its ground on its own land |
 | Crocodile | R | 8 | Apex Predator. | the ambush at the river crossing; art: the huge Nile crocodile, not the Jaguar's caiman |
-
 | Meerkat | C | 2 | Roar: draw a card. When an enemy is placed next to this, draw a card. | the sentry |
 
 Open: Aardvark, the legendaries; Warthog moves to rare (the herd's den guard), which shifts Savanna's split to rebalance later.
@@ -124,7 +123,8 @@ Its fourth legendary: Omen (a raven; Forest, L, ~3, Bird): "Flight. Roar: put an
 ## Elsewhere, settled in passing
 
 - Cats: Caracal (Savanna, C, 6), "Reach 2.", the leap over the front line onto the engines behind it, which every other Cat can only hit when adjacent (at 5 or less the Eagle practically dominates it); Lynx (Forest, C, 6), "Roar: if placed on top of an enemy, draw a card."; Bobcat (Forest, C, 5), "Roar: if you control another Cat, draw a card." The Cougar and its effect wait for Mountains.
-- Cuckoo (Meadow, R, ~3, Bird): "Flight. Roar: shuffle two Cuckoo Eggs into your opponent's deck." Cuckoo Egg (token, 0): "When you draw this, your opponent draws a card." The opponent's deck is the host's nest: each Egg clogs their deck, then their hand. It stays in the hand of whoever drew it and is theirs to play (a 0-strength animal); with no way to discard, getting rid of it costs one of their actions. A disruption card, hardest on the decks that draw a lot.- Mosquito (City, C, ~1): "Flight. Roar: give an adjacent enemy −2 strength."
+- Cuckoo (Meadow, R, ~3, Bird): "Flight. Roar: shuffle two Cuckoo Eggs into your opponent's deck." Cuckoo Egg (token, 0): "When you draw this, your opponent draws a card." The opponent's deck is the host's nest: each Egg clogs their deck, then their hand. It stays in the hand of whoever drew it and is theirs to play (a 0-strength animal); with no way to discard, getting rid of it costs one of their actions. A disruption card, hardest on the decks that draw a lot.
+- Mosquito (City, C, ~1): "Flight. Roar: give an adjacent enemy −2 strength."
 - Leech (Jungle, 1): "Roar: swap strength with an adjacent animal." It drains its host: the host shrinks, the leech swells. At 1 it can't cover anything, so it lands only on an empty crossroad or one of your own.
 - Opossum (City, R, 2, Marsupial): "Roar: return one of your animals next to this to your hand." A mother gathering her young onto her back; it replays an animal's Roar (Skully, Chipmunk, a removal), a value card for other decks, and the City's seed for the Marsupials' "carrying the young" identity when Australia comes.
 - Clownfish (Coral Reef, later; Fish, C, 2): "Roar: if this is next to one of your Fish, play another Fish." Reserved for the Fish deck.
