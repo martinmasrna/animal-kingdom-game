@@ -27,4 +27,4 @@ Ideally both readings agree. When they don't, the card is flagged, and the fix i
 
 - A Hamster isn't a rare (Martin, 2026-10-08).
 - The Octopus is a rare by feel (Martin, 2026-10-08).
-- The Fox carries a rare's role (a repeatable roaming draw) but feels common: open.
+- How common an animal is in the wild doesn't decide its rarity; how special it feels does, and only a real mismatch counts (a pet or a forgettable rodent on a premium card). The Fox stays rare: its buff-and-roam draw engine would be too much at three copies, and the clever fox of the fables carries a rare fine. The Giants deck already reads this way: Rhinoceros and Hippopotamus are rares, the Elephant and Blue Whale commons (Martin, 2026-10-09).
