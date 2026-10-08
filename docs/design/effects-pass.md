@@ -202,7 +202,7 @@ Imagined games (reasoning, not evidence): the board dominance works from turn 4,
 |---|---|---|---:|---|
 | Brutus (Hoofed) | Savanna | L | 8 | **Hungry 6.** Roar: remove all adjacent animals. |
 | Methuselah | Savanna | L | 3 | **Armor.** At the end of your turn, gain 5 food. |
-| a Sperm Whale (name evoking Moby Dick without citing it, as Eon evokes the Ouroboros: Mocha, the real white whale that inspired the novel, proposed) | Open Ocean | L | | effect open; needs a common or rare Sperm Whale |
+| a Sperm Whale (name evoking Moby Dick without citing it, as Eon evokes the Ouroboros; Mocha, the real white whale behind the novel, proposed) | Open Ocean | L | 10 | **Titan.** Roar: remove all enemies next to your animals. (To try, Martin: on map_b it's close to a full board wipe, everything touching your herd. A 10 can't be covered, so the power has to be in the arrival and nothing may keep working after it: "an enemy placed next to this is removed" locked whole regions for decks without a removal Roar. Dials if too strong: "of strength 7 or less", "next to your Hungry animals", or Brutus's own neighbours. Needs a common or rare Sperm Whale.) |
 | an Oxpecker (proposed; name to come; Bird) | Savanna | L | ~2 | **Flight.** Your Hungry animals next to this don't need to eat. (Oxpeckers live on giants, eating their ticks. Placed between giants, it's guarded by them: an enemy has to reach one of its free sides.) |
 | Rhinoceros (Hoofed) | Savanna | R | 8 | **Hungry 3.** Roar: remove all adjacent enemies of strength 2 or less. |
 | Hippopotamus (Hoofed) | Savanna | R | 8 | **Hungry 3.** When an enemy of strength 3 or less is placed next to this, remove it. |
