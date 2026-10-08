@@ -11,8 +11,8 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 
 test('two people mulligan at the same time', async () => {
   const post = (url, body) => fetch(server.url + url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json());
-  const a = await post('/api/match', { deck: 'cats_midrange', name: 'Ann' });
-  const b = await post(`/api/match/${a.id}/join`, { deck: 'ramp', name: 'Bob' });
+  const a = await post('/api/match', { deck: 'cats', name: 'Ann' });
+  const b = await post(`/api/match/${a.id}/join`, { deck: 'giants', name: 'Bob' });
   const open = async m => { const p = await browser.newPage();
     await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
     await p.evaluate(m => sessionStorage.setItem('ak:seat:' + m.id, m.token), m);

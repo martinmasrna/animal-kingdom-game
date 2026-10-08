@@ -106,9 +106,9 @@ def test_an_apex_eats_ordinary_prey_after_covering_it():
     assert [u.card_id for u in s.board["1,2"]] == ["borealis"] and "lion" in s.remove_pile
 
 
-def test_snow_leopard_lets_an_apex_cat_land_at_equal_strength():
+def test_leopard_lets_an_apex_cat_land_at_equal_strength():
     s = make_state(hands={"A": ["tiger"]})
-    put(s, "2,2", "snow_leopard", "A")                    # A controls a Snow Leopard
+    put(s, "2,2", "leopard", "A")                         # A controls a Leopard
     tiger_str = s.cards["tiger"].base_strength
     prey = put(s, "1,2", "lion", "B")
     prey.strength_counter = tiger_str - s.cards["lion"].base_strength  # equal strength

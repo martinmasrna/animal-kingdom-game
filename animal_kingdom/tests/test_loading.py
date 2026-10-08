@@ -1,4 +1,4 @@
-"""Acceptance: the reworked 98-design pool and Map A load and validate."""
+"""Acceptance: the launch pool (12 starter decks) and Map A load and validate."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ from animal_kingdom.engine.maps import (
 
 # A minimal well-formed record for validation unit tests (new schema).
 GOOD = {
-    "id": "x", "name": "X", "deck": "cats_midrange", "rarity": "common",
+    "id": "x", "name": "X", "deck": "cats", "rarity": "common",
     "tags": [], "base_strength": 3,
 }
 
@@ -34,11 +34,9 @@ GOOD = {
 
 def test_cards_load_full_pool():
     cards = load_cards()
-    # 7 premade decks x 14 designs each = 98 draftable, +1 each for food_otk's and
-    # egg_control's 15th design (see Card.copies / test_pool.DESIGN_COUNT_OVERRIDES),
-    # plus non-deck cards (tokens, reserve).
+    # 12 starter decks x 14 designs each = 168 draftable, plus non-deck cards (bench, tokens, reserve, tutorial).
     from animal_kingdom.engine.cards import DECK_SLUGS
-    assert sum(1 for c in cards.values() if c.deck in DECK_SLUGS) == 100
+    assert sum(1 for c in cards.values() if c.deck in DECK_SLUGS) == 168
     assert all(isinstance(c, Card) for c in cards.values())
 
 
@@ -69,7 +67,8 @@ def test_known_cards_present_with_expected_data():
     assert cards["queen_bee"].tags == frozenset({"Colony", "Queen"})
     assert cards["worker_ant"].tags == frozenset({"Colony", "Worker"})
     assert cards["fathom"].tags == frozenset()  # tagless ('-')
-    assert cards["elephant"].food_cost == 15    # "Costs 15 food" body
+    assert cards["cairn"].food_cost == 15       # "Costs 15 food" body
+    assert cards["elephant"].hungry == 5 and cards["blue_whale"].has_keyword("Titan")
     assert cards["nurse_bee"].has_roar
     assert not cards["guard_hornet"].has_roar
 

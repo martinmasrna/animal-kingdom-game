@@ -21,8 +21,8 @@ from animal_kingdom.recording.writer import (
 def test_schedule_is_deterministic_paired_and_unique():
     kwargs = dict(
         cohort_id="human-v1",
-        human_decks=("ramp", "egg_control"),
-        opponent_decks=("cats_midrange",),
+        human_decks=("giants", "egg_control"),
+        opponent_decks=("cats",),
         opponent_kinds=("random", "greedy"),
         repetitions=2,
         seats=("A", "B"),
@@ -46,8 +46,8 @@ def test_schedule_is_deterministic_paired_and_unique():
 def test_exclude_mirrors_drops_deck_vs_itself():
     kwargs = dict(
         cohort_id="human-v1",
-        human_decks=("ramp", "egg_control", "cats_midrange"),
-        opponent_decks=("ramp", "egg_control", "cats_midrange"),
+        human_decks=("giants", "egg_control", "cats"),
+        opponent_decks=("giants", "egg_control", "cats"),
         opponent_kinds=("greedy",),
         repetitions=1,
         seats=("A", "B"),
@@ -89,11 +89,11 @@ def test_generate_manifest_grouped_keeps_matchups_consecutive():
 
     m = generate_manifest(
         cohort_id="c", human_decks=["food_otk"],
-        opponent_decks=["ramp", "cats_midrange"], opponent_kinds=["greedy"],
+        opponent_decks=["giants", "cats"], opponent_kinds=["greedy"],
         repetitions=3, seats=("A", "B"), base_seed=0, schedule_seed=0,
         map_id="map_b", config=Config.default(), shuffle=False)
     # 3 reps x 2 seats = 6 games per opponent, all of one matchup before the next.
-    assert [g.opponent_deck for g in m.games] == ["ramp"] * 6 + ["cats_midrange"] * 6
+    assert [g.opponent_deck for g in m.games] == ["giants"] * 6 + ["cats"] * 6
 
 
 def test_summarize_cohort_tallies_human_record(tmp_path):
@@ -106,23 +106,23 @@ def test_summarize_cohort_tallies_human_record(tmp_path):
                       "decks": {human_seat: "food_otk", opp_seat: opp_deck}})
             w.append({"type": "result", "winner": winner, "game_valid": valid})
 
-    game("g1.jsonl", "g1", "A", "ramp", "A")                       # human (A) wins
-    game("g2.jsonl", "g2", "B", "ramp", "A")                       # human (B) loses
-    game("g3.jsonl", "g3", "A", "cats_midrange", None)             # draw
-    game("g4.jsonl", "g4", "A", "ramp", "B", valid=False)         # excluded -> ignored
+    game("g1.jsonl", "g1", "A", "giants", "A")                       # human (A) wins
+    game("g2.jsonl", "g2", "B", "giants", "A")                       # human (B) loses
+    game("g3.jsonl", "g3", "A", "cats", None)             # draw
+    game("g4.jsonl", "g4", "A", "giants", "B", valid=False)         # excluded -> ignored
 
     prog = summarize_cohort(sorted(tmp_path.glob("*.jsonl")))
     assert (prog.win, prog.loss, prog.draw) == (1, 1, 1)
     assert prog.completed_ids == {"g1", "g2", "g3"}
-    assert prog.per_opponent["ramp"] == [1, 1, 0]
-    assert prog.per_opponent["cats_midrange"] == [0, 0, 1]
+    assert prog.per_opponent["giants"] == [1, 1, 0]
+    assert prog.per_opponent["cats"] == [0, 0, 1]
     assert prog.win_pct == 50.0                                    # 1 win / 2 decided
 
 
 def test_session_records_replayable_decisions_and_hidden_view(tmp_path):
     config = Config().sweep(max_turns=20)
     setup = GameSetup(
-        "ramp",
+        "giants",
         "egg_control",
         human_seat="A",
         opponent_kind="random",
@@ -172,7 +172,7 @@ def test_session_records_replayable_decisions_and_hidden_view(tmp_path):
 
 
 def test_state_view_to_dict_is_json_safe(tmp_path):
-    setup = GameSetup("ramp", "egg_control", opponent_kind="random", seed=1, map_id="map_a")
+    setup = GameSetup("giants", "egg_control", opponent_kind="random", seed=1, map_id="map_a")
     session = RecorderSession(setup, output_root=tmp_path)
     payload = session.state.view_for(setup.human_seat).to_dict()
     json.dumps(payload)
@@ -187,7 +187,7 @@ def test_schedule_cli_uses_shipped_config_without_retired_preset(tmp_path):
     schedule_main([
         "--id", "default-config",
         "--out", str(output),
-        "--human-decks", "ramp",
+        "--human-decks", "giants",
         "--opponent-decks", "egg_control",
         "--bots", "random",
         "--seats", "A",

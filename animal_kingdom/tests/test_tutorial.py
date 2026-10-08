@@ -20,22 +20,22 @@ def _board(m):
 def test_the_deal_is_fixed_the_player_goes_first_and_there_is_no_mulligan():
     m = _tutorial()
     assert m.tutorial and m.phase == "playing" and m.state.current == "A" and m.state.pending is None
-    assert [u.card_id for u in m.state.hands["A"]] == ["lion", "cape_buffalo", "dire_wolf", "cape_buffalo"]
+    assert [u.card_id for u in m.state.hands["A"]] == ["lion", "tutorial_cape_buffalo", "tutorial_dire_wolf", "tutorial_cape_buffalo"]
 
 
 def test_the_forced_turns_play_out_as_the_lessons_say():
     m = _tutorial()
-    for a in [PlaceAction("lion", ("cr", "1,2")), PlaceAction("cape_buffalo", ("cr", "2,2"))]:
+    for a in [PlaceAction("lion", ("cr", "1,2")), PlaceAction("tutorial_cape_buffalo", ("cr", "2,2"))]:
         m.act("A", a)
     while m.to_act() == "B":
         m.act("B", m.bot_move())
     assert _board(m)["5,2"] == [("B", "rusty")] and _board(m)["4,2"] == [("B", "pup")]
-    m.act("A", PlaceAction("dire_wolf", ("cr", "1,1"))); m.act("A", PlaceAction("cape_buffalo", ("cr", "2,1")))   # the region, closed
+    m.act("A", PlaceAction("tutorial_dire_wolf", ("cr", "1,1"))); m.act("A", PlaceAction("tutorial_cape_buffalo", ("cr", "2,1")))   # the region, closed
     assert m.state.food["A"] == 10, "it pays as the turn ends"
     while m.to_act() == "B":
         m.act("B", m.bot_move())
     m.act("A", DrawAction())
-    assert [u.card_id for u in m.state.hands["A"]] == ["dire_wolf", "pup"]
+    assert [u.card_id for u in m.state.hands["A"]] == ["tutorial_dire_wolf", "pup"]
     assert any(isinstance(a, PlaceAction) and _board(m).get(a.crossroad, [("A",)])[-1][0] == "B" for a in rules.legal_actions(m.state)), "a Pup to cover"
 
 
@@ -121,8 +121,8 @@ def test_lesson_2_can_always_be_finished_wherever_the_player_puts_its_animals():
             return moves
 
         place = lambda card, crs: a(PlaceAction(card, ("cr", rng.choice(crs))))
-        assert [u.card_id for u in m.state.hands["A"]] == ["lynx"] and own("1,2") == "A" and own("5,2") == "B", "the set-up board"
-        place("lynx", empty("lynx"))   # its Roar draws the Eagle
+        assert [u.card_id for u in m.state.hands["A"]] == ["tutorial_lynx"] and own("1,2") == "A" and own("5,2") == "B", "the set-up board"
+        place("tutorial_lynx", empty("tutorial_lynx"))   # its Roar draws the Eagle
         reach = set(x.crossroad for x in legal() if isinstance(x, PlaceAction) and not x.is_hq_capture and x.card_id != "eagle") | {
             n for cr in m.state.board if own(cr) == "A" for n in adj(cr) if not m.state.board.get(n)} | {"1,1", "1,3"} - set(m.state.board)
         unreached = [cr for cr in empty("eagle") if cr not in reach]

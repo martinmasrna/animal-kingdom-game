@@ -223,7 +223,7 @@ def test_ignores_hidden_information():
 # --------------------------------------------------------------------- 7: determinism
 
 def test_choose_is_deterministic():
-    s = new_game(load_premade_deck("ramp"), load_premade_deck("aggro_hq_rush"), seed=3)
+    s = new_game(load_premade_deck("giants"), load_premade_deck("den_rush"), seed=3)
     actor = s.player_to_act()
     legal = rules.legal_actions(s)
     a1 = small_turn(seed=0).choose(s.view_for(actor), legal, s)
@@ -233,7 +233,7 @@ def test_choose_is_deterministic():
 
 @pytest.mark.slow
 def test_serial_and_parallel_simulations_match():
-    pairs = [("ramp", "cats_midrange")]
+    pairs = [("giants", "cats")]
     kw = dict(bots=("turn", "greedy"), map_id="map_b", config=TWO_ACTION)
     serial = run_pairs(pairs, 4, base_seed=683470156, jobs=1, **kw)
     parallel = run_pairs(pairs, 4, base_seed=683470156, jobs=2, **kw)
@@ -271,10 +271,11 @@ def test_cats_plays_twin_enabler_before_the_twin():
 
 
 def test_canine_buffs_before_the_strength_gated_payoff():
-    # Coyote only draws at 5+ strength. Raksha (+2 to your other Canines) must land first so
-    # the str-3 Coyote reaches 5 and its Roar fires instead of fizzling.
+    # The Unnamed Canine only draws at 5+ strength. Raksha (+1 to your other Canines) must land first so
+    # the str-4 Canine (3, trained +1 in hand) reaches 5 and its Roar fires instead of fizzling.
     s = make_state(current="A", hands={"A": ["raksha", "unnamed_canine"]},
-                   decks={"A": ["dog", "dog", "dog"], "B": ["mouse"] * 4}, config=TWO_ACTION)
+                   decks={"A": ["mouse", "mouse", "mouse"], "B": ["mouse"] * 4}, config=TWO_ACTION)
+    next(u for u in s.hands["A"] if u.card_id == "unnamed_canine").strength_counter = 1
     bot = small_turn()
     first = bot.choose(s.view_for("A"), rules.legal_actions(s), s)
     assert isinstance(first, PlaceAction) and first.card_id == "raksha"
@@ -291,9 +292,9 @@ def test_rattlesnake_grows_from_ravens_two_shuffles():
     assert s.card_strength_counters["A"]["rattlesnake"] == 2
 
 
-def test_ramp_pays_food_for_the_big_body_roar():
-    # Brutus costs 15 food and clears adjacent enemies. With food in the bank TurnBot spends
-    # it to play the big body; placing it on the connected HQ front next to the enemy wipes it.
+def test_giants_land_brutus_to_clear_the_den_front():
+    # Brutus clears every adjacent animal. Placing it on the connected HQ front next to the
+    # enemy chain wipes the enemy off A's den front.
     s = make_state(current="A", hands={"A": ["bulwark"]},
                    decks={"A": ["mouse"] * 3, "B": ["mouse"] * 4},
                    food={"A": 30, "B": 0}, config=TWO_ACTION)
@@ -303,7 +304,6 @@ def test_ramp_pays_food_for_the_big_body_roar():
     bot = small_turn()
     play_turn(bot, s)
     assert "bulwark" in own_ids(s, "A")
-    assert s.food["A"] <= 15                              # paid the 15-food cost
     top = s.top_unit("1,2")
     assert top is None or top.owner == "A"                # enemy on A's HQ front neutralized
 

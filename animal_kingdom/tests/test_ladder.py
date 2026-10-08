@@ -49,7 +49,7 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             a, b = [await (await c.post("/api/profile", json={})).json() for _ in range(2)]
             ha, hb = {"X-AK-Key": a["code"]}, {"X-AK-Key": b["code"]}
             # alone: a bot near your rating, on the ladder
-            m = await (await c.post("/api/ranked", json={"deck": "cats_midrange"}, headers=ha)).json()
+            m = await (await c.post("/api/ranked", json={"deck": "cats"}, headers=ha)).json()
             match = server.hub.matches[m["id"]]
             bot = match.seats["B"]   # a seeded bot within reach of a new player's 1500 (nearest_bot: among the five nearest decks)
             assert bot.is_bot and bot.ladder.startswith("bot:") and abs(server.ladder.get(bot.ladder).rating - 1500) < 250
@@ -61,8 +61,8 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             row = next(r for r in (await (await c.get("/api/leaderboard", headers=ha)).json())["rows"] if r["name"] == f"{level.capitalize()} Bot")
             assert seats["A"]["rating"] == "1500?" and seats["B"]["rating"] == row["rating"]
             # two people at once: they meet each other
-            ra, rb = await asyncio.gather(c.post("/api/ranked", json={"deck": "ramp"}, headers=ha),
-                                          c.post("/api/ranked", json={"deck": "aggro_hq_rush"}, headers=hb))
+            ra, rb = await asyncio.gather(c.post("/api/ranked", json={"deck": "giants"}, headers=ha),
+                                          c.post("/api/ranked", json={"deck": "den_rush"}, headers=hb))
             ma, mb = await ra.json(), await rb.json()
             assert ma["id"] == mb["id"] and {ma["seat"], mb["seat"]} == {"A", "B"}
             pair = server.hub.matches[ma["id"]]
@@ -83,7 +83,7 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
 
 def test_a_seed_file_sets_the_bots_once(tmp_path):
     import json, sqlite3
-    L = ladder.Ladder(sqlite3.connect(":memory:"), ["cats_midrange", "ramp"])
+    L = ladder.Ladder(sqlite3.connect(":memory:"), ["cats", "giants"])
     f = tmp_path / "seed.json"
     f.write_text(json.dumps({"version": "v1", "ratings": {"bot:expert:ramp": 1777.0, "bot:easy:cats_midrange": 1111.0}}))
     assert L.apply_seed(f) and round(L.get("bot:expert:ramp").rating) == 1777
@@ -108,7 +108,7 @@ def test_a_bot_that_fails_or_overthinks_still_moves(monkeypatch):
         async def run():
             async with TestClient(TestServer(server.make_app())) as c:
                 a = await (await c.post("/api/profile", json={})).json()
-                m = await (await c.post("/api/ranked", json={"deck": "cats_midrange"}, headers={"X-AK-Key": a["code"]})).json()
+                m = await (await c.post("/api/ranked", json={"deck": "cats"}, headers={"X-AK-Key": a["code"]})).json()
                 match = server.hub.matches[m["id"]]
                 match.ready("A") if match.phase != "playing" else None
                 server.hub.kick_bot(match)
@@ -125,8 +125,8 @@ def test_a_settled_player_still_moves_about_15_for_an_even_game():
     games they've played; bots keep their own steady BOT_RD."""
     import sqlite3
     from animal_kingdom.web.ladder import Ladder, PLAYER_RD_FLOOR, BOT_RD, bot_id
-    lad = Ladder(sqlite3.connect(":memory:"), ["cats_midrange"])
-    bot = bot_id("normal", "cats_midrange")
+    lad = Ladder(sqlite3.connect(":memory:"), ["cats"])
+    bot = bot_id("normal", "cats")
     for _ in range(60):   # a long record: without the floor its uncertainty would shrink far below
         lad.result("me", bot); lad.result(bot, "me")
     me = lad.get("me")
@@ -148,19 +148,19 @@ def test_a_player_at_the_top_meets_five_decks_and_never_the_same_one_twice_runni
     last bot games (Martin, 2026-10-02: variety at the top)."""
     import random, sqlite3
     from animal_kingdom.web.ladder import Ladder, bot_id, parse_bot
-    decks = ["cats_midrange", "aggro_hq_rush", "food_otk", "canine_buff_tempo", "ramp", "colony_food_swarm", "egg_control"]
+    decks = ["cats", "den_rush", "food_otk", "canines", "giants", "colony", "egg_control"]
     lad = Ladder(sqlite3.connect(":memory:"), decks)
-    seed = {("expert", "cats_midrange"): 1776, ("expert", "aggro_hq_rush"): 1716, ("normal", "cats_midrange"): 1716, ("expert", "food_otk"): 1685,
-            ("expert", "canine_buff_tempo"): 1670, ("expert", "ramp"): 1670, ("normal", "colony_food_swarm"): 1641, ("expert", "colony_food_swarm"): 1537,
+    seed = {("expert", "cats"): 1776, ("expert", "den_rush"): 1716, ("normal", "cats"): 1716, ("expert", "food_otk"): 1685,
+            ("expert", "canines"): 1670, ("expert", "giants"): 1670, ("normal", "colony"): 1641, ("expert", "colony"): 1537,
             ("expert", "egg_control"): 1256}
     lad.seed_bots({bot_id(l, d): r for (l, d), r in seed.items()})
     rng = random.Random(7)
     met = {parse_bot(lad.nearest_bot(2200, rng))[1] for _ in range(300)}
-    assert met == {"cats_midrange", "aggro_hq_rush", "food_otk", "canine_buff_tempo", "ramp"}, met
+    assert met == {"cats", "den_rush", "food_otk", "canines", "giants"}, met
     for _ in range(100):
-        assert parse_bot(lad.nearest_bot(2200, rng, avoid={"cats_midrange", "ramp"}))[1] not in {"cats_midrange", "ramp"}
+        assert parse_bot(lad.nearest_bot(2200, rng, avoid={"cats", "giants"}))[1] not in {"cats", "giants"}
     picks = [lad.nearest_bot(2200, rng) for _ in range(200)]
-    assert bot_id("normal", "cats_midrange") not in picks, "of one deck, only its nearest bot"
+    assert bot_id("normal", "cats") not in picks, "of one deck, only its nearest bot"
 
 
 def test_home_shows_the_rank_your_leaderboard_row_has(monkeypatch):
@@ -194,10 +194,10 @@ def test_cancelling_a_ranked_search_leaves_the_queue(monkeypatch):
         async with TestClient(TestServer(server.make_app())) as c:
             a, b = [await (await c.post("/api/profile", json={})).json() for _ in range(2)]
             ha, hb = {"X-AK-Key": a["code"]}, {"X-AK-Key": b["code"]}
-            first = asyncio.ensure_future(c.post("/api/ranked", json={"deck": "ramp"}, headers=ha))
+            first = asyncio.ensure_future(c.post("/api/ranked", json={"deck": "giants"}, headers=ha))
             await asyncio.sleep(0.2)
             await c.delete("/api/ranked", headers=ha)
             assert (await (await first).json()) == {"cancelled": True}
-            m = await (await c.post("/api/ranked", json={"deck": "ramp"}, headers=hb)).json()
+            m = await (await c.post("/api/ranked", json={"deck": "giants"}, headers=hb)).json()
             assert server.hub.matches[m["id"]].seats["B"].is_bot, "paired with a person who had left"
     asyncio.run(run())

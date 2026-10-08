@@ -10,7 +10,8 @@ import { track } from './log.js';
 
 // Each family's medallion: the card whose animal reads clearest at 40 px (chosen side by side at that size).
 const FAMILIES = [['Cat', 'lion'], ['Canine', 'clarion'], ['Rodent', 'chinchilla'], ['Colony', 'worker_bee'], ['Bird', 'andean_condor'],
-  ['Snake', 'viper'], ['Bear', 'polar_bear'], ['Megafauna', 'elephant'], ['Lizard', 'chameleon']];
+  ['Snake', 'viper'], ['Bear', 'polar_bear'], ['Hoofed', 'rhinoceros'], ['Fish', 'sardine'], ['Primate', 'gorilla'], ['Arachnid', 'tarantula'],
+  ['Lizard', 'chameleon']];
 const DECKS_MAX = 20;   // as the server's profiles.DECKS_MAX
 const RANK = { legendary: 0, rare: 1, common: 2 }, LIMIT = { legendary: 1, rare: 2, common: 3 }, CAP = { legendary: 4, rare: 8 };
 const sv = c => c.str === '*' ? -1 : c.str;
@@ -28,7 +29,8 @@ export const ICON = {
 };
 
 // A round head crop of the card art, M px across (CROP: centre x, centre y, diameter as fractions of width, height, width).
-const med = (id, M) => { const [cx, cy, D] = CROP[id], w = M / D, h = w * 1.5;
+const med = (id, M) => { if (!CROP[id]) return '';   // not painted yet: a plain medallion
+  const [cx, cy, D] = CROP[id], w = M / D, h = w * 1.5;
   return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${M / 2 - cx * w}px ${M / 2 - cy * h}px`; };
 // Copies as dots: filled for the copies in the deck; with `max`, hollow for the ones still allowed.
 const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');

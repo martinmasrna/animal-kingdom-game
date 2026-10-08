@@ -49,7 +49,7 @@ def test_prefers_stronger_of_two_placements():
 
 
 def test_choose_is_deterministic():
-    s = new_game(load_premade_deck("ramp"), load_premade_deck("aggro_hq_rush"), seed=3)
+    s = new_game(load_premade_deck("giants"), load_premade_deck("den_rush"), seed=3)
     actor = s.player_to_act()
     legal = rules.legal_actions(s)
     a1 = GreedyBot(seed=0).choose(s.view_for(actor), legal, s)
@@ -249,14 +249,14 @@ def test_coverage_exposure_needs_reachability():
 
 def test_default_depth_matches_original_1_ply_score():
     # depth=1 (the default) must be exactly the old behaviour: no fast-forwarding at all.
-    s = new_game(load_premade_deck("ramp"), load_premade_deck("aggro_hq_rush"), seed=3)
+    s = new_game(load_premade_deck("giants"), load_premade_deck("den_rush"), seed=3)
     nxt = s.clone()
     rules.apply_action(nxt, rules.legal_actions(nxt)[0])
     assert GreedyBot(seed=0)._rollout_value(nxt, "A", 0) == evaluate(nxt, "A", W)
 
 
 def test_lookahead_is_deterministic():
-    s = new_game(load_premade_deck("ramp"), load_premade_deck("aggro_hq_rush"), seed=3)
+    s = new_game(load_premade_deck("giants"), load_premade_deck("den_rush"), seed=3)
     actor = s.player_to_act()
     legal = rules.legal_actions(s)
     a1 = GreedyBot(depth=3, seed=0).choose(s.view_for(actor), legal, s)
@@ -264,24 +264,6 @@ def test_lookahead_is_deterministic():
     assert a1 == a2
 
 
-def test_pending_payoff_surfaces_grizzly_delayed_removal_at_1_ply():
-    # A strength-7 blocker (stronger than Grizzly Bear's str-6 body and my other cards) can't be
-    # covered directly by anything I hold - the only way to clear it is Grizzly Bear's "in 2
-    # turns, remove a random adjacent enemy" roar. The blind eval (pending_payoff=0)
-    # treats Grizzly as a plain vanilla body and needed deep own-line lookahead to play the
-    # position forward until the removal fired; pending_payoff now credits the scheduled
-    # removal directly, so the default 1-ply GreedyBot finds it without any lookahead. (That
-    # subsumes the old lookahead-only demonstration of this exact line.)
-    one_action = Config.default().sweep(actions_per_turn=1, draw_action_count=2)
-    s = make_state(hands={"A": ["grizzly_bear", "lion", "mouse", "mouse"], "B": ["mouse"]},
-                   decks={"A": ["mouse"] * 5, "B": ["mouse"] * 5}, config=one_action)
-    put(s, "2,2", "lion", "B")
-    legal = rules.legal_actions(s)
-    grizzly = PlaceAction("grizzly_bear", ("cr", "1,2"))
-
-    blind = GreedyBot(seed=0, weights=GreedyWeights(pending_payoff=0.0))
-    assert blind.choose(s.view_for("A"), legal, s) != grizzly   # 1-ply blind eval misses it
-    assert GreedyBot(seed=0).choose(s.view_for("A"), legal, s) == grizzly  # the fix finds it
 
 
 # --------------------------------------------------------- wasted-roar detection
@@ -317,8 +299,8 @@ def test_passive_rules_text_is_not_a_fizzled_roar():
 
 
 def test_scheduled_roar_is_not_fizzled():
-    s = make_state(hands={"A": ["grizzly_bear"]})
-    action = PlaceAction("grizzly_bear", ("cr", "1,2"))
+    s = make_state(hands={"A": ["black_bear"]})
+    action = PlaceAction("black_bear", ("cr", "1,2"))
     nxt = s.clone()
     rules.apply_action(nxt, action)
     assert nxt.scheduled

@@ -12,9 +12,9 @@ test('opening the game in a new tab takes you back into the match you are playin
   await one.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   const id = await one.evaluate(async () => {
     const r = await fetch('/api/match', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-AK-Key': localStorage.getItem('ak:key') },
-      body: JSON.stringify({ deck: 'cats_midrange' }) });
+      body: JSON.stringify({ deck: 'cats' }) });
     const id = (await r.json()).id;   // a friend joins: a match between two people, which always brings you back
-    await fetch(`/api/match/${id}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deck: 'ramp', name: 'Friend' }) });
+    await fetch(`/api/match/${id}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deck: 'giants', name: 'Friend' }) });
     return id; });
   await one.close();   // the tab, and its seat token, are gone
   const two = await browser.newPage();

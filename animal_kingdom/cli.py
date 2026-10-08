@@ -47,13 +47,18 @@ def _console_for(stream) -> Console:
 # truth is docs/cards/decks/README.md, which isn't shipped as data). Keep the slugs in sync
 # with engine.cards.DECK_SLUGS.
 _DECK_BLURBS = {
-    "cats_midrange": "mono-Cat tempo / removal",
-    "egg_control": "Snake/Bird/Egg draw-shuffle-remove into food",
-    "colony_food_swarm": "mono-Colony swarm into food",
-    "ramp": "ramp food into huge 'Costs 15' bodies",
-    "food_otk": "sacrifice + Deathrattle food OTK",
-    "aggro_hq_rush": "cheap chained bodies + reach to capture the HQ",
-    "canine_buff_tempo": "mono-Canine persistent strength buffs",
+    "aristocrats": "your own animals die on purpose, and every death pays",
+    "canines": "the pack roams the board and hunts by position",
+    "cats": "mono-Cat tempo / removal",
+    "colony": "mono-Colony swarm into food",
+    "den_rush": "cheap chained bodies + reach to capture the den",
+    "egg_control": "Snake/Bird/Egg removal and card flow",
+    "fish": "one card becomes a school: many small Fish, many regions",
+    "food_aggro": "Rodent burn: every Roar a chunk of food",
+    "food_otk": "a fortress around the food-tripling Squirrel",
+    "giants": "feed the giants, land bodies nothing covers",
+    "handlock": "train in hand, then unveil",
+    "hoofed": "hold the pasture, win on food",
 }
 
 # Opponent levels, in menu order: label -> bot kind understood by _make_controller.

@@ -19,7 +19,7 @@ from typing import Optional
 from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
-from ..engine.cards import load_cards
+from ..engine.cards import STARTER_DECKS, load_cards
 from ..engine.effects import roar_condition
 from ..engine.maps import load_map
 from ..engine.state import EngineError, GameState, Result, new_game, other_player
@@ -29,7 +29,7 @@ from . import tutorial
 
 CARDS = load_cards()
 # What a pending choice asks, by the effect step asking it: a choice from your own hand names its verb (the client heads it).
-ASKS = {"mulligan": "mulligan", "magpie_steal": "discard", "raven_dig": "shuffle"}
+ASKS = {"mulligan": "mulligan", "magpie_steal": "discard", "raven_dig": "shuffle", "discard": "discard"}
 MAP_ID = "map_b"
 # One game per match while there is one map: the best-of-3 is part of the game, but its point is the three-map
 # reveal (rules §14), so it comes back with the maps (Martin, 2026-09-30). Rematch carries the loser-first rule.
@@ -45,9 +45,9 @@ EVENTS_KEPT = 200            # a view carries the game's last events: enough for
 TIMEOUTS_TO_LOSE = 3         # turns in a row a player's clock ran out: they have left, and lose (Martin, 2026-10-01)
 
 # Menu labels for the premade decks (the design mockups' names).
-DECK_NAMES = {"cats_midrange": "Cats", "canine_buff_tempo": "Canines", "aggro_hq_rush": "Aggro",
-              "colony_food_swarm": "Colony", "egg_control": "Egg", "food_otk": "Food", "ramp": "Ramp",
-              "goodstuff": "Goodstuff", **tutorial.NAMES}
+DECK_NAMES = {**{d["slug"]: d["name"] for d in STARTER_DECKS}, **tutorial.NAMES}
+# The card whose art covers each starter deck (cards.json, from the card workbench).
+STARTER_COVERS = {d["slug"]: d.get("cover", "") for d in STARTER_DECKS}
 
 # Easy / Normal / Expert, as in the play screen: the same bot kinds, with the same settings, the
 # simulations measure (a bare RefereeBot() is an untested configuration).
@@ -566,8 +566,11 @@ class Match:
             # "hidden": the enemy can't choose it right now (Stealth, printed or from an adjacent Armadillo).
             board[cr] = [{"iid": u.iid, "id": u.card_id, "owner": u.owner, "str": effective_strength(st, u),
                           **({"timer": timers[u.iid]} if u.iid in timers else {}),
-                          **({"hidden": True} if not statics.can_be_chosen(st, u, other_player(u.owner)) else {}),
-                          **({"spikes": True} if "Spikes" in st.cards[u.card_id].keywords and not u.retaliation_used else {})} for u in stack]   # until used
+                          **({"hidden": True} if not statics.can_be_chosen(st, u, other_player(u.owner), cr) else {}),
+                          **({"spikes": True} if statics.has_keyword(st, u, "Spikes", cr) and not u.retaliation_used else {}),   # until used
+                          # "armor": it can't be removed (printed, or a neighbour's Capybara); "inked": the Octopus's ink is on it
+                          **({"armor": True} if not statics.can_be_removed(st, u, cr) else {}),
+                          **({"inked": True} if statics.inked(st, u) else {})} for u in stack]
         g = {
             "round": st.turn_counter // 2 + 1,
             "current": st.current,
@@ -587,6 +590,9 @@ class Match:
                       **({"ready": True} if roar_condition(st, s, u.card_id) else {})}
                      for u in st.hands[s]],
             "handCount": {p: len(st.hands[p]) for p in "AB"},
+            # the opponent's hand, face up, while they play with it revealed (your legendary Giraffe)
+            **({"revealedHand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u)} for u in st.hands[opp]]}
+               if statics.hand_revealed(st, opp) else {}),
             "handLimit": st.config.hand_limit,
             "deckCount": {p: len(st.decks[p]) for p in "AB"},
             "deckLeft": dict(Counter(st.decks[s])),
@@ -641,7 +647,7 @@ class Match:
         p = st.pending
         step = st.effect_stack[-1] if st.effect_stack else {}
         pending = {"mode": p["mode"], "optional": bool(p.get("optional")), "source": self._source(),
-                   "kind": ASKS.get(step.get("op"), "effect"),
+                   "kind": ASKS.get(step.get("then") if step.get("op") == "choose" else step.get("op"), "effect"),
                    "returned": len(step.get("returned", ())) if step.get("op") == "mulligan" else 0,
                    "cap": st.config.mulligan_cap(step.get("player"), st.first_player) if step.get("op") == "mulligan" else 0,
                    "options": []}

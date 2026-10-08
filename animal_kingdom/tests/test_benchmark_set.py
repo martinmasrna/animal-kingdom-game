@@ -15,7 +15,7 @@ from animal_kingdom.sim.runner import GameRecord
 
 
 def _rec(winner, drawn_a=(), drawn_b=()):
-    return GameRecord("baseline", "cats_midrange", 0, "A", winner, "food", 10,
+    return GameRecord("baseline", "cats", 0, "A", winner, "food", 10,
                       frozenset(drawn_a), frozenset(drawn_b))
 
 
@@ -52,7 +52,7 @@ def test_fold_only_counts_a_card_in_games_it_was_drawn():
 def test_report_mode_is_not_part_of_the_run_identity(tmp_path, monkeypatch):
     """--report picks what's printed; it must not fork the checkpoint or the games."""
     ckpt = tmp_path / "x.ckpt.json"
-    args = ["--pilot", "random", "--games", "1", "--field", "cats_midrange",
+    args = ["--pilot", "random", "--games", "1", "--field", "cats",
             "--checkpoint", str(ckpt)]
     bs.main(args + ["--report", "self"])
     key = json.loads(ckpt.read_text())["run_key"]
@@ -67,10 +67,10 @@ def test_v1_checkpoint_is_refused_rather_than_misread(tmp_path):
     ckpt = tmp_path / "old.ckpt.json"
     ckpt.write_text(json.dumps({
         "run_key": {"pilot": "random", "games": 1, "base_seed": 715000,
-                    "field": ["cats_midrange"], "deck": bs.DECKLIST, "config": "None",
+                    "field": ["cats"], "deck": bs.DECKLIST, "config": "None",
                     "measure": "self"},
-        "matchups": {"cats_midrange": {"n": 2, "credit": 1.0, "cards": {"lion": [1.0, 2]}}},
+        "matchups": {"cats": {"n": 2, "credit": 1.0, "cards": {"lion": [1.0, 2]}}},
     }))
     with pytest.raises(SystemExit, match="one seat only"):
-        bs.main(["--pilot", "random", "--games", "1", "--field", "cats_midrange",
+        bs.main(["--pilot", "random", "--games", "1", "--field", "cats",
                  "--checkpoint", str(ckpt)])

@@ -19,9 +19,9 @@ from ..engine.config import Config
 # (turn 1) and closes the +10 region with the other two (turn 2); turn 3 draws a Wolf and a Pup (1: the cover lesson's other half, 1 can't beat 1) and covers a Pup with
 # one; turn 4 draws the Squirrel, whose Roar (gain 10 food) has no condition, so it doesn't glow: the glow is lesson 2's. No
 # Roar comes before it; the rest are strong animals and Roars to meet later.
-PLAYER_DECK = ["lion", "cape_buffalo", "dire_wolf", "cape_buffalo", "dire_wolf", "pup", "squirrel", "lion", "cape_buffalo",
-               "lion", "dire_wolf", "squirrel", "cape_buffalo", "lion", "dire_wolf", "dire_wolf", "cape_buffalo", "lion",
-               "cape_buffalo", "lion"]   # after the Squirrel only plain animals and Squirrels: no target Roar, no glow in lesson 1
+PLAYER_DECK = ["lion", "tutorial_cape_buffalo", "tutorial_dire_wolf", "tutorial_cape_buffalo", "tutorial_dire_wolf", "pup", "squirrel", "lion", "tutorial_cape_buffalo",
+               "lion", "tutorial_dire_wolf", "squirrel", "tutorial_cape_buffalo", "lion", "tutorial_dire_wolf", "tutorial_dire_wolf", "tutorial_cape_buffalo", "lion",
+               "tutorial_cape_buffalo", "lion"]   # after the Squirrel only plain animals and Squirrels: no target Roar, no glow in lesson 1
 PLAYER_DECK += PLAYER_DECK[7:] + PLAYER_DECK[7:10]   # 36 cards: a slow first game never runs out
 # The opponent: wild dogs (1) that any animal can cover. None of them walls its den: the march must reach it before
 # the player's food reaches 100 (a 7 in front of the den forced a detour, and food won first).
@@ -31,11 +31,11 @@ OPPONENT_DECK = ["rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup
 # Eagle (Flight, on your own animal first); the next draw brings the Squirrel (food from a Roar) and the Black Mamba
 # (removes up to 5: the opponent's Eagle), the one after the Polar Bear (8, Apex Predator: it eats a 7 of the wall, and
 # the den falls); then animals.
-PLAYER_DECK_2 = ["lynx", "eagle", "squirrel", "black_mamba", "polar_bear", "dire_wolf", "lion",
-                 "squirrel", "cape_buffalo", "dire_wolf", "lion", "chipmunk", "cape_buffalo", "dire_wolf", "lion",
-                 "squirrel", "cape_buffalo", "dire_wolf", "lion", "chipmunk", "cape_buffalo", "dire_wolf", "lion",
-                 "squirrel", "cape_buffalo", "dire_wolf", "lion", "cape_buffalo", "dire_wolf", "lion", "squirrel",
-                 "cape_buffalo", "dire_wolf", "lion"]
+PLAYER_DECK_2 = ["tutorial_lynx", "eagle", "squirrel", "black_mamba", "polar_bear", "tutorial_dire_wolf", "lion",
+                 "squirrel", "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion", "tutorial_chipmunk", "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion",
+                 "squirrel", "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion", "tutorial_chipmunk", "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion",
+                 "squirrel", "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion", "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion", "squirrel",
+                 "tutorial_cape_buffalo", "tutorial_dire_wolf", "lion"]
 # Its opponent walls all three crossroads before its den with 7s (a 7 can't cover a 7: only the Polar Bear gets in), flies its Eagle
 # onto the Squirrel (stacks), then plays wild dogs.
 OPPONENT_DECK_2 = ["eagle"] + OPPONENT_DECK[1:]
@@ -59,8 +59,8 @@ AMBUSH = {2: ("eagle", SQUIRREL)}
 
 # Lesson 2 starts from a set-up board (Martin, from the cold reviews: placing the Lion and Buffalo again taught nothing):
 # the player's Lion and Buffalo in a chain from the den, the opponent's den guarded by three 7s.
-SET_UP = {2: [("A", "lion", "1,2"), ("A", "cape_buffalo", "2,2"),
-              ("B", "dire_wolf", "5,1"), ("B", "cape_buffalo", "5,2"), ("B", "lion", "5,3")]}
+SET_UP = {2: [("A", "lion", "1,2"), ("A", "tutorial_cape_buffalo", "2,2"),
+              ("B", "tutorial_dire_wolf", "5,1"), ("B", "tutorial_cape_buffalo", "5,2"), ("B", "lion", "5,3")]}
 
 
 def set_up(state, lesson: int) -> None:

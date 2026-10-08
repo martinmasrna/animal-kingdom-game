@@ -1,16 +1,6 @@
 # Food OTK
 
-Pure food combo: cross the 100-food win threshold in one burst turn.
-
-## The plan
-
-Dig, then go wide with cheap Rodents in one turn (Chinchilla's extra action, Greywhisker's extra play). Rat King converts the wide board into a food burst, every enabler stacks on it, and Scrooge doubles the turn's haul. The defensive bodies (Porcupine, Hedgehog, Armadillo) buy the turns to assemble it, and Armadillo's aura shields the fragile pieces from chosen removal.
-
-## Signature mechanic: food gained this turn
-
-A per-turn counter. Scrooge gains again whatever you gained this turn; Hamster, Muskrat and Groundhog each pay off once you've gained 10 or more this turn (`fed_threshold`). Watch Chinchilla stacking: two in one turn give two extra actions next turn, with no cap.
-
-The wall and sacrifice cards cut from this deck are kept for a future Arachnid aristocrats deck in [`../shelved-cards.md`](../shelved-cards.md).
+What each card is for: [`../../design/effects-pass.md`](../../design/effects-pass.md), its Food OTK section. The cards themselves come from the card workbench (`tools/card-workbench/`, converted by `convert.py`); the table below is generated from cards.json.
 
 ## Cards
 
@@ -21,29 +11,28 @@ The wall and sacrifice cards cut from this deck are kept for a future Arachnid a
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Fathom** | 1 | — | 7 | Roar: Scout a legendary animal. |
-| **Greywhisker** | 1 | Rodent | 1 | Roar: gain 1 food. Draw a card. You may play another animal. |
-| **Barley** | 1 | Rodent | 4 | Roar: gain 4 food for each other Rodent you control. Draw a card. |
-| **Scrooge** | 1 | Rodent | 4 | Roar: gain food equal to the food you gained this turn. |
+| **Squirrel** | 1 | Rodent | 3 | Roar: lose all your food. In 2 turns, gain three times as much. |
+| **Honey Badger** | 1 | — | 5 | Armor. Stealth. Poison. Spikes. |
+| **Octopus** | 1 | — | 3 | Roar: this becomes a copy of an adjacent animal. |
 
 ### Rare
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Flying Squirrel** | 2 | Rodent | 3 | Flight. Roar: gain 10 food. |
+| **Capybara** | 2 | Rodent | 6 | Your adjacent animals have Armor. |
 | **Porcupine** | 2 | Rodent | 7 | Spikes. |
-| **Chinchilla** | 2 | Rodent | 4 | Roar: next turn, take 1 additional action. |
+| **Golden Orb-Weaver** | 2 | Arachnid | 4 | When an enemy with Flight is placed adjacent to this, remove it. |
 | **Armadillo** | 2 | — | 7 | Armor. Your adjacent animals have Stealth. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Squirrel** | 3 | Rodent | 3 | Roar: gain 10 food. |
-| **Chipmunk** | 3 | Rodent | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. |
-| **Hedgehog** | 2 | — | 5 | Spikes. Roar: gain 5 food. |
-| **Hamster** | 2 | Rodent | 3 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
-| **Muskrat** | 3 | Rodent | 2 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. |
-| **Groundhog** | 3 | Rodent | 4 | Roar: if you gained 10 or more food this turn, gain 10 food. |
-| **Gopher** | 2 | Rodent | 4 | Roar: if you played a Rodent last turn, gain 10 food. |
+| **Hedgehog** | 3 | Rodent | 5 | Spikes. Roar: gain 5 food. |
+| **Dart Frog** | 3 | — | 1 | Reach 2. Poison. |
+| **Jellyfish** | 3 | — | 4 | Poison. |
+| **Black Bear** | 3 | Bear | 5 | Roar: in 2 turns, draw 2 cards. |
+| **Tortoise** | 3 | — | 4 | Armor. Roar: gain 5 food for each of your animals with Armor. |
+| **Owl** | 3 | Bird | 2 | Flight. Roar: Scout a card. |
 
 <!-- cards:end -->

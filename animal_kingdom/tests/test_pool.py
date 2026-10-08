@@ -1,4 +1,4 @@
-"""Structural tests for the reworked 98-design pool + 7 premade 4-4-6 decks.
+"""Structural tests for the launch pool: 12 starter 4-4-6 decks from the card workbench.
 
 These assert the *shape* of the static data (counts, uniqueness, domains, the 4-4-6
 expansion) — not card behavior, which is Phase 2.
@@ -21,21 +21,17 @@ from animal_kingdom.decks import PREMADE_DECKS, load_premade_deck
 RETIRED_TAGS = {"Reptile", "Insect"}
 DYNAMIC_IDS = {"goliath", "egg_eater"}
 
-# Two decks deliberately break the locked 4-4-6/14-design template with a 7th common, some
-# commons dropping to 2 copies so the total stays 30: food_otk (Gopher, Hedgehog and Hamster at
-# 2) and egg_control (its three growing Snakes, Python, Rattlesnake and Egg Eater, at 2). The
-# design count and rarity mix move, not the 30-card total. See Card.copies (engine/cards.py).
-DESIGN_COUNT_OVERRIDES = {"food_otk": 15, "egg_control": 15}
-RARITY_MIX_OVERRIDES = {"food_otk": {"legendary": 4, "rare": 4, "common": 7},
-                        "egg_control": {"legendary": 4, "rare": 4, "common": 7}}
+# A deck may break the 4-4-6/14-design template (a 7th common, some commons at 2 copies, the total staying 30); none
+# of the launch decks does. See Card.copies (engine/cards.py).
+DESIGN_COUNT_OVERRIDES: dict[str, int] = {}
+RARITY_MIX_OVERRIDES: dict[str, dict] = {}
 
 
 # ----------------------------------------------------------------- pool composition
 
-def test_98_designs_in_exactly_7_decks():
+def test_14_designs_in_each_of_the_12_starter_decks():
     cards = load_cards()
-    # 100 draftable designs across the 7 decks (98 base + one extra each for food_otk and egg_control); tokens/reserve
-    # live outside the deck pool.
+    # 168 draftable designs across the 12 decks; tokens, the bench, reserve and the tutorial's cards live outside them.
     draftable = [c for c in cards.values() if c.deck in DECK_SLUGS]
     expected_total = 14 * len(DECK_SLUGS) + sum(
         n - 14 for n in DESIGN_COUNT_OVERRIDES.values()
@@ -44,7 +40,7 @@ def test_98_designs_in_exactly_7_decks():
     by_deck: dict[str, list] = {slug: [] for slug in DECK_SLUGS}
     for c in draftable:
         by_deck[c.deck].append(c)
-    assert len(by_deck) == 7
+    assert len(by_deck) == 12
     for slug, designs in by_deck.items():
         expected = DESIGN_COUNT_OVERRIDES.get(slug, 14)
         assert len(designs) == expected, f"{slug} has {len(designs)} designs, expected {expected}"
@@ -55,11 +51,12 @@ def test_98_designs_in_exactly_7_decks():
 
 def test_ids_and_names_globally_unique():
     cards = load_cards()
-    # Every id and name in the registry (draftable + tokens + reserve) is unique.
+    # Every id in the registry is unique, and so is every name a player can collect: an unnamed legendary shows its
+    # species meanwhile (the Wolf beside the common Wolf), and tokens and the tutorial's cards share their animals' names.
     ids = [c.id for c in cards.values()]
-    names = [c.name for c in cards.values()]
     assert len(set(ids)) == len(ids) == len(cards)
-    assert len(set(names)) == len(names) == len(cards)
+    names = [c.name for c in cards.values() if not c.unnamed and c.deck not in ("token", "tutorial")]
+    assert len(set(names)) == len(names)
 
 
 def test_each_deck_expands_to_30():

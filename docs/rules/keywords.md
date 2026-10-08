@@ -42,6 +42,12 @@ For poisonous animals: Poison Dart Frog, Jellyfish; later Pufferfish, Scorpion, 
 ### Titan (proposed, 2026-10-08)
 Playing it costs two actions instead of one. A free placement (Jerboa, the Remora, the Elephant's kind of "play another animal") can't pay for it; an extra action can. For the biggest animals: Blue Whale, Whale Shark.
 
+### Hungry N (proposed, 2026-10-08)
+At the start of your turn this eats N of your food. If you can't feed it, it gets −N strength, for good. A Dawn effect: food is made at the end of your turn and eaten at the start of the next. In `cards.json` the number sits beside the keyword, as Reach's does: `"keywords": ["Hungry"], "hungry": 5`. Carried by the Giants: Elephant, Rhinoceros, Hippopotamus, Whale Shark, Brutus.
+
+### Flee (proposed, 2026-10-08)
+When an enemy covers this, it returns to your hand: the cover takes the crossroad, but nothing dies. A fleer keeps its value in its Roar, which comes again when it's played back. Carried by the herd's fleers (Gazelle, Deer, Zebra) and the Hare.
+
 ### Apex Predator
 A predator that must land on prey and eats it.
 

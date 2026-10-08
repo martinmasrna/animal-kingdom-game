@@ -6,7 +6,7 @@ from animal_kingdom.sim.runner import play_game
 from animal_kingdom.sim import replay
 
 
-def _logged_game(deck_a="colony_food_swarm", deck_b="ramp", seed=0):
+def _logged_game(deck_a="colony", deck_b="giants", seed=0):
     rec = play_game(deck_a, deck_b, seed, bot_a=GreedyBot(), bot_b=GreedyBot(), log_actions=True)
     return rec, replay.game_log_record(rec, map_id="map_b", bots=("greedy", "greedy"))
 
@@ -15,11 +15,11 @@ def test_log_actions_captures_the_full_game():
     # Seed the bots so the logged and unlogged games are genuinely comparable: an unseeded
     # GreedyBot breaks ties from a fresh RNG, so two plays of the same game can diverge (that is
     # bot nondeterminism, not a logging side effect).
-    rec = play_game("cats_midrange", "canine_buff_tempo", 1,
+    rec = play_game("cats", "canines", 1,
                     bot_a=GreedyBot(seed=0), bot_b=GreedyBot(seed=1), log_actions=True)
     assert rec.actions and all("kind" in a for a in rec.actions)
     # Off by default -> no overhead / empty log.
-    quiet = play_game("cats_midrange", "canine_buff_tempo", 1,
+    quiet = play_game("cats", "canines", 1,
                       bot_a=GreedyBot(seed=0), bot_b=GreedyBot(seed=1))
     assert quiet.actions == ()
     assert quiet.winner == rec.winner and quiet.reason == rec.reason  # logging changes nothing
@@ -46,7 +46,7 @@ def test_replay_uses_logged_lists_for_custom_decks():
     from animal_kingdom.decks import load_premade_deck
     rec, log = _logged_game()
     log = {**log, "deck_a": "custom_0123456789",
-           "lists": [load_premade_deck("colony_food_swarm"), load_premade_deck("ramp")]}
+           "lists": [load_premade_deck("colony"), load_premade_deck("giants")]}
     _, result, _ = replay.replay(log)
     assert (result.winner, result.reason) == (rec.winner, rec.reason)
 
@@ -54,7 +54,7 @@ def test_replay_uses_logged_lists_for_custom_decks():
 def test_replay_reproduces_a_forced_first_player():
     # run_pairs forces first_player independently of the seed's coin flip (see runner.py); the
     # logged record and replay must agree on which player actually moved first.
-    rec = play_game("colony_food_swarm", "ramp", 0, bot_a=GreedyBot(), bot_b=GreedyBot(),
+    rec = play_game("colony", "giants", 0, bot_a=GreedyBot(), bot_b=GreedyBot(),
                     log_actions=True, first_player="B")
     assert rec.first_player == "B"
     log = replay.game_log_record(rec, map_id="map_b", bots=("greedy", "greedy"))
@@ -66,7 +66,7 @@ def test_replay_reproduces_a_forced_first_player():
 
 
 def test_write_and_load_logs_round_trip(tmp_path):
-    recs = [play_game("aggro_hq_rush", "egg_control", s,
+    recs = [play_game("den_rush", "egg_control", s,
                       bot_a=GreedyBot(), bot_b=GreedyBot(), log_actions=True) for s in range(3)]
     path = tmp_path / "games.jsonl"
     n = replay.write_game_logs(recs, str(path), map_id="map_b", bots=("greedy", "greedy"))

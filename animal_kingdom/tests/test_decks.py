@@ -1,11 +1,15 @@
 
 
 def test_a_starters_copy_count_does_not_cap_other_decks():
-    """Python and Rattlesnake are 2 in the Egg starter (cards.json `copies`), but any deck may hold a common's 3 (Martin, 2026-10-01)."""
+    """A card's `copies` sizes its starter deck only: any deck may hold its rarity's full count (Martin, 2026-10-01).
+    No launch starter sets `copies`; a card that did would still allow 3 of a common elsewhere."""
     from animal_kingdom.decks import PREMADE_DECKS, decklist_problems
+    from animal_kingdom.engine.cards import load_cards
+    cards = load_cards()
+    two = {cid: rec for cid, rec in cards.items()}
+    import dataclasses
+    two["goliath"] = dataclasses.replace(cards["goliath"], copies=2)
     egg = PREMADE_DECKS["egg_control"]
-    assert egg.count("goliath") == 2 and egg.count("rattlesnake") == 2
-    deck = [c for c in egg if c not in ("goliath", "rattlesnake")]
-    deck = deck[:24] + ["goliath"] * 3 + ["rattlesnake"] * 3
-    assert len(deck) == 30 and not [p for p in decklist_problems(deck) if "Python" in p or "Rattlesnake" in p or "goliath" in p or "rattlesnake" in p]
-    assert decklist_problems(deck[:26] + ["goliath"] * 4)   # a fourth is still too many
+    deck = [c for c in egg if c != "goliath"][:27] + ["goliath"] * 3
+    assert len(deck) == 30 and not [p for p in decklist_problems(deck, cards=two) if "Python" in p]
+    assert decklist_problems(deck[:26] + ["goliath"] * 4, cards=two)   # a fourth is still too many

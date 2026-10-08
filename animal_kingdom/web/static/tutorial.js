@@ -58,17 +58,17 @@ export const LESSONS = [
     text: 'Each turn you get two moves: place an animal, or draw 2 cards. The dots show how many moves you have left.' },
   { id: 'buffalo', when: c => c.mine && c.round === 1 && c.units === 1,
     text: { pick: 'Now the Buffalo. Click it.', place: 'Each new animal must connect to your den, directly or through your other animals. Click one of the circles.' },
-    only: c => ({ card: 'cape_buffalo', crs: c.empty('cape_buffalo') }), at: { rings: true } },   // every place it may go
+    only: c => ({ card: 'tutorial_cape_buffalo', crs: c.empty('tutorial_cape_buffalo') }), at: { rings: true } },   // every place it may go
   { id: 'watch', when: c => c.theirs && c.round === 1, ...talk, at: { oppcards: true },
     text: 'Now it\'s your opponent\'s turn. Watch where the red animals go.' },
-  { id: 'patch', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'), ...talk, at: c => ({ region: c.home }),
+  { id: 'patch', when: c => c.mine && c.round === 2 && c.hand('tutorial_dire_wolf'), ...talk, at: c => ({ region: c.home }),
     text: 'This is a region. Put animals on all four crossroads around it, and you get 10 food every turn.' },
-  { id: 'wolf', when: c => c.mine && c.round === 2 && c.hand('dire_wolf'),
+  { id: 'wolf', when: c => c.mine && c.round === 2 && c.hand('tutorial_dire_wolf'),
     text: { pick: 'Click the Wolf.', place: 'Now click one of the circles around the +10 region.' },
-    only: c => ({ card: 'dire_wolf', crs: c.homeOpen.length ? c.homeOpen : undefined }),
+    only: c => ({ card: 'tutorial_dire_wolf', crs: c.homeOpen.length ? c.homeOpen : undefined }),
     at: { rings: true } },
   // the region is finished by hand with the fourth card, only its last corner (shown only when a card can reach it)
-  { id: 'corner', when: c => c.mine && c.round >= 2 && !c.hand('dire_wolf') && !c.homeHeld && c.homeOpen.length > 0,
+  { id: 'corner', when: c => c.mine && c.round >= 2 && !c.hand('tutorial_dire_wolf') && !c.homeHeld && c.homeOpen.length > 0,
     only: c => ({ crs: c.homeOpen }), at: { rings: true },
     text: { pick: 'Finish the region! Click your Buffalo.', place: 'Now click the last crossroad around the region.' } },
   { id: 'food', when: c => c.homeHeld, ...talk, holdFood: true, at: c => ({ stone: c.home[0] }),
@@ -120,11 +120,11 @@ export const LESSONS = [
 // Then each move is guided to the best spots for finishing a region, until 100 food.
 const one = (card, cr) => ({ card, crs: [cr] });
 export const LESSONS_2 = [
-  { id: 'intro2', when: c => c.mine && c.round === 1 && !c.placed('lynx'), ...talk, at: { middle: true },
+  { id: 'intro2', when: c => c.mine && c.round === 1 && !c.placed('tutorial_lynx'), ...talk, at: { middle: true },
     text: 'Lesson 2! Many animals have special powers. Let\'s meet some of them.' },
-  explain('glow', 'lynx', c => c.mine && c.ready('lynx'),
+  explain('glow', 'tutorial_lynx', c => c.mine && c.ready('tutorial_lynx'),
     'See the Lynx glowing? A glowing card\'s Roar will work if you place it now.'),
-  { id: 'lynx', when: c => c.mine && c.hand('lynx'), only: c => ({ card: 'lynx', crs: c.empty('lynx') }), at: { rings: true },
+  { id: 'lynx', when: c => c.mine && c.hand('tutorial_lynx'), only: c => ({ card: 'tutorial_lynx', crs: c.empty('tutorial_lynx') }), at: { rings: true },
     text: { pick: 'Click the Lynx.', place: 'Now play it.' } },
   explain('eagleinfo', 'eagle', c => c.mine && c.hand('eagle') && !c.placed('eagle'),
     'Your Lynx drew an Eagle. The Eagle has Flight: it can land even where it isn\'t connected to your den.'),
@@ -165,7 +165,7 @@ export const LESSONS_2 = [
   EMPTY,
 ];
 // Lesson 2 holds each teaching card back until its own step: it can't be placed before its line explains it.
-const HOLD = ['lynx', 'squirrel', 'black_mamba', 'eagle', 'polar_bear'];
+const HOLD = ['tutorial_lynx', 'squirrel', 'black_mamba', 'eagle', 'polar_bear'];
 export const lessonOf = V => V.seats.B.bot === 'tutorial2' ? 2 : 1;
 // The cards not to offer now: in lesson 2, a teaching card never yet placed, unless its step is the one showing.
 export function held(V, L) {
@@ -235,7 +235,7 @@ export function context(V, sel, cards) {
   c.feed = cand.length ? [...new Set(cand.filter(([n]) => n === cand[0][0]).flatMap(([, r]) => r.filter(cr => takeable.has(cr))))] : [...takeable];
   // lesson 2's Eagle: it lands where no animal without Flight could go and none could go beside it, so 'isn't connected'
   // shows (else anywhere a walker couldn't go, else anywhere); then where it stands, and whether it stands alone
-  const reach = new Set(c.empty('cape_buffalo'));   // where a card without Flight may go now
+  const reach = new Set(c.empty('tutorial_cape_buffalo'));   // where a card without Flight may go now
   const unreached = c.empty('eagle').filter(cr => !reach.has(cr));
   const alone = unreached.filter(cr => !ADJ(cr).some(n => reach.has(n) || owner(G, n) === V.you));
   c.eagleSpots = alone.length ? alone : unreached.length ? unreached : c.empty('eagle');

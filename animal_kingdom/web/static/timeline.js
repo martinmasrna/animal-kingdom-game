@@ -149,6 +149,10 @@ export function plan(prev, next, cards = {}) {
         else push({ kind: 'strength', dur: DUR.strength, changes: [ch] });
         break;
       }
+      case 'transform':   // it becomes another card where it is (the Butterfly's stages in hand, the mimic Octopus's copy)
+        for (const st of Object.values(s.board)) for (const u of st) if (u.iid === e.iid) u.id = e.card;
+        for (const h of s.hand) if (h.iid === e.iid) h.id = e.card;
+        break;
       case 'turn_start':
         s.current = e.player;
         if (e.player === you) push({ kind: 'yourturn', dur: DUR.yourturn });

@@ -15,28 +15,29 @@ from .resources import load_bundled_json
 
 # Allowed value domains (validation). Reworked 98-design pool: README decisions B-E.
 RARITIES = {"common", "rare", "legendary"}
-KEYWORDS = {"Flight", "Armor", "Apex Predator", "Stealth", "Spikes", "Poison", "Roam", "Reach"}  # static keywords only;
-# Roar/Dawn/Dusk/Deathrattle are trigger prefixes printed in `text`, not stored keywords. Reach carries its number
-# in the record's `reach` field: Reach 2 is {"keywords": ["Reach"], "reach": 2}.
+KEYWORDS = {"Flight", "Armor", "Apex Predator", "Stealth", "Spikes", "Poison", "Roam", "Reach", "Hungry", "Titan",
+            "Flee"}  # static keywords only;
+# Roar/Dawn/Dusk/Deathrattle are trigger prefixes printed in `text`, not stored keywords. A numbered keyword carries its
+# number in its own field: Reach 2 is {"keywords": ["Reach"], "reach": 2}, Hungry 3 is {"keywords": ["Hungry"], "hungry": 3}.
 # Family + role tags (dec. B). Retired umbrellas (Reptile, Insect) are forbidden.
 TAGS = {
     "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent",
-    "Arachnid", "Bear", "Megafauna", "Egg", "Fish",   # species families
+    "Arachnid", "Bear", "Megafauna", "Egg", "Fish", "Primate", "Hoofed",   # species families
     "Queen", "Worker",                                # roles
 }
 DYNAMIC_STRENGTHS = {"removed_units_count", "removed_eggs_count"}  # Python, Egg Eater
 
-# The seven premade deck slugs (align to docs/cards/decks/ filenames).
-DECK_SLUGS = {
-    "cats_midrange", "egg_control", "colony_food_swarm", "ramp",
-    "food_otk", "aggro_hq_rush", "canine_buff_tempo",
-}
+# The starter decks as cards.json lists them (written from the card workbench by tools/card-workbench/convert.py):
+# slug, menu name, order, and the card whose art covers the deck. Slugs align to docs/cards/decks/ filenames.
+STARTER_DECKS: list[dict] = sorted(load_bundled_json("cards.json").get("decks", []), key=lambda d: d.get("order", 0))
+DECK_SLUGS = {d["slug"] for d in STARTER_DECKS}
 
 # Non-draftable pools: cards that exist in the registry but belong to no premade deck.
-# "token" = spawned on the board by effects (e.g. Pup); never drawn. "reserve" = shelved
-# designs kept out of play (e.g. cards earmarked for a not-yet-built deck). Both are
-# skipped by the deck builders in decks.py.
-NON_DECK_SLUGS = {"token", "reserve", "bench"}
+# "token" = made by effects (Baby Turtle, a Stork's younglings, the Butterfly's stages); never in a decklist.
+# "reserve" = shelved designs kept out of play (open designs, the sim tools' calibration bodies). "tutorial" = the
+# tutorial's fixed deal, cards as they were when it was written. "bench" = finished cards in no starter deck (the
+# workbench's pool). All are skipped by the deck builders in decks.py.
+NON_DECK_SLUGS = {"token", "reserve", "bench", "tutorial"}
 
 # What a player can collect and build with: the premade decks' cards plus the bench, finished
 # cards Martin has cleared that sit in no premade deck. The reserve (design scraps, balance-tool
@@ -67,6 +68,9 @@ class Card:
     text: str = ""
     copies: Optional[int] = None   # override COPY_LIMITS[rarity] for this one design (rare exception)
     reach: int = 0                 # Reach N: lands up to N crossroads from a connected unit (0: no Reach)
+    hungry: int = 0                # Hungry N: eats N food at the start of your turn, else loses N strength (0: not Hungry)
+    unnamed: bool = False          # a legendary still waiting for its name: `name` shows its species meanwhile
+    mate: Optional[str] = None     # the card it pairs with in hand (the Eagles): a buff to either counts for both
 
     @property
     def is_dynamic(self) -> bool:
@@ -133,6 +137,12 @@ def validate_card_record(rec: dict) -> None:
         if kw not in KEYWORDS:
             raise CardDataError(f"card {cid!r}: unknown keyword {kw!r}, expected subset of {sorted(KEYWORDS)}")
 
+    hungry = rec.get("hungry")
+    if hungry is not None and (isinstance(hungry, bool) or not isinstance(hungry, int) or hungry < 1):
+        raise CardDataError(f"card {cid!r}: hungry must be a positive int, got {hungry!r}")
+    if ("Hungry" in rec.get("keywords", [])) != (hungry is not None):
+        raise CardDataError(f"card {cid!r}: the Hungry keyword and its `hungry` number go together")
+
     reach = rec.get("reach")
     if reach is not None and (isinstance(reach, bool) or not isinstance(reach, int) or reach < 2):
         raise CardDataError(f"card {cid!r}: reach must be an int >= 2 (Reach 1 is ordinary placement), got {reach!r}")
@@ -158,6 +168,9 @@ def _build_card(rec: dict) -> Card:
         text=rec.get("text", ""),
         copies=rec.get("copies"),
         reach=rec.get("reach", 0),
+        hungry=rec.get("hungry", 0),
+        unnamed=rec.get("unnamed", False),
+        mate=rec.get("mate"),
     )
 
 

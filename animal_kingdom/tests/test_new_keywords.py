@@ -278,8 +278,8 @@ def test_reach_covering_still_needs_greater_strength():
 
 
 def test_reach_works_for_an_extra_placement_too():
-    s = state(hands={"A": ["jerboa", "t_reach2"]})
-    rules.apply_action(s, PlaceAction("jerboa", ("cr", "1,2")))
+    s = state(hands={"A": ["calib_extra_2", "t_reach2"]})
+    rules.apply_action(s, PlaceAction("calib_extra_2", ("cr", "1,2")))
     assert s.pending and s.pending["mode"] == "place"
     assert {"card_id": "t_reach2", "target": ["cr", "3,2"]} in s.pending["placements"]
 
@@ -467,8 +467,8 @@ def _keyword_decks():
             else:
                 out.append(c)
         return out
-    return (swap("canine_buff_tempo", ["t_roamer", "t_roam_apex", "t_poison", "t_reach2", "t_roam_cat", "t_reach3"] * 2),
-            swap("cats_midrange", ["t_roamer", "t_poison", "t_reach3", "t_roam_armor"] * 2))
+    return (swap("canines", ["t_roamer", "t_roam_apex", "t_poison", "t_reach2", "t_roam_cat", "t_reach3"] * 2),
+            swap("cats", ["t_roamer", "t_poison", "t_reach3", "t_roam_armor"] * 2))
 
 
 def _play(kinds, seed):

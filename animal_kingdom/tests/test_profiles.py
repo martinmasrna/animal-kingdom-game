@@ -59,35 +59,35 @@ def test_a_profile_gets_the_starter_decks_once(monkeypatch):
     monkeypatch.setattr(server, "profiles", db)
     _, p = db.create()
     decks = server.profile_view(p)["decks"]
-    assert [d["name"] for d in decks][:3] == ["Cats", "Canines", "Aggro"] and len(decks) == 7
+    assert [d["name"] for d in decks][:3] == ["Colony Food Swarm", "Aristocrats", "Canine Roam Tempo"] and len(decks) == 12
     assert all(sum(d["cards"].values()) == 30 for d in decks)
-    db.save_decks(p["id"], decks[:1])                                   # the player deletes six
+    db.save_decks(p["id"], decks[:1])                                   # the player deletes eleven
     assert len(server.profile_view(p)["decks"]) == 1                    # and they stay deleted
 
 
 def test_an_untouched_starter_copy_follows_its_starter(db):
     _, p = db.create()
     v1 = {"borealis": 1, "elephant": 2}
-    db.seed_decks(p["id"], [{"id": "ramp", "name": "Ramp", "cards": v1}])
-    assert db.decks(p["id"], {"ramp": v1})[0]["cards"] == v1
+    db.seed_decks(p["id"], [{"id": "giants", "name": "Ramp", "cards": v1}])
+    assert db.decks(p["id"], {"giants": v1})[0]["cards"] == v1
     v2 = {"borealis": 1, "elephant": 1, "cairn": 1}                     # the starter's list changes
-    assert db.decks(p["id"], {"ramp": v2})[0]["cards"] == v2            # the untouched copy follows it
+    assert db.decks(p["id"], {"giants": v2})[0]["cards"] == v2            # the untouched copy follows it
     assert db.decks(p["id"])[0]["cards"] == v1, "with no starter to resolve against, what was last saved"
 
 
 def test_editing_a_starter_copys_cards_detaches_it_for_good(db):
     _, p = db.create()
     v1 = {"lion": 3, "tiger": 2}
-    db.seed_decks(p["id"], [{"id": "cats_midrange", "name": "Cats", "cards": v1}])
+    db.seed_decks(p["id"], [{"id": "cats", "name": "Cats", "cards": v1}])
     edited = {"lion": 2, "tiger": 2}                                    # the player takes a copy out: it's theirs now
-    db.save_decks(p["id"], [{"id": "cats_midrange", "name": "Cats", "cards": edited}], {"cats_midrange": v1})
+    db.save_decks(p["id"], [{"id": "cats", "name": "Cats", "cards": edited}], {"cats": v1})
     new_starter = {"lion": 3, "panther": 2}                             # the starter changes
-    assert db.decks(p["id"], {"cats_midrange": new_starter})[0]["cards"] == edited, "detached: it doesn't follow"
+    assert db.decks(p["id"], {"cats": new_starter})[0]["cards"] == edited, "detached: it doesn't follow"
     # editing it back to match a past starter list doesn't relink it
-    db.save_decks(p["id"], [{"id": "cats_midrange", "name": "Cats", "cards": v1}], {"cats_midrange": new_starter})
-    assert db.decks(p["id"], {"cats_midrange": new_starter})[0]["cards"] == v1, "shown as saved"
+    db.save_decks(p["id"], [{"id": "cats", "name": "Cats", "cards": v1}], {"cats": new_starter})
+    assert db.decks(p["id"], {"cats": new_starter})[0]["cards"] == v1, "shown as saved"
     even_newer = {"lion": 1, "panther": 1, "lynx": 1}
-    assert db.decks(p["id"], {"cats_midrange": even_newer})[0]["cards"] == v1, "still detached, not following"
+    assert db.decks(p["id"], {"cats": even_newer})[0]["cards"] == v1, "still detached, not following"
 
 
 def test_renaming_or_recovering_a_starter_copy_does_not_detach_it(db):
@@ -104,10 +104,10 @@ def test_renaming_or_recovering_a_starter_copy_does_not_detach_it(db):
 def test_a_deleted_starter_copy_stays_deleted_even_when_the_starter_changes(db):
     _, p = db.create()
     cards = {"lobo": 3}
-    db.seed_decks(p["id"], [{"id": "canine_buff_tempo", "name": "Canines", "cards": cards}])
-    db.save_decks(p["id"], [], {"canine_buff_tempo": cards})            # the player deletes it
+    db.seed_decks(p["id"], [{"id": "canines", "name": "Canines", "cards": cards}])
+    db.save_decks(p["id"], [], {"canines": cards})            # the player deletes it
     changed = {"lobo": 2, "clarion": 1}
-    assert db.decks(p["id"], {"canine_buff_tempo": changed}) == []
+    assert db.decks(p["id"], {"canines": changed}) == []
 
 
 def test_link_starters_backfills_old_rows_leaving_mismatches_alone(tmp_path):
@@ -116,15 +116,15 @@ def test_link_starters_backfills_old_rows_leaving_mismatches_alone(tmp_path):
     old = sqlite3.connect(path)
     old.executescript(
         "CREATE TABLE decks (profile TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, cards TEXT NOT NULL, pos INTEGER NOT NULL, PRIMARY KEY (profile, id));"
-        "INSERT INTO decks VALUES ('p', 'ramp', 'Ramp', '{\"borealis\": 1}', 0);"
+        "INSERT INTO decks VALUES ('p', 'giants', 'Ramp', '{\"borealis\": 1}', 0);"
         "INSERT INTO decks VALUES ('p', 'egg_control', 'Egg', '{\"eagle\": 2}', 1);")
     old.commit(); old.close()
     db = Profiles(str(path))
-    assert db.link_starters({"ramp": {"borealis": 1}, "egg_control": {"eon": 1}}) == (1, 1)
-    decks = {d["id"]: d for d in db.decks("p", {"ramp": {"borealis": 2}, "egg_control": {"eon": 1}})}
-    assert decks["ramp"]["cards"] == {"borealis": 2}, "matched the current starter: now follows it"
+    assert db.link_starters({"giants": {"borealis": 1}, "egg_control": {"eon": 1}}) == (1, 1)
+    decks = {d["id"]: d for d in db.decks("p", {"giants": {"borealis": 2}, "egg_control": {"eon": 1}})}
+    assert decks["giants"]["cards"] == {"borealis": 2}, "matched the current starter: now follows it"
     assert decks["egg_control"]["cards"] == {"eagle": 2}, "differed: left alone, still its old list"
-    assert db.link_starters({"ramp": {"borealis": 2}, "egg_control": {"eon": 1}}) == (0, 0), "a second run reclassifies nothing"
+    assert db.link_starters({"giants": {"borealis": 2}, "egg_control": {"eon": 1}}) == (0, 0), "a second run reclassifies nothing"
 
 
 def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch):
@@ -132,8 +132,8 @@ def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch):
     db = Profiles(":memory:")
     monkeypatch.setattr(server, "profiles", db)
     _, p = db.create("Martin")
-    m = Match("M1", Seat("ta", "Martin#1", deck="cats_midrange", profile=p["id"]))
-    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m = Match("M1", Seat("ta", "Martin#1", deck="cats", profile=p["id"]))
+    m.join(Seat("tb", "Bot", bot="easy", deck="giants"))
     m.on_match_end = server.record_match
     m._start_game()
     for _ in range(2):
@@ -144,7 +144,7 @@ def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch):
     assert m.phase == "match_over"
     (h,) = db.history(p["id"])
     assert (h["kind"], h["my_deck"], h["opp"], h["opp_deck"], h["won"], h["lost"]) == \
-        ("bot", "Cats", "Bot (Easy)", "Ramp", 2, 0)
+        ("bot", "Cats Midrange Tempo", "Bot (Easy)", "Giants", 2, 0)
 
 
 def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path):
@@ -157,8 +157,8 @@ def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path)
     monkeypatch.delenv("AK_NO_GAME_LOGS", raising=False)
     monkeypatch.setattr(server, "save_game", lambda *a: None)
     _, p = db.create("Martin")
-    m = Match("M2", Seat("ta", "Martin#1", deck="cats_midrange", profile=p["id"]))
-    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m = Match("M2", Seat("ta", "Martin#1", deck="cats", profile=p["id"]))
+    m.join(Seat("tb", "Bot", bot="easy", deck="giants"))
     m.on_match_end = server.record_match
     m.ready("A")
     m.bots["A"] = bot_for("easy", 7)       # a bot plays the human seat
@@ -167,7 +167,7 @@ def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path)
         m.act(m.to_act(), m.bot_move())
         live.append(m.view("A")["game"])
     (h,) = db.history(p["id"])
-    assert h["my_cover"] == "king_theron" and h["opp_cover"] == "borealis"
+    assert h["my_cover"] == "king_theron" and h["opp_cover"] == "bulwark"
     views = json.loads(gzip.decompress(replay.load(tmp_path, h["match"], "A")))
     assert {v["you"] for v in views} == {"A"} and views[0]["game"]["history"] == []
     assert views[-1]["game"]["result"]["winner"] == m.results[-1]["winner"]
@@ -186,24 +186,24 @@ def test_a_match_against_a_person_keeps_their_deck_name_private(monkeypatch):
     monkeypatch.setattr(server, "profiles", db)
     monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
     _, p = db.create("Martin")
-    m = Match("M4", Seat("ta", "Martin#1", deck="cats_midrange", profile=p["id"]))
-    m.join(Seat("tb", "Ana#1234", deck="ramp"))
+    m = Match("M4", Seat("ta", "Martin#1", deck="cats", profile=p["id"]))
+    m.join(Seat("tb", "Ana#1234", deck="giants"))
     m.on_match_end = server.record_match
     m._start_game()
     m.state.result = Result("A", "food")
     m._check_end()
     (h,) = db.history(p["id"])
-    assert (h["kind"], h["opp"], h["opp_deck"], h["opp_cover"]) == ("friend", "Ana#1234", "", "borealis")
-    assert "deckName" not in m.view("A")["seats"]["B"] and m.view("A")["seats"]["A"]["deckName"] == "Cats"
+    assert (h["kind"], h["opp"], h["opp_deck"], h["opp_cover"]) == ("friend", "Ana#1234", "", "bulwark")
+    assert "deckName" not in m.view("A")["seats"]["B"] and m.view("A")["seats"]["A"]["deckName"] == "Cats Midrange Tempo"
 
 
 def test_the_gauntlet_stays_out_of_the_history(monkeypatch):
     db = Profiles(":memory:")
     monkeypatch.setattr(server, "profiles", db)
     _, p = db.create("Martin")
-    m = Match("M3", Seat("ta", "Martin#1", deck="cats_midrange", profile=p["id"]))
-    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
-    m.make_gauntlet(["ramp", "egg_control"], per_seat=1)
+    m = Match("M3", Seat("ta", "Martin#1", deck="cats", profile=p["id"]))
+    m.join(Seat("tb", "Bot", bot="easy", deck="giants"))
+    m.make_gauntlet(["giants", "egg_control"], per_seat=1)
     server.record_match(m)
     assert db.history(p["id"]) == []
 
@@ -217,8 +217,8 @@ def test_every_match_left_in_a_history_has_its_replay(monkeypatch, tmp_path):
     logs.mkdir()
     db = Profiles(":memory:")
     _, p = db.create("Martin")
-    m = Match("OLD1", Seat("ta", "Martin#1", deck="cats_midrange"))
-    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m = Match("OLD1", Seat("ta", "Martin#1", deck="cats"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="giants"))
     m.ready("A")
     m.bots["A"] = bot_for("easy", 3)
     while m.phase == "playing":
@@ -281,7 +281,7 @@ def test_signing_in_on_a_second_device_moves_that_guests_work_into_the_account(d
 
 
 def test_signing_in_brings_no_second_copy_of_the_starters(db, tmp_path):
-    starters = [{"id": "cats", "name": "Cats", "cards": {"lion": 3}}, {"id": "ramp", "name": "Ramp", "cards": {"elephant": 3}}]
+    starters = [{"id": "cats", "name": "Cats", "cards": {"lion": 3}}, {"id": "giants", "name": "Ramp", "cards": {"elephant": 3}}]
     _, first = db.create("Martin")
     db.seed_decks(first["id"], starters)
     account = db.sign_in("discord", "d-1", "martin", first["id"])

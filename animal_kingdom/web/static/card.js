@@ -25,7 +25,7 @@ export function cardHTML(c, { str = c.str, cls = '', attrs = '', lazy = false } 
   const base = c.str === '*' ? null : c.str, delta = base !== null && str !== base ? (str > base ? ' up' : ' down') : '';
   const art = !hasArt(c.id) ? '' : lazy ? ` data-art="${artUrl(c.id)}" style="--fy:${focus(c.id).toFixed(0)}%;--oy:${lift(c.id).toFixed(2)}em"`
     : ` style="background-image:url(${artUrl(c.id)});--fy:${focus(c.id).toFixed(0)}%;--oy:${lift(c.id).toFixed(2)}em"`;
-  return `<div class="card ${c.rarity} ${cls}" ${attrs}><div class="pic"${art}>${hasArt(c.id) ? '' : `<span>${c.name}</span>`}</div><div class="cframe"></div>` +
+  return `<div class="card ${c.rarity} ${cls}" ${attrs}><div class="pic"${art}>${hasArt(c.id) ? '' : `<span>${c.label || c.name}</span>`}</div><div class="cframe"></div>` +
     `<div class="nbar${c.name.length > 18 ? ' two' : ''}" style="--n:${c.name.length}"><span>${c.name}</span></div>` +
     `<div class="stab"><span class="n${String(str).length > 1 ? ' two' : ''}${delta}">${chalk(str)}</span></div>` +
     `<div class="ctext">${c.text ? `<p>${rules(c.text)}</p>` : ''}<i>${c.tags.join(' · ')}</i></div></div>`;
@@ -53,6 +53,9 @@ export const KEYWORDS = {
   'Poison': 'Whenever an enemy covers it, that enemy is removed at the start of your next turn.',
   'Roam': 'As an action, move it to a crossroad next to it: empty, onto your own animal, onto an enemy it beats, or onto the enemy den. Once per turn, only while connected to your den.',
   'Reach': 'Can be placed up to that many crossroads away from one of your connected animals, jumping over what stands between. It can\'t take a den that way.',
+  'Hungry': 'At the start of your turn it eats that much of your food. If you can\'t feed it, it loses that much strength for good.',
+  'Titan': 'Playing it takes two actions. A free play can\'t pay for it.',
+  'Flee': 'When an enemy covers it, it runs back to your hand.',
   'Dawn': 'Happens at the start of your turn.',
   'Dusk': 'Happens at the end of your turn.',
   'Scout': 'Look at three different cards of your deck, draw one and shuffle the others back.',

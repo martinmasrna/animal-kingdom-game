@@ -66,8 +66,11 @@ export const FULL = {
   termite_queen: .455, tiger: .505, verminus: .345, vesper: .425, viper: .415, worker_ant: .465, worker_bee: .355,
   worker_wasp: .375,
 };
+// Cards painted as another card: the tutorial's copies of the cards it was written with (the live cards changed since).
+const ALIAS = { tutorial_cape_buffalo: 'cape_buffalo', tutorial_dire_wolf: 'dire_wolf', tutorial_lynx: 'lynx', tutorial_chipmunk: 'chipmunk' };
+for (const [id, art] of Object.entries(ALIAS)) for (const T of [CROP, STRIP, FULL]) if (art in T) T[id] = T[art];
 export const hasArt = id => id in CROP;
-export const artUrl = id => `/static/art/${id}.webp`;
+export const artUrl = id => `/static/art/${ALIAS[id] || id}.webp`;
 // A long grid's art loads as its cards near view in `scroller` (data-art, from cardHTML's `lazy`), not all hundred at once.
 let seen;
 export const lazyArt = scroller => {
@@ -81,6 +84,7 @@ export const fitStrips = root => root.querySelectorAll('[data-strip]').forEach(e
   el.style.cssText += ';' + stripArt(el.dataset.strip, W, H, +el.dataset.ax);
 });
 export const stripArt = (id, W, H, ax) => {
+  if (!hasArt(id)) return '';                    // not painted yet: the strip shows its plain ground
   if (!STRIP[id]) return `background-image:url(${artUrl(id)})`;
   const [x, y, z] = STRIP[id], w = W * z, h = w * 1.5, fit = (v, lo) => Math.min(0, Math.max(lo, v));
   return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${fit(ax * W - x * w, W - w)}px ${fit(H / 2 - y * h, H - h)}px`;

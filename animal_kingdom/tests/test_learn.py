@@ -30,20 +30,20 @@ FOOD_IDX = features.RUNG0_FEATURES.index("food_progress")
 
 # --------------------------------------------------------------------- deck pool / pairs
 
-def test_deck_pool_is_seven_premades_plus_baseline():
+def test_deck_pool_is_the_twelve_starters_plus_baseline():
     pool = deck_pool()
-    assert len(pool) == 8
+    assert len(pool) == 13
     assert "baseline" in pool
 
 
-def test_all_deck_pairs_is_36_unordered_pairs_including_mirrors():
+def test_all_deck_pairs_is_91_unordered_pairs_including_mirrors():
     pool = deck_pool()
     index = {d: i for i, d in enumerate(pool)}
     pairs = all_deck_pairs()
-    assert len(pairs) == 36
-    assert len(set(pairs)) == 36               # no duplicates
+    assert len(pairs) == 91
+    assert len(set(pairs)) == 91               # no duplicates
     assert all(index[a] <= index[b] for a, b in pairs)   # canonical (unordered) form
-    assert sum(1 for a, b in pairs if a == b) == 8   # every deck mirrors itself once
+    assert sum(1 for a, b in pairs if a == b) == 13  # every deck mirrors itself once
 
 
 def test_baseline_deck_is_loadable():
@@ -55,7 +55,7 @@ def test_baseline_deck_is_loadable():
 
 def _toy_spec(seed=0, anchor_seat=None) -> EpisodeSpec:
     return EpisodeSpec(
-        deck_a="cats_midrange", deck_b="ramp", seed=seed, feature_set="rung0",
+        deck_a="cats", deck_b="giants", seed=seed, feature_set="rung0",
         weights=tuple(0.0 for _ in range(N_RUNG0)), bias=0.0, epsilon=0.05,
         anchor_seat=anchor_seat,
     )
@@ -104,7 +104,7 @@ def test_effect_readiness_is_exercised_in_training_phis():
     nonzero = 0
     total = 0
     for seed in range(4):
-        spec = EpisodeSpec(deck_a="cats_midrange", deck_b="cats_midrange", seed=seed,
+        spec = EpisodeSpec(deck_a="cats", deck_b="cats", seed=seed,
                            feature_set="rung0", weights=(0.1,) * N_RUNG0, epsilon=0.05)
         for traj in play_episode(spec):
             for phi in traj.phis:

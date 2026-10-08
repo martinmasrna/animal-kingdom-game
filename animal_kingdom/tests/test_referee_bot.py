@@ -130,8 +130,8 @@ def test_plans_nurse_then_queen_bee_then_worker_as_one_turn():
 def test_saved_game_opening_preserves_the_duplicate_setup():
     config = Config.default().sweep(actions_per_turn=2, draw_action_count=1, mulligan=False)
     s = new_game(
-        load_premade_deck("colony_food_swarm"),
-        load_premade_deck("cats_midrange"),
+        load_premade_deck("colony"),
+        load_premade_deck("cats"),
         seed=683470156,
         map_id="map_b",
         config=config,
@@ -182,7 +182,7 @@ def test_prefers_drawing_over_a_doomed_placement():
 # ------------------------------------------------------------- determinism / honesty
 
 def test_choose_is_deterministic():
-    s = new_game(load_premade_deck("ramp"), load_premade_deck("aggro_hq_rush"), seed=3)
+    s = new_game(load_premade_deck("giants"), load_premade_deck("den_rush"), seed=3)
     actor = s.player_to_act()
     legal = rules.legal_actions(s)
     a1 = small_referee(seed=0).choose(s.view_for(actor), legal, s)
@@ -192,8 +192,8 @@ def test_choose_is_deterministic():
 
 def test_staged_search_reduces_reply_rollouts_on_a_fixed_position():
     s = new_game(
-        load_premade_deck("ramp"),
-        load_premade_deck("aggro_hq_rush"),
+        load_premade_deck("giants"),
+        load_premade_deck("den_rush"),
         seed=3,
         map_id="map_b",
         config=Config.default().sweep(actions_per_turn=2, draw_action_count=1, mulligan=False),

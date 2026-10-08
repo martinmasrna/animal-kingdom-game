@@ -32,7 +32,7 @@ RARITY_MARK = {"legendary": "\U0001F7E1", "rare": "\U0001F535", "common": "⚪"}
 
 def _resolve_deck(query: str, slugs: list[str]) -> str:
     """Resolve a (possibly abbreviated) --deck query to exactly one slug, e.g. "aggro" ->
-    "aggro_hq_rush". Exact match wins outright; otherwise any slug containing the query."""
+    "den_rush". Exact match wins outright; otherwise any slug containing the query."""
     query = query.strip().lower()
     if query in slugs:
         return query
@@ -186,7 +186,7 @@ def main(
                         "'none' clears a wrapper-injected preset")
     p.add_argument("--deck", default=None,
                    help="only simulate/report this deck's matchups (abbreviation OK, e.g. "
-                        "--deck aggro matches aggro_hq_rush) instead of the full round-robin")
+                        "--deck rush matches den_rush) instead of the full round-robin")
     p.add_argument("--opponent", default=None,
                    help="pair with --deck to simulate/report only that single matchup "
                         "(abbreviation OK; same deck = mirror)")

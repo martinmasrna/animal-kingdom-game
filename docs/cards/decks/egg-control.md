@@ -1,14 +1,6 @@
 # Egg Control
 
-Snake and Bird control, tied together by their Eggs. The Birds churn the deck: Raven draws and shuffles, Owl Scouts, Aurum draws every turn. The Snakes grow: Rattlesnake with every shuffle (in hand and deck too), Python with every removed unit, Egg Eater with every removed Egg. The Snakes also carry the removal: Black Mamba removes an adjacent enemy of strength 5 or less; Taipan's bite removes any adjacent enemy at the start of your next turn, even if the Taipan is covered or removed. Magpie steals a random card from the opponent's hand and discards one of yours, which feeds Python.
-
-Eon is the Ouroboros: a 10 with Apex Predator that eats what it lands on, then shuffles itself back into the deck at the end of your turn, one strength smaller each cycle. Every return is a shuffle, so it also feeds Rattlesnake.
-
-**The Eggs** are the deck's proactive early play: a 0 on the board that pays twice, part on its Roar and part when it hatches, then removes itself (feeding Python and Egg Eater). Paying part up front keeps a broken Egg from being a total loss, and the delayed part is priced above a Draw action. The two trade differently: the Snake Egg is quantity and patience (three Snakes over two turns), the Bird Egg quality and speed (the best of three Birds, twice, hatching next turn). A covered Egg only pauses, since a timer ticks only while its unit is on top: removing the unit that covers it resumes the hatch, so only removal breaks an Egg.
-
-Rarity follows role: the commons are the engine (Snake Egg, Bird Egg, Owl and Raven at three copies; the three growing Snakes, Python, Rattlesnake and Egg Eater, at two), the rares are situational answers (Hawk, Taipan, Magpie, Black Mamba).
-
-The plan is to survive the midgame by removing threats one at a time, then win late on size: good against midrange and ramp, which commit one big unit at a time, weak against wide aggro and combo. Played by a human it wins by taking the initiative early (flyers deep on the other side, breaking regions) and building a chain to the enemy den anchored by the big Snakes; the bots don't play it that way, so its simulated win rate understates it.
+What each card is for: [`../../design/effects-pass.md`](../../design/effects-pass.md), its Egg Control section. The cards themselves come from the card workbench (`tools/card-workbench/`, converted by `convert.py`); the table below is generated from cards.json.
 
 ## Cards
 
@@ -18,17 +10,17 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Eon** | 1 | Snake | 10 | Apex Predator. At the end of your turn, shuffle this into your deck with -1 strength. |
-| **Ember** | 1 | Bird | 7 | Flight. When this is removed, shuffle it into your deck. |
-| **Aurum** | 1 | Bird | 1 | At the start of your turn, draw a card. |
-| **Black Swan** | 1 | Bird | 3 | The first time each turn you draw Black Swan, your opponent discards a random card. |
+| **Eon** | 1 | Snake | 10 | Apex Predator. Dusk: shuffle this into your deck with -1 strength. |
+| **Raven** | 1 | Bird | 3 | Flight. Roar: put an animal from your opponent's Remove Pile into your hand. |
+| **Aurum** | 1 | Bird | 1 | Dawn: draw a card. |
+| **Black Swan** | 1 | Bird | 3 | Whenever you draw Black Swan, your opponent discards a random card. |
 
 ### Rare
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Hawk** | 2 | Bird | 3 | Flight. Roar: remove an adjacent enemy of strength 3 or less. |
-| **Taipan** | 2 | Snake | 4 | Roar: choose an adjacent enemy. At the start of your next turn, remove it. |
+| **King Cobra** | 2 | Snake | 4 | Roar: choose an adjacent enemy. At the start of your next turn, remove it. |
 | **Magpie** | 2 | Bird | 3 | Flight. Roar: steal a card from your opponent's hand, then discard a card. |
 | **Black Mamba** | 2 | Snake | 4 | Roar: remove an adjacent enemy of strength 5 or less. |
 
@@ -36,10 +28,9 @@ The plan is to survive the midgame by removing threats one at a time, then win l
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Python** | 2 | Snake | dynamic | Has +1 strength for each removed animal. |
-| **Rattlesnake** | 2 | Snake | 0 | Whenever you shuffle a card, gain 1 strength (wherever this is). |
-| **Egg Eater** | 2 | Snake | dynamic | Has +2 strength for each removed Egg. |
-| **Owl** | 3 | Bird | 2 | Flight. Roar: Scout a card. |
+| **Python** | 3 | Snake | dynamic | Has +1 strength for each removed animal. |
+| **Egg Eater** | 3 | Snake | dynamic | Has +2 strength for each removed Egg. |
+| **Mosquito** | 3 | — | 2 | Flight. Roar: give an adjacent enemy -2 strength. |
 | **Raven** | 3 | Bird | 1 | Flight. Roar: draw 3 cards, then shuffle 2 cards back. |
 | **Bird Egg** | 3 | Egg | 0 | Roar: Scout a Bird. Next turn, remove this and Scout a Bird. |
 | **Snake Egg** | 3 | Egg | 0 | Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes. |

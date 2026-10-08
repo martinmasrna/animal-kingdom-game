@@ -226,7 +226,7 @@ def test_view_for_hides_opponent_hand_and_deck_contents():
     assert v.own_deck_count == len(s.decks["A"])
     assert v.opponent_deck_count == len(s.decks["B"])
     # no field leaks the opponent's hand/deck contents
-    assert not hasattr(v, "opponent_hand")
+    assert v.opponent_hand is None                     # only a legendary Giraffe reveals it
     assert not hasattr(v, "decks")
 
 

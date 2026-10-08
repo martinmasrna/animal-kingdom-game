@@ -41,10 +41,18 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "rat_king": ["rat_king_per_rodent"],
     "flying_squirrel": ["flying_squirrel_food"],
     "squirrel": ["squirrel_food"],
-    "chipmunk": ["chipmunk_food_now", "chipmunk_food_later"],
+    "hamster": ["hamster_food_now", "hamster_food_later"],
+    "tutorial_chipmunk": ["hamster_food_now", "hamster_food_later"],
     "hedgehog": ["hedgehog_food"],
     "groundhog": ["groundhog_food"],
-    "gopher": ["rodent_last_turn_food"],
+    "gazelle": ["gazelle_food"],
+    "mole": ["mole_food"],
+    "dormouse": ["dormouse_food"],
+    "wildebeest": ["wildebeest_food"],
+    "hyena": ["hyena_food_per"],
+    "tortoise": ["tortoise_per_armor"],
+    "dung_beetle": ["dung_beetle_per"],
+    "fish_legend_tuna": ["tuna_legend_food"],
     **{f"calib_food10_{n}": ["squirrel_food"] for n in (2, 3, 4, 5, 6)},
     **{f"calib_food3t_{n}": ["worker_wasp_food"] for n in (2, 3, 4, 5, 6)},
 }
@@ -59,7 +67,7 @@ NO_CONSTANT = {
 }
 
 # Cards read the shared fed_threshold via "gained N or more food this turn".
-FED_THRESHOLD_CARDS = {"hamster", "muskrat", "groundhog"}
+FED_THRESHOLD_CARDS = {"gopher", "muskrat", "groundhog"}
 
 
 def _cards():
@@ -150,16 +158,18 @@ STRENGTH_LIMIT_RE = re.compile(r"strength (\d+) or (?:less|more)", re.IGNORECASE
 # card_id -> the config attr holding its "strength N or less/more" removal limit.
 STRENGTH_LIMITS = {
     "jaguar": "jaguar_max",
-    "serval": "serval_min",
+    "honey_badger": "honey_badger_min",
+    "aristocrats_legend_cuckoo": "cuckoo_legend_max",
+    "city_spider": "city_spider_max",
     "stoop": "stoop_max",
     "rhinoceros": "rhinoceros_max",
     "black_mamba": "black_mamba_max",
     "hippopotamus": "hippopotamus_max",
     "mock_sentry": "stoop_max",
-    "mock_hunter": "jaguar_max",
+    "mock_hunter": "calib_rm4_max",
     **{f"calib_rm3_{n}": "stoop_max" for n in (2, 3, 4, 5, 6)},
-    **{f"calib_rm4_{n}": "jaguar_max" for n in (2, 3, 4, 5, 6)},
-    **{f"calib_rm6_{n}": "serval_min" for n in (1, 2, 3, 4, 5)},
+    **{f"calib_rm4_{n}": "calib_rm4_max" for n in (2, 3, 4, 5, 6)},
+    **{f"calib_rm6_{n}": "calib_rm6_min" for n in (1, 2, 3, 4, 5)},
 }
 
 
@@ -172,7 +182,7 @@ def test_strength_limit_text_matches_config():
 
 
 def test_no_strength_limit_card_escapes_the_check():
-    # Oxpecker's "strength 6 or more" counts its own decklist, not a removal limit.
+    # Oxpecker's "strength 8 or more" counts its own decklist, not a removal limit (checked below).
     printed = {cid for cid, c in _cards().items() if STRENGTH_LIMIT_RE.search(c.text)}
     assert printed - {"oxpecker"} == set(STRENGTH_LIMITS)
 
@@ -181,9 +191,9 @@ STRENGTH_LOSS_RE = re.compile(r"(?:gets?|enemy) -(\d+) strength", re.IGNORECASE)
 
 
 def test_strength_loss_text_matches_config():
-    """Viper's printed "-N strength" equals viper_poison, and no other card prints a loss unchecked."""
+    """Viper's and Mosquito's printed "-N strength" equal their constants, and no other card prints a loss unchecked."""
     printed = {cid: int(m.group(1)) for cid, c in _cards().items() if (m := STRENGTH_LOSS_RE.search(c.text))}
-    assert printed == {"viper": Config.default().viper_poison}
+    assert printed == {"viper": Config.default().viper_poison, "mosquito": Config.default().mosquito_drain}
 
 
 def test_eon_decay_text_matches_config():
@@ -196,8 +206,8 @@ DELAY_RE = re.compile(r"in (\d+) turns", re.IGNORECASE)
 # card_id -> the config attr its printed "in N turns" delay comes from.
 DELAY_CONSTANTS = {
     "black_bear": "black_bear_delay",
-    "grizzly_bear": "grizzly_bear_delay",
     "sloth": "sloth_delay",
+    "food_otk_legend_squirrel": "otk_squirrel_delay",
     "snake_egg": "egg_hatch_delay",
 }
 
@@ -247,7 +257,12 @@ DRAW_CONSTANTS: dict[str, list[str]] = {
     "nurse_bee": ["nurse_bee_draw"],
     "nurse_bumblebee": ["nurse_bumblebee_draw"],
     "black_bear": ["black_bear_draw"],
-    "hamster": ["hamster_draw"],
+    "gopher": ["gopher_draw"],
+    "praying_mantis": ["mantis_draw"],
+    "mole": ["mole_draw"],
+    "hummingbird": ["hummingbird_draw"],
+    "whale_shark": ["whale_shark_draw"],
+    "handlock_legend_butterfly_5": ["butterfly_legend_stage5_draw"],
     "snake_egg": ["egg_hatch_draw"],   # "draw a Snake" now (snake_egg_draw, no printed number), "draw 2 Snakes" at the hatch
     **{cid: ["test_draw"] for cid in ("mock_draw2", "mock_skully", *(f"calib_draw2_{n}" for n in range(4)))},
 }
@@ -273,3 +288,116 @@ def test_draw_and_shuffle_text_matches_config():
     for cid in DRAW_CONSTANTS:
         assert cid in cards, f"{cid}: in DRAW_CONSTANTS but not a card"
     assert not problems, "card text / config desync:\n  " + "\n  ".join(problems)
+
+
+STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
+
+# card_id -> config attrs, one per printed "+N strength" (a "give" counter or a "has/have" anthem), in order. Every card
+# printing one must be listed (checked below): the launch decks brought a dozen of them at once.
+STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
+    "vesper": ["anthem_vesper_per"],
+    "guard_hornet": ["guard_hornet_bonus"],
+    "verminus": ["anthem_verminus_per"],
+    "goliath": [],                             # dynamic strength: its +1 per removed animal is the rule itself
+    "raksha": ["raksha_anthem"],
+    "dingo": ["dingo_grant"],
+    "shuck": ["shuck_grant"],
+    "egg_eater": ["egg_eater_growth"],
+    "canines_legend_wolf": ["wolf_legend_grant"],
+    "bush_dog": ["bush_dog_grant"],
+    "raccoon_dog": ["raccoon_dog_grant"],
+    "fox": ["fox_grant"],
+    "dog": ["stray_dog_grant"],
+    "mahi_mahi": ["mahi_mahi_grant"],
+    "mackerel": ["mackerel_anthem"],
+    "tuna": ["tuna_per_fish"],
+    "handlock_legend_baboon": ["baboon_legend_grant"],
+    "silverback": ["silverback_grant"],
+    "tarsier": ["tarsier_grant"],
+    "baboon": ["baboon_grant"],
+    "grizzly_bear": ["grizzly_per_card"],
+    "butterfly": ["butterfly_grant"],
+    "handlock_legend_butterfly_3": ["butterfly_grant"],
+    "handlock_legend_butterfly_4": ["butterfly_legend_stage4_grant"],
+    "handlock_legend_butterfly_5": ["butterfly_legend_stage5_grant"],
+    "moose": ["moose_anthem"],
+    "giraffe": ["giraffe_bonus"],
+    "boar": ["boar_grazing_bonus"],
+}
+
+
+def test_strength_bonus_text_matches_config():
+    """Every printed "+N strength" equals the constant its effect or anthem uses, and no card prints one unlisted."""
+    cfg, cards = Config.default(), _cards()
+    problems = []
+    for cid, card in cards.items():
+        nums = [int(n) for n in STRENGTH_BONUS_RE.findall(card.text)]
+        if not nums:
+            continue
+        if cid not in STRENGTH_BONUS_CONSTANTS:
+            problems.append(f"{cid}: text prints +{nums} strength but STRENGTH_BONUS_CONSTANTS doesn't list it")
+            continue
+        attrs = STRENGTH_BONUS_CONSTANTS[cid]
+        if cid == "goliath":
+            assert nums == [1]
+            continue
+        if len(attrs) != len(nums):
+            problems.append(f"{cid}: {len(nums)} printed numbers, {len(attrs)} constants")
+        for n, attr in zip(nums, attrs):
+            if n != getattr(cfg, attr):
+                problems.append(f"{cid}: text says +{n}, config.{attr} = {getattr(cfg, attr)}")
+    for cid in STRENGTH_BONUS_CONSTANTS:
+        assert cid in cards, f"{cid}: listed but not a card"
+    assert not problems, "card text / config desync:\n  " + "\n  ".join(problems)
+
+
+COUNT_THRESHOLD_RE = re.compile(r"(\d+) or more (animals|cards|strength|regions|Colony animals)")
+
+# card_id -> the config attr of its printed "N or more <things>" threshold.
+THRESHOLDS = {
+    "hare": "hare_played_min",
+    "macaque": "macaque_hand_min",
+    "gorilla": "gorilla_min",
+    "fish_legend_manta_ray": "manta_legend_regions",
+    "nurse_bumblebee": "colony_synergy_threshold",
+    "guard_hornet": "guard_hornet_colony_threshold",
+    "soldier_ant": "colony_synergy_threshold",
+    "unnamed_canine": "unnamed_canine_draw_threshold",
+}
+
+
+def test_thresholds_text_matches_config():
+    cfg, cards = Config.default(), _cards()
+    printed = {cid: int(m.group(1)) for cid, c in cards.items() if (m := COUNT_THRESHOLD_RE.search(c.text))}
+    assert printed == {cid: getattr(cfg, attr) for cid, attr in THRESHOLDS.items()}
+
+
+def test_oxpecker_threshold_matches_config():
+    (n,) = re.findall(r"strength (\d+) or more", _cards()["oxpecker"].text)
+    assert int(n) == Config.default().oxpecker_min
+
+
+def test_the_launch_decks_other_numbers_match_config():
+    """The numbers printed as words, or in a shape the patterns above don't read."""
+    cfg, c = Config.default(), _cards()
+    words = {"two": 2, "three": 3}
+    assert words[re.search(r"add (\w+) random younglings", c["stork"].text).group(1)] == cfg.stork_younglings
+    assert words[re.search(r"shuffle (\w+) Cuckoo Eggs", c["cuckoo"].text).group(1)] == cfg.cuckoo_eggs
+    assert words[re.search(r"place (\w+) Worms", c["earthworm"].text).group(1)] == cfg.earthworm_worms
+    assert words[re.search(r"gain (\w+) times as much", c["food_otk_legend_squirrel"].text).group(1)] == cfg.otk_squirrel_multiplier
+    assert int(re.search(r"give (\d+) random animals", c["handlock_legend_baboon"].text).group(1)) == cfg.baboon_legend_count
+    assert int(re.search(r"give (\d+) animals", c["baboon"].text).group(1)) == cfg.baboon_count
+    assert int(re.search(r"produce (\d+) more food", c["hoofed_legend_wildebeest"].text).group(1)) == cfg.migration_bonus
+    assert int(re.search(r"produce (\d+) less food", c["hoofed_legend_boar"].text).group(1)) == cfg.boar_penalty
+    assert int(re.search(r"Reach (\d+)", c["great_white_shark"].text).group(1)) == cfg.shark_reach
+    assert int(re.search(r"strength to (\d+)", c["serval"].text).group(1)) == cfg.serval_set
+    assert "Poppy and Rusty" in c["alpha"].text and cfg.alpha_pups == 2
+
+
+def test_hungry_and_reach_numbers_match_their_fields():
+    """"Hungry N" and "Reach N" opening a card's text are its `hungry` and `reach` fields (written by the converter)."""
+    for cid, card in _cards().items():
+        for kw, field in (("Hungry", card.hungry), ("Reach", card.reach)):
+            m = re.match(r"(?:\w+(?: \w+)?\. )*" + kw + r" (\d+)\.", card.text)
+            if kw in card.keywords:
+                assert m and int(m.group(1)) == field, f"{cid}: {kw} {field} vs text {card.text!r}"

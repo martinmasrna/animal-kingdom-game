@@ -10,7 +10,7 @@ from animal_kingdom.engine.state import EngineError
 from animal_kingdom.web.match import Match, Seat
 
 
-def _match(bots=("easy", "easy"), decks=("cats_midrange", "egg_control")) -> Match:
+def _match(bots=("easy", "easy"), decks=("cats", "egg_control")) -> Match:
     m = Match("T", Seat("ta", "A", bot=bots[0], deck=decks[0]))
     m.join(Seat("tb", "B", bot=bots[1], deck=decks[1]))
     return m
@@ -23,9 +23,9 @@ def _play_out_game(m: Match, rng: random.Random) -> None:
 
 
 def test_a_match_starts_as_soon_as_both_seats_are_filled():
-    m = Match("T", Seat("ta", "A", deck="ramp"))
+    m = Match("T", Seat("ta", "A", deck="giants"))
     assert m.phase == "lobby"
-    m.join(Seat("tb", "B", deck="ramp"))
+    m.join(Seat("tb", "B", deck="giants"))
     assert m.phase == "playing"
     m.ready("A")                          # an older client's Ready changes nothing
     assert m.phase == "playing"
@@ -45,8 +45,8 @@ def test_a_match_is_one_game_and_a_rematch_lets_the_loser_go_first():
 
 
 def test_conceding_loses_the_game_and_ends_the_match():
-    m = Match("T", Seat("ta", "A", deck="ramp"))
-    m.join(Seat("tb", "B", deck="ramp")); m.ready("A"); m.ready("B")
+    m = Match("T", Seat("ta", "A", deck="giants"))
+    m.join(Seat("tb", "B", deck="giants")); m.ready("A"); m.ready("B")
     m.concede("A")
     assert m.results[-1]["winner"] == "B" and m.results[-1]["reason"] == "concede"
     assert m.phase == "match_over" and m.view("A")["game"]["result"]["reason"] == "concede"
@@ -60,8 +60,8 @@ def test_the_view_marks_units_the_enemy_cannot_choose():
     """An Armadillo's neighbours have Stealth; the board must say so, or a Viper or Taipan that finds no
     target looks broken (Martin's game 2026-09-30: Groundhog and Scrooge next to Armadillos)."""
     from animal_kingdom.engine.state import UnitInstance
-    m = Match("T", Seat("ta", "A", deck="ramp"))
-    m.join(Seat("tb", "B", deck="ramp")); m.ready("A"); m.ready("B")
+    m = Match("T", Seat("ta", "A", deck="giants"))
+    m.join(Seat("tb", "B", deck="giants")); m.ready("A"); m.ready("B")
     st = m.state
     st.board = {"4,2": [UnitInstance("armadillo", "B", 901)], "4,1": [UnitInstance("groundhog", "B", 902)],
                 "2,1": [UnitInstance("groundhog", "B", 903)]}
@@ -111,7 +111,7 @@ def test_game_log_replays_to_the_same_result():
     from animal_kingdom.sim.replay import replay
     rng = random.Random(5)
     logs = []
-    m = _match(decks=("food_otk", "aggro_hq_rush"))
+    m = _match(decks=("food_otk", "den_rush"))
     m.on_game_end = lambda match, rec: logs.append(json.loads(json.dumps(rec)))
     _play_out_game(m, rng)
     _, result, _ = replay(logs[0])
@@ -130,8 +130,8 @@ def test_the_game_log_times_every_action():
 def test_gauntlet_runs_its_schedule_opponent_by_opponent_alternating_who_starts():
     from animal_kingdom.engine.state import Result
     m = Match("G", Seat("ta", "You", deck="egg_control"))
-    m.join(Seat("tb", "Bot", bot="easy", deck="aggro_hq_rush"))
-    m.make_gauntlet(["aggro_hq_rush", "ramp"], per_seat=1)
+    m.join(Seat("tb", "Bot", bot="easy", deck="den_rush"))
+    m.make_gauntlet(["den_rush", "giants"], per_seat=1)
     m._start_game()
     seen = []
     for i in range(4):
@@ -141,7 +141,7 @@ def test_gauntlet_runs_its_schedule_opponent_by_opponent_alternating_who_starts(
         if i < 3:
             assert m.phase == "game_over"
             m.next_game()
-    assert seen == [("aggro_hq_rush", "A"), ("aggro_hq_rush", "B"), ("ramp", "A"), ("ramp", "B")]
+    assert seen == [("den_rush", "A"), ("den_rush", "B"), ("giants", "A"), ("giants", "B")]
     assert m.phase == "match_over"
     g = m.view("A")["gauntlet"]
     assert g["played"] == 4 and g["next"] is None
@@ -164,7 +164,7 @@ def test_a_saved_match_resumes_mid_game_after_a_restart():
 
 def test_decklist_problems_follow_the_deck_rules():
     from animal_kingdom.decks import PREMADE_DECKS, decklist_problems
-    cats = PREMADE_DECKS["cats_midrange"]
+    cats = PREMADE_DECKS["cats"]
     assert decklist_problems(cats) == []
     assert decklist_problems(cats[:-1])                                   # 29 cards
     two_kings = [c for c in cats if c != "prince_leo"] + ["king_theron"]
@@ -182,11 +182,11 @@ def test_custom_deck_resolves_to_a_playable_slug(tmp_path, monkeypatch):
     from animal_kingdom.web import custom_decks
     from animal_kingdom.web.match import DECK_NAMES
     monkeypatch.setattr(custom_decks, "DECKS_FILE", tmp_path / "decks.json")
-    cats = PREMADE_DECKS["cats_midrange"]
+    cats = PREMADE_DECKS["cats"]
     slug = custom_decks.resolve({"name": "My cats", "list": cats})
     assert slug.startswith("custom_") and DECK_NAMES[slug] == "My cats"
     assert sorted(load_premade_deck(slug)) == sorted(cats)
-    assert custom_decks.resolve("ramp") == "ramp"
+    assert custom_decks.resolve("giants") == "giants"
     import pytest
     with pytest.raises(EngineError):
         custom_decks.resolve({"name": "bad", "list": cats[:-1]})
@@ -194,9 +194,9 @@ def test_custom_deck_resolves_to_a_playable_slug(tmp_path, monkeypatch):
 
 def test_reverse_gauntlet_rotates_the_players_deck_against_the_bots_fixed_one():
     from animal_kingdom.engine.state import Result
-    m = Match("R", Seat("ta", "You", deck="aggro_hq_rush"))
+    m = Match("R", Seat("ta", "You", deck="den_rush"))
     m.join(Seat("tb", "Bot", bot="easy", deck="goodstuff"))
-    m.make_gauntlet(["aggro_hq_rush", "ramp"], per_seat=1, rotating="A")
+    m.make_gauntlet(["den_rush", "giants"], per_seat=1, rotating="A")
     m._start_game()
     seen = []
     for i in range(4):
@@ -206,10 +206,10 @@ def test_reverse_gauntlet_rotates_the_players_deck_against_the_bots_fixed_one():
         if i < 3:
             assert m.view("A")["gauntlet"]["next"]["yours"]
             m.next_game()
-    assert seen == [("aggro_hq_rush", "goodstuff", "A"), ("aggro_hq_rush", "goodstuff", "B"),
-                    ("ramp", "goodstuff", "A"), ("ramp", "goodstuff", "B")]
+    assert seen == [("den_rush", "goodstuff", "A"), ("den_rush", "goodstuff", "B"),
+                    ("giants", "goodstuff", "A"), ("giants", "goodstuff", "B")]
     g = m.view("A")["gauntlet"]
-    assert [(r["deckName"], r["w"], r["l"]) for r in g["record"]] == [("Aggro", 2, 0), ("Ramp", 1, 1)]
+    assert [(r["deckName"], r["w"], r["l"]) for r in g["record"]] == [("Aggro Den Rush", 2, 0), ("Giants", 1, 1)]
 
 
 # ----------------------------------------------------------------- turn clock
@@ -217,8 +217,8 @@ def _two_humans(monkeypatch, t0=1000.0):
     from animal_kingdom.web import match as M
     now = [t0]
     monkeypatch.setattr(M.time, "time", lambda: now[0])
-    m = Match("C", Seat("ta", "A", deck="cats_midrange"))
-    m.join(Seat("tb", "B", deck="ramp"))
+    m = Match("C", Seat("ta", "A", deck="cats"))
+    m.join(Seat("tb", "B", deck="giants"))
     m._start_game()
     return m, now
 
@@ -302,8 +302,8 @@ def test_a_bot_waits_for_the_watching_players_screen_never_longer_than_the_cap(m
     longer than BOT_WAIT_MAX if a screen never reports (server._watched)."""
     import asyncio, time
     from animal_kingdom.web import server
-    m = Match("WAT", Seat("ta", "A", deck="cats_midrange"))
-    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m = Match("WAT", Seat("ta", "A", deck="cats"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="giants"))
     m._start_game()
     m.seq = 7
     hub = server.Hub()
@@ -323,8 +323,8 @@ def test_a_bot_waits_for_the_watching_players_screen_never_longer_than_the_cap(m
 
 def test_every_view_states_the_decision_and_the_clock():
     """Who decides what, and the clock, are always in the view (never a missing field read as 'no')."""
-    m = Match("DEC", Seat("ta", "A", deck="cats_midrange"))
-    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m = Match("DEC", Seat("ta", "A", deck="cats"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="giants"))
     m._start_game()
     v = m.view("A")["game"]
     assert v["decision"] == "mulligan" and v["clock"] == {"on": False}   # a bot game has no clock, and says so
@@ -339,8 +339,8 @@ def test_a_pick_from_your_own_hand_names_what_it_does():
     """Magpie's discard and Raven's shuffle say so in the view, so the client can head them (feedback 2026-10-01: a lit hand read as 'play one')."""
     from animal_kingdom.engine.actions import ChoiceAction, PlaceAction
     from animal_kingdom.engine.state import UnitInstance
-    m = Match("ASK", Seat("ta", "A", deck="cats_midrange"))
-    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m = Match("ASK", Seat("ta", "A", deck="cats"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="giants"))
     m._start_game()
     while m.state.pending:
         m.act(m.to_act(), ChoiceAction("__skip__"))
@@ -356,8 +356,8 @@ def test_a_spikes_animal_wears_its_badge_until_its_spikes_are_used():
     """Spikes fire once: the view marks the animal until then, so the board shows the danger only while it's real."""
     from animal_kingdom.engine.actions import ChoiceAction
     from animal_kingdom.engine.state import UnitInstance
-    m = Match("SPK", Seat("ta", "A", deck="cats_midrange"))
-    m.join(Seat("tb", "Bot", bot="easy", deck="ramp"))
+    m = Match("SPK", Seat("ta", "A", deck="cats"))
+    m.join(Seat("tb", "Bot", bot="easy", deck="giants"))
     m._start_game()
     while m.state.pending:
         m.act(m.to_act(), ChoiceAction("__skip__"))
@@ -374,8 +374,8 @@ def test_the_opponents_mulligan_never_shows_in_their_unseen_cards():
     it, or the decklist panel would show which cards they threw back (Martin, 2026-10-02)."""
     from collections import Counter
     from animal_kingdom.engine.actions import ChoiceAction
-    m = Match("MUL", Seat("ta", "A", deck="cats_midrange"))
-    m.join(Seat("tb", "B", deck="ramp"))
+    m = Match("MUL", Seat("ta", "A", deck="cats"))
+    m.join(Seat("tb", "B", deck="giants"))
     m._start_game()
     m.act("B", ChoiceAction(m.state.hands["B"][0].iid))
     v = m.view("A")
@@ -386,8 +386,8 @@ def test_a_choice_holding_the_opponents_cards_never_shows_in_their_unseen_cards(
     """A Scout's three cards and a Raven's put-back sit outside the deck and hand while the opponent chooses: their
     'unseen' cards still count them, or the decklist panel shows what they're looking at (Martin, 2026-10-02)."""
     from collections import Counter
-    m = Match("SCO", Seat("ta", "A", deck="cats_midrange"))
-    m.join(Seat("tb", "B", deck="ramp"))
+    m = Match("SCO", Seat("ta", "A", deck="cats"))
+    m.join(Seat("tb", "B", deck="giants"))
     m._start_game()
     st = m.state
     st.effect_stack.append({"op": "scout", "player": "B", "spec": None, "pulled": [st.decks["B"].pop() for _ in range(3)]})
@@ -404,8 +404,8 @@ def test_a_roam_is_offered_taken_and_written_into_the_history():
     as a dict, and the history records it as the animal that roamed."""
     from animal_kingdom.engine.state import UnitInstance
     from ._helpers import cards_with
-    m = Match("T", Seat("ta", "A", deck="ramp"))
-    m.join(Seat("tb", "B", deck="ramp"))
+    m = Match("T", Seat("ta", "A", deck="giants"))
+    m.join(Seat("tb", "B", deck="giants"))
     st = m.state
     st.cards = cards_with({"id": "t_roamer", "base_strength": 4, "keywords": ["Roam"]})
     st.pending, st.effect_stack, st.current = None, [], "A"

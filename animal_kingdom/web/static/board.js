@@ -69,12 +69,14 @@ export function portrait(id, D) {
 function unit(u, under, cards) {
   // Board keywords: the card's own, plus Stealth whenever the enemy can't choose it (an adjacent Armadillo gives it).
   // Spikes only until they've removed a coverer (the view says so): after that it's an ordinary animal.
-  const c = cards[u.id], kws = (c.kw || []).filter(k => BOARD_KW.includes(k) && k !== 'Stealth' && k !== 'Spikes').concat(u.hidden ? ['Stealth'] : [], u.spikes ? ['Spikes'] : []);
+  // Armor likewise when a neighbour gives it (Capybara); an inked animal (the Octopus) wears none until the ink wears off.
+  const c = cards[u.id], kws = u.inked ? [] : (c.kw || []).filter(k => BOARD_KW.includes(k) && k !== 'Stealth' && k !== 'Spikes' && k !== 'Armor')
+    .concat(u.armor ? ['Armor'] : [], u.hidden ? ['Stealth'] : [], u.spikes ? ['Spikes'] : []);
   // the animals underneath peek out behind, down and right: each a solid disc under its team rim, a step darker (at this
   // offset a portrait showed only as a sliver, which read as a gap)
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner} seen" style="transform:translate(${22 + i * 7}px,${20 + i * 6}px) scale(.82);z-index:${-i - 1}">`
     + `<div class="fill"></div><img class="rimimg" src="${kit(`rim_${team(b.owner)}.webp`)}" alt="" draggable="false"></div>`).join('');
-  return peek + `<div class="ring${hasArt(u.id) ? '' : ' noart'}" style="${portrait(u.id, 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
+  return peek + `<div class="ring${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects until the Octopus player\'s next turn' : ''}" style="${portrait(u.id, 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
     `<img class="rimimg" src="${kit(`rim_${team(u.owner)}.webp`)}" alt="" draggable="false"><div class="boss num">${chalk(u.str)}</div>` +
     (u.timer ? `<div class="timer" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${chalk(u.timer)}</div>` : '') +
     (kws.length ? `<div class="kws">${kws.map(k => `<div class="kw" data-tip="${k}: ${KEYWORDS[k]}"><img src="${kit(`kw_${k.toLowerCase()}.webp`)}" alt="${k}" draggable="false"></div>`).join('')}</div>` : '');

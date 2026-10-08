@@ -32,12 +32,6 @@ def advance_to(state, target_tc):
 
 # ============================================================== anthems ("has +X", live)
 
-def test_lobo_scales_with_other_canines():
-    s = make_state()
-    lobo = put(s, "1,1", "lobo", "A")
-    assert effective_strength(s, lobo) == 4              # base, no other Canines
-    put(s, "1,2", "unnamed_canine", "A")
-    assert effective_strength(s, lobo) == 6              # +2 per other Canine
 
 
 def test_raksha_buffs_other_canines_but_not_itself():
@@ -48,13 +42,6 @@ def test_raksha_buffs_other_canines_but_not_itself():
     assert effective_strength(s, raksha) == 5            # body 5; aura excludes itself
 
 
-def test_african_wild_dog_spawns_a_pup():
-    s = make_state(hands={"A": ["african_wild_dog"]})
-    put(s, "1,2", "dog", "A")                            # HQ-front anchor so 2,2 is connected
-    rules.apply_action(s, PlaceAction("african_wild_dog", ("cr", "2,2")))
-    pups = [u for st in s.board.values() for u in st if u.card_id == "pup"]
-    assert len(pups) == 1 and pups[0].owner == "A"       # one Pup token spawned adjacent
-    assert "Canine" in s.cards["pup"].tags               # Pups count for the pack
 
 
 def test_verminus_counts_any_other_unit():
@@ -92,21 +79,8 @@ def test_nurse_bumblebee_draw_gated_on_four_colony():
 
 # ============================================== counters ("give +X", stored on instance)
 
-def test_clarion_buffs_other_board_canines_by_two_not_hand():
-    s = make_state(hands={"A": ["clarion", "gray_wolf"]})
-    fox = put(s, "1,2", "unnamed_canine", "A")
-    rules.apply_action(s, PlaceAction("clarion", ("cr", "2,2")))
-    assert fox.strength_counter == 2                      # +2 to a board Canine
-    assert hand_inst(s, "A", "gray_wolf").strength_counter == 0   # hand is no longer buffed
 
 
-def test_red_wolf_buffs_canines_that_enter_after_it():
-    s = make_state(hands={"A": ["gray_wolf", "lion"]})
-    put(s, "1,2", "red_wolf", "A")                           # Dhole already on the board
-    rules.apply_action(s, PlaceAction("gray_wolf", ("cr", "2,2")))
-    assert s.top_unit("2,2").strength_counter == CFG.red_wolf_grant           # Canine buffed as it entered
-    rules.apply_action(s, PlaceAction("lion", ("cr", "1,3")))
-    assert s.top_unit("1,3").strength_counter == 0           # non-Canine unaffected
 
 
 def test_scarlett_places_poppy_and_rusty():
@@ -117,24 +91,8 @@ def test_scarlett_places_poppy_and_rusty():
     assert cubs == ["poppy", "rusty"]
 
 
-def test_red_wolf_buffs_spawned_pups():
-    # The core token synergy: pups enter play, so Dhole's on-enter buff catches them.
-    s = make_state(hands={"A": ["alpha"]})
-    put(s, "1,2", "red_wolf", "A")
-    rules.apply_action(s, PlaceAction("alpha", ("cr", "2,2")))
-    pups = [u for st in s.board.values() for u in st if u.card_id in ("poppy", "rusty")]
-    assert len(pups) == 2 and all(p.strength_counter == CFG.red_wolf_grant for p in pups)
 
 
-def test_hyena_removal_scales_with_canine_count():
-    # Dog + Hyena = 2 Canines -> may remove strength <= 2, but not a bigger body.
-    s = make_state(hands={"A": ["hyena"]})
-    put(s, "1,2", "dog", "A")
-    put(s, "3,2", "jerboa", "B")                             # STR 2 enemy adjacent to 2,2
-    put(s, "2,3", "lion", "B")                               # STR 7 enemy adjacent to 2,2
-    apply_click(s, PlaceAction("hyena", ("cr", "2,2")))
-    assert s.owner_of("3,2") is None                         # 2 <= 2 Canines: removed
-    assert s.owner_of("2,3") == "B"                          # 7 > 2: survives
 
 
 def test_outrider_lets_canines_ignore_connection():
@@ -145,22 +103,13 @@ def test_outrider_lets_canines_ignore_connection():
     assert "2,2" in place_targets(s)                         # may now place adjacent to the pack
 
 
-def test_fox_draws_on_each_buff_when_uncapped():
-    s = make_state(hands={"A": ["clarion", "clarion"]},
-                   decks={"A": ["lion", "tiger", "eagle"], "B": []})
-    fox = put(s, "1,2", "fox", "A")
-    rules.apply_action(s, PlaceAction("clarion", ("cr", "2,2")))  # +2 -> Fox draws
-    rules.apply_action(s, PlaceAction("clarion", ("cr", "1,1")))  # +2 -> Fox draws AGAIN (uncapped)
-    assert fox.strength_counter == 4
-    # Two placements from hand, two Fox draws -> hand nets back to 2 (would be 1 if capped once/turn).
-    assert len(s.hands["A"]) == 2
 
 
 def test_hand_counter_travels_onto_the_board():
-    s = make_state(hands={"A": ["gray_wolf"]})
-    hand_inst(s, "A", "gray_wolf").strength_counter = 2
-    iid = hand_inst(s, "A", "gray_wolf").iid
-    rules.apply_action(s, PlaceAction("gray_wolf", ("cr", "1,1")))
+    s = make_state(hands={"A": ["chimpanzee"]})
+    hand_inst(s, "A", "chimpanzee").strength_counter = 2
+    iid = hand_inst(s, "A", "chimpanzee").iid
+    rules.apply_action(s, PlaceAction("chimpanzee", ("cr", "1,1")))
     placed = s.top_unit("1,1")
     assert placed.iid == iid and placed.strength_counter == 2  # same instance moved
     assert effective_strength(s, placed) == 6                  # base 4 + counter
@@ -186,21 +135,21 @@ def test_dingo_buffs_every_adjacent_canine_not_just_one():
 
 def test_shuck_returns_a_removed_canine_with_counter():
     s = make_state(hands={"A": ["shuck"]})
-    s.remove_pile.append("gray_wolf")
-    rules.apply_action(s, PlaceAction("shuck", ("cr", "1,2")))
+    s.pile_add("gray_wolf", "A")
+    apply_click(s, PlaceAction("shuck", ("cr", "1,2")))
     assert "gray_wolf" not in s.remove_pile
     assert hand_inst(s, "A", "gray_wolf").strength_counter == CFG.shuck_grant
 
 
 # =================================================================== Canine removal/draw
 
-def test_gray_wolf_removes_enemy_up_to_its_buffed_strength():
-    s = make_state(hands={"A": ["gray_wolf"]})
-    hand_inst(s, "A", "gray_wolf").strength_counter = 2  # buffed body 6
+def test_chimpanzee_removes_enemy_up_to_its_buffed_strength():
+    s = make_state(hands={"A": ["chimpanzee"]})
+    hand_inst(s, "A", "chimpanzee").strength_counter = 2  # buffed body 6
     put(s, "1,2", "lion", "A")                           # connects 2,2
-    put(s, "3,2", "snow_leopard", "B")                   # enemy str 6, adjacent to 2,2
+    put(s, "3,2", "leopard", "B")                        # enemy str 6, adjacent to 2,2
     put(s, "2,3", "lion", "B")                            # enemy str 7, adjacent to 2,2
-    apply_click(s, PlaceAction("gray_wolf", ("cr", "2,2")))
+    apply_click(s, PlaceAction("chimpanzee", ("cr", "2,2")))
     assert s.owner_of("3,2") is None                     # 6 <= 6 removed
     assert s.owner_of("2,3") == "B"                       # 7 > 6 survives
 
@@ -252,33 +201,33 @@ def test_goliath_strength_equals_remove_pile_size():
 
 
 def test_armor_survives_removal_effect():
-    s = make_state(hands={"A": ["gray_wolf"]})
-    hand_inst(s, "A", "gray_wolf").strength_counter = 3  # body 7 - clears Armadillo's str 5
+    s = make_state(hands={"A": ["chimpanzee"]})
+    hand_inst(s, "A", "chimpanzee").strength_counter = 3  # body 7 - clears Armadillo's str 5
     put(s, "1,2", "lion", "A")
     put(s, "3,2", "armadillo", "B")                      # str 5 but Armor
-    rules.apply_action(s, PlaceAction("gray_wolf", ("cr", "2,2")))
+    rules.apply_action(s, PlaceAction("chimpanzee", ("cr", "2,2")))
     assert s.owner_of("3,2") == "B"
 
 
-def test_snow_leopard_lets_other_cats_cover_equal_strength():
+def test_leopard_lets_other_cats_cover_equal_strength():
     s = make_state(hands={"A": ["caracal"]})
-    put(s, "1,2", "snow_leopard", "A")                   # connects 2,2; the anthem source
-    put(s, "2,2", "caracal", "B")                        # enemy str 4
-    assert PlaceAction("caracal", ("cr", "2,2")) in rules.legal_actions(s)  # 4 >= 4
+    put(s, "1,2", "leopard", "A")                        # connects 2,2; the static's source
+    put(s, "2,2", "caracal", "B")                        # enemy str 6
+    assert PlaceAction("caracal", ("cr", "2,2")) in rules.legal_actions(s)  # 6 >= 6
 
 
-def test_second_snow_leopard_benefits_from_the_first():
-    s = make_state(hands={"A": ["snow_leopard"]})
-    put(s, "1,2", "snow_leopard", "A")                   # connects 2,2; the anthem source
-    put(s, "2,2", "grizzly_bear", "B")                   # enemy str 6
-    assert PlaceAction("snow_leopard", ("cr", "2,2")) in rules.legal_actions(s)  # 6 >= 6
+def test_second_leopard_benefits_from_the_first():
+    s = make_state(hands={"A": ["leopard"]})
+    put(s, "1,2", "leopard", "A")                        # connects 2,2; the static's source
+    put(s, "2,2", "dire_wolf", "B")                      # enemy str 6
+    assert PlaceAction("leopard", ("cr", "2,2")) in rules.legal_actions(s)  # 6 >= 6
 
 
-def test_snow_leopard_alone_needs_strictly_greater():
-    s = make_state(hands={"A": ["snow_leopard"]})
-    put(s, "1,2", "lion", "A")                           # connects 2,2; no anthem on the board
-    put(s, "2,2", "grizzly_bear", "B")                   # enemy str 6
-    assert PlaceAction("snow_leopard", ("cr", "2,2")) not in rules.legal_actions(s)
+def test_leopard_alone_needs_strictly_greater():
+    s = make_state(hands={"A": ["leopard"]})
+    put(s, "1,2", "lion", "A")                           # connects 2,2; no Leopard on the board
+    put(s, "2,2", "dire_wolf", "B")                      # enemy str 6
+    assert PlaceAction("leopard", ("cr", "2,2")) not in rules.legal_actions(s)
 
 
 def test_cougar_places_adjacent_to_a_cat_ignoring_connection():
@@ -288,11 +237,11 @@ def test_cougar_places_adjacent_to_a_cat_ignoring_connection():
 
 
 def test_black_panther_untargetable_by_enemy_effect():
-    s = make_state(current="B", hands={"B": ["gray_wolf"]})
-    hand_inst(s, "B", "gray_wolf").strength_counter = 3  # body 7
+    s = make_state(current="B", hands={"B": ["chimpanzee"]})
+    hand_inst(s, "B", "chimpanzee").strength_counter = 3  # body 7
     put(s, "4,3", "caracal", "B")                        # B front connects 3,3
     put(s, "3,2", "black_panther", "A")                  # str 6, adjacent to 3,3
-    rules.apply_action(s, PlaceAction("gray_wolf", ("cr", "3,3")))
+    rules.apply_action(s, PlaceAction("chimpanzee", ("cr", "3,3")))
     assert s.owner_of("3,2") == "A"                      # untargetable -> survives
 
 
@@ -386,25 +335,15 @@ def test_omen_when_drawn_discards_from_opponents_hand_only():
     assert s.remove_pile == ["fox"]
 
 
-def test_omen_hard_cap_fires_once_per_turn():
+def test_omen_fires_every_time_it_is_drawn():
     s = make_state(current="A")
     s.add_to_hand("B", "fox")
     s.add_to_hand("B", "lion")
-    first = UnitInstance("omen", "A", s.new_iid())
-    s.hands["A"].append(first)
-    effects._omen_drawn(s, first)
-    assert len(s.hands["B"]) == 1                        # first trigger this turn: discards one
-
-    second = UnitInstance("omen", "A", s.new_iid())  # a fresh instance (e.g. reshuffled+redrawn)
-    s.hands["A"].append(second)
-    effects._omen_drawn(s, second)
-    assert len(s.hands["B"]) == 1                        # capped: no second discard this turn
-
-    s.turn_flags = {}                                    # simulate rules._end_turn's reset
-    third = UnitInstance("omen", "A", s.new_iid())
-    s.hands["A"].append(third)
-    effects._omen_drawn(s, third)
-    assert len(s.hands["B"]) == 0                         # cap reset -> fires again next turn
+    for left in (1, 0):                                  # "Whenever you draw Black Swan": no cap, twice a turn too
+        inst = UnitInstance("omen", "A", s.new_iid())
+        s.hands["A"].append(inst)
+        effects._omen_drawn(s, inst)
+        assert len(s.hands["B"]) == left
 
 
 def test_ember_deathrattle_shuffles_itself_back_to_deck():
@@ -429,7 +368,7 @@ def test_fathom_draws_a_legendary():
 
 
 def test_snake_egg_draws_a_snake_now_and_two_when_it_hatches():
-    snakes = ["goliath", "rattlesnake", "taipan", "black_mamba"]
+    snakes = ["goliath", "rattlesnake", "king_cobra", "black_mamba"]
     s = make_state(hands={"A": ["snake_egg"]}, decks={"A": snakes + ["owl", "raven"], "B": []})
     rules.apply_action(s, PlaceAction("snake_egg", ("cr", "1,2")))
     assert [CARDS[c].tags >= {"Snake"} for c in hand_ids(s, "A")] == [True] * CFG.snake_egg_draw
@@ -581,11 +520,11 @@ def test_apex_destroys_an_egg():
 # ====================================================== Stage 2.3: "Costs X food" (dec. F)
 
 def test_food_cost_gates_placement_and_is_paid():
-    s = make_state(hands={"A": ["elephant"]}, food={"A": 14, "B": 0})
-    assert not [a for a in rules.legal_actions(s) if a.card_id == "elephant"]   # 14 < 15
+    s = make_state(hands={"A": ["cairn"]}, food={"A": 14, "B": 0})
+    assert not [a for a in rules.legal_actions(s) if a.card_id == "cairn"]      # 14 < 15
     s.food["A"] = 15
-    assert [a for a in rules.legal_actions(s) if a.card_id == "elephant"]       # now affordable
-    rules.apply_action(s, PlaceAction("elephant", ("cr", "1,2")))
+    assert [a for a in rules.legal_actions(s) if a.card_id == "cairn"]          # now affordable
+    rules.apply_action(s, PlaceAction("cairn", ("cr", "1,2")))
     assert s.food["A"] == 0                              # 15 paid on placement
 
 
@@ -679,11 +618,11 @@ def test_bounce_resets_the_timer():
     assert live[0]["remaining"] == CFG.sloth_delay       # full timer, not the partly-elapsed one
 
 
-def test_chipmunk_no_longer_pays_out_after_it_is_destroyed():
+def test_hamster_no_longer_pays_out_after_it_is_destroyed():
     """The 2026-07-12 finding ("chipmunk works when covered as well?"), now ruled: Chipmunk
     scheduled its second payout with no reference to its unit, so it fired even when destroyed."""
-    s = make_state(hands={"A": ["chipmunk"]})
-    rules.apply_action(s, PlaceAction("chipmunk", ("cr", "1,2")))
+    s = make_state(hands={"A": ["hamster"]})
+    rules.apply_action(s, PlaceAction("hamster", ("cr", "1,2")))
     food_after_roar = s.food["A"]
     effects._remove_specific(s, "1,2", s.top_unit("1,2"), by_player="B", by_effect=False)
     _tick(s)
@@ -692,10 +631,11 @@ def test_chipmunk_no_longer_pays_out_after_it_is_destroyed():
 
 # ====================================== Stage 2.3: extra placements (decision F1) + twins
 
-def test_jerboa_plays_another_unit():
-    s = make_state(current="A", hands={"A": ["jerboa", "lion"]})
-    rules.apply_action(s, PlaceAction("jerboa", ("cr", "1,2")))
+def test_naked_mole_rat_plays_another_unit_adjacent_to_it():
+    s = make_state(current="A", hands={"A": ["naked_mole_rat", "lion"]})
+    rules.apply_action(s, PlaceAction("naked_mole_rat", ("cr", "1,2")))
     assert s.pending is not None and s.pending["mode"] == "place"
+    assert {tuple(p["target"]) for p in s.pending["placements"]} == {("cr", "1,1"), ("cr", "1,3"), ("cr", "2,2")}
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
     assert s.owner_of("1,2") == "A" and s.owner_of("1,1") == "A" and s.hands["A"] == []
 
@@ -750,18 +690,24 @@ def test_aurum_draws_at_the_start_of_its_owners_turn():
 
 # ============================================ Stage 2.4: removal roars / reactive
 
-def test_jaguar_and_serval_respect_strength_bounds():
+def test_jaguar_and_honey_badger_respect_strength_bounds():
     jag = make_state(hands={"A": ["jaguar"]})
     put(jag, "1,2", "lion", "A")
     put(jag, "3,2", "unnamed_canine", "B")                      # str 3 <= 5
     apply_click(jag, PlaceAction("jaguar", ("cr", "2,2")))
     assert jag.owner_of("3,2") is None
 
-    srv = make_state(hands={"A": ["serval"]})
+    big = make_state(hands={"A": ["jaguar"]})
+    put(big, "1,2", "lion", "A")
+    put(big, "3,2", "dire_wolf", "B")                   # str 6 > 5: out of reach
+    apply_click(big, PlaceAction("jaguar", ("cr", "2,2")))
+    assert big.owner_of("3,2") == "B"
+
+    srv = make_state(hands={"A": ["honey_badger"]})
     put(srv, "1,2", "lion", "A")
-    put(srv, "3,2", "lion", "B")                        # str 7 >= 6 (Serval's only legal target)
+    put(srv, "3,2", "lion", "B")                        # str 7 >= 6 (the Honey Badger's only legal target)
     put(srv, "2,3", "unnamed_canine", "B")                      # str 3 < 6: survives
-    apply_click(srv, PlaceAction("serval", ("cr", "2,2")))
+    apply_click(srv, PlaceAction("honey_badger", ("cr", "2,2")))
     assert srv.owner_of("3,2") is None and srv.owner_of("2,3") == "B"
 
 
@@ -784,7 +730,7 @@ def test_soldier_ant_removal_gated_on_four_colony():
 def test_rhinoceros_sweeps_only_small_adjacent_enemies():
     s = make_state(hands={"A": ["rhinoceros"]})
     put(s, "1,2", "lion", "A")
-    put(s, "3,2", "serval", "B")                        # 2 - removed (<= 2)
+    put(s, "3,2", "naked_mole_rat", "B")                # 2 - removed (<= 2)
     put(s, "2,3", "unnamed_canine", "B")                        # 3 - survives (threshold tightened 5->2)
     put(s, "2,1", "lion", "B")                          # 7 - survives
     rules.apply_action(s, PlaceAction("rhinoceros", ("cr", "2,2")))
@@ -792,12 +738,11 @@ def test_rhinoceros_sweeps_only_small_adjacent_enemies():
     assert s.owner_of("2,3") == "B" and s.owner_of("2,1") == "B"
 
 
-def test_bulwark_pays_cost_and_clears_all_adjacent_units_friend_and_foe():
-    s = make_state(hands={"A": ["bulwark"]}, food={"A": 15, "B": 0})
+def test_bulwark_clears_all_adjacent_units_friend_and_foe():
+    s = make_state(hands={"A": ["bulwark"]})
     put(s, "1,2", "caracal", "A")                       # friendly - connects 2,2, caught in the blast
     put(s, "3,2", "lion", "B")                          # 7 - removed (uncapped)
     rules.apply_action(s, PlaceAction("bulwark", ("cr", "2,2")))
-    assert s.food["A"] == 0
     assert s.owner_of("3,2") is None                    # enemy removed
     assert s.owner_of("1,2") is None                    # friendly removed too (2026-07-05 nerf)
 
@@ -918,15 +863,15 @@ def test_queen_marabunta_scales_with_other_colony():
     assert s.food["A"] == 2 * CFG.queen_marabunta_per_colony   # two other Colony units
 
 
-def test_chipmunk_pays_now_and_next_turn():
-    s = make_state(current="A", hands={"A": ["chipmunk"]},
+def test_hamster_pays_now_and_next_turn():
+    s = make_state(current="A", hands={"A": ["hamster"]},
                    decks={"A": ["lion"], "B": ["lynx", "lynx"]})
     s.actions_taken_this_turn = s.config.actions_per_turn - 1  # Place ends A's turn
-    rules.apply_action(s, PlaceAction("chipmunk", ("cr", "1,2")))
-    assert s.food["A"] == CFG.chipmunk_food_now
+    rules.apply_action(s, PlaceAction("hamster", ("cr", "1,2")))
+    assert s.food["A"] == CFG.hamster_food_now
     s.actions_taken_this_turn = s.config.actions_per_turn - 1  # Draw ends B's turn -> start of A's next
     rules.apply_action(s, DrawAction())                 # B's turn -> start of A's next turn
-    assert s.food["A"] == CFG.chipmunk_food_now + CFG.chipmunk_food_later
+    assert s.food["A"] == CFG.hamster_food_now + CFG.hamster_food_later
 
 
 def test_methuselah_gains_food_at_end_of_turn():
@@ -939,10 +884,10 @@ def test_methuselah_gains_food_at_end_of_turn():
 
 # ===================================================== Stage 2.4: conditional / delayed / reveal
 
-def test_lynx_draws_only_with_another_cat():
-    s = make_state(current="A", hands={"A": ["lynx"]}, decks={"A": ["lion"], "B": []})
+def test_bobcat_draws_only_with_another_cat():
+    s = make_state(current="A", hands={"A": ["bobcat"]}, decks={"A": ["lion"], "B": []})
     put(s, "1,1", "caracal", "A")                       # another Cat
-    rules.apply_action(s, PlaceAction("lynx", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("bobcat", ("cr", "1,2")))
     assert len(s.hands["A"]) == 1
 
 
@@ -955,15 +900,6 @@ def test_black_bear_schedules_a_delayed_draw():
     assert "lion" in hand_ids(s, "A")
 
 
-def test_grizzly_bear_strikes_a_random_adjacent_enemy_later():
-    s = make_state(hands={"A": ["grizzly_bear"]})
-    put(s, "1,2", "caracal", "A")
-    rules.apply_action(s, PlaceAction("grizzly_bear", ("cr", "2,2")))
-    sched = [x for x in s.scheduled if x["step"]["op"] == "grizzly_strike"]
-    assert sched
-    put(s, "3,2", "lion", "B")                          # an adjacent enemy to strike
-    effects._op_grizzly_strike(s, sched[0]["step"])
-    assert s.owner_of("3,2") is None
 
 
 def test_scrooge_doubles_this_turns_haul():
@@ -986,7 +922,7 @@ def test_andean_condor_draws_only_when_its_top_is_stronger():
 
 def test_oxpecker_counts_strong_units_in_the_starting_deck():
     s = make_state(hands={"A": ["oxpecker"]})
-    s.starting_decks["A"] = ("lion", "lion", "squirrel", "eagle", "goliath")  # 7,7 qualify; 3,5,dyn don't
+    s.starting_decks["A"] = ("elephant", "bulwark", "lion", "squirrel", "goliath")  # 9,8 qualify; 7,3,dyn don't
     rules.apply_action(s, PlaceAction("oxpecker", ("cr", "1,2")))
     assert s.food["A"] == 2
 
@@ -1003,15 +939,15 @@ def test_viper_permanently_shrinks_an_adjacent_enemy_so_a_bird_can_cover_it():
     assert s.owner_of("2,1") == "A"
 
 
-def test_taipan_venom_removes_the_bitten_unit_next_turn_even_if_buried_or_the_taipan_is_gone():
-    s = make_state(hands={"A": ["taipan"], "B": ["tiger"]},
+def test_king_cobra_venom_removes_the_bitten_unit_next_turn_even_if_buried_or_the_cobra_is_gone():
+    s = make_state(hands={"A": ["king_cobra"], "B": ["tiger"]},
                    decks={"A": ["eagle"] * 8, "B": ["eagle"] * 8})
     put(s, "2,1", "lion", "B")
-    apply_click(s, PlaceAction("taipan", ("cr", "1,1")))  # bites the Lion at 2,1
+    apply_click(s, PlaceAction("king_cobra", ("cr", "1,1")))  # bites the Lion at 2,1
     lion = s.top_unit("2,1")
     assert lion.card_id == "lion"
     apply_click(s, DrawAction())                   # A ends the turn
-    put(s, "1,1", "lion", "B")                            # the Taipan is covered...
+    put(s, "1,1", "lion", "B")                            # the cobra is covered...
     put(s, "2,1", "tiger", "B")                           # ...and the Lion buried under B's own Tiger
     apply_click(s, DrawAction()); apply_click(s, DrawAction())   # B's turn
     assert "lion" in s.remove_pile and s.top_unit("2,1").card_id == "tiger"
@@ -1070,7 +1006,7 @@ def test_magpie_takes_a_random_enemy_card_then_discards_one_of_yours():
     assert all(u.owner == "A" for u in s.hands["A"])
 
 
-def test_taipan_removes_an_adjacent_enemy_of_strength_5_or_less():
+def test_black_mamba_removes_an_adjacent_enemy_of_strength_5_or_less():
     s = make_state(hands={"A": ["black_mamba"]})
     put(s, "2,1", "jaguar", "B")                          # a 5: in reach
     apply_click(s, PlaceAction("black_mamba", ("cr", "1,1")))
