@@ -1,6 +1,6 @@
 # Animal–effect fit
 
-The third stage of locking a card, after completeness and wording. It judges whether the animal, its effect, its strength, its tag and its habitat belong together. Rarity is a separate, later pass. Fit is taste, not a rulebook: the criteria below are the common sense Martin has applied so far, written down so a reviewer can apply it, and they grow from his calls on real cards. Every fit judgment is a proposal with its reason; nothing changes on a card until Martin agrees.
+The third stage of locking a card, after completeness and wording. It judges whether the animal, its effect, its strength, its tag and its habitat belong together. Rarity and legendary names are separate, later passes. Fit is taste, not a rulebook: the criteria below are the common sense Martin has applied so far, written down so a reviewer can apply it, and they grow from his calls on real cards. Every fit judgment is a proposal with its reason; nothing changes on a card until Martin agrees.
 
 ## The feeling
 
@@ -15,11 +15,13 @@ A player reads the card and smiles: a small, almost childlike delight at how ama
 
 ## The whole card, not only the effect
 
-- **Strength reads as the animal's size and power,** at least for commons and rares: a common Lion is never a 1, a Mouse at 5 is too big, a Mahi-mahi is too big for a 2. Strength is a balance number, so a mismatch is fixed by moving the effect to an animal of the right size, rarely by changing the number.
+- **Strength reads as the animal's size and power,** at least for commons and rares: a common Lion is never a 1, a Mouse at 5 is too big, a Mahi-mahi is too big for a 2. Strength is a balance number, so a mismatch is fixed by moving the effect to an animal of the right size, rarely by changing the number. Only a glaring mismatch counts (a Lion at 1, an Elephant at 3); a dog at 1 next to a rat at 2 is not worth a comment.
 - **A strong utility effect on a small body is the normal shape** (Bloodmage Thalnos is a 1/1). Small animals don't have to be rodents.
 - **Vanillas and generic effects still have a fit,** just a loose one: a 7 vanilla reads right on a Lion or a Tiger and wrong on a Mouse or a Chimpanzee (a Chimpanzee is clever; a plain body wastes it).
 - **The effect's power matches the animal's power.** A Weasel can't remove a 10. A Honey Badger reads as removal, not as sneaking in.
 - **Tag** is what players believe (a Meerkat, Mole or Hare is a Rodent; a Hyena is no Canine), and a tag nobody would miss is left off. **Habitat** is where a normal person pictures the animal (see `habitats.md`).
+- **Flee goes with a Roar, never with an aura.** A fleer comes back to hand to be played again, so its value is what happens when it's played; an aura wants an animal that stays on the board (a stander).
+- **No literal metaphors.** An animal gets a keyword for what it does, not for what it resembles: a manta ray glides like a bird but doesn't fly, so no Flight.
 - **The mechanic doesn't fight the picture.** Prey animals flee and big grazers stand their ground; a Cockroach is something you want to get away from, not a helper.
 
 ## Spend unique animals on unique effects
@@ -37,7 +39,8 @@ Some animals are one of a kind: nothing else looks or behaves like them (Chamele
 
 - Perfect: Rattlesnake (the rattle shuffles), Owl (sees the hidden: Scout), Raven, Cheetah, Falcon, Cockroach (returns when it dies), Caterpillar and the Butterfly legendary (stacked metamorphosis), Lemming (the swarm), Chameleon (blends in: covers anything).
 - Better fit chosen: the cheek pouches go to the Chipmunk, not the Hamster (wild hamsters exist, but players picture a pet); the extra action goes to the Beaver ("busy as a beaver": more work done); Taipan → Cobra; Snow Leopard → Leopard (habitat); the Serval's effect → Honey Badger; Weasel removal rejected (too small to remove a 10); Mahi-mahi too big for a 2; the Gazelle didn't fit a draw engine; a Remora reads as "draw a Shark".
-- Open: the Zebra's card should be about its stripes, but the current one (the flee bounce) is awkward.
+- Known for its look, not a behaviour: the Zebra. People have no effect in mind for it, and that its stripes confuse predators isn't common knowledge, so no effect is a perfect fit; it keeps the flee bounce, and the art (a zebra kicking away a lion) sells it. For such animals the art carries the fit, and searching for the perfect effect wastes time.
+- Clever animals draw cards: the Fox takes the roaming draw ("Roam. Whenever this covers an enemy, draw a card."), and the African Wild Dog, the pack hunter, takes the pack's Dusk buff.
 - Animals picked for the effect's picture: Flee goes on fast prey (gazelles, antelopes, zebra, deer, hare); a Capybara is a "rodent hippo", not a utility rodent; a Meerkat keeps watch; a Jerboa or a frog jumps, so they don't fit an extra placement.
 - Rejected as trivia: "Battle at Kruger" for the Buffalo, Mocha Dick for the whale (Moby Dick, known to everyone, is fine).
 - Unfamiliar animals rejected: a card many decks play needs an animal a person would list among 200 animals (not a vole or a shrew).
