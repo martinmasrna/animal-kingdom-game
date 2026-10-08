@@ -89,7 +89,7 @@ test('a deck code copies, and pasting it (or a plain list) makes a deck', async 
   const before = (await myDecks()).length; await paste(code); await wait(120);
   assert.equal((await myDecks()).length, before + 1);
   let decks = await myDecks(); const n = decks.length; assert.deepEqual(decks[n - 1].cards, decks.find(d => d.id === 'cats').cards, 'the pasted deck is the same deck');
-  await paste('### From an agent\n3x Lion\n2x Stray Cat'); await wait(120);
+  await paste('### From an agent\n3x Lion\n2x Alley Cat'); await wait(120);
   decks = await myDecks(); assert.equal(decks[n].name, 'From an agent'); assert.deepEqual(decks[n].cards, { lion: 3, house_cat: 2 });
 });
 

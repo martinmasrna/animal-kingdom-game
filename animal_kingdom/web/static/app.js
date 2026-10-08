@@ -1135,6 +1135,7 @@ function moveLine(m) {
   const fx = m.fx.map(f => {
     if (f.k === 'cover') return `covered ${name(f.card)}`;
     if (f.k === 'remove') return `removed ${name(f.card)}`;
+    if (f.k === 'placed') return `${f.owner === V.you ? 'you' : 'your opponent'} placed ${name(f.card)} on it`;
     if (f.k === 'bounce') return `returned ${name(f.card)}`;
     if (f.k === 'draw') return m.kind === 'draw' && f.seat === m.seat ? null : `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'your opponent '}drew ${f.n}`;
     if (f.k === 'food') return `${f.seat === m.seat ? '' : f.seat === V.you ? 'you ' : 'your opponent '}${f.n > 0 ? 'gained' : 'paid'} ${Math.abs(f.n)} food`;

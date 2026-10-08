@@ -69,6 +69,10 @@ export const FULL = {
 // Cards painted as another card: the tutorial's copies of the cards it was written with (the live cards changed since).
 const ALIAS = { tutorial_cape_buffalo: 'cape_buffalo', tutorial_dire_wolf: 'dire_wolf', tutorial_lynx: 'lynx', tutorial_chipmunk: 'chipmunk' };
 for (const [id, art] of Object.entries(ALIAS)) for (const T of [CROP, STRIP, FULL]) if (art in T) T[id] = T[art];
+// Cards whose painting shows an animal the card no longer is (the workbench changed its species): unpainted until
+// repainted, so they never wear another animal's art. Scrooge was painted a hamster (now a chipmunk), Gale an albatross
+// (now a falcon).
+for (const id of ['scrooge', 'gale']) for (const T of [CROP, STRIP, FULL]) delete T[id];
 export const hasArt = id => id in CROP;
 export const artUrl = id => `/static/art/${ALIAS[id] || id}.webp`;
 // A long grid's art loads as its cards near view in `scroller` (data-art, from cardHTML's `lazy`), not all hundred at once.

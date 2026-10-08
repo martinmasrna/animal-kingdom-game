@@ -127,6 +127,8 @@ def _effects(events: list, move: Move) -> list:
     for e in events:
         if e["e"] == "cover" and e["owner"] != move.seat:
             fx.append({"k": "cover", "card": e["card"], "owner": e["owner"]})
+        elif e["e"] == "place" and e.get("reveal"):      # Vesper: out of a hand or deck onto the board
+            fx.append({"k": "placed", "card": e["card"], "owner": e["player"]})
         elif e["e"] == "remove" and e.get("cr"):
             fx.append({"k": "remove", "card": e["card"], "owner": e["owner"]})
         elif e["e"] == "bounce":

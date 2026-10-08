@@ -75,8 +75,9 @@ export function plan(prev, next, cards = {}) {
     if (e.e !== 'food') flushFood();
     switch (e.e) {
       case 'place': {
-        // a card they played is shown large first; units an effect puts down (a Lemming's swarm) are its doing, not plays
-        if (e.player === them && e.from_hand && !e.cause) push({ kind: 'reveal', dur: DUR.reveal, card: e.card, cr: e.cr, player: e.player });
+        // a card they played is shown large first; units an effect puts down (a Sardine's swarm) are its doing, not plays,
+        // unless the engine asks for the card to be shown (`reveal`: Vesper, out of their hand or deck onto your animal)
+        if (e.player === them && ((e.from_hand && !e.cause) || e.reveal)) push({ kind: 'reveal', dur: DUR.reveal, card: e.card, cr: e.cr, player: e.player });
         const put = p => { const u = finalUnit(p.iid) || { iid: p.iid, id: p.card, owner: p.player, str: (cards[p.card] || {}).str };
           landed.add(p.iid);
           (s.board[p.cr] = s.board[p.cr] || []).push(u);
