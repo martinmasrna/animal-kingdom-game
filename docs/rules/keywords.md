@@ -91,6 +91,7 @@ Card text fits three lines on the full card (`docs/design/principles.md`). These
 
 - Every keyword is **bold** wherever it stands on a card, with its number (**Reach 2.**, "Roar: **Scout** a Bird."); a numbered keyword is written "Reach 2", never "Reach [2]". The client bolds whatever its keyword list explains (`static/card.js`), so a new keyword goes on that list.
 - **"enemy"** means an enemy unit; **"your Canines"** means friendly Canines.
+- Neighbouring crossroads are **"adjacent"**, never "next to": "an adjacent enemy", "your adjacent animals", "adjacent to the opponent's den". Bare "adjacent" means adjacent to this animal. A region a crossroad is one of the corners of is a region **"around this"** ("your regions around this"). Your own animals are always **"your"**, never "friendly" ("one of your adjacent animals") (Martin, 2026-10-08).
 - A unit is an **"animal"** on the cards and in the client ("play another animal", "Colony animal"); Eggs and tokens are animals too. "Unit" stays the word in the rules docs and code.
 - Your own units are **"your Canines"** or **"Canines you control"**, never "friendly". **"Play"** means from your hand; only another place is named ("from your hand or deck").
 - One card is **"draw a card"**; more are **"draw 2 cards"**.
