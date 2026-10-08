@@ -193,30 +193,31 @@ function habitatOptions(cur) {
   if (cur && !names.includes(cur)) names.push(cur);
   return `<option value="" ${!cur ? "selected" : ""}>—</option>` + names.map(n => `<option ${n === cur ? "selected" : ""}>${esc(n)}</option>`).join("");
 }
-function deckView(id, ctx) {
-  const d = state.decks[id]; const cards = d.cards || [];
-  const n = r => cards.filter(c => c.rarity === r).length;
-  const pills = d.precon === false ? "" : ["L", "R", "C"].map(r => `<span class="pill ${n(r) === SLOTS[r] ? "ok" : "warn"}">${RARITY[r]} ${n(r)}/${SLOTS[r]}</span>`).join("");
-  const bad = cards.filter(c => cardIssues(c, ctx).some(i => i[0] === "bad")).length;
-  const order = { L: 0, R: 1, C: 2 };
-  const rows = cards.map((c, i) => ({ c, i })).sort((a, b) => order[a.c.rarity] - order[b.c.rarity] || a.i - b.i).map(({ c, i }) => {
-    const iss = cardIssues(c, ctx);
-    const worst = iss.some(x => x[0] === "bad") ? "bad" : iss.length ? "warn" : "";
-    const moveOpts = decksSorted().map(([did, dd]) => `<option value="${esc(did)}" ${did === id ? "selected" : ""}>${esc(dd.name)}</option>`).join("");
-    return `<tr class="${c.rarity}" data-i="${i}">
+const RORDER = { L: 0, R: 1, C: 2 };
+function cardRow(c, deckId, i, ctx, showDeck) {
+  const iss = cardIssues(c, ctx);
+  const worst = iss.some(x => x[0] === "bad") ? "bad" : iss.length ? "warn" : "";
+  const moveOpts = decksSorted().map(([did, dd]) => `<option value="${esc(did)}" ${did === deckId ? "selected" : ""}>${esc(dd.name)}</option>`).join("");
+  return `<tr class="${c.rarity}" data-deck="${esc(deckId)}" data-i="${i}">
       <td class="rar"><select data-f="rarity" aria-label="Rarity">${["L", "R", "C"].map(r => `<option ${r === c.rarity ? "selected" : ""}>${r}</option>`).join("")}</select></td>
       <td style="min-width:150px"><input class="name" data-f="name" value="${esc(c.name)}" placeholder="${c.rarity === "L" ? "name to come" : "animal"}" aria-label="Name"></td>
       <td style="min-width:120px"><input data-f="species" value="${esc(c.species)}" placeholder="species" aria-label="Species"></td>
       <td style="min-width:110px"><input data-f="tag" value="${esc(c.tag)}" placeholder="no tag" aria-label="Tag"></td>
       <td><input class="num" data-f="str" value="${c.str ?? ""}" inputmode="numeric" aria-label="Strength"></td>
-      <td style="min-width:120px"><select data-f="habitat" aria-label="Habitat">${habitatOptions(c.habitat)}</select></td>
+      ${showDeck ? "" : `<td style="min-width:120px"><select data-f="habitat" aria-label="Habitat">${habitatOptions(c.habitat)}</select></td>`}
       <td style="min-width:300px;width:40%"><textarea data-f="text" rows="1" placeholder="no effect yet" aria-label="Effect">${esc(c.text)}</textarea></td>
       <td style="min-width:95px"><select data-f="status" aria-label="Status">${STATUSES.map(s => `<option ${s === c.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>
       <td style="min-width:140px"><textarea data-f="note" rows="1" placeholder="note" aria-label="Note">${esc(c.note)}</textarea></td>
       <td class="flagcell">${worst ? `<span class="dot ${worst}" title="${esc(iss.map(x => x[1]).join("; "))}"></span>` : ""}</td>
-      <td class="rowtools"><select data-act="move" aria-label="Move to deck" style="width:auto;max-width:130px">${moveOpts}</select> <button class="btn quiet" data-act="del" title="Delete this card">Delete</button></td>
+      <td class="rowtools"><select data-act="move" aria-label="Deck" style="width:auto;max-width:150px">${moveOpts}</select>${showDeck ? "" : ` <button class="btn quiet" data-act="del" title="Delete this card">Delete</button>`}</td>
     </tr>`;
-  }).join("");
+}
+function deckView(id, ctx) {
+  const d = state.decks[id]; const cards = d.cards || [];
+  const n = r => cards.filter(c => c.rarity === r).length;
+  const pills = d.precon === false ? "" : ["L", "R", "C"].map(r => `<span class="pill ${n(r) === SLOTS[r] ? "ok" : "warn"}">${RARITY[r]} ${n(r)}/${SLOTS[r]}</span>`).join("");
+  const bad = cards.filter(c => cardIssues(c, ctx).some(i => i[0] === "bad")).length;
+  const rows = cards.map((c, i) => ({ c, i })).sort((a, b) => RORDER[a.c.rarity] - RORDER[b.c.rarity] || a.i - b.i).map(({ c, i }) => cardRow(c, id, i, ctx, false)).join("");
   return `<div class="head"><h2>${esc(d.name)}</h2><div class="pills">${pills}${bad ? `<span class="pill bad">${bad} to fix</span>` : ""}</div></div>
     ${d.precon === false ? `<p class="lede">Cards designed outside the twelve decks: they're in the pool, and count for the habitats and the checks.</p>` : ""}
     <div class="tablewrap"><table data-deck="${esc(id)}">
@@ -232,28 +233,22 @@ function meter(label, have, want, color) {
 }
 function habView(id, ctx) {
   const h = state.habitats[id];
-  const cards = ctx.cards.filter(c => norm(c.habitat) === norm(h.name));
-  const by = r => cards.filter(c => c.rarity === r);
+  const cards = ctx.cards.filter(c => norm(c.habitat) === norm(h.name)).sort((a, b) => RORDER[a.rarity] - RORDER[b.rarity] || norm(a.name || a.species).localeCompare(norm(b.name || b.species)));
+  const n = r => cards.filter(c => c.rarity === r).length;
   const t = h.target || {};
-  const roster = (h.roster || []);
+  const roster = h.roster || [];
   const has = new Set(cards.flatMap(c => [norm(c.name), norm(c.species)]));
   const noCard = roster.filter(a => !has.has(norm(a)));
   const rosterSet = new Set(roster.map(norm));
-  const offRoster = cards.filter(c => c.rarity !== "L" && !rosterSet.has(norm(c.name)) && !rosterSet.has(norm(c.species)));
-  const chip = c => `<span class="chip ${c.rarity}" title="${esc(c.deckName)}: ${esc(c.text)}">${esc(c.name || ("legendary " + (c.species || "?")))}</span>`;
-  const total = (t.C || 0) + (t.R || 0) + (t.L || 0);
-  return `<div class="head"><h2>${esc(h.name)}</h2><div class="pills"><span class="pill">${cards.length} cards · set of ${total}</span></div></div>
-    <div class="grid2">
-      <div class="box"><h3>Against the set</h3><p class="hint">Commons, rares and legendaries keep the 3 : 2 : 2 ratio.</p>
-        ${meter("Commons", by("C").length, t.C, "--graphite")}${meter("Rares", by("R").length, t.R, "--silver")}${meter("Legendaries", by("L").length, t.L, "--gold")}</div>
-      <div class="box"><h3>Roster animals with no card (${noCard.length})</h3><p class="hint">On the roster in habitats.md, not yet on any card.</p>
-        <div class="chips">${noCard.map(a => `<span class="chip todo">${esc(a)}</span>`).join("") || "<span class='chip'>None</span>"}</div></div>
-      <div class="box"><h3>Cards not on the roster (${offRoster.length})</h3><p class="hint">Roster additions for the habitat pass.</p>
-        <div class="chips">${offRoster.map(chip).join("") || "<span class='chip'>None</span>"}</div></div>
-      <div class="box"><h3>Legendaries (${by("L").length})</h3><div class="chips">${by("L").map(chip).join("") || "<span class='chip'>None</span>"}</div></div>
-      <div class="box"><h3>Rares (${by("R").length})</h3><div class="chips">${by("R").map(chip).join("") || "<span class='chip'>None</span>"}</div></div>
-      <div class="box"><h3>Commons (${by("C").length})</h3><div class="chips">${by("C").map(chip).join("") || "<span class='chip'>None</span>"}</div></div>
-    </div>`;
+  const offRoster = cards.filter(c => c.rarity !== "L" && !rosterSet.has(norm(c.name)) && !rosterSet.has(norm(c.species))).length;
+  const pill = (r, label) => `<span class="pill ${n(r) === t[r] ? "ok" : n(r) > t[r] ? "bad" : "warn"}">${label} ${n(r)}/${t[r] ?? "?"}</span>`;
+  const rows = cards.map(c => cardRow(c, c.deckId, (state.decks[c.deckId].cards || []).findIndex(x => x.id === c.id), ctx, true)).join("");
+  const gaps = noCard.map(a => `<tr class="gap"><td class="rar">—</td><td colspan="5" style="padding:8px 10px"><span class="name">${esc(a)}</span> <span style="color:var(--muted)">on the roster, no card yet</span></td><td></td><td></td><td colspan="2" class="rowtools"><button class="btn" data-addanimal="${esc(a)}" data-hab="${esc(h.name)}">Add to Pool</button></td></tr>`).join("");
+  return `<div class="head"><h2>${esc(h.name)}</h2><div class="pills">${pill("C", "Commons")}${pill("R", "Rares")}${pill("L", "Legendaries")}${noCard.length ? `<span class="pill warn">${noCard.length} roster animals with no card</span>` : ""}${offRoster ? `<span class="pill warn">${offRoster} not on the roster</span>` : ""}</div></div>
+    <p class="lede">Every card set in this habitat, from every deck and the Pool. Edits save to the card's own deck.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th></th><th>Name</th><th>Species</th><th>Tag</th><th>Str</th><th>Effect</th><th>Status</th><th>Note</th><th></th><th>Deck</th></tr></thead>
+      <tbody>${rows}${gaps}${!rows && !gaps ? `<tr><td colspan="10" class="empty">No cards in this habitat yet.</td></tr>` : ""}</tbody></table></div>`;
 }
 
 /* ---------- checks ---------- */
@@ -309,8 +304,8 @@ main.addEventListener("focusin", e => { if (e.target.matches("input, textarea"))
 main.addEventListener("focusout", e => { if (e.target.matches("input, textarea")) { state.editing = false; setTimeout(() => { if (!state.editing) render(); }, 50); } });
 main.addEventListener("input", e => { if (e.target.matches("textarea")) autosize(e.target); });
 main.addEventListener("change", async e => {
-  const el = e.target; const table = el.closest("table[data-deck]"); if (!table) return;
-  const deckId = table.dataset.deck; const tr = el.closest("tr[data-i]"); if (!tr) return;
+  const el = e.target; const tr = el.closest("tr[data-i][data-deck]"); if (!tr) return;
+  const deckId = tr.dataset.deck;
   const i = +tr.dataset.i; const deck = state.decks[deckId];
   const cards = structuredClone(deck.cards || []);
   if (el.dataset.act === "move") {
@@ -328,9 +323,14 @@ main.addEventListener("change", async e => {
   await save(deckId, cards);
 });
 main.addEventListener("click", async e => {
-  const add = e.target.closest("[data-add]"); const del = e.target.closest("[data-act='del']");
+  const add = e.target.closest("[data-add]"); const del = e.target.closest("[data-act='del']"); const addAnimal = e.target.closest("[data-addanimal]");
+  if (addAnimal) {
+    const a = addAnimal.dataset.addanimal; const pool = structuredClone(state.decks.pool?.cards || []);
+    pool.push({ id: "pool-" + Date.now().toString(36), rarity: "C", name: a, species: a, tag: "", str: null, habitat: addAnimal.dataset.hab, text: "", status: "open", note: "" });
+    return save("pool", pool);
+  }
   const table = main.querySelector("table[data-deck]"); if (!table || (!add && !del)) return;
-  const deckId = table.dataset.deck; const cards = structuredClone(state.decks[deckId].cards || []);
+  const deckId = del ? del.closest("tr[data-deck]").dataset.deck : table.dataset.deck; const cards = structuredClone(state.decks[deckId].cards || []);
   if (add) cards.push({ id: deckId + "-" + Date.now().toString(36), rarity: add.dataset.add, name: "", species: "", tag: "", str: null, habitat: "", text: "", status: "open", note: "" });
   if (del) { const tr = del.closest("tr[data-i]"); const i = +tr.dataset.i; if (del.dataset.armed !== "1") { del.dataset.armed = "1"; del.textContent = "Confirm"; setTimeout(() => { del.dataset.armed = ""; del.textContent = "Delete"; }, 3000); return; } cards.splice(i, 1); }
   await save(deckId, cards);
