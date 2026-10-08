@@ -51,6 +51,7 @@ test('End turn and the deck keep their painting on hover', async () => {
 test('home starts a match: the deck chooser lists every deck and scrolls in a short window', async () => {
   const p = await browser.newPage(); await p.setViewport({ width: 1100, height: 640 });
   await p.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
+  await p.evaluate(() => { const ok = document.querySelector('#since [data-x="ok"]'); if (ok) ok.click(); });   // a release from today greets this new profile
   await p.click('#deckbtn'); await wait(80);
   const tiles = await p.$$('.chooser [data-deck]'), last = tiles[tiles.length - 1];
   await last.scrollIntoView(); await wait(80);
