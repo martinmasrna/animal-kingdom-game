@@ -1,6 +1,11 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  baboon: [.6, .42, .8],
+  giraffe: [.62, .22, .55],
+  tortoise: [.55, .45, .75],
+  wildebeest: [.6, .5, .65],
+  gazelle: [.6, .38, .68],
   dung_beetle: [.48, .55, .75],
   lion: [.66, .33, .55], lynx: [.52, .30, .62], house_cat: [.58, .36, .62], tiger: [.6, .5, .66], cougar: [.72, .36, .6],
   black_bear: [.34, .24, .66], caracal: [.42, .26, .6], rhinoceros: [.52, .38, .74], elephant: [.64, .3, .74],
@@ -22,13 +27,18 @@ export const CROP = {
   greywhisker: [.5, .33, .65], rat_king: [.52, .35, .8], scrooge: [.62, .45, .62],
   queen_honoria: [.6, .38, .7], queen_marabunta: [.6, .45, .75], vesper: [.6, .42, .72], falstaff: [.52, .37, .95],
   eon: [.6, .33, .7], ember: [.55, .3, .75], aurum: [.52, .5, .85], omen: [.58, .44, .82], anaconda: [.49, .6, .62], egg_eater: [.68, .27, .6], snake_egg: [.55, .46, .62], bird_egg: [.52, .42, .82],
-  dire_wolf: [.55, .33, .62], dingo: [.7, .27, .6], fox: [.62, .42, .7], african_wild_dog: [.7, .3, .55], dog: [.66, .3, .6],
+  dire_wolf: [.55, .33, .62], dingo: [.7, .27, .6], fox: [.62, .42, .7], african_wild_dog: [.5, .4, .6], dog: [.66, .3, .6],
   pup: [.55, .36, .72], outrider: [.62, .36, .75], red_wolf: [.66, .36, .66], hyena: [.62, .45, .6], bush_dog: [.64, .33, .6],
   lobo: [.55, .42, .75], raksha: [.64, .33, .6], clarion: [.6, .22, .7], alpha: [.56, .36, .8], poppy: [.55, .36, .72], rusty: [.45, .36, .72],
 };
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  baboon: [.7, .3, 1],
+  giraffe: [.72, .12, 1.3],
+  tortoise: [.6, .45, 1],
+  wildebeest: [.75, .55, 1.1],
+  gazelle: [.7, .42, 1.2],
   dung_beetle: [.4, .5, 1.2],
   prince_leo: [.72, .3, 1.2], princess_lea: [.34, .34, 1.2], king_theron: [.6, .28, 1], queen_adira: [.62, .22, 1.2], jaguar: [.7, .36, 1], serval: [.66, .48, 1.3],
   snow_leopard: [.66, .38, 1], black_panther: [.7, .43, 1], lion: [.7, .3, 1.2], lynx: [.52, .24, 1.3], caracal: [.47, .28, 1.5], tiger: [.82, .54, 1],
@@ -45,7 +55,7 @@ export const STRIP = {
   pestis: [.66, .48, 1], sirocco: [.47, .62, 1.5], gale: [.72, .56, 1.7], jerboa: [.73, .38, 1.3], hornet: [.5, .45, 1], chameleon: [.62, .28, 1.3],
   skunk: [.53, .52, 1.7], lemming: [.82, .38, 1.4], cheetah: [.87, .4, 1.3], rat: [.8, .48, 1], falcon: [.8, .6, 1.7], bat: [.53, .44, 1.3],
   mouse: [.47, .33, 1], lobo: [.55, .38, 1.2], raksha: [.63, .38, 1.1], clarion: [.63, .16, 1.1], bush_dog: [.63, .25, 1.1], red_wolf: [.7, .32, 1.4],
-  gray_wolf: [.73, .31, 1], fox: [.7, .4, 1.3], african_wild_dog: [.68, .33, 1], dingo: [.73, .25, 1.1], dog: [.67, .34, 1], alpha: [.6, .19, 1.2],
+  gray_wolf: [.73, .31, 1], fox: [.7, .4, 1.3], african_wild_dog: [.55, .3, 1.2], dingo: [.73, .25, 1.1], dog: [.67, .34, 1], alpha: [.6, .19, 1.2],
   hyena: [.72, .45, 1.2], outrider: [.77, .31, 1.3], dire_wolf: [.56, .36, 1.3], pup: [.57, .27, 1.2], poppy: [.5, .32, 1], rusty: [.5, .32, 1],
 };
 // FULL places the painting in the full card's window, which shows 61% of its height between the name bar and the rules panel:
@@ -53,9 +63,14 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  baboon: .45,
+  giraffe: .42,
+  tortoise: .45,
+  wildebeest: .45,
+  gazelle: .48,
   oxpecker: .4,
   dung_beetle: .5,
-  african_wild_dog: .425, alpha: .355, anaconda: .485, andean_condor: .335, armadillo: .435, aurum: .5, bat: .305,
+  african_wild_dog: .45, alpha: .355, anaconda: .485, andean_condor: .335, armadillo: .435, aurum: .5, bat: .305,
   bird_egg: .445, black_bear: .445, black_mamba: .445, black_panther: .455, borealis: .365, bulwark: .45, bush_dog: .475,
   cairn: .42, cape_buffalo: .445, caracal: .345, chameleon: .38, cheetah: .415, chinchilla: .365, chipmunk: .405,
   clarion: .355, cougar: .455, dingo: .375, dire_wolf: .385, dog: .435, egg_eater: .42, elephant: .365, eon: .375,
