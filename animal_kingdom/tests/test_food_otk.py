@@ -150,7 +150,7 @@ def test_beaver_grants_an_extra_action_next_turn():
 def test_armadillo_shields_adjacent_ally_from_targeted_removal():
     s = make_state(current="B", hands={"B": ["jaguar"]})
     put(s, "4,2", "lion", "B")                                        # connects B's 3,2
-    put(s, "2,2", "squirrel", "A")                                    # str 3, a jaguar target (<=5)
+    put(s, "2,2", "squirrel", "A")                                    # str 3, a jaguar target (<=4)
     put(s, "2,1", "armadillo", "A")                                   # adjacent -> grants Stealth
     rules.apply_action(s, PlaceAction("jaguar", ("cr", "3,2")))
     assert s.pending is None                                          # no legal target: it's sheltered

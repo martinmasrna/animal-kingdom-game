@@ -1014,7 +1014,7 @@
         "Cat"
       ],
       "base_strength": 5,
-      "text": "Roar: remove an adjacent enemy of strength 5 or less.",
+      "text": "Roar: remove an adjacent enemy of strength 4 or less.",
       "keywords": [],
       "species": "Jaguar",
       "habitat": "Jungle",

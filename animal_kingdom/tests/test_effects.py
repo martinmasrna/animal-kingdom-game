@@ -692,16 +692,30 @@ def test_aurum_draws_at_the_start_of_its_owners_turn():
 
 # ============================================ Stage 2.4: removal roars / reactive
 
+def test_jaguar_removes_a_4_but_not_a_5():
+    four = make_state(hands={"A": ["jaguar"]})
+    put(four, "1,2", "lion", "A")
+    put(four, "3,2", "deer", "B")                               # str 4: in reach
+    apply_click(four, PlaceAction("jaguar", ("cr", "2,2")))
+    assert four.owner_of("3,2") is None
+
+    five = make_state(hands={"A": ["jaguar"]})
+    put(five, "1,2", "lion", "A")
+    put(five, "3,2", "jaguar", "B")                             # str 5: out of reach
+    apply_click(five, PlaceAction("jaguar", ("cr", "2,2")))
+    assert five.owner_of("3,2") == "B"
+
+
 def test_jaguar_and_honey_badger_respect_strength_bounds():
     jag = make_state(hands={"A": ["jaguar"]})
     put(jag, "1,2", "lion", "A")
-    put(jag, "3,2", "unnamed_canine", "B")                      # str 3 <= 5
+    put(jag, "3,2", "unnamed_canine", "B")                      # str 3 <= 4
     apply_click(jag, PlaceAction("jaguar", ("cr", "2,2")))
     assert jag.owner_of("3,2") is None
 
     big = make_state(hands={"A": ["jaguar"]})
     put(big, "1,2", "lion", "A")
-    put(big, "3,2", "dire_wolf", "B")                   # str 6 > 5: out of reach
+    put(big, "3,2", "dire_wolf", "B")                   # str 6 > 4: out of reach
     apply_click(big, PlaceAction("jaguar", ("cr", "2,2")))
     assert big.owner_of("3,2") == "B"
 

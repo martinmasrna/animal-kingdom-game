@@ -19,7 +19,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Jaguar** | 2 | Cat | 5 | Roar: remove an adjacent enemy of strength 5 or less. |
+| **Jaguar** | 2 | Cat | 5 | Roar: remove an adjacent enemy of strength 4 or less. |
 | **Serval** | 2 | Cat | 4 | Roar: set an adjacent enemy's strength to 1. |
 | **Leopard** | 2 | Cat | 6 | Your other Cats can be placed on enemies of equal or lower strength. |
 | **Black Panther** | 2 | Cat | 7 | Stealth. |

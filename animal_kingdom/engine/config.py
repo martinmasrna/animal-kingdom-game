@@ -106,7 +106,7 @@ class Config:
     oxpecker_min: int = 8                # Oxpecker: count starting-deck animals of strength >= this
 
     # --- Removal-strength caps on Roar removals ---
-    jaguar_max: int = 5
+    jaguar_max: int = 4
     honey_badger_min: int = 6            # Honey Badger removes an enemy of strength >= this
     stoop_max: int = 3                   # baseline-ruler tuning 2026-07-13: str 4→3, remove ≤4→≤3
                                           # (id kept as "stoop"; printed name "Hawk")
