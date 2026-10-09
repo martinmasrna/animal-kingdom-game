@@ -705,6 +705,9 @@ def test_the_legendary_wildebeest_and_boar_move_region_income():
     assert rules.region_income(s, "A") == 10 + CFG.migration_bonus
     put(s, "4,3", "hoofed_legend_boar", "B")
     assert rules.region_income(s, "A") == 10 + CFG.migration_bonus - CFG.boar_penalty
+    r1 = s.game_map.regions["R1"]
+    assert rules.region_yield(s, "A", r1) == 10 + CFG.migration_bonus - CFG.boar_penalty   # what its stone shows
+    assert rules.region_yield(s, "B", r1) == 10                 # the Wildebeest is A's, the Boar works on A
 
 
 def test_the_legendary_giraffe_reveals_the_opponents_hand():

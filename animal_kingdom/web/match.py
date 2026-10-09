@@ -586,6 +586,8 @@ class Match:
                                      "on": self.clock_deadline() is not None}),
             "food": dict(st.food),
             "income": {p: rules.region_income(st, p) for p in "AB"},
+            # what each region produces for each player if they hold it (the Wildebeest's +5, the Boar's -5 on its stone)
+            "regionFood": {p: {r.id: rules.region_yield(st, p, r) for r in st.game_map.regions.values()} for p in "AB"},
             "winFood": st.game_map.win_food,
             "board": board,
             "hand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u),

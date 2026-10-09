@@ -93,13 +93,15 @@ export function renderBoard(el, M, g, cards, ui) {
   const { landed, covered, leaving } = boardChanges(A && A.board, g.board, (A && A.fx) || []);
   const strength = (A && A.strength) || new Map();   // the stored changes this step made (a grant, a poison), iid to up or down
   const held = heldRegions(M.regions, g.board);
+  // what a stone pays: its holder's yield (the legendary Wildebeest and Boar move it), the printed food while no one holds it
+  const pays = (reg, h) => (h && g.regionFood && g.regionFood[h.owner] || {})[reg.id] ?? reg.food;
   const stoneAt = reg => { const [c, r] = reg.c, [x1, y1] = at(c, r), [x2, y2] = at(c + 1, r + 1); return [(x1 + x2) / 2, (y1 + y2) / 2]; };
   let s = '';   // the painted ground is the game screen's (kit2/plate_wide.webp, under the stage), wider than any window
 
   // Payout stones: the plate's stone with a small boss on it holding the payout, in the holder's colour when held.
   for (const reg of M.regions) {
     const [x, y] = stoneAt(reg), h = held.find(r => r.id === reg.id);
-    s += put(`stone pboss ${h ? h.owner : ''}${reg.c.every((v, i) => shownAt && v === shownAt[i]) ? ' shown' : ''}`, x, y, chalk('+' + reg.food));
+    s += put(`stone pboss ${h ? h.owner : ''}${reg.c.every((v, i) => shownAt && v === shownAt[i]) ? ' shown' : ''}`, x, y, chalk('+' + pays(reg, h)));
   }
 
   for (let c = 1; c <= M.cols; c++) for (let r = 1; r <= M.rows; r++) {
@@ -124,7 +126,7 @@ export function renderBoard(el, M, g, cards, ui) {
   }
 
   // a region's income flies from its stone; a card's food comes from no stone
-  const stonesOf = side => A && A.fromStones === false ? [] : held.filter(r => r.owner === side).map(r => { const [x, y] = stoneAt(r); return { x, y, food: r.food }; });
+  const stonesOf = side => A && A.fromStones === false ? [] : held.filter(r => r.owner === side).map(r => { const [x, y] = stoneAt(r); return { x, y, food: pays(r, r) }; });
   for (const side of ['A', 'B']) s += den(side, g, A, stonesOf(side), ui);
   // The unit that took a den stands in its mouth: the game's last move, drawn where it won.
   if (ui.capture) { const [mx, my] = denMouthAt(ui.capture.side), x = VIEW.port ? mx : mx + (ui.capture.side === 'A' ? -22 : 22), y = VIEW.port ? my + (ui.capture.side === 'A' ? 22 : -22) : my;   // seated in the mouth, clear of the crossroad beside it

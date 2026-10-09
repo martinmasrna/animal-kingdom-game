@@ -221,10 +221,15 @@ def regions_controlled(state: GameState, player: str):
 def region_income(state: GameState, player: str) -> int:
     """Food `player`'s regions produce at the end of their turn: each its printed food, moved by the legendary
     Wildebeest and Boar (never below nothing); 0 while they control the Unnamed Giant ("Your regions produce no food")."""
+    return sum(region_yield(state, player, r) for r in regions_controlled(state, player))
+
+
+def region_yield(state: GameState, player: str, region) -> int:
+    """What `region` produces for `player` while they hold it: its printed food, moved by the legendary Wildebeest and
+    Boar (never below nothing), or nothing while they control the Unnamed Giant."""
     if statics.regions_starved(state, player):
         return 0
-    mod = statics.region_food_modifier(state, player)
-    return sum(max(0, r.food + mod) for r in regions_controlled(state, player))
+    return max(0, region.food + statics.region_food_modifier(state, player))
 
 
 def _produce_food(state: GameState, player: str) -> None:

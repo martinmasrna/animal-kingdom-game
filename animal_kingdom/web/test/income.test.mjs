@@ -24,3 +24,23 @@ test('income fruit leaves from the region stones, on the board', async () => {
   assert.deepEqual(page.errors, []);
   await page.close();
 });
+
+test("a held region's stone shows what it pays its holder (the legendary Wildebeest and Boar move it)", async () => {
+  const page = await gamePage(browser, server.url);
+  const stones = () => page.evaluate(() => [...document.querySelectorAll('#board .stone.pboss')]
+    .map(s => ({ held: s.classList.contains('A') || s.classList.contains('B'), text: [...s.querySelectorAll('img')].map(i => i.alt).join('') })));
+  let held = null;
+  for (const v of matches[0].views) {
+    await feed(page, v);
+    if ((await stones()).some(s => s.held)) { held = v; break; }
+  }
+  assert.ok(held, 'some view has a held region');
+  const pays = Object.fromEntries(Object.keys(held.game.regionFood.A).map(id => [id, 37]));
+  await feed(page, { ...held, version: held.version + 1, game: { ...held.game, events: [], regionFood: { A: pays, B: pays } } });
+  await wait(300);
+  const now = await stones();
+  assert.ok(now.filter(s => s.held).every(s => s.text === '+37'), JSON.stringify(now));
+  assert.ok(now.filter(s => !s.held).every(s => s.text !== '+37'), 'a stone no one holds shows the printed food');
+  assert.deepEqual(page.errors, []);
+  await page.close();
+});
