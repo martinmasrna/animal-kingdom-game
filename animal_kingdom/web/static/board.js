@@ -14,7 +14,7 @@ export const LAND = { w: 1512, h: 800 }, PORT = { w: 720, h: 1440 };
 export const VIEW = { port: false };
 export function setView(port) { Object.assign(STAGE, port ? PORT : LAND); VIEW.port = port; }
 const key = (c, r) => `${c},${r}`;
-const BOARD_KW = ['Armor', 'Stealth', 'Spikes'];   // the keywords a unit wears as a badge on the board
+const BOARD_KW = ['Armor', 'Stealth', 'Spikes', 'Poison'];   // the keywords a unit wears as a badge on the board
 const kit = f => `/static/kit2/${f}`;
 const team = side => (side === 'A' ? 'a' : 'b');
 
@@ -69,9 +69,10 @@ export function portrait(id, D) {
 function unit(u, under, cards) {
   // Board keywords: the card's own, plus Stealth whenever the enemy can't choose it (an adjacent Armadillo gives it).
   // Spikes only until they've removed a coverer (the view says so): after that it's an ordinary animal.
-  // Armor likewise when a neighbour gives it (Capybara); an inked animal (the Octopus) wears none until the ink wears off.
-  const c = cards[u.id], kws = u.inked ? [] : (c.kw || []).filter(k => BOARD_KW.includes(k) && k !== 'Stealth' && k !== 'Spikes' && k !== 'Armor')
-    .concat(u.armor ? ['Armor'] : [], u.hidden ? ['Stealth'] : [], u.spikes ? ['Spikes'] : []);
+  // Armor likewise when a neighbour gives it (Capybara), Poison when a neighbour's legendary Jellyfish does; an inked animal
+  // (the Octopus) wears none until the ink wears off.
+  const c = cards[u.id], kws = u.inked ? [] : (c.kw || []).filter(k => BOARD_KW.includes(k) && k !== 'Stealth' && k !== 'Spikes' && k !== 'Armor' && k !== 'Poison')
+    .concat(u.armor ? ['Armor'] : [], u.hidden ? ['Stealth'] : [], u.spikes ? ['Spikes'] : [], u.poison ? ['Poison'] : []);
   // the animals underneath peek out behind, down and right: each a solid disc under its team rim, a step darker (at this
   // offset a portrait showed only as a sliver, which read as a gap)
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner} seen" style="transform:translate(${22 + i * 7}px,${20 + i * 6}px) scale(.82);z-index:${-i - 1}">`

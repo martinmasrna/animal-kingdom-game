@@ -570,6 +570,7 @@ class Match:
                           **({"timer": timers[u.iid]} if u.iid in timers else {}),
                           **({"hidden": True} if not statics.can_be_chosen(st, u, other_player(u.owner), cr) else {}),
                           **({"spikes": True} if statics.has_keyword(st, u, "Spikes", cr) and not u.retaliation_used else {}),   # until used
+                          **({"poison": True} if statics.has_keyword(st, u, "Poison", cr) else {}),   # printed, or a neighbour's legendary Jellyfish
                           # "armor": it can't be removed (printed, or a neighbour's Capybara); "inked": the Octopus's ink is on it
                           **({"armor": True} if not statics.can_be_removed(st, u, cr) else {}),
                           **({"inked": True} if statics.inked(st, u) else {})} for u in stack]
