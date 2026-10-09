@@ -34,14 +34,14 @@ section > header { display: flex; align-items: baseline; gap: 12px; margin-botto
 section > header h2 { font-size: 30px; text-transform: uppercase; }
 section > header span { color: var(--muted); font-variant-numeric: tabular-nums; }
 .rarity-label { font-family: var(--display); text-transform: uppercase; letter-spacing: .08em; font-size: 15px; color: var(--muted); margin: 18px 0 8px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
 
 .tile { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
 .tile[data-v="keep"] { border-color: color-mix(in srgb, var(--keep) 55%, var(--line)); }
 .tile[data-v="redo"] { border-color: color-mix(in srgb, var(--redo) 60%, var(--line)); }
 .tile[data-v="paint"] { border-color: color-mix(in srgb, var(--paint) 60%, var(--line)); }
 .tile[data-v="drop"] { border-color: color-mix(in srgb, var(--drop) 60%, var(--line)); }
-.art { aspect-ratio: 3 / 2; max-width: 100%; width: 100%; background: var(--surface-2); border: 0; padding: 0; display: block; position: relative; }
+.art { aspect-ratio: 2 / 3; max-width: 100%; width: 100%; background: var(--surface-2); border: 0; padding: 0; display: block; position: relative; }
 .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .art .none { position: absolute; inset: 10px; border: 1px dashed var(--faint); border-radius: 6px; display: grid; place-items: center; color: var(--faint); font-family: var(--display); text-transform: uppercase; letter-spacing: .08em; }
 .body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
@@ -66,7 +66,7 @@ textarea::placeholder { color: var(--faint); }
 .box[hidden] { display: none !important; }
 .stage { display: grid; place-items: center; padding: 24px; min-width: 0; min-height: 0; }
 .stage img { max-width: 100%; max-height: calc(100vh - 48px); object-fit: contain; border-radius: 6px; }
-.stage .none { width: min(100%, 720px); aspect-ratio: 3 / 2; border: 1px dashed var(--faint); border-radius: 8px; display: grid; place-items: center; color: var(--faint); font-family: var(--display); font-size: 22px; text-transform: uppercase; letter-spacing: .08em; }
+.stage .none { width: min(100%, 480px); aspect-ratio: 2 / 3; border: 1px dashed var(--faint); border-radius: 8px; display: grid; place-items: center; color: var(--faint); font-family: var(--display); font-size: 22px; text-transform: uppercase; letter-spacing: .08em; }
 .side { background: var(--surface); border-left: 1px solid var(--line); padding: 20px; padding-top: calc(20px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
 .side .name { font-size: 30px; }
 .side .text { font-size: 14px; }
