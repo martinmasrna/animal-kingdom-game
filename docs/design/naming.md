@@ -15,6 +15,14 @@ A legendary's name is what the animals call that individual, rendered into Engli
 - **A nickname the animals would use for this one**, built from what they can see or hear: Greywhisker, Black Swan.
 - **A title on a name** where the animals have real rank (the lion pride, the colony queens), or playfully where the animal is comic (Lord Bumbleton).
 
+## Pronounceable by default
+
+A player must be able to say the name. A foreign word is fine when it reads easily (Leo, Twiga, Zuri, Cuco); a hard one (Hrafn, Nyumbu, Paraoa) is allowed for at most about one legendary in ten, and only when it is so distinct it sticks anyway, the way Yggdrasil does. Distinct beats exotic: an unusual name that is merely unfamiliar (Chui) is forgettable.
+
+## Picture first
+
+Name a legendary after its art is settled, not before: the name is easiest to find once the picture exists and already matches the animal, the ability and the strength (Riot names champions the same way, after art and personality).
+
 ## What fails
 
 - Everyday Western given names (Magnus, Clara, Martin): they read as a person, not an animal.
