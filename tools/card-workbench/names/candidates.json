@@ -1,245 +1,29 @@
 [
- {
-  "card": "Cuckoo (Aristocrats)",
-  "effect": "removes a small animal; if yours, play another",
-  "candidates": [
-   "Changeling",
-   "Usurper",
-   "Interloper"
-  ]
- },
- {
-  "card": "Opossum (Aristocrats)",
-  "effect": "when an ally is covered, remove it and draw",
-  "candidates": [
-   "Feint",
-   "Shroud",
-   "Sham"
-  ]
- },
- {
-  "card": "Sloth (Aristocrats)",
-  "effect": "your Dusk effects happen twice",
-  "candidates": [
-   "Somnus",
-   "Lull",
-   "Drowse"
-  ]
- },
- {
-  "card": "Leopard (Canines)",
-  "effect": "Apex, Roam, Reach 2: drops from a tree",
-  "candidates": [
-   "Canopy",
-   "Rosette",
-   "Shadowfall"
-  ]
- },
- {
-  "card": "Wolf (Canines)",
-  "effect": "roams; its neighbours gain +2",
-  "candidates": [
-   "Howl",
-   "Ashmane",
-   "Rallyfang"
-  ]
- },
- {
-  "card": "Raven (Egg Control)",
-  "effect": "takes an animal from the opponent's Remove Pile",
-  "candidates": [
-   "Omen",
-   "Carrion",
-   "Ashwing"
-  ]
- },
- {
-  "card": "Jellyfish (Fish)",
-  "effect": "adjacent Fish have Poison",
-  "candidates": [
-   "Medusa",
-   "Nettle",
-   "Lantern"
-  ]
- },
- {
-  "card": "Tuna (Fish)",
-  "effect": "per region: draw and gain 5",
-  "candidates": [
-   "Torrent",
-   "Plenty",
-   "Bluefin"
-  ]
- },
- {
-  "card": "Manta Ray (Fish)",
-  "effect": "2+ regions: draw 2 at Dusk",
-  "candidates": [
-   "Mantle",
-   "Drift",
-   "Glide"
-  ]
- },
- {
-  "card": "Piranha (Fish)",
-  "effect": "your Fish cover up to your Fish count",
-  "candidates": [
-   "Frenzy",
-   "Shoal",
-   "Ravage"
-  ]
- },
- {
-  "card": "Capybara (Food Aggro)",
-  "effect": "repeats adjacent Rodents' Roars",
-  "candidates": [
-   "Haven",
-   "Mellow",
-   "Calm"
-  ]
- },
- {
-  "card": "Rat (Food Aggro)",
-  "effect": "draw until you match the opponent",
-  "candidates": [
-   "Rummage",
-   "Packrat",
-   "Scrounge"
-  ]
- },
- {
-  "card": "Scrooge → Chipmunk (Food Aggro)",
-  "effect": "doubles this turn's food",
-  "candidates": [
-   "Stash",
-   "Bounty",
-   "Pouch"
-  ]
- },
- {
-  "card": "Squirrel (Food OTK)",
-  "effect": "lose all food, triple it in 2 turns",
-  "candidates": [
-   "Cache",
-   "Acorn",
-   "Winterhold"
-  ]
- },
- {
-  "card": "Honey Badger (Food OTK)",
-  "effect": "Armor, Stealth, Poison, Spikes",
-  "candidates": [
-   "Nemesis",
-   "Fearless",
-   "Grit"
-  ]
- },
- {
-  "card": "Octopus (Food OTK)",
-  "effect": "becomes a copy of an adjacent animal",
-  "candidates": [
-   "Proteus",
-   "Guise",
-   "Mimic"
-  ]
- },
- {
-  "card": "Oxpecker (Giants)",
-  "effect": "adjacent Hungry animals don't eat",
-  "candidates": [
-   "Steward",
-   "Groomer",
-   "Tender"
-  ]
- },
- {
-  "card": "Mocha → Sperm Whale (Giants)",
-  "effect": "Titan; removes all enemies next to your animals",
-  "candidates": [
-   "Leviathan",
-   "Ivory",
-   "Whitewater"
-  ]
- },
- {
-  "card": "Baboon (Handlock)",
-  "effect": "Dusk: two hand cards +1",
-  "candidates": [
-   "Elder",
-   "Mentor",
-   "Tutor"
-  ]
- },
- {
-  "card": "Butterfly (Handlock)",
-  "effect": "evolves as it grows in hand",
-  "candidates": [
-   "Psyche",
-   "Chrysalis",
-   "Monarch"
-  ]
- },
- {
-  "card": "Eagle (Handlock)",
-  "effect": "[NAME] and [its mate]",
-  "candidates": [
-   "Talon and Tempest",
-   "Aerie and Altus",
-   "Crest and Cloud"
-  ]
- },
- {
-  "card": "Wildebeest (Hoofed)",
-  "effect": "your regions +5 food",
-  "candidates": [
-   "Teeming",
-   "Stampede",
-   "Thunderhoof"
-  ]
- },
- {
-  "card": "Boar (Hoofed)",
-  "effect": "opponent's regions −5 food",
-  "candidates": [
-   "Ruin",
-   "Tusk",
-   "Rootwrecker"
-  ]
- },
- {
-  "card": "Zebra (Hoofed)",
-  "effect": "draw per different Hoofed you control",
-  "candidates": [
-   "Mosaic",
-   "Motley",
-   "Stripe"
-  ]
- },
- {
-  "card": "Giraffe (Hoofed)",
-  "effect": "opponent's hand revealed",
-  "candidates": [
-   "Lookout",
-   "Highsight",
-   "Watchtower"
-  ]
- },
- {
-  "card": "Falstaff → Bumblebee (Colony)",
-  "effect": "whenever you gain food, gain 3 more",
-  "candidates": [
-   "Clover",
-   "Nectar",
-   "Plump"
-  ]
- },
- {
-  "card": "Raksha → Wolf (pool)",
-  "effect": "other Canines +1",
-  "candidates": [
-   "Mother",
-   "Den",
-   "Hearth"
-  ]
- }
+ {"card": "Cuckoo (Aristocrats)", "effect": "", "candidates": ["Tocca", "Nestrel", "Kukela"]},
+ {"card": "Opossum (Aristocrats)", "effect": "", "candidates": ["Mortimer", "Possa", "Greymother"]},
+ {"card": "Sloth (Aristocrats)", "effect": "", "candidates": ["Lento", "Mossa", "Dozabel"]},
+ {"card": "Leopard (Canines)", "effect": "", "candidates": ["Rosetta", "Ombra", "Shadra"]},
+ {"card": "Wolf (Canines)", "effect": "", "candidates": ["Ulfar", "Varga", "Ashfang"]},
+ {"card": "Lobo (Canines)", "effect": "", "candidates": ["Lupa", "Kael", "Greyfang"]},
+ {"card": "Raven (Egg Control)", "effect": "", "candidates": ["Corvane", "Morrow", "Grimmel"]},
+ {"card": "Jellyfish (Fish)", "effect": "", "candidates": ["Lumen", "Glassia", "Velura"]},
+ {"card": "Tuna (Fish)", "effect": "", "candidates": ["Thunnor", "Brava", "Old Blue"]},
+ {"card": "Manta Ray (Fish)", "effect": "", "candidates": ["Mantelle", "Velo", "Umbrin"]},
+ {"card": "Piranha (Fish)", "effect": "", "candidates": ["Rasca", "Snapjaw", "Carnita"]},
+ {"card": "Capybara (Food Aggro)", "effect": "", "candidates": ["Bodo", "Pacca", "Old Calm"]},
+ {"card": "Rat (Food Aggro)", "effect": "", "candidates": ["Longtail", "Hoardwick", "Nibbs"]},
+ {"card": "Scrooge (Food Aggro)", "effect": "", "candidates": ["Tuckwell", "Chippa", "Mister Cheeks"]},
+ {"card": "Squirrel (Food OTK)", "effect": "", "candidates": ["Hazel", "Nutmeg", "Rusk"]},
+ {"card": "Honey Badger (Food OTK)", "effect": "", "candidates": ["Ferox", "Grumbo", "Badrak"]},
+ {"card": "Octopus (Food OTK)", "effect": "", "candidates": ["Mimika", "Polyma", "Veilo"]},
+ {"card": "Oxpecker (Giants)", "effect": "", "candidates": ["Tibbet", "Pikka", "Kipi"]},
+ {"card": "Mocha (Giants)", "effect": "", "candidates": ["Leviathan", "Ivorak", "Old White"]},
+ {"card": "Baboon (Handlock)", "effect": "", "candidates": ["Kito", "Elder Bako", "Mandu"]},
+ {"card": "Butterfly (Handlock)", "effect": "", "candidates": ["Aurelia", "Liriel", "Morphia"]},
+ {"card": "Eagle (Handlock)", "effect": "", "candidates": ["Altan and Altara", "Corin and Corra", "Kestra and Kael"]},
+ {"card": "Wildebeest (Hoofed)", "effect": "", "candidates": ["Mara", "Nuru", "Thundra"]},
+ {"card": "Boar (Hoofed)", "effect": "", "candidates": ["Tuskar", "Gorvak", "Rootrend"]},
+ {"card": "Zebra (Hoofed)", "effect": "", "candidates": ["Zuri", "Stripa", "Zabo"]},
+ {"card": "Giraffe (Hoofed)", "effect": "", "candidates": ["Twiga", "Tavaro", "Kilimo"]},
+ {"card": "Falstaff (Colony)", "effect": "", "candidates": ["Barnaby", "Bumbleton", "Mumble"]}
 ]

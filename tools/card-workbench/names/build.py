@@ -15,7 +15,7 @@ HERE = pathlib.Path(__file__).parent
 ART = ROOT / "animal_kingdom/web/static/art"
 DECK = {"Canines": "canines", "Cats": "cats", "Colony": "colony", "Den Rush": "den-rush", "Egg Control": "egg-control",
         "Fish": "fish", "Food Aggro": "food-aggro", "Food OTK": "food-otk", "Giants": "giants", "Handlock": "handlock",
-        "Hoofed": "hoofed", "Aristocrats": "aristocrats", "pool": "pool"}
+        "Hoofed": "hoofed", "Aristocrats": "aristocrats"}
 # Names that cite a work, a character or a real individual (draft rule 3).
 CITES = {"Scrooge": "Dickens", "Falstaff": "Shakespeare", "Raksha": "The Jungle Book", "Mocha": "Mocha Dick, the real whale",
          "Lobo": "the real wolf of Seton's story"}
@@ -33,7 +33,7 @@ def main() -> None:
     out, files = [], {}
     for dk, deck in export.items():
         for wc in deck["cards"]:
-            if wc["rarity"] != "L":
+            if wc["rarity"] != "L" or dk == "pool":     # launch decks only; the Pool waits for its habitats
                 continue
             name = wc["name"].strip()
             rec = by_wb.get(wc["id"])
