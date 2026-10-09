@@ -1485,12 +1485,6 @@ def _then_discard(state, step, iid):
         remove_from_hand(state, step["chooser"], inst)
 
 
-def _then_spawn(state, step, cr):
-    """Sunfish: a Baby Fish on the chosen empty crossroad."""
-    if not state.board.get(cr):
-        _spawn(state, step["chooser"], step["token"], cr)
-
-
 def _then_roam_to(state, step, cr):
     _, unit = _find_unit(state, step["iid"])
     origin = _crossroad_of(state, step["iid"])
@@ -1502,7 +1496,7 @@ THEN = {
     "remove": _then_remove, "set_strength": _then_set_strength, "drain": _then_drain, "grant": _then_grant,
     "hand_grant": _then_hand_grant, "stray_dog": _then_stray_dog, "copy": _then_copy, "return_ally": _then_return_ally,
     "cuckoo": _then_cuckoo, "remove_and_draw": _then_remove_and_draw, "pile_to_hand": _then_pile_to_hand,
-    "duplicate": _then_duplicate, "discard": _then_discard, "spawn": _then_spawn, "roam_to": _then_roam_to,
+    "duplicate": _then_duplicate, "discard": _then_discard, "roam_to": _then_roam_to,
 }
 
 
@@ -2258,8 +2252,10 @@ def _mahi_mahi_place(state, unit, cr):
 
 
 def _sunfish_place(state, unit, cr):
-    """Roar: place a Baby Fish on an adjacent empty crossroad (the player picks it)."""
-    _push_choose(state, unit.owner, _empty_neighbors(state, cr), "spawn", token="baby_fish")
+    """Roar: place a Baby Fish on a random adjacent empty crossroad."""
+    empty = _empty_neighbors(state, cr)
+    if empty:
+        _spawn(state, unit.owner, "baby_fish", state.rng.choice(empty))
 
 
 # --- Food Aggro -------------------------------------------------------------------------------------------------

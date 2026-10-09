@@ -1368,7 +1368,7 @@
         "Fish"
       ],
       "base_strength": 4,
-      "text": "Roar: place a Baby Fish on an adjacent empty crossroad.",
+      "text": "Roar: place a Baby Fish on a random adjacent empty crossroad.",
       "keywords": [],
       "species": "Sunfish",
       "habitat": "Open Ocean",

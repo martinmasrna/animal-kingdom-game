@@ -1222,7 +1222,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Fish",
-     "text": "Roar: place a Baby Fish on an adjacent empty crossroad."
+     "text": "Roar: place a Baby Fish on a random adjacent empty crossroad."
     }
    ]
   },

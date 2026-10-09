@@ -477,10 +477,11 @@ def test_mahi_mahi_mackerel_and_tuna_grow_the_school():
     assert effective_strength(s, sar) == 1 + CFG.mahi_mahi_grant + CFG.mackerel_anthem
 
 
-def test_sunfish_places_a_baby_fish_where_you_choose():
+def test_sunfish_places_a_baby_fish_on_a_random_adjacent_empty_crossroad():
     s = make_state(hands={"A": ["sunfish"]})
+    put(s, "1,1", "lion", "B"); put(s, "1,3", "lion", "A")    # 2,2 is its only empty neighbour
     rules.apply_action(s, PlaceAction("sunfish", ("cr", "1,2")))
-    choose(s, "2,2")
+    assert not s.effect_stack                                  # no choice asked
     assert s.top_unit("2,2").card_id == "baby_fish" and s.top_unit("2,2").owner == "A"
 
 

@@ -76,7 +76,7 @@ Cards:
 - **The legendary Sloth** runs each of your Dusk effects twice in a row; "At the end of your turn" effects are Dusk effects.
 - **Praying Mantis** is a cost the player may decline; no removal, no cards.
 - **Tarantula** eats a random adjacent ally (Armor excluded) and keeps the strength it showed then, for good.
-- **Sea Turtle** lays on a random adjacent empty crossroad (Dusk asks nothing); **Sunfish** lets the player choose.
+- **Sea Turtle** and **Sunfish** lay on a random adjacent empty crossroad, as the old African Wild Dog placed its Pup (Martin, 2026-10-10).
 - **"An ally was removed this turn"** (Piranha, Vulture) and **"your animals removed this turn"** (Hyena) count your animals leaving the board this turn, whoever removed them; discards from hand don't count.
 - **City Spider** catches animals of either side, including tokens, fills and roaming animals that arrive beside it.
 - **Earthworm**: the two Worms land on its crossroad only while it is empty or yours; under an enemy there is no room and none appear.

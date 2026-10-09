@@ -33,6 +33,6 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Mahi-mahi** | 3 | Fish | 3 | Roar: give your other Fish +1 strength. |
 | **Mackerel** | 3 | Fish | 2 | Your other Fish have +1 strength. |
 | **Tuna** | 3 | Fish | 3 | Has +1 strength for each other Fish you control. |
-| **Sunfish** | 3 | Fish | 4 | Roar: place a Baby Fish on an adjacent empty crossroad. |
+| **Sunfish** | 3 | Fish | 4 | Roar: place a Baby Fish on a random adjacent empty crossroad. |
 
 <!-- cards:end -->
