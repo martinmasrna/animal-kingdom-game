@@ -47,6 +47,8 @@ A habitat's set is its 30 most iconic animals (18 common, 12 rare) plus 12 legen
 
 ### Savanna (locked 2026-10-05)
 
+The Savanna set runs a card over the 3:2:2 count at rare and legendary (13 of each), kept on purpose (Martin, 2026-10-09).
+
 Animals (30; 18 common and 12 rare, rarities set with the effects): Lion, Elephant, Giraffe, Zebra, Cheetah, Wildebeest, Cape Buffalo, Warthog, Ostrich, African Wild Dog, Naked Mole-Rat (carries Jerboa's effect), Baboon, Gazelle, Meerkat, Oxpecker, Leopard, Rhinoceros, Hippopotamus, Crocodile, Hyena, Honey Badger, Serval, Black Mamba, Termite King, Termite Queen, Egg Eater, Caracal, Vulture, Dung Beetle, Jackal.
 
 Legendaries (12): Prince Leo, Princess Lea, King Theron, Queen Adira (the lion family), Brutus (rhino), Methuselah (tortoise, the one legendary without its animal among the 30; its effect may find a better animal), and six new mythic versions of the 30 chosen with the effects (candidates: Elephant, the Giants' Matriarch; Crocodile; Honey Badger; Cheetah, Leopard, Cape Buffalo or Hippo).
