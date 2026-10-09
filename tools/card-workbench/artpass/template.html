@@ -264,7 +264,8 @@ render();
   db.collection("reviews").onSnapshot(snap => {
     const r = {}; snap.docs.forEach(d => r[d.id] = d.data());
     for (const k of Object.keys(timers)) if (state.reviews[k]) r[k] = { ...r[k], note: state.reviews[k].note };
-    state.reviews = r; $("#sync").textContent = "Reviews are saved as you go"; $("#sync").classList.remove("bad"); render();
+    state.reviews = r; $("#sync").textContent = "Reviews are saved as you go"; $("#sync").classList.remove("bad");
+    if (document.activeElement && document.activeElement.tagName === "TEXTAREA") renderBar(); else render();   // never redraw under the cursor
   }, () => { $("#sync").textContent = "Lost the connection to the reviews. Reload to retry."; $("#sync").classList.add("bad"); });
 })();
 </script>

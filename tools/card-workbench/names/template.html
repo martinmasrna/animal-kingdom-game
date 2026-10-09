@@ -57,16 +57,13 @@ main { display: grid; gap: 12px; margin-top: 14px; max-width: 1100px; }
 </div>
 
 <div class="rules">
-  <b>Draft rules</b>, from the research and the names you kept (Prince Leo, Princess Lea, King Theron, Queen Adira, Black Swan):
+  <b>The rule, from the names you kept or picked</b> (Prince Leo, King Theron, Lord Bumbleton, Ember, Eon, Aurum, Pestis, Brutus, Methuselah, Silverback, Greywhisker, Black Swan): the name <b>is the card's idea, in a word any player can decode</b>. Ember returns from the ashes, Eon loops forever, Aurum is gold, Methuselah is old, Silverback leads, Greywhisker is an old rat, Brutus is a brute. Three shapes carry it:
   <ol>
-    <li>It reads as a name, not a word: a coined or classical name (Theron, Adira, Brutus, Aurum), never a verb or an abstract noun (Feint, Ruin, Cache read as card effects).</li>
-    <li>Two or three syllables, with name-like endings (-a, -o, -us, -on, -el, -is).</li>
-    <li>The sound fits the animal's size: open vowels (a, o, u) for big animals, i and e and sharp stops for small ones.</li>
-    <li>A title only where the animal has real royalty (the lion pride, the colony queens); a pair shares a sound (Leo and Lea).</li>
-    <li>A trait compound (Greywhisker) for a few small, scrappy animals; one or two playful human names at most.</li>
-    <li>Myth and folklore may be evoked, never cited: no named character, god or real animal (no Scrooge, no Medusa, no Mocha Dick).</li>
-    <li>Unique in sound across the pool.</li>
+    <li>A meaning word, or a Latin or English root everyone half-knows (Ember, Eon, Aurum, Pestis, Brutus, Methuselah).</li>
+    <li>A two-part compound of what the animal looks like or does (Silverback, Greywhisker).</li>
+    <li>A title on a name, grand for royal animals (King Theron), playful for the rest (Lord Bumbleton).</li>
   </ol>
+  What failed: coined sounds with no meaning (Tocca, Rasca), and words whose meaning doesn't reach the animal (Vesper, Clarion, Sirocco, Gale).
 </div>
 
 <main id="main"></main>
@@ -92,7 +89,7 @@ function render() {
   $("#main").innerHTML = list.length ? list.map(c => {
     const p = pick(c.key), f = final(c);
     const opts = (c.name ? [["__keep", "Keep " + c.name]] : []).concat(c.candidates.map(x => [x, x]));
-    return `<article class="row ${f ? "done" : ""}">
+    return `<article class="row ${f ? "done" : ""}" data-row="${esc(c.key)}">
       <div class="art">${c.art ? `<img src="art/${esc(c.art)}.webp" alt="${esc(c.name || c.species)}" loading="lazy">` : "No art yet"}</div>
       <div class="card">
         ${c.name ? `<div class="now">${esc(c.name)}</div>` : `<div class="now none">Unnamed ${esc(c.species)}</div>`}
@@ -104,12 +101,21 @@ function render() {
         <div class="opts">${opts.map(([v, l]) => `<button class="opt ${v === "__keep" ? "keep" : ""}" data-key="${esc(c.key)}" data-v="${esc(v)}" aria-pressed="${!p.custom && p.choice === v}">${esc(l)}</button>`).join("") || `<span class="meta">No candidates yet.</span>`}</div>
         <input class="own" id="own-${esc(c.key)}" data-key="${esc(c.key)}" data-field="custom" placeholder="Or write your own name" value="${esc(p.custom || "")}">
         <input class="note" id="note-${esc(c.key)}" data-key="${esc(c.key)}" data-field="note" placeholder="Note (why, or what to look for)" value="${esc(p.note || "")}">
-        <div class="chosen">${f ? "Chosen: " + esc(f) : ""}</div>
+        <div class="chosen" data-chosen="${esc(c.key)}">${f ? "Chosen: " + esc(f) : ""}</div>
       </div></article>`;
   }).join("") : `<p class="rules">Nothing here.</p>`;
   if (active) { const el = document.getElementById(active); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
 }
 
+// Typing never re-renders the page: only the row's "Chosen" line and its border change, so no keystroke is lost.
+function refreshRow(key) {
+  const c = DATA.find(x => x.key === key), f = final(c);
+  const row = document.querySelector(`[data-row="${CSS.escape(key)}"]`), ch = document.querySelector(`[data-chosen="${CSS.escape(key)}"]`);
+  if (row) row.classList.toggle("done", !!f);
+  if (ch) ch.textContent = f ? "Chosen: " + f : "";
+  const n = DATA.filter(decided).length;
+  $("#count").textContent = `${n} / ${DATA.length} decided`;
+}
 const timers = {};
 async function write(key, patch) {
   state.picks[key] = { ...pick(key), ...patch, at: Date.now() };
@@ -127,7 +133,7 @@ document.addEventListener("input", e => {
   const key = el.dataset.key, field = el.dataset.field;
   state.picks[key] = { ...pick(key), [field]: el.value };
   clearTimeout(timers[key + field]);
-  timers[key + field] = setTimeout(() => { write(key, { [field]: el.value }); render(); }, 700);
+  timers[key + field] = setTimeout(() => { write(key, { [field]: el.value }); refreshRow(key); }, 700);
 });
 
 render();
@@ -137,7 +143,10 @@ render();
   $("#sync").textContent = "Loading picks…";
   db.collection("picks").onSnapshot(snap => {
     const r = {}; snap.docs.forEach(d => r[d.id] = d.data());
-    state.picks = { ...r }; $("#sync").textContent = "Picks are saved as you go"; $("#sync").classList.remove("bad"); render();
+    const typing = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.field;
+    for (const k in timers) if (state.picks[k.replace(/(custom|note)$/, "")]) { const kk = k.replace(/(custom|note)$/, ""); r[kk] = { ...r[kk], ...state.picks[kk] }; }
+    state.picks = { ...r }; $("#sync").textContent = "Picks are saved as you go"; $("#sync").classList.remove("bad");
+    if (typing) DATA.forEach(c => refreshRow(c.key)); else render();
   }, () => { $("#sync").textContent = "Lost the connection to the picks. Reload to retry."; $("#sync").classList.add("bad"); });
 })();
 </script>
