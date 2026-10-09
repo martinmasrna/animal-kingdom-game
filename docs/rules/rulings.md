@@ -10,6 +10,7 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 
 ## Placement and actions
 
+- **Eon at its end:** an Eon whose Dusk would shuffle it back at 0 strength or less is removed instead. Not printed: it's what players expect, and without it an Eon could loop forever against an empty-handed opponent (found in a random game that ran to the 400-turn cap, Martin, 2026-10-09).
 - **"Place" versus "play":** an effect that *places* an animal (Vesper, Sunfish's Baby Fish, Scarlett's cubs) puts it there outright: no connection, no strength check, no action. It isn't a play: its Roar doesn't happen, and "when you play" reactions (Queen Honoria) and counts of animals played (Hare) don't see it. Everything else that reacts to an animal arriving does: a placed animal that lands on an enemy covers it (Spikes, Poison, Flee react), and traps beside it see it. *Playing* is a full normal placement (below).
 - **Extra placements** ("play another unit", "play one more Cat"): a full normal placement (connection unless Flight, covering strength, any cost) that consumes no action, so they chain. From hand only unless the card says "or deck". "May" makes it optional; it fizzles when nothing qualifies.
 - **"Can't" beats "can".** When one card forbids what another allows, the prohibition wins.

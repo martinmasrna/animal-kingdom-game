@@ -2746,7 +2746,7 @@
         "Flight"
       ],
       "species": "Butterfly",
-      "habitat": "Jungle",
+      "habitat": "Meadow",
       "workbench_id": "pool-3"
     },
     {
@@ -2891,7 +2891,7 @@
     {
       "id": "polar_bear",
       "name": "Polar Bear",
-      "deck": "bench",
+      "deck": "reserve",
       "rarity": "rare",
       "tags": [
         "Bear"
@@ -2908,7 +2908,7 @@
     {
       "id": "borealis",
       "name": "Borealis",
-      "deck": "bench",
+      "deck": "reserve",
       "rarity": "legendary",
       "tags": [
         "Bear"
@@ -2925,7 +2925,7 @@
     {
       "id": "lemming",
       "name": "Lemming",
-      "deck": "bench",
+      "deck": "reserve",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -2955,7 +2955,7 @@
     {
       "id": "rattlesnake",
       "name": "Rattlesnake",
-      "deck": "bench",
+      "deck": "reserve",
       "rarity": "common",
       "tags": [
         "Snake"
@@ -2970,7 +2970,7 @@
     {
       "id": "outrider",
       "name": "Coyote",
-      "deck": "bench",
+      "deck": "reserve",
       "rarity": "rare",
       "tags": [
         "Canine"
@@ -3000,7 +3000,7 @@
     {
       "id": "andean_condor",
       "name": "Andean Condor",
-      "deck": "bench",
+      "deck": "reserve",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -3017,7 +3017,7 @@
     {
       "id": "cougar",
       "name": "Cougar",
-      "deck": "bench",
+      "deck": "reserve",
       "rarity": "common",
       "tags": [
         "Cat"
@@ -3047,7 +3047,7 @@
     {
       "id": "dingo",
       "name": "Dingo",
-      "deck": "bench",
+      "deck": "reserve",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -3062,7 +3062,7 @@
     {
       "id": "cairn",
       "name": "Cairn",
-      "deck": "bench",
+      "deck": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 10,

@@ -2137,11 +2137,15 @@ def _eon_end_of_turn(state, unit, cr):
     # The Ouroboros: it leaves the board (a return, not a remove - no Deathrattle, nothing to
     # the Remove Pile) and shuffles into its owner's deck, a little smaller each cycle. The loss
     # is kept per card id, like Rattlesnake's growth, so it survives the trip through the deck.
+    # Shrunk to nothing, it is removed instead (Martin, 2026-10-09: an endless loop otherwise).
+    counters = state.card_strength_counters.setdefault(unit.owner, {})
+    if state.cards["eon"].base_strength + counters.get("eon", 0) - state.config.eon_decay <= 0:
+        _remove_specific(state, cr, unit, by_player=unit.owner, by_card="eon")
+        return
     state.emit("to_deck", cr=cr, iid=unit.iid, card=unit.card_id, owner=unit.owner)
     state.board[cr].remove(unit)
     if not state.board[cr]:
         del state.board[cr]
-    counters = state.card_strength_counters.setdefault(unit.owner, {})
     counters["eon"] = counters.get("eon", 0) - state.config.eon_decay
     state.emit("strength", card="eon", owner=unit.owner, n=-state.config.eon_decay)   # every copy (this one is in the deck now)
     shuffle_back(state, unit.owner, ["eon"])

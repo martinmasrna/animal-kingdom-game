@@ -38,7 +38,9 @@ COMMENT = ("Static card data, written by tools/card-workbench/convert.py from th
            "mate (the Eagle pair), species, habitat and workbench_id (where it came from).")
 RARITY = {"L": "legendary", "R": "rare", "C": "common"}
 BENCH = "pool"                       # the workbench's deck of cards in no starter deck
-KEPT_DECKS = {"reserve", "tutorial"}  # old cards the workbench doesn't know, kept as they are
+KEPT_DECKS = {"reserve", "tutorial"}
+# The habitats in the game today; a Pool card from any other waits in reserve for its habitat's set.
+LAUNCH_HABITATS = {"Savanna", "Forest", "Meadow", "Jungle", "City", "Open Ocean"}  # old cards the workbench doesn't know, kept as they are
 
 # The first run's ids for cards renamed since the old pool, by workbench name.
 RENAMED = {"Stray Cat": "house_cat", "Stray Dog": "dog"}
@@ -163,8 +165,8 @@ def convert(export: dict, old_data: dict) -> tuple[dict, list[str]]:
             unnamed = not wc["name"].strip()
             name = UNNAMED[wc["id"]][1] if wc["id"] in UNNAMED else (wc["species"] if unnamed else wc["name"].strip())
             in_deck = dslug
-            if dslug == "bench" and wc.get("status") == "open":
-                in_deck = "reserve"                 # an open design: not collectible until it has its effect
+            if dslug == "bench" and (wc.get("status") == "open" or wc.get("habitat") not in LAUNCH_HABITATS):
+                in_deck = "reserve"                 # an open design, or a later habitat's card: not collectible
             rec = {"id": cid, "name": name, "deck": in_deck, "rarity": RARITY[wc["rarity"]],
                    "tags": [t.strip() for t in wc.get("tag", "").split(",") if t.strip()],
                    "base_strength": "dynamic" if cid in DYNAMIC else wc["str"], "text": text}

@@ -986,6 +986,15 @@ def test_eon_eats_then_shuffles_itself_back_one_smaller_each_cycle():
     assert card_strength(s, "eon", "A") == 10 - CFG.eon_decay
 
 
+def test_eon_shrunk_to_nothing_is_removed_instead_of_looping():
+    s = make_state(hands={"A": ["eon"]}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6})
+    s.card_strength_counters["A"] = {"eon": CFG.eon_decay - 10}   # an Eon at its last strength
+    put(s, "1,1", "caracal", "A")
+    rules.apply_action(s, PlaceAction("eon", ("cr", "1,1")))   # onto its own animal, as the endless loop did
+    rules.apply_action(s, DrawAction())                   # A's turn ends: one more cycle would make it 0
+    assert "eon" in s.remove_pile and "eon" not in s.decks["A"]
+
+
 def test_magpie_takes_a_random_enemy_card_then_discards_one_of_yours():
     s = make_state(hands={"A": ["magpie", "mouse"], "B": ["lion"]},
                    decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
