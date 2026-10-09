@@ -5,7 +5,7 @@ description: Make, repaint or review card art for Animal Kingdom, one habitat an
 
 # Card art
 
-Martin agrees each card's True Name in chat, then only judges finished pictures on a review page. Everything between is yours: brief, prompts, generation, checks, page, install, learning. His attention is the scarce resource (the Savanna commons cost ~22 minutes and 14 pictures per card); every step below exists to spend less of it.
+Martin agrees each card's True Name in chat, then only judges finished pictures on a review page. Everything between is yours: brief, prompts, generation, checks, page, install, learning. His attention is the scarce resource, and Claude tokens are the next one (agents share his subscription; the codex quota is for pictures only, never checks) (the Savanna commons cost ~22 minutes and 14 pictures per card); every step below exists to spend less of it.
 
 Everything lives in the design repo `~/Work/fun/animal-kingdom-design/` (`D` below), except the game's art files. Read before starting: `D/cards/art-principles.md` (what the art must do; the only principles doc), `D/cards/true-names.md`, and `python3 D/cards/bar/art.py status` (where every card stands).
 
@@ -17,10 +17,10 @@ A batch is one habitat and one rarity (commons first, then rares, then legendari
 
 1. **True Names.** Every card in the batch needs a line in `true-names.md`. Missing ones: propose one line per card in chat, following that file's rules, and get Martin's agreement before any picture. Write them in, commit.
 2. **The habitat block.** `art-principles.md` needs a "<Habitat> <rarity>" line under "The prompt blocks" (`art.py gen` refuses without it). A new one: draft it from the habitat's description, agree it with Martin, then test the look on 3-4 pictures (one per card) before generating the batch.
-3. **Prompts, by a cold subagent.** Spawn one fresh agent per batch (Agent tool, `model: "opus"`: this is the creative step) with: the batch name, the card ids, the jobs file path to write (`D/cards/bar/jobs/<batch>-<round>.jsonl`), how many ideas per card (6-8 on a card's first round; fewer later), and the instruction to read `D/cards/art-principles.md` and `D/cards/bar/prompts.md` and follow them. Pass nothing else from this session: no old prompts, no pictures, no summary of past rounds beyond what `art.py status` prints. Never write prompts yourself.
+3. **Prompts, by a cold subagent.** Spawn one fresh agent per batch (Agent tool, `model: "opus"`: this is the creative step) with: the batch name, the card ids, the jobs file path to write (`D/cards/bar/jobs/<batch>-<round>.jsonl`), how many ideas per card (4-5 on a card's first round; fewer later), and the instruction to read `D/cards/art-principles.md` and `D/cards/bar/prompts.md` and follow them. Pass nothing else from this session: no old prompts, no pictures, no summary of past rounds beyond what `art.py status` prints. Never write prompts yourself.
 4. **Generate.** `python3 D/cards/bar/art.py gen <jobs file> -p 4` in the background. Each picture is ~1-2 minutes; it prints `done <id>` or `FAIL <id>`, and warns if a prompt reached the model altered (`NOT VERBATIM`: stop and fix the proxy). The ChatGPT image quota is its own cap (about 40-50 pictures, then hours of lockout; a FAIL says when it resets): budget a round before starting it.
 5. **Gates** (`gates.md`; nothing reaches Martin before them):
-   1. `art.py blind <ids>` prints a folder of anonymised copies. Spawn the blind reader (Agent tool, `model: "sonnet"`) with the "blind reader" section of `gates.md` and that folder only.
+   1. `art.py blind <ids>` prints a folder of anonymised copies. Spawn the blind reader (Agent tool, `model: "haiku"`: a few words per picture needs no judgement) with the "blind reader" section of `gates.md` and that folder only.
    2. `art.py readings <folder>` stores and prints the readings by id.
    3. Spawn the checker (`model: "sonnet"`) with the "checker" section, the ids, the printed readings and a results path (`D/cards/bar/gate/<batch>-<round>.json`). Split more than ~12 pictures across checkers.
    4. `art.py gate <results>` merges and prints who passed.
