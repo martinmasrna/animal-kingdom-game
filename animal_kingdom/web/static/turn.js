@@ -55,3 +55,12 @@ export function incomeFlights(foodBefore, foodAfter, winFood, stones, { gap = 0.
   const sources = stones.flatMap((s, i) => Array(s.food).fill(i));
   return Array.from({ length: n }, (_, j) => ({ from: sources[j % sources.length], pit: Math.min(pits - 1, Math.floor((foodBefore + j) / per)), delay: j * gap }));
 }
+
+// Food eaten in flight (Hungry): one fruit per food lost, from the pit it empties (the top ones first) to the animal that
+// ate it (`eaters`: [{ food }], each takes as many as it ate). Returns [{ to: eater index, pit, delay }].
+export function eatFlights(foodBefore, foodAfter, winFood, eaters, { gap = 0.035, pits = 10 } = {}) {
+  const per = winFood / pits, top = Math.min(foodBefore, winFood), n = top - Math.max(0, foodAfter);
+  if (n <= 0 || !eaters.length) return [];
+  const to = eaters.flatMap((e, i) => Array(e.food).fill(i));
+  return Array.from({ length: n }, (_, j) => ({ to: to[j % to.length], pit: Math.max(0, Math.min(pits - 1, Math.floor((top - 1 - j) / per))), delay: j * gap }));
+}

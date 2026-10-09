@@ -688,6 +688,9 @@ function showView(prev) {
         income: { A: prev.game.income[prev.you], B: prev.game.income[prev.you === 'A' ? 'B' : 'A'] },
         hand: prev.game.hand.map(h => h.iid), oppHand: prev.game.handCount[prev.you === 'A' ? 'B' : 'A'], hist: prev.game.history.length,
         fromStones: !(ui.step && ui.step.kind === 'food' && !ui.step.income),   // only region income flies from the stones
+        // a card's food flies from the animals whose doing it is; food eaten (Hungry) flies to the animals that ate it
+        flow: ui.step && (ui.step.kind === 'pay' || ui.step.kind === 'food' && !ui.step.income) && ui.step.from
+          ? { kind: ui.step.kind, side: rel(ui.step.player), at: ui.step.from.map(f => ({ cr: dcr(f.cr), n: f.n })) } : null,
         strength: strengthFlash(ui.step) } : null;
   if (ui.step && ui.step.kind === 'yourturn' && screen === 'game') { turnPlate(); turnCue.until = Date.now() + 900; }
   gameScreen();

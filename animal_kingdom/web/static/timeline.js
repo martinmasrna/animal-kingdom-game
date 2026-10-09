@@ -65,14 +65,25 @@ export function plan(prev, next, cards = {}) {
   const out = [], push = step => out.push({ view: view(), step });
   const take = (cr, iid) => { const st = s.board[cr] || [], i = st.findIndex(u => u.iid === iid); if (i < 0) return null;
     const [u] = st.splice(i, 1); if (!st.length) delete s.board[cr]; return u; };
-  let food = null;   // food gains in a row by one player fly together
+  // food in a row by one player flies together: gains into the den (from the stones, or from the animals whose doing they
+  // are), or food eaten out of it (Hungry: to the animals that ate it). `from`: [{ cr, n }], the animals' crossroads.
+  let food = null;
+  const at = iid => { if (iid == null) return null; for (const [cr, st] of Object.entries(s.board)) if (st.some(u => u.iid === iid)) return cr; return null; };
+  const flow = (kind, e) => {
+    if (!(food && food.kind === kind && food.player === e.player && !!food.income === !!e.income)) {
+      flushFood(); food = { kind, player: e.player, n: 0, income: !!e.income, from: [] };
+    }
+    food.n += e.n;
+    const cr = at(e.cause_iid), f = cr && food.from.find(x => x.cr === cr);
+    if (f) f.n += e.n; else if (cr) food.from.push({ cr, n: e.n });
+  };
   const landed = new Set();   // units put down in these steps: they already show their final strength
-  const flushFood = () => { if (food) { push({ kind: 'food', dur: foodDur(food.n), ...food }); food = null; } };
+  const flushFood = () => { if (food) { push({ ...food, dur: food.kind === 'pay' && !food.from.length ? DUR.pay : foodDur(food.n) }); food = null; } };
   const toHand = e => { s.handCount[e.player] += 1;
     if (e.player === you) s.hand.push(finalCard(e.iid) || { iid: e.iid, id: e.card, str: (cards[e.card] || {}).str }); };
   for (let i = 0; i < fresh.length; i++) {
     const e = fresh[i];
-    if (e.e !== 'food') flushFood();
+    if (e.e !== 'food' && e.e !== 'pay') flushFood();
     switch (e.e) {
       case 'place': {
         // a card they played is shown large first; units an effect puts down (a Sardine's swarm) are its doing, not plays,
@@ -111,12 +122,10 @@ export function plan(prev, next, cards = {}) {
         }
         break;
       case 'food':
-        if (food && food.player === e.player && !!food.income === !!e.income) food.n += e.n;
-        else { flushFood(); food = { player: e.player, n: e.n, income: !!e.income }; }
-        s.food[e.player] += e.n;
+        flow('food', e); s.food[e.player] += e.n;
         break;
-      case 'pay':
-        s.food[e.player] -= e.n; push({ kind: 'pay', dur: DUR.pay, player: e.player, n: e.n });
+      case 'pay':   // a Hungry animal eating, the legendary Squirrel's stake
+        flow('pay', e); s.food[e.player] -= e.n;
         break;
       case 'draw': {
         const n = e.cards ? e.cards.length : e.n;

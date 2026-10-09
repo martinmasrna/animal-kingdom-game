@@ -96,3 +96,16 @@ test('a strength change shows on a unit already on the board, from its flash on'
   }
   assert.ok(seen > 0, 'some strength change on a unit already on the board');
 });
+
+test("a card's food flies from the animal that made it, and food eaten flies to the animal that ate it", () => {
+  const n = { food: 0, pay: 0 };
+  for (const { name, views } of matches) for (let i = 1; i < views.length; i++) {
+    for (const { view, step } of plan(views[i - 1], views[i])) {
+      if (!step || !(step.kind === 'pay' || step.kind === 'food' && !step.income)) continue;
+      for (const f of step.from) assert.ok((view.game.board[f.cr] || []).length, `${name} view ${i}: a ${step.kind} from an empty crossroad`);
+      assert.ok(step.from.reduce((t, f) => t + f.n, 0) <= step.n, `${name} view ${i}: more food from the animals than moved`);
+      if (step.from.length) n[step.kind]++;
+    }
+  }
+  assert.ok(n.food > 0, 'some card food flew from an animal');
+});

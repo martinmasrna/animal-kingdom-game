@@ -4,7 +4,7 @@
 // draws it. Layout and look: the design sandbox's screen/plan.md and screen/kit/.
 import { CROP, hasArt, artUrl } from './art.js';
 import { KEYWORDS } from './card.js';
-import { pitStates, heldRegions, boardChanges, incomeFlights } from './turn.js';
+import { pitStates, heldRegions, boardChanges, incomeFlights, eatFlights } from './turn.js';
 
 export const STAGE = { w: 1512, h: 800 };
 // A window taller than wide (a phone held upright) gets its own board: a painting made upright (kit2/plate_port.webp,
@@ -93,6 +93,10 @@ export function renderBoard(el, M, g, cards, ui) {
   const { landed, covered, leaving } = boardChanges(A && A.board, g.board, (A && A.fx) || []);
   const strength = (A && A.strength) || new Map();   // the stored changes this step made (a grant, a poison), iid to up or down
   const held = heldRegions(M.regions, g.board);
+  // the animals a card's food flies from, or eaten food flies to (Hungry): [{ x, y, food }] on `side`
+  const flowAt = (side, kind) => A && A.flow && A.flow.kind === kind && A.flow.side === side
+    ? A.flow.at.map(f => { const [x, y] = at(...f.cr.split(',').map(Number)); return { x, y, food: f.n }; }) : [];
+  const eating = new Set(A && A.flow && A.flow.kind === 'pay' ? A.flow.at.map(f => f.cr) : []);
   // what a stone pays: its holder's yield (the legendary Wildebeest and Boar move it), the printed food while no one holds it
   const pays = (reg, h) => (h && g.regionFood && g.regionFood[h.owner] || {})[reg.id] ?? reg.food;
   const stoneAt = reg => { const [c, r] = reg.c, [x1, y1] = at(c, r), [x2, y2] = at(c + 1, r + 1); return [(x1 + x2) / 2, (y1 + y2) / 2]; };
@@ -115,7 +119,7 @@ export function renderBoard(el, M, g, cards, ui) {
     let strike = '';
     if (ui.strike && ui.strike.from === cr) { const [tx, ty] = at(...ui.strike.to.split(',').map(Number)), dx = tx - x, dy = ty - y, n = Math.hypot(dx, dy) || 1;
       strike = `--sx:${(dx / n * 26).toFixed(1)}px;--sy:${(dy / n * 26).toFixed(1)}px`; }
-    s += put(`cr unit ${u.owner}${cls}${chg ? ' strchg ' + chg : ''}${strike ? ' strike' : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards), `data-cr="${cr}" data-card="${u.id}"`, strike);
+    s += put(`cr unit ${u.owner}${cls}${chg ? ' strchg ' + chg : ''}${strike ? ' strike' : ''}${eating.has(cr) ? ' eat' : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards), `data-cr="${cr}" data-card="${u.id}"`, strike);
   }
 
   // Removed units drain, sink and leave dust; returned ones lift and fly to their owner's side of the screen.
@@ -126,8 +130,8 @@ export function renderBoard(el, M, g, cards, ui) {
   }
 
   // a region's income flies from its stone; a card's food comes from no stone
-  const stonesOf = side => A && A.fromStones === false ? [] : held.filter(r => r.owner === side).map(r => { const [x, y] = stoneAt(r); return { x, y, food: pays(r, r) }; });
-  for (const side of ['A', 'B']) s += den(side, g, A, stonesOf(side), ui);
+  const stonesOf = side => A && A.fromStones === false ? flowAt(side, 'food') : held.filter(r => r.owner === side).map(r => { const [x, y] = stoneAt(r); return { x, y, food: pays(r, r) }; });
+  for (const side of ['A', 'B']) s += den(side, g, A, stonesOf(side), ui, flowAt(side, 'pay'));
   // The unit that took a den stands in its mouth: the game's last move, drawn where it won.
   if (ui.capture) { const [mx, my] = denMouthAt(ui.capture.side), x = VIEW.port ? mx : mx + (ui.capture.side === 'A' ? -22 : 22), y = VIEW.port ? my + (ui.capture.side === 'A' ? 22 : -22) : my;   // seated in the mouth, clear of the crossroad beside it
     s += put(`cr unit ${ui.capture.owner} capture${A ? ' land' : ''}`, x, y, unit(ui.capture, [], cards)); }
@@ -140,25 +144,33 @@ export function renderBoard(el, M, g, cards, ui) {
   if (!reducedMotion()) el.querySelectorAll('.dcount.tick').forEach(gem => {
     const from = +gem.dataset.from, to = +gem.dataset.to, t0 = performance.now() - ago + +gem.dataset.lag, dur = +gem.dataset.dur;
     const step = t => { const n = Math.round(from + (to - from) * Math.min(1, Math.max(0, (t - t0) / dur)));
-      gem.innerHTML = gemDigits(n); if (n < to && gem.isConnected) requestAnimationFrame(step); };
+      gem.innerHTML = gemDigits(n); if (n !== to && gem.isConnected) requestAnimationFrame(step); };
     requestAnimationFrame(step);
   });
 }
 
 // A den: ten pits of fruit (one fruit per food, ghosts for next turn's income), the gem with the count, the cave mouth.
 // When food came in since the last view, fruit fly in from the held stones and each changed pit ripens as they arrive.
-function den(side, g, A, stones, ui) {
+function den(side, g, A, stones, ui, eaters = []) {
   const food = g.food[side], inc = g.income[side], win = g.winFood, pits = PITS(side);
-  const now = pitStates(food, inc, win), gained = !!(A && A.food && food > A.food[side]);
-  const before = gained ? pitStates(A.food[side], A.income[side], win) : null;
+  const now = pitStates(food, inc, win), gained = !!(A && A.food && food > A.food[side]), eaten = !!(A && A.food && food < A.food[side] && eaters.length);
+  const before = gained || eaten ? pitStates(A.food[side], A.income[side], win) : null;
   const flights = gained ? incomeFlights(A.food[side], food, win, stones, { gap: GAP }) : [];
   const arrive = {};
   let s = '';
+  const fly = (x, y, tx, ty, delay, j) => `<i class="flyfruit" style="left:${x}px;top:${y}px;--dx:${tx - x + (j % 3 - 1) * 8}px;--dy:${ty - y}px;animation-delay:${delay}s;` +
+    `background-image:url(${kit(`fly_${team(side)}${j % 4}.webp`)})"></i>`;
   flights.forEach(({ from, pit, delay }, j) => {
     const { x, y } = stones[from], [tx, ty] = pits[pit];
     arrive[pit] = delay + FLY;
-    s += `<i class="flyfruit" style="left:${x}px;top:${y}px;--dx:${tx - x + (j % 3 - 1) * 8}px;--dy:${ty - y}px;animation-delay:${delay}s;` +
-      `background-image:url(${kit(`fly_${team(side)}${j % 4}.webp`)})"></i>`;
+    s += fly(x, y, tx, ty, delay, j);
+  });
+  // eaten: each fruit leaves its pit (the pit empties as it goes) and flies to the animal that eats it
+  const eats = eaten ? eatFlights(A.food[side], food, win, eaters, { gap: GAP }) : [];
+  eats.forEach(({ to, pit, delay }, j) => {
+    const [x, y] = pits[pit], { x: tx, y: ty } = eaters[to];
+    if (!(pit in arrive)) arrive[pit] = delay + 0.12;   // the pit changes as its first fruit leaves
+    s += fly(x, y, tx, ty, delay, j);
   });
   const src = (p, i) => kit(`pits/${team(side)}pit${i % 3 + 1}_${p.ripe}_${p.ghost}.webp`);
   const b = ui.beat && ui.beat.side === side ? ui.beat : null, at = ms => `animation-delay:${(ms - b.ago) / 1000}s;`;   // the end's beat on this den
@@ -171,13 +183,14 @@ function den(side, g, A, stones, ui) {
     s += put(`pit${changed ? ' ripen' : ''}${b ? ` ${b.kind}` : ''}`, x, y, (changed ? `<img class="was" src="${src(before[i], i)}" alt="" draggable="false" ${delay}>` : '') +
       `<img class="now" src="${src(now[i], i)}" alt="" draggable="false" ${delay}>`, '', fall || (b ? at(i * 75) : ''));
   });
-  const [kx, ky] = gemAt(side), [mx, my] = denMouthAt(side), counting = gained && !reducedMotion();
+  const [kx, ky] = gemAt(side), [mx, my] = denMouthAt(side), moved = gained || eaten, counting = moved && !reducedMotion();
   const timing = flights.length ? `data-lag="${FLY * 1000}" data-dur="${flights.length * GAP * 1000}"`
+    : eats.length ? `data-lag="0" data-dur="${eats.length * GAP * 1000 + 200}"`
     : `data-lag="150" data-dur="${300 + 110 * Math.ceil((food - (gained ? A.food[side] : food)) / 10)}"`;
   if (b && b.kind === 'fall') s += put('beat bflash', mx, my, '', '', at(0)) + put('beat bdust', mx, my, '', '', at(0)) + put('beat bdark', mx, my, '', '', at(80));
   if (b && b.kind === 'lit') s += put('beat bglow', kx, ky, '', '', at(870)) + put(`beat bwave`, kx, ky, '', '', at(870));
   const gemBeat = !b ? '' : b.kind === 'fall' ? at(830) : `animation-delay:${gained ? '.15s, ' : ''}${(870 - b.ago) / 1000}s;`;
-  return s + put(`dcount ${side}${gained ? ' tick' : ''}${b ? (b.kind === 'fall' ? ' fall' : ' flare') : ''}`, kx, ky, gemDigits(counting ? A.food[side] : food),
-    `data-from="${gained ? A.food[side] : food}" data-to="${food}" ${timing} data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`, gemBeat) +
+  return s + put(`dcount ${side}${moved ? ' tick' : ''}${b ? (b.kind === 'fall' ? ' fall' : ' flare') : ''}`, kx, ky, gemDigits(counting ? A.food[side] : food),
+    `data-from="${moved ? A.food[side] : food}" data-to="${food}" ${timing} data-tip="${food} / ${win}${inc ? ` · +${inc} next turn` : ''}"`, gemBeat) +
     put(`mouth${side === 'B' && ui.hqRing ? ' tgt' : ''}`, mx, my, '', `data-hq="${side}"`);
 }
