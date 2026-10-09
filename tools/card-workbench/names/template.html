@@ -93,7 +93,7 @@ function render() {
       <div class="art">${c.art ? `<img src="art/${esc(c.art)}.webp" alt="${esc(c.name || c.species)}" loading="lazy">` : "No art yet"}</div>
       <div class="card">
         ${c.name ? `<div class="now">${esc(c.name)}</div>` : `<div class="now none">Unnamed ${esc(c.species)}</div>`}
-        <div class="meta"><span>${esc(c.species)}</span><span>${esc(c.str)} strength</span><span>${esc(c.deck)}</span>${c.status === "locked" ? "<span>locked</span>" : ""}</div>
+        <div class="meta"><span>${esc(c.species)}</span><span>${esc(c.str)} strength</span>${c.status === "locked" ? "<span>locked</span>" : ""}</div>
         ${c.cites ? `<div class="flag">Cites ${esc(c.cites)}</div>` : ""}
         <div class="text">${esc(c.text)}</div>
       </div>

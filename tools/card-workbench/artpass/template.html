@@ -156,7 +156,7 @@ function nameHTML(i) {
 }
 function metaHTML(i) {
   if (i.kind === "bg" || i.kind === "orphan") return "";
-  return `<div class="meta"><span class="pill ${i.rarity}">${RARITY[i.rarity]}</span><span>${esc(i.str)} strength</span>${i.tag ? `<span>${esc(i.tag)}</span>` : ""}<span>${esc(i.deck)}</span>${i.name ? `<span>${esc(i.species)}</span>` : ""}</div>`;
+  return `<div class="meta"><span class="pill ${i.rarity}">${RARITY[i.rarity]}</span><span>${esc(i.str)} strength</span>${i.tag ? `<span>${esc(i.tag)}</span>` : ""}${i.name && i.name !== i.species ? `<span>${esc(i.species)}</span>` : ""}</div>`;
 }
 function verdictHTML(i) {
   const v = review(i.key).verdict;
