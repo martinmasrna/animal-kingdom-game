@@ -26,4 +26,4 @@ A legendary's name is what the animals call that individual, rendered into Engli
 
 ## Settled
 
-Prince Leo, Princess Lea, King Theron, Queen Adira (lions); Black Swan; Greywhisker (rat); Arne, whose mate token is Arna (eagle); Mimi (mimic octopus); Zuri (zebra); Lord Bumbleton (bumblebee); Big Gus (capybara). Eon stays until a better one turns up.
+Prince Leo, Princess Lea, King Theron, Queen Adira (lions); Black Swan; Greywhisker (rat); Arne, whose mate token is Arna (eagle); Mimi (mimic octopus); Zuri (zebra); Twiga (giraffe); Eber (boar); Cuco (cuckoo); Lord Bumbleton (bumblebee); Big Gus (capybara). Eon stays until a better one turns up.
