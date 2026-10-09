@@ -35,7 +35,9 @@ const med = (id, M) => { if (!CROP[id]) return '';   // not painted yet: a plain
 // Copies as dots: filled for the copies in the deck; with `max`, hollow for the ones still allowed.
 const pips = (n, max = n) => Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
 
-let X, C, cards, st = { open: null, families: new Set(), rar: null, str: '', q: '', sheet: false }, flash = null, wired = false;
+// The launch habitats, in the order the sets are presented.
+const HABITATS = ['Savanna', 'Forest', 'Meadow', 'Jungle', 'City', 'Open Ocean'];
+let X, C, cards, st = { open: null, families: new Set(), rar: null, hab: '', str: '', q: '', sheet: false }, flash = null, wired = false;
 const limit = c => LIMIT[c.rarity];   // copies per deck: the rarity's (a card's starter count is the starter's business)
 // A deck's cover until its player chooses one: its first legendary with a head crop (the play screen uses the same).
 export const coverOf = (list, cards = C) => list.find(id => cards[id].rarity === 'legendary' && CROP[id]) || list.find(id => CROP[id]) || 'lion';
@@ -96,7 +98,7 @@ function render(app, all) {
   if (st.was !== !!st.open) keep[1] = 0; st.was = !!st.open;   // switching list and deck starts the column at its top
   const open = all.find(d => d.id === st.open), counts = open ? countsOf(open.list) : {};
   const q = st.q.toLowerCase();
-  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (st.str === '' || (st.str === '9+' ? c.str >= 9 : String(c.str) === st.str))
+  const shown = cards.filter(c => (!st.families.size || c.tags.some(t => st.families.has(t))) && (!st.rar || c.rarity === st.rar) && (!st.hab || c.habitat === st.hab) && (st.str === '' || (st.str === '9+' ? c.str >= 9 : String(c.str) === st.str))
     && (!q || (c.name + ' ' + c.text + ' ' + c.tags.join(' ')).toLowerCase().includes(q)))
     .sort((a, b) => sv(a) - sv(b) || RANK[a.rarity] - RANK[b.rarity] || a.name.localeCompare(b.name));
 
@@ -110,6 +112,7 @@ function render(app, all) {
   const head = `<div class="chead"><div class="tabs">${tabs}</div>
     ${dd('str', st.str, [['', 'Any strength'], ...strengths.map(v => [v, 'Strength ' + v])])}
     ${dd('rar', st.rar || '', [['', 'Any rarity'], ['legendary', 'Legendary'], ['rare', 'Rare'], ['common', 'Common']])}
+    ${dd('hab', st.hab, [['', 'Any habitat'], ...HABITATS.map(h => [h, h])])}
     <label class="searchw">${ICON.search}<input class="search field" id="q" placeholder="Search" value="${esc(st.q)}"></label></div>`;
 
   const body = d => deckBody(d.list, C);
@@ -144,7 +147,7 @@ function wire(app, all, open) {
   wireDd(app, (k, v) => { st[k] = k === 'rar' ? (v || null) : v; redo(); });
   const q = $('q'); q.oninput = () => { st.q = q.value; const at = q.selectionStart; redo(); const n = app.querySelector('#q'); n.focus(); n.setSelectionRange(at, at); };
   app.querySelectorAll('[data-t]').forEach(e => e.onclick = () => { const f = e.dataset.t; st.families.has(f) ? st.families.delete(f) : st.families.add(f); redo(); });   // toggles; none chosen shows every family
-  const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { families: new Set(), rar: null, str: '', q: '' }); redo(); };
+  const cf = $('clearf'); if (cf) cf.onclick = () => { Object.assign(st, { families: new Set(), rar: null, hab: '', str: '', q: '' }); redo(); };
   app.querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.closest('.nm-edit, .tacts, .nm-in')) return; if (!st.open) { st.open = e.dataset.d; st.sheet = false; redo(); } });
 
   const nm = app.querySelector('.nm-edit');
