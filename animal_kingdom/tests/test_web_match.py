@@ -85,6 +85,8 @@ def test_view_hides_the_opponents_hand_and_deck_order():
     m = _match()
     for _ in range(12):
         m.act(m.to_act(), rng.choice(rules.legal_actions(m.state)).to_dict())
+    while m.state.pending:               # a choice in progress also counts the cards it holds (a Raven's put-back)
+        m.act(m.to_act(), rng.choice(rules.legal_actions(m.state)).to_dict())
     view = m.view("A")
     game = view["game"]
     assert [h["iid"] for h in game["hand"]] == [u.iid for u in m.state.hands["A"]]

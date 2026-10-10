@@ -273,7 +273,9 @@ def _fresh():
 
 def test_pass_ends_the_turn_with_or_without_an_action():
     from animal_kingdom.engine.actions import DrawAction, PassAction
-    s = _fresh(); first = s.current
+    s = _fresh()
+    rules.apply_action(s, DrawAction())                   # the first player's one-action first turn
+    first = s.current
     assert rules.can_pass(s)                              # even before the first action
     rules.apply_action(s, DrawAction())
     rules.apply_action(s, PassAction())
@@ -387,3 +389,15 @@ def test_one_shared_mulligan_window_then_three_timeouts_in_a_row_lose():
             play_turn(first)
     assert st.result is not None and st.result.winner == first and st.result.reason == "timeout"
     assert c["out"][first] == 0, "a player who moves is never counted"
+
+
+def test_the_first_players_first_turn_has_one_action_and_every_turn_after_two():
+    s = _fresh()
+    first = s.current
+    assert s.turn_counter == 0 and rules.turn_actions(s) == 1
+    rules.apply_action(s, DrawAction())
+    assert s.current != first and rules.turn_actions(s) == 2
+    rules.apply_action(s, DrawAction())
+    assert s.current != first                    # the second player keeps both actions
+    rules.apply_action(s, DrawAction())
+    assert s.current == first and rules.turn_actions(s) == 2

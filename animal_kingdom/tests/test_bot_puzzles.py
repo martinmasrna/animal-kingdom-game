@@ -162,7 +162,9 @@ def test_aggro_draws_on_its_opening(bot_cls):
     # Aggro vs the pile, its first turn, second action, empty board, hand Falcon, Falcon, Rat,
     # Rat, Skunk. Martin draws here too. A guard: the fix for drawing too much must not stop
     # this - the bot that flew a Falcon to their den front instead lost these games.
-    for chosen in _choices(bot_cls, _puzzle("aggro_opening_draw")):
+    s = _puzzle("aggro_opening_draw")
+    s.turn_counter += 2                  # recorded when the first turn had two actions; the same opening, a turn later
+    for chosen in _choices(bot_cls, s):
         assert isinstance(chosen, DrawAction), chosen
 
 

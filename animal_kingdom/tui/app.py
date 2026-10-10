@@ -23,6 +23,7 @@ from textual.screen import ModalScreen, Screen
 from textual.widgets import Button, Input, Label, Select, Static
 
 from ..decks import PREMADE_DECKS
+from ..engine import rules
 from ..engine import strength as strength_mod
 from ..engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction
 from ..engine.config import Config, load_config_overrides
@@ -738,7 +739,7 @@ class RecorderApp(App[None]):
         actor = state.player_to_act()
         actions_remaining = max(
             0,
-            state.config.actions_per_turn - state.actions_taken_this_turn,
+            rules.turn_actions(state) - state.actions_taken_this_turn,
         )
         action_text = (
             f"  ·  Actions {actions_remaining}"

@@ -70,10 +70,9 @@ def rebuild(g: dict) -> dict:
     steps = []
     for i, a in enumerate(g["actions"]):
         seat = a.get("by") or m.to_act()
-        bonus = st.turn_flags.get(f"bonus_actions_{st.current}", 0)
         before = {
             "turn": st.turn_counter, "round": st.turn_counter // 2 + 1, "current": st.current,
-            "left": st.config.actions_per_turn + bonus - st.actions_taken_this_turn,
+            "left": rules.turn_actions(st) - st.actions_taken_this_turn,
             "food": dict(st.food), "hand": [u.card_id for u in st.hands[seat]],
             "pending": bool(st.pending), "top": {cr: (s[-1].card_id, s[-1].owner) for cr, s in st.board.items() if s},
         }

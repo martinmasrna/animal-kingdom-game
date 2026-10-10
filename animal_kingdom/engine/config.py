@@ -187,6 +187,8 @@ class Config:
                                           # better and de-fangs free "draw 1" riders (they no longer
                                           # strictly beat the default action)
     actions_per_turn: int = 2            # top-level actions (place/draw) per turn (overview.md §5)
+    first_turn_actions: int = 1          # the first player's first turn only: the tempo the second player
+                                         # lacks (Martin, 2026-10-11, from his gauntlets: 82% first vs 67% second)
 
     # --- Engine safety / sim hygiene ---
     max_turns: int = 400                 # hard cap so fuzz games always terminate (M1)

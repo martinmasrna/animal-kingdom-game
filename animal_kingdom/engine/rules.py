@@ -71,10 +71,14 @@ def _top_level_actions(state: GameState) -> list[Action]:
 TITAN_ACTIONS = 2   # Titan (keywords.md): playing it costs two actions instead of one
 
 
+def turn_actions(state: GameState) -> int:
+    """The current turn's actions: two, one on the first player's first turn, plus any bonus (Beaver)."""
+    base = state.config.first_turn_actions if state.turn_counter == 0 else state.config.actions_per_turn
+    return base + state.turn_flags.get(f"bonus_actions_{state.current}", 0)
+
+
 def _actions_left(state: GameState) -> int:
-    limit = (state.config.actions_per_turn
-             + state.turn_flags.get(f"bonus_actions_{state.current}", 0))  # Beaver
-    return limit - state.actions_taken_this_turn
+    return turn_actions(state) - state.actions_taken_this_turn
 
 
 # ------------------------------------------------------------- apply / resolve

@@ -44,7 +44,7 @@ def test_the_opponent_sees_how_many_cards_were_drawn_not_which():
     other = "B" if p == "A" else "A"
     assert public_event(draw, p)["cards"] == draw["cards"]
     assert "cards" not in public_event(draw, other) and public_event(draw, other)["n"] == 2
-    assert m.view(other)["game"]["events"][-1]["seq"] == draw["seq"]
+    assert draw["seq"] in [e["seq"] for e in m.view(other)["game"]["events"]]
 
 
 def test_the_events_alone_rebuild_the_board_after_every_action():

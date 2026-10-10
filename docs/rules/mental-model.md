@@ -4,7 +4,7 @@
 
 ## The whole system in one breath
 
-Two players place animal **units** onto a **graph of crossroads**. A turn is **2 actions**; each action is either **draw 2** or **place 1 unit** (some effects grant *free* extra draws/places). You win instantly by **capturing the enemy den** (place any unit on it) or **hitting the food threshold** (control regions → they generate food each turn). That's the game.
+Two players place animal **units** onto a **graph of crossroads**. A turn is **2 actions** (the first player's first turn is 1); each action is either **draw 2** or **place 1 unit** (some effects grant *free* extra draws/places). You win instantly by **capturing the enemy den** (place any unit on it) or **hitting the food threshold** (control regions → they generate food each turn). That's the game.
 
 ## A unit is a single number
 

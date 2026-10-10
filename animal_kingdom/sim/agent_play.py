@@ -152,7 +152,7 @@ def show(g, st):
     res = st.result or rules.is_terminal(st)
     inc = {p: rules.region_income(st, p) for p in "AB"}
     turn = f"round {st.turn_counter // 2 + 1}, {'YOUR' if st.current == ME else 'THEIR'} turn"
-    left = st.config.actions_per_turn + st.turn_flags.get(f"bonus_actions_{st.current}", 0) - st.actions_taken_this_turn
+    left = rules.turn_actions(st) - st.actions_taken_this_turn
     out.append(f"== {turn}, actions left {left} | food: you {st.food[ME]} (+{inc[ME]}/turn), them {st.food[OPP]} (+{inc[OPP]}/turn), win at {gm.win_food}")
     if res:
         out.append(f"== GAME OVER: {'YOU WIN' if res.winner == ME else 'YOU LOSE' if res.winner else 'DRAW'} by {res.reason}")

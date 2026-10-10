@@ -559,7 +559,6 @@ class Match:
     def _game_view(self, s: str, opp: str) -> dict:
         st = self.state
         to_act = st.player_to_act() if st.result is None else None
-        bonus = st.turn_flags.get(f"bonus_actions_{st.current}", 0)
         timers = {x["iid"]: x["remaining"] for x in st.scheduled}
         board = {}
         for cr, stack in st.board.items():
@@ -579,8 +578,8 @@ class Match:
             "current": st.current,
             "toAct": to_act,
             "first": st.first_player,
-            "actionsLeft": st.config.actions_per_turn + bonus - st.actions_taken_this_turn,
-            "actionsTotal": st.config.actions_per_turn + bonus,
+            "actionsLeft": rules.turn_actions(st) - st.actions_taken_this_turn,
+            "actionsTotal": rules.turn_actions(st),
             "canPass": rules.can_pass(st),
             "clock": {"on": False} if not self.clock else (self._mulligan_clock(s) if self.mulliganing() and self.clock.get("mull_until") else
                                      {**{k: self.clock[k] for k in ("bank", "holder", "free", "since")}, "now": time.time(),

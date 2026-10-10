@@ -128,7 +128,7 @@ def test_plans_nurse_then_queen_bee_then_worker_as_one_turn():
 
 
 def test_saved_game_opening_preserves_the_duplicate_setup():
-    config = Config.default().sweep(actions_per_turn=2, draw_action_count=1, mulligan=False)
+    config = Config.default().sweep(actions_per_turn=2, first_turn_actions=2, draw_action_count=1, mulligan=False)
     s = new_game(
         load_premade_deck("colony"),
         load_premade_deck("cats"),

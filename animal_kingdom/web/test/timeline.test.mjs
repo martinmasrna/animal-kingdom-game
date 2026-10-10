@@ -57,7 +57,9 @@ test('what removed a unit strikes from the very unit the engine names, never ano
     const named = fresh.filter(e => e.cause_iid != null && ['remove', 'bounce', 'to_deck'].includes(e.e) && e.cr);
     const struck = plan(views[i - 1], views[i]).filter(s => s.step && s.step.by && ['remove', 'bounce', 'to_deck'].includes(s.step.kind));
     for (const s of struck) {
-      const e = named.find(e => e.cr === s.step.cr && e.card === s.step.card); if (!e) continue;
+      // in order: a Cockroach can be struck twice on one crossroad in one batch, by two different animals
+      const k = named.findIndex(e => e.cr === s.step.cr && e.card === s.step.card); if (k < 0) continue;
+      const [e] = named.splice(k, 1);
       assert.ok(s.view.game.board[s.step.by].some(u => u.iid === e.cause_iid), `strikes from unit ${e.cause_iid}`); n++;
     }
   }

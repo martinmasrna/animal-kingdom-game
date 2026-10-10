@@ -19,6 +19,7 @@ def make_state(*, current="A", hands=None, decks=None, food=None, config=None, c
         load_map("map_a"), cards or load_cards(), config or Config.default(),
         board={}, hands={"A": [], "B": []}, decks=decks or {"A": [], "B": []},
         remove_pile=[], food=food or {"A": 0, "B": 0}, current=current, first_player="A",
+        turn_counter=2,                  # a position past the first player's one-action first turn
     )
     for player, ids in (hands or {}).items():
         for card_id in ids:

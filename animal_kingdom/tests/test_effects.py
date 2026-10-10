@@ -830,7 +830,7 @@ def test_skunk_bounces_and_locks_the_card():
     put(s, "3,2", "unnamed_canine", "B")
     apply_click(s, PlaceAction("skunk", ("cr", "2,2")))
     fox = next(u for u in s.hands["B"] if u.card_id == "unnamed_canine")
-    assert fox.locked_until_turn == 2                # locked through B's next turn
+    assert fox.locked_until_turn == 4                # placed on turn 2: locked through B's next turn
     assert "unnamed_canine" not in {a.card_id for a in rules.legal_actions(s) if isinstance(a, PlaceAction)}
 
 

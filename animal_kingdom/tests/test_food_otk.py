@@ -28,7 +28,7 @@ def test_food_gained_counter_tracks_and_resets_between_turns():
     s = make_state(hands={"A": ["squirrel"]}, decks={"A": ["mouse"] * 4, "B": ["mouse"] * 4})
     rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,2")))     # gain 12 (action 1)
     assert effects._food_gained_this_turn(s, "A") == CFG.squirrel_food
-    advance_to(s, 2)                                                   # into A's next turn
+    advance_to(s, 4)                                                   # into A's next turn
     assert effects._food_gained_this_turn(s, "A") == 0                # reset each turn
 
 
@@ -135,7 +135,7 @@ def test_beaver_grants_an_extra_action_next_turn():
     rules.apply_action(s, PlaceAction("beaver", ("cr", "1,2")))     # action 1
     assert len(s.hands["A"]) == 0                                     # no draw
     assert any(x["step"]["op"] == "grant_action" for x in s.scheduled)
-    advance_to(s, 2)                                                  # into A's next turn
+    advance_to(s, 4)                                                  # into A's next turn
     assert s.turn_flags.get("bonus_actions_A") == CFG.beaver_bonus_actions
 
     before = s.turn_counter

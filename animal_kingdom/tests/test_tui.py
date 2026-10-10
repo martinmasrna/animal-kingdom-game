@@ -202,7 +202,7 @@ def test_tui_wide_layout_centers_board_and_labels_players(tmp_path):
             assert "YOUR HAND" not in notice
             assert "Seat A" not in notice
             assert "Food 0" in notice
-            assert "Actions 2" in notice
+            assert "Actions 1" in notice            # the first player's one-action first turn
             footer = str(app.query_one("#footer", Static).content)
             assert "q" in footer and "Quit" in footer
             assert "?" in footer and "Help" in footer
