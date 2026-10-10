@@ -1029,3 +1029,12 @@ def test_black_mamba_removes_an_adjacent_enemy_of_strength_5_or_less():
     put(s2, "2,1", "cougar", "B")                         # a 6: out of reach
     apply_click(s2, PlaceAction("black_mamba", ("cr", "1,1")))
     assert s2.top_unit("2,1").card_id == "cougar"
+
+
+def test_guard_wasp_in_hand_does_not_count_itself_toward_four_colony():
+    s = make_state(hands={"A": ["guard_hornet"]})
+    for cr in ("1,1", "1,2", "1,3"):
+        put(s, cr, "worker_ant", "A")                    # 3 Colony on the board
+    assert card_strength(s, "guard_hornet", "A") == 3    # not yet controlled: no +5 to cover with
+    put(s, "2,1", "worker_ant", "A")
+    assert card_strength(s, "guard_hornet", "A") == 8

@@ -73,8 +73,9 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
     """The live "has +X" anthem bonus for a unit of `card` controlled by `owner`.
 
     `self_iid` is the unit's iid if it is on the board, or None for a prospective placement
-    (a card still in hand). "Other X" auras exclude the unit itself; "each friendly X" auras
-    include it (and add 1 for a prospective placement, since it is not on the board yet).
+    (a card still in hand). "Other X" auras exclude the unit itself; "you control N X" counts
+    include it once it is on the board, but a card in hand is not yet controlled, so it covers
+    with the count the board gives it now.
     An inked unit has no anthem of its own, and an inked source gives none.
     """
     tops = _tops_owned(state, owner)
@@ -84,8 +85,7 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
 
     def count(tag: str, *, include_self: bool) -> int:
         if include_self:
-            n = sum(1 for u in tops if tag in state.cards[u.card_id].tags)
-            return n + 1 if prospective else n
+            return sum(1 for u in tops if tag in state.cards[u.card_id].tags)
         return sum(1 for u in tops if tag in state.cards[u.card_id].tags and u.iid != self_iid)
 
     cid = card.id
@@ -93,7 +93,7 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
     if not _inked(state, self_iid):
         if cid == "verminus":                   # +1 for each OTHER unit you control (any tag)
             bonus += cfg.anthem_verminus_per * sum(1 for u in tops if u.iid != self_iid)
-        elif cid == "guard_hornet":             # +5 while you control >= threshold Colony units (incl. itself)
+        elif cid == "guard_hornet":             # +5 while you control >= threshold Colony units (itself once on the board)
             if count("Colony", include_self=True) >= cfg.guard_hornet_colony_threshold:
                 bonus += cfg.guard_hornet_bonus
         elif cid == "tuna":                     # +1 for each other Fish you control
