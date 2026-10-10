@@ -21,7 +21,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 |---|---:|---|---:|---|
 | **Orca** | 2 | — | 7 | Apex Predator. Roam. |
 | **Fox** | 2 | Canine | 4 | Roam. Whenever this covers an enemy, draw a card. |
-| **Jackal** | 2 | Canine | 4 | Roar: remove an adjacent enemy that has another of your Canines adjacent to it. |
+| **Jackal** | 2 | Canine | 4 | Roar: remove an adjacent enemy that has another of your Canines next to it. |
 | **Dhole** | 2 | Canine | 6 | Roam. Your animals can roam onto enemies of equal strength. |
 
 ### Common

@@ -31,7 +31,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Piranha** | 3 | Fish | 2 | Roar: if an ally was removed this turn, remove an adjacent enemy. |
 | **Hyena** | 3 | — | 4 | Dusk: gain 3 food for each of your animals removed this turn. |
 | **Vulture** | 3 | Bird | 3 | Flight. Dusk: if an ally was removed this turn, draw a card. |
-| **City Spider** | 3 | Arachnid | 2 | When an animal of strength 2 or less is placed adjacent to this, remove it. |
+| **City Spider** | 3 | Arachnid | 2 | When an animal of strength 2 or less is placed next to this, remove it. |
 | **Earthworm** | 3 | — | 1 | When this is removed, place two Worms on its crossroad. |
 | **Cockroach** | 3 | — | 1 | When this is removed, put it back where it was and draw a card. |
 

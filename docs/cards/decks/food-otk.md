@@ -21,7 +21,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 |---|---:|---|---:|---|
 | **Capybara** | 2 | Rodent | 6 | Your adjacent animals have Armor. |
 | **Porcupine** | 2 | Rodent | 7 | Spikes. |
-| **Golden Orb-Weaver** | 2 | Arachnid | 4 | When an enemy with Flight is placed adjacent to this, remove it. |
+| **Golden Orb-Weaver** | 2 | Arachnid | 4 | When an enemy with Flight is placed next to this, remove it. |
 | **Armadillo** | 2 | — | 7 | Armor. Your adjacent animals have Stealth. |
 
 ### Common

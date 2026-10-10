@@ -475,7 +475,7 @@
         "Arachnid"
       ],
       "base_strength": 2,
-      "text": "When an animal of strength 2 or less is placed adjacent to this, remove it.",
+      "text": "When an animal of strength 2 or less is placed next to this, remove it.",
       "keywords": [],
       "species": "Spider",
       "habitat": "City",
@@ -618,7 +618,7 @@
         "Canine"
       ],
       "base_strength": 4,
-      "text": "Roar: remove an adjacent enemy that has another of your Canines adjacent to it.",
+      "text": "Roar: remove an adjacent enemy that has another of your Canines next to it.",
       "keywords": [],
       "species": "Jackal",
       "habitat": "Savanna",
@@ -783,7 +783,7 @@
         "Bird"
       ],
       "base_strength": 5,
-      "text": "Flight. Roar: draw a card for each ally adjacent to the opponent's den.",
+      "text": "Flight. Roar: draw a card for each ally next to the opponent's den.",
       "keywords": [
         "Flight"
       ],
@@ -800,7 +800,7 @@
         "Rodent"
       ],
       "base_strength": 2,
-      "text": "Roar: play another animal adjacent to this.",
+      "text": "Roar: play another animal next to this.",
       "keywords": [],
       "species": "Naked Mole-Rat",
       "habitat": "Savanna",
@@ -877,7 +877,7 @@
         "Cat"
       ],
       "base_strength": 6,
-      "text": "Roar: if placed adjacent to the opponent's den, draw a card.",
+      "text": "Roar: if placed next to the opponent's den, draw a card.",
       "keywords": [],
       "species": "Cheetah",
       "habitat": "Savanna",
@@ -907,7 +907,7 @@
         "Bird"
       ],
       "base_strength": 4,
-      "text": "Flight. Roar: if placed adjacent to the opponent's den, draw a card.",
+      "text": "Flight. Roar: if placed next to the opponent's den, draw a card.",
       "keywords": [
         "Flight"
       ],
@@ -1462,7 +1462,7 @@
         "Rodent"
       ],
       "base_strength": 2,
-      "text": "Roar: draw a card. When an enemy is placed adjacent to this, draw a card.",
+      "text": "Roar: draw a card. When an enemy is placed next to this, draw a card.",
       "keywords": [],
       "species": "Meerkat",
       "habitat": "Savanna",
@@ -1691,7 +1691,7 @@
         "Arachnid"
       ],
       "base_strength": 4,
-      "text": "When an enemy with Flight is placed adjacent to this, remove it.",
+      "text": "When an enemy with Flight is placed next to this, remove it.",
       "keywords": [],
       "species": "Golden Orb-Weaver",
       "habitat": "Jungle",
@@ -2288,7 +2288,7 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 10,
-      "text": "Titan. Roar: remove all enemies adjacent to your animals.",
+      "text": "Titan. Roar: remove all enemies next to your animals.",
       "keywords": [
         "Titan"
       ],
@@ -2341,7 +2341,7 @@
         "Hoofed"
       ],
       "base_strength": 8,
-      "text": "Hungry 3. Remove any enemy of strength 3 or less placed adjacent to this.",
+      "text": "Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it.",
       "keywords": [
         "Hungry"
       ],
@@ -2976,7 +2976,7 @@
         "Canine"
       ],
       "base_strength": 6,
-      "text": "Your other Canines can be placed adjacent to your Canines, ignoring connection.",
+      "text": "Your other Canines can be placed next to your Canines, ignoring connection.",
       "keywords": [],
       "species": "Coyote",
       "habitat": "Desert",
@@ -3023,7 +3023,7 @@
         "Cat"
       ],
       "base_strength": 6,
-      "text": "You can place this adjacent to any Cat you control, ignoring connection.",
+      "text": "You can place this next to any Cat you control, ignoring connection.",
       "keywords": [],
       "species": "Cougar",
       "habitat": "Mountains",

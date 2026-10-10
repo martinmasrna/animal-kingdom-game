@@ -148,7 +148,7 @@
      "status": "proposed",
      "str": 2,
      "tag": "Arachnid",
-     "text": "When an animal of strength 2 or less is placed adjacent to this, remove it."
+     "text": "When an animal of strength 2 or less is placed next to this, remove it."
     },
     {
      "habitat": "Meadow",
@@ -263,7 +263,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Canine",
-     "text": "Roar: remove an adjacent enemy that has another of your Canines adjacent to it."
+     "text": "Roar: remove an adjacent enemy that has another of your Canines next to it."
     },
     {
      "habitat": "Jungle",
@@ -752,7 +752,7 @@
      "status": "proposed",
      "str": 5,
      "tag": "Bird",
-     "text": "Flight. Roar: draw a card for each ally adjacent to the opponent's den."
+     "text": "Flight. Roar: draw a card for each ally next to the opponent's den."
     },
     {
      "habitat": "Savanna",
@@ -764,7 +764,7 @@
      "status": "proposed",
      "str": 2,
      "tag": "Rodent",
-     "text": "Roar: play another animal adjacent to this."
+     "text": "Roar: play another animal next to this."
     },
     {
      "habitat": "Forest",
@@ -824,7 +824,7 @@
      "status": "locked",
      "str": 6,
      "tag": "Cat",
-     "text": "Roar: if placed adjacent to the opponent's den, draw a card."
+     "text": "Roar: if placed next to the opponent's den, draw a card."
     },
     {
      "habitat": "City",
@@ -848,7 +848,7 @@
      "status": "locked",
      "str": 4,
      "tag": "Bird",
-     "text": "Flight. Roar: if placed adjacent to the opponent's den, draw a card."
+     "text": "Flight. Roar: if placed next to the opponent's den, draw a card."
     },
     {
      "habitat": "City",
@@ -1301,7 +1301,7 @@
      "status": "proposed",
      "str": 2,
      "tag": "Rodent",
-     "text": "Roar: draw a card. When an enemy is placed adjacent to this, draw a card."
+     "text": "Roar: draw a card. When an enemy is placed next to this, draw a card."
     },
     {
      "habitat": "Forest",
@@ -1488,7 +1488,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Arachnid",
-     "text": "When an enemy with Flight is placed adjacent to this, remove it."
+     "text": "When an enemy with Flight is placed next to this, remove it."
     },
     {
      "habitat": "Jungle",
@@ -1615,7 +1615,7 @@
      "status": "proposed",
      "str": 10,
      "tag": "",
-     "text": "Titan. Roar: remove all enemies adjacent to your animals."
+     "text": "Titan. Roar: remove all enemies next to your animals."
     },
     {
      "habitat": "Savanna",
@@ -1651,7 +1651,7 @@
      "status": "proposed",
      "str": 8,
      "tag": "Hoofed",
-     "text": "Hungry 3. Remove any enemy of strength 3 or less placed adjacent to this."
+     "text": "Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it."
     },
     {
      "habitat": "Savanna",
@@ -2332,7 +2332,7 @@
      "status": "proposed",
      "str": 6,
      "tag": "Canine",
-     "text": "Your other Canines can be placed adjacent to your Canines, ignoring connection."
+     "text": "Your other Canines can be placed next to your Canines, ignoring connection."
     },
     {
      "habitat": "Desert",
@@ -2368,7 +2368,7 @@
      "status": "proposed",
      "str": 6,
      "tag": "Cat",
-     "text": "You can place this adjacent to any Cat you control, ignoring connection."
+     "text": "You can place this next to any Cat you control, ignoring connection."
     },
     {
      "habitat": "Mountains",
