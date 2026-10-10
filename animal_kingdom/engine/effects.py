@@ -63,10 +63,18 @@ def legal_pending(state: GameState) -> list:
     if p["mode"] == "choice":
         acts = [ChoiceAction(o) for o in p["options"]]
     else:  # "place"
-        acts = [PlaceAction(pl["card_id"], tuple(pl["target"])) for pl in p["placements"]]
+        acts = [PlaceAction(pl["card_id"], tuple(pl["target"]), pl.get("iid")) for pl in p["placements"]]
     if p["optional"]:
         acts.append(ChoiceAction(SKIP))
     return acts
+
+
+def _place_dict(action) -> dict:
+    """A PlaceAction as a pending placement or a recorded choice keeps it: card, target, and the copy when named."""
+    d = {"card_id": action.card_id, "target": list(action.target)}
+    if action.iid is not None:
+        d["iid"] = action.iid
+    return d
 
 
 def apply_pending(state: GameState, action) -> None:
@@ -79,7 +87,7 @@ def apply_pending(state: GameState, action) -> None:
         if isinstance(action, ChoiceAction) and action.choice == SKIP:
             step["place_action"] = SKIP
         else:
-            step["place_action"] = {"card_id": action.card_id, "target": list(action.target)}
+            step["place_action"] = _place_dict(action)
     state.pending = None
     # Resolution is driven by the caller (rules._resolve_and_maybe_end_turn).
 
@@ -155,9 +163,10 @@ def _mulligan_replacement(deck, blacklist):
 
 # ============================================================ placement + events
 
-def do_placement(state: GameState, player: str, card_id: str, target) -> None:
-    """Place an occupant from hand. Handles food cost, HQ capture, and crossroad landing."""
-    unit = playable_copy(state, player, card_id)
+def do_placement(state: GameState, player: str, card_id: str, target, iid: Optional[int] = None) -> None:
+    """Place an occupant from hand (the copy `iid` when given). Handles food cost, HQ capture, and crossroad landing."""
+    unit = playable_copy(state, player, card_id) if iid is None else next(
+        (u for u in playable_copies(state, player, card_id) if u.iid == iid), None)
     if unit is None:
         raise EngineError(f"{player} has no playable {card_id!r} in hand")
     strength = placement_strength(state, unit)   # as it is played (a den capture shows it)
@@ -173,6 +182,39 @@ def do_placement(state: GameState, player: str, card_id: str, target) -> None:
         state.result = Result(player, "hq_capture")
         return
     _land_unit(state, player, unit, where, from_hand=True)
+
+
+def playable_copies(state: GameState, player: str, card_id: str) -> list:
+    """The copies of `card_id` in hand that can be played now (not Skunk-locked), in hand order."""
+    return [u for u in state.hands[player] if u.card_id == card_id and u.locked_until_turn <= state.turn_counter]
+
+
+def copy_choices(state: GameState, player: str, card_id: str) -> list:
+    """(iid, copy) for each distinct playable version of `card_id` in hand: one (None, best copy) when the copies are
+    alike, else the first copy of each strength counter with its iid, so a player can play the weaker one."""
+    copies = playable_copies(state, player, card_id)
+    firsts = {}
+    for u in copies:
+        firsts.setdefault(u.strength_counter, u)
+    if len(firsts) <= 1:
+        best = playable_copy(state, player, card_id)
+        return [(None, best)] if best is not None else []
+    return [(u.iid, u) for u in firsts.values()]
+
+
+def canonical_place(state: GameState, player: str, action):
+    """A PlaceAction naming any copy in hand, as legal_placements names it: the first copy of that strength, or no
+    copy when the copies are alike. A copy that isn't in hand is left as it is (and fails validation)."""
+    if action.iid is None:
+        return action
+    unit = next((u for u in state.hands[player] if u.iid == action.iid and u.card_id == action.card_id), None)
+    if unit is None:
+        return action
+    choices = copy_choices(state, player, action.card_id)
+    if len(choices) == 1 and choices[0][0] is None:
+        return type(action)(action.card_id, action.target)
+    rep = next((iid for iid, u in choices if u.strength_counter == unit.strength_counter), action.iid)
+    return type(action)(action.card_id, action.target, rep)
 
 
 def playable_copy(state: GameState, player: str, card_id: str) -> Optional[UnitInstance]:
@@ -647,19 +689,17 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
     sorted_crossroads = sorted(gm.crossroads)
     connectable = {cr for cr in sorted_crossroads if state.is_connected(player, cr, occ)}
 
-    # One placement per distinct hand card id, using the copy that would actually be played.
-    best: dict[str, "UnitInstance"] = {}
-    for card_id in {u.card_id for u in state.hands[player]}:
+    # One placement per distinct hand card id, using the copy that would actually be played; per strength when
+    # copies of a card differ, so the weaker one can be played (copy_choices).
+    choices: list = []
+    for card_id in sorted({u.card_id for u in state.hands[player]}):
         if allowed_cards is not None and card_id not in allowed_cards:
             continue
-        placer = playable_copy(state, player, card_id)
-        if placer is not None:
-            best[card_id] = placer
+        choices.extend((card_id, iid, placer) for iid, placer in copy_choices(state, player, card_id))
 
     out = []
     reach_sets: dict[int, set] = {}                   # Reach N's crossroads, once per N
-    for card_id in sorted(best):
-        placer = best[card_id]
+    for card_id, iid, placer in choices:
         card = state.cards[card_id]
         if card.food_cost > state.food[player]:
             continue                                  # "Costs X food": only if affordable (dec. F)
@@ -679,14 +719,14 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
             top = state.top_unit(cr)
             if is_apex:
                 if top is not None and _apex_can_land(state, placer, top):
-                    out.append(PlaceAction(card_id, ("cr", cr)))   # must land on an occupant
+                    out.append(PlaceAction(card_id, ("cr", cr), iid))   # must land on an occupant
             elif top is None or top.owner == player:
-                out.append(PlaceAction(card_id, ("cr", cr)))
+                out.append(PlaceAction(card_id, ("cr", cr), iid))
             elif statics.can_cover(state, placer, top):
-                out.append(PlaceAction(card_id, ("cr", cr)))
+                out.append(PlaceAction(card_id, ("cr", cr), iid))
         # Apex Predators can never capture an HQ (decision D).
         if enemy_hq and not is_apex:
-            out.append(PlaceAction(card_id, ("hq", enemy)))
+            out.append(PlaceAction(card_id, ("hq", enemy), iid))
     return out
 
 
@@ -1103,7 +1143,7 @@ def _op_play_extra(state, step):
     if "place_action" in step:
         pa = step["place_action"]
         if pa != SKIP:
-            do_placement(state, step["chooser"], pa["card_id"], tuple(pa["target"]))
+            do_placement(state, step["chooser"], pa["card_id"], tuple(pa["target"]), pa.get("iid"))
         step["played"] = True
         return None
     allowed = _hand_allowed(state, step["chooser"], step["filter"])   # {} means any card, and is said so
@@ -1117,7 +1157,7 @@ def _op_play_extra(state, step):
     if not placements:
         return None
     return PendingRequest("place", step["chooser"], optional=step["optional"],
-                          placements=[{"card_id": p.card_id, "target": list(p.target)} for p in placements])
+                          placements=[_place_dict(p) for p in placements])
 
 
 def _op_play_named(state, step):
@@ -1145,7 +1185,7 @@ def _op_play_named(state, step):
         if pa == SKIP:
             _return_if_fetched()
         else:
-            do_placement(state, player, pa["card_id"], tuple(pa["target"]))
+            do_placement(state, player, pa["card_id"], tuple(pa["target"]), pa.get("iid"))
         return None
     allowed = {cid} if any(u.card_id == cid for u in state.hands[player]) else set()
     placements = legal_placements(state, player, allowed)
@@ -1153,7 +1193,7 @@ def _op_play_named(state, step):
         _return_if_fetched()
         return None
     return PendingRequest("place", player, optional=False,
-                          placements=[{"card_id": p.card_id, "target": list(p.target)} for p in placements])
+                          placements=[_place_dict(p) for p in placements])
 
 
 def _op_grant_strength(state, step):

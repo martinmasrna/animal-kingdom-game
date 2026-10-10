@@ -978,3 +978,23 @@ def test_vesper_landing_is_a_cover_spikes_remove_it_and_an_apex_still_eats_the_q
     assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "hedgehog"] and removed(s, "vesper")
     s = _queen_covered_by("polar_bear", b_hand=["vesper"])
     assert [u.card_id for u in s.board["2,2"]] == ["polar_bear", "vesper"] and removed(s, "queen_bee")
+
+
+def test_a_weaker_copy_in_hand_can_be_played_by_naming_it():
+    s = make_state(hands={"A": ["lion", "lion", "lion"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    strong, weak, weak2 = s.hands["A"]
+    strong.strength_counter = 1
+    copies = {a.iid for a in rules.legal_actions(s) if isinstance(a, PlaceAction)}
+    assert copies == {strong.iid, weak.iid}                     # one choice per strength, named by its first copy
+    target = next(a.target for a in rules.legal_actions(s) if isinstance(a, PlaceAction))
+    rules.apply_action(s, PlaceAction("lion", target, weak2.iid))   # any copy of that strength will do
+    assert [u.strength_counter for u in s.hands["A"]] == [1, 0]     # the buffed one stays in hand
+    assert s.board[target[1]][-1].strength_counter == 0
+
+
+def test_alike_copies_need_no_naming():
+    s = make_state(hands={"A": ["lion", "lion"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    acts = [a for a in rules.legal_actions(s) if isinstance(a, PlaceAction)]
+    assert acts and all(a.iid is None for a in acts)
+    rules.apply_action(s, PlaceAction("lion", acts[0].target, s.hands["A"][1].iid))   # a client naming one is fine
+    assert len(s.hands["A"]) == 1

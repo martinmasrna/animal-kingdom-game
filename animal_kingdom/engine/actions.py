@@ -8,7 +8,7 @@ are immutable, value-equal, hashable (so legal_actions can dedupe), and JSON-ser
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar, Union
+from typing import ClassVar, Optional, Union
 
 
 @dataclass(frozen=True)
@@ -32,10 +32,16 @@ class PlaceAction:
 
     card_id: str
     target: tuple[str, str]
+    # Which copy in hand, when copies of the card differ in strength (a buffed one beside a plain one): the iid of the
+    # first copy of that strength in hand. None when every playable copy is alike, which is nearly always.
+    iid: Optional[int] = None
     kind: ClassVar[str] = "place"  # a tag, not part of value identity
 
     def to_dict(self) -> dict:
-        return {"kind": self.kind, "card_id": self.card_id, "target": list(self.target)}
+        d = {"kind": self.kind, "card_id": self.card_id, "target": list(self.target)}
+        if self.iid is not None:
+            d["iid"] = self.iid
+        return d
 
     @property
     def is_hq_capture(self) -> bool:
@@ -109,7 +115,7 @@ def action_from_dict(d: dict) -> Action:
     if kind == "draw":
         return DrawAction()
     if kind == "place":
-        return PlaceAction(card_id=d["card_id"], target=tuple(d["target"]))
+        return PlaceAction(card_id=d["card_id"], target=tuple(d["target"]), iid=d.get("iid"))
     if kind == "roam":
         return RoamAction(origin=d["from"], target=tuple(d["target"]))
     if kind == "choice":

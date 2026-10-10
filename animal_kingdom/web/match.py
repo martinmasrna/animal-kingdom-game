@@ -640,13 +640,27 @@ class Match:
         st = self.state
         legal = rules.legal_actions(st)
         places: dict[str, list] = {}
+        copies: dict[int, list] = {}      # a named copy's own places, when copies of a card differ in strength
         roams: dict[str, list] = {}       # crossroad of a roaming animal -> where it may go (Roam)
         for a in legal:
             if isinstance(a, PlaceAction):
-                places.setdefault(a.card_id, []).append(list(a.target))
+                ts = places.setdefault(a.card_id, [])
+                if list(a.target) not in ts:
+                    ts.append(list(a.target))
+                if a.iid is not None:
+                    copies.setdefault(a.iid, []).append(list(a.target))
             elif isinstance(a, RoamAction):
                 roams.setdefault(a.origin, []).append(list(a.target))
-        out = {"draw": any(isinstance(a, DrawAction) for a in legal), "place": places, "roam": roams}
+        if copies:                        # every copy in hand answers with the places of its strength's first copy
+            hand = st.hands[st.pending["chooser"] if st.pending else st.current]
+            for u in hand:
+                if u.iid not in copies:
+                    rep = next((v for v in hand if v.iid in copies and v.card_id == u.card_id
+                                and v.strength_counter == u.strength_counter), None)
+                    if rep is not None:
+                        copies[u.iid] = copies[rep.iid]
+        out = {"draw": any(isinstance(a, DrawAction) for a in legal), "place": places, "roam": roams,
+               **({"copies": {str(k): v for k, v in copies.items()}} if copies else {})}
         if st.pending is None:
             return out, None
         p = st.pending

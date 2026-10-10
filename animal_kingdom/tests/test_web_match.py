@@ -6,6 +6,7 @@ import random
 import pytest
 
 from animal_kingdom.engine import rules
+from animal_kingdom.engine.actions import SKIP
 from animal_kingdom.engine.state import EngineError
 from animal_kingdom.web.match import Match, Seat
 
@@ -433,3 +434,22 @@ def test_a_roam_is_offered_taken_and_written_into_the_history():
     assert (move["kind"], move["card"], move["target"]) == ("roam", "t_roamer", ["cr", "2,2"])
     assert m.actions[-1] == {"kind": "roam", "from": "1,2", "target": ["cr", "2,2"]}
     json.dumps(m.view("B"))
+
+
+def test_copies_of_a_card_that_differ_in_strength_each_get_their_places_and_the_clicked_one_plays():
+    m = Match("T", Seat("ta", "A", deck="giants"))
+    m.join(Seat("tb", "B", deck="giants"))
+    st = m.state
+    while st.pending:                                   # past the mulligans
+        m.act(st.pending["chooser"], {"kind": "choice", "choice": SKIP})
+    s = st.current
+    st.hands[s].clear()
+    for _ in range(3):
+        st.add_to_hand(s, "elephant")
+    strong, weak, weak2 = st.hands[s]
+    strong.strength_counter = 2
+    legal, _ = m._decision(s)
+    assert set(legal["copies"]) == {str(strong.iid), str(weak.iid), str(weak2.iid)}
+    target = legal["copies"][str(weak2.iid)][0]
+    m.act(s, {"kind": "place", "card_id": "elephant", "target": target, "iid": weak2.iid})
+    assert [u.strength_counter for u in st.hands[s]] == [2, 0]

@@ -27,7 +27,7 @@ const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } c
 
 let CARDS = {}, MAP, DECKS = [], ME = null;   // ME: your profile {id, name, tag, decks, history}
 let V = null, ws = null, wsId = null, screen = null;
-const ui = { sel: null, roam: null, hover: null, peek: false, menu: false, panel: null };   // roam: the crossroad (viewer space) of the animal picked to roam
+const ui = { sel: null, selIid: null, roam: null, hover: null, peek: false, menu: false, panel: null };   // roam: the crossroad (viewer space) of the animal picked to roam
 
 // ------------------------------------------------------------------ shared bits
 // The menus' hover labels (menu.css: a tag under the thing) turn to stay in the window: above the thing near the bottom,
@@ -607,6 +607,15 @@ if (CLOG) {
   addEventListener('pointerdown', e => clog(`down ${what(e.target)} | ${state()}`), true);
   addEventListener('click', e => clog(`click ${what(e.target)}${e.isTrusted ? '' : ' (redirected)'}`), true);
 }
+// The copy of the picked card that plays: the one clicked (copies can differ in strength: a buffed one beside a plain
+// one), else the strongest, which is what the engine plays when no copy is named.
+const selCopy = () => {
+  const hand = V.game.hand || [], same = hand.filter(h => h.id === ui.sel);
+  return same.find(h => h.iid === ui.selIid) || same.reduce((a, h) => (!a || h.str > a.str ? h : a), null) || {};
+};
+const copyPlaces = () => ((V.game.legal || {}).copies || {})[ui.selIid];
+const selPlaces = d => (ui.selIid != null && copyPlaces()) || d.places[ui.sel] || [];
+const placeAction = target => ({ kind: 'place', card_id: ui.sel, target, ...(ui.selIid != null && copyPlaces() ? { iid: ui.selIid } : {}) });
 const act = action => { ui.sel = null; ui.roam = null; ui.hover = null; send({ t: 'act', action }); };
 
 // A new view: its events (static/timeline.js) play as steps, each view drawn for its step's length, the new view last.
@@ -784,7 +793,7 @@ function decision() {
     if (ui.sel && !d.places[ui.sel]) ui.sel = null;
     const ids = Object.keys(d.places);
     if (!ui.sel && ids.length === 1 && d.pend) ui.sel = ids[0];   // a "play this card" prompt: preselect it
-    if (ui.sel) for (const t of d.places[ui.sel]) { if (t[0] === 'cr') d.rings.push(dcr(t[1])); else d.hqRing = true; }
+    if (ui.sel) for (const t of selPlaces(d)) { if (t[0] === 'cr') d.rings.push(dcr(t[1])); else d.hqRing = true; }
     // Roam: click one of your animals that can move (it wears a dashed ring), its destinations ring, click one
     if (!d.pend) for (const [from, ts] of Object.entries(G.legal.roam || {})) d.roams[dcr(from)] = ts;
     if (ui.sel || !d.roams[ui.roam]) ui.roam = null;
@@ -976,7 +985,7 @@ function drawGame() {
     const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
     const hint = lit.hint(can), shown = lit.shown(h.id);
     const talking = lit.talking || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
-    const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (lit.one || G.hand.find(x => x.id === ui.sel)).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises
+    const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (lit.one || selCopy()).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${PL().deck[0] - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
     return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
@@ -997,8 +1006,9 @@ function drawGame() {
     const iid = Number(el.dataset.iid), id = el.dataset.id;
     if (d.handPick.has(iid)) { clog('card: picked for the choice'); return act({ kind: 'choice', choice: iid }); }
     if (!d.mine || !d.places[id] || !el.classList.contains('can')) { clog(`card: refused (mine=${d.mine} places=${!!d.places[id]} can=${el.classList.contains('can')} pend=${d.pend ? d.pend.kind : '-'} picks=${d.handPick.size})`); return; }   // a dimmed copy (the tutorial lights one) does nothing
-    if (ui.sel !== id) sfx('pick');
-    ui.sel = ui.sel === id ? null : id; ui.roam = null; ui.hover = null; drawGame();
+    const again = ui.sel === id && selCopy().iid === iid;   // the same copy again drops it; another copy of it picks that one
+    if (!again) sfx('pick');
+    ui.sel = again ? null : id; ui.selIid = again ? null : iid; ui.roam = null; ui.hover = null; drawGame();
   });
 
   // The deck is Draw 2; the End turn button is also the turn indicator.
@@ -1179,8 +1189,7 @@ function drawBoard(d) {
   let g = viewerGame();
   let preview = null;
   if (ui.sel && ui.hover && d.rings.includes(ui.hover)) {
-    const strs = V.game.hand.filter(h => h.id === ui.sel).map(h => h.str);
-    preview = { cr: ui.hover, id: ui.sel, str: Math.max(...strs) };
+    preview = { cr: ui.hover, id: ui.sel, str: selCopy().str };
   }
   // A step's animations play once. A redraw while they run (the pointer moving over the board, a card picked) draws the
   // same moment and carries them on from where they are, never restarting them nor cutting them short (Martin, 2026-10-02:
@@ -1234,12 +1243,12 @@ function wireBoard() {
     const d = lastDecision;
     if (!d || !d.mine) { const g = touch() && e.target.closest('[data-cr]'); if (g) readStack(g.dataset.cr); return; }   // off your turn a tap only reads
     const hq = e.target.closest('[data-hq]');
-    if (hq && ui.sel) { const t = d.places[ui.sel].find(t => t[0] === 'hq'); if (t) return act({ kind: 'place', card_id: ui.sel, target: t }); }
+    if (hq && ui.sel) { const t = selPlaces(d).find(t => t[0] === 'hq'); if (t) return act(placeAction(t)); }
     if (hq && ui.roam) { const t = d.roams[ui.roam].find(t => t[0] === 'hq'); if (t) return act({ kind: 'roam', from: dcr(ui.roam), target: t }); }
     const g = e.target.closest('[data-cr]'); if (!g) return;
     const cr = g.dataset.cr;
     if (cr in d.crChoice) return act({ kind: 'choice', choice: d.crChoice[cr] });
-    if (ui.sel && d.rings.includes(cr)) return act({ kind: 'place', card_id: ui.sel, target: ['cr', dcr(cr)] });
+    if (ui.sel && d.rings.includes(cr)) return act(placeAction(['cr', dcr(cr)]));
     if (ui.roam && d.rings.includes(cr)) return act({ kind: 'roam', from: dcr(ui.roam), target: ['cr', dcr(cr)] });
     if (d.roams[cr]) { sfx('pick'); ui.roam = ui.roam === cr ? null : cr; ui.sel = null; return drawGame(); }   // pick (or drop) an animal to roam
     if (ui.roam) { ui.roam = null; return drawGame(); }

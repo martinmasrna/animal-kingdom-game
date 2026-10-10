@@ -136,6 +136,8 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
             raise EngineError("cannot end the turn mid-resolution")
         _end_turn(state)
         return state
+    if isinstance(action, PlaceAction):
+        action = effects.canonical_place(state, state.pending["chooser"] if state.pending else state.current, action)
     if validate and action not in legal_actions(state):
         raise EngineError(f"illegal action {action!r}")
 
@@ -147,7 +149,7 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
     elif isinstance(action, PlaceAction):
         titan = "Titan" in state.cards[action.card_id].keywords
         state.actions_taken_this_turn += TITAN_ACTIONS if titan else 1
-        effects.do_placement(state, state.current, action.card_id, action.target)
+        effects.do_placement(state, state.current, action.card_id, action.target, action.iid)
     elif isinstance(action, RoamAction):
         stack = state.board.get(action.origin)
         effects.pay_for_roam(state, state.current, stack[-1] if stack else None)
