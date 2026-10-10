@@ -11,7 +11,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Baboon** | 1 | Primate | 5 | Dusk: give 2 random animals in your hand +1 strength. |
-| **Silverback** | 1 | Primate | 7 | Roar: give all animals in your hand +2 strength. |
+| **Silverback** | 1 | Primate | 7 | Roar: give all animals in your hand +1 strength. |
 | **Butterfly** | 1 | — | 1 | Whenever this gains strength in your hand, it evolves. |
 | **Eagle** | 1 | Bird | 2 | Flight. Apex Predator. When this enters your hand, add [its mate] to your hand. |
 

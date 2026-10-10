@@ -77,7 +77,7 @@ class Config:
     stray_dog_grant: int = 2             # Stray Dog: give an ally with Roam +2, then it roams
     wild_dog_grant: int = 1              # African Wild Dog: Dusk: your adjacent animals +1
     mahi_mahi_grant: int = 1             # Mahi-mahi: Roar: your other Fish +1
-    silverback_grant: int = 2            # Silverback: Roar: every animal in your hand +2
+    silverback_grant: int = 1            # Silverback: Roar: every animal in your hand +1
     baboon_grant: int = 1                # Baboon: Roar: 2 animals in your hand +1...
     baboon_count: int = 2                # ...this many of them
     baboon_legend_grant: int = 1         # the legendary Baboon: Dusk: 2 random animals in your hand +1...

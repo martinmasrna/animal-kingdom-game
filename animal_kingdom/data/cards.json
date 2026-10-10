@@ -2056,7 +2056,7 @@
         "Primate"
       ],
       "base_strength": 7,
-      "text": "Roar: give all animals in your hand +2 strength.",
+      "text": "Roar: give all animals in your hand +1 strength.",
       "keywords": [],
       "species": "Gorilla",
       "habitat": "Jungle",
