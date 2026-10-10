@@ -674,6 +674,14 @@ def test_the_legendary_eagle_brings_its_mate_and_they_share_every_buff():
     assert eagle.strength_counter == mate.strength_counter == 3
 
 
+def test_the_mate_comes_only_when_the_eagle_itself_enters_the_hand():
+    s = make_state(decks={"A": ["lion", "lion", "handlock_legend_eagle"], "B": []})
+    effects.draw_cards(s, "A", 1)
+    s.hands["A"].remove(hand_inst(s, "A", "handlock_legend_eagle_mate"))     # the mate played, the Eagle kept
+    effects.draw_cards(s, "A", 2)                                            # other cards arrive: no new mate
+    assert sorted(hand_ids(s, "A")) == ["handlock_legend_eagle", "lion", "lion"]
+
+
 def test_orangutan_duplicates_a_primate_and_tarsier_scouts_one_and_trains_it():
     s = make_state(hands={"A": ["orangutan", "gorilla", "lion"]})
     rules.apply_action(s, PlaceAction("orangutan", ("cr", "1,2")))

@@ -355,14 +355,15 @@ class GameState:
         inst = UnitInstance(card_id, player, self.new_iid(), strength_counter=strength_counter)
         self.hands[player].append(inst)
         self.emit("to_hand", player=player, iid=inst.iid, card=card_id)
-        self.ensure_mates(player)
+        self.ensure_mates(player, [inst])
         return inst
 
-    def ensure_mates(self, player: str) -> None:
-        """A card that brings its mate (the legendary Eagle: "When this enters your hand, add its mate to your hand") has
-        it in `player`'s hand. The mate itself (a token) brings nothing back."""
+    def ensure_mates(self, player: str, entered: Optional[list] = None) -> None:
+        """A card that brings its mate (the legendary Eagle: "When this enters your hand, add its mate to your hand") and
+        has just entered `player`'s hand (`entered`; the whole hand for an opening hand) brings it, unless it's there
+        already. One already in hand brings nothing when other cards arrive. The mate itself (a token) brings nothing."""
         hand = self.hands[player]
-        for u in list(hand):
+        for u in list(hand if entered is None else entered):
             card = self.cards[u.card_id]
             if card.mate and card.deck != "token" and not any(h.card_id == card.mate for h in hand):
                 self.add_to_hand(player, card.mate)

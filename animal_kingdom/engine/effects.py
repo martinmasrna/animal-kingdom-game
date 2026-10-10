@@ -595,7 +595,7 @@ def _fire_draw(state, drawn) -> None:
         if hook:
             hook(state, inst)
     if drawn:
-        state.ensure_mates(drawn[0].owner)               # a legendary Eagle entering the hand brings its mate
+        state.ensure_mates(drawn[0].owner, drawn)        # a legendary Eagle entering the hand brings its mate
 
 
 def draw_cards(state: GameState, player: str, n: int) -> list:
@@ -2208,7 +2208,7 @@ def _op_magpie_steal(state, step):
             new = UnitInstance(inst.card_id, player, state.new_iid())
             state.hands[player].append(new)
             state.emit("steal", player=player, victim=other_player(player), iid=inst.iid, new=new.iid, card=inst.card_id)
-            state.ensure_mates(player)
+            state.ensure_mates(player, [new])
     hand = state.hands[player]
     if not hand:
         return None
