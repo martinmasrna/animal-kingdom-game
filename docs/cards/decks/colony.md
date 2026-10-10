@@ -29,7 +29,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Queen Bee** | 3 | Colony, Queen | 2 | Roar: play a Worker animal. |
-| **Guard Wasp** | 3 | Colony | 3 | Flight. Has +5 strength while you control 4 or more Colony animals. |
+| **Guard Wasp** | 3 | Colony | 2 | Flight. Has +5 strength while you control 4 or more Colony animals. |
 | **Soldier Ant** | 3 | Colony | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. |
 | **Worker Ant** | 3 | Colony, Worker | 1 | Roar: gain 12 food. |
 | **Worker Wasp** | 3 | Colony, Worker | 3 | Flight. Dusk: gain 3 food. |

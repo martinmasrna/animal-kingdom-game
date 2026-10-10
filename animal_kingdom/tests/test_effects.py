@@ -55,12 +55,12 @@ def test_verminus_counts_any_other_unit():
 def test_guard_hornet_anthem_gated_on_four_colony():
     s = make_state()
     gh = put(s, "1,1", "guard_hornet", "A")
-    assert effective_strength(s, gh) == 3
+    assert effective_strength(s, gh) == 2
     for cr in ("1,2", "1,3"):
         put(s, cr, "worker_ant", "A")
-    assert effective_strength(s, gh) == 3                # only 3 Colony incl. self
+    assert effective_strength(s, gh) == 2                # only 3 Colony incl. self
     put(s, "2,1", "worker_ant", "A")                     # three more Colony -> 4 incl. self
-    assert effective_strength(s, gh) == 8                # +5 anthem
+    assert effective_strength(s, gh) == 7                # +5 anthem
 
 
 def test_nurse_bumblebee_draw_gated_on_four_colony():
@@ -1035,6 +1035,6 @@ def test_guard_wasp_in_hand_does_not_count_itself_toward_four_colony():
     s = make_state(hands={"A": ["guard_hornet"]})
     for cr in ("1,1", "1,2", "1,3"):
         put(s, cr, "worker_ant", "A")                    # 3 Colony on the board
-    assert card_strength(s, "guard_hornet", "A") == 3    # not yet controlled: no +5 to cover with
+    assert card_strength(s, "guard_hornet", "A") == 2    # not yet controlled: no +5 to cover with
     put(s, "2,1", "worker_ant", "A")
-    assert card_strength(s, "guard_hornet", "A") == 8
+    assert card_strength(s, "guard_hornet", "A") == 7
