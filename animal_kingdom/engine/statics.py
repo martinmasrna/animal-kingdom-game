@@ -132,20 +132,19 @@ def can_roam(state: GameState, unit: UnitInstance) -> bool:
     return "Roam" in state.cards[unit.card_id].keywords and active(state, unit)
 
 
-# Card ids that, while on top of their crossroad, give their controller one free roam each turn for one of their animals
-# of a family ("Once each turn, an allied Canine can roam for free."): card id -> the family.
-FREE_ROAM_CARDS: dict[str, str] = {"clarion": "Canine"}
+# Card ids that, while on top of their crossroad, give their controller one free roam each turn ("Once each turn, an
+# ally can roam for free.").
+FREE_ROAM_CARDS = frozenset({"clarion"})
 
 
 def free_roams(state: GameState, player: str, unit: Optional[UnitInstance] = None) -> int:
-    """Free roams `player`'s board gives them each turn (spent before an action; effects.free_roams_left). With `unit`,
-    only those that animal may use (a Clarion's goes to a Canine)."""
+    """Free roams `player`'s board gives them each turn (spent before an action; effects.free_roams_left). Any of their
+    animals may use one; `unit` is kept for callers that ask on an animal's behalf."""
     n = 0
     for st in state.board.values():
         top = st[-1] if st else None
         if top and top.owner == player and top.card_id in FREE_ROAM_CARDS and active(state, top):
-            if unit is None or FREE_ROAM_CARDS[top.card_id] in state.cards[unit.card_id].tags:
-                n += 1
+            n += 1
     return n
 
 

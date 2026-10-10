@@ -261,7 +261,7 @@ def test_a_returning_cockroach_is_not_placed_so_a_city_spider_cannot_loop_it():
 
 # ================================================================================= Canines
 
-def test_clarion_gives_a_free_roam_to_a_canine_only():
+def test_clarion_gives_a_free_roam_to_any_ally():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,1", "clarion", "A")
     put(s, "1,2", "dire_wolf", "A")                            # Wolf: Roam
@@ -272,7 +272,7 @@ def test_clarion_gives_a_free_roam_to_a_canine_only():
     put(s2, "1,2", "orca", "A")                                # Roam, not a Canine
     put(s2, "2,2", "squirrel", "A")
     rules.apply_action(s2, RoamAction("1,2", ("cr", "2,2")))
-    assert s2.actions_taken_this_turn == 1
+    assert s2.actions_taken_this_turn == 0
 
 
 def test_lobo_draws_when_an_ally_roams_onto_an_enemy():

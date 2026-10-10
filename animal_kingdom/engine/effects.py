@@ -802,7 +802,7 @@ def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None) -> list:
 
 
 def free_roams_left(state: GameState, player: str, unit=None) -> int:
-    """Free roams `player` still holds this turn; with `unit`, those that animal may use (Clarion's are for Canines)."""
+    """Free roams `player` still holds this turn; with `unit`, those that animal may use."""
     granted = statics.free_roams(state, player, unit) + state.turn_flags.get(f"free_roams_{player}", 0)
     return max(0, granted - state.turn_flags.get(f"free_roams_used_{player}", 0))
 
