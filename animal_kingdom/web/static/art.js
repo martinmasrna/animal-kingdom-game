@@ -2,6 +2,8 @@
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
   zebra: [.62, .33, .7],
+  dart_frog: [.5, .4, .8],
+  anteater: [.65, .5, .66],
   meerkat: [.56, .24, .6],
   leopard: [.62, .3, .7],
   baboon: [.6, .42, .8],
@@ -38,6 +40,8 @@ export const CROP = {
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
   zebra: [.72, .26, 1],
+  dart_frog: [.55, .38, 1],
+  anteater: [.7, .48, 1],
   meerkat: [.62, .14, 1.2],
   leopard: [.7, .28, 1],
   baboon: [.7, .3, 1],
@@ -70,6 +74,8 @@ export const STRIP = {
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
   zebra: .35,
+  dart_frog: .4,
+  anteater: .45,
   meerkat: .25,
   leopard: .3,
   baboon: .45,
