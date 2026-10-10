@@ -763,27 +763,32 @@ def legal_roams(state: GameState, player: str, *, free_only: bool = False) -> li
     actions are spent)."""
     if not any(st and st[-1].owner == player and statics.can_roam(state, st[-1]) for st in state.board.values()):
         return []                                     # the usual case, and the search's hot path: skip the BFS
-    gm = state.game_map
     occ = state.connected_occupied(player)
-    enemy = other_player(player)
-    enemy_front = gm.hq_front(enemy)
+    enemy_front = state.game_map.hq_front(other_player(player))
     out = []
-    for cr in sorted(occ):
+    for cr in sorted(cr for cr, st in state.board.items() if st and st[-1].owner == player):
         unit = state.board[cr][-1]
         if not statics.can_roam(state, unit) or state.turn_flags.get(f"roamed_{unit.iid}"):
             continue
         if free_only and not free_roams_left(state, player, unit):
             continue
-        out.extend(RoamAction(cr, t) for t in roam_targets(state, unit, cr, enemy_front=enemy_front))
+        out.extend(RoamAction(cr, t) for t in roam_targets(state, unit, cr, enemy_front=enemy_front, occ=occ))
     return out
 
 
-def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None) -> list:
-    """Where `unit` (on `cr`) may roam to: ("cr", crossroad) targets, and ("hq", enemy) from the enemy's den front."""
+def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None) -> list:
+    """Where `unit` (on `cr`) may roam to: ("cr", crossroad) targets, and ("hq", enemy) from the enemy's den front.
+    A roam lands where you could place, judged before the animal leaves: an animal connected to your den goes to any
+    neighbour, a cut-off one only to a crossroad connected to your den (back to your lines), never onto a den."""
     player = unit.owner
     enemy = other_player(player)
     if enemy_front is None:
         enemy_front = state.game_map.hq_front(enemy)
+    if occ is None:
+        occ = state.connected_occupied(player)
+    if cr not in occ:
+        return [t for t in roam_targets(state, unit, cr, enemy_front=(), occ=occ | {cr})
+                if state.is_connected(player, t[1], occ)]
     is_apex = statics.has_keyword(state, unit, "Apex Predator", cr)
     out = []
     for nb in state.game_map.neighbors(cr):
@@ -1541,12 +1546,12 @@ THEN = {
 
 
 def _op_forced_roam(state, step):
-    """"It roams" (Stray Dog): a roam the effect pays for, under the Roam rules (connected to your den, once per turn).
+    """"It roams" (Stray Dog): a roam the effect pays for, under the Roam rules (where you could place, once per turn).
     The player picks where; it can't take a den this way."""
     cr, unit = _find_unit(state, step["iid"])
     if unit is None or state.top_unit(cr) is not unit or state.turn_flags.get(f"roamed_{unit.iid}"):
         return None
-    if not statics.can_roam(state, unit) or cr not in state.connected_occupied(unit.owner):
+    if not statics.can_roam(state, unit):
         return None
     targets = [t[1] for t in roam_targets(state, unit, cr) if t[0] == "cr"]
     _push_choose(state, step["player"], targets, "roam_to", iid=unit.iid, by_card=step.get("by_card"))

@@ -46,6 +46,7 @@ The keywords are defined in [`keywords.md`](keywords.md); these are the calls th
 - **Roam lands like a placement in everything but the Roar.** Arriving sets off every adjacent trap (Hippopotamus), even one the animal already stood next to before it moved. A cover by roaming is a cover: Spikes, Poison, Pufferfish, King Theron and an Apex Predator's eat all happen. What is printed as a Roar does not (Caracal's "if placed on top of an enemy"), nor do "when you play" reactions (Queen Honoria, Red Wolf). An Apex Predator roams only onto an animal, its own included, and eats it; it never roams onto a den.
 - **A roam keeps the animal's place in the play order.** Moving isn't playing; a bounced animal played again is newly played.
 - **Roaming onto a den ends the game where it stands.** The animal never leaves its crossroad.
+- **A roam onto the den is a capture like a placement from hand.** Both cost an action from a connected den-front crossroad. Reach never changes a roam: a roam is always one step, and an animal Reach dropped behind the enemy's lines is cut off, so it can't roam onto the den (Martin, 2026-10-10).
 - **A player who can roam has a move.** Only a player with no legal action passes automatically, and a roam is one.
 - **A free roam is spent before an action** and keeps the turn open after its two actions until it is used or the player ends the turn. No card grants one yet.
 - **Poison ticks under a cover.** The poisoned coverer is removed at the start of the Poison animal's controller's next turn even if something has covered it since (it comes out from under the stack), as with venom.
@@ -82,7 +83,7 @@ Cards:
 - **Earthworm**: the two Worms land on its crossroad only while it is empty or yours; under an enemy there is no room and none appear.
 - **Clarion's** free roam is for a Canine only, one per Clarion each turn, spent before an action.
 - **Jackal's** flanker must be another of your Canines, not the Jackal itself.
-- **Street Dog** picks another ally with Roam anywhere, gives it +2, then it roams for free under the Roam rules (it must be connected and not have roamed this turn). That roam can't take a den.
+- **Street Dog** picks another ally with Roam anywhere, gives it +2, then it roams for free under the Roam rules (where you could place, and not if it has roamed this turn). That roam can't take a den.
 - **Fox** draws for a cover by placement or by roaming.
 - **Serval** sets the strength by storing the difference: later buffs and auras count on top of the 1.
 - **Leopard** (Cats) changes placements only, not roams; an Apex Cat landing is a placement.

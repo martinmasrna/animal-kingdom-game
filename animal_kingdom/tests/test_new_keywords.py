@@ -57,12 +57,23 @@ def test_roam_moves_to_an_adjacent_crossroad_and_costs_an_action():
     assert s.actions_taken_this_turn == 1 and s.current == "A"
 
 
-def test_only_an_animal_connected_to_your_den_roams():
+def test_a_cut_off_animal_roams_only_back_to_your_lines():
     s = state()
     put(s, "3,2", "t_roamer", "A")                      # stranded: no chain back to the den
     assert roams(s) == set()
-    put(s, "1,2", "t_body", "A"); put(s, "2,2", "t_body", "A")
+    put(s, "1,2", "t_body", "A")                        # 2,2 is now a place you could place
+    assert roams(s) == {("3,2", ("cr", "2,2"))}
+    put(s, "2,2", "t_body", "A")                        # connected again: any neighbour
     assert ("3,2", ("cr", "3,1")) in roams(s)
+
+
+def test_a_cut_off_animal_on_the_den_front_does_not_take_the_den():
+    s = state()                                         # map_a: B's den front is the 4 column
+    put(s, "1,2", "t_body", "A"); put(s, "2,2", "t_body", "A")
+    put(s, "4,2", "t_roamer", "A")                      # next to B's den, cut off by the empty 3,2
+    assert roams(s) == {("4,2", ("cr", "3,2"))}         # only back towards the chain
+    put(s, "3,2", "t_body", "A")
+    assert ("4,2", ("hq", "B")) in roams(s)
 
 
 def test_an_animal_without_roam_does_not_roam():
