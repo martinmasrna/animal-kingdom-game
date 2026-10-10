@@ -1263,7 +1263,7 @@
         "Fish"
       ],
       "base_strength": 6,
-      "text": "Whenever your opponent covers an allied Fish, draw a card.",
+      "text": "Whenever your opponent covers an adjacent allied Fish, draw a card.",
       "keywords": [],
       "species": "Manta Ray",
       "habitat": "Open Ocean",

@@ -1138,7 +1138,7 @@
      "status": "proposed",
      "str": 6,
      "tag": "Fish",
-     "text": "Whenever your opponent covers an allied Fish, draw a card."
+     "text": "Whenever your opponent covers an adjacent allied Fish, draw a card."
     },
     {
      "habitat": "Open Ocean",

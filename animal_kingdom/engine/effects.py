@@ -2276,8 +2276,10 @@ def _barracuda_place(state, unit, cr):
 
 
 def _manta_ally_covered(state, watcher, covered, coverer, cr):
-    """Whenever your opponent covers an allied Fish, draw a card."""
-    if coverer.owner != watcher.owner and "Fish" in state.cards[covered.card_id].tags:
+    """Whenever your opponent covers an adjacent allied Fish, draw a card."""
+    at = statics.crossroad_of(state, watcher)
+    if (coverer.owner != watcher.owner and "Fish" in state.cards[covered.card_id].tags
+            and at is not None and state.game_map.adjacent(at, cr)):
         _push_draw(state, watcher.owner, 1)
 
 

@@ -460,13 +460,22 @@ def test_barracuda_removes_up_to_the_number_of_your_fish():
     assert removed(s, "baby_turtle") and s.top_unit("1,3") is not None
 
 
-def test_manta_ray_draws_when_the_opponent_covers_an_allied_fish():
+def test_manta_ray_draws_when_the_opponent_covers_an_adjacent_allied_fish():
     s = make_state(current="B", hands={"B": ["lion"]}, decks={"A": ["lion"], "B": []})
     put(s, "4,2", "lion", "B")
     put(s, "3,3", "manta_ray", "A")
     put(s, "3,2", "sardine", "A")
     rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))
     assert hand_ids(s, "A") == ["lion"]
+
+
+def test_manta_ray_ignores_a_fish_covered_away_from_it():
+    s = make_state(current="B", hands={"B": ["lion"]}, decks={"A": ["lion"], "B": []})
+    put(s, "4,2", "lion", "B")
+    put(s, "1,1", "manta_ray", "A")
+    put(s, "3,2", "sardine", "A")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))
+    assert hand_ids(s, "A") == []
 
 
 def test_cod_draws_per_adjacent_allied_fish_and_remora_plays_a_fish():
