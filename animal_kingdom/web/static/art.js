@@ -1,6 +1,9 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  chimpanzee: [.52, .33, .65],
+  golden_orb_weaver: [.5, .36, .75],
+  hummingbird: [.56, .42, .62],
   zebra: [.62, .33, .7],
   dart_frog: [.5, .4, .8],
   anteater: [.65, .5, .66],
@@ -42,6 +45,9 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  chimpanzee: [.53, .25, 1],
+  golden_orb_weaver: [.5, .34, 1],
+  hummingbird: [.56, .42, 1],
   zebra: [.72, .26, 1],
   dart_frog: [.55, .38, 1],
   anteater: [.7, .48, 1],
@@ -79,6 +85,9 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  chimpanzee: .3,
+  golden_orb_weaver: .36,
+  hummingbird: .42,
   zebra: .35,
   dart_frog: .4,
   anteater: .45,
