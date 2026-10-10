@@ -188,7 +188,7 @@ function route() {
   if (parts[0] !== 'replay') stopReplay();
   play.open = null;   // a chooser never outlives its screen
   if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
-  if (parts[0].split('?')[0] === 'gauntlet') return homeScreen({ gauntlet: true });   // #/gauntlet?skip=a,b&games=2 narrows the field
+  if ((parts[0] || '').split('?')[0] === 'gauntlet') return homeScreen({ gauntlet: true });   // #/gauntlet?skip=a,b&games=2 narrows the field
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'leaderboard' || parts[0] === 'profile') { history.replaceState(null, '', '#/ladder' + (parts[1] ? '/' + parts[1] : '')); parts[0] = 'ladder'; }   // the old addresses
