@@ -1216,7 +1216,7 @@
       "tags": [
         "Fish"
       ],
-      "base_strength": 7,
+      "base_strength": 3,
       "text": "Your Fish can cover enemies of strength up to the number of your Fish.",
       "keywords": [],
       "unnamed": true,
