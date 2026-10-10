@@ -34,7 +34,7 @@ Every family archetype has a core habitat, two at most, holding enough of that f
 | Canines | Forest 6 (Fox, Wolf, Lobo, Raksha, Clarion, Scarlett), Savanna 2, City 2, Jungle 2 | weakest: Forest + any one makes 8; Dingo's effect still needs its canine |
 | Colony | Meadow 6, Forest 5, Savanna 2, Jungle 2 | Meadow + Forest makes 11 |
 | Rodents | City 7, Forest 5, Meadow 4, Savanna 1, Jungle 1 | City + Forest makes 12 |
-| Snakes | Jungle 4 (Anaconda, King Cobra, Python, Eon), Savanna 2, Forest 1 | thin: Jungle + Savanna makes 6; Egg Control also runs Birds |
+| Snakes | Jungle 4 (Anaconda, Gaboon Viper, Python, Eon), Savanna 2, Forest 1 | thin: Jungle + Savanna makes 6; Egg Control also runs Birds |
 | Birds | Forest 8, Meadow 8, Jungle 4, Savanna 3, City 2, Open Ocean 2 | 27 of 210, about 13%: a little over the ~10% aim |
 
 Families are also spread on purpose, so later sets can feed them. An expansion (likely three habitats at once) has two jobs: bring one to four archetypes into the competitive game (new, or newly viable), and give the existing archetypes new cards so they evolve instead of going stale. So a family keeps its core in one or two launch habitats and leaves some of its animals for the habitats still to come (Snow Leopard for Polar, Cougar for Mountains), and every new habitat brings one to three cards to the families it touches. By the public launch, the first expansions are planned (Martin, 2026-10-05).
@@ -79,7 +79,7 @@ Legendaries (6): the rat family, Verminus, Pestis, Greywhisker, Barley and Scroo
 
 ### Jungle (locked 2026-10-05)
 
-Animals (30; 18 common and 12 rare, rarities set with the effects): Jaguar, Black Panther, Tiger, Bush Dog, Dhole, Anaconda, King Cobra, Python, Soldier Ant, Gorilla, Orangutan, Chimpanzee, Sloth, Capybara, Giant Anteater, Tarsier, Armadillo, Tapir, Chameleon, Poison Dart Frog, Basilisk, Iguana, Golden Orb-Weaver, Macaw, Hummingbird, Peacock, Piranha, Electric Eel, Tarantula, Leech.
+Animals (30; 18 common and 12 rare, rarities set with the effects): Jaguar, Black Panther, Tiger, Bush Dog, Dhole, Anaconda, Gaboon Viper, Python, Soldier Ant, Gorilla, Orangutan, Chimpanzee, Sloth, Capybara, Giant Anteater, Tarsier, Armadillo, Tapir, Chameleon, Poison Dart Frog, Basilisk, Iguana, Golden Orb-Weaver, Macaw, Hummingbird, Peacock, Piranha, Electric Eel, Tarantula, Leech.
 
 Legendaries (12): Eon (snake), Queen Marabunta (army ant), and ten new, chosen with the effects.
 
@@ -102,7 +102,7 @@ Cards that keep their animal, by habitat:
 - **Savanna:** Prince Leo, Princess Lea, King Theron, Queen Adira, Serval, Lion, Caracal, Cheetah, Egg Eater, Black Mamba, Termite King, Termite Queen, Rhinoceros, Brutus, Methuselah, Hippopotamus, Elephant, Oxpecker, Cape Buffalo, Jackal, African Wild Dog, Hyena, Pup.
 - **Forest:** Lynx, Ember (golden pheasant), Hawk, Owl, Magpie, Raven, Vesper, Guard Wasp, Worker Wasp, Worker Ant, Grizzly Bear, Black Bear, Flying Squirrel, Squirrel, Chipmunk, Porcupine, Sirocco, Skunk, Hornet, Bat, Falcon, Lobo, Raksha, Clarion, Scarlett, Fox, Wolf, Poppy, Rusty, Viper, Bird Egg.
 - **City:** House Cat, Dog, Verminus, Pestis, Rat, Mouse, Greywhisker, Barley, Scrooge.
-- **Jungle:** Jaguar, Black Panther, Tiger, Eon, Python, Queen Marabunta, Soldier Ant, Sloth, Chameleon, Armadillo, Bush Dog, Dhole, Anaconda, Snake Egg, King Cobra (Taipan's effect).
+- **Jungle:** Jaguar, Black Panther, Tiger, Eon, Python, Queen Marabunta, Soldier Ant, Sloth, Chameleon, Armadillo, Bush Dog, Dhole, Anaconda, Snake Egg, Gaboon Viper (Taipan's effect).
 - **Open Ocean:** Fathom (the giant octopus rising from the depths), Gale.
 - **Meadow:** Aurum (a goose on the meadow pond), Black Swan (the one black swan on a pond of white ones), Queen Honoria, Falstaff, Nurse Bee, Nurse Bumblebee, Queen Bee, Worker Bee, Hedgehog, Groundhog, Hamster, Gopher, Muskrat.
 
@@ -111,7 +111,7 @@ Reprints: the effect stays, the animal changes to one from the launch six.
 | Card | Becomes | Why |
 |---|---|---|
 | Snow Leopard | Leopard (Savanna) | the snow leopard belongs to Polar; its effect, a Cats staple, stays in the launch on the leopard |
-| Taipan | King Cobra (Jungle) | a delayed venomous bite fits any deadly snake, and the cobra is the more iconic one |
+| Taipan | Gaboon Viper (Jungle) | the delayed bite is how it hunts: the longest fangs of any snake, it bites and waits for the prey to die; the King Cobra is kept for a later Jungle set, around its real hook, eating other snakes |
 | Jerboa | Naked Mole-Rat (Savanna), nerfed to "Roar: play another animal next to this" | a launch-defining effect on a small, one-of-a-kind animal that never lives alone |
 | Chinchilla | Octopus (Open Ocean) | eight arms working at once: next turn, an extra action |
 

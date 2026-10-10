@@ -145,7 +145,7 @@ DECKS = [
         ("L", "Aurum", "Goose", "Bird", 1, "Meadow", "Dawn: draw a card.", "locked"),
         ("L", "Black Swan", "Swan", "Bird", 3, "Meadow", "Whenever you draw Black Swan, your opponent discards a random card.", "locked"),
         ("R", "Hawk", "Hawk", "Bird", 3, "Forest", "Flight. Roar: remove an adjacent enemy of strength 3 or less.", "locked"),
-        ("R", "King Cobra", "King Cobra", "Snake", 4, "Jungle", "Roar: choose an adjacent enemy. At the start of your next turn, remove it.", "locked"),
+        ("R", "Gaboon Viper", "Gaboon Viper", "Snake", 4, "Jungle", "Roar: choose an adjacent enemy. At the start of your next turn, remove it.", "locked"),
         ("R", "Magpie", "Magpie", "Bird", 3, "Forest", "Flight. Roar: steal a card from your opponent's hand, then discard a card.", "locked"),
         ("R", "Black Mamba", "Black Mamba", "Snake", 4, "Savanna", "Roar: remove an adjacent enemy of strength 5 or less.", "locked"),
         ("C", "Python", "Python", "Snake", 0, "Jungle", "Has +1 strength for each removed animal.", "locked"),
@@ -218,7 +218,7 @@ HABITATS = [
     ("forest", "Forest", [18, 12, 12], ["Fox", "Wolf", "Grizzly Bear", "Black Bear", "Deer", "Moose", "Boar", "Badger", "Lynx", "Beaver", "Porcupine", "Skunk", "Squirrel", "Chipmunk", "Flying Squirrel", "Woodpecker", "Firefly", "Owl", "Raven", "Hawk", "Eagle", "Falcon", "Magpie", "Salamander", "Viper", "Stag Beetle", "Hornet", "Guard Wasp", "Worker Wasp", "Worker Ant"]),
     ("meadow", "Meadow", [18, 12, 12], ["Hare", "Hedgehog", "Mole", "Weasel", "Hamster", "Groundhog", "Gopher", "Muskrat", "Queen Bee", "Worker Bee", "Nurse Bee", "Nurse Bumblebee", "Butterfly", "Dragonfly", "Ladybird", "Grasshopper", "Praying Mantis", "Pond Skater", "Frog", "Toad", "Snail", "Earthworm", "Tick", "Centipede", "Goose", "Swan", "Duck", "Stork", "Swallow", "Cuckoo"]),
     ("city", "City", [9, 6, 6], ["Rat", "Mouse", "Stray Cat", "Stray Dog", "Raccoon", "Opossum", "Macaque", "Gecko", "Cockroach", "City Spider", "Mosquito", "Bat", "Pigeon", "Sparrow"]),
-    ("jungle", "Jungle", [18, 12, 12], ["Jaguar", "Black Panther", "Tiger", "Bush Dog", "Dhole", "Anaconda", "King Cobra", "Python", "Soldier Ant", "Gorilla", "Orangutan", "Chimpanzee", "Sloth", "Capybara", "Giant Anteater", "Tarsier", "Armadillo", "Tapir", "Chameleon", "Poison Dart Frog", "Basilisk", "Iguana", "Golden Orb-Weaver", "Macaw", "Hummingbird", "Peacock", "Piranha", "Electric Eel", "Tarantula", "Leech"]),
+    ("jungle", "Jungle", [18, 12, 12], ["Jaguar", "Black Panther", "Tiger", "Bush Dog", "Dhole", "Anaconda", "Gaboon Viper", "Python", "Soldier Ant", "Gorilla", "Orangutan", "Chimpanzee", "Sloth", "Capybara", "Giant Anteater", "Tarsier", "Armadillo", "Tapir", "Chameleon", "Poison Dart Frog", "Basilisk", "Iguana", "Golden Orb-Weaver", "Macaw", "Hummingbird", "Peacock", "Piranha", "Electric Eel", "Tarantula", "Leech"]),
     ("open-ocean", "Open Ocean", [15, 10, 10], ["Great White Shark", "Hammerhead", "Whale Shark", "Blue Whale", "Sperm Whale", "Orca", "Dolphin", "Octopus", "Squid", "Jellyfish", "Sea Turtle", "Manta Ray", "Sunfish", "Swordfish", "Albatross"]),
 ]
 

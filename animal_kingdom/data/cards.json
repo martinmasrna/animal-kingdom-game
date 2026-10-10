@@ -1892,7 +1892,7 @@
     },
     {
       "id": "king_cobra",
-      "name": "King Cobra",
+      "name": "Gaboon Viper",
       "deck": "egg_control",
       "rarity": "rare",
       "tags": [
@@ -1901,7 +1901,7 @@
       "base_strength": 4,
       "text": "Roar: choose an adjacent enemy. At the start of your next turn, remove it.",
       "keywords": [],
-      "species": "King Cobra",
+      "species": "Gaboon Viper",
       "habitat": "Jungle",
       "workbench_id": "egg-control-5"
     },

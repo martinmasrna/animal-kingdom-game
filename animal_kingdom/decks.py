@@ -54,7 +54,7 @@ BASELINE_DECK: list[str] = [
 ]
 
 # The goodstuff pile: the greedy optimizer's best cross-deck list over the old seven-deck pool
-# (2026-09-29), its cards as they are now (King Cobra for the retired Taipan). Stale since the
+# (2026-09-29), its cards as they are now (Gaboon Viper for the retired Taipan). Stale since the
 # launch decks: kept loadable as the sim tools' default pile until the optimizer runs again.
 GOODSTUFF_DECK: list[str] = (
     ["alpha", "bulwark", "gale", "pestis"]

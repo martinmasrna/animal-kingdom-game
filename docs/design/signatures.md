@@ -118,7 +118,7 @@ Columns: **Shape** is the rule the signature suggests, in this game's terms, wit
 | Black Panther | shadow in the dark | Stealth | on card ✓ |
 | Anaconda | biggest snake, swallows prey whole | Apex Predator | on card ✓ |
 | Python | squeezes and swallows; a bulge after a meal | grows from what was eaten | on card: grows per removed animal, acceptable |
-| King Cobra | the hood; deadly bite | delayed venom removal | on card ✓ (Taipan's effect) |
+| Gaboon Viper | the longest fangs, the woven pattern; bites and waits | delayed venom removal | on card ✓ (Taipan's effect) |
 | Army Ant | marching column devours everything | swarm removal, food | on card ✓ (Marabunta, Soldier Ant) |
 | Gorilla | strongest primate; chest-beating silverback | ? chest-beat: adjacent enemies have less strength; Primate leader anthem | new |
 | Orangutan | the red "person of the forest", long arms | — | — |
@@ -232,7 +232,7 @@ Columns: **Shape** is the rule the signature suggests, in this game's terms, wit
 
 | Animal | Signature | Shape | Now |
 |---|---|---|---|
-| Komodo Dragon | biggest lizard; the bite, then it waits for the prey to die | delayed removal | = King Cobra (Taipan) |
+| Komodo Dragon | biggest lizard; the bite, then it waits for the prey to die | delayed removal | = Gaboon Viper (Taipan) |
 | Giant Tortoise | lives 150+ years, slow, shell | Armor + steady payoff each turn | = Methuselah (its true home) |
 | Tasmanian Devil | Taz, the spinning whirlwind | ? whirlwind: return all adjacent animals | = Sirocco |
 | Dodo (or Extinct) | "dead as a dodo" | ? extinction: when removed, remove every Dodo | new |
@@ -434,7 +434,7 @@ Best animal, runner-up. **None** means no animal fits naturally: put it on an or
 | Adjacent enemy of strength X or less | None in particular: generic predators (Jaguar, Black Mamba) | — |
 | Small kills big (strength X or more) | Piranha | Honey Badger (spent elsewhere), Sperm Whale |
 | Removal behind a family condition (Soldier Ant, Muskrat) | Army Ant | Orca (with another Orca) |
-| Delayed venom | King Cobra | Komodo Dragon |
+| Delayed venom | Gaboon Viper | Komodo Dragon |
 | Delayed random removal (Grizzly) | None | — |
 | Remove weak adjacents (AoE) | Rhinoceros (charge) | Elephant |
 | Territorial: remove an enemy placed adjacent | Hippopotamus | Moray Eel, Antlion, Heron |
@@ -551,7 +551,7 @@ Best animal, runner-up. **None** means no animal fits naturally: put it on an or
 
 ### Fits that are right
 
-Rhinoceros (charge), Hippopotamus (territorial), Skunk and Sirocco (spray), Porcupine and Hedgehog (Spikes), Magpie (steal), Owl (Scout), Raven (clever selection), Sloth (long delay), Squirrel and Chipmunk (hoard), Rattlesnake (rattle as shuffle), Black Panther (Stealth), Black Bear (hibernation), Goose as Aurum (golden egg), King Cobra (venom), Lemming (swarm), Methuselah (tortoise Armor and longevity, though its home is Islands).
+Rhinoceros (charge), Hippopotamus (territorial), Skunk and Sirocco (spray), Porcupine and Hedgehog (Spikes), Magpie (steal), Owl (Scout), Raven (clever selection), Sloth (long delay), Squirrel and Chipmunk (hoard), Rattlesnake (rattle as shuffle), Black Panther (Stealth), Black Bear (hibernation), Goose as Aurum (golden egg), Gaboon Viper (venom), Lemming (swarm), Methuselah (tortoise Armor and longevity, though its home is Islands).
 
 ### Signatures on the launch rosters with no card yet (reserve these effects for them)
 
