@@ -2039,7 +2039,7 @@
       "tags": [
         "Primate"
       ],
-      "base_strength": 5,
+      "base_strength": 3,
       "text": "Dusk: give 2 random animals in your hand +1 strength.",
       "keywords": [],
       "unnamed": true,
@@ -2055,7 +2055,7 @@
       "tags": [
         "Primate"
       ],
-      "base_strength": 7,
+      "base_strength": 4,
       "text": "Roar: give all animals in your hand +1 strength.",
       "keywords": [],
       "species": "Gorilla",

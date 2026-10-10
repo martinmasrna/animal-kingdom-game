@@ -1764,7 +1764,7 @@
      "rarity": "L",
      "species": "Baboon",
      "status": "proposed",
-     "str": 5,
+     "str": 3,
      "tag": "Primate",
      "text": "Dusk: give 2 random animals in your hand +1 strength."
     },
@@ -1776,7 +1776,7 @@
      "rarity": "L",
      "species": "Gorilla",
      "status": "proposed",
-     "str": 7,
+     "str": 4,
      "tag": "Primate",
      "text": "Roar: give all animals in your hand +1 strength."
     },
