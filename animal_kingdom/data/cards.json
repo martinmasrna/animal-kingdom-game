@@ -2078,20 +2078,19 @@
     },
     {
       "id": "handlock_legend_eagle",
-      "name": "Eagle",
+      "name": "Arne",
       "deck": "handlock",
       "rarity": "legendary",
       "tags": [
         "Bird"
       ],
       "base_strength": 2,
-      "text": "Flight. Apex Predator. When this enters your hand, add [its mate] to your hand.",
+      "text": "Flight. Apex Predator. When this enters your hand, add Arna to your hand.",
       "keywords": [
         "Flight",
         "Apex Predator"
       ],
       "mate": "handlock_legend_eagle_mate",
-      "unnamed": true,
       "species": "Eagle",
       "habitat": "Forest",
       "workbench_id": "handlock-3"
@@ -3305,7 +3304,7 @@
     },
     {
       "id": "handlock_legend_eagle_mate",
-      "name": "Eagle",
+      "name": "Arna",
       "deck": "token",
       "rarity": "legendary",
       "tags": [
@@ -3316,9 +3315,8 @@
         "Flight",
         "Apex Predator"
       ],
-      "text": "Flight. Apex Predator. While this and its mate are in your hand, they share their strength.",
-      "mate": "handlock_legend_eagle",
-      "unnamed": true
+      "text": "Flight. Apex Predator. While this and Arne are in your hand, they share their strength.",
+      "mate": "handlock_legend_eagle"
     },
     {
       "id": "eon_food_engine",

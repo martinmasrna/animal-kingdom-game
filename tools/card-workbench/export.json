@@ -462,7 +462,7 @@
      "status": "locked",
      "str": 7,
      "tag": "Cat",
-     "text": "—"
+     "text": ""
     },
     {
      "habitat": "Forest",
@@ -1795,14 +1795,14 @@
     {
      "habitat": "Forest",
      "id": "handlock-3",
-     "name": "",
+     "name": "Arne",
      "note": "",
      "rarity": "L",
      "species": "Eagle",
      "status": "proposed",
      "str": 2,
      "tag": "Bird",
-     "text": "Flight. Apex Predator. When this enters your hand, add [its mate] to your hand."
+     "text": "Flight. Apex Predator. When this enters your hand, add Arna to your hand."
     },
     {
      "habitat": "Jungle",

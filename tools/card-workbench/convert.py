@@ -90,9 +90,9 @@ TOKENS = [
     _token("handlock_legend_butterfly_5", "Monarch", 1, rarity="legendary", keywords=["Stealth", "Flight"], stage=5,
            text="Stealth. Flight. Roar: draw 2 cards, then give all animals in your hand +2 strength."),
     # The legendary Eagle's mate, made by it in your hand.
-    _token("handlock_legend_eagle_mate", "Eagle", 2, ["Bird"], rarity="legendary", keywords=["Flight", "Apex Predator"],
-           text="Flight. Apex Predator. While this and its mate are in your hand, they share their strength.",
-           mate="handlock_legend_eagle", unnamed=True),
+    _token("handlock_legend_eagle_mate", "Arna", 2, ["Bird"], rarity="legendary", keywords=["Flight", "Apex Predator"],
+           text="Flight. Apex Predator. While this and Arne are in your hand, they share their strength.",
+           mate="handlock_legend_eagle"),
 ]
 # Cards made from the workbench that the engine pairs with a token.
 MATES = {"handlock_legend_eagle": "handlock_legend_eagle_mate"}
