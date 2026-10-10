@@ -885,13 +885,18 @@ async def create_match(req):
         level = gauntlet.get("level", "normal")
         if level not in BOT_LEVELS:
             raise web.HTTPBadRequest(text="bad bot level")
-        field = [d for d in sorted(DECK_SLUGS) if d != deck]
+        skip, per_seat = gauntlet.get("skip") or [], gauntlet.get("per_seat", 5)
+        if not isinstance(skip, list) or per_seat not in range(1, 6):
+            raise web.HTTPBadRequest(text="bad gauntlet")
+        field = [d for d in sorted(DECK_SLUGS) if d != deck and d not in skip]
+        if not field:
+            raise web.HTTPBadRequest(text="empty gauntlet")
         match.join(Seat(secrets.token_urlsafe(12), f"Bot ({level.capitalize()})", bot=level, deck=field[0]))
         if gauntlet.get("reverse"):     # the bot keeps the chosen deck; the player plays the field
             match.seats["B"].deck = deck
-            match.make_gauntlet(field, per_seat=5, rotating="A")
+            match.make_gauntlet(field, per_seat, rotating="A")
         else:
-            match.make_gauntlet(field, per_seat=5)
+            match.make_gauntlet(field, per_seat)
         match._start_game()
         match.version += 1
     elif bot:

@@ -188,7 +188,7 @@ function route() {
   if (parts[0] !== 'replay') stopReplay();
   play.open = null;   // a chooser never outlives its screen
   if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
-  if (parts[0] === 'gauntlet') return homeScreen({ gauntlet: true });
+  if (parts[0].split('?')[0] === 'gauntlet') return homeScreen({ gauntlet: true });   // #/gauntlet?skip=a,b&games=2 narrows the field
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'leaderboard' || parts[0] === 'profile') { history.replaceState(null, '', '#/ladder' + (parts[1] ? '/' + parts[1] : '')); parts[0] = 'ladder'; }   // the old addresses
@@ -315,7 +315,12 @@ function homeScreen(mode = {}) {
       const pool = DECKS, deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
       body.bot = { level: play.level, deck };
     }
-    if (play.opp === 'gauntlet') body.gauntlet = { level: play.level, reverse: play.side === 'theirs' };
+    if (play.opp === 'gauntlet') {
+      const q = new URLSearchParams(location.hash.split('?')[1] || '');
+      body.gauntlet = { level: play.level, reverse: play.side === 'theirs' };
+      if (q.get('skip')) body.gauntlet.skip = q.get('skip').split(',');
+      if (q.get('games')) body.gauntlet.per_seat = Math.max(1, Math.round(+q.get('games') / 2));   // games per deck, half going first
+    }
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
     if (!r.ok) return toast(await r.text());
     const m = await r.json(); setToken(m.id, m.token); play.open = null;
