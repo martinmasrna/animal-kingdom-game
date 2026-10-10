@@ -33,6 +33,6 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Vulture** | 3 | Bird | 3 | Flight. Dusk: if an ally was removed this turn, draw a card. |
 | **City Spider** | 3 | Arachnid | 2 | When an animal of strength 2 or less is placed adjacent to this, remove it. |
 | **Earthworm** | 3 | — | 1 | When this is removed, place two Worms on its crossroad. |
-| **Cockroach** | 3 | — | 1 | When this is removed, put it back in your hand and draw a card. |
+| **Cockroach** | 3 | — | 1 | When this is removed, put it back where it was and draw a card. |
 
 <!-- cards:end -->

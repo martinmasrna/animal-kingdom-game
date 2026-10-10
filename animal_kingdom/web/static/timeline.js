@@ -91,7 +91,8 @@ export function plan(prev, next, cards = {}) {
         if (e.player === them && ((e.from_hand && !e.cause) || e.reveal)) push({ kind: 'reveal', dur: DUR.reveal, card: e.card, cr: e.cr, player: e.player });
         const put = p => { const u = finalUnit(p.iid) || { iid: p.iid, id: p.card, owner: p.player, str: (cards[p.card] || {}).str };
           landed.add(p.iid);
-          (s.board[p.cr] = s.board[p.cr] || []).push(u);
+          const st = (s.board[p.cr] = s.board[p.cr] || []);
+          if (p.at != null) st.splice(p.at, 0, u); else st.push(u);   // a Cockroach comes back at its old height
           if (p.from_hand) {   // from a hand (an effect putting a unit down from the deck leaves the hand alone)
             s.handCount[p.player] = Math.max(0, s.handCount[p.player] - 1);
             if (p.player === you) s.hand = s.hand.filter(h => h.iid !== p.iid);

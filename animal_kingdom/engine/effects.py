@@ -1733,9 +1733,15 @@ def _worm_remove(state, unit, cr, pos):
 
 
 def _cockroach_remove(state, unit, cr, pos):
-    """When this is removed, put it back in your hand and draw a card."""
+    """When this is removed, put it back where it was and draw a card. A fresh copy goes back into the same stack at the
+    same height (on top, or still buried), and it comes back, it isn't placed: nothing that reacts to a placement sees it
+    (a City Spider beside it would otherwise remove it for ever, drawing a card each time)."""
     if state.pile_take(unit.card_id, unit.owner):
-        state.add_to_hand(unit.owner, unit.card_id)
+        back = UnitInstance(unit.card_id, unit.owner, state.new_iid())
+        stack = state.board.setdefault(cr, [])
+        at = min(pos, len(stack))
+        stack.insert(at, back)
+        state.emit("place", player=unit.owner, iid=back.iid, card=back.card_id, cr=cr, from_hand=False, at=at)
     draw_cards(state, unit.owner, 1)
 
 

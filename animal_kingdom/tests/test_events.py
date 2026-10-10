@@ -48,7 +48,7 @@ def test_the_opponent_sees_how_many_cards_were_drawn_not_which():
 
 
 def test_the_events_alone_rebuild_the_board_after_every_action():
-    """Completeness: a board rebuilt only from the events (place puts a unit on top, remove and bounce take that exact unit
+    """Completeness: a board rebuilt only from the events (place puts a unit on top, or at `at`, remove and bounce take that exact unit
     off) equals the real board after every action of random games over every deck pairing. Food and hands likewise."""
     import itertools
     from animal_kingdom.decks import PREMADE_DECKS
@@ -68,7 +68,8 @@ def test_the_events_alone_rebuild_the_board_after_every_action():
             rules.apply_action(s, bots[p].choose(s.clone().view_for(p), rules.legal_actions(s), s.clone()))
             for e in s.events:
                 if e["e"] == "place":
-                    board.setdefault(e["cr"], []).append(e["iid"])
+                    st = board.setdefault(e["cr"], [])
+                    st.insert(e["at"], e["iid"]) if "at" in e else st.append(e["iid"])   # a Cockroach comes back at its height
                 elif e["e"] == "roam" and e.get("to"):            # Roam: the unit moves (a den capture doesn't)
                     board[e["cr"]].remove(e["iid"])
                     if not board[e["cr"]]:

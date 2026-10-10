@@ -173,7 +173,7 @@ def test_praying_mantis_may_remove_an_ally_to_draw_two():
     assert s.pending["optional"]
     choose(s, "1,1")
     assert hand_ids(s, "A").count("lion") == CFG.mantis_draw + 1   # the Cockroach drew one too
-    assert "cockroach" in hand_ids(s, "A")                     # and came back to hand
+    assert s.top_unit("1,1").card_id == "cockroach"            # and came back where it was
 
 
 def test_tarantula_eats_an_adjacent_ally_at_dusk_and_grows():
@@ -232,11 +232,31 @@ def test_earthworm_leaves_two_worms_and_a_worm_draws_when_removed():
     assert hand_ids(s, "A") == ["lion"]
 
 
-def test_cockroach_comes_back_to_hand_and_draws():
+def test_cockroach_comes_back_where_it_was_and_draws():
     s = make_state(decks={"A": ["lion"], "B": []})
     put(s, "1,2", "cockroach", "A")
     effects.remove_top(s, "1,2", by_player="B")
-    assert sorted(hand_ids(s, "A")) == ["cockroach", "lion"] and not removed(s, "cockroach")
+    assert hand_ids(s, "A") == ["lion"] and not removed(s, "cockroach")
+    assert s.top_unit("1,2").card_id == "cockroach" and s.top_unit("1,2").owner == "A"
+
+
+def test_a_buried_cockroach_comes_back_buried_at_the_same_height():
+    s = make_state(decks={"A": ["lion"], "B": []})
+    put(s, "1,2", "mouse", "A")
+    put(s, "1,2", "cockroach", "A")
+    put(s, "1,2", "lion", "B")                                 # covered by an enemy
+    roach = s.board["1,2"][1]
+    effects._remove_specific(s, "1,2", roach, by_player="B")
+    assert [u.card_id for u in s.board["1,2"]] == ["mouse", "cockroach", "lion"]
+
+
+def test_a_returning_cockroach_is_not_placed_so_a_city_spider_cannot_loop_it():
+    s = make_state(hands={"A": ["cockroach"]}, decks={"A": ["lion"] * 5, "B": []})
+    put(s, "2,2", "city_spider", "B")
+    put(s, "1,1", "lion", "A")                                 # connects 1,2
+    rules.apply_action(s, PlaceAction("cockroach", ("cr", "1,2")))   # a 1 placed beside the Spider: removed, once
+    assert s.top_unit("1,2").card_id == "cockroach"            # back where it was, and the Spider let it be
+    assert hand_ids(s, "A").count("lion") == 1                 # one card drawn, not a loop
 
 
 # ================================================================================= Canines
