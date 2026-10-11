@@ -1718,17 +1718,28 @@ def _mantis_place(state, unit, cr):
                  n=state.config.mantis_draw)
 
 
-def _tarantula_eot(state, unit, cr):
-    """Dusk: remove a random adjacent ally and gain its strength."""
+def _eat_random_ally(state, unit, cr) -> int:
+    """Remove a random adjacent ally (Dawn asks no decision; the owner steers it by what it places beside). Returns the
+    strength of what was eaten, 0 if nothing was."""
     options = _adjacent_friendly_units(state, unit, cr)
     if not options:
-        return
+        return 0
     nb = state.rng.choice(options)
-    prey = state.top_unit(nb)
-    gained = effective_strength(state, prey)
-    if remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id) and gained:
+    gained = effective_strength(state, state.top_unit(nb))
+    return gained if remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id) else 0
+
+
+def _tarantula_sot(state, unit, cr):
+    """Dawn: remove a random adjacent ally and gain its strength."""
+    gained = _eat_random_ally(state, unit, cr)
+    if gained:
         unit.strength_counter += gained
         state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=gained)
+
+
+def _city_spider_sot(state, unit, cr):
+    """Dawn: remove a random adjacent ally. With a Cockroach beside it, a death and a card every turn."""
+    _eat_random_ally(state, unit, cr)
 
 
 def _sea_turtle_eot(state, unit, cr):
@@ -1753,13 +1764,6 @@ def _vulture_eot(state, unit, cr):
     """Dusk: if an ally was removed this turn, draw a card."""
     if _lost_this_turn(state, unit.owner):
         _push_draw(state, unit.owner, 1)
-
-
-def _city_spider_trap(state, spider, placed, cr):
-    """When an animal of strength 2 or less is placed adjacent to this, remove it (yours too)."""
-    if effective_strength(state, placed) <= state.config.city_spider_max and statics.can_be_removed(state, placed, cr):
-        state.effect_stack.append(remove_iid_step(placed.iid, by_player=spider.owner, by_effect=True,
-                                                  source_iid=spider.iid, by_card=spider.card_id))
 
 
 def _earthworm_remove(state, unit, cr, pos):
@@ -2735,13 +2739,13 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "ember": {"on_remove": _ember_remove},
     "aristocrats_legend_opossum": {"on_ally_covered": _opossum_legend_ally_covered},
     "praying_mantis": {"on_place": _mantis_place},
-    "tarantula": {"on_end_of_turn": _tarantula_eot},
+    "tarantula": {"on_start_of_turn": _tarantula_sot},
     "sea_turtle": {"on_end_of_turn": _sea_turtle_eot},
     "raccoon": {"on_place": _raccoon_place},
     "piranha": {"on_place": _conditional(_removes())},
     "hyena": {"on_end_of_turn": _hyena_eot},
     "vulture": {"on_end_of_turn": _vulture_eot},
-    "city_spider": {"on_animal_placed_adjacent": _city_spider_trap},
+    "city_spider": {"on_start_of_turn": _city_spider_sot},
     "earthworm": {"on_remove": _earthworm_remove},
     "worm": {"on_remove": _worm_remove},
     "cockroach": {"on_remove": _cockroach_remove},

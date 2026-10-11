@@ -15,7 +15,7 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 - **Extra placements** ("play another unit", "play one more Cat"): a full normal placement (connection unless Flight, covering strength, any cost) that consumes no action, so they chain. From hand only unless the card says "or deck". "May" makes it optional; it fizzles when nothing qualifies.
 - **"Can't" beats "can".** When one card forbids what another allows, the prohibition wins.
 - **Next to the opponent's den** means one of the enemy den's front crossroads.
-- **Sardine** places the copies from hand and deck on random empty crossroads adjacent to the triggering one; leftovers stay where they are. The copies are placed (traps beside them see them, a City Spider eats them), but their Roars don't fire.
+- **Sardine** places the copies from hand and deck on random empty crossroads adjacent to the triggering one; leftovers stay where they are. The copies are placed (traps beside them see them), but their Roars don't fire.
 - **Recurring timed triggers** ("at the start of your turn") fire every time their window comes while the unit is in play, including the turn it was played if the window is still ahead. "Your turn" means the owner's turn only.
 
 ## Drawing and hidden information
@@ -27,7 +27,7 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 ## Remove Pile, returns and shuffles
 
 - There is one shared Remove Pile, and each card in it is still its owner's: **"your Remove Pile"** (Raccoon) and **"your opponent's Remove Pile"** (the legendary Raven) are the owner's cards in it. A **remove** is any card sent there from hand, deck or board and fires remove triggers; **Deathrattle** is the narrower case of a unit leaving the board.
-- **"…instead"** would replace the removal (the card never reaches the Remove Pile, fires nothing); no card in the pool does it now. **"When this is removed, do X"** (Ember, Cockroach, Earthworm, Worm) is a real removal, then the effect: a Cockroach that goes back where it was still counts as removed (Hyena, Piranha, Vulture). It goes back at the same height in the stack, as a fresh copy, and it comes back rather than being placed: placement reactions (City Spider, Golden Orb-Weaver, Hippopotamus) never see it, so nothing loops (Martin, 2026-10-10).
+- **"…instead"** would replace the removal (the card never reaches the Remove Pile, fires nothing); no card in the pool does it now. **"When this is removed, do X"** (Ember, Cockroach, Earthworm, Worm) is a real removal, then the effect: a Cockroach that goes back where it was still counts as removed (Hyena, Piranha, Vulture). It goes back at the same height in the stack, as a fresh copy, and it comes back rather than being placed: placement reactions (Golden Orb-Weaver, Hippopotamus) never see it, so nothing loops (Martin, 2026-10-10).
 - **Shuffle events** are one per card shuffled into a deck (Raven's "shuffle 2 back" is two events). Incidental reorders don't count.
 - **Skunk's bounce** returns the enemy unit to its owner's hand. It is not a removal (no Deathrattle, no remove trigger). The returned copy is locked, unplayable through its owner's next turn; other copies of the same card stay playable.
 - **Rat** removes an adjacent enemy of any strength, then a random card from your hand goes to the Remove Pile (a remove, not a Deathrattle), target or not; an empty hand pays nothing.
@@ -79,7 +79,7 @@ Cards:
 - **Tarantula** eats a random adjacent ally (Armor excluded) and keeps the strength it showed then, for good.
 - **Sea Turtle** and **Sunfish** lay on a random adjacent empty crossroad, as the old African Wild Dog placed its Pup (Martin, 2026-10-10).
 - **"An ally was removed this turn"** (Piranha, Vulture) and **"your animals removed this turn"** (Hyena) count your animals leaving the board this turn, whoever removed them; discards from hand don't count.
-- **City Spider** catches animals of either side, including tokens, fills and roaming animals that arrive beside it.
+- **City Spider** eats like the Tarantula without growing: a random adjacent ally at Dawn (Armor excluded). A Dawn death counts as removed this turn, so the Piranha, Hyena and Vulture see it. With a Cockroach as its only neighbour it's a death and a card every turn (Martin, 2026-10-11).
 - **Earthworm**: the two Worms land on its crossroad only while it is empty or yours; under an enemy there is no room and none appear.
 - **Clarion's** free roam is for a Canine only, one per Clarion each turn, spent before an action.
 - **Jackal's** flanker must be another of your Canines, not the Jackal itself.

@@ -114,7 +114,6 @@ class Config:
     rhinoceros_max: int = 2              # baseline-ruler tuning 2026-07-13: remove-all ≤3→≤2
     hippopotamus_max: int = 3
     cuckoo_legend_max: int = 4           # the legendary Cuckoo: removes an adjacent animal of strength <= this
-    city_spider_max: int = 2             # City Spider: removes an animal of strength <= this placed adjacent
     calib_rm4_max: int = 4               # the calibration bodies' "strength 4 or less" (reserve, sim tools)
     calib_rm6_min: int = 6               # the calibration bodies' "strength 6 or more"
 

@@ -308,7 +308,7 @@
     },
     {
       "id": "aristocrats_legend_cuckoo",
-      "name": "Cuckoo",
+      "name": "Cuco",
       "deck": "aristocrats",
       "rarity": "legendary",
       "tags": [
@@ -317,7 +317,6 @@
       "base_strength": 6,
       "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal.",
       "keywords": [],
-      "unnamed": true,
       "species": "Cuckoo",
       "habitat": "Meadow",
       "workbench_id": "aristocrats-0"
@@ -389,7 +388,7 @@
         "Arachnid"
       ],
       "base_strength": 5,
-      "text": "Dusk: remove a random adjacent ally and gain its strength.",
+      "text": "Dawn: remove a random adjacent ally and gain its strength.",
       "keywords": [],
       "species": "Tarantula",
       "habitat": "Jungle",
@@ -475,7 +474,7 @@
         "Arachnid"
       ],
       "base_strength": 2,
-      "text": "When an animal of strength 2 or less is placed next to this, remove it.",
+      "text": "Dawn: remove a random adjacent ally.",
       "keywords": [],
       "species": "Spider",
       "habitat": "City",

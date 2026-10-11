@@ -160,7 +160,6 @@ STRENGTH_LIMITS = {
     "jaguar": "jaguar_max",
     "honey_badger": "honey_badger_min",
     "aristocrats_legend_cuckoo": "cuckoo_legend_max",
-    "city_spider": "city_spider_max",
     "stoop": "stoop_max",
     "rhinoceros": "rhinoceros_max",
     "black_mamba": "black_mamba_max",

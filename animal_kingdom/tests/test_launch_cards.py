@@ -176,21 +176,36 @@ def test_praying_mantis_may_remove_an_ally_to_draw_two():
     assert s.top_unit("1,1").card_id == "cockroach"            # and came back where it was
 
 
-def test_tarantula_eats_an_adjacent_ally_at_dusk_and_grows():
+def test_tarantula_eats_an_adjacent_ally_at_dawn_and_grows():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     t = put(s, "1,2", "tarantula", "A")
     put(s, "1,1", "lion", "A")
     end_turn(s)
+    assert s.top_unit("1,1") is not None                       # not at Dusk
+    end_turn(s)                                                # B's turn ends: A's Dawn
     assert s.top_unit("1,1") is None and effective_strength(s, t) == 5 + 7
 
 
-def test_sea_turtle_lays_a_baby_turtle_and_a_city_spider_eats_it():
+def test_the_city_spider_eats_the_cockroach_every_dawn_and_the_turn_sees_the_death():
+    s = make_state(hands={"A": ["piranha"]}, decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
+    put(s, "1,2", "city_spider", "A")
+    put(s, "1,1", "cockroach", "A")
+    put(s, "2,1", "lion", "B")
+    end_turn(s); end_turn(s)                                   # to A's next turn: Dawn
+    assert s.top_unit("1,1").card_id == "cockroach"            # eaten and back where it was
+    assert hand_ids(s, "A").count("lion") == 1                 # one card, once
+    rules.apply_action(s, PlaceAction("piranha", ("cr", "2,2")))   # the Dawn death arms the Piranha
+    if s.pending:
+        choose(s, "2,1")
+    assert s.top_unit("2,1") is None
+
+
+def test_sea_turtle_lays_a_baby_turtle_on_an_empty_neighbour():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "sea_turtle", "A")
     put(s, "1,1", "lion", "A"); put(s, "2,2", "lion", "A")    # the only empty neighbour: 1,3
-    put(s, "2,3", "city_spider", "B")
     end_turn(s)
-    assert s.top_unit("1,3") is None and removed(s, "baby_turtle")   # the turtle hatched beside the spider
+    assert s.top_unit("1,3").card_id == "baby_turtle"
 
 
 def test_raccoon_returns_only_your_own_removed_animal():
@@ -248,15 +263,6 @@ def test_a_buried_cockroach_comes_back_buried_at_the_same_height():
     roach = s.board["1,2"][1]
     effects._remove_specific(s, "1,2", roach, by_player="B")
     assert [u.card_id for u in s.board["1,2"]] == ["mouse", "cockroach", "lion"]
-
-
-def test_a_returning_cockroach_is_not_placed_so_a_city_spider_cannot_loop_it():
-    s = make_state(hands={"A": ["cockroach"]}, decks={"A": ["lion"] * 5, "B": []})
-    put(s, "2,2", "city_spider", "B")
-    put(s, "1,1", "lion", "A")                                 # connects 1,2
-    rules.apply_action(s, PlaceAction("cockroach", ("cr", "1,2")))   # a 1 placed beside the Spider: removed, once
-    assert s.top_unit("1,2").card_id == "cockroach"            # back where it was, and the Spider let it be
-    assert hand_ids(s, "A").count("lion") == 1                 # one card drawn, not a loop
 
 
 # ================================================================================= Canines

@@ -9,7 +9,7 @@
     {
      "habitat": "Meadow",
      "id": "aristocrats-0",
-     "name": "",
+     "name": "Cuco",
      "note": "",
      "rarity": "L",
      "species": "Cuckoo",
@@ -76,7 +76,7 @@
      "status": "proposed",
      "str": 5,
      "tag": "Arachnid",
-     "text": "Dusk: remove a random adjacent ally and gain its strength."
+     "text": "Dawn: remove a random adjacent ally and gain its strength."
     },
     {
      "habitat": "Open Ocean",
@@ -148,7 +148,7 @@
      "status": "proposed",
      "str": 2,
      "tag": "Arachnid",
-     "text": "When an animal of strength 2 or less is placed next to this, remove it."
+     "text": "Dawn: remove a random adjacent ally."
     },
     {
      "habitat": "Meadow",
