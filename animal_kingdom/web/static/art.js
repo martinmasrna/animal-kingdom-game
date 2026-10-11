@@ -1,6 +1,8 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  barracuda: [.62, .42, .72],
+  sardine: [.62, .41, .74],
   canines_legend_leopard: [.62, .38, .62],
   hoofed_legend_zebra: [.42, .35, .65],
   hoofed_legend_giraffe: [.55, .25, .6],
@@ -61,6 +63,8 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  barracuda: [.72, .44, 1.4],
+  sardine: [.8, .41, 1.4],
   canines_legend_leopard: [.65, .35, 1],
   hoofed_legend_zebra: [.45, .32, 1],
   hoofed_legend_giraffe: [.6, .2, 1],
@@ -117,6 +121,8 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  barracuda: .43,
+  sardine: .41,
   canines_legend_leopard: .38,
   hoofed_legend_zebra: .35,
   hoofed_legend_giraffe: .25,
