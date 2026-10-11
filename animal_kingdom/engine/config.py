@@ -123,7 +123,7 @@ class Config:
     hyena_food_per: int = 3              # Hyena: Dusk: 3 food for each of your animals removed this turn
     hummingbird_draw: int = 2            # Hummingbird: Roar: draw 2
     termite_king_draw: int = 2           # Termite King: Roar: draw 2 if you control a Colony Queen
-    dormouse_food: int = 10              # Dormouse: Dusk: gain 10 food
+    dormouse_food: int = 5               # Dormouse: Dusk: gain 5 food (a rare: Worker Wasp, a common, pays 3)
     hamster_per_step: int = 1            # Hamster: +1 strength for each 10 food you have
     hamster_food_step: int = 10
     tuna_legend_food: int = 5            # the legendary Tuna: per region you control, a card and 5 food

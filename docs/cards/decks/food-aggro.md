@@ -22,7 +22,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Flying Squirrel** | 2 | Rodent | 3 | Flight. Roar: gain 10 food. |
 | **Meerkat** | 2 | Rodent | 2 | Roar: draw a card. When an enemy is placed next to this, draw a card. |
 | **Beaver** | 2 | Rodent | 6 | Roar: next turn, take 1 additional action. |
-| **Dormouse** | 2 | Rodent | 3 | Dusk: gain 10 food. |
+| **Dormouse** | 2 | Rodent | 3 | Dusk: gain 5 food. |
 
 ### Common
 
