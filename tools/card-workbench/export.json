@@ -124,7 +124,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "",
-     "text": "Dusk: gain 3 food for each of your animals removed this turn."
+     "text": "Dusk: gain 5 food for each of your animals removed this turn."
     },
     {
      "habitat": "Savanna",
@@ -146,7 +146,7 @@
      "rarity": "C",
      "species": "Spider",
      "status": "proposed",
-     "str": 2,
+     "str": 4,
      "tag": "Arachnid",
      "text": "Dawn: remove a random adjacent ally."
     },

@@ -442,7 +442,7 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
-      "text": "Dusk: gain 3 food for each of your animals removed this turn.",
+      "text": "Dusk: gain 5 food for each of your animals removed this turn.",
       "keywords": [],
       "species": "Hyena",
       "habitat": "Savanna",
@@ -473,7 +473,7 @@
       "tags": [
         "Arachnid"
       ],
-      "base_strength": 2,
+      "base_strength": 4,
       "text": "Dawn: remove a random adjacent ally.",
       "keywords": [],
       "species": "Spider",
