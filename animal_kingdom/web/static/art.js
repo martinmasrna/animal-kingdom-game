@@ -1,6 +1,8 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  moose: [.6, .35, .8],
+  boar: [.6, .4, .75],
   blue_whale: [.45, .45, .8],
   whale_shark: [.55, .45, .85],
   orca: [.65, .3, .66],
@@ -70,7 +72,7 @@ export const CROP = {
   cairn: [.66, .44, .66], chipmunk: [.6, .45, .8], gopher: [.52, .38, .8], groundhog: [.55, .36, .65], hamster: [.52, .42, .72], hedgehog: [.5, .45, .8], muskrat: [.56, .42, .86],
   armadillo: [.55, .45, .75], chinchilla: [.68, .38, .7], flying_squirrel: [.62, .5, .7], porcupine: [.35, .48, .62], fathom: [.5, .47, .75],
   greywhisker: [.5, .33, .65], rat_king: [.52, .35, .8], scrooge: [.62, .45, .62],
-  queen_honoria: [.6, .38, .7], queen_marabunta: [.64, .43, .7], vesper: [.6, .42, .72], falstaff: [.52, .37, .95],
+  queen_honoria: [.6, .38, .7], queen_marabunta: [.64, .43, .7], vesper: [.55, .42, .8], falstaff: [.52, .37, .95],
   eon: [.6, .33, .7], ember: [.55, .3, .75], aurum: [.52, .5, .85], omen: [.58, .44, .82], anaconda: [.49, .6, .62], egg_eater: [.68, .27, .6], snake_egg: [.5, .42, .8], bird_egg: [.52, .42, .82],
   dire_wolf: [.55, .33, .62], dingo: [.7, .27, .6], fox: [.62, .42, .7], african_wild_dog: [.5, .4, .6], dog: [.66, .3, .6],
   pup: [.55, .36, .72], outrider: [.62, .36, .75], red_wolf: [.66, .36, .66], hyena: [.62, .45, .6], bush_dog: [.64, .34, .6],
@@ -79,6 +81,8 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  moose: [.72, .3, 1.2],
+  boar: [.72, .38, 1.2],
   blue_whale: [.45, .42, 1.1],
   whale_shark: [.6, .45, 1.1],
   orca: [.75, .25, 1.3],
@@ -134,7 +138,7 @@ export const STRIP = {
   snow_leopard: [.66, .38, 1], black_panther: [.7, .43, 1], lion: [.72, .36, 1.2], lynx: [.52, .24, 1.3], caracal: [.47, .28, 1.5], tiger: [.6, .32, 1],
   cougar: [.73, .38, 1.1], house_cat: [.43, .37, 1.5], eon: [.62, .29, 1], goliath: [.62, .55, 1.2], ember: [.75, .17, 1.5], aurum: [.6, .45, 1.2], anaconda: [.5, .55, 1.2], egg_eater: [.72, .26, 1.3], snake_egg: [.6, .4, 1], bird_egg: [.6, .33, 1.2],
   rattlesnake: [.53, .35, 1.3], omen: [.72, .3, 1.7], stoop: [.58, .47, 1.8], eagle: [.63, .43, 1.8], owl: [.6, .24, 1.2], taipan: [.6, .3, 1],
-  viper: [.63, .35, 1], magpie: [.73, .34, 1.7], black_mamba: [.58, .3, 1], raven: [.77, .47, 1.7], queen_marabunta: [.72, .45, 1.4], vesper: [.66, .47, 1.1],
+  viper: [.63, .35, 1], magpie: [.73, .34, 1.7], black_mamba: [.58, .3, 1], raven: [.77, .47, 1.7], queen_marabunta: [.72, .45, 1.4], vesper: [.55, .4, 1.1],
   queen_honoria: [.62, .32, 1.2], falstaff: [.6, .33, 1.1], nurse_bee: [.58, .45, 1.2], nurse_bumblebee: [.65, .4, 1.1], termite_king: [.73, .47, 1], crocodile: [.75, .45, 1], honey_badger: [.72, .42, 1], termite_queen: [.7, .58, 1.1], naked_mole_rat: [.76, .48, 1],
   queen_bee: [.65, .42, 1.3], guard_hornet: [.43, .4, 1], soldier_ant: [.55, .34, 1.3], worker_ant: [.52, .32, 1], worker_wasp: [.62, .4, 1.1], worker_bee: [.6, .42, 1.2],
   methuselah: [.62, .33, 1], borealis: [.83, .17, 1], bulwark: [.6, .33, 1.1], cairn: [.7, .42, 1.1], polar_bear: [.52, .32, 1.3], rhinoceros: [.68, .42, 1],
@@ -153,6 +157,8 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  moose: .42,
+  boar: .45,
   blue_whale: .45,
   whale_shark: .45,
   orca: .45,
@@ -217,7 +223,7 @@ export const FULL = {
   queen_bee: .425, queen_marabunta: .45, raksha: .425, rat: .475, rat_king: .365, rattlesnake: .555, raven: .405,
   red_wolf: .445, rhinoceros: .395, rusty: .345, scrooge: .485, serval: .5, sirocco: .44, skunk: .45, sloth: .3,
   snake_egg: .42, snow_leopard: .385, soldier_ant: .465, squirrel: .455, taipan: .405, termite_king: .485, crocodile: .45, honey_badger: .5,
-  termite_queen: .47, naked_mole_rat: .5, tiger: .35, verminus: .345, vesper: .425, viper: .415, worker_ant: .465, worker_bee: .355,
+  termite_queen: .47, naked_mole_rat: .5, tiger: .35, verminus: .345, vesper: .43, viper: .415, worker_ant: .465, worker_bee: .355,
   worker_wasp: .375,
 };
 // Cards painted as another card: the tutorial's copies of the cards it was written with (the live cards changed since).
