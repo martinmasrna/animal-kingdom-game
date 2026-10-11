@@ -315,7 +315,7 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "tarsier": ["tarsier_grant"],
     "baboon": ["baboon_grant"],
     "grizzly_bear": ["grizzly_per_card"],
-    "marmot": ["marmot_per_step"],
+    "hamster": ["hamster_per_step"],
     "butterfly": ["butterfly_grant"],
     "handlock_legend_butterfly_3": ["butterfly_grant"],
     "handlock_legend_butterfly_4": ["butterfly_legend_stage4_grant"],

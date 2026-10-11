@@ -124,8 +124,8 @@ class Config:
     hummingbird_draw: int = 2            # Hummingbird: Roar: draw 2
     termite_king_draw: int = 2           # Termite King: Roar: draw 2 if you control a Colony Queen
     dormouse_food: int = 10              # Dormouse: Dusk: gain 10 food
-    marmot_per_step: int = 1             # Marmot: +1 strength for each 10 food you have
-    marmot_food_step: int = 10
+    hamster_per_step: int = 1            # Hamster: +1 strength for each 10 food you have
+    hamster_food_step: int = 10
     tuna_legend_food: int = 5            # the legendary Tuna: per region you control, a card and 5 food
     tortoise_per_armor: int = 5          # Tortoise: 5 food for each of your animals with Armor
     wildebeest_food: int = 5             # Wildebeest: at the end of your turn, if grazing, gain 5

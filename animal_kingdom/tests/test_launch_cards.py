@@ -553,12 +553,12 @@ def test_dormouse_pays_every_dusk_whatever_the_hand():
     assert s.food["A"] == CFG.dormouse_food
 
 
-def test_the_marmot_grows_with_your_food_in_hand_and_on_the_board():
-    s = make_state(hands={"A": ["marmot"]}, food={"A": 39, "B": 0})
-    assert placement_strength(s, hand_inst(s, "A", "marmot")) == 2 + 3     # 39 is three whole tens
+def test_the_hamster_grows_with_your_food_in_hand_and_on_the_board():
+    s = make_state(hands={"A": ["hamster"]}, food={"A": 39, "B": 0})
+    assert placement_strength(s, hand_inst(s, "A", "hamster")) == 2 + 3     # 39 is three whole tens
     put(s, "1,2", "squirrel", "B")                                          # a 3: the 5 covers it
-    rules.apply_action(s, PlaceAction("marmot", ("cr", "1,2")))
-    assert s.board["1,2"][-1].card_id == "marmot"
+    rules.apply_action(s, PlaceAction("hamster", ("cr", "1,2")))
+    assert s.board["1,2"][-1].card_id == "hamster"
 
 
 # ================================================================================ Food OTK

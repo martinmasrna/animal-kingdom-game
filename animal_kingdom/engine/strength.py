@@ -98,8 +98,8 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
                 bonus += cfg.guard_hornet_bonus
         elif cid == "tuna":                     # +1 for each other Fish you control
             bonus += cfg.tuna_per_fish * count("Fish", include_self=False)
-        elif cid == "marmot":                   # +1 for each 10 food you have
-            bonus += cfg.marmot_per_step * (state.food[owner] // cfg.marmot_food_step)
+        elif cid == "hamster":                  # +1 for each 10 food you have
+            bonus += cfg.hamster_per_step * (state.food[owner] // cfg.hamster_food_step)
         elif cid == "grizzly_bear":             # +1 for each card in your hand (it has left it when placed)
             bonus += cfg.grizzly_per_card * max(0, len(state.hands[owner]) - (1 if prospective else 0))
         elif cid == "giraffe":                  # +5 during your opponent's turn

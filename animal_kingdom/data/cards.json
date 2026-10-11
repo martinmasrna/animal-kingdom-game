@@ -1573,8 +1573,8 @@
       "workbench_id": "food-aggro-12"
     },
     {
-      "id": "marmot",
-      "name": "Marmot",
+      "id": "hamster",
+      "name": "Hamster",
       "deck": "food_aggro",
       "rarity": "common",
       "tags": [
@@ -1583,9 +1583,9 @@
       "base_strength": 2,
       "text": "Has +1 strength for each 10 food you have.",
       "keywords": [],
-      "species": "Marmot",
+      "species": "Hamster",
       "habitat": "Meadow",
-      "workbench_id": "food-aggro-14"
+      "workbench_id": "food-aggro-15"
     },
     {
       "id": "fathom",

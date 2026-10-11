@@ -33,6 +33,6 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Gopher** | 3 | Rodent | 3 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
 | **Muskrat** | 3 | Rodent | 2 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. |
 | **Groundhog** | 3 | Rodent | 4 | Roar: if you gained 10 or more food this turn, gain 10 food. |
-| **Marmot** | 3 | Rodent | 2 | Has +1 strength for each 10 food you have. |
+| **Hamster** | 3 | Rodent | 2 | Has +1 strength for each 10 food you have. |
 
 <!-- cards:end -->
