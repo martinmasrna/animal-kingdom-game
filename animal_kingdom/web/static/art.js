@@ -1,6 +1,8 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  blue_whale: [.45, .45, .8],
+  whale_shark: [.55, .45, .85],
   orca: [.65, .3, .66],
   jellyfish: [.58, .27, .72],
   food_otk_legend_octopus: [.5, .4, .8],
@@ -77,6 +79,8 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  blue_whale: [.45, .42, 1.1],
+  whale_shark: [.6, .45, 1.1],
   orca: [.75, .25, 1.3],
   jellyfish: [.58, .22, 1.3],
   food_otk_legend_octopus: [.5, .38, 1.2],
@@ -149,6 +153,8 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  blue_whale: .45,
+  whale_shark: .45,
   orca: .45,
   jellyfish: .37,
   food_otk_legend_octopus: .4,
