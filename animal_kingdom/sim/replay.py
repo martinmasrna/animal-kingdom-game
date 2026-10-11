@@ -27,24 +27,25 @@ from ..engine.state import GameState, new_game
 
 # ------------------------------------------------------------------ log I/O
 
-def game_log_record(rec, *, map_id: str, bots: tuple[str, str]) -> dict:
+def game_log_record(rec, *, map_id: str, bots: tuple[str, str], config: Optional[Config] = None) -> dict:
     """The JSONL log line for one finished game: metadata + the full action sequence."""
     return {
         "deck_a": rec.deck_a, "deck_b": rec.deck_b, "seed": rec.seed, "map_id": map_id,
-        "bots": list(bots), "first_player": rec.first_player, "first_turn_actions": Config.default().first_turn_actions,
+        "bots": list(bots), "first_player": rec.first_player, "first_turn_actions": (config or Config.default()).first_turn_actions,
         "winner": rec.winner, "reason": rec.reason, "turns": rec.turns,
         "actions": list(rec.actions),
     }
 
 
-def write_game_logs(records: Iterable, path: str, *, map_id: str, bots: tuple[str, str]) -> int:
+def write_game_logs(records: Iterable, path: str, *, map_id: str, bots: tuple[str, str],
+                    config: Optional[Config] = None) -> int:
     """Write one JSONL line per game. Returns the number of games written."""
     from ..recording.writer import JsonlGameWriter
     w = JsonlGameWriter(path)
     n = 0
     try:
         for rec in records:
-            w.append(game_log_record(rec, map_id=map_id, bots=bots))
+            w.append(game_log_record(rec, map_id=map_id, bots=bots, config=config))
             n += 1
     finally:
         w.close()
