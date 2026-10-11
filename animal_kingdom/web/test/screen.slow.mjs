@@ -30,9 +30,11 @@ test('animations settle with every unit visible', async () => {
   const { name, views } = { name: matches[0].name, views: matches[0].views.slice(0, 40) }, page = await gamePage(browser, server.url, { still: false });
   for (let i = 0; i < views.length; i++) {
     await feed(page, views[i]);
-    await new Promise(r => setTimeout(r, 2200));
-    const hidden = await page.evaluate(() => [...document.querySelectorAll('#board .cr.unit')]
+    // settled: a long chain (a Cockroach struck, back, then a draw) plays for over 2 s, so wait for it, up to 8 s
+    const unsettled = () => page.evaluate(() => [...document.querySelectorAll('#board .cr.unit')]
       .filter(e => { const s = getComputedStyle(e); return s.display === 'none' || +s.opacity < 0.5; }).map(e => e.dataset.cr));
+    let hidden;
+    for (let t = 0; t < 40 && (hidden = await unsettled()).length; t++) await new Promise(r => setTimeout(r, 200));
     assert.deepEqual(hidden, [], `view ${i} of ${name}: units left invisible`);
   }
   assert.deepEqual(page.errors, []);
