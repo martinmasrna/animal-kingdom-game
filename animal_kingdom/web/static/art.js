@@ -1,6 +1,9 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  sunfish: [.58, .45, .8],
+  tuna: [.62, .46, .74],
+  fish_legend_jellyfish: [.55, .33, .76],
   barracuda: [.62, .42, .72],
   sardine: [.62, .41, .74],
   canines_legend_leopard: [.62, .38, .62],
@@ -63,6 +66,9 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  sunfish: [.7, .42, 1.2],
+  tuna: [.8, .5, 1.4],
+  fish_legend_jellyfish: [.55, .3, 1],
   barracuda: [.72, .44, 1.4],
   sardine: [.8, .41, 1.4],
   canines_legend_leopard: [.65, .35, 1],
@@ -121,6 +127,9 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  sunfish: .42,
+  tuna: .5,
+  fish_legend_jellyfish: .28,
   barracuda: .43,
   sardine: .41,
   canines_legend_leopard: .38,
