@@ -1,6 +1,11 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  swordfish: [.62, .42, .72],
+  remora: [.7, .36, .7],
+  mahi_mahi: [.68, .57, .68],
+  mackerel: [.68, .5, .66],
+  cod: [.68, .42, .66],
   sunfish: [.58, .45, .8],
   tuna: [.62, .46, .74],
   fish_legend_jellyfish: [.55, .33, .76],
@@ -66,6 +71,11 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  swordfish: [.75, .4, 1.4],
+  remora: [.7, .35, 1.4],
+  mahi_mahi: [.78, .58, 1.4],
+  mackerel: [.78, .5, 1.4],
+  cod: [.75, .42, 1.4],
   sunfish: [.7, .42, 1.2],
   tuna: [.8, .5, 1.4],
   fish_legend_jellyfish: [.55, .3, 1],
@@ -127,6 +137,11 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  swordfish: .5,
+  remora: .5,
+  mahi_mahi: .45,
+  mackerel: .42,
+  cod: .4,
   sunfish: .42,
   tuna: .5,
   fish_legend_jellyfish: .28,
