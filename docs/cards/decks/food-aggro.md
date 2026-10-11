@@ -10,7 +10,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Rodent** | 1 | Rodent | 6 | Roar: repeat the Roar of each of your adjacent Rodents. |
+| **Big Gus** | 1 | Rodent | 6 | Roar: repeat the Roar of each of your adjacent Rodents. |
 | **Rodent** | 1 | Rodent | 2 | Roar: draw cards until you have as many as your opponent. |
 | **Barley** | 1 | Rodent | 4 | Roar: gain 4 food for each other Rodent you control. Draw a card. |
 | **Scrooge** | 1 | Rodent | 4 | Roar: gain 3 food for each 10 food you have. |
