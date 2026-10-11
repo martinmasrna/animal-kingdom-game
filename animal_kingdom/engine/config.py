@@ -172,11 +172,11 @@ class Config:
 
     # --- Core rules constants (overview.md) ---
     hand_limit: int = 10                 # max hand size (overview.md §3.5)
-    first_player_opening_draw: int = 3   # overview.md §4.3
-    second_player_opening_draw: int = 4
+    first_player_opening_draw: int = 4   # overview.md §4.3: four each (Martin, 2026-10-11, with the one-action first turn;
+    second_player_opening_draw: int = 4  # 3 and 4 plus that turn made the first player win 43% in 1,080 Expert games)
     mulligan: bool = True                # overview.md §4.4: blacklist mulligan, first player first
-    mulligan_max: Optional[int] = None   # returns per mulligan; None: as many as the player's opening hand, 3 first and 4
-                                          # second (Hearthstone's rule, Martin 2026-10-01; was 3 for both)
+    mulligan_max: Optional[int] = None   # returns per mulligan; None: as many as the player's opening hand
+                                          # (Hearthstone's rule, Martin 2026-10-01)
 
     def mulligan_cap(self, player: str, first_player: str) -> int:
         if self.mulligan_max is not None:
@@ -204,8 +204,10 @@ class Config:
 
     def for_log(self, log: dict) -> "Config":
         """This config with the turn rules a game log was played under: a log from before the first player's one-action
-        first turn (2026-10-11) carries no `first_turn_actions`, and its first turn had two."""
-        return replace(self, first_turn_actions=log.get("first_turn_actions", self.actions_per_turn))
+        first turn (2026-10-11) carries no `first_turn_actions`, and its first turn had two; one from before the four-card
+        hands carries no `first_player_opening_draw`, and its first player drew three."""
+        return replace(self, first_turn_actions=log.get("first_turn_actions", self.actions_per_turn),
+                       first_player_opening_draw=log.get("first_player_opening_draw", 3))
 
 
 def load_config_overrides(path: Optional[str]) -> Optional[Config]:

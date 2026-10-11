@@ -29,9 +29,11 @@ from ..engine.state import GameState, new_game
 
 def game_log_record(rec, *, map_id: str, bots: tuple[str, str], config: Optional[Config] = None) -> dict:
     """The JSONL log line for one finished game: metadata + the full action sequence."""
+    config = config or Config.default()
     return {
         "deck_a": rec.deck_a, "deck_b": rec.deck_b, "seed": rec.seed, "map_id": map_id,
-        "bots": list(bots), "first_player": rec.first_player, "first_turn_actions": (config or Config.default()).first_turn_actions,
+        "bots": list(bots), "first_player": rec.first_player, "first_turn_actions": config.first_turn_actions,
+        "first_player_opening_draw": config.first_player_opening_draw,
         "winner": rec.winner, "reason": rec.reason, "turns": rec.turns,
         "actions": list(rec.actions),
     }

@@ -564,6 +564,7 @@ class RecorderApp(App[None]):
     }
     #actions.fits { align-horizontal: center; }
     ActionCard { width: 22; height: 7; margin-right: 1; }
+    ActionCard:last-of-type { margin-right: 0; }
     ActionCard.draw { width: 14; }
     ActionCard:focus { background: $boost; }
     #footer {

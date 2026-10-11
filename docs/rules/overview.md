@@ -58,10 +58,10 @@ Both players start with an **empty board** — no units pre-placed, and both den
 One player is chosen to go first (by coin flip, until a better method is decided).
 
 ## 4.3 Opening hands
-The **first player** draws **3** cards; the **second player** draws **4** cards. The extra card and the first player's one-action first turn (§5) compensate the second player for the turn-order disadvantage of a place-or-draw game.
+Each player draws **4** cards. The first player's one-action first turn (§5) compensates the second player for the turn-order disadvantage of a place-or-draw game.
 
 ## 4.4 Mulligan
-After the opening hands are dealt, **both players at once** (Martin, 2026-10-01: the choice is hidden and each draws only from their own deck, so there is nothing to wait for), each may return as many cards as their opening hand holds (**three** for the first player, **four** for the second: Hearthstone's rule, Martin 2026-10-01), one at a time. Each returned card is replaced at once by the top card of the deck that is **not a copy of any card returned so far** (the blacklist: send away a Lion and no Lion comes back during the mulligan). A replacement may itself be returned, within that number. When the player stops, or has returned that many, the returned cards are shuffled into the deck. This is a hidden decision: neither player sees what the other returned. Mulligan draws and the shuffle are part of setup and trigger nothing (Omen, Rattlesnake, Eon do not fire).
+After the opening hands are dealt, **both players at once** (Martin, 2026-10-01: the choice is hidden and each draws only from their own deck, so there is nothing to wait for), each may return as many cards as their opening hand holds (**four**: Hearthstone's rule, Martin 2026-10-01), one at a time. Each returned card is replaced at once by the top card of the deck that is **not a copy of any card returned so far** (the blacklist: send away a Lion and no Lion comes back during the mulligan). A replacement may itself be returned, within that number. When the player stops, or has returned that many, the returned cards are shuffled into the deck. This is a hidden decision: neither player sees what the other returned. Mulligan draws and the shuffle are part of setup and trigger nothing (Omen, Rattlesnake, Eon do not fire).
 
 ---
 

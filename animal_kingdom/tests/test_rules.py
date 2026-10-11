@@ -222,14 +222,14 @@ def test_mulligan_first_player_first_then_second_then_turn_one():
     assert rules.legal_actions(s)[0].kind == "draw"
 
 
-def test_mulligan_blacklists_every_returned_card_and_stops_at_three():   # the first player's cap: its 3-card opening hand
+def test_mulligan_blacklists_every_returned_card_and_stops_at_four():   # the cap: the 4-card opening hand
     from animal_kingdom.decks import load_premade_deck
     from animal_kingdom.engine.actions import ChoiceAction
     from animal_kingdom.engine.state import new_game
     s = new_game(load_premade_deck("cats"), load_premade_deck("giants"), 11)
     first = s.current
     gone = []
-    for _ in range(3):
+    for _ in range(4):
         inst = s.hands[first][-1]                       # always return the newest card, replacements included
         gone.append(inst.card_id)
         before = {u.iid for u in s.hands[first]}
@@ -240,7 +240,7 @@ def test_mulligan_blacklists_every_returned_card_and_stops_at_three():   # the f
     assert len(s.decks[first]) + len(s.hands[first]) == 30
 
 
-def test_mulligan_cap_is_the_opening_hand_three_first_four_second():
+def test_mulligan_cap_is_the_opening_hand_for_the_second_player_too():
     from animal_kingdom.decks import load_premade_deck
     from animal_kingdom.engine.actions import SKIP, ChoiceAction
     from animal_kingdom.engine.state import new_game, other_player

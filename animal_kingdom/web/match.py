@@ -463,6 +463,7 @@ class Match:
         r = self.results[-1]
         return {"deck_a": self.seats["A"].deck, "deck_b": self.seats["B"].deck, "seed": self.seed,
                 "map_id": MAP_ID, "first_player": r["first"], "first_turn_actions": self.state.config.first_turn_actions,
+                "first_player_opening_draw": self.state.config.first_player_opening_draw,
                 "bots": [self.seats[p].bot or "human" for p in "AB"],
                 "winner": r["winner"], "reason": r["reason"], "turns": self.state.turn_counter,
                 "actions": list(self.actions), "action_times": list(self.action_times),

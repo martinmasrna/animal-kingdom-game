@@ -21,7 +21,7 @@ test('two people mulligan at the same time', async () => {
   const first = await pa.evaluate(() => window.__ak().V.game.first);
   const [p1, p2] = first === 'A' ? [pa, pb] : [pb, pa];
   const box = p => p.evaluate(() => { const b = document.querySelector('#choicebar.mull b'); return b ? b.textContent : null; });
-  assert.match(await box(p1) || '', /0 of 3/, 'the first player mulligans');
+  assert.match(await box(p1) || '', /0 of 4/, 'the first player mulligans');
   assert.match(await box(p2) || '', /0 of 4/, 'and so does the second, at the same time');
   // each step waits for the server's answer, not a fixed time: under a parallel test run it can take over a second
   const until = (p, fn, what) => p.waitForFunction(fn, { timeout: 5000 }).catch(() => assert.fail(what));
