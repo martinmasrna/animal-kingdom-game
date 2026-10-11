@@ -31,7 +31,7 @@ def game_log_record(rec, *, map_id: str, bots: tuple[str, str]) -> dict:
     """The JSONL log line for one finished game: metadata + the full action sequence."""
     return {
         "deck_a": rec.deck_a, "deck_b": rec.deck_b, "seed": rec.seed, "map_id": map_id,
-        "bots": list(bots), "first_player": rec.first_player,
+        "bots": list(bots), "first_player": rec.first_player, "first_turn_actions": Config.default().first_turn_actions,
         "winner": rec.winner, "reason": rec.reason, "turns": rec.turns,
         "actions": list(rec.actions),
     }
@@ -80,7 +80,7 @@ def replay(log: dict, *, config: Optional[Config] = None) -> list[dict]:
     # A web game logs both lists (custom decks have no premade slug); older logs name premades only.
     deck_a, deck_b = log.get("lists") or (load_premade_deck(log["deck_a"]), load_premade_deck(log["deck_b"]))
     state = new_game(list(deck_a), list(deck_b),
-                     log["seed"], map_id=log.get("map_id", "map_b"), config=config,
+                     log["seed"], map_id=log.get("map_id", "map_b"), config=(config or Config.default()).for_log(log),
                      first_player=log["first_player"])
     steps: list[dict] = []
     for adict in log["actions"]:

@@ -18,6 +18,7 @@ from pathlib import Path
 
 from ..engine.actions import action_from_dict
 from ..engine.cards import load_cards
+from ..engine.config import Config
 from ..engine.state import EngineError, new_game
 from ..engine import rules
 from ..decks import load_premade_deck
@@ -64,7 +65,8 @@ def rebuild(g: dict) -> dict:
     m = Match(g.get("match_id", "pt"), Seat("", "A", deck=g["deck_a"]))
     m.seats["B"] = Seat("", "B", deck=g["deck_b"])
     m.phase, m.seed = "playing", g["seed"]
-    m.state = new_game(lists[0], lists[1], g["seed"], map_id=g["map_id"], first_player=g["first_player"])
+    m.state = new_game(lists[0], lists[1], g["seed"], map_id=g["map_id"], first_player=g["first_player"],
+                       config=Config.default().for_log(g))
     st, human = m.state, {p: b == "human" for p, b in zip("AB", g["bots"])}
     times = g.get("action_times") or []
     steps = []

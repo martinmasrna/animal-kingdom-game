@@ -5,6 +5,7 @@ python -m animal_kingdom.sim.transcript results/human_games/web/FILE.jsonl [FIRS
 import json, sys
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine import rules
+from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.actions import SKIP, action_from_dict
 from animal_kingdom.engine.state import new_game
 from animal_kingdom.engine.strength import effective_strength
@@ -21,7 +22,7 @@ def conn(st, p):
 
 def run(rec, idx):
     st = new_game(load_premade_deck(rec["deck_a"]), load_premade_deck(rec["deck_b"]), rec["seed"],
-                  map_id=rec["map_id"], first_player=rec["first_player"])
+                  map_id=rec["map_id"], first_player=rec["first_player"], config=Config.default().for_log(rec))
     who = {"A": "MARTIN", "B": "BOT"}
     print(f"\n######## GAME {idx}: Martin {rec['deck_a']} vs bot {rec['deck_b']} | first: {who[rec['first_player']]} | result: {who.get(rec['winner'],'draw')} wins by {rec['reason']}")
     print("opening hands: Martin " + ", ".join(st.cards[u.card_id].name for u in st.hands['A']) + " | bot " + ", ".join(st.cards[u.card_id].name for u in st.hands['B']))

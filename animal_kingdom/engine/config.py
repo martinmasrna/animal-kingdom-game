@@ -202,6 +202,11 @@ class Config:
         """Return a copy with the given fields overridden (for balance sweeps)."""
         return replace(self, **overrides)
 
+    def for_log(self, log: dict) -> "Config":
+        """This config with the turn rules a game log was played under: a log from before the first player's one-action
+        first turn (2026-10-11) carries no `first_turn_actions`, and its first turn had two."""
+        return replace(self, first_turn_actions=log.get("first_turn_actions", self.actions_per_turn))
+
 
 def load_config_overrides(path: Optional[str]) -> Optional[Config]:
     """Load a JSON dict of `Config` field overrides; unspecified fields keep defaults.
