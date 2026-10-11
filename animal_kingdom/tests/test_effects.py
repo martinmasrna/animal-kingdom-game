@@ -906,12 +906,10 @@ def test_black_bear_schedules_a_delayed_draw():
 
 
 
-def test_scrooge_doubles_this_turns_haul():
-    # Reworked 2026-07-05: Roar gains again whatever you gained this turn (no banking).
-    s = make_state(current="A", hands={"A": ["scrooge"]}, food={"A": 20, "B": 0})
-    s.turn_flags["food_gained_A"] = 20                  # 20 already gained this turn
+def test_scrooge_gains_3_for_each_10_food_you_have():
+    s = make_state(current="A", hands={"A": ["scrooge"]}, food={"A": 67, "B": 0})
     rules.apply_action(s, PlaceAction("scrooge", ("cr", "1,2")))
-    assert s.food["A"] == 20 + 20 * CFG.scrooge_gain_multiplier
+    assert s.food["A"] == 67 + 6 * CFG.scrooge_food_per     # 67 is six whole tens
 
 
 def test_andean_condor_draws_only_when_its_top_is_stronger():

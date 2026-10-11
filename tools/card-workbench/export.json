@@ -1234,7 +1234,7 @@
     {
      "habitat": "Jungle",
      "id": "food-aggro-0",
-     "name": "",
+     "name": "Big Gus",
      "note": "",
      "rarity": "L",
      "species": "Capybara",
@@ -1277,7 +1277,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Rodent",
-     "text": "Roar: gain food equal to the food you gained this turn."
+     "text": "Roar: gain 3 food for each 10 food you have."
     },
     {
      "habitat": "Forest",
@@ -1311,7 +1311,7 @@
      "rarity": "R",
      "species": "Beaver",
      "status": "proposed",
-     "str": 4,
+     "str": 6,
      "tag": "Rodent",
      "text": "Roar: next turn, take 1 additional action."
     },
@@ -1325,7 +1325,7 @@
      "status": "proposed",
      "str": 3,
      "tag": "Rodent",
-     "text": "Dusk: if your hand is empty, gain 10 food."
+     "text": "Dusk: gain 10 food."
     },
     {
      "habitat": "Forest",
@@ -1389,15 +1389,15 @@
     },
     {
      "habitat": "Meadow",
-     "id": "food-aggro-13",
-     "name": "Mole",
+     "id": "food-aggro-14",
+     "name": "Marmot",
      "note": "",
      "rarity": "C",
-     "species": "Mole",
+     "species": "Marmot",
      "status": "proposed",
-     "str": 3,
+     "str": 2,
      "tag": "Rodent",
-     "text": "Roar: gain 5 food. If your hand is empty, draw 2 cards."
+     "text": "Has +1 strength for each 10 food you have."
     }
    ]
   },

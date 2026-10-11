@@ -1385,7 +1385,6 @@
       "base_strength": 6,
       "text": "Roar: repeat the Roar of each of your adjacent Rodents.",
       "keywords": [],
-      "unnamed": true,
       "species": "Capybara",
       "habitat": "Jungle",
       "workbench_id": "food-aggro-0"
@@ -1430,7 +1429,7 @@
         "Rodent"
       ],
       "base_strength": 4,
-      "text": "Roar: gain food equal to the food you gained this turn.",
+      "text": "Roar: gain 3 food for each 10 food you have.",
       "keywords": [],
       "species": "Chipmunk",
       "habitat": "Forest",
@@ -1476,7 +1475,7 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 4,
+      "base_strength": 6,
       "text": "Roar: next turn, take 1 additional action.",
       "keywords": [],
       "species": "Beaver",
@@ -1492,7 +1491,7 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Dusk: if your hand is empty, gain 10 food.",
+      "text": "Dusk: gain 10 food.",
       "keywords": [],
       "species": "Dormouse",
       "habitat": "Forest",
@@ -1574,19 +1573,19 @@
       "workbench_id": "food-aggro-12"
     },
     {
-      "id": "mole",
-      "name": "Mole",
+      "id": "marmot",
+      "name": "Marmot",
       "deck": "food_aggro",
       "rarity": "common",
       "tags": [
         "Rodent"
       ],
-      "base_strength": 3,
-      "text": "Roar: gain 5 food. If your hand is empty, draw 2 cards.",
+      "base_strength": 2,
+      "text": "Has +1 strength for each 10 food you have.",
       "keywords": [],
-      "species": "Mole",
+      "species": "Marmot",
       "habitat": "Meadow",
-      "workbench_id": "food-aggro-13"
+      "workbench_id": "food-aggro-14"
     },
     {
       "id": "fathom",

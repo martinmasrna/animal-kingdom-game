@@ -39,11 +39,12 @@ class Config:
     falstaff_food_rider: int = 3         # extra food whenever you gain food
 
     # --- "Food gained this turn" signature mechanic (food_otk pure-OTK overhaul 2026-07-05) ---
-    # A shared threshold read by Gopher/Muskrat/Groundhog; Scrooge instead doubles the raw haul.
+    # A shared threshold read by Gopher/Muskrat/Groundhog.
     fed_threshold: int = 10              # food gained this turn to arm Gopher/Muskrat/Groundhog
     gopher_draw: int = 2                # Gopher: draw N if fed this turn
     groundhog_food: int = 10            # Groundhog: gain N food if fed this turn (was +5 str)
-    scrooge_gain_multiplier: int = 1    # Scrooge: gain (food gained this turn) x this
+    scrooge_food_per: int = 3           # Scrooge: Roar: gain 3 food for each 10 food you have
+    scrooge_food_step: int = 10
     beaver_bonus_actions: int = 1       # Beaver: extra top-level actions on your NEXT turn
 
     # --- Food-event engine reactors (decision F2/F9; magnitudes are dials) ---
@@ -122,9 +123,9 @@ class Config:
     hyena_food_per: int = 3              # Hyena: Dusk: 3 food for each of your animals removed this turn
     hummingbird_draw: int = 2            # Hummingbird: Roar: draw 2
     termite_king_draw: int = 2           # Termite King: Roar: draw 2 if you control a Colony Queen
-    mole_food: int = 5                   # Mole: gain 5 food...
-    mole_draw: int = 2                   # ...and draw 2 if your hand is empty
-    dormouse_food: int = 10              # Dormouse: Dusk: gain 10 if your hand is empty
+    dormouse_food: int = 10              # Dormouse: Dusk: gain 10 food
+    marmot_per_step: int = 1             # Marmot: +1 strength for each 10 food you have
+    marmot_food_step: int = 10
     tuna_legend_food: int = 5            # the legendary Tuna: per region you control, a card and 5 food
     tortoise_per_armor: int = 5          # Tortoise: 5 food for each of your animals with Armor
     wildebeest_food: int = 5             # Wildebeest: at the end of your turn, if grazing, gain 5

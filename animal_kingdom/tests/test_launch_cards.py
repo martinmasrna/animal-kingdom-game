@@ -546,14 +546,19 @@ def test_meerkat_draws_when_an_enemy_lands_beside_it():
     assert hand_ids(s, "A") == ["lion"]
 
 
-def test_dormouse_and_mole_pay_on_an_empty_hand():
-    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+def test_dormouse_pays_every_dusk_whatever_the_hand():
+    s = make_state(hands={"A": ["lion"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "dormouse", "A")
     end_turn(s)
     assert s.food["A"] == CFG.dormouse_food
-    s2 = make_state(hands={"A": ["mole"]}, decks={"A": ["lion"] * 3, "B": []})
-    rules.apply_action(s2, PlaceAction("mole", ("cr", "1,2")))
-    assert s2.food["A"] == CFG.mole_food and len(s2.hands["A"]) == CFG.mole_draw
+
+
+def test_the_marmot_grows_with_your_food_in_hand_and_on_the_board():
+    s = make_state(hands={"A": ["marmot"]}, food={"A": 39, "B": 0})
+    assert placement_strength(s, hand_inst(s, "A", "marmot")) == 2 + 3     # 39 is three whole tens
+    put(s, "1,2", "squirrel", "B")                                          # a 3: the 5 covers it
+    rules.apply_action(s, PlaceAction("marmot", ("cr", "1,2")))
+    assert s.board["1,2"][-1].card_id == "marmot"
 
 
 # ================================================================================ Food OTK

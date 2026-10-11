@@ -41,5 +41,5 @@ export const CARD_NUMS = [
   "opossum", "baby_turtle", "worm", "baby_fish", "cuckoo_egg", "baby_lion", "baby_wolf", "baby_squirrel",
   "baby_owl", "baby_python", "baby_bear", "baby_gorilla", "baby_zebra", "handlock_legend_butterfly_2", "handlock_legend_butterfly_3", "handlock_legend_butterfly_4",
   "handlock_legend_butterfly_5", "handlock_legend_eagle_mate", "tutorial_cape_buffalo", "tutorial_dire_wolf", "tutorial_lynx", "tutorial_chipmunk",
-  "beaver", "macaw"
+  "beaver", "macaw", "marmot"
 ];

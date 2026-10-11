@@ -32,13 +32,6 @@ def test_food_gained_counter_tracks_and_resets_between_turns():
     assert effects._food_gained_this_turn(s, "A") == 0                # reset each turn
 
 
-def test_scrooge_doubles_this_turns_haul():
-    s = make_state(hands={"A": ["scrooge"]}, food={"A": 20, "B": 0})
-    s.turn_flags["food_gained_A"] = 20                                # gained earlier this turn
-    rules.apply_action(s, PlaceAction("scrooge", ("cr", "1,2")))
-    assert s.food["A"] == 20 + 20 * CFG.scrooge_gain_multiplier
-
-
 def test_gopher_draws_only_when_fed():
     fed = make_state(hands={"A": ["gopher"]}, decks={"A": ["mouse", "mouse"], "B": []})
     fed.turn_flags["food_gained_A"] = CFG.fed_threshold

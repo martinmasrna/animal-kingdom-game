@@ -2327,8 +2327,9 @@ def _refill_legend_place(state, unit, cr):
 
 
 def _scrooge_place(state, unit, cr):
-    # Roar: gain food equal to the food you gained this turn. Snapshot now; the gain resolves as a literal amount.
-    _push_gain(state, unit.owner, _food_gained_this_turn(state, unit.owner) * state.config.scrooge_gain_multiplier)
+    """Roar: gain 3 food for each 10 food you have. Snapshot now; the gain resolves as a literal amount."""
+    cfg = state.config
+    _push_gain(state, unit.owner, cfg.scrooge_food_per * (state.food[unit.owner] // cfg.scrooge_food_step))
 
 
 def _rat_king_place(state, unit, cr):
@@ -2349,9 +2350,8 @@ def _beaver_place(state, unit, cr):
 
 
 def _dormouse_eot(state, unit, cr):
-    """Dusk: if your hand is empty, gain 10 food."""
-    if not state.hands[unit.owner]:
-        _push_gain(state, unit.owner, state.config.dormouse_food)
+    """Dusk: gain 10 food."""
+    _push_gain(state, unit.owner, state.config.dormouse_food)
 
 
 def _chipmunk_place(state, unit, cr):
@@ -2359,13 +2359,6 @@ def _chipmunk_place(state, unit, cr):
     _push_gain(state, unit.owner, state.config.chipmunk_food_now)
     schedule(state, unit, 1, {"op": "gain_food", "player": unit.owner, "amount": state.config.chipmunk_food_later},
              while_buried=False)
-
-
-def _mole_place(state, unit, cr):
-    """Roar: gain 5 food. If your hand is empty, draw 2 cards."""
-    if not state.hands[unit.owner]:
-        _push_draw(state, unit.owner, state.config.mole_draw)
-    _push_gain(state, unit.owner, state.config.mole_food)
 
 
 # --- Food OTK ---------------------------------------------------------------------------------------------------
@@ -2837,7 +2830,6 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "gopher": {"on_place": _conditional(_draws("gopher_draw"))},
     "muskrat": {"on_place": _conditional(_removes())},
     "groundhog": {"on_place": _conditional(_gains("groundhog_food"))},
-    "mole": {"on_place": _mole_place},
     # Food OTK (the legendary Honey Badger is its keywords; Capybara an aura; Armadillo too).
     "fathom": {"on_place": _fathom_place},
     "food_otk_legend_squirrel": {"on_place": _otk_squirrel_place},
