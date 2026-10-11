@@ -27,7 +27,7 @@ for (const m of matches) {
   for (let i = 0; i < m.views.length; i++) {
     await feed(p, m.views[i]);
     await wait(250);
-    for (let k = 0; k < 80 && await p.evaluate(() => window.__ak().PB.busy); k++) await wait(100);
+    for (let k = 0; k < 300 && await p.evaluate(() => window.__ak().PB.busy); k++) await wait(100);   // up to 30 s: a whole opposing turn can chain 12 s of steps
     await wait(i === m.views.length - 1 ? 4500 : 1200);   // a step's last animations (the end: the den's beat and the result's entrance)
     if (i % 3 === 0 || i === m.views.length - 1) {
       const bad = await p.evaluate(screenMismatches);
