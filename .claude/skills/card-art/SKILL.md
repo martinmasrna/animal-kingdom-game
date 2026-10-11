@@ -1,6 +1,6 @@
 ---
 name: card-art
-description: Make, repaint or review card art for Animal Kingdom - the idea per card agreed with Martin, one picture from the proven template with the six-painting reference sheet, a full-size check, Martin's review page, install. Use whenever the work is a card's painting - "card art", "paint the Savanna rares", "repaint X", "art round", "review page for art", reading art verdicts, installing a picked painting, or improving how art is made.
+description: Make, repaint or review card art for Animal Kingdom - four bets per card from the proven template and the six-painting reference sheet, each naming its backdrop, Martin's voice notes folded in, a full-size check, Martin's review page, install. Use whenever the work is a card's painting - "card art", "paint the Savanna rares", "repaint X", "art round", "review page for art", reading art verdicts, installing a picked painting, or improving how art is made.
 ---
 
 # Card art
@@ -17,14 +17,16 @@ Everything here has evidence behind it in `D/cards/research/findings.md` (`D` is
 
 ## The prompt
 
-`D/cards/bar/template.txt`, word for word, sent through Sol with `D/cards/ref_sheet.png` attached; `art.py gen` does both. It made 8 of the 10 graded wows, a quarter of its pictures went live against 4% for everything since, and it was confirmed on the open Savanna rares on 2026-10-10 ("much better", the Zebra "a magnitude of order better"). Never edit the template without a test.
+`D/cards/bar/template.txt`, word for word, with `D/cards/ref_sheet.png` attached, sent through Sol (`codex exec -m gpt-5.6-sol`), never verbatim: Sol rewrites it for the image model with its own image skill, and that rewrite is part of the recipe. Never edit the template without a test.
 
-The only words written per card are its `line`: the animal, the one moment that shows it (the picture people carry, its hook), its habitat and light, then a palette, in one sentence. "a golden eagle, the king of the sky, landing on the top of a high mountain crag, the whole bird in the picture with its great wings raised high above its back and talons reaching for the rock; behind it only a bright open sky and snowy peaks far below; palette of bright sky blue, snow white, warm grey rock and the eagle's golden-brown." No camera directions, no facial expressions, no corrections.
+The only words written per card are its `line`: the animal, one specific thing it is doing, and the one simple backdrop behind it, named, then a palette. "a big gorilla wading knee-deep through a swamp, pulling up water plants to eat; behind him only soft pale morning mist over still water; palette of black fur, silver back, soft greens and pale grey-gold mist." Without a named backdrop the background fills with evenly detailed foliage and the card reads as a photo; without a specific action the model paints its one default pose for the animal.
+
+Extra images when a card needs them: a real wildlife photograph as the pose skeleton when the model keeps getting the anatomy wrong ("copy its pose exactly"); the live card art of the deck's own animals when a legendary gathers them.
 
 ## A round
 
-1. **The idea, with Martin.** For each card, the one picture people carry of the animal and its hook, agreed in chat in a line.
-2. **Paint.** A jobs file in `D/cards/bar/jobs/` with one `{"id", "card", "batch", "line"}` per picture (one or two per card, different moments if two), then `python3 D/cards/bar/art.py gen <file> -p 6` in the background (`--dry` prints the prompts). A FAIL within seconds is the image quota (its own cap, about 80 pictures then hours locked); it prints when it resets.
-3. **Look before showing.** Full-size crops (`art.py crop <id> x0 y0 x1 y1`) of every face, every set of legs, every place two animals touch. A picture with a visible fault isn't shown.
-4. **Martin picks** on the review page: `art.py page <review> <ids...>`, then publish its `index.html` and `files.json` with the Artifact tool to the review artifact in `D/cards/notes.md`. Read his marks with `ArtifactData` (collection `verdicts`), merge them with `art.py verdicts <review> <file>`. A pick with one named flaw gets one surface edit, then the card is done. A card picked "none" gets a new idea, not a reworded one.
-5. **Install** each pick with `D/cards/bar/install.sh <card> <id>`, then set its `CROP`, `STRIP` and `FULL` in the game's `static/art.js` by rendering the board portrait and looking at it, run the web fast suite (`animal_kingdom/web/test`, `node --test`) in the background, and commit: design repo `cards/<card>.png cards/<card>.jpg cards/bar/manifest.jsonl` to `main`; game repo `static/art/<card>.jpg|webp` and `static/art.js` to the local `new-cards` branch, never pushed.
+1. **The cards and Martin's notes.** List the cards with rarity, strength and effect; Martin records a voice note per card when he has a feeling about it, or says "you decide".
+2. **Four bets per card.** Four lines as far apart as possible, each with its own action and named backdrop, each card in its animal's real corner of the habitat. Martin's ideas become one or two of the four.
+3. **Paint.** Four at a time in the background; about 80 pictures per window before the image quota locks. Check every picture at full size (faces, legs, every place two animals touch) before showing.
+4. **Martin picks** on the review page (`D/cards/notes.md` holds its link), each card next to its live art. Read his picks and notes with `ArtifactData` (collection `verdicts`). A pick is installed; "none" with a note becomes new bets on that note; a liked picture with one flaw in its sky, colour or light gets a surface edit.
+5. **Install** each pick with `D/cards/bar/install.sh <card> <id>` (the picture copied to `bar/r1/<id>.png` and recorded in the manifest first), then set its `CROP`, `STRIP` and `FULL` in the game's `static/art.js` by rendering the board portrait and looking at it, run the web fast suite (`animal_kingdom/web/test`, `node --test`), and commit: design repo `cards/<card>.png cards/<card>.jpg cards/bar/manifest.jsonl` to `main`; game repo `static/art/<card>.jpg|webp` and `static/art.js` to the local `new-cards` branch, never pushed.
