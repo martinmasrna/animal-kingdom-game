@@ -19,6 +19,10 @@ What the game should become, and the rules every card is designed against. Read 
 
 Martin's worked application of these to the aggro deck is in [`../cards/aggro-redesign.md`](../cards/aggro-redesign.md).
 
+**Cards serve play styles, not precons.** Tactical play and deep deckbuilding are the game's two equal pillars, and deckbuilding needs cards that are simple, flexible and playable in many decks, each card fitting a theme or play style rather than one pre-constructed list, never needing five other cards to be useful. The Black Bear ("in 2 turns, draw 2 cards") is the model: never in a swarm or board-buff deck, but at home in combo, control and Handlock. The Rat is another: its random discard costs a Cockroach deck nothing, and costs an aggro deck nothing either, since aggro empties its hand fast. A card that is only good with its own deck's engine is a design smell (Martin, 2026-10-12).
+
+**The action is the cost.** Fodder that has to be replayed costs an action every time, on top of the action that removes it, so a deck built on it gets half the actions of its opponent. Anything meant to be removed over and over comes back where it was, at once: a Cockroach that returns to hand or deck is unplayable, and a 1 that leaves a stack can never be played back onto it, since it covers nothing (Martin, 2026-10-12).
+
 **Card text fits three lines on the full card.** Three lines at a size as readable as Hearthstone's caps how much one card may do: complexity goes into keywords and shared wording, not into sentences. About 80 characters is the budget when writing; a natural sentence may run over it as long as it fits, and a sentence is never squeezed (clipped phrases, pronoun shortcuts) to fit. Parentheses are fine where they read naturally ("gain 1 strength (wherever this is)"): players understand them (Martin, 2026-10-08). The web test `cardtext.test.mjs` measures every card. Wording conventions are in [`../rules/keywords.md`](../rules/keywords.md) (card-text conventions).
 
 ## Power calibration
