@@ -8,7 +8,7 @@ Two players place animal **units** onto a **graph of crossroads**. A turn is **2
 
 ## A unit is a single number
 
-A unit has **one stat: strength (0–10)** and an optional effect. There is **no health/toughness, no mana cost, no attack value, no summoning sickness**. Strength does exactly three things:
+A unit has **one stat: strength** (printed 0–10; in play it has no upper limit, only a floor at 0) and an optional effect. There is **no health/toughness, no mana cost, no attack value, no summoning sickness**. Strength does exactly three things:
 
 1. **Covering** — to place on top of an *enemy* unit you need **strictly greater** strength (5 covers 4; 5 cannot cover 5). Placing on your *own* unit needs no strength.
 2. **Surviving strength-gated removal** — many removal effects read "remove an enemy of strength ≤ X" or "≤ your strength". Higher strength dodges those.
