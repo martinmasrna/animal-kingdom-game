@@ -1,6 +1,7 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  dire_wolf: [.57, .38, .62],
   beaver: [.6, .32, .62],
   raccoon_dog: [.72, .45, .55],
   bobcat: [.47, .38, .72],
@@ -80,13 +81,14 @@ export const CROP = {
   greywhisker: [.5, .33, .65], rat_king: [.52, .35, .8], scrooge: [.62, .45, .62],
   queen_honoria: [.6, .38, .7], queen_marabunta: [.64, .43, .7], vesper: [.55, .42, .8], falstaff: [.52, .37, .95],
   eon: [.6, .33, .7], ember: [.55, .3, .75], aurum: [.52, .5, .85], omen: [.58, .44, .82], anaconda: [.49, .6, .62], egg_eater: [.68, .27, .6], snake_egg: [.5, .42, .8], bird_egg: [.52, .42, .82],
-  dire_wolf: [.55, .33, .62], dingo: [.7, .27, .6], fox: [.62, .42, .7], african_wild_dog: [.5, .4, .6], dog: [.66, .3, .6],
+  dingo: [.7, .27, .6], fox: [.62, .42, .7], african_wild_dog: [.5, .4, .6], dog: [.66, .3, .6],
   pup: [.55, .36, .72], outrider: [.62, .36, .75], red_wolf: [.66, .36, .66], hyena: [.62, .45, .6], bush_dog: [.64, .34, .6],
   lobo: [.55, .42, .75], raksha: [.64, .33, .6], clarion: [.6, .22, .7], alpha: [.56, .36, .8], poppy: [.55, .36, .72], rusty: [.45, .36, .72],
 };
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  dire_wolf: [.57, .4, 1.3],
   beaver: [.62, .27, 1.2],
   raccoon_dog: [.8, .42, 1.2],
   bobcat: [.45, .33, 1.2],
@@ -162,7 +164,7 @@ export const STRIP = {
   skunk: [.28, .55, 1.3], lemming: [.82, .38, 1.4], cheetah: [.87, .4, 1.3], rat: [.8, .48, 1], falcon: [.8, .6, 1.7], bat: [.53, .44, 1.3],
   mouse: [.47, .33, 1], lobo: [.55, .38, 1.2], raksha: [.63, .38, 1.1], clarion: [.63, .16, 1.1], bush_dog: [.64, .3, 1.1], red_wolf: [.7, .32, 1.4],
   gray_wolf: [.8, .5, 1], fox: [.7, .4, 1.3], african_wild_dog: [.55, .3, 1.2], dingo: [.73, .25, 1.1], dog: [.67, .34, 1], alpha: [.6, .19, 1.2],
-  hyena: [.72, .45, 1.2], outrider: [.77, .31, 1.3], dire_wolf: [.56, .36, 1.3], pup: [.57, .27, 1.2], poppy: [.5, .32, 1], rusty: [.5, .32, 1],
+  hyena: [.72, .45, 1.2], outrider: [.77, .31, 1.3], pup: [.57, .27, 1.2], poppy: [.5, .32, 1], rusty: [.5, .32, 1],
 };
 // FULL places the painting in the full card's window, which shows 61% of its height between the name bar and the rules panel:
 // the height, as a fraction of the art, the window centres on (its top edge is that minus .305). Set by hand: the whole animal
