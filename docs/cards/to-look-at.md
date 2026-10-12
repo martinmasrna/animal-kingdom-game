@@ -7,3 +7,7 @@ Cards Martin flagged from play for a closer look. A card leaves the list once it
 - **Dhole** (Canine, rare, 5): "Whenever another Canine you control enters play, give it +2 strength." (card id `red_wolf`)
 - **Viper** (Egg, common, 3): "Roar: an adjacent enemy unit gets -3 strength." Martin: this effect needs to be on a flying unit.
 - **Barley** (Food Aggro, legendary, 4): "Roar: gain 4 food for each other Rodent you control. Draw a card." The worst of the deck's legendaries over 2,160 Expert games (2026-10-11); left alone in the redesign until Martin plays the deck with the Hamster.
+
+## Pool-wide sweep: untagged means generalist
+
+Martin's principle (2026-10-12): a card with no family is a neutral generalist, and every strong generic effect lives on an untagged card. Untagged cards can be very strong precisely because no tribe tutor or scout ("Scout a Cat", "draw a Canine") can fetch them; a strong generic effect on a tagged animal turns every search for that tribe into a balance problem. Done right: the rare Honey Badger ("remove an adjacent enemy of strength 6 or more"), the legendary Honey Badger, the legendary Octopus copy effect, Fathom ("Scout a legendary animal"). The pool doesn't follow this yet. The sweep looks for (a) tagged cards carrying strong generic effects, to go untagged or turn tribal, and (b) untagged cards with narrow or tribal effects, to become generalists or get a family. Not urgent.
