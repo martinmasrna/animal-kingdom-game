@@ -73,7 +73,7 @@ class Config:
     dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn
     bush_dog_grant: int = 3              # Bush Dog: Roar: give an adjacent Canine +3
     shuck_grant: int = 2                 # to the Canine returned from the Remove Pile; reserve
-    raccoon_dog_grant: int = 1           # Raccoon Dog: an allied Canine that roams gets +1
+    raccoon_dog_grant: int = 1           # Coyote: an allied Canine that roams gets +1
     wolf_legend_grant: int = 2           # the legendary Wolf: when it roams, your adjacent animals gain +2
     stray_dog_grant: int = 2             # Stray Dog: give an ally with Roam +2, then it roams
     wild_dog_grant: int = 1              # African Wild Dog: Dusk: your adjacent animals +1

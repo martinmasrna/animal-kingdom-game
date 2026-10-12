@@ -54,7 +54,7 @@ DECKS = [
         ("R", "Dhole", "Dhole", "Canine", 6, "Jungle", "Roam. Your animals can roam onto enemies of equal strength.", "locked"),
         ("C", "Wolf", "Wolf", "Canine", 6, "Forest", "Roam.", "locked"),
         ("C", "Bush Dog", "Bush Dog", "Canine", 3, "Jungle", "Roar: give an adjacent Canine +3 strength.", "locked"),
-        ("C", "Raccoon Dog", "Raccoon Dog", "Canine", 3, "Forest", "Whenever one of your Canines roams, give it +1 strength.", "locked"),
+        ("C", "Coyote", "Coyote", "Canine", 3, "Forest", "Whenever one of your Canines roams, give it +1 strength.", "locked"),
         ("C", "Fox", "Fox", "Canine", 3, "Forest", "Dusk: give your adjacent animals +1 strength.", "locked"),
         ("C", "Badger", "Badger", "", 4, "Forest", "Roar: draw an animal with Roam.", "locked"),
         ("C", "Stray Dog", "Stray Dog", "Canine", 1, "City", "Roar: give one of your animals with Roam +2 strength. It roams.", "locked"),

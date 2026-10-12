@@ -674,7 +674,7 @@
     },
     {
       "id": "raccoon_dog",
-      "name": "Raccoon Dog",
+      "name": "Coyote",
       "deck": "canines",
       "rarity": "common",
       "tags": [
@@ -683,7 +683,7 @@
       "base_strength": 3,
       "text": "Whenever an allied Canine roams, give it +1 strength.",
       "keywords": [],
-      "species": "Raccoon Dog",
+      "species": "Coyote",
       "habitat": "Forest",
       "workbench_id": "canines-10"
     },
