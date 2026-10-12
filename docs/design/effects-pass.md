@@ -96,7 +96,7 @@ Imagined games (reasoning, not evidence) showed the clock runs on cards, not foo
 | Scrooge (rename: the name cites Dickens) | City | L | 4 | Roar: gain 3 food for each 10 food you have. (The finisher, Martin 2026-10-11: 18 at 60 food, 27 at 90. Doubling the turn's food was a common's effect on a legendary, and doubling it every Dusk was too strong.) |
 | a Rodent (name to come) | | L | 6 | Roar: repeat the Roar of each of your Rodents next to this. (Martin's wording. The Rodent finisher, played last into your own board; the grid caps it at 4 neighbours, and every Rodent the opponent covers is one fewer Roar. A repeated Scrooge quadruples the turn: Scrooge is the dial.) |
 | Flying Squirrel | Forest | R | 3 | **Flight.** Roar: gain 10 food. |
-| Beaver | Forest | R | 6 | Roar: next turn, take 1 additional action. (Busy as a beaver. The action comes back next turn, so the Beaver is a free body; at 6 it's a wall, Martin 2026-10-11.) |
+| Beaver | Forest | R | 5 | Roar: next turn, take 1 additional action. (Busy as a beaver. The action comes back next turn, so the Beaver is a free body; 5, Martin 2026-10-12.) |
 | Dormouse | Forest (roster addition) | R | 3 | **Dusk:** gain 5 food. (Pays every turn until covered; 5 is a rare's rate, between the common Worker Wasp's 3 and the legendary Methuselah's 5 with its food cap, Martin 2026-10-11. The empty-hand condition never held in a deck that draws constantly. Nocturnal: it comes out at dusk to forage.) |
 | Meerkat (tagged Rodent) | Savanna | R | 2 | Roar: draw a card. When an enemy is placed next to this, draw a card. (The sentry at the den front: den pressure turns into cards, often the Muskrat that pushes it back.) |
 | Squirrel | Forest | C | 3 | Roar: gain 10 food. |

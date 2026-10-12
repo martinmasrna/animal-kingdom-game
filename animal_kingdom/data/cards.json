@@ -1474,7 +1474,7 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 6,
+      "base_strength": 5,
       "text": "Roar: next turn, take 1 additional action.",
       "keywords": [],
       "species": "Beaver",
