@@ -1,6 +1,7 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  handlock_legend_eagle: [.5, .45, .82], handlock_legend_eagle_mate: [.48, .47, .82],
   egg_control_legend_raven: [.6, .3, .65],
   hoofed_legend_boar: [.62, .44, .62],
   dire_wolf: [.57, .38, .62],
@@ -90,6 +91,7 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  handlock_legend_eagle: [.32, .45, 1.3], handlock_legend_eagle_mate: [.24, .48, 1.3],
   egg_control_legend_raven: [.6, .27, 1.2],
   hoofed_legend_boar: [.64, .46, 1.2],
   dire_wolf: [.57, .4, 1.3],
@@ -175,6 +177,7 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  handlock_legend_eagle: .42, handlock_legend_eagle_mate: .44,
   egg_control_legend_raven: .39,
   hoofed_legend_boar: .4,
   beaver: .47,
