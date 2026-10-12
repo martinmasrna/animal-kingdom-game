@@ -1,6 +1,6 @@
 ---
 name: card-art
-description: Make, repaint or review card art for Animal Kingdom - four bets per card from the proven template and the six-painting reference sheet, each naming its backdrop, Martin's voice notes folded in, a full-size check, Martin's review page, install. Use whenever the work is a card's painting - "card art", "paint the Savanna rares", "repaint X", "art round", "review page for art", reading art verdicts, installing a picked painting, or improving how art is made.
+description: Make, repaint or review card art for Animal Kingdom - four bets per card from the proven template and the six-painting reference sheet, each naming its backdrop, Martin's voice notes folded in, Martin's review page, install. Use whenever the work is a card's painting - "card art", "paint the Savanna rares", "repaint X", "art round", "review page for art", reading art verdicts, installing a picked painting, or improving how art is made.
 ---
 
 # Card art
@@ -27,6 +27,6 @@ Extra images when a card needs them: a real wildlife photograph as the pose skel
 
 1. **The cards and Martin's notes.** List the cards with rarity, strength and effect; Martin records a voice note per card when he has a feeling about it, or says "you decide".
 2. **Four bets per card.** Four lines as far apart as possible, each with its own action and named backdrop, each card in its animal's real corner of the habitat. Martin's ideas become one or two of the four.
-3. **Paint.** Four at a time in the background; about 80 pictures per window before the image quota locks. Check every picture at full size (faces, legs, every place two animals touch) before showing.
+3. **Paint.** Four at a time in the background; about 80 pictures per window before the image quota locks. Every picture the round produced goes on the review page; Martin judges anatomy himself.
 4. **Martin picks** on the review page (`D/cards/notes.md` holds its link), each card next to its live art. Read his picks and notes with `ArtifactData` (collection `verdicts`). A pick is installed; "none" with a note becomes new bets on that note; a liked picture with one flaw in its sky, colour or light gets a surface edit.
 5. **Install** each pick with `D/cards/bar/install.sh <card> <id>` (the picture copied to `bar/r1/<id>.png` and recorded in the manifest first), then set its `CROP`, `STRIP` and `FULL` in the game's `static/art.js` by rendering the board portrait and looking at it, run the web fast suite (`animal_kingdom/web/test`, `node --test`), and commit: design repo `cards/<card>.png cards/<card>.jpg cards/bar/manifest.jsonl` to `main`; game repo `static/art/<card>.jpg|webp` and `static/art.js` to the local `new-cards` branch, never pushed.
