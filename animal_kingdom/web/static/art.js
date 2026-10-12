@@ -168,7 +168,7 @@ export const STRIP = {
   sloth: [.55, .29, 1], cape_buffalo: [.52, .38, 1], fathom: [.5, .48, 1.1], greywhisker: [.5, .29, 1], rat_king: [.52, .17, 1.2], scrooge: [.73, .4, 1.2],
   flying_squirrel: [.65, .42, 1.1], porcupine: [.23, .5, 1.5], chinchilla: [.75, .4, 1], armadillo: [.62, .42, 1], squirrel: [.62, .31, 1.1], chipmunk: [.8, .47, 1.3],
   hedgehog: [.47, .47, 1], hamster: [.52, .38, 1], muskrat: [.4, .38, 1.3], groundhog: [.58, .3, 1], gopher: [.62, .37, 1], verminus: [.7, .22, 1],
-  pestis: [.66, .48, 1], sirocco: [.62, .5, 1.2], gale: [.72, .56, 1.7], jerboa: [.73, .38, 1.3], hornet: [.5, .45, 1], chameleon: [.62, .28, 1.3],
+  pestis: [.66, .48, 1], sirocco: [.62, .5, 1.2], gale: [.76, .55, 1.7], jerboa: [.73, .38, 1.3], hornet: [.5, .45, 1], chameleon: [.62, .28, 1.3],
   skunk: [.28, .55, 1.3], lemming: [.82, .38, 1.4], cheetah: [.87, .4, 1.3], rat: [.8, .48, 1], falcon: [.8, .6, 1.7], bat: [.53, .44, 1.3],
   mouse: [.47, .33, 1], lobo: [.55, .38, 1.2], raksha: [.63, .38, 1.1], clarion: [.63, .16, 1.1], bush_dog: [.64, .3, 1.1], red_wolf: [.7, .32, 1.4],
   gray_wolf: [.8, .5, 1], fox: [.7, .4, 1.3], african_wild_dog: [.55, .3, 1.2], dingo: [.73, .25, 1.1], dog: [.67, .34, 1], alpha: [.6, .19, 1.2],
@@ -262,9 +262,8 @@ export const FULL = {
 const ALIAS = { tutorial_cape_buffalo: 'cape_buffalo', tutorial_dire_wolf: 'dire_wolf', tutorial_lynx: 'lynx', tutorial_chipmunk: 'chipmunk' };
 for (const [id, art] of Object.entries(ALIAS)) for (const T of [CROP, STRIP, FULL]) if (art in T) T[id] = T[art];
 // Cards whose painting shows an animal the card no longer is (the workbench changed its species): unpainted until
-// repainted, so they never wear another animal's art. Scrooge was painted a hamster (now a chipmunk), Gale an albatross
-// (now a falcon).
-for (const id of ['scrooge', 'gale']) for (const T of [CROP, STRIP, FULL]) delete T[id];
+// repainted, so they never wear another animal's art. Scrooge was painted a hamster (now a chipmunk).
+for (const id of ['scrooge']) for (const T of [CROP, STRIP, FULL]) delete T[id];
 export const hasArt = id => id in CROP;
 export const artUrl = id => `/static/art/${ALIAS[id] || id}.webp`;
 // A long grid's art loads as its cards near view in `scroller` (data-art, from cardHTML's `lazy`), not all hundred at once.
