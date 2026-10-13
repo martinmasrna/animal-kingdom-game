@@ -1,6 +1,7 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  butterfly: [.52, .45, .95],
   caterpillar: [.52, .38, .85], earthworm: [.52, .47, .85], hare: [.57, .45, .8], stork: [.52, .32, .82],
   food_otk_legend_squirrel: [.58, .52, .78],
   handlock_legend_eagle: [.5, .45, .82], handlock_legend_eagle_mate: [.48, .47, .82],
@@ -83,7 +84,7 @@ export const CROP = {
   nurse_bee: [.6, .5, .8], nurse_bumblebee: [.5, .45, .8], termite_king: [.55, .5, .8], crocodile: [.68, .45, .62], honey_badger: [.6, .48, .8], termite_queen: [.62, .55, .75], naked_mole_rat: [.66, .5, .6],
   cairn: [.66, .44, .66], chipmunk: [.6, .45, .8], gopher: [.52, .38, .8], groundhog: [.55, .36, .65], hamster: [.52, .42, .72], hedgehog: [.5, .45, .8], muskrat: [.56, .42, .86],
   armadillo: [.55, .45, .75], chinchilla: [.68, .38, .7], flying_squirrel: [.62, .5, .7], porcupine: [.35, .48, .62], fathom: [.5, .47, .75],
-  greywhisker: [.5, .33, .65], rat_king: [.52, .35, .8], scrooge: [.62, .45, .62],
+  greywhisker: [.5, .33, .65], rat_king: [.52, .35, .8], scrooge: [.56, .36, .6],
   queen_honoria: [.6, .38, .7], queen_marabunta: [.64, .43, .7], vesper: [.55, .42, .8], falstaff: [.52, .37, .95],
   eon: [.6, .33, .7], ember: [.55, .3, .75], aurum: [.52, .5, .85], omen: [.58, .44, .82], anaconda: [.49, .6, .62], egg_eater: [.68, .27, .6], snake_egg: [.5, .42, .8], bird_egg: [.52, .42, .82],
   dingo: [.7, .27, .6], fox: [.62, .42, .7], african_wild_dog: [.5, .4, .6], dog: [.66, .3, .6],
@@ -93,6 +94,7 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  butterfly: [.55, .4, 1.2],
   caterpillar: [.55, .3, 1.2], earthworm: [.62, .42, 1.2], hare: [.62, .37, 1.2], stork: [.6, .22, 1.2],
   food_otk_legend_squirrel: [.66, .38, 1.3],
   handlock_legend_eagle: [.32, .45, 1.3], handlock_legend_eagle_mate: [.24, .48, 1.3],
@@ -167,7 +169,7 @@ export const STRIP = {
   queen_bee: [.65, .42, 1.3], guard_hornet: [.43, .4, 1], soldier_ant: [.55, .34, 1.3], worker_ant: [.52, .32, 1], worker_wasp: [.62, .4, 1.1], worker_bee: [.6, .42, 1.2],
   methuselah: [.62, .33, 1], borealis: [.83, .17, 1], bulwark: [.6, .33, 1.1], cairn: [.7, .42, 1.1], polar_bear: [.52, .32, 1.3], rhinoceros: [.68, .42, 1],
   hippopotamus: [.62, .24, 1], andean_condor: [.6, .25, 1.6], elephant: [.57, .26, 1], grizzly_bear: [.72, .3, 1], oxpecker: [.62, .25, 1.3], vulture: [.72, .5, 1.2], black_bear: [.38, .28, 1.5],
-  sloth: [.55, .29, 1], cape_buffalo: [.52, .38, 1], fathom: [.5, .48, 1.1], greywhisker: [.5, .29, 1], rat_king: [.52, .17, 1.2], scrooge: [.73, .4, 1.2],
+  sloth: [.55, .29, 1], cape_buffalo: [.52, .38, 1], fathom: [.5, .48, 1.1], greywhisker: [.5, .29, 1], rat_king: [.52, .17, 1.2], scrooge: [.58, .27, 1],
   flying_squirrel: [.65, .42, 1.1], porcupine: [.23, .5, 1.5], chinchilla: [.75, .4, 1], armadillo: [.62, .42, 1], squirrel: [.62, .31, 1.1], chipmunk: [.8, .47, 1.3],
   hedgehog: [.47, .47, 1], hamster: [.52, .38, 1], muskrat: [.4, .38, 1.3], groundhog: [.58, .3, 1], gopher: [.62, .37, 1], verminus: [.7, .22, 1],
   pestis: [.66, .48, 1], sirocco: [.62, .5, 1.2], gale: [.76, .55, 1.7], jerboa: [.73, .38, 1.3], hornet: [.5, .45, 1], chameleon: [.62, .28, 1.3],
@@ -181,6 +183,7 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  butterfly: .42,
   caterpillar: .4, earthworm: .48, hare: .45, stork: .38,
   food_otk_legend_squirrel: .5,
   handlock_legend_eagle: .42, handlock_legend_eagle_mate: .44,
@@ -256,7 +259,7 @@ export const FULL = {
   lynx: .395, magpie: .375, methuselah: .405, mouse: .455, muskrat: .48, nurse_bumblebee: .445, omen: .48, outrider: .365,
   owl: .385, pestis: .405, poppy: .355, porcupine: .435, prince_leo: .365, princess_lea: .395, pup: .365, queen_adira: .375,
   queen_bee: .425, queen_marabunta: .45, raksha: .425, rat: .475, rat_king: .365, rattlesnake: .555, raven: .405,
-  red_wolf: .445, rhinoceros: .395, rusty: .345, scrooge: .485, serval: .5, sirocco: .44, skunk: .45, sloth: .3,
+  red_wolf: .445, rhinoceros: .395, rusty: .345, scrooge: .41, serval: .5, sirocco: .44, skunk: .45, sloth: .3,
   snake_egg: .42, snow_leopard: .385, soldier_ant: .465, squirrel: .455, taipan: .405, termite_king: .485, crocodile: .45, honey_badger: .5,
   termite_queen: .47, naked_mole_rat: .5, tiger: .35, verminus: .345, vesper: .43, viper: .415, worker_ant: .465, worker_bee: .355,
   worker_wasp: .375,
@@ -264,9 +267,6 @@ export const FULL = {
 // Cards painted as another card: the tutorial's copies of the cards it was written with (the live cards changed since).
 const ALIAS = { tutorial_cape_buffalo: 'cape_buffalo', tutorial_dire_wolf: 'dire_wolf', tutorial_lynx: 'lynx', tutorial_chipmunk: 'chipmunk' };
 for (const [id, art] of Object.entries(ALIAS)) for (const T of [CROP, STRIP, FULL]) if (art in T) T[id] = T[art];
-// Cards whose painting shows an animal the card no longer is (the workbench changed its species): unpainted until
-// repainted, so they never wear another animal's art. Scrooge was painted a hamster (now a chipmunk).
-for (const id of ['scrooge']) for (const T of [CROP, STRIP, FULL]) delete T[id];
 export const hasArt = id => id in CROP;
 export const artUrl = id => `/static/art/${ALIAS[id] || id}.webp`;
 // A long grid's art loads as its cards near view in `scroller` (data-art, from cardHTML's `lazy`), not all hundred at once.
