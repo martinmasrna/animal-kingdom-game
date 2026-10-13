@@ -19,7 +19,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Nurse Bee** | 2 | Colony | 3 | Flight. Roar: if you control two of the same Colony animal, draw 2 cards. |
+| **Nurse Bee** | 2 | Colony | 3 | Flight. Roar: if you control two of the same Colony animal, draw 3 cards. |
 | **Nurse Bumblebee** | 2 | Colony | 3 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. |
 | **Termite King** | 2 | Colony | 6 | Roar: if you control a Colony Queen, draw 2 cards. |
 | **Termite Queen** | 2 | Colony, Queen | 3 | Roar: you may play another non-Queen Colony animal. |
