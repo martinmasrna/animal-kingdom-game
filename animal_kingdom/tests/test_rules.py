@@ -13,7 +13,7 @@ from animal_kingdom.engine.state import EngineError, Result
 from ._helpers import make_state, place_targets, put
 
 # Reworked-pool card ids with known integer strengths used below, all vanilla-bodied
-# for rules tests (no Phase-1 effect handler, no keyword): house_cat=1, caracal=4,
+# for rules tests (no Phase-1 effect handler, no keyword): alley_cat=1, caracal=4,
 # cheetah=5, lion=7.
 
 
@@ -35,19 +35,19 @@ def test_connection_extends_through_occupied():
 # ------------------------------------------------------------------------ covering
 
 def test_covering_requires_strictly_greater_strength():
-    s = make_state(hands={"A": ["lion", "house_cat", "caracal"], "B": []})
+    s = make_state(hands={"A": ["lion", "alley_cat", "caracal"], "B": []})
     put(s, "1,2", "caracal", "A")           # A holds a connected front
     put(s, "2,2", "caracal", "B")  # enemy strength 4, adjacent → connected for A
     legal = rules.legal_actions(s)
     assert PlaceAction("lion", ("cr", "2,2")) in legal             # 7 > 4 ✓
-    assert PlaceAction("house_cat", ("cr", "2,2")) not in legal  # 1 > 4 ✗
+    assert PlaceAction("alley_cat", ("cr", "2,2")) not in legal  # 1 > 4 ✗
     assert PlaceAction("caracal", ("cr", "2,2")) not in legal  # 4 > 4 ✗ (strict)
 
 
 def test_own_stacking_needs_no_strength():
-    s = make_state(hands={"A": ["house_cat"], "B": []})
+    s = make_state(hands={"A": ["alley_cat"], "B": []})
     put(s, "1,2", "lion", "A")  # own strong unit
-    assert PlaceAction("house_cat", ("cr", "1,2")) in rules.legal_actions(s)
+    assert PlaceAction("alley_cat", ("cr", "1,2")) in rules.legal_actions(s)
 
 
 def test_stack_reveal_on_removal():
@@ -138,7 +138,7 @@ def test_two_actions_draw_draws_two_and_keeps_turn_open():
 
 
 def test_draw_at_the_hand_limit_burns_the_overflow():
-    full = ["house_cat"] * (TWO_ACTIONS.hand_limit - 1)
+    full = ["alley_cat"] * (TWO_ACTIONS.hand_limit - 1)
     s = make_state(hands={"A": full, "B": ["lion"]},
                    decks={"A": ["lion", "caracal", "cheetah"], "B": []}, config=TWO_ACTIONS)
     rules.apply_action(s, DrawAction())          # one card fits, the newest burns
@@ -154,7 +154,7 @@ def test_turn_ends_early_when_no_second_action_exists():
 
 
 def test_effect_granted_extra_play_consumes_no_action():
-    s = make_state(hands={"A": ["calib_extra_1", "house_cat", "caracal"], "B": ["lion"]},
+    s = make_state(hands={"A": ["calib_extra_1", "alley_cat", "caracal"], "B": ["lion"]},
                    config=TWO_ACTIONS)
     rules.apply_action(s, PlaceAction("calib_extra_1", ("cr", "1,1")))
     assert s.pending is not None                 # "play another animal" (mandatory)

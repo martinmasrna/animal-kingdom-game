@@ -58,8 +58,8 @@ def test_every_card_has_valid_static_fields():
 def test_known_cards_present_with_expected_data():
     cards = load_cards()
     # Only Goliath (Python) is dynamic.
-    assert cards["goliath"].is_dynamic
-    assert cards["goliath"].dynamic_strength == "removed_units_count"
+    assert cards["python"].is_dynamic
+    assert cards["python"].dynamic_strength == "removed_units_count"
     assert cards["chameleon"].base_strength == 0
     assert cards["tiger"].has_keyword("Apex Predator")
     assert cards["eagle"].has_keyword("Flight")
@@ -70,7 +70,7 @@ def test_known_cards_present_with_expected_data():
     assert cards["cairn"].food_cost == 15       # "Costs 15 food" body
     assert cards["elephant"].hungry == 5 and cards["blue_whale"].has_keyword("Titan")
     assert cards["nurse_bee"].has_roar
-    assert not cards["guard_hornet"].has_roar
+    assert not cards["guard_wasp"].has_roar
 
 
 def test_duplicate_card_id_rejected():

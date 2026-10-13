@@ -291,8 +291,8 @@ def test_roar_with_a_pending_choice_is_not_fizzled():
 
 
 def test_passive_rules_text_is_not_a_fizzled_roar():
-    s = make_state(hands={"A": ["guard_hornet"]})
-    action = PlaceAction("guard_hornet", ("cr", "1,2"))
+    s = make_state(hands={"A": ["guard_wasp"]})
+    action = PlaceAction("guard_wasp", ("cr", "1,2"))
     nxt = s.clone()
     rules.apply_action(nxt, action)
     assert not _roar_fizzled(s, nxt, "A", action)
@@ -313,8 +313,8 @@ def test_effect_readiness_detects_enabled_condition_without_card_special_case():
         decks={"A": ["mouse", "lion"], "B": []},
     )
     enabled = disabled.clone()
-    put(enabled, "1,1", "guard_hornet", "A")
-    put(enabled, "1,2", "guard_hornet", "A")
+    put(enabled, "1,1", "guard_wasp", "A")
+    put(enabled, "1,2", "guard_wasp", "A")
     assert _enabled_roar_count(disabled, "A") == 0
     assert _enabled_roar_count(enabled, "A") == 1
 

@@ -71,7 +71,7 @@ Keywords:
 
 Cards:
 
-- **Unnamed legendaries** show their species as their name until Martin names them in the workbench; their ids are fixed (`<deck>_legend_<species>`, `food_aggro_legend_repeat` and `_refill` for the two Rodents), so naming one later changes nothing else.
+- **Unnamed legendaries** show their species as their name until Martin names them in the workbench; their ids are fixed (`<species>_legend`, `rodent` for the placeholder-named Rodent), so naming one later changes nothing else.
 - **The legendary Cuckoo** must remove an adjacent animal of strength 4 or less if there is one (yours or a choosable enemy); "play another animal" is then mandatory if anything can be played.
 - **The legendary Opossum** reacts to covers by either player, your own included, and to any ally it can see covered. It draws only when the removal happened (an Armor ally stays, and no card comes).
 - **The legendary Sloth** runs each of your Dusk effects twice in a row; "At the end of your turn" effects are Dusk effects.

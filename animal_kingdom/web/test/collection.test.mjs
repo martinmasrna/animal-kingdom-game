@@ -65,7 +65,7 @@ test('adding says where the card went, and a refused add says why', async () => 
   await page.click('.side .st[data-card="lion"]'); await wait(80);                   // clicking its strip takes one out: 29
   await page.click(card('lion')); await page.click(card('lion')); await wait(30);        // back to 3 of 3 (30), then one too many
   assert.ok(await has(card('lion'), 'max'), 'all copies in: dimmed');
-  assert.ok(!(await has(card('dog'), 'max')), 'a full deck does not dim the cards it lacks: only used-up cards are dimmed');
+  assert.ok(!(await has(card('street_dog'), 'max')), 'a full deck does not dim the cards it lacks: only used-up cards are dimmed');
 });
 
 test('a chosen name and cover save with the deck', async () => {
@@ -90,7 +90,7 @@ test('a deck code copies, and pasting it (or a plain list) makes a deck', async 
   assert.equal((await myDecks()).length, before + 1);
   let decks = await myDecks(); const n = decks.length; assert.deepEqual(decks[n - 1].cards, decks.find(d => d.id === 'cats').cards, 'the pasted deck is the same deck');
   await paste('### From an agent\n3x Lion\n2x Alley Cat'); await wait(120);
-  decks = await myDecks(); assert.equal(decks[n].name, 'From an agent'); assert.deepEqual(decks[n].cards, { lion: 3, house_cat: 2 });
+  decks = await myDecks(); assert.equal(decks[n].name, 'From an agent'); assert.deepEqual(decks[n].cards, { lion: 3, alley_cat: 2 });
 });
 
 test('delete asks first', async () => {

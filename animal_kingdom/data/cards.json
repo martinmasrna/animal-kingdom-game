@@ -35,13 +35,13 @@
       "slug": "fish",
       "name": "Fish Token Aggro",
       "order": 5,
-      "cover": "fish_legend_tuna"
+      "cover": "tuna_legend"
     },
     {
       "slug": "food_aggro",
       "name": "Food Aggro",
       "order": 6,
-      "cover": "rat_king"
+      "cover": "barley"
     },
     {
       "slug": "food_otk",
@@ -65,13 +65,13 @@
       "slug": "giants",
       "name": "Giants",
       "order": 10,
-      "cover": "bulwark"
+      "cover": "brutus"
     },
     {
       "slug": "hoofed",
       "name": "Hoofed Graze",
       "order": 11,
-      "cover": "hoofed_legend_giraffe"
+      "cover": "giraffe_legend"
     }
   ],
   "cards": [
@@ -223,7 +223,7 @@
       "workbench_id": "colony-8"
     },
     {
-      "id": "guard_hornet",
+      "id": "guard_wasp",
       "name": "Guard Wasp",
       "deck": "colony",
       "rarity": "common",
@@ -307,7 +307,7 @@
       "workbench_id": "colony-13"
     },
     {
-      "id": "aristocrats_legend_cuckoo",
+      "id": "cuco",
       "name": "Cuco",
       "deck": "aristocrats",
       "rarity": "legendary",
@@ -339,7 +339,7 @@
       "workbench_id": "aristocrats-1"
     },
     {
-      "id": "aristocrats_legend_opossum",
+      "id": "opossum_legend",
       "name": "Opossum",
       "deck": "aristocrats",
       "rarity": "legendary",
@@ -353,7 +353,7 @@
       "workbench_id": "aristocrats-2"
     },
     {
-      "id": "aristocrats_legend_sloth",
+      "id": "sloth_legend",
       "name": "Sloth",
       "deck": "aristocrats",
       "rarity": "legendary",
@@ -507,7 +507,7 @@
       "workbench_id": "aristocrats-13"
     },
     {
-      "id": "canines_legend_leopard",
+      "id": "leopard_legend",
       "name": "Leopard",
       "deck": "canines",
       "rarity": "legendary",
@@ -558,7 +558,7 @@
       "workbench_id": "canines-2"
     },
     {
-      "id": "canines_legend_wolf",
+      "id": "wolf_legend",
       "name": "Wolf",
       "deck": "canines",
       "rarity": "legendary",
@@ -609,7 +609,7 @@
       "workbench_id": "canines-5"
     },
     {
-      "id": "gray_wolf",
+      "id": "jackal",
       "name": "Jackal",
       "deck": "canines",
       "rarity": "rare",
@@ -624,7 +624,7 @@
       "workbench_id": "canines-6"
     },
     {
-      "id": "red_wolf",
+      "id": "dhole",
       "name": "Dhole",
       "deck": "canines",
       "rarity": "rare",
@@ -641,7 +641,7 @@
       "workbench_id": "canines-7"
     },
     {
-      "id": "dire_wolf",
+      "id": "wolf",
       "name": "Wolf",
       "deck": "canines",
       "rarity": "common",
@@ -673,7 +673,7 @@
       "workbench_id": "canines-9"
     },
     {
-      "id": "raccoon_dog",
+      "id": "coyote",
       "name": "Coyote",
       "deck": "canines",
       "rarity": "common",
@@ -716,7 +716,7 @@
       "workbench_id": "canines-12"
     },
     {
-      "id": "dog",
+      "id": "street_dog",
       "name": "Street Dog",
       "deck": "canines",
       "rarity": "common",
@@ -1147,7 +1147,7 @@
       "workbench_id": "cats-12"
     },
     {
-      "id": "house_cat",
+      "id": "alley_cat",
       "name": "Alley Cat",
       "deck": "cats",
       "rarity": "common",
@@ -1162,7 +1162,7 @@
       "workbench_id": "cats-13"
     },
     {
-      "id": "fish_legend_jellyfish",
+      "id": "jellyfish_legend",
       "name": "Jellyfish",
       "deck": "fish",
       "rarity": "legendary",
@@ -1176,7 +1176,7 @@
       "workbench_id": "fish-0"
     },
     {
-      "id": "fish_legend_tuna",
+      "id": "tuna_legend",
       "name": "Tuna",
       "deck": "fish",
       "rarity": "legendary",
@@ -1192,7 +1192,7 @@
       "workbench_id": "fish-1"
     },
     {
-      "id": "fish_legend_manta_ray",
+      "id": "manta_ray_legend",
       "name": "Manta Ray",
       "deck": "fish",
       "rarity": "legendary",
@@ -1208,7 +1208,7 @@
       "workbench_id": "fish-2"
     },
     {
-      "id": "fish_legend_piranha",
+      "id": "piranha_legend",
       "name": "Piranha",
       "deck": "fish",
       "rarity": "legendary",
@@ -1374,7 +1374,7 @@
       "workbench_id": "fish-13"
     },
     {
-      "id": "food_aggro_legend_repeat",
+      "id": "big_gus",
       "name": "Big Gus",
       "deck": "food_aggro",
       "rarity": "legendary",
@@ -1389,7 +1389,7 @@
       "workbench_id": "food-aggro-0"
     },
     {
-      "id": "food_aggro_legend_refill",
+      "id": "rodent",
       "name": "Rodent",
       "deck": "food_aggro",
       "rarity": "legendary",
@@ -1405,7 +1405,7 @@
       "workbench_id": "food-aggro-1"
     },
     {
-      "id": "rat_king",
+      "id": "barley",
       "name": "Barley",
       "deck": "food_aggro",
       "rarity": "legendary",
@@ -1600,7 +1600,7 @@
       "workbench_id": "food-otk-0"
     },
     {
-      "id": "food_otk_legend_squirrel",
+      "id": "squirrel_legend",
       "name": "Squirrel",
       "deck": "food_otk",
       "rarity": "legendary",
@@ -1616,7 +1616,7 @@
       "workbench_id": "food-otk-1"
     },
     {
-      "id": "food_otk_legend_honey_badger",
+      "id": "honey_badger_legend",
       "name": "Honey Badger",
       "deck": "food_otk",
       "rarity": "legendary",
@@ -1635,7 +1635,7 @@
       "workbench_id": "food-otk-2"
     },
     {
-      "id": "food_otk_legend_octopus",
+      "id": "octopus_legend",
       "name": "Octopus",
       "deck": "food_otk",
       "rarity": "legendary",
@@ -1824,7 +1824,7 @@
       "workbench_id": "egg-control-0"
     },
     {
-      "id": "egg_control_legend_raven",
+      "id": "raven_legend",
       "name": "Raven",
       "deck": "egg_control",
       "rarity": "legendary",
@@ -1857,7 +1857,7 @@
       "workbench_id": "egg-control-2"
     },
     {
-      "id": "omen",
+      "id": "black_swan",
       "name": "Black Swan",
       "deck": "egg_control",
       "rarity": "legendary",
@@ -1872,7 +1872,7 @@
       "workbench_id": "egg-control-3"
     },
     {
-      "id": "stoop",
+      "id": "hawk",
       "name": "Hawk",
       "deck": "egg_control",
       "rarity": "rare",
@@ -1889,7 +1889,7 @@
       "workbench_id": "egg-control-4"
     },
     {
-      "id": "king_cobra",
+      "id": "gaboon_viper",
       "name": "Gaboon Viper",
       "deck": "egg_control",
       "rarity": "rare",
@@ -1936,7 +1936,7 @@
       "workbench_id": "egg-control-7"
     },
     {
-      "id": "goliath",
+      "id": "python",
       "name": "Python",
       "deck": "egg_control",
       "rarity": "common",
@@ -2030,7 +2030,7 @@
       "workbench_id": "egg-control-13"
     },
     {
-      "id": "handlock_legend_baboon",
+      "id": "baboon_legend",
       "name": "Baboon",
       "deck": "handlock",
       "rarity": "legendary",
@@ -2061,7 +2061,7 @@
       "workbench_id": "handlock-1"
     },
     {
-      "id": "handlock_legend_butterfly",
+      "id": "butterfly_legend",
       "name": "Butterfly",
       "deck": "handlock",
       "rarity": "legendary",
@@ -2075,7 +2075,7 @@
       "workbench_id": "handlock-2"
     },
     {
-      "id": "handlock_legend_eagle",
+      "id": "arne",
       "name": "Arne",
       "deck": "handlock",
       "rarity": "legendary",
@@ -2088,7 +2088,7 @@
         "Flight",
         "Apex Predator"
       ],
-      "mate": "handlock_legend_eagle_mate",
+      "mate": "arna",
       "species": "Eagle",
       "habitat": "Forest",
       "workbench_id": "handlock-3"
@@ -2246,7 +2246,7 @@
       "workbench_id": "handlock-13"
     },
     {
-      "id": "bulwark",
+      "id": "brutus",
       "name": "Brutus",
       "deck": "giants",
       "rarity": "legendary",
@@ -2294,7 +2294,7 @@
       "workbench_id": "giants-2"
     },
     {
-      "id": "giants_legend_oxpecker",
+      "id": "oxpecker_legend",
       "name": "Oxpecker",
       "deck": "giants",
       "rarity": "legendary",
@@ -2469,7 +2469,7 @@
       "workbench_id": "giants-13"
     },
     {
-      "id": "hoofed_legend_wildebeest",
+      "id": "wildebeest_legend",
       "name": "Wildebeest",
       "deck": "hoofed",
       "rarity": "legendary",
@@ -2485,7 +2485,7 @@
       "workbench_id": "hoofed-0"
     },
     {
-      "id": "hoofed_legend_boar",
+      "id": "boar_legend",
       "name": "Boar",
       "deck": "hoofed",
       "rarity": "legendary",
@@ -2501,7 +2501,7 @@
       "workbench_id": "hoofed-1"
     },
     {
-      "id": "hoofed_legend_zebra",
+      "id": "zebra_legend",
       "name": "Zebra",
       "deck": "hoofed",
       "rarity": "legendary",
@@ -2517,7 +2517,7 @@
       "workbench_id": "hoofed-2"
     },
     {
-      "id": "hoofed_legend_giraffe",
+      "id": "giraffe_legend",
       "name": "Giraffe",
       "deck": "hoofed",
       "rarity": "legendary",
@@ -2824,7 +2824,7 @@
       "workbench_id": "pool-y0"
     },
     {
-      "id": "alpha",
+      "id": "scarlett",
       "name": "Scarlett",
       "deck": "bench",
       "rarity": "legendary",
@@ -3249,7 +3249,7 @@
       "text": ""
     },
     {
-      "id": "handlock_legend_butterfly_2",
+      "id": "butterfly_legend_caterpillar",
       "name": "Caterpillar",
       "deck": "token",
       "rarity": "legendary",
@@ -3260,7 +3260,7 @@
       "stage": 2
     },
     {
-      "id": "handlock_legend_butterfly_3",
+      "id": "butterfly_legend_chrysalis",
       "name": "Chrysalis",
       "deck": "token",
       "rarity": "legendary",
@@ -3273,7 +3273,7 @@
       "stage": 3
     },
     {
-      "id": "handlock_legend_butterfly_4",
+      "id": "butterfly_legend_butterfly",
       "name": "Butterfly",
       "deck": "token",
       "rarity": "legendary",
@@ -3287,7 +3287,7 @@
       "stage": 4
     },
     {
-      "id": "handlock_legend_butterfly_5",
+      "id": "butterfly_legend_monarch",
       "name": "Monarch",
       "deck": "token",
       "rarity": "legendary",
@@ -3301,7 +3301,7 @@
       "stage": 5
     },
     {
-      "id": "handlock_legend_eagle_mate",
+      "id": "arna",
       "name": "Arna",
       "deck": "token",
       "rarity": "legendary",
@@ -3314,7 +3314,7 @@
         "Apex Predator"
       ],
       "text": "Flight. Apex Predator. While this and Arne are in your hand, they share their strength.",
-      "mate": "handlock_legend_eagle"
+      "mate": "arne"
     },
     {
       "id": "eon_food_engine",

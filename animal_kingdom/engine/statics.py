@@ -58,7 +58,7 @@ def crossroad_of(state: GameState, unit: UnitInstance) -> Optional[str]:
 KEYWORD_AURAS = {
     "armadillo": ("Stealth", None),               # "Your adjacent animals have Stealth."
     "capybara": ("Armor", None),                  # "Your adjacent animals have Armor."
-    "fish_legend_jellyfish": ("Poison", "Fish"),  # "Your adjacent Fish have Poison."
+    "jellyfish_legend": ("Poison", "Fish"),  # "Your adjacent Fish have Poison."
 }
 
 
@@ -116,7 +116,7 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
                 u is not placer for u in active_tops(state, owner, "leopard")):
             return True
         # The legendary Piranha: "Your Fish can be placed on enemies with strength up to the number of Fish you control."
-        if "Fish" in placer_card.tags and _controls(state, owner, "fish_legend_piranha"):
+        if "Fish" in placer_card.tags and _controls(state, owner, "piranha_legend"):
             fish = sum(1 for st in state.board.values()
                        if st and st[-1].owner == owner and "Fish" in state.cards[st[-1].card_id].tags)
             if target_str <= fish:
@@ -150,8 +150,8 @@ def free_roams(state: GameState, player: str, unit: Optional[UnitInstance] = Non
 
 def roam_covers_equal(state: GameState, unit: UnitInstance) -> bool:
     """Whether `unit`'s roams may cover an enemy of equal strength (Dhole: "Your animals can roam onto enemies of equal
-    strength", id `red_wolf`)."""
-    return _controls(state, unit.owner, "red_wolf")
+    strength", id `dhole`)."""
+    return _controls(state, unit.owner, "dhole")
 
 
 # ------------------------------------------------------------------------ Reach
@@ -276,8 +276,8 @@ def region_food_modifier(state: GameState, player: str) -> int:
     regions produce 5 less food."). A region never produces less than nothing."""
     from .state import other_player
     cfg = state.config
-    return (cfg.migration_bonus * len(active_tops(state, player, "hoofed_legend_wildebeest"))
-            - cfg.boar_penalty * len(active_tops(state, other_player(player), "hoofed_legend_boar")))
+    return (cfg.migration_bonus * len(active_tops(state, player, "wildebeest_legend"))
+            - cfg.boar_penalty * len(active_tops(state, other_player(player), "boar_legend")))
 
 
 def food_cap(state: GameState) -> Optional[int]:
@@ -294,4 +294,4 @@ def food_cap(state: GameState) -> Optional[int]:
 def hand_revealed(state: GameState, player: str) -> bool:
     """`player` plays with their hand revealed while their opponent controls the legendary Giraffe."""
     from .state import other_player
-    return _controls(state, other_player(player), "hoofed_legend_giraffe")
+    return _controls(state, other_player(player), "giraffe_legend")

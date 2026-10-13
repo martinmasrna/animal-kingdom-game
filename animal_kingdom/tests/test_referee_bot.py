@@ -111,7 +111,7 @@ def test_plans_nurse_then_queen_bee_then_worker_as_one_turn():
         config=config,
     )
     for cr in ("1,1", "1,2", "1,3", "2,1", "2,2"):
-        put(s, cr, "guard_hornet", "A")
+        put(s, cr, "guard_wasp", "A")
 
     bot = small_referee()
     nurse = bot.choose(s.view_for("A"), rules.legal_actions(s), s)
@@ -144,7 +144,7 @@ def test_saved_game_opening_preserves_the_duplicate_setup():
         rules.apply_action(s, action)
 
     assert [a.card_id for a in chosen if isinstance(a, PlaceAction)] == [
-        "guard_hornet", "guard_hornet",
+        "guard_wasp", "guard_wasp",
     ]
     assert all(isinstance(a, PlaceAction) for a in chosen)
     assert all(a.crossroad not in s.game_map.hq_front("B") for a in chosen)
@@ -222,7 +222,7 @@ def test_node_budget_falls_back_deterministically():
         config=config,
     )
     for cr in ("1,1", "1,2", "1,3", "2,1", "2,2"):
-        put(s, cr, "guard_hornet", "A")
+        put(s, cr, "guard_wasp", "A")
     legal = rules.legal_actions(s)
     first = RefereeBot(
         seed=4, determinizations=2, beam_width=4, max_search_nodes=1)

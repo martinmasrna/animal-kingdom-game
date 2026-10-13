@@ -93,7 +93,7 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
     if not _inked(state, self_iid):
         if cid == "verminus":                   # +1 for each OTHER unit you control (any tag)
             bonus += cfg.anthem_verminus_per * sum(1 for u in tops if u.iid != self_iid)
-        elif cid == "guard_hornet":             # +5 while you control >= threshold Colony units (itself once on the board)
+        elif cid == "guard_wasp":             # +5 while you control >= threshold Colony units (itself once on the board)
             if count("Colony", include_self=True) >= cfg.guard_hornet_colony_threshold:
                 bonus += cfg.guard_hornet_bonus
         elif cid == "tuna":                     # +1 for each other Fish you control

@@ -115,7 +115,7 @@ def test_plans_nurse_then_queen_bee_then_worker_as_one_turn():
                    decks={"A": ["worker_wasp", "queen_bee"], "B": ["mouse"] * 4},
                    config=TWO_ACTION)
     for cr in ("1,1", "1,2", "1,3", "2,1", "2,2"):
-        put(s, cr, "guard_hornet", "A")
+        put(s, cr, "guard_wasp", "A")
     bot = small_turn()
 
     nurse = bot.choose(s.view_for("A"), rules.legal_actions(s), s)
@@ -136,7 +136,7 @@ def test_resolves_mandatory_removal_target_choice():
                    decks={"A": [], "B": ["pup"] * 4}, config=TWO_ACTION)
     put(s, "1,1", "lion", "A")
     put(s, "2,1", "pup", "B")     # str 1 (Pup), adjacent to 1,1
-    put(s, "1,2", "gray_wolf", "B")   # str 4, adjacent to 1,1 - the better removal
+    put(s, "1,2", "jackal", "B")   # str 4, adjacent to 1,1 - the better removal
     rules.apply_action(s, PlaceAction("jaguar", ("cr", "1,1")))  # covers lion, adjacent to both
     legal = rules.legal_actions(s)
     assert all(isinstance(a, ChoiceAction) for a in legal)
@@ -258,16 +258,16 @@ def test_beam_prunes_a_wide_flight_fixture():
 # ------------------------------------------- same-turn puzzles, one per non-Colony family
 
 def test_cats_plays_twin_enabler_before_the_twin():
-    # house_cat's Roar plays one more Cat when you control another Cat. Playing it first
+    # alley_cat's Roar plays one more Cat when you control another Cat. Playing it first
     # (extra-casting caracal) avoids the wasted-Roar both cards fizzling the other order.
-    s = make_state(current="A", hands={"A": ["house_cat", "caracal"]},
+    s = make_state(current="A", hands={"A": ["alley_cat", "caracal"]},
                    decks={"A": [], "B": ["mouse"] * 4}, config=TWO_ACTION)
-    put(s, "1,1", "lion", "A")     # the "another Cat" house_cat needs
+    put(s, "1,1", "lion", "A")     # the "another Cat" alley_cat needs
     bot = small_turn()
     first = bot.choose(s.view_for("A"), rules.legal_actions(s), s)
-    assert isinstance(first, PlaceAction) and first.card_id == "house_cat"
+    assert isinstance(first, PlaceAction) and first.card_id == "alley_cat"
     play_turn(bot, s)
-    assert {"house_cat", "caracal"} <= set(own_ids(s))
+    assert {"alley_cat", "caracal"} <= set(own_ids(s))
 
 
 def test_canine_buffs_before_the_strength_gated_payoff():
@@ -295,7 +295,7 @@ def test_rattlesnake_grows_from_ravens_two_shuffles():
 def test_giants_land_brutus_to_clear_the_den_front():
     # Brutus clears every adjacent animal. Placing it on the connected HQ front next to the
     # enemy chain wipes the enemy off A's den front.
-    s = make_state(current="A", hands={"A": ["bulwark"]},
+    s = make_state(current="A", hands={"A": ["brutus"]},
                    decks={"A": ["mouse"] * 3, "B": ["mouse"] * 4},
                    food={"A": 30, "B": 0}, config=TWO_ACTION)
     put(s, "1,1", "lion", "A")      # connects the HQ front
@@ -303,7 +303,7 @@ def test_giants_land_brutus_to_clear_the_den_front():
         put(s, cr, "mouse", "B")     # genuine connected enemy chain to A's HQ
     bot = small_turn()
     play_turn(bot, s)
-    assert "bulwark" in own_ids(s, "A")
+    assert "brutus" in own_ids(s, "A")
     top = s.top_unit("1,2")
     assert top is None or top.owner == "A"                # enemy on A's HQ front neutralized
 

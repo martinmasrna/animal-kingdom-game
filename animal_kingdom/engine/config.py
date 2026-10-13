@@ -110,7 +110,6 @@ class Config:
     jaguar_max: int = 4
     honey_badger_min: int = 6            # Honey Badger removes an enemy of strength >= this
     stoop_max: int = 3                   # baseline-ruler tuning 2026-07-13: str 4→3, remove ≤4→≤3
-                                          # (id kept as "stoop"; printed name "Hawk")
     rhinoceros_max: int = 2              # baseline-ruler tuning 2026-07-13: remove-all ≤3→≤2
     hippopotamus_max: int = 3
     cuckoo_legend_max: int = 4           # the legendary Cuckoo: removes an adjacent animal of strength <= this

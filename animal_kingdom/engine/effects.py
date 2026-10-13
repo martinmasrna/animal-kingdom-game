@@ -937,7 +937,7 @@ def _push_timed_hooks(state: GameState, player: str, hook_name: str) -> None:
         if hook_name == "on_start_of_turn" and "Hungry" in state.cards[top.card_id].keywords:
             due.append((top.play_seq, cr, top.iid, top.card_id, "hungry"))
     # The legendary Sloth: "Your Dusk effects happen twice." Each one runs twice in a row.
-    times = 2 if hook_name == "on_end_of_turn" and statics.active_tops(state, player, "aristocrats_legend_sloth") else 1
+    times = 2 if hook_name == "on_end_of_turn" and statics.active_tops(state, player, "sloth_legend") else 1
     for _, _, iid, card_id, hook in sorted(due, reverse=True):
         for _ in range(times):
             state.effect_stack.append({"op": "timed_hook", "hook": hook, "iid": iid, "player": player,
@@ -964,7 +964,7 @@ def _eat(state, unit, cr) -> None:
     if not statics.has_keyword(state, unit, "Hungry", cr):
         return
     n = state.cards[unit.card_id].hungry
-    if any((top := state.top_unit(nb)) and top.owner == unit.owner and top.card_id == "giants_legend_oxpecker"
+    if any((top := state.top_unit(nb)) and top.owner == unit.owner and top.card_id == "oxpecker_legend"
            and statics.active(state, top) for nb in state.game_map.neighbors(cr)):
         return
     prev, state.cause, state.cause_iid = (state.cause, state.cause_iid), unit.card_id, unit.iid
@@ -1630,7 +1630,7 @@ def roar_condition(state, player, card_id, unit=None):
         "groundhog": lambda: _fed_this_turn(state, player),
         "bobcat": lambda: others("Cat") >= 1,
         "tutorial_lynx": lambda: others("Cat") >= 1,
-        "house_cat": lambda: others("Cat") >= 1,
+        "alley_cat": lambda: others("Cat") >= 1,
         "worker_bee": lambda: others("Worker") >= 1,
         "termite_king": lambda: _control_tag_count(state, player, "Colony", "Queen") >= 1,
         "nurse_bumblebee": lambda: others("Colony") + 1 >= colony_min,
@@ -2486,8 +2486,8 @@ def _silverback_place(state, unit, cr):
     _grant(state, _hand_iids(state, unit.owner), state.config.silverback_grant)
 
 
-BUTTERFLY_STAGES = ["handlock_legend_butterfly", "handlock_legend_butterfly_2", "handlock_legend_butterfly_3",
-                    "handlock_legend_butterfly_4", "handlock_legend_butterfly_5"]
+BUTTERFLY_STAGES = ["butterfly_legend", "butterfly_legend_caterpillar", "butterfly_legend_chrysalis",
+                    "butterfly_legend_butterfly", "butterfly_legend_monarch"]
 
 
 def _butterfly_evolve(state, inst, amount):
@@ -2735,9 +2735,9 @@ def _calib_removal(max_attr=None, min_attr=None):
 
 EFFECTS: dict[str, dict[str, Callable]] = {
     # Aristocrats.
-    "aristocrats_legend_cuckoo": {"on_place": _cuckoo_legend_place},
+    "cuco": {"on_place": _cuckoo_legend_place},
     "ember": {"on_remove": _ember_remove},
-    "aristocrats_legend_opossum": {"on_ally_covered": _opossum_legend_ally_covered},
+    "opossum_legend": {"on_ally_covered": _opossum_legend_ally_covered},
     "praying_mantis": {"on_place": _mantis_place},
     "tarantula": {"on_start_of_turn": _tarantula_sot},
     "sea_turtle": {"on_end_of_turn": _sea_turtle_eot},
@@ -2751,14 +2751,14 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "cockroach": {"on_remove": _cockroach_remove},
     # Canines (Clarion's free roam and Dhole's equal roams are statics).
     "lobo": {"on_friendly_roam": _lobo_friendly_roam},
-    "canines_legend_wolf": {"on_roam": _wolf_legend_roam},
+    "wolf_legend": {"on_roam": _wolf_legend_roam},
     "fox": {"on_cover_enemy": _fox_cover},
-    "gray_wolf": {"on_place": _jackal_place},
+    "jackal": {"on_place": _jackal_place},
     "bush_dog": {"on_place": _bush_dog_place},
-    "raccoon_dog": {"on_friendly_roam": _raccoon_dog_friendly_roam},
+    "coyote": {"on_friendly_roam": _raccoon_dog_friendly_roam},
     "african_wild_dog": {"on_end_of_turn": _wild_dog_eot},
     "badger": {"on_place": _draws_filtered("keyword:Roam")},
-    "dog": {"on_place": _stray_dog_place},
+    "street_dog": {"on_place": _stray_dog_place},
     # Cats (King Theron fires from _fire_cover_event; Leopard is a static).
     "prince_leo": {"on_place": _twin_place("princess_lea")},
     "princess_lea": {"on_place": _twin_place("prince_leo")},
@@ -2767,7 +2767,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "serval": {"on_place": _serval_place},
     "lynx": {"on_place_onto_enemy": _draw1},
     "bobcat": {"on_place": _conditional(_draw1)},
-    "house_cat": {"on_place": _house_cat_place},
+    "alley_cat": {"on_place": _house_cat_place},
     # Colony.
     "queen_marabunta": {"on_place": _queen_marabunta_place},
     "queen_honoria": {"on_friendly_play": _queen_honoria_friendly_play},
@@ -2798,11 +2798,11 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "mouse": {"on_place": _draws_filtered("tag:Rodent")},
     # Egg Control.
     "eon": {"on_end_of_turn": _eon_end_of_turn},
-    "egg_control_legend_raven": {"on_place": _raven_legend_place},
+    "raven_legend": {"on_place": _raven_legend_place},
     "aurum": {"on_start_of_turn": _aurum_start},
-    "omen": {"on_draw": _omen_drawn},
-    "stoop": {"on_place": _removes("stoop_max")},
-    "king_cobra": {"on_place": _king_cobra_place},
+    "black_swan": {"on_draw": _omen_drawn},
+    "hawk": {"on_place": _removes("stoop_max")},
+    "gaboon_viper": {"on_place": _king_cobra_place},
     "magpie": {"on_place": _magpie_place},
     "black_mamba": {"on_place": _removes("black_mamba_max")},
     "mosquito": {"on_place": _mosquito_place},
@@ -2810,8 +2810,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "bird_egg": {"on_place": _bird_egg_place},
     "snake_egg": {"on_place": _snake_egg_place},
     # Fish (Mackerel and Tuna are anthems; the legendary Jellyfish an aura; the legendary Piranha a static).
-    "fish_legend_tuna": {"on_place": _tuna_legend_place},
-    "fish_legend_manta_ray": {"on_end_of_turn": _manta_legend_eot},
+    "tuna_legend": {"on_place": _tuna_legend_place},
+    "manta_ray_legend": {"on_end_of_turn": _manta_legend_eot},
     "swordfish": {"on_place": _swordfish_place},
     "barracuda": {"on_place": _barracuda_place},
     "manta_ray": {"on_ally_covered": _manta_ally_covered},
@@ -2821,9 +2821,9 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "mahi_mahi": {"on_place": _mahi_mahi_place},
     "sunfish": {"on_place": _sunfish_place},
     # Food Aggro.
-    "food_aggro_legend_repeat": {"on_place": _repeat_legend_place},
-    "food_aggro_legend_refill": {"on_place": _refill_legend_place},
-    "rat_king": {"on_place": _rat_king_place},
+    "big_gus": {"on_place": _repeat_legend_place},
+    "rodent": {"on_place": _refill_legend_place},
+    "barley": {"on_place": _rat_king_place},
     "scrooge": {"on_place": _scrooge_place},
     "flying_squirrel": {"on_place": _gains("flying_squirrel_food")},
     "meerkat": {"on_place": _draw1, "on_enemy_placed_adjacent": _meerkat_enemy_placed},
@@ -2836,15 +2836,15 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "groundhog": {"on_place": _conditional(_gains("groundhog_food"))},
     # Food OTK (the legendary Honey Badger is its keywords; Capybara an aura; Armadillo too).
     "fathom": {"on_place": _fathom_place},
-    "food_otk_legend_squirrel": {"on_place": _otk_squirrel_place},
-    "food_otk_legend_octopus": {"on_place": _mimic_place},
+    "squirrel_legend": {"on_place": _otk_squirrel_place},
+    "octopus_legend": {"on_place": _mimic_place},
     "golden_orb_weaver": {"on_enemy_placed_adjacent": _orb_weaver_enemy_placed},
     "hedgehog": {"on_place": _gains("hedgehog_food")},
     "black_bear": {"on_place": _black_bear_place},
     "tortoise": {"on_place": _tortoise_place},
     "owl": {"on_place": _owl_place},
     # Giants (Hungry and Titan are keywords; the legendary Oxpecker feeds its neighbours in _eat).
-    "bulwark": {"on_place": _remove_all_adjacent},
+    "brutus": {"on_place": _remove_all_adjacent},
     "methuselah": {"on_end_of_turn": _methuselah_eot},
     "mocha": {"on_place": _mocha_place},
     "rhinoceros": {"on_place": _rhinoceros_place},
@@ -2855,14 +2855,14 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "dung_beetle": {"on_end_of_turn": _dung_beetle_eot},
     "sloth": {"on_place": _sloth_place},
     # Handlock (Grizzly Bear is an anthem; the Eagles' sharing lives in _gain_in_hand, the mate in state.ensure_mates).
-    "handlock_legend_baboon": {"on_end_of_turn": _baboon_legend_eot},
+    "baboon_legend": {"on_end_of_turn": _baboon_legend_eot},
     "silverback": {"on_place": _silverback_place},
-    "handlock_legend_butterfly": {"on_gain_in_hand": _butterfly_evolve},
-    "handlock_legend_butterfly_2": {"on_place": _draw1, "on_gain_in_hand": _butterfly_evolve},
-    "handlock_legend_butterfly_3": {"on_place": _draw_then_give_one, "on_gain_in_hand": _butterfly_evolve},
-    "handlock_legend_butterfly_4": {"on_place": _butterfly_stage_place(None, "butterfly_legend_stage4_grant"),
+    "butterfly_legend": {"on_gain_in_hand": _butterfly_evolve},
+    "butterfly_legend_caterpillar": {"on_place": _draw1, "on_gain_in_hand": _butterfly_evolve},
+    "butterfly_legend_chrysalis": {"on_place": _draw_then_give_one, "on_gain_in_hand": _butterfly_evolve},
+    "butterfly_legend_butterfly": {"on_place": _butterfly_stage_place(None, "butterfly_legend_stage4_grant"),
                                     "on_gain_in_hand": _butterfly_evolve},
-    "handlock_legend_butterfly_5": {"on_place": _butterfly_stage_place("butterfly_legend_stage5_draw",
+    "butterfly_legend_monarch": {"on_place": _butterfly_stage_place("butterfly_legend_stage5_draw",
                                                                        "butterfly_legend_stage5_grant")},
     "hummingbird": {"on_place": _draws("hummingbird_draw")},
     "macaque": {"on_place": _macaque_place},
@@ -2875,7 +2875,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "gorilla": {"on_place": _gorilla_place},
     # Hoofed (the legendary Wildebeest and Boar change region income; the legendary Giraffe reveals; Moose, Giraffe and
     # Boar are anthems).
-    "hoofed_legend_zebra": {"on_place": _zebra_legend_place},
+    "zebra_legend": {"on_place": _zebra_legend_place},
     "honey_badger": {"on_place": _removes(min_attr="honey_badger_min")},
     "okapi": {"on_end_of_turn": _okapi_eot},
     "zebra": {"on_flee": _zebra_flee},
@@ -2891,7 +2891,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "cuckoo": {"on_place": _cuckoo_place},
     "cuckoo_egg": {"on_draw": _cuckoo_egg_drawn},
     "opossum": {"on_place": _opossum_place},
-    "alpha": {"on_place": _alpha_place},
+    "scarlett": {"on_place": _alpha_place},
     "viper": {"on_place": _viper_place},
     "andean_condor": {"on_place": _andean_condor_place},
     "dingo": {"on_end_of_turn": _dingo_eot},

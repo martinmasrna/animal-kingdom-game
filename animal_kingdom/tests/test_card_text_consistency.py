@@ -38,7 +38,7 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "methuselah": ["methuselah_food"],
     "sloth": ["sloth_food"],
     "greywhisker": ["greywhisker_food"],
-    "rat_king": ["rat_king_per_rodent"],
+    "barley": ["rat_king_per_rodent"],
     "flying_squirrel": ["flying_squirrel_food"],
     "squirrel": ["squirrel_food"],
     "chipmunk": ["chipmunk_food_now", "chipmunk_food_later"],
@@ -52,7 +52,7 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "hyena": ["hyena_food_per"],
     "tortoise": ["tortoise_per_armor"],
     "dung_beetle": ["dung_beetle_per"],
-    "fish_legend_tuna": ["tuna_legend_food"],
+    "tuna_legend": ["tuna_legend_food"],
     **{f"calib_food10_{n}": ["squirrel_food"] for n in (2, 3, 4, 5, 6)},
     **{f"calib_food3t_{n}": ["worker_wasp_food"] for n in (2, 3, 4, 5, 6)},
 }
@@ -159,8 +159,8 @@ STRENGTH_LIMIT_RE = re.compile(r"strength (\d+) or (?:less|more)", re.IGNORECASE
 STRENGTH_LIMITS = {
     "jaguar": "jaguar_max",
     "honey_badger": "honey_badger_min",
-    "aristocrats_legend_cuckoo": "cuckoo_legend_max",
-    "stoop": "stoop_max",
+    "cuco": "cuckoo_legend_max",
+    "hawk": "stoop_max",
     "rhinoceros": "rhinoceros_max",
     "black_mamba": "black_mamba_max",
     "hippopotamus": "hippopotamus_max",
@@ -206,7 +206,7 @@ DELAY_RE = re.compile(r"in (\d+) turns", re.IGNORECASE)
 DELAY_CONSTANTS = {
     "black_bear": "black_bear_delay",
     "sloth": "sloth_delay",
-    "food_otk_legend_squirrel": "otk_squirrel_delay",
+    "squirrel_legend": "otk_squirrel_delay",
     "snake_egg": "egg_hatch_delay",
 }
 
@@ -260,8 +260,8 @@ DRAW_CONSTANTS: dict[str, list[str]] = {
     "praying_mantis": ["mantis_draw"],
     "hummingbird": ["hummingbird_draw"],
     "termite_king": ["termite_king_draw"],
-    "fish_legend_manta_ray": ["manta_legend_draw"],
-    "handlock_legend_butterfly_5": ["butterfly_legend_stage5_draw"],
+    "manta_ray_legend": ["manta_legend_draw"],
+    "butterfly_legend_monarch": ["butterfly_legend_stage5_draw"],
     "snake_egg": ["egg_hatch_draw"],   # "draw a Snake" now (snake_egg_draw, no printed number), "draw 2 Snakes" at the hatch
     **{cid: ["test_draw"] for cid in ("mock_draw2", "mock_skully", *(f"calib_draw2_{n}" for n in range(4)))},
 }
@@ -294,31 +294,31 @@ STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
 # card_id -> config attrs, one per printed "+N strength" (a "give" counter or a "has/have" anthem), in order. Every card
 # printing one must be listed (checked below): the launch decks brought a dozen of them at once.
 STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
-    "guard_hornet": ["guard_hornet_bonus"],
+    "guard_wasp": ["guard_hornet_bonus"],
     "verminus": ["anthem_verminus_per"],
-    "goliath": [],                             # dynamic strength: its +1 per removed animal is the rule itself
+    "python": [],                             # dynamic strength: its +1 per removed animal is the rule itself
     "raksha": ["raksha_anthem"],
     "dingo": ["dingo_grant"],
     "shuck": ["shuck_grant"],
     "egg_eater": ["egg_eater_growth"],
-    "canines_legend_wolf": ["wolf_legend_grant"],
+    "wolf_legend": ["wolf_legend_grant"],
     "bush_dog": ["bush_dog_grant"],
-    "raccoon_dog": ["raccoon_dog_grant"],
+    "coyote": ["raccoon_dog_grant"],
     "african_wild_dog": ["wild_dog_grant"],
-    "dog": ["stray_dog_grant"],
+    "street_dog": ["stray_dog_grant"],
     "mahi_mahi": ["mahi_mahi_grant"],
     "mackerel": ["mackerel_anthem"],
     "tuna": ["tuna_per_fish"],
-    "handlock_legend_baboon": ["baboon_legend_grant"],
+    "baboon_legend": ["baboon_legend_grant"],
     "silverback": ["silverback_grant"],
     "tarsier": ["tarsier_grant"],
     "baboon": ["baboon_grant"],
     "grizzly_bear": ["grizzly_per_card"],
     "hamster": ["hamster_per_step"],
     "butterfly": ["butterfly_grant"],
-    "handlock_legend_butterfly_3": ["butterfly_grant"],
-    "handlock_legend_butterfly_4": ["butterfly_legend_stage4_grant"],
-    "handlock_legend_butterfly_5": ["butterfly_legend_stage5_grant"],
+    "butterfly_legend_chrysalis": ["butterfly_grant"],
+    "butterfly_legend_butterfly": ["butterfly_legend_stage4_grant"],
+    "butterfly_legend_monarch": ["butterfly_legend_stage5_grant"],
     "moose": ["moose_anthem"],
     "giraffe": ["giraffe_bonus"],
     "boar": ["boar_grazing_bonus"],
@@ -337,7 +337,7 @@ def test_strength_bonus_text_matches_config():
             problems.append(f"{cid}: text prints +{nums} strength but STRENGTH_BONUS_CONSTANTS doesn't list it")
             continue
         attrs = STRENGTH_BONUS_CONSTANTS[cid]
-        if cid == "goliath":
+        if cid == "python":
             assert nums == [1]
             continue
         if len(attrs) != len(nums):
@@ -357,9 +357,9 @@ THRESHOLDS = {
     "hare": "hare_played_min",
     "macaque": "macaque_hand_min",
     "gorilla": "gorilla_min",
-    "fish_legend_manta_ray": "manta_legend_regions",
+    "manta_ray_legend": "manta_legend_regions",
     "nurse_bumblebee": "colony_synergy_threshold",
-    "guard_hornet": "guard_hornet_colony_threshold",
+    "guard_wasp": "guard_hornet_colony_threshold",
     "soldier_ant": "colony_synergy_threshold",
     "unnamed_canine": "unnamed_canine_draw_threshold",
 }
@@ -383,14 +383,14 @@ def test_the_launch_decks_other_numbers_match_config():
     assert words[re.search(r"add (\w+) random younglings", c["stork"].text).group(1)] == cfg.stork_younglings
     assert words[re.search(r"shuffle (\w+) Cuckoo Eggs", c["cuckoo"].text).group(1)] == cfg.cuckoo_eggs
     assert words[re.search(r"place (\w+) Worms", c["earthworm"].text).group(1)] == cfg.earthworm_worms
-    assert words[re.search(r"gain (\w+) times as much", c["food_otk_legend_squirrel"].text).group(1)] == cfg.otk_squirrel_multiplier
-    assert int(re.search(r"give (\d+) random animals", c["handlock_legend_baboon"].text).group(1)) == cfg.baboon_legend_count
+    assert words[re.search(r"gain (\w+) times as much", c["squirrel_legend"].text).group(1)] == cfg.otk_squirrel_multiplier
+    assert int(re.search(r"give (\d+) random animals", c["baboon_legend"].text).group(1)) == cfg.baboon_legend_count
     assert int(re.search(r"give (\d+) animals", c["baboon"].text).group(1)) == cfg.baboon_count
-    assert int(re.search(r"produce (\d+) more food", c["hoofed_legend_wildebeest"].text).group(1)) == cfg.migration_bonus
-    assert int(re.search(r"produce (\d+) less food", c["hoofed_legend_boar"].text).group(1)) == cfg.boar_penalty
+    assert int(re.search(r"produce (\d+) more food", c["wildebeest_legend"].text).group(1)) == cfg.migration_bonus
+    assert int(re.search(r"produce (\d+) less food", c["boar_legend"].text).group(1)) == cfg.boar_penalty
     assert int(re.search(r"Reach (\d+)", c["great_white_shark"].text).group(1)) == cfg.shark_reach
     assert int(re.search(r"strength to (\d+)", c["serval"].text).group(1)) == cfg.serval_set
-    assert "Poppy and Rusty" in c["alpha"].text and cfg.alpha_pups == 2
+    assert "Poppy and Rusty" in c["scarlett"].text and cfg.alpha_pups == 2
 
 
 def test_hungry_and_reach_numbers_match_their_fields():

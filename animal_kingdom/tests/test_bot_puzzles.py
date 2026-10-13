@@ -131,7 +131,7 @@ def test_canine_develops_instead_of_drawing_a_full_hand(bot_cls):
     # Raksha are wrong too); that Fox's card is `african_wild_dog` now. One good line is a second Dhole in the middle row, then Fox into a
     # corner next turn (+2 from each Dhole, a draw for each), then Dingo beside them.
     for chosen in _choices(bot_cls, _puzzle("canine_develop")):
-        assert isinstance(chosen, PlaceAction) and chosen.card_id in {"red_wolf", "african_wild_dog", "dingo"}, chosen
+        assert isinstance(chosen, PlaceAction) and chosen.card_id in {"dhole", "african_wild_dog", "dingo"}, chosen
 
 
 @pytest.mark.parametrize("bot_cls", [pytest.param(TurnBot, marks=pytest.mark.xfail(strict=True,
@@ -181,4 +181,4 @@ def test_taipan_marks_the_python():
         while s.result is None and s.current == "B":
             turn.append(bot.choose(s.view_for(s.player_to_act()), rules.legal_actions(s), s))
             rules.apply_action(s, turn[-1])
-        assert [x for x in s.scheduled if x["step"].get("by_card") == "king_cobra" and x["step"]["iid"] == python], (seed, turn)
+        assert [x for x in s.scheduled if x["step"].get("by_card") == "gaboon_viper" and x["step"]["iid"] == python], (seed, turn)

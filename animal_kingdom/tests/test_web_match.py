@@ -384,7 +384,7 @@ def test_a_poison_animal_wears_its_badge_printed_or_from_the_legendary_jellyfish
     m.state.board["4,2"] = [UnitInstance("sunfish", "B", m.state.new_iid())]
     board = lambda: m.view("A")["game"]["board"]
     assert board()["3,2"][-1].get("poison") is True and "poison" not in board()["4,2"][-1]
-    m.state.board["4,1"] = [UnitInstance("fish_legend_jellyfish", "B", m.state.new_iid())]   # next to the Sunfish
+    m.state.board["4,1"] = [UnitInstance("jellyfish_legend", "B", m.state.new_iid())]   # next to the Sunfish
     assert board()["4,2"][-1].get("poison") is True
 
 def test_the_opponents_mulligan_never_shows_in_their_unseen_cards():

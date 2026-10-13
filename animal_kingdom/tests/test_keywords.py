@@ -25,12 +25,12 @@ def _ids_at(state, cr):
 def test_stealth_hides_from_chosen_single_target_removal():
     # Jaguar (remove adjacent enemy <=4)... vs Black Panther (str 6) is out of range, so
     # use Jackal (remove adjacent enemy with less-or-equal strength, wolf buffed high).
-    s = make_state(hands={"A": ["gray_wolf"]})
+    s = make_state(hands={"A": ["jackal"]})
     wolf_targets_panther = put(s, "2,2", "black_panther", "B")
     put(s, "1,2", "lion", "A")
     hand_wolf = s.hands["A"][0]
     hand_wolf.strength_counter = 10                       # wolf strength >> panther's 6
-    rules.apply_action(s, PlaceAction("gray_wolf", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("jackal", ("cr", "1,2")))
     # No pending choice was offered (the only candidate is Stealth) and nothing was removed.
     assert s.pending is None
     assert wolf_targets_panther in s.board["2,2"]
@@ -46,9 +46,9 @@ def test_stealth_hides_from_skunk_bounce():
 
 def test_stealth_does_not_hide_from_mass_aoe():
     # Brutus: remove all adjacent enemy units - mass, so the panther dies.
-    s = make_state(hands={"A": ["bulwark"]}, food={"A": 20, "B": 0})
+    s = make_state(hands={"A": ["brutus"]}, food={"A": 20, "B": 0})
     put(s, "2,2", "black_panther", "B")
-    rules.apply_action(s, PlaceAction("bulwark", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("brutus", ("cr", "1,2")))
     assert "2,2" not in s.board
     assert "black_panther" in s.remove_pile
 
@@ -72,9 +72,9 @@ def test_stealth_top_cannot_be_chosen_by_pestis():
 # ------------------------------------------------------------- Armor: physics for all
 
 def test_armor_survives_mass_aoe():
-    s = make_state(hands={"A": ["bulwark"]}, food={"A": 20, "B": 0})
+    s = make_state(hands={"A": ["brutus"]}, food={"A": 20, "B": 0})
     put(s, "2,2", "methuselah", "B")
-    rules.apply_action(s, PlaceAction("bulwark", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("brutus", ("cr", "1,2")))
     assert _ids_at(s, "2,2") == ["methuselah"]
 
 

@@ -8,7 +8,7 @@ from animal_kingdom.engine.cards import load_cards
 
 
 # Cards whose they/their names animals, not the other player ("they share their strength").
-PRONOUNS_FOR_ANIMALS = {"handlock_legend_eagle_mate"}
+PRONOUNS_FOR_ANIMALS = {"arna"}
 
 
 def test_the_other_player_is_your_opponent():

@@ -45,10 +45,10 @@ PREMADE_DECKS: dict[str, list[str]] = _build_premade_decks(load_cards())
 BASELINE_DECK: list[str] = [
     # common
     "lion", "eagle", "bat", "squirrel", "mock_scout", "mock_saboteur", "fox",
-    "anaconda", "gray_wolf", "mock_armor_6", "black_bear", "grizzly_bear", "mock_vanilla_5",
+    "anaconda", "jackal", "mock_armor_6", "black_bear", "grizzly_bear", "mock_vanilla_5",
     "mock_vanilla_6", "mock_vanilla_8", "mock_vanilla_9", "mock_apex_5", "mock_apex_6",
     # rare
-    "jerboa", "jaguar", "serval", "stoop", "porcupine", "polar_bear", "rhinoceros", "mock_draw2",
+    "jerboa", "jaguar", "serval", "hawk", "porcupine", "polar_bear", "rhinoceros", "mock_draw2",
     # legendary
     "greywhisker", "mock_removal", "mock_vanilla_10", "mock_flyer_7",
 ]
@@ -57,9 +57,9 @@ BASELINE_DECK: list[str] = [
 # (2026-09-29), its cards as they are now (Gaboon Viper for the retired Taipan). Stale since the
 # launch decks: kept loadable as the sim tools' default pile until the optimizer runs again.
 GOODSTUFF_DECK: list[str] = (
-    ["alpha", "bulwark", "gale", "pestis"]
-    + ["chinchilla", "polar_bear", "rhinoceros", "king_cobra"] * 2
-    + ["dire_wolf", "elephant", "lemming", "lion", "mouse", "tiger"] * 3
+    ["scarlett", "brutus", "gale", "pestis"]
+    + ["chinchilla", "polar_bear", "rhinoceros", "gaboon_viper"] * 2
+    + ["wolf", "elephant", "lemming", "lion", "mouse", "tiger"] * 3
 )
 
 # Decks loadable by slug that are not shipped premades: the baseline, the goodstuff pile, and

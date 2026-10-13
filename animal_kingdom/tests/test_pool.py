@@ -19,7 +19,7 @@ from animal_kingdom.engine.cards import (
 from animal_kingdom.decks import PREMADE_DECKS, load_premade_deck
 
 RETIRED_TAGS = {"Reptile", "Insect"}
-DYNAMIC_IDS = {"goliath", "egg_eater"}
+DYNAMIC_IDS = {"python", "egg_eater"}
 
 # A deck may break the 4-4-6/14-design template (a 7th common, some commons at 2 copies, the total staying 30); none
 # of the launch decks does. See Card.copies (engine/cards.py).

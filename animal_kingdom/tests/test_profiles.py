@@ -94,9 +94,9 @@ def test_renaming_or_recovering_a_starter_copy_does_not_detach_it(db):
     _, p = db.create()
     cards = {"rat": 3}
     db.seed_decks(p["id"], [{"id": "food_otk", "name": "Food", "cards": cards}])
-    db.save_decks(p["id"], [{"id": "food_otk", "name": "My Food", "cards": cards, "cover": "rat_king"}], {"food_otk": cards})
+    db.save_decks(p["id"], [{"id": "food_otk", "name": "My Food", "cards": cards, "cover": "barley"}], {"food_otk": cards})
     renamed = db.decks(p["id"], {"food_otk": cards})[0]
-    assert renamed["name"] == "My Food" and renamed.get("cover") == "rat_king"
+    assert renamed["name"] == "My Food" and renamed.get("cover") == "barley"
     changed = {"rat": 2, "mouse": 1}                                    # the starter changes
     assert db.decks(p["id"], {"food_otk": changed})[0]["cards"] == changed, "still follows it"
 
@@ -167,7 +167,7 @@ def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path)
         m.act(m.to_act(), m.bot_move())
         live.append(m.view("A")["game"])
     (h,) = db.history(p["id"])
-    assert h["my_cover"] == "king_theron" and h["opp_cover"] == "bulwark"
+    assert h["my_cover"] == "king_theron" and h["opp_cover"] == "brutus"
     views = json.loads(gzip.decompress(replay.load(tmp_path, h["match"], "A")))
     assert {v["you"] for v in views} == {"A"} and views[0]["game"]["history"] == []
     assert views[-1]["game"]["result"]["winner"] == m.results[-1]["winner"]
@@ -193,7 +193,7 @@ def test_a_match_against_a_person_keeps_their_deck_name_private(monkeypatch):
     m.state.result = Result("A", "food")
     m._check_end()
     (h,) = db.history(p["id"])
-    assert (h["kind"], h["opp"], h["opp_deck"], h["opp_cover"]) == ("friend", "Ana#1234", "", "bulwark")
+    assert (h["kind"], h["opp"], h["opp_deck"], h["opp_cover"]) == ("friend", "Ana#1234", "", "brutus")
     assert "deckName" not in m.view("A")["seats"]["B"] and m.view("A")["seats"]["A"]["deckName"] == "Cats Midrange Tempo"
 
 
