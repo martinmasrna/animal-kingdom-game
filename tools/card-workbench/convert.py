@@ -45,7 +45,7 @@ LAUNCH_HABITATS = {"Savanna", "Forest", "Meadow", "Jungle", "City", "Open Ocean"
 # The first run's ids for cards renamed since the old pool, by workbench name.
 RENAMED = {"Stray Cat": "alley_cat", "Stray Dog": "street_dog"}
 # Unnamed legendaries with no species to name them by: id and the name shown meanwhile.
-UNNAMED = {"food-aggro-0": ("big_gus", "Rodent"), "food-aggro-1": ("rodent", "Rodent")}
+UNNAMED = {"food-aggro-0": ("big_gus", "Rodent"), "food-aggro-1": ("macaque_legend", "Macaque")}
 # Engine numbers the text doesn't carry.
 DYNAMIC = {"python": "removed_units_count", "egg_eater": "removed_eggs_count"}
 # The card whose art covers each starter deck in the menus (its first legendary otherwise).

@@ -1249,10 +1249,10 @@
      "name": "",
      "note": "",
      "rarity": "L",
-     "species": "Rat",
+     "species": "Macaque",
      "status": "proposed",
      "str": 2,
-     "tag": "Rodent",
+     "tag": "Primate",
      "text": "Roar: draw cards until you have as many as your opponent."
     },
     {
@@ -2225,18 +2225,6 @@
      "str": 5,
      "tag": "Canine",
      "text": "Roar: place Poppy and Rusty on random adjacent empty crossroads."
-    },
-    {
-     "habitat": "City",
-     "id": "pool-y2",
-     "name": "Verminus",
-     "note": "",
-     "rarity": "L",
-     "species": "Rat",
-     "status": "proposed",
-     "str": 3,
-     "tag": "Rodent",
-     "text": "Has +1 strength for each other animal you control."
     },
     {
      "habitat": "Forest",

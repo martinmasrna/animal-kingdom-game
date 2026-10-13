@@ -1389,18 +1389,18 @@
       "workbench_id": "food-aggro-0"
     },
     {
-      "id": "rodent",
-      "name": "Rodent",
+      "id": "macaque_legend",
+      "name": "Macaque",
       "deck": "food_aggro",
       "rarity": "legendary",
       "tags": [
-        "Rodent"
+        "Primate"
       ],
       "base_strength": 2,
       "text": "Roar: draw cards until you have as many as your opponent.",
       "keywords": [],
       "unnamed": true,
-      "species": "Rat",
+      "species": "Macaque",
       "habitat": "City",
       "workbench_id": "food-aggro-1"
     },
@@ -2837,21 +2837,6 @@
       "species": "Fox",
       "habitat": "Forest",
       "workbench_id": "pool-y1"
-    },
-    {
-      "id": "verminus",
-      "name": "Verminus",
-      "deck": "bench",
-      "rarity": "legendary",
-      "tags": [
-        "Rodent"
-      ],
-      "base_strength": 3,
-      "text": "Has +1 strength for each other animal you control.",
-      "keywords": [],
-      "species": "Rat",
-      "habitat": "City",
-      "workbench_id": "pool-y2"
     },
     {
       "id": "viper",

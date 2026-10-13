@@ -44,14 +44,6 @@ def test_raksha_buffs_other_canines_but_not_itself():
 
 
 
-def test_verminus_counts_any_other_unit():
-    s = make_state()
-    verm = put(s, "1,1", "verminus", "A")
-    assert effective_strength(s, verm) == 3
-    put(s, "1,2", "lion", "A")                           # a Cat still counts (any unit)
-    assert effective_strength(s, verm) == 4
-
-
 def test_guard_hornet_anthem_gated_on_four_colony():
     s = make_state()
     gh = put(s, "1,1", "guard_wasp", "A")

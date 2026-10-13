@@ -58,7 +58,6 @@ class Config:
                                           # top of its crossroad - see rules overview.md 9.1)
 
     # --- Strength anthems ("has +X", live; decision E) ---
-    anthem_verminus_per: int = 1         # per other unit you control
     raksha_anthem: int = 1               # your other Canines have +X (2→1, 2026-07-05; body 4→5 to compensate)
     guard_hornet_bonus: int = 5          # while >= threshold Colony units
     guard_hornet_colony_threshold: int = 4

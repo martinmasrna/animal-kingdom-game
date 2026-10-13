@@ -539,8 +539,8 @@ def test_two_repeat_legends_side_by_side_do_not_repeat_each_other_for_ever():
 
 
 def test_the_refill_legend_draws_up_to_the_opponents_hand():
-    s = make_state(hands={"A": ["rodent"], "B": ["lion"] * 4}, decks={"A": ["lion"] * 9, "B": []})
-    rules.apply_action(s, PlaceAction("rodent", ("cr", "1,2")))
+    s = make_state(hands={"A": ["macaque_legend"], "B": ["lion"] * 4}, decks={"A": ["lion"] * 9, "B": []})
+    rules.apply_action(s, PlaceAction("macaque_legend", ("cr", "1,2")))
     assert len(s.hands["A"]) == 4
 
 

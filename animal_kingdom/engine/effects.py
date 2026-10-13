@@ -2822,7 +2822,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "sunfish": {"on_place": _sunfish_place},
     # Food Aggro.
     "big_gus": {"on_place": _repeat_legend_place},
-    "rodent": {"on_place": _refill_legend_place},
+    "macaque_legend": {"on_place": _refill_legend_place},
     "barley": {"on_place": _rat_king_place},
     "scrooge": {"on_place": _scrooge_place},
     "flying_squirrel": {"on_place": _gains("flying_squirrel_food")},

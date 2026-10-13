@@ -295,7 +295,6 @@ STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
 # printing one must be listed (checked below): the launch decks brought a dozen of them at once.
 STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "guard_wasp": ["guard_hornet_bonus"],
-    "verminus": ["anthem_verminus_per"],
     "python": [],                             # dynamic strength: its +1 per removed animal is the rule itself
     "raksha": ["raksha_anthem"],
     "dingo": ["dingo_grant"],

@@ -84,7 +84,7 @@ export const CROP = {
   lemming: [.65, .36, .7], mouse: [.42, .4, .82], pestis: [.6, .38, .8], prince_leo: [.64, .33, .66],
   princess_lea: [.42, .36, .66], queen_adira: [.6, .29, .62], rat: [.68, .48, .62], serval: [.64, .6, .7],
   sirocco: [.52, .46, .82], skunk: [.4, .48, .78], sloth: [.55, .33, .62], snow_leopard: [.55, .34, .8],
-  squirrel: [.62, .4, .7], verminus: [.6, .38, .8], worker_ant: [.55, .38, .75],
+  squirrel: [.62, .4, .7], worker_ant: [.55, .38, .75],
   eagle: [.56, .42, .62], owl: [.57, .25, .55], raven: [.64, .44, .7], python: [.62, .56, .62], rattlesnake: [.52, .36, .55],
   viper: [.65, .38, .6], hawk: [.55, .45, .7], magpie: [.6, .38, .75], black_mamba: [.52, .42, .75], taipan: [.45, .4, .8],
   queen_bee: [.55, .42, .75], guard_wasp: [.58, .42, .8], soldier_ant: [.55, .38, .75], worker_wasp: [.6, .38, .75], worker_bee: [.52, .42, .8],
@@ -183,7 +183,7 @@ export const STRIP = {
   hippopotamus: [.62, .24, 1], andean_condor: [.6, .25, 1.6], elephant: [.57, .26, 1], grizzly_bear: [.72, .3, 1], oxpecker: [.62, .25, 1.3], vulture: [.72, .5, 1.2], black_bear: [.38, .28, 1.5],
   sloth: [.55, .29, 1], cape_buffalo: [.52, .38, 1], fathom: [.5, .48, 1.1], greywhisker: [.6, .4, 1.2], barley: [.45, .3, 1.2], scrooge: [.58, .27, 1],
   flying_squirrel: [.65, .42, 1.1], porcupine: [.23, .5, 1.5], chinchilla: [.75, .4, 1], armadillo: [.62, .42, 1], squirrel: [.62, .31, 1.1], chipmunk: [.8, .47, 1.3],
-  hedgehog: [.47, .47, 1], hamster: [.52, .38, 1], muskrat: [.4, .38, 1.3], groundhog: [.58, .3, 1], gopher: [.62, .37, 1], verminus: [.7, .22, 1],
+  hedgehog: [.47, .47, 1], hamster: [.52, .38, 1], muskrat: [.4, .38, 1.3], groundhog: [.58, .3, 1], gopher: [.62, .37, 1],
   pestis: [.66, .48, 1], sirocco: [.62, .5, 1.2], gale: [.76, .55, 1.7], jerboa: [.73, .38, 1.3], hornet: [.5, .45, 1], chameleon: [.62, .28, 1.3],
   skunk: [.28, .55, 1.3], lemming: [.82, .38, 1.4], cheetah: [.87, .4, 1.3], rat: [.8, .48, 1], falcon: [.8, .6, 1.7], bat: [.53, .44, 1.3],
   mouse: [.47, .33, 1], lobo: [.55, .38, 1.2], raksha: [.63, .38, 1.1], clarion: [.63, .16, 1.1], bush_dog: [.64, .3, 1.1], dhole: [.7, .32, 1.4],
@@ -278,7 +278,7 @@ export const FULL = {
   queen_bee: .425, queen_marabunta: .45, raksha: .425, rat: .475, barley: .365, rattlesnake: .555, raven: .405,
   dhole: .445, rhinoceros: .395, rusty: .345, scrooge: .41, serval: .5, sirocco: .44, skunk: .45, sloth: .3,
   snake_egg: .42, snow_leopard: .385, soldier_ant: .465, squirrel: .455, taipan: .405, termite_king: .485, crocodile: .45, honey_badger: .5,
-  termite_queen: .47, naked_mole_rat: .5, tiger: .35, verminus: .345, vesper: .43, viper: .415, worker_ant: .465, worker_bee: .355,
+  termite_queen: .47, naked_mole_rat: .5, tiger: .35, vesper: .43, viper: .415, worker_ant: .465, worker_bee: .355,
   worker_wasp: .375,
 };
 // Cards painted as another card: the tutorial's copies of the cards it was written with (the live cards changed since).
