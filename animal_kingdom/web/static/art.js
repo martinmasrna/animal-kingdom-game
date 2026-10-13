@@ -1,6 +1,7 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  handlock_legend_butterfly: [.48, .5, .8], handlock_legend_butterfly_2: [.55, .5, .85], handlock_legend_butterfly_3: [.53, .48, .95], handlock_legend_butterfly_4: [.6, .42, .9],
   worm: [.55, .55, .85],
   cuckoo_egg: [.55, .45, .75],
   cuckoo: [.55, .36, .85], praying_mantis: [.55, .36, .85],
@@ -97,6 +98,7 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  handlock_legend_butterfly: [.5, .45, 1.2], handlock_legend_butterfly_2: [.7, .35, 1.2], handlock_legend_butterfly_3: [.55, .4, 1.2], handlock_legend_butterfly_4: [.6, .35, 1.2],
   worm: [.6, .55, 1.2],
   cuckoo_egg: [.66, .45, 1.2],
   cuckoo: [.45, .3, 1.2], praying_mantis: [.65, .2, 1.2],
@@ -189,6 +191,7 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  handlock_legend_butterfly: .45, handlock_legend_butterfly_2: .42, handlock_legend_butterfly_3: .45, handlock_legend_butterfly_4: .42,
   worm: .5,
   cuckoo_egg: .45,
   cuckoo: .4, praying_mantis: .38,
