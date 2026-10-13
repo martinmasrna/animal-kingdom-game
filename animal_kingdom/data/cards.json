@@ -2735,7 +2735,7 @@
       "id": "butterfly",
       "name": "Butterfly",
       "deck": "bench",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [],
       "base_strength": 2,
       "text": "Flight. Roar: draw a card, then give an animal in your hand +1 strength.",
