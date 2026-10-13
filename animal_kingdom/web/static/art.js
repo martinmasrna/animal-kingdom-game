@@ -76,7 +76,7 @@ export const CROP = {
   black_bear: [.34, .24, .66], caracal: [.42, .26, .6], rhinoceros: [.52, .38, .74], elephant: [.57, .27, .74],
   grizzly_bear: [.56, .4, .7], polar_bear: [.48, .36, .66], oxpecker: [.55, .35, .6], vulture: [.62, .45, .7], cape_buffalo: [.5, .4, .7],
   methuselah: [.56, .38, .8], jaguar: [.66, .42, .55], andean_condor: [.55, .36, .88],
-  bat: [.45, .3, .7], black_panther: [.66, .42, .5], borealis: [.62, .3, .66], brutus: [.5, .45, .9],
+  bat: [.5, .45, .85], black_panther: [.66, .42, .5], borealis: [.62, .3, .66], brutus: [.5, .45, .9],
   chameleon: [.55, .4, .8], cheetah: [.7, .42, .6], falcon: [.66, .5, .6], gale: [.56, .45, .9], jackal: [.72, .52, .6],
   hippopotamus: [.62, .3, .72], hornet: [.58, .42, .8], jerboa: [.65, .32, .65], king_theron: [.6, .3, .62],
   lemming: [.65, .36, .7], mouse: [.42, .4, .82], pestis: [.6, .38, .8], prince_leo: [.64, .33, .66],
