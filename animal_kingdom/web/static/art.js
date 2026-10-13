@@ -1,6 +1,8 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  baby_fish: [.5, .45, .85], baby_gorilla: [.5, .45, .85], baby_lion: [.5, .45, .85], baby_owl: [.5, .45, .85], baby_squirrel: [.5, .45, .85], baby_turtle: [.5, .45, .85],
+  baby_wolf: [.5, .45, .85], baby_zebra: [.5, .45, .85], baby_bear: [.5, .45, .85], baby_python: [.5, .45, .85], mosquito: [.5, .45, .85],
   butterfly_legend_monarch: [.52, .36, .9],
   butterfly_legend: [.48, .5, .8], butterfly_legend_caterpillar: [.55, .5, .85], butterfly_legend_chrysalis: [.53, .48, .95], butterfly_legend_butterfly: [.6, .42, .9],
   worm: [.55, .55, .85],
