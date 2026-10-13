@@ -23,6 +23,10 @@ Martin's worked application of these to the aggro deck is in [`../cards/aggro-re
 
 **The action is the cost.** Fodder that has to be replayed costs an action every time, on top of the action that removes it, so a deck built on it gets half the actions of its opponent. Anything meant to be removed over and over comes back where it was, at once: a Cockroach that returns to hand or deck is unplayable, and a 1 that leaves a stack can never be played back onto it, since it covers nothing (Martin, 2026-10-12).
 
+**Dawn and Dusk effects are automatic.** A start- or end-of-turn effect involves no choice and no optional "you may": decisions belong to the turn's two actions and the Roars they set off, never to upkeep. Upkeep with choices is Magic's triggered-ability solitaire (Martin, 2026-10-13).
+
+**A deck works with a card and its one partner.** A plan that needs three or four of its own animals uncovered on the board at once (an outlet, fodder and the payoffs that count it) is solitaire: the opponent either covers one piece and breaks it, or ignores it and watches. Each card pays off on its own Roar, with at most one partner present (Martin, 2026-10-13).
+
 **Card text fits three lines on the full card.** Three lines at a size as readable as Hearthstone's caps how much one card may do: complexity goes into keywords and shared wording, not into sentences. About 80 characters is the budget when writing; a natural sentence may run over it as long as it fits, and a sentence is never squeezed (clipped phrases, pronoun shortcuts) to fit. Parentheses are fine where they read naturally ("gain 1 strength (wherever this is)"): players understand them (Martin, 2026-10-08). The web test `cardtext.test.mjs` measures every card. Wording conventions are in [`../rules/keywords.md`](../rules/keywords.md) (card-text conventions).
 
 ## Power calibration
