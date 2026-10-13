@@ -1,6 +1,7 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  cuckoo: [.55, .36, .85], praying_mantis: [.55, .36, .85],
   butterfly: [.52, .45, .95],
   caterpillar: [.52, .38, .85], earthworm: [.52, .47, .85], hare: [.57, .45, .8], stork: [.52, .32, .82],
   food_otk_legend_squirrel: [.58, .52, .78],
@@ -94,6 +95,7 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  cuckoo: [.45, .3, 1.2], praying_mantis: [.65, .2, 1.2],
   butterfly: [.55, .4, 1.2],
   caterpillar: [.55, .3, 1.2], earthworm: [.62, .42, 1.2], hare: [.62, .37, 1.2], stork: [.6, .22, 1.2],
   food_otk_legend_squirrel: [.66, .38, 1.3],
@@ -183,6 +185,7 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  cuckoo: .4, praying_mantis: .38,
   butterfly: .42,
   caterpillar: .4, earthworm: .48, hare: .45, stork: .38,
   food_otk_legend_squirrel: .5,
