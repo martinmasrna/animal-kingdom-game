@@ -92,6 +92,9 @@ class GreedyWeights:
                                       # determinization; honest (see `_p_opponent_can_cover`).
     readiness_cap: int = 0            # count at most this many live Roars for effect_readiness
                                       # (0 = no cap)
+    hand_value: float = 0.0           # weight of features.hand_value (a hand worth its best few plays); the
+                                      # `hand_eval` bots set it to 1 and zero card_economy/effect_readiness
+    hand_roar: float = 6.0            # a live Roar's worth inside hand_value (a mid-size removal, or two cards)
     wasted_roar: float = 8.0    # penalty for playing a card whose ability text fired for
                                       # nothing (e.g. a removal roar with no target) - a
                                       # bot policy adjustment, not part of evaluate() (see
@@ -327,6 +330,8 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     # adjacent targets, eligible follow-up cards) without naming a deck or card.
     if w.effect_readiness:
         score += w.effect_readiness * _capped(w, _features.enabled_roar_count(state, me))
+    if w.hand_value:
+        score += w.hand_value * _features.hand_value(state, me, opp, w.hand_roar)
 
     # --- Pending delayed payoffs: net scheduled future effects, imminence-discounted ---
     # A just-placed Egg/Bear contributes ~nothing to board_presence (it's weak now) yet is a

@@ -364,7 +364,31 @@ def _total_strength_counters(state: GameState) -> int:
 
 
 def enabled_roar_count(state: GameState, player: str) -> int:
-    """Count distinct Roars in hand that have at least one live legal placement.
+    """Count distinct Roars in hand that have at least one live legal placement (see `enabled_roar_ids`)."""
+    return len(enabled_roar_ids(state, player))
+
+
+HAND_RANK_WEIGHTS = (1.0, 1.0, 0.5, 0.25)   # you play at most two cards a turn: the 3rd and 4th count less, the rest not
+HAND_CARD_BONUS = 0.5                        # per card: having a choice is worth a little, however weak the cards
+HAND_UNSEEN_CARD = 3.0                       # the opponent's hidden cards, valued by count only (honesty)
+
+
+def hand_value(state: GameState, me: str, opp: str, roar_value: float) -> float:
+    """What each hand can do, mine minus theirs (Martin, 2026-10-14: a hand is worth its best few plays, not its size).
+    A card's play value is what placing it adds (half its strength, like board_presence, plus 1 for the connection,
+    like `connection`) plus `roar_value` if its Roar would do something now. My hand counts its best cards by
+    HAND_RANK_WEIGHTS; the opponent's is hidden, so it is valued by its size alone."""
+    live = enabled_roar_ids(state, me)
+    vals = sorted((0.5 * effective_strength(state, u) + 1.0 + (roar_value if u.card_id in live else 0.0)
+                   for u in state.hands[me]), reverse=True)
+    mine = sum(w * v for w, v in zip(HAND_RANK_WEIGHTS, vals)) + HAND_CARD_BONUS * len(vals)
+    n = len(state.hands[opp])
+    theirs = sum(w * HAND_UNSEEN_CARD for w in HAND_RANK_WEIGHTS[:n]) + HAND_CARD_BONUS * n
+    return mine - theirs
+
+
+def enabled_roar_ids(state: GameState, player: str) -> set:
+    """The distinct Roars in hand that have at least one live legal placement.
 
     Only outcome *shape* is observed (draw count, pending choice, removal, and so on);
     drawn card identities never enter the score. Call only at a top-level decision for
@@ -375,13 +399,13 @@ def enabled_roar_count(state: GameState, player: str) -> int:
     if (state.result is not None or state.pending is not None
             or state.player_to_act() != player
             or state.actions_taken_this_turn != 0):
-        return 0
+        return set()
     roars = {
         u.card_id for u in state.hands[player]
         if state.cards[u.card_id].has_roar
     }
     if not roars:
-        return 0
+        return set()
     placements = [
         a for a in legal_placements(state, player, allowed_cards=roars)
         if not a.is_hq_capture
@@ -415,7 +439,7 @@ def enabled_roar_count(state: GameState, player: str) -> int:
         rules.apply_action(nxt, action, validate=False)
         if not _roar_fizzled(state, nxt, player, action):
             enabled.add(action.card_id)
-    return len(enabled)
+    return enabled
 
 
 def pending_payoff(state: GameState, me: str, opp: str) -> float:
