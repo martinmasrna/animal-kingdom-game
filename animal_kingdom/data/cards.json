@@ -2960,6 +2960,7 @@
       "base_strength": 6,
       "text": "Your other Canines can be placed next to your Canines, ignoring connection.",
       "keywords": [],
+      "unnamed": true,
       "species": "Coyote",
       "habitat": "Desert",
       "workbench_id": "pool-y10"
