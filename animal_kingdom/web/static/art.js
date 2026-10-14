@@ -268,6 +268,9 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  bat: .349,
+  anteater: .396,
+  silverback: .321,
   street_dog: .42,
   rusty: .354,
   poppy: .367,
@@ -373,16 +376,14 @@ export const FULL = {
   piranha_legend: .42,
   gaboon_viper: .35,
   piranha: .42,
-  silverback: .2,
   dart_frog: .4,
-  anteater: .45,
   capybara: .45,
   meerkat: .25,
   leopard: .3,
   gazelle: .5,
   oxpecker: .4, vulture: .5,
   dung_beetle: .5,
-  scarlett: .355, anaconda: .485, andean_condor: .335, armadillo: .45, aurum: .5, bat: .38,
+  scarlett: .355, anaconda: .485, andean_condor: .335, armadillo: .45, aurum: .5,
   bird_egg: .445, black_bear: .445, black_mamba: .445, black_panther: .455, borealis: .365,
   cairn: .42, cape_buffalo: .4, chameleon: .38, cheetah: .415, chinchilla: .365, chipmunk: .405,
   cougar: .455, dingo: .375, egg_eater: .42, elephant: .365, eon: .375,
