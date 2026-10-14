@@ -68,6 +68,15 @@ def _top_level_actions(state: GameState) -> list[Action]:
     return actions
 
 
+def _has_top_level_action(state: GameState) -> bool:
+    """Whether the current player can do anything at all: `_top_level_actions` without building the list. A Draw
+    settles it at once; only an empty deck needs the placements looked at. (Asked at every turn start, also in every
+    line a bot searches, where building the full list was nearly half of a bot's time.)"""
+    if _actions_left(state) > 0 and state.decks[state.current]:
+        return True
+    return bool(_top_level_actions(state))
+
+
 TITAN_ACTIONS = 2   # Titan (keywords.md): playing it costs two actions instead of one
 
 
@@ -178,7 +187,7 @@ def _resolve_and_maybe_end_turn(state: GameState) -> None:
         return  # game decided (HQ capture / food)
     if state.effect_stack or state.pending is not None:
         return  # still resolving (a choice is pending or steps remain)
-    if _top_level_actions(state):
+    if _has_top_level_action(state):
         return  # actions (or a free roam) remain and something is playable: the turn stays open
     _end_turn(state)
 
@@ -213,7 +222,7 @@ def _end_turn(state: GameState) -> None:
     effects.resolve(state)
     # A player who can neither draw nor place nor roam passes; the game goes on.
     if state.result is None and state.pending is None and not state.effect_stack \
-            and state.turn_counter < state.config.max_turns and not _top_level_actions(state):
+            and state.turn_counter < state.config.max_turns and not _has_top_level_action(state):
         _end_turn(state)                     # (never past the turn cap: is_terminal ends the game there)
 
 
