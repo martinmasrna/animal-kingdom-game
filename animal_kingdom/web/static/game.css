@@ -563,8 +563,8 @@
   .readov .rcard.wide .rel.many .card { --w: 140px; }
   .readov .rcard.wide .zside.few { flex-direction: row; align-items: center; gap: 22px; }
   .readov .rcard.wide .zside.few .kws { display: flex; flex-direction: column; gap: 10px; width: 280px; }
-  .readov .rcard.wide .zside.row .kws { display: flex; flex-wrap: wrap; gap: 10px; max-width: 860px; }
-  .readov .rcard.wide .zside.row .kws .kw { flex: 1 1 240px; }
+  .readov .rcard.wide .zside.row .kws { display: flex; flex-wrap: wrap; gap: 10px; width: 0; min-width: 100%; }
+  .readov .rcard.wide .zside.row .kws .kw { flex: 1 1 200px; }
 }
 .readov .sc { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .readov .under { display: flex; justify-content: center; gap: 8px; width: 100%; }
