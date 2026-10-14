@@ -1,7 +1,7 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
-  baby_fish: [.47, .38, .9], baby_gorilla: [.52, .36, .8], baby_lion: [.58, .42, .8], baby_owl: [.47, .42, .75], baby_squirrel: [.52, .3, .7], baby_turtle: [.6, .43, .85],
+  baby_fish: [.45, .4, .8], baby_gorilla: [.52, .36, .8], baby_lion: [.58, .42, .8], baby_owl: [.55, .38, .8], baby_squirrel: [.52, .3, .7], baby_turtle: [.6, .43, .85],
   baby_wolf: [.5, .53, .85], baby_zebra: [.55, .36, .7], baby_bear: [.52, .37, .8], baby_python: [.55, .42, .75], mosquito: [.55, .33, .8],
   macaque_legend: [.47, .33, .8], macaque: [.58, .42, .85],
   butterfly_legend_monarch: [.52, .36, .9],
@@ -109,10 +109,10 @@ export const STRIP = {
   baby_wolf: [.55, .53, 1],
   baby_turtle: [.65, .42, 1],
   baby_squirrel: [.47, .24, 1.3],
-  baby_owl: [.45, .4, 1.2],
+  baby_owl: [.56, .32, 1],
   baby_lion: [.6, .4, 1],
   baby_gorilla: [.53, .32, 1.05],
-  baby_fish: [.55, .36, 1],
+  baby_fish: [.72, .47, 1.2],
   macaque_legend: [.3, .25, 2.4], macaque: [.63, .38, 1.1],
   butterfly_legend_monarch: [.6, .38, 1.2],
   butterfly_legend: [.5, .45, 1.2], butterfly_legend_caterpillar: [.7, .35, 1.2], butterfly_legend_chrysalis: [.55, .4, 1.2], butterfly_legend_butterfly: [.6, .35, 1.2],
@@ -215,7 +215,7 @@ export const FULL = {
   baby_wolf: .5,
   baby_turtle: .45,
   baby_squirrel: .4,
-  baby_owl: .45,
+  baby_owl: .42,
   baby_lion: .45,
   baby_gorilla: .4,
   baby_fish: .4,
