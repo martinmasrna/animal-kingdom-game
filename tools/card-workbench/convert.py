@@ -85,11 +85,11 @@ TOKENS = [
     _token("baby_gorilla", "Baby Gorilla", 1, ["Primate"]),
     _token("baby_zebra", "Baby Zebra", 1, ["Hoofed"]),
     # The legendary Butterfly's stages 2-5 (stage 1 is the card itself): the egg's 1 plus its buffs is its strength.
-    _token("butterfly_legend_caterpillar", "Caterpillar", 1, rarity="legendary", text="Roar: draw a card. Whenever this gains strength in your hand, it evolves.", stage=2),
+    _token("butterfly_legend_caterpillar", "Caterpillar", 1, rarity="legendary", text="Roar: draw a card. When this gains strength in your hand, evolve.", stage=2),
     _token("butterfly_legend_chrysalis", "Chrysalis", 1, rarity="legendary", keywords=["Stealth"], stage=3,
-           text="Stealth. Roar: draw a card, then give an animal in your hand +1 strength. Whenever this gains strength in your hand, it evolves."),
+           text="Stealth. Roar: draw a card, then give an animal in your hand +1 strength. When this gains strength in your hand, evolve."),
     _token("butterfly_legend_butterfly", "Butterfly", 1, rarity="legendary", keywords=["Stealth", "Flight"], stage=4,
-           text="Stealth. Flight. Roar: draw a card, then give all animals in your hand +1 strength. Whenever this gains strength in your hand, it evolves."),
+           text="Stealth. Flight. Roar: draw a card, then give all animals in your hand +1 strength. When this gains strength in your hand, evolve."),
     _token("butterfly_legend_monarch", "Monarch", 1, rarity="legendary", keywords=["Stealth", "Flight"], stage=5,
            text="Stealth. Flight. Roar: draw 2 cards, then give all animals in your hand +2 strength."),
     # The legendary Eagle's mate, made by it in your hand.
