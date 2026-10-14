@@ -248,12 +248,16 @@ function dialog(app, html) {
   m.querySelector('.cancel').onclick = close;
   return { m, close };
 }
-// Right-click a card: it opens large in the middle of the screen, each keyword on it explained beside it (as in
-// Hearthstone, Arena and Runeterra). Escape, a click or another right-click closes it.
+// Right-click a card: it opens large in the middle of the screen, read left to right and top to bottom: the card, then
+// the cards it makes in the order they come (Hearthstone's related cards), then each keyword on any of them explained
+// (as in Hearthstone, Arena and Runeterra). Escape, a click or another right-click closes it.
 function zoom(app, c) {
-  const kws = Object.keys(KEYWORDS).filter(k => hasKeyword(c, k));
+  const rel = (c.related || []).map(id => C[id]).filter(Boolean);
+  const kws = Object.keys(KEYWORDS).filter(k => [c, ...rel].some(x => hasKeyword(x, k)));
   const m = app.querySelector('#cmodal'); m.classList.add('on', 'zoom');
-  m.innerHTML = `<div class="zbox">${cardHTML(c)}${kws.length ? `<div class="kws">${kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k]}</p></div>`).join('')}</div>` : ''}</div>`;
+  const side = (rel.length ? `<div class="rel">${rel.map(r => cardHTML(r)).join('<i class="arr"></i>')}</div>` : '') +
+    (kws.length ? `<div class="kws">${kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k]}</p></div>`).join('')}</div>` : '');
+  m.innerHTML = `<div class="zbox">${cardHTML(c)}${side ? `<div class="zside">${side}</div>` : ''}</div>`;
   fitNames(m);
   const close = () => { m.classList.remove('on', 'zoom'); m.innerHTML = ''; removeEventListener('keydown', key, true); };
   const key = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };

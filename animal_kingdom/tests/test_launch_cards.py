@@ -809,6 +809,10 @@ def test_boar_removes_an_adjacent_enemy_covering_nothing():
     assert "1,1" not in s.board and [u.card_id for u in s.board["2,2"]] == ["squirrel", "lion"]
 
 
+def test_the_legendary_butterflys_related_cards_are_its_stages():
+    assert list(load_cards()["butterfly_legend"].related) == effects.BUTTERFLY_STAGES[1:]
+
+
 # ==================================================================================== Pool
 
 def test_great_white_shark_has_reach_three_after_a_removal():

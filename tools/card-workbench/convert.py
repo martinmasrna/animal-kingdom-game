@@ -42,6 +42,9 @@ KEPT_DECKS = {"reserve", "tutorial"}
 # The habitats in the game today; a Pool card from any other waits in reserve for its habitat's set.
 LAUNCH_HABITATS = {"Savanna", "Forest", "Meadow", "Jungle", "City", "Open Ocean"}  # old cards the workbench doesn't know, kept as they are
 
+# The cards a card makes, shown beside it when it's read large (Hearthstone's related cards), in the order they come.
+RELATED = {"butterfly_legend": ["butterfly_legend_caterpillar", "butterfly_legend_chrysalis", "butterfly_legend_butterfly",
+                                "butterfly_legend_monarch"]}
 # The first run's ids for cards renamed since the old pool, by workbench name.
 RENAMED = {"Stray Cat": "alley_cat", "Stray Dog": "street_dog"}
 # Unnamed legendaries with no species to name them by: id and the name shown meanwhile.
@@ -173,6 +176,8 @@ def convert(export: dict, old_data: dict) -> tuple[dict, list[str]]:
             rec.update(parse_text(text))
             if cid in DYNAMIC:
                 rec["dynamic_strength"] = DYNAMIC[cid]
+            if cid in RELATED:
+                rec["related"] = RELATED[cid]
             if cid in MATES:
                 rec["mate"] = MATES[cid]
             if unnamed:

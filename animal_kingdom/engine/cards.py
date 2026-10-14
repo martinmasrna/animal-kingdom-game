@@ -72,6 +72,7 @@ class Card:
     unnamed: bool = False          # a legendary still waiting for its name: `name` shows its species meanwhile
     mate: Optional[str] = None     # the card it pairs with in hand (the Eagles): a buff to either counts for both
     habitat: str = ""              # the habitat (set) the card belongs to; display only, no rule reads it
+    related: tuple[str, ...] = ()  # the cards it makes, shown beside it when read large; display only
 
     @property
     def is_dynamic(self) -> bool:
@@ -173,6 +174,7 @@ def _build_card(rec: dict) -> Card:
         unnamed=rec.get("unnamed", False),
         mate=rec.get("mate"),
         habitat=rec.get("habitat", ""),
+        related=tuple(rec.get("related", ())),
     )
 
 

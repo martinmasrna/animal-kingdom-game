@@ -2069,6 +2069,12 @@
       "base_strength": 1,
       "text": "Whenever this gains strength in your hand, it evolves.",
       "keywords": [],
+      "related": [
+        "butterfly_legend_caterpillar",
+        "butterfly_legend_chrysalis",
+        "butterfly_legend_butterfly",
+        "butterfly_legend_monarch"
+      ],
       "unnamed": true,
       "species": "Butterfly",
       "habitat": "Meadow",
