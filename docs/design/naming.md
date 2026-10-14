@@ -9,11 +9,17 @@ A legendary's name is what the animals call that individual, rendered into Engli
 - **It names this individual, not the species.** Greywhisker is one old rat; Highneck would be every giraffe.
 - **It doesn't promise a mechanic the card lacks** (Magic renamed Spirit Lynx to Spectral Lynx for that). The ability may show through when it's the animal's most striking trait.
 
-## The shapes
+## Where a name comes from
 
-- **A word that means the animal or its trait, in a language that isn't everyday English**, which reads as a name: Leo (lion), Theron (hunter), Adira (mighty), Arne (eagle), Mimi (from mimic), Zuri (beautiful). This is The Lion King's method: Simba is Swahili for lion.
-- **A nickname the animals would use for this one**, built from what they can see or hear: Greywhisker, Black Swan.
-- **A title on a name** where the animals have real rank (the lion pride, the colony queens), or playfully where the animal is comic (Lord Bumbleton).
+A real animal's name is what someone said after seeing one concrete thing about it: a mark (Jane Goodall's David Greybeard, Fossey's gorilla Digit, the lion Scar), an incident (the leopard Legadema, "lightning", named the night of a storm), a resemblance to a person (Fossey's Uncle Bert, the lion Mr. T for his mohawk mane), a slip of the tongue (the gorilla Beetsme, from "beats me"), or the irony of a sweet name on a fearsome animal (the lion Pretty Boy). Researched 2026-10-14 across named wild animals, field researchers, safari guides and animal fiction.
+
+- **The test: finish "we called her X because one day she…" or "because she looked like…"** with a concrete, particular, slightly funny fact. If the answer is a trait or an ability, the name reads as engineered.
+- **Name the scar, not the superpower.** A name built backwards from a concept (it stinks, so Brimstone; it hoards, so Pinch) is a pun and sounds artificial (Martin, 2026-10-14: "it sounds so artificial, all these names").
+- **Plain words, used flatly:** a person's name or nickname, an ordinary noun, a playful title. A human register is fine (Big Gus, Lord Bumbleton); objects and institutions the animals cannot know are not (Tank, Drum).
+- **The meaning has to reach a player who speaks English.** A foreign word works only when players already know it (Leo is lion to everyone); a Swahili, Zulu or Latin word whose meaning only a dictionary knows is a coined sound (Ingwe, Tamias, Kifaru were "unpronounceable gibberish", Martin, 2026-10-14).
+- **Every name is built its own way.** A set made from one template (Lord or Lady on everything, an adjective plus a body part on everything) is the J.K. Rowling failure, Professor Sprout for the herbology teacher. Variety of source is part of what reads as real.
+- **No verbs as names** (Lull, Pinch), and no single object the animal is known for (Drum for a gorilla is Acorn for a squirrel).
+- **A name fits its animal, not only its own sound.** Ghost is close to a perfect name, but it belongs on a white predator, not a white squirrel (Martin, 2026-10-14).
 
 ## Pronounceable by default
 
@@ -34,4 +40,4 @@ Name a legendary after its art is settled, not before: the name is easiest to fi
 
 ## Settled
 
-Prince Leo, Princess Lea, King Theron, Queen Adira (lions); Black Swan; Greywhisker (rat); Arne, whose mate token is Arna (eagle); Mimi (mimic octopus); Zuri (zebra); Twiga (giraffe); Eber (boar); Cuco (cuckoo); Lord Bumbleton (bumblebee); Big Gus (capybara). Eon stays until a better one turns up.
+Prince Leo, Princess Lea, King Theron, Queen Adira (lions); Black Swan; Greywhisker (rat); Arne, whose mate token is Arna (eagle); Big Gus (capybara); Lord Bumbleton (bumblebee); Vixen (fox, the Poppy and Rusty card); Fathom (octopus: the deep, and to fathom); Pestis (rat); Ember (pheasant). Cuco (cuckoo) is still to be judged against its art. Mimi, Zuri, Twiga and Eber, settled on 2026-10-09, were reopened on 2026-10-14 as the dictionary-word construction that fails above.
