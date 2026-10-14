@@ -373,7 +373,7 @@ HAND_CARD_BONUS = 0.5                        # per card: having a choice is wort
 HAND_UNSEEN_CARD = 3.0                       # the opponent's hidden cards, valued by count only (honesty)
 
 
-def hand_value(state: GameState, me: str, opp: str, roar_value: float) -> float:
+def hand_value(state: GameState, me: str, opp: str, roar_value: float, ranks=HAND_RANK_WEIGHTS) -> float:
     """What each hand can do, mine minus theirs (Martin, 2026-10-14: a hand is worth its best few plays, not its size).
     A card's play value is what placing it adds (half its strength, like board_presence, plus 1 for the connection,
     like `connection`) plus `roar_value` if its Roar would do something now. My hand counts its best cards by
@@ -381,9 +381,9 @@ def hand_value(state: GameState, me: str, opp: str, roar_value: float) -> float:
     live = enabled_roar_ids(state, me)
     vals = sorted((0.5 * effective_strength(state, u) + 1.0 + (roar_value if u.card_id in live else 0.0)
                    for u in state.hands[me]), reverse=True)
-    mine = sum(w * v for w, v in zip(HAND_RANK_WEIGHTS, vals)) + HAND_CARD_BONUS * len(vals)
+    mine = sum(w * v for w, v in zip(ranks, vals)) + HAND_CARD_BONUS * len(vals)
     n = len(state.hands[opp])
-    theirs = sum(w * HAND_UNSEEN_CARD for w in HAND_RANK_WEIGHTS[:n]) + HAND_CARD_BONUS * n
+    theirs = sum(w * HAND_UNSEEN_CARD for w in ranks[:n]) + HAND_CARD_BONUS * n
     return mine - theirs
 
 

@@ -38,6 +38,7 @@ deliberately ruled out for now since this bot could plausibly face a real human 
 
 from __future__ import annotations
 
+import dataclasses
 import math
 import random
 from dataclasses import dataclass
@@ -95,6 +96,7 @@ class GreedyWeights:
     hand_value: float = 0.0           # weight of features.hand_value (a hand worth its best few plays); the
                                       # `hand_eval` bots set it to 1 and zero card_economy/effect_readiness
     hand_roar: float = 6.0            # a live Roar's worth inside hand_value (a mid-size removal, or two cards)
+    hand_ranks: tuple = (1.0, 1.0, 0.5, 0.25)   # how much the hand's 1st, 2nd, ... best cards count in hand_value
     wasted_roar: float = 8.0    # penalty for playing a card whose ability text fired for
                                       # nothing (e.g. a removal roar with no target) - a
                                       # bot policy adjustment, not part of evaluate() (see
@@ -105,8 +107,15 @@ class GreedyBot(Bot):
     def __init__(self, weights: Optional[GreedyWeights] = None,
                  rng: Optional[random.Random] = None, seed: Optional[int] = None,
                  depth: int = 1, beam_width: int = 8,
-                 evaluator: Optional[LinearEval] = None, slip: float = 0.0):
+                 evaluator: Optional[LinearEval] = None, slip: float = 0.0, hand_eval: bool = False,
+                 hand_roar: Optional[float] = None, hand_ranks: Optional[str] = None):
         self.weights = weights or GreedyWeights()
+        if hand_eval:   # a hand worth its best few plays instead of its size (features.hand_value)
+            self.weights = dataclasses.replace(self.weights, card_economy=0.0, effect_readiness=0.0, hand_value=1.0)
+        if hand_roar is not None:
+            self.weights = dataclasses.replace(self.weights, hand_roar=float(hand_roar))
+        if hand_ranks is not None:   # "1/1/0.75/0.5": a bot spec can't carry a tuple
+            self.weights = dataclasses.replace(self.weights, hand_ranks=tuple(float(x) for x in str(hand_ranks).split("/")))
         # RNG only breaks exact eval ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
         self.depth = depth
@@ -331,7 +340,7 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     if w.effect_readiness:
         score += w.effect_readiness * _capped(w, _features.enabled_roar_count(state, me))
     if w.hand_value:
-        score += w.hand_value * _features.hand_value(state, me, opp, w.hand_roar)
+        score += w.hand_value * _features.hand_value(state, me, opp, w.hand_roar, w.hand_ranks)
 
     # --- Pending delayed payoffs: net scheduled future effects, imminence-discounted ---
     # A just-placed Egg/Bear contributes ~nothing to board_presence (it's weak now) yet is a

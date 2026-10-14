@@ -90,10 +90,12 @@ class TurnSearcher(Bot):
                  deck_reveal_choice_width: int = 0,
                  max_search_nodes: Optional[int] = None,
                  evaluator: Optional[LinearEval] = None,
-                 quiesce: bool = False, hand_eval: bool = False):
+                 quiesce: bool = False, hand_eval: bool = False, hand_ranks: Optional[str] = None):
         self.weights = weights or GreedyWeights()
         if hand_eval:   # a hand worth its best few plays instead of its size (features.hand_value)
             self.weights = dataclasses.replace(self.weights, card_economy=0.0, effect_readiness=0.0, hand_value=1.0)
+        if hand_ranks is not None:   # "1/1/1/1/1/0.5": a bot spec can't carry a tuple
+            self.weights = dataclasses.replace(self.weights, hand_ranks=tuple(float(x) for x in str(hand_ranks).split("/")))
         # RNG only breaks exact score ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
         self.det_rng = random.Random(None if seed is None else seed + _DET_SEED_SALT)

@@ -58,12 +58,12 @@ class TurnBot(TurnSearcher):
                  deck_reveal_choice_width: int = TURN_DECK_REVEAL_CHOICE_WIDTH,
                  max_search_nodes: Optional[int] = TURN_MAX_SEARCH_NODES,
                  evaluator: Optional[LinearEval] = None,
-                 quiesce: bool = False, hand_eval: bool = False):
+                 quiesce: bool = False, hand_eval: bool = False, hand_ranks: Optional[str] = None):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          deck_reveal_choice_width=deck_reveal_choice_width,
                          max_search_nodes=max_search_nodes, evaluator=evaluator,
-                         quiesce=quiesce, hand_eval=hand_eval)
+                         quiesce=quiesce, hand_eval=hand_eval, hand_ranks=hand_ranks)
 
     def _begin_root_candidate(self, action) -> None:
         # Per-root budget: each root candidate gets a fresh node allowance (mirrors the oracle).
