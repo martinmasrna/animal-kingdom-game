@@ -40,4 +40,4 @@ Name a legendary after its art is settled, not before: the name is easiest to fi
 
 ## Settled
 
-Prince Leo, Princess Lea, King Theron, Queen Adira (lions); Black Swan; Greywhisker (rat); Arne, whose mate token is Arna (eagle); Big Gus (capybara); Lord Bumbleton (bumblebee); Vixen (fox, the Poppy and Rusty card); Fathom (octopus: the deep, and to fathom); Pestis (rat); Ember (pheasant). Cuco (cuckoo) is still to be judged against its art. Mimi, Zuri, Twiga and Eber, settled on 2026-10-09, were reopened on 2026-10-14 as the dictionary-word construction that fails above.
+Prince Leo, Princess Lea, King Theron, Queen Adira (lions); Black Swan; Greywhisker (rat); Arne, whose mate token is Arna (eagle); Big Gus (capybara); Lord Bumbleton (bumblebee); Vixen (fox, the Poppy and Rusty card); Fathom (octopus: the deep, and to fathom). Kept without a fresh call: Pestis, Ember, Aurum, Queen Marabunta, Queen Honoria, Vesper, Lobo, Gale, Barley. Cuco (cuckoo) is still to be judged against its art. Mimi, Zuri, Twiga and Eber, settled on 2026-10-09, were reopened on 2026-10-14 as the dictionary-word construction that fails above.
