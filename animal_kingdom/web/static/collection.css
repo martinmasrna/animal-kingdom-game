@@ -82,15 +82,15 @@
 .coll .search { flex: 1; min-width: 140px; padding-left: 38px; }
 .coll .searchw svg { position: absolute; left: 13px; top: 50%; width: 17px; height: 17px; margin-top: -8.5px; color: #9d917e; pointer-events: none; }
 /* The card zoom. */
-.coll .modal.zoom { background: rgba(0,0,0,.72); cursor: zoom-out; }
+.coll .modal.zoom { background: rgba(0,0,0,.86); cursor: zoom-out; }
 .coll .zbox { display: flex; align-items: center; gap: 22px; }
 .coll .zbox .card { --w: 360px; }
 .coll .zside { display: flex; flex-direction: column; gap: 18px; }
 .coll .rel { display: flex; align-items: center; gap: 6px; }
-.coll .rel .card { --w: 180px; }
+.coll .rel .card { --w: 210px; }
 .coll .rel .arr { flex: none; width: 0; height: 0; border-style: solid; border-width: 9px 0 9px 12px; border-color: transparent transparent transparent #e4dccd; opacity: .8; }
 .coll .kws { display: flex; flex-direction: column; gap: 10px; width: 280px; }
-.coll .zside .rel ~ .kws { flex-direction: row; flex-wrap: wrap; width: auto; max-width: 760px; }
+.coll .zside .rel ~ .kws { flex-direction: row; flex-wrap: wrap; width: auto; max-width: 900px; }
 .coll .zside .rel ~ .kws .kw { flex: 1 1 240px; }
 .coll .kw { padding: 12px 14px; border-radius: 10px; background: #25221f url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.18), 0 4px 10px rgba(0,0,0,.5); }
 .coll .kw b { display: block; font: 700 18px 'Fira Sans Condensed', sans-serif; color: #fff; margin-bottom: 3px; }
