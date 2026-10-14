@@ -3,6 +3,7 @@
 export const CROP = {
   baby_fish: [.5, .45, .85], baby_gorilla: [.5, .45, .85], baby_lion: [.5, .45, .85], baby_owl: [.5, .45, .85], baby_squirrel: [.5, .45, .85], baby_turtle: [.5, .45, .85],
   baby_wolf: [.5, .45, .85], baby_zebra: [.5, .45, .85], baby_bear: [.5, .45, .85], baby_python: [.5, .45, .85], mosquito: [.5, .45, .85],
+  macaque_legend: [.47, .33, .8], macaque: [.58, .42, .85],
   butterfly_legend_monarch: [.52, .36, .9],
   butterfly_legend: [.48, .5, .8], butterfly_legend_caterpillar: [.55, .5, .85], butterfly_legend_chrysalis: [.53, .48, .95], butterfly_legend_butterfly: [.6, .42, .9],
   worm: [.55, .55, .85],
@@ -101,6 +102,7 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  macaque_legend: [.33, .25, 1.1], macaque: [.63, .38, 1.1],
   butterfly_legend_monarch: [.6, .38, 1.2],
   butterfly_legend: [.5, .45, 1.2], butterfly_legend_caterpillar: [.7, .35, 1.2], butterfly_legend_chrysalis: [.55, .4, 1.2], butterfly_legend_butterfly: [.6, .35, 1.2],
   worm: [.6, .55, 1.2],
@@ -195,6 +197,7 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  macaque_legend: .40, macaque: .45,
   butterfly_legend_monarch: .38,
   butterfly_legend: .45, butterfly_legend_caterpillar: .42, butterfly_legend_chrysalis: .45, butterfly_legend_butterfly: .42,
   worm: .5,
