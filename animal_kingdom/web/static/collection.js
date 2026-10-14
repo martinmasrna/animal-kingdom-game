@@ -2,7 +2,7 @@
 // family, strength, rarity and search filters over it; the decks on the right, the open one unfolded under its tile.
 // Click a card to add a copy, right-click it or click its strip to take one out; every change saves.
 // app.js hands in what it owns: the cards, the starter decks, the player's decks and how to save them, toast, play, back.
-import { cardHTML, fitNames, KEYWORDS, hasKeyword } from './card.js';
+import { cardHTML, fitNames, readSide } from './card.js';
 import { CROP, artUrl, stripArt, fitStrips, lazyArt } from './art.js';
 import { encodeDeck, decodeDeck } from './deckcode.js';
 import { dd, wireDd, onHold } from './menu.js';
@@ -252,11 +252,8 @@ function dialog(app, html) {
 // the cards it makes in the order they come (Hearthstone's related cards), then each keyword on any of them explained
 // (as in Hearthstone, Arena and Runeterra). Escape, a click or another right-click closes it.
 function zoom(app, c) {
-  const rel = (c.related || []).map(id => C[id]).filter(Boolean);
-  const kws = Object.keys(KEYWORDS).filter(k => [c, ...rel].some(x => hasKeyword(x, k)));
   const m = app.querySelector('#cmodal'); m.classList.add('on', 'zoom');
-  const side = (rel.length ? `<div class="rel">${rel.map(r => cardHTML(r)).join('<i class="arr"></i>')}</div>` : '') +
-    (kws.length ? `<div class="kws">${kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k]}</p></div>`).join('')}</div>` : '');
+  const side = readSide(c, C);
   m.innerHTML = `<div class="zbox">${cardHTML(c)}${side ? `<div class="zside">${side}</div>` : ''}</div>`;
   fitNames(m);
   const close = () => { m.classList.remove('on', 'zoom'); m.innerHTML = ''; removeEventListener('keydown', key, true); };

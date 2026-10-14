@@ -88,6 +88,8 @@
 .coll .zside { display: flex; flex-direction: column; gap: 18px; }
 .coll .rel { display: flex; align-items: center; gap: 6px; }
 .coll .rel .card { --w: 210px; }
+.coll .rel.many { flex-wrap: wrap; gap: 10px; width: calc(4 * 150px + 3 * 10px); }   /* a big set (the Stork's younglings): four to a row */
+.coll .rel.many .card { --w: 150px; }
 .coll .rel .arr { flex: none; width: 0; height: 0; border-style: solid; border-width: 9px 0 9px 12px; border-color: transparent transparent transparent #e4dccd; opacity: .8; }
 .coll .kws { display: flex; flex-direction: column; gap: 10px; width: 280px; }
 .coll .zside .rel ~ .kws { flex-direction: row; flex-wrap: wrap; width: auto; max-width: 900px; }
@@ -159,6 +161,7 @@
   .coll .rel { flex-wrap: wrap; justify-content: center; gap: 8px; width: min(78vw, 340px); }
   .coll .rel .card { --w: calc((min(78vw, 340px) - 8px) / 2); flex: none; }
   .coll .rel .arr { display: none; }   /* two to a row: an arrow at a row's end would point nowhere */
+  .coll .rel.many .card { --w: calc((min(78vw, 340px) - 8px) / 2); }
   .coll .zside .rel ~ .kws { flex-direction: column; width: min(78vw, 340px); }
   .coll .zside .rel ~ .kws .kw { flex: none; }
 }

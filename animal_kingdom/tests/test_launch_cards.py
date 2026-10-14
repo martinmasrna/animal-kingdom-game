@@ -809,8 +809,13 @@ def test_boar_removes_an_adjacent_enemy_covering_nothing():
     assert "1,1" not in s.board and [u.card_id for u in s.board["2,2"]] == ["squirrel", "lion"]
 
 
-def test_the_legendary_butterflys_related_cards_are_its_stages():
-    assert list(load_cards()["butterfly_legend"].related) == effects.BUTTERFLY_STAGES[1:]
+def test_related_cards_are_real_cards_and_follow_the_engine():
+    cards = load_cards()
+    assert list(cards["butterfly_legend"].related) == effects.BUTTERFLY_STAGES[1:]
+    assert list(cards["stork"].related) == effects.YOUNGLINGS
+    assert cards["arne"].mate == cards["arne"].related[0]
+    for c in cards.values():
+        assert all(r in cards for r in c.related), c.id
 
 
 # ==================================================================================== Pool

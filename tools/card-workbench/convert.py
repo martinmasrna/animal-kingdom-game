@@ -43,8 +43,14 @@ KEPT_DECKS = {"reserve", "tutorial"}
 LAUNCH_HABITATS = {"Savanna", "Forest", "Meadow", "Jungle", "City", "Open Ocean"}  # old cards the workbench doesn't know, kept as they are
 
 # The cards a card makes, shown beside it when it's read large (Hearthstone's related cards), in the order they come.
+# Only cards it makes itself (a token, a card added to a hand or a deck, what it evolves into), never one it finds.
 RELATED = {"butterfly_legend": ["butterfly_legend_caterpillar", "butterfly_legend_chrysalis", "butterfly_legend_butterfly",
-                                "butterfly_legend_monarch"]}
+                                "butterfly_legend_monarch"],
+           "caterpillar": ["butterfly"], "arne": ["arna"], "earthworm": ["worm"], "cuckoo": ["cuckoo_egg"],
+           "sea_turtle": ["baby_turtle"], "sunfish": ["baby_fish"], "scarlett": ["poppy", "rusty"],
+           "stork": ["baby_lion", "baby_wolf", "baby_squirrel", "baby_owl", "baby_python", "baby_bear", "baby_gorilla",
+                     "baby_zebra"]}
+EVOLVES = {"butterfly_legend", "caterpillar"}   # its related cards are what it becomes, in order: drawn with arrows
 # The first run's ids for cards renamed since the old pool, by workbench name.
 RENAMED = {"Stray Cat": "alley_cat", "Stray Dog": "street_dog"}
 # Unnamed legendaries with no species to name them by: id and the name shown meanwhile.
@@ -178,6 +184,8 @@ def convert(export: dict, old_data: dict) -> tuple[dict, list[str]]:
                 rec["dynamic_strength"] = DYNAMIC[cid]
             if cid in RELATED:
                 rec["related"] = RELATED[cid]
+                if cid in EVOLVES:
+                    rec["evolves"] = True
             if cid in MATES:
                 rec["mate"] = MATES[cid]
             if unnamed:

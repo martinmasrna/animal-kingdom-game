@@ -403,6 +403,9 @@
       "base_strength": 5,
       "text": "Dusk: place a Baby Turtle on an adjacent empty crossroad.",
       "keywords": [],
+      "related": [
+        "baby_turtle"
+      ],
       "species": "Sea Turtle",
       "habitat": "Open Ocean",
       "workbench_id": "aristocrats-6"
@@ -489,6 +492,9 @@
       "base_strength": 1,
       "text": "When this is removed, place two Worms on its crossroad.",
       "keywords": [],
+      "related": [
+        "worm"
+      ],
       "species": "Earthworm",
       "habitat": "Meadow",
       "workbench_id": "aristocrats-12"
@@ -1369,6 +1375,9 @@
       "base_strength": 4,
       "text": "Roar: place a Baby Fish on a random adjacent empty crossroad.",
       "keywords": [],
+      "related": [
+        "baby_fish"
+      ],
       "species": "Sunfish",
       "habitat": "Open Ocean",
       "workbench_id": "fish-13"
@@ -2075,6 +2084,7 @@
         "butterfly_legend_butterfly",
         "butterfly_legend_monarch"
       ],
+      "evolves": true,
       "unnamed": true,
       "species": "Butterfly",
       "habitat": "Meadow",
@@ -2093,6 +2103,9 @@
       "keywords": [
         "Flight",
         "Apex Predator"
+      ],
+      "related": [
+        "arna"
       ],
       "mate": "arna",
       "species": "Eagle",
@@ -2204,6 +2217,16 @@
       "keywords": [
         "Flight"
       ],
+      "related": [
+        "baby_lion",
+        "baby_wolf",
+        "baby_squirrel",
+        "baby_owl",
+        "baby_python",
+        "baby_bear",
+        "baby_gorilla",
+        "baby_zebra"
+      ],
       "species": "Stork",
       "habitat": "Meadow",
       "workbench_id": "handlock-10"
@@ -2232,6 +2255,10 @@
       "base_strength": 1,
       "text": "When this gains strength in your hand, draw a card and turn this into a Butterfly.",
       "keywords": [],
+      "related": [
+        "butterfly"
+      ],
+      "evolves": true,
       "species": "Butterfly",
       "habitat": "Meadow",
       "workbench_id": "handlock-12"
@@ -2797,6 +2824,9 @@
       "keywords": [
         "Flight"
       ],
+      "related": [
+        "cuckoo_egg"
+      ],
       "species": "Cuckoo",
       "habitat": "Meadow",
       "workbench_id": "pool-x1"
@@ -2825,6 +2855,10 @@
       "base_strength": 5,
       "text": "Roar: place Poppy and Rusty on random adjacent empty crossroads.",
       "keywords": [],
+      "related": [
+        "poppy",
+        "rusty"
+      ],
       "species": "Fox",
       "habitat": "Forest",
       "workbench_id": "pool-y1"
