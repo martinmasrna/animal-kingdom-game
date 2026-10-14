@@ -2618,6 +2618,12 @@ def _cape_buffalo_place(state, unit, cr):
                         [nb for nb in _adjacent_enemy_targets(state, unit, cr) if covering(nb)])
 
 
+def _boar_place(state, unit, cr):
+    """Roar: remove an adjacent enemy that isn't covering anything (alone on its crossroad)."""
+    _push_remove_choice(state, unit.owner, unit.card_id,
+                        [nb for nb in _adjacent_enemy_targets(state, unit, cr) if len(state.board[nb]) == 1])
+
+
 def _wildebeest_eot(state, unit, cr):
     """At the end of your turn, if this is grazing, gain 5 food."""
     if statics.grazing(state, unit, cr):
@@ -2880,6 +2886,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "okapi": {"on_end_of_turn": _okapi_eot},
     "zebra": {"on_flee": _zebra_flee},
     "cape_buffalo": {"on_place": _cape_buffalo_place},
+    "boar": {"on_place": _boar_place},
     "gazelle": {"on_place": _gains("gazelle_food")},
     "wildebeest": {"on_end_of_turn": _wildebeest_eot},
     "deer": {"on_place": lambda state, unit, cr: _push_draw(state, unit.owner, 1)},

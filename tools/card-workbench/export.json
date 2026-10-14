@@ -2091,13 +2091,13 @@
      "habitat": "Forest",
      "id": "hoofed-13",
      "name": "Boar",
-     "note": "",
+     "note": "Art: needs repainting for the new text (the boar charging an intruder).",
      "rarity": "C",
      "species": "Boar",
      "status": "proposed",
-     "str": 5,
+     "str": 4,
      "tag": "Hoofed",
-     "text": "Has +3 strength while grazing."
+     "text": "Roar: remove an adjacent enemy that isn't covering anything."
     }
    ]
   },

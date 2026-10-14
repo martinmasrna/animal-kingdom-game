@@ -101,11 +101,6 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
             bonus += cfg.grizzly_per_card * max(0, len(state.hands[owner]) - (1 if prospective else 0))
         elif cid == "giraffe":                  # +5 during your opponent's turn
             bonus += cfg.giraffe_bonus if their_turn else 0
-        elif cid == "boar" and not prospective:  # +3 while grazing
-            from .statics import grazing
-            unit = next((u for u in tops if u.iid == self_iid), None)
-            if unit is not None and grazing(state, unit):
-                bonus += cfg.boar_grazing_bonus
 
     for u in tops:
         aura = FAMILY_AURAS.get(u.card_id)

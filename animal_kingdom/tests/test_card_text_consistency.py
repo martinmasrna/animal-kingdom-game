@@ -319,7 +319,6 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "butterfly_legend_monarch": ["butterfly_legend_stage5_grant"],
     "moose": ["moose_anthem"],
     "giraffe": ["giraffe_bonus"],
-    "boar": ["boar_grazing_bonus"],
 }
 
 

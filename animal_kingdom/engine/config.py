@@ -65,7 +65,6 @@ class Config:
     grizzly_per_card: int = 1            # Grizzly Bear: +1 for each card in your hand
     giraffe_bonus: int = 5               # Giraffe: +5 during your opponent's turn
     moose_anthem: int = 1                # Moose: your other Hoofed animals have +1 during your opponent's turn
-    boar_grazing_bonus: int = 3          # Boar: +3 while grazing
 
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
     dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn

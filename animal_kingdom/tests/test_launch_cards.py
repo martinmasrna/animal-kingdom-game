@@ -776,11 +776,11 @@ def test_the_legendary_zebra_draws_per_different_hoofed_animal_you_control_anywh
     assert len(s.hands["A"]) == 3                               # Gazelle, Deer and the Zebra itself
 
 
-def test_grazing_okapi_draws_wildebeest_feeds_and_boar_grows():
+def test_grazing_okapi_draws_and_wildebeest_feeds():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,1", "okapi", "A"); put(s, "2,1", "wildebeest", "A"); put(s, "2,2", "squirrel", "A")
-    boar = put(s, "1,2", "boar", "A")                           # closes R1: all four graze
-    assert statics.grazing(s, boar) and effective_strength(s, boar) == 5 + CFG.boar_grazing_bonus
+    deer = put(s, "1,2", "deer", "A")                           # closes R1: all four graze
+    assert statics.grazing(s, deer)
     end_turn(s)
     assert len(s.hands["A"]) == 1 and s.food["A"] == CFG.wildebeest_food + 10   # Wildebeest, then R1's income
 
@@ -799,6 +799,14 @@ def test_cape_buffalo_removes_the_enemy_covering_an_allied_hoofed():
     put(s, "1,1", "lion", "B")                                  # covering nothing of A's
     apply_click(s, PlaceAction("cape_buffalo", ("cr", "1,2")))
     assert [u.card_id for u in s.board["2,2"]] == ["gazelle"] and s.top_unit("1,1").owner == "B"
+
+
+def test_boar_removes_an_adjacent_enemy_covering_nothing():
+    s = make_state(hands={"A": ["boar"]})
+    put(s, "1,1", "lion", "B")                                  # alone on its crossroad: the target
+    put(s, "2,2", "squirrel", "B"); put(s, "2,2", "lion", "B")  # on top of its own animal: safe
+    apply_click(s, PlaceAction("boar", ("cr", "1,2")))
+    assert "1,1" not in s.board and [u.card_id for u in s.board["2,2"]] == ["squirrel", "lion"]
 
 
 # ==================================================================================== Pool

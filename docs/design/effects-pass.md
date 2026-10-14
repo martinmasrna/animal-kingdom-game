@@ -211,7 +211,7 @@ The deck is two halves (the fix for Flee fighting the pasture, found in the imag
 | Cape Buffalo (stander) | Savanna | C | 4 | Roar: remove an adjacent enemy covering one of your Hoofed animals. (Martin's: the buffalo drives the predator off and the animal underneath is safe. Common, since it's the deck's core loop.) |
 | Wildebeest (stander) | Savanna | C | 6 | At the end of your turn, if this is grazing, gain 5 food. |
 | Giraffe (stander) | Savanna | C | 4 | Has +5 strength during your opponent's turn. |
-| Boar (stander) | Forest | C | 5 | Has +3 strength while grazing. |
+| Boar (remover) | Forest | C | 4 | Roar: remove an adjacent enemy that isn't covering anything. (Martin, 2026-10-14: the deck had walls enough and no answer to a 6 or 7 on bare ground but two Honey Badgers; Cape Buffalo answers an enemy on your animal, the Boar one on empty ground. The grazing Boar was a third Giraffe. Dial if it's too much: "of strength 7 or less".) |
 | Gazelle (fleer) | Savanna | C | 3 | **Flee.** Roar: gain 5 food. |
 | Deer (fleer) | Forest | C | 4 | **Flee.** Roar: draw a Hoofed animal. |
 
