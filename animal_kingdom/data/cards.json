@@ -3233,7 +3233,7 @@
       "tags": [],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: draw a card.",
+      "text": "Roar: draw a card. Whenever this gains strength in your hand, it evolves.",
       "stage": 2
     },
     {
@@ -3246,7 +3246,7 @@
       "keywords": [
         "Stealth"
       ],
-      "text": "Stealth. Roar: draw a card, then give an animal in your hand +1 strength.",
+      "text": "Stealth. Roar: draw a card, then give an animal in your hand +1 strength. Whenever this gains strength in your hand, it evolves.",
       "stage": 3
     },
     {
@@ -3260,7 +3260,7 @@
         "Stealth",
         "Flight"
       ],
-      "text": "Stealth. Flight. Roar: draw a card, then give all animals in your hand +1 strength.",
+      "text": "Stealth. Flight. Roar: draw a card, then give all animals in your hand +1 strength. Whenever this gains strength in your hand, it evolves.",
       "stage": 4
     },
     {
