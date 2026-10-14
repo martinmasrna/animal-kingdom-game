@@ -22,7 +22,7 @@ from pathlib import Path
 
 from aiohttp import WSMsgType, web
 
-from ..decks import PREMADE_DECKS, load_premade_deck
+from ..decks import PREMADE_DECKS, TEST_BOT_DECKS, load_premade_deck
 from ..engine.state import EngineError
 from ..engine.cards import DECK_SLUGS, load_cards
 from . import custom_decks
@@ -900,7 +900,7 @@ async def create_match(req):
         match._start_game()
         match.version += 1
     elif bot:
-        if bot.get("level") not in BOT_LEVELS or bot.get("deck") not in PREMADE_DECKS:
+        if bot.get("level") not in BOT_LEVELS or bot.get("deck") not in {*PREMADE_DECKS, *TEST_BOT_DECKS}:
             raise web.HTTPBadRequest(text="bad bot")
         match.join(Seat(secrets.token_urlsafe(12), f"Bot ({bot['level'].capitalize()})",
                         bot=bot["level"], deck=bot["deck"]))

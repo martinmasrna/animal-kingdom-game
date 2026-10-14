@@ -45,7 +45,7 @@ EVENTS_KEPT = 200            # a view carries the game's last events: enough for
 TIMEOUTS_TO_LOSE = 3         # turns in a row a player's clock ran out: they have left, and lose (Martin, 2026-10-01)
 
 # Menu labels for the premade decks (the design mockups' names).
-DECK_NAMES = {**{d["slug"]: d["name"] for d in STARTER_DECKS}, **tutorial.NAMES}
+DECK_NAMES = {**{d["slug"]: d["name"] for d in STARTER_DECKS}, **tutorial.NAMES, "lions30": "30 Lions"}
 # The card whose art covers each starter deck (cards.json, from the card workbench).
 STARTER_COVERS = {d["slug"]: d.get("cover", "") for d in STARTER_DECKS}
 

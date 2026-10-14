@@ -66,7 +66,10 @@ GOODSTUFF_DECK: list[str] = (
 # synthetic decks the sim tools register (optimizer candidates, other piles, which may take the
 # "goodstuff" slug over for their own run). Registered decks are mirrored into
 # $AK_EXTRA_DECKS so `spawn`ed worker processes, which re-import this module, load them too.
-EXTRA_DECKS: dict[str, list[str]] = {"baseline": BASELINE_DECK, "goodstuff": GOODSTUFF_DECK}
+# A test opponent for the web client, reached by link only (#/?botdeck=lions30): Martin's heuristic that every deck
+# must beat 30 vanilla Lions. Not a legal deck (three copies at most), so never offered in the deck pickers.
+TEST_BOT_DECKS = {"lions30": ["lion"] * 30}
+EXTRA_DECKS: dict[str, list[str]] = {"baseline": BASELINE_DECK, "goodstuff": GOODSTUFF_DECK, **TEST_BOT_DECKS}
 EXTRA_DECKS.update(json.loads(os.environ.get("AK_EXTRA_DECKS", "{}")))
 
 
