@@ -1,5 +1,5 @@
 {
- "_comment": "Snapshot of the card workbench database (https://claude.ai/artifact/4LbvDkhN1qawhdc3f4dcQU), the source of truth for the card lists. Regenerate from the workbench; never edit by hand.",
+ "_comment": "The card lists of the twelve starter decks and the pool: the source of truth for which cards exist, their names, strengths, families and text. Edit here, then run convert.py (cards.json) and push.py (the workbench page, https://claude.ai/artifact/4LbvDkhN1qawhdc3f4dcQU).",
  "decks": {
   "aristocrats": {
    "name": "Aristocrats",

@@ -17,7 +17,7 @@ RARITY = {"C": "common", "R": "rare", "L": "legendary"}
 
 
 def main() -> None:
-    export = json.loads((ROOT / "tools/card-workbench/export.json").read_text())["decks"]
+    export = json.loads((ROOT / "tools/card-workbench/decks.json").read_text())["decks"]
     data = json.loads((ROOT / "animal_kingdom/data/cards.json").read_text())
     by_wb = {c["workbench_id"]: c for c in data["cards"] if c.get("workbench_id")}
     have = {p.stem for p in ART.glob("*.webp")}

@@ -1,7 +1,7 @@
 """Seed data for the card workbench artifact, transcribed from Martin's deck sheets (2026-10-08).
 
 Writes one JSON file per database document into seed/: decks/<id>.json and habitats/<id>.json.
-The artifact's database is the source of truth after seeding; this file is the starting snapshot.
+The first snapshot, kept for its history; the card lists now live in decks.json.
 """
 import json
 import pathlib

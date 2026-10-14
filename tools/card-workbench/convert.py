@@ -1,17 +1,17 @@
-"""Write the game's card data from the card workbench's export.
+"""Write the game's card data from the repo's card list.
 
     .venv/bin/python tools/card-workbench/convert.py [EXPORT] [--check]
 
-Reads tools/card-workbench/export.json (the workbench snapshot, the source of truth for which cards exist, their
+Reads tools/card-workbench/decks.json (the source of truth for which cards exist, their
 names, strengths, families and text) and rewrites animal_kingdom/data/cards.json: the twelve starter decks (each
 card's `deck` and rarity give its copies, so the decklists follow), the pool as the bench, and the cards the
-engine makes itself (tokens, the Butterfly's stages, the Eagle's mate), which are listed here. Cards the workbench
+engine makes itself (tokens, the Butterfly's stages, the Eagle's mate), which are listed here. Cards decks.json
 doesn't know are kept as they are when they sit in the reserve or the tutorial deal; every other old card goes.
 
 A card keeps its engine id across runs: the id recorded with its workbench id last time, else (the first run) the
 old card of the same name, else one made from its name, or from its species for an unnamed legendary
-(`wolf_legend`; a placeholder-named one is listed in UNNAMED). Effects are bound to ids in engine/effects.py, so a card whose text changed in the
-workbench needs its behaviour changed there too; `--check` lists what changed without writing anything.
+(`wolf_legend`; a placeholder-named one is listed in UNNAMED). Effects are bound to ids in engine/effects.py, so a card whose text changed in
+decks.json needs its behaviour changed there too; `--check` lists what changed without writing anything.
 
 Run `python -m animal_kingdom.render.deck_docs` afterwards to refresh the deck docs' tables.
 """
@@ -25,11 +25,11 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-EXPORT = ROOT / "tools" / "card-workbench" / "export.json"
+EXPORT = ROOT / "tools" / "card-workbench" / "decks.json"
 CARDS = ROOT / "animal_kingdom" / "data" / "cards.json"
 
-COMMENT = ("Static card data, written by tools/card-workbench/convert.py from the card workbench's export (the source "
-           "of truth for the starter decks and the pool); reserve and tutorial cards are kept by it as they are. Effect "
+COMMENT = ("Static card data, written by tools/card-workbench/convert.py from tools/card-workbench/decks.json (the "
+           "source of truth for the starter decks and the pool); reserve and tutorial cards are kept by it as they are. Effect "
            "logic lives in engine code (effects/statics/strength), bound by id; numbers an effect uses live in "
            "engine/config.py. Schema: decks (starter decks: slug, name, order, cover); cards: id (unique, stable across "
            "runs), name (the species while `unnamed`), deck (a starter slug, or bench/token/reserve/tutorial), rarity, "
@@ -181,10 +181,11 @@ def convert(export: dict, old_data: dict) -> tuple[dict, list[str]]:
             prev = by_id.get(cid)
             if prev is None:
                 notes.append(f"new      {cid:32} {name}")
-            elif (prev.get("text", ""), prev["base_strength"], sorted(prev.get("keywords", []))) != (
-                    text, rec["base_strength"], sorted(rec["keywords"])):
-                notes.append(f"changed  {cid:32} {name}: {prev['base_strength']} {prev.get('text', '')!r} -> "
-                             f"{rec['base_strength']} {text!r}")
+            elif (prev["name"], prev.get("species", ""), prev.get("text", ""), prev["base_strength"],
+                  sorted(prev.get("keywords", []))) != (name, rec["species"], text, rec["base_strength"],
+                                                        sorted(rec["keywords"])):
+                notes.append(f"changed  {cid:32} {prev['name']} -> {name}: {prev['base_strength']} "
+                             f"{prev.get('text', '')!r} -> {rec['base_strength']} {text!r}")
             cards.append(rec)
     for d in decks:
         legends = [c["id"] for c in cards if c["deck"] == d["slug"] and c["rarity"] == "legendary"]
