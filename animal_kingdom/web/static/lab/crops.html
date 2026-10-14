@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Crops</title>
+<link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/app.css"><link rel="stylesheet" href="/static/menu.css">
+<style>
+  /* Every painted card as the game frames it: board portrait, hand card, full card, deck-list strip, deck cover tile.
+     ?from=0&n=8 shows a slice; ?ids=a,b shows those cards. */
+  html, body { height: auto; overflow: visible; }
+  body { padding: 16px 20px; background: #1b1714; color: #d8cfc0; }
+  #r { display: grid; grid-template-columns: 1fr 1fr; column-gap: 30px; }
+  .row { display: flex; gap: 22px; align-items: center; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid #3a332c; }
+  .row h3 { width: 90px; margin: 0; font: 600 14px var(--font-body, sans-serif); word-break: break-all; }
+  .ring { width: 98px; height: 98px; border-radius: 50%; background-color: #333; background-repeat: no-repeat; flex: none; box-shadow: 0 0 0 5px #8a7b66; }
+  .hand .card { --w: 143px; } .big .card { --w: 230px; }
+  .strips { display: flex; flex-direction: column; gap: 14px; width: 284px; }
+  .strips .st { width: 230px; }
+  .strips .dtile { width: 284px; }
+</style></head><body class="mscr">
+<div id="r"></div>
+<script type="module">
+import { cardHTML, fitNames } from '/static/card.js';
+import { CROP, stripArt } from '/static/art.js';
+import { portrait } from '/static/board.js';
+import { stripHTML } from '/static/collection.js';
+const q = new URLSearchParams(location.search);
+const pool = await (await fetch('/api/pool')).json();
+const byId = Object.fromEntries(pool.cards.map(c => [c.id, c]));
+let ids = Object.keys(CROP).filter(id => byId[id]);
+if (q.get('ids')) ids = q.get('ids').split(',');
+else ids = ids.slice(+(q.get('from') || 0), +(q.get('from') || 0) + +(q.get('n') || 1000));
+const cardsMap = Object.fromEntries(pool.cards.map(c => [c.id, c]));
+document.getElementById('r').innerHTML = ids.map(id => { const c = byId[id]; return `<div class="row"><h3>${id}</h3>
+  <div class="ring" style="${portrait(id, 98)}"></div>
+  <div class="hand">${cardHTML(c, { cls: 'compact' })}</div>
+  <div class="big">${cardHTML(c)}</div>
+  <div class="strips">${stripHTML(id, cardsMap, 1)}
+    <div class="dtile" style="${stripArt(id, 284, 56, .7)}"><b>${c.name}</b></div></div></div>`; }).join('');
+fitNames(document.body);
+document.body.dataset.count = Object.keys(CROP).filter(id => byId[id]).length;
+document.body.dataset.ready = '1';
+</script></body></html>
