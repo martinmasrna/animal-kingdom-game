@@ -128,7 +128,7 @@ def test_canine_develops_instead_of_drawing_a_full_hand(bot_cls):
     # front, the pile drew twice and has nothing on the board, Canine already drew with its
     # first action and holds six. The bot drew again. Martin: the move is Dhole,
     # Fox or Dingo; drawing is the worst and a vanilla Wolf the second worst (Jackal and
-    # Raksha are wrong too); that Fox's card is `african_wild_dog` now. One good line is a second Dhole in the middle row, then Fox into a
+    # Raksha, a deleted card whose slot holds a second Jackal now, are wrong too); that Fox's card is `african_wild_dog` now. One good line is a second Dhole in the middle row, then Fox into a
     # corner next turn (+2 from each Dhole, a draw for each), then Dingo beside them.
     for chosen in _choices(bot_cls, _puzzle("canine_develop")):
         assert isinstance(chosen, PlaceAction) and chosen.card_id in {"dhole", "african_wild_dog", "dingo"}, chosen

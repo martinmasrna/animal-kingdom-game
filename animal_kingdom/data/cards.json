@@ -2809,21 +2809,6 @@
       "workbench_id": "pool-x2"
     },
     {
-      "id": "raksha",
-      "name": "Raksha",
-      "deck": "bench",
-      "rarity": "legendary",
-      "tags": [
-        "Canine"
-      ],
-      "base_strength": 5,
-      "text": "Your other Canines have +1 strength.",
-      "keywords": [],
-      "species": "Wolf",
-      "habitat": "Forest",
-      "workbench_id": "pool-y0"
-    },
-    {
       "id": "scarlett",
       "name": "Scarlett",
       "deck": "bench",

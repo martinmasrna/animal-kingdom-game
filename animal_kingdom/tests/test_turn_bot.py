@@ -270,17 +270,6 @@ def test_cats_plays_twin_enabler_before_the_twin():
     assert {"alley_cat", "caracal"} <= set(own_ids(s))
 
 
-def test_canine_buffs_before_the_strength_gated_payoff():
-    # The Unnamed Canine only draws at 5+ strength. Raksha (+1 to your other Canines) must land first so
-    # the str-4 Canine (3, trained +1 in hand) reaches 5 and its Roar fires instead of fizzling.
-    s = make_state(current="A", hands={"A": ["raksha", "unnamed_canine"]},
-                   decks={"A": ["mouse", "mouse", "mouse"], "B": ["mouse"] * 4}, config=TWO_ACTION)
-    next(u for u in s.hands["A"] if u.card_id == "unnamed_canine").strength_counter = 1
-    bot = small_turn()
-    first = bot.choose(s.view_for("A"), rules.legal_actions(s), s)
-    assert isinstance(first, PlaceAction) and first.card_id == "raksha"
-
-
 def test_rattlesnake_grows_from_ravens_two_shuffles():
     s = make_state(current="A", hands={"A": ["rattlesnake", "raven"]},
                    decks={"A": ["eagle", "eagle", "eagle", "eagle"], "B": ["mouse"] * 4},

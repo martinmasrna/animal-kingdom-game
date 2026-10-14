@@ -296,7 +296,6 @@ STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
 STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "guard_wasp": ["guard_hornet_bonus"],
     "python": [],                             # dynamic strength: its +1 per removed animal is the rule itself
-    "raksha": ["raksha_anthem"],
     "dingo": ["dingo_grant"],
     "shuck": ["shuck_grant"],
     "egg_eater": ["egg_eater_growth"],

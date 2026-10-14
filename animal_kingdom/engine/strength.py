@@ -11,7 +11,7 @@ matters (covering, removal thresholds, region holding, conditions like Coyote's 
 - stored_counters: `UnitInstance.strength_counter` - one-time "give +X" grants (Unnamed Rallier,
   Clarion, Dhole, Dingo, Bush Dog, Shuck). Stored on the instance; persist after the
   granter dies; travel hand->board.
-- active_anthems: live "has +X" auras (Raksha, Lobo, Verminus, Guard Wasp).
+- active_anthems: live "has +X" auras (Mackerel, Moose, Guard Wasp).
   Recomputed from the board every time; vanish when their condition lapses.
 
 For covering legality a card is still in hand (no board iid yet), so anthems are computed
@@ -63,7 +63,6 @@ def _inked(state: GameState, iid: Optional[int]) -> bool:
 # Auras on the board that give your other animals of a family strength: card id -> (family, config attr of the
 # bonus, whether only during your opponent's turn). Each source counts, and none counts for itself.
 FAMILY_AURAS = {
-    "raksha": ("Canine", "raksha_anthem", False),     # "Your other Canines have +1 strength."
     "mackerel": ("Fish", "mackerel_anthem", False),   # "Your other Fish have +1 strength."
     "moose": ("Hoofed", "moose_anthem", True),        # "Your other Hoofed animals have +1 strength during your opponent's turn."
 }

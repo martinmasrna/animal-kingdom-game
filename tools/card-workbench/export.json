@@ -2204,18 +2204,6 @@
     },
     {
      "habitat": "Forest",
-     "id": "pool-y0",
-     "name": "Raksha",
-     "note": "",
-     "rarity": "L",
-     "species": "Wolf",
-     "status": "proposed",
-     "str": 5,
-     "tag": "Canine",
-     "text": "Your other Canines have +1 strength."
-    },
-    {
-     "habitat": "Forest",
      "id": "pool-y1",
      "name": "Scarlett",
      "note": "Poppy and Rusty: tokens, Canine, 1.",

@@ -34,16 +34,6 @@ def advance_to(state, target_tc):
 
 
 
-def test_raksha_buffs_other_canines_but_not_itself():
-    s = make_state()
-    raksha = put(s, "1,1", "raksha", "A")
-    fox = put(s, "1,2", "unnamed_canine", "A")
-    assert effective_strength(s, fox) == 4            # 3 + 1 aura
-    assert effective_strength(s, raksha) == 5            # body 5; aura excludes itself
-
-
-
-
 def test_guard_hornet_anthem_gated_on_four_colony():
     s = make_state()
     gh = put(s, "1,1", "guard_wasp", "A")

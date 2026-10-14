@@ -13,7 +13,7 @@ export const CARD_NUMS = [
   "chinchilla", "armadillo", "squirrel", "chipmunk", "hedgehog", "hamster", "muskrat", "groundhog",
   "gopher", "retired_verminus", "pestis", "sirocco", "gale", "jerboa", "hornet", "chameleon",
   "skunk", "lemming", "cheetah", "rat", "falcon", "bat", "mouse", "lobo",
-  "shuck", "raksha", "clarion", "retired_dhole", "bush_dog", "retired_jackal", "dhole", "jackal",
+  "shuck", "retired_raksha", "clarion", "retired_dhole", "bush_dog", "retired_jackal", "dhole", "jackal",
   "unnamed_canine", "arctic_fox", "fox", "african_wild_dog", "dingo", "street_dog", "scarlett", "hyena",
   "outrider", "wolf", "pup", "poppy", "rusty", "mock_scout", "mock_draw_3", "mock_draw_4",
   "mock_draw_6", "mock_draw_7", "mock_flydraw_2", "mock_flydraw_3", "mock_flydraw_4", "mock_flydraw_5", "calib_draw1_1", "calib_draw1_2",

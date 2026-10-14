@@ -97,7 +97,7 @@ export const CROP = {
   eon: [.6, .33, .7], ember: [.55, .3, .75], aurum: [.52, .5, .85], black_swan: [.58, .44, .82], anaconda: [.49, .6, .62], egg_eater: [.68, .27, .6], snake_egg: [.5, .42, .8], bird_egg: [.52, .42, .82],
   dingo: [.7, .27, .6], fox: [.62, .42, .7], african_wild_dog: [.5, .4, .6], street_dog: [.66, .3, .6],
   pup: [.55, .36, .72], outrider: [.62, .36, .75], dhole: [.66, .36, .66], hyena: [.62, .45, .6], bush_dog: [.64, .34, .6],
-  lobo: [.55, .42, .75], raksha: [.64, .33, .6], clarion: [.6, .22, .7], scarlett: [.56, .36, .8], poppy: [.55, .36, .72], rusty: [.45, .36, .72],
+  lobo: [.55, .42, .75], clarion: [.6, .22, .7], scarlett: [.56, .36, .8], poppy: [.55, .36, .72], rusty: [.45, .36, .72],
 };
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
@@ -188,7 +188,7 @@ export const STRIP = {
   hedgehog: [.47, .47, 1], hamster: [.52, .38, 1], muskrat: [.4, .38, 1.3], groundhog: [.58, .3, 1], gopher: [.62, .37, 1],
   pestis: [.66, .48, 1], sirocco: [.62, .5, 1.2], gale: [.76, .55, 1.7], jerboa: [.73, .38, 1.3], hornet: [.5, .45, 1], chameleon: [.62, .28, 1.3],
   skunk: [.28, .55, 1.3], lemming: [.82, .38, 1.4], cheetah: [.87, .4, 1.3], rat: [.8, .48, 1], falcon: [.8, .6, 1.7], bat: [.53, .44, 1.3],
-  mouse: [.47, .33, 1], lobo: [.55, .38, 1.2], raksha: [.63, .38, 1.1], clarion: [.63, .16, 1.1], bush_dog: [.64, .3, 1.1], dhole: [.7, .32, 1.4],
+  mouse: [.47, .33, 1], lobo: [.55, .38, 1.2], clarion: [.63, .16, 1.1], bush_dog: [.64, .3, 1.1], dhole: [.7, .32, 1.4],
   jackal: [.8, .5, 1], fox: [.7, .4, 1.3], african_wild_dog: [.55, .3, 1.2], dingo: [.73, .25, 1.1], street_dog: [.67, .34, 1], scarlett: [.6, .19, 1.2],
   hyena: [.72, .45, 1.2], outrider: [.77, .31, 1.3], pup: [.57, .27, 1.2], poppy: [.5, .32, 1], rusty: [.5, .32, 1],
 };
@@ -278,7 +278,7 @@ export const FULL = {
   hornet: .425, alley_cat: .435, hyena: .45, jaguar: .455, king_theron: .305, lemming: .445, lion: .45, lobo: .45,
   lynx: .395, magpie: .375, methuselah: .405, mouse: .455, muskrat: .48, nurse_bumblebee: .445, black_swan: .48, outrider: .365,
   owl: .385, pestis: .405, poppy: .355, porcupine: .435, prince_leo: .365, princess_lea: .395, pup: .365, queen_adira: .375,
-  queen_bee: .425, queen_marabunta: .45, raksha: .425, rat: .475, barley: .365, rattlesnake: .555, raven: .405,
+  queen_bee: .425, queen_marabunta: .45, rat: .475, barley: .365, rattlesnake: .555, raven: .405,
   dhole: .445, rhinoceros: .395, rusty: .345, scrooge: .41, serval: .5, sirocco: .44, skunk: .45, sloth: .3,
   snake_egg: .42, snow_leopard: .385, soldier_ant: .465, squirrel: .455, taipan: .405, termite_king: .485, crocodile: .45, honey_badger: .5,
   termite_queen: .47, naked_mole_rat: .5, tiger: .35, vesper: .43, viper: .415, worker_ant: .465, worker_bee: .355,
