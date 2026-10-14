@@ -82,7 +82,7 @@ export const CROP = {
   bat: [.52, .4, .75], black_panther: [.66, .42, .5], borealis: [.62, .3, .66], brutus: [.5, .45, .9],
   chameleon: [.55, .4, .8], cheetah: [.7, .42, .6], falcon: [.66, .5, .6], gale: [.56, .45, .9], jackal: [.72, .52, .6],
   hippopotamus: [.62, .3, .72], hornet: [.58, .42, .8], jerboa: [.65, .32, .65], king_theron: [.6, .3, .62],
-  lemming: [.65, .36, .7], mouse: [.42, .4, .82], pestis: [.6, .38, .8], prince_leo: [.64, .33, .66],
+  lemming: [.65, .36, .7], mouse: [.6, .5, .62], pestis: [.6, .38, .8], prince_leo: [.64, .33, .66],
   princess_lea: [.42, .36, .66], queen_adira: [.6, .29, .62], rat: [.68, .48, .62], serval: [.64, .6, .7],
   sirocco: [.52, .46, .82], skunk: [.4, .48, .78], sloth: [.55, .33, .62], snow_leopard: [.55, .34, .8],
   squirrel: [.62, .4, .7], worker_ant: [.55, .38, .75],
@@ -199,7 +199,7 @@ export const STRIP = {
   hedgehog: [.47, .47, 1], hamster: [.52, .38, 1], muskrat: [.4, .38, 1.3], groundhog: [.58, .3, 1], gopher: [.62, .37, 1],
   pestis: [.66, .48, 1], sirocco: [.62, .5, 1.2], gale: [.76, .55, 1.7], jerboa: [.73, .38, 1.3], hornet: [.5, .45, 1], chameleon: [.62, .28, 1.3],
   skunk: [.21, .55, 3.4], lemming: [.82, .38, 1.4], cheetah: [.87, .4, 1.3], rat: [.8, .48, 1], falcon: [.8, .6, 1.7], bat: [.6, .42, 1.4],
-  mouse: [.47, .33, 1], lobo: [.55, .38, 1.2], clarion: [.63, .16, 1.1], bush_dog: [.64, .3, 1.1], dhole: [.68, .22, 1.6],
+  mouse: [.7, .47, 1.3], lobo: [.55, .38, 1.2], clarion: [.63, .16, 1.1], bush_dog: [.64, .3, 1.1], dhole: [.68, .22, 1.6],
   jackal: [.8, .5, 1], fox: [.7, .4, 1.3], african_wild_dog: [.55, .3, 1.2], dingo: [.73, .25, 1.1], street_dog: [.78, .6, 1.3], scarlett: [.6, .19, 1.2],
   hyena: [.72, .45, 1.2], outrider: [.77, .31, 1.3], pup: [.57, .27, 1.2], poppy: [.5, .32, 1], rusty: [.5, .32, 1],
 };
