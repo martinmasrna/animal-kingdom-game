@@ -668,7 +668,7 @@ def test_the_legendary_butterfly_moves_one_stage_per_buff():
     s = make_state(hands={"A": ["butterfly_legend", "silverback", "silverback"]}, decks={"A": ["lion"] * 9, "B": ["lion"] * 9})
     bf = hand_inst(s, "A", "butterfly_legend")
     rules.apply_action(s, PlaceAction("silverback", ("cr", "1,1")))
-    assert bf.card_id == "butterfly_legend_caterpillar" and placement_strength(s, bf) == 1 + CFG.silverback_grant
+    assert bf.card_id == "butterfly_legend_caterpillar" and placement_strength(s, bf) == CFG.silverback_grant
     rules.apply_action(s, PlaceAction("silverback", ("cr", "1,3")))
     assert bf.card_id == "butterfly_legend_chrysalis"         # one buff, one stage
     end_turn(s)                                                 # the opponent's turn passes: A's again

@@ -2066,7 +2066,7 @@
       "deck": "handlock",
       "rarity": "legendary",
       "tags": [],
-      "base_strength": 1,
+      "base_strength": 0,
       "text": "When this gains strength in your hand, evolve.",
       "keywords": [],
       "related": [
@@ -3231,7 +3231,7 @@
       "deck": "token",
       "rarity": "legendary",
       "tags": [],
-      "base_strength": 1,
+      "base_strength": 0,
       "keywords": [],
       "text": "Roar: draw a card. When this gains strength in your hand, evolve.",
       "stage": 2
@@ -3242,7 +3242,7 @@
       "deck": "token",
       "rarity": "legendary",
       "tags": [],
-      "base_strength": 1,
+      "base_strength": 0,
       "keywords": [
         "Stealth"
       ],
@@ -3255,7 +3255,7 @@
       "deck": "token",
       "rarity": "legendary",
       "tags": [],
-      "base_strength": 1,
+      "base_strength": 0,
       "keywords": [
         "Stealth",
         "Flight"
@@ -3269,7 +3269,7 @@
       "deck": "token",
       "rarity": "legendary",
       "tags": [],
-      "base_strength": 1,
+      "base_strength": 0,
       "keywords": [
         "Stealth",
         "Flight"
