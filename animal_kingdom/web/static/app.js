@@ -218,6 +218,7 @@ try { const k = JSON.parse(store('ak:play') || '{}');
   if (typeof k.botDeck === 'string') play.botDeck = k.botDeck;
   if (['mine', 'theirs'].includes(k.side)) play.side = k.side; } catch { /* nothing kept */ }
 const keepPlay = () => { if (['bot', 'ranked'].includes(play.opp)) store('ak:play', JSON.stringify({ opp: play.opp, level: play.level, botDeck: play.botDeck, side: play.side })); };
+const TEST_BOTS = [['lions30', '30 Lions']];   // test opponents (decks.TEST_BOT_DECKS), offered only after #/?botdeck=<id>
 const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']], SIDES = [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']];
 const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
 // Home's corner piece (design sandbox screen/nav/, 2026-10-02): the Ladder (where you stand on it), Collection by name, and a menu (three bars) listing the rest, the gear kept for Settings in it; seven equal icons were too many. Feedback is a tab on the
@@ -235,16 +236,19 @@ function homeScreen(mode = {}) {
   if (!newsAsked) { newsAsked = true; loadNews(api).then(() => { if (screen === 'home') homeScreen(homeMode); }); }   // the dot and "Since you last played" once it's known
   if (mode.gauntlet) play.opp = 'gauntlet'; else if (play.opp === 'gauntlet' || mode.join) play.opp = mode.join ? 'friend' : 'bot';
   const all = playable(), chosen = chosenDeck(), peek = all.find(d => d.id === play.peek) || chosen;
-  if (play.botDeck && play.botDeck !== 'random' && !DECKS.some(d => d.id === play.botDeck)) play.botDeck = 'random';   // a deck that's gone
+  const testBot = new URLSearchParams(location.hash.split('?')[1] || '').get('botdeck');   // a test opponent, by link only
+  if (TEST_BOTS.some(([id]) => id === testBot)) play.botDeck = testBot;
+  const isTest = TEST_BOTS.some(([id]) => id === play.botDeck);
+  if (play.botDeck && play.botDeck !== 'random' && !isTest && !DECKS.some(d => d.id === play.botDeck)) play.botDeck = 'random';   // a deck that's gone
   keepPlay();   // home draws on every change of the choice: what it draws is what's kept
   const bd = DECKS.find(d => d.id === play.botDeck), redraw = () => homeScreen(mode);
-  const botDecks = [['random', 'Random'], ...DECKS.map(d => [d.id, d.name])];   // the starters
+  const botDecks = [['random', 'Random'], ...DECKS.map(d => [d.id, d.name]), ...(isTest ? TEST_BOTS : [])];   // the starters (and a test opponent once its link was opened)
   // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
   const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
   const fr = play.opp === 'friend' && (play.friends || []).find(f => f.id === play.friend);
   const opp = mode.join ? ['Friend', 'Match ' + mode.join] : play.opp === 'friend' ? ['Friend', fr ? friendLabel(fr, play.friends) : ''] : play.opp === 'gauntlet' ? ['Gauntlet', `${label(LEVELS, play.level)} · ${label(SIDES, play.side)}`]
     : play.opp === 'ranked' ? ['Ranked', `your rating ${(ME && ME.rating) || '1500?'}`]
-    : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name : 'Random'}`];
+    : ['Practice', `${label(LEVELS, play.level)} · ${bd ? bd.name : isTest ? label(TEST_BOTS, play.botDeck) : 'Random'}`];
   const go = mode.join ? 'Join match' : play.opp === 'friend' ? (fr ? (fr.online ? `Challenge ${esc(friendLabel(fr, play.friends))}` : 'Send a match link') : 'Create match') : play.opp === 'gauntlet' ? 'Start gauntlet' : 'Play';
   const tile = (d, W, cls = '') => `<div class="dtile${cls}" data-deck="${d.id}" data-strip="${coverFor(d)}" data-ax=".7" style="${stripArt(coverFor(d), W, 56, .7)}"><b>${esc(d.name)}</b></div>`;
   // Your decks beside the list of the one under the pointer (the chosen one to begin with): what is in a deck, while choosing it.
@@ -312,8 +316,7 @@ function homeScreen(mode = {}) {
     if (play.opp === 'friend' && fr && fr.online) return startSearch('challenge', 'go', '/api/challenge', { friend: fr.id, deck: deckSpec(chosen) }, friendLabel(fr, play.friends));
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
-      const pool = DECKS, test = new URLSearchParams(location.hash.split('?')[1] || '').get('botdeck');   // a test opponent by link
-      const deck = test || (play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck);
+      const pool = DECKS, deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
       body.bot = { level: play.level, deck };
     }
     if (play.opp === 'gauntlet') {
