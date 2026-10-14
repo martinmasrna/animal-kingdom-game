@@ -78,7 +78,7 @@ function readOverlay(html) {
 function readCard(id, str) {
   const c = CARDS[id]; if (!c) return;
   const side = readSide(c, CARDS);   // the cards it makes and its keywords, right of the card (under it on a narrow screen)
-  readOverlay(`<div class="rcard${(c.related || []).length ? ' wide' : ''}">${cardHTML(c, str == null ? {} : { str })}${side ? `<div class="zside">${side}</div>` : ''}</div>`);
+  readOverlay(`<div class="rcard${(c.related || []).length ? ' wide' : ''}">${cardHTML(c, str == null ? {} : { str })}${side}</div>`);
 }
 function wirePops(root) {
   root.querySelectorAll('[data-card]').forEach(el => {

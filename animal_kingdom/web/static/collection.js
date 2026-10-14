@@ -254,7 +254,7 @@ function dialog(app, html) {
 function zoom(app, c) {
   const m = app.querySelector('#cmodal'); m.classList.add('on', 'zoom');
   const side = readSide(c, C);
-  m.innerHTML = `<div class="zbox">${cardHTML(c)}${side ? `<div class="zside">${side}</div>` : ''}</div>`;
+  m.innerHTML = `<div class="zbox">${cardHTML(c)}${side}</div>`;
   fitNames(m);
   const close = () => { m.classList.remove('on', 'zoom'); m.innerHTML = ''; removeEventListener('keydown', key, true); };
   const key = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
