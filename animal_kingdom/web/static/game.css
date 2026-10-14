@@ -502,7 +502,7 @@
   background: url(/static/kit2/gem_a.webp) center / 142% no-repeat; }
 .game .intro .iside.B .iring .jewel { background-image: url(/static/kit2/gem_b.webp); }
 .game .intro .iring .gemnum { height: 1em; } .game .intro .iring .q { font: 700 .95em/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; margin-left: .05em; }
-.game .intro .card .stab { display: none; } .game .intro .card .nbar { padding: 0 .5em; } .game .intro .card .nbar::before { min-width: 0; }   /* a deck's face here, not a card to weigh: no strength, the name centred */
+.game .intro .card .stab { display: none; } .game .intro .card .nbar { left: .55em; padding: 0 .5em; }   /* a deck's face here, not a card to weigh: no strength, the name centred */
 .game .intro .iside.A { animation: introL .7s cubic-bezier(.2,.8,.3,1) both; } .game .intro .iside.B { animation: introR .7s cubic-bezier(.2,.8,.3,1) both; }
 @keyframes introL { from { transform: translateX(-60vw); } } @keyframes introR { from { transform: translateX(60vw); } }
 .game .intro .ivs { font: 800 80px/1 'Fira Sans Condensed', sans-serif; color: #f3ead8; text-shadow: 0 4px 20px rgba(0,0,0,.8); animation: introVs .4s ease .55s both; }
