@@ -253,6 +253,7 @@ SHUFFLE_RE = re.compile(r"\bshuffle (\d+) cards back", re.IGNORECASE)
 # number must be listed (checked below), so a new draw card can't print a number its effect doesn't use.
 DRAW_CONSTANTS: dict[str, list[str]] = {
     "raven": ["raven_draw"],
+    "hare": ["hare_draw"],
     "nurse_bee": ["nurse_bee_draw"],
     "nurse_bumblebee": ["nurse_bumblebee_draw"],
     "black_bear": ["black_bear_draw"],

@@ -1198,6 +1198,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flee. Roar: if you played 3 or more animals this turn, draw a card."
+      },
+      "note": "Martin, 2026-10-15, after his Canines gauntlet: buff to 2 cards.",
+      "by": "claude",
+      "at": 1792089833
     }
   },
   "hawk": {

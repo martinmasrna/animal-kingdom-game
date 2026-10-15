@@ -459,10 +459,10 @@ def test_greywhisker_gains_draws_plays_then_discards():
 
 
 def test_hare_draws_after_three_animals_this_turn():
-    s = make_state(hands={"A": ["hare"]}, decks={"A": ["lion"], "B": []})
+    s = make_state(hands={"A": ["hare"]}, decks={"A": ["lion"] * 3, "B": []})
     s.units_placed_this_turn = 2
     rules.apply_action(s, PlaceAction("hare", ("cr", "1,2")))
-    assert hand_ids(s, "A") == ["lion"]
+    assert hand_ids(s, "A") == ["lion"] * CFG.hare_draw
 
 
 # ============================================================================= Egg Control

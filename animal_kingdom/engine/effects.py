@@ -2894,7 +2894,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "naked_mole_rat": {"on_place": _naked_mole_rat_place},
     "hornet": {"on_place": _hornet_place},
     "skunk": {"on_place": _skunk_place},
-    "hare": {"on_place": _conditional(_draw1)},
+    "hare": {"on_place": _conditional(_draws("hare_draw"))},
     "cheetah": {"on_place": _hq_adjacent_draw},
     "rat": {"on_place": _rat_place},
     "falcon": {"on_place": _hq_adjacent_draw},
