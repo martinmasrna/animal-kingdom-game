@@ -71,16 +71,16 @@ def test_a_cut_off_animal_roams_only_back_to_your_lines():
     assert ("3,2", ("cr", "2,3")) in roams(s)
 
 
-def test_a_roamer_takes_the_den_only_along_a_chain_that_reaches_it_without_the_roamer():
+def test_a_roamer_takes_the_den_whenever_a_card_from_the_hand_could():
     s = state()                                         # map_a: B's den front is the 4 column
     for cr in ("1,2", "2,2", "3,2"):
         put(s, cr, "t_body", "A")
-    put(s, "4,2", "t_roamer", "A")
-    assert ("4,2", ("hq", "B")) not in roams(s)         # lifted, nothing of A's stands at B's den
-    put(s, "4,1", "t_body", "A")
-    assert ("4,2", ("hq", "B")) not in roams(s)         # 4,1 hangs on the roamer: lifted, it's cut off too
-    put(s, "3,1", "t_body", "A")
+    put(s, "4,2", "t_roamer", "A")                      # connected, on B's den front: a card could take the den now
     assert ("4,2", ("hq", "B")) in roams(s)
+    s2 = state()
+    put(s2, "1,2", "t_body", "A")
+    put(s2, "4,2", "t_roamer", "A")                     # cut off on the den front: no chain, no den
+    assert ("4,2", ("hq", "B")) not in roams(s2)
 
 
 def test_an_animal_without_roam_does_not_roam():
@@ -124,7 +124,7 @@ def test_an_illegal_roam_is_refused():
 
 def test_roaming_onto_the_enemy_den_captures_it():
     s = state()
-    for cr in ("1,2", "2,2", "3,2", "3,1", "4,1"):
+    for cr in ("1,2", "2,2", "3,2"):
         put(s, cr, "t_body", "A")
     put(s, "4,2", "t_roamer", "A")
     assert ("4,2", ("hq", "B")) in roams(s)

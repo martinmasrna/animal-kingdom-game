@@ -784,32 +784,27 @@ def legal_roams(state: GameState, player: str, *, free_only: bool = False) -> li
 
 
 def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None) -> list:
-    """Where `unit` (on `cr`) may roam to: ("cr", crossroad) targets, and ("hq", enemy). A roam picks the animal up and
-    places it again by the placement rules (Martin, 2026-10-15): connection is judged with the animal lifted, so a
-    roamer that was the only link of its chain can't land beyond the gap it opens, and a cut-off one can only come back
-    to your lines; Flight, Reach and every other placement static apply as from the hand; it covers an enemy only if it
-    beats it (Dhole's equal included), an Apex Predator lands only on an animal and never takes a den.
-    `enemy_front` and `occ` are accepted for old callers and ignored: they describe the board before the lift."""
+    """Where `unit` (on `cr`) may roam to: ("cr", crossroad) targets, and ("hq", enemy). A roam moves the animal
+    anywhere you could place a card, judged as the board stands (Martin, 2026-10-15): its own crossroad counts toward
+    your chain while it's connected, so it can step onto a neighbour, jump to any crossroad beside the chain, and take
+    the den when the chain reaches its front; a cut-off animal adds nothing and can only come back to your lines.
+    Flight, Reach and every other placement static apply as from the hand; it covers an enemy only if it beats it
+    (Dhole's equal included), and an Apex Predator lands only on an animal (so never on a den).
+    `enemy_front` is accepted for old callers and ignored."""
     player = unit.owner
     enemy = other_player(player)
     gm = state.game_map
-    stack = state.board[cr]
-    stack.pop()                                       # lift it: connection is judged without it
-    if not stack:
-        del state.board[cr]
-    try:
-        lifted_occ = state.connected_occupied(player)
-    finally:
-        state.board.setdefault(cr, []).append(unit)
+    if occ is None:
+        occ = state.connected_occupied(player)
     is_apex = statics.has_keyword(state, unit, "Apex Predator", cr)
     flight = statics.ignores_connection(state, unit.card_id)
     extra = statics.extra_placement_crossroads(state, unit.card_id, player)
     reach = statics.reach_of(state, unit.card_id)
     if reach:
-        extra = extra | statics.reach_crossroads(state, player, reach, lifted_occ)
+        extra = extra | statics.reach_crossroads(state, player, reach, occ)
     out = []
     for c in sorted(gm.crossroads):
-        if c == cr or not (flight or c in extra or state.is_connected(player, c, lifted_occ)):
+        if c == cr or not (flight or c in extra or state.is_connected(player, c, occ)):
             continue
         top = state.top_unit(c)
         if top is None:
@@ -820,8 +815,8 @@ def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None)
             ok = statics.can_cover(state, unit, top, roaming=True)
         if ok:
             out.append(("cr", c))
-    if not is_apex and any(c in lifted_occ for c in gm.hq_front(enemy)):
-        out.append(("hq", enemy))                     # a den along a connected chain, as from the hand
+    if not is_apex and any(c in occ for c in gm.hq_front(enemy)):
+        out.append(("hq", enemy))                     # the den, whenever a card from the hand could take it
     return out
 
 
