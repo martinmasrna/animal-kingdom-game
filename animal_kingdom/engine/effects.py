@@ -838,15 +838,27 @@ def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None)
     return out
 
 
+def _own_free_roams(state: GameState, player: str, unit=None) -> int:
+    """Free roams given to one animal ("It roams", the Street Dog): `unit`'s own, or with no unit, any of `player`'s
+    animals still on top that hasn't roamed this turn."""
+    if unit is not None:
+        return state.turn_flags.get(f"free_roam_iid_{unit.iid}", 0)
+    return sum(1 for st in state.board.values() if st and st[-1].owner == player
+               and state.turn_flags.get(f"free_roam_iid_{st[-1].iid}") and not state.turn_flags.get(f"roamed_{st[-1].iid}"))
+
+
 def free_roams_left(state: GameState, player: str, unit=None) -> int:
     """Free roams `player` still holds this turn; with `unit`, those that animal may use."""
     granted = statics.free_roams(state, player, unit) + state.turn_flags.get(f"free_roams_{player}", 0)
-    return max(0, granted - state.turn_flags.get(f"free_roams_used_{player}", 0))
+    return max(0, granted - state.turn_flags.get(f"free_roams_used_{player}", 0)) + _own_free_roams(state, player, unit)
 
 
 def pay_for_roam(state: GameState, player: str, unit=None) -> None:
-    """A roam spends a free roam if the player holds one this animal may use, else one of the turn's actions."""
-    if free_roams_left(state, player, unit):
+    """A roam spends the animal's own free roam first, then a free roam the player holds that it may use, else one of
+    the turn's actions."""
+    if unit is not None and state.turn_flags.get(f"free_roam_iid_{unit.iid}"):
+        del state.turn_flags[f"free_roam_iid_{unit.iid}"]
+    elif free_roams_left(state, player, unit) - _own_free_roams(state, player, unit):
         state.turn_flags[f"free_roams_used_{player}"] = state.turn_flags.get(f"free_roams_used_{player}", 0) + 1
     else:
         state.actions_taken_this_turn += 1
@@ -1504,7 +1516,7 @@ def _then_hand_grant(state, step, iid):
 
 
 def _then_stray_dog(state, step, cr):
-    """Stray Dog: the ally gets +2, then it roams (no action spent; only if it still can roam this turn)."""
+    """Street Dog: the ally gets +2, then a free Roam this turn (only if it still can roam this turn)."""
     top = state.top_unit(cr)
     if top is None:
         return
@@ -1581,15 +1593,13 @@ THEN = {
 
 
 def _op_forced_roam(state, step):
-    """"It roams" (Stray Dog): a roam the effect pays for, under the Roam rules (where you could place, once per turn).
-    The player picks where; it can't take a den this way."""
+    """"It roams" (Street Dog): the animal gets a free Roam this turn, an ordinary roam the player takes when they like
+    (Martin, 2026-10-15: "it should just be normal roam"), the den included, while it hasn't roamed this turn."""
     cr, unit = _find_unit(state, step["iid"])
     if unit is None or state.top_unit(cr) is not unit or state.turn_flags.get(f"roamed_{unit.iid}"):
         return None
-    if not statics.can_roam(state, unit):
-        return None
-    targets = [t[1] for t in roam_targets(state, unit, cr) if t[0] == "cr"]
-    _push_choose(state, step["player"], targets, "roam_to", iid=unit.iid, by_card=step.get("by_card"))
+    if statics.can_roam(state, unit):
+        state.turn_flags[f"free_roam_iid_{unit.iid}"] = 1
     return None
 
 

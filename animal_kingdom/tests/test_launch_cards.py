@@ -417,14 +417,31 @@ def test_raccoon_dog_grows_a_roaming_canine():
     assert w.strength_counter == CFG.raccoon_dog_grant
 
 
-def test_stray_dog_buffs_an_ally_with_roam_and_it_roams():
+def test_stray_dog_buffs_an_ally_with_roam_and_gives_it_a_free_roam():
     s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     w = put(s, "1,1", "wolf", "A")
     rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
     choose(s, "1,1")
-    assert w.strength_counter == CFG.stray_dog_grant
-    choose(s, "2,2")                                           # lifted from 1,1, it lands beside the Street Dog
+    assert w.strength_counter == CFG.stray_dog_grant and s.pending is None
+    rules.apply_action(s, RoamAction("1,1", ("cr", "2,2")))          # an ordinary roam, paid by the Street Dog
     assert s.top_unit("2,2") is w and s.actions_taken_this_turn == 1
+
+
+def test_the_street_dogs_roam_can_take_the_den():
+    s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    gm = s.game_map
+    front = sorted(gm.hq_front("B"))[0]
+    path = [front]
+    while not any(c in gm.hq_front("A") for c in path[-1:]):     # a chain from A's den to B's den front
+        path.append(min(gm.neighbors(path[-1]), key=lambda c: int(c.split(",")[0])))
+    for c in path[1:]:
+        put(s, c, "lion", "A")
+    w = put(s, front, "wolf", "A")
+    spot = next(c for c in gm.hq_front("A") if s.top_unit(c) is None)
+    rules.apply_action(s, PlaceAction("street_dog", ("cr", spot)))
+    choose(s, front)
+    rules.apply_action(s, RoamAction(front, ("hq", "B")))
+    assert s.result is not None and s.result.winner == "A"
 
 
 def test_badger_draws_an_animal_with_roam():

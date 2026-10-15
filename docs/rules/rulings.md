@@ -83,7 +83,7 @@ Cards:
 - **Earthworm**: the two Worms land on its crossroad only while it is empty or yours; under an enemy there is no room and none appear.
 - **Clarion's** free roam is for a Canine only, one per Clarion each turn, spent before an action.
 - **Jackal's** flanker must be another of your Canines, not the Jackal itself.
-- **Street Dog** picks another ally with Roam anywhere, gives it +2, then it roams for free under the Roam rules (where you could place, and not if it has roamed this turn). That roam can't take a den.
+- **Street Dog** picks another ally with Roam anywhere and gives it +2; "It roams" gives that animal a free Roam this turn, an ordinary roam you take when you like, the den included (Martin, 2026-10-15: "it should just be normal roam"), and none if it has roamed this turn.
 - **Fox** draws for a cover by placement or by roaming.
 - **Serval** sets the strength by storing the difference: later buffs and auras count on top of the 1.
 - **Leopard** (Cats) changes placements only, not roams; an Apex Cat landing is a placement.
