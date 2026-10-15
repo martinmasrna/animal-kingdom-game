@@ -960,12 +960,31 @@
   },
   "gaboon_viper": {
     "art": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "problem",
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "Still the Gaboon Viper's painting; Coral Snake art in progress (coral-1).",
+      "at": 1792066399
     },
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Gaboon Viper",
+          "species": "Gaboon Viper"
+        }
+      },
+      "note": "Martin, 2026-10-15: two Vipers read as a mistake; the coral snake's slow venom is the effect.",
+      "by": "claude",
+      "at": 1792066342
     }
   },
   "gale": {
