@@ -37,12 +37,12 @@ class Bot(ABC):
         """
 
 
-def keep_hand(view: StateView, legal: Sequence[Action], state=None, rng=None, weights=None) -> Optional[Action]:
-    """The bots' mulligan step while one is pending, else None: keep, or send back the card whose replacement plays best
-    (`mulligan.mulligan_choice`). Without the state to sample from (or `weights` None) the bot keeps."""
+def keep_hand(view: StateView, legal: Sequence[Action], state=None) -> Optional[Action]:
+    """The bots' mulligan step while one is pending, else None: keep, or send back the weakest card while the deck's
+    average replacement is better (`mulligan.mulligan_choice`). Without the state (a bot that doesn't mulligan) it keeps."""
     if view.pending is not None and view.pending.get("kind") == "mulligan":
-        if state is None or rng is None or weights is None:
+        if state is None:
             return next(a for a in legal if isinstance(a, ChoiceAction) and a.choice == SKIP)
-        from .mulligan import mulligan_choice   # local: mulligan imports the greedy bot, which imports this module
-        return mulligan_choice(state, view.player, legal, rng, weights)
+        from .mulligan import mulligan_choice
+        return mulligan_choice(state, view.player, legal)
     return None

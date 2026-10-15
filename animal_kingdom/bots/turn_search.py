@@ -134,7 +134,7 @@ class TurnSearcher(Bot):
         state: Optional[GameState] = None,
     ) -> Action:
         legal = list(legal)
-        if (keep := keep_hand(view, legal, state, self.det_rng, self.weights if self.mulligan else None)) is not None:
+        if (keep := keep_hand(view, legal, state if self.mulligan else None)) is not None:
             return keep
         if state is None or len(legal) == 1:
             return legal[0]

@@ -108,8 +108,8 @@ class GreedyBot(Bot):
                  depth: int = 1, beam_width: int = 8,
                  evaluator: Optional[LinearEval] = None, slip: float = 0.0, mulligan: bool = False):
         self.weights = weights or GreedyWeights()
-        # Off by default: a mulligan costs a second or two a game, far more than a 1-ply game itself (TurnBot and
-        # RefereeBot mulligan by default; see bots/mulligan.py).
+        # Off by default: GreedyBot's games, dealt at random and kept, are what the mulligan's opening-hand table is
+        # learned from (sim/opening_hand.py); a bot that chose its hands would bias it. TurnBot and RefereeBot mulligan.
         self.mulligan = mulligan
         # RNG only breaks exact eval ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
@@ -137,7 +137,7 @@ class GreedyBot(Bot):
         state: Optional[GameState] = None,
     ) -> Action:
         legal = list(legal)
-        if (keep := keep_hand(view, legal, state, self.rng, self.weights if self.mulligan else None)) is not None:
+        if (keep := keep_hand(view, legal, state if self.mulligan else None)) is not None:
             return keep
         if self.slip and self.slip_rng.random() < self.slip:
             moves = [a for a in legal if not isinstance(a, PassAction)] or legal
