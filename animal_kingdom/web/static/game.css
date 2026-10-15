@@ -599,9 +599,7 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .bwave { width: 40px; height: 40px; margin: -20px 0 0 -20px; z-index: 0; border-radius: 50%; border: 6px solid #ffd76a; box-shadow: 0 0 24px #ffd76a; animation: bwave .9s cubic-bezier(.15,.7,.3,1) both; }
 @keyframes bwave { from { transform: scale(.4); opacity: 1; } to { transform: scale(10.5); opacity: 0; } }   /* under the gem: over it, its first frames read as a yellow dot on the jewel (Martin, 2026-10-15) */
 
-/* The Remove Pile, in the History panel in place of the moves while it's open */
-.panel .hist.off, .panel .pile { display: none; }
-.panel .pile.on { display: block; }
-.panel h4 .removed { cursor: pointer; }
-.panel .pile .t .n { margin-left: 6px; opacity: .7; }
-.panel .pile .none { padding: 4px 0 10px; opacity: .6; font-size: 13px; }
+/* A side's Remove Pile, under its cards in the decklist panel; your panel stops below the button row, its lists scrolling */
+.panel h4.sub { margin-top: 12px; font-size: 16px; }
+.game .panel.mine { max-height: calc(100% - 270px); }
+.panel .rows { min-height: 0; flex-shrink: 1; }

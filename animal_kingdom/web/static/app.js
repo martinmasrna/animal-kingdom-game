@@ -842,7 +842,7 @@ function gameScreen() {
       <div class="abs opts" id="opts"></div>
       <div class="abs reveal" id="reveal"></div>
       <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
-      <div class="panel histp" id="histp"><h4><span id="htitle">History</span><span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div><div class="hist pile" id="pile"></div></div>
+      <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
       <div class="abs rbar" id="rbar"></div>
       <div class="abs recent" id="recent"></div>
       <div class="endov" id="endov"></div>
@@ -1117,30 +1117,20 @@ function drawHistory(G) {
   hist.innerHTML = hs; hist.scrollTop = hist.scrollHeight;
   wireHist(hist, G);
   const removed = document.getElementById('removed');
-  document.getElementById('htitle').textContent = ui.pile ? 'Remove Pile' : 'History';
-  removed.innerHTML = ui.pile ? 'History' : `Removed <b>${G.removed.length}</b>`;
-  removed.onclick = e => { e.stopPropagation(); ui.pile = !ui.pile; drawHistory(G); };
-  drawPile(G);
+  removed.innerHTML = `Removed <b>${G.removed.length}</b>`;
   drawRecent(G);
-}
-// The Remove Pile, yours and theirs, each card at its strength now: opened from the History panel's "Removed N".
-function drawPile(G) {
-  const el = document.getElementById('pile'), hist = document.getElementById('hist');
-  el.classList.toggle('on', !!ui.pile); hist.classList.toggle('off', !!ui.pile);
-  if (!ui.pile) return;
-  const side = (who, label) => {
-    const mine = (G.pile || []).filter(c => c.owner === who), counts = {}, cards = { ...CARDS };
-    mine.forEach(c => { counts[c.id] = (counts[c.id] || 0) + 1; cards[c.id] = { ...CARDS[c.id], str: c.str }; });
-    return `<div class="t">${label}<span class="n">${mine.length}</span></div>${mine.length ? rows(counts, null, cards) : '<div class="none">None</div>'}`;
-  };
-  el.innerHTML = side(V.you, 'Yours') + side(opp(), 'Theirs');
-  wirePops(el);
 }
 function drawLists(G) {
   const sum = o => Object.values(o).reduce((a, b) => a + b, 0), you = V.you, them = opp();
   const mine = document.getElementById('mine'), theirs = document.getElementById('theirs');
-  mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4><div class="rows">${rows(V.lists[you], G.deckLeft)}</div>`;
-  theirs.innerHTML = `<h4>Opponent's cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them], G.unseen)}</div>`;
+  // under each side's cards, its Remove Pile, each card at its strength now (a Python grows there too)
+  const pile = who => {
+    const cs = (G.pile || []).filter(c => c.owner === who), counts = {}, cards = { ...CARDS };
+    cs.forEach(c => { counts[c.id] = (counts[c.id] || 0) + 1; cards[c.id] = { ...CARDS[c.id], str: c.str }; });
+    return cs.length ? `<h4 class="sub">Removed<span class="n">${cs.length}</span></h4><div class="rows">${rows(counts, null, cards)}</div>` : '';
+  };
+  mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4><div class="rows">${rows(V.lists[you], G.deckLeft)}</div>${pile(you)}`;
+  theirs.innerHTML = `<h4>Opponent's cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them], G.unseen)}</div>${pile(them)}`;
   wirePops(mine); wirePops(theirs);
 }
 
