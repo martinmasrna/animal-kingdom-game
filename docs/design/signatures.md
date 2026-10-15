@@ -147,7 +147,7 @@ Columns: **Shape** is the rule the signature suggests, in this game's terms, wit
 | Great White Shark | Jaws; smells blood | Apex Predator | = Apex Predator |
 | Hammerhead | the hammer head | — | — |
 | Whale Shark | biggest fish, harmless filter feeder | huge gentle body | — |
-| Blue Whale | biggest animal ever | Titan (undefined in keywords.md; presumably can't be covered) | new keyword |
+| Blue Whale | biggest animal ever | Titan (playing it costs two actions) | = Titan |
 | Sperm Whale | Moby Dick; fights giant squid in the deep | ? remove an adjacent enemy of high strength | ~ Serval |
 | Orca | killer whale; pack hunts sharks and whales | pack removal: with another Orca, remove an adjacent enemy | ~ Soldier Ant |
 | Dolphin | smart, saves drowning swimmers | rescue: when an adjacent ally would be removed, return it to hand instead | new |
@@ -383,7 +383,7 @@ Best animal, runner-up. **None** means no animal fits naturally: put it on an or
 |---|---|---|
 | Vanilla big body | Lion | Wolf, Cape Buffalo, Moose (ordinary skins) |
 | Huge body behind a food cost | Elephant | Woolly Mammoth |
-| Titan (biggest; definition pending) | Blue Whale | Brachiosaurus |
+| Titan (playing it costs two actions) | Blue Whale | Brachiosaurus |
 | Strength grows each turn (Boa, benched) | None (weak: Crocodile "never stops growing" is trivia) | Python |
 
 ### Drawing and information
@@ -475,7 +475,7 @@ Best animal, runner-up. **None** means no animal fits naturally: put it on an or
 | Lure the opponent's next placement (new) | Anglerfish | Alligator Snapping Turtle, Glowworm |
 | Block adjacent empty crossroads (new) | Beaver (dam) | Spider (web) |
 | Den guard (new) | None (Wombat at a stretch) | — |
-| Can't be covered | Blue Whale (Titan) | Pangolin |
+| Can't be covered | None | Pangolin |
 | Returns when removed, to deck (Ember) | Cockroach | Golden Pheasant (phoenix) |
 | Returns when removed, to hand, once | Stray Cat (nine lives) | Pigeon (homing) |
 | Gets back up next turn (new) | Opossum | — |
@@ -563,5 +563,4 @@ Honey Badger (cover any), Zebra (herd Stealth), Piranha (small kills big), Elect
 - Naked Mole-Rat: keep "play another animal next to this", or move it to Stork and make the mole-rat a Rodent that counts as Colony.
 - Myths as signatures (stork babies, nine lives, the split earthworm, lemmings, Santa's reindeer): I counted them, because an ordinary fan believes them. Say if they're out.
 - Family tags vs fit: Serval and the Stray Cat and Stray Dog glue cards keep effects their families need. Should a family's need beat a better animal elsewhere?
-- Titan (Blue Whale) is named in habitats.md but has no definition in keywords.md.
 - Several new shapes break guardrails if written loosely: Stork and Kangaroo add placements (an instant-capture audit is needed, and "never onto a den" for Stork's Flight), Electric Eel's stun and Coelacanth's play-from-the-Remove-Pile are action economy, the very thing that breaks goodstuff open.
