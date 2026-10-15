@@ -15,8 +15,9 @@ MSG = ("Cards change only through the card table's tool, so locks hold and Marti
        "  .venv/bin/python tools/cards/hq.py show [ID...]\n"
        "(run from the game repo, ~/Work/fun/animal-kingdom-game). Its docstring has the rules.")
 
-DATA = re.compile(r"(tools/card-workbench/decks\.json|animal_kingdom/data/cards\.json)$")
-ART = re.compile(r"animal_kingdom/web/static/art\.js$")
+GAME = "/Users/martin/Work/fun/animal-kingdom-game/"   # only the real repo is guarded; worktrees and scratch copies aren't
+DATA = re.compile(r"^" + re.escape(GAME) + r"(tools/card-workbench/decks\.json|animal_kingdom/data/cards\.json)$")
+ART = re.compile(r"^" + re.escape(GAME) + r"animal_kingdom/web/static/art\.js$")
 # a CROP, STRIP or FULL entry: `  lion: [.651, .373, .55],` or `bat: .349,`
 ENTRY = re.compile(r"(^|[\s,{])[a-z0-9_]+: (\[[\d., ]+\]|\.\d+|\d\.\d+)\s*,", re.M)
 SHELL_WRITE = re.compile(r"(sed\s+(-[a-zA-Z]*i|--in-place)|perl\s+-[a-zA-Z]*i|>\s*\S*|\btee\b|\bmv\b|\bcp\b|\.write|json\.dump|writeFile)")
@@ -47,6 +48,10 @@ def main() -> None:
         cmd = inp.get("command", "")
         if "hq.py" in cmd or "convert.py" in cmd or "install.sh" in cmd:
             return
+        cwd = ev.get("cwd", "")
+        in_game = cwd.rstrip("/") + "/" == GAME or (cwd.startswith(GAME) and "/.claude/worktrees/" not in cwd)
+        if not in_game and GAME not in cmd:
+            return    # relative paths here can't reach the real repo's files
         if NAMES.search(cmd) and SHELL_WRITE.search(cmd):
             # reading is fine (cat, grep, git diff); only writes to those files are refused
             for m in re.finditer(r"(>\s*|sed\s+-[a-zA-Z]*i\S*\s+.*?|\btee\s+|\bmv\s+\S+\s+|\bcp\s+\S+\s+|perl\s+-\S+\s+.*?)(\S*(decks\.json|cards\.json|art\.js))", cmd):
