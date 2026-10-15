@@ -9,8 +9,6 @@ neighbours on a 4x3 grid of "col,row" crossroads.
 
 from __future__ import annotations
 
-import pytest
-
 from animal_kingdom.bots.greedy_bot import GreedyBot
 from animal_kingdom.bots.referee_bot import RefereeBot
 from animal_kingdom.decks import load_premade_deck
