@@ -47,33 +47,39 @@ def end_turn(s):
 
 
 # ===================================================================== Roam
+# A roam picks the animal up and places it again by the placement rules; connection is judged with it lifted.
 
-def test_roam_moves_to_an_adjacent_crossroad_and_costs_an_action():
+def test_roam_picks_the_animal_up_and_places_it_again_and_costs_an_action():
     s = state(hands={"A": ["t_body"]})
-    u = put(s, "1,2", "t_roamer", "A")
-    assert roams(s) == {("1,2", ("cr", "1,1")), ("1,2", ("cr", "1,3")), ("1,2", ("cr", "2,2"))}
-    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
-    assert ids(s, "2,2") == ["t_roamer"] and "1,2" not in s.board
-    assert s.board["2,2"][-1] is u                       # the same animal, not a new one
+    for cr in ("1,2", "2,2"):
+        put(s, cr, "t_body", "A")
+    u = put(s, "1,1", "t_roamer", "A")
+    assert {t for o, t in roams(s)} == {("cr", c) for c in ("1,2", "1,3", "2,1", "2,2", "2,3", "3,2")}
+    rules.apply_action(s, RoamAction("1,1", ("cr", "3,2")))                 # two crossroads away, past its chain
+    assert ids(s, "3,2") == ["t_roamer"] and "1,1" not in s.board
+    assert s.board["3,2"][-1] is u                       # the same animal, not a new one
     assert s.actions_taken_this_turn == 1 and s.current == "A"
 
 
 def test_a_cut_off_animal_roams_only_back_to_your_lines():
     s = state()
     put(s, "3,2", "t_roamer", "A")                      # stranded: no chain back to the den
-    assert roams(s) == set()
-    put(s, "1,2", "t_body", "A")                        # 2,2 is now a place you could place
-    assert roams(s) == {("3,2", ("cr", "2,2"))}
-    put(s, "2,2", "t_body", "A")                        # connected again: any neighbour
-    assert ("3,2", ("cr", "3,1")) in roams(s)
+    assert roams(s) == {("3,2", ("cr", c)) for c in ("1,1", "1,2", "1,3")}   # lifted, only the den front is placeable
+    put(s, "1,2", "t_body", "A")
+    assert ("3,2", ("cr", "2,2")) in roams(s) and ("3,2", ("cr", "2,3")) not in roams(s)
+    put(s, "2,2", "t_body", "A")                        # a longer chain: anywhere beside it
+    assert ("3,2", ("cr", "2,3")) in roams(s)
 
 
-def test_a_cut_off_animal_on_the_den_front_does_not_take_the_den():
+def test_a_roamer_takes_the_den_only_along_a_chain_that_reaches_it_without_the_roamer():
     s = state()                                         # map_a: B's den front is the 4 column
-    put(s, "1,2", "t_body", "A"); put(s, "2,2", "t_body", "A")
-    put(s, "4,2", "t_roamer", "A")                      # next to B's den, cut off by the empty 3,2
-    assert roams(s) == {("4,2", ("cr", "3,2"))}         # only back towards the chain
-    put(s, "3,2", "t_body", "A")
+    for cr in ("1,2", "2,2", "3,2"):
+        put(s, cr, "t_body", "A")
+    put(s, "4,2", "t_roamer", "A")
+    assert ("4,2", ("hq", "B")) not in roams(s)         # lifted, nothing of A's stands at B's den
+    put(s, "4,1", "t_body", "A")
+    assert ("4,2", ("hq", "B")) not in roams(s)         # 4,1 hangs on the roamer: lifted, it's cut off too
+    put(s, "3,1", "t_body", "A")
     assert ("4,2", ("hq", "B")) in roams(s)
 
 
@@ -85,21 +91,24 @@ def test_an_animal_without_roam_does_not_roam():
 
 def test_each_animal_roams_at_most_once_per_turn():
     s = state(hands={"A": ["t_body", "t_body"], "B": ["t_body"]})
-    put(s, "1,2", "t_roamer", "A")
+    put(s, "1,2", "t_body", "A")
+    put(s, "1,2", "t_roamer", "A")                      # on its own animal: lifting it keeps 1,2 connected
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
     assert roams(s) == set()                            # it has roamed this turn; nothing else roams
-    rules.apply_action(s, PlaceAction("t_body", ("cr", "1,2")))   # keeps it connected
+    rules.apply_action(s, PlaceAction("t_body", ("cr", "1,3")))
     end_turn(s)                                         # B passes
-    assert s.current == "A" and ("2,2", ("cr", "3,2")) in roams(s)
+    assert s.current == "A" and ("2,2", ("cr", "2,3")) in roams(s)
 
 
 def test_roam_follows_the_placement_rules():
     s = state()
+    put(s, "1,2", "t_body", "A")
     put(s, "1,2", "t_roamer", "A")                      # strength 4
     put(s, "1,1", "t_dusk", "B")                        # 2: it beats it
     put(s, "1,3", "t_body", "B")                        # 4: equal, it can't
     put(s, "2,2", "t_dusk", "A")                        # its own: always
-    assert roams(s) == {("1,2", ("cr", "1,1")), ("1,2", ("cr", "2,2"))}
+    targets = {t for o, t in roams(s)}
+    assert ("cr", "1,1") in targets and ("cr", "2,2") in targets and ("cr", "1,3") not in targets
     rules.apply_action(s, RoamAction("1,2", ("cr", "1,1")))
     assert ids(s, "1,1") == ["t_dusk", "t_roamer"]      # it covers; the cover buries, it doesn't remove
 
@@ -108,14 +117,14 @@ def test_an_illegal_roam_is_refused():
     s = state()
     put(s, "1,2", "t_roamer", "A")
     with pytest.raises(EngineError):
-        rules.apply_action(s, RoamAction("1,2", ("cr", "3,2")))   # not adjacent
+        rules.apply_action(s, RoamAction("1,2", ("cr", "3,2")))   # not a place it could be placed
     with pytest.raises(EngineError):
         rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))   # nothing there
 
 
 def test_roaming_onto_the_enemy_den_captures_it():
     s = state()
-    for cr in ("1,2", "2,2", "3,2"):
+    for cr in ("1,2", "2,2", "3,2", "3,1", "4,1"):
         put(s, cr, "t_body", "A")
     put(s, "4,2", "t_roamer", "A")
     assert ("4,2", ("hq", "B")) in roams(s)
@@ -128,7 +137,7 @@ def test_leaving_a_crossroad_uncovers_what_was_beneath():
     s = state()
     put(s, "1,2", "t_body", "B")
     put(s, "1,2", "t_roamer", "A")                      # A's roamer sits on B's animal
-    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
+    rules.apply_action(s, RoamAction("1,2", ("cr", "1,1")))
     assert ids(s, "1,2") == ["t_body"] and s.owner_of("1,2") == "B"
 
 
@@ -140,15 +149,16 @@ def test_moving_is_not_placing_no_roar_and_no_play_reactions(monkeypatch):
     put(s, "1,2", "t_roamer", "A")
     put(s, "1,1", "t_body", "A")
     seq = s.board["1,2"][-1].play_seq
-    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
+    rules.apply_action(s, RoamAction("1,2", ("cr", "2,1")))
     assert calls == []
-    assert s.board["2,2"][-1].play_seq == seq           # its place in the play order stays
+    assert s.board["2,1"][-1].play_seq == seq           # its place in the play order stays
     assert not any(e["e"] == "place" for e in s.events)
-    assert any(e["e"] == "roam" and e["cr"] == "1,2" and e["to"] == "2,2" for e in s.events)
+    assert any(e["e"] == "roam" and e["cr"] == "1,2" and e["to"] == "2,1" for e in s.events)
 
 
 def test_arriving_next_to_a_hippopotamus_sets_it_off():
     s = state()
+    put(s, "1,1", "t_dusk", "A")
     put(s, "1,2", "t_dusk", "A")
     put(s, "2,2", "t_roam_cat", "A")
     s.board["2,2"][-1].strength_counter = -2            # strength 3: within the Hippo's reach
@@ -159,6 +169,7 @@ def test_arriving_next_to_a_hippopotamus_sets_it_off():
 
 def test_covering_by_roaming_sets_off_spikes():
     s = state()
+    put(s, "1,2", "t_body", "A")
     put(s, "1,2", "t_roam_apex", "A")                   # an Apex lands on the porcupine...
     s.board["1,2"][-1].strength_counter = 1             # 8 beats 7
     put(s, "2,2", "porcupine", "B")
@@ -170,6 +181,7 @@ def test_covering_by_roaming_sets_off_spikes():
 def test_king_theron_watches_a_roaming_cat_cover():
     s = state()
     put(s, "1,1", "king_theron", "A")
+    put(s, "1,2", "t_dusk", "A")
     put(s, "1,2", "t_roam_cat", "A")
     put(s, "2,2", "t_body", "B")
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
@@ -181,24 +193,23 @@ def test_an_apex_roams_only_onto_an_animal_and_eats_it():
     for cr in ("1,2", "2,2", "3,2"):
         put(s, cr, "t_body", "A")
     put(s, "4,2", "t_roam_apex", "A")
-    put(s, "4,1", "t_dusk", "B")
-    assert roams(s) == {("4,2", ("cr", "4,1")), ("4,2", ("cr", "3,2"))}   # no empty crossroad, no den
-    rules.apply_action(s, RoamAction("4,2", ("cr", "4,1")))
-    assert ids(s, "4,1") == ["t_roam_apex"] and "t_dusk" in s.remove_pile
+    put(s, "3,1", "t_dusk", "B")
+    assert roams(s) == {("4,2", ("cr", c)) for c in ("3,1", "3,2", "2,2", "1,2")}   # no empty crossroad, no den
+    rules.apply_action(s, RoamAction("4,2", ("cr", "3,1")))
+    assert ids(s, "3,1") == ["t_roam_apex"] and "t_dusk" in s.remove_pile
 
 
-def test_a_roamer_with_reach_roams_that_far_jumping_over_what_stands_between():
-    # the legendary Leopard (Apex Predator. Roam. Reach 2.): it pounces on prey two crossroads away, past its own Orca
+def test_a_roamer_lands_as_far_as_its_reach_like_a_placement():
+    # the legendary Leopard (Apex Predator. Roam. Reach 2.): it pounces on prey two crossroads beyond your chain
     s = state()
-    for cr in ("1,2", "2,2"):
+    for cr in ("1,2", "2,2", "3,2"):
         put(s, cr, "t_body", "A")
-    put(s, "3,2", "t_roam_apex_reach", "A")
-    put(s, "4,2", "t_body", "A")
-    put(s, "4,1", "t_dusk", "B")                      # two steps, past the ally on 4,2
+    put(s, "1,1", "t_roam_apex_reach", "A")
+    put(s, "4,1", "t_dusk", "B")                      # two steps beyond the chain's end
     put(s, "4,3", "t_dusk2", "B")
-    targets = {t for o, t in roams(s) if o == "3,2"}
-    assert {("cr", "4,1"), ("cr", "4,3"), ("cr", "4,2"), ("cr", "2,2"), ("cr", "1,2")} == targets   # only onto animals
-    rules.apply_action(s, RoamAction("3,2", ("cr", "4,1")))
+    targets = {t for o, t in roams(s) if o == "1,1"}
+    assert targets == {("cr", c) for c in ("1,2", "2,2", "3,2", "4,1", "4,3")}   # only onto animals
+    rules.apply_action(s, RoamAction("1,1", ("cr", "4,1")))
     assert ids(s, "4,1") == ["t_roam_apex_reach"] and "t_dusk" in s.remove_pile
 
 
@@ -212,9 +223,9 @@ def test_roam_hooks_fire_for_the_roamer_and_its_friends(monkeypatch):
     put(s, "1,1", "t_body", "A")
     put(s, "1,3", "t_body", "B")                        # the enemy's watcher doesn't see it
     put(s, "1,2", "t_roamer", "A")
-    prey = put(s, "2,2", "t_dusk", "B")
-    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
-    assert sorted(seen) == [("friend", "A", prey.iid), ("self", "2,2", "1,2", True)]
+    prey = put(s, "2,1", "t_dusk", "B")
+    rules.apply_action(s, RoamAction("1,2", ("cr", "2,1")))
+    assert sorted(seen) == [("friend", "A", prey.iid), ("self", "2,1", "1,2", True)]
 
 
 def test_a_free_roam_spends_no_action_and_keeps_the_turn_open():
@@ -227,7 +238,7 @@ def test_a_free_roam_spends_no_action_and_keeps_the_turn_open():
     assert s.current == "A"                             # both actions spent, the free roam keeps the turn open
     legal = rules.legal_actions(s)
     assert legal and all(isinstance(a, RoamAction) for a in legal)   # only the roam is left
-    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
+    rules.apply_action(s, RoamAction("1,2", ("cr", "2,1")))
     assert s.current == "B"
 
 
@@ -235,7 +246,7 @@ def test_a_free_roam_is_spent_before_an_action():
     s = state()
     put(s, "1,2", "t_roamer", "A")
     s.turn_flags["free_roams_A"] = 1
-    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
+    rules.apply_action(s, RoamAction("1,2", ("cr", "1,1")))
     assert s.actions_taken_this_turn == 0 and effects.free_roams_left(s, "A") == 0
 
 
@@ -245,20 +256,20 @@ def test_roam_is_serialisable_and_replays():
     s = state(hands={"A": ["t_body"]})
     put(s, "1,2", "t_roamer", "A")
     start = GameState.from_dict(s.to_dict(), cards=CARDS)
-    log = [RoamAction("1,2", ("cr", "2,2")).to_dict(), PlaceAction("t_body", ("cr", "1,2")).to_dict()]
+    log = [RoamAction("1,2", ("cr", "1,1")).to_dict(), PlaceAction("t_body", ("cr", "1,2")).to_dict()]
     for d in log:
         rules.apply_logged(s, d)
     for d in log:
         rules.apply_logged(start, d)
     assert start.to_dict() == s.to_dict()
-    assert start.board["2,2"][-1].card_id == "t_roamer"
+    assert start.board["1,1"][-1].card_id == "t_roamer"
 
 
 def test_a_free_roam_alone_is_not_an_idle_turn():
     s = state(hands={"B": ["t_body"]})
     put(s, "1,2", "t_roamer", "A")
     s.turn_flags["free_roams_A"] = 1
-    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
+    rules.apply_action(s, RoamAction("1,2", ("cr", "1,1")))
     assert s.current == "B" and s.idle_turns == 0        # nothing else to do: the turn ended, and A had acted
 
 

@@ -429,12 +429,12 @@ def test_a_roam_is_offered_taken_and_written_into_the_history():
     st.pending, st.effect_stack, st.current = None, [], "A"
     st.board = {"1,2": [UnitInstance("t_roamer", "A", 901)]}
     legal = m.view("A")["game"]["legal"]
-    assert legal["roam"] == {"1,2": [["cr", "1,1"], ["cr", "1,3"], ["cr", "2,2"]]}
-    m.act("A", {"kind": "roam", "from": "1,2", "target": ["cr", "2,2"]})
-    assert [u.card_id for u in st.board["2,2"]] == ["t_roamer"]
+    assert legal["roam"] == {"1,2": [["cr", "1,1"], ["cr", "1,3"]]}   # lifted, a lone animal can only move along the den front
+    m.act("A", {"kind": "roam", "from": "1,2", "target": ["cr", "1,1"]})
+    assert [u.card_id for u in st.board["1,1"]] == ["t_roamer"]
     move = m.view("A")["game"]["history"][-1]
-    assert (move["kind"], move["card"], move["target"]) == ("roam", "t_roamer", ["cr", "2,2"])
-    assert m.actions[-1] == {"kind": "roam", "from": "1,2", "target": ["cr", "2,2"]}
+    assert (move["kind"], move["card"], move["target"]) == ("roam", "t_roamer", ["cr", "1,1"])
+    assert m.actions[-1] == {"kind": "roam", "from": "1,2", "target": ["cr", "1,1"]}
     json.dumps(m.view("B"))
 
 

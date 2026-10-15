@@ -784,50 +784,45 @@ def legal_roams(state: GameState, player: str, *, free_only: bool = False) -> li
 
 
 def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None) -> list:
-    """Where `unit` (on `cr`) may roam to: ("cr", crossroad) targets, and ("hq", enemy) from the enemy's den front.
-    A roam lands where you could place, judged before the animal leaves: an animal connected to your den goes to any
-    crossroad within its Reach (one step without Reach, counting along paths and jumping over whatever stands between),
-    a cut-off one only to a crossroad connected to your den (back to your lines). A den is taken only by one step from
-    its front crossroads, never by Reach."""
+    """Where `unit` (on `cr`) may roam to: ("cr", crossroad) targets, and ("hq", enemy). A roam picks the animal up and
+    places it again by the placement rules (Martin, 2026-10-15): connection is judged with the animal lifted, so a
+    roamer that was the only link of its chain can't land beyond the gap it opens, and a cut-off one can only come back
+    to your lines; Flight, Reach and every other placement static apply as from the hand; it covers an enemy only if it
+    beats it (Dhole's equal included), an Apex Predator lands only on an animal and never takes a den.
+    `enemy_front` and `occ` are accepted for old callers and ignored: they describe the board before the lift."""
     player = unit.owner
     enemy = other_player(player)
-    if enemy_front is None:
-        enemy_front = state.game_map.hq_front(enemy)
-    if occ is None:
-        occ = state.connected_occupied(player)
-    if cr not in occ:
-        return [t for t in roam_targets(state, unit, cr, enemy_front=(), occ=occ | {cr})
-                if state.is_connected(player, t[1], occ)]
+    gm = state.game_map
+    stack = state.board[cr]
+    stack.pop()                                       # lift it: connection is judged without it
+    if not stack:
+        del state.board[cr]
+    try:
+        lifted_occ = state.connected_occupied(player)
+    finally:
+        state.board.setdefault(cr, []).append(unit)
     is_apex = statics.has_keyword(state, unit, "Apex Predator", cr)
+    flight = statics.ignores_connection(state, unit.card_id)
+    extra = statics.extra_placement_crossroads(state, unit.card_id, player)
+    reach = statics.reach_of(state, unit.card_id)
+    if reach:
+        extra = extra | statics.reach_crossroads(state, player, reach, lifted_occ)
     out = []
-    for nb in _within(state.game_map, cr, max(1, statics.reach_of(state, unit.card_id))):
-        top = state.top_unit(nb)
+    for c in sorted(gm.crossroads):
+        if c == cr or not (flight or c in extra or state.is_connected(player, c, lifted_occ)):
+            continue
+        top = state.top_unit(c)
         if top is None:
-            ok = not is_apex                      # an Apex roams only onto an animal
+            ok = not is_apex                          # an Apex lands only on an animal
         elif top.owner == player:
             ok = True
         else:
             ok = statics.can_cover(state, unit, top, roaming=True)
         if ok:
-            out.append(("cr", nb))
-    if cr in enemy_front and not is_apex:         # an Apex never takes a den
-        out.append(("hq", enemy))
+            out.append(("cr", c))
+    if not is_apex and any(c in lifted_occ for c in gm.hq_front(enemy)):
+        out.append(("hq", enemy))                     # a den along a connected chain, as from the hand
     return out
-
-
-def _within(gm, cr: str, n: int) -> list:
-    """The crossroads 1 to `n` steps from `cr` along paths, whatever stands between, in a deterministic order."""
-    if n == 1:
-        return list(gm.neighbors(cr))
-    dist, queue = {cr: 0}, deque([cr])
-    while queue:
-        c = queue.popleft()
-        if dist[c] < n:
-            for nb in gm.neighbors(c):
-                if nb not in dist:
-                    dist[nb] = dist[c] + 1
-                    queue.append(nb)
-    return sorted((c for c in dist if c != cr), key=lambda c: (dist[c], c))
 
 
 def free_roams_left(state: GameState, player: str, unit=None) -> int:
