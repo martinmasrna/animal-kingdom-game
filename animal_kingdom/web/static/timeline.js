@@ -90,6 +90,7 @@ export function plan(prev, next, cards = {}) {
   for (let i = 0; i < fresh.length; i++) {
     const e = fresh[i];
     if (e.e !== 'food' && e.e !== 'pay') flushFood();
+    if (!e.cause && ['place', 'roam', 'draw', 'capture'].includes(e.e)) day();   // the player's own move: their dawn is over
     switch (e.e) {
       case 'place': {
         // a card they played is shown large first; units an effect puts down (a Sardine's swarm) are its doing, not plays,

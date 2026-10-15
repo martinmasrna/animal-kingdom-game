@@ -37,8 +37,8 @@ button { cursor: pointer; }
 .sync { margin-left: auto; font-size: 13px; color: var(--muted); }
 .sync.bad { color: var(--problem); }
 
-.grid { --cols: 80px 80px minmax(160px, 240px) 96px 44px minmax(320px, 680px) 44px 48px; }
-.grid.balance { --cols: 80px minmax(160px, 240px) 96px 44px minmax(380px, 760px); }
+.grid { --cols: 80px 80px minmax(170px, 260px) 44px minmax(320px, 680px) 44px 48px; }
+.grid.balance { --cols: 80px minmax(170px, 260px) 44px minmax(380px, 760px); }
 .grid.names { --cols: 70px minmax(200px, 280px) 44px minmax(320px, 680px); --rowh: 86px; }
 .head, .row { display: grid; grid-template-columns: var(--cols); padding: 0 16px; }
 .head { background: var(--bg); border-bottom: 1px solid var(--line); }
@@ -190,12 +190,12 @@ const RNAME = { L: 'Legendary', R: 'Rare', C: 'Common' }, RORD = { L: 0, R: 1, C
 const LV = ['draft', 'problem', 'fine', 'locked'], LVKEY = { d: 'draft', p: 'problem', f: 'fine', l: 'locked' };
 const LVORD = ['empty', 'draft', 'problem', 'fine', 'locked'];
 const COLS = {
-  habitat: { t: 'Habitat', cls: 'habc' }, rarity: { t: 'Rarity', cls: 'rar' }, animal: { t: 'Animal', cls: 'ani' }, tag: { t: 'Tag', cls: 'tagc' },
+  habitat: { t: 'Habitat', cls: 'habc' }, rarity: { t: 'Rarity', cls: 'rar' }, animal: { t: 'Name', cls: 'ani' }, tag: { t: 'Tag', cls: 'tagc' },
   strength: { t: 'Str', cls: 'str' }, effect: { t: 'Effect', cls: 'eff' }, art: { t: 'Art', cls: 'artc' }, crop: { t: 'Crop', cls: 'cropc' },
 };
 const VIEWS = {
-  all: { t: 'Everything', cols: ['habitat', 'rarity', 'animal', 'tag', 'strength', 'effect', 'art', 'crop'] },
-  balance: { t: 'Balance', cols: ['rarity', 'animal', 'tag', 'strength', 'effect'] },
+  all: { t: 'Everything', cols: ['habitat', 'rarity', 'animal', 'strength', 'effect', 'art', 'crop'] },
+  balance: { t: 'Balance', cols: ['rarity', 'animal', 'strength', 'effect'] },
   art: { t: 'Art', cols: ['art', 'crop'], cards: true },
   names: { t: 'Names', cols: ['art', 'animal', 'strength', 'effect'], only: r => r.rarity === 'L' && !r.parent },
 };
@@ -279,8 +279,10 @@ function valueHTML(r, col) {
     case 'habitat': return r.habitat ? esc(r.habitat) : '';
     case 'rarity': return `<span class="${r.rarity}">${RNAME[r.rarity]}</span>`;
     case 'animal':
-      if (r.rarity === 'L' && !r.parent) return r.name ? `<b>${esc(r.name)}</b><small>${esc(r.species)}</small>` : `<b class="ph">${esc(r.species || 'no animal')}</b><small>no name yet</small>`;
-      return `<b>${esc(nameOf(r))}</b>${r.species && r.species !== r.name ? `<small>${esc(r.species)}</small>` : ''}`;
+    { // the name, and under it the species (when it isn't the name) and the tag
+      const sub = (first) => { const t = [first, r.tag].filter(Boolean).join(' · '); return t ? `<small>${esc(t)}</small>` : ''; };
+      if (r.rarity === 'L' && !r.parent) return r.name ? `<b>${esc(r.name)}</b>${sub(r.species)}` : `<b class="ph">${esc(r.species || 'no animal')}</b>${sub('no name yet')}`;
+      return `<b>${esc(nameOf(r))}</b>${sub(r.species && r.species !== r.name ? r.species : '')}`; }
     case 'tag': return r.tag ? esc(r.tag) : ' ';
     case 'strength': return r.str ?? '';
     case 'effect': return r.text === '—' || (!r.text && r.deck === 'token') ? 'Vanilla' : rules(r.text);
@@ -388,8 +390,8 @@ function editorHTML(r, col) {
     case 'habitat': return `<select data-in>${S.habitats.map(h => `<option ${h === r.habitat ? 'selected' : ''}>${h}</option>`).join('')}</select>`;
     case 'rarity': return `<select data-in>${['L', 'R', 'C'].map(k => `<option value="${k}" ${k === r.rarity ? 'selected' : ''}>${RNAME[k]}</option>`).join('')}</select>`;
     case 'animal': return r.rarity === 'L'
-      ? `<div class="two"><div><div class="lab">Name</div><input data-in="name" value="${esc(r.name)}" placeholder="no name yet"></div><div><div class="lab">Species</div><input data-in="species" value="${esc(r.species)}"></div></div>`
-      : `<div class="two"><div><div class="lab">Animal</div><input data-in="name" value="${esc(r.name)}"></div><div><div class="lab">Species, if different</div><input data-in="species" value="${esc(r.species === r.name ? '' : r.species)}"></div></div>`;
+      ? `<div class="two"><div><div class="lab">Name</div><input data-in="name" value="${esc(r.name)}" placeholder="no name yet"></div><div><div class="lab">Species</div><input data-in="species" value="${esc(r.species)}"></div></div><div><div class="lab">Tag</div><input data-tag value="${esc(r.tag)}"></div>`
+      : `<div class="two"><div><div class="lab">Name</div><input data-in="name" value="${esc(r.name)}"></div><div><div class="lab">Species</div><input data-in="species" value="${esc(r.species === r.name ? '' : r.species)}"></div></div><div><div class="lab">Tag</div><input data-tag value="${esc(r.tag)}"></div>`;
     case 'tag': return `<input data-in value="${esc(r.tag)}" placeholder="no tag">`;
     case 'strength': return `<input data-in type="number" min="0" max="15" value="${r.str ?? ''}">`;
     case 'effect': return `<textarea data-in rows="2" placeholder="No effect yet">${esc(r.text)}</textarea>`;
@@ -429,6 +431,8 @@ async function savePop(close = true) {
   const note = $('#pop [data-note]').value.trim();
   try {
     if (r.editable && !['art', 'crop'].includes(col)) { const v = readInput(r, col); if (v !== undefined && !sameValue(r, col, v)) { const j = await post('value', { id, col, value: v }); toast(changedNote(j.report)); } }
+    const tag = $('#pop [data-tag]');
+    if (tag && r.editable && tag.value.trim() !== byId[id].tag) { const j = await post('value', { id, col: 'tag', value: tag.value.trim() }); toast(changedNote(j.report)); }
     if (note !== (cell(byId[id], col).note || '')) await post('note', { id, col, note });
   } catch (e) { return; }
   if (close) closePop();
