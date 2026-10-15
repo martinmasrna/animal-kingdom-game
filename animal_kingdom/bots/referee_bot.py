@@ -50,7 +50,11 @@ from ..engine.actions import Action, DrawAction, PlaceAction, RoamAction
 from ..engine.state import GameState, StateView
 from .greedy_bot import GreedyWeights, _roar_fizzled
 from .learned_eval import LinearEval
-from .turn_search import TurnSearcher
+from .turn_search import _DECISIVE, TurnSearcher
+
+# Bound on the lost-world tiebreak: far below the 2e8 that one more lost world (of five)
+# costs, so it only orders moves that lose in the same worlds.
+_LOSS_TIEBREAK = 1e6
 
 
 class RefereeBot(TurnSearcher):
@@ -317,8 +321,15 @@ class RefereeBot(TurnSearcher):
     ) -> list[float]:
         scores = []
         for state, penalty in branches:
+            # A lost world is a flat -_DECISIVE, so when every world is lost all moves tie
+            # and the bot plays a random one. Keep the position it handed the opponent as a
+            # tiebreak: still a decisive loss, but the most resistant one ranks first.
+            before = max(-_LOSS_TIEBREAK, min(_LOSS_TIEBREAK, self._planning_eval(state, me)))
             self._advance(state, me)
-            scores.append(self._clamped_eval(state, me) - penalty)
+            score = self._clamped_eval(state, me)
+            if score == -_DECISIVE:
+                score += before
+            scores.append(score - penalty)
             self.last_search_stats["reply_world_rollouts"] += 1
         return scores
 
