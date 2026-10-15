@@ -47,6 +47,8 @@ There is no mana: every card costs one card and one placement action. Low streng
 - **Legendaries** come in three kinds. The build-around (a deck's whole plan, like Black Swan; few of these). The amplifier, which takes the plan the commons and rares already have and pushes it over the edge, without changing it (King Theron, Queen Adira: Cats play the same with or without them). The generally excellent card, far stronger than a common and good in many decks (Prince Leo and Princess Lea, Aurum, Scarlett). Test: if two copies in a deck would be balanced, it isn't a legendary.
 - **A higher rarity gets a better rate, never a worse one.** A rare or legendary with the same effect as a common is at least as strong.
 
+**Every deck beats 30 Lions.** A deck of thirty vanilla Lions (the `lions30` test deck, `decks.TEST_BOT_DECKS`) is the floor: a deck that can't beat it does nothing its cards' strength alone wouldn't. Every deck wins at least 8 of 10 games against it, piloted by the Expert bot on both sides, going first and second equally; two losses allow for bad draws (Martin, 2026-10-15).
+
 ## Guardrails
 
 - No burst extra placements, and an instant-capture audit for every chaining effect near an enemy den.
