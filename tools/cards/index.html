@@ -188,7 +188,7 @@ button { cursor: pointer; }
 
 <script>
 const HABS = ['Savanna', 'Jungle', 'Forest', 'Meadow', 'City', 'Open Ocean', 'Polar', 'Desert', 'Mountains', 'Australia', 'Ice Age', ''];
-const RNAME = { L: 'Legendary', R: 'Rare', C: 'Common' }, RORD = { L: 0, R: 1, C: 2 };
+const RNAME = { L: 'Legendary', R: 'Rare', C: 'Common', '': '' }, RORD = { L: 0, R: 1, C: 2 };
 const LV = ['draft', 'problem', 'fine', 'locked'], LVKEY = { d: 'draft', p: 'problem', f: 'fine', l: 'locked' };
 const LVORD = ['empty', 'draft', 'problem', 'fine', 'locked'];
 const COLS = {
@@ -259,7 +259,7 @@ const nameOf = r => r.name || r.species;
 // Families in table order: habitat, then rarity, then name; a card's related cards straight under it.
 function families() {
   const tops = S.rows.filter(r => !r.parent);
-  tops.sort((a, b) => (HABS.indexOf(a.habitat) + 99) % 99 - (HABS.indexOf(b.habitat) + 99) % 99 || RORD[a.rarity] - RORD[b.rarity] || nameOf(a).localeCompare(nameOf(b)));
+  tops.sort((a, b) => (HABS.indexOf(a.habitat) + 99) % 99 - (HABS.indexOf(b.habitat) + 99) % 99 || (RORD[a.rarity] ?? 3) - (RORD[b.rarity] ?? 3) || nameOf(a).localeCompare(nameOf(b)));
   const out = [];
   for (const t of tops) {
     const fam = [t, ...(S.kids[t.id] || []).flatMap(k => [k, ...(S.kids[k.id] || [])])];
@@ -279,7 +279,7 @@ function ringCss(id, D, crop) { const [x, y, d] = crop || S.crops.CROP[id], w = 
 function valueHTML(r, col) {
   switch (col) {
     case 'habitat': return r.habitat ? esc(r.habitat) : '';
-    case 'rarity': return `<span class="${r.rarity}">${RNAME[r.rarity]}</span>`;
+    case 'rarity': return r.rarity ? `<span class="${r.rarity}">${RNAME[r.rarity]}</span>` : '';
     case 'animal':
     { // the name, and under it the species (when it isn't the name) and the tag
       const sub = (first) => { const t = [first, r.tag].filter(Boolean).join(' · '); return t ? `<small>${esc(t)}</small>` : ''; };
@@ -390,7 +390,7 @@ function editorHTML(r, col) {
   if (!r.editable && !['art', 'crop'].includes(col)) return '';
   switch (col) {
     case 'habitat': return `<select data-in>${S.habitats.map(h => `<option ${h === r.habitat ? 'selected' : ''}>${h}</option>`).join('')}</select>`;
-    case 'rarity': return `<select data-in>${['L', 'R', 'C'].map(k => `<option value="${k}" ${k === r.rarity ? 'selected' : ''}>${RNAME[k]}</option>`).join('')}</select>`;
+    case 'rarity': return `<select data-in>${r.rarity ? '' : '<option value="" selected>—</option>'}${['L', 'R', 'C'].map(k => `<option value="${k}" ${k === r.rarity ? 'selected' : ''}>${RNAME[k]}</option>`).join('')}</select>`;
     case 'animal': return r.rarity === 'L'
       ? `<div class="two"><div><div class="lab">Name</div><input data-in="name" value="${esc(r.name)}" placeholder="no name yet"></div><div><div class="lab">Species</div><input data-in="species" value="${esc(r.species)}"></div></div><div><div class="lab">Tag</div><input data-tag value="${esc(r.tag)}"></div>`
       : `<div class="two"><div><div class="lab">Name</div><input data-in="name" value="${esc(r.name)}"></div><div><div class="lab">Species</div><input data-in="species" value="${esc(r.species === r.name ? '' : r.species)}"></div></div><div><div class="lab">Tag</div><input data-tag value="${esc(r.tag)}"></div>`;

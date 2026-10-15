@@ -18,6 +18,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (animal: "Name/Species" for a legendary)
     .venv/bin/python tools/cards/hq.py level ID COLUMN LEVEL [--note N]
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d] [--strip x,y,z] [--full y|reset]
+    .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
 
 This is the only way cards change: a hook (.claude/hooks/cards-one-path.py) refuses direct edits of decks.json,
 cards.json and the crop tables in art.js.
@@ -344,6 +345,20 @@ def revert(card_id: str, col: str) -> None:
     _write(LEVELS, levels)
 
 
+def add(name: str, habitat: str, species: str = "") -> str:
+    """A planned card: only its animal and habitat, everything else blank (it waits in the pool; convert.py skips a card
+    with no strength, so the game doesn't see it yet). Returns its id."""
+    decks = _read(DECKS)
+    pool = decks["decks"]["pool"]["cards"]
+    if any((c["name"] or c["species"]).lower() == name.lower() for d in decks["decks"].values() for c in d["cards"]):
+        raise Refused(f"{name} already has a card")
+    wid = "pool-" + re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    pool.append({"habitat": habitat, "id": wid, "name": name, "note": "", "rarity": "", "species": species or name,
+                 "status": "open", "str": None, "tag": "", "text": ""})
+    _write(DECKS, decks)
+    return wid
+
+
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description="The card table, for Claude: every edit is marked for Martin's review.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -351,6 +366,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("set"); s.add_argument("id"); s.add_argument("col", choices=VALUE_COLS); s.add_argument("value"); s.add_argument("--note")
     s = sub.add_parser("level"); s.add_argument("id"); s.add_argument("col", choices=COLUMNS); s.add_argument("lv", choices=LEVELS_ORDER); s.add_argument("--note")
     s = sub.add_parser("note"); s.add_argument("id"); s.add_argument("col", choices=COLUMNS); s.add_argument("note")
+    s = sub.add_parser("add"); s.add_argument("name"); s.add_argument("habitat", choices=HABITATS); s.add_argument("--species", default="")
     s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
     a = ap.parse_args(argv)
     try:
@@ -367,6 +383,8 @@ def main(argv=None) -> None:
             set_level(a.id, a.col, a.lv, "claude", a.note)
         elif a.cmd == "note":
             set_note(a.id, a.col, a.note, "claude")
+        elif a.cmd == "add":
+            print(add(a.name, a.habitat, a.species))
         elif a.cmd == "crop":
             nums = lambda v: [float(x) for x in v.split(",")] if v else None
             full = None if a.full is None else "reset" if a.full == "reset" else float(a.full)

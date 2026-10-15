@@ -57,7 +57,7 @@ Out of Savanna: Impala (people can't tell it from the Gazelle). Waiting for a Sa
 
 ### Forest (locked 2026-10-05)
 
-Animals (30; 18 common and 12 rare, rarities set with the effects): Fox, Wolf, Grizzly Bear, Black Bear, Deer, Moose, Boar, Badger, Lynx, Beaver, Porcupine, Skunk, Squirrel, Chipmunk, Flying Squirrel, Woodpecker, Firefly, Owl, Raven, Hawk, Eagle (the bald eagle, the vanilla bird), Falcon, Magpie, Salamander, Viper, Stag Beetle, Hornet, Guard Wasp, Worker Wasp, Worker Ant.
+Animals (30; 18 common and 12 rare, rarities set with the effects): Fox, Wolf, Grizzly Bear, Black Bear, Deer, Moose, Boar, Badger, Lynx, Beaver, Porcupine, Skunk, Squirrel, Chipmunk, Flying Squirrel, Woodpecker, Firefly, Owl, Raven, Hawk, Eagle (the bald eagle, the vanilla bird), Falcon, Magpie, Salamander, Viper, Cottonmouth (the Gaboon Viper's card, renamed so two Vipers don't share the pool), Stag Beetle, Hornet, Guard Wasp, Worker Wasp, Worker Ant.
 
 Legendaries (12): Lobo, Raksha, Clarion (the wolves), Scarlett (fox), Sirocco (skunk), Vesper (hornet), Ember (pheasant, like Methuselah a legendary without its animal among the 30), and five new, chosen with the effects.
 
@@ -79,7 +79,7 @@ Legendaries (6): the rat family, Verminus, Pestis, Greywhisker, Barley and Scroo
 
 ### Jungle (locked 2026-10-05)
 
-Animals (30; 18 common and 12 rare, rarities set with the effects): Jaguar, Black Panther, Tiger, Bush Dog, Dhole, Anaconda, Gaboon Viper, Python, Soldier Ant, Gorilla, Orangutan, Chimpanzee, Sloth, Capybara, Giant Anteater, Tarsier, Armadillo, Tapir, Chameleon, Poison Dart Frog, Basilisk, Iguana, Golden Orb-Weaver, Macaw, Hummingbird, Peacock, Piranha, Electric Eel, Tarantula, Leech.
+Animals (30; 18 common and 12 rare, rarities set with the effects): Jaguar, Black Panther, Tiger, Bush Dog, Dhole, Anaconda, Coral Snake, Python, Soldier Ant, Gorilla, Orangutan, Chimpanzee, Sloth, Capybara, Giant Anteater, Tarsier, Armadillo, Tapir, Chameleon, Poison Dart Frog, Basilisk, Iguana, Golden Orb-Weaver, Macaw, Hummingbird, Peacock, Piranha, Electric Eel, Tarantula, Leech.
 
 Legendaries (12): Eon (snake), Queen Marabunta (army ant), and ten new, chosen with the effects.
 
