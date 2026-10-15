@@ -1909,6 +1909,16 @@
       "note": "Martin, 2026-10-15: the Cats' answer to big animals is removal again (Queen Adira draws); setting to 1 was weak and didn't fit a cat.",
       "by": "claude",
       "at": 1792070194
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Martin, 2026-10-15: at 4 it outclassed the Jaguar; any-size removal pays with a small body.",
+      "by": "claude",
+      "at": 1792070441
     }
   },
   "silverback": {

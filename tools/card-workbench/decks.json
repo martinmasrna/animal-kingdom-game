@@ -424,7 +424,7 @@
      "rarity": "R",
      "species": "Serval",
      "status": "proposed",
-     "str": 4,
+     "str": 2,
      "tag": "Cat",
      "text": "Roar: if you control another Cat, remove an adjacent enemy."
     },
