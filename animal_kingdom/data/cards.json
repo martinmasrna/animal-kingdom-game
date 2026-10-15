@@ -675,7 +675,7 @@
         "Canine"
       ],
       "base_strength": 3,
-      "text": "Dusk: give an adjacent Canine +2 strength.",
+      "text": "Dusk: give a random adjacent Canine +2 strength.",
       "keywords": [],
       "species": "Bush Dog",
       "habitat": "Jungle",

@@ -1921,9 +1921,10 @@ def _jackal_place(state, unit, cr):
 
 
 def _bush_dog_eot(state, unit, cr):
-    """Dusk: give an adjacent Canine +2 strength (one of yours, the player's choice)."""
-    options = [nb for nb, top in _adjacent_tops(state, cr, unit.owner) if "Canine" in state.cards[top.card_id].tags]
-    _push_choose(state, unit.owner, options, "grant", amount=state.config.bush_dog_grant)
+    """Dusk: give a random adjacent Canine +2 strength (one of yours)."""
+    options = [top.iid for _, top in _adjacent_tops(state, cr, unit.owner) if "Canine" in state.cards[top.card_id].tags]
+    if options:
+        _grant(state, [state.rng.choice(options)], state.config.bush_dog_grant)
 
 
 def _raccoon_dog_friendly_roam(state, watcher, roamer, event):

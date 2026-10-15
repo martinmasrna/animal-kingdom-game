@@ -437,9 +437,9 @@
         "prev_note": "",
         "prev": "Roar: give an adjacent Canine +3 strength."
       },
-      "note": "Martin, 2026-10-15: the Dusk Canine package (with the African Wild Dog and the Sloth legendary).",
+      "note": "Martin, 2026-10-15: random, not a choice.",
       "by": "claude",
-      "at": 1792093810
+      "at": 1792094232
     }
   },
   "butterfly": {
@@ -2485,10 +2485,6 @@
   },
   "sperm_whale": {
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from pool to aristocrats",
       "by": "claude",
       "at": 1792085440

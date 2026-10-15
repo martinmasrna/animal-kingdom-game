@@ -367,15 +367,14 @@ def test_the_legendary_wolf_grows_at_dusk_by_its_adjacent_canines():
     assert w.strength_counter == 2 * CFG.wolf_legend_grant
 
 
-def test_the_bush_dog_gives_an_adjacent_canine_plus_two_at_dusk():
+def test_the_bush_dog_gives_a_random_adjacent_canine_plus_two_at_dusk():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "bush_dog", "A")
     w = put(s, "1,1", "wolf", "A")
     other = put(s, "1,3", "jackal", "A")
+    put(s, "2,2", "squirrel", "A")                             # not a Canine: never chosen
     end_turn(s)
-    assert s.pending is not None and set(s.pending["options"]) == {"1,1", "1,3"}
-    choose(s, "1,1")
-    assert w.strength_counter == CFG.bush_dog_grant and other.strength_counter == 0 and s.current == "B"
+    assert s.current == "B" and sorted([w.strength_counter, other.strength_counter]) == [0, CFG.bush_dog_grant]
 
 
 def test_the_fox_draws_whenever_it_covers_an_enemy():

@@ -299,7 +299,7 @@
      "status": "proposed",
      "str": 3,
      "tag": "Canine",
-     "text": "Dusk: give an adjacent Canine +2 strength."
+     "text": "Dusk: give a random adjacent Canine +2 strength."
     },
     {
      "habitat": "Forest",
