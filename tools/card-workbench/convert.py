@@ -56,7 +56,7 @@ RENAMED = {"Stray Cat": "alley_cat", "Stray Dog": "street_dog"}
 # Unnamed legendaries with no species to name them by: id and the name shown meanwhile.
 UNNAMED = {"food-aggro-0": ("big_gus", "Rodent"), "food-aggro-1": ("macaque_legend", "Macaque")}
 # Engine numbers the text doesn't carry.
-DYNAMIC = {"python": "removed_units_count", "egg_eater": "removed_eggs_count"}
+DYNAMIC = {"egg_eater": "removed_eggs_count"}
 # The card whose art covers each starter deck in the menus (its first legendary otherwise).
 COVERS = {"cats": "king_theron", "canines": "lobo", "colony": "queen_honoria", "den_rush": "pestis",
           "egg_control": "eon", "food_aggro": "barley", "food_otk": "fathom", "giants": "brutus",

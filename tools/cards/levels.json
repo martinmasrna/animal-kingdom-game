@@ -1783,6 +1783,24 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from egg-control to aristocrats",
+      "by": "claude",
+      "at": 1792086365
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Has +1 strength for each removed animal."
+      },
+      "by": "claude",
+      "at": 1792086365
     }
   },
   "queen_adira": {
@@ -2299,6 +2317,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from pool to egg-control",
+      "by": "claude",
+      "at": 1792086365
     }
   },
   "vulture": {

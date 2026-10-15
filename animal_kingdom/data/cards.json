@@ -486,6 +486,21 @@
       "workbench_id": "pool-roach-king"
     },
     {
+      "id": "python",
+      "name": "Python",
+      "deck": "aristocrats",
+      "rarity": "common",
+      "tags": [
+        "Snake"
+      ],
+      "base_strength": 0,
+      "text": "Whenever an animal is removed, gain 1 strength (wherever this is).",
+      "keywords": [],
+      "species": "Python",
+      "habitat": "Jungle",
+      "workbench_id": "egg-control-8"
+    },
+    {
       "id": "leopard_legend",
       "name": "Leopard",
       "deck": "canines",
@@ -1918,22 +1933,6 @@
       "workbench_id": "egg-control-7"
     },
     {
-      "id": "python",
-      "name": "Python",
-      "deck": "egg_control",
-      "rarity": "common",
-      "tags": [
-        "Snake"
-      ],
-      "base_strength": "dynamic",
-      "text": "Has +1 strength for each removed animal.",
-      "keywords": [],
-      "dynamic_strength": "removed_units_count",
-      "species": "Python",
-      "habitat": "Jungle",
-      "workbench_id": "egg-control-8"
-    },
-    {
       "id": "egg_eater",
       "name": "Egg Eater",
       "deck": "egg_control",
@@ -2010,6 +2009,21 @@
       "species": "",
       "habitat": "Jungle",
       "workbench_id": "egg-control-13"
+    },
+    {
+      "id": "viper",
+      "name": "Viper",
+      "deck": "egg_control",
+      "rarity": "common",
+      "tags": [
+        "Snake"
+      ],
+      "base_strength": 3,
+      "text": "Roar: give an adjacent enemy -3 strength.",
+      "keywords": [],
+      "species": "Viper",
+      "habitat": "Forest",
+      "workbench_id": "pool-y3"
     },
     {
       "id": "baboon_legend",
@@ -2820,21 +2834,6 @@
       "species": "Fox",
       "habitat": "Forest",
       "workbench_id": "pool-y1"
-    },
-    {
-      "id": "viper",
-      "name": "Viper",
-      "deck": "bench",
-      "rarity": "common",
-      "tags": [
-        "Snake"
-      ],
-      "base_strength": 3,
-      "text": "Roar: give an adjacent enemy -3 strength.",
-      "keywords": [],
-      "species": "Viper",
-      "habitat": "Forest",
-      "workbench_id": "pool-y3"
     },
     {
       "id": "anaconda",

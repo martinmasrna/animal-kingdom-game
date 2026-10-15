@@ -211,7 +211,7 @@ def test_growth_rate_diff_divides_by_turn():
 
 def test_dynamic_board_diff_counts_dynamic_tops():
     s = make_state()
-    put(s, "1,2", "python", "A")
+    put(s, "1,2", "egg_eater", "A")
     put(s, "2,2", "lion", "B")   # not dynamic
     assert features.dynamic_board_diff(s, "A", "B") == 1
     assert features.dynamic_board_diff(s, "B", "A") == -1
@@ -219,7 +219,7 @@ def test_dynamic_board_diff_counts_dynamic_tops():
 
 def test_dynamic_fuel_scales_with_remove_pile():
     s = make_state()
-    put(s, "1,2", "python", "A")
+    put(s, "1,2", "egg_eater", "A")
     s.remove_pile = ["mouse"] * 6   # 6/60 = 0.1
     vec = _vec(s, "A", "rung1")
     assert vec["dynamic_fuel"] == pytest.approx(0.1 * 1)

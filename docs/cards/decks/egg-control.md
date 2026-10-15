@@ -28,11 +28,11 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Python** | 3 | Snake | dynamic | Has +1 strength for each removed animal. |
 | **Egg Eater** | 3 | Snake | dynamic | Has +2 strength for each removed Egg. |
 | **Mosquito** | 3 | — | 2 | Flight. Roar: give an adjacent enemy -2 strength. |
 | **Raven** | 3 | Bird | 1 | Flight. Roar: draw 3 cards, then shuffle 2 cards back. |
 | **Bird Egg** | 3 | Egg | 0 | Roar: Scout a Bird. Next turn, remove this and draw a Bird. |
 | **Snake Egg** | 3 | Egg | 0 | Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes. |
+| **Viper** | 3 | Snake | 3 | Roar: give an adjacent enemy -3 strength. |
 
 <!-- cards:end -->

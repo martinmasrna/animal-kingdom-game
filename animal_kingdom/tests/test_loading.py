@@ -57,9 +57,9 @@ def test_every_card_has_valid_static_fields():
 
 def test_known_cards_present_with_expected_data():
     cards = load_cards()
-    # Only Goliath (Python) is dynamic.
-    assert cards["python"].is_dynamic
-    assert cards["python"].dynamic_strength == "removed_units_count"
+    # Only the Egg Eater is dynamic; the Python grows by a counter (wherever it is).
+    assert cards["egg_eater"].is_dynamic and not cards["python"].is_dynamic
+    assert cards["egg_eater"].dynamic_strength == "removed_eggs_count"
     assert cards["chameleon"].base_strength == 0
     assert cards["tiger"].has_keyword("Apex Predator")
     assert cards["eagle"].has_keyword("Flight")

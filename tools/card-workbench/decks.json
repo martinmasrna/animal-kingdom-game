@@ -149,6 +149,18 @@
      "str": 1,
      "tag": "",
      "text": "When this is removed, put it back where it was with +1 strength and draw a card."
+    },
+    {
+     "habitat": "Jungle",
+     "id": "egg-control-8",
+     "name": "Python",
+     "note": "",
+     "rarity": "C",
+     "species": "Python",
+     "status": "proposed",
+     "str": 0,
+     "tag": "Snake",
+     "text": "Whenever an animal is removed, gain 1 strength (wherever this is)."
     }
    ]
   },
@@ -954,18 +966,6 @@
      "text": "Roar: remove an adjacent enemy of strength 5 or less."
     },
     {
-     "habitat": "Jungle",
-     "id": "egg-control-8",
-     "name": "Python",
-     "note": "",
-     "rarity": "C",
-     "species": "Python",
-     "status": "proposed",
-     "str": 0,
-     "tag": "Snake",
-     "text": "Has +1 strength for each removed animal."
-    },
-    {
      "habitat": "Savanna",
      "id": "egg-control-9",
      "name": "Egg Eater",
@@ -1024,6 +1024,18 @@
      "str": 0,
      "tag": "Egg",
      "text": "Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes."
+    },
+    {
+     "habitat": "Forest",
+     "id": "pool-y3",
+     "name": "Viper",
+     "note": "",
+     "rarity": "C",
+     "species": "Viper",
+     "status": "proposed",
+     "str": 3,
+     "tag": "Snake",
+     "text": "Roar: give an adjacent enemy -3 strength."
     }
    ]
   },
@@ -2177,18 +2189,6 @@
      "str": 5,
      "tag": "Canine",
      "text": "Roar: place Poppy and Rusty on random adjacent empty crossroads."
-    },
-    {
-     "habitat": "Forest",
-     "id": "pool-y3",
-     "name": "Viper",
-     "note": "",
-     "rarity": "C",
-     "species": "Viper",
-     "status": "proposed",
-     "str": 3,
-     "tag": "Snake",
-     "text": "Roar: give an adjacent enemy -3 strength."
     },
     {
      "habitat": "Jungle",

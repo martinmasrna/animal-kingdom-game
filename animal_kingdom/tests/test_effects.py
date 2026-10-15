@@ -175,12 +175,14 @@ def test_chameleon_covers_enemies_of_any_strength():
     assert PlaceAction("alley_cat", ("cr", "3,2")) in rules.legal_actions(covered)
 
 
-def test_goliath_strength_equals_remove_pile_size():
-    s = make_state()
+def test_python_grows_with_every_removal_wherever_it_is():
+    s = make_state(hands={"A": ["python"]})
     g = put(s, "1,1", "python", "A")
     assert effective_strength(s, g) == 0
-    s.remove_pile.extend(["lion", "fox", "rat"])
-    assert effective_strength(s, g) == 3
+    for cr, who in (("2,1", "B"), ("2,2", "A"), ("2,3", "B")):
+        put(s, cr, "mouse", who)
+        effects.remove_top(s, cr, by_player="A")
+    assert effective_strength(s, g) == 3 and placement_strength(s, s.hands["A"][0]) == 3   # on the board and in hand
 
 
 def test_armor_survives_removal_effect():

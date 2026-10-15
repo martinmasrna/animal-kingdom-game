@@ -100,8 +100,8 @@ def test_octopus_ink_switches_one_chosen_enemys_effects_off_until_the_inkers_nex
     s = make_state(hands={"A": ["octopus", "lion"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
     put(s, "1,2", "caracal", "A")
     porc = put(s, "3,2", "porcupine", "B")                     # Spikes, 7
-    py = put(s, "2,3", "python", "B")                         # dynamic strength
-    s.pile_add("lion", "A"); s.pile_add("lion", "A")
+    py = put(s, "2,3", "egg_eater", "B")                      # dynamic strength
+    s.pile_add("bird_egg", "A")
     assert effective_strength(s, py) == 2
     rules.apply_action(s, PlaceAction("octopus", ("cr", "2,2")))
     choose(s, "3,2")                                            # one target: the Porcupine

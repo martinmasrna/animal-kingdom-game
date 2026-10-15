@@ -32,5 +32,6 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **City Spider** | 3 | Arachnid | 4 | Dawn: remove the weakest animal next to this. |
 | **Cockroach** | 3 | — | 1 | When this is removed, put it back where it was and place a Roach on an adjacent empty crossroad. |
 | **Toad** | 3 | — | 1 | Reach 2. When this is removed, remove all animals next to it. |
+| **Python** | 3 | Snake | 0 | Whenever an animal is removed, gain 1 strength (wherever this is). |
 
 <!-- cards:end -->

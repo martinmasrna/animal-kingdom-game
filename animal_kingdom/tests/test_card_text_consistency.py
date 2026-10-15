@@ -295,7 +295,7 @@ STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
 # printing one must be listed (checked below): the launch decks brought a dozen of them at once.
 STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "guard_wasp": ["guard_hornet_bonus"],
-    "python": [],                             # dynamic strength: its +1 per removed animal is the rule itself
+    "python": ["python_growth"],
     "dingo": ["dingo_grant"],
     "shuck": ["shuck_grant"],
     "egg_eater": ["egg_eater_growth"],
@@ -335,9 +335,6 @@ def test_strength_bonus_text_matches_config():
             problems.append(f"{cid}: text prints +{nums} strength but STRENGTH_BONUS_CONSTANTS doesn't list it")
             continue
         attrs = STRENGTH_BONUS_CONSTANTS[cid]
-        if cid == "python":
-            assert nums == [1]
-            continue
         if len(attrs) != len(nums):
             problems.append(f"{cid}: {len(nums)} printed numbers, {len(attrs)} constants")
         for n, attr in zip(nums, attrs):
