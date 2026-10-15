@@ -18,6 +18,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (animal: "Name/Species" for a legendary)
     .venv/bin/python tools/cards/hq.py level ID COLUMN LEVEL [--note N]
     .venv/bin/python tools/cards/hq.py move ID DECK                  to another deck (a starter deck's key, or pool)
+    .venv/bin/python tools/cards/hq.py shelve ID                     a pool card out of the collection (into the reserve)
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d] [--strip x,y,z] [--full y|reset]
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
 
@@ -381,6 +382,26 @@ def add(name: str, habitat: str, species: str = "") -> str:
     return wid
 
 
+def shelve(card_id: str, by: str = "martin") -> str:
+    """Take a pool card out of the collection: its workbench status becomes `open`, so convert.py files it in the reserve
+    (kept, not collectible). Only a pool card; a starter deck's card is moved to the pool first."""
+    r = _row(card_id)
+    if r["deck"] != "pool":
+        raise Refused(f"{r['id']} is in {r['deck']}, not the pool")
+    decks = _read(DECKS)
+    src, i = _deck_index(decks)[r["wid"]]
+    wc = decks["decks"][src]["cards"][i]
+    if wc.get("status") == "open":
+        return ""
+    wc["status"] = "open"
+    _write(DECKS, decks)
+    report = regenerate()
+    levels = _levels()
+    _mark(levels, r, "animal", by, None, "out of the collection (status open, in the reserve)")
+    _write(LEVELS, levels)
+    return report
+
+
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description="The card table, for Claude: every edit is marked for Martin's review.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -389,6 +410,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("level"); s.add_argument("id"); s.add_argument("col", choices=COLUMNS); s.add_argument("lv", choices=LEVELS_ORDER); s.add_argument("--note")
     s = sub.add_parser("note"); s.add_argument("id"); s.add_argument("col", choices=COLUMNS); s.add_argument("note")
     s = sub.add_parser("move"); s.add_argument("id"); s.add_argument("deck")
+    s = sub.add_parser("shelve"); s.add_argument("id")
     s = sub.add_parser("add"); s.add_argument("name"); s.add_argument("habitat", choices=HABITATS); s.add_argument("--species", default="")
     s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
     a = ap.parse_args(argv)
@@ -408,6 +430,8 @@ def main(argv=None) -> None:
             set_note(a.id, a.col, a.note, "claude")
         elif a.cmd == "move":
             print(move(a.id, a.deck, "claude"))
+        elif a.cmd == "shelve":
+            print(shelve(a.id, "claude"))
         elif a.cmd == "add":
             print(add(a.name, a.habitat, a.species))
         elif a.cmd == "crop":
