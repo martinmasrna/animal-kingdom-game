@@ -80,7 +80,7 @@
       "by": "martin"
     },
     "animal": {
-      "lv": "fine",
+      "lv": "draft",
       "by": "martin"
     }
   },
@@ -180,7 +180,7 @@
       "by": "martin"
     },
     "animal": {
-      "lv": "fine",
+      "lv": "draft",
       "by": "martin"
     }
   },
@@ -222,27 +222,27 @@
   },
   "bird_egg": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -276,27 +276,27 @@
   },
   "black_panther": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -310,27 +310,27 @@
   },
   "black_swan": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -505,27 +505,27 @@
   },
   "chameleon": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -539,27 +539,27 @@
   },
   "cheetah": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -629,23 +629,23 @@
   },
   "crocodile": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -731,27 +731,27 @@
   },
   "eagle": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin",
       "note": "The vanilla flyer."
     },
@@ -776,27 +776,27 @@
   },
   "egg_eater": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -820,27 +820,27 @@
   },
   "ember": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -868,27 +868,27 @@
   },
   "falcon": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -968,7 +968,7 @@
       "by": "martin"
     },
     "animal": {
-      "lv": "fine",
+      "lv": "draft",
       "by": "martin"
     }
   },
@@ -1212,27 +1212,27 @@
   },
   "king_theron": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -1266,23 +1266,23 @@
   },
   "lion": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -1304,7 +1304,7 @@
       "by": "martin"
     },
     "animal": {
-      "lv": "fine",
+      "lv": "draft",
       "by": "martin"
     }
   },
@@ -1539,7 +1539,7 @@
       "by": "martin"
     },
     "animal": {
-      "lv": "fine",
+      "lv": "draft",
       "by": "martin"
     }
   },
@@ -1591,27 +1591,27 @@
   },
   "prince_leo": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -1625,27 +1625,27 @@
   },
   "princess_lea": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -1679,27 +1679,27 @@
   },
   "queen_adira": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -1731,7 +1731,7 @@
       "by": "martin"
     },
     "animal": {
-      "lv": "fine",
+      "lv": "draft",
       "by": "martin"
     }
   },
@@ -1745,7 +1745,7 @@
       "by": "martin"
     },
     "animal": {
-      "lv": "fine",
+      "lv": "draft",
       "by": "martin"
     }
   },
@@ -1914,27 +1914,27 @@
   },
   "snake_egg": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -1984,27 +1984,27 @@
   },
   "stork": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -2066,27 +2066,27 @@
   },
   "tiger": {
     "habitat": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "rarity": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "animal": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "tag": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "effect": {
-      "lv": "locked",
+      "lv": "draft",
       "by": "martin"
     },
     "art": {
@@ -2130,7 +2130,7 @@
       "by": "martin"
     },
     "animal": {
-      "lv": "fine",
+      "lv": "draft",
       "by": "martin"
     }
   },

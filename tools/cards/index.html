@@ -4,11 +4,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap">
 <style>
-/* Plain on purpose: a spreadsheet for one reader. Levels use the colours everyone already reads: red is a problem,
-   yellow is good enough (fine), green is done (locked), white is not judged yet (draft), a dash is empty. Blue is Claude's change awaiting review. */
+/* Plain on purpose: a spreadsheet for one reader. Each level its own pale colour, as Martin would set up a sheet:
+   white empty, yellow draft, red problem, green fine, blue locked. A purple edge is Claude's change awaiting review. */
 :root {
   --bg: #fff; --bg2: #f4f4f5; --line: #e2e2e5; --soft: #efefef; --text: #1f1f22; --muted: #6b6b73; --faint: #a3a3aa;
-  --problem-bg: #fde4e1; --problem: #c8372a; --fine-bg: #fdf1c2; --locked-bg: #cfe9cf; --claude: #2f6fd6; --claude-bg: #e8f0fc;
+  --draft-bg: #fdf6dc; --problem-bg: #f8cfc8; --problem: #c8372a; --fine-bg: #e7f4e4; --locked-bg: #e2ecfa; --claude: #8a4fd0; --claude-bg: #f2eafb;
   --f: system-ui, -apple-system, 'Segoe UI', sans-serif;
   --rowh: 40px;
 }
@@ -43,8 +43,8 @@ button { cursor: pointer; }
 .lvbar { display: flex; height: 6px; margin-top: 4px; border-radius: 3px; overflow: hidden; background: var(--soft); }
 .lvbar i { display: block; height: 100%; cursor: pointer; }
 .lvbar i:hover { opacity: .75; }
-.lvbar .empty { background: #e4e4e7; } .lvbar .draft { background: #d0d0d5; } .lvbar .problem { background: #e0574a; }
-.lvbar .fine { background: #f0cf5a; } .lvbar .locked { background: #4caf50; }
+.lvbar .empty { background: #e4e4e7; } .lvbar .draft { background: #ecd57e; } .lvbar .problem { background: #e07a6e; }
+.lvbar .fine { background: #8cc98a; } .lvbar .locked { background: #7aa5e0; }
 .lvbar i.on { outline: 2px solid var(--text); outline-offset: -2px; }
 .hab { padding: 18px 24px 6px; display: flex; align-items: baseline; gap: 8px; }
 .hab h2 { margin: 0; font-size: 16px; font-weight: 600; }
@@ -54,12 +54,13 @@ button { cursor: pointer; }
 .row.faded { opacity: .35; }
 .c { position: relative; padding: 5px 8px; display: flex; flex-direction: column; justify-content: center; min-width: 0; cursor: default; border-left: 1px solid var(--soft); }
 .c:first-child { border-left: 0; }
+.c.draft { background: var(--draft-bg); }
 .c.problem { background: var(--problem-bg); }
 .c.fine { background: var(--fine-bg); }
 .c.locked { background: var(--locked-bg); }
 .c.rv { box-shadow: inset 3px 0 0 var(--claude); }
 .c:hover { filter: brightness(.97); }
-.c.sel { outline: 2px solid var(--claude); outline-offset: -2px; }
+.c.sel { outline: 2px solid #1f1f22; outline-offset: -2px; }
 .c .nt { font-size: 12px; color: var(--muted); margin-top: 2px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .c.problem .nt { color: var(--problem); }
 .v { overflow: hidden; }
@@ -87,7 +88,7 @@ button { cursor: pointer; }
 .tile.faded { opacity: .35; }
 .tile .st2 { display: flex; gap: 6px; }
 .pill { font-size: 12px; color: var(--text); padding: 1px 8px; border-radius: 4px; background: var(--bg2); }
-.pill.problem { background: var(--problem-bg); color: var(--problem); } .pill.fine { background: var(--fine-bg); } .pill.locked { background: var(--locked-bg); }
+.pill.draft { background: var(--draft-bg); } .pill.problem { background: var(--problem-bg); color: var(--problem); } .pill.fine { background: var(--fine-bg); } .pill.locked { background: var(--locked-bg); }
 .pill.rv { box-shadow: inset 3px 0 0 var(--claude); }
 
 /* the card, as the game draws it (static/app.css, card.js) */
@@ -117,7 +118,7 @@ button { cursor: pointer; }
 .pop h4 span { font-weight: 400; }
 .pop input, .pop textarea, .pop select, .drawer textarea { width: 100%; background: var(--bg); border: 1px solid #d4d4d8; border-radius: 6px; padding: 6px 8px; }
 .pop textarea, .drawer textarea { resize: vertical; min-height: 36px; line-height: 1.35; }
-.pop input:focus, .pop textarea:focus, .pop select:focus, .drawer textarea:focus { outline: 2px solid var(--claude); outline-offset: -1px; }
+.pop input:focus, .pop textarea:focus, .pop select:focus, .drawer textarea:focus { outline: 2px solid #8a8a92; outline-offset: -1px; }
 .pop .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .pop .lab { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
 .lvl { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid #d4d4d8; border-radius: 6px; overflow: hidden; }
@@ -125,7 +126,7 @@ button { cursor: pointer; }
 .lvl button:last-child { border-right: 0; }
 .lvl button u { text-decoration: none; color: var(--faint); margin-left: 4px; font-size: 12px; }
 .lvl button[aria-pressed="true"] { color: var(--text); font-weight: 600; }
-.lvl button[aria-pressed="true"].draft { background: var(--bg2); }
+.lvl button[aria-pressed="true"].draft { background: var(--draft-bg); }
 .lvl button[aria-pressed="true"].problem { background: var(--problem-bg); color: var(--problem); }
 .lvl button[aria-pressed="true"].fine { background: var(--fine-bg); }
 .lvl button[aria-pressed="true"].locked { background: var(--locked-bg); }
