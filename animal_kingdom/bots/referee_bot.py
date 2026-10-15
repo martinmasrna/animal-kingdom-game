@@ -65,7 +65,7 @@ class RefereeBot(TurnSearcher):
                  reply_width: int = 4,
                  max_search_nodes: Optional[int] = 1_000,
                  evaluator: Optional[LinearEval] = None,
-                 quiesce: bool = False, mulligan: bool = True):
+                 quiesce: bool = False, mulligan: bool = False):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          evaluator=evaluator, quiesce=quiesce, mulligan=mulligan)

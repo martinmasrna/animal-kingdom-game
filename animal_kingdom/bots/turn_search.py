@@ -89,9 +89,9 @@ class TurnSearcher(Bot):
                  deck_reveal_choice_width: int = 0,
                  max_search_nodes: Optional[int] = None,
                  evaluator: Optional[LinearEval] = None,
-                 quiesce: bool = False, mulligan: bool = True):
+                 quiesce: bool = False, mulligan: bool = False):
         self.weights = weights or GreedyWeights()
-        self.mulligan = mulligan     # False: keep every opening hand (the paired tests' baseline)
+        self.mulligan = mulligan     # off by default: the opening-hand table is GreedyBot's and misjudges this pilot (bots.md)
         # RNG only breaks exact score ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
         self.det_rng = random.Random(None if seed is None else seed + _DET_SEED_SALT)

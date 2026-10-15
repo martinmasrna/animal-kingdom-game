@@ -58,7 +58,7 @@ class TurnBot(TurnSearcher):
                  deck_reveal_choice_width: int = TURN_DECK_REVEAL_CHOICE_WIDTH,
                  max_search_nodes: Optional[int] = TURN_MAX_SEARCH_NODES,
                  evaluator: Optional[LinearEval] = None,
-                 quiesce: bool = False, mulligan: bool = True):
+                 quiesce: bool = False, mulligan: bool = False):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          deck_reveal_choice_width=deck_reveal_choice_width,
