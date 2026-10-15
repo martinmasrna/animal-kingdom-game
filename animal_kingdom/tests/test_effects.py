@@ -18,6 +18,7 @@ from ._helpers import apply_click, hand_ids, make_state, place_targets, put
 
 CFG = Config.default()
 CARDS = load_cards()
+GW = CARDS["guard_wasp"].base_strength
 
 
 def hand_inst(state, player, card_id):
@@ -37,12 +38,12 @@ def advance_to(state, target_tc):
 def test_guard_hornet_anthem_gated_on_four_colony():
     s = make_state()
     gh = put(s, "1,1", "guard_wasp", "A")
-    assert effective_strength(s, gh) == 2
+    assert effective_strength(s, gh) == GW
     for cr in ("1,2", "1,3"):
         put(s, cr, "worker_ant", "A")
-    assert effective_strength(s, gh) == 2                # only 3 Colony incl. self
+    assert effective_strength(s, gh) == GW               # only 3 Colony incl. self
     put(s, "2,1", "worker_ant", "A")                     # three more Colony -> 4 incl. self
-    assert effective_strength(s, gh) == 7                # +5 anthem
+    assert effective_strength(s, gh) == GW + CFG.guard_hornet_bonus   # the anthem
 
 
 def test_nurse_bumblebee_draw_gated_on_four_colony():
@@ -1017,9 +1018,9 @@ def test_guard_wasp_in_hand_does_not_count_itself_toward_four_colony():
     s = make_state(hands={"A": ["guard_wasp"]})
     for cr in ("1,1", "1,2", "1,3"):
         put(s, cr, "worker_ant", "A")                    # 3 Colony on the board
-    assert card_strength(s, "guard_wasp", "A") == 2    # not yet controlled: no +5 to cover with
+    assert card_strength(s, "guard_wasp", "A") == GW   # not yet controlled: no bonus to cover with
     put(s, "2,1", "worker_ant", "A")
-    assert card_strength(s, "guard_wasp", "A") == 7
+    assert card_strength(s, "guard_wasp", "A") == GW + CFG.guard_hornet_bonus
 
 
 def test_falstaffs_extra_food_is_its_own_doing():

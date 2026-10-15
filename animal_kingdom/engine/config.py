@@ -27,8 +27,8 @@ class Config:
     hedgehog_food: int = 5               # Hedgehog: a spiny body that also feeds
     rat_king_per_rodent: int = 4         # Roar: gain N food per OTHER Rodent you control
     worker_ant_food: int = 12            # trimmed from 15 in the 2026-07-05 balance pass
-    worker_bee_food: int = 10            # 5→10; +worker_bee_extra if you control another Worker
-    worker_bee_extra: int = 10           # 5→10
+    worker_bee_food: int = 8             # +worker_bee_extra if you control another Worker
+    worker_bee_extra: int = 8
     worker_wasp_food: int = 3            # at end of your turn
     methuselah_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
                                           # recurring passive in the pool - ruled down 2026-07-02)
@@ -58,7 +58,7 @@ class Config:
                                           # top of its crossroad - see rules overview.md 9.1)
 
     # --- Strength anthems ("has +X", live; decision E) ---
-    guard_hornet_bonus: int = 5          # while >= threshold Colony units
+    guard_hornet_bonus: int = 3          # while >= threshold Colony units
     guard_hornet_colony_threshold: int = 4
     mackerel_anthem: int = 1             # Mackerel: your other Fish have +1
     tuna_per_fish: int = 1               # Tuna: +1 for each other Fish you control

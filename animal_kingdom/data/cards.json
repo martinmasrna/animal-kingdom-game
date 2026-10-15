@@ -199,7 +199,7 @@
         "Colony",
         "Queen"
       ],
-      "base_strength": 3,
+      "base_strength": 1,
       "text": "Roar: you may play another non-Queen Colony animal.",
       "keywords": [],
       "species": "Termite",
@@ -230,8 +230,8 @@
       "tags": [
         "Colony"
       ],
-      "base_strength": 2,
-      "text": "Flight. Has +5 strength while you control 4 or more Colony animals.",
+      "base_strength": 3,
+      "text": "Flight. Has +3 strength while you control 4 or more Colony animals.",
       "keywords": [
         "Flight"
       ],
@@ -298,7 +298,7 @@
         "Worker"
       ],
       "base_strength": 1,
-      "text": "Flight. Roar: gain 10 food; if you control another Worker, gain 10 more.",
+      "text": "Flight. Roar: gain 8 food; if you control another Worker, gain 8 more.",
       "keywords": [
         "Flight"
       ],

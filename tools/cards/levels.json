@@ -1122,6 +1122,26 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
+      "by": "claude",
+      "at": 1792076082
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Has +5 strength while you control 4 or more Colony animals."
+      },
+      "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers. (3 base, +3: a 6 with Flight, so never a worse Eagle)",
+      "by": "claude",
+      "at": 1792076082
     }
   },
   "hamster": {
@@ -2144,6 +2164,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
+      "by": "claude",
+      "at": 1792076082
     }
   },
   "tiger": {
@@ -2290,6 +2320,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: gain 10 food; if you control another Worker, gain 10 more."
+      },
+      "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
+      "by": "claude",
+      "at": 1792076082
     }
   },
   "worker_wasp": {

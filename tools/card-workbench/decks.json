@@ -623,7 +623,7 @@
      "rarity": "R",
      "species": "Termite",
      "status": "proposed",
-     "str": 3,
+     "str": 1,
      "tag": "Colony, Queen",
      "text": "Roar: you may play another non-Queen Colony animal."
     },
@@ -647,9 +647,9 @@
      "rarity": "C",
      "species": "Wasp",
      "status": "proposed",
-     "str": 2,
+     "str": 3,
      "tag": "Colony",
-     "text": "Flight. Has +5 strength while you control 4 or more Colony animals."
+     "text": "Flight. Has +3 strength while you control 4 or more Colony animals."
     },
     {
      "habitat": "Jungle",
@@ -697,7 +697,7 @@
      "status": "proposed",
      "str": 1,
      "tag": "Colony, Worker",
-     "text": "Flight. Roar: gain 10 food; if you control another Worker, gain 10 more."
+     "text": "Flight. Roar: gain 8 food; if you control another Worker, gain 8 more."
     }
    ]
   },
