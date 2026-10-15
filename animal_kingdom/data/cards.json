@@ -1899,7 +1899,7 @@
     },
     {
       "id": "gaboon_viper",
-      "name": "Coral Snake",
+      "name": "Cottonmouth",
       "deck": "egg_control",
       "rarity": "rare",
       "tags": [
@@ -1908,8 +1908,8 @@
       "base_strength": 4,
       "text": "Roar: choose an adjacent enemy. At the start of your next turn, remove it.",
       "keywords": [],
-      "species": "Coral Snake",
-      "habitat": "Jungle",
+      "species": "Cottonmouth",
+      "habitat": "Forest",
       "workbench_id": "egg-control-5"
     },
     {

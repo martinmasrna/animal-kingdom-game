@@ -942,12 +942,12 @@
      "text": "Flight. Roar: remove an adjacent enemy of strength 3 or less."
     },
     {
-     "habitat": "Jungle",
+     "habitat": "Forest",
      "id": "egg-control-5",
-     "name": "Coral Snake",
+     "name": "Cottonmouth",
      "note": "",
      "rarity": "R",
-     "species": "Coral Snake",
+     "species": "Cottonmouth",
      "status": "proposed",
      "str": 4,
      "tag": "Snake",
