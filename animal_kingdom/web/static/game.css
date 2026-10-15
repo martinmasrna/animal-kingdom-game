@@ -599,7 +599,17 @@ html:has(.game), html:has(.game) body { overscroll-behavior: none; }
 .game .bwave { width: 40px; height: 40px; margin: -20px 0 0 -20px; z-index: 0; border-radius: 50%; border: 6px solid #ffd76a; box-shadow: 0 0 24px #ffd76a; animation: bwave .9s cubic-bezier(.15,.7,.3,1) both; }
 @keyframes bwave { from { transform: scale(.4); opacity: 1; } to { transform: scale(10.5); opacity: 0; } }   /* under the gem: over it, its first frames read as a yellow dot on the jewel (Martin, 2026-10-15) */
 
-/* A side's Remove Pile, under its cards in the decklist panel; your panel stops below the button row, its lists scrolling */
-.panel h4.sub { margin-top: 12px; font-size: 16px; }
-.game .panel.mine { max-height: calc(100% - 270px); }
-.panel .rows { min-height: 0; flex-shrink: 1; }
+/* The Remove Pile: a dialog in full focus over the board, every removed card in full, yours and theirs; it scrolls */
+.game .pmodal { position: absolute; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center; background: rgba(10,9,8,.72); }
+.game .pmodal.on { display: flex; }
+.game .pmodal .pbox { display: flex; flex-direction: column; width: 1060px; max-height: 720px; padding: 16px 20px 12px; border-radius: 14px; box-sizing: border-box;
+  background: #26221e url(/static/kit2/coll_slab.webp) center / 600px auto; border: 1px solid #5b544b; box-shadow: 0 20px 60px rgba(0,0,0,.7); }
+.game .pmodal h4 { display: flex; align-items: center; gap: 10px; font: 700 24px 'Fira Sans Condensed', sans-serif; color: #f3ead8; margin-bottom: 6px; }
+.game .pmodal h4 .n { font: 500 17px 'Fira Sans Condensed', sans-serif; color: #b3a996; }
+.game .pmodal h4 .x { margin-left: auto; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; font-size: 26px; color: #d8cdb9; cursor: pointer; }
+.game .pmodal h4 .x:hover { background: rgba(255,255,255,.08); }
+.game .pmodal .pbody { overflow-y: auto; scrollbar-width: thin; padding-right: 6px; }
+.game .pmodal .t { font: 600 17px 'Fira Sans Condensed', sans-serif; color: #b3a996; margin: 8px 0 8px; } .game .pmodal .t .n { margin-left: 6px; color: #f3e3c0; }
+.game .pmodal .pgrid { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
+.game .pmodal .pc { position: relative; width: 156px; height: 229px; } .game .pmodal .pc .card { --w: 156px; }
+.game .pmodal .nil { padding: 2px 0 10px; opacity: .6; font-size: 15px; }

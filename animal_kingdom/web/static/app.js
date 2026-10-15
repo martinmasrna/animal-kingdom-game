@@ -48,8 +48,8 @@ function sortIds(ids) {
   return ids.sort((a, b) => RANK[CARDS[a].rarity] - RANK[CARDS[b].rarity] || sv(CARDS[a]) - sv(CARDS[b]) || CARDS[a].name.localeCompare(CARDS[b].name));
 }
 // A decklist in the game's panels: the collection's strips, each with the copies left.
-function rows(list, counts, cards = CARDS) {
-  return `<div class="dbody flat">${sortIds(Object.keys(list)).map(id => stripHTML(id, cards, counts ? (counts[id] || 0) : list[id])).join('')}</div>`;
+function rows(list, counts) {
+  return `<div class="dbody flat">${sortIds(Object.keys(list)).map(id => stripHTML(id, CARDS, counts ? (counts[id] || 0) : list[id])).join('')}</div>`;
 }
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 function cardPop(el, id, extra, place) {
@@ -829,6 +829,7 @@ function gameScreen() {
       <div id="board"></div>
       <div class="abs menu snd" id="sndbtn"></div><div class="panel setp" id="setp"></div>
       <div class="abs menu hs" id="series" data-tip="History"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg></div>
+      <div class="abs menu" id="pilebtn" data-tip="Remove Pile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-4.4 0-7.5 3-7.5 7 0 2.4 1.1 4.2 3 5.2V19h9v-3.8c1.9-1 3-2.8 3-5.2 0-4-3.1-7-7.5-7z"/><circle cx="9" cy="11" r="1.5"/><circle cx="15" cy="11" r="1.5"/><path d="M10.5 19v2M13.5 19v2"/></svg></div><div class="pmodal" id="pilep"></div>
       <div class="abs opphand" id="opphand"></div>
       <div class="abs menu fb" id="fbbtn" data-tip="Send feedback"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></div>
       <div class="abs menu chatbtn" id="chatbtn" data-tip="Friends">${ICON_FRIENDS}${chatBadge()}</div>
@@ -865,7 +866,7 @@ function gameScreen() {
     $('concede').onclick = e => { e.stopPropagation(); ask.classList.remove('on'); send({ t: 'concede' }); };
     // The series opens the history, the opponent's hand their decklist; hovering your deck shows yours.
     const toggle = k => e => { e.stopPropagation(); ui.panel = ui.panel === k ? null : k; showPanel(); };
-    $('series').onclick = toggle('hist'); $('opphand').onclick = toggle('theirs');
+    $('series').onclick = toggle('hist'); $('opphand').onclick = toggle('theirs'); $('pilebtn').onclick = toggle('pile');
     $('deck').onmouseenter = () => { if (matchMedia('(hover: none)').matches) return; ui.panel = 'mine'; showPanel(); };   // touch: held instead (below)
     $('deck').onmouseleave = () => { if (ui.panel === 'mine') { ui.panel = null; showPanel(); } };
     app.querySelectorAll('.panel').forEach(el => el.onclick = e => e.stopPropagation());
@@ -952,7 +953,8 @@ function drawGame() {
   $('menubtn').style.display = playing && V.id && !RP.views.length ? '' : 'none';
   $('fbbtn').style.display = V.id ? '' : 'none'; $('fbbtn').classList.toggle('alone', $('menubtn').style.display === 'none');   // feedback: any real match or replay, never the lab   // the flag: only a game in play (never the lab or a replay)
   { const n = [$('menubtn'), $('fbbtn')].filter(e => e.style.display !== 'none').length, w = VIEW.port ? 88 : 52;
-    $('series').style.right = 16 + w * n + 'px'; $('sndbtn').style.right = 16 + w * (n + 1) + 'px'; $('chatbtn').style.right = 16 + w * (n + 2) + 'px'; }   // Friends, left of sound
+    $('series').style.right = 16 + w * n + 'px'; $('pilebtn').style.right = 16 + w * (n + 1) + 'px';
+    $('sndbtn').style.right = 16 + w * (n + 2) + 'px'; $('chatbtn').style.right = 16 + w * (n + 3) + 'px'; }   // the Remove Pile left of History; Friends, left of sound
   $('chatbtn').style.display = V.id && !isTutorial() && hasFriends() ? '' : 'none';   // a real match or replay, once you have a friend   // sound, left of History   // History, left of feedback and the flag
   $('menubtn').dataset.tip = isTutorial() ? 'Leave tutorial' : 'Concede';
   // the flag concedes a match; a tutorial has nothing to concede, so the same button is a house: back home
@@ -1123,20 +1125,30 @@ function drawHistory(G) {
 function drawLists(G) {
   const sum = o => Object.values(o).reduce((a, b) => a + b, 0), you = V.you, them = opp();
   const mine = document.getElementById('mine'), theirs = document.getElementById('theirs');
-  // under each side's cards, its Remove Pile, each card at its strength now (a Python grows there too)
-  const pile = who => {
-    const cs = (G.pile || []).filter(c => c.owner === who), counts = {}, cards = { ...CARDS };
-    cs.forEach(c => { counts[c.id] = (counts[c.id] || 0) + 1; cards[c.id] = { ...CARDS[c.id], str: c.str }; });
-    return cs.length ? `<h4 class="sub">Removed<span class="n">${cs.length}</span></h4><div class="rows">${rows(counts, null, cards)}</div>` : '';
-  };
-  mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4><div class="rows">${rows(V.lists[you], G.deckLeft)}</div>${pile(you)}`;
-  theirs.innerHTML = `<h4>Opponent's cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them], G.unseen)}</div>${pile(them)}`;
+  mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4><div class="rows">${rows(V.lists[you], G.deckLeft)}</div>`;
+  theirs.innerHTML = `<h4>Opponent's cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them], G.unseen)}</div>`;
   wirePops(mine); wirePops(theirs);
+  drawPile(G);
 }
-
+// The Remove Pile, from its button beside History: a dialog in full focus (Gwent's graveyard), every removed card in full
+// at its strength now (a Python grows there too), yours then your opponent's, the latest first. Escape, ×, or a click beside it closes.
+function drawPile(G) {
+  const side = (who, label) => {
+    const cs = (G.pile || []).filter(c => c.owner === who).reverse();
+    return `<div class="t">${label}<span class="n">${cs.length}</span></div>` + (cs.length
+      ? `<div class="pgrid">${cs.map(c => `<div class="pc ${CARDS[c.id].rarity}">${cardHTML(CARDS[c.id], { str: c.str })}</div>`).join('')}</div>`
+      : '<div class="nil">Nothing removed yet</div>');
+  };
+  const el = document.getElementById('pilep');
+  el.innerHTML = `<div class="pbox"><h4>Remove Pile<span class="n">${(G.pile || []).length}</span><span class="x" id="pclose">×</span></h4>`
+    + `<div class="pbody">${side(V.you, 'You')}${side(opp(), 'Your opponent')}</div></div>`;
+  const close = e => { e.stopPropagation(); ui.panel = null; showPanel(); };
+  el.onclick = e => e.target === el ? close(e) : e.stopPropagation();
+  document.getElementById('pclose').onclick = close;
+}
 function showPanel() {
   if (isTutorial()) ui.panel = null;   // the tutorial never opens the decklists or the history: nothing it teaches, and they give away its deal
-  for (const [k, id] of [['mine', 'mine'], ['theirs', 'theirs'], ['hist', 'histp'], ['set', 'setp']]) document.getElementById(id).classList.toggle('on', ui.panel === k);
+  for (const [k, id] of [['mine', 'mine'], ['theirs', 'theirs'], ['hist', 'histp'], ['set', 'setp'], ['pile', 'pilep']]) document.getElementById(id).classList.toggle('on', ui.panel === k);
   if (ui.panel === 'hist') { const h = document.getElementById('hist'); h.scrollTop = h.scrollHeight; }
 }
 // The stage keeps its design size (STAGE) and scales to fit the window. The painted ground under it is one painting wider
