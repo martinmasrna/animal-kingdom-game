@@ -475,3 +475,19 @@ def test_a_gauntlet_leaves_out_the_premade_your_custom_deck_copies(monkeypatch, 
             field = {g["deck"] for g in server.hub.matches[m["id"]].schedule}
             assert "cats" not in field and len(field) == len(PREMADE_DECKS) - 1
     asyncio.run(run())
+
+
+def test_the_remove_pile_and_a_card_choice_show_each_card_at_its_strength_now():
+    """A Python in the Remove Pile has grown like any Python: the pile and the Raccoon's choice show that, not its 0."""
+    from animal_kingdom.engine.state import UnitInstance
+    from animal_kingdom.engine.strength import card_strength
+    m = _match(decks=("egg_control", "cats"))
+    m._start_game()
+    st = m.state
+    for cid, owner in (("python", "A"), ("lion", "B"), ("mouse", "A")):
+        st.pile_add(cid, owner)
+    grown = card_strength(st, "python", "A")
+    assert grown > 0
+    pile = m.view("A")["game"]["pile"]
+    assert {"id": "python", "owner": "A", "str": grown} in pile and {"id": "lion", "owner": "B", "str": 7} in pile
+    assert m._describe_option("python", "A") == {"v": "python", "kind": "card", "id": "python", "str": grown}

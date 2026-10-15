@@ -48,8 +48,8 @@ function sortIds(ids) {
   return ids.sort((a, b) => RANK[CARDS[a].rarity] - RANK[CARDS[b].rarity] || sv(CARDS[a]) - sv(CARDS[b]) || CARDS[a].name.localeCompare(CARDS[b].name));
 }
 // A decklist in the game's panels: the collection's strips, each with the copies left.
-function rows(list, counts) {
-  return `<div class="dbody flat">${sortIds(Object.keys(list)).map(id => stripHTML(id, CARDS, counts ? (counts[id] || 0) : list[id])).join('')}</div>`;
+function rows(list, counts, cards = CARDS) {
+  return `<div class="dbody flat">${sortIds(Object.keys(list)).map(id => stripHTML(id, cards, counts ? (counts[id] || 0) : list[id])).join('')}</div>`;
 }
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 function cardPop(el, id, extra, place) {
@@ -842,7 +842,7 @@ function gameScreen() {
       <div class="abs opts" id="opts"></div>
       <div class="abs reveal" id="reveal"></div>
       <div class="panel mine" id="mine"></div><div class="panel theirs" id="theirs"></div>
-      <div class="panel histp" id="histp"><h4>History<span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div></div>
+      <div class="panel histp" id="histp"><h4><span id="htitle">History</span><span class="removed" id="removed"></span></h4><div class="hist" id="hist"></div><div class="hist pile" id="pile"></div></div>
       <div class="abs rbar" id="rbar"></div>
       <div class="abs recent" id="recent"></div>
       <div class="endov" id="endov"></div>
@@ -1117,8 +1117,24 @@ function drawHistory(G) {
   hist.innerHTML = hs; hist.scrollTop = hist.scrollHeight;
   wireHist(hist, G);
   const removed = document.getElementById('removed');
-  removed.innerHTML = `Removed <b>${G.removed.length}</b>`;
+  document.getElementById('htitle').textContent = ui.pile ? 'Remove Pile' : 'History';
+  removed.innerHTML = ui.pile ? 'History' : `Removed <b>${G.removed.length}</b>`;
+  removed.onclick = e => { e.stopPropagation(); ui.pile = !ui.pile; drawHistory(G); };
+  drawPile(G);
   drawRecent(G);
+}
+// The Remove Pile, yours and theirs, each card at its strength now: opened from the History panel's "Removed N".
+function drawPile(G) {
+  const el = document.getElementById('pile'), hist = document.getElementById('hist');
+  el.classList.toggle('on', !!ui.pile); hist.classList.toggle('off', !!ui.pile);
+  if (!ui.pile) return;
+  const side = (who, label) => {
+    const mine = (G.pile || []).filter(c => c.owner === who), counts = {}, cards = { ...CARDS };
+    mine.forEach(c => { counts[c.id] = (counts[c.id] || 0) + 1; cards[c.id] = { ...CARDS[c.id], str: c.str }; });
+    return `<div class="t">${label}<span class="n">${mine.length}</span></div>${mine.length ? rows(counts, null, cards) : '<div class="none">None</div>'}`;
+  };
+  el.innerHTML = side(V.you, 'Yours') + side(opp(), 'Theirs');
+  wirePops(el);
 }
 function drawLists(G) {
   const sum = o => Object.values(o).reduce((a, b) => a + b, 0), you = V.you, them = opp();

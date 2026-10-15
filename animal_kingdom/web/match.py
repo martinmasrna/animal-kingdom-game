@@ -23,7 +23,7 @@ from ..engine.cards import STARTER_DECKS, load_cards
 from ..engine.effects import roar_condition
 from ..engine.maps import load_map
 from ..engine.state import EngineError, GameState, Result, new_game, other_player
-from ..engine.strength import effective_strength, placement_strength
+from ..engine.strength import card_strength, effective_strength, placement_strength
 from ..sim.runner import make_bot
 from . import tutorial
 
@@ -607,6 +607,8 @@ class Match:
                            + Counter(c for step in st.effect_stack if step.get("player") == opp
                                      for k in ("returned", "pulled", "shuffled") for c in step.get(k, ()))),
             "removed": list(st.remove_pile),
+            # the Remove Pile by owner, each card at its strength now (a Python grows there too)
+            "pile": [{"id": c, "owner": o, "str": card_strength(st, c, o or s)} for c, o in zip(st.remove_pile, st.pile_owners)],
             "result": st.result.to_dict() if st.result else None,
             "history": [m.public() for m in self.history],
             "events": [public_event(e, s) for e in self.events if not (e["e"] == "mulligan" and e["player"] != s)],
@@ -671,7 +673,8 @@ class Match:
                    "cap": st.config.mulligan_cap(step.get("player"), st.first_player) if step.get("op") == "mulligan" else 0,
                    "options": []}
         if p["mode"] == "choice":
-            pending["options"] = [self._describe_option(o) for o in p["options"]]
+            owner = step.get("from_owner") or p["chooser"]   # whose cards a card choice offers: their strength is theirs
+            pending["options"] = [self._describe_option(o, owner) for o in p["options"]]
         if pending["kind"] == "shuffle":
             pending["left"] = step.get("remaining", 0)   # the Raven's cards still to shuffle back
         return out, pending
@@ -681,7 +684,7 @@ class Match:
         step = self.state.effect_stack[-1] if self.state.effect_stack else {}
         return step.get("by_card") if step.get("by_card") in CARDS else None
 
-    def _describe_option(self, o) -> dict:
+    def _describe_option(self, o, owner: Optional[str] = None) -> dict:
         st = self.state
         if isinstance(o, str) and o in st.game_map.crossroads:
             return {"v": o, "kind": "cr"}
@@ -695,7 +698,7 @@ class Match:
                     if u.iid == o:
                         return {"v": o, "kind": "cr", "cr": cr, "id": u.card_id}
         if isinstance(o, str) and o in CARDS:
-            return {"v": o, "kind": "card", "id": o}
+            return {"v": o, "kind": "card", "id": o, **({"str": card_strength(st, o, owner)} if owner else {})}
         return {"v": o, "kind": "other", "label": str(o)}
 
 
