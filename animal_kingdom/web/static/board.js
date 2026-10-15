@@ -15,6 +15,11 @@ export const VIEW = { port: false };
 export function setView(port) { Object.assign(STAGE, port ? PORT : LAND); VIEW.port = port; }
 const key = (c, r) => `${c},${r}`;
 const BOARD_KW = ['Armor', 'Stealth', 'Spikes', 'Poison'];   // the keywords a unit wears as a badge on the board
+// Where a unit's n badges sit: on its rim, fanned evenly around the top-left corner (degrees, 90 = top), one where one always
+// sat; four (the Honey Badger, the most any animal can wear) reach from the top to the left side (Martin, 2026-10-15).
+const KW_FAN = { 1: [135], 2: [117, 153], 3: [99, 135, 171], 4: [81, 117, 153, 189] };
+const kwAt = (i, n) => { const a = KW_FAN[n][i] * Math.PI / 180;   // the badge's centre 47.8% of the unit out (on the rim)
+  return `left:calc(${(50 + 47.8 * Math.cos(a)).toFixed(1)}% - 19px);top:calc(${(50 - 47.8 * Math.sin(a)).toFixed(1)}% - 19px)`; };
 const kit = f => `/static/kit2/${f}`;
 const team = side => (side === 'A' ? 'a' : 'b');
 
@@ -80,7 +85,7 @@ function unit(u, under, cards) {
   return peek + `<div class="ring${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects until the Octopus player\'s next turn' : ''}" style="${portrait(u.id, 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
     `<img class="rimimg" src="${kit(`rim_${team(u.owner)}.webp`)}" alt="" draggable="false"><div class="boss num">${chalk(u.str)}</div>` +
     (u.timer ? `<div class="timer" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${chalk(u.timer)}</div>` : '') +
-    (kws.length ? `<div class="kws">${kws.map(k => `<div class="kw" data-tip="${k}: ${KEYWORDS[k]}"><img src="${kit(`kw_${k.toLowerCase()}.webp`)}" alt="${k}" draggable="false"></div>`).join('')}</div>` : '');
+    (kws.length ? `<div class="kws">${kws.map((k, i) => `<div class="kw" style="${kwAt(i, kws.length)}" data-tip="${k}: ${KEYWORDS[k]}"><img src="${kit(`kw_${k.toLowerCase()}.webp`)}" alt="${k}" draggable="false"></div>`).join('')}</div>` : '');
 }
 
 // `g` is a viewer-space game { board, food, income, winFood }. `ui`: { rings: [cr] legal targets, hqRing (the enemy den can

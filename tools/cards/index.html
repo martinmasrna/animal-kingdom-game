@@ -355,7 +355,7 @@ function lazy(root = document) {
 
 /* ---------- the editor ---------- */
 let popAt = null;
-function lvButtons(c) { return `<div class="lvl">${LV.map(l => `<button class="${l}" data-lv="${l}" aria-pressed="${c.lv === l}">${l[0].toUpperCase() + l.slice(1)}<u>${l[0].toUpperCase()}</u></button>`).join('')}</div>`; }
+function lvButtons(c) { return `<div class="lvl">${LV.map(l => `<button class="${l}" data-lv="${l}" aria-pressed="${c.lv === l}">${l[0].toUpperCase() + l.slice(1)}</button>`).join('')}</div>`; }
 function prevText(col, p) {
   if (p === undefined) return '';
   if (col === 'animal') return [p.name, p.species].filter(Boolean).join(' / ');
@@ -368,10 +368,10 @@ function rvHTML(r, col) {
   const change = 'prev' in p && col !== 'crop' ? `<div><span class="was">${esc(prevText(col, p.prev))}</span> → ${esc(prevText(col, cur))}</div>` : col === 'crop' && 'prev' in p ? '<div>Claude moved the crop.</div>' : '';
   const lvch = p.prev_lv !== c.lv ? `<div>Level: ${p.prev_lv} → ${c.lv}</div>` : '';
   const fresh = col === 'art' && !change && !lvch ? '<div>A new painting is installed.</div>' : '';
-  return `<div class="rvbox"><b>Claude's change</b>${change}${lvch}${fresh}<div class="acts"><button class="btn pri" data-accept>Accept (A)</button><button class="btn" data-revert>Revert</button></div></div>`;
+  return `<div class="rvbox"><b>Claude's change</b>${change}${lvch}${fresh}<div class="acts"><button class="btn pri" data-accept>Accept</button><button class="btn" data-revert>Revert</button></div></div>`;
 }
 function editorHTML(r, col) {
-  if (!r.editable && !['art', 'crop'].includes(col)) return `<div class="hint">${r.deck === 'token' ? 'The engine makes this card; its values live in convert.py.' : ''}</div>`;
+  if (!r.editable && !['art', 'crop'].includes(col)) return '';
   switch (col) {
     case 'habitat': return `<select data-in>${S.habitats.map(h => `<option ${h === r.habitat ? 'selected' : ''}>${h}</option>`).join('')}</select>`;
     case 'rarity': return `<select data-in>${['L', 'R', 'C'].map(k => `<option value="${k}" ${k === r.rarity ? 'selected' : ''}>${RNAME[k]}</option>`).join('')}</select>`;
@@ -380,7 +380,7 @@ function editorHTML(r, col) {
       : `<div class="two"><div><div class="lab">Animal</div><input data-in="name" value="${esc(r.name)}"></div><div><div class="lab">Species, if different</div><input data-in="species" value="${esc(r.species === r.name ? '' : r.species)}"></div></div>`;
     case 'tag': return `<input data-in value="${esc(r.tag)}" placeholder="no tag">`;
     case 'strength': return `<input data-in type="number" min="0" max="15" value="${r.str ?? ''}">`;
-    case 'effect': return `<textarea data-in rows="2" placeholder="No effect yet (— for a vanilla animal)">${esc(r.text)}</textarea>`;
+    case 'effect': return `<textarea data-in rows="2" placeholder="No effect yet">${esc(r.text)}</textarea>`;
   }
   return '';
 }
@@ -390,7 +390,7 @@ function openPop(id, col) {
   popAt = { id, col };
   const pop = $('#pop');
   pop.innerHTML = `<h4>${COLS[col].t} · ${esc(nameOf(r) || r.species)}<span>${r.parent ? 'made by ' + esc(nameOf(byId[r.parent])) : ''}</span></h4>${rvHTML(r, col)}${editorHTML(r, col)}${lvButtons(c)}` +
-    `<textarea data-note rows="1" placeholder="Note">${esc(c.note || '')}</textarea><div class="hint">Enter saves · D P F L set the level · Esc closes</div>`;
+    `<textarea data-note rows="1" placeholder="Note">${esc(c.note || '')}</textarea>`;
   pop.hidden = false;
   const b = el.getBoundingClientRect(), w = 420;
   pop.style.left = clamp(b.left + window.scrollX, 8, window.scrollX + innerWidth - w - 12) + 'px';
@@ -485,15 +485,13 @@ function drawer(id) {
   const d = $('#drawer');
   d.innerHTML = `<header><h3>${esc(r.rarity === 'L' && !r.name && !r.parent ? r.species : nameOf(r))}</h3><span>${RNAME[r.rarity]} · ${esc(r.habitat)} · ${esc(r.id)}</span><button data-x aria-label="Close">×</button></header>
     <section data-col="art"><h4 class="dh">Art</h4>${rvHTML(r, 'art')}<div class="bigart">${r.art ? `<img src="${artUrl(id)}" alt="">` : '<div class="noart" style="width:170px;height:255px"></div>'}
-      <div class="side">${lvButtons(a)}<textarea data-note rows="4" placeholder="Note: what's off, or what the next painting should do">${esc(a.note || '')}</textarea>
-      <div class="hint">${r.art ? 'New paintings come from Card Art Review; installing one sets this back to draft.' : 'Not painted yet.'}</div></div></div></section>
+      <div class="side">${lvButtons(a)}<textarea data-note rows="4" placeholder="Note">${esc(a.note || '')}</textarea></div></div></section>
     ${r.art ? `<section data-col="crop"><h4 class="dh">Crop</h4>${rvHTML(r, 'crop')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start">${lvButtons(c)}<textarea data-note rows="1" placeholder="Note">${esc(c.note || '')}</textarea></div><div class="frames">
-      <div class="col"><div class="bring drag" data-drag="ring"></div><div class="zm"><button data-z="ring:-">−</button><button data-z="ring:+">+</button></div><span class="lbl">Board</span></div>
-      <div class="col hand">${cardHTML(r, { compact: true, kind: 'hand', live })}<span class="lbl">Hand</span></div>
-      <div class="col big">${cardHTML(r, { kind: 'full', live })}<span class="lbl">Card</span></div>
+      <div class="col"><div class="bring drag" data-drag="ring"></div><div class="zm"><button data-z="ring:-">−</button><button data-z="ring:+">+</button></div></div>
+      <div class="col hand">${cardHTML(r, { compact: true, kind: 'hand', live })}</div>
+      <div class="col big">${cardHTML(r, { kind: 'full', live })}</div>
       <div class="col"><div class="strips"><div class="st"><div class="art drag" data-drag="strip"></div><span class="n">${esc(nameOf(r))}</span></div><div class="dtile drag" data-drag="tile"><b>${esc(nameOf(r))}</b></div></div>
-        <div class="zm"><button data-z="strip:-">−</button><button data-z="strip:+">+</button></div><span class="lbl">Deck list · Deck cover</span></div></div>
-      <div class="hint">Drag a picture to move it; scroll on it or use − + to zoom. The full card only moves up and down. Changes save to art.js as you go.</div></section>` : ''}`;
+        <div class="zm"><button data-z="strip:-">−</button><button data-z="strip:+">+</button></div></div></div></section>` : ''}`;
   d.hidden = false;
   d.querySelectorAll('[data-bg]').forEach(el => el.style.backgroundImage = `url(${el.dataset.bg})`);
   paintCrop();
