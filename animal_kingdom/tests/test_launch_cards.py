@@ -166,13 +166,11 @@ def test_praying_mantis_may_remove_an_ally_to_draw_two():
     assert s.top_unit("1,1").card_id == "cockroach"            # the Cockroach came back where it was
 
 
-def test_tarantula_eats_an_adjacent_ally_at_dawn_and_grows():
+def test_tarantula_eats_an_adjacent_ally_at_dusk_and_grows():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     t = put(s, "1,2", "tarantula", "A")
     put(s, "1,1", "lion", "A")
-    end_turn(s)
-    assert s.top_unit("1,1") is not None                       # not at Dusk
-    end_turn(s)                                                # B's turn ends: A's Dawn
+    end_turn(s)                                                # A's Dusk
     assert s.top_unit("1,1") is None and effective_strength(s, t) == 5 + 7
 
 

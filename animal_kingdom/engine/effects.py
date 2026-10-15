@@ -1761,8 +1761,8 @@ def _eat_random_ally(state, unit, cr) -> int:
     return gained if remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id) else 0
 
 
-def _tarantula_sot(state, unit, cr):
-    """Dawn: remove a random adjacent ally and gain its strength."""
+def _tarantula_eot(state, unit, cr):
+    """Dusk: remove a random adjacent ally and gain its strength."""
     gained = _eat_random_ally(state, unit, cr)
     if gained:
         unit.strength_counter += gained
@@ -2840,7 +2840,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "cuco": {"on_place": _cuckoo_legend_place},
     "ember": {"on_remove": _ember_remove},
     "praying_mantis": {"on_place": _mantis_place},
-    "tarantula": {"on_start_of_turn": _tarantula_sot},
+    "tarantula": {"on_end_of_turn": _tarantula_eot},
     "sea_turtle": {"on_end_of_turn": _sea_turtle_eot},
     "raccoon": {"on_place": _raccoon_place},
     "piranha": {"on_place": _conditional(_piranha_place)},
