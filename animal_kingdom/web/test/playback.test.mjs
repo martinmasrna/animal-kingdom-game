@@ -23,7 +23,7 @@ test("the opponent's card shows, lands, then 'Your turn'; the controls wait for 
   const t0 = Date.now();
   await page.evaluate(v => window.__ak.feed(v), pair[1]);
   const seen = {};
-  for (let i = 0; i < 160 && !seen.final; i++) {
+  for (let i = 0; i < 60 && !seen.final; i++) {
     const s = await page.evaluate(() => ({ reveal: document.getElementById('reveal').classList.contains('on'), plate: !!document.querySelector('.yourturn'),
       land: !!document.querySelector('#board .cr.land'), can: !!document.querySelector('#hand .hc.can'), step: !!window.__ak().ui.step }));
     const t = Date.now() - t0;

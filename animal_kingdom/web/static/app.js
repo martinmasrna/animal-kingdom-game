@@ -712,7 +712,6 @@ function showView(prev) {
         strength: strengthFlash(ui.step) } : null;
   if (ui.step && ui.step.kind === 'yourturn' && screen === 'game') { turnPlate(); turnCue.until = Date.now() + 900; }
   gameScreen();
-  skyLight();
 }
 
 // Lab: #/lab/<name> renders the frozen view static/lab/<name>.json (no server match; nothing can be played).
@@ -825,7 +824,7 @@ function wireTips(root) {
 function gameScreen() {
   if (screen !== 'game') {
     screen = 'game';
-    app.innerHTML = `<div class="game kit" id="scr"><div id="world"><img src="/static/kit2/plate_wide.webp" alt="" draggable="false"><div id="sky"><i class="dusk"></i><i class="night"></i><i class="dawn"></i></div></div><div id="stage">
+    app.innerHTML = `<div class="game kit" id="scr"><div id="world"><img src="/static/kit2/plate_wide.webp" alt="" draggable="false"></div><div id="stage">
       <div class="abs ledge"></div>
       <div id="board"></div>
       <div class="abs menu snd" id="sndbtn"></div><div class="panel setp" id="setp"></div>
@@ -924,14 +923,6 @@ function turnCue(mine) {
 }
 addEventListener('visibilitychange', () => { if (!document.hidden) { document.title = 'Animal Kingdom'; if (matchScreen.wake) matchScreen.wake(); } });
 // Hearthstone's plate, on granite, with the knock.
-// The light over the board (game.css #sky): the step in play says which (timeline.js: a turn ends at its player's dusk, the
-// next starts with a night and its player's dawn); every other moment is day. Each light eases in over the last, so a redraw
-// never cuts it short. The dawn rises from the den of the player whose turn it is.
-function skyLight() {
-  const sky = document.getElementById('sky'); if (!sky) return;
-  const st = ui.step, kind = st && st.sky || 'day';
-  sky.className = kind + (st && st.skySide ? ` ${rel(st.skySide)}` : '');
-}
 function turnPlate() {
   sfx('yourturn');
   const b = document.createElement('div'); b.className = 'yourturn'; b.innerHTML = '<b>Your turn</b>';

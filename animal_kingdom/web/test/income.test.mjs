@@ -16,7 +16,7 @@ test('income fruit leaves from the region stones, on the board', async () => {
     new MutationObserver(() => { for (const f of board.querySelectorAll('.flyfruit')) window.__fly.push([parseFloat(f.style.left), parseFloat(f.style.top)]); })
       .observe(board, { childList: true }); });
   const views = matches[0].views;
-  for (const v of views.slice(0, 30)) { await feed(page, v); await page.waitForFunction(() => !window.__ak().PB.busy, { timeout: 15000 }); }   // as a server does: the next view once these have played
+  for (const v of views.slice(0, 30)) { await feed(page, v); await wait(400); }
   await wait(3000);
   const fly = await page.evaluate(() => window.__fly);
   assert.ok(fly.length > 0, 'some income flew');

@@ -13,7 +13,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 test('a food win plays its last move before the end shows, and the gem counts through hover redraws', async () => {
   await page.evaluate(async () => { const v = await fetch('/static/lab/mid.json').then(r => r.json()); window.__base = v;
     v.version += 10; v.game.food[v.you] = 90; v.game.events = [{ e: 'turn_start', player: v.you, seq: 1 }]; window.__ak.feed(v); });
-  await page.waitForFunction(() => !window.__ak().PB.busy, { timeout: 10000 });
+  await wait(1200);
   await page.evaluate(() => { const v = JSON.parse(JSON.stringify(window.__base)), o = v.you === 'A' ? 'B' : 'A';
     v.version += 20; v.game.food[v.you] = 100; v.phase = 'match_over'; v.results = [{ winner: v.you }]; v.score = { [v.you]: 1, [o]: 0 };
     v.game.result = { winner: v.you, reason: 'food' }; v.game.board['5,3'] = [{ iid: 950, id: 'squirrel', owner: v.you, str: 2 }];

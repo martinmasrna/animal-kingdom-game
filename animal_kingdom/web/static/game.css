@@ -143,17 +143,6 @@
 /* The painted ground: plate_wide (2124 x 1260 plate px; the board's plate at 226, 160; 1.10582 plate px per stage px, the stage from plate y 28). */
 .game #world { position: absolute; left: 50%; top: 50%; width: 1512px; height: 800px; transform-origin: 0 0; pointer-events: none; }
 .game #world img { position: absolute; left: -204.37px; top: -169.69px; width: 1920.75px; height: 1139.42px; user-select: none; }
-/* The light over the painted ground (app.js skyLight, timeline.js): a turn ends at dusk, a night, the next player's dawn rising
-   from their den, then day. The pieces keep their own light: they stay readable at any hour. */
-.game #sky { position: absolute; left: -204.37px; top: -169.69px; width: 1920.75px; height: 1139.42px; }
-.game #sky i { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease-in-out; }
-.game #sky .dusk { background: linear-gradient(to bottom, #f4b072, #cf8a88 55%, #8f7aa6); mix-blend-mode: multiply; }
-.game #sky .night { background: #4a5a96; mix-blend-mode: multiply; }
-.game #sky .dawn { mix-blend-mode: screen; background: radial-gradient(ellipse 32% 60% at var(--sun, 16% 50%), rgba(255,200,125,.6), rgba(255,165,130,.22) 45%, rgba(255,160,130,0) 72%); }
-.game #sky.B { --sun: 84% 50%; }
-.game #sky.dusk .dusk { opacity: 1; transition-duration: 1.5s; }
-.game #sky.night .dusk { opacity: .6; transition-duration: .8s; } .game #sky.night .night { opacity: .8; transition-duration: .8s; }
-.game #sky.dawn .night { opacity: .3; transition-duration: 1.8s; } .game #sky.dawn .dawn { opacity: 1; transition-duration: 1.1s; }
 .game.kit #stage { background: transparent; }
 .game.kit .cr.clear { background: none; border: 0; }
 .game.kit .stone { background: none; border: 0; color: #e9e1d2; font-size: 17px; text-shadow: 0 1px 2px rgba(0,0,0,.8); }
@@ -459,7 +448,6 @@
 .game.port { background: #5d4829; }   /* the ground's dark earth, past the painting's end on the tallest phones */
 .game.port #stage, .game.port #world { width: 720px; height: 1440px; }
 .game.port #world img { left: -95.5px; top: -237.4px; width: 911px; height: 1824.9px; }   /* 45 px above centre (both dens clear of both hands), 200 plate px of savanna beyond each end */
-.game.port #sky { left: -95.5px; top: -237.4px; width: 911px; height: 1824.9px; --sun: 50% 79%; } .game.port #sky.B { --sun: 50% 18%; }
 .game.port .hand { top: 1230px; }
 .game.port .ledge { left: 588px; top: 1222px; width: 132px; height: 218px; background-image: url(/static/kit2/ledge_port.webp); }   /* upright, its own rock painted to this corner (design sandbox screen/kit/ledge/port/) */
 .game.port.kit .deck { left: 606px; top: 1238px; width: 98px; height: 128px; font-size: 22px; }   /* the deck over End turn, at the right end of the hand's row */
