@@ -148,16 +148,6 @@ def test_the_legendary_cuckoo_removes_an_ally_and_plays_another_animal():
     assert s2.pending is None and removed(s2, "squirrel")
 
 
-def test_the_legendary_opossum_removes_a_covered_ally_and_draws():
-    s = make_state(current="B", hands={"B": ["lion"]}, decks={"A": ["lion"], "B": []})
-    put(s, "4,2", "lion", "B")
-    put(s, "3,3", "opossum_legend", "A")
-    put(s, "3,2", "squirrel", "A")
-    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))
-    assert [u.card_id for u in s.board["3,2"]] == ["lion"] and removed(s, "squirrel")
-    assert hand_ids(s, "A") == ["lion"]
-
-
 def test_the_legendary_sloth_makes_dusk_effects_happen_twice():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,1", "sloth_legend", "A")

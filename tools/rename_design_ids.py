@@ -14,7 +14,7 @@ import subprocess
 import sys
 
 RENAME = {
-    "guard_hornet": "guard_wasp", "aristocrats_legend_cuckoo": "cuco", "aristocrats_legend_opossum": "opossum_legend",
+    "guard_hornet": "guard_wasp", "aristocrats_legend_cuckoo": "cuco",
     "aristocrats_legend_sloth": "sloth_legend", "canines_legend_leopard": "leopard_legend",
     "canines_legend_wolf": "wolf_legend", "gray_wolf": "jackal", "red_wolf": "dhole", "dire_wolf": "wolf",
     "raccoon_dog": "coyote", "dog": "street_dog", "house_cat": "alley_cat",

@@ -1611,14 +1611,6 @@ def _op_draw_to_match(state, step):
     return None
 
 
-def _op_remove_then_draw(state, step):
-    """The legendary Opossum: remove the covered ally, then draw a card (no removal, no card)."""
-    cr, unit = _find_unit(state, step["iid"])
-    if unit is not None and _remove_specific(state, cr, unit, by_player=step["player"], by_card=step.get("by_card")):
-        draw_cards(state, step["player"], 1)
-    return None
-
-
 def _op_anteater(state, step):
     """Anteater: draw a card, then gain food equal to its strength (as it would be played now)."""
     drawn = draw_cards(state, step["player"], 1)
@@ -1639,7 +1631,6 @@ OPS.update({
     "choose": _op_choose,
     "forced_roam": _op_forced_roam,
     "draw_to_match": _op_draw_to_match,
-    "remove_then_draw": _op_remove_then_draw,
     "anteater": _op_anteater,
     "flee_return": _op_flee_return,
 })
@@ -1751,11 +1742,6 @@ def _ember_remove(state, unit, cr, pos):
     """When this is removed, shuffle it into your deck."""
     if state.pile_take(unit.card_id, unit.owner):
         shuffle_back(state, unit.owner, [unit.card_id])
-
-
-def _opossum_legend_ally_covered(state, watcher, covered, coverer, cr):
-    """When an ally is covered (by anyone), remove it and draw a card."""
-    state.effect_stack.append({"op": "remove_then_draw", "iid": covered.iid, "player": watcher.owner})
 
 
 def _mantis_place(state, unit, cr):
@@ -2853,7 +2839,6 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Aristocrats.
     "cuco": {"on_place": _cuckoo_legend_place},
     "ember": {"on_remove": _ember_remove},
-    "opossum_legend": {"on_ally_covered": _opossum_legend_ally_covered},
     "praying_mantis": {"on_place": _mantis_place},
     "tarantula": {"on_start_of_turn": _tarantula_sot},
     "sea_turtle": {"on_end_of_turn": _sea_turtle_eot},

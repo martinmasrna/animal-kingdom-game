@@ -19,6 +19,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py level ID COLUMN LEVEL [--note N]
     .venv/bin/python tools/cards/hq.py move ID DECK                  to another deck (a starter deck's key, or pool)
     .venv/bin/python tools/cards/hq.py shelve ID                     a pool card out of the collection (into the reserve)
+    .venv/bin/python tools/cards/hq.py delete ID                     a card out of the game entirely
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d] [--strip x,y,z] [--full y|reset]
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
 
@@ -402,6 +403,34 @@ def shelve(card_id: str, by: str = "martin") -> str:
     return report
 
 
+def delete(card_id: str, by: str = "martin") -> str:
+    """Remove a card from the game: out of decks.json (so convert.py drops it from cards.json) and its levels gone. Its
+    number in static/cardnums.js stays, since deck codes depend on every number. Claude can't delete a card with a locked
+    value. A reserve card is kept by convert.py as it is, so its record leaves cards.json here too."""
+    keys = {card_id}
+    try:
+        r = _row(card_id)
+    except KeyError:
+        r = None   # already out of decks.json: only its cards.json record and levels are left
+    if r:
+        if by == "claude" and any(r["lv"][c]["lv"] == "locked" for c in VALUE_COLS):
+            raise Refused(f"{r['id']} has a locked value; ask Martin")
+        keys |= {r["id"], r["wid"]}
+        decks = _read(DECKS)
+        src, i = _deck_index(decks)[r["wid"]]
+        decks["decks"][src]["cards"].pop(i)
+        _write(DECKS, decks)
+    cards = _read(CARDS)
+    cards["cards"] = [c for c in cards["cards"] if c["id"] not in keys]
+    _write(CARDS, cards)
+    report = regenerate()
+    levels = _levels()
+    for key in keys:
+        levels.pop(key, None)
+    _write(LEVELS, levels)
+    return report
+
+
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description="The card table, for Claude: every edit is marked for Martin's review.")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -411,6 +440,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("note"); s.add_argument("id"); s.add_argument("col", choices=COLUMNS); s.add_argument("note")
     s = sub.add_parser("move"); s.add_argument("id"); s.add_argument("deck")
     s = sub.add_parser("shelve"); s.add_argument("id")
+    s = sub.add_parser("delete"); s.add_argument("id")
     s = sub.add_parser("add"); s.add_argument("name"); s.add_argument("habitat", choices=HABITATS); s.add_argument("--species", default="")
     s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
     a = ap.parse_args(argv)
@@ -432,6 +462,8 @@ def main(argv=None) -> None:
             print(move(a.id, a.deck, "claude"))
         elif a.cmd == "shelve":
             print(shelve(a.id, "claude"))
+        elif a.cmd == "delete":
+            print(delete(a.id, "claude"))
         elif a.cmd == "add":
             print(add(a.name, a.habitat, a.species))
         elif a.cmd == "crop":
