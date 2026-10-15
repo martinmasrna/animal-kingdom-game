@@ -1,6 +1,7 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  cockroach: [.47, .53, .8],
   street_dog: [.7, .51, .62],
   macaque_legend: [.62, .304, .6],
   baby_turtle: [.519, .408, .675],
@@ -138,6 +139,7 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  cockroach: [.6, .42, 1.2],
   street_dog: [.78, .524, 1.3],
   macaque_legend: [.7, .239, 1.3],
   greywhisker: [.5, .335, 1.2],
@@ -268,6 +270,7 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  cockroach: .45,
   bat: .349,
   anteater: .396,
   silverback: .321,
