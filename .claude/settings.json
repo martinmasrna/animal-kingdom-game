@@ -6,5 +6,18 @@
       "Bash(deploy/deploy.sh players)",
       "Bash(/Users/martin/Work/fun/animal-kingdom-game/deploy/deploy.sh players)"
     ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/cards-one-path.py\""
+          }
+        ]
+      }
+    ]
   }
 }

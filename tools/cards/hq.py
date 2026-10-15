@@ -17,6 +17,10 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py show [ID...]                  the rows, as JSON
     .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (animal: "Name/Species" for a legendary)
     .venv/bin/python tools/cards/hq.py level ID COLUMN LEVEL [--note N]
+    .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d] [--strip x,y,z] [--full y|reset]
+
+This is the only way cards change: a hook (.claude/hooks/cards-one-path.py) refuses direct edits of decks.json,
+cards.json and the crop tables in art.js.
 """
 from __future__ import annotations
 
@@ -254,6 +258,10 @@ def set_value(card_id: str, col: str, value, by: str = "martin", note: str | Non
         raise Refused(f"{r['id']} {col} isn't editable here")
     cur = _guard(r, col, by)
     prev = value_of(r, col)
+    if col == "strength" and value not in ("", None):
+        value = int(value)
+    if value == prev:
+        return ""
     _apply_value(r, col, value)
     report = regenerate()
     levels = _levels()
@@ -290,6 +298,9 @@ def set_crop(card_id: str, crop=None, strip=None, full=None, by: str = "martin")
     r = _row(card_id)
     cur = _guard(r, "crop", by)
     art = read_art()
+    same = lambda t, v: v is None or (art[t].get(r["id"]) is None if v == "reset" else art[t].get(r["id"]) == v)
+    if same("CROP", crop) and same("STRIP", strip) and same("FULL", full):
+        return
     if crop is not None:
         write_art(r["id"], "CROP", crop)
     if strip is not None:
@@ -340,6 +351,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("set"); s.add_argument("id"); s.add_argument("col", choices=VALUE_COLS); s.add_argument("value"); s.add_argument("--note")
     s = sub.add_parser("level"); s.add_argument("id"); s.add_argument("col", choices=COLUMNS); s.add_argument("lv", choices=LEVELS_ORDER); s.add_argument("--note")
     s = sub.add_parser("note"); s.add_argument("id"); s.add_argument("col", choices=COLUMNS); s.add_argument("note")
+    s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
     a = ap.parse_args(argv)
     try:
         if a.cmd == "show":
@@ -355,6 +367,10 @@ def main(argv=None) -> None:
             set_level(a.id, a.col, a.lv, "claude", a.note)
         elif a.cmd == "note":
             set_note(a.id, a.col, a.note, "claude")
+        elif a.cmd == "crop":
+            nums = lambda v: [float(x) for x in v.split(",")] if v else None
+            full = None if a.full is None else "reset" if a.full == "reset" else float(a.full)
+            set_crop(a.id, nums(a.crop), nums(a.strip), full, "claude")
     except (Refused, KeyError) as e:
         sys.exit(f"refused: {e}")
 
