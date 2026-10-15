@@ -1118,3 +1118,13 @@ def test_alike_copies_need_no_naming():
     assert acts and all(a.iid is None for a in acts)
     rules.apply_action(s, PlaceAction("lion", acts[0].target, s.hands["A"][1].iid))   # a client naming one is fine
     assert len(s.hands["A"]) == 1
+
+
+def test_the_anaconda_swallows_what_it_eats_and_grows_by_its_strength():
+    s = make_state(hands={"A": ["anaconda"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,2", "lion", "A")
+    put(s, "2,2", "fox", "B")                                  # 4: an Anaconda (5) can land on it
+    rules.apply_action(s, PlaceAction("anaconda", ("cr", "2,2")))
+    a = s.top_unit("2,2")
+    assert a.card_id == "anaconda" and [u.card_id for u in s.board["2,2"]] == ["anaconda"]
+    assert effective_strength(s, a) == 5 + 4

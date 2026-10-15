@@ -494,7 +494,10 @@ def _op_apex_eat(state, step):
     i = stack.index(apex)
     prey = stack[i - 1] if i > 0 else None
     if prey is not None and prey.iid == step["prey"]:
-        _remove_specific(state, cr, prey, by_player=apex.owner, by_card=apex.card_id)
+        gained = effective_strength(state, prey)
+        if _remove_specific(state, cr, prey, by_player=apex.owner, by_card=apex.card_id) and apex.card_id == "anaconda":
+            apex.strength_counter += gained       # Anaconda: "When this eats an animal, it gains that animal's strength."
+            state.emit("strength", iid=apex.iid, card=apex.card_id, owner=apex.owner, n=gained)
     return None
 
 
@@ -789,26 +792,35 @@ def legal_roams(state: GameState, player: str, *, free_only: bool = False) -> li
 
 def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None) -> list:
     """Where `unit` (on `cr`) may roam to: ("cr", crossroad) targets, and ("hq", enemy). A roam moves the animal
-    anywhere you could place a card, judged as the board stands (Martin, 2026-10-15): its own crossroad counts toward
-    your chain while it's connected, so it can step onto a neighbour, jump to any crossroad beside the chain, and take
-    the den when the chain reaches its front; a cut-off animal adds nothing and can only come back to your lines.
-    Flight, Reach and every other placement static apply as from the hand; it covers an enemy only if it beats it
-    (Dhole's equal included), and an Apex Predator lands only on an animal (so never on a den).
-    `enemy_front` is accepted for old callers and ignored."""
+    through your own animals connected to it (its pack), then up to its Reach beyond them, one step without Reach,
+    jumping over whatever stands between (Martin, 2026-10-15): distance counts from the animal, never from the den. It
+    lands by the placement rules: empty, your own animal, or an enemy it beats (Dhole's equal included); an Apex
+    Predator lands only on an animal. It takes the den only when its pack stands on the den front and is connected to
+    your own den, as a card from the hand would. `enemy_front` and `occ` are accepted for old callers."""
     player = unit.owner
     enemy = other_player(player)
     gm = state.game_map
-    if occ is None:
-        occ = state.connected_occupied(player)
+    pack, queue = {cr}, deque([cr])                   # the animal and your animals touching it, transitively
+    while queue:
+        c = queue.popleft()
+        for nb in gm.neighbors(c):
+            if nb not in pack and state.owner_of(nb) == player:
+                pack.add(nb)
+                queue.append(nb)
+    n = max(1, statics.reach_of(state, unit.card_id))
+    dist = {c: 0 for c in pack}
+    queue = deque(pack)
+    while queue:
+        c = queue.popleft()
+        if dist[c] < n:
+            for nb in gm.neighbors(c):
+                if nb not in dist:
+                    dist[nb] = dist[c] + 1
+                    queue.append(nb)
     is_apex = statics.has_keyword(state, unit, "Apex Predator", cr)
-    flight = statics.ignores_connection(state, unit.card_id)
-    extra = statics.extra_placement_crossroads(state, unit.card_id, player)
-    reach = statics.reach_of(state, unit.card_id)
-    if reach:
-        extra = extra | statics.reach_crossroads(state, player, reach, occ)
     out = []
-    for c in sorted(gm.crossroads):
-        if c == cr or not (flight or c in extra or state.is_connected(player, c, occ)):
+    for c in sorted(dist):
+        if c == cr:
             continue
         top = state.top_unit(c)
         if top is None:
@@ -819,8 +831,10 @@ def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None)
             ok = statics.can_cover(state, unit, top, roaming=True)
         if ok:
             out.append(("cr", c))
-    if not is_apex and any(c in occ for c in gm.hq_front(enemy)):
-        out.append(("hq", enemy))                     # the den, whenever a card from the hand could take it
+    if occ is None:
+        occ = state.connected_occupied(player)
+    if not is_apex and cr in occ and any(c in pack for c in gm.hq_front(enemy)):
+        out.append(("hq", enemy))                     # the den: along a chain from your own den, as from the hand
     return out
 
 

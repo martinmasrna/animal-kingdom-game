@@ -13,6 +13,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Ember** | 1 | Bird | 7 | Flight. When this is removed, shuffle it into your deck. |
 | **Locust** | 1 | — | 2 | Roar: remove all other animals and discard your hand. |
 | **Roach King** | 1 | — | 1 | When this is removed, put it back where it was with +1 strength and draw a card. |
+| **Pestis** | 1 | Rodent | 3 | Roar: remove an adjacent animal and every animal under it. |
 
 ### Rare
 

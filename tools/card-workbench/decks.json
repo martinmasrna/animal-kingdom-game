@@ -161,6 +161,18 @@
      "str": 0,
      "tag": "Snake",
      "text": "Whenever an animal is removed, gain 1 strength (wherever this is)."
+    },
+    {
+     "habitat": "City",
+     "id": "den-rush-1",
+     "name": "Pestis",
+     "note": "",
+     "rarity": "L",
+     "species": "Rat",
+     "status": "proposed",
+     "str": 3,
+     "tag": "Rodent",
+     "text": "Roar: remove an adjacent animal and every animal under it."
     }
    ]
   },
@@ -707,18 +719,6 @@
      "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card."
     },
     {
-     "habitat": "City",
-     "id": "den-rush-1",
-     "name": "Pestis",
-     "note": "",
-     "rarity": "L",
-     "species": "Rat",
-     "status": "proposed",
-     "str": 3,
-     "tag": "Rodent",
-     "text": "Roar: remove an adjacent animal and every animal under it."
-    },
-    {
      "habitat": "Forest",
      "id": "den-rush-2",
      "name": "Sirocco",
@@ -861,6 +861,18 @@
      "str": 4,
      "tag": "Rodent",
      "text": "Roar: draw a Rodent."
+    },
+    {
+     "habitat": "Forest",
+     "id": "pool-y1",
+     "name": "Scarlett",
+     "note": "Poppy and Rusty: tokens, Canine, 1.",
+     "rarity": "L",
+     "species": "Fox",
+     "status": "proposed",
+     "str": 5,
+     "tag": "Canine",
+     "text": "Roar: place Poppy and Rusty on random adjacent empty crossroads."
     }
    ]
   },
@@ -2179,18 +2191,6 @@
      "text": "Roar: return an adjacent ally to your hand."
     },
     {
-     "habitat": "Forest",
-     "id": "pool-y1",
-     "name": "Scarlett",
-     "note": "Poppy and Rusty: tokens, Canine, 1.",
-     "rarity": "L",
-     "species": "Fox",
-     "status": "proposed",
-     "str": 5,
-     "tag": "Canine",
-     "text": "Roar: place Poppy and Rusty on random adjacent empty crossroads."
-    },
-    {
      "habitat": "Jungle",
      "id": "pool-y4",
      "name": "Anaconda",
@@ -2198,9 +2198,9 @@
      "rarity": "C",
      "species": "Anaconda",
      "status": "proposed",
-     "str": 7,
+     "str": 5,
      "tag": "Snake",
-     "text": "Apex Predator."
+     "text": "Apex Predator. When this eats an animal, it gains that animal's strength."
     },
     {
      "habitat": "Polar",

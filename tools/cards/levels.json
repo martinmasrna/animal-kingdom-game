@@ -24,6 +24,24 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 7
+      },
+      "by": "claude",
+      "at": 1792086811
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Apex Predator."
+      },
+      "by": "claude",
+      "at": 1792086811
     }
   },
   "anteater": {
@@ -1639,7 +1657,13 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from den-rush to aristocrats",
+      "at": 1792086811
     }
   },
   "piranha": {
@@ -1948,7 +1972,13 @@
     },
     "animal": {
       "lv": "fine",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "note": "moved from pool to den-rush",
+      "at": 1792086810
     }
   },
   "scrooge": {

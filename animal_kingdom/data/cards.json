@@ -501,6 +501,21 @@
       "workbench_id": "egg-control-8"
     },
     {
+      "id": "pestis",
+      "name": "Pestis",
+      "deck": "aristocrats",
+      "rarity": "legendary",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 3,
+      "text": "Roar: remove an adjacent animal and every animal under it.",
+      "keywords": [],
+      "species": "Rat",
+      "habitat": "City",
+      "workbench_id": "den-rush-1"
+    },
+    {
       "id": "leopard_legend",
       "name": "Leopard",
       "deck": "canines",
@@ -740,21 +755,6 @@
       "workbench_id": "den-rush-0"
     },
     {
-      "id": "pestis",
-      "name": "Pestis",
-      "deck": "den_rush",
-      "rarity": "legendary",
-      "tags": [
-        "Rodent"
-      ],
-      "base_strength": 3,
-      "text": "Roar: remove an adjacent animal and every animal under it.",
-      "keywords": [],
-      "species": "Rat",
-      "habitat": "City",
-      "workbench_id": "den-rush-1"
-    },
-    {
       "id": "sirocco",
       "name": "Sirocco",
       "deck": "den_rush",
@@ -937,6 +937,25 @@
       "species": "Mouse",
       "habitat": "City",
       "workbench_id": "den-rush-13"
+    },
+    {
+      "id": "scarlett",
+      "name": "Scarlett",
+      "deck": "den_rush",
+      "rarity": "legendary",
+      "tags": [
+        "Canine"
+      ],
+      "base_strength": 5,
+      "text": "Roar: place Poppy and Rusty on random adjacent empty crossroads.",
+      "keywords": [],
+      "related": [
+        "poppy",
+        "rusty"
+      ],
+      "species": "Fox",
+      "habitat": "Forest",
+      "workbench_id": "pool-y1"
     },
     {
       "id": "prince_leo",
@@ -2817,25 +2836,6 @@
       "workbench_id": "pool-x2"
     },
     {
-      "id": "scarlett",
-      "name": "Scarlett",
-      "deck": "bench",
-      "rarity": "legendary",
-      "tags": [
-        "Canine"
-      ],
-      "base_strength": 5,
-      "text": "Roar: place Poppy and Rusty on random adjacent empty crossroads.",
-      "keywords": [],
-      "related": [
-        "poppy",
-        "rusty"
-      ],
-      "species": "Fox",
-      "habitat": "Forest",
-      "workbench_id": "pool-y1"
-    },
-    {
       "id": "anaconda",
       "name": "Anaconda",
       "deck": "bench",
@@ -2843,8 +2843,8 @@
       "tags": [
         "Snake"
       ],
-      "base_strength": 7,
-      "text": "Apex Predator.",
+      "base_strength": 5,
+      "text": "Apex Predator. When this eats an animal, it gains that animal's strength.",
       "keywords": [
         "Apex Predator"
       ],
