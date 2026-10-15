@@ -200,7 +200,7 @@ function route() {
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
   if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : homeScreen({ join: id });
   if (parts[0] === 'm' && id) return matchScreen(id);
-  if (parts[0] === 'lab' && parts[1]) return labScreen(parts[1]);
+  if (parts[0] === 'lab' && parts[1]) return labScreen(parts[1], parts[2]);
   homeScreen(); if (play.opp === 'ranked') loadProfile().then(() => { if (screen === 'home' && !play.open) homeScreen(); });   // your rating after a ranked game
 }
 
@@ -715,10 +715,12 @@ function showView(prev) {
 }
 
 // Lab: #/lab/<name> renders the frozen view static/lab/<name>.json (no server match; nothing can be played).
-// The browser tests start here and feed recorded views through window.__ak.feed.
-async function labScreen(name) {
+// The browser tests start here and feed recorded views through window.__ak.feed. #/lab/<name>/<fx> also runs the effects
+// prototype static/lab/_fx/<fx>.js on it.
+async function labScreen(name, fx) {
   V = await fetch(`/static/lab/${name}.json`).then(r => r.json());
   screen = null; gameScreen();
+  if (fx) import(`/static/lab/_fx/${fx}.js?v=${Date.now()}`);
 }
 
 // Before the match: the key art dimmed, the menus' granite. Waiting for a friend: the code to send, on one piece.
