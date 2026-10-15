@@ -645,6 +645,19 @@ function onView(prev) {
   };
   run(0, prev);
 }
+// A card in your hand that gains strength rises out of the hand, its number changes up there, and it settles back (Martin,
+// 2026-10-15, after Hearthstone's hand buffs). The hand redraws on every view, so the motion is timed from when its step began
+// (--ago, a negative delay) and carries on across redraws; the old number and the new are both drawn, and CSS swaps them.
+const RISE_MS = 1100, rising = new Map();   // iid: { step, t0, was, now }
+function rise(h) {
+  const st = ui.step, ch = st && st.kind === 'strength' && st.changes.find(c => c.iid === h.iid);
+  let r = rising.get(h.iid);
+  if (ch && (!r || r.step !== st)) rising.set(h.iid, r = { step: st, t0: performance.now(), was: h.str, now: h.str + ch.n });
+  if (!r) return null;
+  const ago = performance.now() - r.t0;
+  if (ago > RISE_MS) { rising.delete(h.iid); return null; }
+  return { ...r, ago };
+}
 // A strength step's changes as the board flashes them: each unit named, or every copy of a card that grows as one
 // (Rattlesnake, Eon) on its owner's side.
 function strengthFlash(step) {
@@ -996,7 +1009,9 @@ function drawGame() {
     const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (lit.one || selCopy()).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises
     // a card just drawn slides in from the deck (bottom right), the second a beat after the first
     const drawn = A && !A.hand.includes(h.iid) ? ++drawnK : 0, from = drawn ? `--fx:${PL().deck[0] - (x0 + i * (cw + gap) + cw / 2)}px;animation-delay:${(drawn - 1) * 0.14}s;` : '';
-    return `<div class="hc ${cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}">${cardHTML(c, { str: h.str, cls: 'compact' })}</div>`;
+    const r = rise(h), html = cardHTML(c, { str: r ? r.now : h.str, cls: 'compact' });
+    return `<div class="hc ${r ? cls.replace(' dim', '') + ' rise' : cls}${drawn ? ' drawn' : ''}" data-iid="${h.iid}" data-id="${h.id}" style="left:${x0 + i * (cw + gap)}px;z-index:${i + 1};${from}${r ? `--ago:${-r.ago}ms` : ''}">${r
+      ? html.replace('<div class="stab">', `<div class="stab">${cardHTML(c, { str: r.was, cls: 'compact' }).match(/<span class="n[^"]*">.*?<\/span>/)[0].replace('class="n', 'class="n was')}`) : html}</div>`;
   }).join('');
   fitNames(hand);
   // touch: press and hold a card to read it (a tap picks it): it opens large in the middle, clear of the finger, and stays
@@ -1228,7 +1243,8 @@ function drawBoard(d) {
   const capture = cap ? { side: rel(cap.den), id: cap.card, owner: rel(cap.player), str: cap.str } : null;
   const region = shownRegion(d);
   const st = ui.step, strike = st && st.by ? { from: dcr(st.by), to: dcr(st.cr) } : null;   // what removed a unit answers in its beat
-  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, roamable: Object.keys(d.roams || {}), roamFrom: ui.roam, preview, anim: A, ago, capture, strike,
+  const fire = st && st.src ? st.src.map(dcr) : null;   // the animals whose own effect this is: their trigger marks brighten
+  const draw = () => renderBoard(document.getElementById('board'), viewerMap(), g, CARDS, { region, rings: d.rings, hqRing: d.hqRing, roamable: Object.keys(d.roams || {}), roamFrom: ui.roam, preview, anim: A, ago, capture, strike, fire,
     beat: endBeat(), current: V.phase === 'playing' ? rel(V.game.current) : null });
   draw();
   if (startBeat(g, A, ago, capture)) draw();

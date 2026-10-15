@@ -20,6 +20,13 @@ const BOARD_KW = ['Armor', 'Stealth', 'Spikes', 'Poison'];   // the keywords a u
 const KW_FAN = { 1: [135], 2: [117, 153], 3: [99, 135, 171], 4: [81, 117, 153, 189] };
 const kwAt = (i, n) => { const a = KW_FAN[n][i] * Math.PI / 180;   // the badge's centre 47.8% of the unit out (on the rim)
   return `left:calc(${(50 + 47.8 * Math.cos(a)).toFixed(1)}% - 19px);top:calc(${(50 - 47.8 * Math.sin(a)).toFixed(1)}% - 19px)`; };
+// An animal whose effect fires on its own wears one mark on its rim, bottom right, clear of its number (Martin, 2026-10-15,
+// after Hearthstone's trigger bolt): a moon for Dusk, a sun for Dawn, an eye for "when/whenever". When it fires, the mark
+// brightens and the effect plays out of the animal. A Roar wears none: you see it played.
+const TRIGGER = [[/\bDusk:/, 'dusk', 'Dusk: happens at the end of your turn.'], [/\bDawn:/, 'dawn', 'Dawn: happens at the start of your turn.'],
+  [/(^|\. )When(ever)? /, 'when', 'Happens on its own when its condition is met.']];
+const triggerOf = c => TRIGGER.find(([re]) => re.test(c.text || ''));
+const TRG_AT = (() => { const a = -32 * Math.PI / 180; return `left:calc(${(50 + 47.8 * Math.cos(a)).toFixed(1)}% - 19px);top:calc(${(50 - 47.8 * Math.sin(a)).toFixed(1)}% - 19px)`; })();
 const kit = f => `/static/kit2/${f}`;
 const team = side => (side === 'A' ? 'a' : 'b');
 
@@ -71,7 +78,7 @@ export function portrait(id, D) {
 }
 
 // A unit: portrait under its team rim, strength on the boss, buried units peeking out behind, timer and board keywords as badges.
-function unit(u, under, cards) {
+function unit(u, under, cards, fire = false) {
   // Board keywords: the card's own, plus Stealth whenever the enemy can't choose it (an adjacent Armadillo gives it).
   // Spikes only until they've removed a coverer (the view says so): after that it's an ordinary animal.
   // Armor likewise when a neighbour gives it (Capybara), Poison when a neighbour's legendary Jellyfish does; an inked animal
@@ -85,6 +92,7 @@ function unit(u, under, cards) {
   return peek + `<div class="ring${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects until the Octopus player\'s next turn' : ''}" style="${portrait(u.id, 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
     `<img class="rimimg" src="${kit(`rim_${team(u.owner)}.webp`)}" alt="" draggable="false"><div class="boss num">${chalk(u.str)}</div>` +
     (u.timer ? `<div class="timer" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${chalk(u.timer)}</div>` : '') +
+    ((t => t && !u.inked ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TRG_AT}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c))) +
     (kws.length ? `<div class="kws">${kws.map((k, i) => `<div class="kw" style="${kwAt(i, kws.length)}" data-tip="${k}: ${KEYWORDS[k]}"><img src="${kit(`kw_${k.toLowerCase()}.webp`)}" alt="${k}" draggable="false"></div>`).join('')}</div>` : '');
 }
 
@@ -93,7 +101,7 @@ function unit(u, under, cards) {
 // fx, fromStones } when this view follows one (so what changed animates; static/timeline.js plays one step per view), else null, capture: { side, id, owner, str } when a
 // unit took a den, which ends the game (it stands in that den's mouth) }.
 export function renderBoard(el, M, g, cards, ui) {
-  const A = ui.anim, rings = new Set(ui.rings || []), roamable = new Set(ui.roamable || []);   // your animals that can roam now
+  const A = ui.anim, rings = new Set(ui.rings || []), roamable = new Set(ui.roamable || []), fire = new Set(ui.fire || []);   // fire: the animals whose own effect this step is   // your animals that can roam now
   // the tutorial shows a region: its four crossroads and its stone glow (not rings: rings mean a click acts there)
   const shown = new Set(ui.region || []), shownAt = ui.region && ui.region[0].split(',').map(Number);
   const { landed, covered, leaving } = boardChanges(A && A.board, g.board, (A && A.fx) || []);
@@ -125,7 +133,7 @@ export function renderBoard(el, M, g, cards, ui) {
     let strike = '';
     if (ui.strike && ui.strike.from === cr) { const [tx, ty] = at(...ui.strike.to.split(',').map(Number)), dx = tx - x, dy = ty - y, n = Math.hypot(dx, dy) || 1;
       strike = `--sx:${(dx / n * 26).toFixed(1)}px;--sy:${(dy / n * 26).toFixed(1)}px`; }
-    s += put(`cr unit ${u.owner}${cls}${chg ? ' strchg ' + chg : ''}${strike ? ' strike' : ''}${eating.has(cr) ? ' eat' : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards), `data-cr="${cr}" data-card="${u.id}"`, strike);
+    s += put(`cr unit ${u.owner}${cls}${chg ? ' strchg ' + chg : ''}${strike ? ' strike' : ''}${eating.has(cr) ? ' eat' : ''}`, x, y, unit(u, st.slice(0, -1).reverse(), cards, fire.has(cr)), `data-cr="${cr}" data-card="${u.id}"`, strike);
   }
 
   // Removed units drain, sink and leave dust; returned ones lift and fly to their owner's side of the screen.

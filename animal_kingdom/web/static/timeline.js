@@ -62,7 +62,10 @@ export function plan(prev, next, cards = {}) {
     v.phase = 'playing';
     return v;
   };
-  const out = [], push = step => out.push({ view: view(), step });
+  // a step's src: the crossroads of the animals whose doing it is (the engine's cause_iid), where they stand as it plays; the
+  // board brightens their trigger marks (board.js)
+  let cur = null;
+  const out = [], push = step => { if (!step.src) { const cr = cur && at(cur.cause_iid); if (cr) step.src = [cr]; } out.push({ view: view(), step }); };
   const take = (cr, iid) => { const st = s.board[cr] || [], i = st.findIndex(u => u.iid === iid); if (i < 0) return null;
     const [u] = st.splice(i, 1); if (!st.length) delete s.board[cr]; return u; };
   // food in a row by one player flies together: gains into the den (from the stones, or from the animals whose doing they
@@ -78,11 +81,11 @@ export function plan(prev, next, cards = {}) {
     if (f) f.n += e.n; else if (cr) food.from.push({ cr, n: e.n });
   };
   const landed = new Set();   // units put down in these steps: they already show their final strength
-  const flushFood = () => { if (food) { push({ ...food, dur: food.kind === 'pay' && !food.from.length ? DUR.pay : foodDur(food.n) }); food = null; } };
+  const flushFood = () => { if (food) { push({ ...food, src: food.kind === 'food' ? food.from.map(f => f.cr) : [], dur: food.kind === 'pay' && !food.from.length ? DUR.pay : foodDur(food.n) }); food = null; } };
   const toHand = e => { s.handCount[e.player] += 1;
     if (e.player === you) s.hand.push(finalCard(e.iid) || { iid: e.iid, id: e.card, str: (cards[e.card] || {}).str }); };
   for (let i = 0; i < fresh.length; i++) {
-    const e = fresh[i];
+    const e = fresh[i]; cur = e;
     if (e.e !== 'food' && e.e !== 'pay') flushFood();
     switch (e.e) {
       case 'place': {
@@ -156,7 +159,8 @@ export function plan(prev, next, cards = {}) {
         for (const st of Object.values(s.board)) for (const u of st) if (hit(u)) u.str += e.n;
         if (last && last.step && last.step.kind === 'strength')   // shown with the change before it: in that step's board too
           for (const st of Object.values(last.view.game.board)) for (const u of st) if (hit(u)) u.str += e.n;
-        if (last && last.step && last.step.kind === 'strength') last.step.changes.push(ch);   // several in a row show together
+        if (last && last.step && last.step.kind === 'strength') {   // several in a row show together
+          last.step.changes.push(ch); const cr = at(e.cause_iid); if (cr) last.step.src = [...new Set([...(last.step.src || []), cr])]; }
         else push({ kind: 'strength', dur: DUR.strength, changes: [ch] });
         break;
       }
