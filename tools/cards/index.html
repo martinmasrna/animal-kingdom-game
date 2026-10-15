@@ -37,11 +37,12 @@ button { cursor: pointer; }
 .sync { margin-left: auto; font-size: 13px; color: var(--muted); }
 .sync.bad { color: var(--problem); }
 
-.grid { --cols: 80px 80px minmax(170px, 260px) 44px minmax(320px, 680px) 44px 48px; }
-.grid.balance { --cols: 80px minmax(170px, 260px) 44px minmax(380px, 760px); }
-.grid.names { --cols: 70px minmax(200px, 280px) 44px minmax(320px, 680px); --rowh: 86px; }
-.head, .row { display: grid; grid-template-columns: var(--cols); padding: 0 16px; }
+.grid { --cols: 80px 84px 250px 44px 660px 44px 48px; }
+.grid.balance { --cols: 84px 250px 44px 760px; }
+.grid.names { --cols: 70px 280px 44px 660px; --rowh: 86px; }
+.head, .row { display: grid; grid-template-columns: var(--cols); padding: 0 0 0 16px; width: max-content; }
 .head { background: var(--bg); border-bottom: 1px solid var(--line); }
+.top { border-bottom: 1px solid var(--line); } .head { border-bottom: 0; }
 .head > div { padding: 6px 8px; font-size: 12px; font-weight: 600; color: var(--muted); }
 .lvbar { display: flex; height: 6px; margin-top: 4px; border-radius: 3px; overflow: hidden; background: var(--soft); }
 .lvbar i { display: block; height: 100%; cursor: pointer; }
