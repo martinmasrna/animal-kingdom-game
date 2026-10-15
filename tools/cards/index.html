@@ -37,9 +37,9 @@ button { cursor: pointer; }
 .sync { margin-left: auto; font-size: 13px; color: var(--muted); }
 .sync.bad { color: var(--problem); }
 
-.grid { --cols: 80px 80px minmax(160px, 1.1fr) 96px 44px minmax(320px, 3fr) 40px 44px; }
-.grid.balance { --cols: 80px minmax(160px, 1fr) 96px 44px minmax(380px, 3.4fr); }
-.grid.names { --cols: 70px minmax(200px, 300px) 44px minmax(320px, 1fr); --rowh: 86px; }
+.grid { --cols: 80px 80px minmax(160px, 240px) 96px 44px minmax(320px, 680px) 44px 48px; }
+.grid.balance { --cols: 80px minmax(160px, 240px) 96px 44px minmax(380px, 760px); }
+.grid.names { --cols: 70px minmax(200px, 280px) 44px minmax(320px, 680px); --rowh: 86px; }
 .head, .row { display: grid; grid-template-columns: var(--cols); padding: 0 16px; }
 .head { background: var(--bg); border-bottom: 1px solid var(--line); }
 .head > div { padding: 6px 8px; font-size: 12px; font-weight: 600; color: var(--muted); }
@@ -58,6 +58,7 @@ button { cursor: pointer; }
 .c { position: relative; padding: 5px 8px; display: flex; flex-direction: column; justify-content: center; min-width: 0; cursor: default; border-left: 1px solid var(--soft); }
 .c:first-child { border-left: 0; }
 .c.draft { background: var(--draft-bg); }
+.c.tagc { background: none !important; }
 .c.problem { background: var(--problem-bg); }
 .c.fine { background: var(--fine-bg); }
 .c.locked { background: var(--locked-bg); }
@@ -78,11 +79,11 @@ button { cursor: pointer; }
 .str .v { font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; }
 .eff .v .k { font-weight: 600; }
 .eff .v.vanilla { color: var(--faint); font-style: italic; }
-.thumb { width: 22px; height: 33px; border-radius: 2px; background: #ddd center 30% / cover no-repeat; }
+.thumb { width: 26px; height: 39px; border-radius: 2px; background: #ddd center 30% / cover no-repeat; }
 .names .thumb { width: 52px; height: 78px; }
 .names .ani .v b { font-size: 17px; }
-.ring { width: 28px; height: 28px; border-radius: 50%; background: #ddd no-repeat; }
-.noart { width: 22px; height: 33px; border-radius: 2px; border: 1px dashed #c8c8cc; }
+.ring { width: 32px; height: 32px; border-radius: 50%; background: #ddd no-repeat; }
+.noart { width: 26px; height: 39px; border-radius: 2px; border: 1px dashed #c8c8cc; }
 .none { padding: 40px 24px; color: var(--muted); }
 
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 20px 16px; padding: 4px 24px 10px; }
@@ -360,7 +361,7 @@ let io;
 function lazy(root = document) {
   io ||= new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) return; const el = e.target; io.unobserve(el);
     if (el.dataset.bg) el.style.backgroundImage = `url(${el.dataset.bg})`;
-    if (el.dataset.ring) el.style.cssText = ringCss(el.dataset.ring, 30); }), { rootMargin: '800px 0px' });
+    if (el.dataset.ring) el.style.cssText = ringCss(el.dataset.ring, 32); }), { rootMargin: '800px 0px' });
   root.querySelectorAll('[data-bg],[data-ring]').forEach(el => io.observe(el));
 }
 
