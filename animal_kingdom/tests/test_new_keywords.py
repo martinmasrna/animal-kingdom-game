@@ -61,14 +61,27 @@ def test_roam_picks_the_animal_up_and_places_it_again_and_costs_an_action():
     assert s.actions_taken_this_turn == 1 and s.current == "A"
 
 
-def test_a_cut_off_animal_roams_only_back_to_your_lines():
+def test_a_roam_counts_from_the_animal_through_its_pack():
     s = state()
-    put(s, "3,2", "t_roamer", "A")                      # stranded: no chain back to the den
-    assert roams(s) == {("3,2", ("cr", c)) for c in ("1,1", "1,2", "1,3")}   # lifted, only the den front is placeable
+    put(s, "3,2", "t_roamer", "A")                      # stranded, a pack of one: it moves around itself
+    assert roams(s) == {("3,2", ("cr", c)) for c in ("2,2", "3,1", "3,3", "4,2")}
+    put(s, "1,2", "t_body", "A")                        # not touching it: nothing changes
+    assert roams(s) == {("3,2", ("cr", c)) for c in ("2,2", "3,1", "3,3", "4,2")}
+    put(s, "2,2", "t_body", "A")                        # now its pack runs back to the den: it walks it
+    assert {t for o, t in roams(s) if o == "3,2"} == {("cr", c) for c in
+                                                       ("1,1", "1,2", "1,3", "2,1", "2,2", "2,3", "3,1", "3,3", "4,2")}
+
+
+def test_a_stranded_leopard_pounces_on_its_neighbours_not_across_the_board():
+    # Martin's game, 2026-10-15: a Leopard cut off on the enemy's den front could reach a Lion near his chain but
+    # not the cats beside it; counted from the animal, it's the other way round
+    s = state()
     put(s, "1,2", "t_body", "A")
-    assert ("3,2", ("cr", "2,2")) in roams(s) and ("3,2", ("cr", "2,3")) not in roams(s)
-    put(s, "2,2", "t_body", "A")                        # a longer chain: anywhere beside it
-    assert ("3,2", ("cr", "2,3")) in roams(s)
+    put(s, "4,2", "t_roam_apex_reach", "A")             # 8, Reach 2, alone by B's den
+    put(s, "4,1", "t_dusk", "B"); put(s, "4,3", "t_dusk2", "B")   # beside it
+    put(s, "2,1", "t_dusk", "B")                        # two from your chain, three from the Leopard
+    targets = {t for o, t in roams(s) if o == "4,2"}
+    assert {("cr", "4,1"), ("cr", "4,3")} <= targets and ("cr", "2,1") not in targets
 
 
 def test_a_roamer_takes_the_den_whenever_a_card_from_the_hand_could():
@@ -199,7 +212,7 @@ def test_an_apex_roams_only_onto_an_animal_and_eats_it():
     assert ids(s, "3,1") == ["t_roam_apex"] and "t_dusk" in s.remove_pile
 
 
-def test_a_roamer_lands_as_far_as_its_reach_like_a_placement():
+def test_a_roamer_lands_as_far_as_its_reach_beyond_its_pack():
     # the legendary Leopard (Apex Predator. Roam. Reach 2.): it pounces on prey two crossroads beyond your chain
     s = state()
     for cr in ("1,2", "2,2", "3,2"):
