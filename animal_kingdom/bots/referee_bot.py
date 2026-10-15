@@ -61,10 +61,10 @@ class RefereeBot(TurnSearcher):
                  reply_width: int = 4,
                  max_search_nodes: Optional[int] = 1_000,
                  evaluator: Optional[LinearEval] = None,
-                 quiesce: bool = False):
+                 quiesce: bool = False, mulligan: bool = True):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
-                         evaluator=evaluator, quiesce=quiesce)
+                         evaluator=evaluator, quiesce=quiesce, mulligan=mulligan)
         self.staged = staged
         self.root_width = root_width
         self.reply_width = reply_width
@@ -92,7 +92,7 @@ class RefereeBot(TurnSearcher):
             "plan_reused": 0,
             "budget_fallbacks": 0,
         }
-        if (keep := keep_hand(view, legal)) is not None:
+        if (keep := keep_hand(view, legal, state, self.det_rng, self.weights if self.mulligan else None)) is not None:
             return keep
         self._search_nodes = 0
         if self.staged:

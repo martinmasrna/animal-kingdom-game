@@ -89,8 +89,9 @@ class TurnSearcher(Bot):
                  deck_reveal_choice_width: int = 0,
                  max_search_nodes: Optional[int] = None,
                  evaluator: Optional[LinearEval] = None,
-                 quiesce: bool = False):
+                 quiesce: bool = False, mulligan: bool = True):
         self.weights = weights or GreedyWeights()
+        self.mulligan = mulligan     # False: keep every opening hand (the paired tests' baseline)
         # RNG only breaks exact score ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
         self.det_rng = random.Random(None if seed is None else seed + _DET_SEED_SALT)
@@ -133,7 +134,7 @@ class TurnSearcher(Bot):
         state: Optional[GameState] = None,
     ) -> Action:
         legal = list(legal)
-        if (keep := keep_hand(view, legal)) is not None:
+        if (keep := keep_hand(view, legal, state, self.det_rng, self.weights if self.mulligan else None)) is not None:
             return keep
         if state is None or len(legal) == 1:
             return legal[0]
