@@ -332,6 +332,12 @@ def _roar_fizzled(pre: GameState, post: GameState, me: str, action) -> bool:
         return False
     if not pre.cards[action.card_id].has_roar:
         return False  # passives, keywords, Deathrattles, and vanilla units are not Roars
+    if post.current != pre.current or post.turn_counter != pre.turn_counter:
+        # The turn's last action: `post` already holds the turn's end (region food, Dusk), which would read as the Roar
+        # doing something. Judge it on a copy with an action to spare, so the turn doesn't end.
+        post = pre.clone()
+        post.actions_taken_this_turn -= 1
+        rules.apply_action(post, action, validate=False)
     if post.pending is not None:
         return False  # roar offered a real choice - it hasn't fizzled, its outcome just
                        # isn't resolved yet
