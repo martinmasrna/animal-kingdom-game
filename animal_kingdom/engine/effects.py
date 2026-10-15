@@ -2481,8 +2481,8 @@ def _sloth_place(state, unit, cr):
 
 # --- Handlock ---------------------------------------------------------------------------------------------------
 
-def _baboon_legend_eot(state, unit, cr):
-    """Dusk: give 2 random animals in your hand +1 strength."""
+def _baboon_legend_sot(state, unit, cr):
+    """Dawn: give 2 random animals in your hand +1 strength."""
     hand = _hand_iids(state, unit.owner)
     k = min(len(hand), state.config.baboon_legend_count)
     _grant(state, state.rng.sample(hand, k), state.config.baboon_legend_grant)
@@ -2868,7 +2868,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "dung_beetle": {"on_end_of_turn": _dung_beetle_eot},
     "sloth": {"on_place": _sloth_place},
     # Handlock (Grizzly Bear is an anthem; the Eagles' sharing lives in _gain_in_hand, the mate in state.ensure_mates).
-    "baboon_legend": {"on_end_of_turn": _baboon_legend_eot},
+    "baboon_legend": {"on_start_of_turn": _baboon_legend_sot},
     "silverback": {"on_place": _silverback_place},
     "butterfly_legend": {"on_gain_in_hand": _butterfly_evolve},
     "butterfly_legend_caterpillar": {"on_place": _draw1, "on_gain_in_hand": _butterfly_evolve},

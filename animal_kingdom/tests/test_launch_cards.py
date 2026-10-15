@@ -713,7 +713,7 @@ def test_orangutan_duplicates_a_primate_and_tarsier_draws_one_and_trains_it():
     assert hand_inst(s2, "A", "gorilla").strength_counter == CFG.tarsier_grant
 
 
-def test_baboon_trains_two_different_cards_and_the_legend_two_random_ones_at_dusk():
+def test_baboon_trains_two_different_cards_and_the_legend_two_random_ones_at_dawn():
     s = make_state(hands={"A": ["baboon", "lion", "tiger", "squirrel"]})
     rules.apply_action(s, PlaceAction("baboon", ("cr", "1,2")))
     choose(s, hand_inst(s, "A", "lion").iid)
@@ -722,7 +722,9 @@ def test_baboon_trains_two_different_cards_and_the_legend_two_random_ones_at_dus
     assert [u.strength_counter for u in s.hands["A"]] == [1, 1, 0]
     s2 = make_state(hands={"A": ["lion", "tiger", "squirrel"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s2, "1,2", "baboon_legend", "A")
-    end_turn(s2)
+    end_turn(s2)                                                     # A's Dusk: nothing yet
+    assert sum(u.strength_counter for u in s2.hands["A"]) == 0
+    end_turn(s2)                                                     # B's turn ends; A's Dawn
     assert sum(u.strength_counter for u in s2.hands["A"]) == CFG.baboon_legend_count
 
 
