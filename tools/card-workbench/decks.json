@@ -1488,7 +1488,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Arachnid",
-     "text": "When an enemy with Flight is placed next to this, remove it."
+     "text": "When an enemy with Flight or Roam is placed next to this, remove it."
     },
     {
      "habitat": "Jungle",

@@ -695,6 +695,18 @@ def test_golden_orb_weaver_catches_a_flyer_landing_beside_it():
     assert removed(s, "eagle")
 
 
+def test_golden_orb_weaver_catches_a_roamer_placed_or_roaming_beside_it():
+    s = make_state(hands={"A": ["wolf"]})
+    put(s, "2,2", "golden_orb_weaver", "B")
+    rules.apply_action(s, PlaceAction("wolf", ("cr", "1,2")))     # placed beside it
+    assert removed(s, "wolf")
+    s = make_state()
+    put(s, "2,2", "golden_orb_weaver", "B")
+    put(s, "1,1", "wolf", "A")
+    rules.apply_action(s, RoamAction("1,1", ("cr", "1,2")))       # roams beside it
+    assert removed(s, "wolf")
+
+
 def test_tortoise_counts_armor_including_a_capybaras():
     s = make_state(hands={"A": ["tortoise"]})
     put(s, "1,1", "capybara", "A")

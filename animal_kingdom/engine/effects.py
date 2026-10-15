@@ -2488,8 +2488,9 @@ def _mimic_place(state, unit, cr):
 
 
 def _orb_weaver_enemy_placed(state, spider, placed, cr):
-    """When an enemy with Flight is placed adjacent to this, remove it."""
-    if statics.has_keyword(state, placed, "Flight", cr) and statics.can_be_removed(state, placed, cr):
+    """When an enemy with Flight or Roam is placed adjacent to this (or roams there), remove it."""
+    if (statics.has_keyword(state, placed, "Flight", cr) or statics.has_keyword(state, placed, "Roam", cr)) \
+            and statics.can_be_removed(state, placed, cr):
         state.effect_stack.append(remove_iid_step(placed.iid, by_player=spider.owner, by_effect=True,
                                                   source_iid=spider.iid, by_card=spider.card_id))
 

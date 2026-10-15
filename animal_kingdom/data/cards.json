@@ -1705,7 +1705,7 @@
         "Arachnid"
       ],
       "base_strength": 4,
-      "text": "When an enemy with Flight is placed next to this, remove it.",
+      "text": "When an enemy with Flight or Roam is placed next to this, remove it.",
       "keywords": [],
       "species": "Golden Orb-Weaver",
       "habitat": "Jungle",

@@ -1081,6 +1081,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "When an enemy with Flight is placed next to this, remove it."
+      },
+      "note": "Martin, 2026-10-15, mid-gauntlet: it catches roamers too (a roam that lands beside it counts).",
+      "by": "claude",
+      "at": 1792097016
     }
   },
   "gopher": {
