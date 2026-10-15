@@ -592,7 +592,7 @@ def test_mahi_mahi_mackerel_and_tuna_grow_the_school():
     rules.apply_action(s, PlaceAction("mahi_mahi", ("cr", "1,2")))
     assert sar.strength_counter == CFG.mahi_mahi_grant
     put(s, "2,2", "mackerel", "A")
-    assert effective_strength(s, sar) == 1 + CFG.mahi_mahi_grant + CFG.mackerel_anthem
+    assert effective_strength(s, sar) == load_cards()["sardine"].base_strength + CFG.mahi_mahi_grant + CFG.mackerel_anthem
 
 
 def test_sunfish_places_a_baby_fish_on_a_random_adjacent_empty_crossroad():

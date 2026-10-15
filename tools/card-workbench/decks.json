@@ -1172,7 +1172,7 @@
      "rarity": "C",
      "species": "Sardine",
      "status": "proposed",
-     "str": 1,
+     "str": 0,
      "tag": "Fish",
      "text": "Roar: fill adjacent empty crossroads with Sardines from your hand and deck."
     },

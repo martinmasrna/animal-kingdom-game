@@ -29,7 +29,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Cod** | 3 | Fish | 4 | Roar: draw a card for each adjacent allied Fish. |
-| **Sardine** | 3 | Fish | 1 | Roar: fill adjacent empty crossroads with Sardines from your hand and deck. |
+| **Sardine** | 3 | Fish | 0 | Roar: fill adjacent empty crossroads with Sardines from your hand and deck. |
 | **Mahi-mahi** | 3 | Fish | 3 | Roar: give your other Fish +1 strength. |
 | **Mackerel** | 3 | Fish | 2 | Your other Fish have +1 strength. |
 | **Tuna** | 3 | Fish | 3 | Has +1 strength for each other Fish you control. |

@@ -996,21 +996,14 @@
   },
   "gaboon_viper": {
     "art": {
-      "lv": "draft",
-      "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "at": 1792068297
+      "lv": "problem",
+      "by": "martin",
+      "at": 1792096411,
+      "note": "too photorealistic"
     },
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
       "at": 1792068317
     },
     "animal": {
@@ -1947,6 +1940,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin, 2026-10-15, mid-gauntlet.",
+      "by": "claude",
+      "at": 1792096533
     }
   },
   "scarlett": {

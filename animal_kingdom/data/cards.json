@@ -1319,7 +1319,7 @@
       "tags": [
         "Fish"
       ],
-      "base_strength": 1,
+      "base_strength": 0,
       "text": "Roar: fill adjacent empty crossroads with Sardines from your hand and deck.",
       "keywords": [],
       "species": "Sardine",
