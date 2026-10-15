@@ -19,6 +19,7 @@ CARDS = cards_with(
     {"id": "t_roamer", "base_strength": 4, "keywords": ["Roam"], "tags": ["Canine"]},
     {"id": "t_roam_cat", "base_strength": 5, "keywords": ["Roam"], "tags": ["Cat"]},
     {"id": "t_roam_apex", "base_strength": 7, "keywords": ["Roam", "Apex Predator"]},
+    {"id": "t_roam_apex_reach", "base_strength": 8, "keywords": ["Roam", "Apex Predator", "Reach"], "reach": 2},
     {"id": "t_roam_armor", "base_strength": 6, "keywords": ["Roam", "Armor"]},
     {"id": "t_poison", "base_strength": 2, "keywords": ["Poison"]},
     {"id": "t_reach2", "base_strength": 3, "keywords": ["Reach"], "reach": 2},
@@ -184,6 +185,21 @@ def test_an_apex_roams_only_onto_an_animal_and_eats_it():
     assert roams(s) == {("4,2", ("cr", "4,1")), ("4,2", ("cr", "3,2"))}   # no empty crossroad, no den
     rules.apply_action(s, RoamAction("4,2", ("cr", "4,1")))
     assert ids(s, "4,1") == ["t_roam_apex"] and "t_dusk" in s.remove_pile
+
+
+def test_a_roamer_with_reach_roams_that_far_jumping_over_what_stands_between():
+    # the legendary Leopard (Apex Predator. Roam. Reach 2.): it pounces on prey two crossroads away, past its own Orca
+    s = state()
+    for cr in ("1,2", "2,2"):
+        put(s, cr, "t_body", "A")
+    put(s, "3,2", "t_roam_apex_reach", "A")
+    put(s, "4,2", "t_body", "A")
+    put(s, "4,1", "t_dusk", "B")                      # two steps, past the ally on 4,2
+    put(s, "4,3", "t_dusk2", "B")
+    targets = {t for o, t in roams(s) if o == "3,2"}
+    assert {("cr", "4,1"), ("cr", "4,3"), ("cr", "4,2"), ("cr", "2,2"), ("cr", "1,2")} == targets   # only onto animals
+    rules.apply_action(s, RoamAction("3,2", ("cr", "4,1")))
+    assert ids(s, "4,1") == ["t_roam_apex_reach"] and "t_dusk" in s.remove_pile
 
 
 def test_roam_hooks_fire_for_the_roamer_and_its_friends(monkeypatch):

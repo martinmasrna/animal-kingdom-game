@@ -17,6 +17,8 @@ M2a implements a representative slice; remaining cards are added in M2b.
 
 from __future__ import annotations
 
+from collections import deque
+
 from dataclasses import dataclass
 from typing import Callable, Optional
 
@@ -784,7 +786,9 @@ def legal_roams(state: GameState, player: str, *, free_only: bool = False) -> li
 def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None) -> list:
     """Where `unit` (on `cr`) may roam to: ("cr", crossroad) targets, and ("hq", enemy) from the enemy's den front.
     A roam lands where you could place, judged before the animal leaves: an animal connected to your den goes to any
-    neighbour, a cut-off one only to a crossroad connected to your den (back to your lines), never onto a den."""
+    crossroad within its Reach (one step without Reach, counting along paths and jumping over whatever stands between),
+    a cut-off one only to a crossroad connected to your den (back to your lines). A den is taken only by one step from
+    its front crossroads, never by Reach."""
     player = unit.owner
     enemy = other_player(player)
     if enemy_front is None:
@@ -796,7 +800,7 @@ def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None)
                 if state.is_connected(player, t[1], occ)]
     is_apex = statics.has_keyword(state, unit, "Apex Predator", cr)
     out = []
-    for nb in state.game_map.neighbors(cr):
+    for nb in _within(state.game_map, cr, max(1, statics.reach_of(state, unit.card_id))):
         top = state.top_unit(nb)
         if top is None:
             ok = not is_apex                      # an Apex roams only onto an animal
@@ -809,6 +813,21 @@ def roam_targets(state: GameState, unit, cr: str, *, enemy_front=None, occ=None)
     if cr in enemy_front and not is_apex:         # an Apex never takes a den
         out.append(("hq", enemy))
     return out
+
+
+def _within(gm, cr: str, n: int) -> list:
+    """The crossroads 1 to `n` steps from `cr` along paths, whatever stands between, in a deterministic order."""
+    if n == 1:
+        return list(gm.neighbors(cr))
+    dist, queue = {cr: 0}, deque([cr])
+    while queue:
+        c = queue.popleft()
+        if dist[c] < n:
+            for nb in gm.neighbors(c):
+                if nb not in dist:
+                    dist[nb] = dist[c] + 1
+                    queue.append(nb)
+    return sorted((c for c in dist if c != cr), key=lambda c: (dist[c], c))
 
 
 def free_roams_left(state: GameState, player: str, unit=None) -> int:
