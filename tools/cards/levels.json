@@ -992,6 +992,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Martin, 2026-10-15, after his Canines gauntlet: underwhelming at 4.",
+      "by": "claude",
+      "at": 1792090640
     }
   },
   "gaboon_viper": {
