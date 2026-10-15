@@ -129,8 +129,6 @@ def test_plans_nurse_then_queen_bee_then_worker_as_one_turn():
     )
 
 
-@pytest.mark.xfail(strict=True, reason="in this old ruleset (Draw draws 1) hand_value counts a hand's five best cards "
-                   "fully, so the 4-card Colony hand draws twice instead of placing both Guard Wasps (2026-10-15)")
 def test_saved_game_opening_preserves_the_duplicate_setup():
     config = Config.default().sweep(actions_per_turn=2, first_turn_actions=2, draw_action_count=1, mulligan=False)
     s = new_game(
