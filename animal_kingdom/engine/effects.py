@@ -1899,9 +1899,11 @@ def _lobo_friendly_roam(state, watcher, roamer, event):
         _push_draw(state, watcher.owner, 1)
 
 
-def _wolf_legend_roam(state, unit, cr, event):
-    """When this roams, your adjacent animals gain +2 strength."""
-    _grant(state, [top.iid for _, top in _adjacent_tops(state, cr, unit.owner)], state.config.wolf_legend_grant)
+def _wolf_legend_eot(state, unit, cr):
+    """Dusk: this gains +2 strength for each adjacent Canine (yours)."""
+    n = sum(1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Canine" in state.cards[top.card_id].tags)
+    if n:
+        _grant(state, [unit.iid], n * state.config.wolf_legend_grant)
 
 
 def _fox_cover(state, unit, covered):
@@ -1918,8 +1920,8 @@ def _jackal_place(state, unit, cr):
                         [nb for nb in _adjacent_enemy_targets(state, unit, cr) if flanked(nb)])
 
 
-def _bush_dog_place(state, unit, cr):
-    """Roar: give an adjacent Canine +3 strength (one of yours)."""
+def _bush_dog_eot(state, unit, cr):
+    """Dusk: give an adjacent Canine +2 strength (one of yours, the player's choice)."""
     options = [nb for nb, top in _adjacent_tops(state, cr, unit.owner) if "Canine" in state.cards[top.card_id].tags]
     _push_choose(state, unit.owner, options, "grant", amount=state.config.bush_dog_grant)
 
@@ -2855,10 +2857,10 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "locust": {"on_place": _locust_place},
     # Canines (Clarion's free roam and Dhole's equal roams are statics).
     "lobo": {"on_friendly_roam": _lobo_friendly_roam},
-    "wolf_legend": {"on_roam": _wolf_legend_roam},
+    "wolf_legend": {"on_end_of_turn": _wolf_legend_eot},
     "fox": {"on_cover_enemy": _fox_cover},
     "jackal": {"on_place": _jackal_place},
-    "bush_dog": {"on_place": _bush_dog_place},
+    "bush_dog": {"on_end_of_turn": _bush_dog_eot},
     "coyote": {"on_friendly_roam": _raccoon_dog_friendly_roam},
     "african_wild_dog": {"on_end_of_turn": _wild_dog_eot},
     "badger": {"on_place": _draws_filtered("keyword:Roam")},

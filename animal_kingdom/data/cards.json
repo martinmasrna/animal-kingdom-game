@@ -575,7 +575,7 @@
         "Canine"
       ],
       "base_strength": 4,
-      "text": "Roam. When this roams, your adjacent animals gain +2 strength.",
+      "text": "Roam. Dusk: this gains +2 strength for each adjacent Canine.",
       "keywords": [
         "Roam"
       ],
@@ -675,7 +675,7 @@
         "Canine"
       ],
       "base_strength": 3,
-      "text": "Roar: give an adjacent Canine +3 strength.",
+      "text": "Dusk: give an adjacent Canine +2 strength.",
       "keywords": [],
       "species": "Bush Dog",
       "habitat": "Jungle",

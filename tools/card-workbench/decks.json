@@ -227,7 +227,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Canine",
-     "text": "Roam. When this roams, your adjacent animals gain +2 strength."
+     "text": "Roam. Dusk: this gains +2 strength for each adjacent Canine."
     },
     {
      "habitat": "Open Ocean",
@@ -299,7 +299,7 @@
      "status": "proposed",
      "str": 3,
      "tag": "Canine",
-     "text": "Roar: give an adjacent Canine +3 strength."
+     "text": "Dusk: give an adjacent Canine +2 strength."
     },
     {
      "habitat": "Forest",

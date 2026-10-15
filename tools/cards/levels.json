@@ -122,11 +122,6 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Dusk: give 2 random animals in your hand +1 strength."
-      },
       "note": "Martin, 2026-10-15: Dusk to Dawn.",
       "by": "claude",
       "at": 1792064539
@@ -435,6 +430,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: give an adjacent Canine +3 strength."
+      },
+      "note": "Martin, 2026-10-15: the Dusk Canine package (with the African Wild Dog and the Sloth legendary).",
+      "by": "claude",
+      "at": 1792093810
     }
   },
   "butterfly": {
@@ -802,20 +807,10 @@
       "by": "martin"
     },
     "rarity": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "C"
-      },
       "by": "claude",
       "at": 1792085441
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "When this is removed, place two Worms on its crossroad."
-      },
       "by": "claude",
       "at": 1792085441
     }
@@ -994,11 +989,6 @@
       "by": "martin"
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 4
-      },
       "note": "Martin, 2026-10-15, after his Canines gauntlet: underwhelming at 4.",
       "by": "claude",
       "at": 1792090640
@@ -1140,11 +1130,6 @@
       "by": "martin"
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 2
-      },
       "note": "Martin, 2026-10-15: at 2 it was a 9 when played (bots, 4,400 games); at 0 it averages a Lion's 7 and reaches 9 with a full hand. Costs Handlock about 4 points of win rate.",
       "by": "claude",
       "at": 1792065311
@@ -1170,21 +1155,11 @@
       "by": "martin"
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 2
-      },
       "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
       "by": "claude",
       "at": 1792076082
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Flight. Has +5 strength while you control 4 or more Colony animals."
-      },
       "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers. (3 base, +3: a 6 with Flight, so never a worse Eagle)",
       "by": "claude",
       "at": 1792076082
@@ -1200,11 +1175,6 @@
       "by": "martin"
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 2
-      },
       "note": "Martin, 2026-10-15: +1 after playing Food Aggro against 30 Lions",
       "by": "claude",
       "at": 1792092268
@@ -1220,11 +1190,6 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Flee. Roar: if you played 3 or more animals this turn, draw a card."
-      },
       "note": "Martin, 2026-10-15, after his Canines gauntlet: buff to 2 cards.",
       "by": "claude",
       "at": 1792089833
@@ -1317,6 +1282,11 @@
       "note": "moved from aristocrats to pool",
       "by": "claude",
       "at": 1792085440
+    },
+    "effect": {
+      "lv": "problem",
+      "by": "martin",
+      "at": 1792093953
     }
   },
   "jackal": {
@@ -1688,10 +1658,6 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from den-rush to aristocrats",
       "at": 1792086811
     }
@@ -1706,11 +1672,6 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Roar: if an ally was removed this turn, remove an adjacent enemy."
-      },
       "by": "claude",
       "at": 1792085440
     }
@@ -1839,20 +1800,11 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from egg-control to aristocrats",
       "by": "claude",
       "at": 1792086365
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Has +1 strength for each removed animal."
-      },
       "by": "claude",
       "at": 1792086365
     }
@@ -2035,21 +1987,11 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Roar: set an adjacent enemy's strength to 1."
-      },
       "note": "Martin, 2026-10-15: the Cats' answer to big animals is removal again (Queen Adira draws); setting to 1 was weak and didn't fit a cat.",
       "by": "claude",
       "at": 1792070194
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 4
-      },
       "note": "Martin, 2026-10-15: at 4 it outclassed the Jaguar; any-size removal pays with a small body.",
       "by": "claude",
       "at": 1792070441
@@ -2118,10 +2060,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "note": "moved from aristocrats to pool",
       "by": "claude",
       "at": 1792085439
@@ -2259,11 +2197,6 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Roar: Scout a Primate and give it +1 strength."
-      },
       "note": "Martin, 2026-10-15: Scouting a Primate was too strong and too consistent; a random Primate keeps the tutor, drops the choice.",
       "by": "claude",
       "at": 1792064208
@@ -2289,11 +2222,6 @@
       "by": "martin"
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 3
-      },
       "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
       "by": "claude",
       "at": 1792076082
@@ -2379,10 +2307,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from pool to egg-control",
       "by": "claude",
       "at": 1792086365
@@ -2472,11 +2396,6 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Flight. Roar: gain 10 food; if you control another Worker, gain 10 more."
-      },
       "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
       "by": "claude",
       "at": 1792076082
@@ -2588,11 +2507,6 @@
   },
   "city_spider": {
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Dawn: remove a random adjacent ally."
-      },
       "by": "claude",
       "at": 1792085441
     }
@@ -2621,20 +2535,11 @@
   },
   "toad": {
     "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792085442
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from pool to aristocrats",
       "by": "claude",
       "at": 1792085442
@@ -2724,6 +2629,18 @@
       "note": "moved from pool to aristocrats",
       "by": "claude",
       "at": 1792085443
+    }
+  },
+  "wolf_legend": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roam. When this roams, your adjacent animals gain +2 strength."
+      },
+      "note": "Martin, 2026-10-15: the Dusk Canine package (with the African Wild Dog and the Sloth legendary). Its old roam buff almost never fired.",
+      "by": "claude",
+      "at": 1792093810
     }
   }
 }

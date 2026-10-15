@@ -358,13 +358,24 @@ def test_lobo_draws_when_an_ally_roams_onto_an_enemy():
     assert hand_ids(s, "A") == ["lion"]
 
 
-def test_the_legendary_wolf_buffs_its_new_neighbours_when_it_roams():
-    s = make_state()
-    put(s, "1,2", "wolf_legend", "A")
-    ally = put(s, "2,1", "squirrel", "A")                      # beside 1,1, where it goes
-    old = put(s, "1,3", "squirrel", "A")                       # beside 1,2, where it was
-    rules.apply_action(s, RoamAction("1,2", ("cr", "1,1")))
-    assert ally.strength_counter == CFG.wolf_legend_grant and old.strength_counter == 0
+def test_the_legendary_wolf_grows_at_dusk_by_its_adjacent_canines():
+    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    w = put(s, "1,2", "wolf_legend", "A")
+    put(s, "1,1", "wolf", "A"); put(s, "1,3", "jackal", "A")    # two Canines beside it
+    put(s, "2,2", "squirrel", "A")                             # not a Canine: doesn't count
+    end_turn(s)
+    assert w.strength_counter == 2 * CFG.wolf_legend_grant
+
+
+def test_the_bush_dog_gives_an_adjacent_canine_plus_two_at_dusk():
+    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,2", "bush_dog", "A")
+    w = put(s, "1,1", "wolf", "A")
+    other = put(s, "1,3", "jackal", "A")
+    end_turn(s)
+    assert s.pending is not None and set(s.pending["options"]) == {"1,1", "1,3"}
+    choose(s, "1,1")
+    assert w.strength_counter == CFG.bush_dog_grant and other.strength_counter == 0 and s.current == "B"
 
 
 def test_the_fox_draws_whenever_it_covers_an_enemy():

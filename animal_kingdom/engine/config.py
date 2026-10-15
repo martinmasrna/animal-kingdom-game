@@ -68,10 +68,10 @@ class Config:
 
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
     dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn
-    bush_dog_grant: int = 3              # Bush Dog: Roar: give an adjacent Canine +3
+    bush_dog_grant: int = 2              # Bush Dog: Dusk: give an adjacent Canine +2
     shuck_grant: int = 2                 # to the Canine returned from the Remove Pile; reserve
     raccoon_dog_grant: int = 1           # Coyote: an allied Canine that roams gets +1
-    wolf_legend_grant: int = 2           # the legendary Wolf: when it roams, your adjacent animals gain +2
+    wolf_legend_grant: int = 2           # the legendary Wolf: Dusk: +2 for each adjacent Canine
     stray_dog_grant: int = 2             # Stray Dog: give an ally with Roam +2, then it roams
     wild_dog_grant: int = 1              # African Wild Dog: Dusk: your adjacent animals +1
     mahi_mahi_grant: int = 1             # Mahi-mahi: Roar: your other Fish +1
