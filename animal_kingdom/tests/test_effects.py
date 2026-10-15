@@ -549,6 +549,8 @@ def test_sloth_pays_out_after_its_delay_when_left_uncovered():
     _tick(s)
     assert s.food["A"] == food_before + CFG.sloth_food
     assert not _pending(s, "gain_food")                  # fired and dropped
+    sloth = s.board["1,2"][-1]
+    assert [e.get("cause_iid") for e in s.events if e["e"] == "food" and not e.get("income")] == [sloth.iid]   # its food flies from it
 
 
 def test_timer_is_suspended_while_the_unit_is_buried():
@@ -1018,3 +1020,13 @@ def test_guard_wasp_in_hand_does_not_count_itself_toward_four_colony():
     assert card_strength(s, "guard_wasp", "A") == 2    # not yet controlled: no +5 to cover with
     put(s, "2,1", "worker_ant", "A")
     assert card_strength(s, "guard_wasp", "A") == 7
+
+
+def test_falstaffs_extra_food_is_its_own_doing():
+    # The client flies a gain's fruit from the animal whose doing it is: Falstaff's extra flies from Falstaff, even after
+    # region income or another animal's Roar (Martin, 2026-10-15).
+    s = make_state(food={"A": 0, "B": 0})
+    put(s, "1,1", "falstaff", "A")
+    effects.gain_food(s, "A", 5, income=True)
+    rider = [e for e in s.events if e["e"] == "food" and not e.get("income")]
+    assert [(e["cause"], e["cause_iid"]) for e in rider] == [("falstaff", s.board["1,1"][-1].iid)]

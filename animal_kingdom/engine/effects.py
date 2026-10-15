@@ -545,11 +545,16 @@ def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True,
         return
     # Falstaff: whenever you gain food, gain N more (once per gain event; never recursively).
     if rider:
-        falstaffs = len(statics.active_tops(state, player, "falstaff"))
+        tops = statics.active_tops(state, player, "falstaff")
+        falstaffs = len(tops)
         if falstaffs and not (state.config.cap_falstaff and state.turn_flags.get(f"falstaff_{player}")):
             if state.config.cap_falstaff:
                 state.turn_flags[f"falstaff_{player}"] = True
-            gain_food(state, player, falstaffs * state.config.falstaff_food_rider, rider=False)
+            was, (state.cause, state.cause_iid) = (state.cause, state.cause_iid), ("falstaff", tops[0].iid)   # the extra is Falstaff's doing: its food flies from it
+            try:
+                gain_food(state, player, falstaffs * state.config.falstaff_food_rider, rider=False)
+            finally:
+                state.cause, state.cause_iid = was
 
 
 # ============================================ draw / shuffle / remove event engine
@@ -881,6 +886,7 @@ def schedule(state: GameState, unit, owner_turn_delay: int, step: dict, *, while
     timer rather than resuming this one - "bounce resets".
     """
     step.setdefault("by_card", unit.card_id)   # a delayed effect still names its card when it fires
+    step.setdefault("by_iid", unit.iid)        # and its animal (the timer dies with it, so it is on the board when it fires: its food flies from it)
     state.scheduled.append({"iid": unit.iid, "owner": unit.owner, "while_buried": while_buried,   # keep ticking under a cover?
                             "remaining": owner_turn_delay, "step": step})
 
