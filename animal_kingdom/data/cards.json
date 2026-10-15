@@ -1180,7 +1180,7 @@
       "deck": "fish",
       "rarity": "legendary",
       "tags": [],
-      "base_strength": 6,
+      "base_strength": 3,
       "text": "Your adjacent Fish have Poison.",
       "keywords": [],
       "unnamed": true,

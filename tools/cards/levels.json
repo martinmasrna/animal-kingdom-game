@@ -1319,6 +1319,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "note": "Martin, 2026-10-15, mid-gauntlet.",
+      "by": "claude",
+      "at": 1792096269
     }
   },
   "jerboa": {
