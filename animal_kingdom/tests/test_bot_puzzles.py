@@ -130,8 +130,7 @@ def test_canine_develops_instead_of_drawing_a_full_hand(bot_cls):
         assert isinstance(chosen, PlaceAction) and chosen.card_id in {"dhole", "african_wild_dog", "dingo"}, chosen
 
 
-@pytest.mark.parametrize("bot_cls", [pytest.param(TurnBot, marks=pytest.mark.xfail(strict=True,
-    reason="the search draws with Owl and two Vipers in hand (2026-09-30)")),
+@pytest.mark.parametrize("bot_cls", [TurnBot,
     pytest.param(RefereeBot, marks=pytest.mark.xfail(strict=False, reason="recorded against the old goodstuff pile, whose cards changed with the launch decks (Brutus, the Rhinoceros and the Elephant are Hungry, the Wolf roams): the search reads a different opponent now; re-record (2026-10-08)"))])   # RefereeBot played Owl since single targets are asked
 @pytest.mark.slow
 def test_egg_plays_owl_before_drawing(bot_cls):
