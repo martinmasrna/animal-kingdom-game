@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# The card table: every card's values and how settled each one is, edited in place (tools/cards/).
+#
+#   ./cards                   # http://localhost:8002
+#   ./cards --port 8003 --no-open
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$here"
+exec "$here/.venv/bin/python" tools/cards/serve.py "$@"

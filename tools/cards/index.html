@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap">
+<style>
+/* The game's dark ground and its card type. A cell's level is its brightness: what still needs work is bright, a fine
+   value dims, a locked one goes quiet. Only a problem (red) and Claude's unreviewed change (blue) carry a mark. */
+:root {
+  --bg: #17140f; --bg2: #1e1a14; --panel: #221d16; --line: #3a3024; --soft: #2a231a; --text: #efe4cf; --muted: #a8977b; --faint: #6f624e;
+  --draft: #d9a441; --problem: #e0664f; --fine: #8fb37a; --locked: #a8977b; --claude: #6fa8e0;
+  --common: #b59c78; --rare: #a9bccb; --legendary: #e2b553;
+  --f: 'Fira Sans Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --rowh: 46px;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { color-scheme: dark; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 500 15px/1.35 var(--f); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+
+/* top bar */
+.top { position: sticky; top: 0; z-index: 20; background: var(--bg); }
+.bar { display: flex; align-items: center; gap: 22px; padding: 10px 20px; border-bottom: 1px solid var(--soft); }
+.bar h1 { margin: 0; font: 700 22px/1 var(--f); letter-spacing: .01em; }
+.seg { display: flex; gap: 2px; background: var(--bg2); border-radius: 7px; padding: 2px; }
+.seg button { border: 0; background: none; padding: 4px 12px; border-radius: 5px; color: var(--muted); font-weight: 600; }
+.seg button[aria-pressed="true"] { background: var(--text); color: #1d140a; }
+.seg button b { font-weight: 700; margin-left: 5px; font-variant-numeric: tabular-nums; }
+.seg button .cl { color: var(--claude); }
+.seg button[aria-pressed="true"] .cl { color: #1f4b78; }
+.bar select, .bar input { background: var(--bg2); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
+.bar input { width: 180px; }
+.chipf { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 2px 4px 2px 10px; font-size: 14px; }
+.chipf button { border: 0; background: none; color: var(--muted); padding: 0 6px; font-size: 16px; line-height: 1; }
+.sync { margin-left: auto; font-size: 13px; color: var(--faint); }
+.sync.bad { color: var(--problem); }
+
+/* table */
+.grid { --cols: 86px 92px minmax(170px, 1.1fr) 96px 50px minmax(320px, 3fr) 44px 48px; }
+.grid.balance { --cols: 92px minmax(170px, 1fr) 96px 50px minmax(380px, 3.4fr); }
+.grid.names { --cols: 76px minmax(200px, 300px) 50px minmax(320px, 1fr); --rowh: 96px; }
+.head, .row { display: grid; grid-template-columns: var(--cols); column-gap: 0; padding: 0 20px; }
+.head { background: var(--bg); border-bottom: 1px solid var(--line); }
+.head > div { padding: 8px 10px 7px; font: 600 12px var(--f); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.lvbar { display: flex; height: 5px; margin-top: 6px; border-radius: 3px; overflow: hidden; background: var(--soft); }
+.lvbar i { display: block; height: 100%; cursor: pointer; }
+.lvbar i:hover { filter: brightness(1.3); }
+.lvbar .empty { background: #3a3024; } .lvbar .draft { background: #8a6d36; } .lvbar .problem { background: var(--problem); }
+.lvbar .fine { background: var(--fine); } .lvbar .locked { background: var(--text); }
+.lvbar i.on { outline: 2px solid var(--text); outline-offset: -2px; }
+.hab { padding: 26px 30px 8px; display: flex; align-items: baseline; gap: 12px; }
+.hab h2 { margin: 0; font: 700 19px var(--f); }
+.hab span { color: var(--faint); font-size: 14px; }
+.row { min-height: var(--rowh); border-bottom: 1px solid var(--soft); }
+.row.kid { min-height: 44px; background: rgba(0,0,0,.14); }
+.row.faded { opacity: .38; }
+.c { position: relative; padding: 7px 10px 7px 12px; display: flex; flex-direction: column; justify-content: center; min-width: 0; cursor: default; border-radius: 3px; }
+.c::before { content: ''; position: absolute; left: 3px; top: 9px; bottom: 9px; width: 3px; border-radius: 2px; }
+.c.problem::before { background: var(--problem); }
+.c.fine > .v { opacity: .7; }
+.c.locked > .v { opacity: .38; }
+.c.rv { background: rgba(111,168,224,.09); }
+.c.rv::before { background: var(--claude); }
+.c:hover { background: rgba(255,255,255,.035); }
+.c.sel { box-shadow: inset 0 0 0 2px #efe4cf55; }
+.c .nt { font-size: 13px; color: var(--muted); margin-top: 2px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.c.problem .nt { color: #ee9a88; }
+.v { overflow: hidden; }
+.v.dash { color: var(--faint); }
+.habc .v { font-size: 14px; color: var(--faint); }
+.rar .v { font: 700 12px var(--f); letter-spacing: .08em; text-transform: uppercase; }
+.rar .v.L { color: var(--legendary); } .rar .v.R { color: var(--rare); } .rar .v.C { color: var(--common); }
+.ani .v b { font-weight: 700; font-size: 16px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ani .v small { display: block; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ani .v .ph { color: var(--faint); font-style: italic; font-weight: 500; }
+.kid .ani .v b { font-size: 15px; font-weight: 600; }
+.kid .ani .v::before { content: '↳ '; color: var(--faint); }
+.tagc .v { font-size: 13px; color: var(--faint); }
+.str .v { font: 700 19px var(--f); font-variant-numeric: tabular-nums; text-align: center; }
+.eff .v { font-size: 15px; line-height: 1.3; color: #e2d6bf; }
+.eff .v .k { font-weight: 700; color: var(--text); }
+.eff .v.vanilla { color: var(--faint); font-style: italic; }
+.thumb { width: 26px; height: 39px; border-radius: 3px; background: #2f271d center 30% / cover no-repeat; }
+.names .thumb { width: 60px; height: 90px; }
+.names .ani .v b { font-size: 21px; }
+.ring { width: 30px; height: 30px; border-radius: 50%; background: #2f271d no-repeat; box-shadow: 0 0 0 2px #6b5d49; }
+.noart { width: 26px; height: 39px; border-radius: 3px; border: 1px dashed #4a3e2f; }
+.ro { cursor: default; }
+.ed { cursor: pointer; }
+.none { padding: 60px 30px; color: var(--muted); }
+
+/* art view */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 22px 18px; padding: 4px 30px 10px; }
+.tile { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+.tile.kid .card { --w: 150px; }
+.tile.faded { opacity: .38; }
+.tile .st2 { display: flex; gap: 6px; }
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); padding: 1px 8px; border-radius: 999px; background: var(--bg2); }
+.pill i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.pill i.empty { border: 1px solid var(--faint); } .pill i.draft { background: var(--draft); } .pill i.problem { background: var(--problem); }
+.pill i.fine { background: var(--fine); } .pill i.locked { background: var(--text); }
+.pill.rv { color: var(--claude); background: rgba(111,168,224,.12); }
+
+/* the card, as the game draws it (static/app.css, card.js) */
+.card { --w: 196px; position: relative; width: var(--w); height: calc(var(--w) * 1.467); font-size: calc(var(--w) / 20); flex: none; border-radius: .45em;
+  box-shadow: .2em .45em .9em rgba(0,0,0,.55); overflow: hidden; isolation: isolate; --fr: url(/static/kit2/card_frame_common.webp); }
+.card.rare { --fr: url(/static/kit2/card_frame_rare.webp); } .card.legendary { --fr: url(/static/kit2/card_frame_legendary.webp); }
+.card.compact { --fr: url(/static/kit2/card_frame_common_compact.webp); } .card.compact.rare { --fr: url(/static/kit2/card_frame_rare_compact.webp); } .card.compact.legendary { --fr: url(/static/kit2/card_frame_legendary_compact.webp); }
+.card .cframe { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: var(--fr) 0 0 / 100% 100% no-repeat; }
+.card .pic { position: absolute; inset: 3.05em 0 0; background: #3a2c1a 50% 0 / cover no-repeat; display: flex; align-items: center; justify-content: center; }
+.card .pic > span { color: #8a7a62; font-size: 1.4em; padding-bottom: 6em; }
+.card:not(.compact) .pic { bottom: 8.15em; }
+.card .pic::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1.2em; background: linear-gradient(rgba(0,0,0,.45), transparent); pointer-events: none; }
+.card .nbar { position: absolute; z-index: 2; top: .1em; height: 3em; left: 4.45em; right: .55em; display: flex; align-items: center; justify-content: center; padding: 0 .3em; pointer-events: none; }
+.card .nbar span { font: 600 1.4em/1 var(--f); color: #1d140a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card.compact .nbar span { font-size: 1.8em; }
+.card .stab { position: absolute; left: 0; top: 0; width: 4.39em; height: 5.57em; z-index: 3; pointer-events: none; }
+.card .stab .n { position: absolute; left: 0; right: 0; top: 1em; height: 2.9em; display: flex; justify-content: center; }
+.card .stab .n.two { top: 1.3em; height: 2.3em; }
+.card .stab .n img { display: block; height: 100%; filter: brightness(.16) sepia(.6); }
+.card .ctext { position: absolute; z-index: 2; left: .7em; right: .7em; bottom: .35em; height: 7.6em; padding: 0 .3em 1.2em; display: flex; flex-direction: column; justify-content: center; pointer-events: none; }
+.card .ctext p { margin: 0; font: 500 1.3em/1.14 var(--f); color: #1a1108; text-align: center; text-wrap: pretty; }
+.card .ctext i { position: absolute; left: 0; right: 0; bottom: .15em; text-align: center; font: 700 1em/1 var(--f); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #3a2a18; }
+.card.compact .ctext { display: none; }
+
+/* the editor under a cell */
+.pop { position: absolute; z-index: 40; width: 420px; background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 14px; box-shadow: 0 14px 40px rgba(0,0,0,.6); display: grid; gap: 12px; }
+.pop h4, .drawer h4 { margin: 0; font: 600 12px var(--f); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; }
+.pop h4 span, .drawer h4 span { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--faint); }
+.pop input, .pop textarea, .pop select { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; }
+.pop textarea { resize: vertical; min-height: 40px; line-height: 1.35; }
+.pop input:focus, .pop textarea:focus, .pop select:focus { outline: none; border-color: #8a7458; }
+.pop .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pop .lab { font-size: 12px; color: var(--faint); margin-bottom: 3px; }
+.lvl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.lvl button { border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 5px 0; color: var(--muted); font-weight: 600; font-size: 14px; }
+.lvl button u { text-decoration: none; opacity: .5; font-weight: 500; margin-left: 4px; font-size: 12px; }
+.lvl button[aria-pressed="true"].draft { background: var(--draft); border-color: var(--draft); color: #241a08; }
+.lvl button[aria-pressed="true"].problem { background: var(--problem); border-color: var(--problem); color: #2a0e08; }
+.lvl button[aria-pressed="true"].fine { background: var(--fine); border-color: var(--fine); color: #10180c; }
+.lvl button[aria-pressed="true"].locked { background: var(--text); border-color: var(--text); color: #1d140a; }
+.rvbox { border-left: 3px solid var(--claude); background: rgba(111,168,224,.08); padding: 8px 10px; border-radius: 4px; font-size: 14px; display: grid; gap: 6px; }
+.rvbox .was { color: var(--muted); text-decoration: line-through; }
+.rvbox .acts { display: flex; gap: 6px; }
+.btn { border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 4px 12px; font-weight: 600; font-size: 14px; }
+.btn.pri { background: var(--text); color: #1d140a; border-color: var(--text); }
+.hint { font-size: 12px; color: var(--faint); }
+
+/* the art and crop drawer */
+.drawer { position: fixed; z-index: 50; top: 0; right: 0; bottom: 0; width: min(880px, 100vw); background: var(--panel); border-left: 1px solid var(--line);
+  box-shadow: -20px 0 50px rgba(0,0,0,.5); overflow-y: auto; padding: 14px 22px 30px; display: grid; gap: 12px; align-content: start; }
+.drawer header { display: flex; align-items: baseline; gap: 12px; }
+.drawer header h3 { margin: 0; font: 700 24px var(--f); }
+.drawer header span { color: var(--muted); }
+.drawer header button { margin-left: auto; border: 0; background: none; color: var(--muted); font-size: 24px; line-height: 1; }
+.drawer section { display: grid; gap: 10px; padding-top: 10px; border-top: 1px solid var(--soft); }
+.drawer .bigart { display: flex; gap: 18px; align-items: flex-start; }
+.drawer .bigart img { width: 170px; border-radius: 6px; display: block; }
+.drawer .bigart .side { flex: 1; display: grid; gap: 10px; align-content: start; }
+.frames { display: flex; gap: 16px; align-items: center; }
+.frames .col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.frames .lbl { font-size: 11px; color: var(--faint); letter-spacing: .08em; text-transform: uppercase; }
+.frames .bring { width: 98px; height: 98px; border-radius: 50%; background-color: #333; background-repeat: no-repeat; box-shadow: 0 0 0 5px #8a7b66; }
+.frames .hand .card { --w: 124px; } .frames .big .card { --w: 176px; }
+.frames .zm { display: flex; gap: 4px; } .frames .zm button { width: 28px; height: 24px; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; color: var(--muted); padding: 0; line-height: 1; }
+.strips { display: flex; flex-direction: column; gap: 12px; width: 284px; }
+.st { position: relative; display: flex; align-items: center; width: 277px; height: 27px; border-radius: 6px; overflow: hidden; background: #2a2521; }
+.st .art { position: absolute; right: 0; top: 0; bottom: 0; width: 166px; background: center 30% / cover no-repeat; -webkit-mask-image: linear-gradient(90deg, transparent, #000 70%); mask-image: linear-gradient(90deg, transparent, #000 70%); opacity: .75; }
+.st .n { position: relative; padding-left: 38px; font: 600 14px var(--f); text-shadow: 0 1px 2px #000; pointer-events: none; }
+.dtile { position: relative; width: 284px; height: 56px; border-radius: 8px; background: #2a2521 center 30% / cover no-repeat; }
+.dtile::before { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(90deg, rgba(22,19,16,.95) 35%, rgba(22,19,16,.2)); }
+.dtile b { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font: 700 19px/1.1 var(--f); pointer-events: none; }
+.drawer textarea { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; resize: vertical; line-height: 1.35; }
+.drawer textarea:focus { outline: none; border-color: #8a7458; }
+.drawer .rvbox { margin-bottom: 2px; }
+.drag { touch-action: none; cursor: grab; user-select: none; } .drag:active { cursor: grabbing; }
+.toast { position: fixed; z-index: 60; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--text); color: #1d140a; font-weight: 600; padding: 7px 14px; border-radius: 6px; }
+.toast.bad { background: var(--problem); color: #fff; }
+</style></head><body>
+<div class="top">
+  <div class="bar">
+    <h1>Cards</h1>
+    <div class="seg" id="views"></div>
+    <div class="seg" id="shows"></div>
+    <select id="hab" aria-label="Habitat"></select>
+    <input id="q" type="search" placeholder="Find a card" aria-label="Find a card">
+    <span id="colf"></span>
+    <span class="sync" id="sync"></span>
+  </div>
+  <div class="head grid" id="head"></div>
+</div>
+<main id="main"></main>
+<div class="pop" id="pop" hidden></div>
+<div class="drawer" id="drawer" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const HABS = ['Savanna', 'Jungle', 'Forest', 'Meadow', 'City', 'Open Ocean', 'Polar', 'Desert', 'Mountains', 'Australia', 'Ice Age', ''];
+const RNAME = { L: 'Legendary', R: 'Rare', C: 'Common' }, RORD = { L: 0, R: 1, C: 2 };
+const LV = ['draft', 'problem', 'fine', 'locked'], LVKEY = { d: 'draft', p: 'problem', f: 'fine', l: 'locked' };
+const LVORD = ['empty', 'draft', 'problem', 'fine', 'locked'];
+const COLS = {
+  habitat: { t: 'Habitat', cls: 'habc' }, rarity: { t: 'Rarity', cls: 'rar' }, animal: { t: 'Animal', cls: 'ani' }, tag: { t: 'Tag', cls: 'tagc' },
+  strength: { t: 'Str', cls: 'str' }, effect: { t: 'Effect', cls: 'eff' }, art: { t: 'Art', cls: 'artc' }, crop: { t: 'Crop', cls: 'cropc' },
+};
+const VIEWS = {
+  all: { t: 'Everything', cols: ['habitat', 'rarity', 'animal', 'tag', 'strength', 'effect', 'art', 'crop'] },
+  balance: { t: 'Balance', cols: ['rarity', 'animal', 'tag', 'strength', 'effect'] },
+  art: { t: 'Art', cols: ['art', 'crop'], cards: true },
+  names: { t: 'Names', cols: ['art', 'animal', 'strength', 'effect'], only: r => r.rarity === 'L' && !r.parent },
+};
+const SHOWS = { all: 'All', open: 'Open', problem: 'Problems', claude: 'Claude' };
+const KW = /\b(Roar|Dusk|Dawn|Flight|Armor|Stealth|Poison|Spikes|Roam|Flee|Titan|Apex Predator|Hungry \d+|Reach \d+|Scout)\b/g;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+let S = null, byId = {}, stampSeen = 0;
+let ui = { view: 'all', show: 'all', hab: '', q: '', colf: null, sel: null };
+try { Object.assign(ui, JSON.parse(localStorage.getItem('cards-ui') || '{}'), { sel: null, colf: null }); } catch (e) {}
+const keep = () => { try { localStorage.setItem('cards-ui', JSON.stringify({ view: ui.view, show: ui.show, hab: ui.hab })); } catch (e) {} };
+
+/* ---------- data ---------- */
+async function loadState() {
+  const r = await fetch('/api/state');
+  S = await r.json(); stampSeen = S.stamp;
+  byId = Object.fromEntries(S.rows.map(r => [r.id, r]));
+  S.kids = {};
+  for (const r of S.rows) if (r.parent) (S.kids[r.parent] ||= []).push(r);
+  for (const k in S.kids) { const p = byId[k]; S.kids[k].sort((a, b) => p.related.indexOf(a.id) - p.related.indexOf(b.id)); }
+}
+async function post(path, body) {
+  const r = await fetch('/api/' + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!r.ok) { toast(await r.text(), true); throw new Error('refused'); }
+  const j = await r.json();
+  await loadState();
+  return j;
+}
+let toastT;
+function toast(msg, bad) { const t = $('#toast'); t.textContent = msg; t.classList.toggle('bad', !!bad); t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, bad ? 4000 : 1400); }
+// Claude edits from the command line: the page picks them up within a few seconds.
+setInterval(async () => {
+  if (document.hidden || !$('#pop').hidden || drag) return;
+  try {
+    const { stamp } = await (await fetch('/api/stamp')).json();
+    $('#sync').textContent = ''; $('#sync').classList.remove('bad');
+    if (stamp !== stampSeen) { await loadState(); render(); if (!$('#drawer').hidden) drawer(drawerId); }
+  } catch (e) { $('#sync').textContent = 'The card server is not running: ./cards'; $('#sync').classList.add('bad'); }
+}, 2500);
+
+/* ---------- which rows ---------- */
+const cell = (r, col) => r.lv[col];
+const viewCols = () => VIEWS[ui.view].cols;
+function matches(r) {
+  const cols = viewCols();
+  if (ui.q) { const q = ui.q.toLowerCase(); if (![r.name, r.species, r.text, r.id, r.tag].some(x => String(x || '').toLowerCase().includes(q))) return false; }
+  if (ui.colf && cell(r, ui.colf.col).lv !== ui.colf.lv) return false;
+  if (ui.show === 'open' && !cols.some(c => ['empty', 'draft', 'problem'].includes(cell(r, c).lv))) return false;
+  if (ui.show === 'problem' && !cols.some(c => cell(r, c).lv === 'problem')) return false;
+  if (ui.show === 'claude' && !Object.values(r.lv).some(c => c.review)) return false;
+  return true;
+}
+function inScope(r) { const p = r.parent ? byId[r.parent] : r; return (!ui.hab || p.habitat === ui.hab) && (!VIEWS[ui.view].only || VIEWS[ui.view].only(r)); }
+const nameOf = r => r.name || r.species;
+// Families in table order: habitat, then rarity, then name; a card's related cards straight under it.
+function families() {
+  const tops = S.rows.filter(r => !r.parent);
+  tops.sort((a, b) => (HABS.indexOf(a.habitat) + 99) % 99 - (HABS.indexOf(b.habitat) + 99) % 99 || RORD[a.rarity] - RORD[b.rarity] || nameOf(a).localeCompare(nameOf(b)));
+  const out = [];
+  for (const t of tops) {
+    const fam = [t, ...(S.kids[t.id] || []).flatMap(k => [k, ...(S.kids[k.id] || [])])];
+    const shown = VIEWS[ui.view].only ? fam.filter(VIEWS[ui.view].only) : fam;
+    if (!shown.length || !inScope(t)) continue;
+    const hit = shown.map(matches);
+    if (hit.some(Boolean)) out.push({ hab: t.habitat, members: shown.map((r, i) => ({ r, faded: !hit[i] })) });
+  }
+  return out;
+}
+
+/* ---------- drawing a cell ---------- */
+const rules = t => esc(t).replace(KW, '<span class="k">$&</span>');
+const artUrl = id => `/static/art/${id}.webp`;
+function ringCss(id, D, crop) { const [x, y, d] = crop || S.crops.CROP[id], w = D / d, h = w * 1.5;
+  return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${D / 2 - x * w}px ${D / 2 - y * h}px`; }
+function valueHTML(r, col) {
+  switch (col) {
+    case 'habitat': return r.habitat ? esc(r.habitat) : '';
+    case 'rarity': return `<span class="${r.rarity}">${RNAME[r.rarity]}</span>`;
+    case 'animal':
+      if (r.rarity === 'L' && !r.parent) return r.name ? `<b>${esc(r.name)}</b><small>${esc(r.species)}</small>` : `<b class="ph">${esc(r.species || 'no animal')}</b><small>no name yet</small>`;
+      return `<b>${esc(nameOf(r))}</b>${r.species && r.species !== r.name ? `<small>${esc(r.species)}</small>` : ''}`;
+    case 'tag': return r.tag ? esc(r.tag) : ' ';
+    case 'strength': return r.str ?? '';
+    case 'effect': return r.text === '—' || (!r.text && r.deck === 'token') ? 'Vanilla' : rules(r.text);
+    case 'art': return r.art ? `<div class="thumb" data-bg="${artUrl(r.id)}"></div>` : '<div class="noart"></div>';
+    case 'crop': return r.art ? `<div class="ring" data-ring="${r.id}"></div>` : '';
+  }
+}
+function cellHTML(r, col) {
+  const c = cell(r, col), v = valueHTML(r, col);
+  const empty = v === '' || (c.lv === 'empty' && col !== 'animal' && col !== 'tag');
+  const vcls = 'v' + (empty ? ' dash' : '') + (col === 'effect' && v === 'Vanilla' ? ' vanilla' : '') + (col === 'rarity' ? ' ' + r.rarity : '');
+  const note = c.note && col !== 'art' && col !== 'crop' ? `<div class="nt">${esc(c.note)}</div>` : '';
+  const sel = ui.sel && ui.sel.id === r.id && ui.sel.col === col ? ' sel' : '';
+  return `<div class="c ${COLS[col].cls} ${c.lv}${c.review ? ' rv' : ''}${sel}" data-id="${r.id}" data-col="${col}" title="${esc(c.note && (col === 'art' || col === 'crop') ? c.note : '')}">` +
+    `<div class="${vcls}">${empty ? '—' : v}</div>${note}</div>`;
+}
+
+/* ---------- render ---------- */
+function headHTML(fams) {
+  const rows = fams.flatMap(f => f.members.map(m => m.r));
+  return viewCols().map(col => {
+    const n = {}; rows.forEach(r => { const l = cell(r, col).lv; n[l] = (n[l] || 0) + 1; });
+    const tot = rows.length || 1;
+    const segs = LVORD.filter(l => n[l]).map(l => `<i class="${l}${ui.colf && ui.colf.col === col && ui.colf.lv === l ? ' on' : ''}" style="width:${n[l] / tot * 100}%" data-colf="${col}:${l}" title="${n[l]} ${l}"></i>`).join('');
+    return `<div>${COLS[col].t}<div class="lvbar">${segs}</div></div>`;
+  }).join('');
+}
+function render() {
+  if (!S) return;
+  const fams = families();
+  $('#views').innerHTML = Object.entries(VIEWS).map(([k, v]) => `<button data-view="${k}" aria-pressed="${ui.view === k}">${v.t}</button>`).join('');
+  const nClaude = S.rows.filter(r => Object.values(r.lv).some(c => c.review)).length;
+  $('#shows').innerHTML = Object.entries(SHOWS).map(([k, t]) => k === 'claude' && !nClaude && ui.show !== 'claude' ? '' :
+    `<button data-show="${k}" aria-pressed="${ui.show === k}">${t}${k === 'claude' ? `<b class="cl">${nClaude}</b>` : ''}</button>`).join('');
+  $('#hab').innerHTML = `<option value="">All habitats</option>` + HABS.filter(h => h && S.rows.some(r => r.habitat === h)).map(h => `<option ${ui.hab === h ? 'selected' : ''}>${h}</option>`).join('');
+  $('#colf').innerHTML = ui.colf ? `<span class="chipf">${COLS[ui.colf.col].t}: ${ui.colf.lv}<button data-clearcolf aria-label="Clear">×</button></span>` : '';
+  const head = $('#head'); head.className = 'head grid ' + ui.view; head.hidden = !!VIEWS[ui.view].cards;
+  head.innerHTML = VIEWS[ui.view].cards ? '' : headHTML(fams);
+  let out = '', hab = null, block = [];
+  const flush = () => { if (!block.length) return; const n = block.reduce((s, f) => s + f.members.length, 0);
+    out += `<div class="hab"><h2>${esc(hab || 'No habitat')}</h2><span>${n}</span></div>`;
+    out += VIEWS[ui.view].cards ? `<div class="cards">${block.map(tilesHTML).join('')}</div>` : `<div class="grid ${ui.view}">${block.map(famHTML).join('')}</div>`;
+    block = []; };
+  for (const f of fams) { if (f.hab !== hab) { flush(); hab = f.hab; } block.push(f); }
+  flush();
+  $('#main').innerHTML = out || '<p class="none">No card matches.</p>';
+  if (VIEWS[ui.view].cards) { /* the art view's headline numbers sit in the pills */ }
+  lazy();
+}
+const famHTML = f => f.members.map(({ r, faded }) => `<div class="row${r.parent ? ' kid' : ''}${faded ? ' faded' : ''}" data-row="${r.id}">${viewCols().map(c => cellHTML(r, c)).join('')}</div>`).join('');
+
+/* the art view: each card as the game draws it, its art and crop levels under it */
+const chalk = n => String(n ?? '').split('').map(d => /\d/.test(d) ? `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">` : `<b>${esc(d)}</b>`).join('');
+const VIS = 0.61;
+const fy = (id, full, crop) => { const y = full ?? (crop || S.crops.CROP[id] || [0, .35])[1]; return clamp((y - VIS / 2) / (1 - VIS), 0, 1) * 100; };
+const lift = (id, full, crop) => { const y = full ?? (crop || S.crops.CROP[id] || [0, .35])[1]; return clamp(13.15 - 30 * y, -3.71, 0); };
+function cardHTML(r, { compact = false, kind = '', live = null } = {}) {
+  const rar = { L: 'legendary', R: 'rare', C: 'common' }[r.rarity], v = live || { crop: S.crops.CROP[r.id], full: S.crops.FULL[r.id] };
+  const pos = r.art ? (compact ? `background-position:50% ${lift(r.id, v.full, v.crop)}em` : `background-position:50% ${fy(r.id, v.full, v.crop)}%`) : '';
+  const name = r.rarity === 'L' && !r.parent && !r.name ? r.species : nameOf(r);
+  const text = r.text === '—' ? '' : r.text;
+  return `<div class="card ${rar}${compact ? ' compact' : ''}"><div class="pic${kind ? ' drag' : ''}" ${kind ? `data-drag="${kind}"` : ''} ${r.art ? `data-bg="${artUrl(r.id)}"` : ''} style="${pos}">${r.art ? '' : `<span>${esc(name)}</span>`}</div><div class="cframe"></div>` +
+    `<div class="nbar"><span>${esc(name)}</span></div><div class="stab"><span class="n${String(r.str ?? '').length > 1 ? ' two' : ''}">${chalk(r.str)}</span></div>` +
+    `<div class="ctext">${text ? `<p>${esc(text).replace(KW, '<b>$&</b>')}</p>` : ''}<i>${esc(r.tag.split(',').map(s => s.trim()).filter(Boolean).join(' · '))}</i></div></div>`;
+}
+const pill = (r, col) => { const c = cell(r, col); return `<span class="pill${c.review ? ' rv' : ''}" title="${esc(c.note || '')}"><i class="${c.lv}"></i>${COLS[col].t} ${c.lv}</span>`; };
+const tilesHTML = f => f.members.map(({ r, faded }) => `<div class="tile${r.parent ? ' kid' : ''}${faded ? ' faded' : ''}" data-open="${r.id}">${cardHTML(r)}<div class="st2">${pill(r, 'art')}${r.art ? pill(r, 'crop') : ''}</div></div>`).join('');
+
+// Pictures load as they near the screen.
+let io;
+function lazy(root = document) {
+  io ||= new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) return; const el = e.target; io.unobserve(el);
+    if (el.dataset.bg) el.style.backgroundImage = `url(${el.dataset.bg})`;
+    if (el.dataset.ring) el.style.cssText = ringCss(el.dataset.ring, 30); }), { rootMargin: '800px 0px' });
+  root.querySelectorAll('[data-bg],[data-ring]').forEach(el => io.observe(el));
+}
+
+/* ---------- the editor ---------- */
+let popAt = null;
+function lvButtons(c) { return `<div class="lvl">${LV.map(l => `<button class="${l}" data-lv="${l}" aria-pressed="${c.lv === l}">${l[0].toUpperCase() + l.slice(1)}<u>${l[0].toUpperCase()}</u></button>`).join('')}</div>`; }
+function prevText(col, p) {
+  if (p === undefined) return '';
+  if (col === 'animal') return [p.name, p.species].filter(Boolean).join(' / ');
+  if (col === 'rarity') return RNAME[p] || p;
+  return String(p ?? '—');
+}
+function rvHTML(r, col) {
+  const c = cell(r, col); if (!c.review) return '';
+  const p = c.review, cur = col === 'animal' ? { name: r.name, species: r.species } : col === 'strength' ? r.str : col === 'effect' ? r.text : r[col];
+  const change = 'prev' in p && col !== 'crop' ? `<div><span class="was">${esc(prevText(col, p.prev))}</span> → ${esc(prevText(col, cur))}</div>` : col === 'crop' && 'prev' in p ? '<div>Claude moved the crop.</div>' : '';
+  const lvch = p.prev_lv !== c.lv ? `<div>Level: ${p.prev_lv} → ${c.lv}</div>` : '';
+  const fresh = col === 'art' && !change && !lvch ? '<div>A new painting is installed.</div>' : '';
+  return `<div class="rvbox"><b style="color:var(--claude)">Claude's change</b>${change}${lvch}${fresh}<div class="acts"><button class="btn pri" data-accept>Accept <u style="opacity:.5;text-decoration:none">A</u></button><button class="btn" data-revert>Revert</button></div></div>`;
+}
+function editorHTML(r, col) {
+  if (!r.editable && !['art', 'crop'].includes(col)) return `<div class="hint">${r.deck === 'token' ? 'The engine makes this card; its values live in convert.py.' : ''}</div>`;
+  switch (col) {
+    case 'habitat': return `<select data-in>${S.habitats.map(h => `<option ${h === r.habitat ? 'selected' : ''}>${h}</option>`).join('')}</select>`;
+    case 'rarity': return `<select data-in>${['L', 'R', 'C'].map(k => `<option value="${k}" ${k === r.rarity ? 'selected' : ''}>${RNAME[k]}</option>`).join('')}</select>`;
+    case 'animal': return r.rarity === 'L'
+      ? `<div class="two"><div><div class="lab">Name</div><input data-in="name" value="${esc(r.name)}" placeholder="no name yet"></div><div><div class="lab">Species</div><input data-in="species" value="${esc(r.species)}"></div></div>`
+      : `<div class="two"><div><div class="lab">Animal</div><input data-in="name" value="${esc(r.name)}"></div><div><div class="lab">Species, if different</div><input data-in="species" value="${esc(r.species === r.name ? '' : r.species)}"></div></div>`;
+    case 'tag': return `<input data-in value="${esc(r.tag)}" placeholder="no tag">`;
+    case 'strength': return `<input data-in type="number" min="0" max="15" value="${r.str ?? ''}">`;
+    case 'effect': return `<textarea data-in rows="2" placeholder="No effect yet (— for a vanilla animal)">${esc(r.text)}</textarea>`;
+  }
+  return '';
+}
+function openPop(id, col) {
+  const r = byId[id], c = cell(r, col);
+  const el = document.querySelector(`.c[data-id="${id}"][data-col="${col}"]`); if (!el) return;
+  popAt = { id, col };
+  const pop = $('#pop');
+  pop.innerHTML = `<h4>${COLS[col].t} · ${esc(nameOf(r) || r.species)}<span>${r.parent ? 'made by ' + esc(nameOf(byId[r.parent])) : ''}</span></h4>${rvHTML(r, col)}${editorHTML(r, col)}${lvButtons(c)}` +
+    `<textarea data-note rows="1" placeholder="Note">${esc(c.note || '')}</textarea><div class="hint">Enter saves · D P F L set the level · Esc closes</div>`;
+  pop.hidden = false;
+  const b = el.getBoundingClientRect(), w = 420;
+  pop.style.left = clamp(b.left + window.scrollX, 8, window.scrollX + innerWidth - w - 12) + 'px';
+  const below = b.bottom + window.scrollY + 6, h = pop.offsetHeight;
+  pop.style.top = (b.bottom + h + 12 > innerHeight ? b.top + window.scrollY - h - 6 : below) + 'px';
+  const inp = pop.querySelector('[data-in]'); if (inp) { inp.focus(); if (inp.select && inp.tagName !== 'SELECT') inp.select(); } else pop.querySelector('[data-note]').focus();
+}
+function closePop() { $('#pop').hidden = true; popAt = null; }
+function readInput(r, col) {
+  const pop = $('#pop');
+  if (col === 'animal') { const n = pop.querySelector('[data-in="name"]').value.trim(), s = pop.querySelector('[data-in="species"]').value.trim();
+    return { name: n, species: r.rarity === 'L' ? s : (s || n) }; }
+  const el = pop.querySelector('[data-in]'); return el ? el.value : undefined;
+}
+function sameValue(r, col, v) {
+  if (col === 'animal') return v.name === r.name && v.species === r.species;
+  if (col === 'strength') return String(v) === String(r.str ?? '');
+  if (col === 'effect') return v.trim() === r.text;
+  return v === (col === 'tag' ? r.tag : r[col]);
+}
+async function savePop(close = true) {
+  if (!popAt) return;
+  const { id, col } = popAt, r = byId[id];
+  const note = $('#pop [data-note]').value.trim();
+  try {
+    if (r.editable && !['art', 'crop'].includes(col)) { const v = readInput(r, col); if (v !== undefined && !sameValue(r, col, v)) { const j = await post('value', { id, col, value: v }); toast(changedNote(j.report)); } }
+    if (note !== (cell(byId[id], col).note || '')) await post('note', { id, col, note });
+  } catch (e) { return; }
+  if (close) closePop();
+  render();
+}
+const changedNote = rep => /changed|new/.test(rep || '') ? 'Saved to the game' : 'Saved';
+async function setLevel(id, col, lv) {
+  const c = cell(byId[id], col); if (c.lv === lv) return;
+  try { await post('level', { id, col, lv }); } catch (e) { return; }
+  render(); if (popAt) openPop(id, col);
+}
+document.addEventListener('click', async e => {
+  const t = e.target;
+  if (t.closest('#pop')) {
+    const lvb = t.closest('[data-lv]'); if (lvb && popAt) { await savePop(false); setLevel(popAt.id, popAt.col, lvb.dataset.lv); return; }
+    if (t.closest('[data-accept]') && popAt) { await post('accept', popAt); render(); openPop(popAt.id, popAt.col); return; }
+    if (t.closest('[data-revert]') && popAt) { await post('revert', popAt); render(); openPop(popAt.id, popAt.col); return; }
+    return;
+  }
+  if (t.closest('#drawer')) return;
+  if (popAt) { await savePop(); }
+  const v = t.closest('[data-view]'); if (v) { ui.view = v.dataset.view; ui.colf = null; keep(); render(); window.scrollTo(0, 0); return; }
+  const s = t.closest('[data-show]'); if (s) { ui.show = s.dataset.show; keep(); render(); return; }
+  const cf = t.closest('[data-colf]'); if (cf) { const [col, lv] = cf.dataset.colf.split(':'); ui.colf = ui.colf && ui.colf.col === col && ui.colf.lv === lv ? null : { col, lv }; render(); return; }
+  if (t.closest('[data-clearcolf]')) { ui.colf = null; render(); return; }
+  const tile = t.closest('[data-open]'); if (tile) { drawer(tile.dataset.open); return; }
+  const c = t.closest('.c[data-col]');
+  if (c) { select(c.dataset.id, c.dataset.col); if (['art', 'crop'].includes(c.dataset.col)) drawer(c.dataset.id); else openPop(c.dataset.id, c.dataset.col); return; }
+  if (!$('#drawer').hidden && !t.closest('.c')) closeDrawer();
+});
+$('#hab').addEventListener('change', e => { ui.hab = e.target.value; keep(); render(); window.scrollTo(0, 0); });
+$('#q').addEventListener('input', e => { ui.q = e.target.value.trim(); render(); });
+function select(id, col) { ui.sel = { id, col }; document.querySelectorAll('.c.sel').forEach(x => x.classList.remove('sel'));
+  document.querySelector(`.c[data-id="${id}"][data-col="${col}"]`)?.classList.add('sel'); }
+
+// Keys: arrows move between cells, D P F L set the level, Enter edits, A accepts Claude's change, Esc closes.
+document.addEventListener('keydown', async e => {
+  const typing = e.target.matches('input, textarea, select');
+  if (e.key === 'Escape') { if (popAt) closePop(); else if (!$('#drawer').hidden) closeDrawer(); else { ui.sel = null; document.querySelectorAll('.c.sel').forEach(x => x.classList.remove('sel')); } return; }
+  if (popAt && e.key === 'Enter' && !e.shiftKey && !(e.target.matches('[data-note]') && e.altKey)) { e.preventDefault(); const { id, col } = popAt; await savePop(); select(id, col); return; }
+  if (typing) return;
+  if (popAt && LVKEY[e.key.toLowerCase()] && !e.metaKey && !e.ctrlKey) { e.preventDefault(); setLevel(popAt.id, popAt.col, LVKEY[e.key.toLowerCase()]); return; }
+  if (!ui.sel || e.metaKey || e.ctrlKey) return;
+  const k = e.key.toLowerCase();
+  if (LVKEY[k]) { e.preventDefault(); await setLevel(ui.sel.id, ui.sel.col, LVKEY[k]); select(ui.sel.id, ui.sel.col); return; }
+  if (k === 'a' && cell(byId[ui.sel.id], ui.sel.col).review) { await post('accept', ui.sel); render(); select(ui.sel.id, ui.sel.col); return; }
+  if (e.key === 'Enter') { e.preventDefault(); ['art', 'crop'].includes(ui.sel.col) ? drawer(ui.sel.id) : openPop(ui.sel.id, ui.sel.col); return; }
+  const cells = [...document.querySelectorAll('.row')].map(row => [...row.querySelectorAll('.c')]);
+  let ri = cells.findIndex(rc => rc[0]?.dataset.id === ui.sel.id), ci = ri < 0 ? -1 : cells[ri].findIndex(c => c.dataset.col === ui.sel.col);
+  if (ri < 0) return;
+  if (e.key === 'ArrowDown') ri = Math.min(cells.length - 1, ri + 1); else if (e.key === 'ArrowUp') ri = Math.max(0, ri - 1);
+  else if (e.key === 'ArrowRight') ci = Math.min(cells[ri].length - 1, ci + 1); else if (e.key === 'ArrowLeft') ci = Math.max(0, ci - 1); else return;
+  e.preventDefault();
+  const nc = cells[ri][ci]; select(nc.dataset.id, nc.dataset.col);
+  nc.scrollIntoView({ block: 'nearest' }); const b = nc.getBoundingClientRect(), top = $('.top').offsetHeight;
+  if (b.top < top + 4) window.scrollBy(0, b.top - top - 8);
+});
+
+/* ---------- the art and crop drawer ---------- */
+let drawerId = null, live = null, drag = null, cropT = null;
+const RING = 98, HANDW = 124, FULLW = 176;
+function drawer(id) {
+  const r = byId[id]; drawerId = id;
+  live = { crop: [...(S.crops.CROP[id] || [.5, .4, .7])], strip: [...(S.crops.STRIP[id] || [.5, .35, 1])], full: S.crops.FULL[id] ?? null };
+  const a = cell(r, 'art'), c = cell(r, 'crop');
+  const d = $('#drawer');
+  d.innerHTML = `<header><h3>${esc(r.rarity === 'L' && !r.name && !r.parent ? r.species : nameOf(r))}</h3><span>${RNAME[r.rarity]} · ${esc(r.habitat)} · ${esc(r.id)}</span><button data-x aria-label="Close">×</button></header>
+    <section data-col="art"><h4 class="dh">Art</h4>${rvHTML(r, 'art')}<div class="bigart">${r.art ? `<img src="${artUrl(id)}" alt="">` : '<div class="noart" style="width:170px;height:255px"></div>'}
+      <div class="side">${lvButtons(a)}<textarea data-note rows="4" placeholder="Note: what's off, or what the next painting should do">${esc(a.note || '')}</textarea>
+      <div class="hint">${r.art ? 'New paintings come from Card Art Review; installing one sets this back to draft.' : 'Not painted yet.'}</div></div></div></section>
+    ${r.art ? `<section data-col="crop"><h4 class="dh">Crop</h4>${rvHTML(r, 'crop')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start">${lvButtons(c)}<textarea data-note rows="1" placeholder="Note">${esc(c.note || '')}</textarea></div><div class="frames">
+      <div class="col"><div class="bring drag" data-drag="ring"></div><div class="zm"><button data-z="ring:-">−</button><button data-z="ring:+">+</button></div><span class="lbl">Board</span></div>
+      <div class="col hand">${cardHTML(r, { compact: true, kind: 'hand', live })}<span class="lbl">Hand</span></div>
+      <div class="col big">${cardHTML(r, { kind: 'full', live })}<span class="lbl">Card</span></div>
+      <div class="col"><div class="strips"><div class="st"><div class="art drag" data-drag="strip"></div><span class="n">${esc(nameOf(r))}</span></div><div class="dtile drag" data-drag="tile"><b>${esc(nameOf(r))}</b></div></div>
+        <div class="zm"><button data-z="strip:-">−</button><button data-z="strip:+">+</button></div><span class="lbl">Deck list · Deck cover</span></div></div>
+      <div class="hint">Drag a picture to move it; scroll on it or use − + to zoom. The full card only moves up and down. Changes save to art.js as you go.</div></section>` : ''}`;
+  d.hidden = false;
+  d.querySelectorAll('[data-bg]').forEach(el => el.style.backgroundImage = `url(${el.dataset.bg})`);
+  paintCrop();
+}
+function closeDrawer() { $('#drawer').hidden = true; drawerId = null; }
+function stripCss(id, s, W, H, ax) { const [x, y, z] = s, w = W * z, h = w * 1.5, fit = (v, lo) => Math.min(0, Math.max(lo, v));
+  return `background-image:url(${artUrl(id)});background-size:${w}px ${h}px;background-position:${fit(ax * W - x * w, W - w)}px ${fit(H / 2 - y * h, H - h)}px`; }
+function paintCrop() {
+  const d = $('#drawer'), id = drawerId; if (!d.querySelector('.frames')) return;
+  d.querySelector('.bring').style.cssText = ringCss(id, RING, live.crop);
+  const big = d.querySelector('.big .pic'); big.style.backgroundPosition = `50% ${fy(id, live.full, live.crop)}%`;
+  const hand = d.querySelector('.hand .pic'); hand.style.backgroundPosition = `50% ${lift(id, live.full, live.crop)}em`;
+  d.querySelector('.st .art').style.cssText = stripCss(id, live.strip, 166, 30, .55);
+  d.querySelector('.dtile').style.cssText = stripCss(id, live.strip, 284, 56, .7);
+}
+const r3 = n => Math.round(n * 1000) / 1000;
+function cropChanged() {
+  paintCrop(); clearTimeout(cropT);
+  cropT = setTimeout(async () => { try { await post('crop', { id: drawerId, crop: live.crop.map(r3), strip: live.strip.map(r3), full: live.full === null ? 'reset' : r3(live.full) }); toast('Crop saved'); render(); } catch (e) {} }, 700);
+}
+const zoom = (which, k) => { if (which === 'ring') live.crop[2] = clamp(live.crop[2] / k, .2, 1); else live.strip[2] = clamp(live.strip[2] * k, 1, 5); cropChanged(); };
+$('#drawer').addEventListener('click', async e => {
+  const t = e.target;
+  if (t.closest('[data-x]')) { closeDrawer(); return; }
+  const z = t.closest('[data-z]'); if (z) { const [w, d] = z.dataset.z.split(':'); zoom(w, d === '+' ? 1.08 : 1 / 1.08); return; }
+  const lvb = t.closest('[data-lv]'); if (lvb) { const col = lvb.closest('section').dataset.col; try { await post('level', { id: drawerId, col, lv: lvb.dataset.lv }); } catch (err) { return; } render(); drawer(drawerId); return; }
+  const sec = t.closest('section');
+  if (t.closest('[data-accept]')) { await post('accept', { id: drawerId, col: sec.dataset.col }); render(); drawer(drawerId); return; }
+  if (t.closest('[data-revert]')) { await post('revert', { id: drawerId, col: sec.dataset.col }); render(); drawer(drawerId); return; }
+});
+$('#drawer').addEventListener('change', async e => {
+  if (!e.target.matches('[data-note]')) return;
+  const col = e.target.closest('section').dataset.col;
+  try { await post('note', { id: drawerId, col, note: e.target.value.trim() }); toast('Note saved'); render(); } catch (err) {}
+});
+$('#drawer').addEventListener('pointerdown', e => {
+  const t = e.target.closest('[data-drag]'); if (!t) return;
+  e.preventDefault(); t.setPointerCapture(e.pointerId); drag = { kind: t.dataset.drag, x: e.clientX, y: e.clientY };
+});
+document.addEventListener('pointermove', e => {
+  if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY; if (!dx && !dy) return;
+  if (drag.kind === 'ring') { const w = RING / live.crop[2]; live.crop[0] -= dx / w; live.crop[1] -= dy / (w * 1.5); }
+  else if (drag.kind === 'strip' || drag.kind === 'tile') { const W = drag.kind === 'tile' ? 284 : 166, w = W * live.strip[2]; live.strip[0] -= dx / w; live.strip[1] -= dy / (w * 1.5); }
+  else { const em = (drag.kind === 'full' ? FULLW : HANDW) / 20, y = live.full ?? live.crop[1]; live.full = clamp(y - dy / (30 * em), VIS / 2, 1 - VIS / 2); }
+  cropChanged();
+});
+const endDrag = () => { drag = null; };
+document.addEventListener('pointerup', endDrag); document.addEventListener('pointercancel', endDrag);
+$('#drawer').addEventListener('wheel', e => {
+  const t = e.target.closest('[data-drag]'); if (!t || !['ring', 'strip', 'tile'].includes(t.dataset.drag)) return;
+  e.preventDefault(); zoom(t.dataset.drag === 'ring' ? 'ring' : 'strip', Math.exp(-e.deltaY * .0015));
+}, { passive: false });
+
+(async () => {
+  try { await loadState(); } catch (e) { $('#main').innerHTML = '<p class="none">The card server is not running. Start it with ./cards in the game repo.</p>'; return; }
+  render();
+})();
+</script>
+</body></html>

@@ -1,0 +1,2251 @@
+{
+  "african_wild_dog": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "alley_cat": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "anaconda": {
+    "art": {
+      "lv": "problem",
+      "note": "think we should re-make this card since we already have 7 strength Apex Predator and I don’t want to have 2 of the same cards I think.",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "anteater": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "armadillo": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "arna": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "arne": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "aurum": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "baboon": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "baboon_legend": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "baby_bear": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "baby_fish": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "baby_gorilla": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "baby_lion": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "baby_owl": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "baby_python": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "baby_squirrel": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "baby_turtle": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "baby_wolf": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "baby_zebra": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "badger": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "barley": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "barracuda": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "bat": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "beaver": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "big_gus": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "bird_egg": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "black_bear": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "black_mamba": {
+    "art": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "black_panther": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "black_swan": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "blue_whale": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "boar": {
+    "art": {
+      "note": "needs repainting for the new text (the boar charging an intruder).",
+      "by": "martin",
+      "lv": "fine"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "boar_legend": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "bobcat": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "borealis": {
+    "animal": {
+      "lv": "draft",
+      "by": "martin"
+    }
+  },
+  "brutus": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "draft",
+      "by": "martin"
+    }
+  },
+  "bush_dog": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "butterfly": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "butterfly_legend": {
+    "effect": {
+      "note": "Watch in play: the five stages and their power ladder.",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "butterfly_legend_butterfly": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "butterfly_legend_caterpillar": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "butterfly_legend_chrysalis": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "butterfly_legend_monarch": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "cairn": {
+    "animal": {
+      "lv": "draft",
+      "by": "martin"
+    }
+  },
+  "cape_buffalo": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "capybara": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "caracal": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "caterpillar": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "chameleon": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "cheetah": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "chimpanzee": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "chinchilla": {
+    "effect": {
+      "note": "Its old effect (an extra action next turn) went to the Chipmunk; needs a new one.",
+      "by": "martin"
+    }
+  },
+  "chipmunk": {
+    "art": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "clarion": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "draft",
+      "by": "martin"
+    }
+  },
+  "cod": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "coyote": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "crocodile": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "cuckoo": {
+    "effect": {
+      "note": "Cuckoo Egg (token, 0): When you draw this, your opponent draws a card.",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "cuckoo_egg": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "dart_frog": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "deer": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "dhole": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "dingo": {
+    "effect": {
+      "note": "The pack growth launches on a canine in the launch six; the Dingo waits for Australia.",
+      "by": "martin"
+    }
+  },
+  "dormouse": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "dung_beetle": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "eagle": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin",
+      "note": "The vanilla flyer."
+    },
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "earthworm": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "egg_eater": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "elephant": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "ember": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "eon": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "draft",
+      "by": "martin"
+    }
+  },
+  "falcon": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "falstaff": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "fathom": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "flying_squirrel": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "fox": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "gaboon_viper": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "gale": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "gazelle": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "giraffe": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "giraffe_legend": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "golden_orb_weaver": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "gopher": {
+    "art": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "gorilla": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "greywhisker": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "grizzly_bear": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "groundhog": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "guard_wasp": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "hamster": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "hare": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "hawk": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "hedgehog": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "hippopotamus": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "honey_badger": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "honey_badger_legend": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "hornet": {
+    "art": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "hummingbird": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "hyena": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "jackal": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "jaguar": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "jellyfish": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "jellyfish_legend": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "jerboa": {
+    "effect": {
+      "note": "Its old effect went to the Naked Mole-Rat (Savanna); needs a new one.",
+      "by": "martin"
+    }
+  },
+  "king_theron": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "leopard": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "leopard_legend": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "lion": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "lobo": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "lynx": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "macaque": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "macaque_legend": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "macaw": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "mackerel": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "magpie": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "mahi_mahi": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "manta_ray": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "manta_ray_legend": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "meerkat": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "methuselah": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "draft",
+      "by": "martin"
+    }
+  },
+  "mocha": {
+    "effect": {
+      "note": "Watch in play: close to a full board wipe.",
+      "by": "martin"
+    }
+  },
+  "moose": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "mosquito": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "mouse": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "muskrat": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "naked_mole_rat": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "nurse_bee": {
+    "art": {
+      "lv": "fine",
+      "note": "either this or nurse bumblebee should change, they look way too similar especially with both having 3 strength and very similar effects",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "nurse_bumblebee": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "octopus_legend": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "okapi": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "orangutan": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "orca": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "owl": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "oxpecker": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "oxpecker_legend": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "pestis": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "piranha": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "piranha_legend": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "poppy": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "porcupine": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "praying_mantis": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "prince_leo": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "princess_lea": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "pup": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "python": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "queen_adira": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "queen_bee": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "queen_honoria": {
+    "art": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "queen_marabunta": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "rat": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "raven": {
+    "art": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "raven_legend": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "remora": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "rhinoceros": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "rusty": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "sardine": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "scarlett": {
+    "effect": {
+      "note": "Poppy and Rusty: tokens, Canine, 1.",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "scrooge": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "draft",
+      "by": "martin"
+    }
+  },
+  "serval": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "silverback": {
+    "effect": {
+      "note": "Watch in play: +2 to the whole hand may be too strong (dial: the +2 or the 7).",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "draft",
+      "by": "martin",
+      "note": "idk, isn't that a general name for Gorilla male?"
+    }
+  },
+  "sirocco": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "draft",
+      "by": "martin"
+    }
+  },
+  "skunk": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "sloth": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "sloth_legend": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "snake_egg": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "snow_leopard": {
+    "effect": {
+      "note": "Its old effect went to the Leopard (Savanna); needs a new one.",
+      "by": "martin"
+    }
+  },
+  "soldier_ant": {
+    "art": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "squirrel": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "squirrel_legend": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "stork": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "street_dog": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "sunfish": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "swordfish": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "tarsier": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "termite_king": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "termite_queen": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "tiger": {
+    "habitat": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "tag": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "strength": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "tortoise": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "tuna": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "tuna_legend": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "vesper": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "viper": {
+    "art": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "vulture": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "whale_shark": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "wildebeest": {
+    "art": {
+      "lv": "fine",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "wildebeest_legend": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "wolf": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "worker_ant": {
+    "art": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "worker_bee": {
+    "art": {
+      "lv": "locked",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "worker_wasp": {
+    "art": {
+      "lv": "fine",
+      "note": "is this Forest? if so, change to Fine (it is Forest; set to Fine)",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "worm": {
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "zebra": {
+    "art": {
+      "note": "the zebra kicking away a lion about to catch it (sells the bounce).",
+      "by": "martin",
+      "lv": "fine"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  },
+  "zebra_legend": {
+    "art": {
+      "lv": "draft",
+      "by": "martin"
+    },
+    "crop": {
+      "lv": "fine",
+      "by": "martin"
+    }
+  }
+}
