@@ -1655,6 +1655,7 @@ def roar_condition(state, player, card_id, unit=None):
         "muskrat": lambda: _fed_this_turn(state, player),
         "groundhog": lambda: _fed_this_turn(state, player),
         "bobcat": lambda: others("Cat") >= 1,
+        "serval": lambda: others("Cat") >= 1,
         "tutorial_lynx": lambda: others("Cat") >= 1,
         "alley_cat": lambda: others("Cat") >= 1,
         "worker_bee": lambda: others("Worker") >= 1,
@@ -1913,10 +1914,9 @@ OPS["shuck_return"] = _op_shuck_return
 # --- Cats -------------------------------------------------------------------------------------------------------
 
 def _serval_place(state, unit, cr):
-    """Roar: set an adjacent enemy's strength to 1."""
-    _push_choose(state, unit.owner, [nb for nb, top in _adjacent_tops(state, cr)
-                                     if top.owner != unit.owner and statics.can_be_chosen(state, top, unit.owner, nb)],
-                 "set_strength")
+    """Roar: if you control another Cat, remove an adjacent enemy."""
+    if roar_condition(state, unit.owner, unit.card_id, unit):
+        _push_remove_choice(state, unit.owner, unit.card_id, _adjacent_enemy_targets(state, unit, cr))
 
 
 def _house_cat_place(state, unit, cr):

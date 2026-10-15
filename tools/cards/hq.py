@@ -227,7 +227,7 @@ def regenerate() -> str:
     if out.returncode:
         raise RuntimeError(out.stderr or out.stdout)
     subprocess.run([str(PY), "-m", "animal_kingdom.render.deck_docs"], cwd=ROOT, capture_output=True)
-    return out.stdout.strip()
+    return "\n".join(l for l in out.stdout.splitlines() if not l.startswith("skipped "))   # planned cards: no strength yet
 
 
 def _apply_value(r: dict, col: str, value) -> None:

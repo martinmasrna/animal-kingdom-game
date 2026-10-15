@@ -357,11 +357,16 @@ def test_badger_draws_an_animal_with_roam():
 
 # ==================================================================================== Cats
 
-def test_serval_sets_an_adjacent_enemys_strength_to_one():
+def test_serval_removes_an_adjacent_enemy_of_any_strength_only_beside_another_cat():
     s = make_state(hands={"A": ["serval"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    big = put(s, "2,2", "elephant", "B")
+    put(s, "2,2", "elephant", "B")
+    apply_click(s, PlaceAction("serval", ("cr", "1,2")))          # no other Cat: nothing happens
+    assert s.top_unit("2,2").card_id == "elephant"
+    s = make_state(hands={"A": ["serval"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,1", "lion", "A")
+    put(s, "2,2", "elephant", "B")
     apply_click(s, PlaceAction("serval", ("cr", "1,2")))
-    assert effective_strength(s, big) == CFG.serval_set
+    assert s.top_unit("2,2") is None and "elephant" in s.remove_pile
 
 
 def test_lynx_draws_only_when_placed_on_an_enemy():

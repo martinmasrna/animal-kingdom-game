@@ -85,7 +85,6 @@ class Config:
     butterfly_legend_stage4_grant: int = 1   # the Butterfly stage: every animal in your hand +1
     butterfly_legend_stage5_grant: int = 2   # the Monarch stage: every animal in your hand +2
     butterfly_legend_stage5_draw: int = 2    # the Monarch stage: draw 2
-    serval_set: int = 1                  # Serval: an adjacent enemy's strength becomes this
 
     # --- Token spawns (Canine go-wide; 2026-07-05) ---
     alpha_pups: int = 2                  # Pups Scarlett places on adjacent empty crossroads

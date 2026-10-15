@@ -426,7 +426,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Cat",
-     "text": "Roar: set an adjacent enemy's strength to 1."
+     "text": "Roar: if you control another Cat, remove an adjacent enemy."
     },
     {
      "habitat": "Savanna",

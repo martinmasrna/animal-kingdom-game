@@ -1899,6 +1899,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: set an adjacent enemy's strength to 1."
+      },
+      "note": "Martin, 2026-10-15: the Cats' answer to big animals is removal again (Queen Adira draws); setting to 1 was weak and didn't fit a cat.",
+      "by": "claude",
+      "at": 1792070194
     }
   },
   "silverback": {

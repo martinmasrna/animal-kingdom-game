@@ -1034,7 +1034,7 @@
         "Cat"
       ],
       "base_strength": 4,
-      "text": "Roar: set an adjacent enemy's strength to 1.",
+      "text": "Roar: if you control another Cat, remove an adjacent enemy.",
       "keywords": [],
       "species": "Serval",
       "habitat": "Savanna",

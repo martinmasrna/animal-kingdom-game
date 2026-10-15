@@ -386,7 +386,6 @@ def test_the_launch_decks_other_numbers_match_config():
     assert int(re.search(r"produce (\d+) more food", c["wildebeest_legend"].text).group(1)) == cfg.migration_bonus
     assert int(re.search(r"produce (\d+) less food", c["boar_legend"].text).group(1)) == cfg.boar_penalty
     assert int(re.search(r"Reach (\d+)", c["great_white_shark"].text).group(1)) == cfg.shark_reach
-    assert int(re.search(r"strength to (\d+)", c["serval"].text).group(1)) == cfg.serval_set
     assert "Poppy and Rusty" in c["scarlett"].text and cfg.alpha_pups == 2
 
 
