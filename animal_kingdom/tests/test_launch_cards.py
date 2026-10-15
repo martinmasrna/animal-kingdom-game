@@ -659,7 +659,7 @@ def test_whale_shark_draws_a_card_at_the_end_of_your_turn():
 
 def test_silverback_trains_the_whole_hand_and_the_grizzly_counts_it():
     s = make_state(hands={"A": ["silverback", "lion", "grizzly_bear"]})
-    assert placement_strength(s, hand_inst(s, "A", "grizzly_bear")) == 2 + 2   # two other cards in hand
+    assert placement_strength(s, hand_inst(s, "A", "grizzly_bear")) == load_cards()["grizzly_bear"].base_strength + 2   # two other cards in hand
     rules.apply_action(s, PlaceAction("silverback", ("cr", "1,2")))
     assert hand_inst(s, "A", "lion").strength_counter == CFG.silverback_grant
 

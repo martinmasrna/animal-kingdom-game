@@ -2239,7 +2239,7 @@
       "tags": [
         "Bear"
       ],
-      "base_strength": 2,
+      "base_strength": 0,
       "text": "Has +1 strength for each card in your hand.",
       "keywords": [],
       "species": "Grizzly Bear",
