@@ -16,7 +16,7 @@ import os
 import random
 from typing import Optional, Sequence
 
-from .engine.cards import COLLECTIBLE_SLUGS, COPY_LIMITS, Card, DECK_SLUGS, NON_DECK_SLUGS, load_cards
+from .engine.cards import COLLECTIBLE_SLUGS, COPY_LIMITS, Card, DECK_SLUGS, NON_DECK_SLUGS, STARTER_DECKS, load_cards
 
 
 def _build_premade_decks(cards: dict[str, Card]) -> dict[str, list[str]]:
@@ -25,7 +25,9 @@ def _build_premade_decks(cards: dict[str, Card]) -> dict[str, list[str]]:
     Non-draftable cards (tokens, reserve designs; see NON_DECK_SLUGS) are skipped — they
     live in the registry but belong to no premade deck.
     """
-    decks: dict[str, list[str]] = {slug: [] for slug in DECK_SLUGS}
+    # Menu order, not DECK_SLUGS (a set): a set's order changes with each process's hash seed, and with it
+    # every sim's pair order and so its game seeds.
+    decks: dict[str, list[str]] = {d["slug"]: [] for d in STARTER_DECKS}
     for card in cards.values():
         if card.deck in NON_DECK_SLUGS:
             continue
