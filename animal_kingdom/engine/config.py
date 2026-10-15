@@ -91,6 +91,7 @@ class Config:
     stork_younglings: int = 2            # Stork: random younglings added to your hand
     cuckoo_eggs: int = 2                 # Cuckoo: Cuckoo Eggs shuffled into your opponent's deck
     earthworm_worms: int = 2             # Earthworm: Worms placed on its crossroad when it's removed
+    roach_king_growth: int = 1           # Roach King: comes back with +1 strength
 
     # --- Thresholds / strength gates ---
     unnamed_canine_draw_threshold: int = 5   # draw if Unnamed Canine has >= this strength
@@ -101,6 +102,7 @@ class Config:
     manta_legend_regions: int = 2        # the legendary Manta Ray: draw at Dusk with this many regions...
     manta_legend_draw: int = 2           # ...this many cards
     oxpecker_min: int = 8                # Oxpecker: count starting-deck animals of strength >= this
+    vulture_removals: int = 3            # Vulture: lands at your Dusk if this many animals were removed this turn
 
     # --- Removal-strength caps on Roar removals ---
     jaguar_max: int = 4

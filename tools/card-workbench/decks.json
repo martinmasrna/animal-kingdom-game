@@ -7,18 +7,6 @@
    "precon": true,
    "cards": [
     {
-     "habitat": "Meadow",
-     "id": "aristocrats-0",
-     "name": "Cuco",
-     "note": "",
-     "rarity": "L",
-     "species": "Cuckoo",
-     "status": "proposed",
-     "str": 6,
-     "tag": "Bird",
-     "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal."
-    },
-    {
      "habitat": "Forest",
      "id": "aristocrats-1",
      "name": "Ember",
@@ -31,30 +19,6 @@
      "text": "Flight. When this is removed, shuffle it into your deck."
     },
     {
-     "habitat": "City",
-     "id": "aristocrats-2",
-     "name": "",
-     "note": "",
-     "rarity": "L",
-     "species": "Opossum",
-     "status": "proposed",
-     "str": 3,
-     "tag": "",
-     "text": "When an ally is covered, remove it and draw a card."
-    },
-    {
-     "habitat": "Jungle",
-     "id": "aristocrats-3",
-     "name": "",
-     "note": "",
-     "rarity": "L",
-     "species": "Sloth",
-     "status": "proposed",
-     "str": 4,
-     "tag": "",
-     "text": "Your Dusk effects happen twice."
-    },
-    {
      "habitat": "Meadow",
      "id": "aristocrats-4",
      "name": "Praying Mantis",
@@ -65,30 +29,6 @@
      "str": 3,
      "tag": "",
      "text": "Roar: remove an adjacent ally to draw 2 cards."
-    },
-    {
-     "habitat": "Jungle",
-     "id": "aristocrats-5",
-     "name": "Tarantula",
-     "note": "",
-     "rarity": "R",
-     "species": "Tarantula",
-     "status": "proposed",
-     "str": 5,
-     "tag": "Arachnid",
-     "text": "Dawn: remove a random adjacent ally and gain its strength."
-    },
-    {
-     "habitat": "Open Ocean",
-     "id": "aristocrats-6",
-     "name": "Sea Turtle",
-     "note": "",
-     "rarity": "R",
-     "species": "Sea Turtle",
-     "status": "proposed",
-     "str": 5,
-     "tag": "",
-     "text": "Dusk: place a Baby Turtle on an adjacent empty crossroad."
     },
     {
      "habitat": "City",
@@ -112,19 +52,7 @@
      "status": "proposed",
      "str": 2,
      "tag": "Fish",
-     "text": "Roar: if an ally was removed this turn, remove an adjacent enemy."
-    },
-    {
-     "habitat": "Savanna",
-     "id": "aristocrats-9",
-     "name": "Hyena",
-     "note": "",
-     "rarity": "C",
-     "species": "Hyena",
-     "status": "proposed",
-     "str": 4,
-     "tag": "",
-     "text": "Dusk: gain 5 food for each of your animals removed this turn."
+     "text": "Roar: if an ally was removed this turn, remove an adjacent animal."
     },
     {
      "habitat": "Savanna",
@@ -134,9 +62,9 @@
      "rarity": "C",
      "species": "Vulture",
      "status": "proposed",
-     "str": 3,
+     "str": 2,
      "tag": "Bird",
-     "text": "Flight. Dusk: if an ally was removed this turn, draw a card."
+     "text": "Flight. Dusk: after 3 or more removals this turn, this lands from your hand or deck."
     },
     {
      "habitat": "City",
@@ -148,19 +76,19 @@
      "status": "proposed",
      "str": 4,
      "tag": "Arachnid",
-     "text": "Dawn: remove a random adjacent ally."
+     "text": "Dawn: remove the weakest animal next to this."
     },
     {
      "habitat": "Meadow",
      "id": "aristocrats-12",
      "name": "Earthworm",
      "note": "",
-     "rarity": "C",
+     "rarity": "R",
      "species": "Earthworm",
      "status": "proposed",
      "str": 1,
      "tag": "",
-     "text": "When this is removed, place two Worms on its crossroad."
+     "text": "When this is removed, draw a card and place two Worms on its crossroad."
     },
     {
      "habitat": "City",
@@ -172,7 +100,55 @@
      "status": "proposed",
      "str": 1,
      "tag": "",
-     "text": "When this is removed, put it back where it was and draw a card."
+     "text": "When this is removed, put it back where it was and place a Roach on an adjacent empty crossroad."
+    },
+    {
+     "habitat": "Open Ocean",
+     "id": "pool-2",
+     "name": "Sperm Whale",
+     "note": "",
+     "rarity": "R",
+     "species": "Sperm Whale",
+     "status": "proposed",
+     "str": 8,
+     "tag": "",
+     "text": "Titan. Roar: remove all adjacent animals."
+    },
+    {
+     "habitat": "Meadow",
+     "id": "pool-toad",
+     "name": "Toad",
+     "note": "",
+     "rarity": "C",
+     "species": "Toad",
+     "status": "open",
+     "str": 1,
+     "tag": "",
+     "text": "Reach 2. When this is removed, remove all animals next to it."
+    },
+    {
+     "habitat": "Meadow",
+     "id": "pool-locust",
+     "name": "Locust",
+     "note": "",
+     "rarity": "L",
+     "species": "Grasshopper",
+     "status": "open",
+     "str": 2,
+     "tag": "",
+     "text": "Roar: remove all other animals and discard your hand."
+    },
+    {
+     "habitat": "City",
+     "id": "pool-roach-king",
+     "name": "Roach King",
+     "note": "",
+     "rarity": "L",
+     "species": "Cockroach",
+     "status": "open",
+     "str": 1,
+     "tag": "",
+     "text": "When this is removed, put it back where it was with +1 strength and draw a card."
     }
    ]
   },
@@ -2131,18 +2107,6 @@
      "text": "Apex Predator. If an animal was removed this turn, this has Reach 3."
     },
     {
-     "habitat": "Open Ocean",
-     "id": "pool-2",
-     "name": "Sperm Whale",
-     "note": "",
-     "rarity": "R",
-     "species": "Sperm Whale",
-     "status": "proposed",
-     "str": 8,
-     "tag": "",
-     "text": "Titan. Roar: remove all adjacent animals."
-    },
-    {
      "habitat": "Meadow",
      "id": "pool-3",
      "name": "Butterfly",
@@ -2540,18 +2504,6 @@
     },
     {
      "habitat": "Meadow",
-     "id": "pool-toad",
-     "name": "Toad",
-     "note": "",
-     "rarity": "",
-     "species": "Toad",
-     "status": "open",
-     "str": null,
-     "tag": "",
-     "text": ""
-    },
-    {
-     "habitat": "Meadow",
      "id": "pool-snail",
      "name": "Snail",
      "note": "",
@@ -2777,6 +2729,78 @@
      "str": null,
      "tag": "",
      "text": ""
+    },
+    {
+     "habitat": "Meadow",
+     "id": "aristocrats-0",
+     "name": "Cuco",
+     "note": "",
+     "rarity": "L",
+     "species": "Cuckoo",
+     "status": "proposed",
+     "str": 6,
+     "tag": "Bird",
+     "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal."
+    },
+    {
+     "habitat": "City",
+     "id": "aristocrats-2",
+     "name": "",
+     "note": "",
+     "rarity": "L",
+     "species": "Opossum",
+     "status": "proposed",
+     "str": 3,
+     "tag": "",
+     "text": "When an ally is covered, remove it and draw a card."
+    },
+    {
+     "habitat": "Jungle",
+     "id": "aristocrats-3",
+     "name": "",
+     "note": "",
+     "rarity": "L",
+     "species": "Sloth",
+     "status": "proposed",
+     "str": 4,
+     "tag": "",
+     "text": "Your Dusk effects happen twice."
+    },
+    {
+     "habitat": "Jungle",
+     "id": "aristocrats-5",
+     "name": "Tarantula",
+     "note": "",
+     "rarity": "R",
+     "species": "Tarantula",
+     "status": "proposed",
+     "str": 5,
+     "tag": "Arachnid",
+     "text": "Dawn: remove a random adjacent ally and gain its strength."
+    },
+    {
+     "habitat": "Open Ocean",
+     "id": "aristocrats-6",
+     "name": "Sea Turtle",
+     "note": "",
+     "rarity": "R",
+     "species": "Sea Turtle",
+     "status": "proposed",
+     "str": 5,
+     "tag": "",
+     "text": "Dusk: place a Baby Turtle on an adjacent empty crossroad."
+    },
+    {
+     "habitat": "Savanna",
+     "id": "aristocrats-9",
+     "name": "Hyena",
+     "note": "",
+     "rarity": "C",
+     "species": "Hyena",
+     "status": "proposed",
+     "str": 4,
+     "tag": "",
+     "text": "Dusk: gain 5 food for each of your animals removed this turn."
     }
    ]
   }

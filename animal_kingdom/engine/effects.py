@@ -933,6 +933,7 @@ def end_of_turn(state: GameState, player: str) -> None:
     End-of-turn effects are choice-free (auto/deterministic) so the turn can still advance
     without a pending decision - see rules._end_turn.
     """
+    _vultures_dusk(state, player)
     _push_timed_hooks(state, player, "on_end_of_turn")
 
 
@@ -1755,8 +1756,12 @@ def _tarantula_sot(state, unit, cr):
 
 
 def _city_spider_sot(state, unit, cr):
-    """Dawn: remove a random adjacent ally. With a Cockroach beside it, a death and a card every turn."""
-    _eat_random_ally(state, unit, cr)
+    """Dawn: remove the weakest animal next to this, yours or theirs (ties at random: Dawn asks no decision)."""
+    options = [(nb, top) for nb, top in _adjacent_tops(state, cr) if statics.can_be_removed(state, top, nb)]
+    if options:
+        low = min(effective_strength(state, top) for _, top in options)
+        nb = state.rng.choice([nb for nb, top in options if effective_strength(state, top) == low])
+        remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
 
 
 def _sea_turtle_eot(state, unit, cr):
@@ -1777,15 +1782,30 @@ def _hyena_eot(state, unit, cr):
     _push_gain(state, unit.owner, state.config.hyena_food_per * _lost_this_turn(state, unit.owner))
 
 
-def _vulture_eot(state, unit, cr):
-    """Dusk: if an ally was removed this turn, draw a card."""
-    if _lost_this_turn(state, unit.owner):
-        _push_draw(state, unit.owner, 1)
+def _vultures_dusk(state, player):
+    """Vulture: at your Dusk, if 3 or more animals were removed this turn, every Vulture in your hand and deck lands on a
+    random empty crossroad, all at once (Dusk asks no decision). Not a placement from the hand: nothing Roars."""
+    if state.turn_flags.get("lost_A", 0) + state.turn_flags.get("lost_B", 0) < state.config.vulture_removals:
+        return
+    for inst in [u for u in state.hands[player] if u.card_id == "vulture"]:
+        empty = sorted(c for c in state.game_map.crossroads if not state.board.get(c))
+        if not empty:
+            return
+        state.hands[player].remove(inst)
+        _land_unit(state, player, inst, state.rng.choice(empty), from_hand=False, roar=False, play=False)
+    while "vulture" in state.decks[player]:
+        empty = sorted(c for c in state.game_map.crossroads if not state.board.get(c))
+        if not empty:
+            return
+        state.decks[player].remove("vulture")
+        _land_unit(state, player, UnitInstance("vulture", player, state.new_iid()), state.rng.choice(empty),
+                   from_hand=False, roar=False, play=False)
 
 
 def _earthworm_remove(state, unit, cr, pos):
     """When this is removed, place two Worms on its crossroad: they land on top, as placements do, while the crossroad is
-    empty or yours. Under an enemy there is no room for them (rulings.md: Worms never cover an enemy)."""
+    empty or yours. Under an enemy there is no room for them (rulings.md: Worms never cover an enemy). And draw a card."""
+    draw_cards(state, unit.owner, 1)
     for _ in range(state.config.earthworm_worms):
         top = state.top_unit(cr)
         if top is not None and top.owner != unit.owner or state.result is not None:
@@ -1798,17 +1818,59 @@ def _worm_remove(state, unit, cr, pos):
     draw_cards(state, unit.owner, 1)
 
 
-def _cockroach_remove(state, unit, cr, pos):
-    """When this is removed, put it back where it was and draw a card. A fresh copy goes back into the same stack at the
-    same height (on top, or still buried), and it comes back, it isn't placed: nothing that reacts to a placement sees it
-    (a City Spider beside it would otherwise remove it for ever, drawing a card each time)."""
+def _put_back(state, unit, cr, pos, *, grow=0) -> None:
+    """A fresh copy of a removed unit goes back into the same stack at the same height (on top, or still buried). It comes
+    back, it isn't placed: nothing that reacts to a placement sees it (a City Spider beside it would otherwise eat it
+    for ever)."""
     if state.pile_take(unit.card_id, unit.owner):
-        back = UnitInstance(unit.card_id, unit.owner, state.new_iid())
+        back = UnitInstance(unit.card_id, unit.owner, state.new_iid(), strength_counter=unit.strength_counter + grow)
         stack = state.board.setdefault(cr, [])
         at = min(pos, len(stack))
         stack.insert(at, back)
         state.emit("place", player=unit.owner, iid=back.iid, card=back.card_id, cr=cr, from_hand=False, at=at)
+
+
+def _cockroach_remove(state, unit, cr, pos):
+    """When this is removed, put it back where it was and place a Roach on an adjacent empty crossroad (a random one)."""
+    _put_back(state, unit, cr, pos)
+    empty = _empty_neighbors(state, cr)
+    if empty and state.result is None:
+        _spawn(state, unit.owner, "roach", state.rng.choice(empty))
+
+
+def _roach_king_remove(state, unit, cr, pos):
+    """When this is removed, put it back where it was with +1 strength and draw a card."""
+    _put_back(state, unit, cr, pos, grow=state.config.roach_king_growth)
     draw_cards(state, unit.owner, 1)
+
+
+def _toad_remove(state, unit, cr, pos):
+    """When this is removed, remove all animals next to it, yours or theirs: each in turn, so a chain settles."""
+    _remove_tops(state, unit, [nb for nb, _ in _adjacent_tops(state, cr)])
+
+
+def _locust_place(state, unit, cr):
+    """Roar: remove all other animals (the top of every other crossroad; what was under comes back up) and discard your
+    hand."""
+    for inst in list(state.hands[unit.owner]):
+        remove_from_hand(state, unit.owner, inst)
+    _remove_tops(state, unit, sorted(c for c in state.board if c != cr))
+
+
+def _remove_tops(state, unit, crs):
+    """Queue the removal of the top animal on each of `crs` (Toad, Locust)."""
+    for nb in reversed(crs):
+        top = state.top_unit(nb)
+        if top is not None:
+            state.effect_stack.append(remove_iid_step(top.iid, by_player=unit.owner, by_effect=True,
+                                                      source_iid=None, by_card=unit.card_id))
+
+
+def _piranha_place(state, unit, cr):
+    """Roar (if an ally was removed this turn): remove an adjacent animal, yours or theirs: the player picks it."""
+    _push_remove_choice(state, unit.owner, unit.card_id,
+                        [nb for nb, top in _adjacent_tops(state, cr)
+                         if statics.can_be_removed(state, top, nb) and statics.can_be_chosen(state, top, unit.owner, nb)])
 
 
 # --- Canines ----------------------------------------------------------------------------------------------------
@@ -2764,13 +2826,15 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "tarantula": {"on_start_of_turn": _tarantula_sot},
     "sea_turtle": {"on_end_of_turn": _sea_turtle_eot},
     "raccoon": {"on_place": _raccoon_place},
-    "piranha": {"on_place": _conditional(_removes())},
+    "piranha": {"on_place": _conditional(_piranha_place)},
     "hyena": {"on_end_of_turn": _hyena_eot},
-    "vulture": {"on_end_of_turn": _vulture_eot},
     "city_spider": {"on_start_of_turn": _city_spider_sot},
     "earthworm": {"on_remove": _earthworm_remove},
     "worm": {"on_remove": _worm_remove},
     "cockroach": {"on_remove": _cockroach_remove},
+    "roach_king": {"on_remove": _roach_king_remove},
+    "toad": {"on_remove": _toad_remove},
+    "locust": {"on_place": _locust_place},
     # Canines (Clarion's free roam and Dhole's equal roams are statics).
     "lobo": {"on_friendly_roam": _lobo_friendly_roam},
     "wolf_legend": {"on_roam": _wolf_legend_roam},

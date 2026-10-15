@@ -17,6 +17,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py show [ID...]                  the rows, as JSON
     .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (animal: "Name/Species" for a legendary)
     .venv/bin/python tools/cards/hq.py level ID COLUMN LEVEL [--note N]
+    .venv/bin/python tools/cards/hq.py move ID DECK                  to another deck (a starter deck's key, or pool)
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d] [--strip x,y,z] [--full y|reset]
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
 
@@ -345,6 +346,27 @@ def revert(card_id: str, col: str) -> None:
     _write(LEVELS, levels)
 
 
+def move(card_id: str, deck: str, by: str = "martin") -> str:
+    """Move a card to another deck of decks.json (a starter deck, or `pool`, the bench), keeping its workbench id and so its
+    engine id. Claude can't move a card with a locked value; the move is noted on its animal for Martin's review."""
+    r = _row(card_id)
+    decks = _read(DECKS)
+    if deck not in decks["decks"]:
+        raise Refused(f"no deck {deck!r}: one of {sorted(decks['decks'])}")
+    if r["deck"] == deck:
+        return ""
+    if by == "claude" and any(r["lv"][c]["lv"] == "locked" for c in VALUE_COLS):
+        raise Refused(f"{r['id']} has a locked value; ask Martin")
+    src, i = _deck_index(decks)[r["wid"]]
+    decks["decks"][deck]["cards"].append(decks["decks"][src]["cards"].pop(i))
+    _write(DECKS, decks)
+    report = regenerate()
+    levels = _levels()
+    _mark(levels, r, "animal", by, None, f"moved from {src} to {deck}")
+    _write(LEVELS, levels)
+    return report
+
+
 def add(name: str, habitat: str, species: str = "") -> str:
     """A planned card: only its animal and habitat, everything else blank (it waits in the pool; convert.py skips a card
     with no strength, so the game doesn't see it yet). Returns its id."""
@@ -366,6 +388,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("set"); s.add_argument("id"); s.add_argument("col", choices=VALUE_COLS); s.add_argument("value"); s.add_argument("--note")
     s = sub.add_parser("level"); s.add_argument("id"); s.add_argument("col", choices=COLUMNS); s.add_argument("lv", choices=LEVELS_ORDER); s.add_argument("--note")
     s = sub.add_parser("note"); s.add_argument("id"); s.add_argument("col", choices=COLUMNS); s.add_argument("note")
+    s = sub.add_parser("move"); s.add_argument("id"); s.add_argument("deck")
     s = sub.add_parser("add"); s.add_argument("name"); s.add_argument("habitat", choices=HABITATS); s.add_argument("--species", default="")
     s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
     a = ap.parse_args(argv)
@@ -383,6 +406,8 @@ def main(argv=None) -> None:
             set_level(a.id, a.col, a.lv, "claude", a.note)
         elif a.cmd == "note":
             set_note(a.id, a.col, a.note, "claude")
+        elif a.cmd == "move":
+            print(move(a.id, a.deck, "claude"))
         elif a.cmd == "add":
             print(add(a.name, a.habitat, a.species))
         elif a.cmd == "crop":

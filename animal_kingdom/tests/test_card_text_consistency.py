@@ -319,6 +319,7 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "butterfly_legend_monarch": ["butterfly_legend_stage5_grant"],
     "moose": ["moose_anthem"],
     "giraffe": ["giraffe_bonus"],
+    "roach_king": ["roach_king_growth"],
 }
 
 
@@ -347,7 +348,7 @@ def test_strength_bonus_text_matches_config():
     assert not problems, "card text / config desync:\n  " + "\n  ".join(problems)
 
 
-COUNT_THRESHOLD_RE = re.compile(r"(\d+) or more (animals|cards|strength|regions|Colony animals)")
+COUNT_THRESHOLD_RE = re.compile(r"(\d+) or more (animals|cards|strength|regions|Colony animals|removals)")
 
 # card_id -> the config attr of its printed "N or more <things>" threshold.
 THRESHOLDS = {
@@ -359,6 +360,7 @@ THRESHOLDS = {
     "guard_wasp": "guard_hornet_colony_threshold",
     "soldier_ant": "colony_synergy_threshold",
     "unnamed_canine": "unnamed_canine_draw_threshold",
+    "vulture": "vulture_removals",
 }
 
 

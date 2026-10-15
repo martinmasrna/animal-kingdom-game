@@ -46,7 +46,7 @@ LAUNCH_HABITATS = {"Savanna", "Forest", "Meadow", "Jungle", "City", "Open Ocean"
 # Only cards it makes itself (a token, a card added to a hand or a deck, what it evolves into), never one it finds.
 RELATED = {"butterfly_legend": ["butterfly_legend_caterpillar", "butterfly_legend_chrysalis", "butterfly_legend_butterfly",
                                 "butterfly_legend_monarch"],
-           "caterpillar": ["butterfly"], "arne": ["arna"], "earthworm": ["worm"], "cuckoo": ["cuckoo_egg"],
+           "caterpillar": ["butterfly"], "arne": ["arna"], "earthworm": ["worm"], "cockroach": ["roach"], "cuckoo": ["cuckoo_egg"],
            "sea_turtle": ["baby_turtle"], "sunfish": ["baby_fish"], "scarlett": ["poppy", "rusty"],
            "stork": ["baby_lion", "baby_wolf", "baby_squirrel", "baby_owl", "baby_python", "baby_bear", "baby_gorilla",
                      "baby_zebra"]}
@@ -76,6 +76,7 @@ def _token(cid, name, strength, tags=(), text="", keywords=(), rarity="common", 
 TOKENS = [
     _token("baby_turtle", "Baby Turtle", 0),                                   # Sea Turtle
     _token("worm", "Worm", 0, text="When this is removed, draw a card."),     # Earthworm
+    _token("roach", "Roach", 1),                                              # Cockroach
     _token("baby_fish", "Baby Fish", 0, ["Fish"]),                            # Sunfish
     _token("cuckoo_egg", "Cuckoo Egg", 0, ["Egg"], "When you draw this, your opponent draws a card."),   # Cuckoo
     _token("pup", "Pup", 1, ["Canine"]),                                      # the tutorial's opponent

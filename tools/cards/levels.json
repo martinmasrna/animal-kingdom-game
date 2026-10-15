@@ -782,6 +782,24 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "by": "claude",
+      "at": 1792085441
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "When this is removed, place two Worms on its crossroad."
+      },
+      "by": "claude",
+      "at": 1792085441
     }
   },
   "egg_eater": {
@@ -1242,6 +1260,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from aristocrats to pool",
+      "by": "claude",
+      "at": 1792085440
     }
   },
   "jackal": {
@@ -1623,6 +1650,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: if an ally was removed this turn, remove an adjacent enemy."
+      },
+      "by": "claude",
+      "at": 1792085440
     }
   },
   "piranha_legend": {
@@ -2002,6 +2038,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "note": "moved from aristocrats to pool",
+      "by": "claude",
+      "at": 1792085439
     }
   },
   "snake_egg": {
@@ -2264,6 +2309,24 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "by": "claude",
+      "at": 1792085440
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Dusk: if an ally was removed this turn, draw a card."
+      },
+      "by": "claude",
+      "at": 1792085803
     }
   },
   "whale_shark": {
@@ -2368,6 +2431,212 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    }
+  },
+  "cuco": {
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from aristocrats to pool",
+      "by": "claude",
+      "at": 1792085439
+    }
+  },
+  "opossum_legend": {
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "note": "moved from aristocrats to pool",
+      "by": "claude",
+      "at": 1792085439
+    }
+  },
+  "tarantula": {
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from aristocrats to pool",
+      "by": "claude",
+      "at": 1792085439
+    }
+  },
+  "sea_turtle": {
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from aristocrats to pool",
+      "by": "claude",
+      "at": 1792085440
+    }
+  },
+  "sperm_whale": {
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from pool to aristocrats",
+      "by": "claude",
+      "at": 1792085440
+    }
+  },
+  "cockroach": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "When this is removed, put it back where it was and draw a card."
+      },
+      "by": "claude",
+      "at": 1792085440
+    }
+  },
+  "city_spider": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Dawn: remove a random adjacent ally."
+      },
+      "by": "claude",
+      "at": 1792085441
+    }
+  },
+  "pool-toad": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792085441
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792085441
+    }
+  },
+  "toad": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792085442
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from pool to aristocrats",
+      "by": "claude",
+      "at": 1792085442
+    }
+  },
+  "pool-locust": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792085442
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792085442
+    }
+  },
+  "locust": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792085442
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from pool to aristocrats",
+      "by": "claude",
+      "at": 1792085442
+    }
+  },
+  "pool-roach-king": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792085443
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792085443
+    }
+  },
+  "roach_king": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792085443
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from pool to aristocrats",
+      "by": "claude",
+      "at": 1792085443
     }
   }
 }

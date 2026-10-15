@@ -10,29 +10,27 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Cuco** | 1 | Bird | 6 | Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal. |
 | **Ember** | 1 | Bird | 7 | Flight. When this is removed, shuffle it into your deck. |
-| **Opossum** | 1 | — | 3 | When an ally is covered, remove it and draw a card. |
-| **Sloth** | 1 | — | 4 | Your Dusk effects happen twice. |
+| **Locust** | 1 | — | 2 | Roar: remove all other animals and discard your hand. |
+| **Roach King** | 1 | — | 1 | When this is removed, put it back where it was with +1 strength and draw a card. |
 
 ### Rare
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Praying Mantis** | 2 | — | 3 | Roar: remove an adjacent ally to draw 2 cards. |
-| **Tarantula** | 2 | Arachnid | 5 | Dawn: remove a random adjacent ally and gain its strength. |
-| **Sea Turtle** | 2 | — | 5 | Dusk: place a Baby Turtle on an adjacent empty crossroad. |
 | **Raccoon** | 2 | — | 2 | Roar: return an animal from your Remove Pile to your hand. |
+| **Earthworm** | 2 | — | 1 | When this is removed, draw a card and place two Worms on its crossroad. |
+| **Sperm Whale** | 2 | — | 8 | Titan. Roar: remove all adjacent animals. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Piranha** | 3 | Fish | 2 | Roar: if an ally was removed this turn, remove an adjacent enemy. |
-| **Hyena** | 3 | — | 4 | Dusk: gain 5 food for each of your animals removed this turn. |
-| **Vulture** | 3 | Bird | 3 | Flight. Dusk: if an ally was removed this turn, draw a card. |
-| **City Spider** | 3 | Arachnid | 4 | Dawn: remove a random adjacent ally. |
-| **Earthworm** | 3 | — | 1 | When this is removed, place two Worms on its crossroad. |
-| **Cockroach** | 3 | — | 1 | When this is removed, put it back where it was and draw a card. |
+| **Piranha** | 3 | Fish | 2 | Roar: if an ally was removed this turn, remove an adjacent animal. |
+| **Vulture** | 3 | Bird | 2 | Flight. Dusk: after 3 or more removals this turn, this lands from your hand or deck. |
+| **City Spider** | 3 | Arachnid | 4 | Dawn: remove the weakest animal next to this. |
+| **Cockroach** | 3 | — | 1 | When this is removed, put it back where it was and place a Roach on an adjacent empty crossroad. |
+| **Toad** | 3 | — | 1 | Reach 2. When this is removed, remove all animals next to it. |
 
 <!-- cards:end -->

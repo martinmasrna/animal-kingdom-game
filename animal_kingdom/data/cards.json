@@ -307,21 +307,6 @@
       "workbench_id": "colony-13"
     },
     {
-      "id": "cuco",
-      "name": "Cuco",
-      "deck": "aristocrats",
-      "rarity": "legendary",
-      "tags": [
-        "Bird"
-      ],
-      "base_strength": 6,
-      "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal.",
-      "keywords": [],
-      "species": "Cuckoo",
-      "habitat": "Meadow",
-      "workbench_id": "aristocrats-0"
-    },
-    {
       "id": "ember",
       "name": "Ember",
       "deck": "aristocrats",
@@ -339,34 +324,6 @@
       "workbench_id": "aristocrats-1"
     },
     {
-      "id": "opossum_legend",
-      "name": "Opossum",
-      "deck": "aristocrats",
-      "rarity": "legendary",
-      "tags": [],
-      "base_strength": 3,
-      "text": "When an ally is covered, remove it and draw a card.",
-      "keywords": [],
-      "unnamed": true,
-      "species": "Opossum",
-      "habitat": "City",
-      "workbench_id": "aristocrats-2"
-    },
-    {
-      "id": "sloth_legend",
-      "name": "Sloth",
-      "deck": "aristocrats",
-      "rarity": "legendary",
-      "tags": [],
-      "base_strength": 4,
-      "text": "Your Dusk effects happen twice.",
-      "keywords": [],
-      "unnamed": true,
-      "species": "Sloth",
-      "habitat": "Jungle",
-      "workbench_id": "aristocrats-3"
-    },
-    {
       "id": "praying_mantis",
       "name": "Praying Mantis",
       "deck": "aristocrats",
@@ -378,37 +335,6 @@
       "species": "Praying Mantis",
       "habitat": "Meadow",
       "workbench_id": "aristocrats-4"
-    },
-    {
-      "id": "tarantula",
-      "name": "Tarantula",
-      "deck": "aristocrats",
-      "rarity": "rare",
-      "tags": [
-        "Arachnid"
-      ],
-      "base_strength": 5,
-      "text": "Dawn: remove a random adjacent ally and gain its strength.",
-      "keywords": [],
-      "species": "Tarantula",
-      "habitat": "Jungle",
-      "workbench_id": "aristocrats-5"
-    },
-    {
-      "id": "sea_turtle",
-      "name": "Sea Turtle",
-      "deck": "aristocrats",
-      "rarity": "rare",
-      "tags": [],
-      "base_strength": 5,
-      "text": "Dusk: place a Baby Turtle on an adjacent empty crossroad.",
-      "keywords": [],
-      "related": [
-        "baby_turtle"
-      ],
-      "species": "Sea Turtle",
-      "habitat": "Open Ocean",
-      "workbench_id": "aristocrats-6"
     },
     {
       "id": "raccoon",
@@ -432,24 +358,11 @@
         "Fish"
       ],
       "base_strength": 2,
-      "text": "Roar: if an ally was removed this turn, remove an adjacent enemy.",
+      "text": "Roar: if an ally was removed this turn, remove an adjacent animal.",
       "keywords": [],
       "species": "Piranha",
       "habitat": "Jungle",
       "workbench_id": "aristocrats-8"
-    },
-    {
-      "id": "hyena",
-      "name": "Hyena",
-      "deck": "aristocrats",
-      "rarity": "common",
-      "tags": [],
-      "base_strength": 4,
-      "text": "Dusk: gain 5 food for each of your animals removed this turn.",
-      "keywords": [],
-      "species": "Hyena",
-      "habitat": "Savanna",
-      "workbench_id": "aristocrats-9"
     },
     {
       "id": "vulture",
@@ -459,8 +372,8 @@
       "tags": [
         "Bird"
       ],
-      "base_strength": 3,
-      "text": "Flight. Dusk: if an ally was removed this turn, draw a card.",
+      "base_strength": 2,
+      "text": "Flight. Dusk: after 3 or more removals this turn, this lands from your hand or deck.",
       "keywords": [
         "Flight"
       ],
@@ -477,7 +390,7 @@
         "Arachnid"
       ],
       "base_strength": 4,
-      "text": "Dawn: remove a random adjacent ally.",
+      "text": "Dawn: remove the weakest animal next to this.",
       "keywords": [],
       "species": "Spider",
       "habitat": "City",
@@ -487,10 +400,10 @@
       "id": "earthworm",
       "name": "Earthworm",
       "deck": "aristocrats",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [],
       "base_strength": 1,
-      "text": "When this is removed, place two Worms on its crossroad.",
+      "text": "When this is removed, draw a card and place two Worms on its crossroad.",
       "keywords": [],
       "related": [
         "worm"
@@ -506,11 +419,71 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "text": "When this is removed, put it back where it was and draw a card.",
+      "text": "When this is removed, put it back where it was and place a Roach on an adjacent empty crossroad.",
       "keywords": [],
+      "related": [
+        "roach"
+      ],
       "species": "Cockroach",
       "habitat": "City",
       "workbench_id": "aristocrats-13"
+    },
+    {
+      "id": "sperm_whale",
+      "name": "Sperm Whale",
+      "deck": "aristocrats",
+      "rarity": "rare",
+      "tags": [],
+      "base_strength": 8,
+      "text": "Titan. Roar: remove all adjacent animals.",
+      "keywords": [
+        "Titan"
+      ],
+      "species": "Sperm Whale",
+      "habitat": "Open Ocean",
+      "workbench_id": "pool-2"
+    },
+    {
+      "id": "toad",
+      "name": "Toad",
+      "deck": "aristocrats",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "text": "Reach 2. When this is removed, remove all animals next to it.",
+      "keywords": [
+        "Reach"
+      ],
+      "reach": 2,
+      "species": "Toad",
+      "habitat": "Meadow",
+      "workbench_id": "pool-toad"
+    },
+    {
+      "id": "locust",
+      "name": "Locust",
+      "deck": "aristocrats",
+      "rarity": "legendary",
+      "tags": [],
+      "base_strength": 2,
+      "text": "Roar: remove all other animals and discard your hand.",
+      "keywords": [],
+      "species": "Grasshopper",
+      "habitat": "Meadow",
+      "workbench_id": "pool-locust"
+    },
+    {
+      "id": "roach_king",
+      "name": "Roach King",
+      "deck": "aristocrats",
+      "rarity": "legendary",
+      "tags": [],
+      "base_strength": 1,
+      "text": "When this is removed, put it back where it was with +1 strength and draw a card.",
+      "keywords": [],
+      "species": "Cockroach",
+      "habitat": "City",
+      "workbench_id": "pool-roach-king"
     },
     {
       "id": "leopard_legend",
@@ -2750,21 +2723,6 @@
       "workbench_id": "pool-1"
     },
     {
-      "id": "sperm_whale",
-      "name": "Sperm Whale",
-      "deck": "bench",
-      "rarity": "rare",
-      "tags": [],
-      "base_strength": 8,
-      "text": "Titan. Roar: remove all adjacent animals.",
-      "keywords": [
-        "Titan"
-      ],
-      "species": "Sperm Whale",
-      "habitat": "Open Ocean",
-      "workbench_id": "pool-2"
-    },
-    {
       "id": "butterfly",
       "name": "Butterfly",
       "deck": "bench",
@@ -3084,6 +3042,93 @@
       "workbench_id": "pool-y16"
     },
     {
+      "id": "cuco",
+      "name": "Cuco",
+      "deck": "bench",
+      "rarity": "legendary",
+      "tags": [
+        "Bird"
+      ],
+      "base_strength": 6,
+      "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal.",
+      "keywords": [],
+      "species": "Cuckoo",
+      "habitat": "Meadow",
+      "workbench_id": "aristocrats-0"
+    },
+    {
+      "id": "opossum_legend",
+      "name": "Opossum",
+      "deck": "bench",
+      "rarity": "legendary",
+      "tags": [],
+      "base_strength": 3,
+      "text": "When an ally is covered, remove it and draw a card.",
+      "keywords": [],
+      "unnamed": true,
+      "species": "Opossum",
+      "habitat": "City",
+      "workbench_id": "aristocrats-2"
+    },
+    {
+      "id": "sloth_legend",
+      "name": "Sloth",
+      "deck": "bench",
+      "rarity": "legendary",
+      "tags": [],
+      "base_strength": 4,
+      "text": "Your Dusk effects happen twice.",
+      "keywords": [],
+      "unnamed": true,
+      "species": "Sloth",
+      "habitat": "Jungle",
+      "workbench_id": "aristocrats-3"
+    },
+    {
+      "id": "tarantula",
+      "name": "Tarantula",
+      "deck": "bench",
+      "rarity": "rare",
+      "tags": [
+        "Arachnid"
+      ],
+      "base_strength": 5,
+      "text": "Dawn: remove a random adjacent ally and gain its strength.",
+      "keywords": [],
+      "species": "Tarantula",
+      "habitat": "Jungle",
+      "workbench_id": "aristocrats-5"
+    },
+    {
+      "id": "sea_turtle",
+      "name": "Sea Turtle",
+      "deck": "bench",
+      "rarity": "rare",
+      "tags": [],
+      "base_strength": 5,
+      "text": "Dusk: place a Baby Turtle on an adjacent empty crossroad.",
+      "keywords": [],
+      "related": [
+        "baby_turtle"
+      ],
+      "species": "Sea Turtle",
+      "habitat": "Open Ocean",
+      "workbench_id": "aristocrats-6"
+    },
+    {
+      "id": "hyena",
+      "name": "Hyena",
+      "deck": "bench",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "text": "Dusk: gain 5 food for each of your animals removed this turn.",
+      "keywords": [],
+      "species": "Hyena",
+      "habitat": "Savanna",
+      "workbench_id": "aristocrats-9"
+    },
+    {
       "id": "baby_turtle",
       "name": "Baby Turtle",
       "deck": "token",
@@ -3102,6 +3147,16 @@
       "base_strength": 0,
       "keywords": [],
       "text": "When this is removed, draw a card."
+    },
+    {
+      "id": "roach",
+      "name": "Roach",
+      "deck": "token",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "keywords": [],
+      "text": ""
     },
     {
       "id": "baby_fish",

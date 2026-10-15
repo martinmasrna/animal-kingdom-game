@@ -172,8 +172,8 @@ def test_praying_mantis_may_remove_an_ally_to_draw_two():
     rules.apply_action(s, PlaceAction("praying_mantis", ("cr", "1,2")))
     assert s.pending["optional"]
     choose(s, "1,1")
-    assert hand_ids(s, "A").count("lion") == CFG.mantis_draw + 1   # the Cockroach drew one too
-    assert s.top_unit("1,1").card_id == "cockroach"            # and came back where it was
+    assert hand_ids(s, "A").count("lion") == CFG.mantis_draw
+    assert s.top_unit("1,1").card_id == "cockroach"            # the Cockroach came back where it was
 
 
 def test_tarantula_eats_an_adjacent_ally_at_dawn_and_grows():
@@ -192,12 +192,20 @@ def test_the_city_spider_eats_the_cockroach_every_dawn_and_the_turn_sees_the_dea
     put(s, "1,1", "cockroach", "A")
     put(s, "2,1", "lion", "B")
     end_turn(s); end_turn(s)                                   # to A's next turn: Dawn
-    assert s.top_unit("1,1").card_id == "cockroach"            # eaten and back where it was
-    assert hand_ids(s, "A").count("lion") == 1                 # one card, once
+    assert s.top_unit("1,1").card_id == "cockroach"            # the weakest beside it: eaten, and back where it was
+    assert hand_ids(s, "A") == ["piranha"]                     # it draws nothing now
     rules.apply_action(s, PlaceAction("piranha", ("cr", "2,2")))   # the Dawn death arms the Piranha
-    if s.pending:
-        choose(s, "2,1")
+    choose(s, "2,1")
     assert s.top_unit("2,1") is None
+
+
+def test_the_city_spider_eats_the_weakest_animal_beside_it_yours_or_theirs():
+    s = make_state(decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
+    put(s, "1,2", "city_spider", "A")
+    put(s, "1,1", "tiger", "A")
+    put(s, "2,2", "mouse", "B")
+    end_turn(s); end_turn(s)
+    assert s.top_unit("2,2") is None and s.top_unit("1,1").card_id == "tiger"
 
 
 def test_sea_turtle_lays_a_baby_turtle_on_an_empty_neighbour():
@@ -224,7 +232,9 @@ def test_piranha_needs_an_ally_removed_this_turn():
     assert s.top_unit("2,2") is not None                       # no blood in the water
     put(s, "1,1", "cockroach", "A")
     effects.remove_top(s, "1,1", by_player="B")
-    apply_click(s, PlaceAction("piranha", ("cr", "1,2")))       # on top of the first one, beside the Lion
+    rules.apply_action(s, PlaceAction("piranha", ("cr", "1,2")))   # on top of the first one, beside the Lion
+    assert set(s.pending["options"]) >= {"1,1", "2,2"}         # any animal beside it, the Cockroach too
+    choose(s, "2,2")
     assert s.top_unit("2,2") is None
 
 
@@ -242,17 +252,75 @@ def test_earthworm_leaves_two_worms_and_a_worm_draws_when_removed():
     s = make_state(decks={"A": ["lion"] * 3, "B": []})
     put(s, "1,2", "earthworm", "A")
     effects.remove_top(s, "1,2", by_player="B")
-    assert [u.card_id for u in s.board["1,2"]] == ["worm", "worm"]
+    assert [u.card_id for u in s.board["1,2"]] == ["worm", "worm"] and hand_ids(s, "A") == ["lion"]
     effects.remove_top(s, "1,2", by_player="B")
-    assert hand_ids(s, "A") == ["lion"]
+    assert hand_ids(s, "A") == ["lion", "lion"]
 
 
-def test_cockroach_comes_back_where_it_was_and_draws():
+def test_cockroach_comes_back_where_it_was_and_spreads_a_roach():
     s = make_state(decks={"A": ["lion"], "B": []})
     put(s, "1,2", "cockroach", "A")
     effects.remove_top(s, "1,2", by_player="B")
-    assert hand_ids(s, "A") == ["lion"] and not removed(s, "cockroach")
+    assert not removed(s, "cockroach") and hand_ids(s, "A") == []
     assert s.top_unit("1,2").card_id == "cockroach" and s.top_unit("1,2").owner == "A"
+    roaches = [cr for cr in ("1,1", "1,3", "2,2") if (t := s.top_unit(cr)) and t.card_id == "roach" and t.owner == "A"]
+    assert len(roaches) == 1
+
+
+def test_a_cockroach_with_no_empty_neighbour_spreads_nothing():
+    s = make_state(decks={"A": ["lion"], "B": []})
+    put(s, "1,1", "cockroach", "A")
+    put(s, "1,2", "lion", "B"); put(s, "2,1", "lion", "B")
+    effects.remove_top(s, "1,1", by_player="B")
+    assert s.top_unit("1,1").card_id == "cockroach" and "roach" not in {st[-1].card_id for st in s.board.values()}
+
+
+def test_roach_king_comes_back_stronger_and_draws():
+    s = make_state(decks={"A": ["lion"], "B": []})
+    put(s, "1,2", "roach_king", "A")
+    effects.remove_top(s, "1,2", by_player="B")
+    king = s.top_unit("1,2")
+    assert king.card_id == "roach_king" and effective_strength(s, king) == 1 + CFG.roach_king_growth
+    assert hand_ids(s, "A") == ["lion"] and "roach_king" not in s.decks["A"]
+
+
+def test_the_toad_takes_everything_beside_it_when_removed():
+    s = make_state(hands={"A": ["praying_mantis"]}, decks={"A": ["lion"] * 3, "B": []})
+    put(s, "1,2", "toad", "A")
+    put(s, "2,2", "tiger", "B"); put(s, "1,1", "lion", "A")
+    rules.apply_action(s, PlaceAction("praying_mantis", ("cr", "1,3")))
+    choose(s, "1,2")                                           # the Mantis eats the Toad: everything beside it goes
+    assert all(s.top_unit(cr) is None for cr in ("1,1", "1,2", "1,3", "2,2"))
+
+
+def test_the_toad_has_reach_two():
+    s = make_state(hands={"A": ["toad"]})
+    put(s, "1,2", "lion", "A")
+    assert "3,2" in {a.crossroad for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "toad"}
+
+
+def test_the_locust_clears_every_other_top_animal_and_your_hand():
+    s = make_state(hands={"A": ["locust", "lion"]}, decks={"A": ["lion"] * 3, "B": []})
+    put(s, "1,2", "lion", "A")
+    put(s, "2,2", "mouse", "B"); put(s, "2,2", "tiger", "B")
+    rules.apply_action(s, PlaceAction("locust", ("cr", "1,1")))
+    assert {cr: st[-1].card_id for cr, st in s.board.items()} == {"1,1": "locust", "2,2": "mouse"}   # the buried Mouse surfaces
+    assert hand_ids(s, "A") == [] and removed(s, "lion")
+
+
+def test_vultures_land_from_hand_and_deck_after_three_removals():
+    s = make_state(hands={"A": ["vulture"]}, decks={"A": ["vulture", "lion"], "B": ["lion"] * 3})
+    for cr in ("1,1", "1,2", "1,3"):
+        put(s, cr, "mouse", "B")
+    for cr in ("1,1", "1,2"):
+        effects.remove_top(s, cr, by_player="A")
+    assert CFG.vulture_removals == 3                           # two removed: they stay put
+    probe = s.clone(); end_turn(probe)
+    assert not any(st[-1].card_id == "vulture" for st in probe.board.values())
+    effects.remove_top(s, "1,3", by_player="A")
+    end_turn(s)
+    assert sum(st[-1].card_id == "vulture" and st[-1].owner == "A" for st in s.board.values()) == 2
+    assert hand_ids(s, "A") == [] and s.decks["A"] == ["lion"]
 
 
 def test_a_buried_cockroach_comes_back_buried_at_the_same_height():
