@@ -28,7 +28,7 @@ test('between every pair of views the steps rebuild the new board, food and hand
   assert.ok(pairs > 100 && steps > pairs, `enough covered (${pairs} view changes, ${steps} steps)`);
 });
 
-test("'Your turn' comes after everything the opponent did, and before what your turn's start sets off", () => {
+test("'Your turn' comes after everything the opponent did and what your turn's start set off (your dawn)", () => {
   for (const { views } of matches) for (let i = 1; i < views.length; i++) {
     const kinds = plan(views[i - 1], views[i]).map(s => s.step && s.step.kind).filter(Boolean);
     const t = kinds.indexOf('yourturn');
@@ -110,4 +110,21 @@ test("a card's food flies from the animal that made it, and food eaten flies to 
     }
   }
   assert.ok(n.food > 0, 'some card food flew from an animal');
+});
+
+test('a turn change plays as its player\'s dusk, a night, the next player\'s dawn, then day; every step in between is lit by it', () => {
+  let changes = 0;
+  for (const { views } of matches) for (let i = 1; i < views.length; i++) {
+    const steps = plan(views[i - 1], views[i]).map(s => s.step).filter(Boolean);
+    const kinds = steps.map(s => s.kind);
+    for (let k = kinds.indexOf('dusk'); k >= 0; k = kinds.indexOf('dusk', k + 1)) {
+      const n = kinds.indexOf('night', k), d = kinds.indexOf('dawn', k), e = kinds.findIndex((x, j) => j > d && (x === 'day' || x === 'yourturn'));
+      if (n < 0) continue;   // the game ended at that dusk
+      assert.ok(k < n && n + 1 === d && d < e, `dusk, night, dawn, day in order (${kinds.join(' ')})`);
+      assert.ok(steps.slice(k, n).every(s => s.sky === 'dusk') && steps.slice(d, e).every(s => s.sky === 'dawn'), 'what plays between is lit by it');
+      assert.ok(!steps[e].sky, 'and day is plain light');
+      changes++;
+    }
+  }
+  assert.ok(changes > 50, `enough turn changes covered (${changes})`);
 });

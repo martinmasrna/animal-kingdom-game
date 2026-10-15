@@ -220,11 +220,12 @@ def test_parse_bot_spec_round_trips_learned_eval_kwarg():
 
 
 def test_learned_kind_identity_artifact_matches_hand_kind_one_game():
-    # 1-game integration smoke: the shipped dev fixture (an exact GreedyWeights() mimic)
-    # must choose identically to plain 'greedy' over a full game, through the whole
+    # 1-game integration smoke: the shipped dev fixture (an exact RUNG0_WEIGHTS mimic)
+    # must choose identically to 'greedy' on those weights over a full game, through the whole
     # make_bot -> MatchSpec -> ProcessPoolExecutor path (not just direct construction).
     pairs = [("cats", "giants")]
-    hand = run_pairs(pairs, 1, base_seed=0, bots=("greedy", "greedy"))
+    rung0 = (("w.card_economy", 3.0), ("w.effect_readiness", 16.0), ("w.hand_value", 0.0))
+    hand = run_pairs(pairs, 1, base_seed=0, bots=("greedy", "greedy"), bot_kwargs=(rung0, ()))
     learned = run_pairs(pairs, 1, base_seed=0, bots=("greedy_learned", "greedy"),
                         bot_kwargs=((("eval", "rung0_identity"),), ()))
     assert hand == learned

@@ -8,7 +8,7 @@ import math
 import pytest
 
 from animal_kingdom.bots import features
-from animal_kingdom.bots.greedy_bot import GreedyBot, GreedyWeights, evaluate
+from animal_kingdom.bots.greedy_bot import RUNG0_WEIGHTS, GreedyBot, GreedyWeights, evaluate
 from animal_kingdom.bots.learned_eval import LinearEval, load_eval
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine import rules
@@ -114,7 +114,7 @@ def _random_scenarios():
 
 @pytest.mark.parametrize("state", _random_scenarios())
 def test_hand_mimic_matches_evaluate_to_1e9(state):
-    w = GreedyWeights()
+    w = RUNG0_WEIGHTS
     ev = LinearEval.hand_mimic(w)
     assert ev.value(state, "A") == pytest.approx(evaluate(state, "A", w), abs=1e-9)
     assert ev.value(state, "B") == pytest.approx(evaluate(state, "B", w), abs=1e-9)
@@ -125,7 +125,7 @@ def test_hand_mimic_chooses_identically_over_a_seeded_game():
     # the exact same action as the hand-eval GreedyBot at every single choice point.
     ev = LinearEval.hand_mimic()
     state = new_game(load_premade_deck("giants"), load_premade_deck("den_rush"), seed=7)
-    hand_bot = GreedyBot(seed=0)
+    hand_bot = GreedyBot(seed=0, weights=RUNG0_WEIGHTS)
     learned_bot = GreedyBot(seed=0, evaluator=ev)
 
     result = rules.is_terminal(state)

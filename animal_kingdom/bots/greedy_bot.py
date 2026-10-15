@@ -38,7 +38,6 @@ deliberately ruled out for now since this bot could plausibly face a real human 
 
 from __future__ import annotations
 
-import dataclasses
 import math
 import random
 from dataclasses import dataclass
@@ -71,13 +70,10 @@ class GreedyWeights:
     region_control: float = 2.0      # per controlled region corner, x that region's food
     enemy_hq_threat: float = 40.0    # per crossroad I hold in front of the enemy HQ
     own_hq_threat: float = 40.0      # per crossroad the enemy holds in front of my HQ
-    card_economy: float = 3.0        # per net card *in hand* (mine - theirs). Deliberately not
-                                      # hand+deck: drawing must visibly help (hand+deck is
-                                      # invariant under a draw), and deck size alone isn't a
-                                      # real resource with the current card pool - hand size is
-                                      # the actual flexibility/tempo/denial resource.
-    effect_readiness: float = 16.0   # per distinct Roar in hand that can currently
-                                      # produce an observable effect on at least one legal play
+    card_economy: float = 0.0        # per net card in hand (mine - theirs); off, hand_value
+                                      # values the hand by what its cards can do instead
+    effect_readiness: float = 0.0    # per distinct Roar in hand that can currently
+                                      # produce an observable effect on at least one legal play; off
     pending_payoff: float = 20.0     # per delayed effect I own on state.scheduled (Egg hatch,
                                       # Bear, ...), imminence-discounted. board_presence can't
                                       # see these - the placed card is weak *now* and only pays
@@ -93,29 +89,25 @@ class GreedyWeights:
                                       # determinization; honest (see `_p_opponent_can_cover`).
     readiness_cap: int = 0            # count at most this many live Roars for effect_readiness
                                       # (0 = no cap)
-    hand_value: float = 0.0           # weight of features.hand_value (a hand worth its best few plays); the
-                                      # `hand_eval` bots set it to 1 and zero card_economy/effect_readiness
-    hand_roar: float = 6.0            # a live Roar's worth inside hand_value (a mid-size removal, or two cards)
-    hand_ranks: tuple = (1.0, 1.0, 0.5, 0.25)   # how much the hand's 1st, 2nd, ... best cards count in hand_value
+    hand_value: float = 1.0           # weight of features.hand_value (a hand worth its best few plays)
+    hand_ranks: tuple = _features.HAND_RANK_WEIGHTS   # how much the hand's 1st, 2nd, ... best cards count
     wasted_roar: float = 8.0    # penalty for playing a card whose ability text fired for
                                       # nothing (e.g. a removal roar with no target) - a
                                       # bot policy adjustment, not part of evaluate() (see
                                       # `_roar_fizzled`)
 
 
+# The eval as it was before hand_value: the rung-0 LinearEval features (features.RUNG0_FEATURES) mirror these
+# weights term for term, and hand_value has no rung-0 feature.
+RUNG0_WEIGHTS = GreedyWeights(card_economy=3.0, effect_readiness=16.0, hand_value=0.0)
+
+
 class GreedyBot(Bot):
     def __init__(self, weights: Optional[GreedyWeights] = None,
                  rng: Optional[random.Random] = None, seed: Optional[int] = None,
                  depth: int = 1, beam_width: int = 8,
-                 evaluator: Optional[LinearEval] = None, slip: float = 0.0, hand_eval: bool = False,
-                 hand_roar: Optional[float] = None, hand_ranks: Optional[str] = None):
+                 evaluator: Optional[LinearEval] = None, slip: float = 0.0):
         self.weights = weights or GreedyWeights()
-        if hand_eval:   # a hand worth its best few plays instead of its size (features.hand_value)
-            self.weights = dataclasses.replace(self.weights, card_economy=0.0, effect_readiness=0.0, hand_value=1.0)
-        if hand_roar is not None:
-            self.weights = dataclasses.replace(self.weights, hand_roar=float(hand_roar))
-        if hand_ranks is not None:   # "1/1/0.75/0.5": a bot spec can't carry a tuple
-            self.weights = dataclasses.replace(self.weights, hand_ranks=tuple(float(x) for x in str(hand_ranks).split("/")))
         # RNG only breaks exact eval ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
         self.depth = depth
@@ -340,7 +332,7 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     if w.effect_readiness:
         score += w.effect_readiness * _capped(w, _features.enabled_roar_count(state, me))
     if w.hand_value:
-        score += w.hand_value * _features.hand_value(state, me, opp, w.hand_roar, w.hand_ranks)
+        score += w.hand_value * _features.hand_value(state, me, opp, w.hand_ranks)
 
     # --- Pending delayed payoffs: net scheduled future effects, imminence-discounted ---
     # A just-placed Egg/Bear contributes ~nothing to board_presence (it's weak now) yet is a

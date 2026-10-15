@@ -29,6 +29,9 @@ button { cursor: pointer; }
 .seg button .cl { color: var(--claude); }
 .bar select, .bar input { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
 .bar input { width: 180px; }
+.bar.filt { padding-top: 6px; padding-bottom: 6px; gap: 12px; }
+.bar.filt .seg button { padding: 3px 9px; }
+.bar.filt .seg button[aria-pressed="true"] { background: var(--text); color: #fff; }
 .chipf { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 6px; padding: 2px 2px 2px 8px; }
 .chipf button { border: 0; background: none; color: var(--muted); padding: 0 6px; font-size: 16px; line-height: 1; }
 .sync { margin-left: auto; font-size: 13px; color: var(--muted); }
@@ -166,14 +169,13 @@ button { cursor: pointer; }
 </style></head><body>
 <div class="top">
   <div class="bar">
-    <h1>Cards</h1>
     <div class="seg" id="views"></div>
     <div class="seg" id="shows"></div>
-    <select id="hab" aria-label="Habitat"></select>
     <input id="q" type="search" placeholder="Find a card" aria-label="Find a card">
     <span id="colf"></span>
     <span class="sync" id="sync"></span>
   </div>
+  <div class="bar filt"><div class="seg" id="habs"></div><div class="seg" id="rars"></div><div class="seg" id="strs"></div></div>
   <div class="head grid" id="head"></div>
 </div>
 <main id="main"></main>
@@ -203,9 +205,9 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 let S = null, byId = {}, stampSeen = 0;
-let ui = { view: 'all', show: 'all', hab: '', q: '', colf: null, sel: null };
+let ui = { view: 'all', show: 'all', habs: [], rars: [], strs: [], q: '', colf: null, sel: null };
 try { Object.assign(ui, JSON.parse(localStorage.getItem('cards-ui') || '{}'), { sel: null, colf: null }); } catch (e) {}
-const keep = () => { try { localStorage.setItem('cards-ui', JSON.stringify({ view: ui.view, show: ui.show, hab: ui.hab })); } catch (e) {} };
+const keep = () => { try { localStorage.setItem('cards-ui', JSON.stringify({ view: ui.view, show: ui.show, habs: ui.habs, rars: ui.rars, strs: ui.strs })); } catch (e) {} };
 
 /* ---------- data ---------- */
 async function loadState() {
@@ -240,6 +242,8 @@ const cell = (r, col) => r.lv[col];
 const viewCols = () => VIEWS[ui.view].cols;
 function matches(r) {
   const cols = viewCols();
+  if (ui.rars.length && !ui.rars.includes(r.rarity)) return false;
+  if (ui.strs.length && !ui.strs.includes(String(r.str ?? ''))) return false;
   if (ui.q) { const q = ui.q.toLowerCase(); if (![r.name, r.species, r.text, r.id, r.tag].some(x => String(x || '').toLowerCase().includes(q))) return false; }
   if (ui.colf && cell(r, ui.colf.col).lv !== ui.colf.lv) return false;
   if (ui.show === 'open' && !cols.some(c => ['empty', 'draft', 'problem'].includes(cell(r, c).lv))) return false;
@@ -247,7 +251,7 @@ function matches(r) {
   if (ui.show === 'claude' && !Object.values(r.lv).some(c => c.review)) return false;
   return true;
 }
-function inScope(r) { const p = r.parent ? byId[r.parent] : r; return (!ui.hab || p.habitat === ui.hab) && (!VIEWS[ui.view].only || VIEWS[ui.view].only(r)); }
+function inScope(r) { const p = r.parent ? byId[r.parent] : r; return (!ui.habs.length || ui.habs.includes(p.habitat)) && (!VIEWS[ui.view].only || VIEWS[ui.view].only(r)); }
 const nameOf = r => r.name || r.species;
 // Families in table order: habitat, then rarity, then name; a card's related cards straight under it.
 function families() {
@@ -310,7 +314,14 @@ function render() {
   const nClaude = S.rows.filter(r => Object.values(r.lv).some(c => c.review)).length;
   $('#shows').innerHTML = Object.entries(SHOWS).map(([k, t]) => k === 'claude' && !nClaude && ui.show !== 'claude' ? '' :
     `<button data-show="${k}" aria-pressed="${ui.show === k}">${t}${k === 'claude' ? `<b class="cl">${nClaude}</b>` : ''}</button>`).join('');
-  $('#hab').innerHTML = `<option value="">All habitats</option>` + HABS.filter(h => h && S.rows.some(r => r.habitat === h)).map(h => `<option ${ui.hab === h ? 'selected' : ''}>${h}</option>`).join('');
+  const chips = (key, vals, label = v => v) => vals.map(v => `<button data-f="${key}" data-v="${esc(v)}" aria-pressed="${ui[key].includes(v)}">${esc(label(v))}</button>`).join('');
+  // built once and then only re-marked, so a double click lands on the same button
+  if (!$('#habs').children.length) {
+    $('#habs').innerHTML = chips('habs', HABS.filter(h => h && S.rows.some(r => r.habitat === h)));
+    $('#rars').innerHTML = chips('rars', ['L', 'R', 'C'], k => RNAME[k]);
+    $('#strs').innerHTML = chips('strs', [...new Set(S.rows.map(r => r.str).filter(v => v !== null && v !== undefined))].sort((a, b) => a - b).map(String));
+  }
+  document.querySelectorAll('.filt [data-f]').forEach(b => b.setAttribute('aria-pressed', String(ui[b.dataset.f].includes(b.dataset.v))));
   $('#colf').innerHTML = ui.colf ? `<span class="chipf">${COLS[ui.colf.col].t}: ${ui.colf.lv}<button data-clearcolf aria-label="Clear">×</button></span>` : '';
   const head = $('#head'); head.className = 'head grid ' + ui.view; head.hidden = !!VIEWS[ui.view].cards;
   head.innerHTML = VIEWS[ui.view].cards ? '' : headHTML(fams);
@@ -447,7 +458,17 @@ document.addEventListener('click', async e => {
   if (c) { select(c.dataset.id, c.dataset.col); if (['art', 'crop'].includes(c.dataset.col)) drawer(c.dataset.id); else openPop(c.dataset.id, c.dataset.col); return; }
   if (!$('#drawer').hidden && !t.closest('.c')) closeDrawer();
 });
-$('#hab').addEventListener('change', e => { ui.hab = e.target.value; keep(); render(); window.scrollTo(0, 0); });
+// A filter chip toggles in or out (none in means all); a double click keeps that one alone.
+document.querySelector('.filt').addEventListener('click', e => {
+  const b = e.target.closest('[data-f]'); if (!b) return;
+  const { f, v } = b.dataset;
+  ui[f] = ui[f].includes(v) ? ui[f].filter(x => x !== v) : [...ui[f], v];
+  keep(); render(); window.scrollTo(0, 0);
+});
+document.querySelector('.filt').addEventListener('dblclick', e => {
+  const b = e.target.closest('[data-f]'); if (!b) return;
+  ui[b.dataset.f] = [b.dataset.v]; keep(); render();
+});
 $('#q').addEventListener('input', e => { ui.q = e.target.value.trim(); render(); });
 function select(id, col) { ui.sel = { id, col }; document.querySelectorAll('.c.sel').forEach(x => x.classList.remove('sel'));
   document.querySelector(`.c[data-id="${id}"][data-col="${col}"]`)?.classList.add('sel'); }

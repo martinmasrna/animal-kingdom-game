@@ -193,7 +193,7 @@ def test_eval_ignores_opponent_hand_contents():
 # Isolate the coverage_exposure term (all other weights zeroed).
 ONLY_COV = GreedyWeights(food_progress=0, food_proximity=0, board_presence=0, connection=0,
                          region_control=0, enemy_hq_threat=0, own_hq_threat=0, card_economy=0,
-                         effect_readiness=0, coverage_exposure=40.0)
+                         effect_readiness=0, hand_value=0, coverage_exposure=40.0)
 
 
 def _exposed_state(*, hands=None, decks=None) -> GameState:

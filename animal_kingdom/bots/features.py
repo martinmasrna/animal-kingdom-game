@@ -368,19 +368,17 @@ def enabled_roar_count(state: GameState, player: str) -> int:
     return len(enabled_roar_ids(state, player))
 
 
-HAND_RANK_WEIGHTS = (1.0, 1.0, 0.5, 0.25)   # you play at most two cards a turn: the 3rd and 4th count less, the rest not
+HAND_RANK_WEIGHTS = (1.0, 1.0, 1.0, 1.0, 1.0, 0.5)   # a hand's five best cards count fully, the sixth half, the rest not
 HAND_CARD_BONUS = 0.5                        # per card: having a choice is worth a little, however weak the cards
 HAND_UNSEEN_CARD = 3.0                       # the opponent's hidden cards, valued by count only (honesty)
 
 
-def hand_value(state: GameState, me: str, opp: str, roar_value: float, ranks=HAND_RANK_WEIGHTS) -> float:
+def hand_value(state: GameState, me: str, opp: str, ranks=HAND_RANK_WEIGHTS) -> float:
     """What each hand can do, mine minus theirs (Martin, 2026-10-14: a hand is worth its best few plays, not its size).
     A card's play value is what placing it adds (half its strength, like board_presence, plus 1 for the connection,
-    like `connection`) plus `roar_value` if its Roar would do something now. My hand counts its best cards by
-    HAND_RANK_WEIGHTS; the opponent's is hidden, so it is valued by its size alone."""
-    live = enabled_roar_ids(state, me)
-    vals = sorted((0.5 * effective_strength(state, u) + 1.0 + (roar_value if u.card_id in live else 0.0)
-                   for u in state.hands[me]), reverse=True)
+    like `connection`). My hand counts its best cards by `ranks`; the opponent's is hidden, so it is valued by its
+    size alone. Paired tests, 2026-10-15: every deck gains under ExpertBot (about +10 points on average)."""
+    vals = sorted((0.5 * effective_strength(state, u) + 1.0 for u in state.hands[me]), reverse=True)
     mine = sum(w * v for w, v in zip(ranks, vals)) + HAND_CARD_BONUS * len(vals)
     n = len(state.hands[opp])
     theirs = sum(w * HAND_UNSEEN_CARD for w in ranks[:n]) + HAND_CARD_BONUS * n

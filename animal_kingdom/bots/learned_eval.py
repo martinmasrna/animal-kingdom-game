@@ -122,12 +122,13 @@ class LinearEval:
     def hand_mimic(weights: Optional[Any] = None) -> "LinearEval":
         """A rung-0 LinearEval whose weights are read straight off `GreedyWeights`, so its
         `value()` reproduces `evaluate()` to numerical precision (the equivalence test this
-        session's step 2 gates on). `weights` defaults to `GreedyWeights()`; the feature order
-        must match `features.RUNG0_FEATURES` exactly.
+        session's step 2 gates on). `weights` defaults to `RUNG0_WEIGHTS`; rung 0 has no hand_value
+        feature, so it must be off. The feature order must match `features.RUNG0_FEATURES` exactly.
         """
-        from .greedy_bot import GreedyWeights  # local: avoid a bots-module import cycle
+        from .greedy_bot import RUNG0_WEIGHTS  # local: avoid a bots-module import cycle
 
-        w = weights or GreedyWeights()
+        w = weights or RUNG0_WEIGHTS
+        assert not w.hand_value, "rung 0 has no hand_value feature"
         ordered = (
             w.food_progress, w.food_proximity, w.board_presence, w.connection,
             w.region_control, w.enemy_hq_threat, w.own_hq_threat, w.coverage_exposure,

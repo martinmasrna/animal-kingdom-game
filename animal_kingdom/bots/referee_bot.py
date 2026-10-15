@@ -61,10 +61,10 @@ class RefereeBot(TurnSearcher):
                  reply_width: int = 4,
                  max_search_nodes: Optional[int] = 1_000,
                  evaluator: Optional[LinearEval] = None,
-                 quiesce: bool = False, hand_eval: bool = False, hand_ranks: Optional[str] = None):
+                 quiesce: bool = False):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
-                         evaluator=evaluator, quiesce=quiesce, hand_eval=hand_eval, hand_ranks=hand_ranks)
+                         evaluator=evaluator, quiesce=quiesce)
         self.staged = staged
         self.root_width = root_width
         self.reply_width = reply_width

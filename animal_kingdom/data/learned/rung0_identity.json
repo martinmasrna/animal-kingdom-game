@@ -17,6 +17,6 @@
   "bias": 0.0,
   "provenance": {
     "kind": "hand_mimic",
-    "notes": "dev/test fixture: exact GreedyWeights() defaults, for gate verification (identity-artifact bot_comparison delta should be ~0)"
+    "notes": "dev/test fixture: exact RUNG0_WEIGHTS (greedy_bot.py), for gate verification (identity-artifact bot_comparison delta should be ~0)"
   }
 }

@@ -99,8 +99,6 @@ def test_recognizes_black_bear_delayed_draw_as_better_than_a_vanilla_body():
     assert evaluate(bear, "A", W) > evaluate(vanilla_twin, "A", W)
 
 
-@pytest.mark.xfail(strict=True, reason="effect_readiness pays +16 for holding a live Roar, "
-                   "so the search keeps Jerboa in hand rather than spend it (gauntlet, 2026-09-29)")
 @pytest.mark.parametrize("bot_cls", [TurnBot, RefereeBot])
 def test_last_action_spends_an_extra_play_roar(bot_cls):
     # The turn's last action. Jerboa ("Roar: play another unit") lands two units for one
@@ -120,8 +118,6 @@ def test_last_action_spends_an_extra_play_roar(bot_cls):
     assert chosen.card_id == "jerboa"
 
 
-@pytest.mark.xfail(strict=True, reason="the eval pays for live Roars and hand size against the "
-                   "opponent's, so the search draws a seventh and eighth card (2026-09-30)")
 @pytest.mark.parametrize("bot_cls", [TurnBot, RefereeBot])
 def test_canine_develops_instead_of_drawing_a_full_hand(bot_cls):
     # From a RefereeBot game (Canine vs the goodstuff pile, round 2): Dhole on Canine's den

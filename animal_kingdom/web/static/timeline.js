@@ -25,7 +25,7 @@ function culprit(board, cause, cr, causeIid) {
   return best;
 }
 
-export const DUR = { strength: 0.6, to_hand: 0.5, leave_hand: 0.4, steal: 0.7, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, bounce: 0.85, to_deck: 0.85, draw: 0.5, pay: 0.4, capture: 0.6, yourturn: 1.5 };
+export const DUR = { strength: 0.6, to_hand: 0.5, leave_hand: 0.4, steal: 0.7, discard: 0.5, reveal: 0.95, land: 0.5, remove: 0.85, bounce: 0.85, to_deck: 0.85, draw: 0.5, pay: 0.4, capture: 0.6, yourturn: 1.5, dusk: 1.6, night: 0.9, dawn: 1.6, day: 1.0 };
 // Food in flight: one fruit per food, 0.035 s apart, each flying 0.7 s, then the count settles.
 export const foodDur = n => Math.min(2.4, 0.7 + 0.035 * Math.max(0, n - 1) + 0.3);
 
@@ -62,7 +62,13 @@ export function plan(prev, next, cards = {}) {
     v.phase = 'playing';
     return v;
   };
-  const out = [], push = step => out.push({ view: view(), step });
+  // The light each step plays under (the sky over the board, app.js): a turn's end is its player's dusk (their Dusk effects and
+  // region income play in it), the next turn's start a night and then that player's dawn (their Dawn effects: Hungry, timers,
+  // eggs), and the day returns once those have played, with "Your turn" when it is yours (Martin, 2026-10-15).
+  let sky = null;
+  const out = [], push = step => out.push({ view: view(), step: sky ? { ...step, sky: sky.kind, skySide: sky.player } : step });
+  const day = () => { if (!sky || sky.kind !== 'dawn') return; const p = sky.player; sky = null;
+    push(p === you ? { kind: 'yourturn', dur: DUR.yourturn } : { kind: 'day', dur: DUR.day }); };
   const take = (cr, iid) => { const st = s.board[cr] || [], i = st.findIndex(u => u.iid === iid); if (i < 0) return null;
     const [u] = st.splice(i, 1); if (!st.length) delete s.board[cr]; return u; };
   // food in a row by one player flies together: gains into the den (from the stones, or from the animals whose doing they
@@ -164,9 +170,14 @@ export function plan(prev, next, cards = {}) {
         for (const st of Object.values(s.board)) for (const u of st) if (u.iid === e.iid) u.id = e.card;
         for (const h of s.hand) if (h.iid === e.iid) h.id = e.card;
         break;
+      case 'turn_end':
+        day();   // a turn passed straight after its dawn
+        sky = { kind: 'dusk', player: e.player }; push({ kind: 'dusk', dur: DUR.dusk, player: e.player });
+        break;
       case 'turn_start':
         s.current = e.player;
-        if (e.player === you) push({ kind: 'yourturn', dur: DUR.yourturn });
+        sky = { kind: 'night', player: e.player }; push({ kind: 'night', dur: DUR.night, player: e.player });
+        sky = { kind: 'dawn', player: e.player }; push({ kind: 'dawn', dur: DUR.dawn, player: e.player });
         break;
       case 'capture':
         if (!e.roam) {   // played from the hand (a roaming animal walks in from the board)
@@ -175,10 +186,10 @@ export function plan(prev, next, cards = {}) {
         }
         push({ kind: 'capture', dur: DUR.capture, card: e.card, player: e.player, den: e.den });
         break;
-      // cover (the land step shows it), turn_end, mulligan (its own screen) need no step of their own
+      // cover (the land step shows it), mulligan (its own screen) need no step of their own
     }
   }
-  flushFood();
+  flushFood(); day();
   out.push({ view: next, step: null });
   return out;
 }

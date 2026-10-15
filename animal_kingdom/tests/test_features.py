@@ -71,8 +71,7 @@ def test_extract_rejects_terminal_state():
 # ----------------------------------------------------------------------- rung0 == evaluate()
 
 def test_rung0_extract_matches_evaluate_dot_product():
-    from animal_kingdom.bots.greedy_bot import GreedyWeights, evaluate
-    w = GreedyWeights()
+    from animal_kingdom.bots.greedy_bot import RUNG0_WEIGHTS as w, evaluate
     s = make_state(hands={"A": ["lion", "mouse"], "B": ["mouse"]},
                    decks={"A": ["mouse"] * 5, "B": ["mouse"] * 3})
     put(s, "1,2", "lion", "A")
