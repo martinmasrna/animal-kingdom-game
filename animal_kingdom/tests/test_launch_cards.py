@@ -634,7 +634,7 @@ def test_dormouse_pays_every_dusk_whatever_the_hand():
 
 def test_the_hamster_grows_with_your_food_in_hand_and_on_the_board():
     s = make_state(hands={"A": ["hamster"]}, food={"A": 39, "B": 0})
-    assert placement_strength(s, hand_inst(s, "A", "hamster")) == 2 + 3     # 39 is three whole tens
+    assert placement_strength(s, hand_inst(s, "A", "hamster")) == 3 + 3     # 39 is three whole tens
     put(s, "1,2", "squirrel", "B")                                          # a 3: the 5 covers it
     rules.apply_action(s, PlaceAction("hamster", ("cr", "1,2")))
     assert s.board["1,2"][-1].card_id == "hamster"
@@ -1123,8 +1123,8 @@ def test_alike_copies_need_no_naming():
 def test_the_anaconda_swallows_what_it_eats_and_grows_by_its_strength():
     s = make_state(hands={"A": ["anaconda"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "lion", "A")
-    put(s, "2,2", "fox", "B")                                  # 4: an Anaconda (5) can land on it
+    put(s, "2,2", "squirrel", "B")                             # 3: an Anaconda (5) can land on it
     rules.apply_action(s, PlaceAction("anaconda", ("cr", "2,2")))
     a = s.top_unit("2,2")
     assert a.card_id == "anaconda" and [u.card_id for u in s.board["2,2"]] == ["anaconda"]
-    assert effective_strength(s, a) == 5 + 4
+    assert effective_strength(s, a) == 5 + 3

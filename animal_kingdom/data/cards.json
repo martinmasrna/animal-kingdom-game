@@ -1595,7 +1595,7 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 2,
+      "base_strength": 3,
       "text": "Has +1 strength for each 10 food you have.",
       "keywords": [],
       "species": "Hamster",

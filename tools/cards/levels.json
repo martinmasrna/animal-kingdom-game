@@ -1198,6 +1198,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "Martin, 2026-10-15: +1 after playing Food Aggro against 30 Lions",
+      "by": "claude",
+      "at": 1792092268
     }
   },
   "hare": {

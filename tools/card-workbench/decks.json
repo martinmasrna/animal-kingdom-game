@@ -1395,7 +1395,7 @@
      "rarity": "C",
      "species": "Hamster",
      "status": "proposed",
-     "str": 2,
+     "str": 3,
      "tag": "Rodent",
      "text": "Has +1 strength for each 10 food you have."
     }
