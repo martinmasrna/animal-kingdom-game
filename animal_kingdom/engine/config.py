@@ -71,7 +71,7 @@ class Config:
     bush_dog_grant: int = 2              # Bush Dog: Dusk: give an adjacent Canine +2
     shuck_grant: int = 2                 # to the Canine returned from the Remove Pile; reserve
     raccoon_dog_grant: int = 1           # Coyote: an allied Canine that roams gets +1
-    wolf_legend_grant: int = 2           # the legendary Wolf: Dusk: +2 for each adjacent Canine
+    wolf_legend_grant: int = 1           # the legendary Wolf: Dusk: +1 for each adjacent Canine
     stray_dog_grant: int = 2             # Stray Dog: give an ally with Roam +2, then it roams
     wild_dog_grant: int = 1              # African Wild Dog: Dusk: your adjacent animals +1
     mahi_mahi_grant: int = 1             # Mahi-mahi: Roar: your other Fish +1
