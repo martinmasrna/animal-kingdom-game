@@ -702,7 +702,7 @@ def test_the_mate_comes_only_when_the_eagle_itself_enters_the_hand():
     assert sorted(hand_ids(s, "A")) == ["arne", "lion", "lion"]
 
 
-def test_orangutan_duplicates_a_primate_and_tarsier_scouts_one_and_trains_it():
+def test_orangutan_duplicates_a_primate_and_tarsier_draws_one_and_trains_it():
     s = make_state(hands={"A": ["orangutan", "gorilla", "lion"]})
     rules.apply_action(s, PlaceAction("orangutan", ("cr", "1,2")))
     assert s.pending["options"] == [hand_inst(s, "A", "gorilla").iid]

@@ -2042,6 +2042,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: Scout a Primate and give it +1 strength."
+      },
+      "note": "Martin, 2026-10-15: Scouting a Primate was too strong and too consistent; a random Primate keeps the tutor, drops the choice.",
+      "by": "claude",
+      "at": 1792064208
     }
   },
   "termite_king": {

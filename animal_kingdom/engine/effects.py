@@ -997,7 +997,10 @@ def _op_draw(state, step):
 
 
 def _op_draw_filtered(state, step):
+    before = {i.iid for i in state.hands[step["player"]]}
     draw_filtered_random(state, step["player"], step["n"], step["spec"])
+    if step.get("grant"):    # Tarsier: "draw a Primate and give it +1 strength"
+        _grant(state, [i.iid for i in state.hands[step["player"]] if i.iid not in before], step["grant"])
     return None
 
 
@@ -1074,8 +1077,6 @@ def _op_scout(state, step):
     state.hands[player].append(inst)
     _fire_draw(state, [inst])
     shuffle_back(state, player, pulled)
-    if step.get("grant") and inst in state.hands[player]:    # Tarsier: "Scout a Primate and give it +1 strength"
-        _grant(state, [inst.iid], step["grant"])
     return None
 
 
@@ -2552,8 +2553,8 @@ def _orangutan_place(state, unit, cr):
 
 
 def _tarsier_place(state, unit, cr):
-    """Roar: Scout a Primate and give it +1 strength."""
-    state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": "tag:Primate",
+    """Roar: draw a Primate and give it +1 strength."""
+    state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": "tag:Primate",
                                "grant": state.config.tarsier_grant})
 
 

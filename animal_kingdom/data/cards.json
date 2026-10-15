@@ -2168,7 +2168,7 @@
         "Primate"
       ],
       "base_strength": 2,
-      "text": "Roar: Scout a Primate and give it +1 strength.",
+      "text": "Roar: draw a Primate and give it +1 strength.",
       "keywords": [],
       "species": "Tarsier",
       "habitat": "Jungle",
