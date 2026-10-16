@@ -4,15 +4,15 @@ Every deck is 30 cards in the 4-4-6 shape: 4 legendary designs ×1, 4 rare ×2, 
 
 | Deck |
 |---|
-| [Colony Food Swarm](colony.md) |
+| [Colony](colony.md) |
 | [Aristocrats](aristocrats.md) |
 | [Canine Roam Tempo](canines.md) |
 | [Aggro Den Rush](den-rush.md) |
-| [Cats Midrange Tempo](cats.md) |
-| [Fish Token Aggro](fish.md) |
-| [Food Aggro](food-aggro.md) |
+| [Cats](cats.md) |
+| [Fish](fish.md) |
+| [Rodents](food-aggro.md) |
 | [Food OTK](food-otk.md) |
-| [Egg Control](egg-control.md) |
-| [Handlock](handlock.md) |
+| [Birds & Snakes](egg-control.md) |
+| [Primates](handlock.md) |
 | [Giants](giants.md) |
-| [Hoofed Graze](hoofed.md) |
+| [Hoofed](hoofed.md) |

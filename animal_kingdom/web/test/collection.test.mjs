@@ -43,7 +43,7 @@ test('the full card shows as the pointer moves onto a card, and a scroll under a
 
 test('a new profile has the twelve starter decks as its own, none open', async () => {
   const decks = await myDecks();
-  assert.deepEqual(decks.map(d => d.name), ['Colony Food Swarm', 'Aristocrats', 'Canine Roam Tempo', 'Aggro Den Rush', 'Cats Midrange Tempo', 'Fish Token Aggro', 'Food Aggro', 'Food OTK', 'Egg Control', 'Handlock', 'Giants', 'Hoofed Graze']);
+  assert.deepEqual(decks.map(d => d.name), ['Colony', 'Aristocrats', 'Canine Roam Tempo', 'Aggro Den Rush', 'Cats', 'Fish', 'Rodents', 'Food OTK', 'Birds & Snakes', 'Primates', 'Giants', 'Hoofed']);
   assert.equal(await page.$('.dtile.on'), null, 'the screen opens on the deck list');
   assert.match(await page.$eval('.fcount', e => e.textContent), /12\/20/, 'the foot counts decks against the limit');
   assert.ok(await page.$('.clist #dnew'), 'New deck is the slot after the last deck');
@@ -51,7 +51,7 @@ test('a new profile has the twelve starter decks as its own, none open', async (
   assert.equal(await page.$$eval('.clist .dtile', t => t.length), 1, 'editing shows only that deck');
   await page.click('.side .st[data-card="lion"]'); await wait(100);
   const cats = (await myDecks()).find(d => d.id === 'cats');
-  assert.equal(cats.name, 'Cats Midrange Tempo'); assert.equal(Object.values(cats.cards).reduce((a, n) => a + n, 0), 29, 'a starter is edited in place: it is yours');
+  assert.equal(cats.name, 'Cats'); assert.equal(Object.values(cats.cards).reduce((a, n) => a + n, 0), 29, 'a starter is edited in place: it is yours');
   assert.equal((await myDecks()).length, 12, 'no copy');
   assert.match(await page.$eval('.fcount', e => e.textContent), /29\/30/); assert.ok(await page.$('#play[disabled]'), 'Play waits for 30 cards');
 });

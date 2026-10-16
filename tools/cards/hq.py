@@ -19,6 +19,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py level ID COLUMN LEVEL [--note N]
     .venv/bin/python tools/cards/hq.py move ID DECK                  to another deck (a starter deck's key, or pool)
     .venv/bin/python tools/cards/hq.py shelve ID                     a pool card out of the collection (into the reserve)
+    .venv/bin/python tools/cards/hq.py deck-name DECK NAME           a starter deck's name
     .venv/bin/python tools/cards/hq.py delete ID                     a card out of the game entirely
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d] [--strip x,y,z] [--full y|reset]
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
@@ -383,6 +384,18 @@ def add(name: str, habitat: str, species: str = "") -> str:
     return wid
 
 
+def deck_name(deck: str, name: str) -> str:
+    """Rename a starter deck (the name players see). A player's saved copy keeps the name it was saved with."""
+    decks = _read(DECKS)
+    if deck not in decks["decks"] or not decks["decks"][deck].get("precon"):
+        raise Refused(f"no starter deck {deck!r}: one of {sorted(k for k, v in decks['decks'].items() if v.get('precon'))}")
+    if decks["decks"][deck]["name"] == name:
+        return ""
+    decks["decks"][deck]["name"] = name
+    _write(DECKS, decks)
+    return regenerate()
+
+
 def shelve(card_id: str, by: str = "martin") -> str:
     """Take a pool card out of the collection: its workbench status becomes `open`, so convert.py files it in the reserve
     (kept, not collectible). Only a pool card; a starter deck's card is moved to the pool first."""
@@ -440,6 +453,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("note"); s.add_argument("id"); s.add_argument("col", choices=COLUMNS); s.add_argument("note")
     s = sub.add_parser("move"); s.add_argument("id"); s.add_argument("deck")
     s = sub.add_parser("shelve"); s.add_argument("id")
+    s = sub.add_parser("deck-name"); s.add_argument("deck"); s.add_argument("name")
     s = sub.add_parser("delete"); s.add_argument("id")
     s = sub.add_parser("add"); s.add_argument("name"); s.add_argument("habitat", choices=HABITATS); s.add_argument("--species", default="")
     s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
@@ -462,6 +476,8 @@ def main(argv=None) -> None:
             print(move(a.id, a.deck, "claude"))
         elif a.cmd == "shelve":
             print(shelve(a.id, "claude"))
+        elif a.cmd == "deck-name":
+            print(deck_name(a.deck, a.name))
         elif a.cmd == "delete":
             print(delete(a.id, "claude"))
         elif a.cmd == "add":

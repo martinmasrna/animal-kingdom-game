@@ -352,7 +352,7 @@
    ]
   },
   "cats": {
-   "name": "Cats Midrange Tempo",
+   "name": "Cats",
    "order": 4,
    "precon": true,
    "cards": [
@@ -527,7 +527,7 @@
    ]
   },
   "colony": {
-   "name": "Colony Food Swarm",
+   "name": "Colony",
    "order": 0,
    "precon": true,
    "cards": [
@@ -877,7 +877,7 @@
    ]
   },
   "egg-control": {
-   "name": "Egg Control",
+   "name": "Birds & Snakes",
    "order": 8,
    "precon": true,
    "cards": [
@@ -1052,7 +1052,7 @@
    ]
   },
   "fish": {
-   "name": "Fish Token Aggro",
+   "name": "Fish",
    "order": 5,
    "precon": true,
    "cards": [
@@ -1227,7 +1227,7 @@
    ]
   },
   "food-aggro": {
-   "name": "Food Aggro",
+   "name": "Rodents",
    "order": 6,
    "precon": true,
    "cards": [
@@ -1752,7 +1752,7 @@
    ]
   },
   "handlock": {
-   "name": "Handlock",
+   "name": "Primates",
    "order": 9,
    "precon": true,
    "cards": [
@@ -1927,7 +1927,7 @@
    ]
   },
   "hoofed": {
-   "name": "Hoofed Graze",
+   "name": "Hoofed",
    "order": 11,
    "precon": true,
    "cards": [
