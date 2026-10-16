@@ -2245,7 +2245,7 @@
       "tags": [
         "Bear"
       ],
-      "base_strength": 0,
+      "base_strength": 1,
       "text": "Has +1 strength for each other card in your hand.",
       "keywords": [],
       "species": "Grizzly Bear",

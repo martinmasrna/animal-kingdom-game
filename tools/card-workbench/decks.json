@@ -1896,7 +1896,7 @@
      "rarity": "C",
      "species": "Grizzly Bear",
      "status": "proposed",
-     "str": 0,
+     "str": 1,
      "tag": "Bear",
      "text": "Has +1 strength for each other card in your hand."
     },
