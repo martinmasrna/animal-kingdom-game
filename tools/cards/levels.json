@@ -1830,6 +1830,19 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Oxpecker"
+        }
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792169123
     }
   },
   "pestis": {

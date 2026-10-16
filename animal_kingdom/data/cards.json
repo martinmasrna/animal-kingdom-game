@@ -2331,7 +2331,7 @@
     },
     {
       "id": "oxpecker_legend",
-      "name": "Oxpecker",
+      "name": "Redbeak",
       "deck": "giants",
       "rarity": "legendary",
       "tags": [
@@ -2342,7 +2342,6 @@
       "keywords": [
         "Flight"
       ],
-      "unnamed": true,
       "species": "Oxpecker",
       "habitat": "Savanna",
       "workbench_id": "giants-3"
