@@ -39,7 +39,7 @@ A path is a printed connection between two crossroads. Paths determine:
 A region is a closed area surrounded by paths and crossroads. A player controls a region when they occupy every crossroad surrounding it.
 
 ## 3.5 Hand
-'Hand' stands for available units of each player. A hand can contain no more than ten units. A player at the limit may still draw: each card drawn past it is revealed and burns, going straight to the Remove Pile (a remove, §3.7; it does not count as drawn, so draw triggers ignore it).
+'Hand' stands for available units of each player. A hand can contain no more than ten units, whatever puts a card there. A player at the limit may still draw, and effects may still give them cards (made, returned, stolen, copied, taken from a Remove Pile): each card past the limit is revealed and burns, going straight to the Remove Pile (a remove, §3.7; a burned draw does not count as drawn, so draw triggers ignore it). A card fetched only to be placed at once (Prince Leo, Princess Lea) is placement, not a gain.
 
 ## 3.6 Deck
 Player's face-down cards, pile he draws from.

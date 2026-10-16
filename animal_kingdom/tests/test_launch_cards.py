@@ -1164,3 +1164,26 @@ def test_the_anaconda_swallows_what_it_eats_and_grows_by_its_strength():
     a = s.top_unit("2,2")
     assert a.card_id == "anaconda" and [u.card_id for u in s.board["2,2"]] == ["anaconda"]
     assert effective_strength(s, a) == 5 + 3
+
+
+# ==================================================================================== the hand limit
+
+def test_cards_made_past_the_hand_limit_burn():
+    # Nine cards left in hand after the Stork: the first youngling fills it to ten, the second burns.
+    s = make_state(hands={"A": ["stork"] + ["lion"] * 9}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    apply_click(s, PlaceAction("stork", ("cr", "1,2")))
+    assert len(s.hands["A"]) == CFG.hand_limit
+    assert sum(1 for c in s.remove_pile if c not in ("lion", "stork")) == 1
+
+
+def test_an_animal_returned_to_a_full_hand_burns():
+    s = make_state(hands={"A": ["skunk"], "B": ["lion"] * 10}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "2,2", "elephant", "B")
+    apply_click(s, PlaceAction("skunk", ("cr", "1,2")))
+    assert len(s.hands["B"]) == CFG.hand_limit and "elephant" in s.remove_pile
+
+
+def test_a_mate_brought_into_a_full_hand_burns():
+    s = make_state(hands={"A": ["lion"] * 9}, decks={"A": ["arne"], "B": ["lion"] * 3})
+    rules.apply_action(s, DrawAction())
+    assert len(s.hands["A"]) == CFG.hand_limit and "arna" in s.remove_pile

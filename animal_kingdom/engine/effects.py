@@ -611,7 +611,10 @@ def _fire_draw(state, drawn) -> None:
         if hook:
             hook(state, inst)
     if drawn:
+        hand = state.hands[drawn[0].owner]
+        before = len(hand)
         state.ensure_mates(drawn[0].owner, drawn)        # a legendary Eagle entering the hand brings its mate
+        _burn_over_limit(state, drawn[0].owner, hand[before:])
 
 
 def draw_cards(state: GameState, player: str, n: int) -> list:
@@ -647,6 +650,23 @@ def shuffle_back(state: GameState, player: str, card_ids: list, *, by: Optional[
     state.rng.shuffle(deck)
     for cid in card_ids:
         _fire_event(state, "on_shuffle_event", {"card_id": cid, "player": by or player})
+
+
+def gain_to_hand(state: GameState, player: str, card_id: str, *, strength_counter: int = 0) -> UnitInstance:
+    """A card entering `player`'s hand other than by a draw (returned, made, stolen, copied, taken from a Remove Pile).
+    Past the hand limit it burns, as a drawn card does (overview.md §3.5); so does a mate it brings."""
+    before = len(state.hands[player])
+    inst = state.add_to_hand(player, card_id, strength_counter=strength_counter)
+    _burn_over_limit(state, player, state.hands[player][before:])
+    return inst
+
+
+def _burn_over_limit(state: GameState, player: str, entered: list) -> None:
+    """The newest of `entered` past the hand limit go to the Remove Pile (a remove from hand)."""
+    over = len(state.hands[player]) - state.config.hand_limit
+    for inst in entered[-over:] if over > 0 else []:
+        if inst in state.hands[player]:
+            remove_from_hand(state, player, inst)
 
 
 def remove_from_hand(state: GameState, player: str, inst: UnitInstance) -> None:
@@ -1223,7 +1243,7 @@ def _op_play_named(state, step):
         in_hand = any(u.card_id == cid for u in state.hands[player])
         if not in_hand and cid in state.decks[player]:
             state.decks[player].remove(cid)
-            state.add_to_hand(player, cid)
+            state.add_to_hand(player, cid)      # only to be placed at once: not a gain, so no hand-limit burn
             step["fetched"] = True
         else:
             step["fetched"] = False
@@ -1453,7 +1473,7 @@ def _bounce(state, cr, top, *, lock_until=0):
     state.board[cr].remove(top)
     if not state.board[cr]:
         del state.board[cr]
-    state.add_to_hand(top.owner, top.card_id).locked_until_turn = lock_until
+    gain_to_hand(state, top.owner, top.card_id).locked_until_turn = lock_until
 
 
 def _spawn(state, owner, card_id, cr):
@@ -1563,14 +1583,14 @@ def _then_pile_to_hand(state, step, card_id):
     """Raccoon (your own Remove Pile), the legendary Raven (your opponent's): the chosen card goes to your hand."""
     if state.pile_take(card_id, step["from_owner"]):
         state.emit("unremove", card=card_id, owner=step["from_owner"], to=step["chooser"])
-        state.add_to_hand(step["chooser"], card_id)
+        gain_to_hand(state, step["chooser"], card_id)
 
 
 def _then_duplicate(state, step, iid):
     """Orangutan: a copy of the chosen hand card, its strength counter included."""
     inst = next((u for u in state.hands[step["chooser"]] if u.iid == iid), None)
     if inst is not None:
-        state.add_to_hand(step["chooser"], inst.card_id, strength_counter=inst.strength_counter)
+        gain_to_hand(state, step["chooser"], inst.card_id, strength_counter=inst.strength_counter)
 
 
 def _then_discard(state, step, iid):
@@ -1981,7 +2001,7 @@ def _op_shuck_return(state, step):
     if "choice" not in step:
         return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
     if state.pile_take(step["choice"]):
-        state.add_to_hand(step["chooser"], step["choice"], strength_counter=state.config.shuck_grant)
+        gain_to_hand(state, step["chooser"], step["choice"], strength_counter=state.config.shuck_grant)
     return None
 
 
@@ -2318,9 +2338,11 @@ def _op_magpie_steal(state, step):
             inst = state.rng.choice(theirs)
             theirs.remove(inst)
             new = UnitInstance(inst.card_id, player, state.new_iid())
+            before = len(state.hands[player])
             state.hands[player].append(new)
             state.emit("steal", player=player, victim=other_player(player), iid=inst.iid, new=new.iid, card=inst.card_id)
             state.ensure_mates(player, [new])
+            _burn_over_limit(state, player, state.hands[player][before:])
     hand = state.hands[player]
     if not hand:
         return None
@@ -2650,7 +2672,7 @@ def _orangutan_place(state, unit, cr):
 
 
 def _tarsier_place(state, unit, cr):
-    """Roar: draw a Primate and give it +1 strength."""
+    """Roar: draw a Primate and give it +2 strength (tarsier_grant)."""
     state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": "tag:Primate",
                                "grant": state.config.tarsier_grant})
 
@@ -2678,7 +2700,7 @@ YOUNGLINGS = ["baby_lion", "baby_wolf", "baby_squirrel", "baby_owl", "baby_pytho
 def _stork_place(state, unit, cr):
     """Roar: add two random younglings to your hand (two different ones)."""
     for cid in state.rng.sample(YOUNGLINGS, state.config.stork_younglings):
-        state.add_to_hand(unit.owner, cid)
+        gain_to_hand(state, unit.owner, cid)
 
 
 def _caterpillar_grows(state, inst, amount):
