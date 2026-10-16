@@ -426,7 +426,7 @@
      "status": "proposed",
      "str": 2,
      "tag": "Cat",
-     "text": "Roar: if you control another Cat, remove an adjacent enemy."
+     "text": "Roar: if you played another Cat this turn, remove an adjacent enemy."
     },
     {
      "habitat": "Savanna",
@@ -1824,7 +1824,7 @@
      "rarity": "R",
      "species": "Macaque",
      "status": "proposed",
-     "str": 2,
+     "str": 3,
      "tag": "Primate",
      "text": "Roar: if you have 5 or more cards in your hand, remove an adjacent enemy."
     },

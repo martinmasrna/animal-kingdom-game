@@ -1041,7 +1041,7 @@
         "Cat"
       ],
       "base_strength": 2,
-      "text": "Roar: if you control another Cat, remove an adjacent enemy.",
+      "text": "Roar: if you played another Cat this turn, remove an adjacent enemy.",
       "keywords": [],
       "species": "Serval",
       "habitat": "Savanna",
@@ -2143,7 +2143,7 @@
       "tags": [
         "Primate"
       ],
-      "base_strength": 2,
+      "base_strength": 3,
       "text": "Roar: if you have 5 or more cards in your hand, remove an adjacent enemy.",
       "keywords": [],
       "species": "Macaque",

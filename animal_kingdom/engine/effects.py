@@ -271,6 +271,8 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
         _fire_cover_event(state, unit, covered)
         _push_flee(state, covered, unit, cr)
     if play:
+        key = f"played_{player}"         # what each player played this turn, for "if you played another Cat" (Serval)
+        state.turn_flags[key] = [*state.turn_flags.get(key, []), [unit.iid, unit.card_id]]
         _fire_play_event(state, unit)    # Queen Honoria: gain food when you play a Colony unit
     if roar:
         times = 1
@@ -1665,7 +1667,7 @@ def roar_condition(state, player, card_id, unit=None):
         "muskrat": lambda: _fed_this_turn(state, player),
         "groundhog": lambda: _fed_this_turn(state, player),
         "bobcat": lambda: others("Cat") >= 1,
-        "serval": lambda: others("Cat") >= 1,
+        "serval": lambda: _played_this_turn(state, player, "Cat", unit) >= 1,
         "tutorial_lynx": lambda: others("Cat") >= 1,
         "alley_cat": lambda: others("Cat") >= 1,
         "worker_bee": lambda: others("Worker") >= 1,
@@ -1680,6 +1682,12 @@ def roar_condition(state, player, card_id, unit=None):
         "gorilla": lambda: strength() >= cfg.gorilla_min,
     }.get(card_id)
     return check() if check else None
+
+
+def _played_this_turn(state, player, tag, unit) -> int:
+    """How many animals with `tag` `player` played this turn, other than `unit`."""
+    return sum(1 for iid, cid in state.turn_flags.get(f"played_{player}", [])
+               if tag in state.cards[cid].tags and (unit is None or iid != unit.iid))
 
 
 def _controls_two_same_colony(state, player) -> bool:
@@ -1983,7 +1991,7 @@ OPS["shuck_return"] = _op_shuck_return
 # --- Cats -------------------------------------------------------------------------------------------------------
 
 def _serval_place(state, unit, cr):
-    """Roar: if you control another Cat, remove an adjacent enemy."""
+    """Roar: if you played another Cat this turn, remove an adjacent enemy."""
     if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_remove_choice(state, unit.owner, unit.card_id, _adjacent_enemy_targets(state, unit, cr))
 
