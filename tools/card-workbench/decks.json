@@ -2200,7 +2200,7 @@
      "status": "proposed",
      "str": 5,
      "tag": "Snake",
-     "text": "Apex Predator. When this eats an animal, it gains that animal's strength."
+     "text": "Apex Predator. Whenever this removes an animal, gain its strength."
     },
     {
      "habitat": "Polar",

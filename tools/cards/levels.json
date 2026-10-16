@@ -35,10 +35,15 @@
       "at": 1792086811
     },
     "effect": {
-      "by": "martin",
-      "at": 1792101661,
+      "by": "claude",
+      "at": 1792147998,
       "lv": "problem",
-      "note": "horrible wording"
+      "note": "Martin, 2026-10-16: his wording",
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "horrible wording",
+        "prev": "Apex Predator. When this eats an animal, it gains that animal's strength."
+      }
     }
   },
   "anteater": {

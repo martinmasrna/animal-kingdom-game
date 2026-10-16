@@ -496,7 +496,7 @@ def _op_apex_eat(state, step):
     if prey is not None and prey.iid == step["prey"]:
         gained = effective_strength(state, prey)
         if _remove_specific(state, cr, prey, by_player=apex.owner, by_card=apex.card_id) and apex.card_id == "anaconda":
-            apex.strength_counter += gained       # Anaconda: "When this eats an animal, it gains that animal's strength."
+            apex.strength_counter += gained       # Anaconda: "Whenever this removes an animal, gain its strength."
             state.emit("strength", iid=apex.iid, card=apex.card_id, owner=apex.owner, n=gained)
     return None
 

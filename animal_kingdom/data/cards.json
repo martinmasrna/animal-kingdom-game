@@ -2844,7 +2844,7 @@
         "Snake"
       ],
       "base_strength": 5,
-      "text": "Apex Predator. When this eats an animal, it gains that animal's strength.",
+      "text": "Apex Predator. Whenever this removes an animal, gain its strength.",
       "keywords": [
         "Apex Predator"
       ],
