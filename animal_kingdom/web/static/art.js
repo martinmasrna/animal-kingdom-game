@@ -1,6 +1,9 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  octopus: [.68, .48, .7],
+  great_white_shark: [.6, .45, .75],
+  cuco: [.47, .45, .7],
   tarantula: [.55, .5, .75],
   mocha: [.6, .5, .72],
   opossum: [.68, .4, .7],
@@ -99,7 +102,7 @@ export const CROP = {
   blue_whale: [.45, .45, .8],
   whale_shark: [.55, .45, .85],
   orca: [.65, .3, .66],
-  octopus_legend: [.5, .4, .8],
+  octopus_legend: [.58, .42, .75],
   tuna_legend: [.67, .52, .64],
   manta_ray_legend: [.6, .42, .82],
   manta_ray: [.56, .42, .88],
@@ -150,6 +153,9 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  octopus: [.7, .45, 1.2],
+  great_white_shark: [.6, .45, 1.2],
+  cuco: [.47, .4, 1.2],
   tarantula: [.55, .48, 1.2],
   mocha: [.62, .5, 1.2],
   opossum: [.72, .42, 1.2],
@@ -241,7 +247,7 @@ export const STRIP = {
   blue_whale: [.45, .42, 1.1],
   whale_shark: [.6, .45, 1.1],
   orca: [.75, .25, 1.3],
-  octopus_legend: [.5, .38, 1.2],
+  octopus_legend: [.6, .38, 1.2],
   tuna_legend: [.82, .55, 1.4],
   manta_ray_legend: [.62, .45, 1.2],
   manta_ray: [.6, .35, 1.2],
@@ -292,6 +298,9 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  octopus: .45,
+  great_white_shark: .45,
+  cuco: .38,
   tarantula: .48,
   mocha: .5,
   opossum: .42,
@@ -306,7 +315,7 @@ export const FULL = {
   cockroach: .45,
   bat: .349,
   anteater: .396,
-  silverback: .321,
+  silverback: .384,
   street_dog: .42,
   rusty: .354,
   poppy: .367,
