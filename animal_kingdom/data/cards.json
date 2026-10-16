@@ -2246,7 +2246,7 @@
         "Bear"
       ],
       "base_strength": 0,
-      "text": "Has +1 strength for each card in your hand.",
+      "text": "Has +1 strength for each other card in your hand.",
       "keywords": [],
       "species": "Grizzly Bear",
       "habitat": "Forest",

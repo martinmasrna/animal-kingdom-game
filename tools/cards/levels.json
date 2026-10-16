@@ -1179,6 +1179,16 @@
       "note": "Martin, 2026-10-15: at 2 it was a 9 when played (bots, 4,400 games); at 0 it averages a Lion's 7 and reaches 9 with a full hand. Costs Handlock about 4 points of win rate.",
       "by": "claude",
       "at": 1792065311
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Has +1 strength for each card in your hand."
+      },
+      "note": "Martin, 2026-10-16: read in hand, 'each card in your hand' counted itself (8 cards shown as 8, played as 7); 'other' says what the engine does.",
+      "by": "claude",
+      "at": 1792149298
     }
   },
   "groundhog": {

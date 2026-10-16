@@ -31,7 +31,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Chimpanzee** | 3 | Primate | 4 | Roar: remove an adjacent enemy of equal or lower strength. |
 | **Baboon** | 3 | Primate | 4 | Roar: give 2 animals in your hand +1 strength. |
 | **Stork** | 3 | Bird | 4 | Flight. Roar: add two random younglings to your hand. |
-| **Grizzly Bear** | 3 | Bear | 0 | Has +1 strength for each card in your hand. |
+| **Grizzly Bear** | 3 | Bear | 0 | Has +1 strength for each other card in your hand. |
 | **Caterpillar** | 3 | — | 1 | When this gains strength in your hand, draw a card and turn this into a Butterfly. |
 | **Gorilla** | 3 | Primate | 6 | Roar: if this has 8 or more strength, draw a card. |
 

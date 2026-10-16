@@ -1898,7 +1898,7 @@
      "status": "proposed",
      "str": 0,
      "tag": "Bear",
-     "text": "Has +1 strength for each card in your hand."
+     "text": "Has +1 strength for each other card in your hand."
     },
     {
      "habitat": "Meadow",
