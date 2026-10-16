@@ -112,6 +112,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Martin, 2026-10-16: 4 -> 5 is the biggest step in the field (covers 47% -> 65% of cards); 5 body + 2 hand points = a Lion's 7, and in Handlock hand strength triggers Caterpillar, Gorilla and Chimpanzee. 6 would be a Lion that also buffs.",
+      "by": "claude",
+      "at": 1792150022
     }
   },
   "baboon_legend": {
