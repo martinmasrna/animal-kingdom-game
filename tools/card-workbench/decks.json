@@ -702,7 +702,7 @@
    ]
   },
   "den-rush": {
-   "name": "Aggro Den Rush",
+   "name": "Den Rush",
    "order": 3,
    "precon": true,
    "cards": [

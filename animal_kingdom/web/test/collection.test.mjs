@@ -43,7 +43,7 @@ test('the full card shows as the pointer moves onto a card, and a scroll under a
 
 test('a new profile has the twelve starter decks as its own, none open', async () => {
   const decks = await myDecks();
-  assert.deepEqual(decks.map(d => d.name), ['Colony', 'Aristocrats', 'Roaming Pack', 'Aggro Den Rush', 'Cats', 'Fish', 'Rodents', 'Food OTK', 'Birds & Snakes', 'Primates', 'Giants', 'Hoofed']);
+  assert.deepEqual(decks.map(d => d.name), ['Colony', 'Aristocrats', 'Roaming Pack', 'Den Rush', 'Cats', 'Fish', 'Rodents', 'Food OTK', 'Birds & Snakes', 'Primates', 'Giants', 'Hoofed']);
   assert.equal(await page.$('.dtile.on'), null, 'the screen opens on the deck list');
   assert.match(await page.$eval('.fcount', e => e.textContent), /12\/20/, 'the foot counts decks against the limit');
   assert.ok(await page.$('.clist #dnew'), 'New deck is the slot after the last deck');

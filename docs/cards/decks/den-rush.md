@@ -1,4 +1,4 @@
-# Aggro Den Rush
+# Den Rush
 
 Its cards carried over from the old pool; their reasoning is in the git history of this file. The cards themselves come from the card workbench (`tools/card-workbench/`, converted by `convert.py`); the table below is generated from cards.json.
 
