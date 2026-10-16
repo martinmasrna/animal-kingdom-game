@@ -77,7 +77,7 @@
   "cards": [
     {
       "id": "queen_marabunta",
-      "name": "Queen Marabunta",
+      "name": "Queen [Ant]",
       "deck": "colony",
       "rarity": "legendary",
       "tags": [
@@ -110,7 +110,7 @@
     },
     {
       "id": "queen_honoria",
-      "name": "Queen Honoria",
+      "name": "Queen [Bee]",
       "deck": "colony",
       "rarity": "legendary",
       "tags": [
@@ -461,14 +461,14 @@
     },
     {
       "id": "locust",
-      "name": "Locust",
+      "name": "[Locust]",
       "deck": "aristocrats",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 2,
       "text": "Roar: remove all other animals and discard your hand.",
       "keywords": [],
-      "species": "Grasshopper",
+      "species": "Locust",
       "habitat": "Meadow",
       "workbench_id": "pool-locust"
     },
@@ -538,7 +538,7 @@
     },
     {
       "id": "clarion",
-      "name": "Luna",
+      "name": "[White Wolf]",
       "deck": "canines",
       "rarity": "legendary",
       "tags": [
@@ -769,7 +769,7 @@
     },
     {
       "id": "gale",
-      "name": "Gale",
+      "name": "[Falcon]",
       "deck": "den_rush",
       "rarity": "legendary",
       "tags": [
@@ -1174,7 +1174,7 @@
     },
     {
       "id": "jellyfish_legend",
-      "name": "Calypso",
+      "name": "[Jellyfish]",
       "deck": "fish",
       "rarity": "legendary",
       "tags": [],
@@ -1419,7 +1419,7 @@
     },
     {
       "id": "barley",
-      "name": "Barley",
+      "name": "[Rat]",
       "deck": "food_aggro",
       "rarity": "legendary",
       "tags": [
@@ -1428,13 +1428,13 @@
       "base_strength": 4,
       "text": "Roar: gain 4 food for each other Rodent you control. Draw a card.",
       "keywords": [],
-      "species": "Mouse",
+      "species": "Rat",
       "habitat": "City",
       "workbench_id": "food-aggro-2"
     },
     {
       "id": "scrooge",
-      "name": "Scrooge",
+      "name": "[Chipmunk]",
       "deck": "food_aggro",
       "rarity": "legendary",
       "tags": [
@@ -1599,7 +1599,7 @@
     },
     {
       "id": "fathom",
-      "name": "Fathom",
+      "name": "[Octopus]",
       "deck": "food_otk",
       "rarity": "legendary",
       "tags": [],
@@ -2053,7 +2053,7 @@
     },
     {
       "id": "silverback",
-      "name": "Silverback",
+      "name": "[Gorilla]",
       "deck": "handlock",
       "rarity": "legendary",
       "tags": [
@@ -2277,7 +2277,7 @@
     },
     {
       "id": "brutus",
-      "name": "Brutus",
+      "name": "[Rhinoceros]",
       "deck": "giants",
       "rarity": "legendary",
       "tags": [
@@ -2295,7 +2295,7 @@
     },
     {
       "id": "methuselah",
-      "name": "Methuselah",
+      "name": "[Tortoise]",
       "deck": "giants",
       "rarity": "legendary",
       "tags": [],
@@ -2310,7 +2310,7 @@
     },
     {
       "id": "mocha",
-      "name": "Mocha",
+      "name": "[Sperm Whale]",
       "deck": "giants",
       "rarity": "legendary",
       "tags": [],
@@ -2325,7 +2325,7 @@
     },
     {
       "id": "oxpecker_legend",
-      "name": "Redbeak",
+      "name": "[Oxpecker]",
       "deck": "giants",
       "rarity": "legendary",
       "tags": [
@@ -2515,7 +2515,7 @@
     },
     {
       "id": "boar_legend",
-      "name": "Stonetusk",
+      "name": "[Boar]",
       "deck": "hoofed",
       "rarity": "legendary",
       "tags": [
@@ -3031,7 +3031,7 @@
     },
     {
       "id": "cuco",
-      "name": "Cuco",
+      "name": "[Cuckoo]",
       "deck": "bench",
       "rarity": "legendary",
       "tags": [
@@ -3046,7 +3046,7 @@
     },
     {
       "id": "sloth_legend",
-      "name": "Aya",
+      "name": "[Sloth]",
       "deck": "bench",
       "rarity": "legendary",
       "tags": [],

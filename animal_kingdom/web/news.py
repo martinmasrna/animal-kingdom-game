@@ -28,7 +28,9 @@ class NewsError(ValueError):
 
 def parse(path: Path, cards: dict) -> dict:
     """One release file: its date and groups of changes, each with its why, the cards it touches and how they were."""
+    # a change names its cards by id (stable) or by the name they carry today
     by_name = {c.name.lower(): cid for cid, c in cards.items()}
+    by_name.update({cid.lower(): cid for cid in cards})
     rid = path.stem
     try:
         day = datetime.date.fromisoformat(rid)

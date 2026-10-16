@@ -129,10 +129,10 @@
     {
      "habitat": "Meadow",
      "id": "pool-locust",
-     "name": "Locust",
+     "name": "[Locust]",
      "note": "",
      "rarity": "L",
-     "species": "Grasshopper",
+     "species": "Locust",
      "status": "open",
      "str": 2,
      "tag": "",
@@ -196,7 +196,7 @@
     {
      "habitat": "Forest",
      "id": "canines-1",
-     "name": "Luna",
+     "name": "[White Wolf]",
      "note": "",
      "rarity": "L",
      "species": "Wolf",
@@ -534,7 +534,7 @@
     {
      "habitat": "Jungle",
      "id": "colony-0",
-     "name": "Queen Marabunta",
+     "name": "Queen [Ant]",
      "note": "",
      "rarity": "L",
      "species": "Army Ant",
@@ -558,7 +558,7 @@
     {
      "habitat": "Meadow",
      "id": "colony-2",
-     "name": "Queen Honoria",
+     "name": "Queen [Bee]",
      "note": "",
      "rarity": "L",
      "species": "Bee",
@@ -733,7 +733,7 @@
     {
      "habitat": "Forest",
      "id": "den-rush-3",
-     "name": "Gale",
+     "name": "[Falcon]",
      "note": "",
      "rarity": "L",
      "species": "Falcon",
@@ -1059,7 +1059,7 @@
     {
      "habitat": "Open Ocean",
      "id": "fish-0",
-     "name": "Calypso",
+     "name": "[Jellyfish]",
      "note": "",
      "rarity": "L",
      "species": "Jellyfish",
@@ -1258,10 +1258,10 @@
     {
      "habitat": "City",
      "id": "food-aggro-2",
-     "name": "Barley",
+     "name": "[Rat]",
      "note": "",
      "rarity": "L",
-     "species": "Mouse",
+     "species": "Rat",
      "status": "proposed",
      "str": 4,
      "tag": "Rodent",
@@ -1270,7 +1270,7 @@
     {
      "habitat": "Forest",
      "id": "food-aggro-3",
-     "name": "Scrooge",
+     "name": "[Chipmunk]",
      "note": "",
      "rarity": "L",
      "species": "Chipmunk",
@@ -1409,7 +1409,7 @@
     {
      "habitat": "Open Ocean",
      "id": "food-otk-0",
-     "name": "Fathom",
+     "name": "[Octopus]",
      "note": "",
      "rarity": "L",
      "species": "Octopus",
@@ -1584,7 +1584,7 @@
     {
      "habitat": "Savanna",
      "id": "giants-0",
-     "name": "Brutus",
+     "name": "[Rhinoceros]",
      "note": "",
      "rarity": "L",
      "species": "Rhinoceros",
@@ -1596,7 +1596,7 @@
     {
      "habitat": "Savanna",
      "id": "giants-1",
-     "name": "Methuselah",
+     "name": "[Tortoise]",
      "note": "",
      "rarity": "L",
      "species": "Tortoise",
@@ -1608,7 +1608,7 @@
     {
      "habitat": "Open Ocean",
      "id": "giants-2",
-     "name": "Mocha",
+     "name": "[Sperm Whale]",
      "note": "Watch in play: close to a full board wipe.",
      "rarity": "L",
      "species": "Sperm Whale",
@@ -1620,7 +1620,7 @@
     {
      "habitat": "Savanna",
      "id": "giants-3",
-     "name": "Redbeak",
+     "name": "[Oxpecker]",
      "note": "",
      "rarity": "L",
      "species": "Oxpecker",
@@ -1771,7 +1771,7 @@
     {
      "habitat": "Jungle",
      "id": "handlock-1",
-     "name": "Silverback",
+     "name": "[Gorilla]",
      "note": "Watch in play: +2 to the whole hand may be too strong (dial: the +2 or the 7).",
      "rarity": "L",
      "species": "Gorilla",
@@ -1946,7 +1946,7 @@
     {
      "habitat": "Forest",
      "id": "hoofed-1",
-     "name": "Stonetusk",
+     "name": "[Boar]",
      "note": "",
      "rarity": "L",
      "species": "Boar",
@@ -2733,7 +2733,7 @@
     {
      "habitat": "Meadow",
      "id": "aristocrats-0",
-     "name": "Cuco",
+     "name": "[Cuckoo]",
      "note": "",
      "rarity": "L",
      "species": "Cuckoo",
@@ -2745,7 +2745,7 @@
     {
      "habitat": "Jungle",
      "id": "aristocrats-3",
-     "name": "Aya",
+     "name": "[Sloth]",
      "note": "",
      "rarity": "L",
      "species": "Sloth",

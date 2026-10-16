@@ -10,7 +10,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Fathom** | 1 | — | 7 | Roar: Scout a legendary animal. |
+| **[Octopus]** | 1 | — | 7 | Roar: Scout a legendary animal. |
 | **Yuki** | 1 | Rodent | 3 | Roar: lose all your food. In 2 turns, gain three times as much. |
 | **[Honey Badger]** | 1 | — | 5 | Armor. Stealth. Poison. Spikes. |
 | **Iris** | 1 | — | 3 | Roar: this becomes a copy of an adjacent animal. |
