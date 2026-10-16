@@ -19,7 +19,7 @@ from ..engine.actions import SKIP, Action, ChoiceAction
 from ..engine.state import GameState
 
 TABLE = Path(__file__).resolve().parent.parent / "data" / "learned" / "opening_hand.json"
-MULLIGAN_MARGIN = 1.0    # points of win rate the average replacement must beat the card by
+MULLIGAN_MARGIN = 5.0    # points of win rate the average replacement must beat the card by: per-card noise is ±4-5
 
 
 @lru_cache(maxsize=1)

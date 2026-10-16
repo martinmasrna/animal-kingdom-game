@@ -108,8 +108,8 @@ class GreedyBot(Bot):
                  depth: int = 1, beam_width: int = 8,
                  evaluator: Optional[LinearEval] = None, slip: float = 0.0, mulligan: bool = False):
         self.weights = weights or GreedyWeights()
-        # Off by default: GreedyBot's games, dealt at random and kept, are what the mulligan's opening-hand table is
-        # learned from (sim/opening_hand.py); a bot that chose its hands would bias it.
+        # Off by default, as for every bot: the per-card mulligan measured about zero for ExpertBot, and kept hands are
+        # what the opening-hand table is learned from (sim/opening_hand.py, bots.md).
         self.mulligan = mulligan
         # RNG only breaks exact eval ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)

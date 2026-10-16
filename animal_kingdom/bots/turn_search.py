@@ -91,7 +91,7 @@ class TurnSearcher(Bot):
                  evaluator: Optional[LinearEval] = None,
                  quiesce: bool = False, mulligan: bool = False):
         self.weights = weights or GreedyWeights()
-        self.mulligan = mulligan     # off by default: the opening-hand table is GreedyBot's and misjudges this pilot (bots.md)
+        self.mulligan = mulligan     # off by default: worth about zero measured, and kept hands feed the table (bots.md)
         # RNG only breaks exact score ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
         self.det_rng = random.Random(None if seed is None else seed + _DET_SEED_SALT)
