@@ -948,6 +948,21 @@ def test_cuckoo_eggs_clog_the_opponents_deck_and_feed_you():
     assert hand_ids(s, "B") == ["cuckoo_egg"] and hand_ids(s, "A") == ["lion"]
 
 
+def test_aurum_lays_a_golden_egg_that_pays_two_cards_when_drawn():
+    s = make_state(current="A", decks={"A": ["lion"] * 8, "B": ["lynx"] * 8})
+    put(s, "1,2", "aurum", "A")
+    while s.current == "A":
+        rules.apply_action(s, DrawAction())              # A's turn
+    while s.current == "B":
+        rules.apply_action(s, DrawAction())              # B's turn, then A's Dawn: an egg into A's deck
+    assert s.decks["A"].count("golden_egg") == 1
+    s.decks["A"] = ["tiger", "lion", "fox", "golden_egg"]   # the egg on top
+    hand = len(s.hands["A"])
+    effects.draw_cards(s, "A", 1)                        # draws the egg: it goes, two cards come
+    assert len(s.hands["A"]) == hand + 2 and "golden_egg" not in hand_ids(s, "A")
+    assert "golden_egg" in s.remove_pile                 # a removed Egg, for the Egg Eater
+
+
 def test_opossum_returns_an_adjacent_ally_to_hand():
     s = make_state(hands={"A": ["opossum"]})
     put(s, "1,1", "squirrel", "A")

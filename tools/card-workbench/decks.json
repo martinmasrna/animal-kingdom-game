@@ -1038,16 +1038,16 @@
      "text": "Roar: give an adjacent enemy -3 strength."
     },
     {
-     "habitat": "City",
-     "id": "pool-bat-legend",
-     "name": "",
+     "habitat": "Meadow",
+     "id": "egg-control-2",
+     "name": "Aurum",
      "note": "",
      "rarity": "L",
-     "species": "Bat",
-     "status": "open",
+     "species": "Goose",
+     "status": "proposed",
      "str": 1,
-     "tag": "",
-     "text": "Flight. Dawn: draw a card."
+     "tag": "Bird",
+     "text": "Dawn: shuffle a Golden Egg into your deck."
     }
    ]
   },
@@ -2803,16 +2803,16 @@
      "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card."
     },
     {
-     "habitat": "Meadow",
-     "id": "egg-control-2",
-     "name": "Aurum",
+     "habitat": "City",
+     "id": "pool-bat-legend",
+     "name": "",
      "note": "",
      "rarity": "L",
-     "species": "Goose",
-     "status": "open",
+     "species": "Bat",
+     "status": "proposed",
      "str": 1,
-     "tag": "Bird",
-     "text": "Dawn: draw a card."
+     "tag": "",
+     "text": "Flight. Dawn: draw a card."
     }
    ]
   }

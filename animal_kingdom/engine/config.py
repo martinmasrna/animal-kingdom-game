@@ -90,6 +90,7 @@ class Config:
     alpha_pups: int = 2                  # Pups Scarlett places on adjacent empty crossroads
     stork_younglings: int = 2            # Stork: random younglings added to your hand
     cuckoo_eggs: int = 2                 # Cuckoo: Cuckoo Eggs shuffled into your opponent's deck
+    golden_egg_draw: int = 2             # Golden Egg (Aurum's): cards drawn when you draw it
     earthworm_worms: int = 2             # Earthworm: Worms placed on its crossroad when it's removed
     roach_king_growth: int = 1           # Roach King: comes back with +1 strength
     python_growth: int = 1               # Python: +1 strength whenever an animal is removed

@@ -19,6 +19,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py level ID COLUMN LEVEL [--note N]
     .venv/bin/python tools/cards/hq.py move ID DECK                  to another deck (a starter deck's key, or pool)
     .venv/bin/python tools/cards/hq.py shelve ID                     a pool card out of the collection (into the reserve)
+    .venv/bin/python tools/cards/hq.py collect ID                    a card back into the collection (the reverse of shelve)
     .venv/bin/python tools/cards/hq.py deck-name DECK NAME           a starter deck's name
     .venv/bin/python tools/cards/hq.py delete ID                     a card out of the game entirely
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d] [--strip x,y,z] [--full y|reset]
@@ -416,6 +417,24 @@ def shelve(card_id: str, by: str = "martin") -> str:
     return report
 
 
+def collect(card_id: str, by: str = "martin") -> str:
+    """Put a card into the collection: its workbench status becomes `proposed`, so in the pool convert.py makes it
+    collectible instead of filing it in the reserve. The reverse of shelve."""
+    r = _row(card_id)
+    decks = _read(DECKS)
+    src, i = _deck_index(decks)[r["wid"]]
+    wc = decks["decks"][src]["cards"][i]
+    if wc.get("status") != "open":
+        return ""
+    wc["status"] = "proposed"
+    _write(DECKS, decks)
+    report = regenerate()
+    levels = _levels()
+    _mark(levels, r, "animal", by, None, "into the collection (status proposed)")
+    _write(LEVELS, levels)
+    return report
+
+
 def delete(card_id: str, by: str = "martin") -> str:
     """Remove a card from the game: out of decks.json (so convert.py drops it from cards.json) and its levels gone. Its
     number in static/cardnums.js stays, since deck codes depend on every number. Claude can't delete a card with a locked
@@ -453,6 +472,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("note"); s.add_argument("id"); s.add_argument("col", choices=COLUMNS); s.add_argument("note")
     s = sub.add_parser("move"); s.add_argument("id"); s.add_argument("deck")
     s = sub.add_parser("shelve"); s.add_argument("id")
+    s = sub.add_parser("collect"); s.add_argument("id")
     s = sub.add_parser("deck-name"); s.add_argument("deck"); s.add_argument("name")
     s = sub.add_parser("delete"); s.add_argument("id")
     s = sub.add_parser("add"); s.add_argument("name"); s.add_argument("habitat", choices=HABITATS); s.add_argument("--species", default="")
@@ -476,6 +496,8 @@ def main(argv=None) -> None:
             print(move(a.id, a.deck, "claude"))
         elif a.cmd == "shelve":
             print(shelve(a.id, "claude"))
+        elif a.cmd == "collect":
+            print(collect(a.id, "claude"))
         elif a.cmd == "deck-name":
             print(deck_name(a.deck, a.name))
         elif a.cmd == "delete":

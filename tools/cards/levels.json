@@ -126,8 +126,18 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "out of the collection (status open, in the reserve)",
-      "at": 1792192620
+      "note": "into the collection (status proposed)",
+      "at": 1792194643
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Dawn: draw a card."
+      },
+      "note": "lays Golden Eggs instead of drawing (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792194642
     }
   },
   "baboon": {
@@ -3833,9 +3843,9 @@
         "prev_lv": "empty",
         "prev_note": ""
       },
-      "note": "moved from pool to egg-control",
+      "note": "into the collection (status proposed)",
       "by": "claude",
-      "at": 1792192619
+      "at": 1792194643
     }
   }
 }

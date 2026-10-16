@@ -2009,20 +2009,22 @@
       "workbench_id": "pool-y3"
     },
     {
-      "id": "bat_legend",
-      "name": "[BAT]",
+      "id": "aurum",
+      "name": "Aurum",
       "deck": "egg_control",
       "rarity": "legendary",
-      "tags": [],
-      "base_strength": 1,
-      "text": "Flight. Dawn: draw a card.",
-      "keywords": [
-        "Flight"
+      "tags": [
+        "Bird"
       ],
-      "unnamed": true,
-      "species": "Bat",
-      "habitat": "City",
-      "workbench_id": "pool-bat-legend"
+      "base_strength": 1,
+      "text": "Dawn: shuffle a Golden Egg into your deck.",
+      "keywords": [],
+      "related": [
+        "golden_egg"
+      ],
+      "species": "Goose",
+      "habitat": "Meadow",
+      "workbench_id": "egg-control-2"
     },
     {
       "id": "baboon_legend",
@@ -3116,19 +3118,20 @@
       "workbench_id": "den-rush-0"
     },
     {
-      "id": "aurum",
-      "name": "Aurum",
-      "deck": "reserve",
+      "id": "bat_legend",
+      "name": "[BAT]",
+      "deck": "bench",
       "rarity": "legendary",
-      "tags": [
-        "Bird"
-      ],
+      "tags": [],
       "base_strength": 1,
-      "text": "Dawn: draw a card.",
-      "keywords": [],
-      "species": "Goose",
-      "habitat": "Meadow",
-      "workbench_id": "egg-control-2"
+      "text": "Flight. Dawn: draw a card.",
+      "keywords": [
+        "Flight"
+      ],
+      "unnamed": true,
+      "species": "Bat",
+      "habitat": "City",
+      "workbench_id": "pool-bat-legend"
     },
     {
       "id": "baby_turtle",
@@ -3183,6 +3186,18 @@
       "base_strength": 0,
       "keywords": [],
       "text": "When you draw this, your opponent draws a card."
+    },
+    {
+      "id": "golden_egg",
+      "name": "Golden Egg",
+      "deck": "token",
+      "rarity": "common",
+      "tags": [
+        "Egg"
+      ],
+      "base_strength": 0,
+      "keywords": [],
+      "text": "When you draw this, remove it and draw 2 cards."
     },
     {
       "id": "pup",

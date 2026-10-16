@@ -2371,6 +2371,19 @@ def _snake_egg_place(state, unit, cr):
 
 
 def _aurum_start(state, unit, cr):
+    """Dawn: shuffle a Golden Egg into your deck."""
+    shuffle_back(state, unit.owner, ["golden_egg"], by=unit.owner)
+
+
+def _golden_egg_drawn(state, inst):
+    """Golden Egg: when you draw this, remove it and draw 2 cards (a removed Egg, for the Egg Eater)."""
+    if inst in state.hands[inst.owner]:
+        remove_from_hand(state, inst.owner, inst)
+    draw_cards(state, inst.owner, state.config.golden_egg_draw)
+
+
+def _bat_legend_start(state, unit, cr):
+    """Dawn: draw a card."""
     _push_draw(state, unit.owner, 1)
 
 
@@ -2935,7 +2948,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "eon": {"on_end_of_turn": _eon_end_of_turn},
     "raven_legend": {"on_place": _raven_legend_place},
     "aurum": {"on_start_of_turn": _aurum_start},
-    "bat_legend": {"on_start_of_turn": _aurum_start},
+    "bat_legend": {"on_start_of_turn": _bat_legend_start},
     "black_swan": {"on_draw": _omen_drawn},
     "hawk": {"on_place": _removes("stoop_max")},
     "gaboon_viper": {"on_place": _king_cobra_place},
@@ -3027,6 +3040,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "butterfly": {"on_place": _draw_then_give_one},
     "cuckoo": {"on_place": _cuckoo_place},
     "cuckoo_egg": {"on_draw": _cuckoo_egg_drawn},
+    "golden_egg": {"on_draw": _golden_egg_drawn},
     "opossum": {"on_place": _opossum_place},
     "scarlett": {"on_place": _alpha_place},
     "viper": {"on_place": _viper_place},
