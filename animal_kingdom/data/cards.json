@@ -2521,7 +2521,7 @@
     },
     {
       "id": "boar_legend",
-      "name": "Boar",
+      "name": "Stonetusk",
       "deck": "hoofed",
       "rarity": "legendary",
       "tags": [
@@ -2530,7 +2530,6 @@
       "base_strength": 5,
       "text": "Your opponent's regions produce 5 less food.",
       "keywords": [],
-      "unnamed": true,
       "species": "Boar",
       "habitat": "Forest",
       "workbench_id": "hoofed-1"
