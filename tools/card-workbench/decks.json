@@ -799,7 +799,7 @@
      "species": "Hare",
      "status": "proposed",
      "str": 3,
-     "tag": "Rodent",
+     "tag": "",
      "text": "Flee. Roar: if you played 3 or more animals this turn, draw 2 cards."
     },
     {
@@ -1300,7 +1300,7 @@
      "species": "Meerkat",
      "status": "proposed",
      "str": 2,
-     "tag": "Rodent",
+     "tag": "",
      "text": "Roar: draw a card. When an enemy is placed next to this, draw a card."
     },
     {
@@ -1511,7 +1511,7 @@
      "species": "Hedgehog",
      "status": "proposed",
      "str": 5,
-     "tag": "Rodent",
+     "tag": "",
      "text": "Spikes. Roar: gain 5 food."
     },
     {

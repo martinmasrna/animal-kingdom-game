@@ -1298,6 +1298,16 @@
       "note": "Martin, 2026-10-15, after his Canines gauntlet: buff to 2 cards.",
       "by": "claude",
       "at": 1792089833
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Rodent"
+      },
+      "note": "not a rodent (Martin 2026-10-16: drop the tag)",
+      "by": "claude",
+      "at": 1792187557
     }
   },
   "hawk": {
@@ -1318,6 +1328,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Rodent"
+      },
+      "note": "not a rodent (Martin 2026-10-16: drop the tag)",
+      "by": "claude",
+      "at": 1792187557
     }
   },
   "hippopotamus": {
@@ -1652,6 +1672,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Rodent"
+      },
+      "note": "not a rodent (Martin 2026-10-16: drop the tag)",
+      "by": "claude",
+      "at": 1792187557
     }
   },
   "methuselah": {
@@ -1670,8 +1700,10 @@
   },
   "mocha": {
     "effect": {
-      "note": "Watch in play: close to a full board wipe.",
-      "by": "martin"
+      "note": "next to -> adjacent to?",
+      "by": "martin",
+      "lv": "problem",
+      "at": 1792185298
     },
     "art": {
       "review": {
