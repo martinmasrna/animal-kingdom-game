@@ -1,0 +1,138 @@
+<title>Placeholder Names</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* fourteen cards, each a section: the art and line, then every name in a list with two taps per name */
+  :root {
+    --bg: #f6f5f2; --card: #ffffff; --ink: #1c1b19; --mut: #6b6862; --faint: #a09c95;
+    --line: #e6e3dd; --soft: #f1efeb; --accent: #17706a; --accent-soft: #e4f0ee;
+    --warn: #b0651c; --warn-soft: #fbf1e6;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #17181a; --card: #202225; --ink: #ecebe7; --mut: #a7a49e; --faint: #74716b;
+    --line: #2d3033; --soft: #26292c; --accent: #5fc4bb; --accent-soft: #1f3634;
+    --warn: #e0a05a; --warn-soft: #3a2d1e; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --bg: #17181a; --card: #202225; --ink: #ecebe7; --mut: #a7a49e; --faint: #74716b;
+    --line: #2d3033; --soft: #26292c; --accent: #5fc4bb; --accent-soft: #1f3634;
+    --warn: #e0a05a; --warn-soft: #3a2d1e; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 var(--sans); -webkit-font-smoothing: antialiased; }
+  #app { max-width: 760px; margin: 0 auto; padding-block: .6rem max(1rem, env(safe-area-inset-bottom, 0px));
+         padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+  #rail { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; gap: .8rem; align-items: center;
+          padding: .5rem 0; font-size: 13px; color: var(--mut); border-bottom: 1px solid var(--line); }
+  #rail b { color: var(--ink); }
+  #rail .sp { flex: 1; }
+  #jump { font: inherit; font-size: 13px; padding: .3rem .5rem; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); max-width: 46vw; }
+  section { margin-top: 1.2rem; }
+  .head { display: grid; grid-template-columns: 84px 1fr; gap: .9rem; align-items: start; margin-bottom: .6rem; }
+  .head img { width: 84px; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); background: var(--soft); max-width: 100%; }
+  .head h2 { margin: 0; font-size: 20px; font-weight: 680; letter-spacing: -.01em; }
+  .head .meta { font-size: 13px; color: var(--mut); }
+  .head .eff { font-size: 14px; margin-top: .2rem; }
+  .head .who { font-size: 13px; color: var(--mut); font-style: italic; margin-top: .2rem; }
+  .names { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .n { display: grid; grid-template-columns: 1fr 3.6rem 4.2rem 5.6rem; align-items: center; gap: .4rem; padding: .3rem .4rem .3rem .8rem; border-bottom: 1px solid var(--soft); }
+  .n:last-child { border-bottom: none; }
+  .n .t { font-size: 16px; min-width: 0; }
+  .n.it { background: var(--accent-soft); }
+  .n.shelf { background: var(--warn-soft); }
+  .n.no { display: none; }
+  .names.showno .n.no { display: grid; opacity: .45; }
+  .n.no .b.no { background: var(--mut); color: #fff; border-color: var(--mut); }
+  .gone { padding: .5rem .8rem; font-size: 13px; color: var(--faint); cursor: pointer; }
+  .n.it .t { font-weight: 650; }
+  .b { font: inherit; font-size: 12.5px; padding: .35rem 0; width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--mut); cursor: pointer; white-space: nowrap; }
+  .b:hover, .b:focus-visible { color: var(--ink); border-color: var(--mut); outline: none; }
+  .n.it .b.it { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .n.shelf .b.sh { background: var(--warn); color: #fff; border-color: var(--warn); }
+  .none { padding: .5rem .8rem; font-size: 13px; color: var(--faint); }
+  #saved { min-width: 3.5rem; text-align: right; color: var(--faint); font-size: 12px; }
+</style>
+<div id="app">
+  <div id="rail"><span id="count"></span><span class="sp"></span><select id="jump"></select><span id="saved">loading</span></div>
+  <div id="cards"></div>
+</div>
+<script>
+const CARDS = __CARDS__;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let S = { marks: {} };     // key "cardid|name" -> "it" | "shelf"
+let doc = null, loaded = false, saving = null, dirty = false;
+
+function key(c, n) { return c + "|" + n; }
+async function save() {
+  dirty = true;
+  if (saving) return;
+  if (!loaded) { $("saved").textContent = "not saved"; return; }
+  $("saved").textContent = "…";
+  saving = (async () => {
+    while (dirty) {
+      dirty = false;
+      try { await doc.set({ marks: S.marks, at: new Date().toISOString() }); $("saved").textContent = "saved"; }
+      catch (e) { $("saved").textContent = "save failed"; }
+    }
+    saving = null;
+  })();
+}
+function mark(c, n, m) {
+  const k = key(c, n);
+  if (S.marks[k] === m) delete S.marks[k]; else S.marks[k] = m;
+  paintRow(c, n); paintCount(); save();
+}
+function paintRow(c, n) {
+  const el = document.querySelector(`.n[data-k="${CSS.escape(key(c, n))}"]`); if (!el) return;
+  const m = S.marks[key(c, n)];
+  el.classList.toggle("it", m === "it"); el.classList.toggle("shelf", m === "shelf"); el.classList.toggle("no", m === "no");
+  paintGone(c);
+}
+function paintGone(c) {
+  const sec = document.getElementById(c); if (!sec) return;
+  const card = CARDS.find(x => x.id === c);
+  const gone = card.names.filter(n => S.marks[key(c, n)] === "no").length;
+  const el = sec.querySelector(".gone");
+  const open = sec.querySelector(".names").classList.contains("showno");
+  el.textContent = `${card.names.length - gone} left · ${gone} removed` + (gone ? (open ? " · hide them" : " · show them") : "");
+}
+function paintCount() {
+  const v = Object.values(S.marks);
+  const its = v.filter(x => x === "it").length, sh = v.filter(x => x === "shelf").length;
+  $("count").innerHTML = `<b>${its}</b> this is it · <b>${sh}</b> on the shelf`;
+}
+function build() {
+  $("cards").innerHTML = CARDS.map(c => `
+    <section id="${esc(c.id)}">
+      <div class="head"><img src="${esc(c.img)}" alt="${esc(c.title)}">
+        <div><h2>${esc(c.title)}</h2><div class="meta">${esc(c.meta)}</div><div class="eff">${esc(c.effect)}</div><div class="who">${esc(c.who)}</div></div></div>
+      <div class="names">${c.names.map(n => `
+        <div class="n" data-k="${esc(key(c.id, n))}"><span class="t">${esc(n)}</span>
+          <button class="b no" data-c="${esc(c.id)}" data-n="${esc(n)}" data-m="no">Nope</button>
+          ${c.fromShelf.includes(n) ? `<span></span>` : `<button class="b sh" data-c="${esc(c.id)}" data-n="${esc(n)}" data-m="shelf">Shelf</button>`}
+          <button class="b it" data-c="${esc(c.id)}" data-n="${esc(n)}" data-m="it">This is it</button></div>`).join("")}
+        <div class="gone" data-c="${esc(c.id)}"></div>
+      </div>
+    </section>`).join("");
+  for (const b of document.querySelectorAll(".b")) b.onclick = () => mark(b.dataset.c, b.dataset.n, b.dataset.m);
+  for (const g of document.querySelectorAll(".gone")) g.onclick = () => { g.parentElement.classList.toggle("showno"); paintGone(g.dataset.c); };
+  $("jump").innerHTML = `<option value="">Jump to…</option>` + CARDS.map(c => `<option value="${esc(c.id)}">${esc(c.title)}</option>`).join("");
+  $("jump").onchange = () => { const s = document.getElementById($("jump").value); if (s) s.scrollIntoView({ block: "start" }); $("jump").value = ""; };
+  for (const c of CARDS) { for (const n of c.names) paintRow(c.id, n); paintGone(c.id); }
+  paintCount();
+}
+build();
+(async () => {
+  try {
+    const db = await window.claude?.use?.("db");
+    if (!db) { $("saved").textContent = "not saved"; return; }
+    const ref = db.doc("picks/placeholders");
+    const snap = await ref.get();
+    if (snap.exists) S.marks = Object.assign({}, snap.data().marks || {}, S.marks);
+    doc = ref; loaded = true;
+    for (const c of CARDS) for (const n of c.names) paintRow(c.id, n);
+    paintCount(); $("saved").textContent = "saved";
+    if (Object.keys(S.marks).length) save();
+  } catch (e) { $("saved").textContent = "not saved"; }
+})();
+</script>
