@@ -22,7 +22,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Hummingbird** | 2 | Bird | 1 | Flight. Roar: draw 2 cards. |
 | **Macaque** | 2 | Primate | 3 | Roar: if you have 5 or more cards in your hand, remove an adjacent enemy. |
 | **Orangutan** | 2 | Primate | 5 | Roar: duplicate a Primate in your hand. |
-| **Tarsier** | 2 | Primate | 2 | Roar: draw a Primate and give it +1 strength. |
+| **Tarsier** | 2 | Primate | 2 | Roar: draw a Primate and give it +2 strength. |
 
 ### Common
 

@@ -80,7 +80,7 @@ class Config:
     baboon_count: int = 2                # ...this many of them
     baboon_legend_grant: int = 1         # the legendary Baboon: Dawn: 2 random animals in your hand +1...
     baboon_legend_count: int = 2         # ...this many
-    tarsier_grant: int = 1               # Tarsier: the Primate it draws gets +1
+    tarsier_grant: int = 2               # Tarsier: the Primate it draws gets +2
     butterfly_grant: int = 1             # Butterfly (and the Chrysalis stage): an animal in your hand +1
     butterfly_legend_stage4_grant: int = 1   # the Butterfly stage: every animal in your hand +1
     butterfly_legend_stage5_grant: int = 2   # the Monarch stage: every animal in your hand +2

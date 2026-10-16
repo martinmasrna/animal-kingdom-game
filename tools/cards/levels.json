@@ -2351,9 +2351,14 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin, 2026-10-15: Scouting a Primate was too strong and too consistent; a random Primate keeps the tutor, drops the choice.",
+      "note": "Martin, 2026-10-16: at +1 a rare 2 was a worse Mouse (common 4, draws a Rodent); +2 makes a drawn Gorilla an 8 at once, fine for a rare.",
       "by": "claude",
-      "at": 1792064208
+      "at": 1792149632,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-15: Scouting a Primate was too strong and too consistent; a random Primate keeps the tutor, drops the choice.",
+        "prev": "Roar: draw a Primate and give it +1 strength."
+      }
     }
   },
   "termite_king": {
