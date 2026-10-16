@@ -673,7 +673,17 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Clarion",
+          "species": "Wolf"
+        }
+      },
+      "note": "Martin, 2026-10-14, applied 2026-10-16",
+      "at": 1792157857
     }
   },
   "cod": {
@@ -983,8 +993,18 @@
       "by": "martin"
     },
     "animal": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": {
+          "name": "Falstaff",
+          "species": "Bumblebee"
+        }
+      },
+      "note": "Martin, 2026-10-14, applied 2026-10-16",
+      "at": 1792157857
     }
   },
   "fathom": {
@@ -1401,6 +1421,20 @@
       "note": "Martin, 2026-10-15, mid-gauntlet.",
       "by": "claude",
       "at": 1792096269
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Jellyfish"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-14, applied 2026-10-16",
+      "by": "claude",
+      "at": 1792157858
     }
   },
   "jerboa": {
@@ -1726,6 +1760,20 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792143575
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Octopus"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-14, applied 2026-10-16",
+      "by": "claude",
+      "at": 1792157858
     }
   },
   "okapi": {
@@ -2191,7 +2239,17 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Sirocco",
+          "species": "Skunk"
+        }
+      },
+      "note": "Martin, 2026-10-14, applied 2026-10-16",
+      "at": 1792157857
     }
   },
   "skunk": {
@@ -2224,9 +2282,18 @@
       "by": "martin"
     },
     "animal": {
-      "note": "moved from aristocrats to pool",
+      "note": "Martin, 2026-10-14, applied 2026-10-16",
       "by": "claude",
-      "at": 1792085439
+      "at": 1792157858,
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "moved from aristocrats to pool",
+        "prev": {
+          "name": "",
+          "species": "Sloth"
+        }
+      },
+      "lv": "draft"
     }
   },
   "snake_egg": {
@@ -2297,6 +2364,20 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Squirrel"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-14, applied 2026-10-16",
+      "by": "claude",
+      "at": 1792157857
     }
   },
   "stork": {

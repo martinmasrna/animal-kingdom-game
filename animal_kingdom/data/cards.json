@@ -126,7 +126,7 @@
     },
     {
       "id": "falstaff",
-      "name": "Falstaff",
+      "name": "Lord Bumbleton",
       "deck": "colony",
       "rarity": "legendary",
       "tags": [
@@ -538,7 +538,7 @@
     },
     {
       "id": "clarion",
-      "name": "Clarion",
+      "name": "Luna",
       "deck": "canines",
       "rarity": "legendary",
       "tags": [
@@ -756,7 +756,7 @@
     },
     {
       "id": "sirocco",
-      "name": "Sirocco",
+      "name": "Rue",
       "deck": "den_rush",
       "rarity": "legendary",
       "tags": [],
@@ -1176,14 +1176,13 @@
     },
     {
       "id": "jellyfish_legend",
-      "name": "Jellyfish",
+      "name": "Calypso",
       "deck": "fish",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
       "text": "Your adjacent Fish have Poison.",
       "keywords": [],
-      "unnamed": true,
       "species": "Jellyfish",
       "habitat": "Open Ocean",
       "workbench_id": "fish-0"
@@ -1617,7 +1616,7 @@
     },
     {
       "id": "squirrel_legend",
-      "name": "Squirrel",
+      "name": "Yuki",
       "deck": "food_otk",
       "rarity": "legendary",
       "tags": [
@@ -1626,7 +1625,6 @@
       "base_strength": 3,
       "text": "Roar: lose all your food. In 2 turns, gain three times as much.",
       "keywords": [],
-      "unnamed": true,
       "species": "Squirrel",
       "habitat": "Forest",
       "workbench_id": "food-otk-1"
@@ -1652,14 +1650,13 @@
     },
     {
       "id": "octopus_legend",
-      "name": "Octopus",
+      "name": "Iris",
       "deck": "food_otk",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
       "text": "Roar: this becomes a copy of an adjacent animal.",
       "keywords": [],
-      "unnamed": true,
       "species": "Octopus",
       "habitat": "Open Ocean",
       "workbench_id": "food-otk-3"
@@ -3057,14 +3054,13 @@
     },
     {
       "id": "sloth_legend",
-      "name": "Sloth",
+      "name": "Aya",
       "deck": "bench",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 4,
       "text": "Your Dusk effects happen twice.",
       "keywords": [],
-      "unnamed": true,
       "species": "Sloth",
       "habitat": "Jungle",
       "workbench_id": "aristocrats-3"

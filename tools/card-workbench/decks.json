@@ -196,7 +196,7 @@
     {
      "habitat": "Forest",
      "id": "canines-1",
-     "name": "Clarion",
+     "name": "Luna",
      "note": "",
      "rarity": "L",
      "species": "Wolf",
@@ -570,7 +570,7 @@
     {
      "habitat": "Meadow",
      "id": "colony-3",
-     "name": "Falstaff",
+     "name": "Lord Bumbleton",
      "note": "",
      "rarity": "L",
      "species": "Bumblebee",
@@ -721,7 +721,7 @@
     {
      "habitat": "Forest",
      "id": "den-rush-2",
-     "name": "Sirocco",
+     "name": "Rue",
      "note": "",
      "rarity": "L",
      "species": "Skunk",
@@ -1059,7 +1059,7 @@
     {
      "habitat": "Open Ocean",
      "id": "fish-0",
-     "name": "",
+     "name": "Calypso",
      "note": "",
      "rarity": "L",
      "species": "Jellyfish",
@@ -1421,7 +1421,7 @@
     {
      "habitat": "Forest",
      "id": "food-otk-1",
-     "name": "",
+     "name": "Yuki",
      "note": "",
      "rarity": "L",
      "species": "Squirrel",
@@ -1445,7 +1445,7 @@
     {
      "habitat": "Open Ocean",
      "id": "food-otk-3",
-     "name": "",
+     "name": "Iris",
      "note": "",
      "rarity": "L",
      "species": "Octopus",
@@ -2745,7 +2745,7 @@
     {
      "habitat": "Jungle",
      "id": "aristocrats-3",
-     "name": "",
+     "name": "Aya",
      "note": "",
      "rarity": "L",
      "species": "Sloth",

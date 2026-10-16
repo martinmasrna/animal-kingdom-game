@@ -13,7 +13,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Queen Marabunta** | 1 | Colony, Queen | 4 | Roar: gain 4 food for each other Colony animal you control. |
 | **Vesper** | 1 | Colony | 5 | Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck. |
 | **Queen Honoria** | 1 | Colony, Queen | 4 | Whenever you play a Colony animal, gain 4 food. |
-| **Falstaff** | 1 | Colony | 3 | Flight. Whenever you gain food, gain 3 additional food. |
+| **Lord Bumbleton** | 1 | Colony | 3 | Flight. Whenever you gain food, gain 3 additional food. |
 
 ### Rare
 

@@ -10,7 +10,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Jellyfish** | 1 | — | 3 | Your adjacent Fish have Poison. |
+| **Calypso** | 1 | — | 3 | Your adjacent Fish have Poison. |
 | **Tuna** | 1 | Fish | 5 | Roar: for each region you control, draw a card and gain 5 food. |
 | **Manta Ray** | 1 | Fish | 4 | Dusk: if you control 2 or more regions, draw 2 cards. |
 | **Piranha** | 1 | Fish | 3 | Your Fish can cover enemies of strength up to the number of your Fish. |
