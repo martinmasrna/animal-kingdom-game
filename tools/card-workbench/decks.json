@@ -2743,18 +2743,6 @@
      "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal."
     },
     {
-     "habitat": "City",
-     "id": "aristocrats-2",
-     "name": "",
-     "note": "",
-     "rarity": "L",
-     "species": "Opossum",
-     "status": "proposed",
-     "str": 3,
-     "tag": "",
-     "text": "When an ally is covered, remove it and draw a card."
-    },
-    {
      "habitat": "Jungle",
      "id": "aristocrats-3",
      "name": "",
@@ -2776,7 +2764,7 @@
      "status": "proposed",
      "str": 5,
      "tag": "Arachnid",
-     "text": "Dawn: remove a random adjacent ally and gain its strength."
+     "text": "Dusk: remove a random adjacent ally and gain its strength."
     },
     {
      "habitat": "Open Ocean",

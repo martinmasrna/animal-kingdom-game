@@ -35,13 +35,10 @@
       "at": 1792086811
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Apex Predator."
-      },
-      "by": "claude",
-      "at": 1792086811
+      "by": "martin",
+      "at": 1792101661,
+      "lv": "problem",
+      "note": "horrible wording"
     }
   },
   "anteater": {
@@ -189,12 +186,15 @@
   },
   "badger": {
     "art": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "problem",
+      "by": "martin",
+      "at": 1792143268,
+      "note": "too photographic"
     },
     "crop": {
       "lv": "fine",
-      "by": "martin"
+      "by": "martin",
+      "at": 1792143262
     }
   },
   "barley": {
@@ -232,11 +232,21 @@
   "big_gus": {
     "art": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "at": 1792139106
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792139106
     },
     "animal": {
       "lv": "fine",
@@ -996,15 +1006,22 @@
   },
   "gaboon_viper": {
     "art": {
-      "lv": "problem",
-      "by": "martin",
-      "at": 1792096411,
-      "note": "too photorealistic"
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792139107,
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "too photorealistic"
+      }
     },
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792068317
+      "at": 1792139107,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      }
     },
     "animal": {
       "review": {
@@ -1115,12 +1132,26 @@
   },
   "greywhisker": {
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792139108
     },
     "animal": {
       "lv": "fine",
       "by": "martin"
+    },
+    "art": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792139108
     }
   },
   "grizzly_bear": {
@@ -1178,9 +1209,10 @@
       "by": "martin"
     },
     "strength": {
-      "note": "Martin, 2026-10-15: +1 after playing Food Aggro against 30 Lions",
-      "by": "claude",
-      "at": 1792092268
+      "note": "Martin, 2026-10-15: +1 after playing Food Aggro against 30 Lions -- IDK, MIGHT HAVE BEEN OVERCORRECTION",
+      "by": "martin",
+      "at": 1792144875,
+      "lv": "draft"
     }
   },
   "hare": {
@@ -1456,8 +1488,22 @@
   },
   "macaque_legend": {
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792144570
+    },
+    "art": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792144552
     }
   },
   "macaw": {
@@ -1532,6 +1578,24 @@
     "effect": {
       "note": "Watch in play: close to a full board wipe.",
       "by": "martin"
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792141740
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792141751
     }
   },
   "moose": {
@@ -1599,8 +1663,22 @@
   },
   "octopus_legend": {
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792143620
+    },
+    "art": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792143575
     }
   },
   "okapi": {
@@ -1913,11 +1991,21 @@
   "raven_legend": {
     "art": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "at": 1792139110
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792139110
     }
   },
   "remora": {
@@ -2031,7 +2119,8 @@
     },
     "crop": {
       "lv": "fine",
-      "by": "martin"
+      "by": "martin",
+      "at": 1792143287
     },
     "animal": {
       "lv": "draft",
@@ -2276,8 +2365,10 @@
       "by": "martin"
     },
     "art": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "problem",
+      "by": "martin",
+      "at": 1792143107,
+      "note": "way too photographic"
     },
     "crop": {
       "lv": "fine",
@@ -2471,17 +2562,24 @@
       "note": "moved from aristocrats to pool",
       "by": "claude",
       "at": 1792085439
-    }
-  },
-  "opossum_legend": {
-    "animal": {
+    },
+    "art": {
       "review": {
         "prev_lv": "empty",
         "prev_note": ""
       },
-      "note": "moved from aristocrats to pool",
+      "lv": "draft",
       "by": "claude",
-      "at": 1792085439
+      "at": 1792143573
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792143620
     }
   },
   "tarantula": {
@@ -2493,6 +2591,35 @@
       "note": "moved from aristocrats to pool",
       "by": "claude",
       "at": 1792085439
+    },
+    "effect": {
+      "lv": "problem",
+      "by": "claude",
+      "at": 1792107323,
+      "note": "Martin, 2026-10-16: Dusk, a night hunter, and further from the City Spider's Dawn",
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "have it remove any unit, just like city spider?",
+        "prev": "Dawn: remove a random adjacent ally and gain its strength."
+      }
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792142394
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792142411
     }
   },
   "sea_turtle": {
@@ -2504,6 +2631,24 @@
       "note": "moved from aristocrats to pool",
       "by": "claude",
       "at": 1792085440
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792139104
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792140511
     }
   },
   "sperm_whale": {
@@ -2511,6 +2656,24 @@
       "note": "moved from pool to aristocrats",
       "by": "claude",
       "at": 1792085440
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792105969
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792105989
     }
   },
   "cockroach": {
@@ -2522,12 +2685,48 @@
       },
       "by": "claude",
       "at": 1792085440
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792104136
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792104163
     }
   },
   "city_spider": {
     "effect": {
       "by": "claude",
       "at": 1792085441
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792106877
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792106916
     }
   },
   "pool-toad": {
@@ -2562,6 +2761,24 @@
       "note": "moved from pool to aristocrats",
       "by": "claude",
       "at": 1792085442
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792106879
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792106916
     }
   },
   "pool-locust": {
@@ -2605,6 +2822,24 @@
       "note": "moved from pool to aristocrats",
       "by": "claude",
       "at": 1792085442
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792106878
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792106916
     }
   },
   "pool-roach-king": {
@@ -2648,6 +2883,24 @@
       "note": "moved from pool to aristocrats",
       "by": "claude",
       "at": 1792085443
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792105969
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792105989
     }
   },
   "wolf_legend": {
@@ -2660,6 +2913,124 @@
       "note": "Martin, 2026-10-15, mid-gauntlet: +2 each was too much.",
       "by": "claude",
       "at": 1792095928
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792144188
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792144200
+    }
+  },
+  "raccoon": {
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792105968
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792105989
+    }
+  },
+  "roach": {
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792139103
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792140511
+    }
+  },
+  "opossum": {
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792139105
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792140512
+    }
+  },
+  "great_white_shark": {
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792143574
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792143620
+    }
+  },
+  "octopus": {
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792143574
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792143620
     }
   }
 }

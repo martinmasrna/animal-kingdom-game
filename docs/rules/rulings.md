@@ -64,7 +64,7 @@ Keywords:
 
 - **Hungry N** is a Dawn effect: it eats in play order with your other Dawn effects. Only a top animal eats; a buried one is skipped. Fed or not is all or nothing: with fewer than N food it eats nothing and gets −N strength for good. An adjacent legendary Oxpecker feeds it, and an inked animal isn't Hungry until the ink wears off.
 - **Titan** takes two actions, so it's offered only while two are left (an extra action from the Chipmunk counts). No free placement can play it ("play another animal", Remora, the Prince's twin).
-- **Flee** happens before every other reaction to the cover: the animal is back in hand before an Apex Predator eats, King Theron removes, or the legendary Opossum takes it. Only an enemy cover sets it off, by placement or by roaming. The returned card is playable at once. The Zebra's coverer goes back to its owner's hand unless it has Armor.
+- **Flee** happens before every other reaction to the cover: the animal is back in hand before an Apex Predator eats, or King Theron removes it. Only an enemy cover sets it off, by placement or by roaming. The returned card is playable at once. The Zebra's coverer goes back to its owner's hand unless it has Armor.
 - **Octopus ink** lasts until the start of the inking player's next turn. An inked animal has no keywords (printed or given), no anthem of its own (a dynamic strength counts as its printed 0), no aura for others, and none of its triggered effects (Roar-less reactions, Dawn, Dusk, "when this is removed"). It keeps its stored counters and still gets other animals' auras; a timer it already started still runs.
 - **Auras that give a keyword** (Armadillo's Stealth, Capybara's Armor, the legendary Jellyfish's Poison) reach the top animal on each adjacent crossroad you control, never the source itself.
 - **Grazing**: an animal grazes while it is the top of a crossroad that is a corner of a region its owner controls.
@@ -73,7 +73,6 @@ Cards:
 
 - **Unnamed legendaries** show their species as their name until Martin names them in the workbench; their ids are fixed (`<species>_legend`, `rodent` for the placeholder-named Rodent), so naming one later changes nothing else.
 - **The legendary Cuckoo** must remove an adjacent animal of strength 4 or less if there is one (yours or a choosable enemy); "play another animal" is then mandatory if anything can be played.
-- **The legendary Opossum** reacts to covers by either player, your own included, and to any ally it can see covered. It draws only when the removal happened (an Armor ally stays, and no card comes).
 - **The legendary Sloth** runs each of your Dusk effects twice in a row; "At the end of your turn" effects are Dusk effects.
 - **Praying Mantis** is a cost the player may decline; no removal, no cards.
 - **Tarantula** eats a random adjacent ally (Armor excluded) and keeps the strength it showed then, for good.
