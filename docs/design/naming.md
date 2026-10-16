@@ -19,8 +19,8 @@ The namers are the animals, never people (Martin, 2026-10-14: "the names need to
 - **A legendary name belongs to one animal.** A name any animal could carry (Little One, Speedy, Shaggy) is no name for a legend.
 - **Every name is built its own way.** A set made from one template (Lord or Lady on everything, an adjective plus a body part on everything) is the J.K. Rowling failure, Professor Sprout for the herbology teacher. Variety of source is part of what reads as real.
 - **The name's weight matches the card's strength and role.** Ghost is a perfect name for a strength-8 apex predator that roams and strikes from range, and a lie on a strength-1 squirrel; Goliath promises a 9 or 10, not a strength-4 gorilla that buffs the hand (Martin, 2026-10-14). Read the strength and the effect before naming, not only the animal and the art.
-- **Search real given names from anywhere in the world whose meaning belongs to the animal.** Every accepted name is one: Leo, Lea, Theron, Adira, Luna, Yuki, Aya, Rue, Calypso. It is The Lion King's method (Simba, Nala, Rafiki are Swahili names with meanings). English nouns and descriptions (Nettle, Lava, Scarlet) are things, not names, and were rejected (2026-10-14).
-- **It reads as a name first, the meaning second.** Luna, Yuki, Rue and Aya sound like names and reveal a meaning underneath; Moss, Fern and Mist sound like the thing, a description, not a name. Lengths vary too: settling into one- and two-syllable names would be one more template (Martin, 2026-10-14).
+- **The sound carries the character; meaning is optional.** Ragnaros sounds huge and burning, Yogg-Saron wrong and ancient, Geralt gruff and worn, before anyone knows what they mean (Martin, 2026-10-16: "why does there have to be perfect hidden meaning in some forgotten language??"). Choose names for how they sound against the animal, its art, strength and role. A meaning underneath (Luna, Yuki, Rue) is a bonus, never the search. A coined sound fails only when it evokes nothing (Tocca, Rasca); a coined sound that sounds like the character is a name.
+- **It reads as a name, not a thing.** Moss, Fern and Mist sound like the thing, a description, not a name. Lengths vary: settling into one- and two-syllable names makes every legendary blur into the next (Martin, 2026-10-14 and 2026-10-16).
 - **No verbs as names** (Lull, Pinch), and no single object the animal is known for (Drum for a gorilla is Acorn for a squirrel).
 - **A name fits its animal, not only its own sound.** Ghost is close to a perfect name, but it belongs on a white predator, not a white squirrel (Martin, 2026-10-14).
 - **Name one card at a time and get it right,** never a page of fifty (Martin, 2026-10-14). Only the six launch habitats are named now.
@@ -37,7 +37,7 @@ Name a legendary after its art is settled, not before: the name is easiest to fi
 
 - Everyday Western given names (Magnus, Clara, Martin): they read as a person, not an animal.
 - Abstract nouns and verbs (Ruin, Cache, Migration, Harvest): they read as card effects.
-- Coined sounds with no meaning (Tocca, Rasca): they show nothing.
+- Coined sounds that evoke nothing (Tocca, Rasca).
 - Clever two-word mash-ups (Gravepicker, Drillmaster): the AI-startup reflex.
 - Words with an established other meaning (Leviathan) and anything citing a work, character, god or real animal (Scrooge, Medusa, Moby Dick, Cecil).
 - Defaulting to one trick: not every legendary is Old or Big.
