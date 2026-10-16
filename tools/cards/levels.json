@@ -2422,14 +2422,22 @@
       "by": "martin"
     },
     "art": {
-      "lv": "problem",
-      "by": "martin",
-      "at": 1792143107,
-      "note": "way too photographic"
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792155282,
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "way too photographic"
+      }
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792155290
     }
   },
   "tortoise": {
