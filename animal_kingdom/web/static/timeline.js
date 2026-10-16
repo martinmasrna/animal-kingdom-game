@@ -53,7 +53,14 @@ export function plan(prev, next, cards = {}) {
   const g0 = prev.game, gN = next.game;
   const s = { board: clone(g0.board), food: { ...g0.food }, handCount: { ...g0.handCount }, hand: clone(g0.hand), current: g0.current };
   const finalUnit = iid => { for (const st of Object.values(gN.board)) for (const u of st) if (u.iid === iid) return u; return null; };
-  const finalCard = iid => gN.hand.find(h => h.iid === iid);
+  // a card entering your hand, as it was then: the final view's copy less the gains still to come in these events (a
+  // Tarsier's Primate arrives without its +2, then rises to it)
+  const finalCard = iid => {
+    const h = gN.hand.find(x => x.iid === iid);
+    if (!h) return h;
+    const later = fresh.slice(fresh.indexOf(cur) + 1).filter(x => x.e === 'strength' && x.iid === iid).reduce((a, x) => a + x.n, 0);
+    return later ? { ...h, str: h.str - later } : h;
+  };
   const view = () => {
     const v = clone(next);
     Object.assign(v.game, { board: clone(s.board), food: { ...s.food }, handCount: { ...s.handCount }, hand: clone(s.hand),
@@ -162,6 +169,7 @@ export function plan(prev, next, cards = {}) {
         if (last && last.step && last.step.kind === 'strength') {   // several in a row show together
           last.step.changes.push(ch); const cr = at(e.cause_iid); if (cr) last.step.src = [...new Set([...(last.step.src || []), cr])]; }
         else push({ kind: 'strength', dur: DUR.strength, changes: [ch] });
+        for (const h of s.hand) if (e.iid != null && h.iid === e.iid) h.str += e.n;   // a hand card keeps its new number after it rises
         break;
       }
       case 'transform':   // it becomes another card where it is (the Butterfly's stages in hand, the mimic Octopus's copy)

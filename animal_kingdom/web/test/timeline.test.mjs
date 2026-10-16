@@ -111,3 +111,21 @@ test("a card's food flies from the animal that made it, and food eaten flies to 
   }
   assert.ok(n.food > 0, 'some card food flew from an animal');
 });
+
+test('a card drawn and given strength in the same move shows its old number, then rises to the new one once', () => {
+  // A Tarsier's Primate: drawn as a 4, given +2. The final view already says 6; the steps must not add the +2 again.
+  const view = (hand, events) => ({ you: 'A', phase: 'playing', results: [],
+    game: { board: {}, food: { A: 0, B: 0 }, handCount: { A: hand.length, B: 0 }, hand, current: 'A', events, history: [] } });
+  const start = [{ seq: 1, e: 'turn_start', player: 'A', turn: 1 }];
+  const prev = view([], start);
+  const next = view([{ iid: 5, id: 'chimpanzee', str: 6 }], [...start,
+    { seq: 2, e: 'draw', player: 'A', cards: [[5, 'chimpanzee']] },
+    { seq: 3, e: 'strength', iid: 5, card: 'chimpanzee', owner: 'A', n: 2 }]);
+  const p = plan(prev, next);
+  const str = v => v.game.hand.find(h => h.iid === 5).str;
+  const rise = p.find(x => x.step && x.step.kind === 'strength');
+  assert.ok(rise, 'a strength step');
+  assert.equal(str(rise.view), 4, 'it rises from 4 (to 4 + 2), not from the final 6');
+  for (const x of p.slice(0, p.indexOf(rise))) if (x.view.game.hand.length) assert.equal(str(x.view), 4, 'drawn as a 4');
+  assert.equal(str(p[p.length - 1].view), 6);
+});
