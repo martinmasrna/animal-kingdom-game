@@ -652,7 +652,12 @@ const RISE_MS = 1100, rising = new Map();   // iid: { step, t0, was, now }
 function rise(h) {
   const st = ui.step, ch = st && st.kind === 'strength' && st.changes.find(c => c.iid === h.iid);
   let r = rising.get(h.iid);
-  if (ch && (!r || r.step !== st)) rising.set(h.iid, r = { step: st, t0: performance.now(), was: h.str, now: h.str + ch.n });
+  if (ch && (!r || r.step !== st)) {
+    rising.set(h.iid, r = { step: st, t0: performance.now(), was: h.str, now: h.str + ch.n });
+    // a rising card is drawn undimmed: redraw once it has settled, or it stays lit through a quiet opponent's turn (a
+    // playback still running redraws on its next step anyway)
+    setTimeout(() => { if (screen === 'game' && V && V.game && !PB.busy) drawGame(); }, RISE_MS + 30);
+  }
   if (!r) return null;
   const ago = performance.now() - r.t0;
   if (ago > RISE_MS) { rising.delete(h.iid); return null; }
