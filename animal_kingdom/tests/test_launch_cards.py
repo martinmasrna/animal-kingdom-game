@@ -472,9 +472,9 @@ def test_lynx_draws_only_when_placed_on_an_enemy():
 
 # ================================================================================ Den Rush
 
-def test_greywhisker_gains_draws_plays_then_discards():
-    s = make_state(hands={"A": ["greywhisker", "lion", "tiger"]}, decks={"A": ["squirrel"], "B": []})
-    rules.apply_action(s, PlaceAction("greywhisker", ("cr", "1,2")))
+def test_legendary_mole_gains_draws_plays_then_discards():
+    s = make_state(hands={"A": ["mole_legend", "lion", "tiger"]}, decks={"A": ["squirrel"], "B": []})
+    rules.apply_action(s, PlaceAction("mole_legend", ("cr", "1,2")))
     assert s.food["A"] == CFG.greywhisker_food and "squirrel" in hand_ids(s, "A")
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))      # play another animal
     assert s.pending["mode"] == "choice"                           # then discard a card of your choice

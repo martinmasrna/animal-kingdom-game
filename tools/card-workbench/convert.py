@@ -58,7 +58,7 @@ UNNAMED = {"food-aggro-0": ("big_gus", "Rodent"), "food-aggro-1": ("macaque_lege
 # Engine numbers the text doesn't carry.
 DYNAMIC = {"egg_eater": "removed_eggs_count"}
 # The card whose art covers each starter deck in the menus (its first legendary otherwise).
-COVERS = {"cats": "king_theron", "canines": "lobo", "colony": "queen_honoria", "den_rush": "greywhisker",
+COVERS = {"cats": "king_theron", "canines": "lobo", "colony": "queen_honoria", "den_rush": "scarlett",
           "egg_control": "eon", "food_aggro": "barley", "food_otk": "fathom", "giants": "brutus",
           "aristocrats": "ember", "fish": "tuna_legend", "handlock": "silverback", "hoofed": "giraffe_legend"}
 

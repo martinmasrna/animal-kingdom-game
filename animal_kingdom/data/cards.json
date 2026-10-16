@@ -23,7 +23,7 @@
       "slug": "den_rush",
       "name": "Den Rush",
       "order": 3,
-      "cover": "greywhisker"
+      "cover": "scarlett"
     },
     {
       "slug": "cats",
@@ -738,21 +738,6 @@
       "workbench_id": "canines-13"
     },
     {
-      "id": "greywhisker",
-      "name": "Greywhisker",
-      "deck": "den_rush",
-      "rarity": "legendary",
-      "tags": [
-        "Rodent"
-      ],
-      "base_strength": 1,
-      "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card.",
-      "keywords": [],
-      "species": "Rat",
-      "habitat": "City",
-      "workbench_id": "den-rush-0"
-    },
-    {
       "id": "sirocco",
       "name": "Rue",
       "deck": "den_rush",
@@ -950,6 +935,20 @@
       "species": "Mole",
       "habitat": "Meadow",
       "workbench_id": "pool-mole"
+    },
+    {
+      "id": "mole_legend",
+      "name": "[Mole]",
+      "deck": "den_rush",
+      "rarity": "legendary",
+      "tags": [],
+      "base_strength": 1,
+      "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card.",
+      "keywords": [],
+      "unnamed": true,
+      "species": "Mole",
+      "habitat": "Meadow",
+      "workbench_id": "pool-mole-legend"
     },
     {
       "id": "prince_leo",
@@ -3100,6 +3099,21 @@
       "species": "Naked Mole-Rat",
       "habitat": "Savanna",
       "workbench_id": "den-rush-4"
+    },
+    {
+      "id": "greywhisker",
+      "name": "Greywhisker",
+      "deck": "reserve",
+      "rarity": "legendary",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 1,
+      "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card.",
+      "keywords": [],
+      "species": "Rat",
+      "habitat": "City",
+      "workbench_id": "den-rush-0"
     },
     {
       "id": "baby_turtle",

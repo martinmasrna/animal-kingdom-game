@@ -2917,6 +2917,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "worker_bee": {"on_place": _worker_bee_place},
     # Den Rush.
     "greywhisker": {"on_place": _greywhisker_place},
+    "mole_legend": {"on_place": _greywhisker_place},
     "pestis": {"on_place": _pestis_place},
     "sirocco": {"on_place": _sirocco_place},
     "gale": {"on_place": _gale_place},

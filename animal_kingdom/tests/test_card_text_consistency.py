@@ -38,6 +38,7 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "methuselah": ["methuselah_food"],
     "sloth": ["sloth_food"],
     "greywhisker": ["greywhisker_food"],
+    "mole_legend": ["greywhisker_food"],
     "barley": ["rat_king_per_rodent"],
     "flying_squirrel": ["flying_squirrel_food"],
     "squirrel": ["squirrel_food"],

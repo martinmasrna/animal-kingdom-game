@@ -707,18 +707,6 @@
    "precon": true,
    "cards": [
     {
-     "habitat": "City",
-     "id": "den-rush-0",
-     "name": "Greywhisker",
-     "note": "",
-     "rarity": "L",
-     "species": "Rat",
-     "status": "proposed",
-     "str": 1,
-     "tag": "Rodent",
-     "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card."
-    },
-    {
      "habitat": "Forest",
      "id": "den-rush-2",
      "name": "Rue",
@@ -873,6 +861,18 @@
      "str": 2,
      "tag": "",
      "text": "Roar: play another animal next to this."
+    },
+    {
+     "habitat": "Meadow",
+     "id": "pool-mole-legend",
+     "name": "",
+     "note": "",
+     "rarity": "L",
+     "species": "Mole",
+     "status": "open",
+     "str": 1,
+     "tag": "",
+     "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card."
     }
    ]
   },
@@ -2789,6 +2789,18 @@
      "str": 2,
      "tag": "Rodent",
      "text": "Roar: play another animal next to this."
+    },
+    {
+     "habitat": "City",
+     "id": "den-rush-0",
+     "name": "Greywhisker",
+     "note": "",
+     "rarity": "L",
+     "species": "Rat",
+     "status": "open",
+     "str": 1,
+     "tag": "Rodent",
+     "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card."
     }
    ]
   }
