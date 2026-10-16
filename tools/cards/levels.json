@@ -191,15 +191,22 @@
   },
   "badger": {
     "art": {
-      "lv": "problem",
-      "by": "martin",
-      "at": 1792143268,
-      "note": "too photographic"
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792148289,
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "too photographic"
+      }
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792143262
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792148298,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      }
     }
   },
   "barley": {
