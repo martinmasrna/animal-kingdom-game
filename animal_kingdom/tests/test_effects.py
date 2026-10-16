@@ -620,9 +620,9 @@ def test_chipmunk_no_longer_pays_out_after_it_is_destroyed():
 
 # ====================================== Stage 2.3: extra placements (decision F1) + twins
 
-def test_naked_mole_rat_plays_another_unit_adjacent_to_it():
-    s = make_state(current="A", hands={"A": ["naked_mole_rat", "lion"]})
-    rules.apply_action(s, PlaceAction("naked_mole_rat", ("cr", "1,2")))
+def test_mole_plays_another_unit_adjacent_to_it():
+    s = make_state(current="A", hands={"A": ["mole", "lion"]})
+    rules.apply_action(s, PlaceAction("mole", ("cr", "1,2")))
     assert s.pending is not None and s.pending["mode"] == "place"
     assert {tuple(p["target"]) for p in s.pending["placements"]} == {("cr", "1,1"), ("cr", "1,3"), ("cr", "2,2")}
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))

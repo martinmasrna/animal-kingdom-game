@@ -783,21 +783,6 @@
       "workbench_id": "den-rush-3"
     },
     {
-      "id": "naked_mole_rat",
-      "name": "Naked Mole-Rat",
-      "deck": "den_rush",
-      "rarity": "rare",
-      "tags": [
-        "Rodent"
-      ],
-      "base_strength": 2,
-      "text": "Roar: play another animal next to this.",
-      "keywords": [],
-      "species": "Naked Mole-Rat",
-      "habitat": "Savanna",
-      "workbench_id": "den-rush-4"
-    },
-    {
       "id": "hornet",
       "name": "Hornet",
       "deck": "den_rush",
@@ -952,6 +937,19 @@
       "species": "Fox",
       "habitat": "Forest",
       "workbench_id": "pool-y1"
+    },
+    {
+      "id": "mole",
+      "name": "Mole",
+      "deck": "den_rush",
+      "rarity": "rare",
+      "tags": [],
+      "base_strength": 2,
+      "text": "Roar: play another animal next to this.",
+      "keywords": [],
+      "species": "Mole",
+      "habitat": "Meadow",
+      "workbench_id": "pool-mole"
     },
     {
       "id": "prince_leo",
@@ -3087,6 +3085,21 @@
       "species": "Hyena",
       "habitat": "Savanna",
       "workbench_id": "aristocrats-9"
+    },
+    {
+      "id": "naked_mole_rat",
+      "name": "Naked Mole-Rat",
+      "deck": "reserve",
+      "rarity": "rare",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 2,
+      "text": "Roar: play another animal next to this.",
+      "keywords": [],
+      "species": "Naked Mole-Rat",
+      "habitat": "Savanna",
+      "workbench_id": "den-rush-4"
     },
     {
       "id": "baby_turtle",

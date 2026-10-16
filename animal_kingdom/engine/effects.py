@@ -2075,8 +2075,8 @@ def _op_discard_choice(state, step):
 OPS["discard_choice"] = _op_discard_choice
 
 
-def _naked_mole_rat_place(state, unit, cr):
-    """Roar: play another animal adjacent to this."""
+def _mole_place(state, unit, cr):
+    """Roar: play another animal adjacent to this (the Mole; the shelved Naked Mole-Rat had it first)."""
     _push_play_extra(state, unit.owner, filter={"adjacent_to": cr})
 
 
@@ -2920,7 +2920,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "pestis": {"on_place": _pestis_place},
     "sirocco": {"on_place": _sirocco_place},
     "gale": {"on_place": _gale_place},
-    "naked_mole_rat": {"on_place": _naked_mole_rat_place},
+    "mole": {"on_place": _mole_place},
+    "naked_mole_rat": {"on_place": _mole_place},
     "hornet": {"on_place": _hornet_place},
     "skunk": {"on_place": _skunk_place},
     "hare": {"on_place": _conditional(_draws("hare_draw"))},

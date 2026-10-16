@@ -743,18 +743,6 @@
      "text": "Flight. Roar: draw a card for each ally next to the opponent's den."
     },
     {
-     "habitat": "Savanna",
-     "id": "den-rush-4",
-     "name": "Naked Mole-Rat",
-     "note": "",
-     "rarity": "R",
-     "species": "Naked Mole-Rat",
-     "status": "proposed",
-     "str": 2,
-     "tag": "Rodent",
-     "text": "Roar: play another animal next to this."
-    },
-    {
      "habitat": "Forest",
      "id": "den-rush-5",
      "name": "Hornet",
@@ -873,6 +861,18 @@
      "str": 5,
      "tag": "Canine",
      "text": "Roar: place Poppy and Rusty on random adjacent empty crossroads."
+    },
+    {
+     "habitat": "Meadow",
+     "id": "pool-mole",
+     "name": "Mole",
+     "note": "",
+     "rarity": "R",
+     "species": "Mole",
+     "status": "open",
+     "str": 2,
+     "tag": "",
+     "text": "Roar: play another animal next to this."
     }
    ]
   },
@@ -2420,18 +2420,6 @@
     },
     {
      "habitat": "Meadow",
-     "id": "pool-mole",
-     "name": "Mole",
-     "note": "",
-     "rarity": "",
-     "species": "Mole",
-     "status": "open",
-     "str": null,
-     "tag": "",
-     "text": ""
-    },
-    {
-     "habitat": "Meadow",
      "id": "pool-weasel",
      "name": "Weasel",
      "note": "",
@@ -2789,6 +2777,18 @@
      "str": 4,
      "tag": "",
      "text": "Dusk: gain 5 food for each of your animals removed this turn."
+    },
+    {
+     "habitat": "Savanna",
+     "id": "den-rush-4",
+     "name": "Naked Mole-Rat",
+     "note": "",
+     "rarity": "R",
+     "species": "Naked Mole-Rat",
+     "status": "open",
+     "str": 2,
+     "tag": "Rodent",
+     "text": "Roar: play another animal next to this."
     }
    ]
   }
