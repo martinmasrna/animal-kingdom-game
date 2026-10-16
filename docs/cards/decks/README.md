@@ -5,7 +5,7 @@ Every deck is 30 cards in the 4-4-6 shape: 4 legendary designs ×1, 4 rare ×2, 
 | Deck |
 |---|
 | [Colony](colony.md) |
-| [Aristocrats](aristocrats.md) |
+| [Circle of Life](aristocrats.md) |
 | [Roaming Pack](canines.md) |
 | [Den Rush](den-rush.md) |
 | [Cats](cats.md) |
