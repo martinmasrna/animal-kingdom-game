@@ -11,7 +11,7 @@ Every deck is 30 cards in the 4-4-6 shape: 4 legendary designs ×1, 4 rare ×2, 
 | [Cats](cats.md) |
 | [Fish](fish.md) |
 | [Rodents](food-aggro.md) |
-| [Food OTK](food-otk.md) |
+| [Untouchables](food-otk.md) |
 | [Birds & Snakes](egg-control.md) |
 | [Primates](handlock.md) |
 | [Giants](giants.md) |
