@@ -258,7 +258,7 @@ def starter_cards() -> dict[str, dict]:
 
 def profile_view(p: dict) -> dict:
     starters = starter_decks()
-    profiles.seed_decks(p["id"], starters)
+    profiles.seed_decks(p["id"], starters, set(CARDS))
     return {**p, "decks": profiles.decks(p["id"], {d["id"]: d["cards"] for d in starters}),
             "history": profiles.history(p["id"]), "records": profiles.records(p["id"]),
             "logins": profiles.identities(p["id"]), "providers": oauth.available(),
@@ -269,7 +269,7 @@ def bot_levels(table) -> dict[str, float]:
     """Each bot level's rating on the leaderboard: its decks' ratings averaged by games played."""
     levels: dict[str, list] = {}
     for lid, r in table:
-        if (b := ranking.parse_bot(lid)):
+        if (b := ranking.parse_bot(lid)) and b[1] in PREMADE_DECKS:   # a retired deck's bot no longer plays
             levels.setdefault(b[0], []).append(r)
     return {level: sum(r.rating * max(1, r.games) for r in rs) / sum(max(1, r.games) for r in rs) for level, rs in levels.items()}
 

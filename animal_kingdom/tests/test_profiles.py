@@ -365,3 +365,25 @@ def test_the_server_round_trip_signs_the_browser_in(monkeypatch):
             bad = await c.get("/auth/google/callback?code=x&state=forged", allow_redirects=False)
             assert bad.headers["Location"] == "/#/auth/failed"
     asyncio.run(run())
+
+
+def test_when_the_starters_change_retired_copies_go_new_ones_come_and_a_deleted_one_stays_gone(db):
+    _, p = db.create()
+    old = {"lion": 3}
+    db.seed_decks(p["id"], [{"id": "cats_midrange", "name": "Cats", "cards": old}, {"id": "giants", "name": "Giants", "cards": old}])
+    db.save_decks(p["id"], [{"id": "cats_midrange", "name": "Cats", "cards": old}], {"cats_midrange": old})   # deletes Giants
+    new = [{"id": "cats", "name": "Cats", "cards": {"tiger": 2}}, {"id": "giants", "name": "Giants", "cards": old},
+           {"id": "fish", "name": "Fish", "cards": {"cod": 3}}]
+    db.seed_decks(p["id"], new)
+    assert [d["id"] for d in db.decks(p["id"])] == ["cats", "fish"], "the retired copy went, Giants stays deleted"
+    db.seed_decks(p["id"], new)
+    assert len(db.decks(p["id"])) == 2, "and once given, not given again"
+
+
+def test_cards_gone_from_the_pool_leave_a_players_own_deck(db):
+    _, p = db.create()
+    db.seed_decks(p["id"], [])
+    db.save_decks(p["id"], [{"id": "mine", "name": "Mine", "cards": {"lion": 3, "house_cat": 2}}])
+    db.seed_decks(p["id"], [], pool={"lion"})
+    assert db.decks(p["id"])[0]["cards"] == {"lion": 3}
+

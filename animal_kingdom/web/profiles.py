@@ -93,6 +93,12 @@ class Profiles:
         if "starter" not in [r[1] for r in self.db.execute("PRAGMA table_info(decks)")]:   # decks saved before a copy could follow its starter
             self.db.execute("ALTER TABLE decks ADD COLUMN starter TEXT NOT NULL DEFAULT ''")
             self.db.execute("ALTER TABLE decks ADD COLUMN edited INTEGER NOT NULL DEFAULT 0")
+        if "starters_seen" not in [r[1] for r in self.db.execute("PRAGMA table_info(profiles)")]:   # before the pool's starters could change
+            self.db.execute("ALTER TABLE profiles ADD COLUMN starters_seen TEXT NOT NULL DEFAULT ''")
+            with self.db:   # a seeded profile has seen the starters it holds a copy of (one it deleted was a retired one)
+                for (pid,) in self.db.execute("SELECT id FROM profiles WHERE seeded = 1").fetchall():
+                    seen = sorted({r[0] for r in self.db.execute("SELECT starter FROM decks WHERE profile = ? AND starter != ''", (pid,))})
+                    self.db.execute("UPDATE profiles SET starters_seen = ? WHERE id = ?", (json.dumps(seen), pid))
         with self.db:   # sign-ins once brought each device's untouched starters along: keep one untouched copy of each starter
             self.db.execute("DELETE FROM decks WHERE starter != '' AND edited = 0 AND rowid NOT IN "
                             "(SELECT MIN(rowid) FROM decks WHERE starter != '' AND edited = 0 GROUP BY profile, starter)")
@@ -203,18 +209,34 @@ class Profiles:
                         **({"cover": r["cover"]} if r["cover"] else {})})
         return out
 
-    def seed_decks(self, pid: str, starters: list[dict]) -> None:
-        """Give a profile the starter decks as its own, once: appended after any decks it already has. An
-        untouched copy then follows its starter as the starter's list changes; the moment its card list is
-        edited, it's the player's own, frozen as it then stood -- renaming or re-covering it doesn't count."""
-        if self.db.execute("SELECT seeded FROM profiles WHERE id = ?", (pid,)).fetchone()[0]:
-            return
-        mine = self.decks(pid)
-        taken = {d["id"] for d in mine}
-        new = mine + [d for d in starters if d["id"] not in taken]
-        self.save_decks(pid, new, {d["id"]: d["cards"] for d in starters})
+    def seed_decks(self, pid: str, starters: list[dict], pool: Optional[set] = None) -> None:
+        """Give a profile each starter deck as its own, once per starter: appended after any decks it already has
+        (up to DECKS_MAX). An untouched copy then follows its starter as the starter's list changes; the moment its card
+        list is edited, it's the player's own, frozen as it then stood -- renaming or re-covering it doesn't count.
+        As the pool changes: an untouched copy of a starter that no longer exists goes, a starter new to the profile is
+        given (one the player deleted is not given back), and cards gone from the pool (`pool`: the card ids that
+        exist) leave the player's own decks, which stay, short of 30, for the player to refill."""
+        row = self.db.execute("SELECT seeded, starters_seen FROM profiles WHERE id = ?", (pid,)).fetchone()
+        current = {d["id"]: d["cards"] for d in starters}
+        seen = set(json.loads(row["starters_seen"])) if row["starters_seen"] else set()
         with self.db:
-            self.db.execute("UPDATE profiles SET seeded = 1 WHERE id = ?", (pid,))
+            for r in self.db.execute("SELECT DISTINCT starter FROM decks WHERE profile = ? AND starter != '' AND edited = 0", (pid,)).fetchall():
+                if r[0] not in current:
+                    self.db.execute("DELETE FROM decks WHERE profile = ? AND starter = ? AND edited = 0", (pid, r[0]))
+        mine = self.decks(pid, current)
+        changed = False
+        if pool is not None:
+            for d in mine:
+                kept = {c: n for c, n in d["cards"].items() if c in pool}
+                if kept != d["cards"]:
+                    d["cards"], changed = kept, True
+        taken = {d["id"] for d in mine}
+        fresh = [d for d in starters if d["id"] not in taken and (not row["seeded"] or d["id"] not in seen)]
+        new = mine + fresh[:max(0, DECKS_MAX - len(mine))]
+        if fresh or changed or not row["seeded"]:
+            self.save_decks(pid, new, current)
+        with self.db:
+            self.db.execute("UPDATE profiles SET seeded = 1, starters_seen = ? WHERE id = ?", (json.dumps(sorted(seen | set(current))), pid))
 
     def save_decks(self, pid: str, decks: list, starters: Optional[dict[str, dict]] = None) -> list[dict]:
         """Replace the profile's decks with `decks` ([{id, name, cards: {card id: copies}, cover?}]). Drafts
