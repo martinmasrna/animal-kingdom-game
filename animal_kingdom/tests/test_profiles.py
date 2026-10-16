@@ -59,7 +59,7 @@ def test_a_profile_gets_the_starter_decks_once(monkeypatch):
     monkeypatch.setattr(server, "profiles", db)
     _, p = db.create()
     decks = server.profile_view(p)["decks"]
-    assert [d["name"] for d in decks][:3] == ["Colony", "Aristocrats", "Canine Roam Tempo"] and len(decks) == 12
+    assert [d["name"] for d in decks][:3] == ["Colony", "Aristocrats", "Roaming Pack"] and len(decks) == 12
     assert all(sum(d["cards"].values()) == 30 for d in decks)
     db.save_decks(p["id"], decks[:1])                                   # the player deletes eleven
     assert len(server.profile_view(p)["decks"]) == 1                    # and they stay deleted

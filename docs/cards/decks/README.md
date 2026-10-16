@@ -6,7 +6,7 @@ Every deck is 30 cards in the 4-4-6 shape: 4 legendary designs ×1, 4 rare ×2, 
 |---|
 | [Colony](colony.md) |
 | [Aristocrats](aristocrats.md) |
-| [Canine Roam Tempo](canines.md) |
+| [Roaming Pack](canines.md) |
 | [Aggro Den Rush](den-rush.md) |
 | [Cats](cats.md) |
 | [Fish](fish.md) |
