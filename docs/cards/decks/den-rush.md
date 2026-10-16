@@ -13,7 +13,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Rue** | 1 | — | 5 | Roar: return all adjacent enemies to your opponent's hand. |
 | **[FALCON]** | 1 | Bird | 5 | Flight. Roar: draw a card for each ally next to the opponent's den. |
 | **Scarlett** | 1 | Canine | 5 | Roar: place Poppy and Rusty on random adjacent empty crossroads. |
-| **[Mole]** | 1 | — | 1 | Roar: gain 1 food, draw a card, play another animal, then discard a card. |
+| **[MOLE]** | 1 | — | 1 | Roar: gain 1 food, draw a card, play another animal, then discard a card. |
 
 ### Rare
 

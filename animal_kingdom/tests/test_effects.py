@@ -668,13 +668,13 @@ def test_cheetah_draws_when_placed_next_to_enemy_base():
     assert len(s.hands["A"]) == 1
 
 
-def test_aurum_draws_at_the_start_of_its_owners_turn():
+def test_legendary_bat_draws_at_the_start_of_its_owners_turn():
     s = make_state(current="A", decks={"A": ["lion", "fox", "rat"], "B": ["lynx", "lynx"]})
-    put(s, "1,2", "aurum", "A")
+    put(s, "1,2", "bat_legend", "A")
     rules.apply_action(s, DrawAction())                 # A's turn ends
     hand_a = len(s.hands["A"])
     rules.apply_action(s, DrawAction())                 # B's turn ends -> start of A's turn
-    assert len(s.hands["A"]) == hand_a + 1              # Aurum drew
+    assert len(s.hands["A"]) == hand_a + 1              # the Bat drew
 
 
 # ============================================ Stage 2.4: removal roars / reactive

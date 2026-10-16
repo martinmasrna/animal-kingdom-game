@@ -2935,6 +2935,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "eon": {"on_end_of_turn": _eon_end_of_turn},
     "raven_legend": {"on_place": _raven_legend_place},
     "aurum": {"on_start_of_turn": _aurum_start},
+    "bat_legend": {"on_start_of_turn": _aurum_start},
     "black_swan": {"on_draw": _omen_drawn},
     "hawk": {"on_place": _removes("stoop_max")},
     "gaboon_viper": {"on_place": _king_cobra_place},

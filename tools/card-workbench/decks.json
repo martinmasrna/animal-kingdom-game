@@ -907,18 +907,6 @@
     },
     {
      "habitat": "Meadow",
-     "id": "egg-control-2",
-     "name": "Aurum",
-     "note": "",
-     "rarity": "L",
-     "species": "Goose",
-     "status": "proposed",
-     "str": 1,
-     "tag": "Bird",
-     "text": "Dawn: draw a card."
-    },
-    {
-     "habitat": "Meadow",
      "id": "egg-control-3",
      "name": "Black Swan",
      "note": "",
@@ -1048,6 +1036,18 @@
      "str": 3,
      "tag": "Snake",
      "text": "Roar: give an adjacent enemy -3 strength."
+    },
+    {
+     "habitat": "City",
+     "id": "pool-bat-legend",
+     "name": "",
+     "note": "",
+     "rarity": "L",
+     "species": "Bat",
+     "status": "open",
+     "str": 1,
+     "tag": "",
+     "text": "Flight. Dawn: draw a card."
     }
    ]
   },
@@ -2801,6 +2801,18 @@
      "str": 1,
      "tag": "Rodent",
      "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card."
+    },
+    {
+     "habitat": "Meadow",
+     "id": "egg-control-2",
+     "name": "Aurum",
+     "note": "",
+     "rarity": "L",
+     "species": "Goose",
+     "status": "open",
+     "str": 1,
+     "tag": "Bird",
+     "text": "Dawn: draw a card."
     }
    ]
   }

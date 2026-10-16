@@ -938,14 +938,13 @@
     },
     {
       "id": "mole_legend",
-      "name": "[Mole]",
+      "name": "[MOLE]",
       "deck": "den_rush",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
       "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card.",
       "keywords": [],
-      "unnamed": true,
       "species": "Mole",
       "habitat": "Meadow",
       "workbench_id": "pool-mole-legend"
@@ -1838,21 +1837,6 @@
       "workbench_id": "egg-control-1"
     },
     {
-      "id": "aurum",
-      "name": "Aurum",
-      "deck": "egg_control",
-      "rarity": "legendary",
-      "tags": [
-        "Bird"
-      ],
-      "base_strength": 1,
-      "text": "Dawn: draw a card.",
-      "keywords": [],
-      "species": "Goose",
-      "habitat": "Meadow",
-      "workbench_id": "egg-control-2"
-    },
-    {
       "id": "black_swan",
       "name": "Black Swan",
       "deck": "egg_control",
@@ -2023,6 +2007,22 @@
       "species": "Viper",
       "habitat": "Forest",
       "workbench_id": "pool-y3"
+    },
+    {
+      "id": "bat_legend",
+      "name": "[BAT]",
+      "deck": "egg_control",
+      "rarity": "legendary",
+      "tags": [],
+      "base_strength": 1,
+      "text": "Flight. Dawn: draw a card.",
+      "keywords": [
+        "Flight"
+      ],
+      "unnamed": true,
+      "species": "Bat",
+      "habitat": "City",
+      "workbench_id": "pool-bat-legend"
     },
     {
       "id": "baboon_legend",
@@ -3114,6 +3114,21 @@
       "species": "Rat",
       "habitat": "City",
       "workbench_id": "den-rush-0"
+    },
+    {
+      "id": "aurum",
+      "name": "Aurum",
+      "deck": "reserve",
+      "rarity": "legendary",
+      "tags": [
+        "Bird"
+      ],
+      "base_strength": 1,
+      "text": "Dawn: draw a card.",
+      "keywords": [],
+      "species": "Goose",
+      "habitat": "Meadow",
+      "workbench_id": "egg-control-2"
     },
     {
       "id": "baby_turtle",
