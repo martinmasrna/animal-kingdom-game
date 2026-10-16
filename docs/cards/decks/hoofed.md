@@ -10,10 +10,10 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Wildebeest** | 1 | Hoofed | 5 | Your regions produce 5 more food. |
+| **[Wildebeest]** | 1 | Hoofed | 5 | Your regions produce 5 more food. |
 | **Stonetusk** | 1 | Hoofed | 5 | Your opponent's regions produce 5 less food. |
-| **Zebra** | 1 | Hoofed | 4 | Roar: draw a card for each different Hoofed animal you control. |
-| **Giraffe** | 1 | Hoofed | 7 | Your opponent's hand is revealed. |
+| **[Zebra]** | 1 | Hoofed | 4 | Roar: draw a card for each different Hoofed animal you control. |
+| **[Giraffe]** | 1 | Hoofed | 7 | Your opponent's hand is revealed. |
 
 ### Rare
 

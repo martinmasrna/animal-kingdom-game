@@ -517,7 +517,7 @@
     },
     {
       "id": "leopard_legend",
-      "name": "Leopard",
+      "name": "[Leopard]",
       "deck": "canines",
       "rarity": "legendary",
       "tags": [
@@ -568,7 +568,7 @@
     },
     {
       "id": "wolf_legend",
-      "name": "Wolf",
+      "name": "[Wolf]",
       "deck": "canines",
       "rarity": "legendary",
       "tags": [
@@ -1189,7 +1189,7 @@
     },
     {
       "id": "tuna_legend",
-      "name": "Tuna",
+      "name": "[Tuna]",
       "deck": "fish",
       "rarity": "legendary",
       "tags": [
@@ -1205,7 +1205,7 @@
     },
     {
       "id": "manta_ray_legend",
-      "name": "Manta Ray",
+      "name": "[Manta Ray]",
       "deck": "fish",
       "rarity": "legendary",
       "tags": [
@@ -1221,7 +1221,7 @@
     },
     {
       "id": "piranha_legend",
-      "name": "Piranha",
+      "name": "[Piranha]",
       "deck": "fish",
       "rarity": "legendary",
       "tags": [
@@ -1405,7 +1405,7 @@
     },
     {
       "id": "macaque_legend",
-      "name": "Macaque",
+      "name": "[Macaque]",
       "deck": "food_aggro",
       "rarity": "legendary",
       "tags": [
@@ -1631,7 +1631,7 @@
     },
     {
       "id": "honey_badger_legend",
-      "name": "Honey Badger",
+      "name": "[Honey Badger]",
       "deck": "food_otk",
       "rarity": "legendary",
       "tags": [],
@@ -1838,7 +1838,7 @@
     },
     {
       "id": "raven_legend",
-      "name": "Raven",
+      "name": "[Raven]",
       "deck": "egg_control",
       "rarity": "legendary",
       "tags": [
@@ -2043,7 +2043,7 @@
     },
     {
       "id": "baboon_legend",
-      "name": "Baboon",
+      "name": "[Baboon]",
       "deck": "handlock",
       "rarity": "legendary",
       "tags": [
@@ -2074,7 +2074,7 @@
     },
     {
       "id": "butterfly_legend",
-      "name": "Butterfly",
+      "name": "[Butterfly]",
       "deck": "handlock",
       "rarity": "legendary",
       "tags": [],
@@ -2505,7 +2505,7 @@
     },
     {
       "id": "wildebeest_legend",
-      "name": "Wildebeest",
+      "name": "[Wildebeest]",
       "deck": "hoofed",
       "rarity": "legendary",
       "tags": [
@@ -2536,7 +2536,7 @@
     },
     {
       "id": "zebra_legend",
-      "name": "Zebra",
+      "name": "[Zebra]",
       "deck": "hoofed",
       "rarity": "legendary",
       "tags": [
@@ -2552,7 +2552,7 @@
     },
     {
       "id": "giraffe_legend",
-      "name": "Giraffe",
+      "name": "[Giraffe]",
       "deck": "hoofed",
       "rarity": "legendary",
       "tags": [

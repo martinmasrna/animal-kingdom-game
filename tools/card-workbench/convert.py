@@ -174,6 +174,8 @@ def convert(export: dict, old_data: dict) -> tuple[dict, list[str]]:
                 text = ""
             unnamed = not wc["name"].strip()
             name = wc["name"].strip() if not unnamed else UNNAMED[wc["id"]][1] if wc["id"] in UNNAMED else wc["species"]
+            if unnamed and wc["rarity"] == "L":
+                name = f"[{name}]"                  # a legendary still waiting for its name, plainly a placeholder
             in_deck = dslug
             if dslug == "bench" and (wc.get("status") == "open" or wc.get("habitat") not in LAUNCH_HABITATS):
                 in_deck = "reserve"                 # an open design, or a later habitat's card: not collectible
