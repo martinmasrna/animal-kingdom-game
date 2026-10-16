@@ -10,10 +10,10 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **[Baboon]** | 1 | Primate | 3 | Dawn: give 2 random animals in your hand +1 strength. |
-| **[Gorilla]** | 1 | Primate | 4 | Roar: give all animals in your hand +1 strength. |
-| **[Butterfly]** | 1 | — | 0 | When this gains strength in your hand, evolve. |
-| **Arne** | 1 | Bird | 2 | Flight. Apex Predator. When this enters your hand, add Arna to your hand. |
+| **[BABOON]** | 1 | Primate | 3 | Dawn: give 2 random animals in your hand +1 strength. |
+| **[GORILLA]** | 1 | Primate | 4 | Roar: give all animals in your hand +1 strength. |
+| **[BUTTERFLY]** | 1 | — | 0 | When this gains strength in your hand, evolve. |
+| **[EAGLE]** | 1 | Bird | 2 | Flight. Apex Predator. When this enters your hand, add its mate to your hand. |
 
 ### Rare
 

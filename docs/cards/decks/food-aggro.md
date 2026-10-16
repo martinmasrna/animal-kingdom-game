@@ -11,9 +11,9 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Big Gus** | 1 | Rodent | 6 | Roar: repeat the Roar of each of your adjacent Rodents. |
-| **[Macaque]** | 1 | Primate | 2 | Roar: draw cards until you have as many as your opponent. |
-| **[Rat]** | 1 | Rodent | 4 | Roar: gain 4 food for each other Rodent you control. Draw a card. |
-| **[Chipmunk]** | 1 | Rodent | 4 | Roar: gain 3 food for each 10 food you have. |
+| **[MACAQUE]** | 1 | Primate | 2 | Roar: draw cards until you have as many as your opponent. |
+| **[RAT]** | 1 | Rodent | 4 | Roar: gain 4 food for each other Rodent you control. Draw a card. |
+| **[CHIPMUNK]** | 1 | Rodent | 4 | Roar: gain 3 food for each 10 food you have. |
 
 ### Rare
 

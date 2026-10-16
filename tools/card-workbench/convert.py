@@ -100,8 +100,8 @@ TOKENS = [
     _token("butterfly_legend_monarch", "Monarch", 0, rarity="legendary", keywords=["Stealth", "Flight"], stage=5,
            text="Stealth. Flight. Roar: draw 2 cards, then give all animals in your hand +2 strength."),
     # The legendary Eagle's mate, made by it in your hand.
-    _token("arna", "Arna", 2, ["Bird"], rarity="legendary", keywords=["Flight", "Apex Predator"],
-           text="Flight. Apex Predator. While this and Arne are in your hand, they share their strength.",
+    _token("arna", "[EAGLE'S MATE]", 2, ["Bird"], rarity="legendary", keywords=["Flight", "Apex Predator"],
+           text="Flight. Apex Predator. While this and its mate are in your hand, they share their strength.",
            mate="arne"),
 ]
 # Cards made from the workbench that the engine pairs with a token.

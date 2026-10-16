@@ -96,8 +96,18 @@
           "species": "Eagle"
         }
       },
-      "note": "kept: the mate token Arna's printed text names Arne",
-      "at": 1792190448
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "at": 1792191060
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Apex Predator. When this enters your hand, add Arna to your hand."
+      },
+      "note": "placeholder names: the text names the mate, not a name",
+      "by": "claude",
+      "at": 1792191078
     }
   },
   "aurum": {
@@ -147,6 +157,20 @@
       "note": "Martin, 2026-10-15: Dusk to Dawn.",
       "by": "claude",
       "at": 1792064539
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Baboon"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191063
     }
   },
   "baby_bear": {
@@ -245,8 +269,8 @@
           "species": "Mouse"
         }
       },
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
-      "at": 1792190430
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "at": 1792191061
     }
   },
   "barracuda": {
@@ -454,8 +478,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792190448,
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of"
+      "at": 1792191060,
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
     }
   },
   "bobcat": {
@@ -494,8 +518,8 @@
           "species": "Rhinoceros"
         }
       },
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
-      "at": 1792190430
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "at": 1792191061
     }
   },
   "bush_dog": {
@@ -536,6 +560,20 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Butterfly"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191063
     }
   },
   "butterfly_legend_butterfly": {
@@ -726,8 +764,8 @@
           "species": "Wolf"
         }
       },
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
-      "at": 1792190429
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "at": 1792191059
     }
   },
   "cod": {
@@ -1071,8 +1109,8 @@
           "species": "Octopus"
         }
       },
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
-      "at": 1792190429
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "at": 1792191060
     }
   },
   "flying_squirrel": {
@@ -1162,8 +1200,8 @@
           "species": "Falcon"
         }
       },
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
-      "at": 1792190430
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "at": 1792191060
     }
   },
   "gazelle": {
@@ -1194,6 +1232,20 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Giraffe"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191064
     }
   },
   "golden_orb_weaver": {
@@ -1419,6 +1471,20 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Honey Badger"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191062
     }
   },
   "hornet": {
@@ -1516,9 +1582,9 @@
         }
       },
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
-      "at": 1792190429
+      "at": 1792191059
     }
   },
   "jerboa": {
@@ -1579,6 +1645,20 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Leopard"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191062
     }
   },
   "lion": {
@@ -1622,7 +1702,17 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Lobo",
+          "species": "Wolf"
+        }
+      },
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "at": 1792191059
     }
   },
   "lynx": {
@@ -1669,6 +1759,20 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792144552
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Macaque"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191062
     }
   },
   "macaw": {
@@ -1713,6 +1817,20 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Manta Ray"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191063
     }
   },
   "meerkat": {
@@ -1755,8 +1873,8 @@
           "species": "Tortoise"
         }
       },
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
-      "at": 1792190431
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "at": 1792191061
     }
   },
   "mocha": {
@@ -1793,9 +1911,9 @@
           "species": "Sperm Whale"
         }
       },
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
-      "at": 1792190430
+      "at": 1792191061
     }
   },
   "moose": {
@@ -1961,8 +2079,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792190448,
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of"
+      "at": 1792191060,
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
     }
   },
   "pestis": {
@@ -2003,6 +2121,20 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Piranha"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191063
     }
   },
   "poppy": {
@@ -2192,8 +2324,8 @@
           "species": "Bee"
         }
       },
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
-      "at": 1792190431
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "at": 1792191062
     }
   },
   "queen_marabunta": {
@@ -2216,8 +2348,8 @@
           "species": "Army Ant"
         }
       },
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
-      "at": 1792190431
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "at": 1792191061
     }
   },
   "rat": {
@@ -2254,6 +2386,20 @@
         "prev_note": ""
       },
       "at": 1792139110
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Raven"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191063
     }
   },
   "remora": {
@@ -2342,8 +2488,8 @@
           "species": "Chipmunk"
         }
       },
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
-      "at": 1792190430
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "at": 1792191061
     }
   },
   "serval": {
@@ -2388,7 +2534,7 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "review": {
         "prev_lv": "draft",
         "prev_note": "idk, isn't that a general name for Gorilla male?",
@@ -2397,7 +2543,7 @@
           "species": "Gorilla"
         }
       },
-      "at": 1792190431
+      "at": 1792191061
     }
   },
   "sirocco": {
@@ -2454,9 +2600,9 @@
       "by": "martin"
     },
     "animal": {
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
-      "at": 1792190429,
+      "at": 1792191059,
       "review": {
         "prev_lv": "empty",
         "prev_note": "moved from aristocrats to pool",
@@ -2713,6 +2859,20 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Tuna"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191063
     }
   },
   "vesper": {
@@ -2796,6 +2956,20 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Wildebeest"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191064
     }
   },
   "wolf": {
@@ -2869,6 +3043,20 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Zebra"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191064
     }
   },
   "cuco": {
@@ -2877,9 +3065,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
-      "at": 1792190429
+      "at": 1792191060
     },
     "art": {
       "review": {
@@ -3137,9 +3325,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "Martin 2026-10-17: placeholder until a name he is sure of",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
-      "at": 1792190431
+      "at": 1792191062
     },
     "art": {
       "review": {
@@ -3249,6 +3437,20 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792144200
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": {
+          "name": "",
+          "species": "Wolf"
+        }
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "by": "claude",
+      "at": 1792191062
     }
   },
   "raccoon": {

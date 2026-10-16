@@ -129,7 +129,7 @@
     {
      "habitat": "Meadow",
      "id": "pool-locust",
-     "name": "[Locust]",
+     "name": "[LOCUST]",
      "note": "",
      "rarity": "L",
      "species": "Locust",
@@ -184,7 +184,7 @@
     {
      "habitat": "Savanna",
      "id": "canines-0",
-     "name": "",
+     "name": "[LEOPARD]",
      "note": "",
      "rarity": "L",
      "species": "Leopard",
@@ -196,7 +196,7 @@
     {
      "habitat": "Forest",
      "id": "canines-1",
-     "name": "[White Wolf]",
+     "name": "[WHITE WOLF]",
      "note": "",
      "rarity": "L",
      "species": "Wolf",
@@ -208,7 +208,7 @@
     {
      "habitat": "Forest",
      "id": "canines-2",
-     "name": "Lobo",
+     "name": "[BLACK WOLF]",
      "note": "",
      "rarity": "L",
      "species": "Wolf",
@@ -220,7 +220,7 @@
     {
      "habitat": "Forest",
      "id": "canines-3",
-     "name": "",
+     "name": "[WOLF]",
      "note": "",
      "rarity": "L",
      "species": "Wolf",
@@ -534,7 +534,7 @@
     {
      "habitat": "Jungle",
      "id": "colony-0",
-     "name": "Queen [Ant]",
+     "name": "Queen [ANT]",
      "note": "",
      "rarity": "L",
      "species": "Army Ant",
@@ -558,7 +558,7 @@
     {
      "habitat": "Meadow",
      "id": "colony-2",
-     "name": "Queen [Bee]",
+     "name": "Queen [BEE]",
      "note": "",
      "rarity": "L",
      "species": "Bee",
@@ -733,7 +733,7 @@
     {
      "habitat": "Forest",
      "id": "den-rush-3",
-     "name": "[Falcon]",
+     "name": "[FALCON]",
      "note": "",
      "rarity": "L",
      "species": "Falcon",
@@ -896,7 +896,7 @@
     {
      "habitat": "Forest",
      "id": "egg-control-1",
-     "name": "",
+     "name": "[RAVEN]",
      "note": "",
      "rarity": "L",
      "species": "Raven",
@@ -1059,7 +1059,7 @@
     {
      "habitat": "Open Ocean",
      "id": "fish-0",
-     "name": "[Jellyfish]",
+     "name": "[JELLYFISH]",
      "note": "",
      "rarity": "L",
      "species": "Jellyfish",
@@ -1071,7 +1071,7 @@
     {
      "habitat": "Open Ocean",
      "id": "fish-1",
-     "name": "",
+     "name": "[TUNA]",
      "note": "",
      "rarity": "L",
      "species": "Tuna",
@@ -1083,7 +1083,7 @@
     {
      "habitat": "Open Ocean",
      "id": "fish-2",
-     "name": "",
+     "name": "[MANTA RAY]",
      "note": "",
      "rarity": "L",
      "species": "Manta Ray",
@@ -1095,7 +1095,7 @@
     {
      "habitat": "Jungle",
      "id": "fish-3",
-     "name": "",
+     "name": "[PIRANHA]",
      "note": "",
      "rarity": "L",
      "species": "Piranha",
@@ -1246,7 +1246,7 @@
     {
      "habitat": "City",
      "id": "food-aggro-1",
-     "name": "",
+     "name": "[MACAQUE]",
      "note": "",
      "rarity": "L",
      "species": "Macaque",
@@ -1258,7 +1258,7 @@
     {
      "habitat": "City",
      "id": "food-aggro-2",
-     "name": "[Rat]",
+     "name": "[RAT]",
      "note": "",
      "rarity": "L",
      "species": "Rat",
@@ -1270,7 +1270,7 @@
     {
      "habitat": "Forest",
      "id": "food-aggro-3",
-     "name": "[Chipmunk]",
+     "name": "[CHIPMUNK]",
      "note": "",
      "rarity": "L",
      "species": "Chipmunk",
@@ -1409,7 +1409,7 @@
     {
      "habitat": "Open Ocean",
      "id": "food-otk-0",
-     "name": "[Octopus]",
+     "name": "[OCTOPUS]",
      "note": "",
      "rarity": "L",
      "species": "Octopus",
@@ -1433,7 +1433,7 @@
     {
      "habitat": "Savanna",
      "id": "food-otk-2",
-     "name": "",
+     "name": "[HONEY BADGER]",
      "note": "",
      "rarity": "L",
      "species": "Honey Badger",
@@ -1584,7 +1584,7 @@
     {
      "habitat": "Savanna",
      "id": "giants-0",
-     "name": "[Rhinoceros]",
+     "name": "[RHINOCEROS]",
      "note": "",
      "rarity": "L",
      "species": "Rhinoceros",
@@ -1596,7 +1596,7 @@
     {
      "habitat": "Savanna",
      "id": "giants-1",
-     "name": "[Tortoise]",
+     "name": "[TORTOISE]",
      "note": "",
      "rarity": "L",
      "species": "Tortoise",
@@ -1608,7 +1608,7 @@
     {
      "habitat": "Open Ocean",
      "id": "giants-2",
-     "name": "[Sperm Whale]",
+     "name": "[SPERM WHALE]",
      "note": "Watch in play: close to a full board wipe.",
      "rarity": "L",
      "species": "Sperm Whale",
@@ -1620,7 +1620,7 @@
     {
      "habitat": "Savanna",
      "id": "giants-3",
-     "name": "[Oxpecker]",
+     "name": "[OXPECKER]",
      "note": "",
      "rarity": "L",
      "species": "Oxpecker",
@@ -1759,7 +1759,7 @@
     {
      "habitat": "Savanna",
      "id": "handlock-0",
-     "name": "",
+     "name": "[BABOON]",
      "note": "",
      "rarity": "L",
      "species": "Baboon",
@@ -1771,7 +1771,7 @@
     {
      "habitat": "Jungle",
      "id": "handlock-1",
-     "name": "[Gorilla]",
+     "name": "[GORILLA]",
      "note": "Watch in play: +2 to the whole hand may be too strong (dial: the +2 or the 7).",
      "rarity": "L",
      "species": "Gorilla",
@@ -1783,7 +1783,7 @@
     {
      "habitat": "Meadow",
      "id": "handlock-2",
-     "name": "",
+     "name": "[BUTTERFLY]",
      "note": "Watch in play: the five stages and their power ladder.",
      "rarity": "L",
      "species": "Butterfly",
@@ -1795,14 +1795,14 @@
     {
      "habitat": "Forest",
      "id": "handlock-3",
-     "name": "Arne",
+     "name": "[EAGLE]",
      "note": "",
      "rarity": "L",
      "species": "Eagle",
      "status": "proposed",
      "str": 2,
      "tag": "Bird",
-     "text": "Flight. Apex Predator. When this enters your hand, add Arna to your hand."
+     "text": "Flight. Apex Predator. When this enters your hand, add its mate to your hand."
     },
     {
      "habitat": "Jungle",
@@ -1934,7 +1934,7 @@
     {
      "habitat": "Savanna",
      "id": "hoofed-0",
-     "name": "",
+     "name": "[WILDEBEEST]",
      "note": "",
      "rarity": "L",
      "species": "Wildebeest",
@@ -1946,7 +1946,7 @@
     {
      "habitat": "Forest",
      "id": "hoofed-1",
-     "name": "[Boar]",
+     "name": "[BOAR]",
      "note": "",
      "rarity": "L",
      "species": "Boar",
@@ -1958,7 +1958,7 @@
     {
      "habitat": "Savanna",
      "id": "hoofed-2",
-     "name": "",
+     "name": "[ZEBRA]",
      "note": "",
      "rarity": "L",
      "species": "Zebra",
@@ -1970,7 +1970,7 @@
     {
      "habitat": "Savanna",
      "id": "hoofed-3",
-     "name": "",
+     "name": "[GIRAFFE]",
      "note": "",
      "rarity": "L",
      "species": "Giraffe",
@@ -2733,7 +2733,7 @@
     {
      "habitat": "Meadow",
      "id": "aristocrats-0",
-     "name": "[Cuckoo]",
+     "name": "[CUCKOO]",
      "note": "",
      "rarity": "L",
      "species": "Cuckoo",
@@ -2745,7 +2745,7 @@
     {
      "habitat": "Jungle",
      "id": "aristocrats-3",
-     "name": "[Sloth]",
+     "name": "[SLOTH]",
      "note": "",
      "rarity": "L",
      "species": "Sloth",

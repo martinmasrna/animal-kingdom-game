@@ -77,7 +77,7 @@
   "cards": [
     {
       "id": "queen_marabunta",
-      "name": "Queen [Ant]",
+      "name": "Queen [ANT]",
       "deck": "colony",
       "rarity": "legendary",
       "tags": [
@@ -110,7 +110,7 @@
     },
     {
       "id": "queen_honoria",
-      "name": "Queen [Bee]",
+      "name": "Queen [BEE]",
       "deck": "colony",
       "rarity": "legendary",
       "tags": [
@@ -461,7 +461,7 @@
     },
     {
       "id": "locust",
-      "name": "[Locust]",
+      "name": "[LOCUST]",
       "deck": "aristocrats",
       "rarity": "legendary",
       "tags": [],
@@ -517,7 +517,7 @@
     },
     {
       "id": "leopard_legend",
-      "name": "[Leopard]",
+      "name": "[LEOPARD]",
       "deck": "canines",
       "rarity": "legendary",
       "tags": [
@@ -531,14 +531,13 @@
         "Reach"
       ],
       "reach": 2,
-      "unnamed": true,
       "species": "Leopard",
       "habitat": "Savanna",
       "workbench_id": "canines-0"
     },
     {
       "id": "clarion",
-      "name": "[White Wolf]",
+      "name": "[WHITE WOLF]",
       "deck": "canines",
       "rarity": "legendary",
       "tags": [
@@ -553,7 +552,7 @@
     },
     {
       "id": "lobo",
-      "name": "Lobo",
+      "name": "[BLACK WOLF]",
       "deck": "canines",
       "rarity": "legendary",
       "tags": [
@@ -568,7 +567,7 @@
     },
     {
       "id": "wolf_legend",
-      "name": "[Wolf]",
+      "name": "[WOLF]",
       "deck": "canines",
       "rarity": "legendary",
       "tags": [
@@ -579,7 +578,6 @@
       "keywords": [
         "Roam"
       ],
-      "unnamed": true,
       "species": "Wolf",
       "habitat": "Forest",
       "workbench_id": "canines-3"
@@ -769,7 +767,7 @@
     },
     {
       "id": "gale",
-      "name": "[Falcon]",
+      "name": "[FALCON]",
       "deck": "den_rush",
       "rarity": "legendary",
       "tags": [
@@ -1174,7 +1172,7 @@
     },
     {
       "id": "jellyfish_legend",
-      "name": "[Jellyfish]",
+      "name": "[JELLYFISH]",
       "deck": "fish",
       "rarity": "legendary",
       "tags": [],
@@ -1187,7 +1185,7 @@
     },
     {
       "id": "tuna_legend",
-      "name": "[Tuna]",
+      "name": "[TUNA]",
       "deck": "fish",
       "rarity": "legendary",
       "tags": [
@@ -1196,14 +1194,13 @@
       "base_strength": 5,
       "text": "Roar: for each region you control, draw a card and gain 5 food.",
       "keywords": [],
-      "unnamed": true,
       "species": "Tuna",
       "habitat": "Open Ocean",
       "workbench_id": "fish-1"
     },
     {
       "id": "manta_ray_legend",
-      "name": "[Manta Ray]",
+      "name": "[MANTA RAY]",
       "deck": "fish",
       "rarity": "legendary",
       "tags": [
@@ -1212,14 +1209,13 @@
       "base_strength": 4,
       "text": "Dusk: if you control 2 or more regions, draw 2 cards.",
       "keywords": [],
-      "unnamed": true,
       "species": "Manta Ray",
       "habitat": "Open Ocean",
       "workbench_id": "fish-2"
     },
     {
       "id": "piranha_legend",
-      "name": "[Piranha]",
+      "name": "[PIRANHA]",
       "deck": "fish",
       "rarity": "legendary",
       "tags": [
@@ -1228,7 +1224,6 @@
       "base_strength": 3,
       "text": "Your Fish can cover enemies of strength up to the number of your Fish.",
       "keywords": [],
-      "unnamed": true,
       "species": "Piranha",
       "habitat": "Jungle",
       "workbench_id": "fish-3"
@@ -1403,7 +1398,7 @@
     },
     {
       "id": "macaque_legend",
-      "name": "[Macaque]",
+      "name": "[MACAQUE]",
       "deck": "food_aggro",
       "rarity": "legendary",
       "tags": [
@@ -1412,14 +1407,13 @@
       "base_strength": 2,
       "text": "Roar: draw cards until you have as many as your opponent.",
       "keywords": [],
-      "unnamed": true,
       "species": "Macaque",
       "habitat": "City",
       "workbench_id": "food-aggro-1"
     },
     {
       "id": "barley",
-      "name": "[Rat]",
+      "name": "[RAT]",
       "deck": "food_aggro",
       "rarity": "legendary",
       "tags": [
@@ -1434,7 +1428,7 @@
     },
     {
       "id": "scrooge",
-      "name": "[Chipmunk]",
+      "name": "[CHIPMUNK]",
       "deck": "food_aggro",
       "rarity": "legendary",
       "tags": [
@@ -1599,7 +1593,7 @@
     },
     {
       "id": "fathom",
-      "name": "[Octopus]",
+      "name": "[OCTOPUS]",
       "deck": "food_otk",
       "rarity": "legendary",
       "tags": [],
@@ -1627,7 +1621,7 @@
     },
     {
       "id": "honey_badger_legend",
-      "name": "[Honey Badger]",
+      "name": "[HONEY BADGER]",
       "deck": "food_otk",
       "rarity": "legendary",
       "tags": [],
@@ -1639,7 +1633,6 @@
         "Poison",
         "Spikes"
       ],
-      "unnamed": true,
       "species": "Honey Badger",
       "habitat": "Savanna",
       "workbench_id": "food-otk-2"
@@ -1832,7 +1825,7 @@
     },
     {
       "id": "raven_legend",
-      "name": "[Raven]",
+      "name": "[RAVEN]",
       "deck": "egg_control",
       "rarity": "legendary",
       "tags": [
@@ -1843,7 +1836,6 @@
       "keywords": [
         "Flight"
       ],
-      "unnamed": true,
       "species": "Raven",
       "habitat": "Forest",
       "workbench_id": "egg-control-1"
@@ -2037,7 +2029,7 @@
     },
     {
       "id": "baboon_legend",
-      "name": "[Baboon]",
+      "name": "[BABOON]",
       "deck": "handlock",
       "rarity": "legendary",
       "tags": [
@@ -2046,14 +2038,13 @@
       "base_strength": 3,
       "text": "Dawn: give 2 random animals in your hand +1 strength.",
       "keywords": [],
-      "unnamed": true,
       "species": "Baboon",
       "habitat": "Savanna",
       "workbench_id": "handlock-0"
     },
     {
       "id": "silverback",
-      "name": "[Gorilla]",
+      "name": "[GORILLA]",
       "deck": "handlock",
       "rarity": "legendary",
       "tags": [
@@ -2068,7 +2059,7 @@
     },
     {
       "id": "butterfly_legend",
-      "name": "[Butterfly]",
+      "name": "[BUTTERFLY]",
       "deck": "handlock",
       "rarity": "legendary",
       "tags": [],
@@ -2082,21 +2073,20 @@
         "butterfly_legend_monarch"
       ],
       "evolves": true,
-      "unnamed": true,
       "species": "Butterfly",
       "habitat": "Meadow",
       "workbench_id": "handlock-2"
     },
     {
       "id": "arne",
-      "name": "Arne",
+      "name": "[EAGLE]",
       "deck": "handlock",
       "rarity": "legendary",
       "tags": [
         "Bird"
       ],
       "base_strength": 2,
-      "text": "Flight. Apex Predator. When this enters your hand, add Arna to your hand.",
+      "text": "Flight. Apex Predator. When this enters your hand, add its mate to your hand.",
       "keywords": [
         "Flight",
         "Apex Predator"
@@ -2277,7 +2267,7 @@
     },
     {
       "id": "brutus",
-      "name": "[Rhinoceros]",
+      "name": "[RHINOCEROS]",
       "deck": "giants",
       "rarity": "legendary",
       "tags": [
@@ -2295,7 +2285,7 @@
     },
     {
       "id": "methuselah",
-      "name": "[Tortoise]",
+      "name": "[TORTOISE]",
       "deck": "giants",
       "rarity": "legendary",
       "tags": [],
@@ -2310,7 +2300,7 @@
     },
     {
       "id": "mocha",
-      "name": "[Sperm Whale]",
+      "name": "[SPERM WHALE]",
       "deck": "giants",
       "rarity": "legendary",
       "tags": [],
@@ -2325,7 +2315,7 @@
     },
     {
       "id": "oxpecker_legend",
-      "name": "[Oxpecker]",
+      "name": "[OXPECKER]",
       "deck": "giants",
       "rarity": "legendary",
       "tags": [
@@ -2499,7 +2489,7 @@
     },
     {
       "id": "wildebeest_legend",
-      "name": "[Wildebeest]",
+      "name": "[WILDEBEEST]",
       "deck": "hoofed",
       "rarity": "legendary",
       "tags": [
@@ -2508,14 +2498,13 @@
       "base_strength": 5,
       "text": "Your regions produce 5 more food.",
       "keywords": [],
-      "unnamed": true,
       "species": "Wildebeest",
       "habitat": "Savanna",
       "workbench_id": "hoofed-0"
     },
     {
       "id": "boar_legend",
-      "name": "[Boar]",
+      "name": "[BOAR]",
       "deck": "hoofed",
       "rarity": "legendary",
       "tags": [
@@ -2530,7 +2519,7 @@
     },
     {
       "id": "zebra_legend",
-      "name": "[Zebra]",
+      "name": "[ZEBRA]",
       "deck": "hoofed",
       "rarity": "legendary",
       "tags": [
@@ -2539,14 +2528,13 @@
       "base_strength": 4,
       "text": "Roar: draw a card for each different Hoofed animal you control.",
       "keywords": [],
-      "unnamed": true,
       "species": "Zebra",
       "habitat": "Savanna",
       "workbench_id": "hoofed-2"
     },
     {
       "id": "giraffe_legend",
-      "name": "[Giraffe]",
+      "name": "[GIRAFFE]",
       "deck": "hoofed",
       "rarity": "legendary",
       "tags": [
@@ -2555,7 +2543,6 @@
       "base_strength": 7,
       "text": "Your opponent's hand is revealed.",
       "keywords": [],
-      "unnamed": true,
       "species": "Giraffe",
       "habitat": "Savanna",
       "workbench_id": "hoofed-3"
@@ -3031,7 +3018,7 @@
     },
     {
       "id": "cuco",
-      "name": "[Cuckoo]",
+      "name": "[CUCKOO]",
       "deck": "bench",
       "rarity": "legendary",
       "tags": [
@@ -3046,7 +3033,7 @@
     },
     {
       "id": "sloth_legend",
-      "name": "[Sloth]",
+      "name": "[SLOTH]",
       "deck": "bench",
       "rarity": "legendary",
       "tags": [],
@@ -3341,7 +3328,7 @@
     },
     {
       "id": "arna",
-      "name": "Arna",
+      "name": "[EAGLE'S MATE]",
       "deck": "token",
       "rarity": "legendary",
       "tags": [
@@ -3352,7 +3339,7 @@
         "Flight",
         "Apex Predator"
       ],
-      "text": "Flight. Apex Predator. While this and Arne are in your hand, they share their strength.",
+      "text": "Flight. Apex Predator. While this and its mate are in your hand, they share their strength.",
       "mate": "arne"
     },
     {
