@@ -121,7 +121,13 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (status open, in the reserve)",
+      "at": 1792192620
     }
   },
   "baboon": {
@@ -375,28 +381,33 @@
   },
   "black_panther": {
     "habitat": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193273
     },
     "rarity": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193271
     },
     "animal": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193270
     },
     "tag": {
       "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792193276
     },
     "effect": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792193275
     },
     "art": {
       "lv": "fine",
@@ -786,24 +797,29 @@
   },
   "crocodile": {
     "habitat": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193180
     },
     "rarity": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193179
     },
     "animal": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193177
     },
     "strength": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193176
     },
     "effect": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193174
     },
     "art": {
       "lv": "fine",
@@ -981,6 +997,21 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193254
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193255
+    },
+    "habitat": {
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193257
     }
   },
   "ember": {
@@ -1300,7 +1331,13 @@
     },
     "animal": {
       "lv": "fine",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "note": "out of the collection (status open, in the reserve)",
+      "at": 1792191573
     },
     "art": {
       "review": {
@@ -1461,6 +1498,31 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792193227
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193234
+    },
+    "habitat": {
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193236
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193240
+    },
+    "strength": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792193242
     }
   },
   "honey_badger_legend": {
@@ -1505,6 +1567,31 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193287
+    },
+    "effect": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792193290
+    },
+    "strength": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792193292
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792193294
+    },
+    "habitat": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792193297
     }
   },
   "hyena": {
@@ -1663,24 +1750,28 @@
   },
   "lion": {
     "habitat": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193141
     },
     "rarity": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193139
     },
     "animal": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193137
     },
     "tag": {
       "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193136
     },
     "art": {
       "lv": "fine",
@@ -1689,6 +1780,11 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193106
     }
   },
   "lobo": {
@@ -1783,6 +1879,12 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "lv": "problem",
+      "by": "martin",
+      "at": 1792193353,
+      "note": "wasn't this supposed to repeat last roar played? we can have both these cards, but repeat sounds like better fit for parrot no?"
     }
   },
   "mackerel": {
@@ -1956,6 +2058,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (status open, in the reserve)",
+      "by": "claude",
+      "at": 1792191132
     }
   },
   "nurse_bee": {
@@ -2165,28 +2276,33 @@
   },
   "prince_leo": {
     "habitat": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193194
     },
     "rarity": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193196
     },
     "animal": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193191
     },
     "tag": {
       "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792193212
     },
     "effect": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193200
     },
     "art": {
       "lv": "fine",
@@ -2199,28 +2315,33 @@
   },
   "princess_lea": {
     "habitat": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193198
     },
     "rarity": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193199
     },
     "animal": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193193
     },
     "tag": {
       "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792193215
     },
     "effect": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193202
     },
     "art": {
       "lv": "fine",
@@ -2797,28 +2918,33 @@
   },
   "tiger": {
     "habitat": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193147
     },
     "rarity": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193153
     },
     "animal": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193145
     },
     "tag": {
       "lv": "draft",
       "by": "martin"
     },
     "strength": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193149
     },
     "effect": {
-      "lv": "draft",
-      "by": "martin"
+      "lv": "locked",
+      "by": "martin",
+      "at": 1792193150
     },
     "art": {
       "lv": "draft",
@@ -3421,22 +3547,14 @@
       "at": 1792095928
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792144188
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
-      "by": "claude",
-      "at": 1792144200
+      "by": "martin",
+      "at": 1792191267
     },
     "animal": {
       "review": {
@@ -3557,6 +3675,167 @@
       "by": "martin",
       "at": 1792148892,
       "note": "it should work on all adjacet enemies, so that it works on legendary honey badger"
+    }
+  },
+  "pool-mole": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792191132
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792191132
+    }
+  },
+  "mole": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792191132
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from pool to den-rush",
+      "by": "claude",
+      "at": 1792191132
+    }
+  },
+  "pool-mole-legend": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792191572
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Mole Legend",
+          "species": "Mole"
+        }
+      },
+      "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792191573
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792191573
+    }
+  },
+  "mole_legend": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792191573
+    },
+    "animal": {
+      "note": "moved from pool to den-rush",
+      "by": "martin",
+      "at": 1792192092,
+      "lv": "draft"
+    }
+  },
+  "pool-bat-legend": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792192619
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Bat Legend",
+          "species": "Bat"
+        }
+      },
+      "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792192619
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792192619
+    }
+  },
+  "bat_legend": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792192619
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "note": "moved from pool to egg-control",
+      "by": "claude",
+      "at": 1792192619
     }
   }
 }

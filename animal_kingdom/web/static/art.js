@@ -300,7 +300,7 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
-  wolf_legend: .3,
+  wolf_legend: .406,
   octopus: .45,
   great_white_shark: .45,
   cuco: .38,
