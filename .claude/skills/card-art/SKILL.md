@@ -32,7 +32,7 @@ A pick is a draft. It stays on the board; a later repaint needs a reason Martin 
 
 ## The brief
 
-Sol is an illustrator, not a tool: it gets the card and the idea, and it decides how to paint it (Martin, 2026-10-18: "trust it, treat it as your partner"). `art.py` puts the card's facts in front of every brief (name, habitat, rarity, strength, text), so a brief is two or three plain sentences: the one idea, and what the picture should say in half a second and on a second look. Sol picks the pose, the backdrop, the light and the palette.
+Sol is an illustrator, not a tool: it gets the card and the idea, and it decides how to paint it (Martin, 2026-10-18: "trust it, treat it as your partner"). `art.py` puts the card's facts in front of every brief (name, habitat, rarity, strength, text) and explains the game's words the text uses (Roar, Flight, Armor, adjacent, remove...), since Sol has never seen the rules (Martin, 2026-10-18); a new keyword gets its line in `GLOSS` there. A brief is then two or three plain sentences: the one idea, and what the picture should say in half a second and on a second look. Sol picks the pose, the backdrop, the light and the palette.
 
 A brief never lists parts. No palette, no anatomy, no clause about where a limb goes, no negatives ("no X", "nothing like Y"), no stack of constraints: Sol turns every clause into a rule and the model paints the rules instead of the animal. The template already carries the fixed principles (one animal the hero, a calm area behind it, painted not photographed, the top band and bottom third kept clear). The record's lines ran at a median of 56 words and the ones that settled were no longer.
 
