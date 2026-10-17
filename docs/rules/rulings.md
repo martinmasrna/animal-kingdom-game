@@ -48,7 +48,7 @@ The keywords are defined in [`keywords.md`](keywords.md); these are the calls th
 - **Roaming onto a den ends the game where it stands.** The animal never leaves its crossroad.
 - **A roam onto the den is a capture like a placement from hand.** A roam takes the den only when the roamer's pack stands on the den front and is connected to your den (Martin, 2026-10-15); an animal Reach dropped behind the enemy's lines is cut off and can't take it (Martin, 2026-10-10).
 - **A player who can roam has a move.** Only a player with no legal action passes automatically, and a roam is one.
-- **A free roam is spent before an action** and keeps the turn open after its two actions until it is used or the player ends the turn. No card grants one yet.
+- **A free roam is spent before an action** and keeps the turn open after its two actions until it is used or the player ends the turn. Clarion ([WHITE WOLF]) grants one each turn and Street Dog one on its Roar.
 - **Poison ticks under a cover.** The poisoned coverer is removed at the start of the Poison animal's controller's next turn even if something has covered it since (it comes out from under the stack), as with venom.
 - **Dawn and Dusk resolve one at a time, in play order, each in full before the next.** One that an earlier one removed or buried does nothing. Dawn effects (Hungry among them) resolve before the delayed "at the start of your next turn" payouts (the Chipmunk, King Cobra's venom, Poison).
 
@@ -80,7 +80,7 @@ Cards:
 - **"An ally was removed this turn"** (Piranha, Vulture) and **"your animals removed this turn"** (Hyena) count your animals leaving the board this turn, whoever removed them; discards from hand don't count.
 - **City Spider** eats like the Tarantula without growing: a random adjacent ally at Dawn (Armor excluded). A Dawn death counts as removed this turn, so the Piranha, Hyena and Vulture see it. With a Cockroach as its only neighbour it's a death and a card every turn (Martin, 2026-10-11).
 - **Earthworm**: the two Worms land on its crossroad only while it is empty or yours; under an enemy there is no room and none appear.
-- **Clarion's** free roam is for a Canine only, one per Clarion each turn, spent before an action.
+- **Clarion's** free roam is for any of your animals with Roam (the card says "an ally"), one per Clarion each turn, spent before an action.
 - **Jackal's** flanker must be another of your Canines, not the Jackal itself.
 - **Street Dog** picks another ally with Roam anywhere and gives it +2; "It roams" gives that animal a free Roam this turn, an ordinary roam you take when you like, the den included (Martin, 2026-10-15: "it should just be normal roam"), and none if it has roamed this turn.
 - **Fox** draws for a cover by placement or by roaming.
