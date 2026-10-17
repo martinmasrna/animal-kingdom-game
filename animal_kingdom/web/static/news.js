@@ -60,7 +60,7 @@ export async function newsScreen(app, { api, cards, back, onOpened }) {
 // Once, on home: the changes since a returning player last saw this piece that are rules or touch their decks.
 export function showSince(api, { onRead }) {
   if (!N || !N.since || !N.since.length || document.getElementById('since')) return;
-  const order = it => it.group === 'Rules' ? 0 : 1;   // rules touch everyone: first
+  const order = it => it.group === 'Rules' || it.group === 'Keywords' ? 0 : 1;   // rules and keywords touch everyone: first
   const all = [...N.since].sort((a, b) => order(a) - order(b)), items = all.slice(0, 3), more = all.length - items.length;
   const el = document.createElement('div'); el.id = 'since'; el.className = 'chal since';
   el.innerHTML = `<b>Since you last played</b><ul>${items.map(it => `<li><p>${esc(it.text)}</p>${it.decks && it.decks.length && it.group !== 'Rules'

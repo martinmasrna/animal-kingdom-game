@@ -28,11 +28,11 @@ def test_a_release_names_only_real_cards_and_keeps_the_group_order(tmp_path):
     with pytest.raises(news.NewsError, match="no card named"):
         news.parse(_release(tmp_path, "2026-10-05.md", "# x\n\n## Rules\n\n- A change.\n  Cards: Tigger\n"), cards)
     with pytest.raises(news.NewsError, match="the groups go"):
-        news.parse(_release(tmp_path, "2026-10-06.md", "# x\n\n## New\n\n- One.\n\n## Rules\n\n- Two.\n"), cards)
+        news.parse(_release(tmp_path, "2026-10-06.md", "# x\n\n## Interface\n\n- One.\n\n## Rules\n\n- Two.\n"), cards)
 
 
 def _rels():
-    return [{"id": "2026-10-03", "groups": [{"name": "New", "items": [{"text": "A screen.", "cards": []}]},
+    return [{"id": "2026-10-03", "groups": [{"name": "Interface", "items": [{"text": "A screen.", "cards": []}]},
                                            {"name": "Cards", "items": [{"text": "Lemming is 2.", "cards": ["lemming"]}]}]},
             {"id": "2026-10-01", "groups": [{"name": "Rules", "items": [{"text": "A rule.", "cards": []}]}]}]
 

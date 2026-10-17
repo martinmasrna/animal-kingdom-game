@@ -16,7 +16,7 @@ from pathlib import Path
 from ..engine.cards import load_cards
 
 NEWS_DIR = Path(__file__).resolve().parent / "news"
-GROUPS = ("Rules", "Cards", "New", "Fixed")
+GROUPS = ("Rules", "Keywords", "Cards", "Interface", "Fixed")
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS news_seen (profile TEXT PRIMARY KEY, opened TEXT NOT NULL DEFAULT '', shown TEXT NOT NULL DEFAULT '');
 """

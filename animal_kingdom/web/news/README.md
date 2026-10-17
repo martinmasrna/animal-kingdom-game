@@ -4,7 +4,7 @@ What changed in the game, one file per release, shown on the News screen newest 
 
 ## How a release reads
 
-- `# 2 October 2026`, then the groups in this order, each only when it has something: `## Rules`, `## Cards`, `## New`, `## Fixed`.
+- `# 2 October 2026`, then the groups in this order, each only when it has something: `## Rules`, `## Keywords` (each new or changed keyword with what it does), `## Cards`, `## Interface`, `## Fixed`. A Why line only where the reason is not obvious (Martin, 2026-10-17).
 - One bullet per change, one plain sentence in the cards' voice ("your opponent", never "they"). A Fixed bullet names what was wrong ("A bot could take minutes over a move").
 - A rule or card change says why on the next line: `  Why: ...`, one sentence.
 - A change that touches cards lists them on another line, by name: `  Cards: Tiger, Eon`. Players never see this line; it decides whose "Since you last played" shows the change (a player whose decks hold one of them).
