@@ -41,7 +41,7 @@ The cold walkthrough of 17 October (a Sonnet agent on a test server; screenshots
 ### 3. First hours (days 7 to 11)
 
 - The tutorial teaches den defence before it hands the player to a real bot, and the lesson lines the walkthrough tripped on are fixed: "the circles show" when none are visible; "click one of your animals" meaning a hand card; the tutorial Lynx's text differing from the real Lynx; home defaulting to Normal after the tutorial's Easy match.
-- No How to play page: nobody learns a game from text, the tutorial teaches (Martin, 2026-10-17). The words a card uses that nothing explains (remove, adjacent, connected, +N is for good) get a line in the card reader's term table, beside Grazing, shown on the card that uses them.
+- No How to play page: nobody learns a game from text, the tutorial teaches (Martin, 2026-10-17). The words the walkthrough called unexplained (remove, adjacent, connected) are taught by the lessons (the Mamba frees the Squirrel; the chain from the den), and sit on 60 to 71 cards each, so no term line for them: it would caption a quarter of the pool.
 - Keyword lines redlined by Martin (players learn the rules from them; the Roam line is 60 words).
 - Why a card is greyed in hand (Apex with nothing to eat, Hungry without the food) said on hover, and a hint that right-click reads a card large.
 - News shown only to a returning player; a newcomer's red dot points nowhere.
