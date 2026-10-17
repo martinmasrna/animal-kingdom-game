@@ -51,6 +51,10 @@ from .base import keep_hand
 from ..engine.actions import Action, DrawAction, PlaceAction, RoamAction
 from ..engine.state import GameState, StateView
 from ..engine.strength import card_strength
+from ..engine.state import UnitInstance
+from .features import opponent_unseen_card_ids
+from collections import Counter
+from math import comb
 from .greedy_bot import GreedyWeights, _roar_fizzled
 from .learned_eval import LinearEval
 from .turn_search import _DECISIVE, TurnSearcher
@@ -89,11 +93,14 @@ class RefereeBot(TurnSearcher):
         self.time_budget = time_budget      # seconds per move after which no further root is deepened (0: no limit)
         self._move_started = 0.0
         # Den sense (2026-10-17, from Martin's three dens lost in a row that evening, each with a one-card guard on the
-        # table): the sampled reply takes a den capture when the world holds one within their turn (the fast policy that
-        # plays the reply picks one action at a time, so a capture behind a setup action, cover my weak den guard then
-        # walk in, was only seen when the setup happened to be its best single move); and the root screen keeps the
-        # strongest guard for each den approach (the one-move score ranked a Meerkat above the Groundhog on the square
-        # that decided the game, so the only defence was never searched).
+        # table): the fast policy that plays the reply picks one action at a time, so a capture behind a setup action
+        # (cover my weak den guard, then walk in) was only seen when the setup happened to be its best single move. Now
+        # every reply leaf carries the exact chance of that capture, computed over the opponent's public unseen pool
+        # (which of their cards would open my den from where they stand, and the odds their hand holds one), and the
+        # leaf scores as a loss by that chance. Five sampled hands made every guard look equally lost; the exact odds
+        # tell a guard of 7 from a guard of 3 and the threatened square from the other two. The root screen also keeps
+        # the strongest guard for each den approach (the one-move score ranked a Meerkat above the Groundhog on the
+        # square that decided a game, so the only defence was never searched).
         self.den_sense = den_sense
         # The reply as a turn (2026-10-17, Martin: "a turn is an atomic event consisting of 2 actions"): at the start of
         # the opponent's sampled reply, their first action is chosen by the position after their whole turn (the
@@ -362,10 +369,12 @@ class RefereeBot(TurnSearcher):
             # and the bot plays a random one. Keep the position it handed the opponent as a
             # tiebreak: still a decisive loss, but the most resistant one ranks first.
             before = max(-_LOSS_TIEBREAK, min(_LOSS_TIEBREAK, self._planning_eval(state, me)))
-            self._advance(state, me)
+            threat = self._advance(state, me)
             score = self._clamped_eval(state, me)
             if score == -_DECISIVE:
                 score += before
+            if threat:
+                score = threat * (-_DECISIVE + before) + (1.0 - threat) * score
             scores.append(score - penalty)
             leaves.append((state, penalty, before))
             self.last_search_stats["reply_world_rollouts"] += 1
@@ -431,9 +440,11 @@ class RefereeBot(TurnSearcher):
             nxt = state.clone()
             rules.apply_action(nxt, action, validate=False)
             self._play_turn(nxt, me)        # the rest of my turn, by the fast policy
-            self._advance(nxt, me)          # their reply, to my next decision or a terminal state
+            threat = self._advance(nxt, me) # their reply, to my next decision or a terminal state
             self.last_search_stats["lookahead_lines"] = self.last_search_stats.get("lookahead_lines", 0) + 1
             value = self._leaf_score(nxt, me, depth - 1)
+            if threat:
+                value = threat * -_DECISIVE + (1.0 - threat) * value
             best = value if best is None else max(best, value)
         if best is not None and abs(best) >= _DECISIVE / 2:
             best /= 2        # a game decided a turn later counts half: lose later rather than now, win now rather than later
@@ -461,23 +472,23 @@ class RefereeBot(TurnSearcher):
         """Play the rollout clone forward with the greedy policy - through my pending
         sub-choices, the opponent's whole reply turn (their sampled hand), and any
         pendings that opens - until my next top-level decision or a terminal state.
-        Mutates `state`; sets `state.result` at terminals so `evaluate` sees them."""
+        Mutates `state`; sets `state.result` at terminals so `evaluate` sees them. Returns the chance (den sense) that
+        the opponent's reply captured my den instead; 0.0 without den sense or threat."""
         guard = 0
+        threat = 0.0
         while guard < 40:
             guard += 1
             result = rules.is_terminal(state)   # also catches max_turns,
             if result is not None:              # which is_terminal returns without
                 state.result = result           # writing to state.result itself
-                return
+                return threat
             if state.player_to_act() == me and state.pending is None:
-                return
+                return threat
             actor = state.player_to_act()
             legal = rules.legal_actions(state)
-            if self.den_sense and actor != me and state.pending is None:
-                setup = self._capture_setup(state, actor, me, legal)
-                if setup is not None:
-                    rules.apply_action(state, setup, validate=False)     # the capture itself is the policy's next pick
-                    continue
+            if self.den_sense and actor != me and state.pending is None and state.actions_taken_this_turn == 0 \
+                    and threat == 0.0:
+                threat = self._den_threat(state, actor, me)
             if self.reply_turns and (self._deepening or not self.depth) and actor != me and state.pending is None \
                     and state.actions_taken_this_turn == 0:
                 opening = self._reply_opening(state, actor, legal)
@@ -486,6 +497,44 @@ class RefereeBot(TurnSearcher):
                     continue
             action = self._policy.choose(state.view_for(actor), legal, state)
             rules.apply_action(state, action, validate=False)
+        return threat
+
+    def _den_threat(self, state: GameState, opp: str, me: str) -> float:
+        """The chance the opponent, to act with their whole turn, can capture my den: 1.0 when they already stand
+        connected in front of it with a card to spend, else the odds their hand holds a card that steps onto a front
+        crossroad beside their chain and leaves the capture open (exact over the public unseen pool and their hand
+        size; the engine decides which cards can step where)."""
+        gm = state.game_map
+        front = gm.hq_front(me)
+        occ = state.connected_occupied(opp)
+        hand, deck = len(state.hands[opp]), state.decks[opp]
+        if any(cr in occ for cr in front) and (hand or (deck and state.config.actions_per_turn >= 2)):
+            return 1.0
+        if hand < 2 or state.config.actions_per_turn < 2:
+            return 0.0
+        reach = [cr for cr in front if any(nb in occ for nb in gm.neighbors(cr))]
+        if not reach:
+            return 0.0
+        unseen = Counter(opponent_unseen_card_ids(state, opp))
+        total = sum(unseen.values())
+        if total < hand:
+            return 0.0
+        filler = next((cid for cid in unseen if "Apex Predator" not in state.cards[cid].keywords), None)
+        enabling = 0
+        for cid, count in unseen.items():
+            probe = state.clone()
+            probe.hands[opp] = [UnitInstance(cid, opp, 900001), UnitInstance(filler or cid, opp, 900002)]
+            for a in rules.legal_actions(probe):
+                if isinstance(a, PlaceAction) and a.target[0] == "cr" and a.target[1] in reach:
+                    nxt = probe.clone()
+                    rules.apply_action(nxt, a, validate=False)
+                    if nxt.pending is None and nxt.player_to_act() == opp and rules.is_terminal(nxt) is None and any(
+                            isinstance(b, (PlaceAction, RoamAction)) and b.is_hq_capture for b in rules.legal_actions(nxt)):
+                        enabling += count
+                        break
+        if not enabling:
+            return 0.0
+        return 1.0 - comb(total - enabling, hand) / comb(total, hand)
 
     def _reply_opening(self, state: GameState, opp: str, legal: Sequence[Action]) -> Optional[Action]:
         """The opponent's first action, judged by the position after their whole turn: each of their `reply_turns` best
@@ -502,13 +551,6 @@ class RefereeBot(TurnSearcher):
                 best, best_score = opening, score
         return best
 
-    @staticmethod
-    def _capture_setup(state: GameState, opp: str, me: str, legal: Sequence[Action]) -> Optional[Action]:
-        """The action that opens a den capture for `opp` with their next one, in this (sampled) world: a step onto a
-        crossroad in front of my den, or a draw when they already stand there empty-handed. None when no two of their
-        remaining actions capture. An immediate capture needs no setup (the policy takes it)."""
-        if any(isinstance(a, (PlaceAction, RoamAction)) and a.is_hq_capture for a in legal):
-            return None
         if state.config.actions_per_turn - state.actions_taken_this_turn < 2:
             return None
         front = state.game_map.hq_front(me)
