@@ -67,7 +67,7 @@ export const KEYWORDS = {
   'Roam': 'As an action, move it to a crossroad next to it: empty, onto your own animal, onto an enemy it beats, or onto the enemy den. Once per turn. Cut off from your den, it can only move back to your lines.',
   'Reach': 'Can be placed up to that many crossroads away from one of your connected animals, jumping over what stands between. It can\'t take a den that way.',
   'Hungry': 'At the start of your turn it eats that much of your food. If you can\'t feed it, it loses that much strength for good.',
-  'Titan': 'Playing it takes two actions. A free play can\'t pay for it.',
+  'Titan': 'Playing it takes two actions. A free play (an effect like "play another animal") can\'t pay for it.',
   'Flee': 'When an enemy covers it, it runs back to your hand.',
   'Dawn': 'Happens at the start of your turn.',
   'Dusk': 'Happens at the end of your turn.',
