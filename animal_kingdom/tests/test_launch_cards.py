@@ -1018,8 +1018,8 @@ def test_the_termite_king_draws_two_with_a_colony_queen():
     assert len(s.hands["A"]) == CFG.termite_king_draw == 2
 
 
-def test_the_legendary_leopard_is_eight():
-    assert load_cards()["leopard_legend"].base_strength == 8
+def test_the_legendary_leopard_is_seven():
+    assert load_cards()["leopard_legend"].base_strength == 7
 
 
 def test_the_lemming_is_a_plain_one_now():

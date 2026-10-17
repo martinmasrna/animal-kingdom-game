@@ -1776,6 +1776,16 @@
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
       "at": 1792191062
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 8
+      },
+      "note": "Martin 2026-10-17: 8 -> 7",
+      "by": "claude",
+      "at": 1792244246
     }
   },
   "lion": {
@@ -1912,9 +1922,14 @@
     },
     "effect": {
       "lv": "problem",
-      "by": "martin",
-      "at": 1792193353,
-      "note": "wasn't this supposed to repeat last roar played? we can have both these cards, but repeat sounds like better fit for parrot no?"
+      "by": "claude",
+      "at": 1792244246,
+      "note": "Martin 2026-10-17: Flight added. Open from before: wasn't this supposed to repeat last roar played? we can have both these cards, but repeat sounds like better fit for parrot no?",
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "wasn't this supposed to repeat last roar played? we can have both these cards, but repeat sounds like better fit for parrot no?",
+        "prev": "Roar: your next Roar this turn happens twice."
+      }
     }
   },
   "mackerel": {

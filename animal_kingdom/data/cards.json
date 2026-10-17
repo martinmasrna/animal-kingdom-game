@@ -523,7 +523,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 8,
+      "base_strength": 7,
       "text": "Apex Predator. Roam. Reach 2.",
       "keywords": [
         "Apex Predator",
@@ -2754,8 +2754,10 @@
         "Bird"
       ],
       "base_strength": 3,
-      "text": "Roar: your next Roar this turn happens twice.",
-      "keywords": [],
+      "text": "Flight. Roar: your next Roar this turn happens twice.",
+      "keywords": [
+        "Flight"
+      ],
       "species": "Macaw",
       "habitat": "Jungle",
       "workbench_id": "pool-4"

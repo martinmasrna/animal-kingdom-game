@@ -189,7 +189,7 @@
      "rarity": "L",
      "species": "Leopard",
      "status": "proposed",
-     "str": 8,
+     "str": 7,
      "tag": "Cat",
      "text": "Apex Predator. Roam. Reach 2."
     },
@@ -2152,7 +2152,7 @@
      "status": "proposed",
      "str": 3,
      "tag": "Bird",
-     "text": "Roar: your next Roar this turn happens twice."
+     "text": "Flight. Roar: your next Roar this turn happens twice."
     },
     {
      "habitat": "Forest",
