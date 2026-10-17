@@ -27,7 +27,10 @@ function markNew(was, now) {
 // A card change shows the card as it was beside the card as it is (as Hearthstone does), the change marked on the new one: a
 // strength that went up or down tinted as a changed strength is in the hand, new rules words highlighted. A rule is words alone.
 function itemHTML(it, cards) {
-  const c = it.cards.length === 1 && Object.keys(it.was || {}).length ? cards[it.cards[0]] : null;
+  const one = it.cards.length === 1 && cards[it.cards[0]];
+  if (one && !Object.keys(it.was || {}).length)   // a keyword or a new card: the card itself, as an example
+    return `<li class="chg"><div class="ncard">${cardHTML(one)}</div><div class="nwords"><p>${esc(it.text)}</p>${it.why ? `<p class="why">${esc(it.why[0].toUpperCase() + it.why.slice(1))}</p>` : ''}</div></li>`;
+  const c = one && Object.keys(it.was || {}).length ? one : null;
   const was = c && { ...c, str: it.was.str ?? c.str, text: it.was.text ?? c.text };
   const card = c ? `<div class="ncard">${cardHTML(was)}<i class="arr" aria-label="becomes">→</i>${cardHTML({ ...was, text: it.was.text !== undefined ? markNew(it.was.text, c.text) : c.text }, { str: c.str })}</div>` : '';
   const words = `<p>${esc(it.text)}</p>${it.why ? `<p class="why">${esc(it.why[0].toUpperCase() + it.why.slice(1))}</p>` : ''}`;
