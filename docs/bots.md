@@ -8,6 +8,8 @@ Opponents for people, nothing else. They never found a balance problem a person 
 
 The search scores a board after its own turn and the opponent's reply and never imagines its own next turn; that horizon, not evaluation detail, is why a practised player reaches 75% in a week (a Zebra played on turn one for one card). Levers, in order: depth (a second own turn in the search), decks that suit a bot's strengths, per-deck evaluation for ladder bots, the value network. Width on a one-turn search is not worth CPU (the 17 October budget runs: a few points at twice the cost, every interval across zero, stopped).
 
+The candidate Expert (`referee:depth=1,w.pending_target=1.5,w.buried_presence=0.25`): after the one-turn search ranks the roots, the best three are re-scored with the bot's own next turn (the reply played by the fast policy, then its best `next_width` openings and a greedy finish), on the evaluation that values a creature already marked for removal and strength buried under covers. It keeps the Zebra on turn one and marks the Python in the Taipan position; today's Expert does neither. Against today's Expert, 50 paired games per deck on 17 October: +3 points on average, hoofed +13 and food aggro +12 beyond noise, no deck worse beyond noise (a den rush -20 in the first run did not reproduce on a frozen tree: 0, +3 and -3 across 100-game splits), 1.3 to 1.7x the time per move. `AK_EXPERT_DEPTH=1 ./play` offers it as the Expert, with an 8 s budget, for Martin to play before it ships; the web Expert and the ladder seed change only after that.
+
 ## The ladder
 
 | Kind | What it does | Cost vs greedy | In the game UI |
