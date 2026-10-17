@@ -3731,6 +3731,24 @@
       "note": "moved from pool to den-rush",
       "by": "claude",
       "at": 1792191132
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792196551
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792196569
     }
   },
   "pool-mole-legend": {
