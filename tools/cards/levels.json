@@ -38,12 +38,7 @@
       "by": "claude",
       "at": 1792147998,
       "lv": "problem",
-      "note": "Martin, 2026-10-16: his wording",
-      "review": {
-        "prev_lv": "problem",
-        "prev_note": "horrible wording",
-        "prev": "Apex Predator. When this eats an animal, it gains that animal's strength."
-      }
+      "note": "Martin, 2026-10-16: his wording"
     }
   },
   "anteater": {
@@ -521,6 +516,31 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247915
+    },
+    "strength": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247916
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247918
+    },
+    "rarity": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247919
+    },
+    "habitat": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247921
     }
   },
   "borealis": {
@@ -669,6 +689,31 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247950
+    },
+    "strength": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247952
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247954
+    },
+    "rarity": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247955
+    },
+    "habitat": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247957
     }
   },
   "caterpillar": {
@@ -1635,7 +1680,8 @@
     "effect": {
       "lv": "problem",
       "by": "martin",
-      "at": 1792093953
+      "at": 1792247822,
+      "note": "no too sure about this...maybe make it +3 food for each animal removed this turn?"
     }
   },
   "jackal": {
@@ -1849,6 +1895,31 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247927
+    },
+    "strength": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247929
+    },
+    "animal": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247930
+    },
+    "rarity": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247932
+    },
+    "habitat": {
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792247934
     }
   },
   "macaque": {
@@ -2301,7 +2372,8 @@
   "praying_mantis": {
     "crop": {
       "lv": "fine",
-      "by": "martin"
+      "by": "martin",
+      "at": 1792229273
     }
   },
   "prince_leo": {
@@ -2748,7 +2820,8 @@
     },
     "crop": {
       "lv": "fine",
-      "by": "martin"
+      "by": "martin",
+      "at": 1792229409
     },
     "animal": {
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
@@ -3258,12 +3331,7 @@
       "lv": "problem",
       "by": "claude",
       "at": 1792107323,
-      "note": "Martin, 2026-10-16: Dusk, a night hunter, and further from the City Spider's Dawn",
-      "review": {
-        "prev_lv": "problem",
-        "prev_note": "have it remove any unit, just like city spider?",
-        "prev": "Dawn: remove a random adjacent ally and gain its strength."
-      }
+      "note": "Martin, 2026-10-16: Dusk, a night hunter, and further from the City Spider's Dawn"
     },
     "art": {
       "review": {
@@ -3704,8 +3772,8 @@
     "effect": {
       "lv": "problem",
       "by": "martin",
-      "at": 1792148892,
-      "note": "it should work on all adjacet enemies, so that it works on legendary honey badger"
+      "at": 1792247699,
+      "note": "it should work on all adjacet enemies, so that it works on legendary honey badger ... also we can 100% make it permanent, still won't be too strong"
     }
   },
   "pool-mole": {
