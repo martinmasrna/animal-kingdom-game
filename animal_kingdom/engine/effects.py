@@ -1925,7 +1925,7 @@ def _lobo_friendly_roam(state, watcher, roamer, event):
 
 
 def _wolf_legend_eot(state, unit, cr):
-    """Dusk: this gains +2 strength for each adjacent Canine (yours)."""
+    """Dusk: this gains +1 strength for each of your adjacent Canines."""
     n = sum(1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Canine" in state.cards[top.card_id].tags)
     if n:
         _grant(state, [unit.iid], n * state.config.wolf_legend_grant)
@@ -1946,7 +1946,7 @@ def _jackal_place(state, unit, cr):
 
 
 def _bush_dog_eot(state, unit, cr):
-    """Dusk: give a random adjacent Canine +2 strength (one of yours)."""
+    """Dusk: give a random adjacent Canine of yours +2 strength."""
     options = [top.iid for _, top in _adjacent_tops(state, cr, unit.owner) if "Canine" in state.cards[top.card_id].tags]
     if options:
         _grant(state, [state.rng.choice(options)], state.config.bush_dog_grant)

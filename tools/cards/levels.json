@@ -568,9 +568,9 @@
         "prev_note": "",
         "prev": "Roar: give an adjacent Canine +3 strength."
       },
-      "note": "Martin, 2026-10-15: random, not a choice.",
+      "note": "Martin, 2026-10-17: only your Canines; text now says so",
       "by": "claude",
-      "at": 1792094232
+      "at": 1792227005
     }
   },
   "butterfly": {
@@ -3573,9 +3573,9 @@
         "prev_note": "",
         "prev": "Roam. When this roams, your adjacent animals gain +2 strength."
       },
-      "note": "Martin, 2026-10-15, mid-gauntlet: +2 each was too much.",
+      "note": "Martin, 2026-10-17: counts only your Canines; text now says so",
       "by": "claude",
-      "at": 1792095928
+      "at": 1792227005
     },
     "art": {
       "lv": "draft",

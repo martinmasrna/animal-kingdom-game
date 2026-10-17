@@ -30,7 +30,7 @@ Cannot be **chosen** by an enemy ability: excluded from any option list an enemy
 Carried by: Black Panther. Armadillo gives it to every friendly unit on an adjacent crossroad while Armadillo tops its own.
 
 ### Spikes
-The first time an enemy covers it, that enemy is removed (a remove, so Armor resists it). Once per animal: a Spikes animal that has removed a coverer is an ordinary animal from then on, and its badge on the board goes. Covering is placement, so the coverer's own Roar resolves first, then the spikes (and an Apex Predator landing on it is removed before it can eat). A friendly cover doesn't set it off.
+The first time an enemy covers it, that enemy is removed (a remove, so Armor resists it). Once per animal: the first enemy cover spends them even when nothing is removed (an Armor coverer stays, and the Spikes are gone all the same; Martin, 2026-10-17), so a Spikes animal that has been covered by an enemy is an ordinary animal from then on, and its badge on the board goes. Covering is placement, so the coverer's own Roar resolves first, then the spikes (and an Apex Predator landing on it is removed before it can eat). A friendly cover doesn't set it off.
 
 Carried by: Porcupine and Hedgehog (Food).
 
@@ -90,7 +90,7 @@ Card text grants strength two ways, **distinguished by the verb** — this readi
 **`effective_strength`** = `base_or_dynamic + stored_counters + active_anthems`, clamped ≥ 0, **evaluated live** wherever strength matters (covering, removal thresholds, region-holding, conditions like Coyote's "if this has 5+"). Counters are signed ints (Viper's "−3" is one). The event **`ON_GAIN_STRENGTH`** fires only when a counter is granted (not on live anthem drift).
 
 ### Discard  *(card-text term, not a keyword)*
-**Discard a card** means remove a card from a hand (or from a deck, when the text says so, as on Hornet). "Your opponent discards a random card" (Black Swan) and "discard a random card" (Rat) are the same removal the engine has always done for "removes a random card from their hand".
+**Discard a card** means a card leaves a hand (or a deck, when the text says so, as on Hornet). "Your opponent discards a random card" (Black Swan) and "discard a random card" (Rat) are discards too. A discard is never a remove: "removed" on a card means an animal leaving the board, so a discard doesn't grow the Python or count as "an ally was removed" (Martin, 2026-10-17).
 
 ### Scout  *(card-text term, not a keyword)*
 **Scout a card** means look at three different cards from the top of your deck, draw one and shuffle the other two back (copies of a card already seen are passed over and stay where they are). **Scout a Bird** (or a legendary unit, or any other kind) looks at three different random cards of that kind in your deck instead, all of them if there are fewer kinds. It draws from the deck and never creates a card; the shuffle counts as shuffling (Rattlesnake grows). The count is `scout_count`. Cards: Owl, Fathom, Bird Egg.

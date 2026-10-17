@@ -227,7 +227,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Canine",
-     "text": "Roam. Dusk: this gains +1 strength for each adjacent Canine."
+     "text": "Roam. Dusk: this gains +1 strength for each of your adjacent Canines."
     },
     {
      "habitat": "Open Ocean",
@@ -299,7 +299,7 @@
      "status": "proposed",
      "str": 3,
      "tag": "Canine",
-     "text": "Dusk: give a random adjacent Canine +2 strength."
+     "text": "Dusk: give a random adjacent Canine of yours +2 strength."
     },
     {
      "habitat": "Forest",

@@ -113,3 +113,10 @@ Cards:
 
 - **Vesper** works only from its owner's hand or deck: on the board or in the Remove Pile it does nothing. It answers an enemy covering one of your top animals tagged Queen, by placement or by roaming; your own cover of your Queen doesn't count. It resolves with the other reactions to the cover, after the coverer's Roar (as Spikes does), and only if that enemy is still on the crossroad by then. Vesper comes from your hand if it's there, else from the deck, and is placed on top of the enemy: no action, no connection or strength check (a 5 lands on a 10), no Roar, not a play. Landing there is a cover like any other: a Hedgehog's Spikes remove Vesper, a Flee animal runs. An Apex Predator that covered the Queen still eats her under Vesper (it is still right on top of its prey). Vesper's trigger reads only where it is, which is public: the decklist is open and hand plus deck is everything not yet seen, so the bots anticipate it without reading hidden information. The client shows Vesper large as it lands, whoever's it is.
 - **Methuselah's cap** counts every food a player gains in the current turn, whoever's turn it is and from any source: Roars, Dawn and Dusk, region income, Falstaff's rider. Methuselah's own Dusk 5 counts, and Dusk comes before region income, so its controller's turn ends with at most 20 food gained in all. Food over the cap is lost, not saved for later; food paid or eaten doesn't make room. Like every static, the cap holds only while a Methuselah tops its crossroad and isn't inked: buried, it caps nothing. "The food you gained this turn" (Scrooge, the fed threshold) counts what was actually gained.
+
+## After the launch (2026-10-17, Martin)
+
+- **Gale** counts itself: landing next to the opponent's den, it draws for itself too.
+- **[WOLF]** and **Bush Dog** count only your own adjacent Canines, never the opponent's; their text says "your".
+- **Python** grows only when an animal leaves the board; a discard from hand isn't a remove (keywords.md, Discard).
+- **Spikes** are spent by the first enemy cover even when Armor keeps the coverer on the board.
