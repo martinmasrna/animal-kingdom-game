@@ -2,6 +2,7 @@
 // The server holds the game; this file only renders the seat's view and sends choices back.
 import { hasArt, artUrl, stripArt, fitStrips } from './art.js';
 import { cardHTML, fitNames, readSide } from './card.js';
+import { SUCCESSOR } from './cardnums.js';
 import { plan } from './timeline.js';
 import { renderBoard, BEAT_MS, STAGE, VIEW, setView, crossroadAt, denMouthAt, gemAt, chalk, gemDigits, portrait } from './board.js';
 import { collectionScreen as renderCollection, coverOf, deckBody, stripHTML, ICON } from './collection.js';
@@ -503,6 +504,31 @@ function ladderScreen() {
 }
 // A deck in a match's row shows its list as it was played, beside the row: on hover, or on a touch screen a tap (which
 // there opens no replay; the rest of the row does).
+// A replay or an old decklist can name a card the game no longer has (a match from before a card changed). Each such id
+// is filed under the reserve, so the collection and deck codes never offer it: a retired id as its successor (the same
+// animal, or its effect on another), a card gone for good as a plain stand-in under its name. Without it the game
+// screen stopped on the first unknown card.
+function adoptRetired(ids) {
+  for (const id of ids) {
+    if (typeof id !== 'string' || CARDS[id] || !/^[a-z][a-z0-9_]*$/.test(id)) continue;
+    const s = CARDS[SUCCESSOR[id]];
+    CARDS[id] = s ? { ...s, id, deck: 'reserve' }
+      : { id, name: id.split('_').map(w => w[0].toUpperCase() + w.slice(1)).join(' '), deck: 'reserve', rarity: 'common', tags: [], str: 0,
+          text: '', kw: [], cost: null, habitat: '', related: [], evolves: false };
+  }
+}
+// The card ids in a replay's views: units and hand cards ("id"), events ("card", [iid, card] pairs, lists of ids) and the
+// seats' decklists ("lists", keyed by card id). adoptRetired passes over anything that isn't an unknown card-shaped id.
+function replayIds(views) {
+  const out = new Set();
+  const walk = x => { if (Array.isArray(x)) { x.forEach(y => typeof y === 'string' ? out.add(y) : walk(y)); }
+    else if (x && typeof x === 'object') for (const [k, v] of Object.entries(x)) {
+      if (k === 'lists' && v && typeof v === 'object') Object.values(v).forEach(l => l && typeof l === 'object' && Object.keys(l).forEach(id => out.add(id)));
+      else if ((k === 'id' || k === 'card') && typeof v === 'string') out.add(v);
+      else walk(v); } };
+  walk(views); return out;
+}
+
 // Lists come from the saved replay (/api/replay/<match>/lists), fetched once per match.
 const listsOf = {};
 function wireDeckPeek(root) {
@@ -514,6 +540,7 @@ function wireDeckPeek(root) {
     listsOf[key] = listsOf[key] || api(`/api/replay/${encodeURIComponent(key)}/lists`).then(r => r.ok ? r.json() : null).catch(() => null);
     const lists = await listsOf[key]; if (on !== el) return;
     const list = lists && lists[el.dataset.side];
+    if (list) adoptRetired(Object.keys(list));
     if (!list) { box.innerHTML = `<h4>${esc(el.dataset.name)}</h4><p class="none">This match's decklists weren't kept.</p>`; }
     else box.innerHTML = `<h4>${esc(el.dataset.name)}</h4>${deckBody(Object.entries(list).flatMap(([id, n]) => Array(n).fill(id)).filter(id => CARDS[id]), CARDS, false)}`;
     box.style.display = 'block';
@@ -1443,6 +1470,7 @@ async function replayScreen(key) {
   try { const r = await api('/api/replay/' + encodeURIComponent(key)); if (!r.ok) throw new Error(await r.text()); views = await r.json(); }
   catch (e) { if (RP.key === key) back(e.message || 'The replay didn\'t load, try again'); return; }
   if (RP.key !== key) return;   // left while it loaded
+  adoptRetired(replayIds(views));
   // A step is a view that brought something: new events (static/timeline.js plays them), a choice put to you, or the game's
   // end. The rest (the opponent's hidden choices, their kept hand) is skipped; the progress bar marks each turn.
   const seq = v => { const ev = v.game.events || []; return ev.length ? ev[ev.length - 1].seq : 0; };
@@ -1531,5 +1559,6 @@ window.__ak = () => ({ V, ui, d: lastDecision, PB, RP });   // test hook: the he
 window.__ak.cards = () => CARDS;   // test hook: the card pool as the client holds it
 window.__ak.build = checkBuild;   // test hook: a socket naming another build
 window.__ak.feed = v => { const prev = V; V = v; onView(prev); };   // test hook: play a recorded sequence of views through the client
+window.__ak.adopt = views => adoptRetired(replayIds(views));   // test hook: what loading a replay does to the cards it names
 boot();
 
