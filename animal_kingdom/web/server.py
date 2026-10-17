@@ -256,15 +256,21 @@ def starter_cards() -> dict[str, dict]:
     return {d["id"]: d["cards"] for d in starter_decks()}
 
 
-# Live cards that kept their animal under a new id in the launch collection (2026-10-16): a player's own deck keeps them.
-RENAMED_IDS = {"alpha": "scarlett", "dire_wolf": "wolf", "goliath": "python", "gray_wolf": "jackal", "guard_hornet": "guard_wasp",
-               "omen": "black_swan", "red_wolf": "dhole", "stoop": "hawk", "bulwark": "brutus", "rat_king": "barley"}
+# A live card's successor in the launch collection (2026-10-16), which takes its place in a player's own deck: the same
+# animal under a new id, or the same effect on another animal (Martin, 2026-10-17: "if one card kept the exact effect,
+# just changed the animal, then it should get replaced in the deck"; the effect wins when the two disagree, the Jackal).
+RENAMED_IDS = {"alpha": "scarlett", "dire_wolf": "wolf", "goliath": "python", "guard_hornet": "guard_wasp", "omen": "black_swan",
+               "red_wolf": "dhole", "stoop": "hawk", "bulwark": "brutus", "rat_king": "barley",
+               "jerboa": "mole", "chinchilla": "beaver", "greywhisker": "mole_legend", "house_cat": "alley_cat",
+               "taipan": "gaboon_viper", "polar_bear": "crocodile", "gray_wolf": "chimpanzee", "snow_leopard": "leopard"}
 COPY_LIMIT = {cid: c.copies or COPY_LIMITS[c.rarity] for cid, c in CARDS.items()}
+# The cards a player's deck can hold: the starter decks' and the bench's (not the reserve's, the tutorial's or tokens).
+COLLECTIBLE = {cid for cid, c in CARDS.items() if c.deck not in ("reserve", "tutorial", "token")}
 
 
 def profile_view(p: dict) -> dict:
     starters = starter_decks()
-    profiles.seed_decks(p["id"], starters, set(CARDS), RENAMED_IDS, COPY_LIMIT)
+    profiles.seed_decks(p["id"], starters, COLLECTIBLE, RENAMED_IDS, COPY_LIMIT)
     return {**p, "decks": profiles.decks(p["id"], {d["id"]: d["cards"] for d in starters}),
             "history": profiles.history(p["id"]), "records": profiles.records(p["id"]),
             "logins": profiles.identities(p["id"]), "providers": oauth.available(),
