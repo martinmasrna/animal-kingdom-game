@@ -396,8 +396,10 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .since li > p, .since .more { margin: 0; font: 500 16px/1.35 'Fira Sans Condensed', sans-serif; color: #f0e8da; }
 .since li > p.why { margin-top: 2px; font-size: 14px; color: #a99f8e; }
 .news li.chg { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; }
-.news .ncard .card { --w: 170px; }
-@media (max-width: 700px) { .news .ncard .card { --w: 128px; } .news li.chg { gap: 12px; } }
+.news .ncard { display: flex; align-items: center; gap: 10px; }
+.news .ncard .arr { font-style: normal; font-size: 26px; color: #9d917e; }
+.news .ncard .card { --w: 150px; }
+@media (max-width: 700px) { .news .ncard .card { --w: 118px; } .news li.chg { grid-template-columns: 1fr; gap: 10px; } }
 /* new rules words marked as with a highlighter: bold, on a warm band (a change can be a buff or a nerf, so not green) */
 .news .ncard .card .ctext mark { color: inherit; font-weight: 800; background: rgba(236,178,52,.72); border-radius: .25em; padding: 0 .22em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .news .none { color: #a99f8e; font: 500 16px 'Fira Sans Condensed', sans-serif; }
