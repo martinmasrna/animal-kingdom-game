@@ -55,3 +55,10 @@ def test_a_new_player_sees_nothing_from_before_they_came_nor_cards_they_dont_hol
     p = {"id": "p2", "created": datetime.datetime(2026, 10, 2, 9).timestamp()}
     s = news.state(db, p, [{"name": "Cats", "cards": {"tiger": 3}}], _rels())
     assert s["since"] == [] and s["unread"]
+
+
+def test_a_name_the_tutorial_shares_means_the_collections_card():
+    from animal_kingdom.web import server
+    r = next(x for x in news.releases() if x["id"] == "2026-10-16")
+    ids = [c for g in r["groups"] for it in g["items"] for c in it["cards"]]
+    assert "cape_buffalo" in ids and not any(server.CARDS[c].deck in ("tutorial", "token", "reserve") for c in ids)
