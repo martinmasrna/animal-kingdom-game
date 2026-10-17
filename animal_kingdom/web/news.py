@@ -98,7 +98,7 @@ def state(db, profile: dict, decks: list, rels: list) -> dict:
                     since.append({"release": r["id"], "group": g["name"], "text": it["text"],
                                   "cards": [c for c in it["cards"] if c in mine] or it["cards"],
                                   "decks": [d["name"] for d in decks if set(d.get("cards") or {}) & set(it["cards"])]})
-    return {"unread": newest > opened, "newest": newest, "since": since}
+    return {"unread": newest > opened and newest >= joined, "newest": newest, "since": since}   # a newcomer has nothing to catch up on
 
 
 def mark(db, profile_id: str, *, opened: str = "", shown: str = "") -> None:

@@ -57,6 +57,13 @@ def test_a_new_player_sees_nothing_from_before_they_came_nor_cards_they_dont_hol
     assert s["since"] == [] and s["unread"]
 
 
+def test_a_player_who_came_after_the_newest_release_has_no_dot():
+    db = sqlite3.connect(":memory:")
+    p = {"id": "p3", "created": datetime.datetime(2026, 10, 9, 9).timestamp()}
+    s = news.state(db, p, [], _rels())
+    assert not s["unread"] and s["since"] == []
+
+
 def test_a_name_the_tutorial_shares_means_the_collections_card():
     from animal_kingdom.web import server
     r = next(x for x in news.releases() if x["id"] == "2026-10-16")

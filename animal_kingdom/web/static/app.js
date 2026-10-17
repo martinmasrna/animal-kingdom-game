@@ -1074,9 +1074,9 @@ function drawGame() {
   const pips = playing ? Array.from({ length: G.actionsTotal }, (_, i) => { const used = G.actionsTotal - G.actionsLeft;
     return `<i class="${i < used ? 'used' : i === used ? 'next' : ''}"></i>`; }).join('') : '';
   if (playing && G.current === you) {
-    tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass && !d.noPass ? ' can' : '') + (Date.now() < (turnCue.until || 0) ? ' yours' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}<span class="clock" id="clock"></span></span>`;
+    tb.className = 'abs tbtn A num' + (d.mine && !d.pend && G.canPass && !d.noPass ? ' can' : '') + (Date.now() < (turnCue.until || 0) ? ' yours' : ''); tb.innerHTML = `<b>End turn</b><span class="pips">${pips}<span class="clock" id="clock"></span></span>`; delete tb.dataset.tip;
   } else if (playing) { tb.className = 'abs tbtn B num'; tb.innerHTML = `<span class="pips">${pips}<span class="clock" id="clock"></span></span>`; tb.dataset.tip = 'Your opponent\'s turn'; }
-  else { tb.className = 'abs tbtn'; tb.innerHTML = ''; }
+  else { tb.className = 'abs tbtn'; tb.innerHTML = ''; delete tb.dataset.tip; }
 
   // A pending choice: the asking card and its rule; card options float above the hand.
   const bar = $('choicebar'), opts = $('opts'), waiting = $('waiting');

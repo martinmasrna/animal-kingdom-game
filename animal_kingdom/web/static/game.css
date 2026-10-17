@@ -487,9 +487,13 @@
 
 /* Sideways on a phone the wide stage shows at about half size: the end of a game and the concede question grow to be read and tapped. */
 .game:not(.port) .endbox { scale: max(1, calc(.75 / var(--k, 1))); }
-/* A replay held upright: the deck and End turn do nothing, so its controls take their corner at the end of the hand's
-   row, in two rows (step, play, step and the eye; the bar and Leave), clear of the opponent's hand and both dens. */
-.game.port.rp .deck, .game.port.rp .tbtn { display: none; }
+/* A replay: the deck and End turn do nothing, so its controls take their corner, clear of the opponent's hand, the icon row and
+   both dens. Wide: two rows on the ledge (step, play, step, the eye and Leave; the bar under them). Upright: at the end of the
+   hand's row (step, play, step and the eye; the bar and Leave). */
+.game.rp .deck, .game.rp .tbtn { display: none; }
+.game:not(.port).rp .rbar { right: auto; left: 1222px; top: 640px; width: 274px; flex-wrap: wrap; justify-content: space-between; row-gap: 12px; translate: var(--side, 0px) var(--above, 0px); }
+.game:not(.port).rp .rbar .track { order: 5; width: 100%; height: 32px; } .game:not(.port).rp .rbar .track::after { top: 12px; } .game:not(.port).rp .rbar .track b { top: 9px; }
+.game:not(.port).rp .rbar .out { margin-left: 0; padding: 0 12px; }
 .game.port .rbar { top: 1250px; right: 12px; width: 288px; flex-wrap: wrap; justify-content: flex-end; gap: 8px; translate: var(--side, 0px) var(--above, 0px); }
 .game.port .rbar .slab { width: 64px; height: 64px; } .game.port .rbar .slab svg { width: 30px; height: 30px; }
 .game.port .rbar .track { order: 5; width: 190px; height: 64px; } .game.port .rbar .track::after { top: 28px; } .game.port .rbar .track b { top: 25px; }
