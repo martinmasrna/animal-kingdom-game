@@ -201,3 +201,13 @@ def test_cancelling_a_ranked_search_leaves_the_queue(monkeypatch):
             m = await (await c.post("/api/ranked", json={"deck": "giants"}, headers=hb)).json()
             assert server.hub.matches[m["id"]].seats["B"].is_bot, "paired with a person who had left"
     asyncio.run(run())
+
+
+def test_a_retired_decks_bot_never_plays_and_tied_decks_take_turns():
+    import random, sqlite3
+    from animal_kingdom.web import ladder as L
+    lad = L.Ladder(sqlite3.connect(":memory:"), [f"d{i}" for i in range(8)])
+    lad.seed_bots({"bot:normal:retired": 1500.0})          # exactly a player's rating: nearest of all
+    rng = random.Random(0)
+    picks = {L.parse_bot(lad.nearest_bot(1500, rng))[1] for _ in range(200)}
+    assert "retired" not in picks and len(picks) == 8        # eight decks tied at 1500, all of them met

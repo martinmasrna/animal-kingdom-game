@@ -179,9 +179,13 @@ class Ladder:
         nearest: dict[str, tuple[float, str]] = {}
         for lid, r in self.bots().items():
             deck = parse_bot(lid)[1]
+            if deck not in self.decks:
+                continue                       # a retired deck's bot keeps its row (its games stay rated), never plays
             if deck not in nearest or abs(r.rating - rating) < nearest[deck][0]:
                 nearest[deck] = (abs(r.rating - rating), lid)
-        five = [(lid, deck) for deck, (_, lid) in sorted(nearest.items(), key=lambda kv: kv[1][0])][:5]
+        ranked = list(nearest.items())
+        rng.shuffle(ranked)                    # decks at the same distance (new bots share a start) take turns
+        five = [(lid, deck) for deck, (_, lid) in sorted(ranked, key=lambda kv: kv[1][0])][:5]
         fresh = [lid for lid, deck in five if deck not in avoid]
         return rng.choice(fresh or [lid for lid, _ in five])
 
