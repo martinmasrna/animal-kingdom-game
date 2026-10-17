@@ -15,6 +15,8 @@ Why it works this way: `knowledge/card-art-diagnosis-2026-10-17.md` (game repo).
 
 **Martin:** a voice note or a character for a card when he has a feeling ("you decide" otherwise), then one tap per picture.
 
+**The agent checks facts, never taste.** Before a prompt goes out, it is read once as Sol will read it, with only the attached images and the words: "in their place" next to a picture is a location, not "instead of" (the Albatross's fish landed on the horizon, 2026-10-18). When the pictures come back, each is looked at against its concept: is what was asked in it, where it was asked? A miss is rolled again before the page, or said in one line next to the picture. Whether a picture is good stays Martin's.
+
 ## A round
 
 1. **Cards.** `.venv/bin/python tools/cards/hq.py show` (game repo): the Art column marks each painting empty, draft, problem (with his note), fine or locked. Read the card's effect and name before writing anything: the picture shows the effect through what the real animal does. Look at the live cards of the same animal and family first; the new picture must not read as one of them.
