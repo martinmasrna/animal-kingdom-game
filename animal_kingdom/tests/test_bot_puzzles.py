@@ -163,6 +163,26 @@ def test_aggro_draws_on_its_opening(bot_cls):
         assert isinstance(chosen, DrawAction), chosen
 
 
+def test_hoofed_holds_the_zebra_for_a_bigger_draw():
+    # Martin, 2026-10-17: the Expert played the legendary Zebra ("draw a card for each different Hoofed animal you
+    # control") on turn one, for one card, with a hand of Hoofed animals. The one-turn search can't see that two Hoofed
+    # now and the Zebra next turn draw three; a second turn of sight (depth 1) can. Depth 0 plays the Zebra in 5 of 5
+    # seeds, depth 1 in 0 of 5 (measured 2026-10-17).
+    from animal_kingdom.engine.maps import load_map
+    from animal_kingdom.sim.runner import make_bot
+    for seed in range(3):
+        s = make_state(current="A", hands={"A": ["zebra_legend", "okapi", "deer", "gazelle", "giraffe", "wildebeest"],
+                                           "B": ["lion", "serval", "lynx", "bobcat"]},
+                       decks={"A": ["moose", "boar", "zebra", "cape_buffalo", "okapi", "deer"] * 3, "B": ["tiger", "lion", "cougar"] * 5})
+        s.game_map = load_map("map_b")
+        put(s, next(iter(s.game_map.hq_front("B"))), "serval", "B")
+        bot, turn = make_bot("referee", seed, extra={"depth": 1}), []
+        while s.result is None and s.current == "A":
+            turn.append(bot.choose(s.view_for(s.player_to_act()), rules.legal_actions(s), s))
+            rules.apply_action(s, turn[-1])
+        assert "zebra_legend" not in [getattr(a, "card_id", None) for a in turn], (seed, turn)
+
+
 def test_taipan_marks_the_python():
     # Goodstuff vs Martin's Egg Control, his game of 2026-09-30, the bot's turn with 0 food: hand
     # Elephant, Tiger, Brutus, Wolf, Taipan; his Python (8) in the middle, his Raven beside it.
@@ -170,6 +190,12 @@ def test_taipan_marks_the_python():
     # Taipan with no target, marking the Raven, or drawing and holding Taipan are all wrong.
     # Solved by the target-aware candidate weights (2026-10-17): the mark is worth what it removes, and
     # covering the Python (what the bot did) is not removing it. With either term alone it still fails.
+    # The position is kept as played: the Python at 8 (the card is a 0 that grows since), and the Elephant
+    # and Brutus out of the bot's hand (the Elephant cost 15 food then; Brutus was a plain Armor 8, and
+    # today's Roar wipes the Python outright: with it in hand, depth 1 finds a near-forced den capture
+    # instead, 893 of Martin's 894 replies losing). A second turn of sight alone (depth 1, default
+    # weights) draws and holds the Cottonmouth, one of the named wrong plays; depth 1 with these weights
+    # marks the Python in 4 of 5 seeds.
     from animal_kingdom.sim.runner import make_bot
     from animal_kingdom.bots.greedy_bot import TARGET_AWARE_WEIGHTS
     for seed in range(5):

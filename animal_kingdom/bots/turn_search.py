@@ -148,8 +148,6 @@ class TurnSearcher(Bot):
         candidates = self._beam(worlds[0], legal, me)
         candidates = self._select_root_candidates(worlds, candidates, state, me)
 
-        best_score = -math.inf
-        best: list[Action] = []
         root_scores: list[tuple[Action, float]] = []
         for action in candidates:
             self._begin_root_candidate(action)
@@ -158,6 +156,10 @@ class TurnSearcher(Bot):
             score = self._score_final_line(branches, me)
             self._end_root_candidate(action)
             root_scores.append((action, score))
+        root_scores = self._rescore_roots(worlds, root_scores, state, me)   # a second, costlier look at the best few (RefereeBot's depth)
+        best_score = -math.inf
+        best: list[Action] = []
+        for action, score in root_scores:
             if score > best_score:
                 best_score, best = score, [action]
             elif score == best_score:
@@ -331,6 +333,11 @@ class TurnSearcher(Bot):
     ) -> list[Action]:
         """Optional second-stage root pruning after the generic tactical beam."""
         return candidates
+
+    def _rescore_roots(self, worlds, root_scores, state, me):
+        """Hook: the root candidates with their scores, after the search; a subclass may re-score the best few more
+        carefully and return the list to choose from. Identity here."""
+        return root_scores
 
     def _record_root_scores(
         self,

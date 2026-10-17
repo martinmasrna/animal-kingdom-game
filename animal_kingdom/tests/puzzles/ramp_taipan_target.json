@@ -160,27 +160,9 @@
   ],
   "B": [
    {
-    "card_id": "elephant",
-    "owner": "B",
-    "iid": 10,
-    "placed_on_turn": 0,
-    "strength_counter": 0,
-    "locked_until_turn": 0,
-    "retaliation_used": false
-   },
-   {
     "card_id": "tiger",
     "owner": "B",
     "iid": 19,
-    "placed_on_turn": 0,
-    "strength_counter": 0,
-    "locked_until_turn": 0,
-    "retaliation_used": false
-   },
-   {
-    "card_id": "brutus",
-    "owner": "B",
-    "iid": 20,
     "placed_on_turn": 0,
     "strength_counter": 0,
     "locked_until_turn": 0,

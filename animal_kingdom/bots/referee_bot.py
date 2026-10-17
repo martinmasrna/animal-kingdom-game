@@ -41,6 +41,8 @@ are dropped - both err toward the referee knowing less than a perfect observer.
 
 from __future__ import annotations
 
+import time
+
 import random
 from typing import Optional, Sequence
 
@@ -65,7 +67,8 @@ class RefereeBot(TurnSearcher):
                  reply_width: int = 4,
                  max_search_nodes: Optional[int] = 1_000,
                  evaluator: Optional[LinearEval] = None,
-                 quiesce: bool = False, mulligan: bool = False):
+                 quiesce: bool = False, mulligan: bool = False,
+                 depth: int = 0, next_width: int = 3, deepen_top: int = 4, deepen_roots: int = 3, time_budget: float = 0.0):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          evaluator=evaluator, quiesce=quiesce, mulligan=mulligan)
@@ -73,6 +76,17 @@ class RefereeBot(TurnSearcher):
         self.root_width = root_width
         self.reply_width = reply_width
         self.max_search_nodes = max_search_nodes
+        # Sight past the reply (2026-10-17): at the leaf, after the opponent's sampled reply, play `depth` more rounds
+        # of my own turn (the `next_width` best first actions by one-move score, each finished by the fast policy) and
+        # their reply (the fast policy), and score after; the best of my lines counts. Depth 0 scores at the reply, as
+        # before: the one-turn horizon that never saw the Zebra draw three next turn.
+        self.depth = depth
+        self.next_width = next_width
+        self.deepen_top = deepen_top        # only this many of a root's best lines (by the one-turn score) get the extra sight
+        self.deepen_roots = deepen_roots    # only this many root candidates (the one-turn search's best) get it at all
+        self.time_budget = time_budget      # seconds per move after which no further root is deepened (0: no limit)
+        self._move_started = 0.0
+        self._deepening = False             # on only while _rescore_roots scores a root's final lines
         # `self._policy` (the GreedyBot that plays every rollout seat) and `self._search_nodes`
         # are set identically by TurnSearcher.__init__; RefereeBot uses them for reply rollouts
         # and its staged node budget.
@@ -89,6 +103,7 @@ class RefereeBot(TurnSearcher):
         state: Optional[GameState] = None,
     ) -> Action:
         legal = list(legal)
+        self._move_started = time.monotonic()
         self.last_search_stats = {
             "root_candidates": len(legal),
             "screened_candidates": len(legal),
@@ -319,7 +334,7 @@ class RefereeBot(TurnSearcher):
         branches: list[tuple[GameState, float]],
         me: str,
     ) -> list[float]:
-        scores = []
+        scores, leaves = [], []
         for state, penalty in branches:
             # A lost world is a flat -_DECISIVE, so when every world is lost all moves tie
             # and the bot plays a random one. Keep the position it handed the opponent as a
@@ -330,7 +345,23 @@ class RefereeBot(TurnSearcher):
             if score == -_DECISIVE:
                 score += before
             scores.append(score - penalty)
+            leaves.append((state, penalty, before))
             self.last_search_stats["reply_world_rollouts"] += 1
+        if self.depth and self._deepening and leaves:
+            # The extra sight goes to the lines the one-turn score likes best (ties and near-ties are where it decides),
+            # while the move's time budget lasts.
+            order = sorted(range(len(scores)), key=lambda i: -scores[i])[:self.deepen_top]
+            for i in order:
+                if self.time_budget and time.monotonic() - self._move_started > self.time_budget:
+                    self.last_search_stats["lookahead_cut"] = self.last_search_stats.get("lookahead_cut", 0) + 1
+                    break
+                state, penalty, before = leaves[i]
+                if state.result is not None:
+                    continue
+                score = self._leaf_score(state, me, self.depth)
+                if score == -_DECISIVE:
+                    score += before
+                scores[i] = score - penalty
         return scores
 
     def _mean_reply_score(
@@ -340,6 +371,67 @@ class RefereeBot(TurnSearcher):
     ) -> float:
         scores = self._reply_scores(branches, me)
         return sum(scores) / len(scores)
+
+    def _rescore_roots(self, worlds, root_scores, state, me):
+        """Two stages (2026-10-17): the one-turn search ranks every root candidate; the best `deepen_roots` of them are
+        then scored again with `depth` more rounds of sight on their best lines, and the move is chosen among those.
+        Out of time (`time_budget`), the one-turn ranking stands."""
+        if not self.depth or len(root_scores) < 2:
+            return root_scores
+        top = sorted(root_scores, key=lambda row: -row[1])[:self.deepen_roots]
+        deep = []
+        for action, _shallow in top:
+            if self.time_budget and time.monotonic() - self._move_started > self.time_budget:
+                self.last_search_stats["lookahead_cut"] = 1
+                return root_scores
+            self._begin_root_candidate(action)
+            branches = self._branches_after_action(worlds, action, me, complete_turn=(state.current == me))
+            self._deepening = True
+            try:
+                score = self._mean_reply_score(branches, me)
+            finally:
+                self._deepening = False
+            self._end_root_candidate(action)
+            deep.append((action, score))
+        self.last_search_stats["deepened_roots"] = len(deep)
+        return deep
+
+    def _leaf_score(self, state: GameState, me: str, depth: int) -> float:
+        """The score at a leaf: the board as it stands (depth 0), or the best of my next turns played out with their
+        replies (depth 1: one more round of sight, and so on). `state` is at my next top-level decision or terminal."""
+        if depth <= 0 or state.result is not None or state.pending is not None or state.player_to_act() != me:
+            return self._clamped_eval(state, me)
+        legal = rules.legal_actions(state)
+        if not legal:
+            return self._clamped_eval(state, me)
+        best = None
+        for action in self._greedy_topn(state, legal, me, self.next_width):
+            nxt = state.clone()
+            rules.apply_action(nxt, action, validate=False)
+            self._play_turn(nxt, me)        # the rest of my turn, by the fast policy
+            self._advance(nxt, me)          # their reply, to my next decision or a terminal state
+            self.last_search_stats["lookahead_lines"] = self.last_search_stats.get("lookahead_lines", 0) + 1
+            value = self._leaf_score(nxt, me, depth - 1)
+            best = value if best is None else max(best, value)
+        return best
+
+    def _play_turn(self, state: GameState, me: str) -> None:
+        """Play the rest of my turn with the fast policy (sub-choices included), until the turn passes to the opponent
+        or the game ends. Mutates `state`; sets `state.result` at terminals."""
+        guard = 0
+        while guard < 40:
+            guard += 1
+            result = rules.is_terminal(state)
+            if result is not None:
+                state.result = result
+                return
+            if state.player_to_act() != me:
+                return
+            legal = rules.legal_actions(state)
+            if not legal:
+                return
+            action = self._policy.choose(state.view_for(me), legal, state)
+            rules.apply_action(state, action, validate=False)
 
     def _advance(self, state: GameState, me: str) -> None:
         """Play the rollout clone forward with the greedy policy - through my pending
