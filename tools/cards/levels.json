@@ -4318,6 +4318,24 @@
       "note": "moved from pool to hoofed",
       "by": "claude",
       "at": 1792262680
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792272029
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792272048
     }
   },
   "pool-albatross": {
