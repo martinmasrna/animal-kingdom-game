@@ -278,9 +278,9 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
         if unit.card_id != "macaw" and _hook(state, unit.card_id, "on_place"):
             state.last_roar[player] = unit.card_id        # the Macaw repeats it (its own copy records the copied card)
         times = 1
-        if (state.roar_twice.get(unit.owner) == state.turn_counter and unit.card_id != "macaw"
+        if (state.roar_twice.get(unit.owner) == state.turn_counter and unit.card_id != "woodpecker"
                 and (_hook(state, unit.card_id, "on_place") or (onto_enemy and _hook(state, unit.card_id, "on_place_onto_enemy")))):
-            del state.roar_twice[unit.owner]            # the Macaw: this Roar happens twice, then the double is spent
+            del state.roar_twice[unit.owner]            # the Woodpecker: this Roar happens twice, then the double is spent
             times = 2
         for _ in range(times):
             _push_hook(state, unit, cr, "on_place")
@@ -2800,6 +2800,11 @@ def _macaw_place(state, unit, cr):
         hook(state, unit, cr)
 
 
+def _woodpecker_place(state, unit, cr):
+    """Roar: your next Roar this turn happens twice."""
+    state.roar_twice[unit.owner] = state.turn_counter
+
+
 def _cuckoo_place(state, unit, cr):
     """Roar: shuffle two Cuckoo Eggs into your opponent's deck."""
     shuffle_back(state, other_player(unit.owner), ["cuckoo_egg"] * state.config.cuckoo_eggs, by=unit.owner)
@@ -3041,6 +3046,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # The pool (Great White Shark's Reach is a static; Raksha, Verminus are anthems; Coyote, Cougar statics).
     "octopus": {"on_place": _octopus_ink_place},
     "macaw": {"on_place": _macaw_place},
+    "woodpecker": {"on_place": _woodpecker_place},
     "sperm_whale": {"on_place": _remove_all_adjacent},
     "butterfly": {"on_place": _draw_then_give_one},
     "cuckoo": {"on_place": _cuckoo_place},

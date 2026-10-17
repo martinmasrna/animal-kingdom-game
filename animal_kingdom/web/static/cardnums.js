@@ -41,7 +41,7 @@ export const CARD_NUMS = [
   "opossum", "baby_turtle", "worm", "baby_fish", "cuckoo_egg", "baby_lion", "baby_wolf", "baby_squirrel",
   "baby_owl", "baby_python", "baby_bear", "baby_gorilla", "baby_zebra", "butterfly_legend_caterpillar", "butterfly_legend_chrysalis", "butterfly_legend_butterfly",
   "butterfly_legend_monarch", "arna", "tutorial_cape_buffalo", "tutorial_dire_wolf", "tutorial_lynx", "tutorial_chipmunk",
-  "beaver", "macaw", "toad", "locust", "roach_king", "roach", "mole_legend", "bat_legend", "golden_egg"
+  "beaver", "macaw", "toad", "locust", "roach_king", "roach", "mole_legend", "bat_legend", "golden_egg", "woodpecker"
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

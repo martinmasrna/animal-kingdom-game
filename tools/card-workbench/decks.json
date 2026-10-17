@@ -2375,12 +2375,12 @@
      "id": "pool-woodpecker",
      "name": "Woodpecker",
      "note": "",
-     "rarity": "",
+     "rarity": "R",
      "species": "Woodpecker",
-     "status": "open",
-     "str": null,
-     "tag": "",
-     "text": ""
+     "status": "proposed",
+     "str": 2,
+     "tag": "Bird",
+     "text": "Flight. Roar: your next Roar this turn happens twice."
     },
     {
      "habitat": "Forest",

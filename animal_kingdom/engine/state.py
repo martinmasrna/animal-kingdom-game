@@ -266,7 +266,7 @@ class GameState:
         # Octopus ink: the iids of inked animals. An inked animal has no keywords and no effects, for as long as it is
         # on the board (statics.inked).
         self.inked = inked if inked is not None else set()
-        # Macaw: player -> the turn_counter in which that player's next Roar happens twice (spent by that Roar).
+        # Woodpecker: player -> the turn_counter in which that player's next Roar happens twice (spent by that Roar).
         self.roar_twice = roar_twice if roar_twice is not None else {}
         # The Macaw: player -> the card whose Roar that player played last (public; a Macaw's copy counts as the copied card).
         self.last_roar = last_roar if last_roar is not None else {}

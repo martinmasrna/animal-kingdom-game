@@ -995,6 +995,14 @@ def test_every_launch_card_can_be_played_by_the_bots_without_crashing():
             rules.apply_action(s, rng.choice(rules.legal_actions(s)))
 
 
+def test_the_woodpecker_makes_the_next_roar_this_turn_happen_twice():
+    s = make_state(hands={"A": ["woodpecker", "squirrel", "squirrel"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("woodpecker", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,1")))
+    assert s.food["A"] == 2 * s.config.squirrel_food
+    assert "A" not in s.roar_twice                              # spent by that Roar
+
+
 def test_a_played_roar_is_remembered_for_the_macaw():
     s = make_state(hands={"A": ["squirrel"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,2")))

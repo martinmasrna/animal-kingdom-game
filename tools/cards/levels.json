@@ -4048,5 +4048,61 @@
       "by": "claude",
       "at": 1792198558
     }
+  },
+  "pool-woodpecker": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17",
+      "by": "claude",
+      "at": 1792250813
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17",
+      "by": "claude",
+      "at": 1792250814
+    }
+  },
+  "woodpecker": {
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792250814
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: the Macaw's old effect; a woodpecker strikes twice (knock-knock)",
+      "by": "claude",
+      "at": 1792250814
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection (status proposed)",
+      "by": "claude",
+      "at": 1792250825
+    }
   }
 }

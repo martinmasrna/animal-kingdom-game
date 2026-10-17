@@ -3022,6 +3022,23 @@
       "workbench_id": "pool-y16"
     },
     {
+      "id": "woodpecker",
+      "name": "Woodpecker",
+      "deck": "bench",
+      "rarity": "rare",
+      "tags": [
+        "Bird"
+      ],
+      "base_strength": 2,
+      "text": "Flight. Roar: your next Roar this turn happens twice.",
+      "keywords": [
+        "Flight"
+      ],
+      "species": "Woodpecker",
+      "habitat": "Forest",
+      "workbench_id": "pool-woodpecker"
+    },
+    {
       "id": "cuco",
       "name": "[CUCKOO]",
       "deck": "bench",
