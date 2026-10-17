@@ -1742,6 +1742,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Your other Cats can be placed on enemies of equal or lower strength."
+      },
+      "note": "Martin's 30 Sep wording back; the workbench conversion of 8 Oct had resurrected the old text",
+      "by": "claude",
+      "at": 1792203166
     }
   },
   "leopard_legend": {

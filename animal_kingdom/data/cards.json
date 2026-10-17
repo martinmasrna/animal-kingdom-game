@@ -1048,7 +1048,7 @@
         "Cat"
       ],
       "base_strength": 6,
-      "text": "Your other Cats can be placed on enemies of equal or lower strength.",
+      "text": "Your Cats can be placed on enemies of equal strength.",
       "keywords": [],
       "species": "Leopard",
       "habitat": "Savanna",
