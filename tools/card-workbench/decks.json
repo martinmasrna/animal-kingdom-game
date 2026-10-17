@@ -915,7 +915,7 @@
      "status": "locked",
      "str": 3,
      "tag": "Bird",
-     "text": "Whenever you draw Black Swan, your opponent discards a random card."
+     "text": "Flight. Whenever you draw Black Swan, your opponent discards a random card."
     },
     {
      "habitat": "Forest",
@@ -1047,7 +1047,7 @@
      "status": "proposed",
      "str": 1,
      "tag": "Bird",
-     "text": "Dawn: shuffle a Golden Egg into your deck."
+     "text": "Flight. Dawn: shuffle a Golden Egg into your deck."
     }
    ]
   },

@@ -1845,8 +1845,10 @@
         "Bird"
       ],
       "base_strength": 3,
-      "text": "Whenever you draw Black Swan, your opponent discards a random card.",
-      "keywords": [],
+      "text": "Flight. Whenever you draw Black Swan, your opponent discards a random card.",
+      "keywords": [
+        "Flight"
+      ],
       "species": "Swan",
       "habitat": "Meadow",
       "workbench_id": "egg-control-3"
@@ -2017,8 +2019,10 @@
         "Bird"
       ],
       "base_strength": 1,
-      "text": "Dawn: shuffle a Golden Egg into your deck.",
-      "keywords": [],
+      "text": "Flight. Dawn: shuffle a Golden Egg into your deck.",
+      "keywords": [
+        "Flight"
+      ],
       "related": [
         "golden_egg"
       ],

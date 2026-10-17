@@ -145,9 +145,9 @@
         "prev_note": "",
         "prev": "Dawn: draw a card."
       },
-      "note": "lays Golden Eggs instead of drawing (Martin 2026-10-17)",
+      "note": "lays Golden Eggs instead of drawing (Martin 2026-10-17); Flight added (geese fly, Martin 2026-10-17)",
       "by": "claude",
-      "at": 1792194642
+      "at": 1792247609
     }
   },
   "baboon": {
@@ -461,7 +461,14 @@
     },
     "effect": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Whenever you draw Black Swan, your opponent discards a random card."
+      },
+      "note": "Martin 2026-10-17: Flight added (swans fly)",
+      "at": 1792247608
     },
     "art": {
       "lv": "draft",
