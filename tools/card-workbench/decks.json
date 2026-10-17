@@ -1654,18 +1654,6 @@
      "text": "Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it."
     },
     {
-     "habitat": "Savanna",
-     "id": "giants-6",
-     "name": "Crocodile",
-     "note": "",
-     "rarity": "R",
-     "species": "Crocodile",
-     "status": "locked",
-     "str": 8,
-     "tag": "",
-     "text": "Apex Predator."
-    },
-    {
      "habitat": "Open Ocean",
      "id": "giants-7",
      "name": "Whale Shark",
@@ -1748,6 +1736,18 @@
      "str": 9,
      "tag": "",
      "text": "Hungry 5."
+    },
+    {
+     "habitat": "Forest",
+     "id": "hoofed-6",
+     "name": "Moose",
+     "note": "",
+     "rarity": "R",
+     "species": "Moose",
+     "status": "proposed",
+     "str": 8,
+     "tag": "Hoofed",
+     "text": "Hungry 3. Roam."
     }
    ]
   },
@@ -1889,18 +1889,6 @@
      "text": "Flight. Roar: add two random younglings to your hand."
     },
     {
-     "habitat": "Forest",
-     "id": "handlock-11",
-     "name": "Grizzly Bear",
-     "note": "",
-     "rarity": "C",
-     "species": "Grizzly Bear",
-     "status": "proposed",
-     "str": 1,
-     "tag": "Bear",
-     "text": "Has +1 strength for each other card in your hand."
-    },
-    {
      "habitat": "Meadow",
      "id": "handlock-12",
      "name": "Caterpillar",
@@ -1923,6 +1911,18 @@
      "str": 6,
      "tag": "Primate",
      "text": "Roar: if this has 8 or more strength, draw a card."
+    },
+    {
+     "habitat": "Jungle",
+     "id": "pool-placeholder",
+     "name": "[PLACEHOLDER]",
+     "note": "",
+     "rarity": "C",
+     "species": "Placeholder",
+     "status": "open",
+     "str": 1,
+     "tag": "",
+     "text": "Has +1 strength for each other card in your hand."
     }
    ]
   },
@@ -2004,18 +2004,6 @@
      "text": "Dusk: if this is grazing, draw a card."
     },
     {
-     "habitat": "Forest",
-     "id": "hoofed-6",
-     "name": "Moose",
-     "note": "",
-     "rarity": "R",
-     "species": "Moose",
-     "status": "proposed",
-     "str": 6,
-     "tag": "Hoofed",
-     "text": "Your other Hoofed animals have +1 strength during your opponent's turn."
-    },
-    {
      "habitat": "Savanna",
      "id": "hoofed-7",
      "name": "Zebra",
@@ -2044,12 +2032,12 @@
      "id": "hoofed-9",
      "name": "Cape Buffalo",
      "note": "",
-     "rarity": "C",
+     "rarity": "R",
      "species": "Cape Buffalo",
      "status": "proposed",
-     "str": 4,
+     "str": 6,
      "tag": "Hoofed",
-     "text": "Roar: remove an adjacent enemy covering an allied Hoofed animal."
+     "text": "Your other Hoofed animals have +1 strength during your opponent's turn."
     },
     {
      "habitat": "Savanna",
@@ -2098,6 +2086,18 @@
      "str": 4,
      "tag": "Hoofed",
      "text": "Roar: remove an adjacent enemy that isn't covering anything."
+    },
+    {
+     "habitat": "Savanna",
+     "id": "pool-warthog",
+     "name": "Warthog",
+     "note": "",
+     "rarity": "C",
+     "species": "Warthog",
+     "status": "open",
+     "str": 4,
+     "tag": "Hoofed",
+     "text": "Roar: remove an adjacent enemy covering an allied Hoofed animal."
     }
    ]
   },
@@ -2345,18 +2345,6 @@
      "str": 10,
      "tag": "",
      "text": "Armor. Costs 15 food."
-    },
-    {
-     "habitat": "Savanna",
-     "id": "pool-warthog",
-     "name": "Warthog",
-     "note": "",
-     "rarity": "",
-     "species": "Warthog",
-     "status": "open",
-     "str": null,
-     "tag": "",
-     "text": ""
     },
     {
      "habitat": "Savanna",
@@ -2711,12 +2699,12 @@
      "id": "pool-albatross",
      "name": "Albatross",
      "note": "",
-     "rarity": "",
+     "rarity": "R",
      "species": "Albatross",
-     "status": "open",
-     "str": null,
-     "tag": "",
-     "text": ""
+     "status": "proposed",
+     "str": 4,
+     "tag": "Bird",
+     "text": "Flight. Roar: remove all adjacent enemies of strength 2 or less."
     },
     {
      "habitat": "Meadow",
@@ -2813,6 +2801,30 @@
      "str": 1,
      "tag": "",
      "text": "Flight. Dawn: draw a card."
+    },
+    {
+     "habitat": "Savanna",
+     "id": "giants-6",
+     "name": "Crocodile",
+     "note": "",
+     "rarity": "C",
+     "species": "Crocodile",
+     "status": "locked",
+     "str": 8,
+     "tag": "",
+     "text": "Has -3 strength during your opponent's turn."
+    },
+    {
+     "habitat": "Forest",
+     "id": "handlock-11",
+     "name": "Grizzly Bear",
+     "note": "",
+     "rarity": "C",
+     "species": "Grizzly Bear",
+     "status": "proposed",
+     "str": 8,
+     "tag": "Bear",
+     "text": "Roar: your opponent draws a card."
     }
    ]
   }

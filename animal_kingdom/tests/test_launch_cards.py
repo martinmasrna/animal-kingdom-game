@@ -775,11 +775,16 @@ def test_whale_shark_draws_a_card_at_the_end_of_your_turn():
 
 # ================================================================================ Handlock
 
-def test_silverback_trains_the_whole_hand_and_the_grizzly_counts_it():
-    s = make_state(hands={"A": ["silverback", "lion", "grizzly_bear"]})
-    assert placement_strength(s, hand_inst(s, "A", "grizzly_bear")) == load_cards()["grizzly_bear"].base_strength + 2   # two other cards in hand
+def test_silverback_trains_the_whole_hand():
+    s = make_state(hands={"A": ["silverback", "lion"]})
     rules.apply_action(s, PlaceAction("silverback", ("cr", "1,2")))
     assert hand_inst(s, "A", "lion").strength_counter == CFG.silverback_grant
+
+
+def test_the_grizzly_is_an_eight_that_gives_its_opponent_a_card():
+    s = make_state(hands={"A": ["grizzly_bear"], "B": []}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("grizzly_bear", ("cr", "1,2")))
+    assert effective_strength(s, s.top_unit("1,2")) == 8 and hand_ids(s, "B") == ["lion"]
 
 
 def test_the_legendary_butterfly_moves_one_stage_per_buff():
@@ -905,19 +910,47 @@ def test_grazing_okapi_draws_and_wildebeest_feeds():
     assert len(s.hands["A"]) == 1 and s.food["A"] == CFG.wildebeest_food + 10   # Wildebeest, then R1's income
 
 
-def test_giraffe_and_moose_are_bigger_on_the_opponents_turn():
+def test_giraffe_and_cape_buffalo_are_bigger_on_the_opponents_turn():
     s = make_state()
-    g = put(s, "1,2", "giraffe", "A"); put(s, "1,1", "moose", "A")
+    g = put(s, "1,2", "giraffe", "A"); put(s, "1,1", "cape_buffalo", "A")
     assert effective_strength(s, g) == 4
     s.current = "B"
-    assert effective_strength(s, g) == 4 + CFG.giraffe_bonus + CFG.moose_anthem
+    assert effective_strength(s, g) == 4 + CFG.giraffe_bonus + CFG.buffalo_anthem
 
 
-def test_cape_buffalo_removes_the_enemy_covering_an_allied_hoofed():
-    s = make_state(hands={"A": ["cape_buffalo"]})
+def test_the_crocodile_covers_a_lion_on_its_turn_and_is_a_five_on_the_opponents():
+    s = make_state(hands={"A": ["crocodile"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,1", "caracal", "A"); put(s, "1,2", "lion", "B")
+    rules.apply_action(s, PlaceAction("crocodile", ("cr", "1,2")))
+    croc = s.top_unit("1,2")
+    assert croc.card_id == "crocodile" and effective_strength(s, croc) == 8
+    s.current = "B"
+    assert effective_strength(s, croc) == 8 - CFG.crocodile_penalty
+
+
+def test_the_moose_is_a_hungry_eight_that_roams():
+    card = load_cards()["moose"]
+    assert (card.base_strength, card.hungry, card.rarity) == (8, 3, "rare") and "Roam" in card.keywords
+
+
+def test_the_albatross_sweeps_the_small_enemies_where_it_lands():
+    s = make_state(hands={"A": ["albatross"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    for cr, cid in (("2,1", "sardine"), ("3,2", "mackerel"), ("2,3", "mouse")):
+        put(s, cr, cid, "B")
+    rules.apply_action(s, PlaceAction("albatross", ("cr", "2,2")))   # Flight: no connection needed
+    assert s.top_unit("2,1") is None and s.top_unit("3,2") is None and s.top_unit("2,3").card_id == "mouse"
+
+
+def test_the_hand_size_card_counts_the_other_cards_in_your_hand():
+    s = make_state(hands={"A": ["placeholder", "lion", "lion", "lion"]})
+    assert placement_strength(s, hand_inst(s, "A", "placeholder")) == 1 + 3 * CFG.hand_per_card
+
+
+def test_warthog_removes_the_enemy_covering_an_allied_hoofed():
+    s = make_state(hands={"A": ["warthog"]})
     put(s, "2,2", "gazelle", "A"); put(s, "2,2", "lion", "B")
     put(s, "1,1", "lion", "B")                                  # covering nothing of A's
-    apply_click(s, PlaceAction("cape_buffalo", ("cr", "1,2")))
+    apply_click(s, PlaceAction("warthog", ("cr", "1,2")))
     assert [u.card_id for u in s.board["2,2"]] == ["gazelle"] and s.top_unit("1,1").owner == "B"
 
 

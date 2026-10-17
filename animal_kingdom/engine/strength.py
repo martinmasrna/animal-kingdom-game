@@ -63,7 +63,7 @@ def _inked(state: GameState, iid: Optional[int]) -> bool:
 # bonus, whether only during your opponent's turn). Each source counts, and none counts for itself.
 FAMILY_AURAS = {
     "mackerel": ("Fish", "mackerel_anthem", False),   # "Your other Fish have +1 strength."
-    "moose": ("Hoofed", "moose_anthem", True),        # "Your other Hoofed animals have +1 strength during your opponent's turn."
+    "cape_buffalo": ("Hoofed", "buffalo_anthem", True),   # "Your other Hoofed animals have +1 strength during your opponent's turn."
 }
 
 
@@ -77,7 +77,6 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
     An inked unit has no anthem of its own, and an inked source gives none.
     """
     tops = _tops_owned(state, owner)
-    prospective = self_iid is None
     cfg = state.config
     their_turn = state.current != owner
 
@@ -96,10 +95,12 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
             bonus += cfg.tuna_per_fish * count("Fish", include_self=False)
         elif cid == "hamster":                  # +1 for each 10 food you have
             bonus += cfg.hamster_per_step * (state.food[owner] // cfg.hamster_food_step)
-        elif cid == "grizzly_bear":             # +1 for each card in your hand (it has left it when placed)
-            bonus += cfg.grizzly_per_card * max(0, len(state.hands[owner]) - (1 if prospective else 0))
+        elif cid == "placeholder":              # +1 for each other card in your hand (it has left it when placed)
+            bonus += cfg.hand_per_card * max(0, len(state.hands[owner]) - (1 if self_iid is None else 0))
         elif cid == "giraffe":                  # +5 during your opponent's turn
             bonus += cfg.giraffe_bonus if their_turn else 0
+        elif cid == "crocodile":                # -3 during your opponent's turn
+            bonus -= cfg.crocodile_penalty if their_turn else 0
 
     for u in tops:
         aura = FAMILY_AURAS.get(u.card_id)

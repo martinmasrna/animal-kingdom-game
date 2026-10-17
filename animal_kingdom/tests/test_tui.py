@@ -30,7 +30,7 @@ def _human_first_seed() -> int:
     the shelf shows a disabled card."""
     for seed in range(400):
         state = new_game(
-            load_premade_deck("giants"),
+            load_premade_deck("cats"),
             load_premade_deck("egg_control"),
             seed,
             map_id="map_b",
@@ -43,7 +43,7 @@ def _human_first_seed() -> int:
 def _manifest():
     return generate_manifest(
         cohort_id="ui-test",
-        human_decks=("giants",),
+        human_decks=("cats",),
         opponent_decks=("egg_control",),
         opponent_kinds=("random",),
         repetitions=1,
@@ -484,7 +484,7 @@ def test_help_overlay_keeps_recorder_controls_out_of_footer(tmp_path):
 def test_tui_runs_bot_first_without_blocking_input_loop(tmp_path):
     manifest = generate_manifest(
         cohort_id="bot-first",
-        human_decks=("giants",),
+        human_decks=("cats",),
         opponent_decks=("egg_control",),
         opponent_kinds=("random",),
         repetitions=1,

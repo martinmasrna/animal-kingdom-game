@@ -2222,21 +2222,6 @@
       "workbench_id": "handlock-10"
     },
     {
-      "id": "grizzly_bear",
-      "name": "Grizzly Bear",
-      "deck": "handlock",
-      "rarity": "common",
-      "tags": [
-        "Bear"
-      ],
-      "base_strength": 1,
-      "text": "Has +1 strength for each other card in your hand.",
-      "keywords": [],
-      "species": "Grizzly Bear",
-      "habitat": "Forest",
-      "workbench_id": "handlock-11"
-    },
-    {
       "id": "caterpillar",
       "name": "Caterpillar",
       "deck": "handlock",
@@ -2267,6 +2252,19 @@
       "species": "Gorilla",
       "habitat": "Jungle",
       "workbench_id": "handlock-13"
+    },
+    {
+      "id": "placeholder",
+      "name": "[PLACEHOLDER]",
+      "deck": "handlock",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 1,
+      "text": "Has +1 strength for each other card in your hand.",
+      "keywords": [],
+      "species": "Placeholder",
+      "habitat": "Jungle",
+      "workbench_id": "pool-placeholder"
     },
     {
       "id": "brutus",
@@ -2368,21 +2366,6 @@
       "species": "Hippopotamus",
       "habitat": "Savanna",
       "workbench_id": "giants-5"
-    },
-    {
-      "id": "crocodile",
-      "name": "Crocodile",
-      "deck": "giants",
-      "rarity": "rare",
-      "tags": [],
-      "base_strength": 8,
-      "text": "Apex Predator.",
-      "keywords": [
-        "Apex Predator"
-      ],
-      "species": "Crocodile",
-      "habitat": "Savanna",
-      "workbench_id": "giants-6"
     },
     {
       "id": "whale_shark",
@@ -2491,6 +2474,25 @@
       "workbench_id": "giants-13"
     },
     {
+      "id": "moose",
+      "name": "Moose",
+      "deck": "giants",
+      "rarity": "rare",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 8,
+      "text": "Hungry 3. Roam.",
+      "keywords": [
+        "Hungry",
+        "Roam"
+      ],
+      "hungry": 3,
+      "species": "Moose",
+      "habitat": "Forest",
+      "workbench_id": "hoofed-6"
+    },
+    {
       "id": "wildebeest_legend",
       "name": "[WILDEBEEST]",
       "deck": "hoofed",
@@ -2579,21 +2581,6 @@
       "workbench_id": "hoofed-5"
     },
     {
-      "id": "moose",
-      "name": "Moose",
-      "deck": "hoofed",
-      "rarity": "rare",
-      "tags": [
-        "Hoofed"
-      ],
-      "base_strength": 6,
-      "text": "Your other Hoofed animals have +1 strength during your opponent's turn.",
-      "keywords": [],
-      "species": "Moose",
-      "habitat": "Forest",
-      "workbench_id": "hoofed-6"
-    },
-    {
       "id": "zebra",
       "name": "Zebra",
       "deck": "hoofed",
@@ -2629,12 +2616,12 @@
       "id": "cape_buffalo",
       "name": "Cape Buffalo",
       "deck": "hoofed",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Hoofed"
       ],
-      "base_strength": 4,
-      "text": "Roar: remove an adjacent enemy covering an allied Hoofed animal.",
+      "base_strength": 6,
+      "text": "Your other Hoofed animals have +1 strength during your opponent's turn.",
       "keywords": [],
       "species": "Cape Buffalo",
       "habitat": "Savanna",
@@ -2703,6 +2690,21 @@
       "species": "Boar",
       "habitat": "Forest",
       "workbench_id": "hoofed-13"
+    },
+    {
+      "id": "warthog",
+      "name": "Warthog",
+      "deck": "hoofed",
+      "rarity": "common",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 4,
+      "text": "Roar: remove an adjacent enemy covering an allied Hoofed animal.",
+      "keywords": [],
+      "species": "Warthog",
+      "habitat": "Savanna",
+      "workbench_id": "pool-warthog"
     },
     {
       "id": "octopus",
@@ -3039,6 +3041,23 @@
       "workbench_id": "pool-woodpecker"
     },
     {
+      "id": "albatross",
+      "name": "Albatross",
+      "deck": "bench",
+      "rarity": "rare",
+      "tags": [
+        "Bird"
+      ],
+      "base_strength": 4,
+      "text": "Flight. Roar: remove all adjacent enemies of strength 2 or less.",
+      "keywords": [
+        "Flight"
+      ],
+      "species": "Albatross",
+      "habitat": "Open Ocean",
+      "workbench_id": "pool-albatross"
+    },
+    {
       "id": "cuco",
       "name": "[CUCKOO]",
       "deck": "bench",
@@ -3155,6 +3174,34 @@
       "species": "Bat",
       "habitat": "City",
       "workbench_id": "pool-bat-legend"
+    },
+    {
+      "id": "crocodile",
+      "name": "Crocodile",
+      "deck": "bench",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 8,
+      "text": "Has -3 strength during your opponent's turn.",
+      "keywords": [],
+      "species": "Crocodile",
+      "habitat": "Savanna",
+      "workbench_id": "giants-6"
+    },
+    {
+      "id": "grizzly_bear",
+      "name": "Grizzly Bear",
+      "deck": "bench",
+      "rarity": "common",
+      "tags": [
+        "Bear"
+      ],
+      "base_strength": 8,
+      "text": "Roar: your opponent draws a card.",
+      "keywords": [],
+      "species": "Grizzly Bear",
+      "habitat": "Forest",
+      "workbench_id": "handlock-11"
     },
     {
       "id": "baby_turtle",

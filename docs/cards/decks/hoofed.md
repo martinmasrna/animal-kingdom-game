@@ -21,18 +21,18 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 |---|---:|---|---:|---|
 | **Honey Badger** | 2 | — | 2 | Roar: remove an adjacent enemy of strength 6 or more. |
 | **Okapi** | 2 | Hoofed | 4 | Dusk: if this is grazing, draw a card. |
-| **Moose** | 2 | Hoofed | 6 | Your other Hoofed animals have +1 strength during your opponent's turn. |
 | **Zebra** | 2 | Hoofed | 5 | Flee. When this flees, return the enemy that covered it to its owner's hand. |
+| **Cape Buffalo** | 2 | Hoofed | 6 | Your other Hoofed animals have +1 strength during your opponent's turn. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Giraffe** | 3 | Hoofed | 4 | Has +5 strength during your opponent's turn. |
-| **Cape Buffalo** | 3 | Hoofed | 4 | Roar: remove an adjacent enemy covering an allied Hoofed animal. |
 | **Gazelle** | 3 | Hoofed | 3 | Flee. Roar: gain 5 food. |
 | **Wildebeest** | 3 | Hoofed | 6 | Dusk: if this is grazing, gain 5 food. |
 | **Deer** | 3 | Hoofed | 4 | Flee. Roar: draw a card. |
 | **Boar** | 3 | Hoofed | 4 | Roar: remove an adjacent enemy that isn't covering anything. |
+| **Warthog** | 3 | Hoofed | 4 | Roar: remove an adjacent enemy covering an allied Hoofed animal. |
 
 <!-- cards:end -->

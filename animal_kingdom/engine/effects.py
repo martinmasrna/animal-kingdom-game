@@ -2550,6 +2550,11 @@ def _tortoise_place(state, unit, cr):
     _push_gain(state, unit.owner, n * state.config.tortoise_per_armor)
 
 
+def _grizzly_place(state, unit, cr):
+    """Roar: your opponent draws a card (the price of an 8)."""
+    _push_draw(state, other_player(unit.owner), 1)
+
+
 def _black_bear_place(state, unit, cr):
     schedule(state, unit, state.config.black_bear_delay,
              {"op": "draw", "player": unit.owner, "n": state.config.black_bear_draw}, while_buried=False)
@@ -2559,6 +2564,14 @@ def _black_bear_place(state, unit, cr):
 
 def _rhinoceros_place(state, unit, cr):
     for nb in _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.rhinoceros_max,
+                                      chosen=False):        # mass AoE hits Stealth
+        state.effect_stack.append(remove_iid_step(state.top_unit(nb).iid, by_player=unit.owner, by_effect=True,
+                                                  source_iid=None, by_card=unit.card_id))
+
+
+def _albatross_place(state, unit, cr):
+    """Roar: remove all adjacent enemies of strength 2 or less (the Rhinoceros's sweep, landing anywhere)."""
+    for nb in _adjacent_enemy_targets(state, unit, cr, max_strength=state.config.albatross_max,
                                       chosen=False):        # mass AoE hits Stealth
         state.effect_stack.append(remove_iid_step(state.top_unit(nb).iid, by_player=unit.owner, by_effect=True,
                                                   source_iid=None, by_card=unit.card_id))
@@ -2757,7 +2770,7 @@ def _zebra_flee(state, unit, coverer_iid):
     state.effect_stack.append({"op": "flee_return", "iid": coverer_iid})
 
 
-def _cape_buffalo_place(state, unit, cr):
+def _warthog_place(state, unit, cr):
     """Roar: remove an adjacent enemy covering an allied Hoofed animal (the animal right beneath it)."""
     def covering(nb):
         st = state.board[nb]
@@ -3000,6 +3013,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "golden_orb_weaver": {"on_enemy_placed_adjacent": _orb_weaver_enemy_placed},
     "hedgehog": {"on_place": _gains("hedgehog_food")},
     "black_bear": {"on_place": _black_bear_place},
+    "grizzly_bear": {"on_place": _grizzly_place},
     "tortoise": {"on_place": _tortoise_place},
     "owl": {"on_place": _owl_place},
     # Giants (Hungry and Titan are keywords; the legendary Oxpecker feeds its neighbours in _eat).
@@ -3038,7 +3052,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "honey_badger": {"on_place": _removes(min_attr="honey_badger_min")},
     "okapi": {"on_end_of_turn": _okapi_eot},
     "zebra": {"on_flee": _zebra_flee},
-    "cape_buffalo": {"on_place": _cape_buffalo_place},
+    "warthog": {"on_place": _warthog_place},
+    "albatross": {"on_place": _albatross_place},
     "boar": {"on_place": _boar_place},
     "gazelle": {"on_place": _gains("gazelle_food")},
     "wildebeest": {"on_end_of_turn": _wildebeest_eot},

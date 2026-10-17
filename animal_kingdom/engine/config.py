@@ -62,9 +62,11 @@ class Config:
     guard_hornet_colony_threshold: int = 4
     mackerel_anthem: int = 1             # Mackerel: your other Fish have +1
     tuna_per_fish: int = 1               # Tuna: +1 for each other Fish you control
-    grizzly_per_card: int = 1            # Grizzly Bear: +1 for each card in your hand
     giraffe_bonus: int = 5               # Giraffe: +5 during your opponent's turn
-    moose_anthem: int = 1                # Moose: your other Hoofed animals have +1 during your opponent's turn
+    crocodile_penalty: int = 3           # Crocodile: -3 during your opponent's turn
+    buffalo_anthem: int = 1              # Cape Buffalo: your other Hoofed animals have +1 during your opponent's turn
+    hand_per_card: int = 1               # [PLACEHOLDER]: +1 for each other card in your hand
+    albatross_max: int = 2               # Albatross: remove all adjacent enemies of strength 2 or less
 
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
     dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn

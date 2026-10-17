@@ -21,8 +21,8 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 |---|---:|---|---:|---|
 | **Rhinoceros** | 2 | Hoofed | 8 | Hungry 3. Roar: remove all adjacent enemies of strength 2 or less. |
 | **Hippopotamus** | 2 | Hoofed | 8 | Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it. |
-| **Crocodile** | 2 | — | 8 | Apex Predator. |
 | **Whale Shark** | 2 | Fish | 8 | Titan. Hungry 4. Dusk: draw a card. |
+| **Moose** | 2 | Hoofed | 8 | Hungry 3. Roam. |
 
 ### Common
 

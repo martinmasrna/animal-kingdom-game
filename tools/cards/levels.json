@@ -681,6 +681,34 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin 2026-10-17: the herd closes ranks",
+      "by": "claude",
+      "at": 1792262681
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "by": "claude",
+      "at": 1792262681
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: remove an adjacent enemy covering an allied Hoofed animal."
+      },
+      "by": "claude",
+      "at": 1792262682
     }
   },
   "capybara": {
@@ -874,29 +902,46 @@
   },
   "crocodile": {
     "habitat": {
-      "lv": "locked",
+      "lv": "fine",
       "by": "martin",
-      "at": 1792193180
+      "at": 1792257559
     },
     "rarity": {
-      "lv": "locked",
-      "by": "martin",
-      "at": 1792193179
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792257581,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin 2026-10-17: a common 8, the attacker"
     },
     "animal": {
-      "lv": "locked",
-      "by": "martin",
-      "at": 1792193177
+      "lv": "fine",
+      "by": "claude",
+      "at": 1792262682,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "note": "moved from giants to pool"
     },
     "strength": {
-      "lv": "locked",
+      "lv": "fine",
       "by": "martin",
-      "at": 1792193176
+      "at": 1792257556
     },
     "effect": {
-      "lv": "locked",
-      "by": "martin",
-      "at": 1792193174
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792257581,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": "Apex Predator."
+      },
+      "note": "Martin 2026-10-17: strikes from the water, exposed on land; the Apex 8 waits for the Polar Bear"
     },
     "art": {
       "lv": "fine",
@@ -1436,9 +1481,9 @@
       "by": "martin"
     },
     "strength": {
-      "note": "Martin, 2026-10-16: at 0 it needed 8 cards in hand (itself included) to match a Lion; at 1, 7 cards, normal for Handlock. 2 was too strong.",
+      "note": "Martin 2026-10-17: a common 8 (8 and up can take on a lion)",
       "by": "claude",
-      "at": 1792149383,
+      "at": 1792257358,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: at 2 it was a 9 when played (bots, 4,400 games); at 0 it averages a Lion's 7 and reaches 9 with a full hand. Costs Handlock about 4 points of win rate.",
@@ -1451,9 +1496,18 @@
         "prev_note": "",
         "prev": "Has +1 strength for each card in your hand."
       },
-      "note": "Martin, 2026-10-16: read in hand, 'each card in your hand' counted itself (8 cards shown as 8, played as 7); 'other' says what the engine does.",
+      "note": "Martin 2026-10-17: the price of the body; its old '+1 for each card in your hand' needs a new animal",
       "by": "claude",
-      "at": 1792149298
+      "at": 1792257358
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from handlock to pool",
+      "by": "claude",
+      "at": 1792262683
     }
   },
   "groundhog": {
@@ -2153,6 +2207,35 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "note": "Martin 2026-10-17: the Giants rare",
+      "by": "claude",
+      "at": 1792262682
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Your other Hoofed animals have +1 strength during your opponent's turn."
+      },
+      "note": "Martin 2026-10-17: the wanderer; bigger than the Orca, pays to stay big",
+      "by": "claude",
+      "at": 1792262682
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from hoofed to giants",
+      "by": "claude",
+      "at": 1792262682
     }
   },
   "mosquito": {
@@ -3804,12 +3887,7 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792249437,
-      "note": "Martin 2026-10-17: every adjacent enemy (so Stealth doesn't shield the legendary Honey Badger), for good",
-      "review": {
-        "prev_lv": "problem",
-        "prev_note": "it should work on all adjacet enemies, so that it works on legendary honey badger",
-        "prev": "Roar: choose an adjacent enemy. Until your next turn, it loses all its effects."
-      }
+      "note": "Martin 2026-10-17: every adjacent enemy (so Stealth doesn't shield the legendary Honey Badger), for good"
     }
   },
   "pool-mole": {
@@ -4103,6 +4181,158 @@
       "note": "into the collection (status proposed)",
       "by": "claude",
       "at": 1792250825
+    }
+  },
+  "pool-placeholder": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: the Grizzly's old effect, animal to come",
+      "by": "claude",
+      "at": 1792262678
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792262678
+    }
+  },
+  "placeholder": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792262679
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from pool to handlock",
+      "by": "claude",
+      "at": 1792262679
+    }
+  },
+  "pool-warthog": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: the sow charges to get her young back",
+      "by": "claude",
+      "at": 1792262679
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792262679
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792262679
+    }
+  },
+  "warthog": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792262680
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from pool to hoofed",
+      "by": "claude",
+      "at": 1792262680
+    }
+  },
+  "pool-albatross": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: printed for the pool, not a deck",
+      "by": "claude",
+      "at": 1792262680
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792262680
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792262681
+    }
+  },
+  "albatross": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792262681
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection (status proposed)",
+      "by": "claude",
+      "at": 1792262681
     }
   }
 }
