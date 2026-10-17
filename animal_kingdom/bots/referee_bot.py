@@ -70,7 +70,7 @@ class RefereeBot(TurnSearcher):
                  evaluator: Optional[LinearEval] = None,
                  quiesce: bool = False, mulligan: bool = False,
                  depth: int = 0, next_width: int = 3, deepen_top: int = 4, deepen_roots: int = 3, time_budget: float = 0.0,
-                 den_sense: bool = False):
+                 den_sense: bool = False, reply_turns: int = 0):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          evaluator=evaluator, quiesce=quiesce, mulligan=mulligan)
@@ -95,6 +95,11 @@ class RefereeBot(TurnSearcher):
         # strongest guard for each den approach (the one-move score ranked a Meerkat above the Groundhog on the square
         # that decided the game, so the only defence was never searched).
         self.den_sense = den_sense
+        # The reply as a turn (2026-10-17, Martin: "a turn is an atomic event consisting of 2 actions"): at the start of
+        # the opponent's sampled reply, their first action is chosen by the position after their whole turn (the
+        # `reply_turns` best openings by one-move score, each finished by the fast policy) instead of by the one-move
+        # score alone, so a setup-then-payoff reply is seen. 0: the fast policy picks both actions, as before.
+        self.reply_turns = reply_turns
         self._deepening = False             # on only while _rescore_roots scores a root's final lines
         # `self._policy` (the GreedyBot that plays every rollout seat) and `self._search_nodes`
         # are set identically by TurnSearcher.__init__; RefereeBot uses them for reply rollouts
@@ -471,8 +476,28 @@ class RefereeBot(TurnSearcher):
                 if setup is not None:
                     rules.apply_action(state, setup, validate=False)     # the capture itself is the policy's next pick
                     continue
+            if self.reply_turns and actor != me and state.pending is None and state.actions_taken_this_turn == 0:
+                opening = self._reply_opening(state, actor, legal)
+                if opening is not None:
+                    rules.apply_action(state, opening, validate=False)   # the rest of their turn is the policy's
+                    continue
             action = self._policy.choose(state.view_for(actor), legal, state)
             rules.apply_action(state, action, validate=False)
+
+    def _reply_opening(self, state: GameState, opp: str, legal: Sequence[Action]) -> Optional[Action]:
+        """The opponent's first action, judged by the position after their whole turn: each of their `reply_turns` best
+        openings by one-move score is finished by the fast policy and the finished turn scored for them."""
+        if len(legal) < 2:
+            return None
+        best, best_score = None, None
+        for opening in self._greedy_topn(state, list(legal), opp, self.reply_turns):
+            nxt = state.clone()
+            rules.apply_action(nxt, opening, validate=False)
+            self._play_turn(nxt, opp)
+            score = self._clamped_eval(nxt, opp)
+            if best_score is None or score > best_score:
+                best, best_score = opening, score
+        return best
 
     @staticmethod
     def _capture_setup(state: GameState, opp: str, me: str, legal: Sequence[Action]) -> Optional[Action]:
