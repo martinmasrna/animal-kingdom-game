@@ -165,8 +165,11 @@ class TurnSearcher(Bot):
             elif score == best_score:
                 best.append(action)
         self._record_root_scores(root_scores)
-        # `legal` is already deterministically ordered; RNG only splits exact ties.
-        chosen = best[0] if len(best) == 1 else self.rng.choice(best)
+        # `legal` is already deterministically ordered; RNG only splits exact ties, and a Draw wins them: lines that
+        # score the same are the same cards played in a different order, and drawing first shows the new cards before
+        # anything is committed (2026-10-17: with one card in hand the Expert played it and then drew, a coin flip).
+        draws = [a for a in best if isinstance(a, DrawAction)]
+        chosen = best[0] if len(best) == 1 else draws[0] if draws else self.rng.choice(best)
         self._record_chosen_root(chosen)
         return chosen
 

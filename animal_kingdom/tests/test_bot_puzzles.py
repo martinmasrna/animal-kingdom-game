@@ -250,3 +250,18 @@ def test_the_hoofed_bot_covers_its_gazelle():
         while s.result is None and s.current == "B":
             rules.apply_action(s, bot.choose(s.view_for("B"), rules.legal_actions(s), s))
         assert not _opponent_captures_in_two(s), seed
+
+
+def test_with_one_card_in_hand_the_expert_draws_before_it_plays():
+    # Two turn openings from this week's games with a single card in hand (a Wolf; a Swordfish). Playing it and then
+    # drawing scored exactly the same as drawing and then playing it (the same cards end up in the same places in every
+    # sampled world), and the coin that split the tie fell on play-first in 6 of 24 such openings. Martin, 17 October:
+    # "obviously moronic". Drawing first shows the new cards before anything is committed, so a Draw wins exact ties.
+    from animal_kingdom.engine.actions import DrawAction
+    from animal_kingdom.sim.runner import make_bot
+    for name in ("one_card_draw_first", "one_card_draw_first_b"):
+        for seed in range(3):
+            s = _puzzle(name)
+            me = s.player_to_act()
+            assert len(s.hands[me]) == 1
+            assert isinstance(make_bot("referee", seed).choose(s.view_for(me), rules.legal_actions(s), s), DrawAction), (name, seed)
