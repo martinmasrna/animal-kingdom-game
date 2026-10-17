@@ -275,6 +275,8 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
         state.turn_flags[key] = [*state.turn_flags.get(key, []), [unit.iid, unit.card_id]]
         _fire_play_event(state, unit)    # Queen Honoria: gain food when you play a Colony unit
     if roar:
+        if unit.card_id != "macaw" and _hook(state, unit.card_id, "on_place"):
+            state.last_roar[player] = unit.card_id        # the Macaw repeats it (its own copy records the copied card)
         times = 1
         if (state.roar_twice.get(unit.owner) == state.turn_counter and unit.card_id != "macaw"
                 and (_hook(state, unit.card_id, "on_place") or (onto_enemy and _hook(state, unit.card_id, "on_place_onto_enemy")))):
@@ -411,12 +413,14 @@ def _push_hook(state, unit, cr, hook_name) -> None:
         hook(state, unit, cr)
 
 
-def _hook(state, card_id, hook_name) -> Optional[Callable]:
+def _hook(state, card_id, hook_name, *, as_card=None) -> Optional[Callable]:
     """A card's hook, wrapped so every step it pushes carries the card as its source (`by_card`): the player is always
-    told which card is asking, never left to a guess."""
+    told which card is asking, never left to a guess. `as_card`: another card runs this one's effect as its own (the
+    Macaw repeating a Roar), so the source is that card."""
     fn = EFFECTS.get(card_id, {}).get(hook_name)
     if fn is None:
         return None
+    card_id = as_card or card_id
     def stamped(state, unit, *args, **kw):   # every hook gets its own card's unit first
         if state.inked and statics.inked(state, unit):
             return None                       # an inked animal has no effects
@@ -2787,8 +2791,13 @@ def _octopus_ink_place(state, unit, cr):
 
 
 def _macaw_place(state, unit, cr):
-    """Roar: your next Roar this turn happens twice."""
-    state.roar_twice[unit.owner] = state.turn_counter
+    """Roar: repeat the last Roar your opponent played, as this card's own: next to the Macaw, for its owner. A
+    Macaw's copy is the copied Roar, so a Macaw repeating a Macaw repeats what that one repeated."""
+    copied = state.last_roar.get(other_player(unit.owner))
+    hook = copied and _hook(state, copied, "on_place", as_card="macaw")
+    if hook:
+        state.last_roar[unit.owner] = copied
+        hook(state, unit, cr)
 
 
 def _cuckoo_place(state, unit, cr):

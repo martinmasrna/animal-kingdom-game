@@ -995,12 +995,35 @@ def test_every_launch_card_can_be_played_by_the_bots_without_crashing():
             rules.apply_action(s, rng.choice(rules.legal_actions(s)))
 
 
-def test_the_macaw_makes_the_next_roar_this_turn_happen_twice():
-    s = make_state(hands={"A": ["macaw", "squirrel", "squirrel"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+def test_a_played_roar_is_remembered_for_the_macaw():
+    s = make_state(hands={"A": ["squirrel"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,2")))
+    assert s.last_roar == {"A": "squirrel"}
+
+
+def test_the_macaw_repeats_the_last_roar_its_opponent_played():
+    s = make_state(hands={"A": ["macaw"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    s.last_roar["B"] = "squirrel"
     rules.apply_action(s, PlaceAction("macaw", ("cr", "1,2")))
-    rules.apply_action(s, PlaceAction("squirrel", ("cr", "1,1")))
-    assert s.food["A"] == 2 * s.config.squirrel_food
-    assert "A" not in s.roar_twice                              # spent by that Roar
+    assert s.food["A"] == s.config.squirrel_food
+    assert s.last_roar["A"] == "squirrel"                       # a Macaw repeating this Macaw repeats the Squirrel
+
+
+def test_the_macaw_repeats_a_removal_next_to_itself():
+    s = make_state(hands={"A": ["macaw"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,2", "caracal", "A")
+    put(s, "3,2", "mouse", "B")                                 # 4, next to where the Macaw lands
+    s.last_roar["B"] = "jaguar"                                # remove an adjacent enemy of strength 4 or less
+    rules.apply_action(s, PlaceAction("macaw", ("cr", "2,2")))
+    if s.pending:
+        choose(s, "3,2")
+    assert s.top_unit("3,2") is None
+
+
+def test_the_macaw_does_nothing_before_its_opponent_roars():
+    s = make_state(hands={"A": ["macaw"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("macaw", ("cr", "1,2")))
+    assert s.food["A"] == 0 and "A" not in s.last_roar
 
 
 # ================================================================================ 2026-10-09: the fit and rarity passes

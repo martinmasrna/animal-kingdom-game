@@ -2152,7 +2152,7 @@
      "status": "proposed",
      "str": 3,
      "tag": "Bird",
-     "text": "Flight. Roar: your next Roar this turn happens twice."
+     "text": "Flight. Roar: repeat the last Roar your opponent played."
     },
     {
      "habitat": "Forest",

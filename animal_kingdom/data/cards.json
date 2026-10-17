@@ -2758,7 +2758,7 @@
         "Bird"
       ],
       "base_strength": 3,
-      "text": "Flight. Roar: your next Roar this turn happens twice.",
+      "text": "Flight. Roar: repeat the last Roar your opponent played.",
       "keywords": [
         "Flight"
       ],
