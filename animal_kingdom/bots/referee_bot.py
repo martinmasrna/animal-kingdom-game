@@ -98,7 +98,9 @@ class RefereeBot(TurnSearcher):
         # The reply as a turn (2026-10-17, Martin: "a turn is an atomic event consisting of 2 actions"): at the start of
         # the opponent's sampled reply, their first action is chosen by the position after their whole turn (the
         # `reply_turns` best openings by one-move score, each finished by the fast policy) instead of by the one-move
-        # score alone, so a setup-then-payoff reply is seen. 0: the fast policy picks both actions, as before.
+        # score alone, so a setup-then-payoff reply is seen. With a second turn of sight it runs only in the second stage
+        # (the best roots' final scoring), where the decision is made: everywhere, it cost 2.7x the move. 0: the fast
+        # policy picks both actions, as before.
         self.reply_turns = reply_turns
         self._deepening = False             # on only while _rescore_roots scores a root's final lines
         # `self._policy` (the GreedyBot that plays every rollout seat) and `self._search_nodes`
@@ -476,7 +478,8 @@ class RefereeBot(TurnSearcher):
                 if setup is not None:
                     rules.apply_action(state, setup, validate=False)     # the capture itself is the policy's next pick
                     continue
-            if self.reply_turns and actor != me and state.pending is None and state.actions_taken_this_turn == 0:
+            if self.reply_turns and (self._deepening or not self.depth) and actor != me and state.pending is None \
+                    and state.actions_taken_this_turn == 0:
                 opening = self._reply_opening(state, actor, legal)
                 if opening is not None:
                     rules.apply_action(state, opening, validate=False)   # the rest of their turn is the policy's

@@ -309,7 +309,7 @@ def test_the_candidate_expert_is_a_switch_on_the_play_server(monkeypatch):
     assert bot_for("expert", 7).depth == 0
     monkeypatch.setenv("AK_EXPERT_DEPTH", "1")
     bot = bot_for("expert", 7)
-    assert bot.depth == 1 and bot.den_sense and 0 < bot.time_budget < BOT_THINK_MAX
+    assert bot.depth == 1 and bot.den_sense and bot.reply_turns and 0 < bot.time_budget < BOT_THINK_MAX
     assert bot.weights.pending_target > 0 and bot.weights.buried_presence > 0
     assert bot_for("normal", 7).__class__.__name__ == "TurnBot"
 
