@@ -32,7 +32,7 @@ The cold walkthrough of 17 October (a Sonnet agent on a test server; screenshots
 - Measure first: thinking time per move for each web level and deck (walkthrough: bot turns took 6 to 12 s, Easy included; split pacing, animation and search before changing any of it).
 - Search budget A/B in the background: the web Expert with a node cap of 10x and 25x today's 80 and quiescence on, against today's Expert, paired seeds, both seats, 200+ games a matchup. Ship the winner as the web Expert if it is clearly stronger and stays under the 15 s move limit.
 - Easy loses to a day-one player: the walkthrough's naive script lost four in a row to Easy, Kalista 16 of 34. Weaken Easy on purpose (a worse evaluator or deliberate suboptimal picks, never a cheat in the player's favour either) and check it against the recorded day-one games.
-- A newcomer's first ranked games sit against Easy or Normal regardless of the Glicko start (the walkthrough's first ranked game was Expert at 1689 against a fresh 1500; Kalista's first game was Expert too). Waiting on Martin: the exact rule; Claude's default is the first five ranked games capped at Normal. Also waiting: a warning in the concede dialog when the concede costs rating (a turn-5 concede cost 215 points).
+- A newcomer's first ranked games and the concede's cost stay as Glicko gives them (Martin, 2026-10-17: dropped).
 - Ladder bots play the lists the deck optimizer finds strongest for a bot, not the human-tuned starters.
 - Target-aware removal in the hand eval and the features, round 4 of the value net, proved on current cards (scoped in `bots.md`). Per-deck evaluation for ladder bots is allowed: each ladder bot is one deck at one level (Martin, 17 October; the generalist invariant in CLAUDE.md stays for the search bots that play any deck).
 - Re-seed the ladder's bot ratings when a new Expert ships (`sim/ladder_seed.py`).
@@ -45,7 +45,7 @@ The cold walkthrough of 17 October (a Sonnet agent on a test server; screenshots
 - Keyword lines redlined by Martin (players learn the rules from them; the Roam line is 60 words).
 - Why a card is greyed in hand (Apex with nothing to eat, Hungry without the food) said on hover, and a hint that right-click reads a card large.
 - News shown only to a returning player; a newcomer's red dot points nowhere.
-- Placeholder names: fifteen sit beside a real card of the same name ([RAVEN] and Raven, [TUNA] and Tuna, [BOAR] and Boar) and read as duplicates. Waiting on Martin: name those fifteen first through the `naming` skill, or show a working name without brackets.
+- Placeholder names ship in brackets as they are, the fifteen beside a same-named card included (Martin, 2026-10-17: dropped); names come through the `naming` skill at its own pace.
 
 ### 4. Goals and shareable things (days 9 to 13)
 
@@ -60,7 +60,6 @@ The cold walkthrough of 17 October (a Sonnet agent on a test server; screenshots
 
 ## Waiting on Martin
 
-- The first-ranked-games rule and the concede warning (step 2).
-- The fifteen colliding placeholder names: name or unbracket (step 3).
 - The keyword and How to play lines (step 3), as a redline.
 - Who gets the pilot link, and when in the week (step 2).
+- The phone path from the Discord app (step 1), a two-minute check on his phone.
