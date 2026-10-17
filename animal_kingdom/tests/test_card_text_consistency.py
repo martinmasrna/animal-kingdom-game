@@ -321,7 +321,7 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "butterfly_legend_butterfly": ["butterfly_legend_stage4_grant"],
     "butterfly_legend_monarch": ["butterfly_legend_stage5_grant"],
     "cape_buffalo": ["buffalo_anthem"],
-    "placeholder": ["hand_per_card"],
+    "peacock": ["hand_per_card"],
     "giraffe": ["giraffe_bonus"],
     "crocodile": ["crocodile_penalty"],
     "roach_king": ["roach_king_growth"],

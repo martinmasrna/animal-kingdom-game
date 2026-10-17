@@ -55,6 +55,8 @@ EVOLVES = {"butterfly_legend", "caterpillar"}   # its related cards are what it 
 RENAMED = {"Stray Cat": "alley_cat", "Stray Dog": "street_dog"}
 # Unnamed legendaries with no species to name them by: id and the name shown meanwhile.
 UNNAMED = {"food-aggro-0": ("big_gus", "Rodent"), "food-aggro-1": ("macaque_legend", "Macaque")}
+# A card whose id was made while it was a placeholder: workbench id to the id it carries now.
+REIDS = {"pool-placeholder": "peacock"}
 # Engine numbers the text doesn't carry.
 DYNAMIC = {"egg_eater": "removed_eggs_count"}
 # The card whose art covers each starter deck in the menus (its first legendary otherwise).
@@ -137,6 +139,8 @@ def parse_text(text: str) -> dict:
 
 def resolve_id(wc: dict, deck: str, old: list[dict], taken: set) -> str:
     """The engine id for workbench card `wc` (see the module docstring)."""
+    if wc["id"] in REIDS:
+        return REIDS[wc["id"]]
     for rec in old:
         if rec.get("workbench_id") == wc["id"]:
             return rec["id"]

@@ -95,7 +95,7 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
             bonus += cfg.tuna_per_fish * count("Fish", include_self=False)
         elif cid == "hamster":                  # +1 for each 10 food you have
             bonus += cfg.hamster_per_step * (state.food[owner] // cfg.hamster_food_step)
-        elif cid == "placeholder":              # +1 for each other card in your hand (it has left it when placed)
+        elif cid == "peacock":                  # +1 for each other card in your hand (it has left it when placed)
             bonus += cfg.hand_per_card * max(0, len(state.hands[owner]) - (1 if self_iid is None else 0))
         elif cid == "giraffe":                  # +5 during your opponent's turn
             bonus += cfg.giraffe_bonus if their_turn else 0

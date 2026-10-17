@@ -942,8 +942,8 @@ def test_the_albatross_sweeps_the_small_enemies_where_it_lands():
 
 
 def test_the_hand_size_card_counts_the_other_cards_in_your_hand():
-    s = make_state(hands={"A": ["placeholder", "lion", "lion", "lion"]})
-    assert placement_strength(s, hand_inst(s, "A", "placeholder")) == 1 + 3 * CFG.hand_per_card
+    s = make_state(hands={"A": ["peacock", "lion", "lion", "lion"]})
+    assert placement_strength(s, hand_inst(s, "A", "peacock")) == 1 + 3 * CFG.hand_per_card
 
 
 def test_warthog_removes_the_enemy_covering_an_allied_hoofed():
