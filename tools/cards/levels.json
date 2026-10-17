@@ -1345,12 +1345,22 @@
   },
   "gale": {
     "art": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792276062
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792276062
     },
     "animal": {
       "lv": "draft",
@@ -2374,10 +2384,10 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "lv": "problem",
-      "note": "Martin, 2026-10-17: the Orca needs another picture, underwater.",
+      "lv": "draft",
+      "note": "Martin, 2026-10-18: keeps the current Orca painting after seeing eight underwater alternatives.",
       "by": "claude",
-      "at": 1792273060
+      "at": 1792276047
     }
   },
   "owl": {
