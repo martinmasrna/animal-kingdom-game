@@ -7,7 +7,7 @@ and region income modifiers, and who plays with their hand revealed. Each is key
 keyword and composes into a small set of predicates the rules and effects call.
 
 An "effect" here is anything printed on a card that isn't its strength: an Octopus's ink
-(`inked`) switches a unit's keywords and effects off until the inking player's next turn, so
+(`inked`) switches a unit's keywords and effects off for good, so
 every static below asks `active` of the unit it reads.
 """
 
@@ -23,9 +23,8 @@ from .strength import effective_strength, placement_strength
 # ------------------------------------------------------------------ ink / tops
 
 def inked(state: GameState, unit: UnitInstance) -> bool:
-    """Octopus ink: the unit has lost its keywords and effects until the inking player's next turn."""
-    until = state.inked.get(unit.iid)
-    return until is not None and state.turn_counter < until
+    """Octopus ink: the unit has lost its keywords and effects."""
+    return unit.iid in state.inked
 
 
 def active(state: GameState, unit: UnitInstance) -> bool:

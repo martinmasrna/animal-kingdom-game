@@ -96,21 +96,30 @@ def test_the_zebra_flees_and_sends_its_coverer_home_too():
     assert "zebra" in hand_ids(s, "A") and "lion" in hand_ids(s, "B") and s.top_unit("3,2") is None
 
 
-def test_octopus_ink_switches_one_chosen_enemys_effects_off_until_the_inkers_next_turn():
+def test_octopus_ink_switches_every_adjacent_enemys_effects_off_for_good():
     s = make_state(hands={"A": ["octopus", "lion"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
     put(s, "1,2", "caracal", "A")
     porc = put(s, "3,2", "porcupine", "B")                     # Spikes, 7
     py = put(s, "2,3", "egg_eater", "B")                      # dynamic strength
+    badger = put(s, "2,1", "honey_badger_legend", "B")       # Stealth and Armor don't keep the ink out
     s.pile_add("bird_egg", "A")
     assert effective_strength(s, py) == 2
     rules.apply_action(s, PlaceAction("octopus", ("cr", "2,2")))
-    choose(s, "3,2")                                            # one target: the Porcupine
-    assert statics.inked(s, porc) and not statics.inked(s, py) and effective_strength(s, py) == 2
-    assert "Spikes" not in statics.unit_keywords(s, porc)
-    end_turn(s)                                                 # the opponent's turn: still inked
-    assert statics.inked(s, porc)
-    end_turn(s)                                                 # the inking player's next turn: the ink is gone
-    assert not statics.inked(s, porc)
+    assert all(statics.inked(s, u) for u in (porc, py, badger)) and effective_strength(s, py) == 0
+    assert "Spikes" not in statics.unit_keywords(s, porc) and not statics.unit_keywords(s, badger)
+    assert not statics.inked(s, s.top_unit("1,2"))             # an ally isn't inked
+    for _ in range(4):
+        end_turn(s)
+    assert statics.inked(s, porc) and statics.inked(s, badger)
+
+
+def test_an_inked_animal_back_in_hand_is_a_fresh_card():
+    s = make_state(hands={"A": ["octopus"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    put(s, "1,2", "caracal", "A")
+    porc = put(s, "3,2", "porcupine", "B")
+    rules.apply_action(s, PlaceAction("octopus", ("cr", "2,2")))
+    effects._bounce(s, "3,2", porc)
+    assert not statics.inked(s, s.hands["B"][-1])
 
 
 def test_capybara_gives_its_neighbours_armor():
@@ -226,14 +235,14 @@ def test_piranha_needs_an_ally_removed_this_turn():
     assert s.top_unit("2,2") is None
 
 
-def test_hyena_gains_food_for_each_of_your_animals_removed_this_turn():
+def test_hyena_gains_food_for_each_animal_removed_this_turn_either_players():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "hyena", "A")
-    for cr in ("1,1", "1,3"):
-        put(s, cr, "lion", "A")
-        effects.remove_top(s, cr, by_player="B")
+    for cr, owner in (("1,1", "A"), ("1,3", "A"), ("3,2", "B")):
+        put(s, cr, "lion", owner)
+        effects.remove_top(s, cr, by_player="B" if owner == "A" else "A")
     end_turn(s)
-    assert s.food["A"] == 2 * CFG.hyena_food_per
+    assert s.food["A"] == 3 * CFG.hyena_food_per
 
 
 def test_earthworm_leaves_two_worms_and_a_worm_draws_when_removed():

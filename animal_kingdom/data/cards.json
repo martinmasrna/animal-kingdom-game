@@ -1845,8 +1845,10 @@
         "Bird"
       ],
       "base_strength": 3,
-      "text": "Whenever you draw Black Swan, your opponent discards a random card.",
-      "keywords": [],
+      "text": "Flight. Whenever you draw Black Swan, your opponent discards a random card.",
+      "keywords": [
+        "Flight"
+      ],
       "species": "Swan",
       "habitat": "Meadow",
       "workbench_id": "egg-control-3"
@@ -2017,8 +2019,10 @@
         "Bird"
       ],
       "base_strength": 1,
-      "text": "Dawn: shuffle a Golden Egg into your deck.",
-      "keywords": [],
+      "text": "Flight. Dawn: shuffle a Golden Egg into your deck.",
+      "keywords": [
+        "Flight"
+      ],
       "related": [
         "golden_egg"
       ],
@@ -2707,7 +2711,7 @@
       "rarity": "rare",
       "tags": [],
       "base_strength": 4,
-      "text": "Roar: choose an adjacent enemy. Until your next turn, it loses all its effects.",
+      "text": "Roar: adjacent enemies lose all their effects.",
       "keywords": [],
       "species": "Octopus",
       "habitat": "Open Ocean",
@@ -2754,8 +2758,10 @@
         "Bird"
       ],
       "base_strength": 3,
-      "text": "Roar: your next Roar this turn happens twice.",
-      "keywords": [],
+      "text": "Flight. Roar: your next Roar this turn happens twice.",
+      "keywords": [
+        "Flight"
+      ],
       "species": "Macaw",
       "habitat": "Jungle",
       "workbench_id": "pool-4"
@@ -3081,7 +3087,7 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
-      "text": "Dusk: gain 5 food for each of your animals removed this turn.",
+      "text": "Dusk: gain 3 food for each animal removed this turn.",
       "keywords": [],
       "species": "Hyena",
       "habitat": "Savanna",
