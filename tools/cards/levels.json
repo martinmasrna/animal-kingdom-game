@@ -2368,6 +2368,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "art": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "lv": "problem",
+      "note": "Martin, 2026-10-17: the Orca needs another picture, underwater.",
+      "by": "claude",
+      "at": 1792273060
     }
   },
   "owl": {
@@ -4480,6 +4490,24 @@
       "note": "into the collection (status proposed)",
       "by": "claude",
       "at": 1792270570
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792273477
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792273513
     }
   },
   "stag_beetle": {
@@ -4502,6 +4530,24 @@
       "note": "into the collection (status proposed)",
       "by": "claude",
       "at": 1792270570
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792273477
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792273537
     }
   }
 }
