@@ -25,7 +25,7 @@ Why it works this way: `knowledge/card-art-diagnosis-2026-10-17.md` (game repo).
    - This is it: install.
    - Almost and nothing better: two or three more rolls of that idea from the same line, or a surface edit (`edit.sh`) when the flaw is a sky, a colour, the eyes. Never a new scene for a liked picture.
    - All Nope: the ideas are dead; new ideas, not re-rolls. Ask for his feeling only if he hasn't given one.
-   - A card past two rounds is parked (`problem` on the card table, with his note), not rolled again. "More legendary" and "too photographic" are reasons to park, never to roll.
+   - A card is parked (`problem` on the card table, with his note) when its ideas are dead and nobody has a new one, or when Martin says so; never by a round count. "More legendary" and "too photographic" are reasons to park, never to roll.
 6. **Install** with `D/cards/bar/install.sh <card> <id>` (master to `cards/<card>.png`, JPEG and WebP into the game, the settle recorded, the card's art and crop back to draft on the card table). Set `CROP`, `STRIP` and `FULL` by rendering the board portrait and looking: `.venv/bin/python tools/cards/hq.py crop <card> --crop x,y,d --strip x,y,z --full y` (a hook refuses hand edits). An install runs no tests. Commit by path: design repo `cards/<card>.png cards/<card>.jpg cards/bar/manifest.jsonl cards/bar/<batch>.jsonl`; game repo `static/art/<card>.jpg|webp`, `static/art.js` and `tools/cards/levels.json` (only your own hunks; other sessions edit them too).
 
 A pick is a draft. It stays on the board; a later repaint needs a reason Martin writes on the card table.
