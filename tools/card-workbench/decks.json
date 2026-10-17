@@ -1047,7 +1047,7 @@
      "status": "proposed",
      "str": 1,
      "tag": "Bird",
-     "text": "Flight. Dawn: shuffle a Golden Egg into your deck."
+     "text": "Dawn: shuffle a Golden Egg into your deck."
     }
    ]
   },
@@ -1915,13 +1915,13 @@
     {
      "habitat": "Jungle",
      "id": "pool-placeholder",
-     "name": "[PLACEHOLDER]",
+     "name": "Peacock",
      "note": "",
      "rarity": "C",
-     "species": "Placeholder",
+     "species": "Peacock",
      "status": "open",
      "str": 1,
-     "tag": "",
+     "tag": "Bird",
      "text": "Has +1 strength for each other card in your hand."
     }
    ]

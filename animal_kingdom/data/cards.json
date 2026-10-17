@@ -2019,10 +2019,8 @@
         "Bird"
       ],
       "base_strength": 1,
-      "text": "Flight. Dawn: shuffle a Golden Egg into your deck.",
-      "keywords": [
-        "Flight"
-      ],
+      "text": "Dawn: shuffle a Golden Egg into your deck.",
+      "keywords": [],
       "related": [
         "golden_egg"
       ],
@@ -2255,14 +2253,16 @@
     },
     {
       "id": "placeholder",
-      "name": "[PLACEHOLDER]",
+      "name": "Peacock",
       "deck": "handlock",
       "rarity": "common",
-      "tags": [],
+      "tags": [
+        "Bird"
+      ],
       "base_strength": 1,
       "text": "Has +1 strength for each other card in your hand.",
       "keywords": [],
-      "species": "Placeholder",
+      "species": "Peacock",
       "habitat": "Jungle",
       "workbench_id": "pool-placeholder"
     },

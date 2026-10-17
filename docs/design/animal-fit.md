@@ -44,4 +44,5 @@ Some animals are one of a kind: nothing else looks or behaves like them (Chamele
 - Animals picked for the effect's picture: Flee goes on fast prey (gazelles, antelopes, zebra, deer, hare); a Capybara is a "rodent hippo", not a utility rodent; a Meerkat keeps watch; a Jerboa or a frog jumps, so they don't fit an extra placement.
 - Rejected as trivia: "Battle at Kruger" for the Buffalo, Mocha Dick for the whale (Moby Dick, known to everyone, is fine).
 - Unfamiliar animals rejected: a card many decks play needs an animal a person would list among 200 animals (not a vole or a shrew).
+- Flight is arriving from far away through the air, not having wings (Martin, 2026-10-17): a bird people picture on the ground gets the Bird tag without Flight. The Peacock (fanned on the ground) has none, and Aurum lost it (the golden-egg goose is the fable's farm goose). Ember, a golden pheasant, keeps it as the phoenix.
 - Strength follows the Lion (Martin, 2026-10-17): the Lion is the vanilla 7, so an animal at 8 or more must be one that could realistically take on a lion (Grizzly, Cape Buffalo, Elephant, Rhino, Hippo, Crocodile; not an Ostrich, a Tapir or a Hammerhead).
