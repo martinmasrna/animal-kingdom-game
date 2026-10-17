@@ -1202,3 +1202,14 @@ def test_a_mate_brought_into_a_full_hand_burns():
     s = make_state(hands={"A": ["lion"] * 9}, decks={"A": ["arne"], "B": ["lion"] * 3})
     rules.apply_action(s, DrawAction())
     assert len(s.hands["A"]) == CFG.hand_limit and "arna" in s.remove_pile
+
+
+def test_an_aura_reaches_the_top_animal_not_one_buried():
+    s = make_state(current="B", hands={"B": ["pestis"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,2", "capybara", "A"); put(s, "2,2", "lynx", "A"); put(s, "2,2", "lion", "B")
+    for c in ("4,2", "3,2", "3,1", "3,3"):
+        put(s, c, "lion", "B")
+    assert "Armor" not in statics.unit_keywords(s, s.board["2,2"][0])   # buried under the enemy Lion: out of reach
+    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,1")))
+    choose(s, "2,2")
+    assert s.board.get("2,2", []) == []                                 # Pestis wipes the whole stack, the Lynx too

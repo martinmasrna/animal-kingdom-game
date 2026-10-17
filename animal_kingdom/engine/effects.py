@@ -443,9 +443,10 @@ def _dispose(state: GameState, unit: UnitInstance) -> bool:
     return True
 
 
-def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None) -> bool:
+def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None, armor_checked=False) -> bool:
     """Remove a specific unit from a stack (mid-stack ok). Fires removal reactions. `by_card`
-    is the card id of the effect's source unit, if any (for Queen Adira's "a Cat removes")."""
+    is the card id of the effect's source unit, if any (for Queen Adira's "a Cat removes"). `armor_checked`: the caller
+    judged Armor already, as the board stood (a stack wipe judges the whole stack before taking any of it)."""
     stack = state.board.get(cr)
     if not stack or unit not in stack:
         return False
@@ -453,7 +454,7 @@ def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None
     # it). Stealth is a *choice* restriction, enforced where enemy option lists are built,
     # never at resolution - so mass/random/automatic removals
     # (Pestis, Rhino/Brutus, Grizzly, Hippo, King Theron, Pufferfish) hit Stealth units.
-    if by_effect and not statics.can_be_removed(state, unit):
+    if by_effect and not armor_checked and not statics.can_be_removed(state, unit):
         return False
     was_top = stack[-1] is unit
     pos = stack.index(unit)
@@ -2164,8 +2165,11 @@ def _op_pestis_wipe(state, step):
     target = step["choice"]
     # Remove the entire stack under the enemy, both players' units, top-down. A buried
     # Armor unit is skipped in place, not a shield: everything else is still wiped around it.
-    for unit in reversed(list(state.board.get(target) or [])):
-        _remove_specific(state, target, unit, by_player=step["chooser"], by_card="pestis")
+    # Armor is judged on the stack as it stands, before any of it goes: a buried ally is out of a neighbour's aura
+    # (rulings.md) and stays out of it while the units above it are being removed.
+    doomed = [u for u in reversed(list(state.board.get(target) or [])) if statics.can_be_removed(state, u)]
+    for unit in doomed:
+        _remove_specific(state, target, unit, by_player=step["chooser"], by_card="pestis", armor_checked=True)
     return None
 
 

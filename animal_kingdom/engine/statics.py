@@ -70,7 +70,9 @@ def unit_keywords(state: GameState, unit: UnitInstance, cr: Optional[str] = None
     kws = card.keywords
     if not any(st and st[-1].owner == unit.owner and st[-1].card_id in KEYWORD_AURAS for st in state.board.values()):
         return kws
-    cr = cr if cr is not None else crossroad_of(state, unit)
+    at = crossroad_of(state, unit)
+    buried = at is not None and state.top_unit(at) is not unit   # Armor and Stealth reach the top animal only (rulings.md);
+    cr = cr if cr is not None else at                             # Poison is judged as the Fish is covered, so it reaches it
     if cr is None:
         return kws
     extra = set()
@@ -79,6 +81,8 @@ def unit_keywords(state: GameState, unit: UnitInstance, cr: Optional[str] = None
         if top is None or top.owner != unit.owner or top.card_id not in KEYWORD_AURAS or not active(state, top):
             continue
         kw, family = KEYWORD_AURAS[top.card_id]
+        if buried and kw != "Poison":
+            continue
         if family is None or family in card.tags:
             extra.add(kw)
     return kws | extra if extra else kws
