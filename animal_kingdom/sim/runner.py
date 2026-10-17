@@ -145,6 +145,9 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
     """
     kind = kind.strip().lower()
     extra = dict(extra or {})
+    if ":" in kind:                       # a `kind:k=v,k=v` spec, as the CLIs take it, usable anywhere a kind is
+        kind, kwargs = parse_bot_spec(kind, "kind")
+        extra = {**dict(kwargs), **extra}
     overrides = {k[2:]: extra.pop(k) for k in list(extra) if k.startswith("w.")}
     if overrides:
         weights = replace(weights or GreedyWeights(), **overrides)

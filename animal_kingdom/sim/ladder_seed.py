@@ -49,7 +49,9 @@ def main(argv=None) -> None:
     ap.add_argument("--jobs", type=int, default=4)
     ap.add_argument("--batch", type=int, default=32, help="games per batch written to disk")
     ap.add_argument("--out", default="results/ladder/seed.json")
+    ap.add_argument("--expert", default=None, help="the Expert's bot kind, with options (e.g. 'referee:depth=1,den_sense=1'); default: the web's")
     args = ap.parse_args(argv)
+    kinds = dict(BOT_LEVELS, expert=args.expert) if args.expert else BOT_LEVELS
     out = Path(args.out); out.parent.mkdir(parents=True, exist_ok=True)
     log = out.with_suffix(".games.jsonl")   # every finished game, appended batch by batch: a rerun resumes where it stopped
     done = {json.loads(l)["seed"] for l in log.read_text().splitlines() if l.strip()} if log.exists() else set()
@@ -59,7 +61,7 @@ def main(argv=None) -> None:
             x, y = (a, b) if g % 2 == 0 else (b, a)
             seed = 1000 * k + g
             if seed not in done:
-                todo.append((MatchSpec(x[1], y[1], seed, bot_a=BOT_LEVELS[x[0]], bot_b=BOT_LEVELS[y[0]]), bot_id(*x), bot_id(*y)))
+                todo.append((MatchSpec(x[1], y[1], seed, bot_a=kinds[x[0]], bot_b=kinds[y[0]]), bot_id(*x), bot_id(*y)))
     print(f"{len(done)} games done, {len(todo)} to play, {args.jobs} jobs", flush=True)
     for i in range(0, len(todo), args.batch):
         chunk = todo[i:i + args.batch]
