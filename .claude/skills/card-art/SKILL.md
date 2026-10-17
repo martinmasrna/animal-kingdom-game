@@ -19,7 +19,7 @@ Why it works this way: `knowledge/card-art-diagnosis-2026-10-17.md` (game repo).
 
 1. **Cards.** `.venv/bin/python tools/cards/hq.py show` (game repo): the Art column marks each painting empty, draft, problem (with his note), fine or locked. Read the card's effect and name before writing anything: the picture shows the effect through what the real animal does. Look at the live cards of the same animal and family first; the new picture must not read as one of them.
 2. **Ideas.** Four to six per card, as far apart as possible: different moments, different ways the effect shows, different distance and backdrop. His note becomes one or two of them, translated, never executed word for word. One picture per idea in round one. A roll is dice; an idea is not.
-3. **Lines.** One line per idea, checked against the list below before painting. Jobs in `D/cards/bar/<batch>.jsonl`: `{"id","card","batch","idea","line"}`, plus a `{"card","batch","brief"}` line holding what Martin said. `python3 art.py gen <batch>.jsonl -p 4` in the background (about 10 minutes per 16; about 80 pictures per window before the image quota locks). The template, the reference sheet and Sol's rewrite stay as they are: tested 2026-10-17, they neither help nor hurt, and changing them is not a lever.
+3. **Briefs.** One brief per idea, two or three plain sentences (see below). Jobs in `D/cards/bar/<batch>.jsonl`: `{"id","card","batch","idea","line"}`, plus a `{"card","batch","brief"}` line holding what Martin said. `python3 art.py gen <batch>.jsonl -p 4` in the background (about 10 minutes per 16; about 80 pictures per window before the image quota locks). The template, the reference sheet and Sol's rewrite stay as they are: tested 2026-10-17, they neither help nor hurt, and changing them is not a lever.
 4. **Page.** `python3 art.py page <review> <ids...>` builds it; publish to the review artifact (`D/cards/notes.md` holds its link) with its image files. Every picture of the round, next to the live art, numbered, with no label of ours. Tell Martin what each idea is, one line each, and the link. Nothing about which is better.
 5. **Verdicts.** Three buttons per picture: This is it, Almost, Nope. Read them with `ArtifactData` (collection `verdicts`) and merge them with `python3 art.py verdicts <review> <export.json>`. His note is a `note` record in the manifest, never a rule. Then:
    - This is it: install.
@@ -30,19 +30,15 @@ Why it works this way: `knowledge/card-art-diagnosis-2026-10-17.md` (game repo).
 
 A pick is a draft. It stays on the board; a later repaint needs a reason Martin writes on the card table.
 
-## The line
+## The brief
 
-What a line controls, checked before painting. Everything else about a picture (painted or photographic, legendary or flat, caught or posed) is selected by Martin, never instructed.
+Sol is an illustrator, not a tool: it gets the card and the idea, and it decides how to paint it (Martin, 2026-10-18: "trust it, treat it as your partner"). `art.py` puts the card's facts in front of every brief (name, habitat, rarity, strength, text), so a brief is two or three plain sentences: the one idea, and what the picture should say in half a second and on a second look. Sol picks the pose, the backdrop, the light and the palette.
 
-- One animal is the hero, big. A second animal only when the card can't be read without it, and then small or partial, never its whole body.
-- A specific action the real animal does, showing the effect where it can; never a stock pose, never a title or a feeling (king, wise, proud, joyful: the model paints a character acting it out).
-- The one simple backdrop behind it, named, in the animal's real corner of its habitat (`docs/design/habitats.md`); to separate a green bird from green, change the light, not the habitat.
-- A palette, as the last clause.
-- Real animals in a real place: nothing human-made, no camera or lens words, nothing that implies an effect the card lacks (a calf under a giraffe).
-- A legendary is a different animal from its common (the one in a million) caught in a moment, never a portrait; its wonder is a real phenomenon its habitat has.
-- A real photo as pose skeleton (`"sheet"` in the job) when the model keeps getting the anatomy wrong; the deck's live card art attached when a legendary gathers them.
+A brief never lists parts. No palette, no anatomy, no clause about where a limb goes, no negatives ("no X", "nothing like Y"), no stack of constraints: Sol turns every clause into a rule and the model paints the rules instead of the animal. The template already carries the fixed principles (one animal the hero, a calm area behind it, painted not photographed, the top band and bottom third kept clear). The record's lines ran at a median of 56 words and the ones that settled were no longer.
 
-"a big gorilla wading knee-deep through a swamp, pulling up water plants to eat; behind him only soft pale morning mist over still water; palette of black fur, silver back, soft greens and pale grey-gold mist."
+"The idea: the albatross arriving, and the moment it arrives the small creatures around it are gone. One albatross, the hero; the small ones are whatever you think reads best and paints well. It is a portrait card, so solve the wingspan with the composition rather than cutting it."
+
+What stays in the agent's hands: real animals in a real place, one animal as the hero, no human roles or feelings as the idea (king, wise, proud paint a character), the animal's own habitat, nothing that implies an effect the card lacks. A real photo as pose skeleton (`"sheet"` in the job) only when the model keeps getting the anatomy wrong; the deck's live card art attached when a legendary gathers them; a liked picture attached as `"world"` when Martin wants it kept and one thing changed.
 
 `D/cards/art-principles.md` is Martin's taste as it was written down, frozen 2026-10-17: read it for what the art must achieve; never add to it.
 
