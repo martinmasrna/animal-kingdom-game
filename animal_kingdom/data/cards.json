@@ -3041,6 +3041,34 @@
       "workbench_id": "pool-woodpecker"
     },
     {
+      "id": "stag_beetle",
+      "name": "Stag Beetle",
+      "deck": "bench",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "text": "Armor.",
+      "keywords": [
+        "Armor"
+      ],
+      "species": "Stag Beetle",
+      "habitat": "Forest",
+      "workbench_id": "pool-stag-beetle"
+    },
+    {
+      "id": "dolphin",
+      "name": "Dolphin",
+      "deck": "bench",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 5,
+      "text": "Roar: draw a card.",
+      "keywords": [],
+      "species": "Dolphin",
+      "habitat": "Open Ocean",
+      "workbench_id": "pool-dolphin"
+    },
+    {
       "id": "albatross",
       "name": "Albatross",
       "deck": "bench",

@@ -2966,6 +2966,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "rat": {"on_place": _rat_place},
     "falcon": {"on_place": _hq_adjacent_draw},
     "bat": {"on_place": _draw1},
+    "dolphin": {"on_place": _draw1},
     "mouse": {"on_place": _draws_filtered("tag:Rodent")},
     # Egg Control.
     "eon": {"on_end_of_turn": _eon_end_of_turn},

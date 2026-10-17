@@ -941,6 +941,17 @@ def test_the_albatross_sweeps_the_small_enemies_where_it_lands():
     assert s.top_unit("2,1") is None and s.top_unit("3,2") is None and s.top_unit("2,3").card_id == "mouse"
 
 
+def test_the_dolphin_is_a_five_that_draws_a_card():
+    s = make_state(hands={"A": ["dolphin"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("dolphin", ("cr", "1,2")))
+    assert effective_strength(s, s.top_unit("1,2")) == 5 and hand_ids(s, "A") == ["lion"]
+
+
+def test_the_stag_beetle_is_a_common_six_with_armor():
+    card = load_cards()["stag_beetle"]
+    assert (card.base_strength, card.rarity) == (6, "common") and not card.tags and "Armor" in card.keywords
+
+
 def test_the_hand_size_card_counts_the_other_cards_in_your_hand():
     s = make_state(hands={"A": ["peacock", "lion", "lion", "lion"]})
     assert placement_strength(s, hand_inst(s, "A", "peacock")) == 1 + 3 * CFG.hand_per_card

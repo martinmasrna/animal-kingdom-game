@@ -4393,5 +4393,97 @@
       "by": "claude",
       "at": 1792267341
     }
+  },
+  "pool-dolphin": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "neutral common (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792270569
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "the 5-strength draw anchor made real",
+      "by": "claude",
+      "at": 1792270569
+    }
+  },
+  "pool-stag-beetle": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "neutral common (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792270569
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "the Armor 6 anchor made real",
+      "by": "claude",
+      "at": 1792270569
+    }
+  },
+  "dolphin": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "clever animals draw cards; untagged: a mammal, and neutral",
+      "by": "claude",
+      "at": 1792270569
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection (status proposed)",
+      "by": "claude",
+      "at": 1792270570
+    }
+  },
+  "stag_beetle": {
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "the plain wall removal can't touch",
+      "by": "claude",
+      "at": 1792270570
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection (status proposed)",
+      "by": "claude",
+      "at": 1792270570
+    }
   }
 }

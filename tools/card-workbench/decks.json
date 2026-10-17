@@ -2399,12 +2399,12 @@
      "id": "pool-stag-beetle",
      "name": "Stag Beetle",
      "note": "",
-     "rarity": "",
+     "rarity": "C",
      "species": "Stag Beetle",
-     "status": "open",
-     "str": null,
+     "status": "proposed",
+     "str": 6,
      "tag": "",
-     "text": ""
+     "text": "Armor."
     },
     {
      "habitat": "Meadow",
@@ -2675,12 +2675,12 @@
      "id": "pool-dolphin",
      "name": "Dolphin",
      "note": "",
-     "rarity": "",
+     "rarity": "C",
      "species": "Dolphin",
-     "status": "open",
-     "str": null,
+     "status": "proposed",
+     "str": 5,
      "tag": "",
-     "text": ""
+     "text": "Roar: draw a card."
     },
     {
      "habitat": "Open Ocean",
