@@ -81,6 +81,7 @@ def profile_row(p, ev, hs):
         "last": day(ts[-1]) if ts else "", "sessions": len(sessions),
         "median_min": round(statistics.median(sessions) / 60, 1) if sessions else 0,
         "first_min": round(sessions[0] / 60, 1) if sessions else 0,
+        "_span": (ts[-1] - p["created"]) / 86400 if ts else 0,
     }
 
 
@@ -109,19 +110,11 @@ def main(argv=None):
         ("won one", sum(1 for r in rows if r["won"])),
         ("played ranked", sum(1 for r in rows if r["ranked"])),
         ("came back another day", sum(1 for r in rows if r["days"] >= 2)),
-        ("played a week later", sum(1 for r in rows if r["days"] >= 2 and _span(r) >= 7)),
+        ("played a week later", sum(1 for r in rows if r["days"] >= 2 and r["_span"] >= 7)),
     ]
     print("\nFunnel")
     for name, k in stage:
         print(f"  {name:24} {k:4}  {100 * k // n:3}%")
-
-
-def _span(r):
-    try:
-        a = datetime.datetime.strptime(r["created"], "%m-%d"); b = datetime.datetime.strptime(r["last"], "%m-%d")
-        return (b - a).days
-    except ValueError:
-        return 0
 
 
 if __name__ == "__main__":
