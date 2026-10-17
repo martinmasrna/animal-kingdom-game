@@ -1,6 +1,8 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  bat_legend: [.5, .45, .85],
+  mole_legend: [.5, .48, .8],
   golden_egg: [.5, .53, 1],
   mole: [.45, .38, .7],
   wolf_legend: [.6, .3, .6],
@@ -15,7 +17,7 @@ export const CROP = {
   toad: [.62, .45, .8],
   locust: [.62, .38, .8],
   city_spider: [.45, .38, .78],
-  sperm_whale: [.62, .6, .75],
+  sperm_whale: [.62, .45, .8],
   roach_king: [.62, .48, .8],
   raccoon: [.55, .55, .72],
   cockroach: [.47, .53, .8],
@@ -156,6 +158,8 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  bat_legend: [.5, .48, 1.2],
+  mole_legend: [.55, .47, 1.2],
   golden_egg: [.5, .5, 1.1],
   mole: [.48, .32, 1.2],
   wolf_legend: [.6, .3, 1.2],
@@ -170,7 +174,7 @@ export const STRIP = {
   toad: [.72, .35, 1.2],
   locust: [.7, .28, 1.2],
   city_spider: [.42, .32, 1.2],
-  sperm_whale: [.8, .58, 1.2],
+  sperm_whale: [.72, .45, 1.2],
   roach_king: [.78, .47, 1.2],
   raccoon: [.6, .55, 1.2],
   cockroach: [.6, .42, 1.2],
@@ -304,6 +308,8 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  bat_legend: .42,
+  mole_legend: .45,
   golden_egg: .5,
   mole: .4,
   wolf_legend: .406,

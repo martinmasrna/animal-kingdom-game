@@ -3314,9 +3314,10 @@
         "prev_lv": "empty",
         "prev_note": ""
       },
-      "lv": "draft",
+      "lv": "problem",
       "by": "claude",
-      "at": 1792105969
+      "at": 1792201507,
+      "note": "Placeholder (Martin, 2026-10-17): the thrashing idea is right, execution 'almost'; revisit."
     },
     "crop": {
       "review": {
@@ -3325,7 +3326,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792105989
+      "at": 1792201506
     }
   },
   "cockroach": {
@@ -3815,6 +3816,25 @@
       "by": "martin",
       "at": 1792192092,
       "lv": "draft"
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "problem",
+      "by": "claude",
+      "at": 1792201507,
+      "note": "Placeholder (Martin, 2026-10-17): the long-tunnel idea is 'almost'; revisit."
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792201506
     }
   },
   "pool-bat-legend": {
@@ -3874,6 +3894,25 @@
       "note": "into the collection (status proposed)",
       "by": "claude",
       "at": 1792194643
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "problem",
+      "by": "claude",
+      "at": 1792201507,
+      "note": "Placeholder (Martin, 2026-10-17): the arch-and-sunbeam idea is miles ahead, but the anatomy is wrong (head and wings); revisit."
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792201507
     }
   },
   "golden_egg": {
