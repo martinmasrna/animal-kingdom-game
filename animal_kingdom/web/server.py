@@ -35,6 +35,7 @@ from .profiles import ProfileError, Profiles
 from . import replay
 from . import tutorial
 from .match import BOT_LEVELS, DECK_NAMES, STARTER_COVERS, Match, Seat, card_pool, map_info
+from . import discord
 
 CARDS = load_cards()
 
@@ -155,6 +156,12 @@ class Hub:
                 events.record(profiles.db, s.profile, "game_end", {
                     "match": match.id, "game": len(match.results), "lesson": lesson, "won": r["winner"] == p,
                     "reason": r["reason"], "rounds": r["turns"]})
+                if r["winner"] == p:   # a line for the Discord channel, when it is one worth a line (web/discord.py)
+                    opp = match.seats.get("B" if p == "A" else "A")
+                    deck = lambda q: DECK_NAMES.get(q.deck, "their own deck") if q else ""
+                    text = discord.result_text(s.name, opp.name if opp else "", deck(s), deck(opp), opp.bot if opp and opp.is_bot else None, lesson)
+                    if text:
+                        asyncio.get_running_loop().run_in_executor(None, discord.post, "events", text)
 
     async def push(self, match: Match) -> None:
         await self.broadcast(match)
@@ -494,6 +501,7 @@ async def send_feedback(req):
     except feedback.FeedbackError as e:
         raise web.HTTPBadRequest(text=str(e))
     asyncio.get_running_loop().run_in_executor(None, feedback.mail, display(p), body["text"].strip(), context, body.get("view"))
+    asyncio.get_running_loop().run_in_executor(None, discord.post, "feedback", discord.feedback_text(display(p), body["text"].strip(), context))
     return web.json_response({})
 
 
@@ -530,6 +538,7 @@ async def join_ranked(req):
     entry = {"pid": p["id"], "name": display(p), "deck": deck, "rating": r, "since": now,
              "fut": asyncio.get_running_loop().create_future()}
     waiting[:] = [w for w in waiting if w["pid"] != p["id"]] + [entry]   # one place in the queue per person
+    asyncio.get_running_loop().run_in_executor(None, discord.post, "events", discord.queue_text(display(p)))   # the Discord channel hears it: someone may queue too
     try:
         res = await asyncio.wait_for(asyncio.shield(entry["fut"]), RANKED_WAIT)
         return web.json_response(res if res else {"cancelled": True})
