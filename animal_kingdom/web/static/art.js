@@ -1,6 +1,8 @@
 // Card art: /static/art/<id>.webp (placeholder paintings from the design sandbox, cards/; web/art_webp.sh makes the WebP from the JPEG).
 // CROP places a card's round board portrait: centre x, centre y, diameter, as fractions of the art's width, height, width.
 export const CROP = {
+  woodpecker: [.57, .3, .62],
+  peacock: [.53, .44, .62],
   bat_legend: [.5, .45, .85],
   mole_legend: [.5, .48, .8],
   golden_egg: [.5, .53, 1],
@@ -70,7 +72,7 @@ export const CROP = {
   chimpanzee: [.502, .357, .65],
   caterpillar: [.551, .382, .787],
   caracal: [.539, .333, .62],
-  cape_buffalo: [.568, .388, .7],
+  cape_buffalo: [.5, .42, .86],
   butterfly_legend: [.514, .467, .8],
   brutus: [.472, .338, .771],
   bobcat: [.285, .392, .572],
@@ -158,6 +160,8 @@ export const CROP = {
 // STRIP places the art in a thin strip (the Collection's deck tile and deck list): the point (x, y as fractions of the art)
 // that lands on the strip's focus, and a zoom over the strip's own width.
 export const STRIP = {
+  woodpecker: [.6, .25, 1.2],
+  peacock: [.53, .42, 1.2],
   bat_legend: [.5, .48, 1.2],
   mole_legend: [.55, .47, 1.2],
   golden_egg: [.5, .5, 1.1],
@@ -214,7 +218,7 @@ export const STRIP = {
   giraffe: [.709, .145, 1.3],
   crocodile: [.71, .467, 1],
   chimpanzee: [.55, .31, 1],
-  cape_buffalo: [.515, .398, 1],
+  cape_buffalo: [.5, .42, 1.1],
   bush_dog: [.64, .325, 1.1],
   brutus: [.585, .356, 1.1],
   black_mamba: [.568, .332, 1],
@@ -308,6 +312,8 @@ export const STRIP = {
 // where it fits, otherwise its head near the top with a little room and the legs cut. A card without an entry centres on its
 // board portrait (CROP), which Martin preferred for a few (Eagle, Ember, Hippopotamus, ...).
 export const FULL = {
+  woodpecker: .3,
+  peacock: .42,
   bat_legend: .42,
   mole_legend: .45,
   golden_egg: .5,
