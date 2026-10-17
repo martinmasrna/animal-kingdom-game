@@ -45,16 +45,19 @@ export function fitNames(root) {
 // right of the card. One related card takes the keywords beside it ('few'); two or more, under them, as wide as their row.
 export function readSide(c, cards) {
   const rel = (c.related || []).map(id => cards[id]).filter(Boolean);
-  const kws = Object.keys(KEYWORDS).filter(k => [c, ...rel].some(x => hasKeyword(x, k)));
+  const kws = Object.keys(KEYWORDS).filter(k => [c, ...rel].some(x => hasKeyword(x, k)))
+    .concat(Object.keys(TERMS).filter(t => [c, ...rel].some(x => new RegExp(`\\b${t.toLowerCase()}\\b`).test(x.text || ''))));
   if (!rel.length && !kws.length) return '';
   const cls = !rel.length ? '' : rel.length === 1 ? ' few' : ' row';
   return `<div class="zside${cls}">` +
     (rel.length ? `<div class="rel${rel.length > 4 ? ' many' : ''}">${rel.map(r => cardHTML(r)).join(c.evolves ? '<i class="arr"></i>' : '')}</div>` : '') +
-    (kws.length ? `<div class="kws">${kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k]}</p></div>`).join('')}</div>` : '') + '</div>';
+    (kws.length ? `<div class="kws">${kws.map(k => `<div class="kw"><b>${k}</b><p>${KEYWORDS[k] || TERMS[k]}</p></div>`).join('')}</div>` : '') + '</div>';
 }
 
 // Each keyword in one line, for players learning the rules: the collection's zoom lists them, the board's badges show them on hover.
 // Scout is a card-text term ("Roar: Scout a Bird."), explained the same way (hasKeyword finds it).
+// Rules words a card uses mid-sentence ("Dusk: if this is grazing, draw a card."), explained beside its keywords (rulings.md).
+export const TERMS = { 'Grazing': 'An animal grazes while it\'s the top animal on a corner of a region you control.' };
 export const hasKeyword = (c, k) => new RegExp(`(^|\\. |: )${k}[:. ]`).test(c.text || '');
 export const KEYWORDS = {
   'Roar': 'Happens when you place this animal.',
