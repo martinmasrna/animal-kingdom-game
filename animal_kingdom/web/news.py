@@ -94,7 +94,7 @@ def state(db, profile: dict, decks: list, rels: list) -> dict:
             continue
         for g in r["groups"]:
             for it in g["items"]:
-                if g["name"] == "Rules" or set(it["cards"]) & mine:
+                if g["name"] in ("Rules", "Keywords") or set(it["cards"]) & mine:   # rules and keywords touch everyone
                     since.append({"release": r["id"], "group": g["name"], "text": it["text"],
                                   "cards": [c for c in it["cards"] if c in mine] or it["cards"],
                                   "decks": [d["name"] for d in decks if set(d.get("cards") or {}) & set(it["cards"])]})

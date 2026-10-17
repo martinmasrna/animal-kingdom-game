@@ -64,7 +64,7 @@ export function showSince(api, { onRead }) {
   const order = it => it.group === 'Rules' || it.group === 'Keywords' ? 0 : 1;   // rules and keywords touch everyone: first
   const all = [...N.since].sort((a, b) => order(a) - order(b)), items = all.slice(0, 3), more = all.length - items.length;
   const el = document.createElement('div'); el.id = 'since'; el.className = 'chal since';
-  el.innerHTML = `<b>Since you last played</b><ul>${items.map(it => `<li><p>${esc(it.text)}</p>${it.decks && it.decks.length && it.group !== 'Rules'
+  el.innerHTML = `<b>Since you last played</b><ul>${items.map(it => `<li><p>${esc(it.text)}</p>${it.decks && it.decks.length && it.group !== 'Rules' && it.group !== 'Keywords'
       ? `<p class="why">In your ${it.decks.length > 1 ? 'decks' : 'deck'} ${it.decks.map(esc).join(', ')}</p>` : ''}</li>`).join('')}</ul>`
     + (more > 0 ? `<p class="more">and ${more} more</p>` : '')
     + '<div class="btns"><button class="slab" data-x="read">Read all news</button><button class="play" data-x="ok">OK</button></div>';
