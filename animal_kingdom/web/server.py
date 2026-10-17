@@ -23,6 +23,7 @@ from pathlib import Path
 from aiohttp import WSMsgType, web
 
 from ..decks import PREMADE_DECKS, TEST_BOT_DECKS, load_premade_deck
+from ..engine import rules
 from ..engine.state import EngineError
 from ..engine.cards import COPY_LIMITS, DECK_SLUGS, load_cards
 from . import custom_decks
@@ -190,7 +191,8 @@ class Hub:
             return
         task = self.bot_tasks.get(match.id)
         if task is None or task.done():
-            self.bot_tasks[match.id] = asyncio.create_task(self._run_bot(match))
+            self.bot_tasks[match.id] = task = asyncio.create_task(self._run_bot(match))
+            task.add_done_callback(lambda t: t.cancelled() or t.exception() is None or log.error("bot task died in match %s: %r", match.id, t.exception()))
 
     async def _watched(self, match: Match) -> None:
         """Until every person watching has played the match's events out on screen (their client says so, 'played'), at
@@ -203,6 +205,7 @@ class Hub:
             await asyncio.sleep(0.05)
 
     async def _run_bot(self, match: Match) -> None:
+        failures = 0
         while (s := match.to_act()) is not None and match.seats[s].is_bot:
             opening = not match.state.pending and match.state.actions_taken_this_turn == 0
             await self._watched(match)
@@ -220,7 +223,22 @@ class Hub:
                 action = match.fallback_move()
             if match.version != version:     # the position moved under the bot (rematch etc.)
                 continue
-            match.act(s, action)
+            try:
+                match.act(s, action)
+            except Exception:   # the move was refused (feedback 2026-10-01: a bot that never moved, only conceding got out): the
+                log.exception("bot move refused in match %s; playing a fallback move", match.id)   # plain move, then the first legal one
+                failures += 1
+                if match.version == version and match.to_act() == s:
+                    try:
+                        match.act(s, match.fallback_move() if failures == 1 else rules.legal_actions(match.state)[0])
+                    except Exception:
+                        log.exception("fallback refused too in match %s", match.id)
+                        if failures >= 3:    # the position itself is broken: say so loudly and stop hammering it
+                            log.error("bot gives up in match %s after %d refused moves", match.id, failures)
+                            return
+                        await asyncio.sleep(1)
+                        continue
+            failures = 0
             await self.broadcast(match)
 
 

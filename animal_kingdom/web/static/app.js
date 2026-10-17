@@ -621,7 +621,7 @@ async function matchScreen(id) {
   matchScreen.wake = () => { if (document.hidden || wsId !== id) return;
     if (!ws || ws.readyState > 1) { if (ws) ws.onclose = null; connect(); } };
 }
-const send = msg => { clog('send ' + (msg.t === 'act' ? JSON.stringify(msg.action).slice(0, 50) : msg.t) + (ws && ws.readyState === 1 ? '' : ' DROPPED (socket ' + (ws ? ws.readyState : 'none') + ')')); return ws && ws.readyState === 1 && ws.send(JSON.stringify(msg)); };
+const send = msg => { clog('send ' + (msg.t === 'act' ? JSON.stringify(msg.action).slice(0, 50) : msg.t) + (ws && ws.readyState === 1 ? '' : ' DROPPED (socket ' + (ws ? ws.readyState : 'none') + ')')); if (!(ws && ws.readyState === 1)) { if (msg.t === 'act') toast('Reconnecting… try again in a moment'); return false; } return ws.send(JSON.stringify(msg)); };   // a dropped move says so (feedback 2026-10-04: clicks that did nothing)
 // ?clicklog: a live record of presses, clicks and what the game did with them, in a corner (chasing clicks that do
 // nothing, 2026-10-04). Off unless asked for; it costs nothing then.
 const CLOG = new URLSearchParams(location.search).has('clicklog');

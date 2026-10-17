@@ -120,6 +120,43 @@ def test_a_bot_that_fails_or_overthinks_still_moves(monkeypatch):
         asyncio.run(run())
 
 
+def test_a_bot_whose_move_is_refused_still_moves(monkeypatch):
+    """The other way a match froze: the bot chose a move and the match refused it (verification 2026-10-17: the task died with
+    the exception, and only conceding got the player out). Now it plays a fallback, and the task's death would be logged."""
+    import asyncio
+    from aiohttp.test_utils import TestClient, TestServer
+    from animal_kingdom.web import server
+    from animal_kingdom.web.match import Match
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    monkeypatch.setattr(server, "RANKED_WAIT", 0.1)
+    monkeypatch.setattr(server, "BOT_PAUSE", {"choice": 0, "open": 0, "move": 0})
+    real_act, refused = Match.act, []
+
+    def act(self, s, action, auto=False):
+        if self.seats[s].is_bot and not refused:   # the bot's first move is refused once
+            refused.append(action)
+            raise RuntimeError("refused")
+        return real_act(self, s, action, auto)
+    monkeypatch.setattr(Match, "act", act)
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a = await (await c.post("/api/profile", json={})).json()
+            m = await (await c.post("/api/ranked", json={"deck": "cats"}, headers={"X-AK-Key": a["code"]})).json()
+            match = server.hub.matches[m["id"]]
+            real_act(match, "A", {"kind": "choice", "choice": "__skip__"})   # the person keeps their hand; the bot is to act
+            server.hub.kick_bot(match)
+            for _ in range(60):
+                await asyncio.sleep(0.1)
+                if refused and match.to_act() == "A":
+                    break
+            assert refused, "the first bot move was refused"
+            assert match.to_act() == "A", "the bot still moved"
+            task = server.hub.bot_tasks[match.id]
+            assert not task.done() or task.exception() is None, "the bot task did not die"
+    asyncio.run(run())
+
+
 def test_a_settled_player_still_moves_about_15_for_an_even_game():
     """People keep an uncertainty of at least PLAYER_RD_FLOOR (Martin, 2026-10-01): about +-15 an even game, however many
     games they've played; bots keep their own steady BOT_RD."""
