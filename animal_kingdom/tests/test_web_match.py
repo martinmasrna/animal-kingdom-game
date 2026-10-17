@@ -300,6 +300,20 @@ def test_bot_levels_are_the_configurations_the_simulations_measure():
             assert getattr(web, attr, None) == getattr(sim, attr, None), (level, attr)
 
 
+def test_the_candidate_expert_is_a_switch_on_the_play_server(monkeypatch):
+    """AK_EXPERT_DEPTH=1 makes the Expert the candidate under evaluation (two turns of sight, target-aware weights,
+    a time budget under BOT_THINK_MAX); without it the Expert is the configuration the simulations measure."""
+    from animal_kingdom.web.match import bot_for
+    from animal_kingdom.web.server import BOT_THINK_MAX
+    monkeypatch.delenv("AK_EXPERT_DEPTH", raising=False)
+    assert bot_for("expert", 7).depth == 0
+    monkeypatch.setenv("AK_EXPERT_DEPTH", "1")
+    bot = bot_for("expert", 7)
+    assert bot.depth == 1 and 0 < bot.time_budget < BOT_THINK_MAX
+    assert bot.weights.pending_target > 0 and bot.weights.buried_presence > 0
+    assert bot_for("normal", 7).__class__.__name__ == "TurnBot"
+
+
 def test_a_bot_waits_for_the_watching_players_screen_never_longer_than_the_cap(monkeypatch):
     """The bot's next move waits until each person watching has played the events out (their 'played' report), and no
     longer than BOT_WAIT_MAX if a screen never reports (server._watched)."""

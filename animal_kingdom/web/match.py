@@ -8,6 +8,7 @@ hand); the opponent's hand and both deck orders never leave this module.
 from __future__ import annotations
 
 import logging
+import os
 import random
 import secrets
 import time
@@ -53,11 +54,16 @@ STARTER_COVERS = {d["slug"]: d.get("cover", "") for d in STARTER_DECKS}
 # simulations measure (a bare RefereeBot() is an untested configuration).
 log = logging.getLogger(__name__)
 BOT_LEVELS = {"easy": "easy", "normal": "turn", "expert": "referee"}
+# The candidate Expert under evaluation (docs/bots.md): two turns of sight and the target-aware evaluation, capped so a
+# move stays under the server's BOT_THINK_MAX. `AK_EXPERT_DEPTH=1 ./play` offers it as the Expert; unset, today's Expert.
+CANDIDATE_EXPERT = {"depth": 1, "time_budget": 8.0, "w.pending_target": 1.5, "w.buried_presence": 0.25}
 
 
 def bot_for(level: str, seed: int):
     if level in tutorial.BOTS.values():
         return tutorial.TutorialBot(seed=seed, lesson=next(n for n, b in tutorial.BOTS.items() if b == level))
+    if level == "expert" and os.environ.get("AK_EXPERT_DEPTH") == "1":
+        return make_bot("referee", seed, extra=dict(CANDIDATE_EXPERT))
     return make_bot(BOT_LEVELS[level], seed)
 
 
