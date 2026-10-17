@@ -110,6 +110,8 @@ RUNG2_EXTRA_FEATURES: tuple[str, ...] = (
     "extra_actions_theirs",
     "den_front_held",
     "den_front_pressure",
+    "pending_target_strength",
+    "buried_presence",
 )
 
 FEATURE_SETS: dict[str, tuple[str, ...]] = {
@@ -456,6 +458,44 @@ def pending_payoff(state: GameState, me: str, opp: str) -> float:
     return pending
 
 
+def pending_target_strength(state: GameState, me: str, opp: str) -> float:
+    """Net effective strength of the units that scheduled removals will take (a Taipan's marked animal), imminence-
+    discounted as `pending_payoff`. `pending_payoff` pays the same for any delayed effect, so a removal scored the same
+    whatever it marked (the bot marked a Raven over a Python, 2026-09-30); this term is what the mark is worth."""
+    total = 0.0
+    for s in state.scheduled:
+        step = s["step"]
+        if step.get("op") != "remove_iid":
+            continue
+        target = _unit_by_iid(state, step["iid"])
+        if target is None or target.owner == s["owner"]:
+            continue
+        horizon = 2 * max(0, s["remaining"]) - (0 if state.current == s["owner"] else 1)
+        value = effective_strength(state, target) / (1.0 + 0.25 * max(0, horizon))   # a mark almost always lands: a soft discount
+        total += value if s["owner"] == me else -value
+    return total
+
+
+def buried_presence(state: GameState, me: str, opp: str) -> float:
+    """Net effective strength of the units under a cover (mine - theirs). A covered unit is not gone: it is back on top
+    the moment its coverer leaves, so an enemy 8 under my 3 is a liability `board_presence` (top units only) can't see,
+    and the eval otherwise scores covering it like removing it (the Taipan puzzle, 2026-10-17)."""
+    total = 0.0
+    for stack in state.board.values():
+        for u in stack[:-1]:
+            s = effective_strength(state, u)
+            total += s if u.owner == me else -s
+    return total
+
+
+def _unit_by_iid(state: GameState, iid):
+    for stack in state.board.values():
+        for u in stack:
+            if u.iid == iid:
+                return u
+    return None
+
+
 # =============================================================== rung-1 dynamics helpers
 # All public-info, card-agnostic (only base_strength/is_dynamic/keywords/food_cost/
 # has_roar ever read from Card), and antisymmetric by construction (mine - theirs).
@@ -649,4 +689,6 @@ def context_features(state: GameState, me: str, opp: str, opp_connection: set) -
         "extra_actions_theirs": _extra_actions(state, opp),
         "den_front_held": float(held),
         "den_front_pressure": float(pressure),
+        "pending_target_strength": pending_target_strength(state, me, opp),
+        "buried_presence": buried_presence(state, me, opp),
     }

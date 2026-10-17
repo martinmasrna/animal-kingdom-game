@@ -82,6 +82,12 @@ class GreedyWeights:
                                       # (reads scheduled, names no card). Validated 2026-07-04:
                                       # paired benchmark egg +5.3 / ramp +10.4, all decks
                                       # improve-or-tie (see docs/bots).
+    buried_presence: float = 0.0     # per net effective strength under a cover (mine - theirs): a covered unit comes
+                                      # back when its coverer leaves, so covering an 8 is not removing it (2026-10-17).
+                                      # Off until the paired benchmark passes; TARGET_AWARE_WEIGHTS is the candidate.
+    pending_target: float = 0.0      # per point of effective strength a scheduled removal of mine will take (minus
+                                      # theirs), imminence-discounted: what a Taipan's mark is worth depends on what it
+                                      # marked; pending_payoff above can't tell a Python from a Raven (2026-10-17).
     coverage_exposure: float = 0.0   # belief term (default OFF): expected own-HQ danger one
                                       # ply ahead, = P(opponent's hidden hand can cover a
                                       # currently-safe HQ-front defender next turn). Exact
@@ -100,6 +106,10 @@ class GreedyWeights:
 # The eval as it was before hand_value: the rung-0 LinearEval features (features.RUNG0_FEATURES) mirror these
 # weights term for term, and hand_value has no rung-0 feature.
 RUNG0_WEIGHTS = GreedyWeights(card_economy=3.0, effect_readiness=16.0, hand_value=0.0)
+
+# The candidate that marks the Python (test_taipan_marks_the_python, 2026-10-17): a scheduled removal is worth what it
+# removes, and buried strength is not gone. Becomes the default once the paired benchmark passes (docs/bots.md).
+TARGET_AWARE_WEIGHTS = GreedyWeights(pending_target=1.5, buried_presence=0.25)
 
 
 class GreedyBot(Bot):
@@ -346,5 +356,9 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     # term's 20.0 was tuned to that.
     if w.pending_payoff:
         score += w.pending_payoff * _features.pending_payoff(state, me, opp)
+    if w.pending_target:
+        score += w.pending_target * _features.pending_target_strength(state, me, opp)
+    if w.buried_presence:
+        score += w.buried_presence * _features.buried_presence(state, me, opp)
 
     return score

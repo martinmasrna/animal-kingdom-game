@@ -163,15 +163,17 @@ def test_aggro_draws_on_its_opening(bot_cls):
         assert isinstance(chosen, DrawAction), chosen
 
 
-@pytest.mark.xfail(strict=True, reason="a pending removal scores the same whatever it targets: marks the Raven (2026-10-01)")
 def test_taipan_marks_the_python():
     # Goodstuff vs Martin's Egg Control, his game of 2026-09-30, the bot's turn with 0 food: hand
     # Elephant, Tiger, Brutus, Wolf, Taipan; his Python (8) in the middle, his Raven beside it.
     # Wolf on 4,2 opens 3,2, and Taipan there must mark the Python. Martin: the only right play;
     # Taipan with no target, marking the Raven, or drawing and holding Taipan are all wrong.
+    # Solved by the target-aware candidate weights (2026-10-17): the mark is worth what it removes, and
+    # covering the Python (what the bot did) is not removing it. With either term alone it still fails.
     from animal_kingdom.sim.runner import make_bot
+    from animal_kingdom.bots.greedy_bot import TARGET_AWARE_WEIGHTS
     for seed in range(5):
-        s, bot, turn = _puzzle("ramp_taipan_target"), make_bot("referee", seed), []
+        s, bot, turn = _puzzle("ramp_taipan_target"), make_bot("referee", seed, weights=TARGET_AWARE_WEIGHTS), []
         python = s.top_unit("3,3").iid
         while s.result is None and s.current == "B":
             turn.append(bot.choose(s.view_for(s.player_to_act()), rules.legal_actions(s), s))
