@@ -1,0 +1,5 @@
+# Later
+
+Work parked on purpose. Each item says why it exists and what would make it the next thing, so it is picked up for the right reason and not before.
+
+- **A different painter for card art (parked 2026-10-17).** The art diagnosis ([`../knowledge/card-art-diagnosis-2026-10-17.md`](../knowledge/card-art-diagnosis-2026-10-17.md)) found that words never moved the pictures, so the one lever left is what paints. Two ways: a second generator on the same lines (Flux, Imagen; cents a picture; judged blind against the current model), or a style add-on (a LoRA) trained on the forty locked paintings over an open model (about five dollars and an hour for one run; public galleries prove a hand stays locked across subjects and prove nothing about Martin's hand; he wants proof before spending, and the only proof is the run). Pick it up when `art.py cost` shows the lean card-art skill did not bring pictures per installed card below about 8 after four weeks, or when the alpha needs art faster than the image quota gives it.

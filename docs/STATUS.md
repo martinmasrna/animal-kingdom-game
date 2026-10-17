@@ -48,5 +48,6 @@ The map. Read it first each session and keep it current: when something here cha
 - [`cards/`](cards/): the seven [`decks/`](cards/decks/README.md) (tables generated from `cards.json`), [`to-look-at.md`](cards/to-look-at.md) (cards Martin flagged from play), [`card-candidates.md`](cards/card-candidates.md), [`shelved-cards.md`](cards/shelved-cards.md), and the idea banks [`expansion-design-todo.md`](cards/expansion-design-todo.md) and [`deckbuilding-todo.md`](cards/deckbuilding-todo.md).
 - [`bots.md`](bots.md), [`balance.md`](balance.md).
 - [`pre-launch.md`](pre-launch.md): what must be settled before going public, and not before.
+- [`later.md`](later.md): work parked on purpose, with what would make each item next.
 - [`../knowledge/`](../knowledge/): diagnoses of stuck feedback loops, read before changing how that work is done: [`naming-diagnosis-2026-10-16.md`](../knowledge/naming-diagnosis-2026-10-16.md), [`card-art-diagnosis-2026-10-17.md`](../knowledge/card-art-diagnosis-2026-10-17.md).
 - Research tooling removed from the tree (pilot ratings, conquest and roster experiments, referee comparison, gauntlet, human scorer) and the old docs are at tag `archive/research-2026-07`.

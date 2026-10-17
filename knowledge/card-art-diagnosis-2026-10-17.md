@@ -86,7 +86,7 @@ Octopus, Sperm Whale, and the mole and bat legendaries. 16 lines, each generated
 Re-rolls (fix-2, 11 pictures) and four fresh mole ideas (fix-3): one Almost each for the whale and the mole, nothing better than the round-1 bat. The one bat hit was 1 roll of 3 of its idea, so a live idea deserves a few rolls; a dead idea deserves none.
 Installed: Octopus from the one This is it. Sperm Whale, mole and bat legendaries installed from their Almost pictures as placeholders flagged `problem` on the card table. Martin's reasons for each verdict are `note` records in the manifest, not rules.
 Martin's verdict on the evening: not better than the old pipeline, probably worse in feel. This is consistent with the diagnosis: only the words changed, the model and the dice did not, so the install rate per picture could not move. The remaining lever is what paints.
-Proposed and undecided: a style add-on (LoRA) trained on the locked paintings over an open model, about five dollars and an hour for one run. Public galleries of such add-ons prove a hand stays locked across subjects and prove nothing about his hand; none fits the game. The only proof is the run itself. Three bat re-rolls that keep the hit's composition (t2_blg_5a, 6a, 7a) have no verdict.
+Parked in `docs/later.md` (Martin, 2026-10-17, not a priority): a style add-on (LoRA) trained on the locked paintings over an open model, about five dollars and an hour for one run. Public galleries of such add-ons prove a hand stays locked across subjects and prove nothing about his hand; none fits the game. The only proof is the run itself. Three bat re-rolls that keep the hit's composition (t2_blg_5a, 6a, 7a) have no verdict.
 
 ## What changing the work would take (Martin's call, not a treatment)
 
@@ -158,3 +158,7 @@ Sample: 31 manifest reviews with a recorded pick among 3 or 4 shown candidates w
 | 10-16 | Four distinct ideas re-demanded ("for the love of fucking god"); primates on all fours, then hands-and-gaze; Tiger back to the 09-26 crouch; "We're done with art for now" | - | 181 pictures, 24 settles (7.5 per settle, where 10-09 started at 22.5 and 10-11 reached 3.9) |
 
 Per-arm settle rates from the manifest: template 76 of 654, sol-rewrite 58 of 217, edit 32 of 91, early-template 4 of 7, raw 2 of 11, pair-cut 2 of 32; paint, none, swatch, swatch+ref, sheet, reverse, short, detailed, model-chooses, keep-line+rules, combine, paint-v2: 0 of 150 together. Attempts per card by rarity: common 12.1, rare 9.6, legendary 12.1; rounds per card: common 2.9, rare 2.5, legendary 3.6.
+
+## Treatment (2026-10-17)
+
+The card-art skill (`.claude/skills/card-art/SKILL.md`) was rewritten from this diagnosis: the agent does ideas and logistics and never a judgment; one picture per idea, three buttons per picture on the review page (This is it, Almost, Nope), re-rolls only for an Almost, a card parked after two rounds; no rule, memory or principle written from a verdict; `art-principles.md` frozen. The measure is `art.py cost` (pictures per installed card and rounds per card, by week; the week before the treatment stood at 7.9 and 2.5). Disproof: four weeks of rounds still at about 8 pictures and 3 rounds per installed card; then the generator question in `docs/later.md` is the next thing.

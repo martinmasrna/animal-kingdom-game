@@ -1,32 +1,51 @@
 ---
 name: card-art
-description: Make, repaint or review card art for Animal Kingdom - four bets per card from the proven template and the six-painting reference sheet, each naming its backdrop, Martin's voice notes folded in, Martin's review page, install. Use whenever the work is a card's painting - "card art", "paint the Savanna rares", "repaint X", "art round", "review page for art", reading art verdicts, installing a picked painting, or improving how art is made.
+description: Make, repaint or review card art for Animal Kingdom - the agent turns Martin's feeling for a card into clearly different picture ideas and runs the logistics (lines, painting, review page, install, crops); Martin makes every judgment, one tap per picture. Use whenever the work is a card's painting - "card art", "paint the Savanna rares", "repaint X", "art round", "review page for art", reading art verdicts, installing a picked painting, or improving how art is made.
 ---
 
 # Card art
 
-Everything here has evidence behind it in `D/cards/research/findings.md` (`D` is `~/Work/fun/animal-kingdom-design/`): every image ever generated, the prompt it got, and Martin's reaction to it. A rule without evidence doesn't go in; a change to how art is made is tested on a few cards and goes in only when Martin's verdicts back it. What the art must achieve is `D/cards/art-principles.md`.
+Why it works this way: `knowledge/card-art-diagnosis-2026-10-17.md` (game repo). Three weeks of record say that words move what is in a picture, not how it feels; that an agent's judgment of these pictures is at chance (11 of 31 against Martin's picks, chance 8, with or without the rules); and that no rule written from a verdict ever changed what came out. So the agent does ideas and logistics, Martin does every judgment, and no verdict becomes a rule. `D` below is `~/Work/fun/animal-kingdom-design/`.
 
-## What works
+## The split
 
-- **The animal is the hero.** Big, filling most of the card, a calm simple area behind it so its silhouette reads instantly. Never a landscape with a small animal in it.
-- **The picture people carry of that animal, plus one hook no other card has.** What a player pictures when hearing the name, not an obscure behaviour: the big-eyed eagle-owl at dusk, the green viper with open fangs, the strawberry chipmunk.
-- **One idea.** One animal, one moment. A second animal only when the card can't be read without it, and then small or partial; the effect shown by one simple device, if at all (the Jerboa's second hop, the Hornet pair).
-- **A legendary's myth lives in the animal itself**, never only in the sky or in size.
-- **An approved composition is kept.** To fix a liked picture, repaint only what is wrong (`edit.sh`: the sky, the eyes, the colour); never invent a new scene for it. To fix a wrong one, start fresh; never stack edits.
+**The agent:** reads the card, turns Martin's feeling into clearly different picture ideas, writes the lines, paints, builds the page, installs, sets crops, commits.
 
-## The prompt
+**The agent never:** picks, ranks, recommends, praises or grades a picture, or says which is "strongest"; writes a rule, a memory or a principle from a verdict; starts a repaint round without a reason Martin stated; drops a picture from the page (every picture a round produced goes on it; he judges anatomy himself, at full size).
 
-`D/cards/bar/template.txt`, word for word, with `D/cards/ref_sheet.png` attached, sent through Sol (`codex exec -m gpt-5.6-sol`), never verbatim: Sol rewrites it for the image model with its own image skill, and that rewrite is part of the recipe. Never edit the template without a test.
-
-The only words written per card are its `line`: the animal, one specific thing it is doing, and the one simple backdrop behind it, named, then a palette. "a big gorilla wading knee-deep through a swamp, pulling up water plants to eat; behind him only soft pale morning mist over still water; palette of black fur, silver back, soft greens and pale grey-gold mist." Without a named backdrop the background fills with evenly detailed foliage and the card reads as a photo; without a specific action the model paints its one default pose for the animal.
-
-Extra images when a card needs them: a real wildlife photograph as the pose skeleton when the model keeps getting the anatomy wrong ("copy its pose exactly"); the live card art of the deck's own animals when a legendary gathers them.
+**Martin:** a voice note or a character for a card when he has a feeling ("you decide" otherwise), then one tap per picture.
 
 ## A round
 
-1. **The cards and Martin's notes.** Which cards need art is on the card table (the game's `./cards`): its Art column, where Martin marks each painting draft, problem (with a note on what's wrong), fine or locked; `.venv/bin/python tools/cards/hq.py show` reads it. List the cards with rarity, strength and effect; Martin records a voice note per card when he has a feeling about it, or says "you decide".
-2. **Four bets per card.** Four lines as far apart as possible, each with its own action and named backdrop, each card in its animal's real corner of the habitat. Martin's ideas become one or two of the four.
-3. **Paint.** Four at a time in the background; about 80 pictures per window before the image quota locks. Every picture the round produced goes on the review page; Martin judges anatomy himself.
-4. **Martin picks** on the review page (`D/cards/notes.md` holds its link), each card next to its live art. Read his picks and notes with `ArtifactData` (collection `verdicts`). A pick is installed; "none" with a note becomes new bets on that note; a liked picture with one flaw in its sky, colour or light gets a surface edit.
-5. **Install** each pick with `D/cards/bar/install.sh <card> <id>` (the picture copied to `bar/r1/<id>.png` and recorded in the manifest first; it sets the card's art and crop back to draft on the card table, marked for Martin's review), then set its `CROP`, `STRIP` and `FULL` by rendering the board portrait and looking at it, through `.venv/bin/python tools/cards/hq.py crop <card> --crop x,y,d --strip x,y,z --full y` (a hook refuses hand edits of those tables), and commit; an art install runs no tests: design repo `cards/<card>.png cards/<card>.jpg cards/bar/manifest.jsonl` to `main`; game repo `static/art/<card>.jpg|webp` and `static/art.js` to the local `new-cards` branch, never pushed.
+1. **Cards.** `.venv/bin/python tools/cards/hq.py show` (game repo): the Art column marks each painting empty, draft, problem (with his note), fine or locked. Read the card's effect and name before writing anything: the picture shows the effect through what the real animal does. Look at the live cards of the same animal and family first; the new picture must not read as one of them.
+2. **Ideas.** Four to six per card, as far apart as possible: different moments, different ways the effect shows, different distance and backdrop. His note becomes one or two of them, translated, never executed word for word. One picture per idea in round one. A roll is dice; an idea is not.
+3. **Lines.** One line per idea, checked against the list below before painting. Jobs in `D/cards/bar/<batch>.jsonl`: `{"id","card","batch","idea","line"}`, plus a `{"card","batch","brief"}` line holding what Martin said. `python3 art.py gen <batch>.jsonl -p 4` in the background (about 10 minutes per 16; about 80 pictures per window before the image quota locks). The template, the reference sheet and Sol's rewrite stay as they are: tested 2026-10-17, they neither help nor hurt, and changing them is not a lever.
+4. **Page.** `python3 art.py page <review> <ids...>` builds it; publish to the review artifact (`D/cards/notes.md` holds its link) with its image files. Every picture of the round, next to the live art, numbered, with no label of ours. Tell Martin what each idea is, one line each, and the link. Nothing about which is better.
+5. **Verdicts.** Three buttons per picture: This is it, Almost, Nope. Read them with `ArtifactData` (collection `verdicts`) and merge them with `python3 art.py verdicts <review> <export.json>`. His note is a `note` record in the manifest, never a rule. Then:
+   - This is it: install.
+   - Almost and nothing better: two or three more rolls of that idea from the same line, or a surface edit (`edit.sh`) when the flaw is a sky, a colour, the eyes. Never a new scene for a liked picture.
+   - All Nope: the ideas are dead; new ideas, not re-rolls. Ask for his feeling only if he hasn't given one.
+   - A card past two rounds is parked (`problem` on the card table, with his note), not rolled again. "More legendary" and "too photographic" are reasons to park, never to roll.
+6. **Install** with `D/cards/bar/install.sh <card> <id>` (master to `cards/<card>.png`, JPEG and WebP into the game, the settle recorded, the card's art and crop back to draft on the card table). Set `CROP`, `STRIP` and `FULL` by rendering the board portrait and looking: `.venv/bin/python tools/cards/hq.py crop <card> --crop x,y,d --strip x,y,z --full y` (a hook refuses hand edits). An install runs no tests. Commit by path: design repo `cards/<card>.png cards/<card>.jpg cards/bar/manifest.jsonl cards/bar/<batch>.jsonl`; game repo `static/art/<card>.jpg|webp`, `static/art.js` and `tools/cards/levels.json` (only your own hunks; other sessions edit them too).
+
+A pick is a draft. It stays on the board; a later repaint needs a reason Martin writes on the card table.
+
+## The line
+
+What a line controls, checked before painting. Everything else about a picture (painted or photographic, legendary or flat, caught or posed) is selected by Martin, never instructed.
+
+- One animal is the hero, big. A second animal only when the card can't be read without it, and then small or partial, never its whole body.
+- A specific action the real animal does, showing the effect where it can; never a stock pose, never a title or a feeling (king, wise, proud, joyful: the model paints a character acting it out).
+- The one simple backdrop behind it, named, in the animal's real corner of its habitat (`docs/design/habitats.md`); to separate a green bird from green, change the light, not the habitat.
+- A palette, as the last clause.
+- Real animals in a real place: nothing human-made, no camera or lens words, nothing that implies an effect the card lacks (a calf under a giraffe).
+- A legendary is a different animal from its common (the one in a million) caught in a moment, never a portrait; its wonder is a real phenomenon its habitat has.
+- A real photo as pose skeleton (`"sheet"` in the job) when the model keeps getting the anatomy wrong; the deck's live card art attached when a legendary gathers them.
+
+"a big gorilla wading knee-deep through a swamp, pulling up water plants to eat; behind him only soft pale morning mist over still water; palette of black fur, silver back, soft greens and pale grey-gold mist."
+
+`D/cards/art-principles.md` is Martin's taste as it was written down, frozen 2026-10-17: read it for what the art must achieve; never add to it.
+
+## The measure
+
+`python3 art.py cost`: pictures per installed card and rounds per card, by week. The floor is one round of four to six. The treatment has failed if, after four weeks of rounds, pictures per installed card are still about 8 and rounds about 3. Then the lever is what paints (`docs/later.md`), not the words.
