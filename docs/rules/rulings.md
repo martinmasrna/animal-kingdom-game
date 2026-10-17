@@ -65,7 +65,7 @@ Keywords:
 - **Hungry N** is a Dawn effect: it eats in play order with your other Dawn effects. Only a top animal eats; a buried one is skipped. Fed or not is all or nothing: with fewer than N food it eats nothing and gets −N strength for good. An adjacent legendary Oxpecker feeds it, and an inked animal isn't Hungry until the ink wears off.
 - **Titan** takes two actions, so it's offered only while two are left (an extra action from the Chipmunk counts). No free placement can play it ("play another animal", Remora, the Prince's twin).
 - **Flee** happens before every other reaction to the cover: the animal is back in hand before an Apex Predator eats, or King Theron removes it. Only an enemy cover sets it off, by placement or by roaming. The returned card is playable at once. The Zebra's coverer goes back to its owner's hand unless it has Armor.
-- **Octopus ink** lasts until the start of the inking player's next turn. An inked animal has no keywords (printed or given), no anthem of its own (a dynamic strength counts as its printed 0), no aura for others, and none of its triggered effects (Roar-less reactions, Dawn, Dusk, "when this is removed"). It keeps its stored counters and still gets other animals' auras; a timer it already started still runs.
+- **Octopus ink** lasts for good, while the animal stays on the board (Martin, 2026-10-17); the Octopus inks every adjacent enemy, so Stealth doesn't keep one out. An inked animal has no keywords (printed or given), no anthem of its own (a dynamic strength counts as its printed 0), no aura for others, and none of its triggered effects (Roar-less reactions, Dawn, Dusk, "when this is removed"). It keeps its stored counters and still gets other animals' auras; a timer it already started still runs.
 - **Auras that give a keyword** (Armadillo's Stealth, Capybara's Armor, the legendary Jellyfish's Poison) reach the top animal on each adjacent crossroad you control, never the source itself.
 - **Grazing**: an animal grazes while it is the top of a crossroad that is a corner of a region its owner controls.
 
@@ -77,7 +77,7 @@ Cards:
 - **Praying Mantis** is a cost the player may decline; no removal, no cards.
 - **Tarantula** eats a random adjacent ally (Armor excluded) and keeps the strength it showed then, for good.
 - **Sea Turtle** and **Sunfish** lay on a random adjacent empty crossroad, as the old African Wild Dog placed its Pup (Martin, 2026-10-10).
-- **"An ally was removed this turn"** (Piranha, Vulture) and **"your animals removed this turn"** (Hyena) count your animals leaving the board this turn, whoever removed them; discards from hand don't count.
+- **"An ally was removed this turn"** (Piranha, Vulture) counts your animals leaving the board this turn, whoever removed them; **"each animal removed this turn"** (Hyena) counts both players' (Martin, 2026-10-17). Discards from hand don't count.
 - **City Spider** eats like the Tarantula without growing: a random adjacent ally at Dawn (Armor excluded). A Dawn death counts as removed this turn, so the Piranha, Hyena and Vulture see it. With a Cockroach as its only neighbour it's a death and a card every turn (Martin, 2026-10-11).
 - **Earthworm**: the two Worms land on its crossroad only while it is empty or yours; under an enemy there is no room and none appear.
 - **Clarion's** free roam is for any of your animals with Roam (the card says "an ally"), one per Clarion each turn, spent before an action.

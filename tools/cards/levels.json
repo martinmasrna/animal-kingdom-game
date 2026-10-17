@@ -36,9 +36,9 @@
     },
     "effect": {
       "by": "claude",
-      "at": 1792147998,
-      "lv": "problem",
-      "note": "Martin, 2026-10-16: his wording",
+      "at": 1792248229,
+      "lv": "draft",
+      "note": "Martin 2026-10-16: his wording",
       "review": {
         "prev_lv": "problem",
         "prev_note": "horrible wording",
@@ -1641,8 +1641,14 @@
     },
     "effect": {
       "lv": "problem",
-      "by": "martin",
-      "at": 1792093953
+      "by": "claude",
+      "at": 1792248229,
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "",
+        "prev": "Dusk: gain 5 food for each of your animals removed this turn."
+      },
+      "note": "Martin 2026-10-17: any animal removed, either side, 3 each"
     }
   },
   "jackal": {
@@ -2023,10 +2029,14 @@
   },
   "mocha": {
     "effect": {
-      "note": "next to -> adjacent to?",
-      "by": "martin",
-      "lv": "problem",
-      "at": 1792185298
+      "note": "Martin 2026-10-17: 'next to' is right: adjacent as an adjective, next to in place of adjacent to",
+      "by": "claude",
+      "lv": "draft",
+      "at": 1792248230,
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "next to -> adjacent to?"
+      }
     },
     "art": {
       "review": {
@@ -3267,10 +3277,10 @@
       "at": 1792085439
     },
     "effect": {
-      "lv": "problem",
+      "lv": "draft",
       "by": "claude",
-      "at": 1792107323,
-      "note": "Martin, 2026-10-16: Dusk, a night hunter, and further from the City Spider's Dawn",
+      "at": 1792248229,
+      "note": "Martin 2026-10-16: Dusk, a night hunter, and further from the City Spider's Dawn",
       "review": {
         "prev_lv": "problem",
         "prev_note": "have it remove any unit, just like city spider?",
@@ -3715,9 +3725,14 @@
     },
     "effect": {
       "lv": "problem",
-      "by": "martin",
-      "at": 1792148892,
-      "note": "it should work on all adjacet enemies, so that it works on legendary honey badger"
+      "by": "claude",
+      "at": 1792248228,
+      "note": "Martin 2026-10-17: every adjacent enemy (so Stealth doesn't shield the legendary Honey Badger), for good",
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "it should work on all adjacet enemies, so that it works on legendary honey badger",
+        "prev": "Roar: choose an adjacent enemy. Until your next turn, it loses all its effects."
+      }
     }
   },
   "pool-mole": {

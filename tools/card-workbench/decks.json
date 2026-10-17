@@ -2116,7 +2116,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "",
-     "text": "Roar: choose an adjacent enemy. Until your next turn, it loses all its effects."
+     "text": "Roar: adjacent enemies lose all their effects."
     },
     {
      "habitat": "Open Ocean",
@@ -2776,7 +2776,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "",
-     "text": "Dusk: gain 5 food for each of your animals removed this turn."
+     "text": "Dusk: gain 3 food for each animal removed this turn."
     },
     {
      "habitat": "Savanna",

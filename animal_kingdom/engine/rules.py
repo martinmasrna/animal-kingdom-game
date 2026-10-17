@@ -213,8 +213,6 @@ def _end_turn(state: GameState) -> None:
     state.units_placed_this_turn = 0
     state.actions_taken_this_turn = 0
     state.turn_flags = {}                    # reset once-per-turn trigger flags
-    if state.inked:                          # ink that has worn off
-        state.inked = {i: t for i, t in state.inked.items() if t > state.turn_counter}
     state.current = other_player(player)
     state.emit("turn_start", player=state.current, turn=state.turn_counter)
     # Start of the new player's turn: delayed effects + start-of-turn triggers, then resolve.

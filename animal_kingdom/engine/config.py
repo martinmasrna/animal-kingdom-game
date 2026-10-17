@@ -119,7 +119,7 @@ class Config:
 
     # --- Draws, food and other magnitudes of the launch decks ---
     mantis_draw: int = 2                 # Praying Mantis: remove an adjacent ally to draw 2
-    hyena_food_per: int = 5              # Hyena: Dusk: 5 food for each of your animals removed this turn
+    hyena_food_per: int = 3              # Hyena: Dusk: 3 food for each animal removed this turn
     hummingbird_draw: int = 2            # Hummingbird: Roar: draw 2
     termite_king_draw: int = 2           # Termite King: Roar: draw 2 if you control a Colony Queen
     dormouse_food: int = 5               # Dormouse: Dusk: gain 5 food (a rare: Worker Wasp, a common, pays 3)

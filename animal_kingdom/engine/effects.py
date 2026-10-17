@@ -419,7 +419,7 @@ def _hook(state, card_id, hook_name) -> Optional[Callable]:
         return None
     def stamped(state, unit, *args, **kw):   # every hook gets its own card's unit first
         if state.inked and statics.inked(state, unit):
-            return None                       # an inked animal has no effects until the inking player's next turn
+            return None                       # an inked animal has no effects
         n, was = len(state.effect_stack), (state.cause, state.cause_iid)
         state.cause, state.cause_iid = card_id, unit.iid   # what it does now is this unit's doing (events say so)
         try:
@@ -460,7 +460,7 @@ def _remove_specific(state, cr, unit, *, by_player, by_effect=True, by_card=None
     pos = stack.index(unit)
     state.emit("remove", cr=cr, iid=unit.iid, card=unit.card_id, owner=unit.owner, by=by_player)
     stack.remove(unit)
-    # "if an ally was removed this turn" (Piranha, Vulture), "for each of your animals removed this turn" (Hyena),
+    # "if an ally was removed this turn" (Piranha, Vulture), "for each animal removed this turn" (Hyena),
     # "if an animal was removed this turn" (Great White Shark): board removals, counted per owner.
     state.turn_flags[f"lost_{unit.owner}"] = state.turn_flags.get(f"lost_{unit.owner}", 0) + 1
     state.turn_flags["removed_any"] = True
@@ -1029,7 +1029,7 @@ def _op_timed_hook(state, step):
 def _eat(state, unit, cr) -> None:
     """Hungry N (keywords.md): at the start of your turn the animal eats N of your food; if you can't feed it, it gets -N
     strength, for good. An adjacent legendary Oxpecker feeds it ("Your adjacent Hungry animals don't need to eat"), and
-    an inked animal isn't Hungry until the ink wears off."""
+    an inked animal isn't Hungry."""
     if not statics.has_keyword(state, unit, "Hungry", cr):
         return
     n = state.cards[unit.card_id].hungry
@@ -1821,8 +1821,9 @@ def _raccoon_place(state, unit, cr):
 
 
 def _hyena_eot(state, unit, cr):
-    """Dusk: gain 3 food for each of your animals removed this turn."""
-    _push_gain(state, unit.owner, state.config.hyena_food_per * _lost_this_turn(state, unit.owner))
+    """Dusk: gain 3 food for each animal removed this turn (either player's)."""
+    removed = _lost_this_turn(state, "A") + _lost_this_turn(state, "B")
+    _push_gain(state, unit.owner, state.config.hyena_food_per * removed)
 
 
 def _vultures_dusk(state, player):
@@ -2776,22 +2777,13 @@ def _wildebeest_eot(state, unit, cr):
 # --- The pool ---------------------------------------------------------------------------------------------------
 
 def _octopus_ink_place(state, unit, cr):
-    """Roar: choose an adjacent enemy. Until your next turn, it loses all its effects (keywords included, so an
-    animal with Armor can be inked; Stealth still keeps it from being chosen)."""
-    options = [nb for nb in sorted(state.game_map.neighbors(cr))
-               if (top := state.top_unit(nb)) is not None and top.owner != unit.owner
-               and statics.can_be_chosen(state, top, unit.owner, nb)]
-    _push_choose(state, unit.owner, options, "ink", until=state.turn_counter + 2)   # the inking player's next turn
-
-
-def _then_ink(state, step, cr):
-    top = state.top_unit(cr)
-    if top is not None and top.owner != step["chooser"]:
-        state.inked[top.iid] = step["until"]
-        state.emit("inked", iid=top.iid, card=top.card_id, owner=top.owner)
-
-
-THEN["ink"] = _then_ink
+    """Roar: adjacent enemies lose all their effects (keywords included, so Armor doesn't keep it out; nothing is
+    chosen, so neither does Stealth). For good: the ink stays while the animal is on the board."""
+    for nb in sorted(state.game_map.neighbors(cr)):
+        top = state.top_unit(nb)
+        if top is not None and top.owner != unit.owner and top.iid not in state.inked:
+            state.inked.add(top.iid)
+            state.emit("inked", iid=top.iid, card=top.card_id, owner=top.owner)
 
 
 def _macaw_place(state, unit, cr):

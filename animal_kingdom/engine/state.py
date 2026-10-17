@@ -247,7 +247,7 @@ class GameState:
         card_strength_counters: Optional[dict[str, dict[str, int]]] = None,
         result: Optional[Result] = None,
         pile_owners: Optional[list] = None,
-        inked: Optional[dict[int, int]] = None,
+        inked: Optional[set[int]] = None,
         roar_twice: Optional[dict[str, int]] = None,
     ):
         self.game_map = game_map
@@ -262,9 +262,9 @@ class GameState:
         # Whose each Remove Pile card is, in step with remove_pile ("your Remove Pile": Raccoon, the legendary Raven).
         # None for a card put there by hand (tests) or by a state saved before owners were kept.
         self.pile_owners = pile_owners if pile_owners is not None else [None] * len(remove_pile)
-        # Octopus ink: iid -> the turn_counter its ink lasts until (the inking player's next turn starts then). An inked
-        # animal has no keywords and no effects meanwhile (statics.inked).
-        self.inked = inked if inked is not None else {}
+        # Octopus ink: the iids of inked animals. An inked animal has no keywords and no effects, for as long as it is
+        # on the board (statics.inked).
+        self.inked = inked if inked is not None else set()
         # Macaw: player -> the turn_counter in which that player's next Roar happens twice (spent by that Roar).
         self.roar_twice = roar_twice if roar_twice is not None else {}
         self.food = food
@@ -450,7 +450,7 @@ class GameState:
         new.turn_flags = _plain_copy(self.turn_flags)
         new.card_strength_counters = _plain_copy(self.card_strength_counters)
         new.pile_owners = list(self.pile_owners)
-        new.inked = dict(self.inked)
+        new.inked = set(self.inked)
         new.roar_twice = dict(self.roar_twice)
         new.result = self.result  # Result is frozen/immutable - safe to share
         return new
@@ -514,7 +514,7 @@ class GameState:
             "card_strength_counters": copy.deepcopy(self.card_strength_counters),
             "result": self.result.to_dict() if self.result else None,
             "pile_owners": list(self.pile_owners),
-            "inked": [[i, t] for i, t in sorted(self.inked.items())],
+            "inked": sorted(self.inked),
             "roar_twice": dict(sorted(self.roar_twice.items())),
         }
 
@@ -561,7 +561,7 @@ class GameState:
             ),
             result=Result.from_dict(d["result"]) if d["result"] else None,
             pile_owners=list(d["pile_owners"]) if "pile_owners" in d else None,
-            inked={int(i): t for i, t in (d.get("inked") or [])},
+            inked={int(i[0] if isinstance(i, list) else i) for i in (d.get("inked") or [])},   # [iid, until]: saved while ink wore off
             roar_twice=dict(d.get("roar_twice") or {}),
         )
 

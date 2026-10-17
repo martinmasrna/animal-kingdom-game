@@ -56,8 +56,7 @@ def _global_growth(state: GameState, card_id: str, owner: str) -> int:
 
 def _inked(state: GameState, iid: Optional[int]) -> bool:
     """Octopus ink (statics.inked, inlined here: statics imports this module): the unit's effects are off."""
-    until = state.inked.get(iid) if iid is not None and state.inked else None
-    return until is not None and state.turn_counter < until
+    return iid is not None and iid in state.inked
 
 
 # Auras on the board that give your other animals of a family strength: card id -> (family, config attr of the
