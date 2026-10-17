@@ -24,7 +24,7 @@ from aiohttp import WSMsgType, web
 
 from ..decks import PREMADE_DECKS, TEST_BOT_DECKS, load_premade_deck
 from ..engine.state import EngineError
-from ..engine.cards import DECK_SLUGS, load_cards
+from ..engine.cards import COPY_LIMITS, DECK_SLUGS, load_cards
 from . import custom_decks
 from . import events, feedback, news
 from .chat import Chat, ChatError
@@ -256,9 +256,15 @@ def starter_cards() -> dict[str, dict]:
     return {d["id"]: d["cards"] for d in starter_decks()}
 
 
+# Live cards that kept their animal under a new id in the launch collection (2026-10-16): a player's own deck keeps them.
+RENAMED_IDS = {"alpha": "scarlett", "dire_wolf": "wolf", "goliath": "python", "gray_wolf": "jackal", "guard_hornet": "guard_wasp",
+               "omen": "black_swan", "red_wolf": "dhole", "stoop": "hawk", "bulwark": "brutus", "rat_king": "barley"}
+COPY_LIMIT = {cid: c.copies or COPY_LIMITS[c.rarity] for cid, c in CARDS.items()}
+
+
 def profile_view(p: dict) -> dict:
     starters = starter_decks()
-    profiles.seed_decks(p["id"], starters, set(CARDS))
+    profiles.seed_decks(p["id"], starters, set(CARDS), RENAMED_IDS, COPY_LIMIT)
     return {**p, "decks": profiles.decks(p["id"], {d["id"]: d["cards"] for d in starters}),
             "history": profiles.history(p["id"]), "records": profiles.records(p["id"]),
             "logins": profiles.identities(p["id"]), "providers": oauth.available(),

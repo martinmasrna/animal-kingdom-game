@@ -209,10 +209,13 @@ class Profiles:
                         **({"cover": r["cover"]} if r["cover"] else {})})
         return out
 
-    def seed_decks(self, pid: str, starters: list[dict], pool: Optional[set] = None) -> None:
+    def seed_decks(self, pid: str, starters: list[dict], pool: Optional[set] = None, renamed: Optional[dict] = None,
+                   limits: Optional[dict] = None) -> None:
         """Give a profile each starter deck as its own, once per starter: appended after any decks it already has
         (up to DECKS_MAX). An untouched copy then follows its starter as the starter's list changes; the moment its card
         list is edited, it's the player's own, frozen as it then stood -- renaming or re-covering it doesn't count.
+        A card whose id changed (`renamed`: old id -> new id, the same animal) follows into the player's decks first,
+        at most `limits[new id]` copies.
         As the pool changes: an untouched copy of a starter that no longer exists goes, a starter new to the profile is
         given (one the player deleted is not given back), and cards gone from the pool (`pool`: the card ids that
         exist) leave the player's own decks, which stay, short of 30, for the player to refill."""
@@ -225,6 +228,15 @@ class Profiles:
                     self.db.execute("DELETE FROM decks WHERE profile = ? AND starter = ? AND edited = 0", (pid, r[0]))
         mine = self.decks(pid, current)
         changed = False
+        for d in mine:
+            if renamed and any(c in renamed for c in d["cards"]):
+                cards = {}
+                for c, n in d["cards"].items():
+                    c = renamed.get(c, c)
+                    cards[c] = min(cards.get(c, 0) + n, (limits or {}).get(c, cards.get(c, 0) + n))
+                d["cards"], changed = cards, True
+            if renamed and d.get("cover") in renamed:
+                d["cover"], changed = renamed[d["cover"]], True
         if pool is not None:
             for d in mine:
                 kept = {c: n for c, n in d["cards"].items() if c in pool}

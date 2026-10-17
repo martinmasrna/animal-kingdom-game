@@ -387,3 +387,12 @@ def test_cards_gone_from_the_pool_leave_a_players_own_deck(db):
     db.seed_decks(p["id"], [], pool={"lion"})
     assert db.decks(p["id"])[0]["cards"] == {"lion": 3}
 
+
+
+def test_a_card_whose_id_changed_follows_into_a_players_deck_within_its_copy_limit(db):
+    _, p = db.create()
+    db.seed_decks(p["id"], [])
+    db.save_decks(p["id"], [{"id": "mine", "name": "Mine", "cards": {"lion": 3, "gray_wolf": 3}, "cover": "gray_wolf"}])
+    db.seed_decks(p["id"], [], pool={"lion", "jackal"}, renamed={"gray_wolf": "jackal"}, limits={"jackal": 2})
+    d = db.decks(p["id"])[0]
+    assert d["cards"] == {"lion": 3, "jackal": 2} and d["cover"] == "jackal"
