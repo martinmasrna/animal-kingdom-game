@@ -54,9 +54,9 @@ STARTER_COVERS = {d["slug"]: d.get("cover", "") for d in STARTER_DECKS}
 # simulations measure (a bare RefereeBot() is an untested configuration).
 log = logging.getLogger(__name__)
 BOT_LEVELS = {"easy": "easy", "normal": "turn", "expert": "referee"}
-# The candidate Expert under evaluation (docs/bots.md): two turns of sight and the target-aware evaluation, capped so a
+# The candidate Expert under evaluation (docs/bots.md): two turns of sight, the target-aware evaluation and den sense, capped so a
 # move stays under the server's BOT_THINK_MAX. `AK_EXPERT_DEPTH=1 ./play` offers it as the Expert; unset, today's Expert.
-CANDIDATE_EXPERT = {"depth": 1, "time_budget": 8.0, "w.pending_target": 1.5, "w.buried_presence": 0.25}
+CANDIDATE_EXPERT = {"depth": 1, "time_budget": 8.0, "w.pending_target": 1.5, "w.buried_presence": 0.25, "den_sense": True}
 
 
 def bot_for(level: str, seed: int):

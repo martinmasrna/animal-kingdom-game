@@ -50,6 +50,7 @@ from ..engine import rules
 from .base import keep_hand
 from ..engine.actions import Action, DrawAction, PlaceAction, RoamAction
 from ..engine.state import GameState, StateView
+from ..engine.strength import card_strength
 from .greedy_bot import GreedyWeights, _roar_fizzled
 from .learned_eval import LinearEval
 from .turn_search import _DECISIVE, TurnSearcher
@@ -68,7 +69,8 @@ class RefereeBot(TurnSearcher):
                  max_search_nodes: Optional[int] = 1_000,
                  evaluator: Optional[LinearEval] = None,
                  quiesce: bool = False, mulligan: bool = False,
-                 depth: int = 0, next_width: int = 3, deepen_top: int = 4, deepen_roots: int = 3, time_budget: float = 0.0):
+                 depth: int = 0, next_width: int = 3, deepen_top: int = 4, deepen_roots: int = 3, time_budget: float = 0.0,
+                 den_sense: bool = False):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          evaluator=evaluator, quiesce=quiesce, mulligan=mulligan)
@@ -86,6 +88,13 @@ class RefereeBot(TurnSearcher):
         self.deepen_roots = deepen_roots    # only this many root candidates (the one-turn search's best) get it at all
         self.time_budget = time_budget      # seconds per move after which no further root is deepened (0: no limit)
         self._move_started = 0.0
+        # Den sense (2026-10-17, from Martin's three dens lost in a row that evening, each with a one-card guard on the
+        # table): the sampled reply takes a den capture when the world holds one within their turn (the fast policy that
+        # plays the reply picks one action at a time, so a capture behind a setup action, cover my weak den guard then
+        # walk in, was only seen when the setup happened to be its best single move); and the root screen keeps the
+        # strongest guard for each den approach (the one-move score ranked a Meerkat above the Groundhog on the square
+        # that decided the game, so the only defence was never searched).
+        self.den_sense = den_sense
         self._deepening = False             # on only while _rescore_roots scores a root's final lines
         # `self._policy` (the GreedyBot that plays every rollout seat) and `self._search_nodes`
         # are set identically by TurnSearcher.__init__; RefereeBot uses them for reply rollouts
@@ -223,6 +232,12 @@ class RefereeBot(TurnSearcher):
         selected = {
             action for _, _, action in scored[:self.root_width]
         }
+        if self.den_sense:
+            for cr in state.game_map.hq_front(me):
+                guards = [a for a in candidates
+                          if isinstance(a, PlaceAction) and not a.is_hq_capture and a.crossroad == cr]
+                if guards:
+                    selected.add(max(guards, key=lambda a: card_strength(state, a.card_id, me)))
         # Draw is strategically distinct and deliberately protected by the generic beam;
         # retain it through the cheap screen even when its immediate score is low.
         selected.update(
@@ -413,6 +428,8 @@ class RefereeBot(TurnSearcher):
             self.last_search_stats["lookahead_lines"] = self.last_search_stats.get("lookahead_lines", 0) + 1
             value = self._leaf_score(nxt, me, depth - 1)
             best = value if best is None else max(best, value)
+        if best is not None and abs(best) >= _DECISIVE / 2:
+            best /= 2        # a game decided a turn later counts half: lose later rather than now, win now rather than later
         return best
 
     def _play_turn(self, state: GameState, me: str) -> None:
@@ -449,5 +466,33 @@ class RefereeBot(TurnSearcher):
                 return
             actor = state.player_to_act()
             legal = rules.legal_actions(state)
+            if self.den_sense and actor != me and state.pending is None:
+                setup = self._capture_setup(state, actor, me, legal)
+                if setup is not None:
+                    rules.apply_action(state, setup, validate=False)     # the capture itself is the policy's next pick
+                    continue
             action = self._policy.choose(state.view_for(actor), legal, state)
             rules.apply_action(state, action, validate=False)
+
+    @staticmethod
+    def _capture_setup(state: GameState, opp: str, me: str, legal: Sequence[Action]) -> Optional[Action]:
+        """The action that opens a den capture for `opp` with their next one, in this (sampled) world: a step onto a
+        crossroad in front of my den, or a draw when they already stand there empty-handed. None when no two of their
+        remaining actions capture. An immediate capture needs no setup (the policy takes it)."""
+        if any(isinstance(a, (PlaceAction, RoamAction)) and a.is_hq_capture for a in legal):
+            return None
+        if state.config.actions_per_turn - state.actions_taken_this_turn < 2:
+            return None
+        front = state.game_map.hq_front(me)
+        firsts = [a for a in legal
+                  if isinstance(a, (PlaceAction, RoamAction)) and a.target[0] == "cr" and a.target[1] in front]
+        if not state.hands[opp] and any(cr in state.connected_occupied(opp) for cr in front):
+            firsts += [a for a in legal if isinstance(a, DrawAction)]
+        for first in firsts:
+            nxt = state.clone()
+            rules.apply_action(nxt, first, validate=False)
+            if nxt.pending is not None or nxt.player_to_act() != opp or rules.is_terminal(nxt) is not None:
+                continue
+            if any(isinstance(a, (PlaceAction, RoamAction)) and a.is_hq_capture for a in rules.legal_actions(nxt)):
+                return first
+        return None

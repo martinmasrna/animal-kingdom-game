@@ -205,3 +205,48 @@ def test_taipan_marks_the_python():
             turn.append(bot.choose(s.view_for(s.player_to_act()), rules.legal_actions(s), s))
             rules.apply_action(s, turn[-1])
         assert [x for x in s.scheduled if x["step"].get("by_card") == "gaboon_viper" and x["step"]["iid"] == python], (seed, turn)
+
+
+DEN_SENSE_CANDIDATE = {"depth": 1, "w.pending_target": 1.5, "w.buried_presence": 0.25, "den_sense": True}
+
+
+def _opponent_captures_in_two(s):
+    """Can A take B's den within two actions from here (A to act)?"""
+    for a1 in rules.legal_actions(s):
+        if getattr(a1, "is_hq_capture", False):
+            return True
+        n = s.clone()
+        rules.apply_action(n, a1, validate=False)
+        if n.player_to_act() == "A" and any(getattr(a2, "is_hq_capture", False) for a2 in rules.legal_actions(n)):
+            return True
+    return False
+
+
+def test_the_groundhog_guards_the_den():
+    # Martin's Hoofed vs the Expert's Food Aggro, 17 October (web match HWENGG), the bot's turn 6 with a Groundhog in
+    # hand and a Chipmunk alone in front of its den, Martin's Zebra and Warthog beside it with two cards in hand. He
+    # covers the Chipmunk and walks in unless something stronger stands on 5,2. Today's Expert drew twice and lost
+    # the game there. Two blindnesses: its reply model plays the opponent one action at a time, so the cover-then-
+    # capture never appeared in any world; and its root screen ranked a Meerkat above the Groundhog on that square,
+    # so the only guard was never searched. With den sense it guards in every seed (draw first, then the guard, or
+    # the guard first).
+    from animal_kingdom.sim.runner import make_bot
+    for seed in range(5):
+        s, bot = _puzzle("den_guard_cover"), make_bot("referee", seed, extra=dict(DEN_SENSE_CANDIDATE))
+        while s.result is None and s.current == "B":
+            rules.apply_action(s, bot.choose(s.view_for("B"), rules.legal_actions(s), s))
+        assert s.top_unit("5,2").card_id != "chipmunk", seed
+        assert not _opponent_captures_in_two(s), seed
+
+
+def test_the_hoofed_bot_covers_its_gazelle():
+    # The same evening, Martin's Cats vs the Expert's Hoofed (web match HDUPLA, first game), the bot's turn 6: a
+    # Gazelle alone on 5,2, Martin's Tiger and Lynx next to it with six cards in hand, the bot holding Giraffe, Cape
+    # Buffalo, Boar, Giraffe, Deer. Today's Expert drew and put the Buffalo on 5,3; Martin covered the Gazelle and
+    # captured. With den sense the bot's turn leaves no two-action capture.
+    from animal_kingdom.sim.runner import make_bot
+    for seed in range(3):
+        s, bot = _puzzle("den_guard_hoofed"), make_bot("referee", seed, extra=dict(DEN_SENSE_CANDIDATE))
+        while s.result is None and s.current == "B":
+            rules.apply_action(s, bot.choose(s.view_for("B"), rules.legal_actions(s), s))
+        assert not _opponent_captures_in_two(s), seed
