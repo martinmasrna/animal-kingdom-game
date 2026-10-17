@@ -79,7 +79,7 @@ TOKENS = [
     _token("roach", "Roach", 1),                                              # Cockroach
     _token("baby_fish", "Baby Fish", 0, ["Fish"]),                            # Sunfish
     _token("cuckoo_egg", "Cuckoo Egg", 0, ["Egg"], "When you draw this, your opponent draws a card."),   # Cuckoo
-    _token("golden_egg", "Golden Egg", 0, ["Egg"], "When you draw this, remove it and draw 2 cards."),   # Aurum
+    _token("golden_egg", "Golden Egg", 0, ["Egg"], "When you draw this, remove it and draw 2 cards.", rarity="legendary"),   # Aurum
     _token("pup", "Pup", 1, ["Canine"]),                                      # the tutorial's opponent
     _token("poppy", "Poppy", 1, ["Canine"]),                                  # Scarlett
     _token("rusty", "Rusty", 1, ["Canine"]),
