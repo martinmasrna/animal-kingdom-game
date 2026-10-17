@@ -88,9 +88,11 @@ export function screenMismatches() {
     const timer = el.querySelector('.timer');
     const alts = e => [...e.querySelectorAll('img')].map(i => i.alt).join('');   // painted digits: their alt text
     if (top.timer && !(timer && alts(timer) === String(top.timer))) out.push(`${cr}: ${top.id} timer ${top.timer} not shown`);
-    const kw = (window.__ak.cards()[top.id].kw || []).filter(k => ['Armor', 'Stealth'].includes(k));
-    const badges = [...el.querySelectorAll('.kw img')].map(i => i.alt).join(', ');   // one painted badge per keyword
-    if (kw.length && badges !== kw.join(', ')) out.push(`${cr}: ${top.id} is ${kw.join(', ')} but shows ${badges || 'no badge'}`);
+    // the board keywords the view gives it (printed or lent by a neighbour; Spikes until used), none while inked; the
+    // trigger mark (Dawn, Dusk, eye) is a separate badge, not a keyword
+    const kw = top.inked ? [] : [top.armor && 'Armor', top.hidden && 'Stealth', top.spikes && 'Spikes', top.poison && 'Poison'].filter(Boolean);
+    const badges = [...el.querySelectorAll('.kws .kw img')].map(i => i.alt).join(', ');   // one painted badge per keyword
+    if (badges !== kw.join(', ')) out.push(`${cr}: ${top.id} is ${kw.join(', ') || 'unbadged'} but shows ${badges || 'no badge'}`);
     const buried = el.querySelectorAll('.buried').length;
     if (buried !== Math.min(3, st.length - 1)) out.push(`${cr}: ${buried} buried discs for a stack of ${st.length}`);
     delete want[cr];
