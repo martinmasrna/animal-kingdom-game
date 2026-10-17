@@ -29,14 +29,14 @@ The cold walkthrough of 17 October (a Sonnet agent on a test server; screenshots
 
 ### 2. The climb (days 3 to 7)
 
-- Measure first: thinking time per move for each web level and deck (walkthrough: bot turns took 6 to 12 s, Easy included; split pacing, animation and search before changing any of it).
-- Search budget A/B in the background: the web Expert with a node cap of 10x and 25x today's 80 and quiescence on, against today's Expert, paired seeds, both seats, 200+ games a matchup. Ship the winner as the web Expert if it is clearly stronger and stays under the 15 s move limit.
-- Easy for a day-one player. Measured 17 October against the greedy bot: Easy's strength is its deck, not its slip (Cats 42% and Fish 44%, Egg Control 5%, Aristocrats 8%; raising the slip lowers all of them and keeps the spread). The ranked queue already picks a bot by its own per-deck rating, so nothing changes there. Where ratings don't apply, Practice Easy on Random and the tutorial's first match (which was Easy Den Rush, four den captures in the walkthrough's first ten minutes), the bot's deck comes from Colony, Hoofed or Giants: the simpler half of the weak ones (Martin, 2026-10-17). The twelve new decks' ladder bots still sit at level defaults (the launch seed named the old decks): re-seed with `sim/ladder_seed.py` once the cores are free, whether or not the Expert changes.
-- A newcomer's first ranked games and the concede's cost stay as Glicko gives them (Martin, 2026-10-17: dropped).
-- Ladder bots play the lists the deck optimizer finds strongest for a bot, not the human-tuned starters.
-- Target-aware removal in the hand eval and the features, round 4 of the value net, proved on current cards (scoped in `bots.md`). Per-deck evaluation for ladder bots is allowed: each ladder bot is one deck at one level (Martin, 17 October; the generalist invariant in CLAUDE.md stays for the search bots that play any deck).
-- Re-seed the ladder's bot ratings when a new Expert ships (`sim/ladder_seed.py`).
-- At the end of the week: the cold pilot. The link to two or three people from the Discord, asked only to play and say where they got stuck. One cold data point exists today; three more a week early beat any amount of guessing.
+The bots are opponents, not balance instruments (Martin, 2026-10-17; `bots.md` opens with it). The measure is the ladder rating against people per bot and deck; baseline 17 October: Expert Cats 1921, Martin and Kalista 1870 (beating the Expert three in four), Laras 2367; goal: the best pairing near 2100.
+
+- Depth first. The search never imagines its own next turn; at the leaf, after the opponent's reply, it now plays its own next turn and their reply with the fast policy and scores after, a second turn of sight at about twice the cost. Acceptance: a Zebra puzzle (the legendary played on turn one for one card), the Taipan puzzle, an A/B against today's Expert at ten games, the time per move under the 15 s limit, then it ships as the web Expert and the ladder is re-seeded.
+- Then decks that suit a bot (the ladder bots play the lists a bot wins most with, not the human-tuned starters) and per-deck evaluation for ladder bots, each measured against the baseline.
+- The target-aware evaluator candidate (the Taipan fix) ships when its paired run passes; it is cheap and orthogonal.
+- Easy for a day-one player: done (Practice Easy on Random and the tutorial's first match draw from Colony, Hoofed or Giants; the queue picks by per-deck rating).
+- Re-seed the ladder's bot ratings whenever a new Expert ships (`sim/ladder_seed.py`).
+- At the end of the week: the cold pilot. The link to two or three people from the Discord, asked only to play and say where they got stuck.
 
 ### 3. First hours (days 7 to 11)
 

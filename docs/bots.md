@@ -2,6 +2,12 @@
 
 The bots have two jobs: the AI opponent people play against, and the pilots whose games produce balance data. Both jobs hit the same limit, which is judgement about the future.
 
+## What the bots are for (Martin, 2026-10-17)
+
+Opponents for people, nothing else. They never found a balance problem a person doesn't see within a couple of games of a deck, so bot-vs-bot numbers only rank candidates of the same cost; the measure of a bot is its ladder rating against humans, one per level and deck (`bot:<level>:<deck>` in the `ladder` table). Baseline, 17 October: the best pairing is Expert Cats at 1921, Martin and Kalista at 1870 beating the Expert three games in four, Laras at 2367. Goal: the best pairing at about 2100, a challenge, not a wall. Difficulty comes from real strength only, never a handicap.
+
+The search scores a board after its own turn and the opponent's reply and never imagines its own next turn; that horizon, not evaluation detail, is why a practised player reaches 75% in a week (a Zebra played on turn one for one card). Levers, in order: depth (a second own turn in the search), decks that suit a bot's strengths, per-deck evaluation for ladder bots, the value network. Width on a one-turn search is not worth CPU (the 17 October budget runs: a few points at twice the cost, every interval across zero, stopped).
+
 ## The ladder
 
 | Kind | What it does | Cost vs greedy | In the game UI |
