@@ -43,3 +43,8 @@ export const CARD_NUMS = [
   "butterfly_legend_monarch", "arna", "tutorial_cape_buffalo", "tutorial_dire_wolf", "tutorial_lynx", "tutorial_chipmunk",
   "beaver", "macaw", "toad", "locust", "roach_king", "roach", "mole_legend", "bat_legend", "golden_egg"
 ];
+
+// A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck
+// code's number now means; the server moves players' saved decks the same way (web/server.py RENAMED_IDS, kept equal by a test).
+export const SUCCESSOR = { alpha: 'scarlett', dire_wolf: 'wolf', goliath: 'python', guard_hornet: 'guard_wasp', omen: 'black_swan', red_wolf: 'dhole', stoop: 'hawk', bulwark: 'brutus', rat_king: 'barley', jerboa: 'mole', chinchilla: 'beaver', greywhisker: 'mole_legend', house_cat: 'alley_cat', taipan: 'gaboon_viper', polar_bear: 'crocodile', gray_wolf: 'chimpanzee', snow_leopard: 'leopard' };
+

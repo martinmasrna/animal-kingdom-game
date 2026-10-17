@@ -263,7 +263,7 @@ RENAMED_IDS = {"alpha": "scarlett", "dire_wolf": "wolf", "goliath": "python", "g
                "red_wolf": "dhole", "stoop": "hawk", "bulwark": "brutus", "rat_king": "barley",
                "jerboa": "mole", "chinchilla": "beaver", "greywhisker": "mole_legend", "house_cat": "alley_cat",
                "taipan": "gaboon_viper", "polar_bear": "crocodile", "gray_wolf": "chimpanzee", "snow_leopard": "leopard"}
-COPY_LIMIT = {cid: c.copies or COPY_LIMITS[c.rarity] for cid, c in CARDS.items()}
+COPY_LIMIT = {cid: COPY_LIMITS[c.rarity] for cid, c in CARDS.items()}   # any deck may hold the rarity's full count (decks.py)
 # The cards a player's deck can hold: the starter decks' and the bench's (not the reserve's, the tutorial's or tokens).
 COLLECTIBLE = {cid for cid, c in CARDS.items() if c.deck not in ("reserve", "tutorial", "token")}
 

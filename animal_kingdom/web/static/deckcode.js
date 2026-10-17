@@ -5,7 +5,10 @@
 //   AK1:BAUEfw...
 // The AK1 line is each card as a varint of (card number * 4 + copies), base64url. Import takes the AK1 line, or failing that,
 // any lines shaped like "3x Worker Ant" (with or without the "(1)" strength), so a list typed by hand or by an agent works.
-import { CARD_NUMS } from './cardnums.js';
+import { CARD_NUMS, SUCCESSOR } from './cardnums.js';
+
+// A card a deck can hold: not the reserve's (cards outside the launch habitats, retired designs), the tutorial's or a token.
+const collectible = (cards, id) => cards[id] && !['reserve', 'tutorial', 'token'].includes(cards[id].deck);
 
 const NUM = Object.fromEntries(CARD_NUMS.map((id, i) => [id, i + 1]));
 const RANK = { legendary: 0, rare: 1, common: 2 }, sv = c => c.str === '*' ? -1 : c.str;
@@ -29,11 +32,11 @@ export function decodeDeck(text, cards) {
     const bytes = unb64(m[1]);
     for (let i = 0, v = 0, s = 0; i < bytes.length; i++) {
       v |= (bytes[i] & 127) << s; s += 7;
-      if (!(bytes[i] & 128)) { const id = CARD_NUMS[(v >> 2) - 1], k = v & 3; if (cards[id]) for (let j = 0; j < k; j++) list.push(id); v = 0; s = 0; }
+      if (!(bytes[i] & 128)) { const old = CARD_NUMS[(v >> 2) - 1], id = SUCCESSOR[old] || old, k = v & 3; if (collectible(cards, id)) for (let j = 0; j < k; j++) list.push(id); v = 0; s = 0; }
     }
   } catch { list = []; }
   if (!list.length) {
-    const byName = Object.fromEntries(Object.values(cards).map(c => [c.name.toLowerCase(), c.id]));
+    const byName = Object.fromEntries(Object.values(cards).filter(c => collectible(cards, c.id)).map(c => [c.name.toLowerCase(), c.id]));
     for (const line of String(text).split('\n')) {
       const q = line.match(/(\d+)\s*x\s*(?:\(\S+\)\s*)?(.+?)\s*$/i), id = q && byName[q[2].toLowerCase()];
       if (id) for (let j = 0; j < Math.min(+q[1], 3); j++) list.push(id);

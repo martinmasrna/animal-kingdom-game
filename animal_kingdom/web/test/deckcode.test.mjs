@@ -32,3 +32,9 @@ test('a readable list works without the code line (typed by hand or by an agent)
 test('text without a deck is not a deck', () => {
   assert.equal(decodeDeck('hello', C), null); assert.equal(decodeDeck('AK1:!!!', C), null);
 });
+
+test('an old code still imports: a retired card comes as its successor, a card no deck can hold is left out', () => {
+  const code = encodeDeck('Old', ['chinchilla', 'chinchilla', 'jerboa', 'lion', 'lemming'], C);   // all three are reserve cards now
+  assert.deepEqual(sorted(decodeDeck(code, C).list), ['beaver', 'beaver', 'lion', 'mole'], 'Beaver and Mole by succession; the Lemming dropped');
+  assert.equal(decodeDeck('3x Lemming', C), null, 'a hand-typed reserve card is not a deck card');
+});
