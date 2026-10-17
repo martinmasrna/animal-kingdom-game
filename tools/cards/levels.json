@@ -4410,6 +4410,24 @@
       "note": "into the collection (status proposed)",
       "by": "claude",
       "at": 1792262681
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792277777
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792277801
     }
   },
   "peacock": {
