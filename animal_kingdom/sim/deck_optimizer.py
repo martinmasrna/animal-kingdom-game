@@ -59,21 +59,42 @@ def draftable_by_rarity(cards=None, exclude: frozenset[str] = frozenset()) -> di
     return {r: sorted(ids) for r, ids in pools.items()}
 
 
+_COLLECTIBLE: dict | None = None
+
+
+def _collectible_cards() -> dict:
+    """The cards a recipe may hold: what a player can collect (premade decks and the bench), by id.
+
+    A recipe outside this pool measures nothing a player could build: the first best-deck run
+    against the bot pool carried the reserve's Polar Bear out of a stale seed through every
+    swap, and the pile had to be thrown away (18 October 2026)."""
+    global _COLLECTIBLE
+    if _COLLECTIBLE is None:
+        _COLLECTIBLE = {cid: c for cid, c in load_cards().items() if c.deck in COLLECTIBLE_SLUGS}
+    return _COLLECTIBLE
+
+
 @dataclass(frozen=True)
 class Recipe:
-    """A legal 4-4-6 decklist as its unique designs (order-insensitive; stored sorted)."""
+    """A legal 4-4-6 decklist as its unique collectible designs (order-insensitive; stored sorted)."""
 
     legendary: tuple[str, ...]
     rare: tuple[str, ...]
     common: tuple[str, ...]
 
     def __post_init__(self):
+        cards = _collectible_cards()
         for rarity in RARITIES:
             ids = getattr(self, rarity)
             if len(ids) != SLOTS[rarity]:
                 raise ValueError(f"{rarity}: need {SLOTS[rarity]} designs, got {len(ids)}")
             if len(set(ids)) != len(ids):
                 raise ValueError(f"{rarity}: duplicate design in {ids}")
+            for cid in ids:
+                if cid not in cards:
+                    raise ValueError(f"{cid} is not a collectible card (a reserve design, a token, or unknown)")
+                if cards[cid].rarity != rarity:
+                    raise ValueError(f"{cid} is {cards[cid].rarity}, listed under {rarity}")
 
     def slot(self, rarity: str) -> tuple[str, ...]:
         return getattr(self, rarity)
@@ -113,8 +134,8 @@ def random_recipe(rng: random.Random, pools: Optional[dict[str, list[str]]] = No
 # with no "if you control N friendly X" precondition, so cross-deck mixing doesn't break synergy.
 SEED_RECIPE = make_recipe(
     legendary=("gale", "sirocco", "pestis", "scarlett"),
-    rare=("jaguar", "hawk", "polar_bear", "rhinoceros"),
-    common=("lion", "tiger", "lemming", "wolf", "eagle", "bat"),
+    rare=("jaguar", "hawk", "orca", "rhinoceros"),
+    common=("lion", "tiger", "mouse", "wolf", "eagle", "bat"),
 )
 
 
