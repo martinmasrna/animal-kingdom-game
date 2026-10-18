@@ -14,14 +14,14 @@ const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/M
 
 const freePort = () => new Promise(res => { const s = net.createServer(); s.listen(0, () => { const { port } = s.address(); s.close(() => res(port)); }); });
 
-export async function startServer() {
+export async function startServer(env = {}) {   // env: extra variables for the server (a test's AK_DB, say)
   const port = await freePort();
   // The server exits when its stdin closes, so a test process that dies without reaching after() takes it down too
   // (otherwise each killed run left a server running for days).
   const boot = 'import os, sys, threading, runpy; threading.Thread(target=lambda: (sys.stdin.read(), os._exit(0)), daemon=True).start(); '
     + `sys.argv = ['server', '--port', '${port}', '--no-open']; runpy.run_module('animal_kingdom.web.server', run_name='__main__')`;
   const proc = spawn(PY, ['-c', boot],
-    { cwd: REPO, env: { ...process.env, AK_NO_GAME_LOGS: '1', AK_BOT_PAUSE: '0' }, stdio: ['pipe', 'ignore', 'ignore'] });
+    { cwd: REPO, env: { ...process.env, AK_NO_GAME_LOGS: '1', AK_BOT_PAUSE: '0', ...env }, stdio: ['pipe', 'ignore', 'ignore'] });
   for (let i = 0; i < 100; i++) {
     try { const r = await fetch(`http://localhost:${port}/`); if (r.ok) return { url: `http://localhost:${port}`, stop: () => proc.kill() }; } catch { }
     await new Promise(r => setTimeout(r, 100));
