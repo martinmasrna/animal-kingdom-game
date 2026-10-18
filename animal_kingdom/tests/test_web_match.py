@@ -302,7 +302,7 @@ def test_bot_levels_are_the_configurations_the_simulations_measure():
 
 def test_the_bots_play_the_bot_pool_only():
     """Bots are opponents for people (Martin, 2026-10-18): ranked, the ladder seed and the benchmark panel use decks.BOT_DECKS,
-    eight premades the bots pilot well; the other premades stay player decks (a bot losing with one teaches it is bad)."""
+    nine premades the bots pilot well; the other premades stay player decks (a bot losing with one teaches it is bad)."""
     import sqlite3
     from animal_kingdom.decks import BOT_DECKS, PANEL_OPPONENTS, PREMADE_DECKS
     from animal_kingdom.sim.ladder_seed import bots
