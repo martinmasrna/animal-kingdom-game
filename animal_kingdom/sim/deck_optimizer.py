@@ -35,6 +35,7 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 from ..decks import register_deck
+from ..decks import BOT_DECKS
 from ..engine.cards import COLLECTIBLE_SLUGS, COPY_LIMITS, DECK_SLUGS, load_cards
 from ..engine.config import Config, load_config_overrides
 from .runner import run_pairs
@@ -305,10 +306,13 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--evaluate-only", action="store_true",
                         help="just score the seed recipe vs the field and exit (no search)")
     parser.add_argument("--out", type=Path, help="write the finalist recipe + eval as JSON")
+    parser.add_argument("--field", default=None,
+                        help="comma-separated field decks, or 'all' for every premade (default: the bot pool, decks.BOT_DECKS)")
     args = parser.parse_args(argv)
 
     config = load_config_overrides(args.config)
-    field = sorted(DECK_SLUGS)
+    field = (sorted(BOT_DECKS) if args.field is None else sorted(DECK_SLUGS) if args.field.strip().lower() == "all"
+             else [f.strip().lower() for f in args.field.split(",") if f.strip()])
 
     if args.seed_recipe:
         data = json.loads(args.seed_recipe.read_text())
