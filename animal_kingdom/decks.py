@@ -40,6 +40,14 @@ def _build_premade_decks(cards: dict[str, Card]) -> dict[str, list[str]]:
 # each card's `deck`/`rarity`), so it can never drift from cards.json.
 PREMADE_DECKS: dict[str, list[str]] = _build_premade_decks(load_cards())
 
+# The decks the bots play: ranked matchmaking, the ladder seed and the bot benchmark panel draw from these eight.
+# Bots are opponents for people, so a deck the bots pilot badly (Egg Control, Aristocrats, Food OTK, Handlock as of
+# the 18 October seeds) stays a player deck only: a bot losing with it teaches the deck is bad (Martin, 2026-10-18).
+# Practice still lets a player pick any premade for the bot; this is the pool for 'Random' and for ranked.
+BOT_DECKS: tuple[str, ...] = ("cats", "fish", "canines", "hoofed", "den_rush", "giants", "food_aggro", "colony")
+assert all(d in PREMADE_DECKS for d in BOT_DECKS), [d for d in BOT_DECKS if d not in PREMADE_DECKS]
+PANEL_OPPONENTS: tuple[str, ...] = ("cats", "den_rush", "fish")   # the benchmark's standing opponents, from the pool
+
 
 # The no-synergy "baseline" deck: 30 distinct self-sufficient cards (18 common / 8 rare /
 # 4 legendary, 1 copy each) plus minted calibration bodies (the `mock_*` reserve cards). Not a

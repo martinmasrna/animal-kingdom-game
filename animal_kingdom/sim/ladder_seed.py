@@ -1,4 +1,4 @@
-"""Seed the ladder's bots (web/ladder.py): a round robin of every level-and-deck bot against every other, then each
+"""Seed the ladder's bots (web/ladder.py): a round robin of every level-and-deck bot (the levels times decks.BOT_DECKS) against every other, then each
 bot's rating fitted to the results (Bradley-Terry on the Elo scale, the field centred at 1500).
 
     python -m animal_kingdom.sim.ladder_seed --games 3 --jobs 4 --out results/ladder/seed.json
@@ -15,14 +15,14 @@ import json
 import math
 from pathlib import Path
 
-from ..decks import PREMADE_DECKS
+from ..decks import BOT_DECKS
 from ..web.ladder import LEVELS, bot_id
 from ..web.match import BOT_LEVELS
 from .runner import MatchSpec, run_specs
 
 
 def bots() -> list[tuple[str, str]]:
-    return [(level, deck) for level in LEVELS for deck in sorted(PREMADE_DECKS) if deck != "goodstuff"]
+    return [(level, deck) for level in LEVELS for deck in sorted(BOT_DECKS)]   # the bot pool: what ranked offers
 
 
 def fit(results: list[tuple[str, str]], iters: int = 2000) -> dict[str, float]:

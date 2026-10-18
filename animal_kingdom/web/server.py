@@ -22,7 +22,7 @@ from pathlib import Path
 
 from aiohttp import WSMsgType, web
 
-from ..decks import PREMADE_DECKS, TEST_BOT_DECKS, load_premade_deck
+from ..decks import BOT_DECKS, PREMADE_DECKS, TEST_BOT_DECKS, load_premade_deck
 from ..engine import rules
 from ..engine.state import EngineError
 from ..engine.cards import COPY_LIMITS, DECK_SLUGS, load_cards
@@ -306,7 +306,7 @@ def bot_levels(table) -> dict[str, float]:
     """Each bot level's rating on the leaderboard: its decks' ratings averaged by games played."""
     levels: dict[str, list] = {}
     for lid, r in table:
-        if (b := ranking.parse_bot(lid)) and b[1] in PREMADE_DECKS:   # a retired deck's bot no longer plays
+        if (b := ranking.parse_bot(lid)) and b[1] in BOT_DECKS:   # a retired deck's bot no longer plays
             levels.setdefault(b[0], []).append(r)
     return {level: sum(r.rating * max(1, r.games) for r in rs) / sum(max(1, r.games) for r in rs) for level, rs in levels.items()}
 
@@ -898,6 +898,7 @@ async def pool(_req):
                   for slug in DECK_NAMES if slug in PREMADE_DECKS],
         "map": map_info(),
         "levels": list(BOT_LEVELS),
+        "bot_decks": list(BOT_DECKS),   # the pool a Random bot deck is drawn from (decks.BOT_DECKS)
         "build": BUILD,
     })
 
@@ -1088,7 +1089,7 @@ def make_app() -> web.Application:
         global ladder, friends, chat
         friends = Friends(profiles.db)
         chat = Chat(profiles.db)
-        ladder = ranking.Ladder(profiles.db, sorted(PREMADE_DECKS))
+        ladder = ranking.Ladder(profiles.db, sorted(BOT_DECKS))   # ranked offers the bot pool only (decks.BOT_DECKS)
         if ladder.apply_seed(Path(__file__).parent / "ladder_seed.json"):   # the bots' ratings from simulation (sim/ladder_seed.py)
             log.info("ladder: bots seeded from ladder_seed.json")
         custom_decks.load()

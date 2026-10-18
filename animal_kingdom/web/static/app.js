@@ -26,7 +26,7 @@ const tokenKey = id => 'ak:seat:' + id;
 const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } catch { return null; } };
 const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } catch { /* private mode: the tab just can't reconnect */ } };
 
-let CARDS = {}, MAP, DECKS = [], ME = null;   // ME: your profile {id, name, tag, decks, history}
+let CARDS = {}, MAP, DECKS = [], BOT_POOL = [], ME = null;   // BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
 let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, selIid: null, roam: null, hover: null, peek: false, menu: false, panel: null };   // roam: the crossroad (viewer space) of the animal picked to roam
 
@@ -123,7 +123,7 @@ function checkBuild(b) {
 }
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
-  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BUILD = p.build;
+  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BUILD = p.build; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
   COVER = Object.fromEntries(DECKS.map(d => [d.id, d.cover]));
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
@@ -321,7 +321,7 @@ function homeScreen(mode = {}) {
     if (play.opp === 'friend' && fr && fr.online) return startSearch('challenge', 'go', '/api/challenge', { friend: fr.id, deck: deckSpec(chosen) }, friendLabel(fr, play.friends));
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
-      const pool = play.level === 'easy' ? DECKS.filter(d => EASY_POOL.includes(d.id)) : DECKS, deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
+      const pool = play.level === 'easy' ? DECKS.filter(d => EASY_POOL.includes(d.id)) : DECKS.filter(d => BOT_POOL.includes(d.id)), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
       body.bot = { level: play.level, deck };
     }
     if (play.opp === 'gauntlet') {

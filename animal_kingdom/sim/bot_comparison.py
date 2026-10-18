@@ -34,6 +34,7 @@ from dataclasses import asdict, dataclass
 from typing import Optional, Sequence
 
 from ..bots.greedy_bot import GreedyWeights
+from ..decks import BOT_DECKS, PANEL_OPPONENTS
 from ..engine.cards import DECK_SLUGS
 from ..engine.config import Config, load_config_overrides
 from . import metrics
@@ -526,10 +527,12 @@ def main(argv: Sequence[str] | None = None) -> None:
     p.add_argument("--config", default=None,
                    help="JSON file of Config field overrides; 'none' clears a wrapper preset")
     p.add_argument("--deck", default=None,
-                   help="only benchmark this one candidate deck (default: all seven)")
+                   help="only benchmark this one candidate deck (default: the bot pool, decks.BOT_DECKS)")
+    p.add_argument("--decks", default=None,
+                   help="comma-separated candidate decks, or 'all' for every premade (default: the bot pool)")
     p.add_argument("--opponents", default=None,
-                   help="comma-separated opponent decks, e.g. goodstuff (default: the seven "
-                        "premades, mirror included)")
+                   help="comma-separated opponent decks, e.g. goodstuff, or 'all' for every premade with the mirror "
+                        "(default: the standing panel, decks.PANEL_OPPONENTS)")
     p.add_argument("--out", default="results/bot_quality/turnbot",
                    help="artifact output directory")
     p.add_argument("--bootstrap-resamples", type=int, default=DEFAULT_BOOTSTRAP_RESAMPLES)
@@ -541,17 +544,19 @@ def main(argv: Sequence[str] | None = None) -> None:
     baseline_kind, baseline_kwargs = parse_bot_spec(args.baseline_kind, "--baseline-kind")
     opponent_kind, opponent_kwargs = parse_bot_spec(args.opponent_kind, "--opponent-kind")
 
-    decks = sorted(DECK_SLUGS)
+    decks = sorted(BOT_DECKS)   # the standing panel: the decks the bots play (decks.BOT_DECKS)
+    if args.decks is not None:
+        decks = sorted(DECK_SLUGS) if args.decks.strip().lower() == "all" else [d.strip().lower() for d in args.decks.split(",") if d.strip()]
     if args.deck is not None:
-        target = args.deck.strip().lower()
-        if target not in DECK_SLUGS:
-            raise SystemExit(f"--deck {target!r} not in {sorted(DECK_SLUGS)}")
-        decks = [target]
+        decks = [args.deck.strip().lower()]
+    if bad := [d for d in decks if d not in DECK_SLUGS]:
+        raise SystemExit(f"decks {bad} not in {sorted(DECK_SLUGS)}")
+    full = args.opponents is not None and args.opponents.strip().lower() == "all"
 
     total = len(decks)
     start = time.monotonic()
     print(f"Paired benchmark: {baseline_kind} vs {candidate_kind} on {total} deck(s), "
-          f"{args.games} games/opponent x {args.opponents or '7 opponents'}, map={args.map_id}, "
+          f"{args.games} games/opponent x {args.opponents or ','.join(PANEL_OPPONENTS)}, map={args.map_id}, "
           f"jobs={args.jobs}, seed={args.seed}...", file=sys.stderr)
 
     def _progress(deck: str, done: int, deck_total: int, result=None) -> None:
@@ -562,9 +567,9 @@ def main(argv: Sequence[str] | None = None) -> None:
             line += "\n" + next(row for row in table if row.startswith(deck))
         print(line, file=sys.stderr, flush=True)
 
-    # run_all always sweeps DECK_SLUGS; for a single --deck we still want the full opponent
-    # pool (incl. mirror), so reuse run_bot_comparison directly there.
-    if len(decks) == len(DECK_SLUGS) and args.opponents is None:
+    # run_all sweeps every premade against every premade (--decks all --opponents all); anything narrower runs
+    # run_bot_comparison per deck against the chosen pool.
+    if len(decks) == len(DECK_SLUGS) and full:
         results = run_all(
             args.games, args.seed,
             baseline_kind=baseline_kind, candidate_kind=candidate_kind,
@@ -575,7 +580,7 @@ def main(argv: Sequence[str] | None = None) -> None:
             bootstrap_resamples=args.bootstrap_resamples,
             bootstrap_seed=args.bootstrap_seed, progress=_progress)
     else:
-        pool = (sorted(DECK_SLUGS) if args.opponents is None
+        pool = (list(PANEL_OPPONENTS) if args.opponents is None else sorted(DECK_SLUGS) if full
                 else [o.strip() for o in args.opponents.split(",") if o.strip()])
         results = {}
         for i, deck in enumerate(decks):
@@ -593,7 +598,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     gates = evaluate_gates(results)
     print(f"\nDone in {time.monotonic() - start:.1f}s.", file=sys.stderr)
     print(format_table(results, gates))
-    if len(decks) == len(DECK_SLUGS) and args.opponents is None:
+    if len(decks) == len(DECK_SLUGS) and full:
         print(f"\nArtifacts written to {args.out}/ "
               "(summary.json, per_deck.csv, per_opponent.csv)")
 
