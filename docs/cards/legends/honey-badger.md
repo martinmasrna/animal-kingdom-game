@@ -8,7 +8,7 @@ Internal: a legend is the card's character for naming and art. No player ever se
 
 ## Who he is
 
-A honey badger with no white on him. Old burns cover his body: broad expanses of bald, charcoal-dark skin, thick and cracked like bark, ashen grey where the dust sits in the creases. Patches of black fur survive between the scars, their edges ragged. The burns are long healed; this is the body he lives in. He lives alone, far past where the herds go. He wants nothing from anyone. He has never started a fight. He has never lost one.
+A completely hairless honey badger. The fire took his fur when he was a baby, and none of it grew back. His body is thick, charcoal-dark hide, ashen grey with dust and weather, folding heavily where he moves. Across that continuous bare skin lie the larger scars of later encounters: healed claw marks and bites left by predators that tried and failed to kill him. The fire and every wound are long healed; this is the body he lives in. He lives alone, far past where the herds go. He wants nothing from anyone. He has never started a fight. He has never lost one.
 
 ## How he got this way
 
@@ -18,7 +18,7 @@ That was the first time.
 
 The burn wept for weeks and smelled like meat left out, and every hyena and jackal downwind came sniffing at the den. A mother whose cub draws scavengers to her door has one cub and a lot of enemies, so she took herself out of that arithmetic. Not cruel. An animal's reason.
 
-The burns healed thick and dead, and across much of his body the fur never came back. That was **Armor**: nothing gets a grip on him.
+The burns healed into thick, heavy hide, and his fur never came back. That was **Armor**: nothing gets a grip on him. The scars across it came later, collected when predators tried to kill him and failed.
 
 Everything he met after that tried to finish what the fire started, and each attempt left something in him:
 
@@ -40,8 +40,11 @@ He doesn't want a name. The animals gave him one anyway.
 
 Nobody knows how old he is; the old lions say their fathers warned them. What the herds say about him is a warning, not a title. Kings and queens get titles from their own kind; he has no kind. His name is the thing a mother says to stop a young one going out there.
 
+## Art brief
+
+Martin, 2026-10-19: "make him fur-less" with "thick armor-like skin, like a rhino"; "fur got burned off when he was a baby, then scars got collected later on in life, when the predators tried (and failed) to kill him." The whole body is hairless, with continuous heavy ash-grey hide and distinct old predator scars. In art round three, Martin preferred #1's expression and #2's sandstorm, and said "looking ahead rather than turning head back works better." The burns becoming protective hide is the legend's exaggeration. Paint from the series style sheet alone; the interrupted step inside the engulfing sandstorm is described in words.
+
 ## Dissent log
 
 - The first draft made him albino, cast out for being born white. Martin dropped it (2026-10-19): the most stereotyped outcast mark there is, borrowed from *Snow in the Desert*, and it left only white-thing names. The mark has to be made, not born, and visible on the card at a glance.
 - Martin's first framing of the want was "one quiet meal"; dropped because it makes him funny, and funny is not the vibe. The meal stays as a detail, not as the motive.
-- The art (2026-10-19) is a white-backed badger with red eyes. It no longer matches: he needs repainting with old, healed burns across his body, charcoal and ashen scarred skin among surviving patches of black fur, and no white at all. The red eyes can stay as the one thing wrong about his face, or go; Martin's call.
