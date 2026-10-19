@@ -1679,11 +1679,21 @@
   "honey_badger_legend": {
     "art": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "at": 1792451889
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792452002
     },
     "animal": {
       "review": {
