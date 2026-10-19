@@ -32,7 +32,7 @@ Why it works this way: `knowledge/card-art-diagnosis-2026-10-17.md` (game repo).
 
 A pick is a draft. It stays on the board; a later repaint needs a reason Martin writes on the card table.
 
-**Martin painting with Sol himself.** The same round without the agent in the middle: he opens `D/cards` in the Codex app (its `AGENTS.md` is Sol's standing brief: the card, the hand sheet, the absolutes, where the data is, where to save), talks to Sol, and judges the pictures there. The agent's part starts afterwards: `python art.py adopt <card> <batch> <ids...>` puts the pictures Sol saved to `bar/r1/` into the manifest, then install and crops as above. Steps 2 to 5 are his in that mode; nothing from them is written down by the agent.
+**Martin painting with Sol himself.** The same round without the agent in the middle: he opens `D` in the Codex app (its `AGENTS.md` is the sandbox's map and Sol's standing brief: the card, the hand sheet, the absolutes, where the data is, where to save), talks to Sol, and judges the pictures there. The agent's part starts afterwards: `python art.py adopt <card> <batch>` moves the pictures Sol saved to `D/cards/new/` into `bar/r1/` and the manifest, then install and crops as above. Steps 2 to 5 are his in that mode; nothing from them is written down by the agent.
 
 ## Concepts
 
