@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(game/deploy/deploy.sh feedback)",
+      "Bash(game/deploy/deploy.sh players)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v python3 >/dev/null 2>&1; then python3 \"$CLAUDE_PROJECT_DIR/game/.claude/hooks/cards-one-path.py\"; else python \"$CLAUDE_PROJECT_DIR/game/.claude/hooks/cards-one-path.py\"; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

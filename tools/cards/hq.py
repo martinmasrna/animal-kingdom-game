@@ -25,8 +25,8 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d] [--strip x,y,z] [--full y|reset]
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
 
-This is the only way cards change: a hook (.claude/hooks/cards-one-path.py) refuses direct edits of decks.json,
-cards.json and the crop tables in art.js.
+This is the only way cards change: a hook (.claude/hooks/cards-one-path.py, wired from the workspace folder and from
+this repo) refuses direct edits of decks.json, cards.json and the crop tables in art.js.
 """
 from __future__ import annotations
 

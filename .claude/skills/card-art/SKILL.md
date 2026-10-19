@@ -5,7 +5,7 @@ description: Make, repaint or review card art for Animal Kingdom - the agent tur
 
 # Card art
 
-Why it works this way: `knowledge/card-art-diagnosis-2026-10-17.md` (game repo). Three weeks of record say that words move what is in a picture, not how it feels; that an agent's judgment of these pictures is at chance (11 of 31 against Martin's picks, chance 8, with or without the rules); and that no rule written from a verdict ever changed what came out. So the agent does ideas and logistics, Martin does every judgment, and no verdict becomes a rule. `D` below is `~/Work/fun/animal-kingdom-design/`.
+Why it works this way: `knowledge/card-art-diagnosis-2026-10-17.md` (game repo). Three weeks of record say that words move what is in a picture, not how it feels; that an agent's judgment of these pictures is at chance (11 of 31 against Martin's picks, chance 8, with or without the rules); and that no rule written from a verdict ever changed what came out. So the agent does ideas and logistics, Martin does every judgment, and no verdict becomes a rule. `D` below is the design sandbox, the game repo's sibling folder `../design/`.
 
 ## The split
 
