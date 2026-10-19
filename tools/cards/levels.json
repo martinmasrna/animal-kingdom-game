@@ -1682,8 +1682,26 @@
       "by": "martin"
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": {
+          "CROP": [
+            0.591,
+            0.473,
+            0.694
+          ],
+          "STRIP": [
+            0.552,
+            0.498,
+            1
+          ],
+          "FULL": 0.48
+        }
+      },
+      "at": 1792453459
     },
     "animal": {
       "review": {
@@ -1695,9 +1713,9 @@
         }
       },
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin: name the selected final card Ash (2026-10-20)",
       "by": "claude",
-      "at": 1792191062
+      "at": 1792453459
     }
   },
   "hornet": {
