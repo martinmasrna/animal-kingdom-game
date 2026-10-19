@@ -1,0 +1,35 @@
+# CLAUDE.md
+
+*Animal Kingdom* is a two-player tactical deckbuilding game Martin is designing, meant to become a digital game people play competitively. This repo holds its rules engine, the bots, the simulation tools used to design and balance it, and a terminal interface.
+
+This repo is `game/` in the Animal Kingdom workspace, the folder above it where every session starts and where the skills and guard hooks live; its sibling `design/` is the design sandbox. **Start every session at [`docs/STATUS.md`](docs/STATUS.md)**: where the game stands, its open problems, and what's waiting on Martin. Before reasoning about any card, effect or balance change, read [`docs/rules/mental-model.md`](docs/rules/mental-model.md).
+
+## The trap
+
+The game has no mana, no attack or health, no combat damage. A unit is a single number, strength, and the only resource is the action (two per turn). It borrows Magic/Hearthstone vocabulary ("draw", "removal"), and pattern-matching onto those games ("dies to a ping", "mana curve", "go wide for damage") is the most common mistake made here.
+
+## Commands
+
+Python ≥3.11 with a venv at `.venv`: `python3 -m venv .venv && .venv/bin/pip install -e '.[dev,cli]'` (add `analysis` for self-play training and plots).
+
+- Tests: `.venv/bin/python -m pytest -q -m 'not slow'` is the fast tier (seconds: engine, rules, events, server, timeline sources); run it after any change. `.venv/bin/python -m pytest -q` adds the bot simulations and training (`@pytest.mark.slow`, about two and a half minutes): run it in the background before a deploy, never in the foreground.
+- Web client tests: `cd animal_kingdom/web/test && npm install` once. `node --test` is the fast suite (seconds: UI, board logic, card text); run it after any change to `web/static/`. `npm run test:full` adds the slow ones (about 15 minutes: recorded bot-vs-bot matches checked view by view, clicked matches against the bot, the tutorial played through by clicks; `SHOTS=<dir> node --test tutorial.slow.mjs` saves a 2x screenshot of each lesson); after changes to the engine, the server, or the game screen's drawing and animation, run it in the background and keep working. Never make Martin wait on it; report only if it fails. The tutorial play-through runs its animations at 20x (`window.AK_SPEED`, set by the test only): about 12 s per run.
+- Deploying: the two fast tiers (under a minute together) gate a deploy; `deploy/deploy.sh` then runs in the background (it stops a hung Fly after 10 minutes and retries once). The slow tiers run alongside in the background and never stand in front of a deploy; a failure there is reported and fixed after.
+- Web client: `./play` (serves `animal_kingdom/web/` at localhost:8000). The server Martin plays on always runs plain `./play`, logging: his games, replays and match history are the playtest record. `AK_NO_GAME_LOGS=1` is for test servers only; it keeps nothing, not even the profile database. Terminal: `./run` (interactive setup; `--help` for flags). Recorder UI: `./record` (needs the `tui` extra).
+- Card table: `./cards` (http://localhost:8002) shows every card's values and how settled each is, and writes edits into `decks.json`, `cards.json` and `static/art.js`. An agent's edits go through `.venv/bin/python tools/cards/hq.py` (its docstring has the rules: never change a locked value, never set fine or locked); each waits there for Martin's review. A workspace hook refuses every other write to those files.
+- Design sandbox: the game's visual design (mockups, design notes, the painted master art that `static/kit2/`, `static/art/` and the key art are exported from) lives in a separate repo, https://github.com/martinmasrna/animal-kingdom-design, cloned beside this one as `../design/` (kept apart only for its size, 1.4 GB of paintings). "Design sandbox" in code comments and docs means that folder; its `AGENTS.md` is the entry point.
+- Hosting: https://animal-kingdom.fly.dev/ (Fly.io app `animal-kingdom`). `deploy/deploy.sh` ships the committed HEAD, never the working tree; `deploy/deploy.sh pull` brings the server's human game logs into `results/human_games/web/`, to commit.
+- Balance report: `./report 200` (round-robin; `--deck X --opponent Y` to scope, `--format files --out DIR` for CSV/JSON, every run records its games to `results/logs/<time>.jsonl`, `--log FILE` to pick the path, `--no-log` to skip). Every simulation keeps its game log: an ad-hoc script calling `run_pairs` passes `log_actions=True` and writes with `sim.replay.write_game_logs`, so questions about how games went are answered from logs, not new runs. Replay a logged game with no bot compute: `.venv/bin/python -m animal_kingdom.sim.replay FILE`.
+- Paired bot A/B: `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/<name>`.
+- Deckbuilding and the goodstuff problem: `sim.deck_optimizer`, `sim.metagame_search`, `sim.measure_deck`, `sim.benchmark_set` (see `docs/design/goodstuff.md`).
+- After changing `cards.json`, regenerate the deck docs' card tables: `.venv/bin/python -m animal_kingdom.render.deck_docs`.
+
+The ruleset (map_b, two actions per turn, Draw draws 2) is the default everywhere; no flags needed. `results/` is untracked except `results/human_games/`: human recordings are irreplaceable, so commit them.
+
+## Invariants
+
+- `engine/` is stdlib-only and transport-agnostic; file loading happens only at construction. `apply_action` validates every action; only bot search, which applies actions it just generated, passes `validate=False`.
+- Card numbers live in `cards.json` (strength, food cost, text) or `engine/config.py` (effect magnitudes), never as literals in effect code. `test_card_text_consistency.py` checks printed numbers against config; extend it when a card gains a new kind of number.
+- Bots are generalist (no deck slugs, archetype names or card ids in policy) and honest (never read hidden information). Both are regression-tested.
+- Never nerf a card to fix a bot. A simulation finding is either a card signal or a pilot flaw; triage it first (the `balance-eval` skill).
+- Balance and bot claims need ≥200 games per matchup, paired seeds, both seats.

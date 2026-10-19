@@ -1,6 +1,6 @@
 # Naming legendaries
 
-Commons and rares carry plain species names; only legendaries are named, and a legendary's name is what the animals call that individual, rendered into English. The process is the `naming` skill (`.claude/skills/naming/SKILL.md`); why it is shaped that way is `../../knowledge/naming-diagnosis-2026-10-16.md`. Names waiting for a card are on the shelf, `../cards/name-shelf.md`. Which names are settled, draft or placeholders is the card table (`./cards`), never this file.
+Commons and rares carry plain species names; only legendaries are named, and a legendary's name is what the animals call that individual, rendered into English. The process is the workspace's `naming` skill; why it is shaped that way is `../../knowledge/naming-diagnosis-2026-10-16.md`. Names waiting for a card are on the shelf, `../cards/name-shelf.md`. Which names are settled, draft or placeholders is the card table (`./cards`), never this file.
 
 ## The test
 

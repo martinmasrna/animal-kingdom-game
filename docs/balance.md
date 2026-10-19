@@ -10,7 +10,7 @@ How the game gets measured, and what is known on the current ruleset (draw 2 per
 
 ## Method
 
-The `balance-eval` skill (`.claude/skills/balance-eval/`) holds the full procedure. In short:
+The workspace's `balance-eval` skill holds the full procedure. In short:
 
 - At least 200 games per matchup, paired seeds, both seats. 40-game runs have misled this project before.
 - Read deltas against their confidence interval; a delta inside it is noise.

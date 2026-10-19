@@ -4,18 +4,5 @@
       "Bash(deploy/deploy.sh feedback)",
       "Bash(deploy/deploy.sh players)"
     ]
-  },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Edit|Write|MultiEdit|Bash|PowerShell",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "v=\"$CLAUDE_PROJECT_DIR/.venv\"; h=\"$CLAUDE_PROJECT_DIR/.claude/hooks/cards-one-path.py\"; if [ -x \"$v/bin/python\" ]; then \"$v/bin/python\" \"$h\"; else \"$v/Scripts/python.exe\" \"$h\"; fi"
-          }
-        ]
-      }
-    ]
   }
 }
