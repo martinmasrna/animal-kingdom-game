@@ -1,9 +1,10 @@
-"""Deck construction helpers.
+"""The decks: the shipped lists (decklists.json) and the rules a list must obey.
 
-The pool ships as **12 starter 4-4-6 decks** (`PREMADE_DECKS` / `load_premade_deck`, from the
-card workbench via cards.json), each a fixed 30-card list expanded from its 14 designs by the
-per-rarity copy limits (4 legendary ×1 + 4 rare ×2 + 6 common ×3 = 30). These are the
-real decks games are played with.
+Cards are cards and decks are decks (Martin, 2026-10-19). The game ships its decks as lists over the collectible
+cards in data/decklists.json: the **starter decks** (`starter: true`), the 12 4-4-6 decks a new profile gets, which
+share no card so a new player meets as many cards as possible; and the **bot decks** (`bot: true`), what the bots
+play ranked and in Practice's Random, which may overlap with anything. A deck can be both. `PREMADE_DECKS` holds
+every shipped deck as its 30-card list; `BOT_DECKS` the bot pool's slugs; `load_premade_deck` any loadable slug.
 
 `make_vanilla_deck` survives as a fuzz/CLI helper: it builds a legal-ish deck from
 integer-strength cards only (the dynamic ones are excluded), respecting the copy limits.
@@ -16,37 +17,27 @@ import os
 import random
 from typing import Optional, Sequence
 
-from .engine.cards import COLLECTIBLE_SLUGS, COPY_LIMITS, Card, DECK_SLUGS, NON_DECK_SLUGS, STARTER_DECKS, load_cards
+from .engine.cards import COPY_LIMITS, Card, DECKLISTS, DECK_SLUGS, load_cards
 
 
-def _build_premade_decks(cards: dict[str, Card]) -> dict[str, list[str]]:
-    """Expand each deck's 14 designs into its 30-card decklist via the copy limits.
-
-    Non-draftable cards (tokens, reserve designs; see NON_DECK_SLUGS) are skipped — they
-    live in the registry but belong to no premade deck.
-    """
-    # Menu order, not DECK_SLUGS (a set): a set's order changes with each process's hash seed, and with it
-    # every sim's pair order and so its game seeds.
-    decks: dict[str, list[str]] = {d["slug"]: [] for d in STARTER_DECKS}
-    for card in cards.values():
-        if card.deck in NON_DECK_SLUGS:
-            continue
-        copies = card.copies if card.copies is not None else COPY_LIMITS[card.rarity]
-        decks[card.deck].extend([card.id] * copies)
-    return decks
+def _expand(deck: dict) -> list[str]:
+    """A shipped deck's 30-card list from its design counts, in the file's order (the order the seed shuffles: a
+    set's order changes with each process's hash seed, and with it every sim's game seeds)."""
+    return [cid for cid, n in deck["cards"].items() for _ in range(n)]
 
 
-# Deck slug -> 30 card ids. Built once from the bundled pool (single source of truth:
-# each card's `deck`/`rarity`), so it can never drift from cards.json.
-PREMADE_DECKS: dict[str, list[str]] = _build_premade_decks(load_cards())
+# Deck slug -> 30 card ids, every shipped deck (starters and bot decks), in menu order. Built once from
+# decklists.json, so it can never drift from it.
+PREMADE_DECKS: dict[str, list[str]] = {d["slug"]: _expand(d) for d in DECKLISTS}
 
-# The decks the bots play: ranked matchmaking, the ladder seed and the bot benchmark panel draw from these nine.
-# Bots are opponents for people, so a deck the bots pilot badly (Egg Control, Aristocrats, Food OTK as of the
-# 18 October seeds) stays a player deck only: a bot losing with it teaches the deck is bad (Martin, 2026-10-18).
-# Practice still lets a player pick any premade for the bot; this is the pool for 'Random' and for ranked.
-BOT_DECKS: tuple[str, ...] = ("cats", "fish", "canines", "hoofed", "den_rush", "giants", "handlock", "food_aggro", "colony")
-assert all(d in PREMADE_DECKS for d in BOT_DECKS), [d for d in BOT_DECKS if d not in PREMADE_DECKS]
+# The decks the bots play (decklists.json `bot: true`): ranked matchmaking, the ladder seed and the bot benchmark
+# panel draw from these. Bots are opponents for people, so a deck the bots pilot badly (Egg Control, Aristocrats,
+# Food OTK as of the 18 October seeds) stays a player deck only: a bot losing with it teaches the deck is bad
+# (Martin, 2026-10-18). Practice still lets a player pick any shipped deck for the bot; this is the pool for
+# 'Random' and for ranked.
+BOT_DECKS: tuple[str, ...] = tuple(d["slug"] for d in DECKLISTS if d.get("bot"))
 PANEL_OPPONENTS: tuple[str, ...] = ("cats", "den_rush", "fish")   # the benchmark's standing opponents, from the pool
+assert all(d in BOT_DECKS for d in PANEL_OPPONENTS), PANEL_OPPONENTS
 
 
 # The no-synergy "baseline" deck: 30 distinct self-sufficient cards (18 common / 8 rare /
@@ -85,8 +76,8 @@ EXTRA_DECKS.update(json.loads(os.environ.get("AK_EXTRA_DECKS", "{}")))
 
 def register_deck(slug: str, decklist: Sequence[str]) -> None:
     """Make `decklist` loadable as `slug` in this process and in any worker it spawns later."""
-    if slug in DECK_SLUGS:
-        raise ValueError(f"{slug!r} collides with a premade deck slug")
+    if slug in PREMADE_DECKS:
+        raise ValueError(f"{slug!r} collides with a shipped deck's slug")
     EXTRA_DECKS[slug] = list(decklist)
     os.environ["AK_EXTRA_DECKS"] = json.dumps(
         {s: d for s, d in EXTRA_DECKS.items() if s != "baseline"})
@@ -98,7 +89,7 @@ RARITY_CAPS = {"rare": 8, "legendary": 4}   # rules §13: at most 8 rares and 4 
 
 def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card]] = None) -> list[str]:
     """What makes `decklist` illegal under the deck rules (rules §13); empty when it's legal.
-    Only the premade decks' cards and the bench are collectible."""
+    Only collectible cards (the starter decks' and the bench) may be in it."""
     cards = cards if cards is not None else load_cards()
     problems = []
     if len(decklist) != DECK_SIZE:
@@ -109,10 +100,10 @@ def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card
     by_rarity: dict[str, int] = {}
     for cid, n in counts.items():
         card = cards.get(cid)
-        if card is None or card.deck not in COLLECTIBLE_SLUGS:
+        if card is None or not card.collectible:
             problems.append(f"{cid!r} is not a collectible card")
             continue
-        limit = COPY_LIMITS[card.rarity]   # a card's `copies` sizes its starter deck only (Martin, 2026-10-01): any deck may hold the rarity's full count
+        limit = COPY_LIMITS[card.rarity]
         if n > limit:
             problems.append(f"at most {limit} {card.name}")
         by_rarity[card.rarity] = by_rarity.get(card.rarity, 0) + n
@@ -123,9 +114,8 @@ def decklist_problems(decklist: Sequence[str], *, cards: Optional[dict[str, Card
 
 
 def load_premade_deck(slug: str, *, cards: Optional[dict[str, Card]] = None) -> list[str]:
-    """Return a fresh copy of the 30-card decklist for `slug`."""
-    decks = _build_premade_decks(cards) if cards is not None else PREMADE_DECKS
-    decks = {**decks, **EXTRA_DECKS}
+    """Return a fresh copy of the 30-card decklist for `slug`: a shipped deck's, or a registered one's."""
+    decks = {**PREMADE_DECKS, **EXTRA_DECKS}
     if slug not in decks:
         raise ValueError(f"unknown deck slug {slug!r}, expected one of {sorted(decks)}")
     return list(decks[slug])
@@ -146,7 +136,7 @@ def make_vanilla_deck(
     for card in cards.values():
         if not isinstance(card.base_strength, int):
             continue  # exclude dynamic-strength cards (Goliath, Chameleon)
-        if card.deck in NON_DECK_SLUGS:
+        if not card.collectible:
             continue  # exclude tokens / reserve designs
         pool.extend([card.id] * COPY_LIMITS[card.rarity])
 
@@ -155,3 +145,14 @@ def make_vanilla_deck(
 
     rng.shuffle(pool)
     return pool[:n]
+
+
+def _check_shipped() -> None:
+    """Every shipped deck is a legal list over the collectible cards (the loader is the trust boundary)."""
+    cards = load_cards()
+    for slug, decklist in PREMADE_DECKS.items():
+        if problems := decklist_problems(decklist, cards=cards):
+            raise ValueError(f"decklists.json: {slug}: " + "; ".join(problems))
+
+
+_check_shipped()

@@ -1,84 +1,10 @@
 {
-  "_comment": "Static card data, written by tools/card-workbench/convert.py from tools/card-workbench/decks.json (the source of truth for the starter decks and the pool); reserve and tutorial cards are kept by it as they are. Effect logic lives in engine code (effects/statics/strength), bound by id; numbers an effect uses live in engine/config.py. Schema: decks (starter decks: slug, name, order, cover); cards: id (unique, stable across runs), name (the species while `unnamed`), deck (a starter slug, or bench/token/reserve/tutorial), rarity, tags (families and roles), base_strength (int 0-10, or 'dynamic' with dynamic_strength), keywords (printed static keywords), reach and hungry (their numbers), food_cost (a printed 'Costs X food'), text (verbatim), mate (the Eagle pair), species, habitat and workbench_id (where it came from).",
-  "decks": [
-    {
-      "slug": "colony",
-      "name": "Colony",
-      "order": 0,
-      "cover": "queen_honoria"
-    },
-    {
-      "slug": "aristocrats",
-      "name": "Circle of Life",
-      "order": 1,
-      "cover": "ember"
-    },
-    {
-      "slug": "canines",
-      "name": "Roaming Pack",
-      "order": 2,
-      "cover": "lobo"
-    },
-    {
-      "slug": "den_rush",
-      "name": "Den Rush",
-      "order": 3,
-      "cover": "scarlett"
-    },
-    {
-      "slug": "cats",
-      "name": "Cats",
-      "order": 4,
-      "cover": "king_theron"
-    },
-    {
-      "slug": "fish",
-      "name": "Fish",
-      "order": 5,
-      "cover": "tuna_legend"
-    },
-    {
-      "slug": "food_aggro",
-      "name": "Rodents",
-      "order": 6,
-      "cover": "barley"
-    },
-    {
-      "slug": "food_otk",
-      "name": "Untouchables",
-      "order": 7,
-      "cover": "fathom"
-    },
-    {
-      "slug": "egg_control",
-      "name": "Birds & Snakes",
-      "order": 8,
-      "cover": "eon"
-    },
-    {
-      "slug": "handlock",
-      "name": "Primates",
-      "order": 9,
-      "cover": "silverback"
-    },
-    {
-      "slug": "giants",
-      "name": "Giants",
-      "order": 10,
-      "cover": "brutus"
-    },
-    {
-      "slug": "hoofed",
-      "name": "Hoofed",
-      "order": 11,
-      "cover": "giraffe_legend"
-    }
-  ],
+  "_comment": "Static card data, written by tools/card-workbench/convert.py from tools/card-workbench/decks.json (the source of truth for the pool); reserve and tutorial cards are kept by it as they are. A card belongs to no deck: the decks (starters and bot decks) are lists over this pool in decklists.json. Effect logic lives in engine code (effects/statics/strength), bound by id; numbers an effect uses live in engine/config.py. Schema: cards: id (unique, stable across runs), name (the species while `unnamed`), status (collectible: a card a deck may hold; reserve: a shelved design or a later habitat's card; tutorial: the tutorial's fixed deal; token: made by an effect, never in a decklist), rarity, tags (families and roles), base_strength (int 0-10, or 'dynamic' with dynamic_strength), keywords (printed static keywords), reach and hungry (their numbers), food_cost (a printed 'Costs X food'), text (verbatim), mate (the Eagle pair), species, habitat and workbench_id (where it came from).",
   "cards": [
     {
       "id": "queen_marabunta",
       "name": "Queen [ANT]",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Colony",
@@ -94,7 +20,7 @@
     {
       "id": "vesper",
       "name": "Vesper",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Colony"
@@ -111,7 +37,7 @@
     {
       "id": "queen_honoria",
       "name": "Queen [BEE]",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Colony",
@@ -127,7 +53,7 @@
     {
       "id": "falstaff",
       "name": "Lord Bumbleton",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Colony"
@@ -144,7 +70,7 @@
     {
       "id": "nurse_bee",
       "name": "Nurse Bee",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Colony"
@@ -161,7 +87,7 @@
     {
       "id": "nurse_bumblebee",
       "name": "Nurse Bumblebee",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Colony"
@@ -178,7 +104,7 @@
     {
       "id": "termite_king",
       "name": "Termite King",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Colony"
@@ -193,7 +119,7 @@
     {
       "id": "termite_queen",
       "name": "Termite Queen",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Colony",
@@ -209,7 +135,7 @@
     {
       "id": "queen_bee",
       "name": "Queen Bee",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Colony",
@@ -225,7 +151,7 @@
     {
       "id": "guard_wasp",
       "name": "Guard Wasp",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Colony"
@@ -242,7 +168,7 @@
     {
       "id": "soldier_ant",
       "name": "Soldier Ant",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Colony"
@@ -257,7 +183,7 @@
     {
       "id": "worker_ant",
       "name": "Worker Ant",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Colony",
@@ -273,7 +199,7 @@
     {
       "id": "worker_wasp",
       "name": "Worker Wasp",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Colony",
@@ -291,7 +217,7 @@
     {
       "id": "worker_bee",
       "name": "Worker Bee",
-      "deck": "colony",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Colony",
@@ -309,7 +235,7 @@
     {
       "id": "ember",
       "name": "Ember",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -326,7 +252,7 @@
     {
       "id": "praying_mantis",
       "name": "Praying Mantis",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 3,
@@ -339,7 +265,7 @@
     {
       "id": "raccoon",
       "name": "Raccoon",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 2,
@@ -352,7 +278,7 @@
     {
       "id": "piranha",
       "name": "Piranha",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -367,7 +293,7 @@
     {
       "id": "vulture",
       "name": "Vulture",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -384,7 +310,7 @@
     {
       "id": "city_spider",
       "name": "City Spider",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Arachnid"
@@ -399,7 +325,7 @@
     {
       "id": "earthworm",
       "name": "Earthworm",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 1,
@@ -415,7 +341,7 @@
     {
       "id": "cockroach",
       "name": "Cockroach",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
@@ -431,7 +357,7 @@
     {
       "id": "sperm_whale",
       "name": "Sperm Whale",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 8,
@@ -446,7 +372,7 @@
     {
       "id": "toad",
       "name": "Toad",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
@@ -462,7 +388,7 @@
     {
       "id": "locust",
       "name": "[LOCUST]",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 2,
@@ -475,7 +401,7 @@
     {
       "id": "roach_king",
       "name": "Roach King",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
@@ -488,7 +414,7 @@
     {
       "id": "python",
       "name": "Python",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Snake"
@@ -503,7 +429,7 @@
     {
       "id": "pestis",
       "name": "Pestis",
-      "deck": "aristocrats",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Rodent"
@@ -518,7 +444,7 @@
     {
       "id": "leopard_legend",
       "name": "[LEOPARD]",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Cat"
@@ -538,7 +464,7 @@
     {
       "id": "clarion",
       "name": "[WHITE WOLF]",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Canine"
@@ -553,7 +479,7 @@
     {
       "id": "lobo",
       "name": "[BLACK WOLF]",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Canine"
@@ -568,7 +494,7 @@
     {
       "id": "wolf_legend",
       "name": "[WOLF]",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Canine"
@@ -585,7 +511,7 @@
     {
       "id": "orca",
       "name": "Orca",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 7,
@@ -601,7 +527,7 @@
     {
       "id": "fox",
       "name": "Fox",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Canine"
@@ -618,7 +544,7 @@
     {
       "id": "jackal",
       "name": "Jackal",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Canine"
@@ -633,7 +559,7 @@
     {
       "id": "dhole",
       "name": "Dhole",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Canine"
@@ -650,7 +576,7 @@
     {
       "id": "wolf",
       "name": "Wolf",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -667,7 +593,7 @@
     {
       "id": "bush_dog",
       "name": "Bush Dog",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -682,7 +608,7 @@
     {
       "id": "coyote",
       "name": "Coyote",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -697,7 +623,7 @@
     {
       "id": "african_wild_dog",
       "name": "African Wild Dog",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -712,7 +638,7 @@
     {
       "id": "badger",
       "name": "Badger",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -725,7 +651,7 @@
     {
       "id": "street_dog",
       "name": "Street Dog",
-      "deck": "canines",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -740,7 +666,7 @@
     {
       "id": "sirocco",
       "name": "Rue",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 5,
@@ -753,7 +679,7 @@
     {
       "id": "gale",
       "name": "[FALCON]",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -770,7 +696,7 @@
     {
       "id": "hornet",
       "name": "Hornet",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Colony"
@@ -787,7 +713,7 @@
     {
       "id": "chameleon",
       "name": "Chameleon",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Lizard"
@@ -802,7 +728,7 @@
     {
       "id": "skunk",
       "name": "Skunk",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 4,
@@ -815,7 +741,7 @@
     {
       "id": "hare",
       "name": "Hare",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
@@ -830,7 +756,7 @@
     {
       "id": "cheetah",
       "name": "Cheetah",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Cat"
@@ -845,7 +771,7 @@
     {
       "id": "rat",
       "name": "Rat",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -860,7 +786,7 @@
     {
       "id": "falcon",
       "name": "Falcon",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -877,7 +803,7 @@
     {
       "id": "bat",
       "name": "Bat",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
@@ -892,7 +818,7 @@
     {
       "id": "mouse",
       "name": "Mouse",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -907,7 +833,7 @@
     {
       "id": "scarlett",
       "name": "Scarlett",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Canine"
@@ -926,7 +852,7 @@
     {
       "id": "mole",
       "name": "Mole",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 2,
@@ -939,7 +865,7 @@
     {
       "id": "mole_legend",
       "name": "[MOLE]",
-      "deck": "den_rush",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
@@ -952,7 +878,7 @@
     {
       "id": "prince_leo",
       "name": "Prince Leo",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Cat"
@@ -967,7 +893,7 @@
     {
       "id": "princess_lea",
       "name": "Princess Lea",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Cat"
@@ -982,7 +908,7 @@
     {
       "id": "king_theron",
       "name": "King Theron",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Cat"
@@ -997,7 +923,7 @@
     {
       "id": "queen_adira",
       "name": "Queen Adira",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Cat"
@@ -1012,7 +938,7 @@
     {
       "id": "jaguar",
       "name": "Jaguar",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Cat"
@@ -1027,7 +953,7 @@
     {
       "id": "serval",
       "name": "Serval",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Cat"
@@ -1042,7 +968,7 @@
     {
       "id": "leopard",
       "name": "Leopard",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Cat"
@@ -1057,7 +983,7 @@
     {
       "id": "black_panther",
       "name": "Black Panther",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Cat"
@@ -1074,7 +1000,7 @@
     {
       "id": "lion",
       "name": "Lion",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Cat"
@@ -1089,7 +1015,7 @@
     {
       "id": "lynx",
       "name": "Lynx",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Cat"
@@ -1104,7 +1030,7 @@
     {
       "id": "caracal",
       "name": "Caracal",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Cat"
@@ -1122,7 +1048,7 @@
     {
       "id": "tiger",
       "name": "Tiger",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Cat"
@@ -1139,7 +1065,7 @@
     {
       "id": "bobcat",
       "name": "Bobcat",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Cat"
@@ -1154,7 +1080,7 @@
     {
       "id": "alley_cat",
       "name": "Alley Cat",
-      "deck": "cats",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Cat"
@@ -1169,7 +1095,7 @@
     {
       "id": "jellyfish_legend",
       "name": "[JELLYFISH]",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
@@ -1182,7 +1108,7 @@
     {
       "id": "tuna_legend",
       "name": "[TUNA]",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Fish"
@@ -1197,7 +1123,7 @@
     {
       "id": "manta_ray_legend",
       "name": "[MANTA RAY]",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Fish"
@@ -1212,7 +1138,7 @@
     {
       "id": "piranha_legend",
       "name": "[PIRANHA]",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Fish"
@@ -1227,7 +1153,7 @@
     {
       "id": "swordfish",
       "name": "Swordfish",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Fish"
@@ -1242,7 +1168,7 @@
     {
       "id": "barracuda",
       "name": "Barracuda",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Fish"
@@ -1257,7 +1183,7 @@
     {
       "id": "manta_ray",
       "name": "Manta Ray",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Fish"
@@ -1272,7 +1198,7 @@
     {
       "id": "remora",
       "name": "Remora",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Fish"
@@ -1287,7 +1213,7 @@
     {
       "id": "cod",
       "name": "Cod",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -1302,7 +1228,7 @@
     {
       "id": "sardine",
       "name": "Sardine",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -1317,7 +1243,7 @@
     {
       "id": "mahi_mahi",
       "name": "Mahi-mahi",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -1332,7 +1258,7 @@
     {
       "id": "mackerel",
       "name": "Mackerel",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -1347,7 +1273,7 @@
     {
       "id": "tuna",
       "name": "Tuna",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -1362,7 +1288,7 @@
     {
       "id": "sunfish",
       "name": "Sunfish",
-      "deck": "fish",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -1380,7 +1306,7 @@
     {
       "id": "big_gus",
       "name": "Big Gus",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Rodent"
@@ -1395,7 +1321,7 @@
     {
       "id": "macaque_legend",
       "name": "[MACAQUE]",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Primate"
@@ -1410,7 +1336,7 @@
     {
       "id": "barley",
       "name": "[RAT]",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Rodent"
@@ -1425,7 +1351,7 @@
     {
       "id": "scrooge",
       "name": "[CHIPMUNK]",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Rodent"
@@ -1440,7 +1366,7 @@
     {
       "id": "flying_squirrel",
       "name": "Flying Squirrel",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Rodent"
@@ -1457,7 +1383,7 @@
     {
       "id": "meerkat",
       "name": "Meerkat",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 2,
@@ -1470,7 +1396,7 @@
     {
       "id": "beaver",
       "name": "Beaver",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Rodent"
@@ -1485,7 +1411,7 @@
     {
       "id": "dormouse",
       "name": "Dormouse",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Rodent"
@@ -1500,7 +1426,7 @@
     {
       "id": "squirrel",
       "name": "Squirrel",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -1515,7 +1441,7 @@
     {
       "id": "chipmunk",
       "name": "Chipmunk",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -1530,7 +1456,7 @@
     {
       "id": "gopher",
       "name": "Gopher",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -1545,7 +1471,7 @@
     {
       "id": "muskrat",
       "name": "Muskrat",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -1560,7 +1486,7 @@
     {
       "id": "groundhog",
       "name": "Groundhog",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -1575,7 +1501,7 @@
     {
       "id": "hamster",
       "name": "Hamster",
-      "deck": "food_aggro",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -1590,7 +1516,7 @@
     {
       "id": "fathom",
       "name": "[OCTOPUS]",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 7,
@@ -1603,7 +1529,7 @@
     {
       "id": "squirrel_legend",
       "name": "Yuki",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Rodent"
@@ -1618,7 +1544,7 @@
     {
       "id": "honey_badger_legend",
       "name": "Ash",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 5,
@@ -1636,7 +1562,7 @@
     {
       "id": "octopus_legend",
       "name": "Iris",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
@@ -1649,7 +1575,7 @@
     {
       "id": "capybara",
       "name": "Capybara",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Rodent"
@@ -1664,7 +1590,7 @@
     {
       "id": "porcupine",
       "name": "Porcupine",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Rodent"
@@ -1681,7 +1607,7 @@
     {
       "id": "golden_orb_weaver",
       "name": "Golden Orb-Weaver",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Arachnid"
@@ -1696,7 +1622,7 @@
     {
       "id": "armadillo",
       "name": "Armadillo",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 7,
@@ -1711,7 +1637,7 @@
     {
       "id": "hedgehog",
       "name": "Hedgehog",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
@@ -1726,7 +1652,7 @@
     {
       "id": "dart_frog",
       "name": "Dart Frog",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
@@ -1743,7 +1669,7 @@
     {
       "id": "jellyfish",
       "name": "Jellyfish",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -1758,7 +1684,7 @@
     {
       "id": "black_bear",
       "name": "Black Bear",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Bear"
@@ -1773,7 +1699,7 @@
     {
       "id": "tortoise",
       "name": "Tortoise",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -1788,7 +1714,7 @@
     {
       "id": "owl",
       "name": "Owl",
-      "deck": "food_otk",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -1805,7 +1731,7 @@
     {
       "id": "eon",
       "name": "Eon",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Snake"
@@ -1822,7 +1748,7 @@
     {
       "id": "raven_legend",
       "name": "[RAVEN]",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -1839,7 +1765,7 @@
     {
       "id": "black_swan",
       "name": "Black Swan",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -1856,7 +1782,7 @@
     {
       "id": "hawk",
       "name": "Hawk",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -1873,7 +1799,7 @@
     {
       "id": "gaboon_viper",
       "name": "Cottonmouth",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Snake"
@@ -1888,7 +1814,7 @@
     {
       "id": "magpie",
       "name": "Magpie",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -1905,7 +1831,7 @@
     {
       "id": "black_mamba",
       "name": "Black Mamba",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Snake"
@@ -1920,7 +1846,7 @@
     {
       "id": "egg_eater",
       "name": "Egg Eater",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Snake"
@@ -1936,7 +1862,7 @@
     {
       "id": "mosquito",
       "name": "Mosquito",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
@@ -1951,7 +1877,7 @@
     {
       "id": "raven",
       "name": "Raven",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -1968,7 +1894,7 @@
     {
       "id": "bird_egg",
       "name": "Bird Egg",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Egg"
@@ -1983,7 +1909,7 @@
     {
       "id": "snake_egg",
       "name": "Snake Egg",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Egg"
@@ -1998,7 +1924,7 @@
     {
       "id": "viper",
       "name": "Viper",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Snake"
@@ -2013,7 +1939,7 @@
     {
       "id": "aurum",
       "name": "Aurum",
-      "deck": "egg_control",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -2031,7 +1957,7 @@
     {
       "id": "baboon_legend",
       "name": "[BABOON]",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Primate"
@@ -2046,7 +1972,7 @@
     {
       "id": "silverback",
       "name": "[GORILLA]",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Primate"
@@ -2061,7 +1987,7 @@
     {
       "id": "butterfly_legend",
       "name": "[BUTTERFLY]",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
@@ -2081,7 +2007,7 @@
     {
       "id": "arne",
       "name": "[EAGLE]",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -2103,7 +2029,7 @@
     {
       "id": "hummingbird",
       "name": "Hummingbird",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -2120,7 +2046,7 @@
     {
       "id": "macaque",
       "name": "Macaque",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Primate"
@@ -2135,7 +2061,7 @@
     {
       "id": "orangutan",
       "name": "Orangutan",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Primate"
@@ -2150,7 +2076,7 @@
     {
       "id": "tarsier",
       "name": "Tarsier",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Primate"
@@ -2165,7 +2091,7 @@
     {
       "id": "chimpanzee",
       "name": "Chimpanzee",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Primate"
@@ -2180,7 +2106,7 @@
     {
       "id": "baboon",
       "name": "Baboon",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Primate"
@@ -2195,7 +2121,7 @@
     {
       "id": "stork",
       "name": "Stork",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -2222,7 +2148,7 @@
     {
       "id": "caterpillar",
       "name": "Caterpillar",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
@@ -2239,7 +2165,7 @@
     {
       "id": "gorilla",
       "name": "Gorilla",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Primate"
@@ -2254,7 +2180,7 @@
     {
       "id": "peacock",
       "name": "Peacock",
-      "deck": "handlock",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -2269,7 +2195,7 @@
     {
       "id": "brutus",
       "name": "[RHINOCEROS]",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
@@ -2287,7 +2213,7 @@
     {
       "id": "methuselah",
       "name": "[TORTOISE]",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
@@ -2302,7 +2228,7 @@
     {
       "id": "mocha",
       "name": "[SPERM WHALE]",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 10,
@@ -2317,7 +2243,7 @@
     {
       "id": "oxpecker_legend",
       "name": "[OXPECKER]",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -2334,7 +2260,7 @@
     {
       "id": "rhinoceros",
       "name": "Rhinoceros",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Hoofed"
@@ -2352,7 +2278,7 @@
     {
       "id": "hippopotamus",
       "name": "Hippopotamus",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Hoofed"
@@ -2370,7 +2296,7 @@
     {
       "id": "whale_shark",
       "name": "Whale Shark",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Fish"
@@ -2389,7 +2315,7 @@
     {
       "id": "oxpecker",
       "name": "Oxpecker",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -2406,7 +2332,7 @@
     {
       "id": "anteater",
       "name": "Anteater",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -2419,7 +2345,7 @@
     {
       "id": "dung_beetle",
       "name": "Dung Beetle",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
@@ -2432,7 +2358,7 @@
     {
       "id": "blue_whale",
       "name": "Blue Whale",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 10,
@@ -2447,7 +2373,7 @@
     {
       "id": "sloth",
       "name": "Sloth",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
@@ -2460,7 +2386,7 @@
     {
       "id": "elephant",
       "name": "Elephant",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 9,
@@ -2476,7 +2402,7 @@
     {
       "id": "moose",
       "name": "Moose",
-      "deck": "giants",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Hoofed"
@@ -2495,7 +2421,7 @@
     {
       "id": "wildebeest_legend",
       "name": "[WILDEBEEST]",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
@@ -2510,7 +2436,7 @@
     {
       "id": "boar_legend",
       "name": "[BOAR]",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
@@ -2525,7 +2451,7 @@
     {
       "id": "zebra_legend",
       "name": "[ZEBRA]",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
@@ -2540,7 +2466,7 @@
     {
       "id": "giraffe_legend",
       "name": "[GIRAFFE]",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Hoofed"
@@ -2555,7 +2481,7 @@
     {
       "id": "honey_badger",
       "name": "Honey Badger",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 2,
@@ -2568,7 +2494,7 @@
     {
       "id": "okapi",
       "name": "Okapi",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Hoofed"
@@ -2583,7 +2509,7 @@
     {
       "id": "zebra",
       "name": "Zebra",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Hoofed"
@@ -2600,7 +2526,7 @@
     {
       "id": "giraffe",
       "name": "Giraffe",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2615,7 +2541,7 @@
     {
       "id": "cape_buffalo",
       "name": "Cape Buffalo",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Hoofed"
@@ -2630,7 +2556,7 @@
     {
       "id": "gazelle",
       "name": "Gazelle",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2647,7 +2573,7 @@
     {
       "id": "wildebeest",
       "name": "Wildebeest",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2662,7 +2588,7 @@
     {
       "id": "deer",
       "name": "Deer",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2679,7 +2605,7 @@
     {
       "id": "boar",
       "name": "Boar",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2694,7 +2620,7 @@
     {
       "id": "warthog",
       "name": "Warthog",
-      "deck": "hoofed",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -2709,7 +2635,7 @@
     {
       "id": "octopus",
       "name": "Octopus",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 4,
@@ -2722,7 +2648,7 @@
     {
       "id": "great_white_shark",
       "name": "Great White Shark",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Fish"
@@ -2739,7 +2665,7 @@
     {
       "id": "butterfly",
       "name": "Butterfly",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
@@ -2754,7 +2680,7 @@
     {
       "id": "macaw",
       "name": "Macaw",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -2771,7 +2697,7 @@
     {
       "id": "eagle",
       "name": "Eagle",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -2788,7 +2714,7 @@
     {
       "id": "cuckoo",
       "name": "Cuckoo",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -2808,7 +2734,7 @@
     {
       "id": "opossum",
       "name": "Opossum",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 2,
@@ -2821,7 +2747,7 @@
     {
       "id": "anaconda",
       "name": "Anaconda",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Snake"
@@ -2838,7 +2764,7 @@
     {
       "id": "polar_bear",
       "name": "Polar Bear",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Bear"
@@ -2855,7 +2781,7 @@
     {
       "id": "borealis",
       "name": "Borealis",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Bear"
@@ -2872,7 +2798,7 @@
     {
       "id": "lemming",
       "name": "Lemming",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -2887,7 +2813,7 @@
     {
       "id": "snow_leopard",
       "name": "Snow Leopard",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Cat"
@@ -2902,7 +2828,7 @@
     {
       "id": "rattlesnake",
       "name": "Rattlesnake",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Snake"
@@ -2917,7 +2843,7 @@
     {
       "id": "outrider",
       "name": "Coyote",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Canine"
@@ -2933,7 +2859,7 @@
     {
       "id": "jerboa",
       "name": "Jerboa",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Rodent"
@@ -2948,7 +2874,7 @@
     {
       "id": "andean_condor",
       "name": "Andean Condor",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -2965,7 +2891,7 @@
     {
       "id": "cougar",
       "name": "Cougar",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Cat"
@@ -2980,7 +2906,7 @@
     {
       "id": "chinchilla",
       "name": "Chinchilla",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Rodent"
@@ -2995,7 +2921,7 @@
     {
       "id": "dingo",
       "name": "Dingo",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -3010,7 +2936,7 @@
     {
       "id": "cairn",
       "name": "Cairn",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 10,
@@ -3026,7 +2952,7 @@
     {
       "id": "woodpecker",
       "name": "Woodpecker",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -3043,7 +2969,7 @@
     {
       "id": "stag_beetle",
       "name": "Stag Beetle",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
@@ -3058,7 +2984,7 @@
     {
       "id": "dolphin",
       "name": "Dolphin",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
@@ -3071,7 +2997,7 @@
     {
       "id": "albatross",
       "name": "Albatross",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Bird"
@@ -3088,7 +3014,7 @@
     {
       "id": "cuco",
       "name": "[CUCKOO]",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -3103,7 +3029,7 @@
     {
       "id": "sloth_legend",
       "name": "[SLOTH]",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 4,
@@ -3116,7 +3042,7 @@
     {
       "id": "tarantula",
       "name": "Tarantula",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Arachnid"
@@ -3131,7 +3057,7 @@
     {
       "id": "sea_turtle",
       "name": "Sea Turtle",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [],
       "base_strength": 5,
@@ -3147,7 +3073,7 @@
     {
       "id": "hyena",
       "name": "Hyena",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -3160,7 +3086,7 @@
     {
       "id": "naked_mole_rat",
       "name": "Naked Mole-Rat",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Rodent"
@@ -3175,7 +3101,7 @@
     {
       "id": "greywhisker",
       "name": "Greywhisker",
-      "deck": "reserve",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Rodent"
@@ -3190,7 +3116,7 @@
     {
       "id": "bat_legend",
       "name": "[BAT]",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
@@ -3206,7 +3132,7 @@
     {
       "id": "crocodile",
       "name": "Crocodile",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
@@ -3219,7 +3145,7 @@
     {
       "id": "grizzly_bear",
       "name": "Grizzly Bear",
-      "deck": "bench",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Bear"
@@ -3234,7 +3160,7 @@
     {
       "id": "baby_turtle",
       "name": "Baby Turtle",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [],
       "base_strength": 0,
@@ -3244,7 +3170,7 @@
     {
       "id": "worm",
       "name": "Worm",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [],
       "base_strength": 0,
@@ -3254,7 +3180,7 @@
     {
       "id": "roach",
       "name": "Roach",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
@@ -3264,7 +3190,7 @@
     {
       "id": "baby_fish",
       "name": "Baby Fish",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Fish"
@@ -3276,7 +3202,7 @@
     {
       "id": "cuckoo_egg",
       "name": "Cuckoo Egg",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Egg"
@@ -3288,7 +3214,7 @@
     {
       "id": "golden_egg",
       "name": "Golden Egg",
-      "deck": "token",
+      "status": "token",
       "rarity": "legendary",
       "tags": [
         "Egg"
@@ -3300,7 +3226,7 @@
     {
       "id": "pup",
       "name": "Pup",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -3312,7 +3238,7 @@
     {
       "id": "poppy",
       "name": "Poppy",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -3324,7 +3250,7 @@
     {
       "id": "rusty",
       "name": "Rusty",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -3336,7 +3262,7 @@
     {
       "id": "baby_lion",
       "name": "Baby Lion",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Cat"
@@ -3348,7 +3274,7 @@
     {
       "id": "baby_wolf",
       "name": "Baby Wolf",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Canine"
@@ -3360,7 +3286,7 @@
     {
       "id": "baby_squirrel",
       "name": "Baby Squirrel",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Rodent"
@@ -3372,7 +3298,7 @@
     {
       "id": "baby_owl",
       "name": "Baby Owl",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Bird"
@@ -3384,7 +3310,7 @@
     {
       "id": "baby_python",
       "name": "Baby Python",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Snake"
@@ -3396,7 +3322,7 @@
     {
       "id": "baby_bear",
       "name": "Baby Bear",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Bear"
@@ -3408,7 +3334,7 @@
     {
       "id": "baby_gorilla",
       "name": "Baby Gorilla",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Primate"
@@ -3420,7 +3346,7 @@
     {
       "id": "baby_zebra",
       "name": "Baby Zebra",
-      "deck": "token",
+      "status": "token",
       "rarity": "common",
       "tags": [
         "Hoofed"
@@ -3432,7 +3358,7 @@
     {
       "id": "butterfly_legend_caterpillar",
       "name": "Caterpillar",
-      "deck": "token",
+      "status": "token",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
@@ -3443,7 +3369,7 @@
     {
       "id": "butterfly_legend_chrysalis",
       "name": "Chrysalis",
-      "deck": "token",
+      "status": "token",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
@@ -3456,7 +3382,7 @@
     {
       "id": "butterfly_legend_butterfly",
       "name": "Butterfly",
-      "deck": "token",
+      "status": "token",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
@@ -3470,7 +3396,7 @@
     {
       "id": "butterfly_legend_monarch",
       "name": "Monarch",
-      "deck": "token",
+      "status": "token",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
@@ -3484,7 +3410,7 @@
     {
       "id": "arna",
       "name": "[EAGLE'S MATE]",
-      "deck": "token",
+      "status": "token",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -3500,932 +3426,932 @@
     {
       "id": "eon_food_engine",
       "name": "Eon (food engine)",
-      "deck": "reserve",
       "rarity": "legendary",
       "tags": [
         "Snake"
       ],
       "base_strength": 7,
       "keywords": [],
-      "text": "Whenever a card is drawn, shuffled or removed, gain 1 food."
+      "text": "Whenever a card is drawn, shuffled or removed, gain 1 food.",
+      "status": "reserve"
     },
     {
       "id": "unnamed_giant",
       "name": "Unnamed Giant",
-      "deck": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 10,
       "keywords": [
         "Apex Predator"
       ],
-      "text": "Apex Predator. Your regions produce no food."
+      "text": "Apex Predator. Your regions produce no food.",
+      "status": "reserve"
     },
     {
       "id": "shuck",
       "name": "Shuck",
-      "deck": "reserve",
       "rarity": "legendary",
       "tags": [
         "Canine"
       ],
       "base_strength": 6,
       "keywords": [],
-      "text": "Roar: return a removed Canine to your hand. Give it +2 strength."
+      "text": "Roar: return a removed Canine to your hand. Give it +2 strength.",
+      "status": "reserve"
     },
     {
       "id": "unnamed_canine",
       "name": "Unnamed Canine",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [
         "Canine"
       ],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: if this has 5 or more strength, draw a card."
+      "text": "Roar: if this has 5 or more strength, draw a card.",
+      "status": "reserve"
     },
     {
       "id": "arctic_fox",
       "name": "Arctic Fox",
-      "deck": "reserve",
       "rarity": "rare",
       "tags": [
         "Canine"
       ],
       "base_strength": 3,
       "keywords": [],
-      "text": ""
+      "text": "",
+      "status": "reserve"
     },
     {
       "id": "mock_scout",
       "name": "Scout",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Roar: draw a card."
+      "text": "Roar: draw a card.",
+      "status": "reserve"
     },
     {
       "id": "mock_draw_3",
       "name": "Draw 3",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: draw a card."
+      "text": "Roar: draw a card.",
+      "status": "reserve"
     },
     {
       "id": "mock_draw_4",
       "name": "Draw 4",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: draw a card."
+      "text": "Roar: draw a card.",
+      "status": "reserve"
     },
     {
       "id": "mock_draw_6",
       "name": "Draw 6",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
       "keywords": [],
-      "text": "Roar: draw a card."
+      "text": "Roar: draw a card.",
+      "status": "reserve"
     },
     {
       "id": "mock_draw_7",
       "name": "Draw 7",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 7,
       "keywords": [],
-      "text": "Roar: draw a card."
+      "text": "Roar: draw a card.",
+      "status": "reserve"
     },
     {
       "id": "mock_flydraw_2",
       "name": "Flying Draw 2",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
       "keywords": [
         "Flight"
       ],
-      "text": "Flight. Roar: draw a card."
+      "text": "Flight. Roar: draw a card.",
+      "status": "reserve"
     },
     {
       "id": "mock_flydraw_3",
       "name": "Flying Draw 3",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
       "keywords": [
         "Flight"
       ],
-      "text": "Flight. Roar: draw a card."
+      "text": "Flight. Roar: draw a card.",
+      "status": "reserve"
     },
     {
       "id": "mock_flydraw_4",
       "name": "Flying Draw 4",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
       "keywords": [
         "Flight"
       ],
-      "text": "Flight. Roar: draw a card."
+      "text": "Flight. Roar: draw a card.",
+      "status": "reserve"
     },
     {
       "id": "mock_flydraw_5",
       "name": "Flying Draw 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [
         "Flight"
       ],
-      "text": "Flight. Roar: draw a card."
+      "text": "Flight. Roar: draw a card.",
+      "status": "reserve"
     },
     {
       "id": "calib_draw1_1",
       "name": "Calibration Draw1 1",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: draw a card."
+      "text": "Roar: draw a card.",
+      "status": "reserve"
     },
     {
       "id": "calib_draw1_2",
       "name": "Calibration Draw1 2",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: draw a card."
+      "text": "Roar: draw a card.",
+      "status": "reserve"
     },
     {
       "id": "calib_draw2_0",
       "name": "Calibration Draw2 0",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 0,
       "keywords": [],
-      "text": "Roar: draw 2 cards."
+      "text": "Roar: draw 2 cards.",
+      "status": "reserve"
     },
     {
       "id": "calib_draw2_1",
       "name": "Calibration Draw2 1",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: draw 2 cards."
+      "text": "Roar: draw 2 cards.",
+      "status": "reserve"
     },
     {
       "id": "calib_draw2_2",
       "name": "Calibration Draw2 2",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: draw 2 cards."
+      "text": "Roar: draw 2 cards.",
+      "status": "reserve"
     },
     {
       "id": "calib_draw2_3",
       "name": "Calibration Draw2 3",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: draw 2 cards."
+      "text": "Roar: draw 2 cards.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm3_2",
       "name": "Calibration Rm3 2",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 3 or less."
+      "text": "Roar: remove an adjacent enemy of strength 3 or less.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm3_3",
       "name": "Calibration Rm3 3",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 3 or less."
+      "text": "Roar: remove an adjacent enemy of strength 3 or less.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm3_4",
       "name": "Calibration Rm3 4",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 3 or less."
+      "text": "Roar: remove an adjacent enemy of strength 3 or less.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm3_5",
       "name": "Calibration Rm3 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 3 or less."
+      "text": "Roar: remove an adjacent enemy of strength 3 or less.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm3_6",
       "name": "Calibration Rm3 6",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 3 or less."
+      "text": "Roar: remove an adjacent enemy of strength 3 or less.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm4_2",
       "name": "Calibration Rm4 2",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 4 or less."
+      "text": "Roar: remove an adjacent enemy of strength 4 or less.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm4_3",
       "name": "Calibration Rm4 3",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 4 or less."
+      "text": "Roar: remove an adjacent enemy of strength 4 or less.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm4_4",
       "name": "Calibration Rm4 4",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 4 or less."
+      "text": "Roar: remove an adjacent enemy of strength 4 or less.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm4_5",
       "name": "Calibration Rm4 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 4 or less."
+      "text": "Roar: remove an adjacent enemy of strength 4 or less.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm4_6",
       "name": "Calibration Rm4 6",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 4 or less."
+      "text": "Roar: remove an adjacent enemy of strength 4 or less.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm6_1",
       "name": "Calibration Rm6 1",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 6 or more."
+      "text": "Roar: remove an adjacent enemy of strength 6 or more.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm6_2",
       "name": "Calibration Rm6 2",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 6 or more."
+      "text": "Roar: remove an adjacent enemy of strength 6 or more.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm6_3",
       "name": "Calibration Rm6 3",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 6 or more."
+      "text": "Roar: remove an adjacent enemy of strength 6 or more.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm6_4",
       "name": "Calibration Rm6 4",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 6 or more."
+      "text": "Roar: remove an adjacent enemy of strength 6 or more.",
+      "status": "reserve"
     },
     {
       "id": "calib_rm6_5",
       "name": "Calibration Rm6 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 6 or more."
+      "text": "Roar: remove an adjacent enemy of strength 6 or more.",
+      "status": "reserve"
     },
     {
       "id": "calib_rmany_1",
       "name": "Calibration Rmany 1",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy."
+      "text": "Roar: remove an adjacent enemy.",
+      "status": "reserve"
     },
     {
       "id": "calib_rmany_2",
       "name": "Calibration Rmany 2",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy."
+      "text": "Roar: remove an adjacent enemy.",
+      "status": "reserve"
     },
     {
       "id": "calib_rmany_3",
       "name": "Calibration Rmany 3",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy."
+      "text": "Roar: remove an adjacent enemy.",
+      "status": "reserve"
     },
     {
       "id": "calib_rmany_4",
       "name": "Calibration Rmany 4",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy."
+      "text": "Roar: remove an adjacent enemy.",
+      "status": "reserve"
     },
     {
       "id": "calib_rmany_5",
       "name": "Calibration Rmany 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy."
+      "text": "Roar: remove an adjacent enemy.",
+      "status": "reserve"
     },
     {
       "id": "calib_extra_1",
       "name": "Calibration Extra 1",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: play another animal."
+      "text": "Roar: play another animal.",
+      "status": "reserve"
     },
     {
       "id": "calib_extra_2",
       "name": "Calibration Extra 2",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: play another animal."
+      "text": "Roar: play another animal.",
+      "status": "reserve"
     },
     {
       "id": "calib_extra_3",
       "name": "Calibration Extra 3",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: play another animal."
+      "text": "Roar: play another animal.",
+      "status": "reserve"
     },
     {
       "id": "calib_extra_4",
       "name": "Calibration Extra 4",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: play another animal."
+      "text": "Roar: play another animal.",
+      "status": "reserve"
     },
     {
       "id": "calib_extra_5",
       "name": "Calibration Extra 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Roar: play another animal."
+      "text": "Roar: play another animal.",
+      "status": "reserve"
     },
     {
       "id": "calib_food10_2",
       "name": "Calibration Food10 2",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: gain 10 food."
+      "text": "Roar: gain 10 food.",
+      "status": "reserve"
     },
     {
       "id": "calib_food10_3",
       "name": "Calibration Food10 3",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "Roar: gain 10 food."
+      "text": "Roar: gain 10 food.",
+      "status": "reserve"
     },
     {
       "id": "calib_food10_4",
       "name": "Calibration Food10 4",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: gain 10 food."
+      "text": "Roar: gain 10 food.",
+      "status": "reserve"
     },
     {
       "id": "calib_food10_5",
       "name": "Calibration Food10 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Roar: gain 10 food."
+      "text": "Roar: gain 10 food.",
+      "status": "reserve"
     },
     {
       "id": "calib_food10_6",
       "name": "Calibration Food10 6",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
       "keywords": [],
-      "text": "Roar: gain 10 food."
+      "text": "Roar: gain 10 food.",
+      "status": "reserve"
     },
     {
       "id": "calib_food3t_2",
       "name": "Calibration Food3T 2",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "At the end of your turn, gain 3 food."
+      "text": "At the end of your turn, gain 3 food.",
+      "status": "reserve"
     },
     {
       "id": "calib_food3t_3",
       "name": "Calibration Food3T 3",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
       "keywords": [],
-      "text": "At the end of your turn, gain 3 food."
+      "text": "At the end of your turn, gain 3 food.",
+      "status": "reserve"
     },
     {
       "id": "calib_food3t_4",
       "name": "Calibration Food3T 4",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "At the end of your turn, gain 3 food."
+      "text": "At the end of your turn, gain 3 food.",
+      "status": "reserve"
     },
     {
       "id": "calib_food3t_5",
       "name": "Calibration Food3T 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "At the end of your turn, gain 3 food."
+      "text": "At the end of your turn, gain 3 food.",
+      "status": "reserve"
     },
     {
       "id": "calib_food3t_6",
       "name": "Calibration Food3T 6",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
       "keywords": [],
-      "text": "At the end of your turn, gain 3 food."
+      "text": "At the end of your turn, gain 3 food.",
+      "status": "reserve"
     },
     {
       "id": "calib_apex_5",
       "name": "Calibration Apex 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [
         "Apex Predator"
       ],
-      "text": "Apex Predator."
+      "text": "Apex Predator.",
+      "status": "reserve"
     },
     {
       "id": "calib_apex_6",
       "name": "Calibration Apex 6",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
       "keywords": [
         "Apex Predator"
       ],
-      "text": "Apex Predator."
+      "text": "Apex Predator.",
+      "status": "reserve"
     },
     {
       "id": "calib_apex_7",
       "name": "Calibration Apex 7",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 7,
       "keywords": [
         "Apex Predator"
       ],
-      "text": "Apex Predator."
+      "text": "Apex Predator.",
+      "status": "reserve"
     },
     {
       "id": "calib_apex_8",
       "name": "Calibration Apex 8",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
       "keywords": [
         "Apex Predator"
       ],
-      "text": "Apex Predator."
+      "text": "Apex Predator.",
+      "status": "reserve"
     },
     {
       "id": "calib_immov_5",
       "name": "Calibration Immov 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [
         "Armor"
       ],
-      "text": "Armor."
+      "text": "Armor.",
+      "status": "reserve"
     },
     {
       "id": "calib_immov_6",
       "name": "Calibration Immov 6",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
       "keywords": [
         "Armor"
       ],
-      "text": "Armor."
+      "text": "Armor.",
+      "status": "reserve"
     },
     {
       "id": "calib_immov_7",
       "name": "Calibration Immov 7",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 7,
       "keywords": [
         "Armor"
       ],
-      "text": "Armor."
+      "text": "Armor.",
+      "status": "reserve"
     },
     {
       "id": "calib_immov_8",
       "name": "Calibration Immov 8",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
       "keywords": [
         "Armor"
       ],
-      "text": "Armor."
+      "text": "Armor.",
+      "status": "reserve"
     },
     {
       "id": "calib_stealth_5",
       "name": "Calibration Stealth 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [
         "Stealth"
       ],
-      "text": "Stealth."
+      "text": "Stealth.",
+      "status": "reserve"
     },
     {
       "id": "calib_stealth_6",
       "name": "Calibration Stealth 6",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
       "keywords": [
         "Stealth"
       ],
-      "text": "Stealth."
+      "text": "Stealth.",
+      "status": "reserve"
     },
     {
       "id": "calib_stealth_7",
       "name": "Calibration Stealth 7",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 7,
       "keywords": [
         "Stealth"
       ],
-      "text": "Stealth."
+      "text": "Stealth.",
+      "status": "reserve"
     },
     {
       "id": "calib_stealth_8",
       "name": "Calibration Stealth 8",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
       "keywords": [
         "Stealth"
       ],
-      "text": "Stealth."
+      "text": "Stealth.",
+      "status": "reserve"
     },
     {
       "id": "mock_courier",
       "name": "Courier",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 3,
       "keywords": [
         "Flight"
       ],
-      "text": "Flight. Roar: draw a card."
+      "text": "Flight. Roar: draw a card.",
+      "status": "reserve"
     },
     {
       "id": "mock_skully",
       "name": "Skully",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: draw 2 cards."
+      "text": "Roar: draw 2 cards.",
+      "status": "reserve"
     },
     {
       "id": "mock_sentry",
       "name": "Sentry",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 3 or less."
+      "text": "Roar: remove an adjacent enemy of strength 3 or less.",
+      "status": "reserve"
     },
     {
       "id": "mock_hunter",
       "name": "Hunter",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy of strength 4 or less."
+      "text": "Roar: remove an adjacent enemy of strength 4 or less.",
+      "status": "reserve"
     },
     {
       "id": "mock_saboteur",
       "name": "Saboteur",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: your opponent discards a random card."
+      "text": "Roar: your opponent discards a random card.",
+      "status": "reserve"
     },
     {
       "id": "mock_vanilla_5",
       "name": "Vanilla 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [],
-      "text": ""
+      "text": "",
+      "status": "reserve"
     },
     {
       "id": "mock_vanilla_6",
       "name": "Vanilla 6",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
       "keywords": [],
-      "text": ""
+      "text": "",
+      "status": "reserve"
     },
     {
       "id": "mock_vanilla_8",
       "name": "Vanilla 8",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
       "keywords": [],
-      "text": ""
+      "text": "",
+      "status": "reserve"
     },
     {
       "id": "mock_vanilla_9",
       "name": "Vanilla 9",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 9,
       "keywords": [],
-      "text": ""
+      "text": "",
+      "status": "reserve"
     },
     {
       "id": "mock_vanilla_10",
       "name": "Vanilla 10",
-      "deck": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 10,
       "keywords": [],
-      "text": ""
+      "text": "",
+      "status": "reserve"
     },
     {
       "id": "mock_flyer_7",
       "name": "Flyer 7",
-      "deck": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 7,
       "keywords": [
         "Flight"
       ],
-      "text": "Flight."
+      "text": "Flight.",
+      "status": "reserve"
     },
     {
       "id": "mock_armor_6",
       "name": "Armor 6",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
       "keywords": [
         "Armor"
       ],
-      "text": "Armor."
+      "text": "Armor.",
+      "status": "reserve"
     },
     {
       "id": "mock_removal",
       "name": "Executioner",
-      "deck": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 4,
       "keywords": [],
-      "text": "Roar: remove an adjacent enemy."
+      "text": "Roar: remove an adjacent enemy.",
+      "status": "reserve"
     },
     {
       "id": "mock_apex_5",
       "name": "Apex 5",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
       "keywords": [
         "Apex Predator"
       ],
-      "text": "Apex Predator."
+      "text": "Apex Predator.",
+      "status": "reserve"
     },
     {
       "id": "mock_apex_6",
       "name": "Apex 6",
-      "deck": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 6,
       "keywords": [
         "Apex Predator"
       ],
-      "text": "Apex Predator."
+      "text": "Apex Predator.",
+      "status": "reserve"
     },
     {
       "id": "mock_draw2",
       "name": "Archivist",
-      "deck": "reserve",
       "rarity": "rare",
       "tags": [],
       "base_strength": 2,
       "keywords": [],
-      "text": "Roar: draw 2 cards."
+      "text": "Roar: draw 2 cards.",
+      "status": "reserve"
     },
     {
       "id": "tutorial_cape_buffalo",
       "name": "Cape Buffalo",
-      "deck": "tutorial",
       "rarity": "common",
       "tags": [
         "Megafauna"
       ],
       "base_strength": 7,
       "keywords": [],
-      "text": ""
+      "text": "",
+      "status": "tutorial"
     },
     {
       "id": "tutorial_dire_wolf",
       "name": "Wolf",
-      "deck": "tutorial",
       "rarity": "common",
       "tags": [
         "Canine"
       ],
       "base_strength": 7,
       "keywords": [],
-      "text": ""
+      "text": "",
+      "status": "tutorial"
     },
     {
       "id": "tutorial_lynx",
       "name": "Lynx",
-      "deck": "tutorial",
       "rarity": "common",
       "tags": [
         "Cat"
       ],
       "base_strength": 5,
       "keywords": [],
-      "text": "Roar: if you control another Cat, draw a card."
+      "text": "Roar: if you control another Cat, draw a card.",
+      "status": "tutorial"
     },
     {
       "id": "tutorial_chipmunk",
       "name": "Chipmunk",
-      "deck": "tutorial",
       "rarity": "common",
       "tags": [
         "Rodent"
       ],
       "base_strength": 1,
       "keywords": [],
-      "text": "Roar: gain 10 food. At the start of your next turn, gain 10 more."
+      "text": "Roar: gain 10 food. At the start of your next turn, gain 10 more.",
+      "status": "tutorial"
     }
   ]
 }

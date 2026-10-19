@@ -26,7 +26,7 @@ const tokenKey = id => 'ak:seat:' + id;
 const getToken = id => { try { return sessionStorage.getItem(tokenKey(id)); } catch { return null; } };
 const setToken = (id, t) => { try { sessionStorage.setItem(tokenKey(id), t); } catch { /* private mode: the tab just can't reconnect */ } };
 
-let CARDS = {}, MAP, DECKS = [], BOT_POOL = [], ME = null;   // BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
+let CARDS = {}, MAP, DECKS = [], BOT_ONLY = [], BOT_POOL = [], ME = null;   // DECKS: the starters; BOT_ONLY: the bots' other decks (named and listed, never yours); BOT_POOL: the deck ids a Random bot deck is drawn from   // ME: your profile {id, name, tag, decks, history}
 let V = null, ws = null, wsId = null, screen = null;
 const ui = { sel: null, selIid: null, roam: null, hover: null, peek: false, menu: false, panel: null };   // roam: the crossroad (viewer space) of the animal picked to roam
 
@@ -123,8 +123,8 @@ function checkBuild(b) {
 }
 async function boot() {
   const p = await fetch('/api/pool').then(r => r.json());
-  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BUILD = p.build; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
-  COVER = Object.fromEntries(DECKS.map(d => [d.id, d.cover]));
+  CARDS = Object.fromEntries(p.cards.map(c => [c.id, c])); MAP = p.map; DECKS = p.decks; BOT_ONLY = p.bot_only || []; BUILD = p.build; BOT_POOL = p.bot_decks || DECKS.map(d => d.id);
+  COVER = Object.fromEntries([...DECKS, ...BOT_ONLY].map(d => [d.id, d.cover]));
   // the animals' calls (web/parked_calls/, not served) are parked (Martin, 2026-10-01): only the basic sounds play for now
   await loadProfile();
   // Feedback while the game is in testing: a tab on the screen's edge where the edge is free (home, News, Settings: app.css shows
@@ -244,10 +244,11 @@ function homeScreen(mode = {}) {
   const testBot = new URLSearchParams(location.hash.split('?')[1] || '').get('botdeck');   // a test opponent, by link only
   if (TEST_BOTS.some(([id]) => id === testBot)) play.botDeck = testBot;
   const isTest = TEST_BOTS.some(([id]) => id === play.botDeck);
-  if (play.botDeck && play.botDeck !== 'random' && !isTest && !DECKS.some(d => d.id === play.botDeck)) play.botDeck = 'random';   // a deck that's gone
+  const botAll = [...DECKS, ...BOT_ONLY];   // every deck a bot can be given: the starters and the bots' own
+  if (play.botDeck && play.botDeck !== 'random' && !isTest && !botAll.some(d => d.id === play.botDeck)) play.botDeck = 'random';   // a deck that's gone
   keepPlay();   // home draws on every change of the choice: what it draws is what's kept
-  const bd = DECKS.find(d => d.id === play.botDeck), redraw = () => homeScreen(mode);
-  const botDecks = [['random', 'Random'], ...DECKS.map(d => [d.id, d.name]), ...(isTest ? TEST_BOTS : [])];   // the starters (and a test opponent once its link was opened)
+  const bd = botAll.find(d => d.id === play.botDeck), redraw = () => homeScreen(mode);
+  const botDecks = [['random', 'Random'], ...botAll.map(d => [d.id, d.name]), ...(isTest ? TEST_BOTS : [])];   // the starters, the bots' own decks (and a test opponent once its link was opened)
   // The level as a three-way picker, like Bot/Friend: three choices are read at a glance, not opened.
   const levels = `<div class="seg">${LEVELS.map(([v, l]) => `<button class="slab${play.level === v ? ' on' : ''}" data-level="${v}">${l}</button>`).join('')}</div>`;
   const fr = play.opp === 'friend' && (play.friends || []).find(f => f.id === play.friend);
@@ -321,7 +322,7 @@ function homeScreen(mode = {}) {
     if (play.opp === 'friend' && fr && fr.online) return startSearch('challenge', 'go', '/api/challenge', { friend: fr.id, deck: deckSpec(chosen) }, friendLabel(fr, play.friends));
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
-      const pool = play.level === 'easy' ? DECKS.filter(d => EASY_POOL.includes(d.id)) : DECKS.filter(d => BOT_POOL.includes(d.id)), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
+      const pool = play.level === 'easy' ? DECKS.filter(d => EASY_POOL.includes(d.id)) : botAll.filter(d => BOT_POOL.includes(d.id)), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
       body.bot = { level: play.level, deck };
     }
     if (play.opp === 'gauntlet') {
@@ -516,8 +517,8 @@ function adoptRetired(ids) {
   for (const id of ids) {
     if (typeof id !== 'string' || CARDS[id] || !/^[a-z][a-z0-9_]*$/.test(id)) continue;
     const s = CARDS[SUCCESSOR[id]];
-    CARDS[id] = s ? { ...s, id, deck: 'reserve' }
-      : { id, name: id.split('_').map(w => w[0].toUpperCase() + w.slice(1)).join(' '), deck: 'reserve', rarity: 'common', tags: [], str: 0,
+    CARDS[id] = s ? { ...s, id, status: 'reserve' }
+      : { id, name: id.split('_').map(w => w[0].toUpperCase() + w.slice(1)).join(' '), status: 'reserve', rarity: 'common', tags: [], str: 0,
           text: '', kw: [], cost: null, habitat: '', related: [], evolves: false };
   }
 }

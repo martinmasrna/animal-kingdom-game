@@ -68,8 +68,7 @@ const FB = '<button class="backbtn fbx" data-tip="Feedback" aria-label="Feedback
 export function collectionScreen(app, ctx) {
   X = ctx; C = ctx.cards;
   if (!saved) saved = Object.fromEntries(decks().map(d => [d.id, [...d.list]]));
-  const starterIds = new Set(ctx.starters.map(d => d.id));
-  cards = Object.values(C).filter(c => starterIds.has(c.deck) || c.deck === 'bench');   // the bench: cleared cards in no starter
+  cards = Object.values(C).filter(c => c.status === 'collectible');   // the starters' cards and the bench (cleared cards in no starter)
   if (!wired) { wired = true; wireGlobal(); }
   const all = decks();
   // Opens your first deck; with none yet, nothing is open and the grid is for browsing.

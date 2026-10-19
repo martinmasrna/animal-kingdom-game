@@ -68,7 +68,7 @@ def test_a_name_the_tutorial_shares_means_the_collections_card():
     from animal_kingdom.web import server
     r = next(x for x in news.releases() if x["id"] == "2026-10-16")
     ids = [c for g in r["groups"] for it in g["items"] for c in it["cards"]]
-    assert "cape_buffalo" in ids and not any(server.CARDS[c].deck in ("tutorial", "token", "reserve") for c in ids)
+    assert "cape_buffalo" in ids and all(server.CARDS[c].collectible for c in ids)
 
 
 def test_the_clients_successor_map_is_the_servers():

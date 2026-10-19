@@ -3,10 +3,13 @@
     .venv/bin/python tools/card-workbench/convert.py [EXPORT] [--check]
 
 Reads tools/card-workbench/decks.json (the source of truth for which cards exist, their
-names, strengths, families and text) and rewrites animal_kingdom/data/cards.json: the twelve starter decks (each
-card's `deck` and rarity give its copies, so the decklists follow), the pool as the bench, and the cards the
-engine makes itself (tokens, the Butterfly's stages, the Eagle's mate), which are listed here. Cards decks.json
-doesn't know are kept as they are when they sit in the reserve or the tutorial deal; every other old card goes.
+names, strengths, families and text, and which starter deck each ships in) and rewrites two files:
+animal_kingdom/data/cards.json, every card with its status (collectible, or reserve, tutorial, token), and
+animal_kingdom/data/decklists.json, the starter decks as lists (a card's rarity gives its copies). Cards are cards and
+decks are decks: a starter deck is a list over the pool like any other, and the bot decks in decklists.json, which
+the workbench does not know, are kept as they are. The cards the engine makes itself (tokens, the Butterfly's stages,
+the Eagle's mate) are listed here. Cards decks.json doesn't know are kept as they are when they sit in the reserve or
+the tutorial deal; every other old card goes.
 
 A card keeps its engine id across runs: the id recorded with its workbench id last time, else (the first run) the
 old card of the same name, else one made from its name, or from its species for an unnamed legendary
@@ -27,18 +30,29 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 EXPORT = ROOT / "tools" / "card-workbench" / "decks.json"
 CARDS = ROOT / "animal_kingdom" / "data" / "cards.json"
+DECKLISTS = ROOT / "animal_kingdom" / "data" / "decklists.json"
 
 COMMENT = ("Static card data, written by tools/card-workbench/convert.py from tools/card-workbench/decks.json (the "
-           "source of truth for the starter decks and the pool); reserve and tutorial cards are kept by it as they are. Effect "
+           "source of truth for the pool); reserve and tutorial cards are kept by it as they are. A card belongs to no "
+           "deck: the decks (starters and bot decks) are lists over this pool in decklists.json. Effect "
            "logic lives in engine code (effects/statics/strength), bound by id; numbers an effect uses live in "
-           "engine/config.py. Schema: decks (starter decks: slug, name, order, cover); cards: id (unique, stable across "
-           "runs), name (the species while `unnamed`), deck (a starter slug, or bench/token/reserve/tutorial), rarity, "
+           "engine/config.py. Schema: cards: id (unique, stable across runs), name (the species while `unnamed`), "
+           "status (collectible: a card a deck may hold; reserve: a shelved design or a later habitat's card; tutorial: "
+           "the tutorial's fixed deal; token: made by an effect, never in a decklist), rarity, "
            "tags (families and roles), base_strength (int 0-10, or 'dynamic' with dynamic_strength), keywords (printed "
            "static keywords), reach and hungry (their numbers), food_cost (a printed 'Costs X food'), text (verbatim), "
            "mate (the Eagle pair), species, habitat and workbench_id (where it came from).")
+DECKLISTS_COMMENT = ("The decks the game ships, as lists over cards.json: a starter deck (starter: true; written by "
+                     "tools/card-workbench/convert.py from the workbench, which says which starter a card ships in) is what a "
+                     "new profile gets, one copy each; a bot deck (bot: true) is what the bots play, ranked and in Practice's "
+                     "Random (a starter may be both). Starter decks share no card, so a new player meets as many cards as "
+                     "possible; bot decks may overlap with anything (Martin, 2026-10-19). Each deck: slug, name, cover (the "
+                     "card whose art faces it), order (the menus), cards (id: copies; a legal 4-4-6 list of collectible cards). "
+                     "Bot decks are edited here by hand; convert.py keeps them.")
+COPIES = {"L": 1, "R": 2, "C": 3}        # the 4-4-6 copy limits, by the workbench's rarity letters
 RARITY = {"L": "legendary", "R": "rare", "C": "common"}
 BENCH = "pool"                       # the workbench's deck of cards in no starter deck
-KEPT_DECKS = {"reserve", "tutorial"}
+KEPT = {"reserve", "tutorial"}       # old cards with these statuses are kept as they are
 # The habitats in the game today; a Pool card from any other waits in reserve for its habitat's set.
 LAUNCH_HABITATS = {"Savanna", "Forest", "Meadow", "Jungle", "City", "Open Ocean"}  # old cards the workbench doesn't know, kept as they are
 
@@ -70,7 +84,7 @@ COSTS = re.compile(r"Costs (\d+) food")
 
 
 def _token(cid, name, strength, tags=(), text="", keywords=(), rarity="common", **extra):
-    return {"id": cid, "name": name, "deck": "token", "rarity": rarity, "tags": list(tags), "base_strength": strength,
+    return {"id": cid, "name": name, "status": "token", "rarity": rarity, "tags": list(tags), "base_strength": strength,
             "keywords": list(keywords), "text": text, **extra}
 
 
@@ -152,20 +166,22 @@ def resolve_id(wc: dict, deck: str, old: list[dict], taken: set) -> str:
     if name in RENAMED:
         return RENAMED[name]
     for rec in old:
-        if rec["name"] == name and rec["deck"] not in KEPT_DECKS | {"token"} and rec["id"] not in taken:
+        if rec["name"] == name and rec["status"] == "collectible" and rec["id"] not in taken:
             return rec["id"]
     return slug(name)
 
 
-def convert(export: dict, old_data: dict) -> tuple[dict, list[str]]:
+def convert(export: dict, old_data: dict, old_decklists: dict | None = None) -> tuple[dict, dict, list[str]]:
     old = old_data.get("cards", [])
     by_id = {r["id"]: r for r in old}
+    kept_decks = {d["slug"]: d for d in (old_decklists or {}).get("decks", [])}
     cards, notes, taken = [], [], set()
     decks = []
     for key, deck in sorted(export["decks"].items(), key=lambda kv: kv[1].get("order", 0)):
         dslug = deck_slug(key)
         if deck.get("precon"):
-            decks.append({"slug": dslug, "name": deck["name"], "order": deck.get("order", 0)})
+            decks.append({**kept_decks.get(dslug, {}), "slug": dslug, "name": deck["name"], "order": deck.get("order", 0),
+                          "starter": True, "cards": {}})
         for wc in deck["cards"]:
             if wc.get("str") is None:
                 notes.append(f"skipped {wc['id']} ({wc['name'] or wc['species']}): no strength yet")
@@ -181,10 +197,12 @@ def convert(export: dict, old_data: dict) -> tuple[dict, list[str]]:
             name = wc["name"].strip() if not unnamed else UNNAMED[wc["id"]][1] if wc["id"] in UNNAMED else wc["species"]
             if unnamed and wc["rarity"] == "L":
                 name = f"[{name.upper()}]"          # a legendary still waiting for its name, plainly a placeholder
-            in_deck = dslug
+            status = "collectible"
             if dslug == "bench" and (wc.get("status") == "open" or wc.get("habitat") not in LAUNCH_HABITATS):
-                in_deck = "reserve"                 # an open design, or a later habitat's card: not collectible
-            rec = {"id": cid, "name": name, "deck": in_deck, "rarity": RARITY[wc["rarity"]],
+                status = "reserve"                  # an open design, or a later habitat's card: not collectible
+            elif deck.get("precon"):
+                decks[-1]["cards"][cid] = COPIES[wc["rarity"]]
+            rec = {"id": cid, "name": name, "status": status, "rarity": RARITY[wc["rarity"]],
                    "tags": [t.strip() for t in wc.get("tag", "").split(",") if t.strip()],
                    "base_strength": "dynamic" if cid in DYNAMIC else wc["str"], "text": text}
             rec.update(parse_text(text))
@@ -208,8 +226,9 @@ def convert(export: dict, old_data: dict) -> tuple[dict, list[str]]:
                 notes.append(f"changed  {cid:32} {prev['name']} -> {name}: {prev['base_strength']} "
                              f"{prev.get('text', '')!r} -> {rec['base_strength']} {text!r}")
             cards.append(rec)
+    by_new = {c["id"]: c for c in cards}
     for d in decks:
-        legends = [c["id"] for c in cards if c["deck"] == d["slug"] and c["rarity"] == "legendary"]
+        legends = [cid for cid in d["cards"] if by_new[cid]["rarity"] == "legendary"]
         d["cover"] = COVERS.get(d["slug"], legends[0] if legends else "")
     for tok in TOKENS:
         if tok["id"] in taken:
@@ -217,14 +236,20 @@ def convert(export: dict, old_data: dict) -> tuple[dict, list[str]]:
         taken.add(tok["id"])
         cards.append(tok)
     for rec in old:
-        if rec["deck"] in KEPT_DECKS and rec["id"] not in taken:
+        if rec["status"] in KEPT and rec["id"] not in taken:
             taken.add(rec["id"])
             cards.append(rec)
     for rec in old:
         if rec["id"] not in taken:
             notes.append(f"retired  {rec['id']:32} {rec['name']}")
-    data = {"_comment": COMMENT, "decks": decks, "cards": cards}
-    return data, notes
+    starters = {d["slug"] for d in decks}
+    decks += [d for slug, d in kept_decks.items() if slug not in starters]   # the bot decks, as they are
+    for d in decks:
+        if gone := [cid for cid in d["cards"] if cid not in by_new or by_new[cid]["status"] != "collectible"]:
+            notes.append(f"deck {d['slug']} names cards no longer collectible: {gone}")
+    data = {"_comment": COMMENT, "cards": cards}
+    decklists = {"_comment": DECKLISTS_COMMENT, "decks": decks}
+    return data, decklists, notes
 
 
 def main(argv=None) -> None:
@@ -234,13 +259,18 @@ def main(argv=None) -> None:
     args = ap.parse_args(argv)
     export = json.loads(Path(args.export).read_text(encoding="utf-8"))
     old = json.loads(CARDS.read_text(encoding="utf-8"))
-    data, notes = convert(export, old)
+    for rec in old.get("cards", []):     # card data from before 2026-10-19 filed each card under a deck; its status follows
+        rec.setdefault("status", {"token": "token", "reserve": "reserve", "tutorial": "tutorial"}.get(rec.pop("deck", None), "collectible"))
+    old_decklists = json.loads(DECKLISTS.read_text(encoding="utf-8")) if DECKLISTS.exists() else None
+    data, decklists, notes = convert(export, old, old_decklists)
     print("\n".join(notes) or "no changes")
     if args.check:
         return
     CARDS.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"wrote {CARDS.relative_to(ROOT)}: {len(data['decks'])} starter decks, {len(data['cards'])} cards",
-          file=sys.stderr)
+    DECKLISTS.write_text(json.dumps(decklists, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    starters = sum(1 for d in decklists["decks"] if d.get("starter"))
+    print(f"wrote {CARDS.relative_to(ROOT)}: {len(data['cards'])} cards; {DECKLISTS.relative_to(ROOT)}: "
+          f"{starters} starter decks, {len(decklists['decks']) - starters} bot decks", file=sys.stderr)
 
 
 if __name__ == "__main__":

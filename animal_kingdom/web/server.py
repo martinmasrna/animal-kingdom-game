@@ -25,7 +25,7 @@ from aiohttp import WSMsgType, web
 from ..decks import BOT_DECKS, PREMADE_DECKS, TEST_BOT_DECKS, load_premade_deck
 from ..engine import rules
 from ..engine.state import EngineError
-from ..engine.cards import COPY_LIMITS, DECK_SLUGS, load_cards
+from ..engine.cards import COPY_LIMITS, DECK_SLUGS, STARTER_DECKS, load_cards
 from . import custom_decks
 from . import events, feedback, news
 from .chat import Chat, ChatError
@@ -263,17 +263,9 @@ def display(p: dict) -> str:
     return f"{p['name']}#{p['tag']}"
 
 
-# A profile starts with the starter decks as its own (their covers, as on the play screen, from cards.json).
+# A profile starts with the starter decks as its own (their covers, as on the play screen, from decklists.json).
 def starter_decks() -> list[dict]:
-    out = []
-    for slug in DECK_NAMES:
-        if slug not in PREMADE_DECKS:
-            continue
-        cards: dict = {}
-        for cid in load_premade_deck(slug):
-            cards[cid] = cards.get(cid, 0) + 1
-        out.append({"id": slug, "name": DECK_NAMES[slug], "cards": cards, "cover": STARTER_COVERS.get(slug, "")})
-    return out
+    return [{"id": d["slug"], "name": d["name"], "cards": dict(d["cards"]), "cover": d.get("cover", "")} for d in STARTER_DECKS]
 
 
 def starter_cards() -> dict[str, dict]:
@@ -290,7 +282,7 @@ RENAMED_IDS = {"alpha": "scarlett", "dire_wolf": "wolf", "goliath": "python", "g
                "taipan": "gaboon_viper", "polar_bear": "crocodile", "gray_wolf": "chimpanzee", "snow_leopard": "leopard"}
 COPY_LIMIT = {cid: COPY_LIMITS[c.rarity] for cid, c in CARDS.items()}   # any deck may hold the rarity's full count (decks.py)
 # The cards a player's deck can hold: the starter decks' and the bench's (not the reserve's, the tutorial's or tokens).
-COLLECTIBLE = {cid for cid, c in CARDS.items() if c.deck not in ("reserve", "tutorial", "token")}
+COLLECTIBLE = {cid for cid, c in CARDS.items() if c.collectible}
 
 
 def profile_view(p: dict) -> dict:
@@ -893,12 +885,15 @@ async def privacy(_req):
 async def pool(_req):
     return web.json_response({
         "cards": card_pool(),
-        "decks": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug),
-                   "cover": STARTER_COVERS.get(slug, "")}
-                  for slug in DECK_NAMES if slug in PREMADE_DECKS],
+        "decks": [{"id": d["slug"], "name": d["name"], "list": load_premade_deck(d["slug"]), "cover": d.get("cover", "")}
+                  for d in STARTER_DECKS],
         "map": map_info(),
         "levels": list(BOT_LEVELS),
         "bot_decks": list(BOT_DECKS),   # the pool a Random bot deck is drawn from (decks.BOT_DECKS)
+        # The bot decks that are not starters: shown by name and list wherever a bot's deck is (Practice's chooser,
+        # the versus moment, the match history), never in a player's collection.
+        "bot_only": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug), "cover": STARTER_COVERS.get(slug, "")}
+                     for slug in BOT_DECKS if slug not in DECK_SLUGS],
         "build": BUILD,
     })
 

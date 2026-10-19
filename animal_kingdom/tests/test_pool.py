@@ -1,4 +1,4 @@
-"""Structural tests for the launch pool: 12 starter 4-4-6 decks from the card workbench.
+"""Structural tests for the launch pool: 12 starter 4-4-6 decks, lists over the collectible cards (decklists.json).
 
 These assert the *shape* of the static data (counts, uniqueness, domains, the 4-4-6
 expansion) — not card behavior, which is Phase 2.
@@ -10,43 +10,49 @@ from collections import Counter
 
 from animal_kingdom.engine.cards import (
     COPY_LIMITS,
+    DECKLISTS,
     DECK_SLUGS,
     DYNAMIC_STRENGTHS,
     KEYWORDS,
+    STARTER_DECKS,
     TAGS,
     load_cards,
 )
-from animal_kingdom.decks import PREMADE_DECKS, load_premade_deck
+from animal_kingdom.decks import BOT_DECKS, PREMADE_DECKS, decklist_problems, load_premade_deck
 
 RETIRED_TAGS = {"Reptile", "Insect"}
 DYNAMIC_IDS = {"egg_eater"}
-
-# A deck may break the 4-4-6/14-design template (a 7th common, some commons at 2 copies, the total staying 30); none
-# of the launch decks does. See Card.copies (engine/cards.py).
-DESIGN_COUNT_OVERRIDES: dict[str, int] = {}
-RARITY_MIX_OVERRIDES: dict[str, dict] = {}
 
 
 # ----------------------------------------------------------------- pool composition
 
 def test_14_designs_in_each_of_the_12_starter_decks():
     cards = load_cards()
-    # 168 draftable designs across the 12 decks; tokens, the bench, reserve and the tutorial's cards live outside them.
-    draftable = [c for c in cards.values() if c.deck in DECK_SLUGS]
-    expected_total = 14 * len(DECK_SLUGS) + sum(
-        n - 14 for n in DESIGN_COUNT_OVERRIDES.values()
-    )
-    assert len(draftable) == expected_total
-    by_deck: dict[str, list] = {slug: [] for slug in DECK_SLUGS}
-    for c in draftable:
-        by_deck[c.deck].append(c)
-    assert len(by_deck) == 12
-    for slug, designs in by_deck.items():
-        expected = DESIGN_COUNT_OVERRIDES.get(slug, 14)
-        assert len(designs) == expected, f"{slug} has {len(designs)} designs, expected {expected}"
-        rarities = Counter(c.rarity for c in designs)
-        expected_mix = RARITY_MIX_OVERRIDES.get(slug, {"legendary": 4, "rare": 4, "common": 6})
-        assert rarities == expected_mix, f"{slug}: {rarities}"
+    assert len(STARTER_DECKS) == 12 and DECK_SLUGS == {d["slug"] for d in STARTER_DECKS}
+    for d in STARTER_DECKS:
+        assert len(d["cards"]) == 14, f"{d['slug']} has {len(d['cards'])} designs"
+        rarities = Counter(cards[cid].rarity for cid in d["cards"])
+        assert rarities == {"legendary": 4, "rare": 4, "common": 6}, f"{d['slug']}: {rarities}"
+        assert all(cards[cid].collectible for cid in d["cards"])
+        assert d.get("cover") in d["cards"], f"{d['slug']}: its cover is not one of its cards"
+
+
+def test_starter_decks_share_no_card():
+    # A new player meets as many cards as possible: no card ships in two starter decks (Martin, 2026-10-19). Bot decks
+    # are free to overlap with anything.
+    seen: dict[str, str] = {}
+    for d in STARTER_DECKS:
+        for cid in d["cards"]:
+            assert cid not in seen, f"{cid} ships in both {seen[cid]} and {d['slug']}"
+            seen[cid] = d["slug"]
+
+
+def test_every_shipped_deck_is_legal_and_the_bots_play_shipped_decks():
+    slugs = [d["slug"] for d in DECKLISTS]
+    assert len(set(slugs)) == len(slugs)
+    for slug, decklist in PREMADE_DECKS.items():
+        assert decklist_problems(decklist) == [], slug
+    assert set(BOT_DECKS) <= set(PREMADE_DECKS) and BOT_DECKS
 
 
 def test_ids_and_names_globally_unique():
@@ -55,7 +61,7 @@ def test_ids_and_names_globally_unique():
     # species meanwhile (the Wolf beside the common Wolf), and tokens and the tutorial's cards share their animals' names.
     ids = [c.id for c in cards.values()]
     assert len(set(ids)) == len(ids) == len(cards)
-    names = [c.name for c in cards.values() if not c.unnamed and c.deck not in ("token", "tutorial")]
+    names = [c.name for c in cards.values() if not c.unnamed and c.status not in ("token", "tutorial")]
     assert len(set(names)) == len(names)
 
 
@@ -64,8 +70,8 @@ def test_each_deck_expands_to_30():
         deck = load_premade_deck(slug)
         assert len(deck) == 30, f"{slug} expands to {len(deck)}"
         counts = Counter(deck)
-        assert len(counts) == DESIGN_COUNT_OVERRIDES.get(slug, 14)
-    assert PREMADE_DECKS.keys() == DECK_SLUGS
+        assert len(counts) == 14
+    assert DECK_SLUGS <= PREMADE_DECKS.keys()
 
 
 def test_copy_limits_locked_446():
@@ -74,9 +80,7 @@ def test_copy_limits_locked_446():
     for slug in DECK_SLUGS:
         counts = Counter(load_premade_deck(slug))
         for cid, n in counts.items():
-            card = cards[cid]
-            expected = card.copies if card.copies is not None else COPY_LIMITS[card.rarity]
-            assert n == expected
+            assert n == COPY_LIMITS[cards[cid].rarity]
 
 
 # ------------------------------------------------------------------ field domains

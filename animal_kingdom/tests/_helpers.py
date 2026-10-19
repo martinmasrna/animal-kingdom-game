@@ -39,7 +39,7 @@ def cards_with(*records) -> dict:
     needs only an id, a strength and its keywords/tags; the rest is filled in."""
     from animal_kingdom.engine.resources import load_bundled_json
     raw = load_bundled_json("cards.json")
-    extra = [{"name": r["id"], "deck": "reserve", "rarity": "common", "tags": [], "keywords": [], "text": "", **r}
+    extra = [{"name": r["id"], "status": "reserve", "rarity": "common", "tags": [], "keywords": [], "text": "", **r}
              for r in records]
     return load_cards({**raw, "cards": raw["cards"] + extra})
 

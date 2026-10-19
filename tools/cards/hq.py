@@ -1,7 +1,7 @@
 """The card table's data: every card's values, read from and written to the game's own files, and how settled each one is.
 
 The values live where the game keeps them: tools/card-workbench/decks.json (habitat, rarity, name and species, tag,
-strength, text; convert.py then rewrites animal_kingdom/data/cards.json) and animal_kingdom/web/static/art.js (the
+strength, text; convert.py then rewrites animal_kingdom/data/cards.json and the starter decks in decklists.json) and animal_kingdom/web/static/art.js (the
 crops). The engine makes some cards itself (tokens, evolution stages, the Eagle's mate); they are listed in convert.py,
 shown under the card that makes them, and their values are read-only here.
 
@@ -138,7 +138,7 @@ def load() -> dict:
                 "art": key in art["CROP"],
             })
     for c in cards["cards"]:
-        if c["deck"] != "token":
+        if c["status"] != "token":
             continue
         rows.append({
             "id": c["id"], "wid": None, "deck": "token", "editable": False, "habitat": "",

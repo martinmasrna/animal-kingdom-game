@@ -30,8 +30,7 @@ def parse(path: Path, cards: dict) -> dict:
     """One release file: its date and groups of changes, each with its why, the cards it touches and how they were."""
     # a change names its cards by id (stable) or by the name they carry today
     # a name the tutorial, a token or the reserve shares (the tutorial's Cape Buffalo) means the collection's card
-    side = {"tutorial", "token", "reserve"}
-    by_name = {c.name.lower(): cid for cid, c in sorted(cards.items(), key=lambda kv: getattr(kv[1], "deck", "") not in side)}
+    by_name = {c.name.lower(): cid for cid, c in sorted(cards.items(), key=lambda kv: kv[1].collectible)}
     by_name.update({cid.lower(): cid for cid in cards})
     rid = path.stem
     try:

@@ -842,7 +842,7 @@ class RecorderApp(App[None]):
         removed = Counter(state.remove_pile)
         for player, deck_slug in deck_by_player.items():
             for card_id, count in removed.items():
-                if state.cards[card_id].deck == deck_slug:
+                if card_id in PREMADE_DECKS.get(deck_slug, ()):
                     self.revealed_cards[player][card_id] = max(
                         self.revealed_cards[player][card_id],
                         count,

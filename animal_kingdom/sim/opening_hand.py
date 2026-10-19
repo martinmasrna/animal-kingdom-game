@@ -30,7 +30,7 @@ from pathlib import Path
 from ..bots.mulligan import TABLE
 from ..decks import PREMADE_DECKS
 from ..engine import rules
-from ..engine.cards import COPY_LIMITS, NON_DECK_SLUGS
+from ..engine.cards import COPY_LIMITS
 from ..engine.config import Config
 from ..engine.state import new_game
 
@@ -39,32 +39,38 @@ PILOTS = {"referee", "turn"}      # ExpertBot and TurnBot, which kept their hand
 MIN_HANDS = 30                    # hands with and without the card, per deck
 PRIOR_SD = 5.0                    # points: the spread of real impacts the shrinkage assumes
 REPO = Path(__file__).resolve().parents[2]
-CARDS = "animal_kingdom/data/cards.json"
+CARDS = "animal_kingdom/data/cards.json"              # before 2026-10-19 each card was filed under its deck
+DECKLISTS = "animal_kingdom/data/decklists.json"      # since then the decks are lists of their own
 
 _VERSIONS: list = []
 
 
-def _lists(cards_json: dict) -> dict[str, list[str]]:
-    """Deck slug -> 30 card ids, in the order decks.py builds them (the order the seed shuffles)."""
+def _lists(data: dict) -> dict[str, list[str]]:
+    """Deck slug -> 30 card ids, in the order decks.py builds them (the order the seed shuffles): from a decklists.json,
+    or from a cards.json of before 2026-10-19, which filed each card under its deck."""
+    if data.get("decks") and "cards" in data["decks"][0]:
+        return {d["slug"]: [cid for cid, n in d["cards"].items() for _ in range(n)] for d in data["decks"]}
     decks: dict[str, list[str]] = {}
-    for rec in cards_json.get("cards", []):
-        if rec.get("deck") and rec["deck"] not in NON_DECK_SLUGS:
+    for rec in data.get("cards", []):
+        if rec.get("deck") and rec["deck"] not in ("token", "reserve", "bench", "tutorial"):
             decks.setdefault(rec["deck"], []).extend([rec["id"]] * (rec.get("copies") or COPY_LIMITS.get(rec.get("rarity"), 0)))
     return decks
 
 
 def _load_versions() -> None:
-    """Every committed cards.json's deck lists with its commit time, and today's."""
+    """Every committed deck list (decklists.json, and cards.json from before it) with its commit time, and today's."""
     out = []
-    log = subprocess.run(["git", "-C", str(REPO), "log", "--format=%H %ct", "--", CARDS], capture_output=True, text=True).stdout
-    for line in log.split("\n"):
-        if line.strip():
-            h, t = line.split()
-            try:
-                show = subprocess.run(["git", "-C", str(REPO), "show", f"{h}:{CARDS}"], capture_output=True, text=True).stdout
-                out.append((int(t), _lists(json.loads(show))))
-            except ValueError:
-                pass
+    for path in (DECKLISTS, CARDS):
+        log = subprocess.run(["git", "-C", str(REPO), "log", "--format=%H %ct", "--", path], capture_output=True, text=True).stdout
+        for line in log.split("\n"):
+            if line.strip():
+                h, t = line.split()
+                try:
+                    show = subprocess.run(["git", "-C", str(REPO), "show", f"{h}:{path}"], capture_output=True, text=True).stdout
+                    if lists := _lists(json.loads(show)):
+                        out.append((int(t), lists))
+                except ValueError:
+                    pass
     out.append((10 ** 12, {k: list(v) for k, v in PREMADE_DECKS.items()}))
     _VERSIONS[:] = sorted(out, key=lambda v: v[0])
 

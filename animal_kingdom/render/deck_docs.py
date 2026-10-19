@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..engine.cards import COPY_LIMITS, DECK_SLUGS, Card, load_cards
+from ..engine.cards import DECKLISTS, DECK_SLUGS, Card, load_cards
 
 DOCS_DIR = Path(__file__).resolve().parents[2] / "docs" / "cards" / "decks"
 CARDS_BEGIN = "<!-- cards:begin (generated from cards.json by animal_kingdom.render.deck_docs) -->"
@@ -23,13 +23,14 @@ def doc_path(deck: str) -> Path:
 
 
 def cards_block(deck: str, cards: dict[str, Card]) -> str:
+    counts = next(d["cards"] for d in DECKLISTS if d["slug"] == deck)
     lines = [CARDS_BEGIN]
     for rarity in ("legendary", "rare", "common"):
-        rows = [c for c in cards.values() if c.deck == deck and c.rarity == rarity]
+        rows = [cards[cid] for cid in counts if cards[cid].rarity == rarity]
         lines += ["", f"### {rarity.title()}", "",
                   "| Card | × | Tags | Str | Text |", "|---|---:|---|---:|---|"]
         for c in rows:
-            copies = c.copies if c.copies is not None else COPY_LIMITS[rarity]
+            copies = counts[c.id]
             tags = ", ".join(sorted(c.tags)) or "—"
             text = c.text.replace("|", "\\|") or "—"
             lines.append(f"| **{c.name}** | {copies} | {tags} | {c.base_strength} | {text} |")

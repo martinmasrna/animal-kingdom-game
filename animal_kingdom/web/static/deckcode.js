@@ -8,7 +8,7 @@
 import { CARD_NUMS, SUCCESSOR } from './cardnums.js';
 
 // A card a deck can hold: not the reserve's (cards outside the launch habitats, retired designs), the tutorial's or a token.
-const collectible = (cards, id) => cards[id] && !['reserve', 'tutorial', 'token'].includes(cards[id].deck);
+const collectible = (cards, id) => cards[id] && cards[id].status === 'collectible';
 
 const NUM = Object.fromEntries(CARD_NUMS.map((id, i) => [id, i + 1]));
 const RANK = { legendary: 0, rare: 1, common: 2 }, sv = c => c.str === '*' ? -1 : c.str;

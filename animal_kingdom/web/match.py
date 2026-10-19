@@ -20,7 +20,7 @@ from typing import Optional
 from ..decks import PREMADE_DECKS, load_premade_deck
 from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
-from ..engine.cards import STARTER_DECKS, load_cards
+from ..engine.cards import DECKLISTS, load_cards
 from ..engine.effects import roar_condition
 from ..engine.maps import load_map
 from ..engine.state import EngineError, GameState, Result, new_game, other_player
@@ -45,10 +45,10 @@ CLOCK_MULLIGAN = 30.0        # one window for both players' mulligans at once (M
 EVENTS_KEPT = 200            # a view carries the game's last events: enough for a client that missed a few views
 TIMEOUTS_TO_LOSE = 3         # turns in a row a player's clock ran out: they have left, and lose (Martin, 2026-10-01)
 
-# Menu labels for the premade decks (the design mockups' names).
-DECK_NAMES = {**{d["slug"]: d["name"] for d in STARTER_DECKS}, **tutorial.NAMES, "lions30": "30 Lions"}
-# The card whose art covers each starter deck (cards.json, from the card workbench).
-STARTER_COVERS = {d["slug"]: d.get("cover", "") for d in STARTER_DECKS}
+# Menu labels for the shipped decks (starters and bot decks, decklists.json) and the tutorial's.
+DECK_NAMES = {**{d["slug"]: d["name"] for d in DECKLISTS}, **tutorial.NAMES, "lions30": "30 Lions"}
+# The card whose art covers each shipped deck (decklists.json).
+STARTER_COVERS = {d["slug"]: d.get("cover", "") for d in DECKLISTS}
 
 # Easy / Normal / Expert, as in the play screen: the same bot kinds, with the same settings, the
 # simulations measure (a bare RefereeBot() is an untested configuration).
@@ -722,7 +722,7 @@ def map_info() -> dict:
 
 
 def card_pool() -> list[dict]:
-    return [{"id": c.id, "name": c.name, "deck": c.deck, "rarity": c.rarity, "tags": sorted(c.tags),
+    return [{"id": c.id, "name": c.name, "status": c.status, "rarity": c.rarity, "tags": sorted(c.tags),
              # A variable-strength card (Python) prints 0: its text says what it gains ("+1 for each removed animal").
              "str": 0 if c.is_dynamic else c.base_strength, "text": c.text,
              "kw": sorted(c.keywords), "cost": c.food_cost, "habitat": c.habitat, "related": list(c.related), "evolves": c.evolves}

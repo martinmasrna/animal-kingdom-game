@@ -25,7 +25,7 @@ from animal_kingdom.engine.maps import (
 
 # A minimal well-formed record for validation unit tests (new schema).
 GOOD = {
-    "id": "x", "name": "X", "deck": "cats", "rarity": "common",
+    "id": "x", "name": "X", "status": "collectible", "rarity": "common",
     "tags": [], "base_strength": 3,
 }
 
@@ -34,9 +34,11 @@ GOOD = {
 
 def test_cards_load_full_pool():
     cards = load_cards()
-    # 12 starter decks x 14 designs each = 168 draftable, plus non-deck cards (bench, tokens, reserve, tutorial).
-    from animal_kingdom.engine.cards import DECK_SLUGS
-    assert sum(1 for c in cards.values() if c.deck in DECK_SLUGS) == 168
+    # 12 starter decks x 14 designs each = 168 designs in starters; the bench (collectible, in no starter), tokens,
+    # the reserve and the tutorial's cards beside them.
+    from animal_kingdom.engine.cards import STARTER_DECKS
+    assert sum(len(d["cards"]) for d in STARTER_DECKS) == 168
+    assert all(cards[cid].collectible for d in STARTER_DECKS for cid in d["cards"])
     assert all(isinstance(c, Card) for c in cards.values())
 
 
@@ -93,7 +95,7 @@ def test_validate_card_record_directly():
     with pytest.raises(CardDataError):
         validate_card_record({**GOOD, "tags": ["Reptile"]})         # retired tag
     with pytest.raises(CardDataError):
-        validate_card_record({**GOOD, "deck": "nope"})              # unknown deck
+        validate_card_record({**GOOD, "status": "nope"})            # unknown status
 
 
 def test_validate_false_skips_checks():

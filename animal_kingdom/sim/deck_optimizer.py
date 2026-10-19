@@ -36,7 +36,7 @@ from typing import Optional, Sequence
 
 from ..decks import register_deck
 from ..decks import BOT_DECKS
-from ..engine.cards import COLLECTIBLE_SLUGS, COPY_LIMITS, DECK_SLUGS, load_cards
+from ..engine.cards import COPY_LIMITS, DECK_SLUGS, load_cards
 from ..engine.config import Config, load_config_overrides
 from .runner import run_pairs
 
@@ -53,7 +53,7 @@ def draftable_by_rarity(cards=None, exclude: frozenset[str] = frozenset()) -> di
     cards = cards or load_cards()
     pools: dict[str, list[str]] = {r: [] for r in RARITIES}
     for card in cards.values():
-        if card.deck not in COLLECTIBLE_SLUGS or card.id in exclude:
+        if not card.collectible or card.id in exclude:
             continue
         pools[card.rarity].append(card.id)
     return {r: sorted(ids) for r, ids in pools.items()}
@@ -70,7 +70,7 @@ def _collectible_cards() -> dict:
     swap, and the pile had to be thrown away (18 October 2026)."""
     global _COLLECTIBLE
     if _COLLECTIBLE is None:
-        _COLLECTIBLE = {cid: c for cid, c in load_cards().items() if c.deck in COLLECTIBLE_SLUGS}
+        _COLLECTIBLE = {cid: c for cid, c in load_cards().items() if c.collectible}
     return _COLLECTIBLE
 
 

@@ -368,7 +368,7 @@ class GameState:
         hand = self.hands[player]
         for u in list(hand if entered is None else entered):
             card = self.cards[u.card_id]
-            if card.mate and card.deck != "token" and not any(h.card_id == card.mate for h in hand):
+            if card.mate and card.status != "token" and not any(h.card_id == card.mate for h in hand):
                 self.add_to_hand(player, card.mate)
 
     # --- board queries (shared by rules and effects, hence here on the state) ---

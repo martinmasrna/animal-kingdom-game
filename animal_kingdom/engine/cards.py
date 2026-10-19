@@ -27,22 +27,21 @@ TAGS = {
 }
 DYNAMIC_STRENGTHS = {"removed_units_count", "removed_eggs_count"}  # Python, Egg Eater
 
-# The starter decks as cards.json lists them (written from the card workbench by tools/card-workbench/convert.py):
-# slug, menu name, order, and the card whose art covers the deck. Slugs align to docs/cards/decks/ filenames.
-STARTER_DECKS: list[dict] = sorted(load_bundled_json("cards.json").get("decks", []), key=lambda d: d.get("order", 0))
-DECK_SLUGS = {d["slug"] for d in STARTER_DECKS}
-
-# Non-draftable pools: cards that exist in the registry but belong to no premade deck.
+# A card's status. Cards are cards and decks are decks (Martin, 2026-10-19): a card belongs to no deck, and the
+# decks the game ships (decklists.json: the starter decks a new profile gets, the decks the bots play) are lists over
+# the collectible cards, read by decks.py.
+# "collectible" = a card a deck may hold: the starter decks' cards and the bench (finished cards in no starter deck).
+# "reserve" = shelved designs kept out of play (open designs, a later habitat's cards, the sim tools' calibration bodies).
+# "tutorial" = the tutorial's fixed deal, cards as they were when it was written.
 # "token" = made by effects (Baby Turtle, a Stork's younglings, the Butterfly's stages); never in a decklist.
-# "reserve" = shelved designs kept out of play (open designs, the sim tools' calibration bodies). "tutorial" = the
-# tutorial's fixed deal, cards as they were when it was written. "bench" = finished cards in no starter deck (the
-# workbench's pool). All are skipped by the deck builders in decks.py.
-NON_DECK_SLUGS = {"token", "reserve", "bench", "tutorial"}
+STATUSES = {"collectible", "reserve", "tutorial", "token"}
 
-# What a player can collect and build with: the premade decks' cards plus the bench, finished
-# cards Martin has cleared that sit in no premade deck. The reserve (design scraps, balance-tool
-# cards) and tokens are never collectible.
-COLLECTIBLE_SLUGS = DECK_SLUGS | {"bench"}
+# The decks the game ships (decklists.json, written for the starters by tools/card-workbench/convert.py), in menu order:
+# slug, name, cover (the card whose art faces it), starter (a new profile gets it), bot (the bots play it), cards
+# (id: copies). Starter slugs align to docs/cards/decks/ filenames.
+DECKLISTS: list[dict] = sorted(load_bundled_json("decklists.json")["decks"], key=lambda d: d.get("order", 0))
+STARTER_DECKS: list[dict] = [d for d in DECKLISTS if d.get("starter")]
+DECK_SLUGS = {d["slug"] for d in STARTER_DECKS}          # the starter decks
 
 # Copy limits per rarity for the locked 4-4-6 decklist shape (legendary 1 / rare 2 / common 3).
 COPY_LIMITS = {"common": 3, "rare": 2, "legendary": 1}
@@ -58,7 +57,7 @@ class Card:
 
     id: str
     name: str
-    deck: str
+    status: str                    # collectible / reserve / tutorial / token (STATUSES)
     rarity: str
     tags: frozenset[str]
     base_strength: int | str       # int 0-10, or the string "dynamic"
@@ -66,7 +65,6 @@ class Card:
     dynamic_strength: Optional[str] = None  # rule name when base_strength == "dynamic"
     food_cost: int = 0             # placement cost; only on "Costs X food" cards
     text: str = ""
-    copies: Optional[int] = None   # override COPY_LIMITS[rarity] for this one design (rare exception)
     reach: int = 0                 # Reach N: lands up to N crossroads from a connected unit (0: no Reach)
     hungry: int = 0                # Hungry N: eats N food at the start of your turn, else loses N strength (0: not Hungry)
     unnamed: bool = False          # a legendary still waiting for its name: `name` shows its species meanwhile
@@ -78,6 +76,11 @@ class Card:
     @property
     def is_dynamic(self) -> bool:
         return self.base_strength == "dynamic"
+
+    @property
+    def collectible(self) -> bool:
+        """Whether a deck may hold this card (not a reserve design, the tutorial's or a token)."""
+        return self.status == "collectible"
 
     @property
     def has_roar(self) -> bool:
@@ -98,7 +101,7 @@ def validate_card_record(rec: dict) -> None:
     so a constructed Card is always valid and the engine needs no defensive checks.
     Directly unit-testable on its own.
     """
-    required = ("id", "name", "deck", "rarity", "tags", "base_strength")
+    required = ("id", "name", "status", "rarity", "tags", "base_strength")
     for key in required:
         if key not in rec:
             raise CardDataError(f"card {rec.get('id', rec)!r} missing required field {key!r}")
@@ -107,10 +110,8 @@ def validate_card_record(rec: dict) -> None:
     cid = rec["id"]
     if rec["rarity"] not in RARITIES:
         raise CardDataError(f"card {cid!r}: bad rarity {rec['rarity']!r}, expected one of {sorted(RARITIES)}")
-    if rec["deck"] not in DECK_SLUGS and rec["deck"] not in NON_DECK_SLUGS:
-        raise CardDataError(
-            f"card {cid!r}: bad deck {rec['deck']!r}, expected one of "
-            f"{sorted(DECK_SLUGS | NON_DECK_SLUGS)}")
+    if rec["status"] not in STATUSES:
+        raise CardDataError(f"card {cid!r}: bad status {rec['status']!r}, expected one of {sorted(STATUSES)}")
 
     tags = rec["tags"]
     if not isinstance(tags, list):
@@ -152,16 +153,12 @@ def validate_card_record(rec: dict) -> None:
     if ("Reach" in rec.get("keywords", [])) != (reach is not None):
         raise CardDataError(f"card {cid!r}: the Reach keyword and its `reach` number go together")
 
-    copies = rec.get("copies")
-    if copies is not None and (isinstance(copies, bool) or not isinstance(copies, int) or copies < 1):
-        raise CardDataError(f"card {cid!r}: copies must be a positive int if set, got {copies!r}")
-
 
 def _build_card(rec: dict) -> Card:
     return Card(
         id=rec["id"],
         name=rec["name"],
-        deck=rec["deck"],
+        status=rec["status"],
         rarity=rec["rarity"],
         tags=frozenset(rec["tags"]),
         base_strength=rec["base_strength"],
@@ -169,7 +166,6 @@ def _build_card(rec: dict) -> Card:
         dynamic_strength=rec.get("dynamic_strength"),
         food_cost=rec.get("food_cost", 0),
         text=rec.get("text", ""),
-        copies=rec.get("copies"),
         reach=rec.get("reach", 0),
         hungry=rec.get("hungry", 0),
         unnamed=rec.get("unnamed", False),
