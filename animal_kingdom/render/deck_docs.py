@@ -50,7 +50,7 @@ def main() -> None:
     cards = load_cards()
     for deck in sorted(DECK_SLUGS):
         path = doc_path(deck)
-        path.write_text(render(path.read_text(), cards_block(deck, cards)))
+        path.write_text(render(path.read_text(encoding="utf-8"), cards_block(deck, cards)), encoding="utf-8")
         print(f"wrote {path}")
 
 

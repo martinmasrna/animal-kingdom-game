@@ -43,7 +43,7 @@ DECKS = ROOT / "tools" / "card-workbench" / "decks.json"
 CARDS = ROOT / "animal_kingdom" / "data" / "cards.json"
 ART_JS = ROOT / "animal_kingdom" / "web" / "static" / "art.js"
 LEVELS = Path(__file__).parent / "levels.json"
-PY = ROOT / ".venv" / "bin" / "python"
+PY = Path(sys.executable)   # the venv this runs in (bin/ on Unix, Scripts/ on Windows)
 
 COLUMNS = ["habitat", "rarity", "animal", "tag", "strength", "effect", "art", "crop"]
 VALUE_COLS = ["habitat", "rarity", "animal", "tag", "strength", "effect"]
@@ -57,12 +57,12 @@ class Refused(Exception):
 
 
 def _read(p: Path):
-    return json.loads(p.read_text())
+    return json.loads(p.read_text(encoding="utf-8"))
 
 
 def _write(p: Path, data) -> None:
     tmp = p.with_suffix(".tmp")
-    tmp.write_text(json.dumps(data, indent=1 if p == DECKS else 2, ensure_ascii=False) + ("" if p == DECKS else "\n"))
+    tmp.write_text(json.dumps(data, indent=1 if p == DECKS else 2, ensure_ascii=False) + ("" if p == DECKS else "\n"), encoding="utf-8")
     tmp.replace(p)
 
 

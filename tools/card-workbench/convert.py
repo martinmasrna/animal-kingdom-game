@@ -232,13 +232,13 @@ def main(argv=None) -> None:
     ap.add_argument("export", nargs="?", default=str(EXPORT))
     ap.add_argument("--check", action="store_true", help="list what would change; write nothing")
     args = ap.parse_args(argv)
-    export = json.loads(Path(args.export).read_text())
-    old = json.loads(CARDS.read_text())
+    export = json.loads(Path(args.export).read_text(encoding="utf-8"))
+    old = json.loads(CARDS.read_text(encoding="utf-8"))
     data, notes = convert(export, old)
     print("\n".join(notes) or "no changes")
     if args.check:
         return
-    CARDS.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+    CARDS.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"wrote {CARDS.relative_to(ROOT)}: {len(data['decks'])} starter decks, {len(data['cards'])} cards",
           file=sys.stderr)
 

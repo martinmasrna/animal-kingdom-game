@@ -1,26 +1,29 @@
-# The Honey Badger
+# Ash, the Honey Badger
 
 > The world cast him out and then wouldn't leave him there.
 
-Legendary, Savanna, strength 5. Armor. Stealth. Poison. Spikes. Deck: Untouchables. Name: open.
+Legendary, Savanna, strength 5. Armor. Stealth. Poison. Spikes. Deck: Untouchables. Name: Ash (draft, Martin, 2026-10-19).
 
 Internal: a legend is the card's character for naming and art. No player ever sees this text.
 
 ## Who he is
 
-An albino honey badger: white all over, no mantle, no black, red eyes. He lives alone, far past where the herds go. He wants nothing from anyone. He has never started a fight. He has never lost one.
+A honey badger with no white on him. Where his kind wears the grey-white saddle from crown to tail, he has a bald band of old burn scar down his spine: charcoal-dark, cracked like bark, grey where the dust sits in the creases, ragged at the edges where the black fur meets it. One dark shape with a dead back. He lives alone, far past where the herds go. He wants nothing from anyone. He has never started a fight. He has never lost one.
 
 ## How he got this way
 
-He was born wrong-coloured. His kind wear black below and grey-white above; he came out pure white with red eyes, and his mother couldn't read him as one of hers. The family left him in the den on his first day.
+A dry-season storm put lightning in the grass, and the fire ran over the bank where his den was before his mother got back. The den was shallow; the heat came down through the roof and cooked the skin off his back. He lived through it in the dark with the smoke sitting on him.
 
-He lived. That was the first time.
+That was the first time.
 
-Everything he met after that tried to finish what his family started, and each attempt left something in him. The card is his biography, four scars:
+The burn wept for weeks and smelled like meat left out, and every hyena and jackal downwind came sniffing at the den. A mother whose cub draws scavengers to her door has one cub and a lot of enemies, so she took herself out of that arithmetic. Not cruel. An animal's reason.
+
+The scar healed thick and dead, and the fur never came back. That was **Armor**: nothing gets a grip on him.
+
+Everything he met after that tried to finish what the fire started, and each attempt left something in him:
 
 - **Poison.** A mamba bit him while he was still a cub. He slept it off, which no cub should. The venom never left him; whatever bites him now gets it back.
-- **Armor.** A lion took him in its jaws. He walked out, and the lion didn't keep its face. His skin never closed properly after that; it just thickened.
-- **Spikes.** A pack ran him down, dug him out and buried him. He came up through the dirt. Nothing that climbs on him comes off clean.
+- **Spikes.** He went straight at a porcupine, the way his kind does, and it ran backwards into him. Some quills worked out over the months, some worked deeper, and some are still in him. Nothing that climbs on him comes off clean.
 - **Stealth.** After enough of that, he went out past the edge where nobody goes. Not hiding. Just gone from where they look.
 
 He was never angry about any of it. There was no one to be angry at; it was just what the world did.
@@ -39,5 +42,6 @@ Nobody knows how old he is; the old lions say their fathers warned them. What th
 
 ## Dissent log
 
-- Martin's first framing of the want was "one quiet meal"; it was dropped because it makes him funny, and funny is not the vibe. The meal stays as a detail (he eats, he's interrupted), not as the motive.
-- The art (2026-10-19) is a white-backed badger with red eyes: halfway to albino. Whether to repaint him fully white is Martin's call and doesn't block the legend. The black ratel (a real all-black subspecies) was the alternative for "born different"; white was chosen because the card carries the story by itself.
+- The first draft made him albino, cast out for being born white. Martin dropped it (2026-10-19): the most stereotyped outcast mark there is, borrowed from *Snow in the Desert*, and it left only white-thing names. The mark has to be made, not born, and visible on the card at a glance.
+- Martin's first framing of the want was "one quiet meal"; dropped because it makes him funny, and funny is not the vibe. The meal stays as a detail, not as the motive.
+- The art (2026-10-19) is a white-backed badger with red eyes. It no longer matches: he needs repainting as a black badger with a bald, scarred back and no white at all. The red eyes can stay as the one thing wrong about his face, or go; Martin's call.

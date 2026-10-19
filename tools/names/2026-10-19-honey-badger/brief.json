@@ -1,0 +1,11 @@
+[
+ {
+  "id": "honey_badger_legend",
+  "title": "[HONEY BADGER]",
+  "meta": "Legendary, Savanna, strength 5, Untouchables",
+  "effect": "Armor. Stealth. Poison. Spikes.",
+  "who": "The world cast him out and then wouldn't leave him there. Born albino, left in the den on his first day; a mamba's venom, a lion's jaws and a pack's grave each left a scar in him; he went out past the edge to be alone, and the legend of him keeps bringing challengers, none of whom has left. The herds' name for him is a warning, not a title.",
+  "img": "art/honey_badger_legend.webp",
+  "shelf": ["One-Eye", "Scarface", "Fearless"]
+ }
+]
