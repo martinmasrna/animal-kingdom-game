@@ -28,8 +28,13 @@ SHELL_WRITE = re.compile(r"(sed\s+(-[a-zA-Z]*i|--in-place)|perl\s+-[a-zA-Z]*i|>\
 NAMES = re.compile(r"(decks\.json|data/cards\.json|static/art\.js|\bcards\.json|\bart\.js)")
 
 
+def drive(s: str) -> str:
+    """Git Bash spells C:/Users as /c/Users; the hook compares in the Windows spelling."""
+    return re.sub(r"(?<![\w:/])/([a-z])/", r"\1:/", s, flags=re.I)
+
+
 def norm(p: str) -> str:
-    return Path(p).resolve().as_posix().lower() if p else ""
+    return Path(drive(p)).resolve().as_posix().lower() if p else ""
 
 
 def refuse() -> None:
@@ -56,7 +61,7 @@ def main() -> None:
         cmd = inp.get("command", "")
         if "hq.py" in cmd or "convert.py" in cmd or "install.sh" in cmd:
             return
-        cmd_n = cmd.replace("\\", "/").lower()
+        cmd_n = drive(cmd.replace("\\", "/")).lower()
         cwd = norm(ev.get("cwd", ""))
         in_game = cwd + "/" == GAME or (cwd.startswith(GAME) and "/.claude/worktrees/" not in cwd)
         if not in_game and GAME not in cmd_n:
