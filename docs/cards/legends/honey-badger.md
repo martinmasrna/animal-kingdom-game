@@ -8,17 +8,17 @@ Internal: a legend is the card's character for naming and art. No player ever se
 
 ## Who he is
 
-A honey badger with no white on him. Where his kind wears the grey-white saddle from crown to tail, he has a bald band of old burn scar down his spine: charcoal-dark, cracked like bark, grey where the dust sits in the creases, ragged at the edges where the black fur meets it. One dark shape with a dead back. He lives alone, far past where the herds go. He wants nothing from anyone. He has never started a fight. He has never lost one.
+A honey badger with no white on him. Old burns cover his body: broad expanses of bald, charcoal-dark skin, thick and cracked like bark, ashen grey where the dust sits in the creases. Patches of black fur survive between the scars, their edges ragged. The burns are long healed; this is the body he lives in. He lives alone, far past where the herds go. He wants nothing from anyone. He has never started a fight. He has never lost one.
 
 ## How he got this way
 
-A dry-season storm put lightning in the grass, and the fire ran over the bank where his den was before his mother got back. The den was shallow; the heat came down through the roof and cooked the skin off his back. He lived through it in the dark with the smoke sitting on him.
+A dry-season storm put lightning in the grass, and the fire ran over the bank where his den was before his mother got back. The den was shallow; the heat came down through the roof and burned him across his body. He lived through it in the dark with the smoke sitting on him.
 
 That was the first time.
 
 The burn wept for weeks and smelled like meat left out, and every hyena and jackal downwind came sniffing at the den. A mother whose cub draws scavengers to her door has one cub and a lot of enemies, so she took herself out of that arithmetic. Not cruel. An animal's reason.
 
-The scar healed thick and dead, and the fur never came back. That was **Armor**: nothing gets a grip on him.
+The burns healed thick and dead, and across much of his body the fur never came back. That was **Armor**: nothing gets a grip on him.
 
 Everything he met after that tried to finish what the fire started, and each attempt left something in him:
 
@@ -44,4 +44,4 @@ Nobody knows how old he is; the old lions say their fathers warned them. What th
 
 - The first draft made him albino, cast out for being born white. Martin dropped it (2026-10-19): the most stereotyped outcast mark there is, borrowed from *Snow in the Desert*, and it left only white-thing names. The mark has to be made, not born, and visible on the card at a glance.
 - Martin's first framing of the want was "one quiet meal"; dropped because it makes him funny, and funny is not the vibe. The meal stays as a detail, not as the motive.
-- The art (2026-10-19) is a white-backed badger with red eyes. It no longer matches: he needs repainting as a black badger with a bald, scarred back and no white at all. The red eyes can stay as the one thing wrong about his face, or go; Martin's call.
+- The art (2026-10-19) is a white-backed badger with red eyes. It no longer matches: he needs repainting with old, healed burns across his body, charcoal and ashen scarred skin among surviving patches of black fur, and no white at all. The red eyes can stay as the one thing wrong about his face, or go; Martin's call.
