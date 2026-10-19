@@ -8,7 +8,7 @@ Internal: a legend is the card's character for naming and art. No player ever se
 
 ## Who he is
 
-A completely hairless honey badger. The fire took his fur when he was a baby, and none of it grew back. His body is thick, charcoal-dark hide, ashen grey with dust and weather, folding heavily where he moves. Across that continuous bare skin lie the larger scars of later encounters: healed claw marks and bites left by predators that tried and failed to kill him. The fire and every wound are long healed; this is the body he lives in. He lives alone, far past where the herds go. He wants nothing from anyone. He has never started a fight. He has never lost one.
+A completely hairless honey badger, small and low to the ground, with a little extra muscular density. The fire took his fur when he was a baby, and none of it grew back. His body is thick, charcoal-dark hide, ashen grey with dust and weather, folding where he moves. Across that continuous bare skin lie the larger scars of later encounters: healed claw marks and bites left by predators that tried and failed to kill him. The fire and every wound are long healed; this is the body he lives in. He lives alone, far past where the herds go. He wants nothing from anyone. He has never started a fight. He has never lost one.
 
 ## How he got this way
 
@@ -42,7 +42,7 @@ Nobody knows how old he is; the old lions say their fathers warned them. What th
 
 ## Art brief
 
-Martin, 2026-10-19: "make him fur-less" with "thick armor-like skin, like a rhino"; "fur got burned off when he was a baby, then scars got collected later on in life, when the predators tried (and failed) to kill him." The whole body is hairless, with continuous heavy ash-grey hide and distinct old predator scars. In art round three, Martin preferred #1's expression and #2's sandstorm, and said "looking ahead rather than turning head back works better." The burns becoming protective hide is the legend's exaggeration. Paint from the series style sheet alone; the interrupted step inside the engulfing sandstorm is described in words.
+Martin, 2026-10-19: "make him fur-less"; "fur got burned off when he was a baby, then scars got collected later on in life, when the predators tried (and failed) to kill him." Ash stays small: "One of the points of Honey Badgers is that they're NOT massive at all." A little extra muscle is fine. The whole body is hairless, with continuous thick hide and distinct old predator scars. Martin preferred round-three #1's expression and #2's sandstorm, and said "looking ahead rather than turning head back works better." The burns becoming protective hide is the legend's exaggeration. The current painting experiment carries the familiar light-above/dark-below honey-badger pattern in bare skin, with a real honey badger photograph for the anatomy and forward walk and the series sheet for the painting hand. No previous Ash painting is attached. His species and small stature stay readable while his hide, scars and indifference carry the legend.
 
 ## Dissent log
 
