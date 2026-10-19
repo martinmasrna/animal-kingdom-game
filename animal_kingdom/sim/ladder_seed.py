@@ -4,7 +4,9 @@ bot's rating fitted to the results (Bradley-Terry on the Elo scale, the field ce
     python -m animal_kingdom.sim.ladder_seed --games 3 --jobs 4 --out results/ladder/seed.json
 
 Each pair meets `games` times, seats alternating. Draws are left out, as on the ladder. The output holds the games and
-the fitted ratings by bot ladder id; the server reads the ratings (ladder.Ladder.seed_bots).
+the fitted ratings by bot ladder id; the server reads the ratings (ladder.Ladder.seed_bots). `--anchor` (an earlier seed
+file, usually the shipped one) shifts the new ratings so the bots in both keep their mean: new decks join the scale people
+were already rated on instead of pushing the field down. A rerun with more `--games` resumes from the games already played.
 """
 
 from __future__ import annotations
@@ -50,6 +52,7 @@ def main(argv=None) -> None:
     ap.add_argument("--batch", type=int, default=32, help="games per batch written to disk")
     ap.add_argument("--out", default="results/ladder/seed.json")
     ap.add_argument("--expert", default=None, help="the Expert's bot kind, with options (e.g. 'referee:depth=1,den_sense=1'); default: the web's")
+    ap.add_argument("--anchor", default=None, help="an earlier seed file: the ratings shift so the bots in both keep their mean")
     args = ap.parse_args(argv)
     kinds = dict(BOT_LEVELS, expert=args.expert) if args.expert else BOT_LEVELS
     out = Path(args.out); out.parent.mkdir(parents=True, exist_ok=True)
@@ -73,7 +76,13 @@ def main(argv=None) -> None:
     games = [json.loads(l) for l in log.read_text().splitlines() if l.strip()]
     rated = [(g["a"], g["b"]) if g["winner"] == "A" else (g["b"], g["a"]) for g in games if g["winner"]]
     ratings = fit(rated)
-    out.write_text(json.dumps({"games": len(games), "ratings": ratings}, indent=1))
+    shift = 0.0
+    if args.anchor:
+        old = json.loads(Path(args.anchor).read_text())["ratings"]; common = [lid for lid in ratings if lid in old]
+        shift = sum(old[lid] - ratings[lid] for lid in common) / len(common)
+        ratings = {lid: r + shift for lid, r in ratings.items()}
+        print(f"anchored to {args.anchor}: {len(common)} bots in common, shifted {shift:+.0f}")
+    out.write_text(json.dumps({"games": len(games), "anchor": args.anchor, "shift": shift, "ratings": ratings}, indent=1))
     for lid, r in sorted(ratings.items(), key=lambda kv: -kv[1]):
         print(f"{round(r):5d}  {lid}")
 

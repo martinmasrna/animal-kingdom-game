@@ -488,10 +488,12 @@ def test_copies_of_a_card_that_differ_in_strength_each_get_their_places_and_the_
 
 
 def test_a_gauntlet_leaves_out_the_premade_your_custom_deck_copies(monkeypatch, tmp_path):
-    """The play screen can send a premade as a custom list; that premade is still the mirror, not an opponent."""
+    """The play screen can send a premade as a custom list; that premade is still the mirror, not an opponent. The gauntlet's
+    field is the starter decks (the bots' other decks are opponents on the ladder, not in the gauntlet)."""
     import asyncio
     from aiohttp.test_utils import TestClient, TestServer
     from animal_kingdom.decks import PREMADE_DECKS
+    from animal_kingdom.engine.cards import DECK_SLUGS
     from animal_kingdom.web import custom_decks, server
     monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
     monkeypatch.setattr(custom_decks, "DECKS_FILE", tmp_path / "web_decks.json")
@@ -503,7 +505,7 @@ def test_a_gauntlet_leaves_out_the_premade_your_custom_deck_copies(monkeypatch, 
             m = await (await c.post("/api/match", json={"deck": deck, "gauntlet": {"level": "easy", "per_seat": 1}},
                                     headers={"X-AK-Key": a["code"]})).json()
             field = {g["deck"] for g in server.hub.matches[m["id"]].schedule}
-            assert "cats" not in field and len(field) == len(PREMADE_DECKS) - 1
+            assert "cats" not in field and field == set(DECK_SLUGS) - {"cats"}
     asyncio.run(run())
 
 

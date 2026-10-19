@@ -288,6 +288,150 @@
     "boar": 3,
     "warthog": 3
    }
+  },
+  {
+   "slug": "tempo",
+   "name": "Tempo",
+   "order": 12,
+   "cover": "king_theron",
+   "starter": false,
+   "bot": true,
+   "cards": {
+    "ember": 1,
+    "honey_badger_legend": 1,
+    "king_theron": 1,
+    "octopus_legend": 1,
+    "black_panther": 2,
+    "hippopotamus": 2,
+    "moose": 2,
+    "whale_shark": 2,
+    "blue_whale": 3,
+    "eagle": 3,
+    "elephant": 3,
+    "grizzly_bear": 3,
+    "lion": 3,
+    "wolf": 3
+   }
+  },
+  {
+   "slug": "token",
+   "name": "Token",
+   "order": 13,
+   "cover": "scarlett",
+   "starter": false,
+   "bot": true,
+   "cards": {
+    "manta_ray_legend": 1,
+    "mole_legend": 1,
+    "scarlett": 1,
+    "wildebeest_legend": 1,
+    "chameleon": 2,
+    "hornet": 2,
+    "hummingbird": 2,
+    "mole": 2,
+    "bat": 3,
+    "dart_frog": 3,
+    "dolphin": 3,
+    "giraffe": 3,
+    "sardine": 3,
+    "sunfish": 3
+   }
+  },
+  {
+   "slug": "removal",
+   "name": "Removal",
+   "order": 14,
+   "cover": "leopard_legend",
+   "starter": false,
+   "bot": true,
+   "cards": {
+    "clarion": 1,
+    "eon": 1,
+    "fathom": 1,
+    "leopard_legend": 1,
+    "black_mamba": 2,
+    "great_white_shark": 2,
+    "honey_badger": 2,
+    "orca": 2,
+    "anaconda": 3,
+    "black_bear": 3,
+    "boar": 3,
+    "python": 3,
+    "snake_egg": 3,
+    "tiger": 3
+   }
+  },
+  {
+   "slug": "bot_optimized",
+   "name": "Bot Optimized",
+   "order": 15,
+   "cover": "leopard_legend",
+   "starter": false,
+   "bot": true,
+   "cards": {
+    "leopard_legend": 1,
+    "scarlett": 1,
+    "fathom": 1,
+    "locust": 1,
+    "orca": 2,
+    "honey_badger": 2,
+    "porcupine": 2,
+    "hornet": 2,
+    "tiger": 3,
+    "lion": 3,
+    "sardine": 3,
+    "owl": 3,
+    "badger": 3,
+    "black_bear": 3
+   }
+  },
+  {
+   "slug": "optimizer_1",
+   "name": "Optimizer 1",
+   "order": 16,
+   "cover": "fathom",
+   "starter": false,
+   "bot": true,
+   "cards": {
+    "fathom": 1,
+    "leopard_legend": 1,
+    "locust": 1,
+    "scarlett": 1,
+    "black_panther": 2,
+    "honey_badger": 2,
+    "meerkat": 2,
+    "sea_turtle": 2,
+    "bobcat": 3,
+    "elephant": 3,
+    "giraffe": 3,
+    "owl": 3,
+    "sardine": 3,
+    "tiger": 3
+   }
+  },
+  {
+   "slug": "optimizer_4",
+   "name": "Optimizer 4",
+   "order": 17,
+   "cover": "ember",
+   "starter": false,
+   "bot": true,
+   "cards": {
+    "ember": 1,
+    "leopard_legend": 1,
+    "mole_legend": 1,
+    "queen_marabunta": 1,
+    "great_white_shark": 2,
+    "porcupine": 2,
+    "rhinoceros": 2,
+    "sea_turtle": 2,
+    "anteater": 3,
+    "badger": 3,
+    "deer": 3,
+    "dolphin": 3,
+    "elephant": 3,
+    "hedgehog": 3
+   }
   }
  ]
 }
