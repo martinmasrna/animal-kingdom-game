@@ -99,23 +99,67 @@ def _plain_copy(v):
     Anything unexpected falls back to `copy.deepcopy`, so correctness never depends on the
     plain-data assumption holding."""
     t = type(v)
-    if t is dict:
-        return {k: _plain_copy(x) for k, x in v.items()}
-    if t is list:
-        return [_plain_copy(x) for x in v]
-    if t is tuple:
-        return tuple(_plain_copy(x) for x in v)
-    if v is None or t is str or t is int or t is float or t is bool:
+    if t in _LEAVES:
         return v
+    if t is dict:
+        return {k: (x if type(x) in _LEAVES else _plain_copy(x)) for k, x in v.items()} if v else {}
+    if t is list:
+        return [x if type(x) in _LEAVES else _plain_copy(x) for x in v] if v else []
+    if t is tuple:
+        return tuple(x if type(x) in _LEAVES else _plain_copy(x) for x in v)
     return copy.deepcopy(v)
 
 
-def _copy_rng(rng: random.Random) -> random.Random:
-    """An independent RNG at the same position. `random.Random()` reads OS entropy on
-    construction only to have it immediately overwritten by `setstate`; bypass __init__ via
-    __new__ so the throwaway seed (a top profile entry) is never drawn."""
-    new = random.Random.__new__(random.Random)
-    new.setstate(rng.getstate())
+_LEAVES = frozenset({type(None), str, int, float, bool})
+
+
+class Rng(random.Random):
+    """The game's random stream, cloned for nearly nothing. The search clones a position for every move it imagines and
+    almost none of those clones ever draw, while `getstate` builds a 625-int tuple each time (a tenth of the Expert's
+    move, 2026-10-20). So a clone takes its parent's snapshot, the state tuple the parent keeps until its next draw, and
+    becomes a generator of its own only when it draws. The stream is the same one `setstate(parent.getstate())` would
+    give, draw for draw."""
+    _snap = None      # the state tuple at the current position, or None once a draw has moved past it
+    _live = True      # False: a lazy clone whose generator still holds no state (its position is _snap)
+
+    def _wake(self) -> None:
+        if not self._live:
+            super().setstate(self._snap)
+            self._live = True
+
+    def random(self) -> float:
+        self._wake(); self._snap = None
+        return super().random()
+
+    def getrandbits(self, k: int) -> int:
+        self._wake(); self._snap = None
+        return super().getrandbits(k)
+
+    def getstate(self):
+        if self._snap is None:
+            self._snap = super().getstate()
+        return self._snap
+
+    def setstate(self, state) -> None:
+        super().setstate(state)
+        self._snap, self._live = state, True
+
+    def seed(self, *args, **kw) -> None:
+        super().seed(*args, **kw)
+        self._snap, self._live = None, True
+
+    def __reduce__(self):
+        return (self.__class__, (), self.getstate())
+
+    def __setstate__(self, state) -> None:
+        self.setstate(state)
+
+
+def _copy_rng(rng: random.Random) -> "Rng":
+    """An independent RNG at the same position: a lazy Rng on the parent's snapshot (see Rng). `random.Random()` reads
+    OS entropy on construction only to have it overwritten, so __init__ is bypassed via __new__."""
+    new = Rng.__new__(Rng)
+    new._snap, new._live = rng.getstate(), False
     return new
 
 
@@ -193,7 +237,7 @@ def _rng_to_dict(rng: random.Random) -> dict:
 
 
 def _rng_from_dict(d: dict) -> random.Random:
-    rng = random.Random()
+    rng = Rng.__new__(Rng)
     rng.setstate((d["version"], tuple(d["state"]), d["gauss"]))
     return rng
 
@@ -273,7 +317,7 @@ class GameState:
         self.food = food
         self.current = current
         self.first_player = first_player
-        self.rng = rng if rng is not None else random.Random()
+        self.rng = rng if isinstance(rng, Rng) else _copy_rng(rng if rng is not None else random.Random())   # an Rng: cloned for free
         self.turn_counter = turn_counter
         self.units_placed_this_turn = units_placed_this_turn
         self.actions_taken_this_turn = actions_taken_this_turn
@@ -391,9 +435,10 @@ class GameState:
         seeds = [cr for cr in gm.hq_front(player)
                  if (st := board.get(cr)) and st[-1].owner == player]
         seen, queue = set(seeds), deque(seeds)
+        adjacency = gm._sorted_adjacency       # gm.neighbors(cr), inlined (the same tuples, in the same order)
         while queue:
             cr = queue.popleft()
-            for nb in gm.neighbors(cr):
+            for nb in adjacency.get(cr, ()):
                 if nb not in seen and (st := board.get(nb)) and st[-1].owner == player:
                     seen.add(nb)
                     queue.append(nb)

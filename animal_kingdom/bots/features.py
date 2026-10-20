@@ -38,7 +38,7 @@ from typing import Iterator
 from ..engine import rules
 from ..engine.actions import PlaceAction
 from ..engine.state import GameState, other_player
-from ..engine.strength import effective_strength
+from ..engine.strength import effective_strength, aura_sources
 
 # --------------------------------------------------------------------- schema constants
 # Fixed, part of schema_hash() - changing any of these invalidates every artifact trained
@@ -224,22 +224,30 @@ def food_terms(state: GameState, me: str, opp: str) -> tuple[float, float]:
 def board_presence(state: GameState, me: str, opp: str) -> float:
     """Net effective strength of controlled crossroads (mine - theirs)."""
     presence = 0.0
+    sources = aura_sources(state)
     for stack in state.board.values():
         if not stack:
             continue
         top = stack[-1]
-        s = effective_strength(state, top)
+        s = effective_strength(state, top, sources)
         presence += s if top.owner == me else -s
     return presence
 
 
 def _region_fractions(state: GameState, me: str, opp: str) -> Iterator[tuple[int, float, float]]:
     """Yield (region.food, mine_fraction, theirs_fraction) for every region on the map."""
+    board = state.board
     for r in state.game_map.regions.values():
         n = len(r.corners)
-        mine = sum(1 for c in r.corners if state.owner_of(c) == me) / n
-        theirs = sum(1 for c in r.corners if state.owner_of(c) == opp) / n
-        yield r.food, mine, theirs
+        mine = theirs = 0
+        for c in r.corners:                 # owner_of(c), inlined: evaluated for every position the search imagines
+            st = board.get(c)
+            if st:
+                if st[-1].owner == me:
+                    mine += 1
+                elif st[-1].owner == opp:
+                    theirs += 1
+        yield r.food, mine / n, theirs / n
 
 
 def region_control(state: GameState, me: str, opp: str, *, fractions=None) -> float:

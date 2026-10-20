@@ -417,9 +417,14 @@ def _hook(state, card_id, hook_name, *, as_card=None) -> Optional[Callable]:
     """A card's hook, wrapped so every step it pushes carries the card as its source (`by_card`): the player is always
     told which card is asking, never left to a guess. `as_card`: another card runs this one's effect as its own (the
     Macaw repeating a Roar), so the source is that card."""
-    fn = EFFECTS.get(card_id, {}).get(hook_name)
+    hooks = EFFECTS.get(card_id)
+    fn = hooks.get(hook_name) if hooks else None
     if fn is None:
         return None
+    key = (card_id, hook_name, as_card)
+    hit = _STAMPED.get(key)
+    if hit is not None and hit[0] is fn:      # the wrapper closes over fn and the card only: built once per hook
+        return hit[1]
     card_id = as_card or card_id
     def stamped(state, unit, *args, **kw):   # every hook gets its own card's unit first
         if state.inked and statics.inked(state, unit):
@@ -435,7 +440,11 @@ def _hook(state, card_id, hook_name, *, as_card=None) -> Optional[Callable]:
             if step["by_card"] == card_id:
                 step.setdefault("by_iid", unit.iid)
         return out
+    _STAMPED[key] = (fn, stamped)
     return stamped
+
+
+_STAMPED: dict = {}   # (card id, hook name, as_card) -> (the hook it wraps, its stamped wrapper); the search asks millions of times a move
 
 
 # ================================================================= removal & food

@@ -65,10 +65,22 @@ FAMILY_AURAS = {
     "mackerel": ("Fish", "mackerel_anthem", False),   # "Your other Fish have +1 strength."
     "cape_buffalo": ("Hoofed", "buffalo_anthem", True),   # "Your other Hoofed animals have +1 strength during your opponent's turn."
 }
+AURA_FAMILIES = frozenset(fam for fam, _, _ in FAMILY_AURAS.values())
+# The cards whose own text is a live "+X" (the branches of anthem_bonus). Any other card, of a family no aura reaches,
+# has no anthem at all: anthem_bonus answers 0 for it before walking the board. The search asks for every unit's strength
+# in every position it imagines, so that walk, once per unit, was the hottest line of the engine (2026-10-20).
+ANTHEM_CARDS = frozenset({"guard_wasp", "tuna", "hamster", "peacock", "giraffe", "crocodile"})
 
 
-def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) -> int:
-    """The live "has +X" anthem bonus for a unit of `card` controlled by `owner`.
+def aura_sources(state: GameState) -> list:
+    """The board's family-aura sources as (unit, aura) pairs: what anthem_bonus looks for. An evaluation of a whole board
+    gathers them once and hands them to effective_strength for every unit, instead of walking the board per unit."""
+    return [(u, aura) for stack in state.board.values() if stack and (aura := FAMILY_AURAS.get((u := stack[-1]).card_id)) is not None]
+
+
+def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], sources: Optional[list] = None) -> int:
+    """The live "has +X" anthem bonus for a unit of `card` controlled by `owner`. `sources`: aura_sources(state), if the
+    caller has them.
 
     `self_iid` is the unit's iid if it is on the board, or None for a prospective placement
     (a card still in hand). "Other X" auras exclude the unit itself; "you control N X" counts
@@ -76,9 +88,18 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
     with the count the board gives it now.
     An inked unit has no anthem of its own, and an inked source gives none.
     """
-    tops = _tops_owned(state, owner)
     cfg = state.config
     their_turn = state.current != owner
+    if card.id not in ANTHEM_CARDS:
+        if card.tags.isdisjoint(AURA_FAMILIES):
+            return 0
+        bonus = 0                           # only an aura can reach it: look for sources, never gather the board
+        for u, aura in (aura_sources(state) if sources is None else sources):
+            if u.owner != owner or u.iid == self_iid or aura[0] not in card.tags or _inked(state, u.iid) or (aura[2] and not their_turn):
+                continue
+            bonus += getattr(cfg, aura[1])
+        return bonus
+    tops = _tops_owned(state, owner)
 
     def count(tag: str, *, include_self: bool) -> int:
         if include_self:
@@ -112,17 +133,18 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int]) ->
     return bonus
 
 
-def effective_strength(state: GameState, unit: UnitInstance) -> int:
-    """Strength of a unit in play: base/dynamic + its stored counter + live anthems, >= 0."""
+def effective_strength(state: GameState, unit: UnitInstance, sources: Optional[list] = None) -> int:
+    """Strength of a unit in play: base/dynamic + its stored counter + live anthems, >= 0. `sources`: aura_sources(state),
+    when the caller scores the whole board."""
     card = state.cards[unit.card_id]
     if _inked(state, unit.iid):             # its own effects are off: a dynamic strength is its printed 0
         base = card.base_strength if isinstance(card.base_strength, int) else 0
         return max(0, base + _global_growth(state, card.id, unit.owner) + unit.strength_counter
-                   + anthem_bonus(state, card, unit.owner, unit.iid))
+                   + anthem_bonus(state, card, unit.owner, unit.iid, sources))
     val = (_base_or_dynamic(state, card, unit.owner)
            + _global_growth(state, card.id, unit.owner)
            + unit.strength_counter
-           + anthem_bonus(state, card, unit.owner, unit.iid))
+           + anthem_bonus(state, card, unit.owner, unit.iid, sources))
     return max(0, val)
 
 
