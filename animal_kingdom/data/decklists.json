@@ -291,9 +291,9 @@
   },
   {
    "slug": "tempo",
-   "name": "Tempo",
+   "name": "Heavyweights",
    "order": 12,
-   "cover": "king_theron",
+   "cover": "octopus_legend",
    "starter": false,
    "bot": true,
    "cards": {
@@ -315,9 +315,9 @@
   },
   {
    "slug": "token",
-   "name": "Token",
+   "name": "Small Fry",
    "order": 13,
-   "cover": "scarlett",
+   "cover": "manta_ray_legend",
    "starter": false,
    "bot": true,
    "cards": {
@@ -339,7 +339,7 @@
   },
   {
    "slug": "removal",
-   "name": "Removal",
+   "name": "Hunters",
    "order": 14,
    "cover": "leopard_legend",
    "starter": false,
@@ -363,9 +363,9 @@
   },
   {
    "slug": "bot_optimized",
-   "name": "Bot Optimized",
+   "name": "Teeth and Claws",
    "order": 15,
-   "cover": "leopard_legend",
+   "cover": "locust",
    "starter": false,
    "bot": true,
    "cards": {
@@ -387,9 +387,9 @@
   },
   {
    "slug": "optimizer_1",
-   "name": "Optimizer 1",
+   "name": "Menagerie",
    "order": 16,
-   "cover": "fathom",
+   "cover": "black_panther",
    "starter": false,
    "bot": true,
    "cards": {
@@ -411,9 +411,9 @@
   },
   {
    "slug": "optimizer_4",
-   "name": "Optimizer 4",
+   "name": "Thick Skin",
    "order": 17,
-   "cover": "ember",
+   "cover": "rhinoceros",
    "starter": false,
    "bot": true,
    "cards": {
