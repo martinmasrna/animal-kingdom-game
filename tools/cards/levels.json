@@ -281,8 +281,13 @@
   },
   "barley": {
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792496711
     },
     "animal": {
       "lv": "draft",
@@ -297,6 +302,15 @@
       },
       "note": "Martin, 2026-10-20: his pick from the list; a draft, a week on the card before a lock",
       "at": 1792495596
+    },
+    "art": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792496652
     }
   },
   "barracuda": {
