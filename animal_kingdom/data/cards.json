@@ -387,7 +387,7 @@
     },
     {
       "id": "locust",
-      "name": "[LOCUST]",
+      "name": "The First of Many",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [],
@@ -1335,7 +1335,7 @@
     },
     {
       "id": "barley",
-      "name": "[RAT]",
+      "name": "Fat Bob",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -1350,7 +1350,7 @@
     },
     {
       "id": "scrooge",
-      "name": "[CHIPMUNK]",
+      "name": "Tally",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [
@@ -1747,7 +1747,7 @@
     },
     {
       "id": "raven_legend",
-      "name": "[RAVEN]",
+      "name": "Grimm",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [

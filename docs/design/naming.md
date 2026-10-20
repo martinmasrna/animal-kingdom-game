@@ -2,6 +2,12 @@
 
 Commons and rares carry plain species names; only legendaries are named, and a legendary's name is what the animals call that individual, rendered into English. The process is the workspace's `naming` skill; why it is shaped that way is `../../knowledge/naming-diagnosis-2026-10-16.md`. Names waiting for a card are on the shelf, `../cards/name-shelf.md`. Which names are settled, draft or placeholders is the card table (`./cards`), never this file.
 
+## Who gives the name
+
+The animals, never people (Martin, 2026-10-14: "the names need to be names the animals would have given them, not humans"). A legendary's name is what the animals call that individual, rendered into English the way Tolkien renders Rohan as Old English and Adams renders Lapine. The namers may be its own kin, its prey or its predators: a terror of the sea carries the name its prey gave it, an unkillable one the name its predators gave it, a bogeyman of the herds the name the mothers say.
+
+How would a cat know what a hammer is? (Warriors renamed its villain Hammerclaw to Tigerclaw days before print.) Every word lives in the namers' world: body, colour, size, sound, smell, food, weather, plants, places, the other animals. A name gets made the way real named animals get theirs: someone saw one concrete thing about this individual and said it. A mark the others see (Greywhisker; Watership Down's Bigwig is Thlayli, "fur-head"), something they lived through with it, or a likeness to something in their own world. Researched 2026-10-09 and 2026-10-14 (Tolkien, Adams, Watership Down, Warriors, The Jungle Book, how real animals are named).
+
 ## The test
 
 Hear the name inside an animal card game and you see the card, its art first; think of the card and the name comes back. Prince Leo and Princess Lea are two lion cubs, siblings; Greywhisker is an old grey rat; Black Swan is the black swan. It works the same for a non-native player, which is most of the audience.

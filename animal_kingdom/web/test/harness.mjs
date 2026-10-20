@@ -9,7 +9,7 @@ import net from 'node:net';
 import puppeteer from 'puppeteer-core';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-const PY = process.env.AK_PYTHON || join(REPO, '.venv', 'bin', 'python');
+const PY = process.env.AK_PYTHON || join(REPO, '.venv', ...(process.platform === 'win32' ? ['Scripts', 'python.exe'] : ['bin', 'python']));
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 const freePort = () => new Promise(res => { const s = net.createServer(); s.listen(0, () => { const { port } = s.address(); s.close(() => res(port)); }); });

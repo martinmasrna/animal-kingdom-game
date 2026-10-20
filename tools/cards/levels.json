@@ -281,8 +281,13 @@
   },
   "barley": {
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792496711
     },
     "animal": {
       "lv": "draft",
@@ -295,8 +300,17 @@
           "species": "Mouse"
         }
       },
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
-      "at": 1792191061
+      "note": "Martin, 2026-10-20: his pick from the list; a draft, a week on the card before a lock",
+      "at": 1792495596
+    },
+    "art": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792496652
     }
   },
   "barracuda": {
@@ -2769,9 +2783,9 @@
         }
       },
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin, 2026-10-20: his own name, a draft; a week on the card before a lock",
       "by": "claude",
-      "at": 1792191063
+      "at": 1792486463
     }
   },
   "remora": {
@@ -2860,8 +2874,8 @@
           "species": "Chipmunk"
         }
       },
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
-      "at": 1792191061
+      "note": "Martin, 2026-10-20: his pick from the list; a draft, a week on the card before a lock",
+      "at": 1792493790
     }
   },
   "serval": {
@@ -3704,9 +3718,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "Martin, 2026-10-20: his own name (first said 2026-10-16); a draft, a week on the card before a lock",
       "by": "claude",
-      "at": 1792191062
+      "at": 1792497992
     },
     "art": {
       "review": {

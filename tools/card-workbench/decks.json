@@ -129,7 +129,7 @@
     {
      "habitat": "Meadow",
      "id": "pool-locust",
-     "name": "[LOCUST]",
+     "name": "The First of Many",
      "note": "",
      "rarity": "L",
      "species": "Locust",
@@ -896,7 +896,7 @@
     {
      "habitat": "Forest",
      "id": "egg-control-1",
-     "name": "[RAVEN]",
+     "name": "Grimm",
      "note": "",
      "rarity": "L",
      "species": "Raven",
@@ -1258,7 +1258,7 @@
     {
      "habitat": "City",
      "id": "food-aggro-2",
-     "name": "[RAT]",
+     "name": "Fat Bob",
      "note": "",
      "rarity": "L",
      "species": "Rat",
@@ -1270,7 +1270,7 @@
     {
      "habitat": "Forest",
      "id": "food-aggro-3",
-     "name": "[CHIPMUNK]",
+     "name": "Tally",
      "note": "",
      "rarity": "L",
      "species": "Chipmunk",

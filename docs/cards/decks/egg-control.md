@@ -11,7 +11,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Eon** | 1 | Snake | 10 | Apex Predator. Dusk: shuffle this into your deck with -1 strength. |
-| **[RAVEN]** | 1 | Bird | 3 | Flight. Roar: put an animal from your opponent's Remove Pile into your hand. |
+| **Grimm** | 1 | Bird | 3 | Flight. Roar: put an animal from your opponent's Remove Pile into your hand. |
 | **Black Swan** | 1 | Bird | 3 | Flight. Whenever you draw Black Swan, your opponent discards a random card. |
 | **Aurum** | 1 | Bird | 1 | Dawn: shuffle a Golden Egg into your deck. |
 
