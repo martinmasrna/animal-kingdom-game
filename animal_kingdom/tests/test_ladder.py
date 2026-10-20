@@ -252,8 +252,38 @@ def test_a_retired_decks_bot_never_plays_and_tied_decks_take_turns():
 
 
 def test_a_rating_sits_on_one_rung_and_a_bot_is_named_by_it():
-    """The climb made visible (Martin, 2026-10-20): five rungs over the rating scale, a bot named by the rung its own
-    rating sits on, never by its pilot's level, and the leaderboard listing the bots one row per rung."""
+    """The bots as five named opponents (Martin, 2026-10-20): five bands over the rating scale, a bot named by the band its
+    own rating sits in, never by its pilot's level, and the leaderboard listing the bots one row per band."""
     assert [ladder.rung_of(r) for r in (1000, 1299, 1300, 1699, 1700, 1899, 1900, 2200)] == \
-        ["Bronze", "Bronze", "Silver", "Gold", "Platinum", "Platinum", "Diamond", "Diamond"]
+        ["Beginner", "Beginner", "Intermediate", "Advanced", "Expert", "Expert", "Legendary", "Legendary"]
     assert [n for n, _ in ladder.RUNGS] == [ladder.rung_of(f) for _, f in ladder.RUNGS]
+
+
+def test_practice_offers_the_ladders_five_bots_and_the_pilot_follows_the_band(monkeypatch, tmp_path):
+    """One vocabulary (Martin, 2026-10-20): Practice's bot is one of the five bands. The server hands out the pilot whose
+    rating with the chosen deck sits nearest the band, and names the seat by the band the bot's own rating sits in; the
+    engine's pilot levels still work for callers that send them."""
+    import asyncio
+    from aiohttp.test_utils import TestClient, TestServer
+    from animal_kingdom.web import custom_decks, server
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    monkeypatch.setattr(custom_decks, "DECKS_FILE", tmp_path / "web_decks.json")
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a = await (await c.post("/api/profile", json={})).json()
+            h = {"X-AK-Key": a["code"]}
+            rows = server.ladder.bots()
+            for band in ladder.BANDS:
+                m = await (await c.post("/api/match", json={"deck": "cats", "bot": {"level": band, "deck": "fish"}}, headers=h)).json()
+                seat = server.hub.matches[m["id"]].seats["B"]
+                assert seat.bot in ("easy", "normal", "expert") and seat.deck == "fish"
+                centre = ladder.band_centre(band)
+                nearest = min(("easy", "normal", "expert"), key=lambda l: abs(rows[ladder.bot_id(l, "fish")].rating - centre))
+                assert seat.bot == nearest, band
+                assert seat.name == f"{ladder.rung_of(rows[ladder.bot_id(seat.bot, 'fish')].rating)} Bot"
+            m = await (await c.post("/api/match", json={"deck": "cats", "bot": {"level": "easy", "deck": "fish"}}, headers=h)).json()
+            assert server.hub.matches[m["id"]].seats["B"].bot == "easy"            # a pilot level still works
+            r = await c.post("/api/match", json={"deck": "cats", "bot": {"level": "Grandmaster", "deck": "fish"}}, headers=h)
+            assert r.status == 400
+    asyncio.run(run())

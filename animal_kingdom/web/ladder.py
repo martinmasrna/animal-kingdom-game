@@ -20,11 +20,20 @@ START_RD = 350.0
 START_VOL = 0.06
 BOT_RD = 60.0           # a seeded bot's uncertainty: it moves, slowly
 PROVISIONAL = 10        # games before the "?" goes
-# The ladder's rungs (Martin, 2026-10-20): the climb made visible. A rating sits on a rung; a bot is named by its rung, not
-# its pilot's level ("Fish (Gold Bot)"), and the leaderboard lists the bots as one row per rung. Matchmaking is untouched:
-# it still rates every bot's deck on its own and picks by rating. Plain names any card gamer reads at once (Martin, 2026-10-20:
-# "either simple names, or the animal theme properly").
-RUNGS = (("Bronze", 0), ("Silver", 1300), ("Gold", 1500), ("Platinum", 1700), ("Diamond", 1900))   # name, floor
+# The five bots (Martin, 2026-10-20): one vocabulary everywhere. A bot is named by the band its own rating sits in, never by
+# its pilot ("Fish (Expert Bot)"); the leaderboard lists the bots one row per band; Practice offers the same five, and the
+# server picks the pilot whose rating with the chosen deck sits nearest the band (server.pilot_for). Easy, Normal and Expert
+# are the engine's three pilots and no longer words a player sees. Matchmaking is untouched: it rates every bot's deck on
+# its own and picks by rating. A person's row shows the rating alone: a band word beside a rating is noise (Martin).
+RUNGS = (("Beginner", 0), ("Intermediate", 1300), ("Advanced", 1500), ("Expert", 1700), ("Legendary", 1900))   # name, floor
+BANDS = tuple(name for name, _ in RUNGS)
+PILOT_BAND = {"easy": "Beginner", "normal": "Advanced", "expert": "Expert"}   # a pilot's band when its deck has no ladder row
+
+
+def band_centre(band: str) -> float:
+    """The middle of a band: between its floor and the next band's (the top band: 200 above its floor)."""
+    names = [n for n, _ in RUNGS]; floors = dict(RUNGS); i = names.index(band)
+    return (floors[band] + (floors[names[i + 1]] if i + 1 < len(names) else floors[band] + 200)) / 2
 
 
 def rung_of(rating: float) -> str:

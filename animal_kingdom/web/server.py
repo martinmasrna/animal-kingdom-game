@@ -294,6 +294,25 @@ def profile_view(p: dict) -> dict:
             "rating": ladder.get(p["id"]).shown() if ladder else None, **standing(p["id"])}
 
 
+def pilot_for(band: str, deck: str) -> str:
+    """Practice's bot (Martin, 2026-10-20): the player picks one of the five bots (ranking.BANDS) and a deck; the pilot is the
+    one whose ladder rating with that deck sits nearest the band's middle. A deck without ladder rows gets the pilot by name."""
+    rows = ladder.bots() if ladder else {}
+    ids = {level: ranking.bot_id(level, deck) for level in ranking.LEVELS}
+    if all(lid in rows for lid in ids.values()):
+        centre = ranking.band_centre(band)
+        return min(ranking.LEVELS, key=lambda level: abs(rows[ids[level]].rating - centre))
+    return next(level for level, b in ranking.PILOT_BAND.items() if b == band) if band in ranking.PILOT_BAND.values() \
+        else ("easy" if ranking.BANDS.index(band) < 2 else "expert")
+
+
+def bot_seat_name(level: str, deck: str) -> str:
+    """What a practice bot is called: its band ("Expert Bot"), by its rating with the deck when the ladder has it."""
+    lid = ranking.bot_id(level, deck)
+    band = ranking.rung_of(ladder.bots()[lid].rating) if ladder and lid in ladder.bots() else ranking.PILOT_BAND[level]
+    return f"{band} Bot"
+
+
 def bot_rungs(table) -> dict[str, float]:
     """Each rung's bots as one rating on the leaderboard (ranking.RUNGS): the bots on it, averaged by games played."""
     rungs: dict[str, list] = {}
@@ -310,10 +329,10 @@ def standing(pid: str) -> dict:
     r = ladder.get(pid)
     if r.provisional:
         return {"placing": {"games": r.games, "of": ranking.PROVISIONAL}}
-    # your row's place on the leaderboard: the ranked people and the bot rungs above you; and your rung
+    # your row's place on the leaderboard: the ranked people and the bot rows above you
     table = ladder.table()
     above = sum(1 for lid, x in table if not lid.startswith("bot:") and not x.provisional and x.rating > r.rating)
-    return {"rank": 1 + above + sum(1 for avg in bot_rungs(table).values() if avg > r.rating), "rung": ranking.rung_of(r.rating)}
+    return {"rank": 1 + above + sum(1 for avg in bot_rungs(table).values() if avg > r.rating)}
 
 
 # ----------------------------------------------------------------- sign in with Google / Discord
@@ -918,6 +937,8 @@ async def create_match(req):
         match.ready("A")
     elif gauntlet:
         level = gauntlet.get("level", "normal")
+        if level in ranking.BANDS:                   # the gauntlet's one pilot for the whole field: by the band's name
+            level = next((l for l, b in ranking.PILOT_BAND.items() if b == level), "easy" if ranking.BANDS.index(level) < 2 else "expert")
         if level not in BOT_LEVELS:
             raise web.HTTPBadRequest(text="bad bot level")
         skip, per_seat = gauntlet.get("skip") or [], gauntlet.get("per_seat", 5)
@@ -928,7 +949,7 @@ async def create_match(req):
         field = [d for d in sorted(DECK_SLUGS) if d != deck and d not in skip and sorted(PREMADE_DECKS[d]) != mine]
         if not field:
             raise web.HTTPBadRequest(text="empty gauntlet")
-        match.join(Seat(secrets.token_urlsafe(12), f"Bot ({level.capitalize()})", bot=level, deck=field[0]))
+        match.join(Seat(secrets.token_urlsafe(12), f"{ranking.PILOT_BAND[level]} Bot", bot=level, deck=field[0]))
         if gauntlet.get("reverse"):     # the bot keeps the chosen deck; the player plays the field
             match.seats["B"].deck = deck
             match.make_gauntlet(field, per_seat, rotating="A")
@@ -937,10 +958,12 @@ async def create_match(req):
         match._start_game()
         match.version += 1
     elif bot:
-        if bot.get("level") not in BOT_LEVELS or bot.get("deck") not in {*PREMADE_DECKS, *TEST_BOT_DECKS}:
+        level, bdeck = bot.get("level"), bot.get("deck")
+        if level in ranking.BANDS and bdeck in PREMADE_DECKS:
+            level = pilot_for(level, bdeck)          # one of the five bots, as on the ladder: the pilot follows the band
+        if level not in BOT_LEVELS or bdeck not in {*PREMADE_DECKS, *TEST_BOT_DECKS}:
             raise web.HTTPBadRequest(text="bad bot")
-        match.join(Seat(secrets.token_urlsafe(12), f"Bot ({bot['level'].capitalize()})",
-                        bot=bot["level"], deck=bot["deck"]))
+        match.join(Seat(secrets.token_urlsafe(12), bot_seat_name(level, bdeck), bot=level, deck=bdeck))
     else:
         match.version += 1
     if not match.tutorial:      # a tutorial is neither a game log for balance nor a match in the history

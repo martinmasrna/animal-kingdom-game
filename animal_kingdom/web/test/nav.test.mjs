@@ -60,8 +60,8 @@ test('the opponent you set up outlives a reload: Practice\'s level stays as you 
   const page = await browser.newPage();
   await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   await page.click('#oppbtn'); await page.waitForSelector('[data-opp="bot"]');
-  await page.$eval('[data-opp="bot"]', e => e.click()); await page.waitForSelector('[data-level="expert"]');
-  await page.$eval('[data-level="expert"]', e => e.click());
+  await page.$eval('[data-opp="bot"]', e => e.click()); await page.waitForSelector('[data-level="Expert"]');
+  await page.$eval('[data-level="Expert"]', e => e.click());
   await page.reload({ waitUntil: 'networkidle0' });
   assert.match(await page.$eval('#oppbtn', e => e.textContent), /Expert/);
   await page.evaluate(() => localStorage.removeItem('ak:play'));

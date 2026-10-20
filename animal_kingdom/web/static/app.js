@@ -210,7 +210,8 @@ function route() {
 // The key art, the title along its top and, on its ground, one granite piece: your deck | the opponent, Play under them. Each
 // side opens its chooser above the piece. Collection and the profile stand beside it for now, until the hub holds more.
 // #/gauntlet is the same screen with the developer's gauntlet as the opponent; #/join/<code> the same with a friend's match.
-const play = { opp: 'bot', level: 'normal', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };
+const BANDS = ['Beginner', 'Intermediate', 'Advanced', 'Expert', 'Legendary'], OLD_LEVELS = { easy: 'Beginner', normal: 'Advanced', expert: 'Expert' };   // the five bots (web/ladder.py RUNGS): the same five on the ladder and in Practice
+const play = { opp: 'bot', level: 'Advanced', botDeck: 'random', side: 'mine', code: '', open: null, peek: null };
 // The decks an Easy bot plays when nobody chose one (Random, and the tutorial's first match): the simpler half of the ones
 // Easy is weakest with (Martin, 2026-10-17: Easy with Cats or Fish beats the greedy bot 4 games in 10, with these 1 to 3;
 // Egg and Aristocrats are weaker still but the hardest to read). The ranked queue picks by rating instead.
@@ -219,12 +220,12 @@ const EASY_POOL = ['colony', 'hoofed', 'giants'];
 // the chosen deck is: a reload (a new build reloads open tabs) or another visit finds it as you left it.
 try { const k = JSON.parse(store('ak:play') || '{}');
   if (['bot', 'ranked'].includes(k.opp)) play.opp = k.opp;
-  if (['easy', 'normal', 'expert'].includes(k.level)) play.level = k.level;
+  if (BANDS.includes(k.level)) play.level = k.level; else if (k.level in OLD_LEVELS) play.level = OLD_LEVELS[k.level];   // the five bots; a stored pilot level from before 2026-10-20 maps to its band
   if (typeof k.botDeck === 'string') play.botDeck = k.botDeck;
   if (['mine', 'theirs'].includes(k.side)) play.side = k.side; } catch { /* nothing kept */ }
 const keepPlay = () => { if (['bot', 'ranked'].includes(play.opp)) store('ak:play', JSON.stringify({ opp: play.opp, level: play.level, botDeck: play.botDeck, side: play.side })); };
 const TEST_BOTS = [['lions30', '30 Lions']];   // test opponents (decks.TEST_BOT_DECKS), offered only after #/?botdeck=<id>
-const LEVELS = [['easy', 'Easy'], ['normal', 'Normal'], ['expert', 'Expert']], SIDES = [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']];
+const LEVELS = BANDS.map(b => [b, b]), SIDES = [['mine', 'You play your deck'], ['theirs', 'The bot plays your deck']];
 const label = (opts, v) => (opts.find(o => o[0] === v) || opts[0])[1];
 // Home's corner piece (design sandbox screen/nav/, 2026-10-02): the Ladder (where you stand on it), Collection by name, and a menu (three bars) listing the rest, the gear kept for Settings in it; seven equal icons were too many. Feedback is a tab on the
 // screen's edge while the game is in testing (moves into the menu's list at launch; see boot). Icons painted in the board numbers' chalk.
@@ -232,7 +233,7 @@ const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" dragga
 const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news'), friends: TI('friends'), menu: TI('menu') };
 let newsAsked = false;
 const mePiece = () => {   // the Ladder, with your rating and place once ranked, your placement games while placing
-  const sub = !ME ? '' : ME.rank ? `${ME.rating} · ${ME.rung} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
+  const sub = !ME ? '' : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
   return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${TOPICON.leaderboard}<span><b>Ladder</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
 };
 let homeMode = {};   // the mode home was last drawn in: a late redraw keeps to it (not to the mode it was first opened with)
@@ -322,7 +323,7 @@ function homeScreen(mode = {}) {
     if (play.opp === 'friend' && fr && fr.online) return startSearch('challenge', 'go', '/api/challenge', { friend: fr.id, deck: deckSpec(chosen) }, friendLabel(fr, play.friends));
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
-      const pool = play.level === 'easy' ? DECKS.filter(d => EASY_POOL.includes(d.id)) : botAll.filter(d => BOT_POOL.includes(d.id)), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
+      const pool = play.level === 'Beginner' ? DECKS.filter(d => EASY_POOL.includes(d.id)) : botAll.filter(d => BOT_POOL.includes(d.id)), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
       body.bot = { level: play.level, deck };
     }
     if (play.opp === 'gauntlet') {
@@ -439,7 +440,7 @@ async function firstMatch() {
   const name = (DECKS.find(d => d.id === 'cats') || {}).name;
   const cats = playable().find(d => d.name === name);   // the player's own Cats deck (a copy of the starter), else the starter
   if (cats) store('ak:deck', cats.id);
-  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: cats ? deckSpec(cats) : 'cats', name: 'You', bot: { level: 'easy', deck: EASY_POOL[Math.floor(Math.random() * EASY_POOL.length)] } }) });
+  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: cats ? deckSpec(cats) : 'cats', name: 'You', bot: { level: 'Beginner', deck: EASY_POOL[Math.floor(Math.random() * EASY_POOL.length)] } }) });
   if (!r.ok) return toast(await r.text());
   const m = await r.json(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
 }
@@ -786,7 +787,7 @@ function lobbyScreen() {
 function seatLabel(p) {
   const s = V.seats[p];
   if (!s) return '';
-  if (s.bot) return `Bot (${s.bot[0].toUpperCase() + s.bot.slice(1)})`;
+  if (s.bot) return esc(s.name || 'Bot');   // its band, as the server named it ("Expert Bot")
   return p === V.you ? 'You' : esc(s.name || 'Opponent');
 }
 
