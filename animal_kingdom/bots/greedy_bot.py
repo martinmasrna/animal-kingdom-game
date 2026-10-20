@@ -65,6 +65,11 @@ class GreedyWeights:
 
     food_progress: float = 1.0       # per net food (mine - theirs)
     food_proximity: float = 30.0     # x (my_food / win_food): pull toward the food win
+    food_curve: float = 1.0          # exponent on that proximity: 1 is linear (shipped); 3 makes a food lead worth little
+                                      # until the win is near. Martin, 2026-10-20, reading the positions the Expert lost
+                                      # from "ahead": a food lead you cannot convert is worth nothing, the board is what
+                                      # converts. In 15 of his 35 wins the bot's lead was these two food terms alone.
+    food_race: bool = False          # proximity as mine minus theirs (who is nearer the win), not mine alone
     board_presence: float = 0.5      # per net effective-strength on controlled crossroads
     connection: float = 1.0          # per own unit connected to my HQ
     region_control: float = 2.0      # per controlled region corner, x that region's food
@@ -301,7 +306,13 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     # --- Food: net total + proximity to the food win ---
     food_progress, food_proximity = _features.food_terms(state, me, opp)
     score += w.food_progress * food_progress
-    score += w.food_proximity * food_proximity
+    if w.food_curve != 1.0 or w.food_race:
+        proximity = food_proximity ** w.food_curve
+        if w.food_race:
+            proximity -= (state.food[opp] / state.game_map.win_food) ** w.food_curve
+        score += w.food_proximity * proximity
+    else:
+        score += w.food_proximity * food_proximity
 
     # --- Board presence: net effective strength of controlled crossroads ---
     score += w.board_presence * _features.board_presence(state, me, opp)
