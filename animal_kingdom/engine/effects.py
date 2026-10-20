@@ -49,9 +49,9 @@ class PendingRequest:
     def to_pending(self) -> dict:
         p = {"mode": self.mode, "chooser": self.chooser, "optional": self.optional}
         if self.mode == "choice":
-            p["options"] = list(self.options)
+            p["options"] = list(self.options)  # type: ignore[arg-type]
         else:
-            p["placements"] = list(self.placements)
+            p["placements"] = list(self.placements)  # type: ignore[arg-type]
         if self.from_deck_reveal:
             p["from_deck_reveal"] = True
         if self.kind:
@@ -62,6 +62,8 @@ class PendingRequest:
 def legal_pending(state: GameState) -> list:
     """Actions offered while a choice is pending."""
     p = state.pending
+    assert p is not None
+    acts: list = []
     if p["mode"] == "choice":
         acts = [ChoiceAction(o) for o in p["options"]]
     else:  # "place"
@@ -82,6 +84,7 @@ def _place_dict(action) -> dict:
 def apply_pending(state: GameState, action) -> None:
     """Record the chosen option onto the paused step, then continue resolving."""
     p = state.pending
+    assert p is not None
     step = state.effect_stack[-1]  # the paused op (left on the stack by resolve)
     if p["mode"] == "choice":
         step["choice"] = action.choice
@@ -195,7 +198,7 @@ def copy_choices(state: GameState, player: str, card_id: str) -> list:
     """(iid, copy) for each distinct playable version of `card_id` in hand: one (None, best copy) when the copies are
     alike, else the first copy of each strength counter with its iid, so a player can play the weaker one."""
     copies = playable_copies(state, player, card_id)
-    firsts = {}
+    firsts: dict = {}
     for u in copies:
         firsts.setdefault(u.strength_counter, u)
     if len(firsts) <= 1:
@@ -815,7 +818,7 @@ def legal_roams(state: GameState, player: str, *, free_only: bool = False) -> li
         return []                                     # the usual case, and the search's hot path: skip the BFS
     occ = state.connected_occupied(player)
     enemy_front = state.game_map.hq_front(other_player(player))
-    out = []
+    out: list = []
     for cr in sorted(cr for cr, st in state.board.items() if st and st[-1].owner == player):
         unit = state.board[cr][-1]
         if not statics.can_roam(state, unit) or state.turn_flags.get(f"roamed_{unit.iid}"):
@@ -976,7 +979,8 @@ def start_of_turn(state: GameState, player: str) -> None:
     """
     on_board = {u.iid for stack in state.board.values() for u in stack}
     tops = {stack[-1].iid for stack in state.board.values() if stack}
-    fired, keep = [], []
+    fired: list = []
+    keep: list = []
     for s in state.scheduled:
         if s["owner"] != player:
             keep.append(s)
@@ -988,7 +992,7 @@ def start_of_turn(state: GameState, player: str) -> None:
             s["remaining"] -= 1
             (fired if s["remaining"] <= 0 else keep).append(s)
     state.scheduled = keep
-    for s in reversed(fired):  # earliest-scheduled ends on top of the stack -> resolves first
+    for s in fired[::-1]:      # earliest-scheduled ends on top of the stack -> resolves first (reversed() trips mypyc here)
         state.effect_stack.append(s["step"])
     _push_timed_hooks(state, player, "on_start_of_turn")   # Dawn, above the timers: it resolves first
 

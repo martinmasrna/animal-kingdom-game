@@ -547,8 +547,8 @@ class TurnSearcher(Bot):
             ]
             covers = [
                 a for a in card_actions
-                if world.top_unit(a.crossroad) is not None
-                and world.top_unit(a.crossroad).owner == opponent
+                if (t := world.top_unit(a.crossroad)) is not None
+                and t.owner == opponent
             ]
             live = []
             if world.cards[card_actions[0].card_id].has_roar:

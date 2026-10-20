@@ -448,7 +448,7 @@ class RefereeBot(TurnSearcher):
             best = value if best is None else max(best, value)
         if best is not None and abs(best) >= _DECISIVE / 2:
             best /= 2        # a game decided a turn later counts half: lose later rather than now, win now rather than later
-        return best
+        return best  # type: ignore[return-value]
 
     def _play_turn(self, state: GameState, me: str) -> None:
         """Play the rest of my turn with the fast policy (sub-choices included), until the turn passes to the opponent
@@ -468,7 +468,7 @@ class RefereeBot(TurnSearcher):
             action = self._policy.choose(state.view_for(me), legal, state)
             rules.apply_action(state, action, validate=False)
 
-    def _advance(self, state: GameState, me: str) -> None:
+    def _advance(self, state: GameState, me: str) -> float:
         """Play the rollout clone forward with the greedy policy - through my pending
         sub-choices, the opponent's whole reply turn (their sampled hand), and any
         pendings that opens - until my next top-level decision or a terminal state.
@@ -550,19 +550,3 @@ class RefereeBot(TurnSearcher):
             if best_score is None or score > best_score:
                 best, best_score = opening, score
         return best
-
-        if state.config.actions_per_turn - state.actions_taken_this_turn < 2:
-            return None
-        front = state.game_map.hq_front(me)
-        firsts = [a for a in legal
-                  if isinstance(a, (PlaceAction, RoamAction)) and a.target[0] == "cr" and a.target[1] in front]
-        if not state.hands[opp] and any(cr in state.connected_occupied(opp) for cr in front):
-            firsts += [a for a in legal if isinstance(a, DrawAction)]
-        for first in firsts:
-            nxt = state.clone()
-            rules.apply_action(nxt, first, validate=False)
-            if nxt.pending is not None or nxt.player_to_act() != opp or rules.is_terminal(nxt) is not None:
-                continue
-            if any(isinstance(a, (PlaceAction, RoamAction)) and a.is_hq_capture for a in rules.legal_actions(nxt)):
-                return first
-        return None
