@@ -77,7 +77,7 @@ def save_game(match: Match, record: dict) -> None:
         log.exception("could not save the game log for match %s", match.id)
 
 
-BOT_THINK_MAX = 15          # seconds a bot may think before the Easy bot's move is played for it
+BOT_THINK_MAX = 20          # seconds a bot may think before the Easy bot's move is played for it (the Expert deepens for 8 s, then finishes the root in hand)
 
 
 class Hub:

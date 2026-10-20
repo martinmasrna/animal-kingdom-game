@@ -8,7 +8,6 @@ hand); the opponent's hand and both deck orders never leave this module.
 from __future__ import annotations
 
 import logging
-import os
 import random
 import secrets
 import time
@@ -53,18 +52,16 @@ STARTER_COVERS = {d["slug"]: d.get("cover", "") for d in DECKLISTS}
 # Easy / Normal / Expert, as in the play screen: the same bot kinds, with the same settings, the
 # simulations measure (a bare RefereeBot() is an untested configuration).
 log = logging.getLogger(__name__)
-BOT_LEVELS = {"easy": "easy", "normal": "turn", "expert": "referee"}
-# The candidate Expert under evaluation (docs/bots.md): two turns of sight, the target-aware evaluation, den sense and
-# the reply as a turn, capped so a
-# move stays under the server's BOT_THINK_MAX. `AK_EXPERT_DEPTH=1 ./play` offers it as the Expert; unset, today's Expert.
-CANDIDATE_EXPERT = {"depth": 1, "time_budget": 8.0, "w.pending_target": 1.5, "w.buried_presence": 0.25, "den_sense": True, "reply_turns": 3}
+# The Expert (docs/bots.md; shipped 2026-10-20, Martin: "of course it should be live if it makes the bot better"): the
+# referee with two turns of sight, the target-aware evaluation, den sense and the reply as a turn, its deepening capped at
+# 8 s so a move stays under the server's BOT_THINK_MAX.
+EXPERT = "referee:depth=1,time_budget=8,den_sense=true,reply_turns=3,w.pending_target=1.5,w.buried_presence=0.25"
+BOT_LEVELS = {"easy": "easy", "normal": "turn", "expert": EXPERT}
 
 
 def bot_for(level: str, seed: int):
     if level in tutorial.BOTS.values():
         return tutorial.TutorialBot(seed=seed, lesson=next(n for n, b in tutorial.BOTS.items() if b == level))
-    if level == "expert" and os.environ.get("AK_EXPERT_DEPTH") == "1":
-        return make_bot("referee", seed, extra=dict(CANDIDATE_EXPERT))
     return make_bot(BOT_LEVELS[level], seed)
 
 

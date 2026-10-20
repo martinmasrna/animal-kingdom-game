@@ -316,16 +316,13 @@ def test_the_bots_play_the_bot_pool_only():
     assert bot_levels(lad.table()) == bot_levels([(lid, r) for lid, r in lad.table() if "egg_control" not in lid])
 
 
-def test_the_candidate_expert_is_a_switch_on_the_play_server(monkeypatch):
-    """AK_EXPERT_DEPTH=1 makes the Expert the candidate under evaluation (two turns of sight, target-aware weights,
-    a time budget under BOT_THINK_MAX); without it the Expert is the configuration the simulations measure."""
+def test_the_expert_is_the_deepened_referee():
+    """The Expert (shipped 2026-10-20) is the referee with two turns of sight, den sense, the reply as a turn and the
+    target-aware weights, deepening under a time budget below BOT_THINK_MAX; Normal is the TurnBot."""
     from animal_kingdom.web.match import bot_for
     from animal_kingdom.web.server import BOT_THINK_MAX
-    monkeypatch.delenv("AK_EXPERT_DEPTH", raising=False)
-    assert bot_for("expert", 7).depth == 0
-    monkeypatch.setenv("AK_EXPERT_DEPTH", "1")
     bot = bot_for("expert", 7)
-    assert bot.depth == 1 and bot.den_sense and bot.reply_turns and 0 < bot.time_budget < BOT_THINK_MAX
+    assert bot.depth == 1 and bot.den_sense and bot.reply_turns == 3 and 0 < bot.time_budget < BOT_THINK_MAX
     assert bot.weights.pending_target > 0 and bot.weights.buried_presence > 0
     assert bot_for("normal", 7).__class__.__name__ == "TurnBot"
 
