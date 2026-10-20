@@ -33,7 +33,7 @@ import hashlib
 import json
 import math
 from collections import deque
-from typing import Iterator
+from typing import Iterator, Optional
 
 from ..engine import rules
 from ..engine.actions import PlaceAction
@@ -300,7 +300,7 @@ def p_opponent_can_cover(state: GameState, opp: str, defender_strength: int) -> 
     k = 0
     for cid in unseen:
         c = state.cards[cid]
-        if not c.is_dynamic and c.base_strength > defender_strength:
+        if not c.is_dynamic and c.base_strength > defender_strength:  # type: ignore[operator]
             k += 1
     if k == 0:
         return 0.0
@@ -525,7 +525,7 @@ def growth_board_diff(state: GameState, me: str, opp: str) -> float:
     return float((board_mine - board_theirs) + (global_mine - global_theirs))
 
 
-def growth_rate_diff_from(state: GameState, me: str, opp: str, *, growth: float = None) -> float:
+def growth_rate_diff_from(state: GameState, me: str, opp: str, *, growth: Optional[float] = None) -> float:
     """`growth_board_diff` normalized per elapsed turn - a cheap proxy for "growing turn over
     turn" rather than just "grown so far". `growth` may be passed in to avoid recomputing it
     when the caller already has it (see `extract`)."""
@@ -668,7 +668,7 @@ def context_features(state: GameState, me: str, opp: str, opp_connection: set) -
                 if my_tags[i] & my_tags[j])
     gm = state.game_map
     front = gm.hq_front(me)
-    held = sum(1 for cr in front if state.top_unit(cr) is not None and state.top_unit(cr).owner == me)
+    held = sum(1 for cr in front if (t := state.top_unit(cr)) is not None and t.owner == me)  # type: ignore[misc]
     near_front = {n for cr in front for n in gm.neighbors(cr)} | set(front)
     pressure = sum(1 for cr in near_front if cr in opp_connection)
     return {
@@ -678,10 +678,10 @@ def context_features(state: GameState, me: str, opp: str, opp_connection: set) -
         "hand_theirs": float(len(state.hands[opp])),
         "hand_roars": float(roars),
         "hand_dead_roars": float(max(0, roars - live)),
-        "hand_strength_mean": sum(strengths) / len(strengths) if strengths else 0.0,
+        "hand_strength_mean": sum(strengths) / len(strengths) if strengths else 0.0,  # type: ignore[arg-type]
         "hand_strength_max": float(max(strengths, default=0)),
-        "hand_small": float(sum(1 for x in strengths if x <= 2)),
-        "hand_fliers": float(sum(c.has_keyword("Flight") for c in hand)),
+        "hand_small": float(sum(1 for x in strengths if x <= 2)),  # type: ignore[misc, operator]
+        "hand_fliers": float(sum(c.has_keyword("Flight") for c in hand)),  # type: ignore[arg-type]
         "hand_food_cards": float(sum(bool(c.food_cost) for c in hand)),
         "hand_food_affordable": float(sum(bool(c.food_cost) and c.food_cost <= state.food[me]
                                           for c in hand)),

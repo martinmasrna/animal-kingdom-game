@@ -38,7 +38,7 @@ class PlaceAction:
     kind: ClassVar[str] = "place"  # a tag, not part of value identity
 
     def to_dict(self) -> dict:
-        d = {"kind": self.kind, "card_id": self.card_id, "target": list(self.target)}
+        d: dict = {"kind": self.kind, "card_id": self.card_id, "target": list(self.target)}
         if self.iid is not None:
             d["iid"] = self.iid
         return d

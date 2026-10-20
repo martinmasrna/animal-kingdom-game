@@ -38,7 +38,7 @@ from __future__ import annotations
 
 import random
 
-from ..engine.state import GameState, UnitInstance, other_player
+from ..engine.state import GameState, Rng, UnitInstance, other_player
 
 
 def determinize(state: GameState, me: str, rng: random.Random) -> GameState:
@@ -71,5 +71,5 @@ def determinize(state: GameState, me: str, rng: random.Random) -> GameState:
     clone.decks[opp] = pool[dealt:]
 
     # Independent chance stream per world (a plain clone would replay the original's).
-    clone.rng = random.Random(rng.getrandbits(64))
+    clone.rng = Rng(rng.getrandbits(64))   # the same stream random.Random(seed) gives, in the state's own class
     return clone

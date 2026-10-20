@@ -28,6 +28,12 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any, Mapping, Optional
 
+try:                                   # mypyc's markers (the Docker image compiles the engine; the tree runs it plain)
+    from mypy_extensions import mypyc_attr
+except ImportError:                    # pragma: no cover
+    def mypyc_attr(*args, **kwargs):   # type: ignore[misc]
+        return lambda cls: cls
+
 from .cards import Card, load_cards
 from .config import Config
 from .maps import GameMap, load_map
@@ -113,18 +119,19 @@ def _plain_copy(v):
 _LEAVES = frozenset({type(None), str, int, float, bool})
 
 
+@mypyc_attr(native_class=False)      # a random.Random subclass, built by __new__ in _copy_rng
 class Rng(random.Random):
     """The game's random stream, cloned for nearly nothing. The search clones a position for every move it imagines and
     almost none of those clones ever draw, while `getstate` builds a 625-int tuple each time (a tenth of the Expert's
     move, 2026-10-20). So a clone takes its parent's snapshot, the state tuple the parent keeps until its next draw, and
     becomes a generator of its own only when it draws. The stream is the same one `setstate(parent.getstate())` would
     give, draw for draw."""
-    _snap = None      # the state tuple at the current position, or None once a draw has moved past it
-    _live = True      # False: a lazy clone whose generator still holds no state (its position is _snap)
+    _snap: Optional[tuple] = None   # the state tuple at the current position, or None once a draw has moved past it
+    _live: bool = True              # False: a lazy clone whose generator still holds no state (its position is _snap)
 
     def _wake(self) -> None:
         if not self._live:
-            super().setstate(self._snap)
+            super().setstate(self._snap)  # type: ignore[arg-type]
             self._live = True
 
     def random(self) -> float:
@@ -163,6 +170,7 @@ def _copy_rng(rng: random.Random) -> "Rng":
     return new
 
 
+@mypyc_attr(native_class=False)
 @dataclass(frozen=True)
 class Result:
     """Terminal game outcome. winner is 'A'/'B', or None for a draw."""
@@ -256,6 +264,7 @@ def _upgrade_step(step: dict) -> dict:
     return step
 
 
+@mypyc_attr(native_class=False)      # built by __new__ in clone(), which a compiled (native) class forbids
 class GameState:
     """The full mutable position. Construct via new_game() or from_dict().
 

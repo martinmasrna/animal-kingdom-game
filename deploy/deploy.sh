@@ -59,7 +59,7 @@ if [[ -n "$unwritten" && -z "${NEWS_OK:-}" ]]; then
 fi
 
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-git -C "$repo" archive HEAD animal_kingdom | tar -x -C "$tmp"
+git -C "$repo" archive HEAD animal_kingdom tools/engine_speed | tar -x -C "$tmp"   # the engine and the compile gate's recordings
 cp "$repo/deploy/Dockerfile" "$cfg" "$tmp/"
 echo "deploying $(git -C "$repo" log --oneline -1)"
 # Fly's deploy sometimes hangs on its own API: give it 10 minutes, then stop it and try once more; a second hang fails loudly.

@@ -177,7 +177,7 @@ def reach_crossroads(state: GameState, player: str, n: int, occ: set) -> set[str
     dist = {cr: 0 for cr in occ}
     for cr in gm.hq_front(player):
         dist.setdefault(cr, 1)
-    frontier = sorted(dist, key=dist.get)
+    frontier = sorted(dist, key=lambda cr: dist[cr])
     queue = deque(frontier)
     while queue:
         cr = queue.popleft()

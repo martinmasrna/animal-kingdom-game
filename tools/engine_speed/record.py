@@ -1,8 +1,10 @@
 """Record the bots' play on a fixed schedule, move for move, with timings: the acceptance set for engine speedups.
 Byte-identical play before and after a change is the test (the Expert runs without its time budget here, so the
 machine's load cannot change its moves).   .venv/bin/python tools/engine_speed/record.py results/engine_speed/<name>.json
-The baseline (results/engine_speed/baseline.json) was recorded at commit 612b1fbd, before the speed pass; to record it again, check that
-commit out into a worktree and run this script from there."""
+The committed baseline, tools/engine_speed/baseline.json, is what the Docker build's compile gate compares against (deploy/Dockerfile):
+the compiled engine must play all 22 games move for move the same. Record it again whenever the play legitimately changes: a bot
+change, a card change, a new Expert spec (web.match.EXPERT, which this reads). Record it with the plain engine from the tree:
+    .venv/bin/python tools/engine_speed/record.py tools/engine_speed/baseline.json"""
 import json, sys, time
 from animal_kingdom.sim.runner import make_bot, play_game
 from animal_kingdom.web.match import EXPERT

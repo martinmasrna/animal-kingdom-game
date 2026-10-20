@@ -42,7 +42,7 @@ def top_unit(state: GameState, cr: str):
 def legal_actions(state: GameState) -> list[Action]:
     """Every legal action for the player to act. Empty only once the game is over: a turn that
     opens with nothing to do passes at once (_end_turn)."""
-    if state.result is not None:
+    if _decided(state):
         return []
     if state.pending is not None:          # mid-resolution: offer the sub-choices
         return effects.legal_pending(state)
@@ -142,7 +142,7 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
     Raises EngineError unless `action` is in `legal_actions(state)`. Bot search, which only
     ever applies actions it just drew from `legal_actions`, passes `validate=False` to skip
     regenerating them."""
-    if state.result is not None:
+    if _decided(state):
         raise EngineError("cannot act: the game is over")
     if isinstance(action, PassAction):
         if not can_pass(state):
@@ -183,7 +183,7 @@ def _resolve_and_maybe_end_turn(state: GameState) -> None:
     """Drain pending effects; end the turn only when resolution is fully complete
     and the player has no turn actions left (config.actions_per_turn)."""
     effects.resolve(state)
-    if state.result is not None:
+    if _decided(state):
         return  # game decided (HQ capture / food)
     if state.effect_stack or state.pending is not None:
         return  # still resolving (a choice is pending or steps remain)
@@ -192,15 +192,22 @@ def _resolve_and_maybe_end_turn(state: GameState) -> None:
     _end_turn(state)
 
 
+def _decided(state: GameState) -> bool:
+    """Whether the game is over, asked afresh each time. A rule asks it more than once in a row, around calls that can win
+    the game; mypy would keep its first answer across those calls (narrowing never sees a call), and the compiled engine
+    (mypyc) checks that narrowed type at run time."""
+    return state.result is not None
+
+
 def _end_turn(state: GameState) -> None:
     player = state.current
     state.emit("turn_end", player=player)
     effects.end_of_turn(state, player)      # on_end_of_turn triggers (Dingo, Worker Wasp, Methuselah)
     effects.resolve(state)                  # choice-free by design, so it drains fully
-    if state.result is not None:
+    if _decided(state):
         return  # an end-of-turn food gain could already win
     _produce_food(state, player)            # end-of-turn region income
-    if state.result is not None:
+    if _decided(state):
         return  # food win
     # Both players ending a turn without acting, back to back, ends the game (more food wins;
     # on a tie, the player whose pass ended it loses). A player with no move passes too.
@@ -255,7 +262,7 @@ def _produce_food(state: GameState, player: str) -> None:
 
 def is_terminal(state: GameState) -> Optional[Result]:
     """The game's Result if over, else None. Authoritative (also detects the turn limit)."""
-    if state.result is not None:
+    if _decided(state):
         return state.result
     if state.turn_counter >= state.config.max_turns:
         return _resolve_by_food(state, "max_turns")
