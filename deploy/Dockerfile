@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev &
     && pip install --no-cache-dir "aiohttp>=3.9" "mypy>=1.19" setuptools
 COPY animal_kingdom ./animal_kingdom
 COPY tools/engine_speed ./tools/engine_speed
+ENV PYTHONPATH=/app
 RUN python -m mypyc --ignore-missing-imports \
         animal_kingdom/engine/maps.py animal_kingdom/engine/strength.py animal_kingdom/engine/state.py \
         animal_kingdom/engine/rules.py animal_kingdom/engine/statics.py animal_kingdom/bots/features.py \
