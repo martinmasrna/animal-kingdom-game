@@ -255,5 +255,5 @@ def test_a_rating_sits_on_one_rung_and_a_bot_is_named_by_it():
     """The climb made visible (Martin, 2026-10-20): five rungs over the rating scale, a bot named by the rung its own
     rating sits on, never by its pilot's level, and the leaderboard listing the bots one row per rung."""
     assert [ladder.rung_of(r) for r in (1000, 1299, 1300, 1699, 1700, 1899, 1900, 2200)] == \
-        ["Hatchling", "Hatchling", "Yearling", "Hunter", "Alpha", "Alpha", "Legend", "Legend"]
+        ["Bronze", "Bronze", "Silver", "Gold", "Platinum", "Platinum", "Diamond", "Diamond"]
     assert [n for n, _ in ladder.RUNGS] == [ladder.rung_of(f) for _, f in ladder.RUNGS]
