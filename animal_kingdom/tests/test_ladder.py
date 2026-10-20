@@ -57,8 +57,9 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             # the match states both ratings as they stood going in, for the versus moment; an unrated match states none.
             # A bot states its level's rating, the leaderboard's row for it, not its deck's own
             seats = match.view("A")["seats"]
-            level = bot.ladder.split(":")[1]
-            row = next(r for r in (await (await c.get("/api/leaderboard", headers=ha)).json())["rows"] if r["name"] == f"{level.capitalize()} Bot")
+            rung = ladder.rung_of(server.ladder.get(bot.ladder).rating)   # a bot is named by its rung, not its level
+            assert bot.name.endswith(f"({rung} Bot)")
+            row = next(r for r in (await (await c.get("/api/leaderboard", headers=ha)).json())["rows"] if r["name"] == f"{rung} Bot")
             assert seats["A"]["rating"] == "1500?" and seats["B"]["rating"] == row["rating"]
             # two people at once: they meet each other
             ra, rb = await asyncio.gather(c.post("/api/ranked", json={"deck": "giants"}, headers=ha),
@@ -74,8 +75,8 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             assert not any(r["you"] for r in board["rows"]), "placing: not ranked yet"
             pl = board["placing"]
             assert pl["rating"].endswith("?") and int(pl["rating"][:-1]) > 1500 and (pl["games"], pl["of"]) == (1, 10)
-            bots = [r for r in board["rows"] if r["bot"]]   # one row per level, not one per level and deck
-            assert [r["name"] for r in bots] == ["Expert Bot", "Normal Bot", "Easy Bot"]
+            bots = [r for r in board["rows"] if r["bot"]]   # one row per rung, not one per level and deck
+            assert [r["name"] for r in bots] == [f"{n} Bot" for n, _ in reversed(ladder.RUNGS) if any(r["name"] == f"{n} Bot" for r in bots)] and len(bots) >= 2
             me = await (await c.get("/api/me", headers=ha)).json()   # home's name piece: placement progress, no rank yet
             assert me["placing"] == {"games": 1, "of": 10} and "rank" not in me
     asyncio.run(run())
@@ -248,3 +249,11 @@ def test_a_retired_decks_bot_never_plays_and_tied_decks_take_turns():
     rng = random.Random(0)
     picks = {L.parse_bot(lad.nearest_bot(1500, rng))[1] for _ in range(200)}
     assert "retired" not in picks and len(picks) == 8        # eight decks tied at 1500, all of them met
+
+
+def test_a_rating_sits_on_one_rung_and_a_bot_is_named_by_it():
+    """The climb made visible (Martin, 2026-10-20): five rungs over the rating scale, a bot named by the rung its own
+    rating sits on, never by its pilot's level, and the leaderboard listing the bots one row per rung."""
+    assert [ladder.rung_of(r) for r in (1000, 1299, 1300, 1699, 1700, 1899, 1900, 2200)] == \
+        ["Hatchling", "Hatchling", "Yearling", "Hunter", "Alpha", "Alpha", "Legend", "Legend"]
+    assert [n for n, _ in ladder.RUNGS] == [ladder.rung_of(f) for _, f in ladder.RUNGS]

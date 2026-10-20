@@ -294,13 +294,13 @@ def profile_view(p: dict) -> dict:
             "rating": ladder.get(p["id"]).shown() if ladder else None, **standing(p["id"])}
 
 
-def bot_levels(table) -> dict[str, float]:
-    """Each bot level's rating on the leaderboard: its decks' ratings averaged by games played."""
-    levels: dict[str, list] = {}
+def bot_rungs(table) -> dict[str, float]:
+    """Each rung's bots as one rating on the leaderboard (ranking.RUNGS): the bots on it, averaged by games played."""
+    rungs: dict[str, list] = {}
     for lid, r in table:
         if (b := ranking.parse_bot(lid)) and b[1] in BOT_DECKS:   # a retired deck's bot no longer plays
-            levels.setdefault(b[0], []).append(r)
-    return {level: sum(r.rating * max(1, r.games) for r in rs) / sum(max(1, r.games) for r in rs) for level, rs in levels.items()}
+            rungs.setdefault(ranking.rung_of(r.rating), []).append(r)
+    return {rung: sum(r.rating * max(1, r.games) for r in rs) / sum(max(1, r.games) for r in rs) for rung, rs in rungs.items()}
 
 
 def standing(pid: str) -> dict:
@@ -310,10 +310,10 @@ def standing(pid: str) -> dict:
     r = ladder.get(pid)
     if r.provisional:
         return {"placing": {"games": r.games, "of": ranking.PROVISIONAL}}
-    # your row's place on the leaderboard: the ranked people and the bot levels above you
+    # your row's place on the leaderboard: the ranked people and the bot rungs above you; and your rung
     table = ladder.table()
     above = sum(1 for lid, x in table if not lid.startswith("bot:") and not x.provisional and x.rating > r.rating)
-    return {"rank": 1 + above + sum(1 for avg in bot_levels(table).values() if avg > r.rating)}
+    return {"rank": 1 + above + sum(1 for avg in bot_rungs(table).values() if avg > r.rating), "rung": ranking.rung_of(r.rating)}
 
 
 # ----------------------------------------------------------------- sign in with Google / Discord
@@ -583,13 +583,13 @@ async def leave_ranked(req):
 
 
 def _open(match: Match) -> None:
-    # A ranked match states both ratings as they stand going in (the versus moment shows them). A bot shows its level's
+    # A ranked match states both ratings as they stand going in (the versus moment shows them). A bot shows its rung's
     # rating, the one the leaderboard lists (Martin, 2026-10-04: one number per bot everywhere); matchmaking still rates
     # each of its decks on its own, out of sight.
     for seat in match.seats.values():
         if seat.ladder:
             bot = ranking.parse_bot(seat.ladder)
-            seat.rating = str(round(bot_levels(ladder.table())[bot[0]])) if bot else ladder.get(seat.ladder).shown()
+            seat.rating = str(round(bot_rungs(ladder.table())[ranking.rung_of(ladder.get(seat.ladder).rating)])) if bot else ladder.get(seat.ladder).shown()
     match.on_game_end = save_game
     match.on_match_end = record_match
     hub.matches[match.id] = match
@@ -614,8 +614,8 @@ def rate_match(match: Match) -> None:
 
 def ladder_name(lid: str) -> str:
     bot = ranking.parse_bot(lid)
-    if bot:
-        return f"{DECK_NAMES.get(bot[1], bot[1])} ({bot[0].capitalize()} Bot)"
+    if bot:   # a bot is named by its deck and its rung, never its pilot's level
+        return f"{DECK_NAMES.get(bot[1], bot[1])} ({ranking.rung_of(ladder.get(lid).rating)} Bot)"
     p = profiles.get(lid)
     return display(p) if p else "?"
 
@@ -629,10 +629,10 @@ async def leaderboard(req):
     rows = [(r.rating, {"name": ladder_name(lid), "rating": r.shown(), "bot": False, "you": bool(p and lid == p["id"]),
                         **({} if p and lid == p["id"] else {"id": lid, "friend": lid in mine, "asked": lid in asked})})   # whether you're friends or have asked
             for lid, r in table if not lid.startswith("bot:") and not r.provisional]   # still placing: not ranked yet (as on Lichess)
-    # The bots as one row per level (Martin, 2026-10-02: 21 level-and-deck rows cluttered it): its decks' ratings averaged
-    # by games played. Matchmaking still rates each deck on its own (a bot plays some decks far better than others).
-    for level, avg in bot_levels(table).items():
-        rows.append((avg, {"name": f"{level.capitalize()} Bot", "rating": str(round(avg)), "bot": True, "you": False}))
+    # The bots as one row per rung (Martin, 2026-10-02: 21 level-and-deck rows cluttered it; 2026-10-20: rungs, not levels):
+    # the rung's bots averaged by games played. Matchmaking still rates each deck on its own.
+    for rung, avg in bot_rungs(table).items():
+        rows.append((avg, {"name": f"{rung} Bot", "rating": str(round(avg)), "bot": True, "you": False}))
     rows = [row for _, row in sorted(rows, key=lambda x: -x[0])]
     me_ = ladder.get(p["id"]) if p else None
     placing = {"name": display(p), "rating": me_.shown(), "games": me_.games, "of": ranking.PROVISIONAL} \

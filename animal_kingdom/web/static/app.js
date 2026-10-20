@@ -232,7 +232,7 @@ const TI = n => `<img class="tic" src="/static/kit2/top/${n}.webp" alt="" dragga
 const TOPICON = { collection: TI('collection'), leaderboard: TI('trophy'), learn: TI('learn'), feedback: TI('feedback'), settings: TI('settings'), news: TI('news'), friends: TI('friends'), menu: TI('menu') };
 let newsAsked = false;
 const mePiece = () => {   // the Ladder, with your rating and place once ranked, your placement games while placing
-  const sub = !ME ? '' : ME.rank ? `${ME.rating} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
+  const sub = !ME ? '' : ME.rank ? `${ME.rating} · ${ME.rung} · #${ME.rank}` : ME.placing && ME.placing.games ? `Placing ${ME.placing.games} of ${ME.placing.of}` : '';
   return `<a class="backbtn me" href="#/ladder" aria-label="Ladder">${TOPICON.leaderboard}<span><b>Ladder</b>${sub ? `<small>${sub}</small>` : ''}</span></a>`;
 };
 let homeMode = {};   // the mode home was last drawn in: a late redraw keeps to it (not to the mode it was first opened with)

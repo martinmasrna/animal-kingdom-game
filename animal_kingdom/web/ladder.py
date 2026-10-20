@@ -20,6 +20,15 @@ START_RD = 350.0
 START_VOL = 0.06
 BOT_RD = 60.0           # a seeded bot's uncertainty: it moves, slowly
 PROVISIONAL = 10        # games before the "?" goes
+# The ladder's rungs (Martin, 2026-10-20): the climb made visible. A rating sits on a rung; a bot is named by its rung, not
+# its pilot's level ("Fish (Alpha Bot)"), and the leaderboard lists the bots as one row per rung. Matchmaking is untouched:
+# it still rates every bot's deck on its own and picks by rating. Working names until Martin names them.
+RUNGS = (("Hatchling", 0), ("Yearling", 1300), ("Hunter", 1500), ("Alpha", 1700), ("Legend", 1900))   # name, floor
+
+
+def rung_of(rating: float) -> str:
+    """The rung a rating sits on: the highest floor at or under it."""
+    return next(name for name, floor in reversed(RUNGS) if rating >= floor)
 PLAYER_RD_FLOOR = 75.0  # a person's uncertainty never settles below this: an even game stays worth about +-15 (Martin,
                         # 2026-10-01: a rating that keeps up with a player still learning beats a precise one; bots keep BOT_RD)
 
