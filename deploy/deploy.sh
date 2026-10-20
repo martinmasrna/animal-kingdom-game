@@ -6,6 +6,10 @@
 #   deploy/deploy.sh players    pull who played what (profiles, match histories, events) into results/players.json
 set -euo pipefail
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# The Fly CLI: `fly` on the Mac, `flyctl` where winget installed it (Windows; its folder joins PATH only in new shells).
+FLY="$(command -v fly || command -v flyctl || ls "${LOCALAPPDATA:-}"/Microsoft/WinGet/Packages/Fly-io.flyctl_*/flyctl.exe 2>/dev/null | head -1 || true)"
+[[ -n "$FLY" ]] || { echo "the Fly CLI is not installed (winget install Fly-io.flyctl, then flyctl auth login)"; exit 1; }
+fly() { "$FLY" "$@"; }
 cfg="$repo/deploy/fly.toml"
 app="$(sed -n 's/^app = "\(.*\)"/\1/p' "$cfg")"
 
