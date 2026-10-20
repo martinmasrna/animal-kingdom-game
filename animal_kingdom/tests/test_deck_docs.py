@@ -10,6 +10,6 @@ from animal_kingdom.render.deck_docs import cards_block, doc_path, render
 
 @pytest.mark.parametrize("deck", sorted(DECK_SLUGS))
 def test_deck_doc_card_table_matches_cards_json(deck):
-    doc = doc_path(deck).read_text()
+    doc = doc_path(deck).read_text(encoding="utf-8")
     assert render(doc, cards_block(deck, load_cards())) == doc, (
         f"{doc_path(deck).name} is stale: run `.venv/bin/python -m animal_kingdom.render.deck_docs`")
