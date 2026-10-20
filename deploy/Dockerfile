@@ -24,6 +24,9 @@ FROM python:3.14-slim
 WORKDIR /app
 RUN pip install --no-cache-dir "aiohttp>=3.9"
 COPY --from=build /app/animal_kingdom ./animal_kingdom
+# mypyc links the compiled modules into one shared library beside the package (<hash>__mypyc.*.so); without it they fail to import.
+COPY --from=build /app/*__mypyc*.so ./
+RUN python -c "import animal_kingdom.engine.rules as r; assert r.__file__.endswith('.so'), r.__file__"   # the runtime image imports the compiled engine
 # results/ is the Fly volume: profiles (web.db), saved matches, player decks and the human game logs.
 ENV PYTHONUNBUFFERED=1
 EXPOSE 8080
