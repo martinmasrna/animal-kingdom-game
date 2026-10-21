@@ -10,7 +10,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **[LEOPARD]** | 1 | Cat | 8 | Apex Predator. Roam. Reach 2. |
+| **[LEOPARD]** | 1 | Cat | 6 | Apex Predator. Roam. Reach 2. Whenever this removes an animal, gain 1 strength. |
 | **[WHITE WOLF]** | 1 | Canine | 5 | Once each turn, an ally can roam for free. |
 | **[BLACK WOLF]** | 1 | Canine | 6 | Whenever an ally roams onto an enemy, draw a card. |
 | **[WOLF]** | 1 | Canine | 4 | Roam. Dusk: this gains +1 strength for each of your adjacent Canines. |

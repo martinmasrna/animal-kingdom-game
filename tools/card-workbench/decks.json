@@ -189,9 +189,9 @@
      "rarity": "L",
      "species": "Leopard",
      "status": "proposed",
-     "str": 8,
+     "str": 6,
      "tag": "Cat",
-     "text": "Apex Predator. Roam. Reach 2."
+     "text": "Apex Predator. Roam. Reach 2. Whenever this removes an animal, gain 1 strength."
     },
     {
      "habitat": "Forest",

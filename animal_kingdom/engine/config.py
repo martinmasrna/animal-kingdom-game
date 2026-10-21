@@ -96,6 +96,7 @@ class Config:
     earthworm_worms: int = 2             # Earthworm: Worms placed on its crossroad when it's removed
     roach_king_growth: int = 1           # Roach King: comes back with +1 strength
     python_growth: int = 1               # Python: +1 strength whenever an animal is removed
+    leopard_legend_growth: int = 1       # the legendary Leopard: +1 strength whenever it removes an animal (every kill makes him bigger)
 
     # --- Thresholds / strength gates ---
     unnamed_canine_draw_threshold: int = 5   # draw if Unnamed Canine has >= this strength

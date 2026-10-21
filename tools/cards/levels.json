@@ -1937,6 +1937,26 @@
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
       "at": 1792191062
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 8
+      },
+      "note": "Martin, 2026-10-20: 6 with growth on every kill; a leopard is no lion (the Lion is the vanilla 7)",
+      "by": "claude",
+      "at": 1792567456
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Apex Predator. Roam. Reach 2."
+      },
+      "note": "Martin, 2026-10-20: every kill makes him bigger",
+      "by": "claude",
+      "at": 1792567487
     }
   },
   "lion": {

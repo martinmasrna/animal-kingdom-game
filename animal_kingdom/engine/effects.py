@@ -514,9 +514,15 @@ def _op_apex_eat(state, step):
     prey = stack[i - 1] if i > 0 else None
     if prey is not None and prey.iid == step["prey"]:
         gained = effective_strength(state, prey)
-        if _remove_specific(state, cr, prey, by_player=apex.owner, by_card=apex.card_id) and apex.card_id == "anaconda":
-            apex.strength_counter += gained       # Anaconda: "Whenever this removes an animal, gain its strength."
-            state.emit("strength", iid=apex.iid, card=apex.card_id, owner=apex.owner, n=gained)
+        if _remove_specific(state, cr, prey, by_player=apex.owner, by_card=apex.card_id):
+            grown = 0
+            if apex.card_id == "anaconda":        # Anaconda: "Whenever this removes an animal, gain its strength."
+                grown = gained
+            elif apex.card_id == "leopard_legend":   # the legendary Leopard: "Whenever this removes an animal, gain 1 strength."
+                grown = state.config.leopard_legend_growth
+            if grown:
+                apex.strength_counter += grown
+                state.emit("strength", iid=apex.iid, card=apex.card_id, owner=apex.owner, n=grown)
     return None
 
 
