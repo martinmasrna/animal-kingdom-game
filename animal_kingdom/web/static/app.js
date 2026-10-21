@@ -507,10 +507,12 @@ function ladderScreen() {
   const bot = h => h.kind !== 'friend';   // a bot's deck has a name you know; a person's deck name is theirs, so the row names the person
   const result = h => h.won > h.lost ? 'Won' : h.won < h.lost ? 'Lost' : 'Draw';
   const mode = h => ({ ranked: 'Ranked · ', practice: 'Practice · ', friendly: 'Friendly · ' })[h.mode] || '';   // older matches: unknown   // a match is one game (older best-of-3s by their result)
+  // the game's name in the logs, to point at it ("look at GMIDKA", Martin, 2026-10-21): here, not on the result screen
+  const gid = h => { const [, id, n] = h.match.match(/^(.*)-(\d+)$/) || [, h.match, null]; return ` · ${esc(id)}${n === null ? '' : ` game ${+n + 1}`}`; };
   const side = (s, name) => `data-side="${s}" data-name="${esc(name)}"`;   // a deck in the row: hovered (tapped), its list shows
   const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
     ${piece(deckFace(h.my_cover, h.my_deck), side('mine', h.my_deck))}<span class="dk" ${side('mine', h.my_deck)}>${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck), side('theirs', h.opp_deck))}<span class="dk" ${side('theirs', h.opp_deck)}>${esc(h.opp_deck)}</span>
-    <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}</span>` : `${piece(h.opp_cover, side('theirs', h.opp))}<span class="dk" ${side('theirs', h.opp)}>${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}</span>`}</div>`).join('');
+    <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}${gid(h)}</span>` : `${piece(h.opp_cover, side('theirs', h.opp))}<span class="dk" ${side('theirs', h.opp)}>${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}${gid(h)}</span>`}</div>`).join('');
   // the leaderboard first (Martin, 2026-10-02), the match history its second tab
   const lead = location.hash !== '#/ladder/history';
   app.innerHTML = `<div class="mscr ladder"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${lead ? '' : ' on'}" href="#/ladder/history">Match history</a></div>${!lead && (hist || ui.histDeck) ? filter : ''}</div>
@@ -1422,7 +1424,6 @@ function drawEnd() {
   const howLine = ['hq_capture', 'food'].includes(G.result.reason) && w !== null ? '' : `<div class="how">${how}.</div>`;   // a den taken, a full den: the board showed it
   const score = `<div class="score"><span class="gem A">${gemDigits(S[you])}</span><span class="gem B">${gemDigits(S[them])}</span></div>`;
   const peek = `<button class="slab" id="peek">See the board</button>`;
-  const gid = V.id && V.results ? `<div class="gid">${esc(V.id)} · game ${V.results.length}</div>` : '';   // the game's name in the logs (Martin, 2026-10-21): "look at GMIDKA"
   if (RP.views.length) {
     // a replay: the game's result, then the replay again or back to the profile
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}
@@ -1441,14 +1442,14 @@ function drawEnd() {
     const firstNext = w === null ? G.first : (w === you ? them : you);
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}${score}
       <div class="next">Game ${V.results.length + 1}: ${firstNext === you ? 'you go first' : 'your opponent goes first'}</div>
-      ${gid}<div class="btns">${peek}<button class="play" id="nextg">Next game</button></div></div>`;
+      <div class="btns">${peek}<button class="play" id="nextg">Next game</button></div></div>`;
     document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else if (isTutorial()) {
     lessonEnd(ov, { res, how, won: w === you });
   } else if (V.takeover) {
     // a position played on from a logged game (a study): the result means little; on to the next position, or back to the list
     const nx = studyNext();
-    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}${gid}
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}
       <div class="btns">${nx ? `<a class="slab" href="#/study/${esc(nx.name)}">The study</a>` : `<a class="slab" href="#/">Menu</a>`}${peek}${nx && nx.i !== null ? `<button class="play" id="nextpos">Next position</button>` : ''}</div></div>`;
     const np = document.getElementById('nextpos'); if (np) np.onclick = () => { if (STUDY.list.length) studyStart(nx.i); else location.hash = '#/study/' + nx.name; };
   } else if (V.ranked) {
@@ -1456,7 +1457,7 @@ function drawEnd() {
     const rt = V.rating, d = rt && rt.delta;
     ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}
       ${rt ? `<div class="rating"><small>Rating</small><div><b id="rnum">${live ? rt.before : rt.after}</b><span class="rd ${d >= 0 ? 'up' : 'down'}${live ? '' : ' on'}">${d >= 0 ? '+' : '−'}${Math.abs(d)}</span></div></div>` : ''}
-      ${gid}<div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Play again</button></div></div>`;
+      <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="again">Play again</button></div></div>`;
     document.getElementById('again').onclick = () => findRanked('again', deckSpec(chosenDeck()));
     if (live && rt) countRating(rt);
   } else {
@@ -1464,7 +1465,7 @@ function drawEnd() {
     const won = S[you] > S[them], series = V.results.length > 1;
     ov.innerHTML = `<div class="endbox">${series ? `<div class="res ${won ? 'A' : 'B'}">${won ? 'Match won' : 'Match lost'}</div><div class="how">${res[1]} in game ${V.results.length} · ${how}</div>${score}`
       : `<div class="res ${res[0]}">${res[1]}</div>${howLine}`}
-      ${gid}<div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="rematch">Rematch</button></div></div>`;
+      <div class="btns"><a class="slab" href="#/">Menu</a>${peek}<button class="play" id="rematch">Rematch</button></div></div>`;
     document.getElementById('rematch').onclick = () => send({ t: 'rematch' });
   }
   const pk = document.getElementById('peek'); if (pk) pk.onclick = () => { ui.peek = true; drawGame(); };   // a lesson has none

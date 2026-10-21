@@ -23,7 +23,6 @@
 .endbox .score { display: flex; align-items: center; gap: 18px; font: 40px 'Lilita One', var(--font-display); margin-top: 6px; }
 .endbox .score .A { color: #5aaaf5; } .endbox .score .B { color: #f0584a; }
 .endbox .next { font-size: 15px; color: #c9b48f; }
-.endbox .gid { font-size: 12px; color: #a08f6e; letter-spacing: 0.08em; }   /* the match code and game number: how to point at a game afterwards */
 .endbox .btns { display: flex; gap: 12px; margin-top: 10px; }
 
 .game { --frame: #121110; --ground: #1c1b19; --path: #3d3a35; --clear: #252321; --clearline: #4a463f; --stone: #302d2a; --stonenum: #a39c90;
