@@ -976,9 +976,13 @@ def test_the_stag_beetle_is_a_common_six_with_armor():
     assert (card.base_strength, card.rarity) == (6, "common") and not card.tags and "Armor" in card.keywords
 
 
-def test_the_hand_size_card_counts_the_other_cards_in_your_hand():
+def test_the_peacock_counts_every_card_in_your_hand_itself_included_until_it_lands():
+    """It covers with the number it shows, then has one less (Martin, 2026-10-21: the text taken literally)."""
     s = make_state(hands={"A": ["peacock", "lion", "lion", "lion"]})
-    assert placement_strength(s, hand_inst(s, "A", "peacock")) == 1 + 3 * CFG.hand_per_card
+    assert placement_strength(s, hand_inst(s, "A", "peacock")) == 1 + 4 * CFG.hand_per_card
+    peacock = hand_inst(s, "A", "peacock")
+    s.hands["A"].remove(peacock); s.board["2,1"] = [peacock]
+    assert effective_strength(s, peacock) == 1 + 3 * CFG.hand_per_card
 
 
 def test_warthog_removes_the_enemy_covering_an_allied_hoofed():

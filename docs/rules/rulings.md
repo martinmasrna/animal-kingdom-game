@@ -95,7 +95,7 @@ Cards:
 - **Greywhisker's** "play another animal" is mandatory if able; the discard is the player's choice.
 - **Hare** counts the animals played from your hand this turn, itself included.
 - **Mole, Dormouse and Macaque** count the hand after the card that roars has left it.
-- **[PLACEHOLDER]** (the hand-size common, animal to come) in hand doesn't count itself (it shows the strength it will have when played).
+- **Peacock** counts every card in your hand, itself included while it is there: it covers with the strength it shows, then has one less once it lands (the text taken literally, Martin 2026-10-21).
 - **The legendary Butterfly** evolves only in hand and only on a gain: each gain moves it one stage, whatever its size; it keeps every point gained; stage 5 (Monarch) is the last. The stage shows as the card itself (Caterpillar, Chrysalis, Butterfly, Monarch), not as a badge on the art yet.
 - **The Caterpillar** becomes the pool's Butterfly (strength 2) and keeps its counter.
 - **The Eagles**: the legendary Eagle brings its mate whenever it enters your hand (a draw, a Scout, a steal, a return; the opening hand once the mulligans are done), one mate at a time. A buff to either while both are in hand gives the other the same. The mate never brings the Eagle back.

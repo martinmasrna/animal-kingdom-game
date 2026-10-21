@@ -2043,7 +2043,7 @@
         "Bird"
       ],
       "base_strength": 1,
-      "text": "Has +1 strength for each card left in your hand.",
+      "text": "Has +1 strength for each card in your hand.",
       "species": "Peacock",
       "habitat": "Jungle",
       "keywords": []

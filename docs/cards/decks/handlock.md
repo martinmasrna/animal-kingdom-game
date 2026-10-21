@@ -33,6 +33,6 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Stork** | 3 | Bird | 4 | Flight. Roar: add two random younglings to your hand. |
 | **Caterpillar** | 3 | — | 1 | When this gains strength in your hand, draw a card and turn this into a Butterfly. |
 | **Gorilla** | 3 | Primate | 6 | Roar: if this has 8 or more strength, draw a card. |
-| **Peacock** | 3 | Bird | 1 | Has +1 strength for each card left in your hand. |
+| **Peacock** | 3 | Bird | 1 | Has +1 strength for each card in your hand. |
 
 <!-- cards:end -->
