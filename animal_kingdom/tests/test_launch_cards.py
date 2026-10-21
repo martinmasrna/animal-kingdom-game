@@ -132,6 +132,16 @@ def test_capybara_gives_its_neighbours_armor():
     assert s2.top_unit("3,2") is sq and s2.pending is None
 
 
+def test_an_apex_cannot_eat_what_a_capybara_armors():
+    # The eat resolves after the cover, when the prey is already buried and out of the aura's reach;
+    # it is judged as the prey stood on top, so the Squirrel is covered, not eaten.
+    s = make_state(hands={"A": ["tiger"]}, food={"A": 50, "B": 0})
+    put(s, "2,2", "capybara", "B")
+    sq = put(s, "1,2", "squirrel", "B")
+    rules.apply_action(s, PlaceAction("tiger", ("cr", "1,2")))
+    assert s.board["1,2"][0] is sq and "squirrel" not in s.remove_pile
+
+
 def test_the_legendary_jellyfish_poisons_its_adjacent_fish():
     s = make_state(current="B", hands={"B": ["lion"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "4,2", "lion", "B")

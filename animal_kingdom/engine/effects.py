@@ -504,8 +504,9 @@ def remove_top(state, cr, *, by_player, by_effect=True, by_card=None) -> bool:
 
 def _op_apex_eat(state, step):
     """An Apex eats what it covered, if both are still there, the prey is right beneath it,
-    and it can be eaten (not Armor, which _remove_specific refuses). Stealth doesn't save it: a predator eats what it
-    lands on, nobody chooses a target (Martin, 2026-10-01)."""
+    and it can be eaten (not Armor, judged as the prey stood on top: a Capybara's Armor still shields what the
+    predator landed on). Stealth doesn't save it: a predator eats what it lands on, nobody chooses a target
+    (Martin, 2026-10-01)."""
     cr, apex = _find_unit(state, step["iid"])
     if apex is None:
         return None
@@ -514,7 +515,10 @@ def _op_apex_eat(state, step):
     prey = stack[i - 1] if i > 0 else None
     if prey is not None and prey.iid == step["prey"]:
         gained = effective_strength(state, prey)
-        if _remove_specific(state, cr, prey, by_player=apex.owner, by_card=apex.card_id) and apex.card_id == "anaconda":
+        if not statics.can_be_removed(state, prey, cr, as_top=True):
+            return None
+        if _remove_specific(state, cr, prey, by_player=apex.owner, by_card=apex.card_id, armor_checked=True) \
+                and apex.card_id == "anaconda":
             apex.strength_counter += gained       # Anaconda: "Whenever this removes an animal, gain its strength."
             state.emit("strength", iid=apex.iid, card=apex.card_id, owner=apex.owner, n=gained)
     return None

@@ -61,8 +61,9 @@ KEYWORD_AURAS = {
 }
 
 
-def unit_keywords(state: GameState, unit: UnitInstance, cr: Optional[str] = None) -> frozenset:
-    """The keywords a board unit has right now: printed, plus any an adjacent ally's aura gives it; none while inked."""
+def unit_keywords(state: GameState, unit: UnitInstance, cr: Optional[str] = None, *, as_top: bool = False) -> frozenset:
+    """The keywords a board unit has right now: printed, plus any an adjacent ally's aura gives it; none while inked.
+    `as_top`: judge it as the top animal it was a moment ago (an Apex's prey, eaten just after being covered)."""
     if state.inked and inked(state, unit):
         return frozenset()
     card = state.cards[unit.card_id]
@@ -70,7 +71,7 @@ def unit_keywords(state: GameState, unit: UnitInstance, cr: Optional[str] = None
     if not any(st and st[-1].owner == unit.owner and st[-1].card_id in KEYWORD_AURAS for st in state.board.values()):
         return kws
     at = crossroad_of(state, unit)
-    buried = at is not None and state.top_unit(at) is not unit   # Armor and Stealth reach the top animal only (rulings.md);
+    buried = not as_top and at is not None and state.top_unit(at) is not unit   # Armor and Stealth reach the top animal only (rulings.md);
     cr = cr if cr is not None else at                             # Poison is judged as the Fish is covered, so it reaches it
     if cr is None:
         return kws
@@ -225,7 +226,7 @@ def extra_placement_crossroads(state: GameState, card_id: str, owner: str) -> se
 
 # ------------------------------------------------------------ Armor and Stealth
 
-def can_be_removed(state: GameState, unit: UnitInstance, cr: Optional[str] = None) -> bool:
+def can_be_removed(state: GameState, unit: UnitInstance, cr: Optional[str] = None, *, as_top: bool = False) -> bool:
     """Armor (keyword-review decision A2, 2026-07-02): *physics*. The unit cannot be
     removed, moved (bounced), or eaten by ANY ability - the enemy's or its own
     controller's (covering is placement, not an ability, and stays legal). Consulted by
@@ -233,7 +234,7 @@ def can_be_removed(state: GameState, unit: UnitInstance, cr: Optional[str] = Non
 
     Carriers: Methuselah, Armadillo, Cairn, Tortoise, the legendary Honey Badger; Capybara gives it to its neighbours.
     """
-    return "Armor" not in unit_keywords(state, unit, cr)
+    return "Armor" not in unit_keywords(state, unit, cr, as_top=as_top)
 
 
 def can_be_chosen(state: GameState, unit: UnitInstance, by_player: str, cr: Optional[str] = None) -> bool:
