@@ -20,7 +20,7 @@ Python ≥3.11 with a venv at `.venv`: `python3 -m venv .venv && .venv/bin/pip i
 - Design sandbox: the game's visual design (mockups, design notes, the painted master art that `static/kit2/`, `static/art/` and the key art are exported from) lives in a separate repo, https://github.com/martinmasrna/animal-kingdom-design, cloned beside this one as `../design/` (kept apart only for its size, 1.4 GB of paintings). "Design sandbox" in code comments and docs means that folder; its `AGENTS.md` is the entry point.
 - Hosting: https://animal-kingdom.fly.dev/ (Fly.io app `animal-kingdom`). `deploy/deploy.sh` ships the committed HEAD, never the working tree; `deploy/deploy.sh pull` brings the server's human game logs into `results/human_games/web/`, to commit.
 - Balance report: `./report 200` (round-robin; `--deck X --opponent Y` to scope, `--format files --out DIR` for CSV/JSON, every run records its games to `results/logs/<time>.jsonl`, `--log FILE` to pick the path, `--no-log` to skip). Every simulation keeps its game log: an ad-hoc script calling `run_pairs` passes `log_actions=True` and writes with `sim.replay.write_game_logs`, so questions about how games went are answered from logs, not new runs. Replay a logged game with no bot compute: `.venv/bin/python -m animal_kingdom.sim.replay FILE`.
-- Paired bot A/B: `.venv/bin/python -m animal_kingdom.sim.bot_comparison --games 200 --out results/bot_quality/<name>`.
+- Measuring a bot change: the `bot-change` skill (`.claude/skills/bot-change/SKILL.md`); `tools/bot_bench/bench.sh` runs the paired benchmark (`sim.bot_comparison`) on a frozen checkout.
 - Deckbuilding and the goodstuff problem: `sim.deck_optimizer`, `sim.metagame_search`, `sim.measure_deck`, `sim.benchmark_set` (see `docs/design/goodstuff.md`).
 - After changing `cards.json`, regenerate the deck docs' card tables: `.venv/bin/python -m animal_kingdom.render.deck_docs`.
 
@@ -28,6 +28,7 @@ The ruleset (map_b, two actions per turn, Draw draws 2) is the default everywher
 
 ## Invariants
 
+- `tools/card-workbench/decks.json` is the one source of the cards; `cards.json` and the starter decks are generated from it and never edited by hand, because the next conversion undoes the edit. `test_cards_from_workbench.py` fails on any drift, also where the workspace's hook doesn't run (a cloud session on this repo alone).
 - `engine/` is stdlib-only and transport-agnostic; file loading happens only at construction. `apply_action` validates every action; only bot search, which applies actions it just generated, passes `validate=False`.
 - Card numbers live in `cards.json` (strength, food cost, text) or `engine/config.py` (effect magnitudes), never as literals in effect code. `test_card_text_consistency.py` checks printed numbers against config; extend it when a card gains a new kind of number.
 - Bots are generalist (no deck slugs, archetype names or card ids in policy) and honest (never read hidden information). Both are regression-tested.
