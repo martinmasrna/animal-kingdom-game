@@ -551,7 +551,7 @@ class Match:
     def view(self, s: str) -> dict:
         opp = other_player(s)
         v = {
-            "id": self.id, "you": s, "phase": self.phase, "version": self.version,
+            "id": self.id, "you": s, "phase": self.phase, "version": self.version, "takeover": self.takeover,
             # a seat's deck by name only for you or a bot: a person's deck name is theirs (their list is open, by rule)
             "seats": {p: {"name": seat.name, "bot": seat.bot, "ready": seat.ready, **({"rating": seat.rating} if seat.rating else {}),
                           **({"deck": seat.deck, "deckName": DECK_NAMES.get(seat.deck, seat.deck)} if p == s or seat.is_bot else {})}

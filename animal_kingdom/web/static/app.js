@@ -198,6 +198,7 @@ function route() {
   if (parts[0] === 'friend' && id) { homeScreen(); return confirmFriend(id, () => { history.replaceState(null, '', '#/'); route(); }); }
   if (parts[0] === 'ladder') { ladderScreen(); return loadProfile().then(() => { if (location.hash.startsWith('#/ladder')) ladderScreen(); }); }   // a match just played shows
   if (parts[0] === 'replay' && parts[1]) return replayScreen(parts[1]);
+  if (parts[0] === 'study' && parts[1]) return studyScreen(parts[1]);
   if (parts[0] === 'auth') return finishSignIn(parts[1]);
   if (parts[0] === 'join' && id) return getToken(id) ? (location.hash = '#/m/' + id) : homeScreen({ join: id });
   if (parts[0] === 'm' && id) return matchScreen(id);
@@ -1431,6 +1432,12 @@ function drawEnd() {
     document.getElementById('nextg').onclick = () => send({ t: 'next' });
   } else if (isTutorial()) {
     lessonEnd(ov, { res, how, won: w === you });
+  } else if (V.takeover) {
+    // a position played on from a logged game (a study): the result means little; on to the next position, or back to the list
+    const nx = studyNext();
+    ov.innerHTML = `<div class="endbox"><div class="res ${res[0]}">${res[1]}</div>${howLine}${gid}
+      <div class="btns">${nx ? `<a class="slab" href="#/study/${esc(nx.name)}">The study</a>` : `<a class="slab" href="#/">Menu</a>`}${peek}${nx && nx.i !== null ? `<button class="play" id="nextpos">Next position</button>` : ''}</div></div>`;
+    const np = document.getElementById('nextpos'); if (np) np.onclick = () => { if (STUDY.list.length) studyStart(nx.i); else location.hash = '#/study/' + nx.name; };
   } else if (V.ranked) {
     // a ranked game: its result and your rating before and after; Play again looks for the next opponent (no rematch)
     const rt = V.rating, d = rt && rt.delta;
@@ -1462,6 +1469,38 @@ function countRating(rt) {
     n.textContent = k < 1 ? Math.round(from + rt.delta * e) : rt.after;
     if (k < 1) requestAnimationFrame(step); else n.nextElementSibling.classList.add('on'); };
   requestAnimationFrame(step);
+}
+
+// ------------------------------------------------------------------ study
+// A developer's study (Martin, 2026-10-21): positions from your logged games, in order, each a 'Play from here' as the other
+// seat. #/study/<name>; the list is the server's studies/<name>.json. 'Next position' on the end screen walks the list.
+const STUDY = { name: null, list: [] };
+const studyPlayed = () => { try { return JSON.parse(localStorage.getItem('ak:study:' + STUDY.name) || '[]'); } catch (e) { return []; } };
+async function studyStart(i) {
+  const p = STUDY.list[i]; if (!p) return;
+  const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ from: { match: p.match, series: p.series || 0, game: p.game, round: p.round, seat: p.seat } }) });
+  if (!r.ok) return toast(await r.text());
+  const m = await r.json();
+  try { sessionStorage.setItem('ak:study', JSON.stringify({ name: STUDY.name, i })); localStorage.setItem('ak:study:' + STUDY.name, JSON.stringify([...new Set([...studyPlayed(), i])])); } catch (e) {}
+  setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+}
+async function studyScreen(name) {
+  screen = 'study';
+  app.innerHTML = `<div class="mscr pre"><p class="wait">Loading the study…</p></div>`;
+  const r = await api('/api/study/' + encodeURIComponent(name));
+  if (!r.ok) { app.innerHTML = `<div class="mscr pre"><p class="wait">${esc(await r.text())}</p><a class="slab" href="#/">Menu</a></div>`; return; }
+  const s = await r.json(); STUDY.name = name; STUDY.list = s.positions;
+  const done = new Set(studyPlayed());
+  app.innerHTML = `<div class="mscr ladder"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab on" href="#/study/${esc(name)}">${esc(s.title)}</a></div></div>
+    <p class="note">${esc(s.note)}</p>
+    ${s.positions.map((p, i) => `<div class="hr study${done.has(i) ? ' won' : ''}" data-i="${i}"><b>${i + 1}</b> <span>Bot ${esc(p.botDeck)} vs your ${esc(p.yourDeck)} · round ${p.round} of ${p.rounds}</span><small>${esc(p.match)}</small><button class="slab" data-i="${i}">${done.has(i) ? 'Again' : 'Play'}</button></div>`).join('')}
+    <div class="btns"><a class="slab" href="#/">Menu</a></div></div></div>`;
+  app.querySelectorAll('button[data-i]').forEach(b => b.onclick = () => studyStart(Number(b.dataset.i)));
+}
+function studyNext() {   // on a takeover's end screen: the study's next position, if a study is on
+  let st = null; try { st = JSON.parse(sessionStorage.getItem('ak:study') || 'null'); } catch (e) {}
+  if (!st || !STUDY.list.length && STUDY.name !== st.name) return st ? { name: st.name, i: null } : null;
+  return { name: st.name, i: st.i + 1 < STUDY.list.length ? st.i + 1 : null };
 }
 
 // ------------------------------------------------------------------ replay
