@@ -1800,8 +1800,9 @@ def _ember_remove(state, unit, cr, pos):
 
 
 def _mantis_place(state, unit, cr):
-    """Roar: remove an adjacent ally to draw 2 cards. (A cost the player may decline.)"""
-    _push_choose(state, unit.owner, _adjacent_friendly_units(state, unit, cr), "remove_and_draw", optional=True,
+    """Roar: remove an adjacent ally to draw 2 cards. With an ally adjacent the Mantis eats one, no declining (Martin,
+    2026-10-21: a cost that may be declined reads as a lie on the card); with none, nothing happens."""
+    _push_choose(state, unit.owner, _adjacent_friendly_units(state, unit, cr), "remove_and_draw", optional=False,
                  n=state.config.mantis_draw)
 
 

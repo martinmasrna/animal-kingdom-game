@@ -10,6 +10,7 @@ import pytest
 
 from animal_kingdom.engine import effects, rules, statics
 from animal_kingdom.engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction
+from animal_kingdom.engine.state import EngineError
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.strength import effective_strength, placement_strength
 
@@ -175,11 +176,14 @@ def test_the_legendary_sloth_makes_dusk_effects_happen_twice():
     assert s.food["A"] == 2 * CFG.methuselah_food
 
 
-def test_praying_mantis_may_remove_an_ally_to_draw_two():
+def test_praying_mantis_must_remove_an_ally_to_draw_two():
+    # The cost cannot be declined (Martin, 2026-10-21): with an ally adjacent the Mantis eats; with none, nothing happens.
     s = make_state(hands={"A": ["praying_mantis"]}, decks={"A": ["lion"] * 3, "B": []})
     put(s, "1,1", "cockroach", "A")
     rules.apply_action(s, PlaceAction("praying_mantis", ("cr", "1,2")))
-    assert s.pending["optional"]
+    assert not s.pending["optional"]
+    with pytest.raises(EngineError):
+        rules.apply_action(s, ChoiceAction(SKIP))
     choose(s, "1,1")
     assert hand_ids(s, "A").count("lion") == CFG.mantis_draw
     assert s.top_unit("1,1").card_id == "cockroach"            # the Cockroach came back where it was
