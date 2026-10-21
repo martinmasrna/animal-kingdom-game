@@ -11,7 +11,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **[RHINOCEROS]** | 1 | Hoofed | 8 | Hungry 6. Roar: remove all adjacent animals. |
-| **Mogologolo** | 1 | — | 3 | Armor. Each player gains at most 20 food per turn. Dusk: gain 5 food. |
+| **Azamandulai** | 1 | — | 3 | Armor. Each player gains at most 20 food per turn. Dusk: gain 5 food. |
 | **[SPERM WHALE]** | 1 | — | 10 | Titan. Roar: remove all enemies next to your animals. |
 | **[OXPECKER]** | 1 | Bird | 4 | Flight. Your adjacent Hungry animals don't need to eat. |
 

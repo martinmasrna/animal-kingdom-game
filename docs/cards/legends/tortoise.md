@@ -1,8 +1,8 @@
-# Mogologolo, the Tortoise
+# Azamandulai, the Tortoise
 
 > Nothing hurries while he is here.
 
-Legendary, Savanna, strength 3. Armor. Each player gains at most 20 food per turn. Dusk: gain 5 food. Deck: Giants. Name: Mogologolo (draft, Martin, 2026-10-21): Setswana, "ancient one", from *bogologolo*, the time of long ago. The construction: the oldest name in the world is the one left untranslated (El-ahrairah, Fangorn), a word from the plain's own tongues whose meaning the young no longer carry, long because old names are said slowly.
+Legendary, Savanna, strength 3. Armor. Each player gains at most 20 food per turn. Dusk: gain 5 food. Deck: Giants. Name: Azamandulai (draft, Martin, 2026-10-21). Built to a reason per piece: a bare vowel then a buzz at the front, so the ear stops on the first beat and files the name as old and from nowhere it knows; the weight on -man-, the middle, where the shell is, over the Swahili zamani, the deep past; a tail shaped like the plain's hill-names (Olduvai, Lengai) that falls away slowly. Five beats that rise and fall. The construction: the oldest name in the world is the one left untranslated (El-ahrairah, Fangorn), said by each generation without knowing what the last one meant by it.
 
 Internal: a legend is the card's character for naming and art, told from the animals' point of view. No player ever sees this text.
 
