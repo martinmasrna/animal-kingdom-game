@@ -1,0 +1,102 @@
+{
+ "title": "The games the Expert never led",
+ "note": "Each position is the bot's turn in the round that cost it most. Play that turn as the bot; the rest matters little.",
+ "positions": [
+  {
+   "match": "7VO37Q",
+   "series": 0,
+   "game": 1,
+   "round": 3,
+   "seat": "B",
+   "drop": 106
+  },
+  {
+   "match": "5W37VW",
+   "series": 0,
+   "game": 1,
+   "round": 7,
+   "seat": "B",
+   "drop": 88
+  },
+  {
+   "match": "RKP5OW",
+   "series": 0,
+   "game": 1,
+   "round": 5,
+   "seat": "B",
+   "drop": 85
+  },
+  {
+   "match": "VYDTMQ",
+   "series": 0,
+   "game": 1,
+   "round": 3,
+   "seat": "B",
+   "drop": 72
+  },
+  {
+   "match": "OOSXIW",
+   "series": 0,
+   "game": 1,
+   "round": 4,
+   "seat": "B",
+   "drop": 69
+  },
+  {
+   "match": "S2F1TW",
+   "series": 0,
+   "game": 1,
+   "round": 4,
+   "seat": "B",
+   "drop": 57
+  },
+  {
+   "match": "YCOFXW",
+   "series": 0,
+   "game": 1,
+   "round": 8,
+   "seat": "B",
+   "drop": 55
+  },
+  {
+   "match": "MJ0NTW",
+   "series": 0,
+   "game": 1,
+   "round": 4,
+   "seat": "B",
+   "drop": 54
+  },
+  {
+   "match": "RDWAXG",
+   "series": 0,
+   "game": 1,
+   "round": 8,
+   "seat": "B",
+   "drop": 51
+  },
+  {
+   "match": "WCNFZW",
+   "series": 0,
+   "game": 1,
+   "round": 4,
+   "seat": "B",
+   "drop": 51
+  },
+  {
+   "match": "EQEYPG",
+   "series": 0,
+   "game": 1,
+   "round": 4,
+   "seat": "B",
+   "drop": 51
+  },
+  {
+   "match": "C3FPWW",
+   "series": 0,
+   "game": 1,
+   "round": 7,
+   "seat": "B",
+   "drop": 46
+  }
+ ]
+}

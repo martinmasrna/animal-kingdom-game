@@ -414,3 +414,8 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .hpeek h4 { margin: 2px 6px 6px; font: 700 18px 'Fira Sans Condensed', sans-serif; color: #f0e8da; }
 .hpeek .none { margin: 4px 6px; color: #b3a996; font-size: 15px; }
 @media (hover: none) { .hpeek { pointer-events: auto; } }
+/* A study (#/study/<name>, a developer's tool): one row per position, Play on each; a played one is marked like a won game. */
+.ladder .hist .note { color: #c9b48f; font-size: 14px; padding: 6px 2px 12px; }
+.ladder .hr.study { grid-template-columns: 28px 1fr auto auto; height: 52px; cursor: default; }
+.ladder .hr.study small { color: #a08f6e; font-size: 12px; letter-spacing: .06em; }
+.ladder .hr.study .slab { height: 36px; padding: 0 14px; }

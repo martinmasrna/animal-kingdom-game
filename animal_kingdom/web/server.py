@@ -952,6 +952,30 @@ def position_at(rec: dict, rnd: int, seat: str):
     return None
 
 
+STUDY_DIR = Path(__file__).resolve().parent / "studies"
+
+
+async def get_study(req):
+    """A study (studies/<name>.json): positions from your logged games to play on from, in order, as the other seat. A
+    developer's tool like the gauntlet: reached by its link, each position a 'Play from here'."""
+    me(req)
+    name = req.match_info["name"]
+    path = STUDY_DIR / f"{name}.json"
+    if not name.replace("_", "").isalnum() or not path.is_file():
+        raise web.HTTPNotFound(text="No such study")
+    study = json.loads(path.read_text(encoding="utf-8"))
+    out = []
+    for pos in study.get("positions", []):
+        rec = find_log(pos["match"], pos.get("series", 0), pos.get("game"))
+        if rec is None:
+            continue
+        seat = pos.get("seat") or ("A" if rec["bots"][0] != "human" else "B")
+        bot_deck, your_deck = (rec["deck_a"], rec["deck_b"]) if seat == "A" else (rec["deck_b"], rec["deck_a"])
+        out.append({**pos, "seat": seat, "botDeck": DECK_NAMES.get(bot_deck, bot_deck), "yourDeck": DECK_NAMES.get(your_deck, "deck"),
+                    "rounds": rec["turns"] // 2 + 1})
+    return web.json_response({"title": study.get("title", name), "note": study.get("note", ""), "positions": out})
+
+
 async def takeover_match(req, src: dict):
     """Play on from a position in one of your logged games, in the other seat, the Expert playing your old one. Martin,
     2026-10-21: "what would you do as the bot here?", asked on the real board instead of a rendering. The game is
@@ -1141,6 +1165,7 @@ def make_app() -> web.Application:
         web.get("/auth/{provider}/callback", auth_callback),
         web.get("/api/replay/{match}", get_replay),
         web.get("/api/replay/{match}/lists", replay_lists),
+        web.get("/api/study/{name}", get_study),
         web.post("/api/feedback", send_feedback),
         web.post("/api/events", client_events),
         web.get("/api/news", get_news),

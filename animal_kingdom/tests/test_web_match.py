@@ -565,3 +565,32 @@ def test_play_from_here_seats_you_in_the_other_chair_at_that_round(monkeypatch, 
             again = type(match).from_dict(match.to_dict())
             assert again.takeover
     asyncio.run(run())
+
+
+def test_a_study_lists_its_positions_from_the_logs(monkeypatch, tmp_path):
+    """#/study/<name> (Martin, 2026-10-21): the positions of studies/<name>.json, each with the decks and the round, only
+    those whose game is in the logs; an unknown study is 404."""
+    import asyncio, json, shutil
+    from aiohttp.test_utils import TestClient, TestServer
+    from animal_kingdom.web import server
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    logs = tmp_path / "logs"; logs.mkdir()
+    src = next(p for p in server.LOG_DIR.glob("web_*_GMIDKA.jsonl"))
+    shutil.copy(src, logs / src.name)
+    monkeypatch.setattr(server, "LOG_DIR", logs)
+    studies = tmp_path / "studies"; studies.mkdir()
+    (studies / "falcons.json").write_text(json.dumps({"title": "Falcons", "positions": [
+        {"match": "GMIDKA", "round": 4, "seat": "B"}, {"match": "NOPE00", "round": 2, "seat": "A"}]}))
+    monkeypatch.setattr(server, "STUDY_DIR", studies)
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a = await (await c.post("/api/profile", json={})).json()
+            r = await c.get("/api/study/falcons", headers={"X-AK-Key": a["code"]})
+            assert r.status == 200, await r.text()
+            s = await r.json()
+            assert s["title"] == "Falcons" and len(s["positions"]) == 1
+            p = s["positions"][0]
+            assert p["match"] == "GMIDKA" and p["round"] == 4 and p["seat"] == "B" and p["botDeck"] == "Teeth and Claws" and p["rounds"] == 4
+            assert (await c.get("/api/study/nothing", headers={"X-AK-Key": a["code"]})).status == 404
+    asyncio.run(run())
