@@ -75,6 +75,8 @@ class GreedyWeights:
     region_control: float = 2.0      # per controlled region corner, x that region's food
     enemy_hq_threat: float = 40.0    # per crossroad I hold in front of the enemy HQ
     own_hq_threat: float = 40.0      # per crossroad the enemy holds in front of my HQ
+    hq_threat_reach: float = 0.0     # fraction of a threat for a front crossroad held cut off but one placement from
+                                      # connected (features.hq_threat_terms); 0 is the chain rule alone (shipped)
     card_economy: float = 0.0        # per net card in hand (mine - theirs); off, hand_value
                                       # values the hand by what its cards can do instead
     effect_readiness: float = 0.0    # per distinct Roar in hand that can currently
@@ -331,7 +333,8 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     # --- HQ threat: only a connected chain can capture next turn. An isolated Flight unit
     # in front of an HQ is board presence, not an immediate HQ threat.
     opp_connection = state.connected_occupied(opp)
-    enemy_threat, own_threat = _features.hq_threat_terms(state, me, opp, my_connection, opp_connection)
+    enemy_threat, own_threat = _features.hq_threat_terms(state, me, opp, my_connection, opp_connection,
+                                                         w.hq_threat_reach)
     score += w.enemy_hq_threat * enemy_threat
     score -= w.own_hq_threat * own_threat
 
