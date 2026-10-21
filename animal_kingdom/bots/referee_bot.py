@@ -134,7 +134,7 @@ class RefereeBot(TurnSearcher):
             "plan_reused": 0,
             "budget_fallbacks": 0,
         }
-        if (keep := keep_hand(view, legal, state if self.mulligan else None)) is not None:
+        if (keep := self._keep_hand(view, legal, state)) is not None:
             return keep
         self._search_nodes = 0
         if self.staged:

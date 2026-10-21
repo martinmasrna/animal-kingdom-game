@@ -66,3 +66,43 @@ def test_the_choice_never_reads_the_decks_order(table):
     t = s.clone()
     random.Random(9).shuffle(t.decks["A"])          # the same cards, another hidden order
     assert mulligan.mulligan_choice(s, "A", rules.legal_actions(s)) == mulligan.mulligan_choice(t, "A", rules.legal_actions(t))
+
+
+# ---------------------------------------------------------------- the searched mulligan (2026-10-21)
+
+def _searched(hand, rest, opp="lion", seed=3):
+    """The Expert with the searched mulligan, dealt `hand` on top of `rest` against thirty of `opp`: the cards it sends back."""
+    from animal_kingdom.sim.runner import make_bot
+    s = new_game(hand + rest, [opp] * 30, 1, first_player="A", stacked=True)
+    bot = make_bot("referee", seed, extra={"mulligan": True, "time_budget": 0})
+    sent = []
+    while s.pending is not None and s.effect_stack[-1].get("op") == "mulligan" and s.player_to_act() == "A":
+        a = bot.choose(s.view_for("A"), rules.legal_actions(s), s)
+        if a.choice == SKIP:
+            break
+        sent.append(next(u.card_id for u in s.hands["A"] if u.iid == a.choice))
+        rules.apply_action(s, a)
+    return sent, [u.card_id for u in s.hands["A"]]
+
+
+def test_the_searched_mulligan_sends_a_python_at_zero_back():
+    # Martin, 2026-10-21: "obviously you're not going to keep a Python starting at zero". No rule says so; the play-out does.
+    sent, hand = _searched(["python", "lion", "lion", "tiger"], ["lion"] * 26)
+    assert sent == ["python"] and "python" not in hand
+
+
+def test_the_searched_mulligan_keeps_a_strong_hand_over_a_weak_deck():
+    sent, hand = _searched(["lion", "tiger", "orca", "lion"], ["mouse"] * 26)
+    assert sent == []
+
+
+def test_the_searched_mulligan_digs_out_of_four_weak_commons():
+    # Four 1-strength commons over a deck of Lions, Tigers and Orcas: most of the hand goes back for the deck's average.
+    sent, hand = _searched(["mouse", "mouse", "rat", "rat"], ["lion", "tiger", "orca"] * 8 + ["lion", "lion"])
+    assert len(sent) >= 2 and sum(c in ("lion", "tiger", "orca") for c in hand) >= 2
+
+
+def test_the_searched_mulligan_keeps_the_black_bear():
+    # "In 2 turns, draw 2 cards" is worth more now than later: the play-out sees the draw coming.
+    sent, hand = _searched(["black_bear", "lion", "lion", "lion"], ["lion"] * 26)
+    assert "black_bear" in hand

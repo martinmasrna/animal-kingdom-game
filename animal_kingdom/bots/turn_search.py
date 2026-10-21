@@ -32,7 +32,7 @@ from collections import defaultdict
 from typing import Optional, Sequence
 
 from ..engine import rules
-from ..engine.actions import Action, DrawAction, PlaceAction, RoamAction
+from ..engine.actions import SKIP, Action, ChoiceAction, DrawAction, PlaceAction, RoamAction
 from ..engine.state import GameState, StateView, other_player
 from .base import Bot, keep_hand
 from .determinize import determinize
@@ -134,7 +134,7 @@ class TurnSearcher(Bot):
         state: Optional[GameState] = None,
     ) -> Action:
         legal = list(legal)
-        if (keep := keep_hand(view, legal, state if self.mulligan else None)) is not None:
+        if (keep := self._keep_hand(view, legal, state)) is not None:
             return keep
         if state is None or len(legal) == 1:
             return legal[0]
@@ -447,6 +447,19 @@ class TurnSearcher(Bot):
         if self.evaluator is not None:
             return self.evaluator.value(state, me)
         return evaluate(state, me, self.weights)
+
+    def _keep_hand(self, view: StateView, legal: Sequence[Action], state: Optional[GameState]):
+        """The mulligan step while one is pending, else None. `mulligan` False keeps every hand; "table" sends back by the
+        opening-hand table (mulligan.mulligan_choice); True (the default meaning) searches it: each option played through
+        the opening in sampled worlds with this bot's own policy and evaluation (mulligan.search_choice)."""
+        if view.pending is None or view.pending.get("kind") != "mulligan":
+            return None
+        if not self.mulligan or state is None:
+            return next(a for a in legal if isinstance(a, ChoiceAction) and a.choice == SKIP)
+        if self.mulligan == "table":
+            return keep_hand(view, legal, state)
+        from .mulligan import search_choice
+        return search_choice(state, view.player, legal, self._policy, self._clamped_eval, self.det_rng)
 
     def _clamped_eval(self, state: GameState, me: str) -> float:
         score = self._eval(state, me)
