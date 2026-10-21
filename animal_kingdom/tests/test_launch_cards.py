@@ -485,12 +485,12 @@ def test_a_serval_played_alone_does_not_count_itself():
 
 
 def test_lynx_draws_only_when_placed_on_an_enemy():
-    s = make_state(hands={"A": ["lynx", "lynx"]}, decks={"A": ["lion"] * 2, "B": []})
+    s = make_state(hands={"A": ["lynx", "lynx"]}, decks={"A": ["lion"] * 3, "B": []})
     rules.apply_action(s, PlaceAction("lynx", ("cr", "1,2")))
     assert hand_ids(s, "A") == ["lynx"]
     put(s, "2,2", "squirrel", "B")
     rules.apply_action(s, PlaceAction("lynx", ("cr", "2,2")))
-    assert hand_ids(s, "A") == ["lion"]
+    assert hand_ids(s, "A") == ["lion"] * CFG.lynx_draw          # the rare draws 2 (2026-10-21)
 
 
 # ================================================================================ Den Rush

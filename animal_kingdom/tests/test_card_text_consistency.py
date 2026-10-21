@@ -266,6 +266,7 @@ DRAW_CONSTANTS: dict[str, list[str]] = {
     "praying_mantis": ["mantis_draw"],
     "hummingbird": ["hummingbird_draw"],
     "termite_king": ["termite_king_draw"],
+    "lynx": ["lynx_draw"],
     "manta_ray_legend": ["manta_legend_draw"],
     "butterfly_legend_monarch": ["butterfly_legend_stage5_draw"],
     "snake_egg": ["egg_hatch_draw"],   # "draw a Snake" now (snake_egg_draw, no printed number), "draw 2 Snakes" at the hatch

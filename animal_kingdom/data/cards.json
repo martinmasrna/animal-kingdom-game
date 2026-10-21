@@ -949,15 +949,15 @@
       "id": "lynx",
       "name": "Lynx",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Cat"
       ],
-      "base_strength": 6,
-      "text": "Roar: if you place this on top of an enemy, draw a card.",
-      "keywords": [],
+      "base_strength": 5,
+      "text": "Roar: if you place this on top of an enemy, draw 2 cards.",
       "species": "Lynx",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": []
     },
     {
       "id": "caracal",
@@ -4525,6 +4525,18 @@
       "keywords": [],
       "species": "Squid",
       "habitat": "Open Ocean"
+    },
+    {
+      "id": "strawberry_leopard",
+      "name": "Strawberry Leopard",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Strawberry Leopard",
+      "habitat": "Savanna"
     }
   ]
 }

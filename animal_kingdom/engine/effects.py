@@ -2987,7 +2987,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "queen_adira": {"on_remove_event": _queen_adira_remove_event},
     "jaguar": {"on_place": _removes("jaguar_max")},
     "serval": {"on_place": _serval_place},
-    "lynx": {"on_place_onto_enemy": _draw1},
+    "lynx": {"on_place_onto_enemy": _draws("lynx_draw")},
     "bobcat": {"on_place": _conditional(_draw1)},
     "alley_cat": {"on_place": _house_cat_place},
     # Colony.

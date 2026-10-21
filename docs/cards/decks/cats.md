@@ -22,14 +22,14 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Jaguar** | 2 | Cat | 5 | Roar: remove an adjacent enemy of strength 4 or less. |
 | **Serval** | 2 | Cat | 2 | Roar: if you played another Cat this turn, remove an adjacent enemy. |
 | **Leopard** | 2 | Cat | 6 | Your Cats can be placed on enemies of equal strength. |
+| **Lynx** | 2 | Cat | 5 | Roar: if you place this on top of an enemy, draw 2 cards. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Black Panther** | 2 | Cat | 6 | Stealth. |
+| **Black Panther** | 3 | Cat | 6 | Stealth. |
 | **Lion** | 3 | Cat | 7 | — |
-| **Lynx** | 3 | Cat | 6 | Roar: if you place this on top of an enemy, draw a card. |
 | **Caracal** | 3 | Cat | 6 | Reach. |
 | **Tiger** | 3 | Cat | 7 | Apex Predator. |
 | **Bobcat** | 3 | Cat | 5 | Roar: if you control another Cat, draw a card. |

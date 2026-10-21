@@ -2120,14 +2120,26 @@
       "by": "martin"
     },
     "effect": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792247927
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792614225,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": "Roar: if you place this on top of an enemy, draw a card."
+      },
+      "note": "Martin, 2026-10-21: Cats' fourth rare, the slot the Black Panther left"
     },
     "strength": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792247929
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792614225,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": 6
+      },
+      "note": "Martin, 2026-10-21: Cats' fourth rare, the slot the Black Panther left"
     },
     "animal": {
       "lv": "fine",
@@ -2135,9 +2147,15 @@
       "at": 1792247930
     },
     "rarity": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792247932
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792614224,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-21: Cats' fourth rare, the slot the Black Panther left"
     },
     "habitat": {
       "lv": "fine",
@@ -4943,6 +4961,17 @@
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
       "at": 1792585160
+    }
+  },
+  "strawberry_leopard": {
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "Martin, 2026-10-21: a legendary; the erythristic 'pink panther' leopard (real, photographed in South Africa 2012 and 2019). Deck and effect open",
+      "by": "claude",
+      "at": 1792613675
     }
   }
 }
