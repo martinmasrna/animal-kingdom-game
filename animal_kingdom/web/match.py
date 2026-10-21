@@ -65,6 +65,12 @@ NORMAL = "turn:w.hq_threat_reach=0.5"
 BOT_LEVELS = {"easy": "easy", "normal": NORMAL, "expert": EXPERT}
 
 
+def conditional_reach(state: GameState, card_id: str) -> bool:
+    """A card in hand whose Reach isn't printed but holds now (the Great White Shark after a removal) glows, as a Roar
+    whose condition holds does."""
+    return "Reach" not in state.cards[card_id].keywords and statics.reach_of(state, card_id) > 0
+
+
 def bot_for(level: str, seed: int):
     if level in tutorial.BOTS.values():
         return tutorial.TutorialBot(seed=seed, lesson=next(n for n, b in tutorial.BOTS.items() if b == level))
@@ -626,7 +632,7 @@ class Match:
             "winFood": st.game_map.win_food,
             "board": board,
             "hand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u),
-                      **({"ready": True} if roar_condition(st, s, u.card_id) else {})}
+                      **({"ready": True} if roar_condition(st, s, u.card_id) or conditional_reach(st, u.card_id) else {})}
                      for u in st.hands[s]],
             "handCount": {p: len(st.hands[p]) for p in "AB"},
             # the opponent's hand, face up, while they play with it revealed (your legendary Giraffe)

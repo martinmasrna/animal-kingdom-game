@@ -70,6 +70,20 @@ def test_the_view_marks_units_the_enemy_cannot_choose():
     assert board["4,1"][0].get("hidden") and not board["2,1"][0].get("hidden")
 
 
+def test_the_great_white_shark_glows_in_hand_once_an_animal_was_removed():
+    """Its Reach is a condition like a Roar's, so it lights up as those cards do (Martin, 2026-10-21)."""
+    from animal_kingdom.engine.state import UnitInstance
+    m = Match("T", Seat("ta", "A", deck="giants"))
+    m.join(Seat("tb", "B", deck="giants")); m.ready("A"); m.ready("B")
+    st = m.state
+    st.hands["A"].append(UnitInstance("great_white_shark", "A", 901))
+    shark = lambda: next(h for h in m.view("A")["game"]["hand"] if h["iid"] == 901)
+    st.turn_flags.pop("removed_any", None)
+    assert not shark().get("ready")
+    st.turn_flags["removed_any"] = True
+    assert shark().get("ready")
+
+
 def test_rejects_the_wrong_seat_and_illegal_moves():
     m = _match()
     s = m.to_act()
