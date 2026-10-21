@@ -10,7 +10,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Queen [ANT]** | 1 | Colony, Queen | 4 | Roar: gain 4 food for each other Colony animal you control. |
+| **Queen Solenia** | 1 | Colony, Queen | 4 | Roar: gain 4 food for each other Colony animal you control. |
 | **Vesper** | 1 | Colony | 5 | Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck. |
 | **Queen Melissia** | 1 | Colony, Queen | 4 | Whenever you place a Colony animal, gain 4 food. |
 | **Lord Bumbleton** | 1 | Colony | 3 | Flight. Whenever you gain food, gain 3 additional food. |
