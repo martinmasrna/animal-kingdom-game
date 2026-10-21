@@ -2,7 +2,7 @@
 
 Each launch animal's card, settled habitat by habitat with Martin. Existing cards keep their effect unless noted. Strengths of existing cards wait for the strength-realism pass; numbers marked ~ are first guesses.
 
-Keywords proposed in this pass: **Hungry N** (at the start of your turn, eat N food; if you can't, this gets −N strength), **Flee** (when an enemy covers this, return it to your hand), **Reach N**, **Poison**, **Dawn** and **Dusk** (all in [`../rules/keywords.md`](../rules/keywords.md); card text in this doc still spells out "at the start/end of your turn" until the cards are rewritten), and grazing as a condition (an animal grazes while it's a corner of a region you control; card wording still to choose between "if this is grazing" and "if this controls a region").
+Keywords proposed in this pass: **Hungry N** (at the start of your turn, eat N food; if you can't, this gets −N strength), **Flee** (when an enemy covers this, return it to your hand), **Reach**, **Poison**, **Dawn** and **Dusk** (all in [`../rules/keywords.md`](../rules/keywords.md); card text in this doc still spells out "at the start/end of your turn" until the cards are rewritten), and grazing as a condition (an animal grazes while it's a corner of a region you control; card wording still to choose between "if this is grazing" and "if this controls a region").
 
 ## Savanna
 
@@ -51,7 +51,7 @@ The defensive cards, one answer for each way to reach the squirrel (removal, a g
 
 | Animal | Habitat | Rarity | Str | Text | The opponent's answer |
 |---|---|---|---:|---|---|
-| Poison Dart Frog (locked) | Jungle | C | 1 | Reach 2. Poison. | a removal ability |
+| Poison Dart Frog (locked) | Jungle | C | 1 | Reach. Poison. | a removal ability |
 | Jellyfish (locked) | Open Ocean | R | 3 | Poison. | a removal ability |
 | Golden Orb-Weaver (locked; Arachnid) | Jungle | R | 3 | When an enemy with Flight is placed next to this, remove it. | cover it (a flyer needs 4+); ground animals ignore the web |
 | a Honey Badger (name to come) | | L | 5 | **Armor. Stealth. Spikes. Poison.** (Martin's: every keyword on one animal. Spikes takes the first coverer at once, which cancels that cover's Poison; every later coverer is poisoned. One crossroad the opponent never truly takes, not a wall: the region breaks through any other corner.) |
@@ -78,7 +78,7 @@ Open from the first read: food before the payoff (only the Hedgehog's 5 so far; 
 | Black Bear | Forest | C | 5 | Roar: in 2 turns, draw 2 cards. (From Handlock: slow draw fits the hoard better, Martin.) |
 | Owl | Forest | C | 2 | **Flight.** Roar: **Scout** a card. (From Egg Control, Martin: the dig that finds the squirrel or Fathom.) |
 | Hedgehog (tagged Rodent) | Meadow | C | 5 | **Spikes.** Roar: gain 5 food. |
-| Poison Dart Frog | Jungle | C | 1 | **Reach 2. Poison.** |
+| Poison Dart Frog | Jungle | C | 1 | **Reach. Poison.** |
 | Jellyfish | Open Ocean | C | 4 | **Poison.** |
 
 Every 10 food on the board by turn 4 is about 30 at the finish, and food arriving on turn 7 counts for nothing: the stake has to be early. Rejected: a common paying food for each Armor, Spikes or Poison animal (clunky; the Tortoise counts Armor alone), and its "each of your animals next to this" rewording (generic food that Food Aggro wants more); the Acorns (late, random food; banked for a deck that draws all game, Egg Control first; Jay as the animal, since Squirrel is taken).
@@ -143,7 +143,7 @@ The pack that roams the board, buffs itself on the board (Primates buff in hand)
 
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
-| legendary Leopard (name to come; Cat) | Savanna | L | 7 | Apex Predator. Roam. Reach 2. (Drops onto its prey from a tree, then waits: landing by Reach leaves it unconnected, so it roams again once the chain reaches it.) |
+| legendary Leopard (name to come; Cat) | Savanna | L | 7 | Apex Predator. Roam. Reach. (Drops onto its prey from a tree, then waits: landing by Reach leaves it unconnected, so it roams again once the chain reaches it.) |
 | Clarion | Forest | L | 5 | Once each turn, one of your Canines can roam for free. (The deck is short of actions, not cards.) |
 | Lobo | Forest | L | 6 | Whenever one of your animals roams onto an enemy, draw a card. (The wolf king feeds the pack; bounded by one roam per animal per turn.) |
 | legendary wolf (name to come) | Forest | L | 4 | Roam. When this roams, your animals next to it gain +2 strength. |
@@ -295,7 +295,7 @@ Also: the Naked Mole-Rat (Savanna roster) is the one eusocial mammal and would c
 
 ## Elsewhere, settled in passing
 
-- Cats: Caracal (Savanna, C, 6), "Reach 2.", the leap over the front line onto the engines behind it, which every other Cat can only hit when adjacent (at 5 or less the Eagle practically dominates it); Lynx (Forest, C, 6), "Roar: if placed on top of an enemy, draw a card."; Bobcat (Forest, C, 5), "Roar: if you control another Cat, draw a card." The Cougar and its effect wait for Mountains.
+- Cats: Caracal (Savanna, C, 6), "Reach.", the leap over the front line onto the engines behind it, which every other Cat can only hit when adjacent (at 5 or less the Eagle practically dominates it); Lynx (Forest, C, 6), "Roar: if placed on top of an enemy, draw a card."; Bobcat (Forest, C, 5), "Roar: if you control another Cat, draw a card." The Cougar and its effect wait for Mountains.
 - Cuckoo (Meadow, R, ~3, Bird): "Flight. Roar: shuffle two Cuckoo Eggs into your opponent's deck." Cuckoo Egg (token, 0): "When you draw this, your opponent draws a card." The opponent's deck is the host's nest: each Egg clogs their deck, then their hand. It stays in the hand of whoever drew it and is theirs to play (a 0-strength animal); with no way to discard, getting rid of it costs one of their actions. A disruption card, hardest on the decks that draw a lot.
 - Mosquito (City, C, ~1): "Flight. Roar: give an adjacent enemy −2 strength."
 - Leech (Jungle, 1): "Roar: swap strength with an adjacent animal." It drains its host: the host shrinks, the leech swells. At 1 it can't cover anything, so it lands only on an empty crossroad or one of your own.
@@ -304,7 +304,7 @@ Also: the Naked Mole-Rat (Savanna roster) is the one eusocial mammal and would c
 - The decoy (Lapwing, needs a common or rare Lapwing): "Enemy abilities that choose an animal must choose this, if able." It fakes a broken wing to lead predators from the nest. A protector of any deck's engine.
 - The lure (a legendary Firefly): "Roar: your opponent's next animal must be placed next to this, if able." The femme-fatale firefly copies another species' flash and eats the males that come. First candidate for the Arachnid traps deck.
 - Octopus (Open Ocean, R, ~4; locked, Martin): "Roar: choose an adjacent enemy. Until your next turn, it loses all its effects." The ink cloud: a one-turn blackout of one animal's Spikes, Poison, Armor, trap or aura, the hard answer to Food OTK's fortress and any engine; one target, not all its neighbours (Martin). It gives Fathom and the Mimic Octopus their species.
-- Great White Shark (Open Ocean, R, 7; locked, Martin): "**Apex Predator.** If an animal was removed this turn, this has **Reach 3**." It smells blood from a mile away and strikes deep from your own side. Reach, not "ignoring connection": it launches from your connected animals. The blood condition keeps it apart from the legendary Leopard (Apex, Roam, Reach 2).
+- Great White Shark (Open Ocean, R, 7; locked, Martin): "**Apex Predator.** If an animal was removed this turn, this has **Reach**." It smells blood and strikes from your own side. Reach, not "ignoring connection": it launches from your connected animals. The blood condition keeps it apart from the legendary Leopard (Apex, Roam, Reach).
 - The herd over its young (Martin likes it, for another deck): "Your animals placed on top of your own animals have +2 strength." A mechanic only this game has; Fish landing on their own Fish late is the first fit.
 - Groundhog Day (a later Groundhog legendary, in a slower deck; the species has its Food Aggro common): "Roar: gain 5 food. Dawn: this Roars again." The day that keeps repeating, an everyday idiom. Not on the common: Food Aggro wants this turn's burst, not an engine.
 - Platypus (Australia, later): its family tag is "All", counting as every family (Martin, 2026-10-08).

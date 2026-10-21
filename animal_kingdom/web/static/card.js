@@ -13,7 +13,7 @@ const focus = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35); ret
 // to centre on the same height, never further than its top below the band or its bottom at the card's edge.
 const lift = id => { const y = FULL[id] ?? (CROP[id] ? CROP[id][1] : 0.35); return Math.max(-3.71, Math.min(0, 13.15 - 30 * y)); };
 
-// Every keyword is bold wherever it stands, with its number and the colon or full stop after it ("Reach 2." is bold whole,
+// Every keyword is bold wherever it stands, with its number and the colon or full stop after it ("Hungry 3." is bold whole,
 // and so is Scout in "Roar: Scout a Bird."). The keywords are those KEYWORDS explains, below.
 const rules = t => (t || '').replace(KW, '<b>$&</b>');
 const chalk = n => String(n).split('').map(d => d === '*' ? '<b>*</b>' : `<img src="/static/kit2/chalk/${d}.webp" alt="${d}" draggable="false">`).join('');
@@ -67,8 +67,8 @@ export const KEYWORDS = {
   'Apex Predator': 'Must be placed on top of another animal, yours or an enemy\'s, and eats it. Can\'t be placed on a den.',
   'Spikes': 'The first time an enemy covers it, that enemy is removed.',
   'Poison': 'Whenever an enemy covers it, that enemy is removed at the start of your next turn.',
-  'Roam': 'As an action, move it through your animals connected to it, then one crossroad beyond (as far as its Reach, if it has one): onto an empty crossroad, onto one of your animals, or onto an enemy it beats. It takes the den only from the den front, connected to your den. Once per turn.',
-  'Reach': 'Can be placed up to that many crossroads away from one of your connected animals, jumping over what stands between. It can\'t take a den that way.',
+  'Roam': 'As an action, move it through your animals connected to it, then one crossroad beyond (two with Reach): onto an empty crossroad, onto one of your animals, or onto an enemy it beats. It takes the den only from the den front, connected to your den. Once per turn.',
+  'Reach': 'Can be placed up to two crossroads away from one of your connected animals, jumping over what stands between. It can\'t take a den that way.',
   'Hungry': 'At the start of your turn it eats that much of your food. If you can\'t feed it, it loses that much strength for good.',
   'Titan': 'Playing it takes two actions. A free play (an effect like "play another animal") can\'t pay for it.',
   'Flee': 'When an enemy covers it, it runs back to your hand.',

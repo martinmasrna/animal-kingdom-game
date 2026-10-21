@@ -998,13 +998,13 @@ def test_related_cards_are_real_cards_and_follow_the_engine():
 
 # ==================================================================================== Pool
 
-def test_great_white_shark_has_reach_three_after_a_removal():
+def test_great_white_shark_has_reach_after_a_removal():
     s = make_state(hands={"A": ["great_white_shark"]}, decks={"A": ["lion"] * 3, "B": []})
-    put(s, "3,2", "lion", "B").strength_counter = -1           # a 6, three crossroads out: the shark (7) eats it
-    assert PlaceAction("great_white_shark", ("cr", "3,2")) not in rules.legal_actions(s)
+    put(s, "2,2", "lion", "B").strength_counter = -1           # a 6, two crossroads out: the shark (7) eats it
+    assert PlaceAction("great_white_shark", ("cr", "2,2")) not in rules.legal_actions(s)
     put(s, "4,3", "squirrel", "B")
     effects.remove_top(s, "4,3", by_player="A")
-    assert PlaceAction("great_white_shark", ("cr", "3,2")) in rules.legal_actions(s)
+    assert PlaceAction("great_white_shark", ("cr", "2,2")) in rules.legal_actions(s)
 
 
 def test_cuckoo_eggs_clog_the_opponents_deck_and_feed_you():

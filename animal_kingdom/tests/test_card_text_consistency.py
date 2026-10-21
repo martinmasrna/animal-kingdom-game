@@ -393,17 +393,17 @@ def test_the_launch_decks_other_numbers_match_config():
     assert int(re.search(r"give (\d+) animals", c["baboon"].text).group(1)) == cfg.baboon_count
     assert int(re.search(r"produce (\d+) more food", c["wildebeest_legend"].text).group(1)) == cfg.migration_bonus
     assert int(re.search(r"produce (\d+) less food", c["boar_legend"].text).group(1)) == cfg.boar_penalty
-    assert int(re.search(r"Reach (\d+)", c["great_white_shark"].text).group(1)) == cfg.shark_reach
+    assert c["great_white_shark"].text.endswith("this has Reach.")
     assert "Poppy and Rusty" in c["scarlett"].text and cfg.alpha_pups == 2
 
 
-def test_hungry_and_reach_numbers_match_their_fields():
-    """"Hungry N" and "Reach N" opening a card's text are its `hungry` and `reach` fields (written by the converter)."""
+def test_hungry_number_matches_its_field_and_reach_has_none():
+    """"Hungry N" opening a card's text is its `hungry` field (written by the converter); Reach prints no number."""
     for cid, card in _cards().items():
-        for kw, field in (("Hungry", card.hungry), ("Reach", card.reach)):
-            m = re.match(r"(?:\w+(?: \w+)?\. )*" + kw + r" (\d+)\.", card.text)
-            if kw in card.keywords:
-                assert m and int(m.group(1)) == field, f"{cid}: {kw} {field} vs text {card.text!r}"
+        m = re.match(r"(?:\w+(?: \w+)?\. )*Hungry (\d+)\.", card.text)
+        if "Hungry" in card.keywords:
+            assert m and int(m.group(1)) == card.hungry, f"{cid}: Hungry {card.hungry} vs text {card.text!r}"
+        assert not re.search(r"Reach \d", card.text), f"{cid}: {card.text!r}"
 
 
 FOOD_CAP_RE = re.compile(r"gains at most (\d+) food per turn", re.IGNORECASE)

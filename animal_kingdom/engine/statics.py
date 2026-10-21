@@ -161,18 +161,18 @@ def roam_covers_equal(state: GameState, unit: UnitInstance) -> bool:
 # ------------------------------------------------------------------------ Reach
 
 def reach_of(state: GameState, card_id: str) -> int:
-    """How far a card lands (Reach N), 0 for none: printed, or the Great White Shark's "If an animal was removed this
-    turn, this has Reach 3."."""
-    card = state.cards[card_id]
-    if card_id == "great_white_shark" and state.turn_flags.get("removed_any"):
-        return state.config.shark_reach
-    return card.reach
+    """How far a card lands, 0 without Reach: printed, or the Great White Shark's "If an animal was removed this turn,
+    this has Reach."."""
+    if "Reach" in state.cards[card_id].keywords or (
+            card_id == "great_white_shark" and state.turn_flags.get("removed_any")):
+        return state.config.reach
+    return 0
 
 
 def reach_crossroads(state: GameState, player: str, n: int, occ: set) -> set[str]:
     """Crossroads within `n` steps of a launch point, counting along paths and jumping over whatever stands on them
-    (Reach N, keywords.md). The launch points are `player`'s den (its front crossroads are one step away, as for an
-    ordinary placement: Reach 1) and the connected crossroads `occ` they occupy. Never a den: a Reach unit captures
+    (Reach, keywords.md). The launch points are `player`'s den (its front crossroads are one step away, as for an
+    ordinary placement) and the connected crossroads `occ` they occupy. Never a den: a Reach unit captures
     only along an unbroken chain, which ordinary placement already covers."""
     gm = state.game_map
     dist = {cr: 0 for cr in occ}

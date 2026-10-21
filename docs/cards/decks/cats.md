@@ -1,6 +1,6 @@
 # Cats
 
-Its cards carried over from the old pool; their reasoning is in the git history of this file. The cards themselves come from the card workbench (`tools/card-workbench/`, converted by `convert.py`); the table below is generated from cards.json.
+Its cards carried over from the old pool; their reasoning is in the git history of this file. The table below is generated from cards.json, where the cards live.
 
 ## Cards
 
@@ -30,7 +30,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 |---|---:|---|---:|---|
 | **Lion** | 3 | Cat | 7 | — |
 | **Lynx** | 3 | Cat | 6 | Roar: if you place this on top of an enemy, draw a card. |
-| **Caracal** | 3 | Cat | 6 | Reach 2. |
+| **Caracal** | 3 | Cat | 6 | Reach. |
 | **Tiger** | 3 | Cat | 7 | Apex Predator. |
 | **Bobcat** | 3 | Cat | 5 | Roar: if you control another Cat, draw a card. |
 | **Alley Cat** | 3 | Cat | 1 | Roar: if you control another Cat, play another Cat. |

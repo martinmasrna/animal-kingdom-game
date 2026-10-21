@@ -761,7 +761,7 @@ def legal_placements(state: GameState, player: str, allowed_cards: Optional[set]
         choices.extend((card_id, iid, placer) for iid, placer in copy_choices(state, player, card_id))
 
     out = []
-    reach_sets: dict[int, set] = {}                   # Reach N's crossroads, once per N
+    reach_sets: dict[int, set] = {}                   # Reach's crossroads, worked out once
     for card_id, iid, placer in choices:
         card = state.cards[card_id]
         if card.food_cost > state.food[player]:

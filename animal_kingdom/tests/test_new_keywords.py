@@ -1,4 +1,4 @@
-"""Roam, Reach N, Poison, and Dawn/Dusk play order (keywords.md), on test-only cards: no real card carries
+"""Roam, Reach, Poison, and Dawn/Dusk play order (keywords.md), on test-only cards: no real card carries
 Roam, Reach or Poison yet.
 
 Map A: a 4x3 grid of crossroads "col,row", orthogonal neighbours. A's den fronts column 1, B's column 4.
@@ -19,11 +19,11 @@ CARDS = cards_with(
     {"id": "t_roamer", "base_strength": 4, "keywords": ["Roam"], "tags": ["Canine"]},
     {"id": "t_roam_cat", "base_strength": 5, "keywords": ["Roam"], "tags": ["Cat"]},
     {"id": "t_roam_apex", "base_strength": 7, "keywords": ["Roam", "Apex Predator"]},
-    {"id": "t_roam_apex_reach", "base_strength": 8, "keywords": ["Roam", "Apex Predator", "Reach"], "reach": 2},
+    {"id": "t_roam_apex_reach", "base_strength": 8, "keywords": ["Roam", "Apex Predator", "Reach"]},
     {"id": "t_roam_armor", "base_strength": 6, "keywords": ["Roam", "Armor"]},
     {"id": "t_poison", "base_strength": 2, "keywords": ["Poison"]},
-    {"id": "t_reach2", "base_strength": 3, "keywords": ["Reach"], "reach": 2},
-    {"id": "t_reach3", "base_strength": 6, "keywords": ["Reach"], "reach": 3},
+    {"id": "t_reach", "base_strength": 3, "keywords": ["Reach"]},
+    {"id": "t_reach_big", "base_strength": 6, "keywords": ["Reach"]},
     {"id": "t_dusk", "base_strength": 2},
     {"id": "t_dusk2", "base_strength": 2},
     {"id": "t_body", "base_strength": 4},
@@ -77,7 +77,7 @@ def test_a_stranded_leopard_pounces_on_its_neighbours_not_across_the_board():
     # not the cats beside it; counted from the animal, it's the other way round
     s = state()
     put(s, "1,2", "t_body", "A")
-    put(s, "4,2", "t_roam_apex_reach", "A")             # 8, Reach 2, alone by B's den
+    put(s, "4,2", "t_roam_apex_reach", "A")             # 8, Reach, alone by B's den
     put(s, "4,1", "t_dusk", "B"); put(s, "4,3", "t_dusk2", "B")   # beside it
     put(s, "2,1", "t_dusk", "B")                        # two from your chain, three from the Leopard
     targets = {t for o, t in roams(s) if o == "4,2"}
@@ -213,7 +213,7 @@ def test_an_apex_roams_only_onto_an_animal_and_eats_it():
 
 
 def test_a_roamer_lands_as_far_as_its_reach_beyond_its_pack():
-    # the legendary Leopard (Apex Predator. Roam. Reach 2.): it pounces on prey two crossroads beyond your chain
+    # the legendary Leopard (Apex Predator. Roam. Reach.): it pounces on prey two crossroads beyond your chain
     s = state()
     for cr in ("1,2", "2,2", "3,2"):
         put(s, cr, "t_body", "A")
@@ -286,10 +286,10 @@ def test_a_free_roam_alone_is_not_an_idle_turn():
     assert s.current == "B" and s.idle_turns == 0        # nothing else to do: the turn ended, and A had acted
 
 
-# ===================================================================== Reach N
+# ===================================================================== Reach
 
-def test_reach_lands_up_to_n_crossroads_from_a_connected_unit_jumping_over_occupants():
-    s = state(hands={"A": ["t_reach2"]})
+def test_reach_lands_up_to_two_crossroads_from_a_connected_unit_jumping_over_occupants():
+    s = state(hands={"A": ["t_reach"]})
     put(s, "1,2", "t_body", "A")
     put(s, "2,2", "t_body", "B")                        # in the way: jumped over
     targets = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction)}
@@ -299,48 +299,46 @@ def test_reach_lands_up_to_n_crossroads_from_a_connected_unit_jumping_over_occup
 
 
 def test_reach_launches_from_the_den():
-    s = state(hands={"A": ["t_reach2"]})
+    s = state(hands={"A": ["t_reach"]})
     targets = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction)}
     assert targets == {"1,1", "1,2", "1,3", "2,1", "2,2", "2,3"}
 
 
 def test_reach_does_not_launch_from_a_stranded_unit():
-    s = state(hands={"A": ["t_reach2"]})
+    s = state(hands={"A": ["t_reach"]})
     put(s, "3,2", "t_body", "A")                        # not connected to the den
     targets = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction)}
     assert "4,2" not in targets and "3,1" not in targets
 
 
 def test_reach_never_captures_a_den():
-    s = state(hands={"A": ["t_reach3"]})
+    s = state(hands={"A": ["t_reach_big"]})
     put(s, "1,2", "t_body", "A")
     put(s, "2,2", "t_body", "A")
-    acts = [a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "t_reach3"]
+    acts = [a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "t_reach_big"]
     assert ("cr", "4,2") in {a.target for a in acts}     # it lands next to the den...
     assert not any(a.is_hq_capture for a in acts)        # ...but can't take it
 
 
 def test_reach_covering_still_needs_greater_strength():
-    s = state(hands={"A": ["t_reach3"]})                # strength 6
-    put(s, "3,1", "t_body", "B")                        # 4: it covers
-    put(s, "3,3", "porcupine", "B")                     # 7: it can't
+    s = state(hands={"A": ["t_reach_big"]})                # strength 6
+    put(s, "2,1", "t_body", "B")                        # 4: it covers
+    put(s, "2,3", "porcupine", "B")                     # 7: it can't
     targets = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction)}
-    assert "3,1" in targets and "3,3" not in targets and "3,2" in targets
+    assert "2,1" in targets and "2,3" not in targets and "2,2" in targets
 
 
 def test_reach_works_for_an_extra_placement_too():
-    s = state(hands={"A": ["calib_extra_2", "t_reach2"]})
+    s = state(hands={"A": ["calib_extra_2", "t_reach"]})
     rules.apply_action(s, PlaceAction("calib_extra_2", ("cr", "1,2")))
     assert s.pending and s.pending["mode"] == "place"
-    assert {"card_id": "t_reach2", "target": ["cr", "3,2"]} in s.pending["placements"]
+    assert {"card_id": "t_reach", "target": ["cr", "3,2"]} in s.pending["placements"]
 
 
-def test_reach_needs_its_number():
+def test_reach_has_no_number():
     from animal_kingdom.engine.cards import CardDataError
     with pytest.raises(CardDataError):
-        cards_with({"id": "t_bad", "base_strength": 3, "keywords": ["Reach"]})
-    with pytest.raises(CardDataError):
-        cards_with({"id": "t_bad", "base_strength": 3, "keywords": ["Reach"], "reach": 1})
+        cards_with({"id": "t_bad", "base_strength": 3, "keywords": ["Reach"], "reach": 3})
 
 
 # ===================================================================== Poison
@@ -419,11 +417,11 @@ def test_a_friendly_cover_does_not_set_off_poison():
 
 
 def test_poison_reaches_a_buried_coverer():
-    s, poison = _poisoned_board(hand=("t_body", "t_reach3"))
+    s, poison = _poisoned_board(hand=("t_body", "t_reach_big"))
     coverer = _cover_poison(s)
-    rules.apply_action(s, PlaceAction("t_reach3", ("cr", "2,2")))   # B buries its own coverer
+    rules.apply_action(s, PlaceAction("t_reach_big", ("cr", "2,2")))   # B buries its own coverer
     end_turn(s)
-    assert ids(s, "2,2") == ["t_poison", "t_reach3"]    # the buried coverer is removed from under it
+    assert ids(s, "2,2") == ["t_poison", "t_reach_big"]    # the buried coverer is removed from under it
 
 
 def test_covering_poison_by_roaming_sets_it_off():
@@ -518,8 +516,8 @@ def _keyword_decks():
             else:
                 out.append(c)
         return out
-    return (swap("canines", ["t_roamer", "t_roam_apex", "t_poison", "t_reach2", "t_roam_cat", "t_reach3"] * 2),
-            swap("cats", ["t_roamer", "t_poison", "t_reach3", "t_roam_armor"] * 2))
+    return (swap("canines", ["t_roamer", "t_roam_apex", "t_poison", "t_reach", "t_roam_cat", "t_reach_big"] * 2),
+            swap("cats", ["t_roamer", "t_poison", "t_reach_big", "t_roam_armor"] * 2))
 
 
 def _play(kinds, seed):
@@ -540,7 +538,7 @@ def _play(kinds, seed):
 def test_greedy_bots_see_and_choose_roams():
     chosen = [a for seed in range(3) for a in _play(("greedy", "greedy"), seed)]
     assert any(isinstance(a, RoamAction) for a in chosen)
-    assert any(isinstance(a, PlaceAction) and CARDS[a.card_id].reach for a in chosen)
+    assert any(isinstance(a, PlaceAction) and "Reach" in CARDS[a.card_id].keywords for a in chosen)
 
 
 @pytest.mark.slow

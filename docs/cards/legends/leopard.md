@@ -2,7 +2,7 @@
 
 > The safe place is where he hunts.
 
-Legendary, Savanna, strength 6. Apex Predator. Roam. Reach 2. Whenever this removes an animal, gain 1 strength (Martin, 2026-10-20; wired in 2026-10-21). Name: open.
+Legendary, Savanna, strength 6. Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength (Martin, 2026-10-20; wired in 2026-10-21). Name: open.
 
 Internal: a legend is the card's character for naming and art, told from the animals' point of view. No player ever sees this text.
 
@@ -18,7 +18,7 @@ A young leopard with no territory worth the name, pushed into poor country by th
 
 The first foal taken from inside a sleeping herd was a leopard being clever. The hundredth was something the herds had no word for. He never did anything a leopard wouldn't do; he only did it where no leopard had done it before, and kept doing it, and grew.
 
-The card is this biography. **Reach 2** is the middle of the herd. **Roam** is never where he was last night. **Apex Predator** is that nothing stops him once he has chosen. The strength he gains is the legend and the animal growing together: the mothers are right, he is more dangerous than he was last season.
+The card is this biography. **Reach** is the middle of the herd. **Roam** is never where he was last night. **Apex Predator** is that nothing stops him once he has chosen. The strength he gains is the legend and the animal growing together: the mothers are right, he is more dangerous than he was last season.
 
 ## What the animals say
 

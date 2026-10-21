@@ -1,6 +1,6 @@
 # Circle of Life
 
-What each card is for: [`../../design/effects-pass.md`](../../design/effects-pass.md), its the aristocrats section. The cards themselves come from the card workbench (`tools/card-workbench/`, converted by `convert.py`); the table below is generated from cards.json.
+What each card is for: [`../../design/effects-pass.md`](../../design/effects-pass.md), its the aristocrats section. The table below is generated from cards.json, where the cards live.
 
 ## Cards
 
@@ -32,7 +32,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Vulture** | 3 | Bird | 2 | Flight. Dusk: after 3 or more removals this turn, this lands from your hand or deck. |
 | **City Spider** | 3 | Arachnid | 4 | Dawn: remove the weakest animal next to this. |
 | **Cockroach** | 3 | — | 1 | When this is removed, put it back where it was and place a Roach on an adjacent empty crossroad. |
-| **Toad** | 3 | — | 1 | Reach 2. When this is removed, remove all animals next to it. |
+| **Toad** | 3 | — | 1 | Reach. When this is removed, remove all animals next to it. |
 | **Python** | 3 | Snake | 0 | Whenever an animal is removed, gain 1 strength (wherever this is). |
 
 <!-- cards:end -->

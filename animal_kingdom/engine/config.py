@@ -143,7 +143,7 @@ class Config:
     otk_squirrel_delay: int = 2          # ...after this many of your turns (covering pauses it)
     migration_bonus: int = 5             # the legendary Wildebeest: your regions produce 5 more food
     boar_penalty: int = 5                # the legendary Boar: your opponent's regions produce 5 less food
-    shark_reach: int = 3                 # Great White Shark: Reach 3 if an animal was removed this turn
+    reach: int = 2                       # Reach: lands up to this many crossroads from a connected unit
     mosquito_drain: int = 2              # Mosquito: an adjacent enemy -2 strength
 
     # --- Placement costs (decision F) ---

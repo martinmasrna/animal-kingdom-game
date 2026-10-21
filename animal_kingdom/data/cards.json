@@ -1,5 +1,5 @@
 {
-  "_comment": "Static card data, written by tools/card-workbench/convert.py from tools/card-workbench/decks.json (the source of truth for the pool); reserve and tutorial cards are kept by it as they are. A card belongs to no deck: the decks (starters and bot decks) are lists over this pool in decklists.json. Effect logic lives in engine code (effects/statics/strength), bound by id; numbers an effect uses live in engine/config.py. Schema: cards: id (unique, stable across runs), name (the species while `unnamed`), status (collectible: a card a deck may hold; reserve: a shelved design or a later habitat's card; tutorial: the tutorial's fixed deal; token: made by an effect, never in a decklist), rarity, tags (families and roles), base_strength (int 0-10, or 'dynamic' with dynamic_strength), keywords (printed static keywords), reach and hungry (their numbers), food_cost (a printed 'Costs X food'), text (verbatim), mate (the Eagle pair), species, habitat and workbench_id (where it came from).",
+  "_comment": "The cards: the one source of every card's values, written by the card table (tools/cards/hq.py, which also keeps how settled each value is in tools/cards/levels.json). A card belongs to no deck: the decks (starters and bot decks) are lists over this pool in decklists.json. Effect logic lives in engine code (effects/statics/strength), bound by id; numbers an effect uses live in engine/config.py. Schema: cards: id (unique, stable), name, status (collectible: a card a deck may hold; reserve: a shelved design or a later habitat's card; tutorial: the tutorial's fixed deal; token: made by an effect, never in a decklist; planned: an animal and habitat waiting for a design, which the engine doesn't load), rarity, tags (families and roles), base_strength (int 0-10, or 'dynamic' with dynamic_strength), keywords (the printed static keywords, read from the text by hq.py), hungry (its number), food_cost (a printed 'Costs X food'), text (verbatim), related (the cards it makes), evolves, mate (the Eagle pair), stage, unnamed (a legendary waiting for its name), species, habitat.",
   "cards": [
     {
       "id": "queen_marabunta",
@@ -14,8 +14,7 @@
       "text": "Roar: gain 4 food for each other Colony animal you control.",
       "keywords": [],
       "species": "Army Ant",
-      "habitat": "Jungle",
-      "workbench_id": "colony-0"
+      "habitat": "Jungle"
     },
     {
       "id": "vesper",
@@ -31,8 +30,7 @@
         "Flight"
       ],
       "species": "Hornet",
-      "habitat": "Forest",
-      "workbench_id": "colony-1"
+      "habitat": "Forest"
     },
     {
       "id": "queen_honoria",
@@ -47,8 +45,7 @@
       "text": "Whenever you place a Colony animal, gain 4 food.",
       "keywords": [],
       "species": "Bee",
-      "habitat": "Meadow",
-      "workbench_id": "colony-2"
+      "habitat": "Meadow"
     },
     {
       "id": "falstaff",
@@ -64,8 +61,7 @@
         "Flight"
       ],
       "species": "Bumblebee",
-      "habitat": "Meadow",
-      "workbench_id": "colony-3"
+      "habitat": "Meadow"
     },
     {
       "id": "nurse_bee",
@@ -81,8 +77,7 @@
         "Flight"
       ],
       "species": "Bee",
-      "habitat": "Meadow",
-      "workbench_id": "colony-4"
+      "habitat": "Meadow"
     },
     {
       "id": "nurse_bumblebee",
@@ -98,8 +93,7 @@
         "Flight"
       ],
       "species": "Bumblebee",
-      "habitat": "Meadow",
-      "workbench_id": "colony-5"
+      "habitat": "Meadow"
     },
     {
       "id": "termite_king",
@@ -113,8 +107,7 @@
       "text": "Roar: if you control a Colony Queen, draw 2 cards.",
       "keywords": [],
       "species": "Termite",
-      "habitat": "Savanna",
-      "workbench_id": "colony-6"
+      "habitat": "Savanna"
     },
     {
       "id": "termite_queen",
@@ -129,8 +122,7 @@
       "text": "Roar: you may play another non-Queen Colony animal.",
       "keywords": [],
       "species": "Termite",
-      "habitat": "Savanna",
-      "workbench_id": "colony-7"
+      "habitat": "Savanna"
     },
     {
       "id": "queen_bee",
@@ -145,8 +137,7 @@
       "text": "Roar: play a Worker animal.",
       "keywords": [],
       "species": "Bee",
-      "habitat": "Meadow",
-      "workbench_id": "colony-8"
+      "habitat": "Meadow"
     },
     {
       "id": "guard_wasp",
@@ -162,8 +153,7 @@
         "Flight"
       ],
       "species": "Wasp",
-      "habitat": "Forest",
-      "workbench_id": "colony-9"
+      "habitat": "Forest"
     },
     {
       "id": "soldier_ant",
@@ -177,8 +167,7 @@
       "text": "Roar: if you control 4 or more Colony animals, remove an adjacent enemy.",
       "keywords": [],
       "species": "Army Ant",
-      "habitat": "Jungle",
-      "workbench_id": "colony-10"
+      "habitat": "Jungle"
     },
     {
       "id": "worker_ant",
@@ -193,8 +182,7 @@
       "text": "Roar: gain 12 food.",
       "keywords": [],
       "species": "Ant",
-      "habitat": "Forest",
-      "workbench_id": "colony-11"
+      "habitat": "Forest"
     },
     {
       "id": "worker_wasp",
@@ -211,8 +199,7 @@
         "Flight"
       ],
       "species": "Wasp",
-      "habitat": "Forest",
-      "workbench_id": "colony-12"
+      "habitat": "Forest"
     },
     {
       "id": "worker_bee",
@@ -229,8 +216,7 @@
         "Flight"
       ],
       "species": "Bee",
-      "habitat": "Meadow",
-      "workbench_id": "colony-13"
+      "habitat": "Meadow"
     },
     {
       "id": "ember",
@@ -246,8 +232,7 @@
         "Flight"
       ],
       "species": "Pheasant",
-      "habitat": "Forest",
-      "workbench_id": "aristocrats-1"
+      "habitat": "Forest"
     },
     {
       "id": "praying_mantis",
@@ -259,8 +244,7 @@
       "text": "Roar: remove an adjacent ally to draw 2 cards.",
       "keywords": [],
       "species": "Praying Mantis",
-      "habitat": "Meadow",
-      "workbench_id": "aristocrats-4"
+      "habitat": "Meadow"
     },
     {
       "id": "raccoon",
@@ -272,8 +256,7 @@
       "text": "Roar: return an animal from your Remove Pile to your hand.",
       "keywords": [],
       "species": "Raccoon",
-      "habitat": "City",
-      "workbench_id": "aristocrats-7"
+      "habitat": "City"
     },
     {
       "id": "piranha",
@@ -287,8 +270,7 @@
       "text": "Roar: if an ally was removed this turn, remove an adjacent animal.",
       "keywords": [],
       "species": "Piranha",
-      "habitat": "Jungle",
-      "workbench_id": "aristocrats-8"
+      "habitat": "Jungle"
     },
     {
       "id": "vulture",
@@ -304,8 +286,7 @@
         "Flight"
       ],
       "species": "Vulture",
-      "habitat": "Savanna",
-      "workbench_id": "aristocrats-10"
+      "habitat": "Savanna"
     },
     {
       "id": "city_spider",
@@ -319,8 +300,7 @@
       "text": "Dawn: remove the weakest animal next to this.",
       "keywords": [],
       "species": "Spider",
-      "habitat": "City",
-      "workbench_id": "aristocrats-11"
+      "habitat": "City"
     },
     {
       "id": "earthworm",
@@ -335,8 +315,7 @@
         "worm"
       ],
       "species": "Earthworm",
-      "habitat": "Meadow",
-      "workbench_id": "aristocrats-12"
+      "habitat": "Meadow"
     },
     {
       "id": "cockroach",
@@ -351,8 +330,7 @@
         "roach"
       ],
       "species": "Cockroach",
-      "habitat": "City",
-      "workbench_id": "aristocrats-13"
+      "habitat": "City"
     },
     {
       "id": "sperm_whale",
@@ -366,8 +344,7 @@
         "Titan"
       ],
       "species": "Sperm Whale",
-      "habitat": "Open Ocean",
-      "workbench_id": "pool-2"
+      "habitat": "Open Ocean"
     },
     {
       "id": "toad",
@@ -376,14 +353,12 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "text": "Reach 2. When this is removed, remove all animals next to it.",
+      "text": "Reach. When this is removed, remove all animals next to it.",
       "keywords": [
         "Reach"
       ],
-      "reach": 2,
       "species": "Toad",
-      "habitat": "Meadow",
-      "workbench_id": "pool-toad"
+      "habitat": "Meadow"
     },
     {
       "id": "locust",
@@ -395,8 +370,7 @@
       "text": "Roar: remove all other animals and discard your hand.",
       "keywords": [],
       "species": "Locust",
-      "habitat": "Meadow",
-      "workbench_id": "pool-locust"
+      "habitat": "Meadow"
     },
     {
       "id": "roach_king",
@@ -408,8 +382,7 @@
       "text": "When this is removed, put it back where it was with +1 strength and draw a card.",
       "keywords": [],
       "species": "Cockroach",
-      "habitat": "City",
-      "workbench_id": "pool-roach-king"
+      "habitat": "City"
     },
     {
       "id": "python",
@@ -423,8 +396,7 @@
       "text": "Whenever an animal is removed, gain 1 strength (wherever this is).",
       "keywords": [],
       "species": "Python",
-      "habitat": "Jungle",
-      "workbench_id": "egg-control-8"
+      "habitat": "Jungle"
     },
     {
       "id": "pestis",
@@ -438,8 +410,7 @@
       "text": "Roar: remove an adjacent animal and every animal under it.",
       "keywords": [],
       "species": "Rat",
-      "habitat": "City",
-      "workbench_id": "den-rush-1"
+      "habitat": "City"
     },
     {
       "id": "leopard_legend",
@@ -450,16 +421,14 @@
         "Cat"
       ],
       "base_strength": 6,
-      "text": "Apex Predator. Roam. Reach 2. Whenever this removes an animal, gain 1 strength.",
+      "text": "Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength.",
       "keywords": [
         "Apex Predator",
         "Roam",
         "Reach"
       ],
-      "reach": 2,
       "species": "Leopard",
-      "habitat": "Savanna",
-      "workbench_id": "canines-0"
+      "habitat": "Savanna"
     },
     {
       "id": "clarion",
@@ -473,8 +442,7 @@
       "text": "Once each turn, an ally can roam for free.",
       "keywords": [],
       "species": "Wolf",
-      "habitat": "Forest",
-      "workbench_id": "canines-1"
+      "habitat": "Forest"
     },
     {
       "id": "lobo",
@@ -488,8 +456,7 @@
       "text": "Whenever an ally roams onto an enemy, draw a card.",
       "keywords": [],
       "species": "Wolf",
-      "habitat": "Forest",
-      "workbench_id": "canines-2"
+      "habitat": "Forest"
     },
     {
       "id": "wolf_legend",
@@ -505,8 +472,7 @@
         "Roam"
       ],
       "species": "Wolf",
-      "habitat": "Forest",
-      "workbench_id": "canines-3"
+      "habitat": "Forest"
     },
     {
       "id": "orca",
@@ -521,8 +487,7 @@
         "Roam"
       ],
       "species": "Orca",
-      "habitat": "Open Ocean",
-      "workbench_id": "canines-4"
+      "habitat": "Open Ocean"
     },
     {
       "id": "fox",
@@ -538,8 +503,7 @@
         "Roam"
       ],
       "species": "Fox",
-      "habitat": "Forest",
-      "workbench_id": "canines-5"
+      "habitat": "Forest"
     },
     {
       "id": "jackal",
@@ -553,8 +517,7 @@
       "text": "Roar: remove an adjacent enemy that has another of your Canines next to it.",
       "keywords": [],
       "species": "Jackal",
-      "habitat": "Savanna",
-      "workbench_id": "canines-6"
+      "habitat": "Savanna"
     },
     {
       "id": "dhole",
@@ -570,8 +533,7 @@
         "Roam"
       ],
       "species": "Dhole",
-      "habitat": "Jungle",
-      "workbench_id": "canines-7"
+      "habitat": "Jungle"
     },
     {
       "id": "wolf",
@@ -587,8 +549,7 @@
         "Roam"
       ],
       "species": "Wolf",
-      "habitat": "Forest",
-      "workbench_id": "canines-8"
+      "habitat": "Forest"
     },
     {
       "id": "bush_dog",
@@ -602,8 +563,7 @@
       "text": "Dusk: give a random adjacent Canine of yours +2 strength.",
       "keywords": [],
       "species": "Bush Dog",
-      "habitat": "Jungle",
-      "workbench_id": "canines-9"
+      "habitat": "Jungle"
     },
     {
       "id": "coyote",
@@ -617,8 +577,7 @@
       "text": "Whenever an allied Canine roams, give it +1 strength.",
       "keywords": [],
       "species": "Coyote",
-      "habitat": "Forest",
-      "workbench_id": "canines-10"
+      "habitat": "Forest"
     },
     {
       "id": "african_wild_dog",
@@ -632,8 +591,7 @@
       "text": "Dusk: give your adjacent animals +1 strength.",
       "keywords": [],
       "species": "African Wild Dog",
-      "habitat": "Savanna",
-      "workbench_id": "canines-11"
+      "habitat": "Savanna"
     },
     {
       "id": "badger",
@@ -645,8 +603,7 @@
       "text": "Roar: draw an animal with Roam.",
       "keywords": [],
       "species": "Badger",
-      "habitat": "Forest",
-      "workbench_id": "canines-12"
+      "habitat": "Forest"
     },
     {
       "id": "street_dog",
@@ -660,8 +617,7 @@
       "text": "Roar: give an ally with Roam +2 strength. It roams.",
       "keywords": [],
       "species": "Street Dog",
-      "habitat": "City",
-      "workbench_id": "canines-13"
+      "habitat": "City"
     },
     {
       "id": "sirocco",
@@ -673,8 +629,7 @@
       "text": "Roar: return all adjacent enemies to your opponent's hand.",
       "keywords": [],
       "species": "Skunk",
-      "habitat": "Forest",
-      "workbench_id": "den-rush-2"
+      "habitat": "Forest"
     },
     {
       "id": "gale",
@@ -690,8 +645,7 @@
         "Flight"
       ],
       "species": "Falcon",
-      "habitat": "Forest",
-      "workbench_id": "den-rush-3"
+      "habitat": "Forest"
     },
     {
       "id": "hornet",
@@ -707,8 +661,7 @@
         "Flight"
       ],
       "species": "Hornet",
-      "habitat": "Forest",
-      "workbench_id": "den-rush-5"
+      "habitat": "Forest"
     },
     {
       "id": "chameleon",
@@ -722,8 +675,7 @@
       "text": "Can cover animals of any strength.",
       "keywords": [],
       "species": "Chameleon",
-      "habitat": "Jungle",
-      "workbench_id": "den-rush-6"
+      "habitat": "Jungle"
     },
     {
       "id": "skunk",
@@ -735,8 +687,7 @@
       "text": "Roar: return an adjacent enemy to its owner's hand. It can't be played next turn.",
       "keywords": [],
       "species": "Skunk",
-      "habitat": "Forest",
-      "workbench_id": "den-rush-7"
+      "habitat": "Forest"
     },
     {
       "id": "hare",
@@ -750,8 +701,7 @@
         "Flee"
       ],
       "species": "Hare",
-      "habitat": "Meadow",
-      "workbench_id": "den-rush-8"
+      "habitat": "Meadow"
     },
     {
       "id": "cheetah",
@@ -765,8 +715,7 @@
       "text": "Roar: if placed next to the opponent's den, draw a card.",
       "keywords": [],
       "species": "Cheetah",
-      "habitat": "Savanna",
-      "workbench_id": "den-rush-9"
+      "habitat": "Savanna"
     },
     {
       "id": "rat",
@@ -780,8 +729,7 @@
       "text": "Roar: remove an adjacent enemy, then discard a random card.",
       "keywords": [],
       "species": "Rat",
-      "habitat": "City",
-      "workbench_id": "den-rush-10"
+      "habitat": "City"
     },
     {
       "id": "falcon",
@@ -797,8 +745,7 @@
         "Flight"
       ],
       "species": "Falcon",
-      "habitat": "Forest",
-      "workbench_id": "den-rush-11"
+      "habitat": "Forest"
     },
     {
       "id": "bat",
@@ -812,8 +759,7 @@
         "Flight"
       ],
       "species": "Bat",
-      "habitat": "City",
-      "workbench_id": "den-rush-12"
+      "habitat": "City"
     },
     {
       "id": "mouse",
@@ -827,8 +773,7 @@
       "text": "Roar: draw a Rodent.",
       "keywords": [],
       "species": "Mouse",
-      "habitat": "City",
-      "workbench_id": "den-rush-13"
+      "habitat": "City"
     },
     {
       "id": "scarlett",
@@ -846,8 +791,7 @@
         "rusty"
       ],
       "species": "Fox",
-      "habitat": "Forest",
-      "workbench_id": "pool-y1"
+      "habitat": "Forest"
     },
     {
       "id": "mole",
@@ -859,8 +803,7 @@
       "text": "Roar: play another animal next to this.",
       "keywords": [],
       "species": "Mole",
-      "habitat": "Meadow",
-      "workbench_id": "pool-mole"
+      "habitat": "Meadow"
     },
     {
       "id": "mole_legend",
@@ -872,8 +815,7 @@
       "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card.",
       "keywords": [],
       "species": "Mole",
-      "habitat": "Meadow",
-      "workbench_id": "pool-mole-legend"
+      "habitat": "Meadow"
     },
     {
       "id": "prince_leo",
@@ -887,8 +829,7 @@
       "text": "Roar: play Princess Lea from your hand or deck.",
       "keywords": [],
       "species": "Lion",
-      "habitat": "Savanna",
-      "workbench_id": "cats-0"
+      "habitat": "Savanna"
     },
     {
       "id": "princess_lea",
@@ -902,8 +843,7 @@
       "text": "Roar: play Prince Leo from your hand or deck.",
       "keywords": [],
       "species": "Lion",
-      "habitat": "Savanna",
-      "workbench_id": "cats-1"
+      "habitat": "Savanna"
     },
     {
       "id": "king_theron",
@@ -917,8 +857,7 @@
       "text": "When an allied Cat covers an enemy, remove that enemy.",
       "keywords": [],
       "species": "Lion",
-      "habitat": "Savanna",
-      "workbench_id": "cats-2"
+      "habitat": "Savanna"
     },
     {
       "id": "queen_adira",
@@ -932,8 +871,7 @@
       "text": "When an allied Cat removes an enemy, draw a card.",
       "keywords": [],
       "species": "Lion",
-      "habitat": "Savanna",
-      "workbench_id": "cats-3"
+      "habitat": "Savanna"
     },
     {
       "id": "jaguar",
@@ -947,8 +885,7 @@
       "text": "Roar: remove an adjacent enemy of strength 4 or less.",
       "keywords": [],
       "species": "Jaguar",
-      "habitat": "Jungle",
-      "workbench_id": "cats-4"
+      "habitat": "Jungle"
     },
     {
       "id": "serval",
@@ -962,8 +899,7 @@
       "text": "Roar: if you played another Cat this turn, remove an adjacent enemy.",
       "keywords": [],
       "species": "Serval",
-      "habitat": "Savanna",
-      "workbench_id": "cats-5"
+      "habitat": "Savanna"
     },
     {
       "id": "leopard",
@@ -977,8 +913,7 @@
       "text": "Your Cats can be placed on enemies of equal strength.",
       "keywords": [],
       "species": "Leopard",
-      "habitat": "Savanna",
-      "workbench_id": "cats-6"
+      "habitat": "Savanna"
     },
     {
       "id": "black_panther",
@@ -994,8 +929,7 @@
         "Stealth"
       ],
       "species": "Black Panther",
-      "habitat": "Jungle",
-      "workbench_id": "cats-7"
+      "habitat": "Jungle"
     },
     {
       "id": "lion",
@@ -1009,8 +943,7 @@
       "text": "",
       "keywords": [],
       "species": "Lion",
-      "habitat": "Savanna",
-      "workbench_id": "cats-8"
+      "habitat": "Savanna"
     },
     {
       "id": "lynx",
@@ -1024,8 +957,7 @@
       "text": "Roar: if you place this on top of an enemy, draw a card.",
       "keywords": [],
       "species": "Lynx",
-      "habitat": "Forest",
-      "workbench_id": "cats-9"
+      "habitat": "Forest"
     },
     {
       "id": "caracal",
@@ -1036,14 +968,12 @@
         "Cat"
       ],
       "base_strength": 6,
-      "text": "Reach 2.",
+      "text": "Reach.",
       "keywords": [
         "Reach"
       ],
-      "reach": 2,
       "species": "Caracal",
-      "habitat": "Savanna",
-      "workbench_id": "cats-10"
+      "habitat": "Savanna"
     },
     {
       "id": "tiger",
@@ -1059,8 +989,7 @@
         "Apex Predator"
       ],
       "species": "Tiger",
-      "habitat": "Jungle",
-      "workbench_id": "cats-11"
+      "habitat": "Jungle"
     },
     {
       "id": "bobcat",
@@ -1074,8 +1003,7 @@
       "text": "Roar: if you control another Cat, draw a card.",
       "keywords": [],
       "species": "Bobcat",
-      "habitat": "Forest",
-      "workbench_id": "cats-12"
+      "habitat": "Forest"
     },
     {
       "id": "alley_cat",
@@ -1089,8 +1017,7 @@
       "text": "Roar: if you control another Cat, play another Cat.",
       "keywords": [],
       "species": "Alley Cat",
-      "habitat": "City",
-      "workbench_id": "cats-13"
+      "habitat": "City"
     },
     {
       "id": "jellyfish_legend",
@@ -1102,8 +1029,7 @@
       "text": "Your adjacent Fish have Poison.",
       "keywords": [],
       "species": "Jellyfish",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-0"
+      "habitat": "Open Ocean"
     },
     {
       "id": "tuna_legend",
@@ -1117,8 +1043,7 @@
       "text": "Roar: for each region you control, draw a card and gain 5 food.",
       "keywords": [],
       "species": "Tuna",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-1"
+      "habitat": "Open Ocean"
     },
     {
       "id": "manta_ray_legend",
@@ -1132,8 +1057,7 @@
       "text": "Dusk: if you control 2 or more regions, draw 2 cards.",
       "keywords": [],
       "species": "Manta Ray",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-2"
+      "habitat": "Open Ocean"
     },
     {
       "id": "piranha_legend",
@@ -1147,8 +1071,7 @@
       "text": "Your Fish can cover enemies of strength up to the number of your Fish.",
       "keywords": [],
       "species": "Piranha",
-      "habitat": "Jungle",
-      "workbench_id": "fish-3"
+      "habitat": "Jungle"
     },
     {
       "id": "swordfish",
@@ -1162,8 +1085,7 @@
       "text": "Roar: remove a random adjacent enemy for each adjacent allied Fish.",
       "keywords": [],
       "species": "Swordfish",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-4"
+      "habitat": "Open Ocean"
     },
     {
       "id": "barracuda",
@@ -1177,8 +1099,7 @@
       "text": "Roar: remove an adjacent enemy with strength up to the number of your Fish.",
       "keywords": [],
       "species": "Barracuda",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-5"
+      "habitat": "Open Ocean"
     },
     {
       "id": "manta_ray",
@@ -1192,8 +1113,7 @@
       "text": "Whenever your opponent covers an adjacent allied Fish, draw a card.",
       "keywords": [],
       "species": "Manta Ray",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-6"
+      "habitat": "Open Ocean"
     },
     {
       "id": "remora",
@@ -1207,8 +1127,7 @@
       "text": "Roar: play another Fish.",
       "keywords": [],
       "species": "Remora",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-7"
+      "habitat": "Open Ocean"
     },
     {
       "id": "cod",
@@ -1222,8 +1141,7 @@
       "text": "Roar: draw a card for each adjacent allied Fish.",
       "keywords": [],
       "species": "Cod",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-8"
+      "habitat": "Open Ocean"
     },
     {
       "id": "sardine",
@@ -1237,8 +1155,7 @@
       "text": "Roar: fill adjacent empty crossroads with Sardines from your hand and deck.",
       "keywords": [],
       "species": "Sardine",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-9"
+      "habitat": "Open Ocean"
     },
     {
       "id": "mahi_mahi",
@@ -1252,8 +1169,7 @@
       "text": "Roar: give your other Fish +1 strength.",
       "keywords": [],
       "species": "Mahi-mahi",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-10"
+      "habitat": "Open Ocean"
     },
     {
       "id": "mackerel",
@@ -1267,8 +1183,7 @@
       "text": "Your other Fish have +1 strength.",
       "keywords": [],
       "species": "Mackerel",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-11"
+      "habitat": "Open Ocean"
     },
     {
       "id": "tuna",
@@ -1282,8 +1197,7 @@
       "text": "Has +1 strength for each other Fish you control.",
       "keywords": [],
       "species": "Tuna",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-12"
+      "habitat": "Open Ocean"
     },
     {
       "id": "sunfish",
@@ -1300,8 +1214,7 @@
         "baby_fish"
       ],
       "species": "Sunfish",
-      "habitat": "Open Ocean",
-      "workbench_id": "fish-13"
+      "habitat": "Open Ocean"
     },
     {
       "id": "big_gus",
@@ -1315,8 +1228,7 @@
       "text": "Roar: repeat the Roar of each of your adjacent Rodents.",
       "keywords": [],
       "species": "Capybara",
-      "habitat": "Jungle",
-      "workbench_id": "food-aggro-0"
+      "habitat": "Jungle"
     },
     {
       "id": "macaque_legend",
@@ -1330,8 +1242,7 @@
       "text": "Roar: draw cards until you have as many as your opponent.",
       "keywords": [],
       "species": "Macaque",
-      "habitat": "City",
-      "workbench_id": "food-aggro-1"
+      "habitat": "City"
     },
     {
       "id": "barley",
@@ -1345,8 +1256,7 @@
       "text": "Roar: gain 4 food for each other Rodent you control. Draw a card.",
       "keywords": [],
       "species": "Rat",
-      "habitat": "City",
-      "workbench_id": "food-aggro-2"
+      "habitat": "City"
     },
     {
       "id": "scrooge",
@@ -1360,8 +1270,7 @@
       "text": "Roar: gain 3 food for each 10 food you have.",
       "keywords": [],
       "species": "Chipmunk",
-      "habitat": "Forest",
-      "workbench_id": "food-aggro-3"
+      "habitat": "Forest"
     },
     {
       "id": "flying_squirrel",
@@ -1377,8 +1286,7 @@
         "Flight"
       ],
       "species": "Flying Squirrel",
-      "habitat": "Forest",
-      "workbench_id": "food-aggro-4"
+      "habitat": "Forest"
     },
     {
       "id": "meerkat",
@@ -1390,8 +1298,7 @@
       "text": "Roar: draw a card. When an enemy is placed next to this, draw a card.",
       "keywords": [],
       "species": "Meerkat",
-      "habitat": "Savanna",
-      "workbench_id": "food-aggro-5"
+      "habitat": "Savanna"
     },
     {
       "id": "beaver",
@@ -1405,8 +1312,7 @@
       "text": "Roar: next turn, take 1 additional action.",
       "keywords": [],
       "species": "Beaver",
-      "habitat": "Forest",
-      "workbench_id": "food-aggro-6"
+      "habitat": "Forest"
     },
     {
       "id": "dormouse",
@@ -1420,8 +1326,7 @@
       "text": "Dusk: gain 5 food.",
       "keywords": [],
       "species": "Dormouse",
-      "habitat": "Forest",
-      "workbench_id": "food-aggro-7"
+      "habitat": "Forest"
     },
     {
       "id": "squirrel",
@@ -1435,8 +1340,7 @@
       "text": "Roar: gain 10 food.",
       "keywords": [],
       "species": "Squirrel",
-      "habitat": "Forest",
-      "workbench_id": "food-aggro-8"
+      "habitat": "Forest"
     },
     {
       "id": "chipmunk",
@@ -1450,8 +1354,7 @@
       "text": "Roar: gain 10 food. At the start of your next turn, gain 10 more.",
       "keywords": [],
       "species": "Chipmunk",
-      "habitat": "Forest",
-      "workbench_id": "food-aggro-9"
+      "habitat": "Forest"
     },
     {
       "id": "gopher",
@@ -1465,8 +1368,7 @@
       "text": "Roar: if you gained 10 or more food this turn, draw 2 cards.",
       "keywords": [],
       "species": "Gopher",
-      "habitat": "Meadow",
-      "workbench_id": "food-aggro-10"
+      "habitat": "Meadow"
     },
     {
       "id": "muskrat",
@@ -1480,8 +1382,7 @@
       "text": "Roar: if you gained 10 or more food this turn, remove an adjacent enemy.",
       "keywords": [],
       "species": "Muskrat",
-      "habitat": "Meadow",
-      "workbench_id": "food-aggro-11"
+      "habitat": "Meadow"
     },
     {
       "id": "groundhog",
@@ -1495,8 +1396,7 @@
       "text": "Roar: if you gained 10 or more food this turn, gain 10 food.",
       "keywords": [],
       "species": "Groundhog",
-      "habitat": "Meadow",
-      "workbench_id": "food-aggro-12"
+      "habitat": "Meadow"
     },
     {
       "id": "hamster",
@@ -1510,8 +1410,7 @@
       "text": "Has +1 strength for each 10 food you have.",
       "keywords": [],
       "species": "Hamster",
-      "habitat": "Meadow",
-      "workbench_id": "food-aggro-15"
+      "habitat": "Meadow"
     },
     {
       "id": "fathom",
@@ -1523,8 +1422,7 @@
       "text": "Roar: Scout a legendary animal.",
       "keywords": [],
       "species": "Octopus",
-      "habitat": "Open Ocean",
-      "workbench_id": "food-otk-0"
+      "habitat": "Open Ocean"
     },
     {
       "id": "squirrel_legend",
@@ -1538,8 +1436,7 @@
       "text": "Roar: lose all your food. In 2 turns, gain three times as much.",
       "keywords": [],
       "species": "Squirrel",
-      "habitat": "Forest",
-      "workbench_id": "food-otk-1"
+      "habitat": "Forest"
     },
     {
       "id": "honey_badger_legend",
@@ -1556,8 +1453,7 @@
         "Spikes"
       ],
       "species": "Honey Badger",
-      "habitat": "Savanna",
-      "workbench_id": "food-otk-2"
+      "habitat": "Savanna"
     },
     {
       "id": "octopus_legend",
@@ -1569,8 +1465,7 @@
       "text": "Roar: this becomes a copy of an adjacent animal.",
       "keywords": [],
       "species": "Octopus",
-      "habitat": "Open Ocean",
-      "workbench_id": "food-otk-3"
+      "habitat": "Open Ocean"
     },
     {
       "id": "capybara",
@@ -1584,8 +1479,7 @@
       "text": "Your adjacent animals have Armor.",
       "keywords": [],
       "species": "Capybara",
-      "habitat": "Jungle",
-      "workbench_id": "food-otk-4"
+      "habitat": "Jungle"
     },
     {
       "id": "porcupine",
@@ -1601,8 +1495,7 @@
         "Spikes"
       ],
       "species": "Porcupine",
-      "habitat": "Forest",
-      "workbench_id": "food-otk-5"
+      "habitat": "Forest"
     },
     {
       "id": "golden_orb_weaver",
@@ -1616,8 +1509,7 @@
       "text": "When an enemy with Flight or Roam is placed next to this, remove it.",
       "keywords": [],
       "species": "Golden Orb-Weaver",
-      "habitat": "Jungle",
-      "workbench_id": "food-otk-6"
+      "habitat": "Jungle"
     },
     {
       "id": "armadillo",
@@ -1631,8 +1523,7 @@
         "Armor"
       ],
       "species": "Armadillo",
-      "habitat": "Jungle",
-      "workbench_id": "food-otk-7"
+      "habitat": "Jungle"
     },
     {
       "id": "hedgehog",
@@ -1646,8 +1537,7 @@
         "Spikes"
       ],
       "species": "Hedgehog",
-      "habitat": "Meadow",
-      "workbench_id": "food-otk-8"
+      "habitat": "Meadow"
     },
     {
       "id": "dart_frog",
@@ -1656,15 +1546,13 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "text": "Reach 2. Poison.",
+      "text": "Reach. Poison.",
       "keywords": [
         "Reach",
         "Poison"
       ],
-      "reach": 2,
       "species": "Poison Dart Frog",
-      "habitat": "Jungle",
-      "workbench_id": "food-otk-9"
+      "habitat": "Jungle"
     },
     {
       "id": "jellyfish",
@@ -1678,8 +1566,7 @@
         "Poison"
       ],
       "species": "Jellyfish",
-      "habitat": "Open Ocean",
-      "workbench_id": "food-otk-10"
+      "habitat": "Open Ocean"
     },
     {
       "id": "black_bear",
@@ -1693,8 +1580,7 @@
       "text": "Roar: in 2 turns, draw 2 cards.",
       "keywords": [],
       "species": "Black Bear",
-      "habitat": "Forest",
-      "workbench_id": "food-otk-11"
+      "habitat": "Forest"
     },
     {
       "id": "tortoise",
@@ -1708,8 +1594,7 @@
         "Armor"
       ],
       "species": "Tortoise",
-      "habitat": "Savanna",
-      "workbench_id": "food-otk-12"
+      "habitat": "Savanna"
     },
     {
       "id": "owl",
@@ -1725,8 +1610,7 @@
         "Flight"
       ],
       "species": "Owl",
-      "habitat": "Forest",
-      "workbench_id": "food-otk-13"
+      "habitat": "Forest"
     },
     {
       "id": "eon",
@@ -1742,8 +1626,7 @@
         "Apex Predator"
       ],
       "species": "Anaconda",
-      "habitat": "Jungle",
-      "workbench_id": "egg-control-0"
+      "habitat": "Jungle"
     },
     {
       "id": "raven_legend",
@@ -1759,8 +1642,7 @@
         "Flight"
       ],
       "species": "Raven",
-      "habitat": "Forest",
-      "workbench_id": "egg-control-1"
+      "habitat": "Forest"
     },
     {
       "id": "black_swan",
@@ -1776,8 +1658,7 @@
         "Flight"
       ],
       "species": "Swan",
-      "habitat": "Meadow",
-      "workbench_id": "egg-control-3"
+      "habitat": "Meadow"
     },
     {
       "id": "hawk",
@@ -1793,8 +1674,7 @@
         "Flight"
       ],
       "species": "Hawk",
-      "habitat": "Forest",
-      "workbench_id": "egg-control-4"
+      "habitat": "Forest"
     },
     {
       "id": "gaboon_viper",
@@ -1808,8 +1688,7 @@
       "text": "Roar: choose an adjacent enemy. At the start of your next turn, remove it.",
       "keywords": [],
       "species": "Cottonmouth",
-      "habitat": "Forest",
-      "workbench_id": "egg-control-5"
+      "habitat": "Forest"
     },
     {
       "id": "magpie",
@@ -1825,8 +1704,7 @@
         "Flight"
       ],
       "species": "Magpie",
-      "habitat": "Forest",
-      "workbench_id": "egg-control-6"
+      "habitat": "Forest"
     },
     {
       "id": "black_mamba",
@@ -1840,8 +1718,7 @@
       "text": "Roar: remove an adjacent enemy of strength 5 or less.",
       "keywords": [],
       "species": "Black Mamba",
-      "habitat": "Savanna",
-      "workbench_id": "egg-control-7"
+      "habitat": "Savanna"
     },
     {
       "id": "egg_eater",
@@ -1856,8 +1733,7 @@
       "keywords": [],
       "dynamic_strength": "removed_eggs_count",
       "species": "Egg Eater",
-      "habitat": "Savanna",
-      "workbench_id": "egg-control-9"
+      "habitat": "Savanna"
     },
     {
       "id": "mosquito",
@@ -1871,8 +1747,7 @@
         "Flight"
       ],
       "species": "Mosquito",
-      "habitat": "City",
-      "workbench_id": "egg-control-10"
+      "habitat": "City"
     },
     {
       "id": "raven",
@@ -1888,8 +1763,7 @@
         "Flight"
       ],
       "species": "Raven",
-      "habitat": "Forest",
-      "workbench_id": "egg-control-11"
+      "habitat": "Forest"
     },
     {
       "id": "bird_egg",
@@ -1903,8 +1777,7 @@
       "text": "Roar: Scout a Bird. Next turn, remove this and draw a Bird.",
       "keywords": [],
       "species": "",
-      "habitat": "Forest",
-      "workbench_id": "egg-control-12"
+      "habitat": "Forest"
     },
     {
       "id": "snake_egg",
@@ -1918,8 +1791,7 @@
       "text": "Roar: draw a Snake. In 2 turns, remove this and draw 2 Snakes.",
       "keywords": [],
       "species": "",
-      "habitat": "Jungle",
-      "workbench_id": "egg-control-13"
+      "habitat": "Jungle"
     },
     {
       "id": "viper",
@@ -1933,8 +1805,7 @@
       "text": "Roar: give an adjacent enemy -3 strength.",
       "keywords": [],
       "species": "Viper",
-      "habitat": "Forest",
-      "workbench_id": "pool-y3"
+      "habitat": "Forest"
     },
     {
       "id": "aurum",
@@ -1951,8 +1822,7 @@
         "golden_egg"
       ],
       "species": "Goose",
-      "habitat": "Meadow",
-      "workbench_id": "egg-control-2"
+      "habitat": "Meadow"
     },
     {
       "id": "baboon_legend",
@@ -1966,8 +1836,7 @@
       "text": "Dawn: give 2 random animals in your hand +1 strength.",
       "keywords": [],
       "species": "Baboon",
-      "habitat": "Savanna",
-      "workbench_id": "handlock-0"
+      "habitat": "Savanna"
     },
     {
       "id": "silverback",
@@ -1981,8 +1850,7 @@
       "text": "Roar: give all animals in your hand +1 strength.",
       "keywords": [],
       "species": "Gorilla",
-      "habitat": "Jungle",
-      "workbench_id": "handlock-1"
+      "habitat": "Jungle"
     },
     {
       "id": "butterfly_legend",
@@ -2001,8 +1869,7 @@
       ],
       "evolves": true,
       "species": "Butterfly",
-      "habitat": "Meadow",
-      "workbench_id": "handlock-2"
+      "habitat": "Meadow"
     },
     {
       "id": "arne",
@@ -2023,8 +1890,7 @@
       ],
       "mate": "arna",
       "species": "Eagle",
-      "habitat": "Forest",
-      "workbench_id": "handlock-3"
+      "habitat": "Forest"
     },
     {
       "id": "hummingbird",
@@ -2040,8 +1906,7 @@
         "Flight"
       ],
       "species": "Hummingbird",
-      "habitat": "Jungle",
-      "workbench_id": "handlock-4"
+      "habitat": "Jungle"
     },
     {
       "id": "macaque",
@@ -2055,8 +1920,7 @@
       "text": "Roar: if you have 5 or more cards in your hand, remove an adjacent enemy.",
       "keywords": [],
       "species": "Macaque",
-      "habitat": "City",
-      "workbench_id": "handlock-5"
+      "habitat": "City"
     },
     {
       "id": "orangutan",
@@ -2070,8 +1934,7 @@
       "text": "Roar: duplicate a Primate in your hand.",
       "keywords": [],
       "species": "Orangutan",
-      "habitat": "Jungle",
-      "workbench_id": "handlock-6"
+      "habitat": "Jungle"
     },
     {
       "id": "tarsier",
@@ -2085,8 +1948,7 @@
       "text": "Roar: draw a Primate and give it +2 strength.",
       "keywords": [],
       "species": "Tarsier",
-      "habitat": "Jungle",
-      "workbench_id": "handlock-7"
+      "habitat": "Jungle"
     },
     {
       "id": "chimpanzee",
@@ -2100,8 +1962,7 @@
       "text": "Roar: remove an adjacent enemy of equal or lower strength.",
       "keywords": [],
       "species": "Chimpanzee",
-      "habitat": "Jungle",
-      "workbench_id": "handlock-8"
+      "habitat": "Jungle"
     },
     {
       "id": "baboon",
@@ -2115,8 +1976,7 @@
       "text": "Roar: give 2 animals in your hand +1 strength.",
       "keywords": [],
       "species": "Baboon",
-      "habitat": "Savanna",
-      "workbench_id": "handlock-9"
+      "habitat": "Savanna"
     },
     {
       "id": "stork",
@@ -2142,8 +2002,7 @@
         "baby_zebra"
       ],
       "species": "Stork",
-      "habitat": "Meadow",
-      "workbench_id": "handlock-10"
+      "habitat": "Meadow"
     },
     {
       "id": "caterpillar",
@@ -2159,8 +2018,7 @@
       ],
       "evolves": true,
       "species": "Butterfly",
-      "habitat": "Meadow",
-      "workbench_id": "handlock-12"
+      "habitat": "Meadow"
     },
     {
       "id": "gorilla",
@@ -2174,8 +2032,7 @@
       "text": "Roar: if this has 8 or more strength, draw a card.",
       "keywords": [],
       "species": "Gorilla",
-      "habitat": "Jungle",
-      "workbench_id": "handlock-13"
+      "habitat": "Jungle"
     },
     {
       "id": "peacock",
@@ -2189,8 +2046,7 @@
       "text": "Has +1 strength for each other card in your hand.",
       "keywords": [],
       "species": "Peacock",
-      "habitat": "Jungle",
-      "workbench_id": "pool-placeholder"
+      "habitat": "Jungle"
     },
     {
       "id": "brutus",
@@ -2207,8 +2063,7 @@
       ],
       "hungry": 6,
       "species": "Rhinoceros",
-      "habitat": "Savanna",
-      "workbench_id": "giants-0"
+      "habitat": "Savanna"
     },
     {
       "id": "methuselah",
@@ -2222,8 +2077,7 @@
         "Armor"
       ],
       "species": "Tortoise",
-      "habitat": "Savanna",
-      "workbench_id": "giants-1"
+      "habitat": "Savanna"
     },
     {
       "id": "mocha",
@@ -2237,8 +2091,7 @@
         "Titan"
       ],
       "species": "Sperm Whale",
-      "habitat": "Open Ocean",
-      "workbench_id": "giants-2"
+      "habitat": "Open Ocean"
     },
     {
       "id": "oxpecker_legend",
@@ -2254,8 +2107,7 @@
         "Flight"
       ],
       "species": "Oxpecker",
-      "habitat": "Savanna",
-      "workbench_id": "giants-3"
+      "habitat": "Savanna"
     },
     {
       "id": "rhinoceros",
@@ -2272,8 +2124,7 @@
       ],
       "hungry": 3,
       "species": "Rhinoceros",
-      "habitat": "Savanna",
-      "workbench_id": "giants-4"
+      "habitat": "Savanna"
     },
     {
       "id": "hippopotamus",
@@ -2290,8 +2141,7 @@
       ],
       "hungry": 3,
       "species": "Hippopotamus",
-      "habitat": "Savanna",
-      "workbench_id": "giants-5"
+      "habitat": "Savanna"
     },
     {
       "id": "whale_shark",
@@ -2309,8 +2159,7 @@
       ],
       "hungry": 4,
       "species": "Whale Shark",
-      "habitat": "Open Ocean",
-      "workbench_id": "giants-7"
+      "habitat": "Open Ocean"
     },
     {
       "id": "oxpecker",
@@ -2326,8 +2175,7 @@
         "Flight"
       ],
       "species": "Oxpecker",
-      "habitat": "Savanna",
-      "workbench_id": "giants-8"
+      "habitat": "Savanna"
     },
     {
       "id": "anteater",
@@ -2339,8 +2187,7 @@
       "text": "Roar: draw a card. Gain food equal to its strength.",
       "keywords": [],
       "species": "Giant Anteater",
-      "habitat": "Jungle",
-      "workbench_id": "giants-9"
+      "habitat": "Jungle"
     },
     {
       "id": "dung_beetle",
@@ -2352,8 +2199,7 @@
       "text": "Dusk: gain 2 food for each Hungry animal you control.",
       "keywords": [],
       "species": "Dung Beetle",
-      "habitat": "Savanna",
-      "workbench_id": "giants-10"
+      "habitat": "Savanna"
     },
     {
       "id": "blue_whale",
@@ -2367,8 +2213,7 @@
         "Titan"
       ],
       "species": "Blue Whale",
-      "habitat": "Open Ocean",
-      "workbench_id": "giants-11"
+      "habitat": "Open Ocean"
     },
     {
       "id": "sloth",
@@ -2380,8 +2225,7 @@
       "text": "Roar: in 2 turns, gain 30 food.",
       "keywords": [],
       "species": "Sloth",
-      "habitat": "Jungle",
-      "workbench_id": "giants-12"
+      "habitat": "Jungle"
     },
     {
       "id": "elephant",
@@ -2396,8 +2240,7 @@
       ],
       "hungry": 5,
       "species": "Elephant",
-      "habitat": "Savanna",
-      "workbench_id": "giants-13"
+      "habitat": "Savanna"
     },
     {
       "id": "moose",
@@ -2415,8 +2258,7 @@
       ],
       "hungry": 3,
       "species": "Moose",
-      "habitat": "Forest",
-      "workbench_id": "hoofed-6"
+      "habitat": "Forest"
     },
     {
       "id": "wildebeest_legend",
@@ -2430,8 +2272,7 @@
       "text": "Your regions produce 5 more food.",
       "keywords": [],
       "species": "Wildebeest",
-      "habitat": "Savanna",
-      "workbench_id": "hoofed-0"
+      "habitat": "Savanna"
     },
     {
       "id": "boar_legend",
@@ -2445,8 +2286,7 @@
       "text": "Your opponent's regions produce 5 less food.",
       "keywords": [],
       "species": "Boar",
-      "habitat": "Forest",
-      "workbench_id": "hoofed-1"
+      "habitat": "Forest"
     },
     {
       "id": "zebra_legend",
@@ -2460,8 +2300,7 @@
       "text": "Roar: draw a card for each different Hoofed animal you control.",
       "keywords": [],
       "species": "Zebra",
-      "habitat": "Savanna",
-      "workbench_id": "hoofed-2"
+      "habitat": "Savanna"
     },
     {
       "id": "giraffe_legend",
@@ -2475,8 +2314,7 @@
       "text": "Your opponent's hand is revealed.",
       "keywords": [],
       "species": "Giraffe",
-      "habitat": "Savanna",
-      "workbench_id": "hoofed-3"
+      "habitat": "Savanna"
     },
     {
       "id": "honey_badger",
@@ -2488,8 +2326,7 @@
       "text": "Roar: remove an adjacent enemy of strength 6 or more.",
       "keywords": [],
       "species": "Honey Badger",
-      "habitat": "Savanna",
-      "workbench_id": "hoofed-4"
+      "habitat": "Savanna"
     },
     {
       "id": "okapi",
@@ -2503,8 +2340,7 @@
       "text": "Dusk: if this is grazing, draw a card.",
       "keywords": [],
       "species": "Okapi",
-      "habitat": "Jungle",
-      "workbench_id": "hoofed-5"
+      "habitat": "Jungle"
     },
     {
       "id": "zebra",
@@ -2520,8 +2356,7 @@
         "Flee"
       ],
       "species": "Zebra",
-      "habitat": "Savanna",
-      "workbench_id": "hoofed-7"
+      "habitat": "Savanna"
     },
     {
       "id": "giraffe",
@@ -2535,8 +2370,7 @@
       "text": "Has +5 strength during your opponent's turn.",
       "keywords": [],
       "species": "Giraffe",
-      "habitat": "Savanna",
-      "workbench_id": "hoofed-8"
+      "habitat": "Savanna"
     },
     {
       "id": "cape_buffalo",
@@ -2550,8 +2384,7 @@
       "text": "Your other Hoofed animals have +1 strength during your opponent's turn.",
       "keywords": [],
       "species": "Cape Buffalo",
-      "habitat": "Savanna",
-      "workbench_id": "hoofed-9"
+      "habitat": "Savanna"
     },
     {
       "id": "gazelle",
@@ -2567,8 +2400,7 @@
         "Flee"
       ],
       "species": "Gazelle",
-      "habitat": "Savanna",
-      "workbench_id": "hoofed-10"
+      "habitat": "Savanna"
     },
     {
       "id": "wildebeest",
@@ -2582,8 +2414,7 @@
       "text": "Dusk: if this is grazing, gain 5 food.",
       "keywords": [],
       "species": "Wildebeest",
-      "habitat": "Savanna",
-      "workbench_id": "hoofed-11"
+      "habitat": "Savanna"
     },
     {
       "id": "deer",
@@ -2599,8 +2430,7 @@
         "Flee"
       ],
       "species": "Deer",
-      "habitat": "Forest",
-      "workbench_id": "hoofed-12"
+      "habitat": "Forest"
     },
     {
       "id": "boar",
@@ -2614,8 +2444,7 @@
       "text": "Roar: remove an adjacent enemy that isn't covering anything.",
       "keywords": [],
       "species": "Boar",
-      "habitat": "Forest",
-      "workbench_id": "hoofed-13"
+      "habitat": "Forest"
     },
     {
       "id": "warthog",
@@ -2629,8 +2458,7 @@
       "text": "Roar: remove an adjacent enemy covering an allied Hoofed animal.",
       "keywords": [],
       "species": "Warthog",
-      "habitat": "Savanna",
-      "workbench_id": "pool-warthog"
+      "habitat": "Savanna"
     },
     {
       "id": "octopus",
@@ -2642,8 +2470,7 @@
       "text": "Roar: adjacent enemies lose all their effects.",
       "keywords": [],
       "species": "Octopus",
-      "habitat": "Open Ocean",
-      "workbench_id": "pool-0"
+      "habitat": "Open Ocean"
     },
     {
       "id": "great_white_shark",
@@ -2654,13 +2481,12 @@
         "Fish"
       ],
       "base_strength": 7,
-      "text": "Apex Predator. If an animal was removed this turn, this has Reach 3.",
+      "text": "Apex Predator. If an animal was removed this turn, this has Reach.",
       "keywords": [
         "Apex Predator"
       ],
       "species": "Great White Shark",
-      "habitat": "Open Ocean",
-      "workbench_id": "pool-1"
+      "habitat": "Open Ocean"
     },
     {
       "id": "butterfly",
@@ -2674,8 +2500,7 @@
         "Flight"
       ],
       "species": "Butterfly",
-      "habitat": "Meadow",
-      "workbench_id": "pool-3"
+      "habitat": "Meadow"
     },
     {
       "id": "macaw",
@@ -2691,8 +2516,7 @@
         "Flight"
       ],
       "species": "Macaw",
-      "habitat": "Jungle",
-      "workbench_id": "pool-4"
+      "habitat": "Jungle"
     },
     {
       "id": "eagle",
@@ -2708,8 +2532,7 @@
         "Flight"
       ],
       "species": "Eagle",
-      "habitat": "Forest",
-      "workbench_id": "pool-x0"
+      "habitat": "Forest"
     },
     {
       "id": "cuckoo",
@@ -2728,8 +2551,7 @@
         "cuckoo_egg"
       ],
       "species": "Cuckoo",
-      "habitat": "Meadow",
-      "workbench_id": "pool-x1"
+      "habitat": "Meadow"
     },
     {
       "id": "opossum",
@@ -2741,8 +2563,7 @@
       "text": "Roar: return an adjacent ally to your hand.",
       "keywords": [],
       "species": "Opossum",
-      "habitat": "City",
-      "workbench_id": "pool-x2"
+      "habitat": "City"
     },
     {
       "id": "anaconda",
@@ -2758,8 +2579,7 @@
         "Apex Predator"
       ],
       "species": "Anaconda",
-      "habitat": "Jungle",
-      "workbench_id": "pool-y4"
+      "habitat": "Jungle"
     },
     {
       "id": "polar_bear",
@@ -2775,8 +2595,7 @@
         "Apex Predator"
       ],
       "species": "Polar Bear",
-      "habitat": "Polar",
-      "workbench_id": "pool-y5"
+      "habitat": "Polar"
     },
     {
       "id": "borealis",
@@ -2792,8 +2611,7 @@
         "Apex Predator"
       ],
       "species": "Polar Bear",
-      "habitat": "Polar",
-      "workbench_id": "pool-y6"
+      "habitat": "Polar"
     },
     {
       "id": "lemming",
@@ -2807,8 +2625,7 @@
       "text": "",
       "keywords": [],
       "species": "Lemming",
-      "habitat": "Polar",
-      "workbench_id": "pool-y7"
+      "habitat": "Polar"
     },
     {
       "id": "snow_leopard",
@@ -2822,8 +2639,7 @@
       "text": "",
       "keywords": [],
       "species": "Snow Leopard",
-      "habitat": "Polar",
-      "workbench_id": "pool-y8"
+      "habitat": "Polar"
     },
     {
       "id": "rattlesnake",
@@ -2837,8 +2653,7 @@
       "text": "Whenever you shuffle a card, gain 1 strength (wherever this is).",
       "keywords": [],
       "species": "Rattlesnake",
-      "habitat": "Desert",
-      "workbench_id": "pool-y9"
+      "habitat": "Desert"
     },
     {
       "id": "outrider",
@@ -2853,8 +2668,7 @@
       "keywords": [],
       "unnamed": true,
       "species": "Coyote",
-      "habitat": "Desert",
-      "workbench_id": "pool-y10"
+      "habitat": "Desert"
     },
     {
       "id": "jerboa",
@@ -2868,8 +2682,7 @@
       "text": "",
       "keywords": [],
       "species": "Jerboa",
-      "habitat": "Desert",
-      "workbench_id": "pool-y11"
+      "habitat": "Desert"
     },
     {
       "id": "andean_condor",
@@ -2885,8 +2698,7 @@
         "Flight"
       ],
       "species": "Andean Condor",
-      "habitat": "Mountains",
-      "workbench_id": "pool-y12"
+      "habitat": "Mountains"
     },
     {
       "id": "cougar",
@@ -2900,8 +2712,7 @@
       "text": "You can place this next to any Cat you control, ignoring connection.",
       "keywords": [],
       "species": "Cougar",
-      "habitat": "Mountains",
-      "workbench_id": "pool-y13"
+      "habitat": "Mountains"
     },
     {
       "id": "chinchilla",
@@ -2915,8 +2726,7 @@
       "text": "",
       "keywords": [],
       "species": "Chinchilla",
-      "habitat": "Mountains",
-      "workbench_id": "pool-y14"
+      "habitat": "Mountains"
     },
     {
       "id": "dingo",
@@ -2930,8 +2740,7 @@
       "text": "Dusk: give your adjacent Canines +1 strength.",
       "keywords": [],
       "species": "Dingo",
-      "habitat": "Australia",
-      "workbench_id": "pool-y15"
+      "habitat": "Australia"
     },
     {
       "id": "cairn",
@@ -2946,8 +2755,7 @@
       ],
       "food_cost": 15,
       "species": "Glyptodont",
-      "habitat": "Ice Age",
-      "workbench_id": "pool-y16"
+      "habitat": "Ice Age"
     },
     {
       "id": "woodpecker",
@@ -2963,8 +2771,7 @@
         "Flight"
       ],
       "species": "Woodpecker",
-      "habitat": "Forest",
-      "workbench_id": "pool-woodpecker"
+      "habitat": "Forest"
     },
     {
       "id": "stag_beetle",
@@ -2978,8 +2785,7 @@
         "Armor"
       ],
       "species": "Stag Beetle",
-      "habitat": "Forest",
-      "workbench_id": "pool-stag-beetle"
+      "habitat": "Forest"
     },
     {
       "id": "dolphin",
@@ -2991,8 +2797,7 @@
       "text": "Roar: draw a card.",
       "keywords": [],
       "species": "Dolphin",
-      "habitat": "Open Ocean",
-      "workbench_id": "pool-dolphin"
+      "habitat": "Open Ocean"
     },
     {
       "id": "albatross",
@@ -3008,8 +2813,7 @@
         "Flight"
       ],
       "species": "Albatross",
-      "habitat": "Open Ocean",
-      "workbench_id": "pool-albatross"
+      "habitat": "Open Ocean"
     },
     {
       "id": "cuco",
@@ -3023,8 +2827,7 @@
       "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal.",
       "keywords": [],
       "species": "Cuckoo",
-      "habitat": "Meadow",
-      "workbench_id": "aristocrats-0"
+      "habitat": "Meadow"
     },
     {
       "id": "sloth_legend",
@@ -3036,8 +2839,7 @@
       "text": "Your Dusk effects happen twice.",
       "keywords": [],
       "species": "Sloth",
-      "habitat": "Jungle",
-      "workbench_id": "aristocrats-3"
+      "habitat": "Jungle"
     },
     {
       "id": "tarantula",
@@ -3051,8 +2853,7 @@
       "text": "Dusk: remove a random adjacent ally and gain its strength.",
       "keywords": [],
       "species": "Tarantula",
-      "habitat": "Jungle",
-      "workbench_id": "aristocrats-5"
+      "habitat": "Jungle"
     },
     {
       "id": "sea_turtle",
@@ -3067,8 +2868,7 @@
         "baby_turtle"
       ],
       "species": "Sea Turtle",
-      "habitat": "Open Ocean",
-      "workbench_id": "aristocrats-6"
+      "habitat": "Open Ocean"
     },
     {
       "id": "hyena",
@@ -3080,8 +2880,7 @@
       "text": "Dusk: gain 3 food for each animal removed this turn.",
       "keywords": [],
       "species": "Hyena",
-      "habitat": "Savanna",
-      "workbench_id": "aristocrats-9"
+      "habitat": "Savanna"
     },
     {
       "id": "naked_mole_rat",
@@ -3095,8 +2894,7 @@
       "text": "Roar: play another animal next to this.",
       "keywords": [],
       "species": "Naked Mole-Rat",
-      "habitat": "Savanna",
-      "workbench_id": "den-rush-4"
+      "habitat": "Savanna"
     },
     {
       "id": "greywhisker",
@@ -3110,8 +2908,7 @@
       "text": "Roar: gain 1 food, draw a card, play another animal, then discard a card.",
       "keywords": [],
       "species": "Rat",
-      "habitat": "City",
-      "workbench_id": "den-rush-0"
+      "habitat": "City"
     },
     {
       "id": "bat_legend",
@@ -3126,8 +2923,7 @@
       ],
       "unnamed": true,
       "species": "Bat",
-      "habitat": "City",
-      "workbench_id": "pool-bat-legend"
+      "habitat": "City"
     },
     {
       "id": "crocodile",
@@ -3139,8 +2935,7 @@
       "text": "Has -3 strength during your opponent's turn.",
       "keywords": [],
       "species": "Crocodile",
-      "habitat": "Savanna",
-      "workbench_id": "giants-6"
+      "habitat": "Savanna"
     },
     {
       "id": "grizzly_bear",
@@ -3154,8 +2949,7 @@
       "text": "Roar: your opponent draws a card.",
       "keywords": [],
       "species": "Grizzly Bear",
-      "habitat": "Forest",
-      "workbench_id": "handlock-11"
+      "habitat": "Forest"
     },
     {
       "id": "guard_bee",
@@ -3172,8 +2966,7 @@
         "Spikes"
       ],
       "species": "Bee",
-      "habitat": "Meadow",
-      "workbench_id": "pool-guard-bee"
+      "habitat": "Meadow"
     },
     {
       "id": "forager_ant",
@@ -3188,8 +2981,7 @@
       "text": "Roar: gain 5 food. If you gained 10 or more food this turn, draw a card.",
       "keywords": [],
       "species": "Ant",
-      "habitat": "Forest",
-      "workbench_id": "pool-forager-ant"
+      "habitat": "Forest"
     },
     {
       "id": "queen_wasp",
@@ -3206,8 +2998,7 @@
         "Flight"
       ],
       "species": "Wasp",
-      "habitat": "Forest",
-      "workbench_id": "pool-queen-wasp"
+      "habitat": "Forest"
     },
     {
       "id": "scout_bee",
@@ -3223,8 +3014,7 @@
         "Flight"
       ],
       "species": "Bee",
-      "habitat": "Meadow",
-      "workbench_id": "pool-scout-bee"
+      "habitat": "Meadow"
     },
     {
       "id": "ant",
@@ -3238,8 +3028,7 @@
       "text": "Dusk: gain 2 food for each animal you control.",
       "keywords": [],
       "species": "Ant",
-      "habitat": "Forest",
-      "workbench_id": "pool-ant"
+      "habitat": "Forest"
     },
     {
       "id": "baby_turtle",
@@ -4436,6 +4225,306 @@
       "keywords": [],
       "text": "Roar: gain 10 food. At the start of your next turn, gain 10 more.",
       "status": "tutorial"
+    },
+    {
+      "id": "ostrich",
+      "name": "Ostrich",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Ostrich",
+      "habitat": "Savanna"
+    },
+    {
+      "id": "firefly",
+      "name": "Firefly",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Firefly",
+      "habitat": "Forest"
+    },
+    {
+      "id": "salamander",
+      "name": "Salamander",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Salamander",
+      "habitat": "Forest"
+    },
+    {
+      "id": "weasel",
+      "name": "Weasel",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Weasel",
+      "habitat": "Meadow"
+    },
+    {
+      "id": "dragonfly",
+      "name": "Dragonfly",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Dragonfly",
+      "habitat": "Meadow"
+    },
+    {
+      "id": "ladybird",
+      "name": "Ladybird",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Ladybird",
+      "habitat": "Meadow"
+    },
+    {
+      "id": "grasshopper",
+      "name": "Grasshopper",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Grasshopper",
+      "habitat": "Meadow"
+    },
+    {
+      "id": "pond_skater",
+      "name": "Pond Skater",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Pond Skater",
+      "habitat": "Meadow"
+    },
+    {
+      "id": "frog",
+      "name": "Frog",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Frog",
+      "habitat": "Meadow"
+    },
+    {
+      "id": "snail",
+      "name": "Snail",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Snail",
+      "habitat": "Meadow"
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Tick",
+      "habitat": "Meadow"
+    },
+    {
+      "id": "centipede",
+      "name": "Centipede",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Centipede",
+      "habitat": "Meadow"
+    },
+    {
+      "id": "duck",
+      "name": "Duck",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Duck",
+      "habitat": "Meadow"
+    },
+    {
+      "id": "swallow",
+      "name": "Swallow",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Swallow",
+      "habitat": "Meadow"
+    },
+    {
+      "id": "gecko",
+      "name": "Gecko",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Gecko",
+      "habitat": "City"
+    },
+    {
+      "id": "pigeon",
+      "name": "Pigeon",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Pigeon",
+      "habitat": "City"
+    },
+    {
+      "id": "sparrow",
+      "name": "Sparrow",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Sparrow",
+      "habitat": "City"
+    },
+    {
+      "id": "coral_snake",
+      "name": "Coral Snake",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Coral Snake",
+      "habitat": "Jungle"
+    },
+    {
+      "id": "tapir",
+      "name": "Tapir",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Tapir",
+      "habitat": "Jungle"
+    },
+    {
+      "id": "basilisk",
+      "name": "Basilisk",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Basilisk",
+      "habitat": "Jungle"
+    },
+    {
+      "id": "iguana",
+      "name": "Iguana",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Iguana",
+      "habitat": "Jungle"
+    },
+    {
+      "id": "electric_eel",
+      "name": "Electric Eel",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Electric Eel",
+      "habitat": "Jungle"
+    },
+    {
+      "id": "leech",
+      "name": "Leech",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Leech",
+      "habitat": "Jungle"
+    },
+    {
+      "id": "hammerhead",
+      "name": "Hammerhead",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Hammerhead",
+      "habitat": "Open Ocean"
+    },
+    {
+      "id": "squid",
+      "name": "Squid",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Squid",
+      "habitat": "Open Ocean"
     }
   ]
 }

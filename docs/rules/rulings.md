@@ -42,7 +42,7 @@ How recurring card-text patterns resolve. [`overview.md`](overview.md) holds the
 
 The keywords are defined in [`keywords.md`](keywords.md); these are the calls the engine makes where the definitions leave room.
 
-- **Reach N counts from the den too.** Ordinary placement is Reach 1 and lands on the den's front crossroads, so the den is a launch point: its front crossroads are one step away. Reach never takes a den; a den is taken only along the ordinary chain.
+- **Reach counts from the den too.** Ordinary placement lands on the den's front crossroads, so the den is a launch point: its front crossroads are one step away, and Reach lands one further. Reach never takes a den; a den is taken only along the ordinary chain.
 - **Roam lands like a placement in everything but the Roar.** Arriving sets off every adjacent trap (Hippopotamus), even one the animal already stood next to before it moved. A cover by roaming is a cover: Spikes, Poison, Pufferfish, King Theron and an Apex Predator's eat all happen. What is printed as a Roar does not (Caracal's "if placed on top of an enemy"), nor do "when you play" or "whenever you place" reactions (Red Wolf, Queen Melissia): moving isn't placing. An Apex Predator roams only onto an animal, its own included, and eats it; it never roams onto a den.
 - **A roam keeps the animal's place in the play order.** Moving isn't playing; a bounced animal played again is newly played.
 - **Roaming onto a den ends the game where it stands.** The animal never leaves its crossroad.
@@ -106,7 +106,7 @@ Cards:
 - **Cape Buffalo** removes an enemy sitting directly on top of one of your Hoofed animals.
 - **The legendary Wildebeest and Boar** move each region's food by 5 (each copy counts; a region never produces less than nothing).
 - **The legendary Giraffe** shows its controller the opponent's hand face up in the client; the bots don't use it.
-- **Great White Shark** has Reach 3 after any animal, of either side, left the board this turn.
+- **Great White Shark** has Reach after any animal, of either side, left the board this turn.
 - **Cuckoo's** eggs count as the Cuckoo player's shuffles (their Rattlesnake grows, not the opponent's).
 - **Opossum** (the pool's) must return an adjacent ally if one can be returned (Armor can't).
 

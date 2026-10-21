@@ -18,7 +18,7 @@ RARITIES = {"common", "rare", "legendary"}
 KEYWORDS = {"Flight", "Armor", "Apex Predator", "Stealth", "Spikes", "Poison", "Roam", "Reach", "Hungry", "Titan",
             "Flee"}  # static keywords only;
 # Roar/Dawn/Dusk/Deathrattle are trigger prefixes printed in `text`, not stored keywords. A numbered keyword carries its
-# number in its own field: Reach 2 is {"keywords": ["Reach"], "reach": 2}, Hungry 3 is {"keywords": ["Hungry"], "hungry": 3}.
+# number in its own field: Hungry 3 is {"keywords": ["Hungry"], "hungry": 3}. Reach has none (its distance is config.reach).
 # Family + role tags (dec. B). Retired umbrellas (Reptile, Insect) are forbidden.
 TAGS = {
     "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent",
@@ -34,9 +34,11 @@ DYNAMIC_STRENGTHS = {"removed_units_count", "removed_eggs_count"}  # Python, Egg
 # "reserve" = shelved designs kept out of play (open designs, a later habitat's cards, the sim tools' calibration bodies).
 # "tutorial" = the tutorial's fixed deal, cards as they were when it was written.
 # "token" = made by effects (Baby Turtle, a Stork's younglings, the Butterfly's stages); never in a decklist.
+# A "planned" record in cards.json (an animal and habitat waiting for a design) is no card yet: the loader skips it.
 STATUSES = {"collectible", "reserve", "tutorial", "token"}
+PLANNED = "planned"
 
-# The decks the game ships (decklists.json, written for the starters by tools/card-workbench/convert.py), in menu order:
+# The decks the game ships (decklists.json), in menu order:
 # slug, name, cover (the card whose art faces it), starter (a new profile gets it), bot (the bots play it), cards
 # (id: copies). Starter slugs align to docs/cards/decks/ filenames.
 DECKLISTS: list[dict] = sorted(load_bundled_json("decklists.json")["decks"], key=lambda d: d.get("order", 0))
@@ -65,7 +67,6 @@ class Card:
     dynamic_strength: Optional[str] = None  # rule name when base_strength == "dynamic"
     food_cost: int = 0             # placement cost; only on "Costs X food" cards
     text: str = ""
-    reach: int = 0                 # Reach N: lands up to N crossroads from a connected unit (0: no Reach)
     hungry: int = 0                # Hungry N: eats N food at the start of your turn, else loses N strength (0: not Hungry)
     unnamed: bool = False          # a legendary still waiting for its name: `name` shows its species meanwhile
     mate: Optional[str] = None     # the card it pairs with in hand (the Eagles): a buff to either counts for both
@@ -147,11 +148,8 @@ def validate_card_record(rec: dict) -> None:
     if ("Hungry" in rec.get("keywords", [])) != (hungry is not None):
         raise CardDataError(f"card {cid!r}: the Hungry keyword and its `hungry` number go together")
 
-    reach = rec.get("reach")
-    if reach is not None and (isinstance(reach, bool) or not isinstance(reach, int) or reach < 2):
-        raise CardDataError(f"card {cid!r}: reach must be an int >= 2 (Reach 1 is ordinary placement), got {reach!r}")
-    if ("Reach" in rec.get("keywords", [])) != (reach is not None):
-        raise CardDataError(f"card {cid!r}: the Reach keyword and its `reach` number go together")
+    if "reach" in rec:
+        raise CardDataError(f"card {cid!r}: Reach has no number (every Reach lands two crossroads out, config.reach)")
 
 
 def _build_card(rec: dict) -> Card:
@@ -166,7 +164,6 @@ def _build_card(rec: dict) -> Card:
         dynamic_strength=rec.get("dynamic_strength"),
         food_cost=rec.get("food_cost", 0),
         text=rec.get("text", ""),
-        reach=rec.get("reach", 0),
         hungry=rec.get("hungry", 0),
         unnamed=rec.get("unnamed", False),
         mate=rec.get("mate"),
@@ -192,6 +189,8 @@ def load_cards(raw: Optional[dict] = None, *, validate: bool = True) -> dict[str
 
     registry: dict[str, Card] = {}
     for rec in records:
+        if rec.get("status") == PLANNED:
+            continue
         if validate:
             validate_card_record(rec)
         cid = rec["id"]

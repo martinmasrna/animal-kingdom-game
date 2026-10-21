@@ -1,11 +1,13 @@
 """The card table's data: every card's values, read from and written to the game's own files, and how settled each one is.
 
-The values live where the game keeps them: tools/card-workbench/decks.json (habitat, rarity, name and species, tag,
-strength, text; convert.py then rewrites animal_kingdom/data/cards.json and the starter decks in decklists.json) and animal_kingdom/web/static/art.js (the
-crops). The engine makes some cards itself (tokens, evolution stages, the Eagle's mate); they are listed in convert.py,
-shown under the card that makes them, and their values are read-only here.
+The values live where the game keeps them, one place each: animal_kingdom/data/cards.json (habitat, rarity, name and
+species, tags, strength, text, and the status: collectible, reserve, planned; the keywords are read from the text as it
+is written), animal_kingdom/data/decklists.json (which starter deck a card ships in, and the starters' names) and
+animal_kingdom/web/static/art.js (the crops). The cards the engine makes itself (tokens, evolution stages, the Eagle's
+mate) are shown under the card that makes them, and their values are read-only here. The old pool's shelved cards (no
+habitat) and the tutorial's deal stay off the table.
 
-How settled each value is lives in tools/cards/levels.json, one entry per card and column:
+How settled each value is lives in tools/cards/levels.json, one entry per card id and column:
     {"lv": "empty|draft|problem|fine|locked", "note": "...", "by": "martin|claude", "review": {"prev": ..., "prev_lv": ...}}
 A missing entry is draft when the value exists, else empty. `review` marks a change Claude made that Martin hasn't
 seen; he accepts it (the mark goes) or reverts it (the old value and level come back).
@@ -17,16 +19,18 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py show [ID...]                  the rows, as JSON
     .venv/bin/python tools/cards/hq.py set ID COLUMN VALUE [--note N] a value (animal: "Name/Species" for a legendary)
     .venv/bin/python tools/cards/hq.py level ID COLUMN LEVEL [--note N]
-    .venv/bin/python tools/cards/hq.py move ID DECK                  to another deck (a starter deck's key, or pool)
-    .venv/bin/python tools/cards/hq.py shelve ID                     a pool card out of the collection (into the reserve)
-    .venv/bin/python tools/cards/hq.py collect ID                    a card back into the collection (the reverse of shelve)
+    .venv/bin/python tools/cards/hq.py move ID DECK                  into a starter deck (its slug), or `pool` for none
+    .venv/bin/python tools/cards/hq.py shelve ID                     a card in no starter out of the collection (into the reserve)
+    .venv/bin/python tools/cards/hq.py collect ID                    a reserve card into the collection (the reverse of shelve)
     .venv/bin/python tools/cards/hq.py deck-name DECK NAME           a starter deck's name
     .venv/bin/python tools/cards/hq.py delete ID                     a card out of the game entirely
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d] [--strip x,y,z] [--full y|reset]
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
 
-This is the only way cards change: the workspace's hook (hooks/cards-one-path.py, run before every tool call in Claude Code
-and in Codex) refuses direct edits of decks.json, cards.json and the crop tables in art.js.
+A planned card becomes a card (in the reserve) once it has a rarity and a strength. Every edit is checked against the
+engine's card rules before it is written. This is the only way cards change: the workspace's hook
+(hooks/cards-one-path.py, run before every tool call in Claude Code and in Codex) refuses direct edits of cards.json and
+the crop tables in art.js.
 """
 from __future__ import annotations
 
@@ -39,8 +43,11 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DECKS = ROOT / "tools" / "card-workbench" / "decks.json"
+sys.path.insert(0, str(ROOT))
+from animal_kingdom.engine.cards import PLANNED, CardDataError, validate_card_record  # noqa: E402
+
 CARDS = ROOT / "animal_kingdom" / "data" / "cards.json"
+DECKLISTS = ROOT / "animal_kingdom" / "data" / "decklists.json"
 ART_JS = ROOT / "animal_kingdom" / "web" / "static" / "art.js"
 LEVELS = Path(__file__).parent / "levels.json"
 PY = Path(sys.executable)   # the venv this runs in (bin/ on Unix, Scripts/ on Windows)
@@ -50,6 +57,13 @@ VALUE_COLS = ["habitat", "rarity", "animal", "tag", "strength", "effect"]
 LEVELS_ORDER = ["empty", "draft", "problem", "fine", "locked"]
 HABITATS = ["Savanna", "Jungle", "Forest", "Meadow", "City", "Open Ocean", "Polar", "Desert", "Mountains", "Australia", "Ice Age"]
 RARITY = {"L": "legendary", "R": "rare", "C": "common"}
+LETTER = {v: k for k, v in RARITY.items()}
+COPIES = {"legendary": 1, "rare": 2, "common": 3}     # the 4-4-6 copy limits: a starter holds each card at its limit
+POOL = "pool"                                         # the table's name for "in no starter deck"
+
+# Printed keywords, as the first sentences of a card's text ("Flight. Roar: ...", "Titan. Hungry 4. ...").
+KEYWORD = re.compile(r"(Flight|Armor|Stealth|Spikes|Poison|Roam|Reach|Apex Predator|Titan|Flee|Hungry (\d+))\.(?: |$)")
+COSTS = re.compile(r"Costs (\d+) food")
 
 
 class Refused(Exception):
@@ -62,8 +76,23 @@ def _read(p: Path):
 
 def _write(p: Path, data) -> None:
     tmp = p.with_suffix(".tmp")
-    tmp.write_text(json.dumps(data, indent=1 if p == DECKS else 2, ensure_ascii=False) + ("" if p == DECKS else "\n"), encoding="utf-8")
+    tmp.write_text(json.dumps(data, indent=1 if p == DECKLISTS else 2, ensure_ascii=False) + "\n", encoding="utf-8")
     tmp.replace(p)
+
+
+def parse_text(text: str) -> dict:
+    """The keywords a card's text opens with, Hungry's number, and a printed food cost."""
+    out: dict = {"keywords": []}
+    pos = 0
+    while (m := KEYWORD.match(text, pos)):
+        if m.group(2):
+            out["keywords"].append("Hungry"); out["hungry"] = int(m.group(2))
+        else:
+            out["keywords"].append(m.group(1))
+        pos = m.end()
+    if (m := COSTS.search(text)):
+        out["food_cost"] = int(m.group(1))
+    return out
 
 
 # ---------- art.js ----------
@@ -115,36 +144,27 @@ def write_art(card_id: str, table: str, value) -> None:
 
 # ---------- rows ----------
 
-def _deck_index(decks: dict) -> dict:
-    return {c["id"]: (slug, i) for slug, d in decks["decks"].items() for i, c in enumerate(d["cards"])}
+def _starters(decklists: dict) -> list[dict]:
+    return [d for d in decklists["decks"] if d.get("starter")]
 
 
 def load() -> dict:
     """Everything the page shows: the rows in table order, and the levels."""
-    decks, cards, art = _read(DECKS), _read(CARDS), read_art()
+    cards, decklists, art = _read(CARDS), _read(DECKLISTS), read_art()
     levels = _read(LEVELS) if LEVELS.exists() else {}
-    by_wid = {c["workbench_id"]: c for c in cards["cards"] if c.get("workbench_id")}
-    by_id = {c["id"]: c for c in cards["cards"]}
+    starter_of = {cid: d["slug"] for d in _starters(decklists) for cid in d["cards"]}
     rows = []
-    for slug, d in decks["decks"].items():
-        for wc in d["cards"]:
-            eng = by_wid.get(wc["id"])
-            key = eng["id"] if eng else wc["id"]
-            rows.append({
-                "id": key, "wid": wc["id"], "deck": slug, "editable": True,
-                "habitat": wc.get("habitat", ""), "rarity": wc["rarity"], "name": wc["name"].strip(),
-                "species": wc.get("species", ""), "tag": wc.get("tag", ""), "str": wc.get("str"),
-                "text": wc.get("text", ""), "related": (eng or {}).get("related", []), "evolves": bool((eng or {}).get("evolves")),
-                "art": key in art["CROP"],
-            })
     for c in cards["cards"]:
-        if c["status"] != "token":
+        token = c["status"] == "token"
+        if c["status"] == "tutorial" or (c["status"] == "reserve" and not c.get("habitat")):
             continue
         rows.append({
-            "id": c["id"], "wid": None, "deck": "token", "editable": False, "habitat": "",
-            "rarity": {"legendary": "L", "rare": "R"}.get(c["rarity"], "C"), "name": c["name"], "species": "",
-            "tag": ", ".join(c.get("tags", [])), "str": c["base_strength"], "text": c.get("text", ""),
-            "related": [], "evolves": False, "art": c["id"] in art["CROP"],
+            "id": c["id"], "deck": "token" if token else starter_of.get(c["id"], POOL), "status": c["status"],
+            "editable": not token, "habitat": c.get("habitat", ""), "rarity": LETTER.get(c["rarity"], ""),
+            "name": "" if c.get("unnamed") else c["name"], "species": c.get("species", ""),
+            "tag": ", ".join(c.get("tags", [])), "str": "*" if c["base_strength"] == "dynamic" else c["base_strength"],
+            "text": c.get("text", ""), "related": c.get("related", []), "evolves": bool(c.get("evolves")),
+            "art": c["id"] in art["CROP"],
         })
     ids = {r["id"] for r in rows}
     parent = {}
@@ -171,7 +191,7 @@ def _blank(r: dict, col: str) -> bool:
     if col == "animal":
         return not (v["name"] if r["rarity"] == "L" else (v["name"] or v["species"]))
     if col == "effect":
-        return not v and r["deck"] != "token"   # a vanilla animal says so with "—"; a token may have no text
+        return not v and r["deck"] != "token"   # a token may have no text
     return v is None or v is False or v == ""
 
 
@@ -184,7 +204,7 @@ def cell(levels: dict, r: dict, col: str) -> dict:
 
 
 def stamp() -> float:
-    return max(p.stat().st_mtime for p in (DECKS, CARDS, ART_JS, LEVELS) if p.exists())
+    return max(p.stat().st_mtime for p in (CARDS, DECKLISTS, ART_JS, LEVELS) if p.exists())
 
 
 # ---------- edits ----------
@@ -195,9 +215,13 @@ def _levels() -> dict:
 
 def _row(card_id: str) -> dict:
     for r in load()["rows"]:
-        if r["id"] == card_id or r["wid"] == card_id:
+        if r["id"] == card_id:
             return r
     raise KeyError(f"no card {card_id!r}")
+
+
+def _rec(cards: dict, card_id: str) -> dict:
+    return next(c for c in cards["cards"] if c["id"] == card_id)
 
 
 def _guard(r: dict, col: str, by: str) -> dict:
@@ -226,36 +250,56 @@ def _mark(levels: dict, r: dict, col: str, by: str, new_lv: str | None, note: st
     e["by"], e["at"] = by, int(time.time())
 
 
-def regenerate() -> str:
-    """cards.json from decks.json, then the deck docs' tables. Returns convert's report."""
-    out = subprocess.run([str(PY), "tools/card-workbench/convert.py"], cwd=ROOT, capture_output=True, text=True)
-    if out.returncode:
-        raise RuntimeError(out.stderr or out.stdout)
+def _save_cards(cards: dict) -> None:
+    """Check every card the edit touched against the engine's rules, then write cards.json and the deck docs' tables."""
+    for c in cards["cards"]:
+        if c["status"] != PLANNED:
+            try:
+                validate_card_record(c)
+            except CardDataError as e:
+                raise Refused(str(e)) from None
+    _write(CARDS, cards)
     subprocess.run([str(PY), "-m", "animal_kingdom.render.deck_docs"], cwd=ROOT, capture_output=True)
-    return "\n".join(l for l in out.stdout.splitlines() if not l.startswith("skipped "))   # planned cards: no strength yet
 
 
 def _apply_value(r: dict, col: str, value) -> None:
-    decks = _read(DECKS)
-    slug, i = _deck_index(decks)[r["wid"]]
-    wc = decks["decks"][slug]["cards"][i]
+    cards = _read(CARDS)
+    c = _rec(cards, r["id"])
     if col == "habitat":
-        wc["habitat"] = value
+        c["habitat"] = value
     elif col == "rarity":
-        wc["rarity"] = value
+        c["rarity"] = RARITY[value] if value else ""
+        if c["rarity"]:
+            decklists = _read(DECKLISTS)
+            for d in _starters(decklists):
+                if c["id"] in d["cards"]:
+                    d["cards"][c["id"]] = COPIES[c["rarity"]]
+            _write(DECKLISTS, decklists)
     elif col == "animal":
         name, species = value.get("name", "").strip(), value.get("species", "").strip()
-        if wc["rarity"] != "L":
+        if c["rarity"] != "legendary":
             name = name or species
             species = species or name
-        wc["name"], wc["species"] = name, species
+        c["species"] = species
+        if name:
+            c["name"] = name
+            c.pop("unnamed", None)
+        else:                                   # a legendary waiting for its name: plainly a placeholder
+            c["name"], c["unnamed"] = f"[{species.upper()}]", True
     elif col == "tag":
-        wc["tag"] = value.strip()
+        c["tags"] = [t.strip() for t in value.split(",") if t.strip()]
     elif col == "strength":
-        wc["str"] = None if value in ("", None) else int(value)
+        if c["base_strength"] == "dynamic":
+            raise Refused(f"{c['id']}'s strength is worked out by the engine ({c.get('dynamic_strength')})")
+        c["base_strength"] = None if value in ("", None) else int(value)
     elif col == "effect":
-        wc["text"] = value.strip()
-    _write(DECKS, decks)
+        c["text"] = value.strip()
+        for k in ("keywords", "hungry", "food_cost"):
+            c.pop(k, None)
+        c.update(parse_text(c["text"]))
+    if c["status"] == PLANNED and c["rarity"] and c["base_strength"] is not None:
+        c["status"] = "reserve"                 # designed enough to be a card; collect puts it in the collection
+    _save_cards(cards)
 
 
 def set_value(card_id: str, col: str, value, by: str = "martin", note: str | None = None) -> str:
@@ -269,7 +313,6 @@ def set_value(card_id: str, col: str, value, by: str = "martin", note: str | Non
     if value == prev:
         return ""
     _apply_value(r, col, value)
-    report = regenerate()
     levels = _levels()
     new_lv = None
     if cur["lv"] == "empty":
@@ -278,7 +321,7 @@ def set_value(card_id: str, col: str, value, by: str = "martin", note: str | Non
         new_lv = "draft"
     _mark(levels, r, col, by, new_lv, note, prev, True)
     _write(LEVELS, levels)
-    return report
+    return f"{r['id']} {col}: {prev!r} -> {value!r}"
 
 
 def set_level(card_id: str, col: str, lv: str, by: str = "martin", note: str | None = None) -> None:
@@ -340,7 +383,6 @@ def revert(card_id: str, col: str) -> None:
                 write_art(r["id"], t, rv["prev"][t])
         else:
             _apply_value(r, col, rv["prev"])
-            regenerate()
     e["lv"] = rv["prev_lv"]
     if rv.get("prev_note"):
         e["note"] = rv["prev_note"]
@@ -351,116 +393,105 @@ def revert(card_id: str, col: str) -> None:
 
 
 def move(card_id: str, deck: str, by: str = "martin") -> str:
-    """Move a card to another deck of decks.json (a starter deck, or `pool`, the bench), keeping its workbench id and so its
-    engine id. Claude can't move a card with a locked value; the move is noted on its animal for Martin's review."""
+    """Put a card in a starter deck (decklists.json, at its rarity's copy limit; starters share no card, so it leaves any
+    other), or with `pool` in none. A card in a starter is collectible. Claude can't move a card with a locked value;
+    the move is noted on its animal for Martin's review."""
     r = _row(card_id)
-    decks = _read(DECKS)
-    if deck not in decks["decks"]:
-        raise Refused(f"no deck {deck!r}: one of {sorted(decks['decks'])}")
+    decklists = _read(DECKLISTS)
+    starters = {d["slug"]: d for d in _starters(decklists)}
+    if deck != POOL and deck not in starters:
+        raise Refused(f"no starter deck {deck!r}: one of {sorted(starters)} or {POOL}")
     if r["deck"] == deck:
         return ""
     if by == "claude" and any(r["lv"][c]["lv"] == "locked" for c in VALUE_COLS):
         raise Refused(f"{r['id']} has a locked value; ask Martin")
-    src, i = _deck_index(decks)[r["wid"]]
-    decks["decks"][deck]["cards"].append(decks["decks"][src]["cards"].pop(i))
-    _write(DECKS, decks)
-    report = regenerate()
+    cards = _read(CARDS)
+    c = _rec(cards, r["id"])
+    if deck != POOL and not c["rarity"]:
+        raise Refused(f"{r['id']} has no rarity yet")
+    for d in starters.values():
+        d["cards"].pop(c["id"], None)
+    if deck != POOL:
+        starters[deck]["cards"][c["id"]] = COPIES[c["rarity"]]
+        if c["status"] != "collectible":
+            c["status"] = "collectible"
+            _save_cards(cards)
+    _write(DECKLISTS, decklists)
     levels = _levels()
-    _mark(levels, r, "animal", by, None, f"moved from {src} to {deck}")
+    _mark(levels, r, "animal", by, None, f"moved from {r['deck']} to {deck}")
     _write(LEVELS, levels)
-    return report
+    return f"{r['id']}: {r['deck']} -> {deck}"
 
 
 def add(name: str, habitat: str, species: str = "") -> str:
-    """A planned card: only its animal and habitat, everything else blank (it waits in the pool; convert.py skips a card
-    with no strength, so the game doesn't see it yet). Returns its id."""
-    decks = _read(DECKS)
-    pool = decks["decks"]["pool"]["cards"]
-    if any((c["name"] or c["species"]).lower() == name.lower() for d in decks["decks"].values() for c in d["cards"]):
+    """A planned card: only its animal and habitat, everything else blank (the engine doesn't load it until it has a
+    rarity and a strength). Returns its id."""
+    cards = _read(CARDS)
+    cid = re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
+    if any(name.lower() in (c["name"].lower(), c.get("species", "").lower()) or c["id"] == cid for c in cards["cards"]):
         raise Refused(f"{name} already has a card")
-    wid = "pool-" + re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
-    pool.append({"habitat": habitat, "id": wid, "name": name, "note": "", "rarity": "", "species": species or name,
-                 "status": "open", "str": None, "tag": "", "text": ""})
-    _write(DECKS, decks)
-    return wid
+    cards["cards"].append({"id": cid, "name": name, "status": PLANNED, "rarity": "", "tags": [], "base_strength": None,
+                           "text": "", "keywords": [], "species": species or name, "habitat": habitat})
+    _save_cards(cards)
+    return cid
 
 
 def deck_name(deck: str, name: str) -> str:
     """Rename a starter deck (the name players see). A player's saved copy keeps the name it was saved with."""
-    decks = _read(DECKS)
-    if deck not in decks["decks"] or not decks["decks"][deck].get("precon"):
-        raise Refused(f"no starter deck {deck!r}: one of {sorted(k for k, v in decks['decks'].items() if v.get('precon'))}")
-    if decks["decks"][deck]["name"] == name:
+    decklists = _read(DECKLISTS)
+    starters = {d["slug"]: d for d in _starters(decklists)}
+    if deck not in starters:
+        raise Refused(f"no starter deck {deck!r}: one of {sorted(starters)}")
+    if starters[deck]["name"] == name:
         return ""
-    decks["decks"][deck]["name"] = name
-    _write(DECKS, decks)
-    return regenerate()
+    starters[deck]["name"] = name
+    _write(DECKLISTS, decklists)
+    return f"{deck}: {name}"
+
+
+def _set_status(card_id: str, frm: str, to: str, note: str, by: str) -> str:
+    r = _row(card_id)
+    cards = _read(CARDS)
+    c = _rec(cards, r["id"])
+    if c["status"] != frm:
+        return ""
+    c["status"] = to
+    _save_cards(cards)
+    levels = _levels()
+    _mark(levels, r, "animal", by, None, note)
+    _write(LEVELS, levels)
+    return f"{r['id']}: {frm} -> {to}"
 
 
 def shelve(card_id: str, by: str = "martin") -> str:
-    """Take a pool card out of the collection: its workbench status becomes `open`, so convert.py files it in the reserve
-    (kept, not collectible). Only a pool card; a starter deck's card is moved to the pool first."""
-    r = _row(card_id)
-    if r["deck"] != "pool":
-        raise Refused(f"{r['id']} is in {r['deck']}, not the pool")
-    decks = _read(DECKS)
-    src, i = _deck_index(decks)[r["wid"]]
-    wc = decks["decks"][src]["cards"][i]
-    if wc.get("status") == "open":
-        return ""
-    wc["status"] = "open"
-    _write(DECKS, decks)
-    report = regenerate()
-    levels = _levels()
-    _mark(levels, r, "animal", by, None, "out of the collection (status open, in the reserve)")
-    _write(LEVELS, levels)
-    return report
+    """Take a card in no starter deck out of the collection, into the reserve (kept, not collectible)."""
+    if _row(card_id)["deck"] != POOL:
+        raise Refused(f"{card_id} is in a starter deck; move it to {POOL} first")
+    return _set_status(card_id, "collectible", "reserve", "out of the collection (in the reserve)", by)
 
 
 def collect(card_id: str, by: str = "martin") -> str:
-    """Put a card into the collection: its workbench status becomes `proposed`, so in the pool convert.py makes it
-    collectible instead of filing it in the reserve. The reverse of shelve."""
-    r = _row(card_id)
-    decks = _read(DECKS)
-    src, i = _deck_index(decks)[r["wid"]]
-    wc = decks["decks"][src]["cards"][i]
-    if wc.get("status") != "open":
-        return ""
-    wc["status"] = "proposed"
-    _write(DECKS, decks)
-    report = regenerate()
-    levels = _levels()
-    _mark(levels, r, "animal", by, None, "into the collection (status proposed)")
-    _write(LEVELS, levels)
-    return report
+    """Put a reserve card into the collection. The reverse of shelve."""
+    return _set_status(card_id, "reserve", "collectible", "into the collection", by)
 
 
 def delete(card_id: str, by: str = "martin") -> str:
-    """Remove a card from the game: out of decks.json (so convert.py drops it from cards.json) and its levels gone. Its
-    number in static/cardnums.js stays, since deck codes depend on every number. Claude can't delete a card with a locked
-    value. A reserve card is kept by convert.py as it is, so its record leaves cards.json here too."""
-    keys = {card_id}
-    try:
-        r = _row(card_id)
-    except KeyError:
-        r = None   # already out of decks.json: only its cards.json record and levels are left
-    if r:
-        if by == "claude" and any(r["lv"][c]["lv"] == "locked" for c in VALUE_COLS):
-            raise Refused(f"{r['id']} has a locked value; ask Martin")
-        keys |= {r["id"], r["wid"]}
-        decks = _read(DECKS)
-        src, i = _deck_index(decks)[r["wid"]]
-        decks["decks"][src]["cards"].pop(i)
-        _write(DECKS, decks)
+    """Remove a card from the game: out of cards.json and the starter decks, and its levels gone. Its number in
+    static/cardnums.js stays, since deck codes depend on every number. Claude can't delete a card with a locked value."""
+    r = _row(card_id)
+    if by == "claude" and any(r["lv"][c]["lv"] == "locked" for c in VALUE_COLS):
+        raise Refused(f"{r['id']} has a locked value; ask Martin")
     cards = _read(CARDS)
-    cards["cards"] = [c for c in cards["cards"] if c["id"] not in keys]
-    _write(CARDS, cards)
-    report = regenerate()
+    cards["cards"] = [c for c in cards["cards"] if c["id"] != r["id"]]
+    _save_cards(cards)
+    decklists = _read(DECKLISTS)
+    for d in _starters(decklists):
+        d["cards"].pop(r["id"], None)
+    _write(DECKLISTS, decklists)
     levels = _levels()
-    for key in keys:
-        levels.pop(key, None)
+    levels.pop(r["id"], None)
     _write(LEVELS, levels)
-    return report
+    return f"deleted {r['id']}"
 
 
 def main(argv=None) -> None:
@@ -481,7 +512,7 @@ def main(argv=None) -> None:
     try:
         if a.cmd == "show":
             rows = load()["rows"]
-            print(json.dumps([r for r in rows if not a.ids or r["id"] in a.ids or r["wid"] in a.ids], ensure_ascii=False, indent=1))
+            print(json.dumps([r for r in rows if not a.ids or r["id"] in a.ids], ensure_ascii=False, indent=1))
         elif a.cmd == "set":
             v = a.value
             if a.col == "animal":

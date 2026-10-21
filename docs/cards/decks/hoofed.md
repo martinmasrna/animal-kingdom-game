@@ -1,6 +1,6 @@
 # Hoofed
 
-What each card is for: [`../../design/effects-pass.md`](../../design/effects-pass.md), its Hoofed Graze section. The cards themselves come from the card workbench (`tools/card-workbench/`, converted by `convert.py`); the table below is generated from cards.json.
+What each card is for: [`../../design/effects-pass.md`](../../design/effects-pass.md), its Hoofed Graze section. The table below is generated from cards.json, where the cards live.
 
 ## Cards
 

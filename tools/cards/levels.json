@@ -501,7 +501,7 @@
   },
   "boar": {
     "art": {
-      "note": "needs repainting for the new text (the boar charging an intruder).",
+      "note": "needs repainting for the new text (the boar charging an intruder).; Art: needs repainting for the new text (the boar charging an intruder).",
       "by": "martin",
       "lv": "fine"
     },
@@ -631,7 +631,7 @@
   },
   "butterfly_legend": {
     "effect": {
-      "note": "Watch in play: the five stages and their power ladder.",
+      "note": "Watch in play: the five stages and their power ladder.; Watch in play: the five stages and their power ladder.",
       "by": "martin"
     },
     "crop": {
@@ -765,9 +765,15 @@
       "by": "martin"
     },
     "effect": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792247950
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792604716,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": "Reach 2."
+      },
+      "note": "Reach has no number: every Reach is 2 (Martin, 2026-10-21)"
     },
     "strength": {
       "lv": "fine",
@@ -880,7 +886,7 @@
   },
   "chinchilla": {
     "effect": {
-      "note": "Its old effect (an extra action next turn) went to the Chipmunk; needs a new one.",
+      "note": "Its old effect (an extra action next turn) went to the Chipmunk; needs a new one.; Its old effect (an extra action next turn) went to the Chipmunk; needs a new one.",
       "by": "martin"
     }
   },
@@ -988,7 +994,7 @@
   },
   "cuckoo": {
     "effect": {
-      "note": "Cuckoo Egg (token, 0): When you draw this, your opponent draws a card.",
+      "note": "Cuckoo Egg (token, 0): When you draw this, your opponent draws a card.; Cuckoo Egg (token, 0): When you draw this, your opponent draws a card.",
       "by": "martin"
     },
     "crop": {
@@ -1010,6 +1016,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Reach 2. Poison."
+      },
+      "note": "Reach has no number (Martin, 2026-10-21)",
+      "by": "claude",
+      "at": 1792604717
     }
   },
   "deer": {
@@ -1034,7 +1050,7 @@
   },
   "dingo": {
     "effect": {
-      "note": "The pack growth launches on a canine in the launch six; the Dingo waits for Australia.",
+      "note": "The pack growth launches on a canine in the launch six; the Dingo waits for Australia.; The pack growth launches on a canine in the launch six; the Dingo waits for Australia.",
       "by": "martin"
     }
   },
@@ -1082,7 +1098,7 @@
     "effect": {
       "lv": "draft",
       "by": "martin",
-      "note": "The vanilla flyer."
+      "note": "The vanilla flyer.; The vanilla flyer."
     },
     "art": {
       "lv": "draft",
@@ -1298,6 +1314,16 @@
       },
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "at": 1792191060
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 7
+      },
+      "note": "Martin, 2026-10-21: no reason for a 7 body on top of a legendary tutor (f107dcef set it in the generated file only)",
+      "by": "claude",
+      "at": 1792605220
     }
   },
   "flying_squirrel": {
@@ -1867,7 +1893,7 @@
   },
   "jerboa": {
     "effect": {
-      "note": "Its old effect went to the Naked Mole-Rat (Savanna); needs a new one.",
+      "note": "Its old effect went to the Naked Mole-Rat (Savanna); needs a new one.; Its old effect went to the Naked Mole-Rat (Savanna); needs a new one.",
       "by": "martin"
     }
   },
@@ -1964,9 +1990,9 @@
         "prev_note": "",
         "prev": "Apex Predator. Roam. Reach 2."
       },
-      "note": "Martin, 2026-10-20: every kill makes him bigger",
+      "note": "Reach has no number (Martin, 2026-10-21)",
       "by": "claude",
-      "at": 1792567487
+      "at": 1792604717
     }
   },
   "lion": {
@@ -2232,7 +2258,7 @@
   },
   "mocha": {
     "effect": {
-      "note": "Martin 2026-10-17: 'next to' is right: adjacent as an adjective, next to in place of adjacent to",
+      "note": "Martin 2026-10-17: 'next to' is right: adjacent as an adjective, next to in place of adjacent to; Watch in play: close to a full board wipe.",
       "by": "claude",
       "lv": "draft",
       "at": 1792248230,
@@ -2872,7 +2898,7 @@
   },
   "scarlett": {
     "effect": {
-      "note": "Poppy and Rusty: tokens, Canine, 1.",
+      "note": "Poppy and Rusty: tokens, Canine, 1.; Poppy and Rusty: tokens, Canine, 1.",
       "by": "martin"
     },
     "art": {
@@ -2945,7 +2971,7 @@
   },
   "silverback": {
     "effect": {
-      "note": "Watch in play: +2 to the whole hand may be too strong (dial: the +2 or the 7).",
+      "note": "Watch in play: +2 to the whole hand may be too strong (dial: the +2 or the 7).; Watch in play: +2 to the whole hand may be too strong (dial: the +2 or the 7).",
       "by": "martin"
     },
     "art": {
@@ -3077,7 +3103,7 @@
   },
   "snow_leopard": {
     "effect": {
-      "note": "Its old effect went to the Leopard (Savanna); needs a new one.",
+      "note": "Its old effect went to the Leopard (Savanna); needs a new one.; Its old effect went to the Leopard (Savanna); needs a new one.",
       "by": "martin"
     }
   },
@@ -3458,7 +3484,7 @@
   },
   "zebra": {
     "art": {
-      "note": "the zebra kicking away a lion about to catch it (sells the bounce).",
+      "note": "the zebra kicking away a lion about to catch it (sells the bounce).; Art: the zebra kicking away a lion about to catch it (sells the bounce).",
       "by": "martin",
       "lv": "fine"
     },
@@ -3668,33 +3694,17 @@
       "at": 1792106916
     }
   },
-  "pool-toad": {
-    "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1792085441
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1792085441
-    }
-  },
   "toad": {
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792085442
+      "at": 1792604717,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Reach 2. When this is removed, remove all animals next to it."
+      },
+      "note": "Reach has no number (Martin, 2026-10-21)"
     },
     "animal": {
       "note": "moved from pool to aristocrats",
@@ -3718,9 +3728,7 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792106916
-    }
-  },
-  "pool-locust": {
+    },
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -3729,7 +3737,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792085442
+      "at": 1792085441
     },
     "strength": {
       "review": {
@@ -3739,7 +3747,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792085442
+      "at": 1792085441
     }
   },
   "locust": {
@@ -3779,9 +3787,7 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792106916
-    }
-  },
-  "pool-roach-king": {
+    },
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -3790,7 +3796,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792085443
+      "at": 1792085442
     },
     "strength": {
       "review": {
@@ -3800,7 +3806,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792085443
+      "at": 1792085442
     }
   },
   "roach_king": {
@@ -3840,6 +3846,26 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792105989
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792085443
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792085443
     }
   },
   "wolf_legend": {
@@ -3956,6 +3982,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792143620
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Apex Predator. If an animal was removed this turn, this has Reach 3."
+      },
+      "note": "Reach has no number: the Shark's Reach 3 becomes Reach, 2 (Martin, 2026-10-21)",
+      "by": "claude",
+      "at": 1792604717
     }
   },
   "octopus": {
@@ -3982,30 +4018,6 @@
       "by": "claude",
       "at": 1792249437,
       "note": "Martin 2026-10-17: every adjacent enemy (so Stealth doesn't shield the legendary Honey Badger), for good"
-    }
-  },
-  "pool-mole": {
-    "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
-      "by": "claude",
-      "at": 1792191132
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
-      "lv": "draft",
-      "note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
-      "by": "claude",
-      "at": 1792191132
     }
   },
   "mole": {
@@ -4046,9 +4058,7 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792196569
-    }
-  },
-  "pool-mole-legend": {
+    },
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -4056,22 +4066,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
-      "at": 1792191572
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Mole Legend",
-          "species": "Mole"
-        }
-      },
-      "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
-      "by": "claude",
-      "at": 1792191573
+      "at": 1792191132
     },
     "strength": {
       "review": {
@@ -4080,9 +4077,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
-      "at": 1792191573
+      "at": 1792191132
     }
   },
   "mole_legend": {
@@ -4121,9 +4118,7 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792201506
-    }
-  },
-  "pool-bat-legend": {
+    },
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -4131,22 +4126,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
-      "at": 1792192619
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Bat Legend",
-          "species": "Bat"
-        }
-      },
-      "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
-      "by": "claude",
-      "at": 1792192619
+      "at": 1792191572
     },
     "strength": {
       "review": {
@@ -4155,9 +4137,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
-      "at": 1792192619
+      "at": 1792191573
     }
   },
   "bat_legend": {
@@ -4199,6 +4181,28 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792201507
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792192619
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792192619
     }
   },
   "golden_egg": {
@@ -4219,30 +4223,6 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792198558
-    }
-  },
-  "pool-woodpecker": {
-    "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "note": "Martin 2026-10-17",
-      "by": "claude",
-      "at": 1792250813
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
-      "lv": "draft",
-      "note": "Martin 2026-10-17",
-      "by": "claude",
-      "at": 1792250814
     }
   },
   "woodpecker": {
@@ -4293,9 +4273,7 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792267349
-    }
-  },
-  "pool-placeholder": {
+    },
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -4303,9 +4281,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin 2026-10-17: the Grizzly's old effect, animal to come",
+      "note": "Martin 2026-10-17",
       "by": "claude",
-      "at": 1792262678
+      "at": 1792250813
     },
     "strength": {
       "review": {
@@ -4314,73 +4292,9 @@
         "prev": null
       },
       "lv": "draft",
+      "note": "Martin 2026-10-17",
       "by": "claude",
-      "at": 1792262678
-    }
-  },
-  "placeholder": {
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1792262679
-    },
-    "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "note": "the display: the fan grows with the hand; a ground bird, so no Flight (Martin 2026-10-17)",
-      "by": "claude",
-      "at": 1792264214
-    },
-    "tag": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "note": "no Flight: people picture it on the ground (Martin 2026-10-17)",
-      "by": "claude",
-      "at": 1792264215
-    }
-  },
-  "pool-warthog": {
-    "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "note": "Martin 2026-10-17: the sow charges to get her young back",
-      "by": "claude",
-      "at": 1792262679
-    },
-    "tag": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1792262679
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1792262679
+      "at": 1792250814
     }
   },
   "warthog": {
@@ -4420,9 +4334,7 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792272048
-    }
-  },
-  "pool-albatross": {
+    },
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -4430,9 +4342,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin 2026-10-17: printed for the pool, not a deck",
+      "note": "Martin 2026-10-17: the sow charges to get her young back",
       "by": "claude",
-      "at": 1792262680
+      "at": 1792262679
     },
     "tag": {
       "review": {
@@ -4442,7 +4354,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792262680
+      "at": 1792262679
     },
     "strength": {
       "review": {
@@ -4452,7 +4364,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792262681
+      "at": 1792262679
     }
   },
   "albatross": {
@@ -4492,6 +4404,37 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792277801
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin 2026-10-17: printed for the pool, not a deck",
+      "by": "claude",
+      "at": 1792262680
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792262680
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792262681
     }
   },
   "peacock": {
@@ -4512,9 +4455,7 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792267341
-    }
-  },
-  "pool-dolphin": {
+    },
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -4522,9 +4463,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "neutral common (Martin 2026-10-17)",
+      "note": "Martin 2026-10-17: the Grizzly's old effect, animal to come",
       "by": "claude",
-      "at": 1792270569
+      "at": 1792262678
     },
     "strength": {
       "review": {
@@ -4533,33 +4474,38 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "the 5-strength draw anchor made real",
       "by": "claude",
-      "at": 1792270569
-    }
-  },
-  "pool-stag-beetle": {
-    "rarity": {
+      "at": 1792262678
+    },
+    "effect": {
       "review": {
         "prev_lv": "empty",
         "prev_note": "",
         "prev": ""
       },
       "lv": "draft",
-      "note": "neutral common (Martin 2026-10-17)",
       "by": "claude",
-      "at": 1792270569
+      "at": 1792262679
     },
-    "strength": {
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "the display: the fan grows with the hand; a ground bird, so no Flight (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792264214
+    },
+    "tag": {
       "review": {
         "prev_lv": "empty",
         "prev_note": "",
-        "prev": null
+        "prev": ""
       },
       "lv": "draft",
-      "note": "the Armor 6 anchor made real",
+      "note": "no Flight: people picture it on the ground (Martin 2026-10-17)",
       "by": "claude",
-      "at": 1792270569
+      "at": 1792264215
     }
   },
   "dolphin": {
@@ -4600,6 +4546,28 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792273513
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "neutral common (Martin 2026-10-17)",
+      "by": "claude",
+      "at": 1792270569
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "the 5-strength draw anchor made real",
+      "by": "claude",
+      "at": 1792270569
     }
   },
   "stag_beetle": {
@@ -4640,9 +4608,7 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792273537
-    }
-  },
-  "pool-guard-bee": {
+    },
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -4650,9 +4616,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "note": "neutral common (Martin 2026-10-17)",
       "by": "claude",
-      "at": 1792585133
+      "at": 1792270569
     },
     "strength": {
       "review": {
@@ -4661,9 +4627,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "note": "the Armor 6 anchor made real",
       "by": "claude",
-      "at": 1792585134
+      "at": 1792270569
     }
   },
   "guard_bee": {
@@ -4688,9 +4654,7 @@
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
       "at": 1792585138
-    }
-  },
-  "pool-forager-ant": {
+    },
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -4700,7 +4664,7 @@
       "lv": "draft",
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
-      "at": 1792585139
+      "at": 1792585133
     },
     "strength": {
       "review": {
@@ -4711,7 +4675,7 @@
       "lv": "draft",
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
-      "at": 1792585141
+      "at": 1792585134
     }
   },
   "forager_ant": {
@@ -4736,9 +4700,7 @@
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
       "at": 1792585144
-    }
-  },
-  "pool-queen-wasp": {
+    },
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -4748,7 +4710,7 @@
       "lv": "draft",
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
-      "at": 1792585146
+      "at": 1792585139
     },
     "strength": {
       "review": {
@@ -4759,7 +4721,7 @@
       "lv": "draft",
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
-      "at": 1792585147
+      "at": 1792585141
     }
   },
   "queen_wasp": {
@@ -4784,9 +4746,7 @@
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
       "at": 1792585151
-    }
-  },
-  "pool-scout-bee": {
+    },
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -4796,7 +4756,7 @@
       "lv": "draft",
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
-      "at": 1792585152
+      "at": 1792585146
     },
     "strength": {
       "review": {
@@ -4807,7 +4767,7 @@
       "lv": "draft",
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
-      "at": 1792585154
+      "at": 1792585147
     }
   },
   "scout_bee": {
@@ -4832,9 +4792,7 @@
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
       "at": 1792585157
-    }
-  },
-  "pool-ant": {
+    },
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -4844,7 +4802,7 @@
       "lv": "draft",
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
-      "at": 1792585159
+      "at": 1792585152
     },
     "strength": {
       "review": {
@@ -4855,7 +4813,7 @@
       "lv": "draft",
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
-      "at": 1792585160
+      "at": 1792585154
     }
   },
   "ant": {
@@ -4880,6 +4838,28 @@
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
       "at": 1792585163
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585159
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585160
     }
   }
 }

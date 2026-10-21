@@ -1,6 +1,6 @@
 # Untouchables
 
-What each card is for: [`../../design/effects-pass.md`](../../design/effects-pass.md), its Food OTK section. The cards themselves come from the card workbench (`tools/card-workbench/`, converted by `convert.py`); the table below is generated from cards.json.
+What each card is for: [`../../design/effects-pass.md`](../../design/effects-pass.md), its Food OTK section. The table below is generated from cards.json, where the cards live.
 
 ## Cards
 
@@ -29,7 +29,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Hedgehog** | 3 | — | 5 | Spikes. Roar: gain 5 food. |
-| **Dart Frog** | 3 | — | 1 | Reach 2. Poison. |
+| **Dart Frog** | 3 | — | 1 | Reach. Poison. |
 | **Jellyfish** | 3 | — | 4 | Poison. |
 | **Black Bear** | 3 | Bear | 5 | Roar: in 2 turns, draw 2 cards. |
 | **Tortoise** | 3 | — | 4 | Armor. Roar: gain 5 food for each of your animals with Armor. |

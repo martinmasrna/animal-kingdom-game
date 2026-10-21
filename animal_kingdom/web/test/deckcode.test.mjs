@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { encodeDeck, decodeDeck } from '../static/deckcode.js';
 import { CARD_NUMS } from '../static/cardnums.js';
 
-const pool = JSON.parse(readFileSync(new URL('../../data/cards.json', import.meta.url))).cards;
+const pool = JSON.parse(readFileSync(new URL('../../data/cards.json', import.meta.url))).cards.filter(c => c.status !== 'planned');   // a planned animal is no card yet
 const C = Object.fromEntries(pool.map(c => [c.id, { ...c, str: c.base_strength === 'dynamic' ? '*' : c.base_strength }]));
 const colony = ['vesper', 'falstaff', 'queen_marabunta', 'queen_honoria', ...['nurse_bee', 'nurse_bumblebee', 'termite_queen', 'termite_king'].flatMap(id => [id, id]),
   ...['worker_ant', 'worker_bee', 'queen_bee', 'soldier_ant', 'guard_wasp', 'worker_wasp'].flatMap(id => [id, id, id])];

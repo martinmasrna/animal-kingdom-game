@@ -1,5 +1,5 @@
 {
- "_comment": "The decks the game ships, as lists over cards.json: a starter deck (starter: true; written by tools/card-workbench/convert.py from the workbench, which says which starter a card ships in) is what a new profile gets, one copy each; a bot deck (bot: true) is what the bots play, ranked and in Practice's Random (a starter may be both). Starter decks share no card, so a new player meets as many cards as possible; bot decks may overlap with anything (Martin, 2026-10-19). Each deck: slug, name, cover (the card whose art faces it), order (the menus), cards (id: copies; a legal 4-4-6 list of collectible cards). Bot decks are edited here by hand; convert.py keeps them.",
+ "_comment": "The decks the game ships, as lists over cards.json: a starter deck (starter: true) is what a new profile gets; a bot deck (bot: true) is what the bots play, ranked and in Practice's Random (a starter may be both). Starter decks share no card, so a new player meets as many cards as possible; bot decks may overlap with anything (Martin, 2026-10-19). Each deck: slug, name, cover (the card whose art faces it), order (the menus), cards (id: copies; a legal 4-4-6 list of collectible cards). Edited here by hand, or a starter's through tools/cards/hq.py (move, deck-name).",
  "decks": [
   {
    "slug": "colony",
