@@ -3158,6 +3158,90 @@
       "workbench_id": "handlock-11"
     },
     {
+      "id": "guard_bee",
+      "name": "Guard Bee",
+      "status": "reserve",
+      "rarity": "common",
+      "tags": [
+        "Colony"
+      ],
+      "base_strength": 2,
+      "text": "Flight. Spikes.",
+      "keywords": [
+        "Flight",
+        "Spikes"
+      ],
+      "species": "Bee",
+      "habitat": "Meadow",
+      "workbench_id": "pool-guard-bee"
+    },
+    {
+      "id": "forager_ant",
+      "name": "Forager Ant",
+      "status": "reserve",
+      "rarity": "common",
+      "tags": [
+        "Colony",
+        "Worker"
+      ],
+      "base_strength": 1,
+      "text": "Roar: gain 5 food. If you gained 10 or more food this turn, draw a card.",
+      "keywords": [],
+      "species": "Ant",
+      "habitat": "Forest",
+      "workbench_id": "pool-forager-ant"
+    },
+    {
+      "id": "queen_wasp",
+      "name": "Queen Wasp",
+      "status": "reserve",
+      "rarity": "rare",
+      "tags": [
+        "Colony",
+        "Queen"
+      ],
+      "base_strength": 4,
+      "text": "Flight. Whenever you place an animal with Flight, gain 3 food.",
+      "keywords": [
+        "Flight"
+      ],
+      "species": "Wasp",
+      "habitat": "Forest",
+      "workbench_id": "pool-queen-wasp"
+    },
+    {
+      "id": "scout_bee",
+      "name": "[SCOUT BEE]",
+      "status": "reserve",
+      "rarity": "legendary",
+      "tags": [
+        "Colony"
+      ],
+      "base_strength": 3,
+      "text": "Flight. Dusk: if you gained 20 or more food this turn, draw a card.",
+      "keywords": [
+        "Flight"
+      ],
+      "species": "Bee",
+      "habitat": "Meadow",
+      "workbench_id": "pool-scout-bee"
+    },
+    {
+      "id": "ant",
+      "name": "[ANT]",
+      "status": "reserve",
+      "rarity": "legendary",
+      "tags": [
+        "Colony"
+      ],
+      "base_strength": 1,
+      "text": "Dusk: gain 2 food for each animal you control.",
+      "keywords": [],
+      "species": "Ant",
+      "habitat": "Forest",
+      "workbench_id": "pool-ant"
+    },
+    {
       "id": "baby_turtle",
       "name": "Baby Turtle",
       "status": "token",

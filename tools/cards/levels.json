@@ -4641,5 +4641,245 @@
       "by": "claude",
       "at": 1792273537
     }
+  },
+  "pool-guard-bee": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585133
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585134
+    }
+  },
+  "guard_bee": {
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585136
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585138
+    }
+  },
+  "pool-forager-ant": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585139
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585141
+    }
+  },
+  "forager_ant": {
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585142
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585144
+    }
+  },
+  "pool-queen-wasp": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585146
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585147
+    }
+  },
+  "queen_wasp": {
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585149
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585151
+    }
+  },
+  "pool-scout-bee": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585152
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585154
+    }
+  },
+  "scout_bee": {
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585155
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585157
+    }
+  },
+  "pool-ant": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585159
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585160
+    }
+  },
+  "ant": {
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585162
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "by": "claude",
+      "at": 1792585163
+    }
   }
 }

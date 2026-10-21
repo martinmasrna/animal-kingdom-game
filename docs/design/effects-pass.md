@@ -288,8 +288,6 @@ Proposed, effects agreed (Martin: "sounds much better effect-wise"), animals and
 
 Also: the Naked Mole-Rat (Savanna roster) is the one eusocial mammal and would carry Colony beside Rodent, the first card two families both want.
 
-Rejected in the sitting: an Ant legendary "can cover an animal of any strength" (the Chameleon, word for word); a Tarantula Hawk "Flight. Roar: remove an adjacent enemy of strength 4 or less" (the Hawk plus one, strictly better); a Leafcutter Ant (breaks the caste split); a Yellowjacket "your opponent loses 4 food, you gain it if you control another Colony animal" and a Bullet Ant "Spikes, +2 with another Colony animal" (both the precon in disguise).
-
 ## Open topics
 
 - The bloodsuckers drain strength: Mosquito's −2, Leech's swap, the Tick's effect still to design, likely a slow drain.

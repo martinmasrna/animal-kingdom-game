@@ -2825,6 +2825,66 @@
      "str": 8,
      "tag": "Bear",
      "text": "Roar: your opponent draws a card."
+    },
+    {
+     "habitat": "Meadow",
+     "id": "pool-guard-bee",
+     "name": "Guard Bee",
+     "note": "",
+     "rarity": "C",
+     "species": "Bee",
+     "status": "open",
+     "str": 2,
+     "tag": "Colony",
+     "text": "Flight. Spikes."
+    },
+    {
+     "habitat": "Forest",
+     "id": "pool-forager-ant",
+     "name": "Forager Ant",
+     "note": "",
+     "rarity": "C",
+     "species": "Ant",
+     "status": "open",
+     "str": 1,
+     "tag": "Colony, Worker",
+     "text": "Roar: gain 5 food. If you gained 10 or more food this turn, draw a card."
+    },
+    {
+     "habitat": "Forest",
+     "id": "pool-queen-wasp",
+     "name": "Queen Wasp",
+     "note": "",
+     "rarity": "R",
+     "species": "Wasp",
+     "status": "open",
+     "str": 4,
+     "tag": "Colony, Queen",
+     "text": "Flight. Whenever you place an animal with Flight, gain 3 food."
+    },
+    {
+     "habitat": "Meadow",
+     "id": "pool-scout-bee",
+     "name": "[SCOUT BEE]",
+     "note": "",
+     "rarity": "L",
+     "species": "Bee",
+     "status": "open",
+     "str": 3,
+     "tag": "Colony",
+     "text": "Flight. Dusk: if you gained 20 or more food this turn, draw a card."
+    },
+    {
+     "habitat": "Forest",
+     "id": "pool-ant",
+     "name": "[ANT]",
+     "note": "",
+     "rarity": "L",
+     "species": "Ant",
+     "status": "open",
+     "str": 1,
+     "tag": "Colony",
+     "text": "Dusk: gain 2 food for each animal you control."
     }
    ]
   }

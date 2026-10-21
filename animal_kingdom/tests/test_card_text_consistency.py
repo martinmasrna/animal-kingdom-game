@@ -32,6 +32,9 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "eon_food_engine": ["eon_food"],
     "queen_marabunta": ["queen_marabunta_per_colony"],
     "queen_honoria": ["queen_honoria_per_place"],
+    "forager_ant": ["forager_ant_food"],
+    "queen_wasp": ["queen_wasp_per_place"],
+    "ant": ["ant_legend_per"],
     "worker_ant": ["worker_ant_food"],
     "worker_wasp": ["worker_wasp_food"],
     "worker_bee": ["worker_bee_food", "worker_bee_extra"],
@@ -68,7 +71,7 @@ NO_CONSTANT = {
 }
 
 # Cards read the shared fed_threshold via "gained N or more food this turn".
-FED_THRESHOLD_CARDS = {"gopher", "muskrat", "groundhog"}
+FED_THRESHOLD_CARDS = {"gopher", "muskrat", "groundhog", "forager_ant"}
 
 
 def _cards():

@@ -36,6 +36,13 @@ class Config:
     greywhisker_food: int = 1            # Roar: gain 1 food (+ draw 1, + play 1 more, then discard 1)
     queen_marabunta_per_colony: int = 4  # per other friendly Colony unit
     queen_honoria_per_place: int = 4     # Queen Melissia: per Colony animal you place, played or not (5→4, 2026-07-05; place, 2026-10-21)
+    # Colony outside the precon, bench drafts (Martin, 2026-10-21; effects-pass.md)
+    forager_ant_food: int = 5            # Forager Ant: Roar: gain 5 food
+    forager_ant_draw: int = 1            # ... if you gained fed_threshold or more food this turn, draw a card
+    queen_wasp_per_place: int = 3        # Queen Wasp: whenever you place an animal with Flight, gain 3 food
+    scout_bee_threshold: int = 20        # [SCOUT BEE]: Dusk: if you gained 20 or more food this turn ...
+    scout_bee_draw: int = 1              # ... draw a card
+    ant_legend_per: int = 2              # [ANT]: Dusk: gain 2 food for each animal you control
     falstaff_food_rider: int = 3         # extra food whenever you gain food
 
     # --- "Food gained this turn" signature mechanic (food_otk pure-OTK overhaul 2026-07-05) ---

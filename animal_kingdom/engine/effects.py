@@ -2084,6 +2084,33 @@ def _queen_marabunta_place(state, unit, cr):
     _push_gain(state, unit.owner, state.config.queen_marabunta_per_colony * max(0, others))
 
 
+# Colony outside the precon: bench drafts (Martin, 2026-10-21; docs/design/effects-pass.md). Each card's condition is
+# one other decks meet for their own reasons (a food threshold, Flight, going wide); the Colony tag is only a tag.
+
+def _forager_ant_place(state, unit, cr):
+    """Roar: gain 5 food. If you gained 10 or more food this turn, draw a card. The gain lands first, so it counts."""
+    gain_food(state, unit.owner, state.config.forager_ant_food)
+    if _fed_this_turn(state, unit.owner):
+        _push_draw(state, unit.owner, state.config.forager_ant_draw)
+
+
+def _queen_wasp_friendly_place(state, watcher, placed) -> None:
+    """Queen Wasp: whenever you place an animal with Flight, gain 3 food."""
+    if "Flight" in state.cards[placed.card_id].keywords:
+        gain_food(state, placed.owner, state.config.queen_wasp_per_place)
+
+
+def _scout_bee_eot(state, unit, cr):
+    """[SCOUT BEE]: Dusk: if you gained 20 or more food this turn, draw a card."""
+    if _food_gained_this_turn(state, unit.owner) >= state.config.scout_bee_threshold:
+        _push_draw(state, unit.owner, state.config.scout_bee_draw)
+
+
+def _ant_legend_eot(state, unit, cr):
+    """[ANT]: Dusk: gain 2 food for each animal you control (each crossroad you top)."""
+    _push_gain(state, unit.owner, state.config.ant_legend_per * _control_tag_count(state, unit.owner))
+
+
 # --- Den Rush ---------------------------------------------------------------------------------------------------
 
 def _greywhisker_place(state, unit, cr):
@@ -2966,6 +2993,10 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Colony.
     "queen_marabunta": {"on_place": _queen_marabunta_place},
     "queen_honoria": {"on_friendly_place": _queen_honoria_friendly_place},
+    "forager_ant": {"on_place": _forager_ant_place},
+    "queen_wasp": {"on_friendly_place": _queen_wasp_friendly_place},
+    "scout_bee": {"on_end_of_turn": _scout_bee_eot},
+    "ant": {"on_end_of_turn": _ant_legend_eot},
     "nurse_bee": {"on_place": _conditional(_draws("nurse_bee_draw"))},
     "nurse_bumblebee": {"on_place": _conditional(_draws("nurse_bumblebee_draw"))},
     "termite_king": {"on_place": _conditional(_draws("termite_king_draw"))},
