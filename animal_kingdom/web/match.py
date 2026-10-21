@@ -58,7 +58,11 @@ log = logging.getLogger(__name__)
 # curve and no net-food term (Martin: a food lead you cannot convert is worth nothing; the board is what converts).
 EXPERT = ("referee:depth=1,time_budget=8,den_sense=true,reply_turns=3,w.pending_target=1.5,w.buried_presence=0.25,"
           "w.food_progress=0,w.food_curve=3,w.food_proximity=60,w.food_race=true")
-BOT_LEVELS = {"easy": "easy", "normal": "turn", "expert": EXPERT}
+# The Normal pilot is the one-turn searcher with the den-front reach term (2026-10-21, Martin's game GMIDKA: it left two
+# cut-off Falcons in its den front for two turns). The Expert sees those threats through its reply search and the term
+# cost it a point on average (results/bot_quality/wave2-reach), so it stays off there.
+NORMAL = "turn:w.hq_threat_reach=0.5"
+BOT_LEVELS = {"easy": "easy", "normal": NORMAL, "expert": EXPERT}
 
 
 def bot_for(level: str, seed: int):

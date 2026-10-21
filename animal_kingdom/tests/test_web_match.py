@@ -326,7 +326,9 @@ def test_the_expert_is_the_deepened_referee():
     assert bot.depth == 1 and bot.den_sense and bot.reply_turns == 3 and 0 < bot.time_budget < BOT_THINK_MAX
     assert bot.weights.pending_target > 0 and bot.weights.buried_presence > 0
     assert bot.weights.food_progress == 0 and bot.weights.food_curve > 1 and bot.weights.food_race
-    assert bot_for("normal", 7).__class__.__name__ == "TurnBot"
+    normal = bot_for("normal", 7)
+    assert normal.__class__.__name__ == "TurnBot" and normal.weights.hq_threat_reach > 0   # the den-front reach term (2026-10-21)
+    assert bot.weights.hq_threat_reach == 0                                                 # the Expert's reply search covers it
 
 
 def test_a_bot_waits_for_the_watching_players_screen_never_longer_than_the_cap(monkeypatch):
