@@ -5006,5 +5006,64 @@
       "by": "claude",
       "at": 1792613675
     }
+  },
+  "bee_legend_2": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-22: royal jelly, the small-deck legendary (it sets strength, so it chooses its own deck); name to come",
+      "by": "claude",
+      "at": 1792622964
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-22: royal jelly, the small-deck legendary (it sets strength, so it chooses its own deck); name to come",
+      "by": "claude",
+      "at": 1792622964
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-22: the board as well, one rule",
+      "by": "claude",
+      "at": 1792623280
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-22: royal jelly, the small-deck legendary (it sets strength, so it chooses its own deck); name to come",
+      "by": "claude",
+      "at": 1792622964
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Jelly Bee",
+          "species": "Bee"
+        }
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1792622981
+    }
   }
 }

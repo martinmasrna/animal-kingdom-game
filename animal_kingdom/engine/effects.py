@@ -404,7 +404,7 @@ def _op_queen_guard(state, step):
         state.hands[owner].remove(inst)
     elif cid in state.decks[owner]:
         state.decks[owner].remove(cid)
-        inst = UnitInstance(cid, owner, state.new_iid())
+        inst = state.deck_instance(owner, cid)
     else:
         return None
     _land_unit(state, owner, inst, cr, from_hand=from_hand, roar=False, play=False, reveal=True)
@@ -661,7 +661,7 @@ def draw_filtered_random(state: GameState, player: str, n: int, spec: str) -> li
             break
         cid = state.rng.choice(candidates)
         state.decks[player].remove(cid)
-        inst = UnitInstance(cid, player, state.new_iid())
+        inst = state.deck_instance(player, cid)
         state.hands[player].append(inst)
         drawn.append(inst)
     _fire_draw(state, drawn)
@@ -1163,7 +1163,7 @@ def _op_scout(state, step):
                                   from_deck_reveal=True)
     pulled = list(step["pulled"])
     pulled.remove(step["choice"])
-    inst = UnitInstance(step["choice"], player, state.new_iid())
+    inst = state.deck_instance(player, step["choice"])
     state.hands[player].append(inst)
     _fire_draw(state, [inst])
     shuffle_back(state, player, pulled)
@@ -1271,7 +1271,8 @@ def _op_play_named(state, step):
         in_hand = any(u.card_id == cid for u in state.hands[player])
         if not in_hand and cid in state.decks[player]:
             state.decks[player].remove(cid)
-            state.add_to_hand(player, cid)      # only to be placed at once: not a gain, so no hand-limit burn
+            jellied = state.jelly_take(player, cid)
+            state.add_to_hand(player, cid, strength_counter=state.jelly_counter(player, cid) if jellied else 0)   # only to be placed at once: not a gain, so no hand-limit burn
             step["fetched"] = True
         else:
             step["fetched"] = False
@@ -1870,7 +1871,7 @@ def _vultures_dusk(state, player):
         if not empty:
             return
         state.decks[player].remove("vulture")
-        _land_unit(state, player, UnitInstance("vulture", player, state.new_iid()), state.rng.choice(empty),
+        _land_unit(state, player, state.deck_instance(player, "vulture"), state.rng.choice(empty),
                    from_hand=False, roar=False, play=False)
 
 
@@ -2184,6 +2185,7 @@ def _remove_another_copy(state, player, card_id) -> None:
             remove_from_hand(state, player, inst)
             return
     state.decks[player].remove(card_id)
+    state.jelly_take(player, card_id)
     state.pile_add(card_id, player)
     state.emit("remove", zone="deck", card=card_id, owner=player)
     _fire_remove_event(state, card_id, player, None)
@@ -2278,7 +2280,7 @@ def _fill(state, unit, cr):
             if cid not in state.decks[o]:
                 continue
             state.decks[o].remove(cid)
-            inst = UnitInstance(cid, o, state.new_iid())
+            inst = state.deck_instance(o, cid)
         _land_unit(state, o, inst, spot, from_hand=kind == "hand", roar=False, play=False)
 
 
@@ -2695,6 +2697,20 @@ def _baboon_legend_sot(state, unit, cr):
     _grant(state, state.rng.sample(hand, k), state.config.baboon_legend_grant)
 
 
+def _bee_legend_2_place(state, unit, cr):
+    """Royal jelly: "Roar: your animals on the board, in your hand and in your deck become strength 5." Each on the board (itself included, the
+    top animals and those buried) and in hand gains or loses the difference as a buff would (one in hand that grows
+    there reacts, the Butterfly evolving); the deck's copies come out at it (GameState.deck_instance)."""
+    p = unit.owner
+    jelly: dict = {}
+    for cid in state.decks[p]:
+        jelly[cid] = jelly.get(cid, 0) + 1
+    state.jelly[p] = jelly
+    mine = [u for stack in state.board.values() for u in stack if u.owner == p] + list(state.hands[p])
+    for inst in mine:
+        _grant(state, [inst.iid], state.jelly_counter(p, inst.card_id) - inst.strength_counter)
+
+
 def _gorilla_legend_place(state, unit, cr):
     """Roar: give all animals in your hand +2 strength."""
     _grant(state, _hand_iids(state, unit.owner), state.config.gorilla_legend_grant)
@@ -3087,6 +3103,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Handlock (Grizzly Bear is an anthem; the Eagles' sharing lives in _gain_in_hand, the mate in state.ensure_mates).
     "baboon_legend": {"on_start_of_turn": _baboon_legend_sot},
     "gorilla_legend": {"on_place": _gorilla_legend_place},
+    "bee_legend_2": {"on_place": _bee_legend_2_place},
     "butterfly_legend": {"on_gain_in_hand": _butterfly_evolve},
     "butterfly_legend_caterpillar": {"on_place": _draw1, "on_gain_in_hand": _butterfly_evolve},
     "butterfly_legend_chrysalis": {"on_place": _draw_then_give_one, "on_gain_in_hand": _butterfly_evolve},

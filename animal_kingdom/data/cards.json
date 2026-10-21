@@ -4537,6 +4537,21 @@
       "keywords": [],
       "species": "Strawberry Leopard",
       "habitat": "Savanna"
+    },
+    {
+      "id": "bee_legend_2",
+      "name": "[BEE]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Colony"
+      ],
+      "base_strength": 1,
+      "text": "Roar: your animals on the board, in your hand and in your deck become strength 5.",
+      "species": "Bee",
+      "habitat": "Meadow",
+      "unnamed": true,
+      "keywords": []
     }
   ]
 }

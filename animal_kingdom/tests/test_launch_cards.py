@@ -753,6 +753,22 @@ def test_tortoise_counts_armor_including_an_armadillos_gift():
     assert s.food["A"] == 2 * CFG.tortoise_per_armor
 
 
+def test_royal_jelly_makes_your_animals_five_wherever_they_are():
+    from animal_kingdom.engine.strength import effective_strength
+    s = make_state(hands={"A": ["bee_legend_2", "raven", "lion"]}, decks={"A": ["snake_egg", "lion", "raven"], "B": []})
+    on_board = put(s, "1,1", "worker_ant", "A")
+    enemy = put(s, "4,2", "worker_ant", "B")
+    rules.apply_action(s, PlaceAction("bee_legend_2", ("cr", "1,2")))
+    five = CFG.jelly_strength
+    assert effective_strength(s, s.top_unit("1,2")) == five                     # itself
+    assert effective_strength(s, on_board) == five and effective_strength(s, enemy) == 1   # yours on the board, not theirs
+    assert {u.card_id: effective_strength(s, u) for u in s.hands["A"]} == {"raven": five, "lion": five}   # a 7 too
+    drawn = s.draw("A", 3)
+    assert [effective_strength(s, u) for u in drawn] == [five] * 3              # the deck's copies come out at it
+    s.decks["A"].append("lion")                                                 # shuffled in later: untouched
+    assert effective_strength(s, s.draw("A", 1)[0]) == 7
+
+
 def test_the_capybara_is_a_nine_when_the_rest_of_the_starting_deck_is_small():
     from animal_kingdom.engine.strength import effective_strength
     small = make_state(hands={"A": ["capybara"]})

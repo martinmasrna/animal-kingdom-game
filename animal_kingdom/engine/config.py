@@ -116,6 +116,7 @@ class Config:
     oxpecker_min: int = 8                # Oxpecker: count starting-deck animals of strength >= this
     capybara_strength: int = 9           # Capybara: this has strength 9 if your starting deck has no other animal...
     capybara_small_max: int = 3          # ...of strength 4 or more (the small-deck archetype's line)
+    jelly_strength: int = 5              # the legendary Bee: "the animals in your hand and deck become strength 5"
     vulture_removals: int = 3            # Vulture: lands at your Dusk if this many animals were removed this turn
 
     # --- Removal-strength caps on Roar removals ---

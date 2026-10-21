@@ -191,6 +191,10 @@ def test_no_strength_limit_card_escapes_the_check():
     assert printed - {"oxpecker", "capybara"} == set(STRENGTH_LIMITS)
 
 
+def test_royal_jelly_number_matches_config():
+    assert int(re.search(r"become strength (\d+)", _cards()["bee_legend_2"].text).group(1)) == Config.default().jelly_strength
+
+
 def test_capybara_numbers_match_config():
     cfg, text = Config.default(), _cards()["capybara"].text
     assert int(STRENGTH_LIMIT_RE.search(text).group(1)) == cfg.capybara_small_max + 1

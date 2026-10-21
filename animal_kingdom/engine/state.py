@@ -303,6 +303,7 @@ class GameState:
         inked: Optional[set[int]] = None,
         roar_twice: Optional[dict[str, int]] = None,
         last_roar: Optional[dict[str, str]] = None,
+        jelly: Optional[dict[str, dict[str, int]]] = None,
     ):
         self.game_map = game_map
         self.cards = cards
@@ -323,6 +324,9 @@ class GameState:
         self.roar_twice = roar_twice if roar_twice is not None else {}
         # The Macaw: player -> the card whose Roar that player played last (public; a Macaw's copy counts as the copied card).
         self.last_roar = last_roar if last_roar is not None else {}
+        # The legendary Bee's royal jelly: player -> card id -> how many deck copies it reached. Each comes out of the deck
+        # (drawn, played or placed from it) at the jelly's strength; copies shuffled in later are untouched (deck_instance).
+        self.jelly = jelly if jelly is not None else {}
         self.food = food
         self.current = current
         self.first_player = first_player
@@ -401,10 +405,35 @@ class GameState:
         deck, hand = self.decks[player], self.hands[player]
         drawn: list[UnitInstance] = []
         for _ in range(min(n, len(deck))):
-            inst = UnitInstance(deck.pop(), player, self.new_iid())
+            inst = self.deck_instance(player, deck.pop())
             hand.append(inst)
             drawn.append(inst)
         return drawn
+
+    def jelly_take(self, player: str, card_id: str) -> bool:
+        """A copy of `card_id` just left `player`'s deck: was it one the royal jelly reached? (Spends it.)"""
+        left = self.jelly.get(player, {}).get(card_id, 0)
+        if not left:
+            return False
+        if left == 1:
+            del self.jelly[player][card_id]
+        else:
+            self.jelly[player][card_id] = left - 1
+        return True
+
+    def jelly_counter(self, player: str, card_id: str) -> int:
+        """The stored counter that makes a copy of `card_id` strength `jelly_strength` (its printed strength, a dynamic
+        one as 0, plus any growth its card id carries)."""
+        card = self.cards[card_id]
+        base = card.base_strength if isinstance(card.base_strength, int) else 0
+        return self.config.jelly_strength - base - self.card_strength_counters.get(player, {}).get(card_id, 0)
+
+    def deck_instance(self, player: str, card_id: str) -> "UnitInstance":
+        """An instance of a card just taken out of `player`'s deck, at the royal jelly's strength if it reached it."""
+        inst = UnitInstance(card_id, player, self.new_iid())
+        if self.jelly_take(player, card_id):
+            inst.strength_counter = self.jelly_counter(player, card_id)
+        return inst
 
     def add_to_hand(self, player: str, card_id: str, *, strength_counter: int = 0) -> "UnitInstance":
         """Create a fresh hand instance of `card_id` for `player` (test setup, Opossum return)."""
@@ -510,6 +539,7 @@ class GameState:
         new.inked = set(self.inked)
         new.roar_twice = dict(self.roar_twice)
         new.last_roar = dict(self.last_roar)
+        new.jelly = {p: dict(j) for p, j in self.jelly.items()}
         new.result = self.result  # Result is frozen/immutable - safe to share
         return new
 
@@ -575,6 +605,7 @@ class GameState:
             "inked": sorted(self.inked),
             "roar_twice": dict(sorted(self.roar_twice.items())),
             "last_roar": dict(sorted(self.last_roar.items())),
+            "jelly": {p: dict(sorted(j.items())) for p, j in sorted(self.jelly.items())},
         }
 
     @staticmethod
@@ -623,6 +654,7 @@ class GameState:
             inked={int(i[0] if isinstance(i, list) else i) for i in (d.get("inked") or [])},   # [iid, until]: saved while ink wore off
             roar_twice=dict(d.get("roar_twice") or {}),
             last_roar=dict(d.get("last_roar") or {}),
+            jelly={p: dict(j) for p, j in (d.get("jelly") or {}).items()},
         )
 
 
