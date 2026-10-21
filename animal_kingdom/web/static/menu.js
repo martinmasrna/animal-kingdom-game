@@ -8,8 +8,11 @@ export const dd = (key, cur, opts) => { const c = opts.find(([v]) => v === cur) 
 export function wireDd(root, pick) {
   root.querySelectorAll('.dd').forEach(d => {
     d.querySelector('.sel').onclick = ev => { ev.stopPropagation(); const was = d.classList.contains('open'); closeAll(); d.classList.toggle('open', !was);
-      // The list hangs under its slab, or over it when the window has no room below.
-      d.classList.remove('up'); if (!was && d.querySelector('.ddm').getBoundingClientRect().bottom > innerHeight - 8) d.classList.add('up'); };
+      // The list hangs under its slab, or over it when the window has more room above; a list taller than the room
+      // (the bot decks, nineteen of them since 2026-10-20) scrolls inside it instead of running off the screen.
+      d.classList.remove('up'); const m = d.querySelector('.ddm'); m.style.maxHeight = '';
+      if (!was) { const r = d.getBoundingClientRect(), below = innerHeight - r.bottom - 8, above = r.top - 8, up = m.scrollHeight > below && above > below;
+        d.classList.toggle('up', up); if (m.scrollHeight > (up ? above : below)) m.style.maxHeight = Math.max(120, up ? above : below) + 'px'; } };
     d.querySelectorAll('.ddo').forEach(o => o.onclick = () => pick(d.dataset.dd, o.dataset.v));
   });
 }
