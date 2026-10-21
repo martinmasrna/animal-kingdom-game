@@ -2,7 +2,7 @@
   "_comment": "The cards: the one source of every card's values, written by the card table (tools/cards/hq.py, which also keeps how settled each value is in tools/cards/levels.json). A card belongs to no deck: the decks (starters and bot decks) are lists over this pool in decklists.json. Effect logic lives in engine code (effects/statics/strength), bound by id; numbers an effect uses live in engine/config.py. Schema: cards: id (unique, stable), name, status (collectible: a card a deck may hold; reserve: a shelved design or a later habitat's card; tutorial: the tutorial's fixed deal; token: made by an effect, never in a decklist; planned: an animal and habitat waiting for a design, which the engine doesn't load), rarity, tags (families and roles), base_strength (int 0-10, or 'dynamic' with dynamic_strength), keywords (the printed static keywords, read from the text by hq.py), hungry (its number), food_cost (a printed 'Costs X food'), text (verbatim), related (the cards it makes), evolves, mate (the Eagle pair), stage, unnamed (a legendary waiting for its name), species, habitat.",
   "cards": [
     {
-      "id": "queen_marabunta",
+      "id": "army_ant_legend",
       "name": "Queen Solenia",
       "status": "collectible",
       "rarity": "legendary",
@@ -17,7 +17,7 @@
       "habitat": "Jungle"
     },
     {
-      "id": "vesper",
+      "id": "hornet_legend",
       "name": "Vesper",
       "status": "collectible",
       "rarity": "legendary",
@@ -33,7 +33,7 @@
       "habitat": "Forest"
     },
     {
-      "id": "queen_honoria",
+      "id": "bee_legend",
       "name": "Queen Melissia",
       "status": "collectible",
       "rarity": "legendary",
@@ -48,7 +48,7 @@
       "habitat": "Meadow"
     },
     {
-      "id": "falstaff",
+      "id": "bumblebee_legend",
       "name": "Lord Bumbleton",
       "status": "collectible",
       "rarity": "legendary",
@@ -219,7 +219,7 @@
       "habitat": "Meadow"
     },
     {
-      "id": "ember",
+      "id": "pheasant_legend",
       "name": "Ember",
       "status": "collectible",
       "rarity": "legendary",
@@ -361,7 +361,7 @@
       "habitat": "Meadow"
     },
     {
-      "id": "locust",
+      "id": "locust_legend",
       "name": "The First of Many",
       "status": "collectible",
       "rarity": "legendary",
@@ -373,7 +373,7 @@
       "habitat": "Meadow"
     },
     {
-      "id": "roach_king",
+      "id": "cockroach_legend",
       "name": "Roach King",
       "status": "collectible",
       "rarity": "legendary",
@@ -399,7 +399,7 @@
       "habitat": "Jungle"
     },
     {
-      "id": "pestis",
+      "id": "rat_legend_2",
       "name": "Pestis",
       "status": "collectible",
       "rarity": "legendary",
@@ -431,7 +431,7 @@
       "habitat": "Savanna"
     },
     {
-      "id": "clarion",
+      "id": "wolf_legend_3",
       "name": "[WHITE WOLF]",
       "status": "collectible",
       "rarity": "legendary",
@@ -445,7 +445,7 @@
       "habitat": "Forest"
     },
     {
-      "id": "lobo",
+      "id": "wolf_legend_2",
       "name": "[BLACK WOLF]",
       "status": "collectible",
       "rarity": "legendary",
@@ -620,7 +620,7 @@
       "habitat": "City"
     },
     {
-      "id": "sirocco",
+      "id": "skunk_legend",
       "name": "Rue",
       "status": "collectible",
       "rarity": "legendary",
@@ -632,7 +632,7 @@
       "habitat": "Forest"
     },
     {
-      "id": "gale",
+      "id": "falcon_legend",
       "name": "[FALCON]",
       "status": "collectible",
       "rarity": "legendary",
@@ -776,7 +776,7 @@
       "habitat": "City"
     },
     {
-      "id": "scarlett",
+      "id": "fox_legend",
       "name": "Scarlett",
       "status": "collectible",
       "rarity": "legendary",
@@ -787,8 +787,8 @@
       "text": "Roar: place Poppy and Rusty on random adjacent empty crossroads.",
       "keywords": [],
       "related": [
-        "poppy",
-        "rusty"
+        "baby_fox",
+        "baby_fox_2"
       ],
       "species": "Fox",
       "habitat": "Forest"
@@ -818,7 +818,7 @@
       "habitat": "Meadow"
     },
     {
-      "id": "prince_leo",
+      "id": "lion_legend",
       "name": "Prince Leo",
       "status": "collectible",
       "rarity": "legendary",
@@ -832,7 +832,7 @@
       "habitat": "Savanna"
     },
     {
-      "id": "princess_lea",
+      "id": "lion_legend_2",
       "name": "Princess Lea",
       "status": "collectible",
       "rarity": "legendary",
@@ -846,7 +846,7 @@
       "habitat": "Savanna"
     },
     {
-      "id": "king_theron",
+      "id": "lion_legend_3",
       "name": "King Theron",
       "status": "collectible",
       "rarity": "legendary",
@@ -860,7 +860,7 @@
       "habitat": "Savanna"
     },
     {
-      "id": "queen_adira",
+      "id": "lion_legend_4",
       "name": "Queen Adira",
       "status": "collectible",
       "rarity": "legendary",
@@ -1217,7 +1217,7 @@
       "habitat": "Open Ocean"
     },
     {
-      "id": "big_gus",
+      "id": "capybara_legend",
       "name": "Big Gus",
       "status": "collectible",
       "rarity": "legendary",
@@ -1245,7 +1245,7 @@
       "habitat": "City"
     },
     {
-      "id": "barley",
+      "id": "rat_legend",
       "name": "[RAT]",
       "status": "collectible",
       "rarity": "legendary",
@@ -1259,7 +1259,7 @@
       "habitat": "City"
     },
     {
-      "id": "scrooge",
+      "id": "chipmunk_legend",
       "name": "Tally",
       "status": "collectible",
       "rarity": "legendary",
@@ -1413,7 +1413,7 @@
       "habitat": "Meadow"
     },
     {
-      "id": "fathom",
+      "id": "octopus_legend_2",
       "name": "[OCTOPUS]",
       "status": "collectible",
       "rarity": "legendary",
@@ -1613,7 +1613,7 @@
       "habitat": "Forest"
     },
     {
-      "id": "eon",
+      "id": "anaconda_legend",
       "name": "Eon",
       "status": "collectible",
       "rarity": "legendary",
@@ -1645,7 +1645,7 @@
       "habitat": "Forest"
     },
     {
-      "id": "black_swan",
+      "id": "swan_legend",
       "name": "Black Swan",
       "status": "collectible",
       "rarity": "legendary",
@@ -1677,7 +1677,7 @@
       "habitat": "Forest"
     },
     {
-      "id": "gaboon_viper",
+      "id": "cottonmouth",
       "name": "Cottonmouth",
       "status": "collectible",
       "rarity": "rare",
@@ -1808,7 +1808,7 @@
       "habitat": "Forest"
     },
     {
-      "id": "aurum",
+      "id": "goose_legend",
       "name": "Aurum",
       "status": "collectible",
       "rarity": "legendary",
@@ -1839,7 +1839,7 @@
       "habitat": "Savanna"
     },
     {
-      "id": "silverback",
+      "id": "gorilla_legend",
       "name": "[GORILLA]",
       "status": "collectible",
       "rarity": "legendary",
@@ -1872,7 +1872,7 @@
       "habitat": "Meadow"
     },
     {
-      "id": "arne",
+      "id": "eagle_legend",
       "name": "[EAGLE]",
       "status": "collectible",
       "rarity": "legendary",
@@ -1886,9 +1886,9 @@
         "Apex Predator"
       ],
       "related": [
-        "arna"
+        "eagle_legend_2"
       ],
-      "mate": "arna",
+      "mate": "eagle_legend_2",
       "species": "Eagle",
       "habitat": "Forest"
     },
@@ -2049,7 +2049,7 @@
       "keywords": []
     },
     {
-      "id": "brutus",
+      "id": "rhinoceros_legend",
       "name": "[RHINOCEROS]",
       "status": "collectible",
       "rarity": "legendary",
@@ -2066,7 +2066,7 @@
       "habitat": "Savanna"
     },
     {
-      "id": "methuselah",
+      "id": "tortoise_legend",
       "name": "Azamandulai",
       "status": "collectible",
       "rarity": "legendary",
@@ -2080,7 +2080,7 @@
       "habitat": "Savanna"
     },
     {
-      "id": "mocha",
+      "id": "sperm_whale_legend",
       "name": "[SPERM WHALE]",
       "status": "collectible",
       "rarity": "legendary",
@@ -2474,7 +2474,7 @@
     },
     {
       "id": "great_white_shark",
-      "name": "Great White Shark",
+      "name": "Shark",
       "status": "collectible",
       "rarity": "rare",
       "tags": [
@@ -2816,7 +2816,7 @@
       "habitat": "Open Ocean"
     },
     {
-      "id": "cuco",
+      "id": "cuckoo_legend",
       "name": "[CUCKOO]",
       "status": "collectible",
       "rarity": "legendary",
@@ -3109,7 +3109,7 @@
       "text": ""
     },
     {
-      "id": "poppy",
+      "id": "baby_fox",
       "name": "Poppy",
       "status": "token",
       "rarity": "common",
@@ -3121,7 +3121,7 @@
       "text": ""
     },
     {
-      "id": "rusty",
+      "id": "baby_fox_2",
       "name": "Rusty",
       "status": "token",
       "rarity": "common",
@@ -3281,7 +3281,7 @@
       "stage": 5
     },
     {
-      "id": "arna",
+      "id": "eagle_legend_2",
       "name": "[EAGLE'S MATE]",
       "status": "token",
       "rarity": "legendary",
@@ -3294,7 +3294,7 @@
         "Apex Predator"
       ],
       "text": "Flight. Apex Predator. While this and its mate are in your hand, they share their strength.",
-      "mate": "arne"
+      "mate": "eagle_legend"
     },
     {
       "id": "eon_food_engine",

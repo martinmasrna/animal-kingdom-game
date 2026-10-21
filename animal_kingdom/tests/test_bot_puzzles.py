@@ -204,7 +204,7 @@ def test_taipan_marks_the_python():
         while s.result is None and s.current == "B":
             turn.append(bot.choose(s.view_for(s.player_to_act()), rules.legal_actions(s), s))
             rules.apply_action(s, turn[-1])
-        assert [x for x in s.scheduled if x["step"].get("by_card") == "gaboon_viper" and x["step"]["iid"] == python], (seed, turn)
+        assert [x for x in s.scheduled if x["step"].get("by_card") == "cottonmouth" and x["step"]["iid"] == python], (seed, turn)
 
 
 DEN_SENSE_CANDIDATE = {"depth": 1, "w.pending_target": 1.5, "w.buried_presence": 0.25, "den_sense": True}

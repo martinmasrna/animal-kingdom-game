@@ -31,7 +31,7 @@ from ._helpers import apply_click, make_state, put
 def test_king_theron_uncapped_removes_on_every_cover_this_turn():
     cfg = Config.default()
     s = make_state(config=cfg, hands={"A": ["alley_cat", "black_panther"]})
-    put(s, "1,1", "king_theron", "A")
+    put(s, "1,1", "lion_legend_3", "A")
     put(s, "2,1", "rattlesnake", "B")   # strength 0: coverable by House Cat (1)
     put(s, "2,2", "mouse", "B")
     # House Cat's roar offers "play another Cat" - use it to cover a second enemy
@@ -45,7 +45,7 @@ def test_king_theron_uncapped_removes_on_every_cover_this_turn():
 def test_king_theron_capped_fires_once_per_turn():
     cfg = replace(Config.default(), cap_king_theron=True)
     s = make_state(config=cfg, hands={"A": ["alley_cat", "black_panther"]})
-    put(s, "1,1", "king_theron", "A")
+    put(s, "1,1", "lion_legend_3", "A")
     put(s, "2,1", "rattlesnake", "B")
     put(s, "2,2", "mouse", "B")
     rules.apply_action(s, PlaceAction("alley_cat", ("cr", "2,1")))
@@ -62,21 +62,21 @@ def test_eon_capped_fires_once_per_turn_across_multiple_events():
     # stack fires two remove events in one resolution cascade, so an on-board Eon should
     # gain food only once when capped.
     cfg = replace(Config.default(), cap_eon=True)
-    s = make_state(config=cfg, hands={"A": ["pestis"]})
+    s = make_state(config=cfg, hands={"A": ["rat_legend_2"]})
     put(s, "1,1", "eon_food_engine", "A")
     put(s, "1,2", "mouse", "A")             # connection anchor
     put(s, "2,1", "mouse", "B")
     put(s, "2,1", "rat", "B")               # same crossroad, same owner: stacks freely
-    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))
+    rules.apply_action(s, PlaceAction("rat_legend_2", ("cr", "2,2")))
     rules.apply_action(s, ChoiceAction("2,1"))              # the adjacent enemy stack
-    assert s.food["A"] == cfg.eon_food      # two remove events fired; only the first paid out
+    assert s.food["A"] == cfg.anaconda_legend_food      # two remove events fired; only the first paid out
 
 
 def test_falstaff_capped_limits_rider_to_one_gain_event_per_turn():
     cfg = replace(Config.default(), cap_falstaff=True)
     s = make_state(config=cfg, food={"A": 0, "B": 0})
-    put(s, "1,1", "falstaff", "A")
+    put(s, "1,1", "bumblebee_legend", "A")
     gain_food(s, "A", 1)
     gain_food(s, "A", 1)
     # Both gains apply, but the +3 rider only fires once (capped) instead of twice.
-    assert s.food["A"] == 2 + cfg.falstaff_food_rider
+    assert s.food["A"] == 2 + cfg.bumblebee_legend_food_rider

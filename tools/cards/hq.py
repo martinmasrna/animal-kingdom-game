@@ -24,6 +24,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py collect ID                    a reserve card into the collection (the reverse of shelve)
     .venv/bin/python tools/cards/hq.py deck-name DECK NAME           a starter deck's name
     .venv/bin/python tools/cards/hq.py delete ID                     a card out of the game entirely
+    .venv/bin/python tools/cards/hq.py rename OLD NEW                a new id everywhere (when its animal changes)
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d] [--strip x,y,z] [--full y|reset]
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
 
@@ -475,6 +476,62 @@ def collect(card_id: str, by: str = "martin") -> str:
     return _set_status(card_id, "reserve", "collectible", "into the collection", by)
 
 
+# ---------- ids ----------
+
+RENAMED = ROOT / "animal_kingdom" / "web" / "renamed.py"
+CARDNUMS = ROOT / "animal_kingdom" / "web" / "static" / "cardnums.js"
+DESIGN = ROOT.parent / "design"
+# Records of what happened, kept as written: the human games, the players' news, the design repo's art rounds.
+HISTORY = ("results/", "animal_kingdom/web/news/")
+TEXT = (".py", ".js", ".mjs", ".json", ".jsonl", ".md", ".html", ".css", ".txt", ".toml", ".sh")
+
+
+def _git_files(repo: Path) -> list[str]:
+    return subprocess.run(["git", "-C", str(repo), "ls-files"], capture_output=True, text=True, check=True).stdout.split("\n")
+
+
+def rename(old: str, new: str) -> str:
+    """Give a card a new id everywhere the game knows it: the card data, the levels, the starter and bot decks, the crops,
+    the code, tests and docs, its painting (here and the design repo's master); its deck-code number stays, and players'
+    saved decks, old replays and saved matches follow it through the rename map (web/renamed.py, SUCCESSOR). Ids name the
+    card's animal (AGENTS.md, Invariants), so a card changes id when its animal does, never when its name does."""
+    ids = {c["id"] for c in _read(CARDS)["cards"]}
+    if old not in ids:
+        raise Refused(f"no card {old}")
+    if new in ids or not re.fullmatch(r"[a-z][a-z0-9_]*", new):
+        raise Refused(f"{new} is taken or not an id")
+    # the id as a word, or leading a code name built on it (_goose_legend_roar, goose_legend_eggs), but never another card's id (eon_food_engine)
+    word = re.compile(rf"(?<![A-Za-z0-9_])(_?){re.escape(old)}(?=(_[a-z0-9_]+)?(?![A-Za-z0-9_]))")
+    def sub(text: str) -> str:
+        return word.sub(lambda m: m.group(0) if m.group(2) and old + m.group(2) in ids else m.group(1) + new, text)
+    changed = 0
+    for f in _git_files(ROOT):
+        p = ROOT / f
+        if not f or f.startswith(HISTORY) or not f.endswith(TEXT) or not p.is_file():
+            continue
+        src = p.read_text(encoding="utf-8")
+        out = sub(src)
+        if out != src:
+            p.write_text(out, encoding="utf-8"); changed += 1
+    for f in _git_files(ROOT):    # its painting
+        if Path(f).stem == old and Path(f).parent.name == "art":
+            subprocess.run(["git", "-C", str(ROOT), "mv", f, str(Path(f).with_name(new + Path(f).suffix))], check=True)
+    # the rename map: players' decks and old replays follow the card (its deck-code number already means it, kept in place)
+    src = RENAMED.read_text(encoding="utf-8")
+    RENAMED.write_text(src.replace("RENAMED_IDS = {", f'RENAMED_IDS = {{"{old}": "{new}", ', 1), encoding="utf-8")
+    src = CARDNUMS.read_text(encoding="utf-8")
+    CARDNUMS.write_text(src.replace("export const SUCCESSOR = { ", f"export const SUCCESSOR = {{ {old}: '{new}', ", 1), encoding="utf-8")
+    if DESIGN.is_dir():   # the master painting, and the art rounds' manifest that installs and counts it
+        for ext in (".png", ".jpg"):
+            if (DESIGN / "cards" / (old + ext)).is_file():
+                subprocess.run(["git", "-C", str(DESIGN), "mv", f"cards/{old}{ext}", f"cards/{new}{ext}"], check=True)
+        man = DESIGN / "cards" / "bar" / "manifest.jsonl"
+        if man.is_file():
+            man.write_text(re.sub(rf'"card": "{re.escape(old)}"', f'"card": "{new}"', man.read_text(encoding="utf-8")), encoding="utf-8")
+    subprocess.run([str(PY), "-m", "animal_kingdom.render.deck_docs"], cwd=ROOT, capture_output=True)
+    return f"{old} -> {new} ({changed} files)"
+
+
 def delete(card_id: str, by: str = "martin") -> str:
     """Remove a card from the game: out of cards.json and the starter decks, and its levels gone. Its number in
     static/cardnums.js stays, since deck codes depend on every number. Claude can't delete a card with a locked value."""
@@ -506,6 +563,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("collect"); s.add_argument("id")
     s = sub.add_parser("deck-name"); s.add_argument("deck"); s.add_argument("name")
     s = sub.add_parser("delete"); s.add_argument("id")
+    s = sub.add_parser("rename"); s.add_argument("old"); s.add_argument("new")
     s = sub.add_parser("add"); s.add_argument("name"); s.add_argument("habitat", choices=HABITATS); s.add_argument("--species", default="")
     s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
     a = ap.parse_args(argv)
@@ -533,6 +591,8 @@ def main(argv=None) -> None:
             print(deck_name(a.deck, a.name))
         elif a.cmd == "delete":
             print(delete(a.id, "claude"))
+        elif a.cmd == "rename":
+            print(rename(a.old, a.new))
         elif a.cmd == "add":
             print(add(a.name, a.habitat, a.species))
         elif a.cmd == "crop":

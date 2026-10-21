@@ -300,7 +300,7 @@ def _fire_cover_event(state, coverer, covered) -> None:
         hook(state, coverer, covered)
     if "Cat" not in state.cards[coverer.card_id].tags:
         return
-    for top in statics.active_tops(state, coverer.owner, "king_theron"):
+    for top in statics.active_tops(state, coverer.owner, "lion_legend_3"):
         if not _capped(state, "cap_king_theron", top):
             state.effect_stack.append(
                 remove_iid_step(covered.iid, by_player=coverer.owner, by_effect=True, source_iid=None, by_card=coverer.card_id))
@@ -376,7 +376,7 @@ def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
 
 
 # Cards whose trigger works from their owner's hand or deck: when an enemy covers an allied Queen, they're placed on it.
-QUEEN_GUARDS = frozenset({"vesper"})
+QUEEN_GUARDS = frozenset({"hornet_legend"})
 
 
 def _push_queen_guards(state, owner, coverer, cr) -> None:
@@ -583,14 +583,14 @@ def gain_food(state: GameState, player: str, amount: int, *, rider: bool = True,
         return
     # Falstaff: whenever you gain food, gain N more (once per gain event; never recursively).
     if rider:
-        tops = statics.active_tops(state, player, "falstaff")
+        tops = statics.active_tops(state, player, "bumblebee_legend")
         falstaffs = len(tops)
         if falstaffs and not (state.config.cap_falstaff and state.turn_flags.get(f"falstaff_{player}")):
             if state.config.cap_falstaff:
                 state.turn_flags[f"falstaff_{player}"] = True
-            was, (state.cause, state.cause_iid) = (state.cause, state.cause_iid), ("falstaff", tops[0].iid)   # the extra is Falstaff's doing: its food flies from it
+            was, (state.cause, state.cause_iid) = (state.cause, state.cause_iid), ("bumblebee_legend", tops[0].iid)   # the extra is Falstaff's doing: its food flies from it
             try:
-                gain_food(state, player, falstaffs * state.config.falstaff_food_rider, rider=False)
+                gain_food(state, player, falstaffs * state.config.bumblebee_legend_food_rider, rider=False)
             finally:
                 state.cause, state.cause_iid = was
 
@@ -1794,7 +1794,7 @@ def _cuckoo_legend_place(state, unit, cr):
     _push_choose(state, unit.owner, options, "cuckoo")
 
 
-def _ember_remove(state, unit, cr, pos):
+def _pheasant_legend_remove(state, unit, cr, pos):
     """When this is removed, shuffle it into your deck."""
     if state.pile_take(unit.card_id, unit.owner):
         shuffle_back(state, unit.owner, [unit.card_id])
@@ -1910,9 +1910,9 @@ def _cockroach_remove(state, unit, cr, pos):
         _spawn(state, unit.owner, "roach", state.rng.choice(empty))
 
 
-def _roach_king_remove(state, unit, cr, pos):
+def _cockroach_legend_remove(state, unit, cr, pos):
     """When this is removed, put it back where it was with +1 strength and draw a card."""
-    _put_back(state, unit, cr, pos, grow=state.config.roach_king_growth)
+    _put_back(state, unit, cr, pos, grow=state.config.cockroach_legend_growth)
     draw_cards(state, unit.owner, 1)
 
 
@@ -1921,7 +1921,7 @@ def _toad_remove(state, unit, cr, pos):
     _remove_tops(state, unit, [nb for nb, _ in _adjacent_tops(state, cr)])
 
 
-def _locust_place(state, unit, cr):
+def _locust_legend_place(state, unit, cr):
     """Roar: remove all other animals (the top of every other crossroad; what was under comes back up) and discard your
     hand."""
     for inst in list(state.hands[unit.owner]):
@@ -1947,7 +1947,7 @@ def _piranha_place(state, unit, cr):
 
 # --- Canines ----------------------------------------------------------------------------------------------------
 
-def _lobo_friendly_roam(state, watcher, roamer, event):
+def _wolf_legend_2_friendly_roam(state, watcher, roamer, event):
     """Whenever an ally roams onto an enemy, draw a card."""
     if event["onto_enemy"]:
         _push_draw(state, watcher.owner, 1)
@@ -2012,7 +2012,7 @@ def _spawn_pups(state, unit, cr, n, token_ids=("pup",)):
 
 
 def _alpha_place(state, unit, cr):
-    _spawn_pups(state, unit, cr, state.config.alpha_pups, ("poppy", "rusty"))
+    _spawn_pups(state, unit, cr, state.config.alpha_pups, ("baby_fox", "baby_fox_2"))
 
 
 def _unnamed_canine_place(state, unit, cr):
@@ -2057,7 +2057,7 @@ def _twin_place(twin_id):
     return handler
 
 
-def _queen_adira_remove_event(state, unit, cr, event):
+def _lion_legend_4_remove_event(state, unit, cr, event):
     if (event.get("by_player") == unit.owner and event["owner"] != unit.owner
             and event.get("by_card") and "Cat" in state.cards[event["by_card"]].tags):
         if not _capped(state, "cap_queen_adira", unit):
@@ -2066,10 +2066,10 @@ def _queen_adira_remove_event(state, unit, cr, event):
 
 # --- Colony -----------------------------------------------------------------------------------------------------
 
-def _queen_honoria_friendly_place(state, watcher, placed) -> None:
+def _bee_legend_friendly_place(state, watcher, placed) -> None:
     """Queen Melissia: whenever you place a Colony animal, gain 4 food."""
     if "Colony" in state.cards[placed.card_id].tags and not _capped(state, "cap_queen_honoria", watcher):
-        gain_food(state, placed.owner, state.config.queen_honoria_per_place)
+        gain_food(state, placed.owner, state.config.bee_legend_per_place)
 
 
 def _worker_bee_place(state, unit, cr):
@@ -2079,9 +2079,9 @@ def _worker_bee_place(state, unit, cr):
     _push_gain(state, unit.owner, amount)
 
 
-def _queen_marabunta_place(state, unit, cr):
+def _army_ant_legend_place(state, unit, cr):
     others = _control_tag_count(state, unit.owner, "Colony") - 1   # other friendly Colony units
-    _push_gain(state, unit.owner, state.config.queen_marabunta_per_colony * max(0, others))
+    _push_gain(state, unit.owner, state.config.army_ant_legend_per_colony * max(0, others))
 
 
 # Colony outside the precon: bench drafts (Martin, 2026-10-21; docs/design/effects-pass.md). Each card's condition is
@@ -2138,7 +2138,7 @@ def _mole_place(state, unit, cr):
     _push_play_extra(state, unit.owner, filter={"adjacent_to": cr})
 
 
-def _gale_place(state, unit, cr):
+def _falcon_legend_place(state, unit, cr):
     # "Roar: draw a card for each animal you control adjacent to the opponent's den" (Gale included).
     front = state.game_map.hq_front(other_player(unit.owner))
     _push_draw(state, unit.owner, sum(1 for c in front if (top := state.top_unit(c)) and top.owner == unit.owner))
@@ -2206,13 +2206,13 @@ def _op_hornet_kill(state, step):
     return None
 
 
-def _pestis_place(state, unit, cr):
+def _rat_legend_2_place(state, unit, cr):
     # "Remove an adjacent animal and every animal under it": the target is a chosen top, an enemy
     # (Stealth and Armor off limits, as for any removal) or an ally (Armor off limits), and the whole
     # stack goes. Never declined (Martin, 2026-10-21): a Pestis next to only its own animals wipes one of them.
     options = sorted(_adjacent_enemy_unit_crossroads(state, unit, cr) + _adjacent_friendly_units(state, unit, cr))
     if options:
-        state.effect_stack.append({"op": "pestis_wipe", "chooser": unit.owner, "options": options})
+        state.effect_stack.append({"op": "rat_legend_2_wipe", "chooser": unit.owner, "options": options})
 
 
 def _op_pestis_wipe(state, step):
@@ -2227,11 +2227,11 @@ def _op_pestis_wipe(state, step):
     # (rulings.md) and stays out of it while the units above it are being removed.
     doomed = [u for u in reversed(list(state.board.get(target) or [])) if statics.can_be_removed(state, u)]
     for unit in doomed:
-        _remove_specific(state, target, unit, by_player=step["chooser"], by_card="pestis", armor_checked=True)
+        _remove_specific(state, target, unit, by_player=step["chooser"], by_card="rat_legend_2", armor_checked=True)
     return None
 
 
-def _sirocco_place(state, unit, cr):
+def _skunk_legend_place(state, unit, cr):
     for nb in _adjacent_enemy_unit_crossroads(state, unit, cr, chosen=False):  # mass bounce
         state.effect_stack.append({"op": "bounce_iid", "iid": state.top_unit(nb).iid})
 
@@ -2284,9 +2284,9 @@ def _fill(state, unit, cr):
 
 # --- Egg Control ------------------------------------------------------------------------------------------------
 
-def _eon_event(state, unit, cr, event):           # any draw/shuffle/remove -> +1 (reserve design)
+def _anaconda_legend_event(state, unit, cr, event):           # any draw/shuffle/remove -> +1 (reserve design)
     if not _capped(state, "cap_eon", unit):
-        gain_food(state, unit.owner, state.config.eon_food)
+        gain_food(state, unit.owner, state.config.anaconda_legend_food)
 
 
 def _rattlesnake_shuffle_event(state, event):
@@ -2367,22 +2367,22 @@ def _op_venom(state, step):
     return None
 
 
-def _eon_end_of_turn(state, unit, cr):
+def _anaconda_legend_end_of_turn(state, unit, cr):
     # The Ouroboros: it leaves the board (a return, not a remove - no Deathrattle, nothing to
     # the Remove Pile) and shuffles into its owner's deck, a little smaller each cycle. The loss
     # is kept per card id, like Rattlesnake's growth, so it survives the trip through the deck.
     # Shrunk to nothing, it is removed instead (Martin, 2026-10-09: an endless loop otherwise).
     counters = state.card_strength_counters.setdefault(unit.owner, {})
-    if state.cards["eon"].base_strength + counters.get("eon", 0) - state.config.eon_decay <= 0:
-        _remove_specific(state, cr, unit, by_player=unit.owner, by_card="eon")
+    if state.cards["anaconda_legend"].base_strength + counters.get("anaconda_legend", 0) - state.config.anaconda_legend_decay <= 0:
+        _remove_specific(state, cr, unit, by_player=unit.owner, by_card="anaconda_legend")
         return
     state.emit("to_deck", cr=cr, iid=unit.iid, card=unit.card_id, owner=unit.owner)
     state.board[cr].remove(unit)
     if not state.board[cr]:
         del state.board[cr]
-    counters["eon"] = counters.get("eon", 0) - state.config.eon_decay
-    state.emit("strength", card="eon", owner=unit.owner, n=-state.config.eon_decay)   # every copy (this one is in the deck now)
-    shuffle_back(state, unit.owner, ["eon"])
+    counters["anaconda_legend"] = counters.get("anaconda_legend", 0) - state.config.anaconda_legend_decay
+    state.emit("strength", card="anaconda_legend", owner=unit.owner, n=-state.config.anaconda_legend_decay)   # every copy (this one is in the deck now)
+    shuffle_back(state, unit.owner, ["anaconda_legend"])
 
 
 def _magpie_place(state, unit, cr):
@@ -2432,7 +2432,7 @@ def _snake_egg_place(state, unit, cr):
              {"op": "egg_hatch", "iid": unit.iid, "n": state.config.egg_hatch_draw, "spec": "tag:Snake"}, while_buried=False)
 
 
-def _aurum_start(state, unit, cr):
+def _goose_legend_start(state, unit, cr):
     """Dawn: shuffle a Golden Egg into your deck."""
     shuffle_back(state, unit.owner, ["golden_egg"], by=unit.owner)
 
@@ -2530,10 +2530,10 @@ def _refill_legend_place(state, unit, cr):
     state.effect_stack.append({"op": "draw_to_match", "player": unit.owner})
 
 
-def _scrooge_place(state, unit, cr):
+def _chipmunk_legend_place(state, unit, cr):
     """Roar: gain 3 food for each 10 food you have. Snapshot now; the gain resolves as a literal amount."""
     cfg = state.config
-    _push_gain(state, unit.owner, cfg.scrooge_food_per * (state.food[unit.owner] // cfg.scrooge_food_step))
+    _push_gain(state, unit.owner, cfg.chipmunk_legend_food_per * (state.food[unit.owner] // cfg.chipmunk_legend_food_step))
 
 
 def _rat_king_place(state, unit, cr):
@@ -2567,7 +2567,7 @@ def _chipmunk_place(state, unit, cr):
 
 # --- Food OTK ---------------------------------------------------------------------------------------------------
 
-def _fathom_place(state, unit, cr):
+def _octopus_legend_2_place(state, unit, cr):
     state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": "rarity:legendary"})
 
 
@@ -2638,7 +2638,7 @@ def _remove_all_adjacent(state, unit, cr):
                                                       source_iid=None, by_card=unit.card_id))
 
 
-def _mocha_place(state, unit, cr):
+def _sperm_whale_legend_place(state, unit, cr):
     """Roar: remove all enemies adjacent to your animals (this one included)."""
     mine = [c for c, st in state.board.items() if st and st[-1].owner == unit.owner]
     hit = sorted({nb for c in mine for nb, top in _adjacent_tops(state, c)
@@ -2656,8 +2656,8 @@ def _hippo_enemy_placed(state, hippo, placed, cr):
                                                   source_iid=hippo.iid, by_card=hippo.card_id))
 
 
-def _methuselah_eot(state, unit, cr):
-    _push_gain(state, unit.owner, state.config.methuselah_food)
+def _tortoise_legend_eot(state, unit, cr):
+    _push_gain(state, unit.owner, state.config.tortoise_legend_food)
 
 
 def _oxpecker_place(state, unit, cr):
@@ -2695,9 +2695,9 @@ def _baboon_legend_sot(state, unit, cr):
     _grant(state, state.rng.sample(hand, k), state.config.baboon_legend_grant)
 
 
-def _silverback_place(state, unit, cr):
+def _gorilla_legend_place(state, unit, cr):
     """Roar: give all animals in your hand +2 strength."""
-    _grant(state, _hand_iids(state, unit.owner), state.config.silverback_grant)
+    _grant(state, _hand_iids(state, unit.owner), state.config.gorilla_legend_grant)
 
 
 BUTTERFLY_STAGES = ["butterfly_legend", "butterfly_legend_caterpillar", "butterfly_legend_chrysalis",
@@ -2913,7 +2913,7 @@ def _mock_saboteur_place(state, unit, cr):
 OPS.update({
     "rat_discard": _op_rat_discard,
     "hornet_kill": _op_hornet_kill,
-    "pestis_wipe": _op_pestis_wipe,
+    "rat_legend_2_wipe": _op_pestis_wipe,
     "bounce_iid": _op_bounce_iid,
     "skunk_bounce": _op_skunk_bounce,
     "venom": _op_venom,
@@ -2956,8 +2956,8 @@ def _calib_removal(max_attr=None, min_attr=None):
 
 EFFECTS: dict[str, dict[str, Callable]] = {
     # Aristocrats.
-    "cuco": {"on_place": _cuckoo_legend_place},
-    "ember": {"on_remove": _ember_remove},
+    "cuckoo_legend": {"on_place": _cuckoo_legend_place},
+    "pheasant_legend": {"on_remove": _pheasant_legend_remove},
     "praying_mantis": {"on_place": _mantis_place},
     "tarantula": {"on_end_of_turn": _tarantula_eot},
     "sea_turtle": {"on_end_of_turn": _sea_turtle_eot},
@@ -2968,11 +2968,11 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "earthworm": {"on_remove": _earthworm_remove},
     "worm": {"on_remove": _worm_remove},
     "cockroach": {"on_remove": _cockroach_remove},
-    "roach_king": {"on_remove": _roach_king_remove},
+    "cockroach_legend": {"on_remove": _cockroach_legend_remove},
     "toad": {"on_remove": _toad_remove},
-    "locust": {"on_place": _locust_place},
+    "locust_legend": {"on_place": _locust_legend_place},
     # Canines (Clarion's free roam and Dhole's equal roams are statics).
-    "lobo": {"on_friendly_roam": _lobo_friendly_roam},
+    "wolf_legend_2": {"on_friendly_roam": _wolf_legend_2_friendly_roam},
     "wolf_legend": {"on_end_of_turn": _wolf_legend_eot},
     "fox": {"on_cover_enemy": _fox_cover},
     "jackal": {"on_place": _jackal_place},
@@ -2982,17 +2982,17 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "badger": {"on_place": _draws_filtered("keyword:Roam")},
     "street_dog": {"on_place": _stray_dog_place},
     # Cats (King Theron fires from _fire_cover_event; Leopard is a static).
-    "prince_leo": {"on_place": _twin_place("princess_lea")},
-    "princess_lea": {"on_place": _twin_place("prince_leo")},
-    "queen_adira": {"on_remove_event": _queen_adira_remove_event},
+    "lion_legend": {"on_place": _twin_place("lion_legend_2")},
+    "lion_legend_2": {"on_place": _twin_place("lion_legend")},
+    "lion_legend_4": {"on_remove_event": _lion_legend_4_remove_event},
     "jaguar": {"on_place": _removes("jaguar_max")},
     "serval": {"on_place": _serval_place},
     "lynx": {"on_place_onto_enemy": _draws("lynx_draw")},
     "bobcat": {"on_place": _conditional(_draw1)},
     "alley_cat": {"on_place": _house_cat_place},
     # Colony.
-    "queen_marabunta": {"on_place": _queen_marabunta_place},
-    "queen_honoria": {"on_friendly_place": _queen_honoria_friendly_place},
+    "army_ant_legend": {"on_place": _army_ant_legend_place},
+    "bee_legend": {"on_friendly_place": _bee_legend_friendly_place},
     "forager_ant": {"on_place": _forager_ant_place},
     "queen_wasp": {"on_friendly_place": _queen_wasp_friendly_place},
     "scout_bee": {"on_end_of_turn": _scout_bee_eot},
@@ -3011,9 +3011,9 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Den Rush.
     "greywhisker": {"on_place": _greywhisker_place},
     "mole_legend": {"on_place": _greywhisker_place},
-    "pestis": {"on_place": _pestis_place},
-    "sirocco": {"on_place": _sirocco_place},
-    "gale": {"on_place": _gale_place},
+    "rat_legend_2": {"on_place": _rat_legend_2_place},
+    "skunk_legend": {"on_place": _skunk_legend_place},
+    "falcon_legend": {"on_place": _falcon_legend_place},
     "mole": {"on_place": _mole_place},
     "naked_mole_rat": {"on_place": _mole_place},
     "hornet": {"on_place": _hornet_place},
@@ -3026,13 +3026,13 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "dolphin": {"on_place": _draw1},
     "mouse": {"on_place": _draws_filtered("tag:Rodent")},
     # Egg Control.
-    "eon": {"on_end_of_turn": _eon_end_of_turn},
+    "anaconda_legend": {"on_end_of_turn": _anaconda_legend_end_of_turn},
     "raven_legend": {"on_place": _raven_legend_place},
-    "aurum": {"on_start_of_turn": _aurum_start},
+    "goose_legend": {"on_start_of_turn": _goose_legend_start},
     "bat_legend": {"on_start_of_turn": _bat_legend_start},
-    "black_swan": {"on_draw": _omen_drawn},
+    "swan_legend": {"on_draw": _omen_drawn},
     "hawk": {"on_place": _removes("stoop_max")},
-    "gaboon_viper": {"on_place": _king_cobra_place},
+    "cottonmouth": {"on_place": _king_cobra_place},
     "magpie": {"on_place": _magpie_place},
     "black_mamba": {"on_place": _removes("black_mamba_max")},
     "mosquito": {"on_place": _mosquito_place},
@@ -3051,10 +3051,10 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "mahi_mahi": {"on_place": _mahi_mahi_place},
     "sunfish": {"on_place": _sunfish_place},
     # Food Aggro.
-    "big_gus": {"on_place": _repeat_legend_place},
+    "capybara_legend": {"on_place": _repeat_legend_place},
     "macaque_legend": {"on_place": _refill_legend_place},
-    "barley": {"on_place": _rat_king_place},
-    "scrooge": {"on_place": _scrooge_place},
+    "rat_legend": {"on_place": _rat_king_place},
+    "chipmunk_legend": {"on_place": _chipmunk_legend_place},
     "flying_squirrel": {"on_place": _gains("flying_squirrel_food")},
     "meerkat": {"on_place": _draw1, "on_enemy_placed_adjacent": _meerkat_enemy_placed},
     "beaver": {"on_place": _beaver_place},
@@ -3065,7 +3065,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "muskrat": {"on_place": _conditional(_removes())},
     "groundhog": {"on_place": _conditional(_gains("groundhog_food"))},
     # Food OTK (the legendary Honey Badger is its keywords; Capybara an aura; Armadillo too).
-    "fathom": {"on_place": _fathom_place},
+    "octopus_legend_2": {"on_place": _octopus_legend_2_place},
     "squirrel_legend": {"on_place": _otk_squirrel_place},
     "octopus_legend": {"on_place": _mimic_place},
     "golden_orb_weaver": {"on_enemy_placed_adjacent": _orb_weaver_enemy_placed},
@@ -3074,9 +3074,9 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "tortoise": {"on_place": _tortoise_place},
     "owl": {"on_place": _owl_place},
     # Giants (Hungry and Titan are keywords; the legendary Oxpecker feeds its neighbours in _eat).
-    "brutus": {"on_place": _remove_all_adjacent},
-    "methuselah": {"on_end_of_turn": _methuselah_eot},
-    "mocha": {"on_place": _mocha_place},
+    "rhinoceros_legend": {"on_place": _remove_all_adjacent},
+    "tortoise_legend": {"on_end_of_turn": _tortoise_legend_eot},
+    "sperm_whale_legend": {"on_place": _sperm_whale_legend_place},
     "rhinoceros": {"on_place": _rhinoceros_place},
     "hippopotamus": {"on_enemy_placed_adjacent": _hippo_enemy_placed},
     "whale_shark": {"on_end_of_turn": _draw1},
@@ -3086,7 +3086,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "sloth": {"on_place": _sloth_place},
     # Handlock (Grizzly Bear is an anthem; the Eagles' sharing lives in _gain_in_hand, the mate in state.ensure_mates).
     "baboon_legend": {"on_start_of_turn": _baboon_legend_sot},
-    "silverback": {"on_place": _silverback_place},
+    "gorilla_legend": {"on_place": _gorilla_legend_place},
     "butterfly_legend": {"on_gain_in_hand": _butterfly_evolve},
     "butterfly_legend_caterpillar": {"on_place": _draw1, "on_gain_in_hand": _butterfly_evolve},
     "butterfly_legend_chrysalis": {"on_place": _draw_then_give_one, "on_gain_in_hand": _butterfly_evolve},
@@ -3125,7 +3125,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "cuckoo_egg": {"on_draw": _cuckoo_egg_drawn},
     "golden_egg": {"on_draw": _golden_egg_drawn},
     "opossum": {"on_place": _opossum_place},
-    "scarlett": {"on_place": _alpha_place},
+    "fox_legend": {"on_place": _alpha_place},
     "viper": {"on_place": _viper_place},
     "andean_condor": {"on_place": _andean_condor_place},
     "dingo": {"on_end_of_turn": _dingo_eot},
@@ -3133,7 +3133,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "tutorial_lynx": {"on_place": _conditional(_draw1)},
     "tutorial_chipmunk": {"on_place": _chipmunk_place},
     # Reserve designs and the sim tools' calibration bodies.
-    "eon_food_engine": {"on_draw_event": _eon_event, "on_shuffle_event": _eon_event, "on_remove_event": _eon_event},
+    "eon_food_engine": {"on_draw_event": _anaconda_legend_event, "on_shuffle_event": _anaconda_legend_event, "on_remove_event": _anaconda_legend_event},
     "unnamed_canine": {"on_place": _unnamed_canine_place},
     "shuck": {"on_place": _shuck_place},
     "mock_scout": {"on_place": _draw1},

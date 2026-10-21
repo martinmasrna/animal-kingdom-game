@@ -49,7 +49,7 @@
     "play_seq": 4
    },
    {
-    "card_id": "vesper",
+    "card_id": "hornet_legend",
     "owner": "B",
     "iid": 14,
     "placed_on_turn": 4,
@@ -61,7 +61,7 @@
   ],
   "5,2": [
    {
-    "card_id": "queen_honoria",
+    "card_id": "bee_legend",
     "owner": "B",
     "iid": 13,
     "placed_on_turn": 4,
@@ -181,7 +181,7 @@
    "fox",
    "wolf",
    "wolf_legend",
-   "clarion",
+   "wolf_legend_3",
    "street_dog",
    "bush_dog",
    "coyote",
@@ -190,7 +190,7 @@
    "bush_dog",
    "dhole",
    "badger",
-   "lobo",
+   "wolf_legend_2",
    "jackal",
    "fox",
    "coyote",
@@ -202,7 +202,7 @@
    "nurse_bumblebee",
    "termite_queen",
    "termite_king",
-   "falstaff",
+   "bumblebee_legend",
    "queen_bee",
    "worker_wasp",
    "nurse_bee",
@@ -215,7 +215,7 @@
    "nurse_bumblebee",
    "nurse_bee",
    "queen_bee",
-   "queen_marabunta",
+   "army_ant_legend",
    "soldier_ant"
   ]
  },
@@ -230,7 +230,7 @@
    "bush_dog",
    "bush_dog",
    "bush_dog",
-   "clarion",
+   "wolf_legend_3",
    "coyote",
    "coyote",
    "coyote",
@@ -241,7 +241,7 @@
    "jackal",
    "jackal",
    "leopard_legend",
-   "lobo",
+   "wolf_legend_2",
    "orca",
    "orca",
    "street_dog",
@@ -253,10 +253,10 @@
    "wolf_legend"
   ],
   "B": [
-   "queen_marabunta",
-   "vesper",
-   "queen_honoria",
-   "falstaff",
+   "army_ant_legend",
+   "hornet_legend",
+   "bee_legend",
+   "bumblebee_legend",
    "nurse_bee",
    "nurse_bee",
    "nurse_bumblebee",

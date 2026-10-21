@@ -31,5 +31,6 @@ The ruleset (map_b, two actions per turn, Draw draws 2) is the default everywher
 - `engine/` is stdlib-only and transport-agnostic; file loading happens only at construction. `apply_action` validates every action; only bot search, which applies actions it just generated, passes `validate=False`.
 - Card numbers live in `cards.json` (strength, food cost, text) or `engine/config.py` (effect magnitudes), never as literals in effect code. `test_card_text_consistency.py` checks printed numbers against config; extend it when a card gains a new kind of number.
 - Bots are generalist (no deck slugs, archetype names or card ids in policy) and honest (never read hidden information). Both are regression-tested.
+- A card's id names its animal and never follows its display name: `<animal>` for a common or rare, `<animal>_legend` for a legendary (`_2`, `_3` for later legendaries of the same animal, in deck-code order). A card whose animal changes gets a new id with `tools/cards/hq.py rename OLD NEW`, which carries it everywhere, keeps its deck-code number and maps the old id for saved decks, replays and saved matches. `test_card_ids.py` holds it.
 - Never nerf a card to fix a bot. A simulation finding is either a card signal or a pilot flaw; triage it first (the `balance-eval` skill).
 - Balance and bot claims need ≥200 games per matchup, paired seeds, both seats.

@@ -29,12 +29,12 @@ class Config:
     worker_bee_food: int = 8             # +worker_bee_extra if you control another Worker
     worker_bee_extra: int = 8
     worker_wasp_food: int = 3            # at end of your turn
-    methuselah_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
+    tortoise_legend_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
                                           # recurring passive in the pool - ruled down 2026-07-02)
-    methuselah_food_cap: int = 20        # Methuselah: each player gains at most this much food per turn
+    tortoise_legend_food_cap: int = 20        # Methuselah: each player gains at most this much food per turn
     greywhisker_food: int = 1            # Roar: gain 1 food (+ draw 1, + play 1 more, then discard 1)
-    queen_marabunta_per_colony: int = 4  # per other friendly Colony unit
-    queen_honoria_per_place: int = 4     # Queen Melissia: per Colony animal you place, played or not (5→4, 2026-07-05; place, 2026-10-21)
+    army_ant_legend_per_colony: int = 4  # per other friendly Colony unit
+    bee_legend_per_place: int = 4     # Queen Melissia: per Colony animal you place, played or not (5→4, 2026-07-05; place, 2026-10-21)
     # Colony outside the precon, bench drafts (Martin, 2026-10-21; effects-pass.md)
     forager_ant_food: int = 5            # Forager Ant: Roar: gain 5 food
     forager_ant_draw: int = 1            # ... if you gained fed_threshold or more food this turn, draw a card
@@ -42,19 +42,19 @@ class Config:
     scout_bee_threshold: int = 20        # [SCOUT BEE]: Dusk: if you gained 20 or more food this turn ...
     scout_bee_draw: int = 1              # ... draw a card
     ant_legend_per: int = 2              # [ANT]: Dusk: gain 2 food for each animal you control
-    falstaff_food_rider: int = 3         # extra food whenever you gain food
+    bumblebee_legend_food_rider: int = 3         # extra food whenever you gain food
 
     # --- "Food gained this turn" signature mechanic (food_otk pure-OTK overhaul 2026-07-05) ---
     # A shared threshold read by Gopher/Muskrat/Groundhog.
     fed_threshold: int = 10              # food gained this turn to arm Gopher/Muskrat/Groundhog
     gopher_draw: int = 2                # Gopher: draw N if fed this turn
     groundhog_food: int = 10            # Groundhog: gain N food if fed this turn (was +5 str)
-    scrooge_food_per: int = 3           # Scrooge: Roar: gain 3 food for each 10 food you have
-    scrooge_food_step: int = 10
+    chipmunk_legend_food_per: int = 3           # Scrooge: Roar: gain 3 food for each 10 food you have
+    chipmunk_legend_food_step: int = 10
     beaver_bonus_actions: int = 1       # Beaver: extra top-level actions on your NEXT turn
 
     # --- Food-event engine reactors (decision F2/F9; magnitudes are dials) ---
-    eon_food: int = 1                    # per draw/shuffle/remove event
+    anaconda_legend_food: int = 1                    # per draw/shuffle/remove event
     egg_eater_growth: int = 2            # Egg Eater: +strength for each removed Egg
 
     # --- Payoff food ---
@@ -83,7 +83,7 @@ class Config:
     stray_dog_grant: int = 2             # Stray Dog: give an ally with Roam +2, then it roams
     wild_dog_grant: int = 1              # African Wild Dog: Dusk: your adjacent animals +1
     mahi_mahi_grant: int = 1             # Mahi-mahi: Roar: your other Fish +1
-    silverback_grant: int = 1            # Silverback: Roar: every animal in your hand +1
+    gorilla_legend_grant: int = 1            # Silverback: Roar: every animal in your hand +1
     baboon_grant: int = 1                # Baboon: Roar: 2 animals in your hand +1...
     baboon_count: int = 2                # ...this many of them
     baboon_legend_grant: int = 1         # the legendary Baboon: Dawn: 2 random animals in your hand +1...
@@ -100,7 +100,7 @@ class Config:
     cuckoo_eggs: int = 2                 # Cuckoo: Cuckoo Eggs shuffled into your opponent's deck
     golden_egg_draw: int = 2             # Golden Egg (Aurum's): cards drawn when you draw it
     earthworm_worms: int = 2             # Earthworm: Worms placed on its crossroad when it's removed
-    roach_king_growth: int = 1           # Roach King: comes back with +1 strength
+    cockroach_legend_growth: int = 1           # Roach King: comes back with +1 strength
     python_growth: int = 1               # Python: +1 strength whenever an animal is removed
     leopard_legend_growth: int = 1       # the legendary Leopard: +1 strength whenever it removes an animal (every kill makes him bigger)
 
@@ -167,7 +167,7 @@ class Config:
     test_draw: int = 2                  # the mock and calibration cards' "draw 2 cards" (test fixtures)
     viper_poison: int = 3               # Viper's permanent strength loss on the bitten enemy
     black_mamba_max: int = 5                 # Black Mamba removes an adjacent enemy of at most this strength
-    eon_decay: int = 1                  # Eon's strength lost each time it shuffles itself back
+    anaconda_legend_decay: int = 1                  # Eon's strength lost each time it shuffles itself back
 
     # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the
     # per-card default ruling and the data behind it) ---

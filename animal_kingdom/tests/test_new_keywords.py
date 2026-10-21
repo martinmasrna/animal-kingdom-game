@@ -193,7 +193,7 @@ def test_covering_by_roaming_sets_off_spikes():
 
 def test_king_theron_watches_a_roaming_cat_cover():
     s = state()
-    put(s, "1,1", "king_theron", "A")
+    put(s, "1,1", "lion_legend_3", "A")
     put(s, "1,2", "t_dusk", "A")
     put(s, "1,2", "t_roam_cat", "A")
     put(s, "2,2", "t_body", "B")
@@ -395,8 +395,8 @@ def test_poison_is_cancelled_if_the_coverer_leaves_the_board_first():
 
 
 def test_armor_resists_the_poison():
-    s, poison = _poisoned_board(hand=("methuselah",))
-    coverer = _cover_poison(s, "methuselah")
+    s, poison = _poisoned_board(hand=("tortoise_legend",))
+    coverer = _cover_poison(s, "tortoise_legend")
     end_turn(s)
     assert s.board["2,2"][-1] is coverer
 
@@ -497,9 +497,9 @@ def test_play_order_survives_a_save_and_load():
 def test_existing_dusk_cards_still_fire():
     s = state(food={"A": 0, "B": 0})
     put(s, "1,1", "worker_wasp", "A")
-    put(s, "1,3", "methuselah", "A")
+    put(s, "1,3", "tortoise_legend", "A")
     end_turn(s)
-    assert s.food["A"] == s.config.worker_wasp_food + s.config.methuselah_food
+    assert s.food["A"] == s.config.worker_wasp_food + s.config.tortoise_legend_food
 
 
 # ===================================================================== bots (a sanity smoke, no balance claim)

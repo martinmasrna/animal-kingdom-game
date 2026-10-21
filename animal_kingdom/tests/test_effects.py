@@ -69,11 +69,11 @@ def test_nurse_bumblebee_draw_gated_on_four_colony():
 
 
 def test_scarlett_places_poppy_and_rusty():
-    s = make_state(hands={"A": ["scarlett"]})
+    s = make_state(hands={"A": ["fox_legend"]})
     put(s, "1,2", "street_dog", "A")                                # HQ-front anchor so 2,2 is connected
-    rules.apply_action(s, PlaceAction("scarlett", ("cr", "2,2")))
-    cubs = sorted(u.card_id for st in s.board.values() for u in st if u.owner == "A" and u.card_id in ("poppy", "rusty"))
-    assert cubs == ["poppy", "rusty"]
+    rules.apply_action(s, PlaceAction("fox_legend", ("cr", "2,2")))
+    cubs = sorted(u.card_id for st in s.board.values() for u in st if u.owner == "A" and u.card_id in ("baby_fox", "baby_fox_2"))
+    assert cubs == ["baby_fox", "baby_fox_2"]
 
 
 
@@ -235,11 +235,11 @@ def test_black_panther_untargetable_by_enemy_effect():
 # =============================================================== shared (kept from M2a)
 
 def test_gale_draws_for_each_unit_you_control_next_to_the_opponents_den_itself_included():
-    s = make_state(current="A", hands={"A": ["gale"]}, decks={"A": ["lion"] * 5, "B": []})
+    s = make_state(current="A", hands={"A": ["falcon_legend"]}, decks={"A": ["lion"] * 5, "B": []})
     put(s, "4,1", "rat", "A")                            # B's front crossroads: 4,1 4,2 4,3
     put(s, "4,3", "lion", "B")
     before = len(s.hands["A"])
-    rules.apply_action(s, PlaceAction("gale", ("cr", "4,2")))   # Gale lands on the third
+    rules.apply_action(s, PlaceAction("falcon_legend", ("cr", "4,2")))   # Gale lands on the third
     assert len(s.hands["A"]) == before - 1 + 2          # the Rat and Gale itself
 
 
@@ -276,12 +276,12 @@ def test_eon_gains_on_draw_shuffle_and_remove():
     s = make_state(decks={"A": ["lion", "fox"], "B": []})
     put(s, "1,1", "eon_food_engine", "A")
     effects.draw_cards(s, "A", 1)
-    assert s.food["A"] == CFG.eon_food                   # a draw
+    assert s.food["A"] == CFG.anaconda_legend_food                   # a draw
     effects.shuffle_back(s, "A", ["rat"])
-    assert s.food["A"] == 2 * CFG.eon_food               # a shuffle
+    assert s.food["A"] == 2 * CFG.anaconda_legend_food               # a shuffle
     victim = put(s, "2,2", "rat", "B")
     effects._remove_specific(s, "2,2", victim, by_player="A")
-    assert s.food["A"] == 3 * CFG.eon_food               # a removal
+    assert s.food["A"] == 3 * CFG.anaconda_legend_food               # a removal
 
 
 def test_rattlesnake_gains_strength_per_own_card_shuffled_in_every_zone():
@@ -313,11 +313,11 @@ def test_egg_eater_has_strength_for_each_removed_egg():
 
 
 def test_omen_when_drawn_discards_from_opponents_hand_only():
-    s = make_state(current="A", decks={"A": ["black_swan"], "B": []})
+    s = make_state(current="A", decks={"A": ["swan_legend"], "B": []})
     s.add_to_hand("A", "lion")
     s.add_to_hand("B", "fox")
     effects.draw_cards(s, "A", 1)                        # draws Black Swan
-    assert sorted(hand_ids(s, "A")) == ["black_swan", "lion"]
+    assert sorted(hand_ids(s, "A")) == ["lion", "swan_legend"]
     assert len(s.hands["B"]) == 0                        # lost its only card
     assert s.remove_pile == ["fox"]
 
@@ -327,7 +327,7 @@ def test_omen_fires_every_time_it_is_drawn():
     s.add_to_hand("B", "fox")
     s.add_to_hand("B", "lion")
     for left in (1, 0):                                  # "Whenever you draw Black Swan": no cap, twice a turn too
-        inst = UnitInstance("black_swan", "A", s.new_iid())
+        inst = UnitInstance("swan_legend", "A", s.new_iid())
         s.hands["A"].append(inst)
         effects._omen_drawn(s, inst)
         assert len(s.hands["B"]) == left
@@ -335,10 +335,10 @@ def test_omen_fires_every_time_it_is_drawn():
 
 def test_ember_deathrattle_shuffles_itself_back_to_deck():
     s = make_state(decks={"A": [], "B": []})
-    e = put(s, "2,2", "ember", "A")
+    e = put(s, "2,2", "pheasant_legend", "A")
     effects._remove_specific(s, "2,2", e, by_player="A", by_effect=False)
-    assert "ember" not in s.remove_pile                 # relocated out of the pile
-    assert "ember" in s.decks["A"]
+    assert "pheasant_legend" not in s.remove_pile                 # relocated out of the pile
+    assert "pheasant_legend" in s.decks["A"]
 
 
 def test_mouse_draws_a_rodent_at_random():
@@ -349,13 +349,13 @@ def test_mouse_draws_a_rodent_at_random():
 
 
 def test_fathom_draws_a_legendary():
-    s = make_state(hands={"A": ["fathom"]}, decks={"A": ["lion", "eon", "eagle"], "B": []})
-    rules.apply_action(s, PlaceAction("fathom", ("cr", "1,2")))
-    assert "eon" in hand_ids(s, "A")                    # the only legendary in the deck
+    s = make_state(hands={"A": ["octopus_legend_2"]}, decks={"A": ["lion", "anaconda_legend", "eagle"], "B": []})
+    rules.apply_action(s, PlaceAction("octopus_legend_2", ("cr", "1,2")))
+    assert "anaconda_legend" in hand_ids(s, "A")                    # the only legendary in the deck
 
 
 def test_snake_egg_draws_a_snake_now_and_two_when_it_hatches():
-    snakes = ["python", "rattlesnake", "gaboon_viper", "black_mamba"]
+    snakes = ["python", "rattlesnake", "cottonmouth", "black_mamba"]
     s = make_state(hands={"A": ["snake_egg"]}, decks={"A": snakes + ["owl", "raven"], "B": []})
     rules.apply_action(s, PlaceAction("snake_egg", ("cr", "1,2")))
     assert [CARDS[c].tags >= {"Snake"} for c in hand_ids(s, "A")] == [True] * CFG.snake_egg_draw
@@ -368,7 +368,7 @@ def test_snake_egg_draws_a_snake_now_and_two_when_it_hatches():
 
 
 def test_bird_egg_scouts_now_and_draws_a_bird_when_it_hatches_next_turn():
-    birds = ["owl", "raven", "hawk", "magpie", "ember"]
+    birds = ["owl", "raven", "hawk", "magpie", "pheasant_legend"]
     s = make_state(current="A", hands={"A": ["bird_egg"]},
                    decks={"A": birds + ["python"] * 4, "B": ["lion"] * 6})
     rules.apply_action(s, PlaceAction("bird_egg", ("cr", "1,2")))
@@ -388,9 +388,9 @@ def test_bird_egg_scouts_now_and_draws_a_bird_when_it_hatches_next_turn():
 
 
 def test_scout_with_a_filter_only_shows_matching_cards():
-    s = make_state(current="A", hands={"A": ["fathom"]},
-                   decks={"A": ["lion", "eon", "aurum", "black_swan", "ember", "tiger"], "B": []})
-    rules.apply_action(s, PlaceAction("fathom", ("cr", "1,2")))
+    s = make_state(current="A", hands={"A": ["octopus_legend_2"]},
+                   decks={"A": ["lion", "anaconda_legend", "goose_legend", "swan_legend", "pheasant_legend", "tiger"], "B": []})
+    rules.apply_action(s, PlaceAction("octopus_legend_2", ("cr", "1,2")))
     options = s.pending["options"]
     assert len(options) == CFG.scout_count and all(CARDS[c].rarity == "legendary" for c in options)
     rules.apply_action(s, ChoiceAction(options[1]))
@@ -414,10 +414,10 @@ def test_scout_shows_three_different_cards_when_the_deck_has_them():
     rules.apply_action(s, PlaceAction("owl", ("cr", "1,2")))
     assert sorted(s.pending["options"]) == ["eagle", "lion", "rat"]
     # Scout a Bird: three different Birds however many copies of one the deck holds.
-    s = make_state(current="A", hands={"A": ["fathom"]},
-                   decks={"A": ["eon", "eon", "eon", "aurum", "aurum", "black_swan"], "B": []})
-    rules.apply_action(s, PlaceAction("fathom", ("cr", "1,2")))
-    assert sorted(s.pending["options"]) == ["aurum", "black_swan", "eon"]
+    s = make_state(current="A", hands={"A": ["octopus_legend_2"]},
+                   decks={"A": ["anaconda_legend", "anaconda_legend", "anaconda_legend", "goose_legend", "goose_legend", "swan_legend"], "B": []})
+    rules.apply_action(s, PlaceAction("octopus_legend_2", ("cr", "1,2")))
+    assert sorted(s.pending["options"]) == ["anaconda_legend", "goose_legend", "swan_legend"]
 
 
 def test_raven_draws_three_then_shuffles_two_cards_from_hand():
@@ -651,16 +651,16 @@ def test_termite_queen_extra_play_is_optional():
 
 
 def test_prince_leo_plays_the_twin_from_deck():
-    s = make_state(current="A", hands={"A": ["prince_leo"]},
-                   decks={"A": ["princess_lea", "lion"], "B": []})
-    rules.apply_action(s, PlaceAction("prince_leo", ("cr", "1,2")))
+    s = make_state(current="A", hands={"A": ["lion_legend"]},
+                   decks={"A": ["lion_legend_2", "lion"], "B": []})
+    rules.apply_action(s, PlaceAction("lion_legend", ("cr", "1,2")))
     assert s.pending is not None and not s.pending["optional"]   # must play Princess Lea
-    rules.apply_action(s, PlaceAction("princess_lea", ("cr", "1,1")))
-    assert s.top_unit("1,1").card_id == "princess_lea"
-    assert "princess_lea" not in s.decks["A"]            # fetched from the deck
+    rules.apply_action(s, PlaceAction("lion_legend_2", ("cr", "1,1")))
+    assert s.top_unit("1,1").card_id == "lion_legend_2"
+    assert "lion_legend_2" not in s.decks["A"]            # fetched from the deck
 
 
-# ============================== Stage 2.3: HQ-adjacency draw (F6) + start-of-turn (aurum)
+# ============================== Stage 2.3: HQ-adjacency draw (F6) + start-of-turn (goose_legend)
 
 def test_cheetah_draws_when_placed_next_to_enemy_base():
     s = make_state(current="A", hands={"A": ["cheetah"]}, decks={"A": ["lion"], "B": []})
@@ -744,10 +744,10 @@ def test_rhinoceros_sweeps_only_small_adjacent_enemies():
 
 
 def test_bulwark_clears_all_adjacent_units_friend_and_foe():
-    s = make_state(hands={"A": ["brutus"]})
+    s = make_state(hands={"A": ["rhinoceros_legend"]})
     put(s, "1,2", "caracal", "A")                       # friendly - connects 2,2, caught in the blast
     put(s, "3,2", "lion", "B")                          # 7 - removed (uncapped)
-    rules.apply_action(s, PlaceAction("brutus", ("cr", "2,2")))
+    rules.apply_action(s, PlaceAction("rhinoceros_legend", ("cr", "2,2")))
     assert s.owner_of("3,2") is None                    # enemy removed
     assert s.owner_of("1,2") is None                    # friendly removed too (2026-07-05 nerf)
 
@@ -784,11 +784,11 @@ def test_hornet_has_no_effect_without_a_spare_copy():
 # ================================================================ Stage 2.4: mass effects
 
 def test_pestis_wipes_an_adjacent_enemy_and_everything_under_it():
-    s = make_state(hands={"A": ["pestis"]})
+    s = make_state(hands={"A": ["rat_legend_2"]})
     put(s, "1,2", "caracal", "A")
     put(s, "3,2", "lion", "B")                          # bottom
     put(s, "3,2", "unnamed_canine", "B")                        # top (same owner stacks freely)
-    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))
+    rules.apply_action(s, PlaceAction("rat_legend_2", ("cr", "2,2")))
     rules.apply_action(s, ChoiceAction("3,2"))            # the enemy stack
     assert s.board.get("3,2") is None
     assert s.remove_pile.count("lion") == 1 and s.remove_pile.count("unnamed_canine") == 1
@@ -796,9 +796,9 @@ def test_pestis_wipes_an_adjacent_enemy_and_everything_under_it():
 
 def test_pestis_next_to_only_allies_must_wipe_one():
     # A Roar's cost is never declined (Martin, 2026-10-21): next to its own animals only, the Pestis wipes one of them.
-    s = make_state(hands={"A": ["pestis"]})
+    s = make_state(hands={"A": ["rat_legend_2"]})
     put(s, "1,2", "caracal", "A")                       # the only adjacent animal is an ally
-    rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))
+    rules.apply_action(s, PlaceAction("rat_legend_2", ("cr", "2,2")))
     assert not s.pending["optional"]
     with pytest.raises(EngineError):
         rules.apply_action(s, ChoiceAction(SKIP))
@@ -807,11 +807,11 @@ def test_pestis_next_to_only_allies_must_wipe_one():
 
 
 def test_sirocco_bounces_all_adjacent_enemies_to_hand():
-    s = make_state(hands={"A": ["sirocco"]})
+    s = make_state(hands={"A": ["skunk_legend"]})
     put(s, "1,2", "caracal", "A")
     put(s, "3,2", "unnamed_canine", "B")
     put(s, "2,3", "fox", "B")
-    rules.apply_action(s, PlaceAction("sirocco", ("cr", "2,2")))
+    rules.apply_action(s, PlaceAction("skunk_legend", ("cr", "2,2")))
     assert s.owner_of("3,2") is None and s.owner_of("2,3") is None
     assert {"unnamed_canine", "fox"} <= set(hand_ids(s, "B")) and "unnamed_canine" not in s.remove_pile
 
@@ -830,8 +830,8 @@ def test_skunk_bounces_and_locks_the_card():
 
 def test_king_theron_and_queen_adira_combo_on_a_cat_cover():
     s = make_state(current="A", hands={"A": ["lion"]}, decks={"A": ["fox", "rat"], "B": []})
-    put(s, "1,1", "king_theron", "A")
-    put(s, "1,3", "queen_adira", "A")
+    put(s, "1,1", "lion_legend_3", "A")
+    put(s, "1,3", "lion_legend_4", "A")
     put(s, "1,2", "caracal", "A")                       # connects 2,2
     put(s, "2,2", "unnamed_canine", "B")                        # a Cat (lion) will cover this enemy
     rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))
@@ -843,8 +843,8 @@ def test_king_theron_and_queen_adira_combo_on_a_cat_cover():
 
 def test_queen_honoria_and_falstaff_riders_stack():
     s = make_state(current="A", hands={"A": ["worker_ant"]})
-    put(s, "1,1", "queen_honoria", "A")                 # +5 when you play a Colony unit
-    put(s, "1,3", "falstaff", "A")                      # +3 whenever you gain food
+    put(s, "1,1", "bee_legend", "A")                 # +5 when you play a Colony unit
+    put(s, "1,3", "bumblebee_legend", "A")                      # +3 whenever you gain food
     put(s, "1,2", "caracal", "A")
     rules.apply_action(s, PlaceAction("worker_ant", ("cr", "2,2")))
     # Honoria +4 (+3 rider) then Worker Ant +12 (+3 rider) = 22
@@ -852,11 +852,11 @@ def test_queen_honoria_and_falstaff_riders_stack():
 
 
 def test_queen_marabunta_scales_with_other_colony():
-    s = make_state(hands={"A": ["queen_marabunta"]})
+    s = make_state(hands={"A": ["army_ant_legend"]})
     put(s, "1,1", "worker_ant", "A")
     put(s, "1,3", "worker_bee", "A")
-    rules.apply_action(s, PlaceAction("queen_marabunta", ("cr", "1,2")))
-    assert s.food["A"] == 2 * CFG.queen_marabunta_per_colony   # two other Colony units
+    rules.apply_action(s, PlaceAction("army_ant_legend", ("cr", "1,2")))
+    assert s.food["A"] == 2 * CFG.army_ant_legend_per_colony   # two other Colony units
 
 
 def test_chipmunk_pays_now_and_next_turn():
@@ -872,10 +872,10 @@ def test_chipmunk_pays_now_and_next_turn():
 
 def test_methuselah_gains_food_at_end_of_turn():
     s = make_state(current="A", decks={"A": ["lion"], "B": ["lynx"]})
-    put(s, "1,1", "methuselah", "A")
+    put(s, "1,1", "tortoise_legend", "A")
     s.actions_taken_this_turn = s.config.actions_per_turn - 1
     rules.apply_action(s, DrawAction())
-    assert s.food["A"] == CFG.methuselah_food
+    assert s.food["A"] == CFG.tortoise_legend_food
 
 
 # ===================================================== Stage 2.4: conditional / delayed / reveal
@@ -899,9 +899,9 @@ def test_black_bear_schedules_a_delayed_draw():
 
 
 def test_scrooge_gains_3_for_each_10_food_you_have():
-    s = make_state(current="A", hands={"A": ["scrooge"]}, food={"A": 67, "B": 0})
-    rules.apply_action(s, PlaceAction("scrooge", ("cr", "1,2")))
-    assert s.food["A"] == 67 + 6 * CFG.scrooge_food_per     # 67 is six whole tens
+    s = make_state(current="A", hands={"A": ["chipmunk_legend"]}, food={"A": 67, "B": 0})
+    rules.apply_action(s, PlaceAction("chipmunk_legend", ("cr", "1,2")))
+    assert s.food["A"] == 67 + 6 * CFG.chipmunk_legend_food_per     # 67 is six whole tens
 
 
 def test_andean_condor_draws_only_when_its_top_is_stronger():
@@ -916,7 +916,7 @@ def test_andean_condor_draws_only_when_its_top_is_stronger():
 
 def test_oxpecker_counts_strong_units_in_the_starting_deck():
     s = make_state(hands={"A": ["oxpecker"]})
-    s.starting_decks["A"] = ("elephant", "brutus", "lion", "squirrel", "python")  # 9,8 qualify; 7,3,dyn don't
+    s.starting_decks["A"] = ("elephant", "rhinoceros_legend", "lion", "squirrel", "python")  # 9,8 qualify; 7,3,dyn don't
     rules.apply_action(s, PlaceAction("oxpecker", ("cr", "1,2")))
     assert s.food["A"] == 2
 
@@ -934,10 +934,10 @@ def test_viper_permanently_shrinks_an_adjacent_enemy_so_a_bird_can_cover_it():
 
 
 def test_king_cobra_venom_removes_the_bitten_unit_next_turn_even_if_buried_or_the_cobra_is_gone():
-    s = make_state(hands={"A": ["gaboon_viper"], "B": ["tiger"]},
+    s = make_state(hands={"A": ["cottonmouth"], "B": ["tiger"]},
                    decks={"A": ["eagle"] * 8, "B": ["eagle"] * 8})
     put(s, "2,1", "lion", "B")
-    apply_click(s, PlaceAction("gaboon_viper", ("cr", "1,1")))  # bites the Lion at 2,1
+    apply_click(s, PlaceAction("cottonmouth", ("cr", "1,1")))  # bites the Lion at 2,1
     lion = s.top_unit("2,1")
     assert lion.card_id == "lion"
     apply_click(s, DrawAction())                   # A ends the turn
@@ -949,13 +949,13 @@ def test_king_cobra_venom_removes_the_bitten_unit_next_turn_even_if_buried_or_th
 
 def test_rat_removes_any_adjacent_enemy_then_a_random_hand_card_and_works_on_an_empty_hand():
     s = make_state(hands={"A": ["rat", "lion", "eagle"]})
-    put(s, "2,1", "king_theron", "B")                     # an 8: Rat reaches any strength
+    put(s, "2,1", "lion_legend_3", "B")                     # an 8: Rat reaches any strength
     apply_click(s, PlaceAction("rat", ("cr", "1,1")))
-    assert s.top_unit("2,1") is None and "king_theron" in s.remove_pile
+    assert s.top_unit("2,1") is None and "lion_legend_3" in s.remove_pile
     assert len(s.hands["A"]) == 1                         # one of Lion / Eagle went, at random
 
     s2 = make_state(hands={"A": ["rat"]})
-    put(s2, "2,1", "king_theron", "B")
+    put(s2, "2,1", "lion_legend_3", "B")
     apply_click(s2, PlaceAction("rat", ("cr", "1,1")))    # empty hand: nothing to pay
     assert s2.top_unit("2,1") is None
 
@@ -964,39 +964,39 @@ def test_queen_adira_uncovered_by_the_removal_does_not_draw():
     # Martin's game 2026-09-28: Tiger ate the Grizzly (then a 1) sitting on Queen Adira; she was buried when
     # it was removed, so she must not see that removal (then the Tiger buries her again).
     s = make_state(hands={"A": ["tiger"]}, decks={"A": ["lion", "lion"], "B": []})
-    put(s, "1,2", "queen_adira", "A")
+    put(s, "1,2", "lion_legend_4", "A")
     put(s, "1,2", "mouse", "B")                         # covers Adira
     rules.apply_action(s, PlaceAction("tiger", ("cr", "1,2")))
-    assert [u.card_id for u in s.board["1,2"]] == ["queen_adira", "tiger"]
+    assert [u.card_id for u in s.board["1,2"]] == ["lion_legend_4", "tiger"]
     assert len(s.hands["A"]) == 0                        # no Adira draw
 
 
 def test_queen_adira_on_top_still_draws_for_a_cat_removal():
     s = make_state(hands={"A": ["tiger"]}, decks={"A": ["lion", "lion"], "B": []})
-    put(s, "1,2", "queen_adira", "A")                   # visible, connects 2,2
+    put(s, "1,2", "lion_legend_4", "A")                   # visible, connects 2,2
     put(s, "2,2", "mouse", "B")
     rules.apply_action(s, PlaceAction("tiger", ("cr", "2,2")))
     assert len(s.hands["A"]) == 1
 
 
 def test_eon_eats_then_shuffles_itself_back_one_smaller_each_cycle():
-    s = make_state(hands={"A": ["eon"]}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6})
+    s = make_state(hands={"A": ["anaconda_legend"]}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6})
     put(s, "1,1", "caracal", "A")
-    put(s, "2,1", "king_theron", "B")                     # an 8: Eon (10) lands on it and eats it
-    rules.apply_action(s, PlaceAction("eon", ("cr", "2,1")))
-    assert "king_theron" in s.remove_pile and s.top_unit("2,1").card_id == "eon"
+    put(s, "2,1", "lion_legend_3", "B")                     # an 8: Eon (10) lands on it and eats it
+    rules.apply_action(s, PlaceAction("anaconda_legend", ("cr", "2,1")))
+    assert "lion_legend_3" in s.remove_pile and s.top_unit("2,1").card_id == "anaconda_legend"
     rules.apply_action(s, DrawAction())                   # A's turn ends: Eon leaves
-    assert s.top_unit("2,1") is None and "eon" in s.decks["A"] and "eon" not in s.remove_pile
-    assert card_strength(s, "eon", "A") == 10 - CFG.eon_decay
+    assert s.top_unit("2,1") is None and "anaconda_legend" in s.decks["A"] and "anaconda_legend" not in s.remove_pile
+    assert card_strength(s, "anaconda_legend", "A") == 10 - CFG.anaconda_legend_decay
 
 
 def test_eon_shrunk_to_nothing_is_removed_instead_of_looping():
-    s = make_state(hands={"A": ["eon"]}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6})
-    s.card_strength_counters["A"] = {"eon": CFG.eon_decay - 10}   # an Eon at its last strength
+    s = make_state(hands={"A": ["anaconda_legend"]}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6})
+    s.card_strength_counters["A"] = {"anaconda_legend": CFG.anaconda_legend_decay - 10}   # an Eon at its last strength
     put(s, "1,1", "caracal", "A")
-    rules.apply_action(s, PlaceAction("eon", ("cr", "1,1")))   # onto its own animal, as the endless loop did
+    rules.apply_action(s, PlaceAction("anaconda_legend", ("cr", "1,1")))   # onto its own animal, as the endless loop did
     rules.apply_action(s, DrawAction())                   # A's turn ends: one more cycle would make it 0
-    assert "eon" in s.remove_pile and "eon" not in s.decks["A"]
+    assert "anaconda_legend" in s.remove_pile and "anaconda_legend" not in s.decks["A"]
 
 
 def test_magpie_takes_a_random_enemy_card_then_discards_one_of_yours():
@@ -1034,7 +1034,7 @@ def test_falstaffs_extra_food_is_its_own_doing():
     # The client flies a gain's fruit from the animal whose doing it is: Falstaff's extra flies from Falstaff, even after
     # region income or another animal's Roar (Martin, 2026-10-15).
     s = make_state(food={"A": 0, "B": 0})
-    put(s, "1,1", "falstaff", "A")
+    put(s, "1,1", "bumblebee_legend", "A")
     effects.gain_food(s, "A", 5, income=True)
     rider = [e for e in s.events if e["e"] == "food" and not e.get("income")]
-    assert [(e["cause"], e["cause_iid"]) for e in rider] == [("falstaff", s.board["1,1"][-1].iid)]
+    assert [(e["cause"], e["cause_iid"]) for e in rider] == [("bumblebee_legend", s.board["1,1"][-1].iid)]

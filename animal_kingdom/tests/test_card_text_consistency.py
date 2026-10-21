@@ -29,27 +29,27 @@ COSTS_RE = re.compile(r"costs (\d+) food", re.IGNORECASE)
 
 # card_id -> config attrs, one per "gain N food/more" number in text, in order.
 FOOD_CONSTANTS: dict[str, list[str]] = {
-    "eon_food_engine": ["eon_food"],
-    "queen_marabunta": ["queen_marabunta_per_colony"],
-    "queen_honoria": ["queen_honoria_per_place"],
+    "eon_food_engine": ["anaconda_legend_food"],
+    "army_ant_legend": ["army_ant_legend_per_colony"],
+    "bee_legend": ["bee_legend_per_place"],
     "forager_ant": ["forager_ant_food"],
     "queen_wasp": ["queen_wasp_per_place"],
     "ant": ["ant_legend_per"],
     "worker_ant": ["worker_ant_food"],
     "worker_wasp": ["worker_wasp_food"],
     "worker_bee": ["worker_bee_food", "worker_bee_extra"],
-    "methuselah": ["methuselah_food"],
+    "tortoise_legend": ["tortoise_legend_food"],
     "sloth": ["sloth_food"],
     "greywhisker": ["greywhisker_food"],
     "mole_legend": ["greywhisker_food"],
-    "barley": ["rat_king_per_rodent"],
+    "rat_legend": ["rat_king_per_rodent"],
     "flying_squirrel": ["flying_squirrel_food"],
     "squirrel": ["squirrel_food"],
     "chipmunk": ["chipmunk_food_now", "chipmunk_food_later"],
     "tutorial_chipmunk": ["chipmunk_food_now", "chipmunk_food_later"],
     "groundhog": ["groundhog_food"],
     "gazelle": ["gazelle_food"],
-    "scrooge": ["scrooge_food_per"],
+    "chipmunk_legend": ["chipmunk_legend_food_per"],
     "dormouse": ["dormouse_food"],
     "wildebeest": ["wildebeest_food"],
     "hyena": ["hyena_food_per"],
@@ -162,7 +162,7 @@ STRENGTH_LIMIT_RE = re.compile(r"strength (\d+) or (?:less|more)", re.IGNORECASE
 STRENGTH_LIMITS = {
     "jaguar": "jaguar_max",
     "honey_badger": "honey_badger_min",
-    "cuco": "cuckoo_legend_max",
+    "cuckoo_legend": "cuckoo_legend_max",
     "hawk": "stoop_max",
     "rhinoceros": "rhinoceros_max",
     "albatross": "albatross_max",
@@ -200,8 +200,8 @@ def test_strength_loss_text_matches_config():
 
 
 def test_eon_decay_text_matches_config():
-    (n,) = re.findall(r"with -(\d+) strength", _cards()["eon"].text)
-    assert int(n) == Config.default().eon_decay
+    (n,) = re.findall(r"with -(\d+) strength", _cards()["anaconda_legend"].text)
+    assert int(n) == Config.default().anaconda_legend_decay
 
 
 DELAY_RE = re.compile(r"in (\d+) turns", re.IGNORECASE)
@@ -316,7 +316,7 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "mackerel": ["mackerel_anthem"],
     "tuna": ["tuna_per_fish"],
     "baboon_legend": ["baboon_legend_grant"],
-    "silverback": ["silverback_grant"],
+    "gorilla_legend": ["gorilla_legend_grant"],
     "tarsier": ["tarsier_grant"],
     "baboon": ["baboon_grant"],
     "hamster": ["hamster_per_step"],
@@ -328,7 +328,7 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "peacock": ["hand_per_card"],
     "giraffe": ["giraffe_bonus"],
     "crocodile": ["crocodile_penalty"],
-    "roach_king": ["roach_king_growth"],
+    "cockroach_legend": ["cockroach_legend_growth"],
 }
 
 
@@ -394,7 +394,7 @@ def test_the_launch_decks_other_numbers_match_config():
     assert int(re.search(r"produce (\d+) more food", c["wildebeest_legend"].text).group(1)) == cfg.migration_bonus
     assert int(re.search(r"produce (\d+) less food", c["boar_legend"].text).group(1)) == cfg.boar_penalty
     assert c["great_white_shark"].text.endswith("this has Reach.")
-    assert "Poppy and Rusty" in c["scarlett"].text and cfg.alpha_pups == 2
+    assert "Poppy and Rusty" in c["fox_legend"].text and cfg.alpha_pups == 2
 
 
 def test_hungry_number_matches_its_field_and_reach_has_none():
@@ -407,7 +407,7 @@ def test_hungry_number_matches_its_field_and_reach_has_none():
 
 
 FOOD_CAP_RE = re.compile(r"gains at most (\d+) food per turn", re.IGNORECASE)
-FOOD_CAPS = {"methuselah": "methuselah_food_cap"}
+FOOD_CAPS = {"tortoise_legend": "tortoise_legend_food_cap"}
 
 
 def test_food_cap_text_matches_config():

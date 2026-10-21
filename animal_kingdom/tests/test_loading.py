@@ -68,7 +68,7 @@ def test_known_cards_present_with_expected_data():
     assert cards["lion"].has_tag("Cat")
     assert cards["queen_bee"].tags == frozenset({"Colony", "Queen"})
     assert cards["worker_ant"].tags == frozenset({"Colony", "Worker"})
-    assert cards["fathom"].tags == frozenset()  # tagless ('-')
+    assert cards["octopus_legend_2"].tags == frozenset()  # tagless ('-')
     assert cards["cairn"].food_cost == 15       # "Costs 15 food" body
     assert cards["elephant"].hungry == 5 and cards["blue_whale"].has_keyword("Titan")
     assert cards["nurse_bee"].has_roar

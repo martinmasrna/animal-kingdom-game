@@ -15,7 +15,7 @@
   ],
   "1,2": [
    {
-    "card_id": "princess_lea",
+    "card_id": "lion_legend_2",
     "owner": "A",
     "iid": 8,
     "placed_on_turn": 1,
@@ -27,7 +27,7 @@
   ],
   "2,2": [
    {
-    "card_id": "prince_leo",
+    "card_id": "lion_legend",
     "owner": "A",
     "iid": 9,
     "placed_on_turn": 1,
@@ -137,7 +137,7 @@
     "play_seq": 0
    },
    {
-    "card_id": "queen_adira",
+    "card_id": "lion_legend_4",
     "owner": "A",
     "iid": 18,
     "placed_on_turn": 0,
@@ -214,7 +214,7 @@
   "A": [
    "lynx",
    "serval",
-   "king_theron",
+   "lion_legend_3",
    "black_panther",
    "lynx",
    "jaguar",
@@ -271,7 +271,7 @@
    "caracal",
    "jaguar",
    "jaguar",
-   "king_theron",
+   "lion_legend_3",
    "leopard",
    "leopard",
    "lion",
@@ -280,9 +280,9 @@
    "lynx",
    "lynx",
    "lynx",
-   "prince_leo",
-   "princess_lea",
-   "queen_adira",
+   "lion_legend",
+   "lion_legend_2",
+   "lion_legend_4",
    "serval",
    "serval",
    "tiger",

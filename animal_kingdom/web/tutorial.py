@@ -25,8 +25,8 @@ PLAYER_DECK = ["lion", "tutorial_cape_buffalo", "tutorial_dire_wolf", "tutorial_
 PLAYER_DECK += PLAYER_DECK[7:] + PLAYER_DECK[7:10]   # 36 cards: a slow first game never runs out
 # The opponent: wild dogs (1) that any animal can cover. None of them walls its den: the march must reach it before
 # the player's food reaches 100 (a 7 in front of the den forced a detour, and food won first).
-OPPONENT_DECK = ["rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup",
-                 "poppy", "rusty", "pup", "poppy", "rusty", "pup", "poppy", "rusty", "pup"]
+OPPONENT_DECK = ["baby_fox_2", "pup", "baby_fox", "baby_fox_2", "pup", "baby_fox", "baby_fox_2", "pup", "baby_fox", "baby_fox_2", "pup",
+                 "baby_fox", "baby_fox_2", "pup", "baby_fox", "baby_fox_2", "pup", "baby_fox", "baby_fox_2", "pup"]
 # Lesson 2. The player opens with Lion, Lynx (it glows once the Lion stands) and a Buffalo; the Lynx's Roar draws the
 # Eagle (Flight, on your own animal first); the next draw brings the Squirrel (food from a Roar) and the Black Mamba
 # (removes up to 5: the opponent's Eagle), the one after the Polar Bear (8, Apex Predator: it eats a 7 of the wall, and
@@ -51,7 +51,7 @@ PER_TURN = {1: (2, 2, 1), 2: (1, 1, 1)}   # the opponent's bot name per lesson
 # The opponent's scripted moves, by its turn (turn_counter): lesson 1 walls the middle of its den and puts a dog beside
 # it; lesson 2 walls all three crossroads, then flies the Eagle onto the player's Squirrel (SQUIRREL: wherever it is).
 SQUIRREL = "squirrel"
-OPENINGS = {1: {1: [("rusty", "5,2"), ("pup", "4,2")]},
+OPENINGS = {1: {1: [("baby_fox_2", "5,2"), ("pup", "4,2")]},
             2: {}}   # lesson 2's board is set up (set_up): the guard of 7s stands from the start
 # Lesson 2's Eagle flies onto the Squirrel the first turn it can (the Squirrel on top of its stack), whenever that is.
 AMBUSH = {2: ("eagle", SQUIRREL)}

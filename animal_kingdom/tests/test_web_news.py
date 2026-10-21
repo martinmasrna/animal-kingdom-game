@@ -77,4 +77,5 @@ def test_the_clients_successor_map_is_the_servers():
     from animal_kingdom.web import server
     js = (Path(server.__file__).parent / "static" / "cardnums.js").read_text()
     pairs = dict(re.findall(r"(\w+): '(\w+)'", re.search(r"export const SUCCESSOR = \{(.*?)\};", js, re.S).group(1)))
-    assert pairs == server.RENAMED_IDS
+    from animal_kingdom.web.renamed import RENAMED_IDS
+    assert pairs == RENAMED_IDS

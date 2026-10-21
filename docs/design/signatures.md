@@ -488,7 +488,7 @@ Best animal, runner-up. **None** means no animal fits naturally: put it on an or
 
 | Effect | Best | Runner-up |
 |---|---|---|
-| Family anthem | Wolf (alpha), Lion (king) | Gorilla (silverback, for Primates) |
+| Family anthem | Wolf (alpha), Lion (king) | Gorilla (gorilla_legend, for Primates) |
 | Strength per ally | Army Ant, bee swarm | Wolf pack |
 | Give strength to others (howl) | Wolf | — |
 | Grows per removed animal (Python, Egg Eater) | Vulture (scavenger) | Hyena; Python acceptable |

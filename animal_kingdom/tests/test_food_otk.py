@@ -100,10 +100,10 @@ def test_groundhog_gains_food_only_when_fed():
 # ------------------------------------------------------------------ go-wide rodent payoff
 
 def test_rat_king_gains_food_per_other_rodent_and_draws():
-    s = make_state(hands={"A": ["barley"]}, decks={"A": ["lion"], "B": []})
+    s = make_state(hands={"A": ["rat_legend"]}, decks={"A": ["lion"], "B": []})
     put(s, "1,1", "squirrel", "A")                                    # Rodent
     put(s, "1,3", "chipmunk", "A")                                     # Rodent
-    rules.apply_action(s, PlaceAction("barley", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("rat_legend", ("cr", "1,2")))
     assert s.food["A"] == 2 * CFG.rat_king_per_rodent                 # two OTHER rodents
     assert "lion" in hand_ids(s, "A")                                 # drew 1
 

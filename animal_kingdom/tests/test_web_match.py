@@ -184,9 +184,9 @@ def test_decklist_problems_follow_the_deck_rules():
     cats = PREMADE_DECKS["cats"]
     assert decklist_problems(cats) == []
     assert decklist_problems(cats[:-1])                                   # 29 cards
-    two_kings = [c for c in cats if c != "prince_leo"] + ["king_theron"]
+    two_kings = [c for c in cats if c != "lion_legend"] + ["lion_legend_3"]
     assert any("King Theron" in p for p in decklist_problems(two_kings))
-    reserve = [c for c in cats if c != "prince_leo"] + ["unnamed_giant"]
+    reserve = [c for c in cats if c != "lion_legend"] + ["unnamed_giant"]
     assert any("collectible" in p for p in decklist_problems(reserve))
     bench = list(cats)
     bench[bench.index("lion")] = "eagle"                                  # a common for a common
@@ -570,7 +570,7 @@ def test_play_from_here_seats_you_in_the_other_chair_at_that_round(monkeypatch, 
             assert match.takeover and match.on_game_end is None and match.phase == "playing"
             assert st.turn_counter // 2 + 1 == 4 and st.player_to_act() == "B" and st.pending is None
             assert not match.seats["B"].is_bot and match.seats["A"].bot == "expert" and "A" in match.bots
-            assert {c.card_id for c in st.hands["B"]} == {"leopard_legend", "orca", "honey_badger", "locust"}
+            assert {c.card_id for c in st.hands["B"]} == {"leopard_legend", "orca", "honey_badger", "locust_legend"}
             view = match.view("B")
             assert view["you"] == "B" and view["phase"] == "playing"
             # a round with no turn of that seat is refused; a stranger's match is not found
@@ -671,3 +671,21 @@ def test_each_evolution_stage_read_large_shows_the_stages_still_ahead():
     for i, stage in enumerate(chain):
         assert pool[stage]["related"] == chain[i + 1:]
         assert pool[stage]["evolves"] == (i + 1 < len(chain))
+
+
+def test_a_saved_match_from_before_a_card_was_renamed_reloads_and_plays_on():
+    """A card's id changed while a match was saved (tools/cards/hq.py rename): the reload reads the old ids as the new."""
+    from animal_kingdom.web import server
+    m = Match("T", Seat("ta", "A", bot="easy", deck="giants"))
+    m.join(Seat("tb", "B", bot="easy", deck="giants")); m.ready("A"); m.ready("B")
+    rng = random.Random(3)
+    for _ in range(12):
+        m.act(m.to_act(), rng.choice(rules.legal_actions(m.state)).to_dict())
+    old_of = {new: old for old, new in server.RENAMED_IDS.items() if new in server.CARDS and old not in server.CARDS}
+    back = lambda x: (old_of.get(x, x) if isinstance(x, str) else [back(v) for v in x] if isinstance(x, list)
+                      else {back(k): back(v) for k, v in x.items()} if isinstance(x, dict) else x)
+    saved = json.loads(json.dumps(m.to_dict()))
+    assert json.dumps(back(saved)) != json.dumps(saved), "the match holds a renamed card"
+    r = Match.from_dict(server._renamed(back(saved)))
+    assert r.view("A")["game"] == m.view("A")["game"]
+    _play_out_game(r, rng)

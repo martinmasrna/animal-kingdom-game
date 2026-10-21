@@ -123,7 +123,7 @@ Let's go over them one by one:
 
 4 legendaries currently being used in the deck:
 
-🟡  verminus            Rodent · STR 3 · Has +1 strength for each other unit you control. 🟡  sirocco             - · STR 5 · Roar: return all enemy units adjacent to this to their owner's hand. 🟡  gale                Bird · STR 6 · Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand. 🟡  pestis              Rodent · STR 3 · Roar: remove everything from an adjacent crossroad.
+🟡  verminus            Rodent · STR 3 · Has +1 strength for each other unit you control. 🟡  skunk_legend             - · STR 5 · Roar: return all enemy units adjacent to this to their owner's hand. 🟡  falcon_legend                Bird · STR 6 · Flight. The first time an enemy unit covers this, return that enemy unit to its owner's hand. 🟡  rat_legend_2              Rodent · STR 3 · Roar: remove everything from an adjacent crossroad.
 
 #### 2.3.1 Verminus
 - strongest legendary in the deck (but to be honest, other 3 are quite underwhelming)

@@ -94,19 +94,19 @@ def test_renaming_or_recovering_a_starter_copy_does_not_detach_it(db):
     _, p = db.create()
     cards = {"rat": 3}
     db.seed_decks(p["id"], [{"id": "food_otk", "name": "Food", "cards": cards}])
-    db.save_decks(p["id"], [{"id": "food_otk", "name": "My Food", "cards": cards, "cover": "barley"}], {"food_otk": cards})
+    db.save_decks(p["id"], [{"id": "food_otk", "name": "My Food", "cards": cards, "cover": "rat_legend"}], {"food_otk": cards})
     renamed = db.decks(p["id"], {"food_otk": cards})[0]
-    assert renamed["name"] == "My Food" and renamed.get("cover") == "barley"
+    assert renamed["name"] == "My Food" and renamed.get("cover") == "rat_legend"
     changed = {"rat": 2, "mouse": 1}                                    # the starter changes
     assert db.decks(p["id"], {"food_otk": changed})[0]["cards"] == changed, "still follows it"
 
 
 def test_a_deleted_starter_copy_stays_deleted_even_when_the_starter_changes(db):
     _, p = db.create()
-    cards = {"lobo": 3}
+    cards = {"wolf_legend_2": 3}
     db.seed_decks(p["id"], [{"id": "canines", "name": "Canines", "cards": cards}])
     db.save_decks(p["id"], [], {"canines": cards})            # the player deletes it
-    changed = {"lobo": 2, "clarion": 1}
+    changed = {"wolf_legend_2": 2, "wolf_legend_3": 1}
     assert db.decks(p["id"], {"canines": changed}) == []
 
 
@@ -120,11 +120,11 @@ def test_link_starters_backfills_old_rows_leaving_mismatches_alone(tmp_path):
         "INSERT INTO decks VALUES ('p', 'egg_control', 'Egg', '{\"eagle\": 2}', 1);")
     old.commit(); old.close()
     db = Profiles(str(path))
-    assert db.link_starters({"giants": {"borealis": 1}, "egg_control": {"eon": 1}}) == (1, 1)
-    decks = {d["id"]: d for d in db.decks("p", {"giants": {"borealis": 2}, "egg_control": {"eon": 1}})}
+    assert db.link_starters({"giants": {"borealis": 1}, "egg_control": {"anaconda_legend": 1}}) == (1, 1)
+    decks = {d["id"]: d for d in db.decks("p", {"giants": {"borealis": 2}, "egg_control": {"anaconda_legend": 1}})}
     assert decks["giants"]["cards"] == {"borealis": 2}, "matched the current starter: now follows it"
     assert decks["egg_control"]["cards"] == {"eagle": 2}, "differed: left alone, still its old list"
-    assert db.link_starters({"giants": {"borealis": 2}, "egg_control": {"eon": 1}}) == (0, 0), "a second run reclassifies nothing"
+    assert db.link_starters({"giants": {"borealis": 2}, "egg_control": {"anaconda_legend": 1}}) == (0, 0), "a second run reclassifies nothing"
 
 
 def test_a_finished_bot_match_lands_in_the_players_history(monkeypatch):
@@ -167,7 +167,7 @@ def test_a_finished_match_saves_the_replay_its_player_saw(monkeypatch, tmp_path)
         m.act(m.to_act(), m.bot_move())
         live.append(m.view("A")["game"])
     (h,) = db.history(p["id"])
-    assert h["my_cover"] == "king_theron" and h["opp_cover"] == "brutus"
+    assert h["my_cover"] == "lion_legend_3" and h["opp_cover"] == "rhinoceros_legend"
     views = json.loads(gzip.decompress(replay.load(tmp_path, h["match"], "A")))
     assert {v["you"] for v in views} == {"A"} and views[0]["game"]["history"] == []
     assert views[-1]["game"]["result"]["winner"] == m.results[-1]["winner"]
@@ -193,7 +193,7 @@ def test_a_match_against_a_person_keeps_their_deck_name_private(monkeypatch):
     m.state.result = Result("A", "food")
     m._check_end()
     (h,) = db.history(p["id"])
-    assert (h["kind"], h["opp"], h["opp_deck"], h["opp_cover"]) == ("friend", "Ana#1234", "", "brutus")
+    assert (h["kind"], h["opp"], h["opp_deck"], h["opp_cover"]) == ("friend", "Ana#1234", "", "rhinoceros_legend")
     assert "deckName" not in m.view("A")["seats"]["B"] and m.view("A")["seats"]["A"]["deckName"] == "Cats"
 
 
@@ -247,11 +247,11 @@ def test_a_bot_named_the_old_way_reads_the_new_way(tmp_path):
 
 def test_a_deck_record_sums_every_match_with_it(db):
     _, p = db.create("Martin")
-    db.record(p["id"], "M-0", kind="bot", my_deck="Cats", opp="Bot (Easy)", opp_deck="Ramp", won=1, lost=0, my_cover="king_theron")
-    db.record(p["id"], "N-0", kind="bot", my_deck="Cats", opp="Bot (Easy)", opp_deck="Egg", won=0, lost=1, my_cover="king_theron")
+    db.record(p["id"], "M-0", kind="bot", my_deck="Cats", opp="Bot (Easy)", opp_deck="Ramp", won=1, lost=0, my_cover="lion_legend_3")
+    db.record(p["id"], "N-0", kind="bot", my_deck="Cats", opp="Bot (Easy)", opp_deck="Egg", won=0, lost=1, my_cover="lion_legend_3")
     db.record(p["id"], "O-0", kind="friend", my_deck="Rats", opp="Ana#1234", opp_deck="Cats", won=1, lost=0)
     assert [(r["deck"], r["cover"], r["won"], r["lost"]) for r in db.records(p["id"])] == \
-        [("Cats", "king_theron", 1, 1), ("Rats", "", 1, 0)]
+        [("Cats", "lion_legend_3", 1, 1), ("Rats", "", 1, 0)]
 
 
 # ----------------------------------------------------------------- sign in with Google / Discord

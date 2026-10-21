@@ -3,7 +3,7 @@
  "board": {
   "1,2": [
    {
-    "card_id": "lobo",
+    "card_id": "wolf_legend_2",
     "owner": "A",
     "iid": 7,
     "placed_on_turn": 1,
@@ -145,7 +145,7 @@
   ],
   "2,3": [
    {
-    "card_id": "clarion",
+    "card_id": "wolf_legend_3",
     "owner": "A",
     "iid": 19,
     "placed_on_turn": 5,
@@ -281,7 +281,7 @@
    "bush_dog",
    "bush_dog",
    "bush_dog",
-   "clarion",
+   "wolf_legend_3",
    "coyote",
    "coyote",
    "coyote",
@@ -292,7 +292,7 @@
    "jackal",
    "jackal",
    "leopard_legend",
-   "lobo",
+   "wolf_legend_2",
    "orca",
    "orca",
    "street_dog",

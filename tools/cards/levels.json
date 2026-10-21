@@ -86,7 +86,7 @@
       "at": 1792611263
     }
   },
-  "arna": {
+  "eagle_legend_2": {
     "art": {
       "lv": "draft",
       "by": "martin"
@@ -96,7 +96,7 @@
       "by": "martin"
     }
   },
-  "arne": {
+  "eagle_legend": {
     "art": {
       "lv": "draft",
       "by": "martin"
@@ -130,7 +130,7 @@
       "at": 1792191078
     }
   },
-  "aurum": {
+  "goose_legend": {
     "art": {
       "lv": "draft",
       "by": "claude",
@@ -299,7 +299,7 @@
       }
     }
   },
-  "barley": {
+  "rat_legend": {
     "crop": {
       "lv": "draft",
       "by": "claude",
@@ -355,7 +355,7 @@
       "by": "martin"
     }
   },
-  "big_gus": {
+  "capybara_legend": {
     "art": {
       "lv": "draft",
       "by": "claude",
@@ -484,7 +484,7 @@
       "by": "martin"
     }
   },
-  "black_swan": {
+  "swan_legend": {
     "habitat": {
       "lv": "draft",
       "by": "martin"
@@ -607,7 +607,7 @@
       "by": "martin"
     }
   },
-  "brutus": {
+  "rhinoceros_legend": {
     "art": {
       "lv": "draft",
       "by": "martin"
@@ -942,7 +942,7 @@
       "by": "martin"
     }
   },
-  "clarion": {
+  "wolf_legend_3": {
     "art": {
       "lv": "fine",
       "by": "martin"
@@ -1228,7 +1228,7 @@
       "at": 1792193257
     }
   },
-  "ember": {
+  "pheasant_legend": {
     "habitat": {
       "lv": "draft",
       "by": "martin"
@@ -1262,7 +1262,7 @@
       "by": "martin"
     }
   },
-  "eon": {
+  "anaconda_legend": {
     "art": {
       "lv": "fine",
       "by": "martin"
@@ -1310,7 +1310,7 @@
       "by": "martin"
     }
   },
-  "falstaff": {
+  "bumblebee_legend": {
     "art": {
       "lv": "fine",
       "by": "martin"
@@ -1334,7 +1334,7 @@
       "at": 1792157857
     }
   },
-  "fathom": {
+  "octopus_legend_2": {
     "art": {
       "lv": "draft",
       "by": "martin"
@@ -1393,7 +1393,7 @@
       "at": 1792090640
     }
   },
-  "gaboon_viper": {
+  "cottonmouth": {
     "art": {
       "lv": "draft",
       "by": "claude",
@@ -1435,7 +1435,7 @@
       "at": 1792067745
     }
   },
-  "gale": {
+  "falcon_legend": {
     "art": {
       "lv": "draft",
       "by": "claude",
@@ -1949,7 +1949,7 @@
       "by": "martin"
     }
   },
-  "king_theron": {
+  "lion_legend_3": {
     "habitat": {
       "lv": "draft",
       "by": "martin"
@@ -2086,7 +2086,7 @@
       "at": 1792193106
     }
   },
-  "lobo": {
+  "wolf_legend_2": {
     "art": {
       "lv": "draft",
       "by": "martin"
@@ -2302,7 +2302,7 @@
       "at": 1792187557
     }
   },
-  "methuselah": {
+  "tortoise_legend": {
     "art": {
       "lv": "fine",
       "by": "martin"
@@ -2326,7 +2326,7 @@
       "at": 1792593633
     }
   },
-  "mocha": {
+  "sperm_whale_legend": {
     "effect": {
       "note": "Martin 2026-10-17: 'next to' is right: adjacent as an adjective, next to in place of adjacent to; Watch in play: close to a full board wipe.",
       "by": "claude",
@@ -2594,7 +2594,7 @@
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
     }
   },
-  "pestis": {
+  "rat_legend_2": {
     "art": {
       "lv": "draft",
       "by": "martin"
@@ -2648,7 +2648,7 @@
       "at": 1792191063
     }
   },
-  "poppy": {
+  "baby_fox": {
     "art": {
       "lv": "draft",
       "by": "martin"
@@ -2695,7 +2695,7 @@
       "at": 1792229273
     }
   },
-  "prince_leo": {
+  "lion_legend": {
     "habitat": {
       "lv": "locked",
       "by": "martin",
@@ -2734,7 +2734,7 @@
       "by": "martin"
     }
   },
-  "princess_lea": {
+  "lion_legend_2": {
     "habitat": {
       "lv": "locked",
       "by": "martin",
@@ -2802,7 +2802,7 @@
       "at": 1792086365
     }
   },
-  "queen_adira": {
+  "lion_legend_4": {
     "habitat": {
       "lv": "draft",
       "by": "martin"
@@ -2846,7 +2846,7 @@
       "by": "martin"
     }
   },
-  "queen_honoria": {
+  "bee_legend": {
     "art": {
       "lv": "locked",
       "by": "martin"
@@ -2880,7 +2880,7 @@
       "at": 1792584111
     }
   },
-  "queen_marabunta": {
+  "army_ant_legend": {
     "art": {
       "lv": "fine",
       "by": "martin"
@@ -2970,7 +2970,7 @@
       "by": "martin"
     }
   },
-  "rusty": {
+  "baby_fox_2": {
     "art": {
       "lv": "draft",
       "by": "martin"
@@ -2996,7 +2996,7 @@
       "at": 1792096533
     }
   },
-  "scarlett": {
+  "fox_legend": {
     "effect": {
       "note": "Poppy and Rusty: tokens, Canine, 1.; Poppy and Rusty: tokens, Canine, 1.",
       "by": "martin"
@@ -3020,7 +3020,7 @@
       "at": 1792086810
     }
   },
-  "scrooge": {
+  "chipmunk_legend": {
     "art": {
       "lv": "fine",
       "by": "martin"
@@ -3069,7 +3069,7 @@
       "at": 1792070441
     }
   },
-  "silverback": {
+  "gorilla_legend": {
     "effect": {
       "note": "Watch in play: +2 to the whole hand may be too strong (dial: the +2 or the 7).; Watch in play: +2 to the whole hand may be too strong (dial: the +2 or the 7).",
       "by": "martin"
@@ -3098,7 +3098,7 @@
       "at": 1792191061
     }
   },
-  "sirocco": {
+  "skunk_legend": {
     "art": {
       "lv": "draft",
       "by": "martin"
@@ -3433,7 +3433,7 @@
       "at": 1792191063
     }
   },
-  "vesper": {
+  "hornet_legend": {
     "art": {
       "lv": "draft",
       "by": "martin"
@@ -3617,7 +3617,7 @@
       "at": 1792191064
     }
   },
-  "cuco": {
+  "cuckoo_legend": {
     "animal": {
       "review": {
         "prev_lv": "draft",
@@ -3850,7 +3850,7 @@
       "at": 1792085441
     }
   },
-  "locust": {
+  "locust_legend": {
     "effect": {
       "review": {
         "prev_lv": "empty",
@@ -3909,7 +3909,7 @@
       "at": 1792085442
     }
   },
-  "roach_king": {
+  "cockroach_legend": {
     "effect": {
       "review": {
         "prev_lv": "empty",
@@ -4092,6 +4092,19 @@
       "note": "Reach has no number: the Shark's Reach 3 becomes Reach, 2 (Martin, 2026-10-21)",
       "by": "claude",
       "at": 1792604717
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Great White Shark",
+          "species": "Great White Shark"
+        }
+      },
+      "note": "Martin 2026-10-21: plain everyday name; the id names the species and stays",
+      "by": "claude",
+      "at": 1792619832
     }
   },
   "octopus": {

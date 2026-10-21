@@ -27,6 +27,7 @@ from ..engine import rules
 from ..engine.state import EngineError
 from ..engine.cards import COPY_LIMITS, DECK_SLUGS, STARTER_DECKS, load_cards
 from . import custom_decks
+from .renamed import RENAMED_IDS, renamed as _renamed
 from . import events, feedback, news
 from .chat import Chat, ChatError
 from .friends import FriendError, Friends
@@ -116,7 +117,7 @@ class Hub:
                 d = json.loads(path.read_text(encoding="utf-8"))
                 if d["phase"] == "match_over" and now - path.stat().st_mtime > KEEP_FINISHED:
                     continue
-                match = Match.from_dict(d)
+                match = Match.from_dict(_renamed(d))
             except Exception:
                 log.exception("could not reload %s", path.name)
                 continue
@@ -274,13 +275,9 @@ def starter_cards() -> dict[str, dict]:
     return {d["id"]: d["cards"] for d in starter_decks()}
 
 
-# A live card's successor in the launch collection (2026-10-16), which takes its place in a player's own deck: the same
-# animal under a new id, or the same effect on another animal (Martin, 2026-10-17: "if one card kept the exact effect,
-# just changed the animal, then it should get replaced in the deck"; the effect wins when the two disagree, the Jackal).
-RENAMED_IDS = {"alpha": "scarlett", "dire_wolf": "wolf", "goliath": "python", "guard_hornet": "guard_wasp", "omen": "black_swan",
-               "red_wolf": "dhole", "stoop": "hawk", "bulwark": "brutus", "rat_king": "barley",
-               "jerboa": "mole", "chinchilla": "beaver", "greywhisker": "mole_legend", "house_cat": "alley_cat",
-               "taipan": "gaboon_viper", "polar_bear": "crocodile", "gray_wolf": "chimpanzee", "snow_leopard": "leopard"}
+
+
+
 COPY_LIMIT = {cid: COPY_LIMITS[c.rarity] for cid, c in CARDS.items()}   # any deck may hold the rarity's full count (decks.py)
 # The cards a player's deck can hold: the starter decks' and the bench's (not the reserve's, the tutorial's or tokens).
 COLLECTIBLE = {cid for cid, c in CARDS.items() if c.collectible}
@@ -290,7 +287,8 @@ def profile_view(p: dict) -> dict:
     starters = starter_decks()
     profiles.seed_decks(p["id"], starters, COLLECTIBLE, RENAMED_IDS, COPY_LIMIT)
     return {**p, "decks": profiles.decks(p["id"], {d["id"]: d["cards"] for d in starters}),
-            "history": profiles.history(p["id"]), "records": profiles.records(p["id"]),
+            "history": [{**h, **{k: _renamed(h[k]) for k in ("my_cover", "opp_cover") if h.get(k)}} for h in profiles.history(p["id"])],
+            "records": profiles.records(p["id"]),
             "logins": profiles.identities(p["id"]), "providers": oauth.available(),
             "rating": ladder.get(p["id"]).shown() if ladder else None, **standing(p["id"])}
 
@@ -929,7 +927,7 @@ def find_log(key: str, series: int, game) -> dict | None:
             if rec.get("series", 0) != series or (game is not None and rec.get("game_no") != game):
                 continue
             found = rec
-    return found
+    return _renamed(found)   # a game logged before a card's id changed replays with its new id
 
 
 def position_at(rec: dict, rnd: int, seat: str):

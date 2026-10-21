@@ -139,7 +139,7 @@ def can_roam(state: GameState, unit: UnitInstance) -> bool:
 
 # Card ids that, while on top of their crossroad, give their controller one free roam each turn ("Once each turn, an
 # ally can roam for free.").
-FREE_ROAM_CARDS = frozenset({"clarion"})
+FREE_ROAM_CARDS = frozenset({"wolf_legend_3"})
 
 
 def free_roams(state: GameState, player: str, unit: Optional[UnitInstance] = None) -> int:
@@ -289,8 +289,8 @@ def food_cap(state: GameState) -> Optional[int]:
     """Methuselah: "Each player gains at most 20 food per turn." While either player tops a crossroad with a working
     Methuselah (a buried or inked one rules nothing, like every static), the most food each player may gain in the
     current turn; None when no cap holds."""
-    if any(active_tops(state, p, "methuselah") for p in ("A", "B")):
-        return state.config.methuselah_food_cap
+    if any(active_tops(state, p, "tortoise_legend") for p in ("A", "B")):
+        return state.config.tortoise_legend_food_cap
     return None
 
 

@@ -34,7 +34,7 @@
   ],
   "5,3": [
    {
-    "card_id": "pestis",
+    "card_id": "rat_legend_2",
     "owner": "B",
     "iid": 12,
     "placed_on_turn": 4,
@@ -107,7 +107,7 @@
   ],
   "1,2": [
    {
-    "card_id": "aurum",
+    "card_id": "goose_legend",
     "owner": "A",
     "iid": 27,
     "placed_on_turn": 7,
@@ -149,7 +149,7 @@
     "retaliation_used": false
    },
    {
-    "card_id": "gaboon_viper",
+    "card_id": "cottonmouth",
     "owner": "A",
     "iid": 36,
     "placed_on_turn": 0,
@@ -178,7 +178,7 @@
     "retaliation_used": false
    },
    {
-    "card_id": "gaboon_viper",
+    "card_id": "cottonmouth",
     "owner": "B",
     "iid": 34,
     "placed_on_turn": 0,
@@ -190,17 +190,17 @@
  },
  "decks": {
   "A": [
-   "ember",
+   "pheasant_legend",
    "hawk",
    "bird_egg",
    "rattlesnake",
    "snake_egg",
    "owl",
-   "gaboon_viper",
+   "cottonmouth",
    "raven",
-   "eon",
+   "anaconda_legend",
    "hawk",
-   "black_swan",
+   "swan_legend",
    "egg_eater",
    "owl",
    "bird_egg",
@@ -215,20 +215,20 @@
    "chinchilla",
    "polar_bear",
    "elephant",
-   "scarlett",
+   "fox_legend",
    "mouse",
    "wolf",
    "rhinoceros",
    "tiger",
    "mouse",
    "wolf",
-   "gale",
+   "falcon_legend",
    "rhinoceros"
   ]
  },
  "starting_decks": {
   "A": [
-   "aurum",
+   "goose_legend",
    "bird_egg",
    "bird_egg",
    "bird_egg",
@@ -236,13 +236,13 @@
    "black_mamba",
    "egg_eater",
    "egg_eater",
-   "ember",
-   "eon",
+   "pheasant_legend",
+   "anaconda_legend",
    "python",
    "python",
    "magpie",
    "magpie",
-   "black_swan",
+   "swan_legend",
    "owl",
    "owl",
    "owl",
@@ -256,22 +256,22 @@
    "snake_egg",
    "hawk",
    "hawk",
-   "gaboon_viper",
-   "gaboon_viper"
+   "cottonmouth",
+   "cottonmouth"
   ],
   "B": [
-   "scarlett",
-   "brutus",
-   "gale",
-   "pestis",
+   "fox_legend",
+   "rhinoceros_legend",
+   "falcon_legend",
+   "rat_legend_2",
    "chinchilla",
    "polar_bear",
    "rhinoceros",
-   "gaboon_viper",
+   "cottonmouth",
    "chinchilla",
    "polar_bear",
    "rhinoceros",
-   "gaboon_viper",
+   "cottonmouth",
    "wolf",
    "elephant",
    "lemming",
@@ -293,7 +293,7 @@
   ]
  },
  "remove_pile": [
-  "gaboon_viper",
+  "cottonmouth",
   "python",
   "mouse",
   "black_mamba",

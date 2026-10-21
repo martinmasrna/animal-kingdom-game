@@ -109,7 +109,7 @@ Sample: 31 manifest reviews with a recorded pick among 3 or 4 shown candidates w
 | boar | 3 | 2 | 2 | 2 |
 | rhinoceros | 1 | 3 | 2 | 3 |
 | octopus_legend | 3 | 2 | 1 | 3 |
-| vesper | 1 | 4 | 1 | 1 |
+| hornet_legend | 1 | 4 | 1 | 1 |
 | moose | 1 | 3 | 1 | 3 |
 | tortoise | 1 | 2 | 2 | 4 |
 | honey_badger | 3 | 3 | 3 | 1 |
@@ -122,11 +122,11 @@ Sample: 31 manifest reviews with a recorded pick among 3 or 4 shown candidates w
 | termite_queen | 3 | 1 | 4 | 1 |
 | orca | 4 | 4 | 4 | 4 |
 | mahi_mahi | 2 | 3 | 1 | 2 |
-| sirocco | 1 | 3 | 4 | 3 |
+| skunk_legend | 1 | 3 | 4 | 3 |
 | skunk | 4 | 1 | 4 | 2 |
 | giraffe | 2 | 2 | 3 | 3 |
 | manta_ray | 1 | 3 | 3 | 3 |
-| fathom | 3 | 3 | 4 | 3 |
+| octopus_legend_2 | 3 | 3 | 4 | 3 |
 | tuna_legend | 1 | 3 | 4 | 3 |
 | cod | 4 | 2 | 2 | 2 |
 | hyena | 2 | 2 | 2 | 2 |
@@ -136,7 +136,7 @@ Sample: 31 manifest reviews with a recorded pick among 3 or 4 shown candidates w
 | jellyfish | 4 | 1 | 1 | 1 |
 | mackerel | 1 | 2 | 3 | 1 |
 | gazelle | 3 | 3 | 3 | 3 |
-| methuselah | 2 | 1 | 1 | 3 |
+| tortoise_legend | 2 | 1 | 1 | 3 |
 
 ## Timeline of treatments, counted
 

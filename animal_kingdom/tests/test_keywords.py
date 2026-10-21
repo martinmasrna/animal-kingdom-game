@@ -46,46 +46,46 @@ def test_stealth_hides_from_skunk_bounce():
 
 def test_stealth_does_not_hide_from_mass_aoe():
     # Brutus: remove all adjacent enemy units - mass, so the panther dies.
-    s = make_state(hands={"A": ["brutus"]}, food={"A": 20, "B": 0})
+    s = make_state(hands={"A": ["rhinoceros_legend"]}, food={"A": 20, "B": 0})
     put(s, "2,2", "black_panther", "B")
-    rules.apply_action(s, PlaceAction("brutus", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("rhinoceros_legend", ("cr", "1,2")))
     assert "2,2" not in s.board
     assert "black_panther" in s.remove_pile
 
 
 def test_stealth_does_not_hide_from_sirocco_mass_bounce():
-    s = make_state(hands={"A": ["sirocco"]})
+    s = make_state(hands={"A": ["skunk_legend"]})
     put(s, "2,2", "black_panther", "B")
-    rules.apply_action(s, PlaceAction("sirocco", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("skunk_legend", ("cr", "1,2")))
     assert "2,2" not in s.board
     assert any(u.card_id == "black_panther" for u in s.hands["B"])
 
 
 def test_stealth_top_cannot_be_chosen_by_pestis():
-    s = make_state(hands={"A": ["pestis"]})
+    s = make_state(hands={"A": ["rat_legend_2"]})
     put(s, "2,2", "mouse", "B")
     put(s, "2,2", "black_panther", "B")                   # panther on top of the stack
-    rules.apply_action(s, PlaceAction("pestis", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("rat_legend_2", ("cr", "1,2")))
     assert s.top_unit("2,2").card_id == "black_panther"   # Pestis chooses its enemy; Stealth hides it
 
 
 # ------------------------------------------------------------- Armor: physics for all
 
 def test_armor_survives_mass_aoe():
-    s = make_state(hands={"A": ["brutus"]}, food={"A": 20, "B": 0})
-    put(s, "2,2", "methuselah", "B")
-    rules.apply_action(s, PlaceAction("brutus", ("cr", "1,2")))
-    assert _ids_at(s, "2,2") == ["methuselah"]
+    s = make_state(hands={"A": ["rhinoceros_legend"]}, food={"A": 20, "B": 0})
+    put(s, "2,2", "tortoise_legend", "B")
+    rules.apply_action(s, PlaceAction("rhinoceros_legend", ("cr", "1,2")))
+    assert _ids_at(s, "2,2") == ["tortoise_legend"]
 
 
 def test_pestis_wipes_around_an_armor_unit_not_stopping_at_it():
     # Ruling B amendment: Armor is skipped in place, NOT a shield for the stack.
-    s = make_state(hands={"A": ["pestis"]})
+    s = make_state(hands={"A": ["rat_legend_2"]})
     put(s, "2,2", "mouse", "B")                           # bottom: should die
-    put(s, "2,2", "methuselah", "B")                        # middle: Armor, survives
+    put(s, "2,2", "tortoise_legend", "B")                        # middle: Armor, survives
     put(s, "2,2", "rat", "B")                             # top: should die
-    apply_click(s, PlaceAction("pestis", ("cr", "1,2")))
-    assert _ids_at(s, "2,2") == ["methuselah"]              # alone where the stack was
+    apply_click(s, PlaceAction("rat_legend_2", ("cr", "1,2")))
+    assert _ids_at(s, "2,2") == ["tortoise_legend"]              # alone where the stack was
     assert "mouse" in s.remove_pile and "rat" in s.remove_pile
 
 
@@ -130,21 +130,21 @@ def test_apex_eats_stealth_prey():
 
 def test_apex_covers_armor_prey_instead_of_eating_it():
     s = make_state(hands={"A": ["borealis"]}, food={"A": 20, "B": 0})
-    put(s, "1,2", "methuselah", "B")                      # methuselah 3 < borealis
+    put(s, "1,2", "tortoise_legend", "B")                      # tortoise_legend 3 < borealis
     legal = rules.legal_actions(s)
     if PlaceAction("borealis", ("cr", "1,2")) in legal:   # only if strength allows the cover
         rules.apply_action(s, PlaceAction("borealis", ("cr", "1,2")))
-        assert _ids_at(s, "1,2") == ["methuselah", "borealis"]
-        assert "methuselah" not in s.remove_pile
+        assert _ids_at(s, "1,2") == ["tortoise_legend", "borealis"]
+        assert "tortoise_legend" not in s.remove_pile
 
 
 
 
 def test_pestis_may_wipe_an_allied_stack_and_the_enemies_under_it():
-    s = make_state(hands={"A": ["pestis"]})
+    s = make_state(hands={"A": ["rat_legend_2"]})
     put(s, "2,2", "mouse", "B")                           # buried enemy
     put(s, "2,2", "rat", "A")                             # our top
-    rules.apply_action(s, PlaceAction("pestis", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("rat_legend_2", ("cr", "1,2")))
     assert not s.pending["optional"] and "2,2" in s.pending["options"]   # the cost is never declined (2026-10-21)
     rules.apply_action(s, ChoiceAction("2,2"))
     assert "2,2" not in s.board

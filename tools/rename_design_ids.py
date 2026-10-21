@@ -14,22 +14,22 @@ import subprocess
 import sys
 
 RENAME = {
-    "guard_hornet": "guard_wasp", "aristocrats_legend_cuckoo": "cuco",
+    "guard_hornet": "guard_wasp", "aristocrats_legend_cuckoo": "cuckoo_legend",
     "aristocrats_legend_sloth": "sloth_legend", "canines_legend_leopard": "leopard_legend",
     "canines_legend_wolf": "wolf_legend", "gray_wolf": "jackal", "red_wolf": "dhole", "dire_wolf": "wolf",
     "raccoon_dog": "coyote", "dog": "street_dog", "house_cat": "alley_cat",
     "fish_legend_jellyfish": "jellyfish_legend", "fish_legend_tuna": "tuna_legend",
     "fish_legend_manta_ray": "manta_ray_legend", "fish_legend_piranha": "piranha_legend",
-    "food_aggro_legend_repeat": "big_gus", "food_aggro_legend_refill": "rodent", "rat_king": "barley",
+    "food_aggro_legend_repeat": "capybara_legend", "food_aggro_legend_refill": "rodent", "rat_king": "rat_legend",
     "food_otk_legend_squirrel": "squirrel_legend", "food_otk_legend_honey_badger": "honey_badger_legend",
-    "food_otk_legend_octopus": "octopus_legend", "egg_control_legend_raven": "raven_legend", "omen": "black_swan",
-    "stoop": "hawk", "king_cobra": "gaboon_viper", "goliath": "python", "handlock_legend_baboon": "baboon_legend",
-    "handlock_legend_butterfly": "butterfly_legend", "handlock_legend_eagle": "arne", "bulwark": "brutus",
+    "food_otk_legend_octopus": "octopus_legend", "egg_control_legend_raven": "raven_legend", "omen": "swan_legend",
+    "stoop": "hawk", "king_cobra": "cottonmouth", "goliath": "python", "handlock_legend_baboon": "baboon_legend",
+    "handlock_legend_butterfly": "butterfly_legend", "handlock_legend_eagle": "eagle_legend", "bulwark": "rhinoceros_legend",
     "giants_legend_oxpecker": "oxpecker_legend", "hoofed_legend_wildebeest": "wildebeest_legend",
     "hoofed_legend_boar": "boar_legend", "hoofed_legend_zebra": "zebra_legend", "hoofed_legend_giraffe": "giraffe_legend",
-    "alpha": "scarlett", "handlock_legend_butterfly_2": "butterfly_legend_caterpillar",
+    "alpha": "fox_legend", "handlock_legend_butterfly_2": "butterfly_legend_caterpillar",
     "handlock_legend_butterfly_3": "butterfly_legend_chrysalis", "handlock_legend_butterfly_4": "butterfly_legend_butterfly",
-    "handlock_legend_butterfly_5": "butterfly_legend_monarch", "handlock_legend_eagle_mate": "arna",
+    "handlock_legend_butterfly_5": "butterfly_legend_monarch", "handlock_legend_eagle_mate": "eagle_legend_2",
 }
 FOLDERS = ["cards", "cards/bar/thumbs", "cards/research/timelines", "cards/research/links", "rarity2/masks"]
 EXTS = {".png", ".jpg", ".md", ".json"}

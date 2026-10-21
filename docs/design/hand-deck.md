@@ -30,7 +30,7 @@ Version 3 is version 2 with the first draft's Gorilla sweep restored; it was not
 | Orangutan | Jungle | R | 6 | Roar: give each Primate in your hand +2 strength. |
 | Gorilla | Jungle | R | 7 | Roar: if this has 10 or more strength, remove all adjacent enemies with less strength. |
 | the old teacher (orangutan) | Jungle | L | 5 | At the end of your turn, give each Primate in your hand +1 strength. |
-| the silverback (gorilla) | Jungle | L | 8 | Your other Primates have +2 strength. |
+| the gorilla_legend (gorilla) | Jungle | L | 8 | Your other Primates have +2 strength. |
 | the toolmaker (chimpanzee) | Jungle | L | 4 | Roar: Scout a Primate. Give it +3 strength. |
 | the long sleeper (bear) | Forest | L | 3 | Has +1 strength for each Bear and Primate in your hand. |
 

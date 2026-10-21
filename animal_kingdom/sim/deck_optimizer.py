@@ -133,7 +133,7 @@ def random_recipe(rng: random.Random, pools: Optional[dict[str, list[str]]] = No
 # control/walls + efficient unconditional removal + a little flight for reach. Every card fires
 # with no "if you control N friendly X" precondition, so cross-deck mixing doesn't break synergy.
 SEED_RECIPE = make_recipe(
-    legendary=("gale", "sirocco", "pestis", "scarlett"),
+    legendary=("falcon_legend", "skunk_legend", "rat_legend_2", "fox_legend"),
     rare=("jaguar", "hawk", "orca", "rhinoceros"),
     common=("lion", "tiger", "mouse", "wolf", "eagle", "bat"),
 )

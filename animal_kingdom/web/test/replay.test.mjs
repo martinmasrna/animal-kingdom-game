@@ -7,11 +7,11 @@ import { startServer, openBrowser, recordMatches, screenMismatches } from './har
 let server, browser, page, views;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const HISTORY = [
-  { match: 'AAA-0', ended: 1790700000, kind: 'bot', my_deck: 'Cats', opp: 'Bot (Expert)', opp_deck: 'Giants', won: 1, lost: 0, my_cover: 'king_theron', opp_cover: 'brutus' },
-  { match: 'CCC-0', ended: 1790650000, kind: 'friend', my_deck: 'Cats', opp: 'Ana#1234', opp_deck: 'Her secret deck', won: 1, lost: 0, my_cover: 'king_theron', opp_cover: 'brutus' },
+  { match: 'AAA-0', ended: 1790700000, kind: 'bot', my_deck: 'Cats', opp: 'Bot (Expert)', opp_deck: 'Giants', won: 1, lost: 0, my_cover: 'lion_legend_3', opp_cover: 'rhinoceros_legend' },
+  { match: 'CCC-0', ended: 1790650000, kind: 'friend', my_deck: 'Cats', opp: 'Ana#1234', opp_deck: 'Her secret deck', won: 1, lost: 0, my_cover: 'lion_legend_3', opp_cover: 'rhinoceros_legend' },
   { match: 'BBB-0', ended: 1790600000, kind: 'bot', my_deck: 'Birds & Snakes', opp: 'Bot (Normal)', opp_deck: 'Cats', won: 0, lost: 1, my_cover: '', opp_cover: '' },
 ];
-const RECORDS = [{ deck: 'Cats', cover: 'king_theron', won: 2, lost: 0 }, { deck: 'Birds & Snakes', cover: '', won: 0, lost: 1 }];
+const RECORDS = [{ deck: 'Cats', cover: 'lion_legend_3', won: 2, lost: 0 }, { deck: 'Birds & Snakes', cover: '', won: 0, lost: 1 }];
 
 before(async () => {
   server = await startServer(); browser = await openBrowser();

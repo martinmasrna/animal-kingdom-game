@@ -1,21 +1,21 @@
 // Every card's permanent number for deck codes: a card is number (its index + 1). Append-only: add new cards at the end and
 // never reorder or remove, or every shared deck code changes meaning. A web test checks every card in the pool has one.
 export const CARD_NUMS = [
-  "prince_leo", "princess_lea", "king_theron", "queen_adira", "jaguar", "serval", "snow_leopard", "black_panther",
-  "lion", "lynx", "caracal", "tiger", "cougar", "alley_cat", "eon", "eon_food_engine",
-  "python", "ember", "aurum", "rattlesnake", "egg_eater", "black_swan", "hawk", "eagle",
-  "owl", "anaconda", "taipan", "viper", "magpie", "black_mamba", "gaboon_viper", "puff_adder",
-  "secretary_bird", "raven", "bird_egg", "snake_egg", "queen_marabunta", "vesper", "queen_honoria", "falstaff",
+  "lion_legend", "lion_legend_2", "lion_legend_3", "lion_legend_4", "jaguar", "serval", "snow_leopard", "black_panther",
+  "lion", "lynx", "caracal", "tiger", "cougar", "alley_cat", "anaconda_legend", "eon_food_engine",
+  "python", "pheasant_legend", "goose_legend", "rattlesnake", "egg_eater", "swan_legend", "hawk", "eagle",
+  "owl", "anaconda", "taipan", "viper", "magpie", "black_mamba", "cottonmouth", "puff_adder",
+  "secretary_bird", "raven", "bird_egg", "snake_egg", "army_ant_legend", "hornet_legend", "bee_legend", "bumblebee_legend",
   "nurse_bee", "nurse_bumblebee", "termite_king", "termite_queen", "queen_bee", "guard_wasp", "soldier_ant", "worker_ant",
-  "worker_wasp", "worker_bee", "methuselah", "borealis", "unnamed_giant", "aquila", "brutus", "yuka",
+  "worker_wasp", "worker_bee", "tortoise_legend", "borealis", "unnamed_giant", "aquila", "rhinoceros_legend", "yuka",
   "polar_bear", "rhinoceros", "hippopotamus", "andean_condor", "elephant", "grizzly_bear", "oxpecker", "black_bear",
-  "sloth", "cape_buffalo", "fathom", "greywhisker", "barley", "scrooge", "flying_squirrel", "porcupine",
+  "sloth", "cape_buffalo", "octopus_legend_2", "greywhisker", "rat_legend", "chipmunk_legend", "flying_squirrel", "porcupine",
   "chinchilla", "armadillo", "squirrel", "chipmunk", "hedgehog", "hamster", "muskrat", "groundhog",
-  "gopher", "retired_verminus", "pestis", "sirocco", "gale", "jerboa", "hornet", "chameleon",
-  "skunk", "lemming", "cheetah", "rat", "falcon", "bat", "mouse", "lobo",
-  "shuck", "retired_raksha", "clarion", "retired_dhole", "bush_dog", "retired_jackal", "dhole", "jackal",
-  "unnamed_canine", "arctic_fox", "fox", "african_wild_dog", "dingo", "street_dog", "scarlett", "hyena",
-  "outrider", "wolf", "pup", "poppy", "rusty", "mock_scout", "mock_draw_3", "mock_draw_4",
+  "gopher", "retired_verminus", "rat_legend_2", "skunk_legend", "falcon_legend", "jerboa", "hornet", "chameleon",
+  "skunk", "lemming", "cheetah", "rat", "falcon", "bat", "mouse", "wolf_legend_2",
+  "shuck", "retired_raksha", "wolf_legend_3", "retired_dhole", "bush_dog", "retired_jackal", "dhole", "jackal",
+  "unnamed_canine", "arctic_fox", "fox", "african_wild_dog", "dingo", "street_dog", "fox_legend", "hyena",
+  "outrider", "wolf", "pup", "baby_fox", "baby_fox_2", "mock_scout", "mock_draw_3", "mock_draw_4",
   "mock_draw_6", "mock_draw_7", "mock_flydraw_2", "mock_flydraw_3", "mock_flydraw_4", "mock_flydraw_5", "calib_draw1_1", "calib_draw1_2",
   "calib_draw2_0", "calib_draw2_1", "calib_draw2_2", "calib_draw2_3", "calib_rm3_2", "calib_rm3_3", "calib_rm3_4", "calib_rm3_5",
   "calib_rm3_6", "calib_rm4_2", "calib_rm4_3", "calib_rm4_4", "calib_rm4_5", "calib_rm4_6", "calib_rm6_1", "calib_rm6_2",
@@ -27,25 +27,25 @@ export const CARD_NUMS = [
   "mock_vanilla_5", "mock_vanilla_6", "mock_vanilla_8", "mock_vanilla_9", "mock_vanilla_10", "mock_flyer_7", "mock_armor_6", "mock_removal",
   "mock_apex_5", "mock_apex_6", "mock_draw2",
   "cairn",
-  "cuco", "opossum_legend", "sloth_legend", "praying_mantis", "tarantula", "sea_turtle", "raccoon", "piranha",
+  "cuckoo_legend", "opossum_legend", "sloth_legend", "praying_mantis", "tarantula", "sea_turtle", "raccoon", "piranha",
   "vulture", "city_spider", "earthworm", "cockroach", "leopard_legend", "wolf_legend", "orca", "coyote",
   "badger", "naked_mole_rat", "hare", "leopard", "bobcat", "jellyfish_legend", "tuna_legend", "manta_ray_legend",
   "piranha_legend", "swordfish", "barracuda", "manta_ray", "remora", "cod", "sardine", "mahi_mahi",
-  "mackerel", "tuna", "sunfish", "big_gus", "macaque_legend", "meerkat", "dormouse", "mole",
+  "mackerel", "tuna", "sunfish", "capybara_legend", "macaque_legend", "meerkat", "dormouse", "mole",
   "squirrel_legend", "honey_badger_legend", "octopus_legend", "capybara", "golden_orb_weaver", "dart_frog", "jellyfish", "tortoise",
-  "raven_legend", "mosquito", "baboon_legend", "silverback", "butterfly_legend", "arne", "hummingbird", "macaque",
-  "orangutan", "tarsier", "chimpanzee", "baboon", "stork", "caterpillar", "gorilla", "mocha",
+  "raven_legend", "mosquito", "baboon_legend", "gorilla_legend", "butterfly_legend", "eagle_legend", "hummingbird", "macaque",
+  "orangutan", "tarsier", "chimpanzee", "baboon", "stork", "caterpillar", "gorilla", "sperm_whale_legend",
   "oxpecker_legend", "crocodile", "whale_shark", "anteater", "dung_beetle", "blue_whale", "wildebeest_legend", "boar_legend",
   "zebra_legend", "giraffe_legend", "honey_badger", "okapi", "moose", "zebra", "giraffe", "gazelle",
   "wildebeest", "deer", "boar", "octopus", "great_white_shark", "sperm_whale", "butterfly", "cuckoo",
   "opossum", "baby_turtle", "worm", "baby_fish", "cuckoo_egg", "baby_lion", "baby_wolf", "baby_squirrel",
   "baby_owl", "baby_python", "baby_bear", "baby_gorilla", "baby_zebra", "butterfly_legend_caterpillar", "butterfly_legend_chrysalis", "butterfly_legend_butterfly",
-  "butterfly_legend_monarch", "arna", "tutorial_cape_buffalo", "tutorial_dire_wolf", "tutorial_lynx", "tutorial_chipmunk",
-  "beaver", "macaw", "toad", "locust", "roach_king", "roach", "mole_legend", "bat_legend", "golden_egg", "woodpecker", "warthog", "albatross", "peacock", "dolphin", "stag_beetle",
+  "butterfly_legend_monarch", "eagle_legend_2", "tutorial_cape_buffalo", "tutorial_dire_wolf", "tutorial_lynx", "tutorial_chipmunk",
+  "beaver", "macaw", "toad", "locust_legend", "cockroach_legend", "roach", "mole_legend", "bat_legend", "golden_egg", "woodpecker", "warthog", "albatross", "peacock", "dolphin", "stag_beetle",
   "guard_bee", "forager_ant", "queen_wasp", "scout_bee", "ant"
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck
 // code's number now means; the server moves players' saved decks the same way (web/server.py RENAMED_IDS, kept equal by a test).
-export const SUCCESSOR = { alpha: 'scarlett', dire_wolf: 'wolf', goliath: 'python', guard_hornet: 'guard_wasp', omen: 'black_swan', red_wolf: 'dhole', stoop: 'hawk', bulwark: 'brutus', rat_king: 'barley', jerboa: 'mole', chinchilla: 'beaver', greywhisker: 'mole_legend', house_cat: 'alley_cat', taipan: 'gaboon_viper', polar_bear: 'crocodile', gray_wolf: 'chimpanzee', snow_leopard: 'leopard' };
+export const SUCCESSOR = { black_swan: 'swan_legend', locust: 'locust_legend', fathom: 'octopus_legend_2', pestis: 'rat_legend_2', barley: 'rat_legend', clarion: 'wolf_legend_3', lobo: 'wolf_legend_2', queen_adira: 'lion_legend_4', king_theron: 'lion_legend_3', princess_lea: 'lion_legend_2', prince_leo: 'lion_legend', cuco: 'cuckoo_legend', mocha: 'sperm_whale_legend', methuselah: 'tortoise_legend', brutus: 'rhinoceros_legend', arna: 'eagle_legend_2', arne: 'eagle_legend', silverback: 'gorilla_legend', aurum: 'goose_legend', eon: 'anaconda_legend', scrooge: 'chipmunk_legend', big_gus: 'capybara_legend', rusty: 'baby_fox_2', poppy: 'baby_fox', scarlett: 'fox_legend', gale: 'falcon_legend', sirocco: 'skunk_legend', roach_king: 'cockroach_legend', ember: 'pheasant_legend', falstaff: 'bumblebee_legend', queen_honoria: 'bee_legend', vesper: 'hornet_legend', queen_marabunta: 'army_ant_legend', gaboon_viper: 'cottonmouth', alpha: 'fox_legend', dire_wolf: 'wolf', goliath: 'python', guard_hornet: 'guard_wasp', omen: 'swan_legend', red_wolf: 'dhole', stoop: 'hawk', bulwark: 'rhinoceros_legend', rat_king: 'rat_legend', jerboa: 'mole', chinchilla: 'beaver', greywhisker: 'mole_legend', house_cat: 'alley_cat', taipan: 'cottonmouth', polar_bear: 'crocodile', gray_wolf: 'chimpanzee', snow_leopard: 'leopard' };
 

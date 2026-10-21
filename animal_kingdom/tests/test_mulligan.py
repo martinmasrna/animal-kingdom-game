@@ -42,8 +42,8 @@ def test_the_weakest_card_goes_back_when_the_deck_is_better_on_average(table):
 
 
 def test_a_hand_at_least_as_good_as_the_deck_is_kept(table):
-    table.update({"chipmunk": 15.0, "big_gus": 12.0, "macaque_legend": 12.0, "beaver": 5.0})
-    assert _sent(_deal(["chipmunk", "big_gus", "macaque_legend", "beaver"])) is None
+    table.update({"chipmunk": 15.0, "capybara_legend": 12.0, "macaque_legend": 12.0, "beaver": 5.0})
+    assert _sent(_deal(["chipmunk", "capybara_legend", "macaque_legend", "beaver"])) is None
 
 
 def test_a_card_already_sent_back_cannot_be_the_replacement(table):

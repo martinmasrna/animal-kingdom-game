@@ -58,8 +58,8 @@ BASELINE_DECK: list[str] = [
 # (2026-09-29), its cards as they are now (Gaboon Viper for the retired Taipan). Stale since the
 # launch decks: kept loadable as the sim tools' default pile until the optimizer runs again.
 GOODSTUFF_DECK: list[str] = (
-    ["scarlett", "brutus", "gale", "pestis"]
-    + ["chinchilla", "polar_bear", "rhinoceros", "gaboon_viper"] * 2
+    ["fox_legend", "rhinoceros_legend", "falcon_legend", "rat_legend_2"]
+    + ["chinchilla", "polar_bear", "rhinoceros", "cottonmouth"] * 2
     + ["wolf", "elephant", "lemming", "lion", "mouse", "tiger"] * 3
 )
 

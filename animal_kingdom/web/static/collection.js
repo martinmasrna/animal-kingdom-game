@@ -9,7 +9,7 @@ import { dd, wireDd, onHold } from './menu.js';
 import { track } from './log.js';
 
 // Each family's medallion: the card whose animal reads clearest at 40 px (chosen side by side at that size).
-const FAMILIES = [['Cat', 'lion'], ['Canine', 'clarion'], ['Rodent', 'chinchilla'], ['Colony', 'worker_bee'], ['Bird', 'andean_condor'],
+const FAMILIES = [['Cat', 'lion'], ['Canine', 'wolf_legend_3'], ['Rodent', 'chinchilla'], ['Colony', 'worker_bee'], ['Bird', 'andean_condor'],
   ['Snake', 'viper'], ['Bear', 'polar_bear'], ['Hoofed', 'rhinoceros'], ['Fish', 'sardine'], ['Primate', 'gorilla'], ['Arachnid', 'tarantula'],
   ['Lizard', 'chameleon']];
 const DECKS_MAX = 20;   // as the server's profiles.DECKS_MAX

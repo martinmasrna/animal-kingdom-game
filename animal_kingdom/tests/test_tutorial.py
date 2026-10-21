@@ -29,7 +29,7 @@ def test_the_forced_turns_play_out_as_the_lessons_say():
         m.act("A", a)
     while m.to_act() == "B":
         m.act("B", m.bot_move())
-    assert _board(m)["5,2"] == [("B", "rusty")] and _board(m)["4,2"] == [("B", "pup")]
+    assert _board(m)["5,2"] == [("B", "baby_fox_2")] and _board(m)["4,2"] == [("B", "pup")]
     m.act("A", PlaceAction("tutorial_dire_wolf", ("cr", "1,1"))); m.act("A", PlaceAction("tutorial_cape_buffalo", ("cr", "2,1")))   # the region, closed
     assert m.state.food["A"] == 10, "it pays as the turn ends"
     while m.to_act() == "B":

@@ -284,7 +284,7 @@ def test_rattlesnake_grows_from_ravens_two_shuffles():
 def test_giants_land_brutus_to_clear_the_den_front():
     # Brutus clears every adjacent animal. Placing it on the connected HQ front next to the
     # enemy chain wipes the enemy off A's den front.
-    s = make_state(current="A", hands={"A": ["brutus"]},
+    s = make_state(current="A", hands={"A": ["rhinoceros_legend"]},
                    decks={"A": ["mouse"] * 3, "B": ["mouse"] * 4},
                    food={"A": 30, "B": 0}, config=TWO_ACTION)
     put(s, "1,1", "lion", "A")      # connects the HQ front
@@ -292,7 +292,7 @@ def test_giants_land_brutus_to_clear_the_den_front():
         put(s, cr, "mouse", "B")     # genuine connected enemy chain to A's HQ
     bot = small_turn()
     play_turn(bot, s)
-    assert "brutus" in own_ids(s, "A")
+    assert "rhinoceros_legend" in own_ids(s, "A")
     top = s.top_unit("1,2")
     assert top is None or top.owner == "A"                # enemy on A's HQ front neutralized
 

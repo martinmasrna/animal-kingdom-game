@@ -14,6 +14,7 @@ import re
 from pathlib import Path
 
 from ..engine.cards import load_cards
+from .renamed import RENAMED_IDS
 
 NEWS_DIR = Path(__file__).resolve().parent / "news"
 GROUPS = ("Rules", "Keywords", "Cards", "Interface", "Fixed")
@@ -32,6 +33,7 @@ def parse(path: Path, cards: dict) -> dict:
     # a name the tutorial, a token or the reserve shares (the tutorial's Cape Buffalo) means the collection's card
     by_name = {c.name.lower(): cid for cid, c in sorted(cards.items(), key=lambda kv: kv[1].collectible)}
     by_name.update({cid.lower(): cid for cid in cards})
+    by_name.update({old: new for old, new in RENAMED_IDS.items() if new in cards and old not in by_name})   # a release written before an id changed
     rid = path.stem
     try:
         day = datetime.date.fromisoformat(rid)

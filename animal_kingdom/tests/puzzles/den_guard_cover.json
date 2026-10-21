@@ -39,7 +39,7 @@
   ],
   "5,1": [
    {
-    "card_id": "big_gus",
+    "card_id": "capybara_legend",
     "owner": "B",
     "iid": 3,
     "placed_on_turn": 2,
@@ -190,13 +190,13 @@
    "squirrel",
    "gopher",
    "groundhog",
-   "scrooge",
+   "chipmunk_legend",
    "chipmunk",
    "meerkat",
    "squirrel",
    "muskrat",
    "groundhog",
-   "barley",
+   "rat_legend",
    "beaver",
    "dormouse",
    "flying_squirrel",
@@ -240,10 +240,10 @@
    "zebra_legend"
   ],
   "B": [
-   "big_gus",
+   "capybara_legend",
    "macaque_legend",
-   "barley",
-   "scrooge",
+   "rat_legend",
+   "chipmunk_legend",
    "flying_squirrel",
    "flying_squirrel",
    "meerkat",

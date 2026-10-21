@@ -19,6 +19,7 @@ from ..engine.config import Config
 from ..engine.state import EngineError, new_game, other_player
 from ..engine.strength import placement_strength
 from .match import Match, Seat
+from .renamed import renamed
 
 
 class ReplayError(ValueError):
@@ -51,7 +52,7 @@ def series_games(log_dir: Path, match_id: str, series: int) -> list[dict]:
     """The logged games of one series (a match, or one of its rematches; best-of-3 once), in order."""
     games = []
     for path in sorted(log_dir.glob(f"web_*_{match_id}.jsonl")):
-        games += [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        games += [renamed(json.loads(line)) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
     n = -1
     out = []
     for g in games:
