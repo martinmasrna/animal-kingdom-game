@@ -2,7 +2,7 @@
 
 > The safe place is where he hunts.
 
-Legendary, Savanna, strength 6. Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength (Martin, 2026-10-20; wired in 2026-10-21). Name: open.
+Legendary, Savanna, strength 5. Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength (Martin, 2026-10-20; wired in 2026-10-21). Name: open.
 
 Internal: a legend is the card's character for naming and art, told from the animals' point of view. No player ever sees this text.
 

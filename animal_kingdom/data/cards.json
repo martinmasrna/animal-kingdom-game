@@ -420,7 +420,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 6,
+      "base_strength": 5,
       "text": "Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength.",
       "keywords": [
         "Apex Predator",
@@ -480,7 +480,7 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 7,
+      "base_strength": 6,
       "text": "Apex Predator. Roam.",
       "keywords": [
         "Apex Predator",

@@ -143,11 +143,11 @@ The pack that roams the board, buffs itself on the board (Primates buff in hand)
 
 | Card | Habitat | Rarity | Str | Text |
 |---|---|---|---:|---|
-| legendary Leopard (name to come; Cat) | Savanna | L | 7 | Apex Predator. Roam. Reach. (Drops onto its prey from a tree, then waits: landing by Reach leaves it unconnected, so it roams again once the chain reaches it.) |
+| legendary Leopard (name to come; Cat) | Savanna | L | 5 | Apex Predator. Roam. Reach. (Drops onto its prey from a tree, then waits: landing by Reach leaves it unconnected, so it roams again once the chain reaches it.) |
 | Clarion | Forest | L | 5 | Once each turn, one of your Canines can roam for free. (The deck is short of actions, not cards.) |
 | Lobo | Forest | L | 6 | Whenever one of your animals roams onto an enemy, draw a card. (The wolf king feeds the pack; bounded by one roam per animal per turn.) |
 | legendary wolf (name to come) | Forest | L | 4 | Roam. When this roams, your animals next to it gain +2 strength. |
-| Orca | Open Ocean | R | 7 | Apex Predator. Roam. (The wolf of the sea; it eats with every roam, so its strength is the dial.) |
+| Orca | Open Ocean | R | 6 | Apex Predator. Roam. (The wolf of the sea; it eats with every roam, so its strength is the dial.) |
 | African Wild Dog | Savanna | R | 4 | Roam. Whenever this covers an enemy, draw a card. (The most successful hunter. Rare, not common: three copies would keep one on the board in every game against decks of small animals.) |
 | Jackal | Savanna | R | 4 | Roar: remove an adjacent enemy that has another of your Canines next to it. |
 | Dhole | Jungle | R | ~6 | Roam. Your animals can roam onto enemies of equal strength. (Dhole packs take prey bigger than themselves.) |

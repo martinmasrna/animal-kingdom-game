@@ -1980,9 +1980,9 @@
         "prev_note": "",
         "prev": 8
       },
-      "note": "Martin, 2026-10-20: 6 with growth on every kill; a leopard is no lion (the Lion is the vanilla 7)",
+      "note": "Martin, 2026-10-21: starts in reach of the Black Mamba; grows from there",
       "by": "claude",
-      "at": 1792567456
+      "at": 1792608627
     },
     "effect": {
       "review": {
@@ -2468,6 +2468,16 @@
       "note": "Martin, 2026-10-18: keeps the current Orca painting after seeing eight underwater alternatives.",
       "by": "claude",
       "at": 1792276047
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 7
+      },
+      "note": "Martin, 2026-10-21: 7 was too hard to answer for a repeat eater",
+      "by": "claude",
+      "at": 1792608627
     }
   },
   "owl": {
