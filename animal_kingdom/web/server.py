@@ -1067,7 +1067,11 @@ async def create_match(req):
             raise web.HTTPBadRequest(text="bad gauntlet")
         # The player's deck is no opponent, even sent as a custom list identical to a premade (the mirror isn't a test).
         mine = sorted(load_premade_deck(deck))
-        field = [d for d in sorted(DECK_SLUGS) if d != deck and d not in skip and sorted(PREMADE_DECKS[d]) != mine]
+        wanted = gauntlet.get("decks")       # an explicit field (any shipped deck, the bots' own included), else the starters
+        if wanted is not None and (not isinstance(wanted, list) or not all(d in PREMADE_DECKS for d in wanted)):
+            raise web.HTTPBadRequest(text="bad gauntlet field")
+        field = [d for d in (wanted if wanted is not None else sorted(DECK_SLUGS))
+                 if d != deck and d not in skip and sorted(PREMADE_DECKS[d]) != mine]
         if not field:
             raise web.HTTPBadRequest(text="empty gauntlet")
         match.join(Seat(secrets.token_urlsafe(12), f"{ranking.PILOT_BAND[level]} Bot", bot=level, deck=field[0]))

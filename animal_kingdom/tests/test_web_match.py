@@ -618,3 +618,24 @@ def test_the_studies_list_shows_a_player_only_their_own(monkeypatch, tmp_path):
             names = [s["name"] for s in await (await c.get("/api/studies", headers={"X-AK-Key": a["code"]})).json()]
             assert names == ["mine", "open"]
     asyncio.run(run())
+
+
+def test_a_gauntlet_can_name_its_field(monkeypatch, tmp_path):
+    """#/gauntlet?decks=a,b (Martin, 2026-10-21: his deck against the three piles): the field is exactly those decks, the bots'
+    own included; an unknown deck is refused."""
+    import asyncio
+    from aiohttp.test_utils import TestClient, TestServer
+    from animal_kingdom.web import custom_decks, server
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    monkeypatch.setattr(custom_decks, "DECKS_FILE", tmp_path / "web_decks.json")
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a = await (await c.post("/api/profile", json={})).json()
+            body = {"deck": "cats", "gauntlet": {"level": "expert", "per_seat": 1, "decks": ["bot_optimized", "optimizer_1", "optimizer_4"]}}
+            m = await (await c.post("/api/match", json=body, headers={"X-AK-Key": a["code"]})).json()
+            sched = server.hub.matches[m["id"]].schedule
+            assert [g["deck"] for g in sched] == ["bot_optimized"] * 2 + ["optimizer_1"] * 2 + ["optimizer_4"] * 2
+            body["gauntlet"]["decks"] = ["nope"]
+            assert (await c.post("/api/match", json=body, headers={"X-AK-Key": a["code"]})).status == 400
+    asyncio.run(run())

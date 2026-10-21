@@ -189,7 +189,10 @@ function route() {
   if (parts[0] !== 'replay') stopReplay();
   play.open = null;   // a chooser never outlives its screen
   if (parts[0] === 'play') { history.replaceState(null, '', '#/'); return homeScreen(); }   // the old Play screen's address
-  if ((parts[0] || '').split('?')[0] === 'gauntlet') return homeScreen({ gauntlet: true });   // #/gauntlet?skip=a,b&games=2 narrows the field
+  if ((parts[0] || '').split('?')[0] === 'gauntlet') {   // #/gauntlet?skip=a,b&games=2 narrows the field; ?decks=a,b names it; ?level= picks the bot
+    const lv = new URLSearchParams(location.hash.split('?')[1] || '').get('level'); if (lv && BANDS.includes(lv)) play.level = lv;
+    return homeScreen({ gauntlet: true });
+  }
   if (parts[0] === 'collection') return collectionScreen(parts[1]);
   showChallenge();   // a challenge waiting while a match was in play shows once you're out of it
   if (parts[0] === 'leaderboard' || parts[0] === 'profile') { history.replaceState(null, '', '#/ladder' + (parts[1] ? '/' + parts[1] : '')); parts[0] = 'ladder'; }   // the old addresses
@@ -331,6 +334,8 @@ function homeScreen(mode = {}) {
       const q = new URLSearchParams(location.hash.split('?')[1] || '');
       body.gauntlet = { level: play.level, reverse: play.side === 'theirs' };
       if (q.get('skip')) body.gauntlet.skip = q.get('skip').split(',');
+      if (q.get('decks')) body.gauntlet.decks = q.get('decks').split(',');       // #/gauntlet?decks=a,b: exactly this field (Martin, 2026-10-21: the three piles)
+      if (q.get('level')) body.gauntlet.level = q.get('level');
       if (q.get('games')) body.gauntlet.per_seat = Math.max(1, Math.round(+q.get('games') / 2));   // games per deck, half going first
     }
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
@@ -403,7 +408,8 @@ async function settingsScreen() {
   // The studies this account may open (a developer's tool, Martin 2026-10-21): listed here so a phone's bookmark reaches them.
   api('/api/studies').then(r => r.ok ? r.json() : []).then(list => {
     const cr = document.querySelector('.credits'); if (!cr || !list.length || screen !== 'settings') return;
-    cr.insertAdjacentHTML('beforebegin', `<div class="studies"><h3>Studies</h3>${list.map(s => `<a class="slab" href="#/study/${esc(s.name)}">${esc(s.title)} <small>${s.count}</small></a>`).join('')}</div>`);
+    cr.insertAdjacentHTML('beforebegin', `<div class="studies"><h3>Studies</h3>${list.map(s => `<a class="slab" href="#/study/${esc(s.name)}">${esc(s.title)} <small>${s.count}</small></a>`).join('')}
+      <a class="slab" href="#/gauntlet?decks=bot_optimized,optimizer_1,optimizer_4&level=Expert&games=6">The three piles, Expert <small>18 games</small></a></div>`);
   }).catch(() => {});
   const r = await fetch(CREDITS_URL).catch(() => null), t = r && r.ok ? await r.text() : '';
   const el = document.getElementById('credits'); if (el) el.textContent = t.trim();
