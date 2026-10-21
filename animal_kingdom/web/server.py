@@ -35,7 +35,7 @@ from . import oauth
 from .profiles import ProfileError, Profiles
 from . import replay
 from . import tutorial
-from .match import BOT_LEVELS, DECK_NAMES, STARTER_COVERS, Match, Seat, card_pool, map_info
+from .match import BOT_LEVELS, DECK_NAMES, MAP_ID, STARTER_COVERS, Match, Seat, card_pool, map_info
 from . import discord
 
 CARDS = load_cards()
@@ -120,8 +120,9 @@ class Hub:
             except Exception:
                 log.exception("could not reload %s", path.name)
                 continue
-            match.on_game_end = save_game
-            match.on_match_end = record_match
+            if not match.takeover:
+                match.on_game_end = save_game
+                match.on_match_end = record_match
             self.matches[match.id] = match
         log.info("reloaded %d saved matches", len(self.matches))
 
@@ -917,8 +918,79 @@ async def pool(_req):
     })
 
 
+def find_log(key: str, series: int, game) -> dict | None:
+    """The logged game `game` (the last of the series when None) of match `key`'s series `series`, from LOG_DIR."""
+    found = None
+    for path in sorted(LOG_DIR.glob(f"web_*_{key}.jsonl")):
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            rec = json.loads(line)
+            if rec.get("series", 0) != series or (game is not None and rec.get("game_no") != game):
+                continue
+            found = rec
+    return found
+
+
+def position_at(rec: dict, rnd: int, seat: str):
+    """The logged game replayed to the start of `seat`'s turn in round `rnd` (a clone), or None if it never came."""
+    from ..engine.actions import SKIP, ChoiceAction
+    from ..engine.config import Config
+    from ..engine.state import new_game
+    lists = rec.get("lists")
+    if not lists:
+        return None
+    state = new_game(list(lists[0]), list(lists[1]), rec["seed"], map_id=rec.get("map_id", MAP_ID),
+                     config=Config.default().for_log(rec), first_player=rec["first_player"])
+    for adict in rec["actions"]:
+        while state.pending is not None and state.effect_stack[-1].get("op") == "mulligan" and adict["kind"] != "choice":
+            rules.apply_action(state, ChoiceAction(SKIP))     # a log from before the mulligan rule
+        if state.pending is None and rules.is_terminal(state) is None and state.player_to_act() == seat \
+                and state.turn_counter // 2 + 1 == rnd:
+            return state.clone()
+        rules.apply_logged(state, adict)
+    return None
+
+
+async def takeover_match(req, src: dict):
+    """Play on from a position in one of your logged games, in the other seat, the Expert playing your old one. Martin,
+    2026-10-21: "what would you do as the bot here?", asked on the real board instead of a rendering. The game is
+    neither logged nor rated (Match.takeover)."""
+    p = me(req)
+    try:
+        key, series, rnd = str(src.get("match", "")), int(src.get("series", 0)), int(src.get("round", 0))
+    except (TypeError, ValueError):
+        raise web.HTTPBadRequest(text="bad position")
+    if not profiles.match(p["id"], f"{key}-{series}"):
+        raise web.HTTPNotFound(text="Not one of your matches")
+    rec = find_log(key, series, src.get("game"))
+    if rec is None:
+        raise web.HTTPNotFound(text="This game wasn't kept")
+    seat = src.get("seat")
+    if seat not in ("A", "B"):
+        seat = "A" if rec["bots"][0] != "human" else "B"       # the seat that wasn't yours
+    state = position_at(rec, rnd, seat)
+    if state is None:
+        raise web.HTTPBadRequest(text=f"Round {rnd} has no turn of that seat")
+    for slug, lst in zip((rec["deck_a"], rec["deck_b"]), rec["lists"]):
+        if slug not in DECK_NAMES:      # a custom deck this server no longer knows: registered under its logged slug
+            custom_decks._register(slug, "Their deck", sorted(lst))
+    mid, token = hub.new_id(), secrets.token_urlsafe(12)
+    other = "B" if seat == "A" else "A"
+    seats = {seat: Seat(token, display(p), profile=p["id"]), other: Seat(secrets.token_urlsafe(12), "Expert Bot", bot="expert")}
+    match = Match(mid, seats["A"])
+    match.join(seats["B"])              # no decks yet, so the match does not start on its own
+    match.seats["A"].deck, match.seats["B"].deck = rec["deck_a"], rec["deck_b"]
+    match.start_from(state, rec["seed"])
+    hub.matches[mid] = match
+    hub.save(match)
+    return web.json_response({"id": mid, "token": token, "seat": seat})
+
+
 async def create_match(req):
     body = await req.json()
+    if body.get("from"):
+        return await takeover_match(req, body["from"])
     try:
         lesson = int(body.get("tutorial") or 0)    # the tutorial's lesson: 1 or 2
         if lesson not in (0, *tutorial.BOTS):

@@ -524,3 +524,44 @@ def test_the_remove_pile_and_a_card_choice_show_each_card_at_its_strength_now():
     pile = m.view("A")["game"]["pile"]
     assert {"id": "python", "owner": "A", "str": grown} in pile and {"id": "lion", "owner": "B", "str": 7} in pile
     assert m._describe_option("python", "A") == {"v": "python", "kind": "card", "id": "python", "str": grown}
+
+
+def test_play_from_here_seats_you_in_the_other_chair_at_that_round(monkeypatch, tmp_path):
+    """Martin, 2026-10-21: "what would you do as the bot here?" asked on the real board. From a replay, 'Play from here'
+    rebuilds the logged game at the start of the other seat's turn in the round shown, seats you there with the Expert on
+    your old deck, and the game is neither logged nor rated. The log here is his game GMIDKA (the Falcons in the front)."""
+    import asyncio, shutil
+    from aiohttp.test_utils import TestClient, TestServer
+    from animal_kingdom.web import custom_decks, server
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    monkeypatch.setattr(custom_decks, "DECKS_FILE", tmp_path / "web_decks.json")
+    logs = tmp_path / "logs"; logs.mkdir()
+    src = next(p for p in (server.LOG_DIR).glob("web_*_GMIDKA.jsonl"))
+    shutil.copy(src, logs / src.name)
+    monkeypatch.setattr(server, "LOG_DIR", logs)
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a = await (await c.post("/api/profile", json={})).json()
+            monkeypatch.setattr(server.profiles, "match", lambda pid, key: {"seat": "A"} if key == "GMIDKA-0" else None)   # his match
+            r = await c.post("/api/match", json={"from": {"match": "GMIDKA", "series": 0, "round": 4, "seat": "B"}}, headers={"X-AK-Key": a["code"]})
+            assert r.status == 200, await r.text()
+            m = await r.json()
+            assert m["seat"] == "B"
+            match = server.hub.matches[m["id"]]
+            st = match.state
+            assert match.takeover and match.on_game_end is None and match.phase == "playing"
+            assert st.turn_counter // 2 + 1 == 4 and st.player_to_act() == "B" and st.pending is None
+            assert not match.seats["B"].is_bot and match.seats["A"].bot == "expert" and "A" in match.bots
+            assert {c.card_id for c in st.hands["B"]} == {"leopard_legend", "orca", "honey_badger", "locust"}
+            view = match.view("B")
+            assert view["you"] == "B" and view["phase"] == "playing"
+            # a round with no turn of that seat is refused; a stranger's match is not found
+            r = await c.post("/api/match", json={"from": {"match": "GMIDKA", "series": 0, "round": 40, "seat": "B"}}, headers={"X-AK-Key": a["code"]})
+            assert r.status == 400
+            r = await c.post("/api/match", json={"from": {"match": "GMIDKA", "series": 1, "round": 6}}, headers={"X-AK-Key": a["code"]})
+            assert r.status == 404
+            # the flag survives a restart
+            again = type(match).from_dict(match.to_dict())
+            assert again.takeover
+    asyncio.run(run())
