@@ -1,7 +1,7 @@
 """Golden tests for the pure-OTK food_otk overhaul (2026-07-05).
 
 Covers the signature mechanic ("food gained this turn") and its cards (Food Aggro's since the launch decks): Barley,
-Scrooge, Beaver (bonus action), Hedgehog, Gopher, Muskrat, Groundhog, and the Armadillo Stealth aura. Map A geometry
+Scrooge, Beaver (bonus action), Hedgehog, Gopher, Muskrat, Groundhog, and the Armadillo and Porcupine auras. Map A geometry
 (4x3): "2,2" neighbours "1,2","3,2","2,1","2,3"; A's HQ fronts column 1, B's column 4.
 """
 
@@ -108,10 +108,10 @@ def test_rat_king_gains_food_per_other_rodent_and_draws():
     assert "lion" in hand_ids(s, "A")                                 # drew 1
 
 
-def test_hedgehog_feeds_and_its_spines_remove_the_first_coverer():
+def test_hedgehogs_spines_remove_the_first_coverer():
     s = make_state(hands={"A": ["hedgehog"]})
     rules.apply_action(s, PlaceAction("hedgehog", ("cr", "1,2")))
-    assert s.food["A"] == CFG.hedgehog_food
+    assert s.food["A"] == 0                                             # the Spikes common: no food Roar (2026-10-21)
 
     s = make_state(current="B", hands={"B": ["lion"]})
     put(s, "4,2", "caracal", "B")                                       # B connects to 3,2
@@ -138,15 +138,15 @@ def test_beaver_grants_an_extra_action_next_turn():
     assert s.turn_counter == before + 1                              # ended only after the 3rd
 
 
-# ------------------------------------------------------------------- Armadillo aura
+# ------------------------------------------------------------------- Armadillo and Porcupine auras
 
 def test_armadillo_shields_adjacent_ally_from_targeted_removal():
     s = make_state(current="B", hands={"B": ["jaguar"]})
     put(s, "4,2", "lion", "B")                                        # connects B's 3,2
     put(s, "2,2", "squirrel", "A")                                    # str 3, a jaguar target (<=4)
-    put(s, "2,1", "armadillo", "A")                                   # adjacent -> grants Stealth
+    put(s, "2,1", "armadillo", "A")                                   # adjacent -> grants Armor
     rules.apply_action(s, PlaceAction("jaguar", ("cr", "3,2")))
-    assert s.pending is None                                          # no legal target: it's sheltered
+    assert s.pending is None                                          # nothing it can remove: it's shielded
     assert s.owner_of("2,2") == "A"
 
 
@@ -158,3 +158,22 @@ def test_armadillo_absent_the_ally_is_removable():
     if s.pending is not None:
         rules.apply_action(s, ChoiceAction("2,2"))
     assert s.owner_of("2,2") is None                                 # removed without the shield
+
+
+def test_armadillo_shields_adjacent_ally_from_mass_removal_too():
+    # Armor, not Stealth (2026-10-21): an effect that picks nobody still can't remove it.
+    s = make_state(current="B")
+    put(s, "2,2", "squirrel", "A")
+    put(s, "2,1", "armadillo", "A")
+    assert not statics.can_be_removed(s, s.top_unit("2,2"), "2,2")
+
+
+def test_porcupine_gives_its_neighbours_spikes_each_kills_its_first_coverer():
+    s = make_state(current="B", hands={"B": ["lion", "lion"]})
+    put(s, "4,2", "caracal", "B")                                     # B connects to 3,2
+    squirrel = put(s, "3,2", "squirrel", "A")
+    put(s, "3,1", "porcupine", "A")                                   # adjacent -> grants Spikes
+    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))         # 7 covers 3...
+    assert s.top_unit("3,2") is squirrel and "lion" in s.remove_pile  # ...and the borrowed spines remove it
+    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))         # spent: the second cover holds
+    assert s.top_unit("3,2").card_id == "lion"

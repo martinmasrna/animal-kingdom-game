@@ -3069,7 +3069,6 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "squirrel_legend": {"on_place": _otk_squirrel_place},
     "octopus_legend": {"on_place": _mimic_place},
     "golden_orb_weaver": {"on_enemy_placed_adjacent": _orb_weaver_enemy_placed},
-    "hedgehog": {"on_place": _gains("hedgehog_food")},
     "black_bear": {"on_place": _black_bear_place},
     "grizzly_bear": {"on_place": _grizzly_place},
     "tortoise": {"on_place": _tortoise_place},

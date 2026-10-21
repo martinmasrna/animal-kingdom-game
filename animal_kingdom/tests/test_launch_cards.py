@@ -717,7 +717,8 @@ def test_the_mimic_octopus_becomes_a_copy_of_an_adjacent_animal_but_not_its_roar
     rules.apply_action(s, PlaceAction("octopus_legend", ("cr", "1,2")))
     choose(s, "2,2")
     me = s.top_unit("1,2")
-    assert me.card_id == "porcupine" and effective_strength(s, me) == 8 and "Spikes" in statics.unit_keywords(s, me)
+    base = s.cards["porcupine"].base_strength
+    assert me.card_id == "porcupine" and effective_strength(s, me) == base + 1 and "Spikes" in statics.unit_keywords(s, me)
     s2 = make_state(hands={"A": ["octopus_legend"]})
     put(s2, "2,2", "squirrel", "A")
     rules.apply_action(s2, PlaceAction("octopus_legend", ("cr", "1,2")))

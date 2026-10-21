@@ -323,7 +323,7 @@ def test_reach_never_captures_a_den():
 def test_reach_covering_still_needs_greater_strength():
     s = state(hands={"A": ["t_reach_big"]})                # strength 6
     put(s, "2,1", "t_body", "B")                        # 4: it covers
-    put(s, "2,3", "porcupine", "B")                     # 7: it can't
+    put(s, "2,3", "lion", "B")                          # 7: it can't
     targets = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction)}
     assert "2,1" in targets and "2,3" not in targets and "2,2" in targets
 

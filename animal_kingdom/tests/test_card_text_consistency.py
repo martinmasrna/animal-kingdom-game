@@ -47,7 +47,6 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "squirrel": ["squirrel_food"],
     "chipmunk": ["chipmunk_food_now", "chipmunk_food_later"],
     "tutorial_chipmunk": ["chipmunk_food_now", "chipmunk_food_later"],
-    "hedgehog": ["hedgehog_food"],
     "groundhog": ["groundhog_food"],
     "gazelle": ["gazelle_food"],
     "scrooge": ["scrooge_food_per"],

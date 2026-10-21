@@ -919,11 +919,11 @@
       "id": "black_panther",
       "name": "Black Panther",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Cat"
       ],
-      "base_strength": 7,
+      "base_strength": 6,
       "text": "Stealth.",
       "keywords": [
         "Stealth"
@@ -1489,13 +1489,13 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 7,
-      "text": "Spikes.",
+      "base_strength": 5,
+      "text": "Spikes. Your adjacent animals have Spikes.",
+      "species": "Porcupine",
+      "habitat": "Forest",
       "keywords": [
         "Spikes"
-      ],
-      "species": "Porcupine",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "golden_orb_weaver",
@@ -1517,13 +1517,13 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 7,
-      "text": "Armor. Your adjacent animals have Stealth.",
+      "base_strength": 5,
+      "text": "Armor. Your adjacent animals have Armor.",
+      "species": "Armadillo",
+      "habitat": "Jungle",
       "keywords": [
         "Armor"
-      ],
-      "species": "Armadillo",
-      "habitat": "Jungle"
+      ]
     },
     {
       "id": "hedgehog",
@@ -1532,12 +1532,12 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 5,
-      "text": "Spikes. Roar: gain 5 food.",
+      "text": "Spikes.",
+      "species": "Hedgehog",
+      "habitat": "Meadow",
       "keywords": [
         "Spikes"
-      ],
-      "species": "Hedgehog",
-      "habitat": "Meadow"
+      ]
     },
     {
       "id": "dart_frog",

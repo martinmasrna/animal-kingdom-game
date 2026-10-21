@@ -55,8 +55,9 @@ def crossroad_of(state: GameState, unit: UnitInstance) -> Optional[str]:
 
 # Auras that give an adjacent ally a keyword: card id -> (keyword, the family it's limited to, or None).
 KEYWORD_AURAS = {
-    "armadillo": ("Stealth", None),               # "Your adjacent animals have Stealth."
-    "capybara": ("Armor", None),                  # "Your adjacent animals have Armor."
+    "armadillo": ("Armor", None),                 # "Armor. Your adjacent animals have Armor."
+    "porcupine": ("Spikes", None),                # "Spikes. Your adjacent animals have Spikes."
+    "capybara": ("Armor", None),                  # "Your adjacent animals have Armor." (its redesign is open)
     "jellyfish_legend": ("Poison", "Fish"),  # "Your adjacent Fish have Poison."
 }
 
@@ -72,7 +73,7 @@ def unit_keywords(state: GameState, unit: UnitInstance, cr: Optional[str] = None
         return kws
     at = crossroad_of(state, unit)
     buried = not as_top and at is not None and state.top_unit(at) is not unit   # Armor and Stealth reach the top animal only (rulings.md);
-    cr = cr if cr is not None else at                             # Poison is judged as the Fish is covered, so it reaches it
+    cr = cr if cr is not None else at                             # Poison and Spikes are judged as the animal is covered, so they reach it
     if cr is None:
         return kws
     extra = set()
@@ -81,7 +82,7 @@ def unit_keywords(state: GameState, unit: UnitInstance, cr: Optional[str] = None
         if top is None or top.owner != unit.owner or top.card_id not in KEYWORD_AURAS or not active(state, top):
             continue
         kw, family = KEYWORD_AURAS[top.card_id]
-        if buried and kw != "Poison":
+        if buried and kw not in ("Poison", "Spikes"):
             continue
         if family is None or family in card.tags:
             extra.add(kw)

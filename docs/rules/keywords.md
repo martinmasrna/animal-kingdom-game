@@ -22,17 +22,17 @@ As an action, this moves through your own animals connected to it (its pack), th
 ### Armor
 A shell, plates or spines: cannot be removed, returned to hand, or eaten by **any** ability — the enemy's **or its own controller's**. It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an animal with Armor; when it removes a stack, a buried unit with Armor is skipped **in place** and everything else is still removed. Armor is not a shield for the cards beneath it. Scope is **board-only**: a card with Armor in hand can be paid or removed normally.
 
-Carried by: Azamandulai the tortoise and the Glyptodont (Ramp); Armadillo (Food). Only animals a player sees as armored carry it on their own card (Capybara, proposed, gives it to its neighbours: it shields them, it doesn't make them look armored); the spiny ones (Porcupine, Hedgehog) remove the first enemy that covers them instead.
+Carried by: Azamandulai the tortoise and the Glyptodont (Ramp); the Stag Beetle, the keyword's common; the Armadillo, which also gives it to your adjacent animals (the Capybara gives it too, until its redesign). Only animals a player sees as armored carry it on their own card; the spiny ones (Porcupine, Hedgehog) remove the first enemy that covers them instead.
 
 ### Stealth
 Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis). **Mass, random, and automatic effects hit it normally**, and so does an Apex Predator's eat (a predator eats what it lands on; nobody chooses): Rhinoceros/Brutus AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron triggers. Its own controller may still choose it freely. Scope is board-only.
 
-Carried by: Black Panther. Armadillo gives it to every friendly unit on an adjacent crossroad while Armadillo tops its own.
+Carried by: Black Panther, the keyword's common.
 
 ### Spikes
 The first time an enemy covers it, that enemy is removed (a remove, so Armor resists it). Once per animal: the first enemy cover spends them even when nothing is removed (an Armor coverer stays, and the Spikes are gone all the same; Martin, 2026-10-17), so a Spikes animal that has been covered by an enemy is an ordinary animal from then on, and its badge on the board goes. Covering is placement, so the coverer's own Roar resolves first, then the spikes (and an Apex Predator landing on it is removed before it can eat). A friendly cover doesn't set it off.
 
-Carried by: Porcupine and Hedgehog (Food).
+Carried by: the Hedgehog, the keyword's common; the Porcupine, which also gives it to your adjacent animals.
 
 ### Poison (proposed, 2026-10-07)
 When an enemy covers it, that enemy is removed at the start of your next turn. Every time, not once: the coverer gets the rest of the turn it covered in, then dies and the poisoned animal resurfaces, cutting whatever chain the opponent built through that crossroad. Like venom (§9.1 of `overview.md`), the poison belongs to the coverer: it resolves even if the Poison animal is gone by then, and is cancelled only if the coverer leaves the board first. An Apex Predator landing on it is poisoned and still eats it. A friendly cover doesn't set it off. The clean answer is a removal ability; Poison doesn't stop a two-action walk-in (cover, then take the den), so it guards crossroads the opponent can't win through in one turn. Unlike Spikes (at once, the first time only), it never wears off.

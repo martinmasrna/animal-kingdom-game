@@ -58,13 +58,13 @@ def test_conceding_loses_the_game_and_ends_the_match():
 
 
 def test_the_view_marks_units_the_enemy_cannot_choose():
-    """An Armadillo's neighbours have Stealth; the board must say so, or a Viper or Taipan that finds no
-    target looks broken (Martin's game 2026-09-30: Groundhog and Scrooge next to Armadillos)."""
+    """A Stealth animal is marked on the board, or a Viper or Taipan that finds no target looks broken (Martin's game
+    2026-09-30: Groundhog and Scrooge next to the Armadillo, whose aura gave Stealth then)."""
     from animal_kingdom.engine.state import UnitInstance
     m = Match("T", Seat("ta", "A", deck="giants"))
     m.join(Seat("tb", "B", deck="giants")); m.ready("A"); m.ready("B")
     st = m.state
-    st.board = {"4,2": [UnitInstance("armadillo", "B", 901)], "4,1": [UnitInstance("groundhog", "B", 902)],
+    st.board = {"4,1": [UnitInstance("black_panther", "B", 902)],
                 "2,1": [UnitInstance("groundhog", "B", 903)]}
     board = m.view("A")["game"]["board"]
     assert board["4,1"][0].get("hidden") and not board["2,1"][0].get("hidden")
