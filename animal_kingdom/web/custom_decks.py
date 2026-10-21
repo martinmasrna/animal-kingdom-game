@@ -11,6 +11,7 @@ from pathlib import Path
 from ..decks import PREMADE_DECKS, decklist_problems, register_deck
 from ..engine.state import EngineError
 from .match import DECK_NAMES
+from .renamed import renamed
 
 DECKS_FILE = Path(__file__).resolve().parents[2] / "results" / "web_decks.json"
 _saved: dict[str, dict] = {}
@@ -23,9 +24,11 @@ def _register(slug: str, name: str, decklist: list[str]) -> None:
 
 
 def load() -> None:
+    # A deck saved before a card's id changed loads in the new ids, like a player's own decks and the game logs do:
+    # the match view hands its list to the client, which knows only today's ids (Martin's study of 2026-10-22, blank).
     if DECKS_FILE.is_file():
         for slug, d in json.loads(DECKS_FILE.read_text(encoding="utf-8")).items():
-            _register(slug, d["name"], d["list"])
+            _register(slug, d["name"], renamed(d["list"]))
 
 
 def resolve(spec) -> str:

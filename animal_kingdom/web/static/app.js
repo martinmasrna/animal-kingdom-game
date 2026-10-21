@@ -963,6 +963,7 @@ function drawIntro() {
   if (V.phase !== 'playing' || !G || G.history.length || isTutorial() || RP.views.length || !V.id || ui.intro === key) return;
   ui.intro = key;
   const side = p => { const s = V.seats[p] || {}, list = Object.keys(V.lists[p] || {}), mine = p === V.you;
+    adoptRetired(list);   // a list from an old log may name a card this build no longer has; the cover must not stop the screen
     const own = mine && playable().find(d => d.id === s.deck || d.id === 'my:' + s.deck);
     const cover = own ? coverFor(own) : COVER[s.deck] || coverOf(list, CARDS);
     // One object per player (Martin, 2026-10-02): their cover card, their name in its bar (yours too: a nameplate, not a
