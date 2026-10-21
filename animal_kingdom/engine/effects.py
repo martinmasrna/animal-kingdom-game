@@ -1313,17 +1313,17 @@ def _op_grant_strength(state, step):
         if _crossroad_of(state, iid) is not None:
             _fire_on_gain_strength(state, inst)
         elif inst in state.hands[inst.owner]:
-            _gain_in_hand(state, inst, amount, step["iids"])
+            _gain_in_hand(state, inst, amount)
     return None
 
 
-def _gain_in_hand(state, inst, amount, granted) -> None:
+def _gain_in_hand(state, inst, amount) -> None:
     """A hand card gained strength: its mate shares it (the Eagles: "While this and its mate are in your hand, they
-    share their strength", so a buff to either counts for both), and a card that reacts to growing in hand does
+    share their strength", so a buff to either counts for both, and one buff to each counts twice for both), and a card that reacts to growing in hand does
     (the legendary Butterfly evolves, the Caterpillar turns into a Butterfly)."""
     mate = state.cards[inst.card_id].mate
     if mate:
-        partner = next((u for u in state.hands[inst.owner] if u.card_id == mate and u.iid not in granted), None)
+        partner = next((u for u in state.hands[inst.owner] if u.card_id == mate), None)
         if partner is not None:
             partner.strength_counter += amount
             state.emit("strength", iid=partner.iid, card=partner.card_id, owner=partner.owner, n=amount)

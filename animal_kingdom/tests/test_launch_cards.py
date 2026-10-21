@@ -831,6 +831,16 @@ def test_the_legendary_eagle_brings_its_mate_and_they_share_every_buff():
     assert eagle.strength_counter == mate.strength_counter == 3
 
 
+def test_a_buff_to_both_eagles_reaches_each_twice():
+    """The legendary Baboon's Dawn on both Eagles: each +1 is shared, so 2 becomes 4, not 3 (Martin, 2026-10-21)."""
+    s = make_state(decks={"A": ["arne"], "B": []})
+    effects.draw_cards(s, "A", 1)
+    eagle, mate = hand_inst(s, "A", "arne"), hand_inst(s, "A", "arna")
+    effects._grant(s, [eagle.iid, mate.iid], 1)
+    effects.resolve(s)
+    assert eagle.strength_counter == mate.strength_counter == 2
+
+
 def test_the_mate_comes_only_when_the_eagle_itself_enters_the_hand():
     s = make_state(decks={"A": ["lion", "lion", "arne"], "B": []})
     effects.draw_cards(s, "A", 1)
