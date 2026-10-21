@@ -198,13 +198,16 @@ class Match:
         self.created = datetime.now(timezone.utc)
         self.schedule: Optional[list[dict]] = None   # gauntlet: one {seat, deck, first} per game, in order
 
-    def make_gauntlet(self, decks: list[str], per_seat: int, rotating: str = "B") -> None:
+    def make_gauntlet(self, decks: list[str], per_seat: int, rotating: str = "B", mirror: bool = False) -> None:
         """A fixed series instead of a best-of-3: `per_seat` games going first and `per_seat` going
         second with each of `decks`, alternating who starts, one deck at a time. The decks rotate
-        through seat `rotating`: the bot's seat for a gauntlet, the player's for a reverse one."""
-        self.schedule = [{"seat": rotating, "deck": d, "first": "A" if k % 2 == 0 else "B"}
+        through seat `rotating`: the bot's seat for a gauntlet, the player's for a reverse one; `mirror` puts
+        both seats on each deck (Martin, 2026-10-21: the skill gap, measured with the deck held equal)."""
+        self.schedule = [{"seat": rotating, "deck": d, "first": "A" if k % 2 == 0 else "B", **({"mirror": True} if mirror else {})}
                          for d in decks for k in range(2 * per_seat)]
         self.seats[rotating].deck = self.schedule[0]["deck"]
+        if mirror:
+            self.seats["A"].deck = self.schedule[0]["deck"]
 
     # ----------------------------------------------------------------- seats
     def seat_of(self, token: str) -> Optional[str]:
@@ -265,6 +268,8 @@ class Match:
         if self.schedule:
             entry = self.schedule[len(self.results)]
             self.seats[entry.get("seat", "B")].deck, first = entry["deck"], entry["first"]
+            if entry.get("mirror"):               # a mirror gauntlet: both seats on the same deck, the pilot the only variable
+                self.seats["A"].deck = entry["deck"]
         elif self.results or self.last_game:
             last = self.results[-1] if self.results else self.last_game
             first = other_player(last["winner"]) if last["winner"] else last["first"]

@@ -638,4 +638,11 @@ def test_a_gauntlet_can_name_its_field(monkeypatch, tmp_path):
             assert [g["deck"] for g in sched] == ["bot_optimized"] * 2 + ["optimizer_1"] * 2 + ["optimizer_4"] * 2
             body["gauntlet"]["decks"] = ["nope"]
             assert (await c.post("/api/match", json=body, headers={"X-AK-Key": a["code"]})).status == 400
+            # a mirror: both seats on each named deck in turn, the chosen deck set aside (the skill gap, deck held equal)
+            body["gauntlet"]["decks"] = ["bot_optimized", "optimizer_1"]; body["gauntlet"]["mirror"] = True
+            m = await (await c.post("/api/match", json=body, headers={"X-AK-Key": a["code"]})).json()
+            match = server.hub.matches[m["id"]]
+            assert all(g["mirror"] for g in match.schedule) and [g["deck"] for g in match.schedule] == ["bot_optimized"] * 2 + ["optimizer_1"] * 2
+            assert match.seats["A"].deck == match.seats["B"].deck == "bot_optimized"
+            assert {u.card_id for u in match.state.hands["A"]} <= set(server.PREMADE_DECKS["bot_optimized"])
     asyncio.run(run())

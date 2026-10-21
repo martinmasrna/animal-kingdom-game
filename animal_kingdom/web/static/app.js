@@ -336,6 +336,7 @@ function homeScreen(mode = {}) {
       if (q.get('skip')) body.gauntlet.skip = q.get('skip').split(',');
       if (q.get('decks')) body.gauntlet.decks = q.get('decks').split(',');       // #/gauntlet?decks=a,b: exactly this field (Martin, 2026-10-21: the three piles)
       if (q.get('level')) body.gauntlet.level = q.get('level');
+      if (q.get('mirror')) body.gauntlet.mirror = true;                          // both seats on each named deck: the pilot is the only variable
       if (q.get('games')) body.gauntlet.per_seat = Math.max(1, Math.round(+q.get('games') / 2));   // games per deck, half going first
     }
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
@@ -409,7 +410,8 @@ async function settingsScreen() {
   api('/api/studies').then(r => r.ok ? r.json() : []).then(list => {
     const cr = document.querySelector('.credits'); if (!cr || !list.length || screen !== 'settings') return;
     cr.insertAdjacentHTML('beforebegin', `<div class="studies"><h3>Studies</h3>${list.map(s => `<a class="slab" href="#/study/${esc(s.name)}">${esc(s.title)} <small>${s.count}</small></a>`).join('')}
-      <a class="slab" href="#/gauntlet?decks=bot_optimized,optimizer_1,optimizer_4&level=Expert&games=6">The three piles, Expert <small>18 games</small></a></div>`);
+      <a class="slab" href="#/gauntlet?decks=bot_optimized,optimizer_1,optimizer_4&level=Expert&games=6&mirror=1">Mirror on the three piles, Expert <small>18 games, same deck both seats</small></a>
+      <a class="slab" href="#/gauntlet?decks=bot_optimized,optimizer_1,optimizer_4&level=Expert&games=6">Your deck against the three piles, Expert <small>18 games</small></a></div>`);
   }).catch(() => {});
   const r = await fetch(CREDITS_URL).catch(() => null), t = r && r.ok ? await r.text() : '';
   const el = document.getElementById('credits'); if (el) el.textContent = t.trim();

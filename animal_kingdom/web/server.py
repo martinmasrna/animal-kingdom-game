@@ -1070,12 +1070,15 @@ async def create_match(req):
         wanted = gauntlet.get("decks")       # an explicit field (any shipped deck, the bots' own included), else the starters
         if wanted is not None and (not isinstance(wanted, list) or not all(d in PREMADE_DECKS for d in wanted)):
             raise web.HTTPBadRequest(text="bad gauntlet field")
+        mirror = bool(gauntlet.get("mirror"))   # both seats on each named deck in turn: the pilot is the only variable
         field = [d for d in (wanted if wanted is not None else sorted(DECK_SLUGS))
-                 if d != deck and d not in skip and sorted(PREMADE_DECKS[d]) != mine]
+                 if mirror or (d != deck and d not in skip and sorted(PREMADE_DECKS[d]) != mine)]
         if not field:
             raise web.HTTPBadRequest(text="empty gauntlet")
         match.join(Seat(secrets.token_urlsafe(12), f"{ranking.PILOT_BAND[level]} Bot", bot=level, deck=field[0]))
-        if gauntlet.get("reverse"):     # the bot keeps the chosen deck; the player plays the field
+        if mirror:
+            match.make_gauntlet(field, per_seat, mirror=True)
+        elif gauntlet.get("reverse"):     # the bot keeps the chosen deck; the player plays the field
             match.seats["B"].deck = deck
             match.make_gauntlet(field, per_seat, rotating="A")
         else:
