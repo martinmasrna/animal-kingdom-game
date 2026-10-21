@@ -23,8 +23,10 @@ test('two people mulligan at the same time', async () => {
   const box = p => p.evaluate(() => { const b = document.querySelector('#choicebar.mull b'); return b ? b.textContent : null; });
   assert.match(await box(p1) || '', /0 of 4/, 'the first player mulligans');
   assert.match(await box(p2) || '', /0 of 4/, 'and so does the second, at the same time');
-  // each step waits for the server's answer, not a fixed time: under a parallel test run it can take over a second
-  const until = (p, fn, what) => p.waitForFunction(fn, { timeout: 5000 }).catch(() => assert.fail(what));
+  // each step waits for the server's answer, not a fixed time: under a parallel test run it can take over a second. It
+  // polls on a timer: a check per animation frame never runs on whichever page is in the background, so it timed out
+  // there with the game already begun, one run in four.
+  const until = (p, fn, what) => p.waitForFunction(fn, { timeout: 5000, polling: 50 }).catch(() => assert.fail(what));
   await p2.evaluate(() => document.querySelector(".hc").click());
   await until(p2, () => /1 of 4/.test(document.querySelector('#choicebar.mull b')?.textContent), 'the second returns a card while the first still chooses');
   await p2.evaluate(() => document.getElementById("skip").click());
