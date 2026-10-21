@@ -333,13 +333,14 @@ def test_the_bots_play_the_bot_pool_only():
 def test_the_expert_is_the_deepened_referee():
     """The Expert (shipped 2026-10-20) is the referee with two turns of sight, den sense, the reply as a turn and the
     target-aware weights, deepening under a time budget below BOT_THINK_MAX; since 2026-10-21 it values food as the race
-    on a curve, with no net-food term. Normal is the TurnBot."""
+    on a curve, with no net-food term, and ranks a placement after its sub-choice resolves (quiesce). Normal is the TurnBot."""
     from animal_kingdom.web.match import bot_for
     from animal_kingdom.web.server import BOT_THINK_MAX
     bot = bot_for("expert", 7)
     assert bot.depth == 1 and bot.den_sense and bot.reply_turns == 3 and 0 < bot.time_budget < BOT_THINK_MAX
     assert bot.weights.pending_target > 0 and bot.weights.buried_presence > 0
     assert bot.weights.food_progress == 0 and bot.weights.food_curve > 1 and bot.weights.food_race
+    assert bot.quiesce
     normal = bot_for("normal", 7)
     assert normal.__class__.__name__ == "TurnBot" and normal.weights.hq_threat_reach > 0   # the den-front reach term (2026-10-21)
     assert bot.weights.hq_threat_reach == 0                                                 # the Expert's reply search covers it
