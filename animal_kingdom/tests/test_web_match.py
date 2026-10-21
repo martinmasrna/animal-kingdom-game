@@ -660,3 +660,13 @@ def test_a_gauntlet_can_name_its_field(monkeypatch, tmp_path):
             assert match.seats["A"].deck == match.seats["B"].deck == "bot_optimized"
             assert {u.card_id for u in match.state.hands["A"]} <= set(server.PREMADE_DECKS["bot_optimized"])
     asyncio.run(run())
+
+
+def test_each_evolution_stage_read_large_shows_the_stages_still_ahead():
+    """Right-click a later stage of the legendary Caterpillar: its remaining stages show, as on the card itself."""
+    from animal_kingdom.web.match import card_pool
+    pool = {c["id"]: c for c in card_pool()}
+    chain = pool["butterfly_legend"]["related"]
+    for i, stage in enumerate(chain):
+        assert pool[stage]["related"] == chain[i + 1:]
+        assert pool[stage]["evolves"] == (i + 1 < len(chain))

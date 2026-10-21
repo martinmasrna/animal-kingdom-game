@@ -755,9 +755,13 @@ def map_info() -> dict:
 
 
 def card_pool() -> list[dict]:
+    # Each stage of an evolving card, read large, shows the stages still ahead of it, as the card itself shows them all
+    # (Martin, 2026-10-21: the legendary Caterpillar's later stages too).
+    ahead = {stage: c.related[i + 1:] for c in CARDS.values() if c.evolves for i, stage in enumerate(c.related)}
     return [{"id": c.id, "name": c.name, "status": c.status, "rarity": c.rarity, "tags": sorted(c.tags),
              # A variable-strength card (Python) prints 0: its text says what it gains ("+1 for each removed animal").
              "str": 0 if c.is_dynamic else c.base_strength, "text": c.text,
-             "kw": sorted(c.keywords), "cost": c.food_cost, "habitat": c.habitat, "related": list(c.related), "evolves": c.evolves}
+             "kw": sorted(c.keywords), "cost": c.food_cost, "habitat": c.habitat,
+             "related": list(c.related or ahead.get(c.id, ())), "evolves": c.evolves or bool(ahead.get(c.id))}
             for c in CARDS.values()]
 
