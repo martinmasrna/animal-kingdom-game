@@ -8,8 +8,10 @@ FROM python:3.14-slim AS build
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir "aiohttp>=3.9" "mypy>=1.19" setuptools
-COPY animal_kingdom ./animal_kingdom
-COPY tools/engine_speed ./tools/engine_speed
+# core/ first: everything the compile and the gate depend on. The client's files come after the gate, so a change to them
+# reuses this layer (deploy.sh builds the two trees).
+COPY core/animal_kingdom ./animal_kingdom
+COPY core/tools/engine_speed ./tools/engine_speed
 ENV PYTHONPATH=/app
 RUN python -m mypyc --ignore-missing-imports \
         animal_kingdom/engine/maps.py animal_kingdom/engine/strength.py animal_kingdom/engine/state.py \
@@ -21,6 +23,7 @@ RUN python -m mypyc --ignore-missing-imports \
     && python tools/engine_speed/record.py /tmp/compiled.json \
     && python tools/engine_speed/compare.py tools/engine_speed/baseline.json /tmp/compiled.json | tee /tmp/gate.txt \
     && grep -q "^22/22 identical" /tmp/gate.txt
+COPY ui/animal_kingdom/web ./animal_kingdom/web
 
 FROM python:3.14-slim
 WORKDIR /app

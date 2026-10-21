@@ -59,14 +59,20 @@ if [[ -n "$unwritten" && -z "${NEWS_OK:-}" ]]; then
 fi
 
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-git -C "$repo" archive HEAD animal_kingdom tools/engine_speed | tar -x -C "$tmp"   # the engine and the compile gate's recordings
+# Two trees for the image: core/ (the engine, the bots, the data, the server, the gate's recordings) and ui/ (the client's
+# static files, the news, the studies). The compile and its gate run on core/ alone, so a change to the client reuses the
+# cached compiled engine and a deploy takes a minute instead of ten (2026-10-21).
+mkdir -p "$tmp/core" "$tmp/ui/animal_kingdom/web"
+git -C "$repo" archive HEAD animal_kingdom tools/engine_speed | tar -x -C "$tmp/core"
+for d in static news studies; do [[ -d "$tmp/core/animal_kingdom/web/$d" ]] && mv "$tmp/core/animal_kingdom/web/$d" "$tmp/ui/animal_kingdom/web/"; done
 cp "$repo/deploy/Dockerfile" "$cfg" "$tmp/"
 echo "deploying $(git -C "$repo" log --oneline -1)"
-# Fly's deploy sometimes hangs on its own API: give it 10 minutes, then stop it and try once more; a second hang fails loudly.
+# Fly's deploy sometimes hangs on its own API: give it 20 minutes (a full compile and gate takes up to 15), then stop it and
+# try once more; a second hang fails loudly.
 attempt() {
   fly deploy "$tmp" --config "$tmp/fly.toml" --remote-only & local pid=$! waited=0
   while kill -0 "$pid" 2>/dev/null; do
-    if (( waited >= 600 )); then kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null; echo "deploy hung for 10 minutes: stopped"; return 124; fi
+    if (( waited >= 1200 )); then kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null; echo "deploy hung for 20 minutes: stopped"; return 124; fi
     sleep 5; waited=$((waited + 5))
   done
   wait "$pid"
