@@ -38,7 +38,7 @@ He doesn't want a name. The animals gave him one anyway.
 
 ## What the animals say
 
-Nobody knows how old he is; the old lions say their fathers warned them. What the herds say about him is a warning, not a title. Kings and queens get titles from their own kind; he has no kind. His name is the thing a mother says to stop a young one going out there.
+Nobody knows how old he is; the old lions say their fathers warned them. Kings and queens get titles from their own kind; he has no kind. His name came from the ones who tried him and failed, hyenas, jackals, young lions: the hunters' word for him, passed from the ones who limped back to the ones who hadn't gone yet.
 
 ## Art brief
 
