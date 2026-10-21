@@ -300,6 +300,7 @@ STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
 STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "guard_wasp": ["guard_hornet_bonus"],
     "python": ["python_growth"],
+    "leopard_legend": ["leopard_legend_growth"],
     "dingo": ["dingo_grant"],
     "shuck": ["shuck_grant"],
     "egg_eater": ["egg_eater_growth"],

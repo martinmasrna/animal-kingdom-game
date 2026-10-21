@@ -1112,8 +1112,9 @@ def test_the_termite_king_draws_two_with_a_colony_queen():
     assert len(s.hands["A"]) == CFG.termite_king_draw == 2
 
 
-def test_the_legendary_leopard_is_eight():
-    assert load_cards()["leopard_legend"].base_strength == 8
+def test_the_legendary_leopard_is_six_and_grows():
+    # 8 until 2026-10-20; then 6 with "gain 1 strength" on every kill (Martin: a leopard is no lion, and the Lion is the vanilla 7).
+    assert load_cards()["leopard_legend"].base_strength == 6
 
 
 def test_the_lemming_is_a_plain_one_now():
@@ -1273,6 +1274,21 @@ def test_the_anaconda_swallows_what_it_eats_and_grows_by_its_strength():
     a = s.top_unit("2,2")
     assert a.card_id == "anaconda" and [u.card_id for u in s.board["2,2"]] == ["anaconda"]
     assert effective_strength(s, a) == 5 + 3
+
+
+def test_the_legendary_leopard_grows_with_every_kill():
+    # Strength 6 and "Whenever this removes an animal, gain 1 strength": each prey it eats, placed or roamed onto, adds one.
+    s = make_state(hands={"A": ["leopard_legend"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,2", "lion", "A")
+    put(s, "2,2", "squirrel", "B")
+    put(s, "3,2", "squirrel", "B")
+    rules.apply_action(s, PlaceAction("leopard_legend", ("cr", "2,2")))
+    leo = s.top_unit("2,2")
+    assert leo.card_id == "leopard_legend" and [u.card_id for u in s.board["2,2"]] == ["leopard_legend"]
+    assert effective_strength(s, leo) == 6 + CFG.leopard_legend_growth
+    rules.apply_action(s, RoamAction("2,2", ("cr", "3,2")))   # it roams onto the next prey and eats that too
+    leo = s.top_unit("3,2")
+    assert leo.card_id == "leopard_legend" and effective_strength(s, leo) == 6 + 2 * CFG.leopard_legend_growth
 
 
 # ==================================================================================== the hand limit
