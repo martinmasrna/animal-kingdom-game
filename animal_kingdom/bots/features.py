@@ -260,14 +260,55 @@ def region_control(state: GameState, me: str, opp: str, *, fractions=None) -> fl
 
 
 def hq_threat_terms(
-    state: GameState, me: str, opp: str, my_connection: set, opp_connection: set,
+    state: GameState, me: str, opp: str, my_connection: set, opp_connection: set, reach: float = 0.0,
 ) -> tuple[float, float]:
     """(enemy_hq_threat, own_hq_threat): crossroads I/they hold connected in front of the
-    other's HQ. Only a connected chain can capture next turn."""
+    other's HQ. Only a connected chain can capture next turn.
+
+    `reach` (0 = off) adds that fraction for every front crossroad the attacker holds cut off but one placement from
+    connected: an empty crossroad next to both their chain and the cut-off piece. With two actions a turn, placing the
+    connector and capturing is one turn, so a cut-off Falcon in the den front is a threat the chain rule cannot see
+    (Martin's game GMIDKA, 2026-10-21: the Advanced bot left two of them standing for two turns)."""
     gm = state.game_map
     enemy_threat = float(sum(1 for cr in gm.hq_front(opp) if cr in my_connection))
     own_threat = float(sum(1 for cr in gm.hq_front(me) if cr in opp_connection))
+    if reach:
+        enemy_threat += reach * _reachable_front(state, me, opp, my_connection)
+        own_threat += reach * _reachable_front(state, opp, me, opp_connection)
     return enemy_threat, own_threat
+
+
+def _reachable_front(state: GameState, attacker: str, defender: str, connection: set) -> int:
+    """Front crossroads of `defender` that `attacker` holds cut off, but that one placement on an empty crossroad
+    would connect to the attacker's chain (or to the attacker's own front, which counts as the chain's start)."""
+    gm = state.game_map
+    board = state.board
+    cut = [cr for cr in gm.hq_front(defender) if cr not in connection and (st := board.get(cr)) and st[-1].owner == attacker]
+    if not cut:
+        return 0
+    home = gm.hq_front(attacker)
+    count = 0
+    for front in cut:
+        # the cut-off group the front piece belongs to (attacker-topped crossroads, none of them connected)
+        group, queue = {front}, [front]
+        while queue:
+            cr = queue.pop()
+            for nb in gm.neighbors(cr):
+                if nb not in group and (st := board.get(nb)) and st[-1].owner == attacker:
+                    group.add(nb)
+                    queue.append(nb)
+        for cr in group:
+            hit = False
+            for nb in gm.neighbors(cr):
+                if board.get(nb):
+                    continue                     # a placement must land on an empty crossroad
+                if nb in home or any(x in connection for x in gm.neighbors(nb)):
+                    hit = True
+                    break
+            if hit:
+                count += 1
+                break
+    return count
 
 
 def opponent_unseen_card_ids(state: GameState, opp: str) -> list[str]:

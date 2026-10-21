@@ -265,3 +265,21 @@ def test_with_one_card_in_hand_the_expert_draws_before_it_plays():
             me = s.player_to_act()
             assert len(s.hands[me]) == 1
             assert isinstance(make_bot("referee", seed).choose(s.view_for(me), rules.legal_actions(s), s), DrawAction), (name, seed)
+
+
+def test_the_normal_pilot_answers_falcons_in_its_den_front():
+    # Martin's Cats vs the Advanced bot's Teeth and Claws, 21 October (web match GMIDKA), the bot's turn 6: two of
+    # Martin's Falcons stand in its den front, cut off from his chain by the empty 4,1; his Hare holds 3,1. The bot's
+    # hand: Leopard, Orca, Honey Badger, The First of Many. Today's Normal pilot played Honey Badger and Orca at the
+    # far end of the board, twice, and Black Bear on 4,1 plus Bobcat took the den. Its threat term counts only
+    # connected front pieces, and a cut-off piece one placement from connected is the same threat under two actions a
+    # turn. With `hq_threat_reach` it covers the Hare (cutting the chain) or a Falcon, and no capture is left within
+    # Martin's two actions.
+    for seed in range(3):
+        s = _puzzle("falcons_in_the_front")
+        bot = TurnBot(weights=GreedyWeights(hq_threat_reach=0.5), seed=seed)
+        turn = []
+        while s.result is None and s.player_to_act() == "B":
+            turn.append(bot.choose(s.view_for("B"), rules.legal_actions(s), s))
+            rules.apply_action(s, turn[-1])
+        assert not _opponent_captures_in_two(s), (seed, turn)
