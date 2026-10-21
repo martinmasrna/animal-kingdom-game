@@ -400,6 +400,11 @@ async function settingsScreen() {
     <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
   wireSettings(app); wireAccount(app, settingsScreen);
+  // The studies this account may open (a developer's tool, Martin 2026-10-21): listed here so a phone's bookmark reaches them.
+  api('/api/studies').then(r => r.ok ? r.json() : []).then(list => {
+    const cr = document.querySelector('.credits'); if (!cr || !list.length || screen !== 'settings') return;
+    cr.insertAdjacentHTML('beforebegin', `<div class="studies"><h3>Studies</h3>${list.map(s => `<a class="slab" href="#/study/${esc(s.name)}">${esc(s.title)} <small>${s.count}</small></a>`).join('')}</div>`);
+  }).catch(() => {});
   const r = await fetch(CREDITS_URL).catch(() => null), t = r && r.ok ? await r.text() : '';
   const el = document.getElementById('credits'); if (el) el.textContent = t.trim();
 }

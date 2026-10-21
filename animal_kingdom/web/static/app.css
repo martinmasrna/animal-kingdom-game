@@ -419,3 +419,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .hr.study { grid-template-columns: 28px 1fr auto auto; height: 52px; cursor: default; }
 .ladder .hr.study small { color: #a08f6e; font-size: 12px; letter-spacing: .06em; }
 .ladder .hr.study .slab { height: 36px; padding: 0 14px; }
+.sets .studies { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.sets .studies h3 { margin: 0 0 2px; font: 700 18px 'Fira Sans Condensed', sans-serif; color: #c9bfae; }
+.sets .studies .slab { text-decoration: none; padding: 0 16px; height: 40px; display: inline-flex; align-items: center; gap: 8px; }
+.sets .studies .slab small { color: #a08f6e; }

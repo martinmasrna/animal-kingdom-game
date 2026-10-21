@@ -1,5 +1,6 @@
 {
  "title": "The games the Expert never led",
+ "owner": "9429ccf2c28900ca",
  "note": "Each position is the bot's turn in the round that cost it most. Play that turn as the bot; the rest matters little.",
  "positions": [
   {

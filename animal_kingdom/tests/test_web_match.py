@@ -594,3 +594,25 @@ def test_a_study_lists_its_positions_from_the_logs(monkeypatch, tmp_path):
             assert p["match"] == "GMIDKA" and p["round"] == 4 and p["seat"] == "B" and p["botDeck"] == "Teeth and Claws" and p["rounds"] == 4
             assert (await c.get("/api/study/nothing", headers={"X-AK-Key": a["code"]})).status == 404
     asyncio.run(run())
+
+
+def test_the_studies_list_shows_a_player_only_their_own(monkeypatch, tmp_path):
+    """Settings lists the studies (GET /api/studies) whose owner is you, or that name no owner; another player's is not shown."""
+    import asyncio, json
+    from aiohttp.test_utils import TestClient, TestServer
+    from animal_kingdom.web import server
+    monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
+    studies = tmp_path / "studies"; studies.mkdir()
+    (studies / "open.json").write_text(json.dumps({"title": "Open", "positions": []}))
+    (studies / "theirs.json").write_text(json.dumps({"title": "Theirs", "owner": "someone-else", "positions": []}))
+    monkeypatch.setattr(server, "STUDY_DIR", studies)
+
+    async def run():
+        async with TestClient(TestServer(server.make_app())) as c:
+            a = await (await c.post("/api/profile", json={})).json()
+            names = [s["name"] for s in await (await c.get("/api/studies", headers={"X-AK-Key": a["code"]})).json()]
+            assert names == ["open"]
+            (studies / "mine.json").write_text(json.dumps({"title": "Mine", "owner": a["profile"]["id"], "positions": []}))
+            names = [s["name"] for s in await (await c.get("/api/studies", headers={"X-AK-Key": a["code"]})).json()]
+            assert names == ["mine", "open"]
+    asyncio.run(run())

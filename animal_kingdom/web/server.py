@@ -955,6 +955,20 @@ def position_at(rec: dict, rnd: int, seat: str):
 STUDY_DIR = Path(__file__).resolve().parent / "studies"
 
 
+async def list_studies(req):
+    """The studies you may open, for Settings: those naming you as owner, and those naming no owner."""
+    p = me(req)
+    out = []
+    for path in sorted(STUDY_DIR.glob("*.json")) if STUDY_DIR.is_dir() else []:
+        try:
+            study = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if study.get("owner") in (None, p["id"]):
+            out.append({"name": path.stem, "title": study.get("title", path.stem), "count": len(study.get("positions", []))})
+    return web.json_response(out)
+
+
 async def get_study(req):
     """A study (studies/<name>.json): positions from your logged games to play on from, in order, as the other seat. A
     developer's tool like the gauntlet: reached by its link, each position a 'Play from here'."""
@@ -1166,6 +1180,7 @@ def make_app() -> web.Application:
         web.get("/api/replay/{match}", get_replay),
         web.get("/api/replay/{match}/lists", replay_lists),
         web.get("/api/study/{name}", get_study),
+        web.get("/api/studies", list_studies),
         web.post("/api/feedback", send_feedback),
         web.post("/api/events", client_events),
         web.get("/api/news", get_news),
