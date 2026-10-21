@@ -74,7 +74,7 @@ Cards:
 - **Unnamed legendaries** show their species as their name until Martin names them in the workbench; their ids are fixed (`<species>_legend`, `rodent` for the placeholder-named Rodent), so naming one later changes nothing else.
 - **The legendary Cuckoo** must remove an adjacent animal of strength 4 or less if there is one (yours or a choosable enemy); "play another animal" is then mandatory if anything can be played.
 - **The legendary Sloth** runs each of your Dusk effects twice in a row; "At the end of your turn" effects are Dusk effects.
-- **Praying Mantis** eats when it can: with an ally adjacent, one of them is removed and the cards drawn, no declining; with none adjacent, nothing happens and no cards are drawn.
+- **A Roar's cost is never declined** (Praying Mantis, Hornet, Pestis): when the cost can be paid, it is, and the Roar only asks which target. The Mantis with an ally adjacent eats one; the Hornet with a spare copy and an enemy adjacent spends the copy; the Pestis next to only its own animals wipes one of them. When the cost cannot be paid, nothing happens.
 - **Tarantula** eats a random adjacent ally (Armor excluded) and keeps the strength it showed then, for good.
 - **Sea Turtle** and **Sunfish** lay on a random adjacent empty crossroad, as the old African Wild Dog placed its Pup (Martin, 2026-10-10).
 - **"An ally was removed this turn"** (Piranha, Vulture) counts your animals leaving the board this turn, whoever removed them; **"each animal removed this turn"** (Hyena) counts both players' (Martin, 2026-10-17). Discards from hand don't count.

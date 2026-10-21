@@ -7,11 +7,13 @@ below: A's HQ fronts are column 1 ("1,1"/"1,2"/"1,3"), B's are column 4; crossro
 
 from __future__ import annotations
 
+import pytest
+
 from animal_kingdom.engine import effects, rules
 from animal_kingdom.engine.actions import SKIP, ChoiceAction, DrawAction, PlaceAction
 from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
-from animal_kingdom.engine.state import UnitInstance
+from animal_kingdom.engine.state import EngineError, UnitInstance
 from animal_kingdom.engine.strength import card_strength, effective_strength, placement_strength
 
 from ._helpers import apply_click, hand_ids, make_state, place_targets, put
@@ -792,13 +794,16 @@ def test_pestis_wipes_an_adjacent_enemy_and_everything_under_it():
     assert s.remove_pile.count("lion") == 1 and s.remove_pile.count("unnamed_canine") == 1
 
 
-def test_pestis_next_to_only_allies_may_decline():
+def test_pestis_next_to_only_allies_must_wipe_one():
+    # A Roar's cost is never declined (Martin, 2026-10-21): next to its own animals only, the Pestis wipes one of them.
     s = make_state(hands={"A": ["pestis"]})
     put(s, "1,2", "caracal", "A")                       # the only adjacent animal is an ally
     rules.apply_action(s, PlaceAction("pestis", ("cr", "2,2")))
-    assert s.pending["optional"]
-    rules.apply_action(s, ChoiceAction(SKIP))
-    assert s.top_unit("1,2").card_id == "caracal"
+    assert not s.pending["optional"]
+    with pytest.raises(EngineError):
+        rules.apply_action(s, ChoiceAction(SKIP))
+    rules.apply_action(s, ChoiceAction("1,2"))
+    assert s.top_unit("1,2") is None
 
 
 def test_sirocco_bounces_all_adjacent_enemies_to_hand():

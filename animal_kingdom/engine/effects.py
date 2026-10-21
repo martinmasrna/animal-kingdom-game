@@ -2167,8 +2167,9 @@ def _hornet_place(state, unit, cr):
 
 
 def _op_hornet_kill(state, step):
+    # The cost is paid when it can be (Martin, 2026-10-21: a Roar's cost is never declined); the Roar only asks which enemy.
     if "choice" not in step:
-        return PendingRequest("choice", step["chooser"], optional=True, options=step["options"])
+        return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
     if step["choice"] == SKIP:
         return None
     _remove_another_copy(state, step["chooser"], "hornet")
@@ -2179,7 +2180,7 @@ def _op_hornet_kill(state, step):
 def _pestis_place(state, unit, cr):
     # "Remove an adjacent animal and every animal under it": the target is a chosen top, an enemy
     # (Stealth and Armor off limits, as for any removal) or an ally (Armor off limits), and the whole
-    # stack goes. Declinable, so a Pestis next to only its own animals never has to wipe them.
+    # stack goes. Never declined (Martin, 2026-10-21): a Pestis next to only its own animals wipes one of them.
     options = sorted(_adjacent_enemy_unit_crossroads(state, unit, cr) + _adjacent_friendly_units(state, unit, cr))
     if options:
         state.effect_stack.append({"op": "pestis_wipe", "chooser": unit.owner, "options": options})
@@ -2187,7 +2188,7 @@ def _pestis_place(state, unit, cr):
 
 def _op_pestis_wipe(state, step):
     if "choice" not in step:   # asked even with one target
-        return PendingRequest("choice", step["chooser"], optional=True, options=step["options"])
+        return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
     if step["choice"] == SKIP:
         return None
     target = step["choice"]

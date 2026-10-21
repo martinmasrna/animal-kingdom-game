@@ -145,6 +145,6 @@ def test_pestis_may_wipe_an_allied_stack_and_the_enemies_under_it():
     put(s, "2,2", "mouse", "B")                           # buried enemy
     put(s, "2,2", "rat", "A")                             # our top
     rules.apply_action(s, PlaceAction("pestis", ("cr", "1,2")))
-    assert s.pending["optional"] and "2,2" in s.pending["options"]
+    assert not s.pending["optional"] and "2,2" in s.pending["options"]   # the cost is never declined (2026-10-21)
     rules.apply_action(s, ChoiceAction("2,2"))
     assert "2,2" not in s.board
