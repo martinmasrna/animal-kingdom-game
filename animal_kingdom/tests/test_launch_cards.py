@@ -123,9 +123,9 @@ def test_an_inked_animal_back_in_hand_is_a_fresh_card():
     assert not statics.inked(s, s.hands["B"][-1])
 
 
-def test_capybara_gives_its_neighbours_armor():
+def test_the_armadillo_gives_its_neighbours_armor():
     s2 = make_state(current="B", hands={"B": ["jaguar"]})
-    put(s2, "3,3", "capybara", "A")
+    put(s2, "3,3", "armadillo", "A")
     sq = put(s2, "3,2", "squirrel", "A")
     assert not statics.can_be_removed(s2, sq)
     put(s2, "4,3", "lion", "B")
@@ -133,11 +133,11 @@ def test_capybara_gives_its_neighbours_armor():
     assert s2.top_unit("3,2") is sq and s2.pending is None
 
 
-def test_an_apex_cannot_eat_what_a_capybara_armors():
+def test_an_apex_cannot_eat_what_an_armadillo_armors():
     # The eat resolves after the cover, when the prey is already buried and out of the aura's reach;
     # it is judged as the prey stood on top, so the Squirrel is covered, not eaten.
     s = make_state(hands={"A": ["tiger"]}, food={"A": 50, "B": 0})
-    put(s, "2,2", "capybara", "B")
+    put(s, "2,2", "armadillo", "B")
     sq = put(s, "1,2", "squirrel", "B")
     rules.apply_action(s, PlaceAction("tiger", ("cr", "1,2")))
     assert s.board["1,2"][0] is sq and "squirrel" not in s.remove_pile
@@ -745,11 +745,22 @@ def test_golden_orb_weaver_catches_a_roamer_placed_or_roaming_beside_it():
     assert removed(s, "wolf")
 
 
-def test_tortoise_counts_armor_including_a_capybaras():
+def test_tortoise_counts_armor_including_an_armadillos_gift():
     s = make_state(hands={"A": ["tortoise"]})
-    put(s, "1,1", "capybara", "A")
-    rules.apply_action(s, PlaceAction("tortoise", ("cr", "1,2")))   # Armor printed, and beside the Capybara
-    assert s.food["A"] == CFG.tortoise_per_armor
+    put(s, "1,1", "armadillo", "A")
+    put(s, "2,2", "squirrel", "A")                                  # beside the Tortoise's crossroad, not the Armadillo's
+    rules.apply_action(s, PlaceAction("tortoise", ("cr", "1,2")))   # the Tortoise (printed, and the aura) and the Armadillo
+    assert s.food["A"] == 2 * CFG.tortoise_per_armor
+
+
+def test_the_capybara_is_a_nine_when_the_rest_of_the_starting_deck_is_small():
+    from animal_kingdom.engine.strength import effective_strength
+    small = make_state(hands={"A": ["capybara"]})
+    small.starting_decks = {"A": ("capybara", "capybara", "raven", "snake_egg", "hawk"), "B": ()}
+    big = make_state(hands={"A": ["capybara"]})
+    big.starting_decks = {"A": ("capybara", "raven", "lynx"), "B": ()}       # the Lynx is a 5
+    assert effective_strength(small, small.hands["A"][0]) == CFG.capybara_strength == 9
+    assert effective_strength(big, big.hands["A"][0]) == 2
 
 
 def test_the_legendary_honey_badger_has_every_keyword():

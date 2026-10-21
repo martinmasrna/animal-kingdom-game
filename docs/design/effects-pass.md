@@ -70,7 +70,7 @@ Open from the first read: food before the payoff (only the Hedgehog's 5 so far; 
 | Fathom | Open Ocean | L | 7 | Roar: **Scout** a legendary animal. |
 | a Squirrel (name to come; Rodent) | | L | 3 | Roar: lose all your food. In 2 turns, gain three times that much. (Three times, Martin: twice is a net gain of only the stake, two turns late, so fair decks just raced it in the imagined games, and neither side touched the other. Three times makes the siege compulsory: fired at 35, it's 105.) |
 | a Mimic Octopus (name to come) | Open Ocean | L | ~3 | Roar: this becomes a copy of an adjacent animal. (An amplifier, Martin's pick: a second Capybara, Porcupine or Honey Badger where the fortress needs it; elsewhere it copies any deck's best piece, an enemy's too. The copy takes the animal's strength, keywords and text, but not its Roar, so copying the Squirrel does nothing to the payoff. Fathom and this both need a common or rare Octopus in the pool.) |
-| Capybara (Rodent) | Jungle | R | 6 | Your animals next to this have **Armor**. |
+| Capybara (Rodent) | Jungle | C | 2 | If your starting deck has no other animal of strength 4 or more, this has strength 9. (2026-10-22: the small-deck common, its one big body; the Armor aura went to the Armadillo, and the Octopus holds its Untouchables rare slot for now.) |
 | Porcupine | Forest | R | 5 | **Spikes. Your adjacent animals have Spikes.** |
 | Golden Orb-Weaver (Arachnid) | Jungle | R | 4 | When an enemy with **Flight** is placed next to this, remove it. |
 | Armadillo | Jungle | R | 5 | **Armor.** Your adjacent animals have **Armor**. |

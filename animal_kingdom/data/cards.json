@@ -1471,15 +1471,15 @@
       "id": "capybara",
       "name": "Capybara",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Rodent"
       ],
-      "base_strength": 6,
-      "text": "Your adjacent animals have Armor.",
-      "keywords": [],
+      "base_strength": 2,
+      "text": "If your starting deck has no other animal of strength 4 or more, this has strength 9.",
       "species": "Capybara",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "porcupine",

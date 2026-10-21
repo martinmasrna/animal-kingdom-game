@@ -181,7 +181,6 @@
     "squirrel_legend": 1,
     "honey_badger_legend": 1,
     "octopus_legend": 1,
-    "capybara": 2,
     "porcupine": 2,
     "golden_orb_weaver": 2,
     "armadillo": 2,
@@ -190,7 +189,8 @@
     "jellyfish": 3,
     "black_bear": 3,
     "tortoise": 3,
-    "owl": 3
+    "owl": 3,
+    "octopus": 2
    }
   },
   {

@@ -69,7 +69,22 @@ AURA_FAMILIES = frozenset(fam for fam, _, _ in FAMILY_AURAS.values())
 # The cards whose own text is a live "+X" (the branches of anthem_bonus). Any other card, of a family no aura reaches,
 # has no anthem at all: anthem_bonus answers 0 for it before walking the board. The search asks for every unit's strength
 # in every position it imagines, so that walk, once per unit, was the hottest line of the engine (2026-10-20).
-ANTHEM_CARDS = frozenset({"guard_wasp", "tuna", "hamster", "peacock", "giraffe", "crocodile"})
+ANTHEM_CARDS = frozenset({"guard_wasp", "tuna", "hamster", "peacock", "giraffe", "crocodile", "capybara"})
+
+
+_SMALL_DECKS: dict = {}
+
+
+def small_starting_deck(state: GameState, owner: str, but: str) -> bool:
+    """No animal of strength `capybara_small_max` + 1 or more in `owner`'s starting deck apart from `but` (printed
+    strength; a dynamic one counts as its printed 0). The starting deck never changes, so the answer is kept."""
+    deck = state.starting_decks.get(owner, ())
+    key = (deck, but)
+    if key not in _SMALL_DECKS:
+        cap = state.config.capybara_small_max
+        _SMALL_DECKS[key] = all(cid == but or not isinstance(s := state.cards[cid].base_strength, int) or s <= cap
+                                for cid in deck)
+    return _SMALL_DECKS[key]
 
 
 def aura_sources(state: GameState) -> list:
@@ -122,6 +137,9 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], so
             bonus += cfg.giraffe_bonus if their_turn else 0
         elif cid == "crocodile":                # -3 during your opponent's turn
             bonus -= cfg.crocodile_penalty if their_turn else 0
+        elif cid == "capybara":                 # strength 9 if your starting deck holds no other animal of 4 or more
+            if state.starting_decks.get(owner) and small_starting_deck(state, owner, cid):
+                bonus += cfg.capybara_strength - card.base_strength
 
     for u in tops:
         aura = FAMILY_AURAS.get(u.card_id)

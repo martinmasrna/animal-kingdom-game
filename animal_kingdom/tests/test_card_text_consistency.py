@@ -185,9 +185,16 @@ def test_strength_limit_text_matches_config():
 
 
 def test_no_strength_limit_card_escapes_the_check():
-    # Oxpecker's "strength 8 or more" counts its own decklist, not a removal limit (checked below).
+    # Oxpecker's "strength 8 or more" and the Capybara's "strength 4 or more" read the starting deck, not a removal limit
+    # (checked below and in test_capybara_numbers_match_config).
     printed = {cid for cid, c in _cards().items() if STRENGTH_LIMIT_RE.search(c.text)}
-    assert printed - {"oxpecker"} == set(STRENGTH_LIMITS)
+    assert printed - {"oxpecker", "capybara"} == set(STRENGTH_LIMITS)
+
+
+def test_capybara_numbers_match_config():
+    cfg, text = Config.default(), _cards()["capybara"].text
+    assert int(STRENGTH_LIMIT_RE.search(text).group(1)) == cfg.capybara_small_max + 1
+    assert int(re.search(r"this has strength (\d+)", text).group(1)) == cfg.capybara_strength
 
 
 STRENGTH_LOSS_RE = re.compile(r"(?:gets?|enemy) -(\d+) strength", re.IGNORECASE)

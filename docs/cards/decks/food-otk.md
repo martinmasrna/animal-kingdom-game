@@ -19,10 +19,10 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Capybara** | 2 | Rodent | 6 | Your adjacent animals have Armor. |
 | **Porcupine** | 2 | Rodent | 5 | Spikes. Your adjacent animals have Spikes. |
 | **Golden Orb-Weaver** | 2 | Arachnid | 4 | When an enemy with Flight or Roam is placed next to this, remove it. |
 | **Armadillo** | 2 | — | 5 | Armor. Your adjacent animals have Armor. |
+| **Octopus** | 2 | — | 4 | Roar: adjacent enemies lose all their effects. |
 
 ### Common
 

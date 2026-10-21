@@ -791,10 +791,30 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "lv": "problem",
-      "note": "Martin, 2026-10-21: its Armor aura moved to the Armadillo; needs a new effect (parked)",
+      "lv": "draft",
+      "note": "Martin, 2026-10-22: the small-deck common, its one big body",
       "by": "claude",
-      "at": 1792611263
+      "at": 1792622196
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-22: the small-deck common, its one big body",
+      "by": "claude",
+      "at": 1792622195
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "note": "Martin, 2026-10-22: the small-deck common, its one big body",
+      "by": "claude",
+      "at": 1792622195
     }
   },
   "caracal": {

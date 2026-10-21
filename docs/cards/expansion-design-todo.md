@@ -291,3 +291,14 @@ Eggs can support multiple archetypes if their outcomes differ: cards, units, tok
 - [ ] Second prototype wave: Camouflage, Venom package, Fish/Landmark formation package.
 - [ ] Third prototype wave: tokens, Dinosaur Hatch, Primate Roar copying.
 - [ ] Before any wave becomes canonical, build at least two competing 30-card lists using the enlarged pool. A new card has succeeded only if plausible lists sometimes omit it.
+
+## 6. Deckbuilding conditions and choose-one (Martin, 2026-10-21/22)
+
+**The small-deck archetype ("your starting deck has no animal of strength 4 or more").** A condition any deck can meet in its own way, so it pulls several lists toward one theme instead of dictating a family's fourteen cards (the Kazakus effect: two or three decks end up good, and nobody is forced into one list). Target at launch: two commons, two rares, one legendary. The Capybara is the first common ("If your starting deck has no other animal of strength 4 or more, this has strength 9"; printed 2). The condition is cheap for decks already small (Colony 25 of 30, Aristocrats 24, Egg Control 25), so its payoffs stay modest. A payoff must be flat: an effect that reads strength either rewards big decks (useless under the condition) or needs no condition at all. Rejected on the way: a cover-protection aura (a prohibition, fun for nobody), "+2 to your small animals" (defensive, and buried animals don't cover back), deck-to-board placement and "gains its neighbours' strength" (both best with big animals), "return adjacent 7s" (strictly worse than Rue), an extra turn (breaks the den race).
+
+- **Seagull** (Coast, later set; čajka), rare, Flight: "Roar: if your starting deck has no animal of strength 4 or more, Scout your opponent's hand." It snatches the sandwich out of your hand: it takes one of three, not the whole hand, which cuts most of the information and keeps the choosing. Waits for Coast, as the Rattlesnake waits for Desert; it is no city bird.
+- **"Dawn: your next Roar this turn happens twice."** A parrot legendary (mimicry, the dawn racket; the Macaw is the rare), left unconditional: Roars live on small cards anyway, so the condition would cost nothing. The Woodpecker's "your next Roar this turn happens twice" then needs a new effect.
+
+**Choose-one cards, their own design session.** Skill-rewarding and healthy in every card game that has them, as long as the options are balanced. Not to be spent on a deck condition: a group of animals (a family or a subgroup) gets it as its signature, the way Primates own the hand buffs and parrots own repetition. Commons choose between 2, rares 2–3, legendaries 3–4; a handful at each rarity, not the whole pool.
+
+**Costlier conditions, a later set.** Singleton (Reno, Kazakus), ten different strengths in the starting deck, ten different families. Gwent's Shupe and Syanna show how much fun they are when the payoff is unique and big; Kazakus is the model, Reno was toxic (Martin).
