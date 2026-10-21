@@ -489,10 +489,13 @@ export const lazyArt = scroller => {
     e.target.style.backgroundImage = `url(${e.target.dataset.art})`; o.unobserve(e.target); }), { root: scroller, rootMargin: '600px 0px' });
   scroller.querySelectorAll('[data-art]').forEach(el => seen.observe(el));
 };
-export const fitStrips = root => root.querySelectorAll('[data-strip]').forEach(el => {
-  const { offsetWidth: W, offsetHeight: H } = el; if (!W) return;
-  el.style.cssText += ';' + stripArt(el.dataset.strip, W, H, +el.dataset.ax);
-});
+// A strip's crop is sized from its box, so it is fitted again whenever the box changes (a phone's wider rows, a panel
+// opening, a rotation): a crop sized for another width tiles across the strip. A strip leaving the page measures 0 and is let go.
+let sized;
+export const fitStrips = root => root.querySelectorAll('[data-strip]').forEach(el => (sized ||= new ResizeObserver(es => es.forEach(({ target: el }) => {
+  const { offsetWidth: W, offsetHeight: H } = el; if (!W) { if (!el.isConnected) sized.unobserve(el); return; }
+  for (const d of stripArt(el.dataset.strip, W, H, +el.dataset.ax).split(';')) { const i = d.indexOf(':'); if (i > 0) el.style.setProperty(d.slice(0, i), d.slice(i + 1)); }
+}))).observe(el));
 export const stripArt = (id, W, H, ax) => {
   if (!hasArt(id)) return '';                    // not painted yet: the strip shows its plain ground
   if (!STRIP[id]) return `background-image:url(${artUrl(id)})`;

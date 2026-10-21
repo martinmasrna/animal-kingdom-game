@@ -81,7 +81,7 @@ export function collectionScreen(app, ctx) {
 // Strips are slivers of the cards: strength on a driftwood plaque, the name, copies as dots (legendaries have one).
 // One strip: a sliver of the card; the number of copies at its end when there are two or more (the game's decklists: copies
 // left), as in Hearthstone. A strip with none left is marked gone.
-export const stripHTML = (id, cards, have) => `<div class="st ${cards[id].rarity}${have ? '' : ' gone'}" data-card="${id}"><div class="art" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span><span class="x">${have > 1 ? have : ''}</span></div>`;
+export const stripHTML = (id, cards, have) => `<div class="st ${cards[id].rarity}${have ? '' : ' gone'}" data-card="${id}"><div class="art" data-strip="${id}" data-ax=".55" style="${stripArt(id, 166, 30, .55)}"></div><span class="s">${String(cards[id].str).split('').map(d => `<img src="/static/kit2/chalk/${d}.webp" alt="${d}">`).join('')}</span><span class="n">${esc(cards[id].name)}</span><span class="x">${have > 1 ? have : ''}</span></div>`;
 // flat: one list in the same order (rarity, then strength) without the group labels (home's chooser); each strip keeps its rarity edge.
 export function deckBody(list, cards, caps = true, flat = false) {
   const counts = countsOf(list), inR = r => list.filter(id => cards[id].rarity === r).length;

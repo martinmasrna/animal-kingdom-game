@@ -563,7 +563,7 @@ function wireDeckPeek(root) {
     if (list) adoptRetired(Object.keys(list));
     if (!list) { box.innerHTML = `<h4>${esc(el.dataset.name)}</h4><p class="none">This match's decklists weren't kept.</p>`; }
     else box.innerHTML = `<h4>${esc(el.dataset.name)}</h4>${deckBody(Object.entries(list).flatMap(([id, n]) => Array(n).fill(id)).filter(id => CARDS[id]), CARDS, false)}`;
-    box.style.display = 'block';
+    box.style.display = 'block'; fitStrips(box);
     const r = el.closest('.hr').getBoundingClientRect(), w = box.offsetWidth, h = box.offsetHeight;
     box.style.left = (r.right + 12 + w <= innerWidth - 8 ? r.right + 12 : Math.max(8, r.left - 12 - w)) + 'px';
     box.style.top = Math.max(8, Math.min(r.top - 40, innerHeight - h - 8)) + 'px';
@@ -816,7 +816,7 @@ function prematchScreen() {
       <div class="mid">${me.ready ? '<p class="wait">Waiting for your opponent</p>' : '<button class="play" id="ready">Ready</button>'}</div>
       ${side(opp, 'theirs')}</div><a class="backbtn leave" href="#/"><span>Leave</span></a></div>`;
   const b = document.getElementById('ready'); if (b) b.onclick = () => send({ t: 'ready' });
-  wirePops(app);
+  wirePops(app); fitStrips(app);
 }
 
 // The turn clock (matches between two people): the free window, then the game bank, of whoever must act.
@@ -1196,7 +1196,7 @@ function drawLists(G) {
   const mine = document.getElementById('mine'), theirs = document.getElementById('theirs');
   mine.innerHTML = `<h4>Your deck<span class="n">${sum(G.deckLeft)} left</span></h4><div class="rows">${rows(V.lists[you], G.deckLeft)}</div>`;
   theirs.innerHTML = `<h4>Opponent's cards<span class="n">${sum(G.unseen)} left</span></h4><div class="rows">${rows(V.lists[them], G.unseen)}</div>`;
-  wirePops(mine); wirePops(theirs);
+  wirePops(mine); wirePops(theirs); fitStrips(mine); fitStrips(theirs);
   drawPile(G);
 }
 // The Remove Pile, from its button beside History: a dialog in full focus (Gwent's graveyard), every removed card in full
