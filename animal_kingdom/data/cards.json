@@ -2043,10 +2043,10 @@
         "Bird"
       ],
       "base_strength": 1,
-      "text": "Has +1 strength for each other card in your hand.",
-      "keywords": [],
+      "text": "Has +1 strength for each card left in your hand.",
       "species": "Peacock",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "brutus",
