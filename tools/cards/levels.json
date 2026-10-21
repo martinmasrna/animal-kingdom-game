@@ -684,7 +684,17 @@
   "cairn": {
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Cairn",
+          "species": "Glyptodont"
+        }
+      },
+      "note": "Martin, 2026-10-21: Cairn scratched (a pile of stones people build); back to a placeholder",
+      "at": 1792575661
     }
   },
   "cape_buffalo": {
