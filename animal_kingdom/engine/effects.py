@@ -2702,7 +2702,7 @@ def _bee_legend_2_place(state, unit, cr):
     top animals and those buried) and in hand gains or loses the difference as a buff would (one in hand that grows
     there reacts, the Butterfly evolving); the deck's copies come out at it (GameState.deck_instance)."""
     p = unit.owner
-    jelly: dict = {}
+    jelly = {}
     for cid in state.decks[p]:
         jelly[cid] = jelly.get(cid, 0) + 1
     state.jelly[p] = jelly
