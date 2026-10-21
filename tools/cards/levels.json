@@ -2742,6 +2742,16 @@
       },
       "note": "Martin's own, 2026-10-21. Draft, a week on the card before a lock",
       "at": 1792581990
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Whenever you play a Colony animal, gain 4 food."
+      },
+      "note": "Martin, 2026-10-21: place, not play, so Vesper and the Vulture count",
+      "by": "claude",
+      "at": 1792584111
     }
   },
   "queen_marabunta": {

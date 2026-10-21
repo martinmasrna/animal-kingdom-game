@@ -44,7 +44,7 @@
         "Queen"
       ],
       "base_strength": 4,
-      "text": "Whenever you play a Colony animal, gain 4 food.",
+      "text": "Whenever you place a Colony animal, gain 4 food.",
       "keywords": [],
       "species": "Bee",
       "habitat": "Meadow",

@@ -35,7 +35,7 @@ class Config:
     methuselah_food_cap: int = 20        # Methuselah: each player gains at most this much food per turn
     greywhisker_food: int = 1            # Roar: gain 1 food (+ draw 1, + play 1 more, then discard 1)
     queen_marabunta_per_colony: int = 4  # per other friendly Colony unit
-    queen_honoria_per_play: int = 4      # per Colony unit you play (5→4, 2026-07-05)
+    queen_honoria_per_place: int = 4     # Queen Melissia: per Colony animal you place, played or not (5→4, 2026-07-05; place, 2026-10-21)
     falstaff_food_rider: int = 3         # extra food whenever you gain food
 
     # --- "Food gained this turn" signature mechanic (food_otk pure-OTK overhaul 2026-07-05) ---

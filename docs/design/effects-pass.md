@@ -270,6 +270,26 @@ The Owl went to Food OTK; its common slot goes to the Mosquito (Martin, 2026-10-
 
 Its fourth legendary: Omen (a raven; Forest, L, ~3, Bird): "Flight. Roar: put an animal from your opponent's Remove Pile into your hand." The deck removes more than any other, so the opponent's pile holds their best cards; a Bird, so the Bird Egg's Scout can find it. Wording to bring in line on the deck's cards: Eon's end-of-turn shuffle is a Dusk effect, Aurum is "Dawn: draw a card.", the Python counts removed animals (not units), and the Egg Eater counts removed Eggs.
 
+## Colony outside the precon, draft
+
+The precon's fourteen cards all carry a Colony-shaped condition (4 or more, a Queen, a Worker, two of the same), so none of them leaves the deck and only the Hornet enters it (Martin, 2026-10-21: a Colony player is forced into all four legendaries, and the tag has one card outside the precon). Wanted: about two legendaries, a rare and three commons that carry the tag and work in other decks. The shape that travels: the card's own condition is one other decks meet for their own reasons (a food threshold, Flight, its own copies), and the tag is only a tag, a body Colony counts toward its thresholds. "If you control another Colony animal" is the precon in disguise and is not used. New Colony cards are castes of the species already in the deck (Bee, Bumblebee, Wasp, Hornet, Ant, Army Ant, Termite): the deck splits its species by caste, never by subspecies, so a Leafcutter Ant can't stand beside Worker Ant and Soldier Ant.
+
+Queen Melissia says "whenever you place" (Martin, 2026-10-21), not "play": Vesper arriving from the deck and a Vulture landing pay her too; moving (Roam) still doesn't.
+
+Proposed, effects agreed (Martin: "sounds much better effect-wise"), animals and numbers to settle:
+
+| Card | Rarity | Habitat | Str | Text | Closest card |
+|---|---|---|---:|---|---|
+| Guard Bee | C | Meadow | 2 | Flight. Spikes. | Hedgehog (5, Spikes, gain 5), Porcupine (7, Spikes): a third the body, and it flies |
+| Forager Ant (Worker) | C | Forest | 1 | Roar: gain 5 food. If you gained 10 or more food this turn, draw a card. | Worker Ant (12 on the same body), Muskrat (the same condition, removal) |
+| Queen Wasp (Queen) | R | Forest | 4 | Flight. Whenever you place an animal with Flight, gain 3 food. | Queen Melissia, keyed to Flight at a rare's rate so the legendary stays ahead |
+| The Bee (the dancer) | L | Meadow | ? | Flight. Dusk: if you gained 20 or more food this turn, draw a card. | Tally turns food into food; this turns it into cards |
+| The Ant (the farmer) | L | Forest | 1 | Dusk: gain 2 food for each animal you control. | Dung Beetle (Dusk: 2 per Hungry animal); pays any wide deck |
+
+Also: the Naked Mole-Rat (Savanna roster) is the one eusocial mammal and would carry Colony beside Rodent, the first card two families both want.
+
+Rejected in the sitting: an Ant legendary "can cover an animal of any strength" (the Chameleon, word for word); a Tarantula Hawk "Flight. Roar: remove an adjacent enemy of strength 4 or less" (the Hawk plus one, strictly better); a Leafcutter Ant (breaks the caste split); a Yellowjacket "your opponent loses 4 food, you gain it if you control another Colony animal" and a Bullet Ant "Spikes, +2 with another Colony animal" (both the precon in disguise).
+
 ## Open topics
 
 - The bloodsuckers drain strength: Mosquito's −2, Leech's swap, the Tick's effect still to design, likely a slow drain.

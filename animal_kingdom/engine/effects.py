@@ -276,7 +276,7 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
     if play:
         key = f"played_{player}"         # what each player played this turn, for "if you played another Cat" (Serval)
         state.turn_flags[key] = [*state.turn_flags.get(key, []), [unit.iid, unit.card_id]]
-        _fire_play_event(state, unit)    # Queen Honoria: gain food when you play a Colony unit
+    _fire_place_event(state, unit)       # Queen Melissia: gain food whenever you place a Colony animal, played or not
     if roar:
         if unit.card_id != "macaw" and _hook(state, unit.card_id, "on_place"):
             state.last_roar[player] = unit.card_id        # the Macaw repeats it (its own copy records the copied card)
@@ -327,16 +327,17 @@ def _op_flee(state, step):
     return None
 
 
-def _fire_play_event(state, played) -> None:
-    """Fire ON_FRIENDLY_PLAY reactors for a unit its controller just played (Queen Honoria's food). An animal an effect
-    places isn't played and doesn't come here. The played unit itself is skipped."""
+def _fire_place_event(state, placed) -> None:
+    """Fire "whenever you place" reactors for a unit its controller just landed (Queen Melissia's food): played from
+    hand, placed by an effect (Vesper, the Vultures) or made as a token alike (Martin, 2026-10-21: "place", not "play",
+    so Vesper and the Vulture count). The placed unit itself is skipped."""
     for st in state.board.values():
         top = st[-1] if st else None
-        if not (top and top.owner == played.owner and top.iid != played.iid):
+        if not (top and top.owner == placed.owner and top.iid != placed.iid):
             continue
-        hook = _hook(state, top.card_id, "on_friendly_play")
+        hook = _hook(state, top.card_id, "on_friendly_place")
         if hook is not None:
-            hook(state, top, played)
+            hook(state, top, placed)
 
 
 def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
@@ -2065,9 +2066,10 @@ def _queen_adira_remove_event(state, unit, cr, event):
 
 # --- Colony -----------------------------------------------------------------------------------------------------
 
-def _queen_honoria_friendly_play(state, watcher, played) -> None:
-    if "Colony" in state.cards[played.card_id].tags and not _capped(state, "cap_queen_honoria", watcher):
-        gain_food(state, played.owner, state.config.queen_honoria_per_play)
+def _queen_honoria_friendly_place(state, watcher, placed) -> None:
+    """Queen Melissia: whenever you place a Colony animal, gain 4 food."""
+    if "Colony" in state.cards[placed.card_id].tags and not _capped(state, "cap_queen_honoria", watcher):
+        gain_food(state, placed.owner, state.config.queen_honoria_per_place)
 
 
 def _worker_bee_place(state, unit, cr):
@@ -2963,7 +2965,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "alley_cat": {"on_place": _house_cat_place},
     # Colony.
     "queen_marabunta": {"on_place": _queen_marabunta_place},
-    "queen_honoria": {"on_friendly_play": _queen_honoria_friendly_play},
+    "queen_honoria": {"on_friendly_place": _queen_honoria_friendly_place},
     "nurse_bee": {"on_place": _conditional(_draws("nurse_bee_draw"))},
     "nurse_bumblebee": {"on_place": _conditional(_draws("nurse_bumblebee_draw"))},
     "termite_king": {"on_place": _conditional(_draws("termite_king_draw"))},

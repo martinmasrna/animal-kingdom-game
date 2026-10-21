@@ -565,7 +565,7 @@
      "status": "proposed",
      "str": 4,
      "tag": "Colony, Queen",
-     "text": "Whenever you play a Colony animal, gain 4 food."
+     "text": "Whenever you place a Colony animal, gain 4 food."
     },
     {
      "habitat": "Meadow",
