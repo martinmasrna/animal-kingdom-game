@@ -187,6 +187,7 @@ class Match:
         self.on_game_end = None          # callback(match, log record); the server saves human games
         self.on_match_end = None         # callback(match); the server adds it to the players' histories
         self.rematches = 0               # a rematch starts a new series in the same match
+        self.takeover = False            # a game played on from a logged position (start_from): neither logged nor rated
         self.last_log: Optional[dict] = None   # the last finished game (game_log), for its replay
         self.clock: Optional[dict] = None   # {bank: {A, B}, holder, turn, free, since}; None when a bot plays
         self.rng = random.Random(secrets.randbits(32))
@@ -284,6 +285,22 @@ class Match:
             {"bank": {"A": CLOCK_BANK, "B": CLOCK_BANK}, "holder": None, "turn": -1, "free": 0.0, "since": time.time(),
              "mull_until": time.time() + CLOCK_MULLIGAN, "out": {"A": 0, "B": 0}}
         self._clock_update()
+
+    def start_from(self, state: GameState, seed: int) -> None:
+        """A game from a given position: a takeover of a logged game (server.create_match `from`; Martin, 2026-10-21:
+        "what would you do as the bot here?", asked on the real board). The seats' decks are in the state already, the
+        clock is off, and whoever the position says is to act, acts. Neither logged nor rated (`takeover`)."""
+        self.seed = seed
+        self.actions, self.action_times = [], []
+        self.started_at = time.time()
+        self.state = state
+        self.bots = {s: bot_for(seat.bot, seed + i) for i, (s, seat) in enumerate(self.seats.items()) if seat.is_bot}
+        self.history, self.events, self.seq = [], [], 0
+        self.phase = "playing"
+        self.clock = None
+        self.takeover = True
+        self._clock_update()
+        self.version += 1
 
     def next_game(self) -> None:
         if self.phase != "game_over":
@@ -501,6 +518,7 @@ class Match:
                 "actions": self.actions, "action_times": self.action_times,
                 "started_at": self.started_at, "created": self.created.isoformat(),
                 "schedule": self.schedule, "version": self.version, "rematches": self.rematches, "clock": self.clock, "last_game": self.last_game, "last_log": self.last_log,
+                "takeover": self.takeover,
                 "state": self.state.to_dict() if self.state is not None else None,
                 "history": [_jsonable(asdict(m)) for m in self.history],
                 "events": self.events, "seq": self.seq}
@@ -516,6 +534,7 @@ class Match:
         m.rematches = d.get("rematches", 0)
         m.last_game = d.get("last_game")
         m.last_log = d.get("last_log")
+        m.takeover = d.get("takeover", False)
         m.clock = d.get("clock")
         if m.clock:
             m.clock["since"] = time.time()      # time the server was down isn't anyone's

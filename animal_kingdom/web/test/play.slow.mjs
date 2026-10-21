@@ -19,9 +19,9 @@ async function startMatch(deck, botDeck) {
   await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   await page.evaluate(d => localStorage.setItem('ak:deck', d), deck);
   await page.reload({ waitUntil: 'networkidle0' });
-  for (const [k, v] of [['level', 'easy'], ['botDeck', botDeck]]) {   // home's opponent chooser: open it, then its dropdown, then pick
+  for (const [k, v] of [['level', 'Advanced'], ['botDeck', botDeck]]) {   // home's opponent chooser: open it, then its dropdown, then pick
     if (!(await page.$('.chooser'))) await page.click('#oppbtn');
-    if (k === 'level') await page.click(`[data-level="${v}"]`); else { await page.click(`.dd[data-dd="${k}"] .sel`); await page.click(`.ddo[data-k="${k}"][data-v="${v}"]`); }
+    if (k === 'level') await page.click(`[data-level="${v}"]`); else { await page.click(`.dd[data-dd="${k}"] .sel`); const o = `.ddo[data-k="${k}"][data-v="${v}"]`; await page.$eval(o, el => el.scrollIntoView()); await page.click(o); }   // a long list: the option may sit below the fold
     await wait(100);
   }
   await page.click('#go');

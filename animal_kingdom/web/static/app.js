@@ -1525,7 +1525,16 @@ function drawReplayBar() {
       <button class="slab" id="rfwd" tabindex="-1" data-tip="Forward one move">${ric('fwd')}</button>
       <div class="track" id="rtrack"><i></i></div>
       <button class="slab" id="reye" tabindex="-1"></button>
+      <button class="slab take" id="rtake" tabindex="-1" data-tip="Take the other seat from this round and play on against the Expert">Play from here</button>
       <a class="slab out" href="#/ladder/history">Leave</a>`;
+    // Play from here (Martin, 2026-10-21): the other seat, from the start of its turn in the round shown, the Expert on yours.
+    $('rtake').onclick = stop(async () => {
+      const v = RP.views[RP.i]; if (!v || v.phase !== 'playing') return toast('Step to a round first');
+      const key = RP.key.replace(/-\d+$/, ''), series = Number((RP.key.match(/-(\d+)$/) || [])[1] || 0);
+      const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ from: { match: key, series, round: v.game.round, seat: v.you === 'A' ? 'B' : 'A' } }) });
+      if (!r.ok) return toast(await r.text());
+      const m = await r.json(); stopReplay(); setToken(m.id, m.token); location.hash = '#/m/' + m.id;
+    });
     $('rback').onclick = stop(() => { replayPlay(false); replayStep(replayPrev()); });
     $('rfwd').onclick = stop(() => { replayPlay(false); replayStep(replayNext()); });
     $('rplay').onclick = stop(() => replayPlay(!RP.playing));
