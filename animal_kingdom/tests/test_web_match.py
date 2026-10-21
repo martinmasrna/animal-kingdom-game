@@ -581,7 +581,7 @@ def test_a_study_lists_its_positions_from_the_logs(monkeypatch, tmp_path):
     studies = tmp_path / "studies"; studies.mkdir()
     (studies / "falcons.json").write_text(json.dumps({"title": "Falcons", "positions": [
         {"match": "GMIDKA", "round": 4, "seat": "B"}, {"match": "NOPE00", "round": 2, "seat": "A"}]}))
-    monkeypatch.setattr(server, "STUDY_DIR", studies)
+    monkeypatch.setattr(server, "STUDY_DIR", studies); monkeypatch.setattr(server, "STUDY_DATA_DIR", tmp_path / "none")
 
     async def run():
         async with TestClient(TestServer(server.make_app())) as c:
@@ -605,7 +605,7 @@ def test_the_studies_list_shows_a_player_only_their_own(monkeypatch, tmp_path):
     studies = tmp_path / "studies"; studies.mkdir()
     (studies / "open.json").write_text(json.dumps({"title": "Open", "positions": []}))
     (studies / "theirs.json").write_text(json.dumps({"title": "Theirs", "owner": "someone-else", "positions": []}))
-    monkeypatch.setattr(server, "STUDY_DIR", studies)
+    monkeypatch.setattr(server, "STUDY_DIR", studies); monkeypatch.setattr(server, "STUDY_DATA_DIR", tmp_path / "none")
 
     async def run():
         async with TestClient(TestServer(server.make_app())) as c:

@@ -952,20 +952,31 @@ def position_at(rec: dict, rnd: int, seat: str):
     return None
 
 
-STUDY_DIR = Path(__file__).resolve().parent / "studies"
+STUDY_DIR = Path(__file__).resolve().parent / "studies"                               # shipped with the app
+STUDY_DATA_DIR = Path(__file__).resolve().parents[2] / "results" / "studies"          # on the server's volume: a copy, no deploy
+
+
+def study_files() -> dict[str, Path]:
+    """Every study by name: the shipped ones, and those on the volume (`fly ssh sftp put` lands a new one in seconds), which win."""
+    out: dict[str, Path] = {}
+    for d in (STUDY_DIR, STUDY_DATA_DIR):
+        if d.is_dir():
+            for path in sorted(d.glob("*.json")):
+                out[path.stem] = path
+    return out
 
 
 async def list_studies(req):
     """The studies you may open, for Settings: those naming you as owner, and those naming no owner."""
     p = me(req)
     out = []
-    for path in sorted(STUDY_DIR.glob("*.json")) if STUDY_DIR.is_dir() else []:
+    for name, path in sorted(study_files().items()):
         try:
             study = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
         if study.get("owner") in (None, p["id"]):
-            out.append({"name": path.stem, "title": study.get("title", path.stem), "count": len(study.get("positions", []))})
+            out.append({"name": name, "title": study.get("title", name), "count": len(study.get("positions", []))})
     return web.json_response(out)
 
 
@@ -974,8 +985,8 @@ async def get_study(req):
     developer's tool like the gauntlet: reached by its link, each position a 'Play from here'."""
     me(req)
     name = req.match_info["name"]
-    path = STUDY_DIR / f"{name}.json"
-    if not name.replace("_", "").isalnum() or not path.is_file():
+    path = study_files().get(name)
+    if not name.replace("_", "").isalnum() or path is None:
         raise web.HTTPNotFound(text="No such study")
     study = json.loads(path.read_text(encoding="utf-8"))
     out = []
