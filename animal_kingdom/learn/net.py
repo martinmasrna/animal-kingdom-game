@@ -96,7 +96,7 @@ def fit_linear(X, y, l2=1e-3):
     return lambda A: 1 / (1 + np.exp(-np.clip(A @ w[:-1] + w[-1], -30, 30)))
 
 
-def train(out, paths, hidden=32, l2=1e-4, feature_set="rung2"):
+def train(out, paths, hidden=32, l2=1e-4, feature_set="rung2", test_path=None):
     np = _np()
     from ..bots.net_eval import NetEval
 
@@ -120,6 +120,23 @@ def train(out, paths, hidden=32, l2=1e-4, feature_set="rung2"):
                        ("t10p", turn[test] >= 10)):
             row[bn] = logloss(p[mk], y[test][mk])
         report[label] = row
+    if test_path:
+        # An outside test set (2026-10-22: Martin's games against the Expert, `scratchpad/belief/human_set.py`), scored
+        # with the training set's standardisation; a `hand` column, if present, is the hand evaluation's score in points.
+        t = np.load(test_path)
+        if [str(n) for n in t["features"]] != names:
+            raise ValueError("the test set was recorded with a different feature set")
+        Zt, yt, tt = (t["x"].astype(np.float64) - mean) / std, t["y"], t["turn"]
+        outside = {"positions": int(len(yt)), "games": int(len(np.unique(t["game"])))}
+        scorers = [("base_rate", np.full(len(yt), y[~test].mean())), ("linear", lin(Zt)), ("net", net(Zt))]
+        if "hand" in t:
+            scorers.append(("hand", 1 / (1 + np.exp(-np.clip(t["hand"] / POINTS_PER_LOGIT, -30, 30)))))
+        for label, p in scorers:
+            row = {"all": logloss(p, yt)}
+            for bn, mk in (("t1_4", tt <= 4), ("t5_9", (tt >= 5) & (tt <= 9)), ("t10p", tt >= 10)):
+                row[bn] = logloss(p[mk], yt[mk]) if mk.any() else None
+            outside[label] = row
+        report["outside_test"] = outside
     NetEval(feature_set=feature_set, mean=tuple(mean), std=tuple(std),
             w1=tuple(tuple(col) for col in P[0].T), b1=tuple(P[1]), w2=tuple(P[2]),
             b2=float(P[3][0]), scale=POINTS_PER_LOGIT,
@@ -134,8 +151,9 @@ def main(argv=None) -> None:
     p.add_argument("rounds", nargs="+")
     p.add_argument("--hidden", type=int, default=32)
     p.add_argument("--l2", type=float, default=1e-4)
+    p.add_argument("--test", default=None, help="an outside test set (.npz with x, y, turn, game, features[, hand])")
     a = p.parse_args(argv)
-    rep = train(a.out, a.rounds, a.hidden, a.l2)
+    rep = train(a.out, a.rounds, a.hidden, a.l2, test_path=a.test)
     for k, v in rep.items():
         print(f"{k:15s} {v}")
 

@@ -1,6 +1,7 @@
-"""Self-play data for the value network: TurnBot games (hand eval or the current net) across
-every pairing of the seven premades and the goodstuff pile, recording the positions the search
-scores, labelled with who won.
+"""Self-play data for the value network: games between two copies of one pilot (TurnBot by default, any
+`sim.runner` bot spec with `--pilot`, e.g. the Expert) across every pairing of the decks (the seven starters and
+the goodstuff pile by default, the bot pool with `--pool`), recording the positions the search scores, labelled
+with who won.
 
 Recorded per decision of each seat: the afterstate as the search scores it (`extract_as_scored`:
 raw mid-turn, reframed to my next turn once control passes), plus, at every turn start, the
@@ -8,7 +9,7 @@ position from the mover's side (what RefereeBot scores after the sampled reply).
 uniformly random legal move with probability `epsilon`, recorded like any other.
 
     python -m animal_kingdom.learn.selfplay OUT.npz [--eval PATH] [--games-per-pair 110] \\
-        [--seed 0] [--jobs 8] [--decks den_rush,goodstuff]
+        [--seed 0] [--jobs 8] [--decks den_rush,goodstuff] [--pilot "referee:depth=1,..."] [--pool]
 """
 
 from __future__ import annotations
@@ -42,10 +43,15 @@ class GameSpec:
     seed: int
     eval_path: Optional[str]
     epsilon: float = 0.05
+    pilot: str = "turn"
 
 
-def pairings() -> list[tuple[str, str]]:
-    decks = sorted(DECK_SLUGS) + ["goodstuff"]
+def pairings(pool: bool = False) -> list[tuple[str, str]]:
+    if pool:
+        from ..decks import BOT_DECKS
+        decks = sorted(BOT_DECKS)
+    else:
+        decks = sorted(DECK_SLUGS) + ["goodstuff"]
     return list(itertools.combinations_with_replacement(decks, 2))
 
 
@@ -53,7 +59,12 @@ def play(spec: GameSpec) -> dict:
     evaluator = load_eval(spec.eval_path) if spec.eval_path else None
     state = new_game(load_premade_deck(spec.deck_a), load_premade_deck(spec.deck_b), spec.seed,
                      map_id="map_b")
-    bots = {s: TurnBot(seed=spec.seed * 2 + i, evaluator=evaluator) for i, s in enumerate("AB")}
+    if spec.pilot == "turn":
+        bots = {s: TurnBot(seed=spec.seed * 2 + i, evaluator=evaluator) for i, s in enumerate("AB")}
+    else:
+        from ..sim.runner import make_bot
+        bots = {s: make_bot(spec.pilot, spec.seed * 2 + i, extra={"evaluator": evaluator} if evaluator else None)
+                for i, s in enumerate("AB")}
     rng = random.Random(spec.seed)
     rows: list[tuple[str, list[float], int]] = []     # (seat, features, turn)
     while (result := rules.is_terminal(state)) is None:
@@ -82,13 +93,13 @@ def play(spec: GameSpec) -> dict:
 
 
 def generate(out: str, eval_path: Optional[str], games_per_pair: int, seed: int, jobs: int,
-             epsilon: float = 0.05, decks: Optional[list[str]] = None) -> None:
+             epsilon: float = 0.05, decks: Optional[list[str]] = None, pilot: str = "turn", pool: bool = False) -> None:
     """`decks`, if given, keeps only the pairings that include one of them."""
     import numpy as np
 
-    pairs = [(i, (a, b)) for i, (a, b) in enumerate(pairings())
+    pairs = [(i, (a, b)) for i, (a, b) in enumerate(pairings(pool))
              if not decks or a in decks or b in decks]
-    specs = [GameSpec(a, b, seed + i * 1000 + k, eval_path, epsilon)
+    specs = [GameSpec(a, b, seed + i * 1000 + k, eval_path, epsilon, pilot)
              for i, (a, b) in pairs for k in range(games_per_pair)]
     random.Random(seed).shuffle(specs)          # mixed decks in every progress slice
     cols: dict[str, list] = {k: [] for k in ("x", "y", "turn", "deck", "opp", "game", "reason")}
@@ -104,7 +115,7 @@ def generate(out: str, eval_path: Optional[str], games_per_pair: int, seed: int,
                         opp=np.array(cols["opp"]), game=np.array(cols["game"]),
                         reason=np.array(cols["reason"]),
                         features=np.array(features.feature_names(FEATURE_SET)),
-                        eval_path=np.array(eval_path or ""))
+                        eval_path=np.array(eval_path or ""), pilot=np.array(pilot))
 
 
 def main(argv=None) -> None:
@@ -117,9 +128,11 @@ def main(argv=None) -> None:
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
     p.add_argument("--decks", default=None,
                    help="comma-separated: only the pairings that include one of these decks")
+    p.add_argument("--pilot", default="turn", help="the bot spec both seats play (sim.runner.make_bot); default TurnBot")
+    p.add_argument("--pool", action="store_true", help="pair the bot pool (decks.BOT_DECKS) instead of the starters and goodstuff")
     a = p.parse_args(argv)
     generate(a.out, a.eval, a.games_per_pair, a.seed, a.jobs, a.epsilon,
-             a.decks.split(",") if a.decks else None)
+             a.decks.split(",") if a.decks else None, a.pilot, a.pool)
 
 
 if __name__ == "__main__":
