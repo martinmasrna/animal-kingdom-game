@@ -4492,7 +4492,7 @@
       "rarity": "rare",
       "tags": [],
       "base_strength": 2,
-      "text": "Roar: your opponent takes 1 fewer action next turn.",
+      "text": "Roar: your opponent takes only 1 action next turn.",
       "species": "Electric Eel",
       "habitat": "Jungle",
       "keywords": []

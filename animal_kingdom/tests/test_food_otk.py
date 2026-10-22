@@ -138,18 +138,19 @@ def test_beaver_grants_an_extra_action_next_turn():
     assert s.turn_counter == before + 1                              # ended only after the 3rd
 
 
-def test_the_electric_eel_takes_an_action_from_the_opponents_very_next_turn_never_the_last():
-    """The Beaver's mirror (Martin, 2026-10-22): "Roar: your opponent takes 1 fewer action next turn"."""
+def test_the_electric_eel_leaves_the_opponent_only_one_action_next_turn():
+    """The Beaver's mirror (Martin, 2026-10-22): "Roar: your opponent takes only 1 action next turn". Two Eels change
+    nothing more: one action is the floor the text names."""
     s = make_state(hands={"A": ["electric_eel"] * 3}, decks={"A": ["mouse"] * 12, "B": ["mouse"] * 12})
     rules.apply_action(s, PlaceAction("electric_eel", ("cr", "1,2")))
     rules.apply_action(s, DrawAction())                               # A's turn ends
-    assert s.current == "B" and rules.turn_actions(s) == CFG.actions_per_turn - CFG.eel_lost_actions
+    assert s.current == "B" and rules.turn_actions(s) == CFG.eel_actions == 1
     rules.apply_action(s, DrawAction())
     assert s.current == "A"                                           # B's turn ended after its one action
     assert rules.turn_actions(s) == CFG.actions_per_turn              # and A's own turn is whole
     rules.apply_action(s, PlaceAction("electric_eel", ("cr", "1,1")))
     rules.apply_action(s, PlaceAction("electric_eel", ("cr", "1,3")))
-    assert s.current == "B" and rules.turn_actions(s) == 1            # two Eels: a turn is never skipped whole
+    assert s.current == "B" and rules.turn_actions(s) == 1
 
 
 # ------------------------------------------------------------------- Armadillo and Porcupine auras

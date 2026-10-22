@@ -1341,6 +1341,14 @@ def _gain_in_hand(state, inst, amount) -> None:
         hook(state, inst, amount)
 
 
+def _op_cap_actions(state, step):
+    """Electric Eel: `player` takes at most `n` actions this turn (it fires at the start of their turn; turn_flags reset
+    at its end, so the cap lasts that one turn)."""
+    key = f"action_cap_{step['player']}"
+    state.turn_flags[key] = min(state.turn_flags.get(key, step["n"]), step["n"])
+    return None
+
+
 def _op_grant_action(state, step):
     """Chinchilla: add extra top-level actions to `player` for the turn this fires on (it is
     scheduled to fire at the start of the owner's next turn). Read by rules._resolve_and_maybe_end_turn
@@ -1366,6 +1374,7 @@ OPS: dict[str, Callable] = {
     "play_named": _op_play_named,
     "grant_strength": _op_grant_strength,
     "grant_action": _op_grant_action,
+    "cap_actions": _op_cap_actions,
     "grant_free_roam": _op_grant_free_roam,
     "timed_hook": _op_timed_hook,
     "flee": _op_flee,
@@ -2572,10 +2581,10 @@ def _beaver_place(state, unit, cr):
 
 
 def _electric_eel_place(state, unit, cr):
-    """Roar: your opponent takes 1 fewer action next turn. The Beaver's mirror: it lands on the opponent's very next turn,
+    """Roar: your opponent takes only 1 action next turn. The Beaver's mirror: it lands on the opponent's very next turn,
     as a timer that ticks on their turn (and dies with the Eel, as the Beaver's does)."""
     opp = other_player(unit.owner)
-    schedule(state, unit, 1, {"op": "grant_action", "player": opp, "n": -state.config.eel_lost_actions},
+    schedule(state, unit, 1, {"op": "cap_actions", "player": opp, "n": state.config.eel_actions},
              while_buried=True, turn_of=opp)
 
 
