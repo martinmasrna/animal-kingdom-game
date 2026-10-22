@@ -728,11 +728,11 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 2,
-      "text": "Roar: remove an adjacent enemy, then discard a random card.",
-      "keywords": [],
+      "base_strength": 3,
+      "text": "Roar: if you played 3 or more animals this turn, remove an adjacent enemy.",
       "species": "Rat",
-      "habitat": "City"
+      "habitat": "City",
+      "keywords": []
     },
     {
       "id": "falcon",

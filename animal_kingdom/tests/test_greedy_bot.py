@@ -283,6 +283,7 @@ def test_roar_with_a_pending_choice_is_not_fizzled():
     s = make_state(hands={"A": ["rat", "mouse"]})
     put(s, "2,2", "pup", "B")
     put(s, "1,3", "pup", "B")
+    s.units_placed_this_turn = 2                            # the Rat swarms: its Roar is live
     action = PlaceAction("rat", ("cr", "1,2"))
     nxt = s.clone()
     rules.apply_action(nxt, action)

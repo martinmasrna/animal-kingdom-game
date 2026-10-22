@@ -947,17 +947,13 @@ def test_king_cobra_venom_removes_the_bitten_unit_next_turn_even_if_buried_or_th
     assert "lion" in s.remove_pile and s.top_unit("2,1").card_id == "tiger"
 
 
-def test_rat_removes_any_adjacent_enemy_then_a_random_hand_card_and_works_on_an_empty_hand():
+def test_the_swarming_rat_removes_an_adjacent_enemy_of_any_strength_and_keeps_the_hand():
     s = make_state(hands={"A": ["rat", "lion", "eagle"]})
     put(s, "2,1", "lion_legend_3", "B")                     # an 8: Rat reaches any strength
+    s.units_placed_this_turn = 2                            # the Rat is the turn's third animal
     apply_click(s, PlaceAction("rat", ("cr", "1,1")))
     assert s.top_unit("2,1") is None and "lion_legend_3" in s.remove_pile
-    assert len(s.hands["A"]) == 1                         # one of Lion / Eagle went, at random
-
-    s2 = make_state(hands={"A": ["rat"]})
-    put(s2, "2,1", "lion_legend_3", "B")
-    apply_click(s2, PlaceAction("rat", ("cr", "1,1")))    # empty hand: nothing to pay
-    assert s2.top_unit("2,1") is None
+    assert len(s.hands["A"]) == 2                           # no discard any more
 
 
 def test_queen_adira_uncovered_by_the_removal_does_not_draw():

@@ -30,7 +30,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 |---|---:|---|---:|---|
 | **Hare** | 3 | — | 4 | Flee. Roar: if you played 3 or more animals this turn, draw 2 cards. |
 | **Cheetah** | 3 | Cat | 6 | Roar: if placed next to the opponent's den, draw a card. |
-| **Rat** | 3 | Rodent | 2 | Roar: remove an adjacent enemy, then discard a random card. |
+| **Rat** | 3 | Rodent | 3 | Roar: if you played 3 or more animals this turn, remove an adjacent enemy. |
 | **Falcon** | 3 | Bird | 4 | Flight. Roar: if placed next to the opponent's den, draw a card. |
 | **Bat** | 3 | — | 3 | Flight. Roar: draw a card. |
 | **Mouse** | 3 | Rodent | 4 | Roar: draw a Rodent. |

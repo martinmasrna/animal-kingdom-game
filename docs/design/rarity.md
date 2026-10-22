@@ -35,7 +35,7 @@ Rares therefore hold most of the pool's generic answers and are shared across de
 
 ## Calls so far
 
-- The 2026-10-22 pass by the test: Macaque, Jackal, Serval, Barracuda, Termite Queen, Remora, Nurse Bumblebee, Termite King and Praying Mantis became commons, their strength to re-level against their new peers; Boar, Chimpanzee and Rat become rares in the starter pass, since each starter runs three. The Earthworm stays rare (its two Worms draw too, three cards in all, where the Cockroach draws none). The Tarsier stays rare and its owner picks the Primate the +2 lands on. The Dormouse waits for a redesign: as a common it would be the Worker Wasp again. Open: whether the Mackerel, an anthem that stacks, belongs at rare beside the Cape Buffalo (Martin, 2026-10-22).
+- The 2026-10-22 pass by the test: Macaque, Jackal, Serval, Barracuda, Termite Queen, Remora, Nurse Bumblebee, Termite King and Praying Mantis became commons, their strength to re-level against their new peers; Boar and Chimpanzee became rares at 4. The Rat stays a common and pays for its any-size removal with Den Rush's own condition, Hare's three animals in a turn, instead of a random discard every deck pays alike (Martin, 2026-10-22). The Earthworm stays rare (its two Worms draw too, three cards in all, where the Cockroach draws none). The Tarsier stays rare and its owner picks the Primate the +2 lands on. The Dormouse waits for a redesign: as a common it would be the Worker Wasp again. Open: whether the Mackerel, an anthem that stacks, belongs at rare beside the Cape Buffalo (Martin, 2026-10-22).
 
 - A Hamster isn't a rare (Martin, 2026-10-08).
 - The Octopus is a rare by feel (Martin, 2026-10-08).

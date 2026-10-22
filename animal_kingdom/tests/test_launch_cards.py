@@ -508,6 +508,20 @@ def test_hare_draws_after_three_animals_this_turn():
     assert hand_ids(s, "A") == ["lion"] * CFG.hare_draw
 
 
+def test_the_rat_removes_only_as_the_third_animal_of_a_turn_and_discards_nothing():
+    s = make_state(hands={"A": ["rat", "lion"]})
+    put(s, "2,2", "tiger", "B")
+    s.units_placed_this_turn = 1                                 # the Rat is the second: no swarm
+    rules.apply_action(s, PlaceAction("rat", ("cr", "1,2")))
+    assert not s.pending and s.top_unit("2,2").card_id == "tiger" and hand_ids(s, "A") == ["lion"]
+    s2 = make_state(hands={"A": ["rat", "lion"]})
+    put(s2, "2,2", "tiger", "B")
+    s2.units_placed_this_turn = 2
+    rules.apply_action(s2, PlaceAction("rat", ("cr", "1,2")))
+    choose(s2, "2,2")
+    assert s2.top_unit("2,2") is None and hand_ids(s2, "A") == ["lion"]
+
+
 # ============================================================================= Egg Control
 
 def test_the_legendary_raven_takes_from_the_opponents_remove_pile():

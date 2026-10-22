@@ -1726,6 +1726,7 @@ def roar_condition(state, player, card_id, unit=None):
             st and st[-1].owner == player and st[-1].card_id == card_id for st in state.board.values())),
         "piranha": lambda: _lost_this_turn(state, player) >= 1,
         "hare": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
+        "rat": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
         "macaque": lambda: hand_after() >= cfg.macaque_hand_min,
         "gorilla": lambda: strength() >= cfg.gorilla_min,
     }.get(card_id)
@@ -2177,16 +2178,8 @@ def _adjacent_enemy_unit_crossroads(state, unit, cr, *, chosen=True):
 
 
 def _rat_place(state, unit, cr):
-    # "Remove an adjacent enemy, then discard a random card." The hand card goes whether or not there was a target.
-    state.effect_stack.append({"op": "rat_discard", "player": unit.owner})
+    """Roar: if you played 3 or more animals this turn, remove an adjacent enemy (the swarm; Hare's condition)."""
     _push_remove_choice(state, unit.owner, "rat", _adjacent_enemy_targets(state, unit, cr))
-
-
-def _op_rat_discard(state, step):
-    hand = state.hands[step["player"]]
-    if hand:
-        remove_from_hand(state, step["player"], state.rng.choice(hand))   # a remove, not a Deathrattle
-    return None
 
 
 def _has_spare_copy(state, player, card_id) -> bool:
@@ -2960,7 +2953,6 @@ def _mock_saboteur_place(state, unit, cr):
 
 
 OPS.update({
-    "rat_discard": _op_rat_discard,
     "hornet_kill": _op_hornet_kill,
     "rat_legend_2_wipe": _op_pestis_wipe,
     "bounce_iid": _op_bounce_iid,
@@ -3069,7 +3061,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "skunk": {"on_place": _skunk_place},
     "hare": {"on_place": _conditional(_draws("hare_draw"))},
     "cheetah": {"on_place": _hq_adjacent_draw},
-    "rat": {"on_place": _rat_place},
+    "rat": {"on_place": _conditional(_rat_place)},
     "falcon": {"on_place": _hq_adjacent_draw},
     "bat": {"on_place": _draw1},
     "dolphin": {"on_place": _draw1},

@@ -372,6 +372,7 @@ COUNT_THRESHOLD_RE = re.compile(r"(\d+) or more (animals|cards|strength|regions|
 # card_id -> the config attr of its printed "N or more <things>" threshold.
 THRESHOLDS = {
     "hare": "hare_played_min",
+    "rat": "hare_played_min",
     "macaque": "macaque_hand_min",
     "gorilla": "gorilla_min",
     "manta_ray_legend": "manta_legend_regions",

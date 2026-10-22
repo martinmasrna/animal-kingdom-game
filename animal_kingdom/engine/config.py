@@ -110,7 +110,7 @@ class Config:
     # --- Thresholds / strength gates ---
     unnamed_canine_draw_threshold: int = 5   # draw if Unnamed Canine has >= this strength
     colony_synergy_threshold: int = 4    # Guard Wasp / Soldier Ant / Nurse Bumblebee "4+ Colony"
-    hare_played_min: int = 3             # Hare: draw if you played this many animals this turn
+    hare_played_min: int = 3             # Hare and Rat: their Roar if you played this many animals this turn
     hare_draw: int = 2                   # ...this many cards
     macaque_hand_min: int = 5            # Macaque: remove if you have this many cards in hand
     gorilla_min: int = 8                 # Gorilla: draw if this has this much strength
