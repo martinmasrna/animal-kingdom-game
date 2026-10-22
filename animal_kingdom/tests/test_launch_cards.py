@@ -610,8 +610,12 @@ def test_cod_draws_per_adjacent_allied_fish_and_remora_plays_a_fish():
     rules.apply_action(s, PlaceAction("cod", ("cr", "1,2")))
     assert len(s.hands["A"]) == 2
     s2 = make_state(hands={"A": ["remora", "lion", "sardine"]})
-    rules.apply_action(s2, PlaceAction("remora", ("cr", "1,2")))
-    assert {p["card_id"] for p in s2.pending["placements"]} == {"sardine"}
+    rules.apply_action(s2, PlaceAction("remora", ("cr", "1,2")))     # no Fish beside it: no extra play
+    assert not s2.pending
+    s3 = make_state(hands={"A": ["remora", "lion", "sardine"]})
+    put(s3, "1,1", "tuna", "A")
+    rules.apply_action(s3, PlaceAction("remora", ("cr", "1,2")))
+    assert {p["card_id"] for p in s3.pending["placements"]} == {"sardine"}
 
 
 def test_sardines_fill_adjacent_empty_crossroads_from_hand_and_deck_without_roaring():

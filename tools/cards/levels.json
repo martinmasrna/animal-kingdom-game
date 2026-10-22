@@ -2587,6 +2587,26 @@
       "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
       "by": "claude",
       "at": 1792661449
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: play another Fish."
+      },
+      "note": "Martin, 2026-10-22: Alley Cat's kind of condition in the Fish language (placed together)",
+      "by": "claude",
+      "at": 1792662817
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin, 2026-10-22: the Alley Cat of Fish",
+      "by": "claude",
+      "at": 1792662817
     }
   },
   "rhinoceros": {

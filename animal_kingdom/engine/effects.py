@@ -1697,7 +1697,7 @@ OPS.update({
 
 def roar_condition(state, player, card_id, unit=None):
     """Whether the "if ..." of `card_id`'s Roar holds: None for a card with no such
-    condition, or one that depends on where it lands (Lynx, Cheetah, Falcon). `unit` is the
+    condition, or one that depends on where it lands (Lynx, Cheetah, Falcon, Remora). `unit` is the
     placed unit while its Roar resolves; None asks about the card in hand, as if it were
     played now (the client lights such cards up). The Roars below call this too, so the
     two can't disagree."""
@@ -2501,7 +2501,9 @@ def _manta_ally_covered(state, watcher, covered, coverer, cr):
 
 
 def _remora_place(state, unit, cr):
-    _push_play_extra(state, unit.owner, filter={"tags_all": ["Fish"]})
+    """Roar: if placed next to an allied Fish, play another Fish."""
+    if _adjacent_ally_fish(state, unit, cr) >= 1:
+        _push_play_extra(state, unit.owner, filter={"tags_all": ["Fish"]})
 
 
 def _cod_place(state, unit, cr):

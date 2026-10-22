@@ -1123,11 +1123,11 @@
       "tags": [
         "Fish"
       ],
-      "base_strength": 3,
-      "text": "Roar: play another Fish.",
-      "keywords": [],
+      "base_strength": 1,
+      "text": "Roar: if placed next to an allied Fish, play another Fish.",
       "species": "Remora",
-      "habitat": "Open Ocean"
+      "habitat": "Open Ocean",
+      "keywords": []
     },
     {
       "id": "cod",
