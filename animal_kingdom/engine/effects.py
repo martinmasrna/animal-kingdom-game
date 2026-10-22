@@ -1275,7 +1275,7 @@ def _op_play_named(state, step):
         if not in_hand and cid in state.decks[player]:
             state.decks[player].remove(cid)
             jellied = state.jelly_take(player, cid)
-            state.add_to_hand(player, cid, strength_counter=state.jelly_counter(player, cid) if jellied else 0)   # only to be placed at once: not a gain, so no hand-limit burn
+            state.add_to_hand(player, cid, strength_counter=jellied or 0)   # only to be placed at once: not a gain, so no hand-limit burn
             step["fetched"] = True
         else:
             step["fetched"] = False
@@ -2045,29 +2045,6 @@ def _alpha_place(state, unit, cr):
     _spawn_pups(state, unit, cr, state.config.alpha_pups, ("baby_fox", "baby_fox_2"))
 
 
-def _unnamed_canine_place(state, unit, cr):
-    if effective_strength(state, unit) >= state.config.unnamed_canine_draw_threshold:
-        _push_draw(state, unit.owner, 1)
-
-
-def _shuck_place(state, unit, cr):
-    # Reserve design: return a removed Canine from the Remove Pile to hand with a +2 counter.
-    canines = sorted({cid for cid in state.remove_pile if "Canine" in state.cards[cid].tags})
-    if canines:
-        state.effect_stack.append({"op": "shuck_return", "chooser": unit.owner, "options": canines})
-
-
-def _op_shuck_return(state, step):
-    if "choice" not in step:
-        return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
-    if state.pile_take(step["choice"]):
-        gain_to_hand(state, step["chooser"], step["choice"], strength_counter=state.config.shuck_grant)
-    return None
-
-
-OPS["shuck_return"] = _op_shuck_return
-
-
 # --- Cats -------------------------------------------------------------------------------------------------------
 
 def _serval_place(state, unit, cr):
@@ -2306,11 +2283,6 @@ def _fill(state, unit, cr):
 
 
 # --- Egg Control ------------------------------------------------------------------------------------------------
-
-def _anaconda_legend_event(state, unit, cr, event):           # any draw/shuffle/remove -> +1 (reserve design)
-    if not _capped(state, "cap_eon", unit):
-        gain_food(state, unit.owner, state.config.anaconda_legend_food)
-
 
 def _rattlesnake_shuffle_event(state, event):
     """Each copy grows on its owner's shuffle, including copies still in the deck."""
@@ -3009,10 +2981,6 @@ _draw1 = _draws()
 _draw_test = _draws("test_draw")
 
 
-def _calib_removal(max_attr=None, min_attr=None):
-    return {"on_place": _removes(max_attr, min_attr)}
-
-
 EFFECTS: dict[str, dict[str, Callable]] = {
     # Aristocrats.
     "cuckoo_legend": {"on_place": _cuckoo_legend_place},
@@ -3193,28 +3161,9 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # The tutorial's own cards, as they were when it was written.
     "tutorial_lynx": {"on_place": _conditional(_draw1)},
     "tutorial_chipmunk": {"on_place": _chipmunk_place},
-    # Reserve designs and the sim tools' calibration bodies.
-    "eon_food_engine": {"on_draw_event": _anaconda_legend_event, "on_shuffle_event": _anaconda_legend_event, "on_remove_event": _anaconda_legend_event},
-    "unnamed_canine": {"on_place": _unnamed_canine_place},
-    "shuck": {"on_place": _shuck_place},
+    # The self-play baseline deck's calibration bodies (decks.BASELINE_DECK).
     "mock_scout": {"on_place": _draw1},
-    "mock_courier": {"on_place": _draw1},
     "mock_saboteur": {"on_place": _mock_saboteur_place},
     "mock_draw2": {"on_place": _draw_test},
-    "mock_skully": {"on_place": _draw_test},
     "mock_removal": {"on_place": _removes()},
-    "mock_sentry": {"on_place": _removes("stoop_max")},
-    "mock_hunter": {"on_place": _removes("calib_rm4_max")},
-    **{f"mock_draw_{n}": {"on_place": _draw1} for n in (3, 4, 6, 7)},
-    **{f"mock_flydraw_{n}": {"on_place": _draw1} for n in (2, 3, 4, 5)},
-    **{f"calib_draw1_{n}": {"on_place": _draw1} for n in (1, 2)},
-    **{f"calib_draw2_{n}": {"on_place": _draw_test} for n in (0, 1, 2, 3)},
-    **{f"calib_rm3_{n}": _calib_removal("stoop_max") for n in (2, 3, 4, 5, 6)},
-    **{f"calib_rm4_{n}": _calib_removal("calib_rm4_max") for n in (2, 3, 4, 5, 6)},
-    **{f"calib_rm6_{n}": _calib_removal(min_attr="calib_rm6_min") for n in (1, 2, 3, 4, 5)},
-    **{f"calib_rmany_{n}": _calib_removal() for n in (1, 2, 3, 4, 5)},
-    **{f"calib_extra_{n}": {"on_place": lambda state, unit, cr: _push_play_extra(state, unit.owner)}
-       for n in (1, 2, 3, 4, 5)},
-    **{f"calib_food10_{n}": {"on_place": _gains("squirrel_food")} for n in (2, 3, 4, 5, 6)},
-    **{f"calib_food3t_{n}": {"on_end_of_turn": _gains("worker_wasp_food")} for n in (2, 3, 4, 5, 6)},
 }

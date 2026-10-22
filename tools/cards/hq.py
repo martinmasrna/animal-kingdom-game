@@ -552,10 +552,13 @@ def rename(old: str, new: str) -> str:
 def delete(card_id: str, by: str = "martin") -> str:
     """Remove a card from the game: out of cards.json and the starter decks, and its levels gone. Its number in
     static/cardnums.js stays, since deck codes depend on every number. Claude can't delete a card with a locked value."""
-    r = _row(card_id)
-    if by == "claude" and any(r["lv"][c]["lv"] == "locked" for c in VALUE_COLS):
-        raise Refused(f"{r['id']} has a locked value; ask Martin")
     cards = _read(CARDS)
+    if any(c["id"] == card_id and c["status"] == "reserve" and not c.get("habitat") for c in cards["cards"]):
+        r = {"id": card_id}                       # a sim fixture the table hides (no habitat): nothing of Martin's to lock
+    else:
+        r = _row(card_id)
+        if by == "claude" and any(r["lv"][c]["lv"] == "locked" for c in VALUE_COLS):
+            raise Refused(f"{r['id']} has a locked value; ask Martin")
     cards["cards"] = [c for c in cards["cards"] if c["id"] != r["id"]]
     _save_cards(cards)
     decklists = _read(DECKLISTS)

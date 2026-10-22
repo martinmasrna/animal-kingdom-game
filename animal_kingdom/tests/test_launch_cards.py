@@ -67,8 +67,8 @@ def test_titan_costs_two_actions_and_no_free_placement_pays_for_it():
     s2 = make_state(hands={"A": ["lion", "blue_whale"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     rules.apply_action(s2, PlaceAction("lion", ("cr", "1,1")))  # one action left
     assert not [a for a in rules.legal_actions(s2) if getattr(a, "card_id", None) == "blue_whale"]
-    s3 = make_state(hands={"A": ["calib_extra_2", "blue_whale"]})
-    rules.apply_action(s3, PlaceAction("calib_extra_2", ("cr", "1,1")))   # "play another animal": a free placement
+    s3 = make_state(hands={"A": ["greywhisker", "blue_whale"]})
+    rules.apply_action(s3, PlaceAction("greywhisker", ("cr", "1,1")))   # Roar "play another animal": a free placement
     assert s3.pending is None or all(p["card_id"] != "blue_whale" for p in s3.pending.get("placements", []))
 
 
@@ -827,7 +827,7 @@ def test_the_capybara_is_a_nine_when_the_rest_of_the_starting_deck_is_small():
     small.starting_decks = {"A": ("capybara", "capybara", "raven", "snake_egg", "hawk"), "B": ()}
     big = make_state(hands={"A": ["capybara"]})
     big.starting_decks = {"A": ("capybara", "raven", "lynx"), "B": ()}       # the Lynx is a 5
-    assert effective_strength(small, small.hands["A"][0]) == CFG.capybara_strength == 9
+    assert effective_strength(small, small.hands["A"][0]) == 2 + CFG.capybara_bonus == 9
     assert effective_strength(big, big.hands["A"][0]) == 2
 
 

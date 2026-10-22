@@ -268,12 +268,6 @@ def grazing(state: GameState, unit: UnitInstance, cr: Optional[str] = None) -> b
                for r in state.game_map.regions.values())
 
 
-def regions_starved(state, player: str) -> bool:
-    """The Unnamed Giant: while `player` controls it (on top of its crossroad), their regions
-    produce no food."""
-    return _controls(state, player, "unnamed_giant")
-
-
 def region_food_modifier(state: GameState, player: str) -> int:
     """What each of `player`'s regions produces on top of its printed food: +5 for each legendary Wildebeest they
     control ("Your regions produce 5 more food."), -5 for each legendary Boar their opponent controls ("Your opponent's

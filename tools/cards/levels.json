@@ -714,7 +714,12 @@
       "lv": "draft",
       "note": "Martin, 2026-10-22: 'other' cut, the Capybara's own printed 2 never counts",
       "by": "claude",
-      "at": 1792655320
+      "at": 1792684067,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-22: 'other' cut, the Capybara's own printed 2 never counts",
+        "prev": "If your starting deck has no animal of strength 4 or more, this has strength 9."
+      }
     },
     "rarity": {
       "note": "Martin, 2026-10-22: the small-deck common, its one big body",

@@ -186,7 +186,7 @@ def test_decklist_problems_follow_the_deck_rules():
     assert decklist_problems(cats[:-1])                                   # 29 cards
     two_kings = [c for c in cats if c != "lion_legend"] + ["lion_legend_3"]
     assert any("King Theron" in p for p in decklist_problems(two_kings))
-    reserve = [c for c in cats if c != "lion_legend"] + ["unnamed_giant"]
+    reserve = [c for c in cats if c != "lion_legend"] + ["mock_vanilla_10"]
     assert any("collectible" in p for p in decklist_problems(reserve))
     bench = list(cats)
     bench[bench.index("lion")] = "eagle"                                  # a common for a common

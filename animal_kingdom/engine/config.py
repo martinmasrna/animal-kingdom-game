@@ -55,7 +55,6 @@ class Config:
     eel_actions: int = 1                # Electric Eel: the actions your opponent takes on their next turn
 
     # --- Food-event engine reactors (decision F2/F9; magnitudes are dials) ---
-    anaconda_legend_food: int = 1                    # per draw/shuffle/remove event
     egg_eater_growth: int = 2            # Egg Eater: +strength for each removed Egg
 
     # --- Payoff food ---
@@ -80,7 +79,6 @@ class Config:
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
     dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn
     bush_dog_grant: int = 2              # Bush Dog: Dusk: give an adjacent Canine +2
-    shuck_grant: int = 2                 # to the Canine returned from the Remove Pile; reserve
     raccoon_dog_grant: int = 1           # Coyote: an allied Canine that roams gets +1
     wolf_legend_grant: int = 1           # the legendary Wolf: Dusk: +1 for each adjacent Canine
     stray_dog_grant: int = 2             # Stray Dog: give an ally with Roam +2, then it roams
@@ -109,7 +107,6 @@ class Config:
     leopard_legend_growth: int = 1       # the legendary Leopard: +1 strength whenever it removes an animal (every kill makes him bigger)
 
     # --- Thresholds / strength gates ---
-    unnamed_canine_draw_threshold: int = 5   # draw if Unnamed Canine has >= this strength
     colony_synergy_threshold: int = 4    # Guard Wasp / Soldier Ant / Nurse Bumblebee "4+ Colony"
     hare_played_min: int = 3             # Hare and Rat: their Roar if you played this many animals this turn
     hare_draw: int = 2                   # ...this many cards
@@ -118,7 +115,7 @@ class Config:
     manta_legend_regions: int = 2        # the legendary Manta Ray: draw at Dusk with this many regions...
     manta_legend_draw: int = 2           # ...this many cards
     oxpecker_min: int = 8                # Oxpecker: count starting-deck animals of strength >= this
-    capybara_strength: int = 9           # Capybara: this has strength 9 if your starting deck has no other animal...
+    capybara_bonus: int = 7              # Capybara: this has +7 strength if your starting deck has no other animal...
     capybara_small_max: int = 3          # ...of strength 4 or more (the small-deck archetype's line)
     jelly_strength: int = 5              # the legendary Bee: "the animals in your hand and deck become strength 5"
     vulture_removals: int = 3            # Vulture: lands at your Dusk if this many animals were removed this turn
@@ -130,8 +127,6 @@ class Config:
     rhinoceros_max: int = 2              # baseline-ruler tuning 2026-07-13: remove-all ≤3→≤2
     hippopotamus_max: int = 3
     cuckoo_legend_max: int = 4           # the legendary Cuckoo: removes an adjacent animal of strength <= this
-    calib_rm4_max: int = 4               # the calibration bodies' "strength 4 or less" (reserve, sim tools)
-    calib_rm6_min: int = 6               # the calibration bodies' "strength 6 or more"
 
     # --- Draws, food and other magnitudes of the launch decks ---
     mantis_draw: int = 2                 # Praying Mantis: remove an adjacent ally to draw 2
@@ -178,7 +173,6 @@ class Config:
     # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the
     # per-card default ruling and the data behind it) ---
     cap_queen_adira: bool = False
-    cap_eon: bool = False
     cap_queen_honoria: bool = False
     cap_falstaff: bool = False
     cap_king_theron: bool = False

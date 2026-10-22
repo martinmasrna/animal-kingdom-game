@@ -19,7 +19,7 @@ from __future__ import annotations
 from dataclasses import replace
 
 from animal_kingdom.engine import rules
-from animal_kingdom.engine.actions import ChoiceAction, PlaceAction
+from animal_kingdom.engine.actions import PlaceAction
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.effects import gain_food
 
@@ -56,21 +56,6 @@ def test_king_theron_capped_fires_once_per_turn():
 
 
 # --------------------------------------------------------- existing caps, no prior tests
-
-def test_eon_capped_fires_once_per_turn_across_multiple_events():
-    # Reuse the same double-remove-in-one-action pattern: Pestis wiping a 2-unit enemy
-    # stack fires two remove events in one resolution cascade, so an on-board Eon should
-    # gain food only once when capped.
-    cfg = replace(Config.default(), cap_eon=True)
-    s = make_state(config=cfg, hands={"A": ["rat_legend_2"]})
-    put(s, "1,1", "eon_food_engine", "A")
-    put(s, "1,2", "mouse", "A")             # connection anchor
-    put(s, "2,1", "mouse", "B")
-    put(s, "2,1", "rat", "B")               # same crossroad, same owner: stacks freely
-    rules.apply_action(s, PlaceAction("rat_legend_2", ("cr", "2,2")))
-    rules.apply_action(s, ChoiceAction("2,1"))              # the adjacent enemy stack
-    assert s.food["A"] == cfg.anaconda_legend_food      # two remove events fired; only the first paid out
-
 
 def test_falstaff_capped_limits_rider_to_one_gain_event_per_turn():
     cfg = replace(Config.default(), cap_falstaff=True)

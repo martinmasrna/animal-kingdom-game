@@ -29,7 +29,6 @@ COSTS_RE = re.compile(r"costs (\d+) food", re.IGNORECASE)
 
 # card_id -> config attrs, one per "gain N food/more" number in text, in order.
 FOOD_CONSTANTS: dict[str, list[str]] = {
-    "eon_food_engine": ["anaconda_legend_food"],
     "army_ant_legend": ["army_ant_legend_per_colony"],
     "bee_legend": ["bee_legend_per_place"],
     "forager_ant": ["forager_ant_food"],
@@ -56,8 +55,6 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "tortoise": ["tortoise_per_armor"],
     "dung_beetle": ["dung_beetle_per"],
     "tuna_legend": ["tuna_legend_food"],
-    **{f"calib_food10_{n}": ["squirrel_food"] for n in (2, 3, 4, 5, 6)},
-    **{f"calib_food3t_{n}": ["worker_wasp_food"] for n in (2, 3, 4, 5, 6)},
 }
 
 # Cards whose food-gain number is structural, not a tunable constant, so there is
@@ -168,11 +165,6 @@ STRENGTH_LIMITS = {
     "albatross": "albatross_max",
     "black_mamba": "black_mamba_max",
     "hippopotamus": "hippopotamus_max",
-    "mock_sentry": "stoop_max",
-    "mock_hunter": "calib_rm4_max",
-    **{f"calib_rm3_{n}": "stoop_max" for n in (2, 3, 4, 5, 6)},
-    **{f"calib_rm4_{n}": "calib_rm4_max" for n in (2, 3, 4, 5, 6)},
-    **{f"calib_rm6_{n}": "calib_rm6_min" for n in (1, 2, 3, 4, 5)},
 }
 
 
@@ -198,7 +190,6 @@ def test_royal_jelly_number_matches_config():
 def test_capybara_numbers_match_config():
     cfg, text = Config.default(), _cards()["capybara"].text
     assert int(STRENGTH_LIMIT_RE.search(text).group(1)) == cfg.capybara_small_max + 1
-    assert int(re.search(r"this has strength (\d+)", text).group(1)) == cfg.capybara_strength
 
 
 STRENGTH_LOSS_RE = re.compile(r"(?:gets?|enemy) -(\d+) strength", re.IGNORECASE)
@@ -282,7 +273,7 @@ DRAW_CONSTANTS: dict[str, list[str]] = {
     "manta_ray_legend": ["manta_legend_draw"],
     "butterfly_legend_monarch": ["butterfly_legend_stage5_draw"],
     "snake_egg": ["egg_hatch_draw"],   # "draw a Snake" now (snake_egg_draw, no printed number), "draw 2 Snakes" at the hatch
-    **{cid: ["test_draw"] for cid in ("mock_draw2", "mock_skully", *(f"calib_draw2_{n}" for n in range(4)))},
+    "mock_draw2": ["test_draw"],
 }
 SHUFFLE_CONSTANTS = {"raven": "raven_shuffle"}
 
@@ -313,11 +304,11 @@ STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
 # card_id -> config attrs, one per printed "+N strength" (a "give" counter or a "has/have" anthem), in order. Every card
 # printing one must be listed (checked below): the launch decks brought a dozen of them at once.
 STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
+    "capybara": ["capybara_bonus"],
     "guard_wasp": ["guard_hornet_bonus"],
     "python": ["python_growth"],
     "leopard_legend": ["leopard_legend_growth"],
     "dingo": ["dingo_grant"],
-    "shuck": ["shuck_grant"],
     "egg_eater": ["egg_eater_growth"],
     "wolf_legend": ["wolf_legend_grant"],
     "bush_dog": ["bush_dog_grant"],
@@ -378,7 +369,6 @@ THRESHOLDS = {
     "nurse_bumblebee": "colony_synergy_threshold",
     "guard_wasp": "guard_hornet_colony_threshold",
     "soldier_ant": "colony_synergy_threshold",
-    "unnamed_canine": "unnamed_canine_draw_threshold",
     "vulture": "vulture_removals",
 }
 

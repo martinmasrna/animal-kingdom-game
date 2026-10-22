@@ -154,10 +154,10 @@ def test_turn_ends_early_when_no_second_action_exists():
 
 
 def test_effect_granted_extra_play_consumes_no_action():
-    s = make_state(hands={"A": ["calib_extra_1", "alley_cat", "caracal"], "B": ["lion"]},
+    s = make_state(hands={"A": ["queen_bee", "worker_ant", "caracal"], "B": ["lion"]},
                    config=TWO_ACTIONS)
-    rules.apply_action(s, PlaceAction("calib_extra_1", ("cr", "1,1")))
-    assert s.pending is not None                 # "play another animal" (mandatory)
+    rules.apply_action(s, PlaceAction("queen_bee", ("cr", "1,1")))
+    assert s.pending is not None                 # "play a Worker" (mandatory)
     extra = next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction))
     rules.apply_action(s, extra)                 # the free play resolves the pending
     assert s.current == "A"                      # still action 1 of 2
@@ -308,20 +308,6 @@ def test_two_idle_turns_on_equal_food_lose_for_the_last_to_pass():
     rules.apply_action(s, PassAction())
     rules.apply_action(s, PassAction())                   # the second player's pass ends it
     assert s.result == Result(first, "passes")
-
-
-def test_unnamed_giant_starves_its_owners_regions_only():
-    from animal_kingdom.engine.state import UnitInstance
-    s = make_state()
-    region = next(iter(s.game_map.regions.values()))
-    for i, cr in enumerate(region.corners):
-        s.board[cr] = [UnitInstance("lion", "A", 900 + i)]
-    assert rules.region_income(s, "A") == region.food
-    far = next(c for c in s.game_map.crossroads if c not in region.corners)
-    s.board[far] = [UnitInstance("unnamed_giant", "A", 950)]
-    assert rules.region_income(s, "A") == 0
-    s.board[far] = [UnitInstance("unnamed_giant", "B", 951)]      # the opponent's giant: no effect on A
-    assert rules.region_income(s, "A") == region.food
 
 
 def test_both_players_mulligan_at_once_and_a_log_replays_it():

@@ -249,9 +249,7 @@ def region_income(state: GameState, player: str) -> int:
 
 def region_yield(state: GameState, player: str, region) -> int:
     """What `region` produces for `player` while they hold it: its printed food, moved by the legendary Wildebeest and
-    Boar (never below nothing), or nothing while they control the Unnamed Giant."""
-    if statics.regions_starved(state, player):
-        return 0
+    Boar (never below nothing)."""
     return max(0, region.food + statics.region_food_modifier(state, player))
 
 
