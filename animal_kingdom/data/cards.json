@@ -1859,8 +1859,7 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
-      "text": "When this gains strength in your hand, evolve.",
-      "keywords": [],
+      "text": "Dawn: evolve. Whenever this gains strength, evolve.",
       "related": [
         "butterfly_legend_caterpillar",
         "butterfly_legend_chrysalis",
@@ -1869,7 +1868,8 @@
       ],
       "evolves": true,
       "species": "Butterfly",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "eagle_legend",
@@ -1880,17 +1880,17 @@
         "Bird"
       ],
       "base_strength": 3,
-      "text": "Flight. Apex Predator. When this enters your hand, add its mate to your hand.",
-      "keywords": [
-        "Flight",
-        "Apex Predator"
-      ],
+      "text": "Flight. Apex Predator. When this enters your hand, add [NAME] to your hand.",
       "related": [
         "eagle_legend_2"
       ],
       "mate": "eagle_legend_2",
       "species": "Eagle",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": [
+        "Flight",
+        "Apex Predator"
+      ]
     },
     {
       "id": "hummingbird",
@@ -3235,9 +3235,9 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
-      "keywords": [],
-      "text": "Roar: draw a card. When this gains strength in your hand, evolve.",
-      "stage": 2
+      "text": "Roar: draw a card. Dawn: evolve. Whenever this gains strength, evolve.",
+      "stage": 2,
+      "keywords": []
     },
     {
       "id": "butterfly_legend_chrysalis",
@@ -3246,11 +3246,11 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
+      "text": "Stealth. Roar: draw a card, then give an animal in your hand +1 strength. Dawn: evolve. Whenever this gains strength, evolve.",
+      "stage": 3,
       "keywords": [
         "Stealth"
-      ],
-      "text": "Stealth. Roar: draw a card, then give an animal in your hand +1 strength. When this gains strength in your hand, evolve.",
-      "stage": 3
+      ]
     },
     {
       "id": "butterfly_legend_butterfly",
@@ -3259,12 +3259,12 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 0,
+      "text": "Stealth. Flight. Roar: draw a card, then give all animals in your hand +1 strength. Dawn: evolve. Whenever this gains strength, evolve.",
+      "stage": 4,
       "keywords": [
         "Stealth",
         "Flight"
-      ],
-      "text": "Stealth. Flight. Roar: draw a card, then give all animals in your hand +1 strength. When this gains strength in your hand, evolve.",
-      "stage": 4
+      ]
     },
     {
       "id": "butterfly_legend_monarch",

@@ -836,9 +836,21 @@ def test_the_legendary_butterfly_moves_one_stage_per_buff():
     assert bf.card_id == "butterfly_legend_caterpillar" and placement_strength(s, bf) == CFG.gorilla_legend_grant
     rules.apply_action(s, PlaceAction("gorilla_legend", ("cr", "1,3")))
     assert bf.card_id == "butterfly_legend_chrysalis"         # one buff, one stage
-    end_turn(s)                                                 # the opponent's turn passes: A's again
-    rules.apply_action(s, PlaceAction("butterfly_legend_chrysalis", ("cr", "1,2")))   # Stealth. Roar: draw, then +1
-    assert s.pending and s.pending["mode"] == "choice"
+    end_turn(s)                                                 # the opponent's turn passes: A's Dawn
+    assert bf.card_id == "butterfly_legend_butterfly"         # Dawn: evolve, in the hand
+    rules.apply_action(s, PlaceAction("butterfly_legend_butterfly", ("cr", "1,2")))   # Roar: draw, then all +1
+    assert s.board["1,2"][-1].card_id == "butterfly_legend_butterfly"   # the Roar buffs the hand, not itself
+    end_turn(s); end_turn(s)
+    assert s.board["1,2"][-1].card_id == "butterfly_legend_monarch"     # Dawn: evolve, on the board too
+
+
+def test_the_legendary_butterfly_evolves_when_it_gains_strength_on_the_board():
+    s = make_state()
+    put(s, "1,2", "butterfly_legend_caterpillar", "A")
+    bf = s.board["1,2"][-1]
+    effects._grant(s, [bf.iid], 1)
+    effects.resolve(s)
+    assert bf.card_id == "butterfly_legend_chrysalis"
 
 
 def test_the_caterpillar_turns_into_a_butterfly_and_draws_when_trained():

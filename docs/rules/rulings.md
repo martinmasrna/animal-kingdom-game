@@ -96,7 +96,7 @@ Cards:
 - **Hare** counts the animals played from your hand this turn, itself included.
 - **Mole, Dormouse and Macaque** count the hand after the card that roars has left it.
 - **Peacock** counts every card in your hand, itself included while it is there: it covers with the strength it shows, then has one less once it lands (the text taken literally, Martin 2026-10-21).
-- **The legendary Butterfly** evolves only in hand and only on a gain: each gain moves it one stage, whatever its size; it keeps every point gained; stage 5 (Monarch) is the last. The stage shows as the card itself (Caterpillar, Chrysalis, Butterfly, Monarch), not as a badge on the art yet.
+- **The legendary Butterfly** evolves in hand and on the board alike: each of your Dawns and each gain moves it one stage, whatever the gain's size (its Dawn works from the hand too, the one Dawn that does); a buried stage doesn't evolve at Dawn, and an evolution on the board never fires a Roar again; it keeps every point gained; stage 5 (Monarch) is the last. The stage shows as the card itself (Caterpillar, Chrysalis, Butterfly, Monarch), not as a badge on the art yet.
 - **The Caterpillar** becomes the pool's Butterfly (strength 2) and keeps its counter.
 - **The Eagles**: the legendary Eagle brings its mate whenever it enters your hand (a draw, a Scout, a steal, a return; the opening hand once the mulligans are done), one mate at a time. A buff to either while both are in hand gives the other the same. The mate never brings the Eagle back.
 - **Orangutan's** copy keeps the original's counter. **Baboon** (common): the player picks two different cards; **Baboon** (legendary): two random ones. **Stork**: two different younglings.

@@ -17,20 +17,15 @@
   },
   "anaconda": {
     "art": {
-      "lv": "problem",
-      "note": "think we should re-make this card since we already have 7 strength Apex Predator and I don’t want to have 2 of the same cards I think.",
-      "by": "martin"
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792658148
     },
     "crop": {
       "lv": "fine",
       "by": "martin"
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 7
-      },
       "by": "claude",
       "at": 1792086811
     },
@@ -38,12 +33,7 @@
       "by": "claude",
       "at": 1792248229,
       "lv": "draft",
-      "note": "Martin 2026-10-16: his wording",
-      "review": {
-        "prev_lv": "problem",
-        "prev_note": "horrible wording",
-        "prev": "Apex Predator. When this eats an animal, it gains that animal's strength."
-      }
+      "note": "Martin 2026-10-16: his wording"
     }
   },
   "anteater": {
@@ -66,21 +56,11 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Armor. Your adjacent animals have Stealth."
-      },
       "note": "Martin, 2026-10-21: the defence set, the Armadillo shares its shell, the Porcupine its quills; both 5",
       "by": "claude",
       "at": 1792611263
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 7
-      },
       "note": "Martin, 2026-10-21: the defence set, the Armadillo shares its shell, the Porcupine its quills; both 5",
       "by": "claude",
       "at": 1792611263
@@ -96,11 +76,6 @@
       "by": "martin"
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 2
-      },
       "note": "Martin, 2026-10-22: the mate matches the Eagle (they share strength)",
       "by": "claude",
       "at": 1792655320
@@ -118,33 +93,15 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": "",
-        "prev": {
-          "name": "Arne",
-          "species": "Eagle"
-        }
-      },
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "at": 1792191060
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Flight. Apex Predator. When this enters your hand, add Arna to your hand."
-      },
       "note": "placeholder names: the text names the mate, not a name",
-      "by": "claude",
-      "at": 1792191078
+      "by": "martin",
+      "at": 1792657587
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 2
-      },
       "note": "Martin, 2026-10-22: buffed to 3",
       "by": "claude",
       "at": 1792655320
@@ -154,37 +111,20 @@
     "art": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "at": 1792198542
     },
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
       "at": 1792198542
     },
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "into the collection (status proposed)",
       "at": 1792194643
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Dawn: draw a card."
-      },
       "note": "Martin, 2026-10-22: two eggs a turn",
       "by": "claude",
       "at": 1792655211
@@ -220,14 +160,6 @@
       "at": 1792064539
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Baboon"
-        }
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
@@ -298,20 +230,12 @@
     "art": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792148289,
-      "review": {
-        "prev_lv": "problem",
-        "prev_note": "too photographic"
-      }
+      "at": 1792148289
     },
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792148298,
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      }
+      "at": 1792148298
     }
   },
   "rat_legend": {
@@ -374,19 +298,11 @@
     "art": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "at": 1792139106
     },
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
       "at": 1792139106
     },
     "animal": {
@@ -458,11 +374,6 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792611447,
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": "",
-        "prev": "R"
-      },
       "note": "Martin, 2026-10-21: the Stealth common (a one-keyword card is a common)"
     },
     "animal": {
@@ -518,11 +429,6 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Whenever you draw Black Swan, your opponent discards a random card."
-      },
       "note": "Martin 2026-10-17: Flight added (swans fly)",
       "at": 1792247608
     },
@@ -562,14 +468,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Boar"
-        }
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792191060,
@@ -629,14 +527,6 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Brutus",
-          "species": "Rhinoceros"
-        }
-      },
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "at": 1792191061
     }
@@ -651,14 +541,10 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Roar: give an adjacent Canine +3 strength."
-      },
-      "note": "Martin, 2026-10-17: only your Canines; text now says so",
-      "by": "claude",
-      "at": 1792227005
+      "note": "horrible text",
+      "by": "martin",
+      "at": 1792657414,
+      "lv": "problem"
     }
   },
   "butterfly": {
@@ -673,22 +559,20 @@
   },
   "butterfly_legend": {
     "effect": {
-      "note": "Watch in play: the five stages and their power ladder.; Watch in play: the five stages and their power ladder.",
-      "by": "martin"
+      "note": "Martin, 2026-10-22: it ripens by itself, buffs speed it up",
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Watch in play: the five stages and their power ladder.; Watch in play: the five stages and their power ladder.",
+        "prev": "When this gains strength in your hand, evolve."
+      },
+      "at": 1792660241
     },
     "crop": {
       "lv": "fine",
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Butterfly"
-        }
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
@@ -699,18 +583,48 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Stealth. Flight. Roar: draw a card, then give all animals in your hand +1 strength. When this gains strength in your hand, evolve."
+      },
+      "note": "Martin, 2026-10-22: it ripens by itself, buffs speed it up",
+      "by": "claude",
+      "at": 1792660242
     }
   },
   "butterfly_legend_caterpillar": {
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: draw a card. When this gains strength in your hand, evolve."
+      },
+      "note": "Martin, 2026-10-22: it ripens by itself, buffs speed it up",
+      "by": "claude",
+      "at": 1792660241
     }
   },
   "butterfly_legend_chrysalis": {
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Stealth. Roar: draw a card, then give an animal in your hand +1 strength. When this gains strength in your hand, evolve."
+      },
+      "note": "Martin, 2026-10-22: it ripens by itself, buffs speed it up",
+      "by": "claude",
+      "at": 1792660242
     }
   },
   "butterfly_legend_monarch": {
@@ -727,14 +641,6 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Cairn",
-          "species": "Glyptodont"
-        }
-      },
       "note": "Martin, 2026-10-21: Cairn scratched (a pile of stones people build); back to a placeholder",
       "at": 1792575661
     }
@@ -774,31 +680,17 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "lv": "draft",
       "note": "Martin, 2026-10-22: 'other' cut, the Capybara's own printed 2 never counts",
       "by": "claude",
       "at": 1792655320
     },
     "rarity": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "R"
-      },
       "note": "Martin, 2026-10-22: the small-deck common, its one big body",
       "by": "claude",
       "at": 1792622195
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 6
-      },
       "note": "Martin, 2026-10-22: the small-deck common, its one big body",
       "by": "claude",
       "at": 1792622195
@@ -956,14 +848,6 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Clarion",
-          "species": "Wolf"
-        }
-      },
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "at": 1792191059
     }
@@ -994,11 +878,6 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792257581,
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": "",
-        "prev": "R"
-      },
       "note": "Martin 2026-10-17: a common 8, the attacker"
     },
     "animal": {
@@ -1053,11 +932,6 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Reach 2. Poison."
-      },
       "note": "Reach has no number (Martin, 2026-10-21)",
       "by": "claude",
       "at": 1792604717
@@ -1109,11 +983,6 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Dusk: gain 2 food for each Hungry animal you control."
-      },
       "note": "Martin, 2026-10-22: 5 per Hungry animal",
       "by": "claude",
       "at": 1792655320
@@ -1325,14 +1194,6 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": "",
-        "prev": {
-          "name": "Falstaff",
-          "species": "Bumblebee"
-        }
-      },
       "note": "Martin, 2026-10-14, applied 2026-10-16",
       "at": 1792157857
     }
@@ -1349,23 +1210,10 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": "",
-        "prev": {
-          "name": "Fathom",
-          "species": "Octopus"
-        }
-      },
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "at": 1792191060
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 7
-      },
       "note": "Martin, 2026-10-21: no reason for a 7 body on top of a legendary tutor (f107dcef set it in the generated file only)",
       "by": "claude",
       "at": 1792605220
@@ -1400,42 +1248,23 @@
     "art": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792139107,
-      "review": {
-        "prev_lv": "problem",
-        "prev_note": "too photorealistic"
-      }
+      "at": 1792139107
     },
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792139107,
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      }
+      "at": 1792139107
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Gaboon Viper",
-          "species": "Gaboon Viper"
-        }
-      },
       "note": "Martin, 2026-10-15: two Vipers read as a mistake; the Coral Snake's small head lost the bite close-up. The cottonmouth's white gape and slow venom fit both.",
       "by": "claude",
       "at": 1792067745
     },
     "habitat": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Jungle"
-      },
-      "by": "claude",
-      "at": 1792067745
+      "by": "martin",
+      "at": 1792656606,
+      "lv": "problem",
+      "note": "forest?"
     }
   },
   "falcon_legend": {
@@ -1460,14 +1289,6 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Gale",
-          "species": "Falcon"
-        }
-      },
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "at": 1792191060
     }
@@ -1502,14 +1323,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Giraffe"
-        }
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
@@ -1526,11 +1339,6 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "When an enemy with Flight is placed next to this, remove it."
-      },
       "note": "Martin, 2026-10-15, mid-gauntlet: it catches roamers too (a roam that lands beside it counts).",
       "by": "claude",
       "at": 1792097016
@@ -1569,10 +1377,6 @@
     "animal": {
       "lv": "fine",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
       "note": "out of the collection (status open, in the reserve)",
       "at": 1792191573
     },
@@ -1598,28 +1402,14 @@
     "strength": {
       "note": "Martin 2026-10-17: a common 8 (8 and up can take on a lion)",
       "by": "claude",
-      "at": 1792257358,
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "Martin, 2026-10-15: at 2 it was a 9 when played (bots, 4,400 games); at 0 it averages a Lion's 7 and reaches 9 with a full hand. Costs Handlock about 4 points of win rate.",
-        "prev": 0
-      }
+      "at": 1792257358
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Has +1 strength for each card in your hand."
-      },
       "note": "Martin 2026-10-17: the price of the body; its old '+1 for each card in your hand' needs a new animal",
       "by": "claude",
       "at": 1792257358
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from handlock to pool",
       "by": "claude",
       "at": 1792262683
@@ -1726,11 +1516,6 @@
       "at": 1792187557
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Spikes. Roar: gain 5 food."
-      },
       "note": "Martin, 2026-10-21: the Spikes common (a one-keyword card is a common); the food Roar is gone",
       "by": "claude",
       "at": 1792610184
@@ -1801,14 +1586,6 @@
       "at": 1792570261
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Honey Badger"
-        }
-      },
       "lv": "draft",
       "note": "Martin, 2026-10-19: draft; a week on the card before a lock",
       "by": "claude",
@@ -1870,10 +1647,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from aristocrats to pool",
       "by": "claude",
       "at": 1792085440
@@ -1882,11 +1655,6 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792249437,
-      "review": {
-        "prev_lv": "problem",
-        "prev_note": "",
-        "prev": "Dusk: gain 5 food for each of your animals removed this turn."
-      },
       "note": "Martin 2026-10-17: any animal removed, either side, 3 each"
     }
   },
@@ -1932,14 +1700,6 @@
       "at": 1792096269
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Jellyfish"
-        }
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
@@ -2011,14 +1771,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Leopard"
-        }
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
@@ -2086,14 +1838,6 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Lobo",
-          "species": "Wolf"
-        }
-      },
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "at": 1792191059
     }
@@ -2111,22 +1855,12 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792614225,
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": "",
-        "prev": "Roar: if you place this on top of an enemy, draw a card."
-      },
       "note": "Martin, 2026-10-21: Cats' fourth rare, the slot the Black Panther left"
     },
     "strength": {
       "lv": "draft",
       "by": "claude",
       "at": 1792614225,
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": "",
-        "prev": 6
-      },
       "note": "Martin, 2026-10-21: Cats' fourth rare, the slot the Black Panther left"
     },
     "animal": {
@@ -2138,11 +1872,6 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792614224,
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": "",
-        "prev": "C"
-      },
       "note": "Martin, 2026-10-21: Cats' fourth rare, the slot the Black Panther left"
     },
     "habitat": {
@@ -2157,11 +1886,6 @@
       "by": "martin"
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 2
-      },
       "note": "Martin, 2026-10-16: a rare with a real condition sits one above the common conditional anchor (2); Serval at 2 had the same removal for free.",
       "by": "claude",
       "at": 1792148717
@@ -2171,17 +1895,9 @@
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
       "at": 1792144570
     },
     "art": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792144552
@@ -2214,12 +1930,7 @@
       "lv": "problem",
       "by": "claude",
       "at": 1792250451,
-      "note": "Martin 2026-10-17: the parrot repeats (no 'may'); 'your next Roar this turn happens twice' moves to another animal",
-      "review": {
-        "prev_lv": "problem",
-        "prev_note": "wasn't this supposed to repeat last roar played? we can have both these cards, but repeat sounds like better fit for parrot no?",
-        "prev": "Roar: your next Roar this turn happens twice."
-      }
+      "note": "Martin 2026-10-17: the parrot repeats (no 'may'); 'your next Roar this turn happens twice' moves to another animal"
     }
   },
   "mackerel": {
@@ -2256,14 +1967,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Manta Ray"
-        }
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
@@ -2302,14 +2005,6 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Methuselah",
-          "species": "Tortoise"
-        }
-      },
       "note": "Martin, 2026-10-21: replaces Mogologolo the same day (the doubled syllable wore off). The a-z front, the weight on -man-, the Maa-shaped tail falling away. Draft, a week on the card before a lock",
       "at": 1792593633
     }
@@ -2344,14 +2039,6 @@
       "at": 1792141751
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Mocha",
-          "species": "Sperm Whale"
-        }
-      },
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
       "at": 1792191061
@@ -2367,30 +2054,16 @@
       "by": "martin"
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 6
-      },
       "note": "Martin 2026-10-17: the Giants rare",
       "by": "claude",
       "at": 1792262682
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Your other Hoofed animals have +1 strength during your opponent's turn."
-      },
       "note": "Martin 2026-10-17: the wanderer; bigger than the Orca, pays to stay big",
       "by": "claude",
       "at": 1792262682
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from hoofed to giants",
       "by": "claude",
       "at": 1792262682
@@ -2428,10 +2101,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "out of the collection (status open, in the reserve)",
       "by": "claude",
       "at": 1792191132
@@ -2462,30 +2131,14 @@
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
       "at": 1792143620
     },
     "art": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792143575
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Octopus"
-        }
-      },
       "lv": "draft",
       "note": "Martin, 2026-10-14, applied 2026-10-16",
       "by": "claude",
@@ -2518,21 +2171,12 @@
       "by": "martin"
     },
     "art": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "lv": "draft",
       "note": "Martin, 2026-10-18: keeps the current Orca painting after seeing eight underwater alternatives.",
       "by": "claude",
       "at": 1792276047
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 7
-      },
       "note": "Martin, 2026-10-21: 7 was too hard to answer for a repeat eater",
       "by": "claude",
       "at": 1792608627
@@ -2568,14 +2212,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Oxpecker"
-        }
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792191060,
@@ -2622,14 +2258,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Piranha"
-        }
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
@@ -2656,21 +2284,11 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Spikes."
-      },
       "note": "Martin, 2026-10-21: the defence set, the Armadillo shares its shell, the Porcupine its quills; both 5",
       "by": "claude",
       "at": 1792611263
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 7
-      },
       "note": "Martin, 2026-10-21: the defence set, the Armadillo shares its shell, the Porcupine its quills; both 5",
       "by": "claude",
       "at": 1792611263
@@ -2846,23 +2464,10 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Queen Honoria",
-          "species": "Bee"
-        }
-      },
       "note": "Martin's own, 2026-10-21. Draft, a week on the card before a lock",
       "at": 1792581990
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Whenever you play a Colony animal, gain 4 food."
-      },
       "note": "Martin, 2026-10-21: place, not play, so Vesper and the Vulture count",
       "by": "claude",
       "at": 1792584111
@@ -2880,14 +2485,6 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Queen Marabunta",
-          "species": "Army Ant"
-        }
-      },
       "note": "Martin, 2026-10-21: from Solenopsis, the fire ants, the ant-word notched into a queen's name like Melissia. Draft, a week on the card before a lock",
       "at": 1792587741
     }
@@ -2912,30 +2509,14 @@
     "art": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "at": 1792139110
     },
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
       "at": 1792139110
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Raven"
-        }
-      },
       "lv": "draft",
       "note": "Martin, 2026-10-20: his own name, a draft; a week on the card before a lock",
       "by": "claude",
@@ -2974,11 +2555,6 @@
       "by": "martin"
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 1
-      },
       "note": "Martin, 2026-10-15, mid-gauntlet.",
       "by": "claude",
       "at": 1792096533
@@ -3000,10 +2576,6 @@
     "animal": {
       "lv": "fine",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
       "note": "moved from pool to den-rush",
       "at": 1792086810
     }
@@ -3020,14 +2592,6 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Scrooge",
-          "species": "Chipmunk"
-        }
-      },
       "note": "Martin, 2026-10-20: his pick from the list; a draft, a week on the card before a lock",
       "at": 1792493790
     }
@@ -3070,14 +2634,6 @@
       "lv": "draft",
       "by": "claude",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "idk, isn't that a general name for Gorilla male?",
-        "prev": {
-          "name": "Silverback",
-          "species": "Gorilla"
-        }
-      },
       "at": 1792191061
     }
   },
@@ -3093,14 +2649,6 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Sirocco",
-          "species": "Skunk"
-        }
-      },
       "note": "Martin, 2026-10-14, applied 2026-10-16",
       "at": 1792157857
     }
@@ -3139,14 +2687,6 @@
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
       "at": 1792191059,
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "moved from aristocrats to pool",
-        "prev": {
-          "name": "",
-          "species": "Sloth"
-        }
-      },
       "lv": "draft"
     }
   },
@@ -3220,14 +2760,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Squirrel"
-        }
-      },
       "lv": "draft",
       "note": "Martin, 2026-10-14, applied 2026-10-16",
       "by": "claude",
@@ -3364,19 +2896,11 @@
     "art": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792155282,
-      "review": {
-        "prev_lv": "problem",
-        "prev_note": "way too photographic"
-      }
+      "at": 1792155282
     },
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
       "at": 1792155290
     }
   },
@@ -3402,14 +2926,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Tuna"
-        }
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
@@ -3455,22 +2971,14 @@
       "by": "martin"
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 3
-      },
       "by": "claude",
       "at": 1792085440
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Flight. Dusk: if an ally was removed this turn, draw a card."
-      },
-      "by": "claude",
-      "at": 1792085803
+      "by": "martin",
+      "at": 1792656901,
+      "lv": "problem",
+      "note": "weird wording"
     }
   },
   "whale_shark": {
@@ -3499,14 +3007,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Wildebeest"
-        }
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
@@ -3586,14 +3086,6 @@
       "by": "martin"
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Zebra"
-        }
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
@@ -3602,28 +3094,16 @@
   },
   "cuckoo_legend": {
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
       "at": 1792191060
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792143573
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792143620
@@ -3631,10 +3111,6 @@
   },
   "tarantula": {
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from aristocrats to pool",
       "by": "claude",
       "at": 1792085439
@@ -3643,27 +3119,14 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792248229,
-      "note": "Martin 2026-10-16: Dusk, a night hunter, and further from the City Spider's Dawn",
-      "review": {
-        "prev_lv": "problem",
-        "prev_note": "have it remove any unit, just like city spider?",
-        "prev": "Dawn: remove a random adjacent ally and gain its strength."
-      }
+      "note": "Martin 2026-10-16: Dusk, a night hunter, and further from the City Spider's Dawn"
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792142394
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792142411
@@ -3671,28 +3134,16 @@
   },
   "sea_turtle": {
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from aristocrats to pool",
       "by": "claude",
       "at": 1792085440
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792139104
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792140511
@@ -3726,28 +3177,15 @@
   },
   "cockroach": {
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "When this is removed, put it back where it was and draw a card."
-      },
       "by": "claude",
       "at": 1792085440
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792104136
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792104163
@@ -3759,19 +3197,11 @@
       "at": 1792085441
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792106877
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792106916
@@ -3779,14 +3209,9 @@
   },
   "toad": {
     "effect": {
-      "lv": "draft",
-      "by": "claude",
-      "at": 1792604717,
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Reach 2. When this is removed, remove all animals next to it."
-      },
+      "lv": "problem",
+      "by": "martin",
+      "at": 1792657677,
       "note": "Reach has no number (Martin, 2026-10-21)"
     },
     "animal": {
@@ -3795,32 +3220,19 @@
       "at": 1792085442
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792106879
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792106916
     },
     "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1792085441
+      "lv": "problem",
+      "by": "martin",
+      "at": 1792657671
     },
     "strength": {
       "review": {
@@ -3854,19 +3266,11 @@
       "at": 1792497992
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792106878
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792106916
@@ -3894,58 +3298,31 @@
   },
   "cockroach_legend": {
     "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792085443
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from pool to aristocrats",
       "by": "claude",
       "at": 1792085443
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792105969
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792105989
     },
     "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792085443
     },
     "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792085443
@@ -3953,14 +3330,10 @@
   },
   "wolf_legend": {
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Roam. When this roams, your adjacent animals gain +2 strength."
-      },
-      "note": "Martin, 2026-10-17: counts only your Canines; text now says so",
-      "by": "claude",
-      "at": 1792227005
+      "note": "why not just \"gain +1\"...",
+      "by": "martin",
+      "at": 1792657031,
+      "lv": "problem"
     },
     "art": {
       "lv": "draft",
@@ -3973,14 +3346,6 @@
       "at": 1792191267
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": {
-          "name": "",
-          "species": "Wolf"
-        }
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
@@ -3989,19 +3354,11 @@
   },
   "raccoon": {
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792105968
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792105989
@@ -4009,19 +3366,11 @@
   },
   "roach": {
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792139103
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792140511
@@ -4029,19 +3378,11 @@
   },
   "opossum": {
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792139105
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792140512
@@ -4049,42 +3390,22 @@
   },
   "great_white_shark": {
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792143574
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792143620
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Apex Predator. If an animal was removed this turn, this has Reach 3."
-      },
-      "note": "Reach has no number: the Shark's Reach 3 becomes Reach, 2 (Martin, 2026-10-21)",
-      "by": "claude",
-      "at": 1792604717
+      "note": "Reach has no number: the Shark's Reach 3 becomes Reach, 2 (Martin, 2026-10-21)\n\nwhy \"this has reach\" and not just \"reach\"? let's discuss in chat",
+      "by": "martin",
+      "at": 1792657349,
+      "lv": "problem"
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": {
-          "name": "Great White Shark",
-          "species": "Great White Shark"
-        }
-      },
       "note": "Martin 2026-10-21: plain everyday name; the id names the species and stays",
       "by": "claude",
       "at": 1792619832
@@ -4092,19 +3413,11 @@
   },
   "octopus": {
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792200729
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792200799
@@ -4118,60 +3431,33 @@
   },
   "mole": {
     "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
       "at": 1792191132
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from pool to den-rush",
       "by": "claude",
       "at": 1792191132
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1792196551
+      "lv": "problem",
+      "by": "martin",
+      "at": 1792657159
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1792196569
+      "lv": "problem",
+      "by": "martin",
+      "at": 1792657160
     },
     "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
       "at": 1792191132
     },
     "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
       "lv": "draft",
       "note": "takes the Naked Mole-Rat's effect, which shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
@@ -4180,11 +3466,6 @@
   },
   "mole_legend": {
     "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
@@ -4216,22 +3497,12 @@
       "at": 1792201506
     },
     "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
       "at": 1792191572
     },
     "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
       "lv": "draft",
       "note": "takes Greywhisker's ability: a generic engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
@@ -4240,61 +3511,34 @@
   },
   "bat_legend": {
     "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
       "at": 1792192619
     },
     "animal": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "note": "into the collection (status proposed)",
       "by": "claude",
       "at": 1792194643
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "problem",
       "by": "claude",
       "at": 1792201507,
       "note": "Placeholder (Martin, 2026-10-17): the arch-and-sunbeam idea is miles ahead, but the anatomy is wrong (head and wings); revisit."
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792201507
     },
     "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
       "at": 1792192619
     },
     "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
       "lv": "draft",
       "note": "takes Aurum's ability: a generic draw engine shouldn't sit on a tagged animal (Martin 2026-10-17)",
       "by": "claude",
@@ -4303,19 +3547,11 @@
   },
   "golden_egg": {
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792198543
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792198558
@@ -4395,48 +3631,26 @@
   },
   "warthog": {
     "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792262680
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "moved from pool to hoofed",
       "by": "claude",
       "at": 1792262680
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1792272029
+      "lv": "problem",
+      "by": "martin",
+      "at": 1792657959
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
-      "lv": "draft",
-      "by": "claude",
-      "at": 1792272048
+      "lv": "problem",
+      "by": "martin",
+      "at": 1792657963
     },
     "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: the sow charges to get her young back",
       "by": "claude",
@@ -4453,11 +3667,6 @@
       "at": 1792262679
     },
     "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792262679
@@ -4465,48 +3674,26 @@
   },
   "albatross": {
     "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792262681
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "into the collection (status proposed)",
       "by": "claude",
       "at": 1792262681
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792277777
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792277801
     },
     "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: printed for the pool, not a deck",
       "by": "claude",
@@ -4523,11 +3710,6 @@
       "at": 1792262680
     },
     "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792262681
@@ -4535,60 +3717,33 @@
   },
   "peacock": {
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792267312
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792267341
     },
     "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "Martin 2026-10-17: the Grizzly's old effect, animal to come",
       "by": "claude",
       "at": 1792262678
     },
     "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792262678
     },
     "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792611140,
       "note": "Martin 2026-10-21: the text taken literally: in hand it counts itself (covers with what it shows), on the board one less; base stays 1"
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "the display: the fan grows with the hand; a ground bird, so no Flight (Martin 2026-10-17)",
       "by": "claude",
       "at": 1792264214
@@ -4607,60 +3762,33 @@
   },
   "dolphin": {
     "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "clever animals draw cards; untagged: a mammal, and neutral",
       "by": "claude",
       "at": 1792270569
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "into the collection (status proposed)",
       "by": "claude",
       "at": 1792270570
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792273477
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792273513
     },
     "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "neutral common (Martin 2026-10-17)",
       "by": "claude",
       "at": 1792270569
     },
     "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
       "lv": "draft",
       "note": "the 5-strength draw anchor made real",
       "by": "claude",
@@ -4669,60 +3797,33 @@
   },
   "stag_beetle": {
     "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "the plain wall removal can't touch",
       "by": "claude",
       "at": 1792270570
     },
     "animal": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "into the collection (status proposed)",
       "by": "claude",
       "at": 1792270570
     },
     "art": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792273477
     },
     "crop": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": ""
-      },
       "lv": "draft",
       "by": "claude",
       "at": 1792273537
     },
     "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
       "lv": "draft",
       "note": "neutral common (Martin 2026-10-17)",
       "by": "claude",
       "at": 1792270569
     },
     "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
       "lv": "draft",
       "note": "the Armor 6 anchor made real",
       "by": "claude",

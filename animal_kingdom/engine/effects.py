@@ -1002,6 +1002,10 @@ def start_of_turn(state: GameState, player: str) -> None:
             s["remaining"] -= 1
             (fired if s["remaining"] <= 0 else keep).append(s)
     state.scheduled = keep
+    for inst in list(state.hands[player]):     # a Dawn that works from the hand too (the legendary Butterfly's)
+        hook = _hook(state, inst.card_id, "on_dawn_in_hand")
+        if hook:
+            hook(state, inst, None)
     for s in fired[::-1]:      # earliest-scheduled ends on top of the stack -> resolves first (reversed() trips mypyc here)
         state.effect_stack.append(s["step"])
     _push_timed_hooks(state, player, "on_start_of_turn")   # Dawn, above the timers: it resolves first
@@ -1315,6 +1319,11 @@ def _op_grant_strength(state, step):
             _fire_on_gain_strength(state, inst)
         elif inst in state.hands[inst.owner]:
             _gain_in_hand(state, inst, amount)
+        else:
+            continue
+        grows = _hook(state, inst.card_id, "on_gain")    # "Whenever this gains strength", wherever it is
+        if grows:
+            grows(state, inst, amount)
     return None
 
 
@@ -2720,12 +2729,15 @@ BUTTERFLY_STAGES = ["butterfly_legend", "butterfly_legend_caterpillar", "butterf
                     "butterfly_legend_butterfly", "butterfly_legend_monarch"]
 
 
-def _butterfly_evolve(state, inst, amount):
-    """The legendary Butterfly: whenever it gains strength in your hand, it moves one stage on (one buff, one stage;
-    five stages, each adding to the last)."""
+def _butterfly_evolve(state, inst, _):
+    """The legendary Butterfly: "Dawn: evolve. Whenever this gains strength, evolve." In hand or on the board, it moves
+    one stage on (one Dawn or one buff, one stage; five stages, each adding to the last)."""
     i = BUTTERFLY_STAGES.index(inst.card_id)
     if i + 1 < len(BUTTERFLY_STAGES):
         _transform(state, inst, BUTTERFLY_STAGES[i + 1])
+
+
+_BUTTERFLY_GROWS = {"on_dawn_in_hand": _butterfly_evolve, "on_start_of_turn": _butterfly_evolve, "on_gain": _butterfly_evolve}
 
 
 def _hand_grant_one(state, unit, amount):
@@ -3104,11 +3116,11 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "baboon_legend": {"on_start_of_turn": _baboon_legend_sot},
     "gorilla_legend": {"on_place": _gorilla_legend_place},
     "bee_legend_2": {"on_place": _bee_legend_2_place},
-    "butterfly_legend": {"on_gain_in_hand": _butterfly_evolve},
-    "butterfly_legend_caterpillar": {"on_place": _draw1, "on_gain_in_hand": _butterfly_evolve},
-    "butterfly_legend_chrysalis": {"on_place": _draw_then_give_one, "on_gain_in_hand": _butterfly_evolve},
+    "butterfly_legend": _BUTTERFLY_GROWS,
+    "butterfly_legend_caterpillar": {"on_place": _draw1, **_BUTTERFLY_GROWS},
+    "butterfly_legend_chrysalis": {"on_place": _draw_then_give_one, **_BUTTERFLY_GROWS},
     "butterfly_legend_butterfly": {"on_place": _butterfly_stage_place(None, "butterfly_legend_stage4_grant"),
-                                    "on_gain_in_hand": _butterfly_evolve},
+                                    **_BUTTERFLY_GROWS},
     "butterfly_legend_monarch": {"on_place": _butterfly_stage_place("butterfly_legend_stage5_draw",
                                                                        "butterfly_legend_stage5_grant")},
     "hummingbird": {"on_place": _draws("hummingbird_draw")},
