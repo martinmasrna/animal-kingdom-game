@@ -48,12 +48,22 @@
   },
   "armadillo": {
     "art": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792678137
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792678137
     },
     "effect": {
       "note": "Martin, 2026-10-21: the defence set, the Armadillo shares its shell, the Porcupine its quills; both 5",
@@ -2498,12 +2508,22 @@
   },
   "porcupine": {
     "art": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792678136
     },
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792678136
     },
     "effect": {
       "note": "Martin, 2026-10-21: the defence set, the Armadillo shares its shell, the Porcupine its quills; both 5",
