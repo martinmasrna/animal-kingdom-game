@@ -27,6 +27,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py rename OLD NEW                a new id everywhere (when its animal changes)
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d] [--strip x,y,z] [--full y|reset]
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
+    .venv/bin/python tools/cards/hq.py token MAKER ID NAME STR [--tags T,U]   a token MAKER's effect places
 
 A planned card becomes a card (in the reserve) once it has a rarity and a strength. Every edit is checked against the
 engine's card rules before it is written. This is the only way cards change: the workspace's hook
@@ -63,7 +64,7 @@ COPIES = {"legendary": 1, "rare": 2, "common": 3}     # the 4-4-6 copy limits: a
 POOL = "pool"                                         # the table's name for "in no starter deck"
 
 # Printed keywords, as the first sentences of a card's text ("Flight. Roar: ...", "Titan. Hungry 4. ...").
-KEYWORD = re.compile(r"(Flight|Armor|Stealth|Spikes|Poison|Roam|Reach|Apex Predator|Titan|Flee|Hungry (\d+))\.(?: |$)")
+KEYWORD = re.compile(r"(Flight|Armor|Stealth|Spikes|Poison|Roam|Reach|Apex Predator|Titan|Flee|Wild|Hungry (\d+))\.(?: |$)")
 COSTS = re.compile(r"Costs (\d+) food")
 
 
@@ -440,6 +441,19 @@ def add(name: str, habitat: str, species: str = "") -> str:
     return cid
 
 
+def add_token(maker: str, cid: str, name: str, strength: int, tags: list[str]) -> str:
+    """A token the engine makes for `maker` (a youngling, an egg): strength and tags, no text; shown under its maker."""
+    cards = _read(CARDS)
+    if any(c["id"] == cid for c in cards["cards"]):
+        raise Refused(f"{cid} already exists")
+    m = _rec(cards, _row(maker)["id"])
+    cards["cards"].append({"id": cid, "name": name, "status": "token", "rarity": "common", "tags": tags,
+                           "base_strength": strength, "keywords": [], "text": ""})
+    m["related"] = [*m.get("related", []), cid]
+    _save_cards(cards)
+    return f"{cid}: a token of {maker}"
+
+
 def deck_name(deck: str, name: str) -> str:
     """Rename a starter deck (the name players see). A player's saved copy keeps the name it was saved with."""
     decklists = _read(DECKLISTS)
@@ -568,6 +582,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("delete"); s.add_argument("id")
     s = sub.add_parser("rename"); s.add_argument("old"); s.add_argument("new")
     s = sub.add_parser("add"); s.add_argument("name"); s.add_argument("habitat", choices=HABITATS); s.add_argument("--species", default="")
+    s = sub.add_parser("token"); s.add_argument("maker"); s.add_argument("id"); s.add_argument("name"); s.add_argument("strength", type=int); s.add_argument("--tags", default="")
     s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
     a = ap.parse_args(argv)
     try:
@@ -598,6 +613,8 @@ def main(argv=None) -> None:
             print(rename(a.old, a.new))
         elif a.cmd == "add":
             print(add(a.name, a.habitat, a.species))
+        elif a.cmd == "token":
+            print(add_token(a.maker, a.id, a.name, a.strength, [t for t in a.tags.split(",") if t]))
         elif a.cmd == "crop":
             nums = lambda v: [float(x) for x in v.split(",")] if v else None
             full = None if a.full is None else "reset" if a.full == "reset" else float(a.full)

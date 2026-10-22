@@ -2394,13 +2394,13 @@
       "tags": [
         "Hoofed"
       ],
-      "base_strength": 3,
-      "text": "Flee. Roar: gain 5 food.",
+      "base_strength": 2,
+      "text": "Flee. Roar: draw a card and gain 5 food.",
+      "species": "Gazelle",
+      "habitat": "Savanna",
       "keywords": [
         "Flee"
-      ],
-      "species": "Gazelle",
-      "habitat": "Savanna"
+      ]
     },
     {
       "id": "wildebeest",
@@ -2424,13 +2424,16 @@
       "tags": [
         "Hoofed"
       ],
-      "base_strength": 4,
-      "text": "Flee. Roar: draw a card.",
+      "base_strength": 3,
+      "text": "Flee. Roar: place a Fawn on a random adjacent empty crossroad.",
+      "species": "Deer",
+      "habitat": "Forest",
+      "related": [
+        "fawn"
+      ],
       "keywords": [
         "Flee"
-      ],
-      "species": "Deer",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "boar",
@@ -4552,6 +4555,18 @@
       "habitat": "Meadow",
       "unnamed": true,
       "keywords": []
+    },
+    {
+      "id": "fawn",
+      "name": "Fawn",
+      "status": "token",
+      "rarity": "common",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 1,
+      "keywords": [],
+      "text": ""
     }
   ]
 }

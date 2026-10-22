@@ -975,6 +975,26 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flee. Roar: draw a card."
+      },
+      "note": "Martin, 2026-10-22: Bambi in Hoofed's language; when covered the doe bolts, the Fawn stays, the replay places another",
+      "by": "claude",
+      "at": 1792668601
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Martin, 2026-10-22: a point under Sunfish's 4 for Flee",
+      "by": "claude",
+      "at": 1792668601
     }
   },
   "dhole": {
@@ -1331,6 +1351,26 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flee. Roar: gain 5 food."
+      },
+      "note": "Martin, 2026-10-22: card and food flow on the smaller body",
+      "by": "claude",
+      "at": 1792668601
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin, 2026-10-22",
+      "by": "claude",
+      "at": 1792668601
     }
   },
   "giraffe": {
@@ -4400,6 +4440,18 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1792622981
+    }
+  },
+  "fawn": {
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin, 2026-10-22: 1, like the other younglings",
+      "by": "claude",
+      "at": 1792668694
     }
   }
 }

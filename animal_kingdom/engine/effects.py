@@ -2509,11 +2509,25 @@ def _mahi_mahi_place(state, unit, cr):
                    and "Fish" in state.cards[st[-1].card_id].tags], state.config.mahi_mahi_grant)
 
 
-def _sunfish_place(state, unit, cr):
-    """Roar: place a Baby Fish on a random adjacent empty crossroad."""
-    empty = _empty_neighbors(state, cr)
-    if empty:
-        _spawn(state, unit.owner, "baby_fish", state.rng.choice(empty))
+def _spawns_beside(token):
+    """Roar: place `token` on a random adjacent empty crossroad (Sunfish's Baby Fish, Deer's Fawn)."""
+    def handler(state, unit, cr):
+        empty = _empty_neighbors(state, cr)
+        if empty:
+            _spawn(state, unit.owner, token, state.rng.choice(empty))
+    return handler
+
+
+# --- Food Aggro -------------------------------------------------------------------------------------------------
+
+def _repeat_legend_place(state, unit, cr):
+    """Roar: repeat the Roar of each of your adjacent Rodents (as if each roared again where it stands). Another of these
+    (a mimic Octopus's copy) isn't repeated: two side by side would repeat each other for ever."""
+    for nb, top in reversed(_adjacent_tops(state, cr, unit.owner)):
+        if "Rodent" in state.cards[top.card_id].tags and top.card_id != unit.card_id:
+            _push_hook(state, top, nb, "on_place")
+
+
 
 
 # --- Food Aggro -------------------------------------------------------------------------------------------------
@@ -2837,6 +2851,12 @@ def _okapi_eot(state, unit, cr):
         _push_draw(state, unit.owner, 1)
 
 
+def _gazelle_place(state, unit, cr):
+    """Roar: draw a card and gain 5 food (gazelle_food)."""
+    _push_gain(state, unit.owner, state.config.gazelle_food)
+    _push_draw(state, unit.owner, 1)
+
+
 def _zebra_place(state, unit, cr):
     """Roar: gain 5 food for each other Hoofed animal next to this (zebra_food)."""
     n = sum(1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Hoofed" in state.cards[top.card_id].tags)
@@ -3070,7 +3090,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "cod": {"on_place": _cod_place},
     "sardine": {"on_place": _fill},
     "mahi_mahi": {"on_place": _mahi_mahi_place},
-    "sunfish": {"on_place": _sunfish_place},
+    "sunfish": {"on_place": _spawns_beside("baby_fish")},
     # Food Aggro.
     "capybara_legend": {"on_place": _repeat_legend_place},
     "macaque_legend": {"on_place": _refill_legend_place},
@@ -3134,9 +3154,9 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "warthog": {"on_place": _warthog_place},
     "albatross": {"on_place": _albatross_place},
     "boar": {"on_place": _boar_place},
-    "gazelle": {"on_place": _gains("gazelle_food")},
+    "gazelle": {"on_place": _gazelle_place},
     "wildebeest": {"on_end_of_turn": _wildebeest_eot},
-    "deer": {"on_place": lambda state, unit, cr: _push_draw(state, unit.owner, 1)},
+    "deer": {"on_place": _spawns_beside("fawn")},
     # The pool (Great White Shark's Reach is a static; Raksha, Verminus are anthems; Coyote, Cougar statics).
     "octopus": {"on_place": _octopus_ink_place},
     "macaw": {"on_place": _macaw_place},

@@ -649,6 +649,17 @@ def test_sunfish_places_a_baby_fish_on_a_random_adjacent_empty_crossroad():
     assert s.top_unit("2,2").card_id == "baby_fish" and s.top_unit("2,2").owner == "A"
 
 
+def test_deer_places_a_fawn_and_the_gazelle_draws_and_feeds():
+    s = make_state(hands={"A": ["deer"]})
+    put(s, "1,1", "lion", "B"); put(s, "1,3", "lion", "A")
+    rules.apply_action(s, PlaceAction("deer", ("cr", "1,2")))
+    assert s.top_unit("2,2").card_id == "fawn" and s.top_unit("2,2").owner == "A"
+    s2 = make_state(hands={"A": ["gazelle"]}, decks={"A": ["lion"] * 3, "B": []})
+    before = s2.food["A"]
+    rules.apply_action(s2, PlaceAction("gazelle", ("cr", "1,2")))
+    assert hand_ids(s2, "A") == ["lion"] and s2.food["A"] - before == CFG.gazelle_food
+
+
 # ============================================================================= Food Aggro
 
 def test_the_repeat_legend_roars_its_adjacent_rodents_again():

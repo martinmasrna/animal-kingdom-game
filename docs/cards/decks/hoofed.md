@@ -30,9 +30,9 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 |---|---:|---|---:|---|
 | **Zebra** | 3 | Hoofed | 4 | Flee. Roar: gain 5 food for each other Hoofed animal next to this. |
 | **Giraffe** | 3 | Hoofed | 4 | Has +5 strength during your opponent's turn. |
-| **Gazelle** | 3 | Hoofed | 3 | Flee. Roar: gain 5 food. |
+| **Gazelle** | 3 | Hoofed | 2 | Flee. Roar: draw a card and gain 5 food. |
 | **Wildebeest** | 3 | Hoofed | 6 | Dusk: if this is grazing, gain 5 food. |
-| **Deer** | 3 | Hoofed | 4 | Flee. Roar: draw a card. |
+| **Deer** | 3 | Hoofed | 3 | Flee. Roar: place a Fawn on a random adjacent empty crossroad. |
 | **Warthog** | 3 | Hoofed | 4 | Roar: remove an adjacent enemy covering an allied Hoofed animal. |
 
 <!-- cards:end -->
