@@ -698,11 +698,22 @@ def test_meerkat_draws_when_an_enemy_lands_beside_it():
     assert hand_ids(s, "A") == ["lion"]
 
 
-def test_dormouse_pays_every_dusk_whatever_the_hand():
-    s = make_state(hands={"A": ["lion"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+def test_the_dormouse_draws_at_dusk_after_a_food_turn_and_region_income_never_counts():
+    s = make_state(hands={"A": ["squirrel"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "dormouse", "A")
-    end_turn(s)
-    assert s.food["A"] == CFG.dormouse_food
+    end_turn(s)                                                  # no food this turn: no card
+    assert hand_ids(s, "A") == ["squirrel"]
+    s2 = make_state(hands={"A": ["squirrel"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s2, "1,2", "dormouse", "A")
+    rules.apply_action(s2, PlaceAction("squirrel", ("cr", "2,2")))    # 10 food from a Roar
+    end_turn(s2)
+    assert hand_ids(s2, "A") == ["lion"]
+    s3 = make_state(hands={"A": []}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    for cr in ("1,1", "1,2", "2,1", "2,2"):                          # a held region pays at the end of the turn
+        put(s3, cr, "lion", "A")
+    put(s3, "1,3", "dormouse", "A")
+    end_turn(s3)
+    assert hand_ids(s3, "A") == []
 
 
 def test_the_hamster_grows_with_your_food_in_hand_and_on_the_board():

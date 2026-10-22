@@ -1327,10 +1327,10 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Dusk: gain 5 food.",
-      "keywords": [],
+      "text": "Dusk: if you gained 10 or more food this turn, draw a card.",
       "species": "Dormouse",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": []
     },
     {
       "id": "squirrel",

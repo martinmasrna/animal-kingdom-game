@@ -51,7 +51,6 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
     "gazelle": ["gazelle_food"],
     "zebra": ["zebra_food"],
     "chipmunk_legend": ["chipmunk_legend_food_per"],
-    "dormouse": ["dormouse_food"],
     "wildebeest": ["wildebeest_food"],
     "hyena": ["hyena_food_per"],
     "tortoise": ["tortoise_per_armor"],

@@ -2570,8 +2570,10 @@ def _beaver_place(state, unit, cr):
 
 
 def _dormouse_eot(state, unit, cr):
-    """Dusk: gain 10 food."""
-    _push_gain(state, unit.owner, state.config.dormouse_food)
+    """Dusk: if you gained 10 or more food this turn, draw a card. Dusk comes before region income, so only the turn's
+    own food counts."""
+    if _fed_this_turn(state, unit.owner):
+        _push_draw(state, unit.owner, 1)
 
 
 def _chipmunk_place(state, unit, cr):

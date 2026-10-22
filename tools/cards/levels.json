@@ -1059,6 +1059,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Dusk: gain 5 food."
+      },
+      "note": "Martin, 2026-10-22: the nocturnal forager; Food Aggro's refill on its own condition. Dusk comes before region income, so only the turn's own food counts",
+      "by": "claude",
+      "at": 1792677337
     }
   },
   "dung_beetle": {
