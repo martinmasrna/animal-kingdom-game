@@ -300,19 +300,20 @@ def test_roach_king_comes_back_stronger_and_draws():
     assert hand_ids(s, "A") == ["lion"] and "cockroach_legend" not in s.decks["A"]
 
 
-def test_the_toad_takes_everything_beside_it_when_removed():
+def test_the_dart_frog_takes_everything_beside_it_when_removed():
     s = make_state(hands={"A": ["praying_mantis"]}, decks={"A": ["lion"] * 3, "B": []})
-    put(s, "1,2", "toad", "A")
+    put(s, "1,2", "dart_frog", "A")
     put(s, "2,2", "tiger", "B"); put(s, "1,1", "lion", "A")
     rules.apply_action(s, PlaceAction("praying_mantis", ("cr", "1,3")))
-    choose(s, "1,2")                                           # the Mantis eats the Toad: everything beside it goes
+    choose(s, "1,2")                                           # the Mantis eats the Frog: everything beside it goes
     assert all(s.top_unit(cr) is None for cr in ("1,1", "1,2", "1,3", "2,2"))
 
 
-def test_the_toad_has_reach_two():
+def test_the_toad_has_reach_and_poison_and_nothing_more():
     s = make_state(hands={"A": ["toad"]})
     put(s, "1,2", "lion", "A")
     assert "3,2" in {a.crossroad for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "toad"}
+    assert set(load_cards()["toad"].keywords) == {"Reach", "Poison"}
 
 
 def test_vultures_land_from_hand_and_deck_after_three_removals():

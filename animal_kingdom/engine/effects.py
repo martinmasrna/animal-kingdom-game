@@ -1917,7 +1917,7 @@ def _cockroach_legend_remove(state, unit, cr, pos):
     draw_cards(state, unit.owner, 1)
 
 
-def _toad_remove(state, unit, cr, pos):
+def _blast_remove(state, unit, cr, pos):
     """When this is removed, remove all animals next to it, yours or theirs: each in turn, so a chain settles."""
     _remove_tops(state, unit, [nb for nb, _ in _adjacent_tops(state, cr)])
 
@@ -3010,7 +3010,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "worm": {"on_remove": _worm_remove},
     "cockroach": {"on_remove": _cockroach_remove},
     "cockroach_legend": {"on_remove": _cockroach_legend_remove},
-    "toad": {"on_remove": _toad_remove},
+    "dart_frog": {"on_remove": _blast_remove},
     "locust_legend": {"on_place": _locust_legend_place},
     # Canines (Clarion's free roam and Dhole's equal roams are statics).
     "wolf_legend_2": {"on_friendly_roam": _wolf_legend_2_friendly_roam},

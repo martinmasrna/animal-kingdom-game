@@ -22,17 +22,17 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Raccoon** | 2 | — | 2 | Roar: return an animal from your Remove Pile to your hand. |
 | **Earthworm** | 2 | — | 1 | When this is removed, draw a card and place two Worms on its crossroad. |
 | **Sperm Whale** | 2 | — | 8 | Titan. Roar: remove all adjacent animals. |
+| **Dart Frog** | 2 | — | 1 | Reach. Poison. When this is removed, remove all animals next to it. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Praying Mantis** | 2 | — | 2 | Roar: remove an adjacent ally to draw 2 cards. |
+| **Praying Mantis** | 3 | — | 2 | Roar: remove an adjacent ally to draw 2 cards. |
 | **Piranha** | 3 | Fish | 3 | Roar: if an ally was removed this turn, remove an adjacent animal. |
 | **Vulture** | 3 | Bird | 2 | Flight. Dusk: after 3 or more removals this turn, this lands from your hand or deck. |
 | **City Spider** | 3 | Arachnid | 4 | Dawn: remove the weakest animal next to this. |
 | **Cockroach** | 3 | — | 1 | When this is removed, put it back where it was and place a Roach on an adjacent empty crossroad. |
-| **Toad** | 3 | — | 1 | Reach. When this is removed, remove all animals next to it. |
 | **Python** | 3 | Snake | 0 | Whenever an animal is removed, gain 1 strength (wherever this is). |
 
 <!-- cards:end -->

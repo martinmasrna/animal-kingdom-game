@@ -29,10 +29,10 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Hedgehog** | 3 | — | 5 | Spikes. |
-| **Dart Frog** | 3 | — | 1 | Reach. Poison. |
 | **Jellyfish** | 3 | — | 4 | Poison. |
 | **Black Bear** | 3 | Bear | 5 | Roar: in 2 turns, draw 2 cards. |
 | **Tortoise** | 3 | — | 4 | Armor. Roar: gain 5 food for each of your animals with Armor. |
 | **Owl** | 3 | Bird | 2 | Flight. Roar: Scout a card. |
+| **Toad** | 3 | — | 2 | Reach. Poison. |
 
 <!-- cards:end -->

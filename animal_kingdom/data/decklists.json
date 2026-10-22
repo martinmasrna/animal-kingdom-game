@@ -34,7 +34,7 @@
    "bot": false,
    "cards": {
     "pheasant_legend": 1,
-    "praying_mantis": 2,
+    "praying_mantis": 3,
     "raccoon": 2,
     "piranha": 3,
     "vulture": 3,
@@ -42,11 +42,11 @@
     "earthworm": 2,
     "cockroach": 3,
     "sperm_whale": 2,
-    "toad": 3,
     "locust_legend": 1,
     "cockroach_legend": 1,
     "python": 3,
-    "rat_legend_2": 1
+    "rat_legend_2": 1,
+    "dart_frog": 2
    }
   },
   {
@@ -185,12 +185,12 @@
     "golden_orb_weaver": 2,
     "armadillo": 2,
     "hedgehog": 3,
-    "dart_frog": 3,
     "jellyfish": 3,
     "black_bear": 3,
     "tortoise": 3,
     "owl": 3,
-    "octopus": 2
+    "octopus": 2,
+    "toad": 3
    }
   },
   {
@@ -330,7 +330,7 @@
     "hummingbird": 2,
     "mole": 2,
     "bat": 3,
-    "dart_frog": 3,
+    "toad": 3,
     "dolphin": 3,
     "giraffe": 3,
     "sardine": 3,

@@ -976,9 +976,33 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Reach has no number (Martin, 2026-10-21)",
+      "note": "Martin, 2026-10-22: the bomb you plant and set off, now with Poison (a cover kills the coverer, so only a removal can clear it, and that sets it off); rare, on the animal whose poison is famous",
       "by": "claude",
-      "at": 1792604717
+      "at": 1792676406,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Reach has no number (Martin, 2026-10-21)",
+        "prev": "Reach. Poison."
+      }
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-22: the bomb you plant and set off, now with Poison (a cover kills the coverer, so only a removal can clear it, and that sets it off); rare, on the animal whose poison is famous",
+      "by": "claude",
+      "at": 1792676407
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from food_otk to aristocrats",
+      "by": "claude",
+      "at": 1792676407
     }
   },
   "deer": {
@@ -3593,14 +3617,23 @@
   "toad": {
     "effect": {
       "lv": "problem",
-      "by": "martin",
-      "at": 1792657677,
-      "note": "Reach has no number (Martin, 2026-10-21)"
+      "by": "claude",
+      "at": 1792676407,
+      "note": "Martin, 2026-10-22: the everyday poisonous animal on the plain Poison card",
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "Reach has no number (Martin, 2026-10-21)",
+        "prev": "Reach. When this is removed, remove all animals next to it."
+      }
     },
     "animal": {
-      "note": "moved from pool to aristocrats",
+      "note": "moved from aristocrats to food_otk",
       "by": "claude",
-      "at": 1792085442
+      "at": 1792676407,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "moved from pool to aristocrats"
+      }
     },
     "art": {
       "lv": "draft",
@@ -3625,7 +3658,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792085441
+      "at": 1792676613,
+      "note": "Martin, 2026-10-22"
     }
   },
   "locust_legend": {

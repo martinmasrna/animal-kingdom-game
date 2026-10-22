@@ -352,13 +352,14 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 1,
-      "text": "Reach. When this is removed, remove all animals next to it.",
-      "keywords": [
-        "Reach"
-      ],
+      "base_strength": 2,
+      "text": "Reach. Poison.",
       "species": "Toad",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": [
+        "Reach",
+        "Poison"
+      ]
     },
     {
       "id": "locust_legend",
@@ -1546,16 +1547,16 @@
       "id": "dart_frog",
       "name": "Dart Frog",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [],
       "base_strength": 1,
-      "text": "Reach. Poison.",
+      "text": "Reach. Poison. When this is removed, remove all animals next to it.",
+      "species": "Poison Dart Frog",
+      "habitat": "Jungle",
       "keywords": [
         "Reach",
         "Poison"
-      ],
-      "species": "Poison Dart Frog",
-      "habitat": "Jungle"
+      ]
     },
     {
       "id": "jellyfish",
