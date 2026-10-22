@@ -57,9 +57,10 @@ log = logging.getLogger(__name__)
 # 8 s so a move stays under the server's BOT_THINK_MAX. Since 2026-10-21 food is valued as the race to the win on a cubed
 # curve and no net-food term (Martin: a food lead you cannot convert is worth nothing; the board is what converts), and
 # the root screen ranks a placement after its own sub-choice resolves (quiesce; Martin's gauntlet game QR4OFW-4: a Hornet
-# ranked by its half-resolved position; +4.3 points a deck, results/bot_quality/wave2-quiesce).
+# ranked by its half-resolved position; +4.3 points a deck, results/bot_quality/wave2-quiesce), and it searches its
+# mulligan: each option played through the opening in sampled worlds (mulligan; +5.1 points a deck, wave2-mulligan).
 EXPERT = ("referee:depth=1,time_budget=8,den_sense=true,reply_turns=3,w.pending_target=1.5,w.buried_presence=0.25,"
-          "w.food_progress=0,w.food_curve=3,w.food_proximity=60,w.food_race=true,quiesce=true")
+          "w.food_progress=0,w.food_curve=3,w.food_proximity=60,w.food_race=true,quiesce=true,mulligan=true")
 # The Normal pilot is the one-turn searcher with the den-front reach term (2026-10-21, Martin's game GMIDKA: it left two
 # cut-off Falcons in its den front for two turns). The Expert sees those threats through its reply search and the term
 # cost it a point on average (results/bot_quality/wave2-reach), so it stays off there.
