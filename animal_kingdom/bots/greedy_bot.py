@@ -73,6 +73,7 @@ class GreedyWeights:
     board_presence: float = 0.5      # per net effective-strength on controlled crossroads
     connection: float = 1.0          # per own unit connected to my HQ
     region_control: float = 2.0      # per controlled region corner, x that region's food
+    region_hold: float = 0.0         # share of region control counted by what each side can hold (features.held_region_control)
     enemy_hq_threat: float = 40.0    # per crossroad I hold in front of the enemy HQ
     own_hq_threat: float = 40.0      # per crossroad the enemy holds in front of my HQ
     hq_threat_reach: float = 0.0     # fraction of a threat for a front crossroad held cut off but one placement from
@@ -328,7 +329,12 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     # A lone central unit can touch four regions but is nowhere close to producing any of
     # them. Cubing the completion fraction keeps that speculative footprint small while
     # still making a 3/4 or completed region strategically meaningful.
-    score += w.region_control * _features.region_control(state, me, opp)
+    if w.region_hold:      # a corner is worth what its holder can keep this coming turn (Martin, 2026-10-22)
+        held = _features.held_region_control(state, me, opp)
+        plain = _features.region_control(state, me, opp) if w.region_hold < 1.0 else 0.0
+        score += w.region_control * ((1.0 - w.region_hold) * plain + w.region_hold * held)
+    else:
+        score += w.region_control * _features.region_control(state, me, opp)
 
     # --- HQ threat: only a connected chain can capture next turn. An isolated Flight unit
     # in front of an HQ is board presence, not an immediate HQ threat.
