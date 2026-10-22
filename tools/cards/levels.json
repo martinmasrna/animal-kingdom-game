@@ -3641,14 +3641,22 @@
       "at": 1792262680
     },
     "art": {
-      "lv": "problem",
-      "by": "martin",
-      "at": 1792657959
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792660654,
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": ""
+      }
     },
     "crop": {
-      "lv": "problem",
-      "by": "martin",
-      "at": 1792657963
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792660654,
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": ""
+      }
     },
     "rarity": {
       "lv": "draft",
