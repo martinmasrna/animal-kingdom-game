@@ -1362,6 +1362,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin, 2026-10-22: conditional draw 2 priced by what the condition costs the turn you play it (Mantis 2, Termite King 2, Nurse Bumblebee 2 with Flight, Gopher 4, Hare 4)",
+      "by": "claude",
+      "at": 1792663941
     }
   },
   "gorilla": {
@@ -1494,6 +1504,16 @@
       "note": "not a rodent (Martin 2026-10-16: drop the tag)",
       "by": "claude",
       "at": 1792187557
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin, 2026-10-22: conditional draw 2 priced by what the condition costs the turn you play it (Mantis 2, Termite King 2, Nurse Bumblebee 2 with Flight, Gopher 4, Hare 4)",
+      "by": "claude",
+      "at": 1792663942
     }
   },
   "hawk": {
@@ -2165,6 +2185,16 @@
       "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
       "by": "claude",
       "at": 1792661449
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin, 2026-10-22: conditional draw 2 priced by what the condition costs the turn you play it (Mantis 2, Termite King 2, Nurse Bumblebee 2 with Flight, Gopher 4, Hare 4)",
+      "by": "claude",
+      "at": 1792663941
     }
   },
   "octopus_legend": {
@@ -2349,6 +2379,16 @@
       "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
       "by": "claude",
       "at": 1792661450
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin, 2026-10-22: conditional draw 2 priced by what the condition costs the turn you play it (Mantis 2, Termite King 2, Nurse Bumblebee 2 with Flight, Gopher 4, Hare 4)",
+      "by": "claude",
+      "at": 1792663941
     }
   },
   "lion_legend": {
@@ -2960,6 +3000,16 @@
       "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
       "by": "claude",
       "at": 1792661449
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "note": "Martin, 2026-10-22: conditional draw 2 priced by what the condition costs the turn you play it (Mantis 2, Termite King 2, Nurse Bumblebee 2 with Flight, Gopher 4, Hare 4)",
+      "by": "claude",
+      "at": 1792663941
     }
   },
   "termite_queen": {

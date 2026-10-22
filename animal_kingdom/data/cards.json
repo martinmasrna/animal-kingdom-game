@@ -87,7 +87,7 @@
       "tags": [
         "Colony"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Flight. Roar: if you control 4 or more Colony animals, draw 2 cards.",
       "keywords": [
         "Flight"
@@ -103,7 +103,7 @@
       "tags": [
         "Colony"
       ],
-      "base_strength": 6,
+      "base_strength": 2,
       "text": "Roar: if you control a Colony Queen, draw 2 cards.",
       "keywords": [],
       "species": "Termite",
@@ -240,7 +240,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Roar: remove an adjacent ally to draw 2 cards.",
       "keywords": [],
       "species": "Praying Mantis",
@@ -695,7 +695,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 3,
+      "base_strength": 4,
       "text": "Flee. Roar: if you played 3 or more animals this turn, draw 2 cards.",
       "keywords": [
         "Flee"
@@ -1364,7 +1364,7 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 3,
+      "base_strength": 4,
       "text": "Roar: if you gained 10 or more food this turn, draw 2 cards.",
       "keywords": [],
       "species": "Gopher",
