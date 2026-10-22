@@ -68,7 +68,7 @@ export const feed = (page, view) => page.evaluate(v => window.__ak.feed(v), view
 export function screenMismatches() {
   const { V } = window.__ak(), G = V.game, out = [];
   if (!G) return out;
-  const you = V.you, them = you === 'A' ? 'B' : 'A', rel = p => (p === you ? 'A' : 'B');
+  const you = V.you, them = you === 'A' ? 'B' : 'A', rel = p => (p === you ? 'A' : p === 'wild' ? 'W' : 'B');
   const dcr = cr => { if (you === 'A') return cr; const [c, r] = cr.split(','); return `${6 - +c},${r}`; };
   const visible = e => { const s = getComputedStyle(e), r = e.getBoundingClientRect(); return s.display !== 'none' && s.visibility !== 'hidden' && +s.opacity > 0.5 && r.width > 20; };
   const digits = e => [...e.querySelectorAll('img')].map(i => i.alt).join('');

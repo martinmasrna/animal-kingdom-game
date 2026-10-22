@@ -1865,7 +1865,7 @@ def _vultures_dusk(state, player):
         if not empty:
             return
         state.hands[player].remove(inst)
-        _land_unit(state, player, inst, state.rng.choice(empty), from_hand=False, roar=False, play=False)
+        _land_unit(state, player, inst, state.rng.choice(empty), from_hand=True, roar=False, play=False)
     while "vulture" in state.decks[player]:
         empty = sorted(c for c in state.game_map.crossroads if not state.board.get(c))
         if not empty:
