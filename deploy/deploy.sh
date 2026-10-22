@@ -58,39 +58,53 @@ if [[ -n "$unwritten" && -z "${NEWS_OK:-}" ]]; then
   echo "write animal_kingdom/web/news/$(date -v-6H +%F 2>/dev/null || date -d "-6 hours" +%F).md (or NEWS_OK=1 if players won't notice), then deploy again"; exit 1
 fi
 
-# The fast tiers gate the deploy here, so nothing waits on a separate test run first (SKIP_TESTS=1 when they just passed).
-[[ -n "${SKIP_TESTS:-}" ]] || "$repo/test" || { echo "fast tests failed: not deploying"; exit 1; }
+# The web client's fast suite gates the deploy here (SKIP_TESTS=1 when it just passed); the Python fast tier runs in the
+# image's build, against the compiled engine that ships (deploy/Dockerfile).
+[[ -n "${SKIP_TESTS:-}" ]] || (cd "$repo/animal_kingdom/web/test" && node --test > /tmp/ak-deploy-web.txt 2>&1) \
+  || { grep -vE '^# Subtest|^ok ' /tmp/ak-deploy-web.txt | tail -40; echo "web tests failed: not deploying"; exit 1; }
 
-# The build context lives in one fixed folder, refreshed with rsync --checksum, so files that did not change keep their
-# timestamps and the builder's incremental context transfer sends only what changed, not the 85 MB of art every time.
-# Three trees for the image (deploy/Dockerfile): code/ (the engine, the bots, the server, the tests), data/ (cards, decks,
-# maps) and ui/ (the client's static files, the news, the studies). The compile runs on code/ alone, so a card or client
-# change reuses the compiled engine and pays only the tests.
-ctx="${XDG_CACHE_HOME:-$HOME/.cache}/animal-kingdom-deploy"
-lock="$ctx.lock"
 # one deploy at a time across sessions; a lock left by a killed deploy is taken over
+cache="${XDG_CACHE_HOME:-$HOME/.cache}/animal-kingdom-deploy"; lock="$cache.lock"; mkdir -p "$cache"
 until mkdir "$lock" 2>/dev/null; do
   kill -0 "$(cat "$lock/pid" 2>/dev/null)" 2>/dev/null || { rm -rf "$lock"; continue; }
   echo "another deploy is running: waiting"; sleep 10
 done
 echo $$ > "$lock/pid"
-trap 'rm -rf "$lock" "$ctx.new"' EXIT
-rm -rf "$ctx.new"; mkdir -p "$ctx.new/code" "$ctx.new/ui/animal_kingdom/web" "$ctx"
-git -C "$repo" archive HEAD animal_kingdom | tar -x -C "$ctx.new/code"
-mv "$ctx.new/code/animal_kingdom/data" "$ctx.new/data"
-for d in static news studies; do [[ -d "$ctx.new/code/animal_kingdom/web/$d" ]] && mv "$ctx.new/code/animal_kingdom/web/$d" "$ctx.new/ui/animal_kingdom/web/"; done
-cp "$repo/deploy/Dockerfile" "$cfg" "$ctx.new/"
-rsync -a --checksum --delete "$ctx.new/" "$ctx/"
-tmp="$ctx"
-echo "deploying $(git -C "$repo" log --oneline -1)"
-# Fly's deploy sometimes hangs on its own API: give it 20 minutes (a full compile and gate takes about 5), then stop it and
-# try once more; a second hang fails loudly.
+tmp="$(mktemp -d)"; trap 'rm -rf "$lock" "$tmp"' EXIT
+
+# Fly's deploy sometimes hangs on its own API: give it 20 minutes, then stop it and try once more; a second hang fails loudly.
 attempt() {
-  fly deploy "$tmp" --config "$tmp/fly.toml" --remote-only & local pid=$! waited=0
+  fly deploy "$@" & local pid=$! waited=0
   while kill -0 "$pid" 2>/dev/null; do
     if (( waited >= 1200 )); then kill "$pid" 2>/dev/null; wait "$pid" 2>/dev/null; echo "deploy hung for 20 minutes: stopped"; return 124; fi
     sleep 5; waited=$((waited + 5))
   done
   wait "$pid"
 }
-attempt || { echo "retrying the deploy once"; attempt || { echo "DEPLOY FAILED twice"; exit 1; }; }
+retry() { attempt "$@" || { echo "retrying once"; attempt "$@" || { echo "DEPLOY FAILED twice"; exit 1; }; }; }
+
+# The paintings (static/art, static/kit2: 81 of the 85 MB) ship as their own image, built and pushed only when they change,
+# keyed by their git trees; the app's build copies them from it, so a card or code change uploads a few MB. The Fly builder
+# keeps no context between builds, so without this every deploy sent all of it (two minutes, ten on a slow line).
+art="art-$(git -C "$repo" rev-parse HEAD:animal_kingdom/web/static/art HEAD:animal_kingdom/web/static/kit2 | shasum | cut -c1-16)"
+if [[ "$(cat "$cache/art" 2>/dev/null)" != "$art" ]]; then
+  echo "the paintings changed: pushing them as $art"
+  mkdir -p "$tmp/art"
+  git -C "$repo" archive HEAD animal_kingdom/web/static/art animal_kingdom/web/static/kit2 | tar -x -C "$tmp/art" --strip-components 3
+  printf 'FROM scratch\nCOPY art /art\nCOPY kit2 /kit2\n' > "$tmp/art/Dockerfile"
+  cp "$cfg" "$tmp/art/"
+  retry "$tmp/art" --config "$tmp/art/fly.toml" --dockerfile "$tmp/art/Dockerfile" --remote-only --build-only --push --image-label "$art"
+  echo "$art" > "$cache/art"
+fi
+
+# Three trees for the image (deploy/Dockerfile): code/ (the engine, the bots, the server, the tests), data/ (cards, decks,
+# maps) and ui/ (the client's static files but the paintings, the news, the studies). The compile runs on code/ alone, so a
+# card or client change reuses the compiled engine and pays only the tests.
+mkdir -p "$tmp/app/code" "$tmp/app/ui/animal_kingdom/web"
+git -C "$repo" archive HEAD animal_kingdom | tar -x -C "$tmp/app/code"
+mv "$tmp/app/code/animal_kingdom/data" "$tmp/app/data"
+for d in static news studies; do [[ -d "$tmp/app/code/animal_kingdom/web/$d" ]] && mv "$tmp/app/code/animal_kingdom/web/$d" "$tmp/app/ui/animal_kingdom/web/"; done
+rm -rf "$tmp/app/ui/animal_kingdom/web/static/art" "$tmp/app/ui/animal_kingdom/web/static/kit2"
+cp "$repo/deploy/Dockerfile" "$cfg" "$tmp/app/"
+echo "deploying $(git -C "$repo" log --oneline -1)"
+retry "$tmp/app" --config "$tmp/app/fly.toml" --remote-only --build-arg "ART=registry.fly.io/$app:$art"

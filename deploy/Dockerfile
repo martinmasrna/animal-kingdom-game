@@ -7,7 +7,11 @@
 # recorded bot games, which saw only the common cards' paths and needed a committed recording kept current).
 #
 # Three trees (deploy.sh): code/ (the Python), data/ (cards, decks, maps), ui/ (the client's static files, the news, the
-# studies). The compile depends on code/ alone, so a card or client change reuses it and pays only the tests.
+# studies), and the paintings from their own image (deploy.sh pushes it when they change). The compile depends on code/
+# alone, so a card or client change reuses it and pays only the tests.
+ARG ART
+FROM ${ART} AS art
+
 FROM python:3.14-slim AS build
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev && rm -rf /var/lib/apt/lists/* \
@@ -22,6 +26,8 @@ RUN python -m mypyc --ignore-missing-imports \
     && rm -rf build
 COPY data ./animal_kingdom/data
 COPY ui/animal_kingdom/web ./animal_kingdom/web
+COPY --from=art /art ./animal_kingdom/web/static/art
+COPY --from=art /kit2 ./animal_kingdom/web/static/kit2
 # Left out, for what the image doesn't carry: the deck docs (docs/), Martin's logged games (results/), the features
 # file's own source text, and parallel simulation, which pickles the bot's frozen weights (the server never does).
 RUN python -c "import animal_kingdom.engine.rules as r, animal_kingdom.bots.referee_bot as b; assert r.__file__.endswith('.so') and b.__file__.endswith('.so')" \
