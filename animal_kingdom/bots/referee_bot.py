@@ -74,10 +74,10 @@ class RefereeBot(TurnSearcher):
                  evaluator: Optional[LinearEval] = None,
                  quiesce: bool = False, mulligan: bool = False,
                  depth: int = 0, next_width: int = 3, deepen_top: int = 4, deepen_roots: int = 3, time_budget: float = 0.0,
-                 den_sense: bool = False, reply_turns: int = 0):
+                 den_sense: bool = False, reply_turns: int = 0, decisive: float = _DECISIVE):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
-                         evaluator=evaluator, quiesce=quiesce, mulligan=mulligan)
+                         evaluator=evaluator, quiesce=quiesce, mulligan=mulligan, decisive=decisive)
         self.staged = staged
         self.root_width = root_width
         self.reply_width = reply_width
@@ -368,13 +368,14 @@ class RefereeBot(TurnSearcher):
             # A lost world is a flat -_DECISIVE, so when every world is lost all moves tie
             # and the bot plays a random one. Keep the position it handed the opponent as a
             # tiebreak: still a decisive loss, but the most resistant one ranks first.
-            before = max(-_LOSS_TIEBREAK, min(_LOSS_TIEBREAK, self._planning_eval(state, me)))
+            tiebreak = _LOSS_TIEBREAK if self.decisive >= _DECISIVE else self.decisive / 10
+            before = max(-tiebreak, min(tiebreak, self._planning_eval(state, me)))
             threat = self._advance(state, me)
             score = self._clamped_eval(state, me)
-            if score == -_DECISIVE:
+            if score == -self.decisive:
                 score += before
             if threat:
-                score = threat * (-_DECISIVE + before) + (1.0 - threat) * score
+                score = threat * (-self.decisive + before) + (1.0 - threat) * score
             scores.append(score - penalty)
             leaves.append((state, penalty, before))
             self.last_search_stats["reply_world_rollouts"] += 1
@@ -390,7 +391,7 @@ class RefereeBot(TurnSearcher):
                 if state.result is not None:
                     continue
                 score = self._leaf_score(state, me, self.depth)
-                if score == -_DECISIVE:
+                if score == -self.decisive:
                     score += before
                 scores[i] = score - penalty
         return scores
@@ -444,9 +445,9 @@ class RefereeBot(TurnSearcher):
             self.last_search_stats["lookahead_lines"] = self.last_search_stats.get("lookahead_lines", 0) + 1
             value = self._leaf_score(nxt, me, depth - 1)
             if threat:
-                value = threat * -_DECISIVE + (1.0 - threat) * value
+                value = threat * -self.decisive + (1.0 - threat) * value
             best = value if best is None else max(best, value)
-        if best is not None and abs(best) >= _DECISIVE / 2:
+        if best is not None and abs(best) >= self.decisive / 2:
             best /= 2        # a game decided a turn later counts half: lose later rather than now, win now rather than later
         return best  # type: ignore[return-value]
 

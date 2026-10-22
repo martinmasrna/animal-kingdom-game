@@ -89,8 +89,13 @@ class TurnSearcher(Bot):
                  deck_reveal_choice_width: int = 0,
                  max_search_nodes: Optional[int] = None,
                  evaluator: Optional[LinearEval] = None,
-                 quiesce: bool = False, mulligan: bool = False):
+                 quiesce: bool = False, mulligan: bool = False, decisive: float = _DECISIVE):
         self.weights = weights or GreedyWeights()
+        # What a decided game is worth inside the search (2026-10-22). The default 1e9 makes a win in one of five sampled
+        # worlds outweigh anything that happens in the other four, so the bot plays for the hand it hopes you have:
+        # in Martin's games the Expert expected a sure win at the turn before it was lost in 8 of 23 swings. A finite
+        # value (a few hundred, above any positional swing) makes a win in one world one world's worth.
+        self.decisive = decisive
         self.mulligan = mulligan     # off by default: worth about zero measured, and kept hands feed the table (bots.md)
         # RNG only breaks exact score ties, so policy stays reproducible.
         self.rng = rng if rng is not None else random.Random(seed)
@@ -463,7 +468,7 @@ class TurnSearcher(Bot):
 
     def _clamped_eval(self, state: GameState, me: str) -> float:
         score = self._eval(state, me)
-        return max(-_DECISIVE, min(_DECISIVE, score))
+        return max(-self.decisive, min(self.decisive, score))
 
     def _planning_eval(self, state: GameState, me: str) -> float:
         """End-of-own-turn beam score, including effects prepared for the next turn.
@@ -489,8 +494,8 @@ class TurnSearcher(Bot):
         readiness = _capped(self.weights, _reframed_at_my_turn(
             state, me, lambda: _enabled_roar_count(state, me)))
         return max(
-            -_DECISIVE,
-            min(_DECISIVE, score + self.weights.effect_readiness * readiness),
+            -self.decisive,
+            min(self.decisive, score + self.weights.effect_readiness * readiness),
         )
 
     # ------------------------------------------------------------------ pruning
