@@ -828,6 +828,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-22: an answer any deck can run (removal gated by the target), priced at 4: a hair under Jaguar at base, above it once Handlock buffs it",
+      "by": "claude",
+      "at": 1792664788
     }
   },
   "chinchilla": {
