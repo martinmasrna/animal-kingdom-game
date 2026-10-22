@@ -1,6 +1,6 @@
 # Circle of Life
 
-What each card is for: [`../../design/effects-pass.md`](../../design/effects-pass.md), its the aristocrats section. The table below is generated from cards.json, where the cards live.
+What each card is for: [`../../design/effects-pass.md`](../../design/effects-pass.md), its Circle of Life section. The table below is generated from cards.json, where the cards live.
 
 ## Cards
 

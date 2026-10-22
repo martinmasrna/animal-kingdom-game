@@ -108,9 +108,9 @@ Imagined games (reasoning, not evidence) showed the clock runs on cards, not foo
 
 Rejected: the Octopus carrying the extra action (its octopus is Fathom, the clever one, and a sea animal in the Rodent deck); Greywhisker and the Naked Mole-Rat (Den Rush's); Mouse and other draw-one cards (tempo, not value); a "protect it and it wins" food engine (a control card); "discard your hand, gain food for each"; "gain food for each card your opponent has more than you"; "the next Roar you play this turn happens twice" (here it's mostly a second Squirrel; banked as the Macaw); a Squirrel that shuffles Acorns into your deck (20 food eventually, in a deck that barely draws; banked for Food OTK, the hoard); the Mouse raid ("gain 10 food for each enemy next to this": Mouse is already a card, and a common animal); a Prairie Dog town rare (Meerkat filled the slot).
 
-## The aristocrats, draft
+## Circle of Life (the Cockroach deck), draft
 
-Your own animals die on purpose and every death pays. What makes it worth playing: the opponent's interaction feeds it (their covers are your deaths), each turn is a puzzle (how many deaths and payoffs out of two actions), and it wins from behind, on food the opponent can't block, while they seem to hold the board.
+Symmetric removal that punishes the opponent more than you (Martin, 2026-10-22): the Sperm Whale and its kin remove everything around them, yours included, and you don't mind, because your animals come back (the Cockroach, the Roach King) and every removal pays (the Vulture, the Hyena, the Python). The legendary, The First of Many, is the big reset that amplifies it: the board's top layer cleared, and what survives is yours, the cockroaches crawling back and your buried animals resurfacing. What makes it worth playing: the opponent's interaction feeds it (their covers are your deaths), each turn is a puzzle (how many deaths and payoffs out of two actions), and it wins from behind, on food the opponent can't block, while they seem to hold the board.
 
 How it's built:
 
