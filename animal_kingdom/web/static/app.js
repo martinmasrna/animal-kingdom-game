@@ -837,7 +837,7 @@ setInterval(() => { if (screen === 'game') drawClock(); }, 250);
 
 // Viewer space: you are always 'A' on the left; the server's seats are mapped through these.
 const opp = () => V.you === 'A' ? 'B' : 'A';
-const rel = p => p === V.you ? 'A' : 'B';
+const rel = p => p === V.you ? 'A' : p === 'wild' ? 'W' : 'B';   // W: a Wild animal, no one's (the Locusts)
 const dcr = cr => { if (V.you === 'A') return cr; const [c, r] = cr.split(','); return `${MAP.cols + 1 - Number(c)},${r}`; };
 
 // A lesson (coach.js holds everything the tutorial does on this screen).
@@ -1258,7 +1258,7 @@ function moveLine(m) {
 }
 
 function viewerBoard(v) {
-  const out = {}, rl = p => p === v.you ? 'A' : p === 'wild' ? 'W' : 'B';   // W: a Wild animal, no one's (the Locusts)
+  const out = {}, rl = p => p === v.you ? 'A' : p === 'wild' ? 'W' : 'B';
   for (const [cr, st] of Object.entries(v.game.board)) {
     const c = v.you === 'A' ? cr : `${MAP.cols + 1 - Number(cr.split(',')[0])},${cr.split(',')[1]}`;
     out[c] = st.map(u => ({ ...u, owner: rl(u.owner) }));
