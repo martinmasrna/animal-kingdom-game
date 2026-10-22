@@ -62,13 +62,14 @@ def test_covering_a_locust_spares_that_crossroad():
     assert lion not in s.board.get("2,2", [])                # the uncovered one ate
 
 
-def test_an_apex_predator_eats_a_locust_outright():
+def test_an_apex_predator_on_a_locust_eats_it_and_sits_on_the_animal_beneath():
     s = swarm()
+    front = sorted(s.game_map.hq_front("B"))[0]
+    mouse = put(s, front, "mouse", "B")
     rules.apply_action(s, PlaceAction("locust_legend", ("cr", "1,2")))
     end_turn(s)
-    front = sorted(s.game_map.hq_front("B"))[0]
-    rules.apply_action(s, PlaceAction("tiger", ("cr", front)))
-    assert [u.card_id for u in s.board[front]] == ["tiger"]
+    rules.apply_action(s, PlaceAction("tiger", ("cr", front)))   # any Apex: it covers, then eats what it covered
+    assert [u.card_id for u in s.board[front]] == ["mouse", "tiger"] and s.board[front][0] is mouse
 
 
 def test_a_wild_animal_connects_no_one_and_holds_no_region():
