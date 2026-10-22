@@ -56,7 +56,7 @@ There is no mana: every card costs one card and one placement action. Low streng
 - No effect that grants a connection-ignoring placement able to reach the den. Flight alone never captures.
 - Avoid unconditional body-plus-card cards: a body that replaces itself is already premium.
 - A new keyword needs at least three cards that want the exact same rules object.
-- A tag is a search key: any day a card may say "draw a Bird" or "duplicate a Cat". So a tagged animal's strong effect asks for its own family (Serval: "if you played another Cat"), and a strong generic effect (removal without a family condition, extra actions, extra plays, card advantage) goes on a tagless animal (Honey Badger, Raccoon, Opossum). A generic bomb behind a tag taxes every tutor that family could ever get (Martin, 2026-10-16).
+- A tag is a search key: any day a card may say "draw a Bird" or "duplicate a Cat". So a tagged animal's strong effect asks for its own family (Serval: "if you played another Cat"), and a generic bomb (removal of any size, extra actions, extra plays, card-advantage engines) goes on a tagless animal (Raccoon, Opossum, Mole): behind a tag it taxes every tutor that family could ever get (Martin, 2026-10-16). Removal capped by the target's strength is an ordinary answer and sits fine behind a tag; Egg Control tutors its Hawk and Black Mamba on purpose (Martin, 2026-10-22).
 
 ## Before proposing a card
 
