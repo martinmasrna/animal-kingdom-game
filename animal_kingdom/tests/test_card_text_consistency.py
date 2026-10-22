@@ -224,6 +224,7 @@ DELAY_CONSTANTS = {
     "sloth": "sloth_delay",
     "squirrel_legend": "otk_squirrel_delay",
     "snake_egg": "egg_hatch_delay",
+    "locust_swarm": "locust_delay",
 }
 
 

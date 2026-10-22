@@ -3558,7 +3558,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792085442
+      "at": 1792668430,
+      "note": "Martin, 2026-10-22: the plague in the game's language; the board wipe was a Deathwing reprint"
     },
     "animal": {
       "review": {
@@ -4440,6 +4441,18 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1792622981
+    }
+  },
+  "locust_swarm": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "note": "Martin, 2026-10-22: the plague in the game's language",
+      "by": "claude",
+      "at": 1792668430
     }
   },
   "fawn": {

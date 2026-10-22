@@ -315,15 +315,6 @@ def test_the_toad_has_reach_two():
     assert "3,2" in {a.crossroad for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "toad"}
 
 
-def test_the_locust_clears_every_other_top_animal_and_your_hand():
-    s = make_state(hands={"A": ["locust_legend", "lion"]}, decks={"A": ["lion"] * 3, "B": []})
-    put(s, "1,2", "lion", "A")
-    put(s, "2,2", "mouse", "B"); put(s, "2,2", "tiger", "B")
-    rules.apply_action(s, PlaceAction("locust_legend", ("cr", "1,1")))
-    assert {cr: st[-1].card_id for cr, st in s.board.items()} == {"1,1": "locust_legend", "2,2": "mouse"}   # the buried Mouse surfaces
-    assert hand_ids(s, "A") == [] and removed(s, "lion")
-
-
 def test_vultures_land_from_hand_and_deck_after_three_removals():
     s = make_state(hands={"A": ["vulture"]}, decks={"A": ["vulture", "lion"], "B": ["lion"] * 3})
     for cr in ("1,1", "1,2", "1,3"):

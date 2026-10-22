@@ -43,6 +43,9 @@ class EngineError(Exception):
     """Raised on an illegal engine operation (bad action, unsupported state)."""
 
 
+WILD = "wild"      # the owner of a Wild animal (the Locusts): no one's, so it connects no one and holds no region
+
+
 def other_player(player: str) -> str:
     return "B" if player == "A" else "A"
 

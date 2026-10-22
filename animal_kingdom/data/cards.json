@@ -367,10 +367,13 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 2,
-      "text": "Roar: remove all other animals and discard your hand.",
-      "keywords": [],
+      "text": "Roar: cover the board with Locusts.",
       "species": "Locust",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "related": [
+        "locust_swarm"
+      ],
+      "keywords": []
     },
     {
       "id": "cockroach_legend",
@@ -4567,6 +4570,18 @@
       "base_strength": 1,
       "keywords": [],
       "text": ""
+    },
+    {
+      "id": "locust_swarm",
+      "name": "Locust",
+      "status": "token",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 0,
+      "text": "Wild. In 2 turns, remove this and the animal under it.",
+      "keywords": [
+        "Wild"
+      ]
     }
   ]
 }

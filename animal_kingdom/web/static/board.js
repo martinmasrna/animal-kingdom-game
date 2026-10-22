@@ -28,7 +28,7 @@ const TRIGGER = [[/\bDusk:/, 'dusk', 'Dusk: happens at the end of your turn.'], 
 const triggerOf = c => TRIGGER.find(([re]) => re.test(c.text || ''));
 const TRG_AT = (() => { const a = -32 * Math.PI / 180; return `left:calc(${(50 + 47.8 * Math.cos(a)).toFixed(1)}% - 19px);top:calc(${(50 - 47.8 * Math.sin(a)).toFixed(1)}% - 19px)`; })();
 const kit = f => `/static/kit2/${f}`;
-const team = side => (side === 'A' ? 'a' : 'b');
+const team = side => (side === 'A' ? 'a' : side === 'W' ? 'n' : 'b');   // n: the neutral paint of a Wild animal
 
 // Where things are painted on the plate (measured in plate pixels, 1672 wide), converted to stage pixels.
 const PX = x => x / 1.10582, PY = y => y / 1.10582 - 25;

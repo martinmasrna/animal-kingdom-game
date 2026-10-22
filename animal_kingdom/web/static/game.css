@@ -174,7 +174,7 @@
 .game.kit .unit .ring { inset: 18px; border: 0; background-color: #3a342c; }
 .game.kit .unit .rimimg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .game.kit .unit .boss { width: 46px; height: 46px; margin-left: -23px; bottom: -16px; border: 0; background: url(/static/kit2/boss_a.webp) center / contain no-repeat; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
-.game.kit .unit.B .boss { background-image: url(/static/kit2/boss_b.webp); }
+.game.kit .unit.B .boss { background-image: url(/static/kit2/boss_b.webp); } .game.kit .unit.W .boss { background-image: url(/static/kit2/boss_n.webp); }
 .game.kit .unit .buried { border: 0; inset: 6px; }
 /* painted numbers: payout stones with the number carved in; den counts in painted war-paint digits, laid into the rock */
 .game.kit .stone.carved { width: 50px; height: 50px; margin: -25px 0 0 -25px; background: none; filter: drop-shadow(1px 3px 3px rgba(20,12,4,.55)); }
@@ -450,7 +450,7 @@
   50% { filter: drop-shadow(0 0 2px var(--ready)) drop-shadow(0 0 2px var(--ready)) drop-shadow(0 0 10px var(--ready)) drop-shadow(0 0 20px var(--ready)); } }
 .game.kit .unit .buried.seen { inset: 0; background: none; border: 0; filter: brightness(.72) saturate(.85); transform-origin: 50% 50%; }   /* a covered animal: itself, peeking out */
 .game.kit .unit .buried.seen .fill { position: absolute; inset: 14px; border-radius: 50%; }
-.game.kit .unit .buried.seen.A .fill { background: var(--Adk); } .game.kit .unit .buried.seen.B .fill { background: var(--Bdk); }
+.game.kit .unit .buried.seen.A .fill { background: var(--Adk); } .game.kit .unit .buried.seen.B .fill { background: var(--Bdk); } .game.kit .unit .buried.seen.W .fill { background: #4a443b; }
 
 /* Upright (a window taller than wide, board.js setView): its own tall stage and its own painting (kit2/plate_port.webp:
    1260x2524 plate px at 0.723 stage px each), every piece placed on it upright (board.js

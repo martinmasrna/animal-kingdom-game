@@ -1258,7 +1258,7 @@ function moveLine(m) {
 }
 
 function viewerBoard(v) {
-  const out = {}, rl = p => p === v.you ? 'A' : 'B';
+  const out = {}, rl = p => p === v.you ? 'A' : p === 'wild' ? 'W' : 'B';   // W: a Wild animal, no one's (the Locusts)
   for (const [cr, st] of Object.entries(v.game.board)) {
     const c = v.you === 'A' ? cr : `${MAP.cols + 1 - Number(cr.split(',')[0])},${cr.split(',')[1]}`;
     out[c] = st.map(u => ({ ...u, owner: rl(u.owner) }));

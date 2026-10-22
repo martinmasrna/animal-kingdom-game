@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from typing import Callable, Optional
 
 from .actions import SKIP, ChoiceAction, PlaceAction, RoamAction
-from .state import EngineError, GameState, Result, UnitInstance, other_player
+from .state import WILD, EngineError, GameState, Result, UnitInstance, other_player
 from . import statics
 from .strength import effective_strength, placement_strength
 
@@ -992,7 +992,7 @@ def start_of_turn(state: GameState, player: str) -> None:
     fired: list = []
     keep: list = []
     for s in state.scheduled:
-        if s["owner"] != player:
+        if s["owner"] not in (player, WILD):       # a Wild animal's timer ticks every turn: every turn is its turn
             keep.append(s)
         elif s["iid"] not in on_board:
             continue                       # removed: cancelled outright (§9.1)
@@ -1508,6 +1508,8 @@ def _bounce(state, cr, top, *, lock_until=0):
     state.board[cr].remove(top)
     if not state.board[cr]:
         del state.board[cr]
+    if top.owner == WILD:       # a Wild animal has no hand to go back to: it just leaves
+        return
     gain_to_hand(state, top.owner, top.card_id).locked_until_turn = lock_until
 
 
@@ -1920,11 +1922,29 @@ def _toad_remove(state, unit, cr, pos):
 
 
 def _locust_legend_place(state, unit, cr):
-    """Roar: remove all other animals (the top of every other crossroad; what was under comes back up) and discard your
-    hand."""
-    for inst in list(state.hands[unit.owner]):
-        remove_from_hand(state, unit.owner, inst)
-    _remove_tops(state, unit, sorted(c for c in state.board if c != cr))
+    """Roar: cover the board with Locusts. A Wild Locust lands on every crossroad, this one too, as a placement would
+    (Spikes, Poison, Flee and the traps all see it), each with its own timer: "In 2 turns, remove this and the animal
+    under it". A Wild animal's timer ticks every turn, so the swarm eats at the start of the caster's next turn, after
+    the opponent's whole turn to see it; a covered Locust waits (overview.md §9.1), so covering one spares that crossroad."""
+    for c in sorted(state.game_map.crossroads):
+        locust = UnitInstance("locust_swarm", WILD, state.new_iid())
+        _land_unit(state, WILD, locust, c, from_hand=False, play=False)
+        schedule(state, locust, state.config.locust_delay,
+                 {"op": "locust_eat", "iid": locust.iid, "by_player": unit.owner}, while_buried=False)
+
+
+def _op_locust_eat(state, step):
+    """A Locust's time is up: it goes, and so does the animal under it (Armor still holds; a crossroad the swarm found
+    empty just clears)."""
+    cr, locust = _find_unit(state, step["iid"])
+    if locust is None or state.board[cr][-1] is not locust:
+        return None
+    if remove_top(state, cr, by_player=step["by_player"], by_card="locust_swarm"):
+        remove_top(state, cr, by_player=step["by_player"], by_card="locust_swarm")
+    return None
+
+
+OPS["locust_eat"] = _op_locust_eat
 
 
 def _remove_tops(state, unit, crs):
@@ -2516,18 +2536,6 @@ def _spawns_beside(token):
         if empty:
             _spawn(state, unit.owner, token, state.rng.choice(empty))
     return handler
-
-
-# --- Food Aggro -------------------------------------------------------------------------------------------------
-
-def _repeat_legend_place(state, unit, cr):
-    """Roar: repeat the Roar of each of your adjacent Rodents (as if each roared again where it stands). Another of these
-    (a mimic Octopus's copy) isn't repeated: two side by side would repeat each other for ever."""
-    for nb, top in reversed(_adjacent_tops(state, cr, unit.owner)):
-        if "Rodent" in state.cards[top.card_id].tags and top.card_id != unit.card_id:
-            _push_hook(state, top, nb, "on_place")
-
-
 
 
 # --- Food Aggro -------------------------------------------------------------------------------------------------
