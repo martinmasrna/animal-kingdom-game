@@ -4,7 +4,7 @@ The values live where the game keeps them, one place each: animal_kingdom/data/c
 species, tags, strength, text, and the status: collectible, reserve, planned; the keywords are read from the text as it
 is written), animal_kingdom/data/decklists.json (which starter deck a card ships in, and the starters' names) and
 animal_kingdom/web/static/art.js (the crops). The cards the engine makes itself (tokens, evolution stages, the Eagle's
-mate) are shown under the card that makes them, and their values are read-only here. The old pool's shelved cards (no
+mate) are shown under the card that makes them; only their strength and text are edited here. The old pool's shelved cards (no
 habitat) and the tutorial's deal stay off the table.
 
 How settled each value is lives in tools/cards/levels.json, one entry per card id and column:
@@ -303,9 +303,12 @@ def _apply_value(r: dict, col: str, value) -> None:
     _save_cards(cards)
 
 
+TOKEN_COLS = ("strength", "effect")      # what a token's card says; where it sits stays its maker's business
+
+
 def set_value(card_id: str, col: str, value, by: str = "martin", note: str | None = None) -> str:
     r = _row(card_id)
-    if col not in VALUE_COLS or not r["editable"]:
+    if col not in VALUE_COLS or not (r["editable"] or col in TOKEN_COLS):
         raise Refused(f"{r['id']} {col} isn't editable here")
     cur = _guard(r, col, by)
     prev = value_of(r, col)

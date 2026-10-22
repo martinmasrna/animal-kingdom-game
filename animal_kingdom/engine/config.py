@@ -98,6 +98,7 @@ class Config:
     alpha_pups: int = 2                  # Pups Scarlett places on adjacent empty crossroads
     stork_younglings: int = 2            # Stork: random younglings added to your hand
     cuckoo_eggs: int = 2                 # Cuckoo: Cuckoo Eggs shuffled into your opponent's deck
+    aurum_eggs: int = 2                  # Aurum: Golden Eggs shuffled into your deck each Dawn
     golden_egg_draw: int = 2             # Golden Egg (Aurum's): cards drawn when you draw it
     earthworm_worms: int = 2             # Earthworm: Worms placed on its crossroad when it's removed
     cockroach_legend_growth: int = 1           # Roach King: comes back with +1 strength
@@ -141,7 +142,7 @@ class Config:
     tuna_legend_food: int = 5            # the legendary Tuna: per region you control, a card and 5 food
     tortoise_per_armor: int = 5          # Tortoise: 5 food for each of your animals with Armor
     wildebeest_food: int = 5             # Wildebeest: at the end of your turn, if grazing, gain 5
-    dung_beetle_per: int = 2             # Dung Beetle: 2 food for each Hungry animal you control
+    dung_beetle_per: int = 5             # Dung Beetle: 5 food for each Hungry animal you control
     otk_squirrel_multiplier: int = 3     # the legendary Squirrel: in 2 turns, gain three times the food it lost...
     otk_squirrel_delay: int = 2          # ...after this many of your turns (covering pauses it)
     migration_bonus: int = 5             # the legendary Wildebeest: your regions produce 5 more food

@@ -398,6 +398,7 @@ def test_the_launch_decks_other_numbers_match_config():
     words = {"two": 2, "three": 3}
     assert words[re.search(r"add (\w+) random younglings", c["stork"].text).group(1)] == cfg.stork_younglings
     assert words[re.search(r"shuffle (\w+) Cuckoo Eggs", c["cuckoo"].text).group(1)] == cfg.cuckoo_eggs
+    assert words[re.search(r"shuffle (\w+) Golden Eggs", c["goose_legend"].text).group(1)] == cfg.aurum_eggs
     assert words[re.search(r"place (\w+) Worms", c["earthworm"].text).group(1)] == cfg.earthworm_worms
     assert words[re.search(r"gain (\w+) times as much", c["squirrel_legend"].text).group(1)] == cfg.otk_squirrel_multiplier
     assert int(re.search(r"give (\d+) random animals", c["baboon_legend"].text).group(1)) == cfg.baboon_legend_count

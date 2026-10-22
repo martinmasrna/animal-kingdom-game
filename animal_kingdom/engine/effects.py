@@ -2435,8 +2435,8 @@ def _snake_egg_place(state, unit, cr):
 
 
 def _goose_legend_start(state, unit, cr):
-    """Dawn: shuffle a Golden Egg into your deck."""
-    shuffle_back(state, unit.owner, ["golden_egg"], by=unit.owner)
+    """Dawn: shuffle two Golden Eggs into your deck."""
+    shuffle_back(state, unit.owner, ["golden_egg"] * state.config.aurum_eggs, by=unit.owner)
 
 
 def _golden_egg_drawn(state, inst):
@@ -2675,7 +2675,7 @@ def _anteater_place(state, unit, cr):
 
 
 def _dung_beetle_eot(state, unit, cr):
-    """At the end of your turn, gain 2 food for each Hungry animal you control."""
+    """At the end of your turn, gain 5 food for each Hungry animal you control."""
     n = sum(1 for c, st in state.board.items()
             if st and st[-1].owner == unit.owner and statics.has_keyword(state, st[-1], "Hungry", c))
     _push_gain(state, unit.owner, n * state.config.dung_beetle_per)

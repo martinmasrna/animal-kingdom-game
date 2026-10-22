@@ -30,7 +30,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 |---|---:|---|---:|---|
 | **Oxpecker** | 3 | Bird | 1 | Flight. Roar: gain 1 food for each animal of strength 8 or more in your starting deck. |
 | **Anteater** | 3 | — | 4 | Roar: draw a card. Gain food equal to its strength. |
-| **Dung Beetle** | 3 | — | 1 | Dusk: gain 2 food for each Hungry animal you control. |
+| **Dung Beetle** | 3 | — | 1 | Dusk: gain 5 food for each Hungry animal you control. |
 | **Blue Whale** | 3 | — | 10 | Titan. |
 | **Sloth** | 3 | — | 3 | Roar: in 2 turns, gain 30 food. |
 | **Elephant** | 3 | — | 9 | Hungry 5. |

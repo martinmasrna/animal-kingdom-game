@@ -94,6 +94,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "Martin, 2026-10-22: the mate matches the Eagle (they share strength)",
+      "by": "claude",
+      "at": 1792655320
     }
   },
   "eagle_legend": {
@@ -128,6 +138,16 @@
       "note": "placeholder names: the text names the mate, not a name",
       "by": "claude",
       "at": 1792191078
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "Martin, 2026-10-22: buffed to 3",
+      "by": "claude",
+      "at": 1792655320
     }
   },
   "goose_legend": {
@@ -165,9 +185,9 @@
         "prev_note": "",
         "prev": "Dawn: draw a card."
       },
-      "note": "Flight removed: the golden-egg goose is the fable's farm goose (Martin 2026-10-17)",
+      "note": "Martin, 2026-10-22: two eggs a turn",
       "by": "claude",
-      "at": 1792264215
+      "at": 1792655211
     }
   },
   "baboon": {
@@ -180,11 +200,6 @@
       "by": "martin"
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 4
-      },
       "note": "Martin, 2026-10-16: 4 -> 5 is the biggest step in the field (covers 47% -> 65% of cards); 5 body + 2 hand points = a Lion's 7, and in Handlock hand strength triggers Caterpillar, Gorilla and Chimpanzee. 6 would be a Lion that also buffs.",
       "by": "claude",
       "at": 1792150022
@@ -463,11 +478,6 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792611447,
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": "",
-        "prev": 7
-      },
       "note": "Martin, 2026-10-21: Stealth is about -1 against the Lion"
     },
     "effect": {
@@ -733,46 +743,23 @@
     "art": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
       "at": 1792267313
     },
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
       "at": 1792267349
     },
     "rarity": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "C"
-      },
       "note": "Martin 2026-10-17: the herd closes ranks",
       "by": "claude",
       "at": 1792262681
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 4
-      },
       "by": "claude",
       "at": 1792262681
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Roar: remove an adjacent enemy covering an allied Hoofed animal."
-      },
       "by": "claude",
       "at": 1792262682
     }
@@ -792,9 +779,9 @@
         "prev_note": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-22: the small-deck common, its one big body",
+      "note": "Martin, 2026-10-22: 'other' cut, the Capybara's own printed 2 never counts",
       "by": "claude",
-      "at": 1792622196
+      "at": 1792655320
     },
     "rarity": {
       "review": {
@@ -830,11 +817,6 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792604716,
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": "",
-        "prev": "Reach 2."
-      },
       "note": "Reach has no number: every Reach is 2 (Martin, 2026-10-21)"
     },
     "strength": {
@@ -1023,10 +1005,6 @@
       "lv": "fine",
       "by": "claude",
       "at": 1792262682,
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
       "note": "moved from giants to pool"
     },
     "strength": {
@@ -1038,11 +1016,6 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792257581,
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": "",
-        "prev": "Apex Predator."
-      },
       "note": "Martin 2026-10-17: strikes from the water, exposed on land; the Apex 8 waits for the Polar Bear"
     },
     "art": {
@@ -1134,6 +1107,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Dusk: gain 2 food for each Hungry animal you control."
+      },
+      "note": "Martin, 2026-10-22: 5 per Hungry animal",
+      "by": "claude",
+      "at": 1792655320
     }
   },
   "eagle": {
@@ -2013,11 +1996,6 @@
       "by": "martin"
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Your other Cats can be placed on enemies of equal or lower strength."
-      },
       "note": "Martin's 30 Sep wording back; the workbench conversion of 8 Oct had resurrected the old text",
       "by": "claude",
       "at": 1792203166
@@ -2047,21 +2025,11 @@
       "at": 1792191062
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 8
-      },
       "note": "Martin, 2026-10-21: starts in reach of the Black Mamba; grows from there",
       "by": "claude",
       "at": 1792608627
     },
     "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Apex Predator. Roam. Reach 2."
-      },
       "note": "Reach has no number (Martin, 2026-10-21)",
       "by": "claude",
       "at": 1792604717
@@ -3076,12 +3044,7 @@
     "effect": {
       "note": "Martin, 2026-10-16: 'if you control another Cat' was always met, making it the one unconditional any-size removal at 2; the condition now costs the turn (or an Alley Cat / twin chain). Likely unplayable outside Cats, which is fine.",
       "by": "claude",
-      "at": 1792148718,
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "Martin, 2026-10-15: the Cats' answer to big animals is removal again (Queen Adira draws); setting to 1 was weak and didn't fit a cat.",
-        "prev": "Roar: if you control another Cat, remove an adjacent enemy."
-      }
+      "at": 1792148718
     },
     "strength": {
       "note": "Martin, 2026-10-15: at 4 it outclassed the Jaguar; any-size removal pays with a small body.",

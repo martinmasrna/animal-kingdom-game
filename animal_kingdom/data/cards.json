@@ -1476,7 +1476,7 @@
         "Rodent"
       ],
       "base_strength": 2,
-      "text": "If your starting deck has no other animal of strength 4 or more, this has strength 9.",
+      "text": "If your starting deck has no animal of strength 4 or more, this has strength 9.",
       "species": "Capybara",
       "habitat": "Jungle",
       "keywords": []
@@ -1816,13 +1816,13 @@
         "Bird"
       ],
       "base_strength": 1,
-      "text": "Dawn: shuffle a Golden Egg into your deck.",
-      "keywords": [],
+      "text": "Dawn: shuffle two Golden Eggs into your deck.",
       "related": [
         "golden_egg"
       ],
       "species": "Goose",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "baboon_legend",
@@ -1879,7 +1879,7 @@
       "tags": [
         "Bird"
       ],
-      "base_strength": 2,
+      "base_strength": 3,
       "text": "Flight. Apex Predator. When this enters your hand, add its mate to your hand.",
       "keywords": [
         "Flight",
@@ -2196,10 +2196,10 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "text": "Dusk: gain 2 food for each Hungry animal you control.",
-      "keywords": [],
+      "text": "Dusk: gain 5 food for each Hungry animal you control.",
       "species": "Dung Beetle",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": []
     },
     {
       "id": "blue_whale",
@@ -3093,8 +3093,8 @@
         "Egg"
       ],
       "base_strength": 0,
-      "keywords": [],
-      "text": "When you draw this, remove it and draw 2 cards."
+      "text": "When you draw this, remove it and draw 2 cards.",
+      "keywords": []
     },
     {
       "id": "pup",
@@ -3288,7 +3288,7 @@
       "tags": [
         "Bird"
       ],
-      "base_strength": 2,
+      "base_strength": 3,
       "keywords": [
         "Flight",
         "Apex Predator"
