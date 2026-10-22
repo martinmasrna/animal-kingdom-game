@@ -806,6 +806,21 @@ def test_royal_jelly_makes_your_animals_five_wherever_they_are():
     assert effective_strength(s, s.draw("A", 1)[0]) == 7
 
 
+def test_royal_jelly_sets_five_at_the_roar_and_a_pythons_growth_in_the_deck_stays():
+    """Martin's game HFMRHG (2026-10-22): two Pythons drawn after the Roar showed 7 and 5, each set to 5 when drawn, which
+    erased the growth it had in the deck. Both are 5 at the Roar, and every removal since grows both."""
+    from animal_kingdom.engine.effects import remove_top
+    from animal_kingdom.engine.strength import effective_strength
+    s = make_state(hands={"A": ["bee_legend_2"]}, decks={"A": ["python", "python"], "B": []})
+    rules.apply_action(s, PlaceAction("bee_legend_2", ("cr", "1,2")))
+    for cr in ("4,1", "4,3"):
+        put(s, cr, "worker_ant", "B"); remove_top(s, cr, by_player="A")
+    first = s.draw("A", 1)[0]
+    put(s, "4,2", "worker_ant", "B"); remove_top(s, "4,2", by_player="A")
+    second = s.draw("A", 1)[0]
+    assert effective_strength(s, first) == effective_strength(s, second) == CFG.jelly_strength + 3
+
+
 def test_the_capybara_is_a_nine_when_the_rest_of_the_starting_deck_is_small():
     from animal_kingdom.engine.strength import effective_strength
     small = make_state(hands={"A": ["capybara"]})
