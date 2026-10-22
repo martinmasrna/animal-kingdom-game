@@ -302,6 +302,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "5: the action comes back next turn, so the Beaver is a free body (Martin, 2026-10-12)",
+      "by": "claude",
+      "at": 1792670323
     }
   },
   "capybara_legend": {
@@ -733,8 +742,13 @@
     },
     "strength": {
       "lv": "fine",
-      "by": "martin",
-      "at": 1792247952
+      "by": "claude",
+      "at": 1792670323,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "note": "6: at 5 or less the Eagle (5, Flight) practically dominates it"
     },
     "animal": {
       "lv": "fine",
@@ -3023,6 +3037,15 @@
       "note": "Martin, 2026-10-14, applied 2026-10-16",
       "by": "claude",
       "at": 1792157857
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "Three times, not twice: twice is a net gain of only the stake, two turns late, so fair decks raced it and neither side touched the other; three makes the siege compulsory (fired at 35, it's 105) (Martin, 2026-10-08)",
+      "by": "claude",
+      "at": 1792670323
     }
   },
   "stork": {
@@ -3314,6 +3337,15 @@
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
       "at": 1792191064
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "5, under the common's 6: an engine has to stay coverable (Martin, 2026-10-08)",
+      "by": "claude",
+      "at": 1792670323
     }
   },
   "wolf": {
@@ -3324,6 +3356,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "6, the plain hunter one below the Lion",
+      "by": "claude",
+      "at": 1792670323
     }
   },
   "worker_ant": {
@@ -3538,6 +3579,15 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792106916
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "4, so breaking the engine takes a real animal, not any 3 (Martin, 2026-10-11)",
+      "by": "claude",
+      "at": 1792670323
     }
   },
   "toad": {
