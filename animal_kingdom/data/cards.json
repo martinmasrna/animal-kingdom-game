@@ -2346,17 +2346,17 @@
       "id": "zebra",
       "name": "Zebra",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Hoofed"
       ],
-      "base_strength": 5,
-      "text": "Flee. When this flees, return the enemy that covered it to its owner's hand.",
+      "base_strength": 4,
+      "text": "Flee. Roar: gain 5 food for each other Hoofed animal next to this.",
+      "species": "Zebra",
+      "habitat": "Savanna",
       "keywords": [
         "Flee"
-      ],
-      "species": "Zebra",
-      "habitat": "Savanna"
+      ]
     },
     {
       "id": "giraffe",
@@ -2436,7 +2436,7 @@
       "id": "boar",
       "name": "Boar",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Hoofed"
       ],

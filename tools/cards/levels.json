@@ -466,6 +466,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-22: an answer any deck can run, priced at 4 beside Black Mamba",
+      "by": "claude",
+      "at": 1792666803
     }
   },
   "boar_legend": {
@@ -3298,6 +3308,36 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flee. When this flees, return the enemy that covered it to its owner's hand."
+      },
+      "note": "Martin, 2026-10-22: the mixed herd, with Flee",
+      "by": "claude",
+      "at": 1792666803
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "note": "Claude, 2026-10-22: 5 without Flee; Flee repeats the Roar, so 4 (Deer's size)",
+      "by": "claude",
+      "at": 1792666803
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-22: the herd's food on its own deck's condition",
+      "by": "claude",
+      "at": 1792666803
     }
   },
   "zebra_legend": {

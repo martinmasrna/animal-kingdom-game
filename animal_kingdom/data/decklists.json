@@ -279,13 +279,13 @@
     "giraffe_legend": 1,
     "honey_badger": 2,
     "okapi": 2,
-    "zebra": 2,
+    "zebra": 3,
     "giraffe": 3,
     "cape_buffalo": 2,
     "gazelle": 3,
     "wildebeest": 3,
     "deer": 3,
-    "boar": 3,
+    "boar": 2,
     "warthog": 3
    }
   },
@@ -355,7 +355,7 @@
     "orca": 2,
     "anaconda": 3,
     "black_bear": 3,
-    "boar": 3,
+    "city_spider": 3,
     "python": 3,
     "snake_egg": 3,
     "tiger": 3

@@ -59,6 +59,7 @@ class Config:
 
     # --- Payoff food ---
     gazelle_food: int = 5                # Gazelle: Roar: gain 5 food (its Flee brings the Roar back)
+    zebra_food: int = 5                  # Zebra: Roar: gain 5 food for each other Hoofed animal next to this
     sloth_food: int = 30                 # Sloth: gain food when its timer comes due
     sloth_delay: int = 2                 # owner-turns until Sloth pays out (ticks only while it is
                                           # top of its crossroad - see rules overview.md 9.1)

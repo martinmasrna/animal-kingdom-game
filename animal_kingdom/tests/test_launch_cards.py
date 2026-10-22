@@ -89,12 +89,17 @@ def test_flee_runs_before_an_apex_predator_can_eat():
     assert "gazelle" in hand_ids(s, "A") and s.top_unit("3,2").card_id == "tiger"
 
 
-def test_the_zebra_flees_and_sends_its_coverer_home_too():
-    s = make_state(current="B", hands={"B": ["lion"]})
-    put(s, "4,2", "lion", "B")
-    put(s, "3,2", "zebra", "A")
-    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))
-    assert "zebra" in hand_ids(s, "A") and "lion" in hand_ids(s, "B") and s.top_unit("3,2") is None
+def test_the_zebra_gains_food_for_each_hoofed_neighbour_and_flees():
+    s = make_state(hands={"A": ["zebra"]})
+    put(s, "1,1", "deer", "A"); put(s, "1,3", "giraffe", "A"); put(s, "2,2", "lion", "A")
+    before = s.food["A"]
+    rules.apply_action(s, PlaceAction("zebra", ("cr", "1,2")))       # two Hoofed neighbours; the Lion isn't one
+    assert s.food["A"] - before == 2 * CFG.zebra_food
+    s2 = make_state(current="B", hands={"B": ["lion"]})
+    put(s2, "4,2", "lion", "B")
+    put(s2, "3,2", "zebra", "A")
+    rules.apply_action(s2, PlaceAction("lion", ("cr", "3,2")))
+    assert "zebra" in hand_ids(s2, "A") and s2.top_unit("3,2").card_id == "lion"
 
 
 def test_octopus_ink_switches_every_adjacent_enemys_effects_off_for_good():

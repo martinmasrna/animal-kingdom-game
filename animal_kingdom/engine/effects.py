@@ -321,7 +321,7 @@ def _op_flee(state, step):
     if unit is None:
         return None
     _bounce(state, cr, unit)
-    hook = _hook(state, unit.card_id, "on_flee")     # Zebra: "When this flees, ..."
+    hook = _hook(state, unit.card_id, "on_flee")     # "When this flees, ..." (no card has one now)
     if hook:
         hook(state, unit, step["coverer"])
     return None
@@ -1676,20 +1676,11 @@ def _op_anteater(state, step):
     return None
 
 
-def _op_flee_return(state, step):
-    """Zebra: "When this flees, return the enemy that covered it to its owner's hand." (A return: Armor resists it.)"""
-    cr, unit = _find_unit(state, step["iid"])
-    if unit is not None and statics.can_be_removed(state, unit, cr):
-        _bounce(state, cr, unit)
-    return None
-
-
 OPS.update({
     "choose": _op_choose,
     "forced_roam": _op_forced_roam,
     "draw_to_match": _op_draw_to_match,
     "anteater": _op_anteater,
-    "flee_return": _op_flee_return,
 })
 
 
@@ -2846,9 +2837,11 @@ def _okapi_eot(state, unit, cr):
         _push_draw(state, unit.owner, 1)
 
 
-def _zebra_flee(state, unit, coverer_iid):
-    """When this flees, return the enemy that covered it to its owner's hand."""
-    state.effect_stack.append({"op": "flee_return", "iid": coverer_iid})
+def _zebra_place(state, unit, cr):
+    """Roar: gain 5 food for each other Hoofed animal next to this (zebra_food)."""
+    n = sum(1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Hoofed" in state.cards[top.card_id].tags)
+    if n:
+        _push_gain(state, unit.owner, n * state.config.zebra_food)
 
 
 def _warthog_place(state, unit, cr):
@@ -3137,7 +3130,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "zebra_legend": {"on_place": _zebra_legend_place},
     "honey_badger": {"on_place": _removes(min_attr="honey_badger_min")},
     "okapi": {"on_end_of_turn": _okapi_eot},
-    "zebra": {"on_flee": _zebra_flee},
+    "zebra": {"on_place": _zebra_place},
     "warthog": {"on_place": _warthog_place},
     "albatross": {"on_place": _albatross_place},
     "boar": {"on_place": _boar_place},
