@@ -93,6 +93,9 @@ class GreedyWeights:
     buried_presence: float = 0.0     # per net effective strength under a cover (mine - theirs): a covered unit comes
                                       # back when its coverer leaves, so covering an 8 is not removing it (2026-10-17).
                                       # Off until the paired benchmark passes; TARGET_AWARE_WEIGHTS is the candidate.
+    pending_alive: float = 0.0       # 1: a scheduled effect counts only while its animal is on top of its crossroad (a buried
+                                      # timer is suspended, an eaten animal's cancelled; the Expert covered and then ate its
+                                      # own Snake Egg for free, Martin 2026-10-22, HYWCZW). 0: every entry counts, as before.
     pending_target: float = 0.0      # per point of effective strength a scheduled removal of mine will take (minus
                                       # theirs), imminence-discounted: what a Taipan's mark is worth depends on what it
                                       # marked; pending_payoff above can't tell a Python from a Raven (2026-10-17).
@@ -375,7 +378,7 @@ def evaluate(state: GameState, me: str, weights: GreedyWeights) -> float:
     # OWNER's remaining turns; equals the pre-2026-07-15 `due - turn_counter` exactly - this
     # term's 20.0 was tuned to that.
     if w.pending_payoff:
-        score += w.pending_payoff * _features.pending_payoff(state, me, opp)
+        score += w.pending_payoff * _features.pending_payoff(state, me, opp, alive_only=bool(w.pending_alive))
     if w.pending_target:
         score += w.pending_target * _features.pending_target_strength(state, me, opp)
     if w.buried_presence:

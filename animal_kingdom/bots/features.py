@@ -537,10 +537,26 @@ def enabled_roar_ids(state: GameState, player: str) -> set:
     return enabled
 
 
-def pending_payoff(state: GameState, me: str, opp: str) -> float:
-    """Net imminence-discounted scheduled future effects (Egg hatch, Bear, ...)."""
+def _timer_alive(state: GameState, s: dict) -> bool:
+    """A scheduled effect still fires only while its animal stands on top of its crossroad (`overview.md` 9.1: a buried
+    timer is suspended, a removed one is cancelled; `effects.py` applies both at the owner's next turn start, so between
+    the cover or the removal and that moment the entry lingers in `state.scheduled`). The Expert twice placed on its own
+    Snake Egg (Martin, 2026-10-22, HYWCZW: a Black Bear covering it, then Eon eating it) while this term went on crediting
+    the egg's hatch as if nothing had happened."""
+    for stack in state.board.values():
+        for k, u in enumerate(stack):
+            if u.iid == s.get("iid"):
+                return k == len(stack) - 1 or bool(s.get("while_buried"))
+    return False
+
+
+def pending_payoff(state: GameState, me: str, opp: str, alive_only: bool = False) -> float:
+    """Net imminence-discounted scheduled future effects (Egg hatch, Bear, ...); with `alive_only`, those whose animal
+    can still fire them (candidate `w.pending_alive`, 2026-10-22)."""
     pending = 0.0
     for s in state.scheduled:
+        if alive_only and not _timer_alive(state, s):
+            continue
         horizon = 2 * max(0, s["remaining"]) - (0 if state.current == s["owner"] else 1)
         disc = 1.0 / (1.0 + max(0, horizon))
         pending += disc if s["owner"] == me else -disc

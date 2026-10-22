@@ -379,3 +379,23 @@ def test_held_region_control_counts_a_corner_by_what_can_cover_it():
     s = make_state(hands={"A": ["owl"], "B": ["mouse"]}, decks={"B": ["mouse"] * 8})
     put(s, corner, "gorilla", "B")
     assert features.held_region_control(s, "A", "B") == pytest.approx(features.region_control(s, "A", "B"))
+
+
+def test_pending_payoff_credits_only_a_timer_that_can_still_fire():
+    """A buried timer is suspended and an eaten animal's timer is cancelled (overview.md 9.1), but the entry lingers in
+    state.scheduled until the owner's next turn start; the term must not credit it (Martin, 2026-10-22, HYWCZW)."""
+    from animal_kingdom.bots.features import pending_payoff
+    state = make_state(current="A")
+    egg = put(state, "5,2", "snake_egg", "A")
+    timer = {"iid": egg.iid, "owner": "A", "while_buried": False, "remaining": 1, "step": {"op": "egg_hatch", "iid": egg.iid}}
+    state.scheduled = [timer]
+    alive = pending_payoff(state, "A", "B", alive_only=True)
+    assert alive > 0
+    put(state, "5,2", "black_bear", "A")                 # my own Black Bear covers the egg: suspended
+    assert pending_payoff(state, "A", "B", alive_only=True) == 0
+    assert pending_payoff(state, "A", "B") == alive      # the shipped term still credits it
+    state.scheduled = [{**timer, "while_buried": True}]  # a timer that ticks under a cover still counts
+    assert pending_payoff(state, "A", "B", alive_only=True) == alive
+    state.scheduled = [timer]
+    state.board["5,2"] = [state.board["5,2"][-1]]       # the egg is eaten (Eon), the entry lingers
+    assert pending_payoff(state, "A", "B", alive_only=True) == 0

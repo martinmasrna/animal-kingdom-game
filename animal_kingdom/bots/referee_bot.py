@@ -74,7 +74,7 @@ class RefereeBot(TurnSearcher):
                  evaluator: Optional[LinearEval] = None,
                  quiesce: bool = False, mulligan: bool = False,
                  depth: int = 0, next_width: int = 3, deepen_top: int = 4, deepen_roots: int = 3, time_budget: float = 0.0,
-                 den_sense: bool = False, reply_turns: int = 0, decisive: float = _DECISIVE):
+                 den_sense: bool = False, reply_turns: int = 0, decisive: float = _DECISIVE, deepen_chase: bool = False):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          evaluator=evaluator, quiesce=quiesce, mulligan=mulligan, decisive=decisive)
@@ -109,6 +109,12 @@ class RefereeBot(TurnSearcher):
         # (the best roots' final scoring), where the decision is made: everywhere, it cost 2.7x the move. 0: the fast
         # policy picks both actions, as before.
         self.reply_turns = reply_turns
+        # Chase (2026-10-22, Martin's HYWCZW: a City Spider placed beside its own Black Bear): the one-turn stage ranks
+        # roots on the position after the reply, before the bot's own next turn starts, so a Dawn that eats an ally is
+        # invisible there; the second stage sees it and marks the top roots down, but the root it should have fallen
+        # behind (drawing) was never deepened. With chase, deepening continues down the one-turn order while the best
+        # deepened score trails the next root's one-turn score, within the move's time budget.
+        self.deepen_chase = deepen_chase
         self._deepening = False             # on only while _rescore_roots scores a root's final lines
         # `self._policy` (the GreedyBot that plays every rollout seat) and `self._search_nodes`
         # are set identically by TurnSearcher.__init__; RefereeBot uses them for reply rollouts
@@ -410,9 +416,13 @@ class RefereeBot(TurnSearcher):
         Out of time (`time_budget`), the one-turn ranking stands."""
         if not self.depth or len(root_scores) < 2:
             return root_scores
-        top = sorted(root_scores, key=lambda row: -row[1])[:self.deepen_roots]
+        ordered = sorted(root_scores, key=lambda row: -row[1])
         deep = []
-        for action, _shallow in top:
+        for k, (action, _shallow) in enumerate(ordered):
+            if k >= self.deepen_roots:
+                if not self.deepen_chase or not deep or max(s for _, s in deep) >= _shallow:
+                    break
+                self.last_search_stats["chased_roots"] = self.last_search_stats.get("chased_roots", 0) + 1
             if self.time_budget and time.monotonic() - self._move_started > self.time_budget:
                 self.last_search_stats["lookahead_cut"] = 1
                 return root_scores
