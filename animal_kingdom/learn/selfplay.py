@@ -104,18 +104,24 @@ def generate(out: str, eval_path: Optional[str], games_per_pair: int, seed: int,
     random.Random(seed).shuffle(specs)          # mixed decks in every progress slice
     cols: dict[str, list] = {k: [] for k in ("x", "y", "turn", "deck", "opp", "game", "reason")}
     t0 = time.time()
+
+    def save(path: str) -> None:
+        np.savez_compressed(path, x=np.array(cols["x"], dtype=np.float32), y=np.array(cols["y"]),
+                            turn=np.array(cols["turn"]), deck=np.array(cols["deck"]),
+                            opp=np.array(cols["opp"]), game=np.array(cols["game"]),
+                            reason=np.array(cols["reason"]),
+                            features=np.array(features.feature_names(FEATURE_SET)),
+                            eval_path=np.array(eval_path or ""), pilot=np.array(pilot))
+
     with ProcessPoolExecutor(max_workers=jobs) as ex:
         for n, rec in enumerate(ex.map(play, specs, chunksize=4), 1):
             for k in cols:
                 cols[k].extend(rec[k])
             if n % 200 == 0:
                 print(f"  {n}/{len(specs)} games  {time.time() - t0:.0f}s", file=sys.stderr, flush=True)
-    np.savez_compressed(out, x=np.array(cols["x"], dtype=np.float32), y=np.array(cols["y"]),
-                        turn=np.array(cols["turn"]), deck=np.array(cols["deck"]),
-                        opp=np.array(cols["opp"]), game=np.array(cols["game"]),
-                        reason=np.array(cols["reason"]),
-                        features=np.array(features.feature_names(FEATURE_SET)),
-                        eval_path=np.array(eval_path or ""), pilot=np.array(pilot))
+            if n % 400 == 0:          # a checkpoint every 400 games: a run that dies keeps what it played (2026-10-23)
+                save(out.replace(".npz", "") + ".partial.npz")
+    save(out)
 
 
 def main(argv=None) -> None:
