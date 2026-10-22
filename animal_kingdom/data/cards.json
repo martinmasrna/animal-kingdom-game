@@ -4490,9 +4490,7 @@
       "name": "Electric Eel",
       "status": "collectible",
       "rarity": "rare",
-      "tags": [
-        "Fish"
-      ],
+      "tags": [],
       "base_strength": 2,
       "text": "Roar: your opponent takes 1 fewer action next turn.",
       "species": "Electric Eel",
