@@ -356,3 +356,26 @@ def test_a_roar_wasted_on_the_turns_last_action_still_fizzles():
     rules.apply_action(post, action)
     assert post.current == "B" and post.food["A"] > s.food["A"]      # the turn ended, and paid
     assert features._roar_fizzled(s, post, "A", action)
+
+
+def test_held_region_control_counts_a_corner_by_what_can_cover_it():
+    """Martin, 2026-10-22: the bot counts a contested middle as owned. Under `held_region_control` a corner is worth 1
+    minus the chance the other side holds a unit that covers it: an Owl facing a hand that may hold Elephants counts for
+    little, a Lion facing mice counts in full, and their Gorilla counts for nothing while my hand holds a Lion."""
+    s = make_state(hands={"B": ["elephant", "owl"]}, decks={"B": ["elephant"] * 3 + ["owl"] * 5})
+    corner = next(iter(s.game_map.regions.values())).corners[0]
+    put(s, corner, "owl", "A")
+    plain, held = features.region_control(s, "A", "B"), features.held_region_control(s, "A", "B")
+    assert 0 < held < plain * 0.1                      # four Elephants among ten unseen, two in hand: two chances in three of a cover
+
+    s = make_state(hands={"B": ["mouse", "mouse"]}, decks={"B": ["mouse"] * 8})
+    put(s, corner, "lion", "A")
+    assert features.held_region_control(s, "A", "B") == pytest.approx(features.region_control(s, "A", "B"))
+
+    s = make_state(hands={"A": ["lion"], "B": ["mouse"]}, decks={"B": ["mouse"] * 8})
+    put(s, corner, "gorilla", "B")
+    assert features.region_control(s, "A", "B") < 0                       # their corner counts against me as it stands
+    assert features.held_region_control(s, "A", "B") == pytest.approx(0.0)   # my Lion covers their six: not theirs to keep
+    s = make_state(hands={"A": ["owl"], "B": ["mouse"]}, decks={"B": ["mouse"] * 8})
+    put(s, corner, "gorilla", "B")
+    assert features.held_region_control(s, "A", "B") == pytest.approx(features.region_control(s, "A", "B"))

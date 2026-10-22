@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import bisect
 import math
 from collections import deque
 from typing import Iterator, Optional
@@ -348,6 +349,45 @@ def p_opponent_can_cover(state: GameState, opp: str, defender_strength: int) -> 
     if k > N - h:                      # more coverers than deck slots -> at least one in hand
         return 1.0
     return 1.0 - math.comb(N - k, h) / math.comb(N, h)
+
+
+def held_region_control(state: GameState, me: str, opp: str) -> float:
+    """Region control counted by what each side can hold (Martin, 2026-10-22: the bot counts a contested middle as owned;
+    his swing turns took back 50 region points a round with one or two cards). A corner is worth 1 minus the chance the
+    other side holds a unit that covers it: for my corners the exact chance their hidden hand holds a stronger unit
+    (`p_opponent_can_cover`), for theirs whether my own hand holds one. Reach is not asked: with two actions a turn a
+    connector and the cover are one turn, and in Martin's swing replies 37 of the 48 pieces the bot had just placed were
+    coverable from his hand while only 13 stood next to his chain. A Lion on their six takes a corner they held and adds
+    one almost nothing covers; an Owl in the middle adds a corner every hand covers. Same cube and food weighting as
+    `region_control`."""
+    board = state.board
+    unseen = opponent_unseen_card_ids(state, opp)
+    n_unseen, h_opp = len(unseen), len(state.hands[opp])
+    their_strengths = sorted(c.base_strength for c in (state.cards[cid] for cid in unseen) if not c.is_dynamic)  # type: ignore[type-var]
+    my_best = max((effective_strength(state, u) for u in state.hands[me] if not state.cards[u.card_id].is_dynamic), default=-1)
+    sources = aura_sources(state)
+    region = 0.0
+    for r in state.game_map.regions.values():
+        n = len(r.corners)
+        mine = theirs = 0.0
+        for cr in r.corners:
+            st = board.get(cr)
+            if not st:
+                continue
+            top = st[-1]
+            if top.owner == me:
+                hold = 1.0
+                if n_unseen and h_opp:
+                    s = effective_strength(state, top, sources)
+                    k = len(their_strengths) - bisect.bisect_right(their_strengths, s)
+                    if k:
+                        hold = math.comb(n_unseen - k, h_opp) / math.comb(n_unseen, h_opp) if k <= n_unseen - h_opp else 0.0
+                mine += hold
+            elif top.owner == opp:
+                covered = my_best > effective_strength(state, top, sources)
+                theirs += 0.0 if covered else 1.0
+        region += r.food * ((mine / n) ** 3 - (theirs / n) ** 3)
+    return region
 
 
 def coverage_exposure_worst(state: GameState, me: str, opp: str, opp_connection: set) -> float:
