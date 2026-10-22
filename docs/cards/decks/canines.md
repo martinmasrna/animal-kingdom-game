@@ -27,7 +27,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Jackal** | 2 | Canine | 4 | Roar: remove an adjacent enemy that has another of your Canines next to it. |
+| **Jackal** | 2 | Canine | 3 | Roar: remove an adjacent enemy that has another of your Canines next to it. |
 | **Wolf** | 3 | Canine | 6 | Roam. |
 | **Bush Dog** | 3 | Canine | 3 | Dusk: give a random adjacent Canine of yours +2 strength. |
 | **Coyote** | 3 | Canine | 3 | Whenever an allied Canine roams, give it +1 strength. |

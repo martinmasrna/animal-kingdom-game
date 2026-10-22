@@ -266,7 +266,7 @@
       "tags": [
         "Fish"
       ],
-      "base_strength": 2,
+      "base_strength": 3,
       "text": "Roar: if an ally was removed this turn, remove an adjacent animal.",
       "keywords": [],
       "species": "Piranha",
@@ -513,7 +513,7 @@
       "tags": [
         "Canine"
       ],
-      "base_strength": 4,
+      "base_strength": 3,
       "text": "Roar: remove an adjacent enemy that has another of your Canines next to it.",
       "keywords": [],
       "species": "Jackal",
@@ -895,7 +895,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 2,
+      "base_strength": 3,
       "text": "Roar: if you played another Cat this turn, remove an adjacent enemy.",
       "keywords": [],
       "species": "Serval",
@@ -1378,7 +1378,7 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 2,
+      "base_strength": 3,
       "text": "Roar: if you gained 10 or more food this turn, remove an adjacent enemy.",
       "keywords": [],
       "species": "Muskrat",
@@ -1916,7 +1916,7 @@
       "tags": [
         "Primate"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Roar: if you have 5 or more cards in your hand, remove an adjacent enemy.",
       "keywords": [],
       "species": "Macaque",

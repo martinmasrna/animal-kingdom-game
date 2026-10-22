@@ -27,7 +27,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Serval** | 2 | Cat | 2 | Roar: if you played another Cat this turn, remove an adjacent enemy. |
+| **Serval** | 2 | Cat | 3 | Roar: if you played another Cat this turn, remove an adjacent enemy. |
 | **Black Panther** | 3 | Cat | 6 | Stealth. |
 | **Lion** | 3 | Cat | 7 | — |
 | **Caracal** | 3 | Cat | 6 | Reach. |

@@ -1706,6 +1706,16 @@
       "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
       "by": "claude",
       "at": 1792661449
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Martin, 2026-10-22: conditional removal priced by what the condition costs the turn you play it, 1 below its draw-2 twin",
+      "by": "claude",
+      "at": 1792664336
     }
   },
   "jaguar": {
@@ -1926,9 +1936,14 @@
       "by": "martin"
     },
     "strength": {
-      "note": "Martin, 2026-10-16: a rare with a real condition sits one above the common conditional anchor (2); Serval at 2 had the same removal for free.",
+      "note": "Martin, 2026-10-22: conditional removal priced by what the condition costs the turn you play it, 1 below its draw-2 twin",
       "by": "claude",
-      "at": 1792148717
+      "at": 1792664336,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-16: a rare with a real condition sits one above the common conditional anchor (2); Serval at 2 had the same removal for free.",
+        "prev": 3
+      }
     },
     "rarity": {
       "review": {
@@ -2139,6 +2154,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "Martin, 2026-10-22: conditional removal priced by what the condition costs the turn you play it, 1 below its draw-2 twin",
+      "by": "claude",
+      "at": 1792664337
     }
   },
   "naked_mole_rat": {
@@ -2316,6 +2341,16 @@
     "effect": {
       "by": "claude",
       "at": 1792085440
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "Martin, 2026-10-22: conditional removal priced by what the condition costs the turn you play it, 1 below its draw-2 twin",
+      "by": "claude",
+      "at": 1792664337
     }
   },
   "piranha_legend": {
@@ -2731,9 +2766,14 @@
       "at": 1792148718
     },
     "strength": {
-      "note": "Martin, 2026-10-15: at 4 it outclassed the Jaguar; any-size removal pays with a small body.",
+      "note": "Martin, 2026-10-22: conditional removal priced by what the condition costs the turn you play it, 1 below its draw-2 twin",
       "by": "claude",
-      "at": 1792070441
+      "at": 1792664337,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-15: at 4 it outclassed the Jaguar; any-size removal pays with a small body.",
+        "prev": 2
+      }
     },
     "rarity": {
       "review": {
