@@ -889,15 +889,18 @@ def test_the_mate_comes_only_when_the_eagle_itself_enters_the_hand():
     assert sorted(hand_ids(s, "A")) == ["eagle_legend", "lion", "lion"]
 
 
-def test_orangutan_duplicates_a_primate_and_tarsier_draws_one_and_trains_it():
+def test_orangutan_duplicates_a_primate_and_tarsier_draws_one_and_trains_a_chosen_primate():
     s = make_state(hands={"A": ["orangutan", "gorilla", "lion"]})
     rules.apply_action(s, PlaceAction("orangutan", ("cr", "1,2")))
     assert s.pending["options"] == [hand_inst(s, "A", "gorilla").iid]
     choose(s, hand_inst(s, "A", "gorilla").iid)
     assert hand_ids(s, "A").count("gorilla") == 2
-    s2 = make_state(hands={"A": ["tarsier"]}, decks={"A": ["lion", "gorilla", "lion"], "B": []})
-    apply_click(s2, PlaceAction("tarsier", ("cr", "1,2")))
-    assert hand_inst(s2, "A", "gorilla").strength_counter == CFG.tarsier_grant
+    s2 = make_state(hands={"A": ["tarsier", "chimpanzee", "lion"]}, decks={"A": ["lion", "gorilla", "lion"], "B": []})
+    rules.apply_action(s2, PlaceAction("tarsier", ("cr", "1,2")))       # draws the Gorilla, then asks which Primate
+    assert sorted(s2.pending["options"]) == sorted([hand_inst(s2, "A", "chimpanzee").iid, hand_inst(s2, "A", "gorilla").iid])
+    choose(s2, hand_inst(s2, "A", "chimpanzee").iid)
+    assert hand_inst(s2, "A", "chimpanzee").strength_counter == CFG.tarsier_grant
+    assert hand_inst(s2, "A", "gorilla").strength_counter == 0
 
 
 def test_baboon_trains_two_different_cards_and_the_legend_two_random_ones_at_dawn():

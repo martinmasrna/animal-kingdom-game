@@ -1,6 +1,6 @@
 # Rarity
 
-The fourth stage of locking a card, after completeness, wording and the animal–effect fit. It judges whether each card sits at the right rarity, card by card. The starter decks are only precons: a card's rarity is right or wrong on its own, whatever its deck's 4 legendaries, 4 rares and 6 commons would need, and fixing a deck's counts comes after. Every judgment is a proposal with its reason; nothing changes until Martin agrees.
+The fourth stage of locking a card, after completeness, wording and the animal–effect fit. It judges whether each card sits at the right rarity, card by card. The starter decks are only precons: a card's rarity is right or wrong on its own, whatever its deck would need, and fixing a deck's counts comes after. Every judgment is a proposal with its reason; nothing changes until Martin agrees.
 
 ## Two readings that should agree
 
@@ -8,6 +8,16 @@ The fourth stage of locking a card, after completeness, wording and the animal�
 - **The animal.** How rare the animal feels to a normal person. A Hamster reads wrong as a rare; a Chinchilla read right; the Octopus felt rare before its effect existed. A one-of-a-kind animal sits naturally at rare or legendary, a lookalike at common.
 
 Ideally both readings agree. When they don't, the card is flagged, and the fix is whichever change makes them agree: the card's rarity, or the animal carrying it.
+
+## The test
+
+Copies set how often a card shows up, and its rate (strength, numbers) sets how strong it is. So the rarity question is what goes wrong if the opponent faces this card three times a game, never which slot its deck has free (Martin, 2026-10-22).
+
+- **Common:** the deck's own verb, done once. Removal, draw and extra plays are commons when their condition is the deck's own engine (food gained, a Colony count, an ally removed, cards in hand, Canines next to the target): three copies are fine because the card works only in that deck and only while the deck is doing its thing (Muskrat, Soldier Ant, Piranha, Macaque, Jackal, Serval, Barracuda, Termite Queen, Remora).
+- **Rare:** good because it's occasional. An answer that slots into any deck (removal gated by the target's strength or state, bounce, tech: Jaguar, Black Mamba, Hawk, Boar, Chimpanzee); a swing bigger than one for one (mass removal, an extra action, draw 3, a removed card that keeps paying like the Earthworm's three cards); an ongoing effect the board plays around (Leopard, Dhole, Cape Buffalo, Porcupine); a card too narrow to want three of.
+- For removal the line is where the condition lives: on your deck, common; on the target, rare. Three copies of a generic answer in every deck would mean no wall ever holds.
+
+Rares therefore hold most of the pool's generic answers and are shared across decks, the way every Magic deck runs some removal. A starter runs as many rare designs as its cards have, not a fixed four.
 
 ## Things that bear on the role
 
@@ -24,6 +34,8 @@ Ideally both readings agree. When they don't, the card is flagged, and the fix i
 - **Unclear role:** the card doesn't do any rarity's job well; say what's wrong.
 
 ## Calls so far
+
+- The 2026-10-22 pass by the test: Macaque, Jackal, Serval, Barracuda, Termite Queen, Remora, Nurse Bumblebee, Termite King and Praying Mantis became commons, their strength to re-level against their new peers; Boar, Chimpanzee and Rat become rares in the starter pass, since each starter runs three. The Earthworm stays rare (its two Worms draw too, three cards in all, where the Cockroach draws none). The Tarsier stays rare and its owner picks the Primate the +2 lands on. The Dormouse waits for a redesign: as a common it would be the Worker Wasp again. Open: whether the Mackerel, an anthem that stacks, belongs at rare beside the Cape Buffalo (Martin, 2026-10-22).
 
 - A Hamster isn't a rare (Martin, 2026-10-08).
 - The Octopus is a rare by feel (Martin, 2026-10-08).

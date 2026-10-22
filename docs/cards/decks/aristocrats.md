@@ -19,7 +19,6 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Praying Mantis** | 2 | — | 3 | Roar: remove an adjacent ally to draw 2 cards. |
 | **Raccoon** | 2 | — | 2 | Roar: return an animal from your Remove Pile to your hand. |
 | **Earthworm** | 2 | — | 1 | When this is removed, draw a card and place two Worms on its crossroad. |
 | **Sperm Whale** | 2 | — | 8 | Titan. Roar: remove all adjacent animals. |
@@ -28,6 +27,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
+| **Praying Mantis** | 2 | — | 3 | Roar: remove an adjacent ally to draw 2 cards. |
 | **Piranha** | 3 | Fish | 2 | Roar: if an ally was removed this turn, remove an adjacent animal. |
 | **Vulture** | 3 | Bird | 2 | Flight. Dusk: after 3 or more removals this turn, this lands from your hand or deck. |
 | **City Spider** | 3 | Arachnid | 4 | Dawn: remove the weakest animal next to this. |

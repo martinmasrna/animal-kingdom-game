@@ -83,7 +83,7 @@
       "id": "nurse_bumblebee",
       "name": "Nurse Bumblebee",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Colony"
       ],
@@ -99,7 +99,7 @@
       "id": "termite_king",
       "name": "Termite King",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Colony"
       ],
@@ -113,7 +113,7 @@
       "id": "termite_queen",
       "name": "Termite Queen",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Colony",
         "Queen"
@@ -238,7 +238,7 @@
       "id": "praying_mantis",
       "name": "Praying Mantis",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [],
       "base_strength": 3,
       "text": "Roar: remove an adjacent ally to draw 2 cards.",
@@ -509,7 +509,7 @@
       "id": "jackal",
       "name": "Jackal",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Canine"
       ],
@@ -891,7 +891,7 @@
       "id": "serval",
       "name": "Serval",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Cat"
       ],
@@ -1091,7 +1091,7 @@
       "id": "barracuda",
       "name": "Barracuda",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Fish"
       ],
@@ -1119,7 +1119,7 @@
       "id": "remora",
       "name": "Remora",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Fish"
       ],
@@ -1912,7 +1912,7 @@
       "id": "macaque",
       "name": "Macaque",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Primate"
       ],
@@ -1945,10 +1945,10 @@
         "Primate"
       ],
       "base_strength": 2,
-      "text": "Roar: draw a Primate and give it +2 strength.",
-      "keywords": [],
+      "text": "Roar: draw a Primate, then give a Primate in your hand +2 strength.",
       "species": "Tarsier",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "chimpanzee",

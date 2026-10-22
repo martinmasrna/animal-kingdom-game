@@ -203,7 +203,7 @@ Each deck contains exactly **30 cards** and must satisfy all of the following:
 - no more than 8 rare cards in total;
 - no more than 4 legendary cards in total (so at least 18 commons).
 
-In practice every deck is built to the clean **4–4–6** shape: 4 legendary designs (×1), 4 rare designs (×2), and 6 common designs (×3) = 30 cards. This is the lowest-legendary split that still keeps a healthy rarity pyramid — more common designs than rare, commons the plurality of cards — which is why decks don't run fewer legendaries even though the rules permit it.
+Any deck within these rules is legal, the starters included: a starter runs as many rare and common designs as its cards' rarities give it, with no fixed split (Martin, 2026-10-22; the rarity test is in `design/rarity.md`).
 
 # 14. Match Structure
 

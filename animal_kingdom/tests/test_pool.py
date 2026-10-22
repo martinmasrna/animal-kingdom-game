@@ -1,12 +1,10 @@
-"""Structural tests for the launch pool: 12 starter 4-4-6 decks, lists over the collectible cards (decklists.json).
+"""Structural tests for the launch pool: 12 starter decks, lists over the collectible cards (decklists.json).
 
-These assert the *shape* of the static data (counts, uniqueness, domains, the 4-4-6
-expansion) — not card behavior, which is Phase 2.
+These assert the *shape* of the static data (counts, uniqueness, domains) — not card behavior, which is Phase 2. A
+starter has no fixed rarity split: any legal deck will do (Martin, 2026-10-22).
 """
 
 from __future__ import annotations
-
-from collections import Counter
 
 from animal_kingdom.engine.cards import (
     COPY_LIMITS,
@@ -26,13 +24,10 @@ DYNAMIC_IDS = {"egg_eater"}
 
 # ----------------------------------------------------------------- pool composition
 
-def test_14_designs_in_each_of_the_12_starter_decks():
+def test_12_starter_decks_of_collectible_cards():
     cards = load_cards()
     assert len(STARTER_DECKS) == 12 and DECK_SLUGS == {d["slug"] for d in STARTER_DECKS}
     for d in STARTER_DECKS:
-        assert len(d["cards"]) == 14, f"{d['slug']} has {len(d['cards'])} designs"
-        rarities = Counter(cards[cid].rarity for cid in d["cards"])
-        assert rarities == {"legendary": 4, "rare": 4, "common": 6}, f"{d['slug']}: {rarities}"
         assert all(cards[cid].collectible for cid in d["cards"])
         assert d.get("cover") in d["cards"], f"{d['slug']}: its cover is not one of its cards"
 
@@ -69,18 +64,11 @@ def test_each_deck_expands_to_30():
     for slug in DECK_SLUGS:
         deck = load_premade_deck(slug)
         assert len(deck) == 30, f"{slug} expands to {len(deck)}"
-        counts = Counter(deck)
-        assert len(counts) == 14
     assert DECK_SLUGS <= PREMADE_DECKS.keys()
 
 
-def test_copy_limits_locked_446():
+def test_copy_limits():
     assert COPY_LIMITS == {"legendary": 1, "rare": 2, "common": 3}
-    cards = load_cards()
-    for slug in DECK_SLUGS:
-        counts = Counter(load_premade_deck(slug))
-        for cid, n in counts.items():
-            assert n == COPY_LIMITS[cards[cid].rarity]
 
 
 # ------------------------------------------------------------------ field domains

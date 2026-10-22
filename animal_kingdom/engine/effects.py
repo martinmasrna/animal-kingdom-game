@@ -1091,10 +1091,7 @@ def _op_draw(state, step):
 
 
 def _op_draw_filtered(state, step):
-    before = {i.iid for i in state.hands[step["player"]]}
     draw_filtered_random(state, step["player"], step["n"], step["spec"])
-    if step.get("grant"):    # Tarsier: "draw a Primate and give it +1 strength"
-        _grant(state, [i.iid for i in state.hands[step["player"]] if i.iid not in before], step["grant"])
     return None
 
 
@@ -2752,8 +2749,8 @@ def _draw_then_give_one(state, unit, cr):
 
 
 def _op_hand_grant_one(state, step):
-    _push_choose(state, step["player"], _hand_iids(state, step["player"]), "grant", amount=step["amount"],
-                 by_card=step.get("by_card"))
+    _push_choose(state, step["player"], _hand_iids(state, step["player"], tag=step.get("tag")), "grant",
+                 amount=step["amount"], by_card=step.get("by_card"))
     return None
 
 
@@ -2788,9 +2785,10 @@ def _orangutan_place(state, unit, cr):
 
 
 def _tarsier_place(state, unit, cr):
-    """Roar: draw a Primate and give it +2 strength (tarsier_grant)."""
-    state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": "tag:Primate",
-                               "grant": state.config.tarsier_grant})
+    """Roar: draw a Primate, then give a Primate in your hand +2 strength (tarsier_grant)."""
+    state.effect_stack.append({"op": "hand_grant_one", "player": unit.owner, "amount": state.config.tarsier_grant,
+                               "tag": "Primate"})
+    state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": "tag:Primate"})
 
 
 def _chimpanzee_place(state, unit, cr):

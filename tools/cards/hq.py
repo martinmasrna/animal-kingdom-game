@@ -273,8 +273,8 @@ def _apply_value(r: dict, col: str, value) -> None:
         if c["rarity"]:
             decklists = _read(DECKLISTS)
             for d in _starters(decklists):
-                if c["id"] in d["cards"]:
-                    d["cards"][c["id"]] = COPIES[c["rarity"]]
+                if c["id"] in d["cards"]:    # capped at the new limit, never raised: the deck stays 30
+                    d["cards"][c["id"]] = min(d["cards"][c["id"]], COPIES[c["rarity"]])
             _write(DECKLISTS, decklists)
     elif col == "animal":
         name, species = value.get("name", "").strip(), value.get("species", "").strip()

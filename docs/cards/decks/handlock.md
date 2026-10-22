@@ -20,14 +20,14 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Hummingbird** | 2 | Bird | 1 | Flight. Roar: draw 2 cards. |
-| **Macaque** | 2 | Primate | 3 | Roar: if you have 5 or more cards in your hand, remove an adjacent enemy. |
 | **Orangutan** | 2 | Primate | 5 | Roar: duplicate a Primate in your hand. |
-| **Tarsier** | 2 | Primate | 2 | Roar: draw a Primate and give it +2 strength. |
+| **Tarsier** | 2 | Primate | 2 | Roar: draw a Primate, then give a Primate in your hand +2 strength. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
+| **Macaque** | 2 | Primate | 3 | Roar: if you have 5 or more cards in your hand, remove an adjacent enemy. |
 | **Chimpanzee** | 3 | Primate | 4 | Roar: remove an adjacent enemy of equal or lower strength. |
 | **Baboon** | 3 | Primate | 5 | Roar: give 2 animals in your hand +1 strength. |
 | **Stork** | 3 | Bird | 4 | Flight. Roar: add two random younglings to your hand. |

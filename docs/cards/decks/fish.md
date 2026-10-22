@@ -20,14 +20,14 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Swordfish** | 2 | Fish | 3 | Roar: remove a random adjacent enemy for each adjacent allied Fish. |
-| **Barracuda** | 2 | Fish | 4 | Roar: remove an adjacent enemy with strength up to the number of your Fish. |
 | **Manta Ray** | 2 | Fish | 6 | Whenever your opponent covers an adjacent allied Fish, draw a card. |
-| **Remora** | 2 | Fish | 3 | Roar: play another Fish. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
+| **Barracuda** | 2 | Fish | 4 | Roar: remove an adjacent enemy with strength up to the number of your Fish. |
+| **Remora** | 2 | Fish | 3 | Roar: play another Fish. |
 | **Cod** | 3 | Fish | 4 | Roar: draw a card for each adjacent allied Fish. |
 | **Sardine** | 3 | Fish | 0 | Roar: fill adjacent empty crossroads with Sardines from your hand and deck. |
 | **Mahi-mahi** | 3 | Fish | 3 | Roar: give your other Fish +1 strength. |

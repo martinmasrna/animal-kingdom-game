@@ -276,6 +276,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "by": "claude",
+      "at": 1792661449
     }
   },
   "bat": {
@@ -1666,6 +1676,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "by": "claude",
+      "at": 1792661449
     }
   },
   "jaguar": {
@@ -1889,6 +1909,16 @@
       "note": "Martin, 2026-10-16: a rare with a real condition sits one above the common conditional anchor (2); Serval at 2 had the same removal for free.",
       "by": "claude",
       "at": 1792148717
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "by": "claude",
+      "at": 1792661449
     }
   },
   "macaque_legend": {
@@ -2125,6 +2155,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "by": "claude",
+      "at": 1792661449
     }
   },
   "octopus_legend": {
@@ -2299,6 +2339,16 @@
       "lv": "fine",
       "by": "martin",
       "at": 1792229273
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "by": "claude",
+      "at": 1792661450
     }
   },
   "lion_legend": {
@@ -2527,6 +2577,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "by": "claude",
+      "at": 1792661449
     }
   },
   "rhinoceros": {
@@ -2614,6 +2674,16 @@
       "note": "Martin, 2026-10-15: at 4 it outclassed the Jaguar; any-size removal pays with a small body.",
       "by": "claude",
       "at": 1792070441
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "by": "claude",
+      "at": 1792661449
     }
   },
   "gorilla_legend": {
@@ -2828,9 +2898,9 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin, 2026-10-16: at +1 a rare 2 was a worse Mouse (common 4, draws a Rodent); +2 makes a drawn Gorilla an 8 at once, fine for a rare.",
+      "note": "Martin, 2026-10-22: the player picks where the buff lands; stays rare",
       "by": "claude",
-      "at": 1792149632,
+      "at": 1792661448,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Scouting a Primate was too strong and too consistent; a random Primate keeps the tutor, drops the choice.",
@@ -2846,6 +2916,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "by": "claude",
+      "at": 1792661449
     }
   },
   "termite_queen": {
@@ -2861,6 +2941,16 @@
       "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
       "by": "claude",
       "at": 1792076082
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "by": "claude",
+      "at": 1792661449
     }
   },
   "tiger": {
