@@ -134,15 +134,15 @@
     "manta_ray_legend": 1,
     "piranha_legend": 1,
     "swordfish": 2,
-    "barracuda": 2,
+    "barracuda": 3,
     "manta_ray": 2,
-    "remora": 2,
+    "remora": 3,
     "cod": 3,
     "sardine": 3,
     "mahi_mahi": 3,
-    "mackerel": 3,
     "tuna": 3,
-    "sunfish": 3
+    "sunfish": 3,
+    "great_white_shark": 1
    }
   },
   {

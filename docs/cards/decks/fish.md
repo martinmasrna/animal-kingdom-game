@@ -21,17 +21,17 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 |---|---:|---|---:|---|
 | **Swordfish** | 2 | Fish | 3 | Roar: remove a random adjacent enemy for each adjacent allied Fish. |
 | **Manta Ray** | 2 | Fish | 6 | Whenever your opponent covers an adjacent allied Fish, draw a card. |
+| **Shark** | 1 | Fish | 7 | Apex Predator. If an animal was removed this turn, this has Reach. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Barracuda** | 2 | Fish | 4 | Roar: remove an adjacent enemy with strength up to the number of your Fish. |
-| **Remora** | 2 | Fish | 1 | Roar: if placed next to an allied Fish, play another Fish. |
+| **Barracuda** | 3 | Fish | 4 | Roar: remove an adjacent enemy with strength up to the number of your Fish. |
+| **Remora** | 3 | Fish | 1 | Roar: if placed next to an allied Fish, play another Fish. |
 | **Cod** | 3 | Fish | 4 | Roar: draw a card for each adjacent allied Fish. |
 | **Sardine** | 3 | Fish | 0 | Roar: fill adjacent empty crossroads with Sardines from your hand and deck. |
 | **Mahi-mahi** | 3 | Fish | 3 | Roar: give your other Fish +1 strength. |
-| **Mackerel** | 3 | Fish | 2 | Your other Fish have +1 strength. |
 | **Tuna** | 3 | Fish | 3 | Has +1 strength for each other Fish you control. |
 | **Sunfish** | 3 | Fish | 4 | Roar: place a Baby Fish on a random adjacent empty crossroad. |
 

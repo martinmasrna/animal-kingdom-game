@@ -1177,7 +1177,7 @@
     {
       "id": "mackerel",
       "name": "Mackerel",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Fish"

@@ -2062,6 +2062,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1792669794
     }
   },
   "magpie": {
@@ -3731,9 +3740,13 @@
       "lv": "problem"
     },
     "animal": {
-      "note": "Martin 2026-10-21: plain everyday name; the id names the species and stays",
+      "note": "moved from pool to fish",
       "by": "claude",
-      "at": 1792619832
+      "at": 1792669794,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-21: plain everyday name; the id names the species and stays"
+      }
     }
   },
   "octopus": {
