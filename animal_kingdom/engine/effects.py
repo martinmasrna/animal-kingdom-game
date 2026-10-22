@@ -965,8 +965,10 @@ def _op_grant_free_roam(state, step):
 
 # ============================================================= delayed scheduler
 
-def schedule(state: GameState, unit, owner_turn_delay: int, step: dict, *, while_buried: bool) -> None:
-    """Queue `step` to fire after `owner_turn_delay` more of `unit`'s owner's turns.
+def schedule(state: GameState, unit, owner_turn_delay: int, step: dict, *, while_buried: bool,
+             turn_of: Optional[str] = None) -> None:
+    """Queue `step` to fire after `owner_turn_delay` more of `unit`'s owner's turns (`turn_of`: another player's turns,
+    the Electric Eel's on its opponent's).
 
     The timer belongs to the **unit**, not the board (rules `overview.md` §9.1): it advances only
     while `unit` is the top of its crossroad, and is cancelled outright if `unit` leaves the board.
@@ -975,7 +977,7 @@ def schedule(state: GameState, unit, owner_turn_delay: int, step: dict, *, while
     """
     step.setdefault("by_card", unit.card_id)   # a delayed effect still names its card when it fires
     step.setdefault("by_iid", unit.iid)        # and its animal (the timer dies with it, so it is on the board when it fires: its food flies from it)
-    state.scheduled.append({"iid": unit.iid, "owner": unit.owner, "while_buried": while_buried,   # keep ticking under a cover?
+    state.scheduled.append({"iid": unit.iid, "owner": turn_of or unit.owner, "while_buried": while_buried,   # keep ticking under a cover?
                             "remaining": owner_turn_delay, "step": step})
 
 
@@ -2569,6 +2571,14 @@ def _beaver_place(state, unit, cr):
              while_buried=False)
 
 
+def _electric_eel_place(state, unit, cr):
+    """Roar: your opponent takes 1 fewer action next turn. The Beaver's mirror: it lands on the opponent's very next turn,
+    as a timer that ticks on their turn (and dies with the Eel, as the Beaver's does)."""
+    opp = other_player(unit.owner)
+    schedule(state, unit, 1, {"op": "grant_action", "player": opp, "n": -state.config.eel_lost_actions},
+             while_buried=True, turn_of=opp)
+
+
 def _dormouse_eot(state, unit, cr):
     """Dusk: if you gained 10 or more food this turn, draw a card. Dusk comes before region income, so only the turn's
     own food counts."""
@@ -3098,6 +3108,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "flying_squirrel": {"on_place": _gains("flying_squirrel_food")},
     "meerkat": {"on_place": _draw1, "on_enemy_placed_adjacent": _meerkat_enemy_placed},
     "beaver": {"on_place": _beaver_place},
+    "electric_eel": {"on_place": _electric_eel_place},
     "dormouse": {"on_end_of_turn": _dormouse_eot},
     "squirrel": {"on_place": _gains("squirrel_food")},
     "chipmunk": {"on_place": _chipmunk_place},

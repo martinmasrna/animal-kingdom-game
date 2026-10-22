@@ -52,6 +52,7 @@ class Config:
     chipmunk_legend_food_per: int = 3           # Scrooge: Roar: gain 3 food for each 10 food you have
     chipmunk_legend_food_step: int = 10
     beaver_bonus_actions: int = 1       # Beaver: extra top-level actions on your NEXT turn
+    eel_lost_actions: int = 1           # Electric Eel: actions your opponent loses on their next turn (never below 1)
 
     # --- Food-event engine reactors (decision F2/F9; magnitudes are dials) ---
     anaconda_legend_food: int = 1                    # per draw/shuffle/remove event

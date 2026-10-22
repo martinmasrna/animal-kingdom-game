@@ -4488,14 +4488,16 @@
     {
       "id": "electric_eel",
       "name": "Electric Eel",
-      "status": "planned",
-      "rarity": "",
-      "tags": [],
-      "base_strength": null,
-      "text": "",
-      "keywords": [],
+      "status": "collectible",
+      "rarity": "rare",
+      "tags": [
+        "Fish"
+      ],
+      "base_strength": 2,
+      "text": "Roar: your opponent takes 1 fewer action next turn.",
       "species": "Electric Eel",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "leech",
