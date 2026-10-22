@@ -2872,8 +2872,22 @@
   },
   "street_dog": {
     "crop": {
-      "lv": "fine",
-      "by": "martin"
+      "lv": "draft",
+      "by": "claude",
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": ""
+      },
+      "at": 1792662404
+    },
+    "art": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792662404
     }
   },
   "sunfish": {
