@@ -48,22 +48,14 @@
   },
   "armadillo": {
     "art": {
-      "lv": "draft",
-      "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
-      "at": 1792678137
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792679212
     },
     "crop": {
-      "lv": "draft",
-      "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
-      "at": 1792678137
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792679208
     },
     "effect": {
       "note": "Martin, 2026-10-21: the defence set, the Armadillo shares its shell, the Porcupine its quills; both 5",
@@ -1716,22 +1708,14 @@
   },
   "honey_badger_legend": {
     "art": {
-      "lv": "draft",
-      "by": "claude",
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
-      "at": 1792570220
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792679238
     },
     "crop": {
-      "lv": "draft",
-      "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
-      "at": 1792570261
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792679237
     },
     "animal": {
       "lv": "draft",
@@ -2508,22 +2492,14 @@
   },
   "porcupine": {
     "art": {
-      "lv": "draft",
-      "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
-      "at": 1792678136
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792679197
     },
     "crop": {
-      "lv": "draft",
-      "by": "claude",
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": ""
-      },
-      "at": 1792678136
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792679195
     },
     "effect": {
       "note": "Martin, 2026-10-21: the defence set, the Armadillo shares its shell, the Porcupine its quills; both 5",
@@ -3393,10 +3369,6 @@
       "at": 1792191064
     },
     "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": ""
-      },
       "note": "5, under the common's 6: an engine has to stay coverable (Martin, 2026-10-08)",
       "by": "claude",
       "at": 1792670323
