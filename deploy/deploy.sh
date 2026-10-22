@@ -58,16 +58,32 @@ if [[ -n "$unwritten" && -z "${NEWS_OK:-}" ]]; then
   echo "write animal_kingdom/web/news/$(date -v-6H +%F 2>/dev/null || date -d "-6 hours" +%F).md (or NEWS_OK=1 if players won't notice), then deploy again"; exit 1
 fi
 
-tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-# Two trees for the image: core/ (the engine, the bots, the data, the server, the gate's recordings) and ui/ (the client's
-# static files, the news, the studies). The compile and its gate run on core/ alone, so a change to the client reuses the
-# cached compiled engine and a deploy takes a minute instead of ten (2026-10-21).
-mkdir -p "$tmp/core" "$tmp/ui/animal_kingdom/web"
-git -C "$repo" archive HEAD animal_kingdom tools/engine_speed | tar -x -C "$tmp/core"
-for d in static news studies; do [[ -d "$tmp/core/animal_kingdom/web/$d" ]] && mv "$tmp/core/animal_kingdom/web/$d" "$tmp/ui/animal_kingdom/web/"; done
-cp "$repo/deploy/Dockerfile" "$cfg" "$tmp/"
+# The fast tiers gate the deploy here, so nothing waits on a separate test run first (SKIP_TESTS=1 when they just passed).
+[[ -n "${SKIP_TESTS:-}" ]] || "$repo/test" || { echo "fast tests failed: not deploying"; exit 1; }
+
+# The build context lives in one fixed folder, refreshed with rsync --checksum, so files that did not change keep their
+# timestamps and the builder's incremental context transfer sends only what changed, not the 85 MB of art every time.
+# Three trees for the image (deploy/Dockerfile): code/ (the engine, the bots, the server, the gate's recorder), data/ (cards,
+# decks, maps) and ui/ (the client's static files, the news, the studies). The compile runs on code/ alone, so a card change
+# reuses the compiled engine and pays only the gate; a client change reuses both.
+ctx="${XDG_CACHE_HOME:-$HOME/.cache}/animal-kingdom-deploy"
+lock="$ctx.lock"
+# one deploy at a time across sessions; a lock left by a killed deploy is taken over
+until mkdir "$lock" 2>/dev/null; do
+  kill -0 "$(cat "$lock/pid" 2>/dev/null)" 2>/dev/null || { rm -rf "$lock"; continue; }
+  echo "another deploy is running: waiting"; sleep 10
+done
+echo $$ > "$lock/pid"
+trap 'rm -rf "$lock" "$ctx.new"' EXIT
+rm -rf "$ctx.new"; mkdir -p "$ctx.new/code" "$ctx.new/ui/animal_kingdom/web" "$ctx"
+git -C "$repo" archive HEAD animal_kingdom tools/engine_speed | tar -x -C "$ctx.new/code"
+mv "$ctx.new/code/animal_kingdom/data" "$ctx.new/data"
+for d in static news studies; do [[ -d "$ctx.new/code/animal_kingdom/web/$d" ]] && mv "$ctx.new/code/animal_kingdom/web/$d" "$ctx.new/ui/animal_kingdom/web/"; done
+cp "$repo/deploy/Dockerfile" "$cfg" "$ctx.new/"
+rsync -a --checksum --delete "$ctx.new/" "$ctx/"
+tmp="$ctx"
 echo "deploying $(git -C "$repo" log --oneline -1)"
-# Fly's deploy sometimes hangs on its own API: give it 20 minutes (a full compile and gate takes up to 15), then stop it and
+# Fly's deploy sometimes hangs on its own API: give it 20 minutes (a full compile and gate takes about 5), then stop it and
 # try once more; a second hang fails loudly.
 attempt() {
   fly deploy "$tmp" --config "$tmp/fly.toml" --remote-only & local pid=$! waited=0

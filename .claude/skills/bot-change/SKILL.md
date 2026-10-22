@@ -33,7 +33,7 @@ Report the table to Martin as decks and points, with the mechanism read in one s
 
 ## 4. Ship
 
-Shipping is the spec, not the code: add the dial to the level's string in `animal_kingdom/web/match.py` (the Expert, and Normal only when its own run says so), update the test that pins that spec, re-record `tools/engine_speed/baseline.json` with `tools/engine_speed/record.py` since the deploy's compile gate compares play move for move, and add the result to the bot's entry in `docs/bots.md` as the current state, with the numbers and the date. Commit by path. Deploy from a tree whose HEAD contains origin/main (never the shared tree when it is behind), with `NEWS_OK=1` while the collection is unplayed, and check the live server plays the new spec, not only that it answers.
+Shipping is the spec, not the code: add the dial to the level's string in `animal_kingdom/web/match.py` (the Expert, and Normal only when its own run says so), update the test that pins that spec, and add the result to the bot's entry in `docs/bots.md` as the current state, with the numbers and the date. Commit by path. Deploy from a tree whose HEAD contains origin/main (never the shared tree when it is behind), with `NEWS_OK=1` while the collection is unplayed, and check the live server plays the new spec, not only that it answers.
 
 A bot change never triggers a full ladder re-seed; the ladder's Expert ratings lag the spec until a seed is due for its own reasons.
 

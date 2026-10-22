@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# The fast checks, all of them, in parallel: the Python fast tier spread over the cores (pytest-xdist) and the web
+# client's fast suite at the same time. About 30 seconds; prints one line each, the failures in full.
+#
+#   ./test                    # both fast tiers
+#   ./test animal_kingdom/tests/test_locust.py   # named Python tests only, in the foreground, a second or two
+set -uo pipefail
+cd "$(dirname "$0")"
+if (( $# )); then exec .venv/bin/python -m pytest -q -p no:cacheprovider "$@"; fi
+out="$(mktemp -d)"; trap 'rm -rf "$out"' EXIT
+.venv/bin/python -m pytest -q -m 'not slow' -n auto -p no:cacheprovider > "$out/py" 2>&1 & py=$!
+(cd animal_kingdom/web/test && node --test > "$out/web" 2>&1) & web=$!
+wait $py; pys=$?; wait $web; webs=$?
+(( pys )) && cat "$out/py" || echo "python: $(tail -1 "$out/py")"
+(( webs )) && grep -vE '^# Subtest|^ok ' "$out/web" | tail -60 || echo "web: $(grep -E '^ℹ (pass|fail) ' "$out/web" | tr '\n' ' ')"
+exit $(( pys || webs ))
