@@ -1,9 +1,7 @@
 """Record the bots' play on a fixed schedule, move for move, with timings: the acceptance set for engine speedups.
 Byte-identical play before and after a change is the test (the Expert runs without its time budget here, so the
 machine's load cannot change its moves).   .venv/bin/python tools/engine_speed/record.py results/engine_speed/<name>.json [-j1]
-The games run in parallel, one per core; `-j1` plays them one at a time, for timings that compare across runs.
-The Docker build's compile gate (deploy/Dockerfile) records the schedule twice, with the plain engine and the compiled one,
-and needs every game the same: there is no committed baseline to keep current."""
+The games run in parallel, one per core; `-j1` plays them one at a time, for timings that compare across runs."""
 import json, os, sys, time
 from concurrent.futures import ProcessPoolExecutor
 from animal_kingdom.sim.runner import make_bot, play_game

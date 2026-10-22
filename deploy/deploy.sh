@@ -63,9 +63,9 @@ fi
 
 # The build context lives in one fixed folder, refreshed with rsync --checksum, so files that did not change keep their
 # timestamps and the builder's incremental context transfer sends only what changed, not the 85 MB of art every time.
-# Three trees for the image (deploy/Dockerfile): code/ (the engine, the bots, the server, the gate's recorder), data/ (cards,
-# decks, maps) and ui/ (the client's static files, the news, the studies). The compile runs on code/ alone, so a card change
-# reuses the compiled engine and pays only the gate; a client change reuses both.
+# Three trees for the image (deploy/Dockerfile): code/ (the engine, the bots, the server, the tests), data/ (cards, decks,
+# maps) and ui/ (the client's static files, the news, the studies). The compile runs on code/ alone, so a card or client
+# change reuses the compiled engine and pays only the tests.
 ctx="${XDG_CACHE_HOME:-$HOME/.cache}/animal-kingdom-deploy"
 lock="$ctx.lock"
 # one deploy at a time across sessions; a lock left by a killed deploy is taken over
@@ -76,7 +76,7 @@ done
 echo $$ > "$lock/pid"
 trap 'rm -rf "$lock" "$ctx.new"' EXIT
 rm -rf "$ctx.new"; mkdir -p "$ctx.new/code" "$ctx.new/ui/animal_kingdom/web" "$ctx"
-git -C "$repo" archive HEAD animal_kingdom tools/engine_speed | tar -x -C "$ctx.new/code"
+git -C "$repo" archive HEAD animal_kingdom | tar -x -C "$ctx.new/code"
 mv "$ctx.new/code/animal_kingdom/data" "$ctx.new/data"
 for d in static news studies; do [[ -d "$ctx.new/code/animal_kingdom/web/$d" ]] && mv "$ctx.new/code/animal_kingdom/web/$d" "$ctx.new/ui/animal_kingdom/web/"; done
 cp "$repo/deploy/Dockerfile" "$cfg" "$ctx.new/"
