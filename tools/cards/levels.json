@@ -4612,6 +4612,24 @@
       "note": "Martin, 2026-10-22: 1, like the other younglings",
       "by": "claude",
       "at": 1792668694
+    },
+    "art": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792678921
+    },
+    "crop": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792678989
     }
   }
 }
