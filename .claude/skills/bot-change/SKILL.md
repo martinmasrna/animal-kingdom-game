@@ -17,7 +17,7 @@ The benchmark plays what is in a checkout, so the candidate's code must be a com
 
 `tools/bot_bench/bench.sh run <name> "+dial=value"` freezes origin/main into `results/bot_quality/<name>/tree` (`AT=<commit>` for another), records the commit and the card pool in `run.json`, and launches the paired benchmark in the background: candidate and baseline are the shipped Expert without its time budget, with and without the change, both playing the shipped Expert as the opponent. Twenty games a deck over the bot pool takes about four hours on the Mac; `AFTER=<name>` queues a run behind another, since two runs at once halve each other. Leave a background waiter on the log and keep the conversation going.
 
-The checkout is the run's. Never fetch into it, rebase it or edit it while the run goes; the workers re-read the cards whenever a batch starts. Deploys and commits happen from another tree.
+The run plays on the Rust engine with its own copy of the built module (`run.json` says `"rust": "1"`; AK_PY_BOTS=1 for the Python bots, fifty times slower). The checkout is the run's. Never fetch into it, rebase it, edit it or move it while the run goes; the workers re-read the cards whenever a batch starts. A self-play round, an oracle run or any other long job gets its own `tools/bot_bench/bench.sh freeze <name>` tree, never a benchmark's. Deploys and commits happen from another tree.
 
 A change to the time budget, or anything whose effect is speed, is measured on moves per second, not here: the benchmark runs untimed so the machine's load cannot change a move.
 
