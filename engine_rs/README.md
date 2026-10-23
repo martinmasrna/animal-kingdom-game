@@ -32,6 +32,8 @@ Every change is reproven by the four oracles in `tools/engine_rs/`:
 - `bot_oracle.py`: the same positions and seeds, the Python bot and the Rust bot must choose the same move with the same root scores (greedy, turn, the Expert).
 - `feature_oracle.py`: the rung-2 feature vector and the Expert's evaluation agree to 1e-9.
 
+The two engines are meant to agree to the bit, not to a tolerance: a tie deep in the search broken on a last-bit difference sends the two searches down different lines (the slot network's Expert disagreed with Python on one position in twenty, by ten points, with identical features everywhere). The one source found so far was serde_json's default float parsing, best-effort rather than correctly rounded, which put some network weights an ulp off Python's; the crate's `float_roundtrip` feature closes it. The root ordering still rounds its sort key, and the bot oracle still allows 1e-9 on a decided line near ±4e8, where the two engines' arithmetic differs in the last bits.
+
 ## Layout
 
 `state.rs` (the position, its cache, serialisation), `rules.rs`, `effects.rs` (the effect stack and its operations), `cards.rs` (every card's hooks, the THEN table), `statics.rs`, `strength.rs`, `data.rs` (cards, maps, config), `rng.rs` (CPython's `random.Random`, bit for bit), `value.rs` (the step data), `bots/` (features and evaluation, greedy, the determinized search for turn and referee, worlds), `py.rs` (the Python module), `bin/bench.rs`.
