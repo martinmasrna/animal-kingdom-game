@@ -7,6 +7,22 @@ use std::sync::Arc;
 
 use rustc_hash::FxHashMap;
 use serde_json as sj;
+use smallvec::SmallVec;
+
+pub type Stack = SmallVec<[Unit; 4]>;
+
+/// What the board says at a glance, recomputed whenever a unit lands, leaves or changes card: the top-owner masks,
+/// the den-connected masks, the family auras on top and whether a side has a keyword aura on top.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct BoardCache {
+    pub mine: [u32; 2],
+    pub conn: [u32; 2],
+    pub aura: [(Player, i64, u8); 4],
+    pub aura_n: u8,
+    pub kw_aura: [bool; 2],
+}
+pub type Hand = SmallVec<[Unit; 12]>;
+pub type Deck = SmallVec<[CardId; 32]>;
 
 use crate::data::*;
 use crate::rng::PyRandom;
@@ -197,13 +213,13 @@ impl Game {
 
 pub struct State {
     pub g: Arc<Game>,
-    pub stacks: Vec<Vec<Unit>>, // by crossroad index
-    pub order: Vec<Cr>,         // occupied crossroads in insertion order (Python's dict order)
-    pub hands: [Vec<Unit>; 2],
-    pub decks: [Vec<CardId>; 2], // top = last
-    pub starting_decks: [Vec<CardId>; 2],
-    pub remove_pile: Vec<CardId>,
-    pub pile_owners: Vec<Option<Player>>,
+    pub stacks: SmallVec<[Stack; 16]>, // by crossroad index
+    pub order: SmallVec<[Cr; 16]>,     // occupied crossroads in insertion order (Python's dict order)
+    pub hands: [Hand; 2],
+    pub decks: [Deck; 2], // top = last
+    pub starting_decks: [Deck; 2],
+    pub remove_pile: Deck,
+    pub pile_owners: SmallVec<[Option<Player>; 32]>,
     pub food: [i32; 2],
     pub current: Player,
     pub first_player: Player,
@@ -226,6 +242,7 @@ pub struct State {
     pub jelly: [FxHashMap<CardId, (i32, i32)>; 2],
     /// Whether `jelly[p]` exists at all (Python keeps the player's dict once the legendary Bee roared, empty or not).
     pub jelly_set: [bool; 2],
+    pub cache: BoardCache,
     pub events: Vec<Map>,
     pub cause: Option<CardId>,
     pub cause_iid: Option<i64>,
@@ -266,6 +283,7 @@ impl Clone for State {
             last_roar: self.last_roar,
             jelly: self.jelly.clone(),
             jelly_set: self.jelly_set,
+            cache: self.cache,
             events: Vec::new(),
             cause: None,
             cause_iid: None,
@@ -409,7 +427,7 @@ impl State {
     /// A card that brings its mate (the legendary Eagle) and has just entered `player`'s hand brings it unless it's
     /// there already; the whole hand when `entered` is None.
     pub fn ensure_mates(&mut self, player: Player, entered: Option<Vec<Unit>>) {
-        let list: Vec<Unit> = entered.unwrap_or_else(|| self.hands[player as usize].clone());
+        let list: Vec<Unit> = entered.unwrap_or_else(|| self.hands[player as usize].to_vec());
         for u in list {
             let card = self.card(u.card);
             if let Some(mate) = card.mate {
@@ -421,7 +439,7 @@ impl State {
     }
 
     // ---------------------------------------------------------------- board
-    pub fn stack(&self, cr: Cr) -> &Vec<Unit> {
+    pub fn stack(&self, cr: Cr) -> &[Unit] {
         &self.stacks[cr as usize]
     }
     pub fn occupied(&self, cr: Cr) -> bool {
@@ -442,6 +460,45 @@ impl State {
             self.order.push(cr);
         }
         self.stacks[cr as usize].push(unit);
+        self.recache();
+    }
+
+    /// Recompute `cache` from the board.
+    pub fn recache(&mut self) {
+        let gm = &self.g.map;
+        let mut c = BoardCache::default();
+        for &cr in &self.order {
+            let Some(top) = self.stacks[cr as usize].last() else { continue };
+            if top.owner <= B {
+                c.mine[top.owner as usize] |= 1 << cr;
+                let card = self.g.cards.get(top.card);
+                if card.family_aura != 0 && (c.aura_n as usize) < c.aura.len() {
+                    c.aura[c.aura_n as usize] = (top.owner, top.iid, card.family_aura);
+                    c.aura_n += 1;
+                }
+                if card.keyword_aura != 0 {
+                    c.kw_aura[top.owner as usize] = true;
+                }
+            }
+        }
+        for p in 0..2 {
+            let mine = c.mine[p];
+            let mut seen = mine & gm.front_masks[p];
+            let mut frontier = seen;
+            while frontier != 0 {
+                let cr = frontier.trailing_zeros() as Cr;
+                frontier &= frontier - 1;
+                for &nb in gm.neighbors(cr) {
+                    let bit = 1u32 << nb;
+                    if seen & bit == 0 && mine & bit != 0 {
+                        seen |= bit;
+                        frontier |= bit;
+                    }
+                }
+            }
+            c.conn[p] = seen;
+        }
+        self.cache = c;
     }
     pub fn insert_unit(&mut self, cr: Cr, at: usize, unit: Unit) {
         if self.stacks[cr as usize].is_empty() {
@@ -450,6 +507,7 @@ impl State {
         let st = &mut self.stacks[cr as usize];
         let at = at.min(st.len());
         st.insert(at, unit);
+        self.recache();
     }
     /// Take the unit with `iid` out of `cr`'s stack; the crossroad leaves the order when empty.
     pub fn take_unit(&mut self, cr: Cr, iid: i64) -> Option<Unit> {
@@ -459,6 +517,7 @@ impl State {
         if st.is_empty() {
             self.order.retain(|c| *c != cr);
         }
+        self.recache();
         Some(u)
     }
     pub fn pop_top(&mut self, cr: Cr) -> Option<Unit> {
@@ -466,6 +525,7 @@ impl State {
         if self.stacks[cr as usize].is_empty() {
             self.order.retain(|c| *c != cr);
         }
+        self.recache();
         Some(u)
     }
     /// The crossroad and stack position of a unit on the board.
@@ -524,30 +584,17 @@ impl State {
 
     /// Player-occupied crossroads connected to the player's den (overview.md §8), as a bitmask.
     pub fn connected_occupied(&self, player: Player) -> u32 {
-        let gm = &self.g.map;
-        let mut mine: u32 = 0;
-        for &cr in &self.order {
-            if self.stacks[cr as usize].last().map(|u| u.owner == player).unwrap_or(false) {
-                mine |= 1 << cr;
-            }
+        if player > B {
+            return 0;
         }
-        let mut seen: u32 = 0;
-        for &cr in gm.front(player) {
-            seen |= mine & (1 << cr);
+        self.cache.conn[player as usize]
+    }
+    /// The crossroads `player` tops, as a bitmask.
+    pub fn owned_mask(&self, player: Player) -> u32 {
+        if player > B {
+            return 0;
         }
-        let mut frontier = seen;
-        while frontier != 0 {
-            let cr = frontier.trailing_zeros() as Cr;
-            frontier &= frontier - 1;
-            for &nb in gm.neighbors(cr) {
-                let bit = 1u32 << nb;
-                if seen & bit == 0 && mine & bit != 0 {
-                    seen |= bit;
-                    frontier |= bit;
-                }
-            }
-        }
-        seen
+        self.cache.mine[player as usize]
     }
 
     pub fn is_connected(&self, player: Player, cr: Cr, occ: u32) -> bool {
@@ -601,7 +648,7 @@ impl State {
             board.insert(self.crname(cr).to_string(), sj::Value::Array(self.stacks[cr as usize].iter().map(|u| self.unit_json(u)).collect()));
         }
         let hands = |p: usize| sj::Value::Array(self.hands[p].iter().map(|u| self.unit_json(u)).collect());
-        let deck = |d: &Vec<CardId>| sj::Value::Array(d.iter().map(|c| sj::Value::String(self.cname(*c).to_string())).collect());
+        let deck = |d: &[CardId]| sj::Value::Array(d.iter().map(|c| sj::Value::String(self.cname(*c).to_string())).collect());
         let counters = |p: usize| {
             let mut m: Vec<(String, i32)> = self.card_strength_counters[p].iter().map(|(c, n)| (self.cname(*c).to_string(), *n)).collect();
             m.sort();
@@ -665,8 +712,8 @@ impl State {
         let n = g.map.n();
         let mut st = State::blank(g.clone());
         let cid = |name: &str| g.cards.id_of(name).expect("unknown card in saved state");
-        let cards_of = |v: &sj::Value| -> Vec<CardId> { v.as_array().map(|a| a.iter().map(|x| cid(x.as_str().unwrap())).collect()).unwrap_or_default() };
-        st.stacks = vec![Vec::new(); n];
+        let cards_of = |v: &sj::Value| -> Deck { v.as_array().map(|a| a.iter().map(|x| cid(x.as_str().unwrap())).collect()).unwrap_or_default() };
+        st.stacks = (0..n).map(|_| Stack::new()).collect();
         for (crn, stack) in d["board"].as_object().unwrap() {
             let cr = g.map.cr(crn).expect("unknown crossroad in saved state");
             for u in stack.as_array().unwrap() {
@@ -709,7 +756,7 @@ impl State {
         st.remove_pile = cards_of(&d["remove_pile"]);
         st.pile_owners = match d.get("pile_owners").and_then(|p| p.as_array()) {
             Some(a) => a.iter().map(|o| o.as_str().map(player_from)).collect(),
-            None => vec![None; st.remove_pile.len()],
+            None => (0..st.remove_pile.len()).map(|_| None).collect(),
         };
         st.current = player_from(d["current"].as_str().unwrap());
         st.first_player = player_from(d["first_player"].as_str().unwrap());
@@ -761,13 +808,13 @@ impl State {
         let n = g.map.n();
         State {
             g,
-            stacks: vec![Vec::new(); n],
-            order: Vec::new(),
-            hands: [Vec::new(), Vec::new()],
-            decks: [Vec::new(), Vec::new()],
-            starting_decks: [Vec::new(), Vec::new()],
-            remove_pile: Vec::new(),
-            pile_owners: Vec::new(),
+            stacks: (0..n).map(|_| Stack::new()).collect(),
+            order: SmallVec::new(),
+            hands: [Hand::new(), Hand::new()],
+            decks: [Deck::new(), Deck::new()],
+            starting_decks: [Deck::new(), Deck::new()],
+            remove_pile: Deck::new(),
+            pile_owners: SmallVec::new(),
             food: [0, 0],
             current: A,
             first_player: A,
@@ -789,6 +836,7 @@ impl State {
             last_roar: [None, None],
             jelly: [FxHashMap::default(), FxHashMap::default()],
             jelly_set: [false, false],
+            cache: BoardCache::default(),
             events: Vec::new(),
             cause: None,
             cause_iid: None,
@@ -800,8 +848,8 @@ impl State {
     pub fn new_game(g: Arc<Game>, deck_a: &[CardId], deck_b: &[CardId], seed: i64, first_player: Option<Player>, stacked: bool) -> State {
         let mut st = State::blank(g.clone());
         st.rng = PyRandom::seeded(seed);
-        st.decks = [deck_a.to_vec(), deck_b.to_vec()];
-        st.starting_decks = [deck_a.to_vec(), deck_b.to_vec()];
+        st.decks = [Deck::from_slice(deck_a), Deck::from_slice(deck_b)];
+        st.starting_decks = [Deck::from_slice(deck_a), Deck::from_slice(deck_b)];
         if stacked {
             st.decks[0].reverse();
             st.decks[1].reverse();

@@ -43,7 +43,7 @@ pub fn unit_keywords(st: &State, unit: &Unit, cr: Option<Cr>, as_top: bool) -> u
     }
     let card = st.card(unit.card);
     let kws = card.keywords;
-    if !st.tops().any(|(_, t)| t.owner == unit.owner && st.card(t.card).keyword_aura != 0) {
+    if unit.owner > B || !st.cache.kw_aura[unit.owner as usize] {
         return kws;
     }
     let at = crossroad_of(st, unit.iid);

@@ -278,6 +278,8 @@ pub struct GameMap {
     pub adjacency: Vec<Vec<Cr>>, // sorted by neighbour name
     pub hq_front: [Vec<Cr>; 2],
     pub regions: Vec<Region>,
+    pub region_masks: Vec<u32>,
+    pub front_masks: [u32; 2],
     pub win_food: i32,
 }
 
@@ -314,9 +316,14 @@ impl GameMap {
                 food: r["food"].as_i64().unwrap() as i32,
             });
         }
+        let fa = front("A");
+        let fb = front("B");
+        let front_masks = [fa.iter().fold(0u32, |m, c| m | (1 << c)), fb.iter().fold(0u32, |m, c| m | (1 << c))];
         Ok(GameMap {
             id: rec["id"].as_str().unwrap().to_string(),
-            hq_front: [front("A"), front("B")],
+            hq_front: [fa, fb],
+            region_masks: regions.iter().map(|r| r.corners.iter().fold(0u32, |m, c| m | (1 << c))).collect(),
+            front_masks,
             snames: names.iter().map(|n| crate::value::intern(n)).collect(),
             crossroads: names,
             sorted,

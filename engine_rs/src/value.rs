@@ -4,8 +4,6 @@
 //! `&'static str`: the engine's own are literals, card ids and crossroad names are leaked once per process, and
 //! strings read from JSON are interned.
 
-use indexmap::IndexMap;
-use rustc_hash::FxBuildHasher;
 use serde_json as sj;
 use std::collections::HashSet;
 use std::sync::Mutex;
@@ -17,10 +15,74 @@ pub enum Value {
     Int(i64),
     Str(&'static str),
     List(Vec<Value>),
-    Map(IndexMap<&'static str, Value, FxBuildHasher>),
+    Map(Map),
 }
 
-pub type Map = IndexMap<&'static str, Value, FxBuildHasher>;
+/// A small insertion-ordered map with static keys: a step has a handful of fields, so a vector beats a hash table.
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct Map(pub Vec<(&'static str, Value)>);
+
+impl Map {
+    pub fn new() -> Map {
+        Map(Vec::new())
+    }
+    pub fn with_capacity(n: usize) -> Map {
+        Map(Vec::with_capacity(n))
+    }
+    pub fn insert(&mut self, k: &'static str, v: Value) -> Option<Value> {
+        if let Some(e) = self.0.iter_mut().find(|(kk, _)| *kk == k) {
+            return Some(std::mem::replace(&mut e.1, v));
+        }
+        self.0.push((k, v));
+        None
+    }
+    pub fn get(&self, k: &str) -> Option<&Value> {
+        self.0.iter().find(|(kk, _)| *kk == k).map(|(_, v)| v)
+    }
+    pub fn get_mut(&mut self, k: &str) -> Option<&mut Value> {
+        self.0.iter_mut().find(|(kk, _)| *kk == k).map(|(_, v)| v)
+    }
+    pub fn contains_key(&self, k: &str) -> bool {
+        self.0.iter().any(|(kk, _)| *kk == k)
+    }
+    pub fn shift_remove(&mut self, k: &str) -> Option<Value> {
+        let i = self.0.iter().position(|(kk, _)| *kk == k)?;
+        Some(self.0.remove(i).1)
+    }
+    pub fn iter(&self) -> impl Iterator<Item = (&'static str, &Value)> {
+        self.0.iter().map(|(k, v)| (*k, v))
+    }
+    pub fn keys(&self) -> impl Iterator<Item = &'static str> + '_ {
+        self.0.iter().map(|(k, _)| *k)
+    }
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
+impl std::ops::Index<&str> for Map {
+    type Output = Value;
+    fn index(&self, k: &str) -> &Value {
+        self.get(k).expect("no such key")
+    }
+}
+
+impl IntoIterator for Map {
+    type Item = (&'static str, Value);
+    type IntoIter = std::vec::IntoIter<(&'static str, Value)>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+impl FromIterator<(&'static str, Value)> for Map {
+    fn from_iter<I: IntoIterator<Item = (&'static str, Value)>>(iter: I) -> Map {
+        Map(iter.into_iter().collect())
+    }
+}
 
 static INTERNED: Mutex<Option<HashSet<&'static str>>> = Mutex::new(None);
 
@@ -134,7 +196,7 @@ pub fn m_flag(m: &Map, k: &str) -> bool {
 #[macro_export]
 macro_rules! vmap {
     ($($k:expr => $v:expr),* $(,)?) => {{
-        let mut m = $crate::value::Map::default();
+        let mut m = $crate::value::Map::with_capacity(6);
         $( m.insert($k, $v); )*
         m
     }};

@@ -5,7 +5,7 @@ use crate::data::*;
 use crate::state::{State, Unit};
 
 pub fn count_units_controlled(st: &State, player: Player) -> i32 {
-    st.tops().filter(|(_, u)| u.owner == player).count() as i32
+    st.owned_mask(player).count_ones() as i32
 }
 
 fn dynamic_strength(st: &State, rule: &str) -> i32 {
@@ -23,11 +23,11 @@ fn base_or_dynamic(st: &State, card: &Card) -> i32 {
     }
 }
 
-/// A family aura on the board: (owner, iid, kind).
-pub type Sources = Vec<(Player, i64, u8)>;
+/// The family auras on the board: (owner, iid, kind).
+pub type Sources = smallvec::SmallVec<[(Player, i64, u8); 4]>;
 
 pub fn aura_sources(st: &State) -> Sources {
-    st.tops().filter(|(_, u)| st.card(u.card).family_aura != 0).map(|(_, u)| (u.owner, u.iid, st.card(u.card).family_aura)).collect()
+    st.cache.aura[..st.cache.aura_n as usize].iter().copied().collect()
 }
 
 fn aura_applies(st: &State, kind: u8, owner: Player, src_owner: Player, src_iid: i64, self_iid: Option<i64>, card: &Card, their_turn: bool) -> Option<i32> {

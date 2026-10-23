@@ -936,7 +936,7 @@ impl Searcher {
         let mut enabling: u64 = 0;
         for &(cid, count) in &counts {
             let mut probe = st.clone();
-            probe.hands[opp as usize] = vec![Unit::new(cid, opp, 900001), Unit::new(filler.unwrap_or(cid), opp, 900002)];
+            probe.hands[opp as usize] = smallvec::smallvec![Unit::new(cid, opp, 900001), Unit::new(filler.unwrap_or(cid), opp, 900002)];
             for a in rules::legal_actions(&probe) {
                 if let Action::Place { target: Target::Cr(c), .. } = &a {
                     if reach.contains(c) {
@@ -1082,7 +1082,7 @@ fn canon(v: &Value, out: &mut String) {
             out.push(']');
         }
         Value::Map(m) => {
-            let mut keys: Vec<&'static str> = m.keys().copied().collect();
+            let mut keys: Vec<&'static str> = m.keys().collect();
             keys.sort();
             out.push('{');
             for k in keys {

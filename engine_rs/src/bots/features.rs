@@ -132,21 +132,15 @@ pub fn board_presence(st: &State, me: Player) -> f64 {
 
 /// (food, mine fraction, theirs fraction) per region, in map order.
 pub fn region_fractions(st: &State, me: Player, opp: Player) -> Vec<(f64, f64, f64)> {
-    st.map()
-        .regions
+    let gm = st.map();
+    let mm = st.owned_mask(me);
+    let tm = st.owned_mask(opp);
+    gm.regions
         .iter()
-        .map(|r| {
+        .zip(gm.region_masks.iter())
+        .map(|(r, &mask)| {
             let n = r.corners.len() as f64;
-            let mut mine = 0;
-            let mut theirs = 0;
-            for &c in &r.corners {
-                match st.owner_of(c) {
-                    Some(o) if o == me => mine += 1,
-                    Some(o) if o == opp => theirs += 1,
-                    _ => {}
-                }
-            }
-            (r.food as f64, mine as f64 / n, theirs as f64 / n)
+            (r.food as f64, (mask & mm).count_ones() as f64 / n, (mask & tm).count_ones() as f64 / n)
         })
         .collect()
 }

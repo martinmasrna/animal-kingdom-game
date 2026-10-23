@@ -20,13 +20,13 @@ pub fn determinize(st: &State, me: Player, rng: &mut PyRandom) -> State {
     pool.sort_by(|a, b| st.cname(*a).cmp(st.cname(*b)));
     rng.shuffle(&mut pool);
     let dealt = hidden.len();
-    let mut new_hand = kept;
+    let mut new_hand: crate::state::Hand = kept.into_iter().collect();
     for &card in &pool[..dealt] {
         let iid = clone.new_iid();
         new_hand.push(Unit::new(card, opp, iid));
     }
     clone.hands[o] = new_hand;
-    clone.decks[o] = pool[dealt..].to_vec();
+    clone.decks[o] = crate::state::Deck::from_slice(&pool[dealt..]);
     clone.rng = PyRandom::seeded_u64(rng.getrandbits(64));
     clone
 }

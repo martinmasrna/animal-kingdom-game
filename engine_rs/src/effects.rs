@@ -1088,7 +1088,7 @@ pub fn start_of_turn(st: &mut State, player: Player) {
         }
     }
     st.scheduled = keep;
-    let hand: Vec<Unit> = st.hands[player as usize].clone();
+    let hand: Vec<Unit> = st.hands[player as usize].to_vec();
     for inst in hand {
         if st.g.has_hook(inst.card, Hook::OnDawnInHand) {
             cards::run(st, inst.card, None, Hook::OnDawnInHand, &inst, &Args::None);
@@ -1649,6 +1649,7 @@ pub fn transform(st: &mut State, iid: i64, card: CardId) {
     let was = inst.card;
     inst.card = card;
     let owner = inst.owner;
+    st.recache();
     crate::emit!(st, "transform", vmap!("iid" => Value::Int(iid), "owner" => pn(owner), "card" => card_v(st, card), "was" => card_v(st, was)));
 }
 
