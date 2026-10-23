@@ -4,7 +4,7 @@
 """
 import os as _os, sys as _sys
 _sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))))   # REPO_ROOT: this tree, not an installed copy
-import argparse, dataclasses, json, math, sys
+import argparse, sys, dataclasses, json, math, sys
 
 from animal_kingdom.bots import features
 from animal_kingdom.bots.greedy_bot import GreedyWeights, evaluate
@@ -22,23 +22,28 @@ EXPERT_W = {"pending_target": 1.5, "buried_presence": 0.25, "food_progress": 0, 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--positions", type=int, default=200)
+    ap.add_argument("--set", default="rung2", help="the feature set (rung2, board)")
     ap.add_argument("--seed", type=int, default=0)
     a = ap.parse_args()
     cards = load_cards()
     pool = sorted(c for c, card in cards.items() if card.collectible)
     config = Config.default()
     eng = ak_engine.Engine(CARDS_JSON, MAPS_JSON, json.dumps(dataclasses.asdict(config)), "map_b")
-    names = features.feature_names("rung2")
+    names = features.feature_names(a.set)
+    rs_names = ak_engine.feature_names(a.set) if hasattr(ak_engine, "feature_names") else None
+    if rs_names is not None and list(rs_names) != list(names):
+        print(f"feature names differ: python {len(names)}, rust {len(rs_names)}; first difference at {next((i for i, (x, y) in enumerate(zip(names, rs_names)) if x != y), min(len(names), len(rs_names)))}")
+        sys.exit(1)
     bad = 0
     pos = positions(a.positions, a.seed, cards, config, pool)
     for k, (seed, st) in enumerate(pos):
         rs = eng.from_dict(st.to_dict())
         for me in ("A", "B"):
-            py = features.extract(st, me, "rung2")
-            rr = rs.extract(me, "rung2")
+            py = features.extract(st, me, a.set)
+            rr = rs.extract(me, a.set)
             diffs = [(n, x, y) for n, x, y in zip(names, py, rr) if not math.isclose(x, y, rel_tol=1e-9, abs_tol=1e-9)]
-            py2 = extract_as_scored(st, me, "rung2")
-            rr2 = rs.extract(me, "rung2", True)
+            py2 = extract_as_scored(st, me, a.set)
+            rr2 = rs.extract(me, a.set, True)
             diffs2 = [(n, x, y) for n, x, y in zip(names, py2, rr2) if not math.isclose(x, y, rel_tol=1e-9, abs_tol=1e-9)]
             ev_py = evaluate(st, me, GreedyWeights(**EXPERT_W))
             ev_rs = rs.evaluate(me, json.dumps(EXPERT_W))

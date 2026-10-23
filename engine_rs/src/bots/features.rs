@@ -597,13 +597,118 @@ pub const RUNG2_EXTRA: [&str; 24] = [
 
 pub fn feature_names(set: &str) -> Vec<&'static str> {
     let mut v: Vec<&str> = RUNG0.to_vec();
-    if set == "rung1" || set == "rung2" {
+    if set == "rung1" || set == "rung2" || set == "board" {
         v.extend(RUNG1_EXTRA);
     }
-    if set == "rung2" {
+    if set == "rung2" || set == "board" {
         v.extend(RUNG2_EXTRA);
     }
+    if set == "board" {
+        v.extend(board_names().iter().copied());
+    }
     v
+}
+
+// ------------------------------------------------------------------ the board (features.py: BOARD_EXTRA_FEATURES)
+// Sixteen crossroad slots in the map's name order, each the top animal as properties from the mover's side (+1 mine,
+// -1 theirs, 0 empty), then the eight strongest cards in hand as properties, then four counts. Keyword and tag columns
+// follow the engine's lists in alphabetical order, as Python sorts them.
+
+pub const BOARD_SLOTS: usize = 16;
+pub const HAND_SLOTS: usize = 8;
+const SLOT_BASE: [&str; 7] = ["mine", "theirs", "strength", "depth", "buried_mine", "buried_theirs", "fresh"];
+const HAND_BASE: [&str; 3] = ["present", "strength", "food_cost"];
+
+/// Keyword bit indexes in alphabetical name order, and tag bit indexes likewise.
+fn property_order() -> &'static (Vec<usize>, Vec<usize>) {
+    static ORDER: std::sync::OnceLock<(Vec<usize>, Vec<usize>)> = std::sync::OnceLock::new();
+    ORDER.get_or_init(|| {
+        let mut kw: Vec<usize> = (0..crate::data::KEYWORDS.len()).collect();
+        kw.sort_by_key(|&i| crate::data::KEYWORDS[i]);
+        let mut tags: Vec<usize> = (0..crate::data::TAGS.len()).collect();
+        tags.sort_by_key(|&i| crate::data::TAGS[i]);
+        (kw, tags)
+    })
+}
+
+fn property_names() -> Vec<String> {
+    let (kw, tags) = property_order();
+    let mut v = vec!["roar".to_string(), "ability".to_string()];
+    v.extend(kw.iter().map(|&i| format!("kw_{}", crate::data::KEYWORDS[i].replace(' ', "_"))));
+    v.extend(tags.iter().map(|&i| format!("tag_{}", crate::data::TAGS[i])));
+    v
+}
+
+pub fn board_names() -> &'static Vec<&'static str> {
+    static NAMES: std::sync::OnceLock<Vec<&'static str>> = std::sync::OnceLock::new();
+    NAMES.get_or_init(|| {
+        let props = property_names();
+        let mut v: Vec<String> = Vec::new();
+        for k in 0..BOARD_SLOTS {
+            for f in SLOT_BASE.iter().map(|s| s.to_string()).chain(props.iter().cloned()) {
+                v.push(format!("cr{k}_{f}"));
+            }
+        }
+        for k in 0..HAND_SLOTS {
+            for f in HAND_BASE.iter().map(|s| s.to_string()).chain(props.iter().cloned()) {
+                v.push(format!("hand{k}_{f}"));
+            }
+        }
+        v.extend(["my_hand_n", "opp_hand_n", "my_deck_n", "opp_deck_n"].iter().map(|s| s.to_string()));
+        v.into_iter().map(|s| &*Box::leak(s.into_boxed_str())).collect()
+    })
+}
+
+fn push_properties(v: &mut Vec<f64>, card: &Card, sign: f64) {
+    let (kw, tags) = property_order();
+    v.push(sign * if card.has_roar { 1.0 } else { 0.0 });
+    v.push(sign * if card.has_ability { 1.0 } else { 0.0 });
+    for &i in kw {
+        v.push(sign * if card.keywords & (1 << i) != 0 { 1.0 } else { 0.0 });
+    }
+    for &i in tags {
+        v.push(sign * if card.tags & (1 << i) != 0 { 1.0 } else { 0.0 });
+    }
+}
+
+pub fn board_features(st: &State, me: Player, opp: Player, v: &mut Vec<f64>) {
+    let gm = st.map();
+    let n_props = 2 + crate::data::KEYWORDS.len() + crate::data::TAGS.len();
+    for k in 0..BOARD_SLOTS {
+        let stack = if k < gm.sorted.len() { Some(&st.stacks[gm.sorted[k] as usize]) } else { None };
+        let Some(stack) = stack.filter(|s| !s.is_empty()) else {
+            v.extend(std::iter::repeat(0.0).take(SLOT_BASE.len() + n_props));
+            continue;
+        };
+        let top = stack.last().unwrap();
+        let sign = if top.owner == me { 1.0 } else if top.owner == opp { -1.0 } else { 0.0 };
+        v.push(if top.owner == me { 1.0 } else { 0.0 });
+        v.push(if top.owner == opp { 1.0 } else { 0.0 });
+        v.push(sign * effective_strength(st, top, None) as f64 / 10.0);
+        v.push(stack.len() as f64 / 4.0);
+        let under = &stack[..stack.len() - 1];
+        v.push(under.iter().filter(|u| u.owner == me).count() as f64 / 3.0);
+        v.push(under.iter().filter(|u| u.owner == opp).count() as f64 / 3.0);
+        v.push(sign * if top.placed_on_turn as i32 == st.turn_counter { 1.0 } else { 0.0 });
+        push_properties(v, st.card(top.card), sign);
+    }
+    let mut hand: Vec<&Unit> = st.hands[me as usize].iter().collect();
+    hand.sort_by_key(|u| std::cmp::Reverse(effective_strength(st, u, None)));   // stable: ties keep hand order
+    for k in 0..HAND_SLOTS {
+        let Some(u) = hand.get(k) else {
+            v.extend(std::iter::repeat(0.0).take(HAND_BASE.len() + n_props));
+            continue;
+        };
+        let card = st.card(u.card);
+        v.push(1.0);
+        v.push(effective_strength(st, u, None) as f64 / 10.0);
+        v.push(card.food_cost as f64 / 5.0);
+        push_properties(v, card, 1.0);
+    }
+    v.push(st.hands[me as usize].len() as f64 / 8.0);
+    v.push(st.hands[opp as usize].len() as f64 / 8.0);
+    v.push(st.decks[me as usize].len() as f64 / 30.0);
+    v.push(st.decks[opp as usize].len() as f64 / 30.0);
 }
 
 fn growth_board_diff(st: &State, me: Player, opp: Player) -> f64 {
@@ -755,7 +860,7 @@ pub fn extract(st: &State, me: Player, set: &str) -> Vec<f64> {
     let live = enabled_roar_count(st, me);
     v.push(live as f64);
     v.push(pending_payoff(st, me, false));
-    if set == "rung1" || set == "rung2" {
+    if set == "rung1" || set == "rung2" || set == "board" {
         let phase = (st.turn_counter as f64 / T_NORM).min(1.0);
         let growth = growth_board_diff(st, me, opp);
         v.push(growth);
@@ -775,7 +880,7 @@ pub fn extract(st: &State, me: Player, set: &str) -> Vec<f64> {
         v.push(hq_dist_diff(st, me, opp, my_connection, opp_connection));
         v.push(flight_hand_expected_diff(st, me, opp));
     }
-    if set == "rung2" {
+    if set == "rung2" || set == "board" {
         let hand: Vec<&Card> = st.hands[me as usize].iter().map(|u| st.card(u.card)).collect();
         let strengths: Vec<i32> = hand.iter().filter_map(|c| c.base).collect();
         let roars = hand.iter().filter(|c| c.has_roar).count() as i32;
@@ -825,6 +930,9 @@ pub fn extract(st: &State, me: Player, set: &str) -> Vec<f64> {
         v.push(pressure as f64);
         v.push(pending_target_strength(st, me));
         v.push(buried_presence(st, me));
+    }
+    if set == "board" {
+        board_features(st, me, opp, &mut v);
     }
     v
 }

@@ -7,7 +7,7 @@ reports log-loss and sign agreement for the hand formula, the linear fit and the
 is read on his games before its paired benchmark (a network that beats the self-play pool and reads
 his games worse has learned the pool's blind spot, not the game; docs/bots.md, 2026-10-23).
 
-    python -m animal_kingdom.learn.human_set results/netlearn/human_set.npz
+    python -m animal_kingdom.learn.human_set results/netlearn/human_set.npz [--features board]
 """
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ def expert_weights() -> GreedyWeights:
     return replace(GreedyWeights(), **{k[2:]: v for k, v in kwargs if k.startswith("w.")})
 
 
-def positions(log: dict, weights: GreedyWeights):
+def positions(log: dict, weights: GreedyWeights, feature_set: str = FEATURE_SET):
     """(seat, features, turn, hand score) at every turn start of one logged game, or None if it no longer replays."""
     st = new_game(list(log["lists"][0]), list(log["lists"][1]), log["seed"], map_id=log.get("map_id", "map_b"),
                   config=Config.default().for_log(log), first_player=log["first_player"])
@@ -49,7 +49,7 @@ def positions(log: dict, weights: GreedyWeights):
                 key = (st.turn_counter, st.player_to_act())
                 if key != last:
                     seat = key[1]
-                    rows.append((seat, features.extract(st, seat, FEATURE_SET), st.turn_counter, evaluate(st, seat, weights)))
+                    rows.append((seat, features.extract(st, seat, feature_set), st.turn_counter, evaluate(st, seat, weights)))
                     last = key
             rules.apply_logged(st, adict)
     except Exception:
@@ -57,7 +57,7 @@ def positions(log: dict, weights: GreedyWeights):
     return rows
 
 
-def build(out: str, root: str = "results/human_games/web") -> tuple[int, int, int]:
+def build(out: str, root: str = "results/human_games/web", feature_set: str = FEATURE_SET) -> tuple[int, int, int]:
     import numpy as np
     weights = expert_weights()
     cols = {k: [] for k in ("x", "y", "turn", "deck", "opp", "game", "hand")}
@@ -71,7 +71,7 @@ def build(out: str, root: str = "results/human_games/web") -> tuple[int, int, in
                 if "human" not in g.get("bots", []) or g.get("winner") is None or not g.get("lists"):
                     continue
                 games += 1
-                rows = positions(g, weights)
+                rows = positions(g, weights, feature_set)
                 if rows is None:
                     continue
                 kept += 1
@@ -83,15 +83,18 @@ def build(out: str, root: str = "results/human_games/web") -> tuple[int, int, in
                     cols["game"].append(game_id)
     np.savez_compressed(out, x=np.array(cols["x"], dtype=np.float32), y=np.array(cols["y"]), turn=np.array(cols["turn"]),
                         deck=np.array(cols["deck"]), opp=np.array(cols["opp"]), game=np.array(cols["game"]),
-                        hand=np.array(cols["hand"], dtype=np.float32), features=np.array(features.feature_names(FEATURE_SET)),
+                        hand=np.array(cols["hand"], dtype=np.float32), features=np.array(features.feature_names(feature_set)), feature_set=np.array(feature_set),
                         eval_path=np.array(""), pilot=np.array("human"))
     return kept, games, len(cols["x"])
 
 
 def main(argv=None) -> None:
     args = sys.argv[1:] if argv is None else argv
+    feature_set = FEATURE_SET
+    if "--features" in args:
+        i = args.index("--features"); feature_set = args[i + 1]; args = args[:i] + args[i + 2:]
     out = args[0] if args else "results/netlearn/human_set.npz"
-    kept, games, n = build(out)
+    kept, games, n = build(out, feature_set=feature_set)
     print(f"{kept} of {games} human games replay; {n} positions -> {out}")
 
 

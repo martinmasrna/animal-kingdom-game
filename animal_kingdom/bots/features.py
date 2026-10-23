@@ -37,6 +37,7 @@ from collections import deque
 from typing import Iterator, Optional
 
 from ..engine import rules
+from ..engine.cards import KEYWORDS, TAGS
 from ..engine.actions import PlaceAction
 from ..engine.state import GameState, other_player
 from ..engine.strength import effective_strength, aura_sources
@@ -115,10 +116,30 @@ RUNG2_EXTRA_FEATURES: tuple[str, ...] = (
     "buried_presence",
 )
 
+# **The board** (`feature_set="board"`, 2026-10-23): rung 2 plus the position as it stands, so a network can read what
+# the sums cannot say (a Poison animal on the den front, a Spider beside my Bear). Sixteen crossroad slots in the map's
+# name order, each the top animal as properties from the mover's side (+1 mine, -1 theirs, 0 empty): owner, strength,
+# stack depth, what lies buried, Roar and ability, placed this turn, every keyword and every family tag. Then the eight
+# strongest cards in my hand as the same properties, and the four counts (hands, decks). Properties, never card names:
+# a balance patch changes a number, a brand-new mechanic adds a column. Keyword and tag columns follow the engine's own
+# lists in alphabetical order, so this file names no card, deck or tag.
+BOARD_SLOTS = 16
+HAND_SLOTS = 8
+KEYWORD_ORDER: tuple[str, ...] = tuple(sorted(KEYWORDS))
+TAG_ORDER: tuple[str, ...] = tuple(sorted(TAGS))
+_PROPERTY_FEATURES: tuple[str, ...] = (("roar", "ability") + tuple("kw_" + k.replace(" ", "_") for k in KEYWORD_ORDER)
+                                       + tuple("tag_" + t for t in TAG_ORDER))
+SLOT_FEATURES: tuple[str, ...] = ("mine", "theirs", "strength", "depth", "buried_mine", "buried_theirs", "fresh") + _PROPERTY_FEATURES
+HAND_FEATURES: tuple[str, ...] = ("present", "strength", "food_cost") + _PROPERTY_FEATURES
+BOARD_EXTRA_FEATURES: tuple[str, ...] = (tuple(f"cr{k}_{f}" for k in range(BOARD_SLOTS) for f in SLOT_FEATURES)
+                                         + tuple(f"hand{k}_{f}" for k in range(HAND_SLOTS) for f in HAND_FEATURES)
+                                         + ("my_hand_n", "opp_hand_n", "my_deck_n", "opp_deck_n"))
+
 FEATURE_SETS: dict[str, tuple[str, ...]] = {
     "rung0": RUNG0_FEATURES,
     "rung1": RUNG0_FEATURES + RUNG1_EXTRA_FEATURES,
     "rung2": RUNG0_FEATURES + RUNG1_EXTRA_FEATURES + RUNG2_EXTRA_FEATURES,
+    "board": RUNG0_FEATURES + RUNG1_EXTRA_FEATURES + RUNG2_EXTRA_FEATURES + BOARD_EXTRA_FEATURES,
 }
 
 
@@ -183,7 +204,7 @@ def extract(state: GameState, me: str, feature_set: str = "rung0") -> list[float
     values["effect_readiness"] = float(enabled_roar_count(state, me))
     values["pending_payoff"] = pending_payoff(state, me, opp)
 
-    if feature_set in ("rung1", "rung2"):
+    if feature_set in ("rung1", "rung2", "board"):
         phase = min(1.0, state.turn_counter / T_NORM)
         growth = growth_board_diff(state, me, opp)
         values["growth_board_diff"] = growth
@@ -203,10 +224,55 @@ def extract(state: GameState, me: str, feature_set: str = "rung0") -> list[float
         values["hq_dist_diff"] = hq_dist_diff(state, me, opp, my_connection, opp_connection)
         values["flight_hand_expected_diff"] = flight_hand_expected_diff(state, me, opp)
 
-    if feature_set == "rung2":
+    if feature_set in ("rung2", "board"):
         values.update(context_features(state, me, opp, opp_connection))
+    if feature_set == "board":
+        return [values[name] for name in names[:len(names) - len(BOARD_EXTRA_FEATURES)]] + board_features(state, me, opp)
 
     return [values[name] for name in names]
+
+
+def _properties(card, sign: float) -> list[float]:
+    """Roar, ability, each keyword, each family tag, signed by the side (`_PROPERTY_FEATURES` order)."""
+    out = [sign * float(card.has_roar), sign * float(has_ability(card))]
+    out.extend(sign * float(k in card.keywords) for k in KEYWORD_ORDER)
+    out.extend(sign * float(t in card.tags) for t in TAG_ORDER)
+    return out
+
+
+def board_features(state: GameState, me: str, opp: str) -> list[float]:
+    """`BOARD_EXTRA_FEATURES`: the crossroad slots, the hand slots and the four counts."""
+    cards = state.cards
+    out: list[float] = []
+    crs = sorted(state.game_map.crossroads)
+    for k in range(BOARD_SLOTS):
+        stack = state.board.get(crs[k]) if k < len(crs) else None
+        if not stack:
+            out.extend([0.0] * len(SLOT_FEATURES))
+            continue
+        top = stack[-1]
+        sign = 1.0 if top.owner == me else -1.0 if top.owner == opp else 0.0
+        out.append(float(top.owner == me))
+        out.append(float(top.owner == opp))
+        out.append(sign * effective_strength(state, top) / 10.0)
+        out.append(len(stack) / 4.0)
+        out.append(sum(u.owner == me for u in stack[:-1]) / 3.0)
+        out.append(sum(u.owner == opp for u in stack[:-1]) / 3.0)
+        out.append(sign * float(top.placed_on_turn == state.turn_counter))
+        out.extend(_properties(cards[top.card_id], sign))
+    hand = sorted(state.hands[me], key=lambda u: -effective_strength(state, u))   # stable: ties keep hand order
+    for k in range(HAND_SLOTS):
+        if k >= len(hand):
+            out.extend([0.0] * len(HAND_FEATURES))
+            continue
+        u = hand[k]
+        card = cards[u.card_id]
+        out.append(1.0)
+        out.append(effective_strength(state, u) / 10.0)
+        out.append(card.food_cost / 5.0)
+        out.extend(_properties(card, 1.0))
+    out.extend([len(state.hands[me]) / 8.0, len(state.hands[opp]) / 8.0, len(state.decks[me]) / 30.0, len(state.decks[opp]) / 30.0])
+    return out
 
 
 # =============================================================== rung-0 term helpers

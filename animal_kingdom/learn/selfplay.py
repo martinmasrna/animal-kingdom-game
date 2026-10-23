@@ -33,7 +33,7 @@ from ..engine.cards import DECK_SLUGS
 from ..engine.state import new_game, other_player
 from .episodes import extract_as_scored
 
-FEATURE_SET = "rung2"
+FEATURE_SET = "rung2"   # the default; `--features` picks another (features.FEATURE_SETS)
 
 
 @dataclass(frozen=True)
@@ -45,6 +45,7 @@ class GameSpec:
     epsilon: float = 0.05
     pilot: str = "turn"
     pilot_b: str = ""        # a different pilot for seat B ("" means the same as A): two styles in one pool
+    feature_set: str = FEATURE_SET
 
 
 def pairings(pool: bool = False) -> list[tuple[str, str]]:
@@ -74,7 +75,7 @@ def play(spec: GameSpec) -> dict:
     while (result := rules.is_terminal(state)) is None:
         actor = state.player_to_act()
         if state.pending is None and state.actions_taken_this_turn == 0 and state.turn_counter > 0:
-            rows.append((actor, features.extract(state, actor, FEATURE_SET), state.turn_counter))
+            rows.append((actor, features.extract(state, actor, spec.feature_set), state.turn_counter))
         legal = rules.legal_actions(state)
         if len(legal) > 1 and rng.random() < spec.epsilon:
             action = rng.choice(legal)
@@ -83,7 +84,7 @@ def play(spec: GameSpec) -> dict:
         turn = state.turn_counter
         rules.apply_action(state, action, validate=False)
         if rules.is_terminal(state) is None:
-            rows.append((actor, extract_as_scored(state, actor, FEATURE_SET), turn))
+            rows.append((actor, extract_as_scored(state, actor, spec.feature_set), turn))
     decks = {"A": spec.deck_a, "B": spec.deck_b}
     return {
         "x": [r[1] for r in rows],
@@ -98,13 +99,13 @@ def play(spec: GameSpec) -> dict:
 
 def generate(out: str, eval_path: Optional[str], games_per_pair: int, seed: int, jobs: int,
              epsilon: float = 0.05, decks: Optional[list[str]] = None, pilot: str = "turn", pool: bool = False,
-             pilot_b: str = "") -> None:
-    """`decks`, if given, keeps only the pairings that include one of them."""
+             pilot_b: str = "", feature_set: str = FEATURE_SET) -> None:
+    """`decks`, if given, keeps only the pairings that include one of them; `feature_set` names what is recorded."""
     import numpy as np
 
     pairs = [(i, (a, b)) for i, (a, b) in enumerate(pairings(pool))
              if not decks or a in decks or b in decks]
-    specs = [GameSpec(a, b, seed + i * 1000 + k, eval_path, epsilon, pilot, pilot_b)
+    specs = [GameSpec(a, b, seed + i * 1000 + k, eval_path, epsilon, pilot, pilot_b, feature_set)
              for i, (a, b) in pairs for k in range(games_per_pair)]
     random.Random(seed).shuffle(specs)          # mixed decks in every progress slice
     cols: dict[str, list] = {k: [] for k in ("x", "y", "turn", "deck", "opp", "game", "reason")}
@@ -115,7 +116,7 @@ def generate(out: str, eval_path: Optional[str], games_per_pair: int, seed: int,
                             turn=np.array(cols["turn"]), deck=np.array(cols["deck"]),
                             opp=np.array(cols["opp"]), game=np.array(cols["game"]),
                             reason=np.array(cols["reason"]),
-                            features=np.array(features.feature_names(FEATURE_SET)),
+                            features=np.array(features.feature_names(feature_set)), feature_set=np.array(feature_set),
                             eval_path=np.array(eval_path or ""), pilot=np.array(pilot), pilot_b=np.array(pilot_b))
 
     with ProcessPoolExecutor(max_workers=jobs) as ex:
@@ -142,9 +143,10 @@ def main(argv=None) -> None:
     p.add_argument("--pilot", default="turn", help="the bot spec both seats play (sim.runner.make_bot); default TurnBot")
     p.add_argument("--pool", action="store_true", help="pair the bot pool (decks.BOT_DECKS) instead of the starters and goodstuff")
     p.add_argument("--pilot-b", default="", help="a different pilot for the other seat (the seats swap every other game)")
+    p.add_argument("--features", default=FEATURE_SET, help="the feature set recorded (features.FEATURE_SETS: rung2, board)")
     a = p.parse_args(argv)
     generate(a.out, a.eval, a.games_per_pair, a.seed, a.jobs, a.epsilon,
-             a.decks.split(",") if a.decks else None, a.pilot, a.pool, a.pilot_b)
+             a.decks.split(",") if a.decks else None, a.pilot, a.pool, a.pilot_b, a.features)
 
 
 if __name__ == "__main__":

@@ -34,8 +34,12 @@ def load_rounds(paths):
         if [str(n) for n in d["features"]] != names:
             raise ValueError("rounds were recorded with different feature sets")
     cat = lambda k: np.concatenate([d[k] for d in ds])
+    sets = {str(d["feature_set"]) for d in ds if "feature_set" in d}
+    if len(sets) > 1:
+        raise ValueError(f"rounds were recorded with different feature sets: {sorted(sets)}")
+    feature_set = sets.pop() if sets else "rung2"     # files from before the name was recorded are rung-2 files
     # games are identified by seed; rounds use disjoint seed ranges
-    return names, cat("x").astype(np.float64), cat("y"), cat("turn"), cat("game"), cat("deck")
+    return names, cat("x").astype(np.float64), cat("y"), cat("turn"), cat("game"), cat("deck"), feature_set
 
 
 def logloss(p, t):
@@ -96,11 +100,11 @@ def fit_linear(X, y, l2=1e-3):
     return lambda A: 1 / (1 + np.exp(-np.clip(A @ w[:-1] + w[-1], -30, 30)))
 
 
-def train(out, paths, hidden=32, l2=1e-4, feature_set="rung2", test_path=None):
+def train(out, paths, hidden=32, l2=1e-4, test_path=None):
     np = _np()
     from ..bots.net_eval import NetEval
 
-    names, X, y, turn, game, deck = load_rounds(paths)
+    names, X, y, turn, game, deck, feature_set = load_rounds(paths)
     bucket = (game.astype(np.int64) * 2654435761 % 2**32) % 100    # seeds are not uniform mod k
     test = bucket < 20
     val = (bucket >= 20) & (bucket < 30)
