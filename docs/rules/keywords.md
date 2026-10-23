@@ -27,7 +27,7 @@ Carried by: Azamandulai the tortoise and the Glyptodont (Ramp); the Stag Beetle,
 ### Stealth
 Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis). **Mass, random, and automatic effects hit it normally**, and so does an Apex Predator's eat (a predator eats what it lands on; nobody chooses): Rhinoceros/Brutus AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron triggers. Its own controller may still choose it freely. Scope is board-only.
 
-Carried by: the Stick Insect, the keyword's common; the Black Panther, whose Stealth keeps its food engine safe from chosen removal; Ash.
+Carried by: the Stick Insect, the keyword's common; the Black Panther, a Stealth Apex Predator; Ash.
 
 ### Spikes
 The first time an enemy covers it, that enemy is removed (a remove, so Armor resists it). Once per animal: the first enemy cover spends them even when nothing is removed (an Armor coverer stays, and the Spikes are gone all the same; Martin, 2026-10-17), so a Spikes animal that has been covered by an enemy is an ordinary animal from then on, and its badge on the board goes. Covering is placement, so the coverer's own Roar resolves first, then the spikes (and an Apex Predator landing on it is removed before it can eat). A friendly cover doesn't set it off.
@@ -61,7 +61,7 @@ A predator that must land on prey and eats it.
 - **If the occupant can't be eaten** (Armor), the predator is **not** blocked from landing there: it simply **covers** it under the normal placement rules and buries it instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it does *when it can*, not a placement precondition.
 - **Cannot be placed onto a den** — deliberate design choice, so Apex Predators can't capture an enemy den directly.
 
-Carried by: **Tiger** (Cats), **Eon** (Egg), **Polar Bear** and **Borealis** (Ramp).
+Carried by: **Tiger** and **Black Panther** (Cats), **Eon** (Egg), **Polar Bear** and **Borealis** (Ramp).
 
 ### Roar
 An effect that resolves when the unit is placed. Most "when placed…" effects are Roars.

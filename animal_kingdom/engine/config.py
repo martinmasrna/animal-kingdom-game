@@ -135,7 +135,6 @@ class Config:
     termite_king_draw: int = 2           # Termite King: Roar: draw 2 if you control a Colony Queen
     lynx_draw: int = 2                   # Lynx (rare): Roar: draw 2 if placed on top of an enemy
     ocelot_draw: int = 3                 # Ocelot (rare): Roar: if your hand is empty, draw 3
-    black_panther_food: int = 5          # Black Panther (rare): whenever an allied Cat covers an enemy, gain 5 food
     hamster_per_step: int = 1            # Hamster: +1 strength for each 10 food you have
     hamster_food_step: int = 10
     tuna_legend_food: int = 5            # the legendary Tuna: per region you control, a card and 5 food

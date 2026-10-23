@@ -927,11 +927,12 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 5,
-      "text": "Stealth. Whenever an allied Cat covers an enemy, gain 5 food.",
+      "base_strength": 7,
+      "text": "Apex Predator. Stealth.",
       "species": "Black Panther",
       "habitat": "Jungle",
       "keywords": [
+        "Apex Predator",
         "Stealth"
       ]
     },

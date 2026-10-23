@@ -394,8 +394,8 @@
     "rarity": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792756927,
-      "note": "Martin, 2026-10-21: the Stealth common (a one-keyword card is a common)",
+      "at": 1792781132,
+      "note": "Martin, 2026-10-23: two keywords make it a rare (a one-keyword card is a common)",
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-21: the Stealth common (a one-keyword card is a common)",
@@ -414,8 +414,8 @@
     "strength": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792756927,
-      "note": "5 (Martin, 2026-10-23): a food engine that only a cover answers sits below the 6 its old plain Stealth had",
+      "at": 1792781132,
+      "note": "7 (Martin, 2026-10-23): a Tiger with Stealth, the rare above the common Tiger",
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-21: Stealth is about -1 against the Lion",
@@ -425,7 +425,7 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792756927,
+      "at": 1792781132,
       "review": {
         "prev_lv": "fine",
         "prev_note": "",

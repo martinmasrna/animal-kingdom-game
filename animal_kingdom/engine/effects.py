@@ -300,8 +300,6 @@ def _fire_cover_event(state, coverer, covered) -> None:
         hook(state, coverer, covered)
     if "Cat" not in state.cards[coverer.card_id].tags:
         return
-    for _ in statics.active_tops(state, coverer.owner, "black_panther"):   # each Black Panther: gain 5 food
-        _push_gain(state, coverer.owner, state.config.black_panther_food)
     for top in statics.active_tops(state, coverer.owner, "lion_legend_3"):
         if not _capped(state, "cap_king_theron", top):
             state.effect_stack.append(

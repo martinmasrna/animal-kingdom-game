@@ -244,16 +244,6 @@ def test_the_ocelot_draws_three_only_from_an_empty_hand():
     assert hand_ids(s, "A") == ["mouse"]
 
 
-def test_the_black_panther_gains_food_whenever_an_allied_cat_covers_an_enemy():
-    for card, gain in (("lion", 5), ("mouse", 0)):                 # a Cat covers: +5; any other animal: nothing
-        s = make_state(hands={"A": [card, "mouse"]}, decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
-        put(s, "1,1", "black_panther", "A")
-        put(s, "2,1", "serval", "B")
-        food = s.food["A"]
-        rules.apply_action(s, PlaceAction(card, ("cr", "2,1")))
-        assert s.food["A"] == food + gain
-
-
 def test_sea_turtle_lays_a_baby_turtle_on_an_empty_neighbour():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "sea_turtle", "A")

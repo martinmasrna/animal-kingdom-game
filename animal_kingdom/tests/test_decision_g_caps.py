@@ -30,7 +30,7 @@ from ._helpers import apply_click, make_state, put
 
 def test_king_theron_uncapped_removes_on_every_cover_this_turn():
     cfg = Config.default()
-    s = make_state(config=cfg, hands={"A": ["alley_cat", "black_panther"]})
+    s = make_state(config=cfg, hands={"A": ["alley_cat", "lion"]})
     put(s, "1,1", "lion_legend_3", "A")
     put(s, "2,1", "rattlesnake", "B")   # strength 0: coverable by House Cat (1)
     put(s, "2,2", "mouse", "B")
@@ -38,21 +38,21 @@ def test_king_theron_uncapped_removes_on_every_cover_this_turn():
     # within the same placement's resolution.
     rules.apply_action(s, PlaceAction("alley_cat", ("cr", "2,1")))
     assert s.pending is not None
-    rules.apply_action(s, PlaceAction("black_panther", ("cr", "2,2")))
+    rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))
     assert sorted(s.remove_pile) == ["mouse", "rattlesnake"]
 
 
 def test_king_theron_capped_fires_once_per_turn():
     cfg = replace(Config.default(), cap_king_theron=True)
-    s = make_state(config=cfg, hands={"A": ["alley_cat", "black_panther"]})
+    s = make_state(config=cfg, hands={"A": ["alley_cat", "lion"]})
     put(s, "1,1", "lion_legend_3", "A")
     put(s, "2,1", "rattlesnake", "B")
     put(s, "2,2", "mouse", "B")
     rules.apply_action(s, PlaceAction("alley_cat", ("cr", "2,1")))
-    rules.apply_action(s, PlaceAction("black_panther", ("cr", "2,2")))
+    rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))
     assert s.remove_pile == ["rattlesnake"]
     # The second cover still lands normally - it's the free removal that's capped, not the cover.
-    assert s.board["2,2"][-1].card_id == "black_panther"
+    assert s.board["2,2"][-1].card_id == "lion"
 
 
 # --------------------------------------------------------- existing caps, no prior tests

@@ -387,9 +387,6 @@ fn fire_cover_event(st: &mut State, coverer: &Unit, covered: &Unit) {
     if !st.card(coverer.card).has_tag(T_CAT) {
         return;
     }
-    let panther = st.g.known.black_panther;
-    let panthers = statics::active_tops(st, coverer.owner, panther).len() as i32;
-    push_gain(st, coverer.owner, panthers * st.cfg().int("black_panther_food"));
     let theron = st.g.known.lion_legend_3;
     for (_, iid) in statics::active_tops(st, coverer.owner, theron) {
         let top = st.unit_by_iid(iid).cloned().unwrap();
