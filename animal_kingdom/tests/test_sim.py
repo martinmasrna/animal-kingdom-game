@@ -100,17 +100,20 @@ def test_make_bot_applies_custom_weights():
     assert bot.weights == custom
 
 
-def test_make_bot_defaults_weights_when_omitted():
+def test_make_bot_defaults_weights_when_omitted(monkeypatch):
+    monkeypatch.setenv("AK_PY_BOTS", "1")   # these read the Python bots' dials; AK_RUST_BOTS=1 would hand out RustBots
     bot = make_bot("greedy", seed=1)
     assert bot.weights == GreedyWeights()
 
 
-def test_make_bot_lookahead_kind_uses_deeper_search():
+def test_make_bot_lookahead_kind_uses_deeper_search(monkeypatch):
+    monkeypatch.setenv("AK_PY_BOTS", "1")   # these read the Python bots' dials; AK_RUST_BOTS=1 would hand out RustBots
     bot = make_bot("lookahead", seed=1)
     assert bot.depth > 1
 
 
-def test_make_bot_referee_kind_uses_module_knobs():
+def test_make_bot_referee_kind_uses_module_knobs(monkeypatch):
+    monkeypatch.setenv("AK_PY_BOTS", "1")   # these read the Python bots' dials; AK_RUST_BOTS=1 would hand out RustBots
     from animal_kingdom.bots.referee_bot import RefereeBot
     from animal_kingdom.sim.runner import (
         REFEREE_BEAM_WIDTH,
@@ -146,7 +149,8 @@ def test_parse_bot_spec_coerces_kwargs():
     assert all(isinstance(v, int) for _, v in kw)   # "0"/"2" coerced to int, not str
 
 
-def test_make_bot_extra_overrides_kind_defaults():
+def test_make_bot_extra_overrides_kind_defaults(monkeypatch):
+    monkeypatch.setenv("AK_PY_BOTS", "1")   # these read the Python bots' dials; AK_RUST_BOTS=1 would hand out RustBots
     from animal_kingdom.bots.turn_bot import TURN_DECK_REVEAL_CHOICE_WIDTH
     default = make_bot("turn", seed=1)
     overridden = make_bot("turn", seed=1, extra={"deck_reveal_choice_width": 0})
@@ -196,7 +200,8 @@ def test_learned_kinds_are_registered():
         assert kind in LEARNED_BASE_KIND
 
 
-def test_make_bot_learned_kind_constructs_base_kind_with_evaluator(tmp_path):
+def test_make_bot_learned_kind_constructs_base_kind_with_evaluator(tmp_path, monkeypatch):
+    monkeypatch.setenv("AK_PY_BOTS", "1")   # these read the Python bots' dials; AK_RUST_BOTS=1 would hand out RustBots
     from animal_kingdom.bots.greedy_bot import GreedyBot
     from animal_kingdom.bots.learned_eval import LinearEval, load_eval
 

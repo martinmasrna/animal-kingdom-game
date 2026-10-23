@@ -416,7 +416,9 @@ class RefereeBot(TurnSearcher):
         Out of time (`time_budget`), the one-turn ranking stands."""
         if not self.depth or len(root_scores) < 2:
             return root_scores
-        ordered = sorted(root_scores, key=lambda row: -row[1])
+        # ties (two roots whose lines reach the same positions) keep the candidate order: the key is rounded so float noise
+        # from the summation order cannot flip it (the Rust engine, whose arithmetic rounds differently, deepens in the same order)
+        ordered = sorted(root_scores, key=lambda row: -round(row[1], 9))
         deep = []
         for k, (action, _shallow) in enumerate(ordered):
             if k >= self.deepen_roots:

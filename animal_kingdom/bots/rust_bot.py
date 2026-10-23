@@ -23,6 +23,7 @@ except ImportError:  # pragma: no cover - the pure-Python tree
     ak_engine = None
 
 _engines: dict = {}
+_known: dict = {}          # engine key -> the card ids it knows
 _cards_json: Optional[str] = None
 _maps_json: Optional[str] = None
 
@@ -42,20 +43,37 @@ def engine_for(state: GameState):
             _maps_json = json.dumps(load_bundled_json("maps.json"))
         eng = ak_engine.Engine(_cards_json, _maps_json, key[0], key[1])
         _engines[key] = eng
+        _known[key] = set(eng.card_ids())
     return eng
 
 
+def knows_cards(engine, state: GameState) -> bool:
+    """Whether the Rust engine has every card this game plays with (a test's fixture table it does not)."""
+    known = _known[next(k for k, e in _engines.items() if e is engine)]
+    ids = {c for d in state.starting_decks.values() for c in d} | {c for d in state.decks.values() for c in d}
+    ids |= {u.card_id for h in state.hands.values() for u in h} | {u.card_id for s in state.board.values() for u in s}
+    return ids <= known
+
+
 class RustBot(Bot):
-    def __init__(self, spec: str, seed: int, evaluator_json: Optional[str] = None):
+    def __init__(self, spec: str, seed: int, evaluator_json: Optional[str] = None, fallback=None):
         self.spec = spec
         self.seed = seed
         self.bot = ak_engine.Bot(spec, seed, evaluator_json)
         self.last_search_stats: dict = {}
+        self._fallback = fallback      # builds the Python bot of the same spec, for a game the Rust engine cannot read
+        self._py: Optional[Bot] = None
 
     def choose(self, view: StateView, legal: Sequence[Action], state: Optional[GameState] = None) -> Action:
+        if self._py is not None:
+            return self._py.choose(view, legal, state)
         if state is None or len(legal) == 1:
             return legal[0]
-        rs = engine_for(state).from_dict(state.to_dict())
+        eng = engine_for(state)
+        if self._fallback is not None and not knows_cards(eng, state):
+            self._py = self._fallback()
+            return self._py.choose(view, legal, state)
+        rs = eng.from_dict(state.to_dict())
         d = self.bot.choose(rs)
         self.last_search_stats = self.bot.stats() or {}
         self._last_roots = (rs, d)

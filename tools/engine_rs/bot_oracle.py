@@ -3,7 +3,9 @@ their root scores) must agree. Positions come from random play through the Pytho
 
     .venv/bin/python tools/engine_rs/bot_oracle.py [--specs greedy,turn,expert] [--positions 60] [--seed 0]
 """
-import argparse, dataclasses, json, os, random, sys, time
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))))   # REPO_ROOT: this tree, not an installed copy
+import argparse, dataclasses, json, os, random, re, sys, time
 
 os.environ["AK_PY_BOTS"] = "1"   # the Python side of the oracle must be the Python bot
 
@@ -12,8 +14,19 @@ from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import new_game
 from animal_kingdom.sim.runner import make_bot
+from animal_kingdom.bots.learned_eval import load_eval
 from animal_kingdom.web.match import EXPERT
 import ak_engine
+
+
+def rust_bot(spec, seed):
+    """The Rust bot of `spec`; a `*_learned` kind gets its evaluator artifact, as `sim.runner._rust_bot` hands it over."""
+    head, _, tail = spec.partition(":")
+    ev = None
+    if head.endswith("_learned"):
+        name = dict(kv.split("=", 1) for kv in tail.split(",") if "=" in kv).get("eval", "rung0")
+        ev = json.dumps(load_eval(name).to_dict())
+    return ak_engine.Bot(spec, seed, ev)
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
 from oracle import canon, CARDS_JSON, MAPS_JSON
@@ -26,6 +39,8 @@ SPECS = {
     "normal": "turn:w.hq_threat_reach=0.5",
     "referee": "referee",
     "expert": EXPERT.replace("time_budget=8", "time_budget=0"),
+    # the hand-evaluation Expert (the shipped one until 2026-10-23), still the baseline of the paired benchmark's history
+    "expert_hand": re.sub(r"referee_learned:eval=[^,]*,", "referee:", EXPERT).replace("time_budget=8", "time_budget=0"),
 }
 
 
@@ -60,7 +75,7 @@ def positions(n, seed, cards, config, pool):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--specs", default="greedy,turn,expert")
+    ap.add_argument("--specs", default="greedy,turn,expert,expert_hand")
     ap.add_argument("--positions", type=int, default=60)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--stop", action="store_true")
@@ -87,7 +102,7 @@ if __name__ == "__main__":
             py_action = py_bot.choose(st.view_for(me), legal, st).to_dict()
             t_py += time.time() - t0
             rs_state = eng.from_dict(st.to_dict())
-            rs_bot = ak_engine.Bot(spec, seed)
+            rs_bot = rust_bot(spec, seed)
             t0 = time.time()
             rs_action = rs_bot.choose(rs_state)
             t_rs += time.time() - t0
@@ -95,9 +110,11 @@ if __name__ == "__main__":
             same = canon(py_action) == canon(rs_action)
             roots_same = True
             if "r" in py_roots:
-                pr = sorted((canon(x), round(s, 6)) for x, s in py_roots["r"])
-                rr = sorted((canon(x), round(s, 6)) for x, s in rs_roots)
-                roots_same = pr == rr
+                # the same roots with the same scores, to a relative 1e-9: a decided line sits near +-4e8, where the two
+                # engines' arithmetic differs in the last bits
+                pr = sorted((canon(x), s) for x, s in py_roots["r"])
+                rr = sorted((canon(x), s) for x, s in rs_roots)
+                roots_same = len(pr) == len(rr) and all(a == b and abs(x - y) <= 1e-9 * max(1.0, abs(x)) for (a, x), (b, y) in zip(pr, rr))
             if same and roots_same:
                 agree += 1
             else:

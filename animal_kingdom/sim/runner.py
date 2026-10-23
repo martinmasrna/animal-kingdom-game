@@ -126,7 +126,7 @@ GREEDY_BELIEF_COVERAGE_EXPOSURE = 40.0
 
 
 def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
-             extra: Optional[dict] = None) -> Bot:
+             extra: Optional[dict] = None, python_only: bool = False) -> Bot:
     """Construct a bot from a kind string (see `BOT_KINDS`) with a derived seed.
 
     `weights` overrides a greedy/lookahead bot's eval weights (default `GreedyWeights()` if
@@ -150,9 +150,10 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
     if ":" in kind:                       # a `kind:k=v,k=v` spec, as the CLIs take it, usable anywhere a kind is
         kind, kwargs = parse_bot_spec(kind, "kind")
         extra = {**dict(kwargs), **extra}
-    rust = _rust_bot(kind, seed, weights, extra)   # the same bot on the Rust engine when it is built (bots/rust_bot.py)
-    if rust is not None:
-        return rust
+    if not python_only:
+        rust = _rust_bot(kind, seed, weights, extra)   # the same bot on the Rust engine when it is built (bots/rust_bot.py)
+        if rust is not None:
+            return rust
     overrides = {k[2:]: extra.pop(k) for k in list(extra) if k.startswith("w.")}
     if overrides:
         weights = replace(weights or GreedyWeights(), **overrides)
@@ -209,7 +210,9 @@ def _rust_bot(kind: str, seed: int, weights, extra: dict):
             continue
         parts.append(f"{k}={v}")
     spec = kind if not parts else f"{kind}:{','.join(parts)}"
-    return rust_bot.RustBot(spec, seed, evaluator_json)
+    # a game with a card the Rust engine lacks (a test's fixture table) is played by the Python bot of the same spec
+    fallback = lambda: make_bot(kind, seed, weights, dict(extra), python_only=True)
+    return rust_bot.RustBot(spec, seed, evaluator_json, fallback=fallback)
 
 
 def parse_bot_kind(kind: str, flag: str) -> str:

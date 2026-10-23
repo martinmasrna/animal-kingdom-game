@@ -801,7 +801,9 @@ impl Searcher {
             return root_scores;
         }
         let mut ordered = root_scores.clone();
-        ordered.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+        // ties keep the candidate order; the key is rounded to 1e-9 as in Python, so float noise cannot flip it
+        let key = |x: f64| (x * 1e9).round();
+        ordered.sort_by(|a, b| key(b.1).partial_cmp(&key(a.1)).unwrap_or(std::cmp::Ordering::Equal));
         let mut deep: Vec<(Action, f64)> = Vec::new();
         for (k, (action, shallow)) in ordered.iter().enumerate() {
             if k >= self.deepen_roots {

@@ -4,6 +4,8 @@ card reach the effects no logged game does.
 
     .venv/bin/python tools/engine_rs/fuzz.py [--games 200] [--seed 0] [--pass-rate 0.03] [--all-cards]
 """
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))))   # REPO_ROOT: this tree, not an installed copy
 import argparse, dataclasses, json, os, random, sys, time
 
 from animal_kingdom.engine import rules

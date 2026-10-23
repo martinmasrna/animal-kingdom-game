@@ -2,6 +2,8 @@
 
     .venv/bin/python tools/engine_rs/feature_oracle.py [--positions 200] [--seed 0]
 """
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))))   # REPO_ROOT: this tree, not an installed copy
 import argparse, dataclasses, json, math, sys
 
 from animal_kingdom.bots import features

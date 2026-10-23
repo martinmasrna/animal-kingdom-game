@@ -240,6 +240,15 @@ impl PyState {
         Ok(bots::features::evaluate(&self.st, player_from(player), &w))
     }
 
+    /// The hand path's readiness inputs, for the bot oracle's diagnosis: live Roars in hand now, and as framed at
+    /// `player`'s next top-level decision.
+    fn readiness(&mut self, player: &str) -> (i32, i32) {
+        let me = player_from(player);
+        let now = bots::features::enabled_roar_count(&self.st, me);
+        let next = bots::features::reframed_at_my_turn(&mut self.st, me, |s| bots::features::enabled_roar_count(s, me));
+        (now, next)
+    }
+
     #[pyo3(signature = (player, card, unit_iid=None))]
     fn roar_condition(&self, player: &str, card: &str, unit_iid: Option<i64>) -> Option<bool> {
         let unit = unit_iid.and_then(|i| self.st.find_instance(i).cloned());
@@ -271,7 +280,9 @@ impl PyBot {
         if legal.is_empty() {
             return Err(err("no legal actions".into()));
         }
-        let a = self.bot.choose(&state.st, me, &legal);
+        // without the GIL: the server runs a bot's move in a thread (asyncio.to_thread) and must keep serving meanwhile
+        let (bot, st) = (&mut self.bot, &state.st);
+        let a = py.detach(|| bot.choose(st, me, &legal));
         json_to_py(py, &a.to_json(&state.st))
     }
 
