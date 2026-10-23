@@ -980,6 +980,29 @@ pub struct NetEval {
     pub w2: Vec<f64>,
     pub b2: f64,
     pub scale: f64,
+    /// The standardisation folded into the weights (net_eval.py): `w1t[i]` is the hidden vector for input i divided
+    /// by its std, `b1f` is b1 less the means' share, so a zero input is skipped. Same operations, same order as Python.
+    pub w1t: Vec<Vec<f64>>,
+    pub b1f: Vec<f64>,
+}
+
+impl NetEval {
+    fn fold(&mut self) {
+        let n = self.mean.len();
+        let hidden = self.b1.len();
+        let inv: Vec<f64> = self.std.iter().map(|s| 1.0 / s).collect();
+        self.w1t = (0..n).map(|i| (0..hidden).map(|j| self.w1[j][i] * inv[i]).collect()).collect();
+        self.b1f = (0..hidden)
+            .map(|j| {
+                let mut acc = 0.0;
+                let row = &self.w1[j];
+                for i in 0..n {
+                    acc += (self.mean[i] * inv[i]) * row[i];
+                }
+                self.b1[j] - acc
+            })
+            .collect();
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -994,7 +1017,7 @@ impl Evaluator {
         let fs = d["feature_set"].as_str().ok_or("evaluator without feature_set")?.to_string();
         let vec = |k: &str| -> Vec<f64> { d[k].as_array().map(|a| a.iter().map(|x| x.as_f64().unwrap_or(0.0)).collect()).unwrap_or_default() };
         if d.get("kind").and_then(|k| k.as_str()) == Some("mlp") || d.get("w1").is_some() {
-            Ok(Evaluator::Net(NetEval {
+            let mut net = NetEval {
                 feature_set: fs,
                 mean: vec("mean"),
                 std: vec("std"),
@@ -1003,7 +1026,11 @@ impl Evaluator {
                 w2: vec("w2"),
                 b2: d["b2"].as_f64().unwrap_or(0.0),
                 scale: d.get("scale").and_then(|s| s.as_f64()).unwrap_or(1.0),
-            }))
+                w1t: Vec::new(),
+                b1f: Vec::new(),
+            };
+            net.fold();
+            Ok(Evaluator::Net(net))
         } else {
             Ok(Evaluator::Linear(LinearEval { feature_set: fs, weights: vec("weights"), bias: d["bias"].as_f64().unwrap_or(0.0) }))
         }
@@ -1028,16 +1055,19 @@ impl Evaluator {
                     return if r.winner == Some(me) { f64::INFINITY } else if r.winner == Some(other(me)) { f64::NEG_INFINITY } else { 0.0 };
                 }
                 let phi = extract(st, me, &n.feature_set);
-                let z: Vec<f64> = phi.iter().zip(n.mean.iter()).zip(n.std.iter()).map(|((x, m), s)| (x - m) / s).collect();
-                let mut out = n.b2;
-                for ((row, b), w) in n.w1.iter().zip(n.b1.iter()).zip(n.w2.iter()) {
-                    let mut acc = 0.0;
-                    for (a, x) in row.iter().zip(z.iter()) {
-                        acc += a * x;
+                let mut h: Vec<f64> = n.b1f.clone();
+                for (i, &x) in phi.iter().enumerate() {
+                    if x != 0.0 {
+                        let row = &n.w1t[i];
+                        for j in 0..h.len() {
+                            h[j] += x * row[j];
+                        }
                     }
-                    let h = b + acc;
-                    if h > 0.0 {
-                        out += w * h;
+                }
+                let mut out = n.b2;
+                for j in 0..h.len() {
+                    if h[j] > 0.0 {
+                        out += n.w2[j] * h[j];
                     }
                 }
                 n.scale * out

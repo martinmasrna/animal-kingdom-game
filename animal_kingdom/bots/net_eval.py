@@ -33,15 +33,40 @@ class NetEval:
     b2: float
     scale: float = 1.0
     provenance: Mapping[str, Any] = field(default_factory=dict)
+    # The forward pass folds the standardisation into the weights, so a zero input costs nothing: the board feature set
+    # (2026-10-23) has 908 columns and about 75 non-zero. `_w1t[i]` is the hidden vector for input i divided by its
+    # std; `_b1f` is b1 less the means' share. The Rust evaluator does the same operations in the same order, so the two
+    # engines' values agree to the last bit (the bot oracle holds them to it).
+    _w1t: tuple = field(init=False, repr=False, compare=False, default=())
+    _b1f: tuple = field(init=False, repr=False, compare=False, default=())
+
+    def __post_init__(self) -> None:
+        n, hidden = len(self.mean), len(self.b1)
+        inv = [1.0 / s for s in self.std]
+        w1t = [tuple(self.w1[j][i] * inv[i] for j in range(hidden)) for i in range(n)]
+        b1f = []
+        for j in range(hidden):
+            acc = 0.0
+            row = self.w1[j]
+            for i in range(n):
+                acc += (self.mean[i] * inv[i]) * row[i]
+            b1f.append(self.b1[j] - acc)
+        object.__setattr__(self, "_w1t", tuple(w1t))
+        object.__setattr__(self, "_b1f", tuple(b1f))
 
     def logit(self, state: GameState, me: str) -> float:
         phi = features.extract(state, me, self.feature_set)
-        z = [(x - m) / s for x, m, s in zip(phi, self.mean, self.std)]
+        h = list(self._b1f)
+        hidden = len(h)
+        for i, x in enumerate(phi):
+            if x != 0.0:
+                row = self._w1t[i]
+                for j in range(hidden):
+                    h[j] += x * row[j]
         out = self.b2
-        for row, b, w in zip(self.w1, self.b1, self.w2):
-            h = b + sum(a * x for a, x in zip(row, z))
-            if h > 0:
-                out += w * h
+        for j in range(hidden):
+            if h[j] > 0:
+                out += self.w2[j] * h[j]
         return out
 
     def value(self, state: GameState, me: str) -> float:
