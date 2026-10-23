@@ -11,6 +11,42 @@ use smallvec::SmallVec;
 
 pub type Stack = FastVec<[Unit; 4]>;
 
+/// The board's stacks by crossroad. Cloned as one memcpy while every stack is inline (a stack of five or more units
+/// spills to the heap and is cloned element by element, as SmallVec does); the search clones the board thousands
+/// of times an action and a stack of five is rare.
+#[derive(Debug, Default)]
+pub struct Stacks(pub SmallVec<[Stack; 16]>);
+
+impl Clone for Stacks {
+    fn clone(&self) -> Stacks {
+        if self.0.spilled() || self.0.iter().any(|s| s.spilled()) {
+            return Stacks(self.0.clone());
+        }
+        // SAFETY: nothing here owns heap memory (no stack is spilled, the outer vector is inline), so a bitwise copy
+        // is an independent value with the same contents.
+        Stacks(unsafe { std::ptr::read(&self.0) })
+    }
+}
+
+impl std::ops::Deref for Stacks {
+    type Target = SmallVec<[Stack; 16]>;
+    fn deref(&self) -> &SmallVec<[Stack; 16]> {
+        &self.0
+    }
+}
+
+impl std::ops::DerefMut for Stacks {
+    fn deref_mut(&mut self) -> &mut SmallVec<[Stack; 16]> {
+        &mut self.0
+    }
+}
+
+impl FromIterator<Stack> for Stacks {
+    fn from_iter<I: IntoIterator<Item = Stack>>(iter: I) -> Stacks {
+        Stacks(SmallVec::from_iter(iter))
+    }
+}
+
 /// A Vec behind a copy-on-write handle: cloned positions share it until one of them mutates it. The scheduled timers
 /// (eggs, poison) are read by every evaluation and changed a few times a turn, while the search clones the position
 /// thousands of times an action.
@@ -215,12 +251,14 @@ macro_rules! emit {
 pub struct Unit {
     pub card: CardId,
     pub owner: Player,
-    pub iid: i64,
-    pub placed_on_turn: i32,
-    pub strength_counter: i32,
-    pub locked_until_turn: i32,
     pub retaliation_used: bool,
-    pub play_seq: i32,
+    pub iid: i64,
+    // 16-bit counters: a game's turns, plays and strength changes stay far below 32k, and the unit is what the board,
+    // the hands and every clone of them are made of (24 bytes instead of 32)
+    pub placed_on_turn: i16,
+    pub strength_counter: i16,
+    pub locked_until_turn: i16,
+    pub play_seq: i16,
 }
 
 impl Unit {
@@ -233,20 +271,20 @@ impl Unit {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct TurnFlags {
     // inline lists: a turn's handful of entries never reach the heap, so a state clone copies them with the struct
-    pub played: [SmallVec<[(i64, CardId); 6]>; 2],
+    pub played: [FastVec<[(i64, CardId); 6]>; 2],
     pub lost: [i32; 3],
     pub removed_any: bool,
     pub food_gained: [i32; 2],
-    pub roamed: SmallVec<[i64; 4]>,
+    pub roamed: FastVec<[i64; 4]>,
     pub roams: [i32; 2],
     pub free_roams: [i32; 2],
     pub free_roams_used: [i32; 2],
-    pub free_roam_iid: SmallVec<[(i64, i64); 2]>,
+    pub free_roam_iid: FastVec<[(i64, i64); 2]>,
     pub bonus_actions: [i32; 2],
     pub action_cap: [Option<i32>; 2],
-    pub gain_str: SmallVec<[i64; 4]>,
+    pub gain_str: FastVec<[i64; 4]>,
     pub falstaff: [bool; 2],
-    pub caps: SmallVec<[(&'static str, i64); 4]>,
+    pub caps: FastVec<[(&'static str, i64); 4]>,
 }
 
 impl TurnFlags {
@@ -388,7 +426,7 @@ impl Game {
 
 pub struct State {
     pub g: Arc<Game>,
-    pub stacks: SmallVec<[Stack; 16]>, // by crossroad index
+    pub stacks: Stacks,                // by crossroad index
     pub order: FastVec<[Cr; 16]>,      // occupied crossroads in insertion order (Python's dict order)
     pub hands: [Hand; 2],
     pub decks: [Deck; 2], // top = last
@@ -532,7 +570,7 @@ impl State {
 
     pub fn stamp_played(&mut self, unit: &mut Unit) {
         self.play_seq += 1;
-        unit.play_seq = self.play_seq;
+        unit.play_seq = self.play_seq as i16;
     }
     pub fn new_iid(&mut self) -> i64 {
         let i = self.next_iid;
@@ -585,7 +623,7 @@ impl State {
         let iid = self.new_iid();
         let mut inst = Unit::new(card, player, iid);
         if let Some(c) = self.jelly_take(player, card) {
-            inst.strength_counter = c;
+            inst.strength_counter = c as i16;
         }
         inst
     }
@@ -593,7 +631,7 @@ impl State {
     pub fn add_to_hand(&mut self, player: Player, card: CardId, strength_counter: i32) -> Unit {
         let iid = self.new_iid();
         let mut inst = Unit::new(card, player, iid);
-        inst.strength_counter = strength_counter;
+        inst.strength_counter = strength_counter as i16;
         self.hands[player as usize].push(inst.clone());
         let f = crate::vmap!("player" => Value::s(player_name(player)), "iid" => Value::Int(iid), "card" => Value::s(self.cname(card)));
         if self.record_events {
@@ -813,11 +851,11 @@ impl State {
             card,
             owner: player_from(d["owner"].as_str().unwrap()),
             iid: d["iid"].as_i64().unwrap(),
-            placed_on_turn: d.get("placed_on_turn").and_then(|x| x.as_i64()).unwrap_or(0) as i32,
-            strength_counter: d.get("strength_counter").and_then(|x| x.as_i64()).unwrap_or(0) as i32,
-            locked_until_turn: d.get("locked_until_turn").and_then(|x| x.as_i64()).unwrap_or(0) as i32,
+            placed_on_turn: d.get("placed_on_turn").and_then(|x| x.as_i64()).unwrap_or(0) as i16,
+            strength_counter: d.get("strength_counter").and_then(|x| x.as_i64()).unwrap_or(0) as i16,
+            locked_until_turn: d.get("locked_until_turn").and_then(|x| x.as_i64()).unwrap_or(0) as i16,
             retaliation_used: d.get("retaliation_used").and_then(|x| x.as_bool()).unwrap_or(false),
-            play_seq: d.get("play_seq").and_then(|x| x.as_i64()).unwrap_or(0) as i32,
+            play_seq: d.get("play_seq").and_then(|x| x.as_i64()).unwrap_or(0) as i16,
         }
     }
 

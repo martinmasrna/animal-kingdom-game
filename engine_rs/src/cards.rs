@@ -242,7 +242,7 @@ fn eat_random_ally(st: &mut State, unit: &Unit, cr: Cr) -> i32 {
 
 fn add_strength(st: &mut State, iid: i64, n: i32) {
     if let Some(u) = st.unit_by_iid_mut(iid) {
-        u.strength_counter += n;
+        u.strength_counter += n as i16;
         let u = u.clone();
         crate::emit!(st, "strength", vmap!("iid" => Value::Int(iid), "card" => card_v(st, u.card), "owner" => pn(u.owner), "n" => Value::Int(n as i64)));
     }
@@ -252,7 +252,7 @@ fn put_back(st: &mut State, unit: &Unit, cr: Cr, pos: usize, grow: i32) {
     if st.pile_take(unit.card, Some(unit.owner)) {
         let iid = st.new_iid();
         let mut back = Unit::new(unit.card, unit.owner, iid);
-        back.strength_counter = unit.strength_counter + grow;
+        back.strength_counter = unit.strength_counter + grow as i16;
         let at = pos.min(st.stack(cr).len());
         st.insert_unit(cr, at, back);
         crate::emit!(st, "place", vmap!("player" => pn(unit.owner), "iid" => Value::Int(iid), "card" => card_v(st, unit.card), "cr" => cr_v(st, cr), "from_hand" => Value::Bool(false), "at" => Value::Int(at as i64)));
@@ -1101,7 +1101,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let mut mine: Vec<Unit> = st.order.iter().flat_map(|&c| st.stacks[c as usize].iter().filter(|u| u.owner == owner).cloned()).collect();
             mine.extend(st.hands[p].iter().cloned());
             for inst in mine {
-                let d = st.jelly_counter(owner, inst.card) - inst.strength_counter;
+                let d = st.jelly_counter(owner, inst.card) - inst.strength_counter as i32;
                 grant(st, vec![inst.iid], d);
             }
         }
@@ -1398,7 +1398,7 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
         "duplicate" => {
             let iid = choice.as_i64().unwrap_or(-1);
             if let Some(inst) = st.hands[chooser as usize].iter().find(|u| u.iid == iid).cloned() {
-                gain_to_hand(st, chooser, inst.card, inst.strength_counter);
+                gain_to_hand(st, chooser, inst.card, inst.strength_counter as i32);
             }
         }
         "discard" => {

@@ -263,7 +263,7 @@ pub fn do_placement(st: &mut State, player: Player, card: CardId, target: &Targe
 }
 
 pub fn playable_copies(st: &State, player: Player, card: CardId) -> Vec<Unit> {
-    st.hands[player as usize].iter().filter(|u| u.card == card && u.locked_until_turn <= st.turn_counter).cloned().collect()
+    st.hands[player as usize].iter().filter(|u| u.card == card && u.locked_until_turn as i32 <= st.turn_counter).cloned().collect()
 }
 
 /// (iid, copy) for each distinct playable version of `card` in hand.
@@ -299,7 +299,7 @@ pub fn canonical_place(st: &State, player: Player, action: &Action) -> Action {
 pub fn playable_copy(st: &State, player: Player, card: CardId) -> Option<Unit> {
     let mut best: Option<&Unit> = None;
     for u in &st.hands[player as usize] {
-        if u.card != card || u.locked_until_turn > st.turn_counter {
+        if u.card != card || u.locked_until_turn as i32 > st.turn_counter {
             continue;
         }
         if best.map(|b| u.strength_counter > b.strength_counter).unwrap_or(true) {
@@ -326,7 +326,7 @@ pub fn land_unit(st: &mut State, player: Player, mut unit: Unit, cr: Cr, from_ha
     let covered = st.top(cr).cloned();
     let is_apex = st.card(unit.card).has_kw(K_APEX);
     let onto_enemy = covered.as_ref().map(|c| c.owner != player).unwrap_or(false);
-    unit.placed_on_turn = st.turn_counter;
+    unit.placed_on_turn = st.turn_counter as i16;
     st.stamp_played(&mut unit);
     let unit = unit;
     st.push_unit(cr, unit.clone());
@@ -553,7 +553,7 @@ fn op_apex_eat(st: &mut State, step: &mut Map) -> Option<Pending> {
             };
             if grown != 0 {
                 if let Some(a) = st.unit_by_iid_mut(apex.iid) {
-                    a.strength_counter += grown;
+                    a.strength_counter += grown as i16;
                 }
                 crate::emit!(st, "strength", vmap!("iid" => Value::Int(apex.iid), "card" => card_v(st, apex.card), "owner" => pn(apex.owner), "n" => Value::Int(grown as i64)));
             }
@@ -1115,10 +1115,10 @@ fn push_timed_hooks(st: &mut State, player: Player, hook: Hook) {
             continue;
         }
         if st.g.has_hook(top.card, hook) {
-            due.push((top.play_seq, st.crname(cr), top.iid, st.cname(top.card), hook.name()));
+            due.push((top.play_seq as i32, st.crname(cr), top.iid, st.cname(top.card), hook.name()));
         }
         if hook == Hook::OnStartOfTurn && st.card(top.card).has_kw(K_HUNGRY) {
-            due.push((top.play_seq, st.crname(cr), top.iid, st.cname(top.card), "hungry"));
+            due.push((top.play_seq as i32, st.crname(cr), top.iid, st.cname(top.card), "hungry"));
         }
     }
     let times = if hook == Hook::OnEndOfTurn && !statics::active_tops(st, player, st.g.known.sloth_legend).is_empty() { 2 } else { 1 };
@@ -1167,7 +1167,7 @@ fn eat(st: &mut State, unit: &Unit, cr: Cr) {
         lose_food(st, unit.owner, n, Some(unit.card));
     } else {
         if let Some(u) = st.unit_by_iid_mut(unit.iid) {
-            u.strength_counter -= n;
+            u.strength_counter -= n as i16;
         }
         crate::emit!(st, "strength", vmap!("iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "owner" => pn(unit.owner), "n" => Value::Int(-(n as i64))));
     }
@@ -1459,7 +1459,7 @@ fn op_grant_strength(st: &mut State, step: &mut Map) -> Option<Pending> {
     let iids: Vec<i64> = step.get("iids").and_then(|l| l.as_list()).map(|l| l.iter().filter_map(|v| v.as_i64()).collect()).unwrap_or_default();
     for iid in iids {
         let Some(inst) = st.find_instance_mut(iid) else { continue };
-        inst.strength_counter += amount;
+        inst.strength_counter += amount as i16;
         let inst = inst.clone();
         crate::emit!(st, "strength", vmap!("iid" => Value::Int(iid), "card" => card_v(st, inst.card), "owner" => pn(inst.owner), "n" => Value::Int(amount as i64)));
         if amount <= 0 {
@@ -1484,7 +1484,7 @@ fn gain_in_hand(st: &mut State, inst: &Unit, amount: i32) {
     if let Some(mate) = st.card(inst.card).mate {
         let p = inst.owner as usize;
         if let Some(pos) = st.hands[p].iter().position(|u| u.card == mate) {
-            st.hands[p][pos].strength_counter += amount;
+            st.hands[p][pos].strength_counter += amount as i16;
             let partner = st.hands[p][pos].clone();
             crate::emit!(st, "strength", vmap!("iid" => Value::Int(partner.iid), "card" => card_v(st, partner.card), "owner" => pn(partner.owner), "n" => Value::Int(amount as i64)));
         }
@@ -1628,7 +1628,7 @@ pub fn bounce(st: &mut State, cr: Cr, top: &Unit, lock_until: i32) {
     let inst = gain_to_hand(st, top.owner, top.card, 0);
     let p = top.owner as usize;
     if let Some(u) = st.hands[p].iter_mut().find(|u| u.iid == inst.iid) {
-        u.locked_until_turn = lock_until;
+        u.locked_until_turn = lock_until as i16;
     }
 }
 

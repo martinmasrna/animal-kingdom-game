@@ -14,7 +14,7 @@ pub fn determinize(st: &State, me: Player, rng: &mut PyRandom) -> State {
     rng.shuffle(&mut mine);
     clone.decks[m] = mine;
     let hand = std::mem::take(&mut clone.hands[o]);
-    let (kept, hidden): (Vec<Unit>, Vec<Unit>) = hand.into_iter().partition(|u| u.locked_until_turn > clone.turn_counter);
+    let (kept, hidden): (Vec<Unit>, Vec<Unit>) = hand.into_iter().partition(|u| u.locked_until_turn as i32 > clone.turn_counter);
     let mut pool: Vec<CardId> = hidden.iter().map(|u| u.card).collect();
     pool.extend(clone.decks[o].iter().copied());
     pool.sort_by(|a, b| st.cname(*a).cmp(st.cname(*b)));

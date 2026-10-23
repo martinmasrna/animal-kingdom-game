@@ -126,9 +126,9 @@ pub fn effective_strength(st: &State, unit: &Unit, sources: Option<&Sources>) ->
     let card = st.card(unit.card);
     if st.is_inked(unit.iid) {
         let base = card.base.unwrap_or(0);
-        return (base + st.growth(unit.owner, card.idx) + unit.strength_counter + anthem_bonus(st, card, unit.owner, Some(unit.iid), sources)).max(0);
+        return (base + st.growth(unit.owner, card.idx) + unit.strength_counter as i32 + anthem_bonus(st, card, unit.owner, Some(unit.iid), sources)).max(0);
     }
-    (base_or_dynamic(st, card) + st.growth(unit.owner, card.idx) + unit.strength_counter + anthem_bonus(st, card, unit.owner, Some(unit.iid), sources)).max(0)
+    (base_or_dynamic(st, card) + st.growth(unit.owner, card.idx) + unit.strength_counter as i32 + anthem_bonus(st, card, unit.owner, Some(unit.iid), sources)).max(0)
 }
 
 /// Strength of a unit of `card` for `owner` as a prospective placement, without any instance counter.
@@ -139,5 +139,5 @@ pub fn card_strength(st: &State, card: CardId, owner: Player) -> i32 {
 
 /// Effective strength of a hand instance if it were placed now.
 pub fn placement_strength(st: &State, inst: &Unit) -> i32 {
-    (card_strength(st, inst.card, inst.owner) + inst.strength_counter).max(0)
+    (card_strength(st, inst.card, inst.owner) + inst.strength_counter as i32).max(0)
 }

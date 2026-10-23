@@ -9,7 +9,13 @@ brew install rust                      # once
 cd engine_rs && ../.venv/bin/maturin develop --release
 ```
 
-That installs the module `ak_engine` into the venv. `cargo build --release --no-default-features --bin bench` builds the standalone timing binary without the Python glue.
+That installs the module `ak_engine` into the venv. `cargo build --release --no-default-features --bin bench` builds the standalone timing binary without the Python glue (it prints ms per action and state clones per action).
+
+`engine_rs/pgo.sh` builds the venv module profile-guided (about 9% off the Expert's move): an instrumented timing binary plays Expert games across six deck pairs, the profiles are merged with Homebrew llvm's `llvm-profdata`, and `maturin develop --release` builds with them. The profile stays local under `engine_rs/target/pgo/`; the Fly image builds without it. Rerun the oracles after it like after any build.
+
+## Speed, and where it goes
+
+The Expert's move on the timing binary (one core, the hand evaluation, Expert against Expert): 24.4 ms at the end of the first night, 17 ms after the 2026-10-23 pass, 15.7 ms profile-guided. A profile of the move: the search copies the position about 14,000 times an action (once per candidate the greedy policy evaluates, in both engines), and that copying is about a quarter of the time; allocation and freeing of the Python-shaped effect steps about a tenth; the board cache, strength and the evaluation a few percent each; the rest is the rules themselves. What was tried and measured on the way: a lazy board cache (slower: the check on every read costs more than the recomputes it saves), the step maps inline instead of on the heap (slower: the state grows by their inline size and every clone pays it), per-evaluation vectors inline (no change). What is left is structural: apply-evaluate-undo on one position instead of a copy per candidate, worth perhaps 15% for a rewrite of every mutation in the effect system.
 
 ## Use
 
