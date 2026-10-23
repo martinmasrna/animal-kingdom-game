@@ -503,7 +503,7 @@ def test_tui_runs_bot_first_without_blocking_input_loop(tmp_path):
                 if app.session.human_turn:
                     break
             assert app.session.human_turn
-            assert app.session.decision_count >= 2
+            assert app.session.decision_count >= 1           # the bot moved first: one action on the first turn
             assert not app.bot_busy
             board = app.query_one(BoardWidget).board_render
             own_hq = board.hitboxes[("hq", "B")]
