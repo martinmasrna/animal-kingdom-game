@@ -22,7 +22,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Porcupine** | 2 | Rodent | 5 | Spikes. Your adjacent animals have Spikes. |
 | **Golden Orb-Weaver** | 2 | Arachnid | 4 | When an enemy with Flight or Roam is placed next to this, remove it. |
 | **Armadillo** | 2 | — | 5 | Armor. Your adjacent animals have Armor. |
-| **Octopus** | 2 | — | 4 | Roar: adjacent enemies lose all their effects. |
+| **Meerkat** | 2 | — | 2 | Roar: draw a card. When an enemy is placed next to this, draw a card. |
 
 ### Common
 
@@ -32,7 +32,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Jellyfish** | 3 | — | 4 | Poison. |
 | **Black Bear** | 3 | Bear | 5 | Roar: in 2 turns, draw 2 cards. |
 | **Tortoise** | 3 | — | 4 | Armor. Roar: gain 5 food for each of your animals with Armor. |
-| **Owl** | 3 | Bird | 2 | Flight. Roar: Scout a card. |
 | **Toad** | 3 | — | 2 | Reach. Poison. |
+| **Stag Beetle** | 3 | — | 6 | Armor. |
 
 <!-- cards:end -->

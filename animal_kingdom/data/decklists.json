@@ -158,7 +158,6 @@
     "rat_legend": 1,
     "chipmunk_legend": 1,
     "flying_squirrel": 2,
-    "meerkat": 2,
     "beaver": 2,
     "dormouse": 2,
     "squirrel": 3,
@@ -166,7 +165,8 @@
     "gopher": 3,
     "muskrat": 3,
     "groundhog": 3,
-    "hamster": 3
+    "hamster": 3,
+    "woodpecker": 2
    }
   },
   {
@@ -188,9 +188,9 @@
     "jellyfish": 3,
     "black_bear": 3,
     "tortoise": 3,
-    "owl": 3,
-    "octopus": 2,
-    "toad": 3
+    "toad": 3,
+    "stag_beetle": 3,
+    "meerkat": 2
    }
   },
   {

@@ -2172,6 +2172,15 @@
       "note": "not a rodent (Martin 2026-10-16: drop the tag)",
       "by": "claude",
       "at": 1792187557
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from food_aggro to food_otk",
+      "by": "claude",
+      "at": 1792747912
     }
   },
   "tortoise_legend": {
@@ -2401,6 +2410,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from food_otk to pool",
+      "by": "claude",
+      "at": 1792747911
     }
   },
   "oxpecker": {
@@ -3856,6 +3874,15 @@
       "by": "claude",
       "at": 1792249437,
       "note": "Martin 2026-10-17: every adjacent enemy (so Stealth doesn't shield the legendary Honey Badger), for good"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from food_otk to pool",
+      "by": "claude",
+      "at": 1792747911
     }
   },
   "mole": {
@@ -4013,9 +4040,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "into the collection (status proposed)",
+      "note": "moved from pool to food_aggro",
       "by": "claude",
-      "at": 1792250825
+      "at": 1792747912
     },
     "art": {
       "review": {
@@ -4240,9 +4267,13 @@
       "at": 1792270570
     },
     "animal": {
-      "note": "into the collection (status proposed)",
+      "note": "moved from pool to food_otk",
       "by": "claude",
-      "at": 1792270570
+      "at": 1792747912,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "into the collection (status proposed)"
+      }
     },
     "art": {
       "lv": "draft",
