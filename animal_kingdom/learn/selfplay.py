@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import itertools
+import json
 import os
 import random
 import sys
@@ -46,20 +47,36 @@ class GameSpec:
     pilot: str = "turn"
     pilot_b: str = ""        # a different pilot for seat B ("" means the same as A): two styles in one pool
     feature_set: str = FEATURE_SET
+    extra_path: str = ""      # a JSON of extra decks ({slug: {"list": [...]}}), Martin's own decks in the pool
 
 
-def pairings(pool: bool = False) -> list[tuple[str, str]]:
+def pairings(pool: bool = False, extra: tuple[str, ...] = ()) -> list[tuple[str, str]]:
     if pool:
         from ..decks import BOT_DECKS
         decks = sorted(BOT_DECKS)
     else:
         decks = sorted(DECK_SLUGS) + ["goodstuff"]
-    return list(itertools.combinations_with_replacement(decks, 2))
+    return list(itertools.combinations_with_replacement(decks + list(extra), 2))
+
+
+_extra_cache: dict[str, dict] = {}
+
+
+def deck_for(slug: str, extra_path: str) -> list[str]:
+    """The 30 cards of `slug`: a shipped deck, or one from the extra-deck file (loaded once per process)."""
+    if extra_path:
+        if extra_path not in _extra_cache:
+            with open(extra_path) as fh:
+                _extra_cache[extra_path] = json.load(fh)
+        rec = _extra_cache[extra_path].get(slug)
+        if rec is not None:
+            return list(rec["list"])
+    return load_premade_deck(slug)
 
 
 def play(spec: GameSpec) -> dict:
     evaluator = load_eval(spec.eval_path) if spec.eval_path else None
-    state = new_game(load_premade_deck(spec.deck_a), load_premade_deck(spec.deck_b), spec.seed,
+    state = new_game(deck_for(spec.deck_a, spec.extra_path), deck_for(spec.deck_b, spec.extra_path), spec.seed,
                      map_id="map_b")
     if spec.pilot == "turn":
         bots = {s: TurnBot(seed=spec.seed * 2 + i, evaluator=evaluator) for i, s in enumerate("AB")}
@@ -99,15 +116,23 @@ def play(spec: GameSpec) -> dict:
 
 def generate(out: str, eval_path: Optional[str], games_per_pair: int, seed: int, jobs: int,
              epsilon: float = 0.05, decks: Optional[list[str]] = None, pilot: str = "turn", pool: bool = False,
-             pilot_b: str = "", feature_set: str = FEATURE_SET) -> None:
-    """`decks`, if given, keeps only the pairings that include one of them; `feature_set` names what is recorded."""
+             pilot_b: str = "", feature_set: str = FEATURE_SET, extra_path: str = "", max_games: int = 0) -> None:
+    """`decks`, if given, keeps only the pairings that include one of them; `feature_set` names what is recorded;
+    `extra_path` adds decks to the pool (Martin's own, `results/netlearn/martin_decks.json`); `max_games` keeps a
+    random sample of the games when the pairings outgrow the time."""
     import numpy as np
 
-    pairs = [(i, (a, b)) for i, (a, b) in enumerate(pairings(pool))
+    extra: tuple[str, ...] = ()
+    if extra_path:
+        with open(extra_path) as fh:
+            extra = tuple(sorted(json.load(fh)))
+    pairs = [(i, (a, b)) for i, (a, b) in enumerate(pairings(pool, extra))
              if not decks or a in decks or b in decks]
-    specs = [GameSpec(a, b, seed + i * 1000 + k, eval_path, epsilon, pilot, pilot_b, feature_set)
+    specs = [GameSpec(a, b, seed + i * 1000 + k, eval_path, epsilon, pilot, pilot_b, feature_set, extra_path)
              for i, (a, b) in pairs for k in range(games_per_pair)]
     random.Random(seed).shuffle(specs)          # mixed decks in every progress slice
+    if max_games and len(specs) > max_games:
+        specs = specs[:max_games]
     cols: dict[str, list] = {k: [] for k in ("x", "y", "turn", "deck", "opp", "game", "reason")}
     t0 = time.time()
 
@@ -144,9 +169,11 @@ def main(argv=None) -> None:
     p.add_argument("--pool", action="store_true", help="pair the bot pool (decks.BOT_DECKS) instead of the starters and goodstuff")
     p.add_argument("--pilot-b", default="", help="a different pilot for the other seat (the seats swap every other game)")
     p.add_argument("--features", default=FEATURE_SET, help="the feature set recorded (features.FEATURE_SETS: rung2, board)")
+    p.add_argument("--extra-decks", default="", help="a JSON of extra decks for the pool ({slug: {'list': [...]}})")
+    p.add_argument("--max-games", type=int, default=0, help="play a random sample of this many games of the pairings")
     a = p.parse_args(argv)
     generate(a.out, a.eval, a.games_per_pair, a.seed, a.jobs, a.epsilon,
-             a.decks.split(",") if a.decks else None, a.pilot, a.pool, a.pilot_b, a.features)
+             a.decks.split(",") if a.decks else None, a.pilot, a.pool, a.pilot_b, a.features, a.extra_decks, a.max_games)
 
 
 if __name__ == "__main__":

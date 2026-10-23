@@ -18,7 +18,7 @@ import sys
 import time
 
 POINTS_PER_LOGIT = 47.0
-STD_FLOOR = 1e-3
+STD_FLOOR = 0.1      # a rare binary column (2026-10-23, the board set) would otherwise standardise to z in the hundreds
 
 
 def _np():
@@ -110,10 +110,14 @@ def train(out, paths, hidden=32, l2=1e-4, test_path=None):
     val = (bucket >= 20) & (bucket < 30)
     fit = ~test & ~val
     mean = X[fit].mean(0)
-    std = np.maximum(X[fit].std(0), STD_FLOOR)
+    raw_std = X[fit].std(0)
+    dead = raw_std < 1e-9                  # columns the training data never varies: unseen in play, so they must not count
+    mean = np.where(dead, 0.0, mean)
+    std = np.where(dead, 1.0, np.maximum(raw_std, STD_FLOOR))
     Z = (X - mean) / std
     t0 = time.time()
     P, net = fit_mlp(Z[fit], y[fit], Z[val], y[val], hidden, l2)
+    P[0][dead, :] = 0.0                    # the first layer ignores what it never saw (its random init would not); `net` closes over P
     lin = fit_linear(Z[~test], y[~test])
     base = np.full(test.sum(), y[~test].mean())
     report = {"positions": int(len(y)), "games": int(len(np.unique(game))),

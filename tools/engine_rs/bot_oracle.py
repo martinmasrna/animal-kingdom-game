@@ -75,7 +75,7 @@ def positions(n, seed, cards, config, pool):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--specs", default="greedy,turn,expert,expert_hand")
+    ap.add_argument("--specs", default="greedy;turn;expert;expert_hand", help="names from SPECS or full bot specs, separated by ';'")
     ap.add_argument("--positions", type=int, default=60)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--stop", action="store_true")
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     eng = ak_engine.Engine(CARDS_JSON, MAPS_JSON, json.dumps(dataclasses.asdict(config)), "map_b")
     pos = positions(a.positions, a.seed, cards, config, pool)
     print(f"{len(pos)} positions", flush=True)
-    for name in a.specs.split(","):
+    for name in a.specs.replace(",greedy", ";greedy").split(";"):
         spec = SPECS.get(name, name)
         agree = 0
         fails = 0
