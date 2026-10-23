@@ -38,5 +38,6 @@ fn main() {
         println!("game {k}: {:?} by {} in {} turns, {} actions", r.winner, r.reason, st.turn_counter, log.len());
     }
     let dt = t0.elapsed().as_secs_f64();
-    println!("{games} games, {actions} actions in {dt:.2}s ({:.1} ms/action)", 1000.0 * dt / actions as f64);
+    let clones = ak_engine::state::CLONES.load(std::sync::atomic::Ordering::Relaxed);
+    println!("{games} games, {actions} actions in {dt:.2}s ({:.1} ms/action, {} state clones an action)", 1000.0 * dt / actions as f64, clones / actions.max(1));
 }

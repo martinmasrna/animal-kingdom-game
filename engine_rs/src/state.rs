@@ -9,7 +9,181 @@ use rustc_hash::FxHashMap;
 use serde_json as sj;
 use smallvec::SmallVec;
 
-pub type Stack = SmallVec<[Unit; 4]>;
+pub type Stack = FastVec<[Unit; 4]>;
+
+/// A Vec behind a copy-on-write handle: cloned positions share it until one of them mutates it. The scheduled timers
+/// (eggs, poison) are read by every evaluation and changed a few times a turn, while the search clones the position
+/// thousands of times an action.
+#[derive(Debug)]
+pub struct CowVec<T: Clone>(std::sync::Arc<Vec<T>>);
+
+impl<T: Clone> CowVec<T> {
+    pub fn new() -> CowVec<T> {
+        CowVec(std::sync::Arc::new(Vec::new()))
+    }
+}
+
+impl<T: Clone> Clone for CowVec<T> {
+    fn clone(&self) -> CowVec<T> {
+        CowVec(self.0.clone())
+    }
+}
+
+impl<T: Clone> Default for CowVec<T> {
+    fn default() -> CowVec<T> {
+        CowVec::new()
+    }
+}
+
+impl<T: Clone> From<Vec<T>> for CowVec<T> {
+    fn from(v: Vec<T>) -> CowVec<T> {
+        CowVec(std::sync::Arc::new(v))
+    }
+}
+
+impl<T: Clone> std::ops::Deref for CowVec<T> {
+    type Target = Vec<T>;
+    fn deref(&self) -> &Vec<T> {
+        &self.0
+    }
+}
+
+impl<T: Clone> std::ops::DerefMut for CowVec<T> {
+    fn deref_mut(&mut self) -> &mut Vec<T> {
+        std::sync::Arc::make_mut(&mut self.0)
+    }
+}
+
+impl<T: Clone> FromIterator<T> for CowVec<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> CowVec<T> {
+        CowVec(std::sync::Arc::new(Vec::from_iter(iter)))
+    }
+}
+
+impl<'a, T: Clone> IntoIterator for &'a CowVec<T> {
+    type Item = &'a T;
+    type IntoIter = std::slice::Iter<'a, T>;
+    fn into_iter(self) -> std::slice::Iter<'a, T> {
+        self.0.iter()
+    }
+}
+
+/// A SmallVec whose clone is one memcpy while it is inline. SmallVec clones element by element, and the search clones a
+/// position for every line it imagines: in the 2026-10-23 profile that copying was a third of the Expert's move.
+/// Spilled (heap) vectors clone as before. Everything else is the SmallVec underneath, by deref.
+pub struct FastVec<A: smallvec::Array>(pub SmallVec<A>);
+
+impl<A: smallvec::Array> FastVec<A> {
+    pub fn new() -> FastVec<A> {
+        FastVec(SmallVec::new())
+    }
+}
+
+impl<A: smallvec::Array> FastVec<A>
+where
+    A::Item: Copy,
+{
+    pub fn from_slice(s: &[A::Item]) -> FastVec<A> {
+        FastVec(SmallVec::from_slice(s))
+    }
+}
+
+impl<A: smallvec::Array> Clone for FastVec<A>
+where
+    A::Item: Copy,
+{
+    fn clone(&self) -> FastVec<A> {
+        if self.0.spilled() {
+            return FastVec(self.0.clone());
+        }
+        let mut v: SmallVec<A> = SmallVec::new();
+        // SAFETY: the source is inline, so its length fits the inline capacity of a fresh vector; the items are Copy.
+        unsafe {
+            std::ptr::copy_nonoverlapping(self.0.as_ptr(), v.as_mut_ptr(), self.0.len());
+            v.set_len(self.0.len());
+        }
+        FastVec(v)
+    }
+}
+
+impl<A: smallvec::Array> Default for FastVec<A> {
+    fn default() -> FastVec<A> {
+        FastVec::new()
+    }
+}
+
+impl<A: smallvec::Array> std::fmt::Debug for FastVec<A>
+where
+    A::Item: std::fmt::Debug,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl<A: smallvec::Array> PartialEq for FastVec<A>
+where
+    A::Item: PartialEq,
+{
+    fn eq(&self, other: &FastVec<A>) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl<A: smallvec::Array> std::ops::Deref for FastVec<A> {
+    type Target = SmallVec<A>;
+    fn deref(&self) -> &SmallVec<A> {
+        &self.0
+    }
+}
+
+impl<A: smallvec::Array> std::ops::DerefMut for FastVec<A> {
+    fn deref_mut(&mut self) -> &mut SmallVec<A> {
+        &mut self.0
+    }
+}
+
+impl<A: smallvec::Array> From<SmallVec<A>> for FastVec<A> {
+    fn from(v: SmallVec<A>) -> FastVec<A> {
+        FastVec(v)
+    }
+}
+
+impl<A: smallvec::Array> FromIterator<A::Item> for FastVec<A> {
+    fn from_iter<I: IntoIterator<Item = A::Item>>(iter: I) -> FastVec<A> {
+        FastVec(SmallVec::from_iter(iter))
+    }
+}
+
+impl<A: smallvec::Array> Extend<A::Item> for FastVec<A> {
+    fn extend<I: IntoIterator<Item = A::Item>>(&mut self, iter: I) {
+        self.0.extend(iter)
+    }
+}
+
+impl<A: smallvec::Array> IntoIterator for FastVec<A> {
+    type Item = A::Item;
+    type IntoIter = smallvec::IntoIter<A>;
+    fn into_iter(self) -> smallvec::IntoIter<A> {
+        self.0.into_iter()
+    }
+}
+
+impl<'a, A: smallvec::Array> IntoIterator for &'a FastVec<A> {
+    type Item = &'a A::Item;
+    type IntoIter = std::slice::Iter<'a, A::Item>;
+    fn into_iter(self) -> std::slice::Iter<'a, A::Item> {
+        self.0.iter()
+    }
+}
+
+impl<'a, A: smallvec::Array> IntoIterator for &'a mut FastVec<A> {
+    type Item = &'a mut A::Item;
+    type IntoIter = std::slice::IterMut<'a, A::Item>;
+    fn into_iter(self) -> std::slice::IterMut<'a, A::Item> {
+        self.0.iter_mut()
+    }
+}
 
 /// What the board says at a glance, recomputed whenever a unit lands, leaves or changes card: the top-owner masks,
 /// the den-connected masks, the family auras on top and whether a side has a keyword aura on top.
@@ -21,11 +195,11 @@ pub struct BoardCache {
     pub aura_n: u8,
     pub kw_aura: [bool; 2],
 }
-pub type Hand = SmallVec<[Unit; 12]>;
-pub type Deck = SmallVec<[CardId; 32]>;
+pub type Hand = FastVec<[Unit; 12]>;
+pub type Deck = FastVec<[CardId; 32]>;
 
 use crate::data::*;
-use crate::rng::PyRandom;
+use crate::rng::{CowRng, PyRandom};
 use crate::value::{Map, Value};
 
 #[macro_export]
@@ -58,20 +232,21 @@ impl Unit {
 /// The once-per-turn flags (Python's `turn_flags` dict), typed. `to_json`/`from_json` keep the dict's shape.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct TurnFlags {
-    pub played: [Vec<(i64, CardId)>; 2],
+    // inline lists: a turn's handful of entries never reach the heap, so a state clone copies them with the struct
+    pub played: [SmallVec<[(i64, CardId); 6]>; 2],
     pub lost: [i32; 3],
     pub removed_any: bool,
     pub food_gained: [i32; 2],
-    pub roamed: Vec<i64>,
+    pub roamed: SmallVec<[i64; 4]>,
     pub roams: [i32; 2],
     pub free_roams: [i32; 2],
     pub free_roams_used: [i32; 2],
-    pub free_roam_iid: Vec<(i64, i64)>,
+    pub free_roam_iid: SmallVec<[(i64, i64); 2]>,
     pub bonus_actions: [i32; 2],
     pub action_cap: [Option<i32>; 2],
-    pub gain_str: Vec<i64>,
+    pub gain_str: SmallVec<[i64; 4]>,
     pub falstaff: [bool; 2],
-    pub caps: Vec<(&'static str, i64)>,
+    pub caps: SmallVec<[(&'static str, i64); 4]>,
 }
 
 impl TurnFlags {
@@ -214,16 +389,16 @@ impl Game {
 pub struct State {
     pub g: Arc<Game>,
     pub stacks: SmallVec<[Stack; 16]>, // by crossroad index
-    pub order: SmallVec<[Cr; 16]>,     // occupied crossroads in insertion order (Python's dict order)
+    pub order: FastVec<[Cr; 16]>,      // occupied crossroads in insertion order (Python's dict order)
     pub hands: [Hand; 2],
     pub decks: [Deck; 2], // top = last
     pub starting_decks: [Deck; 2],
     pub remove_pile: Deck,
-    pub pile_owners: SmallVec<[Option<Player>; 32]>,
+    pub pile_owners: FastVec<[Option<Player>; 32]>,
     pub food: [i32; 2],
     pub current: Player,
     pub first_player: Player,
-    pub rng: PyRandom,
+    pub rng: CowRng,
     pub turn_counter: i32,
     pub units_placed_this_turn: i32,
     pub actions_taken_this_turn: i32,
@@ -232,7 +407,7 @@ pub struct State {
     pub play_seq: i32,
     pub effect_stack: Vec<Map>,
     pub pending: Option<Map>,
-    pub scheduled: Vec<Map>,
+    pub scheduled: CowVec<Map>,
     pub turn_flags: TurnFlags,
     pub card_strength_counters: [FxHashMap<CardId, i32>; 2],
     pub result: Option<GameResult>,
@@ -249,10 +424,14 @@ pub struct State {
     pub record_events: bool,
 }
 
+/// Clones made so far (the timing binary reports clones per action; relaxed, one increment per clone).
+pub static CLONES: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+
 impl Clone for State {
     /// An independent copy. Events are not recorded on a copy: the search clones a position for every line it imagines
     /// and nothing reads a copy's events (the live game's are read by the server).
     fn clone(&self) -> State {
+        CLONES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         State {
             g: self.g.clone(),
             stacks: self.stacks.clone(),
@@ -761,7 +940,7 @@ impl State {
         st.current = player_from(d["current"].as_str().unwrap());
         st.first_player = player_from(d["first_player"].as_str().unwrap());
         let words: Vec<i64> = d["rng"]["state"].as_array().unwrap().iter().map(|x| x.as_i64().unwrap()).collect();
-        st.rng = PyRandom::from_state(&words);
+        st.rng = PyRandom::from_state(&words).into();
         st.turn_counter = d["turn_counter"].as_i64().unwrap() as i32;
         st.units_placed_this_turn = d["units_placed_this_turn"].as_i64().unwrap() as i32;
         st.actions_taken_this_turn = d.get("actions_taken_this_turn").and_then(|x| x.as_i64()).unwrap_or(0) as i32;
@@ -809,16 +988,16 @@ impl State {
         State {
             g,
             stacks: (0..n).map(|_| Stack::new()).collect(),
-            order: SmallVec::new(),
+            order: FastVec::new(),
             hands: [Hand::new(), Hand::new()],
             decks: [Deck::new(), Deck::new()],
             starting_decks: [Deck::new(), Deck::new()],
             remove_pile: Deck::new(),
-            pile_owners: SmallVec::new(),
+            pile_owners: FastVec::new(),
             food: [0, 0],
             current: A,
             first_player: A,
-            rng: PyRandom::seeded(0),
+            rng: CowRng::new(PyRandom::seeded(0)),
             turn_counter: 0,
             units_placed_this_turn: 0,
             actions_taken_this_turn: 0,
@@ -827,7 +1006,7 @@ impl State {
             play_seq: 0,
             effect_stack: Vec::new(),
             pending: None,
-            scheduled: Vec::new(),
+            scheduled: CowVec::new(),
             turn_flags: TurnFlags::default(),
             card_strength_counters: [FxHashMap::default(), FxHashMap::default()],
             result: None,
@@ -847,7 +1026,7 @@ impl State {
     /// `new_game`: shuffle, coin flip, deal, and the mulligan's first pending choice.
     pub fn new_game(g: Arc<Game>, deck_a: &[CardId], deck_b: &[CardId], seed: i64, first_player: Option<Player>, stacked: bool) -> State {
         let mut st = State::blank(g.clone());
-        st.rng = PyRandom::seeded(seed);
+        st.rng = PyRandom::seeded(seed).into();
         st.decks = [Deck::from_slice(deck_a), Deck::from_slice(deck_b)];
         st.starting_decks = [Deck::from_slice(deck_a), Deck::from_slice(deck_b)];
         if stacked {

@@ -938,7 +938,7 @@ impl Searcher {
         let mut enabling: u64 = 0;
         for &(cid, count) in &counts {
             let mut probe = st.clone();
-            probe.hands[opp as usize] = smallvec::smallvec![Unit::new(cid, opp, 900001), Unit::new(filler.unwrap_or(cid), opp, 900002)];
+            probe.hands[opp as usize] = crate::state::Hand::from_slice(&[Unit::new(cid, opp, 900001), Unit::new(filler.unwrap_or(cid), opp, 900002)]);
             for a in rules::legal_actions(&probe) {
                 if let Action::Place { target: Target::Cr(c), .. } = &a {
                     if reach.contains(c) {

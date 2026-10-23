@@ -27,6 +27,6 @@ pub fn determinize(st: &State, me: Player, rng: &mut PyRandom) -> State {
     }
     clone.hands[o] = new_hand;
     clone.decks[o] = crate::state::Deck::from_slice(&pool[dealt..]);
-    clone.rng = PyRandom::seeded_u64(rng.getrandbits(64));
+    clone.rng = PyRandom::seeded_u64(rng.getrandbits(64)).into();
     clone
 }

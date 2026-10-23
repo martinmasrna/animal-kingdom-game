@@ -2,6 +2,7 @@
 //! its operations, removal, food, draws and shuffles, Roam, the delayed-effect scheduler, Dawn and Dusk. Card
 //! behaviour itself is in cards.rs.
 
+use smallvec::SmallVec;
 use crate::actions::{Action, Target, SKIP};
 use crate::cards::{self, Args, Hook};
 use crate::data::*;
@@ -329,13 +330,15 @@ pub fn land_unit(st: &mut State, player: Player, mut unit: Unit, cr: Cr, from_ha
     st.stamp_played(&mut unit);
     let unit = unit;
     st.push_unit(cr, unit.clone());
-    let mut f = vmap!("player" => pn(player), "iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "cr" => cr_v(st, cr), "from_hand" => Value::Bool(from_hand));
-    if reveal {
-        f.insert("reveal".into(), Value::Bool(true));
-    }
-    crate::emit!(st, "place", f);
-    if let Some(c) = &covered {
-        crate::emit!(st, "cover", vmap!("cr" => cr_v(st, cr), "iid" => Value::Int(c.iid), "card" => card_v(st, c.card), "owner" => pn(c.owner), "by" => Value::Int(unit.iid)));
+    if st.record_events {    // the live game only: an imagined placement builds no event maps
+        let mut f = vmap!("player" => pn(player), "iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "cr" => cr_v(st, cr), "from_hand" => Value::Bool(from_hand));
+        if reveal {
+            f.insert("reveal".into(), Value::Bool(true));
+        }
+        st.emit("place", f);
+        if let Some(c) = &covered {
+            st.emit("cover", vmap!("cr" => cr_v(st, cr), "iid" => Value::Int(c.iid), "card" => card_v(st, c.card), "owner" => pn(c.owner), "by" => Value::Int(unit.iid)));
+        }
     }
     if is_apex {
         if let Some(c) = &covered {
@@ -414,7 +417,7 @@ fn op_flee(st: &mut State, step: &mut Map) -> Option<Pending> {
 }
 
 fn fire_place_event(st: &mut State, placed: &Unit) {
-    let tops: Vec<Unit> = st.tops().filter(|(_, t)| t.owner == placed.owner && t.iid != placed.iid).map(|(_, t)| t.clone()).collect();
+    let tops: SmallVec<[Unit; 16]> = st.tops().filter(|(_, t)| t.owner == placed.owner && t.iid != placed.iid).map(|(_, t)| *t).collect();
     for top in tops {
         if st.g.has_hook(top.card, Hook::OnFriendlyPlace) {
             cards::run(st, top.card, None, Hook::OnFriendlyPlace, &top, &Args::FriendlyPlace(placed.clone()));
@@ -423,7 +426,7 @@ fn fire_place_event(st: &mut State, placed: &Unit) {
 }
 
 fn push_reactions(st: &mut State, unit: &Unit, cr: Cr, covered: Option<&Unit>, _onto_enemy: bool) {
-    let nbs: Vec<Cr> = st.map().neighbors(cr).to_vec();
+    let nbs: SmallVec<[Cr; 8]> = SmallVec::from_slice(st.map().neighbors(cr));
     for nb in nbs {
         let Some(top) = st.top(nb).cloned() else { continue };
         if top.owner != unit.owner && st.g.has_hook(top.card, Hook::OnEnemyPlacedAdjacent) {
@@ -447,7 +450,7 @@ fn push_reactions(st: &mut State, unit: &Unit, cr: Cr, covered: Option<&Unit>, _
         if covered.owner != unit.owner && st.card(covered.card).has_tag(T_QUEEN) {
             push_queen_guards(st, covered.owner, unit, cr);
         }
-        let watchers: Vec<Unit> = st.tops().filter(|(_, t)| t.owner == covered.owner && t.iid != covered.iid).map(|(_, t)| t.clone()).collect();
+        let watchers: SmallVec<[Unit; 16]> = st.tops().filter(|(_, t)| t.owner == covered.owner && t.iid != covered.iid).map(|(_, t)| *t).collect();
         for top in watchers {
             if st.g.has_hook(top.card, Hook::OnAllyCovered) {
                 cards::run(st, top.card, None, Hook::OnAllyCovered, &top, &Args::AllyCovered(covered.clone(), unit.clone(), cr));
@@ -1067,7 +1070,7 @@ pub fn start_of_turn(st: &mut State, player: Player) {
     let tops: Vec<i64> = st.tops().map(|(_, u)| u.iid).collect();
     let mut fired: Vec<Map> = Vec::new();
     let mut keep: Vec<Map> = Vec::new();
-    let scheduled = std::mem::take(&mut st.scheduled);
+    let scheduled: Vec<Map> = std::mem::take(&mut *st.scheduled);
     for mut s in scheduled {
         let owner = m_get_s(&s, "owner").unwrap_or("");
         let iid = m_get_i(&s, "iid").unwrap_or(-1);
@@ -1087,7 +1090,7 @@ pub fn start_of_turn(st: &mut State, player: Player) {
             }
         }
     }
-    st.scheduled = keep;
+    st.scheduled = keep.into();
     let hand: Vec<Unit> = st.hands[player as usize].to_vec();
     for inst in hand {
         if st.g.has_hook(inst.card, Hook::OnDawnInHand) {
@@ -1106,7 +1109,7 @@ pub fn end_of_turn(st: &mut State, player: Player) {
 }
 
 fn push_timed_hooks(st: &mut State, player: Player, hook: Hook) {
-    let mut due: Vec<(i32, &'static str, i64, &'static str, &'static str)> = Vec::new();
+    let mut due: SmallVec<[(i32, &'static str, i64, &'static str, &'static str); 16]> = SmallVec::new();
     for (cr, top) in st.tops() {
         if top.owner != player {
             continue;

@@ -249,3 +249,34 @@ mod tests {
         assert!((r.random() - 0.6394267984578837).abs() < 1e-15);
     }
 }
+
+/// The state's generator behind a copy-on-write handle: the search clones a position for every line it imagines and
+/// almost none of those lines draw or shuffle, so a clone shares the 2.5 KB Mersenne state and the first mutation
+/// (any `&mut` method through `DerefMut`) copies it. Same numbers, same order, as the bare generator.
+#[derive(Clone, Debug)]
+pub struct CowRng(std::sync::Arc<PyRandom>);
+
+impl CowRng {
+    pub fn new(r: PyRandom) -> CowRng {
+        CowRng(std::sync::Arc::new(r))
+    }
+}
+
+impl From<PyRandom> for CowRng {
+    fn from(r: PyRandom) -> CowRng {
+        CowRng::new(r)
+    }
+}
+
+impl std::ops::Deref for CowRng {
+    type Target = PyRandom;
+    fn deref(&self) -> &PyRandom {
+        &self.0
+    }
+}
+
+impl std::ops::DerefMut for CowRng {
+    fn deref_mut(&mut self) -> &mut PyRandom {
+        std::sync::Arc::make_mut(&mut self.0)
+    }
+}

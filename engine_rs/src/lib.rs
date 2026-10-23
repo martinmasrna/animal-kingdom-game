@@ -15,3 +15,8 @@ pub mod value;
 
 #[cfg(feature = "python")]
 pub mod py;
+
+// The search allocates and frees effect maps and action lists by the million; the system allocator on macOS was a
+// quarter of the Expert's move in the profile (2026-10-23), mimalloc about halves that cost.
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
