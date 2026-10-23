@@ -708,6 +708,8 @@ def remove_from_hand(state: GameState, player: str, inst: UnitInstance) -> None:
 def _matches(card, spec: str) -> bool:
     """A serializable filter for filtered draws: 'tag:Bird', 'rarity:legendary',
     """
+    if "&" in spec:                       # Ocelot: "draw 2 common Cats" is 'tag:Cat&rarity:common'
+        return all(_matches(card, part) for part in spec.split("&"))
     kind, _, val = spec.partition(":")
     if kind == "tag":
         return val in card.tags
@@ -1739,7 +1741,6 @@ def roar_condition(state, player, card_id, unit=None):
         "hare": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
         "rat": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
         "macaque": lambda: hand_after() >= cfg.macaque_hand_min,
-        "ocelot": lambda: hand_after() == 0,
         "gorilla": lambda: strength() >= cfg.gorilla_min,
     }.get(card_id)
     return check() if check else None
@@ -1848,12 +1849,14 @@ def _city_spider_sot(state, unit, cr):
         remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
 
 
-def _tiger_legend_eot(state, unit, cr):
-    """Dusk: remove a random adjacent enemy (random hits Stealth too; Armor stays)."""
-    options = [nb for nb, top in _adjacent_tops(state, cr)
+def _sperm_whale_legend_eot(state, unit, cr):
+    """Dusk: remove the strongest adjacent enemy (ties at random: Dusk asks no decision; Stealth doesn't hide)."""
+    options = [(nb, top) for nb, top in _adjacent_tops(state, cr)
                if top.owner != unit.owner and statics.can_be_removed(state, top, nb)]
     if options:
-        remove_top(state, state.rng.choice(options), by_player=unit.owner, by_card=unit.card_id)
+        high = max(effective_strength(state, top) for _, top in options)
+        nb = state.rng.choice([nb for nb, top in options if effective_strength(state, top) == high])
+        remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
 
 
 def _sea_turtle_eot(state, unit, cr):
@@ -2656,16 +2659,6 @@ def _remove_all_adjacent(state, unit, cr):
                                                       source_iid=None, by_card=unit.card_id))
 
 
-def _sperm_whale_legend_place(state, unit, cr):
-    """Roar: remove all enemies adjacent to your animals (this one included)."""
-    mine = [c for c, st in state.board.items() if st and st[-1].owner == unit.owner]
-    hit = sorted({nb for c in mine for nb, top in _adjacent_tops(state, c)
-                  if top.owner != unit.owner and statics.can_be_removed(state, top, nb)})
-    for nb in hit:
-        state.effect_stack.append(remove_iid_step(state.top_unit(nb).iid, by_player=unit.owner, by_effect=True,
-                                                  source_iid=None, by_card=unit.card_id))
-
-
 def _hippo_enemy_placed(state, hippo, placed, cr):
     # Automatic trigger, nobody "chose" the target: Stealth doesn't hide (decision B).
     if (effective_strength(state, placed) <= state.config.hippopotamus_max
@@ -2997,7 +2990,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "praying_mantis": {"on_place": _mantis_place},
     "tarantula": {"on_end_of_turn": _tarantula_eot},
     "sea_turtle": {"on_end_of_turn": _sea_turtle_eot},
-    "tiger_legend": {"on_end_of_turn": _tiger_legend_eot},
+    "tiger_legend": {"on_place": _removes("tiger_legend_max")},
     "raccoon": {"on_place": _raccoon_place},
     "piranha": {"on_place": _conditional(_piranha_place)},
     "hyena": {"on_end_of_turn": _hyena_eot},
@@ -3056,7 +3049,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "hornet": {"on_place": _hornet_place},
     "skunk": {"on_place": _skunk_place},
     "hare": {"on_place": _conditional(_draws("hare_draw"))},
-    "ocelot": {"on_place": _conditional(_draws("ocelot_draw"))},
+    "ocelot": {"on_place": lambda state, unit, cr: _draws_filtered("tag:Cat&rarity:common",
+                                                                    state.config.ocelot_draw)(state, unit, cr)},
     "cheetah": {"on_place": _hq_adjacent_draw},
     "rat": {"on_place": _conditional(_rat_place)},
     "falcon": {"on_place": _hq_adjacent_draw},
@@ -3115,7 +3109,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Giants (Hungry and Titan are keywords; the legendary Oxpecker feeds its neighbours in _eat).
     "rhinoceros_legend": {"on_place": _remove_all_adjacent},
     "tortoise_legend": {"on_end_of_turn": _tortoise_legend_eot},
-    "sperm_whale_legend": {"on_place": _sperm_whale_legend_place},
+    "sperm_whale_legend": {"on_end_of_turn": _sperm_whale_legend_eot},
     "rhinoceros": {"on_place": _rhinoceros_place},
     "hippopotamus": {"on_enemy_placed_adjacent": _hippo_enemy_placed},
     "whale_shark": {"on_end_of_turn": _draw1},

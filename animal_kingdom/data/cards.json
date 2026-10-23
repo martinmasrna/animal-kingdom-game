@@ -2090,13 +2090,13 @@
       "status": "collectible",
       "rarity": "legendary",
       "tags": [],
-      "base_strength": 10,
-      "text": "Titan. Roar: remove all enemies next to your animals.",
+      "base_strength": 8,
+      "text": "Titan. Dusk: remove the strongest adjacent enemy.",
+      "species": "Sperm Whale",
+      "habitat": "Open Ocean",
       "keywords": [
         "Titan"
-      ],
-      "species": "Sperm Whale",
-      "habitat": "Open Ocean"
+      ]
     },
     {
       "id": "oxpecker_legend",
@@ -3850,7 +3850,7 @@
         "Cat"
       ],
       "base_strength": 7,
-      "text": "Apex Predator. Dusk: remove a random adjacent enemy.",
+      "text": "Apex Predator. Roar: remove an adjacent enemy of strength 7 or less.",
       "species": "Tiger",
       "habitat": "Jungle",
       "unnamed": true,
@@ -3867,7 +3867,7 @@
         "Cat"
       ],
       "base_strength": 3,
-      "text": "Roar: if your hand is empty, draw 3 cards.",
+      "text": "Roar: draw 2 common Cats.",
       "species": "Ocelot",
       "habitat": "Jungle",
       "keywords": []

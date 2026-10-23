@@ -158,6 +158,7 @@ STRENGTH_LIMIT_RE = re.compile(r"strength (\d+) or (?:less|more)", re.IGNORECASE
 # card_id -> the config attr holding its "strength N or less/more" removal limit.
 STRENGTH_LIMITS = {
     "jaguar": "jaguar_max",
+    "tiger_legend": "tiger_legend_max",
     "honey_badger": "honey_badger_min",
     "cuckoo_legend": "cuckoo_legend_max",
     "hawk": "stoop_max",

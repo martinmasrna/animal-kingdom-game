@@ -2219,7 +2219,7 @@
       "note": "Martin 2026-10-17: 'next to' is right: adjacent as an adjective, next to in place of adjacent to; Watch in play: close to a full board wipe.",
       "by": "claude",
       "lv": "draft",
-      "at": 1792248230,
+      "at": 1792783032,
       "review": {
         "prev_lv": "problem",
         "prev_note": "next to -> adjacent to?"
@@ -2247,6 +2247,16 @@
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "by": "claude",
       "at": 1792191061
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 10
+      },
+      "note": "8 (Martin, 2026-10-23): a Dusk engine at the front stays coverable by the 9s and 10s",
+      "by": "claude",
+      "at": 1792783031
     }
   },
   "moose": {
@@ -4777,7 +4787,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792754515
+      "at": 1792783031
     }
   },
   "ocelot": {
@@ -4808,9 +4818,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "a Bobcat's size would be about 5; 3 because drawing 3 is a big swing and the fast build meets its condition naturally (2026-10-23)",
+      "note": "3 (2026-10-23): above the draw-2 anchor (a 1), since the rare gets the better rate and the card is dead outside a Cat deck",
       "by": "claude",
-      "at": 1792755459
+      "at": 1792783031
     },
     "effect": {
       "review": {
@@ -4820,7 +4830,7 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792755459
+      "at": 1792783031
     },
     "animal": {
       "review": {

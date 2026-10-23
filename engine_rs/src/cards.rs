@@ -79,7 +79,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "remora" | "cod" | "sardine" | "mahi_mahi" | "sunfish"
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
         | "chipmunk" | "gopher" | "muskrat" | "groundhog" | "octopus_legend_2" | "squirrel_legend" | "octopus_legend" | "black_bear"
-        | "grizzly_bear" | "tortoise" | "owl" | "rhinoceros_legend" | "sperm_whale_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
+        | "grizzly_bear" | "tortoise" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
@@ -88,7 +88,7 @@ pub fn hook_mask(card: &str) -> u32 {
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
         "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "worker_wasp" | "scout_bee" | "ant"
         | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "okapi" | "wildebeest"
-        | "dingo" | "tiger_legend" => &[OnEndOfTurn],
+        | "dingo" | "sperm_whale_legend" => &[OnEndOfTurn],
         "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" => &[OnStartOfTurn],
         "wolf_legend_2" | "coyote" => &[OnFriendlyRoam],
         "fox" => &[OnCoverEnemy],
@@ -199,7 +199,6 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
         "piranha" => lost_this_turn(st, player) >= 1,
         "hare" | "rat" => placed_plus >= cfg(st, "hare_played_min"),
         "macaque" => hand_after() >= cfg(st, "macaque_hand_min"),
-        "ocelot" => hand_after() == 0,
         "gorilla" => strength() >= cfg(st, "gorilla_min"),
         _ => return None,
     })
@@ -525,14 +524,17 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("sea_turtle", OnEndOfTurn) => spawns_beside(st, unit, cr, "baby_turtle"),
-        ("tiger_legend", OnEndOfTurn) => {
-            let options: Vec<Cr> = adjacent_tops(st, cr, None)
+        ("tiger_legend", OnPlace) => removes(st, unit, cr, Some("tiger_legend_max"), None),
+        ("sperm_whale_legend", OnEndOfTurn) => {
+            let options: Vec<(Cr, i32)> = adjacent_tops(st, cr, None)
                 .into_iter()
                 .filter(|(nb, top)| top.owner != unit.owner && statics::can_be_removed(st, top, Some(*nb), false))
-                .map(|(nb, _)| nb)
+                .map(|(nb, top)| (nb, effective_strength(st, &top, None)))
                 .collect();
             if !options.is_empty() {
-                let nb = options[st.rng.choice_index(options.len())];
+                let high = options.iter().map(|(_, s)| *s).max().unwrap();
+                let highs: Vec<Cr> = options.iter().filter(|(_, s)| *s == high).map(|(nb, _)| *nb).collect();
+                let nb = highs[st.rng.choice_index(highs.len())];
                 remove_top(st, nb, owner, true, Some(unit.card));
             }
         }
@@ -819,10 +821,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("ocelot", OnPlace) => {
-            if conditional(st, unit) {
-                let n = cfg(st, "ocelot_draw");
-                draws(st, unit, n);
-            }
+            let n = cfg(st, "ocelot_draw");
+            draws_filtered(st, unit, "tag:Cat&rarity:common", n);
         }
         ("cheetah", OnPlace) | ("falcon", OnPlace) => hq_adjacent_draw(st, unit, cr),
         ("rat", OnPlace) => {
@@ -1044,23 +1044,6 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         // Giants
         ("rhinoceros_legend", OnPlace) | ("sperm_whale", OnPlace) => remove_all_adjacent(st, unit, cr),
         ("tortoise_legend", OnEndOfTurn) => gains(st, unit, "tortoise_legend_food"),
-        ("sperm_whale_legend", OnPlace) => {
-            let mine: Vec<Cr> = st.tops().filter(|(_, t)| t.owner == owner).map(|(c, _)| c).collect();
-            let mut hit: Vec<Cr> = Vec::new();
-            for c in mine {
-                for (nb, top) in adjacent_tops(st, c, None) {
-                    if top.owner != owner && statics::can_be_removed(st, &top, Some(nb), false) && !hit.contains(&nb) {
-                        hit.push(nb);
-                    }
-                }
-            }
-            hit.sort_by(|a, b| st.crname(*a).cmp(st.crname(*b)));
-            for nb in hit {
-                let iid = st.top(nb).unwrap().iid;
-                let step = remove_iid_step(st, iid, owner, true, None, Some(unit.card));
-                st.effect_stack.push(step);
-            }
-        }
         ("rhinoceros", OnPlace) => sweep(st, unit, cr, "rhinoceros_max"),
         ("albatross", OnPlace) => sweep(st, unit, cr, "albatross_max"),
         ("hippopotamus", OnEnemyPlacedAdjacent) => {

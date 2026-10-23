@@ -224,24 +224,22 @@ def test_the_city_spider_eats_the_weakest_animal_beside_it_yours_or_theirs():
     assert s.top_unit("2,2") is None and s.top_unit("1,1").card_id == "tiger"
 
 
-def test_the_tiger_legend_removes_an_adjacent_enemy_at_dusk_never_an_ally_or_armor():
-    s = make_state(decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
-    put(s, "1,2", "tiger_legend", "A")
-    put(s, "1,1", "lion", "A")
-    put(s, "1,3", "stag_beetle", "B")                          # Armor: nothing removes it
-    put(s, "2,2", "mouse", "B")
-    end_turn(s)                                                # A's Dusk
-    assert s.top_unit("2,2") is None
-    assert s.top_unit("1,1").card_id == "lion" and s.top_unit("1,3").card_id == "stag_beetle"
+def test_the_tiger_legend_eats_its_prey_then_removes_an_adjacent_enemy_of_7_but_not_8():
+    for neighbour, removed in (("lion", True), ("rhinoceros_legend", False)):
+        s = make_state(hands={"A": ["tiger_legend"]}, decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
+        put(s, "1,1", "lion", "A")
+        put(s, "2,1", "mouse", "B")                            # the prey it lands on
+        put(s, "2,2", neighbour, "B")
+        apply_click(s, PlaceAction("tiger_legend", ("cr", "2,1")))
+        assert s.top_unit("2,1").card_id == "tiger_legend" and "mouse" in s.remove_pile
+        assert (s.top_unit("2,2") is None) == removed
 
 
-def test_the_ocelot_draws_three_only_from_an_empty_hand():
-    s = make_state(hands={"A": ["ocelot"]}, decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
+def test_the_ocelot_draws_two_common_cats():
+    s = make_state(hands={"A": ["ocelot"]},
+                   decks={"A": ["lion_legend_3", "jaguar", "lion", "mouse", "serval"], "B": ["lion"] * 5})
     rules.apply_action(s, PlaceAction("ocelot", ("cr", "1,2")))
-    assert hand_ids(s, "A") == ["lion"] * 3
-    s = make_state(hands={"A": ["ocelot", "mouse"]}, decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
-    rules.apply_action(s, PlaceAction("ocelot", ("cr", "1,2")))
-    assert hand_ids(s, "A") == ["mouse"]
+    assert sorted(hand_ids(s, "A")) == ["lion", "serval"]
 
 
 def test_sea_turtle_lays_a_baby_turtle_on_an_empty_neighbour():
@@ -859,14 +857,15 @@ def test_the_legendary_honey_badger_has_every_keyword():
 
 # ================================================================================== Giants
 
-def test_mocha_removes_every_enemy_adjacent_to_your_animals():
-    s = make_state(hands={"A": ["sperm_whale_legend"]})
-    put(s, "1,1", "lion", "A")
-    put(s, "2,1", "lion", "B")                                 # beside the Lion
-    put(s, "2,2", "lion", "B")                                 # beside Mocha
-    put(s, "4,3", "lion", "B")                                 # beside nothing of A's
-    rules.apply_action(s, PlaceAction("sperm_whale_legend", ("cr", "1,2")))
-    assert s.top_unit("2,1") is None and s.top_unit("2,2") is None and s.top_unit("4,3") is not None
+def test_mocha_removes_the_strongest_adjacent_enemy_at_dusk():
+    s = make_state(decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
+    put(s, "1,2", "sperm_whale_legend", "A")
+    put(s, "1,1", "lion", "B")
+    put(s, "2,2", "mouse", "B")
+    put(s, "1,3", "rhinoceros_legend", "A")                    # an ally: never removed
+    end_turn(s)                                                # A's Dusk
+    assert s.top_unit("1,1") is None and s.top_unit("2,2").card_id == "mouse"
+    assert s.top_unit("1,3").card_id == "rhinoceros_legend"
 
 
 def test_dung_beetle_feeds_on_hungry_animals_and_anteater_eats_the_drawn_cards_strength():

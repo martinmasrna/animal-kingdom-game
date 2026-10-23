@@ -764,6 +764,9 @@ pub fn remove_from_hand(st: &mut State, player: Player, iid: i64) {
 }
 
 pub fn matches(st: &State, card: CardId, spec: &str) -> bool {
+    if spec.contains('&') {
+        return spec.split('&').all(|part| matches(st, card, part));
+    }
     let (kind, val) = spec.split_once(':').unwrap_or((spec, ""));
     let c = st.card(card);
     match kind {
