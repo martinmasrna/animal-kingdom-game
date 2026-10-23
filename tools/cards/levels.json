@@ -394,8 +394,13 @@
     "rarity": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792611447,
-      "note": "Martin, 2026-10-21: the Stealth common (a one-keyword card is a common)"
+      "at": 1792756927,
+      "note": "Martin, 2026-10-21: the Stealth common (a one-keyword card is a common)",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-21: the Stealth common (a one-keyword card is a common)",
+        "prev": "C"
+      }
     },
     "animal": {
       "lv": "locked",
@@ -409,13 +414,23 @@
     "strength": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792611447,
-      "note": "Martin, 2026-10-21: Stealth is about -1 against the Lion"
+      "at": 1792756927,
+      "note": "5 (Martin, 2026-10-23): a food engine that only a cover answers sits below the 6 its old plain Stealth had",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-21: Stealth is about -1 against the Lion",
+        "prev": 6
+      }
     },
     "effect": {
-      "lv": "fine",
-      "by": "martin",
-      "at": 1792193275
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792756927,
+      "review": {
+        "prev_lv": "fine",
+        "prev_note": "",
+        "prev": "Stealth."
+      }
     },
     "art": {
       "lv": "fine",
@@ -4815,6 +4830,47 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1792755470
+    }
+  },
+  "stick_insect": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792756927
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792756928
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792756928
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1792756928
     }
   }
 }

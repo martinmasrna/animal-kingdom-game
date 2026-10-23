@@ -27,7 +27,7 @@ Carried by: Azamandulai the tortoise and the Glyptodont (Ramp); the Stag Beetle,
 ### Stealth
 Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis). **Mass, random, and automatic effects hit it normally**, and so does an Apex Predator's eat (a predator eats what it lands on; nobody chooses): Rhinoceros/Brutus AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron triggers. Its own controller may still choose it freely. Scope is board-only.
 
-Carried by: Black Panther, the keyword's common.
+Carried by: the Stick Insect, the keyword's common; the Black Panther, whose Stealth keeps its food engine safe from chosen removal; Ash.
 
 ### Spikes
 The first time an enemy covers it, that enemy is removed (a remove, so Armor resists it). Once per animal: the first enemy cover spends them even when nothing is removed (an Armor coverer stays, and the Spikes are gone all the same; Martin, 2026-10-17), so a Spikes animal that has been covered by an enemy is an ordinary animal from then on, and its badge on the board goes. Covering is placement, so the coverer's own Roar resolves first, then the spikes (and an Apex Predator landing on it is removed before it can eat). A friendly cover doesn't set it off.

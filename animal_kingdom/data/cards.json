@@ -923,17 +923,17 @@
       "id": "black_panther",
       "name": "Black Panther",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Cat"
       ],
-      "base_strength": 6,
-      "text": "Stealth.",
+      "base_strength": 5,
+      "text": "Stealth. Whenever an allied Cat covers an enemy, gain 5 food.",
+      "species": "Black Panther",
+      "habitat": "Jungle",
       "keywords": [
         "Stealth"
-      ],
-      "species": "Black Panther",
-      "habitat": "Jungle"
+      ]
     },
     {
       "id": "lion",
@@ -3870,6 +3870,20 @@
       "species": "Ocelot",
       "habitat": "Jungle",
       "keywords": []
+    },
+    {
+      "id": "stick_insect",
+      "name": "Stick Insect",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 6,
+      "text": "Stealth.",
+      "species": "Stick Insect",
+      "habitat": "Jungle",
+      "keywords": [
+        "Stealth"
+      ]
     }
   ]
 }
