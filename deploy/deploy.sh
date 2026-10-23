@@ -97,11 +97,12 @@ if [[ "$(cat "$cache/art" 2>/dev/null)" != "$art" ]]; then
   echo "$art" > "$cache/art"
 fi
 
-# Three trees for the image (deploy/Dockerfile): code/ (the engine, the bots, the server, the tests), data/ (cards, decks,
-# maps) and ui/ (the client's static files but the paintings, the news, the studies). The compile runs on code/ alone, so a
-# card or client change reuses the compiled engine and pays only the tests.
-mkdir -p "$tmp/app/code" "$tmp/app/ui/animal_kingdom/web"
+# Four trees for the image (deploy/Dockerfile): code/ (the engine, the bots, the server, the tests), data/ (cards, decks,
+# maps), ui/ (the client's static files but the paintings, the news, the studies) and rs/ (the Rust engine and its oracles).
+# The compiles run on code/ and rs/ alone, so a card or client change reuses both and pays only the tests.
+mkdir -p "$tmp/app/code" "$tmp/app/ui/animal_kingdom/web" "$tmp/app/rs"
 git -C "$repo" archive HEAD animal_kingdom | tar -x -C "$tmp/app/code"
+git -C "$repo" archive HEAD engine_rs tools/engine_rs | tar -x -C "$tmp/app/rs"
 mv "$tmp/app/code/animal_kingdom/data" "$tmp/app/data"
 for d in static news studies; do [[ -d "$tmp/app/code/animal_kingdom/web/$d" ]] && mv "$tmp/app/code/animal_kingdom/web/$d" "$tmp/app/ui/animal_kingdom/web/"; done
 rm -rf "$tmp/app/ui/animal_kingdom/web/static/art" "$tmp/app/ui/animal_kingdom/web/static/kit2"
