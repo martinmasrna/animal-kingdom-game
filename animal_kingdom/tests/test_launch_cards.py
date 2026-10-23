@@ -224,6 +224,17 @@ def test_the_city_spider_eats_the_weakest_animal_beside_it_yours_or_theirs():
     assert s.top_unit("2,2") is None and s.top_unit("1,1").card_id == "tiger"
 
 
+def test_the_tiger_legend_removes_an_adjacent_enemy_at_dusk_never_an_ally_or_armor():
+    s = make_state(decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
+    put(s, "1,2", "tiger_legend", "A")
+    put(s, "1,1", "lion", "A")
+    put(s, "1,3", "stag_beetle", "B")                          # Armor: nothing removes it
+    put(s, "2,2", "mouse", "B")
+    end_turn(s)                                                # A's Dusk
+    assert s.top_unit("2,2") is None
+    assert s.top_unit("1,1").card_id == "lion" and s.top_unit("1,3").card_id == "stag_beetle"
+
+
 def test_sea_turtle_lays_a_baby_turtle_on_an_empty_neighbour():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "sea_turtle", "A")

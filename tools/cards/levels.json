@@ -4708,5 +4708,61 @@
       "by": "claude",
       "at": 1792682852
     }
+  },
+  "tiger_legend": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792754514
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Tiger Legend",
+          "species": "Tiger"
+        }
+      },
+      "by": "claude",
+      "at": 1792754583,
+      "note": "into the collection"
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792754515
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "7, not 8: the ordinary 8s (Theron, Rhinoceros, Hippopotamus) can cover it, so the engine at the front stays answerable (Martin, 2026-10-23)",
+      "by": "claude",
+      "at": 1792754515
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1792754515
+    }
   }
 }

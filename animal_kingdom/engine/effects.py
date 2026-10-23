@@ -1847,6 +1847,14 @@ def _city_spider_sot(state, unit, cr):
         remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
 
 
+def _tiger_legend_eot(state, unit, cr):
+    """Dusk: remove a random adjacent enemy (random hits Stealth too; Armor stays)."""
+    options = [nb for nb, top in _adjacent_tops(state, cr)
+               if top.owner != unit.owner and statics.can_be_removed(state, top, nb)]
+    if options:
+        remove_top(state, state.rng.choice(options), by_player=unit.owner, by_card=unit.card_id)
+
+
 def _sea_turtle_eot(state, unit, cr):
     """Dusk: place a Baby Turtle on an adjacent empty crossroad (a random one: Dusk asks no decision)."""
     empty = _empty_neighbors(state, cr)
@@ -2988,6 +2996,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "praying_mantis": {"on_place": _mantis_place},
     "tarantula": {"on_end_of_turn": _tarantula_eot},
     "sea_turtle": {"on_end_of_turn": _sea_turtle_eot},
+    "tiger_legend": {"on_end_of_turn": _tiger_legend_eot},
     "raccoon": {"on_place": _raccoon_place},
     "piranha": {"on_place": _conditional(_piranha_place)},
     "hyena": {"on_end_of_turn": _hyena_eot},

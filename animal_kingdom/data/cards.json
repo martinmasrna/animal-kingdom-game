@@ -3839,6 +3839,23 @@
       "keywords": [
         "Wild"
       ]
+    },
+    {
+      "id": "tiger_legend",
+      "name": "[TIGER]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Cat"
+      ],
+      "base_strength": 7,
+      "text": "Apex Predator. Dusk: remove a random adjacent enemy.",
+      "species": "Tiger",
+      "habitat": "Jungle",
+      "unnamed": true,
+      "keywords": [
+        "Apex Predator"
+      ]
     }
   ]
 }

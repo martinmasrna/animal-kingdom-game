@@ -88,7 +88,7 @@ pub fn hook_mask(card: &str) -> u32 {
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
         "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "worker_wasp" | "scout_bee" | "ant"
         | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "okapi" | "wildebeest"
-        | "dingo" => &[OnEndOfTurn],
+        | "dingo" | "tiger_legend" => &[OnEndOfTurn],
         "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" => &[OnStartOfTurn],
         "wolf_legend_2" | "coyote" => &[OnFriendlyRoam],
         "fox" => &[OnCoverEnemy],
@@ -524,6 +524,17 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("sea_turtle", OnEndOfTurn) => spawns_beside(st, unit, cr, "baby_turtle"),
+        ("tiger_legend", OnEndOfTurn) => {
+            let options: Vec<Cr> = adjacent_tops(st, cr, None)
+                .into_iter()
+                .filter(|(nb, top)| top.owner != unit.owner && statics::can_be_removed(st, top, Some(*nb), false))
+                .map(|(nb, _)| nb)
+                .collect();
+            if !options.is_empty() {
+                let nb = options[st.rng.choice_index(options.len())];
+                remove_top(st, nb, owner, true, Some(unit.card));
+            }
+        }
         ("raccoon", OnPlace) => {
             let mut names: Vec<&'static str> = st.pile_cards_of(owner).iter().map(|c| st.cname(*c)).collect();
             names.sort();

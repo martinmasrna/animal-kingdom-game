@@ -43,6 +43,14 @@ Pool cards built for it: the Hyena turns the turn's deaths into food; the Tarant
 
 Expected weak points, untested: few cards that kill your own (Spiders die to any cover), and few bodies bigger than a 4.
 
+## Cats
+
+Midrange tempo on the front foot (Martin, 2026-10-23): Hearthstone's Hunter, never reacting to the opponent. Cats win the fight for the board by covering, and each cover is worth more than the opponent's placement because the body comes with a second half: the Jaguar and the Serval remove, the Lynx and the Bobcat draw, Alley Cat and Prince Leo with Princess Lea bring another body. King Theron makes every cover a removal and Queen Adira turns removals into cards. Removal is a rider, not the deck's signature.
+
+The Cat pool is meant to build along a spectrum, as Hunter ran from Face through Hybrid to Midrange with Dr. Boom and Ragnaros: an aggro build on the cheap Cats and their extra bodies, a midrange build with top end. Top end here means an engine, an effect that keeps paying every turn it stays on the board, never a big body: a body does nothing after it lands but hold its crossroad. An engine in the backline is safe and pays for it with conditions (Theron, Adira); one that works only next to enemies is exposed by its own design. The legendary Leopard is the engine that hunts, roaming and eating each turn. The legendary Tiger is the man-eater at the front: it lands as a predator and takes a random neighbour at every Dusk until the opponent covers it with an 8 or removes it. It stands at 7 so the ordinary 8s can answer it.
+
+Rejected for the Tiger: "this turn, your Cats can be placed on enemies of any strength" (a ceiling only small bodies need: the Fish legendary that covers by Fish count does it); "Dusk: gain 5 food for each enemy buried under your Cats" (too strong, a food engine safe in the backline, and against half the deck, whose removal leaves nothing buried); a big body that leaves two cubs when covered (Savannah Highmane's surface: leftover bodies matter where bodies attack, here they only fill crossroads); "Dusk: remove the strongest adjacent enemy" (Martin chose the random one).
+
 ## Canines
 
 The pack that roams the board, buffs itself on the board (Primates buff in hand) and hunts by position. High skill: each turn is a puzzle of moves and placements across two actions. Built on Roam ([`../rules/keywords.md`](../rules/keywords.md)), a game-wide keyword that Canines carry most. Count-based effects (stronger the more of them) belong to the Fish.
