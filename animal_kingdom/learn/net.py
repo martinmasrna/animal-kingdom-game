@@ -121,7 +121,7 @@ def train(out, paths, hidden=32, l2=1e-4, feature_set="rung2", test_path=None):
             row[bn] = logloss(p[mk], y[test][mk])
         report[label] = row
     if test_path:
-        # An outside test set (2026-10-22: Martin's games against the Expert, `scratchpad/belief/human_set.py`), scored
+        # An outside test set (2026-10-22: Martin's games against the Expert, `learn.human_set`), scored
         # with the training set's standardisation; a `hand` column, if present, is the hand evaluation's score in points.
         t = np.load(test_path)
         if [str(n) for n in t["features"]] != names:
@@ -135,6 +135,11 @@ def train(out, paths, hidden=32, l2=1e-4, feature_set="rung2", test_path=None):
             row = {"all": logloss(p, yt)}
             for bn, mk in (("t1_4", tt <= 4), ("t5_9", (tt >= 5) & (tt <= 9)), ("t10p", tt >= 10)):
                 row[bn] = logloss(p[mk], yt[mk]) if mk.any() else None
+            # sign agreement: how often the score's side (p > 1/2) is the side that went on to win
+            agree = (p > 0.5) == (yt > 0.5)
+            row["sign"] = round(float(agree.mean()), 4)
+            mid = (tt >= 5) & (tt <= 9)
+            row["sign_t5_9"] = round(float(agree[mid].mean()), 4) if mid.any() else None
             outside[label] = row
         report["outside_test"] = outside
     NetEval(feature_set=feature_set, mean=tuple(mean), std=tuple(std),
