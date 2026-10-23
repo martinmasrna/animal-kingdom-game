@@ -8,6 +8,8 @@ module only *produces* the per-game `GameRecord`s.
 
 from __future__ import annotations
 
+import json
+
 import random
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, replace
@@ -148,6 +150,9 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
     if ":" in kind:                       # a `kind:k=v,k=v` spec, as the CLIs take it, usable anywhere a kind is
         kind, kwargs = parse_bot_spec(kind, "kind")
         extra = {**dict(kwargs), **extra}
+    rust = _rust_bot(kind, seed, weights, extra)   # the same bot on the Rust engine when it is built (bots/rust_bot.py)
+    if rust is not None:
+        return rust
     overrides = {k[2:]: extra.pop(k) for k in list(extra) if k.startswith("w.")}
     if overrides:
         weights = replace(weights or GreedyWeights(), **overrides)
@@ -181,6 +186,30 @@ def make_bot(kind: str, seed: int, weights: Optional[GreedyWeights] = None,
         kw.update(extra)
         return TurnBot(weights=weights, seed=seed, **kw)
     raise ValueError(f"unknown bot kind {kind!r} (expected one of {BOT_KINDS})")
+
+
+def _rust_bot(kind: str, seed: int, weights, extra: dict):
+    """The RustBot for this kind and kwargs, or None when the Rust engine is not built, AK_PY_BOTS=1 is set, or the
+    request needs something only the Python bots do (a GreedyWeights object, a bot kind the port lacks)."""
+    from ..bots import rust_bot
+    if not rust_bot.available() or weights is not None:
+        return None
+    base = LEARNED_BASE_KIND.get(kind, kind)
+    if base not in ("greedy", "easy", "turn", "referee", "lookahead", "greedy_belief", "random"):
+        return None
+    evaluator_json = None
+    kwargs = dict(extra)
+    if kind in LEARNED_BASE_KIND:
+        evaluator_json = json.dumps(load_eval(kwargs.pop("eval", DEFAULT_LEARNED_EVAL)).to_dict())
+    parts = []
+    for k, v in kwargs.items():
+        if isinstance(v, bool):
+            v = "true" if v else "false"
+        elif v is None:
+            continue
+        parts.append(f"{k}={v}")
+    spec = kind if not parts else f"{kind}:{','.join(parts)}"
+    return rust_bot.RustBot(spec, seed, evaluator_json)
 
 
 def parse_bot_kind(kind: str, flag: str) -> str:

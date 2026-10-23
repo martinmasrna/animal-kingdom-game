@@ -12,7 +12,16 @@ use crate::data::*;
 use crate::rng::PyRandom;
 use crate::value::{Map, Value};
 
-#[derive(Clone, Debug)]
+#[macro_export]
+macro_rules! emit {
+    ($st:expr, $e:expr, $m:expr) => {
+        if $st.record_events {
+            $st.emit($e, $m);
+        }
+    };
+}
+
+#[derive(Clone, Copy, Debug)]
 pub struct Unit {
     pub card: CardId,
     pub owner: Player,
@@ -27,6 +36,135 @@ pub struct Unit {
 impl Unit {
     pub fn new(card: CardId, owner: Player, iid: i64) -> Unit {
         Unit { card, owner, iid, placed_on_turn: 0, strength_counter: 0, locked_until_turn: 0, retaliation_used: false, play_seq: 0 }
+    }
+}
+
+/// The once-per-turn flags (Python's `turn_flags` dict), typed. `to_json`/`from_json` keep the dict's shape.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct TurnFlags {
+    pub played: [Vec<(i64, CardId)>; 2],
+    pub lost: [i32; 3],
+    pub removed_any: bool,
+    pub food_gained: [i32; 2],
+    pub roamed: Vec<i64>,
+    pub roams: [i32; 2],
+    pub free_roams: [i32; 2],
+    pub free_roams_used: [i32; 2],
+    pub free_roam_iid: Vec<(i64, i64)>,
+    pub bonus_actions: [i32; 2],
+    pub action_cap: [Option<i32>; 2],
+    pub gain_str: Vec<i64>,
+    pub falstaff: [bool; 2],
+    pub caps: Vec<(&'static str, i64)>,
+}
+
+impl TurnFlags {
+    pub fn to_json(&self, st: &State) -> sj::Value {
+        let mut m = sj::Map::default();
+        for p in 0..2 {
+            let pn = player_name(p as Player);
+            if !self.played[p].is_empty() {
+                m.insert(format!("played_{pn}"), sj::Value::Array(self.played[p].iter().map(|(iid, c)| sj::json!([iid, st.cname(*c)])).collect()));
+            }
+            if self.food_gained[p] != 0 {
+                m.insert(format!("food_gained_{pn}"), sj::Value::from(self.food_gained[p]));
+            }
+            if self.roams[p] != 0 {
+                m.insert(format!("roams_{pn}"), sj::Value::from(self.roams[p]));
+            }
+            if self.free_roams[p] != 0 {
+                m.insert(format!("free_roams_{pn}"), sj::Value::from(self.free_roams[p]));
+            }
+            if self.free_roams_used[p] != 0 {
+                m.insert(format!("free_roams_used_{pn}"), sj::Value::from(self.free_roams_used[p]));
+            }
+            if self.bonus_actions[p] != 0 {
+                m.insert(format!("bonus_actions_{pn}"), sj::Value::from(self.bonus_actions[p]));
+            }
+            if let Some(c) = self.action_cap[p] {
+                m.insert(format!("action_cap_{pn}"), sj::Value::from(c));
+            }
+            if self.falstaff[p] {
+                m.insert(format!("falstaff_{pn}"), sj::Value::Bool(true));
+            }
+        }
+        for p in 0..3 {
+            if self.lost[p] != 0 {
+                m.insert(format!("lost_{}", player_name(p as Player)), sj::Value::from(self.lost[p]));
+            }
+        }
+        if self.removed_any {
+            m.insert("removed_any".into(), sj::Value::Bool(true));
+        }
+        for iid in &self.roamed {
+            m.insert(format!("roamed_{iid}"), sj::Value::Bool(true));
+        }
+        for (iid, n) in &self.free_roam_iid {
+            m.insert(format!("free_roam_iid_{iid}"), sj::Value::from(*n));
+        }
+        for iid in &self.gain_str {
+            m.insert(format!("gain_str_{iid}"), sj::Value::Bool(true));
+        }
+        for (flag, iid) in &self.caps {
+            m.insert(format!("{flag}_{iid}"), sj::Value::Bool(true));
+        }
+        sj::Value::Object(m)
+    }
+
+    pub fn from_json(st: &State, v: &sj::Value) -> TurnFlags {
+        let mut t = TurnFlags::default();
+        let Some(obj) = v.as_object() else { return t };
+        for (k, val) in obj {
+            let p_of = |s: &str| -> usize { player_from(s) as usize };
+            if let Some(rest) = k.strip_prefix("played_") {
+                let p = p_of(rest);
+                if p < 2 {
+                    t.played[p] = val.as_array().map(|a| a.iter().map(|e| (e[0].as_i64().unwrap_or(0), st.card_id(e[1].as_str().unwrap_or("")).unwrap_or(0))).collect()).unwrap_or_default();
+                }
+            } else if let Some(rest) = k.strip_prefix("food_gained_") {
+                t.food_gained[p_of(rest).min(1)] = val.as_i64().unwrap_or(0) as i32;
+            } else if let Some(rest) = k.strip_prefix("lost_") {
+                t.lost[p_of(rest)] = val.as_i64().unwrap_or(0) as i32;
+            } else if k == "removed_any" {
+                t.removed_any = val.as_bool().unwrap_or(false);
+            } else if let Some(rest) = k.strip_prefix("roamed_") {
+                if let Ok(i) = rest.parse::<i64>() {
+                    t.roamed.push(i);
+                }
+            } else if let Some(rest) = k.strip_prefix("roams_") {
+                t.roams[p_of(rest).min(1)] = val.as_i64().unwrap_or(0) as i32;
+            } else if let Some(rest) = k.strip_prefix("free_roams_used_") {
+                t.free_roams_used[p_of(rest).min(1)] = val.as_i64().unwrap_or(0) as i32;
+            } else if let Some(rest) = k.strip_prefix("free_roam_iid_") {
+                if let Ok(i) = rest.parse::<i64>() {
+                    t.free_roam_iid.push((i, val.as_i64().unwrap_or(1)));
+                }
+            } else if let Some(rest) = k.strip_prefix("free_roams_") {
+                t.free_roams[p_of(rest).min(1)] = val.as_i64().unwrap_or(0) as i32;
+            } else if let Some(rest) = k.strip_prefix("bonus_actions_") {
+                t.bonus_actions[p_of(rest).min(1)] = val.as_i64().unwrap_or(0) as i32;
+            } else if let Some(rest) = k.strip_prefix("action_cap_") {
+                t.action_cap[p_of(rest).min(1)] = val.as_i64().map(|x| x as i32);
+            } else if let Some(rest) = k.strip_prefix("gain_str_") {
+                if let Ok(i) = rest.parse::<i64>() {
+                    t.gain_str.push(i);
+                }
+            } else if let Some(rest) = k.strip_prefix("falstaff_") {
+                t.falstaff[p_of(rest).min(1)] = val.as_bool().unwrap_or(false);
+            } else if k.starts_with("cap_") {
+                if let Some((flag, iid)) = k.rsplit_once('_') {
+                    if let Ok(i) = iid.parse::<i64>() {
+                        t.caps.push((crate::value::intern(flag), i));
+                    }
+                }
+            }
+        }
+        t
+    }
+
+    /// A canonical rendering for the search's observation key.
+    pub fn canon_into(&self, st: &State, out: &mut String) {
+        out.push_str(&self.to_json(st).to_string());
     }
 }
 
@@ -79,7 +217,7 @@ pub struct State {
     pub effect_stack: Vec<Map>,
     pub pending: Option<Map>,
     pub scheduled: Vec<Map>,
-    pub turn_flags: Map,
+    pub turn_flags: TurnFlags,
     pub card_strength_counters: [FxHashMap<CardId, i32>; 2],
     pub result: Option<GameResult>,
     pub inked: BTreeSet<i64>,
@@ -150,19 +288,19 @@ impl State {
     pub fn card_id(&self, name: &str) -> Option<CardId> {
         self.g.cards.id_of(name)
     }
-    pub fn cname(&self, id: CardId) -> &str {
+    pub fn cname(&self, id: CardId) -> &'static str {
         self.g.cards.name_of(id)
     }
-    pub fn crname(&self, cr: Cr) -> &str {
+    pub fn crname(&self, cr: Cr) -> &'static str {
         self.g.map.name(cr)
     }
 
     // ---------------------------------------------------------------- events
-    pub fn emit(&mut self, e: &str, fields: Map) {
+    pub fn emit(&mut self, e: &'static str, fields: Map) {
         if !self.record_events {
             return;
         }
-        let mut m = Map::new();
+        let mut m = Map::default();
         m.insert("e".into(), Value::s(e));
         for (k, v) in fields {
             m.insert(k, v);
@@ -261,7 +399,9 @@ impl State {
         inst.strength_counter = strength_counter;
         self.hands[player as usize].push(inst.clone());
         let f = crate::vmap!("player" => Value::s(player_name(player)), "iid" => Value::Int(iid), "card" => Value::s(self.cname(card)));
-        self.emit("to_hand", f);
+        if self.record_events {
+            self.emit("to_hand", f);
+        }
         self.ensure_mates(player, Some(vec![inst.clone()]));
         inst
     }
@@ -385,22 +525,25 @@ impl State {
     /// Player-occupied crossroads connected to the player's den (overview.md §8), as a bitmask.
     pub fn connected_occupied(&self, player: Player) -> u32 {
         let gm = &self.g.map;
-        let mut seen: u32 = 0;
-        let mut queue: Vec<Cr> = Vec::with_capacity(16);
-        for &cr in gm.front(player) {
-            if self.owner_of(cr) == Some(player) {
-                seen |= 1 << cr;
-                queue.push(cr);
+        let mut mine: u32 = 0;
+        for &cr in &self.order {
+            if self.stacks[cr as usize].last().map(|u| u.owner == player).unwrap_or(false) {
+                mine |= 1 << cr;
             }
         }
-        let mut qi = 0;
-        while qi < queue.len() {
-            let cr = queue[qi];
-            qi += 1;
+        let mut seen: u32 = 0;
+        for &cr in gm.front(player) {
+            seen |= mine & (1 << cr);
+        }
+        let mut frontier = seen;
+        while frontier != 0 {
+            let cr = frontier.trailing_zeros() as Cr;
+            frontier &= frontier - 1;
             for &nb in gm.neighbors(cr) {
-                if seen & (1 << nb) == 0 && self.owner_of(nb) == Some(player) {
-                    seen |= 1 << nb;
-                    queue.push(nb);
+                let bit = 1u32 << nb;
+                if seen & bit == 0 && mine & bit != 0 {
+                    seen |= bit;
+                    frontier |= bit;
                 }
             }
         }
@@ -453,7 +596,7 @@ impl State {
     }
 
     pub fn to_json(&self) -> sj::Value {
-        let mut board = sj::Map::new();
+        let mut board = sj::Map::default();
         for &cr in &self.order {
             board.insert(self.crname(cr).to_string(), sj::Value::Array(self.stacks[cr as usize].iter().map(|u| self.unit_json(u)).collect()));
         }
@@ -469,19 +612,19 @@ impl State {
             m.sort();
             sj::Value::Object(m.into_iter().map(|(k, (a, b))| (k, sj::json!([a, b]))).collect())
         };
-        let mut roar_twice = sj::Map::new();
+        let mut roar_twice = sj::Map::default();
         for p in 0..2 {
             if let Some(t) = self.roar_twice[p] {
                 roar_twice.insert(player_name(p as Player).to_string(), sj::Value::from(t));
             }
         }
-        let mut last_roar = sj::Map::new();
+        let mut last_roar = sj::Map::default();
         for p in 0..2 {
             if let Some(c) = self.last_roar[p] {
                 last_roar.insert(player_name(p as Player).to_string(), sj::Value::String(self.cname(c).to_string()));
             }
         }
-        let mut jelly_m = sj::Map::new();
+        let mut jelly_m = sj::Map::default();
         for p in 0..2 {
             if self.jelly_set[p] {
                 jelly_m.insert(player_name(p as Player).to_string(), jelly(p));
@@ -507,7 +650,7 @@ impl State {
             "effect_stack": self.effect_stack.iter().map(|m| Value::Map(m.clone()).to_json()).collect::<Vec<_>>(),
             "pending": self.pending.as_ref().map(|m| Value::Map(m.clone()).to_json()).unwrap_or(sj::Value::Null),
             "scheduled": self.scheduled.iter().map(|m| Value::Map(m.clone()).to_json()).collect::<Vec<_>>(),
-            "turn_flags": Value::Map(self.turn_flags.clone()).to_json(),
+            "turn_flags": self.turn_flags.to_json(self),
             "card_strength_counters": {"A": counters(0), "B": counters(1)},
             "result": self.result.as_ref().map(|r| sj::json!({"winner": r.winner.map(player_name), "reason": r.reason})).unwrap_or(sj::Value::Null),
             "pile_owners": self.pile_owners.iter().map(|o| o.map(|p| sj::Value::String(player_name(p).to_string())).unwrap_or(sj::Value::Null)).collect::<Vec<_>>(),
@@ -597,7 +740,7 @@ impl State {
                     .collect()
             })
             .unwrap_or_default();
-        st.turn_flags = d.get("turn_flags").filter(|t| !t.is_null()).map(|t| Value::from_json(t).as_map().unwrap().clone()).unwrap_or_default();
+        st.turn_flags = d.get("turn_flags").filter(|t| !t.is_null()).map(|t| TurnFlags::from_json(&st, t)).unwrap_or_default();
         st.result = d.get("result").filter(|r| !r.is_null()).map(|r| GameResult {
             winner: r["winner"].as_str().map(player_from),
             reason: r["reason"].as_str().unwrap().to_string(),
@@ -638,7 +781,7 @@ impl State {
             effect_stack: Vec::new(),
             pending: None,
             scheduled: Vec::new(),
-            turn_flags: Map::new(),
+            turn_flags: TurnFlags::default(),
             card_strength_counters: [FxHashMap::default(), FxHashMap::default()],
             result: None,
             inked: BTreeSet::new(),
@@ -710,9 +853,9 @@ pub fn mulligan_request(st: &State, player: Player) -> Map {
 /// A step saved before its facts were required (2026-10-01) gets them as the engine used to assume them.
 pub fn upgrade_step(mut step: Map) -> Map {
     let op = step.get("op").and_then(|o| o.as_str()).unwrap_or("").to_string();
-    let set_default = |m: &mut Map, k: &str, v: Value| {
+    let set_default = |m: &mut Map, k: &'static str, v: Value| {
         if !m.contains_key(k) {
-            m.insert(k.to_string(), v);
+            m.insert(k, v);
         }
     };
     match op.as_str() {
@@ -722,7 +865,7 @@ pub fn upgrade_step(mut step: Map) -> Map {
         }
         "remove_choice" => set_default(&mut step, "optional", Value::Bool(false)),
         "play_extra" => {
-            set_default(&mut step, "filter", Value::Map(Map::new()));
+            set_default(&mut step, "filter", Value::Map(Map::default()));
             set_default(&mut step, "optional", Value::Bool(false));
         }
         "scout" => set_default(&mut step, "spec", Value::Null),

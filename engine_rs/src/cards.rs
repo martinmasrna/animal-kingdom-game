@@ -155,7 +155,7 @@ fn removes(st: &mut State, unit: &Unit, cr: Cr, max_attr: Option<&str>, min_attr
     let targets = adjacent_enemy_targets(st, unit, cr, max, min, true);
     push_remove_choice(st, unit.owner, unit.card, targets, false);
 }
-fn draws_filtered(st: &mut State, unit: &Unit, spec: &str, n: i32) {
+fn draws_filtered(st: &mut State, unit: &Unit, spec: &'static str, n: i32) {
     st.effect_stack.push(vmap!("op" => Value::s("draw_filtered"), "player" => pn(unit.owner), "n" => Value::Int(n as i64), "spec" => Value::s(spec)));
 }
 fn conditional(st: &State, unit: &Unit) -> bool {
@@ -205,16 +205,10 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
 }
 
 fn played_this_turn(st: &State, player: Player, tag: u32, unit: Option<&Unit>) -> i32 {
-    let key = format!("played_{}", player_name(player));
-    let Some(Value::List(l)) = st.turn_flags.get(&key) else { return 0 };
-    l.iter()
-        .filter(|e| {
-            let e = e.as_list().unwrap();
-            let iid = e[0].as_i64().unwrap_or(-1);
-            let c = st.card_id(e[1].as_str().unwrap_or("")).map(|c| st.card(c).tags).unwrap_or(0);
-            c & tag != 0 && unit.map(|u| u.iid != iid).unwrap_or(true)
-        })
-        .count() as i32
+    if player > B {
+        return 0;
+    }
+    st.turn_flags.played[player as usize].iter().filter(|(iid, c)| st.card(*c).tags & tag != 0 && unit.map(|u| u.iid != *iid).unwrap_or(true)).count() as i32
 }
 
 fn controls_two_same_colony(st: &State, player: Player) -> bool {
@@ -250,7 +244,7 @@ fn add_strength(st: &mut State, iid: i64, n: i32) {
     if let Some(u) = st.unit_by_iid_mut(iid) {
         u.strength_counter += n;
         let u = u.clone();
-        st.emit("strength", vmap!("iid" => Value::Int(iid), "card" => card_v(st, u.card), "owner" => pn(u.owner), "n" => Value::Int(n as i64)));
+        crate::emit!(st, "strength", vmap!("iid" => Value::Int(iid), "card" => card_v(st, u.card), "owner" => pn(u.owner), "n" => Value::Int(n as i64)));
     }
 }
 
@@ -261,7 +255,7 @@ fn put_back(st: &mut State, unit: &Unit, cr: Cr, pos: usize, grow: i32) {
         back.strength_counter = unit.strength_counter + grow;
         let at = pos.min(st.stack(cr).len());
         st.insert_unit(cr, at, back);
-        st.emit("place", vmap!("player" => pn(unit.owner), "iid" => Value::Int(iid), "card" => card_v(st, unit.card), "cr" => cr_v(st, cr), "from_hand" => Value::Bool(false), "at" => Value::Int(at as i64)));
+        crate::emit!(st, "place", vmap!("player" => pn(unit.owner), "iid" => Value::Int(iid), "card" => card_v(st, unit.card), "cr" => cr_v(st, cr), "from_hand" => Value::Bool(false), "at" => Value::Int(at as i64)));
     }
 }
 
@@ -297,7 +291,7 @@ pub fn remove_another_copy(st: &mut State, player: Player, card: CardId) {
     }
     st.jelly_take(player, card);
     st.pile_add(card, Some(player));
-    st.emit("remove", vmap!("zone" => Value::s("deck"), "card" => card_v(st, card), "owner" => pn(player)));
+    crate::emit!(st, "remove", vmap!("zone" => Value::s("deck"), "card" => card_v(st, card), "owner" => pn(player)));
     // a remove event from nowhere on the board: the Python engine fires it with cr None
     fire_remove_event_pub(st, card, player);
 }
@@ -445,7 +439,7 @@ fn spawns_beside(st: &mut State, unit: &Unit, cr: Cr, token: &str) {
     }
 }
 
-fn twin_place(st: &mut State, unit: &Unit, twin: &str) {
+fn twin_place(st: &mut State, unit: &Unit, twin: &'static str) {
     st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(unit.owner), "card_id" => Value::s(twin)));
 }
 
@@ -457,14 +451,14 @@ pub fn rattlesnake_shuffle_event(st: &mut State, player: Player) {
     let Some(rs) = st.g.known.rattlesnake else { return };
     if owns_copy(st, player, rs) {
         *st.card_strength_counters[player as usize].entry(rs).or_insert(0) += 1;
-        st.emit("strength", vmap!("card" => Value::s("rattlesnake"), "owner" => pn(player), "n" => Value::Int(1)));
+        crate::emit!(st, "strength", vmap!("card" => Value::s("rattlesnake"), "owner" => pn(player), "n" => Value::Int(1)));
     }
 }
 
 pub fn vultures_dusk(st: &mut State, player: Player) {
     let Some(vulture) = st.g.known.vulture else { return };
-    let lost = m_get_i(&st.turn_flags, "lost_A").unwrap_or(0) + m_get_i(&st.turn_flags, "lost_B").unwrap_or(0);
-    if (lost as i32) < cfg(st, "vulture_removals") {
+    let lost = st.turn_flags.lost[0] + st.turn_flags.lost[1];
+    if lost < cfg(st, "vulture_removals") {
         return;
     }
     let p = player as usize;
@@ -511,7 +505,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 .map(|(nb, _)| nb)
                 .collect();
             let o = crs(st, options);
-            push_choose(st, owner, o, "cuckoo", false, Map::new());
+            push_choose(st, owner, o, "cuckoo", false, Map::default());
         }
         ("pheasant_legend", OnRemove) => {
             if st.pile_take(unit.card, Some(owner)) {
@@ -531,7 +525,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("sea_turtle", OnEndOfTurn) => spawns_beside(st, unit, cr, "baby_turtle"),
         ("raccoon", OnPlace) => {
-            let mut names: Vec<String> = st.pile_cards_of(owner).iter().map(|c| st.cname(*c).to_string()).collect();
+            let mut names: Vec<&'static str> = st.pile_cards_of(owner).iter().map(|c| st.cname(*c)).collect();
             names.sort();
             names.dedup();
             push_choose(st, owner, names.into_iter().map(Value::Str).collect(), "pile_to_hand", false, vmap!("from_owner" => pn(owner)));
@@ -831,15 +825,15 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 remove_specific(st, cr, unit.iid, owner, true, Some(me), false);
                 return;
             }
-            st.emit("to_deck", vmap!("cr" => cr_v(st, cr), "iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "owner" => pn(owner)));
+            crate::emit!(st, "to_deck", vmap!("cr" => cr_v(st, cr), "iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "owner" => pn(owner)));
             st.take_unit(cr, unit.iid);
             *st.card_strength_counters[owner as usize].entry(me).or_insert(0) -= decay;
-            st.emit("strength", vmap!("card" => Value::s("anaconda_legend"), "owner" => pn(owner), "n" => Value::Int(-(decay as i64))));
+            crate::emit!(st, "strength", vmap!("card" => Value::s("anaconda_legend"), "owner" => pn(owner), "n" => Value::Int(-(decay as i64))));
             shuffle_back(st, owner, &[me], None);
         }
         ("raven_legend", OnPlace) => {
             let opp = other(owner);
-            let mut names: Vec<String> = st.pile_cards_of(opp).iter().map(|c| st.cname(*c).to_string()).collect();
+            let mut names: Vec<&'static str> = st.pile_cards_of(opp).iter().map(|c| st.cname(*c)).collect();
             names.sort();
             names.dedup();
             push_choose(st, owner, names.into_iter().map(Value::Str).collect(), "pile_to_hand", false, vmap!("from_owner" => pn(opp)));
@@ -1131,7 +1125,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("orangutan", OnPlace) => {
             let o: Vec<Value> = hand_iids(st, owner, T_PRIMATE).into_iter().map(Value::Int).collect();
-            push_choose(st, owner, o, "duplicate", false, Map::new());
+            push_choose(st, owner, o, "duplicate", false, Map::default());
         }
         ("tarsier", OnPlace) => {
             let g = cfg(st, "tarsier_grant");
@@ -1225,7 +1219,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 if let Some(top) = st.top(nb).cloned() {
                     if top.owner != owner && !st.inked.contains(&top.iid) {
                         st.inked.insert(top.iid);
-                        st.emit("inked", vmap!("iid" => Value::Int(top.iid), "card" => card_v(st, top.card), "owner" => pn(top.owner)));
+                        crate::emit!(st, "inked", vmap!("iid" => Value::Int(top.iid), "card" => card_v(st, top.card), "owner" => pn(top.owner)));
                     }
                 }
             }
@@ -1265,7 +1259,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("opossum", OnPlace) => {
             let o = crs(st, adjacent_friendly_units(st, unit, cr));
-            push_choose(st, owner, o, "return_ally", false, Map::new());
+            push_choose(st, owner, o, "return_ally", false, Map::default());
         }
         ("fox_legend", OnPlace) => {
             let n = cfg(st, "alpha_pups");
@@ -1397,7 +1391,7 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             let Some(card) = choice.as_str().and_then(|s| st.card_id(s)) else { return };
             let from_owner = m_get_s(step, "from_owner").map(player_from);
             if st.pile_take(card, from_owner) {
-                st.emit("unremove", vmap!("card" => card_v(st, card), "owner" => from_owner.map(pn).unwrap_or(Value::Null), "to" => pn(chooser)));
+                crate::emit!(st, "unremove", vmap!("card" => card_v(st, card), "owner" => from_owner.map(pn).unwrap_or(Value::Null), "to" => pn(chooser)));
                 gain_to_hand(st, chooser, card, 0);
             }
         }

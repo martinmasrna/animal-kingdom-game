@@ -24,7 +24,7 @@ pub const SKIP: &str = "__skip__";
 
 impl Action {
     pub fn is_skip(&self) -> bool {
-        matches!(self, Action::Choice(Value::Str(s)) if s == SKIP)
+        matches!(self, Action::Choice(Value::Str(s)) if *s == SKIP)
     }
     pub fn skip() -> Action {
         Action::Choice(Value::s(SKIP))

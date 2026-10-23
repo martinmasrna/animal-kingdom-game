@@ -5,7 +5,7 @@ use crate::data::*;
 use crate::effects;
 use crate::state::{mulligan_request, GameResult, State};
 use crate::statics;
-use crate::value::{m_get_i, m_get_s, Map};
+use crate::value::m_get_s;
 use serde_json as sj;
 
 pub const TITAN_ACTIONS: i32 = 2;
@@ -48,9 +48,10 @@ fn has_top_level_action(st: &State) -> bool {
 
 pub fn turn_actions(st: &State) -> i32 {
     let base = if st.turn_counter == 0 { st.cfg().first_turn_actions } else { st.cfg().actions_per_turn };
-    let total = base + m_get_i(&st.turn_flags, &format!("bonus_actions_{}", player_name(st.current))).unwrap_or(0) as i32;
-    match m_get_i(&st.turn_flags, &format!("action_cap_{}", player_name(st.current))) {
-        Some(cap) => total.min(cap as i32),
+    let p = st.current.min(1) as usize;
+    let total = base + st.turn_flags.bonus_actions[p];
+    match st.turn_flags.action_cap[p] {
+        Some(cap) => total.min(cap),
         None => total,
     }
 }
@@ -175,7 +176,7 @@ fn resolve_and_maybe_end_turn(st: &mut State) {
 
 fn end_turn(st: &mut State) {
     let player = st.current;
-    st.emit("turn_end", crate::vmap!("player" => effects::pn(player)));
+    crate::emit!(st, "turn_end", crate::vmap!("player" => effects::pn(player)));
     effects::end_of_turn(st, player);
     effects::resolve(st);
     if st.decided() {
@@ -185,7 +186,7 @@ fn end_turn(st: &mut State) {
     if st.decided() {
         return;
     }
-    let acted = st.actions_taken_this_turn != 0 || m_get_i(&st.turn_flags, &format!("roams_{}", player_name(player))).unwrap_or(0) != 0;
+    let acted = st.actions_taken_this_turn != 0 || st.turn_flags.roams[player.min(1) as usize] != 0;
     st.idle_turns = if acted { 0 } else { st.idle_turns + 1 };
     if st.idle_turns >= 2 {
         st.result = Some(resolve_passes(st));
@@ -194,10 +195,10 @@ fn end_turn(st: &mut State) {
     st.turn_counter += 1;
     st.units_placed_this_turn = 0;
     st.actions_taken_this_turn = 0;
-    st.turn_flags = Map::new();
+    st.turn_flags = crate::state::TurnFlags::default();
     st.current = other(player);
     let (cur, t) = (st.current, st.turn_counter);
-    st.emit("turn_start", crate::vmap!("player" => effects::pn(cur), "turn" => crate::value::Value::Int(t as i64)));
+    crate::emit!(st, "turn_start", crate::vmap!("player" => effects::pn(cur), "turn" => crate::value::Value::Int(t as i64)));
     effects::start_of_turn(st, cur);
     effects::resolve(st);
     if st.result.is_none() && st.pending.is_none() && st.effect_stack.is_empty() && st.turn_counter < st.cfg().max_turns && !has_top_level_action(st) {

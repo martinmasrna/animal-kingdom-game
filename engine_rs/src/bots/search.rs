@@ -1082,7 +1082,7 @@ fn canon(v: &Value, out: &mut String) {
             out.push(']');
         }
         Value::Map(m) => {
-            let mut keys: Vec<&String> = m.keys().collect();
+            let mut keys: Vec<&'static str> = m.keys().copied().collect();
             keys.sort();
             out.push('{');
             for k in keys {
@@ -1141,7 +1141,7 @@ pub fn observation_key(st: &State, me: Player) -> String {
         out.push(';');
     }
     out.push('|');
-    canon(&Value::Map(st.turn_flags.clone()), &mut out);
+    st.turn_flags.canon_into(st, &mut out);
     out.push('|');
     match &st.result {
         Some(r) => out.push_str(&format!("{:?}/{}", r.winner.map(player_name), r.reason)),

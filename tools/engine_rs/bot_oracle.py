@@ -3,7 +3,9 @@ their root scores) must agree. Positions come from random play through the Pytho
 
     .venv/bin/python tools/engine_rs/bot_oracle.py [--specs greedy,turn,expert] [--positions 60] [--seed 0]
 """
-import argparse, dataclasses, json, random, sys, time
+import argparse, dataclasses, json, os, random, sys, time
+
+os.environ["AK_PY_BOTS"] = "1"   # the Python side of the oracle must be the Python bot
 
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.cards import load_cards

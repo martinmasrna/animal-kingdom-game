@@ -116,7 +116,7 @@ pub fn roam_covers_equal(st: &State, owner: Player) -> bool {
 }
 
 pub fn reach_of(st: &State, card: CardId) -> i32 {
-    if st.card(card).has_kw(K_REACH) || (Some(card) == st.g.known.great_white_shark && crate::value::m_flag(&st.turn_flags, "removed_any")) {
+    if st.card(card).has_kw(K_REACH) || (Some(card) == st.g.known.great_white_shark && st.turn_flags.removed_any) {
         st.cfg().reach
     } else {
         0
@@ -224,12 +224,17 @@ pub fn grazing(st: &State, unit: &Unit, cr: Option<Cr>) -> bool {
 
 pub fn region_food_modifier(st: &State, player: Player) -> i32 {
     let cfg = st.cfg();
-    cfg.int("migration_bonus") * active_tops(st, player, st.g.known.wildebeest_legend).len() as i32
-        - cfg.int("boar_penalty") * active_tops(st, other(player), st.g.known.boar_legend).len() as i32
+    let count = |p: Player, c: Option<CardId>| -> i32 { c.map(|c| st.tops().filter(|(_, u)| u.owner == p && u.card == c && active(st, u)).count() as i32).unwrap_or(0) };
+    let w = count(player, st.g.known.wildebeest_legend);
+    let b = count(other(player), st.g.known.boar_legend);
+    if w == 0 && b == 0 {
+        return 0;
+    }
+    cfg.int("migration_bonus") * w - cfg.int("boar_penalty") * b
 }
 
 pub fn food_cap(st: &State) -> Option<i32> {
-    if !active_tops(st, A, st.g.known.tortoise_legend).is_empty() || !active_tops(st, B, st.g.known.tortoise_legend).is_empty() {
+    if controls(st, A, st.g.known.tortoise_legend) || controls(st, B, st.g.known.tortoise_legend) {
         return Some(st.cfg().int("tortoise_legend_food_cap"));
     }
     None

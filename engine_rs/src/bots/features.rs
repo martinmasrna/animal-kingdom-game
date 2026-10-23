@@ -154,7 +154,8 @@ pub fn region_fractions(st: &State, me: Player, opp: Player) -> Vec<(f64, f64, f
 pub fn region_control(fractions: &[(f64, f64, f64)]) -> f64 {
     let mut region = 0.0;
     for &(food, mine, theirs) in fractions {
-        region += food * (mine.powf(3.0) - theirs.powf(3.0));
+        // the fractions are quarters: their cubes are exact either way, so the product equals Python's `** 3`
+        region += food * (mine * mine * mine - theirs * theirs * theirs);
     }
     region
 }
@@ -736,7 +737,7 @@ fn extra_actions(st: &State, player: Player) -> f64 {
             }
         }
     }
-    (m_get_i(&st.turn_flags, &format!("bonus_actions_{}", player_name(player))).unwrap_or(0) + pending) as f64
+    (st.turn_flags.bonus_actions[player.min(1) as usize] as i64 + pending) as f64
 }
 
 /// The feature vector for `st` from `me`'s side, in `feature_names` order. `st` must be non-terminal.

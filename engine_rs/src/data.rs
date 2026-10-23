@@ -186,6 +186,8 @@ impl Card {
 pub struct Cards {
     pub list: Vec<Card>,
     pub by_id: FxHashMap<String, CardId>,
+    /// Each card's id as a `&'static str` (leaked once per process), for the engine's step data.
+    pub snames: Vec<&'static str>,
 }
 
 impl Cards {
@@ -246,7 +248,8 @@ impl Cards {
         for (i, m) in mates {
             list[i].mate = by_id.get(&m).copied();
         }
-        Ok(Cards { list, by_id })
+        let snames = list.iter().map(|c| crate::value::intern(&c.id)).collect();
+        Ok(Cards { list, by_id, snames })
     }
     pub fn get(&self, id: CardId) -> &Card {
         &self.list[id as usize]
@@ -254,8 +257,8 @@ impl Cards {
     pub fn id_of(&self, name: &str) -> Option<CardId> {
         self.by_id.get(name).copied()
     }
-    pub fn name_of(&self, id: CardId) -> &str {
-        &self.list[id as usize].id
+    pub fn name_of(&self, id: CardId) -> &'static str {
+        self.snames[id as usize]
     }
 }
 
@@ -269,6 +272,7 @@ pub struct Region {
 pub struct GameMap {
     pub id: String,
     pub crossroads: Vec<String>, // index -> name
+    pub snames: Vec<&'static str>,
     pub sorted: Vec<Cr>,         // crossroad indexes in name order (the Python engine iterates sorted names)
     pub by_name: FxHashMap<String, Cr>,
     pub adjacency: Vec<Vec<Cr>>, // sorted by neighbour name
@@ -313,6 +317,7 @@ impl GameMap {
         Ok(GameMap {
             id: rec["id"].as_str().unwrap().to_string(),
             hq_front: [front("A"), front("B")],
+            snames: names.iter().map(|n| crate::value::intern(n)).collect(),
             crossroads: names,
             sorted,
             by_name,
@@ -324,8 +329,8 @@ impl GameMap {
     pub fn n(&self) -> usize {
         self.crossroads.len()
     }
-    pub fn name(&self, cr: Cr) -> &str {
-        &self.crossroads[cr as usize]
+    pub fn name(&self, cr: Cr) -> &'static str {
+        self.snames[cr as usize]
     }
     pub fn cr(&self, name: &str) -> Option<Cr> {
         self.by_name.get(name).copied()
