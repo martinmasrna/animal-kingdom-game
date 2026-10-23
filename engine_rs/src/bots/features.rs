@@ -1005,17 +1005,181 @@ impl NetEval {
     }
 }
 
+/// The slot network (bots/slot_eval.py, learn/slotnet.py): one shared encoder over the board's crossroad slots with a
+/// learned embedding per slot, one over the hand slots, sum and max pooling, the globals standardised, a small trunk.
+/// Written in the exact order the Python evaluator uses, so both engines agree to the last bit.
+#[derive(Clone, Debug)]
+pub struct SlotEval {
+    pub feature_set: String,
+    pub globals: Vec<usize>,
+    pub slot_offset: usize,
+    pub slot_width: usize,
+    pub n_slots: usize,
+    pub hand_offset: usize,
+    pub hand_width: usize,
+    pub n_hands: usize,
+    pub we_s: Vec<Vec<f64>>,
+    pub we_h: Vec<Vec<f64>>,
+    pub be_h: Vec<f64>,
+    pub w1: Vec<Vec<f64>>,
+    pub w2: Vec<f64>,
+    pub b2: f64,
+    pub scale: f64,
+    pub w1g: Vec<Vec<f64>>,       // the globals' rows of w1 divided by their std
+    pub b1f: Vec<f64>,            // b1 less the means' share
+    pub slot_bias: Vec<Vec<f64>>, // be_s plus the embedding's share, per slot
+}
+
+impl SlotEval {
+    fn from_json(d: &sj::Value, fs: String) -> Result<SlotEval, String> {
+        let vec = |k: &str| -> Vec<f64> { d[k].as_array().map(|a| a.iter().map(|x| x.as_f64().unwrap_or(0.0)).collect()).unwrap_or_default() };
+        let rows = |k: &str| -> Vec<Vec<f64>> { d[k].as_array().map(|rs| rs.iter().map(|r| r.as_array().unwrap().iter().map(|x| x.as_f64().unwrap_or(0.0)).collect()).collect()).unwrap_or_default() };
+        let usize_of = |k: &str| d[k].as_u64().ok_or(format!("slotnet artifact without {k}")).map(|x| x as usize);
+        let globals: Vec<usize> = d["globals"].as_array().ok_or("slotnet artifact without globals")?.iter().map(|x| x.as_u64().unwrap_or(0) as usize).collect();
+        let (mean, std, embed, we_s, be_s, b1, w1) = (vec("mean"), vec("std"), rows("embed"), rows("we_s"), vec("be_s"), vec("b1"), rows("w1"));
+        let slot_width = usize_of("slot_width")?;
+        let n_slots = usize_of("n_slots")?;
+        let ng = globals.len();
+        let hidden = b1.len();
+        let inv: Vec<f64> = std.iter().map(|s| 1.0 / s).collect();
+        let w1g: Vec<Vec<f64>> = (0..ng).map(|i| (0..hidden).map(|j| w1[i][j] * inv[i]).collect()).collect();
+        let b1f: Vec<f64> = (0..hidden)
+            .map(|j| {
+                let mut acc = 0.0;
+                for i in 0..ng {
+                    acc += (mean[i] * inv[i]) * w1[i][j];
+                }
+                b1[j] - acc
+            })
+            .collect();
+        let slot_bias: Vec<Vec<f64>> = (0..n_slots)
+            .map(|k| {
+                (0..be_s.len())
+                    .map(|j| {
+                        let mut acc = be_s[j];
+                        for e in 0..embed[k].len() {
+                            acc += embed[k][e] * we_s[slot_width + e][j];
+                        }
+                        acc
+                    })
+                    .collect()
+            })
+            .collect();
+        Ok(SlotEval {
+            feature_set: fs,
+            globals,
+            slot_offset: usize_of("slot_offset")?,
+            slot_width,
+            n_slots,
+            hand_offset: usize_of("hand_offset")?,
+            hand_width: usize_of("hand_width")?,
+            n_hands: usize_of("n_hands")?,
+            we_s,
+            we_h: rows("we_h"),
+            be_h: vec("be_h"),
+            w1,
+            w2: vec("w2"),
+            b2: d["b2"].as_f64().unwrap_or(0.0),
+            scale: d.get("scale").and_then(|s| s.as_f64()).unwrap_or(1.0),
+            w1g,
+            b1f,
+            slot_bias,
+        })
+    }
+
+    pub fn logit_of(&self, phi: &[f64]) -> f64 {
+        let sh = self.slot_bias.first().map(|b| b.len()).unwrap_or(0);
+        let hh = self.be_h.len();
+        let th = self.b1f.len();
+        let mut sum_s = vec![0.0; sh];
+        let mut max_s = vec![f64::NEG_INFINITY; sh];
+        for k in 0..self.n_slots {
+            let mut a = self.slot_bias[k].clone();
+            let base = self.slot_offset + k * self.slot_width;
+            for i in 0..self.slot_width {
+                let x = phi[base + i];
+                if x != 0.0 {
+                    let row = &self.we_s[i];
+                    for j in 0..sh {
+                        a[j] += x * row[j];
+                    }
+                }
+            }
+            for j in 0..sh {
+                let h = if a[j] > 0.0 { a[j] } else { 0.0 };
+                sum_s[j] += h;
+                if h > max_s[j] {
+                    max_s[j] = h;
+                }
+            }
+        }
+        let mut sum_h = vec![0.0; hh];
+        let mut max_h = vec![f64::NEG_INFINITY; hh];
+        for k in 0..self.n_hands {
+            let mut a = self.be_h.clone();
+            let base = self.hand_offset + k * self.hand_width;
+            for i in 0..self.hand_width {
+                let x = phi[base + i];
+                if x != 0.0 {
+                    let row = &self.we_h[i];
+                    for j in 0..hh {
+                        a[j] += x * row[j];
+                    }
+                }
+            }
+            for j in 0..hh {
+                let h = if a[j] > 0.0 { a[j] } else { 0.0 };
+                sum_h[j] += h;
+                if h > max_h[j] {
+                    max_h[j] = h;
+                }
+            }
+        }
+        let mut t = self.b1f.clone();
+        for (i, &col) in self.globals.iter().enumerate() {
+            let x = phi[col];
+            if x != 0.0 {
+                let row = &self.w1g[i];
+                for j in 0..th {
+                    t[j] += x * row[j];
+                }
+            }
+        }
+        let ng = self.globals.len();
+        let pooled: Vec<f64> = sum_s.iter().chain(max_s.iter()).chain(sum_h.iter()).chain(max_h.iter()).copied().collect();
+        for (i, &x) in pooled.iter().enumerate() {
+            if x != 0.0 {
+                let row = &self.w1[ng + i];
+                for j in 0..th {
+                    t[j] += x * row[j];
+                }
+            }
+        }
+        let mut out = self.b2;
+        for j in 0..th {
+            if t[j] > 0.0 {
+                out += self.w2[j] * t[j];
+            }
+        }
+        out
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum Evaluator {
     Hand,
     Linear(LinearEval),
     Net(NetEval),
+    Slot(SlotEval),
 }
 
 impl Evaluator {
     pub fn from_json(d: &sj::Value) -> Result<Evaluator, String> {
         let fs = d["feature_set"].as_str().ok_or("evaluator without feature_set")?.to_string();
         let vec = |k: &str| -> Vec<f64> { d[k].as_array().map(|a| a.iter().map(|x| x.as_f64().unwrap_or(0.0)).collect()).unwrap_or_default() };
+        if d.get("kind").and_then(|k| k.as_str()) == Some("slotnet") {
+            return Ok(Evaluator::Slot(SlotEval::from_json(d, fs)?));
+        }
         if d.get("kind").and_then(|k| k.as_str()) == Some("mlp") || d.get("w1").is_some() {
             let mut net = NetEval {
                 feature_set: fs,
@@ -1049,6 +1213,13 @@ impl Evaluator {
                     s += w * x;
                 }
                 l.bias + s
+            }
+            Evaluator::Slot(n) => {
+                if let Some(r) = &st.result {
+                    return if r.winner == Some(me) { f64::INFINITY } else if r.winner == Some(other(me)) { f64::NEG_INFINITY } else { 0.0 };
+                }
+                let phi = extract(st, me, &n.feature_set);
+                n.scale * n.logit_of(&phi)
             }
             Evaluator::Net(n) => {
                 if let Some(r) = &st.result {

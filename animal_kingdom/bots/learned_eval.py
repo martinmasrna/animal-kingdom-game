@@ -159,4 +159,7 @@ def load_eval(name_or_path: str) -> LinearEval:
     if raw.get("kind") == "mlp":
         from .net_eval import NetEval
         return NetEval.from_dict(raw)
+    if raw.get("kind") == "slotnet":
+        from .slot_eval import SlotEval
+        return SlotEval.from_dict(raw)
     return LinearEval.from_dict(raw)
