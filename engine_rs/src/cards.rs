@@ -83,7 +83,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
-        | "tutorial_lynx" | "tutorial_chipmunk" | "mock_scout" | "mock_saboteur" | "mock_draw2" | "mock_removal" => &[OnPlace],
+        | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "mock_scout" | "mock_saboteur" | "mock_draw2" | "mock_removal" => &[OnPlace],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
         "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "worker_wasp" | "scout_bee" | "ant"
@@ -199,6 +199,7 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
         "piranha" => lost_this_turn(st, player) >= 1,
         "hare" | "rat" => placed_plus >= cfg(st, "hare_played_min"),
         "macaque" => hand_after() >= cfg(st, "macaque_hand_min"),
+        "ocelot" => hand_after() == 0,
         "gorilla" => strength() >= cfg(st, "gorilla_min"),
         _ => return None,
     })
@@ -814,6 +815,12 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("hare", OnPlace) => {
             if conditional(st, unit) {
                 let n = cfg(st, "hare_draw");
+                draws(st, unit, n);
+            }
+        }
+        ("ocelot", OnPlace) => {
+            if conditional(st, unit) {
+                let n = cfg(st, "ocelot_draw");
                 draws(st, unit, n);
             }
         }

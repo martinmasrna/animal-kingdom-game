@@ -235,6 +235,15 @@ def test_the_tiger_legend_removes_an_adjacent_enemy_at_dusk_never_an_ally_or_arm
     assert s.top_unit("1,1").card_id == "lion" and s.top_unit("1,3").card_id == "stag_beetle"
 
 
+def test_the_ocelot_draws_three_only_from_an_empty_hand():
+    s = make_state(hands={"A": ["ocelot"]}, decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
+    rules.apply_action(s, PlaceAction("ocelot", ("cr", "1,2")))
+    assert hand_ids(s, "A") == ["lion"] * 3
+    s = make_state(hands={"A": ["ocelot", "mouse"]}, decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
+    rules.apply_action(s, PlaceAction("ocelot", ("cr", "1,2")))
+    assert hand_ids(s, "A") == ["mouse"]
+
+
 def test_sea_turtle_lays_a_baby_turtle_on_an_empty_neighbour():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "sea_turtle", "A")

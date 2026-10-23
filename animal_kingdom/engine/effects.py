@@ -1739,6 +1739,7 @@ def roar_condition(state, player, card_id, unit=None):
         "hare": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
         "rat": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
         "macaque": lambda: hand_after() >= cfg.macaque_hand_min,
+        "ocelot": lambda: hand_after() == 0,
         "gorilla": lambda: strength() >= cfg.gorilla_min,
     }.get(card_id)
     return check() if check else None
@@ -3055,6 +3056,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "hornet": {"on_place": _hornet_place},
     "skunk": {"on_place": _skunk_place},
     "hare": {"on_place": _conditional(_draws("hare_draw"))},
+    "ocelot": {"on_place": _conditional(_draws("ocelot_draw"))},
     "cheetah": {"on_place": _hq_adjacent_draw},
     "rat": {"on_place": _conditional(_rat_place)},
     "falcon": {"on_place": _hq_adjacent_draw},
