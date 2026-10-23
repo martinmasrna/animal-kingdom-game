@@ -295,10 +295,13 @@ def test_decisive_bounds_what_a_decided_game_is_worth_in_the_search():
     from animal_kingdom.bots.turn_search import _DECISIVE
     default, finite = RefereeBot(seed=1), RefereeBot(seed=1, decisive=300)
     assert default.decisive == _DECISIVE
-    s = make_state(hands={"A": ["lion"]})     # a real state: the compiled search (mypyc, the image) enforces the annotation
-    for bot in (default, finite):
-        bot._eval = lambda state, me: 1e7
-    assert default._clamped_eval(s, "A") == 1e7
-    assert finite._clamped_eval(s, "A") == 300
-    finite._eval = lambda state, me: -1e7
-    assert finite._clamped_eval(s, "A") == -300
+    # a real position with a clear lead, scored for real: the compiled search in the image (mypyc) enforces the state's
+    # type and binds methods at compile time, so neither None nor a patched `_eval` reaches it
+    s = make_state()
+    for cr in ("1,1", "1,2", "2,1"):
+        put(s, cr, "lion", "A")
+    tiny = RefereeBot(seed=1, decisive=1.0)
+    plain = default._clamped_eval(s, "A")
+    assert plain > 1.0 and default._clamped_eval(s, "B") < -1.0
+    assert tiny._clamped_eval(s, "A") == 1.0 and tiny._clamped_eval(s, "B") == -1.0
+    assert finite._clamped_eval(s, "A") == plain      # within a finite bound the score is untouched
