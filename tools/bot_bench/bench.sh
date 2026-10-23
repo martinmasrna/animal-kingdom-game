@@ -22,6 +22,9 @@ run)
   mkdir -p "$out"
   git -C "$repo" worktree add -q --detach "$tree" "$at"
   ln -s "$repo/.venv" "$tree/.venv"
+  # The bots on the Rust engine (AK_RUST_BOTS=1): the tree gets its own copy of the built module, so a rebuild during
+  # the run cannot change what it plays with.
+  [[ "${AK_RUST_BOTS:-}" != "1" ]] || cp -R "$repo/.venv/lib/python3.14/site-packages/ak_engine" "$tree/ak_engine"
   py() { (cd "$tree" && PYTHONPATH="$tree" .venv/bin/python "$@"); }
   [[ -n "$base" ]] || base="$(py -c 'import re; from animal_kingdom.web.match import EXPERT; print(re.sub(r"time_budget=\d+", "time_budget=0", EXPERT))')"
   [[ "$cand" == +* ]] && cand="$base,${cand#+}"
@@ -29,10 +32,11 @@ run)
   lists="$(git -C "$repo" rev-parse "$at:animal_kingdom/data/decklists.json")"
   games="${GAMES:-20}"; jobs="${JOBS:-7}"
   python3 -c 'import json,sys; print(json.dumps(dict(zip(sys.argv[1::2], sys.argv[2::2])), indent=2))' \
-    commit "$at" cards "$cards" decklists "$lists" candidate "$cand" baseline "$base" games "$games" jobs "$jobs" after "${AFTER:-}" started "$(date '+%Y-%m-%d %H:%M')" > "$out/run.json"
+    commit "$at" cards "$cards" decklists "$lists" candidate "$cand" baseline "$base" games "$games" jobs "$jobs" after "${AFTER:-}" rust "${AK_RUST_BOTS:-0}" started "$(date '+%Y-%m-%d %H:%M')" > "$out/run.json"
   {
     echo '#!/bin/zsh'
     echo "cd '$tree'"
+    [[ "${AK_RUST_BOTS:-}" != "1" ]] || echo "export AK_RUST_BOTS=1"
     [[ -z "${AFTER:-}" ]] || echo "until grep -q '=== done' '$repo/results/bot_quality/$AFTER/run.log' || ! pgrep -f 'bot_quality/$AFTER/run.sh' >/dev/null; do sleep 60; done"
     echo 'echo "=== start $(date)"'
     echo "PYTHONPATH=\$PWD .venv/bin/python -m animal_kingdom.sim.bot_comparison --games $games --jobs $jobs --candidate-kind '$cand' --baseline-kind '$base' --opponent-kind '$base' --out '$out'"
