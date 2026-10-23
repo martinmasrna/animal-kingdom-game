@@ -44,6 +44,7 @@ class GameSpec:
     eval_path: Optional[str]
     epsilon: float = 0.05
     pilot: str = "turn"
+    pilot_b: str = ""        # a different pilot for seat B ("" means the same as A): two styles in one pool
 
 
 def pairings(pool: bool = False) -> list[tuple[str, str]]:
@@ -63,7 +64,10 @@ def play(spec: GameSpec) -> dict:
         bots = {s: TurnBot(seed=spec.seed * 2 + i, evaluator=evaluator) for i, s in enumerate("AB")}
     else:
         from ..sim.runner import make_bot
-        bots = {s: make_bot(spec.pilot, spec.seed * 2 + i, extra={"evaluator": evaluator} if evaluator else None)
+        specs_by_seat = {"A": spec.pilot, "B": spec.pilot_b or spec.pilot}
+        if spec.pilot_b and spec.seed % 2:          # the two pilots swap seats every other game
+            specs_by_seat = {"A": spec.pilot_b, "B": spec.pilot}
+        bots = {s: make_bot(specs_by_seat[s], spec.seed * 2 + i, extra={"evaluator": evaluator} if evaluator else None)
                 for i, s in enumerate("AB")}
     rng = random.Random(spec.seed)
     rows: list[tuple[str, list[float], int]] = []     # (seat, features, turn)
@@ -93,13 +97,14 @@ def play(spec: GameSpec) -> dict:
 
 
 def generate(out: str, eval_path: Optional[str], games_per_pair: int, seed: int, jobs: int,
-             epsilon: float = 0.05, decks: Optional[list[str]] = None, pilot: str = "turn", pool: bool = False) -> None:
+             epsilon: float = 0.05, decks: Optional[list[str]] = None, pilot: str = "turn", pool: bool = False,
+             pilot_b: str = "") -> None:
     """`decks`, if given, keeps only the pairings that include one of them."""
     import numpy as np
 
     pairs = [(i, (a, b)) for i, (a, b) in enumerate(pairings(pool))
              if not decks or a in decks or b in decks]
-    specs = [GameSpec(a, b, seed + i * 1000 + k, eval_path, epsilon, pilot)
+    specs = [GameSpec(a, b, seed + i * 1000 + k, eval_path, epsilon, pilot, pilot_b)
              for i, (a, b) in pairs for k in range(games_per_pair)]
     random.Random(seed).shuffle(specs)          # mixed decks in every progress slice
     cols: dict[str, list] = {k: [] for k in ("x", "y", "turn", "deck", "opp", "game", "reason")}
@@ -111,7 +116,7 @@ def generate(out: str, eval_path: Optional[str], games_per_pair: int, seed: int,
                             opp=np.array(cols["opp"]), game=np.array(cols["game"]),
                             reason=np.array(cols["reason"]),
                             features=np.array(features.feature_names(FEATURE_SET)),
-                            eval_path=np.array(eval_path or ""), pilot=np.array(pilot))
+                            eval_path=np.array(eval_path or ""), pilot=np.array(pilot), pilot_b=np.array(pilot_b))
 
     with ProcessPoolExecutor(max_workers=jobs) as ex:
         for n, rec in enumerate(ex.map(play, specs, chunksize=4), 1):
@@ -136,9 +141,10 @@ def main(argv=None) -> None:
                    help="comma-separated: only the pairings that include one of these decks")
     p.add_argument("--pilot", default="turn", help="the bot spec both seats play (sim.runner.make_bot); default TurnBot")
     p.add_argument("--pool", action="store_true", help="pair the bot pool (decks.BOT_DECKS) instead of the starters and goodstuff")
+    p.add_argument("--pilot-b", default="", help="a different pilot for the other seat (the seats swap every other game)")
     a = p.parse_args(argv)
     generate(a.out, a.eval, a.games_per_pair, a.seed, a.jobs, a.epsilon,
-             a.decks.split(",") if a.decks else None, a.pilot, a.pool)
+             a.decks.split(",") if a.decks else None, a.pilot, a.pool, a.pilot_b)
 
 
 if __name__ == "__main__":
