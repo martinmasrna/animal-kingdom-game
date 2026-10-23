@@ -59,11 +59,12 @@ log = logging.getLogger(__name__)
 # the root screen ranks a placement after its own sub-choice resolves (quiesce; Martin's gauntlet game QR4OFW-4: a Hornet
 # ranked by its half-resolved position; +4.3 points a deck, results/bot_quality/wave2-quiesce), and it searches its
 # mulligan: each option played through the opening in sampled worlds (mulligan; +5.1 points a deck, wave2-mulligan).
-# Since 2026-10-23 its evaluation is the value network of self-play round 2 (`data/learned/wave2_net_r2.json`, docs/bots.md:
-# +4.9 points a deck against the hand evaluation, the first network under the ship rule, a wash on Martin's own games); the
-# hand weights stay for the terms the search prices outside the evaluation. The bots think on the Rust engine
-# (AK_RUST_BOTS=1 in the image), where the network's slower evaluation costs no depth inside the 8 s.
-EXPERT = ("referee_learned:eval=wave2_net_r2,depth=1,time_budget=8,den_sense=true,reply_turns=3,w.pending_target=1.5,"
+# Since 2026-10-23 its evaluation is the slot network of self-play rounds 4 to 6 (`data/learned/wave2_slot_r456.json`,
+# docs/bots.md: one encoder shared across the board's crossroads; +6.0 points a deck against the round-2 value network it
+# replaced the same day, which was +4.9 over the hand evaluation; the first evaluator to read Martin's own games better
+# than the hand formula); the hand weights stay for the terms the search prices outside the evaluation. The bots think on
+# the Rust engine (AK_RUST_BOTS=1 in the image), where the network's slower evaluation costs no depth inside the 8 s.
+EXPERT = ("referee_learned:eval=wave2_slot_r456,depth=1,time_budget=8,den_sense=true,reply_turns=3,w.pending_target=1.5,"
           "w.buried_presence=0.25,w.food_progress=0,w.food_curve=3,w.food_proximity=60,w.food_race=true,quiesce=true,mulligan=true")
 # The Normal pilot is the one-turn searcher with the den-front reach term (2026-10-21, Martin's game GMIDKA: it left two
 # cut-off Falcons in its den front for two turns). The Expert sees those threats through its reply search and the term

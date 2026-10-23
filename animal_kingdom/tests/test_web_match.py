@@ -334,7 +334,7 @@ def test_the_expert_is_the_deepened_referee():
     """The Expert (shipped 2026-10-20) is the referee with two turns of sight, den sense, the reply as a turn and the
     target-aware weights, deepening under a time budget below BOT_THINK_MAX; since 2026-10-21 it values food as the race
     on a curve, with no net-food term, ranks a placement after its sub-choice resolves (quiesce) and searches its mulligan
-    (2026-10-22); since 2026-10-23 its evaluation is the round-2 value network. Normal is the TurnBot. On the Rust engine
+    (2026-10-22); since 2026-10-23 its evaluation is the slot network (rounds 4 to 6). Normal is the TurnBot. On the Rust engine
     (AK_RUST_BOTS=1, the image) `bot_for` hands out the same bots as RustBots; the dials are read off the Python build."""
     import os
     from animal_kingdom.sim.runner import make_bot
@@ -343,7 +343,7 @@ def test_the_expert_is_the_deepened_referee():
     if os.environ.get("AK_RUST_BOTS") == "1":
         assert bot_for("expert", 7).__class__.__name__ == "RustBot"
     bot = make_bot(BOT_LEVELS["expert"], 7, python_only=True)
-    assert bot.evaluator.__class__.__name__ == "NetEval"
+    assert bot.evaluator.__class__.__name__ == "SlotEval"
     assert bot.depth == 1 and bot.den_sense and bot.reply_turns == 3 and 0 < bot.time_budget < BOT_THINK_MAX
     assert bot.weights.pending_target > 0 and bot.weights.buried_presence > 0
     assert bot.weights.food_progress == 0 and bot.weights.food_curve > 1 and bot.weights.food_race
