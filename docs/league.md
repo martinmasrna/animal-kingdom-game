@@ -31,8 +31,8 @@ Where it breaks, and the answer in the design: pilot bias (decks tuned to how th
 ## The build, in order
 
 1. Done 2026-10-24: the reseed for the live Expert, everyone's placement games, the leaderboard one row per pairing, the pool widened to 43 decks and 129 pairings with its bootstrap seed.
-2. The server endpoint that accepts a bot game result and a new list (authenticated, bots only), rating with the same Glicko update; provisional players kept out of people's matchmaking until placed.
-3. The runner: plays by matchmaking on the Rust engine, games where uncertainty is largest first, and reports every result. The Mac's own Bradley-Terry fit stays only as a check.
+2. Done 2026-10-24: `web/league.py` and the three keyed calls (`/api/league/pool`, `/api/league/games`, `/api/league/decks`): a bot game posted is rated with the same Glicko update a person's game gets and kept in `league_games`; a new list joins the pool in the database as three placing players, loadable at once, kept from people's matchmaking until placed and shown on the leaderboard with its '?'. The key is `AK_LEAGUE_KEY` (Fly secret; locally results/oauth.json).
+3. Done 2026-10-24: the runner, `animal_kingdom/league/runner.py`: each pass takes the pool, picks placing pairings first and the least certain next, opponents within 150 rating (a fifth against anyone), plays on the Rust engine untimed, posts and logs every result, and paces itself to a games-an-hour cap. It runs on the Mac from a frozen checkout (`bench.sh freeze`), so a rebuild of the engine module cannot reach it. The Mac's own Bradley-Terry fit (`tools/ladder/ladder.py`) stays only as a check.
 4. Tinkering, then netdecking, at the pace above. Martin's lists enter through the same endpoint.
 5. Pilot candidates enter as players on every pool list and ship when their pairings outrate the live pilot's beyond the noise; the paired benchmark stays as a cheap first screen.
 

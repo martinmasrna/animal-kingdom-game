@@ -32,6 +32,7 @@ from . import events, feedback, news
 from .chat import Chat, ChatError
 from .friends import FriendError, Friends
 from . import ladder as ranking
+from . import league as league_mod
 from . import oauth
 from .profiles import ProfileError, Profiles
 from . import replay
@@ -314,8 +315,10 @@ def bot_seat_name(level: str, deck: str) -> str:
 
 def bot_rows(table) -> list[tuple[str, ranking.Rating]]:
     """The bots the leaderboard lists: one row per pilot-and-deck pairing on a deck still in the pool (Martin, 2026-10-24:
-    every pairing is a player of its own on the ladder; a retired deck's rows keep their games but are not listed)."""
-    return [(lid, r) for lid, r in table if (b := ranking.parse_bot(lid)) and b[1] in BOT_DECKS]
+    every pairing is a player of its own on the ladder; a retired deck's rows keep their games but are not listed). A
+    league newcomer still placing is listed with its '?', as a person placing is not: people see what they may meet."""
+    pool_ = set(ladder.decks) if ladder else set(BOT_DECKS)
+    return [(lid, r) for lid, r in table if (b := ranking.parse_bot(lid)) and b[1] in pool_]
 
 
 def standing(pid: str) -> dict:
@@ -654,6 +657,69 @@ async def leaderboard(req):
     return web.json_response({"rows": rows, "placing": placing})
 
 
+# ----------------------------------------------------------------- the league (web/league.py, docs/league.md)
+league: league_mod.Pool = None      # the lists the league added; `pool` is the /api/pool handler
+
+
+def league_auth(req) -> None:
+    k = league_mod.key()
+    if not k or req.headers.get("X-AK-League-Key") != k:
+        raise web.HTTPForbidden(text="the league key")
+
+
+async def league_pool(req):
+    """The runner's view: every bot deck's list and name, every bot pairing's rating, the pilots' specs."""
+    league_auth(req)
+    decks = [{"slug": s, "name": DECK_NAMES.get(s, s), "list": load_premade_deck(s)} for s in ladder.decks]
+    players = [{"id": lid, "rating": r.rating, "rd": r.rd, "games": r.games} for lid, r in ladder.bots().items()
+               if ranking.parse_bot(lid)[1] in ladder.decks]
+    return web.json_response({"decks": decks, "players": players, "pilots": dict(BOT_LEVELS)})
+
+
+async def league_games(req):
+    """Bot games played by the runner, rated here like anyone's: [{a, b, winner, seed, turns, reason}], a and b bot ladder ids."""
+    league_auth(req)
+    body = await req.json()
+    games = body.get("games") if isinstance(body, dict) else None
+    if not isinstance(games, list) or len(games) > 1000:
+        raise web.HTTPBadRequest(text="games: a list of at most 1000")
+    ok, touched = [], set()
+    for g in games:
+        a, b, w = g.get("a"), g.get("b"), g.get("winner")
+        if not (ranking.parse_bot(a or "") and ranking.parse_bot(b or "") and a != b):
+            continue
+        if ranking.parse_bot(a)[1] not in ladder.decks or ranking.parse_bot(b)[1] not in ladder.decks:
+            continue
+        if w in ("A", "B"):
+            ladder.result(a if w == "A" else b, b if w == "A" else a)
+            touched |= {a, b}
+        ok.append(g)
+    league.record(ok)
+    return web.json_response({"rated": len(ok), "ratings": {lid: ladder.get(lid).shown() for lid in touched}})
+
+
+async def league_decks(req):
+    """New lists for the pool: [{slug, name, list, source, parent}]; each legal, distinct list joins as three placing players."""
+    league_auth(req)
+    body = await req.json()
+    decks = body.get("decks") if isinstance(body, dict) else None
+    if not isinstance(decks, list) or len(decks) > 100:
+        raise web.HTTPBadRequest(text="decks: a list of at most 100")
+    added, rejected = [], {}
+    for d in decks:
+        slug, name, lst = str(d.get("slug") or ""), str(d.get("name") or "").strip()[:40] or "Deck", d.get("list")
+        if not isinstance(lst, list):
+            rejected[slug] = ["list: 30 card ids"]; continue
+        problems = league.add(slug, name, [str(c) for c in lst], str(d.get("source") or "league")[:20], d.get("parent"), set(ladder.decks))
+        if problems:
+            rejected[slug] = problems; continue
+        ladder.decks.append(slug)
+        for level in ranking.LEVELS:
+            ladder.add_player(ranking.bot_id(level, slug))
+        added.append(slug)
+    return web.json_response({"added": added, "rejected": rejected})
+
+
 # ----------------------------------------------------------------- friends and challenges (web/friends.py)
 CHALLENGE_WAIT = 60          # seconds a challenge stands before it lapses
 presence: dict[str, set] = {}   # profile id -> its open presence sockets (one per tab or device): online while any is open
@@ -903,11 +969,11 @@ async def pool(_req):
                   for d in STARTER_DECKS],
         "map": map_info(),
         "levels": list(BOT_LEVELS),
-        "bot_decks": list(BOT_DECKS),   # the pool a Random bot deck is drawn from (decks.BOT_DECKS)
+        "bot_decks": list(ladder.decks if ladder else BOT_DECKS),   # the pool a Random bot deck is drawn from (decks.BOT_DECKS plus the league's)
         # The bot decks that are not starters: shown by name and list wherever a bot's deck is (Practice's chooser,
         # the versus moment, the match history), never in a player's collection.
         "bot_only": [{"id": slug, "name": DECK_NAMES.get(slug, slug), "list": load_premade_deck(slug), "cover": STARTER_COVERS.get(slug, "")}
-                     for slug in BOT_DECKS if slug not in DECK_SLUGS],
+                     for slug in (ladder.decks if ladder else BOT_DECKS) if slug not in DECK_SLUGS],
         "build": BUILD,
     })
 
@@ -1198,6 +1264,9 @@ def make_app() -> web.Application:
         web.get("/api/news", get_news),
         web.post("/api/news/seen", news_seen),
         web.post("/api/ranked", join_ranked),
+        web.get("/api/league/pool", league_pool),
+        web.post("/api/league/games", league_games),
+        web.post("/api/league/decks", league_decks),
         web.delete("/api/ranked", leave_ranked),
         web.get("/api/leaderboard", leaderboard),
         web.get("/api/friends", friends_list),
@@ -1228,10 +1297,11 @@ def make_app() -> web.Application:
         if linked or left:
             log.info("starter decks: %d untouched cop%s now follow their starter, %d left alone",
                      linked, "y" if linked == 1 else "ies", left)
-        global ladder, friends, chat
+        global ladder, friends, chat, league
         friends = Friends(profiles.db)
         chat = Chat(profiles.db)
-        ladder = ranking.Ladder(profiles.db, sorted(BOT_DECKS))   # ranked offers the bot pool only (decks.BOT_DECKS)
+        league = league_mod.Pool(profiles.db, DECK_NAMES)      # the lists the league added (web/league.py)
+        ladder = ranking.Ladder(profiles.db, sorted(BOT_DECKS) + league.slugs())   # ranked offers the bot pool: shipped, ladder and league decks
         if ladder.apply_seed(Path(__file__).parent / "ladder_seed.json"):   # the bots' ratings from simulation (sim/ladder_seed.py)
             log.info("ladder: bots seeded from ladder_seed.json")
         custom_decks.load()

@@ -76,8 +76,7 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             pl = board["placing"]
             assert pl["rating"].endswith("?") and int(pl["rating"][:-1]) > 1500 and (pl["games"], pl["of"]) == (1, 10)
             bots = [r for r in board["rows"] if r["bot"]]   # one row per pilot-and-deck pairing, best first
-            from animal_kingdom.decks import BOT_DECKS
-            assert len(bots) == len(ladder.LEVELS) * len(BOT_DECKS) and all(r["name"].endswith(" Bot)") for r in bots)
+            assert len(bots) == len(ladder.LEVELS) * len(server.ladder.decks) and all(r["name"].endswith(" Bot)") for r in bots)
             assert [int(r["rating"]) for r in bots] == sorted((int(r["rating"]) for r in bots), reverse=True)
             me = await (await c.get("/api/me", headers=ha)).json()   # home's name piece: placement progress, no rank yet
             assert me["placing"] == {"games": 1, "of": 10} and "rank" not in me

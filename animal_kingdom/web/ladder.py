@@ -186,6 +186,11 @@ class Ladder:
             self._put(winner, w); self._put(loser, l)
         return w, l
 
+    def add_player(self, lid: str) -> None:
+        """A league newcomer's row: the start every person gets, placement games ahead (docs/league.md)."""
+        with self.db:
+            self.db.execute("INSERT OR IGNORE INTO ladder VALUES (?, ?, ?, ?, ?)", (lid, START, START_RD, START_VOL, 0))
+
     def seed_bots(self, ratings: dict[str, float]) -> None:
         """Set the bots' ratings from simulation (bot ladder id -> rating), with a seeded bot's narrow uncertainty."""
         with self.db:
@@ -202,8 +207,9 @@ class Ladder:
         nearest: dict[str, tuple[float, str]] = {}
         for lid, r in self.bots().items():
             deck = parse_bot(lid)[1]
-            if deck not in self.decks:
-                continue                       # a retired deck's bot keeps its row (its games stay rated), never plays
+            if deck not in self.decks or r.provisional:
+                continue                       # a retired deck's bot keeps its row (its games stay rated), never plays;
+                                               # a league newcomer places through bot games before people meet it
             if deck not in nearest or abs(r.rating - rating) < nearest[deck][0]:
                 nearest[deck] = (abs(r.rating - rating), lid)
         ranked = list(nearest.items())
