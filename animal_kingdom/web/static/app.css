@@ -424,11 +424,26 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .sets .studies .slab { text-decoration: none; padding: 0 16px; height: 40px; display: inline-flex; align-items: center; gap: 8px; }
 .sets .studies .slab small { color: #a08f6e; }
 
-/* The Ladder screen's Meta tab: the morning's report on the bot ladder, one column of short rows (2026-10-24). */
-.ladder .metar { padding: 0 24px 24px; color: #cfc3ad; } .ladder .metar h3 { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 22px 0 8px; }
-.ladder .metar .mwhen { color: #9d917e; margin: 6px 0 0; } .ladder .metar .mrows { display: flex; flex-direction: column; gap: 4px; }
-.ladder .metar .mr { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 6px 10px; background: rgba(0,0,0,.25); border-radius: 6px; }
-.ladder .metar .mr .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ladder .metar .mr .md { color: #9d917e; font-size: .9em; overflow: hidden; text-overflow: ellipsis; }
-.ladder .metar .mr b { text-align: right; white-space: nowrap; } .ladder .metar .mr small { font-size: .78em; font-weight: 500; } .ladder .metar .up { color: #9fcf8a; } .ladder .metar .dn { color: #d98f7a; }
-.ladder .metar .mr.birth { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) auto; } .ladder .metar .mr.birth .md { white-space: normal; }
-@media (max-width: 700px) { .ladder .metar { padding: 0 12px 16px; } .ladder .metar .mr, .ladder .metar .mr.birth { grid-template-columns: minmax(0, 1fr) auto; } .ladder .metar .mr .md { grid-column: 1 / -1; } }
+/* The Ladder screen's Meta tab: the morning's report on the bot ladder, one screen to scan (2026-10-24). */
+.ladder .metar { padding: 0 24px 28px; color: #cfc3ad; } .ladder .metar section { margin-top: 26px; }
+.ladder .metar h3 { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 0 0 10px; } .ladder .metar h3 small { font-weight: 400; color: #9d917e; margin-left: 8px; font-size: 15px; }
+.ladder .metar .mwhen { color: #8f8574; font-size: 13px; margin: 6px 0 0; }
+.ladder .metar .mfig { display: flex; gap: 10px; margin-top: 8px; } .ladder .metar .mfig div { flex: 1; background: rgba(0,0,0,.28); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; }
+.ladder .metar .mfig b { font: 700 30px 'Fira Sans Condensed', sans-serif; color: #f0e8da; line-height: 1; } .ladder .metar .mfig span { color: #9d917e; font-size: 13px; margin-top: 4px; }
+.ladder .metar .mbars { display: flex; flex-direction: column; gap: 5px; }
+.ladder .metar .mb { display: grid; grid-template-columns: auto minmax(0, 1.1fr) minmax(0, 1fr) 64px; gap: 10px; align-items: center; min-height: 36px; }
+.ladder .metar .mb .pm { position: relative; width: 36px; height: 36px; } .ladder .metar .mb .pm .face { position: absolute; inset: 3.5px; border-radius: 50%; background-color: #3a342c; } .ladder .metar .mb .pm img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ladder .metar .mb .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; flex-direction: column; line-height: 1.15; } .ladder .metar .mb .nm small { color: #8f8574; font-size: 12px; }
+.ladder .metar .mb .tr { height: 10px; background: rgba(0,0,0,.3); border-radius: 5px; overflow: hidden; } .ladder .metar .mb .tr .bar { display: block; height: 100%; border-radius: 5px; }
+.ladder .metar .bar.up { background: #8fbf78; } .ladder .metar .bar.dn { background: #c97f67; } .ladder .metar .mb.dn .tr { direction: rtl; }
+.ladder .metar .mb b { text-align: right; font-weight: 700; white-space: nowrap; } .ladder .metar .mb.up b { color: #9fcf8a; } .ladder .metar .mb.dn b { color: #d98f7a; } .ladder .metar .mb b small { display: block; color: #9d917e; font-weight: 400; font-size: 12px; }
+.ladder .metar .mbands { display: flex; flex-direction: column; gap: 10px; } .ladder .metar .band { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px 10px; align-items: center; }
+.ladder .metar .band .nm { color: #f0e8da; font-weight: 700; } .ladder .metar .band .stack { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: rgba(0,0,0,.3); } .ladder .metar .band .stack i { display: block; height: 100%; }
+.ladder .metar .band .lg { grid-column: 2; font-size: 12px; color: #9d917e; display: flex; gap: 12px; flex-wrap: wrap; } .ladder .metar .band .lg em { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.ladder .metar .s0 { background: #8fbf78; } .ladder .metar .s1 { background: #c9a85c; } .ladder .metar .s2 { background: #7fa7c9; } .ladder .metar .s3 { background: #c97f67; } .ladder .metar .s4 { background: #a58bc9; } .ladder .metar .s5 { background: #8f8574; }
+.ladder .metar .mbirths { display: flex; flex-direction: column; gap: 8px; } .ladder .metar .birth { background: rgba(0,0,0,.25); border-radius: 8px; padding: 8px 12px; display: grid; gap: 2px 8px; grid-template-columns: auto 1fr; }
+.ladder .metar .birth b { color: #f0e8da; } .ladder .metar .birth .from { color: #9d917e; } .ladder .metar .birth .why, .ladder .metar .birth .now { grid-column: 1 / -1; } .ladder .metar .birth .now { color: #9d917e; font-size: 13px; }
+.ladder .metar .mtop { display: flex; flex-direction: column; gap: 4px; } .ladder .metar .tp { display: grid; grid-template-columns: 28px auto minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 40px; }
+.ladder .metar .tp .rk { color: #9d917e; font-weight: 500; } .ladder .metar .tp .pm { position: relative; width: 36px; height: 36px; } .ladder .metar .tp .pm .face { position: absolute; inset: 3.5px; border-radius: 50%; background-color: #3a342c; } .ladder .metar .tp .pm img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ladder .metar .tp .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ladder .metar .tp b { font-weight: 700; color: #f0e8da; }
+@media (max-width: 700px) { .ladder .metar { padding: 0 12px 20px; } .ladder .metar .mfig b { font-size: 24px; } .ladder .metar .mb { grid-template-columns: auto minmax(0, 1fr) 72px 52px; gap: 8px; } .ladder .metar .band { grid-template-columns: 40px minmax(0, 1fr); } }

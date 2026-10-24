@@ -29,6 +29,6 @@ def test_the_report_reads_snapshots_births_and_draws(tmp_path):
     lion = next(c for c in r["cards_up"] if c["card"] == "lion")
     assert lion["drawn_win"] == 100 and lion["lift"] > 0 and lion["games"] == 50
     assert r["meta"]["2100"][0]["pairings"] == 1 and r["meta"]["1500"][0]["pairings"] == 1   # Expert Cats at 2100; Normal Cats at 1500
-    assert r["top"][0]["name"] == "Cats (expert)"
+    assert r["top"][0]["name"] == "Cats (expert)" and r["pairings"] == 3 and r["top"][0]["cover"] == lst[0]
     md = report.to_markdown(r)
     assert "## Movers, last day" in md and "Cats II from Cats" in md and "Lion" in md

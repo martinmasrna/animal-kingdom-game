@@ -448,24 +448,33 @@ async function fillLeaderboard() {
   const mine = box.querySelector('.lr.you:not(.placing)'); if (mine) mine.scrollIntoView({ block: 'center' });
 }
 
-// The Meta tab: the morning's report on the bot ladder (league/report.py, posted by the runner): who moved, who was born,
-// which cards win or lose when drawn, what a player at each rating meets, the top pairings, the people.
+// The Meta tab: the morning's report on the bot ladder (league/report.py, posted by the runner). One screen to scan
+// (Martin, 2026-10-24: "good idea, poor execution" of the first list of numbers): the day in three figures, then only
+// the sections that have something, each a bar to read at a glance: movers by their change, cards by their lift within
+// their own decks, the bands as stacked shares, the top pairings with their deck's face.
 async function fillMeta() {
   const box = document.getElementById('metar'); if (!box) return;
   const r = await api('/api/league/report'), j = r.ok ? await r.json() : { empty: true };
   if (j.empty) { box.innerHTML = '<p class="none">No report yet: the first one comes the morning after the league starts.</p>'; return; }
-  const sec = (title, rows) => `<h3>${title}</h3>${rows.length ? `<div class="mrows">${rows.join('')}</div>` : '<p class="none">nothing yet</p>'}`;
-  const row = (a, b, c) => `<div class="mr"><span class="nm">${a}</span><span class="md">${b || ''}</span><b>${c}</b></div>`;
-  const sign = d => (d > 0 ? '+' : '') + d;
-  box.innerHTML = `<p class="mwhen">${esc(j.generated)} · ${j.games_logged} bot games read</p>`
-    + sec('People', (j.people || []).map(p => row(esc(p.name), `${p.games} games`, esc(p.rating))))
-    + sec('Movers, last day', j.movers_day.map(m => row(esc(m.name), `${m.games} games`, `${m.rating} <small class="${m.delta < 0 ? 'dn' : 'up'}">${sign(m.delta)}</small>`)))
-    + sec('Movers, last week', j.movers_week.map(m => row(esc(m.name), `${m.games} games`, `${m.rating} <small class="${m.delta < 0 ? 'dn' : 'up'}">${sign(m.delta)}</small>`)))
-    + sec('New lists', j.births.map(b => `<div class="mr birth"><span class="nm">${esc(b.name)} <small>from ${esc(b.parent || '?')}</small></span><span class="md">${esc(b.why)}</span><b>${b.child_rating ?? '–'}<small> after ${b.child_games}</small></b></div>`))
-    + sec('Cards that win when drawn', j.cards_up.map(c => row(esc(c.name), `${c.games} games`, `${c.drawn_win}% <small class="up">${sign(c.lift)}</small>`)))
-    + sec('Cards that lose when drawn', j.cards_down.map(c => row(esc(c.name), `${c.games} games`, `${c.drawn_win}% <small class="dn">${sign(c.lift)}</small>`)))
-    + sec('What a player meets', Object.entries(j.meta).map(([band, ms]) => row(`at ${band}`, ms.map(m => `${esc(m.archetype)} ${m.share}%`).join(', ') || 'nobody within 75', '')))
-    + sec('Top pairings', j.top.map(t => row(esc(t.name), `${t.games} games`, t.rating)));
+  const sign = d => (d > 0 ? '+' : '') + d, bar = (v, max, cls) => `<i class="bar ${cls}" style="width:${Math.min(100, Math.round(100 * Math.abs(v) / (max || 1)))}%"></i>`;
+  const sec = (title, note, html) => html ? `<section><h3>${title}${note ? `<small>${note}</small>` : ''}</h3>${html}</section>` : '';
+  const movers = ms => { if (!ms.length) return ''; const max = Math.max(...ms.map(m => Math.abs(m.delta)));
+    return `<div class="mbars">${ms.map(m => `<div class="mb ${m.delta < 0 ? 'dn' : 'up'}"><span class="nm">${esc(m.name)}</span><span class="tr">${bar(m.delta, max, m.delta < 0 ? 'dn' : 'up')}</span><b>${sign(m.delta)}<small>${m.rating}</small></b></div>`).join('')}</div>`; };
+  const cards = cs => { if (!cs.length) return ''; const max = Math.max(...cs.map(c => Math.abs(c.lift)));
+    return `<div class="mbars">${cs.map(c => `<div class="mb ${c.lift < 0 ? 'dn' : 'up'}">${piece(c.card)}<span class="nm">${esc(c.name)}<small>${c.games} games</small></span><span class="tr">${bar(c.lift, max, c.lift < 0 ? 'dn' : 'up')}</span><b>${sign(c.lift)}</b></div>`).join('')}</div>`; };
+  const bands = Object.entries(j.meta || {}).filter(([, ms]) => ms.length);
+  const bandsHtml = bands.length ? `<div class="mbands">${bands.map(([band, ms]) => `<div class="band"><span class="nm">${band}</span><span class="stack">${ms.map((m, i) => `<i class="s${i % 6}" style="width:${m.share}%" title="${esc(m.archetype)} ${m.share}%"></i>`).join('')}</span><span class="lg">${ms.slice(0, 3).map((m, i) => `<em class="s${i % 6}"></em>${esc(m.archetype)} ${m.share}%`).join(' ')}</span></div>`).join('')}</div>` : '';
+  const births = (j.births || []).length ? `<div class="mbirths">${j.births.map(b => `<div class="birth"><b>${esc(b.name)}</b> <span class="from">from ${esc(b.parent || '?')}</span><span class="why">${esc(b.why)}</span><span class="now">${b.child_rating ?? '–'} after ${b.child_games} games${b.parent_rating ? `, parent ${b.parent_rating}` : ''}</span></div>`).join('')}</div>` : '';
+  const top = (j.top || []).length ? `<div class="mtop">${j.top.map((t, i) => `<div class="tp"><span class="rk">${i + 1}</span>${piece(t.cover)}<span class="nm">${esc(t.name)}</span><b>${t.rating}</b></div>`).join('')}</div>` : '';
+  box.innerHTML = `<div class="mfig"><div><b>${j.games_day ?? j.games_logged}</b><span>bot games today</span></div><div><b>${j.pairings ?? '–'}</b><span>pairings playing</span></div><div><b>${j.births_day ?? 0}</b><span>new lists today</span></div></div>
+    <p class="mwhen">${esc(j.generated)}</p>`
+    + sec('Movers', 'last day', movers(j.movers_day || [])) + (j.movers_day?.length ? '' : sec('Movers', '', '<p class="none">the first movers show tomorrow, once a day of ratings is on record</p>'))
+    + sec('Movers', 'last week', movers(j.movers_week || []))
+    + sec('New lists', '', births)
+    + sec('Cards that win when drawn', 'lift within their own decks', cards(j.cards_up || []))
+    + sec('Cards that lose when drawn', '', cards(j.cards_down || []))
+    + sec('What you meet', 'at each rating, within 75', bandsHtml)
+    + sec('Top pairings', '', top);
 }
 
 // The tutorial: a real game with a fixed deal against a gentle opponent, a coach teaching one step at a time (tutorial.js).

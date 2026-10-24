@@ -59,20 +59,23 @@ def build(pool: dict, folder: Path, births: list[dict], games: list[dict], now: 
                              "games": p["games"] - before[lid][2]})
         return sorted(rows, key=lambda r: -abs(r["delta"]))
 
-    # card impact across the Expert pairings: win rate drawn against not drawn, pooled over games
-    won: collections.Counter = collections.Counter(); n: collections.Counter = collections.Counter()
-    total_w = total_n = 0
+    # card impact within each Expert pairing: a card's lift is the win rate of that pairing's games where it was drawn
+    # against the pairing's own win rate, so a card in a strong deck is not credited with the deck's strength; pooled over
+    # pairings by games. The '[LEGEND]' placeholders of unnamed legends read as their species.
+    by_pair: dict[str, list[tuple[bool, set[str]]]] = collections.defaultdict(list)
     for g in games:
         for seat, lid, drawn in (("A", g["a"], g["drawn_a"]), ("B", g["b"], g["drawn_b"])):
-            if not lid.startswith("bot:expert:"):
-                continue
-            w = g["winner"] == seat
-            total_w += w; total_n += 1
-            for cid in set(drawn):
-                won[cid] += w; n[cid] += 1
-    base = total_w / total_n if total_n else 0.5
-    impact = [{"card": cid, "name": cards[cid].name if cid in cards else cid, "drawn_win": round(100 * won[cid] / n[cid]),
-               "lift": round(100 * (won[cid] / n[cid] - base)), "games": n[cid]} for cid in n if n[cid] >= MIN_CARD_GAMES]
+            if lid.startswith("bot:expert:"):
+                by_pair[lid].append((g["winner"] == seat, set(drawn)))
+    lift_sum: collections.Counter = collections.Counter(); n: collections.Counter = collections.Counter(); won: collections.Counter = collections.Counter()
+    for lid, rows in by_pair.items():
+        base = sum(w for w, _ in rows) / len(rows)
+        for w, drawn in rows:
+            for cid in drawn:
+                lift_sum[cid] += (1.0 if w else 0.0) - base; n[cid] += 1; won[cid] += w
+    card_name = lambda cid: (cards[cid].name.strip("[]").replace("_", " ").title() if cards[cid].name.startswith("[") else cards[cid].name) if cid in cards else cid   # an unnamed legend's placeholder reads as its animal
+    impact = [{"card": cid, "name": card_name(cid), "drawn_win": round(100 * won[cid] / n[cid]),
+               "lift": round(100 * lift_sum[cid] / n[cid]), "games": n[cid]} for cid in n if n[cid] >= MIN_CARD_GAMES]
     impact.sort(key=lambda r: -r["lift"])
 
     # the meta by band: what a person at that rating meets (the Expert pilot preferred within the window, else all pilots)
@@ -90,11 +93,14 @@ def build(pool: dict, folder: Path, births: list[dict], games: list[dict], now: 
                            "why": b.get("why", ""), "added": b.get("added", True),
                            "child_rating": round(child["rating"]) if child else None, "child_games": child["games"] if child else 0,
                            "parent_rating": round(parent["rating"]) if parent else None})
-    top = sorted((p for p in players.values() if parse_bot(p["id"])[1] in decks and p["games"] >= PROVISIONAL), key=lambda p: -p["rating"])[:15]
-    return {"generated": time.strftime("%Y-%m-%d %H:%M", time.localtime(now)), "games_logged": len(games),
-            "movers_day": movers(day)[:15], "movers_week": movers(week)[:15],
-            "births": births_out[::-1], "cards_up": impact[:15], "cards_down": impact[-15:][::-1], "meta": meta,
-            "top": [{"name": name(p["id"]), "rating": round(p["rating"]), "games": p["games"]} for p in top]}
+    top = sorted((p for p in players.values() if parse_bot(p["id"])[1] in decks and p["games"] >= PROVISIONAL), key=lambda p: -p["rating"])[:12]
+    day_games = sum(1 for g in games if g.get("t", 0) >= now - 86400)
+    cover = lambda slug: (decks.get(slug, {}).get("list") or [""])[0]
+    return {"generated": time.strftime("%Y-%m-%d %H:%M", time.localtime(now)), "games_logged": len(games), "games_day": day_games,
+            "pairings": sum(1 for p in players.values() if parse_bot(p["id"])[1] in decks), "births_day": sum(1 for b in births if b["t"] >= now - 86400),
+            "movers_day": movers(day)[:12], "movers_week": movers(week)[:12],
+            "births": births_out[::-1], "cards_up": impact[:10], "cards_down": impact[-10:][::-1], "meta": meta,
+            "top": [{"name": name(p["id"]), "deck": parse_bot(p["id"])[1], "cover": cover(parse_bot(p["id"])[1]), "rating": round(p["rating"]), "games": p["games"]} for p in top]}
 
 
 def to_markdown(r: dict) -> str:
