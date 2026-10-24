@@ -1,6 +1,6 @@
 # The herds
 
-The first society page, written 2026-10-24 to the form in `knowledge/world-first-study-2026-10-24.md` (section 6): observed nature written down, so the deck's playstyle, the cards' effects, the art and the names read from one source. Lines 1 to 4 are documentary and checkable; line 5 is the one invented thing and is a proposal for Martin. Nothing here is settled.
+The first society page, written 2026-10-24 to the form in `knowledge/world-first-study-2026-10-24.md` (section 6): observed nature written down, so the playstyle the family's cards serve, their effects, the art and the names read from one source. The herd is a family, not a deck: a player runs a few of these animals in a defensive or long-game deck beside other families; the Hoofed precon is one deck built from them to teach. Lines 1 to 4 are documentary and checkable; line 5 is the one invented thing and is a proposal for Martin. Nothing here is settled.
 
 ## 1. What they are
 
@@ -19,13 +19,13 @@ The grazers of the open plain: zebra, wildebeest, gazelle, with the giraffe abov
 - They never stop eating. A grazer feeds most of the day and drinks every day or two, so the herd is wherever the grass and the water are, and it leaves the moment they run out.
 - At night they bunch and stand. Zebra sleep standing and in turns; somebody is always awake.
 
-## 3. How the deck plays
+## 3. The playstyle the herd's cards serve
 
-The herd on its pasture (Martin, 2026-10-08; `effects-pass.md`, Hoofed Graze): hold both home regions with grazers and win on food, Magic's Pillowfort on a piece of land. Safe and productive together, broken when scattered: one covered corner breaks the region and switches off every grazing bonus, and the fleers run home rather than die, keeping their Roar for the next placement. It beats decks that win by covering and loses to decks that race.
+Holding ground and winning the long game on food. A player who runs hoofed animals is choosing to hold regions with grazers rather than race or hunt: safe and productive together, broken when scattered, since one covered corner breaks the region and switches off every grazing bonus, and the fleers run home rather than die, keeping their Roar for the next placement. The more of them stand together, the more each is worth, so they reward a tight pasture and punish a deck that wins by covering; alone, a hoofed animal is a body that holds a corner and little more. The precon (Martin, 2026-10-08; `effects-pass.md`, Hoofed Graze) is the all-in version: both home regions held by grazers, Magic's Pillowfort on a piece of land.
 
 ## 4. Who does what
 
-The roles the behaviours give, and the card that carries each:
+The roles the behaviours give, and the herd card that carries each:
 
 - **The eyes.** Giraffe, common: +5 strength on the opponent's turn, the wall when the lions come at night. Giraffe, legendary: the opponent's hand revealed, nothing gets tried where she can see.
 - **The voice that gathers.** Zebra, common: Flee, and food for each Hoofed neighbour, zebra grazing among the wildebeest. Zebra, legendary: a card for each different Hoofed animal, the mixed herd itself.
@@ -33,7 +33,8 @@ The roles the behaviours give, and the card that carries each:
 - **The runners.** Gazelle: Flee, a card and food, the stot and the escape. Deer: Flee, and a Fawn left behind, the calf that runs the day it is born.
 - **The ones that turn and fight.** Cape Buffalo: the others +1 on the opponent's turn, the mob. Warthog: removes the enemy covering a Hoofed animal, the predator driven off. Boar: removes an enemy on bare ground, the one that charges what stands alone.
 - **The forest cousin.** Okapi: a card while grazing.
-- **Not of the herd.** Honey Badger, rare, the deck's answer to a giant. It is the one card in the list no herd behaviour explains; it stays because play needs it, and the page notes it so nobody later reads the honey badger as a herd animal.
+
+The Honey Badger in the Hoofed precon is a Savanna rare the precon borrows as its answer to a giant, not a herd animal, and no line of this page explains it.
 
 Behaviours no card uses yet, a pool for later slots: the alarm that belongs to everyone (a Hoofed effect that fires for the herd when one of them is covered), the stallion at the rear, the calving that swamps the hunters, the river crossing, the oxpecker on the back.
 
@@ -51,4 +52,4 @@ Goals for the Giraffe's name, in order, for the naming skill's pool: the word th
 
 ## 6. Ledger
 
-Cards that read from this page: the fourteen designs of the Hoofed starter (`decklists.json`). Legends: `cards/legends/giraffe.md` (the eyes, as an individual); `cards/legends/leopard.md` reads from it as the outsider who breaks "the young are kept inside". Names taken: none.
+Cards that read from this page: every card tagged Hoofed (Zebra, Giraffe, Wildebeest, Gazelle, Deer, Cape Buffalo, Warthog, Boar, Okapi and the four legendaries; the Hungry giants that carry the tag, Rhinoceros, Hippopotamus and Moose, graze with nobody and belong to Giants, which has no page yet). Legends: `cards/legends/giraffe.md` (the eyes, as an individual); `cards/legends/leopard.md` reads from it as the outsider who breaks "the young are kept inside". Names taken: none.
