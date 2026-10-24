@@ -33,6 +33,7 @@ from .chat import Chat, ChatError
 from .friends import FriendError, Friends
 from . import ladder as ranking
 from . import league as league_mod
+from . import meta as meta_mod
 from . import oauth
 from .profiles import ProfileError, Profiles
 from . import replay
@@ -659,6 +660,7 @@ async def leaderboard(req):
 
 # ----------------------------------------------------------------- the league (web/league.py, docs/league.md)
 league: league_mod.Pool = None      # the lists the league added; `pool` is the /api/pool handler
+meta: meta_mod.Meta = None          # the Meta tab's sums over every game's card facts (web/meta.py)
 
 
 def league_auth(req) -> None:
@@ -695,7 +697,54 @@ async def league_games(req):
             touched |= {a, b}
         ok.append(g)
     league.record(ok)
+    meta.add({**g, **g["facts"]} for g in ok if isinstance(g.get("facts"), dict))   # the runner sends each game's card facts with it
     return web.json_response({"rated": len(ok), "ratings": {lid: ladder.get(lid).shown() for lid in touched}})
+
+
+async def league_facts(req):
+    """Card facts of games already rated (a backfill from the runner's log): [{t, a, b, winner, ra, rb, A, B}], counted once."""
+    league_auth(req)
+    body = await req.json()
+    games = body.get("games") if isinstance(body, dict) else None
+    if not isinstance(games, list) or len(games) > 5000:
+        raise web.HTTPBadRequest(text="games: a list of at most 5000")
+    return web.json_response({"counted": meta.add(g for g in games if isinstance(g, dict))})
+
+
+def _list_of(slug: str):
+    try:
+        return load_premade_deck(slug)
+    except (KeyError, ValueError):
+        return None
+
+
+def _meta_args(req) -> tuple[int, int, int]:
+    q = req.query
+    lo, hi, days = int(q.get("lo", 0) or 0), int(q.get("hi", 10000) or 10000), int(q.get("days", 0) or 0)
+    return max(0, lo), min(10000, hi), max(0, min(60, days))
+
+
+def _archetypes():
+    return meta_mod.archetype_map(league.rows if league else {}, ladder.decks if ladder else [])
+
+
+async def meta_overview(req):
+    """The Meta tab: each archetype's share and win rate in a rating range over recent days, and the matchup matrix."""
+    lo, hi, days = _meta_args(req)
+    arch, names = _archetypes()
+    p = profile_of(req)
+    me_ = ladder.get(p["id"]) if p and ladder else None
+    return web.json_response({**meta.overview(arch, names, lo, hi, days), "you": me_.shown() if me_ and me_.games else None})
+
+
+async def meta_archetype(req):
+    """One archetype: its lists and every card's figures in the range, against one opponent archetype when `vs` is given."""
+    lo, hi, days = _meta_args(req)
+    arch, names = _archetypes()
+    x, vs = req.query.get("id", ""), req.query.get("vs") or None
+    if x not in names or (vs and vs not in names):
+        raise web.HTTPNotFound(text="no such archetype")
+    return web.json_response({**meta.archetype(x, arch, lo, hi, days, vs), "name": names[x], "vs_name": names.get(vs) if vs else None})
 
 
 async def league_retire(req):
@@ -1305,6 +1354,9 @@ def make_app() -> web.Application:
         web.get("/api/league/pool", league_pool),
         web.post("/api/league/games", league_games),
         web.post("/api/league/retire", league_retire),
+        web.post("/api/league/facts", league_facts),
+        web.get("/api/meta", meta_overview),
+        web.get("/api/meta/archetype", meta_archetype),
         web.post("/api/league/decks", league_decks),
         web.post("/api/league/report", league_report_post),
         web.get("/api/league/report", league_report),
@@ -1338,11 +1390,12 @@ def make_app() -> web.Application:
         if linked or left:
             log.info("starter decks: %d untouched cop%s now follow their starter, %d left alone",
                      linked, "y" if linked == 1 else "ies", left)
-        global ladder, friends, chat, league
+        global ladder, friends, chat, league, meta
         friends = Friends(profiles.db)
         chat = Chat(profiles.db)
         league = league_mod.Pool(profiles.db, DECK_NAMES)      # the lists the league added (web/league.py)
         ladder = ranking.Ladder(profiles.db, [s for s in sorted(BOT_DECKS) + league.slugs() if s not in league.retired()])   # ranked offers the bot pool: shipped, ladder and league decks, less the retired
+        meta = meta_mod.Meta(profiles.db, _list_of)
         if ladder.apply_seed(Path(__file__).parent / "ladder_seed.json"):   # the bots' ratings from simulation (sim/ladder_seed.py)
             log.info("ladder: bots seeded from ladder_seed.json")
         custom_decks.load()

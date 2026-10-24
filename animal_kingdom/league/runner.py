@@ -182,7 +182,7 @@ def main(argv=None) -> None:
                     fh.write(json.dumps({"t": started, "a": g["a"], "b": g["b"], "winner": g["winner"], "turns": g["turns"],
                                          "reason": g["reason"], **g["facts"]}, separators=(",", ":")) + "\n")
         try:
-            ack = api(args.server, "/api/league/games", key, {"games": [{k: v for k, v in g.items() if not k.startswith("drawn_") and k != "facts"} for g in results]})
+            ack = api(args.server, "/api/league/games", key, {"games": [{**{k: v for k, v in g.items() if not k.startswith("drawn_")}, "t": started} for g in results]})
         except (urllib.error.URLError, OSError) as e:
             print(f"games not posted: {e} (kept in {log})", flush=True); ack = {"rated": 0}
         if args.births and started - last_tinker > 3600:
