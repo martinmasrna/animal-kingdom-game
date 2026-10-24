@@ -60,8 +60,8 @@ The daughters who carry: nectar, seeds, wood, whatever the nest eats. More of th
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **Worker Ant** | common | 1 | Roar: gain 12 food. | Forest |
-| **Worker Bee** | common | 2 | Flight. Roar: gain 2 food for each Colony animal you control. | Meadow |
-| **Worker Wasp** | common | 2 | Flight. Whenever you place a Colony animal, gain 2 food. | Forest |
+| **Worker Bee** | common | 2 | Flight. Roar: gain 3 food for each Colony animal you control. | Meadow |
+| **Worker Wasp** | common | 2 | Flight. Whenever you place a Colony animal, gain 3 food. | Forest |
 | **Forager Ant (reserve)** | common | 1 | Roar: gain 5 food. If you gained 10 or more food this turn, draw a card. | Forest |
 
 <!-- cards:end -->
@@ -87,7 +87,7 @@ The ones at the door and the ones built to fight. Nothing alone; everything in n
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Vesper** | legendary | 5 | Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck. | Forest |
+| **Vesper** | legendary | 5 | Flight. When an enemy covers an allied Colony animal, place Vesper on it from your hand or deck. | Forest |
 | **Soldier Hornet** | rare | 2 | Flight. Roar: discard a Soldier Hornet from your hand or deck to remove an adjacent enemy. | Forest |
 | **Soldier Ant** | common | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. | Jungle |
 | **Soldier Bee** | common | 3 | Flight. Spikes. | Meadow |

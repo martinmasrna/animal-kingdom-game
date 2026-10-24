@@ -1326,10 +1326,16 @@ def test_vesper_on_the_board_or_in_the_remove_pile_does_nothing():
     assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "lion"]
 
 
-def test_vesper_ignores_a_non_queen_ally_and_a_friendly_cover():
+def test_vesper_answers_any_colony_ally_but_not_another_animal_or_a_friendly_cover():
+    """Any Colony animal, not only a Queen (Martin, 2026-10-24: Queens only was incredibly useless)."""
     s = make_state(hands={"A": ["lion"], "B": ["hornet_legend"]}, decks={"A": [], "B": []})
     put(s, "1,2", "lion", "A")
-    put(s, "2,2", "worker_bee", "B")                            # Colony, but no Queen
+    put(s, "2,2", "worker_bee", "B")                            # Colony, no Queen
+    rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))
+    assert s.board["2,2"][-1].card_id == "hornet_legend"
+    s = make_state(hands={"A": ["lion"], "B": ["hornet_legend"]}, decks={"A": [], "B": []})
+    put(s, "1,2", "lion", "A")
+    put(s, "2,2", "squirrel", "B")                              # not Colony
     rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))
     assert s.board["2,2"][-1].card_id == "lion" and hand_ids(s, "B") == ["hornet_legend"]
     s = make_state(current="B", hands={"B": ["lion", "hornet_legend"]}, decks={"A": [], "B": []})

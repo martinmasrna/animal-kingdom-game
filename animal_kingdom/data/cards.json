@@ -25,7 +25,7 @@
         "Colony"
       ],
       "base_strength": 5,
-      "text": "Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck.",
+      "text": "Flight. When an enemy covers an allied Colony animal, place Vesper on it from your hand or deck.",
       "species": "Hornet",
       "habitat": "Forest",
       "keywords": [
@@ -201,7 +201,7 @@
         "Worker"
       ],
       "base_strength": 2,
-      "text": "Flight. Whenever you place a Colony animal, gain 2 food.",
+      "text": "Flight. Whenever you place a Colony animal, gain 3 food.",
       "species": "Wasp",
       "habitat": "Forest",
       "keywords": [
@@ -218,7 +218,7 @@
         "Worker"
       ],
       "base_strength": 2,
-      "text": "Flight. Roar: gain 2 food for each Colony animal you control.",
+      "text": "Flight. Roar: gain 3 food for each Colony animal you control.",
       "species": "Bee",
       "habitat": "Meadow",
       "keywords": [

@@ -11,7 +11,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Queen Solenia** | 1 | Colony, Queen | 3 | Dusk: gain 2 food for each animal you control. |
-| **Vesper** | 1 | Colony | 5 | Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck. |
+| **Vesper** | 1 | Colony | 5 | Flight. When an enemy covers an allied Colony animal, place Vesper on it from your hand or deck. |
 | **Queen Melissia** | 1 | Colony, Queen | 3 | Roar: draw a Worker, a Soldier and a Nurse Colony animal. |
 | **Lord Bumbleton** | 1 | Colony | 3 | Flight. Whenever you gain food, gain 3 additional food. |
 
@@ -32,7 +32,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | **Soldier Wasp** | 3 | Colony, Soldier | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. |
 | **Soldier Ant** | 3 | Colony, Soldier | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. |
 | **Worker Ant** | 3 | Colony, Worker | 1 | Roar: gain 12 food. |
-| **Worker Wasp** | 3 | Colony, Worker | 2 | Flight. Whenever you place a Colony animal, gain 2 food. |
-| **Worker Bee** | 3 | Colony, Worker | 2 | Flight. Roar: gain 2 food for each Colony animal you control. |
+| **Worker Wasp** | 3 | Colony, Worker | 2 | Flight. Whenever you place a Colony animal, gain 3 food. |
+| **Worker Bee** | 3 | Colony, Worker | 2 | Flight. Roar: gain 3 food for each Colony animal you control. |
 
 <!-- cards:end -->

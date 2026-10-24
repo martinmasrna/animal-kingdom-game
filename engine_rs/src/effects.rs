@@ -454,7 +454,7 @@ fn push_reactions(st: &mut State, unit: &Unit, cr: Cr, covered: Option<&Unit>, _
         if st.g.has_hook(covered.card, Hook::OnCovered) {
             cards::run(st, covered.card, None, Hook::OnCovered, covered, &Args::Covered(unit.clone(), cr));
         }
-        if covered.owner != unit.owner && st.card(covered.card).has_tag(T_QUEEN) {
+        if covered.owner != unit.owner && st.card(covered.card).has_tag(T_COLONY) {
             push_queen_guards(st, covered.owner, unit, cr);
         }
         let watchers: SmallVec<[Unit; 16]> = st.tops().filter(|(_, t)| t.owner == covered.owner && t.iid != covered.iid).map(|(_, t)| *t).collect();

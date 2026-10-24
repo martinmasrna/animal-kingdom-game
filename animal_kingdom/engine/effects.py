@@ -278,7 +278,7 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
     if play:
         key = f"played_{player}"         # what each player played this turn, for "if you played another Cat" (Serval)
         state.turn_flags[key] = [*state.turn_flags.get(key, []), [unit.iid, unit.card_id]]
-    _fire_place_event(state, unit)       # Queen Melissia: gain food whenever you place a Colony animal, played or not
+    _fire_place_event(state, unit)       # the Worker Wasp: gain food whenever you place a Colony animal, played or not
     if roar:
         if unit.card_id != "macaw" and _hook(state, unit.card_id, "on_place"):
             state.last_roar[player] = unit.card_id        # the Macaw repeats it (its own copy records the copied card)
@@ -370,7 +370,7 @@ def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
         hook = _hook(state, covered.card_id, "on_covered")
         if hook:
             hook(state, covered, unit, cr)
-        if covered.owner != unit.owner and "Queen" in state.cards[covered.card_id].tags:
+        if covered.owner != unit.owner and "Colony" in state.cards[covered.card_id].tags:
             _push_queen_guards(state, covered.owner, unit, cr)
         # "When an ally is covered" / "Whenever your opponent covers an allied Fish": the covered unit's side watches.
         for st in list(state.board.values()):
@@ -381,12 +381,12 @@ def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
                     hook(state, top, covered, unit, cr)
 
 
-# Cards whose trigger works from their owner's hand or deck: when an enemy covers an allied Queen, they're placed on it.
+# Cards whose trigger works from their owner's hand or deck: when an enemy covers an allied Colony animal, they're placed on it.
 QUEEN_GUARDS = frozenset({"hornet_legend"})
 
 
 def _push_queen_guards(state, owner, coverer, cr) -> None:
-    """Vesper: "When an enemy covers an allied Queen, place Vesper on it from your hand or deck." A trigger that works
+    """Vesper: "When an enemy covers an allied Colony animal, place Vesper on it from your hand or deck." A trigger that works
     while the card is in its owner's hand or deck: one step per such card there, pushed with the other reactions to the
     cover, so it resolves after the coverer's Roar (as Spikes does). Whether the card is in hand or deck changes nothing,
     and the two together are public (open decklists, minus what has been seen leaving them), so the engine reading them
@@ -398,7 +398,7 @@ def _push_queen_guards(state, owner, coverer, cr) -> None:
 
 
 def _op_queen_guard(state, step):
-    """The guard leaves its owner's hand (first) or deck and is placed on top of the enemy that covered the Queen: no
+    """The guard leaves its owner's hand (first) or deck and is placed on top of the enemy that covered the Colony animal: no
     action, no connection or strength check, no Roar. Nothing happens if that enemy has left the crossroad meanwhile, or
     the guard has left the hand and deck (played, discarded, stolen)."""
     cid, owner, cr = step["card"], step["player"], step["cr"]

@@ -3576,9 +3576,9 @@
         "prev_note": "",
         "prev": "Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck."
       },
-      "note": "Martin, 2026-10-24: Queen only again, now that the King no longer draws at Dusk; the old wording",
+      "note": "Martin, 2026-10-24, playing it: Queens only was incredibly useless; any Colony animal",
       "by": "claude",
-      "at": 1792863086
+      "at": 1792866671
     }
   },
   "viper": {
@@ -3692,9 +3692,9 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin's sheet, 2026-10-24",
+      "note": "Martin, 2026-10-24, playing it: at 2 it was weaker than the Squirrel on average",
       "by": "claude",
-      "at": 1792861463,
+      "at": 1792866671,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
@@ -3728,9 +3728,9 @@
         "prev_note": "",
         "prev": "Flight. Dusk: gain 3 food."
       },
-      "note": "Martin's sheet, 2026-10-24: the engine on a worker",
+      "note": "Martin, 2026-10-24, playing it: at 2 it felt too weak",
       "by": "claude",
-      "at": 1792861463
+      "at": 1792866671
     },
     "strength": {
       "review": {
