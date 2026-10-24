@@ -76,19 +76,15 @@ The sources are as clear on failure as on method, and each failure has a version
 
 ## 5. The unit of society for this game
 
-Not species (section 4), not habitat (a habitat gives naming nothing to read: who names a giraffe "because Savanna"?). A society is a group with a namer and a bargain, and the sources show both kinds we have: societies of one species (a pride, a hive, a pack) and societies of several fixed by a job or a pact (a herd, a street with its crews, the Guard, the Abbey). The animals with no society are named from outside, by what they do to the others.
+Settled in discussion with Martin on 2026-10-24, after two wrong units in one day (habitat plus biology, which gives five hundred pages; the family tag, which puts the hippo in the herd):
 
-Read from the legends and the decks as they stand, these are the candidates. They are readings, not a list Martin has agreed to; the naming skill's "Societies" section is the same reading and says so.
+1. A society is a way of living together that is also one playstyle: herd, hive, pride, pack, school, street, loner. Never a habitat, a tag or a species. That lands at about one page per family archetype, ten or so, which is the Bloomburrow lesson (factions that group numerous animals) in our terms. The Colony is one society although bees do not live with ants: one way of living under a queen, one playstyle.
+2. An animal belongs if a nature fan pictures it living that way and its cards play that way. Deer, boar and okapi are herd animals in the game and nobody pictures them otherwise; the hippo's card neither grazes nor holds ground with others and nobody pictures it in a herd, so it is out.
+3. Habitat never splits a society. Where they live is the painting's business (`design/cards/art-principles.md`).
+4. A card sits in one society; a precon borrowing a card from elsewhere does not make it a member.
+5. A society too small for a page gets a paragraph on its neighbour's page, or nothing.
 
-- The Pride (Savanna lions): a house; names exist (Theron, Adira, Leo, Lea).
-- The Hive court (Colony): a court; names exist (Melissia, Solenia, Bumbleton, Vesper).
-- The herds (Hoofed, mixed species): no bargain and no namer yet; three cards waiting.
-- The City street (Rats and the Macaque's crew): a mob frame; the capo's name half-made.
-- The Pack (the three wolves): nothing written.
-- The sea: nothing written.
-- The loners (Ash, Azamandulai, the Leopard, Eon, Iris): no society; named by witnesses, by what they do.
-
-Rosewater's "five animal factions" and Ravnica's "ten at once was just too much" both say the count should stay small and be staged. Seven starter decks and five or six societies is already at that size (*inference*).
+The animals with no society (Ash, Azamandulai, the Leopard, Eon, Iris) are named from outside, by what they do to the others, as the Calamity Beasts are.
 
 ## 6. The page: a proposal (revised the same day)
 
