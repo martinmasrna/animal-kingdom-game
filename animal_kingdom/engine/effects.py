@@ -264,6 +264,7 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
     # Apex Predator: it covers the occupant like any placement, and eats it afterwards
     # (Martin, 2026-09-29): the roar, then every reaction to the cover (Porcupine's Spikes,
     # Gale), then the eat. The stack is LIFO, so the eat goes in first, at the bottom.
+    _push_theron(state, unit, covered)
     if is_apex and covered is not None:
         state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id})
 
@@ -292,13 +293,17 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
 
 
 def _fire_cover_event(state, coverer, covered) -> None:
-    """King Theron: when one of your Cats covers an enemy unit, remove that enemy (now buried).
-    Decision G: House Cat/extra-placement chains can cover multiple enemies in one turn -
-    `cap_king_theron` (off by default) limits Theron to one free removal per turn."""
     hook = _hook(state, coverer.card_id, "on_cover_enemy")   # "Whenever this covers an enemy" (Fox)
     if hook:
         hook(state, coverer, covered)
-    if "Cat" not in state.cards[coverer.card_id].tags:
+
+
+def _push_theron(state, coverer, covered) -> None:
+    """King Theron: when one of your Cats covers an enemy unit, remove that enemy (now buried). Pushed before
+    everything else the cover sets off, so it resolves last: the Cat acts first (an Apex Cat eats, and the legendary
+    Leopard grows for it), and Theron removes whatever it left. Decision G: House Cat/extra-placement chains can
+    cover multiple enemies in one turn - `cap_king_theron` (off by default) limits Theron to one free removal per turn."""
+    if covered is None or covered.owner == coverer.owner or "Cat" not in state.cards[coverer.card_id].tags:
         return
     for top in statics.active_tops(state, coverer.owner, "lion_legend_3"):
         if not _capped(state, "cap_king_theron", top):
@@ -939,6 +944,7 @@ def do_roam(state: GameState, player: str, origin: str, target) -> None:
     state.board.setdefault(where, []).append(unit)
     if covered is not None:
         state.emit("cover", cr=where, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
+    _push_theron(state, unit, covered)
     if statics.has_keyword(state, unit, "Apex Predator", where) and covered is not None:
         state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id})
     _push_reactions(state, unit, where, covered, onto_enemy)

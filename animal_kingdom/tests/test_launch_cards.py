@@ -1436,6 +1436,24 @@ def test_the_legendary_leopard_grows_with_every_kill():
     assert leo.card_id == "leopard_legend" and effective_strength(s, leo) == base + 2 * CFG.leopard_legend_growth
 
 
+
+def test_the_legendary_leopard_still_eats_and_grows_under_king_theron():
+    # King Theron removes what a Cat covers only after the Cat has acted: the Leopard eats first and grows (Martin,
+    # 2026-10-24: under Theron it didn't grow, Theron's removal took the prey first).
+    s = make_state(hands={"A": ["leopard_legend"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,1", "lion_legend_3", "A")
+    put(s, "1,2", "lion", "A")
+    put(s, "2,2", "squirrel", "B")
+    put(s, "3,2", "squirrel", "B")
+    base = s.cards["leopard_legend"].base_strength
+    rules.apply_action(s, PlaceAction("leopard_legend", ("cr", "2,2")))
+    leo = s.top_unit("2,2")
+    assert [u.card_id for u in s.board["2,2"]] == ["leopard_legend"] and effective_strength(s, leo) == base + CFG.leopard_legend_growth
+    rules.apply_action(s, RoamAction("2,2", ("cr", "3,2")))
+    leo = s.top_unit("3,2")
+    assert [u.card_id for u in s.board["3,2"]] == ["leopard_legend"] and effective_strength(s, leo) == base + 2 * CFG.leopard_legend_growth
+
+
 # ==================================================================================== the hand limit
 
 def test_cards_made_past_the_hand_limit_burn():
