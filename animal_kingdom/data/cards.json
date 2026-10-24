@@ -10,11 +10,11 @@
         "Colony",
         "Queen"
       ],
-      "base_strength": 4,
-      "text": "Roar: gain 4 food for each other Colony animal you control.",
-      "keywords": [],
+      "base_strength": 3,
+      "text": "Dusk: gain 2 food for each animal you control.",
       "species": "Army Ant",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "hornet_legend",
@@ -41,11 +41,11 @@
         "Colony",
         "Queen"
       ],
-      "base_strength": 4,
-      "text": "Whenever you place a Colony animal, gain 4 food.",
-      "keywords": [],
+      "base_strength": 3,
+      "text": "Roar: draw a Worker, a Soldier and a Nurse Colony animal.",
       "species": "Bee",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "bumblebee_legend",
@@ -69,7 +69,8 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [
-        "Colony"
+        "Colony",
+        "Nurse"
       ],
       "base_strength": 3,
       "text": "Flight. Roar: if you control two of the same Colony animal, draw 3 cards.",
@@ -85,7 +86,8 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [
-        "Colony"
+        "Colony",
+        "Nurse"
       ],
       "base_strength": 2,
       "text": "Flight. Roar: if you control 4 or more Colony animals, draw 2 cards.",
@@ -141,11 +143,12 @@
     },
     {
       "id": "guard_wasp",
-      "name": "Guard Wasp",
+      "name": "Soldier Wasp",
       "status": "collectible",
       "rarity": "common",
       "tags": [
-        "Colony"
+        "Colony",
+        "Soldier"
       ],
       "base_strength": 3,
       "text": "Flight. Has +3 strength while you control 4 or more Colony animals.",
@@ -161,7 +164,8 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [
-        "Colony"
+        "Colony",
+        "Soldier"
       ],
       "base_strength": 2,
       "text": "Roar: if you control 4 or more Colony animals, remove an adjacent enemy.",
@@ -653,19 +657,20 @@
     },
     {
       "id": "hornet",
-      "name": "Hornet",
+      "name": "Soldier Hornet",
       "status": "collectible",
       "rarity": "rare",
       "tags": [
-        "Colony"
+        "Colony",
+        "Soldier"
       ],
       "base_strength": 2,
-      "text": "Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy.",
+      "text": "Flight. Roar: discard a Soldier Hornet from your hand or deck to remove an adjacent enemy.",
+      "species": "Hornet",
+      "habitat": "Forest",
       "keywords": [
         "Flight"
-      ],
-      "species": "Hornet",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "chameleon",
@@ -2961,11 +2966,12 @@
     },
     {
       "id": "guard_bee",
-      "name": "Guard Bee",
+      "name": "Soldier Bee",
       "status": "reserve",
       "rarity": "common",
       "tags": [
-        "Colony"
+        "Colony",
+        "Soldier"
       ],
       "base_strength": 2,
       "text": "Flight. Spikes.",
@@ -3023,20 +3029,6 @@
       ],
       "species": "Bee",
       "habitat": "Meadow"
-    },
-    {
-      "id": "ant",
-      "name": "[ANT]",
-      "status": "reserve",
-      "rarity": "legendary",
-      "tags": [
-        "Colony"
-      ],
-      "base_strength": 1,
-      "text": "Dusk: gain 2 food for each animal you control.",
-      "keywords": [],
-      "species": "Ant",
-      "habitat": "Forest"
     },
     {
       "id": "baby_turtle",

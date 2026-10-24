@@ -23,7 +23,7 @@ KEYWORDS = {"Flight", "Armor", "Apex Predator", "Stealth", "Spikes", "Poison", "
 TAGS = {
     "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent",
     "Arachnid", "Bear", "Megafauna", "Egg", "Fish", "Primate", "Hoofed",   # species families
-    "Queen", "Worker",                                # roles
+    "Queen", "Worker", "Soldier", "Nurse",              # roles (castes: Melissia draws by them)
 }
 DYNAMIC_STRENGTHS = {"removed_units_count", "removed_eggs_count"}  # Python, Egg Eater
 

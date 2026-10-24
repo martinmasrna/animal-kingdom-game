@@ -1603,6 +1603,29 @@
       "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers. (3 base, +3: a 6 with Flight, so never a worse Eagle)",
       "by": "claude",
       "at": 1792076082
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Guard Wasp",
+          "species": "Wasp"
+        }
+      },
+      "note": "Martin's sheet, 2026-10-24: one word for the fighters, Soldier",
+      "by": "claude",
+      "at": 1792858802
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Colony"
+      },
+      "note": "Martin's sheet, 2026-10-24",
+      "by": "claude",
+      "at": 1792858795
     }
   },
   "hamster": {
@@ -1762,6 +1785,39 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Hornet",
+          "species": "Hornet"
+        }
+      },
+      "note": "Martin's sheet, 2026-10-24: one word for the fighters, Soldier",
+      "by": "claude",
+      "at": 1792858802
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Colony"
+      },
+      "note": "Martin's sheet, 2026-10-24",
+      "by": "claude",
+      "at": 1792858795
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy."
+      },
+      "note": "Martin's sheet, 2026-10-24: the name changed, so the text names it",
+      "by": "claude",
+      "at": 1792858795
     }
   },
   "hummingbird": {
@@ -2355,6 +2411,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Colony"
+      },
+      "note": "Martin's sheet, 2026-10-24",
+      "by": "claude",
+      "at": 1792858796
     }
   },
   "nurse_bumblebee": {
@@ -2385,6 +2451,16 @@
       "note": "Martin, 2026-10-22: conditional draw 2 priced by what the condition costs the turn you play it (Mantis 2, Termite King 2, Nurse Bumblebee 2 with Flight, Gopher 4, Hare 4)",
       "by": "claude",
       "at": 1792663941
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Colony"
+      },
+      "note": "Martin's sheet, 2026-10-24",
+      "by": "claude",
+      "at": 1792858796
     }
   },
   "octopus_legend": {
@@ -2769,9 +2845,24 @@
       "at": 1792581990
     },
     "effect": {
-      "note": "Martin, 2026-10-21: place, not play, so Vesper and the Vulture count",
+      "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
-      "at": 1792584111
+      "at": 1792858794,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-21: place, not play, so Vesper and the Vulture count",
+        "prev": "Whenever you place a Colony animal, gain 4 food."
+      }
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Martin's sheet, 2026-10-24: 3 to try",
+      "by": "claude",
+      "at": 1792858794
     }
   },
   "army_ant_legend": {
@@ -2788,6 +2879,26 @@
       "by": "claude",
       "note": "Martin, 2026-10-21: from Solenopsis, the fire ants, the ant-word notched into a queen's name like Melissia. Draft, a week on the card before a lock",
       "at": 1792587741
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: gain 4 food for each other Colony animal you control."
+      },
+      "note": "Martin's sheet, 2026-10-24",
+      "by": "claude",
+      "at": 1792858794
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Martin's sheet, 2026-10-24: 3 to try",
+      "by": "claude",
+      "at": 1792858794
     }
   },
   "rat": {
@@ -3104,6 +3215,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Colony"
+      },
+      "note": "Martin's sheet, 2026-10-24: castes are tags, so Melissia can draw by them",
+      "by": "claude",
+      "at": 1792858795
     }
   },
   "squirrel": {
@@ -4346,9 +4467,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
-      "at": 1792585136
+      "at": 1792858795
     },
     "effect": {
       "review": {
@@ -4382,6 +4503,19 @@
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
       "at": 1792585134
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Guard Bee",
+          "species": "Bee"
+        }
+      },
+      "note": "Martin's sheet, 2026-10-24: one word for the fighters, Soldier",
+      "by": "claude",
+      "at": 1792858802
     }
   },
   "forager_ant": {
@@ -4520,52 +4654,6 @@
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
       "at": 1792585154
-    }
-  },
-  "ant": {
-    "tag": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
-      "by": "claude",
-      "at": 1792585162
-    },
-    "effect": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
-      "by": "claude",
-      "at": 1792585163
-    },
-    "rarity": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": ""
-      },
-      "lv": "draft",
-      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
-      "by": "claude",
-      "at": 1792585159
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "empty",
-        "prev_note": "",
-        "prev": null
-      },
-      "lv": "draft",
-      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
-      "by": "claude",
-      "at": 1792585160
     }
   },
   "strawberry_leopard": {

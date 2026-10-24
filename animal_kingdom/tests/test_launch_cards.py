@@ -1344,13 +1344,11 @@ def test_vesper_answers_a_roaming_cover_too():
     assert [u.card_id for u in s.board["1,3"]] == ["queen_bee", "fox", "hornet_legend"]
 
 
-def test_vesper_resolves_after_the_coverers_roar_and_counts_as_placed():
-    """The Bat's Roar draws first; Vesper comes after it, without an action. Queen Melissia pays for her: she gains
-    food whenever a Colony animal is placed, played or not (Martin, 2026-10-21)."""
-    s = _queen_covered_by("bat", b_hand=["hornet_legend"], extra=lambda s: put(s, "4,1", "bee_legend", "B"))
+def test_vesper_resolves_after_the_coverers_roar():
+    """The Bat's Roar draws first; Vesper comes after it, without an action."""
+    s = _queen_covered_by("bat", b_hand=["hornet_legend"])
     order = [e["e"] for e in s.events if e["e"] in ("draw", "place")]
     assert order == ["place", "draw", "place"] and s.board["2,2"][-1].card_id == "hornet_legend"
-    assert s.food["B"] == s.config.bee_legend_per_place
 
 
 def test_vesper_fires_identically_from_any_determinized_world():

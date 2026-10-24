@@ -43,8 +43,8 @@ The one the colony is for. She lays, and everyone else exists to feed her brood.
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Queen Melissia** | legendary | 4 | Whenever you place a Colony animal, gain 4 food. | Meadow |
-| **Queen Solenia** | legendary | 4 | Roar: gain 4 food for each other Colony animal you control. | Jungle |
+| **Queen Melissia** | legendary | 3 | Roar: draw a Worker, a Soldier and a Nurse Colony animal. | Meadow |
+| **Queen Solenia** | legendary | 3 | Dusk: gain 2 food for each animal you control. | Jungle |
 | **Queen Wasp (reserve)** | rare | 4 | Flight. Whenever you place an animal with Flight, gain 3 food. | Forest |
 | **Queen Bee** | common | 2 | Roar: play a Worker animal. | Meadow |
 | **Termite Queen** | common | 1 | Roar: you may play another non-Queen Colony animal. | Savanna |
@@ -88,10 +88,10 @@ The ones at the door and the ones built to fight. Nothing alone; everything in n
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **Vesper** | legendary | 5 | Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck. | Forest |
-| **Hornet** | rare | 2 | Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy. | Forest |
-| **Guard Wasp** | common | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. | Forest |
+| **Soldier Hornet** | rare | 2 | Flight. Roar: discard a Soldier Hornet from your hand or deck to remove an adjacent enemy. | Forest |
 | **Soldier Ant** | common | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. | Jungle |
-| **Guard Bee (reserve)** | common | 2 | Flight. Spikes. | Meadow |
+| **Soldier Wasp** | common | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. | Forest |
+| **Soldier Bee (reserve)** | common | 2 | Flight. Spikes. | Meadow |
 
 <!-- cards:end -->
 
@@ -111,12 +111,11 @@ The termite king, the one insect king: he stays beside his queen for life and is
 
 The honey, the granary, the fungus garden: a summer's work kept against the winter, more than the nest can eat.
 
-<!-- cards:begin ids=bumblebee_legend,ant (generated from cards.json by animal_kingdom.render.deck_docs) -->
+<!-- cards:begin ids=bumblebee_legend (generated from cards.json by animal_kingdom.render.deck_docs) -->
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **Lord Bumbleton** | legendary | 3 | Flight. Whenever you gain food, gain 3 additional food. | Meadow |
-| **[ANT] (reserve)** | legendary | 1 | Dusk: gain 2 food for each animal you control. | Forest |
 
 <!-- cards:end -->
 
@@ -177,7 +176,7 @@ Who speaks a hive name: the nest itself, about its own queen, the way a people n
 
 ## 6. Ledger
 
-Names on the cards: Queen Melissia (honeybee), Queen Solenia (army ant), Lord Bumbleton (bumblebee), Vesper (hornet). Open: the unplaced bee legendary, the scout bee (reserve), the ant of the store (reserve); all three are court or caste names by this page's rule.
+Names on the cards: Queen Melissia (honeybee), Queen Solenia (army ant), Lord Bumbleton (bumblebee), Vesper (hornet). Open: the unplaced bee legendary and the scout bee (reserve); both are court or caste names by this page's rule.
 
 Legends that read from this page: none written yet.
 

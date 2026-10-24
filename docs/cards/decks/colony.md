@@ -10,27 +10,27 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Queen Solenia** | 1 | Colony, Queen | 4 | Roar: gain 4 food for each other Colony animal you control. |
+| **Queen Solenia** | 1 | Colony, Queen | 3 | Dusk: gain 2 food for each animal you control. |
 | **Vesper** | 1 | Colony | 5 | Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck. |
-| **Queen Melissia** | 1 | Colony, Queen | 4 | Whenever you place a Colony animal, gain 4 food. |
+| **Queen Melissia** | 1 | Colony, Queen | 3 | Roar: draw a Worker, a Soldier and a Nurse Colony animal. |
 | **Lord Bumbleton** | 1 | Colony | 3 | Flight. Whenever you gain food, gain 3 additional food. |
 
 ### Rare
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Nurse Bee** | 2 | Colony | 3 | Flight. Roar: if you control two of the same Colony animal, draw 3 cards. |
+| **Nurse Bee** | 2 | Colony, Nurse | 3 | Flight. Roar: if you control two of the same Colony animal, draw 3 cards. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Nurse Bumblebee** | 2 | Colony | 2 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. |
+| **Nurse Bumblebee** | 2 | Colony, Nurse | 2 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. |
 | **Termite King** | 2 | Colony | 2 | Roar: if you control a Colony Queen, draw 2 cards. |
 | **Termite Queen** | 2 | Colony, Queen | 1 | Roar: you may play another non-Queen Colony animal. |
 | **Queen Bee** | 3 | Colony, Queen | 2 | Roar: play a Worker animal. |
-| **Guard Wasp** | 3 | Colony | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. |
-| **Soldier Ant** | 3 | Colony | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. |
+| **Soldier Wasp** | 3 | Colony, Soldier | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. |
+| **Soldier Ant** | 3 | Colony, Soldier | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. |
 | **Worker Ant** | 3 | Colony, Worker | 1 | Roar: gain 12 food. |
 | **Worker Wasp** | 3 | Colony, Worker | 3 | Flight. Dusk: gain 3 food. |
 | **Worker Bee** | 3 | Colony, Worker | 1 | Flight. Roar: gain 8 food; if you control another Worker, gain 8 more. |

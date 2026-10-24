@@ -819,22 +819,29 @@ def test_king_theron_and_queen_adira_combo_on_a_cat_cover():
 
 # =============================================== Stage 2.4: food gains / play & food riders
 
-def test_queen_honoria_and_falstaff_riders_stack():
+def test_bumbleton_rider_lands_on_a_colony_roar():
     s = make_state(current="A", hands={"A": ["worker_ant"]})
-    put(s, "1,1", "bee_legend", "A")                 # +5 when you play a Colony unit
     put(s, "1,3", "bumblebee_legend", "A")                      # +3 whenever you gain food
     put(s, "1,2", "caracal", "A")
     rules.apply_action(s, PlaceAction("worker_ant", ("cr", "2,2")))
-    # Honoria +4 (+3 rider) then Worker Ant +12 (+3 rider) = 22
-    assert s.food["A"] == 22
+    assert s.food["A"] == CFG.worker_ant_food + CFG.bumblebee_legend_food_rider
 
 
-def test_queen_marabunta_scales_with_other_colony():
-    s = make_state(hands={"A": ["army_ant_legend"]})
+def test_queen_solenia_pays_at_dusk_for_every_animal_you_control():
+    s = make_state(current="A", decks={"A": ["lion"], "B": ["lynx"]})
     put(s, "1,1", "worker_ant", "A")
-    put(s, "1,3", "worker_bee", "A")
-    rules.apply_action(s, PlaceAction("army_ant_legend", ("cr", "1,2")))
-    assert s.food["A"] == 2 * CFG.army_ant_legend_per_colony   # two other Colony units
+    put(s, "1,3", "caracal", "A")                    # any animal counts, not only Colony
+    put(s, "1,2", "army_ant_legend", "A")
+    s.actions_taken_this_turn = s.config.actions_per_turn - 1
+    rules.apply_action(s, DrawAction())
+    assert s.food["A"] == 3 * CFG.army_ant_legend_per   # herself and two others
+
+
+def test_queen_melissia_draws_one_of_each_caste():
+    deck = ["lion", "worker_bee", "guard_wasp", "nurse_bee", "queen_bee", "lion"]
+    s = make_state(current="A", hands={"A": ["bee_legend"]}, decks={"A": deck, "B": []})
+    rules.apply_action(s, PlaceAction("bee_legend", ("cr", "1,2")))
+    assert sorted(hand_ids(s, "A")) == ["guard_wasp", "nurse_bee", "worker_bee"]
 
 
 def test_chipmunk_pays_now_and_next_turn():

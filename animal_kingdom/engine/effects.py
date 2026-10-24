@@ -2099,10 +2099,10 @@ def _lion_legend_4_remove_event(state, unit, cr, event):
 
 # --- Colony -----------------------------------------------------------------------------------------------------
 
-def _bee_legend_friendly_place(state, watcher, placed) -> None:
-    """Queen Melissia: whenever you place a Colony animal, gain 4 food."""
-    if "Colony" in state.cards[placed.card_id].tags and not _capped(state, "cap_queen_honoria", watcher):
-        gain_food(state, placed.owner, state.config.bee_legend_per_place)
+def _bee_legend_place(state, unit, cr):
+    """Queen Melissia: Roar: draw a Worker, a Soldier and a Nurse Colony animal (each a random one from your deck)."""
+    for caste in ("Nurse", "Soldier", "Worker"):   # the stack runs last-in first: the Worker is drawn first
+        state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": f"tag:Colony&tag:{caste}"})
 
 
 def _worker_bee_place(state, unit, cr):
@@ -2112,9 +2112,9 @@ def _worker_bee_place(state, unit, cr):
     _push_gain(state, unit.owner, amount)
 
 
-def _army_ant_legend_place(state, unit, cr):
-    others = _control_tag_count(state, unit.owner, "Colony") - 1   # other friendly Colony units
-    _push_gain(state, unit.owner, state.config.army_ant_legend_per_colony * max(0, others))
+def _army_ant_legend_eot(state, unit, cr):
+    """Queen Solenia: Dusk: gain 2 food for each animal you control (each crossroad you top)."""
+    _push_gain(state, unit.owner, state.config.army_ant_legend_per * _control_tag_count(state, unit.owner))
 
 
 # Colony outside the precon: bench drafts (Martin, 2026-10-21; docs/design/effects-pass.md). Each card's condition is
@@ -2137,11 +2137,6 @@ def _scout_bee_eot(state, unit, cr):
     """[SCOUT BEE]: Dusk: if you gained 20 or more food this turn, draw a card."""
     if _food_gained_this_turn(state, unit.owner) >= state.config.scout_bee_threshold:
         _push_draw(state, unit.owner, state.config.scout_bee_draw)
-
-
-def _ant_legend_eot(state, unit, cr):
-    """[ANT]: Dusk: gain 2 food for each animal you control (each crossroad you top)."""
-    _push_gain(state, unit.owner, state.config.ant_legend_per * _control_tag_count(state, unit.owner))
 
 
 # --- Den Rush ---------------------------------------------------------------------------------------------------
@@ -3035,12 +3030,11 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "bobcat": {"on_place": _conditional(_draw1)},
     "alley_cat": {"on_place": _house_cat_place},
     # Colony.
-    "army_ant_legend": {"on_place": _army_ant_legend_place},
-    "bee_legend": {"on_friendly_place": _bee_legend_friendly_place},
+    "army_ant_legend": {"on_end_of_turn": _army_ant_legend_eot},
+    "bee_legend": {"on_place": _bee_legend_place},
     "forager_ant": {"on_place": _forager_ant_place},
     "queen_wasp": {"on_friendly_place": _queen_wasp_friendly_place},
     "scout_bee": {"on_end_of_turn": _scout_bee_eot},
-    "ant": {"on_end_of_turn": _ant_legend_eot},
     "nurse_bee": {"on_place": _conditional(_draws("nurse_bee_draw"))},
     "nurse_bumblebee": {"on_place": _conditional(_draws("nurse_bumblebee_draw"))},
     "termite_king": {"on_place": _conditional(_draws("termite_king_draw"))},

@@ -19,7 +19,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Hornet** | 2 | Colony | 2 | Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy. |
+| **Soldier Hornet** | 2 | Colony, Soldier | 2 | Flight. Roar: discard a Soldier Hornet from your hand or deck to remove an adjacent enemy. |
 | **Chameleon** | 2 | Lizard | 0 | Can cover animals of any strength. |
 | **Skunk** | 2 | — | 4 | Roar: return an adjacent enemy to its owner's hand. It can't be played next turn. |
 | **Mole** | 2 | — | 2 | Roar: play another animal next to this. |
