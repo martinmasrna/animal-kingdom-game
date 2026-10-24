@@ -4694,7 +4694,7 @@
       "at": 1792585141
     }
   },
-  "queen_wasp": {
+  "queen_ant": {
     "tag": {
       "review": {
         "prev_lv": "empty",
@@ -4713,9 +4713,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin's sheet, 2026-10-24",
+      "note": "Martin, 2026-10-24: an ant queen flies once, sheds her wings and lays where she stands, so no Flight; 5, the Sea Turtle's strength, and the Turtle gets a new effect",
       "by": "claude",
-      "at": 1792861462
+      "at": 1792867920
     },
     "rarity": {
       "review": {
@@ -4735,18 +4735,18 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "note": "Martin, 2026-10-24: an ant queen flies once, sheds her wings and lays where she stands, so no Flight; 5, the Sea Turtle's strength, and the Turtle gets a new effect",
       "by": "claude",
-      "at": 1792585147
+      "at": 1792867920
     },
     "animal": {
       "review": {
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "into the collection",
+      "note": "Martin, 2026-10-24: an ant queen flies once, sheds her wings and lays where she stands, so no Flight; 5, the Sea Turtle's strength, and the Turtle gets a new effect",
       "by": "claude",
-      "at": 1792861462
+      "at": 1792867920
     }
   },
   "scout_bee": {

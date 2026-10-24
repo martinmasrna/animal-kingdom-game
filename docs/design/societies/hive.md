@@ -39,13 +39,13 @@ One section per job the nest gives. Under each, the cards that play it; a headin
 
 The one the colony is for. She lays, and everyone else exists to feed her brood.
 
-<!-- cards:begin ids=queen_bee,termite_queen,bee_legend,army_ant_legend,queen_wasp (generated from cards.json by animal_kingdom.render.deck_docs) -->
+<!-- cards:begin ids=queen_bee,termite_queen,bee_legend,army_ant_legend,queen_ant (generated from cards.json by animal_kingdom.render.deck_docs) -->
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **Queen Melissia** | legendary | 3 | Roar: draw a Worker, a Soldier and a Nurse Colony animal. | Meadow |
 | **Queen Solenia** | legendary | 3 | Dusk: gain 2 food for each animal you control. | Jungle |
-| **Queen Wasp** | rare | 4 | Flight. Dusk: place a Young Wasp on an adjacent empty crossroad. | Forest |
+| **Queen Ant** | rare | 5 | Dusk: place a Young Ant on an adjacent empty crossroad. | Forest |
 | **Termite Queen** | rare | 3 | Roar: play a non-Queen Colony animal. | Savanna |
 | **Queen Bee** | common | 3 | Roar: play a Young Bee. | Meadow |
 

@@ -2125,11 +2125,11 @@ def _queen_bee_place(state, unit, cr):
     state.effect_stack.append({"op": "play_named", "chooser": unit.owner, "card_id": "young_bee", "make": True})
 
 
-def _queen_wasp_eot(state, unit, cr):
-    """Queen Wasp: Dusk: place a Young Wasp on an adjacent empty crossroad (a random one: Dusk asks no decision)."""
+def _queen_ant_eot(state, unit, cr):
+    """Queen Ant: Dusk: place a Young Ant on an adjacent empty crossroad (a random one: Dusk asks no decision)."""
     empty = _empty_neighbors(state, cr)
     if empty:
-        _spawn(state, unit.owner, "young_wasp", state.rng.choice(empty))
+        _spawn(state, unit.owner, "young_ant", state.rng.choice(empty))
 
 
 def _army_ant_legend_eot(state, unit, cr):
@@ -3047,7 +3047,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "army_ant_legend": {"on_end_of_turn": _army_ant_legend_eot},
     "bee_legend": {"on_place": _bee_legend_place},
     "forager_ant": {"on_place": _forager_ant_place},
-    "queen_wasp": {"on_end_of_turn": _queen_wasp_eot},
+    "queen_ant": {"on_end_of_turn": _queen_ant_eot},
     "scout_bee": {"on_end_of_turn": _scout_bee_eot},
     "nurse_bee": {"on_place": _conditional(_draws("nurse_bee_draw"))},
     "nurse_bumblebee": {"on_place": _draws_filtered("tag:Colony")},

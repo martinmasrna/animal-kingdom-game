@@ -3001,24 +3001,23 @@
       "habitat": "Forest"
     },
     {
-      "id": "queen_wasp",
-      "name": "Queen Wasp",
+      "id": "queen_ant",
+      "name": "Queen Ant",
       "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Colony",
         "Queen"
       ],
-      "base_strength": 4,
-      "text": "Flight. Dusk: place a Young Wasp on an adjacent empty crossroad.",
-      "species": "Wasp",
+      "base_strength": 5,
+      "text": "Dusk: place a Young Ant on an adjacent empty crossroad.",
+      "species": "Ant",
       "habitat": "Forest",
       "related": [
-        "young_wasp"
+        "young_ant",
+        "young_ant"
       ],
-      "keywords": [
-        "Flight"
-      ]
+      "keywords": []
     },
     {
       "id": "scout_bee",
@@ -3897,8 +3896,8 @@
       "text": ""
     },
     {
-      "id": "young_wasp",
-      "name": "Young Wasp",
+      "id": "young_ant",
+      "name": "Young Ant",
       "status": "token",
       "rarity": "common",
       "tags": [

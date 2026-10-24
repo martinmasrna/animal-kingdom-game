@@ -86,7 +86,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "mock_scout" | "mock_saboteur" | "mock_draw2" | "mock_removal" => &[OnPlace],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
-        "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "queen_wasp" | "scout_bee" | "army_ant_legend"
+        "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "queen_ant" | "scout_bee" | "army_ant_legend"
         | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "okapi" | "wildebeest"
         | "dingo" | "sperm_whale_legend" => &[OnEndOfTurn],
         "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" => &[OnStartOfTurn],
@@ -701,7 +701,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 push_draw(st, owner, d);
             }
         }
-        ("queen_wasp", OnEndOfTurn) => spawns_beside(st, unit, cr, "young_wasp"),
+        ("queen_ant", OnEndOfTurn) => spawns_beside(st, unit, cr, "young_ant"),
         ("scout_bee", OnEndOfTurn) => {
             if food_gained_this_turn(st, owner) >= cfg(st, "scout_bee_threshold") {
                 let d = cfg(st, "scout_bee_draw");
