@@ -308,7 +308,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
   .pre .leave { position: fixed; z-index: 3; }
   /* the ladder: one scrolling column, Back kept at the foot */
   .ladder { display: block; overflow-y: auto; }
-  .ladder .hist { display: block; height: auto; } .ladder .hbody { overflow: visible; -webkit-mask-image: none; mask-image: none; }
+  .ladder .hist { display: flex; flex-direction: column; height: auto; min-height: 100%; overflow: visible; } .ladder .hbody { flex: 1 0 auto; overflow: visible; -webkit-mask-image: none; mask-image: none; }
   .ladder .hhead { padding: 14px 12px 6px; flex-wrap: wrap; row-gap: 10px; } .ladder .hhead h2 { font-size: 24px; white-space: nowrap; }
   .ladder .hhead .dd { min-width: 0; flex: 1 1 100%; } .ladder .hhead .dd .sel { white-space: nowrap; }   /* the deck filter on its own row under the tabs */
   .ladder .hlist { padding: 0 12px; }
