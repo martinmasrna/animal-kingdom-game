@@ -21,7 +21,13 @@ The insects that live as one family under a queen: honeybees, bumblebees, wasps,
 
 ## 3. The playstyle the hive's cards serve
 
-Numbers into food. A player who runs hive animals is building a colony that grows wide and pays for itself: queens produce workers, workers make food, and the nurses, guards and soldiers come alive once the colony is big (four or more, a queen on the board, two of the same). It wins on food through numbers, not through the den. Its cost is the start: every card is weak alone and the thresholds are met only with the colony around it, so a board swept early or a hive that never reaches four is a pile of ones and twos. The precon (Martin's Colony starter) is the all-in version, and today every one of its cards carries a colony-shaped condition, so none of them leaves the deck and only the Hornet enters it (`effects-pass.md`, Colony outside the precon: the wanted cards are ones whose condition another deck meets for its own reasons).
+The colony is one animal (Martin, 2026-10-24). Three things follow, and a hive card does at least one of them:
+
+- **The queen lays.** The colony makes its own bodies: a queen on the board puts workers down without the player spending actions to go and find them. This is the hive's numbers, and the thing no other society can do; the rodents are many because the player played many.
+- **The workers feed the whole.** A worker's food is worth what the colony around her is worth, not a flat number per card: more of them together, more food. A flat sack of grain is a rat.
+- **Nothing alone, and the queen is the single point of failure.** The payoffs (the guards' strength, the soldiers' removal, the nurses' cards) need the colony standing, four or more, a queen on the board; kill the queen and the colony dies. This is the character, and it is also the weakness that makes the hive lose to a swept board, which is right.
+
+It wins on food through numbers, not through the den, and it loses when the board is cleared before the colony stands. The precon (Martin's Colony starter) is the all-in version; today every one of its cards carries a colony-shaped condition, so none leaves the deck and only the Hornet enters it (`effects-pass.md`, Colony outside the precon). A card that does none of the three is a food card wearing stripes, and belongs to the rodents or to nobody.
 
 ## 4. Who does what
 
