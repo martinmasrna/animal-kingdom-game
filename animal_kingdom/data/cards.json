@@ -25,7 +25,7 @@
         "Colony"
       ],
       "base_strength": 5,
-      "text": "Flight. When an enemy covers your Queen or King, place this on it from your hand or deck.",
+      "text": "Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck.",
       "species": "Hornet",
       "habitat": "Forest",
       "keywords": [
@@ -103,8 +103,7 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [
-        "Colony",
-        "King"
+        "Colony"
       ],
       "base_strength": 5,
       "text": "Roar: draw a card for each Colony Queen you control.",
@@ -122,7 +121,7 @@
         "Queen"
       ],
       "base_strength": 3,
-      "text": "Roar: you may play a non-Queen Colony animal.",
+      "text": "Roar: play a non-Queen Colony animal.",
       "species": "Termite",
       "habitat": "Savanna",
       "keywords": []
@@ -137,7 +136,7 @@
         "Queen"
       ],
       "base_strength": 3,
-      "text": "Roar: place a Young Bee on a random adjacent empty crossroad.",
+      "text": "Roar: play a Young Bee.",
       "species": "Bee",
       "habitat": "Meadow",
       "related": [

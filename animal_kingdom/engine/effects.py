@@ -370,7 +370,7 @@ def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
         hook = _hook(state, covered.card_id, "on_covered")
         if hook:
             hook(state, covered, unit, cr)
-        if covered.owner != unit.owner and state.cards[covered.card_id].tags & {"Queen", "King"}:
+        if covered.owner != unit.owner and "Queen" in state.cards[covered.card_id].tags:
             _push_queen_guards(state, covered.owner, unit, cr)
         # "When an ally is covered" / "Whenever your opponent covers an allied Fish": the covered unit's side watches.
         for st in list(state.board.values()):
@@ -1284,8 +1284,13 @@ def _op_play_extra(state, step):
 def _op_play_named(state, step):
     """Play a specific named card from hand OR deck (the Prince Leo / Princess Lea twins -
     the one F10 exception to "filtered draws are random"). Mandatory when it has a legal
-    place (Martin, 2026-09-30); a twin fetched from the deck that can't be placed goes back."""
+    place (Martin, 2026-09-30); a twin fetched from the deck that can't be placed goes back.
+    With `make`, the card is made out of thin air instead (Queen Bee plays a Young Bee): a token that can't be placed
+    is simply gone."""
     player, cid = step["chooser"], step["card_id"]
+    if "fetched" not in step and step.get("make"):
+        state.add_to_hand(player, cid)              # only to be placed at once: not a gain, so no hand-limit burn
+        step["fetched"] = "made"
     if "fetched" not in step:                       # fetch the twin from deck if not in hand
         in_hand = any(u.card_id == cid for u in state.hands[player])
         if not in_hand and cid in state.decks[player]:
@@ -1299,6 +1304,9 @@ def _op_play_named(state, step):
     def _return_if_fetched():
         if step["fetched"] and any(u.card_id == cid for u in state.hands[player]):
             back = _take_from_hand(state, player, cid)
+            if step["fetched"] == "made":
+                state.emit("leave_hand", zone="hand", owner=player, iid=back.iid, card=cid, to="gone")
+                return
             state.emit("leave_hand", zone="hand", owner=player, iid=back.iid, card=cid, to="deck")
             state.decks[player].append(cid)
 
@@ -2112,10 +2120,9 @@ def _termite_king_place(state, unit, cr):
 
 
 def _queen_bee_place(state, unit, cr):
-    """Queen Bee: Roar: place a Young Bee on a random adjacent empty crossroad."""
-    empty = _empty_neighbors(state, cr)
-    if empty:
-        _spawn(state, unit.owner, "young_bee", state.rng.choice(empty))
+    """Queen Bee: Roar: play a Young Bee. A free play like Prince Leo's, anywhere a placement is legal, of a token made
+    out of thin air (Martin, 2026-10-24)."""
+    state.effect_stack.append({"op": "play_named", "chooser": unit.owner, "card_id": "young_bee", "make": True})
 
 
 def _queen_wasp_eot(state, unit, cr):
@@ -3046,7 +3053,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "nurse_bumblebee": {"on_place": _draws_filtered("tag:Colony")},
     "termite_king": {"on_place": _termite_king_place},
     "termite_queen": {"on_place": lambda state, unit, cr: _push_play_extra(
-        state, unit.owner, filter={"tags_all": ["Colony"], "tags_none": ["Queen"]}, optional=True)},
+        state, unit.owner, filter={"tags_all": ["Colony"], "tags_none": ["Queen"]})},
     "queen_bee": {"on_place": _queen_bee_place},
     "soldier_ant": {"on_place": _conditional(_removes())},
     "worker_ant": {"on_place": _gains("worker_ant_food")},

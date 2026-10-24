@@ -612,13 +612,11 @@ def test_house_cat_extra_play_is_gated_on_another_cat():
     assert no_cat.pending is None and "lion" in hand_ids(no_cat, "A")   # no extra play
 
 
-def test_termite_queen_may_play_a_non_queen_colony_animal():
+def test_termite_queen_plays_a_non_queen_colony_animal():
     s = make_state(current="A", hands={"A": ["termite_queen", "worker_ant", "queen_bee", "lion"]})
     rules.apply_action(s, PlaceAction("termite_queen", ("cr", "1,2")))
-    assert s.pending is not None
+    assert s.pending is not None and not s.pending["optional"]
     assert {a.card_id for a in rules.legal_actions(s) if isinstance(a, PlaceAction)} == {"worker_ant"}
-    rules.apply_action(s, ChoiceAction(SKIP))           # she may: declining is allowed
-    assert "worker_ant" in hand_ids(s, "A")
 
 
 def test_prince_leo_plays_the_twin_from_deck():
@@ -1012,3 +1010,13 @@ def test_falstaffs_extra_food_is_its_own_doing():
     effects.gain_food(s, "A", 5, income=True)
     rider = [e for e in s.events if e["e"] == "food" and not e.get("income")]
     assert [(e["cause"], e["cause_iid"]) for e in rider] == [("bumblebee_legend", s.board["1,1"][-1].iid)]
+
+
+def test_queen_bee_plays_a_young_bee_made_out_of_thin_air():
+    """A free play like Prince Leo's, anywhere a placement is legal, not only next to her (Martin, 2026-10-24)."""
+    s = make_state(current="A", hands={"A": ["queen_bee"]}, decks={"A": [], "B": []})
+    rules.apply_action(s, PlaceAction("queen_bee", ("cr", "1,2")))
+    targets = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "young_bee"}
+    assert "2,2" in targets and "1,1" in targets
+    rules.apply_action(s, PlaceAction("young_bee", ("cr", "2,2")))
+    assert s.board["2,2"][-1].card_id == "young_bee" and hand_ids(s, "A") == []

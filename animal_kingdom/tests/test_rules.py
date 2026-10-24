@@ -157,7 +157,7 @@ def test_effect_granted_extra_play_consumes_no_action():
     s = make_state(hands={"A": ["termite_queen", "worker_ant", "caracal"], "B": ["lion"]},
                    config=TWO_ACTIONS)
     rules.apply_action(s, PlaceAction("termite_queen", ("cr", "1,1")))
-    assert s.pending is not None                 # "you may play a non-Queen Colony animal"
+    assert s.pending is not None                 # "play a non-Queen Colony animal" (mandatory)
     extra = next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction))
     rules.apply_action(s, extra)                 # the free play resolves the pending
     assert s.current == "A"                      # still action 1 of 2

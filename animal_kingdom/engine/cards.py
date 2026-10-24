@@ -24,11 +24,11 @@ TAGS = {
     "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent",
     "Arachnid", "Bear", "Megafauna", "Egg", "Fish", "Primate", "Hoofed",   # species families
     "Queen", "Worker",                                # roles
-    "King", "Soldier", "Nurse",                       # castes (below)
+    "Soldier", "Nurse",                               # castes (below)
 }
-# Castes only card text reads (Melissia draws by them, Vesper guards the King; Martin's sheet, 2026-10-24). The bots'
+# Castes only card text reads (Melissia draws by them; Martin's sheet, 2026-10-24). The bots'
 # trained networks take one column per tag in BOT_TAGS, so a tag added here stays out of the features until a retrain.
-CASTE_TAGS = frozenset({"King", "Soldier", "Nurse"})
+CASTE_TAGS = frozenset({"Soldier", "Nurse"})
 BOT_TAGS = frozenset(TAGS - CASTE_TAGS)
 DYNAMIC_STRENGTHS = {"removed_units_count", "removed_eggs_count"}  # Python, Egg Eater
 

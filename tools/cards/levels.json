@@ -2864,9 +2864,9 @@
         "prev_note": "",
         "prev": "Roar: play a Worker animal."
       },
-      "note": "Martin's sheet, 2026-10-24: the queen lays; no common gives extra placement",
+      "note": "Martin, 2026-10-24: a free play, anywhere legal, like Leo and Lea; the token is made out of thin air",
       "by": "claude",
-      "at": 1792861464
+      "at": 1792863120
     },
     "strength": {
       "review": {
@@ -3443,9 +3443,9 @@
         "prev_note": "",
         "prev": "Colony"
       },
-      "note": "Martin's sheet, 2026-10-24: Vesper guards the King too",
+      "note": "Martin, 2026-10-24: Vesper guards Queens only, so no King tag",
       "by": "claude",
-      "at": 1792861463
+      "at": 1792863086
     }
   },
   "termite_queen": {
@@ -3483,9 +3483,9 @@
         "prev_note": "",
         "prev": "Roar: you may play another non-Queen Colony animal."
       },
-      "note": "Martin's sheet, 2026-10-24, keeping the old 'you may': a forced extra play can force a bad one, and the referee bot misplans it",
+      "note": "Martin's sheet, 2026-10-24; forced, like the Alley Cat and the Mole",
       "by": "claude",
-      "at": 1792862401
+      "at": 1792863194
     }
   },
   "tiger": {
@@ -3576,9 +3576,9 @@
         "prev_note": "",
         "prev": "Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck."
       },
-      "note": "Martin's sheet, 2026-10-24: Queen + King protection, worded to fit three lines",
+      "note": "Martin, 2026-10-24: Queen only again, now that the King no longer draws at Dusk; the old wording",
       "by": "claude",
-      "at": 1792862646
+      "at": 1792863086
     }
   },
   "viper": {
