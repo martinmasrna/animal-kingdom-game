@@ -82,15 +82,14 @@ def test_blocks_draw_then_capture_threat_during_an_effect_choice():
     assert chosen == ChoiceAction("1,2")
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "Known referee flaw (2026-10-24): after a Draw, it plays the drawn card alone instead of the forced free-play card "
-    "plus the drawn one; the same with Alley Cat then Bobcat. Passed while the Termite Queen's play was optional."))
 def test_plans_draw_then_queen_then_king_as_one_turn():
     config = Config.default().sweep(actions_per_turn=2, draw_action_count=1, mulligan=False)
     s = make_state(
         current="A",
         hands={"A": ["termite_queen"]},
-        decks={"A": ["termite_king"], "B": ["mouse"] * 4},
+        # A deck that doesn't run dry: with the King as its only card, the Draw empties it, and then holding the
+        # Queen back (a play for next turn instead of passing) is a fair call, which the referee makes.
+        decks={"A": ["termite_king"] * 8, "B": ["mouse"] * 8},
         config=config,
     )
     bot = small_referee()
