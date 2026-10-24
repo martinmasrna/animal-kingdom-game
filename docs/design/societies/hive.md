@@ -45,9 +45,9 @@ The one the colony is for. She lays, and everyone else exists to feed her brood.
 |---|---|---:|---|---|
 | **Queen Melissia** | legendary | 3 | Roar: draw a Worker, a Soldier and a Nurse Colony animal. | Meadow |
 | **Queen Solenia** | legendary | 3 | Dusk: gain 2 food for each animal you control. | Jungle |
-| **Queen Wasp (reserve)** | rare | 4 | Flight. Whenever you place an animal with Flight, gain 3 food. | Forest |
-| **Queen Bee** | common | 2 | Roar: play a Worker animal. | Meadow |
-| **Termite Queen** | common | 1 | Roar: you may play another non-Queen Colony animal. | Savanna |
+| **Queen Wasp** | rare | 4 | Flight. Dusk: place a Young Wasp on an adjacent empty crossroad. | Forest |
+| **Termite Queen** | rare | 3 | Roar: you may play a non-Queen Colony animal. | Savanna |
+| **Queen Bee** | common | 3 | Roar: place a Young Bee on a random adjacent empty crossroad. | Meadow |
 
 <!-- cards:end -->
 
@@ -60,8 +60,8 @@ The daughters who carry: nectar, seeds, wood, whatever the nest eats. More of th
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **Worker Ant** | common | 1 | Roar: gain 12 food. | Forest |
-| **Worker Bee** | common | 1 | Flight. Roar: gain 8 food; if you control another Worker, gain 8 more. | Meadow |
-| **Worker Wasp** | common | 3 | Flight. Dusk: gain 3 food. | Forest |
+| **Worker Bee** | common | 2 | Flight. Roar: gain 2 food for each Colony animal you control. | Meadow |
+| **Worker Wasp** | common | 2 | Flight. Whenever you place a Colony animal, gain 2 food. | Forest |
 | **Forager Ant (reserve)** | common | 1 | Roar: gain 5 food. If you gained 10 or more food this turn, draw a card. | Forest |
 
 <!-- cards:end -->
@@ -74,8 +74,8 @@ The ones inside who feed the brood and decide, with royal jelly, which larva bec
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Nurse Bee** | rare | 3 | Flight. Roar: if you control two of the same Colony animal, draw 3 cards. | Meadow |
-| **Nurse Bumblebee** | common | 2 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. | Meadow |
+| **Nurse Bee** | common | 3 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. | Meadow |
+| **Nurse Bumblebee** | common | 4 | Flight. Roar: draw a Colony animal. | Meadow |
 
 <!-- cards:end -->
 
@@ -87,11 +87,11 @@ The ones at the door and the ones built to fight. Nothing alone; everything in n
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Vesper** | legendary | 5 | Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck. | Forest |
+| **Vesper** | legendary | 5 | Flight. When an enemy covers your Queen or King, place this on it from your hand or deck. | Forest |
 | **Soldier Hornet** | rare | 2 | Flight. Roar: discard a Soldier Hornet from your hand or deck to remove an adjacent enemy. | Forest |
 | **Soldier Ant** | common | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. | Jungle |
+| **Soldier Bee** | common | 3 | Flight. Spikes. | Meadow |
 | **Soldier Wasp** | common | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. | Forest |
-| **Soldier Bee (reserve)** | common | 2 | Flight. Spikes. | Meadow |
 
 <!-- cards:end -->
 
@@ -103,7 +103,7 @@ The termite king, the one insect king: he stays beside his queen for life and is
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Termite King** | common | 2 | Roar: if you control a Colony Queen, draw 2 cards. | Savanna |
+| **Termite King** | rare | 5 | Roar: draw a card for each Colony Queen you control. | Savanna |
 
 <!-- cards:end -->
 

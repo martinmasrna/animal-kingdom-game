@@ -2421,6 +2421,26 @@
       "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
       "at": 1792858796
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: if you control two of the same Colony animal, draw 3 cards."
+      },
+      "note": "Martin's sheet, 2026-10-24",
+      "by": "claude",
+      "at": 1792861464
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin's sheet, 2026-10-24",
+      "by": "claude",
+      "at": 1792861464
     }
   },
   "nurse_bumblebee": {
@@ -2448,9 +2468,9 @@
         "prev_note": "",
         "prev": 3
       },
-      "note": "Martin, 2026-10-22: conditional draw 2 priced by what the condition costs the turn you play it (Mantis 2, Termite King 2, Nurse Bumblebee 2 with Flight, Gopher 4, Hare 4)",
+      "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
-      "at": 1792663941
+      "at": 1792861464
     },
     "tag": {
       "review": {
@@ -2461,6 +2481,16 @@
       "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
       "at": 1792858796
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: if you control 4 or more Colony animals, draw 2 cards."
+      },
+      "note": "Martin's sheet, 2026-10-24",
+      "by": "claude",
+      "at": 1792861464
     }
   },
   "octopus_legend": {
@@ -2827,6 +2857,26 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: play a Worker animal."
+      },
+      "note": "Martin's sheet, 2026-10-24: the queen lays; no common gives extra placement",
+      "by": "claude",
+      "at": 1792861464
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "Martin's sheet, 2026-10-24",
+      "by": "claude",
+      "at": 1792861465
     }
   },
   "bee_legend": {
@@ -3363,9 +3413,9 @@
         "prev_note": "",
         "prev": "R"
       },
-      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
-      "at": 1792661449
+      "at": 1792861463
     },
     "strength": {
       "review": {
@@ -3373,9 +3423,29 @@
         "prev_note": "",
         "prev": 6
       },
-      "note": "Martin, 2026-10-22: conditional draw 2 priced by what the condition costs the turn you play it (Mantis 2, Termite King 2, Nurse Bumblebee 2 with Flight, Gopher 4, Hare 4)",
+      "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
-      "at": 1792663941
+      "at": 1792861463
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: if you control a Colony Queen, draw 2 cards."
+      },
+      "note": "Martin's sheet, 2026-10-24: a card per turn at Dusk was the strongest rare; one-time draw per Queen to try",
+      "by": "claude",
+      "at": 1792861463
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Colony"
+      },
+      "note": "Martin's sheet, 2026-10-24: Vesper guards the King too",
+      "by": "claude",
+      "at": 1792861463
     }
   },
   "termite_queen": {
@@ -3388,9 +3458,14 @@
       "by": "martin"
     },
     "strength": {
-      "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
+      "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
-      "at": 1792076082
+      "at": 1792861462,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
+        "prev": 1
+      }
     },
     "rarity": {
       "review": {
@@ -3398,9 +3473,19 @@
         "prev_note": "",
         "prev": "R"
       },
-      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
-      "at": 1792661449
+      "at": 1792861462
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: you may play another non-Queen Colony animal."
+      },
+      "note": "Martin's sheet, 2026-10-24, keeping the old 'you may': a forced extra play can force a bad one, and the referee bot misplans it",
+      "by": "claude",
+      "at": 1792862401
     }
   },
   "tiger": {
@@ -3484,6 +3569,16 @@
     "animal": {
       "lv": "draft",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck."
+      },
+      "note": "Martin's sheet, 2026-10-24: Queen + King protection, worded to fit three lines",
+      "by": "claude",
+      "at": 1792862646
     }
   },
   "viper": {
@@ -3597,9 +3692,24 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
+      "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
-      "at": 1792076082
+      "at": 1792861463,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
+        "prev": "Flight. Roar: gain 8 food; if you control another Worker, gain 8 more."
+      }
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin's sheet, 2026-10-24",
+      "by": "claude",
+      "at": 1792861463
     }
   },
   "worker_wasp": {
@@ -3611,6 +3721,26 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Dusk: gain 3 food."
+      },
+      "note": "Martin's sheet, 2026-10-24: the engine on a worker",
+      "by": "claude",
+      "at": 1792861463
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin's sheet, 2026-10-24",
+      "by": "claude",
+      "at": 1792861463
     }
   },
   "worm": {
@@ -4500,9 +4630,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
-      "at": 1792585134
+      "at": 1792861464
     },
     "animal": {
       "review": {
@@ -4513,9 +4643,9 @@
           "species": "Bee"
         }
       },
-      "note": "Martin's sheet, 2026-10-24: one word for the fighters, Soldier",
+      "note": "into the collection",
       "by": "claude",
-      "at": 1792858802
+      "at": 1792861464
     }
   },
   "forager_ant": {
@@ -4583,9 +4713,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
+      "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
-      "at": 1792585151
+      "at": 1792861462
     },
     "rarity": {
       "review": {
@@ -4608,6 +4738,15 @@
       "note": "Martin, 2026-10-21: Colony outside the precon, a draft on the bench; the sitting is in effects-pass.md",
       "by": "claude",
       "at": 1792585147
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1792861462
     }
   },
   "scout_bee": {

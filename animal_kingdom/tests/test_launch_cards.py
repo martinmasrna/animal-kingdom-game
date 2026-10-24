@@ -1261,11 +1261,12 @@ def test_the_african_wild_dog_gives_its_adjacent_allies_one_at_dusk():
     assert (ally.strength_counter, far.strength_counter, enemy.strength_counter) == (CFG.wild_dog_grant, 0, 0)
 
 
-def test_the_termite_king_draws_two_with_a_colony_queen():
+def test_the_termite_king_draws_a_card_for_each_colony_queen():
     s = make_state(hands={"A": ["termite_king"]}, decks={"A": ["lion"] * 3, "B": []})
     put(s, "1,1", "termite_queen", "A")
+    put(s, "1,3", "queen_bee", "A")
     rules.apply_action(s, PlaceAction("termite_king", ("cr", "1,2")))
-    assert len(s.hands["A"]) == CFG.termite_king_draw == 2
+    assert len(s.hands["A"]) == 2
 
 
 def test_the_legendary_leopard_is_five_and_grows():
@@ -1345,8 +1346,8 @@ def test_vesper_answers_a_roaming_cover_too():
 
 
 def test_vesper_resolves_after_the_coverers_roar():
-    """The Bat's Roar draws first; Vesper comes after it, without an action."""
-    s = _queen_covered_by("bat", b_hand=["hornet_legend"])
+    """The Dolphin's Roar draws first; Vesper comes after it, without an action."""
+    s = _queen_covered_by("dolphin", b_hand=["hornet_legend"])
     order = [e["e"] for e in s.events if e["e"] in ("draw", "place")]
     assert order == ["place", "draw", "place"] and s.board["2,2"][-1].card_id == "hornet_legend"
 

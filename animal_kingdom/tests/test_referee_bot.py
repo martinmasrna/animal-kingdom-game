@@ -102,29 +102,23 @@ def test_plans_draw_then_queen_then_king_as_one_turn():
     )
 
 
-def test_plans_nurse_then_queen_bee_then_worker_as_one_turn():
+def test_plans_nurse_then_termite_queen_then_worker_as_one_turn():
+    # The Nurse Bumblebee draws the deck's one Colony animal, the Termite Queen; she plays the Worker Wasp for free.
     config = Config.default().sweep(actions_per_turn=2, draw_action_count=1, mulligan=False)
-    s = make_state(
-        current="A",
-        hands={"A": ["nurse_bumblebee"]},
-        decks={"A": ["worker_wasp", "queen_bee"], "B": ["mouse"] * 4},
-        config=config,
-    )
+    s = make_state(current="A", hands={"A": ["nurse_bumblebee", "worker_wasp"]},
+                   decks={"A": ["termite_queen", "lion"], "B": ["mouse"] * 4}, config=config)
     for cr in ("1,1", "1,2", "1,3", "2,1", "2,2"):
         put(s, cr, "guard_wasp", "A")
-
     bot = small_referee()
+
     nurse = bot.choose(s.view_for("A"), rules.legal_actions(s), s)
     assert isinstance(nurse, PlaceAction) and nurse.card_id == "nurse_bumblebee"
     rules.apply_action(s, nurse)
 
     queen = bot.choose(s.view_for("A"), rules.legal_actions(s), s)
-    assert isinstance(queen, PlaceAction) and queen.card_id == "queen_bee"
+    assert isinstance(queen, PlaceAction) and queen.card_id == "termite_queen"
     rules.apply_action(s, queen)
-    assert all(
-        isinstance(a, PlaceAction) and a.card_id == "worker_wasp"
-        for a in rules.legal_actions(s)
-    )
+    assert any(isinstance(a, PlaceAction) and a.card_id == "worker_wasp" for a in rules.legal_actions(s))
 
 
 def test_saved_game_opening_preserves_the_duplicate_setup():

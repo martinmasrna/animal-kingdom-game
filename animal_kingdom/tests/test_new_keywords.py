@@ -496,10 +496,10 @@ def test_play_order_survives_a_save_and_load():
 
 def test_existing_dusk_cards_still_fire():
     s = state(food={"A": 0, "B": 0})
-    put(s, "1,1", "worker_wasp", "A")
+    put(s, "1,1", "army_ant_legend", "A")
     put(s, "1,3", "tortoise_legend", "A")
     end_turn(s)
-    assert s.food["A"] == s.config.worker_wasp_food + s.config.tortoise_legend_food
+    assert s.food["A"] == 2 * s.config.army_ant_legend_per + s.config.tortoise_legend_food
 
 
 # ===================================================================== bots (a sanity smoke, no balance claim)

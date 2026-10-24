@@ -25,12 +25,12 @@
         "Colony"
       ],
       "base_strength": 5,
-      "text": "Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck.",
+      "text": "Flight. When an enemy covers your Queen or King, place this on it from your hand or deck.",
+      "species": "Hornet",
+      "habitat": "Forest",
       "keywords": [
         "Flight"
-      ],
-      "species": "Hornet",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "bee_legend",
@@ -67,18 +67,18 @@
       "id": "nurse_bee",
       "name": "Nurse Bee",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Colony",
         "Nurse"
       ],
       "base_strength": 3,
-      "text": "Flight. Roar: if you control two of the same Colony animal, draw 3 cards.",
+      "text": "Flight. Roar: if you control 4 or more Colony animals, draw 2 cards.",
+      "species": "Bee",
+      "habitat": "Meadow",
       "keywords": [
         "Flight"
-      ],
-      "species": "Bee",
-      "habitat": "Meadow"
+      ]
     },
     {
       "id": "nurse_bumblebee",
@@ -89,42 +89,43 @@
         "Colony",
         "Nurse"
       ],
-      "base_strength": 2,
-      "text": "Flight. Roar: if you control 4 or more Colony animals, draw 2 cards.",
+      "base_strength": 4,
+      "text": "Flight. Roar: draw a Colony animal.",
+      "species": "Bumblebee",
+      "habitat": "Meadow",
       "keywords": [
         "Flight"
-      ],
-      "species": "Bumblebee",
-      "habitat": "Meadow"
+      ]
     },
     {
       "id": "termite_king",
       "name": "Termite King",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
-        "Colony"
+        "Colony",
+        "King"
       ],
-      "base_strength": 2,
-      "text": "Roar: if you control a Colony Queen, draw 2 cards.",
-      "keywords": [],
+      "base_strength": 5,
+      "text": "Roar: draw a card for each Colony Queen you control.",
       "species": "Termite",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": []
     },
     {
       "id": "termite_queen",
       "name": "Termite Queen",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Colony",
         "Queen"
       ],
-      "base_strength": 1,
-      "text": "Roar: you may play another non-Queen Colony animal.",
-      "keywords": [],
+      "base_strength": 3,
+      "text": "Roar: you may play a non-Queen Colony animal.",
       "species": "Termite",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": []
     },
     {
       "id": "queen_bee",
@@ -135,11 +136,14 @@
         "Colony",
         "Queen"
       ],
-      "base_strength": 2,
-      "text": "Roar: play a Worker animal.",
-      "keywords": [],
+      "base_strength": 3,
+      "text": "Roar: place a Young Bee on a random adjacent empty crossroad.",
       "species": "Bee",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "related": [
+        "young_bee"
+      ],
+      "keywords": []
     },
     {
       "id": "guard_wasp",
@@ -197,13 +201,13 @@
         "Colony",
         "Worker"
       ],
-      "base_strength": 3,
-      "text": "Flight. Dusk: gain 3 food.",
+      "base_strength": 2,
+      "text": "Flight. Whenever you place a Colony animal, gain 2 food.",
+      "species": "Wasp",
+      "habitat": "Forest",
       "keywords": [
         "Flight"
-      ],
-      "species": "Wasp",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "worker_bee",
@@ -214,13 +218,13 @@
         "Colony",
         "Worker"
       ],
-      "base_strength": 1,
-      "text": "Flight. Roar: gain 8 food; if you control another Worker, gain 8 more.",
+      "base_strength": 2,
+      "text": "Flight. Roar: gain 2 food for each Colony animal you control.",
+      "species": "Bee",
+      "habitat": "Meadow",
       "keywords": [
         "Flight"
-      ],
-      "species": "Bee",
-      "habitat": "Meadow"
+      ]
     },
     {
       "id": "pheasant_legend",
@@ -2967,13 +2971,13 @@
     {
       "id": "guard_bee",
       "name": "Soldier Bee",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "common",
       "tags": [
         "Colony",
         "Soldier"
       ],
-      "base_strength": 2,
+      "base_strength": 3,
       "text": "Flight. Spikes.",
       "keywords": [
         "Flight",
@@ -3000,19 +3004,22 @@
     {
       "id": "queen_wasp",
       "name": "Queen Wasp",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "rare",
       "tags": [
         "Colony",
         "Queen"
       ],
       "base_strength": 4,
-      "text": "Flight. Whenever you place an animal with Flight, gain 3 food.",
+      "text": "Flight. Dusk: place a Young Wasp on an adjacent empty crossroad.",
+      "species": "Wasp",
+      "habitat": "Forest",
+      "related": [
+        "young_wasp"
+      ],
       "keywords": [
         "Flight"
-      ],
-      "species": "Wasp",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "scout_bee",
@@ -3877,6 +3884,30 @@
       "keywords": [
         "Stealth"
       ]
+    },
+    {
+      "id": "young_bee",
+      "name": "Young Bee",
+      "status": "token",
+      "rarity": "common",
+      "tags": [
+        "Colony"
+      ],
+      "base_strength": 1,
+      "keywords": [],
+      "text": ""
+    },
+    {
+      "id": "young_wasp",
+      "name": "Young Wasp",
+      "status": "token",
+      "rarity": "common",
+      "tags": [
+        "Colony"
+      ],
+      "base_strength": 1,
+      "keywords": [],
+      "text": ""
     }
   ]
 }

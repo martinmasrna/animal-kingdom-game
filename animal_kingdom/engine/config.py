@@ -26,9 +26,8 @@ class Config:
     flying_squirrel_food: int = 10       # synced to card text "gain 10 food" (was 8; text/const desync broke groundhog fed-threshold combo, 2026-07-09)
     rat_king_per_rodent: int = 4         # Roar: gain N food per OTHER Rodent you control
     worker_ant_food: int = 12            # trimmed from 15 in the 2026-07-05 balance pass
-    worker_bee_food: int = 8             # +worker_bee_extra if you control another Worker
-    worker_bee_extra: int = 8
-    worker_wasp_food: int = 3            # at end of your turn
+    worker_bee_per: int = 2              # Worker Bee: Roar: gain 2 food for each Colony animal you control (Martin's sheet, 2026-10-24)
+    worker_wasp_per_place: int = 2       # Worker Wasp: whenever you place a Colony animal, gain 2 food (Martin's sheet, 2026-10-24)
     tortoise_legend_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
                                           # recurring passive in the pool - ruled down 2026-07-02)
     tortoise_legend_food_cap: int = 20        # Methuselah: each player gains at most this much food per turn
@@ -37,7 +36,6 @@ class Config:
     # Colony outside the precon, bench drafts (Martin, 2026-10-21; effects-pass.md)
     forager_ant_food: int = 5            # Forager Ant: Roar: gain 5 food
     forager_ant_draw: int = 1            # ... if you gained fed_threshold or more food this turn, draw a card
-    queen_wasp_per_place: int = 3        # Queen Wasp: whenever you place an animal with Flight, gain 3 food
     scout_bee_threshold: int = 20        # [SCOUT BEE]: Dusk: if you gained 20 or more food this turn ...
     scout_bee_draw: int = 1              # ... draw a card
     bumblebee_legend_food_rider: int = 3         # extra food whenever you gain food
@@ -130,7 +128,6 @@ class Config:
     mantis_draw: int = 2                 # Praying Mantis: remove an adjacent ally to draw 2
     hyena_food_per: int = 3              # Hyena: Dusk: 3 food for each animal removed this turn
     hummingbird_draw: int = 2            # Hummingbird: Roar: draw 2
-    termite_king_draw: int = 2           # Termite King: Roar: draw 2 if you control a Colony Queen
     lynx_draw: int = 2                   # Lynx (rare): Roar: draw 2 if placed on top of an enemy
     ocelot_draw: int = 2                 # Ocelot (rare): Roar: draw 2 common Cats
     tiger_legend_max: int = 7            # [TIGER] (legendary): Roar: remove an adjacent enemy of strength 7 or less
@@ -163,8 +160,7 @@ class Config:
     black_bear_draw: int = 2            # baseline-ruler tuning 2026-07-13: 1→2 (draw-1 too weak vs draw-2 default)
     raven_draw: int = 3                 # Raven's Roar: cards drawn...
     raven_shuffle: int = 2              # ...then shuffled back from the hand
-    nurse_bee_draw: int = 3             # Nurse Bee: drawn with two of the same Colony animal
-    nurse_bumblebee_draw: int = 2       # Nurse Bumblebee: drawn with 4 or more Colony animals
+    nurse_bee_draw: int = 2             # Nurse Bee: drawn with 4 or more Colony animals (Martin's sheet, 2026-10-24)
     test_draw: int = 2                  # the mock and calibration cards' "draw 2 cards" (test fixtures)
     viper_poison: int = 3               # Viper's permanent strength loss on the bitten enemy
     black_mamba_max: int = 5                 # Black Mamba removes an adjacent enemy of at most this strength

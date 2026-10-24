@@ -370,7 +370,7 @@ def _push_reactions(state, unit, cr, covered, onto_enemy) -> None:
         hook = _hook(state, covered.card_id, "on_covered")
         if hook:
             hook(state, covered, unit, cr)
-        if covered.owner != unit.owner and "Queen" in state.cards[covered.card_id].tags:
+        if covered.owner != unit.owner and state.cards[covered.card_id].tags & {"Queen", "King"}:
             _push_queen_guards(state, covered.owner, unit, cr)
         # "When an ally is covered" / "Whenever your opponent covers an allied Fish": the covered unit's side watches.
         for st in list(state.board.values()):
@@ -1745,12 +1745,8 @@ def roar_condition(state, player, card_id, unit=None):
         "serval": lambda: _played_this_turn(state, player, "Cat", unit) >= 1,
         "tutorial_lynx": lambda: others("Cat") >= 1,
         "alley_cat": lambda: others("Cat") >= 1,
-        "worker_bee": lambda: others("Worker") >= 1,
-        "termite_king": lambda: _control_tag_count(state, player, "Colony", "Queen") >= 1,
-        "nurse_bumblebee": lambda: others("Colony") + 1 >= colony_min,
         "soldier_ant": lambda: others("Colony") + 1 >= colony_min,
-        "nurse_bee": lambda: _controls_two_same_colony(state, player) or (unit is None and any(
-            st and st[-1].owner == player and st[-1].card_id == card_id for st in state.board.values())),
+        "nurse_bee": lambda: others("Colony") + 1 >= colony_min,
         "piranha": lambda: _lost_this_turn(state, player) >= 1,
         "hare": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
         "rat": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
@@ -1764,14 +1760,6 @@ def _played_this_turn(state, player, tag, unit) -> int:
     """How many animals with `tag` `player` played this turn, other than `unit`."""
     return sum(1 for iid, cid in state.turn_flags.get(f"played_{player}", [])
                if tag in state.cards[cid].tags and (unit is None or iid != unit.iid))
-
-
-def _controls_two_same_colony(state, player) -> bool:
-    from collections import Counter
-    counts = Counter(
-        st[-1].card_id for st in state.board.values()
-        if st and st[-1].owner == player and "Colony" in state.cards[st[-1].card_id].tags)
-    return any(v >= 2 for v in counts.values())
 
 
 def _conditional(effect):
@@ -2106,10 +2094,35 @@ def _bee_legend_place(state, unit, cr):
 
 
 def _worker_bee_place(state, unit, cr):
-    amount = state.config.worker_bee_food
-    if roar_condition(state, unit.owner, unit.card_id, unit):   # another Worker besides itself
-        amount += state.config.worker_bee_extra
-    _push_gain(state, unit.owner, amount)
+    """Worker Bee: Roar: gain 2 food for each Colony animal you control (itself included)."""
+    _push_gain(state, unit.owner, state.config.worker_bee_per * _control_tag_count(state, unit.owner, "Colony"))
+
+
+def _worker_wasp_friendly_place(state, watcher, placed) -> None:
+    """Worker Wasp: whenever you place a Colony animal, gain 2 food."""
+    if "Colony" in state.cards[placed.card_id].tags:
+        gain_food(state, placed.owner, state.config.worker_wasp_per_place)
+
+
+def _termite_king_place(state, unit, cr):
+    """Termite King: Roar: draw a card for each Colony Queen you control."""
+    n = _control_tag_count(state, unit.owner, "Colony", "Queen")
+    if n:
+        _push_draw(state, unit.owner, n)
+
+
+def _queen_bee_place(state, unit, cr):
+    """Queen Bee: Roar: place a Young Bee on a random adjacent empty crossroad."""
+    empty = _empty_neighbors(state, cr)
+    if empty:
+        _spawn(state, unit.owner, "young_bee", state.rng.choice(empty))
+
+
+def _queen_wasp_eot(state, unit, cr):
+    """Queen Wasp: Dusk: place a Young Wasp on an adjacent empty crossroad (a random one: Dusk asks no decision)."""
+    empty = _empty_neighbors(state, cr)
+    if empty:
+        _spawn(state, unit.owner, "young_wasp", state.rng.choice(empty))
 
 
 def _army_ant_legend_eot(state, unit, cr):
@@ -2125,12 +2138,6 @@ def _forager_ant_place(state, unit, cr):
     gain_food(state, unit.owner, state.config.forager_ant_food)
     if _fed_this_turn(state, unit.owner):
         _push_draw(state, unit.owner, state.config.forager_ant_draw)
-
-
-def _queen_wasp_friendly_place(state, watcher, placed) -> None:
-    """Queen Wasp: whenever you place an animal with Flight, gain 3 food."""
-    if "Flight" in state.cards[placed.card_id].keywords:
-        gain_food(state, placed.owner, state.config.queen_wasp_per_place)
 
 
 def _scout_bee_eot(state, unit, cr):
@@ -3033,18 +3040,17 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "army_ant_legend": {"on_end_of_turn": _army_ant_legend_eot},
     "bee_legend": {"on_place": _bee_legend_place},
     "forager_ant": {"on_place": _forager_ant_place},
-    "queen_wasp": {"on_friendly_place": _queen_wasp_friendly_place},
+    "queen_wasp": {"on_end_of_turn": _queen_wasp_eot},
     "scout_bee": {"on_end_of_turn": _scout_bee_eot},
     "nurse_bee": {"on_place": _conditional(_draws("nurse_bee_draw"))},
-    "nurse_bumblebee": {"on_place": _conditional(_draws("nurse_bumblebee_draw"))},
-    "termite_king": {"on_place": _conditional(_draws("termite_king_draw"))},
+    "nurse_bumblebee": {"on_place": _draws_filtered("tag:Colony")},
+    "termite_king": {"on_place": _termite_king_place},
     "termite_queen": {"on_place": lambda state, unit, cr: _push_play_extra(
         state, unit.owner, filter={"tags_all": ["Colony"], "tags_none": ["Queen"]}, optional=True)},
-    "queen_bee": {"on_place": lambda state, unit, cr: _push_play_extra(state, unit.owner,
-                                                                      filter={"tags_all": ["Worker"]})},
+    "queen_bee": {"on_place": _queen_bee_place},
     "soldier_ant": {"on_place": _conditional(_removes())},
     "worker_ant": {"on_place": _gains("worker_ant_food")},
-    "worker_wasp": {"on_end_of_turn": _gains("worker_wasp_food")},
+    "worker_wasp": {"on_friendly_place": _worker_wasp_friendly_place},
     "worker_bee": {"on_place": _worker_bee_place},
     # Den Rush.
     "greywhisker": {"on_place": _greywhisker_place},

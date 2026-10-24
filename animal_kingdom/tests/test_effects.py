@@ -48,18 +48,10 @@ def test_guard_hornet_anthem_gated_on_four_colony():
     assert effective_strength(s, gh) == GW + CFG.guard_hornet_bonus   # the anthem
 
 
-def test_nurse_bumblebee_draw_gated_on_four_colony():
-    few = make_state(hands={"A": ["nurse_bumblebee"]}, decks={"A": ["lion", "tiger"], "B": []})
-    put(few, "1,2", "worker_ant", "A")
-    put(few, "1,3", "worker_ant", "A")
-    rules.apply_action(few, PlaceAction("nurse_bumblebee", ("cr", "2,2")))  # 3 Colony incl. Nurse
-    assert len(few.hands["A"]) == 0
-
-    many = make_state(hands={"A": ["nurse_bumblebee"]}, decks={"A": ["lion", "tiger"], "B": []})
-    for cr in ("1,1", "1,2", "1,3"):
-        put(many, cr, "worker_ant", "A")
-    rules.apply_action(many, PlaceAction("nurse_bumblebee", ("cr", "2,2")))  # 4 Colony incl. Nurse
-    assert sorted(hand_ids(many, "A")) == ["lion", "tiger"]
+def test_nurse_bumblebee_draws_a_colony_animal():
+    s = make_state(hands={"A": ["nurse_bumblebee"]}, decks={"A": ["lion", "worker_ant", "tiger"], "B": []})
+    rules.apply_action(s, PlaceAction("nurse_bumblebee", ("cr", "1,2")))
+    assert hand_ids(s, "A") == ["worker_ant"]
 
 
 # ============================================== counters ("give +X", stored on instance)
@@ -620,11 +612,12 @@ def test_house_cat_extra_play_is_gated_on_another_cat():
     assert no_cat.pending is None and "lion" in hand_ids(no_cat, "A")   # no extra play
 
 
-def test_termite_queen_extra_play_is_optional():
-    s = make_state(current="A", hands={"A": ["termite_queen", "worker_ant"]})
+def test_termite_queen_may_play_a_non_queen_colony_animal():
+    s = make_state(current="A", hands={"A": ["termite_queen", "worker_ant", "queen_bee", "lion"]})
     rules.apply_action(s, PlaceAction("termite_queen", ("cr", "1,2")))
     assert s.pending is not None
-    rules.apply_action(s, ChoiceAction(SKIP))           # decline the optional extra play
+    assert {a.card_id for a in rules.legal_actions(s) if isinstance(a, PlaceAction)} == {"worker_ant"}
+    rules.apply_action(s, ChoiceAction(SKIP))           # she may: declining is allowed
     assert "worker_ant" in hand_ids(s, "A")
 
 

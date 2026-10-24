@@ -314,8 +314,8 @@ def test_effect_readiness_detects_enabled_condition_without_card_special_case():
         decks={"A": ["mouse", "lion"], "B": []},
     )
     enabled = disabled.clone()
-    put(enabled, "1,1", "guard_wasp", "A")
-    put(enabled, "1,2", "guard_wasp", "A")
+    for cr in ("1,1", "1,2", "1,3"):          # with the Nurse Bee itself, 4 Colony animals
+        put(enabled, cr, "guard_wasp", "A")
     assert _enabled_roar_count(disabled, "A") == 0
     assert _enabled_roar_count(enabled, "A") == 1
 

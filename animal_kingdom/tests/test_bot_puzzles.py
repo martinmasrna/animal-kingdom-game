@@ -260,7 +260,10 @@ def test_with_one_card_in_hand_the_expert_draws_before_it_plays():
     # "obviously moronic". Drawing first shows the new cards before anything is committed, so a Draw wins exact ties.
     from animal_kingdom.engine.actions import DrawAction
     from animal_kingdom.sim.runner import make_bot
-    for name in ("one_card_draw_first", "one_card_draw_first_b"):
+    # The first recorded opening ("one_card_draw_first") faced a Colony board whose cards changed on 2026-10-24 (Martin's
+    # sheet: the Worker Wasp, Worker Bee, Queen Bee and Termite King do other things now), so its position is no longer a
+    # tie between the two orders and it no longer tests the tie-break. The Swordfish opening still does.
+    for name in ("one_card_draw_first_b",):
         for seed in range(3):
             s = _puzzle(name)
             me = s.player_to_act()
