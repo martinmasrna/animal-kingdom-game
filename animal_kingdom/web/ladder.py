@@ -188,10 +188,11 @@ class Ladder:
             self._put(winner, w); self._put(loser, l)
         return w, l
 
-    def add_player(self, lid: str) -> None:
-        """A league newcomer's row: the start every person gets, placement games ahead (docs/league.md)."""
+    def add_player(self, lid: str, start: float = START) -> None:
+        """A league newcomer's row: `start` is the best prior there is (a tinkered child its parent's rating, a counter-deck
+        its targets', Martin's lists 1500), with the wide uncertainty a newcomer has, placement games ahead (docs/league.md)."""
         with self.db:
-            self.db.execute("INSERT OR IGNORE INTO ladder VALUES (?, ?, ?, ?, ?)", (lid, START, START_RD, START_VOL, 0))
+            self.db.execute("INSERT OR IGNORE INTO ladder VALUES (?, ?, ?, ?, ?)", (lid, start, START_RD, START_VOL, 0))
 
     def seed_bots(self, ratings: dict[str, float]) -> None:
         """Set the bots' ratings from simulation (bot ladder id -> rating), with a seeded bot's narrow uncertainty."""

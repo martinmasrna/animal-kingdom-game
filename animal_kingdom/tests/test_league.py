@@ -69,16 +69,16 @@ def test_a_new_list_joins_as_three_placing_players_kept_from_people(monkeypatch,
         child = sorted(lst[1:] + [pool_ids[0]])
         assert not decklist_problems(child)
         r = await c.post("/api/league/decks", json={"decks": [
-            {"slug": "league_cats_1", "name": "Savanna Cats III", "list": child, "source": "tinker", "parent": "cats"},
+            {"slug": "league_cats_1", "name": "Savanna Cats III", "list": child, "source": "tinker", "parent": "cats", "start": 2050},
             {"slug": "league_dup", "name": "Twin", "list": lst, "source": "test"},               # identical to Cats: refused
             {"slug": "bad slug!", "name": "X", "list": child[:29], "source": "test"}]}, headers=h)
         j = await r.json()
         assert j["added"] == ["league_cats_1"] and set(j["rejected"]) == {"league_dup", "bad slug!"}
         assert "an identical list is already a player" in j["rejected"]["league_dup"][0]
         # three placing players, loadable, named, listed, and never handed to a person until placed
-        for level in ranking.LEVELS:
+        for level in ranking.LEVELS:   # born at its parent's rating, the best prior, with a newcomer's wide uncertainty
             rr = server.ladder.get(ranking.bot_id(level, "league_cats_1"))
-            assert rr.provisional and rr.rating == ranking.START
+            assert rr.provisional and rr.rating == 2050 and rr.rd == ranking.START_RD
         assert load_premade_deck("league_cats_1") == child and server.DECK_NAMES["league_cats_1"] == "Savanna Cats III"
         import random
         assert "league_cats_1" not in {ranking.parse_bot(server.ladder.nearest_bot(1500, random.Random(i)))[1] for i in range(60)}

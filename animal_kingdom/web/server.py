@@ -699,7 +699,8 @@ async def league_games(req):
 
 
 async def league_decks(req):
-    """New lists for the pool: [{slug, name, list, source, parent}]; each legal, distinct list joins as three placing players."""
+    """New lists for the pool: [{slug, name, list, source, parent, start}]; each legal, distinct list joins as three placing
+    players, starting at `start` (the best prior the sender has: a parent's rating, a target's; 1500 when absent)."""
     league_auth(req)
     body = await req.json()
     decks = body.get("decks") if isinstance(body, dict) else None
@@ -714,8 +715,10 @@ async def league_decks(req):
         if problems:
             rejected[slug] = problems; continue
         ladder.decks.append(slug)
+        start = d.get("start")
+        start = min(3000.0, max(800.0, float(start))) if isinstance(start, (int, float)) else ranking.START
         for level in ranking.LEVELS:
-            ladder.add_player(ranking.bot_id(level, slug))
+            ladder.add_player(ranking.bot_id(level, slug), start)
         added.append(slug)
     return web.json_response({"added": added, "rejected": rejected})
 

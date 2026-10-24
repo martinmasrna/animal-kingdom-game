@@ -148,6 +148,7 @@ def test_a_bot_whose_move_is_refused_still_moves(monkeypatch):
     monkeypatch.setenv("AK_NO_GAME_LOGS", "1")
     monkeypatch.setattr(server, "RANKED_WAIT", 0.1)
     monkeypatch.setattr(server, "BOT_PAUSE", {"choice": 0, "open": 0, "move": 0})
+    monkeypatch.setattr(ladder.Ladder, "nearest_bot", lambda self, r, rng, avoid=(), window=0: "bot:normal:cats")   # a quick pilot: the test is about the refusal, not the matchmaking
     real_act, refused = Match.act, []
 
     def act(self, s, action, auto=False):

@@ -8,7 +8,8 @@ untimed), posts the results to `/api/league/games`, and appends them to results/
 still placing first (two games each), then the pairings whose rating is least certain, each against an opponent near its
 rating (within the matching window, widened when nobody is there), a fifth of the time against anyone, never itself.
 `--pace` caps games an hour so the machine stays usable; the runner sleeps when the pool needs nothing. The league key
-comes from AK_LEAGUE_KEY, results/oauth.json (as the server reads it) or --key-file.
+comes from AK_LEAGUE_KEY, results/oauth.json (as the server reads it) or --key-file. The log keeps the cards each side
+drew, and once an hour a tinker pass (league/tinker.py) reads it and posts at most `--births` children a day.
 """
 
 from __future__ import annotations
@@ -27,6 +28,7 @@ from ..decks import PREMADE_DECKS, register_deck
 from ..sim.runner import MatchSpec, run_specs
 from ..web.league import key as league_key
 from ..web.ladder import PROVISIONAL, parse_bot
+from . import tinker
 
 WINDOW = 150          # rating distance a matchmaking opponent is drawn from, doubled until someone is there
 ANYONE = 0.2          # share of games against anyone at all, as a ladder's queue mixes
@@ -79,7 +81,8 @@ def play(games: list[tuple[str, str]], pilots: dict[str, str], jobs: int, seed0:
         x, y = ((la, da), (lb, db)) if i % 2 == 0 else ((lb, db), (la, da))   # seats alternate
         specs.append((MatchSpec(x[1], y[1], seed0 + i, bot_a=pilots[x[0]], bot_b=pilots[y[0]]), f"bot:{x[0]}:{x[1]}", f"bot:{y[0]}:{y[1]}"))
     records = run_specs([s[0] for s in specs], jobs=jobs)
-    return [{"a": a, "b": b, "winner": r.winner, "seed": s.seed, "turns": r.turns, "reason": r.reason}
+    return [{"a": a, "b": b, "winner": r.winner, "seed": s.seed, "turns": r.turns, "reason": r.reason,
+             "drawn_a": sorted(r.cards_drawn_a), "drawn_b": sorted(r.cards_drawn_b)}
             for (s, a, b), r in zip(specs, records)]
 
 
@@ -92,13 +95,16 @@ def main(argv=None) -> None:
     ap.add_argument("--pace", type=int, default=1200, help="games an hour at most")
     ap.add_argument("--once", action="store_true", help="one pass, then stop")
     ap.add_argument("--log", default="results/league/games.jsonl")
+    ap.add_argument("--births", type=int, default=3, help="tinkered children a day at most (0: no tinkering)")
     args = ap.parse_args(argv)
     key = (Path(args.key_file).read_text().strip() if args.key_file else None) or league_key()
     if not key:
         sys.exit("no league key (AK_LEAGUE_KEY, results/oauth.json or --key-file)")
     os.environ.setdefault("AK_RUST_BOTS", "1")
     log = Path(args.log); log.parent.mkdir(parents=True, exist_ok=True)
+    births_log = log.with_name("births.jsonl")
     rng = random.Random()
+    last_tinker = 0.0
     while True:
         started = time.time()
         try:
@@ -120,9 +126,23 @@ def main(argv=None) -> None:
             for g in results:
                 fh.write(json.dumps({"t": started, **g}) + "\n")
         try:
-            ack = api(args.server, "/api/league/games", key, {"games": results})
+            ack = api(args.server, "/api/league/games", key, {"games": [{k: v for k, v in g.items() if not k.startswith("drawn_")} for g in results]})
         except (urllib.error.URLError, OSError) as e:
             print(f"games not posted: {e} (kept in {log})", flush=True); ack = {"rated": 0}
+        if args.births and started - last_tinker > 3600:
+            last_tinker = started
+            try:
+                born = [json.loads(l) for l in births_log.read_text().splitlines() if l.strip()] if births_log.is_file() else []
+                today = sum(1 for b in born if started - b["t"] < 86400)
+                children = tinker.propose(tinker.read_log(log), pool, today, args.births, log=lambda m: print(f"tinker: {m}", flush=True))
+                if children:
+                    ack2 = api(args.server, "/api/league/decks", key, {"decks": [{k: v for k, v in c.items() if k != "why"} for c in children]})
+                    with births_log.open("a") as fh:
+                        for c in children:
+                            fh.write(json.dumps({"t": started, **c, "added": c["slug"] in ack2.get("added", [])}) + "\n")
+                    print(f"tinker: born {ack2.get('added')}, refused {ack2.get('rejected')}", flush=True)
+            except Exception as e:   # a tinker pass never stops the games
+                print(f"tinker pass failed: {e!r}", flush=True)
         placing = sum(1 for p in pool["players"] if p["games"] < PROVISIONAL)
         print(f"{time.strftime('%H:%M')} {len(results)} games in {time.time() - started:.0f} s, {ack.get('rated')} rated; "
               f"{len(pool['players'])} pairings, {placing} placing", flush=True)
