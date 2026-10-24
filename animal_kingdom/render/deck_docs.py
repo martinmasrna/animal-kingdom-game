@@ -1,12 +1,13 @@
-"""Regenerate the card tables in docs/cards/decks/<deck>.md and docs/design/societies/*.md from cards.json.
+"""Regenerate the card tables in docs/cards/decks/<deck>.md and docs/design/societies/*.md from the card data.
 
 Each deck doc is hand-written prose (identity, plan, design notes) plus one generated block
 between CARDS_BEGIN and CARDS_END. A society page (a society's behaviours, playstyle and namer,
-concept only) ends with one generated block of the cards whose animals live in that society,
-named by id in its FAMILY_BEGIN marker (a society is not a tag: hippos carry Hoofed and live in
-no herd; the page decides who belongs). cards.json is the
-only source of card numbers and text; this keeps the docs from drifting away from it.
-`test_deck_docs.py` fails when a block is stale.
+written from nature) has one section per role the society gives its members, each with one line
+of nature and its own generated block of the cards that play that role, named by id in the
+block's marker; a role with no card yet keeps its heading over an empty block, which is the open
+slot. A society is not a tag (hippos carry Hoofed and live in no herd): the page decides who
+belongs, and a card appears once per page. The card data is the only source of card numbers and
+text; this keeps the docs from drifting away from it. `test_deck_docs.py` fails when a block is stale.
 
     .venv/bin/python -m animal_kingdom.render.deck_docs
 """
@@ -22,7 +23,8 @@ DOCS_DIR = Path(__file__).resolve().parents[2] / "docs" / "cards" / "decks"
 SOCIETIES_DIR = Path(__file__).resolve().parents[2] / "docs" / "design" / "societies"
 CARDS_BEGIN = "<!-- cards:begin (generated from cards.json by animal_kingdom.render.deck_docs) -->"
 CARDS_END = "<!-- cards:end -->"
-FAMILY_BEGIN = re.compile(r"<!-- cards:begin ids=([\w,]+) \(generated from cards\.json by animal_kingdom\.render\.deck_docs\) -->")
+FAMILY_BEGIN = re.compile(r"<!-- cards:begin ids=([\w,]*) \(generated from cards\.json by animal_kingdom\.render\.deck_docs\) -->")
+_FAMILY_SPAN = re.compile(FAMILY_BEGIN.pattern + r".*?" + re.escape(CARDS_END), re.S)
 
 
 def doc_path(deck: str) -> Path:
@@ -59,45 +61,45 @@ _STATUS_ORDER = {"collectible": 0, "reserve": 1, "planned": 2, "token": 3, "tuto
 
 
 def family_block(ids: str, raw: dict | None = None) -> str:
-    """The society's cards, named by id in its marker (`ids=zebra,giraffe,...`; a society is who lives
-    together, which the page decides, never a tag), as one table: the card, its rarity, strength and
-    full text, and its habitat. A reserve or planned design says so after its name. An id the data
-    doesn't have is an error, so a renamed card can't silently drop off a page."""
+    """One role's cards, named by id in its marker (`ids=zebra,giraffe,...`), as a table: the card, its
+    rarity, strength and full text, and its habitat. A reserve or planned design says so after its
+    name. An empty id list renders no table (the role has no card yet). An id the data doesn't have
+    is an error, so a renamed card can't silently drop off a page."""
     records = (raw or load_bundled_json("cards.json"))["cards"]
     wanted = [i for i in ids.split(",") if i]
     by_id = {r["id"]: r for r in records}
     missing = [i for i in wanted if i not in by_id]
     if missing:
-        raise ValueError(f"society page names cards that cards.json doesn't have: {', '.join(missing)}")
+        raise ValueError(f"society page names cards that the card data doesn't have: {', '.join(missing)}")
     rows = [by_id[i] for i in wanted]
     rows.sort(key=lambda r: (_RARITY_ORDER.get(r.get("rarity", ""), 9),
                              _STATUS_ORDER.get(r.get("status", ""), 9), r.get("name", "")))
-    lines = [f"<!-- cards:begin ids={ids} (generated from cards.json by animal_kingdom.render.deck_docs) -->", "",
-             "| Card | Rarity | Str | Text | Habitat |", "|---|---|---:|---|---|"]
-    for r in rows:
-        strength = "" if r.get("base_strength") is None else r["base_strength"]
-        text = (r.get("text") or "").replace("|", "\\|")
-        name = r.get("name", "") + ("" if r.get("status") == "collectible" else f" ({r.get('status', '')})")
-        lines.append(f"| **{name}** | {r.get('rarity', '')} | {strength} | {text} | {r.get('habitat', '')} |")
-    lines += ["", CARDS_END]
+    lines = [f"<!-- cards:begin ids={ids} (generated from cards.json by animal_kingdom.render.deck_docs) -->"]
+    if rows:
+        lines += ["", "| Card | Rarity | Str | Text | Habitat |", "|---|---|---:|---|---|"]
+        for r in rows:
+            strength = "" if r.get("base_strength") is None else r["base_strength"]
+            text = (r.get("text") or "").replace("|", "\\|")
+            name = r.get("name", "") + ("" if r.get("status") == "collectible" else f" ({r.get('status', '')})")
+            lines.append(f"| **{name}** | {r.get('rarity', '')} | {strength} | {text} | {r.get('habitat', '')} |")
+        lines.append("")
+    lines.append(CARDS_END)
     return "\n".join(lines)
 
 
-def family_of(doc: str) -> str | None:
-    """The comma-separated card ids a society page's generated block lists, or None when the page has no block."""
-    m = FAMILY_BEGIN.search(doc)
-    return m.group(1) if m else None
+def family_of(doc: str) -> bool:
+    """Whether the page has any role block."""
+    return FAMILY_BEGIN.search(doc) is not None
 
 
-def render_family(doc: str, block: str) -> str:
-    """`doc` with its family block replaced by `block`."""
-    m = FAMILY_BEGIN.search(doc)
-    if not m:
-        raise ValueError("society page is missing its generated-cards marker")
-    _, sep, tail = doc[m.end():].partition(CARDS_END)
-    if not sep:
-        raise ValueError("society page is missing its generated-cards end marker")
-    return doc[:m.start()] + block + tail
+def render_family(doc: str, raw: dict | None = None) -> str:
+    """`doc` with every role block regenerated. A card listed in two roles of one page is an error."""
+    ids = [i for m in FAMILY_BEGIN.finditer(doc) for i in m.group(1).split(",") if i]
+    dupes = sorted({i for i in ids if ids.count(i) > 1})
+    if dupes:
+        raise ValueError(f"society page lists a card in two roles: {', '.join(dupes)}")
+    raw = raw or load_bundled_json("cards.json")
+    return _FAMILY_SPAN.sub(lambda m: family_block(m.group(1), raw), doc)
 
 
 def society_pages() -> list[Path]:
@@ -114,8 +116,7 @@ def main() -> None:
         print(f"wrote {path}")
     raw = load_bundled_json("cards.json")
     for path in society_pages():
-        doc = path.read_text(encoding="utf-8")
-        path.write_text(render_family(doc, family_block(family_of(doc), raw)), encoding="utf-8")
+        path.write_text(render_family(path.read_text(encoding="utf-8"), raw), encoding="utf-8")
         print(f"wrote {path}")
 
 
