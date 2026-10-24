@@ -4,7 +4,7 @@ Martin, 2026-10-24: "what we need to do is simulate a real ladder environment an
 
 ## What it replaces
 
-Until 2026-10-24 a bot change was judged by a paired benchmark: fifteen fixed decks against three fixed opponents, the candidate pilot against the live one, twenty games a deck. That measures one pilot change on one card pool with one deck set, and the self-play rounds that trained the networks drew their games from the same fifteen decks (plus Martin's own decks from round 6). The hand-formula Experts and the network Experts had never met, so the one ladder built that morning hung on fifty human games. The league replaces all of it: one population, one rating scale, every game rated, people included.
+The ladder itself exists: `web/ladder.py` rates people and every bot-and-deck pairing with Glicko-2, the ranked queue matches a person with the bot pairing nearest their rating (`server.join_ranked`, `Ladder.nearest_bot`), and `sim/ladder_seed.py` seeds the bots' ratings from a round robin of the forty-five pairings, anchored so a reseed keeps the scale people were rated on. Of Martin's games against the Expert, 1,085 were ranked games on that ladder, against decks the matchmaking chose. What was missing on 2026-10-24: the seed dated from 20 October and the Expert had changed four times since, so the bots sat on the ladder at the strength of an Expert that no longer existed, and every person's rating was fitted against those stale numbers; the bot pool was fifteen hand-picked decks that never changed; and a bot change was judged by a paired benchmark of those fifteen decks against three fixed opponents, twenty games a deck, with the self-play rounds drawing their games from the same fifteen decks. The league is the seeding made continuous and alive: one population that grows, every game rated on the ladder's own scale, and a reseed shipped whenever the population or the pilot changes.
 
 ## The design
 
@@ -14,7 +14,7 @@ Decks evolve. A deck is a genome over the legal card pool; a mutation swaps one 
 
 Pilots evolve. The shared slot network retrains on league games, which are diverse by construction (every deck the league holds, at every rating level), so the pool drift that narrowed the self-play rounds cannot recur. A candidate pilot enters the league as a new player on every league deck and is rated like everyone else; it ships when its rating across the league's decks beats the live pilot's beyond the fit's uncertainty. Per-deck evaluation heads come after that, as candidates in the same league. Cards never change for the bots (docs/bots.md, invariants).
 
-People play in the same league. A web game is a rated game: the person against the live Expert on a deck the league ranks, not a premade the person hands it. That is a product change for Martin to decide: rated games where matchmaking assigns the Expert's deck from the league's top, casual games as now. His rating then sharpens with every rated game and so does the Expert's, and the goal, the best pairing at about 2100, is read off the same scale he is on.
+People play in the same league already: a ranked web game is the person against the bot pairing the matchmaking picks near their rating, and the result moves both ratings. The league's job on that side is to keep the bots' rows true: a new seed (`web/ladder_seed.json`, versioned, applied once by `Ladder.apply_seed`) after every pilot change and every league epoch, anchored on the pilots that did not change so people's ratings keep their meaning. The goal, the best pairing at about 2100 on the ladder Martin is rated on, is then read off one table.
 
 ## What the literature says it costs and where it breaks
 
@@ -26,7 +26,7 @@ Where it breaks, and the answer in the design: pilot bias (decks tuned to how th
 
 ## The build, in order
 
-1. The league runner: a persistent population file (players, ratings, the win-rate matrix, every game appended), matchmaking by rating, games on the Rust engine, the ladder reported by the existing tool. Seeded with the bot pool, Martin's decks from his logs and the live pilot.
+1. Reseed now (2026-10-24): the round robin of `sim/ladder_seed.py` with the live Expert, anchored on Easy and Normal, shipped as the new `web/ladder_seed.json`. Then the league runner grows out of that tool: a persistent population (players, every game appended, ratings refitted), matchmaking by rating instead of a full round robin, games on the Rust engine, the bot pool plus Martin's decks from his logs as the first population.
 2. Deck evolution: mutation, provisional entry, culling, niches, exploiters.
 3. Pilot candidates as league entrants, and the retrain loop on league games. The paired benchmark stays only as a cheap first screen for a pilot change.
 4. Rated web games on league decks, when Martin says how they should feel.
