@@ -160,7 +160,7 @@ Cards of the hive whose job the page can't yet name.
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **[BEE]** | legendary | 1 | Roar: your animals on the board, in your hand and in your deck become strength 5. | Meadow |
+| **[BEE]** | legendary | 1 | Roar: your animals on the board, in your hand and in your deck become strength 4. | Meadow |
 
 <!-- cards:end -->
 

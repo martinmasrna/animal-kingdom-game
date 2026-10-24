@@ -3808,7 +3808,7 @@
         "Colony"
       ],
       "base_strength": 1,
-      "text": "Roar: your animals on the board, in your hand and in your deck become strength 5.",
+      "text": "Roar: your animals on the board, in your hand and in your deck become strength 4.",
       "species": "Bee",
       "habitat": "Meadow",
       "unnamed": true,

@@ -392,7 +392,7 @@ impl Config {
             mulligan_max: raw.get("mulligan_max").and_then(|x| x.as_i64()).map(|x| x as i32),
             first_player_opening_draw: gi("first_player_opening_draw", 4),
             second_player_opening_draw: gi("second_player_opening_draw", 4),
-            jelly_strength: gi("jelly_strength", 5),
+            jelly_strength: gi("jelly_strength", 4),
             egg_eater_growth: gi("egg_eater_growth", 2),
             capybara_small_max: gi("capybara_small_max", 3),
             raw,
