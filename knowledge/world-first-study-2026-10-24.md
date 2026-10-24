@@ -90,27 +90,30 @@ Read from the legends and the decks as they stand, these are the candidates. The
 
 Rosewater's "five animal factions" and Ravnica's "ten at once was just too much" both say the count should stay small and be staged. Seven starter decks and five or six societies is already at that size (*inference*).
 
-## 6. The page: a proposal
+## 6. The page: a proposal (revised the same day)
 
-One page per society, written the day a card forces it, from the legends that exist, and no page for a society no card needs. Its form caps its size: the five fields of section 2, each one to three sentences, about 150 to 250 words. Half of a Bloomburrow entry is the part we don't need; Root's is a sentence; Riot's naming goals are five lines.
+Martin's correction, 2026-10-24: for real animals the bargain and the event in section 2 are evolution. A herd's safety in numbers, a hive's queen, a pride's house are not bargains anyone struck; they are what the animal does, and a nature fan already knows them. So the page's content is observed, not invented, which does not mean it goes unwritten: it is the one place where the deck's playstyle, the cards' effects, the art and the names read from the same source, and the effects are the most important reader, not an exception.
 
-1. **Position.** Who they are against the neighbours on the same ground, in one sentence each for two neighbours (one kin, one friction, Bloomburrow's pattern).
-2. **The bargain.** One sentence a member would say. The test from the sources: a stranger who hears it knows the society.
-3. **The verb and its weakness.** Taken from the deck's identity in `docs/design/families.md` ("how it wins"), then the cost that the bargain implies. Check: no two societies share a verb (the Eyrie read as the cats' moral twin in Root).
-4. **Who names whom.** The namer, the stock (a seen mark, a deed, a title, the oldest word, the hunters' word), what a name sounds like in that mouth (one or two existing names as the ear's anchor), and the words that namer cannot know (Warriors' list: tools, materials, plants and animals outside their range). This field feeds the naming skill's goals directly.
-5. **One event.** The thing the others still react to.
+One page per society, written when a deck or a card forces it, about a page:
 
-Plus a ledger line at the end: names taken, cards that read from the page. Nothing about looks, home or craft: the species supplies them and `art-principles.md` rules the painting.
+1. **What they are**, as a nature fan pictures them (one or two sentences).
+2. **How they live.** The real behaviours, one line each, each a thing you could watch in a documentary: for the herd, mixed species graze together because each sees or smells differently; the giraffe is the lookout the others stand under; alarm calls cross species; the young are kept in the middle; gazelles stot and scatter, and a scattered herd is a dead one; the route is remembered by the old. Nothing invented, nothing debatable.
+3. **How the deck plays, read from that.** The verb and its cost in one sentence (the herd: safe and productive together, broken when scattered; regions that hold it produce more food, Flee saves the animal and loses the ground). This is the line `docs/design/families.md` already carries as "how it wins"; the page says where it comes from. Check: no two societies share a verb.
+4. **Who does what.** The roles the behaviours imply, which are card slots: the eyes (Giraffe, the opponent's hand revealed), the voice that gathers (Zebra), the memory of the route (Wildebeest). This is the effect generator: when a slot is open, the deck-design skill looks at the behaviour list before anything else, and a candidate effect that no behaviour of the society explains is suspect. The Magic caution stands as a caution only: play decides, the page proposes.
+5. **Who names whom.** The namer, their stock (a seen mark, a deed, a title, the oldest word, the hunters' word), one or two existing names as the ear's anchor, and the words that namer cannot know. The one invented line in the page, since animals do not name; it feeds the naming skill's goals directly.
+6. **Ledger.** Cards and legends that read from the page.
 
-A shared layer above the pages only if a card forces one: Bloomburrow's shared history is what made ten species one world, but our map, food and regions already give the societies one ground to press on (Root's clearings do that job there), and whether the game has a "what happened" at all is Martin's call, not a default (*inference*; open).
+Dropped from the first draft: the bargain as a field (it is line 3, derived from line 2) and the event (it belongs to the individual, in the legend: the fire, the drought year, the mill closing). Nothing about looks or home: the species supplies them and `design/cards/art-principles.md` rules the painting.
 
-## 7. How the page feeds the three jobs
+## 7. How the page feeds the four jobs
 
-**Names.** The page's field 4 becomes three to five ranked goals per name (Riot), written before the pool. The naming skill's wide pool from unrelated sources stays as it is; the goals go above it, the forbidden-words list into `tools/names/build.py` next to the mechanical filters already there. The name is a witness's word: the page says who says it and with what feeling (the herds with relief or the hunters as a curse), so the Giraffe's open question is answered on the page, not per sitting.
+**Effects and playstyle.** Line 3 is the deck's identity and line 4 its slots. A new card for the society starts from a behaviour on line 2 and a role on line 4; the deck-design skill then plays it on the real map, which is where it is judged. A legend reads its card's effect back into the character ("The card is this", as all five legends do).
 
-**Art.** Magic's art description is five short fields (Colour, Location, Action, Focus, Mood), composition left to the artist. The page adds one line of intent per society: what the scene shows about the society, through a real behaviour (the crew eating behind the capo; the foals in the centre of the night circle). One checkable fact per painting, never a history; the animal stays an animal (`art-principles.md`).
+**Names.** Line 5 becomes three to five ranked goals per name (Riot), written before the pool. The naming skill's wide pool from unrelated sources stays; the goals go above it, the forbidden words into `tools/names/build.py` beside the mechanical filters already there. The Giraffe's open question, herds' relief or hunters' curse, is answered on the page once, not per sitting.
 
-**Effects.** The legend reads the card's effect into the character, as all five do now, and the page checks the incentive against the bargain. No effect comes from the page.
+**Art.** Magic's art description is five short fields (Colour, Location, Action, Focus, Mood), composition left to the artist. The page adds the behaviour the scene shows (the foals in the centre of the night circle; the crew eating behind the capo). One checkable fact per painting, never a history; the animal stays an animal.
+
+**Character.** A legend is an individual of the society who keeps, breaks or embodies one line of the page: the Leopard is the herd's line "the young are kept in the middle" broken; the Giraffe is the lookout as an individual.
 
 ## 8. How this can be wrong, and the tests
 
@@ -132,4 +135,4 @@ The hypothesis is: a card with a society page behind it gets its name, art and c
 
 ## Recommendation
 
-Write no bible. Write the Pride's page from its four gold names and run the regenerate test, which costs one sitting and no Martin time; if it passes, write the herds' page and put the Giraffe through the naming skill with goals from it, and let that sitting decide whether society pages exist in this game.
+Write the herds' page first, from documentary behaviour, with its three cards and the Leopard reading from it, since the herd is the live failure in names and the deck whose playstyle is newest; put the Giraffe through the naming skill with goals from line 5 and judge the page by whether its effects, art and name come easier than they did on Oct 21.
