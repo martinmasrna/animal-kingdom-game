@@ -94,11 +94,11 @@ Rosewater's "five animal factions" and Ravnica's "ten at once was just too much"
 
 Martin's correction, 2026-10-24: for real animals the bargain and the event in section 2 are evolution. A herd's safety in numbers, a hive's queen, a pride's house are not bargains anyone struck; they are what the animal does, and a nature fan already knows them. So the page's content is observed, not invented, which does not mean it goes unwritten: it is the one place where the deck's playstyle, the cards' effects, the art and the names read from the same source, and the effects are the most important reader, not an exception.
 
-One page per society, written when a deck or a card forces it, about a page:
+One page per society, written when a family or a card forces it, about a page:
 
 1. **What they are**, as a nature fan pictures them (one or two sentences).
 2. **How they live.** The real behaviours, one line each, each a thing you could watch in a documentary: for the herd, mixed species graze together because each sees or smells differently; the giraffe is the lookout the others stand under; alarm calls cross species; the young are kept in the middle; gazelles stot and scatter, and a scattered herd is a dead one; the route is remembered by the old. Nothing invented, nothing debatable.
-3. **How the deck plays, read from that.** The verb and its cost in one sentence (the herd: safe and productive together, broken when scattered; regions that hold it produce more food, Flee saves the animal and loses the ground). This is the line `docs/design/families.md` already carries as "how it wins"; the page says where it comes from. Check: no two societies share a verb.
+3. **The playstyle the family's cards serve, read from that.** A family is not a deck (Martin, 2026-10-24: the precon teaches the mechanics; nobody is made to play all hoofed animals together, a few of them go into a defensive or long-game deck the way fish go into a token deck). So this line names the verb a player gets from running these animals, and its cost, in one sentence (the herd: safe and productive together, broken when scattered; regions that hold it produce more food, Flee saves the animal and loses the ground). It is the line `docs/design/families.md` already carries as "how it wins"; the page says where it comes from. Check: no two families share a verb.
 4. **Who does what.** The roles the behaviours imply, which are card slots: the eyes (Giraffe, the opponent's hand revealed), the voice that gathers (Zebra), the memory of the route (Wildebeest). This is the effect generator: when a slot is open, the deck-design skill looks at the behaviour list before anything else, and a candidate effect that no behaviour of the society explains is suspect. The Magic caution stands as a caution only: play decides, the page proposes.
 5. **Who names whom.** The namer, their stock (a seen mark, a deed, a title, the oldest word, the hunters' word), one or two existing names as the ear's anchor, and the words that namer cannot know. The one invented line in the page, since animals do not name; it feeds the naming skill's goals directly.
 6. **Ledger.** Cards and legends that read from the page.
@@ -107,7 +107,7 @@ Dropped from the first draft: the bargain as a field (it is line 3, derived from
 
 ## 7. How the page feeds the four jobs
 
-**Effects and playstyle.** Line 3 is the deck's identity and line 4 its slots. A new card for the society starts from a behaviour on line 2 and a role on line 4; the deck-design skill then plays it on the real map, which is where it is judged. A legend reads its card's effect back into the character ("The card is this", as all five legends do).
+**Effects and playstyle.** Line 3 is the family's identity in any deck and line 4 the roles its cards fill. A new card for the family starts from a behaviour on line 2 and a role on line 4; the deck-design skill then plays it on the real map, in the decks players would actually put it in, which is where it is judged. A legend reads its card's effect back into the character ("The card is this", as all five legends do).
 
 **Names.** Line 5 becomes three to five ranked goals per name (Riot), written before the pool. The naming skill's wide pool from unrelated sources stays; the goals go above it, the forbidden words into `tools/names/build.py` beside the mechanical filters already there. The Giraffe's open question, herds' relief or hunters' curse, is answered on the page once, not per sitting.
 
@@ -135,4 +135,4 @@ The hypothesis is: a card with a society page behind it gets its name, art and c
 
 ## Recommendation
 
-Write the herds' page first, from documentary behaviour, with its three cards and the Leopard reading from it, since the herd is the live failure in names and the deck whose playstyle is newest; put the Giraffe through the naming skill with goals from line 5 and judge the page by whether its effects, art and name come easier than they did on Oct 21.
+Write the herds' page first, from documentary behaviour, with its three legendaries and the Leopard reading from it, since the herd is the live failure in names and the family whose playstyle is newest; put the Giraffe through the naming skill with goals from line 5 and judge the page by whether its effects, art and name come easier than they did on Oct 21.
