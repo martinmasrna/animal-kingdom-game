@@ -37,7 +37,7 @@ from collections import deque
 from typing import Iterator, Optional
 
 from ..engine import rules
-from ..engine.cards import KEYWORDS, TAGS
+from ..engine.cards import BOT_TAGS, KEYWORDS
 from ..engine.actions import PlaceAction
 from ..engine.state import GameState, other_player
 from ..engine.strength import effective_strength, aura_sources
@@ -126,7 +126,7 @@ RUNG2_EXTRA_FEATURES: tuple[str, ...] = (
 BOARD_SLOTS = 16
 HAND_SLOTS = 8
 KEYWORD_ORDER: tuple[str, ...] = tuple(sorted(KEYWORDS))
-TAG_ORDER: tuple[str, ...] = tuple(sorted(TAGS))
+TAG_ORDER: tuple[str, ...] = tuple(sorted(BOT_TAGS))
 _PROPERTY_FEATURES: tuple[str, ...] = (("roar", "ability") + tuple("kw_" + k.replace(" ", "_") for k in KEYWORD_ORDER)
                                        + tuple("tag_" + t for t in TAG_ORDER))
 SLOT_FEATURES: tuple[str, ...] = ("mine", "theirs", "strength", "depth", "buried_mine", "buried_theirs", "fresh") + _PROPERTY_FEATURES

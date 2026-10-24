@@ -23,8 +23,13 @@ KEYWORDS = {"Flight", "Armor", "Apex Predator", "Stealth", "Spikes", "Poison", "
 TAGS = {
     "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent",
     "Arachnid", "Bear", "Megafauna", "Egg", "Fish", "Primate", "Hoofed",   # species families
-    "Queen", "Worker", "Soldier", "Nurse",              # roles (castes: Melissia draws by them)
+    "Queen", "Worker",                                # roles
+    "King", "Soldier", "Nurse",                       # castes (below)
 }
+# Castes only card text reads (Melissia draws by them, Vesper guards the King; Martin's sheet, 2026-10-24). The bots'
+# trained networks take one column per tag in BOT_TAGS, so a tag added here stays out of the features until a retrain.
+CASTE_TAGS = frozenset({"King", "Soldier", "Nurse"})
+BOT_TAGS = frozenset(TAGS - CASTE_TAGS)
 DYNAMIC_STRENGTHS = {"removed_units_count", "removed_eggs_count"}  # Python, Egg Eater
 
 # A card's status. Cards are cards and decks are decks (Martin, 2026-10-19): a card belongs to no deck, and the
