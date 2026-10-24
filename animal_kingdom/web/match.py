@@ -16,7 +16,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
-from ..decks import PREMADE_DECKS, load_premade_deck
+from ..decks import LADDER_DECK_NAMES, PREMADE_DECKS, load_premade_deck
 from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
 from ..engine.cards import DECKLISTS, load_cards
@@ -45,7 +45,7 @@ EVENTS_KEPT = 200            # a view carries the game's last events: enough for
 TIMEOUTS_TO_LOSE = 3         # turns in a row a player's clock ran out: they have left, and lose (Martin, 2026-10-01)
 
 # Menu labels for the shipped decks (starters and bot decks, decklists.json) and the tutorial's.
-DECK_NAMES = {**{d["slug"]: d["name"] for d in DECKLISTS}, **tutorial.NAMES, "lions30": "30 Lions"}
+DECK_NAMES = {**{d["slug"]: d["name"] for d in DECKLISTS}, **LADDER_DECK_NAMES, **tutorial.NAMES, "lions30": "30 Lions"}
 # The card whose art covers each shipped deck (decklists.json).
 STARTER_COVERS = {d["slug"]: d.get("cover", "") for d in DECKLISTS}
 

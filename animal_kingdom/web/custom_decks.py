@@ -18,8 +18,9 @@ _saved: dict[str, dict] = {}
 
 
 def _register(slug: str, name: str, decklist: list[str]) -> None:
-    register_deck(slug, decklist)
-    DECK_NAMES[slug] = name
+    if slug not in PREMADE_DECKS:      # a deck the ladder pool already holds under this slug (data/ladder_decks.json) is loadable as it is
+        register_deck(slug, decklist)
+    DECK_NAMES.setdefault(slug, name)  # the pool's name for it stands; a new deck takes its builder's
     _saved[slug] = {"name": name, "list": decklist}
 
 

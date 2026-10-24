@@ -4,7 +4,8 @@ Cards are cards and decks are decks (Martin, 2026-10-19). The game ships its dec
 cards in data/decklists.json: the **starter decks** (`starter: true`), the 12 4-4-6 decks a new profile gets, which
 share no card so a new player meets as many cards as possible; and the **bot decks** (`bot: true`), what the bots
 play ranked and in Practice's Random, which may overlap with anything. A deck can be both. `PREMADE_DECKS` holds
-every shipped deck as its 30-card list; `BOT_DECKS` the bot pool's slugs; `load_premade_deck` any loadable slug.
+every shipped deck and every ladder deck (data/ladder_decks.json, the decks people built and played) as its 30-card list;
+`BOT_DECKS` the bot pool's slugs, all of them; `load_premade_deck` any loadable slug.
 
 `make_vanilla_deck` survives as a fuzz/CLI helper: it builds a legal-ish deck from
 integer-strength cards only (the dynamic ones are excluded), respecting the copy limits.
@@ -30,12 +31,18 @@ def _expand(deck: dict) -> list[str]:
 # decklists.json, so it can never drift from it.
 PREMADE_DECKS: dict[str, list[str]] = {d["slug"]: _expand(d) for d in DECKLISTS}
 
-# The decks the bots play (decklists.json `bot: true`): ranked matchmaking, the ladder seed and the bot benchmark
-# panel draw from these. Bots are opponents for people, so a deck the bots pilot badly (Egg Control, Aristocrats,
-# Food OTK as of the 18 October seeds) stays a player deck only: a bot losing with it teaches the deck is bad
-# (Martin, 2026-10-18). Practice still lets a player pick any shipped deck for the bot; this is the pool for
-# 'Random' and for ranked.
-BOT_DECKS: tuple[str, ...] = tuple(d["slug"] for d in DECKLISTS if d.get("bot"))
+# The ladder's wider pool (data/ladder_decks.json, built by sim/ladder_decks.py): the decks people built and played, as
+# the bots play them. Loadable like a shipped deck; `LADDER_DECK_NAMES` carries their builders' names.
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "ladder_decks.json"), encoding="utf-8") as _fh:
+    LADDER_DECKS: list[dict] = json.load(_fh)["decks"]
+LADDER_DECK_NAMES: dict[str, str] = {d["slug"]: d["name"] for d in LADDER_DECKS}
+PREMADE_DECKS.update({d["slug"]: list(d["list"]) for d in LADDER_DECKS})
+
+# The decks the bots play: every shipped deck and every ladder deck (Martin, 2026-10-24: the bots play many more decks
+# than a hand-picked pool, every pilot-and-deck pairing a player of its own on the ladder; a deck a pilot plays badly sits
+# low on the ladder, which is the ladder's own information). Ranked matchmaking, the ladder seed, Practice's 'Random'
+# and the bot benchmark panel draw from these.
+BOT_DECKS: tuple[str, ...] = tuple(d["slug"] for d in DECKLISTS) + tuple(d["slug"] for d in LADDER_DECKS)
 PANEL_OPPONENTS: tuple[str, ...] = ("cats", "den_rush", "fish")   # the benchmark's standing opponents, from the pool
 assert all(d in BOT_DECKS for d in PANEL_OPPONENTS), PANEL_OPPONENTS
 

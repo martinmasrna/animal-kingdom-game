@@ -315,19 +315,22 @@ def test_bot_levels_are_the_configurations_the_simulations_measure():
 
 
 def test_the_bots_play_the_bot_pool_only():
-    """Bots are opponents for people (Martin, 2026-10-18): ranked, the ladder seed and the benchmark panel use decks.BOT_DECKS,
-    nine premades the bots pilot well; the other premades stay player decks (a bot losing with one teaches it is bad)."""
+    """Bots are opponents for people (Martin, 2026-10-18), and since 2026-10-24 they play every deck the game knows: the
+    shipped decks and the ladder decks people built (data/ladder_decks.json), every pairing a player of its own; ranked, the
+    ladder seed and the benchmark panel use decks.BOT_DECKS."""
     import sqlite3
-    from animal_kingdom.decks import BOT_DECKS, PANEL_OPPONENTS, PREMADE_DECKS
+    from animal_kingdom.decks import BOT_DECKS, LADDER_DECKS, PANEL_OPPONENTS, PREMADE_DECKS, decklist_problems
     from animal_kingdom.sim.ladder_seed import bots
     from animal_kingdom.web import ladder as ranking
-    assert set(BOT_DECKS) < set(PREMADE_DECKS) and set(PANEL_OPPONENTS) <= set(BOT_DECKS)
+    assert set(BOT_DECKS) == set(PREMADE_DECKS) and set(PANEL_OPPONENTS) <= set(BOT_DECKS)
+    assert len(LADDER_DECKS) >= 20 and all(not decklist_problems(d["list"]) for d in LADDER_DECKS), "every ladder deck is legal today"
+    assert len({d["name"] for d in LADDER_DECKS}) == len(LADDER_DECKS) and len({d["slug"] for d in LADDER_DECKS}) == len(LADDER_DECKS)
     assert {deck for _, deck in bots()} == set(BOT_DECKS)
     lad = ranking.Ladder(sqlite3.connect(":memory:"), sorted(BOT_DECKS))
-    lad.seed_bots({ranking.bot_id("expert", "egg_control"): 1500.0})   # a retired deck's row from an older seed
-    assert "egg_control" not in {ranking.parse_bot(lad.nearest_bot(1500, __import__("random").Random(i)))[1] for i in range(50)}
+    lad.seed_bots({ranking.bot_id("expert", "retired_deck"): 1500.0})   # a retired deck's row from an older seed
+    assert "retired_deck" not in {ranking.parse_bot(lad.nearest_bot(1500, __import__("random").Random(i)))[1] for i in range(50)}
     from animal_kingdom.web.server import bot_rows
-    assert all("egg_control" not in lid for lid, _ in bot_rows(lad.table())), "a retired deck's row is not listed"
+    assert all("retired_deck" not in lid for lid, _ in bot_rows(lad.table())), "a retired deck's row is not listed"
 
 
 def test_the_expert_is_the_deepened_referee():
