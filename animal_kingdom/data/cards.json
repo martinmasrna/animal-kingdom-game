@@ -914,10 +914,10 @@
         "Cat"
       ],
       "base_strength": 6,
-      "text": "Your Cats can be placed on enemies of equal strength.",
-      "keywords": [],
+      "text": "Your Cats can cover enemies of equal strength.",
       "species": "Leopard",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": []
     },
     {
       "id": "black_panther",

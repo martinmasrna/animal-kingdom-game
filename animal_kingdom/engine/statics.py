@@ -111,20 +111,19 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
     placer_str = effective_strength(state, placer) if roaming else placement_strength(state, placer)
     target_str = effective_strength(state, target)
 
-    if roaming:
-        if roam_covers_equal(state, placer) and placer_str >= target_str:
+    # Placing and roaming follow one rule: every override below holds for both.
+    if roaming and roam_covers_equal(state, placer) and placer_str >= target_str:
+        return True
+    # Leopard: "Your Cats can cover enemies of equal strength."
+    if "Cat" in placer_card.tags and placer_str >= target_str and any(
+            u is not placer for u in active_tops(state, owner, "leopard")):
+        return True
+    # The legendary Piranha: "Your Fish can cover enemies of strength up to the number of your Fish."
+    if "Fish" in placer_card.tags and _controls(state, owner, "piranha_legend"):
+        fish = sum(1 for st in state.board.values()
+                   if st and st[-1].owner == owner and "Fish" in state.cards[st[-1].card_id].tags)
+        if target_str <= fish:
             return True
-    else:
-        # Leopard: "Your other Cats can be placed on enemies of equal or lower strength." (placing, not roaming)
-        if "Cat" in placer_card.tags and placer_str >= target_str and any(
-                u is not placer for u in active_tops(state, owner, "leopard")):
-            return True
-        # The legendary Piranha: "Your Fish can be placed on enemies with strength up to the number of Fish you control."
-        if "Fish" in placer_card.tags and _controls(state, owner, "piranha_legend"):
-            fish = sum(1 for st in state.board.values()
-                       if st and st[-1].owner == owner and "Fish" in state.cards[st[-1].card_id].tags)
-            if target_str <= fish:
-                return True
 
     return placer_str > target_str  # default: strictly greater
 

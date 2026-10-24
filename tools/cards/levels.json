@@ -1928,9 +1928,14 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin's 30 Sep wording back; the workbench conversion of 8 Oct had resurrected the old text",
+      "note": "Placing and roaming cover by one rule (Martin, 2026-10-24); was 'can be placed on'",
       "by": "claude",
-      "at": 1792203166
+      "at": 1792840415,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin's 30 Sep wording back; the workbench conversion of 8 Oct had resurrected the old text",
+        "prev": "Your Cats can be placed on enemies of equal strength."
+      }
     }
   },
   "leopard_legend": {

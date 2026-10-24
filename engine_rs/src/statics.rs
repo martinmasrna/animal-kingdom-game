@@ -84,19 +84,17 @@ pub fn can_cover(st: &State, placer: &Unit, target: &Unit, roaming: bool) -> boo
     }
     let placer_str = if roaming { effective_strength(st, placer, None) } else { placement_strength(st, placer) };
     let target_str = effective_strength(st, target, None);
-    if roaming {
-        if roam_covers_equal(st, owner) && placer_str >= target_str {
+    // Placing and roaming follow one rule: every override below holds for both.
+    if roaming && roam_covers_equal(st, owner) && placer_str >= target_str {
+        return true;
+    }
+    if placer_card.has_tag(T_CAT) && placer_str >= target_str && active_tops(st, owner, k.leopard).iter().any(|(_, iid)| *iid != placer.iid) {
+        return true;
+    }
+    if placer_card.has_tag(T_FISH) && controls(st, owner, k.piranha_legend) {
+        let fish = st.tops().filter(|(_, u)| u.owner == owner && st.card(u.card).has_tag(T_FISH)).count() as i32;
+        if target_str <= fish {
             return true;
-        }
-    } else {
-        if placer_card.has_tag(T_CAT) && placer_str >= target_str && active_tops(st, owner, k.leopard).iter().any(|(_, iid)| *iid != placer.iid) {
-            return true;
-        }
-        if placer_card.has_tag(T_FISH) && controls(st, owner, k.piranha_legend) {
-            let fish = st.tops().filter(|(_, u)| u.owner == owner && st.card(u.card).has_tag(T_FISH)).count() as i32;
-            if target_str <= fish {
-                return true;
-            }
         }
     }
     placer_str > target_str

@@ -10,7 +10,7 @@ from __future__ import annotations
 import pytest
 
 from animal_kingdom.engine import effects, rules
-from animal_kingdom.engine.actions import SKIP, ChoiceAction, DrawAction, PlaceAction
+from animal_kingdom.engine.actions import SKIP, ChoiceAction, DrawAction, PlaceAction, RoamAction
 from animal_kingdom.engine.cards import load_cards
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.state import EngineError, UnitInstance
@@ -180,6 +180,17 @@ def test_leopard_lets_other_cats_cover_equal_strength():
     put(s, "1,2", "leopard", "A")                        # connects 2,2; the static's source
     put(s, "2,2", "caracal", "B")                        # enemy str 6
     assert PlaceAction("caracal", ("cr", "2,2")) in rules.legal_actions(s)  # 6 >= 6
+
+
+def test_leopard_lets_a_roaming_cat_cover_equal_strength():
+    # Placing and roaming cover by one rule (Martin, 2026-10-24)
+    s = make_state()
+    put(s, "1,1", "leopard", "A")                        # the static's source
+    put(s, "1,2", "leopard_legend", "A")
+    put(s, "2,2", "wolf", "B")
+    roamer, prey = s.top_unit("1,2"), s.top_unit("2,2")
+    roamer.strength_counter += effective_strength(s, prey) - effective_strength(s, roamer)
+    assert RoamAction("1,2", ("cr", "2,2")) in rules.legal_actions(s)
 
 
 def test_second_leopard_benefits_from_the_first():
