@@ -23,7 +23,7 @@ A change to the time budget, or anything whose effect is speed, is measured on m
 
 ## 3. Read
 
-`tools/bot_bench/bench.sh report <name>` gives the per-deck deltas with their intervals and the pooled mean. Twenty games a deck is about plus or minus ten points per deck, so a single deck's sign is noise unless its interval clears zero.
+`tools/bot_bench/bench.sh report <name>` gives the per-deck deltas with their intervals and the pooled mean. `tools/ladder/ladder.py` then places the candidate on the one rating ladder with every bot and person who has played (docs/bots.md, the rating ladder); the result reaches Martin as the candidate's rating next to the live Expert's and his own, and as win rates, never as points a deck. Twenty games a deck is about plus or minus ten points per deck, so a single deck's sign is noise unless its interval clears zero.
 
 Ship when all three hold: the pooled mean is up; no deck is down beyond its own interval; the gain sits where the change's mechanism predicts it (a change to how placements with sub-choices are ranked gains most on the decks whose placements carry sub-choices; the same mean landing on unrelated decks is a lucky run and wants more games). A change that gains where it should and loses clearly somewhere else has a side effect to find in that deck's logs under `<name>/logs/` before any shipping.
 
