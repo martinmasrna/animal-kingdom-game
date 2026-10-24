@@ -203,7 +203,7 @@ def test_the_gauntlet_stays_out_of_the_history(monkeypatch):
     _, p = db.create("Martin")
     m = Match("M3", Seat("ta", "Martin#1", deck="cats", profile=p["id"]))
     m.join(Seat("tb", "Bot", bot="easy", deck="giants"))
-    m.make_gauntlet(["giants", "egg_control"], per_seat=1)
+    m.make_gauntlet(["giants", "egg_control"], games=2)
     server.record_match(m)
     assert db.history(p["id"]) == []
 

@@ -148,7 +148,7 @@ def test_gauntlet_runs_its_schedule_opponent_by_opponent_alternating_who_starts(
     from animal_kingdom.engine.state import Result
     m = Match("G", Seat("ta", "You", deck="egg_control"))
     m.join(Seat("tb", "Bot", bot="easy", deck="den_rush"))
-    m.make_gauntlet(["den_rush", "giants"], per_seat=1)
+    m.make_gauntlet(["den_rush", "giants"], games=2)
     m._start_game()
     seen = []
     for i in range(4):
@@ -213,7 +213,7 @@ def test_reverse_gauntlet_rotates_the_players_deck_against_the_bots_fixed_one():
     from animal_kingdom.engine.state import Result
     m = Match("R", Seat("ta", "You", deck="den_rush"))
     m.join(Seat("tb", "Bot", bot="easy", deck="goodstuff"))
-    m.make_gauntlet(["den_rush", "giants"], per_seat=1, rotating="A")
+    m.make_gauntlet(["den_rush", "giants"], games=2, rotating="A")
     m._start_game()
     seen = []
     for i in range(4):
@@ -528,7 +528,7 @@ def test_a_gauntlet_leaves_out_the_premade_your_custom_deck_copies(monkeypatch, 
         async with TestClient(TestServer(server.make_app())) as c:
             a = await (await c.post("/api/profile", json={})).json()
             deck = {"name": "My Cats", "list": list(PREMADE_DECKS["cats"])}
-            m = await (await c.post("/api/match", json={"deck": deck, "gauntlet": {"level": "easy", "per_seat": 1}},
+            m = await (await c.post("/api/match", json={"deck": deck, "gauntlet": {"level": "easy", "games": 2}},
                                     headers={"X-AK-Key": a["code"]})).json()
             field = {g["deck"] for g in server.hub.matches[m["id"]].schedule}
             assert "cats" not in field and field == set(DECK_SLUGS) - {"cats"}
@@ -657,7 +657,7 @@ def test_a_gauntlet_can_name_its_field(monkeypatch, tmp_path):
     async def run():
         async with TestClient(TestServer(server.make_app())) as c:
             a = await (await c.post("/api/profile", json={})).json()
-            body = {"deck": "cats", "gauntlet": {"level": "expert", "per_seat": 1, "decks": ["bot_optimized", "optimizer_1", "optimizer_4"]}}
+            body = {"deck": "cats", "gauntlet": {"level": "expert", "games": 2, "decks": ["bot_optimized", "optimizer_1", "optimizer_4"]}}
             m = await (await c.post("/api/match", json=body, headers={"X-AK-Key": a["code"]})).json()
             sched = server.hub.matches[m["id"]].schedule
             assert [g["deck"] for g in sched] == ["bot_optimized"] * 2 + ["optimizer_1"] * 2 + ["optimizer_4"] * 2

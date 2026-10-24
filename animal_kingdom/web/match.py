@@ -212,13 +212,13 @@ class Match:
         self.created = datetime.now(timezone.utc)
         self.schedule: Optional[list[dict]] = None   # gauntlet: one {seat, deck, first} per game, in order
 
-    def make_gauntlet(self, decks: list[str], per_seat: int, rotating: str = "B", mirror: bool = False) -> None:
-        """A fixed series instead of a best-of-3: `per_seat` games going first and `per_seat` going
-        second with each of `decks`, alternating who starts, one deck at a time. The decks rotate
+    def make_gauntlet(self, decks: list[str], games: int, rotating: str = "B", mirror: bool = False) -> None:
+        """A fixed series instead of a best-of-3: `games` games with each of `decks`, one deck at a time, who starts
+        alternating game by game across the whole series (one game a deck still splits the field: Martin, 2026-10-25). The decks rotate
         through seat `rotating`: the bot's seat for a gauntlet, the player's for a reverse one; `mirror` puts
         both seats on each deck (Martin, 2026-10-21: the skill gap, measured with the deck held equal)."""
         self.schedule = [{"seat": rotating, "deck": d, "first": "A" if k % 2 == 0 else "B", **({"mirror": True} if mirror else {})}
-                         for d in decks for k in range(2 * per_seat)]
+                         for k, d in enumerate(d for d in decks for _ in range(games))]
         self.seats[rotating].deck = self.schedule[0]["deck"]
         if mirror:
             self.seats["A"].deck = self.schedule[0]["deck"]

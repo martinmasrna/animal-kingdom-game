@@ -1146,8 +1146,8 @@ async def create_match(req):
             level = next((l for l, b in ranking.PILOT_BAND.items() if b == level), "easy" if ranking.BANDS.index(level) < 2 else "expert")
         if level not in BOT_LEVELS:
             raise web.HTTPBadRequest(text="bad bot level")
-        skip, per_seat = gauntlet.get("skip") or [], gauntlet.get("per_seat", 5)
-        if not isinstance(skip, list) or per_seat not in range(1, 6):
+        skip, games = gauntlet.get("skip") or [], gauntlet.get("games", 2 * gauntlet.get("per_seat", 5))   # games a deck
+        if not isinstance(skip, list) or games not in range(1, 11):
             raise web.HTTPBadRequest(text="bad gauntlet")
         # The player's deck is no opponent, even sent as a custom list identical to a premade (the mirror isn't a test).
         mine = sorted(load_premade_deck(deck))
@@ -1161,12 +1161,12 @@ async def create_match(req):
             raise web.HTTPBadRequest(text="empty gauntlet")
         match.join(Seat(secrets.token_urlsafe(12), f"{ranking.PILOT_BAND[level]} Bot", bot=level, deck=field[0]))
         if mirror:
-            match.make_gauntlet(field, per_seat, mirror=True)
+            match.make_gauntlet(field, games, mirror=True)
         elif gauntlet.get("reverse"):     # the bot keeps the chosen deck; the player plays the field
             match.seats["B"].deck = deck
-            match.make_gauntlet(field, per_seat, rotating="A")
+            match.make_gauntlet(field, games, rotating="A")
         else:
-            match.make_gauntlet(field, per_seat)
+            match.make_gauntlet(field, games)
         match._start_game()
         match.version += 1
     elif bot:

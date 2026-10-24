@@ -345,7 +345,7 @@ function homeScreen(mode = {}) {
       if (q.get('decks')) body.gauntlet.decks = q.get('decks').split(',');       // #/gauntlet?decks=a,b: exactly this field (Martin, 2026-10-21: the three piles)
       if (q.get('level')) body.gauntlet.level = q.get('level');
       if (q.get('mirror')) body.gauntlet.mirror = true;                          // both seats on each named deck: the pilot is the only variable
-      if (q.get('games')) body.gauntlet.per_seat = Math.max(1, Math.round(+q.get('games') / 2));   // games per deck, half going first
+      if (q.get('games')) body.gauntlet.games = Math.max(1, Math.round(+q.get('games')));   // games per deck, who goes first alternating
     }
     const r = await api('/api/match', { method: 'POST', body: JSON.stringify(body) });
     if (!r.ok) return toast(await r.text());
