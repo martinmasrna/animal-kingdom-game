@@ -578,9 +578,9 @@ async def join_ranked(req):
     if entry["fut"].done():   # paired in the instant the wait ran out, or cancelled
         res = entry["fut"].result()
         return web.json_response(res if res else {"cancelled": True})
-    recent = [h["opp_deck"] for h in profiles.history(p["id"]) if h.get("mode") == "ranked" and h["opp"].startswith("Bot (")][:2]
+    recent = [h["opp_deck"] for h in profiles.history(p["id"]) if h.get("mode") == "ranked" and h["opp"].startswith("Bot (")][:ranking.RECENT_DECKS]
     slug = {name: s for s, name in DECK_NAMES.items()}
-    bid = ladder.nearest_bot(r, random, avoid={slug.get(d, d) for d in recent})   # never the deck of your last two bot games
+    bid = ladder.nearest_bot(r, random, avoid={slug.get(d, d) for d in recent})   # never the deck of your last four bot games
     level, bdeck = ranking.parse_bot(bid)
     mid, token = hub.new_id(), secrets.token_urlsafe(12)
     match = Match(mid, Seat(token, display(p), deck=deck, profile=p["id"], ladder=p["id"]))

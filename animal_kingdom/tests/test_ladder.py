@@ -197,10 +197,32 @@ def replace_rating(r, **kw):
     return replace(r, **kw)
 
 
+def test_a_person_meets_the_bots_within_the_window_and_the_strongest_pilot_there():
+    """Martin, 2026-10-24: the bots are always there, so the only question is who is close. Within 75 of the person every
+    pairing is a candidate, the Expert pilot is preferred over Normal and Easy at similar rating, the last decks are
+    skipped, and a placing newcomer is never offered."""
+    import random, sqlite3
+    from animal_kingdom.web.ladder import Ladder, Rating, bot_id, parse_bot
+    lad = Ladder(sqlite3.connect(":memory:"), ["cats", "fish", "giants", "colony", "token"])
+    for lid in list(lad.bots()):
+        lad._put(lid, Rating(3000, 60, 0.06, 20))   # every other pairing far out of reach
+    lad.seed_bots({bot_id("expert", "cats"): 1560, bot_id("normal", "fish"): 1510, bot_id("easy", "giants"): 1500,
+                   bot_id("expert", "colony"): 1440, bot_id("normal", "token"): 1700, bot_id("expert", "token"): 1900})
+    lad._put(bot_id("expert", "fish"), Rating(1505, 350, 0.06, 3))   # placing: not yet
+    rng = random.Random(3)
+    picks = {lad.nearest_bot(1500, rng) for _ in range(200)}
+    assert picks == {bot_id("expert", "cats"), bot_id("expert", "colony")}, picks   # the Experts within 75; Normal Fish and Easy Giants wait
+    picks = {lad.nearest_bot(1500, rng, avoid={"cats", "colony"}) for _ in range(200)}
+    assert picks == {bot_id("normal", "fish")}, picks                                 # the next pilot down, Easy Giants only if no Normal
+    picks = {lad.nearest_bot(1500, rng, avoid={"cats", "colony", "fish"}) for _ in range(50)}
+    assert picks == {bot_id("easy", "giants")}, picks
+    assert {parse_bot(lad.nearest_bot(1620, rng))[1] for _ in range(100)} == {"cats"}  # within 75 of 1620: only Expert Cats
+
+
 def test_a_player_at_the_top_meets_five_decks_and_never_the_same_one_twice_running():
     """The ladder's bots are rated per level and deck, and a bot plays some decks far better than others (Expert Egg rates
-    under Easy Cats). A player far above them all still meets the five nearest decks, at random, never the deck of their
-    last bot games (Martin, 2026-10-02: variety at the top)."""
+    under Easy Cats). A player far above them all, nobody within the window, still meets the five nearest decks, at random,
+    never the deck of their last bot games (Martin, 2026-10-02: variety at the top)."""
     import random, sqlite3
     from animal_kingdom.web.ladder import Ladder, bot_id, parse_bot
     decks = ["cats", "den_rush", "food_otk", "canines", "giants", "colony", "egg_control"]

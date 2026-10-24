@@ -20,6 +20,8 @@ START_RD = 350.0
 START_VOL = 0.06
 BOT_RD = 60.0           # a seeded bot's uncertainty: it moves, slowly
 PROVISIONAL = 10        # games before the "?" goes
+MATCH_WINDOW = 75.0     # how far from a person's rating a bot opponent is drawn (web/server.join_ranked)
+RECENT_DECKS = 4        # the decks of a person's last bot games are not offered again (variety)
 # The five bots (Martin, 2026-10-20): one vocabulary everywhere. A bot is named by the band its own rating sits in, never by
 # its pilot ("Fish (Expert Bot)"); the leaderboard lists the bots one row per band; Practice offers the same five, and the
 # server picks the pilot whose rating with the chosen deck sits nearest the band (server.pilot_for). Easy, Normal and Expert
@@ -200,16 +202,23 @@ class Ladder:
     def bots(self) -> dict[str, Rating]:
         return {lid: Rating(*rest) for lid, *rest in self.db.execute("SELECT id, rating, rd, vol, games FROM ladder WHERE id LIKE 'bot:%'")}
 
-    def nearest_bot(self, rating: float, rng, avoid=()) -> str:
-        """A bot for a player at `rating`: the nearest of each deck, the five nearest decks, minus `avoid` (the decks of the
-        player's last bot games), one at random. Every game stays as close as the ladder allows, and a player at the top
-        still meets five decks and never the same one twice running (Martin, 2026-10-02)."""
+    def nearest_bot(self, rating: float, rng, avoid=(), window: float = MATCH_WINDOW) -> str:
+        """A bot for a player at `rating` (Martin, 2026-10-24: the bots are always there, so a person waits for nobody and
+        the only question is who is close). The pairings within `window` of the player, minus `avoid` (the decks of the
+        player's last bot games); among them the strongest pilot there (an Expert on a weaker deck over a Normal on a
+        stronger one at similar rating: the stronger player teaches more), one at random. Nobody within the window, as
+        at the very top: the nearest of each deck, the five nearest decks, one at random (Martin, 2026-10-02: variety)."""
+        rows = [(lid, r) for lid, r in self.bots().items() if parse_bot(lid)[1] in self.decks and not r.provisional]
+        # a retired deck's bot keeps its row (its games stay rated) but never plays; a league newcomer places first
+        near = [(lid, r) for lid, r in rows if abs(r.rating - rating) <= window and parse_bot(lid)[1] not in avoid]
+        if near:
+            for level in reversed(LEVELS):     # expert, normal, easy
+                here = [lid for lid, _ in near if parse_bot(lid)[0] == level]
+                if here:
+                    return rng.choice(here)
         nearest: dict[str, tuple[float, str]] = {}
-        for lid, r in self.bots().items():
+        for lid, r in rows:
             deck = parse_bot(lid)[1]
-            if deck not in self.decks or r.provisional:
-                continue                       # a retired deck's bot keeps its row (its games stay rated), never plays;
-                                               # a league newcomer places through bot games before people meet it
             if deck not in nearest or abs(r.rating - rating) < nearest[deck][0]:
                 nearest[deck] = (abs(r.rating - rating), lid)
         ranked = list(nearest.items())
