@@ -4,6 +4,7 @@
    stylesheet (collection.css) or below. */
 .mscr { position: fixed; inset: 0; background: #171513 url(/static/kit2/coll_ground.webp) center / cover; color: #d8d4cc; font-family: 'Fira Sans Condensed', sans-serif; }
 .mscr button { font: inherit; }
+html.kb .mscr { top: var(--vvt); bottom: auto; height: var(--vvh); }   /* a phone's keyboard is up: the screen ends at its top (app.js) */
 
 /* The column: the den's granite, casting a soft shadow on the ground; its foot holds the actions. */
 .mscr .side { display: flex; flex-direction: column; min-height: 0; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; box-shadow: -6px 0 14px rgba(0,0,0,.45); }

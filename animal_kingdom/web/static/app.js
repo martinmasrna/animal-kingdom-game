@@ -143,6 +143,14 @@ async function boot() {
     } });
   addEventListener('hashchange', route);
   addEventListener('resize', () => { if (screen === 'game') fitStage(); });
+  // A phone's keyboard covers the bottom of the page instead of shrinking it, so a field low on a menu screen (a new deck's
+  // name, in the collection's bottom sheet) was typed blind. While it is up, the menu screens fit the part still showing
+  // (menu.css: html.kb). A pinch zoom shrinks that part too, but changes the scale; a keyboard never does.
+  const vv = window.visualViewport;
+  if (vv) { const fit = () => { const kb = Math.abs(vv.scale - 1) < .01 && innerHeight - vv.height > 80, s = document.documentElement.style;
+    document.documentElement.classList.toggle('kb', kb);
+    if (kb) { s.setProperty('--vvt', vv.offsetTop + 'px'); s.setProperty('--vvh', vv.height + 'px'); } };
+    vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit); }
   addEventListener('keydown', e => {   // Escape backs out of whatever is open: the menu, a panel, then the selected card
     if (e.key === 'Escape' && screen === 'home' && play.open) { play.open = null; return route(); }   // Escape closes the open chooser
     if (e.key === 'Escape' && ['ladder', 'news', 'settings'].includes(screen) && !/INPUT|TEXTAREA/.test(e.target.tagName)) {   // a screen with Back: Escape is Back
