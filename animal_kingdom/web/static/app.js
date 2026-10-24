@@ -448,6 +448,26 @@ async function fillLeaderboard() {
   const mine = box.querySelector('.lr.you:not(.placing)'); if (mine) mine.scrollIntoView({ block: 'center' });
 }
 
+// The Meta tab: the morning's report on the bot ladder (league/report.py, posted by the runner): who moved, who was born,
+// which cards win or lose when drawn, what a player at each rating meets, the top pairings, the people.
+async function fillMeta() {
+  const box = document.getElementById('metar'); if (!box) return;
+  const r = await api('/api/league/report'), j = r.ok ? await r.json() : { empty: true };
+  if (j.empty) { box.innerHTML = '<p class="none">No report yet: the first one comes the morning after the league starts.</p>'; return; }
+  const sec = (title, rows) => `<h3>${title}</h3>${rows.length ? `<div class="mrows">${rows.join('')}</div>` : '<p class="none">nothing yet</p>'}`;
+  const row = (a, b, c) => `<div class="mr"><span class="nm">${a}</span><span class="md">${b || ''}</span><b>${c}</b></div>`;
+  const sign = d => (d > 0 ? '+' : '') + d;
+  box.innerHTML = `<p class="mwhen">${esc(j.generated)} · ${j.games_logged} bot games read</p>`
+    + sec('People', (j.people || []).map(p => row(esc(p.name), `${p.games} games`, esc(p.rating))))
+    + sec('Movers, last day', j.movers_day.map(m => row(esc(m.name), `${m.games} games`, `${m.rating} <small class="${m.delta < 0 ? 'dn' : 'up'}">${sign(m.delta)}</small>`)))
+    + sec('Movers, last week', j.movers_week.map(m => row(esc(m.name), `${m.games} games`, `${m.rating} <small class="${m.delta < 0 ? 'dn' : 'up'}">${sign(m.delta)}</small>`)))
+    + sec('New lists', j.births.map(b => `<div class="mr birth"><span class="nm">${esc(b.name)} <small>from ${esc(b.parent || '?')}</small></span><span class="md">${esc(b.why)}</span><b>${b.child_rating ?? '–'}<small> after ${b.child_games}</small></b></div>`))
+    + sec('Cards that win when drawn', j.cards_up.map(c => row(esc(c.name), `${c.games} games`, `${c.drawn_win}% <small class="up">${sign(c.lift)}</small>`)))
+    + sec('Cards that lose when drawn', j.cards_down.map(c => row(esc(c.name), `${c.games} games`, `${c.drawn_win}% <small class="dn">${sign(c.lift)}</small>`)))
+    + sec('What a player meets', Object.entries(j.meta).map(([band, ms]) => row(`at ${band}`, ms.map(m => `${esc(m.archetype)} ${m.share}%`).join(', ') || 'nobody within 75', '')))
+    + sec('Top pairings', j.top.map(t => row(esc(t.name), `${t.games} games`, t.rating)));
+}
+
 // The tutorial: a real game with a fixed deal against a gentle opponent, a coach teaching one step at a time (tutorial.js).
 // Two lessons: the basics (won by taking the den), then the deeper mechanics (won on food). Learned after the second.
 const LESSON_NAMES = ['The basics', 'Special powers'];   // tutorial.py's lessons, in order
@@ -521,13 +541,14 @@ function ladderScreen() {
   const hist = shown.map(h => `<div class="hr ${h.won > h.lost ? 'won' : h.won < h.lost ? 'lost' : ''}" data-m="${esc(h.match)}"><b>${result(h)}</b>
     ${piece(deckFace(h.my_cover, h.my_deck), side('mine', h.my_deck))}<span class="dk" ${side('mine', h.my_deck)}>${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck), side('theirs', h.opp_deck))}<span class="dk" ${side('theirs', h.opp_deck)}>${esc(h.opp_deck)}</span>
     <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}${gid(h)}</span>` : `${piece(h.opp_cover, side('theirs', h.opp))}<span class="dk" ${side('theirs', h.opp)}>${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}${gid(h)}</span>`}</div>`).join('');
-  // the leaderboard first (Martin, 2026-10-02), the match history its second tab
-  const lead = location.hash !== '#/ladder/history';
-  app.innerHTML = `<div class="mscr ladder"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${lead ? '' : ' on'}" href="#/ladder/history">Match history</a></div>${!lead && (hist || ui.histDeck) ? filter : ''}</div>
-    <div class="hbody">${lead ? '<div class="lead lb" id="lboard"></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
+  // the leaderboard first (Martin, 2026-10-02), the match history its second tab, the meta report its third (2026-10-24)
+  const meta = location.hash === '#/ladder/meta', lead = !meta && location.hash !== '#/ladder/history';
+  app.innerHTML = `<div class="mscr ladder"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${!lead && !meta ? ' on' : ''}" href="#/ladder/history">Match history</a><a class="ptab${meta ? ' on' : ''}" href="#/ladder/meta">Meta</a></div>${!lead && !meta && (hist || ui.histDeck) ? filter : ''}</div>
+    <div class="hbody">${lead ? '<div class="lead lb" id="lboard"></div>' : meta ? '<div class="metar" id="metar"><p class="none">Loading…</p></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
     <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };
   if (lead) fillLeaderboard();
+  if (meta) fillMeta();
   wireDd(app, (k, v) => { ui.histDeck = v || null; ladderScreen(); });
   app.querySelectorAll('[data-m]').forEach(el => el.onclick = () => { location.hash = '#/replay/' + el.dataset.m; });
   wireDeckPeek(app);

@@ -7,7 +7,8 @@ the pilots' specs), picks the games a ladder would pick, plays them on the Rust 
 untimed), posts the results to `/api/league/games`, and appends them to results/league/games.jsonl. Who plays: pairings
 still placing first (two games each), then the pairings whose rating is least certain, each against an opponent near its
 rating (within the matching window, widened when nobody is there), a fifth of the time against anyone, never itself.
-`--pace` caps games an hour so the machine stays usable; the runner sleeps when the pool needs nothing. The league key
+`--pace` caps games an hour so the machine stays usable by day; in the night window (`--night 23-8`) every core plays
+and nothing is capped (Martin, 2026-10-24: all in while he is not working). The runner sleeps when the pool needs nothing. The league key
 comes from AK_LEAGUE_KEY, results/oauth.json (as the server reads it) or --key-file. The log keeps the cards each side
 drew, and once an hour a tinker pass (league/tinker.py) reads it and posts at most `--births` children a day.
 """
@@ -28,11 +29,19 @@ from ..decks import PREMADE_DECKS, register_deck
 from ..sim.runner import MatchSpec, run_specs
 from ..web.league import key as league_key
 from ..web.ladder import PROVISIONAL, parse_bot
-from . import tinker
+from . import report, tinker
 
 WINDOW = 150          # rating distance a matchmaking opponent is drawn from, doubled until someone is there
 ANYONE = 0.2          # share of games against anyone at all, as a ladder's queue mixes
 PLACING_GAMES = 2     # games a placing pairing gets each pass
+
+
+def is_night(window: str, hour: int) -> bool:
+    """Whether `hour` lies in the 'from-to' window (wrapping midnight: '23-8' is 23:00 to 07:59)."""
+    if not window:
+        return False
+    a, b = (int(x) for x in window.split("-"))
+    return a <= hour < b if a < b else hour >= a or hour < b
 
 
 def api(server: str, path: str, key: str, body=None) -> dict:
@@ -96,6 +105,10 @@ def main(argv=None) -> None:
     ap.add_argument("--once", action="store_true", help="one pass, then stop")
     ap.add_argument("--log", default="results/league/games.jsonl")
     ap.add_argument("--births", type=int, default=3, help="tinkered children a day at most (0: no tinkering)")
+    ap.add_argument("--night", default="23-8", help="hours (local) when every core plays uncapped, 'from-to'; '' for never")
+    ap.add_argument("--night-jobs", type=int, default=os.cpu_count() or 8)
+    ap.add_argument("--report-hour", type=int, default=6, help="the hour the meta report is built and posted (-1: never)")
+    ap.add_argument("--report-now", action="store_true", help="build and post the report on the first pass too")
     args = ap.parse_args(argv)
     key = (Path(args.key_file).read_text().strip() if args.key_file else None) or league_key()
     if not key:
@@ -104,7 +117,7 @@ def main(argv=None) -> None:
     log = Path(args.log); log.parent.mkdir(parents=True, exist_ok=True)
     births_log = log.with_name("births.jsonl")
     rng = random.Random()
-    last_tinker = 0.0
+    last_tinker, reported_day = 0.0, ""
     while True:
         started = time.time()
         try:
@@ -114,6 +127,18 @@ def main(argv=None) -> None:
         for d in pool["decks"]:
             if d["slug"] not in PREMADE_DECKS:
                 register_deck(d["slug"], d["list"])
+        today = time.strftime("%Y-%m-%d", time.localtime(started))
+        report.snapshot(pool, log.with_name("snapshots"), today)
+        if (args.report_now and not reported_day) or (args.report_hour >= 0 and time.localtime(started).tm_hour == args.report_hour and reported_day != today):
+            reported_day = today
+            try:
+                births = [json.loads(l) for l in births_log.read_text().splitlines() if l.strip()] if births_log.is_file() else []
+                rep = report.build(pool, log.with_name("snapshots"), births, tinker.read_log(log), started)
+                log.with_name("report.md").write_text(report.to_markdown(rep))
+                api(args.server, "/api/league/report", key, {"report": rep})
+                print(f"report posted ({rep['games_logged']} games, {len(rep['births'])} births)", flush=True)
+            except Exception as e:   # a report never stops the games
+                print(f"report failed: {e!r}", flush=True)
         pilots = {level: spec.replace("time_budget=8", "time_budget=0") for level, spec in pool["pilots"].items()}
         games = pick(pool["players"], args.batch, rng)
         if not games:
@@ -121,7 +146,8 @@ def main(argv=None) -> None:
             if args.once:
                 return
             time.sleep(300); continue
-        results = play(games, pilots, args.jobs, int(started * 1000) % 10_000_000_000)
+        night = is_night(args.night, time.localtime(started).tm_hour)
+        results = play(games, pilots, args.night_jobs if night else args.jobs, int(started * 1000) % 10_000_000_000)
         with log.open("a") as fh:
             for g in results:
                 fh.write(json.dumps({"t": started, **g}) + "\n")
@@ -144,11 +170,12 @@ def main(argv=None) -> None:
             except Exception as e:   # a tinker pass never stops the games
                 print(f"tinker pass failed: {e!r}", flush=True)
         placing = sum(1 for p in pool["players"] if p["games"] < PROVISIONAL)
-        print(f"{time.strftime('%H:%M')} {len(results)} games in {time.time() - started:.0f} s, {ack.get('rated')} rated; "
+        print(f"{time.strftime('%H:%M')}{' night' if night else ''} {len(results)} games in {time.time() - started:.0f} s, {ack.get('rated')} rated; "
               f"{len(pool['players'])} pairings, {placing} placing", flush=True)
         if args.once:
             return
-        time.sleep(max(0.0, len(results) * 3600 / args.pace - (time.time() - started)))
+        if not night:
+            time.sleep(max(0.0, len(results) * 3600 / args.pace - (time.time() - started)))
 
 
 if __name__ == "__main__":

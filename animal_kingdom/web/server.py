@@ -723,6 +723,27 @@ async def league_decks(req):
     return web.json_response({"added": added, "rejected": rejected})
 
 
+async def league_report_post(req):
+    """The morning's meta report from the runner (league/report.py), kept as the latest."""
+    league_auth(req)
+    body = await req.json()
+    rep = body.get("report") if isinstance(body, dict) else None
+    if not isinstance(rep, dict) or len(json.dumps(rep)) > 2_000_000:
+        raise web.HTTPBadRequest(text="report: an object under 2 MB")
+    league.put_report(rep)
+    return web.json_response({"ok": True})
+
+
+async def league_report(_req):
+    """The latest meta report, with the people added (the Ladder screen's Meta tab); empty until the runner has posted one."""
+    rep = league.report() if league else None
+    if not rep:
+        return web.json_response({"empty": True})
+    people = [{"name": ladder_name(lid), "rating": r.shown(), "games": r.games}
+              for lid, r in ladder.table() if not lid.startswith("bot:")]
+    return web.json_response({**rep, "people": people})
+
+
 # ----------------------------------------------------------------- friends and challenges (web/friends.py)
 CHALLENGE_WAIT = 60          # seconds a challenge stands before it lapses
 presence: dict[str, set] = {}   # profile id -> its open presence sockets (one per tab or device): online while any is open
@@ -1270,6 +1291,8 @@ def make_app() -> web.Application:
         web.get("/api/league/pool", league_pool),
         web.post("/api/league/games", league_games),
         web.post("/api/league/decks", league_decks),
+        web.post("/api/league/report", league_report_post),
+        web.get("/api/league/report", league_report),
         web.delete("/api/ranked", leave_ranked),
         web.get("/api/leaderboard", leaderboard),
         web.get("/api/friends", friends_list),

@@ -25,3 +25,9 @@ def test_opponents_come_from_near_the_rating_mostly():
     ratings = {p["id"]: p["rating"] for p in _players()}
     near = sum(1 for a, b in games if abs(ratings[a] - ratings[b]) <= WINDOW)
     assert near >= 0.6 * len(games), near   # a fifth are against anyone, the window widens when nobody is near
+
+
+def test_the_night_window_wraps_midnight():
+    from animal_kingdom.league.runner import is_night
+    assert [is_night("23-8", h) for h in (22, 23, 0, 7, 8, 12)] == [False, True, True, True, False, False]
+    assert [is_night("1-5", h) for h in (0, 1, 4, 5)] == [False, True, True, False] and not is_night("", 3)

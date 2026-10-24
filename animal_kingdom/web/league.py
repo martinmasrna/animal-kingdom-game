@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS pool_decks (
     slug TEXT PRIMARY KEY, name TEXT NOT NULL, list TEXT NOT NULL, source TEXT NOT NULL, parent TEXT, born REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS league_games (
     id INTEGER PRIMARY KEY, t REAL NOT NULL, a TEXT NOT NULL, b TEXT NOT NULL, winner TEXT, seed INTEGER, turns INTEGER, reason TEXT);
+CREATE TABLE IF NOT EXISTS league_report (k TEXT PRIMARY KEY, v TEXT NOT NULL, t REAL NOT NULL);
 """
 
 
@@ -69,6 +70,14 @@ class Pool:
             self.db.execute("INSERT INTO pool_decks VALUES (?, ?, ?, ?, ?, ?)", (slug, name, json.dumps(lst), source, parent, born))
         self._register(slug, name, list(lst), source, parent, born)
         return []
+
+    def put_report(self, rep: dict) -> None:
+        with self.db:
+            self.db.execute("INSERT OR REPLACE INTO league_report VALUES ('latest', ?, ?)", (json.dumps(rep), time.time()))
+
+    def report(self) -> Optional[dict]:
+        row = self.db.execute("SELECT v FROM league_report WHERE k = 'latest'").fetchone()
+        return json.loads(row[0]) if row else None
 
     def record(self, games: list[dict]) -> None:
         with self.db:

@@ -95,3 +95,16 @@ def test_a_new_list_joins_as_three_placing_players_kept_from_people(monkeypatch,
         # the pool survives a restart: the row is in the database
         assert tuple(server.profiles.db.execute("SELECT name, source, parent FROM pool_decks WHERE slug = 'league_cats_1'").fetchone()) == ("Savanna Cats III", "tinker", "cats")
     _run(monkeypatch, tmp_path, body)
+
+
+def test_the_meta_report_is_posted_by_the_runner_and_served_with_the_people(monkeypatch, tmp_path):
+    async def body(c, server):
+        h = {"X-AK-League-Key": "k-test"}
+        assert (await (await c.get("/api/league/report")).json()) == {"empty": True}
+        assert (await c.post("/api/league/report", json={"report": {"generated": "x"}})).status == 403
+        r = await c.post("/api/league/report", json={"report": {"generated": "2026-10-25 06:00", "top": [], "meta": {}}}, headers=h)
+        assert r.status == 200
+        server.ladder.result(server.ladder.get("someone") and "someone", ranking.bot_id("expert", "cats"))
+        j = await (await c.get("/api/league/report")).json()
+        assert j["generated"] == "2026-10-25 06:00" and j["people"] and j["people"][0]["games"] == 1
+    _run(monkeypatch, tmp_path, body)

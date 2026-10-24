@@ -423,3 +423,12 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .sets .studies h3 { margin: 0 0 2px; font: 700 18px 'Fira Sans Condensed', sans-serif; color: #c9bfae; }
 .sets .studies .slab { text-decoration: none; padding: 0 16px; height: 40px; display: inline-flex; align-items: center; gap: 8px; }
 .sets .studies .slab small { color: #a08f6e; }
+
+/* The Ladder screen's Meta tab: the morning's report on the bot ladder, one column of short rows (2026-10-24). */
+.ladder .metar { padding: 0 24px 24px; color: #cfc3ad; } .ladder .metar h3 { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 22px 0 8px; }
+.ladder .metar .mwhen { color: #9d917e; margin: 6px 0 0; } .ladder .metar .mrows { display: flex; flex-direction: column; gap: 4px; }
+.ladder .metar .mr { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 6px 10px; background: rgba(0,0,0,.25); border-radius: 6px; }
+.ladder .metar .mr .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ladder .metar .mr .md { color: #9d917e; font-size: .9em; overflow: hidden; text-overflow: ellipsis; }
+.ladder .metar .mr b { text-align: right; white-space: nowrap; } .ladder .metar .mr small { font-size: .78em; font-weight: 500; } .ladder .metar .up { color: #9fcf8a; } .ladder .metar .dn { color: #d98f7a; }
+.ladder .metar .mr.birth { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) auto; } .ladder .metar .mr.birth .md { white-space: normal; }
+@media (max-width: 700px) { .ladder .metar { padding: 0 12px 16px; } .ladder .metar .mr, .ladder .metar .mr.birth { grid-template-columns: minmax(0, 1fr) auto; } .ladder .metar .mr .md { grid-column: 1 / -1; } }
