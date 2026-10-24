@@ -10,7 +10,8 @@ rating (within the matching window, widened when nobody is there), a fifth of th
 `--pace` caps games an hour so the machine stays usable by day; in the night window (`--night 23-8`) every core plays
 and nothing is capped (Martin, 2026-10-24: all in while he is not working). The runner sleeps when the pool needs nothing. The league key
 comes from AK_LEAGUE_KEY, results/oauth.json (as the server reads it) or --key-file. The log keeps the cards each side
-drew, and once an hour a tinker pass (league/tinker.py) reads it and posts at most `--births` children a day.
+drew, results/league/facts/<day>.jsonl each game's card facts for the Meta tab (league/facts.py: the mulligan, every card's
+draw and play turn, both ratings as it began), and once an hour a tinker pass (league/tinker.py) reads it and posts at most `--births` children a day.
 """
 
 from __future__ import annotations
@@ -25,11 +26,12 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from ..decks import PREMADE_DECKS, register_deck
+from ..decks import PREMADE_DECKS, load_premade_deck, register_deck
 from ..sim.runner import MatchSpec, run_specs
 from ..web.league import key as league_key
 from ..web.ladder import PROVISIONAL, parse_bot
 from . import report, tinker
+from .facts import game_facts
 
 WINDOW = 150          # rating distance a matchmaking opponent is drawn from, doubled until someone is there
 ANYONE = 0.2          # share of games against anyone at all, as a ladder's queue mixes
@@ -83,16 +85,26 @@ def pick(players: list[dict], batch: int, rng: random.Random) -> list[tuple[str,
     return games
 
 
-def play(games: list[tuple[str, str]], pilots: dict[str, str], jobs: int, seed0: int) -> list[dict]:
+def play(games: list[tuple[str, str]], pilots: dict[str, str], jobs: int, seed0: int, ratings: dict[str, float]) -> list[dict]:
+    """The games played, each with its card facts (league/facts.py) and both players' ratings as the game began."""
     specs = []
     for i, (a, b) in enumerate(games):
         la, da = parse_bot(a); lb, db = parse_bot(b)
         x, y = ((la, da), (lb, db)) if i % 2 == 0 else ((lb, db), (la, da))   # seats alternate
-        specs.append((MatchSpec(x[1], y[1], seed0 + i, bot_a=pilots[x[0]], bot_b=pilots[y[0]]), f"bot:{x[0]}:{x[1]}", f"bot:{y[0]}:{y[1]}"))
+        specs.append((MatchSpec(x[1], y[1], seed0 + i, bot_a=pilots[x[0]], bot_b=pilots[y[0]], log_actions=True),
+                      f"bot:{x[0]}:{x[1]}", f"bot:{y[0]}:{y[1]}"))
     records = run_specs([s[0] for s in specs], jobs=jobs)
-    return [{"a": a, "b": b, "winner": r.winner, "seed": s.seed, "turns": r.turns, "reason": r.reason,
+    out = []
+    for (s, a, b), r in zip(specs, records):
+        g = {"a": a, "b": b, "winner": r.winner, "seed": s.seed, "turns": r.turns, "reason": r.reason,
              "drawn_a": sorted(r.cards_drawn_a), "drawn_b": sorted(r.cards_drawn_b)}
-            for (s, a, b), r in zip(specs, records)]
+        try:
+            f = game_facts(load_premade_deck(s.deck_a), load_premade_deck(s.deck_b), s.seed, r.first_player, r.actions)
+            g["facts"] = {"first": r.first_player, "ra": round(ratings.get(a, 0)), "rb": round(ratings.get(b, 0)), **f}
+        except Exception as e:   # a replay that fails never costs the game its rating
+            print(f"facts failed for {a} v {b} seed {s.seed}: {e!r}", flush=True)
+        out.append(g)
+    return out
 
 
 def main(argv=None) -> None:
@@ -116,6 +128,7 @@ def main(argv=None) -> None:
     os.environ.setdefault("AK_RUST_BOTS", "1")
     log = Path(args.log); log.parent.mkdir(parents=True, exist_ok=True)
     births_log = log.with_name("births.jsonl")
+    facts_dir = log.with_name("facts")
     rng = random.Random()
     last_tinker, reported_day = 0.0, ""
     while True:
@@ -147,12 +160,19 @@ def main(argv=None) -> None:
                 return
             time.sleep(300); continue
         night = is_night(args.night, time.localtime(started).tm_hour)
-        results = play(games, pilots, args.night_jobs if night else args.jobs, int(started * 1000) % 10_000_000_000)
+        results = play(games, pilots, args.night_jobs if night else args.jobs, int(started * 1000) % 10_000_000_000,
+                       {p["id"]: p["rating"] for p in pool["players"]})
         with log.open("a") as fh:
             for g in results:
-                fh.write(json.dumps({"t": started, **g}) + "\n")
+                fh.write(json.dumps({"t": started, **{k: v for k, v in g.items() if k != "facts"}}) + "\n")
+        facts_dir.mkdir(exist_ok=True)
+        with (facts_dir / f"{today}.jsonl").open("a") as fh:   # the Meta tab's games, one file a day
+            for g in results:
+                if "facts" in g:
+                    fh.write(json.dumps({"t": started, "a": g["a"], "b": g["b"], "winner": g["winner"], "turns": g["turns"],
+                                         "reason": g["reason"], **g["facts"]}, separators=(",", ":")) + "\n")
         try:
-            ack = api(args.server, "/api/league/games", key, {"games": [{k: v for k, v in g.items() if not k.startswith("drawn_")} for g in results]})
+            ack = api(args.server, "/api/league/games", key, {"games": [{k: v for k, v in g.items() if not k.startswith("drawn_") and k != "facts"} for g in results]})
         except (urllib.error.URLError, OSError) as e:
             print(f"games not posted: {e} (kept in {log})", flush=True); ack = {"rated": 0}
         if args.births and started - last_tinker > 3600:
