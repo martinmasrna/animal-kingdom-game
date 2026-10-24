@@ -30,7 +30,7 @@ Cannot be **chosen** by an enemy ability: excluded from any option list an enemy
 Carried by: the Stick Insect, the keyword's common; the Black Panther, a Stealth Apex Predator; Ash.
 
 ### Spikes
-The first time an enemy covers it, that enemy is removed (a remove, so Armor resists it). Once per animal: the first enemy cover spends them even when nothing is removed (an Armor coverer stays, and the Spikes are gone all the same; Martin, 2026-10-17), so a Spikes animal that has been covered by an enemy is an ordinary animal from then on, and its badge on the board goes. Covering is placement, so the coverer's own Roar resolves first, then the spikes (and an Apex Predator landing on it is removed before it can eat). A friendly cover doesn't set it off.
+The first time an enemy covers it, that enemy is removed (a remove, so Armor resists it). Once per animal: the first enemy cover spends them even when nothing is removed (an Armor coverer stays, and the Spikes are gone all the same; Martin, 2026-10-17), so a Spikes animal that has been covered by an enemy is an ordinary animal from then on, and its badge on the board goes. Covering is placement, so the coverer's own Roar resolves first, then the spikes (an Apex Predator landing on it is removed and still eats it: both die). A friendly cover doesn't set it off.
 
 Carried by: the Hedgehog, the keyword's common; the Porcupine, which also gives it to your adjacent animals.
 
@@ -57,7 +57,7 @@ A predator that must land on prey and eats it.
 - **Must** be placed on top of another **occupant** — it **cannot** be placed on an empty crossroad. If there is no legal occupant to land on, it cannot be played.
 - **Normal covering rules apply in full**: landing on an **enemy** occupant uses the same legality as a normal cover — strictly-greater strength by default, **including every covering static**: Snow Leopard lets an apex Cat land at equal strength. Landing on **your own** occupant has **no** strength requirement.
 - **May target your own occupants** as well as enemy ones — and removes (eats) them too.
-- **It covers, then eats.** Landing is an ordinary cover, and everything that reacts to being covered happens first (Porcupine's and Hedgehog's spines remove it; a Flee animal runs back to its owner's hand, so there is nothing left to eat). Then, if the predator is still on top of its prey, it eats it: the prey is removed, its leave-the-board and remove effects fire normally, and the predator sits on whatever remained beneath.
+- **It covers, then eats.** Landing is an ordinary cover, and everything that reacts to being covered happens first (a Flee animal runs back to its owner's hand, so there is nothing left to eat). Then it eats its prey, if the prey is still there: the prey is removed, its leave-the-board and remove effects fire normally, and the predator sits on whatever remained beneath. It eats even if the cover's reactions removed it: on a Porcupine or Hedgehog the spines remove it and it still eats, so both die (Martin, 2026-10-24).
 - **If the occupant can't be eaten** (Armor), the predator is **not** blocked from landing there: it simply **covers** it under the normal placement rules and buries it instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it does *when it can*, not a placement precondition.
 - **Cannot be placed onto a den** — deliberate design choice, so Apex Predators can't capture an enemy den directly.
 

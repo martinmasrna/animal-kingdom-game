@@ -266,7 +266,8 @@ def _land_unit(state: GameState, player: str, unit: UnitInstance, cr: str, *, fr
     # Gale), then the eat. The stack is LIFO, so the eat goes in first, at the bottom.
     _push_theron(state, unit, covered)
     if is_apex and covered is not None:
-        state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id})
+        state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id,
+                                   "cr": cr, "owner": unit.owner})
 
     # Reactive triggers resolve AFTER the placed unit's roar (decision 8). The stack
     # is LIFO, so push reactive first (lower) and the roar last (on top).
@@ -509,12 +510,17 @@ def remove_top(state, cr, *, by_player, by_effect=True, by_card=None) -> bool:
 
 
 def _op_apex_eat(state, step):
-    """An Apex eats what it covered, if both are still there, the prey is right beneath it,
-    and it can be eaten (not Armor, judged as the prey stood on top: a Capybara's Armor still shields what the
-    predator landed on). Stealth doesn't save it: a predator eats what it lands on, nobody chooses a target
-    (Martin, 2026-10-01)."""
+    """An Apex eats what it covered, if the prey is still right beneath it, and it can be eaten (not Armor, judged as
+    the prey stood on top: a Capybara's Armor still shields what the predator landed on). Stealth doesn't save it: a
+    predator eats what it lands on, nobody chooses a target (Martin, 2026-10-01). It eats even when the cover's other
+    reactions removed it first: Spikes kill it and it still eats the prey, both die (Martin, 2026-10-24); the prey is
+    then the top of the crossroad."""
     cr, apex = _find_unit(state, step["iid"])
     if apex is None:
+        stack = state.board.get(step["cr"])
+        prey = stack[-1] if stack else None
+        if prey is not None and prey.iid == step["prey"] and statics.can_be_removed(state, prey, step["cr"], as_top=True):
+            _remove_specific(state, step["cr"], prey, by_player=step["owner"], by_card=step["by_card"], armor_checked=True)
         return None
     stack = state.board[cr]
     i = stack.index(apex)
@@ -946,7 +952,8 @@ def do_roam(state: GameState, player: str, origin: str, target) -> None:
         state.emit("cover", cr=where, iid=covered.iid, card=covered.card_id, owner=covered.owner, by=unit.iid)
     _push_theron(state, unit, covered)
     if statics.has_keyword(state, unit, "Apex Predator", where) and covered is not None:
-        state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id})
+        state.effect_stack.append({"op": "apex_eat", "iid": unit.iid, "prey": covered.iid, "by_card": unit.card_id,
+                                   "cr": where, "owner": unit.owner})
     _push_reactions(state, unit, where, covered, onto_enemy)
     if onto_enemy:
         _fire_cover_event(state, unit, covered)

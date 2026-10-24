@@ -340,9 +340,12 @@ pub fn land_unit(st: &mut State, player: Player, mut unit: Unit, cr: Cr, from_ha
             st.emit("cover", vmap!("cr" => cr_v(st, cr), "iid" => Value::Int(c.iid), "card" => card_v(st, c.card), "owner" => pn(c.owner), "by" => Value::Int(unit.iid)));
         }
     }
+    if let Some(c) = &covered {
+        push_theron(st, &unit, c);
+    }
     if is_apex {
         if let Some(c) = &covered {
-            st.effect_stack.push(vmap!("op" => Value::s("apex_eat"), "iid" => Value::Int(unit.iid), "prey" => Value::Int(c.iid), "by_card" => card_v(st, unit.card)));
+            st.effect_stack.push(vmap!("op" => Value::s("apex_eat"), "iid" => Value::Int(unit.iid), "prey" => Value::Int(c.iid), "by_card" => card_v(st, unit.card), "cr" => cr_v(st, cr), "owner" => pn(unit.owner)));
         }
     }
     push_reactions(st, &unit, cr, covered.as_ref(), onto_enemy);
@@ -384,7 +387,11 @@ fn fire_cover_event(st: &mut State, coverer: &Unit, covered: &Unit) {
     if st.g.has_hook(coverer.card, Hook::OnCoverEnemy) {
         cards::run(st, coverer.card, None, Hook::OnCoverEnemy, coverer, &Args::Cover(covered.clone()));
     }
-    if !st.card(coverer.card).has_tag(T_CAT) {
+}
+
+// King Theron, pushed before everything else the cover sets off so it resolves last (effects.py `_push_theron`).
+fn push_theron(st: &mut State, coverer: &Unit, covered: &Unit) {
+    if covered.owner == coverer.owner || !st.card(coverer.card).has_tag(T_CAT) {
         return;
     }
     let theron = st.g.known.lion_legend_3;
@@ -532,7 +539,16 @@ pub fn remove_top(st: &mut State, cr: Cr, by_player: Player, by_effect: bool, by
 
 fn op_apex_eat(st: &mut State, step: &mut Map) -> Option<Pending> {
     let iid = m_get_i(step, "iid").unwrap();
-    let Some((cr, i)) = st.find_unit(iid) else { return None };
+    let Some((cr, i)) = st.find_unit(iid) else {
+        // the cover's reactions removed the predator: it still eats (effects.py `_op_apex_eat`)
+        let Some(cr) = step_cr(st, step, "cr") else { return None };
+        let Some(prey) = st.top(cr).cloned() else { return None };
+        if Some(prey.iid) == m_get_i(step, "prey") && statics::can_be_removed(st, &prey, Some(cr), true) {
+            let owner = step_player(st, step, "owner");
+            remove_specific(st, cr, prey.iid, owner, true, step_card(st, step, "by_card"), true);
+        }
+        return None;
+    };
     let apex = st.unit_at(cr, i).clone();
     if i == 0 {
         return None;
@@ -1013,9 +1029,12 @@ pub fn do_roam(st: &mut State, player: Player, origin: Cr, target: &Target) -> R
             if let Some(c) = &covered {
                 crate::emit!(st, "cover", vmap!("cr" => cr_v(st, where_), "iid" => Value::Int(c.iid), "card" => card_v(st, c.card), "owner" => pn(c.owner), "by" => Value::Int(unit.iid)));
             }
+            if let Some(c) = &covered {
+                push_theron(st, &unit, c);
+            }
             if statics::has_keyword(st, &unit, K_APEX, Some(where_)) {
                 if let Some(c) = &covered {
-                    st.effect_stack.push(vmap!("op" => Value::s("apex_eat"), "iid" => Value::Int(unit.iid), "prey" => Value::Int(c.iid), "by_card" => card_v(st, unit.card)));
+                    st.effect_stack.push(vmap!("op" => Value::s("apex_eat"), "iid" => Value::Int(unit.iid), "prey" => Value::Int(c.iid), "by_card" => card_v(st, unit.card), "cr" => cr_v(st, where_), "owner" => pn(unit.owner)));
                 }
             }
             push_reactions(st, &unit, where_, covered.as_ref(), onto_enemy);

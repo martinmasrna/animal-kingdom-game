@@ -91,12 +91,13 @@ def test_pestis_wipes_around_an_armor_unit_not_stopping_at_it():
 
 # ----------------------------------------------------------------- Apex landings (C1/C3)
 
-def test_an_apex_covers_first_so_the_porcupines_spines_remove_it_before_it_eats():
-    # Martin 2026-09-29: an Apex covers, reactions to the cover resolve, then it eats.
+def test_an_apex_on_a_porcupine_is_removed_by_its_spines_and_still_eats_it():
+    # Martin 2026-09-29: an Apex covers, reactions to the cover resolve, then it eats; 2026-10-24: it eats even when
+    # the spines removed it, so both die.
     s = make_state(hands={"A": ["borealis"]})
     put(s, "1,2", "porcupine", "B")
     rules.apply_action(s, PlaceAction("borealis", ("cr", "1,2")))
-    assert s.top_unit("1,2").card_id == "porcupine" and "borealis" in s.remove_pile
+    assert "1,2" not in s.board and "borealis" in s.remove_pile and "porcupine" in s.remove_pile
 
 
 def test_an_apex_eats_ordinary_prey_after_covering_it():

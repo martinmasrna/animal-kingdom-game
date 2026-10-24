@@ -187,8 +187,8 @@ def test_covering_by_roaming_sets_off_spikes():
     s.board["1,2"][-1].strength_counter = 1             # 8 beats 7
     put(s, "2,2", "porcupine", "B")
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
-    assert ids(s, "2,2") == ["porcupine"]               # ...and is removed by the spikes before it can eat
-    assert "t_roam_apex" in s.remove_pile
+    assert "2,2" not in s.board                         # ...the spikes remove it, and it still eats: both die
+    assert "t_roam_apex" in s.remove_pile and "porcupine" in s.remove_pile
 
 
 def test_king_theron_watches_a_roaming_cat_cover():
