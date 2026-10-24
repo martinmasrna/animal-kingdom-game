@@ -321,13 +321,13 @@ def test_the_bots_play_the_bot_pool_only():
     from animal_kingdom.decks import BOT_DECKS, PANEL_OPPONENTS, PREMADE_DECKS
     from animal_kingdom.sim.ladder_seed import bots
     from animal_kingdom.web import ladder as ranking
-    from animal_kingdom.web.server import bot_rungs
     assert set(BOT_DECKS) < set(PREMADE_DECKS) and set(PANEL_OPPONENTS) <= set(BOT_DECKS)
     assert {deck for _, deck in bots()} == set(BOT_DECKS)
     lad = ranking.Ladder(sqlite3.connect(":memory:"), sorted(BOT_DECKS))
     lad.seed_bots({ranking.bot_id("expert", "egg_control"): 1500.0})   # a retired deck's row from an older seed
     assert "egg_control" not in {ranking.parse_bot(lad.nearest_bot(1500, __import__("random").Random(i)))[1] for i in range(50)}
-    assert bot_rungs(lad.table()) == bot_rungs([(lid, r) for lid, r in lad.table() if "egg_control" not in lid])
+    from animal_kingdom.web.server import bot_rows
+    assert all("egg_control" not in lid for lid, _ in bot_rows(lad.table())), "a retired deck's row is not listed"
 
 
 def test_the_expert_is_the_deepened_referee():

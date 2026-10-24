@@ -312,13 +312,10 @@ def bot_seat_name(level: str, deck: str) -> str:
     return f"{band} Bot"
 
 
-def bot_rungs(table) -> dict[str, float]:
-    """Each rung's bots as one rating on the leaderboard (ranking.RUNGS): the bots on it, averaged by games played."""
-    rungs: dict[str, list] = {}
-    for lid, r in table:
-        if (b := ranking.parse_bot(lid)) and b[1] in BOT_DECKS:   # a retired deck's bot no longer plays
-            rungs.setdefault(ranking.rung_of(r.rating), []).append(r)
-    return {rung: sum(r.rating * max(1, r.games) for r in rs) / sum(max(1, r.games) for r in rs) for rung, rs in rungs.items()}
+def bot_rows(table) -> list[tuple[str, ranking.Rating]]:
+    """The bots the leaderboard lists: one row per pilot-and-deck pairing on a deck still in the pool (Martin, 2026-10-24:
+    every pairing is a player of its own on the ladder; a retired deck's rows keep their games but are not listed)."""
+    return [(lid, r) for lid, r in table if (b := ranking.parse_bot(lid)) and b[1] in BOT_DECKS]
 
 
 def standing(pid: str) -> dict:
@@ -328,10 +325,10 @@ def standing(pid: str) -> dict:
     r = ladder.get(pid)
     if r.provisional:
         return {"placing": {"games": r.games, "of": ranking.PROVISIONAL}}
-    # your row's place on the leaderboard: the ranked people and the bot rows above you
+    # your row's place on the leaderboard: the ranked people and the bot pairings above you
     table = ladder.table()
     above = sum(1 for lid, x in table if not lid.startswith("bot:") and not x.provisional and x.rating > r.rating)
-    return {"rank": 1 + above + sum(1 for avg in bot_rungs(table).values() if avg > r.rating)}
+    return {"rank": 1 + above + sum(1 for _, x in bot_rows(table) if x.rating > r.rating)}
 
 
 # ----------------------------------------------------------------- sign in with Google / Discord
@@ -601,13 +598,11 @@ async def leave_ranked(req):
 
 
 def _open(match: Match) -> None:
-    # A ranked match states both ratings as they stand going in (the versus moment shows them). A bot shows its rung's
-    # rating, the one the leaderboard lists (Martin, 2026-10-04: one number per bot everywhere); matchmaking still rates
-    # each of its decks on its own, out of sight.
+    # A ranked match states both ratings as they stand going in (the versus moment shows them). A bot shows the rating of
+    # the pairing that plays, its own leaderboard row (Martin, 2026-10-24).
     for seat in match.seats.values():
         if seat.ladder:
-            bot = ranking.parse_bot(seat.ladder)
-            seat.rating = str(round(bot_rungs(ladder.table())[ranking.rung_of(ladder.get(seat.ladder).rating)])) if bot else ladder.get(seat.ladder).shown()
+            seat.rating = ladder.get(seat.ladder).shown()
     match.on_game_end = save_game
     match.on_match_end = record_match
     hub.matches[match.id] = match
@@ -647,10 +642,11 @@ async def leaderboard(req):
     rows = [(r.rating, {"name": ladder_name(lid), "rating": r.shown(), "bot": False, "you": bool(p and lid == p["id"]),
                         **({} if p and lid == p["id"] else {"id": lid, "friend": lid in mine, "asked": lid in asked})})   # whether you're friends or have asked
             for lid, r in table if not lid.startswith("bot:") and not r.provisional]   # still placing: not ranked yet (as on Lichess)
-    # The bots as one row per rung (Martin, 2026-10-02: 21 level-and-deck rows cluttered it; 2026-10-20: rungs, not levels):
-    # the rung's bots averaged by games played. Matchmaking still rates each deck on its own.
-    for rung, avg in bot_rungs(table).items():
-        rows.append((avg, {"name": f"{rung} Bot", "rating": str(round(avg)), "bot": True, "you": False}))
+    # The bots one row per pilot-and-deck pairing, each a player of its own (Martin, 2026-10-24; from 2026-10-02 to then the
+    # bots were folded into one row per level, then per rung, to keep the board short).
+    for lid, r in bot_rows(table):
+        rows.append((r.rating, {"name": ladder_name(lid), "rating": r.shown(), "bot": True, "you": False,
+                                "deck": ranking.parse_bot(lid)[1]}))
     rows = [row for _, row in sorted(rows, key=lambda x: -x[0])]
     me_ = ladder.get(p["id"]) if p else None
     placing = {"name": display(p), "rating": me_.shown(), "games": me_.games, "of": ranking.PROVISIONAL} \

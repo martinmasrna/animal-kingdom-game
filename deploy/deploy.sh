@@ -3,7 +3,7 @@
 #   deploy/deploy.sh            build and release HEAD
 #   deploy/deploy.sh pull       copy the server's human game logs into results/human_games/web/
 #   deploy/deploy.sh feedback   pull every feedback message into results/feedback.jsonl, print the new ones
-#   deploy/deploy.sh players    pull who played what (profiles, match histories, events) into results/players.json
+#   deploy/deploy.sh players    pull who played what (profiles, match histories, their saved decks, events) into results/players.json
 set -euo pipefail
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # The Fly CLI: `fly` on the Mac, `flyctl` where winget installed it (Windows; its folder joins PATH only in new shells).
@@ -14,8 +14,8 @@ cfg="$repo/deploy/fly.toml"
 app="$(sed -n 's/^app = "\(.*\)"/\1/p' "$cfg")"
 
 if [[ "${1:-}" == "pull" ]]; then
-  fly ssh console -a "$app" -q -C "sh -c 'cd /app/results && tar -czf - human_games | base64'" | base64 -d | tar -xzf - -C "$repo/results"
-  echo "pulled into $repo/results/human_games/ (commit them)"
+  fly ssh console -a "$app" -q -C "sh -c 'cd /app/results && tar -czf - human_games web_decks.json 2>/dev/null | base64'" | base64 -d | tar -xzf - -C "$repo/results"
+  echo "pulled into $repo/results/human_games/ (commit them) and results/web_decks.json (the decks people played under their own names)"
   exit 0
 fi
 
@@ -41,7 +41,7 @@ if [[ "${1:-}" == "players" ]]; then
   # players did (web/events.py),
   # into the untracked results/players.json, to read the game logs player by player.
   out="$repo/results/players.json"
-  fly ssh console -a "$app" -q -C "python3 -c \"import sqlite3,json; db=sqlite3.connect('/app/results/web.db'); db.row_factory=sqlite3.Row; print(json.dumps({'profiles': [dict(r) for r in db.execute('SELECT id, name, tag, created FROM profiles')], 'history': [dict(r) for r in db.execute('SELECT * FROM history ORDER BY ended')], 'events': [dict(r) for r in db.execute('SELECT * FROM events ORDER BY t')] if db.execute(\\\"SELECT 1 FROM sqlite_master WHERE name='events'\\\").fetchone() else []}))\"" > "$out.tmp"
+  fly ssh console -a "$app" -q -C "python3 -c \"import sqlite3,json; db=sqlite3.connect('/app/results/web.db'); db.row_factory=sqlite3.Row; print(json.dumps({'profiles': [dict(r) for r in db.execute('SELECT id, name, tag, created FROM profiles')], 'history': [dict(r) for r in db.execute('SELECT * FROM history ORDER BY ended')], 'decks': [dict(r) for r in db.execute('SELECT profile, id, name, cards, pos FROM decks ORDER BY profile, pos')], 'events': [dict(r) for r in db.execute('SELECT * FROM events ORDER BY t')] if db.execute(\\\"SELECT 1 FROM sqlite_master WHERE name='events'\\\").fetchone() else []}))\"" > "$out.tmp"
   mv "$out.tmp" "$out"
   python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(len(d['profiles']), 'profiles,', len(d['history']), 'matches in histories,', len(d.get('events', [])), 'events')" "$out"
   exit 0

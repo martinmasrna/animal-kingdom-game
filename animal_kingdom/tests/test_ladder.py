@@ -55,12 +55,12 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             assert bot.is_bot and bot.ladder.startswith("bot:") and abs(server.ladder.get(bot.ladder).rating - 1500) < 250
             assert match.seats["A"].ladder == a["profile"]["id"]
             # the match states both ratings as they stood going in, for the versus moment; an unrated match states none.
-            # A bot states its level's rating, the leaderboard's row for it, not its deck's own
+            # A bot states the rating of the pairing that plays: its own leaderboard row
             seats = match.view("A")["seats"]
             rung = ladder.rung_of(server.ladder.get(bot.ladder).rating)   # a bot is named by its rung, not its level
             assert bot.name.endswith(f"({rung} Bot)")
-            row = next(r for r in (await (await c.get("/api/leaderboard", headers=ha)).json())["rows"] if r["name"] == f"{rung} Bot")
-            assert seats["A"]["rating"] == "1500?" and seats["B"]["rating"] == row["rating"]
+            row = next(r for r in (await (await c.get("/api/leaderboard", headers=ha)).json())["rows"] if r["name"] == bot.name and r["deck"] == bot.deck)
+            assert seats["A"]["rating"] == "1500?" and seats["B"]["rating"] == row["rating"] == server.ladder.get(bot.ladder).shown()
             # two people at once: they meet each other
             ra, rb = await asyncio.gather(c.post("/api/ranked", json={"deck": "giants"}, headers=ha),
                                           c.post("/api/ranked", json={"deck": "den_rush"}, headers=hb))
@@ -75,8 +75,10 @@ def test_ranked_queue_gives_a_bot_after_the_wait_and_pairs_two_people(monkeypatc
             assert not any(r["you"] for r in board["rows"]), "placing: not ranked yet"
             pl = board["placing"]
             assert pl["rating"].endswith("?") and int(pl["rating"][:-1]) > 1500 and (pl["games"], pl["of"]) == (1, 10)
-            bots = [r for r in board["rows"] if r["bot"]]   # one row per rung, not one per level and deck
-            assert [r["name"] for r in bots] == [f"{n} Bot" for n, _ in reversed(ladder.RUNGS) if any(r["name"] == f"{n} Bot" for r in bots)] and len(bots) >= 2
+            bots = [r for r in board["rows"] if r["bot"]]   # one row per pilot-and-deck pairing, best first
+            from animal_kingdom.decks import BOT_DECKS
+            assert len(bots) == len(ladder.LEVELS) * len(BOT_DECKS) and all(r["name"].endswith(" Bot)") for r in bots)
+            assert [int(r["rating"]) for r in bots] == sorted((int(r["rating"]) for r in bots), reverse=True)
             me = await (await c.get("/api/me", headers=ha)).json()   # home's name piece: placement progress, no rank yet
             assert me["placing"] == {"games": 1, "of": 10} and "rank" not in me
     asyncio.run(run())
@@ -90,6 +92,22 @@ def test_a_seed_file_sets_the_bots_once(tmp_path):
     assert L.apply_seed(f) and round(L.get("bot:expert:ramp").rating) == 1777
     L.result("p1", "bot:expert:ramp")   # the bot moves after a game
     assert not L.apply_seed(f), "the same seed is applied once"
+
+
+def test_a_seed_can_reset_the_people_for_placement_games(tmp_path):
+    import json, sqlite3
+    db = sqlite3.connect(":memory:"); L = ladder.Ladder(db, ["ramp"])
+    L.result("person-1", "bot:expert:ramp")
+    assert L.get("person-1").games == 1
+    f = tmp_path / "seed.json"
+    f.write_text(json.dumps({"version": "v2", "reset_people": True, "ratings": {"bot:expert:ramp": 1900}}))
+    assert L.apply_seed(f)
+    assert L.get("person-1").games == 0 and L.get("person-1").rating == ladder.START, "everyone places again"
+    assert round(L.get("bot:expert:ramp").rating) == 1900
+    g = tmp_path / "seed2.json"
+    g.write_text(json.dumps({"version": "v3", "ratings": {"bot:expert:ramp": 1950}}))
+    L.result("person-1", "bot:expert:ramp")
+    assert L.apply_seed(g) and L.get("person-1").games == 1, "a seed without the flag leaves people alone"
     assert round(L.get("bot:expert:ramp").rating) != 1777
 
 
@@ -202,7 +220,7 @@ def test_a_player_at_the_top_meets_five_decks_and_never_the_same_one_twice_runni
 
 
 def test_home_shows_the_rank_your_leaderboard_row_has(monkeypatch):
-    # home's name piece and the leaderboard count the same rows: ranked people and one row per bot level
+    # home's name piece and the leaderboard count the same rows: ranked people and one row per bot pairing
     import asyncio
     from aiohttp.test_utils import TestClient, TestServer
     from animal_kingdom.web import server
@@ -253,7 +271,7 @@ def test_a_retired_decks_bot_never_plays_and_tied_decks_take_turns():
 
 def test_a_rating_sits_on_one_rung_and_a_bot_is_named_by_it():
     """The bots as five named opponents (Martin, 2026-10-20): five bands over the rating scale, a bot named by the band its
-    own rating sits in, never by its pilot's level, and the leaderboard listing the bots one row per band."""
+    own rating sits in, never by its pilot's level; since 2026-10-24 the leaderboard lists every pairing as its own row."""
     assert [ladder.rung_of(r) for r in (1000, 1299, 1300, 1699, 1700, 1899, 1900, 2200)] == \
         ["Beginner", "Beginner", "Intermediate", "Advanced", "Expert", "Expert", "Legendary", "Legendary"]
     assert [n for n, _ in ladder.RUNGS] == [ladder.rung_of(f) for _, f in ladder.RUNGS]

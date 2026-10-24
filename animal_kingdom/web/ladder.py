@@ -150,7 +150,9 @@ class Ladder:
 
     def apply_seed(self, path) -> bool:
         """Seed the bots from a seed file (sim/ladder_seed.py's output, shipped as web/ladder_seed.json) once per seed:
-        a new file resets every bot to its seeded rating; people's ratings are left as they are."""
+        a new file resets every bot to its seeded rating; people's ratings are left as they are, unless the seed says
+        `"reset_people": true`: then everyone starts over at 1500 with placement games (Martin, 2026-10-24, with the first
+        seed whose bots are rated against the Expert people actually meet)."""
         import json
         from pathlib import Path
         p = Path(path)
@@ -163,6 +165,8 @@ class Ladder:
             return False
         self.seed_bots({lid: r for lid, r in data["ratings"].items() if parse_bot(lid)})
         with self.db:
+            if data.get("reset_people"):
+                self.db.execute("DELETE FROM ladder WHERE id NOT LIKE 'bot:%'")
             self.db.execute("INSERT OR REPLACE INTO ladder_meta VALUES ('seed', ?)", (version,))
         return True
 
