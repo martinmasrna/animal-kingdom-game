@@ -25,7 +25,7 @@
         "Colony"
       ],
       "base_strength": 5,
-      "text": "Flight. When an enemy covers an allied Colony animal, place this on it from your hand or deck.",
+      "text": "Flight. When an enemy covers a Colony ally, place Vesper on it from your hand or deck.",
       "species": "Hornet",
       "habitat": "Forest",
       "keywords": [
