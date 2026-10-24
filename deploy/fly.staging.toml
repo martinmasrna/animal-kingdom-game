@@ -1,6 +1,6 @@
-# A test copy of the web client, separate from the live app (its own machine and disk): new-cards and other
-# unreleased work, reachable from anywhere. Sleeps when idle, so it costs only the minutes it's used.
-# Deploy: deploy/staging.sh
+# A test copy of the game, separate from the live app (its own machine, disk and database): where Martin tests work that
+# isn't released yet, from any device. Sleeps when idle, so it costs only the minutes it's used. No secrets: no Google or
+# Discord sign-in, no feedback email, not in the bot league. Deploy: deploy/deploy.sh staging
 app = "animal-kingdom-staging"
 primary_region = "fra"
 

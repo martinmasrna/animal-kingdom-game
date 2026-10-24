@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Deploy the committed HEAD to Fly.io (never the working tree, which may hold other work in progress).
-#   deploy/deploy.sh            build and release HEAD
-#   deploy/deploy.sh pull       copy the server's human game logs into results/human_games/web/
+#   deploy/deploy.sh            build and release HEAD to the live app
+#   deploy/deploy.sh staging    the same build to the staging app (deploy/fly.staging.toml): where Martin tests work that
+#                               isn't released yet, from any device; it sleeps when idle. No news check: nobody else plays there.
+#   deploy/deploy.sh pull [staging]   copy the server's human game logs into results/human_games/web/ (deploy/nightly.sh
+#                               does it every night for both)
 #   deploy/deploy.sh feedback   pull every feedback message into results/feedback.jsonl, print the new ones
 #   deploy/deploy.sh players    pull who played what (profiles, match histories, their saved decks, events) into results/players.json
 set -euo pipefail
@@ -11,10 +14,23 @@ FLY="$(command -v fly || command -v flyctl || ls "${LOCALAPPDATA:-}"/Microsoft/W
 [[ -n "$FLY" ]] || { echo "the Fly CLI is not installed (winget install Fly-io.flyctl, then flyctl auth login)"; exit 1; }
 fly() { "$FLY" "$@"; }
 cfg="$repo/deploy/fly.toml"
+target=live
+if [[ "${1:-}" == "staging" ]]; then target=staging; shift; fi
+if [[ "${1:-}" == "pull" && "${2:-}" == "staging" ]]; then target=staging; fi
+[[ "$target" == staging ]] && cfg="$repo/deploy/fly.staging.toml"
 app="$(sed -n 's/^app = "\(.*\)"/\1/p' "$cfg")"
 
 if [[ "${1:-}" == "pull" ]]; then
-  fly ssh console -a "$app" -q -C "sh -c 'cd /app/results && tar -czf - human_games web_decks.json 2>/dev/null | base64'" | base64 -d | tar -xzf - -C "$repo/results"
+  # staging: only its games (its web_decks.json would overwrite the live one); a sleeping machine is woken first
+  files="human_games web_decks.json"
+  if [[ "$target" == staging ]]; then
+    files="human_games"
+    for m in $(fly machine list -a "$app" --json | python3 -c 'import json,sys; print(*(m["id"] for m in json.load(sys.stdin)))'); do
+      fly machine start -a "$app" "$m" >/dev/null 2>&1 || true
+    done
+    sleep 5
+  fi
+  fly ssh console -a "$app" -q -C "sh -c 'cd /app/results && tar -czf - $files 2>/dev/null | base64'" | base64 -d | tar -xzf - -C "$repo/results"
   echo "pulled into $repo/results/human_games/ (commit them) and results/web_decks.json (the decks people played under their own names)"
   exit 0
 fi
@@ -53,7 +69,7 @@ latest="$(ls "$repo/animal_kingdom/web/news" | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]
 # a release covers its day until 06:00 the next morning (a night's session belongs to the day it began)
 cutoff="$(date -j -v+1d -f %Y-%m-%d "$latest" +%Y-%m-%d 2>/dev/null || date -d "$latest +1 day" +%Y-%m-%d) 06:00:00"
 unwritten="$(git -C "$repo" log --since="$cutoff" --format='  %h %s' -- animal_kingdom/engine animal_kingdom/data/cards.json | cut -c1-110)"
-if [[ -n "$unwritten" && -z "${NEWS_OK:-}" ]]; then
+if [[ -n "$unwritten" && -z "${NEWS_OK:-}" && "$target" == live ]]; then
   echo "rules or cards changed since the last news ($latest), with no release written for them:"; echo "$unwritten"
   echo "write animal_kingdom/web/news/$(date -v-6H +%F 2>/dev/null || date -d "-6 hours" +%F).md (or NEWS_OK=1 if players won't notice), then deploy again"; exit 1
 fi
@@ -87,14 +103,15 @@ retry() { attempt "$@" || { echo "retrying once"; attempt "$@" || { echo "DEPLOY
 # keyed by their git trees; the app's build copies them from it, so a card or code change uploads a few MB. The Fly builder
 # keeps no context between builds, so without this every deploy sent all of it (two minutes, ten on a slow line).
 art="art-$(git -C "$repo" rev-parse HEAD:animal_kingdom/web/static/art HEAD:animal_kingdom/web/static/kit2 | shasum | cut -c1-16)"
-if [[ "$(cat "$cache/art" 2>/dev/null)" != "$art" ]]; then
+artmark="$cache/art"; [[ "$target" == staging ]] && artmark="$cache/art-staging"   # each app's registry holds its own copy
+if [[ "$(cat "$artmark" 2>/dev/null)" != "$art" ]]; then
   echo "the paintings changed: pushing them as $art"
   mkdir -p "$tmp/art"
   git -C "$repo" archive HEAD animal_kingdom/web/static/art animal_kingdom/web/static/kit2 | tar -x -C "$tmp/art" --strip-components 3
   printf 'FROM scratch\nCOPY art /art\nCOPY kit2 /kit2\n' > "$tmp/art/Dockerfile"
   cp "$cfg" "$tmp/art/"
   retry "$tmp/art" --config "$tmp/art/fly.toml" --dockerfile "$tmp/art/Dockerfile" --remote-only --build-only --push --image-label "$art"
-  echo "$art" > "$cache/art"
+  echo "$art" > "$artmark"
 fi
 
 # Four trees for the image (deploy/Dockerfile): code/ (the engine, the bots, the server, the tests), data/ (cards, decks,
@@ -107,5 +124,5 @@ mv "$tmp/app/code/animal_kingdom/data" "$tmp/app/data"
 for d in static news studies; do [[ -d "$tmp/app/code/animal_kingdom/web/$d" ]] && mv "$tmp/app/code/animal_kingdom/web/$d" "$tmp/app/ui/animal_kingdom/web/"; done
 rm -rf "$tmp/app/ui/animal_kingdom/web/static/art" "$tmp/app/ui/animal_kingdom/web/static/kit2"
 cp "$repo/deploy/Dockerfile" "$cfg" "$tmp/app/"
-echo "deploying $(git -C "$repo" log --oneline -1)"
+echo "deploying $(git -C "$repo" log --oneline -1) to $target ($app)"
 retry "$tmp/app" --config "$tmp/app/fly.toml" --remote-only --build-arg "ART=registry.fly.io/$app:$art"

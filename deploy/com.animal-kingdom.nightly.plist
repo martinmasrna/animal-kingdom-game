@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- deploy/nightly.sh at 05:30 (a sleeping Mac runs it on waking). Install: cp to ~/Library/LaunchAgents, then
+     launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.animal-kingdom.nightly.plist -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.animal-kingdom.nightly</string>
+  <key>ProgramArguments</key><array><string>/Users/martin/Work/fun/animal-kingdom/game/deploy/nightly.sh</string></array>
+  <key>StartCalendarInterval</key><dict><key>Hour</key><integer>5</integer><key>Minute</key><integer>30</integer></dict>
+  <key>StandardOutPath</key><string>/Users/martin/Library/Logs/animal-kingdom-nightly.log</string>
+  <key>StandardErrorPath</key><string>/Users/martin/Library/Logs/animal-kingdom-nightly.log</string>
+</dict>
+</plist>
