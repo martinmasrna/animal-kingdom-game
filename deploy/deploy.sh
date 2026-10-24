@@ -109,7 +109,7 @@ if [[ "$(cat "$artmark" 2>/dev/null)" != "$art" ]]; then
   mkdir -p "$tmp/art"
   git -C "$repo" archive HEAD animal_kingdom/web/static/art animal_kingdom/web/static/kit2 | tar -x -C "$tmp/art" --strip-components 3
   printf 'FROM scratch\nCOPY art /art\nCOPY kit2 /kit2\n' > "$tmp/art/Dockerfile"
-  cp "$cfg" "$tmp/art/"
+  cp "$cfg" "$tmp/art/fly.toml"
   retry "$tmp/art" --config "$tmp/art/fly.toml" --dockerfile "$tmp/art/Dockerfile" --remote-only --build-only --push --image-label "$art"
   echo "$art" > "$artmark"
 fi
@@ -123,6 +123,6 @@ git -C "$repo" archive HEAD engine_rs tools/engine_rs | tar -x -C "$tmp/app/rs"
 mv "$tmp/app/code/animal_kingdom/data" "$tmp/app/data"
 for d in static news studies; do [[ -d "$tmp/app/code/animal_kingdom/web/$d" ]] && mv "$tmp/app/code/animal_kingdom/web/$d" "$tmp/app/ui/animal_kingdom/web/"; done
 rm -rf "$tmp/app/ui/animal_kingdom/web/static/art" "$tmp/app/ui/animal_kingdom/web/static/kit2"
-cp "$repo/deploy/Dockerfile" "$cfg" "$tmp/app/"
+cp "$repo/deploy/Dockerfile" "$tmp/app/"; cp "$cfg" "$tmp/app/fly.toml"
 echo "deploying $(git -C "$repo" log --oneline -1) to $target ($app)"
 retry "$tmp/app" --config "$tmp/app/fly.toml" --remote-only --build-arg "ART=registry.fly.io/$app:$art"
