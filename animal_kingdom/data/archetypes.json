@@ -1,0 +1,153 @@
+{
+ "_": "Martin's archetypes (2026-10-25, his names and grouping on the naming page): each league list belongs to one; a list born later from a parent joins its parent's archetype.",
+ "archetypes": [
+  {
+   "name": "Aggro Den Rush",
+   "lists": [
+    "custom_43e1171d61",
+    "custom_c0e9b823d8",
+    "den_rush"
+   ]
+  },
+  {
+   "name": "Apex Predators",
+   "lists": [
+    "martin_fd6ab2ac20"
+   ]
+  },
+  {
+   "name": "Apex Roam Handbuff",
+   "lists": [
+    "custom_361486f384"
+   ]
+  },
+  {
+   "name": "Basic",
+   "lists": [
+    "tempo"
+   ]
+  },
+  {
+   "name": "Canines Roam",
+   "lists": [
+    "canines"
+   ]
+  },
+  {
+   "name": "Cats",
+   "lists": [
+    "cats",
+    "custom_29e5c0e686",
+    "custom_f514d5a40f"
+   ]
+  },
+  {
+   "name": "Cockroach",
+   "lists": [
+    "aristocrats",
+    "custom_b552f3137c",
+    "custom_bcaf91a559",
+    "custom_eb7860a664"
+   ]
+  },
+  {
+   "name": "Colony",
+   "lists": [
+    "colony"
+   ]
+  },
+  {
+   "name": "Egg Control",
+   "lists": [
+    "custom_48aece937a",
+    "custom_b0d0a694c9",
+    "custom_e14561fcab",
+    "egg_control"
+   ]
+  },
+  {
+   "name": "Fish Token",
+   "lists": [
+    "fish"
+   ]
+  },
+  {
+   "name": "Food OTK Precon",
+   "lists": [
+    "food_otk"
+   ]
+  },
+  {
+   "name": "Freeze Mage",
+   "lists": [
+    "custom_daff876770"
+   ]
+  },
+  {
+   "name": "goodstuff?",
+   "lists": [
+    "bot_optimized",
+    "optimizer_1"
+   ]
+  },
+  {
+   "name": "Hand Shuffle",
+   "lists": [
+    "custom_10a47c1af2"
+   ]
+  },
+  {
+   "name": "handbuff roaming Apex",
+   "lists": [
+    "custom_d95131a40b"
+   ]
+  },
+  {
+   "name": "Handlock",
+   "lists": [
+    "handlock"
+   ]
+  },
+  {
+   "name": "Hoofed Grazing",
+   "lists": [
+    "custom_cbc0a22734",
+    "hoofed"
+   ]
+  },
+  {
+   "name": "Hungry Giants",
+   "lists": [
+    "custom_7f5730ec52",
+    "deck_bd26c93733",
+    "giants"
+   ]
+  },
+  {
+   "name": "Infinite Orangutan",
+   "lists": [
+    "custom_1c4b12660f"
+   ]
+  },
+  {
+   "name": "Laras",
+   "lists": [
+    "martin_a81c5e1bd3"
+   ]
+  },
+  {
+   "name": "Rodent Food Aggro",
+   "lists": [
+    "deck_2b4441e88f",
+    "food_aggro"
+   ]
+  },
+  {
+   "name": "Token Aggro",
+   "lists": [
+    "tinker_cbbf63170a",
+    "token"
+   ]
+  }
+ ]
+}

@@ -108,3 +108,16 @@ def test_the_meta_report_is_posted_by_the_runner_and_served_with_the_people(monk
         j = await (await c.get("/api/league/report")).json()
         assert j["generated"] == "2026-10-25 06:00" and j["people"] and j["people"][0]["games"] == 1
     _run(monkeypatch, tmp_path, body)
+
+
+def test_a_retired_list_leaves_the_pool_and_stays_out_after_a_restart(monkeypatch, tmp_path):
+    async def body(c, server):
+        h = {"X-AK-League-Key": "k-test"}
+        assert "fish" in server.ladder.decks
+        j = await (await c.post("/api/league/retire", json={"slugs": ["fish", "no_such_deck"]}, headers=h)).json()
+        assert j["retired"] == ["fish"] and "fish" not in server.ladder.decks
+        pool = await (await c.get("/api/league/pool", headers=h)).json()
+        assert "fish" not in {d["slug"] for d in pool["decks"]} and not any(p["id"].endswith(":fish") for p in pool["players"])
+        assert server.league.retired() == {"fish"}
+        assert (await c.post("/api/league/retire", json={"slugs": ["cats"]})).status == 403
+    _run(monkeypatch, tmp_path, body)

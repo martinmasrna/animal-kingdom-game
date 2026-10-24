@@ -698,6 +698,20 @@ async def league_games(req):
     return web.json_response({"rated": len(ok), "ratings": {lid: ladder.get(lid).shown() for lid in touched}})
 
 
+async def league_retire(req):
+    """Lists out of the pool for good (Martin's call, 2026-10-25): {slugs: [...]}; they leave the ranked offers and the runner's pool
+    at once, their ratings and games stay on record."""
+    league_auth(req)
+    body = await req.json()
+    slugs = body.get("slugs") if isinstance(body, dict) else None
+    if not isinstance(slugs, list) or len(slugs) > 200:
+        raise web.HTTPBadRequest(text="slugs: a list of at most 200")
+    out = [s for s in map(str, slugs) if s in ladder.decks]
+    league.retire(out)
+    ladder.decks[:] = [s for s in ladder.decks if s not in out]
+    return web.json_response({"retired": out})
+
+
 async def league_decks(req):
     """New lists for the pool: [{slug, name, list, source, parent, start}]; each legal, distinct list joins as three placing
     players, starting at `start` (the best prior the sender has: a parent's rating, a target's; 1500 when absent)."""
@@ -1290,6 +1304,7 @@ def make_app() -> web.Application:
         web.post("/api/ranked", join_ranked),
         web.get("/api/league/pool", league_pool),
         web.post("/api/league/games", league_games),
+        web.post("/api/league/retire", league_retire),
         web.post("/api/league/decks", league_decks),
         web.post("/api/league/report", league_report_post),
         web.get("/api/league/report", league_report),
@@ -1327,7 +1342,7 @@ def make_app() -> web.Application:
         friends = Friends(profiles.db)
         chat = Chat(profiles.db)
         league = league_mod.Pool(profiles.db, DECK_NAMES)      # the lists the league added (web/league.py)
-        ladder = ranking.Ladder(profiles.db, sorted(BOT_DECKS) + league.slugs())   # ranked offers the bot pool: shipped, ladder and league decks
+        ladder = ranking.Ladder(profiles.db, [s for s in sorted(BOT_DECKS) + league.slugs() if s not in league.retired()])   # ranked offers the bot pool: shipped, ladder and league decks, less the retired
         if ladder.apply_seed(Path(__file__).parent / "ladder_seed.json"):   # the bots' ratings from simulation (sim/ladder_seed.py)
             log.info("ladder: bots seeded from ladder_seed.json")
         custom_decks.load()

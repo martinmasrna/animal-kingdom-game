@@ -137,6 +137,16 @@ def main(argv=None) -> None:
             pool = api(args.server, "/api/league/pool", key)
         except (urllib.error.URLError, OSError) as e:
             print(f"pool: {e}; retrying in 60 s", flush=True); time.sleep(60); continue
+        retired_file = log.with_name("retired.json")   # lists Martin retired, kept out here even before the server knows
+        if retired_file.is_file():
+            out = set(json.loads(retired_file.read_text()))
+            if out & {d["slug"] for d in pool["decks"]}:   # the server still offers some: tell it (a server without the call answers 404)
+                try:
+                    api(args.server, "/api/league/retire", key, {"slugs": sorted(out)})
+                except (urllib.error.URLError, OSError):
+                    pass
+            pool["decks"] = [d for d in pool["decks"] if d["slug"] not in out]
+            pool["players"] = [p for p in pool["players"] if parse_bot(p["id"])[1] not in out]
         for d in pool["decks"]:
             if d["slug"] not in PREMADE_DECKS:
                 register_deck(d["slug"], d["list"])

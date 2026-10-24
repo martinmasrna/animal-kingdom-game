@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS pool_decks (
 CREATE TABLE IF NOT EXISTS league_games (
     id INTEGER PRIMARY KEY, t REAL NOT NULL, a TEXT NOT NULL, b TEXT NOT NULL, winner TEXT, seed INTEGER, turns INTEGER, reason TEXT);
 CREATE TABLE IF NOT EXISTS league_report (k TEXT PRIMARY KEY, v TEXT NOT NULL, t REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS pool_retired (slug TEXT PRIMARY KEY, t REAL NOT NULL);
 """
 
 
@@ -70,6 +71,14 @@ class Pool:
             self.db.execute("INSERT INTO pool_decks VALUES (?, ?, ?, ?, ?, ?)", (slug, name, json.dumps(lst), source, parent, born))
         self._register(slug, name, list(lst), source, parent, born)
         return []
+
+    def retired(self) -> set[str]:
+        """Lists Martin took out of the league (2026-10-25: stale and pointless ones); their games and rows stay, they play no more."""
+        return {r[0] for r in self.db.execute("SELECT slug FROM pool_retired")}
+
+    def retire(self, slugs: list[str]) -> None:
+        with self.db:
+            self.db.executemany("INSERT OR IGNORE INTO pool_retired VALUES (?, ?)", [(s, time.time()) for s in slugs])
 
     def put_report(self, rep: dict) -> None:
         with self.db:
