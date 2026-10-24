@@ -997,8 +997,8 @@ def schedule(state: GameState, unit, owner_turn_delay: int, step: dict, *, while
 
 
 def start_of_turn(state: GameState, player: str) -> None:
-    """Advance `player`'s pending timers, fire those that come due, then run on_start_of_turn
-    hooks (the caller resolves the stack).
+    """Advance `player`'s pending timers and fire those that come due, then run on_start_of_turn hooks (Dawn) after
+    them (the caller resolves the stack).
 
     Per `overview.md` §9.1 a timer ticks only for a unit that is currently the **top** of its
     crossroad: a buried unit's timer is suspended (not lost) and resumes if it becomes visible
@@ -1023,9 +1023,10 @@ def start_of_turn(state: GameState, player: str) -> None:
         hook = _hook(state, inst.card_id, "on_dawn_in_hand")
         if hook:
             hook(state, inst, None)
+    # Dawn under the timers: the delayed payouts resolve first, so a Sloth's food feeds the Hungry (Martin, 2026-10-24)
+    _push_timed_hooks(state, player, "on_start_of_turn")
     for s in fired[::-1]:      # earliest-scheduled ends on top of the stack -> resolves first (reversed() trips mypyc here)
         state.effect_stack.append(s["step"])
-    _push_timed_hooks(state, player, "on_start_of_turn")   # Dawn, above the timers: it resolves first
 
 
 def end_of_turn(state: GameState, player: str) -> None:

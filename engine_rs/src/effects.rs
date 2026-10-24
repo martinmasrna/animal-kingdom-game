@@ -1119,10 +1119,10 @@ pub fn start_of_turn(st: &mut State, player: Player) {
             cards::run(st, inst.card, None, Hook::OnDawnInHand, &inst, &Args::None);
         }
     }
+    push_timed_hooks(st, player, Hook::OnStartOfTurn);   // Dawn, under the timers: the payouts resolve first
     for s in fired.into_iter().rev() {
         st.effect_stack.push(s.get("step").unwrap().as_map().unwrap().clone());
     }
-    push_timed_hooks(st, player, Hook::OnStartOfTurn);
 }
 
 pub fn end_of_turn(st: &mut State, player: Player) {

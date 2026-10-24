@@ -59,6 +59,19 @@ def test_an_adjacent_legendary_oxpecker_feeds_hungry_animals():
     assert effective_strength(s, ele) == 9
 
 
+def test_a_sloths_food_arrives_before_the_hungry_eat():
+    # The delayed payouts resolve before Dawn (Martin, 2026-10-24): the Sloth's food feeds an Elephant the turn it lands.
+    s = make_state(food={"A": 0, "B": 0}, hands={"A": ["sloth"]}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6})
+    ele = put(s, "1,2", "elephant", "A")                       # Hungry 5
+    rules.apply_action(s, PlaceAction("sloth", ("cr", "1,1")))
+    while s.current == "A":
+        end_turn(s)
+    end_turn(s)                                                # A's next turn: no food yet, it shrinks
+    assert effective_strength(s, ele) == 9 - 5
+    end_turn(s); end_turn(s)                                   # the Sloth pays 30, then the Elephant eats 5
+    assert s.food["A"] == CFG.sloth_food - 5 and effective_strength(s, ele) == 9 - 5
+
+
 def test_titan_costs_two_actions_and_no_free_placement_pays_for_it():
     s = make_state(hands={"A": ["blue_whale", "lion"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     assert PlaceAction("blue_whale", ("cr", "1,2")) in rules.legal_actions(s)

@@ -50,7 +50,7 @@ The keywords are defined in [`keywords.md`](keywords.md); these are the calls th
 - **A player who can roam has a move.** Only a player with no legal action passes automatically, and a roam is one.
 - **A free roam is spent before an action** and keeps the turn open after its two actions until it is used or the player ends the turn. Clarion ([WHITE WOLF]) grants one each turn and Street Dog one on its Roar.
 - **Poison ticks under a cover.** The poisoned coverer is removed at the start of the Poison animal's controller's next turn even if something has covered it since (it comes out from under the stack), as with venom.
-- **Dawn and Dusk resolve one at a time, in play order, each in full before the next.** One that an earlier one removed or buried does nothing. Dawn effects (Hungry among them) resolve before the delayed "at the start of your next turn" payouts (the Chipmunk, King Cobra's venom, Poison).
+- **Dawn and Dusk resolve one at a time, in play order, each in full before the next.** One that an earlier one removed or buried does nothing. The delayed payouts due this turn ("In 2 turns", "Next turn": the Sloth's food, the Chipmunk, King Cobra's venom, Poison) resolve before your Dawn effects, so a Sloth's food feeds your Hungry animals the turn it arrives (Martin, 2026-10-24).
 
 ## A unit uncovered by a removal does not react to it
 
