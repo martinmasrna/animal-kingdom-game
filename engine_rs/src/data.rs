@@ -36,10 +36,13 @@ pub fn player_from(s: &str) -> Player {
 }
 
 // Tags and keywords as bit flags.
-pub const TAGS: [&str; 16] = [
+pub const TAGS: [&str; 18] = [
     "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent", "Arachnid", "Bear", "Megafauna", "Egg", "Fish",
-    "Primate", "Hoofed", "Queen", "Worker",
+    "Primate", "Hoofed", "Queen", "Worker", "Soldier", "Nurse",
 ];
+/// The tags the bots' trained networks read: every tag but the castes (Soldier, Nurse) that only card text reads, as
+/// Python's `cards.BOT_TAGS`; the castes stay out of the features until a retrain.
+pub const BOT_TAG_COUNT: usize = 16;
 pub const KEYWORDS: [&str; 12] = [
     "Flight", "Armor", "Apex Predator", "Stealth", "Spikes", "Poison", "Roam", "Reach", "Hungry", "Titan", "Flee", "Wild",
 ];

@@ -625,7 +625,7 @@ fn property_order() -> &'static (Vec<usize>, Vec<usize>) {
     ORDER.get_or_init(|| {
         let mut kw: Vec<usize> = (0..crate::data::KEYWORDS.len()).collect();
         kw.sort_by_key(|&i| crate::data::KEYWORDS[i]);
-        let mut tags: Vec<usize> = (0..crate::data::TAGS.len()).collect();
+        let mut tags: Vec<usize> = (0..crate::data::BOT_TAG_COUNT).collect();
         tags.sort_by_key(|&i| crate::data::TAGS[i]);
         (kw, tags)
     })
@@ -673,7 +673,7 @@ fn push_properties(v: &mut Vec<f64>, card: &Card, sign: f64) {
 
 pub fn board_features(st: &State, me: Player, opp: Player, v: &mut Vec<f64>) {
     let gm = st.map();
-    let n_props = 2 + crate::data::KEYWORDS.len() + crate::data::TAGS.len();
+    let n_props = 2 + crate::data::KEYWORDS.len() + crate::data::BOT_TAG_COUNT;
     for k in 0..BOARD_SLOTS {
         let stack = if k < gm.sorted.len() { Some(&st.stacks[gm.sorted[k] as usize]) } else { None };
         let Some(stack) = stack.filter(|s| !s.is_empty()) else {

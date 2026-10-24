@@ -72,7 +72,7 @@ pub fn hook_mask(card: &str) -> u32 {
     use Hook::*;
     let hooks: &[Hook] = match card {
         "cuckoo_legend" | "praying_mantis" | "raccoon" | "piranha" | "locust_legend" | "jackal" | "badger" | "street_dog" | "lion_legend"
-        | "lion_legend_2" | "jaguar" | "serval" | "bobcat" | "alley_cat" | "army_ant_legend" | "forager_ant" | "nurse_bee" | "nurse_bumblebee"
+        | "lion_legend_2" | "jaguar" | "serval" | "bobcat" | "alley_cat" | "bee_legend" | "forager_ant" | "nurse_bee" | "nurse_bumblebee"
         | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "greywhisker" | "mole_legend"
         | "rat_legend_2" | "skunk_legend" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
         | "falcon" | "bat" | "dolphin" | "mouse" | "raven_legend" | "hawk" | "cottonmouth" | "magpie" | "black_mamba" | "mosquito" | "raven"
@@ -86,7 +86,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "mock_scout" | "mock_saboteur" | "mock_draw2" | "mock_removal" => &[OnPlace],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
-        "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "worker_wasp" | "scout_bee" | "ant"
+        "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "queen_wasp" | "scout_bee" | "army_ant_legend"
         | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "okapi" | "wildebeest"
         | "dingo" | "sperm_whale_legend" => &[OnEndOfTurn],
         "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" => &[OnStartOfTurn],
@@ -94,7 +94,7 @@ pub fn hook_mask(card: &str) -> u32 {
         "fox" => &[OnCoverEnemy],
         "lion_legend_4" => &[OnRemoveEvent],
         "lynx" => &[OnPlaceOntoEnemy],
-        "bee_legend" | "queen_wasp" => &[OnFriendlyPlace],
+        "worker_wasp" => &[OnFriendlyPlace],
         "swan_legend" | "cuckoo_egg" | "golden_egg" => &[OnDraw],
         "manta_ray" => &[OnAllyCovered],
         "golden_orb_weaver" | "hippopotamus" => &[OnEnemyPlacedAdjacent],
@@ -189,13 +189,7 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
         "gopher" | "muskrat" | "groundhog" => fed_this_turn(st, player),
         "bobcat" | "tutorial_lynx" | "alley_cat" => others(T_CAT) >= 1,
         "serval" => played_this_turn(st, player, T_CAT, unit) >= 1,
-        "worker_bee" => others(T_WORKER) >= 1,
-        "termite_king" => control_tag_count(st, player, T_COLONY | T_QUEEN) >= 1,
-        "nurse_bumblebee" | "soldier_ant" => others(T_COLONY) + 1 >= colony_min,
-        "nurse_bee" => {
-            controls_two_same_colony(st, player)
-                || (unit.is_none() && st.tops().any(|(_, t)| t.owner == player && st.cname(t.card) == card))
-        }
+        "soldier_ant" | "nurse_bee" => others(T_COLONY) + 1 >= colony_min,
         "piranha" => lost_this_turn(st, player) >= 1,
         "hare" | "rat" => placed_plus >= cfg(st, "hare_played_min"),
         "macaque" => hand_after() >= cfg(st, "macaque_hand_min"),
@@ -210,21 +204,6 @@ fn played_this_turn(st: &State, player: Player, tag: u32, unit: Option<&Unit>) -
     }
     st.turn_flags.played[player as usize].iter().filter(|(iid, c)| st.card(*c).tags & tag != 0 && unit.map(|u| u.iid != *iid).unwrap_or(true)).count() as i32
 }
-
-fn controls_two_same_colony(st: &State, player: Player) -> bool {
-    let mut counts: Vec<(CardId, i32)> = Vec::new();
-    for (_, t) in st.tops() {
-        if t.owner == player && st.card(t.card).has_tag(T_COLONY) {
-            match counts.iter_mut().find(|(c, _)| *c == t.card) {
-                Some(e) => e.1 += 1,
-                None => counts.push((t.card, 1)),
-            }
-        }
-    }
-    counts.iter().any(|(_, n)| *n >= 2)
-}
-
-// ------------------------------------------------------------------ shared pieces
 
 fn eat_random_ally(st: &mut State, unit: &Unit, cr: Cr) -> i32 {
     let options = adjacent_friendly_units(st, unit, cr);
@@ -703,18 +682,16 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         // Colony
-        ("army_ant_legend", OnPlace) => {
-            let others = control_tag_count(st, owner, T_COLONY) - 1;
-            let per = cfg(st, "army_ant_legend_per_colony");
-            push_gain(st, owner, per * others.max(0));
+        ("army_ant_legend", OnEndOfTurn) => {
+            let per = cfg(st, "army_ant_legend_per");
+            let n = control_tag_count(st, owner, 0);
+            push_gain(st, owner, per * n);
         }
-        ("bee_legend", OnFriendlyPlace) => {
-            if let Args::FriendlyPlace(placed) = args {
-                if st.card(placed.card).has_tag(T_COLONY) && !capped(st, "cap_queen_honoria", unit) {
-                    let n = cfg(st, "bee_legend_per_place");
-                    gain_food(st, placed.owner, n, true, false);
-                }
-            }
+        ("bee_legend", OnPlace) => {
+            // the stack runs last-in first: the Worker is drawn first, as in Python
+            draws_filtered(st, unit, "tag:Colony&tag:Nurse", 1);
+            draws_filtered(st, unit, "tag:Colony&tag:Soldier", 1);
+            draws_filtered(st, unit, "tag:Colony&tag:Worker", 1);
         }
         ("forager_ant", OnPlace) => {
             let n = cfg(st, "forager_ant_food");
@@ -724,24 +701,12 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 push_draw(st, owner, d);
             }
         }
-        ("queen_wasp", OnFriendlyPlace) => {
-            if let Args::FriendlyPlace(placed) = args {
-                if st.card(placed.card).has_kw(K_FLIGHT) {
-                    let n = cfg(st, "queen_wasp_per_place");
-                    gain_food(st, placed.owner, n, true, false);
-                }
-            }
-        }
+        ("queen_wasp", OnEndOfTurn) => spawns_beside(st, unit, cr, "young_wasp"),
         ("scout_bee", OnEndOfTurn) => {
             if food_gained_this_turn(st, owner) >= cfg(st, "scout_bee_threshold") {
                 let d = cfg(st, "scout_bee_draw");
                 push_draw(st, owner, d);
             }
-        }
-        ("ant", OnEndOfTurn) => {
-            let per = cfg(st, "ant_legend_per");
-            let n = control_tag_count(st, owner, 0);
-            push_gain(st, owner, per * n);
         }
         ("nurse_bee", OnPlace) => {
             if conditional(st, unit) {
@@ -749,33 +714,36 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 draws(st, unit, n);
             }
         }
-        ("nurse_bumblebee", OnPlace) => {
-            if conditional(st, unit) {
-                let n = cfg(st, "nurse_bumblebee_draw");
-                draws(st, unit, n);
-            }
-        }
+        ("nurse_bumblebee", OnPlace) => draws_filtered(st, unit, "tag:Colony", 1),
         ("termite_king", OnPlace) => {
-            if conditional(st, unit) {
-                let n = cfg(st, "termite_king_draw");
-                draws(st, unit, n);
+            let n = control_tag_count(st, owner, T_COLONY | T_QUEEN);
+            if n > 0 {
+                push_draw(st, owner, n);
             }
         }
-        ("termite_queen", OnPlace) => push_play_extra(st, owner, Some(vmap!("tags_all" => Value::List(vec![Value::s("Colony")]), "tags_none" => Value::List(vec![Value::s("Queen")]))), true),
-        ("queen_bee", OnPlace) => push_play_extra(st, owner, Some(vmap!("tags_all" => Value::List(vec![Value::s("Worker")]))), false),
+        ("termite_queen", OnPlace) => push_play_extra(st, owner, Some(vmap!("tags_all" => Value::List(vec![Value::s("Colony")]), "tags_none" => Value::List(vec![Value::s("Queen")]))), false),
+        ("queen_bee", OnPlace) => {
+            // Roar: play a Young Bee: a free play like Prince Leo's, of a token made out of thin air
+            st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(owner), "card_id" => Value::s("young_bee"), "make" => Value::Bool(true)));
+        }
         ("soldier_ant", OnPlace) | ("muskrat", OnPlace) => {
             if conditional(st, unit) {
                 removes(st, unit, cr, None, None);
             }
         }
         ("worker_ant", OnPlace) => gains(st, unit, "worker_ant_food"),
-        ("worker_wasp", OnEndOfTurn) => gains(st, unit, "worker_wasp_food"),
-        ("worker_bee", OnPlace) => {
-            let mut amount = cfg(st, "worker_bee_food");
-            if conditional(st, unit) {
-                amount += cfg(st, "worker_bee_extra");
+        ("worker_wasp", OnFriendlyPlace) => {
+            if let Args::FriendlyPlace(placed) = args {
+                if st.card(placed.card).has_tag(T_COLONY) {
+                    let n = cfg(st, "worker_wasp_per_place");
+                    gain_food(st, placed.owner, n, true, false);
+                }
             }
-            push_gain(st, owner, amount);
+        }
+        ("worker_bee", OnPlace) => {
+            let per = cfg(st, "worker_bee_per");
+            let n = control_tag_count(st, owner, T_COLONY);
+            push_gain(st, owner, per * n);
         }
         // Den Rush
         ("greywhisker", OnPlace) | ("mole_legend", OnPlace) => greywhisker(st, unit),

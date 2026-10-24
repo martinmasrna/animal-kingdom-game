@@ -1436,6 +1436,10 @@ fn op_play_named(st: &mut State, step: &mut Map) -> Option<Pending> {
     let player = step_player(st, step, "chooser");
     let p = player as usize;
     let cid = step_card(st, step, "card_id").unwrap();
+    if !step.contains_key("fetched") && m_flag(step, "make") {
+        st.add_to_hand(player, cid, 0);              // a token made out of thin air (Queen Bee), only to be placed at once
+        step.insert("fetched".into(), Value::s("made"));
+    }
     if !step.contains_key("fetched") {
         let in_hand = st.hands[p].iter().any(|u| u.card == cid);
         if !in_hand && st.decks[p].contains(&cid) {
@@ -1449,8 +1453,13 @@ fn op_play_named(st: &mut State, step: &mut Map) -> Option<Pending> {
         }
     }
     let return_if_fetched = |st: &mut State, step: &Map| {
-        if m_flag(step, "fetched") && st.hands[p].iter().any(|u| u.card == cid) {
+        let made = step.get("fetched").and_then(|v| v.as_str()) == Some("made");
+        if (made || m_flag(step, "fetched")) && st.hands[p].iter().any(|u| u.card == cid) {
             let back = take_from_hand(st, player, cid);
+            if made {
+                crate::emit!(st, "leave_hand", vmap!("zone" => Value::s("hand"), "owner" => pn(player), "iid" => Value::Int(back.iid), "card" => card_v(st, cid), "to" => Value::s("gone")));
+                return;
+            }
             crate::emit!(st, "leave_hand", vmap!("zone" => Value::s("hand"), "owner" => pn(player), "iid" => Value::Int(back.iid), "card" => card_v(st, cid), "to" => Value::s("deck")));
             st.decks[p].push(cid);
         }
