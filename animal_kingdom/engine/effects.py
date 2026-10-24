@@ -817,7 +817,7 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
 #   - EFFECTS[card]["on_roam"](state, unit, cr, event): "whenever this roams…", resolves first, where a Roar would;
 #   - EFFECTS[card]["on_friendly_roam"](state, watcher, roamer, event): "whenever one of your animals roams…" (any of
 #     the player's other top units; event["onto_enemy"] tells a cover);
-#   - statics.can_roam / statics.roam_covers_equal: who roams, and who may roam onto an equal enemy;
+#   - statics.can_roam / statics.roam_covers_equal: who roams, and which animals with Roam may cover an equal enemy;
 #   - free roams: statics.free_roams(state, player) per turn, plus turn_flags["free_roams_<player>"] granted by the
 #     `grant_free_roam` op; a free roam is spent before an action.
 # The event dict: {"player", "iid", "from", "to" (None for a den), "covered" (iid or None), "onto_enemy"}.

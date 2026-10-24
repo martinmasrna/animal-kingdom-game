@@ -85,7 +85,7 @@ Cards:
 - **Street Dog** picks another ally with Roam anywhere and gives it +2; "It roams" gives that animal a free Roam this turn, an ordinary roam you take when you like, the den included (Martin, 2026-10-15: "it should just be normal roam"), and none if it has roamed this turn.
 - **Fox** draws for a cover by placement or by roaming.
 - **Serval** sets the strength by storing the difference: later buffs and auras count on top of the 1.
-- **Placing and roaming cover by one rule** (Martin, 2026-10-24: "the rules for Roam and place from hand should not drift"): every card that changes who may cover whom (Leopard, the legendary Piranha, Chameleon) works for a roam exactly as for a placement.
+- **Placing and roaming cover by one rule** (Martin, 2026-10-24: "the rules for Roam and place from hand should not drift"): every card that changes who may cover whom (Leopard, Dhole, the legendary Piranha, Chameleon) works for a roam exactly as for a placement.
 - **The legendary Piranha** counts the Fish you control now, itself included.
 - **Swordfish** removes that many different random adjacent enemies (Stealth doesn't hide from random; Armor stays). **Barracuda** counts itself among your Fish.
 - **The repeat legend** (food aggro) repeats the plain Roar of each adjacent allied Rodent, in crossroad order; a Roar that depends on how it was placed (Lynx's) isn't repeated.

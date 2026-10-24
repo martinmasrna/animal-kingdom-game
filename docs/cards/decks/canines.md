@@ -21,7 +21,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 |---|---:|---|---:|---|
 | **Orca** | 2 | — | 6 | Apex Predator. Roam. |
 | **Fox** | 2 | Canine | 5 | Roam. Whenever this covers an enemy, draw a card. |
-| **Dhole** | 2 | Canine | 6 | Roam. Your animals can roam onto enemies of equal strength. |
+| **Dhole** | 2 | Canine | 6 | Roam. Your animals with Roam can cover enemies of equal strength. |
 
 ### Common
 

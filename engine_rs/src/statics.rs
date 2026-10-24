@@ -85,7 +85,7 @@ pub fn can_cover(st: &State, placer: &Unit, target: &Unit, roaming: bool) -> boo
     let placer_str = if roaming { effective_strength(st, placer, None) } else { placement_strength(st, placer) };
     let target_str = effective_strength(st, target, None);
     // Placing and roaming follow one rule: every override below holds for both.
-    if roaming && roam_covers_equal(st, owner) && placer_str >= target_str {
+    if placer_card.has_kw(K_ROAM) && roam_covers_equal(st, owner) && placer_str >= target_str {
         return true;
     }
     if placer_card.has_tag(T_CAT) && placer_str >= target_str && active_tops(st, owner, k.leopard).iter().any(|(_, iid)| *iid != placer.iid) {

@@ -112,7 +112,7 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
     target_str = effective_strength(state, target)
 
     # Placing and roaming follow one rule: every override below holds for both.
-    if roaming and roam_covers_equal(state, placer) and placer_str >= target_str:
+    if roam_covers_equal(state, placer) and placer_str >= target_str:
         return True
     # Leopard: "Your Cats can cover enemies of equal strength."
     if "Cat" in placer_card.tags and placer_str >= target_str and any(
@@ -152,9 +152,9 @@ def free_roams(state: GameState, player: str, unit: Optional[UnitInstance] = Non
 
 
 def roam_covers_equal(state: GameState, unit: UnitInstance) -> bool:
-    """Whether `unit`'s roams may cover an enemy of equal strength (Dhole: "Your animals can roam onto enemies of equal
-    strength", id `dhole`)."""
-    return _controls(state, unit.owner, "dhole")
+    """Whether `unit`, placed or roaming, may cover an enemy of equal strength (Dhole: "Your animals with Roam can cover
+    enemies of equal strength", id `dhole`)."""
+    return "Roam" in state.cards[unit.card_id].keywords and _controls(state, unit.owner, "dhole")
 
 
 # ------------------------------------------------------------------------ Reach

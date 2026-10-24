@@ -1065,6 +1065,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roam. Your animals can roam onto enemies of equal strength."
+      },
+      "note": "Placing and roaming cover by one rule (Martin, 2026-10-24, 'yes, agree (at least for now, might need redesign anyway)'); was 'can roam onto'",
+      "by": "claude",
+      "at": 1792840813
     }
   },
   "dingo": {

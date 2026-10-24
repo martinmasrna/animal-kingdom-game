@@ -532,12 +532,12 @@
         "Canine"
       ],
       "base_strength": 6,
-      "text": "Roam. Your animals can roam onto enemies of equal strength.",
+      "text": "Roam. Your animals with Roam can cover enemies of equal strength.",
+      "species": "Dhole",
+      "habitat": "Jungle",
       "keywords": [
         "Roam"
-      ],
-      "species": "Dhole",
-      "habitat": "Jungle"
+      ]
     },
     {
       "id": "wolf",

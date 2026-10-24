@@ -435,6 +435,17 @@ def test_dhole_lets_your_animals_roam_onto_an_equal_enemy():
     assert RoamAction("1,2", ("cr", "2,1")) in rules.legal_actions(s)
 
 
+def test_dhole_lets_an_animal_with_roam_be_placed_on_an_equal_enemy_and_no_other():
+    # Placing and roaming cover by one rule (Martin, 2026-10-24)
+    for card, legal in (("wolf", True), ("caracal", False)):   # Roam, no Roam
+        s = make_state(hands={"A": [card]})
+        put(s, "1,1", "dhole", "A")
+        prey = put(s, "2,1", "dhole", "B")
+        inst = next(u for u in s.hands["A"] if u.card_id == card)
+        prey.strength_counter += placement_strength(s, inst) - effective_strength(s, prey)
+        assert (PlaceAction(card, ("cr", "2,1")) in rules.legal_actions(s)) is legal, card
+
+
 def test_raccoon_dog_grows_a_roaming_canine():
     s = make_state()
     put(s, "1,1", "coyote", "A")
