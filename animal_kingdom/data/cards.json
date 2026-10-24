@@ -89,7 +89,7 @@
         "Colony",
         "Nurse"
       ],
-      "base_strength": 4,
+      "base_strength": 3,
       "text": "Flight. Roar: draw a Colony animal.",
       "species": "Bumblebee",
       "habitat": "Meadow",

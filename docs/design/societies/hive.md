@@ -75,7 +75,7 @@ The ones inside who feed the brood and decide, with royal jelly, which larva bec
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **Nurse Bee** | common | 3 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. | Meadow |
-| **Nurse Bumblebee** | common | 4 | Flight. Roar: draw a Colony animal. | Meadow |
+| **Nurse Bumblebee** | common | 3 | Flight. Roar: draw a Colony animal. | Meadow |
 
 <!-- cards:end -->
 
