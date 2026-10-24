@@ -49,13 +49,16 @@ export async function openBrowser({ newPlayer = false } = {}) {
   return b;
 }
 
+// A console error from another server (the Google Fonts stylesheet, when the network hiccups) is not the game's.
+export const offsite = m => /^https?:\/\//.test(m.location()?.url || '') && !/^https?:\/\/(localhost|127\.0\.0\.1)[:/]/.test(m.location().url);
+
 // A game page showing the frozen lab view, ready to be fed; `still` asks for reduced motion, which the client honours by
 // showing every change at once, so each view can be checked the moment it is drawn. Page errors are collected in page.errors.
 export async function gamePage(browser, url, { still = true } = {}) {
   const page = await browser.newPage();
   page.errors = [];
   page.on('pageerror', e => page.errors.push(e.message));
-  page.on('console', m => { if (m.type() === 'error' && !/favicon/.test(m.text())) page.errors.push(m.text()); });
+  page.on('console', m => { if (m.type() === 'error' && !offsite(m) && !/favicon/.test(m.text())) page.errors.push(m.text()); });
   await page.goto(`${url}/#/lab/mid`, { waitUntil: 'networkidle0' });
   if (still) await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
   return page;

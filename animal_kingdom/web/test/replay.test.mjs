@@ -2,7 +2,7 @@
 // and the replay steps through the views the player saw with nothing on the board to act on.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { startServer, openBrowser, recordMatches, screenMismatches } from './harness.mjs';
+import { startServer, openBrowser, recordMatches, screenMismatches, offsite } from './harness.mjs';
 
 let server, browser, page, views;
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -23,7 +23,7 @@ before(async () => {
   page = await browser.newPage();
   page.errors = [];
   page.on('pageerror', e => page.errors.push(e.message));
-  page.on('console', m => { if (m.type() === 'error' && !/favicon|409/.test(m.text())) page.errors.push(m.text()); });   // the 409 is the refused match
+  page.on('console', m => { if (m.type() === 'error' && !offsite(m) && !/favicon|409/.test(m.text())) page.errors.push(m.text()); });   // the 409 is the refused match
   await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
   await page.setRequestInterception(true);
   page.on('request', async r => {

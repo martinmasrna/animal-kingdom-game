@@ -2,7 +2,7 @@
 // checked against the game state, controls keep their painting on hover, and the match runs to the end without errors.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { startServer, openBrowser, screenMismatches } from './harness.mjs';
+import { startServer, openBrowser, screenMismatches, offsite } from './harness.mjs';
 
 let server, browser;
 before(async () => { server = await startServer(); browser = await openBrowser(); });
@@ -14,7 +14,7 @@ async function startMatch(deck, botDeck) {
   const page = await browser.newPage();
   page.errors = [];
   page.on('pageerror', e => page.errors.push(e.message));
-  page.on('console', m => { if (m.type() === 'error' && !/favicon/.test(m.text())) page.errors.push(m.text()); });
+  page.on('console', m => { if (m.type() === 'error' && !offsite(m) && !/favicon/.test(m.text())) page.errors.push(m.text()); });
   await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
   await page.goto(`${server.url}/#/`, { waitUntil: 'networkidle0' });
   await page.evaluate(d => localStorage.setItem('ak:deck', d), deck);
