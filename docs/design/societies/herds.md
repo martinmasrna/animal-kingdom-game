@@ -4,7 +4,7 @@ The first society page, written 2026-10-24 to the form in `knowledge/world-first
 
 ## 1. What they are
 
-The grazers of the open plain: zebra, wildebeest, gazelle, with the giraffe above them, eating in the open all day in sight of everything that eats them. Nobody is in charge. The herd is safe because it is many, and it stays alive by seeing first and running together.
+The grazers of the open plain: zebra, wildebeest, gazelle, with the giraffe above them, eating in the open all day in sight of everything that eats them. Nobody is in charge. The herd is safe because it is many, and it stays alive by seeing first and running together. The heavy grazers, rhino and hippo, and the moose in the forest, are hoofed too and graze alone: nothing hunts a grown one, so they need no herd.
 
 ## 2. How they live
 
@@ -19,6 +19,7 @@ The grazers of the open plain: zebra, wildebeest, gazelle, with the giraffe abov
 - They never stop eating. A grazer feeds most of the day and drinks every day or two, so the herd is wherever the grass and the water are, and it leaves the moment they run out.
 - At night they bunch and stand. Zebra sleep standing and in turns; somebody is always awake.
 - Oxpeckers ride on their backs, eat the ticks, and hiss when something creeps up.
+- The heavy ones hold their ground by being too big to move. A rhino or a hippo eats more in a day than a whole family of gazelles, charges what comes too close, and otherwise stands where it stands.
 
 ## 3. The playstyle the herd's cards serve
 
@@ -26,19 +27,20 @@ Holding ground and winning the long game on food. A player who runs hoofed anima
 
 ## 4. Who does what
 
-The roles the behaviours give a herd, each a kind of card the family can hold:
+The roles the behaviours give a herd, the animal that plays each, and so the kind of card it is; the cards themselves are in the table at the end.
 
-- **The eyes.** The one who sees first, and the wall when the hunters come at night.
-- **The voice that gathers.** The one whose call brings the others in; worth more the more of the herd stands around it.
-- **The memory of the route.** The one who knows where the grass is; the herd's food.
-- **The runners.** The ones that flee and come back, and the calf that runs the day it is born.
-- **The ones that turn and fight.** The mob, the stallion at the rear, the tusks in the hole: the herd's answer to what covers it.
+- **The eyes.** The giraffe: the one who sees first, and the wall when the hunters come at night.
+- **The voice that gathers.** The zebra: the one whose bark brings the others in; worth more the more of the herd stands around it.
+- **The memory of the route.** The wildebeest, and the okapi in the forest: the one who knows where the grass is; the herd's food.
+- **The runners.** The gazelle and the deer: the ones that flee and come back, and the fawn that runs the day it is born.
+- **The ones that turn and fight.** The buffalo, the warthog, the boar: the mob, the tusks in the hole, the charge at what stands alone; the herd's answer to what covers it.
+- **The heavy ones.** The rhino, the hippo, the moose: a body nothing covers, that eats for a herd and holds one crossroad by itself.
 
-Behaviours on line 2 that no role uses yet (the alarm that belongs to everyone, the calving that swamps the hunters, the river crossing, the oxpecker) are where a new card for the family starts; a concrete card idea goes into `cards.json` as a planned card with its note, and appears in the table below.
+Behaviours on line 2 with no role yet: the alarm that belongs to everyone, the calving that swamps the hunters, the river crossing, the oxpecker. A new card for the family starts from one of them; once it has a strength and a text it goes into `cards.json` as a planned card with its note, and appears in the table.
 
 ## 5. Who names whom (proposal)
 
-A herd has no house and no birth-naming. A wildebeest calf is one of half a million born the same month, and nobody keeps a lineage, so herd animals do not carry kin names the way the Pride carries Theron and Adira (which is why the coined birth-names of 2026-10-21 had nothing under them). What a herd has is jobs: the one who sees first, the one whose bark everyone runs from, the one who remembers the river. So the herd names an individual by what the herd relies on it for, in the plain words a grazer has: sight, sound, light, weather, grass, water, the route, the river. Said with relief, the way the Giraffe legend has it.
+A herd has no house and no birth-naming. A wildebeest calf is one of half a million born the same month, and nobody keeps a lineage, so herd animals do not carry kin names the way the Pride carries Theron and Adira. What a herd has is jobs: the one who sees first, the one whose bark everyone runs from, the one who remembers the river. So the herd names an individual by what the herd relies on it for, in the plain words a grazer has: sight, sound, light, weather, grass, water, the route, the river.
 
 The hunters have their own word for the same animals, said as a curse, and the two never match. Which word the card carries is open per legend (Martin, 2026-10-21: "we don't have to commit upfront").
 
@@ -46,15 +48,18 @@ A herd name is a call-name: one to three beats, firm, no drawing room, said acro
 
 Words the herd cannot know: anything made (no tool, rope, tower, wall, watchman, sentinel, lookout as a post), the sea, snow, the forest's trees, the names of the hunters' things. Titles: none; a herd has no rank. The old cow who knows the route is the nearest thing to one, and that is a job, not a title.
 
-Goals for the Giraffe's name, in order, for the naming skill's pool: the word the herd says with relief when they see her; about seeing, height or the first light; a call-name of one to three beats; not the job itself as a word (no Lookout, Watcher, Tower); says nothing about lions.
-
 ## 6. Ledger
 
-Legends that read from this page: `cards/legends/giraffe.md` (the eyes, as an individual); `cards/legends/leopard.md` reads from it as the outsider who breaks "the young are kept inside". Names taken: none.
+Legends that read from this page:
+
+- `cards/legends/giraffe.md` (the eyes, as an individual)
+- `cards/legends/leopard.md` (the outsider who breaks "the young are kept inside")
+
+Names taken: none.
 
 ## The cards
 
-Every card carrying the Hoofed tag, from `cards.json`; the Hungry giants among them (Rhinoceros, Hippopotamus, Moose) graze with nobody and belong to Giants, which has no page yet. A card the precon borrows from another family (the Honey Badger) is not here.
+Every card carrying the Hoofed tag, from `cards.json`.
 
 <!-- cards:begin family=Hoofed (generated from cards.json by animal_kingdom.render.deck_docs) -->
 

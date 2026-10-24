@@ -109,7 +109,7 @@ Dropped from the first draft: the bargain as a field (it is line 3, derived from
 
 **Effects and playstyle.** Line 3 is the family's identity in any deck and line 4 the roles its cards fill. A new card for the family starts from a behaviour on line 2 and a role on line 4; the deck-design skill then plays it on the real map, in the decks players would actually put it in, which is where it is judged. A legend reads its card's effect back into the character ("The card is this", as all five legends do).
 
-**Names.** Line 5 becomes three to five ranked goals per name (Riot), written before the pool. The naming skill's wide pool from unrelated sources stays; the goals go above it, the forbidden words into `tools/names/build.py` beside the mechanical filters already there. The Giraffe's open question, herds' relief or hunters' curse, is answered on the page once, not per sitting.
+**Names.** Line 5 becomes three to five ranked goals per name (Riot), written before the pool, into the card's legend file, not onto the society page (Martin's redline, 2026-10-24: a card's goals don't belong on the family's page). The naming skill's wide pool from unrelated sources stays; the goals go above it, the forbidden words into `tools/names/build.py` beside the mechanical filters already there. The Giraffe's open question, herds' relief or hunters' curse, is answered on the page once, not per sitting.
 
 **Art.** Magic's art description is five short fields (Colour, Location, Action, Focus, Mood), composition left to the artist. The page adds the behaviour the scene shows (the foals in the centre of the night circle; the crew eating behind the capo). One checkable fact per painting, never a history; the animal stays an animal.
 

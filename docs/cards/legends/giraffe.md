@@ -24,6 +24,8 @@ Two sides say her name, and they do not mean the same thing by it. The herds say
 
 Which of the two gave the name the card carries is open (Martin, 2026-10-21: "we don't have to commit upfront").
 
+Goals for her name, in order, for the naming skill's pool (from the herds' page, `design/societies/herds.md`, line 5): the word the herd says with relief when they see her; about seeing, height or the first light; a call-name of one to three beats; not the job itself as a word (no Lookout, Watcher, Tower); says nothing about lions.
+
 Real analogue: a giraffe's place in a mixed herd, the lookout the others graze beside. Fiction: the lookout in the crow's nest; Heimdall, who sees a hundred leagues and hears the grass grow, without the god.
 
 ## Dissent log
