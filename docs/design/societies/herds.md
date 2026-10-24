@@ -58,26 +58,24 @@ Every card carrying the Hoofed tag, from `cards.json`; the Hungry giants among t
 
 <!-- cards:begin family=Hoofed (generated from cards.json by animal_kingdom.render.deck_docs) -->
 
-| Card | Rarity | Str | Text | Habitat | Status |
-|---|---|---:|---|---|---|
-| **[BOAR]** | legendary | 5 | Your opponent's regions produce 5 less food. | Forest |  |
-| **[GIRAFFE]** | legendary | 7 | Your opponent's hand is revealed. | Savanna |  |
-| **[RHINOCEROS]** | legendary | 8 | Hungry 6. Roar: remove all adjacent animals. | Savanna |  |
-| **[WILDEBEEST]** | legendary | 5 | Your regions produce 5 more food. | Savanna |  |
-| **[ZEBRA]** | legendary | 4 | Roar: draw a card for each different Hoofed animal you control. | Savanna |  |
-| **Boar** | rare | 4 | Roar: remove an adjacent enemy that isn't covering anything. | Forest |  |
-| **Cape Buffalo** | rare | 6 | Your other Hoofed animals have +1 strength during your opponent's turn. | Savanna |  |
-| **Hippopotamus** | rare | 8 | Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it. | Savanna |  |
-| **Moose** | rare | 8 | Hungry 3. Roam. | Forest |  |
-| **Okapi** | rare | 4 | Dusk: if this is grazing, draw a card. | Jungle |  |
-| **Rhinoceros** | rare | 8 | Hungry 3. Roar: remove all adjacent enemies of strength 2 or less. | Savanna |  |
-| **Deer** | common | 3 | Flee. Roar: place a Fawn on a random adjacent empty crossroad. | Forest |  |
-| **Gazelle** | common | 2 | Flee. Roar: draw a card and gain 5 food. | Savanna |  |
-| **Giraffe** | common | 4 | Has +5 strength during your opponent's turn. | Savanna |  |
-| **Warthog** | common | 4 | Roar: remove an adjacent enemy covering an allied Hoofed animal. | Savanna |  |
-| **Wildebeest** | common | 6 | Dusk: if this is grazing, gain 5 food. | Savanna |  |
-| **Zebra** | common | 4 | Flee. Roar: gain 5 food for each other Hoofed animal next to this. | Savanna |  |
-| **Baby Zebra** | common | 1 |  |  | token |
-| **Fawn** | common | 1 |  |  | token |
+| Card | Rarity | Str | Text | Habitat |
+|---|---|---:|---|---|
+| **[BOAR]** | legendary | 5 | Your opponent's regions produce 5 less food. | Forest |
+| **[GIRAFFE]** | legendary | 7 | Your opponent's hand is revealed. | Savanna |
+| **[RHINOCEROS]** | legendary | 8 | Hungry 6. Roar: remove all adjacent animals. | Savanna |
+| **[WILDEBEEST]** | legendary | 5 | Your regions produce 5 more food. | Savanna |
+| **[ZEBRA]** | legendary | 4 | Roar: draw a card for each different Hoofed animal you control. | Savanna |
+| **Boar** | rare | 4 | Roar: remove an adjacent enemy that isn't covering anything. | Forest |
+| **Cape Buffalo** | rare | 6 | Your other Hoofed animals have +1 strength during your opponent's turn. | Savanna |
+| **Hippopotamus** | rare | 8 | Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it. | Savanna |
+| **Moose** | rare | 8 | Hungry 3. Roam. | Forest |
+| **Okapi** | rare | 4 | Dusk: if this is grazing, draw a card. | Jungle |
+| **Rhinoceros** | rare | 8 | Hungry 3. Roar: remove all adjacent enemies of strength 2 or less. | Savanna |
+| **Deer** | common | 3 | Flee. Roar: place a Fawn on a random adjacent empty crossroad. | Forest |
+| **Gazelle** | common | 2 | Flee. Roar: draw a card and gain 5 food. | Savanna |
+| **Giraffe** | common | 4 | Has +5 strength during your opponent's turn. | Savanna |
+| **Warthog** | common | 4 | Roar: remove an adjacent enemy covering an allied Hoofed animal. | Savanna |
+| **Wildebeest** | common | 6 | Dusk: if this is grazing, gain 5 food. | Savanna |
+| **Zebra** | common | 4 | Flee. Roar: gain 5 food for each other Hoofed animal next to this. | Savanna |
 
 <!-- cards:end -->

@@ -58,19 +58,20 @@ _STATUS_ORDER = {"collectible": 0, "reserve": 1, "planned": 2, "token": 3, "tuto
 
 
 def family_block(tag: str, raw: dict | None = None) -> str:
-    """Every record in cards.json carrying `tag`, as one table: the card, its rarity, strength and
-    full text, its habitat, and its status when it isn't a collectible card."""
+    """Every design in cards.json carrying `tag` (tokens and the tutorial's cards left out), as one
+    table: the card, its rarity, strength and full text, and its habitat. A reserve or planned design
+    says so after its name."""
     records = (raw or load_bundled_json("cards.json"))["cards"]
-    rows = [r for r in records if tag in (r.get("tags") or [])]
+    rows = [r for r in records if tag in (r.get("tags") or []) and r.get("status") not in ("token", "tutorial")]
     rows.sort(key=lambda r: (_RARITY_ORDER.get(r.get("rarity", ""), 9),
                              _STATUS_ORDER.get(r.get("status", ""), 9), r.get("name", "")))
     lines = [f"<!-- cards:begin family={tag} (generated from cards.json by animal_kingdom.render.deck_docs) -->", "",
-             "| Card | Rarity | Str | Text | Habitat | Status |", "|---|---|---:|---|---|---|"]
+             "| Card | Rarity | Str | Text | Habitat |", "|---|---|---:|---|---|"]
     for r in rows:
         strength = "" if r.get("base_strength") is None else r["base_strength"]
         text = (r.get("text") or "").replace("|", "\\|")
-        status = "" if r.get("status") == "collectible" else r.get("status", "")
-        lines.append(f"| **{r.get('name', '')}** | {r.get('rarity', '')} | {strength} | {text} | {r.get('habitat', '')} | {status} |")
+        name = r.get("name", "") + ("" if r.get("status") == "collectible" else f" ({r.get('status', '')})")
+        lines.append(f"| **{name}** | {r.get('rarity', '')} | {strength} | {text} | {r.get('habitat', '')} |")
     lines += ["", CARDS_END]
     return "\n".join(lines)
 
