@@ -7,7 +7,7 @@ the pilots' specs), picks the games a ladder would pick, plays them on the Rust 
 untimed), posts the results to `/api/league/games`, and appends them to results/league/games.jsonl. Who plays: pairings
 still placing first (two games each), then the pairings whose rating is least certain, each against an opponent near its
 rating (within the matching window, widened when nobody is there), a fifth of the time against anyone, never itself.
-`--pace` caps games an hour so the machine stays usable by day; in the night window (`--night 23-8`) every core plays
+`--pace` caps games an hour so the machine stays usable by day; in the night window (`--night 0-8`) every core plays
 and nothing is capped (Martin, 2026-10-24: all in while he is not working). The runner sleeps when the pool needs nothing. The league key
 comes from AK_LEAGUE_KEY, results/oauth.json (as the server reads it) or --key-file. The log keeps the cards each side
 drew, results/league/facts/<day>.jsonl each game's card facts for the Meta tab (league/facts.py: the mulligan, every card's
@@ -41,7 +41,7 @@ PLACING_GAMES = 2     # games a placing pairing gets each pass
 
 
 def is_night(window: str, hour: int) -> bool:
-    """Whether `hour` lies in the 'from-to' window (wrapping midnight: '23-8' is 23:00 to 07:59)."""
+    """Whether `hour` lies in the 'from-to' window (wrapping midnight: '22-6' is 22:00 to 05:59)."""
     if not window:
         return False
     a, b = (int(x) for x in window.split("-"))
@@ -134,7 +134,7 @@ def main(argv=None) -> None:
     ap.add_argument("--once", action="store_true", help="one pass, then stop")
     ap.add_argument("--log", default="results/league/games.jsonl")
     ap.add_argument("--births", type=int, default=3, help="tinkered children a day at most (0: no tinkering)")
-    ap.add_argument("--night", default="23-8", help="hours (local) when every core plays uncapped, 'from-to'; '' for never")
+    ap.add_argument("--night", default="0-8", help="hours (local) when every core plays uncapped, 'from-to'; '' for never")
     ap.add_argument("--night-jobs", type=int, default=os.cpu_count() or 8)
     ap.add_argument("--report-hour", type=int, default=6, help="the hour the meta report is built and posted (-1: never)")
     ap.add_argument("--report-now", action="store_true", help="build and post the report on the first pass too")
