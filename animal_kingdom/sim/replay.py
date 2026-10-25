@@ -68,8 +68,8 @@ def regions_controlled(state: GameState) -> dict[str, list[str]]:
         tops = [state.top_unit(c) for c in region.corners]
         if all(u is not None for u in tops):
             owners = {u.owner for u in tops}
-            if len(owners) == 1:
-                out[owners.pop()].append(rid)
+            if len(owners) == 1 and (owner := owners.pop()) in out:
+                out[owner].append(rid)
     return out
 
 
