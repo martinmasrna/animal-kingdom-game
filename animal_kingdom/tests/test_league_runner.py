@@ -31,3 +31,18 @@ def test_the_night_window_wraps_midnight():
     from animal_kingdom.league.runner import is_night
     assert [is_night("23-8", h) for h in (22, 23, 0, 7, 8, 12)] == [False, True, True, True, False, False]
     assert [is_night("1-5", h) for h in (0, 1, 4, 5)] == [False, True, True, False] and not is_night("", 3)
+
+
+def test_a_game_the_engine_breaks_is_skipped_not_the_end_of_the_runner(monkeypatch):
+    from animal_kingdom.league import runner
+
+    real = runner._run_spec
+
+    def run(spec):
+        if spec.seed == 11:
+            raise ValueError("list.remove(x): x not in list")
+        return real(spec)
+    monkeypatch.setattr(runner, "_run_spec", run)
+    pilots = {"easy": "greedy"}
+    out = runner.play([("bot:easy:cats", "bot:easy:fish")] * 3, pilots, 1, 10, {})
+    assert [g["seed"] for g in out] == [10, 12]

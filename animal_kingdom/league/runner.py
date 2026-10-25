@@ -27,7 +27,9 @@ import urllib.request
 from pathlib import Path
 
 from ..decks import PREMADE_DECKS, load_premade_deck, register_deck
-from ..sim.runner import MatchSpec, run_specs
+from concurrent.futures import ProcessPoolExecutor
+
+from ..sim.runner import MatchSpec, _run_spec
 from ..web.league import key as league_key
 from ..web.ladder import PROVISIONAL, parse_bot
 from . import report, tinker
@@ -85,6 +87,15 @@ def pick(players: list[dict], batch: int, rng: random.Random) -> list[tuple[str,
     return games
 
 
+def _safe_run(spec: MatchSpec):
+    """One game, or None when the engine raises: a broken game is logged and skipped, never the end of the runner."""
+    try:
+        return _run_spec(spec)
+    except Exception as e:
+        print(f"game failed: {spec.deck_a} v {spec.deck_b} seed {spec.seed}: {e!r}", flush=True)
+        return None
+
+
 def play(games: list[tuple[str, str]], pilots: dict[str, str], jobs: int, seed0: int, ratings: dict[str, float]) -> list[dict]:
     """The games played, each with its card facts (league/facts.py) and both players' ratings as the game began."""
     specs = []
@@ -93,9 +104,15 @@ def play(games: list[tuple[str, str]], pilots: dict[str, str], jobs: int, seed0:
         x, y = ((la, da), (lb, db)) if i % 2 == 0 else ((lb, db), (la, da))   # seats alternate
         specs.append((MatchSpec(x[1], y[1], seed0 + i, bot_a=pilots[x[0]], bot_b=pilots[y[0]], log_actions=True),
                       f"bot:{x[0]}:{x[1]}", f"bot:{y[0]}:{y[1]}"))
-    records = run_specs([s[0] for s in specs], jobs=jobs)
+    if jobs <= 1:
+        records = [_safe_run(s[0]) for s in specs]
+    else:
+        with ProcessPoolExecutor(max_workers=jobs) as ex:
+            records = list(ex.map(_safe_run, [s[0] for s in specs]))
     out = []
     for (s, a, b), r in zip(specs, records):
+        if r is None:
+            continue
         g = {"a": a, "b": b, "winner": r.winner, "seed": s.seed, "turns": r.turns, "reason": r.reason,
              "drawn_a": sorted(r.cards_drawn_a), "drawn_b": sorted(r.cards_drawn_b)}
         try:
