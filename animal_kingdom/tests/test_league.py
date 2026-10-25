@@ -57,6 +57,9 @@ def test_a_posted_bot_game_moves_both_pairings_like_any_game(monkeypatch, tmp_pa
 
 
 def test_a_new_list_joins_as_three_placing_players_kept_from_people(monkeypatch, tmp_path):
+    from animal_kingdom.web import meta
+    monkeypatch.setattr(meta, "ARCHETYPES", tmp_path / "none.json")   # no archetypes: the bot keeps its list's own name
+
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}
         lst = load_premade_deck("cats")
@@ -142,4 +145,5 @@ def test_card_facts_feed_the_meta_tab_by_martins_archetypes(monkeypatch, tmp_pat
         a = await (await c.get("/api/meta/archetype?id=cats&vs=fish_token")).json()
         assert a["name"] == "Cats" and a["vs_name"] == "Fish Token" and {x["card"]: x["p"] for x in a["cards"]}[cats[0]] == [2, 1]
         assert (await c.get("/api/meta/archetype?id=nope")).status == 404
+        assert server.ladder_name("bot:expert:fish").startswith("Fish Token (")   # the ladder names a bot by its archetype
     _run(monkeypatch, tmp_path, body)

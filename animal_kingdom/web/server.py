@@ -631,8 +631,10 @@ def rate_match(match: Match) -> None:
 
 def ladder_name(lid: str) -> str:
     bot = ranking.parse_bot(lid)
-    if bot:   # a bot is named by its deck and its rung, never its pilot's level
-        return f"{DECK_NAMES.get(bot[1], bot[1])} ({ranking.rung_of(ladder.get(lid).rating)} Bot)"
+    if bot:   # a bot is named by its deck's archetype (Martin's names), else its deck, and its rung, never its pilot's level
+        arch, names = _archetypes()
+        deck = names.get(arch.get(bot[1]), DECK_NAMES.get(bot[1], bot[1]))
+        return f"{deck} ({ranking.rung_of(ladder.get(lid).rating)} Bot)"
     p = profiles.get(lid)
     return display(p) if p else "?"
 
