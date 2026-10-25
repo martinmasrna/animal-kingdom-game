@@ -530,13 +530,13 @@ async function metaArchetype(box, id, q) {
   const opp = j.opp ? [...j.opp].filter(c => CARDS[c.card] && c.d[0] >= min).sort((a, b) => theirs(b) - theirs(a)) : null;
   const flip = v => v ? [v[0], v[0] - v[1]] : v;   // their card's games counted with your wins
   box.innerHTML = metaControls(true) + `<div class="mah"><a class="mback" href="#/ladder/meta">All decks</a><h3>${esc(j.name)}</h3><span class="mwr" style="${tint(base)}">${j.games ? base.toFixed(1) + '%' : '–'}</span><span class="dim">${j.games} games</span>${vsDd}</div>
-    <div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${th('play', 'In decks', 'Share of the games whose list runs it')}<th class="num">Copies</th>${th('with', 'With', 'Win rate of the lists that run it')}${th('without', 'Without', 'Win rate of the lists that do not')}
+    <div class="mbody"><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${th('play', 'In decks', 'Share of the games whose list runs it')}<th class="num">Copies</th>${th('with', 'With', 'Win rate of the lists that run it')}${th('without', 'Without', 'Win rate of the lists that do not')}
       ${th('k', 'Mulligan', 'Win rate when kept in the starting hand')}${th('kept', 'Kept', 'How often it is kept when the mulligan shows it')}${th('d', 'Drawn', 'Win rate when drawn, starting hand included')}${th('p', 'Played', 'Win rate when played')}</tr></thead><tbody>
       ${cards.map(c => `<tr><th class="an">${strip(c.card)}</th><td class="num dim">${(100 * c.play).toFixed(0)}%</td><td class="num dim">${c.copies ? c.copies.toFixed(1) : ''}</td>${rate(c.with)}${c.without[0] ? rate(c.without) : '<td></td>'}${rate(c.k)}<td class="num dim">${c.m[0] ? (100 * c.k[0] / c.m[0]).toFixed(0) + '%' : ''}</td>${rate(c.d)}${rate(c.p)}</tr>`).join('')}
-    </tbody></table></div>
+    </tbody></table></div><div class="mside">
     ${opp ? `<h4 class="msub">${esc(j.vs_name)}'s cards</h4><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th><th class="num" title="Your win rate when they drew it">Drawn</th><th class="num" title="Your win rate when they played it">Played</th><th class="num">Games</th></tr></thead><tbody>
       ${opp.map(c => `<tr><th class="an">${strip(c.card)}</th>${rate(flip(c.d))}${rate(flip(c.p))}<td class="num dim">${c.d[0]}</td></tr>`).join('')}</tbody></table></div>` : ''}
-    ${lists ? `<h4 class="msub">Lists</h4><div class="mlists">${lists}</div>` : ''}`;
+    ${lists ? `<h4 class="msub">Lists</h4><div class="mlists">${lists}</div>` : ''}</div></div>`;
   wireMetaControls(box);
   fitStrips(box);
   box.querySelectorAll('th[data-csort]').forEach(t => t.onclick = () => { META.csort = META.csort === t.dataset.csort ? null : t.dataset.csort; fillMeta(); });
