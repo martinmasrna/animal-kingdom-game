@@ -448,33 +448,98 @@ async function fillLeaderboard() {
   const mine = box.querySelector('.lr.you:not(.placing)'); if (mine) mine.scrollIntoView({ block: 'center' });
 }
 
-// The Meta tab: the morning's report on the bot ladder (league/report.py, posted by the runner). One screen to scan
-// (Martin, 2026-10-24: "good idea, poor execution" of the first list of numbers): the day in three figures, then only
-// the sections that have something, each a bar to read at a glance: movers by their change, cards by their lift within
-// their own decks, the bands as stacked shares, the top pairings with their deck's face.
+// The Meta tab (docs/meta-tab.md): the competitive player's two questions, which deck to play and how to play it, answered
+// with raw numbers presented well and nothing written for them (Martin, 2026-10-24). Rating and days filter the whole tab;
+// the overview is every archetype's share and win rate and the matchup matrix, where clicking columns adds each deck's
+// average against just those; an archetype opens its lists and every card's figures, against one opponent when chosen.
+const META = { lo: null, hi: null, days: 0, min: 30, sel: new Set(), sort: 'share', csort: null, vs: '' };
+const pct = (w, n) => n ? (100 * w / n).toFixed(1) : '';
+const tint = (v, base = 50, span = 10) => {   // a win rate's colour: red below the base, green above, full at `span` points
+  if (v === null || v === undefined || v === '') return '';
+  const d = Math.max(-1, Math.min(1, (v - base) / span));
+  return `background:${d >= 0 ? `rgba(120,180,100,${(.55 * d).toFixed(3)})` : `rgba(200,100,80,${(-.55 * d).toFixed(3)})`}`;
+};
 async function fillMeta() {
   const box = document.getElementById('metar'); if (!box) return;
-  const r = await api('/api/league/report'), j = r.ok ? await r.json() : { empty: true };
-  if (j.empty) { box.innerHTML = '<p class="none">No report yet: the first one comes the morning after the league starts.</p>'; return; }
-  const sign = d => (d > 0 ? '+' : '') + d, bar = (v, max, cls) => `<i class="bar ${cls}" style="width:${Math.min(100, Math.round(100 * Math.abs(v) / (max || 1)))}%"></i>`;
-  const sec = (title, note, html) => html ? `<section><h3>${title}${note ? `<small>${note}</small>` : ''}</h3>${html}</section>` : '';
-  const movers = ms => { if (!ms.length) return ''; const max = Math.max(...ms.map(m => Math.abs(m.delta)));
-    return `<div class="mbars">${ms.map(m => `<div class="mb ${m.delta < 0 ? 'dn' : 'up'}"><span class="nm">${esc(m.name)}</span><span class="tr">${bar(m.delta, max, m.delta < 0 ? 'dn' : 'up')}</span><b>${sign(m.delta)}<small>${m.rating}</small></b></div>`).join('')}</div>`; };
-  const cards = cs => { if (!cs.length) return ''; const max = Math.max(...cs.map(c => Math.abs(c.lift)));
-    return `<div class="mbars">${cs.map(c => `<div class="mb ${c.lift < 0 ? 'dn' : 'up'}">${piece(c.card)}<span class="nm">${esc(c.name)}<small>${c.games} games</small></span><span class="tr">${bar(c.lift, max, c.lift < 0 ? 'dn' : 'up')}</span><b>${sign(c.lift)}</b></div>`).join('')}</div>`; };
-  const bands = Object.entries(j.meta || {}).filter(([, ms]) => ms.length);
-  const bandsHtml = bands.length ? `<div class="mbands">${bands.map(([band, ms]) => `<div class="band"><span class="nm">${band}</span><span class="stack">${ms.map((m, i) => `<i class="s${i % 6}" style="width:${m.share}%" title="${esc(m.archetype)} ${m.share}%"></i>`).join('')}</span><span class="lg">${ms.slice(0, 3).map((m, i) => `<em class="s${i % 6}"></em>${esc(m.archetype)} ${m.share}%`).join(' ')}</span></div>`).join('')}</div>` : '';
-  const births = (j.births || []).length ? `<div class="mbirths">${j.births.map(b => `<div class="birth"><b>${esc(b.name)}</b> <span class="from">from ${esc(b.parent || '?')}</span><span class="why">${esc(b.why)}</span><span class="now">${b.child_rating ?? '–'} after ${b.child_games} games${b.parent_rating ? `, parent ${b.parent_rating}` : ''}</span></div>`).join('')}</div>` : '';
-  const top = (j.top || []).length ? `<div class="mtop">${j.top.map((t, i) => `<div class="tp"><span class="rk">${i + 1}</span>${piece(t.cover)}<span class="nm">${esc(t.name)}</span><b>${t.rating}</b></div>`).join('')}</div>` : '';
-  box.innerHTML = `<div class="mfig"><div><b>${j.games_day ?? j.games_logged}</b><span>bot games today</span></div><div><b>${j.pairings ?? '–'}</b><span>pairings playing</span></div><div><b>${j.births_day ?? 0}</b><span>new lists today</span></div></div>
-    <p class="mwhen">${esc(j.generated)}</p>`
-    + sec('Movers', 'last day', movers(j.movers_day || [])) + (j.movers_day?.length ? '' : sec('Movers', '', '<p class="none">the first movers show tomorrow, once a day of ratings is on record</p>'))
-    + sec('Movers', 'last week', movers(j.movers_week || []))
-    + sec('New lists', '', births)
-    + sec('Cards that win when drawn', 'lift within their own decks', cards(j.cards_up || []))
-    + sec('Cards that lose when drawn', '', cards(j.cards_down || []))
-    + sec('What you meet', 'at each rating, within 75', bandsHtml)
-    + sec('Top pairings', '', top);
+  const id = decodeURIComponent(location.hash.split('/')[3] || '');
+  const q = () => `lo=${META.lo ?? 0}&hi=${META.hi ?? 10000}&days=${META.days}`;
+  if (META.lo === null) {   // first visit: the range around your rating, else every rating
+    const j0 = await (await api(`/api/meta?lo=0&hi=10000&days=${META.days}`)).json();
+    const b = j0.bands || [];
+    if (j0.you && b.length) { const c = Math.floor(j0.you / 100) * 100; META.lo = Math.max(b[0], c - 200); META.hi = Math.min(b[b.length - 1] + 100, c + 300); }
+    else if (b.length) { META.lo = b[0]; META.hi = b[b.length - 1] + 100; }
+    META.bands = b;
+  }
+  if (id) return metaArchetype(box, id, q);
+  const j = await (await api(`/api/meta?${q()}`)).json();
+  if (j.bands?.length) META.bands = j.bands;
+  if (!j.games) { box.innerHTML = metaControls(false) + '<p class="none">No games in this range yet.</p>'; wireMetaControls(box); return; }
+  const rows = j.archetypes, mx = j.matrix, min = META.min;
+  const cell = (x, y) => { const v = (mx[x] || {})[y]; return v && v[0] >= min ? 100 * v[1] / v[0] : null; };
+  const vsSel = x => { const vs = [...META.sel].filter(y => y !== x).map(y => cell(x, y)).filter(v => v !== null); return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null; };
+  const wr = r => r.decided ? 100 * r.wins / r.decided : null;
+  const key = { share: r => r.share, wr: r => wr(r) ?? -1, games: r => r.games, vs: r => vsSel(r.id) ?? -1 }[META.sort] || (r => r.share);
+  const sorted = [...rows].sort((a, b) => key(b) - key(a));
+  const cols = [...rows].sort((a, b) => b.share - a.share);
+  const th = (k, label) => `<th class="num sortable${META.sort === k ? ' on' : ''}" data-sort="${k}">${label}</th>`;
+  const fmt = v => v === null ? '' : v.toFixed(1) + '%';
+  box.innerHTML = metaControls(true) + `<div class="mxw"><table class="mx"><thead><tr><th class="an"></th>${th('share', 'Share')}${th('wr', 'Win rate')}${th('games', 'Games')}${META.sel.size ? th('vs', 'vs selected') : ''}
+    ${cols.map(c => `<th class="col${META.sel.has(c.id) ? ' sel' : ''}" data-col="${esc(c.id)}" title="${esc(c.name)}"><span>${esc(c.name)}</span></th>`).join('')}</tr></thead><tbody>
+    ${sorted.map(r => `<tr><th class="an"><a href="#/ladder/meta/${encodeURIComponent(r.id)}">${esc(r.name)}</a></th><td class="num">${(100 * r.share).toFixed(1)}%</td><td class="num" style="${tint(wr(r))}">${fmt(wr(r))}</td><td class="num dim">${r.games}</td>
+      ${META.sel.size ? `<td class="num vs" style="${tint(vsSel(r.id))}">${fmt(vsSel(r.id))}</td>` : ''}
+      ${cols.map(c => { if (c.id === r.id) return '<td class="mir"></td>'; const v = (mx[r.id] || {})[c.id], x = cell(r.id, c.id);
+        return `<td class="m${META.sel.has(c.id) ? ' sel' : ''}" style="${tint(x)}" title="${esc(r.name)} against ${esc(c.name)}: ${v ? `${v[1]}–${v[0] - v[1]} in ${v[0]} games` : 'no games'}">${x === null ? '' : x.toFixed(0)}</td>`; }).join('')}</tr>`).join('')}
+    </tbody></table></div>`;
+  wireMetaControls(box);
+  box.querySelectorAll('th[data-sort]').forEach(t => t.onclick = () => { META.sort = t.dataset.sort; fillMeta(); });
+  box.querySelectorAll('th[data-col]').forEach(t => t.onclick = () => { const c = t.dataset.col; META.sel.has(c) ? META.sel.delete(c) : META.sel.add(c); if (META.sel.size) META.sort = 'vs'; else if (META.sort === 'vs') META.sort = 'share'; fillMeta(); });
+}
+function metaControls(withMin) {
+  const b = META.bands || [], lo = b.map(v => [String(v), String(v)]), hi = b.map(v => [String(v + 100), String(v + 100)]);
+  return `<div class="mctl"><span class="lb">Rating</span>${dd('mlo', String(META.lo), lo.length ? lo : [['0', 'Any']])}<span class="lb">to</span>${dd('mhi', String(META.hi), hi.length ? hi : [['10000', 'Any']])}
+    ${dd('mdays', String(META.days), [['0', 'All time'], ['1', 'Last day'], ['3', 'Last 3 days'], ['7', 'Last week']])}
+    ${withMin ? dd('mmin', String(META.min), [['10', 'At least 10 games'], ['30', 'At least 30 games'], ['100', 'At least 100 games'], ['300', 'At least 300 games']]) : ''}</div>`;
+}
+function wireMetaControls(box) {
+  wireDd(box, (k, v) => {
+    if (k === 'mlo') { META.lo = +v; if (META.hi <= META.lo) META.hi = META.lo + 100; }
+    if (k === 'mhi') { META.hi = +v; if (META.lo >= META.hi) META.lo = META.hi - 100; }
+    if (k === 'mdays') META.days = +v;
+    if (k === 'mmin') META.min = +v;
+    if (k === 'mvs') META.vs = v;
+    fillMeta();
+  });
+}
+async function metaArchetype(box, id, q) {
+  const ov = await (await api(`/api/meta?${q()}`)).json();
+  const r = await api(`/api/meta/archetype?id=${encodeURIComponent(id)}&${q()}${META.vs ? `&vs=${encodeURIComponent(META.vs)}` : ''}`);
+  if (!r.ok) { box.innerHTML = `<p class="none">No such archetype.</p>`; return; }
+  const j = await r.json(), min = META.min, base = j.games ? 100 * j.wins / j.games : 50;
+  const others = ov.archetypes.filter(a => a.id !== id).sort((a, b) => b.share - a.share);
+  const vsDd = dd('mvs', META.vs, [['', 'Against every deck'], ...others.map(a => [a.id, 'Against ' + esc(a.name)])]);
+  const rate = (v, b = base) => v && v[0] >= min ? `<td class="num" style="${tint(100 * v[1] / v[0], b)}" title="${v[1]}–${v[0] - v[1]} in ${v[0]} games">${pct(v[1], v[0])}%</td>` : `<td class="num dim" title="${v ? v[0] : 0} games">·</td>`;
+  const RANKS = { legendary: 0, rare: 1, common: 2 }, strv = c => CARDS[c] ? (CARDS[c].str === '*' ? -1 : CARDS[c].str) : 99;
+  const order = (a, b) => (RANKS[CARDS[a.card]?.rarity] ?? 3) - (RANKS[CARDS[b.card]?.rarity] ?? 3) || strv(a.card) - strv(b.card) || a.card.localeCompare(b.card);
+  const val = { play: c => c.play, with: c => c.with[0] >= min ? c.with[1] / c.with[0] : -1, without: c => c.without[0] >= min ? c.without[1] / c.without[0] : -1,
+    k: c => c.k[0] >= min ? c.k[1] / c.k[0] : -1, kept: c => c.m[0] ? c.k[0] / c.m[0] : -1, d: c => c.d[0] >= min ? c.d[1] / c.d[0] : -1, p: c => c.p[0] >= min ? c.p[1] / c.p[0] : -1 };
+  const cards = [...j.cards].filter(c => CARDS[c.card]).sort(META.csort && val[META.csort] ? (a, b) => val[META.csort](b) - val[META.csort](a) || order(a, b) : order);
+  const th = (k, label, tip) => `<th class="num sortable${META.csort === k ? ' on' : ''}" data-csort="${k}" title="${tip}">${label}</th>`;
+  const strip = c => `<div class="mstrip">${stripHTML(c, CARDS, 1)}</div>`;
+  const lists = j.lists.map(l => `<div class="mlist"><div class="mlh"><b>${pct(l.wins, l.games) || '–'}%</b><span>${l.games} games</span></div>${deckBody(l.list.filter(c => CARDS[c]), CARDS, false, true)}</div>`).join('');
+  const theirs = c => c.p[0] >= min ? c.p[1] / c.p[0] : 0;
+  const opp = j.opp ? [...j.opp].filter(c => CARDS[c.card] && c.d[0] >= min).sort((a, b) => theirs(b) - theirs(a)) : null;
+  const flip = v => v ? [v[0], v[0] - v[1]] : v;   // their card's games counted with your wins
+  box.innerHTML = metaControls(true) + `<div class="mah"><a class="mback" href="#/ladder/meta">All decks</a><h3>${esc(j.name)}</h3><span class="mwr" style="${tint(base)}">${j.games ? base.toFixed(1) + '%' : '–'}</span><span class="dim">${j.games} games</span>${vsDd}</div>
+    <div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${th('play', 'In decks', 'Share of the games whose list runs it')}<th class="num">Copies</th>${th('with', 'With', 'Win rate of the lists that run it')}${th('without', 'Without', 'Win rate of the lists that do not')}
+      ${th('k', 'Mulligan', 'Win rate when kept in the starting hand')}${th('kept', 'Kept', 'How often it is kept when the mulligan shows it')}${th('d', 'Drawn', 'Win rate when drawn, starting hand included')}${th('p', 'Played', 'Win rate when played')}</tr></thead><tbody>
+      ${cards.map(c => `<tr><th class="an">${strip(c.card)}</th><td class="num dim">${(100 * c.play).toFixed(0)}%</td><td class="num dim">${c.copies ? c.copies.toFixed(1) : ''}</td>${rate(c.with)}${c.without[0] ? rate(c.without) : '<td></td>'}${rate(c.k)}<td class="num dim">${c.m[0] ? (100 * c.k[0] / c.m[0]).toFixed(0) + '%' : ''}</td>${rate(c.d)}${rate(c.p)}</tr>`).join('')}
+    </tbody></table></div>
+    ${opp ? `<h4 class="msub">${esc(j.vs_name)}'s cards</h4><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th><th class="num" title="Your win rate when they drew it">Drawn</th><th class="num" title="Your win rate when they played it">Played</th><th class="num">Games</th></tr></thead><tbody>
+      ${opp.map(c => `<tr><th class="an">${strip(c.card)}</th>${rate(flip(c.d))}${rate(flip(c.p))}<td class="num dim">${c.d[0]}</td></tr>`).join('')}</tbody></table></div>` : ''}
+    ${lists ? `<h4 class="msub">Lists</h4><div class="mlists">${lists}</div>` : ''}`;
+  wireMetaControls(box);
+  fitStrips(box);
+  box.querySelectorAll('th[data-csort]').forEach(t => t.onclick = () => { META.csort = META.csort === t.dataset.csort ? null : t.dataset.csort; fillMeta(); });
 }
 
 // The tutorial: a real game with a fixed deal against a gentle opponent, a coach teaching one step at a time (tutorial.js).
@@ -551,8 +616,8 @@ function ladderScreen() {
     ${piece(deckFace(h.my_cover, h.my_deck), side('mine', h.my_deck))}<span class="dk" ${side('mine', h.my_deck)}>${esc(h.my_deck)}</span>${bot(h) ? `${piece(deckFace(h.opp_cover, h.opp_deck), side('theirs', h.opp_deck))}<span class="dk" ${side('theirs', h.opp_deck)}>${esc(h.opp_deck)}</span>
     <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}${gid(h)}</span>` : `${piece(h.opp_cover, side('theirs', h.opp))}<span class="dk" ${side('theirs', h.opp)}>${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}${gid(h)}</span>`}</div>`).join('');
   // the leaderboard first (Martin, 2026-10-02), the match history its second tab, the meta report its third (2026-10-24)
-  const meta = location.hash === '#/ladder/meta', lead = !meta && location.hash !== '#/ladder/history';
-  app.innerHTML = `<div class="mscr ladder"><div class="hist"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${!lead && !meta ? ' on' : ''}" href="#/ladder/history">Match history</a><a class="ptab${meta ? ' on' : ''}" href="#/ladder/meta">Meta</a></div>${!lead && !meta && (hist || ui.histDeck) ? filter : ''}</div>
+  const meta = location.hash.startsWith('#/ladder/meta'), lead = !meta && location.hash !== '#/ladder/history';
+  app.innerHTML = `<div class="mscr ladder"><div class="hist${meta ? ' wide' : ''}"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${!lead && !meta ? ' on' : ''}" href="#/ladder/history">Match history</a><a class="ptab${meta ? ' on' : ''}" href="#/ladder/meta">Meta</a></div>${!lead && !meta && (hist || ui.histDeck) ? filter : ''}</div>
     <div class="hbody">${lead ? '<div class="lead lb" id="lboard"></div>' : meta ? '<div class="metar" id="metar"><p class="none">Loading…</p></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
     <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
   document.getElementById('back').onclick = () => { location.hash = '#/'; };

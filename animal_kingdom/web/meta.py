@@ -128,7 +128,7 @@ class Meta:
         since = time.strftime("%Y-%m-%d", time.gmtime(time.time() - (days - 1) * 86400)) if days else ""
         ok = lambda day, band: (days == 0 or day >= since) and lo <= band < hi
         mine = {s for s, g in arch.items() if g == x}
-        opp_ok = (lambda b: arch.get(b) == vs) if vs else (lambda b: b in arch)
+        opp_ok = (lambda b: arch.get(b) == vs) if vs else (lambda b: b in arch and b not in mine)   # the mirror left out, as in the overview
         per_list: dict[str, list[int]] = collections.defaultdict(lambda: [0, 0])
         for (day, band, a, b), (n, w) in self.games.items():
             if a in mine and opp_ok(b) and ok(day, band):

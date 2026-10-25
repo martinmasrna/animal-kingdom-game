@@ -21,7 +21,7 @@ def main(argv=None) -> None:
     ap.add_argument("--server", required=True)
     ap.add_argument("--facts", default="results/league/facts")
     ap.add_argument("--until", type=float, default=None)
-    ap.add_argument("--chunk", type=int, default=2000)
+    ap.add_argument("--chunk", type=int, default=500)   # under the server's 1 MB body limit
     args = ap.parse_args(argv)
     key = league_key()
     games = [json.loads(l) for f in sorted(Path(args.facts).glob("*.jsonl")) for l in f.read_text().splitlines() if l.strip()]

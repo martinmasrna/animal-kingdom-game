@@ -121,3 +121,25 @@ def test_a_retired_list_leaves_the_pool_and_stays_out_after_a_restart(monkeypatc
         assert server.league.retired() == {"fish"}
         assert (await c.post("/api/league/retire", json={"slugs": ["cats"]})).status == 403
     _run(monkeypatch, tmp_path, body)
+
+
+def test_card_facts_feed_the_meta_tab_by_martins_archetypes(monkeypatch, tmp_path):
+    from animal_kingdom.web import meta
+    (tmp_path / "a.json").write_text(json.dumps({"archetypes": [{"name": "Cats", "lists": ["cats"]}, {"name": "Fish Token", "lists": ["fish"]}]}))
+    monkeypatch.setattr(meta, "ARCHETYPES", tmp_path / "a.json")
+    cats, fish = load_premade_deck("cats"), load_premade_deck("fish")
+    side = lambda l: {"seen": l[:4], "back": [], "cards": [[l[0], 0, 1], [l[5], 2, None]]}
+    g = {"a": "bot:expert:cats", "b": "bot:expert:fish", "winner": "A", "seed": 1, "turns": 9, "reason": "hq_capture"}
+
+    async def body(c, server):
+        h = {"X-AK-League-Key": "k-test"}
+        assert (await c.post("/api/league/facts", json={"games": []})).status == 403
+        await c.post("/api/league/games", json={"games": [{**g, "t": 1e9 * 1.8, "facts": {"ra": 1500, "rb": 1500, "A": side(cats), "B": side(fish)}}]}, headers=h)
+        j = await (await c.post("/api/league/facts", json={"games": [{**g, "winner": "B", "ra": 1500, "rb": 1500, "A": side(cats), "B": side(fish)}]}, headers=h)).json()
+        assert j["counted"] == 1
+        o = await (await c.get("/api/meta?lo=1400&hi=1600")).json()
+        assert o["games"] == 2 and {r["name"]: r["wins"] for r in o["archetypes"]} == {"Cats": 1, "Fish Token": 1}
+        a = await (await c.get("/api/meta/archetype?id=cats&vs=fish_token")).json()
+        assert a["name"] == "Cats" and a["vs_name"] == "Fish Token" and {x["card"]: x["p"] for x in a["cards"]}[cats[0]] == [2, 1]
+        assert (await c.get("/api/meta/archetype?id=nope")).status == 404
+    _run(monkeypatch, tmp_path, body)
