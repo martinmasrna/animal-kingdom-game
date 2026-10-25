@@ -713,6 +713,18 @@ async def league_facts(req):
     return web.json_response({"counted": meta.add(g for g in games if isinstance(g, dict))})
 
 
+async def league_meta_forget(req):
+    """The Meta tab forgets every game of these lists, {slugs: [...]}: for a change to how a card plays that its print
+    does not show (an engine fix, a config number)."""
+    league_auth(req)
+    body = await req.json()
+    slugs = body.get("slugs") if isinstance(body, dict) else None
+    if not isinstance(slugs, list) or not all(isinstance(s, str) for s in slugs):
+        raise web.HTTPBadRequest(text="slugs: a list of list slugs")
+    meta.forget(slugs)
+    return web.json_response({"forgotten": len(slugs)})
+
+
 def _list_of(slug: str):
     try:
         return load_premade_deck(slug)
@@ -1357,6 +1369,7 @@ def make_app() -> web.Application:
         web.post("/api/league/games", league_games),
         web.post("/api/league/retire", league_retire),
         web.post("/api/league/facts", league_facts),
+        web.post("/api/league/meta/forget", league_meta_forget),
         web.get("/api/meta", meta_overview),
         web.get("/api/meta/archetype", meta_archetype),
         web.post("/api/league/decks", league_decks),
@@ -1398,6 +1411,10 @@ def make_app() -> web.Application:
         league = league_mod.Pool(profiles.db, DECK_NAMES)      # the lists the league added (web/league.py)
         ladder = ranking.Ladder(profiles.db, [s for s in sorted(BOT_DECKS) + league.slugs() if s not in league.retired()])   # ranked offers the bot pool: shipped, ladder and league decks, less the retired
         meta = meta_mod.Meta(profiles.db, _list_of)
+        with open(Path(__file__).resolve().parents[1] / "data" / ("cards" + ".json"), encoding="utf-8") as fh:
+            stale = meta.track(meta_mod.card_prints(json.load(fh)["cards"]))
+        if stale:
+            log.info("meta: cards changed, %d lists count again from the new cards", len(stale))
         if ladder.apply_seed(Path(__file__).parent / "ladder_seed.json"):   # the bots' ratings from simulation (sim/ladder_seed.py)
             log.info("ladder: bots seeded from ladder_seed.json")
         custom_decks.load()

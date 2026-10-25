@@ -60,3 +60,20 @@ def test_counts_survive_a_restart_and_a_child_list_joins_its_parents_archetype(t
     assert again.overview({"cats": "C", "fish": "F"}, {"C": "C", "F": "F"}, 0, 10000, 0)["games"] == 1
     arch, names = archetype_map({"tinker_x": {"parent": "tinker_y"}, "tinker_y": {"parent": "cats"}}, ["tinker_x", "cats"])
     assert arch["tinker_x"] == arch["cats"] and names[arch["cats"]] == "Cats"
+
+
+def test_a_changed_card_forgets_the_games_of_every_list_holding_it_and_only_those(tmp_path):
+    db = sqlite3.connect(str(tmp_path / "m.db"))
+    lists = lambda s: load_premade_deck(s) if s in ("cats", "fish", "canines") else None
+    m = Meta(db, lists)
+    canines = {**_game("A"), "b": "bot:expert:canines", "B": {"seen": [], "back": [], "cards": []}}
+    fish_canines = {**_game("A"), "a": "bot:expert:fish", "b": "bot:expert:canines", "A": {"seen": [], "back": [], "cards": []},
+                    "B": {"seen": [], "back": [], "cards": []}}
+    m.add([_game("A"), canines, fish_canines])
+    prints = {c: "1" for s in ("cats", "fish", "canines") for c in load_premade_deck(s)}
+    assert m.track(prints) == set()                                   # the first prints are the baseline
+    only_cats = next(c for c in load_premade_deck("cats") if c not in load_premade_deck("fish") + load_premade_deck("canines"))
+    assert m.track({**prints, only_cats: "2"}) == {"cats"}
+    assert {k[2:4] for k in m.games} == {("fish", "canines"), ("canines", "fish")}   # cats' games gone, both sides
+    m2 = Meta(db, lists)                                              # and gone from the database
+    assert {k[2:4] for k in m2.games} == {("fish", "canines"), ("canines", "fish")} and m2.track({**prints, only_cats: "2"}) == set()

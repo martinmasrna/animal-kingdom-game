@@ -5,11 +5,16 @@ began). It is counted under its day, its rating band (the two ratings' mean, in 
 side, every card of its own list that was seen in the mulligan (m), kept in the starting hand (k), drawn at any point (d)
 and played (p), each with that side's wins. A list is an exact 30 cards that never changes, so archetypes are only a
 mapping over lists, applied when asked: Martin's (data/archetypes.json), a later list joining its parent's.
+
+Only games on the current cards count (Martin, 2026-10-25): the server keeps each card's print (its rules, not its name or
+habitat) and, starting with cards changed since the last start, forgets every game of a list holding a changed card, both
+sides of it, so that list counts again from its new cards while lists untouched by the change keep theirs.
 """
 
 from __future__ import annotations
 
 import collections
+import hashlib
 import json
 import time
 from pathlib import Path
@@ -24,7 +29,15 @@ SCHEMA = """
 CREATE TABLE IF NOT EXISTS meta_games (day TEXT, band INTEGER, a TEXT, b TEXT, n INTEGER, w INTEGER, PRIMARY KEY (day, band, a, b));
 CREATE TABLE IF NOT EXISTS meta_cards (day TEXT, band INTEGER, a TEXT, b TEXT, card TEXT, ev TEXT, n INTEGER, w INTEGER,
     PRIMARY KEY (day, band, a, b, card, ev));
+CREATE TABLE IF NOT EXISTS meta_prints (card TEXT PRIMARY KEY, h TEXT);
 """
+NOT_RULES = {"name", "species", "habitat", "related", "unnamed"}   # what a card is called and where it lives, not how it plays
+
+
+def card_prints(cards: Iterable[dict]) -> dict[str, str]:
+    """Each card's print: a hash of everything on it that plays (the card data's entries)."""
+    return {c["id"]: hashlib.sha1(json.dumps({k: v for k, v in c.items() if k not in NOT_RULES}, sort_keys=True).encode()).hexdigest()
+            for c in cards}
 
 
 def slug_of(lid: str) -> str:
@@ -56,6 +69,31 @@ class Meta:
         for day, band, a, b, card, ev, n, w in db.execute("SELECT day, band, a, b, card, ev, n, w FROM meta_cards"):
             self.cards[(day, band, a, b, card, ev)] = [n, w]
         self._cache: dict[tuple, tuple[float, dict]] = {}
+
+    # ------------------------------------------------------------------ current cards
+    def track(self, prints: dict[str, str]) -> set[str]:
+        """Forget the games of every list holding a card whose print changed since the last call; the lists forgotten."""
+        old = dict(self.db.execute("SELECT card, h FROM meta_prints"))
+        changed = {c for c in old.keys() | prints.keys() if old.get(c) != prints.get(c)} if old else set()
+        stale = {s for key in self.games for s in key[2:4] if changed & set(self.lists(s) or ())}
+        self.forget(stale)
+        with self.db:
+            self.db.execute("DELETE FROM meta_prints")
+            self.db.executemany("INSERT INTO meta_prints VALUES (?, ?)", prints.items())
+        return stale
+
+    def forget(self, slugs: Iterable[str]) -> None:
+        """Every game a list played, both sides of it, gone."""
+        slugs = set(slugs)
+        if not slugs:
+            return
+        self.games = {k: v for k, v in self.games.items() if k[2] not in slugs and k[3] not in slugs}
+        self.cards = {k: v for k, v in self.cards.items() if k[2] not in slugs and k[3] not in slugs}
+        marks = ",".join("?" * len(slugs))
+        with self.db:
+            for t in ("meta_games", "meta_cards"):
+                self.db.execute(f"DELETE FROM {t} WHERE a IN ({marks}) OR b IN ({marks})", (*slugs, *slugs))
+        self._cache.clear()
 
     # ------------------------------------------------------------------ counting
     def add(self, games: Iterable[dict]) -> int:
