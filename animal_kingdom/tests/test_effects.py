@@ -750,6 +750,16 @@ def test_hornet_has_no_effect_without_a_spare_copy():
     assert s.owner_of("3,2") == "B"
 
 
+
+def test_hornet_removes_nothing_when_its_spare_is_gone_before_the_roar_resolves():
+    s = make_state(hands={"A": ["hornet"]}, decks={"A": ["hornet"], "B": []})
+    put(s, "1,2", "caracal", "A")
+    put(s, "3,2", "lion", "B")
+    rules.apply_action(s, PlaceAction("hornet", ("cr", "2,2")))
+    s.decks["A"].remove("hornet")                       # the spare leaves the deck while the Roar waits
+    rules.apply_action(s, ChoiceAction("3,2"))
+    assert s.owner_of("3,2") == "B" and s.remove_pile == []   # nothing to discard, so nothing removed
+
 # ================================================================ Stage 2.4: mass effects
 
 def test_pestis_wipes_an_adjacent_enemy_and_everything_under_it():

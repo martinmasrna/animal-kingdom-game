@@ -1762,6 +1762,9 @@ fn op_hornet_kill(st: &mut State, step: &mut Map) -> Option<Pending> {
         return None;
     }
     let hornet = st.card_id("hornet").unwrap();
+    if !cards::has_spare_copy(st, chooser, hornet) {
+        return None; // no other Soldier Hornet left by the time the Roar resolves: nothing to discard, so nothing removed
+    }
     cards::remove_another_copy(st, chooser, hornet);
     let cr = st.map().cr(choice.as_str().unwrap()).unwrap();
     remove_top(st, cr, chooser, true, Some(hornet));

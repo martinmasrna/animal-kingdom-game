@@ -2234,8 +2234,8 @@ def _op_hornet_kill(state, step):
     # The cost is paid when it can be (Martin, 2026-10-21: a Roar's cost is never declined); the Roar only asks which enemy.
     if "choice" not in step:
         return PendingRequest("choice", step["chooser"], optional=False, options=step["options"])
-    if step["choice"] == SKIP:
-        return None
+    if step["choice"] == SKIP or not _has_spare_copy(state, step["chooser"], "hornet"):
+        return None   # no other Soldier Hornet left by the time the Roar resolves: nothing to discard, so nothing removed
     _remove_another_copy(state, step["chooser"], "hornet")
     remove_top(state, step["choice"], by_player=step["chooser"], by_card="hornet")
     return None

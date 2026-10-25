@@ -255,7 +255,7 @@ fn adjacent_enemy_unit_crossroads(st: &State, unit: &Unit, cr: Cr, chosen: bool)
         .collect()
 }
 
-fn has_spare_copy(st: &State, player: Player, card: CardId) -> bool {
+pub fn has_spare_copy(st: &State, player: Player, card: CardId) -> bool {
     st.hands[player as usize].iter().any(|u| u.card == card) || st.decks[player as usize].contains(&card)
 }
 
