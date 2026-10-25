@@ -13,7 +13,7 @@ The cold walkthrough of 17 October (a Sonnet agent on a test server; screenshots
 ## Rules
 
 - Bot difficulty comes from real strength only. No handicaps, no extra cards or food, no cheats of any kind (Martin: "a lazy solution, garbage user experience").
-- The yardstick for the top bot is Martin's own win rate against it in his games, at or under 55%. Bot-vs-bot numbers rank candidates, never decide.
+- The yardstick for the top bot is its rating on the one ladder (`bots.md`), where every game counts, a person's or a bot's (Martin, 2026-10-24). From Martin's seat the goal reads as his win rate against it at or under 55%.
 - Bug fixes deploy once the fast tiers pass. Anything that changes how the game feels waits for Martin.
 - Out of scope for now: art, best-of-3, simulated balance tuning, async play, self-play bots. Async play (take your turn when you visit) is the likely milestone after.
 
@@ -29,7 +29,7 @@ The cold walkthrough of 17 October (a Sonnet agent on a test server; screenshots
 
 ### 2. The climb
 
-The bots are opponents, not balance instruments (Martin, 2026-10-17; `bots.md` opens with it). The measure is the ladder rating against people per bot and deck; baseline 17 October: Expert Cats 1921, Martin and Kalista 1870 (beating the Expert three in four), Laras 2367; goal: the best pairing near 2100.
+The bots are opponents, not balance instruments (Martin, 2026-10-17), and players like any other (Martin, 2026-10-24); `bots.md` opens with both. The measure is the ladder rating per pilot and deck; baseline 17 October: Expert Cats 1921, Martin and Kalista 1870 (beating the Expert three in four), Laras 2367; goal: the best pairing near 2100.
 
 - Depth first. The search never imagines its own next turn; at the leaf, after the opponent's reply, it now plays its own next turn and their reply with the fast policy and scores after, a second turn of sight at about twice the cost. Acceptance: a Zebra puzzle (the legendary played on turn one for one card), the Taipan puzzle, an A/B against today's Expert at ten games, the time per move under the 15 s limit, then it ships as the web Expert and the ladder is re-seeded.
 - Then decks that suit a bot (the ladder bots play the lists a bot wins most with, not the human-tuned starters) and per-deck evaluation for ladder bots, each measured against the baseline.
