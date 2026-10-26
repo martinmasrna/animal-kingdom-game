@@ -259,7 +259,7 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 2,
+      "base_strength": 4,
       "text": "Roar: return an animal from your Remove Pile to your hand.",
       "keywords": [],
       "species": "Raccoon",
@@ -1307,7 +1307,7 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 2,
+      "base_strength": 3,
       "text": "Roar: draw a card. When an enemy is placed next to this, draw a card.",
       "keywords": [],
       "species": "Meerkat",
@@ -1518,7 +1518,7 @@
       "tags": [
         "Arachnid"
       ],
-      "base_strength": 4,
+      "base_strength": 5,
       "text": "When an enemy with Flight or Roam is placed next to this, remove it.",
       "keywords": [],
       "species": "Golden Orb-Weaver",
@@ -2575,7 +2575,7 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 2,
+      "base_strength": 4,
       "text": "Roar: return an adjacent ally to your hand.",
       "keywords": [],
       "species": "Opossum",
@@ -2781,7 +2781,7 @@
       "tags": [
         "Bird"
       ],
-      "base_strength": 2,
+      "base_strength": 3,
       "text": "Flight. Roar: your next Roar this turn happens twice.",
       "keywords": [
         "Flight"
@@ -3745,7 +3745,7 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 2,
+      "base_strength": 3,
       "text": "Roar: your opponent takes only 1 action next turn.",
       "species": "Electric Eel",
       "habitat": "Jungle",

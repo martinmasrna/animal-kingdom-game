@@ -19,7 +19,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Raccoon** | 2 | — | 2 | Roar: return an animal from your Remove Pile to your hand. |
+| **Raccoon** | 2 | — | 4 | Roar: return an animal from your Remove Pile to your hand. |
 | **Earthworm** | 2 | — | 1 | When this is removed, draw a card and place two Worms on its crossroad. |
 | **Sperm Whale** | 2 | — | 8 | Titan. Roar: remove all adjacent animals. |
 | **Dart Frog** | 2 | — | 1 | Reach. Poison. When this is removed, remove all animals next to it. |

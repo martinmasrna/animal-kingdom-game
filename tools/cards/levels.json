@@ -1522,6 +1522,16 @@
       "note": "Martin, 2026-10-15, mid-gauntlet: it catches roamers too (a roam that lands beside it counts).",
       "by": "claude",
       "at": 1792097016
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Strength buffs with Martin, 2026-10-26",
+      "by": "claude",
+      "at": 1793015429
     }
   },
   "gopher": {
@@ -2333,6 +2343,16 @@
       "note": "moved from food_aggro to food_otk",
       "by": "claude",
       "at": 1792747912
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "Strength buffs with Martin, 2026-10-26",
+      "by": "claude",
+      "at": 1793015427
     }
   },
   "tortoise_legend": {
@@ -4182,6 +4202,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792105989
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "Strength buffs with Martin, 2026-10-26",
+      "by": "claude",
+      "at": 1793015423
     }
   },
   "roach": {
@@ -4206,6 +4236,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792140512
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 2
+      },
+      "note": "Strength buffs with Martin, 2026-10-26",
+      "by": "claude",
+      "at": 1793015425
     }
   },
   "great_white_shark": {
@@ -4457,9 +4497,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "Martin 2026-10-17",
+      "note": "Strength buffs with Martin, 2026-10-26",
       "by": "claude",
-      "at": 1792250814
+      "at": 1793015426
     }
   },
   "warthog": {
@@ -5026,7 +5066,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792682843
+      "at": 1793015428,
+      "note": "Strength buffs with Martin, 2026-10-26"
     },
     "rarity": {
       "review": {

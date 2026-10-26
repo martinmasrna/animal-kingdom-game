@@ -20,9 +20,9 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Porcupine** | 2 | Rodent | 5 | Spikes. Your adjacent animals have Spikes. |
-| **Golden Orb-Weaver** | 2 | Arachnid | 4 | When an enemy with Flight or Roam is placed next to this, remove it. |
+| **Golden Orb-Weaver** | 2 | Arachnid | 5 | When an enemy with Flight or Roam is placed next to this, remove it. |
 | **Armadillo** | 2 | — | 5 | Armor. Your adjacent animals have Armor. |
-| **Meerkat** | 2 | — | 2 | Roar: draw a card. When an enemy is placed next to this, draw a card. |
+| **Meerkat** | 2 | — | 3 | Roar: draw a card. When an enemy is placed next to this, draw a card. |
 
 ### Common
 
