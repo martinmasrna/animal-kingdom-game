@@ -14,9 +14,7 @@ seat's perspective. `ExplorationBot` is the training-only policy that generates 
 `GreedyBot` (so its choices reflect the weights actually being trained) wrapped with
 epsilon-greedy exploration and afterstate recording.
 
-Deck sampling draws from the "36 unordered pairs" pool: the 7 premade decks plus the
-synergy-free `baseline` deck (`decks.BASELINE_DECK`) - 8 decks, C(8,2)+8 = 36 unordered pairs
-including mirrors.
+Deck sampling draws from every unordered pair of the starter decks, mirrors included.
 """
 
 from __future__ import annotations
@@ -35,18 +33,15 @@ from ..engine.actions import Action
 from ..engine.config import Config
 from ..engine.state import GameState, StateView, new_game, other_player
 
-BASELINE_SLUG = "baseline"
-
-
 def deck_pool() -> tuple[str, ...]:
-    """The 8 decks episodes sample from: the 7 premades + the baseline deck."""
+    """The decks episodes sample from: the starters."""
     from ..engine.cards import DECK_SLUGS
 
-    return tuple(sorted(DECK_SLUGS)) + (BASELINE_SLUG,)
+    return tuple(sorted(DECK_SLUGS))
 
 
 def all_deck_pairs() -> tuple[tuple[str, str], ...]:
-    """Every unordered pair (including mirrors) of `deck_pool()` - 36 for the 8-deck pool."""
+    """Every unordered pair (including mirrors) of `deck_pool()`."""
     pool = deck_pool()
     return tuple(
         (pool[i], pool[j])

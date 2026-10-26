@@ -3007,13 +3007,6 @@ def _base_int(state, card_id):
 
 # --- Reserve and test fixtures ----------------------------------------------------------------------------------
 
-def _mock_saboteur_place(state, unit, cr):
-    # Baseline yardstick card: bare random hand-disruption (Black Swan's seeded discard, so it stays honest).
-    hand = state.hands[other_player(unit.owner)]
-    if hand:
-        remove_from_hand(state, other_player(unit.owner), state.rng.choice(hand))
-
-
 OPS.update({
     "hornet_kill": _op_hornet_kill,
     "rat_legend_2_wipe": _op_pestis_wipe,
@@ -3050,7 +3043,6 @@ def _poison_covered(state, covered, coverer):
 
 
 _draw1 = _draws()
-_draw_test = _draws("test_draw")
 
 
 EFFECTS: dict[str, dict[str, Callable]] = {
@@ -3236,9 +3228,4 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # The tutorial's own cards, as they were when it was written.
     "tutorial_lynx": {"on_place": _conditional(_draw1)},
     "tutorial_chipmunk": {"on_place": _chipmunk_place},
-    # The self-play baseline deck's calibration bodies (decks.BASELINE_DECK).
-    "mock_scout": {"on_place": _draw1},
-    "mock_saboteur": {"on_place": _mock_saboteur_place},
-    "mock_draw2": {"on_place": _draw_test},
-    "mock_removal": {"on_place": _removes()},
 }

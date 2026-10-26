@@ -46,7 +46,6 @@ The map. Read it first each session and keep it current: when something here cha
 ## Engine debt
 
 - Printed numbers are in `Config` and guarded against the card text for food, costs, draws ("draw N cards/Snakes") and Raven's shuffle (`test_card_text_consistency.py`). The "draw a card" riders print no number and stay 1 in effect code.
-- `benchmark_set` checkpoints don't fingerprint card data or config values.
 - Before any neural-net bot: move game state to struct-of-arrays for cheap clones (measure clone cost first).
 
 ## Where things live

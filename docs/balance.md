@@ -24,25 +24,6 @@ The workspace's `balance-eval` skill holds the full procedure. In short:
 - `./report N` plays the round-robin (or `--deck X [--opponent Y]`) and prints the matchup matrix and per-card impact; `--format files --out DIR` writes CSV/JSON, `--log FILE` records every game for `sim.replay`.
 - `sim/rules_ab.py` A/Bs a rules change over the full matrix with paired seeds.
 - **Paired swaps** price a card: the deck's win rate minus the same deck with that card's copies replaced in place by vanilla 7s (Cape Buffalo), on the same seeds, both seats. Games only differ once a swapped card matters (5–15% of them), so about 6,000 GreedyBot games give ±1 point in about a minute. A card priced in its home deck and again in goodstuff gives its **synergy**: home value minus pile value. The scripts are in the untracked `results/card-value-2026-09-26/`; promote them to `sim/` once the method has settled.
-- `sim/benchmark_set.py` plays the fixed baseline deck against the field, scoring both seats' cards in one pass. It checkpoints and resumes, but the resume key doesn't fingerprint card data or config values: never resume a run across a card or config change.
-
-## The baseline deck ruler
-
-The plan for pricing cards in absolute terms: a fixed, synergy-free 30-card reference deck (`decks.BASELINE_DECK`: 18 common, 8 rare, 4 legendary, one copy each, including calibration bodies such as vanilla 5 to 10). Because it never changes, it measures card power and drift without the coupled 7×7 matrix, and it gives every synergy deck a meaningful target: beat a pile of merely good cards.
-
-Decided:
-
-- Pilot everything recorded with RefereeBot; greedy is for quick probes only.
-- Anchor within each rarity. A fair common matches the vanilla 7 ground body and the vanilla 5 flyer, which are asserted equal: that prices Flight at about +2 strength, and the rig checks it. Rare and legendary anchors are set by feel on the same ladder; the rarity premium exists because a deck has only 4 legendary and 8 rare slots.
-
-Caveats that survive:
-
-1. Pilot bias favours the baseline, since a synergy-free deck is the easiest to pilot. A scaling deck (egg, ramp) that "loses to baseline" needs human play before any redesign.
-2. The anchor values set the whole game's power level. That's a design decision to own, not a measurement.
-3. Strength is not flat. Paired swaps on GreedyBot (Cats, its three Lions replaced by vanilla bodies, 6,000 games each) give 5: 62.3%, 6: 64.3%, 7: 65.3%, 8: 66.3%, 9: 68.2%, monotonic, about 1–2 points per strength step, with the smallest steps around 7. The earlier "5 to 8 perform about the same" came from the impact metric and is void.
-4. Beating the baseline doesn't make two decks balanced against each other; the 7×7 check is still needed.
-
-Status: the roster is built and was tuned once, but its run was killed when two of its own cards (Black Bear, Grizzly Bear) turned out to cheat under the old timer bug. Next is the full fresh run: `.venv/bin/python -m animal_kingdom.sim.benchmark_set --pilot referee --games 500`, both seats, all 7 decks.
 
 ## Current data (2026-09-29, current ruleset and pool)
 

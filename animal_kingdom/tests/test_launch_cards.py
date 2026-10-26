@@ -1382,8 +1382,8 @@ def test_vesper_is_placed_from_the_deck_too():
 
 
 def test_vesper_lands_on_any_strength_and_skips_connection():
-    s = _queen_covered_by("mock_vanilla_10", b_hand=["hornet_legend"])   # 5 on a 10, far from B's den
-    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "mock_vanilla_10", "hornet_legend"]
+    s = _queen_covered_by("blue_whale", b_hand=["hornet_legend"])   # a 3 on a 12, far from B's den
+    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "blue_whale", "hornet_legend"]
 
 
 def test_vesper_on_the_board_or_in_the_remove_pile_does_nothing():

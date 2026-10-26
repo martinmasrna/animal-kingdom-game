@@ -30,25 +30,20 @@ FOOD_IDX = features.RUNG0_FEATURES.index("food_progress")
 
 # --------------------------------------------------------------------- deck pool / pairs
 
-def test_deck_pool_is_the_twelve_starters_plus_baseline():
+def test_deck_pool_is_the_twelve_starters():
     pool = deck_pool()
-    assert len(pool) == 13
-    assert "baseline" in pool
+    assert len(pool) == 12
+    assert "baseline" not in pool
 
 
-def test_all_deck_pairs_is_91_unordered_pairs_including_mirrors():
+def test_all_deck_pairs_is_78_unordered_pairs_including_mirrors():
     pool = deck_pool()
     index = {d: i for i, d in enumerate(pool)}
     pairs = all_deck_pairs()
-    assert len(pairs) == 91
-    assert len(set(pairs)) == 91               # no duplicates
+    assert len(pairs) == 78
+    assert len(set(pairs)) == 78               # no duplicates
     assert all(index[a] <= index[b] for a, b in pairs)   # canonical (unordered) form
-    assert sum(1 for a, b in pairs if a == b) == 13  # every deck mirrors itself once
-
-
-def test_baseline_deck_is_loadable():
-    from animal_kingdom.decks import load_premade_deck
-    assert len(load_premade_deck("baseline")) == 30
+    assert sum(1 for a, b in pairs if a == b) == 12  # every deck mirrors itself once
 
 
 # --------------------------------------------------------------------- episode determinism

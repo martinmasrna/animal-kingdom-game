@@ -83,7 +83,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
-        | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "mock_scout" | "mock_saboteur" | "mock_draw2" | "mock_removal" => &[OnPlace],
+        | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" => &[OnPlace],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
         "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "queen_ant" | "scout_bee" | "army_ant_legend"
@@ -811,7 +811,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 push_remove_choice(st, owner, rat, t, false);
             }
         }
-        ("bat", OnPlace) | ("dolphin", OnPlace) | ("mock_scout", OnPlace) => draws(st, unit, 1),
+        ("bat", OnPlace) | ("dolphin", OnPlace) => draws(st, unit, 1),
         ("mouse", OnPlace) => draws_filtered(st, unit, "tag:Rodent", 1),
         // Egg Control
         ("anaconda_legend", OnEndOfTurn) => {
@@ -841,7 +841,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             shuffle_back(st, owner, &vec![egg; n], Some(owner));
         }
         ("bat_legend", OnStartOfTurn) => push_draw(st, owner, 1),
-        ("swan_legend", OnDraw) | ("mock_saboteur", OnPlace) => {
+        ("swan_legend", OnDraw) => {
             let opp = other(owner);
             if !st.hands[opp as usize].is_empty() {
                 let i = st.rng.choice_index(st.hands[opp as usize].len());
@@ -1267,11 +1267,6 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let g = cfg(st, "dingo_grant");
             grant(st, iids, g);
         }
-        ("mock_draw2", OnPlace) => {
-            let n = cfg(st, "test_draw");
-            draws(st, unit, n);
-        }
-        ("mock_removal", OnPlace) => removes(st, unit, cr, None, None),
         _ => {}
     }
 }

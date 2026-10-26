@@ -161,7 +161,6 @@ class Config:
     raven_draw: int = 3                 # Raven's Roar: cards drawn...
     raven_shuffle: int = 2              # ...then shuffled back from the hand
     nurse_bee_draw: int = 2             # Nurse Bee: drawn with 4 or more Colony animals (Martin's sheet, 2026-10-24)
-    test_draw: int = 2                  # the mock and calibration cards' "draw 2 cards" (test fixtures)
     viper_poison: int = 3               # Viper's permanent strength loss on the bitten enemy
     black_mamba_max: int = 6                 # Black Mamba removes an adjacent enemy of at most this strength
     anaconda_legend_decay: int = 1                  # Eon's strength lost each time it shuffles itself back

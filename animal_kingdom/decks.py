@@ -47,20 +47,6 @@ PANEL_OPPONENTS: tuple[str, ...] = ("cats", "den_rush", "fish")   # the benchmar
 assert all(d in BOT_DECKS for d in PANEL_OPPONENTS), PANEL_OPPONENTS
 
 
-# The no-synergy "baseline" deck: 30 distinct self-sufficient cards (18 common / 8 rare /
-# 4 legendary, 1 copy each) plus minted calibration bodies (the `mock_*` reserve cards). Not a
-# shipped deck; self-play trains against it as an eighth, synergy-free opponent.
-BASELINE_DECK: list[str] = [
-    # common
-    "lion", "eagle", "bat", "squirrel", "mock_scout", "mock_saboteur", "fox",
-    "anaconda", "jackal", "mock_armor_6", "black_bear", "grizzly_bear", "mock_vanilla_5",
-    "mock_vanilla_6", "mock_vanilla_8", "mock_vanilla_9", "mock_apex_5", "mock_apex_6",
-    # rare
-    "jerboa", "jaguar", "serval", "hawk", "porcupine", "polar_bear", "rhinoceros", "mock_draw2",
-    # legendary
-    "greywhisker", "mock_removal", "mock_vanilla_10", "mock_flyer_7",
-]
-
 # The goodstuff pile: the greedy optimizer's best cross-deck list over the old seven-deck pool
 # (2026-09-29), its cards as they are now (Gaboon Viper for the retired Taipan). Stale since the
 # launch decks: kept loadable as the sim tools' default pile until the optimizer runs again.
@@ -70,14 +56,14 @@ GOODSTUFF_DECK: list[str] = (
     + ["wolf", "elephant", "lemming", "lion", "mouse", "tiger"] * 3
 )
 
-# Decks loadable by slug that are not shipped premades: the baseline, the goodstuff pile, and
+# Decks loadable by slug that are not shipped premades: the goodstuff pile, and
 # synthetic decks the sim tools register (optimizer candidates, other piles, which may take the
 # "goodstuff" slug over for their own run). Registered decks are mirrored into
 # $AK_EXTRA_DECKS so `spawn`ed worker processes, which re-import this module, load them too.
 # A test opponent for the web client, reached by link only (#/?botdeck=lions30): Martin's heuristic that every deck
 # must beat 30 vanilla Lions. Not a legal deck (three copies at most), so never offered in the deck pickers.
 TEST_BOT_DECKS = {"lions30": ["lion"] * 30}
-EXTRA_DECKS: dict[str, list[str]] = {"baseline": BASELINE_DECK, "goodstuff": GOODSTUFF_DECK, **TEST_BOT_DECKS}
+EXTRA_DECKS: dict[str, list[str]] = {"goodstuff": GOODSTUFF_DECK, **TEST_BOT_DECKS}
 EXTRA_DECKS.update(json.loads(os.environ.get("AK_EXTRA_DECKS", "{}")))
 
 

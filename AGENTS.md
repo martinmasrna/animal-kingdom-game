@@ -24,7 +24,7 @@ Python ≥3.11 with a venv at `.venv`: `python3 -m venv .venv && .venv/bin/pip i
 - Game logs: `deploy/nightly.sh` pulls the human games from live and staging into `results/human_games/` every night at 05:30 and commits them (launchd, `deploy/com.animal-kingdom.nightly.plist`, installed on Martin's Mac; log in `~/Library/Logs/animal-kingdom-nightly.log`). `deploy/deploy.sh pull [staging]` does it by hand.
 - Balance report: `./report 200` (round-robin; `--deck X --opponent Y` to scope, `--format files --out DIR` for CSV/JSON, every run records its games to `results/logs/<time>.jsonl`, `--log FILE` to pick the path, `--no-log` to skip). Every simulation keeps its game log: an ad-hoc script calling `run_pairs` passes `log_actions=True` and writes with `sim.replay.write_game_logs`, so questions about how games went are answered from logs, not new runs. Replay a logged game with no bot compute: `.venv/bin/python -m animal_kingdom.sim.replay FILE`.
 - Measuring a bot change: the `bot-change` skill (`.claude/skills/bot-change/SKILL.md`); `tools/bot_bench/bench.sh` runs the paired benchmark (`sim.bot_comparison`) on a frozen checkout.
-- Deckbuilding by bots: `sim.deck_optimizer`, `sim.metagame_search`, `sim.measure_deck`, `sim.benchmark_set`.
+- Deckbuilding by bots: `sim.deck_optimizer`, `sim.metagame_search`, `sim.measure_deck`.
 - After changing `cards.json`, regenerate the deck docs' card tables: `.venv/bin/python -m animal_kingdom.render.deck_docs`.
 
 The ruleset (map_b, two actions per turn, Draw draws 2) is the default everywhere; no flags needed. `results/` is untracked except `results/human_games/`: human recordings are irreplaceable, so commit them.
