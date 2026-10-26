@@ -854,7 +854,14 @@
     },
     "strength": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 0
+      },
+      "note": "Martin, 2026-10-26: it's placed before it copies, so its own strength decides what it can cover",
+      "at": 1793030476
     },
     "effect": {
       "lv": "draft",

@@ -20,7 +20,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Hornet** | 2 | Colony | 2 | Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy. |
-| **Chameleon** | 2 | — | 0 | Roar: become a copy of an animal in your hand. |
+| **Chameleon** | 2 | — | 2 | Roar: become a copy of an animal in your hand. |
 | **Skunk** | 2 | — | 4 | Roar: return an adjacent enemy to its owner's hand. It can't be played next turn. |
 | **Mole** | 2 | — | 2 | Roar: play another animal next to this. |
 

@@ -680,7 +680,7 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 0,
+      "base_strength": 2,
       "text": "Roar: become a copy of an animal in your hand.",
       "species": "Chameleon",
       "habitat": "Jungle",

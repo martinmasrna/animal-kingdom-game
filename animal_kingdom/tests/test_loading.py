@@ -62,7 +62,7 @@ def test_known_cards_present_with_expected_data():
     # Only the Egg Eater is dynamic; the Python grows by a counter (wherever it is).
     assert cards["egg_eater"].is_dynamic and not cards["python"].is_dynamic
     assert cards["egg_eater"].dynamic_strength == "removed_eggs_count"
-    assert cards["chameleon"].base_strength == 0
+    assert cards["hercules_beetle"].base_strength == 0
     assert cards["tiger"].has_keyword("Apex Predator")
     assert cards["eagle"].has_keyword("Flight")
     assert cards["lion"].has_tag("Cat")
