@@ -70,7 +70,7 @@ class Config:
     crocodile_penalty: int = 3           # Crocodile: -3 during your opponent's turn
     buffalo_anthem: int = 1              # Cape Buffalo: your other Hoofed animals have +1 during your opponent's turn
     hand_per_card: int = 1               # [PLACEHOLDER]: +1 for each other card in your hand
-    albatross_max: int = 3               # Albatross: remove all adjacent enemies of strength 3 or less
+    albatross_max: int = 2               # Albatross: remove all adjacent enemies of strength 2 or less
 
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
     dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn
@@ -119,8 +119,8 @@ class Config:
     # --- Removal-strength caps on Roar removals ---
     jaguar_max: int = 4
     honey_badger_min: int = 6            # Honey Badger removes an enemy of strength >= this
-    stoop_max: int = 4                   # Hawk
-    rhinoceros_max: int = 3
+    stoop_max: int = 3                   # baseline-ruler tuning 2026-07-13: str 4→3, remove ≤4→≤3
+    rhinoceros_max: int = 2              # baseline-ruler tuning 2026-07-13: remove-all ≤3→≤2
     hippopotamus_max: int = 3
     cuckoo_legend_max: int = 4           # the legendary Cuckoo: removes an adjacent animal of strength <= this
 
@@ -163,7 +163,7 @@ class Config:
     nurse_bee_draw: int = 2             # Nurse Bee: drawn with 4 or more Colony animals (Martin's sheet, 2026-10-24)
     test_draw: int = 2                  # the mock and calibration cards' "draw 2 cards" (test fixtures)
     viper_poison: int = 3               # Viper's permanent strength loss on the bitten enemy
-    black_mamba_max: int = 6                 # Black Mamba removes an adjacent enemy of at most this strength
+    black_mamba_max: int = 5                 # Black Mamba removes an adjacent enemy of at most this strength
     anaconda_legend_decay: int = 1                  # Eon's strength lost each time it shuffles itself back
 
     # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the

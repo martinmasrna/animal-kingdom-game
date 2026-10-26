@@ -704,8 +704,8 @@ def test_soldier_ant_removal_gated_on_four_colony():
 def test_rhinoceros_sweeps_only_small_adjacent_enemies():
     s = make_state(hands={"A": ["rhinoceros"]})
     put(s, "1,2", "lion", "A")
-    put(s, "3,2", "tuna", "B")                          # 3 - removed (<= 3)
-    put(s, "2,3", "warthog", "B")                       # 4 - survives
+    put(s, "3,2", "naked_mole_rat", "B")                # 2 - removed (<= 2)
+    put(s, "2,3", "tuna", "B")                        # 3 - survives (threshold tightened 5->2)
     put(s, "2,1", "lion", "B")                          # 7 - survives
     rules.apply_action(s, PlaceAction("rhinoceros", ("cr", "2,2")))
     assert s.owner_of("3,2") is None
@@ -991,16 +991,16 @@ def test_magpie_takes_a_random_enemy_card_then_discards_one_of_yours():
     assert all(u.owner == "A" for u in s.hands["A"])
 
 
-def test_black_mamba_removes_an_adjacent_enemy_of_strength_6_or_less():
+def test_black_mamba_removes_an_adjacent_enemy_of_strength_5_or_less():
     s = make_state(hands={"A": ["black_mamba"]})
-    put(s, "2,1", "jaguar", "B")                          # a 6: in reach
+    put(s, "2,1", "jaguar", "B")                          # a 5: in reach
     apply_click(s, PlaceAction("black_mamba", ("cr", "1,1")))
     assert "jaguar" in s.remove_pile
 
     s2 = make_state(hands={"A": ["black_mamba"]})
-    put(s2, "2,1", "lion", "B")                           # a 7: out of reach
+    put(s2, "2,1", "cougar", "B")                         # a 6: out of reach
     apply_click(s2, PlaceAction("black_mamba", ("cr", "1,1")))
-    assert s2.top_unit("2,1").card_id == "lion"
+    assert s2.top_unit("2,1").card_id == "cougar"
 
 
 def test_guard_wasp_in_hand_does_not_count_itself_toward_four_colony():

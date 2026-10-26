@@ -866,7 +866,7 @@ def test_royal_jelly_sets_five_at_the_roar_and_a_pythons_growth_in_the_deck_stay
 def test_the_capybara_is_a_nine_when_the_rest_of_the_starting_deck_is_small():
     from animal_kingdom.engine.strength import effective_strength
     small = make_state(hands={"A": ["capybara"]})
-    small.starting_decks = {"A": ("capybara", "capybara", "raven", "snake_egg", "magpie"), "B": ()}
+    small.starting_decks = {"A": ("capybara", "capybara", "raven", "snake_egg", "hawk"), "B": ()}
     big = make_state(hands={"A": ["capybara"]})
     big.starting_decks = {"A": ("capybara", "raven", "lynx"), "B": ()}       # the Lynx is a 5
     assert effective_strength(small, small.hands["A"][0]) == 2 + CFG.capybara_bonus == 9

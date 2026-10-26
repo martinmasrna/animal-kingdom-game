@@ -383,16 +383,6 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
-    },
-    "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Roar: remove an adjacent enemy of strength 5 or less."
-      },
-      "note": "Removal rares pass with Martin, 2026-10-26: the big-reach end (4, up to 6)",
-      "by": "claude",
-      "at": 1793012648
     }
   },
   "black_panther": {
@@ -512,16 +502,6 @@
       "note": "Martin, 2026-10-22: an answer any deck can run, priced at 4 beside Black Mamba",
       "by": "claude",
       "at": 1792666803
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 4
-      },
-      "note": "Removal rares pass with Martin, 2026-10-26: above its common mirror, the Warthog (4)",
-      "by": "claude",
-      "at": 1793012642
     }
   },
   "boar_legend": {
@@ -1415,16 +1395,6 @@
       "at": 1792656606,
       "lv": "problem",
       "note": "forest?"
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 4
-      },
-      "note": "Removal rares pass with Martin, 2026-10-26: a real body pays for the turn the bite takes",
-      "by": "claude",
-      "at": 1793012643
     }
   },
   "falcon_legend": {
@@ -1717,26 +1687,6 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 3
-      },
-      "note": "Removal rares pass with Martin, 2026-10-26: real body + removal with Flight (4, up to 4)",
-      "by": "claude",
-      "at": 1793012645
-    },
-    "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Flight. Roar: remove an adjacent enemy of strength 3 or less."
-      },
-      "note": "Removal rares pass with Martin, 2026-10-26: one target bigger than the Albatross can take",
-      "by": "claude",
-      "at": 1793012647
     }
   },
   "hedgehog": {
@@ -1804,15 +1754,9 @@
       "at": 1792193240
     },
     "strength": {
-      "lv": "draft",
-      "by": "claude",
-      "at": 1793012641,
-      "review": {
-        "prev_lv": "fine",
-        "prev_note": "",
-        "prev": 2
-      },
-      "note": "Removal rares pass with Martin, 2026-10-26: the generic anti-big removal, +1 for its narrow target"
+      "lv": "fine",
+      "by": "martin",
+      "at": 1792193242
     }
   },
   "honey_badger_legend": {
@@ -1970,16 +1914,6 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
-    },
-    "strength": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": 5
-      },
-      "note": "Removal rares pass with Martin, 2026-10-26: real body + removal; the big-body end (6, up to 4)",
-      "by": "claude",
-      "at": 1793012644
     }
   },
   "jellyfish": {
@@ -3115,16 +3049,6 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
-    },
-    "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Hungry 3. Roar: remove all adjacent enemies of strength 2 or less."
-      },
-      "note": "Removal rares pass with Martin, 2026-10-26: 3 or less catches the small decks' engines, not only tokens",
-      "by": "claude",
-      "at": 1793012650
     }
   },
   "baby_fox_2": {
@@ -3897,16 +3821,6 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792143620
-    },
-    "effect": {
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal."
-      },
-      "note": "Martin, 2026-10-26: keep it exactly as it was",
-      "by": "claude",
-      "at": 1793013526
     }
   },
   "tarantula": {
@@ -4517,13 +4431,7 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1793012649,
-      "review": {
-        "prev_lv": "draft",
-        "prev_note": "",
-        "prev": "Flight. Roar: remove all adjacent enemies of strength 2 or less."
-      },
-      "note": "Removal rares pass with Martin, 2026-10-26: 3 or less catches the small decks' engines, not only tokens"
+      "at": 1792262681
     },
     "animal": {
       "note": "into the collection (status proposed)",

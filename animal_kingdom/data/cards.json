@@ -893,7 +893,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 6,
+      "base_strength": 5,
       "text": "Roar: remove an adjacent enemy of strength 4 or less.",
       "keywords": [],
       "species": "Jaguar",
@@ -1681,13 +1681,13 @@
       "tags": [
         "Bird"
       ],
-      "base_strength": 4,
-      "text": "Flight. Roar: remove an adjacent enemy of strength 4 or less.",
-      "species": "Hawk",
-      "habitat": "Forest",
+      "base_strength": 3,
+      "text": "Flight. Roar: remove an adjacent enemy of strength 3 or less.",
       "keywords": [
         "Flight"
-      ]
+      ],
+      "species": "Hawk",
+      "habitat": "Forest"
     },
     {
       "id": "cottonmouth",
@@ -1697,7 +1697,7 @@
       "tags": [
         "Snake"
       ],
-      "base_strength": 5,
+      "base_strength": 4,
       "text": "Roar: choose an adjacent enemy. At the start of your next turn, remove it.",
       "keywords": [],
       "species": "Cottonmouth",
@@ -1728,10 +1728,10 @@
         "Snake"
       ],
       "base_strength": 4,
-      "text": "Roar: remove an adjacent enemy of strength 6 or less.",
+      "text": "Roar: remove an adjacent enemy of strength 5 or less.",
+      "keywords": [],
       "species": "Black Mamba",
-      "habitat": "Savanna",
-      "keywords": []
+      "habitat": "Savanna"
     },
     {
       "id": "egg_eater",
@@ -2131,13 +2131,13 @@
         "Hoofed"
       ],
       "base_strength": 8,
-      "text": "Hungry 3. Roar: remove all adjacent enemies of strength 3 or less.",
-      "species": "Rhinoceros",
-      "habitat": "Savanna",
+      "text": "Hungry 3. Roar: remove all adjacent enemies of strength 2 or less.",
       "keywords": [
         "Hungry"
       ],
-      "hungry": 3
+      "hungry": 3,
+      "species": "Rhinoceros",
+      "habitat": "Savanna"
     },
     {
       "id": "hippopotamus",
@@ -2335,7 +2335,7 @@
       "status": "collectible",
       "rarity": "rare",
       "tags": [],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Roar: remove an adjacent enemy of strength 6 or more.",
       "keywords": [],
       "species": "Honey Badger",
@@ -2456,7 +2456,7 @@
       "tags": [
         "Hoofed"
       ],
-      "base_strength": 5,
+      "base_strength": 4,
       "text": "Roar: remove an adjacent enemy that isn't covering anything.",
       "keywords": [],
       "species": "Boar",
@@ -2824,12 +2824,12 @@
         "Bird"
       ],
       "base_strength": 4,
-      "text": "Flight. Roar: remove all adjacent enemies of strength 3 or less.",
-      "species": "Albatross",
-      "habitat": "Open Ocean",
+      "text": "Flight. Roar: remove all adjacent enemies of strength 2 or less.",
       "keywords": [
         "Flight"
-      ]
+      ],
+      "species": "Albatross",
+      "habitat": "Open Ocean"
     },
     {
       "id": "cuckoo_legend",
@@ -2841,9 +2841,9 @@
       ],
       "base_strength": 6,
       "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal.",
+      "keywords": [],
       "species": "Cuckoo",
-      "habitat": "Meadow",
-      "keywords": []
+      "habitat": "Meadow"
     },
     {
       "id": "sloth_legend",
