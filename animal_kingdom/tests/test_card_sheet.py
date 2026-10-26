@@ -5,8 +5,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
 CHECK = ROOT / "tools" / "cards" / "check.py"
+pytestmark = pytest.mark.skipif(not CHECK.is_file(), reason="the deploy image ships no tools/cards")
 SECTIONS = ["card", "keywords", "pool", "anchors", "record", "grid", "text", "play"]
 
 
