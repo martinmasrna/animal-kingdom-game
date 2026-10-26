@@ -560,11 +560,11 @@ async function metaArchetype(box, id, q) {
   wireMetaControls(box);
   fitStrips(box);
   box.querySelectorAll('.mpk').forEach(b => b.onclick = () => { pop.style.display = 'none'; META.list = b.dataset.list; fillMeta(); });
-  // every card on the page reads as in the collection: hovered, the card beside it; right-clicked or held, large
+  // every card on the page reads as in the collection: hovered, the card beside it; right-clicked, held or tapped on a phone, large
   box.querySelectorAll('.mf[data-card], .mstrip [data-card]').forEach(el => {
     const read = () => { pop.style.display = 'none'; readCard(el.dataset.card); };
-    el.onmouseenter = () => cardPop(el, el.dataset.card);
-    el.onmouseleave = () => pop.style.display = 'none';
+    if (matchMedia('(hover: none)').matches) el.addEventListener('click', e => { e.stopPropagation(); read(); });   // touch: a tap reads it large (a list is picked by its win rate)
+    else { el.onmouseenter = () => cardPop(el, el.dataset.card); el.onmouseleave = () => pop.style.display = 'none'; }
     el.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); read(); });
     onHold(el, read);
   });
