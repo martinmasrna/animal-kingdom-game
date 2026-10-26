@@ -1,6 +1,6 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
-import { hasArt, artUrl, stripArt, fitStrips } from './art.js';
+import { hasArt, artUrl, stripArt, fitStrips, CROP } from './art.js';
 import { cardHTML, fitNames, readSide } from './card.js';
 import { SUCCESSOR } from './cardnums.js';
 import { plan } from './timeline.js';
@@ -451,8 +451,9 @@ async function fillLeaderboard() {
 // The Meta tab (docs/meta-tab.md): the competitive player's two questions, which deck to play and how to play it, answered
 // with raw numbers presented well and nothing written for them (Martin, 2026-10-24). Rating and days filter the whole tab;
 // the overview is every archetype's share and win rate and the matchup matrix, where clicking columns adds each deck's
-// average against just those; an archetype opens its lists and every card's figures, against one opponent when chosen.
-const META = { lo: null, hi: null, days: 0, min: 30, sel: new Set(), sort: 'share', csort: null, vs: '' };
+// average against just those; an archetype opens its lists and one list's card figures (a player plays an exact list;
+// Martin, 2026-10-26), against one opponent when chosen. A week by default: one list's figures need its games.
+const META = { lo: null, hi: null, days: 7, min: 30, list: null, listOf: null, sel: new Set(), sort: 'share', csort: null, vs: '' };
 const pct = (w, n) => n ? (100 * w / n).toFixed(1) : '';
 const tint = (v, base = 50, span = 10) => {   // a win rate's colour: red below the base, green above, full at `span` points
   if (v === null || v === undefined || v === '') return '';
@@ -479,9 +480,9 @@ async function fillMeta() {
   const vsSel = x => { const vs = [...META.sel].filter(y => y !== x).map(y => cell(x, y)).filter(v => v !== null); return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null; };
   const wr = r => r.decided ? 100 * r.wins / r.decided : null;
   const key = { share: r => r.share, wr: r => wr(r) ?? -1, games: r => r.games, vs: r => vsSel(r.id) ?? -1 }[META.sort] || (r => r.share);
-  const sorted = [...rows].sort((a, b) => key(b) - key(a));
+  const sorted = [...rows].sort((a, b) => (META.sortUp ? -1 : 1) * (key(b) - key(a)));
   const cols = [...rows].sort((a, b) => b.share - a.share);
-  const th = (k, label) => `<th class="num sortable${META.sort === k ? ' on' : ''}" data-sort="${k}">${label}</th>`;
+  const th = (k, label) => `<th class="num sortable${META.sort === k ? ' on' + (META.sortUp ? ' up' : '') : ''}" data-sort="${k}">${label}</th>`;
   const fmt = v => v === null ? '' : v.toFixed(1) + '%';
   box.innerHTML = metaControls(true) + `<div class="mxw"><table class="mx"><thead><tr><th class="an"></th>${th('share', 'Share')}${th('wr', 'Win rate')}${th('games', 'Games')}${META.sel.size ? th('vs', 'vs selected') : ''}
     ${cols.map(c => `<th class="col${META.sel.has(c.id) ? ' sel' : ''}" data-col="${esc(c.id)}" title="${esc(c.name)}"><span>${esc(c.name)}</span></th>`).join('')}</tr></thead><tbody>
@@ -489,21 +490,69 @@ async function fillMeta() {
       ${META.sel.size ? `<td class="num vs" style="${tint(vsSel(r.id))}">${fmt(vsSel(r.id))}</td>` : ''}
       ${cols.map(c => { if (c.id === r.id) return '<td class="mir"></td>'; const v = (mx[r.id] || {})[c.id], x = cell(r.id, c.id);
         return `<td class="m${META.sel.has(c.id) ? ' sel' : ''}" style="${tint(x)}" title="${esc(r.name)} against ${esc(c.name)}: ${v ? `${v[1]}–${v[0] - v[1]} in ${v[0]} games` : 'no games'}">${x === null ? '' : x.toFixed(0)}</td>`; }).join('')}</tr>`).join('')}
-    </tbody></table></div>`;
+    </tbody></table></div>${metaCards(j.cards || [], 'acsort')}`;
   wireMetaControls(box);
-  box.querySelectorAll('th[data-sort]').forEach(t => t.onclick = () => { META.sort = t.dataset.sort; fillMeta(); });
+  wireCardReads(box); fitStrips(box);
+  box.querySelectorAll('th[data-acsort]').forEach(t => t.onclick = () => { flipSort('acsort', t.dataset.acsort, 'd'); fillMeta(); });
+  box.querySelectorAll('th[data-sort]').forEach(t => t.onclick = () => { flipSort('sort', t.dataset.sort, 'share'); fillMeta(); });
   box.querySelectorAll('th[data-col]').forEach(t => t.onclick = () => { const c = t.dataset.col; META.sel.has(c) ? META.sel.delete(c) : META.sel.add(c); if (META.sel.size) META.sort = 'vs'; else if (META.sort === 'vs') META.sort = 'share'; fillMeta(); });
 }
-function metaControls(withMin) {
-  const b = META.bands || [], lo = b.map(v => [String(v), String(v)]), hi = b.map(v => [String(v + 100), String(v + 100)]);
-  return `<div class="mctl"><span class="lb">Rating</span>${dd('mlo', String(META.lo), lo.length ? lo : [['0', 'Any']])}<span class="lb">to</span>${dd('mhi', String(META.hi), hi.length ? hi : [['10000', 'Any']])}
+// A card's figures as HSReplay counts them (web/meta.py impacts; Martin, 2026-10-26), each its win rate minus its list's,
+// in points: Mulligan, in the opening hand after the mulligan; Drawn, drawn at any point; Played, played. Coloured by the
+// number; a figure on fewer games than the filter asks carries a "?".
+const IMPACT = { k: ['Mulligan', 'Win rate when in the opening hand after the mulligan, minus the list\'s'], d: ['Drawn', 'Win rate when drawn at any point, minus the list\'s'],
+  p: ['Played', 'Win rate when played, minus the list\'s'] };
+const impVal = v => v && v.i !== null ? v.i : null;
+function impCell(v, e, min) {
+  const x = impVal(v);
+  if (x === null) return '<td class="num dim">·</td>';
+  const few = v.yes[0] < min, tip = `${v.yes[1]}–${v.yes[0] - v.yes[1]} in ${v.yes[0]} games`;
+  return `<td class="num${few ? ' few' : ''}" style="${tint(100 * x, 0, 8)}" title="${tip}">${x >= 0 ? '+' : '−'}${Math.abs(100 * x).toFixed(1)}${few ? '<sup>?</sup>' : ''}</td>`;
+}
+const impHead = (e, on, attr, up) => `<th class="num sortable${on ? ' on' + (up ? ' up' : '') : ''}" ${attr}="${e}" title="${IMPACT[e][1]}">${IMPACT[e][0]}</th>`;
+// A column's first click sorts it best first, the next worst first, and so on (Martin, 2026-10-26); the figures with a
+// "?" come after the sure ones and the empty last, whichever way it runs.
+function flipSort(k, col, dflt) { if ((META[k] || dflt) === col) META[k + 'Up'] = !META[k + 'Up']; else { META[k] = col; META[k + 'Up'] = false; } }
+const impRank = (v, min) => impVal(v) === null ? [2, 0] : v.yes[0] < min ? [1, v.i] : [0, v.i];
+const impCmp = (e, min, up) => (a, b) => { const x = impRank(a[e], min), y = impRank(b[e], min); return x[0] - y[0] || (up ? -1 : 1) * (y[1] - x[1]); };
+// Every card in the range, its figures pooled over every list that runs it, best drawn first.
+function metaCards(cards, key) {
+  const min = META.min, sort = META.acsort || 'd';
+  const cmp = impCmp(sort, min, META.acsortUp);
+  const rows = cards.filter(c => CARDS[c.card] && c.d.yes[0]).sort((a, b) => cmp(a, b) || b.d.yes[0] - a.d.yes[0]);
+  if (!rows.length) return '';
+  return `<h4 class="msub mcards">Cards</h4><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${impHead('k', sort === 'k', 'data-' + key, META.acsortUp)}${impHead('d', sort === 'd', 'data-' + key, META.acsortUp)}${impHead('p', sort === 'p', 'data-' + key, META.acsortUp)}<th class="num" title="Games it was drawn in">Games</th></tr></thead><tbody>
+    ${rows.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, 1)}</div></th>${impCell(c.k, 'k', min)}${impCell(c.d, 'd', min)}${impCell(c.p, 'p', min)}<td class="num dim">${c.d.yes[0]}</td></tr>`).join('')}</tbody></table></div>`;
+}
+// Every card on a Meta page reads as in the collection: hovered, the card beside it; right-clicked, held or tapped on a phone, large.
+function wireCardReads(box) {
+  box.querySelectorAll('.mf[data-card], .mstrip [data-card]').forEach(el => {
+    const read = () => { pop.style.display = 'none'; readCard(el.dataset.card); };
+    if (matchMedia('(hover: none)').matches) el.addEventListener('click', e => { e.stopPropagation(); read(); });   // touch: a tap reads it large (a list is picked by its win rate)
+    else { el.onmouseenter = () => cardPop(el, el.dataset.card); el.onmouseleave = () => pop.style.display = 'none'; }
+    el.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); read(); });
+    onHold(el, read);
+  });
+}
+function metaControls(withMin, extra = '') {   // extra: the archetype page's opponent, a filter like the rest
+  // the rating range: one slider with two handles over the bands that have games, in steps of a band (100)
+  const b = META.bands || [], min = b.length ? b[0] : 0, max = b.length ? b[b.length - 1] + 100 : 100;
+  const range = b.length > 1 ? `<div class="mrange"><span class="lb">Rating</span><span class="rv">${META.lo}–${META.hi}</span>
+    <div class="rs" style="--a:${(META.lo - min) / (max - min)};--b:${(META.hi - min) / (max - min)}"><div class="rt"></div>
+    <input type="range" id="mrlo" min="${min}" max="${max}" step="100" value="${META.lo}" aria-label="Lowest rating"><input type="range" id="mrhi" min="${min}" max="${max}" step="100" value="${META.hi}" aria-label="Highest rating"></div></div>` : '';
+  return `<div class="mctl">${range}
     ${dd('mdays', String(META.days), [['0', 'All time'], ['1', 'Last day'], ['3', 'Last 3 days'], ['7', 'Last week']])}
-    ${withMin ? dd('mmin', String(META.min), [['10', 'At least 10 games'], ['30', 'At least 30 games'], ['100', 'At least 100 games'], ['300', 'At least 300 games']]) : ''}</div>`;
+    ${withMin ? dd('mmin', String(META.min), [['10', 'At least 10 games'], ['30', 'At least 30 games'], ['100', 'At least 100 games'], ['300', 'At least 300 games']]) : ''}${extra}</div>`;
 }
 function wireMetaControls(box) {
+  const lo = box.querySelector('#mrlo'), hi = box.querySelector('#mrhi');
+  if (lo && hi) {   // the handles move freely, never closer than one band; the tables follow when a handle is let go
+    const min = +lo.min, span = +lo.max - min, rs = lo.parentNode, rv = box.querySelector('.mrange .rv');
+    const move = moved => { if (+hi.value - +lo.value < 100) moved === lo ? lo.value = +hi.value - 100 : hi.value = +lo.value + 100;
+      rs.style.setProperty('--a', (lo.value - min) / span); rs.style.setProperty('--b', (hi.value - min) / span); rv.textContent = `${lo.value}–${hi.value}`; };
+    for (const r of [lo, hi]) { r.oninput = () => move(r); r.onchange = () => { META.lo = +lo.value; META.hi = +hi.value; fillMeta(); }; }
+  }
   wireDd(box, (k, v) => {
-    if (k === 'mlo') { META.lo = +v; if (META.hi <= META.lo) META.hi = META.lo + 100; }
-    if (k === 'mhi') { META.hi = +v; if (META.lo >= META.hi) META.lo = META.hi - 100; }
     if (k === 'mdays') META.days = +v;
     if (k === 'mmin') META.min = +v;
     if (k === 'mvs') META.vs = v;
@@ -511,8 +560,9 @@ function wireMetaControls(box) {
   });
 }
 async function metaArchetype(box, id, q) {
+  if (META.listOf !== id) { META.listOf = id; META.list = null; }   // another archetype opens on its most played list
   const ov = await (await api(`/api/meta?${q()}`)).json();
-  const r = await api(`/api/meta/archetype?id=${encodeURIComponent(id)}&${q()}${META.vs ? `&vs=${encodeURIComponent(META.vs)}` : ''}`);
+  const r = await api(`/api/meta/archetype?id=${encodeURIComponent(id)}&${q()}${META.vs ? `&vs=${encodeURIComponent(META.vs)}` : ''}${META.list ? `&list=${encodeURIComponent(META.list)}` : ''}`);
   if (!r.ok) { box.innerHTML = `<p class="none">No such archetype.</p>`; return; }
   const j = await r.json(), min = META.min, base = j.games ? 100 * j.wins / j.games : 50;
   const others = ov.archetypes.filter(a => a.id !== id).sort((a, b) => b.share - a.share);
@@ -520,24 +570,37 @@ async function metaArchetype(box, id, q) {
   const rate = (v, b = base) => v && v[0] >= min ? `<td class="num" style="${tint(100 * v[1] / v[0], b)}" title="${v[1]}–${v[0] - v[1]} in ${v[0]} games">${pct(v[1], v[0])}%</td>` : `<td class="num dim" title="${v ? v[0] : 0} games">·</td>`;
   const RANKS = { legendary: 0, rare: 1, common: 2 }, strv = c => CARDS[c] ? (CARDS[c].str === '*' ? -1 : CARDS[c].str) : 99;
   const order = (a, b) => (RANKS[CARDS[a.card]?.rarity] ?? 3) - (RANKS[CARDS[b.card]?.rarity] ?? 3) || strv(a.card) - strv(b.card) || a.card.localeCompare(b.card);
-  const val = { k: c => c.k[0] >= min ? c.k[1] / c.k[0] : -1, kept: c => c.m[0] ? c.k[0] / c.m[0] : -1, d: c => c.d[0] >= min ? c.d[1] / c.d[0] : -1, p: c => c.p[0] >= min ? c.p[1] / c.p[0] : -1 };
-  const cards = [...j.cards].filter(c => CARDS[c.card]).sort(META.csort && val[META.csort] ? (a, b) => val[META.csort](b) - val[META.csort](a) || order(a, b) : order);
+
+  const cards = [...j.cards].filter(c => CARDS[c.card]).sort(META.csort ? (a, b) => impCmp(META.csort, min, META.csortUp)(a, b) || order(a, b) : order);   // unsorted, the list's own order
   const th = (k, label, tip) => `<th class="num sortable${META.csort === k ? ' on' : ''}" data-csort="${k}" title="${tip}">${label}</th>`;
   const strip = c => `<div class="mstrip">${stripHTML(c, CARDS, 1)}</div>`;
-  const lists = j.lists.map(l => `<div class="mlist"><div class="mlh"><b>${pct(l.wins, l.games) || '–'}%</b><span>${l.games} games</span></div>${deckBody(l.list.filter(c => CARDS[c]), CARDS, false, true)}</div>`).join('');
+  // the lists, each told apart by the cards it runs beyond the ones every list shares (copies counted)
+  const count = l => l.reduce((m, c) => (m[c] = (m[c] || 0) + 1, m), {});
+  const counts = j.lists.map(l => count(l.list)), core = {};
+  for (const c of Object.keys(counts[0] || {})) core[c] = Math.min(...counts.map(m => m[c] || 0));
+  const face = (c, n) => {   // a card as its round board portrait, its copies beside it; read as in the collection (below)
+    const [x, y, d] = CROP[c] || [.5, .4, .7], S = 44, w = S / d;
+    const art = hasArt(c) ? `background-image:url(${artUrl(c)});background-size:${w}px ${1.5 * w}px;background-position:${S / 2 - x * w}px ${S / 2 - y * 1.5 * w}px` : '';
+    return `<span class="mf ${CARDS[c].rarity}" data-card="${c}"><span class="p" style="${art}"></span>${n > 1 ? `<b>${n}</b>` : ''}</span>`; };
+  const own = m => Object.entries(m).filter(([c, n]) => n > (core[c] || 0) && CARDS[c]).sort(([a], [b]) => order({ card: a }, { card: b }))
+    .map(([c, n]) => face(c, n - (core[c] || 0))).join('');
+  const picker = j.lists.length > 1 ? `<div class="mpick">${j.lists.map((l, i) => `<button class="mpk${l.slug === j.list ? ' on' : ''}" data-list="${esc(l.slug)}">
+    <span class="mpn"><b style="${tint(l.games ? 100 * l.wins / l.games : null, base)}">${pct(l.wins, l.games) || '–'}%</b><small>${l.games} games</small></span><span class="own">${own(counts[i])}</span></button>`).join('')}</div>` : '';
+  const mine = count(j.lists.find(l => l.slug === j.list)?.list || []);   // the table's strips carry the chosen list's copies
   const theirs = c => c.p[0] >= min ? c.p[1] / c.p[0] : 0;
   const opp = j.opp ? [...j.opp].filter(c => CARDS[c.card] && c.d[0] >= min).sort((a, b) => theirs(b) - theirs(a)) : null;
   const flip = v => v ? [v[0], v[0] - v[1]] : v;   // their card's games counted with your wins
-  box.innerHTML = metaControls(true) + `<div class="mah"><a class="mback" href="#/ladder/meta">All decks</a><h3>${esc(j.name)}</h3><span class="mwr" style="${tint(base)}">${j.games ? base.toFixed(1) + '%' : '–'}</span><span class="dim">${j.games} games</span>${vsDd}</div>
-    <div class="mbody"><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${th('k', 'Mulligan', 'Win rate when kept in the starting hand')}${th('kept', 'Kept', 'How often it is kept when the mulligan shows it')}${th('d', 'Drawn', 'Win rate when drawn, starting hand included')}${th('p', 'Played', 'Win rate when played')}</tr></thead><tbody>
-      ${cards.map(c => `<tr><th class="an">${strip(c.card)}</th>${rate(c.k)}<td class="num dim">${c.m[0] ? (100 * c.k[0] / c.m[0]).toFixed(0) + '%' : ''}</td>${rate(c.d)}${rate(c.p)}</tr>`).join('')}
+  box.innerHTML = metaControls(true, vsDd) + `<div class="mah"><h3>${esc(j.name)}</h3><span class="mwr" style="${tint(base)}" title="${j.games} games">${j.games ? base.toFixed(1) + '%' : '–'}</span></div>${picker}
+    <div class="mbody"><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${impHead('k', META.csort === 'k', 'data-csort', META.csortUp)}${impHead('d', META.csort === 'd', 'data-csort', META.csortUp)}${impHead('p', META.csort === 'p', 'data-csort', META.csortUp)}<th class="num" title="Games it was drawn in">Games</th></tr></thead><tbody>
+      ${cards.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, mine[c.card] || 1)}</div></th>${impCell(c.k, 'k', min)}${impCell(c.d, 'd', min)}${impCell(c.p, 'p', min)}<td class="num dim">${c.d.yes[0]}</td></tr>`).join('')}
     </tbody></table></div><div class="mside">
     ${opp ? `<h4 class="msub">${esc(j.vs_name)}'s cards</h4><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th><th class="num" title="Your win rate when they drew it">Drawn</th><th class="num" title="Your win rate when they played it">Played</th><th class="num">Games</th></tr></thead><tbody>
-      ${opp.map(c => `<tr><th class="an">${strip(c.card)}</th>${rate(flip(c.d))}${rate(flip(c.p))}<td class="num dim">${c.d[0]}</td></tr>`).join('')}</tbody></table></div>` : ''}
-    ${lists ? `<h4 class="msub">Lists</h4><div class="mlists">${lists}</div>` : ''}</div></div>`;
+      ${opp.map(c => `<tr><th class="an">${strip(c.card)}</th>${rate(flip(c.d))}${rate(flip(c.p))}<td class="num dim">${c.d[0]}</td></tr>`).join('')}</tbody></table></div>` : ''}</div></div>`;
   wireMetaControls(box);
   fitStrips(box);
-  box.querySelectorAll('th[data-csort]').forEach(t => t.onclick = () => { META.csort = META.csort === t.dataset.csort ? null : t.dataset.csort; fillMeta(); });
+  box.querySelectorAll('.mpk').forEach(b => b.onclick = () => { pop.style.display = 'none'; META.list = b.dataset.list; fillMeta(); });
+  wireCardReads(box);
+  box.querySelectorAll('th[data-csort]').forEach(t => t.onclick = () => { flipSort('csort', t.dataset.csort, null); fillMeta(); });
 }
 
 // The tutorial: a real game with a fixed deal against a gentle opponent, a coach teaching one step at a time (tutorial.js).
@@ -615,10 +678,11 @@ function ladderScreen() {
     <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}${gid(h)}</span>` : `${piece(h.opp_cover, side('theirs', h.opp))}<span class="dk" ${side('theirs', h.opp)}>${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}${gid(h)}</span>`}</div>`).join('');
   // the leaderboard first (Martin, 2026-10-02), the match history its second tab, the meta report its third (2026-10-24)
   const meta = location.hash.startsWith('#/ladder/meta'), lead = !meta && location.hash !== '#/ladder/history';
-  app.innerHTML = `<div class="mscr ladder"><div class="hist${meta ? ' wide' : ''}"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${!lead && !meta ? ' on' : ''}" href="#/ladder/history">Match history</a><a class="ptab${meta ? ' on' : ''}" href="#/ladder/meta">Meta</a></div>${!lead && !meta && (hist || ui.histDeck) ? filter : ''}</div>
+  // back goes up one level: an archetype to every deck, a tab to home (Martin, 2026-10-26: it went home from an archetype)
+  const up = /^#\/ladder\/meta\/./.test(location.hash) ? '#/ladder/meta' : '#/';
+  app.innerHTML = `<div class="mscr ladder"><div class="hist${meta ? ' wide' : ''}"><div class="hhead"><div class="ptabs"><a class="lback" id="back" href="${up}" aria-label="Back"></a><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${!lead && !meta ? ' on' : ''}" href="#/ladder/history">Match history</a><a class="ptab${meta ? ' on' : ''}" href="#/ladder/meta">Meta</a></div>${!lead && !meta && (hist || ui.histDeck) ? filter : ''}</div>
     <div class="hbody">${lead ? '<div class="lead lb" id="lboard"></div>' : meta ? '<div class="metar" id="metar"><p class="none">Loading…</p></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
-    <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
-  document.getElementById('back').onclick = () => { location.hash = '#/'; };
+    </div></div>`;
   if (lead) fillLeaderboard();
   if (meta) fillMeta();
   wireDd(app, (k, v) => { ui.histDeck = v || null; ladderScreen(); });

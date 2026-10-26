@@ -143,7 +143,7 @@ def test_card_facts_feed_the_meta_tab_by_martins_archetypes(monkeypatch, tmp_pat
         o = await (await c.get("/api/meta?lo=1400&hi=1600")).json()
         assert o["games"] == 2 and {r["name"]: r["wins"] for r in o["archetypes"]} == {"Cats": 1, "Fish Token": 1}
         a = await (await c.get("/api/meta/archetype?id=cats&vs=fish_token")).json()
-        assert a["name"] == "Cats" and a["vs_name"] == "Fish Token" and {x["card"]: x["p"] for x in a["cards"]}[cats[0]] == [2, 1]
+        assert a["name"] == "Cats" and a["vs_name"] == "Fish Token" and {x["card"]: x["p"]["yes"] for x in a["cards"]}[cats[0]] == [2, 1]
         assert (await c.get("/api/meta/archetype?id=nope")).status == 404
         assert server.ladder_name("bot:expert:fish").startswith("Fish Token (")   # the ladder names a bot by its archetype
     _run(monkeypatch, tmp_path, body)

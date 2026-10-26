@@ -133,7 +133,8 @@ class Meta:
 
     # ------------------------------------------------------------------ asking
     def overview(self, arch: dict[str, str], names: dict[str, str], lo: int, hi: int, days: int) -> dict:
-        """The meta in a rating range over the last `days` days: each archetype's share of games and win rate, the matchup matrix."""
+        """The meta in a rating range over the last `days` days: each archetype's share of games and win rate, the matchup
+        matrix, and every card's impacts pooled over every list that runs it (mirrors left out, as in the win rates)."""
         key = ("o", lo, hi, days, tuple(sorted(arch.items())))
         hit = self._cache.get(key)
         if hit and time.time() - hit[0] < 120:
@@ -153,16 +154,33 @@ class Meta:
             if x != y:                                       # a win rate leaves the mirror out, as tier lists do
                 tot[x][1] += w; tot[x][2] += n
                 mx[x][y][0] += n; mx[x][y][1] += w
+        inside = lambda day, band, a, b: (days == 0 or day >= since) and lo <= band < hi and a in arch and b in arch and arch[a] != arch[b]
+        lg: dict[str, list[int]] = collections.defaultdict(lambda: [0, 0])          # each list's games outside the mirror
+        for (day, band, a, b), (n, w) in self.games.items():
+            if inside(day, band, a, b):
+                lg[a][0] += n; lg[a][1] += w
+        lc: dict[tuple, dict[str, list[int]]] = collections.defaultdict(lambda: {e: [0, 0] for e in EVENTS})
+        for (day, band, a, b, c, e), (n, w) in self.cards.items():
+            if inside(day, band, a, b):
+                lc[(a, c)][e][0] += n; lc[(a, c)][e][1] += w
+        by_card: dict[str, list[dict]] = collections.defaultdict(list)
+        for a, g in lg.items():
+            for c in set(self.lists(a) or []):
+                by_card[c].append(impacts(lc[(a, c)], g))
         games = sum(t[0] for t in tot.values())
         out = {"games": games // 2, "bands": sorted(bands), "band": BAND,
                "archetypes": sorted(({"id": x, "name": names.get(x, x), "games": t[0], "wins": t[1], "decided": t[2], "share": t[0] / games if games else 0}
                                      for x, t in tot.items()), key=lambda r: -r["games"]),
-               "matrix": {x: {y: v for y, v in row.items()} for x, row in mx.items()}}
+               "matrix": {x: {y: v for y, v in row.items()} for x, row in mx.items()},
+               "cards": [{"card": c, **pooled(v)} for c, v in sorted(by_card.items())]}
         self._cache[key] = (time.time(), out)
         return out
 
-    def archetype(self, x: str, arch: dict[str, str], lo: int, hi: int, days: int, vs: Optional[str] = None) -> dict:
-        """One archetype in a range: its lists with their games, every card's figures, and against `vs` the opponent's cards."""
+    def archetype(self, x: str, arch: dict[str, str], lo: int, hi: int, days: int, vs: Optional[str] = None,
+                  pick: Optional[str] = None) -> dict:
+        """One archetype in a range: its lists with their games, and one list's card figures (`pick`, else its most played
+        list), against `vs` with the opponent's cards. A card's figures are one exact list's: a player plays a list, and
+        a card's numbers depend on the other 29 (Martin, 2026-10-26)."""
         since = time.strftime(HOUR, time.gmtime(time.time() - days * 86400)) if days else ""
         ok = lambda day, band: (days == 0 or day >= since) and lo <= band < hi
         mine = {s for s, g in arch.items() if g == x}
@@ -171,29 +189,49 @@ class Meta:
         for (day, band, a, b), (n, w) in self.games.items():
             if a in mine and opp_ok(b) and ok(day, band):
                 per_list[a][0] += n; per_list[a][1] += w
+        if pick not in per_list:
+            pick = max(per_list, key=lambda s: per_list[s][0], default=None)
         ev: dict[str, dict[str, list[int]]] = collections.defaultdict(lambda: {e: [0, 0] for e in EVENTS})
         opp: dict[str, dict[str, list[int]]] = collections.defaultdict(lambda: {e: [0, 0] for e in EVENTS})
         for (day, band, a, b, c, e), (n, w) in self.cards.items():
             if not ok(day, band):
                 continue
-            if a in mine and opp_ok(b):
+            if a == pick and opp_ok(b):
                 ev[c][e][0] += n; ev[c][e][1] += w
-            elif vs and arch.get(a) == vs and b in mine:     # the opponent's cards in this matchup, counted from their side
+            elif vs and arch.get(a) == vs and b == pick:     # the opponent's cards in this matchup, counted from their side
                 opp[c][e][0] += n; opp[c][e][1] += w
         lists = {s: self.lists(s) or [] for s in per_list}
-        total = sum(v[0] for v in per_list.values())
-        cards = []
-        for c in sorted({c for l in lists.values() for c in l}):
-            inn = [s for s, l in lists.items() if c in l]
-            with_ = [sum(per_list[s][0] for s in inn), sum(per_list[s][1] for s in inn)]
-            without = [total - with_[0], sum(v[1] for v in per_list.values()) - with_[1]]
-            copies = sum(lists[s].count(c) * per_list[s][0] for s in inn) / with_[0] if with_[0] else 0
-            cards.append({"card": c, "play": with_[0] / total if total else 0, "copies": round(copies, 2),
-                          "with": with_, "without": without, **ev[c]})
-        return {"id": x, "games": total, "wins": sum(v[1] for v in per_list.values()),
+        return {"id": x, "games": sum(v[0] for v in per_list.values()), "wins": sum(v[1] for v in per_list.values()),
                 "lists": sorted(({"slug": s, "list": lists[s], "games": v[0], "wins": v[1]} for s, v in per_list.items()), key=lambda r: -r["games"]),
-                "cards": cards,
+                "list": pick, "cards": [{"card": c, **impacts(ev[c], per_list[pick])} for c in sorted(set(lists.get(pick) or []))],
                 "opp": [{"card": c, **v} for c, v in opp.items()] if vs else None}
+
+
+def _rate(v: list[int]) -> Optional[float]:
+    return v[1] / v[0] if v[0] else None
+
+
+def impacts(ev: dict[str, list[int]], games: list[int]) -> dict[str, dict]:
+    """A card's figures in one list, as HSReplay counts them (Martin, 2026-10-26): Mulligan (`k`), the games it ended up
+    in the opening hand after the mulligan, replacements included; Drawn (`d`), the games it was drawn at any point, the
+    opening hand included; Played (`p`), the games it was played. Each against the list's own win rate (`base`), never
+    against 50%, so a strong deck's cards don't look strong for the deck's sake: `i` is the card's win rate minus the
+    list's, None while it has no games. Drawn and Played lean above the list for every card alike (a longer game sees
+    more cards, a winning side plays more), so cards are compared with each other."""
+    base = _rate(games)
+    return {e: {"yes": ev[e], "base": games, "i": _rate(ev[e]) - base if ev[e][0] and base is not None else None} for e in ("k", "d", "p")}
+
+
+def pooled(per_list: list[dict[str, dict]]) -> dict[str, dict]:
+    """A card's figures over every list that runs it: its games summed, its difference from each list averaged over the
+    lists, weighted by the card's games in each."""
+    out = {}
+    for e in ("k", "d", "p"):
+        yes = [sum(x[e]["yes"][j] for x in per_list) for j in (0, 1)]
+        h = [(x[e]["yes"][0], x[e]["i"]) for x in per_list if x[e]["i"] is not None]
+        tot = sum(w for w, _ in h)
+        out[e] = {"yes": yes, "i": sum(w * i for w, i in h) / tot if tot else None}
+    return out
 
 
 def archetype_map(pool_rows: dict[str, dict], known: Iterable[str]) -> tuple[dict[str, str], dict[str, str]]:

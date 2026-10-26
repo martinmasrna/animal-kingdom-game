@@ -227,7 +227,10 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .hhead { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 24px; }
 .ladder .hhead h2 { margin: 0; font: 700 28px 'Fira Sans Condensed', sans-serif; color: #f0e8da; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
 /* the history and the leaderboard as two headings, the other one dimmed: a click on it switches */
-.ladder .ptabs { display: flex; gap: 24px; }
+.ladder .ptabs { display: flex; gap: 24px; align-items: center; }
+.ladder .lback { flex: none; width: 34px; height: 34px; margin-right: -6px; border-radius: 50%; background: rgba(255,245,230,.08); position: relative; }
+.ladder .lback::before { content: ''; position: absolute; left: 13px; top: 11px; width: 10px; height: 10px; border-left: 3px solid #cfc3ad; border-bottom: 3px solid #cfc3ad; transform: rotate(45deg); }
+.ladder .lback:hover { background: rgba(255,245,230,.16); }
 .ladder .ptab { font: 700 28px 'Fira Sans Condensed', sans-serif; color: #8f8574; text-decoration: none; text-shadow: 0 1px 3px rgba(0,0,0,.6); white-space: nowrap; }
 .ladder .ptab.on { color: #f0e8da; } .ladder .ptab:not(.on):hover { color: #cfc3ad; }
 .ladder .lead.lb { width: 100%; max-width: 760px; margin: 0 auto; padding: 0 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px; }
@@ -312,7 +315,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
   .ladder .hhead { padding: 14px 12px 6px; flex-wrap: wrap; row-gap: 10px; } .ladder .hhead h2 { font-size: 24px; white-space: nowrap; }
   .ladder .hhead .dd { min-width: 0; flex: 1 1 100%; } .ladder .hhead .dd .sel { white-space: nowrap; }   /* the deck filter on its own row under the tabs */
   .ladder .hlist { padding: 0 12px; }
-  .ladder .ptabs { gap: 16px; } .ladder .ptab { font-size: 24px; } .ladder .lead.lb { padding: 0 12px; }
+  .ladder .ptabs { gap: 14px; } .ladder .ptab { font-size: 22px; } .ladder .lback { width: 30px; height: 30px; margin-right: -4px; } .ladder .lback::before { left: 12px; top: 9px; } .ladder .lead.lb { padding: 0 12px; }
   .ladder .sfoot { position: sticky; bottom: 0; z-index: 2; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; }
   /* a choice hangs clear of the top bar, scrolling inside when the window is short */
   .home .chooser { max-height: calc(100vh - 290px); overflow-y: auto; }
@@ -429,7 +432,16 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .hist.wide { max-width: 1480px; min-width: 0; } .ladder .hist.wide .hbody { min-width: 0; max-width: 100vw; } .ladder .hist.wide .hhead, .ladder .hist.wide .none { max-width: none; }
 .ladder .metar { box-sizing: border-box; max-width: 100%; min-width: 0; padding: 0 24px 28px; color: #d8cfbf; font: 400 15px 'Fira Sans Condensed', sans-serif; }
 .ladder .metar .mctl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 14px; }
-.ladder .metar .mctl .lb { color: #9d917e; } .ladder .metar .dd { min-width: 110px; }
+.ladder .metar .mctl .lb { color: #9d917e; }
+.ladder .metar .mrange { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 12px; row-gap: 2px; flex: 1 1 320px; max-width: 460px; }
+.ladder .metar .mrange .rv { color: #f0e8da; font-weight: 700; font-variant-numeric: tabular-nums; justify-self: end; }
+.ladder .metar .rs { grid-column: 1 / -1; position: relative; height: 32px; }
+.ladder .metar .rs .rt { position: absolute; left: 11px; right: 11px; top: 14px; height: 4px; border-radius: 2px;
+  background: linear-gradient(90deg, #3a3631 calc(var(--a) * 100%), #e6c46a calc(var(--a) * 100%), #e6c46a calc(var(--b) * 100%), #3a3631 calc(var(--b) * 100%)); }
+.ladder .metar .rs input { position: absolute; inset: 0; width: 100%; margin: 0; background: none; pointer-events: none; -webkit-appearance: none; appearance: none; }
+.ladder .metar .rs input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 22px; height: 22px; border-radius: 50%; background: #e6c46a; border: 3px solid #1b1916; box-shadow: 0 1px 3px rgba(0,0,0,.6); cursor: grab; }
+.ladder .metar .rs input::-moz-range-thumb { pointer-events: auto; width: 16px; height: 16px; border-radius: 50%; background: #e6c46a; border: 3px solid #1b1916; box-shadow: 0 1px 3px rgba(0,0,0,.6); cursor: grab; }
+.ladder .metar .rs input::-webkit-slider-runnable-track { background: none; } .ladder .metar .rs input::-moz-range-track { background: none; } .ladder .metar .dd { min-width: 110px; }
 .ladder .metar .mxw { display: inline-block; max-width: 100%; vertical-align: top; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #4a4540 transparent; border-radius: 8px; background: rgba(8,7,6,.45); box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.18); }
 .ladder .metar table.mx { border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; width: max-content; }
 .ladder .metar .mx th, .ladder .metar .mx td { padding: 5px 9px; white-space: nowrap; border-bottom: 1px solid rgba(255,245,230,.06); }
@@ -439,7 +451,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .metar .mx th.an a { color: #f0e8da; text-decoration: none; } .ladder .metar .mx th.an a:hover { color: #e6c46a; }
 .ladder .metar .mx .num { text-align: right; } .ladder .metar .dim { color: #8f8574; }
 .ladder .metar .mx th.sortable { cursor: pointer; } .ladder .metar .mx th.sortable:hover, .ladder .metar .mx th.on { color: #f0e8da; }
-.ladder .metar .mx th.on::after { content: ' ▾'; color: #e6c46a; }
+.ladder .metar .mx th.on::after { content: ' ▾'; color: #e6c46a; } .ladder .metar .mx th.on.up::after { content: ' ▴'; }
 .ladder .metar .mx th.col { cursor: pointer; padding: 6px 2px; width: 34px; height: 150px; vertical-align: bottom; text-align: center; }
 .ladder .metar .mx th.col span { writing-mode: vertical-rl; transform: rotate(180deg); display: inline-block; max-height: 140px; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
 .ladder .metar .mx th.col:hover { color: #f0e8da; } .ladder .metar .mx th.col.sel { color: #1b1916; background: #e6c46a; }
@@ -450,12 +462,23 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .metar .mah { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 0 14px; }
 .ladder .metar .mah h3 { font: 700 26px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 0; }
 .ladder .metar .mah .mwr { font-weight: 700; font-size: 18px; padding: 2px 8px; border-radius: 6px; color: #f0e8da; }
-.ladder .metar .mah .dd { min-width: 220px; }
-.ladder .metar .mback { color: #a89d8c; text-decoration: none; } .ladder .metar .mback::before { content: '‹ '; } .ladder .metar .mback:hover { color: #f0e8da; }
-.ladder .metar .mlists { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; scrollbar-width: thin; scrollbar-color: #4a4540 transparent; align-items: flex-start; }
 .ladder .metar .mlist { flex: none; width: 250px; } .ladder .metar .mlh { display: flex; gap: 8px; align-items: baseline; margin: 0 2px 6px; } .ladder .metar .mlh b { color: #f0e8da; font-size: 17px; } .ladder .metar .mlh span { color: #8f8574; }
-.ladder .metar .mc th.an { padding: 2px 8px 2px 4px; } .ladder .metar .mstrip { width: 230px; } .ladder .metar .mstrip .st { margin: 0; cursor: default; }
+.ladder .metar .mc tbody td, .ladder .metar .mc tbody th.an { height: 30px; padding-top: 0; padding-bottom: 0; }
+.ladder .metar .mc tbody th.an { padding: 0 0 0 4px; border-bottom: 0; }   /* the strips stack flush, as a deck list in the collection */
+.ladder .metar .mstrip { width: 230px; } .ladder .metar .mstrip .st { margin: 0; height: 30px; border-radius: 0; cursor: default; box-shadow: inset 0 -1px 0 rgba(0,0,0,.7), inset 0 1px 0 rgba(255,245,230,.07); }
+.ladder .metar .mc tbody tr:first-child .mstrip .st { border-radius: 4px 0 0 0; } .ladder .metar .mc tbody tr:last-child .mstrip .st { border-radius: 0 0 0 4px; }   /* the numbers start where the strip ends */
+.ladder .metar .mx td.few { color: #a89d8c; } .ladder .metar .mx td.few sup { font-size: 10px; margin-left: 1px; }
+.ladder .metar .msub.mcards { margin: 28px 0 10px; }
 .ladder .metar .msub { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 0 0 10px; }
+.ladder .metar .mpick { display: flex; flex-direction: column; gap: 6px; margin: 0 0 18px; max-width: 760px; }
+.ladder .metar .mpk { display: flex; align-items: center; gap: 10px; padding: 8px 10px 8px 8px; border: 0; border-left: 3px solid transparent; border-radius: 4px; background: none; font: inherit; cursor: pointer; }
+.ladder .metar .mpk.on { border-left-color: #e6c46a; background: #1b1916; }
+.ladder .metar .mpn { flex: none; width: 68px; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; font-variant-numeric: tabular-nums; }
+.ladder .metar .mpn b { color: #f0e8da; font-size: 17px; padding: 2px 6px; border-radius: 5px; } .ladder .metar .mpn small { color: #8f8574; font-size: 12px; padding-right: 6px; white-space: nowrap; }
+.ladder .metar .own { display: flex; flex-wrap: wrap; gap: 8px 10px; min-width: 0; }
+.ladder .metar .mf { position: relative; display: block; width: 44px; height: 44px; }
+.ladder .metar .mf .p { position: absolute; inset: 0; border-radius: 50%; background-color: #2a2622; box-shadow: 0 0 0 3px #d9d0c0, 0 1px 4px rgba(0,0,0,.6); }
+.ladder .metar .mf.rare .p { box-shadow: 0 0 0 3px #8fb4d8, 0 1px 4px rgba(0,0,0,.6); } .ladder .metar .mf.legendary .p { box-shadow: 0 0 0 3px #e6c46a, 0 1px 4px rgba(0,0,0,.6); }
+.ladder .metar .mf b { position: absolute; right: -6px; bottom: -4px; min-width: 18px; height: 18px; border-radius: 9px; background: #1b1916; color: #f0e8da; font-size: 12px; line-height: 18px; text-align: center; box-shadow: 0 0 0 1px rgba(255,245,230,.25); }
 .ladder .metar .mbody { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; } .ladder .metar .mside { flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
-.ladder .metar .mside .mxw { align-self: flex-start; } .ladder .metar .mside .mxw + .msub { margin-top: 14px; } .ladder .metar .mlists { flex-wrap: wrap; overflow: visible; }
-@media (max-width: 700px) { .ladder .metar { padding: 0 12px 20px; } .ladder .metar .mah .dd { margin-left: 0; flex: 1 1 100%; } .ladder .metar .mstrip { width: 180px; } }
+.ladder .metar .mside .mxw { align-self: flex-start; } .ladder .metar .mside .mxw + .msub { margin-top: 14px; } @media (max-width: 700px) { .ladder .metar { padding: 0 12px 20px; } .ladder .metar .mstrip { width: 180px; } }

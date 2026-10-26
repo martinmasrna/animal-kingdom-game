@@ -124,5 +124,17 @@ mv "$tmp/app/code/animal_kingdom/data" "$tmp/app/data"
 for d in static news studies; do [[ -d "$tmp/app/code/animal_kingdom/web/$d" ]] && mv "$tmp/app/code/animal_kingdom/web/$d" "$tmp/app/ui/animal_kingdom/web/"; done
 rm -rf "$tmp/app/ui/animal_kingdom/web/static/art" "$tmp/app/ui/animal_kingdom/web/static/kit2"
 cp "$repo/deploy/Dockerfile" "$tmp/app/"; cp "$cfg" "$tmp/app/fly.toml"
+# A change to the client's static files alone (static/, the paintings aside) skips the image's Python gate: the engine,
+# the server and the cards are the ones the last deploy to this app already tested, and the web suite ran above
+# (Martin, 2026-10-26: a one-line CSS change waited three minutes on the fuzz and the Python tests).
+deployed="$cache/deployed-$target"; prev="$(cat "$deployed" 2>/dev/null)"; quick=""
+if [[ -n "$prev" ]] && git -C "$repo" cat-file -e "$prev^{commit}" 2>/dev/null; then
+  # what ships in the image (the trees below and this folder); docs, notes and logs other sessions commit don't count
+  changed="$(git -C "$repo" diff --name-only "$prev" HEAD -- animal_kingdom engine_rs tools/engine_rs deploy)"
+  if [[ -n "$changed" ]] && ! grep -qv '^animal_kingdom/web/static/' <<< "$changed"; then
+    quick=1; echo "only the client's static files changed since ${prev:0:8}: the image skips the Python gate"
+  fi
+fi
 echo "deploying $(git -C "$repo" log --oneline -1) to $target ($app)"
-retry "$tmp/app" --config "$tmp/app/fly.toml" --remote-only --build-arg "ART=registry.fly.io/$app:$art"
+retry "$tmp/app" --config "$tmp/app/fly.toml" --remote-only --build-arg "ART=registry.fly.io/$app:$art" --build-arg "QUICK=$quick"
+git -C "$repo" rev-parse HEAD > "$deployed"

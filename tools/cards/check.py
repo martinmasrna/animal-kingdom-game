@@ -11,8 +11,7 @@ nothing else: no verdict, no score. The agent reads the sheet; Martin sees the c
     options: --no-fit (skip the browser measurement of the text), --play (place an existing card in a scratch game)
 
 Sections: card, keywords (the registry's ruling for every keyword and term in the text), pool (the animal, the tag, the
-nearest effects), anchors (the principles' anchor for the effect's verb, the neighbours at this rarity and strength,
-what can cover the body), record (every line of the design record that names the animal), grid (map_b's neighbours
+nearest effects), anchors (the cards at this rarity and strength, what can cover the body), record (every line of the design record that names the animal), grid (map_b's neighbours
 and regions at the places the card will stand), text (lines on the real card at every width the client draws it),
 play (a placement in a scratch game, for a card the engine knows; otherwise the one fact that it isn't in the engine).
 """
@@ -104,6 +103,11 @@ def pool_section(cards: dict, c: dict) -> list[str]:
                    sp(k).lower() == species or (k.name or "").lower() == name]
     lines.append("animal already in the pool: " + ("" if same_animal else "no"))
     lines += [f"  {k.id} ({k.status}) {one_line(k)}" for k in same_animal]
+    if not same_animal:
+        from collections import Counter
+        habs = Counter(k.habitat for k in cards.values() if k.collectible and k.habitat)
+        lines.append("habitats the collectible pool uses: " + ", ".join(f"{h} {n}" for h, n in habs.most_common())
+                     + "; the card's is the animal's real, well-known home")
     for tag in c["tags"]:
         family = sorted((k for k in cards.values() if tag in k.tags and k.status in ("collectible", "reserve") and k.id != c.get("id")),
                         key=lambda k: (99 if k.is_dynamic else k.base_strength, k.name))
@@ -127,20 +131,7 @@ def pool_section(cards: dict, c: dict) -> list[str]:
 def anchors_section(cards: dict, c: dict) -> list[str]:
     lines = []
     text = c["text"]
-    md = (DESIGN / "principles.md").read_text(encoding="utf-8")
-    bullets = [b.strip() for b in md.split("\n") if b.startswith("- **")]
-    wanted = []
-    if re.search(r"\bdraw\b|\bScout\b", text, re.I):
-        wanted.append("Draw anchors")
-    if re.search(r"\bremove\b", text, re.I):
-        wanted.append("Removal anchors")
-    if c["kws"] and not re.sub(r"(" + "|".join(map(re.escape, c["kws"])) + r")( \d+)?\.\s*", "", text).strip():
-        wanted.append("A card that is one keyword")
-    wanted.append("References")
-    for w in wanted:
-        b = next((b for b in bullets if b[4:].startswith(w)), None)
-        if b:
-            lines.append(re.sub(r"\s+", " ", b[2:]))
+    lines.append("Lion 7 (vanilla, ground), Eagle 5 (vanilla, Flight); the pool below is the reference, by rarity and strength")
     if re.search(r"\bdraw (a|\d)", text, re.I):
         lines.append("ledger: the Draw action is 2 cards for one action; this card's draw replaces the card played, the action is still spent")
     s = c["str"]

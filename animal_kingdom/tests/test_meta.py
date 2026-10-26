@@ -25,6 +25,11 @@ def test_games_count_by_archetype_with_shares_win_rates_and_the_matrix():
     rows = {r["id"]: r for r in o["archetypes"]}
     assert o["games"] == 3 and rows["Cats"]["wins"] == 2 and rows["Fish"]["wins"] == 1 and rows["Cats"]["share"] == 0.5
     assert o["matrix"]["Cats"]["Fish"] == [3, 2] and o["matrix"]["Fish"]["Cats"] == [3, 1]
+    cats, fish = load_premade_deck("cats"), load_premade_deck("fish")
+    cards = {c["card"]: c for c in o["cards"]}                                   # every card's impacts over every list running it
+    assert cards[cats[1]]["k"] == {"yes": [3, 2], "i": 0}                        # in every opening hand: the list's own record
+    assert cards[cats[0]]["k"]["i"] is None                                       # sent back every time: never in the hand
+    assert cards[fish[0]]["d"]["yes"] == [3, 1]
 
 
 def test_the_rating_range_and_the_days_filter_the_games():
@@ -57,13 +62,33 @@ def test_card_figures_count_each_event_once_a_game_and_only_the_lists_own_cards(
     r = m.archetype("C", {"cats": "C", "fish": "F"}, 0, 10000, 0, vs="F")
     by = {c["card"]: c for c in r["cards"]}
     assert r["games"] == 2 and r["lists"][0]["slug"] == "cats"
-    assert by[cats[0]]["m"] == [2, 1] and by[cats[0]]["k"] == [0, 0]           # seen in the mulligan, sent back: never kept
-    assert by[cats[1]]["k"] == [2, 1] and by[cats[1]]["p"] == [2, 1]           # kept and played
-    assert by[cats[8]]["d"] == [2, 1] and by[cats[8]]["k"] == [0, 0]           # drawn on turn 2: not in the starting hand
-    assert "not_in_list" not in by and by[cats[0]]["with"] == [2, 1] and by[cats[0]]["play"] == 1
+    assert by[cats[0]]["k"] == {"yes": [0, 0], "base": [2, 1], "i": None}      # seen in the mulligan, sent back: never in the hand
+    assert by[cats[1]]["k"]["yes"] == [2, 1] and by[cats[1]]["p"]["yes"] == [2, 1]   # in the opening hand and played
+    assert by[cats[8]]["d"]["yes"] == [2, 1] and by[cats[8]]["k"]["yes"] == [0, 0]   # drawn on turn 2: not in the opening hand
+    assert "not_in_list" not in by and r["list"] == "cats"
     fish = load_premade_deck("fish")
     opp = {c["card"]: c for c in r["opp"]}
     assert opp[fish[0]]["p"] == [2, 1]                                          # the opponent's played card, with the opponent's wins
+
+
+def test_a_cards_figures_are_against_its_lists_own_win_rate():
+    from animal_kingdom.web.meta import impacts, pooled
+    i = impacts({"m": [10, 5], "k": [6, 4], "d": [8, 6], "p": [0, 0]}, [20, 10])
+    assert i["k"]["i"] == 4 / 6 - .5 and i["d"]["i"] == 6 / 8 - .5 and i["p"]["i"] is None
+    big = {e: {"yes": [90, 0], "base": [0, 0], "i": .1} for e in "kdp"}
+    small = {e: {"yes": [10, 0], "base": [0, 0], "i": -.1} for e in "kdp"}
+    assert abs(pooled([big, small])["d"]["i"] - .08) < 1e-9                      # the list where it shows up more weighs more
+
+
+def test_card_figures_are_one_lists_the_most_played_unless_another_is_picked():
+    m = _meta()
+    m.add([_game("A"), _game("A"), {**_game("B"), "a": "bot:expert:canines"}])
+    arch = {"cats": "C", "canines": "C", "fish": "F"}
+    r = m.archetype("C", arch, 0, 10000, 0)
+    assert r["games"] == 3 and r["list"] == "cats" and [l["slug"] for l in r["lists"]] == ["cats", "canines"]
+    assert {c["card"] for c in r["cards"]} == set(load_premade_deck("cats"))
+    r = m.archetype("C", arch, 0, 10000, 0, pick="canines")
+    assert r["list"] == "canines" and {c["card"] for c in r["cards"]} == set(load_premade_deck("canines"))
 
 
 def test_counts_survive_a_restart_and_a_child_list_joins_its_parents_archetype(tmp_path):

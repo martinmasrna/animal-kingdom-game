@@ -24,7 +24,7 @@ def test_existing_card_sheet_has_every_section_and_plays():
     for s in SECTIONS:
         assert any(line.startswith(s) for line in out.splitlines()), s
     assert "Rodent (" in out                      # the family listed
-    assert "Draw anchors" in out                  # the anchor for its verb
+    assert "commons at 4" in out                  # the peers at its rarity and strength
     assert "neighbours" in out                    # the grid
     assert "placed on" in out and "Mouse(A)4" in out   # the scratch placement happened and the board shows it
 

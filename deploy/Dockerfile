@@ -48,7 +48,11 @@ COPY --from=art /kit2 ./animal_kingdom/web/static/kit2
 # file's own source text, and parallel simulation, which pickles the bot's frozen weights (the server never does).
 COPY rs/tools/engine_rs ./tools/engine_rs
 ENV AK_RUST_BOTS=1
+# QUICK (deploy.sh): only the client's static files changed since this app's last deploy, whose build ran this gate on the
+# same engine, server and cards.
+ARG QUICK=
 RUN python -c "import animal_kingdom.engine.rules as r, animal_kingdom.bots.referee_bot as b; assert r.__file__.endswith('.so') and b.__file__.endswith('.so')" \
+    && if [ -n "$QUICK" ]; then echo "client files only: the Python gate passed on the last deploy"; exit 0; fi \
     && python tools/engine_rs/fuzz.py --all-cards --games 40 --stop \
     && python -m pytest -q -m "not slow" -o markers=slow -n auto -p no:cacheprovider animal_kingdom/tests \
         --ignore=animal_kingdom/tests/test_deck_docs.py \
