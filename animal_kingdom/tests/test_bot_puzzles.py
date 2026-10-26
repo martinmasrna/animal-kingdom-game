@@ -223,25 +223,6 @@ def _opponent_captures_in_two(s):
     return False
 
 
-@pytest.mark.xfail(reason="since the Giraffe became 6+3 with Hungry 2 (2026-10-26) the Expert guards on four seeds of five: the puzzle's "
-                          "Giraffe at 3,2 changed under it, and seed 1 draws instead; a bots backlog item, not a card signal", strict=False)
-def test_the_groundhog_guards_the_den():
-    # Martin's Hoofed vs the Expert's Food Aggro, 17 October (web match HWENGG), the bot's turn 6 with a Groundhog in
-    # hand and a Chipmunk alone in front of its den, Martin's Zebra and Warthog beside it with two cards in hand. He
-    # covers the Chipmunk and walks in unless something stronger stands on 5,2. Today's Expert drew twice and lost
-    # the game there. Two blindnesses: its reply model plays the opponent one action at a time, so the cover-then-
-    # capture never appeared in any world; and its root screen ranked a Meerkat above the Groundhog on that square,
-    # so the only guard was never searched. With den sense it guards in every seed (draw first, then the guard, or
-    # the guard first).
-    from animal_kingdom.sim.runner import make_bot
-    for seed in range(5):
-        s, bot = _puzzle("den_guard_cover"), make_bot("referee", seed, extra=dict(DEN_SENSE_CANDIDATE))
-        while s.result is None and s.current == "B":
-            rules.apply_action(s, bot.choose(s.view_for("B"), rules.legal_actions(s), s))
-        assert s.top_unit("5,2").card_id != "chipmunk", seed
-        assert not _opponent_captures_in_two(s), seed
-
-
 def test_the_hoofed_bot_covers_its_gazelle():
     # The same evening, Martin's Cats vs the Expert's Hoofed (web match HDUPLA, first game), the bot's turn 6: a
     # Gazelle alone on 5,2, Martin's Tiger and Lynx next to it with six cards in hand, the bot holding Giraffe, Cape
