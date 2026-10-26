@@ -75,6 +75,12 @@ def test_known_cards_present_with_expected_data():
     assert not cards["guard_wasp"].has_roar
 
 
+def test_soldiers_workers_and_nurses_are_commons():
+    """The Colony's castes are its rank and file; a rare or legendary Colony card carries no caste (Martin, 2026-10-26)."""
+    castes = {"Soldier", "Worker", "Nurse"}
+    assert [c.id for c in load_cards().values() if c.tags & castes and c.rarity != "common"] == []
+
+
 def test_duplicate_card_id_rejected():
     raw = {"cards": [GOOD, {**GOOD, "name": "X2"}]}
     with pytest.raises(CardDataError):

@@ -88,7 +88,7 @@ The ones at the door and the ones built to fight. Nothing alone; everything in n
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **Vesper** | legendary | 5 | Flight. When an enemy covers a Colony ally, place Vesper on top of it from your hand or deck. | Forest |
-| **Soldier Hornet** | rare | 2 | Flight. Roar: discard a Soldier Hornet from your hand or deck to remove an adjacent enemy. | Forest |
+| **Hornet** | rare | 2 | Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy. | Forest |
 | **Soldier Ant** | common | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. | Jungle |
 | **Soldier Bee** | common | 3 | Flight. Spikes. | Meadow |
 | **Soldier Wasp** | common | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. | Forest |

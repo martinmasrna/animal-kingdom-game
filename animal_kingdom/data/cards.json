@@ -660,15 +660,14 @@
     },
     {
       "id": "hornet",
-      "name": "Soldier Hornet",
+      "name": "Hornet",
       "status": "collectible",
       "rarity": "rare",
       "tags": [
-        "Colony",
-        "Soldier"
+        "Colony"
       ],
       "base_strength": 2,
-      "text": "Flight. Roar: discard a Soldier Hornet from your hand or deck to remove an adjacent enemy.",
+      "text": "Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy.",
       "species": "Hornet",
       "habitat": "Forest",
       "keywords": [
