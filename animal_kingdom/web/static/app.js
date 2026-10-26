@@ -493,21 +493,36 @@ async function fillMeta() {
     </tbody></table></div>${metaCards(j.cards || [], 'acsort')}`;
   wireMetaControls(box);
   wireCardReads(box); fitStrips(box);
-  box.querySelectorAll('th[data-acsort]').forEach(t => t.onclick = () => { META.acsort = META.acsort === t.dataset.acsort ? 'd' : t.dataset.acsort; fillMeta(); });
+  box.querySelectorAll('th[data-acsort]').forEach(t => t.onclick = () => { META.acsort = META.acsort === t.dataset.acsort ? 'o' : t.dataset.acsort; fillMeta(); });
   box.querySelectorAll('th[data-sort]').forEach(t => t.onclick = () => { META.sort = t.dataset.sort; fillMeta(); });
   box.querySelectorAll('th[data-col]').forEach(t => t.onclick = () => { const c = t.dataset.col; META.sel.has(c) ? META.sel.delete(c) : META.sel.add(c); if (META.sel.size) META.sort = 'vs'; else if (META.sort === 'vs') META.sort = 'share'; fillMeta(); });
 }
-// Every card in the range, over every list that runs it: its win rate kept in the starting hand, drawn and played, best
-// drawn first; a card only one archetype runs carries that archetype's record, so the archetype pages hold the finer view.
+// A card's impact against its own list (web/meta.py impacts; Martin, 2026-10-26): Opening, the win rate when the opening
+// hand offered it minus when it didn't (the shuffle's doing, so the game's length doesn't leak in as it does into drawn
+// against not drawn); Keep, when kept minus when offered and sent back; in points, both sides' records on hover. A side
+// under the games filter shows a dot.
+const IMPACT = { o: ['Opening', 'Win rate when the opening hand offered it, minus when it did not', 'Offered', 'Not offered'],
+  k: ['Keep', 'Win rate when kept in the opening hand, minus when offered and sent back', 'Kept', 'Sent back'] };
+const impVal = (v, min) => v && v.i !== null && Math.min(v.yes[0], v.no[0]) >= min ? v.i : null;
+function impCell(v, e, min) {
+  const x = impVal(v, min), rec = (label, r) => `${label} ${r[1]}–${r[0] - r[1]}`;
+  const tip = v ? `${rec(IMPACT[e][2], v.yes)} · ${rec(IMPACT[e][3], v.no)}` : '';
+  if (x === null) return `<td class="num dim" title="${tip}">·</td>`;
+  // the colour is how sure the number is: full at three standard errors from nothing, none inside one (a rare card's +28
+  // on 40 games stays pale, a staple's +5 on 2000 games lights up)
+  const se = r => { const p = r[1] / r[0]; return p * (1 - p) / r[0]; }, z = x / Math.sqrt(se(v.yes) + se(v.no) || 1);
+  const sure = Math.max(0, Math.min(1, (Math.abs(z) - 1) / 2));
+  return `<td class="num" style="${tint(Math.sign(x) * sure * 10, 0, 10)}" title="${tip}">${x >= 0 ? '+' : '−'}${Math.abs(100 * x).toFixed(1)}</td>`;
+}
+const impHead = (e, on, attr) => `<th class="num sortable${on ? ' on' : ''}" ${attr}="${e}" title="${IMPACT[e][1]}">${IMPACT[e][0]}</th>`;
+// Every card in the range, its impacts pooled over every list that runs it, the card that lifts its list most first.
 function metaCards(cards, key) {
-  const min = META.min, sort = META.acsort || 'd';
-  const rate = v => v && v[0] >= min ? `<td class="num" style="${tint(100 * v[1] / v[0])}" title="${v[1]}–${v[0] - v[1]} in ${v[0]} games">${pct(v[1], v[0])}%</td>` : `<td class="num dim" title="${v ? v[0] : 0} games">·</td>`;
-  const val = c => c[sort][0] >= min ? c[sort][1] / c[sort][0] : -1;
-  const rows = cards.filter(c => CARDS[c.card] && c.d[0] >= min).sort((a, b) => val(b) - val(a) || b.d[0] - a.d[0]);
+  const min = META.min, sort = META.acsort || 'o';
+  const val = c => impVal(c[sort], min) ?? -9;
+  const rows = cards.filter(c => CARDS[c.card] && c.o.yes[0] >= min).sort((a, b) => val(b) - val(a) || b.o.yes[0] - a.o.yes[0]);
   if (!rows.length) return '';
-  const th = (k, label, tip) => `<th class="num sortable${sort === k ? ' on' : ''}" data-${key}="${k}" title="${tip}">${label}</th>`;
-  return `<h4 class="msub mcards">Cards</h4><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${th('k', 'Mulligan', 'Win rate when kept in the starting hand')}${th('d', 'Drawn', 'Win rate when drawn, starting hand included')}${th('p', 'Played', 'Win rate when played')}<th class="num">Games</th></tr></thead><tbody>
-    ${rows.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, 1)}</div></th>${rate(c.k)}${rate(c.d)}${rate(c.p)}<td class="num dim">${c.d[0]}</td></tr>`).join('')}</tbody></table></div>`;
+  return `<h4 class="msub mcards">Cards</h4><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${impHead('o', sort === 'o', 'data-' + key)}${impHead('k', sort === 'k', 'data-' + key)}<th class="num" title="Games its opening hand offered it">Games</th></tr></thead><tbody>
+    ${rows.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, 1)}</div></th>${impCell(c.o, 'o', min)}${impCell(c.k, 'k', min)}<td class="num dim">${c.o.yes[0]}</td></tr>`).join('')}</tbody></table></div>`;
 }
 // Every card on a Meta page reads as in the collection: hovered, the card beside it; right-clicked, held or tapped on a phone, large.
 function wireCardReads(box) {
@@ -555,7 +570,7 @@ async function metaArchetype(box, id, q) {
   const rate = (v, b = base) => v && v[0] >= min ? `<td class="num" style="${tint(100 * v[1] / v[0], b)}" title="${v[1]}–${v[0] - v[1]} in ${v[0]} games">${pct(v[1], v[0])}%</td>` : `<td class="num dim" title="${v ? v[0] : 0} games">·</td>`;
   const RANKS = { legendary: 0, rare: 1, common: 2 }, strv = c => CARDS[c] ? (CARDS[c].str === '*' ? -1 : CARDS[c].str) : 99;
   const order = (a, b) => (RANKS[CARDS[a.card]?.rarity] ?? 3) - (RANKS[CARDS[b.card]?.rarity] ?? 3) || strv(a.card) - strv(b.card) || a.card.localeCompare(b.card);
-  const val = { k: c => c.k[0] >= min ? c.k[1] / c.k[0] : -1, d: c => c.d[0] >= min ? c.d[1] / c.d[0] : -1, p: c => c.p[0] >= min ? c.p[1] / c.p[0] : -1 };
+  const val = { o: c => impVal(c.o, min) ?? -9, k: c => impVal(c.k, min) ?? -9 };
   const cards = [...j.cards].filter(c => CARDS[c.card]).sort(META.csort && val[META.csort] ? (a, b) => val[META.csort](b) - val[META.csort](a) || order(a, b) : order);
   const th = (k, label, tip) => `<th class="num sortable${META.csort === k ? ' on' : ''}" data-csort="${k}" title="${tip}">${label}</th>`;
   const strip = c => `<div class="mstrip">${stripHTML(c, CARDS, 1)}</div>`;
@@ -576,8 +591,8 @@ async function metaArchetype(box, id, q) {
   const opp = j.opp ? [...j.opp].filter(c => CARDS[c.card] && c.d[0] >= min).sort((a, b) => theirs(b) - theirs(a)) : null;
   const flip = v => v ? [v[0], v[0] - v[1]] : v;   // their card's games counted with your wins
   box.innerHTML = metaControls(true, vsDd) + `<div class="mah"><h3>${esc(j.name)}</h3><span class="mwr" style="${tint(base)}" title="${j.games} games">${j.games ? base.toFixed(1) + '%' : '–'}</span></div>${picker}
-    <div class="mbody"><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${th('k', 'Mulligan', 'Win rate when kept in the starting hand')}${th('d', 'Drawn', 'Win rate when drawn, starting hand included')}${th('p', 'Played', 'Win rate when played')}</tr></thead><tbody>
-      ${cards.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, mine[c.card] || 1)}</div></th>${rate(c.k)}${rate(c.d)}${rate(c.p)}</tr>`).join('')}
+    <div class="mbody"><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${impHead('o', META.csort === 'o', 'data-csort')}${impHead('k', META.csort === 'k', 'data-csort')}<th class="num" title="Games its opening hand offered it">Games</th></tr></thead><tbody>
+      ${cards.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, mine[c.card] || 1)}</div></th>${impCell(c.o, 'o', min)}${impCell(c.k, 'k', min)}<td class="num dim">${c.o.yes[0]}</td></tr>`).join('')}
     </tbody></table></div><div class="mside">
     ${opp ? `<h4 class="msub">${esc(j.vs_name)}'s cards</h4><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th><th class="num" title="Your win rate when they drew it">Drawn</th><th class="num" title="Your win rate when they played it">Played</th><th class="num">Games</th></tr></thead><tbody>
       ${opp.map(c => `<tr><th class="an">${strip(c.card)}</th>${rate(flip(c.d))}${rate(flip(c.p))}<td class="num dim">${c.d[0]}</td></tr>`).join('')}</tbody></table></div>` : ''}</div></div>`;
