@@ -3904,9 +3904,9 @@
         "prev_note": "",
         "prev": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal."
       },
-      "note": "Removal rares pass with Martin, 2026-10-26: own removal first (Vilgefortz), enemy removal the fallback; no cap on your own. Shortened to fit three lines",
+      "note": "Martin, 2026-10-26: keep it exactly as it was",
       "by": "claude",
-      "at": 1793012858
+      "at": 1793013526
     }
   },
   "tarantula": {

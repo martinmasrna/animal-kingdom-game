@@ -2840,7 +2840,7 @@
         "Bird"
       ],
       "base_strength": 6,
-      "text": "Roar: remove an adjacent ally to play another animal, or an enemy of strength 4 or less.",
+      "text": "Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal.",
       "species": "Cuckoo",
       "habitat": "Meadow",
       "keywords": []

@@ -480,7 +480,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let cap = cfg(st, "cuckoo_legend_max");
             let options: Vec<Cr> = adjacent_tops(st, cr, None)
                 .into_iter()
-                .filter(|(nb, top)| (top.owner == owner || effective_strength(st, top, None) <= cap) && statics::can_be_removed(st, top, Some(*nb), false) && statics::can_be_chosen(st, top, owner, Some(*nb)))
+                .filter(|(nb, top)| effective_strength(st, top, None) <= cap && statics::can_be_removed(st, top, Some(*nb), false) && statics::can_be_chosen(st, top, owner, Some(*nb)))
                 .map(|(nb, _)| nb)
                 .collect();
             let o = crs(st, options);

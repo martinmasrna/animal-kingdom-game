@@ -122,7 +122,7 @@ class Config:
     stoop_max: int = 4                   # Hawk
     rhinoceros_max: int = 3
     hippopotamus_max: int = 3
-    cuckoo_legend_max: int = 4           # the legendary Cuckoo: removes an adjacent enemy of strength <= this
+    cuckoo_legend_max: int = 4           # the legendary Cuckoo: removes an adjacent animal of strength <= this
 
     # --- Draws, food and other magnitudes of the launch decks ---
     mantis_draw: int = 2                 # Praying Mantis: remove an adjacent ally to draw 2

@@ -186,14 +186,6 @@ def test_the_legendary_cuckoo_removes_an_ally_and_plays_another_animal():
     assert s2.pending is None and removed(s2, "squirrel")
 
 
-def test_the_legendary_cuckoo_takes_an_ally_of_any_strength_but_an_enemy_of_4_or_less():
-    s = make_state(hands={"A": ["cuckoo_legend", "lion"]})
-    put(s, "1,1", "elephant", "A")
-    put(s, "2,2", "lion", "B")
-    rules.apply_action(s, PlaceAction("cuckoo_legend", ("cr", "1,2")))
-    assert s.pending["options"] == ["1,1"]                     # your 9, yes; their 7, no
-
-
 def test_the_legendary_sloth_makes_dusk_effects_happen_twice():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,1", "sloth_legend", "A")
