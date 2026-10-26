@@ -91,7 +91,10 @@ def test_card_figures_are_one_lists_the_most_played_unless_another_is_picked():
     assert r["list"] == "canines" and {c["card"] for c in r["cards"]} == set(load_premade_deck("canines"))
 
 
-def test_counts_survive_a_restart_and_a_child_list_joins_its_parents_archetype(tmp_path):
+def test_counts_survive_a_restart_and_a_child_list_joins_its_parents_archetype(tmp_path, monkeypatch):
+    from animal_kingdom.web import meta
+    (tmp_path / "a.json").write_text('{"archetypes": [{"name": "Cats", "lists": ["cats"]}]}')   # not the live file, which changes
+    monkeypatch.setattr(meta, "ARCHETYPES", tmp_path / "a.json")
     db = sqlite3.connect(tmp_path / "m.db")
     lists = lambda s: load_premade_deck(s) if s in ("cats", "fish") else None
     Meta(db, lists).add([_game("A")])
