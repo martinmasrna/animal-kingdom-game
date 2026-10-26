@@ -912,8 +912,8 @@
         "prev_note": "",
         "prev": "Roar: if placed next to the opponent's den, draw a card."
       },
-      "note": "Martin, 2026-10-26: \"if this is next to\", as the Remora",
-      "at": 1793031262
+      "note": "Martin, 2026-10-26: \"your opponent's den\"",
+      "at": 1793031758
     },
     "art": {
       "lv": "fine",
@@ -1394,8 +1394,8 @@
         "prev_note": "",
         "prev": "Flight. Roar: if placed next to the opponent's den, draw a card."
       },
-      "note": "Martin, 2026-10-26: \"if this is next to\", as the Remora",
-      "at": 1793031263
+      "note": "Martin, 2026-10-26: \"your opponent's den\"",
+      "at": 1793031759
     },
     "art": {
       "lv": "draft",
@@ -1525,6 +1525,16 @@
       "by": "claude",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "at": 1792191060
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: draw a card for each ally next to the opponent's den."
+      },
+      "note": "Martin, 2026-10-26: \"your opponent's den\"",
+      "by": "claude",
+      "at": 1793031760
     }
   },
   "gazelle": {
