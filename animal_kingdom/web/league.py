@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS league_games (
     id INTEGER PRIMARY KEY, t REAL NOT NULL, a TEXT NOT NULL, b TEXT NOT NULL, winner TEXT, seed INTEGER, turns INTEGER, reason TEXT);
 CREATE TABLE IF NOT EXISTS league_report (k TEXT PRIMARY KEY, v TEXT NOT NULL, t REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS pool_retired (slug TEXT PRIMARY KEY, t REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS league_seen (gid TEXT PRIMARY KEY, t REAL NOT NULL);
 """
 
 
@@ -79,6 +80,19 @@ class Pool:
     def retire(self, slugs: list[str]) -> None:
         with self.db:
             self.db.executemany("INSERT OR IGNORE INTO pool_retired VALUES (?, ?)", [(s, time.time()) for s in slugs])
+
+    def unseen(self, gids: list[str]) -> set[str]:
+        """The game ids not posted before: the runner resends its outbox until a post is acknowledged, so a post that
+        reached the server but whose answer was lost comes again, and must not be rated twice."""
+        seen = set()
+        for i in range(0, len(gids), 500):
+            chunk = gids[i:i + 500]
+            seen |= {r[0] for r in self.db.execute(f"SELECT gid FROM league_seen WHERE gid IN ({','.join('?' * len(chunk))})", chunk)}
+        return set(gids) - seen
+
+    def mark(self, gids: list[str]) -> None:
+        with self.db:
+            self.db.executemany("INSERT OR IGNORE INTO league_seen VALUES (?, ?)", [(g, time.time()) for g in gids])
 
     def put_report(self, rep: dict) -> None:
         with self.db:

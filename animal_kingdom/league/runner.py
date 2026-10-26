@@ -2,6 +2,12 @@
 
     .venv/bin/python -m animal_kingdom.league.runner --server https://animal-kingdom.fly.dev [--jobs 7] [--batch 64] [--pace 1200] [--once]
 
+Offline first (Martin, 2026-10-27: the games never wait on the internet): the pool and its ratings are kept on disk
+(results/league/state.json) and a pass plays from the last copy when the server can't be reached, nudging its own copy's
+ratings with each result so matchmaking stays sensible; every game goes to an outbox (results/league/outbox.jsonl) and each
+pass sends the outbox, oldest first, until the server acknowledges it. Each game has an id, and the server skips one it has
+seen, so a post that arrived but whose answer was lost is never rated twice. The server stays the one rating store.
+
 Each pass asks the server for the pool (`/api/league/pool`: every bot deck's list, every pairing's rating and uncertainty,
 the pilots' specs), picks the games a ladder would pick, plays them on the Rust engine (AK_RUST_BOTS=1, the pilots
 untimed), posts the results to `/api/league/games`, and appends them to results/league/games.jsonl. Who plays: pairings
@@ -40,6 +46,56 @@ ANYONE = 0.2          # share of games against anyone at all, as a ladder's queu
 PLACING_GAMES = 2     # games a placing pairing gets each pass
 
 
+OUTBOX_CHUNK = 300   # games a post carries
+LOCAL_K = 16         # how far a result moves the local copy's ratings while offline (the server's Glicko replaces them)
+
+
+def load_pool(server: str, key: str, state: Path) -> dict | None:
+    """The server's pool, saved to `state`; offline, the last saved copy (None before the first contact)."""
+    try:
+        pool = api(server, "/api/league/pool", key, timeout=20)
+        state.write_text(json.dumps(pool))
+        return pool
+    except (urllib.error.URLError, OSError, ValueError) as e:
+        if state.is_file():
+            print(f"pool: {e}; playing from the saved copy", flush=True)
+            return json.loads(state.read_text())
+        return None
+
+
+def nudge(pool: dict, results: list[dict], state: Path) -> None:
+    """The local copy learns from the pass while the server can't be asked: an Elo step and a game counted per result."""
+    players = {p["id"]: p for p in pool["players"]}
+    for g in results:
+        a, b = players.get(g["a"]), players.get(g["b"])
+        if not a or not b or g.get("winner") not in ("A", "B"):
+            continue
+        e = 1 / (1 + 10 ** ((b["rating"] - a["rating"]) / 400))
+        s = 1.0 if g["winner"] == "A" else 0.0
+        a["rating"] += LOCAL_K * (s - e); b["rating"] -= LOCAL_K * (s - e)
+        a["games"] += 1; b["games"] += 1
+    state.write_text(json.dumps(pool))
+
+
+def send_outbox(server: str, key: str, outbox: Path) -> tuple[int, int]:
+    """Post the outbox oldest first, dropping each chunk the server acknowledges; stop at the first failure. (rated, left)."""
+    if not outbox.is_file():
+        return 0, 0
+    lines = [l for l in outbox.read_text().splitlines() if l.strip()]
+    rated = 0
+    while lines:
+        chunk = lines[:OUTBOX_CHUNK]
+        try:
+            ack = api(server, "/api/league/games", key, {"games": [json.loads(l) for l in chunk]})
+        except (urllib.error.URLError, OSError, ValueError) as e:
+            print(f"outbox: {e}; {len(lines)} games wait for the connection", flush=True)
+            break
+        rated += ack.get("rated", 0)
+        lines = lines[OUTBOX_CHUNK:]
+        outbox.write_text("".join(l + "\n" for l in lines))
+    return rated, len(lines)
+
+
 def is_night(window: str, hour: int) -> bool:
     """Whether `hour` lies in the 'from-to' window (wrapping midnight: '22-6' is 22:00 to 05:59)."""
     if not window:
@@ -48,10 +104,10 @@ def is_night(window: str, hour: int) -> bool:
     return a <= hour < b if a < b else hour >= a or hour < b
 
 
-def api(server: str, path: str, key: str, body=None) -> dict:
+def api(server: str, path: str, key: str, body=None, timeout: int = 60) -> dict:
     req = urllib.request.Request(server.rstrip("/") + path, headers={"X-AK-League-Key": key, "Content-Type": "application/json"},
                                  data=json.dumps(body).encode() if body is not None else None, method="POST" if body is not None else "GET")
-    with urllib.request.urlopen(req, timeout=60) as r:
+    with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read().decode())
 
 
@@ -157,13 +213,13 @@ def main(argv=None) -> None:
     births_log = log.with_name("births.jsonl")
     facts_dir = log.with_name("facts")
     rng = random.Random()
+    state, outbox = log.with_name("state.json"), log.with_name("outbox.jsonl")
     last_tinker, reported_day = 0.0, ""
     while True:
         started = time.time()
-        try:
-            pool = api(args.server, "/api/league/pool", key)
-        except (urllib.error.URLError, OSError) as e:
-            print(f"pool: {e}; retrying in 60 s", flush=True); time.sleep(60); continue
+        pool = load_pool(args.server, key, state)
+        if pool is None:
+            print("pool: no server and no saved copy yet; retrying in 60 s", flush=True); time.sleep(60); continue
         retired_file = log.with_name("retired.json")   # lists Martin retired, kept out here even before the server knows
         if retired_file.is_file():
             out = set(json.loads(retired_file.read_text()))
@@ -208,10 +264,13 @@ def main(argv=None) -> None:
                 if "facts" in g:
                     fh.write(json.dumps({"t": started, "a": g["a"], "b": g["b"], "winner": g["winner"], "turns": g["turns"],
                                          "reason": g["reason"], **g["facts"]}, separators=(",", ":")) + "\n")
-        try:
-            ack = api(args.server, "/api/league/games", key, {"games": [{**{k: v for k, v in g.items() if not k.startswith("drawn_")}, "t": started} for g in results]})
-        except (urllib.error.URLError, OSError) as e:
-            print(f"games not posted: {e} (kept in {log})", flush=True); ack = {"rated": 0}
+        with outbox.open("a") as fh:   # every game waits here until the server has it
+            for i, g in enumerate(results):
+                fh.write(json.dumps({**{k: v for k, v in g.items() if not k.startswith("drawn_")}, "t": started,
+                                     "gid": f"{int(started * 1000)}-{i}"}, separators=(",", ":")) + "\n")
+        nudge(pool, results, state)
+        rated, left = send_outbox(args.server, key, outbox)
+        ack = {"rated": rated if not left else f"{rated} ({left} waiting)"}
         if args.births and started - last_tinker > 3600:
             last_tinker = started
             try:

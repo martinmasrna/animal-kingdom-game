@@ -140,6 +140,18 @@ def test_a_retired_lists_twin_comes_back_fresh_and_only_at_the_levels_asked(monk
     _run(monkeypatch, tmp_path, body)
 
 
+def test_a_game_posted_twice_is_rated_once(monkeypatch, tmp_path):
+    async def body(c, server):
+        h = {"X-AK-League-Key": "k-test"}
+        before = server.ladder.get("bot:expert:cats").games
+        g = {"gid": "123-0", "a": "bot:expert:cats", "b": "bot:expert:fish", "winner": "A", "seed": 1, "turns": 9, "reason": "hq_capture"}
+        j1 = await (await c.post("/api/league/games", json={"games": [g]}, headers=h)).json()
+        j2 = await (await c.post("/api/league/games", json={"games": [g, {**g, "gid": "123-1"}]}, headers=h)).json()
+        assert (j1["rated"], j1["seen"]) == (1, 0) and (j2["rated"], j2["seen"]) == (1, 1)
+        assert server.ladder.get("bot:expert:cats").games == before + 2
+    _run(monkeypatch, tmp_path, body)
+
+
 def test_card_facts_feed_the_meta_tab_by_martins_archetypes(monkeypatch, tmp_path):
     from animal_kingdom.web import meta
     (tmp_path / "a.json").write_text(json.dumps({"archetypes": [{"name": "Cats", "lists": ["cats"]}, {"name": "Fish Token", "lists": ["fish"]}]}))

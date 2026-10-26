@@ -681,14 +681,20 @@ async def league_pool(req):
 
 
 async def league_games(req):
-    """Bot games played by the runner, rated here like anyone's: [{a, b, winner, seed, turns, reason}], a and b bot ladder ids."""
+    """Bot games played by the runner, rated here like anyone's: [{gid, a, b, winner, seed, turns, reason}], a and b bot
+    ladder ids. A game whose `gid` came before is skipped (the runner resends what it could not confirm), counted as `seen`."""
     league_auth(req)
     body = await req.json()
     games = body.get("games") if isinstance(body, dict) else None
     if not isinstance(games, list) or len(games) > 1000:
         raise web.HTTPBadRequest(text="games: a list of at most 1000")
     ok, touched = [], set()
+    gids = [str(g["gid"]) for g in games if isinstance(g, dict) and g.get("gid")]
+    fresh = league.unseen(gids)
+    seen = len(gids) - len(fresh)
     for g in games:
+        if not isinstance(g, dict) or (g.get("gid") and str(g["gid"]) not in fresh):
+            continue
         a, b, w = g.get("a"), g.get("b"), g.get("winner")
         if not (ranking.parse_bot(a or "") and ranking.parse_bot(b or "") and a != b):
             continue
@@ -699,8 +705,9 @@ async def league_games(req):
             touched |= {a, b}
         ok.append(g)
     league.record(ok)
+    league.mark(list(fresh))
     meta.add({**g, **g["facts"]} for g in ok if isinstance(g.get("facts"), dict))   # the runner sends each game's card facts with it
-    return web.json_response({"rated": len(ok), "ratings": {lid: ladder.get(lid).shown() for lid in touched}})
+    return web.json_response({"rated": len(ok), "seen": seen, "ratings": {lid: ladder.get(lid).shown() for lid in touched}})
 
 
 async def league_facts(req):

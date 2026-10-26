@@ -53,3 +53,21 @@ def test_round_robin_plays_every_same_level_pairing_twice_and_no_mirror():
     g = round_robin(ps, random.Random(1))
     assert len(g) == 12 and all(a.split(":")[1] == b.split(":")[1] and a != b for a, b in g)
     assert {frozenset(x) for x in g} == {frozenset((f"bot:expert:d{i}", f"bot:expert:d{j}")) for i in range(4) for j in range(i + 1, 4)}
+
+
+def test_offline_the_games_wait_in_the_outbox_and_go_once_the_server_answers(monkeypatch, tmp_path):
+    import json, urllib.error
+    from animal_kingdom.league import runner
+    out, state = tmp_path / "outbox.jsonl", tmp_path / "state.json"
+    out.write_text("".join(json.dumps({"gid": f"g{i}", "a": "x", "b": "y"}) + "\n" for i in range(700)))
+    def down(*a, **k): raise urllib.error.URLError("no network")
+    monkeypatch.setattr(runner, "api", down)
+    assert runner.send_outbox("s", "k", out) == (0, 700) and len(out.read_text().splitlines()) == 700
+    assert runner.load_pool("s", "k", state) is None                                   # offline and nothing saved yet
+    state.write_text(json.dumps({"players": [{"id": "x", "rating": 1500, "games": 0}, {"id": "y", "rating": 1500, "games": 0}]}))
+    pool = runner.load_pool("s", "k", state)
+    runner.nudge(pool, [{"a": "x", "b": "y", "winner": "A"}], state)
+    assert pool["players"][0]["rating"] > 1500 > pool["players"][1]["rating"] and pool["players"][0]["games"] == 1
+    sent = []
+    monkeypatch.setattr(runner, "api", lambda s, p, k, body=None, timeout=60: sent.append(len(body["games"])) or {"rated": len(body["games"])})
+    assert runner.send_outbox("s", "k", out) == (700, 0) and sent == [300, 300, 100] and out.read_text() == ""
