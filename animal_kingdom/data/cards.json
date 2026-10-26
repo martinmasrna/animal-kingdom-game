@@ -24,7 +24,7 @@
       "tags": [
         "Colony"
       ],
-      "base_strength": 5,
+      "base_strength": 3,
       "text": "Flight. When an enemy covers a Colony ally, place Vesper on top of it from your hand or deck.",
       "species": "Hornet",
       "habitat": "Forest",
@@ -120,7 +120,7 @@
         "Colony",
         "Queen"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Roar: play a non-Queen Colony animal.",
       "species": "Termite",
       "habitat": "Savanna",

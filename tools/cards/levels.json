@@ -3554,9 +3554,9 @@
       "by": "martin"
     },
     "strength": {
-      "note": "Martin's sheet, 2026-10-24",
+      "note": "Martin, 2026-10-26",
       "by": "claude",
-      "at": 1792861462,
+      "at": 1793016193,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
@@ -3675,6 +3675,16 @@
       "note": "Martin's wording, 2026-10-24; fits three lines at every width",
       "by": "claude",
       "at": 1792867185
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "note": "Martin, 2026-10-26",
+      "by": "claude",
+      "at": 1793016192
     }
   },
   "viper": {

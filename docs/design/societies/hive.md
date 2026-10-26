@@ -46,7 +46,7 @@ The one the colony is for. She lays, and everyone else exists to feed her brood.
 | **Queen Melissia** | legendary | 3 | Roar: draw a Worker, a Soldier and a Nurse Colony animal. | Meadow |
 | **Queen Solenia** | legendary | 3 | Dusk: gain 2 food for each animal you control. | Jungle |
 | **Queen Ant** | rare | 5 | Dusk: place a Young Ant on an adjacent empty crossroad. | Forest |
-| **Termite Queen** | rare | 3 | Roar: play a non-Queen Colony animal. | Savanna |
+| **Termite Queen** | rare | 2 | Roar: play a non-Queen Colony animal. | Savanna |
 | **Queen Bee** | common | 3 | Roar: play a Young Bee. | Meadow |
 
 <!-- cards:end -->
@@ -87,7 +87,7 @@ The ones at the door and the ones built to fight. Nothing alone; everything in n
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Vesper** | legendary | 5 | Flight. When an enemy covers a Colony ally, place Vesper on top of it from your hand or deck. | Forest |
+| **Vesper** | legendary | 3 | Flight. When an enemy covers a Colony ally, place Vesper on top of it from your hand or deck. | Forest |
 | **Hornet** | rare | 2 | Flight. Roar: discard a Hornet from your hand or deck to remove an adjacent enemy. | Forest |
 | **Soldier Ant** | common | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. | Jungle |
 | **Soldier Bee** | common | 3 | Flight. Spikes. | Meadow |
