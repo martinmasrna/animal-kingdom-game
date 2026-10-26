@@ -133,7 +133,8 @@ class Meta:
 
     # ------------------------------------------------------------------ asking
     def overview(self, arch: dict[str, str], names: dict[str, str], lo: int, hi: int, days: int) -> dict:
-        """The meta in a rating range over the last `days` days: each archetype's share of games and win rate, the matchup matrix."""
+        """The meta in a rating range over the last `days` days: each archetype's share of games and win rate, the matchup
+        matrix, and every card's figures over every list that runs it (mirrors left out, as in the win rates)."""
         key = ("o", lo, hi, days, tuple(sorted(arch.items())))
         hit = self._cache.get(key)
         if hit and time.time() - hit[0] < 120:
@@ -153,11 +154,16 @@ class Meta:
             if x != y:                                       # a win rate leaves the mirror out, as tier lists do
                 tot[x][1] += w; tot[x][2] += n
                 mx[x][y][0] += n; mx[x][y][1] += w
+        cards: dict[str, dict[str, list[int]]] = collections.defaultdict(lambda: {e: [0, 0] for e in EVENTS})
+        for (day, band, a, b, c, e), (n, w) in self.cards.items():
+            if (days == 0 or day >= since) and lo <= band < hi and a in arch and b in arch and arch[a] != arch[b]:
+                cards[c][e][0] += n; cards[c][e][1] += w
         games = sum(t[0] for t in tot.values())
         out = {"games": games // 2, "bands": sorted(bands), "band": BAND,
                "archetypes": sorted(({"id": x, "name": names.get(x, x), "games": t[0], "wins": t[1], "decided": t[2], "share": t[0] / games if games else 0}
                                      for x, t in tot.items()), key=lambda r: -r["games"]),
-               "matrix": {x: {y: v for y, v in row.items()} for x, row in mx.items()}}
+               "matrix": {x: {y: v for y, v in row.items()} for x, row in mx.items()},
+               "cards": [{"card": c, **v} for c, v in sorted(cards.items())]}
         self._cache[key] = (time.time(), out)
         return out
 

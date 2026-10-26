@@ -25,6 +25,8 @@ def test_games_count_by_archetype_with_shares_win_rates_and_the_matrix():
     rows = {r["id"]: r for r in o["archetypes"]}
     assert o["games"] == 3 and rows["Cats"]["wins"] == 2 and rows["Fish"]["wins"] == 1 and rows["Cats"]["share"] == 0.5
     assert o["matrix"]["Cats"]["Fish"] == [3, 2] and o["matrix"]["Fish"]["Cats"] == [3, 1]
+    cards = {c["card"]: c for c in o["cards"]}                                   # every card over every list, both sides
+    assert cards[load_premade_deck("cats")[1]]["p"] == [3, 2] and cards[load_premade_deck("fish")[0]]["p"] == [3, 1]
 
 
 def test_the_rating_range_and_the_days_filter_the_games():

@@ -464,6 +464,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .metar .mah .mwr { font-weight: 700; font-size: 18px; padding: 2px 8px; border-radius: 6px; color: #f0e8da; }
 .ladder .metar .mlist { flex: none; width: 250px; } .ladder .metar .mlh { display: flex; gap: 8px; align-items: baseline; margin: 0 2px 6px; } .ladder .metar .mlh b { color: #f0e8da; font-size: 17px; } .ladder .metar .mlh span { color: #8f8574; }
 .ladder .metar .mc th.an { padding: 2px 8px 2px 4px; } .ladder .metar .mstrip { width: 230px; } .ladder .metar .mstrip .st { margin: 0; cursor: default; }
+.ladder .metar .msub.mcards { margin: 28px 0 10px; }
 .ladder .metar .msub { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 0 0 10px; }
 .ladder .metar .mpick { display: flex; flex-direction: column; gap: 6px; margin: 0 0 18px; max-width: 760px; }
 .ladder .metar .mpk { display: flex; align-items: center; gap: 10px; padding: 8px 10px 8px 8px; border: 0; border-left: 3px solid transparent; border-radius: 4px; background: none; font: inherit; cursor: pointer; }

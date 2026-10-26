@@ -490,10 +490,34 @@ async function fillMeta() {
       ${META.sel.size ? `<td class="num vs" style="${tint(vsSel(r.id))}">${fmt(vsSel(r.id))}</td>` : ''}
       ${cols.map(c => { if (c.id === r.id) return '<td class="mir"></td>'; const v = (mx[r.id] || {})[c.id], x = cell(r.id, c.id);
         return `<td class="m${META.sel.has(c.id) ? ' sel' : ''}" style="${tint(x)}" title="${esc(r.name)} against ${esc(c.name)}: ${v ? `${v[1]}–${v[0] - v[1]} in ${v[0]} games` : 'no games'}">${x === null ? '' : x.toFixed(0)}</td>`; }).join('')}</tr>`).join('')}
-    </tbody></table></div>`;
+    </tbody></table></div>${metaCards(j.cards || [], 'acsort')}`;
   wireMetaControls(box);
+  wireCardReads(box); fitStrips(box);
+  box.querySelectorAll('th[data-acsort]').forEach(t => t.onclick = () => { META.acsort = META.acsort === t.dataset.acsort ? 'd' : t.dataset.acsort; fillMeta(); });
   box.querySelectorAll('th[data-sort]').forEach(t => t.onclick = () => { META.sort = t.dataset.sort; fillMeta(); });
   box.querySelectorAll('th[data-col]').forEach(t => t.onclick = () => { const c = t.dataset.col; META.sel.has(c) ? META.sel.delete(c) : META.sel.add(c); if (META.sel.size) META.sort = 'vs'; else if (META.sort === 'vs') META.sort = 'share'; fillMeta(); });
+}
+// Every card in the range, over every list that runs it: its win rate kept in the starting hand, drawn and played, best
+// drawn first; a card only one archetype runs carries that archetype's record, so the archetype pages hold the finer view.
+function metaCards(cards, key) {
+  const min = META.min, sort = META.acsort || 'd';
+  const rate = v => v && v[0] >= min ? `<td class="num" style="${tint(100 * v[1] / v[0])}" title="${v[1]}–${v[0] - v[1]} in ${v[0]} games">${pct(v[1], v[0])}%</td>` : `<td class="num dim" title="${v ? v[0] : 0} games">·</td>`;
+  const val = c => c[sort][0] >= min ? c[sort][1] / c[sort][0] : -1;
+  const rows = cards.filter(c => CARDS[c.card] && c.d[0] >= min).sort((a, b) => val(b) - val(a) || b.d[0] - a.d[0]);
+  if (!rows.length) return '';
+  const th = (k, label, tip) => `<th class="num sortable${sort === k ? ' on' : ''}" data-${key}="${k}" title="${tip}">${label}</th>`;
+  return `<h4 class="msub mcards">Cards</h4><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${th('k', 'Mulligan', 'Win rate when kept in the starting hand')}${th('d', 'Drawn', 'Win rate when drawn, starting hand included')}${th('p', 'Played', 'Win rate when played')}<th class="num">Games</th></tr></thead><tbody>
+    ${rows.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, 1)}</div></th>${rate(c.k)}${rate(c.d)}${rate(c.p)}<td class="num dim">${c.d[0]}</td></tr>`).join('')}</tbody></table></div>`;
+}
+// Every card on a Meta page reads as in the collection: hovered, the card beside it; right-clicked, held or tapped on a phone, large.
+function wireCardReads(box) {
+  box.querySelectorAll('.mf[data-card], .mstrip [data-card]').forEach(el => {
+    const read = () => { pop.style.display = 'none'; readCard(el.dataset.card); };
+    if (matchMedia('(hover: none)').matches) el.addEventListener('click', e => { e.stopPropagation(); read(); });   // touch: a tap reads it large (a list is picked by its win rate)
+    else { el.onmouseenter = () => cardPop(el, el.dataset.card); el.onmouseleave = () => pop.style.display = 'none'; }
+    el.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); read(); });
+    onHold(el, read);
+  });
 }
 function metaControls(withMin, extra = '') {   // extra: the archetype page's opponent, a filter like the rest
   // the rating range: one slider with two handles over the bands that have games, in steps of a band (100)
@@ -560,14 +584,7 @@ async function metaArchetype(box, id, q) {
   wireMetaControls(box);
   fitStrips(box);
   box.querySelectorAll('.mpk').forEach(b => b.onclick = () => { pop.style.display = 'none'; META.list = b.dataset.list; fillMeta(); });
-  // every card on the page reads as in the collection: hovered, the card beside it; right-clicked, held or tapped on a phone, large
-  box.querySelectorAll('.mf[data-card], .mstrip [data-card]').forEach(el => {
-    const read = () => { pop.style.display = 'none'; readCard(el.dataset.card); };
-    if (matchMedia('(hover: none)').matches) el.addEventListener('click', e => { e.stopPropagation(); read(); });   // touch: a tap reads it large (a list is picked by its win rate)
-    else { el.onmouseenter = () => cardPop(el, el.dataset.card); el.onmouseleave = () => pop.style.display = 'none'; }
-    el.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); read(); });
-    onHold(el, read);
-  });
+  wireCardReads(box);
   box.querySelectorAll('th[data-csort]').forEach(t => t.onclick = () => { META.csort = META.csort === t.dataset.csort ? null : t.dataset.csort; fillMeta(); });
 }
 
