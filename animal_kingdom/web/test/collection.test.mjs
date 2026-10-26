@@ -181,3 +181,18 @@ test('Play goes home with the deck chosen; Back and Escape leave', async () => {
   await page.keyboard.press('Escape'); await wait(80); assert.ok(page.url().endsWith('#/'), 'then goes back to the menu');
   assert.deepEqual(page.errors, []);
 });
+
+test('a deck tile drags to a new place in the list, the order saves, and the drag opens nothing', async () => {
+  await page.goto(`${server.url}/#/collection`, { waitUntil: 'networkidle0' }); await toList();
+  while ((await page.$$('.clist .dtile')).length < 3) { await page.click('#dnew'); await wait(50); await toList(); }
+  const names = () => page.$$eval('.clist .dtile', ts => ts.map(t => t.dataset.d));
+  const before = await names(), tiles = await page.$$('.clist .dtile');
+  const a = await tiles[0].boundingBox(), b = await tiles[2].boundingBox();
+  await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2); await page.mouse.down();
+  for (let i = 1; i <= 10; i++) await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2 + (b.y + b.height * .8 - a.y - a.height / 2) * i / 10);
+  await page.mouse.up(); await wait(100);
+  const after = await names();
+  assert.deepEqual(after.slice(0, 3), [before[1], before[2], before[0]], 'the first deck now sits third');
+  assert.equal(await page.$('#done'), null, 'the dragged deck did not open');
+  assert.deepEqual((await myDecks()).slice(0, 3).map(d => d.id), after.slice(0, 3), 'the new order is the saved one');
+});

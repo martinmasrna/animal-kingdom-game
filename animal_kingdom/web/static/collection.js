@@ -138,6 +138,39 @@ function render(app, all) {
 
 const portrait = () => matchMedia('(orientation: portrait)').matches;
 
+// The deck list reorders by dragging a tile (Martin, 2026-10-26): with a mouse, press and move; on a touch screen, hold a
+// moment first, so a plain swipe still scrolls the list. The tile lifts and follows the pointer, the others make room as
+// it passes their middles, and letting go saves the new order. A drag never opens the deck it moved.
+function reorder(app, all, change) {
+  const list = app.querySelector('.clist'); if (!list) return;
+  let drag = null, held = null, moved = false;
+  const tiles = () => [...list.querySelectorAll('.dtile')];
+  const start = (t, y) => { drag = { t, y0: y, top0: t.offsetTop }; moved = true; t.classList.add('lift'); list.classList.add('sorting'); };
+  const move = y => {
+    const { t } = drag; t.style.transform = `translateY(${y - drag.y0 - (t.offsetTop - drag.top0)}px)`;
+    const mid = t.getBoundingClientRect().top + t.offsetHeight / 2;
+    for (const o of tiles()) { if (o === t) continue; const r = o.getBoundingClientRect();
+      if (mid > r.top && mid < r.bottom) { const after = mid > r.top + r.height / 2; o[after ? 'after' : 'before'](t);
+        t.style.transform = `translateY(${y - drag.y0 - (t.offsetTop - drag.top0)}px)`; break; } }
+    const lr = list.getBoundingClientRect();   // near an edge of a long list, it scrolls under the tile
+    if (y < lr.top + 30) list.scrollTop -= 8; else if (y > lr.bottom - 30) list.scrollTop += 8;
+  };
+  const end = () => { clearTimeout(held); held = null; if (!drag) return;
+    const order = tiles().map(e => e.dataset.d); drag.t.classList.remove('lift'); drag.t.style.transform = ''; list.classList.remove('sorting'); drag = null;
+    if (order.join() !== all.map(d => d.id).join()) { all.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id)); change(); } };
+  for (const t of tiles()) {
+    t.addEventListener('mousedown', e => { if (e.button !== 0) return; moved = false; const y0 = e.clientY;
+      const mm = ev => { if (!drag && Math.abs(ev.clientY - y0) > 6) start(t, y0); if (drag) { ev.preventDefault(); move(ev.clientY); } };
+      const mu = () => { removeEventListener('mousemove', mm); removeEventListener('mouseup', mu); end(); };
+      addEventListener('mousemove', mm); addEventListener('mouseup', mu); });
+    t.addEventListener('touchstart', e => { moved = false; const y = e.touches[0].clientY; held = setTimeout(() => { held = null; start(t, y); navigator.vibrate?.(10); }, 350); }, { passive: true });
+    t.addEventListener('touchmove', e => { if (drag) { e.preventDefault(); move(e.touches[0].clientY); } else { clearTimeout(held); held = null; } }, { passive: false });
+    t.addEventListener('touchend', end); t.addEventListener('touchcancel', end);
+    t.addEventListener('click', e => { if (moved) { e.stopImmediatePropagation(); e.preventDefault(); moved = false; } }, true);
+    t.addEventListener('contextmenu', e => { if (drag || held) e.preventDefault(); });
+  }
+}
+
 function wire(app, all, open) {
   const $ = id => app.querySelector('#' + id), redo = () => render(app, all), change = () => { save(all); redo(); };
   const pop = document.getElementById('pop'), hidePop = () => { pop.style.display = 'none'; };
@@ -162,6 +195,7 @@ function wire(app, all, open) {
   const dn = $('dnew'); if (dn) dn.onclick = () => { const d = { id: Date.now().toString(36), name: 'New deck', list: [], cover: null };
     all.push(d); st.open = d.id; st.sheet = false; st.rename = true; change(); };
   const dn2 = $('done'); if (dn2) dn2.onclick = () => { st.open = null; st.sheet = true; redo(); };
+  if (!open) reorder(app, all, change);
   // Upright the deck column is a sheet along the bottom: shut, the cards take the screen. Its grip drags it with the finger
   // and lets go to the nearer state (a flick goes its way); a tap on the grip or on the count opens or shuts it.
   const sh = app.querySelector('.side'), g = $('grip');
