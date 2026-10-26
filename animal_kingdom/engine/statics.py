@@ -104,8 +104,8 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
     placer_card = state.cards[placer.card_id]
     owner = placer.owner
 
-    # Chameleon covers units of any strength (its own side needs no strength anyway).
-    if placer_card.id == "chameleon" and (not roaming or active(state, placer)):
+    # The Hercules Beetle covers units of any strength (its own side needs no strength anyway).
+    if placer_card.id == "hercules_beetle" and (not roaming or active(state, placer)):
         return True
 
     placer_str = effective_strength(state, placer) if roaming else placement_strength(state, placer)

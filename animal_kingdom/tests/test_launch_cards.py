@@ -834,20 +834,30 @@ def test_covering_the_legendary_squirrel_pauses_its_timer():
     assert s.food["A"] == 0
 
 
-def test_the_mimic_octopus_becomes_a_copy_of_an_adjacent_animal_but_not_its_roar():
-    s = make_state(hands={"A": ["octopus_legend"]})
+def test_iris_becomes_a_copy_of_an_adjacent_animal_but_not_its_roar_and_adds_another_to_your_hand():
+    s = make_state(hands={"A": ["chameleon_legend"]})
     por = put(s, "2,2", "porcupine", "B")
     por.strength_counter = 1
-    rules.apply_action(s, PlaceAction("octopus_legend", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
     choose(s, "2,2")
     me = s.top_unit("1,2")
     base = s.cards["porcupine"].base_strength
     assert me.card_id == "porcupine" and effective_strength(s, me) == base + 1 and "Spikes" in statics.unit_keywords(s, me)
-    s2 = make_state(hands={"A": ["octopus_legend"]})
+    assert [(u.card_id, u.owner, u.strength_counter) for u in s.hands["A"]] == [("porcupine", "A", 1)]
+    s2 = make_state(hands={"A": ["chameleon_legend"]})
     put(s2, "2,2", "squirrel", "A")
-    rules.apply_action(s2, PlaceAction("octopus_legend", ("cr", "1,2")))
+    rules.apply_action(s2, PlaceAction("chameleon_legend", ("cr", "1,2")))
     choose(s2, "2,2")
     assert s2.food["A"] == 0                                   # copying the Squirrel doesn't gain its Roar's food
+
+
+def test_the_chameleon_becomes_a_copy_of_an_animal_in_your_hand_which_stays_there():
+    s = make_state(hands={"A": ["chameleon", "lion", "squirrel"]})
+    rules.apply_action(s, PlaceAction("chameleon", ("cr", "1,2")))
+    choose(s, hand_inst(s, "A", "lion").iid)
+    me = s.top_unit("1,2")
+    assert me.card_id == "lion" and effective_strength(s, me) == 7
+    assert sorted(hand_ids(s, "A")) == ["lion", "squirrel"] and s.food["A"] == 0
 
 
 def test_golden_orb_weaver_catches_a_flyer_landing_beside_it():
@@ -1156,7 +1166,7 @@ def test_the_dolphin_is_a_five_that_draws_a_card():
 
 def test_the_stag_beetle_is_a_common_six_with_armor():
     card = load_cards()["stag_beetle"]
-    assert (card.base_strength, card.rarity) == (6, "common") and not card.tags and "Armor" in card.keywords
+    assert (card.base_strength, card.rarity) == (6, "common") and card.tags == {"Beetle"} and "Armor" in card.keywords
 
 
 def test_the_peacock_counts_every_card_in_your_hand_itself_included_until_it_lands():

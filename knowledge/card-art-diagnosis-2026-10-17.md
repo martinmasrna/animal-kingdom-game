@@ -108,7 +108,7 @@ Sample: 31 manifest reviews with a recorded pick among 3 or 4 shown candidates w
 |---|---|---|---|---|
 | boar | 3 | 2 | 2 | 2 |
 | rhinoceros | 1 | 3 | 2 | 3 |
-| octopus_legend | 3 | 2 | 1 | 3 |
+| chameleon_legend | 3 | 2 | 1 | 3 |
 | hornet_legend | 1 | 4 | 1 | 1 |
 | moose | 1 | 3 | 1 | 3 |
 | tortoise | 1 | 2 | 2 | 4 |

@@ -13,7 +13,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **[OCTOPUS]** | 1 | — | 4 | Roar: Scout a legendary animal. |
 | **Yuki** | 1 | Rodent | 3 | Roar: lose all your food. In 2 turns, gain three times as much. |
 | **Ash** | 1 | — | 5 | Armor. Stealth. Poison. Spikes. |
-| **Iris** | 1 | — | 3 | Roar: this becomes a copy of an adjacent animal. |
+| **Iris** | 1 | — | 3 | Roar: choose an adjacent animal. Become a copy of it, and add another copy to your hand. |
 
 ### Rare
 
@@ -33,6 +33,6 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Black Bear** | 3 | Bear | 5 | Roar: in 2 turns, draw 2 cards. |
 | **Tortoise** | 3 | — | 4 | Armor. Roar: gain 5 food for each of your animals with Armor. |
 | **Toad** | 3 | — | 2 | Reach. Poison. |
-| **Stag Beetle** | 3 | — | 6 | Armor. |
+| **Stag Beetle** | 3 | Beetle | 6 | Armor. |
 
 <!-- cards:end -->

@@ -15,7 +15,8 @@ Tags name kinds of animal people recognise. The broad umbrellas stay retired: no
 | Bears | hibernation: hoarding cards, growing in hand | the handlock half of the hand deck | big drops once stocked |
 | Primates | training and tools: buff cards in hand, Roars that pay off past a strength threshold ("if this has 6 or more strength") | the hand-buff half of the hand deck, with Bears | trained threats |
 | Hoofed | the herd grazing: regions it holds produce more food (the Herd mechanic); prey that Flee | region control, the third food route beside Rodents' card food and Colony's numbers | food, through regions |
-| Lizards | no archetype: a handful of individually unique cards (Chameleon's camouflage, the Basilisk over water, the Gecko on walls) | support | — |
+| Lizards | no archetype: a handful of individually unique cards (the Basilisk over water, the Gecko on walls); the Chameleons are tagless | support | — |
+| Beetles | no identity set yet: the tag came with the third beetle (Martin, 2026-10-26): the Stag Beetle, the Dung Beetle, the Hercules Beetle | support | — |
 | Fish | the swarm: payoffs grow with every Fish you control (a smooth count, where Colony checks thresholds), and some reward Fish next to each other | token aggro | food, through regions taken early |
 | Arachnids | webs and traps that punish what lands near them | reactive control | to be designed |
 | Marsupials | the pouch: carrying another animal, joeys | Australia | to be designed |

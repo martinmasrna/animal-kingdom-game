@@ -11,7 +11,7 @@ import { track } from './log.js';
 // Each family's medallion: the card whose animal reads clearest at 40 px (chosen side by side at that size).
 const FAMILIES = [['Cat', 'lion'], ['Canine', 'wolf_legend_3'], ['Rodent', 'chinchilla'], ['Colony', 'worker_bee'], ['Bird', 'andean_condor'],
   ['Snake', 'viper'], ['Bear', 'polar_bear'], ['Hoofed', 'rhinoceros'], ['Fish', 'sardine'], ['Primate', 'gorilla'], ['Arachnid', 'tarantula'],
-  ['Lizard', 'chameleon']];
+  ['Beetle', 'stag_beetle']];
 const DECKS_MAX = 20;   // as the server's profiles.DECKS_MAX
 const RANK = { legendary: 0, rare: 1, common: 2 }, LIMIT = { legendary: 1, rare: 2, common: 3 }, CAP = { legendary: 4, rare: 8 };
 const sv = c => c.str === '*' ? -1 : c.str;

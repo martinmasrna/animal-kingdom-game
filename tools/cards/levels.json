@@ -843,7 +843,14 @@
     },
     "tag": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Lizard"
+      },
+      "note": "Martin, 2026-10-26: tagless, like Iris",
+      "at": 1793028831
     },
     "strength": {
       "lv": "draft",
@@ -851,7 +858,14 @@
     },
     "effect": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Can cover animals of any strength."
+      },
+      "note": "Martin, 2026-10-26",
+      "at": 1793028832
     },
     "art": {
       "lv": "fine",
@@ -1151,6 +1165,17 @@
       "note": "Martin, 2026-10-22: 5 per Hungry animal",
       "by": "claude",
       "at": 1792655320
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-26: the Beetle family",
+      "by": "claude",
+      "at": 1793028836
     }
   },
   "eagle": {
@@ -2607,7 +2632,7 @@
       "at": 1792861464
     }
   },
-  "octopus_legend": {
+  "chameleon_legend": {
     "crop": {
       "lv": "draft",
       "by": "claude",
@@ -2620,9 +2645,27 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin, 2026-10-14, applied 2026-10-16",
+      "note": "Martin, 2026-10-26: the legendary Chameleon, the same animal as the rare",
       "by": "claude",
-      "at": 1792157858
+      "at": 1793028833,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-14, applied 2026-10-16",
+        "prev": {
+          "name": "Iris",
+          "species": "Octopus"
+        }
+      }
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: this becomes a copy of an adjacent animal."
+      },
+      "note": "Martin, 2026-10-26",
+      "by": "claude",
+      "at": 1793028834
     }
   },
   "okapi": {
@@ -4809,6 +4852,17 @@
       "note": "the Armor 6 anchor made real",
       "by": "claude",
       "at": 1792270569
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-26: the Beetle family",
+      "by": "claude",
+      "at": 1793028835
     }
   },
   "guard_bee": {
@@ -5346,6 +5400,61 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1792756928
+    }
+  },
+  "hercules_beetle": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-26: the Chameleon's old ability, on the beetle that lifts 850 times its weight",
+      "by": "claude",
+      "at": 1793028810
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-26: the Chameleon's old ability, on the beetle that lifts 850 times its weight",
+      "by": "claude",
+      "at": 1793028811
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-26: the Chameleon's old ability, on the beetle that lifts 850 times its weight",
+      "by": "claude",
+      "at": 1793028812
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-26: the Chameleon's old ability, on the beetle that lifts 850 times its weight",
+      "by": "claude",
+      "at": 1793028813
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1793028816
     }
   }
 }

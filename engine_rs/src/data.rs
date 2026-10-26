@@ -36,12 +36,12 @@ pub fn player_from(s: &str) -> Player {
 }
 
 // Tags and keywords as bit flags.
-pub const TAGS: [&str; 18] = [
+pub const TAGS: [&str; 19] = [
     "Cat", "Canine", "Colony", "Snake", "Lizard", "Bird", "Rodent", "Arachnid", "Bear", "Megafauna", "Egg", "Fish",
-    "Primate", "Hoofed", "Queen", "Worker", "Soldier", "Nurse",
+    "Primate", "Hoofed", "Queen", "Worker", "Soldier", "Nurse", "Beetle",
 ];
-/// The tags the bots' trained networks read: every tag but the castes (Soldier, Nurse) that only card text reads, as
-/// Python's `cards.BOT_TAGS`; the castes stay out of the features until a retrain.
+/// The tags the bots' trained networks read: the first 16, every tag but the castes (Soldier, Nurse) and Beetle, as
+/// Python's `cards.BOT_TAGS`; those stay out of the features until a retrain.
 pub const BOT_TAG_COUNT: usize = 16;
 pub const KEYWORDS: [&str; 12] = [
     "Flight", "Armor", "Apex Predator", "Stealth", "Spikes", "Poison", "Roam", "Reach", "Hungry", "Titan", "Flee", "Wild",
@@ -114,7 +114,7 @@ pub const KEYWORD_AURAS: [&str; 4] = ["", "armadillo", "porcupine", "jellyfish_l
 
 /// The cards the engine's rules name (never a card's effect: those live with the card in effects): resolved once.
 pub struct Known {
-    pub chameleon: Option<CardId>,
+    pub hercules_beetle: Option<CardId>,
     pub leopard: Option<CardId>,
     pub piranha_legend: Option<CardId>,
     pub dhole: Option<CardId>,
@@ -144,7 +144,7 @@ impl Known {
     pub fn build(cards: &Cards) -> Known {
         let k = |n: &str| cards.id_of(n);
         Known {
-            chameleon: k("chameleon"),
+            hercules_beetle: k("hercules_beetle"),
             leopard: k("leopard"),
             piranha_legend: k("piranha_legend"),
             dhole: k("dhole"),

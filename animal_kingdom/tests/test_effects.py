@@ -136,15 +136,15 @@ def test_porcupine_removes_the_first_enemy_that_covers_it_then_is_an_ordinary_un
     assert s.top_unit("3,2").card_id == "elephant"
 
 
-def test_chameleon_covers_enemies_of_any_strength():
-    cover = make_state(hands={"A": ["chameleon"]})
+def test_the_hercules_beetle_covers_enemies_of_any_strength():
+    cover = make_state(hands={"A": ["hercules_beetle"]})
     put(cover, "1,2", "caracal", "A")
     put(cover, "2,2", "lion", "B")                       # str 7 enemy
-    assert PlaceAction("chameleon", ("cr", "2,2")) in rules.legal_actions(cover)
+    assert PlaceAction("hercules_beetle", ("cr", "2,2")) in rules.legal_actions(cover)
 
     covered = make_state(current="B", hands={"B": ["alley_cat"]})
     put(covered, "4,2", "caracal", "B")
-    put(covered, "3,2", "chameleon", "A")                # a plain 0: str 1 alley_cat covers it
+    put(covered, "3,2", "hercules_beetle", "A")          # a plain 0: str 1 alley_cat covers it
     assert PlaceAction("alley_cat", ("cr", "3,2")) in rules.legal_actions(covered)
 
 

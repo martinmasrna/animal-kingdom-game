@@ -1633,15 +1633,30 @@ def _then_stray_dog(state, step, cr):
     _grant(state, [top.iid], step["amount"])
 
 
-def _then_copy(state, step, cr):
-    """The legendary Octopus (a mimic): "this becomes a copy of an adjacent animal" - its strength, keywords and text,
-    not its Roar (it isn't placed). It is that card from now on (a Faceless Manipulator: removed, it goes to the Remove
-    Pile as the copy)."""
-    me, target = _find_instance(state, step["self"]), state.top_unit(cr)
-    if me is None or target is None or _crossroad_of(state, me.iid) is None:
+def _become(state, step, card_id, counter) -> None:
+    """The Chameleons: this becomes a copy of `card_id` - its strength, keywords and text, not its Roar (it isn't placed).
+    It is that card from now on (a Faceless Manipulator: removed, it goes to the Remove Pile as the copy)."""
+    me = _find_instance(state, step["self"])
+    if me is None or _crossroad_of(state, me.iid) is None:
         return
-    me.strength_counter = target.strength_counter
-    _transform(state, me, target.card_id)
+    me.strength_counter = counter
+    _transform(state, me, card_id)
+
+
+def _then_copy_and_add(state, step, cr):
+    """Iris: "Choose an adjacent animal. Become a copy of it, and add another copy to your hand" (its counter included)."""
+    target = state.top_unit(cr)
+    if target is None:
+        return
+    _become(state, step, target.card_id, target.strength_counter)
+    gain_to_hand(state, step["chooser"], target.card_id, strength_counter=target.strength_counter)
+
+
+def _then_copy_from_hand(state, step, iid):
+    """The Chameleon: "become a copy of an animal in your hand" (its counter included); the card stays in your hand."""
+    inst = next((u for u in state.hands[step["chooser"]] if u.iid == iid), None)
+    if inst is not None:
+        _become(state, step, inst.card_id, inst.strength_counter)
 
 
 def _then_return_ally(state, step, cr):
@@ -1695,7 +1710,8 @@ def _then_roam_to(state, step, cr):
 
 THEN = {
     "remove": _then_remove, "set_strength": _then_set_strength, "drain": _then_drain, "grant": _then_grant,
-    "hand_grant": _then_hand_grant, "stray_dog": _then_stray_dog, "copy": _then_copy, "return_ally": _then_return_ally,
+    "hand_grant": _then_hand_grant, "stray_dog": _then_stray_dog, "copy_and_add": _then_copy_and_add,
+    "copy_from_hand": _then_copy_from_hand, "return_ally": _then_return_ally,
     "cuckoo": _then_cuckoo, "remove_and_draw": _then_remove_and_draw, "pile_to_hand": _then_pile_to_hand,
     "duplicate": _then_duplicate, "discard": _then_discard, "roam_to": _then_roam_to,
 }
@@ -2635,7 +2651,7 @@ def _chipmunk_place(state, unit, cr):
 
 # --- Food OTK ---------------------------------------------------------------------------------------------------
 
-def _octopus_legend_2_place(state, unit, cr):
+def _chameleon_legend_2_place(state, unit, cr):
     state.effect_stack.append({"op": "scout", "player": unit.owner, "spec": "rarity:legendary"})
 
 
@@ -2650,10 +2666,16 @@ def _otk_squirrel_place(state, unit, cr):
                  while_buried=False)
 
 
-def _mimic_place(state, unit, cr):
-    """Roar: this becomes a copy of an adjacent animal (an enemy only if it may be chosen)."""
+def _chameleon_legend_place(state, unit, cr):
+    """Iris: Roar: choose an adjacent animal (an enemy only if it may be chosen). Become a copy of it, and add another
+    copy to your hand."""
     _push_choose(state, unit.owner, [nb for nb, top in _adjacent_tops(state, cr)
-                                     if statics.can_be_chosen(state, top, unit.owner, nb)], "copy", self=unit.iid)
+                                     if statics.can_be_chosen(state, top, unit.owner, nb)], "copy_and_add", self=unit.iid)
+
+
+def _chameleon_place(state, unit, cr):
+    """Roar: become a copy of an animal in your hand."""
+    _push_choose(state, unit.owner, _hand_iids(state, unit.owner), "copy_from_hand", self=unit.iid)
 
 
 def _orb_weaver_enemy_placed(state, spider, placed, cr):
@@ -3143,9 +3165,10 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "muskrat": {"on_place": _conditional(_removes())},
     "groundhog": {"on_place": _conditional(_gains("groundhog_food"))},
     # Food OTK (the legendary Honey Badger is its keywords; Capybara an aura; Armadillo too).
-    "octopus_legend_2": {"on_place": _octopus_legend_2_place},
+    "octopus_legend_2": {"on_place": _chameleon_legend_2_place},
     "squirrel_legend": {"on_place": _otk_squirrel_place},
-    "octopus_legend": {"on_place": _mimic_place},
+    "chameleon_legend": {"on_place": _chameleon_legend_place},
+    "chameleon": {"on_place": _chameleon_place},
     "golden_orb_weaver": {"on_enemy_placed_adjacent": _orb_weaver_enemy_placed},
     "black_bear": {"on_place": _black_bear_place},
     "grizzly_bear": {"on_place": _grizzly_place},

@@ -79,7 +79,7 @@ pub fn can_cover(st: &State, placer: &Unit, target: &Unit, roaming: bool) -> boo
     let k = &st.g.known;
     let placer_card = st.card(placer.card);
     let owner = placer.owner;
-    if Some(placer.card) == k.chameleon && (!roaming || active(st, placer)) {
+    if Some(placer.card) == k.hercules_beetle && (!roaming || active(st, placer)) {
         return true;
     }
     let placer_str = if roaming { effective_strength(st, placer, None) } else { placement_strength(st, placer) };

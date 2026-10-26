@@ -25,11 +25,12 @@ TAGS = {
     "Arachnid", "Bear", "Megafauna", "Egg", "Fish", "Primate", "Hoofed",   # species families
     "Queen", "Worker",                                # roles
     "Soldier", "Nurse",                               # castes (below)
+    "Beetle",                                         # a family added after the networks were trained (2026-10-26)
 }
 # Castes only card text reads (Melissia draws by them; Martin's sheet, 2026-10-24). The bots'
 # trained networks take one column per tag in BOT_TAGS, so a tag added here stays out of the features until a retrain.
 CASTE_TAGS = frozenset({"Soldier", "Nurse"})
-BOT_TAGS = frozenset(TAGS - CASTE_TAGS)
+BOT_TAGS = frozenset(TAGS - CASTE_TAGS - {"Beetle"})
 DYNAMIC_STRENGTHS = {"removed_units_count", "removed_eggs_count"}  # Python, Egg Eater
 
 # A card's status. Cards are cards and decks are decks (Martin, 2026-10-19): a card belongs to no deck, and the

@@ -22,7 +22,7 @@ RENAME = {
     "fish_legend_manta_ray": "manta_ray_legend", "fish_legend_piranha": "piranha_legend",
     "food_aggro_legend_repeat": "capybara_legend", "food_aggro_legend_refill": "rodent", "rat_king": "rat_legend",
     "food_otk_legend_squirrel": "squirrel_legend", "food_otk_legend_honey_badger": "honey_badger_legend",
-    "food_otk_legend_octopus": "octopus_legend", "egg_control_legend_raven": "raven_legend", "omen": "swan_legend",
+    "food_otk_legend_octopus": "chameleon_legend", "egg_control_legend_raven": "raven_legend", "omen": "swan_legend",
     "stoop": "hawk", "king_cobra": "cottonmouth", "goliath": "python", "handlock_legend_baboon": "baboon_legend",
     "handlock_legend_butterfly": "butterfly_legend", "handlock_legend_eagle": "eagle_legend", "bulwark": "rhinoceros_legend",
     "giants_legend_oxpecker": "oxpecker_legend", "hoofed_legend_wildebeest": "wildebeest_legend",

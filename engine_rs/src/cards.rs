@@ -78,7 +78,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "falcon" | "bat" | "dolphin" | "mouse" | "raven_legend" | "hawk" | "cottonmouth" | "magpie" | "black_mamba" | "mosquito" | "raven"
         | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "remora" | "cod" | "sardine" | "mahi_mahi" | "sunfish"
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
-        | "chipmunk" | "gopher" | "muskrat" | "groundhog" | "octopus_legend_2" | "squirrel_legend" | "octopus_legend" | "black_bear"
+        | "chipmunk" | "gopher" | "muskrat" | "groundhog" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
         | "grizzly_bear" | "tortoise" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
@@ -225,6 +225,17 @@ fn add_strength(st: &mut State, iid: i64, n: i32) {
         let u = u.clone();
         crate::emit!(st, "strength", vmap!("iid" => Value::Int(iid), "card" => card_v(st, u.card), "owner" => pn(u.owner), "n" => Value::Int(n as i64)));
     }
+}
+
+/// The Chameleons: the unit `me_iid`, if it is on the board, becomes a copy of `card` with `counter` (no Roar).
+fn become_copy(st: &mut State, me_iid: i64, card: CardId, counter: i16) {
+    if st.find_instance(me_iid).is_none() || st.find_unit(me_iid).is_none() {
+        return;
+    }
+    if let Some(me) = st.find_instance_mut(me_iid) {
+        me.strength_counter = counter;
+    }
+    transform(st, me_iid, card);
 }
 
 fn put_back(st: &mut State, unit: &Unit, cr: Cr, pos: usize, counter: i32) {
@@ -985,10 +996,14 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 schedule(st, unit, d, vmap!("op" => Value::s("gain_food"), "player" => pn(owner), "amount" => Value::Int((stake * m) as i64)), false, None);
             }
         }
-        ("octopus_legend", OnPlace) => {
+        ("chameleon_legend", OnPlace) => {
             let options: Vec<Cr> = adjacent_tops(st, cr, None).into_iter().filter(|(nb, top)| statics::can_be_chosen(st, top, owner, Some(*nb))).map(|(nb, _)| nb).collect();
             let o = crs(st, options);
-            push_choose(st, owner, o, "copy", false, vmap!("self" => Value::Int(unit.iid)));
+            push_choose(st, owner, o, "copy_and_add", false, vmap!("self" => Value::Int(unit.iid)));
+        }
+        ("chameleon", OnPlace) => {
+            let o: Vec<Value> = hand_iids(st, owner, 0).into_iter().map(Value::Int).collect();
+            push_choose(st, owner, o, "copy_from_hand", false, vmap!("self" => Value::Int(unit.iid)));
         }
         ("golden_orb_weaver", OnEnemyPlacedAdjacent) => {
             if let Args::PlacedAdjacent(placed, pcr) = args {
@@ -1323,17 +1338,19 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
                 }
             }
         }
-        "copy" => {
+        "copy_and_add" => {
             let me_iid = m_get_i(step, "self").unwrap_or(-1);
             let Some(cr) = cr_of(st) else { return };
             let Some(target) = st.top(cr).cloned() else { return };
-            if st.find_instance(me_iid).is_none() || st.find_unit(me_iid).is_none() {
-                return;
+            become_copy(st, me_iid, target.card, target.strength_counter);
+            gain_to_hand(st, chooser, target.card, target.strength_counter as i32);
+        }
+        "copy_from_hand" => {
+            let me_iid = m_get_i(step, "self").unwrap_or(-1);
+            let iid = choice.as_i64().unwrap_or(-1);
+            if let Some(inst) = st.hands[chooser as usize].iter().find(|u| u.iid == iid).cloned() {
+                become_copy(st, me_iid, inst.card, inst.strength_counter);
             }
-            if let Some(me) = st.find_instance_mut(me_iid) {
-                me.strength_counter = target.strength_counter;
-            }
-            transform(st, me_iid, target.card);
         }
         "return_ally" => {
             if let Some(cr) = cr_of(st) {

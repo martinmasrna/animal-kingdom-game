@@ -679,14 +679,12 @@
       "name": "Chameleon",
       "status": "collectible",
       "rarity": "rare",
-      "tags": [
-        "Lizard"
-      ],
+      "tags": [],
       "base_strength": 0,
-      "text": "Can cover animals of any strength.",
-      "keywords": [],
+      "text": "Roar: become a copy of an animal in your hand.",
       "species": "Chameleon",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "skunk",
@@ -1468,16 +1466,16 @@
       "habitat": "Savanna"
     },
     {
-      "id": "octopus_legend",
+      "id": "chameleon_legend",
       "name": "Iris",
       "status": "collectible",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
-      "text": "Roar: this becomes a copy of an adjacent animal.",
-      "keywords": [],
-      "species": "Octopus",
-      "habitat": "Open Ocean"
+      "text": "Roar: choose an adjacent animal. Become a copy of it, and add another copy to your hand.",
+      "species": "Chameleon",
+      "habitat": "Open Ocean",
+      "keywords": []
     },
     {
       "id": "capybara",
@@ -2206,7 +2204,9 @@
       "name": "Dung Beetle",
       "status": "collectible",
       "rarity": "common",
-      "tags": [],
+      "tags": [
+        "Beetle"
+      ],
       "base_strength": 1,
       "text": "Dusk: gain 5 food for each Hungry animal you control.",
       "species": "Dung Beetle",
@@ -2793,7 +2793,9 @@
       "name": "Stag Beetle",
       "status": "collectible",
       "rarity": "common",
-      "tags": [],
+      "tags": [
+        "Beetle"
+      ],
       "base_strength": 6,
       "text": "Armor.",
       "keywords": [
@@ -3907,6 +3909,20 @@
       "base_strength": 1,
       "keywords": [],
       "text": ""
+    },
+    {
+      "id": "hercules_beetle",
+      "name": "Hercules Beetle",
+      "status": "collectible",
+      "rarity": "rare",
+      "tags": [
+        "Beetle"
+      ],
+      "base_strength": 0,
+      "text": "Can cover animals of any strength.",
+      "species": "Hercules Beetle",
+      "habitat": "Jungle",
+      "keywords": []
     }
   ]
 }
