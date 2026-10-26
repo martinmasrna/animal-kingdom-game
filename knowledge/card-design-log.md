@@ -8,3 +8,5 @@ Read on 2026-11-15. The treatment failed if, over the sittings since 2026-10-26,
 
 | date | sitting | proposed | accepted | rejected | board | spec | pool | rules | fact | anchor | taste | none |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 2026-10-26 | Brutus (the rhino legendary's new effect) | 12 | 1 | 11 | 0 | 0 | 1 | 1 | 0 | 0 | 9 | 0 |
+| 2026-10-26 | Sea Turtle (new effect; Martin wrote the card himself) | 7 | 0 | 7 | 0 | 0 | 0 | 0 | 0 | 3 | 4 | 0 |
