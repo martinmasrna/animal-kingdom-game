@@ -54,7 +54,7 @@ def test_every_card_has_valid_static_fields():
         if c.is_dynamic:
             assert c.dynamic_strength in DYNAMIC_STRENGTHS
         else:
-            assert isinstance(c.base_strength, int) and 0 <= c.base_strength <= 10
+            assert isinstance(c.base_strength, int) and c.base_strength >= 0
 
 
 def test_known_cards_present_with_expected_data():
@@ -89,7 +89,7 @@ def test_duplicate_card_id_rejected():
 
 def test_bad_strength_rejected():
     with pytest.raises(CardDataError):
-        load_cards({"cards": [{**GOOD, "base_strength": 99}]})
+        load_cards({"cards": [{**GOOD, "base_strength": -1}]})
 
 
 def test_validate_card_record_directly():

@@ -2219,7 +2219,7 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 10,
+      "base_strength": 12,
       "text": "Titan.",
       "keywords": [
         "Titan"
@@ -2947,10 +2947,12 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 8,
-      "text": "Has -3 strength during your opponent's turn.",
-      "keywords": [],
+      "text": "Apex Predator. Has -3 strength during your opponent's turn.",
       "species": "Crocodile",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": [
+        "Apex Predator"
+      ]
     },
     {
       "id": "grizzly_bear",

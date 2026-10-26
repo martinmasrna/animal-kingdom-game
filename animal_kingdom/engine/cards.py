@@ -136,8 +136,8 @@ def validate_card_record(rec: dict) -> None:
             )
     elif isinstance(strength, bool) or not isinstance(strength, int):
         raise CardDataError(f"card {cid!r}: base_strength must be an int or 'dynamic', got {strength!r}")
-    elif not 0 <= strength <= 10:
-        raise CardDataError(f"card {cid!r}: base_strength {strength} out of range 0-10")
+    elif strength < 0:
+        raise CardDataError(f"card {cid!r}: base_strength {strength} is below 0")
 
     food_cost = rec.get("food_cost", 0)
     if isinstance(food_cost, bool) or not isinstance(food_cost, int) or food_cost < 0:

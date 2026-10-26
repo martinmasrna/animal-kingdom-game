@@ -491,6 +491,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 10
+      },
+      "note": "Martin, 2026-10-26",
+      "by": "claude",
+      "at": 1793016535
     }
   },
   "boar": {
@@ -980,8 +990,13 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792257581,
-      "note": "Martin 2026-10-17: strikes from the water, exposed on land; the Apex 8 waits for the Polar Bear"
+      "at": 1793016484,
+      "note": "Martin, 2026-10-26",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: strikes from the water, exposed on land; the Apex 8 waits for the Polar Bear",
+        "prev": "Has -3 strength during your opponent's turn."
+      }
     },
     "art": {
       "lv": "fine",
