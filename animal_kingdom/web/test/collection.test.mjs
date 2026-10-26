@@ -143,7 +143,7 @@ test('on a phone held upright the zoom explains its keywords under the card, all
 test('right-click opens a card large, its keywords explained', async () => {
   await page.click(card('pheasant_legend'), { button: 'right' }); await wait(80);
   assert.ok(await page.$('.modal.zoom .card'), 'the card opens');
-  assert.deepEqual(await page.$$eval('.kw b', b => b.map(e => e.textContent)), ['Flight']);
+  assert.deepEqual(await page.$$eval('.kw b', b => b.map(e => e.textContent)), ['Flight', 'Fall']);
   await page.keyboard.press('Escape'); await wait(50); assert.equal(await page.$('.modal.zoom'), null, 'Escape closes it');
   assert.ok(page.url().endsWith('#/collection'), 'without leaving the screen');
 });
