@@ -104,6 +104,11 @@ def pool_section(cards: dict, c: dict) -> list[str]:
                    sp(k).lower() == species or (k.name or "").lower() == name]
     lines.append("animal already in the pool: " + ("" if same_animal else "no"))
     lines += [f"  {k.id} ({k.status}) {one_line(k)}" for k in same_animal]
+    if not same_animal:
+        from collections import Counter
+        habs = Counter(k.habitat for k in cards.values() if k.collectible and k.habitat)
+        lines.append("habitats the collectible pool uses: " + ", ".join(f"{h} {n}" for h, n in habs.most_common())
+                     + "; the card's is the animal's real, well-known home")
     for tag in c["tags"]:
         family = sorted((k for k in cards.values() if tag in k.tags and k.status in ("collectible", "reserve") and k.id != c.get("id")),
                         key=lambda k: (99 if k.is_dynamic else k.base_strength, k.name))
@@ -128,19 +133,23 @@ def anchors_section(cards: dict, c: dict) -> list[str]:
     lines = []
     text = c["text"]
     md = (DESIGN / "principles.md").read_text(encoding="utf-8")
-    bullets = [b.strip() for b in md.split("\n") if b.startswith("- **")]
-    wanted = []
+    calib = md.split("## Power calibration", 1)[1].split("\n## ", 1)[0]
+    rows = [ln for ln in calib.splitlines() if ln.startswith("| ") and not ln.startswith("| effect") ]
+    verbs = []
     if re.search(r"\bdraw\b|\bScout\b", text, re.I):
-        wanted.append("Draw anchors")
+        verbs.append("draw")
     if re.search(r"\bremove\b", text, re.I):
-        wanted.append("Removal anchors")
-    if c["kws"] and not re.sub(r"(" + "|".join(map(re.escape, c["kws"])) + r")( \d+)?\.\s*", "", text).strip():
-        wanted.append("A card that is one keyword")
-    wanted.append("References")
-    for w in wanted:
-        b = next((b for b in bullets if b[4:].startswith(w)), None)
-        if b:
-            lines.append(re.sub(r"\s+", " ", b[2:]))
+        verbs.append("remove")
+    if not text.strip() or (c["kws"] and not re.sub(r"(" + "|".join(map(re.escape, c["kws"])) + r")( \d+)?\.\s*", "", text).strip()):
+        verbs.append("vanilla")
+    lines.append("anchor rows (principles.md): " + ", ".join(verbs) if verbs else "no anchor row for this verb; the vanilla rows:")
+    for ln in rows:
+        cells = [x.strip() for x in ln.strip("|").split("|")]
+        if any(v in cells[0].lower() for v in (verbs or ["vanilla"])):
+            lines.append(f"  {cells[0]}: {cells[1]} ({cells[2]})")
+    reading = next((para for para in calib.split("\n\n") if para.startswith("Reading the table")), "")
+    if reading:
+        lines.append(re.sub(r"\s+", " ", reading))
     if re.search(r"\bdraw (a|\d)", text, re.I):
         lines.append("ledger: the Draw action is 2 cards for one action; this card's draw replaces the card played, the action is still spent")
     s = c["str"]

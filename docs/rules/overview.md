@@ -203,7 +203,7 @@ Each deck contains exactly **30 cards** and must satisfy all of the following:
 - no more than 8 rare cards in total;
 - no more than 4 legendary cards in total (so at least 18 commons).
 
-Any deck within these rules is legal, the starters included: a starter runs as many rare and common designs as its cards' rarities give it, with no fixed split (Martin, 2026-10-22; the rarity test is in `design/rarity.md`).
+Any deck within these rules is legal, the starters included: a starter runs as many rare and common designs as its cards' rarities give it, with no fixed split (Martin, 2026-10-22; his calls are logged in `design/log_rarity.md`).
 
 # 14. Match Structure
 
