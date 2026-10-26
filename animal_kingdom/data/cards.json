@@ -2372,11 +2372,14 @@
       "tags": [
         "Hoofed"
       ],
-      "base_strength": 4,
-      "text": "Has +5 strength during your opponent's turn.",
-      "keywords": [],
+      "base_strength": 6,
+      "text": "Hungry 2. Has +3 strength during your opponent's turn.",
       "species": "Giraffe",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": [
+        "Hungry"
+      ],
+      "hungry": 2
     },
     {
       "id": "cape_buffalo",

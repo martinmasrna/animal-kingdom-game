@@ -66,7 +66,7 @@ class Config:
     guard_hornet_colony_threshold: int = 4
     mackerel_anthem: int = 1             # Mackerel: your other Fish have +1
     tuna_per_fish: int = 1               # Tuna: +1 for each other Fish you control
-    giraffe_bonus: int = 5               # Giraffe: +5 during your opponent's turn
+    giraffe_bonus: int = 3               # Giraffe: +3 during your opponent's turn (5 on a 4 until 2026-10-26)
     crocodile_penalty: int = 3           # Crocodile: -3 during your opponent's turn
     buffalo_anthem: int = 1              # Cape Buffalo: your other Hoofed animals have +1 during your opponent's turn
     hand_per_card: int = 1               # [PLACEHOLDER]: +1 for each other card in your hand

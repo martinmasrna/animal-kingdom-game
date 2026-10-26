@@ -1595,6 +1595,26 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Martin, 2026-10-26: 6+3 with Hungry 2 instead of 4+5; a 6 reads as a giraffe, the wall stays 9",
+      "by": "claude",
+      "at": 1793050234
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Has +5 strength during your opponent's turn."
+      },
+      "note": "Martin, 2026-10-26: Hungry 2 pays for a 9 wall that covers 5s; a giraffe eats all day",
+      "by": "claude",
+      "at": 1793050234
     }
   },
   "giraffe_legend": {

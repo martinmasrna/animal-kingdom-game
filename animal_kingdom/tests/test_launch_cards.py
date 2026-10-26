@@ -149,7 +149,7 @@ def test_flee_runs_before_an_apex_predator_can_eat():
 
 def test_the_zebra_gains_food_for_each_hoofed_neighbour_and_flees():
     s = make_state(hands={"A": ["zebra"]})
-    put(s, "1,1", "deer", "A"); put(s, "1,3", "giraffe", "A"); put(s, "2,2", "lion", "A")
+    put(s, "1,1", "deer", "A"); put(s, "1,3", "okapi", "A"); put(s, "2,2", "lion", "A")   # the Giraffe is Hungry now: it would eat
     before = s.food["A"]
     rules.apply_action(s, PlaceAction("zebra", ("cr", "1,2")))       # two Hoofed neighbours; the Lion isn't one
     assert s.food["A"] - before == 2 * CFG.zebra_food
@@ -1141,9 +1141,9 @@ def test_grazing_okapi_draws_and_wildebeest_feeds():
 def test_giraffe_and_cape_buffalo_are_bigger_on_the_opponents_turn():
     s = make_state()
     g = put(s, "1,2", "giraffe", "A"); put(s, "1,1", "cape_buffalo", "A")
-    assert effective_strength(s, g) == 4
+    assert effective_strength(s, g) == 6
     s.current = "B"
-    assert effective_strength(s, g) == 4 + CFG.giraffe_bonus + CFG.buffalo_anthem
+    assert effective_strength(s, g) == 6 + CFG.giraffe_bonus + CFG.buffalo_anthem
 
 
 def test_the_crocodile_covers_a_lion_on_its_turn_and_is_a_five_on_the_opponents():
