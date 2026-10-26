@@ -57,5 +57,5 @@ The map. Read it first each session and keep it current: when something here cha
 - [`bots.md`](bots.md), [`balance.md`](balance.md).
 - [`pre-launch.md`](pre-launch.md): what must be settled before going public, and not before.
 - [`later.md`](later.md): work parked on purpose, with what would make each item next.
-- [`../knowledge/`](../knowledge/): diagnoses of stuck feedback loops, read before changing how that work is done: [`naming-diagnosis-2026-10-16.md`](../knowledge/naming-diagnosis-2026-10-16.md), [`card-art-diagnosis-2026-10-17.md`](../knowledge/card-art-diagnosis-2026-10-17.md).
+- [`../knowledge/`](../knowledge/): diagnoses of stuck feedback loops, read before changing how that work is done: [`naming-diagnosis-2026-10-16.md`](../knowledge/naming-diagnosis-2026-10-16.md), [`card-art-diagnosis-2026-10-17.md`](../knowledge/card-art-diagnosis-2026-10-17.md), [`card-design-diagnosis-2026-10-25.md`](../knowledge/card-design-diagnosis-2026-10-25.md) (why agent card proposals kept failing; the sheet, `tools/cards/check.py`, is its treatment, its measure in [`card-design-log.md`](../knowledge/card-design-log.md)).
 - Research tooling removed from the tree (pilot ratings, conquest and roster experiments, referee comparison, gauntlet, human scorer) and the old docs are at tag `archive/research-2026-07`.

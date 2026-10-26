@@ -1,7 +1,7 @@
-"""The Meta tab's numbers (docs/meta-tab.md): every league game's card facts summed as it arrives, answered by rating and days.
+"""The Meta tab's numbers (docs/meta-tab.md): every league game's card facts summed as it arrives, answered by rating and the last so many days, counted back from now in whole hours.
 
 A game comes in with its facts (league/facts.py: both lists' mulligans, every card's draw and play turn, both ratings as it
-began). It is counted under its day, its rating band (the two ratings' mean, in steps of BAND), both lists and, for each
+began). It is counted under its hour (UTC), its rating band (the two ratings' mean, in steps of BAND), both lists and, for each
 side, every card of its own list that was seen in the mulligan (m), kept in the starting hand (k), drawn at any point (d)
 and played (p), each with that side's wins. A list is an exact 30 cards that never changes, so archetypes are only a
 mapping over lists, applied when asked: Martin's (data/archetypes.json), a later list joining its parent's.
@@ -23,6 +23,7 @@ from typing import Callable, Iterable, Optional
 BAND = 100
 KEEP_DAYS = 45
 EVENTS = ("m", "k", "d", "p")
+HOUR = "%Y-%m-%dT%H"   # a game's key in time: its hour, so "the last day" is the last 24 hours
 ARCHETYPES = Path(__file__).resolve().parents[1] / "data" / "archetypes.json"
 
 SCHEMA = """
@@ -61,8 +62,10 @@ class Meta:
         db.executescript(SCHEMA)
         self.games: dict[tuple, list[int]] = {}
         self.cards: dict[tuple, list[int]] = {}
-        cutoff = time.strftime("%Y-%m-%d", time.gmtime(time.time() - KEEP_DAYS * 86400))
+        cutoff = time.strftime(HOUR, time.gmtime(time.time() - KEEP_DAYS * 86400))
         with db:
+            for t in ("meta_games", "meta_cards"):   # rows counted by the day before hours: under that day's first hour
+                db.execute(f"UPDATE {t} SET day = day || 'T00' WHERE length(day) = 10")
             db.execute("DELETE FROM meta_games WHERE day < ?", (cutoff,)); db.execute("DELETE FROM meta_cards WHERE day < ?", (cutoff,))
         for day, band, a, b, n, w in db.execute("SELECT day, band, a, b, n, w FROM meta_games"):
             self.games[(day, band, a, b)] = [n, w]
@@ -108,7 +111,7 @@ class Meta:
             la, lb = self.lists(a), self.lists(b)
             if not la or not lb:
                 continue
-            day = time.strftime("%Y-%m-%d", time.gmtime(g.get("t") or time.time()))
+            day = time.strftime(HOUR, time.gmtime(g.get("t") or time.time()))
             band = int((float(g.get("ra") or 1500) + float(g.get("rb") or 1500)) / 2 // BAND * BAND)
             for me, opp, seat, lst in ((a, b, "A", la), (b, a, "B", lb)):
                 won = int(g["winner"] == seat)
@@ -129,16 +132,13 @@ class Meta:
         return n
 
     # ------------------------------------------------------------------ asking
-    def _keep(self, day: str, band: int, lo: int, hi: int, since: str) -> bool:
-        return day >= since and lo <= band < hi
-
     def overview(self, arch: dict[str, str], names: dict[str, str], lo: int, hi: int, days: int) -> dict:
         """The meta in a rating range over the last `days` days: each archetype's share of games and win rate, the matchup matrix."""
         key = ("o", lo, hi, days, tuple(sorted(arch.items())))
         hit = self._cache.get(key)
         if hit and time.time() - hit[0] < 120:
             return hit[1]
-        since = time.strftime("%Y-%m-%d", time.gmtime(time.time() - (days - 1) * 86400)) if days else ""
+        since = time.strftime(HOUR, time.gmtime(time.time() - days * 86400)) if days else ""
         tot: dict[str, list[int]] = collections.defaultdict(lambda: [0, 0, 0])   # games, wins outside the mirror, games outside it
         mx: dict[str, dict[str, list[int]]] = collections.defaultdict(lambda: collections.defaultdict(lambda: [0, 0]))
         bands: set[int] = set()
@@ -163,7 +163,7 @@ class Meta:
 
     def archetype(self, x: str, arch: dict[str, str], lo: int, hi: int, days: int, vs: Optional[str] = None) -> dict:
         """One archetype in a range: its lists with their games, every card's figures, and against `vs` the opponent's cards."""
-        since = time.strftime("%Y-%m-%d", time.gmtime(time.time() - (days - 1) * 86400)) if days else ""
+        since = time.strftime(HOUR, time.gmtime(time.time() - days * 86400)) if days else ""
         ok = lambda day, band: (days == 0 or day >= since) and lo <= band < hi
         mine = {s for s, g in arch.items() if g == x}
         opp_ok = (lambda b: arch.get(b) == vs) if vs else (lambda b: b in arch and b not in mine)   # the mirror left out, as in the overview
