@@ -495,7 +495,7 @@ async function fillMeta() {
   box.querySelectorAll('th[data-sort]').forEach(t => t.onclick = () => { META.sort = t.dataset.sort; fillMeta(); });
   box.querySelectorAll('th[data-col]').forEach(t => t.onclick = () => { const c = t.dataset.col; META.sel.has(c) ? META.sel.delete(c) : META.sel.add(c); if (META.sel.size) META.sort = 'vs'; else if (META.sort === 'vs') META.sort = 'share'; fillMeta(); });
 }
-function metaControls(withMin) {
+function metaControls(withMin, extra = '') {   // extra: the archetype page's opponent, a filter like the rest
   // the rating range: one slider with two handles over the bands that have games, in steps of a band (100)
   const b = META.bands || [], min = b.length ? b[0] : 0, max = b.length ? b[b.length - 1] + 100 : 100;
   const range = b.length > 1 ? `<div class="mrange"><span class="lb">Rating</span><span class="rv">${META.lo}–${META.hi}</span>
@@ -503,7 +503,7 @@ function metaControls(withMin) {
     <input type="range" id="mrlo" min="${min}" max="${max}" step="100" value="${META.lo}" aria-label="Lowest rating"><input type="range" id="mrhi" min="${min}" max="${max}" step="100" value="${META.hi}" aria-label="Highest rating"></div></div>` : '';
   return `<div class="mctl">${range}
     ${dd('mdays', String(META.days), [['0', 'All time'], ['1', 'Last day'], ['3', 'Last 3 days'], ['7', 'Last week']])}
-    ${withMin ? dd('mmin', String(META.min), [['10', 'At least 10 games'], ['30', 'At least 30 games'], ['100', 'At least 100 games'], ['300', 'At least 300 games']]) : ''}</div>`;
+    ${withMin ? dd('mmin', String(META.min), [['10', 'At least 10 games'], ['30', 'At least 30 games'], ['100', 'At least 100 games'], ['300', 'At least 300 games']]) : ''}${extra}</div>`;
 }
 function wireMetaControls(box) {
   const lo = box.querySelector('#mrlo'), hi = box.querySelector('#mrhi');
@@ -540,14 +540,14 @@ async function metaArchetype(box, id, q) {
   const counts = j.lists.map(l => count(l.list)), core = {};
   for (const c of Object.keys(counts[0] || {})) core[c] = Math.min(...counts.map(m => m[c] || 0));
   const own = m => Object.entries(m).filter(([c, n]) => n > (core[c] || 0) && CARDS[c]).sort(([a], [b]) => order({ card: a }, { card: b }))
-    .map(([c, n]) => `${esc(CARDS[c].name)}${n - (core[c] || 0) > 1 ? ` ×${n - (core[c] || 0)}` : ''}`).join(', ');
+    .map(([c, n]) => `<span>${esc(CARDS[c].name)}${n - (core[c] || 0) > 1 ? ` <i>×${n - (core[c] || 0)}</i>` : ''}</span>`).join('');
   const picker = j.lists.length > 1 ? `<div class="mpick">${j.lists.map((l, i) => `<button class="mpk${l.slug === j.list ? ' on' : ''}" data-list="${esc(l.slug)}">
-    <b style="${tint(l.games ? 100 * l.wins / l.games : null, base)}">${pct(l.wins, l.games) || '–'}%</b><span class="dim">${l.games} games</span><span class="own">${own(counts[i]) || 'the shared cards only'}</span></button>`).join('')}</div>` : '';
+    <span class="mpn"><b style="${tint(l.games ? 100 * l.wins / l.games : null, base)}">${pct(l.wins, l.games) || '–'}%</b><span>${l.games} games</span></span><span class="own">${own(counts[i]) || '<span>The shared cards only</span>'}</span></button>`).join('')}</div>` : '';
   const mine = count(j.lists.find(l => l.slug === j.list)?.list || []);   // the table's strips carry the chosen list's copies
   const theirs = c => c.p[0] >= min ? c.p[1] / c.p[0] : 0;
   const opp = j.opp ? [...j.opp].filter(c => CARDS[c.card] && c.d[0] >= min).sort((a, b) => theirs(b) - theirs(a)) : null;
   const flip = v => v ? [v[0], v[0] - v[1]] : v;   // their card's games counted with your wins
-  box.innerHTML = metaControls(true) + `<div class="mah"><a class="mback" href="#/ladder/meta">All decks</a><h3>${esc(j.name)}</h3><span class="mwr" style="${tint(base)}">${j.games ? base.toFixed(1) + '%' : '–'}</span><span class="dim">${j.games} games</span>${vsDd}</div>${picker}
+  box.innerHTML = metaControls(true, vsDd) + `<div class="mah"><a class="mback" href="#/ladder/meta">All decks</a><h3>${esc(j.name)}</h3><span class="mwr" style="${tint(base)}">${j.games ? base.toFixed(1) + '%' : '–'}</span><span class="dim">${j.games} games</span></div>${picker}
     <div class="mbody"><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${th('k', 'Mulligan', 'Win rate when kept in the starting hand')}${th('d', 'Drawn', 'Win rate when drawn, starting hand included')}${th('p', 'Played', 'Win rate when played')}</tr></thead><tbody>
       ${cards.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, mine[c.card] || 1)}</div></th>${rate(c.k)}${rate(c.d)}${rate(c.p)}</tr>`).join('')}
     </tbody></table></div><div class="mside">
