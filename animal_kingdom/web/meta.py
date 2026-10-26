@@ -212,30 +212,25 @@ def _rate(v: list[int]) -> Optional[float]:
 
 
 def impacts(ev: dict[str, list[int]], games: list[int]) -> dict[str, dict]:
-    """A card's impact in one list (Martin, 2026-10-26: against its own list, never against 50%, so a strong deck's
-    cards don't look strong for the deck's sake): dealt (`o`), the list's win rate when the opening hand offered it
-    against when it didn't, which only the shuffle decides; kept (`k`), when it was kept against when it was offered and
-    sent back. Not "drawn at all": a card goes undrawn mostly in short games, which are mostly losses, so drawn against
-    not drawn credits every card with the game's length (+20 for the Fish list's Remora where dealt says +5). Each with
-    both sides' [games, wins] and the difference in win rate (`i`), None while a side has no games."""
-    def one(yes: list[int], no: list[int]) -> dict:
-        a, b = _rate(yes), _rate(no)
-        return {"yes": yes, "no": no, "i": a - b if a is not None and b is not None else None}
-    k, m = ev["k"], ev["m"]
-    no = lambda all_, yes: [max(0, all_[0] - yes[0]), max(0, all_[1] - yes[1])]   # a starting hand is all seen; never below none
-    return {"o": one(m, no(games, m)), "k": one(k, no(m, k))}
+    """A card's figures in one list, as HSReplay counts them (Martin, 2026-10-26): Mulligan (`k`), the games it ended up
+    in the opening hand after the mulligan, replacements included; Drawn (`d`), the games it was drawn at any point, the
+    opening hand included; Played (`p`), the games it was played. Each against the list's own win rate (`base`), never
+    against 50%, so a strong deck's cards don't look strong for the deck's sake: `i` is the card's win rate minus the
+    list's, None while it has no games. Drawn and Played lean above the list for every card alike (a longer game sees
+    more cards, a winning side plays more), so cards are compared with each other."""
+    base = _rate(games)
+    return {e: {"yes": ev[e], "base": games, "i": _rate(ev[e]) - base if ev[e][0] and base is not None else None} for e in ("k", "d", "p")}
 
 
 def pooled(per_list: list[dict[str, dict]]) -> dict[str, dict]:
-    """A card's impacts over every list that runs it: the sides' games summed, the differences averaged, each list
-    weighted by how much its difference can be trusted (yes * no / (yes + no), the inverse of its variance's scale)."""
+    """A card's figures over every list that runs it: its games summed, its difference from each list averaged over the
+    lists, weighted by the card's games in each."""
     out = {}
-    for e in ("o", "k"):
+    for e in ("k", "d", "p"):
         yes = [sum(x[e]["yes"][j] for x in per_list) for j in (0, 1)]
-        no = [sum(x[e]["no"][j] for x in per_list) for j in (0, 1)]
-        h = [(x[e]["yes"][0] * x[e]["no"][0] / (x[e]["yes"][0] + x[e]["no"][0]), x[e]["i"]) for x in per_list if x[e]["i"] is not None]
+        h = [(x[e]["yes"][0], x[e]["i"]) for x in per_list if x[e]["i"] is not None]
         tot = sum(w for w, _ in h)
-        out[e] = {"yes": yes, "no": no, "i": sum(w * i for w, i in h) / tot if tot else None}
+        out[e] = {"yes": yes, "i": sum(w * i for w, i in h) / tot if tot else None}
     return out
 
 
