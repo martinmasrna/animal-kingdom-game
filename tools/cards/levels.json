@@ -1866,6 +1866,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it."
+      },
+      "note": "Martin, 2026-10-26: 4, so the zone is worth more than the Rhino's one-off sweep at 3",
+      "by": "claude",
+      "at": 1793045909
     }
   },
   "honey_badger": {

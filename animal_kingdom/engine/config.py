@@ -121,7 +121,7 @@ class Config:
     honey_badger_min: int = 6            # Honey Badger removes an enemy of strength >= this
     stoop_max: int = 4                   # Hawk
     rhinoceros_max: int = 3
-    hippopotamus_max: int = 3
+    hippopotamus_max: int = 4
     cuckoo_legend_max: int = 4           # the legendary Cuckoo: removes an adjacent animal of strength <= this
 
     # --- Draws, food and other magnitudes of the launch decks ---

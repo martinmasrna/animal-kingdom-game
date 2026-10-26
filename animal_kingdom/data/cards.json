@@ -2145,13 +2145,13 @@
         "Hoofed"
       ],
       "base_strength": 8,
-      "text": "Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it.",
+      "text": "Hungry 3. When an enemy of strength 4 or less is placed next to this, remove it.",
+      "species": "Hippopotamus",
+      "habitat": "Savanna",
       "keywords": [
         "Hungry"
       ],
-      "hungry": 3,
-      "species": "Hippopotamus",
-      "habitat": "Savanna"
+      "hungry": 3
     },
     {
       "id": "whale_shark",

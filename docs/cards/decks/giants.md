@@ -20,7 +20,7 @@ The table below is generated from cards.json, where the cards live.
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Rhinoceros** | 2 | Hoofed | 8 | Hungry 3. Roar: remove all adjacent enemies of strength 3 or less. |
-| **Hippopotamus** | 2 | Hoofed | 8 | Hungry 3. When an enemy of strength 3 or less is placed next to this, remove it. |
+| **Hippopotamus** | 2 | Hoofed | 8 | Hungry 3. When an enemy of strength 4 or less is placed next to this, remove it. |
 | **Whale Shark** | 2 | Fish | 8 | Titan. Hungry 4. Dusk: draw a card. |
 | **Moose** | 2 | Hoofed | 8 | Hungry 3. Roam. |
 
