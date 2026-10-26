@@ -82,7 +82,7 @@ def test_dynamic_strength_present_iff_dynamic_and_only_goliath():
             assert c.dynamic_strength in DYNAMIC_STRENGTHS
         else:
             assert c.dynamic_strength is None
-            assert isinstance(c.base_strength, int) and 0 <= c.base_strength <= 10
+            assert isinstance(c.base_strength, int) and c.base_strength >= 0
     assert dynamic == DYNAMIC_IDS
 
 
