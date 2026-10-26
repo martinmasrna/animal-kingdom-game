@@ -1,6 +1,6 @@
 // Animal Kingdom web client: menu flow (home -> play -> pre-match) and the game screen.
 // The server holds the game; this file only renders the seat's view and sends choices back.
-import { hasArt, artUrl, stripArt, fitStrips } from './art.js';
+import { hasArt, artUrl, stripArt, fitStrips, CROP } from './art.js';
 import { cardHTML, fitNames, readSide } from './card.js';
 import { SUCCESSOR } from './cardnums.js';
 import { plan } from './timeline.js';
@@ -539,15 +539,19 @@ async function metaArchetype(box, id, q) {
   const count = l => l.reduce((m, c) => (m[c] = (m[c] || 0) + 1, m), {});
   const counts = j.lists.map(l => count(l.list)), core = {};
   for (const c of Object.keys(counts[0] || {})) core[c] = Math.min(...counts.map(m => m[c] || 0));
+  const face = (c, n) => {   // a card as its round board portrait, its copies beside it; the name on hover or a long press
+    const [x, y, d] = CROP[c] || [.5, .4, .7], S = 44, w = S / d;
+    const art = hasArt(c) ? `background-image:url(${artUrl(c)});background-size:${w}px ${1.5 * w}px;background-position:${S / 2 - x * w}px ${S / 2 - y * 1.5 * w}px` : '';
+    return `<span class="mf ${CARDS[c].rarity}" title="${esc(CARDS[c].name)}"><span class="p" style="${art}"></span>${n > 1 ? `<b>${n}</b>` : ''}</span>`; };
   const own = m => Object.entries(m).filter(([c, n]) => n > (core[c] || 0) && CARDS[c]).sort(([a], [b]) => order({ card: a }, { card: b }))
-    .map(([c, n]) => `<span>${esc(CARDS[c].name)}${n - (core[c] || 0) > 1 ? ` <i>×${n - (core[c] || 0)}</i>` : ''}</span>`).join('');
+    .map(([c, n]) => face(c, n - (core[c] || 0))).join('');
   const picker = j.lists.length > 1 ? `<div class="mpick">${j.lists.map((l, i) => `<button class="mpk${l.slug === j.list ? ' on' : ''}" data-list="${esc(l.slug)}">
-    <span class="mpn"><b style="${tint(l.games ? 100 * l.wins / l.games : null, base)}">${pct(l.wins, l.games) || '–'}%</b><span>${l.games} games</span></span><span class="own">${own(counts[i]) || '<span>The shared cards only</span>'}</span></button>`).join('')}</div>` : '';
+    <b class="mpn" style="${tint(l.games ? 100 * l.wins / l.games : null, base)}" title="${l.games} games">${pct(l.wins, l.games) || '–'}%</b><span class="own">${own(counts[i])}</span></button>`).join('')}</div>` : '';
   const mine = count(j.lists.find(l => l.slug === j.list)?.list || []);   // the table's strips carry the chosen list's copies
   const theirs = c => c.p[0] >= min ? c.p[1] / c.p[0] : 0;
   const opp = j.opp ? [...j.opp].filter(c => CARDS[c.card] && c.d[0] >= min).sort((a, b) => theirs(b) - theirs(a)) : null;
   const flip = v => v ? [v[0], v[0] - v[1]] : v;   // their card's games counted with your wins
-  box.innerHTML = metaControls(true, vsDd) + `<div class="mah"><a class="mback" href="#/ladder/meta">All decks</a><h3>${esc(j.name)}</h3><span class="mwr" style="${tint(base)}">${j.games ? base.toFixed(1) + '%' : '–'}</span><span class="dim">${j.games} games</span></div>${picker}
+  box.innerHTML = metaControls(true, vsDd) + `<div class="mah"><h3>${esc(j.name)}</h3><span class="mwr" style="${tint(base)}" title="${j.games} games">${j.games ? base.toFixed(1) + '%' : '–'}</span></div>${picker}
     <div class="mbody"><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${th('k', 'Mulligan', 'Win rate when kept in the starting hand')}${th('d', 'Drawn', 'Win rate when drawn, starting hand included')}${th('p', 'Played', 'Win rate when played')}</tr></thead><tbody>
       ${cards.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, mine[c.card] || 1)}</div></th>${rate(c.k)}${rate(c.d)}${rate(c.p)}</tr>`).join('')}
     </tbody></table></div><div class="mside">
@@ -634,10 +638,11 @@ function ladderScreen() {
     <span class="meta">${mode(h)}${esc(h.opp)} · ${when(h.ended)}${gid(h)}</span>` : `${piece(h.opp_cover, side('theirs', h.opp))}<span class="dk" ${side('theirs', h.opp)}>${esc(h.opp)}</span><span class="meta">${mode(h)}${when(h.ended)}${gid(h)}</span>`}</div>`).join('');
   // the leaderboard first (Martin, 2026-10-02), the match history its second tab, the meta report its third (2026-10-24)
   const meta = location.hash.startsWith('#/ladder/meta'), lead = !meta && location.hash !== '#/ladder/history';
-  app.innerHTML = `<div class="mscr ladder"><div class="hist${meta ? ' wide' : ''}"><div class="hhead"><div class="ptabs"><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${!lead && !meta ? ' on' : ''}" href="#/ladder/history">Match history</a><a class="ptab${meta ? ' on' : ''}" href="#/ladder/meta">Meta</a></div>${!lead && !meta && (hist || ui.histDeck) ? filter : ''}</div>
+  // back goes up one level: an archetype to every deck, a tab to home (Martin, 2026-10-26: it went home from an archetype)
+  const up = /^#\/ladder\/meta\/./.test(location.hash) ? '#/ladder/meta' : '#/';
+  app.innerHTML = `<div class="mscr ladder"><div class="hist${meta ? ' wide' : ''}"><div class="hhead"><div class="ptabs"><a class="lback" id="back" href="${up}" aria-label="Back"></a><a class="ptab${lead ? ' on' : ''}" href="#/ladder">Leaderboard</a><a class="ptab${!lead && !meta ? ' on' : ''}" href="#/ladder/history">Match history</a><a class="ptab${meta ? ' on' : ''}" href="#/ladder/meta">Meta</a></div>${!lead && !meta && (hist || ui.histDeck) ? filter : ''}</div>
     <div class="hbody">${lead ? '<div class="lead lb" id="lboard"></div>' : meta ? '<div class="metar" id="metar"><p class="none">Loading…</p></div>' : hist ? `<div class="hlist">${hist}</div>` : '<p class="none">No finished matches yet.</p>'}</div>
-    <div class="sfoot"><button class="backbtn" id="back"><span>Back</span></button></div></div></div>`;
-  document.getElementById('back').onclick = () => { location.hash = '#/'; };
+    </div></div>`;
   if (lead) fillLeaderboard();
   if (meta) fillMeta();
   wireDd(app, (k, v) => { ui.histDeck = v || null; ladderScreen(); });

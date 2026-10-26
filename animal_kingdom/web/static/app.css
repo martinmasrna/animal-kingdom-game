@@ -227,7 +227,10 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .hhead { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 24px; }
 .ladder .hhead h2 { margin: 0; font: 700 28px 'Fira Sans Condensed', sans-serif; color: #f0e8da; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
 /* the history and the leaderboard as two headings, the other one dimmed: a click on it switches */
-.ladder .ptabs { display: flex; gap: 24px; }
+.ladder .ptabs { display: flex; gap: 24px; align-items: center; }
+.ladder .lback { flex: none; width: 34px; height: 34px; margin-right: -6px; border-radius: 50%; background: rgba(255,245,230,.08); position: relative; }
+.ladder .lback::before { content: ''; position: absolute; left: 13px; top: 11px; width: 10px; height: 10px; border-left: 3px solid #cfc3ad; border-bottom: 3px solid #cfc3ad; transform: rotate(45deg); }
+.ladder .lback:hover { background: rgba(255,245,230,.16); }
 .ladder .ptab { font: 700 28px 'Fira Sans Condensed', sans-serif; color: #8f8574; text-decoration: none; text-shadow: 0 1px 3px rgba(0,0,0,.6); white-space: nowrap; }
 .ladder .ptab.on { color: #f0e8da; } .ladder .ptab:not(.on):hover { color: #cfc3ad; }
 .ladder .lead.lb { width: 100%; max-width: 760px; margin: 0 auto; padding: 0 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px; }
@@ -312,7 +315,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
   .ladder .hhead { padding: 14px 12px 6px; flex-wrap: wrap; row-gap: 10px; } .ladder .hhead h2 { font-size: 24px; white-space: nowrap; }
   .ladder .hhead .dd { min-width: 0; flex: 1 1 100%; } .ladder .hhead .dd .sel { white-space: nowrap; }   /* the deck filter on its own row under the tabs */
   .ladder .hlist { padding: 0 12px; }
-  .ladder .ptabs { gap: 16px; } .ladder .ptab { font-size: 24px; } .ladder .lead.lb { padding: 0 12px; }
+  .ladder .ptabs { gap: 14px; } .ladder .ptab { font-size: 22px; } .ladder .lback { width: 30px; height: 30px; margin-right: -4px; } .ladder .lback::before { left: 12px; top: 9px; } .ladder .lead.lb { padding: 0 12px; }
   .ladder .sfoot { position: sticky; bottom: 0; z-index: 2; background: #1f1d1b url(/static/kit2/coll_granite.webp) center / 600px auto; }
   /* a choice hangs clear of the top bar, scrolling inside when the window is short */
   .home .chooser { max-height: calc(100vh - 290px); overflow-y: auto; }
@@ -459,14 +462,17 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .metar .mah { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 0 14px; }
 .ladder .metar .mah h3 { font: 700 26px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 0; }
 .ladder .metar .mah .mwr { font-weight: 700; font-size: 18px; padding: 2px 8px; border-radius: 6px; color: #f0e8da; }
-.ladder .metar .mback { color: #a89d8c; text-decoration: none; } .ladder .metar .mback::before { content: '‹ '; } .ladder .metar .mback:hover { color: #f0e8da; }
 .ladder .metar .mlist { flex: none; width: 250px; } .ladder .metar .mlh { display: flex; gap: 8px; align-items: baseline; margin: 0 2px 6px; } .ladder .metar .mlh b { color: #f0e8da; font-size: 17px; } .ladder .metar .mlh span { color: #8f8574; }
 .ladder .metar .mc th.an { padding: 2px 8px 2px 4px; } .ladder .metar .mstrip { width: 230px; } .ladder .metar .mstrip .st { margin: 0; cursor: default; }
 .ladder .metar .msub { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 0 0 10px; }
-.ladder .metar .mpick { display: flex; flex-direction: column; margin: 0 0 18px; max-width: 760px; border-top: 1px solid rgba(255,245,230,.08); }
-.ladder .metar .mpk { display: grid; grid-template-columns: 88px 1fr; gap: 14px; align-items: start; text-align: left; padding: 10px 12px; border: 0; border-bottom: 1px solid rgba(255,245,230,.08); border-left: 3px solid transparent; background: none; color: #d8cfc0; font: inherit; cursor: pointer; }
+.ladder .metar .mpick { display: flex; flex-direction: column; gap: 6px; margin: 0 0 18px; max-width: 760px; }
+.ladder .metar .mpk { display: flex; align-items: center; gap: 14px; padding: 8px 10px 8px 8px; border: 0; border-left: 3px solid transparent; border-radius: 4px; background: none; font: inherit; cursor: pointer; }
 .ladder .metar .mpk.on { border-left-color: #e6c46a; background: #1b1916; }
-.ladder .metar .mpn { display: flex; flex-direction: column; gap: 2px; } .ladder .metar .mpn b { align-self: flex-start; color: #f0e8da; font-size: 17px; padding: 0 5px; border-radius: 5px; } .ladder .metar .mpn span { color: #8f8574; font-size: 13px; padding-left: 5px; }
-.ladder .metar .own { display: flex; flex-wrap: wrap; gap: 3px 14px; min-width: 0; padding-top: 1px; } .ladder .metar .own span { white-space: nowrap; } .ladder .metar .own i { font-style: normal; color: #8f8574; }
+.ladder .metar .mpn { flex: none; width: 62px; text-align: right; color: #f0e8da; font-size: 17px; padding: 2px 6px; border-radius: 5px; font-variant-numeric: tabular-nums; }
+.ladder .metar .own { display: flex; flex-wrap: wrap; gap: 8px 12px; min-width: 0; }
+.ladder .metar .mf { position: relative; display: block; width: 44px; height: 44px; }
+.ladder .metar .mf .p { position: absolute; inset: 0; border-radius: 50%; background-color: #2a2622; box-shadow: 0 0 0 3px #d9d0c0, 0 1px 4px rgba(0,0,0,.6); }
+.ladder .metar .mf.rare .p { box-shadow: 0 0 0 3px #8fb4d8, 0 1px 4px rgba(0,0,0,.6); } .ladder .metar .mf.legendary .p { box-shadow: 0 0 0 3px #e6c46a, 0 1px 4px rgba(0,0,0,.6); }
+.ladder .metar .mf b { position: absolute; right: -6px; bottom: -4px; min-width: 18px; height: 18px; border-radius: 9px; background: #1b1916; color: #f0e8da; font-size: 12px; line-height: 18px; text-align: center; box-shadow: 0 0 0 1px rgba(255,245,230,.25); }
 .ladder .metar .mbody { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; } .ladder .metar .mside { flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 .ladder .metar .mside .mxw { align-self: flex-start; } .ladder .metar .mside .mxw + .msub { margin-top: 14px; } @media (max-width: 700px) { .ladder .metar { padding: 0 12px 20px; } .ladder .metar .mstrip { width: 180px; } }
