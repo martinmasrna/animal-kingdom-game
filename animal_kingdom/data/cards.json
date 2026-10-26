@@ -721,10 +721,10 @@
         "Cat"
       ],
       "base_strength": 6,
-      "text": "Roar: if placed next to the opponent's den, draw a card.",
-      "keywords": [],
+      "text": "Roar: if this is next to the opponent's den, draw a card.",
       "species": "Cheetah",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": []
     },
     {
       "id": "rat",
@@ -749,12 +749,12 @@
         "Bird"
       ],
       "base_strength": 4,
-      "text": "Flight. Roar: if placed next to the opponent's den, draw a card.",
+      "text": "Flight. Roar: if this is next to the opponent's den, draw a card.",
+      "species": "Falcon",
+      "habitat": "Forest",
       "keywords": [
         "Flight"
-      ],
-      "species": "Falcon",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "bat",

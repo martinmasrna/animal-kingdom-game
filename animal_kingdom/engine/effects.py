@@ -2564,7 +2564,7 @@ def _manta_ally_covered(state, watcher, covered, coverer, cr):
 
 
 def _remora_place(state, unit, cr):
-    """Roar: if placed next to an allied Fish, play another Fish."""
+    """Roar: if this is next to an allied Fish, play another Fish."""
     if _adjacent_ally_fish(state, unit, cr) >= 1:
         _push_play_extra(state, unit.owner, filter={"tags_all": ["Fish"]})
 

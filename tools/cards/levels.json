@@ -906,7 +906,14 @@
     },
     "effect": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: if placed next to the opponent's den, draw a card."
+      },
+      "note": "Martin, 2026-10-26: \"if this is next to\", as the Remora",
+      "at": 1793031262
     },
     "art": {
       "lv": "fine",
@@ -1381,7 +1388,14 @@
     },
     "effect": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: if placed next to the opponent's den, draw a card."
+      },
+      "note": "Martin, 2026-10-26: \"if this is next to\", as the Remora",
+      "at": 1793031263
     },
     "art": {
       "lv": "draft",
