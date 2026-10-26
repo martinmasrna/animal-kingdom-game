@@ -1909,10 +1909,8 @@ def _sperm_whale_legend_eot(state, unit, cr):
 
 
 def _sea_turtle_eot(state, unit, cr):
-    """Dusk: place a Baby Turtle on an adjacent empty crossroad (a random one: Dusk asks no decision)."""
-    empty = _empty_neighbors(state, cr)
-    if empty:
-        _spawn(state, unit.owner, "baby_turtle", state.rng.choice(empty))
+    """Dusk: add a Baby Turtle to your hand (Martin, 2026-10-26); the hand limit burns it like any gained card."""
+    gain_to_hand(state, unit.owner, "baby_turtle")
 
 
 def _raccoon_place(state, unit, cr):

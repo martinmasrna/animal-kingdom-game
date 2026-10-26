@@ -513,7 +513,10 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 add_strength(st, unit.iid, gained);
             }
         }
-        ("sea_turtle", OnEndOfTurn) => spawns_beside(st, unit, cr, "baby_turtle"),
+        ("sea_turtle", OnEndOfTurn) => {
+            let c = cid(st, "baby_turtle");
+            gain_to_hand(st, owner, c, 0);
+        }
         ("tiger_legend", OnPlace) => removes(st, unit, cr, Some("tiger_legend_max"), None),
         ("sperm_whale_legend", OnEndOfTurn) => {
             let options: Vec<(Cr, i32)> = adjacent_tops(st, cr, None)

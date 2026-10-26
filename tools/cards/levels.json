@@ -4186,6 +4186,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792140511
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Dusk: place a Baby Turtle on an adjacent empty crossroad."
+      },
+      "note": "Martin, 2026-10-26: his card; the Queen Ant took the Dusk token on the board",
+      "by": "claude",
+      "at": 1793049663
     }
   },
   "sperm_whale": {

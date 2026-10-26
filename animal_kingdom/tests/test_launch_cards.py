@@ -300,12 +300,11 @@ def test_the_ocelot_draws_two_common_cats():
     assert sorted(hand_ids(s, "A")) == ["lion", "serval"]
 
 
-def test_sea_turtle_lays_a_baby_turtle_on_an_empty_neighbour():
+def test_sea_turtle_adds_a_baby_turtle_to_your_hand_at_dusk():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "sea_turtle", "A")
-    put(s, "1,1", "lion", "A"); put(s, "2,2", "lion", "A")    # the only empty neighbour: 1,3
     end_turn(s)
-    assert s.top_unit("1,3").card_id == "baby_turtle"
+    assert hand_ids(s, "A") == ["baby_turtle"] and s.top_unit("1,3") is None
 
 
 def test_raccoon_returns_only_your_own_removed_animal():

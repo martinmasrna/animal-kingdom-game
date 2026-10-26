@@ -2873,13 +2873,15 @@
       "rarity": "rare",
       "tags": [],
       "base_strength": 5,
-      "text": "Dusk: place a Baby Turtle on an adjacent empty crossroad.",
-      "keywords": [],
+      "text": "Armor. Dusk: add a Baby Turtle to your hand.",
       "related": [
         "baby_turtle"
       ],
       "species": "Sea Turtle",
-      "habitat": "Open Ocean"
+      "habitat": "Open Ocean",
+      "keywords": [
+        "Armor"
+      ]
     },
     {
       "id": "hyena",

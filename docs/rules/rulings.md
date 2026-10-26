@@ -77,7 +77,7 @@ Cards:
 - **The legendary Sloth** runs each of your Dusk effects twice in a row; "At the end of your turn" effects are Dusk effects.
 - **A Roar's cost is never declined** (Praying Mantis, Hornet, Pestis): when the cost can be paid, it is, and the Roar only asks which target. The Mantis with an ally adjacent eats one; the Hornet with a spare copy and an enemy adjacent spends the copy; the Pestis next to only its own animals wipes one of them. When the cost cannot be paid, nothing happens.
 - **Tarantula** eats a random adjacent ally (Armor excluded) and keeps the strength it showed then, for good.
-- **Sea Turtle** and **Sunfish** lay on a random adjacent empty crossroad, as the old African Wild Dog placed its Pup (Martin, 2026-10-10).
+- **Queen Ant** and **Sunfish** lay on a random adjacent empty crossroad, as the old African Wild Dog placed its Pup (Martin, 2026-10-10); the Sea Turtle's Baby Turtle goes to your hand instead (Martin, 2026-10-26).
 - **"An ally was removed this turn"** (Piranha, Vulture) counts your animals leaving the board this turn, whoever removed them; **"each animal removed this turn"** (Hyena) counts both players' (Martin, 2026-10-17). Discards from hand don't count.
 - **City Spider** eats like the Tarantula without growing: a random adjacent ally at Dawn (Armor excluded). A Dawn death counts as removed this turn, so the Piranha, Hyena and Vulture see it. With a Cockroach as its only neighbour it's a death and a card every turn (Martin, 2026-10-11).
 - **Earthworm**: the two Worms land on its crossroad only while it is empty or yours; under an enemy there is no room and none appear.

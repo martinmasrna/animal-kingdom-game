@@ -277,8 +277,8 @@ def play_section(cards: dict, c: dict) -> list[str]:
             from animal_kingdom.engine.actions import DrawAction
             rules.apply_action(state, DrawAction())
             end = snapshot(state)
-            if end[1] != after[1] or end[0] != after[0]:
-                lines.append(f"after your turn ends (Dusk): board {', '.join(f'{cr} {v}' for cr, v in end[0].items())} · food {end[1]}")
+            if end != after:
+                lines.append(f"after your turn ends (Dusk): board {', '.join(f'{cr} {v}' for cr, v in end[0].items())} · food {end[1]} · hands {end[2]}")
     return lines
 
 
