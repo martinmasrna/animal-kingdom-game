@@ -490,7 +490,7 @@ async function fillMeta() {
     ${sorted.map(r => `<tr><th class="an"><a href="#/ladder/meta/${encodeURIComponent(r.id)}">${esc(r.name)}</a></th><td class="num">${(100 * r.share).toFixed(1)}%</td><td class="num" style="${tint(wr(r))}">${fmt(wr(r))}</td><td class="num dim">${r.games}</td>
       ${META.sel.size ? `<td class="num vs" style="${tint(vsSel(r.id))}">${fmt(vsSel(r.id))}</td>` : ''}
       ${cols.map(c => { if (c.id === r.id) return '<td class="mir"></td>'; const v = (mx[r.id] || {})[c.id], x = cell(r.id, c.id);
-        return `<td class="m${META.sel.has(c.id) ? ' sel' : ''}" style="${tint(x)}" data-mtip="${esc(r.name)} against ${esc(c.name)}: ${v ? `${v[1]}–${v[0] - v[1]} in ${v[0]} games` : 'no games'}">${x === null ? '' : x.toFixed(0)}</td>`; }).join('')}</tr>`).join('')}
+        return `<td class="m${META.sel.has(c.id) ? ' sel' : ''}" style="${tint(x)}">${x === null ? '' : x.toFixed(0)}</td>`; }).join('')}</tr>`).join('')}
     </tbody></table></div>${metaCards(j.cards || [], 'acsort')}`;
   wireMetaControls(box);
   wireCardReads(box); fitStrips(box);
@@ -500,15 +500,16 @@ async function fillMeta() {
 }
 // A card's figures as HSReplay counts them (web/meta.py impacts; Martin, 2026-10-26), each its win rate minus its list's,
 // in points: Mulligan, in the opening hand after the mulligan; Drawn, drawn at any point; Played, played. Coloured by the
-// number; a figure on fewer games than the filter asks carries a "?".
-const IMPACT = { k: ['Mulligan', 'Win rate when in the opening hand after the mulligan, minus the list\'s'], d: ['Drawn', 'Win rate when drawn at any point, minus the list\'s'],
-  p: ['Played', 'Win rate when played, minus the list\'s'] };
+// number; a figure on fewer games than the filter asks carries a "?". Only the column heads explain themselves on hover,
+// never a cell (Martin, 2026-10-26).
+const IMPACT = { k: ['Mulligan', 'Win rate when in the opening hand after the mulligan, minus the list\'s win rate'], d: ['Drawn', 'Win rate when drawn at any point, minus the list\'s win rate'],
+  p: ['Played', 'Win rate when played, minus the list\'s win rate'] };
 const impVal = v => v && v.i !== null ? v.i : null;
 function impCell(v, e, min) {
   const x = impVal(v);
   if (x === null) return '<td class="num dim">·</td>';
-  const few = v.yes[0] < min, tip = `${v.yes[1]}–${v.yes[0] - v.yes[1]} in ${v.yes[0]} games`;
-  return `<td class="num${few ? ' few' : ''}" style="${tint(100 * x, 0, 8)}" data-mtip="${tip}">${x >= 0 ? '+' : '−'}${Math.abs(100 * x).toFixed(1)}${few ? '<sup>?</sup>' : ''}</td>`;
+  const few = v.yes[0] < min;
+  return `<td class="num${few ? ' few' : ''}" style="${tint(100 * x, 0, 8)}">${x >= 0 ? '+' : '−'}${Math.abs(100 * x).toFixed(1)}${few ? '<sup>?</sup>' : ''}</td>`;
 }
 const impHead = (e, on, attr, up) => `<th class="num sortable${on ? ' on' + (up ? ' up' : '') : ''}" ${attr}="${e}" data-mtip="${IMPACT[e][1]}">${IMPACT[e][0]}</th>`;
 // A column's first click sorts it best first, the next worst first, and so on (Martin, 2026-10-26); the figures with a
@@ -583,12 +584,11 @@ async function metaArchetype(box, id, q) {
   const j = await r.json(), min = META.min, base = j.games ? 100 * j.wins / j.games : 50;
   const others = ov.archetypes.filter(a => a.id !== id).sort((a, b) => b.share - a.share);
   const vsDd = dd('mvs', META.vs, [['', 'Against every deck'], ...others.map(a => [a.id, 'Against ' + esc(a.name)])]);
-  const rate = (v, b = base) => v && v[0] >= min ? `<td class="num" style="${tint(100 * v[1] / v[0], b)}" data-mtip="${v[1]}–${v[0] - v[1]} in ${v[0]} games">${pct(v[1], v[0])}%</td>` : `<td class="num dim" data-mtip="${v ? v[0] : 0} games">·</td>`;
+  const rate = (v, b = base) => v && v[0] >= min ? `<td class="num" style="${tint(100 * v[1] / v[0], b)}">${pct(v[1], v[0])}%</td>` : `<td class="num dim">·</td>`;
   const RANKS = { legendary: 0, rare: 1, common: 2 }, strv = c => CARDS[c] ? (CARDS[c].str === '*' ? -1 : CARDS[c].str) : 99;
   const order = (a, b) => (RANKS[CARDS[a.card]?.rarity] ?? 3) - (RANKS[CARDS[b.card]?.rarity] ?? 3) || strv(a.card) - strv(b.card) || a.card.localeCompare(b.card);
 
   const cards = [...j.cards].filter(c => CARDS[c.card]).sort(META.csort ? (a, b) => impCmp(META.csort, min, META.csortUp)(a, b) || order(a, b) : order);   // unsorted, the list's own order
-  const th = (k, label, tip) => `<th class="num sortable${META.csort === k ? ' on' : ''}" data-csort="${k}" data-mtip="${tip}">${label}</th>`;
   const strip = c => `<div class="mstrip">${stripHTML(c, CARDS, 1)}</div>`;
   // the lists, each told apart by the cards it runs beyond the ones every list shares (copies counted)
   const count = l => l.reduce((m, c) => (m[c] = (m[c] || 0) + 1, m), {});
@@ -606,7 +606,7 @@ async function metaArchetype(box, id, q) {
   const theirs = c => c.p[0] >= min ? c.p[1] / c.p[0] : 0;
   const opp = j.opp ? [...j.opp].filter(c => CARDS[c.card] && c.d[0] >= min).sort((a, b) => theirs(b) - theirs(a)) : null;
   const flip = v => v ? [v[0], v[0] - v[1]] : v;   // their card's games counted with your wins
-  box.innerHTML = metaControls(true, vsDd) + `<div class="mah"><h3>${esc(j.name)}</h3><span class="mwr" style="${tint(base)}" data-mtip="${j.games} games">${j.games ? base.toFixed(1) + '%' : '–'}</span></div>${picker}
+  box.innerHTML = metaControls(true, vsDd) + `<div class="mah"><h3>${esc(j.name)}</h3><span class="mwr" style="${tint(base)}">${j.games ? base.toFixed(1) + '%' : '–'}</span></div>${picker}
     <div class="mbody"><div class="mxw"><table class="mx mc"><thead><tr><th class="an"></th>${impHead('k', META.csort === 'k', 'data-csort', META.csortUp)}${impHead('d', META.csort === 'd', 'data-csort', META.csortUp)}${impHead('p', META.csort === 'p', 'data-csort', META.csortUp)}${gHead(META.csort === 'g', 'data-csort', META.csortUp)}</tr></thead><tbody>
       ${cards.map(c => `<tr><th class="an"><div class="mstrip">${stripHTML(c.card, CARDS, mine[c.card] || 1)}</div></th>${impCell(c.k, 'k', min)}${impCell(c.d, 'd', min)}${impCell(c.p, 'p', min)}<td class="num dim">${c.d.yes[0]}</td></tr>`).join('')}
     </tbody></table></div><div class="mside">
