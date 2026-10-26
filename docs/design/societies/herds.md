@@ -37,7 +37,7 @@ The one who sees first, and the wall when the hunters come at night.
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **[GIRAFFE]** | legendary | 7 | Your opponent's hand is revealed. | Savanna |
-| **Giraffe** | common | 4 | Has +5 strength during your opponent's turn. | Savanna |
+| **Giraffe** | common | 6 | Hungry 2. Has +3 strength during your opponent's turn. | Savanna |
 
 <!-- cards:end -->
 
