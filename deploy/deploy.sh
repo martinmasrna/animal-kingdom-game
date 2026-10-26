@@ -132,7 +132,7 @@ cp "$repo/deploy/Dockerfile" "$tmp/app/"; cp "$cfg" "$tmp/app/fly.toml"
 # A change to the client's static files alone (static/, the paintings aside) skips the image's Python gate: the engine,
 # the server and the cards are the ones the last deploy to this app already tested, and the web suite ran above
 # (Martin, 2026-10-26: a one-line CSS change waited three minutes on the fuzz and the Python tests).
-deployed="$cache/deployed-$target"; prev="$(cat "$deployed" 2>/dev/null)"; quick=""
+deployed="$cache/deployed-$target"; prev="$(cat "$deployed" 2>/dev/null || true)"; quick=""   # no record yet (a first deploy to an app): set -e would stop here
 if [[ -n "$prev" ]] && git -C "$repo" cat-file -e "$prev^{commit}" 2>/dev/null; then
   # what ships in the image (the trees below and this folder); docs, notes and logs other sessions commit don't count
   changed="$(git -C "$repo" diff --name-only "$prev" HEAD -- animal_kingdom engine_rs tools/engine_rs deploy)"
