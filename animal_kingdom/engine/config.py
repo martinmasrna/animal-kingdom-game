@@ -25,8 +25,8 @@ class Config:
     chipmunk_food_later: int = 10         # ...and 10 more at the start of the owner's next turn
     flying_squirrel_food: int = 10       # synced to card text "gain 10 food" (was 8; text/const desync broke groundhog fed-threshold combo, 2026-07-09)
     rat_king_per_rodent: int = 4         # Roar: gain N food per OTHER Rodent you control
-    worker_ant_food: int = 12            # trimmed from 15 in the 2026-07-05 balance pass
-    worker_bee_per: int = 3              # Worker Bee: Roar: gain 3 food for each Colony animal you control (2 on Martin's sheet; 3 after his first games, 2026-10-24)
+    worker_bee_food: int = 12            # Worker Bee: Roar: gain 12 food
+    worker_ant_per: int = 3              # Worker Ant: Roar: gain 3 food for each animal you control
     worker_wasp_per_place: int = 3       # Worker Wasp: whenever you place a Colony animal, gain 3 food (2 on Martin's sheet; 3 after his first games, 2026-10-24)
     tortoise_legend_food: int = 5             # at end of your turn (decision H: 10 was 2x any other
                                           # recurring passive in the pool - ruled down 2026-07-02)

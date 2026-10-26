@@ -3801,6 +3801,26 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin, 2026-10-26: the Workers swap, the Ant's food counts every animal like Queen Solenia's",
+      "by": "claude",
+      "at": 1793017112
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: gain 12 food."
+      },
+      "note": "Martin, 2026-10-26: the Workers swap, the Ant's food counts every animal like Queen Solenia's",
+      "by": "claude",
+      "at": 1793017113
     }
   },
   "worker_bee": {
@@ -3813,9 +3833,9 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin, 2026-10-24, playing it: at 2 it was weaker than the Squirrel on average",
+      "note": "Martin, 2026-10-26: the Workers swap, the Ant's food counts every animal like Queen Solenia's",
       "by": "claude",
-      "at": 1792866671,
+      "at": 1793017115,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin, 2026-10-15: Colony wins 73% of 376 expert-bot games; trimming its numbers.",
@@ -3828,9 +3848,9 @@
         "prev_note": "",
         "prev": 1
       },
-      "note": "Martin's sheet, 2026-10-24",
+      "note": "Martin, 2026-10-26: the Workers swap, the Ant's food counts every animal like Queen Solenia's",
       "by": "claude",
-      "at": 1792861463
+      "at": 1793017114
     }
   },
   "worker_wasp": {

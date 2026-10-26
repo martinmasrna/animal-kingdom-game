@@ -835,8 +835,8 @@ def test_tortoise_counts_armor_including_an_armadillos_gift():
 def test_royal_jelly_makes_your_animals_five_wherever_they_are():
     from animal_kingdom.engine.strength import effective_strength
     s = make_state(hands={"A": ["bee_legend_2", "raven", "lion"]}, decks={"A": ["snake_egg", "lion", "raven"], "B": []})
-    on_board = put(s, "1,1", "worker_ant", "A")
-    enemy = put(s, "4,2", "worker_ant", "B")
+    on_board = put(s, "1,1", "worker_bee", "A")
+    enemy = put(s, "4,2", "worker_bee", "B")
     rules.apply_action(s, PlaceAction("bee_legend_2", ("cr", "1,2")))
     five = CFG.jelly_strength
     assert effective_strength(s, s.top_unit("1,2")) == five                     # itself

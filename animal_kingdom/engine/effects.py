@@ -2101,9 +2101,9 @@ def _bee_legend_place(state, unit, cr):
         state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": 1, "spec": f"tag:Colony&tag:{caste}"})
 
 
-def _worker_bee_place(state, unit, cr):
-    """Worker Bee: Roar: gain 2 food for each Colony animal you control (itself included)."""
-    _push_gain(state, unit.owner, state.config.worker_bee_per * _control_tag_count(state, unit.owner, "Colony"))
+def _worker_ant_place(state, unit, cr):
+    """Worker Ant: Roar: gain 3 food for each animal you control (itself included)."""
+    _push_gain(state, unit.owner, state.config.worker_ant_per * _control_tag_count(state, unit.owner))
 
 
 def _worker_wasp_friendly_place(state, watcher, placed) -> None:
@@ -3056,9 +3056,9 @@ EFFECTS: dict[str, dict[str, Callable]] = {
         state, unit.owner, filter={"tags_all": ["Colony"], "tags_none": ["Queen"]})},
     "queen_bee": {"on_place": _queen_bee_place},
     "soldier_ant": {"on_place": _conditional(_removes())},
-    "worker_ant": {"on_place": _gains("worker_ant_food")},
+    "worker_ant": {"on_place": _worker_ant_place},
     "worker_wasp": {"on_friendly_place": _worker_wasp_friendly_place},
-    "worker_bee": {"on_place": _worker_bee_place},
+    "worker_bee": {"on_place": _gains("worker_bee_food")},
     # Den Rush.
     "greywhisker": {"on_place": _greywhisker_place},
     "mole_legend": {"on_place": _greywhisker_place},

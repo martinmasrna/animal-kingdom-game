@@ -31,9 +31,9 @@ COSTS_RE = re.compile(r"costs (\d+) food", re.IGNORECASE)
 FOOD_CONSTANTS: dict[str, list[str]] = {
     "army_ant_legend": ["army_ant_legend_per"],
     "forager_ant": ["forager_ant_food"],
-    "worker_ant": ["worker_ant_food"],
+    "worker_ant": ["worker_ant_per"],
     "worker_wasp": ["worker_wasp_per_place"],
-    "worker_bee": ["worker_bee_per"],
+    "worker_bee": ["worker_bee_food"],
     "tortoise_legend": ["tortoise_legend_food"],
     "sloth": ["sloth_food"],
     "greywhisker": ["greywhisker_food"],

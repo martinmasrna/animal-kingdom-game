@@ -59,8 +59,8 @@ The daughters who carry: nectar, seeds, wood, whatever the nest eats. More of th
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **Worker Ant** | common | 1 | Roar: gain 12 food. | Forest |
-| **Worker Bee** | common | 2 | Flight. Roar: gain 3 food for each Colony animal you control. | Meadow |
+| **Worker Ant** | common | 2 | Roar: gain 3 food for each animal you control. | Forest |
+| **Worker Bee** | common | 1 | Flight. Roar: gain 12 food. | Meadow |
 | **Worker Wasp** | common | 2 | Flight. Whenever you place a Colony animal, gain 3 food. | Forest |
 | **Forager Ant (reserve)** | common | 1 | Roar: gain 5 food. If you gained 10 or more food this turn, draw a card. | Forest |
 

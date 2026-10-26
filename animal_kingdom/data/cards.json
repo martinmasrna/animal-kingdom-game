@@ -185,11 +185,11 @@
         "Colony",
         "Worker"
       ],
-      "base_strength": 1,
-      "text": "Roar: gain 12 food.",
-      "keywords": [],
+      "base_strength": 2,
+      "text": "Roar: gain 3 food for each animal you control.",
       "species": "Ant",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": []
     },
     {
       "id": "worker_wasp",
@@ -217,8 +217,8 @@
         "Colony",
         "Worker"
       ],
-      "base_strength": 2,
-      "text": "Flight. Roar: gain 3 food for each Colony animal you control.",
+      "base_strength": 1,
+      "text": "Flight. Roar: gain 12 food.",
       "species": "Bee",
       "habitat": "Meadow",
       "keywords": [

@@ -821,11 +821,11 @@ def test_king_theron_and_queen_adira_combo_on_a_cat_cover():
 # =============================================== Stage 2.4: food gains / play & food riders
 
 def test_bumbleton_rider_lands_on_a_colony_roar():
-    s = make_state(current="A", hands={"A": ["worker_ant"]})
+    s = make_state(current="A", hands={"A": ["worker_bee"]})
     put(s, "1,3", "bumblebee_legend", "A")                      # +3 whenever you gain food
     put(s, "1,2", "caracal", "A")
-    rules.apply_action(s, PlaceAction("worker_ant", ("cr", "2,2")))
-    assert s.food["A"] == CFG.worker_ant_food + CFG.bumblebee_legend_food_rider
+    rules.apply_action(s, PlaceAction("worker_bee", ("cr", "2,2")))
+    assert s.food["A"] == CFG.worker_bee_food + CFG.bumblebee_legend_food_rider
 
 
 def test_queen_solenia_pays_at_dusk_for_every_animal_you_control():

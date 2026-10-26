@@ -731,7 +731,11 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 removes(st, unit, cr, None, None);
             }
         }
-        ("worker_ant", OnPlace) => gains(st, unit, "worker_ant_food"),
+        ("worker_ant", OnPlace) => {
+            let per = cfg(st, "worker_ant_per");
+            let n = control_tag_count(st, owner, 0);
+            push_gain(st, owner, per * n);
+        }
         ("worker_wasp", OnFriendlyPlace) => {
             if let Args::FriendlyPlace(placed) = args {
                 if st.card(placed.card).has_tag(T_COLONY) {
@@ -740,11 +744,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 }
             }
         }
-        ("worker_bee", OnPlace) => {
-            let per = cfg(st, "worker_bee_per");
-            let n = control_tag_count(st, owner, T_COLONY);
-            push_gain(st, owner, per * n);
-        }
+        ("worker_bee", OnPlace) => gains(st, unit, "worker_bee_food"),
         // Den Rush
         ("greywhisker", OnPlace) | ("mole_legend", OnPlace) => greywhisker(st, unit),
         ("rat_legend_2", OnPlace) => {
