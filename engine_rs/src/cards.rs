@@ -88,7 +88,7 @@ pub fn hook_mask(card: &str) -> u32 {
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
         "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "queen_ant" | "scout_bee" | "army_ant_legend"
         | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "okapi" | "wildebeest"
-        | "dingo" | "sperm_whale_legend" => &[OnEndOfTurn],
+        | "dingo" | "sperm_whale_legend" | "oxpecker_legend" => &[OnEndOfTurn],
         "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" => &[OnStartOfTurn],
         "wolf_legend_2" | "coyote" => &[OnFriendlyRoam],
         "fox" => &[OnCoverEnemy],
@@ -1023,6 +1023,10 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("whale_shark", OnEndOfTurn) => draws(st, unit, 1),
+        ("oxpecker_legend", OnEndOfTurn) => {
+            let n = st.map().neighbors(cr).iter().filter(|&&nb| st.top(nb).map(|t| t.owner == owner && statics::has_keyword(st, t, K_HUNGRY, Some(nb))).unwrap_or(false)).count() as i32;
+            draws(st, unit, n);
+        }
         ("oxpecker", OnPlace) => {
             let min = cfg(st, "oxpecker_min");
             let n = if owner <= B { st.starting_decks[owner as usize].iter().filter(|c| st.card(**c).base.map(|b| b >= min).unwrap_or(false)).count() as i32 } else { 0 };

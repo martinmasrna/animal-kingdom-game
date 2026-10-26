@@ -94,12 +94,14 @@ def test_roach_king_bitten_below_0_comes_back_once_with_only_its_growth():
     assert hand_ids(s, "B") == ["lion"]                        # one fall, one card
 
 
-def test_an_adjacent_legendary_oxpecker_feeds_hungry_animals():
+def test_the_legendary_oxpecker_draws_at_dusk_for_each_adjacent_hungry_ally():
     s = make_state(food={"A": 0, "B": 0}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    ele = put(s, "1,2", "elephant", "A")
     put(s, "2,2", "oxpecker_legend", "A")
-    end_turn(s); end_turn(s)
-    assert effective_strength(s, ele) == 9
+    put(s, "1,2", "elephant", "A")                             # Hungry, yours: counts
+    put(s, "2,1", "lion", "A")                                 # yours, not Hungry
+    put(s, "3,2", "hippopotamus", "B")                         # Hungry, theirs
+    end_turn(s)
+    assert len(s.hands["A"]) == 1
 
 
 def test_a_sloths_food_arrives_before_the_hungry_eat():

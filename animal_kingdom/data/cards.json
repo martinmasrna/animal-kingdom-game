@@ -2114,12 +2114,12 @@
         "Bird"
       ],
       "base_strength": 4,
-      "text": "Flight. Your adjacent Hungry animals don't need to eat.",
+      "text": "Flight. Dusk: draw a card for each adjacent Hungry ally.",
+      "species": "Oxpecker",
+      "habitat": "Savanna",
       "keywords": [
         "Flight"
-      ],
-      "species": "Oxpecker",
-      "habitat": "Savanna"
+      ]
     },
     {
       "id": "rhinoceros",

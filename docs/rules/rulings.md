@@ -62,7 +62,7 @@ The calls made where the card workbench's text left room when its twelve decks w
 
 Keywords:
 
-- **Hungry N** is a Dawn effect: it eats in play order with your other Dawn effects. Only a top animal eats; a buried one is skipped. With fewer than N food it eats all there is and gets −1 strength for good for each food short: an Elephant (Hungry 5) with 4 food eats the 4 and becomes an 8 (Martin, 2026-10-26). An adjacent legendary Oxpecker feeds it, and an inked animal isn't Hungry until the ink wears off.
+- **Hungry N** is a Dawn effect: it eats in play order with your other Dawn effects. Only a top animal eats; a buried one is skipped. With fewer than N food it eats all there is and gets −1 strength for good for each food short: an Elephant (Hungry 5) with 4 food eats the 4 and becomes an 8 (Martin, 2026-10-26). An inked animal isn't Hungry until the ink wears off.
 - **Titan** takes two actions, so it's offered only while two are left (an extra action from the Chipmunk counts). No free placement can play it ("play another animal", Remora, the Prince's twin).
 - **Flee** happens before every other reaction to the cover: the animal is back in hand before an Apex Predator eats, or King Theron removes it. Only an enemy cover sets it off, by placement or by roaming. The returned card is playable at once. The Zebra's coverer goes back to its owner's hand unless it has Armor.
 - **King Theron** happens after every other reaction to the cover: the Cat acts first (an Apex Cat eats, and the legendary Leopard grows for it), then Theron removes whatever is left. It needs only the cover: a Cat removed by Spikes still had Theron remove the animal it covered.

@@ -2705,6 +2705,16 @@
       "by": "claude",
       "at": 1792191060,
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Your adjacent Hungry animals don't need to eat."
+      },
+      "note": "Martin, 2026-10-26",
+      "by": "claude",
+      "at": 1793026186
     }
   },
   "rat_legend_2": {

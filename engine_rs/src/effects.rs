@@ -1202,11 +1202,6 @@ fn eat(st: &mut State, unit: &Unit, cr: Cr) {
         return;
     }
     let n = st.card(unit.card).hungry;
-    let ox = st.g.known.oxpecker_legend;
-    let fed = st.map().neighbors(cr).iter().any(|&nb| st.top(nb).map(|t| t.owner == unit.owner && Some(t.card) == ox && statics::active(st, t)).unwrap_or(false));
-    if fed {
-        return;
-    }
     let prev = (st.cause, st.cause_iid);
     st.cause = Some(unit.card);
     st.cause_iid = Some(unit.iid);

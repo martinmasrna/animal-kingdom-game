@@ -1096,14 +1096,10 @@ def _op_timed_hook(state, step):
 
 def _eat(state, unit, cr) -> None:
     """Hungry N (keywords.md): at the start of your turn the animal eats up to N of your food and gets -1 strength, for
-    good, for each food it was short. An adjacent legendary Oxpecker feeds it ("Your adjacent Hungry animals don't need
-    to eat"), and an inked animal isn't Hungry."""
+    good, for each food it was short. An inked animal isn't Hungry."""
     if not statics.has_keyword(state, unit, "Hungry", cr):
         return
     n = state.cards[unit.card_id].hungry
-    if any((top := state.top_unit(nb)) and top.owner == unit.owner and top.card_id == "oxpecker_legend"
-           and statics.active(state, top) for nb in state.game_map.neighbors(cr)):
-        return
     prev, state.cause, state.cause_iid = (state.cause, state.cause_iid), unit.card_id, unit.iid
     try:
         eaten = min(n, state.food[unit.owner])
@@ -1818,6 +1814,13 @@ def _removes(max_attr=None, min_attr=None):
             max_strength=getattr(state.config, max_attr) if max_attr else None,
             min_strength=getattr(state.config, min_attr) if min_attr else None))
     return handler
+
+
+def _oxpecker_legend_eot(state, unit, cr):
+    """The legendary Oxpecker: Dusk: draw a card for each adjacent Hungry ally."""
+    _push_draw(state, unit.owner, sum(
+        1 for nb in state.game_map.neighbors(cr)
+        if (top := state.top_unit(nb)) and top.owner == unit.owner and statics.has_keyword(state, top, "Hungry", nb)))
 
 
 def _draws_filtered(spec, n=1):
@@ -3148,13 +3151,14 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "grizzly_bear": {"on_place": _grizzly_place},
     "tortoise": {"on_place": _tortoise_place},
     "owl": {"on_place": _owl_place},
-    # Giants (Hungry and Titan are keywords; the legendary Oxpecker feeds its neighbours in _eat).
+    # Giants (Hungry and Titan are keywords).
     "rhinoceros_legend": {"on_place": _remove_all_adjacent},
     "tortoise_legend": {"on_end_of_turn": _tortoise_legend_eot},
     "sperm_whale_legend": {"on_end_of_turn": _sperm_whale_legend_eot},
     "rhinoceros": {"on_place": _rhinoceros_place},
     "hippopotamus": {"on_enemy_placed_adjacent": _hippo_enemy_placed},
     "whale_shark": {"on_end_of_turn": _draw1},
+    "oxpecker_legend": {"on_end_of_turn": _oxpecker_legend_eot},
     "oxpecker": {"on_place": _oxpecker_place},
     "anteater": {"on_place": _anteater_place},
     "dung_beetle": {"on_end_of_turn": _dung_beetle_eot},
