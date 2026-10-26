@@ -129,7 +129,8 @@ cp "$repo/deploy/Dockerfile" "$tmp/app/"; cp "$cfg" "$tmp/app/fly.toml"
 # (Martin, 2026-10-26: a one-line CSS change waited three minutes on the fuzz and the Python tests).
 deployed="$cache/deployed-$target"; prev="$(cat "$deployed" 2>/dev/null)"; quick=""
 if [[ -n "$prev" ]] && git -C "$repo" cat-file -e "$prev^{commit}" 2>/dev/null; then
-  changed="$(git -C "$repo" diff --name-only "$prev" HEAD)"
+  # what ships in the image (the trees below and this folder); docs, notes and logs other sessions commit don't count
+  changed="$(git -C "$repo" diff --name-only "$prev" HEAD -- animal_kingdom engine_rs tools/engine_rs deploy)"
   if [[ -n "$changed" ]] && ! grep -qv '^animal_kingdom/web/static/' <<< "$changed"; then
     quick=1; echo "only the client's static files changed since ${prev:0:8}: the image skips the Python gate"
   fi
