@@ -758,7 +758,7 @@ async def meta_archetype(req):
     x, vs = req.query.get("id", ""), req.query.get("vs") or None
     if x not in names or (vs and vs not in names):
         raise web.HTTPNotFound(text="no such archetype")
-    return web.json_response({**meta.archetype(x, arch, lo, hi, days, vs), "name": names[x], "vs_name": names.get(vs) if vs else None})
+    return web.json_response({**meta.archetype(x, arch, lo, hi, days, vs, req.query.get("list") or None), "name": names[x], "vs_name": names.get(vs) if vs else None})
 
 
 async def league_retire(req):

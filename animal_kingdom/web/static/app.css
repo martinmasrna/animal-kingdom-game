@@ -452,10 +452,12 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .metar .mah .mwr { font-weight: 700; font-size: 18px; padding: 2px 8px; border-radius: 6px; color: #f0e8da; }
 .ladder .metar .mah .dd { min-width: 220px; }
 .ladder .metar .mback { color: #a89d8c; text-decoration: none; } .ladder .metar .mback::before { content: '‹ '; } .ladder .metar .mback:hover { color: #f0e8da; }
-.ladder .metar .mlists { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; scrollbar-width: thin; scrollbar-color: #4a4540 transparent; align-items: flex-start; }
 .ladder .metar .mlist { flex: none; width: 250px; } .ladder .metar .mlh { display: flex; gap: 8px; align-items: baseline; margin: 0 2px 6px; } .ladder .metar .mlh b { color: #f0e8da; font-size: 17px; } .ladder .metar .mlh span { color: #8f8574; }
 .ladder .metar .mc th.an { padding: 2px 8px 2px 4px; } .ladder .metar .mstrip { width: 230px; } .ladder .metar .mstrip .st { margin: 0; cursor: default; }
 .ladder .metar .msub { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 0 0 10px; }
+.ladder .metar .mpick { display: flex; flex-direction: column; gap: 6px; margin: 0 0 16px; max-width: 760px; }
+.ladder .metar .mpk { display: flex; align-items: baseline; gap: 10px; text-align: left; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,245,230,.1); background: #1b1916; color: #d8cfc0; font: inherit; cursor: pointer; }
+.ladder .metar .mpk b { color: #f0e8da; font-size: 16px; padding: 1px 6px; border-radius: 5px; } .ladder .metar .mpk .dim { flex: none; } .ladder .metar .mpk .own { min-width: 0; }
+.ladder .metar .mpk.on { border-color: #e6c46a; box-shadow: inset 0 0 0 1px #e6c46a; }
 .ladder .metar .mbody { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; } .ladder .metar .mside { flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
-.ladder .metar .mside .mxw { align-self: flex-start; } .ladder .metar .mside .mxw + .msub { margin-top: 14px; } .ladder .metar .mlists { flex-wrap: wrap; overflow: visible; }
-@media (max-width: 700px) { .ladder .metar { padding: 0 12px 20px; } .ladder .metar .mah .dd { margin-left: 0; flex: 1 1 100%; } .ladder .metar .mstrip { width: 180px; } }
+.ladder .metar .mside .mxw { align-self: flex-start; } .ladder .metar .mside .mxw + .msub { margin-top: 14px; } @media (max-width: 700px) { .ladder .metar { padding: 0 12px 20px; } .ladder .metar .mah .dd { margin-left: 0; flex: 1 1 100%; } .ladder .metar .mstrip { width: 180px; } }

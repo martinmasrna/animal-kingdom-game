@@ -60,10 +60,21 @@ def test_card_figures_count_each_event_once_a_game_and_only_the_lists_own_cards(
     assert by[cats[0]]["m"] == [2, 1] and by[cats[0]]["k"] == [0, 0]           # seen in the mulligan, sent back: never kept
     assert by[cats[1]]["k"] == [2, 1] and by[cats[1]]["p"] == [2, 1]           # kept and played
     assert by[cats[8]]["d"] == [2, 1] and by[cats[8]]["k"] == [0, 0]           # drawn on turn 2: not in the starting hand
-    assert "not_in_list" not in by and by[cats[0]]["with"] == [2, 1] and by[cats[0]]["play"] == 1
+    assert "not_in_list" not in by and r["list"] == "cats"
     fish = load_premade_deck("fish")
     opp = {c["card"]: c for c in r["opp"]}
     assert opp[fish[0]]["p"] == [2, 1]                                          # the opponent's played card, with the opponent's wins
+
+
+def test_card_figures_are_one_lists_the_most_played_unless_another_is_picked():
+    m = _meta()
+    m.add([_game("A"), _game("A"), {**_game("B"), "a": "bot:expert:canines"}])
+    arch = {"cats": "C", "canines": "C", "fish": "F"}
+    r = m.archetype("C", arch, 0, 10000, 0)
+    assert r["games"] == 3 and r["list"] == "cats" and [l["slug"] for l in r["lists"]] == ["cats", "canines"]
+    assert {c["card"] for c in r["cards"]} == set(load_premade_deck("cats"))
+    r = m.archetype("C", arch, 0, 10000, 0, pick="canines")
+    assert r["list"] == "canines" and {c["card"] for c in r["cards"]} == set(load_premade_deck("canines"))
 
 
 def test_counts_survive_a_restart_and_a_child_list_joins_its_parents_archetype(tmp_path):

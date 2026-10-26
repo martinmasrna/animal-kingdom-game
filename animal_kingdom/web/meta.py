@@ -161,8 +161,11 @@ class Meta:
         self._cache[key] = (time.time(), out)
         return out
 
-    def archetype(self, x: str, arch: dict[str, str], lo: int, hi: int, days: int, vs: Optional[str] = None) -> dict:
-        """One archetype in a range: its lists with their games, every card's figures, and against `vs` the opponent's cards."""
+    def archetype(self, x: str, arch: dict[str, str], lo: int, hi: int, days: int, vs: Optional[str] = None,
+                  pick: Optional[str] = None) -> dict:
+        """One archetype in a range: its lists with their games, and one list's card figures (`pick`, else its most played
+        list), against `vs` with the opponent's cards. A card's figures are one exact list's: a player plays a list, and
+        a card's numbers depend on the other 29 (Martin, 2026-10-26)."""
         since = time.strftime(HOUR, time.gmtime(time.time() - days * 86400)) if days else ""
         ok = lambda day, band: (days == 0 or day >= since) and lo <= band < hi
         mine = {s for s, g in arch.items() if g == x}
@@ -171,28 +174,21 @@ class Meta:
         for (day, band, a, b), (n, w) in self.games.items():
             if a in mine and opp_ok(b) and ok(day, band):
                 per_list[a][0] += n; per_list[a][1] += w
+        if pick not in per_list:
+            pick = max(per_list, key=lambda s: per_list[s][0], default=None)
         ev: dict[str, dict[str, list[int]]] = collections.defaultdict(lambda: {e: [0, 0] for e in EVENTS})
         opp: dict[str, dict[str, list[int]]] = collections.defaultdict(lambda: {e: [0, 0] for e in EVENTS})
         for (day, band, a, b, c, e), (n, w) in self.cards.items():
             if not ok(day, band):
                 continue
-            if a in mine and opp_ok(b):
+            if a == pick and opp_ok(b):
                 ev[c][e][0] += n; ev[c][e][1] += w
-            elif vs and arch.get(a) == vs and b in mine:     # the opponent's cards in this matchup, counted from their side
+            elif vs and arch.get(a) == vs and b == pick:     # the opponent's cards in this matchup, counted from their side
                 opp[c][e][0] += n; opp[c][e][1] += w
         lists = {s: self.lists(s) or [] for s in per_list}
-        total = sum(v[0] for v in per_list.values())
-        cards = []
-        for c in sorted({c for l in lists.values() for c in l}):
-            inn = [s for s, l in lists.items() if c in l]
-            with_ = [sum(per_list[s][0] for s in inn), sum(per_list[s][1] for s in inn)]
-            without = [total - with_[0], sum(v[1] for v in per_list.values()) - with_[1]]
-            copies = sum(lists[s].count(c) * per_list[s][0] for s in inn) / with_[0] if with_[0] else 0
-            cards.append({"card": c, "play": with_[0] / total if total else 0, "copies": round(copies, 2),
-                          "with": with_, "without": without, **ev[c]})
-        return {"id": x, "games": total, "wins": sum(v[1] for v in per_list.values()),
+        return {"id": x, "games": sum(v[0] for v in per_list.values()), "wins": sum(v[1] for v in per_list.values()),
                 "lists": sorted(({"slug": s, "list": lists[s], "games": v[0], "wins": v[1]} for s, v in per_list.items()), key=lambda r: -r["games"]),
-                "cards": cards,
+                "list": pick, "cards": [{"card": c, **ev[c]} for c in sorted(set(lists.get(pick) or []))],
                 "opp": [{"card": c, **v} for c, v in opp.items()] if vs else None}
 
 
