@@ -1,6 +1,6 @@
 # Rodents
 
-What each card is for: [`../../design/effects-pass.md`](../../design/effects-pass.md), its Food Aggro section. The table below is generated from cards.json, where the cards live.
+The table below is generated from cards.json, where the cards live.
 
 ## Cards
 

@@ -22,7 +22,7 @@ The grazers that live in herds: zebra, wildebeest, gazelle, buffalo, warthog, wi
 
 ## 3. The playstyle the herd's cards serve
 
-Holding ground and winning the long game on food. A player who runs herd animals is choosing to hold regions with grazers rather than race or hunt: safe and productive together, broken when scattered, since one covered corner breaks the region and switches off every grazing bonus, and the fleers run home rather than die, keeping their Roar for the next placement. The more of them stand together, the more each is worth, so they reward a tight pasture and punish a deck that wins by covering; alone, a herd animal is a body that holds a corner and little more. The precon (Martin, 2026-10-08; `effects-pass.md`, Hoofed Graze) is the all-in version: both home regions held by grazers, Magic's Pillowfort on a piece of land.
+Holding ground and winning the long game on food. A player who runs herd animals is choosing to hold regions with grazers rather than race or hunt: safe and productive together, broken when scattered, since one covered corner breaks the region and switches off every grazing bonus, and the fleers run home rather than die, keeping their Roar for the next placement. The more of them stand together, the more each is worth, so they reward a tight pasture and punish a deck that wins by covering; alone, a herd animal is a body that holds a corner and little more. The precon (Martin, 2026-10-08) is the all-in version: both home regions held by grazers, Magic's Pillowfort on a piece of land.
 
 ## 4. Who does what
 

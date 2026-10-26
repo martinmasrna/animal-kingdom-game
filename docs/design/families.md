@@ -26,7 +26,7 @@ Not every family needs an archetype: a family can be a handful of individually u
 
 ## Fish
 
-The launch deck, Fish Token Aggro, is drafted in [`effects-pass.md`](effects-pass.md).
+The launch deck is Fish Token Aggro (`decklists.json`).
 
 ## The target meta
 
@@ -43,7 +43,7 @@ Once the game runs, the meta should hold 2–3 clearly different decks in each o
 | | Arachnid traps (punish what lands near them) | sketch |
 | Combo | Food OTK (one burst turn) | exists |
 | | Colony (numbers into food) | exists |
-| | Circle of Life (the Cockroach deck): symmetric removal that punishes the opponent more than you, and every removal pays (draft in [`effects-pass.md`](effects-pass.md)) | new |
+| | Circle of Life (the Cockroach deck): symmetric removal that punishes the opponent more than you, and every removal pays | new |
 | Special | The hand deck (Bears hoard, Primates train) | new |
 | | Giants (big, Hungry, needing pasture) | redesign |
 | | Hoofed (graze regions for food) | new |
