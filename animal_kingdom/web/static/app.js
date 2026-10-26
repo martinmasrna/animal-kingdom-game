@@ -475,7 +475,8 @@ async function fillMeta() {
   const j = await (await api(`/api/meta?${q()}`)).json();
   if (j.bands?.length) META.bands = j.bands;
   if (!j.games) { box.innerHTML = metaControls(false) + '<p class="none">No games in this range yet.</p>'; wireMetaControls(box); return; }
-  const rows = j.archetypes, mx = j.matrix, min = META.min;
+  // the games filter holds for decks too: a deck with fewer games is neither a row nor a column (Martin, 2026-10-26)
+  const min = META.min, rows = j.archetypes.filter(r => r.games >= min), mx = j.matrix;
   const cell = (x, y) => { const v = (mx[x] || {})[y]; return v && v[0] >= min ? 100 * v[1] / v[0] : null; };
   const vsSel = x => { const vs = [...META.sel].filter(y => y !== x).map(y => cell(x, y)).filter(v => v !== null); return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null; };
   const wr = r => r.decided ? 100 * r.wins / r.decided : null;
