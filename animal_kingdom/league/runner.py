@@ -87,6 +87,15 @@ def pick(players: list[dict], batch: int, rng: random.Random) -> list[tuple[str,
     return games
 
 
+def round_robin(players: list[dict], rng: random.Random) -> list[tuple[str, str]]:
+    """Every pairing of two different decks at the same pilot level, twice (play() alternates the seats), in a shuffled order:
+    all the matchups evenly, whatever the ratings (Martin, 2026-10-27: the night's league covers every matchup)."""
+    ids = [p["id"] for p in players]
+    pairs = [(a, b) for i, a in enumerate(ids) for b in ids[i + 1:] if parse_bot(a)[0] == parse_bot(b)[0] and parse_bot(a)[1] != parse_bot(b)[1]]
+    rng.shuffle(pairs)
+    return [g for a, b in pairs for g in ((a, b), (a, b))]
+
+
 def _safe_run(spec: MatchSpec):
     """One game, or None when the engine raises: a broken game is logged and skipped, never the end of the runner."""
     try:
@@ -133,6 +142,7 @@ def main(argv=None) -> None:
     ap.add_argument("--pace", type=int, default=1200, help="games an hour at most")
     ap.add_argument("--once", action="store_true", help="one pass, then stop")
     ap.add_argument("--log", default="results/league/games.jsonl")
+    ap.add_argument("--round-robin", action="store_true", help="every pass plays every same-level pairing twice instead of matchmaking")
     ap.add_argument("--births", type=int, default=3, help="tinkered children a day at most (0: no tinkering)")
     ap.add_argument("--night", default="0-8", help="hours (local) when every core plays uncapped, 'from-to'; '' for never")
     ap.add_argument("--night-jobs", type=int, default=os.cpu_count() or 8)
@@ -180,7 +190,7 @@ def main(argv=None) -> None:
             except Exception as e:   # a report never stops the games
                 print(f"report failed: {e!r}", flush=True)
         pilots = {level: spec.replace("time_budget=8", "time_budget=0") for level, spec in pool["pilots"].items()}
-        games = pick(pool["players"], args.batch, rng)
+        games = round_robin(pool["players"], rng) if args.round_robin else pick(pool["players"], args.batch, rng)
         if not games:
             print("nothing to play", flush=True)
             if args.once:

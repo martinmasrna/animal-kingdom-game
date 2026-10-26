@@ -776,8 +776,9 @@ async def league_retire(req):
 
 
 async def league_decks(req):
-    """New lists for the pool: [{slug, name, list, source, parent, start}]; each legal, distinct list joins as three placing
-    players, starting at `start` (the best prior the sender has: a parent's rating, a target's; 1500 when absent)."""
+    """New lists for the pool: [{slug, name, list, source, parent, start, levels}]; each legal, distinct list joins as a
+    placing player per pilot level (`levels`, every level when absent: Martin's 2026-10-27 league is Expert only), starting at
+    `start` (the best prior the sender has: a parent's rating, a target's; 1500 when absent)."""
     league_auth(req)
     body = await req.json()
     decks = body.get("decks") if isinstance(body, dict) else None
@@ -794,7 +795,8 @@ async def league_decks(req):
         ladder.decks.append(slug)
         start = d.get("start")
         start = min(3000.0, max(800.0, float(start))) if isinstance(start, (int, float)) else ranking.START
-        for level in ranking.LEVELS:
+        levels = [lv for lv in (d.get("levels") or ranking.LEVELS) if lv in ranking.LEVELS] or list(ranking.LEVELS)
+        for level in levels:
             ladder.add_player(ranking.bot_id(level, slug), start)
         added.append(slug)
     return web.json_response({"added": added, "rejected": rejected})

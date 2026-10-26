@@ -1,158 +1,106 @@
 {
- "_": "Martin's archetypes (2026-10-25, his names and grouping on the naming page): each league list belongs to one; a list born later from a parent joins its parent's archetype.",
+ "_": "Martin's archetypes: since 2026-10-27 the league is his 17 profile decks, each its own archetype under its profile name (Martin, 2026-10-27: \"exactly my names\"); a list born later joins its parent's archetype.",
  "archetypes": [
   {
-   "name": "Aggro Den Rush",
+   "name": "Martin Cats",
    "lists": [
-    "custom_43e1171d61",
-    "custom_c0e9b823d8",
-    "den_rush"
-   ]
-  },
-  {
-   "name": "Apex Predators",
-   "lists": [
-    "martin_fd6ab2ac20"
-   ]
-  },
-  {
-   "name": "Apex Roam Handbuff",
-   "lists": [
-    "custom_361486f384"
-   ]
-  },
-  {
-   "name": "Basic",
-   "lists": [
-    "tempo"
-   ]
-  },
-  {
-   "name": "Canines Roam",
-   "lists": [
-    "canines"
-   ]
-  },
-  {
-   "name": "Cats",
-   "lists": [
-    "cats",
-    "custom_29e5c0e686",
-    "custom_f514d5a40f"
-   ]
-  },
-  {
-   "name": "Cockroach",
-   "lists": [
-    "aristocrats",
-    "custom_b552f3137c",
-    "custom_bcaf91a559",
-    "custom_eb7860a664"
-   ]
-  },
-  {
-   "name": "Colony",
-   "lists": [
-    "martin_3bb056c51f"
-   ]
-  },
-  {
-   "name": "Egg Control",
-   "lists": [
-    "custom_48aece937a",
-    "custom_b0d0a694c9",
-    "custom_e14561fcab",
-    "egg_control"
-   ]
-  },
-  {
-   "name": "Fish Token",
-   "lists": [
-    "fish"
-   ]
-  },
-  {
-   "name": "Food OTK Precon",
-   "lists": [
-    "food_otk"
-   ]
-  },
-  {
-   "name": "Freeze Mage",
-   "lists": [
-    "custom_daff876770"
-   ]
-  },
-  {
-   "name": "goodstuff?",
-   "lists": [
-    "bot_optimized",
-    "optimizer_1"
-   ]
-  },
-  {
-   "name": "Hand Shuffle",
-   "lists": [
-    "custom_10a47c1af2"
-   ]
-  },
-  {
-   "name": "handbuff roaming Apex",
-   "lists": [
-    "custom_d95131a40b"
-   ]
-  },
-  {
-   "name": "Handlock",
-   "lists": [
-    "handlock"
-   ]
-  },
-  {
-   "name": "Hoofed Grazing",
-   "lists": [
-    "custom_cbc0a22734",
-    "hoofed"
-   ]
-  },
-  {
-   "name": "Hungry Giants",
-   "lists": [
-    "custom_7f5730ec52",
-    "deck_bd26c93733",
-    "giants"
-   ]
-  },
-  {
-   "name": "Infinite Orangutan",
-   "lists": [
-    "custom_1c4b12660f"
-   ]
-  },
-  {
-   "name": "Laras",
-   "lists": [
-    "martin_a81c5e1bd3"
+    "martin_91a403597d"
    ]
   },
   {
    "name": "Midrange Cats",
    "lists": [
-    "martin_8973dbe0bf"
+    "martin_656ef28470"
    ]
   },
   {
-   "name": "Rodent Food Aggro",
+   "name": "Aggro Den Rush",
    "lists": [
-    "deck_2b4441e88f",
-    "food_aggro"
+    "martin_60579d9d53"
    ]
   },
   {
-   "name": "Token Aggro",
+   "name": "Colony",
    "lists": [
-    "tinker_cbbf63170a",
-    "token"
+    "martin_df9baf0a1b"
+   ]
+  },
+  {
+   "name": "Handlock",
+   "lists": [
+    "martin_77238db25c"
+   ]
+  },
+  {
+   "name": "Freeze Mage",
+   "lists": [
+    "martin_ed25f719a2"
+   ]
+  },
+  {
+   "name": "Hungry Giants",
+   "lists": [
+    "martin_34e9ec4b5f"
+   ]
+  },
+  {
+   "name": "Token Fish",
+   "lists": [
+    "martin_fbbac7624a"
+   ]
+  },
+  {
+   "name": "small Egg",
+   "lists": [
+    "martin_314569a27d"
+   ]
+  },
+  {
+   "name": "Cockroach",
+   "lists": [
+    "martin_1b7082331e"
+   ]
+  },
+  {
+   "name": "Precon Fish",
+   "lists": [
+    "martin_5c1f34bfb3"
+   ]
+  },
+  {
+   "name": "Hoofed Graze",
+   "lists": [
+    "martin_2a81b9e21d"
+   ]
+  },
+  {
+   "name": "Rodent Food",
+   "lists": [
+    "martin_01b5140817"
+   ]
+  },
+  {
+   "name": "Canines Roam",
+   "lists": [
+    "martin_ce1873053c"
+   ]
+  },
+  {
+   "name": "Food OTK Precon",
+   "lists": [
+    "martin_ce499c15b8"
+   ]
+  },
+  {
+   "name": "Hand Shuffle",
+   "lists": [
+    "martin_805478ab5f"
+   ]
+  },
+  {
+   "name": "Goodstuff",
+   "lists": [
+    "martin_44907feb75"
    ]
   }
  ]

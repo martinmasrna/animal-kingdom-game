@@ -2,7 +2,7 @@
 
 import random
 
-from animal_kingdom.league.runner import PLACING_GAMES, WINDOW, pick
+from animal_kingdom.league.runner import PLACING_GAMES, WINDOW, pick, round_robin
 
 
 def _players():
@@ -46,3 +46,10 @@ def test_a_game_the_engine_breaks_is_skipped_not_the_end_of_the_runner(monkeypat
     pilots = {"easy": "greedy"}
     out = runner.play([("bot:easy:cats", "bot:easy:fish")] * 3, pilots, 1, 10, {})
     assert [g["seed"] for g in out] == [10, 12]
+
+
+def test_round_robin_plays_every_same_level_pairing_twice_and_no_mirror():
+    ps = [{"id": f"bot:expert:d{i}", "rating": 1500, "rd": 50, "games": 9} for i in range(4)] + [{"id": "bot:easy:d0", "rating": 1500, "rd": 50, "games": 9}]
+    g = round_robin(ps, random.Random(1))
+    assert len(g) == 12 and all(a.split(":")[1] == b.split(":")[1] and a != b for a, b in g)
+    assert {frozenset(x) for x in g} == {frozenset((f"bot:expert:d{i}", f"bot:expert:d{j}")) for i in range(4) for j in range(i + 1, 4)}

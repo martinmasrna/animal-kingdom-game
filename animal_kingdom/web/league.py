@@ -60,8 +60,8 @@ class Pool:
         problems = decklist_problems(lst)
         if not slug or not slug.replace("_", "").isalnum() or slug in known or slug in self.rows:
             problems.append(f"slug {slug!r} is taken or malformed")
-        key_ = tuple(sorted(lst))
-        if any(tuple(sorted(r["list"])) == key_ for r in self.rows.values()) or \
+        key_, gone = tuple(sorted(lst)), self.retired()   # a retired list's twin may come back as a new player, rated afresh
+        if any(tuple(sorted(r["list"])) == key_ for r in self.rows.values() if r["slug"] not in gone) or \
                 any(tuple(sorted(PREMADE_DECKS[s])) == key_ for s in known if s in PREMADE_DECKS):
             problems.append("an identical list is already a player")
         if problems:
