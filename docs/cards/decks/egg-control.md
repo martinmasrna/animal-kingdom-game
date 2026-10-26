@@ -19,10 +19,10 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Hawk** | 2 | Bird | 3 | Flight. Roar: remove an adjacent enemy of strength 3 or less. |
-| **Cottonmouth** | 2 | Snake | 4 | Roar: choose an adjacent enemy. At the start of your next turn, remove it. |
+| **Hawk** | 2 | Bird | 4 | Flight. Roar: remove an adjacent enemy of strength 4 or less. |
+| **Cottonmouth** | 2 | Snake | 5 | Roar: choose an adjacent enemy. At the start of your next turn, remove it. |
 | **Magpie** | 2 | Bird | 3 | Flight. Roar: steal a card from your opponent's hand, then discard a card. |
-| **Black Mamba** | 2 | Snake | 4 | Roar: remove an adjacent enemy of strength 5 or less. |
+| **Black Mamba** | 2 | Snake | 4 | Roar: remove an adjacent enemy of strength 6 or less. |
 
 ### Common
 

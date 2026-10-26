@@ -19,10 +19,10 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Honey Badger** | 2 | — | 2 | Roar: remove an adjacent enemy of strength 6 or more. |
+| **Honey Badger** | 2 | — | 3 | Roar: remove an adjacent enemy of strength 6 or more. |
 | **Okapi** | 2 | Hoofed | 4 | Dusk: if this is grazing, draw a card. |
 | **Cape Buffalo** | 2 | Hoofed | 6 | Your other Hoofed animals have +1 strength during your opponent's turn. |
-| **Boar** | 2 | Hoofed | 4 | Roar: remove an adjacent enemy that isn't covering anything. |
+| **Boar** | 2 | Hoofed | 5 | Roar: remove an adjacent enemy that isn't covering anything. |
 
 ### Common
 

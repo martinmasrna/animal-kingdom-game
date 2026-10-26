@@ -186,6 +186,14 @@ def test_the_legendary_cuckoo_removes_an_ally_and_plays_another_animal():
     assert s2.pending is None and removed(s2, "squirrel")
 
 
+def test_the_legendary_cuckoo_takes_an_ally_of_any_strength_but_an_enemy_of_4_or_less():
+    s = make_state(hands={"A": ["cuckoo_legend", "lion"]})
+    put(s, "1,1", "elephant", "A")
+    put(s, "2,2", "lion", "B")
+    rules.apply_action(s, PlaceAction("cuckoo_legend", ("cr", "1,2")))
+    assert s.pending["options"] == ["1,1"]                     # your 9, yes; their 7, no
+
+
 def test_the_legendary_sloth_makes_dusk_effects_happen_twice():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,1", "sloth_legend", "A")
@@ -866,7 +874,7 @@ def test_royal_jelly_sets_five_at_the_roar_and_a_pythons_growth_in_the_deck_stay
 def test_the_capybara_is_a_nine_when_the_rest_of_the_starting_deck_is_small():
     from animal_kingdom.engine.strength import effective_strength
     small = make_state(hands={"A": ["capybara"]})
-    small.starting_decks = {"A": ("capybara", "capybara", "raven", "snake_egg", "hawk"), "B": ()}
+    small.starting_decks = {"A": ("capybara", "capybara", "raven", "snake_egg", "magpie"), "B": ()}
     big = make_state(hands={"A": ["capybara"]})
     big.starting_decks = {"A": ("capybara", "raven", "lynx"), "B": ()}       # the Lynx is a 5
     assert effective_strength(small, small.hands["A"][0]) == 2 + CFG.capybara_bonus == 9

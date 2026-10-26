@@ -1810,10 +1810,11 @@ def _draws_filtered(spec, n=1):
 # --- Aristocrats -----------------------------------------------------------------------------------------------
 
 def _cuckoo_legend_place(state, unit, cr):
-    """Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal."""
+    """Roar: remove an adjacent ally to play another animal, or remove an adjacent enemy of strength 4 or less."""
     cap = state.config.cuckoo_legend_max
     options = [nb for nb, top in _adjacent_tops(state, cr)
-               if effective_strength(state, top) <= cap and statics.can_be_removed(state, top, nb)
+               if (top.owner == unit.owner or effective_strength(state, top) <= cap)
+               and statics.can_be_removed(state, top, nb)
                and statics.can_be_chosen(state, top, unit.owner, nb)]
     _push_choose(state, unit.owner, options, "cuckoo")
 
