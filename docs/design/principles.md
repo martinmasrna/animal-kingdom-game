@@ -18,65 +18,51 @@ What the game should become, and the rules every card is designed against. Read 
 
 **Cards serve play styles, not precons.** Tactical play and deep deckbuilding are the game's two equal pillars, and deckbuilding needs cards that are simple, flexible and playable in many decks, each card fitting a theme or play style rather than one pre-constructed list, never needing five other cards to be useful. The Black Bear ("in 2 turns, draw 2 cards") is the model: never in a swarm or board-buff deck, but at home in combo, control and Handlock. The Rat is another: its random discard costs a Cockroach deck nothing, and costs an aggro deck nothing either, since aggro empties its hand fast. A handful of cards may be good only with their own deck's engine; the whole collection may not (Martin, 2026-10-12 and 2026-10-26).
 
-**The action is the cost.** Fodder that has to be replayed costs an action every time, on top of the action that removes it, so a deck built on it gets half the actions of its opponent (Martin, 2026-10-12).
-
 **Dawn and Dusk effects are automatic.** A start- or end-of-turn effect involves no choice and no optional "you may" (Martin, 2026-10-13).
 
 **Don't build solitaire decks.** A plan that needs three or four of its own animals uncovered on the board at once (an outlet, fodder and the payoffs that count it) is solitaire: the opponent either covers one piece and breaks it, or ignores it and watches (Martin, 2026-10-13).
 
-**Card text fits three lines on the full card.** Three lines at a size as readable as Hearthstone's caps how much one card may do: complexity goes into keywords and shared wording, not into sentences. About 80 characters is the budget when writing; a natural sentence may run over it as long as it fits, and a sentence is never squeezed (clipped phrases, pronoun shortcuts) to fit (Martin, 2026-10-08). The web test `cardtext.test.mjs` measures every card. Wording conventions are in [`../rules/keywords.md`](../rules/keywords.md) (card-text conventions).
+**Card text fits three lines on the full card.** Complexity goes into keywords and shared wording, not into sentences. About 80 characters is the budget when writing; a natural sentence may run over it as long as it fits, and a sentence is never squeezed (clipped phrases, pronoun shortcuts) to fit (Martin, 2026-10-08). The web test `cardtext.test.mjs` measures every card. Wording conventions are in [`../rules/keywords.md`](../rules/keywords.md) (card-text conventions).
 
 ## Power calibration
 
-There is no mana: every card costs one card and one placement action. Low strength is a drawback, never a lower price. Price every effect as strength bought off the vanilla body; a utility card sits near vanilla strength for its role, never lowballed to "pay" for an ability. Free placements, tokens and deck-to-board effects are action economy, the game's only resource. A delayed payoff gives up board presence now and hands the opponent a window. A conditional card is priced for its common failed state, not the screenshot where everything lines up. A candidate that an existing card strictly dominates, or that strictly dominates one, is rejected.
+There is no mana: every card costs one action. Low strength is a drawback, never a lower price. Free placements, tokens and deck-to-board effects are action economy, the game's only resource. A delayed payoff gives up board presence now and hands the opponent a window. A conditional card is priced for its common failed state, not the screenshot where everything lines up. A candidate that an existing card strictly dominates, or that strictly dominates one, is rejected.
 
-The anchors, for commons (Martin, 2026-10-22; the sheet, `tools/cards/check.py`, prints the live cards beside any proposal):
+The references are the live cards, never a table: the Lion (7, vanilla) and the Eagle (5, Flight) for bodies, and for an effect, the cards that already carry it or its nearest shape, at the same rarity and strength (the sheet, `tools/cards/check.py`, prints them). How a condition is priced (Martin, 2026-10-22):
 
-| effect | strength | the card |
-|---|---|---|
-| vanilla, on the ground | 7 | Lion |
-| vanilla, Flight | 5 | Eagle |
-| Roar: draw a card | 5 | Dolphin |
-| Roar: draw a card, with Flight | 3 | Bat |
-| Roar: draw 2 cards, no condition | 1 | no card: it turns its own placement into a free Draw action |
-| Roar: draw 2 cards, the condition costs nothing the turn you play it (board state already there, a body the deck wants gone) | 2 | Praying Mantis |
-| Roar: draw 2 cards, the condition takes the turn's other action or extra plays | 4 | Gopher, Hare |
-| Roar: remove an adjacent enemy of strength 3 or less | 5 | no card |
-| Roar: remove an adjacent enemy of strength 4 or less | 4 | no card |
-| Roar: remove an adjacent enemy, the condition already on the board | 2 | Soldier Ant, Macaque |
-| Roar: remove an adjacent enemy, the condition takes the turn's other action | 3 | Muskrat, Serval, Piranha |
-| the same, narrowed to a target | +1 | Jackal |
-
-Reading the table: removal with a condition sits 1 below its draw twin, since removing an enemy undoes one of their actions. A condition that can fail at home buys +1; one nearly always met at home buys nothing, the tag is then the card's edge (Lynx). Filtering to a tag ("draw a Snake") is worth nothing extra. Selection (Owl: look at 3, keep 1) is the plain draw's anchor −1, since it can't be weaker than the draw. "Draw a card" replaces the played card but doesn't refund the action: a Draw action gives 2. Flight is worth what the flier can cover when it lands, so on a 1 or 2 it is little more than reach. An unconditional common "remove any adjacent enemy" and an unconditional flying draw 2 don't exist. Strength 0 is kept for cards that need it for a specific reason.
-
-**Every deck beats 30 Lions.** Every deck wins at least 8 of 10 games against a deck of thirty vanilla Lions (`lions30` in [`decks.py`](../../animal_kingdom/decks.py)), piloted by the Expert bot on both sides, going first and second equally (Martin, 2026-10-15).
+- A conditional effect is priced by what meeting its condition costs on the turn you play it. Board state already there, or a body the deck wants gone, costs nothing; a condition that takes the turn's other action, or extra plays, costs the card strength.
+- Removal with a condition sits one below its draw twin: removing an enemy undoes one of their actions.
+- A condition that can fail at home buys strength; one nearly always met at home buys nothing, and the tag is then the card's edge.
+- Filtering to a tag ("draw a Snake") is worth nothing extra. Selection (look at 3, keep 1) can't be weaker than the plain draw.
+- "Draw a card" replaces the played card but doesn't refund the action: a Draw action gives 2.
+- Flight is worth what the flier can cover when it lands, so on a 1 or 2 it is little more than reach.
 
 ## Rarity
 
-The test card by card is [`rarity.md`](rarity.md).
+The rarity question is what goes wrong if the opponent faces this card three times a game, never which slot its deck has free (Martin, 2026-10-22). His calls so far: [`log_rarity.md`](log_rarity.md).
 
 - **Rarity sets a card's role in its deck, like Gwent's bronze, silver and gold.** Commons (3 copies) are the consistent engine that makes the deck work. Rares (2 copies) are flexible, situational cards for specific use cases. Legendaries (1 copy) are unique, potentially deck-defining cards.
 - **Rares** are the deck's stronger, more situational cards (conditional or unconditional removal, the reactive answers) with more complicated effects, or upgrades that would be too much at three copies: with two, drawing one is a real risk and you play it carefully (the Leopard). A rare advances the plan significantly but doesn't win on its own.
 - **Legendaries** come in three kinds:
-  - The build-around (a deck's whole plan, like Black Swan; few of these).
-  - The amplifier, which takes the plan the commons and rares already have and pushes it over the edge, without changing it (King Theron, Queen Adira: Cats play the same with or without them).
-  - The generally excellent card, far stronger than a common and good in many decks (Prince Leo and Princess Lea, Aurum, Scarlett).
-- If two copies in a deck would be balanced, it isn't a legendary.
+  1. The build-around (a deck's whole plan, like Black Swan; few of these).
+  2. The amplifier, which takes the plan the commons and rares already have and pushes it over the edge, without changing it (King Theron, Queen Adira: Cats play the same with or without them).
+  3. The generally excellent card, far stronger than a common and good in many decks (Prince Leo and Princess Lea, Aurum, Scarlett).
 - **A card that is one keyword and nothing else is a common** (Martin, 2026-10-21). A rare or legendary with a keyword earns its rarity with something more: a second keyword or an effect.
 - **A higher rarity gets a better rate.** A rare must be stronger than a common, and a legendary stronger than a rare, if they were to have the same effect. Ideally they shouldn't, so this is only an anchor (Martin, 2026-10-26).
 
 ## Guardrails
 
 - No burst extra placements, and an instant-capture audit for every chaining effect near an enemy den.
-- No effect that grants a connection-ignoring placement able to reach the den. Flight alone never captures.
-- A new keyword needs at least three cards that want the exact same rules object.
-- A tag is a search key: any day a card may say "draw a Bird" or "duplicate a Cat". So a tagged animal's strong effect asks for its own family (Serval: "if you played another Cat"), and an unconditional generic bomb (removal of any size, extra actions, extra plays, card-advantage engines) goes on a tagless animal (Raccoon, Opossum, Mole) (Martin, 2026-10-16).
+- No effect that grants a connection-ignoring placement able to reach the den.
+- No infinite combos.
+- A new keyword needs at least three cards.
+- Unconditional generic effects (removal of any size, extra actions, extra plays, card-advantage engines) go on a tagless animal (Raccoon, Opossum, Mole, Bat, ...) (Martin, 2026-10-16).
 
 ## Before proposing a card
 
-The sheet (`tools/cards/check.py`) prints the lookups for a card: the keyword rulings, the pool, the anchors, the record, the grid, the text fit. Then, from the opponent's seat:
+The sheet (`tools/cards/check.py`) prints the lookups for a card: the keyword rulings, the pool, the cards at its rarity and strength, the record, the grid, the text fit. Then, from the opponent's seat:
 
-1. **Against the anchors.** The body against the Lion, the effect against the anchor table and against every card with the same or an overlapping effect; a rare or legendary against the common with that effect, which it must beat. If one has the same effect with more strength or an extra rider, the proposal is dominated. When the size rule forces a small body, give the animal a different effect, never the same one on a smaller body.
+1. **Against the references.** The body against the Lion, the effect against every card with the same or an overlapping effect; a rare or legendary against the common with that effect, which it must beat. If one has the same effect with more strength or an extra rider, the proposal is dominated. When the size rule forces a small body, give the animal a different effect, never the same one on a smaller body.
 2. **Answerable.** The opponent can still beat it by ordinary play, and they don't lose the game if they can't answer it instantly.
 3. **A real design.** A known keyword with a word added is a patch, not a new mechanic; an animal isn't dropped because one wording fails.
 
@@ -86,10 +72,9 @@ Games imagined while designing are reasoning, not evidence: only real play settl
 
 - Every card is an animal.
 - The pool celebrates what evolution made. An animal earns its card by being recognisable, one of a kind (nothing else looks like it to a normal person) and astonishing (the axolotl regrowing its legs, the chameleon changing colour). A group of lookalikes (rodents, small brown birds, most antelopes, most fish) doesn't get fifteen members; but two similar animals can both have cards when their art makes them clearly distinct (Martin, 2026-10-07).
-- The most unique effects go on the most unique animals (Martin, 2026-10-05).
-- **Animal–effect fit** runs both ways: the effect is the best one for the animal (its most famous trait, as a normal person knows it, turned into a rule), and the animal is the best one for the effect (the first animal the effect brings to mind). Rattlesnake (the rattle is the shuffle), Owl (sees what's hidden: Scout), Raven, Cheetah and Falcon have it. A card that passes only one direction is a weak fit.
+- **Animal–effect fit** runs both ways: the effect is the best one for the animal (its most famous trait, as a normal person knows it, turned into a rule), and the animal is the best one for the effect (the first animal the effect brings to mind). Rattlesnake (the rattle is the shuffle), Owl (sees what's hidden: Scout), Raven, Cheetah and Falcon have it. Ideally, the most unique effects go on the most unique animals.
+- One species per pool among commons and rares; subspecies, sex and age variants count as the same species. Two exceptions: Colony castes, and metamorphosis, life stages that look nothing alike and turn into each other (Caterpillar and Butterfly; later a tadpole and a frog). (Martin, 2026-10-08).
 - Legendaries are a specific named individual of a real species that has a common or rare in the pool (Martin, 2026-10-08).
-- One species per pool among commons and rares; subspecies, sex and age variants count as the same species. Two exceptions: Colony castes, and metamorphosis, life stages that look nothing alike and turn into each other (Caterpillar and Butterfly; later a tadpole and a frog) (Martin, 2026-10-08).
 - No "[adjective] animal" names that most people would see as the same animal (a Martial Eagle next to an Eagle). Species people tell apart are fine (Polar Bear, Grizzly, Black Bear).
 - Strength follows the animal's real size, at least for commons and rares (a common Lion is never a 1). The strongest utility effects (extra placements, extra actions, draw) therefore sit on small, low-strength animals (Martin, 2026-10-05).
 - No pets and no farm animals. Farm animals appear as their wild forms (Martin, 2026-10-08).

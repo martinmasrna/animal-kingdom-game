@@ -6,7 +6,8 @@ How the game gets measured, and what is known on the current ruleset (draw 2 per
 
 - Every deck's win rate against the field within **40–60%**.
 - Every card priced by its **paired value** (below), within its rarity. The older per-card *impact* (win rate when drawn minus the deck's win rate) is retired: it records which games a card showed up in, not what it did, and it has ranked a vanilla 6 above a vanilla 8.
-- Above both: the archetype metagame in [`design/principles.md`](design/principles.md), which the goodstuff problem currently blocks ([`design/goodstuff.md`](design/goodstuff.md)).
+- Above both: the archetype metagame in [`design/principles.md`](design/principles.md).
+- **Every deck beats 30 Lions:** at least 8 of 10 games against a deck of thirty vanilla Lions (`lions30` in `decks.TEST_BOT_DECKS`), piloted by the Expert bot on both sides, going first and second equally (Martin, 2026-10-15).
 
 ## Method
 
@@ -24,7 +25,6 @@ The workspace's `balance-eval` skill holds the full procedure. In short:
 - `sim/rules_ab.py` A/Bs a rules change over the full matrix with paired seeds.
 - **Paired swaps** price a card: the deck's win rate minus the same deck with that card's copies replaced in place by vanilla 7s (Cape Buffalo), on the same seeds, both seats. Games only differ once a swapped card matters (5–15% of them), so about 6,000 GreedyBot games give ±1 point in about a minute. A card priced in its home deck and again in goodstuff gives its **synergy**: home value minus pile value. The scripts are in the untracked `results/card-value-2026-09-26/`; promote them to `sim/` once the method has settled.
 - `sim/benchmark_set.py` plays the fixed baseline deck against the field, scoring both seats' cards in one pass. It checkpoints and resumes, but the resume key doesn't fingerprint card data or config values: never resume a run across a card or config change.
-- The deckbuilding instruments for the goodstuff problem are listed in [`design/goodstuff.md`](design/goodstuff.md).
 
 ## The baseline deck ruler
 
@@ -64,7 +64,7 @@ Status: the roster is built and was tuned once, but its run was killed when two 
 
 **Baseline ruler, RefereeBot, 600 games per deck (2026-09-26, before the Egg, Colony, Ramp and Food passes):** the fixed synergy-free pile beats aggro 66.7%, canine 58.2%, colony 54.8%, egg 96.0% and food 65.2%, is even with ramp (49.3%), and loses only to cats (47.0%).
 
-**Goodstuff still dominates.** A greedy hill-climb over the current pool built a pile that beats all seven premades (90% mean on GreedyBot), and RefereeBot confirms it: **73.7% mean, worst matchup 57.5% (vs aggro)**, 81% vs cats, 92% vs egg (2026-09-29). The recipe: legendaries Scarlett, Brutus, Gale, Pestis; rares Chinchilla, Polar Bear, Rhinoceros, Taipan; commons Wolf, Elephant, Lemming, Lion, Mouse, Tiger. The structural problem in [`design/goodstuff.md`](design/goodstuff.md) holds.
+**Goodstuff still dominates.** A greedy hill-climb over the current pool built a pile that beats all seven premades (90% mean on GreedyBot), and RefereeBot confirms it: **73.7% mean, worst matchup 57.5% (vs aggro)**, 81% vs cats, 92% vs egg (2026-09-29). The recipe: legendaries Scarlett, Brutus, Gale, Pestis; rares Chinchilla, Polar Bear, Rhinoceros, Taipan; commons Wolf, Elephant, Lemming, Lion, Mouse, Tiger. Goodstuff is not a design problem: the pile won because the bots underplay themed decks (Martin, 2026-10-01).
 
 **Martin against the pile (reverse gauntlet, 2026-09-29).** Martin played each premade 10 times (5 first, 5 second) against the same pile piloted by RefereeBot, in the web client (`results/human_games/web/web_20260929T103600_SJWERG.jsonl`). He went **35–35**, where RefereeBot piloting the premades gets 26%. Per deck, Martin vs the bots' rate against the pile: Ramp 8–2 (38%), Aggro 5–5 (42.5%), Cats 5–5 (19%), Colony 5–5 (33.5%), Egg 5–5 (8%), Canine 4–6 (23.5%), Food 3–7 (19.5%). Ten games per deck is ±30 points, so only Egg, Ramp and Cats are clear of the bot rate on their own; the overall 50% against 26% is not noise (p < 0.0001). The bots underplay the premades far more than the pile, so part of the goodstuff gap is a pilot artifact. How much is still open: Martin knows the pile's list and the bot's habits, and one player's 70 games isn't a field.
 

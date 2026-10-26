@@ -11,8 +11,7 @@ nothing else: no verdict, no score. The agent reads the sheet; Martin sees the c
     options: --no-fit (skip the browser measurement of the text), --play (place an existing card in a scratch game)
 
 Sections: card, keywords (the registry's ruling for every keyword and term in the text), pool (the animal, the tag, the
-nearest effects), anchors (the principles' anchor for the effect's verb, the neighbours at this rarity and strength,
-what can cover the body), record (every line of the design record that names the animal), grid (map_b's neighbours
+nearest effects), anchors (the cards at this rarity and strength, what can cover the body), record (every line of the design record that names the animal), grid (map_b's neighbours
 and regions at the places the card will stand), text (lines on the real card at every width the client draws it),
 play (a placement in a scratch game, for a card the engine knows; otherwise the one fact that it isn't in the engine).
 """
@@ -132,24 +131,7 @@ def pool_section(cards: dict, c: dict) -> list[str]:
 def anchors_section(cards: dict, c: dict) -> list[str]:
     lines = []
     text = c["text"]
-    md = (DESIGN / "principles.md").read_text(encoding="utf-8")
-    calib = md.split("## Power calibration", 1)[1].split("\n## ", 1)[0]
-    rows = [ln for ln in calib.splitlines() if ln.startswith("| ") and not ln.startswith("| effect") ]
-    verbs = []
-    if re.search(r"\bdraw\b|\bScout\b", text, re.I):
-        verbs.append("draw")
-    if re.search(r"\bremove\b", text, re.I):
-        verbs.append("remove")
-    if not text.strip() or (c["kws"] and not re.sub(r"(" + "|".join(map(re.escape, c["kws"])) + r")( \d+)?\.\s*", "", text).strip()):
-        verbs.append("vanilla")
-    lines.append("anchor rows (principles.md): " + ", ".join(verbs) if verbs else "no anchor row for this verb; the vanilla rows:")
-    for ln in rows:
-        cells = [x.strip() for x in ln.strip("|").split("|")]
-        if any(v in cells[0].lower() for v in (verbs or ["vanilla"])):
-            lines.append(f"  {cells[0]}: {cells[1]} ({cells[2]})")
-    reading = next((para for para in calib.split("\n\n") if para.startswith("Reading the table")), "")
-    if reading:
-        lines.append(re.sub(r"\s+", " ", reading))
+    lines.append("Lion 7 (vanilla, ground), Eagle 5 (vanilla, Flight); the pool below is the reference, by rarity and strength")
     if re.search(r"\bdraw (a|\d)", text, re.I):
         lines.append("ledger: the Draw action is 2 cards for one action; this card's draw replaces the card played, the action is still spent")
     s = c["str"]
