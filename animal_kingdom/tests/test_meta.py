@@ -1,4 +1,4 @@
-"""The Meta tab's numbers (web/meta.py): games and card facts summed by day, rating band and list, answered by archetype."""
+"""The Meta tab's numbers (web/meta.py): games and card facts summed by hour, rating band and list, answered by archetype."""
 
 import sqlite3
 import time
@@ -34,6 +34,20 @@ def test_the_rating_range_and_the_days_filter_the_games():
     assert m.overview(arch, names, 1900, 2100, 0)["games"] == 1                 # the mean of 1900 and 2000 sits in the 1900 band
     assert m.overview(arch, names, 0, 10000, 3)["games"] == 2                   # the game ten days old is outside the last three days
     assert m.overview(arch, names, 0, 10000, 0)["bands"] == [1500, 1900]
+
+
+def test_the_last_day_is_the_last_24_hours_not_the_calendar_day():
+    m = _meta()
+    m.add([_game("A", t=time.time() - 23 * 3600), _game("A", t=time.time() - 26 * 3600)])
+    assert m.overview({"cats": "C", "fish": "F"}, {"C": "C", "F": "F"}, 0, 10000, 1)["games"] == 1
+
+
+def test_rows_counted_by_the_day_before_hours_still_load():
+    db = sqlite3.connect(":memory:")
+    Meta(db, lambda s: None)
+    day = time.strftime("%Y-%m-%d", time.gmtime())
+    db.execute("INSERT INTO meta_games VALUES (?, 1500, 'cats', 'fish', 2, 1)", (day,))
+    assert Meta(db, lambda s: None).overview({"cats": "C", "fish": "F"}, {"C": "C", "F": "F"}, 0, 10000, 0)["games"] == 1
 
 
 def test_card_figures_count_each_event_once_a_game_and_only_the_lists_own_cards():
