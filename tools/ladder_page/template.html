@@ -1,0 +1,171 @@
+<title>Name the Archetypes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* the game's deck list, lifted from its stylesheets with every image inlined */
+__FONTS__
+__GAMECSS__
+</style>
+<style>
+/* one archetype per band: its number and name field, then its lists as the game shows them, variants spaced apart */
+:root{--bg:#161412;--band:#1e1b18;--fg:#ece6dc;--mut:#9a9185;--line:#36302a;--acc:#d9b44a;--field:#0f0e0d;--face:'Fira Sans Condensed',system-ui,sans-serif;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.4 var(--face);padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:22px;margin:0 0 16px;font-weight:700}
+section{background:var(--band);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:16px}
+.hd{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;cursor:pointer}
+section.shut .row{display:none} section.shut .hd{margin-bottom:0}
+.tg{width:28px;height:28px;border:0;background:none;color:var(--mut);cursor:pointer;padding:0;font-size:16px}
+.tg::before{content:"▾"} section.shut .tg::before{content:"▸"} .tg:focus-visible{outline:2px solid var(--acc)}
+.no{font-weight:700;font-size:20px;color:var(--mut);min-width:28px}
+.name{flex:1;min-width:200px;max-width:420px;background:var(--field);border:1px solid var(--line);border-radius:6px;color:var(--fg);font:600 19px var(--face);padding:7px 10px}
+.name:focus{outline:2px solid var(--acc);outline-offset:1px} .name::placeholder{color:#6b6359}
+.st-msg{color:var(--acc);font-size:13px}
+.row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;align-items:flex-start}
+.deck{flex:none;display:flex;flex-direction:column;gap:6px;width:284px}
+.deck.gap{margin-left:20px}
+.deck .coll{__INHERIT__}
+.deck .clist{display:flex;flex-direction:column}
+.ctl{display:flex;gap:6px} .ctl .mv{flex:1;min-width:0}
+.mv{background:var(--field);border:1px solid var(--line);border-radius:6px;color:var(--mut);font:500 14px var(--face);padding:5px 8px;cursor:pointer}
+.mv:focus{outline:2px solid var(--acc)}
+.cp{background:var(--field);border:1px solid var(--line);border-radius:6px;color:var(--fg);font:500 14px var(--face);padding:5px 10px;cursor:pointer;white-space:nowrap}
+.cp:focus-visible{outline:2px solid var(--acc)}
+.add{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px}
+.add textarea{flex:1;min-width:240px;max-width:560px;height:44px;background:var(--field);border:1px solid var(--line);border-radius:6px;color:var(--fg);font:14px/1.3 ui-monospace,Menlo,monospace;padding:8px;resize:vertical}
+.add button{background:var(--acc);color:#1a1612;border:0;border-radius:6px;font:700 15px var(--face);padding:10px 16px;cursor:pointer}
+.add .err{flex-basis:100%;color:var(--acc)}
+section.out .no{display:none} .outh{font:600 19px var(--face);color:var(--mut)}
+.rt{font-weight:700;font-size:17px} .rt small{color:var(--mut);font-weight:500;font-size:13px;margin-left:6px}
+</style>
+<h1>League decks</h1>
+<div class="add"><textarea id="code" placeholder="Paste a deck code to add a deck to the league"></textarea><button id="addb">Add</button><span class="err" id="err"></span></div>
+<div id="bands"></div>
+<script>
+__DECKCODE__
+const D = __DATA__;
+const ART = __ART__;
+const CHALK = __CHALK__;
+const META = __META__;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// the game's deck body (collection.js deckBody, caps shown), drawn from the inlined art
+const RANKR = { legendary: 0, rare: 1, common: 2 }, svr = c => c.str === '*' ? -1 : c.str;
+const countsOf = list => list.reduce((o, id) => (o[id] = (o[id] || 0) + 1, o), {});
+const stripHTML = (id, have) => `<div class="st ${META[id].rarity}" data-card="${id}"><div class="art" style="background-image:url(${ART[id] || ''});background-size:100% 100%;background-position:0 0"></div><span class="s">${String(META[id].str).split('').map(d => CHALK[d] ? `<img src="${CHALK[d]}" alt="${d}">` : d).join('')}</span><span class="n">${esc(META[id].name)}</span><span class="x">${have > 1 ? have : ''}</span></div>`;
+function deckBody(list) {
+  list = list.filter(id => META[id]);
+  const counts = countsOf(list), inR = r => list.filter(id => META[id].rarity === r).length;
+  const rhead = (label, r, cap) => `<h4 class="rh" data-r="${r}"><span>${label}</span>${cap ? `<span>${inR(r)}/${cap}</span>` : ''}</h4>`;
+  const byR = r => Object.keys(counts).filter(id => META[id].rarity === r).sort((a, b) => svr(META[a]) - svr(META[b]) || META[a].name.localeCompare(META[b].name)).map(id => stripHTML(id, counts[id])).join('');
+  return `<div class="coll mscr"><div class="side"><div class="clist editing"><div class="dbody">${rhead('Legendary', 'legendary', 4)}${byR('legendary')}${rhead('Rare', 'rare', 8)}${byR('rare')}${rhead('Common', 'common')}${byR('common')}</div></div></div></div>`;
+}
+const overlap = (a, b) => { const ca = countsOf(a), cb = countsOf(b); let n = 0; for (const k in ca) n += Math.min(ca[k], cb[k] || 0); return n / Math.max(1, Math.min(a.length, b.length)); };
+const slugOf = list => { let h = 2166136261; for (const ch of [...list].sort().join(',')) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return 'martin_' + h.toString(16); };
+
+// state: every list, where it sits, every group's number and name; the db overrides the first grouping
+const LISTS = { ...D.lists };
+const order = [...D.order], variant = { ...D.variant }, at = { ...D.initial };
+const groups = Object.fromEntries(D.groups.map(g => [g.id, { n: g.n, name: g.name || '' }]));   // names from archetypes.json
+let shut = new Set(); try { shut = new Set(JSON.parse(localStorage.getItem('shut') || '[]')); } catch (e) {}
+let db = null;
+
+function place(slug, list, group) {   // a pasted deck: beside the pool list it shares most with, in that list's archetype unless told
+  if (LISTS[slug]) { if (group) at[slug] = group; return; }
+  const near = D.order.reduce((best, s) => overlap(list, D.lists[s]) > overlap(list, D.lists[best]) ? s : best, D.order[0]);
+  LISTS[slug] = list; variant[slug] = variant[near]; order.splice(order.indexOf(near) + 1, 0, slug);
+  at[slug] = group && (groups[group] || group === '__out') ? group : at[near];
+}
+
+function deckHTML(s, g) {
+  const r = D.rating[s];
+  return `<div class="deck"><div class="rt">${r ? r : '–'}<small>${r ? 'top bot on the ladder' : 'not on the ladder'}</small></div>${deckBody(LISTS[s])}<div class="ctl"><select class="mv" data-s="${s}" aria-label="Move this deck">${opts(g)}</select><button class="cp" data-s="${s}" data-g="${g}">Copy deck code</button></div></div>`;
+}
+let opts = () => '';
+function render() {
+  const box = document.getElementById('bands');
+  const active = document.activeElement && document.activeElement.classList.contains('name') ? document.activeElement.dataset.g : null;
+  const members = {};
+  for (const s of order) (members[at[s]] ||= []).push(s);
+  const ids = Object.keys(groups).filter(g => members[g]).sort((a, b) => groups[a].n - groups[b].n);
+  opts = cur => `<option value="">Move to…</option>` + ids.filter(g => g !== cur).map(g => `<option value="${g}">${groups[g].n}${groups[g].name ? ' · ' + esc(groups[g].name) : ''}</option>`).join('') + `<option value="__new">New archetype</option>` + (cur === '__out' ? '' : `<option value="__out">Remove from the league</option>`);
+  box.innerHTML = ids.map(g => `<section data-g="${g}" class="${shut.has(g) ? 'shut' : ''}"><div class="hd"><button class="tg" aria-label="Collapse or expand"></button><span class="no">${groups[g].n}</span><input class="name" data-g="${g}" placeholder="Name this archetype" autocomplete="off" spellcheck="false" value="${esc(groups[g].name)}"><span class="st-msg" data-st="${g}"></span></div>
+    <div class="row">${members[g].map((s, i) => deckHTML(s, g).replace('class="deck"', `class="deck${i && variant[s] !== variant[members[g][i - 1]] ? ' gap' : ''}"`)).join('')}</div></section>`).join('')
+    + (members.__out ? `<section data-g="__out" class="out${shut.has('__out') ? ' shut' : ''}"><div class="hd"><button class="tg" aria-label="Collapse or expand"></button><span class="outh">Removed from the league</span></div><div class="row">${members.__out.map(s => deckHTML(s, '__out')).join('')}</div></section>` : '');
+  if (active) { const el = box.querySelector(`.name[data-g="${active}"]`); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+}
+
+document.addEventListener('click', async e => {
+  const b = e.target.closest('.cp');
+  if (b) {
+    const g = groups[b.dataset.g], name = g ? (g.name || 'Archetype ' + g.n) : 'League deck';
+    const code = encodeDeck(name, LISTS[b.dataset.s], META);
+    try { await navigator.clipboard.writeText(code); b.textContent = 'Copied'; }
+    catch (err) {
+      const ta = document.createElement('textarea'); ta.value = code; document.body.appendChild(ta); ta.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch (e2) {}
+      ta.remove(); b.textContent = ok ? 'Copied' : 'Copy failed';
+    }
+    setTimeout(() => b.textContent = 'Copy deck code', 1500);
+    return;
+  }
+  const hd = e.target.closest('.hd'); if (!hd || e.target.closest('input')) return;
+  const sec = hd.parentElement, g = sec.dataset.g;
+  sec.classList.toggle('shut'); sec.classList.contains('shut') ? shut.add(g) : shut.delete(g);
+  try { localStorage.setItem('shut', JSON.stringify([...shut])); } catch (e) {}
+});
+
+async function newGroup(seed) {
+  const id = 'g_' + seed + '_' + Date.now().toString(36);
+  groups[id] = { n: Math.max(...Object.values(groups).map(x => x.n)) + 1, name: '' };
+  if (db) await db.collection('names').doc(id).set({ name: '', n: groups[id].n }).catch(() => {});
+  return id;
+}
+document.addEventListener('change', async e => {
+  const sel = e.target.closest('.mv'); if (!sel || !sel.value) return;
+  const s = sel.dataset.s; let to = sel.value;
+  if (to === '__new') to = await newGroup(s);
+  at[s] = to; render();
+  if (db) await db.collection('lists').doc(s).set({ group: to }).catch(() => flash(to, 'Not saved'));
+});
+
+document.getElementById('addb').addEventListener('click', async () => {
+  const ta = document.getElementById('code'), err = document.getElementById('err');
+  const d = decodeDeck(ta.value, META);
+  if (!d) { err.textContent = 'That is not a deck code'; return; }
+  err.textContent = '';
+  const slug = slugOf(d.list);
+  if (LISTS[slug]) { err.textContent = 'That deck is already here'; return; }
+  place(slug, d.list); ta.value = ''; render();
+  document.querySelector(`.cp[data-s="${slug}"]`)?.closest('.deck')?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+  if (db) await db.collection('added').doc(slug).set({ code: encodeDeck(d.name, d.list, META), list: d.list, name: d.name }).catch(() => { err.textContent = 'Not saved'; });
+});
+
+const timers = {};
+document.addEventListener('input', e => {
+  const inp = e.target.closest('.name'); if (!inp) return;
+  const g = inp.dataset.g; groups[g].name = inp.value;
+  clearTimeout(timers[g]); timers[g] = setTimeout(() => saveName(g), 700);
+});
+document.addEventListener('focusout', e => { const inp = e.target.closest('.name'); if (inp) { clearTimeout(timers[inp.dataset.g]); saveName(inp.dataset.g); } });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest('.name')) e.target.blur(); });
+const saved = {};
+async function saveName(g) {
+  const v = groups[g].name.trim(); if (saved[g] === v || !db) return;
+  try { await db.collection('names').doc(g).set({ name: v, n: groups[g].n }); saved[g] = v; } catch (e) { flash(g, 'Not saved'); }
+}
+function flash(g, t) { const el = document.querySelector(`[data-st="${g}"]`); if (el) el.textContent = t; }
+
+render();
+(async () => {
+  db = await claude.use('db');
+  if (!db) { document.getElementById('err').textContent = 'Not saving: changes on this page are lost on reload'; return; }
+  const [names, lists, added] = await Promise.all(['names', 'lists', 'added'].map(c => db.collection(c).get().catch(() => null)));
+  for (const doc of names?.docs || []) { const v = doc.data(); groups[doc.id] = { n: v.n ?? groups[doc.id]?.n ?? 99, name: v.name || '' }; saved[doc.id] = v.name || ''; }
+  const where = {}; for (const doc of lists?.docs || []) where[doc.id] = doc.data().group;
+  for (const doc of added?.docs || []) {
+    const v = doc.data(), d = v.list ? { list: v.list } : decodeDeck(v.code || '', META);
+    if (d) place(v.list ? doc.id : slugOf(d.list), d.list, where[v.list ? doc.id : slugOf(d.list)] || where[doc.id]);
+  }
+  for (const [s, g] of Object.entries(where)) if (D.lists[s] && (groups[g] || g === '__out')) at[s] = g;
+  render();
+})();
+</script>
