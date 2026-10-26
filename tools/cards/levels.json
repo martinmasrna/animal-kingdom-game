@@ -2636,7 +2636,24 @@
     "crop": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792143620
+      "at": 1793029531,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "CROP": [
+            0.58,
+            0.42,
+            0.75
+          ],
+          "STRIP": [
+            0.6,
+            0.38,
+            1.2
+          ],
+          "FULL": 0.4
+        }
+      }
     },
     "art": {
       "lv": "draft",

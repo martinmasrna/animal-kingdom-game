@@ -25,7 +25,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py deck-name DECK NAME           a starter deck's name
     .venv/bin/python tools/cards/hq.py delete ID                     a card out of the game entirely
     .venv/bin/python tools/cards/hq.py rename OLD NEW                a new id everywhere (when its animal changes)
-    .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d] [--strip x,y,z] [--full y|reset]
+    .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d|reset] [--strip x,y,z|reset] [--full y|reset]   (all three reset: no painting)
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
     .venv/bin/python tools/cards/hq.py token MAKER ID NAME STR [--tags T,U]   a token MAKER's effect places
 
@@ -356,9 +356,9 @@ def set_crop(card_id: str, crop=None, strip=None, full=None, by: str = "martin")
     if same("CROP", crop) and same("STRIP", strip) and same("FULL", full):
         return
     if crop is not None:
-        write_art(r["id"], "CROP", crop)
+        write_art(r["id"], "CROP", None if crop == "reset" else crop)
     if strip is not None:
-        write_art(r["id"], "STRIP", strip)
+        write_art(r["id"], "STRIP", None if strip == "reset" else strip)
     if full is not None:
         write_art(r["id"], "FULL", None if full == "reset" else full)
     levels = _levels()
@@ -619,7 +619,7 @@ def main(argv=None) -> None:
         elif a.cmd == "token":
             print(add_token(a.maker, a.id, a.name, a.strength, [t for t in a.tags.split(",") if t]))
         elif a.cmd == "crop":
-            nums = lambda v: [float(x) for x in v.split(",")] if v else None
+            nums = lambda v: "reset" if v == "reset" else [float(x) for x in v.split(",")] if v else None
             full = None if a.full is None else "reset" if a.full == "reset" else float(a.full)
             set_crop(a.id, nums(a.crop), nums(a.strip), full, "claude")
     except (Refused, KeyError) as e:
