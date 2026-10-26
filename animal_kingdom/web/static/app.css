@@ -468,7 +468,18 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .metar .mstrip { width: 230px; } .ladder .metar .mstrip .st { margin: 0; height: 30px; border-radius: 0; cursor: default; box-shadow: inset 0 -1px 0 rgba(0,0,0,.7), inset 0 1px 0 rgba(255,245,230,.07); }
 .ladder .metar .mc tbody tr:first-child .mstrip .st { border-radius: 4px 0 0 0; } .ladder .metar .mc tbody tr:last-child .mstrip .st { border-radius: 0 0 0 4px; }   /* the numbers start where the strip ends */
 .ladder .metar .mx td.few { color: #a89d8c; } .ladder .metar .mx td.few sup { font-size: 10px; margin-left: 1px; }
-.ladder .metar .msub.mcards { margin: 28px 0 10px; }
+.mtip { position: fixed; z-index: 60; display: none; max-width: 320px; padding: 6px 11px; border-radius: 7px; pointer-events: none;
+  background: #34302c url(/static/kit2/coll_slab.webp) center / 300px auto; box-shadow: inset 0 1px 0 rgba(255,245,230,.2), 0 4px 10px rgba(0,0,0,.6);
+  color: #f0e8da; font: 600 15px/1.3 'Fira Sans Condensed', sans-serif; }
+.ladder .metar .mcardsh { display: flex; align-items: center; gap: 14px; margin: 28px 0 10px; } .ladder .metar .mcardsh .msub.mcards { margin: 0; }
+/* a desktop screen reads from further away (Martin, 2026-10-26: "I have to bring my head closer"): every figure, head and name a size up */
+@media (min-width: 701px) {
+  .ladder .metar { font-size: 17px; }
+  .ladder .metar .mx td.m { font-size: 16px; min-width: 40px; } .ladder .metar .mx th.col { width: 40px; height: 170px; } .ladder .metar .mx th.col span { max-height: 160px; }
+  .ladder .metar .mstrip { width: 270px; } .ladder .metar .mc tbody td, .ladder .metar .mc tbody th.an, .ladder .metar .mstrip .st { height: 34px; }
+  .ladder .metar .mstrip .st .n { font-size: 16px; } .ladder .metar .mstrip .st .s img { height: 17px; }
+  .ladder .metar .mah h3 { font-size: 30px; } .ladder .metar .msub { font-size: 23px; }
+}
 .ladder .metar .msub { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 0 0 10px; }
 .ladder .metar .mpick { display: flex; flex-direction: column; gap: 6px; margin: 0 0 18px; max-width: 760px; }
 .ladder .metar .mpk { display: flex; align-items: center; gap: 10px; padding: 8px 10px 8px 8px; border: 0; border-left: 3px solid transparent; border-radius: 4px; background: none; font: inherit; cursor: pointer; }
