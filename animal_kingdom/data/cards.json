@@ -234,12 +234,12 @@
         "Bird"
       ],
       "base_strength": 7,
-      "text": "Flight. When this is removed, shuffle it into your deck.",
+      "text": "Flight. Fall: shuffle this into your deck.",
+      "species": "Pheasant",
+      "habitat": "Forest",
       "keywords": [
         "Flight"
-      ],
-      "species": "Pheasant",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "praying_mantis",
@@ -316,13 +316,13 @@
       "rarity": "rare",
       "tags": [],
       "base_strength": 1,
-      "text": "When this is removed, draw a card and place two Worms on its crossroad.",
-      "keywords": [],
+      "text": "Fall: draw a card and place two Worms on its crossroad.",
       "related": [
         "worm"
       ],
       "species": "Earthworm",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "cockroach",
@@ -331,13 +331,13 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 1,
-      "text": "When this is removed, put it back where it was and place a Roach on an adjacent empty crossroad.",
-      "keywords": [],
+      "text": "Fall: replace this with a Cockroach and place a Roach on an adjacent empty crossroad.",
       "related": [
         "roach"
       ],
       "species": "Cockroach",
-      "habitat": "City"
+      "habitat": "City",
+      "keywords": []
     },
     {
       "id": "sperm_whale",
@@ -390,10 +390,10 @@
       "rarity": "legendary",
       "tags": [],
       "base_strength": 1,
-      "text": "When this is removed, put it back where it was with +1 strength and draw a card.",
-      "keywords": [],
+      "text": "Fall: put this back where it was with +1 strength and draw a card.",
       "species": "Cockroach",
-      "habitat": "City"
+      "habitat": "City",
+      "keywords": []
     },
     {
       "id": "python",
@@ -1558,7 +1558,7 @@
       "rarity": "rare",
       "tags": [],
       "base_strength": 1,
-      "text": "Reach. Poison. When this is removed, remove all animals next to it.",
+      "text": "Reach. Poison. Fall: remove all animals next to this.",
       "species": "Poison Dart Frog",
       "habitat": "Jungle",
       "keywords": [
@@ -3053,8 +3053,8 @@
       "rarity": "common",
       "tags": [],
       "base_strength": 0,
-      "keywords": [],
-      "text": "When this is removed, draw a card."
+      "text": "Fall: draw a card.",
+      "keywords": []
     },
     {
       "id": "roach",

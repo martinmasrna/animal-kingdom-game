@@ -121,14 +121,19 @@ pub fn anthem_bonus(st: &State, card: &Card, owner: Player, self_iid: Option<i64
     bonus
 }
 
-/// Strength of a unit in play.
-pub fn effective_strength(st: &State, unit: &Unit, sources: Option<&Sources>) -> i32 {
+/// Strength of a unit in play, below 0 too (an animal below 0 dies: effects::resolve removes it).
+pub fn raw_strength(st: &State, unit: &Unit, sources: Option<&Sources>) -> i32 {
     let card = st.card(unit.card);
     if st.is_inked(unit.iid) {
         let base = card.base.unwrap_or(0);
-        return (base + st.growth(unit.owner, card.idx) + unit.strength_counter as i32 + anthem_bonus(st, card, unit.owner, Some(unit.iid), sources)).max(0);
+        return base + st.growth(unit.owner, card.idx) + unit.strength_counter as i32 + anthem_bonus(st, card, unit.owner, Some(unit.iid), sources);
     }
-    (base_or_dynamic(st, card) + st.growth(unit.owner, card.idx) + unit.strength_counter as i32 + anthem_bonus(st, card, unit.owner, Some(unit.iid), sources)).max(0)
+    base_or_dynamic(st, card) + st.growth(unit.owner, card.idx) + unit.strength_counter as i32 + anthem_bonus(st, card, unit.owner, Some(unit.iid), sources)
+}
+
+/// Strength of a unit in play, >= 0.
+pub fn effective_strength(st: &State, unit: &Unit, sources: Option<&Sources>) -> i32 {
+    raw_strength(st, unit, sources).max(0)
 }
 
 /// Strength of a unit of `card` for `owner` as a prospective placement, without any instance counter.

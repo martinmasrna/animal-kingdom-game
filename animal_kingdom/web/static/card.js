@@ -69,12 +69,13 @@ export const KEYWORDS = {
   'Poison': 'Whenever an enemy covers it, that enemy is removed at the start of your next turn.',
   'Roam': 'As an action, move it through your animals connected to it, then one crossroad beyond (two with Reach): onto an empty crossroad, onto one of your animals, or onto an enemy it beats. It takes the den only from the den front, connected to your den. Once per turn.',
   'Reach': 'Can be placed up to two crossroads away from one of your connected animals, jumping over what stands between. It can\'t take a den that way.',
-  'Hungry': 'At the start of your turn it eats that much of your food. If you can\'t feed it, it loses that much strength for good.',
+  'Hungry': 'At the start of your turn it eats up to that much of your food, and loses 1 strength for good for each food it was short.',
   'Titan': 'Playing it takes two actions. A free play (an effect like "play another animal") can\'t pay for it.',
   'Flee': 'When an enemy covers it, it runs back to your hand.',
   'Wild': 'Belongs to no one: it connects no one and holds no region, and any animal can cover it. Every turn is its turn.',
   'Dawn': 'Happens at the start of your turn.',
   'Dusk': 'Happens at the end of your turn.',
+  'Fall': 'Happens when it is removed from the board.',
   'Scout': 'Look at three different cards of your deck, draw one and shuffle the others back.',
 };
 const KW = new RegExp(`\\b(${Object.keys(KEYWORDS).join('|')})\\b( \\d+)?[:.]?`, 'g');

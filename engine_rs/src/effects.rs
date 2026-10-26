@@ -8,7 +8,7 @@ use crate::cards::{self, Args, Hook};
 use crate::data::*;
 use crate::state::{GameResult, State, Unit};
 use crate::statics;
-use crate::strength::{effective_strength, placement_strength};
+use crate::strength::{effective_strength, placement_strength, raw_strength};
 use crate::value::{m_flag, m_get_i, m_get_s, Map, Value};
 use crate::vmap;
 
@@ -143,6 +143,31 @@ pub fn apply_pending(st: &mut State, action: &Action) {
 // ===================================================================== resolve loop
 
 pub fn resolve(st: &mut State) {
+    loop {
+        drain(st);
+        if st.pending.is_some() || st.result.is_some() || !st.effect_stack.is_empty() {
+            return;
+        }
+        if !remove_below_zero(st) {
+            return;
+        }
+    }
+}
+
+/// An animal whose strength drops below 0 dies: removed by the rules, not by an effect, so Armor doesn't stop it.
+fn remove_below_zero(st: &mut State) -> bool {
+    let dying: Vec<(Cr, i64, Player)> = st
+        .sorted_occupied()
+        .into_iter()
+        .filter_map(|cr| st.top(cr).filter(|u| raw_strength(st, u, None) < 0).map(|u| (cr, u.iid, u.owner)))
+        .collect();
+    for &(cr, iid, owner) in &dying {
+        remove_specific(st, cr, iid, owner, false, None, false);
+    }
+    !dying.is_empty()
+}
+
+fn drain(st: &mut State) {
     while st.pending.is_none() && st.result.is_none() && !st.effect_stack.is_empty() {
         let mut step = st.effect_stack.pop().unwrap();
         let n = st.effect_stack.len();
@@ -1185,13 +1210,15 @@ fn eat(st: &mut State, unit: &Unit, cr: Cr) {
     let prev = (st.cause, st.cause_iid);
     st.cause = Some(unit.card);
     st.cause_iid = Some(unit.iid);
-    if unit.owner <= B && st.food[unit.owner as usize] >= n {
-        lose_food(st, unit.owner, n, Some(unit.card));
-    } else {
+    let eaten = if unit.owner <= B { n.min(st.food[unit.owner as usize]) } else { 0 };
+    if eaten > 0 {
+        lose_food(st, unit.owner, eaten, Some(unit.card));
+    }
+    if eaten < n {
         if let Some(u) = st.unit_by_iid_mut(unit.iid) {
-            u.strength_counter -= n as i16;
+            u.strength_counter -= (n - eaten) as i16;
         }
-        crate::emit!(st, "strength", vmap!("iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "owner" => pn(unit.owner), "n" => Value::Int(-(n as i64))));
+        crate::emit!(st, "strength", vmap!("iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "owner" => pn(unit.owner), "n" => Value::Int((eaten - n) as i64)));
     }
     st.cause = prev.0;
     st.cause_iid = prev.1;

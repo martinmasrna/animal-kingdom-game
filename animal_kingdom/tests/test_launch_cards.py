@@ -42,13 +42,56 @@ def removed(s, card_id):
 
 # ================================================================================ keywords
 
-def test_hungry_eats_at_the_start_of_your_turn_or_shrinks_for_good():
+def test_hungry_eats_the_food_there_is_and_shrinks_for_good_by_the_rest():
     s = make_state(food={"A": 7, "B": 0}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
     ele = put(s, "1,2", "elephant", "A")                       # Hungry 5
     end_turn(s); end_turn(s)                                   # A's next turn starts: it eats 5
     assert s.food["A"] == 2 and effective_strength(s, ele) == 9
-    end_turn(s); end_turn(s)                                   # 2 food: it can't eat
-    assert s.food["A"] == 2 and effective_strength(s, ele) == 9 - 5
+    end_turn(s); end_turn(s)                                   # 2 food: it eats both, 3 short
+    assert s.food["A"] == 0 and effective_strength(s, ele) == 9 - 3
+
+
+def test_an_animal_starved_below_0_dies():
+    s = make_state(food={"A": 0, "B": 0}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    put(s, "1,2", "elephant", "A")                             # a 9, Hungry 5
+    end_turn(s); end_turn(s)                                   # 9 -> 4
+    end_turn(s); end_turn(s)                                   # 4 -> -1: it dies
+    assert s.top_unit("1,2") is None and removed(s, "elephant")
+
+
+def test_a_bite_below_0_kills_even_through_armor():
+    s = make_state(hands={"A": ["viper", "viper"]})
+    put(s, "2,1", "tortoise", "B")                             # a 4 with Armor
+    apply_click(s, PlaceAction("viper", ("cr", "1,1")))        # 4 -> 1
+    apply_click(s, PlaceAction("viper", ("cr", "1,1")))        # 1 -> -2: dying is a rule, not an ability
+    assert s.top_unit("2,1") is None and removed(s, "tortoise")
+
+
+def test_a_crocodile_shrunk_below_3_dies_when_the_opponents_turn_starts():
+    s = make_state(decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    croc = put(s, "1,2", "crocodile", "A")
+    croc.strength_counter = -6                                 # an 8 bitten twice: a 2 on its own turn
+    effects.resolve(s)
+    assert s.top_unit("1,2") is croc
+    end_turn(s)                                                # their turn: -3 more
+    assert removed(s, "crocodile")
+
+
+def test_a_cockroach_bitten_below_0_falls_once_and_a_fresh_one_replaces_it():
+    s = make_state(hands={"A": ["viper"]})
+    put(s, "2,1", "cockroach", "B")                            # a 1
+    apply_click(s, PlaceAction("viper", ("cr", "1,1")))        # 1 -> -2: it falls
+    back = s.top_unit("2,1")
+    assert back.card_id == "cockroach" and effective_strength(s, back) == 1
+
+
+def test_roach_king_bitten_below_0_comes_back_once_with_only_its_growth():
+    s = make_state(hands={"A": ["viper"]}, decks={"A": [], "B": ["lion"] * 3})
+    put(s, "2,1", "cockroach_legend", "B")                     # a 1
+    apply_click(s, PlaceAction("viper", ("cr", "1,1")))        # 1 -> -2: it falls
+    back = s.top_unit("2,1")
+    assert back.card_id == "cockroach_legend" and effective_strength(s, back) == 1 + CFG.cockroach_legend_growth
+    assert hand_ids(s, "B") == ["lion"]                        # one fall, one card
 
 
 def test_an_adjacent_legendary_oxpecker_feeds_hungry_animals():

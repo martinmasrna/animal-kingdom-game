@@ -151,19 +151,23 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], so
     return bonus
 
 
-def effective_strength(state: GameState, unit: UnitInstance, sources: Optional[list] = None) -> int:
-    """Strength of a unit in play: base/dynamic + its stored counter + live anthems, >= 0. `sources`: aura_sources(state),
-    when the caller scores the whole board."""
+def raw_strength(state: GameState, unit: UnitInstance, sources: Optional[list] = None) -> int:
+    """Strength of a unit in play: base/dynamic + its stored counter + live anthems, below 0 too (an animal below 0
+    dies: effects.resolve removes it). `sources`: aura_sources(state), when the caller scores the whole board."""
     card = state.cards[unit.card_id]
     if _inked(state, unit.iid):             # its own effects are off: a dynamic strength is its printed 0
         base = card.base_strength if isinstance(card.base_strength, int) else 0
-        return max(0, base + _global_growth(state, card.id, unit.owner) + unit.strength_counter
-                   + anthem_bonus(state, card, unit.owner, unit.iid, sources))
-    val = (_base_or_dynamic(state, card, unit.owner)
-           + _global_growth(state, card.id, unit.owner)
-           + unit.strength_counter
-           + anthem_bonus(state, card, unit.owner, unit.iid, sources))
-    return max(0, val)
+        return (base + _global_growth(state, card.id, unit.owner) + unit.strength_counter
+                + anthem_bonus(state, card, unit.owner, unit.iid, sources))
+    return (_base_or_dynamic(state, card, unit.owner)
+            + _global_growth(state, card.id, unit.owner)
+            + unit.strength_counter
+            + anthem_bonus(state, card, unit.owner, unit.iid, sources))
+
+
+def effective_strength(state: GameState, unit: UnitInstance, sources: Optional[list] = None) -> int:
+    """Strength of a unit in play, >= 0."""
+    return max(0, raw_strength(state, unit, sources))
 
 
 def card_strength(state: GameState, card_id: str, owner: str) -> int:

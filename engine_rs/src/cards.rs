@@ -227,11 +227,11 @@ fn add_strength(st: &mut State, iid: i64, n: i32) {
     }
 }
 
-fn put_back(st: &mut State, unit: &Unit, cr: Cr, pos: usize, grow: i32) {
+fn put_back(st: &mut State, unit: &Unit, cr: Cr, pos: usize, counter: i32) {
     if st.pile_take(unit.card, Some(unit.owner)) {
         let iid = st.new_iid();
         let mut back = Unit::new(unit.card, unit.owner, iid);
-        back.strength_counter = unit.strength_counter + grow as i16;
+        back.strength_counter = counter as i16;
         let at = pos.min(st.stack(cr).len());
         st.insert_unit(cr, at, back);
         crate::emit!(st, "place", vmap!("player" => pn(unit.owner), "iid" => Value::Int(iid), "card" => card_v(st, unit.card), "cr" => cr_v(st, cr), "from_hand" => Value::Bool(false), "at" => Value::Int(at as i64)));
@@ -580,7 +580,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("cockroach_legend", OnRemove) => {
             let Args::Remove(rcr, pos) = args else { return };
             let g = cfg(st, "cockroach_legend_growth");
-            put_back(st, unit, *rcr, *pos, g);
+            put_back(st, unit, *rcr, *pos, (unit.strength_counter as i32).max(0) + g);
             draw_cards(st, owner, 1);
         }
         ("dart_frog", OnRemove) => {

@@ -90,7 +90,7 @@ function unit(u, under, cards, fire = false) {
   const peek = under.slice(0, 3).map((b, i) => `<div class="buried ${b.owner} seen" style="transform:translate(${22 + i * 7}px,${20 + i * 6}px) scale(.82);z-index:${-i - 1}">`
     + `<div class="fill"></div><img class="rimimg" src="${kit(`rim_${team(b.owner)}.webp`)}" alt="" draggable="false"></div>`).join('');
   return peek + `<div class="ring${hasArt(u.id) ? '' : ' noart'}${u.inked ? ' inked" data-tip="Inked: no keywords or effects' : ''}" style="${portrait(u.id, 98)}">${hasArt(u.id) ? '' : `<span>${c.name}</span>`}</div>` +
-    `<img class="rimimg" src="${kit(`rim_${team(u.owner)}.webp`)}" alt="" draggable="false"><div class="boss num">${chalk(u.str)}</div>` +
+    `<img class="rimimg" src="${kit(`rim_${team(u.owner)}.webp`)}" alt="" draggable="false"><div class="boss num">${chalk(Math.max(0, u.str))}</div>` +
     (u.timer ? `<div class="timer" data-tip="Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}">${chalk(u.timer)}</div>` : '') +
     ((t => t && !u.inked ? `<div class="kw trg ${t[1]}${fire ? ' fire' : ''}" style="${TRG_AT}" data-tip="${t[2]}"><img src="${kit(`kw_${t[1]}.webp`)}" alt="${t[1]}" draggable="false"></div>` : '')(triggerOf(c))) +
     (kws.length ? `<div class="kws">${kws.map((k, i) => `<div class="kw" style="${kwAt(i, kws.length)}" data-tip="${k}: ${KEYWORDS[k]}"><img src="${kit(`kw_${k.toLowerCase()}.webp`)}" alt="${k}" draggable="false"></div>`).join('')}</div>` : '');

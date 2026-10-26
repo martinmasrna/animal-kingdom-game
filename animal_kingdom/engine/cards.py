@@ -72,7 +72,7 @@ class Card:
     dynamic_strength: Optional[str] = None  # rule name when base_strength == "dynamic"
     food_cost: int = 0             # placement cost; only on "Costs X food" cards
     text: str = ""
-    hungry: int = 0                # Hungry N: eats N food at the start of your turn, else loses N strength (0: not Hungry)
+    hungry: int = 0                # Hungry N: eats up to N food at the start of your turn, -1 strength per food short (0: not Hungry)
     unnamed: bool = False          # a legendary still waiting for its name: `name` shows its species meanwhile
     mate: Optional[str] = None     # the card it pairs with in hand (the Eagles): a buff to either counts for both
     habitat: str = ""              # the habitat (set) the card belongs to; display only, no rule reads it

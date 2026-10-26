@@ -25,7 +25,7 @@ from typing import Callable, Optional
 from .actions import SKIP, ChoiceAction, PlaceAction, RoamAction
 from .state import WILD, EngineError, GameState, Result, UnitInstance, other_player
 from . import statics
-from .strength import effective_strength, placement_strength
+from .strength import effective_strength, placement_strength, raw_strength
 
 
 # ============================================================== pending / requests
@@ -103,7 +103,26 @@ REQUIRE_SOURCE = False   # tests turn it on: every choice but the mulligan must 
 
 
 def resolve(state: GameState) -> None:
-    """Drain the effect stack until empty, a choice is needed, or the game is won."""
+    """Drain the effect stack until empty, a choice is needed, or the game is won. Once it is empty, every animal below
+    0 strength dies, and what that sets off drains too."""
+    while True:
+        _drain(state)
+        if state.pending is not None or state.result is not None or state.effect_stack:
+            return
+        if not _remove_below_zero(state):
+            return
+
+
+def _remove_below_zero(state: GameState) -> bool:
+    """An animal whose strength drops below 0 dies (Martin, 2026-10-26): removed by the rules, not by an effect, so Armor
+    doesn't stop it, and it counts as removed for everything that counts removals. Returns whether any died."""
+    dying = [(cr, st[-1]) for cr, st in sorted(state.board.items()) if st and raw_strength(state, st[-1]) < 0]
+    for cr, unit in dying:
+        _remove_specific(state, cr, unit, by_player=unit.owner, by_effect=False)
+    return bool(dying)
+
+
+def _drain(state: GameState) -> None:
     while state.pending is None and state.result is None and state.effect_stack:
         step = state.effect_stack.pop()
         n, was = len(state.effect_stack), (state.cause, state.cause_iid)
@@ -1076,9 +1095,9 @@ def _op_timed_hook(state, step):
 
 
 def _eat(state, unit, cr) -> None:
-    """Hungry N (keywords.md): at the start of your turn the animal eats N of your food; if you can't feed it, it gets -N
-    strength, for good. An adjacent legendary Oxpecker feeds it ("Your adjacent Hungry animals don't need to eat"), and
-    an inked animal isn't Hungry."""
+    """Hungry N (keywords.md): at the start of your turn the animal eats up to N of your food and gets -1 strength, for
+    good, for each food it was short. An adjacent legendary Oxpecker feeds it ("Your adjacent Hungry animals don't need
+    to eat"), and an inked animal isn't Hungry."""
     if not statics.has_keyword(state, unit, "Hungry", cr):
         return
     n = state.cards[unit.card_id].hungry
@@ -1087,11 +1106,11 @@ def _eat(state, unit, cr) -> None:
         return
     prev, state.cause, state.cause_iid = (state.cause, state.cause_iid), unit.card_id, unit.iid
     try:
-        if state.food[unit.owner] >= n:
-            lose_food(state, unit.owner, n, card=unit.card_id)
-        else:
-            unit.strength_counter -= n
-            state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=-n)
+        eaten = min(n, state.food[unit.owner])
+        lose_food(state, unit.owner, eaten, card=unit.card_id)
+        if eaten < n:
+            unit.strength_counter -= n - eaten
+            state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=eaten - n)
     finally:
         state.cause, state.cause_iid = prev
 
@@ -1819,7 +1838,7 @@ def _cuckoo_legend_place(state, unit, cr):
 
 
 def _pheasant_legend_remove(state, unit, cr, pos):
-    """When this is removed, shuffle it into your deck."""
+    """Fall: shuffle this into your deck."""
     if state.pile_take(unit.card_id, unit.owner):
         shuffle_back(state, unit.owner, [unit.card_id])
 
@@ -1909,7 +1928,7 @@ def _vultures_dusk(state, player):
 
 
 def _earthworm_remove(state, unit, cr, pos):
-    """When this is removed, place two Worms on its crossroad: they land on top, as placements do, while the crossroad is
+    """Fall: place two Worms on its crossroad: they land on top, as placements do, while the crossroad is
     empty or yours. Under an enemy there is no room for them (rulings.md: Worms never cover an enemy). And draw a card."""
     draw_cards(state, unit.owner, 1)
     for _ in range(state.config.earthworm_worms):
@@ -1924,12 +1943,12 @@ def _worm_remove(state, unit, cr, pos):
     draw_cards(state, unit.owner, 1)
 
 
-def _put_back(state, unit, cr, pos, *, grow=0) -> None:
-    """A fresh copy of a removed unit goes back into the same stack at the same height (on top, or still buried). It comes
-    back, it isn't placed: nothing that reacts to a placement sees it (a City Spider beside it would otherwise eat it
-    for ever)."""
+def _put_back(state, unit, cr, pos, *, counter) -> None:
+    """A fresh copy of a removed unit, carrying `counter`, goes back into the same stack at the same height (on top, or
+    still buried). It comes back, it isn't placed: nothing that reacts to a placement sees it (a City Spider beside it
+    would otherwise eat it for ever)."""
     if state.pile_take(unit.card_id, unit.owner):
-        back = UnitInstance(unit.card_id, unit.owner, state.new_iid(), strength_counter=unit.strength_counter + grow)
+        back = UnitInstance(unit.card_id, unit.owner, state.new_iid(), strength_counter=counter)
         stack = state.board.setdefault(cr, [])
         at = min(pos, len(stack))
         stack.insert(at, back)
@@ -1937,21 +1956,23 @@ def _put_back(state, unit, cr, pos, *, grow=0) -> None:
 
 
 def _cockroach_remove(state, unit, cr, pos):
-    """When this is removed, put it back where it was and place a Roach on an adjacent empty crossroad (a random one)."""
-    _put_back(state, unit, cr, pos)
+    """Fall: replace this with a Cockroach (a fresh one: nothing it was given or lost comes back) and place a Roach on an
+    adjacent empty crossroad (a random one)."""
+    _put_back(state, unit, cr, pos, counter=0)
     empty = _empty_neighbors(state, cr)
     if empty and state.result is None:
         _spawn(state, unit.owner, "roach", state.rng.choice(empty))
 
 
 def _cockroach_legend_remove(state, unit, cr, pos):
-    """When this is removed, put it back where it was with +1 strength and draw a card."""
-    _put_back(state, unit, cr, pos, grow=state.config.cockroach_legend_growth)
+    """Fall: put this back where it was with +1 strength and draw a card. Its growth stacks from fall to fall; a loss of
+    strength doesn't come back with it (else one shrunk below 0 would fall for ever)."""
+    _put_back(state, unit, cr, pos, counter=max(unit.strength_counter, 0) + state.config.cockroach_legend_growth)
     draw_cards(state, unit.owner, 1)
 
 
 def _blast_remove(state, unit, cr, pos):
-    """When this is removed, remove all animals next to it, yours or theirs: each in turn, so a chain settles."""
+    """Fall: remove all animals next to this, yours or theirs: each in turn, so a chain settles."""
     _remove_tops(state, unit, [nb for nb, _ in _adjacent_tops(state, cr)])
 
 

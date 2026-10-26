@@ -19,7 +19,7 @@ The game can also end when both players end a turn without acting, back to back 
 ## 3.1 Unit
 Each unit has:
 - a name;
-- a strength from `0` to `10`;
+- a strength of `0` or more: an animal whose strength drops below `0` dies (Martin, 2026-10-26). Dying is a rule, not an ability, so Armor doesn't stop it; it counts as a removal for everything that counts removals, and its "when this is removed" effects fire;
 - an optional effect.
 
 ## 3.2 Map

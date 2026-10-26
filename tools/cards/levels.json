@@ -1033,9 +1033,9 @@
       "by": "martin"
     },
     "effect": {
-      "note": "Martin, 2026-10-22: the bomb you plant and set off, now with Poison (a cover kills the coverer, so only a removal can clear it, and that sets it off); rare, on the animal whose poison is famous",
+      "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board",
       "by": "claude",
-      "at": 1792676406,
+      "at": 1793023437,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Reach has no number (Martin, 2026-10-21)",
@@ -1203,7 +1203,13 @@
     },
     "effect": {
       "by": "claude",
-      "at": 1792085441
+      "at": 1793023432,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "When this is removed, draw a card and place two Worms on its crossroad."
+      },
+      "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board"
     }
   },
   "egg_eater": {
@@ -1288,7 +1294,14 @@
     },
     "effect": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. When this is removed, shuffle it into your deck."
+      },
+      "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board",
+      "at": 1793023431
     },
     "art": {
       "lv": "fine",
@@ -3888,6 +3901,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "When this is removed, draw a card."
+      },
+      "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board",
+      "by": "claude",
+      "at": 1793023438
     }
   },
   "zebra": {
@@ -4043,7 +4066,13 @@
   "cockroach": {
     "effect": {
       "by": "claude",
-      "at": 1792085440
+      "at": 1793023435,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "When this is removed, put it back where it was and place a Roach on an adjacent empty crossroad."
+      },
+      "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board; a fresh Cockroach, so one shrunk below 0 can't fall for ever"
     },
     "art": {
       "lv": "draft",
@@ -4185,7 +4214,13 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792085443
+      "at": 1793023436,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "When this is removed, put it back where it was with +1 strength and draw a card."
+      },
+      "note": "Martin, 2026-10-26: Fall, the keyword for leaving the board"
     },
     "animal": {
       "note": "moved from pool to aristocrats",

@@ -10,9 +10,9 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Ember** | 1 | Bird | 7 | Flight. When this is removed, shuffle it into your deck. |
+| **Ember** | 1 | Bird | 7 | Flight. Fall: shuffle this into your deck. |
 | **The First of Many** | 1 | — | 2 | Roar: cover the board with Locusts. |
-| **Roach King** | 1 | — | 1 | When this is removed, put it back where it was with +1 strength and draw a card. |
+| **Roach King** | 1 | — | 1 | Fall: put this back where it was with +1 strength and draw a card. |
 | **Pestis** | 1 | Rodent | 3 | Roar: remove an adjacent animal and every animal under it. |
 
 ### Rare
@@ -20,9 +20,9 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Raccoon** | 2 | — | 4 | Roar: return an animal from your Remove Pile to your hand. |
-| **Earthworm** | 2 | — | 1 | When this is removed, draw a card and place two Worms on its crossroad. |
+| **Earthworm** | 2 | — | 1 | Fall: draw a card and place two Worms on its crossroad. |
 | **Sperm Whale** | 2 | — | 8 | Titan. Roar: remove all adjacent animals. |
-| **Dart Frog** | 2 | — | 1 | Reach. Poison. When this is removed, remove all animals next to it. |
+| **Dart Frog** | 2 | — | 1 | Reach. Poison. Fall: remove all animals next to this. |
 
 ### Common
 
@@ -32,7 +32,7 @@ What each card is for: [`../../design/effects-pass.md`](../../design/effects-pas
 | **Piranha** | 3 | Fish | 3 | Roar: if an ally was removed this turn, remove an adjacent animal. |
 | **Vulture** | 3 | Bird | 2 | Flight. Dusk: after 3 or more removals this turn, this lands from your hand or deck. |
 | **City Spider** | 3 | Arachnid | 4 | Dawn: remove the weakest animal next to this. |
-| **Cockroach** | 3 | — | 1 | When this is removed, put it back where it was and place a Roach on an adjacent empty crossroad. |
+| **Cockroach** | 3 | — | 1 | Fall: replace this with a Cockroach and place a Roach on an adjacent empty crossroad. |
 | **Python** | 3 | Snake | 0 | Whenever an animal is removed, gain 1 strength (wherever this is). |
 
 <!-- cards:end -->
