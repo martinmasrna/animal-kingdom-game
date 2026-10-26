@@ -466,10 +466,11 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .metar .mc th.an { padding: 2px 8px 2px 4px; } .ladder .metar .mstrip { width: 230px; } .ladder .metar .mstrip .st { margin: 0; cursor: default; }
 .ladder .metar .msub { font: 700 20px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 0 0 10px; }
 .ladder .metar .mpick { display: flex; flex-direction: column; gap: 6px; margin: 0 0 18px; max-width: 760px; }
-.ladder .metar .mpk { display: flex; align-items: center; gap: 14px; padding: 8px 10px 8px 8px; border: 0; border-left: 3px solid transparent; border-radius: 4px; background: none; font: inherit; cursor: pointer; }
+.ladder .metar .mpk { display: flex; align-items: center; gap: 10px; padding: 8px 10px 8px 8px; border: 0; border-left: 3px solid transparent; border-radius: 4px; background: none; font: inherit; cursor: pointer; }
 .ladder .metar .mpk.on { border-left-color: #e6c46a; background: #1b1916; }
-.ladder .metar .mpn { flex: none; width: 62px; text-align: right; color: #f0e8da; font-size: 17px; padding: 2px 6px; border-radius: 5px; font-variant-numeric: tabular-nums; }
-.ladder .metar .own { display: flex; flex-wrap: wrap; gap: 8px 12px; min-width: 0; }
+.ladder .metar .mpn { flex: none; width: 68px; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; font-variant-numeric: tabular-nums; }
+.ladder .metar .mpn b { color: #f0e8da; font-size: 17px; padding: 2px 6px; border-radius: 5px; } .ladder .metar .mpn small { color: #8f8574; font-size: 12px; padding-right: 6px; white-space: nowrap; }
+.ladder .metar .own { display: flex; flex-wrap: wrap; gap: 8px 10px; min-width: 0; }
 .ladder .metar .mf { position: relative; display: block; width: 44px; height: 44px; }
 .ladder .metar .mf .p { position: absolute; inset: 0; border-radius: 50%; background-color: #2a2622; box-shadow: 0 0 0 3px #d9d0c0, 0 1px 4px rgba(0,0,0,.6); }
 .ladder .metar .mf.rare .p { box-shadow: 0 0 0 3px #8fb4d8, 0 1px 4px rgba(0,0,0,.6); } .ladder .metar .mf.legendary .p { box-shadow: 0 0 0 3px #e6c46a, 0 1px 4px rgba(0,0,0,.6); }

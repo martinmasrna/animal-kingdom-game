@@ -546,7 +546,7 @@ async function metaArchetype(box, id, q) {
   const own = m => Object.entries(m).filter(([c, n]) => n > (core[c] || 0) && CARDS[c]).sort(([a], [b]) => order({ card: a }, { card: b }))
     .map(([c, n]) => face(c, n - (core[c] || 0))).join('');
   const picker = j.lists.length > 1 ? `<div class="mpick">${j.lists.map((l, i) => `<button class="mpk${l.slug === j.list ? ' on' : ''}" data-list="${esc(l.slug)}">
-    <b class="mpn" style="${tint(l.games ? 100 * l.wins / l.games : null, base)}" title="${l.games} games">${pct(l.wins, l.games) || '–'}%</b><span class="own">${own(counts[i])}</span></button>`).join('')}</div>` : '';
+    <span class="mpn"><b style="${tint(l.games ? 100 * l.wins / l.games : null, base)}">${pct(l.wins, l.games) || '–'}%</b><small>${l.games} games</small></span><span class="own">${own(counts[i])}</span></button>`).join('')}</div>` : '';
   const mine = count(j.lists.find(l => l.slug === j.list)?.list || []);   // the table's strips carry the chosen list's copies
   const theirs = c => c.p[0] >= min ? c.p[1] / c.p[0] : 0;
   const opp = j.opp ? [...j.opp].filter(c => CARDS[c.card] && c.d[0] >= min).sort((a, b) => theirs(b) - theirs(a)) : null;
