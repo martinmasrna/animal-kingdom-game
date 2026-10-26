@@ -31,10 +31,6 @@ There is no mana: every card costs one action. Low strength is a drawback, never
 The references are the live cards, never a table: the Lion (7, vanilla) and the Eagle (5, Flight) for bodies, and for an effect, the cards that already carry it or its nearest shape, at the same rarity and strength (the sheet, `tools/cards/check.py`, prints them). How a condition is priced (Martin, 2026-10-22):
 
 - A conditional effect is priced by what meeting its condition costs on the turn you play it. Board state already there, or a body the deck wants gone, costs nothing; a condition that takes the turn's other action, or extra plays, costs the card strength.
-- Removal with a condition sits one below its draw twin: removing an enemy undoes one of their actions.
-- A condition that can fail at home buys strength; one nearly always met at home buys nothing, and the tag is then the card's edge.
-- Filtering to a tag ("draw a Snake") is worth nothing extra. Selection (look at 3, keep 1) can't be weaker than the plain draw.
-- "Draw a card" replaces the played card but doesn't refund the action: a Draw action gives 2.
 - Flight is worth what the flier can cover when it lands, so on a 1 or 2 it is little more than reach.
 
 ## Rarity
