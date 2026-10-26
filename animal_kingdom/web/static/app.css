@@ -429,7 +429,16 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .hist.wide { max-width: 1480px; min-width: 0; } .ladder .hist.wide .hbody { min-width: 0; max-width: 100vw; } .ladder .hist.wide .hhead, .ladder .hist.wide .none { max-width: none; }
 .ladder .metar { box-sizing: border-box; max-width: 100%; min-width: 0; padding: 0 24px 28px; color: #d8cfbf; font: 400 15px 'Fira Sans Condensed', sans-serif; }
 .ladder .metar .mctl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 14px; }
-.ladder .metar .mctl .lb { color: #9d917e; } .ladder .metar .dd { min-width: 110px; }
+.ladder .metar .mctl .lb { color: #9d917e; }
+.ladder .metar .mrange { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 12px; row-gap: 2px; flex: 1 1 320px; max-width: 460px; }
+.ladder .metar .mrange .rv { color: #f0e8da; font-weight: 700; font-variant-numeric: tabular-nums; justify-self: end; }
+.ladder .metar .rs { grid-column: 1 / -1; position: relative; height: 32px; }
+.ladder .metar .rs .rt { position: absolute; left: 11px; right: 11px; top: 14px; height: 4px; border-radius: 2px;
+  background: linear-gradient(90deg, #3a3631 calc(var(--a) * 100%), #e6c46a calc(var(--a) * 100%), #e6c46a calc(var(--b) * 100%), #3a3631 calc(var(--b) * 100%)); }
+.ladder .metar .rs input { position: absolute; inset: 0; width: 100%; margin: 0; background: none; pointer-events: none; -webkit-appearance: none; appearance: none; }
+.ladder .metar .rs input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 22px; height: 22px; border-radius: 50%; background: #e6c46a; border: 3px solid #1b1916; box-shadow: 0 1px 3px rgba(0,0,0,.6); cursor: grab; }
+.ladder .metar .rs input::-moz-range-thumb { pointer-events: auto; width: 16px; height: 16px; border-radius: 50%; background: #e6c46a; border: 3px solid #1b1916; box-shadow: 0 1px 3px rgba(0,0,0,.6); cursor: grab; }
+.ladder .metar .rs input::-webkit-slider-runnable-track { background: none; } .ladder .metar .rs input::-moz-range-track { background: none; } .ladder .metar .dd { min-width: 110px; }
 .ladder .metar .mxw { display: inline-block; max-width: 100%; vertical-align: top; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #4a4540 transparent; border-radius: 8px; background: rgba(8,7,6,.45); box-shadow: inset 0 0 0 1.5px rgba(214,204,188,.18); }
 .ladder .metar table.mx { border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; width: max-content; }
 .ladder .metar .mx th, .ladder .metar .mx td { padding: 5px 9px; white-space: nowrap; border-bottom: 1px solid rgba(255,245,230,.06); }

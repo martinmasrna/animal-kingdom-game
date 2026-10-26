@@ -496,15 +496,24 @@ async function fillMeta() {
   box.querySelectorAll('th[data-col]').forEach(t => t.onclick = () => { const c = t.dataset.col; META.sel.has(c) ? META.sel.delete(c) : META.sel.add(c); if (META.sel.size) META.sort = 'vs'; else if (META.sort === 'vs') META.sort = 'share'; fillMeta(); });
 }
 function metaControls(withMin) {
-  const b = META.bands || [], lo = b.map(v => [String(v), String(v)]), hi = b.map(v => [String(v + 100), String(v + 100)]);
-  return `<div class="mctl"><span class="lb">Rating</span>${dd('mlo', String(META.lo), lo.length ? lo : [['0', 'Any']])}<span class="lb">to</span>${dd('mhi', String(META.hi), hi.length ? hi : [['10000', 'Any']])}
+  // the rating range: one slider with two handles over the bands that have games, in steps of a band (100)
+  const b = META.bands || [], min = b.length ? b[0] : 0, max = b.length ? b[b.length - 1] + 100 : 100;
+  const range = b.length > 1 ? `<div class="mrange"><span class="lb">Rating</span><span class="rv">${META.lo}–${META.hi}</span>
+    <div class="rs" style="--a:${(META.lo - min) / (max - min)};--b:${(META.hi - min) / (max - min)}"><div class="rt"></div>
+    <input type="range" id="mrlo" min="${min}" max="${max}" step="100" value="${META.lo}" aria-label="Lowest rating"><input type="range" id="mrhi" min="${min}" max="${max}" step="100" value="${META.hi}" aria-label="Highest rating"></div></div>` : '';
+  return `<div class="mctl">${range}
     ${dd('mdays', String(META.days), [['0', 'All time'], ['1', 'Last day'], ['3', 'Last 3 days'], ['7', 'Last week']])}
     ${withMin ? dd('mmin', String(META.min), [['10', 'At least 10 games'], ['30', 'At least 30 games'], ['100', 'At least 100 games'], ['300', 'At least 300 games']]) : ''}</div>`;
 }
 function wireMetaControls(box) {
+  const lo = box.querySelector('#mrlo'), hi = box.querySelector('#mrhi');
+  if (lo && hi) {   // the handles move freely, never closer than one band; the tables follow when a handle is let go
+    const min = +lo.min, span = +lo.max - min, rs = lo.parentNode, rv = box.querySelector('.mrange .rv');
+    const move = moved => { if (+hi.value - +lo.value < 100) moved === lo ? lo.value = +hi.value - 100 : hi.value = +lo.value + 100;
+      rs.style.setProperty('--a', (lo.value - min) / span); rs.style.setProperty('--b', (hi.value - min) / span); rv.textContent = `${lo.value}–${hi.value}`; };
+    for (const r of [lo, hi]) { r.oninput = () => move(r); r.onchange = () => { META.lo = +lo.value; META.hi = +hi.value; fillMeta(); }; }
+  }
   wireDd(box, (k, v) => {
-    if (k === 'mlo') { META.lo = +v; if (META.hi <= META.lo) META.hi = META.lo + 100; }
-    if (k === 'mhi') { META.hi = +v; if (META.lo >= META.hi) META.lo = META.hi - 100; }
     if (k === 'mdays') META.days = +v;
     if (k === 'mmin') META.min = +v;
     if (k === 'mvs') META.vs = v;
