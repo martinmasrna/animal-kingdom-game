@@ -71,3 +71,14 @@ def test_offline_the_games_wait_in_the_outbox_and_go_once_the_server_answers(mon
     sent = []
     monkeypatch.setattr(runner, "api", lambda s, p, k, body=None, timeout=60: sent.append(len(body["games"])) or {"rated": len(body["games"])})
     assert runner.send_outbox("s", "k", out) == (700, 0) and sent == [300, 300, 100] and out.read_text() == ""
+
+
+def test_the_round_robin_plays_only_matchups_under_the_target_then_hands_over():
+    import random
+    from animal_kingdom.league import runner
+    players = [{"id": f"bot:expert:{s}", "rating": 1500, "games": 0} for s in ("a", "b", "c")]
+    rng = random.Random(1)
+    assert len(runner.round_robin_until(players, 50, {}, rng)) == 6
+    counts = {"a|b": 50, "a|c": 49}
+    assert sorted({runner.pair_key(*g) for g in runner.round_robin_until(players, 50, counts, rng)}) == ["a|c", "b|c"]
+    assert runner.round_robin_until(players, 50, {"a|b": 50, "a|c": 50, "b|c": 52}, rng) == []

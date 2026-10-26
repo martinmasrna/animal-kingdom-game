@@ -152,6 +152,17 @@ def round_robin(players: list[dict], rng: random.Random) -> list[tuple[str, str]
     return [g for a, b in pairs for g in ((a, b), (a, b))]
 
 
+def pair_key(a: str, b: str) -> str:
+    return "|".join(sorted((parse_bot(a)[1], parse_bot(b)[1])))
+
+
+def round_robin_until(players: list[dict], target: int, counts: dict, rng: random.Random) -> list[tuple[str, str]]:
+    """The round robin, only for the matchups still under `target` games (counts: pair_key -> games played); empty once every
+    matchup has them, and the ladder's matchmaking takes over (Martin, 2026-10-27: 50 games a matchup first, then the ladder;
+    the games are rated as any other, only the pairing is forced)."""
+    return [g for g in round_robin(players, rng) if counts.get(pair_key(*g), 0) < target]
+
+
 def _safe_run(spec: MatchSpec):
     """One game, or None when the engine raises: a broken game is logged and skipped, never the end of the runner."""
     try:
@@ -199,6 +210,7 @@ def main(argv=None) -> None:
     ap.add_argument("--once", action="store_true", help="one pass, then stop")
     ap.add_argument("--log", default="results/league/games.jsonl")
     ap.add_argument("--round-robin", action="store_true", help="every pass plays every same-level pairing twice instead of matchmaking")
+    ap.add_argument("--round-robin-games", type=int, default=0, help="round robin until every matchup has this many games, then matchmaking")
     ap.add_argument("--births", type=int, default=3, help="tinkered children a day at most (0: no tinkering)")
     ap.add_argument("--night", default="0-8", help="hours (local) when every core plays uncapped, 'from-to'; '' for never")
     ap.add_argument("--night-jobs", type=int, default=os.cpu_count() or 8)
@@ -214,6 +226,7 @@ def main(argv=None) -> None:
     facts_dir = log.with_name("facts")
     rng = random.Random()
     state, outbox = log.with_name("state.json"), log.with_name("outbox.jsonl")
+    rr_file = log.with_name("rr.json")   # games per matchup, for --round-robin-games
     last_tinker, reported_day = 0.0, ""
     while True:
         started = time.time()
@@ -246,7 +259,10 @@ def main(argv=None) -> None:
             except Exception as e:   # a report never stops the games
                 print(f"report failed: {e!r}", flush=True)
         pilots = {level: spec.replace("time_budget=8", "time_budget=0") for level, spec in pool["pilots"].items()}
-        games = round_robin(pool["players"], rng) if args.round_robin else pick(pool["players"], args.batch, rng)
+        rr = json.loads(rr_file.read_text()) if rr_file.is_file() else {}
+        games = (round_robin(pool["players"], rng) if args.round_robin else
+                 round_robin_until(pool["players"], args.round_robin_games, rr, rng) if args.round_robin_games else [])
+        games = games or pick(pool["players"], args.batch, rng)
         if not games:
             print("nothing to play", flush=True)
             if args.once:
@@ -269,6 +285,9 @@ def main(argv=None) -> None:
                 fh.write(json.dumps({**{k: v for k, v in g.items() if not k.startswith("drawn_")}, "t": started,
                                      "gid": f"{int(started * 1000)}-{i}"}, separators=(",", ":")) + "\n")
         nudge(pool, results, state)
+        for g in results:
+            rr[pair_key(g["a"], g["b"])] = rr.get(pair_key(g["a"], g["b"]), 0) + 1
+        rr_file.write_text(json.dumps(rr, indent=0))
         rated, left = send_outbox(args.server, key, outbox)
         ack = {"rated": rated if not left else f"{rated} ({left} waiting)"}
         if args.births and started - last_tinker > 3600:
