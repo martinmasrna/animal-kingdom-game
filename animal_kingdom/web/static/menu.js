@@ -5,8 +5,19 @@ export const dd = (key, cur, opts) => { const c = opts.find(([v]) => v === cur) 
   return `<div class="dd" data-dd="${key}"><button class="sel">${c[1]}</button><div class="ddm">${opts.map(([v, l]) => `<div class="ddo${v === cur ? ' on' : ''}" data-k="${key}" data-v="${v}">${l}</div>`).join('')}</div></div>`; };
 
 // Every dropdown under root: its button opens it (closing any other), a row calls pick(key, value).
+// The button is as wide as its widest choice, measured in the list's own type, so the open list fits under it and the
+// button keeps its width whichever choice it shows (Martin, 2026-10-26: 'Every rarity' was cut off under 'Rare').
+const ruler = document.createElement('canvas').getContext('2d');
+function fitChoices(d) {
+  const sel = d.querySelector('.sel'), o = d.querySelector('.ddo'); if (!o) return;
+  const so = getComputedStyle(sel), oo = getComputedStyle(o); ruler.font = oo.font;
+  const widest = Math.max(...[...d.querySelectorAll('.ddo')].map(e => ruler.measureText(e.textContent).width));
+  const need = Math.ceil(widest + parseFloat(oo.paddingLeft) + parseFloat(oo.paddingRight) + parseFloat(so.paddingRight) - parseFloat(oo.paddingRight));
+  if (sel.offsetWidth < need) sel.style.minWidth = need + 'px';
+}
 export function wireDd(root, pick) {
   root.querySelectorAll('.dd').forEach(d => {
+    fitChoices(d);
     d.querySelector('.sel').onclick = ev => { ev.stopPropagation(); const was = d.classList.contains('open'); closeAll(); d.classList.toggle('open', !was);
       // The list hangs under its slab, or over it when the window has more room above; a list taller than the room
       // (the bot decks, nineteen of them since 2026-10-20) scrolls inside it instead of running off the screen.

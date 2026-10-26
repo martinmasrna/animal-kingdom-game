@@ -74,6 +74,11 @@ if [[ -n "$unwritten" && -z "${NEWS_OK:-}" && "$target" == live ]]; then
   echo "write animal_kingdom/web/news/$(date -v-6H +%F 2>/dev/null || date -d "-6 hours" +%F).md (or NEWS_OK=1 if players won't notice), then deploy again"; exit 1
 fi
 
+# Live ships main and nothing else: the folder a deploy runs from may stand on another branch (2026-10-26: a session
+# moved the shared folder to cards mid-session and the next live deploy began building the unplayed cards).
+branch="$(git -C "$repo" branch --show-current)"
+if [[ "$target" == live && "$branch" != main ]]; then echo "this folder is on '$branch': live deploys only main (deploy from a main checkout)"; exit 1; fi
+
 # The web client's fast suite gates the deploy here (SKIP_TESTS=1 when it just passed); the Python fast tier runs in the
 # image's build, against the compiled engine that ships (deploy/Dockerfile).
 [[ -n "${SKIP_TESTS:-}" ]] || (cd "$repo/animal_kingdom/web/test" && node --test > /tmp/ak-deploy-web.txt 2>&1) \
