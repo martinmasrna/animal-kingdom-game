@@ -904,7 +904,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Roar: if you played another Cat this turn, remove an adjacent enemy.",
       "keywords": [],
       "species": "Serval",
