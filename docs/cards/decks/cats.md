@@ -28,7 +28,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Serval** | 3 | Cat | 2 | Roar: if you played another Cat this turn, remove an adjacent enemy. |
+| **Serval** | 3 | Cat | 3 | Roar: if you played another Cat this turn, remove an adjacent enemy. |
 | **Lion** | 3 | Cat | 7 | — |
 | **Caracal** | 3 | Cat | 6 | Reach. |
 | **Tiger** | 3 | Cat | 7 | Apex Predator. |
