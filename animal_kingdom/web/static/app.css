@@ -447,7 +447,6 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .metar .mx td.m.sel { box-shadow: inset 2px 0 0 #e6c46a, inset -2px 0 0 #e6c46a; }
 .ladder .metar .mx td.mir { background: rgba(0,0,0,.35); }
 .ladder .metar .mx td.vs { font-weight: 700; color: #f0e8da; }
-.ladder .metar .mx tbody tr:hover td, .ladder .metar .mx tbody tr:hover th.an { box-shadow: inset 0 1px 0 rgba(230,196,106,.35), inset 0 -1px 0 rgba(230,196,106,.35); }
 .ladder .metar .mah { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 0 14px; }
 .ladder .metar .mah h3 { font: 700 26px 'Fira Sans Condensed', sans-serif; color: #f0e8da; margin: 0; }
 .ladder .metar .mah .mwr { font-weight: 700; font-size: 18px; padding: 2px 8px; border-radius: 6px; color: #f0e8da; }
