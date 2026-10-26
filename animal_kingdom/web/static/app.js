@@ -539,10 +539,10 @@ async function metaArchetype(box, id, q) {
   const count = l => l.reduce((m, c) => (m[c] = (m[c] || 0) + 1, m), {});
   const counts = j.lists.map(l => count(l.list)), core = {};
   for (const c of Object.keys(counts[0] || {})) core[c] = Math.min(...counts.map(m => m[c] || 0));
-  const face = (c, n) => {   // a card as its round board portrait, its copies beside it; the name on hover or a long press
+  const face = (c, n) => {   // a card as its round board portrait, its copies beside it; read as in the collection (below)
     const [x, y, d] = CROP[c] || [.5, .4, .7], S = 44, w = S / d;
     const art = hasArt(c) ? `background-image:url(${artUrl(c)});background-size:${w}px ${1.5 * w}px;background-position:${S / 2 - x * w}px ${S / 2 - y * 1.5 * w}px` : '';
-    return `<span class="mf ${CARDS[c].rarity}" title="${esc(CARDS[c].name)}"><span class="p" style="${art}"></span>${n > 1 ? `<b>${n}</b>` : ''}</span>`; };
+    return `<span class="mf ${CARDS[c].rarity}" data-card="${c}"><span class="p" style="${art}"></span>${n > 1 ? `<b>${n}</b>` : ''}</span>`; };
   const own = m => Object.entries(m).filter(([c, n]) => n > (core[c] || 0) && CARDS[c]).sort(([a], [b]) => order({ card: a }, { card: b }))
     .map(([c, n]) => face(c, n - (core[c] || 0))).join('');
   const picker = j.lists.length > 1 ? `<div class="mpick">${j.lists.map((l, i) => `<button class="mpk${l.slug === j.list ? ' on' : ''}" data-list="${esc(l.slug)}">
@@ -559,7 +559,15 @@ async function metaArchetype(box, id, q) {
       ${opp.map(c => `<tr><th class="an">${strip(c.card)}</th>${rate(flip(c.d))}${rate(flip(c.p))}<td class="num dim">${c.d[0]}</td></tr>`).join('')}</tbody></table></div>` : ''}</div></div>`;
   wireMetaControls(box);
   fitStrips(box);
-  box.querySelectorAll('.mpk').forEach(b => b.onclick = () => { META.list = b.dataset.list; fillMeta(); });
+  box.querySelectorAll('.mpk').forEach(b => b.onclick = () => { pop.style.display = 'none'; META.list = b.dataset.list; fillMeta(); });
+  // every card on the page reads as in the collection: hovered, the card beside it; right-clicked or held, large
+  box.querySelectorAll('.mf[data-card], .mstrip [data-card]').forEach(el => {
+    const read = () => { pop.style.display = 'none'; readCard(el.dataset.card); };
+    el.onmouseenter = () => cardPop(el, el.dataset.card);
+    el.onmouseleave = () => pop.style.display = 'none';
+    el.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); read(); });
+    onHold(el, read);
+  });
   box.querySelectorAll('th[data-csort]').forEach(t => t.onclick = () => { META.csort = META.csort === t.dataset.csort ? null : t.dataset.csort; fillMeta(); });
 }
 
