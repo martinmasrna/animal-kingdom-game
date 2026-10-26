@@ -10,7 +10,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **[RHINOCEROS]** | 1 | Hoofed | 8 | Hungry 6. Roar: remove all adjacent animals. |
+| **[RHINOCEROS]** | 1 | — | 8 | Hungry 4. Roar: remove an adjacent enemy. |
 | **Azamandulai** | 1 | — | 3 | Armor. Each player gains at most 20 food per turn. Dusk: gain 5 food. |
 | **[SPERM WHALE]** | 1 | — | 8 | Titan. Dusk: remove the strongest adjacent enemy. |
 | **[OXPECKER]** | 1 | Bird | 4 | Flight. Dusk: draw a card for each adjacent Hungry ally. |
@@ -19,8 +19,8 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Rhinoceros** | 2 | Hoofed | 8 | Hungry 3. Roar: remove all adjacent enemies of strength 3 or less. |
-| **Hippopotamus** | 2 | Hoofed | 8 | Hungry 3. When an enemy of strength 4 or less is placed next to this, remove it. |
+| **Rhinoceros** | 2 | — | 8 | Hungry 3. Roar: remove all adjacent enemies of strength 3 or less. |
+| **Hippopotamus** | 2 | — | 8 | Hungry 3. When an enemy of strength 4 or less is placed next to this, remove it. |
 | **Whale Shark** | 2 | Fish | 8 | Titan. Hungry 4. Dusk: draw a card. |
 | **Moose** | 2 | Hoofed | 8 | Hungry 3. Roam. |
 

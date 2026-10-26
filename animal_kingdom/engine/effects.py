@@ -3176,7 +3176,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "tortoise": {"on_place": _tortoise_place},
     "owl": {"on_place": _owl_place},
     # Giants (Hungry and Titan are keywords).
-    "rhinoceros_legend": {"on_place": _remove_all_adjacent},
+    "rhinoceros_legend": {"on_place": _removes()},            # the horn: one adjacent enemy, no cap (Martin, 2026-10-26)
     "tortoise_legend": {"on_end_of_turn": _tortoise_legend_eot},
     "sperm_whale_legend": {"on_end_of_turn": _sperm_whale_legend_eot},
     "rhinoceros": {"on_place": _rhinoceros_place},

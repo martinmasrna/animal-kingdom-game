@@ -712,13 +712,15 @@ def test_rhinoceros_sweeps_only_small_adjacent_enemies():
     assert s.owner_of("2,3") == "B" and s.owner_of("2,1") == "B"
 
 
-def test_bulwark_clears_all_adjacent_units_friend_and_foe():
-    s = make_state(hands={"A": ["rhinoceros_legend"]})
-    put(s, "1,2", "caracal", "A")                       # friendly - connects 2,2, caught in the blast
-    put(s, "3,2", "lion", "B")                          # 7 - removed (uncapped)
-    rules.apply_action(s, PlaceAction("rhinoceros_legend", ("cr", "2,2")))
-    assert s.owner_of("3,2") is None                    # enemy removed
-    assert s.owner_of("1,2") is None                    # friendly removed too (2026-07-05 nerf)
+def test_brutus_removes_one_adjacent_enemy_of_any_strength():
+    s = make_state(hands={"A": ["rhinoceros_legend"]}, food={"A": 20, "B": 0})
+    put(s, "1,2", "caracal", "A")                       # friendly - connects 2,2, untouched
+    put(s, "3,2", "elephant", "B")                      # 9 - the horn has no cap
+    put(s, "2,1", "mouse", "B")                         # the other target, left alone
+    apply_click(s, PlaceAction("rhinoceros_legend", ("cr", "2,2")))
+    assert s.pending and s.pending.get("options")       # two enemies: the player picks
+    rules.apply_action(s, ChoiceAction("3,2"))
+    assert s.owner_of("3,2") is None and s.owner_of("2,1") == "B" and s.owner_of("1,2") == "A"
 
 
 def test_hippopotamus_removes_a_weak_enemy_placed_adjacent():

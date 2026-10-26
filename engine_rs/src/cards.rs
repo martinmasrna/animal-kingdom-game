@@ -1025,7 +1025,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             push_gain(st, owner, n * per);
         }
         // Giants
-        ("rhinoceros_legend", OnPlace) | ("sperm_whale", OnPlace) => remove_all_adjacent(st, unit, cr),
+        ("sperm_whale", OnPlace) => remove_all_adjacent(st, unit, cr),
+        ("rhinoceros_legend", OnPlace) => removes(st, unit, cr, None, None),
         ("tortoise_legend", OnEndOfTurn) => gains(st, unit, "tortoise_legend_food"),
         ("rhinoceros", OnPlace) => sweep(st, unit, cr, "rhinoceros_max"),
         ("albatross", OnPlace) => sweep(st, unit, cr, "albatross_max"),

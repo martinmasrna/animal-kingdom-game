@@ -45,10 +45,10 @@ def test_stealth_hides_from_skunk_bounce():
 
 
 def test_stealth_does_not_hide_from_mass_aoe():
-    # Brutus: remove all adjacent enemy units - mass, so the panther dies.
-    s = make_state(hands={"A": ["rhinoceros_legend"]}, food={"A": 20, "B": 0})
+    # The Sperm Whale: remove all adjacent animals - mass, so the panther dies.
+    s = make_state(hands={"A": ["sperm_whale"]}, food={"A": 20, "B": 0})
     put(s, "2,2", "black_panther", "B")
-    rules.apply_action(s, PlaceAction("rhinoceros_legend", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("sperm_whale", ("cr", "1,2")))
     assert "2,2" not in s.board
     assert "black_panther" in s.remove_pile
 
@@ -72,9 +72,9 @@ def test_stealth_top_cannot_be_chosen_by_pestis():
 # ------------------------------------------------------------- Armor: physics for all
 
 def test_armor_survives_mass_aoe():
-    s = make_state(hands={"A": ["rhinoceros_legend"]}, food={"A": 20, "B": 0})
+    s = make_state(hands={"A": ["sperm_whale"]}, food={"A": 20, "B": 0})
     put(s, "2,2", "tortoise_legend", "B")
-    rules.apply_action(s, PlaceAction("rhinoceros_legend", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("sperm_whale", ("cr", "1,2")))
     assert _ids_at(s, "2,2") == ["tortoise_legend"]
 
 

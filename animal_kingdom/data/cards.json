@@ -2063,17 +2063,15 @@
       "name": "[RHINOCEROS]",
       "status": "collectible",
       "rarity": "legendary",
-      "tags": [
-        "Hoofed"
-      ],
+      "tags": [],
       "base_strength": 8,
-      "text": "Hungry 6. Roar: remove all adjacent animals.",
+      "text": "Hungry 4. Roar: remove an adjacent enemy.",
+      "species": "Rhinoceros",
+      "habitat": "Savanna",
       "keywords": [
         "Hungry"
       ],
-      "hungry": 6,
-      "species": "Rhinoceros",
-      "habitat": "Savanna"
+      "hungry": 4
     },
     {
       "id": "tortoise_legend",
@@ -2124,9 +2122,7 @@
       "name": "Rhinoceros",
       "status": "collectible",
       "rarity": "rare",
-      "tags": [
-        "Hoofed"
-      ],
+      "tags": [],
       "base_strength": 8,
       "text": "Hungry 3. Roar: remove all adjacent enemies of strength 3 or less.",
       "species": "Rhinoceros",
@@ -2141,9 +2137,7 @@
       "name": "Hippopotamus",
       "status": "collectible",
       "rarity": "rare",
-      "tags": [
-        "Hoofed"
-      ],
+      "tags": [],
       "base_strength": 8,
       "text": "Hungry 3. When an enemy of strength 4 or less is placed next to this, remove it.",
       "species": "Hippopotamus",

@@ -605,6 +605,26 @@
       "by": "claude",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "at": 1792191061
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Hungry 6. Roar: remove all adjacent animals."
+      },
+      "note": "Martin, 2026-10-26: the horn, one target, no cap; 8 and Hungry 4 as the starting point; the old sweep was the Sperm Whale's text",
+      "by": "claude",
+      "at": 1793047899
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Hoofed"
+      },
+      "note": "Martin, 2026-10-26: a rhino or hippo isn't hoofed to a normal person; not of the herd",
+      "by": "claude",
+      "at": 1793047930
     }
   },
   "bush_dog": {
@@ -1876,6 +1896,16 @@
       "note": "Martin, 2026-10-26: 4, so the zone is worth more than the Rhino's one-off sweep at 3",
       "by": "claude",
       "at": 1793045909
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Hoofed"
+      },
+      "note": "Martin, 2026-10-26: a rhino or hippo isn't hoofed to a normal person; not of the herd",
+      "by": "claude",
+      "at": 1793047929
     }
   },
   "honey_badger": {
@@ -3284,6 +3314,16 @@
       "note": "Removal rares pass with Martin, 2026-10-26: 3 or less catches the small decks' engines, not only tokens",
       "by": "claude",
       "at": 1793012650
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Hoofed"
+      },
+      "note": "Martin, 2026-10-26: a rhino or hippo isn't hoofed to a normal person; not of the herd",
+      "by": "claude",
+      "at": 1793047929
     }
   },
   "baby_fox_2": {
