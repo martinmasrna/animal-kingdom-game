@@ -1644,12 +1644,13 @@ def _become(state, step, card_id, counter) -> None:
 
 
 def _then_copy_and_add(state, step, cr):
-    """Iris: "Choose an adjacent animal. Become a copy of it, and add another copy to your hand" (its counter included)."""
+    """Iris: "Choose an adjacent animal. Become a copy of it, and add another copy to your hand": on the board its counter
+    included, in hand a plain card, its Roar to come when it is played (Martin, 2026-10-26)."""
     target = state.top_unit(cr)
     if target is None:
         return
     _become(state, step, target.card_id, target.strength_counter)
-    gain_to_hand(state, step["chooser"], target.card_id, strength_counter=target.strength_counter)
+    gain_to_hand(state, step["chooser"], target.card_id)
 
 
 def _then_copy_from_hand(state, step, iid):

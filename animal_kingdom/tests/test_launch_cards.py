@@ -843,12 +843,24 @@ def test_iris_becomes_a_copy_of_an_adjacent_animal_but_not_its_roar_and_adds_ano
     me = s.top_unit("1,2")
     base = s.cards["porcupine"].base_strength
     assert me.card_id == "porcupine" and effective_strength(s, me) == base + 1 and "Spikes" in statics.unit_keywords(s, me)
-    assert [(u.card_id, u.owner, u.strength_counter) for u in s.hands["A"]] == [("porcupine", "A", 1)]
+    assert [(u.card_id, u.owner, u.strength_counter) for u in s.hands["A"]] == [("porcupine", "A", 0)]   # a plain card
     s2 = make_state(hands={"A": ["chameleon_legend"]})
     put(s2, "2,2", "squirrel", "A")
     rules.apply_action(s2, PlaceAction("chameleon_legend", ("cr", "1,2")))
     choose(s2, "2,2")
-    assert s2.food["A"] == 0                                   # copying the Squirrel doesn't gain its Roar's food
+    assert s2.food["A"] == 0                                   # copying the Squirrel doesn't gain its Roar's food...
+    rules.apply_action(s2, PlaceAction("squirrel", ("cr", "1,1")))
+    assert s2.food["A"] == CFG.squirrel_food                   # ...the copy in hand does, when it is played
+
+
+def test_a_copy_on_the_board_keeps_the_copied_cards_dawn_and_dusk():
+    s = make_state(hands={"A": ["chameleon_legend"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    put(s, "2,2", "whale_shark", "A")                          # Dusk: draw a card
+    rules.apply_action(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
+    choose(s, "2,2")
+    hand = len(s.hands["A"])                                   # the Whale Shark Iris added
+    end_turn(s)
+    assert len(s.hands["A"]) == hand + 2                       # both Whale Sharks draw at Dusk
 
 
 def test_the_chameleon_becomes_a_copy_of_an_animal_in_your_hand_which_stays_there():

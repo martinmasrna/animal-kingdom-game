@@ -1343,7 +1343,7 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             let Some(cr) = cr_of(st) else { return };
             let Some(target) = st.top(cr).cloned() else { return };
             become_copy(st, me_iid, target.card, target.strength_counter);
-            gain_to_hand(st, chooser, target.card, target.strength_counter as i32);
+            gain_to_hand(st, chooser, target.card, 0);
         }
         "copy_from_hand" => {
             let me_iid = m_get_i(step, "self").unwrap_or(-1);
