@@ -451,7 +451,7 @@ body:has(> #app > .mscr.home, > #app > .mscr.news, > #app > .mscr.sets, > #app >
 .ladder .metar .mx th.an a { color: #f0e8da; text-decoration: none; } .ladder .metar .mx th.an a:hover { color: #e6c46a; }
 .ladder .metar .mx .num { text-align: right; } .ladder .metar .dim { color: #8f8574; }
 .ladder .metar .mx th.sortable { cursor: pointer; } .ladder .metar .mx th.sortable:hover, .ladder .metar .mx th.on { color: #f0e8da; }
-.ladder .metar .mx th.on::after { content: ' ▾'; color: #e6c46a; }
+.ladder .metar .mx th.on::after { content: ' ▾'; color: #e6c46a; } .ladder .metar .mx th.on.up::after { content: ' ▴'; }
 .ladder .metar .mx th.col { cursor: pointer; padding: 6px 2px; width: 34px; height: 150px; vertical-align: bottom; text-align: center; }
 .ladder .metar .mx th.col span { writing-mode: vertical-rl; transform: rotate(180deg); display: inline-block; max-height: 140px; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
 .ladder .metar .mx th.col:hover { color: #f0e8da; } .ladder .metar .mx th.col.sel { color: #1b1916; background: #e6c46a; }
