@@ -611,13 +611,24 @@ def test_the_rat_removes_only_as_the_third_animal_of_a_turn_and_discards_nothing
 
 # ============================================================================= Egg Control
 
-def test_the_legendary_raven_takes_from_the_opponents_remove_pile():
+def test_the_legendary_raven_takes_two_from_the_opponents_remove_pile():
     s = make_state(hands={"A": ["raven_legend"]})
-    s.pile_add("tiger", "B"); s.pile_add("lion", "A")
+    s.pile_add("tiger", "B"); s.pile_add("eagle", "B"); s.pile_add("lion", "A")
     rules.apply_action(s, PlaceAction("raven_legend", ("cr", "1,2")))
-    assert s.pending["options"] == ["tiger"]
+    assert s.pending["options"] == ["eagle", "tiger"]
     choose(s, "tiger")
-    assert hand_inst(s, "A", "tiger").owner == "A" and s.remove_pile == ["lion"]
+    assert s.pending["options"] == ["eagle"]                 # asked afresh: the Tiger is gone
+    choose(s, "eagle")
+    assert sorted(hand_ids(s, "A")) == ["eagle", "tiger"] and hand_inst(s, "A", "tiger").owner == "A"
+    assert s.remove_pile == ["lion"]
+
+
+def test_the_legendary_raven_takes_what_there_is():
+    s = make_state(hands={"A": ["raven_legend"]})
+    s.pile_add("tiger", "B")
+    rules.apply_action(s, PlaceAction("raven_legend", ("cr", "1,2")))
+    choose(s, "tiger")
+    assert s.pending is None and hand_ids(s, "A") == ["tiger"]
 
 
 def test_mosquito_drains_two():

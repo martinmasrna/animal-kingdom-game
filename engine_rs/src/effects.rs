@@ -1747,6 +1747,26 @@ fn op_anteater(st: &mut State, step: &mut Map) -> Option<Pending> {
     None
 }
 
+/// Grimm: one pick from the opponent's Remove Pile, then the next with the options asked afresh. As in Python.
+fn op_steal_from_pile(st: &mut State, step: &mut Map) -> Option<Pending> {
+    let player = step_player(st, step, "player");
+    let opp = crate::data::other(player);
+    let n = m_get_i(step, "n").unwrap_or(0);
+    let mut names: Vec<&'static str> = st.pile_cards_of(opp).iter().map(|c| st.cname(*c)).collect();
+    names.sort();
+    names.dedup();
+    if names.is_empty() || n <= 0 {
+        return None;
+    }
+    if n > 1 {
+        let mut next = step.clone();
+        next.insert("n", Value::Int(n - 1));
+        st.effect_stack.push(next);
+    }
+    push_choose(st, player, names.into_iter().map(Value::Str).collect(), "pile_to_hand", false, vmap!("from_owner" => pn(opp)));
+    None
+}
+
 fn op_oxpecker(st: &mut State, step: &mut Map) -> Option<Pending> {
     let player = step_player(st, step, "player");
     draw_cards(st, player, 1);
@@ -1939,6 +1959,7 @@ fn run_op(st: &mut State, op: &str, step: &mut Map) -> Option<Pending> {
         "draw_to_match" => op_draw_to_match(st, step),
         "anteater" => op_anteater(st, step),
         "oxpecker" => op_oxpecker(st, step),
+        "steal_from_pile" => op_steal_from_pile(st, step),
         "locust_eat" => op_locust_eat(st, step),
         "discard_choice" => op_discard_choice(st, step),
         "hornet_kill" => op_hornet_kill(st, step),

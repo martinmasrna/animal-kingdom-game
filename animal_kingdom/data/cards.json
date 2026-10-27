@@ -1647,12 +1647,12 @@
         "Bird"
       ],
       "base_strength": 3,
-      "text": "Flight. Roar: put an animal from your opponent's Remove Pile into your hand.",
+      "text": "Flight. Roar: put 2 animals from your opponent's Remove Pile into your hand.",
+      "species": "Raven",
+      "habitat": "Forest",
       "keywords": [
         "Flight"
-      ],
-      "species": "Raven",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "swan_legend",

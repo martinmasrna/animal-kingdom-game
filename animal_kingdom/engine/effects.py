@@ -1784,6 +1784,7 @@ OPS.update({
     "draw_to_match": _op_draw_to_match,
     "anteater": _op_anteater,
     "oxpecker": _op_oxpecker,
+    "steal_from_pile": lambda state, step: _op_steal_from_pile(state, step),
 })
 
 
@@ -2421,9 +2422,21 @@ def _omen_drawn(state, inst):
 
 
 def _raven_legend_place(state, unit, cr):
-    """Roar: put an animal from your opponent's Remove Pile into your hand."""
-    opp = other_player(unit.owner)
-    _push_choose(state, unit.owner, sorted(set(state.pile_cards_of(opp))), "pile_to_hand", from_owner=opp)
+    """Roar: put 2 animals from your opponent's Remove Pile into your hand."""
+    state.effect_stack.append({"op": "steal_from_pile", "player": unit.owner, "n": state.config.raven_legend_steals})
+
+
+def _op_steal_from_pile(state, step):
+    """Grimm: one pick from the opponent's Remove Pile, then the next with the options asked afresh (a card taken by the
+    first pick isn't offered again)."""
+    opp = other_player(step["player"])
+    names = sorted(set(state.pile_cards_of(opp)))
+    if not names or step["n"] <= 0:
+        return None
+    if step["n"] > 1:
+        state.effect_stack.append({**step, "n": step["n"] - 1})
+    _push_choose(state, step["player"], names, "pile_to_hand", from_owner=opp)
+    return None
 
 
 def _owl_place(state, unit, cr):

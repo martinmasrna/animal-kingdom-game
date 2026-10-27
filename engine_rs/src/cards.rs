@@ -873,11 +873,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             push_draw(st, owner, 1);
         }
         ("raven_legend", OnPlace) => {
-            let opp = other(owner);
-            let mut names: Vec<&'static str> = st.pile_cards_of(opp).iter().map(|c| st.cname(*c)).collect();
-            names.sort();
-            names.dedup();
-            push_choose(st, owner, names.into_iter().map(Value::Str).collect(), "pile_to_hand", false, vmap!("from_owner" => pn(opp)));
+            let n = cfg(st, "raven_legend_steals");
+            st.effect_stack.push(vmap!("op" => Value::s("steal_from_pile"), "player" => pn(owner), "n" => Value::Int(n as i64)));
         }
         ("goose_legend", OnStartOfTurn) => {
             let egg = cid(st, "golden_egg");

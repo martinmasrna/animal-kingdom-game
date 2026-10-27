@@ -375,6 +375,7 @@ def test_the_launch_decks_other_numbers_match_config():
     cfg, c = Config.default(), _cards()
     words = {"two": 2, "three": 3}
     assert words[re.search(r"add (\w+) random younglings", c["stork"].text).group(1)] == cfg.stork_younglings
+    assert int(re.search(r"put (\d+) animals from your opponent's Remove Pile", c["raven_legend"].text).group(1)) == cfg.raven_legend_steals
     assert words[re.search(r"shuffle (\w+) Cuckoo Eggs", c["cuckoo"].text).group(1)] == cfg.cuckoo_eggs
     assert words[re.search(r"shuffle (\w+) Golden Eggs", c["goose_legend"].text).group(1)] == cfg.aurum_eggs
     assert words[re.search(r"place (\w+) Worms", c["earthworm"].text).group(1)] == cfg.earthworm_worms
