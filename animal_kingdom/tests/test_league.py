@@ -149,6 +149,12 @@ def test_a_person_can_be_reset_but_not_a_bot(monkeypatch, tmp_path):
     _run(monkeypatch, tmp_path, body)
 
 
+def test_the_meta_tab_survives_a_bad_range(monkeypatch, tmp_path):
+    async def body(c, server):
+        assert (await c.get("/api/meta?lo=NaN&hi=NaN&days=7")).status == 200
+    _run(monkeypatch, tmp_path, body)
+
+
 def test_a_game_posted_twice_is_rated_once(monkeypatch, tmp_path):
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}

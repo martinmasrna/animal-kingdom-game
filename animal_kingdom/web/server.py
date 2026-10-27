@@ -741,7 +741,12 @@ def _list_of(slug: str):
 
 def _meta_args(req) -> tuple[int, int, int]:
     q = req.query
-    lo, hi, days = int(q.get("lo", 0) or 0), int(q.get("hi", 10000) or 10000), int(q.get("days", 0) or 0)
+    def num(k, default):   # a bad number is the default, never a 500 (a provisional "1520?" once made the page send NaN)
+        try:
+            return int(float(q.get(k) or default))
+        except (ValueError, OverflowError):
+            return default
+    lo, hi, days = num("lo", 0), num("hi", 10000), num("days", 0)
     return max(0, lo), min(10000, hi), max(0, min(60, days))
 
 
@@ -755,7 +760,7 @@ async def meta_overview(req):
     arch, names = _archetypes()
     p = profile_of(req)
     me_ = ladder.get(p["id"]) if p and ladder else None
-    return web.json_response({**meta.overview(arch, names, lo, hi, days), "you": me_.shown() if me_ and me_.games else None})
+    return web.json_response({**meta.overview(arch, names, lo, hi, days), "you": round(me_.rating) if me_ and me_.games else None})
 
 
 async def meta_archetype(req):
