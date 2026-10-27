@@ -380,6 +380,7 @@ def test_the_launch_decks_other_numbers_match_config():
     words = {"two": 2, "three": 3}
     assert words[re.search(r"add (\w+) random younglings", c["stork"].text).group(1)] == cfg.stork_younglings
     assert int(re.search(r"put (\d+) animals from your opponent's Remove Pile", c["raven_legend"].text).group(1)) == cfg.raven_legend_steals
+    assert int(re.search(r"cost (\d+) food to play", c["krill_legend"].text).group(1)) == cfg.krill_legend_food
     tiers = [int(n) for n in re.findall(r"(\d+) or more", c["dung_beetle_legend"].text)]
     assert tiers == [cfg.dung_beetle_legend_draw_at, cfg.dung_beetle_legend_food_at, cfg.dung_beetle_legend_play_at]
     assert words[re.search(r"shuffle (\w+) Cuckoo Eggs", c["cuckoo"].text).group(1)] == cfg.cuckoo_eggs

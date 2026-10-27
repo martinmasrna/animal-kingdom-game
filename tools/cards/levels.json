@@ -5873,5 +5873,53 @@
       "by": "claude",
       "at": 1793114063
     }
+  },
+  "krill_legend": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-27: the Krill's Titan discount at legendary size, paid in food (his text)",
+      "by": "claude",
+      "at": 1793117861
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Krill Legend",
+          "species": "Krill"
+        }
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1793117866
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "A tiny swarm, as the common",
+      "by": "claude",
+      "at": 1793117863
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-27: the Krill's Titan discount at legendary size, paid in food (his text)",
+      "by": "claude",
+      "at": 1793117864
+    }
   }
 }

@@ -3825,6 +3825,19 @@
       "keywords": [],
       "species": "Black Widow",
       "habitat": "Desert"
+    },
+    {
+      "id": "krill_legend",
+      "name": "[KRILL]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [],
+      "base_strength": 1,
+      "text": "Your Titans cost 10 food to play, but only 1 action.",
+      "species": "Krill",
+      "habitat": "Open Ocean",
+      "unnamed": true,
+      "keywords": []
     }
   ]
 }

@@ -900,6 +900,19 @@ def test_a_copy_on_the_board_keeps_the_copied_cards_dawn_and_dusk():
     assert len(s.hands["A"]) == hand + 2                       # both Whale Sharks draw at Dusk
 
 
+def test_the_legendary_krill_makes_titans_cost_ten_food_and_one_action():
+    whale = PlaceAction("blue_whale", ("cr", "1,1"))
+    s = make_state(hands={"A": ["blue_whale"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4},
+                   food={"A": CFG.krill_legend_food - 1, "B": 0})
+    put(s, "1,2", "krill_legend", "A")
+    assert whale not in rules.legal_actions(s)                                 # one food short
+    s.food["A"] = CFG.krill_legend_food
+    rules.apply_action(s, DrawAction())                                       # one action left is enough now
+    assert whale in rules.legal_actions(s)
+    rules.apply_action(s, whale)
+    assert s.top_unit("1,1").card_id == "blue_whale" and s.food["A"] == 0 and s.current == "B"
+
+
 def test_the_krill_makes_the_next_titan_cost_one_action():
     s = make_state(hands={"A": ["krill", "blue_whale", "blue_whale"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
     rules.apply_action(s, PlaceAction("krill", ("cr", "1,2")))

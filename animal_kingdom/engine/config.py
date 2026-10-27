@@ -169,6 +169,7 @@ class Config:
     dung_beetle_legend_play_at: int = 40
     dung_beetle_legend_food: int = 10
     oxpecker_legend_min: int = 8                    # the legendary Oxpecker: your covering animals this strong draw
+    krill_legend_food: int = 10                     # the legendary Krill: a Titan's food, for one action instead of two
 
     # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the
     # per-card default ruling and the data behind it) ---

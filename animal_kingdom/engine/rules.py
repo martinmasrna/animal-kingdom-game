@@ -63,14 +63,24 @@ def _top_level_actions(state: GameState) -> list[Action]:
     actions: list[Action] = []
     if state.decks[player]:
         actions.append(DrawAction())
-    actions.extend(effects.legal_placements(state, player, titan_ok=left >= titan_cost(state, player)))
+    titan_ok = left >= titan_cost(state, player) and state.food[player] >= titan_food(state, player)
+    actions.extend(effects.legal_placements(state, player, titan_ok=titan_ok))
     actions.extend(effects.legal_roams(state, player))
     return actions
 
 
 def titan_cost(state: GameState, player: str) -> int:
-    """Two actions, one after a Krill this turn ("the next Titan you play this turn costs one action")."""
-    return TITAN_ACTIONS - (1 if state.turn_flags.get(f"titan_discount_{player}") else 0)
+    """Two actions; one after a Krill this turn ("the next Titan you play this turn costs one action"), or while the
+    legendary Krill is yours ("Your Titans cost 10 food to play, but only 1 action")."""
+    cheap = state.turn_flags.get(f"titan_discount_{player}") or statics._controls(state, player, "krill_legend")
+    return TITAN_ACTIONS - 1 if cheap else TITAN_ACTIONS
+
+
+def titan_food(state: GameState, player: str) -> int:
+    """The legendary Krill's food for a Titan; none when a common Krill already made this one cost one action."""
+    if state.turn_flags.get(f"titan_discount_{player}") or not statics._controls(state, player, "krill_legend"):
+        return 0
+    return state.config.krill_legend_food
 
 
 def _has_top_level_action(state: GameState) -> bool:
@@ -171,6 +181,8 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
         titan = "Titan" in state.cards[action.card_id].keywords
         state.actions_taken_this_turn += titan_cost(state, state.current) if titan else 1
         if titan:
+            if food := titan_food(state, state.current):
+                effects.lose_food(state, state.current, food, card="krill_legend")
             state.turn_flags.pop(f"titan_discount_{state.current}", None)
         effects.do_placement(state, state.current, action.card_id, action.target, action.iid)
     elif isinstance(action, RoamAction):

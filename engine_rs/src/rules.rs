@@ -34,7 +34,8 @@ fn top_level_actions(st: &State) -> Vec<Action> {
     if !st.decks[player as usize].is_empty() {
         actions.push(Action::Draw);
     }
-    actions.extend(effects::legal_placements(st, player, None, left >= titan_cost(st, player)));
+    let titan_ok = left >= titan_cost(st, player) && st.food[player.min(1) as usize] >= titan_food(st, player);
+    actions.extend(effects::legal_placements(st, player, None, titan_ok));
     actions.extend(effects::legal_roams(st, player, false));
     actions
 }
@@ -46,9 +47,18 @@ fn has_top_level_action(st: &State) -> bool {
     !top_level_actions(st).is_empty()
 }
 
-/// Two actions, one after a Krill this turn. As in Python.
+/// Two actions; one after a Krill this turn, or while the legendary Krill is yours. As in Python.
 pub fn titan_cost(st: &State, player: Player) -> i32 {
-    TITAN_ACTIONS - if st.turn_flags.titan_discount[player.min(1) as usize] { 1 } else { 0 }
+    let cheap = st.turn_flags.titan_discount[player.min(1) as usize] || statics::controls(st, player, st.card_id("krill_legend"));
+    if cheap { TITAN_ACTIONS - 1 } else { TITAN_ACTIONS }
+}
+
+/// The legendary Krill's food for a Titan; none when a common Krill already made this one cost one action.
+pub fn titan_food(st: &State, player: Player) -> i32 {
+    if st.turn_flags.titan_discount[player.min(1) as usize] || !statics::controls(st, player, st.card_id("krill_legend")) {
+        return 0;
+    }
+    st.cfg().int("krill_legend_food")
 }
 
 pub fn turn_actions(st: &State) -> i32 {
@@ -151,9 +161,13 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
                 let cur = st.current;
                 st.actions_taken_this_turn += if titan { titan_cost(st, cur) } else { 1 };
                 if titan {
+                    let food = titan_food(st, cur);
+                    if food > 0 {
+                        let krill = st.card_id("krill_legend");
+                        effects::lose_food(st, cur, food, krill);
+                    }
                     st.turn_flags.titan_discount[cur.min(1) as usize] = false;
                 }
-                let cur = st.current;
                 effects::do_placement(st, cur, *card, target, *iid)?;
             }
             Action::Roam { origin, target } => {
