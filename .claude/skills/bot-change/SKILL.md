@@ -29,7 +29,7 @@ Ship when all three hold: the pooled mean is up; no deck is down beyond its own 
 
 Stop a run early when half the decks are in and every delta sits inside noise around zero: the second half will not rescue it, and the machine has other runs waiting. Report the stop as a stop, never as a result.
 
-Report the table to Martin as decks and points, with the mechanism read in one sentence. His win rate against the bot is the yardstick; a positive run is a reason to put the change in front of him, not a verdict.
+Report the table to Martin as decks and points, with the mechanism read in one sentence. A change that passes the ship rule ships without waiting for him (Martin, 2026-10-23); his games against the bot afterwards are the yardstick, read from the logs and the ladder, never a session he is asked to play.
 
 ## 4. Ship
 
