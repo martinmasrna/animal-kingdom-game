@@ -3291,9 +3291,9 @@
         "prev_note": "",
         "prev": "R"
       },
-      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "note": "No common plays another card from hand; extra plays are rare and up (Martin, 2026-10-27)",
       "by": "claude",
-      "at": 1792661449
+      "at": 1793094054
     },
     "effect": {
       "review": {
@@ -3311,9 +3311,9 @@
         "prev_note": "",
         "prev": 3
       },
-      "note": "Martin, 2026-10-22: the Alley Cat of Fish",
+      "note": "A rare gets a better rate than the common it was (Martin, 2026-10-27)",
       "by": "claude",
-      "at": 1792662817
+      "at": 1793094031
     }
   },
   "rhinoceros": {
@@ -5477,7 +5477,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792783031
+      "at": 1793094118,
+      "note": "The Alley Cat's extra play, moved up: no common plays another card (Martin, 2026-10-27)"
     },
     "animal": {
       "review": {

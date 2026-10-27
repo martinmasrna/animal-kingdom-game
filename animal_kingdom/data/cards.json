@@ -1129,11 +1129,11 @@
       "id": "remora",
       "name": "Remora",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Fish"
       ],
-      "base_strength": 1,
+      "base_strength": 3,
       "text": "Roar: if this is next to an allied Fish, play another Fish.",
       "species": "Remora",
       "habitat": "Open Ocean",
@@ -3728,7 +3728,7 @@
         "Cat"
       ],
       "base_strength": 3,
-      "text": "Roar: draw 2 common Cats.",
+      "text": "Roar: if you control another Cat, play another Cat.",
       "species": "Ocelot",
       "habitat": "Jungle",
       "keywords": []

@@ -21,14 +21,14 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **Swordfish** | 2 | Fish | 3 | Roar: remove a random adjacent enemy for each adjacent allied Fish. |
 | **Manta Ray** | 2 | Fish | 6 | Whenever your opponent covers an adjacent allied Fish, draw a card. |
-| **Shark** | 1 | Fish | 7 | Apex Predator. If an animal was removed this turn, this has Reach. |
+| **Remora** | 2 | Fish | 3 | Roar: if this is next to an allied Fish, play another Fish. |
+| **Shark** | 2 | Fish | 7 | Apex Predator. If an animal was removed this turn, this has Reach. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Barracuda** | 3 | Fish | 4 | Roar: remove an adjacent enemy with strength up to the number of your Fish. |
-| **Remora** | 3 | Fish | 1 | Roar: if this is next to an allied Fish, play another Fish. |
 | **Cod** | 3 | Fish | 4 | Roar: draw a card for each adjacent allied Fish. |
 | **Sardine** | 3 | Fish | 0 | Roar: fill adjacent empty crossroads with Sardines from your hand and deck. |
 | **Mahi-mahi** | 3 | Fish | 3 | Roar: give your other Fish +1 strength. |
