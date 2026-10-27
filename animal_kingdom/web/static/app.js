@@ -76,8 +76,15 @@ function readOverlay(html) {
   ov.addEventListener('click', e => { e.stopPropagation(); if (pressed) ov.remove(); });
   ov.addEventListener('contextmenu', e => { e.preventDefault(); ov.remove(); });
 }
-function readCard(id, str) {
-  const c = CARDS[id]; if (!c) return;
+// A card that evolves at a food count its owner's Hungry animals reach (the legendary Dung Beetle; Martin, 2026-10-27):
+// in a game its text ends with the count towards the next form, "(14/25)".
+function formOf(id, seat) {
+  const c = CARDS[id], at = c && c.evolvesAt;
+  if (!at || !V || !V.game || !V.game.eaten) return c;
+  return { ...c, text: `${c.text} (${Math.min(V.game.eaten[seat] || 0, at)}/${at})` };
+}
+function readCard(id, str, seat = V && V.you) {
+  const c = formOf(id, seat); if (!c) return;
   const side = readSide(c, CARDS);   // the cards it makes and its keywords, right of the card (under it on a narrow screen)
   readOverlay(`<div class="rcard${(c.related || []).length ? ' wide' : ''}">${cardHTML(c, str == null ? {} : { str })}${side}</div>`);
 }
@@ -1239,7 +1246,7 @@ function drawGame() {
   let drawnK = 0;
   const lit = handLights(d, G.hand);   // a lesson's hints (coach.js)
   hand.innerHTML = G.hand.map((h, i) => {
-    const c = CARDS[h.id], can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
+    const c = formOf(h.id, V.you), can = d.mine && !d.handPick.size && !choosing && d.places[h.id] && (!lit.one || lit.one.iid === h.iid), pick = d.handPick.has(h.iid);
     const hint = lit.hint(can), shown = lit.shown(h.id);
     const talking = lit.talking || RP.views.length;   // while the coach talks (or in a replay) the cards stay lit, and a ready card still glows
     const cls = [c.rarity, shown ? 'shown' : '', can ? 'can' : '', (can || talking) && h.ready ? 'ready' : '', hint ? 'hint' : '', pick ? 'pick' : '', h.id === ui.sel && h.iid === (lit.one || selCopy()).iid ? 'sel' : '', !can && !pick && !talking ? 'dim' : ''].join(' ');   // one copy of the picked card rises
@@ -1332,7 +1339,7 @@ function drawGame() {
     : G.history.slice(A.hist).flatMap(m => m.fx).map(f => f.owner ? { ...f, owner: rel(f.owner) } : f);
   if (st && st.kind === 'reveal') {   // the opponent's card, shown large and flown down onto its crossroad; the next step lands it
     const [tx, ty] = crossroadAt(dcr(st.cr)), rv = $('reveal');
-    rv.innerHTML = cardHTML(CARDS[st.card]); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
+    rv.innerHTML = cardHTML(formOf(st.card, st.player)); fitNames(rv); rv.style.setProperty('--tx', `${tx - STAGE.w / 2}px`); rv.style.setProperty("--ty", `${ty - (VIEW.port ? 560 : 300)}px`);
     rv.classList.remove('on'); void rv.offsetWidth; rv.classList.add('on'); sfx('reveal');
   }
   drawCoach($('coach'), d.lesson, d.rings);   // a lesson's coach (coach.js); none while steps play
@@ -1559,7 +1566,7 @@ function showStack(g, cr) {
 }
 function readStack(cr) {
   const st = V && V.game && viewerGame().board[cr]; if (!st || !st.length) return;
-  const card = u => `<div class="sc ${u.owner}">${cardHTML(CARDS[u.id], { str: u.str })}` +
+  const card = u => `<div class="sc ${u.owner}">${cardHTML(formOf(u.id, u.owner === 'A' ? V.you : opp()), { str: u.str })}` +
     (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `</div>`;
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();
   readOverlay(card(top) + (buried.length ? `<div class="under">${buried.map(card).join('')}</div>` : ''));
@@ -1567,7 +1574,7 @@ function readStack(cr) {
 function stackAt(cr) {
   const g = document.querySelector(`#board [data-cr="${cr}"]`), st = V && V.game && viewerGame().board[cr];
   if (!g || !st) return;
-  const card = (u, w, top) => { const c = CARDS[u.id];
+  const card = (u, w, top) => { const c = formOf(u.id, u.owner === 'A' ? V.you : opp());
     return `<div class="sc ${u.owner}">${cardHTML(c, { str: u.str, attrs: `style="--w:${w}px"` })}` +
       (u.timer ? `<div class="tm">Resolves in ${u.timer} turn${u.timer > 1 ? 's' : ''}</div>` : '') + `</div>`; };
   const top = st[st.length - 1], buried = st.slice(0, -1).reverse();

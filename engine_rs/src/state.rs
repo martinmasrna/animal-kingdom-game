@@ -628,9 +628,21 @@ impl State {
         *self.card_strength_counters[player as usize].get(&card).unwrap_or(&0)
     }
 
+    /// The legendary Dung Beetle's form reached, by the food `player`'s Hungry animals ate this game; any other card is itself.
+    pub fn eaten_form(&self, player: Player, card: CardId) -> CardId {
+        const FORMS: [&str; 4] = ["dung_beetle_legend", "dung_beetle_legend_form2", "dung_beetle_legend_form3", "dung_beetle_legend_form4"];
+        if !self.cname(card).starts_with("dung_beetle_legend") || player > 1 {
+            return card;
+        }
+        let n = self.hungry_eaten[player as usize];
+        let c = self.cfg();
+        let i = ["dung_beetle_legend_draw_at", "dung_beetle_legend_food_at", "dung_beetle_legend_play_at"].iter().filter(|k| n >= c.int(k)).count();
+        self.card_id(FORMS[i]).unwrap_or(card)
+    }
+
     pub fn deck_instance(&mut self, player: Player, card: CardId) -> Unit {
         let iid = self.new_iid();
-        let mut inst = Unit::new(card, player, iid);
+        let mut inst = Unit::new(self.eaten_form(player, card), player, iid);
         if let Some(c) = self.jelly_take(player, card) {
             inst.strength_counter = c as i16;
         }

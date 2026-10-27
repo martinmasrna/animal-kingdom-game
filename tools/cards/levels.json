@@ -5803,9 +5803,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "Martin, 2026-10-27: the dung beetle lives off what the giants ate; the payoff climbs in three tiers",
+      "note": "forms with a progress count (Martin, 2026-10-27)",
       "by": "claude",
-      "at": 1793116835
+      "at": 1793127998
     }
   },
   "black_widow": {
@@ -5920,6 +5920,28 @@
       "note": "Martin, 2026-10-27: the Krill's Titan discount at legendary size, paid in food (his text)",
       "by": "claude",
       "at": 1793117864
+    }
+  },
+  "dung_beetle_legend_form2": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: draw a card. Evolves when your Hungry animals have eaten 25 food."
+      },
+      "by": "claude",
+      "at": 1793127998
+    }
+  },
+  "dung_beetle_legend_form3": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: draw a card and gain 10 food. Evolves when your Hungry animals have eaten 40 food."
+      },
+      "by": "claude",
+      "at": 1793127998
     }
   }
 }

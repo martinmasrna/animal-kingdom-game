@@ -20,9 +20,10 @@ from ..decks import LADDER_DECK_NAMES, PREMADE_DECKS, load_premade_deck
 from ..engine import rules, statics
 from ..engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction, action_from_dict
 from ..engine.cards import DECKLISTS, load_cards
+from ..engine.config import Config
 from ..engine.effects import roar_condition
 from ..engine.maps import load_map
-from ..engine.state import EngineError, GameState, Result, new_game, other_player
+from ..engine.state import EATEN_FORMS, EngineError, GameState, Result, new_game, other_player
 from ..engine.strength import card_strength, effective_strength, placement_strength
 from ..sim.runner import make_bot
 from . import tutorial
@@ -643,6 +644,7 @@ class Match:
                       **({"ready": True} if roar_condition(st, s, u.card_id) or conditional_reach(st, u.card_id) else {})}
                      for u in st.hands[s]],
             "handCount": {p: len(st.hands[p]) for p in "AB"},
+            "eaten": {p: st.hungry_eaten.get(p, 0) for p in "AB"},   # what each side's Hungry animals ate (EVOLVES_AT)
             # the opponent's hand, face up, while they play with it revealed (your legendary Giraffe)
             **({"revealedHand": [{"iid": u.iid, "id": u.card_id, "str": placement_strength(st, u)} for u in st.hands[opp]]}
                if statics.hand_revealed(st, opp) else {}),
@@ -770,6 +772,13 @@ def card_pool() -> list[dict]:
              # A variable-strength card (Python) prints 0: its text says what it gains ("+1 for each removed animal").
              "str": 0 if c.is_dynamic else c.base_strength, "text": c.text,
              "kw": sorted(c.keywords), "cost": c.food_cost, "habitat": c.habitat,
-             "related": list(c.related or ahead.get(c.id, ())), "evolves": c.evolves or bool(ahead.get(c.id))}
+             "related": list(c.related or ahead.get(c.id, ())), "evolves": c.evolves or bool(ahead.get(c.id)),
+             **({"evolvesAt": EVOLVES_AT[c.id]} if c.id in EVOLVES_AT else {})}
             for c in CARDS.values()]
+
+
+# The legendary Dung Beetle's forms but the last: the food its owner's Hungry animals must have eaten for the next one. The
+# game screen prints the count towards it after the text, "(14/25)" (Martin, 2026-10-27).
+_CFG = Config.default()
+EVOLVES_AT = dict(zip(EATEN_FORMS, (_CFG.dung_beetle_legend_draw_at, _CFG.dung_beetle_legend_food_at, _CFG.dung_beetle_legend_play_at)))
 

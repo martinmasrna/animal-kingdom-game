@@ -1217,6 +1217,12 @@ fn eat(st: &mut State, unit: &Unit, cr: Cr) {
     if eaten > 0 {
         lose_food(st, unit.owner, eaten, Some(unit.card));
         st.hungry_eaten[unit.owner as usize] += eaten;
+        // the legendary Dung Beetle evolves in hand (in the deck, as it's drawn)
+        let evolving: Vec<(i64, CardId)> = st.hands[unit.owner as usize].iter()
+            .filter_map(|u| { let f = st.eaten_form(unit.owner, u.card); (f != u.card).then_some((u.iid, f)) }).collect();
+        for (iid, f) in evolving {
+            transform(st, iid, f);
+        }
     }
     if eaten < n {
         if let Some(u) = st.unit_by_iid_mut(unit.iid) {

@@ -38,6 +38,9 @@ from .cards import Card, load_cards
 from .config import Config
 from .maps import GameMap, load_map
 
+# The legendary Dung Beetle's forms, in order: each evolves at the next food count its owner's Hungry animals ate.
+EATEN_FORMS = ("dung_beetle_legend", "dung_beetle_legend_form2", "dung_beetle_legend_form3", "dung_beetle_legend_form4")
+
 
 class EngineError(Exception):
     """Raised on an illegal engine operation (bad action, unsupported state)."""
@@ -437,9 +440,19 @@ class GameState:
         base = card.base_strength if isinstance(card.base_strength, int) else 0
         return self.config.jelly_strength - base - self.card_strength_counters.get(player, {}).get(card_id, 0)
 
+    def eaten_form(self, player: str, card_id: str) -> str:
+        """The legendary Dung Beetle's form reached ("Evolves when your Hungry animals have eaten N food"), by the food
+        `player`'s Hungry animals ate this game; any other card is itself."""
+        if card_id not in EATEN_FORMS:
+            return card_id
+        cfg, n = self.config, self.hungry_eaten.get(player, 0)
+        return EATEN_FORMS[sum(n >= at for at in (cfg.dung_beetle_legend_draw_at, cfg.dung_beetle_legend_food_at,
+                                                  cfg.dung_beetle_legend_play_at))]
+
     def deck_instance(self, player: str, card_id: str) -> "UnitInstance":
-        """An instance of a card just taken out of `player`'s deck, at the royal jelly's strength if it reached it."""
-        inst = UnitInstance(card_id, player, self.new_iid())
+        """An instance of a card just taken out of `player`'s deck, at the royal jelly's strength if it reached it, and in
+        the form it has evolved to there (the legendary Dung Beetle)."""
+        inst = UnitInstance(self.eaten_form(player, card_id), player, self.new_iid())
         counter = self.jelly_take(player, card_id)
         if counter is not None:
             inst.strength_counter = counter

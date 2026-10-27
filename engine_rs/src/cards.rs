@@ -83,7 +83,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
-        | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend" => &[OnPlace],
+        | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend_form2" | "dung_beetle_legend_form3" | "dung_beetle_legend_form4" => &[OnPlace],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
         "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "queen_ant" | "scout_bee" | "army_ant_legend"
@@ -1081,19 +1081,18 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("whale_shark", OnEndOfTurn) => draws(st, unit, 1),
-        ("dung_beetle_legend", OnPlace) => {
-            // by the food your Hungry animals ate this game; pushed last-first so the draw resolves first, as in Python
-            let eaten = if owner <= B { st.hungry_eaten[owner as usize] } else { 0 };
-            if eaten >= cfg(st, "dung_beetle_legend_play_at") {
+        ("dung_beetle_legend_form2", OnPlace) | ("dung_beetle_legend_form3", OnPlace) | ("dung_beetle_legend_form4", OnPlace) => {
+            // the legendary Dung Beetle's later forms; pushed last-first so the draw resolves first, as in Python
+            let name = st.cname(unit.card);
+            let form = if name.ends_with("form4") { 4 } else if name.ends_with("form3") { 3 } else { 2 };
+            if form >= 4 {
                 push_play_extra(st, owner, None, false);
             }
-            if eaten >= cfg(st, "dung_beetle_legend_food_at") {
+            if form >= 3 {
                 let f = cfg(st, "dung_beetle_legend_food");
                 push_gain(st, owner, f);
             }
-            if eaten >= cfg(st, "dung_beetle_legend_draw_at") {
-                push_draw(st, owner, 1);
-            }
+            push_draw(st, owner, 1);
         }
         ("oxpecker", OnPlace) => st.effect_stack.push(vmap!("op" => Value::s("oxpecker"), "player" => pn(owner))),
         ("anteater", OnPlace) => st.effect_stack.push(vmap!("op" => Value::s("anteater"), "player" => pn(owner))),

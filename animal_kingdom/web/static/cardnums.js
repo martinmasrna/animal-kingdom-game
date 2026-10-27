@@ -44,7 +44,8 @@ export const CARD_NUMS = [
   "beaver", "macaw", "toad", "locust_legend", "cockroach_legend", "roach", "mole_legend", "bat_legend", "golden_egg", "woodpecker", "warthog", "albatross", "peacock", "dolphin", "stag_beetle",
   "guard_bee", "forager_ant", "queen_ant", "scout_bee", "ant", "bee_legend_2", "fawn", "locust_swarm", "electric_eel", "tiger_legend", "ocelot", "stick_insect",
   "young_bee", "young_ant",
-  "hercules_beetle",
+  "hercules_beetle", "hammerhead", "krill", "dung_beetle_legend", "krill_legend", "dung_beetle_legend_form2", "dung_beetle_legend_form3",
+  "dung_beetle_legend_form4",
 ];
 
 // A retired card's successor (the same animal under a new id, or its exact effect on another animal), which an old deck

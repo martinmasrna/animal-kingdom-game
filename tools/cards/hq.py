@@ -28,6 +28,7 @@ As a command, for Claude:
     .venv/bin/python tools/cards/hq.py crop ID [--crop x,y,d|reset] [--strip x,y,z|reset] [--full y|reset]   (all three reset: no painting)
     .venv/bin/python tools/cards/hq.py add NAME HABITAT [--species S]   a planned card: animal and habitat only
     .venv/bin/python tools/cards/hq.py token MAKER ID NAME STR [--tags T,U]   a token MAKER's effect places
+    .venv/bin/python tools/cards/hq.py stage MAKER ID TEXT            the next form MAKER evolves into (its rarity, name, strength, tags)
 
 A planned card becomes a card (in the reserve) once it has a rarity and a strength. Every edit is checked against the
 engine's card rules before it is written. This is the only way cards change: the workspace's hook
@@ -454,6 +455,22 @@ def add_token(maker: str, cid: str, name: str, strength: int, tags: list[str]) -
     return f"{cid}: a token of {maker}"
 
 
+def add_stage(maker: str, cid: str, text: str) -> str:
+    """The next form an evolving card becomes, shown after its earlier forms (the legendary Butterfly's stages): the
+    maker's rarity, name, strength and tags, its own text."""
+    cards = _read(CARDS)
+    if any(c["id"] == cid for c in cards["cards"]):
+        raise Refused(f"{cid} already exists")
+    m = _rec(cards, _row(maker)["id"])
+    rec = {"id": cid, "name": m["name"], "status": "token", "rarity": m["rarity"], "tags": list(m.get("tags", [])),
+           "base_strength": m["base_strength"], "keywords": [], "text": text, "stage": len(m.get("related", [])) + 2}
+    validate_card_record(rec)
+    cards["cards"].append(rec)
+    m["related"], m["evolves"] = [*m.get("related", []), cid], True
+    _save_cards(cards)
+    return f"{cid}: form {rec['stage']} of {maker}"
+
+
 def deck_name(deck: str, name: str) -> str:
     """Rename a starter deck (the name players see). A player's saved copy keeps the name it was saved with."""
     decklists = _read(DECKLISTS)
@@ -585,6 +602,7 @@ def main(argv=None) -> None:
     s = sub.add_parser("delete"); s.add_argument("id")
     s = sub.add_parser("rename"); s.add_argument("old"); s.add_argument("new")
     s = sub.add_parser("add"); s.add_argument("name"); s.add_argument("habitat", choices=HABITATS); s.add_argument("--species", default="")
+    s = sub.add_parser("stage"); s.add_argument("maker"); s.add_argument("id"); s.add_argument("text")
     s = sub.add_parser("token"); s.add_argument("maker"); s.add_argument("id"); s.add_argument("name"); s.add_argument("strength", type=int); s.add_argument("--tags", default="")
     s = sub.add_parser("crop"); s.add_argument("id"); s.add_argument("--crop"); s.add_argument("--strip"); s.add_argument("--full")
     a = ap.parse_args(argv)
@@ -616,6 +634,8 @@ def main(argv=None) -> None:
             print(rename(a.old, a.new))
         elif a.cmd == "add":
             print(add(a.name, a.habitat, a.species))
+        elif a.cmd == "stage":
+            print(add_stage(a.maker, a.id, a.text))
         elif a.cmd == "token":
             print(add_token(a.maker, a.id, a.name, a.strength, [t for t in a.tags.split(",") if t]))
         elif a.cmd == "crop":

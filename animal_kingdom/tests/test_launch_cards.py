@@ -94,20 +94,31 @@ def test_roach_king_bitten_below_0_comes_back_once_with_only_its_growth():
     assert hand_ids(s, "B") == ["lion"]                        # one fall, one card
 
 
-def test_the_legendary_dung_beetle_pays_by_the_food_its_hungry_animals_ate():
-    def roar(eaten):
-        s = make_state(hands={"A": ["dung_beetle_legend", "lion"]}, decks={"A": ["mouse"] * 3, "B": []},
-                       food={"A": 0, "B": 0})
-        s.hungry_eaten["A"] = eaten
-        rules.apply_action(s, PlaceAction("dung_beetle_legend", ("cr", "1,2")))
+def test_the_legendary_dung_beetle_evolves_by_the_food_its_hungry_animals_ate():
+    """"Evolves at 10 food eaten by your Hungry animals": in hand as they eat, in the deck as it's drawn."""
+    s = make_state(hands={"A": ["dung_beetle_legend"]}, decks={"A": ["dung_beetle_legend"], "B": []}, food={"A": 30, "B": 0})
+    rhino = put(s, "1,1", "rhinoceros", "A")
+    for _ in range(4):
+        assert hand_ids(s, "A") == ["dung_beetle_legend"]
+        effects._eat(s, rhino, "1,1")                           # 3 a meal: 3, 6, 9, then 12
+    assert s.hungry_eaten["A"] == 12 and hand_ids(s, "A") == ["dung_beetle_legend_form2"]
+    s.hungry_eaten["A"] = CFG.dung_beetle_legend_play_at
+    s.draw("A", 1)
+    assert sorted(hand_ids(s, "A")) == ["dung_beetle_legend_form2", "dung_beetle_legend_form4"]
+
+
+def test_the_legendary_dung_beetle_forms_roar():
+    def roar(form):
+        s = make_state(hands={"A": [form, "lion"]}, decks={"A": ["mouse"] * 3, "B": []}, food={"A": 0, "B": 0})
+        rules.apply_action(s, PlaceAction(form, ("cr", "1,2")))
         return s
-    s = roar(9)
-    assert hand_ids(s, "A") == ["lion"] and s.food["A"] == 0 and s.pending is None   # below the first tier: nothing
-    s = roar(10)
+    s = roar("dung_beetle_legend")
+    assert hand_ids(s, "A") == ["lion"] and s.food["A"] == 0 and s.pending is None   # the first form: nothing
+    s = roar("dung_beetle_legend_form2")
     assert sorted(hand_ids(s, "A")) == ["lion", "mouse"] and s.food["A"] == 0
-    s = roar(25)
+    s = roar("dung_beetle_legend_form3")
     assert len(s.hands["A"]) == 2 and s.food["A"] == CFG.dung_beetle_legend_food and s.pending is None
-    s = roar(40)
+    s = roar("dung_beetle_legend_form4")
     assert s.food["A"] == CFG.dung_beetle_legend_food and s.pending is not None    # and another animal to play
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
     assert s.top_unit("1,1").card_id == "lion"
