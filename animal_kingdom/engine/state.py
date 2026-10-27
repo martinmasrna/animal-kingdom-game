@@ -305,6 +305,7 @@ class GameState:
         pile_owners: Optional[list] = None,
         inked: Optional[set[int]] = None,
         roar_twice: Optional[dict[str, int]] = None,
+        hungry_eaten: Optional[dict[str, int]] = None,
         last_roar: Optional[dict[str, str]] = None,
         jelly: Optional[dict[str, dict[str, Any]]] = None,
     ):
@@ -325,6 +326,8 @@ class GameState:
         self.inked = inked if inked is not None else set()
         # Woodpecker: player -> the turn_counter in which that player's next Roar happens twice (spent by that Roar).
         self.roar_twice = roar_twice if roar_twice is not None else {}
+        # The legendary Dung Beetle: player -> food that player's Hungry animals have eaten this game.
+        self.hungry_eaten = hungry_eaten if hungry_eaten is not None else {}
         # The Macaw: player -> the card whose Roar that player played last (public; a Macaw's copy counts as the copied card).
         self.last_roar = last_roar if last_roar is not None else {}
         # The legendary Bee's royal jelly: player -> card id -> [how many deck copies it reached, the counter that made them
@@ -545,6 +548,7 @@ class GameState:
         new.pile_owners = list(self.pile_owners)
         new.inked = set(self.inked)
         new.roar_twice = dict(self.roar_twice)
+        new.hungry_eaten = dict(self.hungry_eaten)
         new.last_roar = dict(self.last_roar)
         new.jelly = {p: dict(j) for p, j in self.jelly.items()}
         new.result = self.result  # Result is frozen/immutable - safe to share
@@ -611,6 +615,7 @@ class GameState:
             "pile_owners": list(self.pile_owners),
             "inked": sorted(self.inked),
             "roar_twice": dict(sorted(self.roar_twice.items())),
+            "hungry_eaten": dict(sorted(self.hungry_eaten.items())),
             "last_roar": dict(sorted(self.last_roar.items())),
             "jelly": {p: dict(sorted(j.items())) for p, j in sorted(self.jelly.items())},
         }
@@ -660,6 +665,7 @@ class GameState:
             pile_owners=list(d["pile_owners"]) if "pile_owners" in d else None,
             inked={int(i[0] if isinstance(i, list) else i) for i in (d.get("inked") or [])},   # [iid, until]: saved while ink wore off
             roar_twice=dict(d.get("roar_twice") or {}),
+            hungry_eaten=dict(d.get("hungry_eaten") or {}),
             last_roar=dict(d.get("last_roar") or {}),
             jelly={p: dict(j) for p, j in (d.get("jelly") or {}).items()},
         )

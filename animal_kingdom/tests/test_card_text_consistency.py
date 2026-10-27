@@ -30,6 +30,7 @@ COSTS_RE = re.compile(r"costs (\d+) food", re.IGNORECASE)
 # card_id -> config attrs, one per "gain N food/more" number in text, in order.
 FOOD_CONSTANTS: dict[str, list[str]] = {
     "army_ant_legend": ["army_ant_legend_per"],
+    "dung_beetle_legend": ["dung_beetle_legend_food"],
     "forager_ant": ["forager_ant_food"],
     "worker_ant": ["worker_ant_per"],
     "worker_wasp": ["worker_wasp_per_place"],
@@ -376,6 +377,8 @@ def test_the_launch_decks_other_numbers_match_config():
     words = {"two": 2, "three": 3}
     assert words[re.search(r"add (\w+) random younglings", c["stork"].text).group(1)] == cfg.stork_younglings
     assert int(re.search(r"put (\d+) animals from your opponent's Remove Pile", c["raven_legend"].text).group(1)) == cfg.raven_legend_steals
+    tiers = [int(n) for n in re.findall(r"(\d+) or more", c["dung_beetle_legend"].text)]
+    assert tiers == [cfg.dung_beetle_legend_draw_at, cfg.dung_beetle_legend_food_at, cfg.dung_beetle_legend_play_at]
     assert words[re.search(r"shuffle (\w+) Cuckoo Eggs", c["cuckoo"].text).group(1)] == cfg.cuckoo_eggs
     assert words[re.search(r"shuffle (\w+) Golden Eggs", c["goose_legend"].text).group(1)] == cfg.aurum_eggs
     assert words[re.search(r"place (\w+) Worms", c["earthworm"].text).group(1)] == cfg.earthworm_worms

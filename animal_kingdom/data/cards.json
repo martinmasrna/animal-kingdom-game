@@ -3808,7 +3808,7 @@
         "Beetle"
       ],
       "base_strength": 4,
-      "text": "Dusk: draw a card for each adjacent Hungry ally.",
+      "text": "Roar: if your Hungry animals ate 10 or more food this game, draw a card; 25 or more, also gain 10 food; 40 or more, also play another animal.",
       "species": "Dung Beetle",
       "habitat": "Savanna",
       "unnamed": true,

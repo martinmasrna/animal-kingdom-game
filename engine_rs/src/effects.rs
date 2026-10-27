@@ -1208,6 +1208,7 @@ fn eat(st: &mut State, unit: &Unit, cr: Cr) {
     let eaten = if unit.owner <= B { n.min(st.food[unit.owner as usize]) } else { 0 };
     if eaten > 0 {
         lose_food(st, unit.owner, eaten, Some(unit.card));
+        st.hungry_eaten[unit.owner as usize] += eaten;
     }
     if eaten < n {
         if let Some(u) = st.unit_by_iid_mut(unit.iid) {

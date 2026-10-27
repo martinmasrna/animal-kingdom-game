@@ -457,6 +457,8 @@ pub struct State {
     pub result: Option<GameResult>,
     pub inked: BTreeSet<i64>,
     pub roar_twice: [Option<i32>; 2],
+    /// The legendary Dung Beetle: food each player's Hungry animals have eaten this game.
+    pub hungry_eaten: [i32; 2],
     pub last_roar: [Option<CardId>; 2],
     pub jelly: [FxHashMap<CardId, (i32, i32)>; 2],
     /// Whether `jelly[p]` exists at all (Python keeps the player's dict once the legendary Bee roared, empty or not).
@@ -503,6 +505,7 @@ impl Clone for State {
             result: self.result.clone(),
             inked: self.inked.clone(),
             roar_twice: self.roar_twice,
+            hungry_eaten: self.hungry_eaten,
             last_roar: self.last_roar,
             jelly: self.jelly.clone(),
             jelly_set: self.jelly_set,
@@ -888,6 +891,12 @@ impl State {
                 roar_twice.insert(player_name(p as Player).to_string(), sj::Value::from(t));
             }
         }
+        let mut hungry_eaten = sj::Map::default();
+        for p in 0..2 {
+            if self.hungry_eaten[p] != 0 {
+                hungry_eaten.insert(player_name(p as Player).to_string(), sj::Value::from(self.hungry_eaten[p]));
+            }
+        }
         let mut last_roar = sj::Map::default();
         for p in 0..2 {
             if let Some(c) = self.last_roar[p] {
@@ -926,6 +935,7 @@ impl State {
             "pile_owners": self.pile_owners.iter().map(|o| o.map(|p| sj::Value::String(player_name(p).to_string())).unwrap_or(sj::Value::Null)).collect::<Vec<_>>(),
             "inked": self.inked.iter().copied().collect::<Vec<i64>>(),
             "roar_twice": roar_twice,
+            "hungry_eaten": hungry_eaten,
             "last_roar": last_roar,
             "jelly": jelly_m,
         })
@@ -971,6 +981,9 @@ impl State {
             }
             if let Some(t) = d.get("roar_twice").and_then(|c| c.get(pn)).and_then(|c| c.as_i64()) {
                 st.roar_twice[p] = Some(t as i32);
+            }
+            if let Some(n) = d.get("hungry_eaten").and_then(|c| c.get(pn)).and_then(|c| c.as_i64()) {
+                st.hungry_eaten[p] = n as i32;
             }
             if let Some(c) = d.get("last_roar").and_then(|c| c.get(pn)).and_then(|c| c.as_str()) {
                 st.last_roar[p] = Some(cid(c));
@@ -1056,6 +1069,7 @@ impl State {
             result: None,
             inked: BTreeSet::new(),
             roar_twice: [None, None],
+            hungry_eaten: [0, 0],
             last_roar: [None, None],
             jelly: [FxHashMap::default(), FxHashMap::default()],
             jelly_set: [false, false],

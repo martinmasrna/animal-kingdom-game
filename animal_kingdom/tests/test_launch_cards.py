@@ -94,9 +94,35 @@ def test_roach_king_bitten_below_0_comes_back_once_with_only_its_growth():
     assert hand_ids(s, "B") == ["lion"]                        # one fall, one card
 
 
-def test_the_legendary_dung_beetle_draws_at_dusk_for_each_adjacent_hungry_ally():
+def test_the_legendary_dung_beetle_pays_by_the_food_its_hungry_animals_ate():
+    def roar(eaten):
+        s = make_state(hands={"A": ["dung_beetle_legend", "lion"]}, decks={"A": ["mouse"] * 3, "B": []},
+                       food={"A": 0, "B": 0})
+        s.hungry_eaten["A"] = eaten
+        rules.apply_action(s, PlaceAction("dung_beetle_legend", ("cr", "1,2")))
+        return s
+    s = roar(9)
+    assert hand_ids(s, "A") == ["lion"] and s.food["A"] == 0 and s.pending is None   # below the first tier: nothing
+    s = roar(10)
+    assert sorted(hand_ids(s, "A")) == ["lion", "mouse"] and s.food["A"] == 0
+    s = roar(25)
+    assert len(s.hands["A"]) == 2 and s.food["A"] == CFG.dung_beetle_legend_food and s.pending is None
+    s = roar(40)
+    assert s.food["A"] == CFG.dung_beetle_legend_food and s.pending is not None    # and another animal to play
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
+    assert s.top_unit("1,1").card_id == "lion"
+
+
+def test_hungry_animals_count_what_they_eat_for_the_game():
+    s = make_state(food={"A": 3, "B": 0}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,2", "elephant", "A")                             # Hungry 5, with 3 food to eat
+    end_turn(s); end_turn(s)                                   # A's next Dawn
+    assert s.hungry_eaten["A"] == 3
+
+
+def test_the_legendary_oxpecker_draws_at_dusk_for_each_adjacent_hungry_ally():
     s = make_state(food={"A": 0, "B": 0}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    put(s, "2,2", "dung_beetle_legend", "A")
+    put(s, "2,2", "oxpecker_legend", "A")
     put(s, "1,2", "elephant", "A")                             # Hungry, yours: counts
     put(s, "2,1", "lion", "A")                                 # yours, not Hungry
     put(s, "3,2", "hippopotamus", "B")                         # Hungry, theirs

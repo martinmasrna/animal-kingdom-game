@@ -1104,6 +1104,8 @@ def _eat(state, unit, cr) -> None:
     try:
         eaten = min(n, state.food[unit.owner])
         lose_food(state, unit.owner, eaten, card=unit.card_id)
+        if eaten:
+            state.hungry_eaten[unit.owner] = state.hungry_eaten.get(unit.owner, 0) + eaten
         if eaten < n:
             unit.strength_counter -= n - eaten
             state.emit("strength", iid=unit.iid, card=unit.card_id, owner=unit.owner, n=eaten - n)
@@ -1868,8 +1870,20 @@ def _removes(max_attr=None, min_attr=None):
     return handler
 
 
-def _dung_beetle_legend_eot(state, unit, cr):
-    """The legendary Dung Beetle: Dusk: draw a card for each adjacent Hungry ally."""
+def _dung_beetle_legend_place(state, unit, cr):
+    """The legendary Dung Beetle, by the food your Hungry animals ate this game: 10 or more, draw a card; 25 or more, also
+    gain 10 food; 40 or more, also play another animal (Martin, 2026-10-27). In that order: the drawn card can be played."""
+    cfg, eaten = state.config, state.hungry_eaten.get(unit.owner, 0)
+    if eaten >= cfg.dung_beetle_legend_play_at:
+        _push_play_extra(state, unit.owner)
+    if eaten >= cfg.dung_beetle_legend_food_at:
+        _push_gain(state, unit.owner, cfg.dung_beetle_legend_food)
+    if eaten >= cfg.dung_beetle_legend_draw_at:
+        _push_draw(state, unit.owner, 1)
+
+
+def _oxpecker_legend_eot(state, unit, cr):
+    """The legendary Oxpecker: Dusk: draw a card for each adjacent Hungry ally."""
     _push_draw(state, unit.owner, sum(
         1 for nb in state.game_map.neighbors(cr)
         if (top := state.top_unit(nb)) and top.owner == unit.owner and statics.has_keyword(state, top, "Hungry", nb)))
@@ -3223,8 +3237,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "rhinoceros": {"on_place": _rhinoceros_place},
     "hippopotamus": {"on_enemy_placed_adjacent": _hippo_enemy_placed},
     "whale_shark": {"on_end_of_turn": _draw1},
-    "dung_beetle_legend": {"on_end_of_turn": _dung_beetle_legend_eot},
-    "oxpecker_legend": {"on_end_of_turn": _dung_beetle_legend_eot},   # until its own ability: the one it gave the Dung Beetle
+    "dung_beetle_legend": {"on_place": _dung_beetle_legend_place},
+    "oxpecker_legend": {"on_end_of_turn": _oxpecker_legend_eot},
     "oxpecker": {"on_place": _oxpecker_place},
     "anteater": {"on_place": _anteater_place},
     "dung_beetle": {"on_end_of_turn": _dung_beetle_eot},

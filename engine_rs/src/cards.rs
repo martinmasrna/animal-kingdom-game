@@ -83,12 +83,12 @@ pub fn hook_mask(card: &str) -> u32 {
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
-        | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" => &[OnPlace],
+        | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend" => &[OnPlace],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
         "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "queen_ant" | "scout_bee" | "army_ant_legend"
         | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "okapi" | "wildebeest"
-        | "dingo" | "sperm_whale_legend" | "oxpecker_legend" | "dung_beetle_legend" => &[OnEndOfTurn],
+        | "dingo" | "sperm_whale_legend" | "oxpecker_legend" => &[OnEndOfTurn],
         "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" => &[OnStartOfTurn],
         "wolf_legend_2" | "coyote" => &[OnFriendlyRoam],
         "fox" => &[OnCoverEnemy],
@@ -1081,7 +1081,21 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("whale_shark", OnEndOfTurn) => draws(st, unit, 1),
-        ("dung_beetle_legend", OnEndOfTurn) | ("oxpecker_legend", OnEndOfTurn) => {
+        ("dung_beetle_legend", OnPlace) => {
+            // by the food your Hungry animals ate this game; pushed last-first so the draw resolves first, as in Python
+            let eaten = if owner <= B { st.hungry_eaten[owner as usize] } else { 0 };
+            if eaten >= cfg(st, "dung_beetle_legend_play_at") {
+                push_play_extra(st, owner, None, false);
+            }
+            if eaten >= cfg(st, "dung_beetle_legend_food_at") {
+                let f = cfg(st, "dung_beetle_legend_food");
+                push_gain(st, owner, f);
+            }
+            if eaten >= cfg(st, "dung_beetle_legend_draw_at") {
+                push_draw(st, owner, 1);
+            }
+        }
+        ("oxpecker_legend", OnEndOfTurn) => {
             let n = st.map().neighbors(cr).iter().filter(|&&nb| st.top(nb).map(|t| t.owner == owner && statics::has_keyword(st, t, K_HUNGRY, Some(nb))).unwrap_or(false)).count() as i32;
             draws(st, unit, n);
         }
