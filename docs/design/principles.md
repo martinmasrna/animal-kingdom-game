@@ -43,13 +43,12 @@ The rarity question is what goes wrong if the opponent faces this card three tim
   1. The build-around (a deck's whole plan, like Black Swan; few of these).
   2. The amplifier, which takes the plan the commons and rares already have and pushes it over the edge, without changing it (King Theron, Queen Adira: Cats play the same with or without them).
   3. The generally excellent card, far stronger than a common and good in many decks (Prince Leo and Princess Lea, Aurum, Scarlett).
-- **No common plays another card.** An extra play is a rare's or a legendary's effect. A common may still place a token, since it goes on a random empty crossroad ("I don't think there should be extra placement common cards"; "the extra tokens are fine cause they only go on empty crossroads and it's random as well", Martin, 2026-10-27).
+- **No extra placements on commons.** Playing another card is a rare's or a legendary's effect. A common may still place a token on a random empty crossroad (Martin, 2026-10-27).
 - **A card that is one keyword and nothing else is a common** (Martin, 2026-10-21). A rare or legendary with a keyword earns its rarity with something more: a second keyword or an effect.
 - **A higher rarity gets a better rate.** A rare must be stronger than a common, and a legendary stronger than a rare, if they were to have the same effect. Ideally they shouldn't, so this is only an anchor (Martin, 2026-10-26).
 
 ## Guardrails
 
-- No burst extra placements, and an instant-capture audit for every chaining effect near an enemy den.
 - No effect that grants a connection-ignoring placement able to reach the den.
 - No infinite combos.
 - A new keyword needs at least three cards.
@@ -74,4 +73,4 @@ Games imagined while designing are reasoning, not evidence: only real play settl
 - Legendaries are a specific named individual of a real species that has a common or rare in the pool (Martin, 2026-10-08).
 - No "[adjective] animal" names that most people would see as the same animal (a Martial Eagle next to an Eagle). Species people tell apart are fine (Polar Bear, Grizzly, Black Bear).
 - Strength follows the animal's real size, at least for commons and rares (a common Lion is never a 1). The strongest utility effects (extra placements, extra actions, draw) therefore sit on small, low-strength animals (Martin, 2026-10-05).
-- No pets and no farm animals. Farm animals appear as their wild forms (Martin, 2026-10-08).
+- No pets and no farm animals unless they appear as their wild forms (Martin, 2026-10-08).
