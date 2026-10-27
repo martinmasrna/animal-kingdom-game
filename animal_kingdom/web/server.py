@@ -782,6 +782,20 @@ async def league_retire(req):
     return web.json_response({"retired": out})
 
 
+async def league_reset_people(req):
+    """People back to a fresh 1500 with placement games ahead: {ids: [profile ids]}; bots can't be reset here (Martin,
+    2026-10-27, once the league became his 17 Expert lists and the scale moved)."""
+    league_auth(req)
+    body = await req.json()
+    ids = body.get("ids") if isinstance(body, dict) else None
+    if not isinstance(ids, list) or len(ids) > 100:
+        raise web.HTTPBadRequest(text="ids: a list of at most 100")
+    out = [i for i in map(str, ids) if not ranking.parse_bot(i)]
+    with ladder.db:
+        ladder.db.executemany("DELETE FROM ladder WHERE id = ?", [(i,) for i in out])
+    return web.json_response({"reset": out})
+
+
 async def league_decks(req):
     """New lists for the pool: [{slug, name, list, source, parent, start, levels}]; each legal, distinct list joins as a
     placing player per pilot level (`levels`, every level when absent: Martin's 2026-10-27 league is Expert only), starting at
@@ -1382,6 +1396,7 @@ def make_app() -> web.Application:
         web.get("/api/meta", meta_overview),
         web.get("/api/meta/archetype", meta_archetype),
         web.post("/api/league/decks", league_decks),
+        web.post("/api/league/reset_people", league_reset_people),
         web.post("/api/league/report", league_report_post),
         web.get("/api/league/report", league_report),
         web.delete("/api/ranked", leave_ranked),

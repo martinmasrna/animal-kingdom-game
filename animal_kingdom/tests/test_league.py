@@ -140,6 +140,15 @@ def test_a_retired_lists_twin_comes_back_fresh_and_only_at_the_levels_asked(monk
     _run(monkeypatch, tmp_path, body)
 
 
+def test_a_person_can_be_reset_but_not_a_bot(monkeypatch, tmp_path):
+    async def body(c, server):
+        h = {"X-AK-League-Key": "k-test"}
+        server.ladder.result("p1", "bot:expert:cats"); bot = server.ladder.get("bot:expert:cats").games
+        j = await (await c.post("/api/league/reset_people", json={"ids": ["p1", "bot:expert:cats"]}, headers=h)).json()
+        assert j["reset"] == ["p1"] and server.ladder.get("p1").games == 0 and server.ladder.get("bot:expert:cats").games == bot
+    _run(monkeypatch, tmp_path, body)
+
+
 def test_a_game_posted_twice_is_rated_once(monkeypatch, tmp_path):
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}
