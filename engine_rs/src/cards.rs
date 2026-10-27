@@ -737,8 +737,9 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("termite_queen", OnPlace) => push_play_extra(st, owner, Some(vmap!("tags_all" => Value::List(vec![Value::s("Colony")]), "tags_none" => Value::List(vec![Value::s("Queen")]))), false),
         ("queen_bee", OnPlace) => {
-            // Roar: play a Young Bee: a free play like Prince Leo's, of a token made out of thin air
-            st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(owner), "card_id" => Value::s("young_bee"), "make" => Value::Bool(true)));
+            // Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand, made out of thin air; the owner picks
+            let options = ["worker_bee", "guard_bee", "nurse_bee"].into_iter().map(Value::s).collect();
+            push_choose(st, owner, options, "make_in_hand", false, Map::new());
         }
         ("soldier_ant", OnPlace) | ("muskrat", OnPlace) => {
             if conditional(st, unit) {
@@ -1383,6 +1384,10 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
                 crate::emit!(st, "unremove", vmap!("card" => card_v(st, card), "owner" => from_owner.map(pn).unwrap_or(Value::Null), "to" => pn(chooser)));
                 gain_to_hand(st, chooser, card, 0);
             }
+        }
+        "make_in_hand" => {
+            let Some(card) = choice.as_str().and_then(|s| st.card_id(s)) else { return };
+            gain_to_hand(st, chooser, card, 0);
         }
         "duplicate" => {
             let iid = choice.as_i64().unwrap_or(-1);

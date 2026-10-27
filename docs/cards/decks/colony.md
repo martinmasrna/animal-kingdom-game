@@ -21,14 +21,14 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 |---|---:|---|---:|---|
 | **Termite King** | 2 | Colony | 5 | Roar: draw a card for each Colony Queen you control. |
 | **Termite Queen** | 2 | Colony, Queen | 2 | Roar: play a non-Queen Colony animal. |
+| **Queen Bee** | 2 | Colony, Queen | 3 | Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Nurse Bee** | 2 | Colony, Nurse | 3 | Flight. Roar: if you control 4 or more Colony animals, draw 2 cards. |
-| **Nurse Bumblebee** | 2 | Colony, Nurse | 3 | Flight. Roar: draw a Colony animal. |
-| **Queen Bee** | 3 | Colony, Queen | 3 | Roar: play a Young Bee. |
+| **Nurse Bumblebee** | 3 | Colony, Nurse | 3 | Flight. Roar: draw a Colony animal. |
 | **Soldier Wasp** | 3 | Colony, Soldier | 3 | Flight. Has +3 strength while you control 4 or more Colony animals. |
 | **Soldier Ant** | 3 | Colony, Soldier | 2 | Roar: if you control 4 or more Colony animals, remove an adjacent enemy. |
 | **Worker Ant** | 3 | Colony, Worker | 2 | Roar: gain 3 food for each animal you control. |

@@ -14,6 +14,7 @@ Martin's calls on which rarity a card sits at, dated. A log, not criteria: the r
 ## 2026-10-27
 
 - No common plays another card. The Remora became a rare at 3 and the Fish starter runs two Great White Sharks again; the Alley Cat's extra play moves to the Ocelot rare, since an alley cat doesn't read as a rare, and the Alley Cat takes the Ocelot's old draw of 2 common Cats at strength 1, to try.
+- Queen Bee becomes a rare, so every queen is rare or legendary and every worker, soldier and nurse a common. Her Young Bee was weak for a rare, so she now adds a Worker Bee, Soldier Bee or Nurse Bee to your hand, her owner's pick.
 
 ## 2026-10-22, the pass by the three-copies test
 

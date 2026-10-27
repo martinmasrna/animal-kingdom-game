@@ -3149,9 +3149,9 @@
         "prev_note": "",
         "prev": "Roar: play a Worker animal."
       },
-      "note": "Martin, 2026-10-24: a free play, anywhere legal, like Leo and Lea; the token is made out of thin air",
+      "note": "Martin's text, 2026-10-27: the queen makes the hive's castes, the owner picks which",
       "by": "claude",
-      "at": 1792863120
+      "at": 1793096475
     },
     "strength": {
       "review": {
@@ -3162,6 +3162,16 @@
       "note": "Martin's sheet, 2026-10-24",
       "by": "claude",
       "at": 1792861465
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "All queens are rare or legendary, workers, soldiers and nurses common (Martin, 2026-10-27)",
+      "by": "claude",
+      "at": 1793096474
     }
   },
   "bee_legend": {

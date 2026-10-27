@@ -1689,6 +1689,11 @@ def _then_pile_to_hand(state, step, card_id):
         gain_to_hand(state, step["chooser"], card_id)
 
 
+def _then_make_in_hand(state, step, card_id):
+    """Queen Bee: the chosen card is made out of thin air in your hand."""
+    gain_to_hand(state, step["chooser"], card_id)
+
+
 def _then_duplicate(state, step, iid):
     """Orangutan: a copy of the chosen hand card, its strength counter included."""
     inst = next((u for u in state.hands[step["chooser"]] if u.iid == iid), None)
@@ -1714,6 +1719,7 @@ THEN = {
     "hand_grant": _then_hand_grant, "stray_dog": _then_stray_dog, "copy_and_add": _then_copy_and_add,
     "copy_from_hand": _then_copy_from_hand, "return_ally": _then_return_ally,
     "cuckoo": _then_cuckoo, "remove_and_draw": _then_remove_and_draw, "pile_to_hand": _then_pile_to_hand,
+    "make_in_hand": _then_make_in_hand,
     "duplicate": _then_duplicate, "discard": _then_discard, "roam_to": _then_roam_to,
 }
 
@@ -2159,9 +2165,9 @@ def _termite_king_place(state, unit, cr):
 
 
 def _queen_bee_place(state, unit, cr):
-    """Queen Bee: Roar: play a Young Bee. A free play like Prince Leo's, anywhere a placement is legal, of a token made
-    out of thin air (Martin, 2026-10-24)."""
-    state.effect_stack.append({"op": "play_named", "chooser": unit.owner, "card_id": "young_bee", "make": True})
+    """Queen Bee: Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand, made out of thin air; the owner picks
+    which (Martin, 2026-10-27)."""
+    _push_choose(state, unit.owner, ["worker_bee", "guard_bee", "nurse_bee"], "make_in_hand")
 
 
 def _queen_ant_eot(state, unit, cr):

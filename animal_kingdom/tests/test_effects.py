@@ -1024,11 +1024,9 @@ def test_falstaffs_extra_food_is_its_own_doing():
     assert [(e["cause"], e["cause_iid"]) for e in rider] == [("bumblebee_legend", s.board["1,1"][-1].iid)]
 
 
-def test_queen_bee_plays_a_young_bee_made_out_of_thin_air():
-    """A free play like Prince Leo's, anywhere a placement is legal, not only next to her (Martin, 2026-10-24)."""
+def test_queen_bee_makes_the_chosen_bee_in_hand():
     s = make_state(current="A", hands={"A": ["queen_bee"]}, decks={"A": [], "B": []})
     rules.apply_action(s, PlaceAction("queen_bee", ("cr", "1,2")))
-    targets = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "young_bee"}
-    assert "2,2" in targets and "1,1" in targets
-    rules.apply_action(s, PlaceAction("young_bee", ("cr", "2,2")))
-    assert s.board["2,2"][-1].card_id == "young_bee" and hand_ids(s, "A") == []
+    assert sorted(s.pending["options"]) == ["guard_bee", "nurse_bee", "worker_bee"]
+    rules.apply_action(s, ChoiceAction("nurse_bee"))
+    assert hand_ids(s, "A") == ["nurse_bee"] and s.decks["A"] == []

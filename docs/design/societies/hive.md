@@ -46,8 +46,8 @@ The one the colony is for. She lays, and everyone else exists to feed her brood.
 | **Queen Melissia** | legendary | 3 | Roar: draw a Worker, a Soldier and a Nurse Colony animal. | Meadow |
 | **Queen Solenia** | legendary | 3 | Dusk: gain 2 food for each animal you control. | Jungle |
 | **Queen Ant** | rare | 5 | Dusk: place a Young Ant on an adjacent empty crossroad. | Forest |
+| **Queen Bee** | rare | 3 | Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand. | Meadow |
 | **Termite Queen** | rare | 2 | Roar: play a non-Queen Colony animal. | Savanna |
-| **Queen Bee** | common | 3 | Roar: play a Young Bee. | Meadow |
 
 <!-- cards:end -->
 
