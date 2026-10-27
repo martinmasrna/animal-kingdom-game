@@ -21,7 +21,7 @@ Its cards carried over from the old pool; their reasoning is in the git history 
 |---|---:|---|---:|---|
 | **Termite King** | 2 | Colony | 5 | Roar: draw a card for each Colony Queen you control. |
 | **Termite Queen** | 2 | Colony, Queen | 2 | Roar: play a non-Queen Colony animal. |
-| **Queen Bee** | 2 | Colony, Queen | 3 | Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand. |
+| **Queen Bee** | 2 | Colony, Queen | 5 | Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand. |
 
 ### Common
 

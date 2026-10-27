@@ -1354,19 +1354,19 @@ def test_the_legendary_cuckoo_is_a_bird():
 # --- Vesper: "Flight. When an enemy covers an allied Queen, place Vesper on it from your hand or deck." -------------
 
 def _queen_covered_by(coverer, *, b_hand=(), b_deck=(), extra=None):
-    """A's `coverer` covers B's Queen Bee on 2,2 (A holds 1,2, so 2,2 is in reach)."""
+    """A's `coverer` covers B's Nurse Bumblebee on 2,2 (A holds 1,2, so 2,2 is in reach)."""
     s = make_state(hands={"A": [coverer], "B": list(b_hand)}, decks={"A": ["lion"] * 3, "B": list(b_deck)})
     put(s, "1,2", "lion", "A")
-    put(s, "2,2", "queen_bee", "B")
+    put(s, "2,2", "nurse_bumblebee", "B")
     if extra:
         extra(s)
     rules.apply_action(s, PlaceAction(coverer, ("cr", "2,2")))
     return s
 
 
-def test_vesper_is_placed_from_hand_on_the_enemy_that_covers_an_allied_queen():
+def test_vesper_is_placed_from_hand_on_the_enemy_that_covers_an_allied_colony_animal():
     s = _queen_covered_by("lion", b_hand=["hornet_legend", "lion"])
-    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "lion", "hornet_legend"]
+    assert [u.card_id for u in s.board["2,2"]] == ["nurse_bumblebee", "lion", "hornet_legend"]
     assert hand_ids(s, "B") == ["lion"] and s.board["2,2"][-1].owner == "B"
     place = next(e for e in s.events if e["e"] == "place" and e["card"] == "hornet_legend")
     assert place["from_hand"] and place["reveal"] and place["cause"] == "hornet_legend"
@@ -1382,14 +1382,14 @@ def test_vesper_is_placed_from_the_deck_too():
 
 def test_vesper_lands_on_any_strength_and_skips_connection():
     s = _queen_covered_by("blue_whale", b_hand=["hornet_legend"])   # a 3 on a 12, far from B's den
-    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "blue_whale", "hornet_legend"]
+    assert [u.card_id for u in s.board["2,2"]] == ["nurse_bumblebee", "blue_whale", "hornet_legend"]
 
 
 def test_vesper_on_the_board_or_in_the_remove_pile_does_nothing():
     s = _queen_covered_by("lion", extra=lambda s: put(s, "4,1", "hornet_legend", "B"))
-    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "lion"]
+    assert [u.card_id for u in s.board["2,2"]] == ["nurse_bumblebee", "lion"]
     s = _queen_covered_by("lion", extra=lambda s: s.pile_add("hornet_legend", "B"))
-    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "lion"]
+    assert [u.card_id for u in s.board["2,2"]] == ["nurse_bumblebee", "lion"]
 
 
 def test_vesper_answers_any_colony_ally_but_not_another_animal_or_a_friendly_cover():
@@ -1405,16 +1405,16 @@ def test_vesper_answers_any_colony_ally_but_not_another_animal_or_a_friendly_cov
     rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))
     assert s.board["2,2"][-1].card_id == "lion" and hand_ids(s, "B") == ["hornet_legend"]
     s = make_state(current="B", hands={"B": ["lion", "hornet_legend"]}, decks={"A": [], "B": []})
-    put(s, "4,2", "lion", "B"); put(s, "3,2", "queen_bee", "B")
-    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))      # B covers its own Queen
+    put(s, "4,2", "lion", "B"); put(s, "3,2", "nurse_bumblebee", "B")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))      # B covers its own Nurse Bumblebee
     assert s.board["3,2"][-1].card_id == "lion" and hand_ids(s, "B") == ["hornet_legend"]
 
 
 def test_vesper_answers_a_roaming_cover_too():
     s = make_state(decks={"A": [], "B": []}, hands={"B": ["hornet_legend"]})
-    put(s, "1,2", "fox", "A"); put(s, "1,3", "queen_bee", "B")
+    put(s, "1,2", "fox", "A"); put(s, "1,3", "nurse_bumblebee", "B")
     rules.apply_action(s, RoamAction("1,2", ("cr", "1,3")))
-    assert [u.card_id for u in s.board["1,3"]] == ["queen_bee", "fox", "hornet_legend"]
+    assert [u.card_id for u in s.board["1,3"]] == ["nurse_bumblebee", "fox", "hornet_legend"]
 
 
 def test_vesper_resolves_after_the_coverers_roar():
@@ -1426,11 +1426,11 @@ def test_vesper_resolves_after_the_coverers_roar():
 
 def test_vesper_fires_identically_from_any_determinized_world():
     """Honesty: the bots' sampled worlds re-deal B's hand and deck, but Vesper is in one or the other in every world,
-    so a search that covers B's Queen sees the same answer whatever it may not know."""
+    so a search that covers B's Nurse Bumblebee sees the same answer whatever it may not know."""
     import random
     from animal_kingdom.bots.determinize import determinize
     s = make_state(hands={"A": ["lion"], "B": ["lion", "lion"]}, decks={"A": [], "B": ["hornet_legend", "lion", "lion"]})
-    put(s, "1,2", "lion", "A"); put(s, "2,2", "queen_bee", "B")
+    put(s, "1,2", "lion", "A"); put(s, "2,2", "nurse_bumblebee", "B")
     for seed in range(6):
         w = determinize(s, "A", random.Random(seed))
         rules.apply_action(w, PlaceAction("lion", ("cr", "2,2")), validate=False)
@@ -1467,11 +1467,11 @@ def test_a_buried_methuselah_caps_nothing():
     assert s.food["A"] == 30
 
 
-def test_vesper_landing_is_a_cover_spikes_remove_it_and_an_apex_still_eats_the_queen():
+def test_vesper_landing_is_a_cover_spikes_remove_it_and_an_apex_still_eats_the_nurse():
     s = _queen_covered_by("hedgehog", b_hand=["hornet_legend"])           # Spikes: the first enemy to cover it is removed
-    assert [u.card_id for u in s.board["2,2"]] == ["queen_bee", "hedgehog"] and removed(s, "hornet_legend")
+    assert [u.card_id for u in s.board["2,2"]] == ["nurse_bumblebee", "hedgehog"] and removed(s, "hornet_legend")
     s = _queen_covered_by("polar_bear", b_hand=["hornet_legend"])
-    assert [u.card_id for u in s.board["2,2"]] == ["polar_bear", "hornet_legend"] and removed(s, "queen_bee")
+    assert [u.card_id for u in s.board["2,2"]] == ["polar_bear", "hornet_legend"] and removed(s, "nurse_bumblebee")
 
 
 def test_a_weaker_copy_in_hand_can_be_played_by_naming_it():

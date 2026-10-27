@@ -135,7 +135,7 @@
         "Colony",
         "Queen"
       ],
-      "base_strength": 3,
+      "base_strength": 5,
       "text": "Roar: add a Worker Bee, Soldier Bee or Nurse Bee to your hand.",
       "species": "Bee",
       "habitat": "Meadow",
