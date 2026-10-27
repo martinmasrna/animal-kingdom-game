@@ -91,7 +91,7 @@ pub fn can_cover(st: &State, placer: &Unit, target: &Unit, roaming: bool) -> boo
     if placer_card.has_tag(T_CAT) && placer_str >= target_str && active_tops(st, owner, k.leopard).iter().any(|(_, iid)| *iid != placer.iid) {
         return true;
     }
-    if placer_card.has_tag(T_FISH) && controls(st, owner, k.piranha_legend) {
+    if placer_card.has_tag(T_FISH) && controls(st, owner, k.piranha) {
         let fish = st.tops().filter(|(_, u)| u.owner == owner && st.card(u.card).has_tag(T_FISH)).count() as i32;
         if target_str <= fish {
             return true;

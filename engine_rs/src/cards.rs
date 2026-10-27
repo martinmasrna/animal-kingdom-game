@@ -71,7 +71,7 @@ const GROWS: &[Hook] = &[Hook::OnDawnInHand, Hook::OnStartOfTurn, Hook::OnGain];
 pub fn hook_mask(card: &str) -> u32 {
     use Hook::*;
     let hooks: &[Hook] = match card {
-        "cuckoo_legend" | "praying_mantis" | "raccoon" | "piranha" | "locust_legend" | "jackal" | "badger" | "street_dog" | "lion_legend"
+        "cuckoo_legend" | "praying_mantis" | "raccoon" | "hammerhead" | "locust_legend" | "jackal" | "badger" | "street_dog" | "lion_legend"
         | "lion_legend_2" | "jaguar" | "serval" | "bobcat" | "alley_cat" | "bee_legend" | "forager_ant" | "nurse_bee" | "nurse_bumblebee"
         | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "greywhisker" | "mole_legend"
         | "rat_legend_2" | "skunk_legend" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
@@ -190,7 +190,7 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
         "bobcat" | "tutorial_lynx" | "ocelot" => others(T_CAT) >= 1,
         "serval" => played_this_turn(st, player, T_CAT, unit) >= 1,
         "soldier_ant" | "nurse_bee" => others(T_COLONY) + 1 >= colony_min,
-        "piranha" => lost_this_turn(st, player) >= 1,
+        "hammerhead" => lost_this_turn(st, player) >= 1,
         "hare" | "rat" => placed_plus >= cfg(st, "hare_played_min"),
         "macaque" => hand_after() >= cfg(st, "macaque_hand_min"),
         "gorilla" => strength() >= cfg(st, "gorilla_min"),
@@ -576,7 +576,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             names.dedup();
             push_choose(st, owner, names.into_iter().map(Value::Str).collect(), "pile_to_hand", false, vmap!("from_owner" => pn(owner)));
         }
-        ("piranha", OnPlace) => {
+        ("hammerhead", OnPlace) => {
             if conditional(st, unit) {
                 let targets: Vec<Cr> = adjacent_tops(st, cr, None)
                     .into_iter()

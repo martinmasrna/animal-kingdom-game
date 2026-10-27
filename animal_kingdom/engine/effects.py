@@ -1822,7 +1822,7 @@ def roar_condition(state, player, card_id, unit=None):
         "ocelot": lambda: others("Cat") >= 1,
         "soldier_ant": lambda: others("Colony") + 1 >= colony_min,
         "nurse_bee": lambda: others("Colony") + 1 >= colony_min,
-        "piranha": lambda: _lost_this_turn(state, player) >= 1,
+        "hammerhead": lambda: _lost_this_turn(state, player) >= 1,
         "hare": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
         "rat": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
         "macaque": lambda: hand_after() >= cfg.macaque_hand_min,
@@ -2064,7 +2064,7 @@ def _remove_tops(state, unit, crs):
                                                       source_iid=None, by_card=unit.card_id))
 
 
-def _piranha_place(state, unit, cr):
+def _hammerhead_place(state, unit, cr):
     """Roar (if an ally was removed this turn): remove an adjacent animal, yours or theirs: the player picks it."""
     _push_remove_choice(state, unit.owner, unit.card_id,
                         [nb for nb, top in _adjacent_tops(state, cr)
@@ -3102,7 +3102,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "sea_turtle": {"on_end_of_turn": _sea_turtle_eot},
     "tiger_legend": {"on_place": _removes("tiger_legend_max")},
     "raccoon": {"on_place": _raccoon_place},
-    "piranha": {"on_place": _conditional(_piranha_place)},
+    "hammerhead": {"on_place": _conditional(_hammerhead_place)},
     "hyena": {"on_end_of_turn": _hyena_eot},
     "city_spider": {"on_start_of_turn": _city_spider_sot},
     "earthworm": {"on_remove": _earthworm_remove},

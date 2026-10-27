@@ -261,14 +261,14 @@ def test_tarantula_eats_an_adjacent_ally_at_dusk_and_grows():
 
 
 def test_the_city_spider_eats_the_cockroach_every_dawn_and_the_turn_sees_the_death():
-    s = make_state(hands={"A": ["piranha"]}, decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
+    s = make_state(hands={"A": ["hammerhead"]}, decks={"A": ["lion"] * 5, "B": ["lion"] * 5})
     put(s, "1,2", "city_spider", "A")
     put(s, "1,1", "cockroach", "A")
     put(s, "2,1", "lion", "B")
     end_turn(s); end_turn(s)                                   # to A's next turn: Dawn
     assert s.top_unit("1,1").card_id == "cockroach"            # the weakest beside it: eaten, and back where it was
-    assert hand_ids(s, "A") == ["piranha"]                     # it draws nothing now
-    rules.apply_action(s, PlaceAction("piranha", ("cr", "2,2")))   # the Dawn death arms the Piranha
+    assert hand_ids(s, "A") == ["hammerhead"]                     # it draws nothing now
+    rules.apply_action(s, PlaceAction("hammerhead", ("cr", "2,2")))   # the Dawn death arms the Hammerhead
     choose(s, "2,1")
     assert s.top_unit("2,1") is None
 
@@ -316,14 +316,14 @@ def test_raccoon_returns_only_your_own_removed_animal():
     assert "lion" in hand_ids(s, "A") and s.remove_pile == ["tiger"]
 
 
-def test_piranha_needs_an_ally_removed_this_turn():
-    s = make_state(hands={"A": ["piranha", "piranha"]})
+def test_the_hammerhead_needs_an_ally_removed_this_turn():
+    s = make_state(hands={"A": ["hammerhead", "hammerhead"]})
     put(s, "2,2", "lion", "B")
-    apply_click(s, PlaceAction("piranha", ("cr", "1,2")))
+    apply_click(s, PlaceAction("hammerhead", ("cr", "1,2")))
     assert s.top_unit("2,2") is not None                       # no blood in the water
     put(s, "1,1", "cockroach", "A")
     effects.remove_top(s, "1,1", by_player="B")
-    rules.apply_action(s, PlaceAction("piranha", ("cr", "1,2")))   # on top of the first one, beside the Lion
+    rules.apply_action(s, PlaceAction("hammerhead", ("cr", "1,2")))   # on top of the first one, beside the Lion
     assert set(s.pending["options"]) >= {"1,1", "2,2"}         # any animal beside it, the Cockroach too
     choose(s, "2,2")
     assert s.top_unit("2,2") is None
@@ -665,11 +665,11 @@ def test_the_legendary_manta_ray_draws_two_at_dusk_with_two_regions():
     assert len(s.hands["A"]) == CFG.manta_legend_draw == 2
 
 
-def test_the_legendary_piranha_lets_fish_cover_up_to_the_school_size():
+def test_the_piranha_lets_fish_cover_up_to_the_school_size():
     s = make_state(hands={"A": ["sardine"]})
     for cr in ("1,1", "1,3"):
         put(s, cr, "sardine", "A")
-    put(s, "2,1", "piranha_legend", "A")                  # 3 Fish on the board
+    put(s, "2,1", "piranha", "A")                  # 3 Fish on the board
     put(s, "1,2", "lion", "B")                                 # a 7: too big
     put(s, "2,2", "chameleon", "B")
     assert PlaceAction("sardine", ("cr", "1,2")) not in rules.legal_actions(s)

@@ -36,7 +36,6 @@
     "pheasant_legend": 1,
     "praying_mantis": 3,
     "raccoon": 2,
-    "piranha": 3,
     "vulture": 3,
     "city_spider": 3,
     "earthworm": 2,
@@ -46,7 +45,8 @@
     "cockroach_legend": 1,
     "python": 3,
     "rat_legend_2": 1,
-    "dart_frog": 2
+    "dart_frog": 2,
+    "hammerhead": 3
    }
   },
   {
@@ -132,7 +132,6 @@
     "jellyfish_legend": 1,
     "tuna_legend": 1,
     "manta_ray_legend": 1,
-    "piranha_legend": 1,
     "swordfish": 2,
     "barracuda": 3,
     "manta_ray": 2,
@@ -142,7 +141,8 @@
     "mahi_mahi": 3,
     "tuna": 3,
     "sunfish": 3,
-    "great_white_shark": 2
+    "great_white_shark": 2,
+    "mackerel": 1
    }
   },
   {

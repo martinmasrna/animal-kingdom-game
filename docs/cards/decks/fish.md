@@ -13,7 +13,6 @@ The table below is generated from cards.json, where the cards live.
 | **[JELLYFISH]** | 1 | — | 3 | Your adjacent Fish have Poison. |
 | **[TUNA]** | 1 | Fish | 5 | Roar: for each region you control, draw a card and gain 5 food. |
 | **[MANTA RAY]** | 1 | Fish | 4 | Dusk: if you control 2 or more regions, draw 2 cards. |
-| **[PIRANHA]** | 1 | Fish | 3 | Your Fish can cover enemies of strength up to the number of your Fish. |
 
 ### Rare
 
@@ -34,5 +33,6 @@ The table below is generated from cards.json, where the cards live.
 | **Mahi-mahi** | 3 | Fish | 3 | Roar: give your other Fish +1 strength. |
 | **Tuna** | 3 | Fish | 3 | Has +1 strength for each other Fish you control. |
 | **Sunfish** | 3 | Fish | 4 | Roar: place a Baby Fish on a random adjacent empty crossroad. |
+| **Mackerel** | 1 | Fish | 2 | Your other Fish have +1 strength. |
 
 <!-- cards:end -->

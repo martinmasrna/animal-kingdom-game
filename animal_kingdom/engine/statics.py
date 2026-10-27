@@ -118,8 +118,8 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
     if "Cat" in placer_card.tags and placer_str >= target_str and any(
             u is not placer for u in active_tops(state, owner, "leopard")):
         return True
-    # The legendary Piranha: "Your Fish can cover enemies of strength up to the number of your Fish."
-    if "Fish" in placer_card.tags and _controls(state, owner, "piranha_legend"):
+    # The Piranha: "Your Fish can cover enemies of strength up to the number of your Fish."
+    if "Fish" in placer_card.tags and _controls(state, owner, "piranha"):
         fish = sum(1 for st in state.board.values()
                    if st and st[-1].owner == owner and "Fish" in state.cards[st[-1].card_id].tags)
         if target_str <= fish:

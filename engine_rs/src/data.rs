@@ -116,7 +116,7 @@ pub const KEYWORD_AURAS: [&str; 4] = ["", "armadillo", "porcupine", "jellyfish_l
 pub struct Known {
     pub hercules_beetle: Option<CardId>,
     pub leopard: Option<CardId>,
-    pub piranha_legend: Option<CardId>,
+    pub piranha: Option<CardId>,
     pub dhole: Option<CardId>,
     pub wolf_legend_3: Option<CardId>,
     pub great_white_shark: Option<CardId>,
@@ -146,7 +146,7 @@ impl Known {
         Known {
             hercules_beetle: k("hercules_beetle"),
             leopard: k("leopard"),
-            piranha_legend: k("piranha_legend"),
+            piranha: k("piranha"),
             dhole: k("dhole"),
             wolf_legend_3: k("wolf_legend_3"),
             great_white_shark: k("great_white_shark"),

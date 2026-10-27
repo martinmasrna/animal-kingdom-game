@@ -2944,7 +2944,13 @@
     },
     "effect": {
       "by": "claude",
-      "at": 1792085440
+      "at": 1793114056,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: if an ally was removed this turn, remove an adjacent animal."
+      },
+      "note": "Martin, 2026-10-27: the swarm is the piranha; it fits a rare, the shape of the Leopard's cover rule"
     },
     "strength": {
       "review": {
@@ -2955,6 +2961,25 @@
       "note": "Martin, 2026-10-22: conditional removal priced by what the condition costs the turn you play it, 1 below its draw-2 twin",
       "by": "claude",
       "at": 1792664337
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from aristocrats to pool",
+      "by": "claude",
+      "at": 1793114054
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-27: the swarm is the piranha; it fits a rare, the shape of the Leopard's cover rule",
+      "by": "claude",
+      "at": 1793114055
     }
   },
   "piranha_legend": {
@@ -2968,9 +2993,13 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792191063
+      "at": 1793114057,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
+      }
     }
   },
   "baby_fox": {
@@ -5788,6 +5817,61 @@
       "note": "Martin, 2026-10-27: a fit for the effect that profits when your own animal dies (the common Piranha's), left for the Desert expansion",
       "by": "claude",
       "at": 1793112332
+    }
+  },
+  "hammerhead": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-27: blood in the water is the shark's; the common Piranha's effect, moved",
+      "by": "claude",
+      "at": 1793114058
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-27: a big shark; one above the conditional removers at 3 (Serval, Jackal, Rat, Muskrat), level with the Barracuda",
+      "by": "claude",
+      "at": 1793114059
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "A fish",
+      "by": "claude",
+      "at": 1793114061
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-27: blood in the water is the shark's; the common Piranha's effect, moved",
+      "by": "claude",
+      "at": 1793114062
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from pool to aristocrats",
+      "by": "claude",
+      "at": 1793114063
     }
   }
 }

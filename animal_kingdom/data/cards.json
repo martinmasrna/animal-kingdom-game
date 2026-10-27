@@ -269,15 +269,15 @@
       "id": "piranha",
       "name": "Piranha",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Fish"
       ],
       "base_strength": 3,
-      "text": "Roar: if an ally was removed this turn, remove an adjacent animal.",
-      "keywords": [],
+      "text": "Your Fish can cover enemies of strength up to the number of your Fish.",
       "species": "Piranha",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "vulture",
@@ -1072,7 +1072,7 @@
     {
       "id": "piranha_legend",
       "name": "[PIRANHA]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Fish"
@@ -3630,14 +3630,16 @@
     {
       "id": "hammerhead",
       "name": "Hammerhead",
-      "status": "planned",
-      "rarity": "",
-      "tags": [],
-      "base_strength": null,
-      "text": "",
-      "keywords": [],
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [
+        "Fish"
+      ],
+      "base_strength": 4,
+      "text": "Roar: if an ally was removed this turn, remove an adjacent animal.",
       "species": "Hammerhead",
-      "habitat": "Open Ocean"
+      "habitat": "Open Ocean",
+      "keywords": []
     },
     {
       "id": "squid",
