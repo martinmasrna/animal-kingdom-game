@@ -13,6 +13,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: if you control another Cat, play another Cat."
+      },
+      "note": "The Ocelot's old draw, kept at strength 1 (Martin, 2026-10-27)",
+      "by": "claude",
+      "at": 1793094906
     }
   },
   "anaconda": {

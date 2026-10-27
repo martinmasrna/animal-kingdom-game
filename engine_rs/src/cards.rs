@@ -187,7 +187,7 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
     let placed_plus = st.units_placed_this_turn + if unit.is_some() { 0 } else { 1 };
     Some(match card {
         "gopher" | "muskrat" | "groundhog" => fed_this_turn(st, player),
-        "bobcat" | "tutorial_lynx" | "alley_cat" => others(T_CAT) >= 1,
+        "bobcat" | "tutorial_lynx" | "ocelot" => others(T_CAT) >= 1,
         "serval" => played_this_turn(st, player, T_CAT, unit) >= 1,
         "soldier_ant" | "nurse_bee" => others(T_COLONY) + 1 >= colony_min,
         "piranha" => lost_this_turn(st, player) >= 1,
@@ -690,7 +690,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 draws(st, unit, 1);
             }
         }
-        ("alley_cat", OnPlace) => {
+        ("ocelot", OnPlace) => {
             if conditional(st, unit) {
                 push_play_extra(st, owner, Some(vmap!("tags_all" => Value::List(vec![Value::s("Cat")]))), false);
             }
@@ -802,8 +802,8 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 draws(st, unit, n);
             }
         }
-        ("ocelot", OnPlace) => {
-            let n = cfg(st, "ocelot_draw");
+        ("alley_cat", OnPlace) => {
+            let n = cfg(st, "alley_cat_draw");
             draws_filtered(st, unit, "tag:Cat&rarity:common", n);
         }
         ("cheetah", OnPlace) | ("falcon", OnPlace) => hq_adjacent_draw(st, unit, cr),

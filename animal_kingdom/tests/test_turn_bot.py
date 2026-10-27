@@ -257,16 +257,16 @@ def test_beam_prunes_a_wide_flight_fixture():
 # ------------------------------------------- same-turn puzzles, one per non-Colony family
 
 def test_cats_plays_twin_enabler_before_the_twin():
-    # alley_cat's Roar plays one more Cat when you control another Cat. Playing it first
+    # ocelot's Roar plays one more Cat when you control another Cat. Playing it first
     # (extra-casting caracal) avoids the wasted-Roar both cards fizzling the other order.
-    s = make_state(current="A", hands={"A": ["alley_cat", "caracal"]},
+    s = make_state(current="A", hands={"A": ["ocelot", "caracal"]},
                    decks={"A": [], "B": ["mouse"] * 4}, config=TWO_ACTION)
-    put(s, "1,1", "lion", "A")     # the "another Cat" alley_cat needs
+    put(s, "1,1", "lion", "A")     # the "another Cat" ocelot needs
     bot = small_turn()
     first = bot.choose(s.view_for("A"), rules.legal_actions(s), s)
-    assert isinstance(first, PlaceAction) and first.card_id == "alley_cat"
+    assert isinstance(first, PlaceAction) and first.card_id == "ocelot"
     play_turn(bot, s)
-    assert {"alley_cat", "caracal"} <= set(own_ids(s))
+    assert {"ocelot", "caracal"} <= set(own_ids(s))
 
 
 def test_rattlesnake_grows_from_ravens_two_shuffles():

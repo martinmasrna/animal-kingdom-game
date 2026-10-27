@@ -601,14 +601,14 @@ def test_mole_plays_another_unit_adjacent_to_it():
     assert s.owner_of("1,2") == "A" and s.owner_of("1,1") == "A" and s.hands["A"] == []
 
 
-def test_house_cat_extra_play_is_gated_on_another_cat():
-    with_cat = make_state(current="A", hands={"A": ["alley_cat", "lion"]})
+def test_ocelot_extra_play_is_gated_on_another_cat():
+    with_cat = make_state(current="A", hands={"A": ["ocelot", "lion"]})
     put(with_cat, "1,3", "caracal", "A")                # already control another Cat
-    rules.apply_action(with_cat, PlaceAction("alley_cat", ("cr", "1,2")))
+    rules.apply_action(with_cat, PlaceAction("ocelot", ("cr", "1,2")))
     assert with_cat.pending is not None                 # may play one more Cat
 
-    no_cat = make_state(current="A", hands={"A": ["alley_cat", "lion"]})
-    rules.apply_action(no_cat, PlaceAction("alley_cat", ("cr", "1,2")))
+    no_cat = make_state(current="A", hands={"A": ["ocelot", "lion"]})
+    rules.apply_action(no_cat, PlaceAction("ocelot", ("cr", "1,2")))
     assert no_cat.pending is None and "lion" in hand_ids(no_cat, "A")   # no extra play
 
 

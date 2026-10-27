@@ -293,10 +293,10 @@ def test_the_tiger_legend_eats_its_prey_then_removes_an_adjacent_enemy_of_7_but_
         assert (s.top_unit("2,2") is None) == removed
 
 
-def test_the_ocelot_draws_two_common_cats():
-    s = make_state(hands={"A": ["ocelot"]},
+def test_the_alley_cat_draws_two_common_cats():
+    s = make_state(hands={"A": ["alley_cat"]},
                    decks={"A": ["lion_legend_3", "jaguar", "lion", "mouse", "serval"], "B": ["lion"] * 5})
-    rules.apply_action(s, PlaceAction("ocelot", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("alley_cat", ("cr", "1,2")))
     assert sorted(hand_ids(s, "A")) == ["lion", "serval"]
 
 

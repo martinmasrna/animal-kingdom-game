@@ -1784,7 +1784,7 @@ def roar_condition(state, player, card_id, unit=None):
         "bobcat": lambda: others("Cat") >= 1,
         "serval": lambda: _played_this_turn(state, player, "Cat", unit) >= 1,
         "tutorial_lynx": lambda: others("Cat") >= 1,
-        "alley_cat": lambda: others("Cat") >= 1,
+        "ocelot": lambda: others("Cat") >= 1,
         "soldier_ant": lambda: others("Colony") + 1 >= colony_min,
         "nurse_bee": lambda: others("Colony") + 1 >= colony_min,
         "piranha": lambda: _lost_this_turn(state, player) >= 1,
@@ -2114,7 +2114,7 @@ def _serval_place(state, unit, cr):
         _push_remove_choice(state, unit.owner, unit.card_id, _adjacent_enemy_targets(state, unit, cr))
 
 
-def _house_cat_place(state, unit, cr):
+def _ocelot_place(state, unit, cr):
     if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_play_extra(state, unit.owner, filter={"tags_all": ["Cat"]})
 
@@ -3079,7 +3079,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "serval": {"on_place": _serval_place},
     "lynx": {"on_place_onto_enemy": _draws("lynx_draw")},
     "bobcat": {"on_place": _conditional(_draw1)},
-    "alley_cat": {"on_place": _house_cat_place},
+    "alley_cat": {"on_place": lambda state, unit, cr: _draws_filtered("tag:Cat&rarity:common",
+                                                                       state.config.alley_cat_draw)(state, unit, cr)},
     # Colony.
     "army_ant_legend": {"on_end_of_turn": _army_ant_legend_eot},
     "bee_legend": {"on_place": _bee_legend_place},
@@ -3107,8 +3108,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "hornet": {"on_place": _hornet_place},
     "skunk": {"on_place": _skunk_place},
     "hare": {"on_place": _conditional(_draws("hare_draw"))},
-    "ocelot": {"on_place": lambda state, unit, cr: _draws_filtered("tag:Cat&rarity:common",
-                                                                    state.config.ocelot_draw)(state, unit, cr)},
+    "ocelot": {"on_place": _ocelot_place},
     "cheetah": {"on_place": _hq_adjacent_draw},
     "rat": {"on_place": _conditional(_rat_place)},
     "falcon": {"on_place": _hq_adjacent_draw},

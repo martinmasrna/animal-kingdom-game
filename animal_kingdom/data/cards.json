@@ -1024,10 +1024,10 @@
         "Cat"
       ],
       "base_strength": 1,
-      "text": "Roar: if you control another Cat, play another Cat.",
-      "keywords": [],
+      "text": "Roar: draw 2 common Cats.",
       "species": "Alley Cat",
-      "habitat": "City"
+      "habitat": "City",
+      "keywords": []
     },
     {
       "id": "jellyfish_legend",
