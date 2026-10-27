@@ -1867,8 +1867,8 @@ def _removes(max_attr=None, min_attr=None):
     return handler
 
 
-def _oxpecker_legend_eot(state, unit, cr):
-    """The legendary Oxpecker: Dusk: draw a card for each adjacent Hungry ally."""
+def _dung_beetle_legend_eot(state, unit, cr):
+    """The legendary Dung Beetle: Dusk: draw a card for each adjacent Hungry ally."""
     _push_draw(state, unit.owner, sum(
         1 for nb in state.game_map.neighbors(cr)
         if (top := state.top_unit(nb)) and top.owner == unit.owner and statics.has_keyword(state, top, "Hungry", nb)))
@@ -3209,7 +3209,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "rhinoceros": {"on_place": _rhinoceros_place},
     "hippopotamus": {"on_enemy_placed_adjacent": _hippo_enemy_placed},
     "whale_shark": {"on_end_of_turn": _draw1},
-    "oxpecker_legend": {"on_end_of_turn": _oxpecker_legend_eot},
+    "dung_beetle_legend": {"on_end_of_turn": _dung_beetle_legend_eot},
+    "oxpecker_legend": {"on_end_of_turn": _dung_beetle_legend_eot},   # until its own ability: the one it gave the Dung Beetle
     "oxpecker": {"on_place": _oxpecker_place},
     "anteater": {"on_place": _anteater_place},
     "dung_beetle": {"on_end_of_turn": _dung_beetle_eot},

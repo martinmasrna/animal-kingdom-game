@@ -257,12 +257,12 @@
     "hippopotamus": 2,
     "whale_shark": 2,
     "oxpecker": 3,
-    "anteater": 3,
     "dung_beetle": 3,
     "blue_whale": 3,
     "sloth": 3,
     "elephant": 3,
-    "moose": 2
+    "moose": 2,
+    "krill": 3
    }
   },
   {
@@ -425,7 +425,7 @@
     "porcupine": 2,
     "rhinoceros": 2,
     "queen_ant": 2,
-    "anteater": 3,
+    "oxpecker": 3,
     "badger": 3,
     "deer": 3,
     "dolphin": 3,

@@ -94,9 +94,9 @@ def test_roach_king_bitten_below_0_comes_back_once_with_only_its_growth():
     assert hand_ids(s, "B") == ["lion"]                        # one fall, one card
 
 
-def test_the_legendary_oxpecker_draws_at_dusk_for_each_adjacent_hungry_ally():
+def test_the_legendary_dung_beetle_draws_at_dusk_for_each_adjacent_hungry_ally():
     s = make_state(food={"A": 0, "B": 0}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    put(s, "2,2", "oxpecker_legend", "A")
+    put(s, "2,2", "dung_beetle_legend", "A")
     put(s, "1,2", "elephant", "A")                             # Hungry, yours: counts
     put(s, "2,1", "lion", "A")                                 # yours, not Hungry
     put(s, "3,2", "hippopotamus", "B")                         # Hungry, theirs

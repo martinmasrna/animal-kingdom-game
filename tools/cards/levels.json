@@ -54,6 +54,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1793104278
     }
   },
   "armadillo": {
@@ -5676,9 +5685,68 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "What blue whales are famous for eating: where the krill swarm, the whales come (Martin, 2026-10-27)",
+      "note": "moved from pool to giants",
       "by": "claude",
-      "at": 1793103032
+      "at": 1793104279
+    }
+  },
+  "dung_beetle_legend": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-27: the legendary Oxpecker's draw goes to a legendary Dung Beetle",
+      "by": "claude",
+      "at": 1793104314
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Dung Beetle Legend",
+          "species": "Dung Beetle"
+        }
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1793104319
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "As the common Dung Beetle",
+      "by": "claude",
+      "at": 1793104316
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "The legendary Oxpecker's number, carried over with its effect",
+      "by": "claude",
+      "at": 1793104317
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "The legendary Oxpecker's effect, moved (Martin, 2026-10-27)",
+      "by": "claude",
+      "at": 1793104318
     }
   }
 }

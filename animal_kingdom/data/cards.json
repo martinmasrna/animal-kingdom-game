@@ -2184,7 +2184,7 @@
     {
       "id": "anteater",
       "name": "Anteater",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [],
       "base_strength": 4,
@@ -3795,6 +3795,21 @@
       "text": "Roar: the next Titan you play this turn costs one action.",
       "species": "Krill",
       "habitat": "Open Ocean",
+      "keywords": []
+    },
+    {
+      "id": "dung_beetle_legend",
+      "name": "[DUNG BEETLE]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Beetle"
+      ],
+      "base_strength": 4,
+      "text": "Dusk: draw a card for each adjacent Hungry ally.",
+      "species": "Dung Beetle",
+      "habitat": "Savanna",
+      "unnamed": true,
       "keywords": []
     }
   ]
