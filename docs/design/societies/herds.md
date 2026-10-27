@@ -49,7 +49,7 @@ The one whose bark brings the others in; worth more the more of the herd stands 
 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
-| **[ZEBRA]** | legendary | 4 | Roar: draw a card for each different Hoofed animal you control. | Savanna |
+| **[ZEBRA]** | legendary | 4 | Roar: draw a card for each different other Hoofed animal you control. | Savanna |
 | **Zebra** | common | 4 | Flee. Roar: gain 5 food for each other Hoofed animal next to this. | Savanna |
 
 <!-- cards:end -->
