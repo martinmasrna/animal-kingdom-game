@@ -63,9 +63,14 @@ def _top_level_actions(state: GameState) -> list[Action]:
     actions: list[Action] = []
     if state.decks[player]:
         actions.append(DrawAction())
-    actions.extend(effects.legal_placements(state, player, titan_ok=left >= TITAN_ACTIONS))
+    actions.extend(effects.legal_placements(state, player, titan_ok=left >= titan_cost(state, player)))
     actions.extend(effects.legal_roams(state, player))
     return actions
+
+
+def titan_cost(state: GameState, player: str) -> int:
+    """Two actions, one after a Pilot Fish this turn ("the next Titan you play this turn costs one action")."""
+    return TITAN_ACTIONS - (1 if state.turn_flags.get(f"titan_discount_{player}") else 0)
 
 
 def _has_top_level_action(state: GameState) -> bool:
@@ -164,7 +169,9 @@ def apply_action(state: GameState, action: Action, *, validate: bool = True) -> 
         _do_draw(state, state.current)
     elif isinstance(action, PlaceAction):
         titan = "Titan" in state.cards[action.card_id].keywords
-        state.actions_taken_this_turn += TITAN_ACTIONS if titan else 1
+        state.actions_taken_this_turn += titan_cost(state, state.current) if titan else 1
+        if titan:
+            state.turn_flags.pop(f"titan_discount_{state.current}", None)
         effects.do_placement(state, state.current, action.card_id, action.target, action.iid)
     elif isinstance(action, RoamAction):
         stack = state.board.get(action.origin)

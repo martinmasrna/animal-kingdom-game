@@ -5605,5 +5605,60 @@
       "by": "claude",
       "at": 1793028816
     }
+  },
+  "pilot_fish": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-27: a common cheat for the Titans, the fish that swims ahead of sharks and whales",
+      "by": "claude",
+      "at": 1793102574
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "A small fish; its effect is the card",
+      "by": "claude",
+      "at": 1793102575
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "A fish",
+      "by": "claude",
+      "at": 1793102576
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-27: a common cheat for the Titans, the fish that swims ahead of sharks and whales",
+      "by": "claude",
+      "at": 1793102577
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1793102642
+    }
   }
 }

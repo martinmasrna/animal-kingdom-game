@@ -284,6 +284,7 @@ pub struct TurnFlags {
     pub action_cap: [Option<i32>; 2],
     pub gain_str: FastVec<[i64; 4]>,
     pub falstaff: [bool; 2],
+    pub titan_discount: [bool; 2],
     pub caps: FastVec<[(&'static str, i64); 4]>,
 }
 
@@ -315,6 +316,9 @@ impl TurnFlags {
             }
             if self.falstaff[p] {
                 m.insert(format!("falstaff_{pn}"), sj::Value::Bool(true));
+            }
+            if self.titan_discount[p] {
+                m.insert(format!("titan_discount_{pn}"), sj::Value::Bool(true));
             }
         }
         for p in 0..3 {
@@ -380,6 +384,8 @@ impl TurnFlags {
                 }
             } else if let Some(rest) = k.strip_prefix("falstaff_") {
                 t.falstaff[p_of(rest).min(1)] = val.as_bool().unwrap_or(false);
+            } else if let Some(rest) = k.strip_prefix("titan_discount_") {
+                t.titan_discount[p_of(rest).min(1)] = val.as_bool().unwrap_or(false);
             } else if k.starts_with("cap_") {
                 if let Some((flag, iid)) = k.rsplit_once('_') {
                     if let Ok(i) = iid.parse::<i64>() {

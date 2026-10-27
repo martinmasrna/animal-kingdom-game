@@ -862,6 +862,17 @@ def test_a_copy_on_the_board_keeps_the_copied_cards_dawn_and_dusk():
     assert len(s.hands["A"]) == hand + 2                       # both Whale Sharks draw at Dusk
 
 
+def test_the_pilot_fish_makes_the_next_titan_cost_one_action():
+    s = make_state(hands={"A": ["pilot_fish", "blue_whale", "blue_whale"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    rules.apply_action(s, PlaceAction("pilot_fish", ("cr", "1,2")))
+    assert PlaceAction("blue_whale", ("cr", "1,1")) in rules.legal_actions(s)      # one action left pays for it
+    rules.apply_action(s, PlaceAction("blue_whale", ("cr", "1,1")))
+    assert s.top_unit("1,1").card_id == "blue_whale" and s.current == "B"
+    end_turn(s)
+    rules.apply_action(s, DrawAction())                                            # spent: the next whale costs two again
+    assert not any(isinstance(a, PlaceAction) and a.card_id == "blue_whale" for a in rules.legal_actions(s))
+
+
 def test_iris_copies_an_enemy_timer_for_herself_as_far_along_as_it_is():
     s = make_state(hands={"A": ["chameleon_legend"]}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6})
     sloth = put(s, "2,2", "sloth", "B")

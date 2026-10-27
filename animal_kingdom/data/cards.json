@@ -3784,6 +3784,20 @@
       "species": "Hercules Beetle",
       "habitat": "Jungle",
       "keywords": []
+    },
+    {
+      "id": "pilot_fish",
+      "name": "Pilot Fish",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [
+        "Fish"
+      ],
+      "base_strength": 2,
+      "text": "Roar: the next Titan you play this turn costs one action.",
+      "species": "Pilot Fish",
+      "habitat": "Open Ocean",
+      "keywords": []
     }
   ]
 }

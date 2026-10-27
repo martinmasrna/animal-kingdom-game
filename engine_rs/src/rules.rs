@@ -34,7 +34,7 @@ fn top_level_actions(st: &State) -> Vec<Action> {
     if !st.decks[player as usize].is_empty() {
         actions.push(Action::Draw);
     }
-    actions.extend(effects::legal_placements(st, player, None, left >= TITAN_ACTIONS));
+    actions.extend(effects::legal_placements(st, player, None, left >= titan_cost(st, player)));
     actions.extend(effects::legal_roams(st, player, false));
     actions
 }
@@ -44,6 +44,11 @@ fn has_top_level_action(st: &State) -> bool {
         return true;
     }
     !top_level_actions(st).is_empty()
+}
+
+/// Two actions, one after a Pilot Fish this turn. As in Python.
+pub fn titan_cost(st: &State, player: Player) -> i32 {
+    TITAN_ACTIONS - if st.turn_flags.titan_discount[player.min(1) as usize] { 1 } else { 0 }
 }
 
 pub fn turn_actions(st: &State) -> i32 {
@@ -143,7 +148,11 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
             }
             Action::Place { card, target, iid } => {
                 let titan = st.card(*card).has_kw(K_TITAN);
-                st.actions_taken_this_turn += if titan { TITAN_ACTIONS } else { 1 };
+                let cur = st.current;
+                st.actions_taken_this_turn += if titan { titan_cost(st, cur) } else { 1 };
+                if titan {
+                    st.turn_flags.titan_discount[cur.min(1) as usize] = false;
+                }
                 let cur = st.current;
                 effects::do_placement(st, cur, *card, target, *iid)?;
             }

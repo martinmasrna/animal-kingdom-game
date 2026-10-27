@@ -2650,6 +2650,11 @@ def _beaver_place(state, unit, cr):
              while_buried=False)
 
 
+def _pilot_fish_place(state, unit, cr):
+    """Roar: the next Titan you play this turn costs one action (a flag, not a stack: two Pilot Fish still lower one)."""
+    state.turn_flags[f"titan_discount_{unit.owner}"] = True
+
+
 def _electric_eel_place(state, unit, cr):
     """Roar: your opponent takes only 1 action next turn. The Beaver's mirror: it lands on the opponent's very next turn,
     as a timer that ticks on their turn (and dies with the Eel, as the Beaver's does)."""
@@ -3174,6 +3179,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "meerkat": {"on_place": _draw1, "on_enemy_placed_adjacent": _meerkat_enemy_placed},
     "beaver": {"on_place": _beaver_place},
     "electric_eel": {"on_place": _electric_eel_place},
+    "pilot_fish": {"on_place": _pilot_fish_place},
     "dormouse": {"on_end_of_turn": _dormouse_eot},
     "squirrel": {"on_place": _gains("squirrel_food")},
     "chipmunk": {"on_place": _chipmunk_place},
