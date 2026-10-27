@@ -95,6 +95,24 @@ def _play_premade(seed: int, slug_a: str, slug_b: str):
         rules.apply_action(state, action)
 
 
+def rotating_pairs(slugs: list[str], k: int = 4) -> list[tuple[str, str, int]]:
+    """Every deck in both seats against `k` rotating opponents, a seed each: linear in the decks, where the full matrix is
+    quadratic (43 decks made it 7,396 games a test and five minutes of every deploy, 2026-10-27)."""
+    n = len(slugs)
+    return [(slugs[i], slugs[(i + j) % n], j) for i in range(n) for j in range(1, k + 1)]
+
+
+def test_fuzz_premade_decks_rotating_terminates():
+    """Every premade deck (incl. the dynamic-strength cards), both seats, stays legal and terminates."""
+    cfg = Config.default()
+    for a, b, seed in rotating_pairs(sorted(PREMADE_DECKS)):
+        state, result = _play_premade(seed, a, b)
+        assert result is not None
+        assert state.turn_counter <= cfg.max_turns
+        assert_board_legal(state)
+
+
+@pytest.mark.slow
 def test_fuzz_premade_decks_full_matrix_terminates():
     """Every premade deck vs every premade deck (incl. the dynamic-strength cards) stays
     legal and terminates - the real decks the engine is built to simulate."""

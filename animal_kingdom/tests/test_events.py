@@ -1,5 +1,7 @@
 """The engine says what happened, in order (state.events): nothing downstream diffs positions to guess it."""
 
+import pytest
+
 from animal_kingdom.decks import load_premade_deck
 from animal_kingdom.engine import rules
 from animal_kingdom.engine.actions import ChoiceAction, PlaceAction, SKIP
@@ -49,12 +51,23 @@ def test_the_opponent_sees_how_many_cards_were_drawn_not_which():
 
 def test_the_events_alone_rebuild_the_board_after_every_action():
     """Completeness: a board rebuilt only from the events (place puts a unit on top, or at `at`, remove and bounce take that exact unit
-    off) equals the real board after every action of random games over every deck pairing. Food and hands likewise."""
+    off) equals the real board after every action of random games, every deck in both seats. Food and hands likewise."""
+    from animal_kingdom.decks import PREMADE_DECKS
+    from animal_kingdom.tests.test_engine import rotating_pairs
+    _rebuild(rotating_pairs(sorted(d for d in PREMADE_DECKS if d != "goodstuff")))
+
+
+@pytest.mark.slow
+def test_the_events_alone_rebuild_the_board_over_every_deck_pairing():
     import itertools
     from animal_kingdom.decks import PREMADE_DECKS
-    from animal_kingdom.sim.runner import make_bot
     decks = sorted(d for d in PREMADE_DECKS if d != "goodstuff")
-    for (a, b), seed in itertools.product(itertools.product(decks, decks), range(4)):
+    _rebuild([(a, b, seed) for (a, b), seed in itertools.product(itertools.product(decks, decks), range(4))])
+
+
+def _rebuild(games):
+    from animal_kingdom.sim.runner import make_bot
+    for a, b, seed in games:
         s = new_game(load_premade_deck(a), load_premade_deck(b), 8100 + seed)
         board = {cr: [u.iid for u in st] for cr, st in s.board.items() if st}
         food = dict(s.food)
