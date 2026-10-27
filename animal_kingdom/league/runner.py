@@ -167,7 +167,9 @@ def _safe_run(spec: MatchSpec):
     """One game, or None when the engine raises: a broken game is logged and skipped, never the end of the runner."""
     try:
         return _run_spec(spec)
-    except Exception as e:
+    except (KeyboardInterrupt, SystemExit):
+        raise
+    except BaseException as e:   # a Rust panic is a BaseException, and one escaping the worker killed the whole runner (2026-10-27)
         print(f"game failed: {spec.deck_a} v {spec.deck_b} seed {spec.seed}: {e!r}", flush=True)
         return None
 
