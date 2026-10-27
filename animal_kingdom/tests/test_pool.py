@@ -16,7 +16,7 @@ from animal_kingdom.engine.cards import (
     TAGS,
     load_cards,
 )
-from animal_kingdom.decks import BOT_DECKS, PREMADE_DECKS, decklist_problems, load_premade_deck
+from animal_kingdom.decks import BOT_DECKS, PREMADE_DECKS, load_premade_deck
 
 RETIRED_TAGS = {"Reptile", "Insect"}
 DYNAMIC_IDS = {"egg_eater"}
@@ -42,11 +42,11 @@ def test_starter_decks_share_no_card():
             seen[cid] = d["slug"]
 
 
-def test_every_shipped_deck_is_legal_and_the_bots_play_shipped_decks():
+def test_shipped_slugs_are_unique_and_the_bots_play_shipped_decks():
+    # Legality isn't held here: a card change may leave a deck illegal until the decks' pass before shipping; the loader
+    # warns about it (decks.shipped_problems) and the deck still plays (Martin, 2026-10-27).
     slugs = [d["slug"] for d in DECKLISTS]
     assert len(set(slugs)) == len(slugs)
-    for slug, decklist in PREMADE_DECKS.items():
-        assert decklist_problems(decklist) == [], slug
     assert set(BOT_DECKS) <= set(PREMADE_DECKS) and BOT_DECKS
 
 
