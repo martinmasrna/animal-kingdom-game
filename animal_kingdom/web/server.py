@@ -787,6 +787,21 @@ async def league_retire(req):
     return web.json_response({"retired": out})
 
 
+async def league_levels(req):
+    """The pilot levels pool lists play at: {slugs, levels}; the pairings at other levels leave the ladder, and a restart
+    keeps it so (Martin, 2026-10-27: his 17 lists Expert only, after a restart had given them Easy and Normal pilots)."""
+    league_auth(req)
+    body = await req.json()
+    slugs, levels = (body.get("slugs"), body.get("levels")) if isinstance(body, dict) else (None, None)
+    if not isinstance(slugs, list) or not isinstance(levels, list) or not levels or any(lv not in ranking.LEVELS for lv in levels):
+        raise web.HTTPBadRequest(text="slugs: a list; levels: some of " + ", ".join(ranking.LEVELS))
+    slugs = [s for s in map(str, slugs) if s in ladder.decks]
+    league.set_levels(slugs, levels)
+    for s in slugs:
+        ladder.drop_levels(s, levels)
+    return web.json_response({"slugs": slugs, "levels": levels})
+
+
 async def league_reset_people(req):
     """People back to a fresh 1500 with placement games ahead: {ids: [profile ids]}; bots can't be reset here (Martin,
     2026-10-27, once the league became his 17 Expert lists and the scale moved)."""
@@ -822,6 +837,8 @@ async def league_decks(req):
         start = d.get("start")
         start = min(3000.0, max(800.0, float(start))) if isinstance(start, (int, float)) else ranking.START
         levels = [lv for lv in (d.get("levels") or ranking.LEVELS) if lv in ranking.LEVELS] or list(ranking.LEVELS)
+        if d.get("levels"):
+            league.set_levels([slug], levels)
         for level in levels:
             ladder.add_player(ranking.bot_id(level, slug), start)
         added.append(slug)
@@ -1402,6 +1419,7 @@ def make_app() -> web.Application:
         web.get("/api/meta/archetype", meta_archetype),
         web.post("/api/league/decks", league_decks),
         web.post("/api/league/reset_people", league_reset_people),
+        web.post("/api/league/levels", league_levels),
         web.post("/api/league/report", league_report_post),
         web.get("/api/league/report", league_report),
         web.delete("/api/ranked", leave_ranked),
@@ -1438,7 +1456,7 @@ def make_app() -> web.Application:
         friends = Friends(profiles.db)
         chat = Chat(profiles.db)
         league = league_mod.Pool(profiles.db, DECK_NAMES)      # the lists the league added (web/league.py)
-        ladder = ranking.Ladder(profiles.db, [s for s in sorted(BOT_DECKS) + league.slugs() if s not in league.retired()])   # ranked offers the bot pool: shipped, ladder and league decks, less the retired
+        ladder = ranking.Ladder(profiles.db, [s for s in sorted(BOT_DECKS) + league.slugs() if s not in league.retired()], league.levels())   # ranked offers the bot pool: shipped, ladder and league decks, less the retired
         meta = meta_mod.Meta(profiles.db, _list_of)
         with open(Path(__file__).resolve().parents[1] / "data" / ("cards" + ".json"), encoding="utf-8") as fh:
             stale = meta.track(meta_mod.card_prints(json.load(fh)["cards"]))

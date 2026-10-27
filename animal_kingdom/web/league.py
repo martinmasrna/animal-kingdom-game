@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS league_games (
 CREATE TABLE IF NOT EXISTS league_report (k TEXT PRIMARY KEY, v TEXT NOT NULL, t REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS pool_retired (slug TEXT PRIMARY KEY, t REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS league_seen (gid TEXT PRIMARY KEY, t REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS pool_levels (slug TEXT PRIMARY KEY, levels TEXT NOT NULL);
 """
 
 
@@ -55,6 +56,14 @@ class Pool:
 
     def slugs(self) -> list[str]:
         return list(self.rows)
+
+    def levels(self) -> dict[str, list[str]]:
+        """The pilot levels a list plays at, for the lists added at chosen levels only (the rest play at every level)."""
+        return {slug: json.loads(v) for slug, v in self.db.execute("SELECT slug, levels FROM pool_levels")}
+
+    def set_levels(self, slugs: list[str], levels: list[str]) -> None:
+        with self.db:
+            self.db.executemany("INSERT OR REPLACE INTO pool_levels VALUES (?, ?)", [(s, json.dumps(levels)) for s in slugs])
 
     def add(self, slug: str, name: str, lst: list[str], source: str, parent: Optional[str], known: set[str]) -> list[str]:
         """Add a list to the pool; the problems that stop it, else empty. `known` holds every pool slug outside this table."""

@@ -155,6 +155,18 @@ def test_the_meta_tab_survives_a_bad_range(monkeypatch, tmp_path):
     _run(monkeypatch, tmp_path, body)
 
 
+def test_a_list_kept_to_expert_loses_its_other_pilots_and_a_restart_keeps_it_so(monkeypatch, tmp_path):
+    async def body(c, server):
+        from animal_kingdom.web import ladder as ranking
+        h = {"X-AK-League-Key": "k-test"}
+        j = await (await c.post("/api/league/levels", json={"slugs": ["cats"], "levels": ["expert"]}, headers=h)).json()
+        assert j["slugs"] == ["cats"]
+        assert {lid for lid in server.ladder.bots() if lid.endswith(":cats")} == {"bot:expert:cats"}
+        again = ranking.Ladder(server.ladder.db, server.ladder.decks, server.league.levels())   # what a restart builds
+        assert {lid for lid in again.bots() if lid.endswith(":cats")} == {"bot:expert:cats"}
+    _run(monkeypatch, tmp_path, body)
+
+
 def test_a_game_posted_twice_is_rated_once(monkeypatch, tmp_path):
     async def body(c, server):
         h = {"X-AK-League-Key": "k-test"}

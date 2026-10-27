@@ -141,12 +141,12 @@ def parse_bot(lid: str) -> tuple[str, str] | None:
 class Ladder:
     """Ratings by ladder id: a person's profile id, or a bot's bot_id(level, deck). Kept in the profiles database."""
 
-    def __init__(self, db, decks: list[str]):
+    def __init__(self, db, decks: list[str], levels_of: dict[str, list[str]] | None = None):
         self.db, self.decks = db, decks
         db.executescript(SCHEMA)
         with db:
-            for level in LEVELS:
-                for deck in decks:
+            for deck in decks:
+                for level in (levels_of or {}).get(deck, LEVELS):   # a list added at chosen levels only stays at them (2026-10-27)
                     r = bot_seed(LEVEL_START[level])
                     db.execute("INSERT OR IGNORE INTO ladder VALUES (?, ?, ?, ?, ?)", (bot_id(level, deck), r.rating, r.rd, r.vol, r.games))
 
@@ -187,6 +187,11 @@ class Ladder:
         with self.db:
             self._put(winner, w); self._put(loser, l)
         return w, l
+
+    def drop_levels(self, deck: str, keep: list[str]) -> None:
+        """A list's pairings at the other pilot levels leave the ladder, their rows and ratings with them."""
+        with self.db:
+            self.db.executemany("DELETE FROM ladder WHERE id = ?", [(bot_id(lv, deck),) for lv in LEVELS if lv not in keep])
 
     def add_player(self, lid: str, start: float = START) -> None:
         """A league newcomer's row: `start` is the best prior there is (a tinkered child its parent's rating, a counter-deck
