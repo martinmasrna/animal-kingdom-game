@@ -3811,6 +3811,18 @@
       "habitat": "Savanna",
       "unnamed": true,
       "keywords": []
+    },
+    {
+      "id": "black_widow",
+      "name": "Black Widow",
+      "status": "planned",
+      "rarity": "",
+      "tags": [],
+      "base_strength": null,
+      "text": "",
+      "keywords": [],
+      "species": "Black Widow",
+      "habitat": "Desert"
     }
   ]
 }
