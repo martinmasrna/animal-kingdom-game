@@ -5606,7 +5606,7 @@
       "at": 1793028816
     }
   },
-  "pilot_fish": {
+  "krill": {
     "rarity": {
       "review": {
         "prev_lv": "empty",
@@ -5625,9 +5625,9 @@
         "prev": null
       },
       "lv": "draft",
-      "note": "A small fish; its effect is the card",
+      "note": "A tiny swarm",
       "by": "claude",
-      "at": 1793102575
+      "at": 1793103033
     },
     "tag": {
       "review": {
@@ -5636,9 +5636,9 @@
         "prev": ""
       },
       "lv": "draft",
-      "note": "A fish",
+      "note": "Tagless: a Giants card, not a Fish one",
       "by": "claude",
-      "at": 1793102576
+      "at": 1793103045
     },
     "effect": {
       "review": {
@@ -5656,9 +5656,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "into the collection",
+      "note": "What blue whales are famous for eating: where the krill swarm, the whales come (Martin, 2026-10-27)",
       "by": "claude",
-      "at": 1793102642
+      "at": 1793103032
     }
   }
 }

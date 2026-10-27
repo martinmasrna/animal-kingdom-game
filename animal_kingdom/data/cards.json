@@ -3786,16 +3786,14 @@
       "keywords": []
     },
     {
-      "id": "pilot_fish",
-      "name": "Pilot Fish",
+      "id": "krill",
+      "name": "Krill",
       "status": "collectible",
       "rarity": "common",
-      "tags": [
-        "Fish"
-      ],
-      "base_strength": 2,
+      "tags": [],
+      "base_strength": 1,
       "text": "Roar: the next Titan you play this turn costs one action.",
-      "species": "Pilot Fish",
+      "species": "Krill",
       "habitat": "Open Ocean",
       "keywords": []
     }

@@ -862,9 +862,9 @@ def test_a_copy_on_the_board_keeps_the_copied_cards_dawn_and_dusk():
     assert len(s.hands["A"]) == hand + 2                       # both Whale Sharks draw at Dusk
 
 
-def test_the_pilot_fish_makes_the_next_titan_cost_one_action():
-    s = make_state(hands={"A": ["pilot_fish", "blue_whale", "blue_whale"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
-    rules.apply_action(s, PlaceAction("pilot_fish", ("cr", "1,2")))
+def test_the_krill_makes_the_next_titan_cost_one_action():
+    s = make_state(hands={"A": ["krill", "blue_whale", "blue_whale"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    rules.apply_action(s, PlaceAction("krill", ("cr", "1,2")))
     assert PlaceAction("blue_whale", ("cr", "1,1")) in rules.legal_actions(s)      # one action left pays for it
     rules.apply_action(s, PlaceAction("blue_whale", ("cr", "1,1")))
     assert s.top_unit("1,1").card_id == "blue_whale" and s.current == "B"

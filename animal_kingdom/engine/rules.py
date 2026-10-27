@@ -69,7 +69,7 @@ def _top_level_actions(state: GameState) -> list[Action]:
 
 
 def titan_cost(state: GameState, player: str) -> int:
-    """Two actions, one after a Pilot Fish this turn ("the next Titan you play this turn costs one action")."""
+    """Two actions, one after a Krill this turn ("the next Titan you play this turn costs one action")."""
     return TITAN_ACTIONS - (1 if state.turn_flags.get(f"titan_discount_{player}") else 0)
 
 

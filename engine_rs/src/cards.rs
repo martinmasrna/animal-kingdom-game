@@ -83,7 +83,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
-        | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "pilot_fish" => &[OnPlace],
+        | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" => &[OnPlace],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
         "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "queen_ant" | "scout_bee" | "army_ant_legend"
@@ -1005,7 +1005,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let n = cfg(st, "beaver_bonus_actions");
             schedule(st, unit, 1, vmap!("op" => Value::s("grant_action"), "player" => pn(owner), "n" => Value::Int(n as i64)), false, None);
         }
-        ("pilot_fish", OnPlace) => st.turn_flags.titan_discount[owner.min(1) as usize] = true,
+        ("krill", OnPlace) => st.turn_flags.titan_discount[owner.min(1) as usize] = true,
         ("electric_eel", OnPlace) => {
             let opp = other(owner);
             let n = cfg(st, "eel_actions");

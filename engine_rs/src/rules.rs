@@ -46,7 +46,7 @@ fn has_top_level_action(st: &State) -> bool {
     !top_level_actions(st).is_empty()
 }
 
-/// Two actions, one after a Pilot Fish this turn. As in Python.
+/// Two actions, one after a Krill this turn. As in Python.
 pub fn titan_cost(st: &State, player: Player) -> i32 {
     TITAN_ACTIONS - if st.turn_flags.titan_discount[player.min(1) as usize] { 1 } else { 0 }
 }
