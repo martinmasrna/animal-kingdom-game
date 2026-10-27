@@ -2486,6 +2486,7 @@ def _anaconda_legend_end_of_turn(state, unit, cr):
     counters["anaconda_legend"] = counters.get("anaconda_legend", 0) - state.config.anaconda_legend_decay
     state.emit("strength", card="anaconda_legend", owner=unit.owner, n=-state.config.anaconda_legend_decay)   # every copy (this one is in the deck now)
     shuffle_back(state, unit.owner, ["anaconda_legend"])
+    _push_draw(state, unit.owner, 1)              # "and draw a card": after the shuffle, so it may be Eon again
 
 
 def _magpie_place(state, unit, cr):

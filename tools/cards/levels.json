@@ -1402,6 +1402,16 @@
     "animal": {
       "lv": "draft",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Apex Predator. Dusk: shuffle this into your deck with -1 strength."
+      },
+      "note": "Martin, 2026-10-27: the Ouroboros was a pure one-for-one at very low tempo; the draw makes each cycle cost no card",
+      "by": "claude",
+      "at": 1793110105
     }
   },
   "falcon": {

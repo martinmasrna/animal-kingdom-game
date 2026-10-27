@@ -962,14 +962,16 @@ def test_queen_adira_on_top_still_draws_for_a_cat_removal():
     assert len(s.hands["A"]) == 1
 
 
-def test_eon_eats_then_shuffles_itself_back_one_smaller_each_cycle():
+def test_eon_eats_then_shuffles_itself_back_one_smaller_each_cycle_and_draws():
     s = make_state(hands={"A": ["anaconda_legend"]}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6})
     put(s, "1,1", "caracal", "A")
     put(s, "2,1", "lion_legend_3", "B")                     # an 8: Eon (10) lands on it and eats it
     rules.apply_action(s, PlaceAction("anaconda_legend", ("cr", "2,1")))
     assert "lion_legend_3" in s.remove_pile and s.top_unit("2,1").card_id == "anaconda_legend"
-    rules.apply_action(s, DrawAction())                   # A's turn ends: Eon leaves
-    assert s.top_unit("2,1") is None and "anaconda_legend" in s.decks["A"] and "anaconda_legend" not in s.remove_pile
+    rules.apply_action(s, DrawAction())                   # A's turn ends: Eon leaves, and A draws a card
+    assert s.top_unit("2,1") is None and "anaconda_legend" not in s.remove_pile
+    assert len(s.hands["A"]) == 3                         # the Draw action's 2 and Eon's 1
+    assert "anaconda_legend" in s.decks["A"] + hand_ids(s, "A")
     assert card_strength(s, "anaconda_legend", "A") == 10 - CFG.anaconda_legend_decay
 
 

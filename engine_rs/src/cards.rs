@@ -870,6 +870,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             *st.card_strength_counters[owner as usize].entry(me).or_insert(0) -= decay;
             crate::emit!(st, "strength", vmap!("card" => Value::s("anaconda_legend"), "owner" => pn(owner), "n" => Value::Int(-(decay as i64))));
             shuffle_back(st, owner, &[me], None);
+            push_draw(st, owner, 1);
         }
         ("raven_legend", OnPlace) => {
             let opp = other(owner);

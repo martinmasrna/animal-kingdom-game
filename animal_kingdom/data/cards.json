@@ -1631,12 +1631,12 @@
         "Snake"
       ],
       "base_strength": 10,
-      "text": "Apex Predator. Dusk: shuffle this into your deck with -1 strength.",
+      "text": "Apex Predator. Dusk: shuffle this into your deck with -1 strength and draw a card.",
+      "species": "Anaconda",
+      "habitat": "Jungle",
       "keywords": [
         "Apex Predator"
-      ],
-      "species": "Anaconda",
-      "habitat": "Jungle"
+      ]
     },
     {
       "id": "raven_legend",

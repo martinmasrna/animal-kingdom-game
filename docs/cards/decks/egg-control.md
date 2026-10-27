@@ -10,7 +10,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Eon** | 1 | Snake | 10 | Apex Predator. Dusk: shuffle this into your deck with -1 strength. |
+| **Eon** | 1 | Snake | 10 | Apex Predator. Dusk: shuffle this into your deck with -1 strength and draw a card. |
 | **Grimm** | 1 | Bird | 3 | Flight. Roar: put an animal from your opponent's Remove Pile into your hand. |
 | **Black Swan** | 1 | Bird | 3 | Flight. Whenever you draw Black Swan, your opponent discards a random card. |
 | **Aurum** | 1 | Bird | 1 | Dawn: shuffle two Golden Eggs into your deck. |
