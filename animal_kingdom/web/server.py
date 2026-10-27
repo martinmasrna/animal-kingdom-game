@@ -689,6 +689,7 @@ async def league_games(req):
     if not isinstance(games, list) or len(games) > 1000:
         raise web.HTTPBadRequest(text="games: a list of at most 1000")
     ok, touched = [], set()
+    pairings = {lid for lid in ladder.bots() if ranking.parse_bot(lid)[1] in ladder.decks}
     gids = [str(g["gid"]) for g in games if isinstance(g, dict) and g.get("gid")]
     fresh = league.unseen(gids)
     seen = len(gids) - len(fresh)
@@ -698,8 +699,8 @@ async def league_games(req):
         a, b, w = g.get("a"), g.get("b"), g.get("winner")
         if not (ranking.parse_bot(a or "") and ranking.parse_bot(b or "") and a != b):
             continue
-        if ranking.parse_bot(a)[1] not in ladder.decks or ranking.parse_bot(b)[1] not in ladder.decks:
-            continue
+        if a not in pairings or b not in pairings:   # a list at a pilot level it no longer plays (or a retired list): its result
+            continue                                  # would bring the pairing back onto the ladder (2026-10-27)
         if w in ("A", "B"):
             ladder.result(a if w == "A" else b, b if w == "A" else a)
             touched |= {a, b}

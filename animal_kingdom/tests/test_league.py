@@ -162,6 +162,9 @@ def test_a_list_kept_to_expert_loses_its_other_pilots_and_a_restart_keeps_it_so(
         j = await (await c.post("/api/league/levels", json={"slugs": ["cats"], "levels": ["expert"]}, headers=h)).json()
         assert j["slugs"] == ["cats"]
         assert {lid for lid in server.ladder.bots() if lid.endswith(":cats")} == {"bot:expert:cats"}
+        g = {"gid": "x-1", "a": "bot:easy:cats", "b": "bot:expert:fish", "winner": "A", "seed": 1, "turns": 9, "reason": "food"}
+        j = await (await c.post("/api/league/games", json={"games": [g]}, headers=h)).json()
+        assert j["rated"] == 0 and "bot:easy:cats" not in server.ladder.bots()   # a late result can't bring the pilot back
         again = ranking.Ladder(server.ladder.db, server.ladder.decks, server.league.levels())   # what a restart builds
         assert {lid for lid in again.bots() if lid.endswith(":cats")} == {"bot:expert:cats"}
     _run(monkeypatch, tmp_path, body)
