@@ -153,6 +153,8 @@ Some effects resolve on a delay — "in 2 turns, draw 2 cards" (Black Bear), "at
 
 **Venom is the exception: it belongs to the bitten unit, not to the snake.** Taipan's bite ("at the start of your next turn, remove it") resolves even if the Taipan has been covered or removed, and even if the bitten unit is buried; it is cancelled only if the bitten unit leaves the board first.
 
+**A copy carries the timers.** An animal that becomes a copy of one on the board (Iris) takes its ticking timers too, as far along as they are: its own seen from the copy's side (an enemy Sloth's food comes to the copy's owner, an enemy Electric Eel's cap falls on the copy's opponent), and the ones on it as they are (a poisoned or bitten animal's copy is removed when the original would be) (Martin, 2026-10-27).
+
 Covering is placement, not an ability, so neither **Armor** nor **Stealth** protects a timer — only strength (being hard to cover) does.
 
 ---

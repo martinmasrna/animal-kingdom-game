@@ -238,6 +238,45 @@ fn become_copy(st: &mut State, me_iid: i64, card: CardId, counter: i16) {
     transform(st, me_iid, card);
 }
 
+/// A copy carries the animal's ticking timers, as far along as they are: its own seen from the copy's side, the ones on
+/// it (venom, poison) as they are. As in Python.
+fn copy_timers(st: &mut State, src: &Unit, me_iid: i64, me_owner: Player) {
+    let swap = |p: Player| -> Player {
+        if src.owner == me_owner || src.owner == WILD {
+            p
+        } else if p == src.owner {
+            me_owner
+        } else if p == other(src.owner) {
+            other(me_owner)
+        } else {
+            p
+        }
+    };
+    let found: Vec<Map> = st.scheduled.iter().filter(|s| m_get_i(s, "iid") == Some(src.iid)).cloned().collect();
+    for mut s in found {
+        let Some(Value::Map(mut step)) = s.get("step").cloned() else { continue };
+        let own = m_get_i(&step, "by_iid") == Some(src.iid);
+        for (k, v) in step.0.iter_mut() {
+            if (*k == "iid" || *k == "by_iid") && v.as_i64() == Some(src.iid) {
+                *v = Value::Int(me_iid);
+            } else if own && (*k == "player" || *k == "by_player") {
+                if let Some(p) = v.as_str() {
+                    *v = pn(swap(player_from(p)));
+                }
+            }
+        }
+        if own {
+            if let Some(o) = m_get_s(&s, "owner") {
+                let o = swap(player_from(o));
+                s.insert("owner", pn(o));
+            }
+        }
+        s.insert("iid", Value::Int(me_iid));
+        s.insert("step", Value::Map(step));
+        st.scheduled.push(s);
+    }
+}
+
 fn put_back(st: &mut State, unit: &Unit, cr: Cr, pos: usize, counter: i32) {
     if st.pile_take(unit.card, Some(unit.owner)) {
         let iid = st.new_iid();
@@ -1343,6 +1382,9 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             let Some(cr) = cr_of(st) else { return };
             let Some(target) = st.top(cr).cloned() else { return };
             become_copy(st, me_iid, target.card, target.strength_counter);
+            if st.find_unit(me_iid).is_some() {
+                copy_timers(st, &target, me_iid, chooser);
+            }
             gain_to_hand(st, chooser, target.card, 0);
         }
         "copy_from_hand" => {

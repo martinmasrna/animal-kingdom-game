@@ -1649,7 +1649,26 @@ def _then_copy_and_add(state, step, cr):
     if target is None:
         return
     _become(state, step, target.card_id, target.strength_counter)
+    me = _find_instance(state, step["self"])
+    if me is not None and _crossroad_of(state, me.iid) is not None:
+        _copy_timers(state, target, me)
     gain_to_hand(state, step["chooser"], target.card_id)
+
+
+def _copy_timers(state, source, copy) -> None:
+    """A copy carries the animal's ticking timers, as far along as they are (Martin, 2026-10-27): its own (a Sloth's food,
+    an Electric Eel's cap) seen from the copy's side, so an enemy Sloth's food comes to the copy's owner; and the ones on
+    it (venom, poison) as they are, so a poisoned animal's copy is poisoned too."""
+    swap = {}
+    if source.owner != copy.owner and source.owner != WILD:
+        swap = {source.owner: copy.owner, other_player(source.owner): other_player(copy.owner)}
+    for s in [s for s in state.scheduled if s["iid"] == source.iid]:
+        own = s["step"].get("by_iid") == source.iid
+        step = {k: copy.iid if k in ("iid", "by_iid") and v == source.iid
+                else swap.get(v, v) if own and k in ("player", "by_player") else v
+                for k, v in s["step"].items()}
+        state.scheduled.append({**s, "iid": copy.iid, "step": step,
+                                "owner": swap.get(s["owner"], s["owner"]) if own else s["owner"]})
 
 
 def _then_copy_from_hand(state, step, iid):

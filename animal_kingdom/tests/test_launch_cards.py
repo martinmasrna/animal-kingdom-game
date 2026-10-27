@@ -862,6 +862,27 @@ def test_a_copy_on_the_board_keeps_the_copied_cards_dawn_and_dusk():
     assert len(s.hands["A"]) == hand + 2                       # both Whale Sharks draw at Dusk
 
 
+def test_iris_copies_an_enemy_timer_for_herself_as_far_along_as_it_is():
+    s = make_state(hands={"A": ["chameleon_legend"]}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6})
+    sloth = put(s, "2,2", "sloth", "B")
+    effects._sloth_place(s, sloth, "2,2")                      # B's Sloth: its food two of B's turns away
+    rules.apply_action(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
+    choose(s, "2,2")
+    for _ in range(4):
+        end_turn(s)
+    assert s.food["A"] == CFG.sloth_food and s.food["B"] == CFG.sloth_food
+
+
+def test_iris_copying_a_poisoned_animal_is_poisoned_too():
+    s = make_state(hands={"A": ["chameleon_legend"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    put(s, "2,2", "lion", "A")
+    effects._op_venom(s, {"chooser": "B", "options": ["2,2"], "choice": "2,2"})   # B's Cottonmouth bit it
+    rules.apply_action(s, PlaceAction("chameleon_legend", ("cr", "1,2")))
+    choose(s, "2,2")
+    end_turn(s)
+    assert s.top_unit("2,2") is None and s.top_unit("1,2") is None
+
+
 def test_the_chameleon_becomes_a_copy_of_an_animal_in_your_hand_which_stays_there():
     s = make_state(hands={"A": ["chameleon", "lion", "squirrel"]})
     rules.apply_action(s, PlaceAction("chameleon", ("cr", "1,2")))
