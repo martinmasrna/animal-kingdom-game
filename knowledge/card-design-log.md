@@ -10,3 +10,4 @@ Read on 2026-11-15. The treatment failed if, over the sittings since 2026-10-26,
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 2026-10-26 | Brutus (the rhino legendary's new effect) | 12 | 1 | 11 | 0 | 0 | 1 | 1 | 0 | 0 | 9 | 0 |
 | 2026-10-26 | Sea Turtle (new effect; Martin wrote the card himself) | 7 | 0 | 7 | 0 | 0 | 0 | 0 | 0 | 3 | 4 | 0 |
+| 2026-10-27 | Card balance: Alley Cat, Queen Bee, Giants (Titan cheats, Oxpecker, legendary Oxpecker); agent on a stale copy of this skill | 20 | 3 | 17 | 0 | 0 | 3 | 0 | 4 | 3 | 7 | 0 |
