@@ -1769,11 +1769,21 @@ def _op_anteater(state, step):
     return None
 
 
+def _op_oxpecker(state, step):
+    """Oxpecker: draw a card, then gain food equal to the strongest animal in your hand (each as it would be played now)."""
+    draw_cards(state, step["player"], 1)
+    hand = state.hands[step["player"]]
+    if hand:
+        gain_food(state, step["player"], max(placement_strength(state, u) for u in hand))
+    return None
+
+
 OPS.update({
     "choose": _op_choose,
     "forced_roam": _op_forced_roam,
     "draw_to_match": _op_draw_to_match,
     "anteater": _op_anteater,
+    "oxpecker": _op_oxpecker,
 })
 
 
@@ -2770,11 +2780,7 @@ def _tortoise_legend_eot(state, unit, cr):
 
 
 def _oxpecker_place(state, unit, cr):
-    """Roar: gain 1 food for each animal of strength 8 or more in your starting deck."""
-    n = sum(1 for cid in state.starting_decks.get(unit.owner, ())
-            if isinstance(state.cards[cid].base_strength, int)
-            and state.cards[cid].base_strength >= state.config.oxpecker_min)
-    _push_gain(state, unit.owner, n)
+    state.effect_stack.append({"op": "oxpecker", "player": unit.owner})
 
 
 def _anteater_place(state, unit, cr):

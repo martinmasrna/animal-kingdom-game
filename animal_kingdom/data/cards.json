@@ -2173,13 +2173,13 @@
       "tags": [
         "Bird"
       ],
-      "base_strength": 1,
-      "text": "Flight. Roar: gain 1 food for each animal of strength 8 or more in your starting deck.",
+      "base_strength": 2,
+      "text": "Flight. Roar: draw a card, then gain food equal to the strongest animal in your hand.",
+      "species": "Oxpecker",
+      "habitat": "Savanna",
       "keywords": [
         "Flight"
-      ],
-      "species": "Oxpecker",
-      "habitat": "Savanna"
+      ]
     },
     {
       "id": "anteater",

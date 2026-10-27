@@ -1747,6 +1747,16 @@ fn op_anteater(st: &mut State, step: &mut Map) -> Option<Pending> {
     None
 }
 
+fn op_oxpecker(st: &mut State, step: &mut Map) -> Option<Pending> {
+    let player = step_player(st, step, "player");
+    draw_cards(st, player, 1);
+    let hand = st.hands[player as usize].clone();
+    if let Some(s) = hand.iter().map(|u| placement_strength(st, u)).max() {
+        gain_food(st, player, s, true, false);
+    }
+    None
+}
+
 fn op_locust_eat(st: &mut State, step: &mut Map) -> Option<Pending> {
     let iid = m_get_i(step, "iid").unwrap();
     let Some((cr, pos)) = st.find_unit(iid) else { return None };
@@ -1928,6 +1938,7 @@ fn run_op(st: &mut State, op: &str, step: &mut Map) -> Option<Pending> {
         "forced_roam" => op_forced_roam(st, step),
         "draw_to_match" => op_draw_to_match(st, step),
         "anteater" => op_anteater(st, step),
+        "oxpecker" => op_oxpecker(st, step),
         "locust_eat" => op_locust_eat(st, step),
         "discard_choice" => op_discard_choice(st, step),
         "hornet_kill" => op_hornet_kill(st, step),

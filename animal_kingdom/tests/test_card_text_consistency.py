@@ -57,11 +57,7 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
 # Cards whose food-gain number is structural, not a tunable constant, so there is
 # nothing in config to compare against. Keep this list tight — it is the escape
 # hatch, and every entry needs a reason.
-NO_CONSTANT = {
-    # "gain 1 food for each unit ..." — the per-unit rate of 1 is hardcoded in
-    # _oxpecker_place; there is no oxpecker_food dial.
-    "oxpecker",
-}
+NO_CONSTANT: set = set()
 
 # Cards read the shared fed_threshold via "gained N or more food this turn".
 FED_THRESHOLD_CARDS = {"gopher", "muskrat", "groundhog", "forager_ant"}
@@ -175,10 +171,9 @@ def test_strength_limit_text_matches_config():
 
 
 def test_no_strength_limit_card_escapes_the_check():
-    # Oxpecker's "strength 8 or more" and the Capybara's "strength 4 or more" read the starting deck, not a removal limit
-    # (checked below and in test_capybara_numbers_match_config).
+    # The Capybara's "strength 4 or more" reads the starting deck, not a removal limit (test_capybara_numbers_match_config).
     printed = {cid for cid, c in _cards().items() if STRENGTH_LIMIT_RE.search(c.text)}
-    assert printed - {"oxpecker", "capybara"} == set(STRENGTH_LIMITS)
+    assert printed - {"capybara"} == set(STRENGTH_LIMITS)
 
 
 def test_royal_jelly_number_matches_config():
@@ -373,11 +368,6 @@ def test_thresholds_text_matches_config():
     cfg, cards = Config.default(), _cards()
     printed = {cid: int(m.group(1)) for cid, c in cards.items() if (m := COUNT_THRESHOLD_RE.search(c.text))}
     assert printed == {cid: getattr(cfg, attr) for cid, attr in THRESHOLDS.items()}
-
-
-def test_oxpecker_threshold_matches_config():
-    (n,) = re.findall(r"strength (\d+) or more", _cards()["oxpecker"].text)
-    assert int(n) == Config.default().oxpecker_min
 
 
 def test_the_launch_decks_other_numbers_match_config():

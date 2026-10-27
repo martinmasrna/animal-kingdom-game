@@ -110,7 +110,6 @@ class Config:
     gorilla_min: int = 8                 # Gorilla: draw if this has this much strength
     manta_legend_regions: int = 2        # the legendary Manta Ray: draw at Dusk with this many regions...
     manta_legend_draw: int = 2           # ...this many cards
-    oxpecker_min: int = 8                # Oxpecker: count starting-deck animals of strength >= this
     capybara_bonus: int = 7              # Capybara: this has +7 strength if your starting deck has no other animal...
     capybara_small_max: int = 3          # ...of strength 4 or more (the small-deck archetype's line)
     jelly_strength: int = 4              # the legendary Bee: "the animals in your hand and deck become strength 4"

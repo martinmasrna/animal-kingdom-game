@@ -1087,11 +1087,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let n = st.map().neighbors(cr).iter().filter(|&&nb| st.top(nb).map(|t| t.owner == owner && statics::has_keyword(st, t, K_HUNGRY, Some(nb))).unwrap_or(false)).count() as i32;
             draws(st, unit, n);
         }
-        ("oxpecker", OnPlace) => {
-            let min = cfg(st, "oxpecker_min");
-            let n = if owner <= B { st.starting_decks[owner as usize].iter().filter(|c| st.card(**c).base.map(|b| b >= min).unwrap_or(false)).count() as i32 } else { 0 };
-            push_gain(st, owner, n);
-        }
+        ("oxpecker", OnPlace) => st.effect_stack.push(vmap!("op" => Value::s("oxpecker"), "player" => pn(owner))),
         ("anteater", OnPlace) => st.effect_stack.push(vmap!("op" => Value::s("anteater"), "player" => pn(owner))),
         ("dung_beetle", OnEndOfTurn) => {
             let n = st.tops().filter(|(c, t)| t.owner == owner && statics::has_keyword(st, t, K_HUNGRY, Some(*c))).count() as i32;

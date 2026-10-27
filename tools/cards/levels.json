@@ -2850,6 +2850,26 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Flight. Roar: gain 1 food for each animal of strength 8 or more in your starting deck."
+      },
+      "note": "Martin, 2026-10-27: the bird that lives off the biggest animal around; fuel from the giant you hold, not a gamble on a draw",
+      "by": "claude",
+      "at": 1793103779
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin, 2026-10-27",
+      "by": "claude",
+      "at": 1793103780
     }
   },
   "oxpecker_legend": {

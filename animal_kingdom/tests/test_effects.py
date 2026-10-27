@@ -902,11 +902,10 @@ def test_andean_condor_draws_only_when_its_top_is_stronger():
     assert lose.hands["A"] == []
 
 
-def test_oxpecker_counts_strong_units_in_the_starting_deck():
-    s = make_state(hands={"A": ["oxpecker"]})
-    s.starting_decks["A"] = ("elephant", "rhinoceros_legend", "lion", "squirrel", "python")  # 9,8 qualify; 7,3,dyn don't
+def test_oxpecker_draws_then_gains_the_strongest_hand_animals_strength():
+    s = make_state(hands={"A": ["oxpecker", "lion", "squirrel"]}, decks={"A": ["elephant"], "B": []}, food={"A": 0, "B": 0})
     rules.apply_action(s, PlaceAction("oxpecker", ("cr", "1,2")))
-    assert s.food["A"] == 2
+    assert "elephant" in hand_ids(s, "A") and s.food["A"] == s.cards["elephant"].base_strength   # the drawn 9 counts
 
 
 # ============================================ Snake/Bird control (2026-09-26 redesign)

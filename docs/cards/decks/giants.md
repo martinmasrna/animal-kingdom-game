@@ -28,7 +28,7 @@ The table below is generated from cards.json, where the cards live.
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Oxpecker** | 3 | Bird | 1 | Flight. Roar: gain 1 food for each animal of strength 8 or more in your starting deck. |
+| **Oxpecker** | 3 | Bird | 2 | Flight. Roar: draw a card, then gain food equal to the strongest animal in your hand. |
 | **Anteater** | 3 | — | 4 | Roar: draw a card. Gain food equal to its strength. |
 | **Dung Beetle** | 3 | Beetle | 1 | Dusk: gain 5 food for each Hungry animal you control. |
 | **Blue Whale** | 3 | — | 12 | Titan. |
