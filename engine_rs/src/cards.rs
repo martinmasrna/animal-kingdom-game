@@ -1012,7 +1012,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("golden_orb_weaver", OnEnemyPlacedAdjacent) => {
             if let Args::PlacedAdjacent(placed, pcr) = args {
                 if (statics::has_keyword(st, placed, K_FLIGHT, Some(*pcr)) || statics::has_keyword(st, placed, K_ROAM, Some(*pcr))) && statics::can_be_removed(st, placed, Some(*pcr), false) {
-                    let step = remove_iid_step(st, placed.iid, owner, true, Some(unit.iid), Some(unit.card));
+                    let step = remove_iid_step(st, placed.iid, owner, true, None, Some(unit.card));
                     st.effect_stack.push(step);
                 }
             }
@@ -1037,7 +1037,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("hippopotamus", OnEnemyPlacedAdjacent) => {
             if let Args::PlacedAdjacent(placed, pcr) = args {
                 if effective_strength(st, placed, None) <= cfg(st, "hippopotamus_max") && statics::can_be_removed(st, placed, Some(*pcr), false) {
-                    let step = remove_iid_step(st, placed.iid, owner, true, Some(unit.iid), Some(unit.card));
+                    let step = remove_iid_step(st, placed.iid, owner, true, None, Some(unit.card));
                     st.effect_stack.push(step);
                 }
             }

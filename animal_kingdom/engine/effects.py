@@ -1242,10 +1242,9 @@ def remove_choice_step(chooser, options, *, by_card, optional) -> dict:
 
 
 def _op_remove_iid(state, step):
-    # A reactive removal may name the unit that triggered it (`source_iid`). If that source
-    # has since left the board - e.g. a fed Muskrat's roar removed the Hippo before the
-    # Hippo's queued reaction resolves (decision: reactions fizzle when their source is gone) -
-    # the removal fizzles rather than firing from a dead trigger.
+    # A reactive removal may name a unit whose leaving the board makes it fizzle (`source_iid`).
+    # The placement traps (Hippopotamus, Golden Orb-Weaver) name none: once set off, they
+    # resolve even if the placed animal's Roar removed the trap first.
     src = step["source_iid"]
     if src is not None and _find_unit(state, src)[1] is None:
         return None
@@ -2688,7 +2687,7 @@ def _orb_weaver_enemy_placed(state, spider, placed, cr):
     if (statics.has_keyword(state, placed, "Flight", cr) or statics.has_keyword(state, placed, "Roam", cr)) \
             and statics.can_be_removed(state, placed, cr):
         state.effect_stack.append(remove_iid_step(placed.iid, by_player=spider.owner, by_effect=True,
-                                                  source_iid=spider.iid, by_card=spider.card_id))
+                                                  source_iid=None, by_card=spider.card_id))
 
 
 def _tortoise_place(state, unit, cr):
@@ -2734,11 +2733,12 @@ def _remove_all_adjacent(state, unit, cr):
 
 
 def _hippo_enemy_placed(state, hippo, placed, cr):
-    # Automatic trigger, nobody "chose" the target: Stealth doesn't hide (decision B).
+    # Automatic trigger, nobody "chose" the target: Stealth doesn't hide (decision B). Set off by the placement, it
+    # resolves even when the placed animal's Roar removed the Hippo first: the two go together (Martin, 2026-10-27).
     if (effective_strength(state, placed) <= state.config.hippopotamus_max
             and statics.can_be_removed(state, placed, cr)):
         state.effect_stack.append(remove_iid_step(placed.iid, by_player=hippo.owner, by_effect=True,
-                                                  source_iid=hippo.iid, by_card=hippo.card_id))
+                                                  source_iid=None, by_card=hippo.card_id))
 
 
 def _tortoise_legend_eot(state, unit, cr):

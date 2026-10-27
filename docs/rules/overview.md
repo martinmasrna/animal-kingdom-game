@@ -141,7 +141,7 @@ Unless stated otherwise, a units's effect is resolved after it is placed. Effect
 - ignoring connection;
 - removing visible units.
 
-**Timing of reactions.** A placed unit's own effect (Roar) resolves *before* any reaction another unit has to that placement (e.g. Hippopotamus removing a weak enemy placed adjacent). A reaction that has been queued **fizzles if the unit it belongs to is no longer on the board when it would resolve** — so a fed Muskrat placed next to an enemy Hippopotamus removes the Hippo with its Roar first, and the Hippo's queued removal then does nothing; the Muskrat survives. (An unfed Muskrat has no Roar removal, so the Hippo removes it as normal.)
+**Timing of reactions.** A placed unit's own effect (Roar) resolves *before* any reaction another unit has to that placement (e.g. Hippopotamus removing a weak enemy placed adjacent). A trap set off by the placement still resolves **even if the placed unit's Roar removed the trap first**: a fed Muskrat placed next to an enemy Hippopotamus removes the Hippo with its Roar, and the Hippo's removal then takes the Muskrat, so the two go together; a Hornet next to a Golden Orb-Weaver likewise (Martin, 2026-10-27: otherwise the traps are significantly weaker). An unfed Muskrat has no Roar removal, so the Hippo removes it and stays.
 
 ## 9.1 Timed effects ("in N turns")
 
@@ -153,7 +153,7 @@ Some effects resolve on a delay — "in 2 turns, draw 2 cards" (Black Bear), "at
 
 **Venom is the exception: it belongs to the bitten unit, not to the snake.** Taipan's bite ("at the start of your next turn, remove it") resolves even if the Taipan has been covered or removed, and even if the bitten unit is buried; it is cancelled only if the bitten unit leaves the board first.
 
-This is the same principle as the reaction-fizzle rule above: anything queued re-checks its unit before it resolves. Covering is placement, not an ability, so neither **Armor** nor **Stealth** protects a timer — only strength (being hard to cover) does.
+Covering is placement, not an ability, so neither **Armor** nor **Stealth** protects a timer — only strength (being hard to cover) does.
 
 ---
 

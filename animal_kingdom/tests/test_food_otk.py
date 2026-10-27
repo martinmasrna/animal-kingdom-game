@@ -60,11 +60,10 @@ def test_muskrat_removes_adjacent_enemy_only_when_fed():
     assert unfed.owner_of("2,1") == "B"                               # no removal offered
 
 
-def test_fed_muskrat_survives_the_hippo_it_removes():
-    """A fed Muskrat placed next to an enemy Hippo removes it FIRST (roar before
-    reactions, decision 8); the Hippo's queued reactive removal then fizzles because its
-    source is gone - Muskrat lives. An UNfed Muskrat (str 2 <= Hippo's max) is still
-    removed by the Hippo, which survives."""
+def test_fed_muskrat_and_the_hippo_it_removes_go_together():
+    """A fed Muskrat placed next to an enemy Hippo removes it first (roar before reactions), and the Hippo's
+    removal, already set off by the placement, still takes the Muskrat (Martin, 2026-10-27). An UNfed
+    Muskrat (str 2 <= Hippo's max) is removed by the Hippo, which survives."""
     fed = make_state(current="A", hands={"A": ["muskrat"]})
     fed.turn_flags["food_gained_A"] = CFG.fed_threshold
     put(fed, "1,2", "lion", "A")                                      # connects 2,2
@@ -72,9 +71,8 @@ def test_fed_muskrat_survives_the_hippo_it_removes():
     rules.apply_action(fed, PlaceAction("muskrat", ("cr", "2,2")))
     if fed.pending is not None:
         rules.apply_action(fed, ChoiceAction("2,1"))                  # Muskrat removes the Hippo
-    assert fed.owner_of("2,2") == "A"                                 # Muskrat survives...
-    assert fed.owner_of("2,1") is None                               # ...and the Hippo is gone
-    assert "hippopotamus" in fed.remove_pile and "muskrat" not in fed.remove_pile
+    assert fed.owner_of("2,2") is None and fed.owner_of("2,1") is None
+    assert "hippopotamus" in fed.remove_pile and "muskrat" in fed.remove_pile
 
     unfed = make_state(current="A", hands={"A": ["muskrat"]})
     put(unfed, "1,2", "lion", "A")
