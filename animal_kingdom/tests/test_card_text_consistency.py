@@ -172,9 +172,12 @@ def test_strength_limit_text_matches_config():
 
 
 def test_no_strength_limit_card_escapes_the_check():
-    # The Capybara's "strength 4 or more" reads the starting deck, not a removal limit (test_capybara_numbers_match_config).
+    # The Capybara's "strength 4 or more" reads the starting deck and the legendary Oxpecker's "strength 8 or more" is the
+    # coverer's size, neither a removal limit (test_capybara_numbers_match_config, and the check below).
     printed = {cid for cid, c in _cards().items() if STRENGTH_LIMIT_RE.search(c.text)}
-    assert printed - {"capybara"} == set(STRENGTH_LIMITS)
+    assert printed - {"capybara", "oxpecker_legend"} == set(STRENGTH_LIMITS)
+    (n,) = re.findall(r"strength (\d+) or more", _cards()["oxpecker_legend"].text)
+    assert int(n) == Config.default().oxpecker_legend_min
 
 
 def test_royal_jelly_number_matches_config():

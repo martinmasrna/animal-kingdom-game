@@ -2110,7 +2110,7 @@
         "Bird"
       ],
       "base_strength": 4,
-      "text": "Flight. Dusk: draw a card for each adjacent Hungry ally.",
+      "text": "Flight. Whenever your animal of strength 8 or more covers an enemy, draw a card.",
       "species": "Oxpecker",
       "habitat": "Savanna",
       "keywords": [

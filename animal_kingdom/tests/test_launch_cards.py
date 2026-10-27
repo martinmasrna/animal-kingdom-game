@@ -120,14 +120,15 @@ def test_hungry_animals_count_what_they_eat_for_the_game():
     assert s.hungry_eaten["A"] == 3
 
 
-def test_the_legendary_oxpecker_draws_at_dusk_for_each_adjacent_hungry_ally():
-    s = make_state(food={"A": 0, "B": 0}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    put(s, "2,2", "oxpecker_legend", "A")
-    put(s, "1,2", "elephant", "A")                             # Hungry, yours: counts
-    put(s, "2,1", "lion", "A")                                 # yours, not Hungry
-    put(s, "3,2", "hippopotamus", "B")                         # Hungry, theirs
-    end_turn(s)
-    assert len(s.hands["A"]) == 1
+def test_the_legendary_oxpecker_draws_when_your_big_animal_covers_an_enemy():
+    s = make_state(hands={"A": ["elephant", "lion"]}, decks={"A": ["mouse"] * 4, "B": []})
+    put(s, "3,3", "oxpecker_legend", "A")                      # anywhere on the board
+    put(s, "1,1", "mouse", "A")
+    put(s, "2,1", "lion", "B"); put(s, "1,2", "mouse", "B")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,2")))      # a 7 covers: no draw
+    assert sorted(hand_ids(s, "A")) == ["elephant"]
+    rules.apply_action(s, PlaceAction("elephant", ("cr", "2,1")))  # a 9 covers: a card
+    assert hand_ids(s, "A") == ["mouse"]
 
 
 def test_a_sloths_food_arrives_before_the_hungry_eat():

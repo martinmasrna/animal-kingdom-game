@@ -168,6 +168,7 @@ class Config:
     dung_beetle_legend_food_at: int = 25            #   for each tier: a card, then 10 food, then another animal
     dung_beetle_legend_play_at: int = 40
     dung_beetle_legend_food: int = 10
+    oxpecker_legend_min: int = 8                    # the legendary Oxpecker: your covering animals this strong draw
 
     # --- Once-per-turn caps (decision G; dials for the sim - see docs/balance/backlog.md for the
     # per-card default ruling and the data behind it) ---

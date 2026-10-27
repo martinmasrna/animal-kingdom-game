@@ -316,6 +316,11 @@ def _fire_cover_event(state, coverer, covered) -> None:
     hook = _hook(state, coverer.card_id, "on_cover_enemy")   # "Whenever this covers an enemy" (Fox)
     if hook:
         hook(state, coverer, covered)
+    # The legendary Oxpecker: "Whenever your animal of strength 8 or more covers an enemy, draw a card."
+    if effective_strength(state, coverer) >= state.config.oxpecker_legend_min:
+        for bird in statics.active_tops(state, coverer.owner, "oxpecker_legend"):
+            state.effect_stack.append({"op": "draw", "player": coverer.owner, "n": 1, "by_card": bird.card_id,
+                                       "by_iid": bird.iid})
 
 
 def _push_theron(state, coverer, covered) -> None:
@@ -1882,13 +1887,6 @@ def _dung_beetle_legend_place(state, unit, cr):
         _push_draw(state, unit.owner, 1)
 
 
-def _oxpecker_legend_eot(state, unit, cr):
-    """The legendary Oxpecker: Dusk: draw a card for each adjacent Hungry ally."""
-    _push_draw(state, unit.owner, sum(
-        1 for nb in state.game_map.neighbors(cr)
-        if (top := state.top_unit(nb)) and top.owner == unit.owner and statics.has_keyword(state, top, "Hungry", nb)))
-
-
 def _draws_filtered(spec, n=1):
     def handler(state, unit, cr):
         state.effect_stack.append({"op": "draw_filtered", "player": unit.owner, "n": n, "spec": spec})
@@ -3238,7 +3236,6 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "hippopotamus": {"on_enemy_placed_adjacent": _hippo_enemy_placed},
     "whale_shark": {"on_end_of_turn": _draw1},
     "dung_beetle_legend": {"on_place": _dung_beetle_legend_place},
-    "oxpecker_legend": {"on_end_of_turn": _oxpecker_legend_eot},
     "oxpecker": {"on_place": _oxpecker_place},
     "anteater": {"on_place": _anteater_place},
     "dung_beetle": {"on_end_of_turn": _dung_beetle_eot},
