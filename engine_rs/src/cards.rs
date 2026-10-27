@@ -1198,7 +1198,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("zebra_legend", OnPlace) => {
             let mut kinds: Vec<CardId> = Vec::new();
             for (_, t) in st.tops() {
-                if t.owner == owner && st.card(t.card).has_tag(T_HOOFED) && !kinds.contains(&t.card) {
+                if t.owner == owner && t.iid != unit.iid && st.card(t.card).has_tag(T_HOOFED) && !kinds.contains(&t.card) {
                     kinds.push(t.card);
                 }
             }

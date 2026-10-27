@@ -2935,10 +2935,10 @@ def _gorilla_place(state, unit, cr):
 # --- Hoofed -----------------------------------------------------------------------------------------------------
 
 def _zebra_legend_place(state, unit, cr):
-    """Roar: draw a card for each different Hoofed animal you control (the whole board, this one included; different
+    """Roar: draw a card for each different other Hoofed animal you control (the whole board, not this one; different
     cards, so two copies of one count once)."""
     kinds = {st[-1].card_id for st in state.board.values()
-             if st and st[-1].owner == unit.owner and "Hoofed" in state.cards[st[-1].card_id].tags}
+             if st and st[-1].owner == unit.owner and st[-1].iid != unit.iid and "Hoofed" in state.cards[st[-1].card_id].tags}
     _push_draw(state, unit.owner, len(kinds))
 
 

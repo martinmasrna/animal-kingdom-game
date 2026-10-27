@@ -12,7 +12,7 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **[WILDEBEEST]** | 1 | Hoofed | 5 | Your regions produce 5 more food. |
 | **[BOAR]** | 1 | Hoofed | 5 | Your opponent's regions produce 5 less food. |
-| **[ZEBRA]** | 1 | Hoofed | 4 | Roar: draw a card for each different Hoofed animal you control. |
+| **[ZEBRA]** | 1 | Hoofed | 4 | Roar: draw a card for each different other Hoofed animal you control. |
 | **[GIRAFFE]** | 1 | Hoofed | 7 | Your opponent's hand is revealed. |
 
 ### Rare
