@@ -34,5 +34,5 @@ A set theme can cross habitats (Back from the Brink: animals saved from extincti
 
 ## Open
 
-- **Animals between two habitats**, each to get the one home a player pictures: Platypus (Australia or River and Lake), Penguin, Puffin and Walrus (Polar or Coast), Seahorse and Octopus (Coral Reef or Coast; the Octopus already plays in Open Ocean).
+- **Animals between two habitats**, each to get the one home a player pictures: Platypus (Australia or River and Lake), Penguin, Puffin and Walrus (Polar or Coast), Seahorse (Coral Reef or Coast).
 - **Grassland outside Africa,** the prairie and the steppe (bison, prairie dog, pronghorn, burrowing owl, saiga, manul): no home yet.
