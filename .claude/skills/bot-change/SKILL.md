@@ -27,6 +27,8 @@ A change to the time budget, or anything whose effect is speed, is measured on m
 
 Ship when all three hold: the pooled mean is up; no deck is down beyond its own interval; the gain sits where the change's mechanism predicts it (a change to how placements with sub-choices are ranked gains most on the decks whose placements carry sub-choices; the same mean landing on unrelated decks is a lucky run and wants more games). A change that gains where it should and loses clearly somewhere else has a side effect to find in that deck's logs under `<name>/logs/` before any shipping.
 
+The benchmark is a guard against regressions, not proof the bot plays well (Martin, 2026-10-28): candidate and opponent share one evaluation, so its blind spots cancel out, and a stale network (trained before a large card change) is a fair referee between two bots and a poor one of play. A new network is judged first on Martin's own recent games on current cards (log-loss and sign against the live one), and every candidate also runs the misplay positions from his games (a play beyond argument never made, over many seeds) before it ships.
+
 Stop a run early when half the decks are in and every delta sits inside noise around zero: the second half will not rescue it, and the machine has other runs waiting. Report the stop as a stop, never as a result.
 
 Report the table to Martin as decks and points, with the mechanism read in one sentence. A change that passes the ship rule ships without waiting for him (Martin, 2026-10-23); his games against the bot afterwards are the yardstick, read from the logs and the ladder, never a session he is asked to play.
