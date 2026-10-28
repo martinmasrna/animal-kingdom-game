@@ -34,5 +34,4 @@ A set theme can cross habitats (Back from the Brink: animals saved from extincti
 
 ## Open
 
-- **The Platypus:** Australia or River and Lake, whichever a player pictures.
 - **Grassland outside Africa,** the prairie and the steppe (bison, prairie dog, pronghorn, burrowing owl, saiga, manul): no home yet.
