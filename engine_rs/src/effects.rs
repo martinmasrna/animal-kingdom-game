@@ -1037,12 +1037,15 @@ pub fn pay_for_roam(st: &mut State, player: Player, unit: Option<&Unit>) {
     }
 }
 
-pub fn do_roam(st: &mut State, player: Player, origin: Cr, target: &Target) -> Result<(), String> {
+/// `by_effect`: a card's "It roams", which isn't the animal's one roam of the turn (Martin, 2026-10-28).
+pub fn do_roam(st: &mut State, player: Player, origin: Cr, target: &Target, by_effect: bool) -> Result<(), String> {
     let unit = match st.top(origin) {
         Some(u) if u.owner == player => u.clone(),
         _ => return Err(format!("{} has no animal on {:?} to roam", player_name(player), st.crname(origin))),
     };
-    if !st.turn_flags.roamed.contains(&unit.iid) {
+    if by_effect {
+        st.turn_flags.caps.push(("cap_it_roams", unit.iid));
+    } else if !st.turn_flags.roamed.contains(&unit.iid) {
         st.turn_flags.roamed.push(unit.iid);
     }
     st.turn_flags.roams[player.min(1) as usize] += 1;
@@ -1104,6 +1107,32 @@ pub struct RoamEvent {
     pub to: Option<Cr>,
     pub covered: Option<i64>,
     pub onto_enemy: bool,
+}
+
+pub fn it_roamed(st: &State, iid: i64) -> bool {
+    st.turn_flags.caps.iter().any(|(f, i)| *f == "cap_it_roams" && *i == iid)
+}
+
+/// "It roams" (the Street Dog, the Coyote, the African Wild Dog): the animal roams now, as part of the effect, by the
+/// Roam rules, the den included; its owner picks where. It isn't the animal's one roam of the turn; an effect moves an
+/// animal at most once a turn, so two African Wild Dogs can't loop.
+fn op_it_roams(st: &mut State, step: &mut Map) -> Option<Pending> {
+    let iid = m_get_i(step, "iid").unwrap_or(-1);
+    let cr = statics::crossroad_of(st, iid)?;
+    let unit = st.top(cr).filter(|u| u.iid == iid).cloned()?;
+    if it_roamed(st, iid) || !statics::active(st, &unit) {
+        return None;
+    }
+    let occ = st.connected_occupied(unit.owner);
+    let options: Vec<Value> = roam_targets(st, &unit, cr, occ)
+        .into_iter()
+        .map(|t| match t {
+            Target::Cr(c) => cr_v(st, c),
+            Target::Hq(_) => Value::s("den"),
+        })
+        .collect();
+    push_choose(st, unit.owner, options, "roam_to", false, vmap!("iid" => Value::Int(iid)));
+    None
 }
 
 fn op_grant_free_roam(st: &mut State, step: &mut Map) -> Option<Pending> {
@@ -1955,6 +1984,7 @@ fn run_op(st: &mut State, op: &str, step: &mut Map) -> Option<Pending> {
         "play_extra" => op_play_extra(st, step),
         "play_named" => op_play_named(st, step),
         "grant_strength" => op_grant_strength(st, step),
+        "it_roams" => op_it_roams(st, step),
         "grant_action" => op_grant_action(st, step),
         "cap_actions" => op_cap_actions(st, step),
         "grant_free_roam" => op_grant_free_roam(st, step),

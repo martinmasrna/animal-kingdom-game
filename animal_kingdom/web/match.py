@@ -741,6 +741,8 @@ class Match:
         st = self.state
         if isinstance(o, str) and o in st.game_map.crossroads:
             return {"v": o, "kind": "cr"}
+        if o == "den":                                    # "It roams" onto the enemy den
+            return {"v": o, "kind": "hq"}
         if isinstance(o, int):
             for p in "AB":
                 for u in st.hands[p]:

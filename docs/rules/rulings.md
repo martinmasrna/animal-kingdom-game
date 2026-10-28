@@ -48,7 +48,7 @@ The keywords are defined in [`keywords.md`](keywords.md); these are the calls th
 - **Roaming onto a den ends the game where it stands.** The animal never leaves its crossroad.
 - **A roam onto the den is a capture like a placement from hand.** A roam takes the den only when the roamer's pack stands on the den front and is connected to your den (Martin, 2026-10-15); an animal Reach dropped behind the enemy's lines is cut off and can't take it (Martin, 2026-10-10).
 - **A player who can roam has a move.** Only a player with no legal action passes automatically, and a roam is one.
-- **A free roam is spent before an action** and keeps the turn open after its two actions until it is used or the player ends the turn. Clarion ([WHITE WOLF]) grants one each turn and the African Wild Dog one to an adjacent Canine after it roams.
+- **A free roam is spent before an action** and keeps the turn open after its two actions until it is used or the player ends the turn. Clarion ([WHITE WOLF]) grants one each turn.
 - **Poison ticks under a cover.** The poisoned coverer is removed at the start of the Poison animal's controller's next turn even if something has covered it since (it comes out from under the stack), as with venom.
 - **Dawn and Dusk resolve one at a time, in play order, each in full before the next.** One that an earlier one removed or buried does nothing. The delayed payouts due this turn ("In 2 turns", "Next turn": the Sloth's food, the Chipmunk, King Cobra's venom, Poison) resolve before your Dawn effects, so a Sloth's food feeds your Hungry animals the turn it arrives (Martin, 2026-10-24).
 
@@ -83,11 +83,13 @@ Cards:
 - **Earthworm**: the two Worms land on its crossroad only while it is empty or yours; under an enemy there is no room and none appear.
 - **Clarion's** free roam is for any of your animals with Roam (the card says "an ally"), one per Clarion each turn, spent before an action.
 - **Jackal's** flanker must be another of your Canines, not the Jackal itself.
-- **Street Dog** picks one of your other animals connected to it and gives it +3 strength and Roam. The animal keeps Roam for as long as it stays on the board (covered and resurfacing included), and loses it when it leaves the board; it does not roam now, and its roams are ordinary ones that cost an action.
+- **"It roams"** (the Street Dog, the Coyote, the African Wild Dog) happens as the effect resolves, as "draw 2 cards" does: you pick where the animal lands, by the Roam rules, the den included (Martin, 2026-10-28: "if a card says 'draw 2 cards' does that mean I get to choose when it happens?"). It is not the animal's one roam of the turn ("it should NOT count towards the 'one roam per turn' limit"): an animal that roamed can still be moved, and one that was moved can still roam. An effect moves an animal at most once a turn, so two African Wild Dogs can't loop.
+- **Street Dog** picks one of your other animals connected to it that has Roam, gives it +3 strength, and it roams.
+- **Coyote** picks one of your other animals connected to it and gives it Roam, for as long as it stays on the board (covered and resurfacing included; it loses it when it leaves the board), and it roams.
 - **"Connected to this"** means a chain of crossroads next to each other, all topped by your animals, starting at this animal's own crossroad. It has nothing to do with your den.
 - **"Lands"** means the animal is placed (from hand or by an effect) or arrives on a crossroad by roaming. The legendary Elephant sweeps both times; a Roar happens on placement only.
 - **Fox** draws 2 when it is placed if one of your Canines has roamed this turn, free or paid, itself or not.
-- **African Wild Dog** lets you choose one of your Canines next to the crossroad it roamed to, other than itself, that hasn't roamed this turn; that Canine may roam once this turn without spending an action, whether or not it has Roam.
+- **African Wild Dog** lets you choose one of your Canines next to the crossroad it roamed to, other than itself; that Canine roams at once ("It roams", below), whether or not it has Roam.
 - **Bush Dog** puts a Pup on the crossroad it left, but only if the crossroad is empty: an animal that resurfaces there leaves no Pup.
 - **Dhole** draws 2 when it covers an enemy that has no other enemy top animal next to it, by placement or by roaming, judged once the Dhole sits on that crossroad. The Dhole gives no equal-strength cover to anyone.
 - **Wolverine** can remove only an adjacent enemy that has no other enemy top animal next to it; Stealth and Armor protect from it as from any chosen removal.

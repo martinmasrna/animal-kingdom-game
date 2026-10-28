@@ -174,7 +174,7 @@ pub fn apply_action(st: &mut State, action: &Action, validate: bool) -> Result<(
                 let cur = st.current;
                 let top = st.top(*origin).cloned();
                 effects::pay_for_roam(st, cur, top.as_ref());
-                effects::do_roam(st, cur, *origin, target)?;
+                effects::do_roam(st, cur, *origin, target, false)?;
             }
             _ => return Err("unexpected action".into()),
         }

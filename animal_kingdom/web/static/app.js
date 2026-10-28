@@ -1041,6 +1041,7 @@ function decision() {
   if (d.pend && d.pend.mode === 'choice') {
     for (const o of d.pend.options) {
       if (o.kind === 'cr') d.crChoice[dcr(o.cr || o.v)] = o.v;
+      else if (o.kind === 'hq') d.hqRing = true;   // "It roams" may take the enemy den
       else if (o.kind === 'hand' && d.pend.kind === 'mulligan') d.handPick.add(o.v);   // the mulligan picks in the hand itself
       else if (o.kind === 'hand') d.cardOpts.push({ ...o, str: (G.hand.find(h => h.iid === o.v) || {}).str });   // any other pick from your hand is laid out in the middle: a lit hand reads as "play one" (feedback 2026-10-01)
       else if (o.kind === 'card') d.cardOpts.push(o);
@@ -1526,6 +1527,7 @@ function wireBoard() {
     const d = lastDecision;
     if (!d || !d.mine) { const g = touch() && e.target.closest('[data-cr]'); if (g) readStack(g.dataset.cr); return; }   // off your turn a tap only reads
     const hq = e.target.closest('[data-hq]');
+    if (hq && d.pend && d.pend.mode === 'choice' && d.hqRing) return act({ kind: 'choice', choice: 'den' });
     if (hq && ui.sel) { const t = selPlaces(d).find(t => t[0] === 'hq'); if (t) return act(placeAction(t)); }
     if (hq && ui.roam) { const t = d.roams[ui.roam].find(t => t[0] === 'hq'); if (t) return act({ kind: 'roam', from: dcr(ui.roam), target: t }); }
     const g = e.target.closest('[data-cr]'); if (!g) return;

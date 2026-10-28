@@ -594,7 +594,7 @@ def test_the_dhole_draws_two_when_it_covers_an_enemy_with_no_other_enemy_next_to
     assert hand_ids(s, "A") == []
 
 
-def test_coyote_gives_a_connected_ally_roam_and_a_free_roam():
+def test_coyote_gives_a_connected_ally_roam_and_it_roams_now():
     s = make_state(hands={"A": ["coyote"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     ally = put(s, "1,1", "lion", "A")
     put(s, "2,2", "squirrel", "A")
@@ -605,11 +605,11 @@ def test_coyote_gives_a_connected_ally_roam_and_a_free_roam():
     assert s.pending["options"] == ["1,1", "2,2", "3,2"]
     assert not statics.can_roam(s, ally)
     choose(s, "1,1")
-    assert s.pending is None and ally.strength_counter == 0
-    assert statics.can_roam(s, ally) and "Roam" in statics.unit_keywords(s, ally, "1,1")
-    assert s.actions_taken_this_turn == 1
-    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))    # the roam is free: the turn's second action is left
-    assert s.top_unit("2,1") is ally and s.current == "A" and s.actions_taken_this_turn == 1
+    assert ally.strength_counter == 0 and statics.can_roam(s, ally)
+    assert "2,1" in s.pending["options"]                       # it roams now: you pick where it lands
+    choose(s, "2,1")
+    assert s.pending is None and s.top_unit("2,1") is ally and s.actions_taken_this_turn == 1
+    assert RoamAction("2,1", ("cr", "1,1")) in rules.legal_actions(s)   # its own roam of the turn is still there
 
 
 def test_the_coyotes_roam_goes_when_the_animal_leaves_the_board():
@@ -617,9 +617,10 @@ def test_the_coyotes_roam_goes_when_the_animal_leaves_the_board():
     ally = put(s, "1,1", "lion", "A")
     rules.apply_action(s, PlaceAction("coyote", ("cr", "1,2")))
     choose(s, "1,1")
-    assert ally.granted_roam and s.clone().top_unit("1,1").granted_roam    # a clone keeps it
+    choose(s, "2,1")
+    assert ally.granted_roam and s.clone().top_unit("2,1").granted_roam    # a clone keeps it
     assert UnitInstance.from_dict(ally.to_dict()).granted_roam              # so does a saved game
-    effects._bounce(s, "1,1", ally)
+    effects._bounce(s, "2,1", ally)
     assert not hand_inst(s, "A", "lion").granted_roam
 
 
@@ -630,7 +631,7 @@ def test_coyote_with_no_connected_ally_just_lands():
     assert s.pending is None
 
 
-def test_street_dog_gives_a_connected_ally_with_roam_plus_three_and_a_free_roam():
+def test_street_dog_gives_a_connected_ally_with_roam_plus_three_and_it_roams_now():
     s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     wolf = put(s, "1,1", "wolf", "A")
     put(s, "2,2", "squirrel", "A")                             # connected, but no Roam
@@ -639,10 +640,22 @@ def test_street_dog_gives_a_connected_ally_with_roam_plus_three_and_a_free_roam(
     rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
     assert s.pending["options"] == ["1,1", "3,2"]
     choose(s, "1,1")
-    assert s.pending is None and wolf.strength_counter == CFG.street_dog_grant
-    assert s.actions_taken_this_turn == 1
-    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))    # the roam is free: the turn's second action is left
-    assert s.top_unit("2,1") is wolf and s.current == "A" and s.actions_taken_this_turn == 1
+    assert wolf.strength_counter == CFG.street_dog_grant
+    choose(s, "2,1")
+    assert s.pending is None and s.top_unit("2,1") is wolf and s.actions_taken_this_turn == 1
+    assert {a.origin for a in rules.legal_actions(s) if isinstance(a, RoamAction)} == {"2,1", "3,2", "4,3"}   # the free roam left nothing behind
+
+
+def test_it_roams_takes_the_den():
+    s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    for cr in ("1,1", "2,1", "3,1"):
+        put(s, cr, "squirrel", "A")                            # a chain from your den to the enemy's den front
+    put(s, "4,1", "wolf", "A")
+    rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
+    choose(s, "4,1")
+    assert "den" in s.pending["options"]
+    choose(s, "den")
+    assert s.result is not None and s.result.winner == "A"
 
 
 def test_street_dog_with_no_connected_roamer_just_lands():
@@ -652,7 +665,7 @@ def test_street_dog_with_no_connected_roamer_just_lands():
     assert s.pending is None
 
 
-def test_african_wild_dog_gives_an_adjacent_canine_a_free_roam_after_it_roams():
+def test_african_wild_dog_makes_an_adjacent_canine_roam_after_it_roams():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "african_wild_dog", "A")
     jackal = put(s, "2,3", "jackal", "A")                      # a Canine without Roam of its own
@@ -661,20 +674,28 @@ def test_african_wild_dog_gives_an_adjacent_canine_a_free_roam_after_it_roams():
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
     assert s.pending["options"] == ["2,3"]
     choose(s, "2,3")
-    assert s.actions_taken_this_turn == 1
-    assert RoamAction("2,3", ("cr", "1,3")) in rules.legal_actions(s)
-    rules.apply_action(s, RoamAction("2,3", ("cr", "1,3")))
-    assert s.top_unit("1,3") is jackal and s.actions_taken_this_turn == 1      # the free roam paid
-    assert not any(isinstance(a, RoamAction) and a.origin == "1,3" for a in rules.legal_actions(s))   # once per turn
+    choose(s, "1,3")
+    assert s.pending is None and s.top_unit("1,3") is jackal and s.actions_taken_this_turn == 1
 
 
-def test_african_wild_dog_does_not_offer_a_canine_that_already_roamed():
+def test_african_wild_dog_moves_a_canine_that_already_roamed():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "african_wild_dog", "A")
     w = put(s, "2,2", "wolf", "A")
     rules.apply_action(s, RoamAction("2,2", ("cr", "2,3")))    # the Wolf roams first
     rules.apply_action(s, RoamAction("1,2", ("cr", "1,3")))    # then the Dog lands beside it
-    assert s.pending is None and s.top_unit("2,3") is w
+    assert s.pending["options"] == ["2,3"]                     # the effect's roam isn't the Wolf's one roam
+
+
+def test_two_african_wild_dogs_do_not_loop():
+    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,1", "african_wild_dog", "A")
+    put(s, "2,2", "african_wild_dog", "A")
+    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))
+    choose(s, "2,2"); choose(s, "3,1")                        # the second Dog roams beside the first, and offers it
+    assert s.pending["options"] == ["2,1"]
+    choose(s, "2,1"); choose(s, "4,1")                        # the first Dog moves again, beside the second
+    assert s.pending is None                                  # which an effect moved already
 
 
 def test_badger_draws_an_animal_with_roam():

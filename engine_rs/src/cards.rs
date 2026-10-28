@@ -390,6 +390,10 @@ fn drain_place(st: &mut State, unit: &Unit, cr: Cr, amount: i32) {
     push_choose(st, unit.owner, options, "drain", false, vmap!("amount" => Value::Int(amount as i64)));
 }
 
+fn it_roams(st: &mut State, iid: i64) {
+    st.effect_stack.push(vmap!("op" => Value::s("it_roams"), "iid" => Value::Int(iid)));
+}
+
 fn crs(st: &State, v: Vec<Cr>) -> Vec<Value> {
     v.into_iter().map(|c| cr_v(st, c)).collect()
 }
@@ -742,11 +746,11 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             if let Args::Roam(to, _) = args {
                 let options: Vec<Cr> = adjacent_tops(st, *to, Some(owner))
                     .iter()
-                    .filter(|(_, t)| st.card(t.card).has_tag(T_CANINE) && !st.turn_flags.roamed.contains(&t.iid))
+                    .filter(|(_, t)| st.card(t.card).has_tag(T_CANINE) && !it_roamed(st, t.iid))
                     .map(|(nb, _)| *nb)
                     .collect();
                 let o = crs(st, options);
-                push_choose(st, owner, o, "free_roam", false, Map::default());
+                push_choose(st, owner, o, "it_roams", false, Map::default());
             }
         }
         ("badger", OnPlace) => draws_filtered(st, unit, "keyword:Roam", 1),
@@ -1448,35 +1452,20 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
                     }
                     None => return,
                 };
-                if !st.turn_flags.roamed.contains(&iid) {
-                    match st.turn_flags.free_roam_iid.iter_mut().find(|(i, _)| *i == iid) {
-                        Some(e) => e.1 = 1,
-                        None => st.turn_flags.free_roam_iid.push((iid, 1)),
-                    }
-                }
+                it_roams(st, iid);
             }
         }
         "street_dog" => {
             if let Some(cr) = cr_of(st) {
                 let Some(top) = st.top(cr).cloned() else { return };
+                it_roams(st, top.iid);   // pushed first, so the +3 lands before it moves
                 grant(st, vec![top.iid], m_get_i(step, "amount").unwrap_or(0) as i32);
-                if !st.turn_flags.roamed.contains(&top.iid) {
-                    match st.turn_flags.free_roam_iid.iter_mut().find(|(i, _)| *i == top.iid) {
-                        Some(e) => e.1 = 1,
-                        None => st.turn_flags.free_roam_iid.push((top.iid, 1)),
-                    }
-                }
             }
         }
-        "free_roam" => {
+        "it_roams" => {
             if let Some(cr) = cr_of(st) {
                 if let Some(top) = st.top(cr).cloned() {
-                    if !st.turn_flags.roamed.contains(&top.iid) {
-                        match st.turn_flags.free_roam_iid.iter_mut().find(|(i, _)| *i == top.iid) {
-                            Some(e) => e.1 = 1,
-                            None => st.turn_flags.free_roam_iid.push((top.iid, 1)),
-                        }
-                    }
+                    it_roams(st, top.iid);
                 }
             }
         }
@@ -1548,10 +1537,17 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
         }
         "roam_to" => {
             let iid = m_get_i(step, "iid").unwrap_or(-1);
-            if let (Some(cr), Some((origin, pos))) = (cr_of(st), st.find_unit(iid)) {
+            if let Some((origin, pos)) = st.find_unit(iid) {
                 if pos + 1 == st.stack(origin).len() {
                     let owner = st.unit_at(origin, pos).owner;
-                    let _ = do_roam(st, owner, origin, &crate::actions::Target::Cr(cr));
+                    let target = if choice.as_str() == Some("den") {
+                        Some(crate::actions::Target::Hq(other(owner)))
+                    } else {
+                        cr_of(st).map(crate::actions::Target::Cr)
+                    };
+                    if let Some(t) = target {
+                        let _ = do_roam(st, owner, origin, &t, true);
+                    }
                 }
             }
         }
