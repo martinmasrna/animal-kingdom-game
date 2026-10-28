@@ -78,7 +78,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "falcon" | "bat" | "dolphin" | "mouse" | "raven_legend" | "hawk" | "cottonmouth" | "magpie" | "black_mamba" | "mosquito" | "raven"
         | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "remora" | "cod" | "sardine" | "mahi_mahi" | "sunfish"
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
-        | "chipmunk" | "gopher" | "mara" | "groundhog" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
+        | "chipmunk" | "gopher" | "mara" | "groundhog" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
         | "grizzly_bear" | "stag_beetle" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
@@ -1092,6 +1092,10 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             if conditional(st, unit) {
                 gains(st, unit, "groundhog_food");
             }
+        }
+        ("rodent_legend", OnPlace) => {
+            let n = food_gained_this_turn(st, owner);
+            push_gain(st, owner, n);
         }
         // Food OTK
         ("octopus_legend_2", OnPlace) => st.effect_stack.push(vmap!("op" => Value::s("scout"), "player" => pn(owner), "spec" => Value::s("rarity:legendary"))),

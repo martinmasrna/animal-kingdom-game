@@ -1897,6 +1897,10 @@ def _gains(attr):
     return handler
 
 
+def _rodent_legend_place(state, unit, cr):
+    _push_gain(state, unit.owner, _food_gained_this_turn(state, unit.owner))
+
+
 def _removes(max_attr=None, min_attr=None):
     """Roar: remove an adjacent enemy (of strength N or less / more): the player picks it."""
     def handler(state, unit, cr):
@@ -3308,6 +3312,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "gopher": {"on_place": _conditional(_removes())},
     "mara": {"on_place": _conditional(_draws("mara_draw"))},
     "groundhog": {"on_place": _conditional(_gains("groundhog_food"))},
+    "rodent_legend": {"on_place": _rodent_legend_place},
     # Food OTK (the legendary Honey Badger is its keywords; Capybara an aura; Armadillo too).
     "octopus_legend_2": {"on_place": _chameleon_legend_2_place},
     "squirrel_legend": {"on_place": _otk_squirrel_place},

@@ -95,7 +95,7 @@ def test_groundhog_gains_food_only_when_fed():
 
 
 
-# ------------------------------------------------------------------ go-wide rodent payoff
+# ------------------------------------------------------------------ go-wide rodent_legend payoff
 
 def test_rat_king_gains_food_per_other_rodent_and_draws():
     s = make_state(hands={"A": ["rat_legend"]}, decks={"A": ["lion"], "B": []})
@@ -190,3 +190,14 @@ def test_porcupine_gives_its_neighbours_spikes_each_kills_its_first_coverer():
     assert s.top_unit("3,2") is squirrel and "lion" in s.remove_pile  # ...and the borrowed spines remove it
     rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))         # spent: the second cover holds
     assert s.top_unit("3,2").card_id == "lion"
+
+
+def test_rodent_legend_gains_as_much_food_as_gained_this_turn():
+    s = make_state(hands={"A": ["rodent_legend"]})
+    s.turn_flags["food_gained_A"] = 15
+    rules.apply_action(s, PlaceAction("rodent_legend", ("cr", "1,2")))
+    assert s.food["A"] == 15
+
+    none = make_state(hands={"A": ["rodent_legend"]})
+    rules.apply_action(none, PlaceAction("rodent_legend", ("cr", "1,2")))
+    assert none.food["A"] == 0

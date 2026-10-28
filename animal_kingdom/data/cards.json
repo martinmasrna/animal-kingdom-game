@@ -3932,6 +3932,20 @@
         "Roam"
       ],
       "hungry": 6
+    },
+    {
+      "id": "rodent_legend",
+      "name": "[RODENT]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 3,
+      "text": "Roar: gain as much food as you gained this turn.",
+      "species": "Rodent",
+      "habitat": "Forest",
+      "keywords": []
     }
   ]
 }
