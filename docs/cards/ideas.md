@@ -9,7 +9,7 @@ The habitats are listed in [`../design/habitats.md`](../design/habitats.md). The
 - **Deep Ocean:** Anglerfish, Giant Squid, Vampire Squid.
 - **Coral Reef:** Seahorse, Pufferfish, Clownfish, Mantis Shrimp, Cuttlefish, Moray Eel, Lionfish, Parrotfish, Box Jellyfish, Stingray.
 - **Coast:** Crab, Hermit Crab, Seagull, Pelican, Puffin, Seal, Sea Lion, Sea Otter, Starfish, Horseshoe Crab, Barnacle, Great Auk.
-- **River and Lake**, with swamps: Swan (and the Black Swan, Martin, 2026-10-28), Axolotl, Heron, Salmon, Lamprey, Manatee, Saltwater Crocodile, Bull Shark.
+- **River and Lake**, with swamps: Swan (and the Black Swan), Goose (and Aurum), Muskrat, Cottonmouth, Duck, Frog, Pond Skater, Dragonfly, Leech (all in the reserve since 2026-10-28), Axolotl, Heron, Salmon, Lamprey, Manatee, Saltwater Crocodile, Bull Shark.
 - **Australia:** Kangaroo, Platypus, Tasmanian Devil, Echidna, Dingo, Thylacine.
 - **Islands:** Giant Tortoise, Marine Iguana, Blue-footed Booby (Galápagos); Ring-tailed Lemur, Aye-aye, Fossa (Madagascar); Kiwi, Kakapo, Kea, Tuatara (New Zealand); Komodo Dragon; Coconut Crab, Frigatebird; Dodo.
 - **Mountains:** Cougar, Ibex, Bighorn Sheep, Andean Condor, California Condor.

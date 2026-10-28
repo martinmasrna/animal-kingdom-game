@@ -1825,7 +1825,7 @@ def roar_condition(state, player, card_id, unit=None):
         return placement_strength(state, inst) if inst else 0
     check = {
         "gopher": lambda: _fed_this_turn(state, player),
-        "muskrat": lambda: _fed_this_turn(state, player),
+        "mara": lambda: _fed_this_turn(state, player),
         "groundhog": lambda: _fed_this_turn(state, player),
         "bobcat": lambda: others("Cat") >= 1,
         "serval": lambda: _played_this_turn(state, player, "Cat", unit) >= 1,
@@ -2124,10 +2124,6 @@ def _bush_dog_eot(state, unit, cr):
         _grant(state, [state.rng.choice(options)], state.config.bush_dog_grant)
 
 
-def _raccoon_dog_friendly_roam(state, watcher, roamer, event):
-    """Whenever an allied Canine roams, give it +1 strength."""
-    if "Canine" in state.cards[roamer.card_id].tags:
-        _grant(state, [roamer.iid], state.config.raccoon_dog_grant)
 
 
 def _wild_dog_eot(state, unit, cr):
@@ -3134,7 +3130,6 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "fox": {"on_cover_enemy": _fox_cover},
     "jackal": {"on_place": _jackal_place},
     "bush_dog": {"on_end_of_turn": _bush_dog_eot},
-    "coyote": {"on_friendly_roam": _raccoon_dog_friendly_roam},
     "african_wild_dog": {"on_end_of_turn": _wild_dog_eot},
     "badger": {"on_place": _draws_filtered("keyword:Roam")},
     "street_dog": {"on_place": _stray_dog_place},
@@ -3220,8 +3215,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "dormouse": {"on_end_of_turn": _dormouse_eot},
     "squirrel": {"on_place": _gains("squirrel_food")},
     "chipmunk": {"on_place": _chipmunk_place},
-    "gopher": {"on_place": _conditional(_draws("gopher_draw"))},
-    "muskrat": {"on_place": _conditional(_removes())},
+    "gopher": {"on_place": _conditional(_removes())},
+    "mara": {"on_place": _conditional(_draws("mara_draw"))},
     "groundhog": {"on_place": _conditional(_gains("groundhog_food"))},
     # Food OTK (the legendary Honey Badger is its keywords; Capybara an aura; Armadillo too).
     "octopus_legend_2": {"on_place": _chameleon_legend_2_place},

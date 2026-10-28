@@ -12,17 +12,17 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **Eon** | 1 | Snake | 10 | Apex Predator. Dusk: shuffle this into your deck with -1 strength and draw a card. |
 | **Grimm** | 1 | Bird | 3 | Flight. Roar: put 2 animals from your opponent's Remove Pile into your hand. |
-| **Black Swan** | 1 | Bird | 3 | Flight. Whenever you draw Black Swan, your opponent discards a random card. |
-| **Aurum** | 1 | Bird | 1 | Dawn: shuffle two Golden Eggs into your deck. |
+| **[CUCKOO]** | 1 | Bird | 6 | Roar: remove an adjacent animal of strength 4 or less. If it was yours, play another animal. |
+| **[BAT]** | 1 | — | 1 | Flight. Dawn: draw a card. |
 
 ### Rare
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Hawk** | 2 | Bird | 4 | Flight. Roar: remove an adjacent enemy of strength 4 or less. |
-| **Cottonmouth** | 2 | Snake | 5 | Roar: choose an adjacent enemy. At the start of your next turn, remove it. |
 | **Magpie** | 2 | Bird | 3 | Flight. Roar: steal a card from your opponent's hand, then discard a card. |
 | **Black Mamba** | 2 | Snake | 4 | Roar: remove an adjacent enemy of strength 6 or less. |
+| **Cuckoo** | 2 | Bird | 3 | Flight. Roar: shuffle two Cuckoo Eggs into your opponent's deck. |
 
 ### Common
 

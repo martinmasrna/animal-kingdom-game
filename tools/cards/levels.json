@@ -142,13 +142,27 @@
     "animal": {
       "lv": "draft",
       "by": "claude",
-      "note": "into the collection (status proposed)",
-      "at": 1792194643
+      "note": "out of the collection (in the reserve)",
+      "at": 1793188497,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "into the collection (status proposed)"
+      }
     },
     "effect": {
       "note": "Martin, 2026-10-22: two eggs a turn",
       "by": "claude",
       "at": 1792655211
+    },
+    "habitat": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Meadow"
+      },
+      "note": "Martin, 2026-10-28: its home is River and Lake, it waits for that expansion",
+      "by": "claude",
+      "at": 1793188496
     }
   },
   "baboon": {
@@ -473,7 +487,14 @@
   "swan_legend": {
     "habitat": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Meadow"
+      },
+      "note": "Martin, 2026-10-28: its home is River and Lake, it waits for that expansion",
+      "at": 1793188493
     },
     "rarity": {
       "lv": "draft",
@@ -481,7 +502,13 @@
     },
     "animal": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "at": 1793188494
     },
     "tag": {
       "lv": "draft",
@@ -1029,6 +1056,35 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1793188506
+    },
+    "habitat": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Forest"
+      },
+      "note": "Martin, 2026-10-28: a desert animal to most people; waits for Desert, its effect scratched",
+      "by": "claude",
+      "at": 1793188505
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Whenever an allied Canine roams, give it +1 strength."
+      },
+      "note": "Martin, 2026-10-28: scratched; a new effect comes with Desert",
+      "by": "claude",
+      "at": 1793188525
     }
   },
   "crocodile": {
@@ -1082,6 +1138,15 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from pool to egg_control",
+      "by": "claude",
+      "at": 1793188969
     }
   },
   "cuckoo_egg": {
@@ -1529,15 +1594,24 @@
       "at": 1792139107
     },
     "animal": {
-      "note": "Martin, 2026-10-15: two Vipers read as a mistake; the Coral Snake's small head lost the bite close-up. The cottonmouth's white gape and slow venom fit both.",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792067745
+      "at": 1793188503,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-15: two Vipers read as a mistake; the Coral Snake's small head lost the bite close-up. The cottonmouth's white gape and slow venom fit both."
+      }
     },
     "habitat": {
-      "by": "martin",
-      "at": 1792656606,
+      "by": "claude",
+      "at": 1793188502,
       "lv": "problem",
-      "note": "forest?"
+      "note": "Martin, 2026-10-28: its home is River and Lake, it waits for that expansion",
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "forest?",
+        "prev": "Forest"
+      }
     },
     "strength": {
       "review": {
@@ -1705,6 +1779,16 @@
       "note": "Martin, 2026-10-22: conditional draw 2 priced by what the condition costs the turn you play it (Mantis 2, Termite King 2, Nurse Bumblebee 2 with Flight, Gopher 4, Hare 4)",
       "by": "claude",
       "at": 1792663941
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: if you gained 10 or more food this turn, draw 2 cards."
+      },
+      "note": "Martin, 2026-10-28: the digger with the big teeth looks capable of removing; the Muskrat's effect, moved",
+      "by": "claude",
+      "at": 1793188526
     }
   },
   "gorilla": {
@@ -2104,9 +2188,13 @@
       "by": "martin"
     },
     "animal": {
-      "note": "moved from aristocrats to pool",
+      "note": "moved from pool to canines",
       "by": "claude",
-      "at": 1792085440
+      "at": 1793188970,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "moved from aristocrats to pool"
+      }
     },
     "effect": {
       "lv": "draft",
@@ -2644,6 +2732,35 @@
       "note": "Martin, 2026-10-22: conditional removal priced by what the condition costs the turn you play it, 1 below its draw-2 twin",
       "by": "claude",
       "at": 1792664337
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "out of the collection (in the reserve)",
+      "by": "claude",
+      "at": 1793188500
+    },
+    "habitat": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Meadow"
+      },
+      "note": "Martin, 2026-10-28: its home is River and Lake, it waits for that expansion",
+      "by": "claude",
+      "at": 1793188499
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: if you gained 10 or more food this turn, remove an adjacent enemy."
+      },
+      "note": "Martin, 2026-10-28: its removal went to the Gopher; a new effect comes with River and Lake",
+      "by": "claude",
+      "at": 1793188524
     }
   },
   "naked_mole_rat": {
@@ -4261,9 +4378,13 @@
   },
   "cuckoo_legend": {
     "animal": {
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "moved from pool to egg_control",
       "by": "claude",
-      "at": 1792191060
+      "at": 1793188968,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
+      }
     },
     "art": {
       "lv": "draft",
@@ -4769,9 +4890,13 @@
       "at": 1792192619
     },
     "animal": {
-      "note": "into the collection (status proposed)",
+      "note": "moved from pool to egg_control",
       "by": "claude",
-      "at": 1792194643
+      "at": 1793188969,
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "into the collection (status proposed)"
+      }
     },
     "art": {
       "lv": "problem",
@@ -5952,6 +6077,121 @@
       },
       "by": "claude",
       "at": 1793127998
+    }
+  },
+  "duck": {
+    "habitat": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Meadow"
+      },
+      "note": "Martin, 2026-10-28: a pond and river animal",
+      "by": "claude",
+      "at": 1793188507
+    }
+  },
+  "frog": {
+    "habitat": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Meadow"
+      },
+      "note": "Martin, 2026-10-28: a pond and river animal",
+      "by": "claude",
+      "at": 1793188508
+    }
+  },
+  "pond_skater": {
+    "habitat": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Meadow"
+      },
+      "note": "Martin, 2026-10-28: a pond and river animal",
+      "by": "claude",
+      "at": 1793188509
+    }
+  },
+  "dragonfly": {
+    "habitat": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Meadow"
+      },
+      "note": "Martin, 2026-10-28: a pond and river animal",
+      "by": "claude",
+      "at": 1793188510
+    }
+  },
+  "leech": {
+    "habitat": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Jungle"
+      },
+      "note": "Martin, 2026-10-28: a pond and river animal",
+      "by": "claude",
+      "at": 1793188511
+    }
+  },
+  "mara": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-28: the Gopher's draw, on a Rodent that looks and sounds unlike any other",
+      "by": "claude",
+      "at": 1793188529
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "A rodent",
+      "by": "claude",
+      "at": 1793188530
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "The Gopher's number, carried over with its effect",
+      "by": "claude",
+      "at": 1793188531
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-28: the Gopher's draw, moved",
+      "by": "claude",
+      "at": 1793188532
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from pool to food_aggro",
+      "by": "claude",
+      "at": 1793188544
     }
   }
 }

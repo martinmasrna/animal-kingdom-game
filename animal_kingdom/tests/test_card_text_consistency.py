@@ -62,7 +62,7 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
 NO_CONSTANT: set = set()
 
 # Cards read the shared fed_threshold via "gained N or more food this turn".
-FED_THRESHOLD_CARDS = {"gopher", "muskrat", "groundhog", "forager_ant"}
+FED_THRESHOLD_CARDS = {"gopher", "mara", "groundhog", "forager_ant"}
 
 
 def _cards():
@@ -262,7 +262,7 @@ DRAW_CONSTANTS: dict[str, list[str]] = {
     "hare": ["hare_draw"],
     "nurse_bee": ["nurse_bee_draw"],
     "black_bear": ["black_bear_draw"],
-    "gopher": ["gopher_draw"],
+    "mara": ["mara_draw"],
     "praying_mantis": ["mantis_draw"],
     "hummingbird": ["hummingbird_draw"],
     "lynx": ["lynx_draw"],
@@ -308,7 +308,6 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "egg_eater": ["egg_eater_growth"],
     "wolf_legend": ["wolf_legend_grant"],
     "bush_dog": ["bush_dog_grant"],
-    "coyote": ["raccoon_dog_grant"],
     "african_wild_dog": ["wild_dog_grant"],
     "street_dog": ["stray_dog_grant"],
     "mahi_mahi": ["mahi_mahi_grant"],

@@ -67,10 +67,10 @@
     "dhole": 2,
     "wolf": 3,
     "bush_dog": 3,
-    "coyote": 3,
     "african_wild_dog": 3,
     "badger": 3,
-    "street_dog": 3
+    "street_dog": 3,
+    "hyena": 3
    }
   },
   {
@@ -163,10 +163,10 @@
     "squirrel": 3,
     "chipmunk": 3,
     "gopher": 3,
-    "muskrat": 3,
     "groundhog": 3,
     "hamster": 3,
-    "woodpecker": 2
+    "woodpecker": 2,
+    "mara": 3
    }
   },
   {
@@ -203,9 +203,7 @@
    "cards": {
     "anaconda_legend": 1,
     "raven_legend": 1,
-    "swan_legend": 1,
     "hawk": 2,
-    "cottonmouth": 2,
     "magpie": 2,
     "black_mamba": 2,
     "egg_eater": 3,
@@ -214,7 +212,9 @@
     "bird_egg": 3,
     "snake_egg": 3,
     "viper": 3,
-    "goose_legend": 1
+    "cuckoo_legend": 1,
+    "cuckoo": 2,
+    "bat_legend": 1
    }
   },
   {

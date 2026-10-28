@@ -579,16 +579,16 @@
     {
       "id": "coyote",
       "name": "Coyote",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Canine"
       ],
       "base_strength": 3,
-      "text": "Whenever an allied Canine roams, give it +1 strength.",
-      "keywords": [],
+      "text": "",
       "species": "Coyote",
-      "habitat": "Forest"
+      "habitat": "Desert",
+      "keywords": []
     },
     {
       "id": "african_wild_dog",
@@ -1375,24 +1375,24 @@
         "Rodent"
       ],
       "base_strength": 4,
-      "text": "Roar: if you gained 10 or more food this turn, draw 2 cards.",
-      "keywords": [],
+      "text": "Roar: if you gained 10 or more food this turn, remove an adjacent enemy.",
       "species": "Gopher",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "muskrat",
       "name": "Muskrat",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "common",
       "tags": [
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Roar: if you gained 10 or more food this turn, remove an adjacent enemy.",
-      "keywords": [],
+      "text": "",
       "species": "Muskrat",
-      "habitat": "Meadow"
+      "habitat": "River and Lake",
+      "keywords": []
     },
     {
       "id": "groundhog",
@@ -1657,7 +1657,7 @@
     {
       "id": "swan_legend",
       "name": "Black Swan",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -1668,7 +1668,7 @@
         "Flight"
       ],
       "species": "Swan",
-      "habitat": "Meadow"
+      "habitat": "River and Lake"
     },
     {
       "id": "hawk",
@@ -1689,7 +1689,7 @@
     {
       "id": "cottonmouth",
       "name": "Cottonmouth",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "rare",
       "tags": [
         "Snake"
@@ -1698,7 +1698,7 @@
       "text": "Roar: choose an adjacent enemy. At the start of your next turn, remove it.",
       "keywords": [],
       "species": "Cottonmouth",
-      "habitat": "Forest"
+      "habitat": "River and Lake"
     },
     {
       "id": "magpie",
@@ -1820,7 +1820,7 @@
     {
       "id": "goose_legend",
       "name": "Aurum",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Bird"
@@ -1831,7 +1831,7 @@
         "golden_egg"
       ],
       "species": "Goose",
-      "habitat": "Meadow",
+      "habitat": "River and Lake",
       "keywords": []
     },
     {
@@ -3409,7 +3409,7 @@
       "text": "",
       "keywords": [],
       "species": "Dragonfly",
-      "habitat": "Meadow"
+      "habitat": "River and Lake"
     },
     {
       "id": "ladybird",
@@ -3445,7 +3445,7 @@
       "text": "",
       "keywords": [],
       "species": "Pond Skater",
-      "habitat": "Meadow"
+      "habitat": "River and Lake"
     },
     {
       "id": "frog",
@@ -3457,7 +3457,7 @@
       "text": "",
       "keywords": [],
       "species": "Frog",
-      "habitat": "Meadow"
+      "habitat": "River and Lake"
     },
     {
       "id": "snail",
@@ -3505,7 +3505,7 @@
       "text": "",
       "keywords": [],
       "species": "Duck",
-      "habitat": "Meadow"
+      "habitat": "River and Lake"
     },
     {
       "id": "swallow",
@@ -3625,7 +3625,7 @@
       "text": "",
       "keywords": [],
       "species": "Leech",
-      "habitat": "Jungle"
+      "habitat": "River and Lake"
     },
     {
       "id": "hammerhead",
@@ -3883,6 +3883,20 @@
       "keywords": [],
       "text": "Roar: draw a card, gain 10 food and play another animal.",
       "stage": 4
+    },
+    {
+      "id": "mara",
+      "name": "Mara",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 4,
+      "text": "Roar: if you gained 10 or more food this turn, draw 2 cards.",
+      "species": "Mara",
+      "habitat": "Meadow",
+      "keywords": []
     }
   ]
 }

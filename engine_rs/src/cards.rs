@@ -78,7 +78,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "falcon" | "bat" | "dolphin" | "mouse" | "raven_legend" | "hawk" | "cottonmouth" | "magpie" | "black_mamba" | "mosquito" | "raven"
         | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "remora" | "cod" | "sardine" | "mahi_mahi" | "sunfish"
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
-        | "chipmunk" | "gopher" | "muskrat" | "groundhog" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
+        | "chipmunk" | "gopher" | "mara" | "groundhog" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
         | "grizzly_bear" | "tortoise" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
@@ -90,7 +90,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "okapi" | "wildebeest"
         | "dingo" | "sperm_whale_legend" => &[OnEndOfTurn],
         "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" => &[OnStartOfTurn],
-        "wolf_legend_2" | "coyote" => &[OnFriendlyRoam],
+        "wolf_legend_2" => &[OnFriendlyRoam],
         "fox" => &[OnCoverEnemy],
         "lion_legend_4" => &[OnRemoveEvent],
         "lynx" => &[OnPlaceOntoEnemy],
@@ -186,7 +186,7 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
     };
     let placed_plus = st.units_placed_this_turn + if unit.is_some() { 0 } else { 1 };
     Some(match card {
-        "gopher" | "muskrat" | "groundhog" => fed_this_turn(st, player),
+        "gopher" | "mara" | "groundhog" => fed_this_turn(st, player),
         "bobcat" | "tutorial_lynx" | "ocelot" => others(T_CAT) >= 1,
         "serval" => played_this_turn(st, player, T_CAT, unit) >= 1,
         "soldier_ant" | "nurse_bee" => others(T_COLONY) + 1 >= colony_min,
@@ -683,14 +683,6 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 grant(st, vec![pick], g);
             }
         }
-        ("coyote", OnFriendlyRoam) => {
-            if let Args::FriendlyRoam(roamer, _) = args {
-                if st.card(roamer.card).has_tag(T_CANINE) {
-                    let g = cfg(st, "raccoon_dog_grant");
-                    grant(st, vec![roamer.iid], g);
-                }
-            }
-        }
         ("african_wild_dog", OnEndOfTurn) => {
             let iids: Vec<i64> = adjacent_tops(st, cr, Some(owner)).iter().map(|(_, t)| t.iid).collect();
             let g = cfg(st, "wild_dog_grant");
@@ -780,7 +772,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let options = ["worker_bee", "guard_bee", "nurse_bee"].into_iter().map(Value::s).collect();
             push_choose(st, owner, options, "make_in_hand", false, Map::new());
         }
-        ("soldier_ant", OnPlace) | ("muskrat", OnPlace) => {
+        ("soldier_ant", OnPlace) | ("gopher", OnPlace) => {
             if conditional(st, unit) {
                 removes(st, unit, cr, None, None);
             }
@@ -1016,9 +1008,9 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("squirrel", OnPlace) => gains(st, unit, "squirrel_food"),
         ("chipmunk", OnPlace) | ("tutorial_chipmunk", OnPlace) => chipmunk(st, unit),
-        ("gopher", OnPlace) => {
+        ("mara", OnPlace) => {
             if conditional(st, unit) {
-                let n = cfg(st, "gopher_draw");
+                let n = cfg(st, "mara_draw");
                 draws(st, unit, n);
             }
         }

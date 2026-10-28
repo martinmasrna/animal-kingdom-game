@@ -541,14 +541,6 @@ def test_dhole_lets_an_animal_with_roam_be_placed_on_an_equal_enemy_and_no_other
         assert (PlaceAction(card, ("cr", "2,1")) in rules.legal_actions(s)) is legal, card
 
 
-def test_raccoon_dog_grows_a_roaming_canine():
-    s = make_state()
-    put(s, "1,1", "coyote", "A")
-    w = put(s, "1,2", "wolf", "A")
-    rules.apply_action(s, RoamAction("1,2", ("cr", "2,1")))
-    assert w.strength_counter == CFG.raccoon_dog_grant
-
-
 def test_stray_dog_buffs_an_ally_with_roam_and_gives_it_a_free_roam():
     s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     w = put(s, "1,1", "wolf", "A")

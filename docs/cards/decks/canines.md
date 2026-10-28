@@ -30,9 +30,9 @@ The table below is generated from cards.json, where the cards live.
 | **Jackal** | 2 | Canine | 3 | Roar: remove an adjacent enemy that has another of your Canines next to it. |
 | **Wolf** | 3 | Canine | 6 | Roam. |
 | **Bush Dog** | 3 | Canine | 3 | Dusk: give a random adjacent Canine of yours +2 strength. |
-| **Coyote** | 3 | Canine | 3 | Whenever an allied Canine roams, give it +1 strength. |
 | **African Wild Dog** | 3 | Canine | 3 | Dusk: give your adjacent animals +1 strength. |
 | **Badger** | 3 | — | 4 | Roar: draw an animal with Roam. |
 | **Street Dog** | 3 | Canine | 1 | Roar: give an ally with Roam +2 strength. It roams. |
+| **Hyena** | 3 | — | 4 | Dusk: gain 3 food for each animal removed this turn. |
 
 <!-- cards:end -->

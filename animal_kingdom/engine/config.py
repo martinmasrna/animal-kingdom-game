@@ -43,7 +43,7 @@ class Config:
     # --- "Food gained this turn" signature mechanic (food_otk pure-OTK overhaul 2026-07-05) ---
     # A shared threshold read by Gopher/Muskrat/Groundhog.
     fed_threshold: int = 10              # food gained this turn to arm Gopher/Muskrat/Groundhog
-    gopher_draw: int = 2                # Gopher: draw N if fed this turn
+    mara_draw: int = 2                  # Mara: draw N if fed this turn
     groundhog_food: int = 10            # Groundhog: gain N food if fed this turn (was +5 str)
     chipmunk_legend_food_per: int = 3           # Scrooge: Roar: gain 3 food for each 10 food you have
     chipmunk_legend_food_step: int = 10
@@ -75,7 +75,6 @@ class Config:
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
     dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn
     bush_dog_grant: int = 2              # Bush Dog: Dusk: give an adjacent Canine +2
-    raccoon_dog_grant: int = 1           # Coyote: an allied Canine that roams gets +1
     wolf_legend_grant: int = 1           # the legendary Wolf: Dusk: +1 for each adjacent Canine
     stray_dog_grant: int = 2             # Stray Dog: give an ally with Roam +2, then it roams
     wild_dog_grant: int = 1              # African Wild Dog: Dusk: your adjacent animals +1
