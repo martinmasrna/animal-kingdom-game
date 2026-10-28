@@ -252,7 +252,7 @@ pub struct Unit {
     pub card: CardId,
     pub owner: Player,
     pub retaliation_used: bool,
-    /// The Street Dog's gift: Roam for as long as this instance stays on the board.
+    /// The Coyote's gift: Roam for as long as this instance stays on the board.
     pub granted_roam: bool,
     pub iid: i64,
     // 16-bit counters: a game's turns, plays and strength changes stay far below 32k, and the unit is what the board,

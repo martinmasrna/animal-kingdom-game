@@ -42,7 +42,7 @@ pub fn unit_keywords(st: &State, unit: &Unit, cr: Option<Cr>, as_top: bool) -> u
         return 0;
     }
     let card = st.card(unit.card);
-    let kws = if unit.granted_roam { card.keywords | K_ROAM } else { card.keywords };   // the Street Dog's gift
+    let kws = if unit.granted_roam { card.keywords | K_ROAM } else { card.keywords };   // the Coyote's gift
     if unit.owner > B || !st.cache.kw_aura[unit.owner as usize] {
         return kws;
     }

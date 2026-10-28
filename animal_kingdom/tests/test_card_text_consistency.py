@@ -321,7 +321,6 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "wolf_legend": ["wolf_legend_grant"],
     "wolf_legend_2": ["black_wolf_grant"],
     "street_dog": ["street_dog_grant"],
-    "coyote": ["coyote_grant"],
     "mahi_mahi": ["mahi_mahi_grant"],
     "mackerel": ["mackerel_anthem"],
     "tuna": ["tuna_per_fish"],

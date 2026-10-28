@@ -71,7 +71,7 @@ def unit_keywords(state: GameState, unit: UnitInstance, cr: Optional[str] = None
         return frozenset()
     card = state.cards[unit.card_id]
     kws = card.keywords
-    if unit.granted_roam and "Roam" not in kws:   # the Street Dog's gift
+    if unit.granted_roam and "Roam" not in kws:   # the Coyote's gift
         kws = kws | _ROAM
     if not any(st and st[-1].owner == unit.owner and st[-1].card_id in KEYWORD_AURAS for st in state.board.values()):
         return kws
@@ -134,7 +134,7 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
 # ------------------------------------------------------------------------- Roam
 
 def can_roam(state: GameState, unit: UnitInstance) -> bool:
-    """Whether `unit` has Roam right now (printed or given by the Street Dog, and not inked)."""
+    """Whether `unit` has Roam right now (printed or given by the Coyote, and not inked)."""
     return ("Roam" in state.cards[unit.card_id].keywords or unit.granted_roam) and active(state, unit)
 
 

@@ -75,8 +75,7 @@ class Config:
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
     dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn
     wolf_legend_grant: int = 1           # the legendary Wolf: Dusk: +1 for each adjacent Canine
-    street_dog_grant: int = 3            # Street Dog: Roar: give a connected ally +3 strength and Roam
-    coyote_grant: int = 3                # Coyote: Roar: give a connected ally with Roam +3 strength. It roams.
+    street_dog_grant: int = 3            # Street Dog: Roar: give a connected ally with Roam +3 strength. It roams.
     black_wolf_grant: int = 1            # the legendary Black Wolf: whenever a Canine roams, give it +1 strength
     black_wolf_draw: int = 1             # ... and draw a card
     fox_draw: int = 2                    # Fox: Roar: if a Canine roamed this turn, draw 2 cards

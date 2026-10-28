@@ -594,29 +594,28 @@ def test_the_dhole_draws_two_when_it_covers_an_enemy_with_no_other_enemy_next_to
     assert hand_ids(s, "A") == []
 
 
-def test_street_dog_gives_a_connected_ally_plus_three_and_roam():
-    s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+def test_coyote_gives_a_connected_ally_roam_and_a_free_roam():
+    s = make_state(hands={"A": ["coyote"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     ally = put(s, "1,1", "lion", "A")
     put(s, "2,2", "squirrel", "A")
     put(s, "3,2", "squirrel", "A")                             # connected through 2,2
     put(s, "4,3", "squirrel", "A")                             # no chain of your animals to it
     put(s, "1,3", "squirrel", "B")                             # an enemy is never chosen
-    rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("coyote", ("cr", "1,2")))
     assert s.pending["options"] == ["1,1", "2,2", "3,2"]
     assert not statics.can_roam(s, ally)
     choose(s, "1,1")
-    assert s.pending is None and ally.strength_counter == CFG.street_dog_grant
+    assert s.pending is None and ally.strength_counter == 0
     assert statics.can_roam(s, ally) and "Roam" in statics.unit_keywords(s, ally, "1,1")
-    assert s.actions_taken_this_turn == 1                      # it does not roam now
-    assert RoamAction("1,1", ("cr", "2,1")) in rules.legal_actions(s)
-    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))    # an ordinary roam, paid by the turn's second action
-    assert s.top_unit("2,1") is ally and s.current == "B"
+    assert s.actions_taken_this_turn == 1
+    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))    # the roam is free: the turn's second action is left
+    assert s.top_unit("2,1") is ally and s.current == "A" and s.actions_taken_this_turn == 1
 
 
-def test_the_street_dogs_roam_goes_when_the_animal_leaves_the_board():
-    s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+def test_the_coyotes_roam_goes_when_the_animal_leaves_the_board():
+    s = make_state(hands={"A": ["coyote"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     ally = put(s, "1,1", "lion", "A")
-    rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("coyote", ("cr", "1,2")))
     choose(s, "1,1")
     assert ally.granted_roam and s.clone().top_unit("1,1").granted_roam    # a clone keeps it
     assert UnitInstance.from_dict(ally.to_dict()).granted_roam              # so does a saved game
@@ -624,32 +623,32 @@ def test_the_street_dogs_roam_goes_when_the_animal_leaves_the_board():
     assert not hand_inst(s, "A", "lion").granted_roam
 
 
-def test_street_dog_with_no_connected_ally_just_lands():
-    s = make_state(hands={"A": ["street_dog"]})
+def test_coyote_with_no_connected_ally_just_lands():
+    s = make_state(hands={"A": ["coyote"]})
     put(s, "4,3", "lion", "A")
-    rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("coyote", ("cr", "1,2")))
     assert s.pending is None
 
 
-def test_coyote_gives_a_connected_ally_with_roam_plus_three_and_a_free_roam():
-    s = make_state(hands={"A": ["coyote"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+def test_street_dog_gives_a_connected_ally_with_roam_plus_three_and_a_free_roam():
+    s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     wolf = put(s, "1,1", "wolf", "A")
     put(s, "2,2", "squirrel", "A")                             # connected, but no Roam
     put(s, "3,2", "wolf", "A")                                 # connected through 2,2
     put(s, "4,3", "wolf", "A")                                 # no chain of your animals to it
-    rules.apply_action(s, PlaceAction("coyote", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
     assert s.pending["options"] == ["1,1", "3,2"]
     choose(s, "1,1")
-    assert s.pending is None and wolf.strength_counter == CFG.coyote_grant
+    assert s.pending is None and wolf.strength_counter == CFG.street_dog_grant
     assert s.actions_taken_this_turn == 1
     rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))    # the roam is free: the turn's second action is left
     assert s.top_unit("2,1") is wolf and s.current == "A" and s.actions_taken_this_turn == 1
 
 
-def test_coyote_with_no_connected_roamer_just_lands():
-    s = make_state(hands={"A": ["coyote"]})
+def test_street_dog_with_no_connected_roamer_just_lands():
+    s = make_state(hands={"A": ["street_dog"]})
     put(s, "1,1", "lion", "A")
-    rules.apply_action(s, PlaceAction("coyote", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
     assert s.pending is None
 
 

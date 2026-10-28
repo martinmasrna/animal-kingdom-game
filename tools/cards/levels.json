@@ -1127,9 +1127,9 @@
         "prev_note": "",
         "prev": "Whenever an allied Canine roams, give it +1 strength."
       },
-      "note": "Martin, 2026-10-28: the Street Dog's old line, made local; a twin of the Street Dog for an ally that already roams",
+      "note": "Martin, 2026-10-28: no strength; it gives Roam and the ally roams at once",
       "by": "claude",
-      "at": 1793215129,
+      "at": 1793215549,
       "lv": "draft"
     },
     "strength": {
@@ -1148,9 +1148,9 @@
         "prev_note": "",
         "prev": "C"
       },
-      "note": "Martin, 2026-10-28: the Roam-giving card is the rare one, so the Coyote stays common",
+      "note": "Martin, 2026-10-28: giving Roam is rare-worthy; the Coyote carries it",
       "by": "claude",
-      "at": 1793215331
+      "at": 1793215438
     }
   },
   "crocodile": {
@@ -4079,9 +4079,9 @@
         "prev_note": "",
         "prev": "Roar: give an ally with Roam +2 strength. It roams."
       },
-      "note": "Martin, 2026-10-28: Canines and Roam redesign: gives any animal Roam; connected, never global",
+      "note": "Martin, 2026-10-28: the two animals swapped; the Street Dog's old line, made local",
       "by": "claude",
-      "at": 1793210626
+      "at": 1793215438
     },
     "rarity": {
       "review": {
@@ -4089,9 +4089,9 @@
         "prev_note": "",
         "prev": "C"
       },
-      "note": "Martin, 2026-10-28: giving Roam is rare-worthy; swapped with the Bush Dog, now common",
+      "note": "Martin, 2026-10-28: the Street Dog is the common twin",
       "by": "claude",
-      "at": 1793215332
+      "at": 1793215438
     }
   },
   "sunfish": {

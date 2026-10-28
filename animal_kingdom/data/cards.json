@@ -581,12 +581,12 @@
       "id": "coyote",
       "name": "Coyote",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Canine"
       ],
       "base_strength": 1,
-      "text": "Roar: give a connected ally with Roam +3 strength. It roams.",
+      "text": "Roar: give a connected ally Roam. It roams.",
       "species": "Coyote",
       "habitat": "Forest",
       "keywords": []
@@ -623,12 +623,12 @@
       "id": "street_dog",
       "name": "Street Dog",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Canine"
       ],
       "base_strength": 1,
-      "text": "Roar: give a connected ally +3 strength and Roam.",
+      "text": "Roar: give a connected ally with Roam +3 strength. It roams.",
       "species": "Street Dog",
       "habitat": "City",
       "keywords": []

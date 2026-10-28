@@ -852,7 +852,7 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
 #   - EFFECTS[card]["on_roam"](state, unit, cr, event): "whenever this roams…", resolves first, where a Roar would;
 #   - EFFECTS[card]["on_friendly_roam"](state, watcher, roamer, event): "whenever one of your animals roams…" (any of
 #     the player's other top units; event["onto_enemy"] tells a cover);
-#   - statics.can_roam: who roams (printed Roam, or the Street Dog's gift, UnitInstance.granted_roam);
+#   - statics.can_roam: who roams (printed Roam, or the Coyote's gift, UnitInstance.granted_roam);
 #   - free roams: statics.free_roams(state, player) per turn, plus turn_flags["free_roams_<player>"] granted by the
 #     `grant_free_roam` op; a free roam is spent before an action.
 # The event dict: {"player", "iid", "from", "to" (None for a den), "covered" (iid or None), "onto_enemy"}.
@@ -1642,17 +1642,17 @@ def _then_hand_grant(state, step, iid):
     _grant(state, [iid], step["amount"])
 
 
-def _then_street_dog(state, step, cr):
-    """Street Dog: the ally gets +3 strength and Roam, for as long as it stays on the board."""
+def _then_coyote(state, step, cr):
+    """Coyote: the ally gets Roam, for as long as it stays on the board, and may roam this turn without spending an action."""
     top = state.top_unit(cr)
     if top is None:
         return
     top.granted_roam = True
-    _grant(state, [top.iid], step["amount"])
+    _then_free_roam(state, step, cr)
 
 
-def _then_coyote(state, step, cr):
-    """Coyote: the ally gets +3 strength, then may roam this turn without spending an action (as the African Wild Dog's)."""
+def _then_street_dog(state, step, cr):
+    """Street Dog: the ally gets +3 strength, then may roam this turn without spending an action (as the African Wild Dog's)."""
     top = state.top_unit(cr)
     if top is None:
         return
@@ -1769,7 +1769,7 @@ def _then_roam_to(state, step, cr):
 
 THEN = {
     "remove": _then_remove, "set_strength": _then_set_strength, "drain": _then_drain, "grant": _then_grant,
-    "hand_grant": _then_hand_grant, "street_dog": _then_street_dog, "coyote": _then_coyote, "free_roam": _then_free_roam, "copy_and_add": _then_copy_and_add,
+    "hand_grant": _then_hand_grant, "coyote": _then_coyote, "street_dog": _then_street_dog, "free_roam": _then_free_roam, "copy_and_add": _then_copy_and_add,
     "copy_from_hand": _then_copy_from_hand, "return_ally": _then_return_ally,
     "cuckoo": _then_cuckoo, "remove_and_draw": _then_remove_and_draw, "pile_to_hand": _then_pile_to_hand,
     "make_in_hand": _then_make_in_hand,
@@ -2183,15 +2183,15 @@ def _connected_allies(state, unit, cr) -> list:
     return sorted(seen - {cr})
 
 
-def _street_dog_place(state, unit, cr):
-    """Roar: give a connected ally +3 strength and Roam."""
-    _push_choose(state, unit.owner, _connected_allies(state, unit, cr), "street_dog", amount=state.config.street_dog_grant)
-
-
 def _coyote_place(state, unit, cr):
+    """Roar: give a connected ally Roam. It roams."""
+    _push_choose(state, unit.owner, _connected_allies(state, unit, cr), "coyote")
+
+
+def _street_dog_place(state, unit, cr):
     """Roar: give a connected ally with Roam +3 strength. It roams."""
     options = [c for c in _connected_allies(state, unit, cr) if "Roam" in statics.unit_keywords(state, state.top_unit(c), c)]
-    _push_choose(state, unit.owner, options, "coyote", amount=state.config.coyote_grant)
+    _push_choose(state, unit.owner, options, "street_dog", amount=state.config.street_dog_grant)
 
 
 def _dingo_eot(state, unit, cr):
@@ -3202,8 +3202,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "bush_dog": {"on_roam": _bush_dog_roam},
     "african_wild_dog": {"on_roam": _wild_dog_roam},
     "badger": {"on_place": _draws_filtered("keyword:Roam")},
-    "street_dog": {"on_place": _street_dog_place},
     "coyote": {"on_place": _coyote_place},
+    "street_dog": {"on_place": _street_dog_place},
     # Cats (King Theron fires from _fire_cover_event; Leopard is a static).
     "lion_legend": {"on_place": _twin_place("lion_legend_2")},
     "lion_legend_2": {"on_place": _twin_place("lion_legend")},

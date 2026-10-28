@@ -78,7 +78,7 @@ class UnitInstance:
         self.locked_until_turn = locked_until_turn  # Skunk: unplayable from hand while turn < this
         self.retaliation_used = retaliation_used  # Gale: "first time covered" fires once per instance
         self.play_seq = play_seq  # when it entered the board, game-wide (Dawn/Dusk resolve in play order); 0 in hand
-        self.granted_roam = granted_roam  # Street Dog: "gains Roam" for as long as this instance stays on the board
+        self.granted_roam = granted_roam  # Coyote: "gains Roam" for as long as this instance stays on the board
 
     def to_dict(self) -> dict:
         return {"card_id": self.card_id, "owner": self.owner, "iid": self.iid,
