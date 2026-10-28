@@ -48,7 +48,7 @@ The keywords are defined in [`keywords.md`](keywords.md); these are the calls th
 - **Roaming onto a den ends the game where it stands.** The animal never leaves its crossroad.
 - **A roam onto the den is a capture like a placement from hand.** A roam takes the den only when the roamer's pack stands on the den front and is connected to your den (Martin, 2026-10-15); an animal Reach dropped behind the enemy's lines is cut off and can't take it (Martin, 2026-10-10).
 - **A player who can roam has a move.** Only a player with no legal action passes automatically, and a roam is one.
-- **A free roam is spent before an action** and keeps the turn open after its two actions until it is used or the player ends the turn. Clarion ([WHITE WOLF]) grants one each turn and Street Dog one on its Roar.
+- **A free roam is spent before an action** and keeps the turn open after its two actions until it is used or the player ends the turn. Clarion ([WHITE WOLF]) grants one each turn and the African Wild Dog one to an adjacent Canine after it roams.
 - **Poison ticks under a cover.** The poisoned coverer is removed at the start of the Poison animal's controller's next turn even if something has covered it since (it comes out from under the stack), as with venom.
 - **Dawn and Dusk resolve one at a time, in play order, each in full before the next.** One that an earlier one removed or buried does nothing. The delayed payouts due this turn ("In 2 turns", "Next turn": the Sloth's food, the Chipmunk, King Cobra's venom, Poison) resolve before your Dawn effects, so a Sloth's food feeds your Hungry animals the turn it arrives (Martin, 2026-10-24).
 
@@ -83,10 +83,18 @@ Cards:
 - **Earthworm**: the two Worms land on its crossroad only while it is empty or yours; under an enemy there is no room and none appear.
 - **Clarion's** free roam is for any of your animals with Roam (the card says "an ally"), one per Clarion each turn, spent before an action.
 - **Jackal's** flanker must be another of your Canines, not the Jackal itself.
-- **Street Dog** picks another ally with Roam anywhere and gives it +2; "It roams" gives that animal a free Roam this turn, an ordinary roam you take when you like, the den included (Martin, 2026-10-15: "it should just be normal roam"), and none if it has roamed this turn.
-- **Fox** draws for a cover by placement or by roaming.
+- **Street Dog** picks one of your other animals connected to it and gives it +3 strength and Roam. The animal keeps Roam for as long as it stays on the board (covered and resurfacing included), and loses it when it leaves the board; it does not roam now, and its roams are ordinary ones that cost an action.
+- **"Connected to this"** means a chain of crossroads next to each other, all topped by your animals, starting at this animal's own crossroad. It has nothing to do with your den.
+- **"Lands"** means the animal is placed (from hand or by an effect) or arrives on a crossroad by roaming. The legendary Elephant sweeps both times; a Roar happens on placement only.
+- **Fox** draws 2 when it is placed if one of your Canines has roamed this turn, free or paid, itself or not.
+- **African Wild Dog** lets you choose one of your Canines next to the crossroad it roamed to, other than itself, that hasn't roamed this turn; that Canine may roam once this turn without spending an action, whether or not it has Roam.
+- **Bush Dog** puts a Pup on the crossroad it left, but only if the crossroad is empty: an animal that resurfaces there leaves no Pup.
+- **Dhole** draws 2 when it covers an enemy that has no other enemy top animal next to it, by placement or by roaming, judged once the Dhole sits on that crossroad. The Dhole gives no equal-strength cover to anyone.
+- **Wolverine** can remove only an adjacent enemy that has no other enemy top animal next to it; Stealth and Armor protect from it as from any chosen removal.
+- **The legendary Black Wolf** gives +1 strength and draws a card whenever one of your Canines roams, itself included.
+- **Moose** doesn't eat, and loses no strength, at the start of your turn while it is grazing.
 - **Serval** sets the strength by storing the difference: later buffs and auras count on top of the 1.
-- **Placing and roaming cover by one rule** (Martin, 2026-10-24: "the rules for Roam and place from hand should not drift"): every card that changes who may cover whom (Leopard, Dhole, the legendary Piranha, Chameleon) works for a roam exactly as for a placement.
+- **Placing and roaming cover by one rule** (Martin, 2026-10-24: "the rules for Roam and place from hand should not drift"): every card that changes who may cover whom (Leopard, the legendary Piranha, Chameleon) works for a roam exactly as for a placement.
 - **The legendary Piranha** counts the Fish you control now, itself included.
 - **Swordfish** removes that many different random adjacent enemies (Stealth doesn't hide from random; Armor stays). **Barracuda** counts itself among your Fish.
 - **The repeat legend** (food aggro) repeats the plain Roar of each adjacent allied Rodent, in crossroad order; a Roar that depends on how it was placed (Lynx's) isn't repeated.

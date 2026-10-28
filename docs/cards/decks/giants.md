@@ -22,7 +22,6 @@ The table below is generated from cards.json, where the cards live.
 | **Rhinoceros** | 2 | — | 8 | Hungry 3. Roar: remove all adjacent enemies of strength 3 or less. |
 | **Hippopotamus** | 2 | — | 8 | Hungry 3. When an enemy of strength 4 or less is placed next to this, remove it. |
 | **Whale Shark** | 2 | Fish | 8 | Titan. Hungry 4. Dusk: draw a card. |
-| **Moose** | 2 | Hoofed | 8 | Hungry 3. Roam. |
 
 ### Common
 
@@ -33,6 +32,7 @@ The table below is generated from cards.json, where the cards live.
 | **Blue Whale** | 3 | — | 12 | Titan. |
 | **Sloth** | 3 | — | 3 | Roar: in 2 turns, gain 30 food. |
 | **Elephant** | 3 | — | 9 | Hungry 5. |
+| **Moose** | 2 | Hoofed | 8 | Hungry 3. While this is grazing, it doesn't eat. |
 | **Krill** | 3 | — | 1 | Roar: the next Titan you play this turn costs one action. |
 
 <!-- cards:end -->

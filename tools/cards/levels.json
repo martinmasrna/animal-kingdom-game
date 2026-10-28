@@ -7,6 +7,36 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-28: Canines and Roam redesign",
+      "by": "claude",
+      "at": 1793210639
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "Martin, 2026-10-28: Canines and Roam redesign: a bit over the Jackal's 3",
+      "by": "claude",
+      "at": 1793210641
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Dusk: give your adjacent animals +1 strength."
+      },
+      "note": "Martin, 2026-10-28: the pack moves together",
+      "by": "claude",
+      "at": 1793210642
     }
   },
   "alley_cat": {
@@ -683,10 +713,25 @@
       "by": "martin"
     },
     "effect": {
-      "note": "horrible text",
-      "by": "martin",
-      "at": 1792657414,
-      "lv": "problem"
+      "note": "Martin, 2026-10-28: Canines and Roam redesign",
+      "by": "claude",
+      "at": 1793210646,
+      "lv": "problem",
+      "review": {
+        "prev_lv": "problem",
+        "prev_note": "horrible text",
+        "prev": "Dusk: give a random adjacent Canine of yours +2 strength."
+      }
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-28: Canines and Roam redesign",
+      "by": "claude",
+      "at": 1793210644
     }
   },
   "butterfly": {
@@ -1239,9 +1284,19 @@
         "prev_note": "",
         "prev": "Roam. Your animals can roam onto enemies of equal strength."
       },
-      "note": "Placing and roaming cover by one rule (Martin, 2026-10-24, 'yes, agree (at least for now, might need redesign anyway)'); was 'can roam onto'",
+      "note": "Martin, 2026-10-28: Canines and Roam redesign",
       "by": "claude",
-      "at": 1792840813
+      "at": 1793210650
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "note": "Martin, 2026-10-28: Canines and Roam redesign: one below the Wolf, so it doesn't dominate it",
+      "by": "claude",
+      "at": 1793210648
     }
   },
   "dingo": {
@@ -1303,7 +1358,14 @@
     },
     "rarity": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-28: the flying Apex Predator",
+      "at": 1793210659
     },
     "animal": {
       "lv": "draft",
@@ -1315,12 +1377,25 @@
     },
     "strength": {
       "lv": "draft",
-      "by": "martin"
+      "by": "claude",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 5
+      },
+      "note": "Martin, 2026-10-28",
+      "at": 1793210661
     },
     "effect": {
       "lv": "draft",
-      "by": "martin",
-      "note": "The vanilla flyer.; The vanilla flyer."
+      "by": "claude",
+      "note": "Martin, 2026-10-28: the Pigeon takes the plain Flight",
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "The vanilla flyer.; The vanilla flyer.",
+        "prev": "Flight."
+      },
+      "at": 1793210664
     },
     "art": {
       "lv": "draft",
@@ -1577,9 +1652,34 @@
       "by": "martin"
     },
     "strength": {
-      "note": "Martin, 2026-10-15, after his Canines gauntlet: underwhelming at 4.",
+      "note": "Martin, 2026-10-28: Canines and Roam redesign: draw sits on small bodies",
       "by": "claude",
-      "at": 1792090640
+      "at": 1793210630,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin, 2026-10-15, after his Canines gauntlet: underwhelming at 4.",
+        "prev": 5
+      }
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-28: Canines and Roam redesign: part of the Canine package",
+      "by": "claude",
+      "at": 1793210628
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roam. Whenever this covers an enemy, draw a card."
+      },
+      "note": "Martin, 2026-10-28: Canines and Roam redesign",
+      "by": "claude",
+      "at": 1793210632
     }
   },
   "cottonmouth": {
@@ -2462,6 +2562,16 @@
       "by": "claude",
       "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
       "at": 1792191059
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Whenever an ally roams onto an enemy, draw a card."
+      },
+      "note": "Martin, 2026-10-28",
+      "by": "claude",
+      "at": 1793210656
     }
   },
   "lynx": {
@@ -2734,14 +2844,29 @@
       "at": 1792262682
     },
     "effect": {
-      "note": "Martin 2026-10-17: the wanderer; bigger than the Orca, pays to stay big",
+      "note": "Martin, 2026-10-28: Canines and Roam redesign: Hungry and grazing, Roam dropped (on trial)",
       "by": "claude",
-      "at": 1792262682
+      "at": 1793210636,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: the wanderer; bigger than the Orca, pays to stay big",
+        "prev": "Hungry 3. Roam."
+      }
     },
     "animal": {
       "note": "moved from hoofed to giants",
       "by": "claude",
       "at": 1792262682
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "R"
+      },
+      "note": "Martin, 2026-10-28: Canines and Roam redesign: nothing goes wrong facing it three times",
+      "by": "claude",
+      "at": 1793210634
     }
   },
   "mosquito": {
@@ -3926,6 +4051,16 @@
       "lv": "draft",
       "by": "claude",
       "at": 1792662404
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: give an ally with Roam +2 strength. It roams."
+      },
+      "note": "Martin, 2026-10-28: Canines and Roam redesign: gives any animal Roam; connected, never global",
+      "by": "claude",
+      "at": 1793210626
     }
   },
   "sunfish": {
@@ -4749,9 +4884,13 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792191062
+      "at": 1793210666,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
+      }
     }
   },
   "raccoon": {
@@ -6264,6 +6403,153 @@
       "note": "moved from pool to food_aggro",
       "by": "claude",
       "at": 1793188544
+    }
+  },
+  "elephant_legend": {
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Elephant Legend",
+          "species": "Elephant"
+        }
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1793210602
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-28: Canines and Roam redesign",
+      "by": "claude",
+      "at": 1793210580
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-28",
+      "by": "claude",
+      "at": 1793210581
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-28: the AOE roamer, Hungry 6 to compensate",
+      "by": "claude",
+      "at": 1793210584
+    }
+  },
+  "wolverine": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-28: Canines and Roam redesign",
+      "by": "claude",
+      "at": 1793210586
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-28: the condition is hard to meet",
+      "by": "claude",
+      "at": 1793210589
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-28: Canines and Roam redesign: the lone-enemy removal, in plain words",
+      "by": "claude",
+      "at": 1793210592
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1793210604
+    }
+  },
+  "pigeon": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-28: Canines and Roam redesign",
+      "by": "claude",
+      "at": 1793210594
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-28: Canines and Roam redesign",
+      "by": "claude",
+      "at": 1793210596
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "the plain Flight body, the Eagle's old number",
+      "by": "claude",
+      "at": 1793210597
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-28: the vanilla Flight common, the common bird",
+      "by": "claude",
+      "at": 1793210599
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1793210606
     }
   }
 }

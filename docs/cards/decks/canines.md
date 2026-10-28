@@ -12,27 +12,27 @@ The table below is generated from cards.json, where the cards live.
 |---|---:|---|---:|---|
 | **[LEOPARD]** | 1 | Cat | 5 | Apex Predator. Roam. Reach. Whenever this removes an animal, gain 1 strength. |
 | **[WHITE WOLF]** | 1 | Canine | 5 | Once each turn, an ally can roam for free. |
-| **[BLACK WOLF]** | 1 | Canine | 6 | Whenever an ally roams onto an enemy, draw a card. |
-| **[WOLF]** | 1 | Canine | 4 | Roam. Dusk: this gains +1 strength for each of your adjacent Canines. |
+| **[BLACK WOLF]** | 1 | Canine | 6 | Roam. Whenever a Canine roams, give it +1 strength and draw a card. |
+| **[ELEPHANT]** | 1 | — | 9 | Hungry 6. Roam. Whenever this lands, remove all adjacent enemies of strength 3 or less. |
 
 ### Rare
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Orca** | 2 | — | 6 | Apex Predator. Roam. |
-| **Fox** | 2 | Canine | 5 | Roam. Whenever this covers an enemy, draw a card. |
-| **Dhole** | 2 | Canine | 6 | Roam. Your animals with Roam can cover enemies of equal strength. |
+| **African Wild Dog** | 2 | Canine | 4 | Roam. After this roams, choose an adjacent Canine. It roams. |
+| **Bush Dog** | 2 | Canine | 3 | Roam. Whenever this roams, place a Pup on the crossroad it left. |
+| **Dhole** | 2 | Canine | 5 | Roam. Whenever this covers an enemy with no other enemy next to it, draw 2 cards. |
 
 ### Common
 
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
-| **Jackal** | 2 | Canine | 3 | Roar: remove an adjacent enemy that has another of your Canines next to it. |
 | **Wolf** | 3 | Canine | 6 | Roam. |
-| **Bush Dog** | 3 | Canine | 3 | Dusk: give a random adjacent Canine of yours +2 strength. |
-| **African Wild Dog** | 3 | Canine | 3 | Dusk: give your adjacent animals +1 strength. |
+| **Jackal** | 3 | Canine | 3 | Roar: remove an adjacent enemy that has another of your Canines next to it. |
+| **Street Dog** | 3 | Canine | 1 | Roar: give a connected ally +3 strength and Roam. |
 | **Badger** | 3 | — | 4 | Roar: draw an animal with Roam. |
-| **Street Dog** | 3 | Canine | 1 | Roar: give an ally with Roam +2 strength. It roams. |
-| **Hyena** | 3 | — | 4 | Dusk: gain 3 food for each animal removed this turn. |
+| **Fox** | 3 | Canine | 3 | Roar: if a Canine roamed this turn, draw 2 cards. |
+| **Wolverine** | 3 | — | 4 | Roar: remove an adjacent enemy with no other enemy next to it. |
 
 <!-- cards:end -->

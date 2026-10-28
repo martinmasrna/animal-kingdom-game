@@ -60,17 +60,17 @@
     "leopard_legend": 1,
     "wolf_legend_3": 1,
     "wolf_legend_2": 1,
-    "wolf_legend": 1,
+    "elephant_legend": 1,
     "orca": 2,
-    "fox": 2,
-    "jackal": 2,
+    "african_wild_dog": 2,
+    "bush_dog": 2,
     "dhole": 2,
     "wolf": 3,
-    "bush_dog": 3,
-    "african_wild_dog": 3,
-    "badger": 3,
+    "jackal": 3,
     "street_dog": 3,
-    "hyena": 3
+    "badger": 3,
+    "fox": 3,
+    "wolverine": 3
    }
   },
   {

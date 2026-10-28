@@ -71,7 +71,7 @@ const GROWS: &[Hook] = &[Hook::OnDawnInHand, Hook::OnStartOfTurn, Hook::OnGain];
 pub fn hook_mask(card: &str) -> u32 {
     use Hook::*;
     let hooks: &[Hook] = match card {
-        "cuckoo_legend" | "praying_mantis" | "raccoon" | "hammerhead" | "locust_legend" | "jackal" | "badger" | "street_dog" | "lion_legend"
+        "cuckoo_legend" | "praying_mantis" | "raccoon" | "hammerhead" | "locust_legend" | "jackal" | "badger" | "street_dog" | "fox" | "wolverine" | "lion_legend"
         | "lion_legend_2" | "jaguar" | "serval" | "bobcat" | "alley_cat" | "bee_legend" | "forager_ant" | "nurse_bee" | "nurse_bumblebee"
         | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "greywhisker" | "mole_legend"
         | "rat_legend_2" | "skunk_legend" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
@@ -86,12 +86,14 @@ pub fn hook_mask(card: &str) -> u32 {
         | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend_form2" | "dung_beetle_legend_form3" | "dung_beetle_legend_form4" => &[OnPlace],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
-        "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "bush_dog" | "african_wild_dog" | "queen_ant" | "scout_bee" | "army_ant_legend"
+        "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "queen_ant" | "scout_bee" | "army_ant_legend"
         | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "okapi" | "wildebeest"
         | "dingo" | "sperm_whale_legend" => &[OnEndOfTurn],
         "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" => &[OnStartOfTurn],
-        "wolf_legend_2" => &[OnFriendlyRoam],
-        "fox" => &[OnCoverEnemy],
+        "wolf_legend_2" => &[OnFriendlyRoam, OnRoam],
+        "bush_dog" | "african_wild_dog" => &[OnRoam],
+        "elephant_legend" => &[OnPlace, OnRoam],
+        "dhole" => &[OnCoverEnemy],
         "lion_legend_4" => &[OnRemoveEvent],
         "lynx" => &[OnPlaceOntoEnemy],
         "worker_wasp" => &[OnFriendlyPlace],
@@ -194,6 +196,7 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
         "hare" | "rat" => placed_plus >= cfg(st, "hare_played_min"),
         "macaque" => hand_after() >= cfg(st, "macaque_hand_min"),
         "gorilla" => strength() >= cfg(st, "gorilla_min"),
+        "fox" => st.turn_flags.canine_roamed,
         _ => return None,
     })
 }
@@ -398,6 +401,42 @@ fn remove_all_adjacent(st: &mut State, unit: &Unit, cr: Cr) {
             st.effect_stack.push(step);
         }
     }
+}
+
+/// Whenever a Canine of `owner`'s roams (the Black Wolf's own roam included): give it +1 strength and draw a card.
+fn black_wolf_grows(st: &mut State, owner: Player, roamer: &Unit) {
+    if st.card(roamer.card).has_tag(T_CANINE) {
+        let g = cfg(st, "black_wolf_grant");
+        grant(st, vec![roamer.iid], g);
+        let d = cfg(st, "black_wolf_draw");
+        push_draw(st, owner, d);
+    }
+}
+
+/// Whether no enemy of `enemy_of` tops a crossroad next to `cr`: the animal on `cr` has no other enemy beside it.
+fn lonely(st: &State, enemy_of: Player, cr: Cr) -> bool {
+    !adjacent_tops(st, cr, None).iter().any(|(_, t)| t.owner != enemy_of)
+}
+
+/// The crossroads of `owner`'s other top animals connected to the one on `cr` through a chain of `owner`'s top animals,
+/// in crossroad-name order.
+fn connected_allies(st: &State, owner: Player, cr: Cr) -> Vec<Cr> {
+    let gm = st.map();
+    let mut seen: Vec<bool> = vec![false; gm.n()];
+    seen[cr as usize] = true;
+    let mut queue = vec![cr];
+    let mut qi = 0;
+    while qi < queue.len() {
+        let c = queue[qi];
+        qi += 1;
+        for &nb in gm.neighbors(c) {
+            if !seen[nb as usize] && st.owner_of(nb) == Some(owner) {
+                seen[nb as usize] = true;
+                queue.push(nb);
+            }
+        }
+    }
+    gm.sorted.iter().copied().filter(|&c| seen[c as usize] && c != cr).collect()
 }
 
 fn sweep(st: &mut State, unit: &Unit, cr: Cr, max_attr: &str) {
@@ -654,12 +693,11 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         // Canines
         ("wolf_legend_2", OnFriendlyRoam) => {
-            if let Args::FriendlyRoam(_, ev) = args {
-                if ev.onto_enemy {
-                    push_draw(st, owner, 1);
-                }
+            if let Args::FriendlyRoam(roamer, _) = args {
+                black_wolf_grows(st, owner, roamer);
             }
         }
+        ("wolf_legend_2", OnRoam) => black_wolf_grows(st, owner, unit),
         ("wolf_legend", OnEndOfTurn) => {
             let n = adjacent_tops(st, cr, Some(owner)).iter().filter(|(_, t)| st.card(t.card).has_tag(T_CANINE)).count() as i32;
             if n != 0 {
@@ -667,7 +705,24 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 grant(st, vec![unit.iid], n * g);
             }
         }
-        ("fox", OnCoverEnemy) => push_draw(st, owner, 1),
+        ("fox", OnPlace) => {
+            if conditional(st, unit) {
+                let n = cfg(st, "fox_draw");
+                push_draw(st, owner, n);
+            }
+        }
+        ("dhole", OnCoverEnemy) => {
+            if let Some(at) = statics::crossroad_of(st, unit.iid) {
+                if lonely(st, owner, at) {
+                    let n = cfg(st, "dhole_draw");
+                    push_draw(st, owner, n);
+                }
+            }
+        }
+        ("wolverine", OnPlace) => {
+            let targets: Vec<Cr> = adjacent_enemy_targets(st, unit, cr, None, None, true).into_iter().filter(|nb| lonely(st, owner, *nb)).collect();
+            push_remove_choice(st, owner, unit.card, targets, false);
+        }
         ("jackal", OnPlace) => {
             let targets: Vec<Cr> = adjacent_enemy_targets(st, unit, cr, None, None, true)
                 .into_iter()
@@ -675,25 +730,30 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 .collect();
             push_remove_choice(st, owner, unit.card, targets, false);
         }
-        ("bush_dog", OnEndOfTurn) => {
-            let options: Vec<i64> = adjacent_tops(st, cr, Some(owner)).iter().filter(|(_, t)| st.card(t.card).has_tag(T_CANINE)).map(|(_, t)| t.iid).collect();
-            if !options.is_empty() {
-                let pick = options[st.rng.choice_index(options.len())];
-                let g = cfg(st, "bush_dog_grant");
-                grant(st, vec![pick], g);
+        ("bush_dog", OnRoam) => {
+            if let Args::Roam(_, ev) = args {
+                if !st.occupied(ev.from) {
+                    let pup = cid(st, "pup");
+                    spawn(st, owner, pup, ev.from);
+                }
             }
         }
-        ("african_wild_dog", OnEndOfTurn) => {
-            let iids: Vec<i64> = adjacent_tops(st, cr, Some(owner)).iter().map(|(_, t)| t.iid).collect();
-            let g = cfg(st, "wild_dog_grant");
-            grant(st, iids, g);
+        ("african_wild_dog", OnRoam) => {
+            if let Args::Roam(to, _) = args {
+                let options: Vec<Cr> = adjacent_tops(st, *to, Some(owner))
+                    .iter()
+                    .filter(|(_, t)| st.card(t.card).has_tag(T_CANINE) && !st.turn_flags.roamed.contains(&t.iid))
+                    .map(|(nb, _)| *nb)
+                    .collect();
+                let o = crs(st, options);
+                push_choose(st, owner, o, "free_roam", false, Map::default());
+            }
         }
         ("badger", OnPlace) => draws_filtered(st, unit, "keyword:Roam", 1),
         ("street_dog", OnPlace) => {
-            let options: Vec<Cr> = st.sorted_occupied().into_iter().filter(|&c| st.top(c).map(|t| t.owner == owner && t.iid != unit.iid && statics::can_roam(st, t)).unwrap_or(false)).collect();
-            let o = crs(st, options);
-            let g = cfg(st, "stray_dog_grant");
-            push_choose(st, owner, o, "stray_dog", false, vmap!("amount" => Value::Int(g as i64)));
+            let o = crs(st, connected_allies(st, owner, cr));
+            let g = cfg(st, "street_dog_grant");
+            push_choose(st, owner, o, "street_dog", false, vmap!("amount" => Value::Int(g as i64)));
         }
         // Cats
         ("lion_legend", OnPlace) => twin_place(st, unit, "lion_legend_2"),
@@ -1064,6 +1124,12 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("tortoise_legend", OnEndOfTurn) => gains(st, unit, "tortoise_legend_food"),
         ("rhinoceros", OnPlace) => sweep(st, unit, cr, "rhinoceros_max"),
         ("albatross", OnPlace) => sweep(st, unit, cr, "albatross_max"),
+        ("elephant_legend", OnPlace) => sweep(st, unit, cr, "elephant_legend_max"),
+        ("elephant_legend", OnRoam) => {
+            if let Args::Roam(to, _) = args {
+                sweep(st, unit, *to, "elephant_legend_max");
+            }
+        }
         ("hippopotamus", OnEnemyPlacedAdjacent) => {
             if let Args::PlacedAdjacent(placed, pcr) = args {
                 if effective_strength(st, placed, None) <= cfg(st, "hippopotamus_max") && statics::can_be_removed(st, placed, Some(*pcr), false) {
@@ -1365,11 +1431,27 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
             }
             grant(st, vec![iid], amount as i32);
         }
-        "stray_dog" => {
+        "street_dog" => {
+            if let Some(cr) = cr_of(st) {
+                let iid = match st.top_mut(cr) {
+                    Some(top) => {
+                        top.granted_roam = true;
+                        top.iid
+                    }
+                    None => return,
+                };
+                grant(st, vec![iid], m_get_i(step, "amount").unwrap_or(0) as i32);
+            }
+        }
+        "free_roam" => {
             if let Some(cr) = cr_of(st) {
                 if let Some(top) = st.top(cr).cloned() {
-                    st.effect_stack.push(vmap!("op" => Value::s("forced_roam"), "iid" => Value::Int(top.iid), "player" => pn(chooser)));
-                    grant(st, vec![top.iid], m_get_i(step, "amount").unwrap_or(0) as i32);
+                    if !st.turn_flags.roamed.contains(&top.iid) {
+                        match st.turn_flags.free_roam_iid.iter_mut().find(|(i, _)| *i == top.iid) {
+                            Some(e) => e.1 = 1,
+                            None => st.turn_flags.free_roam_iid.push((top.iid, 1)),
+                        }
+                    }
                 }
             }
         }

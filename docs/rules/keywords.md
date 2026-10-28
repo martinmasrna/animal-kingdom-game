@@ -19,6 +19,10 @@ Reach prints no number (Martin, 2026-10-21): one distance reads at a glance. The
 ### Roam (proposed, 2026-10-08; through its pack, 2026-10-15)
 As an action, this moves through your own animals connected to it (its pack), then two steps beyond them with Reach, one without, jumping over whatever stands between (Martin, 2026-10-15): distance counts from the animal, never from your den, so a Wolf steps onto the enemy beside it, a Fox walks through the animal you just placed and lands on the enemy beyond, and a stranded Leopard pounces on the animals around it. It lands by the placement rules: onto an empty crossroad, onto one of your own animals, or onto an enemy it may cover, by the same rule a card from your hand uses (Leopard and the legendary Piranha included). It takes the den only when its pack stands on the den front and is connected to your own den, as a card from your hand would. Each animal roams at most once per turn. Moving isn't placing, so its Roar doesn't happen again; arriving next to a trap (Hippopotamus, the Spiders, Meerkat) sets it off as a placement would, and covering by roaming sets off Spikes and Poison. Leaving a crossroad uncovers whatever was beneath. An Apex Predator is one whenever it lands: it roams only onto an animal, and eats it. Dials if it plays too strong, in order: an animal can't roam the turn it is placed (it ends place-then-roam combos, the one-card den capture among them); then cap the walk at two of your animals.
 
+Roam can also be given: the Street Dog's Roar gives a connected ally Roam for as long as it stays on the board, and the African Wild Dog lets an adjacent Canine roam once, whether or not it has Roam.
+
+Carried by: the Canines (Wolf, Dhole, Bush Dog, African Wild Dog, the legendary Black Wolf), Orca, the legendary Leopard and the legendary Elephant.
+
 ### Armor
 A shell, plates or spines: cannot be removed, returned to hand, or eaten by **any** ability — the enemy's **or its own controller's**. It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an animal with Armor; when it removes a stack, a buried unit with Armor is skipped **in place** and everything else is still removed. Armor is not a shield for the cards beneath it. Scope is **board-only**: a card with Armor in hand can be paid or removed normally. It still dies if its strength drops below 0: that's a rule, not an ability (Martin, 2026-10-26).
 
@@ -43,7 +47,7 @@ Carried by: the Toad, the keyword's common; the Jellyfish, which also gives it t
 Playing it costs two actions instead of one. A free placement (Jerboa, the Remora, the Elephant's kind of "play another animal") can't pay for it; an extra action can. For the biggest animals: Blue Whale, Whale Shark.
 
 ### Hungry N (proposed, 2026-10-08)
-At the start of your turn this eats up to N of your food, and gets −1 strength, for good, for each food it was short (Martin, 2026-10-26). Below 0 it dies, like any animal. A Dawn effect: food is made at the end of your turn and eaten at the start of the next. In `cards.json` the number sits beside the keyword, as Reach's does: `"keywords": ["Hungry"], "hungry": 5`. Carried by the Giants: Elephant, Rhinoceros, Hippopotamus, Whale Shark, Brutus.
+At the start of your turn this eats up to N of your food, and gets −1 strength, for good, for each food it was short (Martin, 2026-10-26). Below 0 it dies, like any animal. A Dawn effect: food is made at the end of your turn and eaten at the start of the next. In `cards.json` the number sits beside the keyword, as Reach's does: `"keywords": ["Hungry"], "hungry": 5`. Carried by the Giants: Elephant, Rhinoceros, Hippopotamus, Whale Shark, Brutus, the legendary Elephant and the Moose, which doesn't eat while it is grazing.
 
 ### Flee (proposed, 2026-10-08)
 When an enemy covers this, it returns to your hand: the cover takes the crossroad, but nothing dies. A fleer keeps its value in its Roar, which comes again when it's played back. Carried by the herd's fleers (Gazelle, Deer, Zebra) and the Hare.
@@ -61,7 +65,7 @@ A predator that must land on prey and eats it.
 - **If the occupant can't be eaten** (Armor), the predator is **not** blocked from landing there: it simply **covers** it under the normal placement rules and buries it instead of eating it. Apex Predator is not restricted to prey it can eat — eating is what it does *when it can*, not a placement precondition.
 - **Cannot be placed onto a den** — deliberate design choice, so Apex Predators can't capture an enemy den directly.
 
-Carried by: **Tiger** and **Black Panther** (Cats), **Eon** (Egg), **Polar Bear** and **Borealis** (Ramp).
+Carried by: **Tiger** and **Black Panther** (Cats), **Eon** (Egg), **Polar Bear** and **Borealis** (Ramp), and the **Eagle**, which also has Flight: it lands on an animal anywhere, connected or not, and eats it.
 
 ### Roar
 An effect that resolves when the unit is placed. Most "when placed…" effects are Roars.

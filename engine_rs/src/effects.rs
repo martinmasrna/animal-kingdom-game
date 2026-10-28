@@ -928,14 +928,16 @@ fn apex_can_land(st: &State, placer: &Unit, top: &Unit) -> bool {
 // ======================================================================== Roam
 
 pub fn legal_roams(st: &State, player: Player, free_only: bool) -> Vec<Action> {
-    if !st.tops().any(|(_, u)| u.owner == player && statics::can_roam(st, u)) {
+    // an animal that has Roam, or one an effect gave a roam this turn (the African Wild Dog's "It roams")
+    let may = |u: &Unit| statics::can_roam(st, u) || (statics::active(st, u) && st.turn_flags.free_roam_iid.iter().any(|(i, n)| *i == u.iid && *n != 0));
+    if !st.tops().any(|(_, u)| u.owner == player && may(u)) {
         return Vec::new();
     }
     let occ = st.connected_occupied(player);
     let mut out = Vec::new();
     for cr in st.sorted_occupied() {
         let unit = st.top(cr).unwrap();
-        if unit.owner != player || !statics::can_roam(st, unit) || st.turn_flags.roamed.contains(&unit.iid) {
+        if unit.owner != player || !may(unit) || st.turn_flags.roamed.contains(&unit.iid) {
             continue;
         }
         if free_only && free_roams_left(st, player, Some(unit)) == 0 {
@@ -1044,6 +1046,9 @@ pub fn do_roam(st: &mut State, player: Player, origin: Cr, target: &Target) -> R
         st.turn_flags.roamed.push(unit.iid);
     }
     st.turn_flags.roams[player.min(1) as usize] += 1;
+    if st.card(unit.card).has_tag(T_CANINE) {
+        st.turn_flags.canine_roamed = true;       // the Fox's Roar asks
+    }
     match target {
         Target::Hq(den) => {
             crate::emit!(st, "roam", vmap!("player" => pn(player), "iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "cr" => cr_v(st, origin), "to" => Value::Null, "den" => pn(*den)));
@@ -1208,6 +1213,9 @@ fn op_timed_hook(st: &mut State, step: &mut Map) -> Option<Pending> {
 fn eat(st: &mut State, unit: &Unit, cr: Cr) {
     if !statics::has_keyword(st, unit, K_HUNGRY, Some(cr)) {
         return;
+    }
+    if Some(unit.card) == st.g.known.moose && statics::grazing(st, unit, Some(cr)) {
+        return;                                   // "While this is grazing, it doesn't eat."
     }
     let n = st.card(unit.card).hungry;
     let prev = (st.cause, st.cause_iid);
@@ -1724,22 +1732,6 @@ pub fn transform(st: &mut State, iid: i64, card: CardId) {
     crate::emit!(st, "transform", vmap!("iid" => Value::Int(iid), "owner" => pn(owner), "card" => card_v(st, card), "was" => card_v(st, was)));
 }
 
-fn op_forced_roam(st: &mut State, step: &mut Map) -> Option<Pending> {
-    let iid = m_get_i(step, "iid").unwrap();
-    let Some((cr, pos)) = st.find_unit(iid) else { return None };
-    if pos + 1 != st.stack(cr).len() || st.turn_flags.roamed.contains(&iid) {
-        return None;
-    }
-    let unit = st.unit_at(cr, pos).clone();
-    if statics::can_roam(st, &unit) {
-        match st.turn_flags.free_roam_iid.iter_mut().find(|(i, _)| *i == iid) {
-            Some(e) => e.1 = 1,
-            None => st.turn_flags.free_roam_iid.push((iid, 1)),
-        }
-    }
-    None
-}
-
 fn op_draw_to_match(st: &mut State, step: &mut Map) -> Option<Pending> {
     let player = step_player(st, step, "player");
     let n = st.hands[other(player) as usize].len() as i32 - st.hands[player as usize].len() as i32;
@@ -1970,7 +1962,6 @@ fn run_op(st: &mut State, op: &str, step: &mut Map) -> Option<Pending> {
         "flee" => op_flee(st, step),
         "queen_guard" => op_queen_guard(st, step),
         "choose" => op_choose(st, step),
-        "forced_roam" => op_forced_roam(st, step),
         "draw_to_match" => op_draw_to_match(st, step),
         "anteater" => op_anteater(st, step),
         "oxpecker" => op_oxpecker(st, step),

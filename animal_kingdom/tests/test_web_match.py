@@ -189,7 +189,7 @@ def test_decklist_problems_follow_the_deck_rules():
     reserve = [c for c in cats if c != "lion_legend"] + ["polar_bear"]
     assert any("collectible" in p for p in decklist_problems(reserve))
     bench = list(cats)
-    bench[bench.index("lion")] = "eagle"                                  # a common for a common
+    bench[bench.index("lion")] = "pigeon"                                 # a common for a common
     assert decklist_problems(bench) == []                                 # the bench is collectible
 
 

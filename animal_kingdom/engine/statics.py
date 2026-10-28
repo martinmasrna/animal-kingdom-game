@@ -61,6 +61,9 @@ KEYWORD_AURAS = {
 }
 
 
+_ROAM = frozenset({"Roam"})
+
+
 def unit_keywords(state: GameState, unit: UnitInstance, cr: Optional[str] = None, *, as_top: bool = False) -> frozenset:
     """The keywords a board unit has right now: printed, plus any an adjacent ally's aura gives it; none while inked.
     `as_top`: judge it as the top animal it was a moment ago (an Apex's prey, eaten just after being covered)."""
@@ -68,6 +71,8 @@ def unit_keywords(state: GameState, unit: UnitInstance, cr: Optional[str] = None
         return frozenset()
     card = state.cards[unit.card_id]
     kws = card.keywords
+    if unit.granted_roam and "Roam" not in kws:   # the Street Dog's gift
+        kws = kws | _ROAM
     if not any(st and st[-1].owner == unit.owner and st[-1].card_id in KEYWORD_AURAS for st in state.board.values()):
         return kws
     at = crossroad_of(state, unit)
@@ -112,8 +117,6 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
     target_str = effective_strength(state, target)
 
     # Placing and roaming follow one rule: every override below holds for both.
-    if roam_covers_equal(state, placer) and placer_str >= target_str:
-        return True
     # Leopard: "Your Cats can cover enemies of equal strength."
     if "Cat" in placer_card.tags and placer_str >= target_str and any(
             u is not placer for u in active_tops(state, owner, "leopard")):
@@ -131,8 +134,8 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
 # ------------------------------------------------------------------------- Roam
 
 def can_roam(state: GameState, unit: UnitInstance) -> bool:
-    """Whether `unit` has Roam right now (printed, and not inked)."""
-    return "Roam" in state.cards[unit.card_id].keywords and active(state, unit)
+    """Whether `unit` has Roam right now (printed or given by the Street Dog, and not inked)."""
+    return ("Roam" in state.cards[unit.card_id].keywords or unit.granted_roam) and active(state, unit)
 
 
 # Card ids that, while on top of their crossroad, give their controller one free roam each turn ("Once each turn, an
@@ -149,12 +152,6 @@ def free_roams(state: GameState, player: str, unit: Optional[UnitInstance] = Non
         if top and top.owner == player and top.card_id in FREE_ROAM_CARDS and active(state, top):
             n += 1
     return n
-
-
-def roam_covers_equal(state: GameState, unit: UnitInstance) -> bool:
-    """Whether `unit`, placed or roaming, may cover an enemy of equal strength (Dhole: "Your animals with Roam can cover
-    enemies of equal strength", id `dhole`)."""
-    return "Roam" in state.cards[unit.card_id].keywords and _controls(state, unit.owner, "dhole")
 
 
 # ------------------------------------------------------------------------ Reach

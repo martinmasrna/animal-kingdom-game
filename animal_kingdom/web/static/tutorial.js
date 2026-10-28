@@ -116,7 +116,7 @@ export const LESSONS = [
 
 // Lesson 2: the deeper mechanics, from a set-up board (tutorial.py SET_UP: your Lion and Buffalo, the opponent's den
 // guarded by 7s). Scripted like lesson 1: every move is a step in a fixed order (connection was taught in lesson 1; here the fixed board is what makes the
-// Eagle's ambush and the Black Mamba's rescue always possible). Only the Eagle, teaching Flight, rings every empty crossroad.
+// Pigeon's ambush and the Black Mamba's rescue always possible). Only the Pigeon, teaching Flight, rings every empty crossroad.
 // Then each move is guided to the best spots for finishing a region, until 100 food.
 const one = (card, cr) => ({ card, crs: [cr] });
 export const LESSONS_2 = [
@@ -126,27 +126,27 @@ export const LESSONS_2 = [
     'See the Lynx glowing? A glowing card\'s Roar will work if you place it now.'),
   { id: 'lynx', when: c => c.mine && c.hand('tutorial_lynx'), only: c => ({ card: 'tutorial_lynx', crs: c.empty('tutorial_lynx') }), at: { rings: true },
     text: { pick: 'Click the Lynx.', place: 'Now play it.' } },
-  explain('eagleinfo', 'eagle', c => c.mine && c.hand('eagle') && !c.placed('eagle'),
-    'Your Lynx drew an Eagle. The Eagle has Flight: it can land even where it isn\'t connected to your den.'),
-  { id: 'eagle', when: c => c.mine && c.hand('eagle') && !c.placed('eagle'),
-    only: c => ({ card: 'eagle', crs: c.eagleSpots }), at: { rings: true },
-    text: { pick: 'Click the Eagle.', place: 'Now click one of the circles. None of your other animals could stand there.' } },
+  explain('eagleinfo', 'pigeon', c => c.mine && c.hand('pigeon') && !c.placed('pigeon'),
+    'Your Lynx drew a Pigeon. The Pigeon has Flight: it can land even where it isn\'t connected to your den.'),
+  { id: 'pigeon', when: c => c.mine && c.hand('pigeon') && !c.placed('pigeon'),
+    only: c => ({ card: 'pigeon', crs: c.eagleSpots }), at: { rings: true },
+    text: { pick: 'Click the Pigeon.', place: 'Now click one of the circles. None of your other animals could stand there.' } },
   { id: 'draw2', when: c => c.mine && c.round >= 2 && !c.hand('squirrel') && !c.placed('squirrel'), only: { deck: true }, at: { deck: true },
     text: 'Your hand is empty. Click your deck to draw 2 cards.' },
   { id: 'squirrel', when: c => c.mine && c.hand('squirrel') && !c.placed('squirrel'), only: c => ({ card: 'squirrel', crs: c.safe.length ? c.safe : c.empty('squirrel') }), at: { rings: true },
     text: { pick: 'Click the Squirrel.', place: 'Now play it.' } },
   { id: 'covered', when: c => c.squirrelCovered, ...talk, at: c => ({ cr: c.squirrelAt }),
-    text: 'Your opponent has an Eagle too! It flew over and covered your Squirrel. But your Squirrel isn\'t gone, it\'s just waiting underneath the Eagle.' },
+    text: 'Your opponent has a Pigeon too! It flew over and covered your Squirrel. But your Squirrel isn\'t gone, it\'s just waiting underneath the Pigeon.' },
   explain('mambainfo', 'black_mamba', c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
-    'The Black Mamba\'s Roar removes an enemy next to it with strength 5 or less, like that Eagle.'),
+    'The Black Mamba\'s Roar removes an enemy next to it with strength 5 or less, like that Pigeon.'),
   { id: 'mamba', when: c => c.mine && c.squirrelCovered && c.hand('black_mamba') && c.nextToFlier.length > 0,
     only: c => ({ card: 'black_mamba', crs: c.nextToFlier }), at: { rings: true },
-    text: c => ({ pick: 'Click the Black Mamba.', place: c.stackRescue ? 'Now click the circle next to the Eagle. An animal can also go on top of one of your own.' : 'Now click the circle next to the Eagle.' }) },
-  // the Mamba's Roar is for the Eagle: a dog beside the circle would be a legal target too, and leave the Squirrel covered
+    text: c => ({ pick: 'Click the Black Mamba.', place: c.stackRescue ? 'Now click the circle next to the Pigeon. An animal can also go on top of one of your own.' : 'Now click the circle next to the Pigeon.' }) },
+  // the Mamba's Roar is for the Pigeon: a dog beside the circle would be a legal target too, and leave the Squirrel covered
   { ...TARGET, only: c => c.squirrelCovered ? { crs: [c.squirrelAt] } : undefined,
-    text: c => c.squirrelCovered ? 'Click the Eagle to remove it.' : TARGET.text },
+    text: c => c.squirrelCovered ? 'Click the Pigeon to remove it.' : TARGET.text },
   { id: 'uncovered', when: c => c.squirrelBack, ...talk, at: c => ({ cr: c.squirrelAt }),
-    text: 'The Eagle is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
+    text: 'The Pigeon is gone, and your Squirrel is back on top! When the top animal leaves, the one below comes back.' },
   { id: 'goal2', when: c => c.mine && c.wall && c.placed('black_mamba'), ...talk, at: { cr: '5,2' },   // beside its den's middle animal, clear of all three
     text: 'Your opponent has guarded its den with animals as strong as yours. You\'ll need something special to get past them.' },
   { id: 'draw3', when: c => c.mine && c.placed('black_mamba') && !c.hand('polar_bear') && !c.placed('polar_bear') && c.canDraw, only: { deck: true }, at: { deck: true },
@@ -165,7 +165,7 @@ export const LESSONS_2 = [
   EMPTY,
 ];
 // Lesson 2 holds each teaching card back until its own step: it can't be placed before its line explains it.
-const HOLD = ['tutorial_lynx', 'squirrel', 'black_mamba', 'eagle', 'polar_bear'];
+const HOLD = ['tutorial_lynx', 'squirrel', 'black_mamba', 'pigeon', 'polar_bear'];
 export const lessonOf = V => V.seats.B.bot === 'tutorial2' ? 2 : 1;
 // The cards not to offer now: in lesson 2, a teaching card never yet placed, unless its step is the one showing.
 export function held(V, L) {
@@ -214,7 +214,7 @@ export function context(V, sel, cards) {
   const closes = cr => REGIONS.some(r => r.includes(cr) && r.every(q => q === cr || owner(G, q) === V.you));
   const ahead = [...new Set(crs.filter(cr => +cr[0] === far))];
   c.forward = ahead.some(cr => !closes(cr)) ? ahead.filter(cr => !closes(cr)) : ahead;
-  // lesson 2's stack: the Squirrel under the opponent's Eagle, then back on top once the Eagle is removed
+  // lesson 2's stack: the Squirrel under the opponent's Pigeon, then back on top once the Pigeon is removed
   const under = Object.entries(G.board).find(([, st]) => st.length > 1 && st[st.length - 1].owner !== V.you && st.slice(0, -1).some(u => u.owner === V.you && u.id === 'squirrel'));
   const top = Object.entries(G.board).find(([, st]) => st.length && st[st.length - 1].owner === V.you && st[st.length - 1].id === 'squirrel');
   const wasCovered = G.history.some(m => m.seat !== V.you && m.fx.some(f => f.k === 'cover' && f.card === 'squirrel'));
@@ -233,16 +233,16 @@ export function context(V, sel, cards) {
   const cand = regions.filter(r => !r.every(cr => owner(G, cr) === V.you) && r.every(cr => owner(G, cr) === V.you || !owner(G, cr) || takeable.has(cr))
       && r.some(cr => takeable.has(cr))).map(r => [r.filter(cr => owner(G, cr) === V.you).length, r]).sort((a, b) => b[0] - a[0]);
   c.feed = cand.length ? [...new Set(cand.filter(([n]) => n === cand[0][0]).flatMap(([, r]) => r.filter(cr => takeable.has(cr))))] : [...takeable];
-  // lesson 2's Eagle: it lands where no animal without Flight could go and none could go beside it, so 'isn't connected'
+  // lesson 2's Pigeon: it lands where no animal without Flight could go and none could go beside it, so 'isn't connected'
   // shows (else anywhere a walker couldn't go, else anywhere); then where it stands, and whether it stands alone
   const reach = new Set(c.empty('tutorial_cape_buffalo'));   // where a card without Flight may go now
-  const unreached = c.empty('eagle').filter(cr => !reach.has(cr));
+  const unreached = c.empty('pigeon').filter(cr => !reach.has(cr));
   const alone = unreached.filter(cr => !ADJ(cr).some(n => reach.has(n) || owner(G, n) === V.you));
-  c.eagleSpots = alone.length ? alone : unreached.length ? unreached : c.empty('eagle');
-  c.eagleAt = (Object.entries(G.board).find(([, st]) => st.length && st[st.length - 1].owner === V.you && st[st.length - 1].id === 'eagle') || [])[0];
+  c.eagleSpots = alone.length ? alone : unreached.length ? unreached : c.empty('pigeon');
+  c.eagleAt = (Object.entries(G.board).find(([, st]) => st.length && st[st.length - 1].owner === V.you && st[st.length - 1].id === 'pigeon') || [])[0];
   c.eagleAlone = !!c.eagleAt && !ADJ(c.eagleAt).some(n => reach.has(n) || owner(G, n) === V.you);
-  // lesson 2's Squirrel: only where, once the opponent's Eagle covers it, a free crossroad beside it stays in reach (the
-  // Black Mamba's): next to the den, or next to another animal of yours (not the lone Eagle)
+  // lesson 2's Squirrel: only where, once the opponent's Pigeon covers it, a free crossroad beside it stays in reach (the
+  // Black Mamba's): next to the den, or next to another animal of yours (not the lone Pigeon)
   c.safe = c.empty('squirrel').filter(cr => ADJ(cr).some(n => !owner(G, n) && (n[0] === '1'
     || ADJ(n).some(m => m !== cr && m !== c.eagleAt && owner(G, m) === V.you))));
   // the wall pieces the Polar Bear may land on and eat (lesson 2)

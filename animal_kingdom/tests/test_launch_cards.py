@@ -10,7 +10,7 @@ import pytest
 
 from animal_kingdom.engine import effects, rules, statics
 from animal_kingdom.engine.actions import SKIP, ChoiceAction, DrawAction, PassAction, PlaceAction, RoamAction
-from animal_kingdom.engine.state import EngineError
+from animal_kingdom.engine.state import EngineError, UnitInstance
 from animal_kingdom.engine.config import Config
 from animal_kingdom.engine.strength import effective_strength, placement_strength
 
@@ -467,13 +467,22 @@ def test_clarion_gives_a_free_roam_to_any_ally():
     assert s2.actions_taken_this_turn == 0
 
 
-def test_lobo_draws_when_an_ally_roams_onto_an_enemy():
+def test_the_black_wolf_grows_and_draws_for_every_canine_that_roams_itself_included():
     s = make_state(decks={"A": ["lion"] * 3, "B": []})
     put(s, "1,1", "wolf_legend_2", "A")
-    put(s, "1,2", "wolf", "A")
+    w = put(s, "1,2", "wolf", "A")
+    rules.apply_action(s, RoamAction("1,2", ("cr", "2,1")))             # onto an empty crossroad: any roam counts
+    assert (w.strength_counter, hand_ids(s, "A")) == (CFG.black_wolf_grant, ["lion"] * CFG.black_wolf_draw)
+    s = make_state(decks={"A": ["lion"] * 3, "B": []})
+    me = put(s, "1,1", "wolf_legend_2", "A")
+    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))             # its own roam triggers it too
+    assert (me.strength_counter, hand_ids(s, "A")) == (CFG.black_wolf_grant, ["lion"] * CFG.black_wolf_draw)
+    s = make_state(decks={"A": ["lion"] * 3, "B": []})
+    put(s, "1,1", "wolf_legend_2", "A")
+    orca = put(s, "1,2", "orca", "A")                                  # Roam, not a Canine
     put(s, "2,1", "squirrel", "B")
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,1")))
-    assert hand_ids(s, "A") == ["lion"]
+    assert (orca.strength_counter, hand_ids(s, "A")) == (0, [])
 
 
 def test_the_legendary_wolf_grows_at_dusk_by_its_adjacent_canines():
@@ -485,24 +494,57 @@ def test_the_legendary_wolf_grows_at_dusk_by_its_adjacent_canines():
     assert w.strength_counter == 2 * CFG.wolf_legend_grant
 
 
-def test_the_bush_dog_gives_a_random_adjacent_canine_plus_two_at_dusk():
+def test_the_bush_dog_leaves_a_pup_on_the_crossroad_it_left_unless_an_animal_resurfaced():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "bush_dog", "A")
-    w = put(s, "1,1", "wolf", "A")
-    other = put(s, "1,3", "jackal", "A")
-    put(s, "2,2", "squirrel", "A")                             # not a Canine: never chosen
-    end_turn(s)
-    assert s.current == "B" and sorted([w.strength_counter, other.strength_counter]) == [0, CFG.bush_dog_grant]
+    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
+    pup = s.top_unit("1,2")
+    assert pup is not None and pup.card_id == "pup" and pup.owner == "A" and s.top_unit("2,2").card_id == "bush_dog"
+    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,2", "lion", "A")
+    put(s, "1,2", "bush_dog", "A")                             # it stands on a Lion
+    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
+    assert [u.card_id for u in s.board["1,2"]] == ["lion"]
 
 
-def test_the_fox_draws_whenever_it_covers_an_enemy():
-    s = make_state(hands={"A": ["fox"]}, decks={"A": ["lion"] * 3, "B": []})
-    put(s, "1,1", "squirrel", "B")
+def test_the_fox_draws_two_only_if_a_canine_roamed_this_turn():
+    def play(roamer, target):
+        s = make_state(hands={"A": ["fox"]}, decks={"A": ["lion"] * 4, "B": []})
+        put(s, "1,1", roamer, "A")
+        if target:
+            put(s, target, "squirrel", "B")
+        rules.apply_action(s, RoamAction("1,1", ("cr", target or "2,1")))
+        rules.apply_action(s, PlaceAction("fox", ("cr", "1,2")))
+        return hand_ids(s, "A")
+    assert play("wolf", None) == ["lion"] * CFG.fox_draw       # a Canine roamed
+    assert play("orca", "2,1") == []                           # a roam, but not a Canine's
+    s = make_state(hands={"A": ["fox"]}, decks={"A": ["lion"] * 4, "B": []})
     rules.apply_action(s, PlaceAction("fox", ("cr", "1,2")))
-    assert hand_ids(s, "A") == []
-    put(s, "1,3", "worker_ant", "B")
-    rules.apply_action(s, RoamAction("1,2", ("cr", "1,3")))   # roams onto the 1
-    assert hand_ids(s, "A") == ["lion"]
+    assert hand_ids(s, "A") == []                              # nobody roamed
+
+
+def test_the_fox_counts_a_roam_a_free_roam_paid():
+    s = make_state(hands={"A": ["fox"]}, decks={"A": ["lion"] * 4, "B": []})
+    put(s, "1,1", "wolf_legend_3", "A")                        # Clarion: a free roam each turn
+    put(s, "1,2", "wolf", "A")
+    rules.apply_action(s, RoamAction("1,2", ("cr", "2,1")))
+    assert s.actions_taken_this_turn == 0
+    rules.apply_action(s, PlaceAction("fox", ("cr", "1,3")))
+    assert hand_ids(s, "A") == ["lion"] * CFG.fox_draw
+
+
+def test_wolverine_removes_an_adjacent_enemy_only_if_no_other_enemy_is_next_to_it():
+    s = make_state(hands={"A": ["wolverine"]})
+    put(s, "1,1", "lion", "A")
+    put(s, "2,2", "lion", "B")
+    apply_click(s, PlaceAction("wolverine", ("cr", "1,2")))
+    assert s.top_unit("2,2") is None
+    s = make_state(hands={"A": ["wolverine"]})
+    put(s, "1,1", "lion", "A")
+    put(s, "2,2", "lion", "B")
+    put(s, "3,2", "squirrel", "B")                             # another enemy beside the Lion
+    rules.apply_action(s, PlaceAction("wolverine", ("cr", "1,2")))
+    assert s.pending is None and s.top_unit("2,2") is not None
 
 
 def test_jackal_removes_only_an_enemy_another_canine_flanks():
@@ -519,50 +561,99 @@ def test_jackal_removes_only_an_enemy_another_canine_flanks():
     assert s2.top_unit("2,2") is None
 
 
-def test_dhole_lets_your_animals_roam_onto_an_equal_enemy():
-    s = make_state()
-    put(s, "1,1", "dhole", "A")                             # Dhole
-    put(s, "1,2", "wolf", "A")                            # Wolf 6
-    put(s, "2,1", "caracal", "B")                              # 6
-    assert RoamAction("1,2", ("cr", "2,1")) in rules.legal_actions(s)
+def test_the_dhole_has_no_equal_strength_cover_for_anyone():
+    s = make_state(hands={"A": ["wolf"]})
+    put(s, "1,1", "dhole", "A")
+    put(s, "1,2", "wolf", "A")                                 # a 6 with Roam
+    put(s, "2,1", "caracal", "B")                              # a 6
+    assert RoamAction("1,2", ("cr", "2,1")) not in rules.legal_actions(s)
+    assert PlaceAction("wolf", ("cr", "2,1")) not in rules.legal_actions(s)
 
 
-def test_dhole_lets_an_animal_with_roam_be_placed_on_an_equal_enemy_and_no_other():
-    # Placing and roaming cover by one rule (Martin, 2026-10-24)
-    for card, legal in (("wolf", True), ("caracal", False)):   # Roam, no Roam
-        s = make_state(hands={"A": [card]})
-        put(s, "1,1", "dhole", "A")
-        prey = put(s, "2,1", "dhole", "B")
-        inst = next(u for u in s.hands["A"] if u.card_id == card)
-        prey.strength_counter += placement_strength(s, inst) - effective_strength(s, prey)
-        assert (PlaceAction(card, ("cr", "2,1")) in rules.legal_actions(s)) is legal, card
+def test_the_dhole_draws_two_when_it_covers_an_enemy_with_no_other_enemy_next_to_it():
+    s = make_state(hands={"A": ["dhole"]}, decks={"A": ["lion"] * 4, "B": []})
+    put(s, "1,1", "lion", "A")
+    put(s, "2,1", "squirrel", "B")
+    rules.apply_action(s, PlaceAction("dhole", ("cr", "2,1")))     # placed: alone, so it draws
+    assert hand_ids(s, "A") == ["lion"] * CFG.dhole_draw
+    s = make_state(hands={"A": ["dhole"]}, decks={"A": ["lion"] * 4, "B": []})
+    put(s, "1,1", "lion", "A")
+    put(s, "2,1", "squirrel", "B")
+    put(s, "2,2", "squirrel", "B")                             # another enemy beside it
+    rules.apply_action(s, PlaceAction("dhole", ("cr", "2,1")))
+    assert hand_ids(s, "A") == []
+    s = make_state(decks={"A": ["lion"] * 4, "B": []})
+    put(s, "1,1", "dhole", "A")
+    put(s, "2,1", "squirrel", "B")
+    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))        # roaming covers too
+    assert hand_ids(s, "A") == ["lion"] * CFG.dhole_draw
+    s = make_state(decks={"A": ["lion"] * 4, "B": []})
+    put(s, "1,1", "dhole", "A")
+    put(s, "2,1", "squirrel", "B")
+    rules.apply_action(s, RoamAction("1,1", ("cr", "1,2")))        # onto an empty crossroad: nothing covered
+    assert hand_ids(s, "A") == []
 
 
-def test_stray_dog_buffs_an_ally_with_roam_and_gives_it_a_free_roam():
+def test_street_dog_gives_a_connected_ally_plus_three_and_roam():
     s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    w = put(s, "1,1", "wolf", "A")
+    ally = put(s, "1,1", "lion", "A")
+    put(s, "2,2", "squirrel", "A")
+    put(s, "3,2", "squirrel", "A")                             # connected through 2,2
+    put(s, "4,3", "squirrel", "A")                             # no chain of your animals to it
+    put(s, "1,3", "squirrel", "B")                             # an enemy is never chosen
+    rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
+    assert s.pending["options"] == ["1,1", "2,2", "3,2"]
+    assert not statics.can_roam(s, ally)
+    choose(s, "1,1")
+    assert s.pending is None and ally.strength_counter == CFG.street_dog_grant
+    assert statics.can_roam(s, ally) and "Roam" in statics.unit_keywords(s, ally, "1,1")
+    assert s.actions_taken_this_turn == 1                      # it does not roam now
+    assert RoamAction("1,1", ("cr", "2,1")) in rules.legal_actions(s)
+    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))    # an ordinary roam, paid by the turn's second action
+    assert s.top_unit("2,1") is ally and s.current == "B"
+
+
+def test_the_street_dogs_roam_goes_when_the_animal_leaves_the_board():
+    s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    ally = put(s, "1,1", "lion", "A")
     rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
     choose(s, "1,1")
-    assert w.strength_counter == CFG.stray_dog_grant and s.pending is None
-    rules.apply_action(s, RoamAction("1,1", ("cr", "2,2")))          # an ordinary roam, paid by the Street Dog
-    assert s.top_unit("2,2") is w and s.actions_taken_this_turn == 1
+    assert ally.granted_roam and s.clone().top_unit("1,1").granted_roam    # a clone keeps it
+    assert UnitInstance.from_dict(ally.to_dict()).granted_roam              # so does a saved game
+    effects._bounce(s, "1,1", ally)
+    assert not hand_inst(s, "A", "lion").granted_roam
 
 
-def test_the_street_dogs_roam_can_take_the_den():
-    s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    gm = s.game_map
-    front = sorted(gm.hq_front("B"))[0]
-    path = [front]
-    while not any(c in gm.hq_front("A") for c in path[-1:]):     # a chain from A's den to B's den front
-        path.append(min(gm.neighbors(path[-1]), key=lambda c: int(c.split(",")[0])))
-    for c in path[1:]:
-        put(s, c, "lion", "A")
-    w = put(s, front, "wolf", "A")
-    spot = next(c for c in gm.hq_front("A") if s.top_unit(c) is None)
-    rules.apply_action(s, PlaceAction("street_dog", ("cr", spot)))
-    choose(s, front)
-    rules.apply_action(s, RoamAction(front, ("hq", "B")))
-    assert s.result is not None and s.result.winner == "A"
+def test_street_dog_with_no_connected_ally_just_lands():
+    s = make_state(hands={"A": ["street_dog"]})
+    put(s, "4,3", "lion", "A")
+    rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
+    assert s.pending is None
+
+
+def test_african_wild_dog_gives_an_adjacent_canine_a_free_roam_after_it_roams():
+    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,2", "african_wild_dog", "A")
+    jackal = put(s, "2,3", "jackal", "A")                      # a Canine without Roam of its own
+    put(s, "3,2", "squirrel", "A")                             # not a Canine
+    put(s, "4,1", "wolf", "A")                                 # a Canine, but far
+    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
+    assert s.pending["options"] == ["2,3"]
+    choose(s, "2,3")
+    assert s.actions_taken_this_turn == 1
+    assert RoamAction("2,3", ("cr", "1,3")) in rules.legal_actions(s)
+    rules.apply_action(s, RoamAction("2,3", ("cr", "1,3")))
+    assert s.top_unit("1,3") is jackal and s.actions_taken_this_turn == 1      # the free roam paid
+    assert not any(isinstance(a, RoamAction) and a.origin == "1,3" for a in rules.legal_actions(s))   # once per turn
+
+
+def test_african_wild_dog_does_not_offer_a_canine_that_already_roamed():
+    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,2", "african_wild_dog", "A")
+    w = put(s, "2,2", "wolf", "A")
+    rules.apply_action(s, RoamAction("2,2", ("cr", "2,3")))    # the Wolf roams first
+    rules.apply_action(s, RoamAction("1,2", ("cr", "1,3")))    # then the Dog lands beside it
+    assert s.pending is None and s.top_unit("2,3") is w
 
 
 def test_badger_draws_an_animal_with_roam():
@@ -955,10 +1046,10 @@ def test_the_chameleon_becomes_a_copy_of_an_animal_in_your_hand_which_stays_ther
 
 
 def test_golden_orb_weaver_catches_a_flyer_landing_beside_it():
-    s = make_state(current="B", hands={"B": ["eagle"]})
+    s = make_state(current="B", hands={"B": ["pigeon"]})
     put(s, "2,2", "golden_orb_weaver", "A")
-    rules.apply_action(s, PlaceAction("eagle", ("cr", "2,1")))
-    assert removed(s, "eagle")
+    rules.apply_action(s, PlaceAction("pigeon", ("cr", "2,1")))
+    assert removed(s, "pigeon")
 
 
 def test_golden_orb_weaver_catches_a_roamer_placed_or_roaming_beside_it():
@@ -1239,9 +1330,24 @@ def test_the_crocodile_covers_a_lion_on_its_turn_and_is_a_five_on_the_opponents(
     assert effective_strength(s, croc) == 8 - CFG.crocodile_penalty
 
 
-def test_the_moose_is_a_hungry_eight_that_roams():
+def test_the_moose_is_a_hungry_eight_that_does_not_roam():
     card = load_cards()["moose"]
-    assert (card.base_strength, card.hungry, card.rarity) == (8, 3, "rare") and "Roam" in card.keywords
+    assert (card.base_strength, card.hungry, card.rarity) == (8, 3, "common") and "Roam" not in card.keywords
+
+
+def test_the_moose_does_not_eat_while_it_is_grazing():
+    def food_after_one_round(moose_at):
+        s = make_state(food={"A": 0, "B": 0}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+        for cr in ("1,1", "2,1", "2,2"):
+            put(s, cr, "lion", "A")                            # with a Moose on 1,2, all four corners of R1 are A's
+        if moose_at != "1,2":
+            put(s, "1,2", "lion", "A")
+        moose = put(s, moose_at, "moose", "A")
+        end_turn(s); end_turn(s)                               # A's turn ends (R1 pays), then A's next turn starts
+        return s.food["A"], effective_strength(s, moose)
+    grazing, fed = food_after_one_round("1,2"), food_after_one_round("3,2")
+    assert grazing[1] == fed[1] == 8                           # fed: enough food, so no strength lost either way
+    assert fed[0] == grazing[0] - 3                            # only the one off the corner ate Hungry 3
 
 
 def test_the_albatross_sweeps_the_small_enemies_where_it_lands():
@@ -1398,16 +1504,53 @@ def test_the_macaw_does_nothing_before_its_opponent_roars():
 def test_the_fox_and_the_african_wild_dog_ids_follow_their_animals():
     cards = load_cards()
     fox, dog = cards["fox"], cards["african_wild_dog"]
-    assert (fox.name, fox.rarity, "Roam" in fox.keywords) == ("Fox", "rare", True)
-    assert (dog.name, dog.rarity, dog.text) == ("African Wild Dog", "common", "Dusk: give your adjacent animals +1 strength.")
+    assert (fox.name, fox.rarity, "Roam" in fox.keywords) == ("Fox", "common", False)
+    assert (dog.name, dog.rarity, "Roam" in dog.keywords) == ("African Wild Dog", "rare", True)
 
 
-def test_the_african_wild_dog_gives_its_adjacent_allies_one_at_dusk():
+def test_the_african_wild_dog_has_no_dusk_effect_any_more():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "2,2", "african_wild_dog", "A")
-    ally, far, enemy = put(s, "1,2", "lion", "A"), put(s, "4,2", "lion", "A"), put(s, "3,2", "lion", "B")
+    ally = put(s, "1,2", "lion", "A")
     end_turn(s)
-    assert (ally.strength_counter, far.strength_counter, enemy.strength_counter) == (CFG.wild_dog_grant, 0, 0)
+    assert ally.strength_counter == 0
+
+
+def test_the_legendary_elephant_sweeps_small_enemies_where_it_is_placed_and_where_it_roams():
+    s = make_state(hands={"A": ["elephant_legend"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,1", "squirrel", "B"); put(s, "1,3", "mackerel", "B")
+    big = put(s, "2,2", "lion", "B")
+    rules.apply_action(s, PlaceAction("elephant_legend", ("cr", "1,2")))
+    assert s.top_unit("1,1") is None and s.top_unit("1,3") is None and s.top_unit("2,2") is big
+    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,2", "elephant_legend", "A")
+    put(s, "2,1", "squirrel", "B"); put(s, "3,2", "lion", "B"); put(s, "2,3", "mackerel", "B")
+    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))    # arriving by a roam is landing too
+    assert s.top_unit("2,1") is None and s.top_unit("2,3") is None and s.top_unit("3,2").card_id == "lion"
+    assert CFG.elephant_legend_max == 3
+
+
+def test_the_legendary_elephant_leaves_armor_standing():
+    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,2", "elephant_legend", "A")
+    shell = put(s, "2,1", "stag_beetle", "B")                  # Armor
+    shell.strength_counter = -2                                # a 2: small enough to be swept, were it not armored
+    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
+    assert s.top_unit("2,1") is shell
+
+
+def test_the_eagle_is_a_flying_apex_predator_and_the_pigeon_a_flier():
+    cards = load_cards()
+    assert cards["eagle"].keywords == {"Flight", "Apex Predator"} and cards["eagle"].base_strength == 6
+    assert cards["pigeon"].keywords == {"Flight"} and cards["pigeon"].base_strength == 5
+    s = make_state(hands={"A": ["eagle", "pigeon"]})
+    put(s, "4,3", "squirrel", "B")
+    targets = {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "eagle"}
+    assert targets == {"4,3"}                                  # Flight skips the connection; an Apex lands on an animal only
+    assert "1,1" in {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "pigeon"}
+    assert "4,1" in {a.target[1] for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "pigeon"}
+    rules.apply_action(s, PlaceAction("eagle", ("cr", "4,3")))
+    assert [u.card_id for u in s.board["4,3"]] == ["eagle"]    # it ate the Squirrel
 
 
 def test_the_termite_king_draws_a_card_for_each_colony_queen():
@@ -1495,9 +1638,9 @@ def test_vesper_answers_any_colony_ally_but_not_another_animal_or_a_friendly_cov
 
 def test_vesper_answers_a_roaming_cover_too():
     s = make_state(decks={"A": [], "B": []}, hands={"B": ["hornet_legend"]})
-    put(s, "1,2", "fox", "A"); put(s, "1,3", "nurse_bumblebee", "B")
+    put(s, "1,2", "wolf", "A"); put(s, "1,3", "nurse_bumblebee", "B")
     rules.apply_action(s, RoamAction("1,2", ("cr", "1,3")))
-    assert [u.card_id for u in s.board["1,3"]] == ["nurse_bumblebee", "fox", "hornet_legend"]
+    assert [u.card_id for u in s.board["1,3"]] == ["nurse_bumblebee", "wolf", "hornet_legend"]
 
 
 def test_vesper_resolves_after_the_coverers_roar():

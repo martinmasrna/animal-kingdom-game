@@ -65,11 +65,11 @@ class UnitInstance:
     """
 
     __slots__ = ("card_id", "owner", "iid", "placed_on_turn", "strength_counter", "locked_until_turn",
-                 "retaliation_used", "play_seq")
+                 "retaliation_used", "play_seq", "granted_roam")
 
     def __init__(self, card_id: str, owner: str, iid: int, placed_on_turn: int = 0,
                  strength_counter: int = 0, locked_until_turn: int = 0, retaliation_used: bool = False,
-                 play_seq: int = 0):
+                 play_seq: int = 0, granted_roam: bool = False):
         self.card_id = card_id
         self.owner = owner
         self.iid = iid
@@ -78,18 +78,19 @@ class UnitInstance:
         self.locked_until_turn = locked_until_turn  # Skunk: unplayable from hand while turn < this
         self.retaliation_used = retaliation_used  # Gale: "first time covered" fires once per instance
         self.play_seq = play_seq  # when it entered the board, game-wide (Dawn/Dusk resolve in play order); 0 in hand
+        self.granted_roam = granted_roam  # Street Dog: "gains Roam" for as long as this instance stays on the board
 
     def to_dict(self) -> dict:
         return {"card_id": self.card_id, "owner": self.owner, "iid": self.iid,
                 "placed_on_turn": self.placed_on_turn, "strength_counter": self.strength_counter,
                 "locked_until_turn": self.locked_until_turn, "retaliation_used": self.retaliation_used,
-                "play_seq": self.play_seq}
+                "play_seq": self.play_seq, "granted_roam": self.granted_roam}
 
     @staticmethod
     def from_dict(d: dict) -> "UnitInstance":
         return UnitInstance(d["card_id"], d["owner"], d["iid"], d.get("placed_on_turn", 0),
                             d.get("strength_counter", 0), d.get("locked_until_turn", 0),
-                            d.get("retaliation_used", False), d.get("play_seq", 0))
+                            d.get("retaliation_used", False), d.get("play_seq", 0), d.get("granted_roam", False))
 
     def __repr__(self) -> str:
         c = f", +{self.strength_counter}" if self.strength_counter else ""
@@ -99,7 +100,7 @@ class UnitInstance:
 def _copy_unit(u: UnitInstance) -> UnitInstance:
     """An independent copy of a unit instance (used by clone, now that instances mutate)."""
     return UnitInstance(u.card_id, u.owner, u.iid, u.placed_on_turn, u.strength_counter,
-                        u.locked_until_turn, u.retaliation_used, u.play_seq)
+                        u.locked_until_turn, u.retaliation_used, u.play_seq, u.granted_roam)
 
 
 def _plain_copy(v):

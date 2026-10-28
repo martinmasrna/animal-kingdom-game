@@ -42,7 +42,7 @@ pub fn unit_keywords(st: &State, unit: &Unit, cr: Option<Cr>, as_top: bool) -> u
         return 0;
     }
     let card = st.card(unit.card);
-    let kws = card.keywords;
+    let kws = if unit.granted_roam { card.keywords | K_ROAM } else { card.keywords };   // the Street Dog's gift
     if unit.owner > B || !st.cache.kw_aura[unit.owner as usize] {
         return kws;
     }
@@ -85,9 +85,6 @@ pub fn can_cover(st: &State, placer: &Unit, target: &Unit, roaming: bool) -> boo
     let placer_str = if roaming { effective_strength(st, placer, None) } else { placement_strength(st, placer) };
     let target_str = effective_strength(st, target, None);
     // Placing and roaming follow one rule: every override below holds for both.
-    if placer_card.has_kw(K_ROAM) && roam_covers_equal(st, owner) && placer_str >= target_str {
-        return true;
-    }
     if placer_card.has_tag(T_CAT) && placer_str >= target_str && active_tops(st, owner, k.leopard).iter().any(|(_, iid)| *iid != placer.iid) {
         return true;
     }
@@ -101,16 +98,12 @@ pub fn can_cover(st: &State, placer: &Unit, target: &Unit, roaming: bool) -> boo
 }
 
 pub fn can_roam(st: &State, unit: &Unit) -> bool {
-    st.card(unit.card).has_kw(K_ROAM) && active(st, unit)
+    (st.card(unit.card).has_kw(K_ROAM) || unit.granted_roam) && active(st, unit)
 }
 
 pub fn free_roams(st: &State, player: Player) -> i32 {
     let Some(card) = st.g.known.wolf_legend_3 else { return 0 };
     st.tops().filter(|(_, u)| u.owner == player && u.card == card && active(st, u)).count() as i32
-}
-
-pub fn roam_covers_equal(st: &State, owner: Player) -> bool {
-    controls(st, owner, st.g.known.dhole)
 }
 
 pub fn reach_of(st: &State, card: CardId) -> i32 {

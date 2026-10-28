@@ -252,6 +252,8 @@ pub struct Unit {
     pub card: CardId,
     pub owner: Player,
     pub retaliation_used: bool,
+    /// The Street Dog's gift: Roam for as long as this instance stays on the board.
+    pub granted_roam: bool,
     pub iid: i64,
     // 16-bit counters: a game's turns, plays and strength changes stay far below 32k, and the unit is what the board,
     // the hands and every clone of them are made of (24 bytes instead of 32)
@@ -263,7 +265,7 @@ pub struct Unit {
 
 impl Unit {
     pub fn new(card: CardId, owner: Player, iid: i64) -> Unit {
-        Unit { card, owner, iid, placed_on_turn: 0, strength_counter: 0, locked_until_turn: 0, retaliation_used: false, play_seq: 0 }
+        Unit { card, owner, iid, placed_on_turn: 0, strength_counter: 0, locked_until_turn: 0, retaliation_used: false, granted_roam: false, play_seq: 0 }
     }
 }
 
@@ -276,6 +278,8 @@ pub struct TurnFlags {
     pub removed_any: bool,
     pub food_gained: [i32; 2],
     pub roamed: FastVec<[i64; 4]>,
+    /// A Canine roamed this turn (the Fox's Roar asks).
+    pub canine_roamed: bool,
     pub roams: [i32; 2],
     pub free_roams: [i32; 2],
     pub free_roams_used: [i32; 2],
@@ -332,6 +336,9 @@ impl TurnFlags {
         for iid in &self.roamed {
             m.insert(format!("roamed_{iid}"), sj::Value::Bool(true));
         }
+        if self.canine_roamed {
+            m.insert("canine_roamed".into(), sj::Value::Bool(true));
+        }
         for (iid, n) in &self.free_roam_iid {
             m.insert(format!("free_roam_iid_{iid}"), sj::Value::from(*n));
         }
@@ -360,6 +367,8 @@ impl TurnFlags {
                 t.lost[p_of(rest)] = val.as_i64().unwrap_or(0) as i32;
             } else if k == "removed_any" {
                 t.removed_any = val.as_bool().unwrap_or(false);
+            } else if k == "canine_roamed" {
+                t.canine_roamed = val.as_bool().unwrap_or(false);
             } else if let Some(rest) = k.strip_prefix("roamed_") {
                 if let Ok(i) = rest.parse::<i64>() {
                     t.roamed.push(i);
@@ -863,6 +872,7 @@ impl State {
             "card_id": self.cname(u.card), "owner": player_name(u.owner), "iid": u.iid,
             "placed_on_turn": u.placed_on_turn, "strength_counter": u.strength_counter,
             "locked_until_turn": u.locked_until_turn, "retaliation_used": u.retaliation_used, "play_seq": u.play_seq,
+            "granted_roam": u.granted_roam,
         })
     }
 
@@ -876,6 +886,7 @@ impl State {
             strength_counter: d.get("strength_counter").and_then(|x| x.as_i64()).unwrap_or(0) as i16,
             locked_until_turn: d.get("locked_until_turn").and_then(|x| x.as_i64()).unwrap_or(0) as i16,
             retaliation_used: d.get("retaliation_used").and_then(|x| x.as_bool()).unwrap_or(false),
+            granted_roam: d.get("granted_roam").and_then(|x| x.as_bool()).unwrap_or(false),
             play_seq: d.get("play_seq").and_then(|x| x.as_i64()).unwrap_or(0) as i16,
         }
     }

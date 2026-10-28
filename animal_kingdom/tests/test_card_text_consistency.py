@@ -161,6 +161,7 @@ STRENGTH_LIMITS = {
     "albatross": "albatross_max",
     "black_mamba": "black_mamba_max",
     "hippopotamus": "hippopotamus_max",
+    "elephant_legend": "elephant_legend_max",
 }
 
 
@@ -245,9 +246,11 @@ def test_roar_label_matches_placement_effect():
     """
     from animal_kingdom.engine.effects import EFFECTS
 
+    # "Whenever this lands" (the legendary Elephant) runs on placement and on a roam's arrival: it has the hook, no label.
     mismatched = sorted(
         cid for cid, card in load_cards().items()
-        if card.has_roar != any(hook.startswith("on_place") for hook in EFFECTS.get(cid, {})))
+        if "Whenever this lands" not in card.text
+        and card.has_roar != any(hook.startswith("on_place") for hook in EFFECTS.get(cid, {})))
     assert mismatched == []
 
 
@@ -266,6 +269,8 @@ DRAW_CONSTANTS: dict[str, list[str]] = {
     "praying_mantis": ["mantis_draw"],
     "hummingbird": ["hummingbird_draw"],
     "lynx": ["lynx_draw"],
+    "fox": ["fox_draw"],
+    "dhole": ["dhole_draw"],
     "alley_cat": ["alley_cat_draw"],
     "manta_ray_legend": ["manta_legend_draw"],
     "butterfly_legend_monarch": ["butterfly_legend_stage5_draw"],
@@ -295,6 +300,13 @@ def test_draw_and_shuffle_text_matches_config():
     assert not problems, "card text / config desync:\n  " + "\n  ".join(problems)
 
 
+def test_the_black_wolfs_card_is_one_and_the_wolverine_prints_no_number():
+    """"Give it +1 strength and draw a card" (the +1 is in STRENGTH_BONUS_CONSTANTS below); the Wolverine's text has no
+    number to map."""
+    assert Config.default().black_wolf_draw == 1
+    assert not re.search(r"\d", _cards()["wolverine"].text)
+
+
 STRENGTH_BONUS_RE = re.compile(r"\+(\d+) strength")
 
 # card_id -> config attrs, one per printed "+N strength" (a "give" counter or a "has/have" anthem), in order. Every card
@@ -307,9 +319,8 @@ STRENGTH_BONUS_CONSTANTS: dict[str, list[str]] = {
     "dingo": ["dingo_grant"],
     "egg_eater": ["egg_eater_growth"],
     "wolf_legend": ["wolf_legend_grant"],
-    "bush_dog": ["bush_dog_grant"],
-    "african_wild_dog": ["wild_dog_grant"],
-    "street_dog": ["stray_dog_grant"],
+    "wolf_legend_2": ["black_wolf_grant"],
+    "street_dog": ["street_dog_grant"],
     "mahi_mahi": ["mahi_mahi_grant"],
     "mackerel": ["mackerel_anthem"],
     "tuna": ["tuna_per_fish"],

@@ -463,15 +463,17 @@
         "Canine"
       ],
       "base_strength": 6,
-      "text": "Whenever an ally roams onto an enemy, draw a card.",
-      "keywords": [],
+      "text": "Roam. Whenever a Canine roams, give it +1 strength and draw a card.",
       "species": "Wolf",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": [
+        "Roam"
+      ]
     },
     {
       "id": "wolf_legend",
       "name": "[WOLF]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [
         "Canine"
@@ -503,17 +505,15 @@
       "id": "fox",
       "name": "Fox",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Canine"
       ],
-      "base_strength": 5,
-      "text": "Roam. Whenever this covers an enemy, draw a card.",
-      "keywords": [
-        "Roam"
-      ],
+      "base_strength": 3,
+      "text": "Roar: if a Canine roamed this turn, draw 2 cards.",
       "species": "Fox",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": []
     },
     {
       "id": "jackal",
@@ -537,8 +537,8 @@
       "tags": [
         "Canine"
       ],
-      "base_strength": 6,
-      "text": "Roam. Your animals with Roam can cover enemies of equal strength.",
+      "base_strength": 5,
+      "text": "Roam. Whenever this covers an enemy with no other enemy next to it, draw 2 cards.",
       "species": "Dhole",
       "habitat": "Jungle",
       "keywords": [
@@ -565,15 +565,17 @@
       "id": "bush_dog",
       "name": "Bush Dog",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Canine"
       ],
       "base_strength": 3,
-      "text": "Dusk: give a random adjacent Canine of yours +2 strength.",
-      "keywords": [],
+      "text": "Roam. Whenever this roams, place a Pup on the crossroad it left.",
       "species": "Bush Dog",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": [
+        "Roam"
+      ]
     },
     {
       "id": "coyote",
@@ -593,15 +595,17 @@
       "id": "african_wild_dog",
       "name": "African Wild Dog",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Canine"
       ],
-      "base_strength": 3,
-      "text": "Dusk: give your adjacent animals +1 strength.",
-      "keywords": [],
+      "base_strength": 4,
+      "text": "Roam. After this roams, choose an adjacent Canine. It roams.",
       "species": "African Wild Dog",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": [
+        "Roam"
+      ]
     },
     {
       "id": "badger",
@@ -624,10 +628,10 @@
         "Canine"
       ],
       "base_strength": 1,
-      "text": "Roar: give an ally with Roam +2 strength. It roams.",
-      "keywords": [],
+      "text": "Roar: give a connected ally +3 strength and Roam.",
       "species": "Street Dog",
-      "habitat": "City"
+      "habitat": "City",
+      "keywords": []
     },
     {
       "id": "skunk_legend",
@@ -2251,19 +2255,18 @@
       "id": "moose",
       "name": "Moose",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Hoofed"
       ],
       "base_strength": 8,
-      "text": "Hungry 3. Roam.",
-      "keywords": [
-        "Hungry",
-        "Roam"
-      ],
-      "hungry": 3,
+      "text": "Hungry 3. While this is grazing, it doesn't eat.",
       "species": "Moose",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": [
+        "Hungry"
+      ],
+      "hungry": 3
     },
     {
       "id": "wildebeest_legend",
@@ -2533,17 +2536,18 @@
       "id": "eagle",
       "name": "Eagle",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Bird"
       ],
-      "base_strength": 5,
-      "text": "Flight.",
-      "keywords": [
-        "Flight"
-      ],
+      "base_strength": 6,
+      "text": "Flight. Apex Predator.",
       "species": "Eagle",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": [
+        "Flight",
+        "Apex Predator"
+      ]
     },
     {
       "id": "cuckoo",
@@ -3533,14 +3537,18 @@
     {
       "id": "pigeon",
       "name": "Pigeon",
-      "status": "planned",
-      "rarity": "",
-      "tags": [],
-      "base_strength": null,
-      "text": "",
-      "keywords": [],
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [
+        "Bird"
+      ],
+      "base_strength": 5,
+      "text": "Flight.",
       "species": "Pigeon",
-      "habitat": "City"
+      "habitat": "City",
+      "keywords": [
+        "Flight"
+      ]
     },
     {
       "id": "sparrow",
@@ -3896,6 +3904,34 @@
       "species": "Mara",
       "habitat": "Meadow",
       "keywords": []
+    },
+    {
+      "id": "wolverine",
+      "name": "Wolverine",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [],
+      "base_strength": 4,
+      "text": "Roar: remove an adjacent enemy with no other enemy next to it.",
+      "species": "Wolverine",
+      "habitat": "Forest",
+      "keywords": []
+    },
+    {
+      "id": "elephant_legend",
+      "name": "[ELEPHANT]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [],
+      "base_strength": 9,
+      "text": "Hungry 6. Roam. Whenever this lands, remove all adjacent enemies of strength 3 or less.",
+      "species": "Elephant",
+      "habitat": "Savanna",
+      "keywords": [
+        "Hungry",
+        "Roam"
+      ],
+      "hungry": 6
     }
   ]
 }

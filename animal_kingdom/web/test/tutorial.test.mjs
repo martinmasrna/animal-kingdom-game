@@ -101,19 +101,19 @@ test('covering and Roar are each done once by hand: the Pup beside the patch, th
 
 // ---- lesson 2
 const v2 = g => view(g, 'tutorial2');
-const falcon = { id: 'eagle', owner: 'B', str: 5 }, squirrel = { id: 'squirrel', owner: 'A', str: 3 };
+const falcon = { id: 'pigeon', owner: 'B', str: 5 }, squirrel = { id: 'squirrel', owner: 'A', str: 3 };
 
 test('lesson 2 holds each teaching card back until its own step', () => {
-  const V = v2({ hand: [{ id: 'black_mamba' }, { id: 'eagle' }, { id: 'lion' }] });
-  assert.deepEqual(held(V, null), ['tutorial_lynx', 'squirrel', 'black_mamba', 'eagle', 'polar_bear']);
+  const V = v2({ hand: [{ id: 'black_mamba' }, { id: 'pigeon' }, { id: 'lion' }] });
+  assert.deepEqual(held(V, null), ['tutorial_lynx', 'squirrel', 'black_mamba', 'pigeon', 'polar_bear']);
   assert.ok(!held(V, { only: { card: 'black_mamba' } }).includes('black_mamba'), 'released while its step shows');
   assert.deepEqual(held(view({}), null), [], 'lesson 1 holds nothing');
 });
 
 test('a covered Squirrel is shown, then uncovered by the Jaguar placed next to the Falcon', () => {
-  const t = fresh(); ['intro2', 'glow', 'lynx', 'lion', 'eagleinfo', 'eagle', 'buffalo2', 'draw2', 'squirrelinfo', 'squirrel', 'mambainfo'].forEach(id => t.seen.add(id));
+  const t = fresh(); ['intro2', 'glow', 'lynx', 'lion', 'eagleinfo', 'pigeon', 'buffalo2', 'draw2', 'squirrelinfo', 'squirrel', 'mambainfo'].forEach(id => t.seen.add(id));
   const board = { '1,2': u('lion', 'A'), '2,2': [squirrel, falcon] };
-  const hist = [{ seat: 'A', kind: 'place', card: 'squirrel', fx: [] }, { seat: 'B', kind: 'place', card: 'eagle', fx: [{ k: 'cover', card: 'squirrel' }] }];
+  const hist = [{ seat: 'A', kind: 'place', card: 'squirrel', fx: [] }, { seat: 'B', kind: 'place', card: 'pigeon', fx: [{ k: 'cover', card: 'squirrel' }] }];
   const g = { round: 3, board, history: hist, hand: [{ id: 'black_mamba' }], legal: { place: { black_mamba: [['cr', '1,1'], ['cr', '2,1'], ['cr', '1,3']] }, draw: true } };
   const covered = current(v2(g), null, CARDS, t);
   assert.equal(covered.id, 'covered'); assert.deepEqual(covered.at, { cr: '2,2' }); t.seen.add('covered');
@@ -126,11 +126,11 @@ test('a covered Squirrel is shown, then uncovered by the Jaguar placed next to t
 
 
 
-test('the Black Mamba\'s Roar targets only the Eagle on the Squirrel, even with a dog beside it', () => {
-  const t = fresh(); ['intro2', 'glow', 'lynx', 'eagleinfo', 'eagle', 'draw2', 'squirrel', 'covered', 'mambainfo', 'mamba'].forEach(id => t.seen.add(id));
+test('the Black Mamba\'s Roar targets only the Pigeon on the Squirrel, even with a dog beside it', () => {
+  const t = fresh(); ['intro2', 'glow', 'lynx', 'eagleinfo', 'pigeon', 'draw2', 'squirrel', 'covered', 'mambainfo', 'mamba'].forEach(id => t.seen.add(id));
   const board = { '1,2': u('lion', 'A'), '2,2': [squirrel, falcon], '2,1': u('black_mamba', 'A'), '3,1': u('pup', 'B') };
-  const hist = [{ seat: 'A', kind: 'place', card: 'squirrel', fx: [] }, { seat: 'B', kind: 'place', card: 'eagle', fx: [{ k: 'cover', card: 'squirrel' }] }];
+  const hist = [{ seat: 'A', kind: 'place', card: 'squirrel', fx: [] }, { seat: 'B', kind: 'place', card: 'pigeon', fx: [{ k: 'cover', card: 'squirrel' }] }];
   const pending = { mode: 'choice', options: [{ kind: 'cr', v: '2,2' }, { kind: 'cr', v: '3,1' }] };
   const L = current(v2({ round: 3, board, history: hist, pending, legal: null }), null, CARDS, t);
-  assert.equal(L.id, 'target'); assert.deepEqual(L.only, { crs: ['2,2'] }); assert.equal(L.text, 'Click the Eagle to remove it.');
+  assert.equal(L.id, 'target'); assert.deepEqual(L.only, { crs: ['2,2'] }); assert.equal(L.text, 'Click the Pigeon to remove it.');
 });

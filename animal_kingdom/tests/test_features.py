@@ -343,15 +343,15 @@ def test_features_source_allows_flight_keyword_literal():
 
 
 def test_a_roar_wasted_on_the_turns_last_action_still_fizzles():
-    # The turn's last action also ends the turn (region food, Dusk): that isn't the Roar doing something. Street Dog
-    # with no Roam ally does nothing, whether or not the turn ends with it (a gauntlet game, 2026-10-15).
+    # The turn's last action also ends the turn (region food, Dusk): that isn't the Roar doing something. A Wolverine
+    # with no enemy to remove does nothing, whether or not the turn ends with it (a gauntlet game, 2026-10-15).
     from animal_kingdom.engine import rules
     from animal_kingdom.engine.actions import PlaceAction
-    s = make_state(hands={"A": ["street_dog"], "B": ["mouse"]}, decks={"A": ["mouse"] * 5, "B": ["mouse"] * 5})
-    for cr in ("1,1", "1,2", "2,1", "2,2"):
+    s = make_state(hands={"A": ["wolverine"], "B": ["mouse"]}, decks={"A": ["mouse"] * 5, "B": ["mouse"] * 5})
+    for cr in ("1,1", "2,1", "2,2"):
         put(s, cr, "lion", "A")
     s.actions_taken_this_turn = rules.turn_actions(s) - 1
-    action = next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "street_dog")
+    action = next(a for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "wolverine" and a.target == ("cr", "1,2"))
     post = s.clone()
     rules.apply_action(post, action)
     assert post.current == "B" and post.food["A"] > s.food["A"]      # the turn ended, and paid

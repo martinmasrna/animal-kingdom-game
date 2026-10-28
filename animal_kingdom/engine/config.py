@@ -74,10 +74,13 @@ class Config:
 
     # --- Strength counters ("give +X", stored on the instance; decision E) ---
     dingo_grant: int = 1                 # to every friendly adjacent Canine, end of turn
-    bush_dog_grant: int = 2              # Bush Dog: Dusk: give an adjacent Canine +2
     wolf_legend_grant: int = 1           # the legendary Wolf: Dusk: +1 for each adjacent Canine
-    stray_dog_grant: int = 2             # Stray Dog: give an ally with Roam +2, then it roams
-    wild_dog_grant: int = 1              # African Wild Dog: Dusk: your adjacent animals +1
+    street_dog_grant: int = 3            # Street Dog: Roar: give a connected ally +3 strength and Roam
+    black_wolf_grant: int = 1            # the legendary Black Wolf: whenever a Canine roams, give it +1 strength
+    black_wolf_draw: int = 1             # ... and draw a card
+    fox_draw: int = 2                    # Fox: Roar: if a Canine roamed this turn, draw 2 cards
+    dhole_draw: int = 2                  # Dhole: whenever it covers an enemy with no other enemy next to it, draw 2 cards
+    elephant_legend_max: int = 3         # the legendary Elephant: whenever it lands, remove all adjacent enemies of strength 3 or less
     mahi_mahi_grant: int = 1             # Mahi-mahi: Roar: your other Fish +1
     gorilla_legend_grant: int = 1            # Silverback: Roar: every animal in your hand +1
     baboon_grant: int = 1                # Baboon: Roar: 2 animals in your hand +1...
