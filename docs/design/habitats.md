@@ -17,7 +17,7 @@ The waters (Martin, 2026-10-28):
 
 - **Deep Ocean:** below where sunlight reaches.
 - **Coral Reef:** warm, shallow reefs.
-- **Coast:** beaches, rocky shores and tide pools, half land and half sea.
+- **Coast:** the shore itself, beaches, rocks, cliffs and tide pools, and the animals living on it: crabs, seagulls, puffins (Martin, 2026-10-28).
 - **River and Lake:** fresh water, with the swamps.
 
 The lands:
@@ -34,5 +34,5 @@ A set theme can cross habitats (Back from the Brink: animals saved from extincti
 
 ## Open
 
-- **Animals between two habitats**, each to get the one home a player pictures: Platypus (Australia or River and Lake), Penguin, Puffin and Walrus (Polar or Coast), Seahorse (Coral Reef or Coast).
+- **The Platypus:** Australia or River and Lake, whichever a player pictures.
 - **Grassland outside Africa,** the prairie and the steppe (bison, prairie dog, pronghorn, burrowing owl, saiga, manul): no home yet.
