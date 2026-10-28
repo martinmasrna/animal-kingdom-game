@@ -729,9 +729,9 @@
         "prev_note": "",
         "prev": "C"
       },
-      "note": "Martin, 2026-10-28: Canines and Roam redesign",
+      "note": "Martin, 2026-10-28: its ability is common-worthy; swapped with the Coyote",
       "by": "claude",
-      "at": 1793210644
+      "at": 1793215284
     }
   },
   "butterfly": {
@@ -1107,9 +1107,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "out of the collection (in the reserve)",
+      "note": "into the collection",
       "by": "claude",
-      "at": 1793188506
+      "at": 1793215129
     },
     "habitat": {
       "review": {
@@ -1117,9 +1117,9 @@
         "prev_note": "",
         "prev": "Forest"
       },
-      "note": "Martin, 2026-10-28: a desert animal to most people; waits for Desert, its effect scratched",
+      "note": "Martin, 2026-10-28: back to Forest (coyotes live across North America's forests and cities; Desert was the cartoon image)",
       "by": "claude",
-      "at": 1793188505
+      "at": 1793215128
     },
     "effect": {
       "review": {
@@ -1127,9 +1127,30 @@
         "prev_note": "",
         "prev": "Whenever an allied Canine roams, give it +1 strength."
       },
-      "note": "Martin, 2026-10-28: scratched; a new effect comes with Desert",
+      "note": "Martin, 2026-10-28: the Street Dog's old line, made local; a twin of the Street Dog for an ally that already roams",
       "by": "claude",
-      "at": 1793188525
+      "at": 1793215129,
+      "lv": "draft"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 3
+      },
+      "note": "the Street Dog's number: the same +3, spent on an ally that already has Roam",
+      "by": "claude",
+      "at": 1793215129
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-28: the Roam-giving card is the rare one, so the Coyote stays common",
+      "by": "claude",
+      "at": 1793215331
     }
   },
   "crocodile": {
@@ -4061,6 +4082,16 @@
       "note": "Martin, 2026-10-28: Canines and Roam redesign: gives any animal Roam; connected, never global",
       "by": "claude",
       "at": 1793210626
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-28: giving Roam is rare-worthy; swapped with the Bush Dog, now common",
+      "by": "claude",
+      "at": 1793215332
     }
   },
   "sunfish": {

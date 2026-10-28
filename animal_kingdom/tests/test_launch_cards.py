@@ -631,6 +631,28 @@ def test_street_dog_with_no_connected_ally_just_lands():
     assert s.pending is None
 
 
+def test_coyote_gives_a_connected_ally_with_roam_plus_three_and_a_free_roam():
+    s = make_state(hands={"A": ["coyote"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    wolf = put(s, "1,1", "wolf", "A")
+    put(s, "2,2", "squirrel", "A")                             # connected, but no Roam
+    put(s, "3,2", "wolf", "A")                                 # connected through 2,2
+    put(s, "4,3", "wolf", "A")                                 # no chain of your animals to it
+    rules.apply_action(s, PlaceAction("coyote", ("cr", "1,2")))
+    assert s.pending["options"] == ["1,1", "3,2"]
+    choose(s, "1,1")
+    assert s.pending is None and wolf.strength_counter == CFG.coyote_grant
+    assert s.actions_taken_this_turn == 1
+    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))    # the roam is free: the turn's second action is left
+    assert s.top_unit("2,1") is wolf and s.current == "A" and s.actions_taken_this_turn == 1
+
+
+def test_coyote_with_no_connected_roamer_just_lands():
+    s = make_state(hands={"A": ["coyote"]})
+    put(s, "1,1", "lion", "A")
+    rules.apply_action(s, PlaceAction("coyote", ("cr", "1,2")))
+    assert s.pending is None
+
+
 def test_african_wild_dog_gives_an_adjacent_canine_a_free_roam_after_it_roams():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "african_wild_dog", "A")

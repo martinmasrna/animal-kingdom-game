@@ -71,7 +71,7 @@ const GROWS: &[Hook] = &[Hook::OnDawnInHand, Hook::OnStartOfTurn, Hook::OnGain];
 pub fn hook_mask(card: &str) -> u32 {
     use Hook::*;
     let hooks: &[Hook] = match card {
-        "cuckoo_legend" | "praying_mantis" | "raccoon" | "hammerhead" | "locust_legend" | "jackal" | "badger" | "street_dog" | "fox" | "wolverine" | "lion_legend"
+        "cuckoo_legend" | "praying_mantis" | "raccoon" | "hammerhead" | "locust_legend" | "jackal" | "badger" | "street_dog" | "coyote" | "fox" | "wolverine" | "lion_legend"
         | "lion_legend_2" | "jaguar" | "serval" | "bobcat" | "alley_cat" | "bee_legend" | "forager_ant" | "nurse_bee" | "nurse_bumblebee"
         | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "greywhisker" | "mole_legend"
         | "rat_legend_2" | "skunk_legend" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
@@ -754,6 +754,15 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let o = crs(st, connected_allies(st, owner, cr));
             let g = cfg(st, "street_dog_grant");
             push_choose(st, owner, o, "street_dog", false, vmap!("amount" => Value::Int(g as i64)));
+        }
+        ("coyote", OnPlace) => {
+            let options: Vec<Cr> = connected_allies(st, owner, cr)
+                .into_iter()
+                .filter(|&c| st.top(c).map(|t| statics::has_keyword(st, t, K_ROAM, Some(c))).unwrap_or(false))
+                .collect();
+            let o = crs(st, options);
+            let g = cfg(st, "coyote_grant");
+            push_choose(st, owner, o, "coyote", false, vmap!("amount" => Value::Int(g as i64)));
         }
         // Cats
         ("lion_legend", OnPlace) => twin_place(st, unit, "lion_legend_2"),
@@ -1441,6 +1450,18 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
                     None => return,
                 };
                 grant(st, vec![iid], m_get_i(step, "amount").unwrap_or(0) as i32);
+            }
+        }
+        "coyote" => {
+            if let Some(cr) = cr_of(st) {
+                let Some(top) = st.top(cr).cloned() else { return };
+                grant(st, vec![top.iid], m_get_i(step, "amount").unwrap_or(0) as i32);
+                if !st.turn_flags.roamed.contains(&top.iid) {
+                    match st.turn_flags.free_roam_iid.iter_mut().find(|(i, _)| *i == top.iid) {
+                        Some(e) => e.1 = 1,
+                        None => st.turn_flags.free_roam_iid.push((top.iid, 1)),
+                    }
+                }
             }
         }
         "free_roam" => {
