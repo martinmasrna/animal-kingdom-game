@@ -88,7 +88,7 @@ Cards:
 - **Coyote** picks one of your other animals connected to it and gives it Roam, for as long as it stays on the board (covered and resurfacing included; it loses it when it leaves the board), and it roams.
 - **"Connected to this"** means a chain of crossroads next to each other, all topped by your animals, starting at this animal's own crossroad. It has nothing to do with your den.
 - **"Lands"** means the animal is placed (from hand or by an effect) or arrives on a crossroad by roaming. The legendary Elephant sweeps both times; a Roar happens on placement only.
-- **Fox** draws 2 when it is placed if one of your Canines has roamed this turn, free or paid, itself or not.
+- **Fox** draws 2 when it is placed if one of your animals has roamed this turn, by an action, a free roam or an effect's "It roams" (Martin, 2026-10-28: "draw on ally roam, not canine roam").
 - **African Wild Dog** lets you choose one of your Canines next to the crossroad it roamed to, other than itself; that Canine roams at once ("It roams", below), whether or not it has Roam.
 - **Bush Dog** puts a Pup on the crossroad it left, but only if the crossroad is empty: an animal that resurfaces there leaves no Pup.
 - **Dhole** draws 2 when it covers an enemy that has no other enemy top animal next to it, by placement or by roaming, judged once the Dhole sits on that crossroad. The Dhole gives no equal-strength cover to anyone.

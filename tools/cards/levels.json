@@ -1698,9 +1698,9 @@
         "prev_note": "",
         "prev": "Roam. Whenever this covers an enemy, draw a card."
       },
-      "note": "Martin, 2026-10-28: Canines and Roam redesign",
+      "note": "Martin, 2026-10-28: any ally's roam, not only a Canine's",
       "by": "claude",
-      "at": 1793210632
+      "at": 1793220060
     }
   },
   "cottonmouth": {

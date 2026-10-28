@@ -1049,9 +1049,7 @@ pub fn do_roam(st: &mut State, player: Player, origin: Cr, target: &Target, by_e
         st.turn_flags.roamed.push(unit.iid);
     }
     st.turn_flags.roams[player.min(1) as usize] += 1;
-    if st.card(unit.card).has_tag(T_CANINE) {
-        st.turn_flags.canine_roamed = true;       // the Fox's Roar asks
-    }
+    st.turn_flags.any_roamed = true;       // the Fox's Roar asks
     match target {
         Target::Hq(den) => {
             crate::emit!(st, "roam", vmap!("player" => pn(player), "iid" => Value::Int(unit.iid), "card" => card_v(st, unit.card), "cr" => cr_v(st, origin), "to" => Value::Null, "den" => pn(*den)));

@@ -510,7 +510,7 @@
         "Canine"
       ],
       "base_strength": 3,
-      "text": "Roar: if a Canine roamed this turn, draw 2 cards.",
+      "text": "Roar: if an ally roamed this turn, draw 2 cards.",
       "species": "Fox",
       "habitat": "Forest",
       "keywords": []

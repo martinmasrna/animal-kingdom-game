@@ -32,7 +32,7 @@ The table below is generated from cards.json, where the cards live.
 | **Jackal** | 3 | Canine | 3 | Roar: remove an adjacent enemy that has another of your Canines next to it. |
 | **Street Dog** | 3 | Canine | 1 | Roar: give a connected ally with Roam +3 strength. It roams. |
 | **Badger** | 3 | — | 4 | Roar: draw an animal with Roam. |
-| **Fox** | 3 | Canine | 3 | Roar: if a Canine roamed this turn, draw 2 cards. |
+| **Fox** | 3 | Canine | 3 | Roar: if an ally roamed this turn, draw 2 cards. |
 | **Wolverine** | 3 | — | 4 | Roar: remove an adjacent enemy with no other enemy next to it. |
 
 <!-- cards:end -->

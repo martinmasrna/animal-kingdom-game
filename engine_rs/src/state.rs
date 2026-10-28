@@ -278,8 +278,8 @@ pub struct TurnFlags {
     pub removed_any: bool,
     pub food_gained: [i32; 2],
     pub roamed: FastVec<[i64; 4]>,
-    /// A Canine roamed this turn (the Fox's Roar asks).
-    pub canine_roamed: bool,
+    /// An animal roamed this turn (the Fox's Roar asks).
+    pub any_roamed: bool,
     pub roams: [i32; 2],
     pub free_roams: [i32; 2],
     pub free_roams_used: [i32; 2],
@@ -336,8 +336,8 @@ impl TurnFlags {
         for iid in &self.roamed {
             m.insert(format!("roamed_{iid}"), sj::Value::Bool(true));
         }
-        if self.canine_roamed {
-            m.insert("canine_roamed".into(), sj::Value::Bool(true));
+        if self.any_roamed {
+            m.insert("any_roamed".into(), sj::Value::Bool(true));
         }
         for (iid, n) in &self.free_roam_iid {
             m.insert(format!("free_roam_iid_{iid}"), sj::Value::from(*n));
@@ -367,8 +367,8 @@ impl TurnFlags {
                 t.lost[p_of(rest)] = val.as_i64().unwrap_or(0) as i32;
             } else if k == "removed_any" {
                 t.removed_any = val.as_bool().unwrap_or(false);
-            } else if k == "canine_roamed" {
-                t.canine_roamed = val.as_bool().unwrap_or(false);
+            } else if k == "any_roamed" {
+                t.any_roamed = val.as_bool().unwrap_or(false);
             } else if let Some(rest) = k.strip_prefix("roamed_") {
                 if let Ok(i) = rest.parse::<i64>() {
                     t.roamed.push(i);

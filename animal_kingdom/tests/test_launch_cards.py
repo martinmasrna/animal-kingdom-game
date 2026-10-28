@@ -507,7 +507,7 @@ def test_the_bush_dog_leaves_a_pup_on_the_crossroad_it_left_unless_an_animal_res
     assert [u.card_id for u in s.board["1,2"]] == ["lion"]
 
 
-def test_the_fox_draws_two_only_if_a_canine_roamed_this_turn():
+def test_the_fox_draws_two_only_if_an_ally_roamed_this_turn():
     def play(roamer, target):
         s = make_state(hands={"A": ["fox"]}, decks={"A": ["lion"] * 4, "B": []})
         put(s, "1,1", roamer, "A")
@@ -517,7 +517,7 @@ def test_the_fox_draws_two_only_if_a_canine_roamed_this_turn():
         rules.apply_action(s, PlaceAction("fox", ("cr", "1,2")))
         return hand_ids(s, "A")
     assert play("wolf", None) == ["lion"] * CFG.fox_draw       # a Canine roamed
-    assert play("orca", "2,1") == []                           # a roam, but not a Canine's
+    assert play("orca", "2,1") == ["lion"] * CFG.fox_draw      # so does any other ally
     s = make_state(hands={"A": ["fox"]}, decks={"A": ["lion"] * 4, "B": []})
     rules.apply_action(s, PlaceAction("fox", ("cr", "1,2")))
     assert hand_ids(s, "A") == []                              # nobody roamed

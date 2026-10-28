@@ -196,7 +196,7 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
         "hare" | "rat" => placed_plus >= cfg(st, "hare_played_min"),
         "macaque" => hand_after() >= cfg(st, "macaque_hand_min"),
         "gorilla" => strength() >= cfg(st, "gorilla_min"),
-        "fox" => st.turn_flags.canine_roamed,
+        "fox" => st.turn_flags.any_roamed,
         _ => return None,
     })
 }

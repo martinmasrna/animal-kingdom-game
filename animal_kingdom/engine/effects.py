@@ -964,8 +964,7 @@ def do_roam(state: GameState, player: str, origin: str, target, *, by_effect: bo
     unit = stack[-1]
     state.turn_flags[f"cap_it_roams_{unit.iid}" if by_effect else f"roamed_{unit.iid}"] = True
     state.turn_flags[f"roams_{player}"] = state.turn_flags.get(f"roams_{player}", 0) + 1
-    if "Canine" in state.cards[unit.card_id].tags:
-        state.turn_flags["canine_roamed"] = True      # the Fox's Roar asks
+    state.turn_flags["any_roamed"] = True             # the Fox's Roar asks
     kind, where = target
     if kind == "hq":                                  # the game ends as it steps onto the den
         state.emit("roam", player=player, iid=unit.iid, card=unit.card_id, cr=origin, to=None, den=where)
@@ -1873,7 +1872,7 @@ def roar_condition(state, player, card_id, unit=None):
         "rat": lambda: state.units_placed_this_turn + (0 if unit is not None else 1) >= cfg.hare_played_min,
         "macaque": lambda: hand_after() >= cfg.macaque_hand_min,
         "gorilla": lambda: strength() >= cfg.gorilla_min,
-        "fox": lambda: bool(state.turn_flags.get("canine_roamed")),
+        "fox": lambda: bool(state.turn_flags.get("any_roamed")),
     }.get(card_id)
     return check() if check else None
 
@@ -2149,7 +2148,7 @@ def _wolf_legend_eot(state, unit, cr):
 
 
 def _fox_place(state, unit, cr):
-    """Roar: if a Canine roamed this turn, draw 2 cards."""
+    """Roar: if an ally roamed this turn, draw 2 cards."""
     if roar_condition(state, unit.owner, unit.card_id, unit):
         _push_draw(state, unit.owner, state.config.fox_draw)
 
