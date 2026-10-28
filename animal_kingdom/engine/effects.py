@@ -856,8 +856,7 @@ def _apex_can_land(state: GameState, placer: UnitInstance, top: UnitInstance) ->
 #   - free roams: statics.free_roams(state, player) per turn, plus turn_flags["free_roams_<player>"] granted by the
 #     `grant_free_roam` op; a free roam is spent before an action.
 # The event dict: {"player", "iid", "from", "to" (None for a den), "covered" (iid or None), "onto_enemy"}.
-# turn_flags: "roamed_<iid>" (this animal has roamed this turn), "cap_it_roams_<iid>" (an effect moved it this turn),
-# "roams_<player>" (how many this turn).
+# turn_flags: "roamed_<iid>" (this animal has roamed this turn), "roams_<player>" (how many this turn).
 
 def legal_roams(state: GameState, player: str, *, free_only: bool = False) -> list:
     """Every legal Roam for `player`, in a deterministic order. `free_only`: only roams a free roam pays for (the turn's
@@ -962,7 +961,8 @@ def do_roam(state: GameState, player: str, origin: str, target, *, by_effect: bo
     if not stack or stack[-1].owner != player:
         raise EngineError(f"{player} has no animal on {origin!r} to roam")
     unit = stack[-1]
-    state.turn_flags[f"cap_it_roams_{unit.iid}" if by_effect else f"roamed_{unit.iid}"] = True
+    if not by_effect:
+        state.turn_flags[f"roamed_{unit.iid}"] = True
     state.turn_flags[f"roams_{player}"] = state.turn_flags.get(f"roams_{player}", 0) + 1
     state.turn_flags["any_roamed"] = True             # the Fox's Roar asks
     kind, where = target
@@ -1661,11 +1661,11 @@ def _then_street_dog(state, step, cr):
     _grant(state, [top.iid], step["amount"])
 
 
-def _then_it_roams(state, step, cr):
-    """African Wild Dog: the chosen Canine roams."""
+def _then_free_roam(state, step, cr):
+    """African Wild Dog: the Canine may roam once this turn without spending an action."""
     top = state.top_unit(cr)
-    if top is not None:
-        _push_it_roams(state, top.iid)
+    if top is not None and not state.turn_flags.get(f"roamed_{top.iid}"):
+        state.turn_flags[f"free_roam_iid_{top.iid}"] = 1
 
 
 def _push_it_roams(state, iid):
@@ -1673,7 +1673,7 @@ def _push_it_roams(state, iid):
 
 
 def _op_it_roams(state, step):
-    """"It roams" (the Street Dog, the Coyote, the African Wild Dog): the animal roams now, as part of the effect, by the
+    """"It roams" (the Street Dog, the Coyote): the animal roams now, as part of the effect, by the
     Roam rules, the den included (Martin, 2026-10-28: "if a card says 'draw 2 cards' does that mean I get to choose when
     it happens?"); its owner picks where. It isn't the animal's one roam of the turn ("it should NOT count towards the
     'one roam per turn' limit")."""
@@ -1791,7 +1791,7 @@ def _then_roam_to(state, step, cr):
 
 THEN = {
     "remove": _then_remove, "set_strength": _then_set_strength, "drain": _then_drain, "grant": _then_grant,
-    "hand_grant": _then_hand_grant, "coyote": _then_coyote, "street_dog": _then_street_dog, "it_roams": _then_it_roams, "copy_and_add": _then_copy_and_add,
+    "hand_grant": _then_hand_grant, "coyote": _then_coyote, "street_dog": _then_street_dog, "free_roam": _then_free_roam, "copy_and_add": _then_copy_and_add,
     "copy_from_hand": _then_copy_from_hand, "return_ally": _then_return_ally,
     "cuckoo": _then_cuckoo, "remove_and_draw": _then_remove_and_draw, "pile_to_hand": _then_pile_to_hand,
     "make_in_hand": _then_make_in_hand,
@@ -2188,11 +2188,11 @@ def _bush_dog_roam(state, unit, cr, event):
 
 
 def _wild_dog_roam(state, unit, cr, event):
-    """After this roams, choose an adjacent Canine of yours: it roams. Not printed, and waiting on Martin's call
-    (2026-10-28): a Canine an effect already moved this turn isn't offered, or two African Wild Dogs would loop."""
+    """After this roams, choose an adjacent Canine of yours that hasn't roamed this turn: it can roam for free this turn,
+    its one roam of the turn, so two Wild Dogs can't loop (Martin, 2026-10-28)."""
     options = [nb for nb, top in _adjacent_tops(state, cr, unit.owner)
-               if "Canine" in state.cards[top.card_id].tags and not state.turn_flags.get(f"cap_it_roams_{top.iid}")]
-    _push_choose(state, unit.owner, options, "it_roams")
+               if "Canine" in state.cards[top.card_id].tags and not state.turn_flags.get(f"roamed_{top.iid}")]
+    _push_choose(state, unit.owner, options, "free_roam")
 
 
 def _connected_allies(state, unit, cr) -> list:

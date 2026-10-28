@@ -34,9 +34,9 @@
         "prev_note": "",
         "prev": "Dusk: give your adjacent animals +1 strength."
       },
-      "note": "Martin, 2026-10-28: the pack moves together",
+      "note": "Martin, 2026-10-28: the Canine's own roam of the turn, so two Wild Dogs can't loop",
       "by": "claude",
-      "at": 1793210642
+      "at": 1793222870
     }
   },
   "alley_cat": {

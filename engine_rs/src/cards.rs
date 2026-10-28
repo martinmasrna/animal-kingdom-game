@@ -746,11 +746,11 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             if let Args::Roam(to, _) = args {
                 let options: Vec<Cr> = adjacent_tops(st, *to, Some(owner))
                     .iter()
-                    .filter(|(_, t)| st.card(t.card).has_tag(T_CANINE) && !it_roamed(st, t.iid))
+                    .filter(|(_, t)| st.card(t.card).has_tag(T_CANINE) && !st.turn_flags.roamed.contains(&t.iid))
                     .map(|(nb, _)| *nb)
                     .collect();
                 let o = crs(st, options);
-                push_choose(st, owner, o, "it_roams", false, Map::default());
+                push_choose(st, owner, o, "free_roam", false, Map::default());
             }
         }
         ("badger", OnPlace) => draws_filtered(st, unit, "keyword:Roam", 1),
@@ -1462,10 +1462,15 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
                 grant(st, vec![top.iid], m_get_i(step, "amount").unwrap_or(0) as i32);
             }
         }
-        "it_roams" => {
+        "free_roam" => {
             if let Some(cr) = cr_of(st) {
                 if let Some(top) = st.top(cr).cloned() {
-                    it_roams(st, top.iid);
+                    if !st.turn_flags.roamed.contains(&top.iid) {
+                        match st.turn_flags.free_roam_iid.iter_mut().find(|(i, _)| *i == top.iid) {
+                            Some(e) => e.1 = 1,
+                            None => st.turn_flags.free_roam_iid.push((top.iid, 1)),
+                        }
+                    }
                 }
             }
         }

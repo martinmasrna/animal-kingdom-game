@@ -658,12 +658,13 @@ def test_it_roams_takes_the_den():
     assert s.result is not None and s.result.winner == "A"
 
 
-def test_street_dog_moves_an_animal_an_effect_already_moved():
+def test_street_dog_moves_an_animal_that_already_roamed():
     s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,1", "african_wild_dog", "A")
-    bush = put(s, "2,2", "bush_dog", "A")
+    put(s, "2,2", "bush_dog", "A")
     rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))
-    choose(s, "2,2"); choose(s, "3,2")                        # the Wild Dog moves the Bush Dog
+    choose(s, "2,2")
+    rules.apply_action(s, RoamAction("2,2", ("cr", "3,2")))    # the Bush Dog's free roam
     rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
     choose(s, "3,2")
     assert s.pending is not None and s.pending["options"]      # it roams again (Martin's game of 2026-10-28, turn 7)
@@ -676,7 +677,7 @@ def test_street_dog_with_no_connected_roamer_just_lands():
     assert s.pending is None
 
 
-def test_african_wild_dog_makes_an_adjacent_canine_roam_after_it_roams():
+def test_african_wild_dog_gives_an_adjacent_canine_a_free_roam_after_it_roams():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "african_wild_dog", "A")
     jackal = put(s, "2,3", "jackal", "A")                      # a Canine without Roam of its own
@@ -685,17 +686,19 @@ def test_african_wild_dog_makes_an_adjacent_canine_roam_after_it_roams():
     rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
     assert s.pending["options"] == ["2,3"]
     choose(s, "2,3")
-    choose(s, "1,3")
-    assert s.pending is None and s.top_unit("1,3") is jackal and s.actions_taken_this_turn == 1
+    assert s.pending is None and s.actions_taken_this_turn == 1   # it doesn't move now
+    rules.apply_action(s, RoamAction("2,3", ("cr", "1,3")))
+    assert s.top_unit("1,3") is jackal and s.actions_taken_this_turn == 1      # the free roam paid
+    assert not any(isinstance(a, RoamAction) and a.origin == "1,3" for a in rules.legal_actions(s))   # its one roam
 
 
-def test_african_wild_dog_moves_a_canine_that_already_roamed():
+def test_african_wild_dog_does_not_offer_a_canine_that_already_roamed():
     s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,2", "african_wild_dog", "A")
     w = put(s, "2,2", "wolf", "A")
     rules.apply_action(s, RoamAction("2,2", ("cr", "2,3")))    # the Wolf roams first
     rules.apply_action(s, RoamAction("1,2", ("cr", "1,3")))    # then the Dog lands beside it
-    assert s.pending["options"] == ["2,3"]                     # the effect's roam isn't the Wolf's one roam
+    assert s.pending is None and s.top_unit("2,3") is w
 
 
 def test_two_african_wild_dogs_do_not_loop():
@@ -703,10 +706,9 @@ def test_two_african_wild_dogs_do_not_loop():
     put(s, "1,1", "african_wild_dog", "A")
     put(s, "2,2", "african_wild_dog", "A")
     rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))
-    choose(s, "2,2"); choose(s, "3,1")                        # the second Dog roams beside the first, and offers it
-    assert s.pending["options"] == ["2,1"]
-    choose(s, "2,1"); choose(s, "4,1")                        # the first Dog moves again, beside the second
-    assert s.pending is None                                  # which an effect moved already
+    choose(s, "2,2")
+    rules.apply_action(s, RoamAction("2,2", ("cr", "3,1")))    # the second Dog's free roam, beside the first
+    assert s.pending is None                                  # the first Dog has roamed: nothing to offer
 
 
 def test_badger_draws_an_animal_with_roam():

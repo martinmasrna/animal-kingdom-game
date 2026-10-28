@@ -600,7 +600,7 @@
         "Canine"
       ],
       "base_strength": 4,
-      "text": "Roam. After this roams, choose an adjacent Canine. It roams.",
+      "text": "Roam. After this roams, choose an adjacent Canine. It can roam for free this turn.",
       "species": "African Wild Dog",
       "habitat": "Savanna",
       "keywords": [

@@ -1043,9 +1043,7 @@ pub fn do_roam(st: &mut State, player: Player, origin: Cr, target: &Target, by_e
         Some(u) if u.owner == player => u.clone(),
         _ => return Err(format!("{} has no animal on {:?} to roam", player_name(player), st.crname(origin))),
     };
-    if by_effect {
-        st.turn_flags.caps.push(("cap_it_roams", unit.iid));
-    } else if !st.turn_flags.roamed.contains(&unit.iid) {
+    if !by_effect && !st.turn_flags.roamed.contains(&unit.iid) {
         st.turn_flags.roamed.push(unit.iid);
     }
     st.turn_flags.roams[player.min(1) as usize] += 1;
@@ -1107,11 +1105,7 @@ pub struct RoamEvent {
     pub onto_enemy: bool,
 }
 
-pub fn it_roamed(st: &State, iid: i64) -> bool {
-    st.turn_flags.caps.iter().any(|(f, i)| *f == "cap_it_roams" && *i == iid)
-}
-
-/// "It roams" (the Street Dog, the Coyote, the African Wild Dog): the animal roams now, as part of the effect, by the
+/// "It roams" (the Street Dog, the Coyote): the animal roams now, as part of the effect, by the
 /// Roam rules, the den included; its owner picks where. It isn't the animal's one roam of the turn.
 fn op_it_roams(st: &mut State, step: &mut Map) -> Option<Pending> {
     let iid = m_get_i(step, "iid").unwrap_or(-1);
