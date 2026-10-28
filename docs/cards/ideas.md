@@ -18,11 +18,13 @@ The habitats are listed in [`../design/habitats.md`](../design/habitats.md). The
 - **Prehistoric:** dinosaurs, pterosaurs and the ancient seas: Tyrannosaurus, Velociraptor, Oviraptor, Archaeopteryx.
 - **Ice Age:** Woolly Mammoth (Yuka, in the reserve since 2026-09-29).
 
+**The prairie**, no habitat yet: Bison, Prairie Dog, Pronghorn.
+
 **Back from the Brink**, a possible set theme across habitats (animals saved from extinction): Bison, Przewalski's Horse, Black-footed Ferret, California Condor, Kakapo.
 
 ### Launch habitats, later sets
 
-Animals of the launch six without a card yet: Giant Panda, Red Panda, Wolverine, Stoat, Blue Jay, Cardinal, Goshawk, Honey Buzzard, Osprey, Shrike, Passenger Pigeon, Bison, Prairie Dog, Pronghorn (Forest and Meadow); Pangolin (Savanna or Jungle); Quagga (Savanna); Tardigrade (anywhere); Flamingo (River and Lake or Coast).
+Animals of the launch six without a card yet: Giant Panda, Red Panda, Wolverine, Stoat, Blue Jay, Cardinal, Goshawk, Honey Buzzard, Osprey, Shrike, Passenger Pigeon (Forest and Meadow); Pangolin (Savanna or Jungle); Quagga (Savanna); Tardigrade (anywhere); Flamingo (River and Lake or Coast).
 
 ## Effects without an animal
 
