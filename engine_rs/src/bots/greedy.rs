@@ -33,6 +33,9 @@ impl GreedyBot {
 
     /// One action from `legal` for `me` (the seat to act, a pending chooser included).
     pub fn choose(&mut self, st: &State, me: Player, legal: &[Action]) -> Action {
+        if legal.is_empty() {
+            return Action::Pass;   // greedy_bot.py: a turn left open with nothing to do ends
+        }
         if let Some(keep) = keep_hand_skip(st, legal) {
             return keep;
         }
