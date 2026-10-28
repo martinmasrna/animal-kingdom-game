@@ -2286,6 +2286,15 @@
       "note": "moved from fish to pool",
       "by": "claude",
       "at": 1793190663
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "Martin, 2026-10-28: try at 4",
+      "by": "claude",
+      "at": 1793191880
     }
   },
   "jellyfish_legend": {
@@ -4627,8 +4636,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1793190597,
-      "note": "draft: the plain Poison body played neutral at 4 on the Jellyfish; to be settled (Martin, 2026-10-28)"
+      "at": 1793191880,
+      "note": "Martin, 2026-10-28: try at 4"
     }
   },
   "locust_legend": {
@@ -5278,9 +5287,9 @@
     },
     "strength": {
       "lv": "draft",
-      "note": "draft, the number this card had on the Tortoise; to be settled (Martin, 2026-10-28)",
+      "note": "Martin, 2026-10-28: try at 4",
       "by": "claude",
-      "at": 1793190855,
+      "at": 1793191881,
       "review": {
         "prev_lv": "draft",
         "prev_note": "the Armor 6 anchor made real",
