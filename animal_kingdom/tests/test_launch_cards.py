@@ -660,13 +660,10 @@ def test_it_roams_takes_the_den():
 
 def test_street_dog_moves_an_animal_that_already_roamed():
     s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    put(s, "1,1", "african_wild_dog", "A")
-    put(s, "2,2", "bush_dog", "A")
-    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))
-    choose(s, "2,2")
-    rules.apply_action(s, RoamAction("2,2", ("cr", "3,2")))    # the Bush Dog's free roam
+    put(s, "1,1", "bush_dog", "A")
+    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))    # its own roam of the turn (it leaves a Pup)
     rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
-    choose(s, "3,2")
+    choose(s, "2,1")
     assert s.pending is not None and s.pending["options"]      # it roams again (Martin's game of 2026-10-28, turn 7)
 
 
@@ -677,38 +674,31 @@ def test_street_dog_with_no_connected_roamer_just_lands():
     assert s.pending is None
 
 
-def test_african_wild_dog_gives_an_adjacent_canine_a_free_roam_after_it_roams():
-    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    put(s, "1,2", "african_wild_dog", "A")
-    jackal = put(s, "2,3", "jackal", "A")                      # a Canine without Roam of its own
-    put(s, "3,2", "squirrel", "A")                             # not a Canine
-    put(s, "4,1", "wolf", "A")                                 # a Canine, but far
-    rules.apply_action(s, RoamAction("1,2", ("cr", "2,2")))
-    assert s.pending["options"] == ["2,3"]
-    choose(s, "2,3")
-    assert s.pending is None and s.actions_taken_this_turn == 1   # it doesn't move now
-    rules.apply_action(s, RoamAction("2,3", ("cr", "1,3")))
-    assert s.top_unit("1,3") is jackal and s.actions_taken_this_turn == 1      # the free roam paid
-    assert not any(isinstance(a, RoamAction) and a.origin == "1,3" for a in rules.legal_actions(s))   # its one roam
-
-
-def test_african_wild_dog_does_not_offer_a_canine_that_already_roamed():
-    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
-    put(s, "1,2", "african_wild_dog", "A")
-    w = put(s, "2,2", "wolf", "A")
-    rules.apply_action(s, RoamAction("2,2", ("cr", "2,3")))    # the Wolf roams first
-    rules.apply_action(s, RoamAction("1,2", ("cr", "1,3")))    # then the Dog lands beside it
-    assert s.pending is None and s.top_unit("2,3") is w
-
-
-def test_two_african_wild_dogs_do_not_loop():
-    s = make_state(decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+def test_african_wild_dog_makes_a_canine_played_next_to_it_roam():
+    s = make_state(hands={"A": ["jackal"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,1", "african_wild_dog", "A")
-    put(s, "2,2", "african_wild_dog", "A")
-    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))
+    rules.apply_action(s, PlaceAction("jackal", ("cr", "1,2")))   # a Canine without Roam of its own
+    jackal = s.top_unit("1,2")
+    assert "2,2" in s.pending["options"]
     choose(s, "2,2")
-    rules.apply_action(s, RoamAction("2,2", ("cr", "3,1")))    # the second Dog's free roam, beside the first
-    assert s.pending is None                                  # the first Dog has roamed: nothing to offer
+    assert s.pending is None and s.top_unit("2,2") is jackal and s.actions_taken_this_turn == 1
+
+
+def test_african_wild_dog_ignores_what_isnt_a_canine_played_next_to_it():
+    s = make_state(hands={"A": ["lion", "wolf"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,1", "african_wild_dog", "A")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,2")))      # not a Canine
+    assert s.pending is None
+    rules.apply_action(s, PlaceAction("wolf", ("cr", "1,3")))      # a Canine, but not next to it
+    assert s.pending is None
+
+
+def test_african_wild_dog_does_not_move_a_token_or_a_roamer():
+    s = make_state(hands={"A": ["bush_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,1", "african_wild_dog", "A")
+    rules.apply_action(s, PlaceAction("bush_dog", ("cr", "1,2")))
+    choose(s, "2,2")                                          # the Bush Dog roams, leaving a Pup next to the Wild Dog
+    assert s.top_unit("1,2").card_id == "pup" and s.pending is None   # a placed token isn't played
 
 
 def test_badger_draws_an_animal_with_roam():

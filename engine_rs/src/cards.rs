@@ -91,12 +91,12 @@ pub fn hook_mask(card: &str) -> u32 {
         | "dingo" | "sperm_whale_legend" => &[OnEndOfTurn],
         "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" => &[OnStartOfTurn],
         "wolf_legend_2" => &[OnFriendlyRoam, OnRoam],
-        "bush_dog" | "african_wild_dog" => &[OnRoam],
+        "bush_dog" => &[OnRoam],
         "elephant_legend" => &[OnPlace, OnRoam],
         "dhole" => &[OnCoverEnemy],
         "lion_legend_4" => &[OnRemoveEvent],
         "lynx" => &[OnPlaceOntoEnemy],
-        "worker_wasp" => &[OnFriendlyPlace],
+        "worker_wasp" | "african_wild_dog" => &[OnFriendlyPlace],
         "swan_legend" | "cuckoo_egg" | "golden_egg" => &[OnDraw],
         "manta_ray" => &[OnAllyCovered],
         "golden_orb_weaver" | "hippopotamus" => &[OnEnemyPlacedAdjacent],
@@ -742,15 +742,17 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 }
             }
         }
-        ("african_wild_dog", OnRoam) => {
-            if let Args::Roam(to, _) = args {
-                let options: Vec<Cr> = adjacent_tops(st, *to, Some(owner))
-                    .iter()
-                    .filter(|(_, t)| st.card(t.card).has_tag(T_CANINE) && !st.turn_flags.roamed.contains(&t.iid))
-                    .map(|(nb, _)| *nb)
-                    .collect();
-                let o = crs(st, options);
-                push_choose(st, owner, o, "free_roam", false, Map::default());
+        ("african_wild_dog", OnFriendlyPlace) => {
+            // a Canine played next to this roams: played from the hand only, never a token or a placed animal
+            if let Args::FriendlyPlace(placed) = args {
+                let played = placed.owner <= B && st.turn_flags.played[placed.owner as usize].iter().any(|(i, _)| *i == placed.iid);
+                let near = match (statics::crossroad_of(st, placed.iid), statics::crossroad_of(st, unit.iid)) {
+                    (Some(a), Some(b)) => st.map().adjacent(a, b),
+                    _ => false,
+                };
+                if played && near && st.card(placed.card).has_tag(T_CANINE) {
+                    it_roams(st, placed.iid);
+                }
             }
         }
         ("badger", OnPlace) => draws_filtered(st, unit, "keyword:Roam", 1),
@@ -1460,18 +1462,6 @@ pub fn then(st: &mut State, name: &str, step: &Map, choice: &Value) {
                 let Some(top) = st.top(cr).cloned() else { return };
                 it_roams(st, top.iid);   // pushed first, so the +3 lands before it moves
                 grant(st, vec![top.iid], m_get_i(step, "amount").unwrap_or(0) as i32);
-            }
-        }
-        "free_roam" => {
-            if let Some(cr) = cr_of(st) {
-                if let Some(top) = st.top(cr).cloned() {
-                    if !st.turn_flags.roamed.contains(&top.iid) {
-                        match st.turn_flags.free_roam_iid.iter_mut().find(|(i, _)| *i == top.iid) {
-                            Some(e) => e.1 = 1,
-                            None => st.turn_flags.free_roam_iid.push((top.iid, 1)),
-                        }
-                    }
-                }
             }
         }
         "copy_and_add" => {

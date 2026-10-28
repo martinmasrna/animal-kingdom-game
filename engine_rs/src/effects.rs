@@ -1105,7 +1105,7 @@ pub struct RoamEvent {
     pub onto_enemy: bool,
 }
 
-/// "It roams" (the Street Dog, the Coyote): the animal roams now, as part of the effect, by the
+/// "It roams" (the Street Dog, the Coyote, the African Wild Dog): the animal roams now, as part of the effect, by the
 /// Roam rules, the den included; its owner picks where. It isn't the animal's one roam of the turn.
 fn op_it_roams(st: &mut State, step: &mut Map) -> Option<Pending> {
     let iid = m_get_i(step, "iid").unwrap_or(-1);

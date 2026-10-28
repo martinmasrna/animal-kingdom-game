@@ -20,7 +20,7 @@ The table below is generated from cards.json, where the cards live.
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Orca** | 2 | — | 6 | Apex Predator. Roam. |
-| **African Wild Dog** | 2 | Canine | 4 | Roam. After this roams, choose an adjacent Canine. It can roam for free this turn. |
+| **African Wild Dog** | 2 | Canine | 4 | Roam. Whenever you play a Canine next to this, it roams. |
 | **Coyote** | 2 | Canine | 1 | Roar: give a connected ally Roam. It roams. |
 | **Dhole** | 2 | Canine | 5 | Roam. Whenever this covers an enemy with no other enemy next to it, draw 2 cards. |
 

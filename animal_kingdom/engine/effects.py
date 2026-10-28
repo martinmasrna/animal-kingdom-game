@@ -1661,19 +1661,12 @@ def _then_street_dog(state, step, cr):
     _grant(state, [top.iid], step["amount"])
 
 
-def _then_free_roam(state, step, cr):
-    """African Wild Dog: the Canine may roam once this turn without spending an action."""
-    top = state.top_unit(cr)
-    if top is not None and not state.turn_flags.get(f"roamed_{top.iid}"):
-        state.turn_flags[f"free_roam_iid_{top.iid}"] = 1
-
-
 def _push_it_roams(state, iid):
     state.effect_stack.append({"op": "it_roams", "iid": iid})
 
 
 def _op_it_roams(state, step):
-    """"It roams" (the Street Dog, the Coyote): the animal roams now, as part of the effect, by the
+    """"It roams" (the Street Dog, the Coyote, the African Wild Dog): the animal roams now, as part of the effect, by the
     Roam rules, the den included (Martin, 2026-10-28: "if a card says 'draw 2 cards' does that mean I get to choose when
     it happens?"); its owner picks where. It isn't the animal's one roam of the turn ("it should NOT count towards the
     'one roam per turn' limit")."""
@@ -1791,7 +1784,7 @@ def _then_roam_to(state, step, cr):
 
 THEN = {
     "remove": _then_remove, "set_strength": _then_set_strength, "drain": _then_drain, "grant": _then_grant,
-    "hand_grant": _then_hand_grant, "coyote": _then_coyote, "street_dog": _then_street_dog, "free_roam": _then_free_roam, "copy_and_add": _then_copy_and_add,
+    "hand_grant": _then_hand_grant, "coyote": _then_coyote, "street_dog": _then_street_dog, "copy_and_add": _then_copy_and_add,
     "copy_from_hand": _then_copy_from_hand, "return_ally": _then_return_ally,
     "cuckoo": _then_cuckoo, "remove_and_draw": _then_remove_and_draw, "pile_to_hand": _then_pile_to_hand,
     "make_in_hand": _then_make_in_hand,
@@ -2187,12 +2180,15 @@ def _bush_dog_roam(state, unit, cr, event):
         _spawn(state, unit.owner, "pup", left)
 
 
-def _wild_dog_roam(state, unit, cr, event):
-    """After this roams, choose an adjacent Canine of yours that hasn't roamed this turn: it can roam for free this turn,
-    its one roam of the turn, so two Wild Dogs can't loop (Martin, 2026-10-28)."""
-    options = [nb for nb, top in _adjacent_tops(state, cr, unit.owner)
-               if "Canine" in state.cards[top.card_id].tags and not state.turn_flags.get(f"roamed_{top.iid}")]
-    _push_choose(state, unit.owner, options, "free_roam")
+def _wild_dog_friendly_place(state, watcher, placed) -> None:
+    """African Wild Dog: whenever you play a Canine next to this, it roams. Played, from the hand: a token or an
+    animal an effect places isn't played (rulings.md, "Place versus play"), and a roam is never a placement, so it
+    can't loop (Martin, 2026-10-28)."""
+    played = any(iid == placed.iid for iid, _ in state.turn_flags.get(f"played_{placed.owner}", []))
+    at, here = _crossroad_of(state, placed.iid), _crossroad_of(state, watcher.iid)
+    if (played and "Canine" in state.cards[placed.card_id].tags and at is not None and here is not None
+            and at in state.game_map.neighbors(here)):
+        _push_it_roams(state, placed.iid)
 
 
 def _connected_allies(state, unit, cr) -> list:
@@ -3223,7 +3219,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "wolverine": {"on_place": _wolverine_place},
     "jackal": {"on_place": _jackal_place},
     "bush_dog": {"on_roam": _bush_dog_roam},
-    "african_wild_dog": {"on_roam": _wild_dog_roam},
+    "african_wild_dog": {"on_friendly_place": _wild_dog_friendly_place},
     "badger": {"on_place": _draws_filtered("keyword:Roam")},
     "coyote": {"on_place": _coyote_place},
     "street_dog": {"on_place": _street_dog_place},
