@@ -1112,13 +1112,12 @@ pub fn it_roamed(st: &State, iid: i64) -> bool {
 }
 
 /// "It roams" (the Street Dog, the Coyote, the African Wild Dog): the animal roams now, as part of the effect, by the
-/// Roam rules, the den included; its owner picks where. It isn't the animal's one roam of the turn; an effect moves an
-/// animal at most once a turn, so two African Wild Dogs can't loop.
+/// Roam rules, the den included; its owner picks where. It isn't the animal's one roam of the turn.
 fn op_it_roams(st: &mut State, step: &mut Map) -> Option<Pending> {
     let iid = m_get_i(step, "iid").unwrap_or(-1);
     let cr = statics::crossroad_of(st, iid)?;
     let unit = st.top(cr).filter(|u| u.iid == iid).cloned()?;
-    if it_roamed(st, iid) || !statics::active(st, &unit) {
+    if !statics::active(st, &unit) {
         return None;
     }
     let occ = st.connected_occupied(unit.owner);

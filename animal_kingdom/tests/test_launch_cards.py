@@ -658,6 +658,17 @@ def test_it_roams_takes_the_den():
     assert s.result is not None and s.result.winner == "A"
 
 
+def test_street_dog_moves_an_animal_an_effect_already_moved():
+    s = make_state(hands={"A": ["street_dog"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s, "1,1", "african_wild_dog", "A")
+    bush = put(s, "2,2", "bush_dog", "A")
+    rules.apply_action(s, RoamAction("1,1", ("cr", "2,1")))
+    choose(s, "2,2"); choose(s, "3,2")                        # the Wild Dog moves the Bush Dog
+    rules.apply_action(s, PlaceAction("street_dog", ("cr", "1,2")))
+    choose(s, "3,2")
+    assert s.pending is not None and s.pending["options"]      # it roams again (Martin's game of 2026-10-28, turn 7)
+
+
 def test_street_dog_with_no_connected_roamer_just_lands():
     s = make_state(hands={"A": ["street_dog"]})
     put(s, "1,1", "lion", "A")

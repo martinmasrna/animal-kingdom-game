@@ -1676,10 +1676,10 @@ def _op_it_roams(state, step):
     """"It roams" (the Street Dog, the Coyote, the African Wild Dog): the animal roams now, as part of the effect, by the
     Roam rules, the den included (Martin, 2026-10-28: "if a card says 'draw 2 cards' does that mean I get to choose when
     it happens?"); its owner picks where. It isn't the animal's one roam of the turn ("it should NOT count towards the
-    'one roam per turn' limit"); an effect moves an animal at most once a turn, so two African Wild Dogs can't loop."""
+    'one roam per turn' limit")."""
     cr = _crossroad_of(state, step["iid"])
     top = state.top_unit(cr) if cr is not None else None
-    if top is None or top.iid != step["iid"] or state.turn_flags.get(f"cap_it_roams_{top.iid}") or not statics.active(state, top):
+    if top is None or top.iid != step["iid"] or not statics.active(state, top):
         return None
     options = ["den" if kind == "hq" else where for kind, where in roam_targets(state, top, cr)]
     _push_choose(state, top.owner, options, "roam_to", iid=top.iid)
@@ -2188,7 +2188,8 @@ def _bush_dog_roam(state, unit, cr, event):
 
 
 def _wild_dog_roam(state, unit, cr, event):
-    """After this roams, choose an adjacent Canine of yours that hasn't roamed this turn: it roams."""
+    """After this roams, choose an adjacent Canine of yours: it roams. Not printed, and waiting on Martin's call
+    (2026-10-28): a Canine an effect already moved this turn isn't offered, or two African Wild Dogs would loop."""
     options = [nb for nb, top in _adjacent_tops(state, cr, unit.owner)
                if "Canine" in state.cards[top.card_id].tags and not state.turn_flags.get(f"cap_it_roams_{top.iid}")]
     _push_choose(state, unit.owner, options, "it_roams")
