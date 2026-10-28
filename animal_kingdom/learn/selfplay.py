@@ -168,7 +168,7 @@ def main(argv=None) -> None:
     p.add_argument("--pilot", default="turn", help="the bot spec both seats play (sim.runner.make_bot); default TurnBot")
     p.add_argument("--pool", action="store_true", help="pair the bot pool (decks.BOT_DECKS) instead of the starters and goodstuff")
     p.add_argument("--pilot-b", default="", help="a different pilot for the other seat (the seats swap every other game)")
-    p.add_argument("--features", default=FEATURE_SET, help="the feature set recorded (features.FEATURE_SETS: rung2, board)")
+    p.add_argument("--features", default=FEATURE_SET, help="the feature set recorded (features.FEATURE_SETS: rung2, board, board_live)")
     p.add_argument("--extra-decks", default="", help="a JSON of extra decks for the pool ({slug: {'list': [...]}})")
     p.add_argument("--max-games", type=int, default=0, help="play a random sample of this many games of the pairings")
     a = p.parse_args(argv)

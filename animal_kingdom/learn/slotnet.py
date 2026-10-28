@@ -205,11 +205,19 @@ def train(out, paths, l2=1e-4, test_path=None, epochs=30, live=False):
     np = _np()
     from ..bots.slot_eval import SlotEval
 
-    names, X, y, turn, game, deck, feature_set = load_rounds(paths)
-    if feature_set != "board":
+    if live:     # board rounds read as board_live, beside rounds recorded with board_live itself
+        np_ = _np()
+        parts = [load_rounds([p]) for p in paths]
+        if any(part[6] not in ("board", "board_live") for part in parts):
+            raise ValueError("the slot network reads the board feature sets")
+        names = parts[0][0]
+        X = np_.concatenate([to_live(names, part[1]) if part[6] == "board" else part[1] for part in parts])
+        y, turn, game, deck = (np_.concatenate([part[k] for part in parts]) for k in (2, 3, 4, 5))
+        feature_set = "board_live"
+    else:
+        names, X, y, turn, game, deck, feature_set = load_rounds(paths)
+    if feature_set not in ("board", "board_live"):
         raise ValueError(f"the slot network reads the board feature set, not {feature_set!r}")
-    if live:
-        X, feature_set = to_live(names, X), "board_live"
     lay = layout(names)
     bucket = (game.astype(np.int64) * 2654435761 % 2**32) % 100
     test = bucket < 20
