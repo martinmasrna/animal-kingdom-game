@@ -140,6 +140,10 @@ FEATURE_SETS: dict[str, tuple[str, ...]] = {
     "rung1": RUNG0_FEATURES + RUNG1_EXTRA_FEATURES,
     "rung2": RUNG0_FEATURES + RUNG1_EXTRA_FEATURES + RUNG2_EXTRA_FEATURES,
     "board": RUNG0_FEATURES + RUNG1_EXTRA_FEATURES + RUNG2_EXTRA_FEATURES + BOARD_EXTRA_FEATURES,
+    # The board with its crossroad slots read as they can still act (2026-10-28): a Roar on the board has fired, so its
+    # slot's roar is 0 and its ability is what the text keeps after the Roar (`lasting_ability`). The "board" networks
+    # learned a fired Roar as worth +10 a slot (Martin's XITW8A game 6: the Tiger ate its own Lion over the Ocelot).
+    "board_live": RUNG0_FEATURES + RUNG1_EXTRA_FEATURES + RUNG2_EXTRA_FEATURES + BOARD_EXTRA_FEATURES,
 }
 
 
@@ -204,7 +208,7 @@ def extract(state: GameState, me: str, feature_set: str = "rung0") -> list[float
     values["effect_readiness"] = float(enabled_roar_count(state, me))
     values["pending_payoff"] = pending_payoff(state, me, opp)
 
-    if feature_set in ("rung1", "rung2", "board"):
+    if feature_set in ("rung1", "rung2", "board", "board_live"):
         phase = min(1.0, state.turn_counter / T_NORM)
         growth = growth_board_diff(state, me, opp)
         values["growth_board_diff"] = growth
@@ -224,23 +228,28 @@ def extract(state: GameState, me: str, feature_set: str = "rung0") -> list[float
         values["hq_dist_diff"] = hq_dist_diff(state, me, opp, my_connection, opp_connection)
         values["flight_hand_expected_diff"] = flight_hand_expected_diff(state, me, opp)
 
-    if feature_set in ("rung2", "board"):
+    if feature_set in ("rung2", "board", "board_live"):
         values.update(context_features(state, me, opp, opp_connection))
-    if feature_set == "board":
-        return [values[name] for name in names[:len(names) - len(BOARD_EXTRA_FEATURES)]] + board_features(state, me, opp)
+    if feature_set in ("board", "board_live"):
+        return ([values[name] for name in names[:len(names) - len(BOARD_EXTRA_FEATURES)]]
+                + board_features(state, me, opp, live=feature_set == "board_live"))
 
     return [values[name] for name in names]
 
 
-def _properties(card, sign: float) -> list[float]:
-    """Roar, ability, each keyword, each family tag, signed by the side (`_PROPERTY_FEATURES` order)."""
-    out = [sign * float(card.has_roar), sign * float(has_ability(card))]
+def _properties(card, sign: float, on_board_live: bool = False) -> list[float]:
+    """Roar, ability, each keyword, each family tag, signed by the side (`_PROPERTY_FEATURES` order). On the board of
+    `board_live` the Roar has fired and the ability is the lasting one."""
+    if on_board_live:
+        out = [0.0, sign * float(lasting_ability(card))]
+    else:
+        out = [sign * float(card.has_roar), sign * float(has_ability(card))]
     out.extend(sign * float(k in card.keywords) for k in KEYWORD_ORDER)
     out.extend(sign * float(t in card.tags) for t in TAG_ORDER)
     return out
 
 
-def board_features(state: GameState, me: str, opp: str) -> list[float]:
+def board_features(state: GameState, me: str, opp: str, live: bool = False) -> list[float]:
     """`BOARD_EXTRA_FEATURES`: the crossroad slots, the hand slots and the four counts."""
     cards = state.cards
     out: list[float] = []
@@ -259,7 +268,7 @@ def board_features(state: GameState, me: str, opp: str) -> list[float]:
         out.append(sum(u.owner == me for u in stack[:-1]) / 3.0)
         out.append(sum(u.owner == opp for u in stack[:-1]) / 3.0)
         out.append(sign * float(top.placed_on_turn == state.turn_counter))
-        out.extend(_properties(cards[top.card_id], sign))
+        out.extend(_properties(cards[top.card_id], sign, on_board_live=live))
     hand = sorted(state.hands[me], key=lambda u: -effective_strength(state, u))   # stable: ties keep hand order
     for k in range(HAND_SLOTS):
         if k >= len(hand):
@@ -804,9 +813,32 @@ def flight_hand_expected_diff(state: GameState, me: str, opp: str) -> float:
 def has_ability(card) -> bool:
     """Rules text beyond keywords and a food cost: a Roar, a trigger, an aura (generic - reads
     only the printed text's shape, never which card it is)."""
-    rest = [t.strip() for t in card.text.split(".") if t.strip()]
-    rest = [t for t in rest if t not in card.keywords and not t.startswith("Costs ")]
-    return bool(rest)
+    return _ability_in(card, [t.strip() for t in card.text.split(".") if t.strip()])
+
+
+def _ability_in(card, sentences: list[str]) -> bool:
+    return any(t not in card.keywords and not t.startswith("Costs ") for t in sentences)
+
+
+# A sentence after a Roar that starts one of these is an ability of its own, not the rest of the Roar
+# (Meerkat's "When an enemy is placed next to this", the Caterpillar's "Dawn: evolve").
+_LASTING_STARTS = ("When ", "Whenever ", "While ", "Dawn:", "Dusk:", "Deathrattle", "Evolves ")
+
+
+def lasting_ability(card) -> bool:
+    """`has_ability` once the Roar has fired: the text without the Roar's own sentences (generic, reads the text's
+    shape)."""
+    out, in_roar = [], False
+    for t in (t.strip() for t in card.text.split(".")):
+        if not t:
+            continue
+        if t.startswith("Roar:"):
+            in_roar = True
+        elif in_roar and t.startswith(_LASTING_STARTS):
+            in_roar = False
+        if not in_roar:
+            out.append(t)
+    return _ability_in(card, out)
 
 
 def _extra_actions(state: GameState, player: str) -> float:

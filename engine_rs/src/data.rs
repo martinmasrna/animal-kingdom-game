@@ -79,6 +79,9 @@ pub const K_HUNGRY: u32 = 1 << 8;
 pub const K_TITAN: u32 = 1 << 9;
 pub const K_FLEE: u32 = 1 << 10;
 
+/// A sentence after a Roar that starts one of these is an ability of its own (features.py `_LASTING_STARTS`).
+const LASTING_STARTS: [&str; 7] = ["When ", "Whenever ", "While ", "Dawn:", "Dusk:", "Deathrattle", "Evolves "];
+
 #[derive(Clone, Debug)]
 pub struct Card {
     pub idx: CardId,
@@ -98,6 +101,8 @@ pub struct Card {
     pub has_roar: bool,
     /// Rules text beyond keywords and a food cost (features.has_ability).
     pub has_ability: bool,
+    /// The ability once the Roar has fired: the text without the Roar's own sentences (features.lasting_ability).
+    pub has_lasting_ability: bool,
     /// The cards whose own text is a live "+X" (strength.py ANTHEM_CARDS): 0 none, 1 guard_wasp, 2 tuna, 3 hamster,
     /// 4 peacock, 5 giraffe, 6 crocodile, 7 capybara.
     pub anthem_kind: u8,
@@ -223,11 +228,22 @@ impl Cards {
             }
             by_id.insert(id.clone(), idx);
             let kw_names: Vec<&str> = rec.get("keywords").and_then(|t| t.as_array()).map(|a| a.iter().filter_map(|x| x.as_str()).collect()).unwrap_or_default();
-            let has_ability = text.split('.').map(|t| t.trim()).filter(|t| !t.is_empty()).any(|t| !kw_names.contains(&t) && !t.starts_with("Costs "));
+            let is_ability = |t: &str| !kw_names.contains(&t) && !t.starts_with("Costs ");
+            let has_ability = text.split('.').map(|t| t.trim()).filter(|t| !t.is_empty()).any(is_ability);
+            let mut in_roar = false;
+            let has_lasting_ability = text.split('.').map(|t| t.trim()).filter(|t| !t.is_empty()).any(|t| {
+                if t.starts_with("Roar:") {
+                    in_roar = true;
+                } else if in_roar && LASTING_STARTS.iter().any(|s| t.starts_with(s)) {
+                    in_roar = false;
+                }
+                !in_roar && is_ability(t)
+            });
             list.push(Card {
                 idx,
                 has_roar: text.contains("Roar:"),
                 has_ability,
+                has_lasting_ability,
                 id,
                 name: rec.get("name").and_then(|t| t.as_str()).unwrap_or("").to_string(),
                 status: rec.get("status").and_then(|t| t.as_str()).unwrap_or("").to_string(),

@@ -189,13 +189,27 @@ def fit(P, Gz, S, H, y, val, l2=1e-4, epochs=30, batch=512, lr=1e-3, seed=0):
     return best_P
 
 
-def train(out, paths, l2=1e-4, test_path=None, epochs=30):
+def to_live(names, X):
+    """Rows of the "board" set as `board_live` reads them: a crossroad's Roar has fired, so its roar column is 0 and a
+    Roar animal's ability column 0 too. Exact but for the few Roar animals with a lasting ability (Meerkat, the
+    Caterpillar's line, the Dung Beetle's forms, the Hungry Rhinos), which the rows cannot tell apart."""
+    for k in range(features.BOARD_SLOTS):
+        r, a = names.index(f"cr{k}_roar"), names.index(f"cr{k}_ability")
+        roar = X[:, r] != 0
+        X[roar, a] = 0.0
+        X[:, r] = 0.0
+    return X
+
+
+def train(out, paths, l2=1e-4, test_path=None, epochs=30, live=False):
     np = _np()
     from ..bots.slot_eval import SlotEval
 
     names, X, y, turn, game, deck, feature_set = load_rounds(paths)
     if feature_set != "board":
         raise ValueError(f"the slot network reads the board feature set, not {feature_set!r}")
+    if live:
+        X, feature_set = to_live(names, X), "board_live"
     lay = layout(names)
     bucket = (game.astype(np.int64) * 2654435761 % 2**32) % 100
     test = bucket < 20
@@ -225,12 +239,13 @@ def train(out, paths, l2=1e-4, test_path=None, epochs=30):
                   mean=tuple(mean), std=tuple(std), embed=tuple(tuple(r) for r in P["E"]),
                   we_s=tuple(tuple(r) for r in P["We_s"]), be_s=tuple(P["be_s"]), we_h=tuple(tuple(r) for r in P["We_h"]), be_h=tuple(P["be_h"]),
                   w1=tuple(tuple(r) for r in P["W1"]), b1=tuple(P["b1"]), w2=tuple(P["w2"]), b2=float(P["b2"][0]), scale=POINTS_PER_LOGIT,
-                  provenance={"rounds": list(paths), "l2": l2, "report": report})
+                  provenance={"rounds": list(paths), "l2": l2, "live": live, "report": report})
     if test_path:
         t = np.load(test_path)
         if [str(n) for n in t["features"]] != names:
             raise ValueError("the test set was recorded with a different feature set")
-        Gt, St, Ht = split(t["x"].astype(np.float64), lay)
+        Xt = t["x"].astype(np.float64)
+        Gt, St, Ht = split(to_live(names, Xt) if live else Xt, lay)
         yt, tt = t["y"], t["turn"]
         pt, _ = forward(P, (Gt - mean) / std, St, Ht)
         outside = {"positions": int(len(yt)), "games": int(len(np.unique(t["game"])))}
@@ -258,12 +273,13 @@ def main(argv=None) -> None:
     p.add_argument("--l2", type=float, default=1e-4)
     p.add_argument("--epochs", type=int, default=30)
     p.add_argument("--test", default=None, help="an outside test set (.npz with x, y, turn, game, features[, hand])")
+    p.add_argument("--live", action="store_true", help="fit the board_live set: the board's fired Roars read as spent")
     p.add_argument("--check", action="store_true", help="only check the gradients against finite differences")
     a = p.parse_args(argv)
     if a.check:
         print("largest relative gradient error by parameter:", {k: f"{v:.1e}" for k, v in check_gradients().items()})
         return
-    rep = train(a.out, a.rounds, a.l2, test_path=a.test, epochs=a.epochs)
+    rep = train(a.out, a.rounds, a.l2, test_path=a.test, epochs=a.epochs, live=a.live)
     for k, v in rep.items():
         print(f"{k:15s} {v}")
 

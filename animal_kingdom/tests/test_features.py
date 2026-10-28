@@ -399,3 +399,21 @@ def test_pending_payoff_credits_only_a_timer_that_can_still_fire():
     state.scheduled = [timer]
     state.board["5,2"] = [state.board["5,2"][-1]]       # the egg is eaten (Eon), the entry lingers
     assert pending_payoff(state, "A", "B", alive_only=True) == 0
+
+
+def test_board_live_reads_a_fired_roar_as_spent():
+    """On the board a Roar has fired: `board_live` zeroes the slot's roar and keeps only an ability that outlasts it
+    (Martin's XITW8A game 6, 2026-10-27: the Tiger ate its own Lion because a spent Ocelot read as worth +10)."""
+    cards = load_cards()
+    assert not features.lasting_ability(cards["ocelot"]) and features.has_ability(cards["ocelot"])
+    assert not features.lasting_ability(cards["skunk"])       # "It can't be played next turn." is the Roar's own
+    assert features.lasting_ability(cards["meerkat"])         # "When an enemy is placed next to this, ..."
+    state = make_state(current="A")
+    put(state, "4,2", "ocelot", "A")
+    names = features.feature_names("board_live")
+    slot = sorted(state.game_map.crossroads).index("4,2")
+    old = dict(zip(names, features.extract(state, "A", "board")))
+    new = dict(zip(names, features.extract(state, "A", "board_live")))
+    assert (old[f"cr{slot}_roar"], old[f"cr{slot}_ability"]) == (1.0, 1.0)
+    assert (new[f"cr{slot}_roar"], new[f"cr{slot}_ability"]) == (0.0, 0.0)
+    assert {k for k in names if old[k] != new[k]} == {f"cr{slot}_roar", f"cr{slot}_ability"}

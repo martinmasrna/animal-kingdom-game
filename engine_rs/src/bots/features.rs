@@ -597,13 +597,13 @@ pub const RUNG2_EXTRA: [&str; 24] = [
 
 pub fn feature_names(set: &str) -> Vec<&'static str> {
     let mut v: Vec<&str> = RUNG0.to_vec();
-    if set == "rung1" || set == "rung2" || set == "board" {
+    if set == "rung1" || set == "rung2" || set == "board" || set == "board_live" {
         v.extend(RUNG1_EXTRA);
     }
-    if set == "rung2" || set == "board" {
+    if set == "rung2" || set == "board" || set == "board_live" {
         v.extend(RUNG2_EXTRA);
     }
-    if set == "board" {
+    if set == "board" || set == "board_live" {
         v.extend(board_names().iter().copied());
     }
     v
@@ -659,10 +659,15 @@ pub fn board_names() -> &'static Vec<&'static str> {
     })
 }
 
-fn push_properties(v: &mut Vec<f64>, card: &Card, sign: f64) {
+fn push_properties(v: &mut Vec<f64>, card: &Card, sign: f64, on_board_live: bool) {
     let (kw, tags) = property_order();
-    v.push(sign * if card.has_roar { 1.0 } else { 0.0 });
-    v.push(sign * if card.has_ability { 1.0 } else { 0.0 });
+    if on_board_live {
+        v.push(0.0);   // board_live: a Roar on the board has fired
+        v.push(sign * if card.has_lasting_ability { 1.0 } else { 0.0 });
+    } else {
+        v.push(sign * if card.has_roar { 1.0 } else { 0.0 });
+        v.push(sign * if card.has_ability { 1.0 } else { 0.0 });
+    }
     for &i in kw {
         v.push(sign * if card.keywords & (1 << i) != 0 { 1.0 } else { 0.0 });
     }
@@ -671,7 +676,7 @@ fn push_properties(v: &mut Vec<f64>, card: &Card, sign: f64) {
     }
 }
 
-pub fn board_features(st: &State, me: Player, opp: Player, v: &mut Vec<f64>) {
+pub fn board_features(st: &State, me: Player, opp: Player, live: bool, v: &mut Vec<f64>) {
     let gm = st.map();
     let n_props = 2 + crate::data::KEYWORDS.len() + crate::data::BOT_TAG_COUNT;
     for k in 0..BOARD_SLOTS {
@@ -690,7 +695,7 @@ pub fn board_features(st: &State, me: Player, opp: Player, v: &mut Vec<f64>) {
         v.push(under.iter().filter(|u| u.owner == me).count() as f64 / 3.0);
         v.push(under.iter().filter(|u| u.owner == opp).count() as f64 / 3.0);
         v.push(sign * if top.placed_on_turn as i32 == st.turn_counter { 1.0 } else { 0.0 });
-        push_properties(v, st.card(top.card), sign);
+        push_properties(v, st.card(top.card), sign, live);
     }
     let mut hand: Vec<&Unit> = st.hands[me as usize].iter().collect();
     hand.sort_by_key(|u| std::cmp::Reverse(effective_strength(st, u, None)));   // stable: ties keep hand order
@@ -703,7 +708,7 @@ pub fn board_features(st: &State, me: Player, opp: Player, v: &mut Vec<f64>) {
         v.push(1.0);
         v.push(effective_strength(st, u, None) as f64 / 10.0);
         v.push(card.food_cost as f64 / 5.0);
-        push_properties(v, card, 1.0);
+        push_properties(v, card, 1.0, false);
     }
     v.push(st.hands[me as usize].len() as f64 / 8.0);
     v.push(st.hands[opp as usize].len() as f64 / 8.0);
@@ -860,7 +865,7 @@ pub fn extract(st: &State, me: Player, set: &str) -> Vec<f64> {
     let live = enabled_roar_count(st, me);
     v.push(live as f64);
     v.push(pending_payoff(st, me, false));
-    if set == "rung1" || set == "rung2" || set == "board" {
+    if set == "rung1" || set == "rung2" || set == "board" || set == "board_live" {
         let phase = (st.turn_counter as f64 / T_NORM).min(1.0);
         let growth = growth_board_diff(st, me, opp);
         v.push(growth);
@@ -880,7 +885,7 @@ pub fn extract(st: &State, me: Player, set: &str) -> Vec<f64> {
         v.push(hq_dist_diff(st, me, opp, my_connection, opp_connection));
         v.push(flight_hand_expected_diff(st, me, opp));
     }
-    if set == "rung2" || set == "board" {
+    if set == "rung2" || set == "board" || set == "board_live" {
         let hand: Vec<&Card> = st.hands[me as usize].iter().map(|u| st.card(u.card)).collect();
         let strengths: Vec<i32> = hand.iter().filter_map(|c| c.base).collect();
         let roars = hand.iter().filter(|c| c.has_roar).count() as i32;
@@ -931,8 +936,8 @@ pub fn extract(st: &State, me: Player, set: &str) -> Vec<f64> {
         v.push(pending_target_strength(st, me));
         v.push(buried_presence(st, me));
     }
-    if set == "board" {
-        board_features(st, me, opp, &mut v);
+    if set == "board" || set == "board_live" {
+        board_features(st, me, opp, set == "board_live", &mut v);
     }
     v
 }
