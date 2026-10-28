@@ -2803,6 +2803,16 @@
       "note": "Martin, 2026-10-26",
       "by": "claude",
       "at": 1793028834
+    },
+    "habitat": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Open Ocean"
+      },
+      "note": "Iris is a Chameleon since 2026-10-26; Open Ocean was left over from the Octopus (Martin, 2026-10-28)",
+      "by": "claude",
+      "at": 1793176561
     }
   },
   "okapi": {
