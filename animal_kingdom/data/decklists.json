@@ -129,7 +129,6 @@
    "starter": true,
    "bot": true,
    "cards": {
-    "jellyfish_legend": 1,
     "tuna_legend": 1,
     "manta_ray_legend": 1,
     "swordfish": 2,
@@ -142,7 +141,7 @@
     "tuna": 3,
     "sunfish": 3,
     "great_white_shark": 2,
-    "mackerel": 1
+    "mackerel": 2
    }
   },
   {
@@ -185,12 +184,12 @@
     "golden_orb_weaver": 2,
     "armadillo": 2,
     "hedgehog": 3,
-    "jellyfish": 3,
     "black_bear": 3,
     "tortoise": 3,
     "toad": 3,
     "stag_beetle": 3,
-    "meerkat": 2
+    "meerkat": 2,
+    "stick_insect": 3
    }
   },
   {

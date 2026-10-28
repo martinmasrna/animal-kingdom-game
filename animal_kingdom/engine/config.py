@@ -132,7 +132,7 @@ class Config:
     hamster_per_step: int = 1            # Hamster: +1 strength for each 10 food you have
     hamster_food_step: int = 10
     tuna_legend_food: int = 5            # the legendary Tuna: per region you control, a card and 5 food
-    tortoise_per_armor: int = 5          # Tortoise: 5 food for each of your animals with Armor
+    stag_beetle_per_armor: int = 5       # Stag Beetle: 5 food for each of your animals with Armor
     wildebeest_food: int = 5             # Wildebeest: at the end of your turn, if grazing, gain 5
     dung_beetle_per: int = 5             # Dung Beetle: 5 food for each Hungry animal you control
     otk_squirrel_multiplier: int = 3     # the legendary Squirrel: in 2 turns, gain three times the food it lost...

@@ -31,7 +31,7 @@ fn keyword_aura(kind: u8) -> (u32, Option<u32>) {
     match kind {
         1 => (K_ARMOR, None),
         2 => (K_SPIKES, None),
-        3 => (K_POISON, Some(T_FISH)),
+        3 => (K_POISON, None),
         _ => (0, None),
     }
 }

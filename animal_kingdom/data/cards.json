@@ -359,12 +359,11 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 2,
-      "text": "Reach. Poison.",
+      "base_strength": 4,
+      "text": "Poison.",
       "species": "Toad",
       "habitat": "Meadow",
       "keywords": [
-        "Reach",
         "Poison"
       ]
     },
@@ -1032,7 +1031,7 @@
     {
       "id": "jellyfish_legend",
       "name": "[JELLYFISH]",
-      "status": "collectible",
+      "status": "reserve",
       "rarity": "legendary",
       "tags": [],
       "base_strength": 3,
@@ -1568,15 +1567,15 @@
       "id": "jellyfish",
       "name": "Jellyfish",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [],
       "base_strength": 4,
-      "text": "Poison.",
+      "text": "Poison. Your adjacent animals have Poison.",
+      "species": "Jellyfish",
+      "habitat": "Open Ocean",
       "keywords": [
         "Poison"
-      ],
-      "species": "Jellyfish",
-      "habitat": "Open Ocean"
+      ]
     },
     {
       "id": "black_bear",
@@ -1598,13 +1597,13 @@
       "status": "collectible",
       "rarity": "common",
       "tags": [],
-      "base_strength": 4,
-      "text": "Armor. Roar: gain 5 food for each of your animals with Armor.",
+      "base_strength": 6,
+      "text": "Armor.",
+      "species": "Tortoise",
+      "habitat": "Savanna",
       "keywords": [
         "Armor"
-      ],
-      "species": "Tortoise",
-      "habitat": "Savanna"
+      ]
     },
     {
       "id": "owl",
@@ -2793,13 +2792,13 @@
       "tags": [
         "Beetle"
       ],
-      "base_strength": 6,
-      "text": "Armor.",
+      "base_strength": 4,
+      "text": "Armor. Roar: gain 5 food for each of your animals with Armor.",
+      "species": "Stag Beetle",
+      "habitat": "Forest",
       "keywords": [
         "Armor"
-      ],
-      "species": "Stag Beetle",
-      "habitat": "Forest"
+      ]
     },
     {
       "id": "dolphin",

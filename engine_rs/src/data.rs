@@ -108,14 +108,14 @@ pub struct Card {
     pub anthem_kind: u8,
     /// Family auras (strength.py FAMILY_AURAS): 0 none, 1 mackerel (Fish, always), 2 cape_buffalo (Hoofed, their turn).
     pub family_aura: u8,
-    /// Keyword auras (statics.py KEYWORD_AURAS): 0 none, 1 armadillo (Armor), 2 porcupine (Spikes), 3 jellyfish_legend
-    /// (Poison, Fish only).
+    /// Keyword auras (statics.py KEYWORD_AURAS): 0 none, 1 armadillo (Armor), 2 porcupine (Spikes), 3 jellyfish
+    /// (Poison).
     pub keyword_aura: u8,
 }
 
 pub const ANTHEM_KINDS: [&str; 8] = ["", "guard_wasp", "tuna", "hamster", "peacock", "giraffe", "crocodile", "capybara"];
 pub const FAMILY_AURAS: [&str; 3] = ["", "mackerel", "cape_buffalo"];
-pub const KEYWORD_AURAS: [&str; 4] = ["", "armadillo", "porcupine", "jellyfish_legend"];
+pub const KEYWORD_AURAS: [&str; 4] = ["", "armadillo", "porcupine", "jellyfish"];
 
 /// The cards the engine's rules name (never a card's effect: those live with the card in effects): resolved once.
 pub struct Known {

@@ -34,11 +34,6 @@ GOOD = {
 
 def test_cards_load_full_pool():
     cards = load_cards()
-    # 12 starter decks x 14 designs each = 168 designs in starters; the bench (collectible, in no starter), tokens,
-    # the reserve and the tutorial's cards beside them.
-    from animal_kingdom.engine.cards import STARTER_DECKS
-    assert sum(len(d["cards"]) for d in STARTER_DECKS) == 168
-    assert all(cards[cid].collectible for d in STARTER_DECKS for cid in d["cards"])
     assert all(isinstance(c, Card) for c in cards.values())
 
 

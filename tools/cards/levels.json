@@ -2257,6 +2257,35 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-28: takes the aura from the legendary Jellyfish",
+      "by": "claude",
+      "at": 1793190598
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Poison."
+      },
+      "note": "Martin, 2026-10-28: the Poison sibling of the Armadillo and the Porcupine",
+      "by": "claude",
+      "at": 1793190599
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "moved from fish to pool",
+      "by": "claude",
+      "at": 1793190663
     }
   },
   "jellyfish_legend": {
@@ -2276,9 +2305,13 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "Martin 2026-10-17: placeholder in caps until a name he is sure of",
+      "note": "out of the collection (in the reserve)",
       "by": "claude",
-      "at": 1792191059
+      "at": 1793190623,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
+      }
     }
   },
   "jerboa": {
@@ -4057,6 +4090,26 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Armor. Roar: gain 5 food for each of your animals with Armor."
+      },
+      "note": "Martin, 2026-10-28: the vanilla Armor common, swapped with the Stag Beetle",
+      "by": "claude",
+      "at": 1793190852
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "draft, the Armor body's number; to be settled (Martin, 2026-10-28)",
+      "by": "claude",
+      "at": 1793190853
     }
   },
   "tuna": {
@@ -4534,8 +4587,8 @@
     "effect": {
       "lv": "problem",
       "by": "claude",
-      "at": 1792676407,
-      "note": "Martin, 2026-10-22: the everyday poisonous animal on the plain Poison card",
+      "at": 1793190595,
+      "note": "Martin, 2026-10-28: the vanilla Poison common (no two-keyword commons if we can help it)",
       "review": {
         "prev_lv": "problem",
         "prev_note": "Reach has no number (Martin, 2026-10-21)",
@@ -4574,8 +4627,8 @@
       },
       "lv": "draft",
       "by": "claude",
-      "at": 1792676613,
-      "note": "Martin, 2026-10-22"
+      "at": 1793190597,
+      "note": "draft: the plain Poison body played neutral at 4 on the Jellyfish; to be settled (Martin, 2026-10-28)"
     }
   },
   "locust_legend": {
@@ -5189,9 +5242,14 @@
   "stag_beetle": {
     "effect": {
       "lv": "draft",
-      "note": "the plain wall removal can't touch",
+      "note": "Martin, 2026-10-28: swapped with the Tortoise",
       "by": "claude",
-      "at": 1792270570
+      "at": 1793190854,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "the plain wall removal can't touch",
+        "prev": "Armor."
+      }
     },
     "animal": {
       "note": "moved from pool to food_otk",
@@ -5220,9 +5278,14 @@
     },
     "strength": {
       "lv": "draft",
-      "note": "the Armor 6 anchor made real",
+      "note": "draft, the number this card had on the Tortoise; to be settled (Martin, 2026-10-28)",
       "by": "claude",
-      "at": 1792270569
+      "at": 1793190855,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "the Armor 6 anchor made real",
+        "prev": 6
+      }
     },
     "tag": {
       "review": {
@@ -5769,9 +5832,9 @@
         "prev_lv": "draft",
         "prev_note": ""
       },
-      "note": "into the collection",
+      "note": "moved from pool to food_otk",
       "by": "claude",
-      "at": 1792756928
+      "at": 1793190634
     }
   },
   "hercules_beetle": {

@@ -428,7 +428,7 @@ def test_a_spikes_animal_wears_its_badge_until_its_spikes_are_used():
     assert "spikes" not in top()
 
 
-def test_a_poison_animal_wears_its_badge_printed_or_from_the_legendary_jellyfish():
+def test_a_poison_animal_wears_its_badge_printed_or_from_the_jellyfish():
     from animal_kingdom.engine.actions import ChoiceAction
     from animal_kingdom.engine.state import UnitInstance
     m = Match("PSN", Seat("ta", "A", deck="cats"))
@@ -436,11 +436,11 @@ def test_a_poison_animal_wears_its_badge_printed_or_from_the_legendary_jellyfish
     m._start_game()
     while m.state.pending:
         m.act(m.to_act(), ChoiceAction("__skip__"))
-    m.state.board["3,2"] = [UnitInstance("jellyfish", "B", m.state.new_iid())]
+    m.state.board["3,2"] = [UnitInstance("toad", "B", m.state.new_iid())]
     m.state.board["4,2"] = [UnitInstance("sunfish", "B", m.state.new_iid())]
     board = lambda: m.view("A")["game"]["board"]
     assert board()["3,2"][-1].get("poison") is True and "poison" not in board()["4,2"][-1]
-    m.state.board["4,1"] = [UnitInstance("jellyfish_legend", "B", m.state.new_iid())]   # next to the Sunfish
+    m.state.board["4,1"] = [UnitInstance("jellyfish", "B", m.state.new_iid())]   # next to the Sunfish
     assert board()["4,2"][-1].get("poison") is True
 
 def test_the_opponents_mulligan_never_shows_in_their_unseen_cards():

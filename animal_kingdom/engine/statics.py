@@ -57,7 +57,7 @@ def crossroad_of(state: GameState, unit: UnitInstance) -> Optional[str]:
 KEYWORD_AURAS = {
     "armadillo": ("Armor", None),                 # "Armor. Your adjacent animals have Armor."
     "porcupine": ("Spikes", None),                # "Spikes. Your adjacent animals have Spikes."
-    "jellyfish_legend": ("Poison", "Fish"),  # "Your adjacent Fish have Poison."
+    "jellyfish": ("Poison", None),                # "Poison. Your adjacent animals have Poison."
 }
 
 

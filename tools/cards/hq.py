@@ -501,9 +501,8 @@ def _set_status(card_id: str, frm: str, to: str, note: str, by: str) -> str:
 
 
 def shelve(card_id: str, by: str = "martin") -> str:
-    """Take a card in no starter deck out of the collection, into the reserve (kept, not collectible)."""
-    if _row(card_id)["deck"] != POOL:
-        raise Refused(f"{card_id} is in a starter deck; move it to {POOL} first")
+    """Take a card out of the collection, into the reserve (kept, not collectible); it leaves its starter deck too."""
+    move(card_id, POOL, by)
     return _set_status(card_id, "collectible", "reserve", "out of the collection (in the reserve)", by)
 
 

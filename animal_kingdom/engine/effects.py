@@ -2751,11 +2751,11 @@ def _orb_weaver_enemy_placed(state, spider, placed, cr):
                                                   source_iid=None, by_card=spider.card_id))
 
 
-def _tortoise_place(state, unit, cr):
+def _stag_beetle_place(state, unit, cr):
     """Roar: gain 5 food for each of your animals with Armor (this one included)."""
     n = sum(1 for c, st in state.board.items()
             if st and st[-1].owner == unit.owner and statics.has_keyword(state, st[-1], "Armor", c))
-    _push_gain(state, unit.owner, n * state.config.tortoise_per_armor)
+    _push_gain(state, unit.owner, n * state.config.stag_beetle_per_armor)
 
 
 def _grizzly_place(state, unit, cr):
@@ -3226,7 +3226,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "golden_orb_weaver": {"on_enemy_placed_adjacent": _orb_weaver_enemy_placed},
     "black_bear": {"on_place": _black_bear_place},
     "grizzly_bear": {"on_place": _grizzly_place},
-    "tortoise": {"on_place": _tortoise_place},
+    "stag_beetle": {"on_place": _stag_beetle_place},
     "owl": {"on_place": _owl_place},
     # Giants (Hungry and Titan are keywords).
     "rhinoceros_legend": {"on_place": _removes()},            # the horn: one adjacent enemy, no cap (Martin, 2026-10-26)

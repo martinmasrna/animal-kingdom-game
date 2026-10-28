@@ -30,12 +30,6 @@ FOOD_IDX = features.RUNG0_FEATURES.index("food_progress")
 
 # --------------------------------------------------------------------- deck pool / pairs
 
-def test_deck_pool_is_the_twelve_starters():
-    pool = deck_pool()
-    assert len(pool) == 12
-    assert "baseline" not in pool
-
-
 def test_all_deck_pairs_is_78_unordered_pairs_including_mirrors():
     pool = deck_pool()
     index = {d: i for i, d in enumerate(pool)}

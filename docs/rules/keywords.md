@@ -22,7 +22,7 @@ As an action, this moves through your own animals connected to it (its pack), th
 ### Armor
 A shell, plates or spines: cannot be removed, returned to hand, or eaten by **any** ability — the enemy's **or its own controller's**. It can still be **covered** under the normal placement rules — covering is placement, not an ability. Pestis can't target an animal with Armor; when it removes a stack, a buried unit with Armor is skipped **in place** and everything else is still removed. Armor is not a shield for the cards beneath it. Scope is **board-only**: a card with Armor in hand can be paid or removed normally. It still dies if its strength drops below 0: that's a rule, not an ability (Martin, 2026-10-26).
 
-Carried by: Azamandulai the tortoise and the Glyptodont (Ramp); the Stag Beetle, the keyword's common; the Armadillo, which also gives it to your adjacent animals; the Sea Turtle's shell. Only animals a player sees as armored carry it on their own card; the spiny ones (Porcupine, Hedgehog) remove the first enemy that covers them instead.
+Carried by: Azamandulai the tortoise and the Glyptodont (Ramp); the Tortoise, the keyword's common; the Stag Beetle, which gains food for each of your animals with Armor; the Armadillo, which also gives it to your adjacent animals; the Sea Turtle's shell. Only animals a player sees as armored carry it on their own card; the spiny ones (Porcupine, Hedgehog) remove the first enemy that covers them instead.
 
 ### Stealth
 Cannot be **chosen** by an enemy ability: excluded from any option list an enemy picks a target from (Jaguar/Serval/Hawk/Jackal/Soldier Ant/Rat/Hornet/Skunk/Pestis). **Mass, random, and automatic effects hit it normally**, and so does an Apex Predator's eat (a predator eats what it lands on; nobody chooses): Rhinoceros/Brutus AoE, the units buried under a Pestis target, Sirocco's mass bounce, Grizzly Bear's random strike, Hippopotamus/King Theron triggers. Its own controller may still choose it freely. Scope is board-only.
@@ -37,7 +37,7 @@ Carried by: the Hedgehog, the keyword's common; the Porcupine, which also gives 
 ### Poison (proposed, 2026-10-07)
 When an enemy covers it, that enemy is removed at the start of your next turn. Every time, not once: the coverer gets the rest of the turn it covered in, then dies and the poisoned animal resurfaces, cutting whatever chain the opponent built through that crossroad. Like venom (§9.1 of `overview.md`), the poison belongs to the coverer: it resolves even if the Poison animal is gone by then, and is cancelled only if the coverer leaves the board first. An Apex Predator landing on it is poisoned and still eats it. A friendly cover doesn't set it off. The clean answer is a removal ability; Poison doesn't stop a two-action walk-in (cover, then take the den), so it guards crossroads the opponent can't win through in one turn. Unlike Spikes (at once, the first time only), it never wears off.
 
-For poisonous animals: Poison Dart Frog, Jellyfish; later Pufferfish, Scorpion, Lionfish.
+Carried by: the Toad, the keyword's common; the Jellyfish, which also gives it to your adjacent animals; the Poison Dart Frog. Later Pufferfish, Scorpion, Lionfish.
 
 ### Titan (proposed, 2026-10-08)
 Playing it costs two actions instead of one. A free placement (Jerboa, the Remora, the Elephant's kind of "play another animal") can't pay for it; an extra action can. For the biggest animals: Blue Whale, Whale Shark.

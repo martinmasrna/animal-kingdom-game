@@ -79,7 +79,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "remora" | "cod" | "sardine" | "mahi_mahi" | "sunfish"
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
         | "chipmunk" | "gopher" | "mara" | "groundhog" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
-        | "grizzly_bear" | "tortoise" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
+        | "grizzly_bear" | "stag_beetle" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
@@ -1053,9 +1053,9 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             schedule(st, unit, d, vmap!("op" => Value::s("draw"), "player" => pn(owner), "n" => Value::Int(n as i64)), false, None);
         }
         ("grizzly_bear", OnPlace) => push_draw(st, other(owner), 1),
-        ("tortoise", OnPlace) => {
+        ("stag_beetle", OnPlace) => {
             let n = st.tops().filter(|(c, t)| t.owner == owner && statics::has_keyword(st, t, K_ARMOR, Some(*c))).count() as i32;
-            let per = cfg(st, "tortoise_per_armor");
+            let per = cfg(st, "stag_beetle_per_armor");
             push_gain(st, owner, n * per);
         }
         // Giants

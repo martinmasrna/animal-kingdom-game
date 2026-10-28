@@ -61,10 +61,10 @@ def test_an_animal_starved_below_0_dies():
 
 def test_a_bite_below_0_kills_even_through_armor():
     s = make_state(hands={"A": ["viper", "viper"]})
-    put(s, "2,1", "tortoise", "B")                             # a 4 with Armor
+    put(s, "2,1", "stag_beetle", "B")                          # a 4 with Armor
     apply_click(s, PlaceAction("viper", ("cr", "1,1")))        # 4 -> 1
     apply_click(s, PlaceAction("viper", ("cr", "1,1")))        # 1 -> -2: dying is a rule, not an ability
-    assert s.top_unit("2,1") is None and removed(s, "tortoise")
+    assert s.top_unit("2,1") is None and removed(s, "stag_beetle")
 
 
 def test_a_crocodile_shrunk_below_3_dies_when_the_opponents_turn_starts():
@@ -244,14 +244,14 @@ def test_an_apex_cannot_eat_what_an_armadillo_armors():
     assert s.board["1,2"][0] is sq and "squirrel" not in s.remove_pile
 
 
-def test_the_legendary_jellyfish_poisons_its_adjacent_fish():
+def test_the_jellyfish_poisons_its_adjacent_animals():
     s = make_state(current="B", hands={"B": ["lion"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "4,2", "lion", "B")
-    put(s, "3,3", "jellyfish_legend", "A")
-    put(s, "3,2", "sardine", "A")
-    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))  # covers the poisoned Sardine
+    put(s, "3,3", "jellyfish", "A")
+    put(s, "3,2", "squirrel", "A")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))  # covers the poisoned Squirrel
     end_turn(s)                                                 # A's turn starts: the coverer dies
-    assert s.top_unit("3,2").card_id == "sardine" and removed(s, "lion")
+    assert s.top_unit("3,2").card_id == "squirrel" and removed(s, "lion")
 
 
 # ============================================================================= Aristocrats
@@ -422,11 +422,8 @@ def test_the_dart_frog_takes_everything_beside_it_when_removed():
     assert all(s.top_unit(cr) is None for cr in ("1,1", "1,2", "1,3", "2,2"))
 
 
-def test_the_toad_has_reach_and_poison_and_nothing_more():
-    s = make_state(hands={"A": ["toad"]})
-    put(s, "1,2", "lion", "A")
-    assert "3,2" in {a.crossroad for a in rules.legal_actions(s) if isinstance(a, PlaceAction) and a.card_id == "toad"}
-    assert set(load_cards()["toad"].keywords) == {"Reach", "Poison"}
+def test_the_toad_has_poison_and_nothing_more():
+    assert set(load_cards()["toad"].keywords) == {"Poison"} and load_cards()["toad"].text == "Poison."
 
 
 def test_vultures_land_from_hand_and_deck_after_three_removals():
@@ -976,12 +973,12 @@ def test_golden_orb_weaver_catches_a_roamer_placed_or_roaming_beside_it():
     assert removed(s, "wolf")
 
 
-def test_tortoise_counts_armor_including_an_armadillos_gift():
-    s = make_state(hands={"A": ["tortoise"]})
+def test_stag_beetle_counts_armor_including_an_armadillos_gift():
+    s = make_state(hands={"A": ["stag_beetle"]})
     put(s, "1,1", "armadillo", "A")
-    put(s, "2,2", "squirrel", "A")                                  # beside the Tortoise's crossroad, not the Armadillo's
-    rules.apply_action(s, PlaceAction("tortoise", ("cr", "1,2")))   # the Tortoise (printed, and the aura) and the Armadillo
-    assert s.food["A"] == 2 * CFG.tortoise_per_armor
+    put(s, "2,2", "squirrel", "A")                                     # beside the Beetle's crossroad, not the Armadillo's
+    rules.apply_action(s, PlaceAction("stag_beetle", ("cr", "1,2")))   # the Beetle (printed, and the aura) and the Armadillo
+    assert s.food["A"] == 2 * CFG.stag_beetle_per_armor
 
 
 def test_royal_jelly_makes_your_animals_five_wherever_they_are():
@@ -1261,9 +1258,9 @@ def test_the_dolphin_is_a_five_that_draws_a_card():
     assert effective_strength(s, s.top_unit("1,2")) == 5 and hand_ids(s, "A") == ["lion"]
 
 
-def test_the_stag_beetle_is_a_common_six_with_armor():
-    card = load_cards()["stag_beetle"]
-    assert (card.base_strength, card.rarity) == (6, "common") and card.tags == {"Beetle"} and "Armor" in card.keywords
+def test_the_tortoise_is_a_common_with_armor_and_nothing_else():
+    card = load_cards()["tortoise"]
+    assert card.rarity == "common" and card.text == "Armor." and "Armor" in card.keywords
 
 
 def test_the_peacock_counts_every_card_in_your_hand_itself_included_until_it_lands():

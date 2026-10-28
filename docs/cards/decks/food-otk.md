@@ -29,10 +29,10 @@ The table below is generated from cards.json, where the cards live.
 | Card | × | Tags | Str | Text |
 |---|---:|---|---:|---|
 | **Hedgehog** | 3 | — | 5 | Spikes. |
-| **Jellyfish** | 3 | — | 4 | Poison. |
 | **Black Bear** | 3 | Bear | 5 | Roar: in 2 turns, draw 2 cards. |
-| **Tortoise** | 3 | — | 4 | Armor. Roar: gain 5 food for each of your animals with Armor. |
-| **Toad** | 3 | — | 2 | Reach. Poison. |
-| **Stag Beetle** | 3 | Beetle | 6 | Armor. |
+| **Tortoise** | 3 | — | 6 | Armor. |
+| **Toad** | 3 | — | 4 | Poison. |
+| **Stag Beetle** | 3 | Beetle | 4 | Armor. Roar: gain 5 food for each of your animals with Armor. |
+| **Stick Insect** | 3 | — | 6 | Stealth. |
 
 <!-- cards:end -->

@@ -1,7 +1,7 @@
-"""Structural tests for the launch pool: 12 starter decks, lists over the collectible cards (decklists.json).
+"""Structural tests for the card pool and the shipped deck lists (decklists.json).
 
-These assert the *shape* of the static data (counts, uniqueness, domains) — not card behavior, which is Phase 2. A
-starter has no fixed rarity split: any legal deck will do (Martin, 2026-10-22).
+These assert the *shape* of the static data (uniqueness, domains), not card behavior. The starter decks' shape (how
+many, sharing no card, 30 each) isn't held here while the cards change (Martin, 2026-10-28).
 """
 
 from __future__ import annotations
@@ -9,38 +9,18 @@ from __future__ import annotations
 from animal_kingdom.engine.cards import (
     COPY_LIMITS,
     DECKLISTS,
-    DECK_SLUGS,
     DYNAMIC_STRENGTHS,
     KEYWORDS,
-    STARTER_DECKS,
     TAGS,
     load_cards,
 )
-from animal_kingdom.decks import BOT_DECKS, PREMADE_DECKS, load_premade_deck
+from animal_kingdom.decks import BOT_DECKS, PREMADE_DECKS
 
 RETIRED_TAGS = {"Reptile", "Insect"}
 DYNAMIC_IDS = {"egg_eater"}
 
 
 # ----------------------------------------------------------------- pool composition
-
-def test_12_starter_decks_of_collectible_cards():
-    cards = load_cards()
-    assert len(STARTER_DECKS) == 12 and DECK_SLUGS == {d["slug"] for d in STARTER_DECKS}
-    for d in STARTER_DECKS:
-        assert all(cards[cid].collectible for cid in d["cards"])
-        assert d.get("cover") in d["cards"], f"{d['slug']}: its cover is not one of its cards"
-
-
-def test_starter_decks_share_no_card():
-    # A new player meets as many cards as possible: no card ships in two starter decks (Martin, 2026-10-19). Bot decks
-    # are free to overlap with anything.
-    seen: dict[str, str] = {}
-    for d in STARTER_DECKS:
-        for cid in d["cards"]:
-            assert cid not in seen, f"{cid} ships in both {seen[cid]} and {d['slug']}"
-            seen[cid] = d["slug"]
-
 
 def test_shipped_slugs_are_unique_and_the_bots_play_shipped_decks():
     # Legality isn't held here: a card change may leave a deck illegal until the decks' pass before shipping; the loader
@@ -58,13 +38,6 @@ def test_ids_and_names_globally_unique():
     assert len(set(ids)) == len(ids) == len(cards)
     names = [c.name for c in cards.values() if not c.unnamed and c.status not in ("token", "tutorial")]
     assert len(set(names)) == len(names)
-
-
-def test_each_deck_expands_to_30():
-    for slug in DECK_SLUGS:
-        deck = load_premade_deck(slug)
-        assert len(deck) == 30, f"{slug} expands to {len(deck)}"
-    assert DECK_SLUGS <= PREMADE_DECKS.keys()
 
 
 def test_copy_limits():
