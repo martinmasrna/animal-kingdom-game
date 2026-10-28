@@ -13,13 +13,13 @@ The later habitats come from the 2026-10-05 habitat survey, an agent's proposal 
 - **Islands:** Komodo Dragon, Giant Tortoise, Coconut Crab, Frigatebird, Dodo (or Extinct).
 - **Mountains**, with China's bamboo forests: Giant Panda, Red Panda, Cougar, Ibex, Bighorn Sheep, Andean Condor (or Back from the Brink).
 - **Polar**, both poles and the snowy north: Polar Bear, Snow Leopard, Lemming, Reindeer, Musk Ox, Arctic Fox, Snowy Owl, Narwhal, Walrus, Penguin (or Coast).
-- **Prehistoric:** dinosaurs, pterosaurs and the ancient seas: Tyrannosaurus (a legendary, "Sue"), Velociraptor, Oviraptor, Archaeopteryx.
+- **Prehistoric:** dinosaurs, pterosaurs and the ancient seas: Tyrannosaurus, Velociraptor, Oviraptor, Archaeopteryx.
 
 ### Half sets
 
 - **River and Lake**, with swamps: Axolotl, Heron, Salmon, Lamprey, Saltwater Crocodile, Bull Shark.
 - **Desert:** Rattlesnake, Black Widow (planned in the card table), Coyote, Camel, Roadrunner, Scorpion, Antlion.
-- **Deep Sea:** Anglerfish, Giant Squid, Vampire Squid.
+- **Deep Ocean:** Anglerfish, Giant Squid, Vampire Squid.
 - **Coast:** Sea Otter, Seagull, Pelican, Manatee, Starfish, Horseshoe Crab, Barnacle, Puffin.
 - **Ice Age:** Woolly Mammoth (Yuka, in the reserve since 2026-09-29).
 
@@ -35,55 +35,27 @@ Animals of the launch six without a card yet: Wolverine, Stoat, Blue Jay, Cardin
 
 ## Effects without an animal
 
-### Bodies and timing
-
-- Fragile. Hatch 1: play two strength-4 tokens on this crossroad and an adjacent empty one.
-- Fragile. Hatch 2: play a strength-8 token here; its Roar removes an adjacent enemy of strength 4 or less.
-- Fragile. In 1 turn, remove this and play a strength-2 token with Flight.
-- Fall: play two strength-1 tokens on adjacent empty crossroads.
-- Has the same strength as the animal beneath this; with none, 0.
-- Armor. Can't be covered. Can't cover or capture a den. Costs 15 food.
-- Apex Predator. Can't be covered by enemies.
-- Can't be covered by enemies. Fall: draw a card.
-- Armor. Can't be removed. In 4 turns, gain 30 food.
-
 ### Cards and food
 
 - Flight. Roar: draw a card; if an enemy was removed this turn, draw 2 instead.
 - Flight. Roar: draw 2 cards, then put a card from your hand on top of your deck.
-- Roar: look at the top 5 cards of your deck, draw an animal of your choice, put the rest on the bottom.
 - Dawn: draw a random animal of this one's family from your deck.
-- Flight. Roar: gain 6 food; if you control a Bear or a Colony animal, gain 4 more.
-- Roar: gain 12 food. You can't gain food again until your next turn.
-- Dusk: gain 2 food.
 
 ### Interaction
 
-- Fall: remove the animal that removed this.
-- When an enemy is placed next to this, remove it if its strength is 2 or less.
-- In 1 turn, remove an adjacent enemy of strength 3 or less.
-- Flight. Roar: remove an adjacent enemy of strength 3 or less; it can't come back to a hand or deck.
-- Roar: an adjacent enemy can't move, be removed, cover or use its effects until your next turn.
 - Roar: attach to an adjacent enemy. At the start of each of your turns, gain 2 food and it gets -1 strength.
-- Adjacent enemies have -1 strength.
-- Enemies that can cover this must cover this before your other animals. Has +2 strength while an enemy is next to it.
-- Your adjacent animals can't be chosen by enemy effects.
-- Flight. Roar: take a random card from your opponent's hand.
 - Flight. Roar: put an adjacent weaker enemy into your hand.
 
 ### Strength and movement
 
 - The first time each turn this gains strength, you may move it to an adjacent empty crossroad.
-- Whenever this gains strength, give an adjacent ally +1 strength.
 - Roar: give +3 strength to every other copy of this, wherever they are.
-- Roar: give a Bird in your hand +2 strength.
 - Can be placed next to any of your animals, ignoring connection.
 
 ### Copying
 
 - Become a copy of the last common your opponent played.
 - Become a copy of the last animal your opponent played (legendary).
-- Flight. Roar: repeat the Roar of the last animal your opponent played.
 - Dawn: your next Roar this turn happens twice (a parrot legendary; the Woodpecker's version then needs a new effect).
 
 ### Venom: delayed removal with counterplay
@@ -91,11 +63,7 @@ Animals of the launch six without a card yet: Wolverine, Stoat, Blue Jay, Cardin
 Mark a visible enemy for removal; the opponent gets a turn to cover it, move it or return it.
 
 - Roar: envenom an adjacent enemy.
-- Roar: envenom an adjacent enemy of strength 5 or less.
-- Stealth. Roar: envenom an adjacent enemy of strength 5 or less.
-- The first enemy that covers this is envenomed.
 - Fall: envenom an adjacent enemy.
-- Roar: clear Venom from an adjacent ally, or else remove an adjacent enemy Snake.
 
 ### Dinosaur Hatch: delayed bodies without food
 
@@ -104,8 +72,6 @@ Protect Eggs, speed up their timers, win with the big bodies they hatch.
 - Fragile. Hatch 2: play a random non-legendary Dinosaur from your deck on this crossroad.
 - Roar: draw a random Egg from your deck.
 - Roar: if an Egg hatched this turn, draw a card.
-- Flight. Roar: incubate an adjacent Egg.
-- Apex Predator. You can play this only if one of your Eggs has hatched this game (a Tyrannosaurus legendary).
 
 ## Directions (Martin, 2026-10-21/22)
 
