@@ -7,7 +7,7 @@ Every card belongs to one habitat: its animal's real, well-known home. The launc
 - **Savanna:** African grassland, gold and brown.
 - **Jungle:** tropical rainforest, deep and wet green.
 - **Forest:** temperate woods, the bamboo forests of the pandas among them.
-- **Meadow:** open fields and hedges, bright and flowering.
+- **Meadow:** open fields and hedges, bright and flowering; the prairie too, which has too few animals of its own for a habitat (Martin, 2026-10-28).
 - **City:** streets, parks and houses, grey.
 - **Open Ocean:** far from shore, sunlit blue water and the seafloor beneath it.
 
@@ -32,6 +32,3 @@ The lands:
 
 A set theme can cross habitats (Back from the Brink: animals saved from extinction), but it is never a card's habitat: its animals live somewhere real.
 
-## Open
-
-- **Grassland outside Africa,** the prairie and the steppe (bison, prairie dog, pronghorn, burrowing owl, saiga, manul): no home yet.
