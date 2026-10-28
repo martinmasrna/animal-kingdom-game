@@ -537,8 +537,13 @@ def rename(old: str, new: str) -> str:
         raise Refused(f"{new} is taken or not an id")
     # the id as a word, or leading a code name built on it (_goose_legend_roar, goose_legend_eggs), but never another card's id (eon_food_engine)
     word = re.compile(rf"(?<![A-Za-z0-9_])(_?){re.escape(old)}(?=(_[a-z0-9_]+)?(?![A-Za-z0-9_]))")
+    # only where it's plainly an id: quoted ("rodent", `rodent`) or in a code name; a bare word is prose (a rodent), left alone
+    def is_id(m: re.Match) -> bool:
+        s, i, j = m.string, m.start(), m.end(2) if m.group(2) else m.end()
+        return bool(m.group(1) or m.group(2)) or (i > 0 and j < len(s) and s[i - 1] in "\"'`" and s[j] in "\"'`")
     def sub(text: str) -> str:
-        return word.sub(lambda m: m.group(0) if m.group(2) and old + m.group(2) in ids else m.group(1) + new, text)
+        return word.sub(lambda m: m.group(0) if not is_id(m) or (m.group(2) and old + m.group(2) in ids)
+                        else m.group(1) + new, text)
     changed = 0
     for f in _git_files(ROOT):
         p = ROOT / f
