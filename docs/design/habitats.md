@@ -6,7 +6,7 @@ Every card belongs to one habitat: its animal's real, well-known home. The launc
 
 - **Savanna:** African grassland, gold and brown.
 - **Jungle:** tropical rainforest, deep and wet green.
-- **Forest:** temperate woods of the north.
+- **Forest:** temperate woods, the bamboo forests of the pandas among them.
 - **Meadow:** open fields and hedges, bright and flowering.
 - **City:** streets, parks and houses, grey.
 - **Open Ocean:** far from shore, sunlit blue water and the seafloor beneath it.
@@ -23,19 +23,16 @@ The waters (Martin, 2026-10-28):
 The lands:
 
 - **Australia.**
-- **Islands:** the islands with animals of their own, the Galápagos first.
-- **Mountains,** with China's bamboo forests.
+- **Islands:** animals that evolved on islands, in one set: Galápagos, Madagascar, New Zealand, Komodo, and the dodo.
+- **Mountains.**
 - **Polar:** the ice and snow of both poles, the snowy north and the polar seas.
 - **Desert.**
 - **Prehistoric:** dinosaurs, pterosaurs and the ancient seas.
 - **Ice Age.**
 
-Small sets across habitats:
+A set theme can cross habitats (Back from the Brink: animals saved from extinction), but it is never a card's habitat: its animals live somewhere real.
 
-- **Back from the Brink:** animals saved from extinction.
-- **Extinct.**
-- **Caves.**
+## Open
 
-## Animals between two habitats
-
-Each gets one home, the one a player pictures: Platypus (Australia or River and Lake), Penguin, Puffin and Walrus (Polar or Coast), Seahorse and Octopus (Coral Reef or Coast; the Octopus already plays in Open Ocean), Dodo and Thylacine (Islands or Extinct), Andean Condor (Mountains or Back from the Brink).
+- **Animals between two habitats**, each to get the one home a player pictures: Platypus (Australia or River and Lake), Penguin, Puffin and Walrus (Polar or Coast), Seahorse and Octopus (Coral Reef or Coast; the Octopus already plays in Open Ocean).
+- **Grassland outside Africa,** the prairie and the steppe (bison, prairie dog, pronghorn, burrowing owl, saiga, manul): no home yet.

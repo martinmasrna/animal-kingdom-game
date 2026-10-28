@@ -4,34 +4,26 @@ Ideas for later sets, nothing settled. Two lists: the expansions with the animal
 
 ## Expansions and their animals
 
-The later habitats come from the 2026-10-05 habitat survey, an agent's proposal Martin never reviewed line by line ([`../design/log_habitats.md`](../design/log_habitats.md)): a reading to work from, not a plan.
+The habitats are listed in [`../design/habitats.md`](../design/habitats.md). The animals are a starting reading, mostly from the 2026-10-05 habitat survey Martin never reviewed line by line.
 
-### Full sets
-
-- **Coral Reef:** Seahorse, Pufferfish, Clownfish, Mantis Shrimp, Cuttlefish, Moray Eel, Lionfish, Parrotfish, Box Jellyfish, Stingray.
-- **Australia:** Kangaroo, Platypus (or River and Lake), Tasmanian Devil, Echidna, Dingo.
-- **Islands:** Komodo Dragon, Giant Tortoise, Coconut Crab, Frigatebird, Dodo (or Extinct).
-- **Mountains**, with China's bamboo forests: Giant Panda, Red Panda, Cougar, Ibex, Bighorn Sheep, Andean Condor (or Back from the Brink).
-- **Polar**, both poles and the snowy north: Polar Bear, Snow Leopard, Lemming, Reindeer, Musk Ox, Arctic Fox, Snowy Owl, Narwhal, Walrus, Penguin (or Coast).
-- **Prehistoric:** dinosaurs, pterosaurs and the ancient seas: Tyrannosaurus, Velociraptor, Oviraptor, Archaeopteryx.
-
-### Half sets
-
-- **River and Lake**, with swamps: Axolotl, Heron, Salmon, Lamprey, Saltwater Crocodile, Bull Shark.
-- **Desert:** Rattlesnake, Black Widow (planned in the card table), Coyote, Camel, Roadrunner, Scorpion, Antlion.
 - **Deep Ocean:** Anglerfish, Giant Squid, Vampire Squid.
-- **Coast:** Sea Otter, Seagull, Pelican, Manatee, Starfish, Horseshoe Crab, Barnacle, Puffin.
+- **Coral Reef:** Seahorse, Pufferfish, Clownfish, Mantis Shrimp, Cuttlefish, Moray Eel, Lionfish, Parrotfish, Box Jellyfish, Stingray.
+- **Coast:** Sea Otter, Seagull, Pelican, Manatee, Starfish, Horseshoe Crab, Barnacle, Puffin, Great Auk, Steller's Sea Cow.
+- **River and Lake**, with swamps: Swan (and the Black Swan, Martin, 2026-10-28), Axolotl, Heron, Salmon, Lamprey, Saltwater Crocodile, Bull Shark.
+- **Australia:** Kangaroo, Platypus, Tasmanian Devil, Echidna, Dingo, Thylacine.
+- **Islands:** Giant Tortoise, Marine Iguana, Blue-footed Booby (Galápagos); Ring-tailed Lemur, Aye-aye, Fossa (Madagascar); Kiwi, Kakapo, Kea, Tuatara (New Zealand); Komodo Dragon; Coconut Crab, Frigatebird; Dodo.
+- **Mountains:** Cougar, Ibex, Bighorn Sheep, Andean Condor, California Condor.
+- **Polar**, both poles and the snowy north: Polar Bear, Snow Leopard, Lemming, Reindeer, Musk Ox, Arctic Fox, Snowy Owl, Narwhal, Walrus, Penguin.
+- **Desert:** Rattlesnake, Black Widow (planned in the card table), Coyote, Camel, Roadrunner, Scorpion, Antlion.
+- **Prehistoric:** dinosaurs, pterosaurs and the ancient seas: Tyrannosaurus, Velociraptor, Oviraptor, Archaeopteryx.
 - **Ice Age:** Woolly Mammoth (Yuka, in the reserve since 2026-09-29).
+- **No home yet,** the grassland outside Africa: Bison, Prairie Dog, Pronghorn, Burrowing Owl, Saiga, Manul, Przewalski's Horse, Black-footed Ferret.
 
-### Mini-sets
-
-- **Back from the Brink**, animals saved from extinction: Bison, Przewalski's Horse, Black-footed Ferret, California Condor, Kakapo.
-- **Extinct:** Dodo, Thylacine, Aurochs, Passenger Pigeon, Great Auk, Steller's Sea Cow, Quagga.
-- **Caves.**
+**Back from the Brink**, a possible set theme across habitats (animals saved from extinction): Bison, Przewalski's Horse, Black-footed Ferret, California Condor, Kakapo.
 
 ### Launch habitats, later sets
 
-Animals of the launch six without a card yet: Wolverine, Stoat, Blue Jay, Cardinal, Goshawk, Honey Buzzard, Osprey, Shrike (Forest and Meadow); Pangolin (Savanna or Jungle); Tardigrade (anywhere); Flamingo; the Prairie animals (Pronghorn, Prairie Dog, Burrowing Owl, Saiga, Manul), which have no habitat of their own.
+Animals of the launch six without a card yet: Giant Panda, Red Panda, Wolverine, Stoat, Blue Jay, Cardinal, Goshawk, Honey Buzzard, Osprey, Shrike, Passenger Pigeon (Forest and Meadow); Pangolin (Savanna or Jungle); Quagga (Savanna); Tardigrade (anywhere); Flamingo (River and Lake or Coast).
 
 ## Effects without an animal
 

@@ -60,7 +60,7 @@ VALUE_COLS = ["habitat", "rarity", "animal", "tag", "strength", "effect"]
 LEVELS_ORDER = ["empty", "draft", "problem", "fine", "locked"]
 HABITATS = ["Savanna", "Jungle", "Forest", "Meadow", "City", "Open Ocean",          # the launch six; the rest: docs/design/habitats.md
             "Deep Ocean", "Coral Reef", "Coast", "River and Lake", "Australia", "Islands", "Mountains", "Polar", "Desert",
-            "Prehistoric", "Ice Age", "Back from the Brink", "Extinct", "Caves"]
+            "Prehistoric", "Ice Age"]
 RARITY = {"L": "legendary", "R": "rare", "C": "common"}
 LETTER = {v: k for k, v in RARITY.items()}
 COPIES = {"legendary": 1, "rare": 2, "common": 3}     # the 4-4-6 copy limits: a starter holds each card at its limit

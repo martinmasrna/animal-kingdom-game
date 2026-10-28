@@ -5,3 +5,5 @@ Martin's calls on habitats, dated. A log, not a plan: the habitats are listed in
 - The Savanna set runs a card over the 3:2:2 count at rare and legendary (13 of each), kept on purpose (2026-10-09).
 - An animal goes where it really lives, or waits for its expansion: "we're not pretending that Polar Bear is a forest animal" (the Black Widow waits for Desert). Within the launch six, "anything that's one of the 6 starting habitats works" (2026-10-27).
 - Several waters: Deep Ocean, Coral Reef, Coast and River and Lake, each its own habitat beside Open Ocean; Coast deserves its own expansion; the deep water is "Deep Ocean", not "Deep Sea"; Islands (the Galápagos) and a dinosaur expansion are planned (2026-10-28).
+- Swans belong to River and Lake; the Black Swan is "obviously an effect for Black Swan", so it leaves the launch with its animal rather than moving to another (2026-10-28; the card itself not moved yet).
+- Islands stays one set: splitting it "doesn't impact the gameplay in any way". Caves goes ("Bat is in City anyway"); the pandas go to Forest, not Mountains; Extinct folds into the habitats its animals lived in (2026-10-28).
