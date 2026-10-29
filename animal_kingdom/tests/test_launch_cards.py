@@ -1438,6 +1438,8 @@ def test_grazing_okapi_draws_and_wildebeest_feeds():
     assert statics.grazing(s, deer)
     end_turn(s)
     assert len(s.hands["A"]) == 1 and s.food["A"] == CFG.wildebeest_food + 10   # Wildebeest, then R1's income
+    end_turn(s)                                                 # B's turn passes: A's Dawn, the grazing Okapi draws again
+    assert len(s.hands["A"]) == 2                               # Martin, 2026-10-29: Dawn and Dusk
 
 
 def test_giraffe_and_cape_buffalo_are_bigger_on_the_opponents_turn():
@@ -1458,24 +1460,17 @@ def test_the_crocodile_covers_a_lion_on_its_turn_and_is_a_five_on_the_opponents(
     assert effective_strength(s, croc) == 8 - CFG.crocodile_penalty
 
 
-def test_the_moose_is_a_hungry_eight_that_does_not_roam():
+def test_the_moose_is_a_hungry_eight_that_roams_and_eats_wherever_it_stands():
+    # Martin, 2026-10-29: "Hungry 3. Roam."; the grazing exemption is gone.
     card = load_cards()["moose"]
-    assert (card.base_strength, card.hungry, card.rarity) == (8, 3, "common") and "Roam" not in card.keywords
-
-
-def test_the_moose_does_not_eat_while_it_is_grazing():
-    def food_after_one_round(moose_at):
-        s = make_state(food={"A": 0, "B": 0}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
-        for cr in ("1,1", "2,1", "2,2"):
-            put(s, cr, "lion", "A")                            # with a Moose on 1,2, all four corners of R1 are A's
-        if moose_at != "1,2":
-            put(s, "1,2", "lion", "A")
-        moose = put(s, moose_at, "moose", "A")
-        end_turn(s); end_turn(s)                               # A's turn ends (R1 pays), then A's next turn starts
-        return s.food["A"], effective_strength(s, moose)
-    grazing, fed = food_after_one_round("1,2"), food_after_one_round("3,2")
-    assert grazing[1] == fed[1] == 8                           # fed: enough food, so no strength lost either way
-    assert fed[0] == grazing[0] - 3                            # only the one off the corner ate Hungry 3
+    assert (card.base_strength, card.hungry, card.rarity) == (8, 3, "common") and "Roam" in card.keywords
+    s = make_state(food={"A": 10, "B": 0}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    for cr in ("1,1", "2,1", "2,2"):
+        put(s, cr, "lion", "A")
+    moose = put(s, "1,2", "moose", "A")                        # closes R1: the Moose grazes
+    assert statics.grazing(s, moose)
+    end_turn(s); end_turn(s)                                   # R1 pays 10 at A's Dusk, the Moose eats 3 at A's Dawn
+    assert s.food["A"] == 10 + 10 - 3 and effective_strength(s, moose) == 8
 
 
 def test_the_albatross_sweeps_the_small_enemies_where_it_lands():

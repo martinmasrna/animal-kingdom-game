@@ -2895,9 +2895,9 @@
       "at": 1792262682
     },
     "effect": {
-      "note": "Martin, 2026-10-28: Canines and Roam redesign: Hungry and grazing, Roam dropped (on trial)",
+      "note": "Martin, 2026-10-29: the Moose roams; its grazing exemption goes",
       "by": "claude",
-      "at": 1793210636,
+      "at": 1793291976,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: the wanderer; bigger than the Orca, pays to stay big",
@@ -3168,6 +3168,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Dusk: if this is grazing, draw a card."
+      },
+      "note": "Martin, 2026-10-29: draws at both ends of the turn while grazing",
+      "by": "claude",
+      "at": 1793291976
     }
   },
   "orangutan": {

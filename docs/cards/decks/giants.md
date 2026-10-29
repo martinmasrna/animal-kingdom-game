@@ -32,7 +32,7 @@ The table below is generated from cards.json, where the cards live.
 | **Blue Whale** | 3 | — | 12 | Titan. |
 | **Sloth** | 3 | — | 3 | Roar: in 2 turns, gain 30 food. |
 | **Elephant** | 3 | — | 9 | Hungry 5. |
-| **Moose** | 2 | Hoofed | 8 | Hungry 3. While this is grazing, it doesn't eat. |
+| **Moose** | 2 | Hoofed | 8 | Hungry 3. Roam. |
 | **Krill** | 3 | — | 1 | Roar: the next Titan you play this turn costs one action. |
 
 <!-- cards:end -->

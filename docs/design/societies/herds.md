@@ -63,7 +63,7 @@ The one who knows where the grass is; the herd's food.
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **[WILDEBEEST]** | legendary | 5 | Your regions produce 5 more food. | Savanna |
-| **Okapi** | rare | 4 | Dusk: if this is grazing, draw a card. | Jungle |
+| **Okapi** | rare | 4 | Dawn and Dusk: if this is grazing, draw a card. | Jungle |
 | **Wildebeest** | common | 6 | Dusk: if this is grazing, gain 6 food. | Savanna |
 
 <!-- cards:end -->

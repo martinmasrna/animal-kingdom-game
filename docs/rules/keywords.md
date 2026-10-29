@@ -47,7 +47,7 @@ Carried by: the Toad, the keyword's common; the Jellyfish, which also gives it t
 Playing it costs two actions instead of one. A free placement (Jerboa, the Remora, the Elephant's kind of "play another animal") can't pay for it; an extra action can. For the biggest animals: Blue Whale, Whale Shark.
 
 ### Hungry N (proposed, 2026-10-08)
-At the start of your turn this eats up to N of your food, and gets −1 strength, for good, for each food it was short (Martin, 2026-10-26). Below 0 it dies, like any animal. A Dawn effect: food is made at the end of your turn and eaten at the start of the next. In `cards.json` the number sits beside the keyword, as Reach's does: `"keywords": ["Hungry"], "hungry": 5`. Carried by the Giants: Elephant, Rhinoceros, Hippopotamus, Whale Shark, Brutus, the legendary Elephant and the Moose, which doesn't eat while it is grazing.
+At the start of your turn this eats up to N of your food, and gets −1 strength, for good, for each food it was short (Martin, 2026-10-26). Below 0 it dies, like any animal. A Dawn effect: food is made at the end of your turn and eaten at the start of the next. In `cards.json` the number sits beside the keyword, as Reach's does: `"keywords": ["Hungry"], "hungry": 5`. Carried by the Giants: Elephant, Rhinoceros, Hippopotamus, Whale Shark, Brutus, the legendary Elephant and the Moose, which roams.
 
 ### Flee (proposed, 2026-10-08)
 When an enemy covers this, it returns to your hand: the cover takes the crossroad, but nothing dies. A fleer keeps its value in its Roar, which comes again when it's played back. Carried by the herd's fleers (Gazelle, Deer, Zebra) and the Hare.

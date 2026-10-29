@@ -94,7 +94,7 @@ Cards:
 - **Dhole** draws 2 when it covers an enemy that has no other enemy top animal next to it, by placement or by roaming, judged once the Dhole sits on that crossroad. The Dhole gives no equal-strength cover to anyone.
 - **Wolverine** can remove only an adjacent enemy that has no other enemy top animal next to it; Stealth and Armor protect from it as from any chosen removal.
 - **The legendary Black Wolf** gives +1 strength and draws a card whenever one of your Canines roams, itself included.
-- **Moose** doesn't eat, and loses no strength, at the start of your turn while it is grazing.
+- **Okapi** draws at your Dawn and at your Dusk, each time it is grazing then (Martin, 2026-10-29); the legendary Sloth doubles only the Dusk draw.
 - **Serval** sets the strength by storing the difference: later buffs and auras count on top of the 1.
 - **Placing and roaming cover by one rule** (Martin, 2026-10-24: "the rules for Roam and place from hand should not drift"): every card that changes who may cover whom (Leopard, the legendary Piranha, Chameleon) works for a roam exactly as for a placement.
 - **The legendary Piranha** counts the Fish you control now, itself included.

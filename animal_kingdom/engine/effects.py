@@ -1131,8 +1131,6 @@ def _eat(state, unit, cr) -> None:
     good, for each food it was short. An inked animal isn't Hungry."""
     if not statics.has_keyword(state, unit, "Hungry", cr):
         return
-    if unit.card_id == "moose" and statics.grazing(state, unit, cr):    # "While this is grazing, it doesn't eat."
-        return
     n = state.cards[unit.card_id].hungry
     prev, state.cause, state.cause_iid = (state.cause, state.cause_iid), unit.card_id, unit.iid
     try:
@@ -3099,8 +3097,8 @@ def _zebra_legend_place(state, unit, cr):
     _push_draw(state, unit.owner, len(kinds))
 
 
-def _okapi_eot(state, unit, cr):
-    """Dusk: if this is grazing, draw a card."""
+def _okapi_graze_draw(state, unit, cr):
+    """Dawn and Dusk: if this is grazing, draw a card (Martin, 2026-10-29: both ends of the turn)."""
     if statics.grazing(state, unit, cr):
         _push_draw(state, unit.owner, 1)
 
@@ -3411,7 +3409,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "zebra_legend": {"on_place": _zebra_legend_place},
     "deer_legend": {"on_friendly_flee": _deer_legend_friendly_flee, "on_flee": _deer_legend_own_flee},
     "honey_badger": {"on_place": _removes(min_attr="honey_badger_min")},
-    "okapi": {"on_end_of_turn": _okapi_eot},
+    "okapi": {"on_start_of_turn": _okapi_graze_draw, "on_end_of_turn": _okapi_graze_draw},
     "zebra": {"on_flee": _zebra_flee},
     "warthog": {"on_place": _warthog_place},
     "albatross": {"on_place": _albatross_place},

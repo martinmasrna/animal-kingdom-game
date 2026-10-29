@@ -2260,11 +2260,12 @@
         "Hoofed"
       ],
       "base_strength": 8,
-      "text": "Hungry 3. While this is grazing, it doesn't eat.",
+      "text": "Hungry 3. Roam.",
       "species": "Moose",
       "habitat": "Forest",
       "keywords": [
-        "Hungry"
+        "Hungry",
+        "Roam"
       ],
       "hungry": 3
     },
@@ -2345,10 +2346,10 @@
         "Hoofed"
       ],
       "base_strength": 4,
-      "text": "Dusk: if this is grazing, draw a card.",
-      "keywords": [],
+      "text": "Dawn and Dusk: if this is grazing, draw a card.",
       "species": "Okapi",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "zebra",
