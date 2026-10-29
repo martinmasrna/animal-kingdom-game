@@ -110,16 +110,20 @@ def test_the_legendary_dung_beetle_evolves_by_the_food_its_hungry_animals_ate():
 def test_the_legendary_dung_beetle_forms_roar():
     def roar(form):
         s = make_state(hands={"A": [form, "lion"]}, decks={"A": ["mouse"] * 3, "B": []}, food={"A": 0, "B": 0})
+        put(s, "2,2", "lion", "B")
         rules.apply_action(s, PlaceAction(form, ("cr", "1,2")))
         return s
     s = roar("dung_beetle_legend")
-    assert hand_ids(s, "A") == ["lion"] and s.food["A"] == 0 and s.pending is None   # the first form: nothing
+    assert hand_ids(s, "A") == ["lion"] and s.top_unit("2,2") and s.pending is None   # the first form: nothing
     s = roar("dung_beetle_legend_form2")
-    assert sorted(hand_ids(s, "A")) == ["lion", "mouse"] and s.food["A"] == 0
+    assert sorted(hand_ids(s, "A")) == ["lion", "mouse"] and s.top_unit("2,2") and s.pending is None
     s = roar("dung_beetle_legend_form3")
-    assert len(s.hands["A"]) == 2 and s.food["A"] == CFG.dung_beetle_legend_food and s.pending is None
+    assert len(s.hands["A"]) == 2
+    choose(s, "2,2")
+    assert s.top_unit("2,2") is None and s.food["A"] == 0 and s.pending is None
     s = roar("dung_beetle_legend_form4")
-    assert s.food["A"] == CFG.dung_beetle_legend_food and s.pending is not None    # and another animal to play
+    choose(s, "2,2")
+    assert s.top_unit("2,2") is None and s.pending is not None    # and another animal to play
     rules.apply_action(s, PlaceAction("lion", ("cr", "1,1")))
     assert s.top_unit("1,1").card_id == "lion"
 

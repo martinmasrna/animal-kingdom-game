@@ -1935,14 +1935,14 @@ def _removes(max_attr=None, min_attr=None):
 
 
 def _dung_beetle_form_place(form):
-    """The legendary Dung Beetle's later forms (Martin, 2026-10-27): form 2 "Roar: draw a card", form 3 also gains 10
-    food, form 4 also plays another animal. In that order: the drawn card can be played."""
+    """The legendary Dung Beetle's later forms (Martin, 2026-10-27): form 2 "Roar: draw a card", form 3 also removes an
+    adjacent enemy (Martin, 2026-10-29, in place of 10 food), form 4 also plays another animal. In that order: the drawn
+    card can be played."""
     def handler(state, unit, cr):
-        cfg = state.config
         if form >= 4:
             _push_play_extra(state, unit.owner)
         if form >= 3:
-            _push_gain(state, unit.owner, cfg.dung_beetle_legend_food)
+            _removes()(state, unit, cr)
         _push_draw(state, unit.owner, 1)
     return handler
 

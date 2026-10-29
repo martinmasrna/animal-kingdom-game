@@ -1185,8 +1185,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 push_play_extra(st, owner, None, false);
             }
             if form >= 3 {
-                let f = cfg(st, "dung_beetle_legend_food");
-                push_gain(st, owner, f);
+                removes(st, unit, cr, None, None);
             }
             push_draw(st, owner, 1);
         }

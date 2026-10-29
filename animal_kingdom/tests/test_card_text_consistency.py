@@ -30,8 +30,6 @@ COSTS_RE = re.compile(r"costs (\d+) food", re.IGNORECASE)
 # card_id -> config attrs, one per "gain N food/more" number in text, in order.
 FOOD_CONSTANTS: dict[str, list[str]] = {
     "army_ant_legend": ["army_ant_legend_per"],
-    "dung_beetle_legend_form3": ["dung_beetle_legend_food"],
-    "dung_beetle_legend_form4": ["dung_beetle_legend_food"],
     "forager_ant": ["forager_ant_food"],
     "worker_ant": ["worker_ant_per"],
     "worker_wasp": ["worker_wasp_per_place"],

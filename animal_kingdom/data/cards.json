@@ -3878,7 +3878,7 @@
         "Beetle"
       ],
       "base_strength": 4,
-      "text": "Roar: draw a card and gain 10 food. Evolves at 40 food eaten by your Hungry animals.",
+      "text": "Roar: draw a card and remove an adjacent enemy. Evolves at 40 food eaten by your Hungry animals.",
       "stage": 3,
       "keywords": []
     },
@@ -3891,9 +3891,9 @@
         "Beetle"
       ],
       "base_strength": 4,
-      "keywords": [],
-      "text": "Roar: draw a card, gain 10 food and play another animal.",
-      "stage": 4
+      "text": "Roar: draw a card, remove an adjacent enemy and play another animal.",
+      "stage": 4,
+      "keywords": []
     },
     {
       "id": "mara",

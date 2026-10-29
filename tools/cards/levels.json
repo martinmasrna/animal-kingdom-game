@@ -6423,7 +6423,8 @@
         "prev": "Roar: draw a card and gain 10 food. Evolves when your Hungry animals have eaten 40 food."
       },
       "by": "claude",
-      "at": 1793127998
+      "at": 1793295478,
+      "note": "Martin, 2026-10-29: the second evolution removes instead of 10 food"
     }
   },
   "duck": {
@@ -6929,6 +6930,18 @@
       "note": "Martin, 2026-10-29: the Impala's token",
       "by": "claude",
       "at": 1793293867
+    }
+  },
+  "dung_beetle_legend_form4": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: draw a card, gain 10 food and play another animal."
+      },
+      "note": "Martin, 2026-10-29: the forms build on each other, so the removal carries into the last",
+      "by": "claude",
+      "at": 1793295478
     }
   }
 }
