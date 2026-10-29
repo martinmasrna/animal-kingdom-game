@@ -1028,7 +1028,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 2,
+      "base_strength": 1,
       "text": "Roar: add 2 Kittens to your hand.",
       "species": "Alley Cat",
       "habitat": "City",
@@ -3991,7 +3991,7 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 1,
+      "base_strength": 0,
       "text": "Roar: draw a Cat.",
       "keywords": []
     },
