@@ -2395,7 +2395,7 @@
       "tags": [
         "Hoofed"
       ],
-      "base_strength": 6,
+      "base_strength": 7,
       "text": "Your other Hoofed animals have +1 strength during your opponent's turn.",
       "keywords": [],
       "species": "Cape Buffalo",
@@ -3992,6 +3992,39 @@
       "base_strength": 1,
       "text": "Roar: draw a Cat.",
       "keywords": []
+    },
+    {
+      "id": "impala",
+      "name": "Impala",
+      "status": "collectible",
+      "rarity": "rare",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 2,
+      "text": "Flee. Roar: play a Baby Impala.",
+      "species": "Impala",
+      "habitat": "Savanna",
+      "related": [
+        "baby_impala"
+      ],
+      "keywords": [
+        "Flee"
+      ]
+    },
+    {
+      "id": "baby_impala",
+      "name": "Baby Impala",
+      "status": "token",
+      "rarity": "common",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 1,
+      "text": "Flee. Roar: if this is grazing, draw a card.",
+      "keywords": [
+        "Flee"
+      ]
     }
   ]
 }

@@ -860,7 +860,13 @@
     },
     "strength": {
       "by": "claude",
-      "at": 1792262681
+      "at": 1793293840,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 6
+      },
+      "note": "Martin, 2026-10-29: 7"
     },
     "effect": {
       "by": "claude",
@@ -6848,6 +6854,71 @@
       "note": "Martin, 2026-10-29",
       "by": "claude",
       "at": 1793292718
+    }
+  },
+  "impala": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793293867
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793293867
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-29: 2",
+      "by": "claude",
+      "at": 1793293867
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-29: the card he wrote",
+      "by": "claude",
+      "at": 1793293867
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1793293892
+    }
+  },
+  "baby_impala": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "note": "Martin, 2026-10-29: the Impala's token",
+      "by": "claude",
+      "at": 1793293867
     }
   }
 }

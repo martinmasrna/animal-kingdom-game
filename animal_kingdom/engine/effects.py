@@ -3103,6 +3103,11 @@ def _zebra_legend_place(state, unit, cr):
     _push_draw(state, unit.owner, len(kinds))
 
 
+def _impala_place(state, unit, cr):
+    """Roar: play a Baby Impala (made, then placed by its owner as a full placement, Roar and all)."""
+    state.effect_stack.append({"op": "play_named", "chooser": unit.owner, "card_id": "baby_impala", "make": True})
+
+
 def _okapi_graze_draw(state, unit, cr):
     """Dawn and Dusk: if this is grazing, draw a card (Martin, 2026-10-29: both ends of the turn)."""
     if statics.grazing(state, unit, cr):
@@ -3423,6 +3428,10 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "gazelle": {"on_place": _gazelle_place},
     "wildebeest": {"on_end_of_turn": _wildebeest_eot},
     "deer": {"on_place": _spawns_beside("fawn")},
+    # Impala (Martin, 2026-10-29): "Flee. Roar: play a Baby Impala." The calf is made and played at once, a full placement
+    # with its own Roar; one that has no legal place is gone. The calf: "Flee. Roar: if this is grazing, draw a card."
+    "impala": {"on_place": _impala_place},
+    "baby_impala": {"on_place": _okapi_graze_draw},
     # The pool (Great White Shark's Reach is a static; Raksha, Verminus are anthems; Coyote, Cougar statics).
     "octopus": {"on_place": _octopus_ink_place},
     "macaw": {"on_place": _macaw_place},

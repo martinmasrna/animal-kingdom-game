@@ -200,6 +200,34 @@ def test_the_zebra_flees_and_kicks_its_coverer_back_to_hand():
     assert "zebra" in hand_ids(s2, "A") and s2.top_unit("3,2").card_id == "tortoise"
 
 
+def test_the_impala_plays_a_calf_that_draws_when_it_lands_grazing():
+    # Martin, 2026-10-29: "Flee. Roar: play a [TOKEN]."; the calf "Flee. Roar: if this is grazing, draw a card."
+    s = make_state(current="A", hands={"A": ["impala"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    for cr in ("1,1", "2,1", "2,2"):
+        put(s, cr, "lion", "A")                                 # three corners of R1
+    rules.apply_action(s, PlaceAction("impala", ("cr", "1,3")))
+    assert s.pending is not None and s.pending["mode"] == "place"
+    assert ("cr", "1,2") in {tuple(p["target"]) for p in s.pending["placements"]}
+    rules.apply_action(s, PlaceAction("baby_impala", ("cr", "1,2")))   # closes R1: the calf lands grazing
+    assert s.top_unit("1,2").card_id == "baby_impala" and len(s.hands["A"]) == 1
+    assert s.player_to_act() == "A"                             # the calf cost no action: A's second one is still there
+
+
+def test_a_covered_calf_flees_to_hand_and_is_played_again():
+    s = make_state(current="A", hands={"A": ["impala"], "B": ["lion"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    rules.apply_action(s, PlaceAction("impala", ("cr", "1,2")))
+    rules.apply_action(s, PlaceAction("baby_impala", ("cr", "1,3")))    # not grazing: no draw
+    assert len(s.hands["A"]) == 0
+    end_turn(s)
+    for cr in ("5,3", "4,3", "3,3", "2,3"):
+        put(s, cr, "lion", "B")                                 # B's chain from its den to the calf's neighbour
+    rules.apply_action(s, PlaceAction("lion", ("cr", "1,3")))          # B covers the calf: it flees
+    assert "baby_impala" in hand_ids(s, "A") and s.top_unit("1,3").card_id == "lion"
+    end_turn(s)
+    rules.apply_action(s, PlaceAction("baby_impala", ("cr", "1,1")))   # and it is a card you can play again
+    assert s.top_unit("1,1").card_id == "baby_impala"
+
+
 def test_the_legendary_deer_grows_every_fleer_including_itself_and_the_growth_travels():
     # Martin, 2026-10-29: "make sure it gives strength to itself as well". The fled card is grown in hand, keeps it when
     # played again, and keeps it through its next flight (the counter travels with the card on every bounce).
