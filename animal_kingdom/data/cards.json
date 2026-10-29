@@ -3878,7 +3878,7 @@
         "Beetle"
       ],
       "base_strength": 4,
-      "text": "Roar: draw a card and remove an adjacent enemy. Evolves at 40 food eaten by your Hungry animals.",
+      "text": "Roar: draw a card and remove an adjacent enemy. Evolves at 40 food your Hungry animals ate.",
       "stage": 3,
       "keywords": []
     },
