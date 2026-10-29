@@ -585,7 +585,7 @@
       "tags": [
         "Canine"
       ],
-      "base_strength": 1,
+      "base_strength": 2,
       "text": "Roar: give a connected ally Roam. It roams.",
       "species": "Coyote",
       "habitat": "Forest",
@@ -627,7 +627,7 @@
       "tags": [
         "Canine"
       ],
-      "base_strength": 1,
+      "base_strength": 2,
       "text": "Roar: give a connected ally with Roam +3 strength. It roams.",
       "species": "Street Dog",
       "habitat": "City",
@@ -1026,11 +1026,14 @@
       "tags": [
         "Cat"
       ],
-      "base_strength": 1,
-      "text": "Roar: draw 2 common Cats.",
+      "base_strength": 2,
+      "text": "Roar: add 2 Kittens to your hand.",
       "species": "Alley Cat",
       "habitat": "City",
-      "keywords": []
+      "keywords": [],
+      "related": [
+        "kitten"
+      ]
     },
     {
       "id": "jellyfish_legend",
@@ -3977,6 +3980,18 @@
       "keywords": [
         "Flee"
       ]
+    },
+    {
+      "id": "kitten",
+      "name": "Kitten",
+      "status": "token",
+      "rarity": "common",
+      "tags": [
+        "Cat"
+      ],
+      "base_strength": 1,
+      "text": "Roar: draw a Cat.",
+      "keywords": []
     }
   ]
 }

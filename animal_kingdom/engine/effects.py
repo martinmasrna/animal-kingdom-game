@@ -2015,6 +2015,12 @@ def _sperm_whale_legend_eot(state, unit, cr):
         remove_top(state, nb, by_player=unit.owner, by_card=unit.card_id)
 
 
+def _alley_cat_place(state, unit, cr):
+    """Roar: add 2 Kittens to your hand (Martin, 2026-10-29)."""
+    for _ in range(state.config.alley_cat_kittens):
+        gain_to_hand(state, unit.owner, "kitten")
+
+
 def _sea_turtle_eot(state, unit, cr):
     """Dusk: add a Baby Turtle to your hand (Martin, 2026-10-26); the hand limit burns it like any gained card."""
     gain_to_hand(state, unit.owner, "baby_turtle")
@@ -3280,8 +3286,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "serval": {"on_place": _serval_place},
     "lynx": {"on_place_onto_enemy": _draws("lynx_draw")},
     "bobcat": {"on_place": _conditional("bobcat", _draw1)},
-    "alley_cat": {"on_place": lambda state, unit, cr: _draws_filtered("tag:Cat&rarity:common",
-                                                                       state.config.alley_cat_draw)(state, unit, cr)},
+    "alley_cat": {"on_place": _alley_cat_place},
+    "kitten": {"on_place": lambda state, unit, cr: _draws_filtered("tag:Cat", state.config.kitten_draw)(state, unit, cr)},
     # Colony.
     "army_ant_legend": {"on_end_of_turn": _army_ant_legend_eot},
     "bee_legend": {"on_place": _bee_legend_place},

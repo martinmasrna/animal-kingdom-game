@@ -50,9 +50,19 @@
         "prev_note": "",
         "prev": "Roar: if you control another Cat, play another Cat."
       },
-      "note": "The Ocelot's old draw, kept at strength 1 (Martin, 2026-10-27)",
+      "note": "Martin, 2026-10-29",
       "by": "claude",
-      "at": 1793094906
+      "at": 1793292717
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin, 2026-10-29",
+      "by": "claude",
+      "at": 1793292717
     }
   },
   "anaconda": {
@@ -1138,9 +1148,9 @@
         "prev_note": "",
         "prev": 3
       },
-      "note": "the Street Dog's number: the same +3, spent on an ally that already has Roam",
+      "note": "Martin, 2026-10-29",
       "by": "claude",
-      "at": 1793215129
+      "at": 1793292718
     },
     "rarity": {
       "review": {
@@ -4151,6 +4161,16 @@
       "note": "Martin, 2026-10-28: the Street Dog is the common twin",
       "by": "claude",
       "at": 1793215438
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 1
+      },
+      "note": "Martin, 2026-10-29",
+      "by": "claude",
+      "at": 1793292718
     }
   },
   "sunfish": {
@@ -6816,6 +6836,18 @@
       "note": "Martin, 2026-10-29: the uncatchable stag; it grows itself too",
       "by": "claude",
       "at": 1793291086
+    }
+  },
+  "kitten": {
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": ""
+      },
+      "note": "Martin, 2026-10-29",
+      "by": "claude",
+      "at": 1793292718
     }
   }
 }

@@ -131,7 +131,8 @@ class Config:
     hyena_food_per: int = 3              # Hyena: Dusk: 3 food for each animal removed this turn
     hummingbird_draw: int = 2            # Hummingbird: Roar: draw 2
     lynx_draw: int = 2                   # Lynx (rare): Roar: draw 2 if placed on top of an enemy
-    alley_cat_draw: int = 2              # Alley Cat: Roar: draw 2 common Cats
+    alley_cat_kittens: int = 2           # Alley Cat: Roar: add 2 Kittens to your hand
+    kitten_draw: int = 1                 # Kitten: Roar: draw a Cat (no printed number)
     tiger_legend_max: int = 7            # [TIGER] (legendary): Roar: remove an adjacent enemy of strength 7 or less
     hamster_per_step: int = 1            # Hamster: +1 strength for each 10 food you have
     hamster_food_step: int = 10
