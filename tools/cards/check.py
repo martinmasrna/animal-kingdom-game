@@ -6,7 +6,7 @@ a crossroad has, an earlier call of Martin's on the same animal, text that doesn
 rejected in three weeks failed one of those (knowledge/card-design-diagnosis-2026-10-25.md). This prints them, and
 nothing else: no verdict, no score. The agent reads the sheet; Martin sees the card.
 
-    .venv/bin/python tools/cards/check.py ID                       an existing card
+    .venv/bin/python tools/cards/check.py ID [--text "..."]        an existing card, or another wording of it
     .venv/bin/python tools/cards/check.py --new "Rat" --rarity C --str 3 --tag Rodent --text "Roar: ..." [--species S]
     options: --no-fit (skip the browser measurement of the text), --play (place an existing card in a scratch game)
 
@@ -304,6 +304,8 @@ def main(argv=None) -> None:
         k = cards[a.id]
         c = {"id": k.id, "name": k.name or sp(k), "species": sp(k), "rarity": k.rarity, "str": "*" if k.is_dynamic else k.base_strength,
              "tags": sorted(k.tags), "text": k.text, "kws": sorted(k.keywords), "status": k.status}
+        if a.text is not None:  # another wording on the same card
+            c["text"] = a.text
     elif a.new:
         if not a.rarity or a.strength is None:
             raise SystemExit("--new needs --rarity and --str")
