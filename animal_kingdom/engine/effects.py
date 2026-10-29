@@ -1875,10 +1875,11 @@ def _played_this_turn(state, player, tag, unit) -> int:
                if tag in state.cards[cid].tags and (unit is None or iid != unit.iid))
 
 
-def _conditional(effect):
-    """A Roar that happens only while its roar_condition holds."""
+def _conditional(card_id, effect):
+    """`card_id`'s Roar, which happens only while its roar_condition holds (read for that card even when a repeat, Big Gus's
+    or the Macaw's, runs it on its own unit)."""
     def handler(state, unit, cr):
-        if roar_condition(state, unit.owner, unit.card_id, unit):
+        if roar_condition(state, unit.owner, card_id, unit):
             effect(state, unit, cr)
     return handler
 
@@ -2739,12 +2740,15 @@ def _spawns_beside(token):
 # --- Food Aggro -------------------------------------------------------------------------------------------------
 
 def _repeat_legend_place(state, unit, cr):
-    """Roar: repeat the Roar of each of your adjacent Rodents. Big Gus absorbs them: each repeat happens here, as if the
-    Rodent stood where Big Gus does (Martin, 2026-10-29: the instinctive reading). Another of these (a mimic Octopus's
-    copy) isn't repeated: two side by side would repeat each other for ever."""
+    """Roar: repeat the Roar of each of your adjacent Rodents. Big Gus absorbs them: each repeat is Big Gus's own, here,
+    as the Macaw's copy is the Macaw's (Martin, 2026-10-29: the instinctive reading), so its food, removals and timers
+    come from Big Gus. Another of these (a mimic Octopus's copy) isn't repeated: two side by side would repeat each
+    other for ever."""
     for _nb, top in reversed(_adjacent_tops(state, cr, unit.owner)):
         if "Rodent" in state.cards[top.card_id].tags and top.card_id != unit.card_id:
-            _push_hook(state, top, cr, "on_place")
+            hook = _hook(state, top.card_id, "on_place", as_card=unit.card_id)
+            if hook:
+                hook(state, unit, cr)
 
 
 def _refill_legend_place(state, unit, cr):
@@ -3216,7 +3220,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "sea_turtle": {"on_end_of_turn": _sea_turtle_eot},
     "tiger_legend": {"on_place": _removes("tiger_legend_max")},
     "raccoon": {"on_place": _raccoon_place},
-    "hammerhead": {"on_place": _conditional(_hammerhead_place)},
+    "hammerhead": {"on_place": _conditional("hammerhead", _hammerhead_place)},
     "hyena": {"on_end_of_turn": _hyena_eot},
     "city_spider": {"on_start_of_turn": _city_spider_sot},
     "earthworm": {"on_remove": _earthworm_remove},
@@ -3244,7 +3248,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "jaguar": {"on_place": _removes("jaguar_max")},
     "serval": {"on_place": _serval_place},
     "lynx": {"on_place_onto_enemy": _draws("lynx_draw")},
-    "bobcat": {"on_place": _conditional(_draw1)},
+    "bobcat": {"on_place": _conditional("bobcat", _draw1)},
     "alley_cat": {"on_place": lambda state, unit, cr: _draws_filtered("tag:Cat&rarity:common",
                                                                        state.config.alley_cat_draw)(state, unit, cr)},
     # Colony.
@@ -3253,13 +3257,13 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "forager_ant": {"on_place": _forager_ant_place},
     "queen_ant": {"on_end_of_turn": _queen_ant_eot},
     "scout_bee": {"on_end_of_turn": _scout_bee_eot},
-    "nurse_bee": {"on_place": _conditional(_draws("nurse_bee_draw"))},
+    "nurse_bee": {"on_place": _conditional("nurse_bee", _draws("nurse_bee_draw"))},
     "nurse_bumblebee": {"on_place": _draws_filtered("tag:Colony")},
     "termite_king": {"on_place": _termite_king_place},
     "termite_queen": {"on_place": lambda state, unit, cr: _push_play_extra(
         state, unit.owner, filter={"tags_all": ["Colony"], "tags_none": ["Queen"]})},
     "queen_bee": {"on_place": _queen_bee_place},
-    "soldier_ant": {"on_place": _conditional(_removes())},
+    "soldier_ant": {"on_place": _conditional("soldier_ant", _removes())},
     "worker_ant": {"on_place": _worker_ant_place},
     "worker_wasp": {"on_friendly_place": _worker_wasp_friendly_place},
     "worker_bee": {"on_place": _gains("worker_bee_food")},
@@ -3273,10 +3277,10 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "naked_mole_rat": {"on_place": _mole_place},
     "hornet": {"on_place": _hornet_place},
     "skunk": {"on_place": _skunk_place},
-    "hare": {"on_place": _conditional(_draws("hare_draw"))},
+    "hare": {"on_place": _conditional("hare", _draws("hare_draw"))},
     "ocelot": {"on_place": _ocelot_place},
     "cheetah": {"on_place": _hq_adjacent_draw},
-    "rat": {"on_place": _conditional(_rat_place)},
+    "rat": {"on_place": _conditional("rat", _rat_place)},
     "falcon": {"on_place": _hq_adjacent_draw},
     "bat": {"on_place": _draw1},
     "dolphin": {"on_place": _draw1},
@@ -3320,8 +3324,8 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "dormouse": {"on_end_of_turn": _dormouse_eot},
     "squirrel": {"on_place": _gains("squirrel_food")},
     "chipmunk": {"on_place": _chipmunk_place},
-    "gopher": {"on_place": _conditional(_removes())},
-    "mara": {"on_place": _conditional(_draws("mara_draw"))},
+    "gopher": {"on_place": _conditional("gopher", _removes())},
+    "mara": {"on_place": _conditional("mara", _draws("mara_draw"))},
     "groundhog": {"on_start_of_turn": _gains("groundhog_food")},
     "rodent_legend": {"on_place": _rodent_legend_place},
     # Food OTK (the legendary Honey Badger is its keywords; Capybara an aura; Armadillo too).
@@ -3396,6 +3400,6 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "andean_condor": {"on_place": _andean_condor_place},
     "dingo": {"on_end_of_turn": _dingo_eot},
     # The tutorial's own cards, as they were when it was written.
-    "tutorial_lynx": {"on_place": _conditional(_draw1)},
+    "tutorial_lynx": {"on_place": _conditional("tutorial_lynx", _draw1)},
     "tutorial_chipmunk": {"on_place": _chipmunk_place},
 }

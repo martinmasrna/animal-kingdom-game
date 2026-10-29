@@ -969,6 +969,8 @@ def test_the_repeat_legend_roars_its_adjacent_rodents_again():
     put(s, "1,3", "lion", "A")                                 # not a Rodent
     rules.apply_action(s, PlaceAction("capybara_legend", ("cr", "1,2")))
     assert s.food["A"] == 2 * CFG.squirrel_food
+    gus = s.top_unit("1,2").iid
+    assert {e["cause_iid"] for e in s.events if e["e"] == "food"} == {gus}   # the food comes from Big Gus
 
 
 def test_the_repeat_legend_absorbs_the_roars_so_they_happen_where_it_stands():

@@ -160,9 +160,9 @@ fn removes(st: &mut State, unit: &Unit, cr: Cr, max_attr: Option<&str>, min_attr
 fn draws_filtered(st: &mut State, unit: &Unit, spec: &'static str, n: i32) {
     st.effect_stack.push(vmap!("op" => Value::s("draw_filtered"), "player" => pn(unit.owner), "n" => Value::Int(n as i64), "spec" => Value::s(spec)));
 }
-fn conditional(st: &State, unit: &Unit) -> bool {
-    let name = st.cname(unit.card).to_string();
-    roar_condition(st, unit.owner, &name, Some(unit)).unwrap_or(false)
+/// `card`: the card whose Roar this is, which a repeat (Big Gus, the Macaw) runs on its own unit.
+fn conditional(st: &State, card: &str, unit: &Unit) -> bool {
+    roar_condition(st, unit.owner, card, Some(unit)).unwrap_or(false)
 }
 
 /// Whether the "if ..." of `card`'s Roar holds; None for a card with no such condition.
@@ -621,7 +621,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             push_choose(st, owner, names.into_iter().map(Value::Str).collect(), "pile_to_hand", false, vmap!("from_owner" => pn(owner)));
         }
         ("hammerhead", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let targets: Vec<Cr> = adjacent_tops(st, cr, None)
                     .into_iter()
                     .filter(|(nb, top)| statics::can_be_removed(st, top, Some(*nb), false) && statics::can_be_chosen(st, top, owner, Some(*nb)))
@@ -711,7 +711,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("fox", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let n = cfg(st, "fox_draw");
                 push_draw(st, owner, n);
             }
@@ -782,7 +782,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("jaguar", OnPlace) => removes(st, unit, cr, Some("jaguar_max"), None),
         ("serval", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let t = adjacent_enemy_targets(st, unit, cr, None, None, true);
                 push_remove_choice(st, owner, unit.card, t, false);
             }
@@ -792,12 +792,12 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             draws(st, unit, n);
         }
         ("bobcat", OnPlace) | ("tutorial_lynx", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 draws(st, unit, 1);
             }
         }
         ("ocelot", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 push_play_extra(st, owner, Some(vmap!("tags_all" => Value::List(vec![Value::s("Cat")]))), false);
             }
         }
@@ -829,7 +829,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("nurse_bee", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let n = cfg(st, "nurse_bee_draw");
                 draws(st, unit, n);
             }
@@ -848,7 +848,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             push_choose(st, owner, options, "make_in_hand", false, Map::new());
         }
         ("soldier_ant", OnPlace) | ("gopher", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 removes(st, unit, cr, None, None);
             }
         }
@@ -904,7 +904,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("hare", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let n = cfg(st, "hare_draw");
                 draws(st, unit, n);
             }
@@ -915,7 +915,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("cheetah", OnPlace) | ("falcon", OnPlace) => hq_adjacent_draw(st, unit, cr),
         ("rat", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let t = adjacent_enemy_targets(st, unit, cr, None, None, true);
                 let rat = cid(st, "rat");
                 push_remove_choice(st, owner, rat, t, false);
@@ -1054,10 +1054,10 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("deer", OnPlace) => spawns_beside(st, unit, cr, "fawn"),
         // Food Aggro
         ("capybara_legend", OnPlace) => {
-            // each repeat happens at Big Gus's crossroad, as if the Rodent stood there
+            // each repeat is Big Gus's own, at its crossroad (as the Macaw's copy is the Macaw's)
             for (_nb, top) in adjacent_tops(st, cr, Some(owner)).into_iter().rev() {
                 if st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && st.g.has_hook(top.card, OnPlace) {
-                    run(st, top.card, None, OnPlace, &top, &Args::Place(cr));
+                    run(st, top.card, Some(unit.card), OnPlace, unit, &Args::Place(cr));
                 }
             }
         }
@@ -1096,7 +1096,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("squirrel", OnPlace) => gains(st, unit, "squirrel_food"),
         ("chipmunk", OnPlace) | ("tutorial_chipmunk", OnPlace) => chipmunk(st, unit),
         ("mara", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let n = cfg(st, "mara_draw");
                 draws(st, unit, n);
             }
@@ -1239,7 +1239,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             draws(st, unit, n);
         }
         ("macaque", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 let t = adjacent_enemy_targets(st, unit, cr, None, None, true);
                 push_remove_choice(st, owner, unit.card, t, false);
             }
@@ -1282,7 +1282,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             draw_cards(st, owner, 1);
         }
         ("gorilla", OnPlace) => {
-            if conditional(st, unit) {
+            if conditional(st, card, unit) {
                 push_draw(st, owner, 1);
             }
         }
