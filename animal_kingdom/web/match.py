@@ -67,7 +67,10 @@ log = logging.getLogger(__name__)
 # the Rust engine (AK_RUST_BOTS=1 in the image), where the network's slower evaluation costs no depth inside the 8 s.
 # A won or lost game scores 500, not 1e9 (2026-10-28, docs/bots.md: at 1e9 a few sampled losses outweighed every
 # positional difference and the bot stacked on its own animals; +1.3 points a deck, results/bot_quality/decisive-mine).
-EXPERT = ("referee_learned:eval=wave2_slot_r456,depth=1,time_budget=8,den_sense=true,reply_turns=3,w.pending_target=1.5,"
+# Since 2026-10-29 the network is `wave2_slot_r4_10_live` (board_live features, retrained on self-play rounds 4 to 10 on
+# current cards and Martin's decks; +5.0 points a deck on his 11, results/bot_quality/net-r4-10; Hoofed Graze -6 clear,
+# shipped on Martin's call: the network cannot see grazing).
+EXPERT = ("referee_learned:eval=wave2_slot_r4_10_live,depth=1,time_budget=8,den_sense=true,reply_turns=3,w.pending_target=1.5,"
           "w.buried_presence=0.25,w.food_progress=0,w.food_curve=3,w.food_proximity=60,w.food_race=true,quiesce=true,mulligan=true,"
           "decisive=500")
 # The Normal pilot is the one-turn searcher with the den-front reach term (2026-10-21, Martin's game GMIDKA: it left two
