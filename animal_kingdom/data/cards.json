@@ -1336,7 +1336,7 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Dusk: if you gained 10 or more food this turn, draw a card.",
+      "text": "Dusk: draw a card for each 10 food you gained this turn.",
       "species": "Dormouse",
       "habitat": "Forest",
       "keywords": []

@@ -1341,9 +1341,9 @@
         "prev_note": "",
         "prev": "Dusk: gain 5 food."
       },
-      "note": "Martin, 2026-10-22: the nocturnal forager; Food Aggro's refill on its own condition. Dusk comes before region income, so only the turn's own food counts",
+      "note": "Martin, 2026-10-29: a card per 10 food gained this turn, replacing the single draw at 10 or more. Dusk comes before region income, so only the turn's own food counts",
       "by": "claude",
-      "at": 1792677337
+      "at": 1793274726
     }
   },
   "dung_beetle": {

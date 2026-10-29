@@ -2789,10 +2789,11 @@ def _electric_eel_place(state, unit, cr):
 
 
 def _dormouse_eot(state, unit, cr):
-    """Dusk: if you gained 10 or more food this turn, draw a card. Dusk comes before region income, so only the turn's
+    """Dusk: draw a card for each 10 food you gained this turn. Dusk comes before region income, so only the turn's
     own food counts."""
-    if _fed_this_turn(state, unit.owner):
-        _push_draw(state, unit.owner, 1)
+    n = _food_gained_this_turn(state, unit.owner) // state.config.fed_threshold
+    if n:
+        _push_draw(state, unit.owner, n)
 
 
 def _chipmunk_place(state, unit, cr):

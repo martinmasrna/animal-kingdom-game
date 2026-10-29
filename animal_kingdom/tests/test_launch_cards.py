@@ -1003,6 +1003,11 @@ def test_the_dormouse_draws_at_dusk_after_a_food_turn_and_region_income_never_co
     rules.apply_action(s2, PlaceAction("squirrel", ("cr", "2,2")))    # 10 food from a Roar
     end_turn(s2)
     assert hand_ids(s2, "A") == ["lion"]
+    s4 = make_state(hands={"A": []}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    put(s4, "1,2", "dormouse", "A")
+    s4.turn_flags["food_gained_A"] = 29                              # a card for each whole 10
+    end_turn(s4)
+    assert hand_ids(s4, "A") == ["lion", "lion"]
     s3 = make_state(hands={"A": []}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     for cr in ("1,1", "1,2", "2,1", "2,2"):                          # a held region pays at the end of the turn
         put(s3, cr, "lion", "A")

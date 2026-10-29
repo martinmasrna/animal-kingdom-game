@@ -1087,8 +1087,9 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             schedule(st, unit, 1, vmap!("op" => Value::s("cap_actions"), "player" => pn(opp), "n" => Value::Int(n as i64)), true, Some(opp));
         }
         ("dormouse", OnEndOfTurn) => {
-            if fed_this_turn(st, owner) {
-                push_draw(st, owner, 1);
+            let n = food_gained_this_turn(st, owner) / cfg(st, "fed_threshold");
+            if n > 0 {
+                push_draw(st, owner, n);
             }
         }
         ("squirrel", OnPlace) => gains(st, unit, "squirrel_food"),
