@@ -2792,6 +2792,12 @@ def _repeat_legend_place(state, unit, cr):
 REPEATERS = {"vole", "capybara_legend"}      # Roars that repeat Roars never repeat each other: two side by side would go for ever
 
 
+def _hamster_draw_event(state, unit, cr, event):
+    """Whenever you draw a card, gain 5 food (Martin, 2026-10-29): the owner's draws only, one gain per card."""
+    if event["player"] == unit.owner:
+        _push_gain(state, unit.owner, state.config.hamster_draw_food)
+
+
 def _vole_place(state, unit, cr):
     """Roar: repeat the Roar of an adjacent Rodent (Martin, 2026-10-29). The Vole picks one of its Rodent neighbours with
     a Roar and repeats it as its own, here, as Big Gus does; it never picks a repeater."""
@@ -3383,6 +3389,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Food Aggro.
     "capybara_legend": {"on_place": _repeat_legend_place},
     "vole": {"on_place": _vole_place},
+    "hamster": {"on_draw_event": _hamster_draw_event},
     "macaque_legend": {"on_place": _refill_legend_place},
     "rat_legend": {"on_place": _rat_king_place},
     "chipmunk_legend": {"on_place": _chipmunk_legend_place},

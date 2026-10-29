@@ -1425,10 +1425,10 @@
         "Rodent"
       ],
       "base_strength": 3,
-      "text": "Has +1 strength for each 10 food you have.",
-      "keywords": [],
+      "text": "Whenever you draw a card, gain 5 food.",
       "species": "Hamster",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "octopus_legend_2",
@@ -4068,6 +4068,20 @@
       "base_strength": 2,
       "text": "Roar: repeat the Roar of an adjacent Rodent.",
       "species": "Vole",
+      "habitat": "Meadow",
+      "keywords": []
+    },
+    {
+      "id": "marmot",
+      "name": "Marmot",
+      "status": "collectible",
+      "rarity": "common",
+      "tags": [
+        "Rodent"
+      ],
+      "base_strength": 3,
+      "text": "Has +1 strength for each 10 food you have.",
+      "species": "Marmot",
       "habitat": "Meadow",
       "keywords": []
     }

@@ -2086,6 +2086,16 @@
       "by": "martin",
       "at": 1792144875,
       "lv": "draft"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Has +1 strength for each 10 food you have."
+      },
+      "note": "Martin, 2026-10-29: 'we can try the engine'; every card drawn goes in the cheeks; its strength effect went to the Marmot",
+      "by": "claude",
+      "at": 1793300648
     }
   },
   "hare": {
@@ -7055,6 +7065,59 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1793300216
+    }
+  },
+  "marmot": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793300648
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793300648
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-29: the Hamster's old number",
+      "by": "claude",
+      "at": 1793300648
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-29: the Hamster's old effect; the marmot fattens up as the food piles",
+      "by": "claude",
+      "at": 1793300648
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": ""
+      },
+      "note": "into the collection",
+      "by": "claude",
+      "at": 1793300648
     }
   }
 }

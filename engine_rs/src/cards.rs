@@ -87,6 +87,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
         | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend_form2" | "dung_beetle_legend_form3" | "dung_beetle_legend_form4" => &[OnPlace],
         "zebra" => &[OnFlee],
+        "hamster" => &[OnDrawEvent],
         "deer_legend" => &[OnFriendlyFlee, OnFlee],
         "okapi" => &[OnStartOfTurn, OnEndOfTurn],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
@@ -1061,6 +1062,15 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("sunfish", OnPlace) => spawns_beside(st, unit, cr, "baby_fish"),
         ("deer", OnPlace) => spawns_beside(st, unit, cr, "fawn"),
         // Food Aggro
+        ("hamster", OnDrawEvent) => {
+            // "Whenever you draw a card, gain 5 food." (Martin, 2026-10-29): your draws only, each card once.
+            if let Args::CardEvent(_, _, player) = args {
+                if *player == owner {
+                    let f = cfg(st, "hamster_draw_food");
+                    push_gain(st, owner, f);
+                }
+            }
+        }
         ("vole", OnPlace) => {
             // "Roar: repeat the Roar of an adjacent Rodent." (Martin, 2026-10-29): one Rodent neighbour with a Roar, the
             // owner's choice, repeated as the Vole's own; never a repeater (the legend, another Vole), or two would go for ever.

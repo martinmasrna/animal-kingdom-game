@@ -69,7 +69,7 @@ AURA_FAMILIES = frozenset(fam for fam, _, _ in FAMILY_AURAS.values())
 # The cards whose own text is a live "+X" (the branches of anthem_bonus). Any other card, of a family no aura reaches,
 # has no anthem at all: anthem_bonus answers 0 for it before walking the board. The search asks for every unit's strength
 # in every position it imagines, so that walk, once per unit, was the hottest line of the engine (2026-10-20).
-ANTHEM_CARDS = frozenset({"guard_wasp", "tuna", "hamster", "peacock", "giraffe", "crocodile", "capybara"})
+ANTHEM_CARDS = frozenset({"guard_wasp", "tuna", "marmot", "peacock", "giraffe", "crocodile", "capybara"})
 
 
 _SMALL_DECKS: dict = {}
@@ -130,8 +130,8 @@ def anthem_bonus(state: GameState, card, owner: str, self_iid: Optional[int], so
         elif cid == "tuna":                     # +1 for each other Fish you control
             sardine = any(u.card_id == "sardine_legend" and not _inked(state, u.iid) for u in tops)
             bonus += cfg.tuna_per_fish * count("Fish", include_self=False) * (2 if sardine else 1)
-        elif cid == "hamster":                  # +1 for each 10 food you have
-            bonus += cfg.hamster_per_step * (state.food[owner] // cfg.hamster_food_step)
+        elif cid == "marmot":                   # +1 for each 10 food you have (the Hamster's until 2026-10-29)
+            bonus += cfg.marmot_per_step * (state.food[owner] // cfg.marmot_food_step)
         elif cid == "peacock":                  # +1 for each card in your hand: itself while there, one less once it lands
             bonus += cfg.hand_per_card * len(state.hands[owner])
         elif cid == "giraffe":                  # +5 during your opponent's turn

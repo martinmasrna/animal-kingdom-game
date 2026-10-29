@@ -134,8 +134,9 @@ class Config:
     alley_cat_kittens: int = 2           # Alley Cat: Roar: add 2 Kittens to your hand
     kitten_draw: int = 1                 # Kitten: Roar: draw a Cat (no printed number)
     tiger_legend_max: int = 7            # [TIGER] (legendary): Roar: remove an adjacent enemy of strength 7 or less
-    hamster_per_step: int = 1            # Hamster: +1 strength for each 10 food you have
-    hamster_food_step: int = 10
+    marmot_per_step: int = 1             # Marmot: +1 strength for each 10 food you have
+    marmot_food_step: int = 10
+    hamster_draw_food: int = 5           # Hamster: whenever you draw a card, gain 5 food
     tuna_legend_food: int = 5            # the legendary Tuna: per region you control, a card and 5 food
     stag_beetle_per_armor: int = 5       # Stag Beetle: 5 food for each of your animals with Armor
     wildebeest_food: int = 6             # Wildebeest: at the end of your turn, if grazing, gain 6 (Martin, 2026-10-29)

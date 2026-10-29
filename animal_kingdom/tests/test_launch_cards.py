@@ -1122,12 +1122,25 @@ def test_groundhog_feeds_you_at_dawn_and_the_turn_starts_fed():
     assert effects._food_gained_this_turn(s, "A") == Config.default().fed_threshold   # Gopher and Mara are armed from the first action
 
 
-def test_the_hamster_grows_with_your_food_in_hand_and_on_the_board():
-    s = make_state(hands={"A": ["hamster"]}, food={"A": 39, "B": 0})
-    assert placement_strength(s, hand_inst(s, "A", "hamster")) == 3 + 3     # 39 is three whole tens
+def test_the_marmot_grows_with_your_food_in_hand_and_on_the_board():
+    # Martin, 2026-10-29: the Hamster's old effect, now the Marmot's
+    s = make_state(hands={"A": ["marmot"]}, food={"A": 39, "B": 0})
+    assert placement_strength(s, hand_inst(s, "A", "marmot")) == 3 + 3      # 39 is three whole tens
     put(s, "1,2", "squirrel", "B")                                          # a 3: the 5 covers it
-    rules.apply_action(s, PlaceAction("hamster", ("cr", "1,2")))
-    assert s.board["1,2"][-1].card_id == "hamster"
+    rules.apply_action(s, PlaceAction("marmot", ("cr", "1,2")))
+    assert s.board["1,2"][-1].card_id == "marmot"
+
+
+def test_the_hamster_turns_every_card_you_draw_into_food():
+    # Martin, 2026-10-29: "Whenever you draw a card, gain 5 food." The Draw action is two cards and 10 food; the
+    # opponent's draws pay nothing.
+    s = make_state(current="A", hands={"A": []}, decks={"A": ["lion"] * 6, "B": ["lion"] * 6}, food={"A": 0, "B": 0})
+    put(s, "1,2", "hamster", "A")
+    rules.apply_action(s, DrawAction())
+    assert len(s.hands["A"]) == 2 and s.food["A"] == 2 * CFG.hamster_draw_food
+    end_turn(s)
+    rules.apply_action(s, DrawAction())                                     # B draws: the Hamster is A's
+    assert s.food["B"] == 0 and s.food["A"] == 2 * CFG.hamster_draw_food
 
 
 # ================================================================================ Food OTK

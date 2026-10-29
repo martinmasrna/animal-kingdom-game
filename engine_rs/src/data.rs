@@ -165,7 +165,7 @@ pub struct Card {
     /// without the Roar's own sentences.
     pub ability_profile: [f64; 12],
     pub lasting_profile: [f64; 12],
-    /// The cards whose own text is a live "+X" (strength.py ANTHEM_CARDS): 0 none, 1 guard_wasp, 2 tuna, 3 hamster,
+    /// The cards whose own text is a live "+X" (strength.py ANTHEM_CARDS): 0 none, 1 guard_wasp, 2 tuna, 3 marmot,
     /// 4 peacock, 5 giraffe, 6 crocodile, 7 capybara.
     pub anthem_kind: u8,
     /// Family auras (strength.py FAMILY_AURAS): 0 none, 1 mackerel (Fish, always), 2 cape_buffalo (Hoofed, their turn).
@@ -175,7 +175,7 @@ pub struct Card {
     pub keyword_aura: u8,
 }
 
-pub const ANTHEM_KINDS: [&str; 8] = ["", "guard_wasp", "tuna", "hamster", "peacock", "giraffe", "crocodile", "capybara"];
+pub const ANTHEM_KINDS: [&str; 8] = ["", "guard_wasp", "tuna", "marmot", "peacock", "giraffe", "crocodile", "capybara"];
 pub const FAMILY_AURAS: [&str; 3] = ["", "mackerel", "cape_buffalo"];
 pub const KEYWORD_AURAS: [&str; 4] = ["", "armadillo", "porcupine", "jellyfish"];
 
