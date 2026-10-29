@@ -519,15 +519,17 @@
       "id": "jackal",
       "name": "Jackal",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Canine"
       ],
       "base_strength": 3,
-      "text": "Roar: remove an adjacent enemy that has another of your Canines next to it.",
-      "keywords": [],
+      "text": "Roam. Whenever this roams, remove an adjacent enemy weaker than this.",
       "species": "Jackal",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": [
+        "Roam"
+      ]
     },
     {
       "id": "dhole",
@@ -595,7 +597,7 @@
       "id": "african_wild_dog",
       "name": "African Wild Dog",
       "status": "collectible",
-      "rarity": "rare",
+      "rarity": "common",
       "tags": [
         "Canine"
       ],
@@ -2475,10 +2477,10 @@
         "Hoofed"
       ],
       "base_strength": 4,
-      "text": "Roar: remove an adjacent enemy covering an allied Hoofed animal.",
-      "keywords": [],
+      "text": "Roar: remove an adjacent enemy that has another of your Hoofed animals next to it.",
       "species": "Warthog",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": []
     },
     {
       "id": "octopus",

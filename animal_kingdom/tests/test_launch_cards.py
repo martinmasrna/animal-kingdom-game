@@ -630,18 +630,30 @@ def test_wolverine_removes_an_adjacent_enemy_only_if_no_other_enemy_is_next_to_i
     assert s.pending is None and s.top_unit("2,2") is not None
 
 
-def test_jackal_removes_only_an_enemy_another_canine_flanks():
+def test_jackal_roams_then_removes_an_adjacent_enemy_weaker_than_itself():
+    s = make_state(hands={"A": []})
+    put(s, "1,1", "jackal", "A")
+    put(s, "2,2", "gazelle", "B")                              # a 2: weaker than the Jackal's 3
+    put(s, "1,3", "fox", "B")                                  # a 3: equal, so safe
+    put(s, "2,1", "lion", "B")                                 # a 7, next to where it starts, never offered
+    rules.apply_action(s, RoamAction("1,1", ("cr", "1,2")))
+    assert s.pending["options"] == ["2,2"]                     # judged where it lands, strictly weaker
+    choose(s, "2,2")
+    assert s.pending is None and s.top_unit("2,2") is None and s.top_unit("1,3").card_id == "fox"
+
+
+def test_jackal_reach_grows_with_its_strength_and_a_placed_jackal_removes_nothing():
     s = make_state(hands={"A": ["jackal"]})
     put(s, "1,1", "lion", "A")
-    put(s, "2,2", "lion", "B")
+    put(s, "2,2", "gazelle", "B")
     rules.apply_action(s, PlaceAction("jackal", ("cr", "1,2")))
-    assert s.pending is None                                   # nobody flanks the Lion
-    s2 = make_state(hands={"A": ["jackal"]})
-    put(s2, "2,1", "wolf", "A")
-    put(s2, "1,1", "lion", "A")
-    put(s2, "2,2", "lion", "B")
-    apply_click(s2, PlaceAction("jackal", ("cr", "1,2")))
-    assert s2.top_unit("2,2") is None
+    assert s.pending is None and s.top_unit("2,2") is not None   # no Roar: it hunts only as it moves
+    s2 = make_state(hands={"A": []})
+    jackal = put(s2, "1,1", "jackal", "A")
+    jackal.strength_counter = 4                                  # the pack's gifts: a 7 now
+    put(s2, "2,2", "wolf", "B")                                  # a 6
+    rules.apply_action(s2, RoamAction("1,1", ("cr", "1,2")))
+    assert s2.pending["options"] == ["2,2"]
 
 
 def test_the_dhole_has_no_equal_strength_cover_for_anyone():
@@ -758,13 +770,13 @@ def test_street_dog_with_no_connected_roamer_just_lands():
 
 
 def test_african_wild_dog_makes_a_canine_played_next_to_it_roam():
-    s = make_state(hands={"A": ["jackal"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    s = make_state(hands={"A": ["fox"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
     put(s, "1,1", "african_wild_dog", "A")
-    rules.apply_action(s, PlaceAction("jackal", ("cr", "1,2")))   # a Canine without Roam of its own
-    jackal = s.top_unit("1,2")
+    rules.apply_action(s, PlaceAction("fox", ("cr", "1,2")))   # a Canine without Roam of its own
+    fox = s.top_unit("1,2")
     assert "2,2" in s.pending["options"]
     choose(s, "2,2")
-    assert s.pending is None and s.top_unit("2,2") is jackal and s.actions_taken_this_turn == 1
+    assert s.pending is None and s.top_unit("2,2") is fox and s.actions_taken_this_turn == 1
 
 
 def test_african_wild_dog_ignores_what_isnt_a_canine_played_next_to_it():
@@ -1577,12 +1589,18 @@ def test_the_peacock_counts_every_card_in_your_hand_itself_included_until_it_lan
     assert effective_strength(s, peacock) == 1 + 3 * CFG.hand_per_card
 
 
-def test_warthog_removes_the_enemy_covering_an_allied_hoofed():
+def test_warthog_removes_only_an_enemy_another_hoofed_flanks():
     s = make_state(hands={"A": ["warthog"]})
-    put(s, "2,2", "gazelle", "A"); put(s, "2,2", "lion", "B")
-    put(s, "1,1", "lion", "B")                                  # covering nothing of A's
-    apply_click(s, PlaceAction("warthog", ("cr", "1,2")))
-    assert [u.card_id for u in s.board["2,2"]] == ["gazelle"] and s.top_unit("1,1").owner == "B"
+    put(s, "1,1", "lion", "A")                                  # a friend, but not Hoofed
+    put(s, "2,2", "lion", "B")
+    rules.apply_action(s, PlaceAction("warthog", ("cr", "1,2")))
+    assert s.pending is None                                    # nobody of the herd flanks the Lion
+    s2 = make_state(hands={"A": ["warthog"]})
+    put(s2, "2,1", "gazelle", "A")                              # the herd member beside the intruder
+    put(s2, "1,1", "lion", "A")
+    put(s2, "2,2", "lion", "B")
+    apply_click(s2, PlaceAction("warthog", ("cr", "1,2")))
+    assert s2.top_unit("2,2") is None
 
 
 def test_boar_removes_an_adjacent_enemy_covering_nothing():
@@ -1704,7 +1722,7 @@ def test_the_fox_and_the_african_wild_dog_ids_follow_their_animals():
     cards = load_cards()
     fox, dog = cards["fox"], cards["african_wild_dog"]
     assert (fox.name, fox.rarity, "Roam" in fox.keywords) == ("Fox", "common", False)
-    assert (dog.name, dog.rarity, "Roam" in dog.keywords) == ("African Wild Dog", "rare", True)
+    assert (dog.name, dog.rarity, "Roam" in dog.keywords) == ("African Wild Dog", "common", True)   # swapped with the Jackal (Martin, 2026-10-29)
 
 
 def test_the_african_wild_dog_has_no_dusk_effect_any_more():

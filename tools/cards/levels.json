@@ -14,9 +14,9 @@
         "prev_note": "",
         "prev": "C"
       },
-      "note": "Martin, 2026-10-28: Canines and Roam redesign",
+      "note": "Martin 2026-10-29: swapped with the Jackal",
       "by": "claude",
-      "at": 1793210639
+      "at": 1793308251
     },
     "strength": {
       "review": {
@@ -2397,9 +2397,9 @@
         "prev_note": "",
         "prev": "R"
       },
-      "note": "Martin, 2026-10-22 rarity session: its condition is its own deck's engine, so common; strength to re-level against its new peers",
+      "note": "Martin 2026-10-29: repeatable removal is a rare; African Wild Dog takes its common slot",
       "by": "claude",
-      "at": 1792661449
+      "at": 1793308251
     },
     "strength": {
       "review": {
@@ -2410,6 +2410,16 @@
       "note": "Martin, 2026-10-22: conditional removal priced by what the condition costs the turn you play it, 1 below its draw-2 twin",
       "by": "claude",
       "at": 1792664336
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: remove an adjacent enemy that has another of your Canines next to it."
+      },
+      "note": "Martin 2026-10-29: the flank went to the Warthog; the Jackal picks off what it can as the pack moves",
+      "by": "claude",
+      "at": 1793308250
     }
   },
   "jaguar": {
@@ -5374,7 +5384,13 @@
     "effect": {
       "lv": "draft",
       "by": "claude",
-      "at": 1792262680
+      "at": 1793308250,
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: remove an adjacent enemy covering an allied Hoofed animal."
+      },
+      "note": "Martin 2026-10-29: the old cover condition was dead once six Hoofed carry Flee; the herd mobs the intruder"
     },
     "animal": {
       "note": "moved from pool to hoofed",

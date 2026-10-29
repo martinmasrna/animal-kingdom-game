@@ -73,7 +73,7 @@ const GROWS: &[Hook] = &[Hook::OnDawnInHand, Hook::OnStartOfTurn, Hook::OnGain];
 pub fn hook_mask(card: &str) -> u32 {
     use Hook::*;
     let hooks: &[Hook] = match card {
-        "cuckoo_legend" | "praying_mantis" | "raccoon" | "hammerhead" | "locust_legend" | "jackal" | "badger" | "coyote" | "street_dog" | "fox" | "wolverine" | "lion_legend"
+        "cuckoo_legend" | "praying_mantis" | "raccoon" | "hammerhead" | "locust_legend" | "badger" | "coyote" | "street_dog" | "fox" | "wolverine" | "lion_legend"
         | "lion_legend_2" | "jaguar" | "serval" | "bobcat" | "alley_cat" | "kitten" | "bee_legend" | "forager_ant" | "nurse_bee" | "nurse_bumblebee"
         | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "greywhisker" | "mole_legend"
         | "rat_legend_2" | "skunk_legend" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
@@ -97,7 +97,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "dingo" | "sperm_whale_legend" => &[OnEndOfTurn],
         "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" | "groundhog" => &[OnStartOfTurn],
         "wolf_legend_2" => &[OnFriendlyRoam, OnRoam],
-        "bush_dog" => &[OnRoam],
+        "bush_dog" | "jackal" => &[OnRoam],
         "elephant_legend" => &[OnPlace, OnRoam],
         "dhole" => &[OnCoverEnemy],
         "lion_legend_4" => &[OnRemoveEvent],
@@ -731,12 +731,13 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             let targets: Vec<Cr> = adjacent_enemy_targets(st, unit, cr, None, None, true).into_iter().filter(|nb| lonely(st, owner, *nb)).collect();
             push_remove_choice(st, owner, unit.card, targets, false);
         }
-        ("jackal", OnPlace) => {
-            let targets: Vec<Cr> = adjacent_enemy_targets(st, unit, cr, None, None, true)
-                .into_iter()
-                .filter(|nb| adjacent_tops(st, *nb, Some(owner)).iter().any(|(_, t)| t.iid != unit.iid && st.card(t.card).has_tag(T_CANINE)))
-                .collect();
-            push_remove_choice(st, owner, unit.card, targets, false);
+        ("jackal", OnRoam) => {
+            // "Roam. Whenever this roams, remove an adjacent enemy weaker than this.": judged where it lands, by its strength then
+            if let Args::Roam(to, _) = args {
+                let cap = effective_strength(st, unit, None) - 1;
+                let targets = adjacent_enemy_targets(st, unit, *to, Some(cap), None, true);
+                push_remove_choice(st, owner, unit.card, targets, false);
+            }
         }
         ("bush_dog", OnRoam) => {
             if let Args::Roam(_, ev) = args {
@@ -1074,18 +1075,20 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("vole", OnPlace) => {
             // "Roar: repeat the Roar of an adjacent Rodent." (Martin, 2026-10-29): one Rodent neighbour with a Roar, the
             // owner's choice, repeated as the Vole's own; never a repeater (the legend, another Vole), or two would go for ever.
-            let gus = st.card_id("capybara_legend");
+            let (gus, vole) = (st.card_id("capybara_legend"), st.card_id("vole"));
             let o: Vec<Cr> = adjacent_tops(st, cr, Some(owner))
                 .into_iter()
-                .filter(|(_, top)| st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && Some(top.card) != gus && st.g.has_hook(top.card, OnPlace))
+                .filter(|(_, top)| st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && Some(top.card) != gus && Some(top.card) != vole && st.g.has_hook(top.card, OnPlace))
                 .map(|(nb, _)| nb)
                 .collect();
             push_choose(st, owner, crs(st, o), "repeat_roar", false, vmap!("vole" => Value::Int(unit.iid)));
         }
         ("capybara_legend", OnPlace) => {
-            // each repeat is Big Gus's own, at its crossroad (as the Macaw's copy is the Macaw's)
+            // each repeat is Big Gus's own, at its crossroad (as the Macaw's copy is the Macaw's); repeaters (the Vole, another
+            // of these) are never repeated, or two side by side would go for ever
+            let vole = st.card_id("vole");
             for (_nb, top) in adjacent_tops(st, cr, Some(owner)).into_iter().rev() {
-                if st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && st.g.has_hook(top.card, OnPlace) {
+                if st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && Some(top.card) != vole && st.g.has_hook(top.card, OnPlace) {
                     run(st, top.card, Some(unit.card), OnPlace, unit, &Args::Place(cr));
                 }
             }
@@ -1358,12 +1361,10 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(owner), "card_id" => Value::s("baby_impala"), "make" => Value::Bool(true)));
         }
         ("warthog", OnPlace) => {
+            // "Roar: remove an adjacent enemy that has another of your Hoofed animals next to it.": the herd mobs the intruder
             let t: Vec<Cr> = adjacent_enemy_targets(st, unit, cr, None, None, true)
                 .into_iter()
-                .filter(|nb| {
-                    let s = st.stack(*nb);
-                    s.len() >= 2 && s[s.len() - 2].owner == owner && st.card(s[s.len() - 2].card).has_tag(T_HOOFED)
-                })
+                .filter(|nb| adjacent_tops(st, *nb, Some(owner)).iter().any(|(_, t)| t.iid != unit.iid && st.card(t.card).has_tag(T_HOOFED)))
                 .collect();
             push_remove_choice(st, owner, unit.card, t, false);
         }

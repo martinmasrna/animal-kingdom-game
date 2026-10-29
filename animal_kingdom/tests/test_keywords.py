@@ -24,13 +24,13 @@ def _ids_at(state, cr):
 
 def test_stealth_hides_from_chosen_single_target_removal():
     # Jaguar (remove adjacent enemy <=4)... vs Black Panther (str 6) is out of range, so
-    # use Jackal (remove adjacent enemy with less-or-equal strength, wolf buffed high).
-    s = make_state(hands={"A": ["jackal"]})
+    # use Chimpanzee (remove adjacent enemy of equal or lower strength, buffed high).
+    s = make_state(hands={"A": ["chimpanzee"]})
     wolf_targets_panther = put(s, "2,2", "black_panther", "B")
     put(s, "1,2", "lion", "A")
-    hand_wolf = s.hands["A"][0]
-    hand_wolf.strength_counter = 10                       # wolf strength >> panther's 6
-    rules.apply_action(s, PlaceAction("jackal", ("cr", "1,2")))
+    hand_chimp = s.hands["A"][0]
+    hand_chimp.strength_counter = 10                      # chimp strength >> panther's 6
+    rules.apply_action(s, PlaceAction("chimpanzee", ("cr", "1,2")))
     # No pending choice was offered (the only candidate is Stealth) and nothing was removed.
     assert s.pending is None
     assert wolf_targets_panther in s.board["2,2"]

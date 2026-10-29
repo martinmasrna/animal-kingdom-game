@@ -2206,13 +2206,11 @@ def _dhole_cover(state, unit, covered):
         _push_draw(state, unit.owner, state.config.dhole_draw)
 
 
-def _jackal_place(state, unit, cr):
-    """Roar: remove an adjacent enemy that has another of your Canines adjacent to it."""
-    def flanked(nb):
-        return any(top.iid != unit.iid and "Canine" in state.cards[top.card_id].tags
-                   for _, top in _adjacent_tops(state, nb, unit.owner))
+def _jackal_roam(state, unit, cr, event):
+    """Roam. Whenever this roams, remove an adjacent enemy weaker than this (judged where it lands, by strength as it
+    stands then: the pack's buffs lengthen its reach; Martin, 2026-10-29)."""
     _push_remove_choice(state, unit.owner, unit.card_id,
-                        [nb for nb in _adjacent_enemy_targets(state, unit, cr) if flanked(nb)])
+                        _adjacent_enemy_targets(state, unit, cr, max_strength=effective_strength(state, unit) - 1))
 
 
 def _bush_dog_roam(state, unit, cr, event):
@@ -2783,7 +2781,7 @@ def _repeat_legend_place(state, unit, cr):
     come from Big Gus. Another of these (a mimic Octopus's copy) isn't repeated: two side by side would repeat each
     other for ever."""
     for _nb, top in reversed(_adjacent_tops(state, cr, unit.owner)):
-        if "Rodent" in state.cards[top.card_id].tags and top.card_id != unit.card_id:
+        if "Rodent" in state.cards[top.card_id].tags and top.card_id != unit.card_id and top.card_id not in REPEATERS:
             hook = _hook(state, top.card_id, "on_place", as_card=unit.card_id)
             if hook:
                 hook(state, unit, cr)
@@ -3169,12 +3167,13 @@ def _deer_legend_own_flee(state, fled, coverer_iid):
 
 
 def _warthog_place(state, unit, cr):
-    """Roar: remove an adjacent enemy covering an allied Hoofed animal (the animal right beneath it)."""
-    def covering(nb):
-        st = state.board[nb]
-        return len(st) >= 2 and st[-2].owner == unit.owner and "Hoofed" in state.cards[st[-2].card_id].tags
+    """Roar: remove an adjacent enemy that has another of your Hoofed animals next to it (the herd mobs the intruder;
+    Martin, 2026-10-29: the old "covering an allied Hoofed" condition went dead once six Hoofed carry Flee)."""
+    def flanked(nb):
+        return any(top.iid != unit.iid and "Hoofed" in state.cards[top.card_id].tags
+                   for _, top in _adjacent_tops(state, nb, unit.owner))
     _push_remove_choice(state, unit.owner, unit.card_id,
-                        [nb for nb in _adjacent_enemy_targets(state, unit, cr) if covering(nb)])
+                        [nb for nb in _adjacent_enemy_targets(state, unit, cr) if flanked(nb)])
 
 
 def _boar_place(state, unit, cr):
@@ -3310,7 +3309,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "fox": {"on_place": _fox_place},
     "dhole": {"on_cover_enemy": _dhole_cover},
     "wolverine": {"on_place": _wolverine_place},
-    "jackal": {"on_place": _jackal_place},
+    "jackal": {"on_roam": _jackal_roam},
     "bush_dog": {"on_roam": _bush_dog_roam},
     "african_wild_dog": {"on_friendly_place": _wild_dog_friendly_place},
     "badger": {"on_place": _draws_filtered("keyword:Roam")},
