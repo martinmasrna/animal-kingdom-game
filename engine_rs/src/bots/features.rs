@@ -597,16 +597,76 @@ pub const RUNG2_EXTRA: [&str; 24] = [
 
 pub fn feature_names(set: &str) -> Vec<&'static str> {
     let mut v: Vec<&str> = RUNG0.to_vec();
-    if set == "rung1" || set == "rung2" || set == "board" || set == "board_live" {
+    if set == "rung1" || set == "rung2" || is_board_set(set) {
         v.extend(RUNG1_EXTRA);
     }
-    if set == "rung2" || set == "board" || set == "board_live" {
+    if set == "rung2" || is_board_set(set) {
         v.extend(RUNG2_EXTRA);
     }
-    if set == "board" || set == "board_live" {
+    if set == "board_ability" {
+        v.extend(TIMER_NAMES);
+        v.extend(board_ab_names().iter().copied());
+    } else if set == "board" || set == "board_live" {
         v.extend(board_names().iter().copied());
     }
     v
+}
+
+fn is_board_set(set: &str) -> bool {
+    set == "board" || set == "board_live" || set == "board_ability"
+}
+
+// ------------------------------------------------------------------ the abilities (features.py: board_ability)
+pub const ABILITY_NAMES: [&str; 12] = ["ab_dawn", "ab_dusk", "ab_react", "ab_timer", "ab_static", "ab_food", "ab_cards", "ab_remove",
+    "ab_strength", "ab_place", "ab_action", "ab_conditional"];
+pub const TIMER_NAMES: [&str; 5] = ["timer_food_diff", "timer_cards_diff", "timer_remove_diff", "timer_action_diff", "timer_place_diff"];
+
+pub fn board_ab_names() -> &'static Vec<&'static str> {
+    static NAMES: std::sync::OnceLock<Vec<&'static str>> = std::sync::OnceLock::new();
+    NAMES.get_or_init(|| {
+        let props = property_names();
+        let mut v: Vec<String> = Vec::new();
+        for k in 0..BOARD_SLOTS {
+            let slot = SLOT_BASE.iter().map(|s| s.to_string()).chain(props.iter().cloned()).chain(std::iter::once("grazing".to_string()))
+                .chain(ABILITY_NAMES.iter().map(|s| s.to_string()));
+            for f in slot {
+                v.push(format!("cr{k}_{f}"));
+            }
+        }
+        for k in 0..HAND_SLOTS {
+            for f in HAND_BASE.iter().map(|s| s.to_string()).chain(props.iter().cloned()).chain(ABILITY_NAMES.iter().map(|s| s.to_string())) {
+                v.push(format!("hand{k}_{f}"));
+            }
+        }
+        v.extend(["my_hand_n", "opp_hand_n", "my_deck_n", "opp_deck_n"].iter().map(|s| s.to_string()));
+        v.into_iter().map(|s| &*Box::leak(s.into_boxed_str())).collect()
+    })
+}
+
+/// features.py `timer_diffs`: the delayed effects in play by what they pay, mine minus theirs.
+fn timer_diffs(st: &State, me: Player) -> [f64; 5] {
+    let me_s = player_name(me);
+    let mut out = [0.0; 5];
+    for s in &st.scheduled {
+        let Some(step) = s.get("step").and_then(|x| x.as_map()) else { continue };
+        let op = m_get_s(step, "op").unwrap_or("");
+        let owner = m_get_s(s, "owner").unwrap_or("");
+        let sign = if m_get_s(step, "player").unwrap_or(owner) == me_s { 1.0 } else { -1.0 };
+        if op == "gain_food" {
+            out[0] += sign * m_get_i(step, "amount").unwrap_or(0) as f64 / 10.0;
+        } else if op.starts_with("draw") || op == "scout" || op == "egg_hatch" {
+            out[1] += sign * m_get_i(step, "n").unwrap_or(1) as f64;
+        } else if op.contains("remove") || op.ends_with("_eat") || op.ends_with("_kill") {
+            out[2] += if owner == me_s { 1.0 } else { -1.0 };
+        } else if op == "grant_action" {
+            out[3] += sign * m_get_i(step, "n").unwrap_or(1) as f64;
+        } else if op == "cap_actions" {
+            out[3] -= sign;
+        } else if op.ends_with("hatch") {
+            out[4] += sign;
+        }
+    }
+    out
 }
 
 // ------------------------------------------------------------------ the board (features.py: BOARD_EXTRA_FEATURES)
@@ -677,12 +737,17 @@ fn push_properties(v: &mut Vec<f64>, card: &Card, sign: f64, on_board_live: bool
 }
 
 pub fn board_features(st: &State, me: Player, opp: Player, live: bool, v: &mut Vec<f64>) {
+    board_features_ab(st, me, opp, live, false, v)
+}
+
+fn board_features_ab(st: &State, me: Player, opp: Player, live: bool, abilities: bool, v: &mut Vec<f64>) {
     let gm = st.map();
+    let n_ab = if abilities { ABILITY_NAMES.len() } else { 0 };
     let n_props = 2 + crate::data::KEYWORDS.len() + crate::data::BOT_TAG_COUNT;
     for k in 0..BOARD_SLOTS {
         let stack = if k < gm.sorted.len() { Some(&st.stacks[gm.sorted[k] as usize]) } else { None };
         let Some(stack) = stack.filter(|s| !s.is_empty()) else {
-            v.extend(std::iter::repeat(0.0).take(SLOT_BASE.len() + n_props));
+            v.extend(std::iter::repeat(0.0).take(SLOT_BASE.len() + n_props + if abilities { 1 + n_ab } else { 0 }));
             continue;
         };
         let top = stack.last().unwrap();
@@ -696,12 +761,16 @@ pub fn board_features(st: &State, me: Player, opp: Player, live: bool, v: &mut V
         v.push(under.iter().filter(|u| u.owner == opp).count() as f64 / 3.0);
         v.push(sign * if top.placed_on_turn as i32 == st.turn_counter { 1.0 } else { 0.0 });
         push_properties(v, st.card(top.card), sign, live);
+        if abilities {
+            v.push(sign * if crate::statics::grazing(st, top, Some(gm.sorted[k])) { 1.0 } else { 0.0 });
+            v.extend(st.card(top.card).lasting_profile.iter().map(|b| sign * b));
+        }
     }
     let mut hand: Vec<&Unit> = st.hands[me as usize].iter().collect();
     hand.sort_by_key(|u| std::cmp::Reverse(effective_strength(st, u, None)));   // stable: ties keep hand order
     for k in 0..HAND_SLOTS {
         let Some(u) = hand.get(k) else {
-            v.extend(std::iter::repeat(0.0).take(HAND_BASE.len() + n_props));
+            v.extend(std::iter::repeat(0.0).take(HAND_BASE.len() + n_props + n_ab));
             continue;
         };
         let card = st.card(u.card);
@@ -709,6 +778,9 @@ pub fn board_features(st: &State, me: Player, opp: Player, live: bool, v: &mut V
         v.push(effective_strength(st, u, None) as f64 / 10.0);
         v.push(card.food_cost as f64 / 5.0);
         push_properties(v, card, 1.0, false);
+        if abilities {
+            v.extend(card.ability_profile.iter().copied());
+        }
     }
     v.push(st.hands[me as usize].len() as f64 / 8.0);
     v.push(st.hands[opp as usize].len() as f64 / 8.0);
@@ -865,7 +937,7 @@ pub fn extract(st: &State, me: Player, set: &str) -> Vec<f64> {
     let live = enabled_roar_count(st, me);
     v.push(live as f64);
     v.push(pending_payoff(st, me, false));
-    if set == "rung1" || set == "rung2" || set == "board" || set == "board_live" {
+    if set == "rung1" || set == "rung2" || is_board_set(set) {
         let phase = (st.turn_counter as f64 / T_NORM).min(1.0);
         let growth = growth_board_diff(st, me, opp);
         v.push(growth);
@@ -885,7 +957,7 @@ pub fn extract(st: &State, me: Player, set: &str) -> Vec<f64> {
         v.push(hq_dist_diff(st, me, opp, my_connection, opp_connection));
         v.push(flight_hand_expected_diff(st, me, opp));
     }
-    if set == "rung2" || set == "board" || set == "board_live" {
+    if set == "rung2" || is_board_set(set) {
         let hand: Vec<&Card> = st.hands[me as usize].iter().map(|u| st.card(u.card)).collect();
         let strengths: Vec<i32> = hand.iter().filter_map(|c| c.base).collect();
         let roars = hand.iter().filter(|c| c.has_roar).count() as i32;
@@ -936,7 +1008,10 @@ pub fn extract(st: &State, me: Player, set: &str) -> Vec<f64> {
         v.push(pending_target_strength(st, me));
         v.push(buried_presence(st, me));
     }
-    if set == "board" || set == "board_live" {
+    if set == "board_ability" {
+        v.extend(timer_diffs(st, me));
+        board_features_ab(st, me, opp, true, true, &mut v);
+    } else if set == "board" || set == "board_live" {
         board_features(st, me, opp, set == "board_live", &mut v);
     }
     v

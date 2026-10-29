@@ -30,6 +30,7 @@ distinguishing which unseen card sits where - see `opponent_unseen_card_ids`), e
 from __future__ import annotations
 
 import hashlib
+import re
 import json
 import bisect
 import math
@@ -135,6 +136,22 @@ BOARD_EXTRA_FEATURES: tuple[str, ...] = (tuple(f"cr{k}_{f}" for k in range(BOARD
                                          + tuple(f"hand{k}_{f}" for k in range(HAND_SLOTS) for f in HAND_FEATURES)
                                          + ("my_hand_n", "opp_hand_n", "my_deck_n", "opp_deck_n"))
 
+# **The abilities** (`feature_set="board_ability"`, 2026-10-29): board_live with each animal's ability read from its text
+# as what it does, not one bit, so a changed card is read right at once and no card id enters (Invariants, generalist):
+# when it fires (Dawn, Dusk, a reaction, a timer, always), what it pays (food, cards, removal, strength, animals placed,
+# actions), whether it is conditional, and on the board whether the animal grazes. The timers in play, by what they pay.
+# The "board_live" networks read an ability as one bit: a grazing Wildebeest was a 6-strength Hoofed animal with an
+# ability, the same as a Cape Buffalo, and the Expert lost Hoofed Graze's food race (results/bot_quality/net-r4-10).
+ABILITY_FEATURES: tuple[str, ...] = ("ab_dawn", "ab_dusk", "ab_react", "ab_timer", "ab_static", "ab_food", "ab_cards",
+                                     "ab_remove", "ab_strength", "ab_place", "ab_action", "ab_conditional")
+TIMER_FEATURES: tuple[str, ...] = ("timer_food_diff", "timer_cards_diff", "timer_remove_diff", "timer_action_diff",
+                                   "timer_place_diff")
+SLOT_FEATURES_AB: tuple[str, ...] = SLOT_FEATURES + ("grazing",) + ABILITY_FEATURES
+HAND_FEATURES_AB: tuple[str, ...] = HAND_FEATURES + ABILITY_FEATURES
+BOARD_AB_EXTRA_FEATURES: tuple[str, ...] = (tuple(f"cr{k}_{f}" for k in range(BOARD_SLOTS) for f in SLOT_FEATURES_AB)
+                                            + tuple(f"hand{k}_{f}" for k in range(HAND_SLOTS) for f in HAND_FEATURES_AB)
+                                            + ("my_hand_n", "opp_hand_n", "my_deck_n", "opp_deck_n"))
+
 FEATURE_SETS: dict[str, tuple[str, ...]] = {
     "rung0": RUNG0_FEATURES,
     "rung1": RUNG0_FEATURES + RUNG1_EXTRA_FEATURES,
@@ -144,7 +161,14 @@ FEATURE_SETS: dict[str, tuple[str, ...]] = {
     # slot's roar is 0 and its ability is what the text keeps after the Roar (`lasting_ability`). The "board" networks
     # learned a fired Roar as worth +10 a slot (Martin's XITW8A game 6: the Tiger ate its own Lion over the Ocelot).
     "board_live": RUNG0_FEATURES + RUNG1_EXTRA_FEATURES + RUNG2_EXTRA_FEATURES + BOARD_EXTRA_FEATURES,
+    "board_ability": RUNG0_FEATURES + RUNG1_EXTRA_FEATURES + RUNG2_EXTRA_FEATURES + TIMER_FEATURES + BOARD_AB_EXTRA_FEATURES,
 }
+BOARD_SETS = ("board", "board_live", "board_ability")
+
+
+def slot_layout(feature_set: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """The per-crossroad and per-hand-card feature names of a board feature set."""
+    return (SLOT_FEATURES_AB, HAND_FEATURES_AB) if feature_set == "board_ability" else (SLOT_FEATURES, HAND_FEATURES)
 
 
 def feature_names(feature_set: str) -> tuple[str, ...]:
@@ -208,7 +232,7 @@ def extract(state: GameState, me: str, feature_set: str = "rung0") -> list[float
     values["effect_readiness"] = float(enabled_roar_count(state, me))
     values["pending_payoff"] = pending_payoff(state, me, opp)
 
-    if feature_set in ("rung1", "rung2", "board", "board_live"):
+    if feature_set in ("rung1", "rung2") + BOARD_SETS:
         phase = min(1.0, state.turn_counter / T_NORM)
         growth = growth_board_diff(state, me, opp)
         values["growth_board_diff"] = growth
@@ -228,8 +252,12 @@ def extract(state: GameState, me: str, feature_set: str = "rung0") -> list[float
         values["hq_dist_diff"] = hq_dist_diff(state, me, opp, my_connection, opp_connection)
         values["flight_hand_expected_diff"] = flight_hand_expected_diff(state, me, opp)
 
-    if feature_set in ("rung2", "board", "board_live"):
+    if feature_set in ("rung2",) + BOARD_SETS:
         values.update(context_features(state, me, opp, opp_connection))
+    if feature_set == "board_ability":
+        values.update(zip(TIMER_FEATURES, timer_diffs(state, me)))
+        return ([values[name] for name in names[:len(names) - len(BOARD_AB_EXTRA_FEATURES)]]
+                + board_features(state, me, opp, live=True, abilities=True))
     if feature_set in ("board", "board_live"):
         return ([values[name] for name in names[:len(names) - len(BOARD_EXTRA_FEATURES)]]
                 + board_features(state, me, opp, live=feature_set == "board_live"))
@@ -249,15 +277,18 @@ def _properties(card, sign: float, on_board_live: bool = False) -> list[float]:
     return out
 
 
-def board_features(state: GameState, me: str, opp: str, live: bool = False) -> list[float]:
-    """`BOARD_EXTRA_FEATURES`: the crossroad slots, the hand slots and the four counts."""
+def board_features(state: GameState, me: str, opp: str, live: bool = False, abilities: bool = False) -> list[float]:
+    """`BOARD_EXTRA_FEATURES` (`BOARD_AB_EXTRA_FEATURES` with `abilities`): the crossroad slots, the hand slots and the
+    four counts."""
+    from ..engine.statics import grazing
     cards = state.cards
     out: list[float] = []
     crs = sorted(state.game_map.crossroads)
+    slot_n, hand_n = (len(SLOT_FEATURES_AB), len(HAND_FEATURES_AB)) if abilities else (len(SLOT_FEATURES), len(HAND_FEATURES))
     for k in range(BOARD_SLOTS):
         stack = state.board.get(crs[k]) if k < len(crs) else None
         if not stack:
-            out.extend([0.0] * len(SLOT_FEATURES))
+            out.extend([0.0] * slot_n)
             continue
         top = stack[-1]
         sign = 1.0 if top.owner == me else -1.0 if top.owner == opp else 0.0
@@ -269,10 +300,13 @@ def board_features(state: GameState, me: str, opp: str, live: bool = False) -> l
         out.append(sum(u.owner == opp for u in stack[:-1]) / 3.0)
         out.append(sign * float(top.placed_on_turn == state.turn_counter))
         out.extend(_properties(cards[top.card_id], sign, on_board_live=live))
+        if abilities:
+            out.append(sign * float(grazing(state, top, crs[k])))
+            out.extend(sign * b for b in ability_profile(cards[top.card_id], lasting=True))
     hand = sorted(state.hands[me], key=lambda u: -effective_strength(state, u))   # stable: ties keep hand order
     for k in range(HAND_SLOTS):
         if k >= len(hand):
-            out.extend([0.0] * len(HAND_FEATURES))
+            out.extend([0.0] * hand_n)
             continue
         u = hand[k]
         card = cards[u.card_id]
@@ -280,6 +314,8 @@ def board_features(state: GameState, me: str, opp: str, live: bool = False) -> l
         out.append(effective_strength(state, u) / 10.0)
         out.append(card.food_cost / 5.0)
         out.extend(_properties(card, 1.0))
+        if abilities:
+            out.extend(ability_profile(card, lasting=False))
     out.extend([len(state.hands[me]) / 8.0, len(state.hands[opp]) / 8.0, len(state.decks[me]) / 30.0, len(state.decks[opp]) / 30.0])
     return out
 
@@ -839,6 +875,68 @@ def lasting_ability(card) -> bool:
         if not in_roar:
             out.append(t)
     return _ability_in(card, out)
+
+
+_TRIGGER_STARTS = ("Roar:", "Dawn:", "Dusk:", "When ", "Whenever ", "Deathrattle")
+_TIMER_WORDS = re.compile(r"\b(in \d+ turns|next turn)\b", re.I)
+_PAYOFF_WORDS: tuple[tuple[str, ...], ...] = (("food",), ("draw", "scout", "to your hand"), ("remove",), ("strength",),
+                                              ("place ",), ("action",))
+_profile_cache: dict[tuple[str, frozenset, bool], tuple[float, ...]] = {}
+
+
+def ability_profile(card, lasting: bool) -> tuple[float, ...]:
+    """`ABILITY_FEATURES` of `card`'s ability, read from the printed text's shape (generic: never which card it is):
+    when it fires, what it pays, whether it is conditional. `lasting`: on the board, without the Roar's own sentences,
+    which have fired (`lasting_ability`)."""
+    key = (card.text, card.keywords, lasting)
+    if key in _profile_cache:
+        return _profile_cache[key]
+    sentences, in_roar = [], False
+    for t in (t.strip() for t in card.text.split(".")):
+        if not t:
+            continue
+        if t.startswith("Roar:"):
+            in_roar = True
+        elif in_roar and t.startswith(_LASTING_STARTS):
+            in_roar = False
+        if (lasting and in_roar) or t in card.keywords or t.startswith("Costs "):
+            continue
+        sentences.append((t, in_roar))
+    low = [t.lower() for t, _ in sentences]
+    out = (
+        any(t.startswith("Dawn:") for t, _ in sentences),
+        any(t.startswith("Dusk:") for t, _ in sentences),
+        any(t.startswith(("When ", "Whenever ", "Deathrattle")) for t, _ in sentences),
+        any(_TIMER_WORDS.search(t) for t, _ in sentences),
+        any(not r and not t.startswith(_TRIGGER_STARTS) for t, r in sentences),
+        *(any(w in t for t in low for w in words) for words in _PAYOFF_WORDS),
+        any(t.startswith("while ") or " if " in f" {t}" for t in low),
+    )
+    _profile_cache[key] = tuple(float(b) for b in out)
+    return _profile_cache[key]
+
+
+def timer_diffs(state: GameState, me: str) -> tuple[float, ...]:
+    """`TIMER_FEATURES`: the delayed effects in play by what they pay, mine minus theirs. A step names the player it
+    pays (`player`) or is paid to its timer's owner; capping actions costs the capped player."""
+    food = cards = remove = action = place = 0.0
+    for s in state.scheduled:
+        step = s["step"]
+        op = step.get("op", "")
+        sign = 1.0 if step.get("player", s["owner"]) == me else -1.0
+        if op == "gain_food":
+            food += sign * step.get("amount", 0) / 10.0
+        elif op.startswith("draw") or op in ("scout", "egg_hatch"):
+            cards += sign * step.get("n", 1)
+        elif "remove" in op or op.endswith(("_eat", "_kill")):
+            remove += 1.0 if s["owner"] == me else -1.0
+        elif op == "grant_action":
+            action += sign * step.get("n", 1)
+        elif op == "cap_actions":
+            action -= sign
+        elif op.endswith("hatch"):
+            place += sign
+    return food, cards, remove, action, place
 
 
 def _extra_actions(state: GameState, player: str) -> float:

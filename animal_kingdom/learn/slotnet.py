@@ -40,7 +40,7 @@ def _np():
 def layout(names):
     """Column indexes of the board set: the global columns, the slot block and the hand block."""
     n_slots, n_hands = features.BOARD_SLOTS, features.HAND_SLOTS
-    sw, hw = len(features.SLOT_FEATURES), len(features.HAND_FEATURES)
+    sw, hw = sum(n.startswith("cr0_") for n in names), sum(n.startswith("hand0_") for n in names)
     first_slot = next(i for i, n in enumerate(names) if n.startswith("cr0_"))
     first_hand = next(i for i, n in enumerate(names) if n.startswith("hand0_"))
     assert names[first_slot + n_slots * sw - 1].startswith(f"cr{n_slots - 1}_") and names[first_hand + n_hands * hw - 1].startswith(f"hand{n_hands - 1}_")
@@ -216,7 +216,7 @@ def train(out, paths, l2=1e-4, test_path=None, epochs=30, live=False):
         feature_set = "board_live"
     else:
         names, X, y, turn, game, deck, feature_set = load_rounds(paths)
-    if feature_set not in ("board", "board_live"):
+    if feature_set not in features.BOARD_SETS:
         raise ValueError(f"the slot network reads the board feature set, not {feature_set!r}")
     lay = layout(names)
     bucket = (game.astype(np.int64) * 2654435761 % 2**32) % 100

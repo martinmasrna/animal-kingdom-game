@@ -82,6 +82,64 @@ pub const K_FLEE: u32 = 1 << 10;
 /// A sentence after a Roar that starts one of these is an ability of its own (features.py `_LASTING_STARTS`).
 const LASTING_STARTS: [&str; 7] = ["When ", "Whenever ", "While ", "Dawn:", "Dusk:", "Deathrattle", "Evolves "];
 
+const TRIGGER_STARTS: [&str; 6] = ["Roar:", "Dawn:", "Dusk:", "When ", "Whenever ", "Deathrattle"];
+const PAYOFF_WORDS: [&[&str]; 6] = [&["food"], &["draw", "scout", "to your hand"], &["remove"], &["strength"], &["place "], &["action"]];
+
+/// `pat` in `t` with a word boundary on both sides (a regex `\b`).
+fn word_at(t: &str, pat: &str) -> bool {
+    let b = t.as_bytes();
+    let w = |i: usize| b[i].is_ascii_alphanumeric() || b[i] == b'_';
+    t.match_indices(pat).any(|(i, m)| (i == 0 || !w(i - 1)) && (i + m.len() == b.len() || !w(i + m.len())))
+}
+
+/// features.py `_TIMER_WORDS`: "in N turns" or "next turn", any case.
+fn has_timer_words(t: &str) -> bool {
+    let low = t.to_lowercase();
+    if word_at(&low, "next turn") {
+        return true;
+    }
+    low.match_indices("in ").any(|(i, _)| {
+        let b = low.as_bytes();
+        if i > 0 && (b[i - 1].is_ascii_alphanumeric() || b[i - 1] == b'_') {
+            return false;
+        }
+        let rest = &low[i + 3..];
+        let digits = rest.bytes().take_while(|c| c.is_ascii_digit()).count();
+        digits > 0 && rest[digits..].starts_with(" turns") && rest[digits + 6..].bytes().next().map_or(true, |c| !(c.is_ascii_alphanumeric() || c == b'_'))
+    })
+}
+
+/// features.py `ability_profile`: when the ability fires, what it pays, whether it is conditional, read from the
+/// printed text's shape.
+fn profile_of(text: &str, kw_names: &[&str], lasting: bool) -> [f64; 12] {
+    let mut sentences: Vec<(&str, bool)> = Vec::new();
+    let mut in_roar = false;
+    for t in text.split('.').map(|t| t.trim()).filter(|t| !t.is_empty()) {
+        if t.starts_with("Roar:") {
+            in_roar = true;
+        } else if in_roar && LASTING_STARTS.iter().any(|s| t.starts_with(s)) {
+            in_roar = false;
+        }
+        if (lasting && in_roar) || kw_names.contains(&t) || t.starts_with("Costs ") {
+            continue;
+        }
+        sentences.push((t, in_roar));
+    }
+    let low: Vec<String> = sentences.iter().map(|(t, _)| t.to_lowercase()).collect();
+    let mut out = [0.0; 12];
+    let flag = |b: bool| if b { 1.0 } else { 0.0 };
+    out[0] = flag(sentences.iter().any(|(t, _)| t.starts_with("Dawn:")));
+    out[1] = flag(sentences.iter().any(|(t, _)| t.starts_with("Dusk:")));
+    out[2] = flag(sentences.iter().any(|(t, _)| ["When ", "Whenever ", "Deathrattle"].iter().any(|s| t.starts_with(s))));
+    out[3] = flag(sentences.iter().any(|(t, _)| has_timer_words(t)));
+    out[4] = flag(sentences.iter().any(|(t, r)| !r && !TRIGGER_STARTS.iter().any(|s| t.starts_with(s))));
+    for (k, words) in PAYOFF_WORDS.iter().enumerate() {
+        out[5 + k] = flag(low.iter().any(|t| words.iter().any(|w| t.contains(w))));
+    }
+    out[11] = flag(low.iter().any(|t| t.starts_with("while ") || format!(" {t}").contains(" if ")));
+    out
+}
+
 #[derive(Clone, Debug)]
 pub struct Card {
     pub idx: CardId,
@@ -103,6 +161,10 @@ pub struct Card {
     pub has_ability: bool,
     /// The ability once the Roar has fired: the text without the Roar's own sentences (features.lasting_ability).
     pub has_lasting_ability: bool,
+    /// The ability as what it does (features.ability_profile, ABILITY_FEATURES order): in hand, and on the board
+    /// without the Roar's own sentences.
+    pub ability_profile: [f64; 12],
+    pub lasting_profile: [f64; 12],
     /// The cards whose own text is a live "+X" (strength.py ANTHEM_CARDS): 0 none, 1 guard_wasp, 2 tuna, 3 hamster,
     /// 4 peacock, 5 giraffe, 6 crocodile, 7 capybara.
     pub anthem_kind: u8,
@@ -239,11 +301,15 @@ impl Cards {
                 }
                 !in_roar && is_ability(t)
             });
+            let ability_profile = profile_of(&text, &kw_names, false);
+            let lasting_profile = profile_of(&text, &kw_names, true);
             list.push(Card {
                 idx,
                 has_roar: text.contains("Roar:"),
                 has_ability,
                 has_lasting_ability,
+                ability_profile,
+                lasting_profile,
                 id,
                 name: rec.get("name").and_then(|t| t.as_str()).unwrap_or("").to_string(),
                 status: rec.get("status").and_then(|t| t.as_str()).unwrap_or("").to_string(),

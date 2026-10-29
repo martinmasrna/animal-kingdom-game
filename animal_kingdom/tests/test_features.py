@@ -417,3 +417,24 @@ def test_board_live_reads_a_fired_roar_as_spent():
     assert (old[f"cr{slot}_roar"], old[f"cr{slot}_ability"]) == (1.0, 1.0)
     assert (new[f"cr{slot}_roar"], new[f"cr{slot}_ability"]) == (0.0, 0.0)
     assert {k for k in names if old[k] != new[k]} == {f"cr{slot}_roar", f"cr{slot}_ability"}
+
+
+def test_board_ability_reads_what_an_ability_does():
+    """`board_ability` reads an ability from its text as what it does, so a grazing Wildebeest is not a Cape Buffalo
+    (both a 6-strength Hoofed animal with an ability to `board_live`), and a timer says what it pays (2026-10-29: the
+    Expert lost Hoofed Graze's food race, results/bot_quality/net-r4-10)."""
+    cards = load_cards()
+    assert features.ability_profile(cards["wildebeest"], lasting=True) != features.ability_profile(cards["cape_buffalo"], lasting=True)
+    state = make_state(current="A")
+    region = next(iter(state.game_map.regions.values()))
+    for cr in region.corners:
+        put(state, cr, "wildebeest", "A")
+    names = features.feature_names("board_ability")
+    v = dict(zip(names, features.extract(state, "A", "board_ability")))
+    slot = sorted(state.game_map.crossroads).index(sorted(region.corners)[0])
+    assert v[f"cr{slot}_grazing"] == 1.0 and v[f"cr{slot}_ab_dusk"] == 1.0 and v[f"cr{slot}_ab_food"] == 1.0
+    assert v[f"cr{slot}_ab_conditional"] == 1.0 and v[f"cr{slot}_ab_strength"] == 0.0
+    state.scheduled = [{"iid": -1, "owner": "B", "remaining": 2, "while_buried": False, "step": {"op": "draw", "player": "B", "n": 2}},
+                       {"iid": -2, "owner": "A", "remaining": 2, "while_buried": False, "step": {"op": "gain_food", "player": "A", "amount": 30}}]
+    v = dict(zip(names, features.extract(state, "A", "board_ability")))
+    assert (v["timer_cards_diff"], v["timer_food_diff"]) == (-2.0, 3.0)
