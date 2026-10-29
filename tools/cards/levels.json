@@ -4397,6 +4397,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Dusk: if this is grazing, gain 5 food."
+      },
+      "note": "Martin 2026-10-29: buff to 6",
+      "by": "claude",
+      "at": 1793271435
     }
   },
   "wildebeest_legend": {

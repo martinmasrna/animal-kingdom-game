@@ -2422,10 +2422,10 @@
         "Hoofed"
       ],
       "base_strength": 6,
-      "text": "Dusk: if this is grazing, gain 5 food.",
-      "keywords": [],
+      "text": "Dusk: if this is grazing, gain 6 food.",
       "species": "Wildebeest",
-      "habitat": "Savanna"
+      "habitat": "Savanna",
+      "keywords": []
     },
     {
       "id": "deer",
