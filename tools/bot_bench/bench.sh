@@ -8,8 +8,8 @@
 # The baseline defaults to the shipped Expert without its time budget, and is the opponent too. GAMES (20) and JOBS (7)
 # size the run; AFTER=<name> makes it wait for that run to finish first. Everything of a run lives in results/bot_quality/<name>:
 # tree/ (the checkout), run.json (what ran on what), run.sh, run.log, logs/ (every game).
-# The bots play on the Rust engine: the tree gets its own copy of the built module, so a rebuild during the run cannot
-# change what it plays with (AK_PY_BOTS=1 for the Python bots, fifty times slower). Every long job gets its own freeze;
+# The bots play on the Rust engine, built from the tree's own source into the tree, so neither a rebuild nor another
+# session's uncommitted engine edits can change what it plays with (AK_PY_BOTS=1 for the Python bots, fifty times slower). Every long job gets its own freeze;
 # a tree is never moved, fetched into or edited while anything runs from it, since workers re-read it as batches start.
 set -euo pipefail
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -30,6 +30,9 @@ freeze() {
   if [[ "$rust" == 1 ]]; then
     ls "$module"/*.so >/dev/null 2>&1 || { echo "no built engine module at $module (cd engine_rs && ../.venv/bin/maturin develop --release)"; exit 1; }
     cp -R "$module" "$tree/ak_engine"
+    # The engine built from the tree's own source: the shared module carries whatever another session left uncommitted.
+    (cd "$tree/engine_rs" && CARGO_TARGET_DIR="$out/target" cargo build --release -q) || { echo "engine build failed in $tree"; exit 1; }
+    cp "$out/target/release/libak_engine.dylib" "$tree/ak_engine/$(basename "$tree"/ak_engine/*.so)"
   fi
 }
 
