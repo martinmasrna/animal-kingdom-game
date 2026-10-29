@@ -46,8 +46,8 @@ class Config:
     mara_draw: int = 2                  # Mara: draw N if fed this turn
     piranha_legend_fish: int = 2        # the legendary Piranha: removes each enemy next to N or more of your Fish
     groundhog_food: int = 10            # Groundhog: Dawn: gain N food
-    chipmunk_legend_food_per: int = 3           # Scrooge: Roar: gain 3 food for each 10 food you have
-    chipmunk_legend_food_step: int = 10
+    chipmunk_legend_food_per: int = 1           # Tally: Roar: gain 1 food for each 3 food you have
+    chipmunk_legend_food_step: int = 3
     beaver_bonus_actions: int = 1       # Beaver: extra top-level actions on your NEXT turn
     eel_actions: int = 1                # Electric Eel: the actions your opponent takes on their next turn
 

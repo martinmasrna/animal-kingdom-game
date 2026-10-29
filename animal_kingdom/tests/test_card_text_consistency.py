@@ -391,6 +391,7 @@ def test_the_launch_decks_other_numbers_match_config():
     assert words[re.search(r"add (\w+) random younglings", c["stork"].text).group(1)] == cfg.stork_younglings
     assert int(re.search(r"put (\d+) animals from your opponent's Remove Pile", c["raven_legend"].text).group(1)) == cfg.raven_legend_steals
     assert int(re.search(r"cost (\d+) food to play", c["krill_legend"].text).group(1)) == cfg.krill_legend_food
+    assert int(re.search(r"for each (\d+) food you have", c["chipmunk_legend"].text).group(1)) == cfg.chipmunk_legend_food_step
     tiers = [int(re.search(r"Evolves at (\d+) food", c[f].text).group(1))
              for f in ("dung_beetle_legend", "dung_beetle_legend_form2", "dung_beetle_legend_form3")]
     assert tiers == [cfg.dung_beetle_legend_draw_at, cfg.dung_beetle_legend_food_at, cfg.dung_beetle_legend_play_at]

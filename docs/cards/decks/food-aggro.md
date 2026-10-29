@@ -13,7 +13,7 @@ The table below is generated from cards.json, where the cards live.
 | **Big Gus** | 1 | Rodent | 6 | Roar: repeat the Roar of each of your adjacent Rodents. |
 | **[MACAQUE]** | 1 | Primate | 2 | Roar: draw cards until you have as many as your opponent. |
 | **[RAT]** | 1 | Rodent | 4 | Roar: gain 4 food for each other Rodent you control. Draw a card. |
-| **Tally** | 1 | Rodent | 4 | Roar: gain 3 food for each 10 food you have. |
+| **Tally** | 1 | Rodent | 4 | Roar: gain 1 food for each 3 food you have. |
 
 ### Rare
 

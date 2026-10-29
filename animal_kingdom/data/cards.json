@@ -1285,10 +1285,10 @@
         "Rodent"
       ],
       "base_strength": 4,
-      "text": "Roar: gain 3 food for each 10 food you have.",
-      "keywords": [],
+      "text": "Roar: gain 1 food for each 3 food you have.",
       "species": "Chipmunk",
-      "habitat": "Forest"
+      "habitat": "Forest",
+      "keywords": []
     },
     {
       "id": "flying_squirrel",

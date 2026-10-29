@@ -886,10 +886,10 @@ def test_black_bear_schedules_a_delayed_draw():
 
 
 
-def test_scrooge_gains_3_for_each_10_food_you_have():
+def test_tally_gains_1_for_each_3_food_you_have():
     s = make_state(current="A", hands={"A": ["chipmunk_legend"]}, food={"A": 67, "B": 0})
     rules.apply_action(s, PlaceAction("chipmunk_legend", ("cr", "1,2")))
-    assert s.food["A"] == 67 + 6 * CFG.chipmunk_legend_food_per     # 67 is six whole tens
+    assert s.food["A"] == 67 + 67 // CFG.chipmunk_legend_food_step * CFG.chipmunk_legend_food_per   # 22 whole threes
 
 
 def test_andean_condor_draws_only_when_its_top_is_stronger():

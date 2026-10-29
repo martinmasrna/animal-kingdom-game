@@ -3911,6 +3911,16 @@
       "by": "claude",
       "note": "Martin, 2026-10-20: his pick from the list; a draft, a week on the card before a lock",
       "at": 1792493790
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: gain 3 food for each 10 food you have."
+      },
+      "note": "Martin, 2026-10-29",
+      "by": "claude",
+      "at": 1793306088
     }
   },
   "serval": {
