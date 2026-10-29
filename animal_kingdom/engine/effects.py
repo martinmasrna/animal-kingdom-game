@@ -3324,7 +3324,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "lynx": {"on_place_onto_enemy": _draws("lynx_draw")},
     "bobcat": {"on_place": _conditional("bobcat", _draw1)},
     "alley_cat": {"on_place": _alley_cat_place},
-    "kitten": {"on_place": lambda state, unit, cr: _draws_filtered("tag:Cat&rarity:common", state.config.kitten_draw)(state, unit, cr)},
+    "kitten": {"on_place": lambda state, unit, cr: _draws_filtered("rarity:common", state.config.kitten_draw)(state, unit, cr)},
     # Colony.
     "army_ant_legend": {"on_end_of_turn": _army_ant_legend_eot},
     "bee_legend": {"on_place": _bee_legend_place},

@@ -921,7 +921,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         }
         ("kitten", OnPlace) => {
             let n = cfg(st, "kitten_draw");
-            draws_filtered(st, unit, "tag:Cat&rarity:common", n);
+            draws_filtered(st, unit, "rarity:common", n);
         }
         ("cheetah", OnPlace) | ("falcon", OnPlace) => hq_adjacent_draw(st, unit, cr),
         ("rat", OnPlace) => {
