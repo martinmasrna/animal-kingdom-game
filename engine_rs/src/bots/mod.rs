@@ -151,6 +151,9 @@ impl Bot {
                     if let Some(v) = get("deepen_chase") {
                         s.deepen_chase = as_bool(v);
                     }
+                    if let Some(v) = get("den_open") {
+                        s.den_open = as_bool(v);
+                    }
                 }
                 Ok(Bot::Search(s))
             }

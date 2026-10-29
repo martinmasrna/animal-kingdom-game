@@ -74,7 +74,8 @@ class RefereeBot(TurnSearcher):
                  evaluator: Optional[LinearEval] = None,
                  quiesce: bool = False, mulligan: bool = False,
                  depth: int = 0, next_width: int = 3, deepen_top: int = 4, deepen_roots: int = 3, time_budget: float = 0.0,
-                 den_sense: bool = False, reply_turns: int = 0, decisive: float = _DECISIVE, deepen_chase: bool = False):
+                 den_sense: bool = False, reply_turns: int = 0, decisive: float = _DECISIVE, deepen_chase: bool = False,
+                 den_open: bool = False):
         super().__init__(weights=weights, rng=rng, seed=seed,
                          determinizations=determinizations, beam_width=beam_width,
                          evaluator=evaluator, quiesce=quiesce, mulligan=mulligan, decisive=decisive)
@@ -115,6 +116,10 @@ class RefereeBot(TurnSearcher):
         # behind (drawing) was never deepened. With chase, deepening continues down the one-turn order while the best
         # deepened score trails the next root's one-turn score, within the move's time budget.
         self.deepen_chase = deepen_chase
+        # Den openers (2026-10-29, Martin's 2TZBCA): a placement that makes my den capture legal is the first half of a
+        # two-action win, but its one-move score is ordinary, so both shortlists (the beam and the root screen) dropped
+        # it and the win was never searched. With den_open both keep every such placement.
+        self.den_open = den_open
         self._deepening = False             # on only while _rescore_roots scores a root's final lines
         # `self._policy` (the GreedyBot that plays every rollout seat) and `self._search_nodes`
         # are set identically by TurnSearcher.__init__; RefereeBot uses them for reply rollouts
@@ -258,6 +263,8 @@ class RefereeBot(TurnSearcher):
                           if isinstance(a, PlaceAction) and not a.is_hq_capture and a.crossroad == cr]
                 if guards:
                     selected.add(max(guards, key=lambda a: card_strength(state, a.card_id, me)))
+        if self.den_open:
+            selected.update(self._den_openers(worlds[0], candidates, me))
         # Draw is strategically distinct and deliberately protected by the generic beam;
         # retain it through the cheap screen even when its immediate score is low.
         selected.update(

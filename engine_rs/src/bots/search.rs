@@ -80,6 +80,7 @@ pub struct Searcher {
     pub den_sense: bool,
     pub reply_turns: usize,
     pub deepen_chase: bool,
+    pub den_open: bool,
     // run state
     search_nodes: usize,
     deepening: bool,
@@ -128,6 +129,7 @@ impl Searcher {
             den_sense: false,
             reply_turns: 0,
             deepen_chase: false,
+            den_open: false,
             search_nodes: 0,
             deepening: false,
             screening: false,
@@ -469,6 +471,14 @@ impl Searcher {
                 selected.push(i);
             }
         }
+        if self.den_open {
+            for a in self.den_openers(&worlds[0], &candidates, me) {
+                let i = candidates.iter().position(|x| *x == a).unwrap();
+                if !selected.contains(&i) {
+                    selected.push(i);
+                }
+            }
+        }
         let narrowed: Vec<Action> = candidates.iter().enumerate().filter(|(i, _)| selected.contains(i)).map(|(_, a)| a.clone()).collect();
         self.stats.screened_candidates = narrowed.len();
         narrowed
@@ -634,6 +644,14 @@ impl Searcher {
                 }
             }
         }
+        if self.den_open {
+            for a in self.den_openers(world, legal, me) {
+                let i = legal.iter().position(|x| *x == a).unwrap();
+                if !reserved.contains(&i) {
+                    reserved.push(i);
+                }
+            }
+        }
         let mut kept: Vec<usize> = reserved.clone();
         let cap = self.beam_width.max(reserved.len());
         for &(_, i) in &scored {
@@ -648,6 +666,32 @@ impl Searcher {
             }
         }
         legal.iter().enumerate().filter(|(i, _)| kept.contains(i)).map(|(_, a)| a.clone()).collect()
+    }
+
+    /// The placements after which my den capture is legal (the Roar settled by the fast policy): the first half of a
+    /// two-action win, whose one-move score looks ordinary (Martin's 2TZBCA, 2026-10-29).
+    fn den_openers(&mut self, world: &State, legal: &[Action], me: Player) -> Vec<Action> {
+        let mut openers = Vec::new();
+        for action in legal {
+            if !matches!(action, Action::Place { target: Target::Cr(_), .. } | Action::Roam { target: Target::Cr(_), .. }) {
+                continue;
+            }
+            let mut nxt = world.clone();
+            let _ = rules::apply_action(&mut nxt, action, false);
+            if self.capture_next(&nxt, me) {
+                openers.push(action.clone());
+            }
+        }
+        openers
+    }
+
+    /// Whether my den capture is legal once this position's pending choices are settled by the fast policy.
+    fn capture_next(&mut self, st: &State, me: Player) -> bool {
+        let s = self.settled(st, me);
+        s.result.is_none()
+            && s.pending.is_none()
+            && s.player_to_act() == me
+            && rules::legal_actions(&s).iter().any(|b| matches!(b, Action::Place { target: Target::Hq(_), .. } | Action::Roam { target: Target::Hq(_), .. }))
     }
 
     fn is_collapsible_deck_reveal(&self, world: &State) -> bool {
@@ -668,13 +712,13 @@ impl Searcher {
         scored.iter().take(n).map(|(_, i)| legal[*i].clone()).collect()
     }
 
-    fn safe_actions(&self, world: &State, legal: &[Action], me: Player) -> Vec<Action> {
+    fn safe_actions(&mut self, world: &State, legal: &[Action], me: Player) -> Vec<Action> {
         let opponent = other(me);
         let mut safe = Vec::new();
         for action in legal {
             let mut nxt = world.clone();
             let _ = rules::apply_action(&mut nxt, action, false);
-            if nxt.result.is_some() || !opponent_lethal_next_turn(&nxt, opponent) {
+            if nxt.result.is_some() || !opponent_lethal_next_turn(&nxt, opponent) || (self.den_open && self.capture_next(&nxt, me)) {
                 safe.push(action.clone());
             }
         }
