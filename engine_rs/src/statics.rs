@@ -23,6 +23,11 @@ pub fn controls(st: &State, player: Player, card: Option<CardId>) -> bool {
     st.tops().any(|(_, u)| u.owner == player && u.card == card && active(st, u))
 }
 
+/// The legendary Sardine: "Each of your Fish counts as 2 Fish." What one of `player`'s Fish counts as.
+pub fn fish_worth(st: &State, player: Player) -> i32 {
+    if controls(st, player, st.g.known.sardine_legend) { 2 } else { 1 }
+}
+
 pub fn crossroad_of(st: &State, iid: i64) -> Option<Cr> {
     st.find_unit(iid).map(|(cr, _)| cr)
 }
@@ -89,7 +94,7 @@ pub fn can_cover(st: &State, placer: &Unit, target: &Unit, roaming: bool) -> boo
         return true;
     }
     if placer_card.has_tag(T_FISH) && controls(st, owner, k.piranha) {
-        let fish = st.tops().filter(|(_, u)| u.owner == owner && st.card(u.card).has_tag(T_FISH)).count() as i32;
+        let fish = st.tops().filter(|(_, u)| u.owner == owner && st.card(u.card).has_tag(T_FISH)).count() as i32 * fish_worth(st, owner);
         if target_str <= fish {
             return true;
         }

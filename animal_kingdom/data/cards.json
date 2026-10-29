@@ -1075,16 +1075,16 @@
     {
       "id": "piranha_legend",
       "name": "[PIRANHA]",
-      "status": "reserve",
+      "status": "collectible",
       "rarity": "legendary",
       "tags": [
         "Fish"
       ],
       "base_strength": 3,
-      "text": "Your Fish can cover enemies of strength up to the number of your Fish.",
-      "keywords": [],
+      "text": "Roar: remove each enemy next to 2 or more of your Fish.",
       "species": "Piranha",
-      "habitat": "Jungle"
+      "habitat": "Jungle",
+      "keywords": []
     },
     {
       "id": "swordfish",
@@ -3945,6 +3945,20 @@
       "text": "Roar: gain as much food as you gained this turn.",
       "species": "Rodent",
       "habitat": "Forest",
+      "keywords": []
+    },
+    {
+      "id": "sardine_legend",
+      "name": "[SARDINE]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Fish"
+      ],
+      "base_strength": 1,
+      "text": "Each of your Fish counts as 2 Fish.",
+      "species": "Sardine",
+      "habitat": "Open Ocean",
       "keywords": []
     }
   ]

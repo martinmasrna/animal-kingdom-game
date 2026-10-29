@@ -76,7 +76,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "termite_king" | "termite_queen" | "queen_bee" | "soldier_ant" | "worker_ant" | "worker_bee" | "greywhisker" | "mole_legend"
         | "rat_legend_2" | "skunk_legend" | "falcon_legend" | "mole" | "naked_mole_rat" | "hornet" | "skunk" | "hare" | "cheetah" | "rat"
         | "falcon" | "bat" | "dolphin" | "mouse" | "raven_legend" | "hawk" | "cottonmouth" | "magpie" | "black_mamba" | "mosquito" | "raven"
-        | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "remora" | "cod" | "sardine" | "mahi_mahi" | "sunfish"
+        | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "piranha_legend" | "remora" | "cod" | "sardine" | "mahi_mahi" | "sunfish"
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
         | "chipmunk" | "gopher" | "mara" | "groundhog" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
         | "grizzly_bear" | "stag_beetle" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
@@ -378,7 +378,8 @@ fn spawn_pups(st: &mut State, unit: &Unit, cr: Cr, n: i32, tokens: &[&str]) {
 }
 
 fn adjacent_ally_fish(st: &State, unit: &Unit, cr: Cr) -> i32 {
-    adjacent_tops(st, cr, Some(unit.owner)).iter().filter(|(_, t)| st.card(t.card).has_tag(T_FISH)).count() as i32
+    statics::fish_worth(st, unit.owner)
+        * adjacent_tops(st, cr, Some(unit.owner)).iter().filter(|(_, t)| st.card(t.card).has_tag(T_FISH)).count() as i32
 }
 
 fn drain_place(st: &mut State, unit: &Unit, cr: Cr, amount: i32) {
@@ -1012,9 +1013,19 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             }
         }
         ("barracuda", OnPlace) => {
-            let max = control_tag_count(st, owner, T_FISH);
+            let max = control_tag_count(st, owner, T_FISH) * statics::fish_worth(st, owner);
             let t = adjacent_enemy_targets(st, unit, cr, Some(max), None, true);
             push_remove_choice(st, owner, unit.card, t, false);
+        }
+        ("piranha_legend", OnPlace) => {
+            let need = cfg(st, "piranha_legend_fish");
+            let prey: Vec<(Cr, i64)> = st.tops().filter(|(_, u)| u.owner != owner).map(|(c, u)| (c, u.iid)).collect();
+            for (at, iid) in prey {
+                if adjacent_ally_fish(st, unit, at) >= need {
+                    let step = remove_iid_step(st, iid, owner, true, None, Some(unit.card));
+                    st.effect_stack.push(step);
+                }
+            }
         }
         ("manta_ray", OnAllyCovered) => {
             if let Args::AllyCovered(covered, coverer, ccr) = args {

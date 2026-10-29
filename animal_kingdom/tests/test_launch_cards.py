@@ -857,6 +857,41 @@ def test_barracuda_removes_up_to_the_number_of_your_fish():
     assert removed(s, "baby_turtle") and s.top_unit("1,3") is not None
 
 
+def test_the_legendary_sardine_counts_each_fish_twice():
+    s = make_state(hands={"A": ["barracuda"]})
+    put(s, "1,1", "sardine_legend", "A")
+    tuna = put(s, "2,1", "tuna", "A")
+    assert effective_strength(s, tuna) == 3 + 2                # one other Fish, counted twice
+    put(s, "1,3", "squirrel", "B")                             # 3 <= 3 Fish counted as 6
+    apply_click(s, PlaceAction("barracuda", ("cr", "1,2")))
+    assert removed(s, "squirrel")
+
+
+def test_a_covered_legendary_sardine_stops_counting_double():
+    s = make_state()
+    put(s, "1,1", "sardine_legend", "A")
+    tuna = put(s, "2,1", "tuna", "A")
+    put(s, "1,1", "lion", "B")
+    assert effective_strength(s, tuna) == 3
+
+
+def test_the_legendary_piranha_removes_each_enemy_next_to_two_of_your_fish():
+    s = make_state(hands={"A": ["piranha_legend"]})
+    put(s, "2,1", "sardine", "A")
+    put(s, "2,2", "lion", "B")                                 # next to the Sardine and the Piranha
+    put(s, "3,1", "squirrel", "B")                             # next to the Sardine only
+    rules.apply_action(s, PlaceAction("piranha_legend", ("cr", "1,2")))
+    assert removed(s, "lion") and s.top_unit("3,1").card_id == "squirrel"
+
+
+def test_the_legendary_piranha_with_the_legendary_sardine_needs_one_fish():
+    s = make_state(hands={"A": ["piranha_legend"]})
+    put(s, "2,1", "sardine_legend", "A")
+    put(s, "3,1", "squirrel", "B")                             # one Fish, counted twice
+    rules.apply_action(s, PlaceAction("piranha_legend", ("cr", "1,2")))
+    assert removed(s, "squirrel")
+
+
 def test_manta_ray_draws_when_the_opponent_covers_an_adjacent_allied_fish():
     s = make_state(current="B", hands={"B": ["lion"]}, decks={"A": ["lion"], "B": []})
     put(s, "4,2", "lion", "B")

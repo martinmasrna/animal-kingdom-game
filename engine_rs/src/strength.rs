@@ -88,7 +88,10 @@ pub fn anthem_bonus(st: &State, card: &Card, owner: Player, self_iid: Option<i64
                     bonus += cfg.int("guard_hornet_bonus");
                 }
             }
-            2 => bonus += cfg.int("tuna_per_fish") * count(T_FISH, false),
+            2 => {
+                let sardine = tops.iter().any(|u| Some(u.card) == st.g.known.sardine_legend && !st.is_inked(u.iid));
+                bonus += cfg.int("tuna_per_fish") * count(T_FISH, false) * if sardine { 2 } else { 1 };
+            }
             3 => bonus += cfg.int("hamster_per_step") * (st.food[owner.min(1) as usize] / cfg.int("hamster_food_step")),
             4 => bonus += cfg.int("hand_per_card") * st.hands[owner.min(1) as usize].len() as i32,
             5 => {

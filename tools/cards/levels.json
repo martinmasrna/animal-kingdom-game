@@ -3308,13 +3308,22 @@
     },
     "animal": {
       "lv": "draft",
-      "note": "out of the collection (in the reserve)",
+      "note": "into the collection",
       "by": "claude",
-      "at": 1793114057,
+      "at": 1793269317,
       "review": {
         "prev_lv": "draft",
         "prev_note": "Martin 2026-10-17: placeholder in caps until a name he is sure of"
       }
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Your Fish can cover enemies of strength up to the number of your Fish."
+      },
+      "by": "claude",
+      "at": 1793269316
     }
   },
   "baby_fox": {
@@ -6633,6 +6642,63 @@
       "note": "into the collection",
       "by": "claude",
       "at": 1793229967
+    }
+  },
+  "sardine_legend": {
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793269315
+    },
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "sardine_legend",
+          "species": "Sardine"
+        }
+      },
+      "by": "claude",
+      "at": 1793269323,
+      "note": "into the collection",
+      "lv": "draft"
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793269316
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "the doubling lives on a 1: any cover turns it off",
+      "by": "claude",
+      "at": 1793269316
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793269316
     }
   }
 }

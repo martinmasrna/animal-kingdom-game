@@ -44,6 +44,7 @@ class Config:
     # A shared threshold read by Gopher/Muskrat/Groundhog.
     fed_threshold: int = 10              # food gained this turn to arm Gopher/Muskrat/Groundhog
     mara_draw: int = 2                  # Mara: draw N if fed this turn
+    piranha_legend_fish: int = 2        # the legendary Piranha: removes each enemy next to N or more of your Fish
     groundhog_food: int = 10            # Groundhog: gain N food if fed this turn (was +5 str)
     chipmunk_legend_food_per: int = 3           # Scrooge: Roar: gain 3 food for each 10 food you have
     chipmunk_legend_food_step: int = 10

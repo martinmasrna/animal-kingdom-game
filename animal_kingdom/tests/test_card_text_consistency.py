@@ -363,7 +363,7 @@ def test_strength_bonus_text_matches_config():
     assert not problems, "card text / config desync:\n  " + "\n  ".join(problems)
 
 
-COUNT_THRESHOLD_RE = re.compile(r"(\d+) or more (animals|cards|strength|regions|Colony animals|removals)")
+COUNT_THRESHOLD_RE = re.compile(r"(\d+) or more (animals|cards|strength|regions|Colony animals|removals|of your Fish)")
 
 # card_id -> the config attr of its printed "N or more <things>" threshold.
 THRESHOLDS = {
@@ -376,6 +376,7 @@ THRESHOLDS = {
     "guard_wasp": "guard_hornet_colony_threshold",
     "soldier_ant": "colony_synergy_threshold",
     "vulture": "vulture_removals",
+    "piranha_legend": "piranha_legend_fish",
 }
 
 

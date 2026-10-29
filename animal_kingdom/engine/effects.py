@@ -2674,7 +2674,8 @@ def _manta_legend_eot(state, unit, cr):
 
 
 def _adjacent_ally_fish(state, unit, cr) -> int:
-    return sum(1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Fish" in state.cards[top.card_id].tags)
+    return statics.fish_worth(state, unit.owner) * sum(
+        1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Fish" in state.cards[top.card_id].tags)
 
 
 def _swordfish_place(state, unit, cr):
@@ -2690,7 +2691,15 @@ def _swordfish_place(state, unit, cr):
 def _barracuda_place(state, unit, cr):
     """Roar: remove an adjacent enemy with strength up to the number of your Fish (this one included)."""
     _push_remove_choice(state, unit.owner, unit.card_id, _adjacent_enemy_targets(
-        state, unit, cr, max_strength=_control_tag_count(state, unit.owner, "Fish")))
+        state, unit, cr, max_strength=_control_tag_count(state, unit.owner, "Fish") * statics.fish_worth(state, unit.owner)))
+
+
+def _piranha_legend_place(state, unit, cr):
+    """Roar: remove each enemy next to 2 or more of your Fish (the Sardine's double count included)."""
+    for where, st in list(state.board.items()):
+        if st and st[-1].owner != unit.owner and _adjacent_ally_fish(state, unit, where) >= state.config.piranha_legend_fish:
+            state.effect_stack.append(remove_iid_step(st[-1].iid, by_player=unit.owner, by_effect=True,
+                                                      source_iid=None, by_card=unit.card_id))
 
 
 def _manta_ally_covered(state, watcher, covered, coverer, cr):
@@ -3290,6 +3299,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "manta_ray_legend": {"on_end_of_turn": _manta_legend_eot},
     "swordfish": {"on_place": _swordfish_place},
     "barracuda": {"on_place": _barracuda_place},
+    "piranha_legend": {"on_place": _piranha_legend_place},
     "manta_ray": {"on_ally_covered": _manta_ally_covered},
     "remora": {"on_place": _remora_place},
     "cod": {"on_place": _cod_place},

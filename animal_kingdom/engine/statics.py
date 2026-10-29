@@ -43,6 +43,11 @@ def _controls(state: GameState, player: str, card_id: str) -> bool:
                for st in state.board.values())
 
 
+def fish_worth(state: GameState, player: str) -> int:
+    """The legendary Sardine: "Each of your Fish counts as 2 Fish." What one of `player`'s Fish counts as."""
+    return 2 if _controls(state, player, "sardine_legend") else 1
+
+
 def crossroad_of(state: GameState, unit: UnitInstance) -> Optional[str]:
     for cr, st in state.board.items():
         for u in st:
@@ -125,7 +130,7 @@ def can_cover(state: GameState, placer: UnitInstance, target: UnitInstance, *, r
     if "Fish" in placer_card.tags and _controls(state, owner, "piranha"):
         fish = sum(1 for st in state.board.values()
                    if st and st[-1].owner == owner and "Fish" in state.cards[st[-1].card_id].tags)
-        if target_str <= fish:
+        if target_str <= fish * fish_worth(state, owner):
             return True
 
     return placer_str > target_str  # default: strictly greater
