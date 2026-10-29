@@ -50,7 +50,7 @@ The one whose bark brings the others in; worth more the more of the herd stands 
 | Card | Rarity | Str | Text | Habitat |
 |---|---|---:|---|---|
 | **[ZEBRA]** | legendary | 4 | Roar: draw a card for each different other Hoofed animal you control. | Savanna |
-| **Zebra** | common | 4 | Flee. Roar: gain 5 food for each other Hoofed animal next to this. | Savanna |
+| **Zebra** | common | 5 | Flee. When this flees, return the enemy that covered it to its owner's hand. | Savanna |
 
 <!-- cards:end -->
 
@@ -64,7 +64,7 @@ The one who knows where the grass is; the herd's food.
 |---|---|---:|---|---|
 | **[WILDEBEEST]** | legendary | 5 | Your regions produce 5 more food. | Savanna |
 | **Okapi** | rare | 4 | Dusk: if this is grazing, draw a card. | Jungle |
-| **Wildebeest** | common | 6 | Dusk: if this is grazing, gain 5 food. | Savanna |
+| **Wildebeest** | common | 6 | Dusk: if this is grazing, gain 6 food. | Savanna |
 
 <!-- cards:end -->
 

@@ -56,7 +56,6 @@ class Config:
 
     # --- Payoff food ---
     gazelle_food: int = 5                # Gazelle: Roar: draw a card and gain 5 food (its Flee brings the Roar back)
-    zebra_food: int = 5                  # Zebra: Roar: gain 5 food for each other Hoofed animal next to this
     sloth_food: int = 30                 # Sloth: gain food when its timer comes due
     locust_delay: int = 2                # Locust (The First of Many's): turns until it eats, every turn counting (Wild)
     sloth_delay: int = 2                 # owner-turns until Sloth pays out (ticks only while it is
@@ -79,6 +78,7 @@ class Config:
     street_dog_grant: int = 3            # Street Dog: Roar: give a connected ally with Roam +3 strength. It roams.
     black_wolf_grant: int = 1            # the legendary Black Wolf: whenever a Canine roams, give it +1 strength
     black_wolf_draw: int = 1             # ... and draw a card
+    deer_legend_grant: int = 2           # the legendary Deer: whenever one of your animals flees, it gains 2 strength (itself too)
     fox_draw: int = 2                    # Fox: Roar: if a Canine roamed this turn, draw 2 cards
     dhole_draw: int = 2                  # Dhole: whenever it covers an enemy with no other enemy next to it, draw 2 cards
     elephant_legend_max: int = 3         # the legendary Elephant: whenever it lands, remove all adjacent enemies of strength 3 or less

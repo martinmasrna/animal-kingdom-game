@@ -12,3 +12,4 @@ Read on 2026-11-15. The treatment failed if, over the sittings since 2026-10-26,
 | 2026-10-26 | Sea Turtle (new effect; Martin wrote the card himself) | 7 | 0 | 7 | 0 | 0 | 0 | 0 | 0 | 3 | 4 | 0 |
 | 2026-10-27 | Card balance: Alley Cat, Queen Bee, Giants (Titan cheats, Oxpecker, legendary Oxpecker); agent on a stale copy of this skill | 24 | 3 | 21 | 0 | 4 | 3 | 0 | 4 | 3 | 7 | 0 |
 | 2026-10-28 | Jellyfish/Toad/Tortoise; Canines and Roam redesign (board puzzle), birds; counts reconstructed from the chat, approximate | 50 | 9 | 30 | 2 | 4 | 5 | 3 | 2 | 4 | 10 | 0 |
+| 2026-10-29 | Hoofed graze: legendary, rare and Zebra slots, run from how-the-game-works.md with no steer; 2 accepted (Zebra kick at common 5, legendary Deer), 10 unjudged | 12 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |

@@ -4612,9 +4612,9 @@
         "prev_note": "",
         "prev": "Flee. When this flees, return the enemy that covered it to its owner's hand."
       },
-      "note": "Martin, 2026-10-22: the mixed herd, with Flee",
+      "note": "Martin, 2026-10-29: the original ability restored, tried as a common",
       "by": "claude",
-      "at": 1792666803
+      "at": 1793291085
     },
     "strength": {
       "review": {
@@ -4622,9 +4622,9 @@
         "prev_note": "",
         "prev": 5
       },
-      "note": "Claude, 2026-10-22: 5 without Flee; Flee repeats the Roar, so 4 (Deer's size)",
+      "note": "Martin, 2026-10-29: the kick back at common 5 (a corner that costs the opponent two actions to take)",
       "by": "claude",
-      "at": 1792666803
+      "at": 1793291085
     },
     "rarity": {
       "review": {
@@ -6749,6 +6749,63 @@
       "lv": "draft",
       "by": "claude",
       "at": 1793269316
+    }
+  },
+  "deer_legend": {
+    "animal": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": {
+          "name": "Deer Legend",
+          "species": "Deer"
+        }
+      },
+      "by": "claude",
+      "at": 1793291108,
+      "note": "into the collection"
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793291085
+    },
+    "tag": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "by": "claude",
+      "at": 1793291086
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": null
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-29: a 3 because the rule ends when the body is covered",
+      "by": "claude",
+      "at": 1793291086
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "empty",
+        "prev_note": "",
+        "prev": ""
+      },
+      "lv": "draft",
+      "note": "Martin, 2026-10-29: the uncatchable stag; it grows itself too",
+      "by": "claude",
+      "at": 1793291086
     }
   }
 }

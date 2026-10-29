@@ -347,13 +347,33 @@ def _push_flee(state, covered, coverer, cr) -> None:
 
 
 def _op_flee(state, step):
+    """The fleer is back in hand (with its stored strength), then the reactions: the player's other top animals'
+    "whenever one of your animals flees" (the legendary Deer), and the fleer's own "when this flees" (the Zebra's kick,
+    the legendary Deer growing itself). Hooks get the hand instance, the one that goes on existing."""
     cr, unit = _find_unit(state, step["iid"])
     if unit is None:
         return None
-    _bounce(state, cr, unit)
-    hook = _hook(state, unit.card_id, "on_flee")     # "When this flees, ..." (no card has one now)
+    fled = _bounce(state, cr, unit)
+    if fled is None:                                  # a Wild fleer has no hand: nothing to react to
+        return None
+    for st in list(state.board.values()):
+        top = st[-1] if st else None
+        if top is None or top.owner != fled.owner:
+            continue
+        hook = _hook(state, top.card_id, "on_friendly_flee")
+        if hook:
+            hook(state, top, fled)
+    hook = _hook(state, fled.card_id, "on_flee")
     if hook:
-        hook(state, unit, step["coverer"])
+        hook(state, fled, step["coverer"])
+    return None
+
+
+def _op_flee_return(state, step):
+    """Zebra: "When this flees, return the enemy that covered it to its owner's hand." (A return: Armor resists it.)"""
+    cr, unit = _find_unit(state, step["iid"])
+    if unit is not None and statics.can_be_removed(state, unit, cr):
+        _bounce(state, cr, unit)
     return None
 
 
@@ -1436,6 +1456,7 @@ OPS: dict[str, Callable] = {
     "grant_free_roam": _op_grant_free_roam,
     "timed_hook": _op_timed_hook,
     "flee": _op_flee,
+    "flee_return": _op_flee_return,
     "queen_guard": _op_queen_guard,
 }
 
@@ -1572,14 +1593,18 @@ def _push_play_extra(state, owner, *, filter=None, optional=False):
 
 
 def _bounce(state, cr, top, *, lock_until=0):
-    """Return a board unit to its owner's hand (not a removal: no Remove Pile, no triggers)."""
+    """Return a board unit to its owner's hand (not a removal: no Remove Pile, no triggers). The card keeps its stored
+    strength, as it does through every other change of place (a fled animal the legendary Deer grew stays grown).
+    Returns the hand instance, or None for a Wild animal."""
     state.emit("bounce", cr=cr, iid=top.iid, card=top.card_id, owner=top.owner)
     state.board[cr].remove(top)
     if not state.board[cr]:
         del state.board[cr]
     if top.owner == WILD:       # a Wild animal has no hand to go back to: it just leaves
-        return
-    gain_to_hand(state, top.owner, top.card_id).locked_until_turn = lock_until
+        return None
+    inst = gain_to_hand(state, top.owner, top.card_id, strength_counter=top.strength_counter)
+    inst.locked_until_turn = lock_until
+    return inst
 
 
 def _spawn(state, owner, card_id, cr):
@@ -3086,11 +3111,19 @@ def _gazelle_place(state, unit, cr):
     _push_draw(state, unit.owner, 1)
 
 
-def _zebra_place(state, unit, cr):
-    """Roar: gain 5 food for each other Hoofed animal next to this (zebra_food)."""
-    n = sum(1 for _, top in _adjacent_tops(state, cr, unit.owner) if "Hoofed" in state.cards[top.card_id].tags)
-    if n:
-        _push_gain(state, unit.owner, n * state.config.zebra_food)
+def _zebra_flee(state, fled, coverer_iid):
+    """When this flees, return the enemy that covered it to its owner's hand (Martin, 2026-10-29: the kick, back)."""
+    state.effect_stack.append({"op": "flee_return", "iid": coverer_iid})
+
+
+def _deer_legend_friendly_flee(state, watcher, fled):
+    """Whenever one of your animals flees, it gains 2 strength: the fled card, now in hand (deer_legend_grant)."""
+    _grant(state, [fled.iid], state.config.deer_legend_grant)
+
+
+def _deer_legend_own_flee(state, fled, coverer_iid):
+    """The legendary Deer fleeing grows itself (Martin, 2026-10-29: "make sure it gives strength to itself as well")."""
+    _grant(state, [fled.iid], state.config.deer_legend_grant)
 
 
 def _warthog_place(state, unit, cr):
@@ -3376,9 +3409,10 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     # Hoofed (the legendary Wildebeest and Boar change region income; the legendary Giraffe reveals; Moose, Giraffe and
     # Boar are anthems).
     "zebra_legend": {"on_place": _zebra_legend_place},
+    "deer_legend": {"on_friendly_flee": _deer_legend_friendly_flee, "on_flee": _deer_legend_own_flee},
     "honey_badger": {"on_place": _removes(min_attr="honey_badger_min")},
     "okapi": {"on_end_of_turn": _okapi_eot},
-    "zebra": {"on_place": _zebra_place},
+    "zebra": {"on_flee": _zebra_flee},
     "warthog": {"on_place": _warthog_place},
     "albatross": {"on_place": _albatross_place},
     "boar": {"on_place": _boar_place},

@@ -185,17 +185,37 @@ def test_flee_runs_before_an_apex_predator_can_eat():
     assert "gazelle" in hand_ids(s, "A") and s.top_unit("3,2").card_id == "tiger"
 
 
-def test_the_zebra_gains_food_for_each_hoofed_neighbour_and_flees():
-    s = make_state(hands={"A": ["zebra"]})
-    put(s, "1,1", "deer", "A"); put(s, "1,3", "okapi", "A"); put(s, "2,2", "lion", "A")   # the Giraffe is Hungry now: it would eat
-    before = s.food["A"]
-    rules.apply_action(s, PlaceAction("zebra", ("cr", "1,2")))       # two Hoofed neighbours; the Lion isn't one
-    assert s.food["A"] - before == 2 * CFG.zebra_food
-    s2 = make_state(current="B", hands={"B": ["lion"]})
+def test_the_zebra_flees_and_kicks_its_coverer_back_to_hand():
+    # Martin, 2026-10-29: the original kick, back as a common 5. Both go home and the crossroad is empty again;
+    # an Armored coverer stays (the kick is a return, and Armor resists it).
+    s = make_state(current="B", hands={"B": ["lion"]})
+    put(s, "4,2", "lion", "B")
+    put(s, "3,2", "zebra", "A")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))
+    assert "zebra" in hand_ids(s, "A") and "lion" in hand_ids(s, "B") and s.top_unit("3,2") is None
+    s2 = make_state(current="B", hands={"B": ["tortoise"]})
     put(s2, "4,2", "lion", "B")
     put(s2, "3,2", "zebra", "A")
-    rules.apply_action(s2, PlaceAction("lion", ("cr", "3,2")))
-    assert "zebra" in hand_ids(s2, "A") and s2.top_unit("3,2").card_id == "lion"
+    rules.apply_action(s2, PlaceAction("tortoise", ("cr", "3,2")))
+    assert "zebra" in hand_ids(s2, "A") and s2.top_unit("3,2").card_id == "tortoise"
+
+
+def test_the_legendary_deer_grows_every_fleer_including_itself_and_the_growth_travels():
+    # Martin, 2026-10-29: "make sure it gives strength to itself as well". The fled card is grown in hand, keeps it when
+    # played again, and keeps it through its next flight (the counter travels with the card on every bounce).
+    s = make_state(current="B", hands={"B": ["lion", "lion"]}, decks={"A": ["lion"] * 4, "B": ["lion"] * 4})
+    put(s, "4,2", "lion", "B")
+    put(s, "3,2", "gazelle", "A")
+    put(s, "2,2", "deer_legend", "A")
+    rules.apply_action(s, PlaceAction("lion", ("cr", "3,2")))
+    gaz = next(u for u in s.hands["A"] if u.card_id == "gazelle")
+    assert gaz.strength_counter == CFG.deer_legend_grant
+    rules.apply_action(s, PlaceAction("lion", ("cr", "2,2")))              # the Deer itself flees: it grows too
+    deer = next(u for u in s.hands["A"] if u.card_id == "deer_legend")
+    assert deer.strength_counter == CFG.deer_legend_grant
+    assert s.player_to_act() == "A"                                         # B's two placements ended its turn
+    rules.apply_action(s, PlaceAction("gazelle", ("cr", "1,2")))
+    assert effective_strength(s, s.top_unit("1,2")) == CFG.deer_legend_grant + s.cards["gazelle"].base_strength
 
 
 def test_octopus_ink_switches_every_adjacent_enemys_effects_off_for_good():

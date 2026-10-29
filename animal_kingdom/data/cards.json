@@ -2358,8 +2358,8 @@
       "tags": [
         "Hoofed"
       ],
-      "base_strength": 4,
-      "text": "Flee. Roar: gain 5 food for each other Hoofed animal next to this.",
+      "base_strength": 5,
+      "text": "Flee. When this flees, return the enemy that covered it to its owner's hand.",
       "species": "Zebra",
       "habitat": "Savanna",
       "keywords": [
@@ -3960,6 +3960,22 @@
       "species": "Sardine",
       "habitat": "Open Ocean",
       "keywords": []
+    },
+    {
+      "id": "deer_legend",
+      "name": "[DEER]",
+      "status": "collectible",
+      "rarity": "legendary",
+      "tags": [
+        "Hoofed"
+      ],
+      "base_strength": 3,
+      "text": "Flee. Whenever one of your animals flees, it gains 2 strength.",
+      "species": "Deer",
+      "habitat": "Forest",
+      "keywords": [
+        "Flee"
+      ]
     }
   ]
 }
