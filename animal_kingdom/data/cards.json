@@ -72,7 +72,7 @@
         "Colony",
         "Nurse"
       ],
-      "base_strength": 3,
+      "base_strength": 2,
       "text": "Flight. Roar: if you control 4 or more Colony animals, draw 2 cards.",
       "species": "Bee",
       "habitat": "Meadow",
