@@ -33,6 +33,7 @@ pub enum Hook {
     OnDawnInHand,
     OnRoam,
     OnFriendlyRoam,
+    OnFriendlyFlee,
 }
 
 impl Hook {
@@ -63,6 +64,7 @@ pub enum Args {
     Timed(Cr),
     Roam(Cr, RoamEvent),
     FriendlyRoam(Unit, RoamEvent),
+    FriendlyFlee(Unit),
 }
 
 const GROWS: &[Hook] = &[Hook::OnDawnInHand, Hook::OnStartOfTurn, Hook::OnGain];
@@ -81,13 +83,16 @@ pub fn hook_mask(card: &str) -> u32 {
         | "chipmunk" | "gopher" | "mara" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
         | "grizzly_bear" | "stag_beetle" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
-        | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
+        | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "warthog" | "albatross" | "boar" | "gazelle" | "deer" | "impala" | "baby_impala"
         | "octopus" | "macaw" | "woodpecker" | "sperm_whale" | "butterfly" | "cuckoo" | "opossum" | "fox_legend" | "viper" | "andean_condor"
         | "ocelot" | "tutorial_lynx" | "tutorial_chipmunk" | "krill" | "dung_beetle_legend_form2" | "dung_beetle_legend_form3" | "dung_beetle_legend_form4" => &[OnPlace],
+        "zebra" => &[OnFlee],
+        "deer_legend" => &[OnFriendlyFlee, OnFlee],
+        "okapi" => &[OnStartOfTurn, OnEndOfTurn],
         "meerkat" => &[OnPlace, OnEnemyPlacedAdjacent],
         "pheasant_legend" | "earthworm" | "worm" | "cockroach" | "cockroach_legend" | "dart_frog" => &[OnRemove],
         "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "queen_ant" | "scout_bee" | "army_ant_legend"
-        | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "okapi" | "wildebeest"
+        | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "wildebeest"
         | "dingo" | "sperm_whale_legend" => &[OnEndOfTurn],
         "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" | "groundhog" => &[OnStartOfTurn],
         "wolf_legend_2" => &[OnFriendlyRoam, OnRoam],
@@ -1303,17 +1308,33 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
             push_draw(st, owner, kinds.len() as i32);
         }
         ("honey_badger", OnPlace) => removes(st, unit, cr, None, Some("honey_badger_min")),
-        ("okapi", OnEndOfTurn) => {
+        ("okapi", OnStartOfTurn) | ("okapi", OnEndOfTurn) | ("baby_impala", OnPlace) => {
+            // Okapi: "Dawn and Dusk: if this is grazing, draw a card." Baby Impala: "Flee. Roar: if this is grazing, draw a card."
             if statics::grazing(st, unit, Some(cr)) {
                 push_draw(st, owner, 1);
             }
         }
-        ("zebra", OnPlace) => {
-            let n = adjacent_tops(st, cr, Some(owner)).iter().filter(|(_, t)| st.card(t.card).has_tag(T_HOOFED)).count() as i32;
-            if n != 0 {
-                let f = cfg(st, "zebra_food");
-                push_gain(st, owner, n * f);
+        ("zebra", OnFlee) => {
+            // "Flee. When this flees, return the enemy that covered it to its owner's hand." (Martin, 2026-10-29: the kick, back)
+            if let Args::Flee(coverer) = args {
+                st.effect_stack.push(vmap!("op" => Value::s("flee_return"), "iid" => Value::Int(*coverer)));
             }
+        }
+        ("deer_legend", OnFriendlyFlee) => {
+            // "Whenever one of your animals flees, it gains 2 strength": the fled card, now in hand.
+            if let Args::FriendlyFlee(fled) = args {
+                let g = cfg(st, "deer_legend_grant");
+                grant(st, vec![fled.iid], g);
+            }
+        }
+        ("deer_legend", OnFlee) => {
+            // The legendary Deer fleeing grows itself (`unit` is its hand instance here).
+            let g = cfg(st, "deer_legend_grant");
+            grant(st, vec![unit.iid], g);
+        }
+        ("impala", OnPlace) => {
+            // "Flee. Roar: play a Baby Impala.": made and played at once, a full placement with its Roar.
+            st.effect_stack.push(vmap!("op" => Value::s("play_named"), "chooser" => pn(owner), "card_id" => Value::s("baby_impala"), "make" => Value::Bool(true)));
         }
         ("warthog", OnPlace) => {
             let t: Vec<Cr> = adjacent_enemy_targets(st, unit, cr, None, None, true)

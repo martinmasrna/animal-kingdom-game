@@ -445,13 +445,33 @@ fn push_flee(st: &mut State, covered: &Unit, coverer: &Unit, cr: Cr) {
     }
 }
 
+/// The fleer is back in hand (with its stored strength), then the reactions: the player's other top animals'
+/// "whenever one of your animals flees" (the legendary Deer), and the fleer's own "when this flees" (the Zebra's kick,
+/// the legendary Deer growing itself). Hooks get the hand instance, the one that goes on existing (effects.py _op_flee).
 fn op_flee(st: &mut State, step: &mut Map) -> Option<Pending> {
     let iid = m_get_i(step, "iid").unwrap();
     let Some((cr, pos)) = st.find_unit(iid) else { return None };
     let unit = st.unit_at(cr, pos).clone();
-    bounce(st, cr, &unit, 0);
-    if st.g.has_hook(unit.card, Hook::OnFlee) {
-        cards::run(st, unit.card, None, Hook::OnFlee, &unit, &Args::Flee(m_get_i(step, "coverer").unwrap_or(-1)));
+    let Some(fled) = bounce(st, cr, &unit, 0) else { return None };
+    let tops: SmallVec<[Unit; 16]> = st.tops().filter(|(_, t)| t.owner == fled.owner).map(|(_, t)| *t).collect();
+    for top in tops {
+        if st.g.has_hook(top.card, Hook::OnFriendlyFlee) {
+            cards::run(st, top.card, None, Hook::OnFriendlyFlee, &top, &Args::FriendlyFlee(fled));
+        }
+    }
+    if st.g.has_hook(fled.card, Hook::OnFlee) {
+        cards::run(st, fled.card, None, Hook::OnFlee, &fled, &Args::Flee(m_get_i(step, "coverer").unwrap_or(-1)));
+    }
+    None
+}
+
+/// Zebra: "When this flees, return the enemy that covered it to its owner's hand." A return: Armor resists it.
+fn op_flee_return(st: &mut State, step: &mut Map) -> Option<Pending> {
+    let iid = m_get_i(step, "iid").unwrap();
+    let Some((cr, pos)) = st.find_unit(iid) else { return None };
+    let unit = st.unit_at(cr, pos).clone();
+    if statics::can_be_removed(st, &unit, Some(cr), true) {
+        bounce(st, cr, &unit, 0);
     }
     None
 }
@@ -1234,9 +1254,6 @@ fn eat(st: &mut State, unit: &Unit, cr: Cr) {
     if !statics::has_keyword(st, unit, K_HUNGRY, Some(cr)) {
         return;
     }
-    if Some(unit.card) == st.g.known.moose && statics::grazing(st, unit, Some(cr)) {
-        return;                                   // "While this is grazing, it doesn't eat."
-    }
     let n = st.card(unit.card).hungry;
     let prev = (st.cause, st.cause_iid);
     st.cause = Some(unit.card);
@@ -1715,17 +1732,21 @@ pub fn push_play_extra(st: &mut State, owner: Player, filter: Option<Map>, optio
 }
 
 /// Return a board unit to its owner's hand (no Remove Pile, no triggers).
-pub fn bounce(st: &mut State, cr: Cr, top: &Unit, lock_until: i32) {
+/// Return a board unit to its owner's hand (not a removal). The card keeps its stored strength, as through every other
+/// change of place (a fled animal the legendary Deer grew stays grown). Returns the hand instance; None for a Wild animal.
+pub fn bounce(st: &mut State, cr: Cr, top: &Unit, lock_until: i32) -> Option<Unit> {
     crate::emit!(st, "bounce", vmap!("cr" => cr_v(st, cr), "iid" => Value::Int(top.iid), "card" => card_v(st, top.card), "owner" => pn(top.owner)));
     st.take_unit(cr, top.iid);
     if top.owner == WILD {
-        return;
+        return None;
     }
-    let inst = gain_to_hand(st, top.owner, top.card, 0);
+    let inst = gain_to_hand(st, top.owner, top.card, top.strength_counter as i32);
     let p = top.owner as usize;
     if let Some(u) = st.hands[p].iter_mut().find(|u| u.iid == inst.iid) {
         u.locked_until_turn = lock_until as i16;
+        return Some(*u);
     }
+    Some(inst)
 }
 
 /// A token made on `cr` by an effect: it lands as a placement would, with nothing to Roar.
@@ -1981,6 +2002,7 @@ fn run_op(st: &mut State, op: &str, step: &mut Map) -> Option<Pending> {
         "grant_free_roam" => op_grant_free_roam(st, step),
         "timed_hook" => op_timed_hook(st, step),
         "flee" => op_flee(st, step),
+        "flee_return" => op_flee_return(st, step),
         "queen_guard" => op_queen_guard(st, step),
         "choose" => op_choose(st, step),
         "draw_to_match" => op_draw_to_match(st, step),
