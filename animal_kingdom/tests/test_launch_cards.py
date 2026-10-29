@@ -971,6 +971,17 @@ def test_the_repeat_legend_roars_its_adjacent_rodents_again():
     assert s.food["A"] == 2 * CFG.squirrel_food
 
 
+def test_the_repeat_legend_absorbs_the_roars_so_they_happen_where_it_stands():
+    s = make_state(hands={"A": ["capybara_legend"]})
+    put(s, "1,3", "lion", "A"); put(s, "2,3", "lion", "A")    # the path from the den
+    put(s, "3,2", "gopher", "A")
+    put(s, "4,3", "lion", "B")                                 # next to Big Gus's 3,3, not to the Gopher
+    s.turn_flags["food_gained_A"] = CFG.fed_threshold
+    rules.apply_action(s, PlaceAction("capybara_legend", ("cr", "3,3")))
+    choose(s, "4,3")                                           # the Gopher's repeat reaches the enemy next to Big Gus
+    assert s.owner_of("4,3") is None
+
+
 def test_two_repeat_legends_side_by_side_do_not_repeat_each_other_for_ever():
     s = make_state(hands={"A": ["capybara_legend"]})
     put(s, "1,1", "capybara_legend", "A")             # a mimic Octopus's copy, say

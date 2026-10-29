@@ -1054,9 +1054,10 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
         ("deer", OnPlace) => spawns_beside(st, unit, cr, "fawn"),
         // Food Aggro
         ("capybara_legend", OnPlace) => {
-            for (nb, top) in adjacent_tops(st, cr, Some(owner)).into_iter().rev() {
+            // each repeat happens at Big Gus's crossroad, as if the Rodent stood there
+            for (_nb, top) in adjacent_tops(st, cr, Some(owner)).into_iter().rev() {
                 if st.card(top.card).has_tag(T_RODENT) && top.card != unit.card && st.g.has_hook(top.card, OnPlace) {
-                    run(st, top.card, None, OnPlace, &top, &Args::Place(nb));
+                    run(st, top.card, None, OnPlace, &top, &Args::Place(cr));
                 }
             }
         }

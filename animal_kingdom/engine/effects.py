@@ -2739,11 +2739,12 @@ def _spawns_beside(token):
 # --- Food Aggro -------------------------------------------------------------------------------------------------
 
 def _repeat_legend_place(state, unit, cr):
-    """Roar: repeat the Roar of each of your adjacent Rodents (as if each roared again where it stands). Another of these
-    (a mimic Octopus's copy) isn't repeated: two side by side would repeat each other for ever."""
-    for nb, top in reversed(_adjacent_tops(state, cr, unit.owner)):
+    """Roar: repeat the Roar of each of your adjacent Rodents. Big Gus absorbs them: each repeat happens here, as if the
+    Rodent stood where Big Gus does (Martin, 2026-10-29: the instinctive reading). Another of these (a mimic Octopus's
+    copy) isn't repeated: two side by side would repeat each other for ever."""
+    for _nb, top in reversed(_adjacent_tops(state, cr, unit.owner)):
         if "Rodent" in state.cards[top.card_id].tags and top.card_id != unit.card_id:
-            _push_hook(state, top, nb, "on_place")
+            _push_hook(state, top, cr, "on_place")
 
 
 def _refill_legend_place(state, unit, cr):
