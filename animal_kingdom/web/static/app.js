@@ -342,7 +342,7 @@ function homeScreen(mode = {}) {
     if (play.opp === 'friend' && fr && fr.online) return startSearch('challenge', 'go', '/api/challenge', { friend: fr.id, deck: deckSpec(chosen) }, friendLabel(fr, play.friends));
     const body = { deck: deckSpec(chosen), name: 'You' };
     if (play.opp === 'bot') {
-      const pool = play.level === 'Beginner' ? DECKS.filter(d => EASY_POOL.includes(d.id)) : botAll.filter(d => BOT_POOL.includes(d.id)), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
+      const pool = play.level === 'Beginner' ? botAll.filter(d => EASY_POOL.includes(d.id)) : botAll.filter(d => BOT_POOL.includes(d.id)), deck = play.botDeck === 'random' ? pool[Math.floor(Math.random() * pool.length)].id : play.botDeck;
       body.bot = { level: play.level, deck };
     }
     if (play.opp === 'gauntlet') {
@@ -637,7 +637,7 @@ async function startTutorial(lesson = 1) {
 }
 // After the tutorial, straight into a real match: Cats against an Easy bot playing Den Rush (the deck chosen for later games too).
 async function firstMatch() {
-  const name = (DECKS.find(d => d.id === 'cats') || {}).name;
+  const name = ([...DECKS, ...BOT_ONLY].find(d => d.id === 'cats') || {}).name;
   const cats = playable().find(d => d.name === name);   // the player's own Cats deck (a copy of the starter), else the starter
   if (cats) store('ak:deck', cats.id);
   const r = await api('/api/match', { method: 'POST', body: JSON.stringify({ deck: cats ? deckSpec(cats) : 'cats', name: 'You', bot: { level: 'Beginner', deck: EASY_POOL[Math.floor(Math.random() * EASY_POOL.length)] } }) });

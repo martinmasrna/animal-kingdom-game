@@ -1,12 +1,11 @@
 {
- "_comment": "The decks the game ships, as lists over cards.json: a starter deck (starter: true) is what a new profile gets; a bot deck (bot: true) is what the bots play, ranked and in Practice's Random (a starter may be both). Starter decks share no card, so a new player meets as many cards as possible; bot decks may overlap with anything (Martin, 2026-10-19). Each deck: slug, name, cover (the card whose art faces it), order (the menus), cards (id: copies; a legal 4-4-6 list of collectible cards). Edited here by hand, or a starter's through tools/cards/hq.py (move, deck-name).",
+ "_comment": "The decks the game ships, as lists over cards.json: a starter deck (starter: true) is what a new profile gets, none while the cards change (Martin, 2026-10-29: back once they settle); a bot deck (bot: true) is what the bots play, ranked and in Practice's Random (a starter may be both). Starter decks share no card, so a new player meets as many cards as possible; bot decks may overlap with anything (Martin, 2026-10-19). Each deck: slug, name, cover (the card whose art faces it), order (the menus), cards (id: copies; a legal 4-4-6 list of collectible cards). Edited here by hand, or a starter's through tools/cards/hq.py (move, deck-name).",
  "decks": [
   {
    "slug": "colony",
    "name": "Colony",
    "order": 0,
    "cover": "bee_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "army_ant_legend": 1,
@@ -30,7 +29,6 @@
    "name": "Circle of Life",
    "order": 1,
    "cover": "pheasant_legend",
-   "starter": true,
    "bot": false,
    "cards": {
     "pheasant_legend": 1,
@@ -54,7 +52,6 @@
    "name": "Roaming Pack",
    "order": 2,
    "cover": "wolf_legend_2",
-   "starter": true,
    "bot": true,
    "cards": {
     "leopard_legend": 1,
@@ -78,7 +75,6 @@
    "name": "Den Rush",
    "order": 3,
    "cover": "fox_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "skunk_legend": 1,
@@ -102,7 +98,6 @@
    "name": "Cats",
    "order": 4,
    "cover": "lion_legend_3",
-   "starter": true,
    "bot": true,
    "cards": {
     "lion_legend": 1,
@@ -126,7 +121,6 @@
    "name": "Fish",
    "order": 5,
    "cover": "tuna_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "tuna_legend": 1,
@@ -149,7 +143,6 @@
    "name": "Rodents",
    "order": 6,
    "cover": "rat_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "capybara_legend": 1,
@@ -173,7 +166,6 @@
    "name": "Untouchables",
    "order": 7,
    "cover": "octopus_legend_2",
-   "starter": true,
    "bot": false,
    "cards": {
     "octopus_legend_2": 1,
@@ -197,7 +189,6 @@
    "name": "Birds & Snakes",
    "order": 8,
    "cover": "anaconda_legend",
-   "starter": true,
    "bot": false,
    "cards": {
     "anaconda_legend": 1,
@@ -221,7 +212,6 @@
    "name": "Primates",
    "order": 9,
    "cover": "gorilla_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "baboon_legend": 1,
@@ -245,7 +235,6 @@
    "name": "Giants",
    "order": 10,
    "cover": "rhinoceros_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "rhinoceros_legend": 1,
@@ -269,7 +258,6 @@
    "name": "Hoofed",
    "order": 11,
    "cover": "giraffe_legend",
-   "starter": true,
    "bot": true,
    "cards": {
     "wildebeest_legend": 1,

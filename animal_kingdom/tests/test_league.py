@@ -32,7 +32,7 @@ def test_the_league_calls_need_the_key(monkeypatch, tmp_path):
         assert r.status == 200
         j = await r.json()
         assert {d["slug"] for d in j["decks"]} == set(server.ladder.decks) and len(j["players"]) == 3 * len(j["decks"])
-        assert set(j["pilots"]) == {"easy", "normal", "expert"} and all(len(d["list"]) == 30 for d in j["decks"])
+        assert set(j["pilots"]) == {"easy", "normal", "expert"} and all(d["list"] == load_premade_deck(d["slug"]) for d in j["decks"])
     _run(monkeypatch, tmp_path, body)
 
 

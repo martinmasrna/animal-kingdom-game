@@ -148,8 +148,9 @@ def shipped_problems() -> dict[str, list[str]]:
 
 
 def _check_shipped() -> None:
-    """A deck a card change made illegal (a rarity moved, a card benched) still loads and plays, with a warning: the
-    decks get their pass before the game ships, and until then a card change never stops the game (Martin, 2026-10-27)."""
+    """A deck a card change made illegal (a rarity moved, a card benched) loads with a warning and never fails a test,
+    commit or deploy: the decks get their pass before the game ships (Martin, 2026-10-27). It is not meant to be played;
+    marking it in the collection is on the to-do list (Martin, 2026-10-29)."""
     for slug, problems in shipped_problems().items():
         warnings.warn(f"deck {slug}: " + "; ".join(problems), stacklevel=2)
 

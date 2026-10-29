@@ -30,14 +30,15 @@ FOOD_IDX = features.RUNG0_FEATURES.index("food_progress")
 
 # --------------------------------------------------------------------- deck pool / pairs
 
-def test_all_deck_pairs_is_78_unordered_pairs_including_mirrors():
+def test_all_deck_pairs_are_the_unordered_pairs_including_mirrors():
     pool = deck_pool()
     index = {d: i for i, d in enumerate(pool)}
     pairs = all_deck_pairs()
-    assert len(pairs) == 78
-    assert len(set(pairs)) == 78               # no duplicates
+    n = len(pool)
+    assert len(pairs) == n * (n + 1) // 2
+    assert len(set(pairs)) == len(pairs)       # no duplicates
     assert all(index[a] <= index[b] for a, b in pairs)   # canonical (unordered) form
-    assert sum(1 for a, b in pairs if a == b) == 12  # every deck mirrors itself once
+    assert sum(1 for a, b in pairs if a == b) == n  # every deck mirrors itself once
 
 
 # --------------------------------------------------------------------- episode determinism
