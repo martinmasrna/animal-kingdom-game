@@ -1981,6 +1981,16 @@
     "crop": {
       "lv": "fine",
       "by": "martin"
+    },
+    "strength": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": 4
+      },
+      "note": "Martin, 2026-10-29: buffed from 4",
+      "by": "claude",
+      "at": 1793275600
     }
   },
   "guard_wasp": {

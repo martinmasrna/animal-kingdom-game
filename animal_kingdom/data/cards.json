@@ -1405,7 +1405,7 @@
       "tags": [
         "Rodent"
       ],
-      "base_strength": 4,
+      "base_strength": 5,
       "text": "Roar: if you gained 10 or more food this turn, gain 10 food.",
       "keywords": [],
       "species": "Groundhog",
