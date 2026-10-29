@@ -15,9 +15,9 @@ def test_cards_without_a_condition_answer_none():
 
 def test_fed_cards_light_up_once_ten_food_came_in_this_turn():
     s = make_state()
-    assert roar_condition(s, "A", "groundhog") is False
+    assert roar_condition(s, "A", "gopher") is False
     s.turn_flags["food_gained_A"] = 10
-    assert all(roar_condition(s, "A", c) for c in ("groundhog", "gopher", "mara"))
+    assert all(roar_condition(s, "A", c) for c in ("gopher", "mara"))
 
 
 def test_another_cat_means_a_cat_other_than_the_one_being_played():

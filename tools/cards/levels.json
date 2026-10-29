@@ -1988,9 +1988,29 @@
         "prev_note": "",
         "prev": 4
       },
-      "note": "Martin, 2026-10-29: buffed from 4",
+      "note": "Martin, 2026-10-29: Groundhog turns from payoff into setup: every turn starts fed while it lives (the fed payoffs outnumbered the cards that feed them, and a food payoff on a food deck gave no tempo); a rare for it",
       "by": "claude",
-      "at": 1793275600
+      "at": 1793278278
+    },
+    "effect": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "Roar: if you gained 10 or more food this turn, gain 10 food."
+      },
+      "note": "Martin, 2026-10-29: Groundhog turns from payoff into setup: every turn starts fed while it lives (the fed payoffs outnumbered the cards that feed them, and a food payoff on a food deck gave no tempo); a rare for it",
+      "by": "claude",
+      "at": 1793278277
+    },
+    "rarity": {
+      "review": {
+        "prev_lv": "draft",
+        "prev_note": "",
+        "prev": "C"
+      },
+      "note": "Martin, 2026-10-29: Groundhog turns from payoff into setup: every turn starts fed while it lives (the fed payoffs outnumbered the cards that feed them, and a food payoff on a food deck gave no tempo); a rare for it",
+      "by": "claude",
+      "at": 1793278278
     }
   },
   "guard_wasp": {

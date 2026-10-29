@@ -1016,6 +1016,16 @@ def test_the_dormouse_draws_at_dusk_after_a_food_turn_and_region_income_never_co
     assert hand_ids(s3, "A") == []
 
 
+def test_groundhog_feeds_you_at_dawn_and_the_turn_starts_fed():
+    s = make_state(hands={"A": ["groundhog", "lion"], "B": ["lion"]}, decks={"A": ["lion"] * 3, "B": ["lion"] * 3})
+    rules.apply_action(s, PlaceAction("groundhog", ("cr", "1,2")))
+    assert s.food["A"] == 0                                          # nothing when it is played
+    end_turn(s)
+    end_turn(s)                                                      # the opponent's turn: nothing either
+    assert s.current == "A" and s.food["A"] == Config.default().groundhog_food
+    assert effects._food_gained_this_turn(s, "A") == Config.default().fed_threshold   # Gopher and Mara are armed from the first action
+
+
 def test_the_hamster_grows_with_your_food_in_hand_and_on_the_board():
     s = make_state(hands={"A": ["hamster"]}, food={"A": 39, "B": 0})
     assert placement_strength(s, hand_inst(s, "A", "hamster")) == 3 + 3     # 39 is three whole tens

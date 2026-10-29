@@ -1853,7 +1853,6 @@ def roar_condition(state, player, card_id, unit=None):
     check = {
         "gopher": lambda: _fed_this_turn(state, player),
         "mara": lambda: _fed_this_turn(state, player),
-        "groundhog": lambda: _fed_this_turn(state, player),
         "bobcat": lambda: others("Cat") >= 1,
         "serval": lambda: _played_this_turn(state, player, "Cat", unit) >= 1,
         "tutorial_lynx": lambda: others("Cat") >= 1,
@@ -3322,7 +3321,7 @@ EFFECTS: dict[str, dict[str, Callable]] = {
     "chipmunk": {"on_place": _chipmunk_place},
     "gopher": {"on_place": _conditional(_removes())},
     "mara": {"on_place": _conditional(_draws("mara_draw"))},
-    "groundhog": {"on_place": _conditional(_gains("groundhog_food"))},
+    "groundhog": {"on_start_of_turn": _gains("groundhog_food")},
     "rodent_legend": {"on_place": _rodent_legend_place},
     # Food OTK (the legendary Honey Badger is its keywords; Capybara an aura; Armadillo too).
     "octopus_legend_2": {"on_place": _chameleon_legend_2_place},

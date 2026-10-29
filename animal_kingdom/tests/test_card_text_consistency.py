@@ -62,7 +62,7 @@ FOOD_CONSTANTS: dict[str, list[str]] = {
 NO_CONSTANT: set = set()
 
 # Cards read the shared fed_threshold via "gained N or more food this turn".
-FED_THRESHOLD_CARDS = {"gopher", "mara", "groundhog", "forager_ant"}
+FED_THRESHOLD_CARDS = {"gopher", "mara", "forager_ant"}
 
 
 def _cards():

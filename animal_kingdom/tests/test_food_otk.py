@@ -83,17 +83,6 @@ def test_fed_gopher_and_the_hippo_it_removes_go_together():
     assert "gopher" in unfed.remove_pile
 
 
-def test_groundhog_gains_food_only_when_fed():
-    fed = make_state(hands={"A": ["groundhog"]})
-    fed.turn_flags["food_gained_A"] = CFG.fed_threshold
-    rules.apply_action(fed, PlaceAction("groundhog", ("cr", "1,2")))
-    assert fed.food["A"] == CFG.groundhog_food
-
-    unfed = make_state(hands={"A": ["groundhog"]})
-    rules.apply_action(unfed, PlaceAction("groundhog", ("cr", "1,2")))
-    assert unfed.food["A"] == 0
-
-
 
 # ------------------------------------------------------------------ go-wide rodent_legend payoff
 

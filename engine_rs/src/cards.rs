@@ -78,7 +78,7 @@ pub fn hook_mask(card: &str) -> u32 {
         | "falcon" | "bat" | "dolphin" | "mouse" | "raven_legend" | "hawk" | "cottonmouth" | "magpie" | "black_mamba" | "mosquito" | "raven"
         | "bird_egg" | "snake_egg" | "tuna_legend" | "swordfish" | "barracuda" | "piranha_legend" | "remora" | "cod" | "sardine" | "mahi_mahi" | "sunfish"
         | "capybara_legend" | "macaque_legend" | "rat_legend" | "chipmunk_legend" | "flying_squirrel" | "beaver" | "electric_eel" | "squirrel"
-        | "chipmunk" | "gopher" | "mara" | "groundhog" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
+        | "chipmunk" | "gopher" | "mara" | "rodent_legend" | "octopus_legend_2" | "squirrel_legend" | "chameleon_legend" | "chameleon" | "black_bear"
         | "grizzly_bear" | "stag_beetle" | "owl" | "rhinoceros_legend" | "tiger_legend" | "rhinoceros" | "oxpecker" | "anteater" | "sloth"
         | "gorilla_legend" | "bee_legend_2" | "butterfly_legend_monarch" | "hummingbird" | "macaque" | "orangutan" | "tarsier" | "chimpanzee"
         | "baboon" | "stork" | "gorilla" | "zebra_legend" | "honey_badger" | "zebra" | "warthog" | "albatross" | "boar" | "gazelle" | "deer"
@@ -89,7 +89,7 @@ pub fn hook_mask(card: &str) -> u32 {
         "tarantula" | "sea_turtle" | "hyena" | "wolf_legend" | "queen_ant" | "scout_bee" | "army_ant_legend"
         | "anaconda_legend" | "manta_ray_legend" | "dormouse" | "tortoise_legend" | "whale_shark" | "dung_beetle" | "okapi" | "wildebeest"
         | "dingo" | "sperm_whale_legend" => &[OnEndOfTurn],
-        "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" => &[OnStartOfTurn],
+        "city_spider" | "goose_legend" | "bat_legend" | "baboon_legend" | "groundhog" => &[OnStartOfTurn],
         "wolf_legend_2" => &[OnFriendlyRoam, OnRoam],
         "bush_dog" => &[OnRoam],
         "elephant_legend" => &[OnPlace, OnRoam],
@@ -188,7 +188,7 @@ pub fn roar_condition(st: &State, player: Player, card: &str, unit: Option<&Unit
     };
     let placed_plus = st.units_placed_this_turn + if unit.is_some() { 0 } else { 1 };
     Some(match card {
-        "gopher" | "mara" | "groundhog" => fed_this_turn(st, player),
+        "gopher" | "mara" => fed_this_turn(st, player),
         "bobcat" | "tutorial_lynx" | "ocelot" => others(T_CAT) >= 1,
         "serval" => played_this_turn(st, player, T_CAT, unit) >= 1,
         "soldier_ant" | "nurse_bee" => others(T_COLONY) + 1 >= colony_min,
@@ -1100,11 +1100,7 @@ fn dispatch(st: &mut State, card: &str, hook: Hook, unit: &Unit, args: &Args) {
                 draws(st, unit, n);
             }
         }
-        ("groundhog", OnPlace) => {
-            if conditional(st, unit) {
-                gains(st, unit, "groundhog_food");
-            }
-        }
+        ("groundhog", OnStartOfTurn) => gains(st, unit, "groundhog_food"),
         ("rodent_legend", OnPlace) => {
             let n = food_gained_this_turn(st, owner);
             push_gain(st, owner, n);

@@ -22,6 +22,7 @@ The table below is generated from cards.json, where the cards live.
 | **Flying Squirrel** | 2 | Rodent | 3 | Flight. Roar: gain 10 food. |
 | **Beaver** | 2 | Rodent | 5 | Roar: next turn, take 1 additional action. |
 | **Dormouse** | 2 | Rodent | 3 | Dusk: draw a card for each 10 food you gained this turn. |
+| **Groundhog** | 2 | Rodent | 3 | Dawn: gain 10 food. |
 | **Woodpecker** | 2 | Bird | 3 | Flight. Roar: your next Roar this turn happens twice. |
 
 ### Common
@@ -31,7 +32,6 @@ The table below is generated from cards.json, where the cards live.
 | **Squirrel** | 3 | Rodent | 3 | Roar: gain 10 food. |
 | **Chipmunk** | 3 | Rodent | 1 | Roar: gain 10 food. At the start of your next turn, gain 10 more. |
 | **Gopher** | 3 | Rodent | 4 | Roar: if you gained 10 or more food this turn, remove an adjacent enemy. |
-| **Groundhog** | 3 | Rodent | 5 | Roar: if you gained 10 or more food this turn, gain 10 food. |
 | **Hamster** | 3 | Rodent | 3 | Has +1 strength for each 10 food you have. |
 | **Mara** | 3 | Rodent | 4 | Roar: if you gained 10 or more food this turn, draw 2 cards. |
 

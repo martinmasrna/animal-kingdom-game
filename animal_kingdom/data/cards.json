@@ -1401,15 +1401,15 @@
       "id": "groundhog",
       "name": "Groundhog",
       "status": "collectible",
-      "rarity": "common",
+      "rarity": "rare",
       "tags": [
         "Rodent"
       ],
-      "base_strength": 5,
-      "text": "Roar: if you gained 10 or more food this turn, gain 10 food.",
-      "keywords": [],
+      "base_strength": 3,
+      "text": "Dawn: gain 10 food.",
       "species": "Groundhog",
-      "habitat": "Meadow"
+      "habitat": "Meadow",
+      "keywords": []
     },
     {
       "id": "hamster",
