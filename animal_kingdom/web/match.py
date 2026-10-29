@@ -71,9 +71,12 @@ log = logging.getLogger(__name__)
 # current cards and Martin's decks; +5.0 points a deck on his 11, results/bot_quality/net-r4-10; Hoofed Graze -6 clear,
 # shipped on Martin's call: the network cannot see grazing). Since that evening it keeps every den opener (den_open, Martin's
 # 2TZBCA: Tiger onto the Wildebeest guarding his den, then Kitten in, was cut by the safety filter before any search).
+# Since 2026-10-30 a deepened line is scored against each of the opponent's reply openings, the worst for the bot counting
+# (reply_min, Martin's G2EFVA: Serval's Roar spared his 9-strength Capybara beside the den because one sampled reply left a
+# Sardine win open, and that one reply scored as a win).
 EXPERT = ("referee_learned:eval=wave2_slot_r4_10_live,depth=1,time_budget=8,den_sense=true,reply_turns=3,w.pending_target=1.5,"
           "w.buried_presence=0.25,w.food_progress=0,w.food_curve=3,w.food_proximity=60,w.food_race=true,quiesce=true,mulligan=true,"
-          "decisive=500,den_open=true")
+          "decisive=500,den_open=true,reply_min=true")
 # The Normal pilot is the one-turn searcher with the den-front reach term (2026-10-21, Martin's game GMIDKA: it left two
 # cut-off Falcons in its den front for two turns). The Expert sees those threats through its reply search and the term
 # cost it a point on average (results/bot_quality/wave2-reach), so it stays off there.

@@ -154,6 +154,9 @@ impl Bot {
                     if let Some(v) = get("den_open") {
                         s.den_open = as_bool(v);
                     }
+                    if let Some(v) = get("reply_min") {
+                        s.reply_min = as_bool(v);
+                    }
                 }
                 Ok(Bot::Search(s))
             }

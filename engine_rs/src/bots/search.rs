@@ -81,7 +81,9 @@ pub struct Searcher {
     pub reply_turns: usize,
     pub deepen_chase: bool,
     pub den_open: bool,
+    pub reply_min: bool,
     // run state
+    reply_openings: Vec<Action>,
     search_nodes: usize,
     deepening: bool,
     screening: bool,
@@ -130,6 +132,8 @@ impl Searcher {
             reply_turns: 0,
             deepen_chase: false,
             den_open: false,
+            reply_min: false,
+            reply_openings: Vec::new(),
             search_nodes: 0,
             deepening: false,
             screening: false,
@@ -794,10 +798,15 @@ impl Searcher {
     fn reply_scores(&mut self, branches: &mut Vec<Branch>, me: Player) -> Vec<f64> {
         let mut scores = Vec::with_capacity(branches.len());
         let mut befores = Vec::with_capacity(branches.len());
+        let deep = self.depth > 0 && self.deepening;
+        // Reply minimax: the position before the reply and the openings it weighed, per branch
+        let mut pres: Vec<Option<(State, Vec<Action>)>> = Vec::with_capacity(branches.len());
         for (s, penalty) in branches.iter_mut() {
             let tiebreak = if self.decisive >= DECISIVE { LOSS_TIEBREAK } else { self.decisive / 10.0 };
             let before = self.planning_eval(s, me).max(-tiebreak).min(tiebreak);
-            let threat = self.advance(s, me);
+            let pre = if deep && self.reply_min { Some(s.clone()) } else { None };
+            let threat = self.advance(s, me, None);
+            pres.push(pre.map(|p| (p, self.reply_openings.clone())));
             let mut score = self.clamped_eval(s, me);
             if score == -self.decisive {
                 score += before;
@@ -809,7 +818,7 @@ impl Searcher {
             befores.push(before);
             self.stats.reply_world_rollouts += 1;
         }
-        if self.depth > 0 && self.deepening && !branches.is_empty() {
+        if deep && !branches.is_empty() {
             let mut order: Vec<usize> = (0..scores.len()).collect();
             order.sort_by(|&a, &b| scores[b].partial_cmp(&scores[a]).unwrap_or(std::cmp::Ordering::Equal).then(a.cmp(&b)));
             for &i in order.iter().take(self.deepen_top) {
@@ -821,14 +830,31 @@ impl Searcher {
                     continue;
                 }
                 let state = branches[i].0.clone();
-                let mut score = self.leaf_score(&state, me, self.depth);
-                if score == -self.decisive {
-                    score += befores[i];
+                let mut score = self.deep_line(&state, me, befores[i]);
+                // Reply minimax: the same line against each of their other openings; the worst for me counts
+                if let Some((pre, openings)) = &pres[i] {
+                    for opening in openings.iter().skip(1) {
+                        if self.over_budget() {
+                            self.stats.lookahead_cut += 1;
+                            break;
+                        }
+                        let mut alt = pre.clone();
+                        self.advance(&mut alt, me, Some(opening));
+                        score = score.min(self.deep_line(&alt, me, befores[i]));
+                    }
                 }
                 scores[i] = score - branches[i].1;
             }
         }
         scores
+    }
+
+    fn deep_line(&mut self, st: &State, me: Player, before: f64) -> f64 {
+        let mut score = self.leaf_score(st, me, self.depth);
+        if score == -self.decisive {
+            score += before;
+        }
+        score
     }
 
     fn mean_reply_score(&mut self, branches: &mut Vec<Branch>, me: Player) -> f64 {
@@ -886,7 +912,7 @@ impl Searcher {
             let mut nxt = st.clone();
             let _ = rules::apply_action(&mut nxt, &action, false);
             self.play_turn(&mut nxt, me);
-            let threat = self.advance(&mut nxt, me);
+            let threat = self.advance(&mut nxt, me, None);
             self.stats.lookahead_lines += 1;
             let mut value = self.leaf_score(&nxt, me, depth - 1);
             if threat != 0.0 {
@@ -922,8 +948,10 @@ impl Searcher {
         }
     }
 
-    fn advance(&mut self, st: &mut State, me: Player) -> f64 {
+    fn advance(&mut self, st: &mut State, me: Player, opening: Option<&Action>) -> f64 {
         let mut threat = 0.0;
+        let mut forced = opening;
+        self.reply_openings.clear();
         for _ in 0..40 {
             if let Some(r) = rules::is_terminal(st) {
                 st.result = Some(r);
@@ -938,6 +966,12 @@ impl Searcher {
                 threat = self.den_threat(st, actor, me);
             }
             if self.reply_turns > 0 && (self.deepening || self.depth == 0) && actor != me && st.pending.is_none() && st.actions_taken_this_turn == 0 {
+                if let Some(o) = forced.take() {
+                    if legal.contains(o) {
+                        let _ = rules::apply_action(st, o, false);
+                        continue;
+                    }
+                }
                 if let Some(opening) = self.reply_opening(st, actor, &legal) {
                     let _ = rules::apply_action(st, &opening, false);
                     continue;
@@ -1012,16 +1046,19 @@ impl Searcher {
         }
         let mut best: Option<Action> = None;
         let mut best_score: Option<f64> = None;
-        for opening in self.greedy_topn(st, legal, opp, self.reply_turns) {
+        let openings = self.greedy_topn(st, legal, opp, self.reply_turns);
+        for opening in &openings {
             let mut nxt = st.clone();
-            let _ = rules::apply_action(&mut nxt, &opening, false);
+            let _ = rules::apply_action(&mut nxt, opening, false);
             self.play_turn(&mut nxt, opp);
             let score = self.clamped_eval(&nxt, opp);
             if best_score.map(|b| score > b).unwrap_or(true) {
-                best = Some(opening);
+                best = Some(opening.clone());
                 best_score = Some(score);
             }
         }
+        // the openings weighed, the one played first (reply minimax tries the others)
+        self.reply_openings = best.iter().cloned().chain(openings.iter().filter(|o| Some(*o) != best.as_ref()).cloned()).collect();
         best
     }
 
